@@ -1403,6 +1403,16 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt_EK.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApply.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyTicket.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyContract.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplySpot.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyStorage.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyContractAllocation.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplySpotAllocation.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyStorageAllocation.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyLoad.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyLoadAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProductionOrder_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPInventoryAdjustment_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment_EK.sql" />
@@ -1453,6 +1463,13 @@
     <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
+    <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
+    <Build Include="dbo\Views\vyuSCHoldTicketApplyAllowedStorageTypePerTicketPool.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyCreateTransparency.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyLog.sql" />
+    <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
+    <Build Include="dbo\Views\vyuSCHoldTicketApplyTicketInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

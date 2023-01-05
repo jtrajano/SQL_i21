@@ -23,6 +23,32 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#LOADSHIPMENTS') IS NOT NULL DROP TABLE #LOADSHIPMENTS
 	IF OBJECT_ID('tempdb..#MFBATCH') IS NOT NULL DROP TABLE #MFBATCH
 
+	--CHECK IF HAS CHANGES FOR BATCH
+	SELECT intBatchId						= B.intBatchId
+		, intSampleId						= B.intSampleId
+		, strLeafGrade						= CA.strDescription
+		, strTeaGardenChopInvoiceNumber		= CRD.strPreInvoiceChopNo
+		, intGardenMarkId					= CRD.intPreInvoiceGardenMarkId
+	INTO #MFBATCH
+	FROM tblMFBatch B
+	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON B.intSampleId = CRD.intSampleId
+	LEFT JOIN tblICCommodityAttribute CA ON CRD.intPreInvoiceGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
+	WHERE B.intSampleId IS NOT NULL
+		AND ((B.strTeaGardenChopInvoiceNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
+		OR (B.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
+		OR (B.strLeafGrade <>  CA.strDescription AND CRD.intPreInvoiceGradeId = CRD.intGradeId))
+
+	--UPDATE BATCH
+	IF EXISTS (SELECT TOP 1 1 FROM #MFBATCH)
+		BEGIN
+			UPDATE MF
+			SET strLeafGrade					= MFB.strLeafGrade
+			  , strTeaGardenChopInvoiceNumber	= MFB.strTeaGardenChopInvoiceNumber
+			  , intGardenMarkId					= MFB.intGardenMarkId
+			FROM tblMFBatch MF
+			INNER JOIN #MFBATCH MFB ON MF.intBatchId = MFB.intBatchId
+		END
+
 	--CHECK IF HAS CHANGES FOR VOUCHERS
     SELECT intCatalogueReconciliationId			= CRD.intCatalogueReconciliationId
 		 , intCatalogueReconciliationDetailId	= CRD.intCatalogueReconciliationDetailId
@@ -352,8 +378,12 @@ BEGIN TRY
          , ysnPosted							= CR.ysnPosted
 		 , dblCatReconPrice						= CRD.dblPreInvoicePrice
 		 , dblCatReconQty						= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, LIUM.strUnitMeasure, CRD.dblPreInvoiceQuantity), 0)
+		 , dblCatReconGrossQty					= ISNULL(CRD.dblPreInvoiceQuantity, 0)
 		 , dblLoadPrice							= ISNULL(LD.dblUnitPrice, 0)
-		 , dblLoadQty							= ISNULL(LD.dblQuantity, 0)		 
+		 , dblLoadQty							= ISNULL(LD.dblQuantity, 0)
+		 , dblGrossQty							= ISNULL(LD.dblGross, 0)
+		 , dblNetQty							= ISNULL(LD.dblNet, 0)
+		 , dblTareQty 							= ISNULL(LD.dblTare, 0)
 	INTO #LOADSHIPMENTS
 	FROM tblQMCatalogueReconciliation CR
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
@@ -375,6 +405,9 @@ BEGIN TRY
 			UPDATE LG
 			SET dblUnitPrice	= LS.dblCatReconPrice
 			  , dblQuantity		= LS.dblCatReconQty
+			  , dblGross		= LS.dblCatReconGrossQty
+			  , dblNet			= LS.dblCatReconGrossQty
+			  , dblTare			= 0
 			FROM tblLGLoadDetail LG
 			INNER JOIN #LOADSHIPMENTS LS ON LG.intLoadDetailId = LS.intLoadDetailId
 
@@ -434,6 +467,32 @@ BEGIN TRY
 					WHERE intLoadId = @intLoadId
 					  AND intLoadDetailId = @intLoadDetailId
 					  AND dblLoadQty <> dblCatReconQty
+
+					UNION ALL
+
+					SELECT [Id]			= 4
+						, [Action]		= NULL
+						, [Change]		= 'Update Gross Quantity'
+						, [From]		= CAST(dblGrossQty AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconGrossQty AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #LOADSHIPMENTS 
+					WHERE intLoadId = @intLoadId
+					  AND intLoadDetailId = @intLoadDetailId
+					  AND dblGrossQty <> dblCatReconGrossQty
+
+					UNION ALL
+
+					SELECT [Id]			= 5
+						, [Action]		= NULL
+						, [Change]		= 'Update Net Quantity'
+						, [From]		= CAST(dblNetQty AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconGrossQty AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #LOADSHIPMENTS 
+					WHERE intLoadId = @intLoadId
+					  AND intLoadDetailId = @intLoadDetailId
+					  AND dblNetQty <> dblCatReconGrossQty
 					  					
 					--AUDIT LOG FOR LOAD SHIPMENT
 					EXEC uspSMSingleAuditLog @screenName		= 'Logistics.view.ShipmentSchedule'

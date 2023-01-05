@@ -66,7 +66,7 @@ BEGIN TRY
 		)
 		SELECT CD.intContractHeaderId,	CD.intContractDetailId,		NULL,					CD.intCompanyLocationId,
 				NULL,					CL.strOregonFacilityNumber,	MZ.strMarketZoneCode,	FT.strFreightTerm,
-				C.strISOCode,			CL.strOregonFacilityNumber,	VE.strVendorAccountNum,	@strPlant,
+				C.strISOCode,			CL.strLocationName,			VE.strVendorAccountNum,	@strPlant,
 				CLSL.strSubLocationName,LP.strCity,					DP.strCity,				CD.dblCashPrice,
 				CU.strCurrency,			CD.dblNetWeight,			CT.strContainerType,	SL.strName,
 				@dtmCurrentDate,		@intEntityId,				@strRowState
@@ -124,7 +124,7 @@ BEGIN TRY
 		)
 		SELECT	NULL,					NULL,						S.intSampleId,			S.intCompanyLocationId,
 				NULL,					CL.strOregonFacilityNumber,	MZ.strMarketZoneCode,	NULL,
-				C.strISOCode,			CL.strOregonFacilityNumber,	VE.strVendorAccountNum,	@strPlant,
+				C.strISOCode,			CL.strLocationName,			VE.strVendorAccountNum,	@strPlant,
 				CLSL.strSubLocationName,LP.strCity,					NULL,					S.dblB1Price,
 				CU.strCurrency,			S.dblSampleQty,				NULL,					NULL,
 				@dtmCurrentDate,		@intEntityId,				@strRowState

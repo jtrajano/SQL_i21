@@ -81,7 +81,7 @@ BEGIN TRY
 	SELECT @strXML = @strXML
 		+ '<Header>'
 		+ '<Origin>' + ISNULL(C.strISOCode, '') + '</Origin>'
-		+ '<BuyingCenter>' + ISNULL(CL.strOregonFacilityNumber, '') + '</BuyingCenter>'
+		+ '<BuyingCenter>' + ISNULL(CL.strLocationName, '') + '</BuyingCenter>'
 		+ '<StorageLocation>' + LTRIM(SUBSTRING(ISNULL(SL.strSubLocationName, ''), CHARINDEX('/', SL.strSubLocationName) + 1, LEN(SL.strSubLocationName))) + '</StorageLocation>'
 		+ '<Channel>' + ISNULL(MZ.strMarketZoneCode, '') + '</Channel>'
 		+ '<PlantCode>' + ISNULL(CL1.strOregonFacilityNumber, '') + '</PlantCode>'
