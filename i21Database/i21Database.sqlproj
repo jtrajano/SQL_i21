@@ -873,6 +873,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountCurrency.sql" />
     <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Views\vyuLGLoadOpenContractsWithAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
