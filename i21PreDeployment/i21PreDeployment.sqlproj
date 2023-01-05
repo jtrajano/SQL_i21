@@ -187,6 +187,7 @@
     <None Include="Scripts\Pre-Deployment\7_AR\11_FixSalesOrderNullysnQuote.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\1910_BasisComponent.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\13_FixCustomerBillToShipTo.sql" />
+    <None Include="Scripts\Pre-Deployment\7_AR\15_FixtblARCustomer_MissingColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />
