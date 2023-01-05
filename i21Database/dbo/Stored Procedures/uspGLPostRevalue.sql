@@ -135,11 +135,12 @@ DECLARE
                   ELSE dblUnrealizedLoss END,0)  
           ,[dblCredit]   = ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
                   WHEN dblUnrealizedGain < 0 THEN 0  
-                  ELSE dblUnrealizedGain END,0)  
+                  ELSE dblUnrealizedGain END,0)
           ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
           ,[ysnIsUnposted]  = 0   
           ,[intConcurrencyId]  = 1  
-          ,[intCurrencyId]  = B.intFunctionalCurrencyId  
+          ,[intDetailCurrencyId]  = ISNULL(A.intCurrencyId, B.intFunctionalCurrencyId)
+          ,[intCurrencyId]  = B.intFunctionalCurrencyId
           ,[intUserId]   = 0  
           ,[intEntityId]   = @intEntityId    
           ,[dtmDateEntered]  = @dateNow  
@@ -167,10 +168,11 @@ DECLARE
             ,[strDescription]    
             ,[dtmTransactionDate]   
             ,[dblDebit]   
-            ,[dblCredit]  
+            ,[dblCredit]
             ,[dtmDate]      
             ,[ysnIsUnposted]    
             ,[intConcurrencyId]    
+            ,[intDetailCurrencyId]    
             ,[intCurrencyId]    
             ,[intUserId]     
             ,[intEntityId]     
@@ -200,7 +202,8 @@ DECLARE
             ,[dblCredit]   = dblDebit     
             ,[dtmDate]  
             ,[ysnIsUnposted]    
-            ,[intConcurrencyId]    
+            ,[intConcurrencyId]   
+            ,[intDetailCurrencyId]  
             ,[intCurrencyId]    
             ,[intUserId]     
             ,[intEntityId]     
@@ -228,11 +231,11 @@ DECLARE
           ,[strDescription]    
           ,[dtmTransactionDate]   
           ,[dblDebit]      
-          ,[dblCredit]     
+          ,[dblCredit]
           ,[dtmDate]      
           ,[ysnIsUnposted]    
           ,[intConcurrencyId]    
-          ,[intCurrencyId]    
+          ,[intCurrencyId] 
           ,[intUserId]     
           ,[intEntityId]     
           ,[dtmDateEntered]    
@@ -248,6 +251,7 @@ DECLARE
           ,intLOBSegmentOverrideId  
           ,intCompanySegmentOverrideId
           ,A.strModule
+          ,OffSet
           INTO #iRelyPostGLEntries
           FROM cte1 A  
           OUTER APPLY (  
@@ -271,7 +275,7 @@ DECLARE
           ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblDebit]  
-          ,[dblCredit]  
+          ,[dblCredit]
           ,[dtmDate]  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -298,7 +302,7 @@ DECLARE
           ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblDebit]  
-          ,[dblCredit]  
+          ,[dblCredit]
           ,[dtmDate]  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -328,7 +332,7 @@ DECLARE
           ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblDebit]  
-          ,[dblCredit]  
+          ,[dblCredit]
           ,[dtmDate]  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -355,7 +359,7 @@ DECLARE
           ,[strDescription]  
           ,[dtmTransactionDate]  
           ,[dblCredit]  
-          ,[dblDebit]  
+          ,[dblDebit]
           ,[dtmDate] = U.dtmReverseDate  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -365,7 +369,7 @@ DECLARE
           ,[dtmDateEntered]  
           ,[strBatchId]  
           ,[strCode]     
-          ,[strJournalLineDescription] = 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod   
+          ,[strJournalLineDescription] = CASE WHEN Offset = 1 THEN  'Reverse Offset Revalue '+ @strTransactionType + ' '  + @strPeriod ELSE 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod END
           ,[intJournalLineNo]  
           ,[strTransactionType]  
           ,[strTransactionForm]  
@@ -399,7 +403,7 @@ DECLARE
    ,[strDescription]  
    ,[dtmTransactionDate]  
    ,[dblDebit]  
-   ,[dblCredit]  
+   ,[dblCredit]
    ,[dtmDate]  
    ,[ysnIsUnposted]  
    ,[intConcurrencyId]   
@@ -422,7 +426,7 @@ DECLARE
    ,[strDescription]  
    ,[dtmTransactionDate]  
    ,[dblCredit]   
-   ,[dblDebit]      
+   ,[dblDebit]
    ,[dtmDate]      
    ,[ysnIsUnposted] = 1  
    ,[intConcurrencyId]    
@@ -452,7 +456,8 @@ DECLARE
     strDescription, 
     dtmTransactionDate,   
     dblDebit,  
-    dblCredit, 
+    dblCredit,
+    dblExchangeRate,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -482,7 +487,8 @@ DECLARE
     strDescription, 
     dtmTransactionDate,
     dblDebit,  
-    dblCredit, 
+    dblCredit,
+    1,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -534,7 +540,8 @@ DECLARE
     strDescription, 
     dtmTransactionDate,   
     dblDebit,  
-    dblCredit, 
+    dblCredit,
+    dblExchangeRate,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -566,6 +573,7 @@ DECLARE
     dtmTransactionDate,  
     dblDebit,  
     dblCredit, 
+    1,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
