@@ -136,12 +136,12 @@ DECLARE
           ,[dblCredit]   = ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
                   WHEN dblUnrealizedGain < 0 THEN 0  
                   ELSE dblUnrealizedGain END,0)
-          ,[dblDebitForeign]    = ISNULL(CASE WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)  
-                  WHEN dblUnrealizedLoss < 0 THEN 0  
-                  ELSE dblUnrealizedLoss END,0)  
-          ,[dblCreditForeign]   = ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
-                  WHEN dblUnrealizedGain < 0 THEN 0  
-                  ELSE dblUnrealizedGain END,0)  
+          --,[dblDebitForeign]    = ISNULL(CASE WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)  
+          --         WHEN dblUnrealizedLoss < 0 THEN 0  
+          --         ELSE dblUnrealizedLoss END,0)  
+          -- ,[dblCreditForeign]   = ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
+          --         WHEN dblUnrealizedGain < 0 THEN 0  
+          --         ELSE dblUnrealizedGain END,0)  
           ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
           ,[ysnIsUnposted]  = 0   
           ,[intConcurrencyId]  = 1  
@@ -175,8 +175,8 @@ DECLARE
             ,[dtmTransactionDate]   
             ,[dblDebit]   
             ,[dblCredit]
-            ,[dblDebitForeign]
-            ,[dblCreditForeign]
+            -- ,[dblDebitForeign]
+            -- ,[dblCreditForeign]
             ,[dtmDate]      
             ,[ysnIsUnposted]    
             ,[intConcurrencyId]    
@@ -208,8 +208,8 @@ DECLARE
             ,[dtmTransactionDate]   
             ,[dblDebit]    = dblCredit      
             ,[dblCredit]   = dblDebit     
-            ,[dblDebitForeign] = dblCredit
-            ,[dblCreditForeign] = dblDebit
+            -- ,[dblDebitForeign] = dblCredit
+            -- ,[dblCreditForeign] = dblDebit
             ,[dtmDate]  
             ,[ysnIsUnposted]    
             ,[intConcurrencyId]   
@@ -242,12 +242,12 @@ DECLARE
           ,[dtmTransactionDate]   
           ,[dblDebit]      
           ,[dblCredit]
-          ,[dblDebitForeign] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
-                                    THEN CASE WHEN A.OffSet = 1 THEN 0 ELSE [dblDebitForeign]  END
-                                    ELSE [dblDebitForeign] END
-          ,[dblCreditForeign] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
-                                    THEN CASE WHEN A.OffSet = 1 THEN 0 ELSE [dblCreditForeign] END
-                                    ELSE [dblCreditForeign] END
+          -- ,[dblDebitForeign] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
+          --                           THEN CASE WHEN A.OffSet = 1 THEN 0 ELSE [dblDebitForeign]  END
+          --                           ELSE [dblDebitForeign] END
+          -- ,[dblCreditForeign] = CASE WHEN A.strModule IN ('GL', 'CM', 'CM Forwards', 'CM In-Transit', 'CM Swaps')
+          --                           THEN CASE WHEN A.OffSet = 1 THEN 0 ELSE [dblCreditForeign] END
+          --                           ELSE [dblCreditForeign] END
           ,[dtmDate]      
           ,[ysnIsUnposted]    
           ,[intConcurrencyId]    
@@ -294,8 +294,8 @@ DECLARE
           ,[dtmTransactionDate]  
           ,[dblDebit]  
           ,[dblCredit]
-          ,[dblDebitForeign]  
-          ,[dblCreditForeign] 
+          -- ,[dblDebitForeign]  
+          -- ,[dblCreditForeign] 
           ,[dtmDate]  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -323,8 +323,8 @@ DECLARE
           ,[dtmTransactionDate]  
           ,[dblDebit]  
           ,[dblCredit]
-          ,[dblDebitForeign]  
-          ,[dblCreditForeign]  
+          -- ,[dblDebitForeign]  
+          -- ,[dblCreditForeign]  
           ,[dtmDate]  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -355,8 +355,8 @@ DECLARE
           ,[dtmTransactionDate]  
           ,[dblDebit]  
           ,[dblCredit]
-          ,[dblDebitForeign]  
-          ,[dblCreditForeign]  
+          -- ,[dblDebitForeign]  
+          -- ,[dblCreditForeign]  
           ,[dtmDate]  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -384,8 +384,8 @@ DECLARE
           ,[dtmTransactionDate]  
           ,[dblCredit]  
           ,[dblDebit]
-          ,[dblCreditForeign]  
-          ,[dblDebitForeign]  
+          -- ,[dblCreditForeign]  
+          -- ,[dblDebitForeign]  
           ,[dtmDate] = U.dtmReverseDate  
           ,[ysnIsUnposted]  
           ,[intConcurrencyId]   
@@ -430,8 +430,8 @@ DECLARE
    ,[dtmTransactionDate]  
    ,[dblDebit]  
    ,[dblCredit]
-   ,[dblDebitForeign]  
-   ,[dblCreditForeign]  
+  --  ,[dblDebitForeign]  
+  --  ,[dblCreditForeign]  
    ,[dtmDate]  
    ,[ysnIsUnposted]  
    ,[intConcurrencyId]   
@@ -455,8 +455,8 @@ DECLARE
    ,[dtmTransactionDate]  
    ,[dblCredit]   
    ,[dblDebit]
-   ,[dblDebitForeign]  
-   ,[dblCreditForeign]      
+  --  ,[dblDebitForeign]  
+  --  ,[dblCreditForeign]      
    ,[dtmDate]      
    ,[ysnIsUnposted] = 1  
    ,[intConcurrencyId]    
@@ -487,8 +487,9 @@ DECLARE
     dtmTransactionDate,   
     dblDebit,  
     dblCredit,
-    dblDebitForeign,
-    dblCreditForeign,
+    dblExchangeRate,
+    -- dblDebitForeign,
+    -- dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -518,9 +519,10 @@ DECLARE
     strDescription, 
     dtmTransactionDate,
     dblDebit,  
-    dblCredit, 
-    dblDebitForeign,
-    dblCreditForeign,
+    dblCredit,
+    1,
+    -- dblDebitForeign,
+    -- dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -572,9 +574,10 @@ DECLARE
     strDescription, 
     dtmTransactionDate,   
     dblDebit,  
-    dblCredit, 
-    dblDebitForeign,
-    dblCreditForeign,
+    dblCredit,
+    dblExchangeRate,
+    -- dblDebitForeign,
+    -- dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -606,8 +609,9 @@ DECLARE
     dtmTransactionDate,  
     dblDebit,  
     dblCredit, 
-    dblDebitForeign,
-    dblCreditForeign,
+    1,
+    -- dblDebitForeign,
+    -- dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
