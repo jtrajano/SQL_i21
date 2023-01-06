@@ -27,7 +27,7 @@ BEGIN TRY
 
 	EXEC uspTFGetTransporterBulkInvoiceTax @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom =@DateFrom , @DateTo =@DateTo  , @IsEdi = @IsEdi, @Refresh =0 
 	
-	EXEC uspTFGetTransporterCustomerInvoiceTax @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom =@DateFrom , @DateTo =@DateTo  , @IsEdi = @IsEdi, @Refresh =0
+	EXEC uspTFGetTransporterCustomerInvoiceTax @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom =@DateFrom , @DateTo =@DateTo  , @IsEdi = @IsEdi, @Refresh =0 , @IsTransporter = 1
 
    
 END TRY
