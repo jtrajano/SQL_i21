@@ -141,7 +141,7 @@ BEGIN
 			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 			LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
-			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = WCD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = WCD.intItemId AND ItemUOM.intUnitMeasureId = WUOM.intUnitMeasureId
 			OUTER APPLY (SELECT TOP 1 ld.intLoadDetailId FROM tblLGLoadDetail ld 
 						 LEFT JOIN tblLGLoadDetailContainerLink ldcl on ldcl.intLoadDetailId = ld.intLoadDetailId 
 							AND ld.intPContractDetailId = WCD.intContractDetailId
