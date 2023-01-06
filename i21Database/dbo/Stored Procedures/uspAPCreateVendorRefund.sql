@@ -69,6 +69,7 @@ END
 
 SELECT TOP 1 @defaultCurrency = intDefaultCurrencyId FROM tblSMCompanyPreference
 SELECT TOP 1 @rateType = intAccountsReceivableRateTypeId FROM tblSMMultiCurrency
+SET @paymentDate = ISNULL(NULLIF(@paymentDate, ''), CAST(GETDATE() AS DATE))
 
 SELECT 
 	TOP 1 @bankGLAccount = intGLAccountId
@@ -194,7 +195,7 @@ FROM (
 		,[strSourceId]						=	A.strInvoiceNumber
 		,[intPaymentId]						=	NULL
 		,[intEntityCustomerId]				=	A.intEntityCustomerId
-		,[intCompanyLocationId]				=	A.intShipToLocationId
+		,[intCompanyLocationId]				=	A.intCompanyLocationId
 		,[intCurrencyId]					=	A.intCurrencyId
 		,[dtmDatePaid]						=	@paymentDate
 		,[intPaymentMethodId]				=	2
@@ -235,7 +236,7 @@ FROM (
 		,[ysnFromAP]						=	0
 	FROM tblARInvoice A
 	INNER JOIN #tmpVouchersForPay payVouchers ON A.intInvoiceId = payVouchers.intInvoiceId
-	INNER JOIN tblSMCompanyLocation B ON A.intShipToLocationId = B.intCompanyLocationId
+	INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
 	OUTER APPLY (
 		SELECT TOP 1
 			exchangeRateDetail.dblRate
@@ -264,6 +265,7 @@ SELECT
 FROM tblARPaymentIntegrationLogDetail
 WHERE intIntegrationLogId = @log
 AND intPaymentId IS NOT NULL
+AND ysnHeader = 1
 
 SELECT @totalPaymentCreated = COUNT(*) FROM @paymentIds
 
