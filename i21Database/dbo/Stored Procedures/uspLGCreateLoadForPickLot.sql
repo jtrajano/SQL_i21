@@ -12,6 +12,7 @@ BEGIN TRY
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @strPickLotNumber NVARCHAR(100)
 	DECLARE @dblScheduledQty NUMERIC(18,6)
+	DECLARE @intItemUOMId NUMERIC(18,6)
 
 	--DECLARE @intLoadId INT
 	DECLARE @intLoadDetailId INT
@@ -184,7 +185,7 @@ BEGIN TRY
 			)
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
-			,PLD.dblSalePickedQty
+			,PLD.dblLotPickedQty
 			,PLD.dblTareWt
 			,AD.intAllocationDetailId
 			,1
@@ -216,16 +217,19 @@ BEGIN TRY
 
 		SELECT @intLoadDetailId = SCOPE_IDENTITY()
 
-		SELECT @dblScheduledQty = dblQuantity
+		SELECT 
+			@dblScheduledQty = dblQuantity,
+			@intItemUOMId = intItemUOMId
 		FROM tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
 
 		IF (ISNULL(@intLoadDetailId,0) <> 0  )
 		BEGIN
-			EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+			EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId = @intSContractDetailId
 				,@dblQuantityToUpdate = @dblScheduledQty
 				,@intUserId = @intEntityUserSecurityId
 				,@intExternalId = @intLoadDetailId
+				,@intSourceItemUOMId = @intItemUOMId
 				,@strScreenName = 'Load Schedule'
 		END
 
