@@ -327,7 +327,7 @@ BEGIN TRY
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 			,dblBoughtPrice = NULL
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+			,strBuyingOrderNumber = CH.strExternalContractNumber
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
@@ -426,6 +426,7 @@ BEGIN TRY
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
