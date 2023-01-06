@@ -18,6 +18,7 @@
 		[intInventoryCostAdjustmentTypeId] INT NOT NULL, 
 		[dblQty] NUMERIC(38, 20) NULL,
 		[dblCost] NUMERIC(38, 20) NULL,
+		[dblForexCost] NUMERIC(38, 20) NULL,
 		[dblValue] NUMERIC(38, 20) NULL,
 		[dblForexValue] NUMERIC(38, 20) NULL,
 		[intCurrencyId] INT NULL,

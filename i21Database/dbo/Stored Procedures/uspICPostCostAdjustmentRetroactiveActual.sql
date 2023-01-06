@@ -92,6 +92,7 @@ BEGIN
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@ForexCurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
+			,@CostBucketNewForexCost AS NUMERIC(38, 20)	
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
 			
 			,@t_intInventoryTransactionId AS INT 
@@ -196,6 +197,8 @@ BEGIN
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 			,@CostBucketDate AS DATETIME 
+			,@CostBucketOriginalForexCost AS NUMERIC(38, 20)
+			,@CostBucketOriginalForexValue AS NUMERIC(38, 20) 
 
 	SELECT	TOP 1 
 			@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -213,6 +216,7 @@ BEGIN
 			,@CostBucketOriginalCost = cb.dblCost
 			,@CostBucketOriginalValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblCost), 2) 
 			,@CostBucketDate = cb.dtmDate
+			,@CostBucketOriginalForexValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblForexCost), 2) 
 	FROM	tblICInventoryActualCost cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -274,6 +278,7 @@ END
 -- Calculate how much cost adjustment goes for each cost bucket. 
 BEGIN 
 	SELECT	@CostAdjustmentPerQty = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+			,@ForexCostAdjustmentPerQty = dbo.fnDivide(@ForexCostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryActualCost cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -307,6 +312,7 @@ BEGIN
 			,[intInventoryCostAdjustmentTypeId] 
 			,[dblQty] 
 			,[dblCost] 
+			,[dblForexCost] 
 			,[dblValue] 
 			,[ysnIsUnposted] 
 			,[dtmCreated] 
@@ -321,7 +327,8 @@ BEGIN
 			,[intInventoryTransactionId] = @DummyInventoryTransactionId 
 			,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
 			,[dblQty] = cb.dblStockIn
-			,[dblCost] = cb.dblCost
+			,[dblCost] = cb.dblCost			
+			,[dblForexCost] = cb.dblForexCost
 			,[dblValue] = NULL 
 			,[ysnIsUnposted]  = 0 
 			,[dtmCreated] = GETDATE()
@@ -420,6 +427,14 @@ BEGIN
 				ELSE
 					@CostBucketNewCost
 			END 
+
+		SET @CostBucketNewForexCost = 
+			CASE	
+				WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+					(@CostBucketOriginalForexValue + @ForexCostAdjustmentPerQty * @t_dblQty) / @t_dblQty
+				ELSE
+					@CostBucketNewForexCost
+			END
 		
 		-- Calculate the current cost adjustment
 		SET @CurrentCostAdjustment = 
@@ -493,6 +508,11 @@ BEGIN
 									,cb.dblStockIn 
 								) 
 						END 
+					,cb.dblForexCost = 
+						dbo.fnDivide(									
+							(@CostBucketOriginalForexValue + @ForexCostAdjustmentPerQty * @t_dblQty)
+							,cb.dblStockIn 
+						) 
 			FROM	tblICInventoryActualCost cb
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryActualCostId = @CostBucketId

@@ -31,6 +31,7 @@ Type the overview for the table here.
 		[intRevalueBuildAssembly] INT NULL,
 		[intRevalueInTransit] INT NULL,
 		intNonInventoryId INT,
+		[intRealizedForeignExchangeGainLossOnInventory] INT,
 		intContraNonInventoryId INT,
 		[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmDateCreated] DATETIME NULL DEFAULT (GETDATE()), 
