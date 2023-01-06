@@ -10,6 +10,8 @@ DECLARE @strErrMsg NVARCHAR(MAX)
 DECLARE @intBillId INT
 DECLARE @intPurchaseSale INT
 DECLARE @intLoadId INT
+DECLARE @ysnTransactionPostedFlag BIT
+DECLARE @intTransactionId INT
 DECLARE @strTransactionId NVARCHAR(100)
 DECLARE @actionType NVARCHAR(10)
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -18,12 +20,16 @@ DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL
 SELECT 
 	@intPurchaseSale = intPurchaseSale
 	,@intLoadId = intLoadId
+	,@intTransactionId = intWeightClaimId
 	,@strTransactionId = WC.strReferenceNumber
+	,@ysnTransactionPostedFlag = ISNULL(ysnPosted, 0)
 FROM tblLGWeightClaim WC
 WHERE intWeightClaimId = @intWeightClaimsId
 
 
-/* Weight Claims No GL */
+/********************
+ Weight Claims No GL
+ ********************/
 IF EXISTS(SELECT TOP 1 1 FROM tblLGCompanyPreference WHERE ISNULL(ysnWeightClaimsImpactGL, 0) = 0)
 BEGIN
 	IF(@ysnPost = 0 AND @ysnRecap = 0) 
@@ -52,21 +58,52 @@ BEGIN
 
 	RETURN;
 END
+
 /* Weight Claims Impact GL */
 /*
 Inbound Claims
-	-ve Claim = Received is less than agreed qty, asking money from vendor (Debit Memo)
+	-ve Claim = Received is less than agreed qty, asking money from vendor (Claim/Debit Memo)
 	+ve Claim = Received is more than agreed qty, sending money to vendor (Normal Voucher)
 Outbound Claims
 	+ve Claim = Shipped is more than the agreed qty; asking money from customer (Normal Invoice)
 	-ve Claim = Shipped is less than the agreed qty; sending money to customer (Credit Memo)
 */
 
-/* Validations */
---Standard Validations
---Check for missing GL setup
+/********************
+ Validations
+ ********************/
 
-/* Generate GL Entries */
+-- Validate if the Inventory Shipment exists
+IF @intWeightClaimsId IS NULL
+BEGIN
+	RAISERROR ('Cannot find the transaction.',11,1)
+	RETURN;
+END
+
+-- Validate the date against the FY Periods  
+IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(GETDATE()) = 0)
+BEGIN
+	RAISERROR ('Unable to find an open fiscal year period to match the transaction date.',11,1)
+	RETURN;
+END
+
+-- Check if the transaction is already posted  
+IF @ysnPost = 1 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 1
+BEGIN
+	RAISERROR ('The transaction is already posted.',11,1)
+	RETURN;
+END
+
+-- Check if the transaction is already posted  
+IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 0
+BEGIN
+	RAISERROR ('The transaction is already unposted.',11,1)
+	RETURN;
+END
+
+/*********************
+ Generate GL Entries 
+ *********************/
 DECLARE @GLEntries AS RecapTableType;
 DECLARE @RecapTable AS RecapTableType;
 DECLARE @APClearing AS APClearing;
@@ -88,7 +125,9 @@ END
 --Construct Data for generating GL Entries
 IF (@intPurchaseSale = 2) 
 BEGIN /* Outbound Claims */
-	RETURN;
+	--No GL (for now)
+	PRINT 'No GL for Outbound Claims for now'
+	ROLLBACK TRAN
 END
 ELSE
 BEGIN /* Inbound Claims */
@@ -287,7 +326,7 @@ BEGIN /* Inbound Claims */
 	ELSE
 	BEGIN
 		--Unpost
-		SELECT	@strBatchId = MAX(strBatchId)
+		SELECT @strBatchId = MAX(strBatchId)
 		FROM tblGLDetail
 		WHERE strTransactionId = @strTransactionId
 				AND intTransactionId = @intWeightClaimsId
@@ -365,11 +404,7 @@ BEGIN /* Inbound Claims */
 			,[strRateType] = ''
 		FROM tblGLDetail 
 		WHERE strTransactionId = @strTransactionId
-				AND intTransactionId = @intWeightClaimsId
-				AND strTransactionType = 'Weight Claim'
-				AND strModuleName = 'Logistics'
-				AND ysnIsUnposted = 0
-				AND strCode = ISNULL('LG', strCode)
+			AND strBatchId = @strBatchId
 		ORDER BY intGLDetailId
 
 		UPDATE tblGLDetail
@@ -380,7 +415,9 @@ BEGIN /* Inbound Claims */
 
 END
 
-/* Recap or Book GL */
+/*******************
+ Recap or Book GL
+ *******************/
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
@@ -389,65 +426,79 @@ BEGIN
 END  
 ELSE
 BEGIN
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+	IF EXISTS (SELECT 1 FROM @GLEntries)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
 
-	--Insert AP Clearing
-	INSERT INTO @APClearing (
-		intTransactionId
-		,strTransactionId
-		,intTransactionType
-		,strReferenceNumber
-		,dtmDate
-		,intEntityVendorId
-		,intLocationId
-		,intTransactionDetailId
-		,intAccountId
-		,intItemId
-		,intItemUOMId
-		,dblQuantity
-		,dblAmount
-		,intOffsetId
-		,strOffsetId
-		,intOffsetDetailId
-		,intOffsetDetailTaxId
-		,strCode)
-	SELECT DISTINCT
-		intTransactionId = GL.intTransactionId
-		,strTransactionId = GL.strTransactionId
-		,intTransactionType = 11
-		,strReferenceNumber = L.strBLNumber
-		,dtmDate = GL.dtmDate
-		,intEntityVendorId = WCD.intPartyEntityId
-		,intLocationId = GL.intCompanyLocationId
-		,intTransactionDetailId = WCD.intWeightClaimDetailId
-		,intAccountId = GL.intAccountId
-		,intItemId = WCD.intItemId
-		,intItemUOMId = IUOM.intItemUOMId
-		,dblQuantity = ABS(WCD.dblClaimableWt)
-		,dblAmount = ABS(GL.dblDebit - GL.dblCredit)
-		,intOffsetId = NULL
-		,strOffsetId = NULL
-		,intOffsetDetailId = NULL
-		,intOffsetDetailTaxId = NULL
-		,strCode = GL.strCode
-	FROM tblLGWeightClaim WC
-		INNER JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
-		INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
-		INNER JOIN @GLEntries GL ON GL.intTransactionId = L.intLoadId AND GL.intJournalLineNo = WCD.intWeightClaimDetailId
-		LEFT JOIN tblICItemLocation IL ON IL.intItemId = WCD.intItemId AND GL.intCompanyLocationId = IL.intLocationId
-		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemId = WCD.intItemId AND IUOM.intUnitMeasureId = L.intWeightUnitMeasureId
-	WHERE GL.intAccountId = dbo.fnGetItemGLAccount(WCD.intItemId, IL.intItemLocationId, 'AP Clearing')
+		IF (@intPurchaseSale = 1)
+		BEGIN
+			--Insert AP Clearing
+			INSERT INTO @APClearing (
+				intTransactionId
+				,strTransactionId
+				,intTransactionType
+				,strReferenceNumber
+				,dtmDate
+				,intEntityVendorId
+				,intLocationId
+				,intTransactionDetailId
+				,intAccountId
+				,intItemId
+				,intItemUOMId
+				,dblQuantity
+				,dblAmount
+				,intOffsetId
+				,strOffsetId
+				,intOffsetDetailId
+				,intOffsetDetailTaxId
+				,strCode)
+			SELECT DISTINCT
+				intTransactionId = GL.intTransactionId
+				,strTransactionId = GL.strTransactionId
+				,intTransactionType = 11
+				,strReferenceNumber = L.strBLNumber
+				,dtmDate = GL.dtmDate
+				,intEntityVendorId = WCD.intPartyEntityId
+				,intLocationId = GL.intCompanyLocationId
+				,intTransactionDetailId = WCD.intWeightClaimDetailId
+				,intAccountId = GL.intAccountId
+				,intItemId = WCD.intItemId
+				,intItemUOMId = IUOM.intItemUOMId
+				,dblQuantity = ABS(WCD.dblClaimableWt)
+				,dblAmount = ABS(GL.dblDebit - GL.dblCredit)
+				,intOffsetId = NULL
+				,strOffsetId = NULL
+				,intOffsetDetailId = NULL
+				,intOffsetDetailTaxId = NULL
+				,strCode = GL.strCode
+			FROM tblLGWeightClaim WC
+				INNER JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
+				INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+				INNER JOIN @GLEntries GL ON GL.intTransactionId = L.intLoadId AND GL.intJournalLineNo = WCD.intWeightClaimDetailId
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = WCD.intItemId AND GL.intCompanyLocationId = IL.intLocationId
+				LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemId = WCD.intItemId AND IUOM.intUnitMeasureId = L.intWeightUnitMeasureId
+			WHERE GL.intAccountId = dbo.fnGetItemGLAccount(WCD.intItemId, IL.intItemLocationId, 'AP Clearing')
 
-	EXEC uspAPClearing @APClearing, @ysnPost
+			EXEC uspAPClearing @APClearing, @ysnPost
 
-	COMMIT TRAN @TransactionName
+			--Create Payables
+			EXEC uspLGProcessClaimPayables @intWeightClaimsId, NULL, @ysnPost, @intEntityUserSecurityId
+
+			COMMIT TRAN @TransactionName
+		END
+	END
 END
 
-/* Create Payables */
-
-/* Audit Log, etc. */
+/**********************************
+ Update Posted Flag and Audit Log
+ *********************************/
 IF (@ysnRecap = 0)
 BEGIN
+	UPDATE tblLGWeightClaim
+	SET ysnPosted = @ysnPost
+		,dtmPosted = GETDATE()
+	WHERE intWeightClaimId = @intWeightClaimsId
+
 	SET @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted' WHEN @ysnPost = 0 THEN 'Unposted' END
 	EXEC uspSMAuditLog
 		@keyValue = @intWeightClaimsId,
