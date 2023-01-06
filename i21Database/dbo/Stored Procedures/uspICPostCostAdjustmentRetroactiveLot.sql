@@ -91,6 +91,7 @@ BEGIN
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@ForexCurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
+			,@CostBucketNewForexCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
 
 			,@t_intInventoryTransactionId AS INT 
@@ -200,6 +201,8 @@ BEGIN
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 			,@CostBucketDate AS DATETIME 
+			,@CostBucketOriginalForexCost AS NUMERIC(38, 20)
+			,@CostBucketOriginalForexValue AS NUMERIC(38, 20) 
 
 	--SELECT	TOP 1 
 	--		@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -320,6 +323,9 @@ BEGIN
 			,[intLotId] INT 
 			,[dblCost] NUMERIC(38, 20)
 			,[dblValue] NUMERIC(38, 20)
+			,[dblForexCost] NUMERIC(38, 20)
+			,[dblForexValue] NUMERIC(38, 20)
+
 		)
 
 		CREATE NONCLUSTERED INDEX [IX_tmpCostBucketOriginal] ON dbo.#tmpCostBucketOriginal(intLotId ASC);
@@ -331,11 +337,15 @@ BEGIN
 			,[intLotId] 
 			,[dblCost] 
 			,[dblValue] 
+			,[dblForexCost] 
+			,[dblForexValue]
 	)
 	SELECT cb.intInventoryLotId
 			,cb.intLotId 
 			,cb.dblCost 
 			,dblValue = cb.dblStockIn * cb.dblCost
+			,cb.dblForexCost 
+			,dblValue = cb.dblStockIn * cb.dblForexCost
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -377,6 +387,7 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] 
 				,[dblQty] 
 				,[dblCost] 
+				,[dblForexCost]
 				,[dblValue] 
 				,[ysnIsUnposted] 
 				,[dtmCreated] 
@@ -392,6 +403,7 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
 				,[dblQty] = cb.dblStockIn
 				,[dblCost] = cb.dblCost
+				,[dblForexCost] = cb.dblForexCost
 				,[dblValue] = NULL 
 				,[ysnIsUnposted]  = 0 
 				,[dtmCreated] = GETDATE()
@@ -470,6 +482,7 @@ BEGIN
 		SET @t_dblCost = ISNULL(@t_dblCost, 0)
 		SET @t_dblValue = ISNULL(@t_dblValue, 0) 
 		SET @CostBucketNewCost = ISNULL(@CostBucketNewCost, 0) 
+		SET @CostBucketNewForexCost = ISNULL(@CostBucketNewForexCost, 0) 
 		SET @CurrentCostAdjustment = ISNULL(@CurrentCostAdjustment, 0) 		
 
 		SET @IsSourceTransaction = 0
@@ -527,6 +540,8 @@ BEGIN
 			SELECT	@CostBucketOriginalValue = cbo.dblValue
 					,@CostBucketOriginalCost = cbo.dblCost
 					,@intInventoryLotId = cb.intInventoryLotId
+					,@CostBucketOriginalForexCost  = cbo.dblForexCost 
+					,@CostBucketOriginalForexValue = cbo.dblForexValue
 			FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
 						ON cb.intInventoryLotId = cbo.intInventoryLotId
 			WHERE	cbo.intLotId = @t_intLotId
@@ -545,6 +560,13 @@ BEGIN
 						(@CostBucketOriginalValue + @CostAdjustmentPerCb * @t_dblQty) / @t_dblQty
 					ELSE
 						@CostBucketNewCost
+			END 
+
+		SET @CostBucketNewForexCost = 
+			CASE	WHEN @IsSourceTransaction = 1 THEN 
+						(@CostBucketOriginalForexValue + @ForexCostAdjustmentPerCb * @t_dblQty) / @t_dblQty
+					ELSE
+						@CostBucketNewForexCost
 			END 
 		
 		-- Calculate the current cost adjustment
@@ -585,14 +607,12 @@ BEGIN
 							WHEN NOT (ROUND(@CostBucketNewCost, 2) < 0) AND @CostBucketNewCost < 0 THEN 0 
 							ELSE @CostBucketNewCost
 						END 
-						--dbo.fnDivide(
-						--	(@CostBucketOriginalValue + @CostAdjustment) 
-						--	,cb.dblStockIn 
-						--) 
-						--dbo.fnDivide(
-						--	(dbo.fnMultiply(cb.dblStockIn, cb.dblCost) + dbo.fnMultiply(@CostAdjustmentPerCb, cb.dblStockIn)) 
-						--	,cb.dblStockIn 
-						--) 
+
+					,cb.dblForexCost = 
+						CASE 
+							WHEN NOT (ROUND(@CostBucketNewForexCost, 2) < 0) AND @CostBucketNewForexCost < 0 THEN 0 
+							ELSE @CostBucketNewForexCost
+						END 
 			FROM	tblICInventoryLot cb
 			WHERE	cb.intInventoryLotId = @intInventoryLotId
 

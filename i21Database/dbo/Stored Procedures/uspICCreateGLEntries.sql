@@ -329,6 +329,7 @@ WITH ForGLEntries_CTE (
 	,intSourceEntityId
 	,intCommodityId
 	,strLotNumber 
+	,dblComputedValue
 	,dblComputedBaseValue1
 	,dblComputedBaseValue2
 	,dblLatestForexRate
@@ -359,6 +360,8 @@ AS
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,lot.strLotNumber
+			,dblComputedValue = 
+				ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)), 2)
 			,dblComputedBaseValue1 = 
 				CASE 
 					WHEN @intFunctionalCurrencyId <> t.intCurrencyId THEN 
@@ -443,16 +446,10 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
-			ISNULL(
-				dblComputedBaseValue1
-				,dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
-			)
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			ISNULL(
-				dblComputedBaseValue1
-				,dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 
-			)
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 
 		) Credit
 		--CROSS APPLY dbo.fnGetDebitForeign(
 		--	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)	
@@ -531,17 +528,10 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(
-			ISNULL(
-				dblComputedBaseValue1
-				,dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
-			)
-
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			ISNULL(
-				dblComputedBaseValue1
-				,dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
-			)
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
 		) Credit
 		--CROSS APPLY dbo.fnGetDebitForeign(
 		--	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
@@ -630,16 +620,10 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(
-			ISNULL(
-				dblComputedBaseValue1
-				,dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
-			)
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			ISNULL(
-				dblComputedBaseValue1
-				,dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
-			)			
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)
 		) Credit
 		--CROSS APPLY dbo.fnGetDebitForeign(
 		--	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)	
@@ -808,10 +792,10 @@ FROM	ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intRealizedForeignExchangeGainLossOnInventory
 		CROSS APPLY dbo.fnGetDebit(			
-			dblComputedBaseValue2 - dblComputedBaseValue1
+			dblComputedBaseValue2 - dblComputedValue
 		) Debit
 		CROSS APPLY dbo.fnGetCredit(
-			dblComputedBaseValue2 - dblComputedBaseValue1
+			dblComputedBaseValue2 - dblComputedValue
 		) Credit
 		CROSS APPLY dbo.fnGetDebitUnit(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
