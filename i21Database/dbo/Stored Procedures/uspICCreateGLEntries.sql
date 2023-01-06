@@ -35,9 +35,6 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will now use Inventory Adjustment. 
 DECLARE @AccountCategory_RealizedForeignExchangeGainLossOnInventory AS NVARCHAR(50) = 'Realized Foreign Exchange Gain/Loss on Inventory'
 
--- Get the default currency ID
-DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
-
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
@@ -348,7 +345,7 @@ AS
 			,t.dblValue
 			,t.dblForexValue
 			,t.intTransactionTypeId
-			,ISNULL(t.intCurrencyId, @DefaultCurrencyId) intCurrencyId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
@@ -812,6 +809,7 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			)
 		AND ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) IN ('Invoice')
 		AND ISNULL(dblComputedBaseValue2, 0) - ISNULL(dblComputedBaseValue1, 0) <> 0 
+
 -----------------------------------------------------------------------------------
 -- This part is for the Auto Variance on Used or Sold Stock
 -----------------------------------------------------------------------------------
