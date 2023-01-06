@@ -345,7 +345,7 @@ BEGIN
 			,cb.dblCost 
 			,dblValue = cb.dblStockIn * cb.dblCost
 			,cb.dblForexCost 
-			,dblValue = cb.dblStockIn * cb.dblForexCost
+			,dblForexValue = cb.dblStockIn * cb.dblForexCost
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
