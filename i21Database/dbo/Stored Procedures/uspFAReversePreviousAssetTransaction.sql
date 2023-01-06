@@ -292,7 +292,7 @@ BEGIN
             -- Tax
             -- Seperate the reversing of Tax depreciations because tax follows default calendar period while GAAP may not.
             SET @dtmDepreciationToDate = NULL
-            IF EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation WHERE intAssetId = @intCurrentAssetId AND intBookId = 2) -- Check if has Tax depreciation
+            IF EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation WHERE intAssetId = @intCurrentAssetId AND intBookId > 1) -- Check if has Tax depreciation
             BEGIN
                 -- Get date period from Calendar Period
                 SELECT TOP 1 
@@ -300,7 +300,7 @@ BEGIN
                 FROM tblFAFixedAssetDepreciation 
                 WHERE 
                     intAssetId = @intCurrentAssetId 
-                    AND intBookId = 2 
+                    AND intBookId > 1
                 ORDER BY dtmDepreciationToDate DESC
 
                 SELECT
@@ -311,14 +311,14 @@ BEGIN
                 DELETE tblFAFixedAssetDepreciation
                 WHERE
                     intAssetId = @intCurrentAssetId
-                    AND intBookId = 2
+                    AND intBookId > 1
                     AND dtmDepreciationToDate BETWEEN @dtmFiscalPeriodStartDate AND @dtmFiscalPeriodEndDate
                
                 -- Adjustments to Basis and Depreciation for Tax - only Basis adjustments have GL Entries
                 DELETE tblFABasisAdjustment 
                 WHERE 
                     intAssetId = @intCurrentAssetId
-                    AND intBookId = 2
+                    AND intBookId > 1
                     AND strAdjustmentType = 'Basis'
                     AND dtmDate BETWEEN @dtmFiscalPeriodStartDate AND @dtmFiscalPeriodEndDate
 
@@ -334,7 +334,7 @@ BEGIN
                     WHERE 
                         intAssetId = @intCurrentAssetId
                         AND strTransaction IN ('Depreciation', 'Imported')
-                        AND intBookId = 2
+                        AND intBookId > 1
                 ) Depreciation
                 WHERE 
                     Depreciation.intCount = 0 
