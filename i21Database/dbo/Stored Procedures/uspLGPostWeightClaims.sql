@@ -196,6 +196,7 @@ BEGIN /* Inbound Claims */
 							OR (ER.intFromCurrencyId = @intFunctionalCurrencyId AND ER.intToCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)))
 					ORDER BY ERD.dtmValidFromDate DESC) FX
 		WHERE WCD.intWeightClaimId = @intWeightClaimsId
+			AND WCD.dblClaimableWt < 0
 		)
 
 		INSERT INTO @GLEntries (
