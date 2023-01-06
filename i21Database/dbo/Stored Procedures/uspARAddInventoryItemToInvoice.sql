@@ -274,7 +274,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 		END
 	END
 
-IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ItemContractDetailId IS NOT NULL
+IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractHeaderId IS NULL AND @ContractDetailId IS NULL
 BEGIN
 	SELECT TOP 1 @ContractDetailId 	= TMO.intContractDetailId
 				, @ContractHeaderId 	= CH.intContractHeaderId
