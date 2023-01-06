@@ -137,7 +137,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
@@ -369,7 +369,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN tblARInvoice.strBOLNumber ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
