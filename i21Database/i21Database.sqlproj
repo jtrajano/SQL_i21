@@ -1206,6 +1206,8 @@
     <Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleBook.sql" />
     <None Include="Scripts\Post-Deployment\FA\05_AssetBookDepreciation.sql" />
     <Build Include="dbo\Stored Procedures\uspFABookDepreciation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFABookDepreciationReport.sql" />
+    <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
