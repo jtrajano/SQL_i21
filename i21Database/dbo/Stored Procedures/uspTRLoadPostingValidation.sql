@@ -521,11 +521,7 @@ BEGIN TRY
 		, DD.intLoadDistributionDetailId
 		, DD.intLoadDistributionHeaderId
 		, DD.intItemId
-		, dblUnits = CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
-							WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
-							WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
-							WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
-							ELSE DD.dblUnits END
+		, DD.dblUnits
 		, DD.dblPrice
 		, dblFreight = DD.dblFreightRate
 		, dblSurcharge = DD.dblDistSurcharge
@@ -536,11 +532,7 @@ BEGIN TRY
 	INTO #DistributionDetailTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
-	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 	LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-	LEFT JOIN vyuTRGetLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
-			SELECT Item 
-			FROM dbo.fnTRSplit(DD.strReceiptLink,','))
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #DistributionDetailTable)
