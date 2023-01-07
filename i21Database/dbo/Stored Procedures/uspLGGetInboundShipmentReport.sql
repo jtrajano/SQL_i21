@@ -698,7 +698,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		) LOGO
 		WHERE L.strLoadNumber = @strTrackingNumber
-		AND (ISNULL(@intCustomerEntityId, 0) = 0 
+		AND ((ISNULL(@intCustomerEntityId, 0) = 0 AND LD.intCustomerEntityId IS NOT NULL)
 			OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = LD.intCustomerEntityId)
 			OR (ISNULL(@intCustomerEntityId, 0) < 0 AND LD.intCustomerEntityId IS NULL))) tbl
 	END
