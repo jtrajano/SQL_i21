@@ -532,9 +532,10 @@ BEGIN
             [strBatchId],
 			[intCurrencyId],
 			[intFunctionalCurrencyId],
-			[intLedgerId]
-            )  
-            SELECT  
+			[intLedgerId],
+			[intBookDepreciationId]
+        )  
+        SELECT  
             F.intAssetId,
             1,
             D.intDepreciationMethodId,
@@ -557,7 +558,8 @@ BEGIN
             @strBatchId,
 			BD.intCurrencyId,
 			BD.intFunctionalCurrencyId,
-			BD.intLedgerId
+			BD.intLedgerId,
+			BD.intBookDepreciationId
             FROM tblFAFixedAsset F 
 			JOIN @tblAsset A ON A.intAssetId = F.intAssetId
             JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
