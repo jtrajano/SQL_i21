@@ -343,7 +343,7 @@ BEGIN
 	FROM tblARPostInvoiceDetail I
 	WHERE I.[dblQtyShipped] = @ZeroDecimal 
 	  AND I.[ysnStockTracking] = @OneBit
-	  AND I.[strType] <> 'Tank Delivery'
+	  AND I.[strType] NOT IN ('Transport Delivery', 'Tank Delivery')
 	  AND I.strSessionId = @strSessionId
 		
 	INSERT INTO tblARPostInvalidInvoiceData
