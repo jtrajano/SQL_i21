@@ -86,12 +86,12 @@ AS
 		INNER JOIN tblBBBuyback Buyback ON BuybackDetail.intBuybackId = Buyback.intBuybackId
 		INNER JOIN tblVRVendorSetup VendorSetup ON Buyback.intEntityId = VendorSetup.intEntityId
 		OUTER APPLY (
-			--SELECT TOP 1 intWarehouseId
-			--FROM vyuARCustomerSearch
-			--WHERE intEntityId = Buyback.intEntityId
-			SELECT TOP 1 intCompanyLocationId intWarehouseId
-			FROM vyuARInvoiceDetail
-			WHERE intInvoiceDetailId = BuybackDetail.intInvoiceDetailId
+			SELECT TOP 1 i.intCompanyLocationId intWarehouseId
+			FROM tblARInvoice i
+			JOIN tblARInvoiceDetail id ON id.intInvoiceId = i.intInvoiceId
+			JOIN tblBBBuybackDetail bd ON bd.intInvoiceDetailId = id.intInvoiceDetailId
+			JOIN tblBBBuyback b ON b.intBuybackId = bd.intBuybackId
+			WHERE b.intBuybackId = @intBuyBackId
 		) customerLocation
 		OUTER APPLY (
 			SELECT TOP 1 intItemLocationId, intLocationId
