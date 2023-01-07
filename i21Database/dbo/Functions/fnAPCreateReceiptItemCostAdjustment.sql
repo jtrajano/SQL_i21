@@ -219,6 +219,7 @@ BEGIN
 				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
 				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
+			OR E2.intTaxGroupId <> B.intTaxGroupId
 		) 
 		AND B.dblQtyReceived > 0
 		UNION ALL
