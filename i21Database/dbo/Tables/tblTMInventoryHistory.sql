@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[tblTMInventoryHistory]
     [dtmInventoryTime]  DATETIME NULL
    
     CONSTRAINT [PK_tblTMInventoryHistory] PRIMARY KEY CLUSTERED ([intInventoryHistoryId] ASC),
-    CONSTRAINT [FK_tblTMInventoryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
+    CONSTRAINT [FK_tblTMInventoryHistory_tblTMSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 )
 
 
