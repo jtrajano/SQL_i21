@@ -26,7 +26,6 @@ SELECT
 FROM tblLGWeightClaim WC
 WHERE intWeightClaimId = @intWeightClaimsId
 
-
 /********************
  Weight Claims No GL
  ********************/
@@ -152,6 +151,7 @@ BEGIN /* Inbound Claims */
 			,intEntityId
 			,intAPAccountId
 			,intAPClearingAccountId
+			,intExpenseAccountId
 			)
 		AS (SELECT 
 			dtmDate = GETDATE()
@@ -170,8 +170,9 @@ BEGIN /* Inbound Claims */
 			,strRateType = FX.strRateType
 			,strItemNo = I.strItemNo
 			,intEntityId = WCD.intPartyEntityId
-			,intAPAccountId = CL.intAPAccount
+			,intAPAccountId = CASE WHEN WCD.dblClaimableWt < 0 THEN CL.intAPAccount ELSE NULL END
 			,intAPClearingAccountId = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
+			,intExpenseAccountId = CASE WHEN WCD.dblClaimableWt < 0 THEN NULL ELSE V.intGLAccountExpenseId END
 		FROM tblLGWeightClaimDetail WCD
 			INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
 			INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
@@ -182,6 +183,7 @@ BEGIN /* Inbound Claims */
 				FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = WCD.intContractDetailId) LD
 			LEFT JOIN tblICItemLocation IL ON IL.intItemId = WCD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
+			LEFT JOIN tblAPVendor V ON V.intEntityId = WCD.intPartyEntityId
 			OUTER APPLY (
 				SELECT	TOP 1  
 					intForexRateTypeId = ERD.intRateTypeId
@@ -196,7 +198,8 @@ BEGIN /* Inbound Claims */
 							OR (ER.intFromCurrencyId = @intFunctionalCurrencyId AND ER.intToCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)))
 					ORDER BY ERD.dtmValidFromDate DESC) FX
 		WHERE WCD.intWeightClaimId = @intWeightClaimsId
-			AND WCD.dblClaimableWt < 0
+			AND WCD.dblClaimableWt <> 0
+			AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		)
 
 		INSERT INTO @GLEntries (
@@ -234,9 +237,8 @@ BEGIN /* Inbound Claims */
 			,[strRateType]
 			)
 		-------------------------------------------------------------------------------------------
-		-- Inbound Claim Weight Loss Impact
-		-- Dr...... AP 
-		-- Cr.................... AP Clearing	
+		-- Inbound Claim Weight Loss Impact: Dr. AP, Cr. AP Clearing	
+		-- Inbound Claim Weight Gain Impact: Dr. AP Clearing, Cr. Expense
 		-------------------------------------------------------------------------------------------
 		SELECT dtmDate = ForGLEntries_CTE.dtmDate
 			,strBatchId = @strBatchId
@@ -275,7 +277,7 @@ BEGIN /* Inbound Claims */
 			,dblForeignRate = ForGLEntries_CTE.dblForexRate
 			,strRateType = ForGLEntries_CTE.strRateType
 		FROM ForGLEntries_CTE
-		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ForGLEntries_CTE.intAPAccountId
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ISNULL(ForGLEntries_CTE.intAPAccountId, ForGLEntries_CTE.intAPClearingAccountId)
 		CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 		CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 		WHERE ForGLEntries_CTE.intItemId IS NOT NULL
@@ -319,7 +321,7 @@ BEGIN /* Inbound Claims */
 			,dblForeignRate = ForGLEntries_CTE.dblForexRate
 			,strRateType = ForGLEntries_CTE.strRateType
 		FROM ForGLEntries_CTE
-		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ForGLEntries_CTE.intAPClearingAccountId
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ISNULL(ForGLEntries_CTE.intAPClearingAccountId, ForGLEntries_CTE.intExpenseAccountId)
 		CROSS APPLY dbo.fnGetCreditFunctional(-ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 		CROSS APPLY dbo.fnGetCredit(-ForGLEntries_CTE.dblCost) CreditForeign
 		WHERE ForGLEntries_CTE.intItemId IS NOT NULL
@@ -456,7 +458,7 @@ BEGIN
 			SELECT DISTINCT
 				intTransactionId = GL.intTransactionId
 				,strTransactionId = GL.strTransactionId
-				,intTransactionType = 11
+				,intTransactionType = CASE WHEN (WCD.dblClaimableWt > 0) THEN 1 ELSE 11 END
 				,strReferenceNumber = L.strBLNumber
 				,dtmDate = GL.dtmDate
 				,intEntityVendorId = WCD.intPartyEntityId

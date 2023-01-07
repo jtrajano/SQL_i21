@@ -126,8 +126,8 @@ BEGIN
 			,[dblExchangeRate] = 1
 			,[ysnSubCurrency] = CU.ysnSubCurrency
 			,[intSubCurrencyCents] = CU.intCent
-			,[intAccountId] = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
-			,[ysnReturn] = 1
+			,[intAccountId] = CASE WHEN (WCD.dblWeightLoss < 0) THEN dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing') ELSE V.intGLAccountExpenseId END 
+			,[ysnReturn] = CAST(CASE WHEN (WCD.dblWeightLoss < 0) THEN 1 ELSE 0 END AS BIT)
 			,[ysnStage] = CAST(0 AS BIT)
 			,[intSubLocationId] = CD.intSubLocationId
 			,[intStorageLocationId] = CD.intStorageLocationId
@@ -136,6 +136,7 @@ BEGIN
 			JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			LEFT JOIN tblAPVendor V ON V.intEntityId = WCD.intPartyEntityId
 			LEFT JOIN tblICItem I ON I.intItemId = WCD.intItemId
 			LEFT JOIN tblICItemLocation IL ON IL.intItemId = WCD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
@@ -150,7 +151,7 @@ BEGIN
 							 OR (WCD.intLoadContainerId IS NOT NULL AND WCD.intLoadContainerId = ldcl.intLoadContainerId))) LD
 		WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
-		AND ISNULL(WCD.dblClaimAmount, 0) > 0
+		AND ISNULL(WCD.dblClaimAmount, 0) <> 0
 		
 		
 		-- Assemble Item Taxes
