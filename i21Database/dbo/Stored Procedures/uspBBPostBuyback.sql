@@ -178,6 +178,28 @@ AS
 				AND intLocationId = iv.intCompanyLocationId
 		WHERE intBuybackId = @intBuyBackId
 
+		DECLARE @shipFromEntityId INT
+		DECLARE @shipTo INT
+		DECLARE @shipFrom INT
+
+		SELECT TOP 1 @shipTo = i.intCompanyLocationId
+		FROM tblARInvoice i
+		JOIN tblARInvoiceDetail id ON id.intInvoiceId = i.intInvoiceId
+		JOIN tblBBBuybackDetail bd ON bd.intInvoiceDetailId = id.intInvoiceDetailId
+		JOIN tblBBBuyback b ON b.intBuybackId = bd.intBuybackId
+		WHERE b.intBuybackId = @intBuyBackId
+
+		-- SELECT TOP 1 @shipFrom = el.intEntityLocationId, @shipTo = iv.intCompanyLocationId, @shipFromEntityId = el.intEntityId
+		-- FROM tblBBBuybackDetail A
+		-- INNER JOIN tblICItem B
+		-- 	ON A.intItemId = B.intItemId
+		-- JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = A.intInvoiceDetailId
+		-- JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
+		-- INNER JOIN tblICItemLocation C ON B.intItemId = C.intItemId AND intLocationId = iv.intCompanyLocationId
+		-- JOIN tblEMEntityLocation el ON el.intEntityId = iv.intEntityId
+		-- 	AND el.intEntityLocationId = iv.intShipToLocationId
+		-- WHERE intBuybackId = @intBuyBackId
+
 		---Check for Other Charge income account.
 		IF EXISTS(SELECT TOP 1 1 FROM #tmpStagingInsert WHERE intAccountId IS NULL)
 		BEGIN
@@ -213,6 +235,7 @@ AS
 			,@vendorOrderNumber = @strReimbursementNo
 			,@voucherDate = @APDate
 			,@voucherNonInvDetails = @voucherNonInvDetails
+			,@shipTo = @shipTo
 			,@billId = @intCreatedBillId OUTPUT
 			,@error = @ErrorMessage OUTPUT
 			,@throwError = 0
