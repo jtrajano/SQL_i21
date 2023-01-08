@@ -486,11 +486,12 @@ AS
 	FROM	@ReturnValuation rv INNER JOIN tblICInventoryReceipt r 
 				ON rv.strReceiptNumber = r.strReceiptNumber	 
 			INNER JOIN tblICInventoryReceiptItem ri 
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId							
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId		
+				AND ri.intInventoryReceiptItemId = rv.intInventoryReceiptItemId	
 			INNER JOIN tblICInventoryTransaction t 
 				ON t.intInventoryTransactionId = rv.intInventoryTransactionId
 				AND t.strTransactionId = rv.strReceiptNumber
-				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId				
 			INNER JOIN tblICItem i
 				ON i.intItemId = ri.intItemId
 			INNER JOIN #tmpRebuildList list	
@@ -781,6 +782,7 @@ AS
 						ON rv.strReceiptNumber = r.strReceiptNumber
 					INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+						AND ri.intInventoryReceiptItemId = rv.intInventoryReceiptItemId
 					INNER JOIN tblICItem i 
 						ON ri.intItemId = i.intItemId
 					INNER JOIN #tmpRebuildList list	
