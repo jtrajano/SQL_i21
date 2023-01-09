@@ -101,6 +101,5 @@
 	ysnRecipeBySite Bit,
 	ysnConsiderBookInDemandView BIT,
 	intPositionByETADemandReport INT,
-	ysnDisplayPickTicketItemXref BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
