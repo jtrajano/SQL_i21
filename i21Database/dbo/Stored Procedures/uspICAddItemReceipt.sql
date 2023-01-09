@@ -1539,6 +1539,7 @@ BEGIN
 				,intLoadShipmentCostId
 				,intSort
 				,dblQuantity
+				,ysnLock
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1573,6 +1574,7 @@ BEGIN
 				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
 				,intSort					= RawData.intSort
 				,dblQuantity				= RawData.dblQuantity 
+				,ysnLock					= RawData.ysnLock
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
