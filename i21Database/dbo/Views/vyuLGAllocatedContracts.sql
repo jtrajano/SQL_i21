@@ -176,17 +176,6 @@ LEFT JOIN tblICItemUOM PPU ON PPU.intItemUOMId = PCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PPU.intUnitMeasureId
 LEFT JOIN tblCTPricingType PPT ON PPT.intPricingTypeId = PCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate PFR ON PFR.intFreightRateId = PCT.intFreightRateId
-LEFT JOIN (tblLGLoadDetail PSID INNER JOIN tblLGLoad PSIH ON PSIH.intLoadId = PSID.intLoadId)
-	ON PSID.intPContractDetailId = PCT.intContractDetailId AND PSIH.intShipmentType = 2
-LEFT JOIN (tblLGLoadDetail PLSD INNER JOIN tblLGLoad PLSH ON PLSH.intLoadId = PLSD.intLoadId)
-	ON PLSD.intPContractDetailId = PCT.intContractDetailId AND PLSH.intShipmentType = 1
-LEFT JOIN (tblICInventoryReceiptItem PIRD INNER JOIN tblICInventoryReceipt PIRH ON PIRH.intInventoryReceiptId = PIRD.intInventoryReceiptId)
-	ON PIRD.intLoadShipmentDetailId = PLSD.intLoadDetailId
-LEFT JOIN (tblLGLoadWarehouse PLSW INNER JOIN tblSMCompanyLocationSubLocation PLSWSL ON PLSWSL.intCompanyLocationSubLocationId = PLSW.intSubLocationId) ON PLSW.intLoadId = PLSH.intLoadId
-LEFT JOIN tblEMEntity PLL ON PLL.intEntityId = PCT.intLogisticsLeadId
-LEFT JOIN (tblQMSample PS INNER JOIN tblQMSampleType PST ON PST.intSampleTypeId = PS.intSampleTypeId) ON PS.intProductValueId = PCT.intContractDetailId AND PS.intProductTypeId = 8 -- Contract item
-LEFT JOIN tblQMSampleStatus PSS ON PSS.intSampleStatusId = PS.intSampleStatusId
-LEFT JOIN vyuCTShipmentStatus PLSSS ON PLSSS.intLoadDetailId = PLSD.intLoadDetailId
 OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = PCT.intContractDetailId) BD
 LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
@@ -212,6 +201,21 @@ LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate SFR ON SFR.intFreightRateId = SCT.intFreightRateId
 LEFT JOIN (tblLGLoadDetail SLSD INNER JOIN tblLGLoad SLSH ON SLSH.intLoadId = SLSD.intLoadId)
 	ON SLSD.intSContractDetailId = SCT.intContractDetailId AND SLSH.intShipmentType = 1
+LEFT JOIN (tblLGLoadDetail PSID INNER JOIN tblLGLoad PSIH ON PSIH.intLoadId = PSID.intLoadId)
+	ON PSID.intPContractDetailId = PCT.intContractDetailId AND PSIH.intShipmentType = 2 AND (
+		(PSIH.intSourceType = 4 AND PSID.intSContractDetailId = SCT.intContractDetailId) OR (PSIH.intSourceType <> 4)
+	)
+LEFT JOIN (tblLGLoadDetail PLSD INNER JOIN tblLGLoad PLSH ON PLSH.intLoadId = PLSD.intLoadId)
+	ON PLSD.intPContractDetailId = PCT.intContractDetailId AND PLSH.intShipmentType = 1 AND (
+		(PLSH.intSourceType = 4 AND PLSD.intSContractDetailId = SCT.intContractDetailId) OR (PLSH.intSourceType <> 4)
+	)
+LEFT JOIN (tblICInventoryReceiptItem PIRD INNER JOIN tblICInventoryReceipt PIRH ON PIRH.intInventoryReceiptId = PIRD.intInventoryReceiptId)
+	ON PIRD.intLoadShipmentDetailId = PLSD.intLoadDetailId
+LEFT JOIN (tblLGLoadWarehouse PLSW INNER JOIN tblSMCompanyLocationSubLocation PLSWSL ON PLSWSL.intCompanyLocationSubLocationId = PLSW.intSubLocationId) ON PLSW.intLoadId = PLSH.intLoadId
+LEFT JOIN tblEMEntity PLL ON PLL.intEntityId = PCT.intLogisticsLeadId
+LEFT JOIN (tblQMSample PS INNER JOIN tblQMSampleType PST ON PST.intSampleTypeId = PS.intSampleTypeId) ON PS.intProductValueId = PCT.intContractDetailId AND PS.intProductTypeId = 8 -- Contract item
+LEFT JOIN tblQMSampleStatus PSS ON PSS.intSampleStatusId = PS.intSampleStatusId
+LEFT JOIN vyuCTShipmentStatus PLSSS ON PLSSS.intLoadDetailId = PLSD.intLoadDetailId
 LEFT JOIN tblEMEntity SLL ON SLL.intEntityId = SCT.intLogisticsLeadId
 LEFT JOIN (tblQMSample SS INNER JOIN tblQMSampleType SST ON SST.intSampleTypeId = SS.intSampleTypeId) ON SS.intProductValueId = SCT.intContractDetailId AND SS.intProductTypeId = 8 -- Contract item
 LEFT JOIN tblQMSampleStatus SSS ON SSS.intSampleStatusId = SS.intSampleStatusId
