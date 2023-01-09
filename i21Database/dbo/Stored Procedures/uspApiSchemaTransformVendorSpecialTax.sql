@@ -121,6 +121,11 @@ SELECT
 FROM tblApiSchemaVendorSpecialTax vst    
 LEFT JOIN tblICCategory i ON vst.strCategoryCode = i.strCategoryCode   
 WHERE vst.guiApiUniqueId = @guiApiUniqueId AND i.intCategoryId IS NULL 
+
+IF EXISTS (SELECT 1 FROM tblApiImportLogDetail WHERE strLogLevel = 'Error' AND guiApiImportLogId = @guiLogId)
+BEGIN
+	RETURN;
+END
     
 INSERT INTO tblAPVendorSpecialTax (
 	 guiApiUniqueId    

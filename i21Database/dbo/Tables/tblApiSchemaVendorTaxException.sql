@@ -7,7 +7,7 @@
 	[intKey] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	
 	[strVendorId] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strTaxGroup] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strTaxGroup] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationName] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strItemNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTaxClass] [nvarchar](150) COLLATE Latin1_General_CI_AS NOT NULL,
