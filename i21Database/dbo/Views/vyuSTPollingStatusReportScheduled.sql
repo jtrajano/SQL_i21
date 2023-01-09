@@ -1,11 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuSTPollingStatusReportScheduled]  
 AS
-SELECT DISTINCT 
+SELECT DISTINCT
 sts.intStoreId,
 stcp.intCheckoutProcessId,
 stcp.strGuid, 
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
-stcp.dtmCheckoutProcessDate,
+stcp.dtmCheckoutProcessDate, 
 ISNULL(CH.dtmCheckoutDate, stcp.dtmCheckoutProcessDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription, 
