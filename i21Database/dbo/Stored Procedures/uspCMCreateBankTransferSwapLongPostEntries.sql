@@ -311,6 +311,7 @@ END
     FROM [dbo].tblCMBankTransfer A   
     WHERE A.strTransactionId = @strTransactionId      
 
+    EXEC uspCMCreateBankTransferDiffEntries @strTransactionId, @dtmDate, @strBatchId, @intDefaultCurrencyId  
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'To' , @dtmDate, @strBatchId, @intDefaultCurrencyId    
   
 END
