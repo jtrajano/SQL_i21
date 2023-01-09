@@ -39,7 +39,7 @@ SELECT   icfSite.intSiteId, icfSite.intNetworkId, icfSite.strSiteNumber, icfSite
                          iicItem.dblFullContainerSize, iicItem.ysnHasMFTImplication, iicItem.intConcurrencyId AS EXPR9, iicItemLoc.intItemLocationId, iicItemLoc.intItemId AS EXPR10, 
                          iicItemLoc.intLocationId, iicItemLoc.intVendorId, iicItemLoc.strDescription AS EXPR11, iicItemLoc.intCostingMethod, iicItemLoc.intAllowNegativeInventory, 
                          iicItemLoc.intSubLocationId, iicItemLoc.intStorageLocationId, iicItemLoc.intIssueUOMId, iicItemLoc.intReceiveUOMId, iicItemLoc.intFamilyId, iicItemLoc.intClassId, 
-                         iicItemLoc.intProductCodeId, iicItemLoc.intFuelTankId, iicItemLoc.strPassportFuelId1, iicItemLoc.strPassportFuelId2, iicItemLoc.strPassportFuelId3, iicItemLoc.ysnTaxFlag1, 
+                         iicItemLoc.intProductCodeId, iicItemLoc.intFuelTankId, iicItemLoc.ysnTaxFlag1, 
                          iicItemLoc.ysnTaxFlag2, iicItemLoc.ysnTaxFlag3, iicItemLoc.ysnTaxFlag4, iicItemLoc.ysnPromotionalItem, iicItemLoc.intMixMatchId, iicItemLoc.ysnDepositRequired, 
                          iicItemLoc.intDepositPLUId, iicItemLoc.intBottleDepositNo, iicItemLoc.ysnSaleable, iicItemLoc.ysnQuantityRequired, iicItemLoc.ysnScaleItem, iicItemLoc.ysnFoodStampable, 
                          iicItemLoc.ysnReturnable, iicItemLoc.ysnPrePriced, iicItemLoc.ysnOpenPricePLU, iicItemLoc.ysnLinkedItem, iicItemLoc.strVendorCategory, iicItemLoc.ysnCountBySINo, 
