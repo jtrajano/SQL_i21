@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCSCalculateDealerCommission] (
-    @intCheckoutId INT
+    @intCheckoutId INT,
+	@intCheckoutProcessId INT
 )
 AS
 SET NOCOUNT ON;
@@ -16,6 +17,9 @@ DECLARE @intCompanyLocationId INT
 DECLARE @intItemUOMId INT  
 DECLARE @intStoreId INT  
 DECLARE @dblTotalCommission DECIMAL (18,6) = 0  
+DECLARE @strItemNo NVARCHAR(250)  
+DECLARE @strItemDescription NVARCHAR(500) 
+DECLARE @strMessage NVARCHAR(MAX)  
 
 DECLARE @intPumpTotalsId int  
   
@@ -45,6 +49,8 @@ WHILE @@FETCH_STATUS = 0
 BEGIN   
 	SELECT 
 	@intItemId = Item.intItemId  
+	, @strItemNo = Item.strItemNo
+	, @strItemDescription = Item.strDescription
 	, @intCompanyLocationId = ST.intCompanyLocationId  
 	, @dblQty = CPT.dblQuantity  
 	, @dblPrice = CPT.dblPrice  
@@ -70,6 +76,13 @@ BEGIN
 	SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
 	SET @dblCommission = @dblMargin * @dblDealerPercentage  
 	SET @dblTotalCommission += @dblCommission  
+
+	IF @dblCommission < 0
+	BEGIN
+		SET @strMessage = 'Negative Dealer commissions have been calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' which is an indication that this fuel''s cost basis isn''t correctly set. Please correct the cost basis before processing this day.'
+		INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
+		VALUES (@intCheckoutProcessId, @intCheckoutId, 'S', @strMessage, 1) 
+	END
   
 	--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
 	FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId  
