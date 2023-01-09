@@ -457,11 +457,9 @@ LEFT JOIN tblTMOrder t on MBDL.intTMDispatchId = t.intDispatchId
 WHERE DO.intDriverEntityId = @intDriverId AND intStopType = 2 and intDispatchStatus = 3      
   
   
-DELETE FROM tblMBILPickupDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and intLoadHeaderId IN(Select intLoadHeaderId from tblMBILLoadHeader where intDri
-verId = @intDriverId)      
+DELETE FROM tblMBILPickupDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and intLoadHeaderId IN(Select intLoadHeaderId from tblMBILLoadHeader where intDriverId = @intDriverId)      
 DELETE FROM tblMBILDeliveryDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and       
      intDeliveryHeaderId IN(Select intDeliveryHeaderId from tblMBILDeliveryHeader d join tblMBILLoadHeader l on d.intLoadHeaderId = d.intLoadHeaderId where l.intDriverId = @intDriverId)      
-DELETE FROM tblMBILDeliveryHeader WHERE NOT EXISTS(SELECT intDeliveryHeaderId FROM tblMBILDeliveryDetail WHERE tblMBILDeliveryDetail.intDeliveryHeaderId = tblMBILDeliveryHeader.intDeliveryHeaderId) and intLoadHeaderId IN(SELECT intLoadHeaderId FROM tblMBI
-LLoadHeader where intDriverId = @intDriverId)      
+DELETE FROM tblMBILDeliveryHeader WHERE NOT EXISTS(SELECT intDeliveryHeaderId FROM tblMBILDeliveryDetail WHERE tblMBILDeliveryDetail.intDeliveryHeaderId = tblMBILDeliveryHeader.intDeliveryHeaderId) and intLoadHeaderId IN(SELECT intLoadHeaderId FROM tblMBILLoadHeader where intDriverId = @intDriverId)      
 DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatchOrderId FROM tblLGDispatchOrder) and intDispatchOrderId is not null AND intDriverId = @intDriverId 
 END
