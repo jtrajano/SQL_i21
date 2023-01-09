@@ -54,6 +54,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.intBookId
 	, Receipt.intSubBookId
+	, ReceiptCharge.ysnLock
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
