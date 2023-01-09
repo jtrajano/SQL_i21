@@ -9,7 +9,7 @@ stcp.dtmCheckoutProcessDate,
 ISNULL(CH.dtmCheckoutDate, stcp.dtmCheckoutProcessDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription, 
-stcpew.strMessage
+ISNULL(stcpew.strMessage, 'Store did not automatically run Today.') AS strMessage
 FROM dbo.tblSTStore AS sts 
 FULL OUTER JOIN dbo.tblSTCheckoutProcess AS stcp 
 	ON stcp.intStoreId = sts.intStoreId
@@ -29,7 +29,7 @@ CH.dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription,
 stcpew.strMessage
-HAVING CH.dtmCheckoutDate IS NOT NULL
+--HAVING CH.dtmCheckoutDate IS NOT NULL
 UNION
 SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, FORMAT(GETDATE(), 'd','us') as strReportDate, GETDATE() AS dtmCheckoutProcessDate, GETDATE() - 1 AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 'Store did not automatically run Today.'
 FROM tblSTStore a
