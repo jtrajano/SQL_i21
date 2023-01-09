@@ -161,7 +161,7 @@ ELSE
 					, intDestId                 = I.intInvoiceId
 					, strDestTransactionNo      = I.strInvoiceNumber
 					, strDestTransactionType    = 'Invoice'
-					, strDestModuleName         = 'Invoice'
+					, strDestModuleName         = 'Accounts Receivable'
 					, strOperation              = 'Process'
 				FROM tblSOSalesOrder SO
 				CROSS APPLY (
