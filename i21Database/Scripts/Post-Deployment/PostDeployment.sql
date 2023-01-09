@@ -256,6 +256,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\04_ClearImportCOAFromCSV.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
+:r .\GL\vyuGLTrialBalance.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
