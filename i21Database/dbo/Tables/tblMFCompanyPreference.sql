@@ -106,5 +106,6 @@
 	intPositionByETADemandReport INT,
 	ysnEnabledPreShipmentSampleByBatch BIT,
 	ysnBlendRecall BIT,
+	ysnDisplayPickTicketItemXref BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
