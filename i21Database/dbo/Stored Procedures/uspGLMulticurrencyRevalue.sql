@@ -202,8 +202,8 @@ BEGIN
 	strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMMultiCurrencyRevalue A
 LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
-WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+WHERE dtmDate = @dtmDate
+AND @intDefaultCurrencyId <> intCurrencyId
 END
 
 IF @strModule = 'FA'

@@ -1277,6 +1277,8 @@
     <Build Include="dbo\Stored Procedures\uspFAManualDepreciateSingleBook.sql" />
     <None Include="Scripts\Post-Deployment\FA\05_AssetBookDepreciation.sql" />
     <Build Include="dbo\Stored Procedures\uspFABookDepreciation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFABookDepreciationReport.sql" />
+    <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -7143,6 +7145,7 @@
     <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql"/>
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
@@ -7654,6 +7657,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351334M.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetReceived.sql" />
     <Build Include="dbo\Functions\fnBBGetChargeRates.sql" />
+    <Build Include="dbo\Functions\fnBBGetItemCostByCostType.sql" />
     <Build Include="dbo\Views\vyuCRMCampaignEntitySalesOrder.sql" />
     <Build Include="dbo\Tables\tblARInvoiceAccrual.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotReceiptPutaway.sql" />
@@ -10825,6 +10829,7 @@
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
     <Build Include="dbo\Stored Procedures\uspVRAddTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspBBAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspBBResolveBuybackCosts.sql" />
     <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />

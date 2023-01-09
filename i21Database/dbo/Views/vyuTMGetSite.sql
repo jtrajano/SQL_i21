@@ -145,7 +145,7 @@ JOIN tblTMRoute route ON route.intRouteId = site.intRouteId
 JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = site.intLocationId
 JOIN (tblICItem item JOIN tblICCategory cat ON cat.intCategoryId = item.intCategoryId) ON item.intItemId = site.intProduct
 LEFT JOIN tblTMClock clock ON clock.intClockID = site.intClockID
-JOIN tblSMTerm deliverTerm ON deliverTerm.intTermID = site.intDeliveryTermID
+LEFT JOIN tblSMTerm deliverTerm ON deliverTerm.intTermID = site.intDeliveryTermID
 LEFT JOIN tblSMCompanyLocationPricingLevel pricingLevel ON pricingLevel.intCompanyLocationPricingLevelId = site.intCompanyLocationPricingLevelId
 LEFT JOIN tblSMTaxGroup taxLocale ON taxLocale.intTaxGroupId = site.intTaxStateID				
 LEFT JOIN tblTMFillMethod fillMethod ON fillMethod.intFillMethodId = site.intFillMethodId

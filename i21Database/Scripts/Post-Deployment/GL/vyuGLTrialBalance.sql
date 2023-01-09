@@ -1,4 +1,8 @@
-﻿CREATE VIEW [dbo].[vyuGLTrialBalance] AS
+--ADD LOB IF COLUMN / SEGMENT IS EXISTING IN THE STRUCTURE
+
+IF COL_LENGTH('tblGLTempCOASegment','LOB') IS NOT NULL 
+EXEC(
+'ALTER VIEW [dbo].[vyuGLTrialBalance] AS
 SELECT 
 TBSum.MTDBalance,
 TBSum.YTDBalance,
@@ -10,7 +14,7 @@ ISNULL(strAccountType,'') COLLATE Latin1_General_CI_AS strAccountType ,
 ISNULL(A.strCashFlow,'') COLLATE Latin1_General_CI_AS strCashFlow,
 Segment.[Primary Account] COLLATE Latin1_General_CI_AS strPrimaryCode ,
 Segment.[Location] COLLATE Latin1_General_CI_AS strLocationCode ,
-'' COLLATE Latin1_General_CI_AS strLOBCode ,
+Segment.[LOB] COLLATE Latin1_General_CI_AS strLOBCode ,
 ISNULL(A.strComments,'') COLLATE Latin1_General_CI_AS strComments,
 ISNULL(strCurrency,'') COLLATE Latin1_General_CI_AS strCurrency,
 ISNULL(coa.strCurrentExternalId,'') COLLATE Latin1_General_CI_AS  strCurrentExternalId,
@@ -26,7 +30,7 @@ TBSum.strPeriod
 FROM vyuGLAccountDetail A
 LEFT JOIN tblGLCOACrossReference coa ON A.intAccountId =coa.inti21Id 
 OUTER APPLY(
-	SELECT TOP 1 [Primary Account],[Location] FROM tblGLTempCOASegment WHERE intAccountId = A.intAccountId
+	SELECT TOP 1 [Primary Account],[Location],[LOB] FROM tblGLTempCOASegment WHERE intAccountId = A.intAccountId
 )Segment
 OUTER APPLY (
 
@@ -40,4 +44,5 @@ OUTER APPLY (
 	JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = TB.intGLFiscalYearPeriodId
 	WHERE intAccountId = A.intAccountId
 	GROUP BY intAccountId, TB.intGLFiscalYearPeriodId,dtmStartDate,dtmEndDate, FYP.strPeriod
-)TBSum
+)TBSum')
+GO

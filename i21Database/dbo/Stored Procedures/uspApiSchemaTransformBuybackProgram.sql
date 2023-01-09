@@ -185,7 +185,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 UPDATE xp
 SET   xp.strProgramName = vts.strProgramName
 	, xp.guiApiUniqueId = @guiApiUniqueId
-	, xp.strProgramDescription = vts.strDescription
+	, xp.strProgramDescription = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Description') WHEN 1 THEN xp.strProgramDescription ELSE vts.strDescription END
 	, xp.intConcurrencyId = xp.intConcurrencyId + 1
 FROM tblBBProgram xp
 JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
