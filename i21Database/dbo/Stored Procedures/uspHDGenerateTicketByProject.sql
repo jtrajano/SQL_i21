@@ -101,11 +101,17 @@ BEGIN
 				WHERE intProjectId = @intProjectId AND
 					  intTemplateTicketId = a.intTicketId
 			) ProjectTask
+			CROSS APPLY
+			(
+				SELECT TOP 1 TicketStatus.strStatus
+				FROM tblHDTicketStatus TicketStatus
+				WHERE TicketStatus.intTicketStatusId = a.intTicketStatusId AND
+				      TicketStatus.strStatus <> 'Closed'		
+			) TicketStatus
 		WHERE a.strProjectionModule = @strModule  AND
 			  a.strType != 'CRM' AND
 			  b.strType = 'Template'  AND
 			  a.intLineOfBusinessId = @intLineOfBusinessId AND
-			  a.intTicketStatusId IS NOT NULL AND
 			  ProjectTask.intProjectTaskId IS NULL
 		GROUP BY a.intTicketId
 	)
