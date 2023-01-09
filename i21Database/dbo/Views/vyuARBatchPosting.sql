@@ -8,20 +8,23 @@ SELECT
     ,dblAmount              = dblInvoiceTotal
     ,strVendorInvoiceNumber = strPONumber
     ,intEntityCustomerId    = intEntityCustomerId
-    ,intEntityId            = intEntityId
+    ,intEntityId            = I.intEntityId
     ,dtmDate                = dtmDate
-    ,strDescription         = strComments
+    ,strDescription         = I.strComments
     ,intCompanyLocationId   = intCompanyLocationId
 FROM
-	tblARInvoice
+	tblARInvoice I
+    INNER JOIN tblARCustomer C
+    ON I.intEntityCustomerId = C.intEntityId
 WHERE 
 	strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash') 
 	AND ysnPosted = 0  
 	AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) 
-	AND (ISNULL(intTransactionId, 0) = 0 AND strType <> 'CF Tran') 
+	AND (ISNULL(intTransactionId, 0) = 0 AND I.strType <> 'CF Tran') 
 	AND ISNULL(ysnRecurring,0) = 0 
-	AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
+	AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND intInvoiceId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Invoice')
+    AND C.ysnActive = 1
 
 UNION ALL
 
