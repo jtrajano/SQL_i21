@@ -174,6 +174,7 @@ BEGIN
 				intSublimitId,
 				dblSublimit,
 				strBankTradeReference,
+				intOverrideBankValuationId,
 				dblFinanceQty,
 				dblFinancedAmount,
 				strBankApprovalStatus,
@@ -204,6 +205,7 @@ BEGIN
 				intSublimitId					= B.intBorrowingFacilityLimitDetailId,
 				dblSublimit						= BFLD.dblLimit,
 				strBankTradeReference			= B.strReferenceNo,
+				intOverrideBankValuationId		= B.intBankValuationRuleId,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
 				strBankApprovalStatus			= ISNULL(ap.strApprovalStatus, 'Approved'),
@@ -228,6 +230,7 @@ BEGIN
 				  OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
 				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL
+				  OR NULLIF(B.intBankValuationRuleId, 0) IS NOT NULL
 		END
 
 		--PAYMENT
@@ -249,6 +252,7 @@ BEGIN
 				intSublimitId,
 				dblSublimit,
 				strBankTradeReference,
+				intOverrideBankValuationId,
 				dblFinanceQty,
 				dblFinancedAmount,
 				strBankApprovalStatus,
@@ -278,6 +282,7 @@ BEGIN
 				intSublimitId					= B.intBorrowingFacilityLimitDetailId,
 				dblSublimit						= BFLD.dblLimit,
 				strBankTradeReference			= B.strReferenceNo,
+				intOverrideBankValuationId		= B.intBankValuationRuleId,
 				dblFinanceQty					= BD.dblQtyReceived,
 				dblFinancedAmount				= PD.dblPayment,
 				strBankApprovalStatus			= ISNULL(ap.strApprovalStatus, 'Approved'),
@@ -304,6 +309,7 @@ BEGIN
 				  OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
 				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL)
+				  OR NULLIF(B.intBankValuationRuleId, 0) IS NOT NULL
 				  AND PD.dblPayment <> 0
 		END
 
