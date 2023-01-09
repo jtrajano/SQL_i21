@@ -163,7 +163,6 @@ BEGIN
 				strTransactionType,
 				strTradeFinanceTransaction,
 				intTransactionHeaderId,
-				intTransactionDetailId,
 				strTransactionNumber,
 				dtmTransactionDate,
 				intBankId,
@@ -177,6 +176,7 @@ BEGIN
 				intOverrideBankValuationId,
 				dblFinanceQty,
 				dblFinancedAmount,
+				ysnDeleted,
 				strBankApprovalStatus,
 				dtmAppliedToTransactionDate,
 				intStatusId,
@@ -194,7 +194,6 @@ BEGIN
 				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
 				intTransactionHeaderId			= B.intBillId,
-				intTransactionDetailId			= BD.intBillDetailId,
 				strTransactionNumber			= B.strBillId,
 				dtmTransactionDate				= B.dtmBillDate,
 				intBankId						= B.intBankId,
@@ -206,21 +205,33 @@ BEGIN
 				dblSublimit						= BFLD.dblLimit,
 				strBankTradeReference			= B.strReferenceNo,
 				intOverrideBankValuationId		= B.intBankValuationRuleId,
-				dblFinanceQty					= BD.dblQtyReceived,
-				dblFinancedAmount				= BD.dblTotal + BD.dblTax,
+				dblFinanceQty					= CASE WHEN (BD.dblQtyReceived - BDT.dblQtyReceived) = 0 THEN BD.dblQtyReceived ELSE BD.dblQtyReceived - BDT.dblQtyReceived END,
+				dblFinancedAmount				= CASE WHEN (BD.dblQtyReceived - BDT.dblQtyReceived) = 0 THEN BD.dblTotal ELSE BD.dblTotal - BDT.dblTotal END,
+				ysnDeleted						= CASE WHEN (BD.dblQtyReceived - BDT.dblQtyReceived) = 0 THEN 1 ELSE 0 END,
 				strBankApprovalStatus			= ISNULL(ap.strApprovalStatus, 'Approved'),
 				dtmAppliedToTransactionDate		= B.dtmBillDate,
-				intStatusId						= 1, --Active
+				intStatusId						= 1,
 				intUserId						= @intUserId,
 				intConcurrencyId				= 1,
 				intContractHeaderId				= BD.intContractHeaderId,
 				intContractDetailId				= BD.intContractDetailId
 			FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) IDS
 			INNER JOIN tblAPBill B ON B.intBillId = IDS.intID
-			INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+			OUTER APPLY (
+				SELECT MIN(BD2.intContractHeaderId) intContractHeaderId, MIN(BD2.intContractDetailId) intContractDetailId, MIN(BD2.intLoadId) intLoadId, SUM(BD2.dblQtyReceived) dblQtyReceived, SUM(BD2.dblTotal + BD2.dblTax) dblTotal
+				FROM tblAPBill B2
+				INNER JOIN tblAPBillDetail BD2 ON BD2.intBillId = B2.intBillId
+				WHERE B2.strFinanceTradeNo = B.strFinanceTradeNo
+			) BD
+			OUTER APPLY (
+				SELECT ISNULL(SUM(BD2.dblQtyReceived), 0) dblQtyReceived, ISNULL(SUM(BD2.dblTotal + BD2.dblTax), 0) dblTotal
+				FROM tblAPBill B2
+				INNER JOIN tblAPBillDetail BD2 ON BD2.intBillId = B2.intBillId
+				WHERE B2.intBillId = B.intBillId AND @intAction NOT IN (1, 2)
+			) BDT
 			LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = B.intBorrowingFacilityLimitId
 			LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = B.intBorrowingFacilityLimitDetailId
-			LEFT JOIN tblCTContractDetail ctd ON BD.intContractDetailId = ctd.intContractDetailId
+			LEFT JOIN tblCTContractDetail ctd ON ctd.intContractDetailId = BD.intContractDetailId
 			LEFT JOIN tblLGLoad l ON l.intLoadId = BD.intLoadId
 			LEFT JOIN tblCTApprovalStatusTF ap ON ap.intApprovalStatusId = ISNULL(l.intApprovalStatusId, ctd.intApprovalStatusId)
 			WHERE NULLIF(B.strFinanceTradeNo, '') IS NOT NULL
@@ -241,7 +252,6 @@ BEGIN
 				strTransactionType,
 				strTradeFinanceTransaction,
 				intTransactionHeaderId,
-				intTransactionDetailId,
 				strTransactionNumber,
 				dtmTransactionDate,
 				intBankId,
@@ -263,7 +273,7 @@ BEGIN
 				intContractHeaderId,
 				intContractDetailId
 			)
-			SELECT
+SELECT
 				strAction						= CASE WHEN @intAction = 1 THEN 'Created Payment' 
 														WHEN @intAction = 2 THEN 'Updated Payment'
 														ELSE 'Deleted Payment'
@@ -271,7 +281,6 @@ BEGIN
 				strTransactionType				= 'Purchasing',
 				strTradeFinanceTransaction		= B.strFinanceTradeNo,
 				intTransactionHeaderId			= P.intPaymentId,
-				intTransactionDetailId			= PD.intPaymentDetailId,
 				strTransactionNumber			= P.strPaymentRecordNum,
 				dtmTransactionDate				= P.dtmDatePaid,
 				intBankId						= B.intBankId,
@@ -308,8 +317,8 @@ BEGIN
 				  OR NULLIF(B.intBorrowingFacilityId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityLimitId, 0) IS NOT NULL
 				  OR NULLIF(B.intBorrowingFacilityLimitDetailId, 0) IS NOT NULL
-				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL)
-				  OR NULLIF(B.intBankValuationRuleId, 0) IS NOT NULL
+				  OR NULLIF(B.strReferenceNo, '') IS NOT NULL
+				  OR NULLIF(B.intBankValuationRuleId, 0) IS NOT NULL)
 				  AND PD.dblPayment <> 0
 		END
 
