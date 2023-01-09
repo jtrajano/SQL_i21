@@ -2,6 +2,7 @@
 	@intLoadId INT,
 	@intEntityUserSecurityId INT,
 	@intType INT = 1, /* 1 - Direct, 2 - Provisional, 3 - Proforma */
+	@intBankAccountId INT = NULL,
 	@intNewInvoiceId INT OUTPUT
 AS	
 BEGIN TRY
@@ -22,6 +23,7 @@ BEGIN TRY
 				@intLoadId = @intLoadId,
 				@intUserId = @intEntityUserSecurityId,
 				@intType = @intType,
+				@intBankAccountId = @intBankAccountId,
 				@NewInvoiceId = @NewInvoiceId OUTPUT
 	END
 	ELSE IF @intPurchaseSale = 3
