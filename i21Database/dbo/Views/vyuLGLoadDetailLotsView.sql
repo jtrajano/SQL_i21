@@ -25,6 +25,9 @@ SELECT
 	,CLSL.strSubLocationName
 	,strStorageLocation = SL.strName
 	,LDL.intConcurrencyId
+	,Receipt.intBankAccountId
+	,BA.strBankAccountNo
+	,BA.strBankName
 	,strWarrantNo = LOT.strWarrantNo
 	,strWarrantStatus = CASE LOT.intWarrantStatus
 		WHEN 1 THEN 'Pledged' 
@@ -59,3 +62,4 @@ FROM tblLGLoad L
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = ReceiptItem.intSourceId
 	LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = Receipt.intBankAccountId

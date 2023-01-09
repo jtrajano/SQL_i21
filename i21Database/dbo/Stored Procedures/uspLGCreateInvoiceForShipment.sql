@@ -2,6 +2,7 @@
 	@intLoadId    INT,
 	@intUserId    INT,
 	@intType	INT = 1, /* 1 - Direct, 2 - Provisional, 3 - Proforma */
+	@intBankAccountId INT = NULL,
 	@NewInvoiceId INT = NULL OUTPUT	
 AS 
 BEGIN
@@ -766,7 +767,8 @@ DECLARE
 				LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 				LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = IRI.intSourceId 
 				LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
-				WHERE LDL.intLoadDetailId = ARSI.intLoadDetailId) TF
+				WHERE LDL.intLoadDetailId = ARSI.intLoadDetailId
+					AND (@intBankAccountId IS NULL OR (@intBankAccountId IS NOT NULL AND IR.intBankAccountId = @intBankAccountId))) TF
 		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 		  AND ARSI.[intLoadId] = @intLoadId
 	
