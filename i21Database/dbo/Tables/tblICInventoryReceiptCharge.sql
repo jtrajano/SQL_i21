@@ -39,7 +39,11 @@
 	[intModifiedByUserId] INT NULL, 
 	[ysnAllowVoucher] BIT NULL,
 	[ysnLock] BIT NULL,
-	[ysnWithGLReversal] BIT NULL,
+	[ysnWithGLReversal] BIT NULL,	
+	[dblOriginalQuantity] NUMERIC(18, 6) NULL DEFAULT ((1)), 
+	[dblOriginalRate] NUMERIC(18, 6) NULL, 
+	[dblOriginalAmount] NUMERIC(18, 6) NULL, 
+	[dblOriginalForexRate] NUMERIC(18, 6) NULL,	
 	[intSourceInventoryReceiptChargeId] INT
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]), --ON DELETE CASCADE, 
