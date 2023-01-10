@@ -22,6 +22,9 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.intItemId
 	,Lot.intCommodityId
 	,Lot.strWarehouseRefNo
+	,BA.intBankAccountId
+	,BA.strBankAccountNo
+	,BA.strBankName
 	,strWarrantNo = Lot.strWarrantNo
 	,strWarrantStatus = CASE Lot.intWarrantStatus
 		WHEN 1 THEN 'Pledged' 
@@ -47,3 +50,4 @@ FROM vyuLGPickOpenInventoryLots Lot
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Lot.intInventoryReceiptItemLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = IR.intBankAccountId
