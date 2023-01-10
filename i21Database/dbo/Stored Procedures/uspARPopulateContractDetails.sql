@@ -332,9 +332,11 @@ INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId 
 INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId AND CD.intItemId = TBL.intItemId
 INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+INNER JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = TBL.intLoadDistributionDetailId
 WHERE CU.strFieldName = 'Scheduled Quantity'
   AND CU.strScreenName = 'TM - Create Order'
   AND TBL.intLoadDistributionDetailId IS NOT NULL 
+  AND LDD.intContractDetailId IS NULL
   AND TBL.intSiteId IS NOT NULL
   AND TMO.dblQuantity > ABS(TBL.dblQty)
   AND TBL.strPricing = 'Subsystem - Transport Load'
