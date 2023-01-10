@@ -567,8 +567,6 @@ AND NOT EXISTS (
 		AND strAction = 'Skipped'
 )
 	
-SELECT strRebateBy, * FROM tblVRProgramItem where guiApiUniqueId = @guiApiUniqueId
-
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
 	  NEWID()
