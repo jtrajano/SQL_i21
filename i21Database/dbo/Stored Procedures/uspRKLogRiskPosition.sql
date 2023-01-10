@@ -1091,10 +1091,24 @@ BEGIN
 					-- WILL USE LOAD SHIPMENT ID INSTEAD FOR @intTransactionReferenceId ON DPR IN TRANSIT HELPER TABLE.
 					IF @intTransactionReferenceId IS NULL
 					BEGIN
-						SELECT @intTransactionReferenceId = (SELECT TOP 1 intLoadId
-															FROM tblARInvoice
-															WHERE intInvoiceId = @intTransactionRecordHeaderId)
+						IF (@strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice'))
+						BEGIN 
+							SELECT @intTransactionReferenceId = (SELECT TOP 1 intLoadId
+																FROM tblARInvoice
+																WHERE intInvoiceId = @intTransactionRecordHeaderId)
+						END
+						ELSE 
+						BEGIN
+							SELECT @intTransactionReferenceId = (SELECT TOP 1 ILD.intLoadId
+																FROM tblICInventoryReceiptItem IT
+																OUTER APPLY (SELECT TOP 1 intLoadId 
+																			FROM tblLGLoadDetail LD
+																			WHERE LD.intPContractDetailId = IT.intContractDetailId
+																) ILD
+																WHERE intInventoryReceiptId = @intTransactionRecordHeaderId)
+						END
 					END
+
 				
 					--TODO: Get In-Transit off-setting entry
 					IF @strBucketType = 'Sales In-Transit' AND @strTransactionType IN ('Invoice')
