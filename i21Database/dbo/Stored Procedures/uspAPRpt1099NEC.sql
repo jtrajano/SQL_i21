@@ -20,7 +20,7 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' OR @xmlParam IS NULL
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT *, NULL AS strCorrected FROM vyuAP1099NEC WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, NULL AS strCorrected, NULL AS strYear FROM vyuAP1099NEC WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
 	RETURN;
 END
 
@@ -76,7 +76,8 @@ END
 
 SELECT 
 A.* ,
-(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
+(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected,
+(SELECT RIGHT(@yearParam,2)) AS strYear
 FROM vyuAP1099NEC A
 OUTER APPLY 
 (
