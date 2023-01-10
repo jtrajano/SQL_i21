@@ -935,10 +935,10 @@ GO
 		VALUES (N'INCO/Ship Term', N'INCO/Ship Term', N'ContractManagement.view.INCOShipTerm', N'Contract Management', N'tblCTContractBasis', 1, N'Contract Management')
 	END
 		
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Reporting.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Reports.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'AOP Vs Actual', N'AOP Vs Actual', N'Reporting.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true', N'Contract Management', N'tblCTAOP', 1, N'Contract Management')
+		VALUES (N'AOP Vs Actual', N'AOP Vs Actual', N'Reports.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true', N'Contract Management', N'tblCTAOP', 1, N'Contract Management')
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.WeightGrades') 
