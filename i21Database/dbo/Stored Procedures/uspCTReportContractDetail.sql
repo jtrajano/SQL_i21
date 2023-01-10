@@ -260,12 +260,26 @@ BEGIN TRY
 									   +  CASE WHEN CD.intPricingTypeId in (2) AND CD.dblBasis > 0	  THEN '  +' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure  ELSE '     ' +  LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2)))  + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure END + ''	
 									   +  CASE WHEN CD.intPricingTypeId = 2 AND CO.strCommodityCode != 'Cocoa' THEN @space+'(Lots to be fixed:' + LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots)) +')'
 											   ELSE '' END
-									 END 
-											
-
+									 END, 
+			--EKATERRA
+			strTealingo				= ISNULL(ICI.strItemNo,IBM.strItemNo),
+			strTargetNoPackage		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity), --Qty Sequence
+			strPkgType				= UM.strUnitMeasure, --Qty UOM
+			strAvgWeight			= U7.strUnitMeasure, --Net UOM
+			strApproxWeight			= dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), --NETWEIGHT
+			strPriceKg				= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,4,CD.dblCashPrice),2), 
+			strTotalValue			= ROUND(CD.dblTotalCost,2) ,
+			strMixingUnit			= CB.strBookDescription,
+			strPortofArrival		= CTY.strCity,
+			dtmEtaPOL				= CD.dtmEtaPol,
+			dtmEtaPOD				= CD.dtmEtaPod,
+			dtmStockDate			= CD.dtmUpdatedAvailabilityDate,
+			dtmOrigStockDate		= CD.dtmPlannedAvailabilityDate								
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
 	JOIN	tblCTContractHeader	CH	WITH (NOLOCK) ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
 	JOIN	tblICCommodity		CO	WITH (NOLOCK) ON	CO.intCommodityId		=	CH.intCommodityId		LEFT
+	--JOIN	 tblICCommodityUnitMeasure CUM WITH (NOLOCK) ON CUM.intCommodityUnitMeasureId = CH.intCommodityUOMId LEFT
+	--JOIN	tblICUnitMeasure	COM	WITH (NOLOCK) ON	COM.intUnitMeasureId	=	CUM.intUnitMeasureId	LEFT	
 	JOIN	tblICItemUOM		QM	WITH (NOLOCK) ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
 	JOIN	tblICUnitMeasure	UM	WITH (NOLOCK) ON	UM.intUnitMeasureId		=	QM.intUnitMeasureId		LEFT
 	JOIN	tblICItemUOM		PM	WITH (NOLOCK) ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
@@ -286,6 +300,7 @@ BEGIN TRY
 	
 	-- Strauss
 	JOIN	tblICItem			IBM	WITH (NOLOCK) ON	IBM.intItemId			=	CD.intItemBundleId		LEFT
+	JOIN	tblICItem			ICI	WITH (NOLOCK) ON	ICI.intItemId			=	CD.intItemId			LEFT
 	JOIN	tblSMCurrency		BCU	WITH (NOLOCK) ON	BCU.intCurrencyID		=	CD.intBasisCurrencyId	LEFT
 	JOIN	tblICItemUOM		BCY	WITH (NOLOCK) ON	BCY.intItemUOMId		=	CD.intBasisUOMId		LEFT
 	JOIN	tblICUnitMeasure	BUM WITH (NOLOCK) ON	BUM.intUnitMeasureId	=	BCY.intUnitMeasureId	LEFT
@@ -293,8 +308,8 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure	PUM WITH (NOLOCK) ON	PUM.intUnitMeasureId	=	PCY.intUnitMeasureId	LEFT
 	JOIN	tblCTPosition		PO	WITH (NOLOCK) ON	PO.intPositionId		=	CH.intPositionId		LEFT
 	JOIN	tblSMCity			CT	WITH (NOLOCK) ON	CT.intCityId			=	CH.intINCOLocationTypeId LEFT
-	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId
-		
+	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId LEFT
+	JOIN	tblCTBook			CB	WITH (NOLOCK) ON	CB.intBookId			=   CD.intBookId
 	CROSS JOIN tblCTCompanyPreference   CP
 	CROSS JOIN (
 		SELECT strReportDateFormat
