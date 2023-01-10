@@ -29,14 +29,19 @@ BEGIN TRY
 		, strLeafGrade						= CA.strDescription
 		, strTeaGardenChopInvoiceNumber		= CRD.strPreInvoiceChopNo
 		, intGardenMarkId					= CRD.intPreInvoiceGardenMarkId
+		, dblTotalQuantity					= dbo.fnCalculateQtyBetweenUOM(WIUOM.intItemUOMId, QIUOM.intItemUOMId, CRD.dblPreInvoiceQuantity)
 	INTO #MFBATCH
 	FROM tblMFBatch B
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON B.intSampleId = CRD.intSampleId
 	LEFT JOIN tblICCommodityAttribute CA ON CRD.intPreInvoiceGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
+	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
+	LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intItemUOMId AND QIUOM.intItemId = B.intTealingoItemId
+	LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = B.intTealingoItemId
 	WHERE B.intSampleId IS NOT NULL
 		AND ((B.strTeaGardenChopInvoiceNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
 		OR (B.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
-		OR (B.strLeafGrade <>  CA.strDescription AND CRD.intPreInvoiceGradeId = CRD.intGradeId))
+		OR (B.strLeafGrade <> CA.strDescription AND CRD.intPreInvoiceGradeId = CRD.intGradeId)
+		OR (B.dblTotalQuantity <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity))
 
 	--UPDATE BATCH
 	IF EXISTS (SELECT TOP 1 1 FROM #MFBATCH)
@@ -45,6 +50,7 @@ BEGIN TRY
 			SET strLeafGrade					= MFB.strLeafGrade
 			  , strTeaGardenChopInvoiceNumber	= MFB.strTeaGardenChopInvoiceNumber
 			  , intGardenMarkId					= MFB.intGardenMarkId
+			  , dblTotalQuantity				= MFB.dblTotalQuantity
 			FROM tblMFBatch MF
 			INNER JOIN #MFBATCH MFB ON MF.intBatchId = MFB.intBatchId
 		END
