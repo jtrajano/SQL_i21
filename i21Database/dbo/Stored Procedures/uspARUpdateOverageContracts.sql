@@ -364,7 +364,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 										   ELSE 
 												CASE WHEN @dblSalesOrderNetWeight > ID.dblQtyOrdered AND ISNULL(@intContractCount, 0) > 1 --CONTRACT USED ON OTHER S.O. (INVOICE NOT POSTED YET)
 										  	     	 THEN CTD.dblBalance - (CTD.dblScheduleQty - ID.dblQtyOrdered)
-												 	 ELSE ISNULL(@dblSalesOrderNetWeight, 0) 
+												 	 ELSE CASE WHEN @dblSalesOrderNetWeight > 0 THEN ISNULL(@dblSalesOrderNetWeight, 0) ELSE CTD.dblScheduleQty END
 												END
 									  END
 				  , dblUnitQuantity	= CASE WHEN ISNULL(@dblSalesOrderNetWeight, 0) > CTD.dblBalance 
@@ -376,7 +376,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 										   ELSE 
 												CASE WHEN @dblSalesOrderNetWeight > ID.dblQtyOrdered AND ISNULL(@intContractCount, 0) > 1
 										  	     	 THEN CTD.dblBalance - (CTD.dblScheduleQty - ID.dblQtyOrdered)
-												 	 ELSE ISNULL(@dblSalesOrderNetWeight, 0) 
+												 	 ELSE CASE WHEN @dblSalesOrderNetWeight > 0 THEN ISNULL(@dblSalesOrderNetWeight, 0) ELSE CTD.dblScheduleQty END
 												END
 									  END
 				  , dblQtyOrdered	= CASE WHEN @dblSalesOrderNetWeight = 0 THEN CTD.dblBalance ELSE ID.dblQtyOrdered END
