@@ -1028,7 +1028,7 @@ IF  EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTic
     NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDTicketJIRAIssue')
 BEGIN
 
-	EXEC uspHDUpdateJiraIconUrl
+	EXEC [dbo].[uspHDUpdateJiraIconUrl]
 
 	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDTicketJIRAIssue','1')
