@@ -21,6 +21,19 @@ BEGIN
 		
 	BEGIN TRY
 
+		UPDATE tblTRImportDtnDetail
+		SET intEntityVendorId = tblPatch.intVendorId
+		FROM (
+			SELECT CR.intVendorId
+				, ID.intEntityVendorId
+				, ID.intImportDtnDetailId
+			FROM tblTRImportDtnDetail ID
+			LEFT JOIN tblTRCrossReferenceDtn CR ON CR.strImportValue = ID.strSeller AND CR.strType = 'Vendor'
+			WHERE CR.intVendorId <> ID.intEntityVendorId
+				AND ID.intImportDtnDetailId IN (SELECT Item FROM #tmpIds)
+		) tblPatch
+		WHERE intImportDtnDetailId = tblPatch.intImportDtnDetailId
+
 		DECLARE @CursorTran AS CURSOR
 		SET @CursorTran = CURSOR FOR
 		SELECT  DD.intImportDtnDetailId,  
