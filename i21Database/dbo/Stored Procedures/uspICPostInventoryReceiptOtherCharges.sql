@@ -28,179 +28,177 @@ BEGIN
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 END 
 
--- Validate 
-BEGIN 
-	-- Check for invalid location for the Other Charge item. 
-	SELECT TOP 1 
-			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
-			,@intChargeItemId = Item.intItemId
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
-				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = OtherCharge.intChargeId
-			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = Item.intItemId
-				AND ItemLocation.intLocationId = Receipt.intLocationId 
-	WHERE	ItemLocation.intItemLocationId IS NULL 
-			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-
-	IF @intChargeItemId IS NOT NULL 
+-- Begin Validation
+BEGIN 	
 	BEGIN 
-		-- 'Item Location is invalid or missing for {Item}.'
-		EXEC uspICRaiseError 80002, @strItemNo;
-		GOTO _Exit
-	END 
-END 
+		-- Check for invalid location for the Other Charge item. 
+		SELECT TOP 1 
+				@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+				,@intChargeItemId = Item.intItemId
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+					ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = OtherCharge.intChargeId
+				LEFT JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intItemId = Item.intItemId
+					AND ItemLocation.intLocationId = Receipt.intLocationId 
+		WHERE	ItemLocation.intItemLocationId IS NULL 
+				AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 
--- Validate 
-BEGIN 
-	-- Check for invalid location for the Receipt Item. 
-	SELECT TOP 1 
-			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
-			,@intChargeItemId = Item.intItemId
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = ReceiptItem.intItemId 
-			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = Item.intItemId
-				AND ItemLocation.intLocationId = Receipt.intLocationId
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- 'Item Location is invalid or missing for {Item}.'
+			EXEC uspICRaiseError 80002, @strItemNo;
+			GOTO _Exit
+		END 
+	END 
+
+	BEGIN 
+		-- Check for invalid location for the Receipt Item. 
+		SELECT TOP 1 
+				@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+				,@intChargeItemId = Item.intItemId
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId 
+				LEFT JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemLocation.intItemId = Item.intItemId
+					AND ItemLocation.intLocationId = Receipt.intLocationId
 				
-	WHERE	ItemLocation.intItemLocationId IS NULL 
-			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND ReceiptItem.intItemId = ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+		WHERE	ItemLocation.intItemLocationId IS NULL 
+				AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ReceiptItem.intItemId = ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
 
-	IF @intChargeItemId IS NOT NULL 
-	BEGIN 
-		-- 'Item Location is invalid or missing for {Item}.'
-		EXEC uspICRaiseError 80002, @strItemNo;
-		GOTO _Exit
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- 'Item Location is invalid or missing for {Item}.'
+			EXEC uspICRaiseError 80002, @strItemNo;
+			GOTO _Exit
+		END 
 	END 
-END 
 	
--- Validate 
-BEGIN 
-	-- Price cannot be checked if Accrue is checked for Receipt vendor.
-	SELECT TOP 1 
-			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
-			,@intChargeItemId = Item.intItemId
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
-				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = OtherCharge.intChargeId
-	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND ISNULL(OtherCharge.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId
-			AND OtherCharge.ysnAccrue = 1
-			AND OtherCharge.ysnPrice = 1
-			AND OtherCharge.ysnInventoryCost = 1
+	BEGIN 
+		-- Price cannot be checked if Accrue is checked for Receipt vendor.
+		SELECT TOP 1 
+				@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+				,@intChargeItemId = Item.intItemId
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+					ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = OtherCharge.intChargeId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ISNULL(OtherCharge.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId
+				AND OtherCharge.ysnAccrue = 1
+				AND OtherCharge.ysnPrice = 1
+				AND OtherCharge.ysnInventoryCost = 1
 			
-	IF @intChargeItemId IS NOT NULL 
-	BEGIN 
-		-- The {Other Charge} is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.
-		EXEC uspICRaiseError 80064, @strItemNo;
-		GOTO _Exit
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- The {Other Charge} is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.
+			EXEC uspICRaiseError 80064, @strItemNo;
+			GOTO _Exit
+		END 
 	END 
-END 
 
--- Validate 
-BEGIN 
-	-- Price cannot be checked if Accrue is checked for Receipt vendor.
-	SELECT TOP 1 
-			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
-			,@intChargeItemId = Item.intItemId
-	FROM	dbo.tblICInventoryReceiptCharge OtherCharge			
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = OtherCharge.intChargeId
-	WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-			AND (
-				-- Do not allow if third party or receipt vendor is going to pay the other charge and cost is passed-on to the item cost. 
-				(
-					OtherCharge.ysnPrice = 1
-					AND OtherCharge.ysnInventoryCost = 1
-					AND ISNULL(Item.strCostType, '') <> 'Grain Discount' 
-				)
-			)			
+	BEGIN 
+		-- Price cannot be checked if Accrue is checked for Receipt vendor.
+		SELECT TOP 1 
+				@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+				,@intChargeItemId = Item.intItemId
+		FROM	dbo.tblICInventoryReceiptCharge OtherCharge			
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = OtherCharge.intChargeId
+		WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
+				AND (
+					-- Do not allow if third party or receipt vendor is going to pay the other charge and cost is passed-on to the item cost. 
+					(
+						OtherCharge.ysnPrice = 1
+						AND OtherCharge.ysnInventoryCost = 1
+						AND ISNULL(Item.strCostType, '') <> 'Grain Discount' 
+					)
+				)			
 			
-	IF @intChargeItemId IS NOT NULL 
-	BEGIN 
-		-- The {Other Charge} is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.
-		EXEC uspICRaiseError 80065, @strItemNo;
-		GOTO _Exit
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- The {Other Charge} is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.
+			EXEC uspICRaiseError 80065, @strItemNo;
+			GOTO _Exit
+		END 
 	END 
-END 
 
--- Validate
-BEGIN 
-	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
-	SELECT @strItemNo = NULL
-			,@intChargeItemId = NULL 
-			,@strTransactionId = NULL 
-			,@strCurrencyId = NULL 
-			,@strFunctionalCurrencyId = NULL 
-
-	SELECT TOP 1 
-			@strTransactionId = Receipt.strReceiptNumber
-			,@strItemNo = Item.strItemNo
-			,@intChargeItemId = Item.intItemId
-			,@strCurrencyId = c.strCurrency
-			,@strFunctionalCurrencyId = fc.strCurrency
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
-				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = OtherCharge.intChargeId
-			LEFT JOIN tblSMCurrency c
-				ON c.intCurrencyID =  OtherCharge.intCurrencyId
-			LEFT JOIN tblSMCurrency fc
-				ON fc.intCurrencyID =  @intFunctionalCurrencyId
-	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND ISNULL(OtherCharge.dblForexRate, 0) = 0 
-			AND OtherCharge.intCurrencyId IS NOT NULL 
-			AND OtherCharge.intCurrencyId <> @intFunctionalCurrencyId			
-			AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = @intFunctionalCurrencyId)
-
-	IF @intChargeItemId IS NOT NULL 
 	BEGIN 
-		-- '{Transaction Id} is using a foreign currency. Please check if {Other Charge} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'	
-		EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
-		RETURN -1
+		-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+		SELECT @strItemNo = NULL
+				,@intChargeItemId = NULL 
+				,@strTransactionId = NULL 
+				,@strCurrencyId = NULL 
+				,@strFunctionalCurrencyId = NULL 
+
+		SELECT TOP 1 
+				@strTransactionId = Receipt.strReceiptNumber
+				,@strItemNo = Item.strItemNo
+				,@intChargeItemId = Item.intItemId
+				,@strCurrencyId = c.strCurrency
+				,@strFunctionalCurrencyId = fc.strCurrency
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+					ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = OtherCharge.intChargeId
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID =  OtherCharge.intCurrencyId
+				LEFT JOIN tblSMCurrency fc
+					ON fc.intCurrencyID =  @intFunctionalCurrencyId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ISNULL(OtherCharge.dblForexRate, 0) = 0 
+				AND OtherCharge.intCurrencyId IS NOT NULL 
+				AND OtherCharge.intCurrencyId <> @intFunctionalCurrencyId			
+				AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = @intFunctionalCurrencyId)
+
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- '{Transaction Id} is using a foreign currency. Please check if {Other Charge} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'	
+			EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
+			RETURN -1
+		END 
 	END 
-END 
 
--- Validate
-BEGIN 
-	-- Check if Other charge is a price down. If yes, then Receipt currency and Other Charge currency must be the same. 
-	SELECT @strItemNo = NULL
-			,@intChargeItemId = NULL 
-			,@strTransactionId = NULL 
-			,@strCurrencyId = NULL 
-			,@strFunctionalCurrencyId = NULL 
-
-	SELECT TOP 1 
-			--@strTransactionId = Receipt.strReceiptNumber
-			@strItemNo = Item.strItemNo
-			,@intChargeItemId = Item.intItemId
-			,@strCurrencyId = cc.strCurrency
-			,@strFunctionalCurrencyId = rc.strCurrency
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
-				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = OtherCharge.intChargeId
-			LEFT JOIN tblSMCurrency cc
-				ON cc.intCurrencyID =  OtherCharge.intCurrencyId
-			LEFT JOIN tblSMCurrency rc
-				ON rc.intCurrencyID =  Receipt.intCurrencyId
-	WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
-			AND OtherCharge.intCurrencyId IS NOT NULL 
-			AND OtherCharge.intCurrencyId <> Receipt.intCurrencyId
-			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-
-	IF @intChargeItemId IS NOT NULL 
 	BEGIN 
-		-- '{Other Charge} is using {Other Charge currency}. Price down is only allowed for {Receipt Currency} currency. Please change the currency or uncheck the Price Down.'
-		EXEC uspICRaiseError 80191, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
-		RETURN -1
+		-- Check if Other charge is a price down. If yes, then Receipt currency and Other Charge currency must be the same. 
+		SELECT @strItemNo = NULL
+				,@intChargeItemId = NULL 
+				,@strTransactionId = NULL 
+				,@strCurrencyId = NULL 
+				,@strFunctionalCurrencyId = NULL 
+
+		SELECT TOP 1 
+				--@strTransactionId = Receipt.strReceiptNumber
+				@strItemNo = Item.strItemNo
+				,@intChargeItemId = Item.intItemId
+				,@strCurrencyId = cc.strCurrency
+				,@strFunctionalCurrencyId = rc.strCurrency
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+					ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = OtherCharge.intChargeId
+				LEFT JOIN tblSMCurrency cc
+					ON cc.intCurrencyID =  OtherCharge.intCurrencyId
+				LEFT JOIN tblSMCurrency rc
+					ON rc.intCurrencyID =  Receipt.intCurrencyId
+		WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
+				AND OtherCharge.intCurrencyId IS NOT NULL 
+				AND OtherCharge.intCurrencyId <> Receipt.intCurrencyId
+				AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- '{Other Charge} is using {Other Charge currency}. Price down is only allowed for {Receipt Currency} currency. Please change the currency or uncheck the Price Down.'
+			EXEC uspICRaiseError 80191, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId
+			RETURN -1
+		END 
 	END 
-END 
+END
+-- End Validation
 
 -- Create the G/L Entries
 BEGIN 
@@ -543,7 +541,7 @@ BEGIN
 
 	DECLARE @ChargesGLEntries AS RecapTableType;
 
-	-- Generate the G/L Entries here: 
+	-- Generate the G/L Entries for Cost Charges with Inventory impact and without GL Reversal. 
 	WITH InventoryCostCharges (
 		dtmDate
 		,intItemId
@@ -634,7 +632,8 @@ BEGIN
 						CASE 
 							WHEN @intRebuildItemId < 0 THEN ReceiptItem.intItemId
 							ELSE ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
-						END						
+						END
+				AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 0 
 	)
 	INSERT INTO @ChargesGLEntries (
 		[dtmDate] 
@@ -1077,7 +1076,7 @@ BEGIN
 				InventoryCostCharges.intItemCommodityId
 
 	;
-	-- Generate the G/L Entries here: 
+	-- Generate the G/L Entries for Cost Charges with no impact to Inventory and without GL Reversal. 
 	WITH NonInventoryCostCharges (
 		dtmDate
 		,intChargeId
@@ -1143,7 +1142,8 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				AND @intRebuildItemId IS NULL 				
+				AND @intRebuildItemId IS NULL 
+				AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 0 
 	)
 	INSERT INTO @ChargesGLEntries (
 		[dtmDate] 
@@ -1553,6 +1553,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 	WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1	
 
+	-- Query the result back to the caller code. 
 	SELECT	[dtmDate] 
 			,[strBatchId]
 			,[intAccountId]
