@@ -267,7 +267,7 @@ begin
 
 	if (ltrim(rtrim(@message)) = '')
 	begin
-		set @strTicketNumber = (select top 1 a.strPrefix + convert(nvarchar(20), (a.intNumber + 1)) from tblSMStartingNumber a where a.strModule = 'Help Desk' and a.strTransactionType = 'Ticket Number');
+		set @strTicketNumber = (select top 1 a.strPrefix + convert(nvarchar(20), (a.intNumber)) from tblSMStartingNumber a where a.strModule = 'Help Desk' and a.strTransactionType = 'Ticket Number');
 		update tblSMStartingNumber set intNumber = intNumber + 1 where strModule = 'Help Desk' and strTransactionType = 'Ticket Number';
 
 		INSERT INTO [dbo].[tblHDTicket]
