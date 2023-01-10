@@ -73,6 +73,7 @@ BEGIN TRY
 		, @dblComboSurcharge DECIMAL(18, 6) = 0
 		, @ysnAllowDifferentUnits BIT
 		, @intLoadId INT
+		, @ysnGrossNet BIT = 0
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -105,7 +106,9 @@ BEGIN TRY
 
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
 		, @ysnComboFreight = ISNULL(ysnComboFreight, 0)
-		, @ysnAllowDifferentUnits = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference
+		, @ysnAllowDifferentUnits = ISNULL(ysnAllowDifferentUnits, 0)
+		, @ysnGrossNet = ISNULL(ysnAllowDifferentUnits, 0)
+	FROM tblTRCompanyPreference
 	SELECT @strFreightBilledBy = strFreightBilledBy FROM tblSMShipVia where intEntityId = @intShipVia
 
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
@@ -521,10 +524,12 @@ BEGIN TRY
 		, DD.intLoadDistributionDetailId
 		, DD.intLoadDistributionHeaderId
 		, DD.intItemId
-		, dblUnits = CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
-							WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
-							WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
-							WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+		, dblUnits = CASE WHEN @ysnGrossNet = 1 THEN
+							CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+								WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
+								WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
+								WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+								ELSE DD.dblUnits END
 							ELSE DD.dblUnits END
 		, DD.dblPrice
 		, dblFreight = DD.dblFreightRate
