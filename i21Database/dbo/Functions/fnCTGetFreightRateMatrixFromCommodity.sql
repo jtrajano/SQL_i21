@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnCTGetFreightRateMatrixFromCommodity]
 (
-	@strLoadingPortId AS NVARCHAR(100)
-	,@strDestinationPortId AS  NVARCHAR(100)
+	@intLoadingPortId AS NVARCHAR(100)
+	,@intDestinationPortId AS  NVARCHAR(100)
 	,@intCommodityId AS INT
 )
 RETURNS NUMERIC(18 , 6)
@@ -9,12 +9,12 @@ AS
 BEGIN
 	DECLARE 
 		@dblRate NUMERIC(18, 6),
-		@intLoadingPortId INT = NULL,
-		@intDestinationPortId INT = NULL,
+		--@intLoadingPortId INT = NULL,
+		--@intDestinationPortId INT = NULL,
 		@intFreightRateMatrixId INT = NULL
 	
-	SELECT @intLoadingPortId = intCityId from tblSMCity where strCity = @strLoadingPortId
-	SELECT @intDestinationPortId = intCityId from tblSMCity where strCity = @strDestinationPortId
+	--SELECT @intLoadingPortId = intCityId from tblSMCity where strCity = @strLoadingPortId
+	--SELECT @intDestinationPortId = intCityId from tblSMCity where strCity = @strDestinationPortId
 	SELECT  TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
             FROM tblLGFreightRateMatrix FRM
             JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
@@ -34,4 +34,3 @@ BEGIN
 
 	RETURN CASE WHEN ISNULL(@dblRate, 0) > 0 THEN @dblRate ELSE 1 END
 END
-
