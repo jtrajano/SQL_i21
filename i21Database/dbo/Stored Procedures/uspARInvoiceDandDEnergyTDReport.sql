@@ -255,10 +255,11 @@ WHERE intEntityUserId = @intEntityUserId
   AND strInvoiceFormat = 'Format 2 - With Laid in Cost'
 
 -- Get Freight itemId
-SELECT @intFreightItemId = intFreightItemId
+SELECT TOP 1 @intFreightItemId = intFreightItemId
 	FROM tblTRLoadHeader H INNER JOIN tblICItem I ON I.intItemId = H.intFreightItemId
 	INNER JOIN tblARInvoiceDetail INVD ON H.strTransaction = INVD.strDocumentNumber
-	WHERE INVD.intInvoiceId =15694
+	WHERE INVD.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
+		OR INVD.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
 
 -- Get Surcharge itemId
 SELECT TOP 1 @intSurchargeItemId = intItemId
@@ -717,8 +718,7 @@ LEFT JOIN (
 		FROM vyuARTaxDetailMCPReport
 		GROUP BY intInvoiceId
 	) Taxes ON ID.intInvoiceId = Taxes.intInvoiceId
-	WHERE ID.intInvoiceId = 15694
-		AND (ID.intItemId <> 18 AND ID.intItemId <> 17)
+	WHERE (ID.intItemId <> 18 AND ID.intItemId <> 17)
 		AND I.strType IN ('Bundle','Inventory')
 ) LIC ON I.intInvoiceDetailId = LIC.intInvoiceDetailId
 
