@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspTRFNegateTFLogFinancedQtyAndAmount]
 	  , @dtmTransactionDate DATETIME
 	  , @strAction NVARCHAR(100)
 	  , @ysnReverse BIT = 0
+	  , @ysnMarkOnlyDeleted BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -27,13 +28,21 @@ BEGIN
 	INTO #tmpTRFLogNegateStaging
 	FROM tblTRFTradeFinanceLog
 	WHERE strTradeFinanceTransaction = @strTradeFinanceNumber
-	AND ISNULL(ysnDeleted, 0) = 0
-	-- IF REVERSE, THE BASIS WILL BE ALL THE NEGATE LOG OF PREVIOUS TRANSACTION/MODULE.
-	AND ((@ysnReverse = 1 AND dblFinanceQty < 0)
-		  OR
-		 (@ysnReverse = 0)
+	AND (	(ISNULL(@ysnMarkOnlyDeleted, 0) = 0
+			AND ISNULL(ysnDeleted, 0) = 0
+			-- IF REVERSE, THE BASIS WILL BE ALL THE NEGATE LOG OF PREVIOUS TRANSACTION/MODULE.
+			AND ((@ysnReverse = 1 AND dblFinanceQty < 0)
+				  OR
+				 (@ysnReverse = 0))
+			)
+			OR
+			ISNULL(@ysnMarkOnlyDeleted, 0) = 1
+			AND ( ISNULL(ysnDeleted, 0) = 0
+				  OR
+				 (ISNULL(ysnDeleted, 0) = 1 AND ISNULL(dblFinanceQty, 0) > 0)
+				)
 		)
-	ORDER BY dtmCreatedDate DESC
+	ORDER BY dtmCreatedDate DESC, intTradeFinanceLogId DESC
 
 	-- CHECK IF LATEST LOG CONTAINS QTY AND AMOUNT TO BE NEGATED. 
 	-- IF FINANCE QTY <= 0, WILL NOT BE CREATING NEGATE LOG DUE TO NO QTY TO BE NEGATED OR QTY WAS ALREADY NEGATED.
@@ -77,6 +86,7 @@ BEGIN
 			, ysnNegateLog
 			, intOverrideBankValuationId
 			, strOverrideBankValuation
+			, ysnMarkOnlyDeleted
 		)
 		SELECT @strAction
 			, strTransactionType
@@ -113,6 +123,7 @@ BEGIN
 			, ysnNegateLog = CAST(1 AS BIT)
 			, intOverrideBankValuationId
 			, strOverrideBankValuation
+			, @ysnMarkOnlyDeleted
 		FROM #tmpTRFLogNegateStaging
 	END
 	ELSE IF (@ysnReverse = 1)
