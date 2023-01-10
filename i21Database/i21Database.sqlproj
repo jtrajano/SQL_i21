@@ -885,6 +885,9 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesOnInTransitValueAdjustment.sql" />
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessClaimPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableReversed.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayableTaxReversed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
