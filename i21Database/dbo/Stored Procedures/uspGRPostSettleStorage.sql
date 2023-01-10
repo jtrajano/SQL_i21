@@ -2779,7 +2779,7 @@ BEGIN TRY
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				left join tblSCTicket SC on SC.intTicketId = CS.intTicketId
-				left join tblICInventoryReceiptItem IRI on SC.intTicketId = IRI.intSourceId
+				left join tblICInventoryReceiptItem IRI on SC.intTicketId = IRI.intSourceId AND IRI.intContractHeaderId IS NOT NULL
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
 						AND DSC.intItemId = a.intItemId
