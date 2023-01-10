@@ -87,7 +87,7 @@ FROM (
 		,strSampleType = ST.strSampleTypeName
 		,strSampleStatus = SS.strStatus
 		,dtmUpdatedDate = S.dtmTestedOn
-		,strShipmentStatus = ISNULL(PSS.strShipmentStatus, SSS.strShipmentStatus)
+		,strShipmentStatus = SSS.strShipmentStatus
 		,strFinancialStatus = CASE WHEN CH.intContractTypeId = 1
 								THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
 										WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
@@ -141,10 +141,9 @@ FROM (
 	LEFT JOIN tblEMEntity LL ON LL.intEntityId = CD.intLogisticsLeadId
 	LEFT JOIN (tblQMSample S INNER JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId) ON S.intProductValueId = CD.intContractDetailId AND S.intProductTypeId = 8 -- Contract item
 	LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-	LEFT JOIN vyuCTShipmentStatus PSS ON PSS.intPContractDetailId = CD.intContractDetailId
-	LEFT JOIN vyuCTShipmentStatus SSS ON SSS.intPContractDetailId = CD.intContractDetailId
-	OUTER APPLY dbo.fnCTGetFinancialStatus(CD.intContractDetailId) SFS
 	OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = CD.intContractDetailId) BD
 	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
+	OUTER APPLY dbo.fnCTGetFinancialStatus(CD.intContractDetailId) SFS
+	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) SSS
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
 ) tbl
