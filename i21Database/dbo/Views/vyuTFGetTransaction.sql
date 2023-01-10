@@ -164,9 +164,9 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, Exception.strOriginCity
 	, Exception.strOriginCounty
 	, Exception.strOriginTCN
-	, Exception.strTaxPayerName
+	, (SELECT TOP 1 strCompanyName FROM tblTFCompanyPreference) strTaxPayerName--Exception.strTaxPayerName
 	, Exception.strTaxPayerIdentificationNumber
-	, Exception.strTaxPayerFEIN
+	, (SELECT TOP 1 REPLACE(strEin,'-','') FROM tblSMCompanySetup) strTaxPayerFEIN--Exception.strTaxPayerFEIN
 	, Exception.strTaxPayerDBA
 	, Exception.strTaxPayerAddress
 	, strTransporterIdType = NULL
