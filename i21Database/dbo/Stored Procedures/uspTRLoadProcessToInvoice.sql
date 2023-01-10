@@ -32,6 +32,7 @@ BEGIN TRY
 	  , @strSurchargeItemNo NVARCHAR(300) = NULL
 	  , @ysnComboFreight BIT = 0  
 	  , @intComboFreightDistId INT = NULL
+	  , @ysnGrossNet BIT = 0
 
 	SELECT @intFreightItemId = intFreightItemId, @strFreightItemNo = I.strItemNo
 	FROM tblTRLoadHeader H INNER JOIN tblICItem I ON I.intItemId = H.intFreightItemId
@@ -40,7 +41,7 @@ BEGIN TRY
 	SELECT TOP 1 @intSurchargeItemId = intItemId, @strSurchargeItemNo = strItemNo 
 	FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0), @ysnGrossNet = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
 
@@ -123,8 +124,20 @@ BEGIN TRY
 		,[strItemDescription]					= Item.strItemDescription
 		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
-		,[dblQtyOrdered]						= DD.dblUnits
-		,[dblQtyShipped]						= DD.dblFreightUnit
+		,[dblQtyOrdered]						= CASE WHEN @ysnGrossNet = 1 THEN 
+															CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+																WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
+																WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
+																WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+																ELSE DD.dblUnits END
+														ELSE DD.dblUnits END
+		,[dblQtyShipped]						= CASE WHEN @ysnGrossNet = 1 THEN 
+															CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+																WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
+																WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
+																WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+																ELSE DD.dblUnits END
+														ELSE DD.dblUnits END
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
