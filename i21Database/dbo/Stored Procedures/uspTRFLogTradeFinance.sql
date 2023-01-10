@@ -54,6 +54,7 @@ BEGIN
 		, @intTotal INT
 		, @ysnNegateLog BIT
 		, @ysnDeleted BIT
+		, @ysnMarkOnlyDeleted BIT
 		, @ysnReverseLog BIT
 		, @intOverrideBankValuationId INT 
 		, @strOverrideBankValuation NVARCHAR(200)
@@ -102,6 +103,7 @@ BEGIN
 		, intContractDetailId INT NULL
 		, ysnNegateLog BIT NULL DEFAULT(0)
 		, ysnDeleted BIT NULL DEFAULT(0)
+		, ysnMarkOnlyDeleted BIT NULL DEFAULT(0)
 		, ysnReverseLog BIT NULL DEFAULT(0)
 		, intOverrideBankValuationId INT NULL
 		, strOverrideBankValuation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -168,6 +170,7 @@ BEGIN
 			, @intContractDetailId = NULL
 			, @ysnNegateLog = NULL
 			, @ysnDeleted = NULL
+			, @ysnMarkOnlyDeleted = NULL
 			, @ysnReverseLog = NULL
 			, @intOverrideBankValuationId = NULL
 			, @strOverrideBankValuation = NULL
@@ -217,6 +220,7 @@ BEGIN
 			, @intContractDetailId = tfLog.intContractDetailId
 			, @ysnNegateLog = tfLog.ysnNegateLog
 			, @ysnDeleted = tfLog.ysnDeleted
+			, @ysnMarkOnlyDeleted = tfLog.ysnMarkOnlyDeleted
 			, @ysnReverseLog = tfLog.ysnReverseLog
 			, @intOverrideBankValuationId = tfLog.intOverrideBankValuationId
 			, @strOverrideBankValuation = CASE WHEN ISNULL(tfLog.strOverrideBankValuation, '') <> '' THEN tfLog.strOverrideBankValuation ELSE bankValuation.strBankValuationRule END COLLATE Latin1_General_CI_AS
@@ -285,6 +289,7 @@ BEGIN
 				 , intContractDetailId
 				 , ysnNegateLog
 				 , ysnDeleted
+				 , ysnMarkOnlyDeleted
 				 , ysnReverseLog
 				 , intOverrideBankValuationId
 				 , strOverrideBankValuation
@@ -332,6 +337,7 @@ BEGIN
 				 , @intContractDetailId
 				 , @ysnNegateLog
 				 , @ysnDeleted
+				 , @ysnMarkOnlyDeleted
 				 , @ysnReverseLog
 				 , @intOverrideBankValuationId
 				 , @strOverrideBankValuation
@@ -341,6 +347,18 @@ BEGIN
 		BEGIN
 			DECLARE @strActionNegate NVARCHAR(100) = 'Moved to ' + @strTransactionType
 
+			IF ISNULL(@ysnMarkOnlyDeleted, 0) = 1
+			BEGIN
+				-- MARK ALL LOGS WITHIN THIS TRANSACTION AS DELETED TO BE EXCLUDED ON CHECKING OF NEGATE/REVERSE LOGS.
+				UPDATE tblTRFTradeFinanceLog
+				SET ysnDeleted = 1
+				WHERE strTradeFinanceTransaction = @strTradeFinanceTransaction
+				AND strTransactionNumber = @strTransactionNumber
+				AND strTransactionType = @strTransactionType
+				AND intTransactionHeaderId = @intTransactionHeaderId
+				AND ISNULL(intTransactionDetailId, 0) = ISNULL(@intTransactionDetailId, 0)
+			END
+
 			EXEC uspTRFNegateTFLogFinancedQtyAndAmount 
 					  @strTradeFinanceNumber = @strTradeFinanceTransaction
 					, @strTransactionType = NULL
@@ -348,6 +366,7 @@ BEGIN
 					, @dtmTransactionDate = @dtmTransactionDate
 					, @strAction = @strActionNegate
 					, @ysnReverse = 0
+					, @ysnMarkOnlyDeleted = @ysnMarkOnlyDeleted
 		END
 
 		-- ADDED TO LIST FOR CREATION OF REVERSAL LOGS.
@@ -471,7 +490,7 @@ BEGIN
 		, intConcurrencyId
 		, intContractHeaderId
 		, intContractDetailId
-		, ysnDeleted
+		, ysnDeleted = CASE WHEN ISNULL(ysnMarkOnlyDeleted, 0) = 1 THEN 1 ELSE ysnDeleted END
 		, intOverrideBankValuationId
 		, strOverrideBankValuation
 	FROM @FinalTable F
@@ -507,7 +526,7 @@ BEGIN
 			AND strTransactionNumber = @strTransactionNumber
 			AND strTransactionType = @strTransactionType
 			AND intTransactionHeaderId = @intTransactionHeaderId
-			AND intTransactionDetailId = @intTransactionDetailId
+			AND ISNULL(intTransactionDetailId, 0) = ISNULL(@intTransactionDetailId, 0)
 
 			-- REVERSAL
 			EXEC uspTRFNegateTFLogFinancedQtyAndAmount 
