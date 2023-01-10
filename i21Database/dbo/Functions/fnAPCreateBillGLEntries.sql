@@ -1264,7 +1264,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intSourceTaxAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST(C.dblSourceTransactionTax * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+		[dblCredit]						=	CAST((C.dblSourceTransactionTax - B.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -1287,9 +1287,10 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,   
-		[dblDebitReport]				=	CAST(C.dblSourceTransactionTax AS DECIMAL(18,2)),
-		[dblCreditForeign]				=	0,
-		[dblCreditReport]				=	0,
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	CAST((C.dblSourceTransactionTax - B.dblTax)  AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblCreditReport]				=	CAST(C.dblSourceTransactionTax - B.dblTax AS DECIMAL(18,2)),
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	F.strCurrencyExchangeRateType,
@@ -1315,7 +1316,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](G.intItemId, ISNULL(H.intItemLocationId, I.intItemLocationId), 'AP Clearing'),
-		[dblDebit]						=	CAST(C.dblSourceTransactionTax * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+		[dblDebit]						=	CAST((C.dblSourceTransactionTax - B.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -1338,7 +1339,7 @@ BEGIN
 		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	CAST(C.dblSourceTransactionTax AS DECIMAL(18,2)),   
+		[dblDebitForeign]				=	CAST(C.dblSourceTransactionTax - B.dblTax AS DECIMAL(18,2)),   
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
