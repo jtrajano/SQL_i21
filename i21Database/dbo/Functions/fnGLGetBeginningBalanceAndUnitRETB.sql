@@ -4,12 +4,14 @@ CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAndUnitRETB] (
 RETURNS @tbl TABLE (
   strAccountId     NVARCHAR(100),
   beginBalance     NUMERIC (18, 6),
+  beginBalanceForeign NUMERIC (18, 6),
   beginBalanceUnit NUMERIC(18, 6))
 AS
   BEGIN
       WITH cte
            AS (SELECT @strAccountId                     AS strAccountId,
                       Sum(dblDebit - dblCredit)         AS beginbalance,
+                      SUM(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) AS beginbalanceForeign,
                       Sum(dblDebitUnit - dblCreditUnit) AS beginbalanceunit,
                       fiscal.dtmEndDate                 dtmDate,
                       ysnIsUnposted,
@@ -37,6 +39,7 @@ AS
                UNION
                SELECT strAccountId,
                       ( dblDebit - dblCredit )         AS beginbalance,
+                      (ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) AS beginbalanceForeign,
                       ( dblDebitUnit - dblCreditUnit ) AS beginbalanceunit,
                       dtmDate,
                       ysnIsUnposted,
@@ -49,6 +52,7 @@ AS
       INSERT INTO @tbl
       SELECT strAccountId,
              SUM(beginbalance)     beginBalance,
+             SUM(beginbalanceForeign) beginBalanceForeign,
              SUM(beginbalanceunit) beginBalanceUnit
       FROM   cte
       WHERE  dtmDate < @dtmDate
