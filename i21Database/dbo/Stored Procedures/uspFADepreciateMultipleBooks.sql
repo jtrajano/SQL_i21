@@ -210,20 +210,18 @@ BEGIN
 
 	-- GL Entry for Adjustment is for GAAP only
 	INSERT INTO @IdHasBasisAdjustment
-        SELECT G.intId, G.intBookDepreciationId, G.intBookId FROM @IdGood G
+        SELECT G.intId, G.intBookDepreciationId, BD.intBookId FROM @IdGood G
         JOIN tblFABookDepreciation BD ON BD.intBookDepreciationId = G.intBookDepreciationId
         OUTER APPLY (
             SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, BD.intBookId, @dtmDepreciationDate) 
             WHERE intAssetId = intId AND intBookdId = BD.intBookId AND strAdjustmentType = 'Basis'
         ) Adjustment
-        WHERE Adjustment.cnt > 0 AND BD.intBookId = 1
+        WHERE Adjustment.cnt > 0
 
     IF EXISTS(SELECT TOP 1 1 FROM @IdHasBasisAdjustment)
     BEGIN
-        DECLARE @idx INT
-        SELECT TOP 1 @idx = intId FROM @IdHasBasisAdjustment
         INSERT INTO @tblBasisAdjustment
-        SELECT TOP 1 
+        SELECT
 			intAssetId, 
 			intBookdId, 
 			intCurrencyId,
@@ -235,11 +233,14 @@ BEGIN
 			dtmDate,
 			ysnAddToBasis,
 			NULL
-		FROM dbo.fnFAGetBasisAdjustment(@idx, 1, @dtmDepreciationDate) WHERE intBookdId = 1 AND intAssetId = @idx
+		FROM @IdHasBasisAdjustment G
+        OUTER APPLY (
+            SELECT * FROM dbo.fnFAGetBasisAdjustment(G.intId, G.intBookId, @dtmDepreciationDate) WHERE intBookdId = G.intBookId
+        ) B
     END 
 
     INSERT INTO @IdHasDepreciationAdjustment
-        SELECT G.intId, G.intBookDepreciationId, G.intBookId FROM @IdGood G
+        SELECT G.intId, G.intBookDepreciationId, BD.intBookId FROM @IdGood G
         LEFT JOIN tblFABookDepreciation BD ON BD.intAssetId = intId AND BD.intBookDepreciationId = G.intBookDepreciationId
         OUTER APPLY (
             SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, BD.intBookId, @dtmDepreciationDate)
@@ -249,10 +250,8 @@ BEGIN
 
     IF EXISTS(SELECT TOP 1 1 FROM @IdHasDepreciationAdjustment)
     BEGIN
-        DECLARE @idx2 INT
-        SELECT TOP 1 @idx2 = intId FROM @IdHasDepreciationAdjustment
         INSERT INTO @tblDepreciationAdjustment
-        SELECT TOP 1 
+        SELECT
 			B.intAssetId, 
 			B.intBookdId, 
 			B.intCurrencyId,
@@ -266,9 +265,8 @@ BEGIN
 			NULL
 		FROM @IdHasDepreciationAdjustment G
         OUTER APPLY (
-            SELECT * FROM dbo.fnFAGetBasisAdjustment(@idx2, G.intBookId, @dtmDepreciationDate) WHERE intBookdId = G.intBookId AND intAssetId = @idx2
+            SELECT * FROM dbo.fnFAGetBasisAdjustment(G.intId, G.intBookId, @dtmDepreciationDate) WHERE intBookdId = G.intBookId
         ) B
-        WHERE intAssetId = @idx2
     END
 
     -- Get Accounts Overridden by Location Segment
@@ -973,7 +971,7 @@ UPDATE A  SET A.ysnDepreciated  =1
 
 UPDATE A  SET A.ysnTaxDepreciated = 1  
   FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
-  WHERE B.ysnDepreciated = 1  AND B.intBookId = 2
+  WHERE B.ysnDepreciated = 1  AND B.intBookId > 1
 
 -- Check the fiscal asset if fiscal period of depreciation exists
 -- Fiscal periods of assets in the tblFAFiscalAsset might be remove/deleted due to reversing of previous depreciation transactions
