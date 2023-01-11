@@ -75,5 +75,7 @@
 			outer apply (
 				select top 1 1 ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
 			)pf
+		where
+			ch.intContractTypeId = 1
 		) otherCosts
 	where isnull(intBillDetailId,0) = 0
