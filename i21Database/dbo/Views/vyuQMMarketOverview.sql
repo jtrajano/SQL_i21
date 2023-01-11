@@ -80,7 +80,7 @@ ItemSaleStat as
 	AVG(dblSupplierValuationPrice) AS AverageSupplierValuationPrice
 	FROM tblQMSample A 
 	JOIN tblQMSampleType ST on ST.intSampleTypeId =A.intSampleTypeId AND  ST.intControlPointId =1
-	JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
+	JOIN tblMFBatch B ON A.intSampleId = B.intSampleId AND A.intLocationId =B.intLocationId 
 	LEFT JOIN tblSMCurrency C on A.intCurrencyId= C.intCurrencyID
 	LEFT JOIN tblICItemUOM IU ON IU.intItemId = A.intItemId AND IU.intUnitMeasureId  = A.intB1QtyUOMId 
 	--OUTER APPLY(
@@ -103,6 +103,7 @@ ItemWeeklySaleStat as
 (
 	SELECT  
 	DATEPART(ww, dtmSaleDate) WeekNo,
+
 	strTeaGroup,strSaleNumber, C.strCurrency,
 	SUM(ISNULL(dblB1QtyBought,0) + ISNULL(dblB2QtyBought,0) +ISNULL(dblB3QtyBought,0)+ISNULL(dblB4QtyBought,0)+ISNULL(dblB5QtyBought,0)) AS TotalSold,
 	SUM(IsNULL(dblB1QtyBought,0)) TotalSold_UL,
@@ -139,7 +140,7 @@ ItemWeeklySaleStat as
 	AVG(B.dblTeaTaste) AverageItemTaste
 	FROM tblQMSample A 
 	JOIN tblQMSampleType ST on ST.intSampleTypeId =A.intSampleTypeId AND ST.intControlPointId =1
-	JOIN tblMFBatch B ON A.intSampleId = B.intSampleId
+	JOIN tblMFBatch B ON A.intSampleId = B.intSampleId AND A.intLocationId =B.intLocationId 
 	LEFT JOIN tblSMCurrency C on A.intCurrencyId= C.intCurrencyID
 	LEFT JOIN tblICItemUOM IU ON IU.intItemId = A.intItemId AND IU.intUnitMeasureId  = A.intB1QtyUOMId 
 	--OUTER APPLY(
@@ -194,7 +195,7 @@ ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId,
 , ROUND(V.AveragePrice,2) dblItemAveragePrevWeekPrice--14
 , ROUND(U.AveragePrice,2)-ROUND(ISNULL(V.AveragePrice,0),2) dblAveItemPriceChange --15
 , ROUND(B.TotalSold_UL,2) dblItemTotalSoldUL--16
-, ROUND((B.TotalSold/B.TotalSold_UL) * 100, 2) dblItemPurchasePercentageUL --17
+, ROUND((B.TotalSold_UL/B.TotalSold) * 100, 2) dblItemPurchasePercentageUL --17
 , ROUND(B.AveragePrice_UL,2) dblItemAveragePriceUL --18
 , ROUND(B.AveragePrice_UL,2) - ROUND(B.AverageSupplierValuationPrice,2) dblItemAveragePriceChange --19
 , ROUND(B.AverageItemTaste,2) dblItemAverageTasteUL --20

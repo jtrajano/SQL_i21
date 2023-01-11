@@ -20,7 +20,7 @@ CASE WHEN A.strMarketZoneCode = 'AUC'  THEN B.strMixingUnitLocation ELSE CT.strM
 CASE WHEN A.strMarketZoneCode = 'AUC'  THEN REPLACE(B.strLeafStyle +  ' ' + B.strLeafSize  + ' ' + Taste.Val, '  ', ' ') ELSE replace(CT.strLeafStyle +  ' ' + CT.strLeafSize  + ' ' + Taste.Val, '  ', ' ') END
 strTestResult,
 IC.strItemNo
-FROM vyuQMSampleList A JOIN vyuMFBatch B ON A.intSampleId = B.intSampleId
+FROM vyuQMSampleList A JOIN vyuMFBatch B ON A.intSampleId = B.intSampleId AND A.intLocationId =B.intLocationId 
 LEFT JOIN tblICItem IC on IC.intItemId = A.intItemId
 OUTER APPLY(
 	SELECT TOP 1 strPropertyValue Val FROM tblQMTestResult T JOIN

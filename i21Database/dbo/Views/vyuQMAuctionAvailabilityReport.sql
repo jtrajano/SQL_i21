@@ -17,6 +17,7 @@ LEFT JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 WHERE B.intBatchId IS NULL
 AND (S.strSaleNumber IS NOT NULL AND S.strSaleNumber <> '')
 AND MZ.strMarketZoneCode = 'AUC' --Auction only
+AND I.strItemNo <>'Catalogue Item'
 GROUP BY
     S.strSaleNumber
     ,CT.strCatalogueType
