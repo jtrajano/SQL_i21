@@ -4,14 +4,15 @@ AS
 		intInventoryHistoryId = IH.intInventoryHistoryId
 		,strCustomerNumber = C.strEntityNo
 		,strCustomerName = C.strName
+		,IH.intSiteId
 		,intSiteNumber = A.intSiteNumber
 		,strProduct = T.strDescription
 		,dtmLastInventoryTime = IH.dtmLastInventoryTime
-		,dblGrossVolume = 0
-		,dblNetVolume = 0
+		,dblGrossVolume = TM.dblFuelVolume
+		,dblNetVolume = TM.dblTempCompensatedVolume
 		,dblUllage = TM.dblUllage
 		,dblTotalCapacity = A.dblTotalCapacity
-		,intFullPercent = 0
+		,dblFullPercent = (TM.dblFuelVolume/A.dblTotalCapacity)
 		,dblWaterHeight = TM.dblWaterHeight
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B	
