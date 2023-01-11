@@ -127,114 +127,71 @@ IF @strBasis = @BASIS_HOURS
 	END
 ELSE IF @strBasis = @BASIS_REVENUE
 	BEGIN
-		DECLARE @tmpAccountsTable TABLE (
-			  intAccountId	INT
-			, intGLDetailId	INT
-			, dblDebit		NUMERIC(18,6)
-			, dblCredit		NUMERIC(18,6)
-			, dtmDate		DATETIME
+		DECLARE @tmpTransactionTable TABLE (
+			 intSourceId	INT
+			,dblAmount	NUMERIC(18,6)
+			,dtmSourceDate	DATETIME
 		)
-		DECLARE @tmpSalespersonsTable TABLE (
-			  intSalespersonId	INT
-			, intInvoiceId		INT
-			, dblInvoiceTotal	NUMERIC(18,6)
-			, dtmPostDate		DATETIME
-		)
-		DECLARE @tmpAgentsTable	TABLE (
-			  intAgentId				INT
-			, intTicketHoursWorkedId	INT
-			, dtmDate					DATETIME
-			, dblAmount					NUMERIC(18,6)	  
-		)
-		DECLARE @tmpDriversTable TABLE (intDriversId INT)
-		DECLARE @tmpItemCategoriesTable TABLE (
-			  intItemCategoryId		INT
-			, intInvoiceDetailId	INT
-			, intInvoiceId			INT
-			, dblTotalAmount		NUMERIC(18,6)
-			, dtmPostDate			DATETIME
-		)
-		DECLARE @tmpItemsTable TABLE (
-			  intItemId				INT
-			, intInvoiceDetailId	INT
-			, intInvoiceId			INT
-			, dblTotalAmount		NUMERIC(18,6)
-			, dtmPostDate			DATETIME
-		)
-
-		DECLARE @dblTotalRevenue			NUMERIC(18,6) = 0
-		      , @dblTotalCOGSAmount			NUMERIC(18,6) = 0
-			  , @dblTotalFreightSurcharge	NUMERIC(18,6) = 0
-			  , @dblTotalTax				NUMERIC(18,6) = 0
 	
 		--GET REVENUE BY GL ACCOUNTS
-		INSERT INTO @tmpAccountsTable
-		SELECT intAccountId		= GL.intAccountId
-			 , intGLDetailId	= GL.intGLDetailId
-			 , dblDebit			= ISNULL(GL.dblDebit, 0)
-			 , dblCredit		= ISNULL(GL.dblCredit, 0)
-			 , dtmDate			= GL.dtmDate
+		INSERT INTO @tmpTransactionTable
+		SELECT 
+			 intSourceId	= intGLDetailId
+			,dblAmount		= ISNULL(GL.dblDebit, 0) - ISNULL(GL.dblCredit, 0)
+			,dtmSourceDate	= GL.dtmDate
 		FROM tblGLDetail GL
 		INNER JOIN tblARCommissionPlanAccount CPA ON GL.intAccountId = CPA.intAccountId
 		WHERE GL.ysnIsUnposted = 0 
 		  AND GL.intAccountId IS NOT NULL
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GL.dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 		  AND CPA.intCommissionPlanId = @intCommissionPlanId
-		
-		SELECT @dblTotalRevenue = ISNULL(SUM(dblDebit - dblCredit), 0) FROM @tmpAccountsTable 
 
 		INSERT INTO tblARCommissionRecapDetail
-		SELECT intCommissionRecapId		= @intCommissionRecapId
-			 , intEntityId				= @intEntityId
-			 , intSourceId				=  intGLDetailId
-			 , strSourceType			= 'tblGLDetail'
-			 , dtmSourceDate			= dtmDate
-			 , dblAmount				= (CASE 
-											WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblDebit - dblCredit), 0)) - ISNULL(@dblHurdle, 0) 
-											WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
-										  END)
-			 , intConcurrencyId			= 1
-		FROM @tmpAccountsTable
+		SELECT 
+			 intCommissionRecapId	= @intCommissionRecapId
+			,intEntityId			= @intEntityId
+			,intSourceId			=  intSourceId
+			,strSourceType			= 'tblGLDetail'
+			,dtmSourceDate			= dtmSourceDate
+			,dblAmount				= dblAmount
+			,intConcurrencyId		= 1
+		FROM @tmpTransactionTable
 
 		--GET INVOICE TOTAL BY SALESPERSON
-		IF(@dblTotalRevenue = 0)
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
 		BEGIN
-			INSERT INTO @tmpSalespersonsTable
-			SELECT intSalespersonId		= I.intEntitySalespersonId
-				 , intInvoiceId			= I.intInvoiceId
-				 , dblInvoiceTotal		= ISNULL(I.dblInvoiceTotal, 0)
-				 , dtmPostDate			= I.dtmPostDate
+			INSERT INTO @tmpTransactionTable
+			SELECT 
+				 intSourceId	= I.intInvoiceId
+				,dblAmount		= ISNULL(I.dblInvoiceTotal, 0)
+				,dtmSourceDate	= I.dtmPostDate
 			FROM tblARInvoice I
 			INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 			WHERE I.ysnPosted = 1
-			 AND I.intEntitySalespersonId IS NOT NULL
-			 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-			 AND SP.intCommissionPlanId = @intCommissionPlanId
-
-			SELECT @dblTotalRevenue = ISNULL(@dblTotalRevenue, 0) + ISNULL(SUM(dblInvoiceTotal), 0) FROM @tmpSalespersonsTable
+			  AND I.intEntitySalespersonId IS NOT NULL
+			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+			  AND SP.intCommissionPlanId = @intCommissionPlanId
 
 			INSERT INTO tblARCommissionRecapDetail
-			SELECT intCommissionRecapId		= @intCommissionRecapId
-				 , intEntityId				= @intEntityId
-				 , intSourceId				= intInvoiceId
-				 , strSourceType			= 'tblARInvoice'
-				 , dtmSourceDate			= dtmPostDate
-				 , dblAmount				= (CASE 
-												WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblInvoiceTotal), 0)) - ISNULL(@dblHurdle, 0) 
-												WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
-											  END)
-				 , intConcurrencyId			= 1
-			FROM @tmpSalespersonsTable
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblARInvoice'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
 		END
 
 		--GET BILLABLE RATES BY AGENT
-		IF(@dblTotalRevenue = 0)
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
 		BEGIN
-			INSERT INTO @tmpAgentsTable
-			SELECT intAgentId				= HD.intAgentEntityId
-				 , intTicketHoursWorkedId	= HD.intTicketHoursWorkedId
-				 , dtmDate					= HD.dtmDate
-				 , dblAmount				= ISNULL(HD.intHours, 0) * ISNULL(HD.dblRate, 0)
+			INSERT INTO @tmpTransactionTable
+			SELECT 
+				 intSourceId	= HD.intTicketHoursWorkedId
+				,dblAmount		= ISNULL(HD.intHours, 0) * ISNULL(HD.dblRate, 0)
+				,dtmSourceDate	= HD.dtmDate
 			FROM tblHDTicketHoursWorked HD
 			INNER JOIN tblARCommissionPlanAgent A ON HD.intAgentEntityId = A.intEntityAgentId
 			WHERE HD.intAgentEntityId IS NOT NULL
@@ -242,31 +199,26 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), HD.dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND A.intCommissionPlanId = @intCommissionPlanId
 		
-			SELECT @dblTotalRevenue = ISNULL(@dblTotalRevenue, 0) + ISNULL(SUM(dblAmount), 0) FROM @tmpAgentsTable
-
 			INSERT INTO tblARCommissionRecapDetail
-			SELECT intCommissionRecapId		= @intCommissionRecapId
-				 , intEntityId				= @intEntityId
-				 , intSourceId				= intTicketHoursWorkedId
-				 , strSourceType			= 'tblHDTicketHoursWorked'
-				 , dtmSourceDate			= dtmDate
-				 , dblAmount				= (CASE 
-												WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblAmount), 0)) - ISNULL(@dblHurdle, 0) 
-												WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
-											  END)
-				 , intConcurrencyId			= 1
-			FROM @tmpAgentsTable
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblHDTicketHoursWorked'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
 		END
 
 		--GET INVOICE LINETOTAL BY ITEM CATEGORY
-		IF(@dblTotalRevenue = 0)
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
 		BEGIN
-			INSERT INTO @tmpItemCategoriesTable
-			SELECT intItemCategoryId	= IC.intCategoryId
-				 , intInvoiceDetailId	= ID.intInvoiceDetailId
-				 , intInvoiceId			= I.intInvoiceId
-				 , dblTotalAmount		= ID.dblTotal
-				 , dtmPostDate			= I.dtmPostDate
+			INSERT INTO @tmpTransactionTable
+			SELECT 
+				 intSourceId	= I.intInvoiceId
+				,dblAmount		= SUM(ID.dblTotal + ID.dblTotalTax)
+				,dtmSourceDate	= I.dtmPostDate
 			FROM tblARInvoice I
 			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 			INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
@@ -276,32 +228,28 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				AND IC.intCategoryId IS NOT NULL
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 				AND CPIC.intCommissionPlanId = @intCommissionPlanId
-		
-			SELECT @dblTotalRevenue = ISNULL(@dblTotalRevenue, 0) + ISNULL(SUM(dblTotalAmount), 0) FROM @tmpItemCategoriesTable
+			GROUP BY I.intInvoiceId, I.dtmPostDate
 
 			INSERT INTO tblARCommissionRecapDetail
-			SELECT intCommissionRecapId		= @intCommissionRecapId
-				 , intEntityId				= @intEntityId
-				 , intSourceId				= intInvoiceId
-				 , strSourceType			= 'tblARInvoice'
-				 , dtmSourceDate			= dtmPostDate
-				 , dblAmount				= (CASE 
-												WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblTotalAmount), 0)) - ISNULL(@dblHurdle, 0) 
-												WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
-											  END)
-				 , intConcurrencyId			= 1
-			FROM @tmpItemCategoriesTable ICT
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblARInvoice'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
 		END
 		
 		--GET INVOICE LINETOTAL BY ITEM
-		IF(@dblTotalRevenue = 0)
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
 		BEGIN
-			INSERT INTO @tmpItemsTable
-			SELECT intItemId			= ID.intItemId
-				 , intInvoiceDetailId	= ID.intInvoiceDetailId
-				 , intInvoiceId			= I.intInvoiceId
-				 , dblTotalAmount		= ID.dblTotal
-				 , dtmPostDate			= I.dtmPostDate
+			INSERT INTO @tmpTransactionTable
+			SELECT 
+				 intSourceId	= I.intInvoiceId
+				,dblTotalAmount	= SUM(ID.dblTotal + ID.dblTotalTax)
+				,dtmSourceDate	= I.dtmPostDate
 			FROM tblARInvoice I
 			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 			INNER JOIN tblARCommissionPlanItem CPI ON ID.intItemId = CPI.intItemId
@@ -309,63 +257,76 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			  AND ID.intItemId IS NOT NULL
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND CPI.intCommissionPlanId = @intCommissionPlanId
+			GROUP BY I.intInvoiceId, I.dtmPostDate
 		
-			SELECT @dblTotalRevenue = ISNULL(@dblTotalRevenue, 0) + ISNULL(SUM(dblTotalAmount), 0) FROM @tmpItemsTable
-
 			INSERT INTO tblARCommissionRecapDetail
-			SELECT intCommissionRecapId		= @intCommissionRecapId
-				 , intEntityId				= @intEntityId
-				 , intSourceId				= intInvoiceId
-				 , strSourceType			= 'tblARInvoice'
-				 , dtmSourceDate			= dtmPostDate
-				 , dblAmount				= (CASE 
-												WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblTotalAmount), 0)) - ISNULL(@dblHurdle, 0) 
-												WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
-											  END)
-				 , intConcurrencyId			= 1
-			FROM @tmpItemsTable
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblARInvoice'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
 		END
 		
 		IF @ysnMarginalSales = 1
 		BEGIN
-			SELECT @dblTotalCOGSAmount = SUM(ABS(ISNULL(ICIT.dblQty, 0)) * ISNULL(ICIT.dblCost, 0))
+			UPDATE ARCRD
+			SET dblAmount = dblAmount - dblTotalCOGSAmount
 			FROM tblARCommissionRecapDetail ARCRD
-			INNER JOIN tblARInvoiceDetail ARID 
-			ON intCommissionRecapId = @intCommissionRecapId AND ARCRD.intSourceId = ARID.intInvoiceId
-			INNER JOIN tblICInventoryTransaction ICIT 
-			ON ARID.intInvoiceDetailId = ICIT.intTransactionDetailId AND ICIT.strTransactionForm = 'Invoice' AND ICIT.ysnIsUnposted = 0
-
-			SET @dblTotalRevenue = @dblTotalRevenue - @dblTotalCOGSAmount
+			INNER JOIN (
+				SELECT 
+					 intCommissionRecapDetailId
+					,dblTotalCOGSAmount			= SUM(ABS(ISNULL(ICIT.dblQty, 0)) * ISNULL(ICIT.dblCost, 0))
+				FROM tblARCommissionRecapDetail ARCRD
+				INNER JOIN tblARInvoiceDetail ARID 
+				ON ARCRD.intCommissionRecapId = @intCommissionRecapId AND ARCRD.intSourceId = ARID.intInvoiceId AND ARCRD.strSourceType = 'tblARInvoice'
+				INNER JOIN tblICInventoryTransaction ICIT 
+				ON ARID.intInvoiceDetailId = ICIT.intTransactionDetailId AND ICIT.strTransactionForm = 'Invoice' AND ICIT.ysnIsUnposted = 0
+				GROUP BY intCommissionRecapDetailId
+			) COGS ON ARCRD.intCommissionRecapDetailId = COGS.intCommissionRecapDetailId
 
 			IF @ysnDeductFreightSurcharge = 1
 			BEGIN
-				SELECT @dblTotalFreightSurcharge = SUM(ISNULL(ARID.dblTotal, 0))
+				UPDATE ARCRD
+				SET dblAmount = dblAmount - dblTotalFreightSurcharge
 				FROM tblARCommissionRecapDetail ARCRD
-				INNER JOIN tblARInvoiceDetail ARID 
-				ON intCommissionRecapId = @intCommissionRecapId AND ARCRD.intSourceId = ARID.intInvoiceId
-				INNER JOIN vyuICGetOtherCharges ICGOC ON ARID.intItemId = ICGOC.intItemId
-
-				SET @dblTotalRevenue = @dblTotalRevenue - @dblTotalFreightSurcharge
+				INNER JOIN (
+					SELECT
+						 intCommissionRecapDetailId
+						,dblTotalFreightSurcharge	= SUM(ISNULL(ARID.dblTotal, 0))
+					FROM tblARCommissionRecapDetail ARCRD
+					INNER JOIN tblARInvoiceDetail ARID 
+					ON intCommissionRecapId = @intCommissionRecapId AND ARCRD.intSourceId = ARID.intInvoiceId AND ARCRD.strSourceType = 'tblARInvoice'
+					INNER JOIN vyuICGetOtherCharges ICGOC ON ARID.intItemId = ICGOC.intItemId
+					GROUP BY intCommissionRecapDetailId
+				) FREIGHTSURCHARGE ON ARCRD.intCommissionRecapDetailId = FREIGHTSURCHARGE.intCommissionRecapDetailId
 			END
 
 			IF @ysnDeductTax = 1
 			BEGIN
-				SELECT @dblTotalTax = SUM(ISNULL(ARID.dblTotalTax, 0))
+				UPDATE ARCRD
+				SET dblAmount = dblAmount - dblTotalTax
 				FROM tblARCommissionRecapDetail ARCRD
-				INNER JOIN tblARInvoiceDetail ARID 
-				ON intCommissionRecapId = @intCommissionRecapId AND ARCRD.intSourceId = ARID.intInvoiceId
-
-				SET @dblTotalRevenue = @dblTotalRevenue - @dblTotalTax
+				INNER JOIN (
+					SELECT 
+						 intCommissionRecapDetailId
+						,dblTotalTax				= SUM(ISNULL(ARID.dblTotalTax, 0))
+					FROM tblARCommissionRecapDetail ARCRD
+					INNER JOIN tblARInvoiceDetail ARID 
+					ON intCommissionRecapId = @intCommissionRecapId AND ARCRD.intSourceId = ARID.intInvoiceId AND ARCRD.strSourceType = 'tblARInvoice'
+					GROUP BY intCommissionRecapDetailId
+				) TAX ON ARCRD.intCommissionRecapDetailId = TAX.intCommissionRecapDetailId
 			END
 		END
 
-		IF @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00
-			SET @dblLineTotal = ((@dblCalculationAmount / 100.00) * ISNULL(@dblTotalRevenue, 0)) - ISNULL(@dblHurdle, 0)
-		ELSE IF @strCalculationType = @CALCTYPE_FLAT
-			SET @dblLineTotal = @dblCalculationAmount
-
 		UPDATE tblARCommissionRecapDetail
-		SET dblAmount = @dblLineTotal
+		SET dblAmount = CASE 
+							WHEN @strCalculationType = @CALCTYPE_PERCENT AND ISNULL(@dblCalculationAmount, 0) > 0.00 THEN ((@dblCalculationAmount/100.00) * ISNULL((dblAmount), 0)) - ISNULL(@dblHurdle, 0) 
+							WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
+						END
 		WHERE intCommissionRecapId = @intCommissionRecapId
 
 		DELETE FROM tblARCommissionRecapDetail WHERE dblAmount <= 0.000000
@@ -376,7 +337,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 	END
 ELSE IF @strBasis = @BASIS_UNITS
 	BEGIN
-			--TODO
+		--TODO
 		SET @dblLineTotal = 0
 	END
 ELSE IF @strBasis = @BASIS_CONDITIONAL
