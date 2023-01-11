@@ -2498,7 +2498,7 @@ BEGIN
 		,strSalesContract = ''
 		,strCustomer = ''
 		,strOrigin =  dbo.[fnCTGetSeqDisplayField](CTD.intContractDetailId, 'Origin')
-		,strProductType = ''
+		,strProductType = IPT.strProductType
 		,strProductLine = ''
 		,strCertificateName = ''
 		,strQualityItem = ''
@@ -2528,6 +2528,8 @@ BEGIN
 	left join realize					r with (nolock)    on r.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblICItemUOM				UOM  WITH (NOLOCK) ON UOM.intItemUOMId = CTD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure		    UM   WITH (NOLOCK) ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICItem					ICI  WITH (NOLOCK) ON ICI.intItemId = CTD.intItemId
+	LEFT JOIN vyuICGetCompactItem		IPT  WITH (NOLOCK) ON IPT.intItemId	= CTD.intItemId
 	INNER JOIN vyuCTEntity				EY   WITH (NOLOCK) ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 	LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = ISNULL(LGD.intPContractDetailId,LGD.intSContractDetailId)
 	LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
