@@ -45,7 +45,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , Batch.strProductionSite						 AS strProductionSite
 	 , Batch.strSupplierReference					 AS strReference
 	 , Batch.strTeaColour							 AS strTeaColour
-	 , Batch.strTeaLingoSubCluster					 AS strTeaLingoSubCluster
+	 , Region.strDescription						 AS strTeaLingoSubCluster
 	 , CAST(Batch.dblTeaVolume  AS NUMERIC(18, 6))	 AS dblTeaVolume
 	 , BlendRequirement.strDemandNo					 AS strComment
 	 , WorkOrder.strERPOrderNo						 AS strERPOrderNo
@@ -69,4 +69,5 @@ LEFT JOIN tblQMTINClearance AS TinClearance ON TinClearance.intBatchId = Batch.i
 LEFT JOIN tblSMCompanyLocation AS BuyingCenterLocation ON Batch.intBuyingCenterLocationId = BuyingCenterLocation.intCompanyLocationId
 LEFT JOIN tblSMCompanyLocation AS BatchLocation ON Batch.intLocationId = BuyingCenterLocation.intCompanyLocationId
 LEFT JOIN tblEMEntity AS Entity on Entity.intEntityId = WorkOrder.intApprovedBy
+LEFT JOIN tblICCommodityAttribute AS Region ON InputLotItem.intRegionId = Region.intCommodityAttributeId
 GO
