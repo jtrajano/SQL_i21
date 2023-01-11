@@ -776,11 +776,7 @@ BEGIN
 										END 
 									ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 								END [strITTDataPaymentSystemsProductCode]
-							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 --WHEN IL.ysnFoodStampable = 0 THEN 2048 
-									WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN 4 WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN 2 
-									WHEN IL.ysnOpenPricePLU = 1 THEN 128
-									ELSE 2048
-								END [intITTDataSalesRestrictCode]
+							, dbo.fnSTGetSalesRestriction(I.intItemId, ST.intCompanyLocationId) AS [intITTDataSalesRestrictCode]
 							, IUOM.dblUnitQty [dblITTDataSellingUnits]
 							, ISNULL((CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
 									WHEN IL.ysnTaxFlag3 = 1 THEN R.intTaxStrategyIdForTax3 WHEN IL.ysnTaxFlag4 = 1 THEN R.intTaxStrategyIdForTax4
@@ -870,11 +866,7 @@ BEGIN
 										END 
 									ELSE  ISNULL(SubCat.strRegProdCode, '40') 
 								END [strITTDataPaymentSystemsProductCode]
-							, CASE	WHEN IL.ysnFoodStampable = 1 THEN 4096 --WHEN IL.ysnFoodStampable = 0 THEN 2048 
-									WHEN CategoryLoc.ysnIdRequiredLiquor = 1 THEN 4 WHEN CategoryLoc.ysnIdRequiredCigarette = 1 THEN 2 
-									WHEN IL.ysnOpenPricePLU = 1 THEN 128
-									ELSE 2048
-								END [intITTDataSalesRestrictCode]
+							, dbo.fnSTGetSalesRestriction(I.intItemId, ST.intCompanyLocationId) AS [intITTDataSalesRestrictCode]
 							, IUOM.dblUnitQty [dblITTDataSellingUnits]
 							, ISNULL((CASE	WHEN IL.ysnTaxFlag1 = 1 THEN R.intTaxStrategyIdForTax1 WHEN IL.ysnTaxFlag2 = 1 THEN R.intTaxStrategyIdForTax2 
 									WHEN IL.ysnTaxFlag3 = 1 THEN R.intTaxStrategyIdForTax3 WHEN IL.ysnTaxFlag4 = 1 THEN R.intTaxStrategyIdForTax4
