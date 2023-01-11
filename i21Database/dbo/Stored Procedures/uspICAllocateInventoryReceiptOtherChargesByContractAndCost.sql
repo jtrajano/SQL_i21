@@ -70,6 +70,12 @@ BEGIN
 									dblCalculatedAmount
 									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
 								)
+							,dblOriginalTotalOtherCharge = 
+								-- Convert the other charge amount to functional currency. 
+								SUM(
+									dblOriginalCalculatedAmount
+									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
+								)
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intContractId
 							,CalculatedCharge.intContractDetailId
@@ -114,7 +120,7 @@ BEGIN
 											--* CASE WHEN ISNULL(ReceiptItem.dblForexRate, 0) = 0 AND ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE ReceiptItem.dblForexRate END 
 										)										
 									)
-								)
+								)							
 							,ReceiptItem.intOrderId 
 							,ReceiptItem.intLineNo
 							,ReceiptItem.strChargesLink
@@ -158,6 +164,22 @@ BEGIN
 								)
 								, 2
 							)
+				,dblOriginalAmount = ROUND (
+								ISNULL(dblOriginalAmount, 0) 
+								+ (
+									dbo.fnDivide(
+										dbo.fnMultiply(
+											dbo.fnMultiply(
+												Source_Query.dblOriginalTotalOtherCharge
+												,Source_Query.Qty
+											)
+											,Source_Query.dblUnitCost
+										)									
+										,Source_Query.dblTotalCost 
+									)
+								)
+								, 2
+							)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
@@ -171,13 +193,15 @@ BEGIN
 			,[ysnInventoryCost]
 			,[ysnPrice]
 			,[strChargesLink]
+			,[dblOriginalAmount]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
-			,ROUND (
+			,-- dblAmount: 
+			ROUND (
 				dbo.fnDivide(	
 					dbo.fnMultiply(
 						dbo.fnMultiply(
@@ -194,6 +218,20 @@ BEGIN
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice 
 			,Source_Query.strChargesLink
+			,-- dblOriginalAmount:
+			ROUND (
+				dbo.fnDivide(	
+					dbo.fnMultiply(
+						dbo.fnMultiply(
+							Source_Query.dblOriginalTotalOtherCharge
+							,Source_Query.Qty 
+						)
+						,Source_Query.dblUnitCost
+					)
+					,Source_Query.dblTotalCost 
+				)
+				,2
+			)
 		)
 	;
 END 

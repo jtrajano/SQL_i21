@@ -150,42 +150,79 @@ SET ANSI_WARNINGS ON
 			,dtmDate = L.dtmScheduledDate
 			,dblQty = LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
-			,dblCost = dbo.fnDivide(
-						dbo.fnMultiply(LD.dblNet,
-							dbo.fnMultiply(
-									dbo.fnCalculateCostBetweenUOM(
-										AD.intSeqPriceUOMId
-										, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-										, CASE 
-											WHEN (AD.dblSeqPrice IS NULL) THEN
-												CASE 
-													WHEN (LD.dblUnitPrice > 0) THEN 
-														LD.dblUnitPrice 
-														/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
-													ELSE 
-														dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
-														/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-												END
-											ELSE 
-												AD.dblSeqPrice 
-												/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-											END) 
-									, CASE --if contract FX tab is setup
-										 WHEN AD.ysnValidFX = 1 THEN 
-											CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-													THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
-												WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-													THEN 1 --foreign price to functional FX, use 1
-												WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-													THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-												ELSE ISNULL(LD.dblForexRate,1) END
-										 ELSE  --if contract FX tab is not setup
-											CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
-												THEN ISNULL(FX.dblFXRate, 1)
-												ELSE 1 END
-										 END
-									))
-								 , LD.dblQuantity)
+			--,dblCost = 
+			--	dbo.fnDivide (
+			--		dbo.fnMultiply (
+			--			LD.dblNet,
+			--			dbo.fnMultiply (
+			--				dbo.fnCalculateCostBetweenUOM (
+			--					AD.intSeqPriceUOMId
+			--					,ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+			--					,CASE 
+			--						WHEN (AD.dblSeqPrice IS NULL) THEN
+			--							CASE 
+			--								WHEN (LD.dblUnitPrice > 0) THEN 
+			--									LD.dblUnitPrice 
+			--									/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
+			--								ELSE 
+			--									dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+			--									/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+			--							END
+			--						ELSE 
+			--							AD.dblSeqPrice 
+			--							/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+			--					END
+			--				) 
+			--				,CASE --if contract FX tab is setup
+			--					WHEN AD.ysnValidFX = 1 THEN 
+			--						CASE 
+			--							WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) THEN 
+			--								dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+			--							WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId) THEN 
+			--								1 --foreign price to functional FX, use 1
+			--							WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) THEN 
+			--								ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+			--							ELSE 
+			--								ISNULL(LD.dblForexRate,1) 
+			--						END
+			--					ELSE  --if contract FX tab is not setup
+			--						CASE 
+			--							WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) THEN 
+			--								ISNULL(FX.dblFXRate, 1)
+			--							ELSE 1 
+			--						END
+			--				END
+			--			)
+			--		)
+			--		, LD.dblQuantity
+			--	)
+
+			-- Cost is in foreign currency. 
+			,dblCost = 
+				dbo.fnDivide (
+					dbo.fnMultiply (
+						LD.dblNet
+						,dbo.fnCalculateCostBetweenUOM (
+							AD.intSeqPriceUOMId
+							,ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+							,CASE 
+								WHEN (AD.dblSeqPrice IS NULL) THEN
+									CASE 
+										WHEN (LD.dblUnitPrice > 0) THEN 
+											LD.dblUnitPrice 
+											/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
+										ELSE 
+											dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+											/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+									END
+								ELSE 
+									AD.dblSeqPrice 
+									/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+							END
+						) 
+					)
+					, LD.dblQuantity
+				)
 			,dblValue = 0
 			,dblSalesPrice = 0.0
 			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
@@ -253,6 +290,25 @@ SET ANSI_WARNINGS ON
 							AND RD.dtmValidFromDate <= L.dtmScheduledDate
 						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId
+
+		
+		-- Update currency fields to functional currency. 
+		BEGIN 
+			UPDATE	itemCost
+			SET		dblExchangeRate = 1
+					,dblForexRate = 1
+					,intCurrencyId = @DefaultCurrencyId
+			FROM	@ItemsToPost itemCost
+			WHERE	ISNULL(itemCost.intCurrencyId, @DefaultCurrencyId) = @DefaultCurrencyId 
+
+			UPDATE	itemCost
+			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
+					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+					,dblForexCost = dblCost
+			FROM	@ItemsToPost itemCost
+			WHERE	itemCost.intCurrencyId <> @DefaultCurrencyId 
+		END
 
 		INSERT INTO @GLEntries (
 			[dtmDate] 

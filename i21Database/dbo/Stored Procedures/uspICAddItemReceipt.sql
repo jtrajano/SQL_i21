@@ -1540,6 +1540,11 @@ BEGIN
 				,intSort
 				,dblQuantity
 				,ysnLock
+				,ysnWithGLReversal
+				,dblOriginalQuantity
+				,dblOriginalRate
+				,dblOriginalAmount
+				,dblOriginalForexRate
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1575,6 +1580,12 @@ BEGIN
 				,intSort					= RawData.intSort
 				,dblQuantity				= RawData.dblQuantity 
 				,ysnLock					= RawData.ysnLock
+				,ysnWithGLReversal			= RawData.ysnWithGLReversal
+				,dblOriginalQuantity		= RawData.dblQuantity 
+				,dblOriginalRate			= RawData.dblRate
+				,dblOriginalAmount			= ROUND(RawData.dblAmount, 2)
+				,dblOriginalForexRate		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 			
+
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

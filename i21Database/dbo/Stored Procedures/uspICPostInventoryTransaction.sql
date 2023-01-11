@@ -197,7 +197,7 @@ BEGIN
 			,[intFobPointId]					= @intFobPointId
 			,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
 			,[intForexRateTypeId]				= @intForexRateTypeId	
-			,[dblForexRate]						= @dblForexRate
+			,[dblForexRate]						= ISNULL(@dblForexRate, 1) 
 			,[strDescription]					= @strDescription
 			,[strActualCostId]					= @strActualCostId
 			,[dblUnitRetail]					= @dblUnitRetail

@@ -6,6 +6,7 @@
 	[intInventoryReceiptItemId] INT NOT NULL, 
 	[intEntityVendorId] INT NULL, 
 	[dblAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+	[dblOriginalAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnInventoryCost] BIT NULL DEFAULT ((0)),	
 	[ysnPrice] BIT NULL DEFAULT ((0)),	
