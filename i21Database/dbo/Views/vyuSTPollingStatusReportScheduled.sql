@@ -71,7 +71,43 @@ FORMAT((
 			AND stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
-), 'd','us') as strReportDate, GETDATE() AS dtmCheckoutProcessDate, GETDATE() - 1 AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 'Store did not automatically run for today, which was stucked on ' +
+), 'd','us') as strReportDate, 
+(
+	SELECT MAX(dtmCheckoutDate)
+	FROM tblSTCheckoutHeader chIn
+	JOIN tblSTCheckoutProcessErrorWarning ewIn
+		ON chIn.intCheckoutId = ewIn.intCheckoutId
+	JOIN tblSTCheckoutProcess cpIn
+		ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
+	WHERE cpIn.intCheckoutProcessId =
+		(
+			SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
+			FROM tblSTCheckoutProcess stcpIn
+			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
+				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
+			WHERE stcpewIn.strMessageType = 'S'
+			AND stcpIn.intStoreId = a.intStoreId
+			GROUP BY stcpIn.intStoreId
+		)
+) AS dtmCheckoutProcessDate, 
+(
+	SELECT MAX(dtmCheckoutDate)
+	FROM tblSTCheckoutHeader chIn
+	JOIN tblSTCheckoutProcessErrorWarning ewIn
+		ON chIn.intCheckoutId = ewIn.intCheckoutId
+	JOIN tblSTCheckoutProcess cpIn
+		ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
+	WHERE cpIn.intCheckoutProcessId =
+		(
+			SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
+			FROM tblSTCheckoutProcess stcpIn
+			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
+				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
+			WHERE stcpewIn.strMessageType = 'S'
+			AND stcpIn.intStoreId = a.intStoreId
+			GROUP BY stcpIn.intStoreId
+		)
+) AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 'Store did not automatically run for today, which was stucked on ' +
 FORMAT((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
