@@ -164,6 +164,7 @@ BEGIN
 			,[ysnInventoryCost]
 			,[ysnPrice]
 			,[strChargesLink]
+			,[dblOriginalAmount]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
