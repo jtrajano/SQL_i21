@@ -40,6 +40,31 @@ SELECT intTeaTypeId				= S.intSampleTypeId
 								    (ISNULL(S.dblB5Price, 0) * CS.dblB5Weight)) / 
 	 							  ISNULL(NULLIF(CS.dblCompetitorWeight, 0), 1)) - ISNULL(S.dblB1Price, 0)
 	 , dblCompetitorPackage		= ISNULL(S.dblB2QtyBought, 0) + ISNULL(S.dblB3QtyBought, 0) + ISNULL(S.dblB4QtyBought, 0) + ISNULL(S.dblB5QtyBought, 0)
+
+	 , dblBuyer2Price			= ISNULL(ISNULL(S.dblB2Price, 0) * CS.dblB2Weight, 0)
+	 , dblBuyer3Price			= ISNULL(ISNULL(S.dblB3Price, 0) * CS.dblB3Weight, 0)
+	 , dblBuyer4Price			= ISNULL(ISNULL(S.dblB4Price, 0) * CS.dblB4Weight, 0)
+	 , dblBuyer5Price			= ISNULL(ISNULL(S.dblB5Price, 0) * CS.dblB5Weight, 0)	 
+
+	 , dblBuyer2Kgs				= ISNULL(CS.dblB2Weight, 0)
+	 , dblBuyer3Kgs				= ISNULL(CS.dblB3Weight, 0)
+	 , dblBuyer4Kgs				= ISNULL(CS.dblB4Weight, 0)
+	 , dblBuyer5Kgs				= ISNULL(CS.dblB5Weight, 0)
+
+	 , dblBuyer2NetSavingValue	= (ISNULL(S.dblB2Price, 0) - ISNULL(S.dblB1Price, 0)) * CS.dblB1Weight
+	 , dblBuyer3NetSavingValue	= (ISNULL(S.dblB3Price, 0) - ISNULL(S.dblB1Price, 0)) * CS.dblB1Weight
+	 , dblBuyer4NetSavingValue	= (ISNULL(S.dblB4Price, 0) - ISNULL(S.dblB1Price, 0)) * CS.dblB1Weight
+	 , dblBuyer5NetSavingValue	= (ISNULL(S.dblB5Price, 0) - ISNULL(S.dblB1Price, 0)) * CS.dblB1Weight
+
+	 , dblBuyer2PriceDifference	= ISNULL(S.dblB2Price, 0) - ISNULL(S.dblB1Price, 0)
+	 , dblBuyer3PriceDifference	= ISNULL(S.dblB3Price, 0) - ISNULL(S.dblB1Price, 0)
+	 , dblBuyer4PriceDifference	= ISNULL(S.dblB4Price, 0) - ISNULL(S.dblB1Price, 0)
+	 , dblBuyer5PriceDifference	= ISNULL(S.dblB5Price, 0) - ISNULL(S.dblB1Price, 0)
+
+	 , dblBuyer2Package			= ISNULL(S.dblB2QtyBought, 0)
+	 , dblBuyer3Package			= ISNULL(S.dblB3QtyBought, 0)
+	 , dblBuyer4Package			= ISNULL(S.dblB4QtyBought, 0)
+	 , dblBuyer5Package			= ISNULL(S.dblB5QtyBought, 0)
 FROM tblQMSample S 
 INNER JOIN (
 	SELECT intSampleId			= SS.intSampleId
