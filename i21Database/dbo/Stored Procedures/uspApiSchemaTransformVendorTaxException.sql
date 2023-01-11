@@ -123,13 +123,18 @@ SELECT
       
 FROM tblApiSchemaVendorTaxException vte      
 LEFT JOIN tblICCategory cat ON vte.strCategoryCode = cat.strCategoryCode     
-WHERE vte.guiApiUniqueId = @guiApiUniqueId AND cat.intCategoryId IS NULL   
+WHERE vte.guiApiUniqueId = @guiApiUniqueId AND cat.intCategoryId IS NULL
+
+IF EXISTS (SELECT TOP 1 1 FROM tblApiImportLogDetail WHERE strLogLevel = 'Error' AND guiApiImportLogId = @guiLogId)
+BEGIN
+	RETURN;
+END
       
 INSERT INTO tblAPVendorTaxException (  
    
   intEntityVendorId   
-    ,intItemId      
-    ,intCategoryId  
+ ,intItemId      
+ ,intCategoryId  
  ,intTaxCodeId  
  ,intTaxClassId  
  ,strState  
@@ -152,9 +157,9 @@ SELECT
  ,vte.strException  
  ,vte.dtmStartDate  
  ,vte.dtmEndDate  
-    ,el.intEntityLocationId      
+ ,el.intEntityLocationId      
  ,@guiApiUniqueId     
-    ,vte.intRowNumber   
+ ,vte.intRowNumber   
 FROM tblApiSchemaVendorTaxException vte      
     
 INNER JOIN tblAPVendor v ON vte.strVendorId = v.strVendorId      
