@@ -875,9 +875,9 @@
     <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
     <Build Include="dbo\Views\vyuLGLoadOpenContractsWithAllocation.sql" />
     <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
-    <Build Include="dbo\Tables\tblGLAuditorTransactionsByAccountId.sql" />
-    <Build Include="dbo\Views\vyuGLAuditorTransactionsByAccountId.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByAccountId.sql" />
+    <Build Include="dbo\Tables\tblGLAuditorTransaction.sql" />
+    <Build Include="dbo\Views\vyuGLAuditorTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLClearAuditorTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6073,7 +6073,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
-    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql"/>
+    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />

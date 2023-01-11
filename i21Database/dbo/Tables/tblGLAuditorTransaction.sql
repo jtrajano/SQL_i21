@@ -1,6 +1,7 @@
-﻿CREATE TABLE [dbo].[tblGLAuditorTransactionsByAccountId]
+﻿CREATE TABLE [dbo].[tblGLAuditorTransaction]
 (
 	[intAuditorTransactionId] INT IDENTITY (1, 1) NOT NULL,
+	[intType] INT DEFAULT 0 NOT NULL,
 	[intGeneratedBy] INT NULL,
 	[dtmDateGenerated] DATETIME,
 	[intEntityId] INT NULL,
@@ -53,5 +54,5 @@
 	
 	[intConcurrencyId] INT DEFAULT 1 NOT NULL,
 	
-	CONSTRAINT [PK_tblGLAuditorTransactionsByAccountId] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
+	CONSTRAINT [PK_tblGLAuditorTransaction] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
 )

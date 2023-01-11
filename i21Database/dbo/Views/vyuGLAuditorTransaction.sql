@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuGLAuditorTransactionsByAccountId]
+﻿CREATE VIEW [dbo].[vyuGLAuditorTransaction]
 AS
 SELECT 
 	A.*
@@ -7,7 +7,7 @@ SELECT
 	,AG.strAccountGroup
 	,Currency.strCurrency
 	,CASE WHEN (A.strTotalTitle = 'Total') THEN '' ELSE EM.strName END COLLATE Latin1_General_CI_AS strUserName
-FROM tblGLAuditorTransactionsByAccountId A
+FROM tblGLAuditorTransaction A
 LEFT JOIN tblGLAccount ACC ON ACC.intAccountId = A.intAccountId
 LEFT JOIN tblGLAccountGroup AG ON AG.intAccountGroupId = ACC.intAccountGroupId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = A.intCurrencyId
