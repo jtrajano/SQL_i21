@@ -89,11 +89,13 @@ AS
  		DROP TABLE #tempReceiptInfo
  	IF OBJECT_ID('tempdb..#tempVoucherInfo') IS NOT NULL
  		DROP TABLE #tempVoucherInfo
+ 	IF OBJECT_ID('tempdb..#tempVoucherInfo2') IS NOT NULL
+ 		DROP TABLE #tempVoucherInfo2
 		
- 	IF OBJECT_ID('tempdb..#tempVoucher') IS NOT NULL
- 		DROP TABLE #tempVoucher
- 	IF OBJECT_ID('tempdb..#tempVoucherPayment') IS NOT NULL
- 		DROP TABLE #tempVoucherPayment
+ 	--IF OBJECT_ID('tempdb..#tempVoucher') IS NOT NULL
+ 	--	DROP TABLE #tempVoucher
+ 	--IF OBJECT_ID('tempdb..#tempVoucherPayment') IS NOT NULL
+ 	--	DROP TABLE #tempVoucherPayment
 
  	IF OBJECT_ID('tempdb..#tempContractPair') IS NOT NULL
  		DROP TABLE #tempContractPair
@@ -655,38 +657,38 @@ AS
  	WHERE shipmentDetail.intPContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 	AND shipment.intShipmentType = 1 -- SHIPMENT
 	
- 	SELECT * 
- 	INTO #tempVoucher
- 	FROM
- 	(
- 		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
- 			, tlog.intContractHeaderId
- 			, tlog.intContractDetailId
- 			, tlog.intTransactionHeaderId
- 			, tlog.intTransactionDetailId
- 		FROM #tempTradeFinanceLog tlog 
- 		WHERE tlog.strTransactionType = 'AP'
- 		AND tlog.strAction = 'Created Voucher'
- 	) t
- 	WHERE intRowNum = 1
+ 	--SELECT * 
+ 	--INTO #tempVoucher
+ 	--FROM
+ 	--(
+ 	--	SELECT 
+ 	--		intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
+ 	--		, tlog.intContractHeaderId
+ 	--		, tlog.intContractDetailId
+ 	--		, tlog.intTransactionHeaderId
+ 	--		, tlog.intTransactionDetailId
+ 	--	FROM #tempTradeFinanceLog tlog 
+ 	--	WHERE tlog.strTransactionType = 'AP'
+ 	--	AND tlog.strAction = 'Created Voucher'
+ 	--) t
+ 	--WHERE intRowNum = 1
 	
 
- 	SELECT * 
- 	INTO #tempVoucherPayment
- 	FROM
- 	(
- 		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
- 			, tlog.intContractHeaderId
- 			, tlog.intContractDetailId
- 			, tlog.intTransactionHeaderId
- 			, tlog.intTransactionDetailId
- 		FROM #tempTradeFinanceLog tlog 
- 		WHERE tlog.strTransactionType = 'AP'
- 		AND tlog.strAction = 'Created AP Payment'
- 	) t
- 	WHERE intRowNum = 1
+ 	--SELECT * 
+ 	--INTO #tempVoucherPayment
+ 	--FROM
+ 	--(
+ 	--	SELECT 
+ 	--		intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
+ 	--		, tlog.intContractHeaderId
+ 	--		, tlog.intContractDetailId
+ 	--		, tlog.intTransactionHeaderId
+ 	--		, tlog.intTransactionDetailId
+ 	--	FROM #tempTradeFinanceLog tlog 
+ 	--	WHERE tlog.strTransactionType = 'AP'
+ 	--	AND tlog.strAction = 'Created AP Payment'
+ 	--) t
+ 	--WHERE intRowNum = 1
 
 
  	-- Get Purchase Contract Ticket
@@ -714,13 +716,13 @@ AS
  	WHERE receiptItem.intContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 
 	
- 	-- Get Purchase Contract Voucher
+ 	-- Get Purchase Contract Voucher (Via Inventory Receipt)
  	SELECT 
  		  voucher.intInventoryReceiptId
  		, voucher.intInventoryReceiptItemId
  		, voucher.intBillId
- 		, strInvoiceNumber = bill.strVendorOrderNumber
- 		, strSupplierVoucherReference = voucher.strBillId
+ 		, strInvoiceNumber = CASE WHEN ISNULL(bill.strVendorOrderNumber, '') = '' THEN NULL ELSE bill.strVendorOrderNumber END
+ 		, strSupplierVoucherReference = CASE WHEN ISNULL(voucher.strBillId, '') = '' THEN NULL ELSE voucher.strBillId END
  		, dblPurchaseInvoiceAmount = bill.dblTotal --bill.dblTotalController
  		, dtmVoucherDate = bill.dtmDate
  		, dtmVoucherDueDate = bill.dtmDueDate
@@ -733,7 +735,26 @@ AS
  	ON bill.intBillId = voucher.intBillId
 	WHERE voucher.intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tempReceiptInfo)
 	AND voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo)
-
+	
+ 	-- Get Purchase Contract Voucher (Via Load Shipment)
+	SELECT 
+		  BD.intContractDetailId
+		, bill.intBillId
+		, strInvoiceNumber = bill.strVendorOrderNumber
+		, strSupplierVoucherReference = bill.strBillId
+		, dblPurchaseInvoiceAmount = bill.dblTotal
+		, dtmVoucherDate = bill.dtmDate
+ 		, dtmVoucherDueDate = bill.dtmDueDate
+ 		, dblVoucherPaidAmount = bill.dblPayment
+ 		, dblVoucherBalance = bill.dblAmountDue
+ 		, bill.intCurrencyId
+		, bill.strFinanceTradeNo
+	INTO #tempVoucherInfo2
+	FROM tblAPBillDetail BD
+	INNER JOIN tblAPBill bill
+		ON bill.intBillId = BD.intBillId
+		AND ISNULL(bill.strFinanceTradeNo, '') <> ''
+		AND BD.intContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 
  	-- Allocated Sale Contract Hedge Info
  	SELECT 
@@ -1265,15 +1286,15 @@ AS
  		, strPDerivativeFutureMonth = pHedge.strFutureMonth
  		, strPLocation = pTicket.strLocation
  		, strPWarehouse = pTicket.strWarehouse
- 		, strPInvoiceNumber = pVoucher.strInvoiceNumber
- 		, pVoucher.strSupplierVoucherReference
- 		, dblPurchaseInvoiceAmount = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
- 		, pVoucher.dtmVoucherDate
- 		, pVoucher.dtmVoucherDueDate
- 		, dblVoucherPaidAmount = ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero)
- 		, dblVoucherBalance = CASE WHEN ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero) > 0
- 									THEN ISNULL(pVoucher.dblVoucherBalance, @dblZero)
- 									ELSE ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
+ 		, strPInvoiceNumber = ISNULL(pVoucher.strInvoiceNumber, pVoucher2.strInvoiceNumber)
+ 		, strSupplierVoucherReference = ISNULL(pVoucher.strSupplierVoucherReference, pVoucher2.strSupplierVoucherReference)
+ 		, dblPurchaseInvoiceAmount = ISNULL(pVoucher.dblPurchaseInvoiceAmount, ISNULL(pVoucher2.dblPurchaseInvoiceAmount, @dblZero))
+ 		, dtmVoucherDate = ISNULL(pVoucher.dtmVoucherDate, pVoucher2.dtmVoucherDate)
+ 		, dtmVoucherDueDate = ISNULL(pVoucher.dtmVoucherDueDate, pVoucher2.dtmVoucherDueDate)
+ 		, dblVoucherPaidAmount = ISNULL(pVoucher.dblVoucherPaidAmount, ISNULL(pVoucher2.dblVoucherPaidAmount, @dblZero))
+ 		, dblVoucherBalance = CASE WHEN ISNULL(pVoucher.dblVoucherPaidAmount, ISNULL(pVoucher2.dblVoucherPaidAmount, @dblZero)) > 0
+ 									THEN ISNULL(pVoucher.dblVoucherBalance, ISNULL(pVoucher2.dblVoucherBalance, @dblZero))
+ 									ELSE ISNULL(pVoucher.dblPurchaseInvoiceAmount, ISNULL(pVoucher2.dblPurchaseInvoiceAmount, @dblZero))
  									END
  		, dblPContractCost = ISNULL(pContractCost.dblCosts, @dblZero)
 
@@ -1303,7 +1324,8 @@ AS
 
  		-- Financing columns
  		, dblSInvoiceAmountInFacilityCurr = ISNULL(sInvoice.dblInvoiceTotal, @dblZero) * dbo.fnRKGetCurrencyConvertion(sInvoice.intCurrencyId, pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
- 		, dblPInvoiceAmountInFacilityCurr = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero) * dbo.fnRKGetCurrencyConvertion(pVoucher.intCurrencyId, pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
+ 		, dblPInvoiceAmountInFacilityCurr = ISNULL(pVoucher.dblPurchaseInvoiceAmount, ISNULL(pVoucher2.dblPurchaseInvoiceAmount, @dblZero)) * 
+					dbo.fnRKGetCurrencyConvertion(ISNULL(pVoucher.intCurrencyId, pVoucher2.intCurrencyId) , pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
 
  		-- Valuation columns
  		, dblMarketPrice = CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
@@ -1398,6 +1420,12 @@ AS
 		WHERE pVoucherInfo.intInventoryReceiptId = pReceipt.intInventoryReceiptId
  		AND pVoucherInfo.intInventoryReceiptItemId = pReceipt.intInventoryReceiptItemId
 	) pVoucher
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM #tempVoucherInfo2 pVoucherInfo2
+		WHERE pVoucherInfo2.intContractDetailId = pContract.intContractDetailId
+		ORDER BY pVoucherInfo2.intBillId DESC
+	) pVoucher2
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM #tempContractPair ctPair
@@ -1512,8 +1540,9 @@ AS
  	DROP TABLE #tempHedgeInfo
  	DROP TABLE #tempReceiptInfo
  	DROP TABLE #tempVoucherInfo
- 	DROP TABLE #tempVoucher
- 	DROP TABLE #tempVoucherPayment
+ 	DROP TABLE #tempVoucherInfo2
+ 	--DROP TABLE #tempVoucher
+ 	--DROP TABLE #tempVoucherPayment
 
  	DROP TABLE #tempContractPair
  	DROP TABLE #tempSaleHedgeInfo
