@@ -888,6 +888,7 @@
     <Build Include="dbo\Tables\tblGLAuditorTransactionsByAccountId.sql" />
     <Build Include="dbo\Views\vyuGLAuditorTransactionsByAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByAccountId.sql" />
+    <Build Include="dbo\Views\vyuCTUnforecastedOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
