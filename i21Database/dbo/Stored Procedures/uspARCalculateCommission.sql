@@ -369,6 +369,10 @@ ELSE IF @strBasis = @BASIS_REVENUE
 		WHERE intCommissionRecapId = @intCommissionRecapId
 
 		DELETE FROM tblARCommissionRecapDetail WHERE dblAmount <= 0.000000
+
+		SELECT @dblLineTotal = SUM(dblAmount)
+		FROM tblARCommissionRecapDetail
+		WHERE intCommissionRecapId = @intCommissionRecapId
 	END
 ELSE IF @strBasis = @BASIS_UNITS
 	BEGIN
