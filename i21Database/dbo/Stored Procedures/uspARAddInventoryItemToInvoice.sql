@@ -618,7 +618,7 @@ BEGIN
 END
 
 --OVERAGE TRANSPORT AND TM ORDER
-IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ItemContractDetailId IS NOT NULL
+IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractDetailId IS NOT NULL
 BEGIN
 	IF EXISTS (
 		SELECT TOP 1 1 
