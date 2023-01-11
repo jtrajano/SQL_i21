@@ -30,7 +30,6 @@ RETURNS TABLE AS RETURN
 				 OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
 				 OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL))
 				 AND A.intTransactionType <> 15
-				 AND B.intTaxGroupId = receiptItem.intTaxGroupId
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId
