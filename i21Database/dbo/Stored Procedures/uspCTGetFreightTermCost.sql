@@ -36,6 +36,8 @@ BEGIN TRY
 		, @ysnFreight BIT
 		, @ysnInsurance BIT
 		, @intOriginCountryId INT
+		, @ysnFreightRateMatrix bit = 0
+		, @ysnWithInsurance BIT = 0
 		--, @intProductTypeId INT
 		--, @intProductLineId INT
 
@@ -100,6 +102,8 @@ BEGIN TRY
 			, @ysnInsurance = ysnInsurance
 		FROM #tmpCosts
 
+		if (@ysnInsurance = 1)begin select @ysnWithInsurance = 1; end
+
 		IF (@intCostItemId = @intFreightItemId) OR (@ysnFreight = 1)
 		BEGIN			
 			SELECT TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
@@ -131,6 +135,8 @@ BEGIN TRY
 															AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
 															AND DP.intCityId = @intToPortId)
 			END
+
+			if (ISNULL(@intFreightRateMatrixId, 0) > 0)begin select @ysnFreightRateMatrix = 1; end
 
 			IF ISNULL(@intFreightRateMatrixId, 0) <> 0 AND ISNULL(@intCostItemId, 0) <> 0
 			BEGIN
@@ -231,7 +237,7 @@ BEGIN TRY
 
 	DROP TABLE #tmpCosts
 
-	IF ISNULL(@intFreightRateMatrixId, 0) = 0 AND ISNULL(@ysnInsurance, 0) = 0
+	IF ISNULL(@ysnFreightRateMatrix, 0) = 0 AND ISNULL(@ysnWithInsurance, 0) = 0
 	BEGIN
 		delete @CostItems;
 	END
