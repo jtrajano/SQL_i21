@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspGLGenerateAuditorTransactions]
+﻿CREATE PROCEDURE [dbo].[uspGLClearAuditorTransactions]
 	@intEntityId INT,
 	@intType INT = 0
 AS
@@ -7,6 +7,6 @@ BEGIN
 	SET ANSI_NULLS ON;
 	SET NOCOUNT ON;
 
-	DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = @intEntityId;
+	DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = @intType;
 
 END
