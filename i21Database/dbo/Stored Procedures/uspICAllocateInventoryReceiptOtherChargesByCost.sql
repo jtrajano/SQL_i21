@@ -71,6 +71,10 @@ BEGIN
 									dblCalculatedAmount
 									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
 								)
+							,dblOriginalTotalOtherCharge = 
+								SUM(
+									dblOriginalCalculatedAmount
+								)
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intEntityVendorId
 							,CalculatedCharge.ysnInventoryCost
@@ -130,6 +134,14 @@ BEGIN
 								)
 								, 2
 							)
+				,dblOriginalAmount = ROUND(
+								ISNULL(dblOriginalAmount, 0) 
+								+ (
+									Source_Query.dblOriginalTotalOtherCharge									
+									* (Source_Query.dblLineTotal / Source_Query.dblTotalCost)
+								)
+								, 2
+							)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 
@@ -143,12 +155,14 @@ BEGIN
 			,[ysnInventoryCost]
 			,[ysnPrice]
 			,[strChargesLink]
+			,[dblOriginalAmount]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
+			-- dblAmount:
 			,ROUND(	
 				--Source_Query.dblTotalOtherCharge
 				--* Source_Query.Qty 
@@ -162,6 +176,12 @@ BEGIN
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
 			,Source_Query.strChargesLink
+			-- dblOriginalAmount:
+			,ROUND(	
+				Source_Query.dblOriginalTotalOtherCharge
+				* (Source_Query.dblLineTotal / Source_Query.dblTotalCost)
+				, 2
+			)
 		)
 	;
 END 

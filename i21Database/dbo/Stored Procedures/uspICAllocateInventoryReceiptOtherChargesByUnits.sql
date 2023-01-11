@@ -72,8 +72,9 @@ BEGIN
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = 
-								-- Convert the other charge amount to functional currency. 
 								SUM(CalculatedCharge.dblCalculatedAmount)								
+							,dblOriginalTotalOtherCharge = 
+								SUM(CalculatedCharge.dblOriginalCalculatedAmount)								
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intEntityVendorId
 							,CalculatedCharge.ysnInventoryCost
@@ -188,6 +189,16 @@ BEGIN
 						)
 						, 2
 					)
+				,dblOriginalAmount = 
+					ROUND (
+						ISNULL(dblOriginalAmount, 0) 
+						+ (
+							Source_Query.dblOriginalTotalOtherCharge
+							* Source_Query.Qty
+							/ Source_Query.dblTotalUnits 
+						)
+						, 2
+					)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
@@ -201,12 +212,14 @@ BEGIN
 			,[ysnInventoryCost]
 			,[ysnPrice]
 			,[strChargesLink]
+			,[dblOriginalAmount]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
+			-- dblAmount: 
 			,ROUND (
 				Source_Query.dblTotalOtherCharge
 				* Source_Query.Qty
@@ -217,6 +230,13 @@ BEGIN
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
 			,Source_Query.strChargesLink
+			-- dblOriginalAmount: 
+			,ROUND (
+				Source_Query.dblOriginalTotalOtherCharge
+				* Source_Query.Qty
+				/ Source_Query.dblTotalUnits 
+				, 2
+			)
 		)
 	;
 END 
