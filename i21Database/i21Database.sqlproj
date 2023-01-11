@@ -11732,7 +11732,21 @@
     <Build Include="dbo\Stored Procedures\uspQMClearTIN.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateTINBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
-    <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSplitBatch.sql" />
+    <Build Include="dbo\User Defined Types\MFBatchSplitTableType.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueReconciliation.sql" />
+    <Build Include="dbo\Tables\tblQMCatalogueReconciliationDetail.sql" />
+    <Build Include="dbo\Views\vyuQMSearchPreInvoiceCatalogueReconciliation.sql" />
+    <Build Include="dbo\Views\vyuQMSearchApprovedPreInvoiceReconciliation.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMPostCatalogueReconciliation.sql" />
+    <Build Include="dbo\Views\vyuQMBuyingEfficiency.sql" />
+    <Build Include="dbo\Views\vyuQMAuctionReport.sql" />
+    <Build Include="dbo\Views\vyuQMApprovedQualityOrders.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleAmendment.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
+    <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
+    <Build Include="dbo\Views\vyuQMAuctionAvailabilityReport.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
