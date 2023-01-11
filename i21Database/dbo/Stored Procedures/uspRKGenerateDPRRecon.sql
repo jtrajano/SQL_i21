@@ -16,7 +16,12 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
  
-	DECLARE @ErrMsg NVARCHAR(MAX) 
+	DECLARE @ErrMsg NVARCHAR(MAX),
+			@dtmServerFromDate DATETIME,
+			@dtmServerToDate DATETIME
+
+	SET @dtmServerFromDate = @dtmFromDate
+	SET @dtmServerToDate = @dtmToDate
 
 	--Convert Dates to UTC
 	SET @dtmFromDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmFromDate)
@@ -820,8 +825,9 @@ BEGIN TRY
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblICInventoryReceiptItem R ON R.intSourceId = T.intTicketId
 	INNER JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = R.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
-	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId AND CAST(CAST(DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), B.dtmDateCreated) AS DATE) AS DATETIME) BETWEEN @dtmFromDate AND @dtmToDate
-	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
+	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+	WHERE --dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
+	B.dtmDateCreated BETWEEN @dtmServerFromDate AND @dtmServerToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
 	AND CT.strContractType = 'Purchase' 
@@ -1525,8 +1531,9 @@ BEGIN TRY
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblICInventoryShipmentItem S ON S.intSourceId = T.intTicketId
 	INNER JOIN tblARInvoiceDetail ID ON ID.intInventoryShipmentItemId = S.intInventoryShipmentItemId AND ID.intInventoryShipmentChargeId IS NULL
-	INNER JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId AND CAST(CAST(DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), IV.dtmDateCreated) AS DATE) AS DATETIME) BETWEEN @dtmFromDate AND @dtmToDate
-	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
+	INNER JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId 
+	WHERE --dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
+	IV.dtmDateCreated BETWEEN @dtmServerFromDate AND @dtmServerToDate
 	AND SL.intCommodityId = @intCommodityId
 	AND SL.strBucketType = 'Company Owned'
 	AND CT.strContractType = 'Sale'
