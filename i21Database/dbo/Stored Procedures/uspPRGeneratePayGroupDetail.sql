@@ -57,7 +57,7 @@ BEGIN
 			,EE.intTypeEarningId
 			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment
 								WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
-			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) 
+			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary', 'Fixed Amount')) 
 											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
 											ELSE NULL END
 			,EE.strCalculationType
