@@ -11,26 +11,36 @@ sts.intStoreNo,
 sts.strDescription, 
 ISNULL(stcpew.strMessage, 
 'Store did not automatically run for today, which was stucked on ' +
-FORMAT(
+FORMAT((
+	SELECT MAX(dtmCheckoutDate)
+	FROM tblSTCheckoutHeader chIn
+	JOIN tblSTCheckoutProcessErrorWarning ewIn
+		ON chIn.intCheckoutId = ewIn.intCheckoutId
+	JOIN tblSTCheckoutProcess cpIn
+		ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
+	WHERE cpIn.intCheckoutProcessId =
 		(
-			SELECT MAX(dtmCheckoutDate)
-			FROM tblSTCheckoutHeader chIn
-			JOIN tblSTCheckoutProcessErrorWarning ewIn
-				ON chIn.intCheckoutId = ewIn.intCheckoutId
-			JOIN tblSTCheckoutProcess cpIn
-				ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
-			WHERE cpIn.intCheckoutProcessId =
-				(
-					SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
-					FROM tblSTCheckoutProcess stcpIn
-					JOIN tblSTCheckoutProcessErrorWarning stcpewIn
-						ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
-					WHERE stcpewIn.strMessageType = 'S'
-					AND stcpIn.intStoreId = sts.intStoreId
-					GROUP BY stcpIn.intStoreId
-				)
-		), 'd','us') + ' and invariably encountered an error on stop condition which prevented it from processing.'
-) AS strMessage
+			SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
+			FROM tblSTCheckoutProcess stcpIn
+			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
+				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
+			WHERE stcpewIn.strMessageType = 'S'
+			AND stcpIn.intStoreId = sts.intStoreId
+			GROUP BY stcpIn.intStoreId
+		)
+), 'd','us') + '. ' +
+(SELECT cpewOutMsg.strMessage
+FROM tblSTCheckoutProcessErrorWarning cpewOutMsg
+WHERE cpewOutMsg.intCheckoutProcessErrorWarningId =
+(
+	SELECT MAX(intCheckoutProcessErrorWarningId) 
+	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
+	JOIN tblSTCheckoutProcess cpInMsg
+		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId
+	WHERE cpInMsg.intStoreId = sts.intStoreId
+	GROUP BY cpInMsg.intStoreId
+)))
+AS strMessage
 FROM dbo.tblSTStore AS sts 
 FULL OUTER JOIN dbo.tblSTCheckoutProcess AS stcp 
 	ON stcp.intStoreId = sts.intStoreId
@@ -107,7 +117,8 @@ FORMAT((
 			AND stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
-) AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 'Store did not automatically run for today, which was stucked on ' +
+) AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 
+'Store did not automatically run for today, which was stucked on ' +
 FORMAT((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
