@@ -225,7 +225,7 @@ BEGIN
 	--1 VIEW FOR PICK LOTS 439
 	--2 VIEW FOR ALLOCATION ROWS  620
 	--3 VIEW FOR RESERVE 826
-	--4 VIEW FOR SECONDARY CONTRACT 1017
+	--4 VIEW FOR SECONDARY CONTRACT 1081
 	--5 VIEW FOR SI PARTIAL LINE 1234
 	--6 VIEW FOR LS PARTIAL LINE 1431
 	--7 VIEW FOR IR PARTIAL 1706
@@ -1078,7 +1078,7 @@ BEGIN
 	AND 1 = (CASE WHEN @YsnyAllocated = 1 THEN 1 ELSE ( CASE WHEN NOT EXISTS (SELECT 1 FROM @AllocatedContracts where intContractDetailId = a.intContractDetailId) THEN 1 ELSE 0 END ) END)
 	
 	UNION ALL
-	--VIEW FOR SECONDARY CONTRACT 1017
+	--VIEW FOR SECONDARY CONTRACT 1081
 	SELECT 
 		   intContractDetailId
 		  ,intCompanyLocationId
@@ -1301,8 +1301,12 @@ BEGIN
 	) IRC
 	WHERE
 	CH.intContractTypeId = 1 --ALL PURCHASE CONTRACT ONLY	
-	AND IR.strReceiptNumber IS NULL
-	AND (ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' OR CTD.dblQuantity - ISNULL(TQL.dblTotalQty,TQS.dblTotalQty) > 0)
+	AND 1 = (CASE WHEN  (CTD.dblQuantity - ISNULL(TQL.dblTotalQty,TQS.dblTotalQty) = 0) THEN 0
+				  WHEN  (IR.intInventoryReceiptId IS NULL AND  CTD.dblQuantity = ISNULL(TQL.dblTotalQty,TQS.dblTotalQty)) THEN 1  
+				  WHEN  (IR.intInventoryReceiptId <> 0 AND  CTD.dblQuantity - ISNULL(TQL.dblTotalQty,TQS.dblTotalQty) > 0) THEN 1
+				  WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' AND CTD.intContractStatusId != 5 THEN 1
+			 ELSE 0 END
+			)
 	) a
 	WHERE a.intCommodityId = CASE WHEN ISNULL(@IntCommodityId , 0) > 0	THEN @IntCommodityId ELSE a.intCommodityId	END
 	AND a.strProductType = CASE WHEN @StrProductType = '' THEN a.strProductType ELSE @StrProductType END
