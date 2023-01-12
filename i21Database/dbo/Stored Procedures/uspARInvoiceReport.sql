@@ -117,6 +117,7 @@ CREATE TABLE #INVOICES (
 	 , intOriginalInvoiceId			INT				NULL
 	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
 	 , strLogoType					NVARCHAR(10)
+	 , intItemId					INT 			NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -275,6 +276,7 @@ INSERT INTO #INVOICES (
 	, intOneLinePrintId
 	, strTicketNumbers
 	, dblPercentFull
+	, intItemId
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -374,6 +376,7 @@ SELECT
 	, intOneLinePrintId				= 1
 	, strTicketNumbers				= INV.strTicketNumbers
 	, dblPercentFull				= INVOICEDETAIL.dblPercentFull
+	, intItemId						= INVOICEDETAIL.intItemId
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -405,6 +408,7 @@ LEFT JOIN (
 		,dblServiceChargeAmountDue	= ID.dblServiceChargeAmountDue
 		,dblServiceChargeAPR		= ID.dblServiceChargeAPR		
 		,intSCInvoiceId				= ID.intSCInvoiceId
+		,intItemId					= ID.intItemId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId	
 	LEFT JOIN tblICItemUOM IUOM ON ID.intItemUOMId = IUOM.intItemUOMId
@@ -447,6 +451,7 @@ LEFT JOIN (
 		 , dblServiceChargeAmountDue	= NULL
 		 , dblServiceChargeAPR			= NULL
 		 , intSCInvoiceId				= NULL
+		 , intItemId					= NULL
 	FROM dbo.tblARInvoiceDeliveryFee DF WITH (NOLOCK)
 	INNER JOIN tblSMTaxCode TC ON DF.intTaxCodeId = TC.intTaxCodeId
 	OUTER APPLY (
@@ -646,6 +651,7 @@ CROSS APPLY (
 	) IDLOT (strLotNumber)
 ) LOT
 
+--SERVICE CHARGE DETAILS
 UPDATE I
 SET dtmDueDate						= CASE WHEN I.strType = 'Service Charge' THEN I.dtmDueDate ELSE INVSC.dtmDueDate END
   , dtmDateSC						= INVSC.dtmDate
@@ -666,6 +672,7 @@ LEFT JOIN (
 WHERE I.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
   AND ID.intSCInvoiceId IS NOT NULL
 
+--CONTRACT DETAILS
 UPDATE I
 SET dblContractBalance		= CD.dblBalance
   , strContractNumber		= CH.strContractNumber
@@ -679,6 +686,7 @@ INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHead
 WHERE ID.intCommentTypeId IS NULL
   AND ID.intContractDetailId IS NOT NULL
 
+--SALES ORDER
 UPDATE I
 SET strBOLNumber	= SO.strBOLNumber
 FROM #INVOICES I
@@ -688,6 +696,7 @@ INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 WHERE I.strBOLNumber IS NULL
   AND ID.intSalesOrderDetailId IS NOT NULL
 
+--RECIPE
 UPDATE I
 SET intRecipeId			= R.intRecipeId
   , intOneLinePrintId	= R.intOneLinePrintId
@@ -696,6 +705,7 @@ INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN tblMFRecipe R ON ID.intRecipeId = R.intRecipeId
 WHERE ID.intRecipeId IS NOT NULL
 
+--SITE TMO
 UPDATE I
 SET intSiteId				= S.intSiteID
   , strSiteNumber			= (CASE WHEN S.intSiteNumber < 9 THEN '00' + CONVERT(VARCHAR, S.intSiteNumber) ELSE '0' + CONVERT(VARCHAR,intSiteNumber) END ) + ' - ' + S.strDescription
@@ -705,6 +715,7 @@ INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
 WHERE ID.intSiteId IS NOT NULL
 
+--LOAD SHIPMENT
 UPDATE I
 SET strCustomerReference	= CASE WHEN I.strCustomerReference IS NULL THEN NULLIF(LG.strCustomerReference, '') END
   , strSalesReference		= NULLIF(LG.strCustomerReference, '')
@@ -716,6 +727,7 @@ INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON ID.intLoadDetailId = LGD.intLoad
 INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
 WHERE ID.intLoadDetailId IS NOT NULL
 
+--SCALE TICKET
 UPDATE I
 SET strTicketNumber			= T.strTicketNumber
   , strTicketNumberDate		= T.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), T.dtmTicketDateTime, 101)
@@ -734,6 +746,23 @@ LEFT JOIN dbo.tblSCTicketSealNumber TSN ON T.intTicketId = TSN.intTicketId
 LEFT JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId
 LEFT JOIN tblLGLoad LG ON T.intLoadId = LG.intLoadId
 WHERE ID.intTicketId IS NOT NULL
+
+--XREF ITEM
+UPDATE I
+SET strItemNo				= XREF.strCustomerProduct
+  , strItem					= ISNULL(XREF.strCustomerProduct, '') + ' - ' + ISNULL(XREF.strProductDescription, '')
+  , strItemDescription		= XREF.strProductDescription
+FROM #INVOICES I
+CROSS APPLY (
+	SELECT TOP 1 ICX.strCustomerProduct
+			   , ICX.strProductDescription
+	FROM tblICItemCustomerXref ICX
+	WHERE ICX.intItemId = I.intItemId
+	  AND ICX.intCustomerId = I.intEntityCustomerId
+	  AND (ICX.intItemLocationId IS NULL OR (ICX.intItemLocationId IS NOT NULL AND ICX.intItemLocationId = I.intCompanyLocationId))
+	ORDER BY ICX.intItemCustomerXrefId ASC
+) XREF
+WHERE I.intItemId IS NOT NULL
 
 INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	  intInvoiceId

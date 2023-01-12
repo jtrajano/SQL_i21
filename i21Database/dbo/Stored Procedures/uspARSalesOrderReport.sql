@@ -6,30 +6,12 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
-IF(OBJECT_ID('tempdb..#XMLTABLE') IS NOT NULL)
-BEGIN
-    DROP TABLE #XMLTABLE
-END
-IF(OBJECT_ID('tempdb..#SELECTEDSO') IS NOT NULL)
-BEGIN
-    DROP TABLE #SELECTEDSO
-END
-IF(OBJECT_ID('tempdb..#DELIMITEDROWS') IS NOT NULL)
-BEGIN
-    DROP TABLE #DELIMITEDROWS
-END
-IF(OBJECT_ID('tempdb..#SALESORDERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #SALESORDERS
-END
-IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERS
-END
-IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #LOCATIONS
-END
+IF(OBJECT_ID('tempdb..#XMLTABLE') IS NOT NULL) DROP TABLE #XMLTABLE
+IF(OBJECT_ID('tempdb..#SELECTEDSO') IS NOT NULL) DROP TABLE #SELECTEDSO
+IF(OBJECT_ID('tempdb..#DELIMITEDROWS') IS NOT NULL) DROP TABLE #DELIMITEDROWS
+IF(OBJECT_ID('tempdb..#SALESORDERS') IS NOT NULL) DROP TABLE #SALESORDERS
+IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL) DROP TABLE #CUSTOMERS
+IF(OBJECT_ID('tempdb..#LOCATIONS') IS NOT NULL) DROP TABLE #LOCATIONS
 
 CREATE TABLE #SELECTEDSO (intSalesOrderId INT);
 
@@ -270,7 +252,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strCustomerNumber		= CAST('' AS NVARCHAR(50))
 	 , strCustomerComments		= CAST('' AS NVARCHAR(500))
 	 , ysnHasEmailSetup			= CAST(0 AS BIT)
-
+	 , intItemId				= SALESORDERDETAIL.intItemId
 INTO #SALESORDERS
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN #SELECTEDSO SOS ON SO.intSalesOrderId = SOS.intSalesOrderId
@@ -304,6 +286,7 @@ LEFT JOIN (
 		 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
 		 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 		 , ysnListBundleSeparately	= I.ysnListBundleSeparately
+		 , intItemId				= SD.intItemId
 	FROM dbo.tblSOSalesOrderDetail SD WITH (NOLOCK)
 	LEFT JOIN tblICItem I WITH (NOLOCK) ON SD.intItemId = I.intItemId
 	LEFT JOIN tblICCategory ICC  WITH (NOLOCK) ON I.intCategoryId = ICC.intCategoryId
@@ -434,6 +417,23 @@ INNER JOIN (
 	WHERE SOD.intRecipeId IS NOT NULL
 	GROUP BY SOD.intSalesOrderId
 ) RECIPEITEM ON RECIPEITEM.intSalesOrderId = SO.intSalesOrderId
+
+--XREF ITEM
+UPDATE SO
+SET strItemNo				= XREF.strCustomerProduct
+  , strItem					= ISNULL(XREF.strCustomerProduct, '') + ' - ' + ISNULL(XREF.strProductDescription, '')
+  , strItemDescription		= XREF.strProductDescription
+FROM #SALESORDERS SO
+CROSS APPLY (
+	SELECT TOP 1 ICX.strCustomerProduct
+			   , ICX.strProductDescription
+	FROM tblICItemCustomerXref ICX
+	WHERE ICX.intItemId = SO.intItemId
+	  AND ICX.intCustomerId = SO.intEntityCustomerId
+	  AND (ICX.intItemLocationId IS NULL OR (ICX.intItemLocationId IS NOT NULL AND ICX.intItemLocationId = SO.intCompanyLocationId))
+	ORDER BY ICX.intItemCustomerXrefId ASC
+) XREF
+WHERE SO.intItemId IS NOT NULL
 
 TRUNCATE TABLE tblARSalesOrderReportStagingTable
 INSERT INTO tblARSalesOrderReportStagingTable WITH (TABLOCK) (
