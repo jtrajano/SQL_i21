@@ -87,7 +87,9 @@
 	strAltUPCQuantity2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strPurchaseSale2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strAltUPCCost2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strAltUPCPrice2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	strAltUPCPrice2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAllowNegativeInventory NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strAllowZeroCostTypeId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 GO
 
