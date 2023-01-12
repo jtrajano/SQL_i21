@@ -34,6 +34,12 @@ BEGIN
             AND il.intLocationId = inv.intCompanyLocationId
         WHERE vr.intInvoiceId = @intInvoiceId
 
+        UPDATE sar
+        SET sar.dblRebateAmount = invd.dblRebateAmount
+        FROM tblARSalesAnalysisStagingReport sar
+        JOIN tblARInvoiceDetail invd ON invd.intInvoiceDetailId = sar.intInvoiceDetailId
+        WHERE invd.intInvoiceId = @intInvoiceId
+
         FETCH NEXT FROM cur INTO @intBillId
     END
 
