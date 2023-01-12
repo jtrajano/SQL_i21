@@ -53,6 +53,7 @@ Type the overview for the table here.
 		[dblNetReturned] NUMERIC(38, 15) NULL DEFAULT ((0)),		
 		[intForexRateTypeId] INT NULL, 
 		[dblForexRate] NUMERIC(38, 15) NULL,
+		[dblOriginalForexRate] NUMERIC(38, 15) NULL,
 		[ysnLotWeightsRequired] BIT NULL DEFAULT((0)),
 		[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 		[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
