@@ -26,10 +26,13 @@ AS
 		,M.strProgramId
 		,dblReimbursementAmount = CAST((P.dblRate * B.dblQtyShipped) AS NUMERIC(18,6))
 		,intProgramRateId = P.intProgramRateId
-		,dblItemCost = 	ISNULL(CED.dblCost, ISNULL(Q.dblCost, 0))
+		--,dblItemCost = 	ISNULL(CED.dblCost, ISNULL(Q.dblCost, 0))
+		,dblItemCost = 	dbo.fnBBGetItemCostByCostType(C.strCostType, B.intItemId, il.intItemLocationId, B.intItemUOMId, A.dtmDate)
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
+	INNER JOIN tblICItemLocation il ON il.intItemId = B.intItemId
+    	AND il.intLocationId = A.intCompanyLocationId
 	INNER JOIN tblVRVendorSetup C
 		ON A.intEntityCustomerId =  C.intEntityId
 	INNER JOIN tblBBCustomerLocationXref D
@@ -56,13 +59,13 @@ AS
 		ON C.intVendorSetupId = M.intVendorSetupId
 	INNER JOIN tblBBProgramCharge N
 		ON M.intProgramId = N.intProgramId
-	LEFT JOIN tblICInventoryTransaction Q
-		ON B.intInvoiceDetailId = Q.intTransactionDetailId
-		AND A.intInvoiceId = Q.intTransactionId
-		AND A.strInvoiceNumber = Q.strTransactionId
-		AND Q.ysnIsUnposted = 0
+	-- LEFT JOIN tblICInventoryTransaction Q
+	-- 	ON B.intInvoiceDetailId = Q.intTransactionDetailId
+	-- 	AND A.intInvoiceId = Q.intTransactionId
+	-- 	AND A.strInvoiceNumber = Q.strTransactionId
+	-- 	AND Q.ysnIsUnposted = 0
 	OUTER APPLY dbo.fnBBGetChargeRates(N.intProgramChargeId,D.intEntityLocationId,B.intItemId,J.intUnitMeasureId,A.dtmDate) P
-	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(A.dtmDate, Q.intItemId, Q.intItemLocationId, DEFAULT) CED
+	-- OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(A.dtmDate, Q.intItemId, Q.intItemLocationId, DEFAULT) CED
 	WHERE B.dblPrice = 0
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)

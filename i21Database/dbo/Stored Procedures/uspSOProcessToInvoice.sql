@@ -160,8 +160,8 @@ ELSE
 					, strSrcModuleName          = 'Accounts Receivable'
 					, intDestId                 = I.intInvoiceId
 					, strDestTransactionNo      = I.strInvoiceNumber
-					, strDestTransactionType    = 'Inventory Shipment'
-					, strDestModuleName         = 'Inventory'
+					, strDestTransactionType    = 'Invoice'
+					, strDestModuleName         = 'Accounts Receivable'
 					, strOperation              = 'Process'
 				FROM tblSOSalesOrder SO
 				CROSS APPLY (

@@ -8,12 +8,15 @@ AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @strXML NVARCHAR(MAX)
-		,@strDetailXML NVARCHAR(MAX)
+	DECLARE @strXML NVARCHAR(MAX)=''
+		,@strDetailXML NVARCHAR(MAX)=''
+		,@strDetailXML2 NVARCHAR(MAX)=''
 		,@intContractedStockPreStageId INT
 		,@dtmCurrentDate DATETIME
 		,@ErrMsg   NVARCHAR(MAX)
 		,@intTotalRows int
+		,@intToCurrencyId INT
+		,@strToCurrency NVARCHAR(40)
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
@@ -52,6 +55,8 @@ BEGIN TRY
 			,dtmProcessedDate = @dtmCurrentDate
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
+					AND IUOM.ysnStockUnit = 1
 		OUTER APPLY (
 			SELECT Sum(B.dblTotalQuantity*B.dblWeightPerUnit ) dblQuantity
 			FROM tblMFBatch B
@@ -59,6 +64,8 @@ BEGIN TRY
 			) B2
 		WHERE CD.intContractStatusId = 1 --Open
 		AND CD.dblQuantity - IsNULL(B2.dblQuantity, 0)>0
+		AND (CD.dblQuantity - IsNULL(B2.dblQuantity, 0))*IUOM.dblUnitQty>100
+		AND IsNULL(CD.dblCashPrice,0) >0
 		ORDER BY CH.intContractHeaderId
 
 		Select @intContractedStockPreStageId=MAX(intContractedStockPreStageId) from tblIPContractedStockPreStage
@@ -78,6 +85,7 @@ BEGIN TRY
 		FROM dbo.tblMFBatch B
 		WHERE NOT EXISTS(SELECT *FROM dbo.tblLGLoadDetail LD WHERE LD.intBatchId=B.intBatchId )
 		AND B.intLocationId<>B.intMixingUnitLocationId
+		AND IsNULL(B.dblBoughtPrice,0) >0
 		ORDER BY B.intBatchId 	
 		END
 
@@ -124,6 +132,11 @@ BEGIN TRY
 	Select @intTotalRows=Count(*)
 	from tblIPContractedStockPreStage
 
+	SELECT TOP 1 @intToCurrencyId = intCurrencyID
+				,@strToCurrency = strCurrency
+	FROM tblSMCurrency
+	WHERE strCurrency LIKE '%USD%'
+
 	Select @strXML= '<root><DocNo>' + IsNULL(ltrim(MIN(CS.intContractedStockPreStageId)), '') + '</DocNo>'
 	+ '<MsgType>Contracted_Stock</MsgType>' 
 	+ '<Sender>iRely</Sender>' 
@@ -148,7 +161,7 @@ BEGIN TRY
 	+ '<PONumber>' +  IsNULL(Case When B.strBatchId is not null Then B.strBatchId Else CH.strContractNumber + '/' + ltrim(CD.intContractSeq) End,'') + '</PONumber>' 
 	+ '<POStatus></POStatus>' 
 	+ '<ShippingDate>' + IsNULL(CONVERT(VARCHAR(33), CD.dtmStartDate, 126),'') + '</ShippingDate>' 
-	+ '<UnitCost>' +  IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),'') + '</UnitCost>' 
+	+ '<UnitCost>' +  IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)),'') + '</UnitCost>' 
 	+ '<Vessel></Vessel>' 
 	+ '<StockType>'+IsNULL((Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End),'')+'</StockType>' 
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
@@ -166,7 +179,7 @@ BEGIN TRY
 	+ '<Origin>' + IsNULL(Country.strISOCode, '') + '</Origin>' 
 	+ '<IncoTerms>' + IsNULL(FT.strFreightTerm, '') + '</IncoTerms>' 
 	+ '<IncoTermsDesc>' + IsNULL(FT.strDescription, '') + '</IncoTermsDesc>' 
-	+ '<Currency>' + IsNULL(C.strCurrency, '') + '</Currency>' 
+	+ '<Currency>' + IsNULL(@strToCurrency, '') + '</Currency>' 
 	+ '<MaterialCode>' + IsNULL(I.strShortName, '') + '</MaterialCode>' 
 	+ '<ReservedMixingUnit>'+IsNULL(B.strReserveMU, '')+'</ReservedMixingUnit>' 
 	+ '<SAPSystem>iRely</SAPSystem>' 
@@ -178,7 +191,7 @@ BEGIN TRY
 	+ '<SaleNumber>' + IsNULL(ltrim(B.intSales), '') + '</SaleNumber>' 
 	+ '<BrokerCode>' + IsNULL(BK.strName, '') + '</BrokerCode>' 
 	+ '<AuctionCenter>' + IsNULL(SM.strLocationName , '') + '</AuctionCenter>' 
-	+ '<BoughtPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice), '') + '</BoughtPrice>' 
+	+ '<BoughtPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)), '') + '</BoughtPrice>' 
 	+ '<LandedPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblLandedPrice), '') + '</LandedPrice>' 
 	+ '<TinNo>' + IsNULL(T.strTINNumber , '') + '</TinNo>' 
 	+ '<TBO>' + IsNULL(SM.strLocationNumber , '') + '</TBO>' 
@@ -187,30 +200,32 @@ BEGIN TRY
 	+ '<SaleDate>' + IsNULL(CONVERT(VARCHAR (33), B.dtmSalesDate , 126),'') + '</SaleDate>' 
 	+ '<InitialBuyDate>' + IsNULL(CONVERT(VARCHAR(33), B.dtmInitialBuy, 126),'') + '</InitialBuyDate>' 
 	+ '<BulkDensity>' + IsNULL(ltrim(B.dblBulkDensity), '') + '</BulkDensity>' 
-	+ '<BasePrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice), '') + '</BasePrice></Header>'
+	+ '<BasePrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)), '') + '</BasePrice></Header>'
 	FROM @tblIPContractedStockPreStage CS
 	JOIN tblIPContractedStockPreStage CS1 on CS1.intContractedStockPreStageId =CS.intContractedStockPreStageId 
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CS1.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
-	Left JOIN tblICCommodityAttribute CA on CA.intCommodityAttributeId =I.intOriginId 
-	Left JOIN tblSMCountry Country on Country.intCountryID =CA.intCountryID 
+	LEFT JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemId = CD.intItemId
+					AND IUOM.ysnStockUnit = 1
+	LEFT JOIN tblICCommodityAttribute CA on CA.intCommodityAttributeId =I.intOriginId 
+	LEFT JOIN tblSMCountry Country on Country.intCountryID =CA.intCountryID 
 	JOIN tblICItemUOM IU ON IU.intItemUOMId  = CD.intItemUOMId 
-	Left JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	JOIN tblSMCurrency C ON C.intCurrencyID = CD.intCurrencyId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN tblSMCity C1 ON C1.intCityId = CD.intLoadingPortId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblMFBatch B ON B.intContractDetailId = CD.intContractDetailId AND B.intLocationId<>B.intMixingUnitLocationId
 	LEFT JOIN tblEMEntity BK ON BK.intEntityId = B.intBrokerId
 	LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = IsNULL(B.intBuyingCenterLocationId, CH.intCompanyLocationId )
-	LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = B.intMixingUnitLocationId  
+	LEFT JOIN tblCTBook B1 on B1.intBookId=CD.intBookId 
+	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B1.strBook 
 	LEFT JOIN tblSMCompanyLocationSubLocation  MUSL ON MUSL.intCompanyLocationSubLocationId  = CD.intSubLocationId 
 	LEFT JOIN tblQMGardenMark  GM ON GM.intGardenMarkId = B.intGardenMarkId  
 	LEFT JOIN tblICItem OI on OI.intItemId=B.intOriginalItemId
 	LEFT JOIN tblQMTINClearance T on T.intBatchId =B.intBatchId 
 	Left JOIN tblARMarketZone MZ on MZ.intMarketZoneId =CD.intMarketZoneId
 	
-SELECT @strDetailXML = IsNULL(@strDetailXML,'') 
+SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'') 
 	+ '<Header><StockCode></StockCode>' 
 	+ '<BatchNumber>' + IsNULL(B.strBatchId,'') + '</BatchNumber>' 
 	+ '<Plant>' + IsNULL(ltrim(MU.strVendorRefNoPrefix),'')  + '</Plant>' 
@@ -227,7 +242,7 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 	+ '<PONumber>' +  IsNULL(B.strBatchId, '') + '</PONumber>' 
 	+ '<POStatus></POStatus>' 
 	+ '<ShippingDate>' + IsNULL(IsNULL(CONVERT(VARCHAR(33), CD.dtmUpdatedAvailabilityDate, 126),CONVERT(VARCHAR(33), B.dtmStock, 126)),'') + '</ShippingDate>' 
-	+ '<UnitCost>' +  IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBoughtPrice)),'') + '</UnitCost>' 
+	+ '<UnitCost>' +  IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId , @intToCurrencyId, CD.dblCashPrice, 0)) ,[dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](IsNULL(B.intCurrencyId ,@intToCurrencyId), @intToCurrencyId, B.dblBoughtPrice, 0))),'') + '</UnitCost>' 
 	+ '<Vessel></Vessel>' 
 	+ '<StockType>'+IsNULL((Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End),'')+'</StockType>' 
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
@@ -245,7 +260,7 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 	+ '<Origin>' + IsNULL(Country.strISOCode, '') + '</Origin>' 
 	+ '<IncoTerms></IncoTerms>' 
 	+ '<IncoTermsDesc></IncoTermsDesc>' 
-	+ '<Currency>' + IsNULL(C.strCurrency, '') + '</Currency>' 
+	+ '<Currency>' + IsNULL(@strToCurrency, '') + '</Currency>' 
 	+ '<MaterialCode>' + IsNULL(I.strShortName, '') + '</MaterialCode>' 
 	+ '<ReservedMixingUnit>'+IsNULL(B.strReserveMU, '')+'</ReservedMixingUnit>' 
 	+ '<SAPSystem>iRely</SAPSystem>' 
@@ -257,7 +272,7 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 	+ '<SaleNumber>' + IsNULL(ltrim(B.intSales), '') + '</SaleNumber>' 
 	+ '<BrokerCode>' + IsNULL(BK.strName, '') + '</BrokerCode>' 
 	+ '<AuctionCenter>' + IsNULL(SM.strLocationName , '') + '</AuctionCenter>' 
-	+ '<BoughtPrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBoughtPrice)),'') + '</BoughtPrice>' 
+	+ '<BoughtPrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)),[dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](B.intCurrencyId, @intToCurrencyId, B.dblBoughtPrice, 0))),'') + '</BoughtPrice>' 
 	+ '<LandedPrice>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblLandedPrice), '') + '</LandedPrice>' 
 	+ '<TinNo>' + IsNULL(T.strTINNumber , '') + '</TinNo>' 
 	+ '<TBO>' + IsNULL(SM.strLocationNumber, '') + '</TBO>' 
@@ -266,16 +281,17 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 	+ '<SaleDate>' + IsNULL(CONVERT(VARCHAR (33), B.dtmSalesDate , 126),'') + '</SaleDate>' 
 	+ '<InitialBuyDate>' + IsNULL(CONVERT(VARCHAR(33), B.dtmInitialBuy, 126),'') + '</InitialBuyDate>' 
 	+ '<BulkDensity>' + IsNULL(ltrim(B.dblBulkDensity), '') + '</BulkDensity>' 
-	+ '<BasePrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes](CD.dblCashPrice),[dbo].[fnRemoveTrailingZeroes](B.dblBasePrice )),'') + '</BasePrice></Header>'
+	+ '<BasePrice>' + IsNULL(IsNULL([dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](CD.intCurrencyId, @intToCurrencyId, CD.dblCashPrice, 0)),[dbo].[fnRemoveTrailingZeroes]([dbo].[fnCTCalculateAmountBetweenCurrency](B.intCurrencyId, @intToCurrencyId, IsNULL(B.dblBasePrice,B.dblBoughtPrice) , 0))),'') + '</BasePrice></Header>'
 	FROM @tblIPContractedStockPreStage CS
 	JOIN tblIPContractedStockPreStage CS1 on CS1.intContractedStockPreStageId =CS.intContractedStockPreStageId 
 	JOIN tblMFBatch B ON B.intBatchId = CS1.intBatchId 
-	Left JOIN tblCTContractDetail CD ON CD.intContractDetailId = B.intContractDetailId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = B.intContractDetailId
 	JOIN tblICItem I ON I.intItemId = B.intTealingoItemId 
+	LEFT JOIN dbo.tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
+					AND IUOM.ysnStockUnit = 1
 	Left JOIN tblICCommodityAttribute CA on CA.intCommodityAttributeId =I.intOriginId 
 	Left JOIN tblSMCountry Country on Country.intCountryID =CA.intCountryID 
 	Left JOIN tblCTSubBook SB ON SB.intSubBookId = B.intSubBookId
-	Left JOIN tblSMCurrency C ON C.intCurrencyID = B.intCurrencyId
 	LEFT JOIN tblSMCity C1 ON C1.intCityId = B.intFromPortId
 	LEFT JOIN tblEMEntity BK ON BK.intEntityId = B.intBrokerId
 	LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = B.intBuyingCenterLocationId
@@ -283,7 +299,7 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 	LEFT JOIN tblQMGardenMark  GM ON GM.intGardenMarkId = B.intGardenMarkId  
 	LEFT JOIN tblICItem OI on OI.intItemId=B.intOriginalItemId
 	LEFT JOIN tblQMTINClearance T on T.intBatchId =B.intBatchId 
-	Left JOIN tblARMarketZone MZ on MZ.intMarketZoneId =B.intMarketZoneId
+	LEFT JOIN tblARMarketZone MZ on MZ.intMarketZoneId =B.intMarketZoneId
 	Where B.intLocationId<>B.intMixingUnitLocationId  
 
 	UPDATE dbo.tblIPContractedStockPreStage
@@ -294,9 +310,9 @@ SELECT @strDetailXML = IsNULL(@strDetailXML,'')
 			)
 		AND intStatusId = - 1
 
-	IF LEN(@strDetailXML)>0
+	IF LEN(@strDetailXML)>0 or LEN(@strDetailXML2)>0
 	BEGIN
-		SELECT @strXML=@strXML+@strDetailXML+'</root>'
+		SELECT @strXML=@strXML+IsNULL(@strDetailXML,'')+IsNULL(@strDetailXML2,'')+'</root>'
 
 		SELECT IsNULL(1, '0') AS id
 			,IsNULL(@strXML, '') AS strXml

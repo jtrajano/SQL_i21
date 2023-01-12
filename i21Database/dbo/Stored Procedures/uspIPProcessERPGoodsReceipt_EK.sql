@@ -27,6 +27,7 @@ BEGIN TRY
 		,@intCompanyLocationId INT
 		,@intInventoryReceiptId INT
 		,@intNewStageReceiptId INT
+		,@strActualLocationName NVARCHAR(100)
 	DECLARE @strERPPONumber NVARCHAR(50)
 		,@strERPItemNumber NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
@@ -138,6 +139,7 @@ BEGIN TRY
 				,@intCompanyLocationId = NULL
 				,@intInventoryReceiptId = NULL
 				,@intNewStageReceiptId = NULL
+				,@strActualLocationName = NULL
 
 			SELECT @intStageReceiptItemId = NULL
 				,@intStageReceiptItemLotId = NULL
@@ -192,8 +194,9 @@ BEGIN TRY
 			END
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
+				,@strActualLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
-			WHERE strOregonFacilityNumber = @strLocationName
+			WHERE strVendorRefNoPrefix = @strLocationName
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -338,7 +341,7 @@ BEGIN TRY
 
 				SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
 				FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
-				WHERE t.strSubLocationName = @strSubLocationName
+				WHERE t.strSubLocationName = @strActualLocationName + ' / ' + @strSubLocationName
 					AND t.intCompanyLocationId = @intCompanyLocationId
 
 				IF ISNULL(@intSubLocationId, 0) = 0
@@ -526,7 +529,7 @@ BEGIN TRY
 							--SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 				END
 
-				SELECT @intLoadId = L.intLoadId
+				SELECT TOP 1 @intLoadId = L.intLoadId
 					,@intLoadDetailId = LD.intLoadDetailId
 					,@ysnPosted = L.ysnPosted
 					,@intBatchId = LD.intBatchId
@@ -537,6 +540,7 @@ BEGIN TRY
 					AND L.intShipmentStatus <> 10
 					AND L.strExternalShipmentNumber = @strERPPONumber
 					AND LD.strExternalShipmentItemNumber = @strERPItemNumber
+				ORDER BY L.intLoadId DESC
 
 				IF ISNULL(@intLoadId, 0) = 0
 				BEGIN
@@ -784,7 +788,7 @@ BEGIN TRY
 					SELECT strReceiptType = 'Approved Quality'
 						,intEntityVendorId = LD.intVendorEntityId
 						,intShipFromId = LD.intVendorEntityLocationId
-						,intLocationId = LD.intPCompanyLocationId
+						,intLocationId = @intCompanyLocationId
 						,strBillOfLadding = @strBLNumber
 						,intItemId = @intItemId
 						,intItemLocationId = IL.intItemLocationId

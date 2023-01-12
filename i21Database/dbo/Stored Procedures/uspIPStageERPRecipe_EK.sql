@@ -264,24 +264,24 @@ BEGIN TRY
 					DocNo BIGINT '../../../DocNo'
 					,OrderNo NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderNo'
 					,LocationCode NVARCHAR(50) collate Latin1_General_CI_AS '../../LocationCode'
-					,OrderQuantity numeric(18,6)'../../OrderQuantity'
+					,OrderQuantity numeric(38,20)'../../OrderQuantity'
 					,OrderQuantityUOM NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderQuantityUOM'
-					,NoOfMixes numeric(18,6)'../../NoOfMixes'
+					,NoOfMixes numeric(38,20)'../../NoOfMixes'
 					--,PlanDate DateTime'../PlanDate'
 					,BatchId NVARCHAR(50) collate Latin1_General_CI_AS
-					,NoOfPack NUMERIC(18, 6)
+					,NoOfPack NUMERIC(38,20)
 					,NoOfPackUOM NVARCHAR(50) collate Latin1_General_CI_AS
-					,Weight NUMERIC(18, 6)
+					,Weight NVARCHAR(50)
 					,WeightUOM NVARCHAR(50) collate Latin1_General_CI_AS
-					,TAverage  NUMERIC(18, 6)'../../TAverage'
-					,HAverage NUMERIC(18, 6)'../../HAverage'
-					,IAverage NUMERIC(18, 6)'../../IAverage'
-					,MAverage NUMERIC(18, 6)'../../MAverage'
-					,AAverage NUMERIC(18, 6)'../../AAverage'
-					,VAverage NUMERIC(18, 6)'../../VAverage'
+					,TAverage  NUMERIC(38,20)'../../TAverage'
+					,HAverage NUMERIC(38,20)'../../HAverage'
+					,IAverage NUMERIC(38,20)'../../IAverage'
+					,MAverage NUMERIC(38,20)'../../MAverage'
+					,AAverage NUMERIC(38,20)'../../AAverage'
+					,VAverage NUMERIC(38,20)'../../VAverage'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
-			WHERE x.BatchId<>'NoN'
+			WHERE x.BatchId<>'NoN' AND isNumeric(Weight)=1
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (

@@ -11,11 +11,15 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@intSampleId INT
 		,@strPlant NVARCHAR(50)
+		,@intPlantId INT
+		,@strDestinationPort NVARCHAR(50)
 
 	SELECT @dblCashPrice = NULL
 		,@intContractDetailId = NULL
 		,@intSampleId = NULL
 		,@strPlant = NULL
+		,@intPlantId = NULL
+		,@strDestinationPort = NULL
 
 	IF ISNULL(@strRowState, '') = ''
 		SELECT @strRowState = 'Modified'
@@ -108,10 +112,24 @@ BEGIN TRY
 		END
 
 		SELECT TOP 1 @strPlant = CL.strOregonFacilityNumber
+			,@intPlantId = CL.intCompanyLocationId
 		FROM dbo.tblQMSample S WITH (NOLOCK)
 		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = S.intBookId
 			AND S.intSampleId = @intSampleId
 		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook
+		
+		SELECT TOP 1 @strDestinationPort = ISNULL(DP.strCity, '')
+		FROM dbo.tblQMSample S WITH (NOLOCK)
+		JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = S.intItemId
+			AND S.intSampleId = @intSampleId
+		JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId
+		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intOriginId = CA.intCountryID
+			AND LLT.intBuyingCenterId = S.intCompanyLocationId
+			AND LLT.intReceivingPlantId = @intPlantId
+			AND LLT.intReceivingStorageLocation = S.intDestinationStorageLocationId
+			AND LLT.intChannelId = S.intMarketZoneId
+			AND LLT.intPortOfDispatchId = S.intFromLocationCodeId
+		JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = LLT.intPortOfArrivalId
 
 		INSERT INTO tblIPPriceFeed
 		(
@@ -123,10 +141,10 @@ BEGIN TRY
 				dtmPricingDate,			intEntityId,				strRowState
 		)
 		SELECT	NULL,					NULL,						S.intSampleId,			S.intCompanyLocationId,
-				NULL,					CL.strOregonFacilityNumber,	MZ.strMarketZoneCode,	NULL,
+				NULL,					CL.strOregonFacilityNumber,	MZ.strMarketZoneCode,	'FOB',
 				C.strISOCode,			CL.strLocationName,			VE.strVendorAccountNum,	@strPlant,
-				CLSL.strSubLocationName,LP.strCity,					NULL,					S.dblB1Price,
-				CU.strCurrency,			S.dblSampleQty,				NULL,					NULL,
+				CLSL.strSubLocationName,LP.strCity,					@strDestinationPort,	S.dblB1Price,
+				CU.strCurrency,			S.dblSampleQty,				'40FT',					'CDFR',
 				@dtmCurrentDate,		@intEntityId,				@strRowState
 		FROM dbo.tblQMSample S WITH (NOLOCK)
 		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = S.intCompanyLocationId

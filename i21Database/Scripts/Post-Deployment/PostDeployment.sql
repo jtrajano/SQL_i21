@@ -223,9 +223,11 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Fixed Assets
 :r .\FA\DefaultData\FixedAssetGroup.sql
+:r .\FA\DefaultData\FixedAssetBooks.sql
 :r .\FA\01_UpdateMultiCurrencyFields.sql
 :r .\FA\02_UpdateMonthlyAssetDepreciation.sql
 :r .\FA\03_UpdateAssetDepreciationCurrency.sql
+:r .\FA\05_AssetBookDepreciation.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
@@ -258,6 +260,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\04_ClearImportCOAFromCSV.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
+:r .\GL\vyuGLTrialBalance.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -492,6 +495,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
 :r .\PR\DefaultData\2_ElectronicFileFormats.sql
+:r .\PR\DefaultData\3_SchoolDistrictCodes.sql
 --:r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
 --:r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
 --:r .\PR\DataFixes\ResetEaningHoursToProcess.sql

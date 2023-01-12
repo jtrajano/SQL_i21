@@ -7736,29 +7736,21 @@ IF(@ysnDebug = CAST(1 AS BIT))
 									BEGIN
 										-- Update customer charges invoices on table tblSTCheckoutCustomerCharges
 										UPDATE CC
-											SET intCustomerChargesInvoiceId = IX.intInvoiceId
+											SET intCustomerChargesInvoiceId = CCX.intInvoiceId
 										FROM tblSTCheckoutCustomerCharges CC
 										JOIN
 										(
 											SELECT 
-												ROW_NUMBER() OVER (ORDER BY C.intCustomerId ASC) as intRowNumber
-												,intCustChargeId 
+												intCustChargeId,
+												inv.intInvoiceId
 											FROM tblSTCheckoutCustomerCharges C
+											JOIN @tblTempInvoiceIds inv 
+												ON C.intCustomerId = inv.intEntityId
 											WHERE C.intCheckoutId = @intCheckoutId
 												AND C.dblAmount > 0
 												-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 
 										) CCX ON CC.intCustChargeId = CCX.intCustChargeId
-										JOIN
-										(
-											SELECT
-												ROW_NUMBER() OVER (ORDER BY intEntityId ASC) as intRowNumber
-												, intInvoiceId
-											FROM @tblTempInvoiceIds 
-											WHERE strTransactionType != @strInvoiceTransactionTypeMain
-											-- FROM #tmpCustomerInvoiceIdList
-
-										) IX ON CCX.intRowNumber = IX.intRowNumber
 									END
 								
 							END

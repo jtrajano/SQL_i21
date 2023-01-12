@@ -2,6 +2,7 @@ CREATE PROCEDURE uspQMImportInitialBuy @intImportLogId INT
 AS
 BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(50)
+	 ,@intPlantId INT 
 
 	BEGIN TRANSACTION
 
@@ -378,6 +379,13 @@ BEGIN TRY
 		,@intB5QtyUOMId INT
 		,@dblB5Price NUMERIC(18, 6)
 		,@intB5PriceUOMId INT
+
+		,@intETAPOL INT
+		,@intStockDate INT
+		,@dtmStock Datetime
+		,@dtmShippingDate Datetime
+		,@dtmCurrentDate DATETIME
+
 	DECLARE @MFBatchTableType MFBatchTableType
 	-- Loop through each valid import detail
 	DECLARE @C AS CURSOR;
@@ -580,6 +588,40 @@ BEGIN TRY
 		DELETE
 		FROM @MFBatchTableType
 
+		SELECT TOP 1 @intPlantId = CL.intCompanyLocationId  
+		FROM dbo.tblQMSample S WITH (NOLOCK)  
+		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = S.intBookId  
+		AND S.intSampleId = @intSampleId  
+		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook  
+    
+		SELECT TOP 1 @intETAPOL=IsNULL(LLT.dblPurchaseToShipment,0)
+				,@intStockDate= IsNULL(LLT.dblPurchaseToShipment,0)+IsNULL(LLT.dblPortToPort,0)+ IsNULL(LLT.dblPortToMixingUnit,0) +IsNULL(LLT.dblMUToAvailableForBlending,0) 
+		FROM dbo.tblQMSample S WITH (NOLOCK)  
+		JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = S.intItemId  
+		AND S.intSampleId = @intSampleId  
+		JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId  
+		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intOriginId = CA.intCountryID  
+		AND LLT.intBuyingCenterId = S.intCompanyLocationId  
+		AND LLT.intReceivingPlantId = @intPlantId  
+		AND LLT.intReceivingStorageLocation = S.intDestinationStorageLocationId  
+		AND LLT.intChannelId = S.intMarketZoneId  
+		AND LLT.intPortOfDispatchId = S.intFromLocationCodeId  
+		JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = LLT.intPortOfArrivalId 
+		
+		IF @intETAPOL IS NULL
+		BEGIN
+			SELECT  @intETAPOL=0
+		END
+
+		IF @intStockDate IS NULL
+		BEGIN
+			SELECT  @intStockDate=0
+		END
+		Select @dtmCurrentDate=Convert(Char, GETDATE(),101)
+		SELECT @dtmStock=DateAdd(d,@intStockDate,@dtmCurrentDate)
+
+		SELECT @dtmShippingDate=DateAdd(d,@intETAPOL,@dtmCurrentDate)
+
 		INSERT INTO @MFBatchTableType (
 			strBatchId
 			,intSales
@@ -684,6 +726,7 @@ BEGIN TRY
 			,dblTeaIntensityPinpoint
 			,dblTeaMouthFeelPinpoint
 			,dblTeaAppearancePinpoint
+			,dtmShippingDate
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -705,9 +748,9 @@ BEGIN TRY
 			,strAirwayBillCode = S.strCourierRef
 			,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 			,strAWBSampleReference = S.strAWBSampleReference
-			,dblBasePrice = S.dblBasePrice
+			,dblBasePrice = @dblB1Price
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-			,dblBoughtPrice = NULL
+			,dblBoughtPrice = @dblB1Price
 			,dblBulkDensity = NULL
 			,strBuyingOrderNumber = S.strBuyingOrderNo
 			,intSubBookId = S.intSubBookId
@@ -722,7 +765,7 @@ BEGIN TRY
 			,dtmExpiration = NULL
 			,intFromPortId = NULL
 			,dblGrossWeight = S.dblGrossWeight
-			,dtmInitialBuy = NULL
+			,dtmInitialBuy = @dtmCurrentDate 
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
@@ -734,13 +777,13 @@ BEGIN TRY
 			,intItemUOMId = S.intRepresentingUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = NULL
+			,intOriginalItemId = S.intItemId
 			,dblPackagesPerPallet = NULL
 			,strPlant = NULL
 			,dblTotalQuantity = S.dblB1QtyBought
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
-			,dtmStock = NULL
+			,dtmStock = @dtmStock
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = NULL
 			,dtmSupplierPreInvoiceDate = NULL
@@ -808,6 +851,7 @@ BEGIN TRY
 			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
 			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
+			,dtmShippingDate=@dtmShippingDate
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId

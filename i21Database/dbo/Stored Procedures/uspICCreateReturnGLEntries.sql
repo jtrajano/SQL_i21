@@ -508,6 +508,7 @@ AS
 				ON rv.strReceiptNumber = r.strReceiptNumber	 
 			INNER JOIN tblICInventoryReceiptItem ri 
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId							
+				AND ri.intInventoryReceiptItemId = rv.intInventoryReceiptItemId
 			INNER JOIN tblICItem i
 				ON i.intItemId = ri.intItemId
 			INNER JOIN #tmpRebuildList list	
@@ -802,6 +803,7 @@ AS
 						ON rv.strReceiptNumber = r.strReceiptNumber
 					INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+						AND ri.intInventoryReceiptItemId = rv.intInventoryReceiptItemId
 					INNER JOIN tblICItem i 
 						ON ri.intItemId = i.intItemId
 					INNER JOIN #tmpRebuildList list	

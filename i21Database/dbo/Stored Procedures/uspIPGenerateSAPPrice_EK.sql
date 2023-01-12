@@ -161,27 +161,24 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Quantity cannot be blank. '
 		END
 
-		IF ISNULL(@strChannel, '') <> 'AUC'
+		IF ISNULL(@strIncoTerms, '') = ''
 		BEGIN
-			IF ISNULL(@strIncoTerms, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'Inco Terms cannot be blank. '
-			END
+			SELECT @strError = @strError + 'Inco Terms cannot be blank. '
+		END
 
-			IF ISNULL(@strDestinationPort, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'Destination Port cannot be blank. '
-			END
+		IF ISNULL(@strDestinationPort, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Destination Port cannot be blank. '
+		END
 
-			IF ISNULL(@strContainerType, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'Container Type cannot be blank. '
-			END
+		IF ISNULL(@strContainerType, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Container Type cannot be blank. '
+		END
 
-			IF ISNULL(@strShippingLine, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'Shipping Line cannot be blank. '
-			END
+		IF ISNULL(@strShippingLine, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Shipping Line cannot be blank. '
 		END
 
 		IF @strError <> ''

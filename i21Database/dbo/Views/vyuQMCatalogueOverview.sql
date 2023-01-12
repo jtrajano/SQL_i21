@@ -53,7 +53,7 @@ LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.intGardenMarkId = S.intGarden
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICCommodityAttribute GMO ON GardenMark.intOriginId = GMO.intCommodityAttributeId AND GMO.strType = 'Origin'
-LEFT JOIN tblMFBatch Batch ON Batch.intSampleId = S.intSampleId
+LEFT JOIN tblMFBatch Batch ON Batch.intSampleId = S.intSampleId AND Batch.intLocationId =S.intLocationId 
 LEFT JOIN dbo.vyuICSearchItem I ON I.intItemId = S.intItemId
 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId

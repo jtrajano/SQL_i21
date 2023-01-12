@@ -113,4 +113,5 @@ CREATE TYPE MFBatchTableType AS TABLE
 	,dblTeaIntensityPinpoint NUMERIC(18,6)  NULL
 	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
 	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
+	,dtmShippingDate DATETIME 
 )

@@ -302,6 +302,7 @@ BEGIN TRY
 			,intLocationId
 			,intMixingUnitLocationId
 			,intMarketZoneId
+			,dtmShippingDate 
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -325,9 +326,9 @@ BEGIN TRY
 			,strAWBSampleReference = S.strAWBSampleReference
 			,dblBasePrice = S.dblBasePrice
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-			,dblBoughtPrice = NULL
+			,dblBoughtPrice = CD.dblCashPrice 
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+			,strBuyingOrderNumber = CH.strExternalContractNumber
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
@@ -352,13 +353,13 @@ BEGIN TRY
 			,intItemUOMId = S.intRepresentingUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = NULL
+			,intOriginalItemId = S.intItemId
 			,dblPackagesPerPallet = NULL
 			,strPlant = NULL
 			,dblTotalQuantity = S.dblRepresentingQty
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
-			,dtmStock = NULL
+			,dtmStock = CD.dtmUpdatedAvailabilityDate 
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = NULL
 			,dtmSupplierPreInvoiceDate = NULL
@@ -421,11 +422,14 @@ BEGIN TRY
 			,intLocationId = S.intCompanyLocationId
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
+			,dtmShippingDate=CD.dtmEtaPol 
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId

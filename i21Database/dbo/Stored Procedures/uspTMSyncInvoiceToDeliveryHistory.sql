@@ -87,10 +87,10 @@ BEGIN
 
 
 	---Get Invoice detail for Deliveries
-	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
+	IF OBJECT_ID('tempdb..#tmpTMInvoiceDetail') IS NOT NULL DROP TABLE #tmpTMInvoiceDetail
 	SELECT *
 		,ysnTMProcessed = 0
-	INTO #tmpInvoiceDetail
+	INTO #tmpTMInvoiceDetail
 	FROM tblARInvoiceDetail
 	WHERE intInvoiceId = @InvoiceId
 		AND intSiteId IS NOT NULL
@@ -98,7 +98,7 @@ BEGIN
 		AND ISNULL(ysnVirtualMeterReading,0) <> 1
 	
 	-- Process Delivery
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInvoiceDetail)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTMInvoiceDetail)
 	BEGIN
 		SET @intPerformerId = NULL
 		SELECT TOP 1 
@@ -110,19 +110,19 @@ BEGIN
 			,@dblQuantityShipped = dblQtyShipped
 			,@dblTotalTax = dblTotalTax
 			,@dblItemTotal = dblTotal
-		FROM #tmpInvoiceDetail
+		FROM #tmpTMInvoiceDetail
 
 		SELECT @strBillingBy = strBillingBy FROM tblTMSite WHERE intSiteID = @intSiteId
 		
 		print 'Check ysnProcessed'
 		---Check ysnProcessed
-		IF((SELECT TOP 1 ysnTMProcessed FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId) = 1)
+		IF((SELECT TOP 1 ysnTMProcessed FROM #tmpTMInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId) = 1)
 		BEGIN
 			GOTO CONTINUELOOP
 		END
 
 		---- Set ysnProcessed to 1 for the current item
-		UPDATE #tmpInvoiceDetail
+		UPDATE #tmpTMInvoiceDetail
 		SET ysnTMProcessed = 1
 		WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -248,7 +248,7 @@ BEGIN
 			IF OBJECT_ID('tempdb..#tmpSiteInvoiceLineItems') IS NOT NULL DROP TABLE #tmpSiteInvoiceLineItems
 
 			SELECT A.* INTO #tmpSiteInvoiceLineItems
-			FROM #tmpInvoiceDetail A
+			FROM #tmpTMInvoiceDetail A
 			INNER JOIN tblICItem B
 				ON A.intItemId = B.intItemId
 			WHERE intSiteId = @intSiteId
@@ -259,10 +259,10 @@ BEGIN
 			SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId FROM #tmpSiteInvoiceLineItems
 			
 			-----Mark Invoice detail that are of the same site as processed
-			UPDATE #tmpInvoiceDetail 
+			UPDATE #tmpTMInvoiceDetail 
 			SET ysnTMProcessed = 1
 			FROM  #tmpSiteInvoiceLineItems A
-			WHERE #tmpInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
+			WHERE #tmpTMInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
 			
 			
 			
@@ -1127,7 +1127,7 @@ BEGIN
 		-------------------------------------------------------
 		
 
-		DELETE FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
+		DELETE FROM #tmpTMInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 		PRINT 'DONE'
 	END
 

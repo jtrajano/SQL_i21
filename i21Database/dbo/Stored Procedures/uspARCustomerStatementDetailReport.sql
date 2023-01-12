@@ -119,7 +119,7 @@ DECLARE @CANCELLEDCMINVOICE TABLE (
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
+		   , @strCompanyAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -402,7 +402,7 @@ END
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress  = LTRIM(RTRIM(EL.strAddress)) + CHAR(13) + CHAR(10) + ISNULL(NULLIF(LTRIM(RTRIM(EL.strCity)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strState)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strZipCode)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strCountry)), ''), '')
+SET strFullAddress		= ISNULL(LTRIM(RTRIM(EL.strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 

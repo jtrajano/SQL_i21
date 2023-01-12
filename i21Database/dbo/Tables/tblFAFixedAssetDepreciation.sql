@@ -28,6 +28,7 @@ CREATE TABLE [dbo].[tblFAFixedAssetDepreciation] (
 	[intFunctionalCurrencyId]	INT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
 	intLedgerId int,
+	[intBookDepreciationId]		INT NULL
     CONSTRAINT [PK_tblFAFixedAssetDepreciation] PRIMARY KEY CLUSTERED ([intAssetDepreciationId] ASC),
     CONSTRAINT [FK_tblFAFixedAssetDepreciation_tblFAFixedAsset] FOREIGN KEY([intAssetId]) REFERENCES [dbo].[tblFAFixedAsset] ([intAssetId]) ON DELETE CASCADE
 );

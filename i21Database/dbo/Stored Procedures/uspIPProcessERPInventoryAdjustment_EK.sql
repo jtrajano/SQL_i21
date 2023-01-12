@@ -15,6 +15,9 @@ BEGIN TRY
 	DECLARE @intUserId INT
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
+	DECLARE @ReceiptStagingTable ReceiptStagingTable
+	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @LotEntries ReceiptItemLotStagingTable
 		,@ItemsForPost AS ItemCostingTableType
 		,@intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
@@ -84,6 +87,8 @@ BEGIN TRY
 		,@strNetWeightUOM NVARCHAR(50)
 		,@strStatus NVARCHAR(50)
 		,@dtmExpiryDate DATETIME
+		,@intFreightTermId INT
+		,@strReceiptNo NVARCHAR(50)
 
 	SELECT @dtmDate = GETDATE()
 
@@ -206,7 +211,7 @@ BEGIN TRY
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLocationNumber = @strCompanyLocation
+			WHERE strVendorRefNoPrefix = @strCompanyLocation
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -252,13 +257,7 @@ BEGIN TRY
 			IF @strStorageUnit IS NULL
 				OR @strStorageUnit = ''
 			BEGIN
-				SELECT @strError = 'Storage Unit cannot be blank.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
+				SELECT @strStorageUnit = 'SU'
 			END
 
 			SELECT @intStorageLocationId = NULL
@@ -279,7 +278,10 @@ BEGIN TRY
 						)
 			END
 
-			IF @intTransactionTypeId in (12, 20)
+			IF @intTransactionTypeId IN (
+					12
+					,20
+					)
 			BEGIN
 				IF @strNewStorageLocation IS NULL
 					OR @strNewStorageLocation = ''
@@ -314,13 +316,7 @@ BEGIN TRY
 				IF @strNewStorageUnit IS NULL
 					OR @strNewStorageUnit = ''
 				BEGIN
-					SELECT @strError = 'New Storage Unit cannot be blank.'
-
-					RAISERROR (
-							@strError
-							,16
-							,1
-							)
+					SELECT @strNewStorageUnit='SU'
 				END
 
 				SELECT @intNewStorageLocationId = NULL
@@ -437,7 +433,369 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF @intTransactionTypeId IN (12,20)
+			IF @intTransactionTypeId = 12
+			BEGIN
+				DECLARE @intInventoryTransferId INT
+					,@intInventoryTransferDetailId INT
+					,@strTransferOrderNo NVARCHAR(50)
+
+				SELECT @intInventoryTransferId = NULL
+					,@intInventoryTransferDetailId = NULL
+					,@strTransferOrderNo = NULL
+
+				SELECT @intInventoryTransferId = IT.intInventoryTransferId
+					,@intInventoryTransferDetailId = ITD.intInventoryTransferDetailId
+					,@strTransferOrderNo = strTransferNo
+				FROM tblICInventoryTransfer IT
+				JOIN tblICInventoryTransferDetail ITD ON IT.intInventoryTransferId = ITD.intInventoryTransferId
+				WHERE ITD.intLotId = @intLotId
+					AND dblQuantity = @dblQuantity
+					AND IT.intStatusId = 2
+
+				IF @intInventoryTransferId IS NULL
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tempdb..sysobjects
+							WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult')
+							)
+					BEGIN
+						CREATE TABLE #tmpAddInventoryTransferResult (
+							intSourceId INT
+							,intInventoryTransferId INT
+							)
+					END
+
+					DECLARE @TransferEntries AS InventoryTransferStagingTable
+
+					-- Insert the data needed to create the inventory transfer.
+					INSERT INTO @TransferEntries (
+						-- Header
+						[dtmTransferDate]
+						,[strTransferType]
+						,[intSourceType]
+						,[strDescription]
+						,[intFromLocationId]
+						,[intToLocationId]
+						,[ysnShipmentRequired]
+						,[intStatusId]
+						,[intShipViaId]
+						,[intFreightUOMId]
+						-- Detail
+						,[intItemId]
+						,[intLotId]
+						,[intItemUOMId]
+						,[dblQuantityToTransfer]
+						,[strNewLotId]
+						,[intFromSubLocationId]
+						,[intToSubLocationId]
+						,[intFromStorageLocationId]
+						,[intToStorageLocationId]
+						-- Integration Field
+						,[intInventoryTransferId]
+						,[intSourceId]
+						,[strSourceId]
+						,[strSourceScreenName]
+						)
+					SELECT -- Header
+						[dtmTransferDate] = GETDATE()
+						,[strTransferType] = 'Location to Location'
+						,[intSourceType] = 0
+						,[strDescription] = NULL
+						,[intFromLocationId] = @intCompanyLocationId
+						,[intToLocationId] = @intCompanyLocationId
+						,[ysnShipmentRequired] = 1
+						,[intStatusId] = 1
+						,[intShipViaId] = NULL
+						,[intFreightUOMId] = NULL
+						-- Detail
+						,[intItemId] = @intItemId
+						,[intLotId] = @intLotId
+						,[intItemUOMId] = @intItemUOMId
+						,[dblQuantityToTransfer] = @dblQuantity
+						,[strNewLotId] = NULL
+						,[intFromSubLocationId] = @intCompanyLocationSubLocationId
+						,[intToSubLocationId] = @intCompanyLocationNewSubLocationId
+						,[intFromStorageLocationId] = @intStorageLocationId
+						,[intToStorageLocationId] = @intNewStorageLocationId
+						-- Integration Field
+						,[intInventoryTransferId] = NULL
+						,[intSourceId] = @intInventoryAdjustmentStageId
+						,[strSourceId] = @intInventoryAdjustmentStageId
+						,[strSourceScreenName] = 'Stock Transfer'
+
+					-- Call uspICAddInventoryTransfer stored procedure.
+					EXEC dbo.uspICAddInventoryTransfer @TransferEntries
+						,@intUserId
+
+					-- Post the Inventory Transfers                                            
+					DECLARE @intTransferId INT
+						,@strTransactionId NVARCHAR(50);
+
+					WHILE EXISTS (
+							SELECT TOP 1 1
+							FROM #tmpAddInventoryTransferResult
+							)
+					BEGIN
+						SELECT @intTransferId = NULL
+							,@strTransactionId = NULL
+
+						SELECT TOP 1 @intTransferId = intInventoryTransferId
+						FROM #tmpAddInventoryTransferResult
+
+						-- Post the Inventory Transfer that was created
+						SELECT @strTransactionId = strTransferNo
+						FROM tblICInventoryTransfer
+						WHERE intInventoryTransferId = @intTransferId
+
+						EXEC dbo.uspICPostInventoryTransfer 1
+							,0
+							,@strTransactionId
+							,@intUserId;
+
+						DELETE
+						FROM #tmpAddInventoryTransferResult
+						WHERE intInventoryTransferId = @intTransferId
+					END;
+				END
+				ELSE
+				BEGIN
+					----************************************************
+					SELECT @intFreightTermId = intFreightTermId
+					FROM tblSMFreightTerms WITH (NOLOCK)
+					WHERE strFreightTerm = 'Deliver'
+						AND strFobPoint = 'Destination'
+
+					INSERT INTO @ReceiptStagingTable (
+						strReceiptType
+						,intEntityVendorId
+						,intShipFromId
+						,intTransferorId
+						,intLocationId
+						,strBillOfLadding
+						,intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,intContractHeaderId
+						,intContractDetailId
+						,dtmDate
+						,intShipViaId
+						,dblQty
+						,intGrossNetUOMId
+						,dblGross
+						,dblNet
+						,dblCost
+						,intCostUOMId
+						,intCurrencyId
+						,intSubCurrencyCents
+						,dblExchangeRate
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId
+						,ysnIsStorage
+						,intSourceId
+						,intSourceType
+						,strSourceId
+						,strSourceScreenName
+						,ysnSubCurrency
+						,intForexRateTypeId
+						,dblForexRate
+						,intContainerId
+						,intFreightTermId
+						,intBookId
+						,intSubBookId
+						,intSort
+						,intLoadShipmentId
+						,intLoadShipmentDetailId
+						,strVendorRefNo
+						,dblUnitRetail
+						,intShipFromEntityId
+						,strWarehouseRefNo
+						,intInventoryTransferId
+						,intInventoryTransferDetailId
+						)
+					SELECT TOP 1 strReceiptType = 'Transfer Order'
+						,intEntityVendorId = - 1
+						,intShipFromId = - 1
+						,intTransferorId = IT.intFromLocationId
+						,intLocationId = IT.intToLocationId
+						,strBillOfLadding = IT.strBolNumber
+						,intItemId = ITD.intItemId
+						,intItemLocationId = @intCompanyLocationId
+						,intItemUOMId = ITD.intItemUOMId
+						,intContractHeaderId = @intInventoryTransferId
+						,intContractDetailId = @intInventoryTransferDetailId
+						,dtmDate = GETDATE()
+						,intShipViaId = IT.intShipViaId
+						,dblQty = @dblQuantity
+						,intGrossNetUOMId = @intItemUOMId
+						,dblGross = @dblQuantity
+						,dblNet = @dblQuantity
+						,dblCost = ITD.dblCost
+						,intCostUOMId = @intItemUOMId
+						,intCurrencyId = ITD.intCurrencyId
+						,intSubCurrencyCents = 1
+						,dblExchangeRate = 1
+						,intLotId = NULL
+						,intSubLocationId = ITD.intToSubLocationId
+						,intStorageLocationId = ITD.intToStorageLocationId
+						,ysnIsStorage = 0
+						,intSourceId = NULL
+						,intSourceType = 0 -- Transfer Order
+						,strSourceId = @strTransferOrderNo
+						,strSourceScreenName = 'External System'
+						,ysnSubCurrency = 0
+						,intForexRateTypeId = NULL
+						,dblForexRate = NULL
+						,intContainerId = NULL
+						,intFreightTermId = @intFreightTermId
+						,intBookId = NULL
+						,intSubBookId = NULL
+						,intSort = @intInventoryTransferDetailId
+						,intLoadShipmentId = NULL
+						,intLoadShipmentDetailId = NULL
+						,strVendorRefNo = NULL
+						,dblUnitRetail = ITD.dblCost
+						,intShipFromEntityId = NULL
+						,strWarehouseRefNo = NULL
+						,intInventoryTransferId = @intInventoryTransferId
+						,intInventoryTransferDetailId = @intInventoryTransferDetailId
+					FROM tblICInventoryTransfer IT
+					JOIN tblICInventoryTransferDetail ITD ON ITD.intInventoryTransferId = IT.intInventoryTransferId
+						AND ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
+					WHERE IT.intInventoryTransferId = @intInventoryTransferId
+
+					IF NOT EXISTS (
+							SELECT 1
+							FROM @ReceiptStagingTable
+							)
+					BEGIN
+						RAISERROR (
+								'Receipt Staging Table entries not inserted. '
+								,16
+								,1
+								)
+					END
+
+					INSERT INTO @LotEntries (
+						intLotId
+						,strLotNumber
+						,strLotAlias
+						,intSubLocationId
+						,intStorageLocationId
+						,intContractHeaderId
+						,intContractDetailId
+						,intItemUnitMeasureId
+						,intItemId
+						,dblQuantity
+						,dblGrossWeight
+						,dblTareWeight
+						,dblCost
+						,strContainerNo
+						,intSort
+						,strMarkings
+						,strCondition
+						,intEntityVendorId
+						,strReceiptType
+						,intLocationId
+						,intShipViaId
+						,intShipFromId
+						,intCurrencyId
+						,intSourceType
+						,strBillOfLadding
+						,dtmExpiryDate
+						,intParentLotId
+						,strParentLotNumber
+						,intLotStatusId
+						,strCertificate
+						,strCertificateId
+						)
+					SELECT intLotId = NULL
+						,strLotNumber = @strLotNo
+						,strLotAlias = NULL
+						,intSubLocationId = RI.intSubLocationId
+						,intStorageLocationId = RI.intStorageLocationId
+						,intContractHeaderId = RI.intContractHeaderId
+						,intContractDetailId = RI.intContractDetailId
+						,intItemUnitMeasureId = RI.intItemUOMId
+						,intItemId = RI.intItemId
+						,dblQuantity = RI.dblQty
+						,dblGrossWeight = @dblQuantity
+						,dblTareWeight = 0
+						,dblCost = 0
+						,strContainerNo = NULL
+						,intSort = RI.intSort
+						,strMarkings = NULL
+						,strCondition = 'Sound/Full'
+						,intEntityVendorId = RI.intEntityVendorId
+						,strReceiptType = RI.strReceiptType
+						,intLocationId = RI.intLocationId
+						,intShipViaId = RI.intShipViaId
+						,intShipFromId = RI.intShipFromId
+						,intCurrencyId = RI.intCurrencyId
+						,intSourceType = RI.intSourceType
+						,strBillOfLadding = RI.strBillOfLadding
+						,dtmExpiryDate = @dtmExpiryDate
+						,intParentLotId = @intParentLotId
+						,strParentLotNumber = @strParentLotNumber
+						,intLotStatusId = @intLotStatusId
+						,strCertificate = NULL --@strCertificate
+						,strCertificateId = NULL --@strCertificateId
+					FROM @ReceiptStagingTable RI
+					WHERE RI.intInventoryTransferId = @intInventoryTransferId
+						AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
+
+					--INSERT INTO @InventoryTransferDetail (intInventoryTransferDetailId)
+					--SELECT @intInventoryTransferDetailId
+				END
+
+				IF EXISTS (
+						SELECT 1
+						FROM @ReceiptStagingTable
+						)
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tempdb..sysobjects
+							WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')
+							)
+					BEGIN
+						CREATE TABLE #tmpAddItemReceiptResult (
+							intSourceId INT
+							,intInventoryReceiptId INT
+							)
+					END
+
+					-- Create IR with lots
+					EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
+						,@OtherCharges = @OtherCharges
+						,@intUserId = @intUserId
+						,@LotEntries = @LotEntries
+
+					SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
+					FROM #tmpAddItemReceiptResult
+
+					-- If IR is created, Post the Receipt
+					IF (@intInventoryReceiptId IS NOT NULL)
+					BEGIN
+						SELECT @strReceiptNo = strReceiptNumber
+						FROM tblICInventoryReceipt
+						WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+						--	--Post Receipt
+						EXEC uspICPostInventoryReceipt 1
+							,0
+							,@strReceiptNo
+							,@intUserId
+
+						DELETE
+						FROM #tmpAddItemReceiptResult
+						WHERE intInventoryReceiptId = @intInventoryReceiptId
+					END
+				END
+						----************************************************
+			END
+			ELSE IF @intTransactionTypeId = 20
 			BEGIN
 				IF @dblWeightPerQty > 0
 				BEGIN
