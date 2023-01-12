@@ -154,7 +154,7 @@ SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
 FROM tblARCompanyPreference WITH (NOLOCK)
 
 SELECT TOP 1 @strCompanyName = strCompanyName
-		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+		   , @strCompanyAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF @strCustomerNumberLocal IS NOT NULL
@@ -299,7 +299,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom				= @dtmDateFromLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 
 UPDATE C
-SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strBillToLocationName ELSE NULL END, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+SET strFullAddress				= CASE WHEN C.strStatementFormat <> 'Running Balance' THEN EL.strLocationName ELSE '' END + CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(EL.strAddress)), '') + CHAR(13) + char(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
   , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
 FROM #CUSTOMERS C
 INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
