@@ -1784,6 +1784,8 @@ USING (
 		 , intIssueUOMId					= SaleUOM.intItemUOMId
 		 , intReceiveUOMId					= ReceiveUOM.intItemUOMId
 		 , ysnOpenPricePLU					= CASE Pricebook.strOpenPLU WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END
+		 , intAllowNegativeInventory		= ISNULL(CASE Pricebook.strAllowNegativeInventory WHEN 'Y' THEN 1 WHEN 'N' THEN 3 ELSE NULL END, ItemLocation.intAllowNegativeInventory) 
+		 , intAllowZeroCostTypeId			= ISNULL(CASE Pricebook.strAllowZeroCostTypeId WHEN 'Y' THEN 2 WHEN 'N' THEN 1 ELSE NULL END, ItemLocation.intAllowZeroCostTypeId) 
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
 	LEFT JOIN tblICCategory AS Category ON Category.intCategoryId = Item.intCategoryId
@@ -1831,33 +1833,35 @@ USING (
 
 /* If matched, update the existing item location. */
 WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
-	UPDATE SET ItemLocation.intClassId				= Source_Query.intClassId
-			 , ItemLocation.intFamilyId				= Source_Query.intFamilyId
-			 , ItemLocation.ysnDepositRequired		= Source_Query.ysnDepositRequired
-			 , ItemLocation.ysnPromotionalItem		= Source_Query.ysnPromotionalItem
-			 , ItemLocation.ysnPrePriced			= Source_Query.ysnPrePriced
-			 , ItemLocation.dblSuggestedQty			= Source_Query.dblSuggestedQty
-			 , ItemLocation.dblMinOrder				= Source_Query.dblMinOrder
-			 , ItemLocation.intBottleDepositNo		= Source_Query.intBottleDepositNo
-			 , ItemLocation.ysnTaxFlag1				= Source_Query.ysnTaxFlag1
-			 , ItemLocation.ysnTaxFlag2				= Source_Query.ysnTaxFlag2
-			 , ItemLocation.ysnTaxFlag3				= Source_Query.ysnTaxFlag3
-			 , ItemLocation.ysnTaxFlag4				= Source_Query.ysnTaxFlag4
-			 , ItemLocation.ysnApplyBlueLaw1		= Source_Query.ysnApplyBlueLaw1
-			 , ItemLocation.ysnApplyBlueLaw2		= Source_Query.ysnApplyBlueLaw2
-			 , ItemLocation.intProductCodeId		= Source_Query.intProductCodeId
-			 , ItemLocation.ysnFoodStampable		= Source_Query.ysnFoodStampable
-			 , ItemLocation.ysnReturnable			= Source_Query.ysnReturnable
-			 , ItemLocation.ysnSaleable				= Source_Query.ysnSaleable
-			 , ItemLocation.ysnIdRequiredCigarette	= Source_Query.ysnIdRequiredCigarette
-			 , ItemLocation.ysnIdRequiredLiquor		= Source_Query.ysnIdRequiredLiquor
-			 , ItemLocation.intMinimumAge			= Source_Query.intMinimumAge
-			 , ItemLocation.intCountGroupId			= Source_Query.intCountGroupId
-			 , ItemLocation.intConcurrencyId		= ItemLocation.intConcurrencyId + 1
-			 , ItemLocation.intIssueUOMId			= Source_Query.intIssueUOMId
-			 , ItemLocation.intReceiveUOMId			= Source_Query.intReceiveUOMId
-			 , ItemLocation.intVendorId				= Source_Query.intEntityId
-			 , ItemLocation.ysnOpenPricePLU			= Source_Query.ysnOpenPricePLU
+	UPDATE SET ItemLocation.intClassId					= Source_Query.intClassId
+			 , ItemLocation.intFamilyId					= Source_Query.intFamilyId
+			 , ItemLocation.ysnDepositRequired			= Source_Query.ysnDepositRequired
+			 , ItemLocation.ysnPromotionalItem			= Source_Query.ysnPromotionalItem
+			 , ItemLocation.ysnPrePriced				= Source_Query.ysnPrePriced
+			 , ItemLocation.dblSuggestedQty				= Source_Query.dblSuggestedQty
+			 , ItemLocation.dblMinOrder					= Source_Query.dblMinOrder
+			 , ItemLocation.intBottleDepositNo			= Source_Query.intBottleDepositNo
+			 , ItemLocation.ysnTaxFlag1					= Source_Query.ysnTaxFlag1
+			 , ItemLocation.ysnTaxFlag2					= Source_Query.ysnTaxFlag2
+			 , ItemLocation.ysnTaxFlag3					= Source_Query.ysnTaxFlag3
+			 , ItemLocation.ysnTaxFlag4					= Source_Query.ysnTaxFlag4
+			 , ItemLocation.ysnApplyBlueLaw1			= Source_Query.ysnApplyBlueLaw1
+			 , ItemLocation.ysnApplyBlueLaw2			= Source_Query.ysnApplyBlueLaw2
+			 , ItemLocation.intProductCodeId			= Source_Query.intProductCodeId
+			 , ItemLocation.ysnFoodStampable			= Source_Query.ysnFoodStampable
+			 , ItemLocation.ysnReturnable				= Source_Query.ysnReturnable
+			 , ItemLocation.ysnSaleable					= Source_Query.ysnSaleable
+			 , ItemLocation.ysnIdRequiredCigarette		= Source_Query.ysnIdRequiredCigarette
+			 , ItemLocation.ysnIdRequiredLiquor			= Source_Query.ysnIdRequiredLiquor
+			 , ItemLocation.intMinimumAge				= Source_Query.intMinimumAge
+			 , ItemLocation.intCountGroupId				= Source_Query.intCountGroupId
+			 , ItemLocation.intConcurrencyId			= ItemLocation.intConcurrencyId + 1
+			 , ItemLocation.intIssueUOMId				= Source_Query.intIssueUOMId
+			 , ItemLocation.intReceiveUOMId				= Source_Query.intReceiveUOMId
+			 , ItemLocation.intVendorId					= Source_Query.intEntityId
+			 , ItemLocation.ysnOpenPricePLU				= Source_Query.ysnOpenPricePLU
+			 , ItemLocation.intAllowNegativeInventory	= Source_Query.intAllowNegativeInventory
+			 , ItemLocation.intAllowZeroCostTypeId		= Source_Query.intAllowZeroCostTypeId
 
 /* If none is found, insert a new item location. */
 WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 THEN 
@@ -1933,74 +1937,74 @@ INSERT (intItemId
 	  , intCreatedByUserId
 	  , intModifiedByUserId
 	  , intDataSourceId)
-VALUES (Source_Query.intItemId				-- intItemId
-      , Source_Query.intLocationId			-- intLocationId
-      , Source_Query.intEntityId			-- intVendorId
-      , DEFAULT								-- strDescription
-      , 1									-- intCostingMethod
-      , 3									-- intAllowNegativeInventory
-      , DEFAULT								-- intSubLocationId
-      , DEFAULT								-- intStorageLocationId
-      , Source_Query.intIssueUOMId			-- intIssueUOMId
-      , Source_Query.intReceiveUOMId		-- intReceiveUOMId
-      , DEFAULT								-- intGrossUOMId
-      , Source_Query.intFamilyId			-- intFamilyId
-      , Source_Query.intClassId				-- intClassId
-      , Source_Query.intProductCodeId		-- intProductCodeId
-      , DEFAULT								-- intFuelTankId
-      , DEFAULT								-- strPassportFuelId1
-      , DEFAULT								-- strPassportFuelId2
-      , DEFAULT								-- strPassportFuelId3
-      , Source_Query.ysnTaxFlag1			-- ysnTaxFlag1
-      , Source_Query.ysnTaxFlag2			-- ysnTaxFlag2
-      , Source_Query.ysnTaxFlag3			-- ysnTaxFlag3
-      , Source_Query.ysnTaxFlag4			-- ysnTaxFlag4
-      , Source_Query.ysnPromotionalItem		-- ysnPromotionalItem
-      , DEFAULT								-- intMixMatchId
-      , Source_Query.ysnDepositRequired		-- ysnDepositRequired
-      , DEFAULT								-- intDepositPLUId
-      , Source_Query.intBottleDepositNo		-- intBottleDepositNo
-      , Source_Query.ysnSaleable			-- ysnSaleable
-      , DEFAULT								-- ysnQuantityRequired
-      , DEFAULT								-- ysnScaleItem
-      , Source_Query.ysnFoodStampable		-- ysnFoodStampable
-      , Source_Query.ysnReturnable			-- ysnReturnable
-      , Source_Query.ysnPrePriced			-- ysnPrePriced
-      , Source_Query.ysnOpenPricePLU		-- ysnOpenPricePLU
-      , DEFAULT								-- ysnLinkedItem
-      , DEFAULT								-- strVendorCategory
-      , DEFAULT								-- ysnCountBySINo
-      , DEFAULT								-- strSerialNoBegin
-      , DEFAULT								-- strSerialNoEnd
-      , Source_Query.ysnIdRequiredLiquor	-- ysnIdRequiredLiquor
-      , Source_Query.ysnIdRequiredCigarette	-- ysnIdRequiredCigarette
-      , Source_Query.intMinimumAge			-- intMinimumAge
-      , Source_Query.ysnApplyBlueLaw1		-- ysnApplyBlueLaw1
-      , Source_Query.ysnApplyBlueLaw2		-- ysnApplyBlueLaw2
-     , DEFAULT								-- ysnCarWash
-      , DEFAULT								-- intItemTypeCode
-      , DEFAULT								-- intItemTypeSubCode
-      , DEFAULT								-- ysnAutoCalculateFreight
-      , DEFAULT								-- intFreightMethodId
-      , DEFAULT								-- dblFreightRate
-      , DEFAULT								-- intShipViaId
-      , DEFAULT								-- intNegativeInventory
-      , DEFAULT								-- dblReorderPoint
-      , Source_Query.dblMinOrder			-- dblMinOrder
-      , Source_Query.dblSuggestedQty		-- dblSuggestedQty
-      , DEFAULT								-- dblLeadTime
-      , DEFAULT								-- strCounted
-      , Source_Query.intCountGroupId		-- intCountGroupId
-      , DEFAULT								-- ysnCountedDaily
-      , 1									-- intAllowZeroCostTypeId
-      , DEFAULT								-- ysnLockedInventory
-      , 0									-- ysnStorageUnitRequired
-      , DEFAULT								-- strStorageUnitNo
-      , DEFAULT								-- intCostAdjustmentType
-      , 1									-- ysnActive
-      , DEFAULT								-- intSort
-      , 1									-- intConcurrencyId
-      , GETDATE()							-- dtmDateCreated
+VALUES (Source_Query.intItemId					-- intItemId
+      , Source_Query.intLocationId				-- intLocationId
+      , Source_Query.intEntityId				-- intVendorId
+      , DEFAULT									-- strDescription
+      , 1										-- intCostingMethod
+      , Source_Query.intAllowNegativeInventory	-- intAllowNegativeInventory
+      , DEFAULT									-- intSubLocationId
+      , DEFAULT									-- intStorageLocationId
+      , Source_Query.intIssueUOMId				-- intIssueUOMId
+      , Source_Query.intReceiveUOMId			-- intReceiveUOMId
+      , DEFAULT									-- intGrossUOMId
+      , Source_Query.intFamilyId				-- intFamilyId
+      , Source_Query.intClassId					-- intClassId
+      , Source_Query.intProductCodeId			-- intProductCodeId
+      , DEFAULT									-- intFuelTankId
+      , DEFAULT									-- strPassportFuelId1
+      , DEFAULT									-- strPassportFuelId2
+      , DEFAULT									-- strPassportFuelId3
+      , Source_Query.ysnTaxFlag1				-- ysnTaxFlag1
+      , Source_Query.ysnTaxFlag2				-- ysnTaxFlag2
+      , Source_Query.ysnTaxFlag3				-- ysnTaxFlag3
+      , Source_Query.ysnTaxFlag4				-- ysnTaxFlag4
+      , Source_Query.ysnPromotionalItem			-- ysnPromotionalItem
+      , DEFAULT									-- intMixMatchId
+      , Source_Query.ysnDepositRequired			-- ysnDepositRequired
+      , DEFAULT									-- intDepositPLUId
+      , Source_Query.intBottleDepositNo			-- intBottleDepositNo
+      , Source_Query.ysnSaleable				-- ysnSaleable
+      , DEFAULT									-- ysnQuantityRequired
+      , DEFAULT									-- ysnScaleItem
+      , Source_Query.ysnFoodStampable			-- ysnFoodStampable
+      , Source_Query.ysnReturnable				-- ysnReturnable
+      , Source_Query.ysnPrePriced				-- ysnPrePriced
+      , Source_Query.ysnOpenPricePLU			-- ysnOpenPricePLU
+      , DEFAULT									-- ysnLinkedItem
+      , DEFAULT									-- strVendorCategory
+      , DEFAULT									-- ysnCountBySINo
+      , DEFAULT									-- strSerialNoBegin
+      , DEFAULT									-- strSerialNoEnd
+      , Source_Query.ysnIdRequiredLiquor		-- ysnIdRequiredLiquor
+      , Source_Query.ysnIdRequiredCigarette		-- ysnIdRequiredCigarette
+      , Source_Query.intMinimumAge				-- intMinimumAge
+      , Source_Query.ysnApplyBlueLaw1			-- ysnApplyBlueLaw1
+      , Source_Query.ysnApplyBlueLaw2			-- ysnApplyBlueLaw2
+     , DEFAULT									-- ysnCarWash
+      , DEFAULT									-- intItemTypeCode
+      , DEFAULT									-- intItemTypeSubCode
+      , DEFAULT									-- ysnAutoCalculateFreight
+      , DEFAULT									-- intFreightMethodId
+      , DEFAULT									-- dblFreightRate
+      , DEFAULT									-- intShipViaId
+      , DEFAULT									-- intNegativeInventory
+      , DEFAULT									-- dblReorderPoint
+      , Source_Query.dblMinOrder				-- dblMinOrder
+      , Source_Query.dblSuggestedQty			-- dblSuggestedQty
+      , DEFAULT									-- dblLeadTime
+      , DEFAULT									-- strCounted
+      , Source_Query.intCountGroupId			-- intCountGroupId
+      , DEFAULT									-- ysnCountedDaily
+      , Source_Query.intAllowZeroCostTypeId		-- intAllowZeroCostTypeId
+      , DEFAULT									-- ysnLockedInventory
+      , 0										-- ysnStorageUnitRequired
+      , DEFAULT									-- strStorageUnitNo
+      , DEFAULT									-- intCostAdjustmentType
+      , 1										-- ysnActive
+      , DEFAULT									-- intSort
+      , 1										-- intConcurrencyId
+      , GETDATE()								-- dtmDateCreated
       , DEFAULT--,dtmDateModified
       , @intUserId--,intCreatedByUserId
       , DEFAULT--,intModifiedByUserId
