@@ -127,7 +127,6 @@ BEGIN
                     , strBatchId
                     , strCode
                     , strTransactionType
-                    , strModuleName
                     , strTransactionForm
                     , strReference
                     , strDocument
@@ -168,7 +167,6 @@ BEGIN
                     , strBatchId
                     , strCode
                     , strTransactionType
-                    , strModuleName
                     , strTransactionForm
                     , strReference
                     , strDocument
