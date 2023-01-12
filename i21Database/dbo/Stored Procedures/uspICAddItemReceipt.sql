@@ -966,6 +966,7 @@ BEGIN
 				,intTaxGroupId
 				,intForexRateTypeId
 				,dblForexRate 
+				,dblOriginalForexRate 
 				,intContainerId 
 				,strChargesLink
 				,intLoadReceive
@@ -1064,6 +1065,7 @@ BEGIN
 										END
 				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
+				,dblOriginalForexRate   = CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 				,intContainerId			= RawData.intContainerId 
 				,strChargesLink			= RawData.strChargesLink
 				,intLoadReceive			= RawData.intLoadReceive
