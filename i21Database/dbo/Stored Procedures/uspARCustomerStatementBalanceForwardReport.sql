@@ -248,7 +248,7 @@ FROM tblARCompanyPreference WITH (NOLOCK)
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
+		   , @strCompanyAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -343,7 +343,7 @@ WHERE CUS.intSalespersonId IS NOT NULL
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress	= EL.strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
+SET strFullAddress	= ISNULL(LTRIM(RTRIM(EL.strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(EL.strCity, ''), '') + ISNULL(', ' + NULLIF(EL.strState, ''), '') + ISNULL(', ' + NULLIF(EL.strZipCode, ''), '') + ISNULL(', ' + NULLIF(EL.strCountry, ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 
