@@ -117,6 +117,7 @@ CREATE TABLE #INVOICES (
 	 , intOriginalInvoiceId			INT				NULL
 	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
 	 , strLogoType					NVARCHAR(10)
+	 , intItemId					INT 			NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -295,6 +296,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	, intOriginalInvoiceId
 	, dblServiceChargeAPR
 	, strLogoType
+	, intItemId
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -430,6 +432,7 @@ SELECT
 	, intOriginalInvoiceId			= INV.intOriginalInvoiceId
 	, dblServiceChargeAPR			= ISNULL(INVOICEDETAIL.dblServiceChargeAPR, 0.00)
 	, strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	, intItemId						= INVOICEDETAIL.intItemId
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -485,6 +488,7 @@ LEFT JOIN (
 		,dtmDueDate					= INVSC.dtmDueDate
 		,ysnPaid					= INVSC.ysnPaid
 		,intSCInvoiceId				= ID.intSCInvoiceId
+		,intItemId					= ID.intItemId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblARInvoice INVSC ON INVSC.intInvoiceId = ID.intSCInvoiceId
@@ -565,6 +569,7 @@ LEFT JOIN (
 		 , dtmDueDate					= NULL
 		 , ysnPaid						= NULL
 		 , intSCInvoiceId				= NULL
+		 , intItemId					= NULL
 	FROM dbo.tblARInvoiceDeliveryFee DF WITH (NOLOCK)
 	INNER JOIN tblSMTaxCode TC ON DF.intTaxCodeId = TC.intTaxCodeId
 	OUTER APPLY (
@@ -773,6 +778,25 @@ CROSS APPLY (
 		FOR XML PATH ('')
 	) IDLOT (strLotNumber)
 ) LOT
+
+--XREF ITEM
+UPDATE I
+SET strItemNo				= XREF.strCustomerProduct
+  , strItem					= ISNULL(XREF.strCustomerProduct, '') + ' - ' + ISNULL(XREF.strProductDescription, '')
+  , strItemDescription		= XREF.strProductDescription
+FROM #INVOICES I
+CROSS APPLY (
+	SELECT TOP 1 ICX.strCustomerProduct
+			   , ICX.strProductDescription
+	FROM tblICItemCustomerXref ICX
+	LEFT JOIN tblICItemLocation IL ON ICX.intItemLocationId = IL.intItemLocationId
+    LEFT JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+	WHERE ICX.intItemId = I.intItemId
+	  AND ICX.intCustomerId = I.intEntityCustomerId
+	  AND (ICX.intItemLocationId IS NULL OR (ICX.intItemLocationId IS NOT NULL AND CL.intCompanyLocationId = I.intCompanyLocationId))
+	ORDER BY ICX.intItemCustomerXrefId ASC
+) XREF
+WHERE I.intItemId IS NOT NULL
 
 INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	  intInvoiceId
