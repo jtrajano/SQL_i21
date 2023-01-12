@@ -3,6 +3,7 @@
 	 @intPatternCode	INT
 	,@intEntityId		INT = NULL
 	,@strPatternString	NVARCHAR(50) OUTPUT
+	,@intCompanyLocationId int = null
 
 AS
 
@@ -13,6 +14,7 @@ BEGIN TRY
 			@ysnExist			BIT	=	1
 
 	IF	@intPatternCode = 25 SET @intContractTypeId = 1 ELSE SET @intContractTypeId = 2
+	if (@intCompanyLocationId is not null and not exists (select top 1 1 from tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId))begin select @intCompanyLocationId = null; end;
 
 	WHILE	@ysnExist	=	1
 	BEGIN
@@ -21,7 +23,7 @@ BEGIN TRY
 				,@intItemId				=	NULL
 				,@intManufacturingId	=	NULL
 				,@intSubLocationId		=	NULL
-				,@intLocationId			=	NULL
+				,@intLocationId			=	@intCompanyLocationId
 				,@intOrderTypeId		=	NULL
 				,@intBlendRequirementId	=	NULL
 				,@intPatternCode		=	@intPatternCode
