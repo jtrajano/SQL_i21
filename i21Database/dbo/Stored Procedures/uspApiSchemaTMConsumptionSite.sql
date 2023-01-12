@@ -785,7 +785,7 @@ BEGIN
 						, @strClassFill
 						, @intFillGroupId
 						, @intHoldReasonId
-						, ISNULL(@intSiteNumber, 0) + 1
+						, ISNULL(@intSiteNumber, 0)
 						
 						, @ysnActive
 						, @strSiteDescription
