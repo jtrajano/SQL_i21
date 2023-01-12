@@ -763,7 +763,7 @@ BEGIN TRY
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
-			,intFromPortId = NULL
+			,intFromPortId = S.intFromLocationCodeId
 			,dblGrossWeight = S.dblGrossWeight
 			,dtmInitialBuy = @dtmCurrentDate 
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)

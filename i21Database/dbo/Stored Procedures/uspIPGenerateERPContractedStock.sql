@@ -246,7 +246,7 @@ SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'')
 	+ '<Vessel></Vessel>' 
 	+ '<StockType>'+IsNULL((Case When B.intMarketZoneId =1 Then 'A'When B.intMarketZoneId =4 Then 'C'When B.intMarketZoneId =7 Then 'C1'When B.intMarketZoneId =3 Then 'C2'When B.intMarketZoneId =8 Then 'SPT' Else 'Others'End),'')+'</StockType>' 
 	+ '<Channel>' + IsNULL(MZ.strMarketZoneCode, '') + '</Channel>' 
-	+ '<StorageLocation></StorageLocation>' 
+	+ '<StorageLocation>'+IsNULL(LTRIM(SUBSTRING(ISNULL(MUSL.strSubLocationName, ''), CHARINDEX('/', MUSL.strSubLocationName) + 1, LEN(MUSL.strSubLocationName))) , '') +'</StorageLocation>' 
 	+ '<Size>' + IsNULL(B.strLeafSize, '') + '</Size>' 
 	+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaVolume), '') + '</Volume>' 
 	+ '<Appearance>' + IsNULL([dbo].[fnRemoveTrailingZeroes](B.dblTeaAppearance), '') + '</Appearance>' 
@@ -300,6 +300,7 @@ SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'')
 	LEFT JOIN tblICItem OI on OI.intItemId=B.intOriginalItemId
 	LEFT JOIN tblQMTINClearance T on T.intBatchId =B.intBatchId 
 	LEFT JOIN tblARMarketZone MZ on MZ.intMarketZoneId =B.intMarketZoneId
+	LEFT JOIN tblSMCompanyLocationSubLocation  MUSL ON MUSL.intCompanyLocationSubLocationId  = B.intStorageLocationId 
 	Where B.intLocationId<>B.intMixingUnitLocationId  
 
 	UPDATE dbo.tblIPContractedStockPreStage

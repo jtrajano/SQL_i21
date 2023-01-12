@@ -312,7 +312,7 @@ BEGIN TRY
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
-			,intStorageLocationId = S.intStorageLocationId
+			,intStorageLocationId = CD.intSubLocationId
 			,intStorageUnitId = NULL
 			,intBrokerWarehouseId = NULL
 			,intParentBatchId = NULL
@@ -324,7 +324,7 @@ BEGIN TRY
 			,strAirwayBillCode = S.strCourierRef
 			,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 			,strAWBSampleReference = S.strAWBSampleReference
-			,dblBasePrice = S.dblBasePrice
+			,dblBasePrice = CD.dblCashPrice
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 			,dblBoughtPrice = CD.dblCashPrice 
 			,dblBulkDensity = NULL
@@ -339,7 +339,7 @@ BEGIN TRY
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
-			,intFromPortId = NULL
+			,intFromPortId = CD.intLoadingPortId
 			,dblGrossWeight = S.dblGrossWeight
 			,dtmInitialBuy = NULL
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
@@ -422,7 +422,7 @@ BEGIN TRY
 			,intLocationId = S.intCompanyLocationId
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
-			,dtmShippingDate=CD.dtmEtaPol 
+			,dtmShippingDate=CD.dtmEtaPol
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
