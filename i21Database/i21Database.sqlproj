@@ -878,6 +878,7 @@
     <Build Include="dbo\Tables\tblGLAuditorTransaction.sql" />
     <Build Include="dbo\Views\vyuGLAuditorTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspGLClearAuditorTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

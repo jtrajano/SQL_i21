@@ -51,7 +51,8 @@
 	[intSourceEntityId] INT NULL,
 	[strSourceEntity] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strSourceEntityNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	
+	[dblTotal] NUMERIC(18, 6) NULL,
+	[dblTotalForeign] NUMERIC(18, 6) NULL,
 	[intConcurrencyId] INT DEFAULT 1 NOT NULL,
 	
 	CONSTRAINT [PK_tblGLAuditorTransaction] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
