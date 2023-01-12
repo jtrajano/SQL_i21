@@ -364,10 +364,7 @@ SET  MBP.[intSellerId] = DO.intSellerId
     ,MBP.[intItemId]  = DOD.intItemId        
     ,MBP.[dblQuantity]  = DOD.dblQuantity        
     ,MBP.[strPONumber]  = NULL   
-    ,MBP.[strItemUOM]  = NULL     
-	,MBP.[dblGross] = 0  
-	,MBP.[dblNet] = 0  
-	,MBP.[dblPickupQuantity] = 0  
+    ,MBP.[strItemUOM]  = NULL
 	,MBP.[strBOL] = ''  
 FROM tblMBILPickupDetail MBP        
 INNER JOIN tblMBILLoadHeader MBL on MBL.intLoadHeaderId = MBP.intLoadHeaderId        
