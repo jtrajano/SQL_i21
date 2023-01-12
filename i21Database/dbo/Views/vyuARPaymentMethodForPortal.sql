@@ -55,6 +55,7 @@ CROSS APPLY (
 	SELECT TOP 1 ECI.*
 	FROM tblEMEntityCardInformation ECI
 	WHERE ECI.intEntityId = C.intEntityId
+	ORDER BY dtmDateCreated desc
 ) ECI
 OUTER APPLY (
 	SELECT TOP 1 dblVisaPercentage
