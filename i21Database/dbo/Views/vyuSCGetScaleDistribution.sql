@@ -21,7 +21,7 @@ IRI.intInventoryReceiptItemId
 ,(
 	CASE 
 		WHEN CTD.intContractDetailId > 0 AND CTD.intPricingTypeId != 5 THEN 'Contract'
-		WHEN ISNULL(CTD.intContractDetailId,0) = 0 AND IRI.intOwnershipType = 1 THEN 'Spot Sale'
+		WHEN (ISNULL(CTD.intContractDetailId,0) = 0 AND IRI.intOwnershipType = 1)  or ST.strStorageTypeCode ='SPL' THEN 'Spot Sale'
 		WHEN ISNULL(SC.intLoadId,0) > 0 THEN 'Load'
 		ELSE GRT.strStorageTypeDescription 
 	END
@@ -35,4 +35,5 @@ LEFT JOIN tblSCTicket SC ON SC.intTicketId = IRI.intSourceId
 LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = IRI.intLineNo
 LEFT JOIN tblGRCustomerStorage GRS ON GRS.intTicketId = IRI.intSourceId
 LEFT JOIN tblGRStorageType GRT ON GRT.intStorageScheduleTypeId = GRS.intStorageTypeId
+left join tblGRStorageType ST on ST.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
 WHERE IR.intSourceType = 1
