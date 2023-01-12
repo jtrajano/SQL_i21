@@ -772,7 +772,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
@@ -834,7 +834,7 @@ BEGIN
 			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
@@ -899,7 +899,7 @@ BEGIN
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= InventoryCostCharges.intItemCurrencyId
@@ -1039,7 +1039,7 @@ BEGIN
 			,dblCredit					= SUM(Debit.Value)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
@@ -1103,7 +1103,8 @@ BEGIN
 				InventoryCostCharges.strInventoryTransactionTypeName,
 				InventoryCostCharges.strTransactionForm,
 				InventoryCostCharges.strRateType,
-				InventoryCostCharges.intChargeCommodityId
+				InventoryCostCharges.intChargeCommodityId,
+				InventoryCostCharges.strItem
 
 	-- Dr...... Inventory In-Transit (EUR)
 	UNION ALL 
@@ -1115,7 +1116,7 @@ BEGIN
 			,dblCredit					= SUM(Credit.Value)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
@@ -1183,7 +1184,8 @@ BEGIN
 				InventoryCostCharges.strInventoryTransactionTypeName,
 				InventoryCostCharges.strTransactionForm,
 				InventoryCostCharges.strRateType,
-				InventoryCostCharges.intChargeCommodityId
+				InventoryCostCharges.intChargeCommodityId,
+				InventoryCostCharges.strItem
 	
 	-- Cr..................... Inventory In-Transit (USD)
 	UNION ALL 
@@ -1195,7 +1197,7 @@ BEGIN
 			,dblCredit					= SUM(Debit.Value)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge 
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= InventoryCostCharges.intItemCurrencyId
@@ -1263,7 +1265,8 @@ BEGIN
 				InventoryCostCharges.strInventoryTransactionTypeName,
 				InventoryCostCharges.strTransactionForm,
 				InventoryCostCharges.strRateType,
-				InventoryCostCharges.intChargeCommodityId
+				InventoryCostCharges.intChargeCommodityId,
+				InventoryCostCharges.strItem
 
 	-- Generate the G/L Entries for Cost Charges with Inventory impact and without GL Reversal. 
 	;WITH InventoryCostCharges (
