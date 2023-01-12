@@ -135,6 +135,7 @@ BEGIN
 			, ci.strDestinationCity
 			, ci.strShippingTerms
 			, ci.strShippineLine
+			, intShippingLineId = Ent.intEntityId
 			, ci.strVessel
 			, ci.strShipper
 			, intStorageLocationId = sl.intCompanyLocationSubLocationId
@@ -198,6 +199,9 @@ BEGIN
 
 		--Garden
 		LEFT JOIN tblQMGardenMark gm on gm.strGardenMark = ci.strGarden collate database_default
+		
+		--Shipping Line
+		LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActive = 1 and ci.strShippineLine = Ent.strEntityName collate database_default
 		
 		where ci.guiUniqueId = @guiUniqueId
 
@@ -403,6 +407,20 @@ BEGIN
 				   ,1
 			FROM #tmpList 
 			WHERE guiUniqueId = @guiUniqueId AND isnull(intMarketZoneId,0) = 0 and strMarketZone <> ''
+		END
+
+		
+		IF EXISTS(SELECT TOP 1 1 FROM #tmpList where isnull(intShippingLineId,0) = 0 and strShippineLine <> '')
+		BEGIN
+		INSERT INTO tblCTErrorImportLogs
+			SELECT guiUniqueId
+				   ,'Invalid Shipping Line'
+				   ,strContractNumber
+				   ,intSequence
+				   ,'Fail'
+				   ,1
+			FROM #tmpList 
+			WHERE guiUniqueId = @guiUniqueId AND isnull(intShippingLineId,0) = 0 and strShippineLine <> ''
 		END
 
 

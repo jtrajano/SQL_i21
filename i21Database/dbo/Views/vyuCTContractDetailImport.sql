@@ -1,5 +1,4 @@
-﻿ 
-Create VIEW [dbo].[vyuCTContractDetailImport]    
+﻿Create VIEW [dbo].[vyuCTContractDetailImport]    
 AS    
     
     
@@ -48,6 +47,7 @@ SELECT CD.intContractDetailImportId
     ,CD.strDestinationPoint    
     ,intDestinationPointId = DP.intCityId    
     ,CD.strShippineLine    
+	,intShippingLineId = Ent.intEntityId
     ,CD.strStorageLocation    
     ,intStorageLocationId = SL.intCompanyLocationSubLocationId    
     ,CD.dtmEtaPol    
@@ -93,11 +93,9 @@ LEFT JOIN tblSMCity       DP  ON DP.strCity     = CD.strDestinationPoint  collat
 LEFT JOIN tblSMCompanyLocationSubLocation SL  ON SL.strSubLocationName  = CD.strStorageLocation  collate database_default AND SL.intCompanyLocationId = CH.intCompanyLocationId    
 LEFT JOIN tblARMarketZone     MZ  ON MZ.strMarketZoneCode   = CD.strMarketZone  collate database_default    
 LEFT JOIN vyuCTInventoryItem    II  ON II.intItemId     = IT.intItemId AND II.intLocationId = CH.intCompanyLocationId    
+LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActive = 1 and CD.strShippineLine = Ent.strEntityName collate database_default
  LEFT JOIN tblICItemUOM ICF on qIuom.intUnitMeasureId   = ICF.intUnitMeasureId and IT.intItemId   = ICF.intItemId    
- LEFT JOIN tblICItemUOM ICT on CUM.intUnitMeasureId = ICT.intUnitMeasureId and IT.intItemId = ICT.intItemId    
-  
-   
-  
+ LEFT JOIN tblICItemUOM ICT on CUM.intUnitMeasureId = ICT.intUnitMeasureId and IT.intItemId = ICT.intItemId
 GO
 
 
