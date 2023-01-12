@@ -227,6 +227,7 @@ BEGIN
 			WHERE @id = intId
 			) T
 		WHERE @strBatchId = A.strBatchId
+			AND A.intLocationId = T.intLocationId
 			--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult, intBatchId, dtmDate)
 			--SELECT @guidBatchLogId, 'Updated ' + @strBatchId, @intBatchId, @dtmCurrent
 	END
