@@ -1211,6 +1211,7 @@
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
