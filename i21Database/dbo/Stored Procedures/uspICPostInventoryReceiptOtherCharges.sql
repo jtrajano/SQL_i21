@@ -618,7 +618,7 @@ BEGIN
 				,intItemCommodityId = Item.intCommodityId 
 				,intChargeCommodityId = Charge.intCommodityId
 				,intItemCurrencyId = Receipt.intCurrencyId
-				,dblOriginalItemForexRate = ReceiptItem.dblOriginalForexRate
+				,dblOriginalItemForexRate = ISNULL(ReceiptItem.dblOriginalForexRate, 1)
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -1268,7 +1268,7 @@ BEGIN
 				InventoryCostCharges.intChargeCommodityId,
 				InventoryCostCharges.strItem
 
-	-- Generate the G/L Entries for Cost Charges with Inventory impact and without GL Reversal. 
+	-- Generate the G/L Entries for Cost Charges with Inventory impact. 
 	;WITH InventoryCostCharges (
 		dtmDate
 		,intItemId
@@ -1645,20 +1645,10 @@ BEGIN
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
-			CROSS APPLY dbo.fnGetDebitFunctional(				
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
-				,InventoryCostCharges.intItemCurrencyId
-				,@intFunctionalCurrencyId
-				,InventoryCostCharges.dblItemForexRate
-			) Debit
-			CROSS APPLY dbo.fnGetCreditFunctional(
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
-				,InventoryCostCharges.intItemCurrencyId
-				,@intFunctionalCurrencyId
-				,InventoryCostCharges.dblItemForexRate
-			) Credit
-			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) CreditForeign
+			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate) Debit 
+			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate) Credit
+			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate / InventoryCostCharges.dblItemForexRate) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate / InventoryCostCharges.dblItemForexRate) CreditForeign
 
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0 
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
@@ -1923,20 +1913,10 @@ BEGIN
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
-			CROSS APPLY dbo.fnGetDebitFunctional(				
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
-				,InventoryCostCharges.intItemCurrencyId
-				,@intFunctionalCurrencyId
-				,InventoryCostCharges.dblItemForexRate
-			) Debit
-			CROSS APPLY dbo.fnGetCreditFunctional(
-				CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END 
-				,InventoryCostCharges.intItemCurrencyId
-				,@intFunctionalCurrencyId
-				,InventoryCostCharges.dblItemForexRate
-			) Credit
-			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END) CreditForeign
+			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate) Debit 
+			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate) Credit
+			CROSS APPLY dbo.fnGetDebit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate / InventoryCostCharges.dblItemForexRate) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN -InventoryCostCharges.dblCost ELSE InventoryCostCharges.dblCost END * InventoryCostCharges.dblForexRate / InventoryCostCharges.dblItemForexRate) CreditForeign
 
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
