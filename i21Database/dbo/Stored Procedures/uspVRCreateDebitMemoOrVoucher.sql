@@ -119,5 +119,11 @@ BEGIN
         LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
             AND il.intLocationId = inv.intCompanyLocationId
         WHERE vr.intInvoiceId = @InvoiceId
+
+        UPDATE sar
+        SET sar.dblRebateAmount = invd.dblRebateAmount
+        FROM tblARSalesAnalysisStagingReport sar
+        JOIN tblARInvoiceDetail invd ON invd.intInvoiceDetailId = sar.intInvoiceDetailId
+        WHERE invd.intInvoiceId = @InvoiceId
     END
 END
