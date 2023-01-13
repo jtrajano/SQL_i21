@@ -718,7 +718,7 @@ LEFT JOIN (
 		FROM vyuARTaxDetailMCPReport
 		GROUP BY intInvoiceId
 	) Taxes ON ID.intInvoiceId = Taxes.intInvoiceId
-	WHERE (ID.intItemId <> 18 AND ID.intItemId <> 17)
+	WHERE (ID.intItemId <> @intSurchargeItemId OR ID.intItemId <> @intFreightItemId)
 		AND I.strType IN ('Bundle','Inventory')
 ) LIC ON I.intInvoiceDetailId = LIC.intInvoiceDetailId
 
