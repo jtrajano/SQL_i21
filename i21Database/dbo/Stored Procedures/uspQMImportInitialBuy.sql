@@ -539,6 +539,13 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Initial Buy Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 1
+
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
 			,intCurrencyId = @intCurrencyId
@@ -975,6 +982,13 @@ BEGIN TRY
 				,'Sample'
 				,@strRowState
 		END
+
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Initial Buy Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 0
 
 		FETCH NEXT
 		FROM @C

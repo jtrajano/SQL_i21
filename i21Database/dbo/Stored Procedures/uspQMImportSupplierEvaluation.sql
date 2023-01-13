@@ -9,6 +9,7 @@ BEGIN TRY
         @intImportCatalogueId INT
         ,@dblSupplierValuationPrice NUMERIC(18, 6)
         ,@intSampleId INT
+        ,@intEntityUserId INT
 
     -- Loop through each valid import detail
     DECLARE @C AS CURSOR;
@@ -17,6 +18,7 @@ BEGIN TRY
             intImportCatalogueId = IMP.intImportCatalogueId
             ,dblSupplierValuationPrice = IMP.dblSupplierValuation
             ,intSampleId = S.intSampleId
+            ,intEntityUserId = IL.intEntityId
         FROM tblQMSample S
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -30,6 +32,7 @@ BEGIN TRY
             AND CT.strCatalogueType = IMP.strCatalogueType
             AND E.strName = IMP.strSupplier
             AND S.strRepresentLotNumber = IMP.strLotNumber
+        INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
         WHERE IMP.intImportLogId = @intImportLogId
             AND IMP.ysnSuccess = 1
 
@@ -38,8 +41,16 @@ BEGIN TRY
 		@intImportCatalogueId
         ,@dblSupplierValuationPrice
         ,@intSampleId
+        ,@intEntityUserId
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+
+        EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Supplier Valuation Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 1
 
         UPDATE S
         SET
@@ -52,10 +63,18 @@ BEGIN TRY
         SET intSampleId = @intSampleId
         WHERE intImportCatalogueId = @intImportCatalogueId
 
+        EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Supplier Valuation Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 0
+
         FETCH NEXT FROM @C INTO
             @intImportCatalogueId
             ,@dblSupplierValuationPrice
             ,@intSampleId
+            ,@intEntityUserId
     END
     CLOSE @C
 	DEALLOCATE @C

@@ -169,6 +169,13 @@ BEGIN TRY
 			GOTO CONT
 		END
 
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Contract Line Allocation Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 1
+
 		-- Update Sample
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -531,6 +538,13 @@ BEGIN TRY
 			SET strBatchNo = @strBatchId
 			WHERE intSampleId = @intSampleId
 		END
+
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Contract Line Allocation Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 0
 
 		CONT:
 

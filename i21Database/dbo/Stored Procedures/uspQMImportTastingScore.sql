@@ -86,6 +86,9 @@ BEGIN TRY
     DECLARE @intValidDate INT
         ,@intDefaultItemId INT
         ,@intDefaultCategoryId INT
+    
+    DECLARE @intBatchSampleId INT
+        ,@ysnCreate BIT
 
     SELECT @intValidDate = (SELECT DATEPART(dy, GETDATE()))
 
@@ -266,6 +269,9 @@ BEGIN TRY
         ,@strMouthFeel
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+        SET @ysnCreate = 0
+        SET @intBatchSampleId = NULL
+
         SELECT @intBatchId
         -- Check if Batch ID is supplied in the template
         IF @intBatchId IS NOT NULL
@@ -280,9 +286,6 @@ BEGIN TRY
                 WHERE intImportCatalogueId = @intImportCatalogueId
                 GOTO CONT
             END
-
-            DECLARE @intBatchSampleId INT
-            SET @intBatchSampleId = NULL
 
             SELECT TOP 1 @intBatchSampleId = intSampleId FROM tblQMSample WHERE strBatchNo = @strBatchNo AND intSampleTypeId = @intTemplateSampleTypeId AND intCompanyLocationId = @intMixingUnitLocationId
 			SELECT @intProductValueId = NULL
@@ -446,6 +449,13 @@ BEGIN TRY
                 
                 SET @intSampleId = SCOPE_IDENTITY()
 
+                SET @ysnCreate = 1
+
+                EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                    @intSampleId  = @intSampleId
+                    ,@intUserEntityId = @intEntityUserId
+                    ,@ysnCreate = 1
+
 				SELECT @intOriginalItemId=NULL
 				Select @intOriginalItemId=intTealingoItemId
 				from tblMFBatch 
@@ -490,6 +500,13 @@ BEGIN TRY
             END
             -- Update if existing sample exists
             ELSE BEGIN
+                EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                    @intSampleId  = @intBatchSampleId
+                    ,@intUserEntityId = @intEntityUserId
+                    ,@strRemarks = 'Updated from Tasting Score Import'
+                    ,@ysnCreate = 0
+                    ,@ysnBeforeUpdate = 1
+
 				SELECT @intOriginalItemId=NULL
 				Select @intOriginalItemId=intItemId
 				from tblQMSample 
@@ -565,6 +582,14 @@ BEGIN TRY
                 END
             END
         END
+
+        IF @intBatchSampleId IS NULL AND @ysnCreate = 0
+            EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                @intSampleId  = @intSampleId
+                ,@intUserEntityId = @intEntityUserId
+                ,@strRemarks = 'Updated from Tasting Score Import'
+                ,@ysnCreate = 0
+                ,@ysnBeforeUpdate = 1
 
         SELECT @intOriginalItemId = NULL
         SELECT @intOriginalItemId = intItemId
@@ -930,6 +955,13 @@ BEGIN TRY
         UPDATE tblQMImportCatalogue
         SET intSampleId = @intSampleId
         WHERE intImportCatalogueId = @intImportCatalogueId
+
+        EXEC uspQMGenerateSampleCatalogueImportAuditLog
+            @intSampleId  = @intSampleId
+            ,@intUserEntityId = @intEntityUserId
+            ,@strRemarks = 'Updated from Tasting Score Import'
+            ,@ysnCreate = 0
+            ,@ysnBeforeUpdate = 0
 
         CONT:
         FETCH NEXT FROM @C INTO
