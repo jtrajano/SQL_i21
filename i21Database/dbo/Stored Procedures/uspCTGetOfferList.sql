@@ -124,12 +124,13 @@ BEGIN
 				CH.intContractHeaderId 
 			  , CTD.intContractDetailId
 			  , CH.strContractNumber
-			  ,dblQuantity = CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN CTD.dblQuantity --ALLOCATED QTY
+			  ,dblQuantity = CTD.dblQuantity - ISNULL(TAQ.dblTotalAllocatedQuantity,0) 
+							/*CASE WHEN LGAS.strAllocationStatus = 'Unallocated' THEN CTD.dblQuantity --ALLOCATED QTY
 								  WHEN LGAS.strAllocationStatus = 'Partially Allocated' THEN  CTD.dblQuantity -  LGAS.dblAllocatedQuantity-- PARTIALLY ALLOCATED QTY
 								  WHEN LGAS.strAllocationStatus = 'Allocated' THEN  LGAS.dblAllocatedQuantity - CTD.dblQuantity --ALLOCATED QTY
 								  WHEN IRI.intLoadShipmentId <> 0  OR IRI.intLoadShipmentId IS NOT NULL THEN CTD.dblQuantity -  TQ.dblTotalQty --IN STORE IR QTY
 								  WHEN LGL.intLoadId <> 0 AND IRI.intLoadShipmentId IS NULL THEN CTD.dblQuantity - TAQ.dblTotalAllocatedQuantity --SHIPPED LS QTY AND IR QTY
-							 ELSE CTD.dblQuantity  END --OPEN CT QTY 
+							 ELSE CTD.dblQuantity  END*/ --OPEN CT QTY 
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CH.intContractHeaderId = CTD.intContractHeaderId
 		LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
@@ -294,7 +295,7 @@ BEGIN
 		  ,dtmContractDate = CONVERT(VARCHAR(20),CH.dtmContractDate, 101) 
 		  ,EY.strEntityName	
 		  ,strCategory = 'Purchased'
-		  ,strStatus =  LGAS.strAllocationStatus
+		  ,strStatus =  CASE WHEN LGAS.strAllocationStatus = 'Reserved' THEN 'Partially Allocated' ELSE LGAS.strAllocationStatus END 
 		  ,strShipmentStatus = ''
 		  ,strReferencePrimary = 'Primary '+CH.strContractNumber + CAST (CTD.intContractSeq AS VARCHAR(MAX)) 
 		  ,strReference = CH.strContractNumber
@@ -451,7 +452,7 @@ BEGIN
 	LEFT JOIN vyuLGLoadViewSearch		LGS  WITH (NOLOCK)ON LGS.intLoadId = LGL.intLoadId
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CTD.intContractDetailId) LD
 	--LEFT JOIN tblICInventoryReceiptCharge IRC WITH (NOLOCK)ON IRC.intLoadShipmentId = LGL.intLoadId AND IRC.intLoadShipmentCostId = LGCInStore.intLoadCostId
-	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.intContractDetailId  = CTD.intContractDetailId
+	LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK)ON LGAS.strPurchaseContractNumber = CH.strContractNumber  AND LGAS.intContractDetailId = CTD.intContractDetailId
 	INNER JOIN @AllocatedContracts		AC	 ON AC.intContractHeaderId = CH.intContractHeaderId
 	LEFT JOIN tblCTContractFutures		CF	 WITH (NOLOCK)ON  CF.intContractDetailId = CTD.intContractDetailId
 	LEFT JOIN tblRKFuturesMonth			HM	 WITH (NOLOCK) ON HM.intFutureMonthId = CF.intHedgeFutureMonthId	
@@ -903,7 +904,7 @@ BEGIN
 	
 	UNION ALL
 	
-	--VIEW FOR RESERVE
+	--VIEW FOR RESERVE 906
 	SELECT DISTINCT
 		   intContractDetailId
 		  ,intCompanyLocationId
@@ -971,7 +972,7 @@ BEGIN
 									WHEN LGAS.strAllocationStatus = 'Reserved' AND LGAS.strAllocationNumber IS NULL THEN 'R-'+CH.strContractNumber 									
 								END
 		  ,strReference = ''
-		  ,dblQuantity = LGAS.dblReservedQuantity
+		  ,dblQuantity = -LGAS.dblReservedQuantity
 		  ,strPacking = UM.strUnitMeasure
 		  ,dblOfferCost = NULL		
 		  ,PT.strPricingType
