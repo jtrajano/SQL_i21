@@ -16,6 +16,8 @@ CREATE TABLE [dbo].[tblTMTankMonitor] (
 	[strSerialNumber]			NVARCHAR (100)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 	[intDeviceId]				INT				NULL,
 	[intSiteId]					INT				NULL,
+	[dblInventoryReading] NUMERIC (18, 6) DEFAULT 0 NULL,
+    [ysnManual]  bit NULL
 	CONSTRAINT [PK_tblTMTankMonitor_intTankMonitorId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC)
 	)
 
