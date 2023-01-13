@@ -695,6 +695,7 @@ BEGIN
 			,CusOwn.intLocationId
 			,CusOwn.strLocationName
 			,CusOwn.strCommodityCode
+			,CusOwn.strTransactionType
 		FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL) CusOwn
 		LEFT JOIN tblGRStorageType ST 
 			ON ST.strStorageTypeDescription = CusOwn.strDistributionType
@@ -702,8 +703,8 @@ BEGIN
 		UNION ALL
 		SELECT
 			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
-			,strTransactionNumber
 			,strDistributionType
+			,strTransactionNumber			
 			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
 			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
 			,intStorageScheduleTypeId = -5
@@ -711,6 +712,7 @@ BEGIN
 			,OH.intLocationId
 			,OH.strLocationName
 			,OH.strCommodityCode
+			,OH.strTransactionType
 		FROM dbo.fnRKGetBucketOnHold(@dtmReportDate,@intCommodityId,NULL) OH
 		WHERE OH.intCommodityId = @intCommodityId2
 	) t
@@ -748,32 +750,57 @@ BEGIN
 		,strLocationName
 		,strCommodityCode
 
-	SELECT 
-		intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
-		,dtmDate
-		,strDistribution = strDistributionType		
-		,dblIn = SUM(dblIn)
-		,dblOut = SUM(dblOut)
-		,dblNet = SUM(dblIn) - SUM(dblOut)
-		,intStorageScheduleTypeId
-		,intLocationId
-		,strLocationName
-		,strCommodityCode
+	SELECT *
 	INTO #CustomerOwnershipIncDec
-	FROM #CustomerOwnershipALL AA
-	INNER JOIN (
-		SELECT strTransactionNumber,strStorageTypeCode
-			,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
-		FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
-		GROUP BY strTransactionNumber,strStorageTypeCode
-	) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0	 AND A.strStorageTypeCode = AA.strStorageTypeCode
-	GROUP BY
-		dtmDate
-		,strDistributionType
-		,intStorageScheduleTypeId
-		,intLocationId
-		,strLocationName
-		,strCommodityCode
+	FROM (
+		SELECT 
+			intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
+			,dtmDate
+			,strDistribution = strDistributionType		
+			,dblIn = SUM(dblIn)
+			,dblOut = SUM(dblOut)
+			,dblNet = SUM(dblIn) - SUM(dblOut)
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode	
+		FROM #CustomerOwnershipALL AA
+		INNER JOIN (
+			SELECT strTransactionNumber,strStorageTypeCode
+				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
+			WHERE strTransactionType <> 'Storage Settlement'
+			GROUP BY strTransactionNumber,strStorageTypeCode
+		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
+		GROUP BY
+			dtmDate
+			,strDistributionType
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode
+		UNION ALL
+		SELECT 
+			intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
+			,dtmDate
+			,strDistribution = strDistributionType		
+			,dblIn = SUM(dblIn)
+			,dblOut = SUM(dblOut)
+			,dblNet = SUM(dblIn) - SUM(dblOut)
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode	
+		FROM #CustomerOwnershipALL AA
+		WHERE strTransactionType = 'Storage Settlement'
+		GROUP BY
+			dtmDate
+			,strDistributionType
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode
+	) A
 
 	WHILE EXISTS(SELECT 1 FROM @StorageTypes)
 	BEGIN
@@ -1472,6 +1499,7 @@ BEGIN
 		,OH.intLocationId
 		,OH.strLocationName
 		,OH.strCommodityCode
+		,OH.strTransactionType
 	INTO #DelayedPricingALL
 	FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
 	LEFT JOIN tblGRStorageType ST 
@@ -1504,32 +1532,57 @@ BEGIN
 		,strLocationName
 		,strCommodityCode
 
-	SELECT
-		intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
-		,dtmDate
-		,strDistribution = strDistributionType
-		,dblIn = SUM(dblIn)
-		,dblOut = SUM(dblOut)
-		,dblNet = SUM(dblIn) - SUM(dblOut)
-		,intStorageScheduleTypeId
-		,intLocationId
-		,strLocationName
-		,strCommodityCode
+	SELECT *
 	INTO #DelayedPricingIncDec
-	FROM #DelayedPricingALL AA
-	INNER JOIN (
-		SELECT strTransactionNumber,strStorageTypeCode
-			,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
-		FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
-		GROUP BY strTransactionNumber,strStorageTypeCode
-	) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
-	GROUP BY
-		dtmDate
-		,strDistributionType
-		,intStorageScheduleTypeId
-		,intLocationId
-		,strLocationName
-		,strCommodityCode
+	FROM (
+		SELECT
+			intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
+			,dtmDate
+			,strDistribution = strDistributionType
+			,dblIn = SUM(dblIn)
+			,dblOut = SUM(dblOut)
+			,dblNet = SUM(dblIn) - SUM(dblOut)
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode		
+		FROM #DelayedPricingALL AA
+		INNER JOIN (
+			SELECT strTransactionNumber,strStorageTypeCode
+				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+			FROM dbo.fnRKGetBucketDelayedPricing(@dtmReportDate,@intCommodityId,NULL) OH
+			WHERE strTransactionType <> 'Storage Settlement'
+			GROUP BY strTransactionNumber,strStorageTypeCode
+		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
+		GROUP BY
+			dtmDate
+			,strDistributionType
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode
+		UNION ALL
+		SELECT
+			intRowNum = ROW_NUMBER() OVER (ORDER BY strDistributionType)
+			,dtmDate
+			,strDistribution = strDistributionType
+			,dblIn = SUM(dblIn)
+			,dblOut = SUM(dblOut)
+			,dblNet = SUM(dblIn) - SUM(dblOut)
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode		
+		FROM #DelayedPricingALL AA
+		WHERE strTransactionType = 'Storage Settlement'
+		GROUP BY
+			dtmDate
+			,strDistributionType
+			,intStorageScheduleTypeId
+			,intLocationId
+			,strLocationName
+			,strCommodityCode
+	) A
 
 	WHILE EXISTS(SELECT 1 FROM @StorageTypes)
 	BEGIN
