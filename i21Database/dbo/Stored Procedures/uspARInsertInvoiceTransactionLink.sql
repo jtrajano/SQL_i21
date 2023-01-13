@@ -105,8 +105,8 @@ CROSS APPLY (
 		, strTransactionType	= 'Issue Stock'
 		, strModuleName         = 'Patronage'
 	FROM tblPATIssueStock PIS	
-	WHERE PIS.intInvoiceId IS NOT NULL
-	  AND PIS.intInvoiceId = MAIN.intInvoiceId
+	WHERE PIS.intIssueStockId = MAIN.intSourceId
+	  AND PIS.strCertificateNo = MAIN.strComments
 ) SRC
 WHERE ISNULL(II.ysnForDelete, 0) = 0
  
