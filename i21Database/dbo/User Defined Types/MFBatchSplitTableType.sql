@@ -13,4 +13,3 @@ CREATE TYPE MFBatchSplitTableType AS TABLE
 	dtmSplit DATETIME NULL,
 	ysnSplit BIT
 )
-

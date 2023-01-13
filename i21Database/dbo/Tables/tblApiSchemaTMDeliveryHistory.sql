@@ -75,7 +75,8 @@ CREATE TABLE [dbo].[tblApiSchemaTMDeliveryHistory]
 	[ysnManualAdjustment] [bit] NOT NULL,
 	[dtmNextDeliveryDate] [datetime] NULL,
 	[dtmRunOutDate] [datetime] NULL,
-	[dtmForecastedDelivery] [datetime] NULL
+	[dtmForecastedDelivery] [datetime] NULL,
+	[strCustomerEntityNo] [NVARCHAR](200) COLLATE Latin1_General_CI_AS NOT NULL
 )
 
 
