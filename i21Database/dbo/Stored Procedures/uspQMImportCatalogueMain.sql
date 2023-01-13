@@ -478,6 +478,9 @@ BEGIN TRY
         IF @intBatchId IS NOT NULL
         BEGIN
             DECLARE @intProductValueId INT, @intOriginalItemId INT
+            DECLARE @ysnCreate BIT
+
+            SET @ysnCreate = 0
 
             IF @intMixingUnitLocationId IS NULL
             BEGIN
@@ -516,6 +519,8 @@ BEGIN TRY
                     ,@intPatternCode = 62
                     ,@ysnProposed = 0
                     ,@strPatternString = @strSampleNumber OUTPUT
+
+                SET @ysnCreate = 1
 
                 -- Insert Entry in Sample Table
                 INSERT INTO tblQMSample (
@@ -655,7 +660,12 @@ BEGIN TRY
                 
                 SET @intSampleId = SCOPE_IDENTITY()
 
-                SELECT @intSampleId
+                EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                    @intSampleId  = @intSampleId
+                    ,@intUserEntityId = @intEntityUserId
+                    ,@strRemarks = 'Created from Catalogue Import'
+                    ,@ysnCreate = 1
+                    ,@ysnBeforeUpdate = 1
 
 				SELECT @intOriginalItemId=NULL
 				Select @intOriginalItemId=intTealingoItemId
@@ -693,6 +703,13 @@ BEGIN TRY
             END
             -- Update if existing sample exists
             ELSE BEGIN
+                EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                    @intSampleId  = @intBatchSampleId
+                    ,@intUserEntityId = @intEntityUserId
+                    ,@strRemarks = 'Updated from Catalogue Import'
+                    ,@ysnCreate = 0
+                    ,@ysnBeforeUpdate = 1
+
 				SELECT @intOriginalItemId=NULL
 				Select @intOriginalItemId=intItemId
 				from tblQMSample 
@@ -755,6 +772,14 @@ BEGIN TRY
                     UPDATE tblQMSample
                     SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId FROM tblQMTINClearance WHERE strTINNumber = @strTINNumber AND intBatchId = @intProductValueId AND intCompanyLocationId = @intMixingUnitLocationId)
                     WHERE intSampleId = @intSampleId
+
+                    IF @ysnCreate = 0
+                        EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                            @intSampleId  = @intBatchSampleId
+                            ,@intUserEntityId = @intEntityUserId
+                            ,@strRemarks = 'Updated from Catalogue Import'
+                            ,@ysnCreate = 0
+                            ,@ysnBeforeUpdate = 0
                 END
             END
 
@@ -1107,11 +1132,23 @@ BEGIN TRY
             ORDER BY PP.intSequenceNo
             -- End Insert Test Result
 
-            -- TODO: Audit Logs here
+            EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                    @intSampleId  = @intSampleId
+                    ,@intUserEntityId = @intEntityUserId
+                    ,@strRemarks = 'Created from Catalogue Import'
+                    ,@ysnCreate = 1
         END
         -- Update if combination exists
         ELSE
         BEGIN
+
+            EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                        @intSampleId  = @intSampleId
+                        ,@intUserEntityId = @intEntityUserId
+                        ,@strRemarks = 'Updated from Catalogue Import'
+                        ,@ysnCreate = 0
+                        ,@ysnBeforeUpdate = 1
+
             UPDATE S
             SET
                 intConcurrencyId = S.intConcurrencyId + 1
@@ -1181,6 +1218,12 @@ BEGIN TRY
             FROM tblQMSample S
             WHERE S.intSampleId = @intSampleId
 
+            EXEC uspQMGenerateSampleCatalogueImportAuditLog
+                @intSampleId  = @intSampleId
+                ,@intUserEntityId = @intEntityUserId
+                ,@strRemarks = 'Updated from Catalogue Import'
+                ,@ysnCreate = 0
+                ,@ysnBeforeUpdate = 0
         END
 
         UPDATE tblQMImportCatalogue
