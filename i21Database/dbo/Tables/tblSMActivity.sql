@@ -50,7 +50,7 @@
 	[strO365EventTitle]				NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
 	[ysnO365OnlineMeeting]			[bit] NULL,
 	[strO365MeetingUrl]				NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strO365CalendarEmail]			NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strO365CalendarEmail]			NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]				[int] NOT NULL DEFAULT ((1)), 
 
     CONSTRAINT [FK_tblSMActivity_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,
