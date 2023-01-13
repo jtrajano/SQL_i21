@@ -384,11 +384,7 @@ BEGIN
 									 dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00)) END  --FreightCost of LS cost Tab
 								   * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) 
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
-																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 								
-																			--Check if need to consider the sub currency
-																			/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-																		   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-																		   ELSE 100 END		
+																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 																											
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 						 --Check if need to consider the sub currency
@@ -1509,11 +1505,7 @@ BEGIN
 									 dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00)) END  --FreightCost of LS cost Tab
 								   * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) 
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
-																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 								
-																			--Check if need to consider the sub currency
-																			/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-																		   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-																		   ELSE 100 END	
+																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 		
 		,dblCIFInStore = 0.00 
 		,dblCUMStorage =  0.00
 		,dblCUMFinancing = 0.00
@@ -1769,11 +1761,7 @@ BEGIN
 									 dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CASE WHEN LGS.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00)) END  --FreightCost of LS cost Tab
 								   * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) 
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
-																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 								
-																			--Check if need to consider the sub currency
-																			/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-																		   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-																		   ELSE 100 END	
+																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 	
 		,dblCIFInStore = 0.00 
 		,dblCUMStorage =  0.00
 		,dblCUMFinancing = 0.00
@@ -2027,11 +2015,7 @@ BEGIN
 									 dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00)) END  --FreightCost of LS cost Tab
 								   * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) 
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
-																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 								
-																			--Check if need to consider the sub currency
-																			/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-																		   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-																		   ELSE 100 END	
+																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate())
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 						 --Check if need to consider the sub currency
@@ -2325,11 +2309,7 @@ BEGIN
 									 dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CASE WHEN LGL.intLoadId <> 0 THEN LGC.dblAmount ELSE 0.00 END,0.00)) END  --FreightCost of LS cost Tab
 								   * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) 
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
-																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 								
-																			--Check if need to consider the sub currency
-																			/ CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  @IntCurrencyId and ysnSubCurrency = 1) THEN 1
-																		   WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 0) THEN 1
-																		   ELSE 100 END		
+																			ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 	
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 						 --Check if need to consider the sub currency
