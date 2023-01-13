@@ -4,7 +4,7 @@ SELECT DISTINCT
 	device.strSerialNumber, 
 	item.strItemNo, 
 	item.strDescription,
-	site.intCompanyLocationId,
+	site.intLocationId as intCompanyLocationId,
 	CASE 
 		WHEN LEN(site.intSiteNumber) = 1
 		THEN '000' + CAST(site.intSiteNumber as NVARCHAR(1))
@@ -15,14 +15,14 @@ SELECT DISTINCT
 		ELSE CAST(site.intSiteNumber as NVARCHAR(1))
 		END as strSiteNumber,
 	device.intDeviceId,
-	site.intCompanyConsumptionSiteId
+	site.intSiteID as intCompanyConsumptionSiteId
 FROM tblTMDevice device
-JOIN tblTMCompanySiteDevice sitedevice
+JOIN tblTMSiteDevice sitedevice
 	ON device.intDeviceId = sitedevice.intDeviceId
-INNER JOIN tblTMCompanyConsumptionSite site
-	ON site.intCompanyConsumptionSiteId = sitedevice.intCompanyConsumptionSiteId
+INNER JOIN tblTMSite site
+	ON site.intSiteID = sitedevice.intSiteID
 INNER JOIN tblICItem item
-	ON site.intItemId = item.intItemId
+	ON site.intProduct = item.intItemId
 WHERE device.strSerialNumber != '' AND 
 		device.intDeviceTypeId = 1 AND --intDeviceTypeId = 1 means Tank
 		site.ysnCompanySite = 1

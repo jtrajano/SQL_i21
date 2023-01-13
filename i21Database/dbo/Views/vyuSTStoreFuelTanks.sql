@@ -8,7 +8,7 @@ SELECT
 	item.strDescription,
 	FT.intRegisterTankNumber,
 	FT.intConcurrencyId,
-	site.intCompanyLocationId,
+	site.intLocationId as intCompanyLocationId,
 	CASE 
 		WHEN LEN(site.intSiteNumber) = 1
 		THEN '000' + CAST(site.intSiteNumber as NVARCHAR(1))
@@ -19,17 +19,17 @@ SELECT
 		ELSE CAST(site.intSiteNumber as NVARCHAR(1))
 		END as strSiteNumber,
 	device.intDeviceId,
-	site.intCompanyConsumptionSiteId
+	site.intSiteID as intCompanyConsumptionSiteId
 FROM tblSTStoreFuelTanks FT
 JOIN tblSTStore ST
 	ON FT.intStoreId = ST.intStoreId
 JOIN tblTMDevice device
 	ON FT.strSerialNumber = device.strSerialNumber
-JOIN tblTMCompanySiteDevice sitedevice
+JOIN tblTMSiteDevice sitedevice
 	ON device.intDeviceId = sitedevice.intDeviceId
 INNER JOIN tblTMSite site
 	ON site.intSiteID = sitedevice.intSiteID AND
 		ST.intCompanyLocationId = site.intLocationId AND
 		site.ysnCompanySite = 1
 INNER JOIN tblICItem item
-	ON site.intItemId = item.intItemId
+	ON site.intProduct = item.intItemId
