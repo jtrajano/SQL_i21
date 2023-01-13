@@ -372,8 +372,10 @@ BEGIN TRY
 			SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 
 			SELECT @intLotId = L.intLotId
+				,@intQtyItemUOMId = L.intItemUOMId
 				,@dblOrgQty = L.dblQty
-				,@dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+				--,@dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+				,@dblQty = dbo.[fnDivide]((@dblNetWeight - L.dblWeight), L.dblWeightPerQty)
 			FROM tblICLot L WITH (NOLOCK)
 			WHERE L.strLotNumber = @strLotNumber
 				AND L.intItemId = @intItemId
@@ -510,7 +512,8 @@ BEGIN TRY
 			BEGIN
 				IF @dblOrgQty <> @dblQty
 				BEGIN
-					SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
+					--SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
+					SELECT @dblAdjustByQuantity = @dblQty
 
 					EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
 						,@dtmDate = NULL
@@ -519,7 +522,7 @@ BEGIN TRY
 						,@intStorageLocationId = @intStorageLocationId
 						,@strLotNumber = @strLotNumber
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
-						,@dblNewUnitCost = @dblNewCost
+						,@dblNewUnitCost = NULL
 						,@intItemUOMId = @intQtyItemUOMId
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8
