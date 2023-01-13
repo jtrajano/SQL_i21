@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{e9e5693b-743b-4a2d-a9f7-59f616bb4fd8}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -478,9 +478,11 @@
     <None Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportVendorLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTaxGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTaxGroupCustomerLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <Build Include="dbo\Tables\tblEMImportedSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspEMImportEntitySplitOrigin.sql" />
     <None Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />

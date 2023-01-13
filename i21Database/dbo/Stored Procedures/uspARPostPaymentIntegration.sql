@@ -81,13 +81,13 @@ BEGIN
     WHERE tblARInvoice.intInvoiceId = P.intInvoiceId
 
     UPDATE tblARInvoice
-    SET tblARInvoice.dblAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)) 
+    SET tblARInvoice.dblAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal) - ISNULL(B.dblCreditCardFee, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)) 
 						            -
 						            CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
 						            THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal)
 						            ELSE 0
 						            END	
-        ,tblARInvoice.dblBaseAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
+        ,tblARInvoice.dblBaseAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal) - ISNULL(B.dblBaseCreditCardFee, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
 								        -
 						                CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
 						                THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal)

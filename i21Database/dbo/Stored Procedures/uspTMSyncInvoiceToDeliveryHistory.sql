@@ -207,7 +207,12 @@ BEGIN
 
 		
 		PRINT 'BEGIN'
-		
+		 IF(@strBillingBy = 'Flow Meter' and EXISTS(SELECT TOP 1 1 FROM tblTMSite WHERE intSiteID = @intSiteId))
+		 BEGIN
+		 		update tblTMSite 
+				set dblLastMeterReading = (select dblNewMeterReading FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND intSiteId IS NOT NULL AND ISNULL(ysnLeaseBilling,0) <> 1 AND ISNULL(ysnVirtualMeterReading,0) <> 1)
+				WHERE intSiteID = @intSiteId
+		 END
 		----Check for service item
 		IF((SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @intItemId) = 'Service')
 		BEGIN

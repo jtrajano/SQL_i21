@@ -833,6 +833,12 @@ BEGIN
 	GROUP BY intInvoiceId 
 	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
 
+	INSERT INTO @UNPAIDINVOICES
+	SELECT DISTINCT intInvoiceId 
+	FROM @returntable 
+	GROUP BY intInvoiceId 
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+
 	DELETE AGING
 	FROM @returntable AGING
 	LEFT JOIN @UNPAIDINVOICES UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId

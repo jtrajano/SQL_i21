@@ -6,11 +6,17 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , dblDiscount			= I.dblDiscountAvailable
 	 , dtmDueDate			= I.dtmDueDate
 	 , intPaymentId			= PAYMENTS.intPaymentId
-	 , dblTotalPayment		= ISNULL(PAYMENTS.dblTotalPayment, 0.00)
+	 , dblTotalPayment		= CASE WHEN I.strTransactionType = 'Cash' AND ISNULL(PAYMENTS.dblTotalPayment, 0.00) = 0
+								THEN ISNULL(I.dblInvoiceTotal, 0) 
+								ELSE ISNULL(PAYMENTS.dblTotalPayment, 0.00) END
 	 , strRecordNumber		= PAYMENTS.strRecordNumber
-	 , strPaymentMethod		= PAYMENTS.strPaymentMethod
+	 , strPaymentMethod		= CASE WHEN I.strTransactionType = 'Cash' AND PAYMENTS.strPaymentMethod IS NULL
+								THEN I.strTransactionType 
+								ELSE PAYMENTS.strPaymentMethod END
 	 , strPaymentInfo		= PAYMENTS.strPaymentInfo
-	 , dtmDatePaid			= PAYMENTS.dtmDatePaid
+	 , dtmDatePaid			= CASE WHEN I.strTransactionType = 'Cash'  AND PAYMENTS.dtmDatePaid IS NULL
+								THEN I.dtmDate 
+								ELSE PAYMENTS.dtmDatePaid END
 	 , strPaymentSource		= PAYMENTS.strPaymentSource
 	 , dtmDiscountDate      = DATEADD(DAYOFYEAR, T.intDiscountDay, I.dtmDate) 
 FROM dbo.tblARInvoice I WITH (NOLOCK)

@@ -104,4 +104,5 @@ LEFT JOIN vyuEMEntity CSalesperson ON CSalesperson.intEntityId = Customer.intSal
 LEFT JOIN vyuEMEntity CLSalesperson ON CLSalesperson.intEntityId = CEL.intSalespersonId AND CLSalesperson.strType = 'Salesperson'
 LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
 LEFT JOIN tblTMSite TS ON LG.intTMSiteId = TS.intSiteID
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LG.intCustomerEntityLocationId
 WHERE ISNULL(LG.ysnDispatched, 0) = 1
