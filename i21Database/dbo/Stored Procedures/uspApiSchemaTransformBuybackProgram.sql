@@ -609,6 +609,7 @@ WHERE NOT (r.intEntityLocationId IS NULL AND r.intItemId IS NULL AND r.intUnitMe
 			AND xd.intRowNo = r.intRowNumber
 			AND xd.strLogLevel = 'Error'
 			AND xd.strStatus = 'Failed'
+			AND xd.strField NOT IN (dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location'))
 	)
 
 UPDATE r
@@ -636,6 +637,7 @@ JOIN @CreatedProgramRates cr ON cr.intEntityId = xv.intEntityId
 			AND xd.intRowNo = r.intRowNumber
 			AND xd.strLogLevel = 'Error'
 			AND xd.strStatus = 'Failed'
+			AND xd.strField NOT IN (dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location'))
 	)
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
