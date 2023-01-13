@@ -127,7 +127,13 @@ ELSE
 												   , @intScaleUOMId = NULL
 												   , @intUserId = @UserId
 												   , @dblNetWeight = 0
-												   , @ysnFromSalesOrder = 1												   
+												   , @ysnFromSalesOrder = 1		
+												   
+				EXEC dbo.uspARUpdateInvoiceIntegrations	 @InvoiceId			= @NewInvoiceId
+														,@ForDelete			= 0    
+														,@UserId			= @UserId
+														,@InvoiceDetailId 	= NULL
+														,@ysnLogRisk		= 0
 			END
 
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTItemContractDetail ICTD ON ICTD.intItemContractDetailId = SOD.intItemContractDetailId AND SOD.dblQtyOrdered > ICTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
