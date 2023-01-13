@@ -184,79 +184,79 @@ BEGIN
 		-- =======================================================================================================================================================
 		-- [START] - Check if has UPC longer than 13 digits
 		-- =======================================================================================================================================================
-		DECLARE @strInvalidUPCs NVARCHAR(MAX)
+		--DECLARE @strInvalidUPCs NVARCHAR(MAX)
 
-		DECLARE @tempInvalidUpc AS TABLE
-		(
-			intItemUOMId		INT,
-			strLongUPCCode		NVARCHAR(50),
-			strItemNo			NVARCHAR(50),
-			strItemDescription	NVARCHAR(150)
-		)
+		--DECLARE @tempInvalidUpc AS TABLE
+		--(
+		--	intItemUOMId		INT,
+		--	strLongUPCCode		NVARCHAR(50),
+		--	strItemNo			NVARCHAR(50),
+		--	strItemDescription	NVARCHAR(150)
+		--)
 
-		INSERT INTO @tempInvalidUpc
-		(
-			intItemUOMId,
-			strLongUPCCode,
-			strItemNo,
-			strItemDescription
-		)
-		SELECT DISTINCT
-			intItemUOMId		= uom.intItemUOMId,
-			strLongUPCCode		= uom.strLongUPCCode,
-			strItemNo			= item.strItemNo,
-			strItemDescription	= item.strDescription
-		FROM tblICItemUOM uom
-		INNER JOIN tblICItem item	
-			ON uom.intItemId = item.intItemId
-		INNER JOIN tblICCategory category
-			ON item.intCategoryId = category.intCategoryId
-		INNER JOIN tblICItemLocation itemLoc
-			ON item.intItemId = itemLoc.intItemId
-		INNER JOIN tblSTStore store
-			ON itemLoc.intLocationId = store.intCompanyLocationId
-		INNER JOIN @tempTableItems temp
-			ON item.intItemId = temp.intItemId
-		WHERE item.ysnFuelItem = CAST(0 AS BIT) 
-			AND store.intStoreId = @intStoreId
-			AND uom.strLongUPCCode IS NOT NULL
-			AND uom.strLongUPCCode <> ''
-			AND uom.strLongUPCCode <> '0'
-			AND uom.strLongUPCCode NOT LIKE '%[^0-9]%'
-			AND LEN(uom.strLongUPCCode) > 13
-			AND (
-					(
-							(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode <> 'whitespaces')
-							AND
-							(
-								category.intCategoryId IN(SELECT * FROM dbo.fnSplitString(@strCategoryCode,','))
-							)
-							OR
-							(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode = 'whitespaces')
-							AND
-							(
-								category.intCategoryId = category.intCategoryId
-							)
-							OR 
-							(@ysnExportEntirePricebookFile = CAST(1 AS BIT))
-							AND
-							(
-								1=1
-							)
-					)
-				)
+		--INSERT INTO @tempInvalidUpc
+		--(
+		--	intItemUOMId,
+		--	strLongUPCCode,
+		--	strItemNo,
+		--	strItemDescription
+		--)
+		--SELECT DISTINCT
+		--	intItemUOMId		= uom.intItemUOMId,
+		--	strLongUPCCode		= uom.strLongUPCCode,
+		--	strItemNo			= item.strItemNo,
+		--	strItemDescription	= item.strDescription
+		--FROM tblICItemUOM uom
+		--INNER JOIN tblICItem item	
+		--	ON uom.intItemId = item.intItemId
+		--INNER JOIN tblICCategory category
+		--	ON item.intCategoryId = category.intCategoryId
+		--INNER JOIN tblICItemLocation itemLoc
+		--	ON item.intItemId = itemLoc.intItemId
+		--INNER JOIN tblSTStore store
+		--	ON itemLoc.intLocationId = store.intCompanyLocationId
+		--INNER JOIN @tempTableItems temp
+		--	ON item.intItemId = temp.intItemId
+		--WHERE ISNULL(item.ysnFuelItem, 0) = CAST(0 AS BIT) 
+		--	AND store.intStoreId = @intStoreId
+		--	AND uom.strLongUPCCode IS NOT NULL
+		--	AND uom.strLongUPCCode <> ''
+		--	AND uom.strLongUPCCode <> '0'
+		--	AND uom.strLongUPCCode NOT LIKE '%[^0-9]%'
+		--	AND LEN(uom.strLongUPCCode) > 13
+		--	AND (
+		--			(
+		--					(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode <> 'whitespaces')
+		--					AND
+		--					(
+		--						category.intCategoryId IN(SELECT * FROM dbo.fnSplitString(@strCategoryCode,','))
+		--					)
+		--					OR
+		--					(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode = 'whitespaces')
+		--					AND
+		--					(
+		--						category.intCategoryId = category.intCategoryId
+		--					)
+		--					OR 
+		--					(@ysnExportEntirePricebookFile = CAST(1 AS BIT))
+		--					AND
+		--					(
+		--						1=1
+		--					)
+		--			)
+		--		)
 
 
 
-		IF EXISTS(SELECT TOP 1 1 FROM @tempInvalidUpc)
-			BEGIN
+		--IF EXISTS(SELECT TOP 1 1 FROM @tempInvalidUpc)
+		--	BEGIN
 
-				SELECT @strInvalidUPCs = COALESCE(@strInvalidUPCs + ', ' + strLongUPCCode, strLongUPCCode) 
-				FROM @tempInvalidUpc
+		--		SELECT @strInvalidUPCs = COALESCE(@strInvalidUPCs + ', ' + strLongUPCCode, strLongUPCCode) 
+		--		FROM @tempInvalidUpc
 
-				SET @strMessageResult = @strMessageResult + 'Invalid UPC found and were not added to ' + @strFilePrefix + ' file: (' + @strInvalidUPCs + '). ' + CHAR(13)
+		--		SET @strMessageResult = @strMessageResult + 'Invalid UPC found and were not added to ' + @strFilePrefix + ' file: (' + @strInvalidUPCs + '). ' + CHAR(13)
 
-			END
+		--	END
 		-- =======================================================================================================================================================
 		-- [END] - Check if has UPC longer than 13 digits
 		-- =======================================================================================================================================================
