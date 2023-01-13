@@ -1630,6 +1630,9 @@ BEGIN TRY
 					,[strDestinationPort4] = x.[strDestinationPort4]
 					,[dtmETSPOL4] = x.[dtmETSPOL4]
 					,[dtmETAPOD4] = x.[dtmETAPOD4]
+					,dtmCustomsReleased=x.dtmCustomsReleased
+					,dtmDocumentsApproved=x.dtmDocumentsApproved
+					,dtmArrivedInPort=x.dtmArrivedInPort
 				OUTPUT inserted.dtmETAPOD
 					,inserted.strDestinationPort
 				INTO @tblIPETAPOD
