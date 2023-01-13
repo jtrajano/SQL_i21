@@ -1494,6 +1494,7 @@
     <Build Include="dbo\Stored Procedures\uspFABookDepreciation.sql" />
     <Build Include="dbo\Stored Procedures\uspFABookDepreciationReport.sql" />
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
+    <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
