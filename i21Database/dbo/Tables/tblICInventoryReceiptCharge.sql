@@ -17,6 +17,7 @@
     [strAllocateCostBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT (''), 
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[intEntityVendorId] INT NULL, 
+	[intNewEntityVendorId] INT NULL, 
 	[ysnPrice] BIT NULL DEFAULT ((0)),
 	[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), 
