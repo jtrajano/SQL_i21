@@ -21,6 +21,7 @@ BEGIN TRY
 		,@strBLNumber NVARCHAR(50)
 		,@strLocationName NVARCHAR(50)
 		,@strWarehouseRefNo NVARCHAR(50)
+		,@strOrderType NVARCHAR(50)
 	DECLARE @intStageReceiptId INT
 		,@strReceiptNo NVARCHAR(50)
 	DECLARE @intEntityId INT
@@ -91,6 +92,7 @@ BEGIN TRY
 	SELECT intStageReceiptId
 	FROM tblIPInvReceiptStage
 	WHERE intStatusId IS NULL
+		AND ISNULL(strOrderType, '') = 'PO'
 
 	SELECT @intStageReceiptId = MIN(intStageReceiptId)
 	FROM @tblIPInvReceiptStage
@@ -134,6 +136,7 @@ BEGIN TRY
 				,@strLocationName = NULL
 				,@strWarehouseRefNo = NULL
 				,@strReceiptNo = NULL
+				,@strOrderType = NULL
 
 			SELECT @intEntityId = NULL
 				,@intCompanyLocationId = NULL
@@ -152,6 +155,7 @@ BEGIN TRY
 				,@strBLNumber = strBLNumber
 				,@strLocationName = strLocationName
 				,@strWarehouseRefNo = strWarehouseRefNo
+				,@strOrderType = strOrderType
 			FROM tblIPInvReceiptStage
 			WHERE intStageReceiptId = @intStageReceiptId
 
@@ -177,22 +181,20 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intEntityId = t.intEntityId
-			FROM dbo.tblEMEntity t WITH (NOLOCK)
-			JOIN dbo.tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
-			JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
-			WHERE ET.strType = 'Vendor'
-				AND V.strVendorAccountNum = @strVendorAccountNo
-
-			IF ISNULL(@intEntityId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Invalid Vendor. '
-						,16
-						,1
-						)
-			END
-
+			--SELECT @intEntityId = t.intEntityId
+			--FROM dbo.tblEMEntity t WITH (NOLOCK)
+			--JOIN dbo.tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
+			--JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
+			--WHERE ET.strType = 'Vendor'
+			--	AND V.strVendorAccountNum = @strVendorAccountNo
+			--IF ISNULL(@intEntityId, 0) = 0
+			--BEGIN
+			--	RAISERROR (
+			--			'Invalid Vendor. '
+			--			,16
+			--			,1
+			--			)
+			--END
 			SELECT @intCompanyLocationId = intCompanyLocationId
 				,@strActualLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
@@ -302,24 +304,6 @@ BEGIN TRY
 					,@strContainerNumber = RIS.strContainerNumber
 				FROM tblIPInvReceiptItemStage RIS WITH (NOLOCK)
 				WHERE RIS.intStageReceiptItemId = @intStageReceiptItemId
-
-				IF ISNULL(@strERPPONumber, '') = ''
-				BEGIN
-					RAISERROR (
-							'Invalid SAP PO No. '
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@strERPItemNumber, '') = ''
-				BEGIN
-					RAISERROR (
-							'Invalid SAP PO Item No. '
-							,16
-							,1
-							)
-				END
 
 				SELECT @intItemId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
@@ -537,61 +521,6 @@ BEGIN TRY
 							--SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 				END
 
-				SELECT TOP 1 @intLoadId = L.intLoadId
-					,@intLoadDetailId = LD.intLoadDetailId
-					,@ysnPosted = L.ysnPosted
-					,@intBatchId = LD.intBatchId
-					,@dblDeliveredQuantity = LD.dblDeliveredQuantity
-				FROM tblLGLoad L WITH (NOLOCK)
-				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
-					AND L.intShipmentType = 1
-					AND L.intShipmentStatus <> 10
-					AND L.strExternalShipmentNumber = @strERPPONumber
-					AND LD.strExternalShipmentItemNumber = @strERPItemNumber
-				ORDER BY L.intLoadId DESC
-
-				IF ISNULL(@intLoadId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Invalid Load. '
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@ysnPosted, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Load is not yet posted. '
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@intBatchId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Load Item is not associated with Batch. '
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@dblDeliveredQuantity, 0) > 0
-				BEGIN
-					RAISERROR (
-							'Load Item is already received. '
-							,16
-							,1
-							)
-				END
-
-				SELECT @intContractDetailId = LD.intPContractDetailId
-					,@intContractHeaderId = CD.intContractHeaderId
-				FROM tblLGLoadDetail LD WITH (NOLOCK)
-				LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
-					AND LD.intLoadDetailId = @intLoadDetailId
-
 				SELECT @intStageReceiptItemLotId = MIN(intStageReceiptItemLotId)
 				FROM tblIPInvReceiptItemLotStage WITH (NOLOCK)
 				WHERE intStageReceiptId = @intStageReceiptId
@@ -617,6 +546,9 @@ BEGIN TRY
 						,@intLotNetWeightItemUOMId = NULL
 						,@intLotStorageLocationId = NULL
 
+					SELECT @strERPPONumber = NULL
+						,@strERPItemNumber = NULL
+
 					SELECT @strLotNo = strLotNo
 						,@dblLotQuantity = ISNULL(dblQuantity, 0)
 						,@strLotQuantityUOM = strQuantityUOM
@@ -639,6 +571,85 @@ BEGIN TRY
 								,1
 								)
 					END
+
+					SELECT TOP 1 @strERPPONumber = strERPPONumber
+						,@strERPItemNumber = strERPPOLineNo
+					FROM tblMFBatch B WITH (NOLOCK)
+					WHERE B.strBatchId = @strLotNo
+						AND B.intLocationId = @intCompanyLocationId
+
+					IF ISNULL(@strERPPONumber, '') = ''
+					BEGIN
+						RAISERROR (
+								'Invalid SAP PO No. '
+								,16
+								,1
+								)
+					END
+
+					IF ISNULL(@strERPItemNumber, '') = ''
+					BEGIN
+						RAISERROR (
+								'Invalid SAP PO Item No. '
+								,16
+								,1
+								)
+					END
+
+					SELECT TOP 1 @intLoadId = L.intLoadId
+						,@intLoadDetailId = LD.intLoadDetailId
+						,@ysnPosted = L.ysnPosted
+						,@intBatchId = LD.intBatchId
+						,@dblDeliveredQuantity = LD.dblDeliveredQuantity
+					FROM tblLGLoad L WITH (NOLOCK)
+					JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+						AND L.intShipmentType = 1
+						AND L.intShipmentStatus <> 10
+						AND L.strExternalShipmentNumber = @strERPPONumber
+						AND LD.strExternalShipmentItemNumber = @strERPItemNumber
+					ORDER BY L.intLoadId DESC
+
+					IF ISNULL(@intLoadId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Invalid Load. '
+								,16
+								,1
+								)
+					END
+
+					IF ISNULL(@ysnPosted, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Load is not yet posted. '
+								,16
+								,1
+								)
+					END
+
+					IF ISNULL(@intBatchId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Load Item is not associated with Batch. '
+								,16
+								,1
+								)
+					END
+
+					IF ISNULL(@dblDeliveredQuantity, 0) > 0
+					BEGIN
+						RAISERROR (
+								'Load Item is already received. '
+								,16
+								,1
+								)
+					END
+
+					SELECT @intContractDetailId = LD.intPContractDetailId
+						,@intContractHeaderId = CD.intContractHeaderId
+					FROM tblLGLoadDetail LD WITH (NOLOCK)
+					LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
+						AND LD.intLoadDetailId = @intLoadDetailId
 
 					IF @dblLotQuantity <= 0
 					BEGIN
@@ -1001,6 +1012,7 @@ BEGIN TRY
 				,strBLNumber
 				,strLocationName
 				,strWarehouseRefNo
+				,strOrderType
 				,dtmTransactionDate
 				,strErrorMessage
 				,strImportStatus
@@ -1013,6 +1025,7 @@ BEGIN TRY
 				,strBLNumber
 				,strLocationName
 				,strWarehouseRefNo
+				,strOrderType
 				,dtmTransactionDate
 				,''
 				,'Success'
@@ -1121,6 +1134,7 @@ BEGIN TRY
 				,strBLNumber
 				,strLocationName
 				,strWarehouseRefNo
+				,strOrderType
 				,dtmTransactionDate
 				,strErrorMessage
 				,strImportStatus
@@ -1133,6 +1147,7 @@ BEGIN TRY
 				,strBLNumber
 				,strLocationName
 				,strWarehouseRefNo
+				,strOrderType
 				,dtmTransactionDate
 				,@ErrMsg
 				,'Failed'
