@@ -526,7 +526,7 @@ BEGIN TRY
 				[intCustomerStorageId] = [intCustomerStorageId]
 				,[intContractHeaderId]  = [intContractHeaderId]
 				,[dblUnits]				= [dblUnits]
-				,[dtmHistoryDate]		= [dtmHistoryDate]--GETDATE()
+				,[dtmHistoryDate]		= @dtmClientPostDate
 				,[strType]				= 'Reverse Settlement'
 				,[intUserId]			= @UserId
 				,[strSettleTicket]		= [strSettleTicket]
