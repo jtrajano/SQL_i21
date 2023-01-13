@@ -8,6 +8,8 @@ AS
 	DECLARE @success BIT 
 	DECLARE @strReimbursementType NVARCHAR(10)
 	DECLARE @intBillId INT
+	DECLARE @strBillId NVARCHAR(50)
+	DECLARE @strInvoiceNumber NVARCHAR(50)
 
 	--DECLARE @strPostingError NVARCHAR(MAX)
 	--dECLARE @intBuyBackId INT
@@ -42,6 +44,10 @@ AS
 		BEGIN
 			BEGIN TRY
 				BEGIN TRANSACTION
+					-- Unlink from transaction graph
+					SElECT @strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+					EXEC uspICDeleteTransactionLinks @intInvoiceId, @strInvoiceNumber, 'Debit Memo', 'Accounts Receivable'
+
 					UPDATE tblBBBuyback 
 					SET intInvoiceId = NULL
 						,intConcurrencyId = intConcurrencyId + 1
@@ -65,7 +71,6 @@ AS
 	END
 	ELSE
 	BEGIN
-
 		SELECT TOP 1 @intBillId = intBillId
 		FROM tblBBBuyback WHERE intBuybackId = @intBuyBackId
 
@@ -87,6 +92,10 @@ AS
 		BEGIN
 			BEGIN TRY
 				BEGIN TRANSACTION
+					-- Unlink from transaction graph
+					SElECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @intBillId
+					EXEC uspICDeleteTransactionLinks @intBillId, @strBillId, 'Debit Memo', 'Accounts Payable'
+
 					UPDATE tblBBBuyback 
 					SET intBillId = NULL
 						,intConcurrencyId = intConcurrencyId + 1
