@@ -22,6 +22,7 @@
 	[intUserId] INT NULL,
 	[intLongTruckLoadId] INT NULL,
 	[intMobileLoadHeaderId] INT NULL,
+	[intDispatchOrderId] INT NULL,
 	[intTruckId] INT NULL,
     CONSTRAINT [PK_tblTRLoadHeader] PRIMARY KEY ([intLoadHeaderId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),

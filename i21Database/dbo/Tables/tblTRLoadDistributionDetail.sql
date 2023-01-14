@@ -24,6 +24,7 @@
 	[dblComboMinimumUnits] DECIMAL(18, 6) NULL,
 	[dblComboSurcharge] DECIMAL(18, 6) NULL,
 	[intSiteId] INT NULL,
+	[intTMOId] INT NULL,
 	[dblDistributionGrossSalesUnits] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblDistributionNetSalesUnits] DECIMAL(18, 6) NULL DEFAULT 0,
 	[dblPercentFull] DECIMAL(18, 6) NULL,
