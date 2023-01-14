@@ -790,7 +790,7 @@ BEGIN TRY
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
-		,SL.dtmCreatedDate
+		,dtmCreatedDate =  DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()),B.dtmDateCreated)
 		,SL.dtmTransactionDate
 		,dblVariance  =  CASE WHEN SL.dblOrigQty < 0 THEN CH.dblQuantityPerLoad - ABS(SL.dblOrigQty)  ELSE  SL.dblOrigQty - CH.dblQuantityPerLoad END
 		,UM.strUnitMeasure
@@ -824,7 +824,7 @@ BEGIN TRY
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblICInventoryReceiptItem R ON R.intSourceId = T.intTicketId
-	INNER JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = R.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
+	INNER JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = R.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL AND BD.intContractDetailId = CD.intContractDetailId
 	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 	WHERE --dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	B.dtmDateCreated BETWEEN @dtmServerFromDate AND @dtmServerToDate
@@ -1496,7 +1496,7 @@ BEGIN TRY
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
-		,SL.dtmCreatedDate
+		,dtmCreatedDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()),IV.dtmDateCreated)
 		,SL.dtmTransactionDate
 		,dblVariance  = CASE WHEN SL.dblOrigQty < 0 THEN ABS(SL.dblOrigQty) - CH.dblQuantityPerLoad ELSE CH.dblQuantityPerLoad - SL.dblOrigQty END
 		,UM.strUnitMeasure
@@ -1530,7 +1530,7 @@ BEGIN TRY
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 	INNER JOIN tblICInventoryShipmentItem S ON S.intSourceId = T.intTicketId
-	INNER JOIN tblARInvoiceDetail ID ON ID.intInventoryShipmentItemId = S.intInventoryShipmentItemId AND ID.intInventoryShipmentChargeId IS NULL
+	INNER JOIN tblARInvoiceDetail ID ON ID.intInventoryShipmentItemId = S.intInventoryShipmentItemId AND ID.intInventoryShipmentChargeId IS NULL AND ID.intContractDetailId = CD.intContractDetailId
 	INNER JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId 
 	WHERE --dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate 
 	IV.dtmDateCreated BETWEEN @dtmServerFromDate AND @dtmServerToDate
