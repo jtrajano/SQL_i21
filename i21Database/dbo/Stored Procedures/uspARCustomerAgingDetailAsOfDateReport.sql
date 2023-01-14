@@ -252,7 +252,11 @@ SELECT intPaymentId
 	 , strRecordNumber
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN #ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
-LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+LEFT JOIN (
+	SELECT intTransactionId, dtmDate, strTransactionType
+	FROM dbo.tblARNSFStagingTableDetail
+	GROUP BY intTransactionId, dtmDate, strTransactionType
+) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE P.ysnPosted = 1
   AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
   AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -387,9 +391,14 @@ INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
+LEFT JOIN (
+	SELECT intTransactionId, dtmDate, strTransactionType
+	FROM dbo.tblARNSFStagingTableDetail
+	GROUP BY intTransactionId, dtmDate, strTransactionType
+) NSF ON I.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
-	AND I.ysnProcessedToNSF = 0
+	AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
 	AND strTransactionType <> 'Cash Refund'
 	AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
