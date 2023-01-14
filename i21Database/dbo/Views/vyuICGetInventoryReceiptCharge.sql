@@ -78,4 +78,4 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 		FROM tblGLFiscalYearPeriod fp
 		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
 	) fiscal
-	LEFT JOIN vyuAPVendor NewVendor ON Vendor.[intEntityId] = ReceiptCharge.intNewEntityVendorId
+	LEFT JOIN vyuAPVendor NewVendor ON NewVendor.[intEntityId] = ReceiptCharge.intNewEntityVendorId
