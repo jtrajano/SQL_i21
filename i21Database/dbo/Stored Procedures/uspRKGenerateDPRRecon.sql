@@ -461,7 +461,7 @@ BEGIN TRY
 			,CL.strLocationName
 			,E.strName
 			,C.strCommodityCode
-			,strContractType = 'Sales'
+			,strContractType = 'Purchase'
 			,CS.strContractStatus
 			,CBL.strContractNumber
 			,CBL.intContractSeq
@@ -526,7 +526,7 @@ BEGIN TRY
 			,CL.strLocationName
 			,E.strName
 			,C.strCommodityCode
-			,strContractType = 'Sales'
+			,strContractType = 'Purchase'
 			,CS.strContractStatus
 			,CBL.strContractNumber
 			,CBL.intContractSeq
