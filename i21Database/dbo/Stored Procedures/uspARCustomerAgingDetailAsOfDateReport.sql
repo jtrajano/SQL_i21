@@ -399,7 +399,7 @@ LEFT JOIN (
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
-	AND strTransactionType <> 'Cash Refund'
+	AND I.strTransactionType <> 'Cash Refund'
 	AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
