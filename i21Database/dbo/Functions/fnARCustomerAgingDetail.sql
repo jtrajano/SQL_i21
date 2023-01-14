@@ -293,7 +293,11 @@ BEGIN
 		 , strRecordNumber
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
-	LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+	LEFT JOIN (
+		SELECT intTransactionId, dtmDate, strTransactionType
+		FROM dbo.tblARNSFStagingTableDetail
+		GROUP BY intTransactionId, dtmDate, strTransactionType
+	) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 	WHERE P.ysnPosted = 1
 	  AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
 	  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -455,8 +459,13 @@ BEGIN
 			 , strCurrency 
 		FROM tblSMCurrency WITH (NOLOCK)  
 	) CUR ON I.intCurrencyId = CUR.intCurrencyID
+	LEFT JOIN (
+		SELECT intTransactionId, dtmDate, strTransactionType
+		FROM dbo.tblARNSFStagingTableDetail
+		GROUP BY intTransactionId, dtmDate, strTransactionType
+	) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 	WHERE I.ysnPosted = 1  
-	  AND I.ysnProcessedToNSF = 0
+	  AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
 	  AND I.strTransactionType <> 'Cash Refund'
 	  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	  AND ( 
