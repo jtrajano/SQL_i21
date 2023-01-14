@@ -412,7 +412,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
-    <Build Include="dbo\Tables\tblCMBankAccountType.sql" /> 
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Functions\fnSTGetSalesRestriction.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
@@ -1210,6 +1210,7 @@
     <Build Include="dbo\Stored Procedures\uspFABookDepreciationReport.sql" />
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
+    <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
