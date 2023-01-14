@@ -5,6 +5,7 @@
 RETURNS  @tbl TABLE(
 	strBook NVARCHAR(100),
 	strLedger NVARCHAR(255),
+	strDepreciationMethodId NVARCHAR(50),
 	dtmPlacedInService VARCHAR(20),
 	dblCost NUMERIC(18, 6),
 	strCurrency NVARCHAR(40),
@@ -23,6 +24,7 @@ BEGIN
 	SELECT
 		ISNULL(B.strBook, '')
 		,ISNULL(L.strLedgerName, '')
+		,ISNULL(DM.strDepreciationMethodId, '')
 		,CONVERT(VARCHAR(20),BD.dtmPlacedInService,101)
 		,BD.dblCost
 		,ISNULL(C.strCurrency, '')
