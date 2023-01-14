@@ -413,7 +413,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
-    <Build Include="dbo\Tables\tblCMBankAccountType.sql" /> 
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Functions\fnSTGetSalesRestriction.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
@@ -1493,6 +1493,7 @@
     <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
+    <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -7360,7 +7361,7 @@
     <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
-    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql"/>
+    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
