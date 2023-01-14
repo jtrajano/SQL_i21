@@ -38,10 +38,10 @@ SELECT LG.intLoadId
 	, strOutboundSalespersonId = ISNULL(LGSalesperson.strName, ISNULL(CLSalesperson.strName, CSalesperson.strName))
 	, LG.strShipTo
 	, intOutboundItemId = LG.intItemId
-	, dblOutboundQuantity = ISNULL(LG.dblQuantity, 0.000000)
-	, dblOutboundPrice = ISNULL(LG.dblSCashPrice, 0.000000)
+	, dblOutboundQuantity = ISNULL(TMO.dblQuantity, ISNULL(LG.dblQuantity, 0.000000))
+	, dblOutboundPrice = ISNULL(TMO.dblPrice, ISNULL(LG.dblSCashPrice, 0.000000))
 	, strOutboundItemNo = LG.strItemNo
-	, strOutboundContractNumber = LG.strSContractNumber
+	, strOutboundContractNumber = ISNULL(TMO.strContractNumber, LG.strSContractNumber)
 	, LG.dtmScheduledDate
 	, LG.dtmDispatchedDate
 	, dtmDeliveredDate = ISNULL(LG.dtmDeliveredDate, LG.dtmScheduledDate)
@@ -54,7 +54,7 @@ SELECT LG.intLoadId
 	, strShipVia = CASE WHEN LG.intHaulerEntityId IS NULL THEN ShipVia.strName ELSE LG.strHauler END 
 	, strSeller = Seller.strName
 	, strSalespersonId = LG.strDriver
-	, intOutboundContractDetailId = LG.intSContractDetailId
+	, intOutboundContractDetailId = ISNULL(TMO.intContractDetailId, LG.intSContractDetailId)
 	, ysnDirectShip = CASE WHEN LG.intPurchaseSale = 3
 								THEN CAST(1 AS BIT)
 							ELSE CAST (0 AS BIT) END
@@ -84,12 +84,15 @@ SELECT LG.intLoadId
 	, LG.strTransUsedBy
 	, ysnBrokered = CASE WHEN (Config.intSellerId IS NOT NULL AND (Config.intSellerId <> ISNULL(LG.intSellerId, 0))) THEN 1 ELSE 0 END
 	, LG.intSalespersonId
-	, intSiteId = LG.intTMSiteId
-	, intSiteNumber = TS.intSiteNumber
+	, intTMDispatchId = TMO.intDispatchID
+	, strTMOrder = TMO.strTMOrder
+	, intSiteId = ISNULL(TMO.intSiteID, LG.strSiteID)
+	, strSiteNumber = ISNULL(TMO.strSiteNumber, RIGHT('000' + CAST(TMS.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS)
+	, dblTMOverageQty = TMO.dblOverageQty
+	, dblTMOveragePrice = TMO.dblOveragePrice
 	, strSupplyPointGrossOrNet = SP.strGrossOrNet
 	, strSaleUnits = CEL.strSaleUnits
 	, strFreightSalesUnit = SP.strFreightSalesUnit
-	, LG.intTMDispatchId  
 	, LG.strOrderNumber  
 FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
@@ -103,5 +106,6 @@ LEFT JOIN vyuEMEntity LGSalesperson ON LGSalesperson.intEntityId = LG.intSalespe
 LEFT JOIN vyuEMEntity CSalesperson ON CSalesperson.intEntityId = Customer.intSalespersonId AND CSalesperson.strType = 'Salesperson'
 LEFT JOIN vyuEMEntity CLSalesperson ON CLSalesperson.intEntityId = CEL.intSalespersonId AND CLSalesperson.strType = 'Salesperson'
 LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
-LEFT JOIN tblTMSite TS ON LG.intTMSiteId = TS.intSiteID
+LEFT JOIN vyuTMGetOrder TMO ON TMO.intDispatchID = LG.intTMDispatchId
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = LG.intTMSiteId
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

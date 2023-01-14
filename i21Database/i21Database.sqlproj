@@ -1281,6 +1281,7 @@
     <Build Include="dbo\Stored Procedures\uspFABookDepreciationReport.sql" />
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
     <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
+    <Build Include="dbo\Views\vyuTMGetOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
