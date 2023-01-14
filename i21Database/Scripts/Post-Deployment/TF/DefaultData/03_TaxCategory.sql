@@ -571,6 +571,7 @@ INSERT INTO @TaxCategoryTN(
 SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Gasoline', intMasterId = 421
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Clear', intMasterId = 422
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Dyed', intMasterId = 423
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Kerosene', intMasterId = 424
 
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
 
