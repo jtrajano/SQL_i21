@@ -1310,6 +1310,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
+    <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT508.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTONo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTODetail.sql" />
