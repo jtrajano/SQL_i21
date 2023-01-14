@@ -893,6 +893,7 @@
     <Build Include="dbo\Tables\tblAPVoucherPayableReversed.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableTaxReversed.sql" />
     <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReciptChangeOtherChargeVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
