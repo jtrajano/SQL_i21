@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[tblFABookDepreciation](
 	[dblBonusDepreciation] [numeric](18, 6) NULL,
 	[dtmPlacedInService] [datetime] NOT NULL,
 	[ysnFullyDepreciated] BIT NULL,
-	[intConcurrencyId] [int] NOT NULL,
+	[intConcurrencyId] [int] DEFAULT 1 NOT NULL,
 	[intBookId] [int] NULL,
 	[intCurrencyId]					[int] NULL,
 	[intFunctionalCurrencyId]		[int] NULL,
