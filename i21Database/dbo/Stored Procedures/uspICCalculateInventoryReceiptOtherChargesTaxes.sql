@@ -274,19 +274,6 @@ BEGIN
 																		vendorTax.[dblTax] 
 																END 
 														END 						
-						 
-													--CASE 
-													--	WHEN rc.dblForexRate <> 0 THEN 
-													--		ROUND(
-													--			dbo.fnDivide(
-													--				-- Convert the tax to the transaction currency. 
-													--					vendorTax.[dblAdjustedTax]
-													--				, rc.dblForexRate
-													--			)
-													--		, 2) 
-													--	ELSE 
-													--		vendorTax.[dblAdjustedTax]
-													--END 
 
 					,[intTaxAccountId]				= vendorTax.[intTaxAccountId]
 					,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
@@ -395,7 +382,7 @@ BEGIN
 								tblICInventoryReceiptChargeTax
 							WHERE
 								intInventoryReceiptChargeId = @InventoryReceiptChargeId
-								AND (ysnReversed = 0 OR @InventoryReceiptChargeId IS NULL)
+								AND (ysnReversed = 0 OR ysnReversed IS NULL)
 							GROUP BY
 								intTaxGroupId
 								,intTaxCodeId
@@ -432,13 +419,11 @@ BEGIN
 						)
 				)
 			BEGIN 
-				-- Flag the existing 
-				UPDATE tblICInventoryReceiptChargeTax
-				SET 
-					ysnReversed = 1
-					,intConcurrencyId += 1 
-				WHERE 
-					intInventoryReceiptChargeId = @InventoryReceiptChargeId					
+				DECLARE @maxInventoryReceiptChargeTaxId AS INT 
+
+				SELECT @maxInventoryReceiptChargeTaxId = MAX(intInventoryReceiptChargeTaxId)
+				FROM  tblICInventoryReceiptChargeTax rcTax
+				WHERE rcTax.intInventoryReceiptChargeId = @InventoryReceiptChargeId
 
 				-- Reverse the existing tax amounts. 
 				INSERT INTO tblICInventoryReceiptChargeTax (
@@ -487,7 +472,16 @@ BEGIN
 				WHERE
 					intInventoryReceiptChargeId = @InventoryReceiptChargeId
 					AND ([ysnReversed] = 0 OR [ysnReversed] IS NULL)
-					AND @NewVendorEntityId IS NOT NULL
+
+				-- Flag the existing 
+				UPDATE tblICInventoryReceiptChargeTax
+				SET 
+					ysnReversed = 1
+					,intConcurrencyId += 1 
+				WHERE 
+					intInventoryReceiptChargeId = @InventoryReceiptChargeId
+					AND ([ysnReversed] = 0 OR [ysnReversed] IS NULL)
+					AND intInventoryReceiptChargeTaxId <= @maxInventoryReceiptChargeTaxId
 
 				-- Insert the new taxes.
 				INSERT INTO tblICInventoryReceiptChargeTax (
