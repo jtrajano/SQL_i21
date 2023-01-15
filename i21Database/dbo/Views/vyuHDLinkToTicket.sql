@@ -15,4 +15,5 @@
 		tblHDTicket
 		inner join tblEMEntity on tblEMEntity.intEntityId = tblHDTicket.intAssignedToEntity
 		inner join tblHDTicketStatus on tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId
-	
+	where tblHDTicket.intCustomerId IS NOT NULL
+GO

@@ -1211,6 +1211,7 @@
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
     <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
+    <Build Include="dbo\Views\vyuHDTicketLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
