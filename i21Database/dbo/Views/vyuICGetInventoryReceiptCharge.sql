@@ -55,6 +55,9 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, Receipt.intBookId
 	, Receipt.intSubBookId
 	, ReceiptCharge.ysnLock
+	, ReceiptCharge.intNewEntityVendorId
+	, NewVendor.strVendorId AS strNewVendorId 
+	, NewVendor.strName AS strNewVendorName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -75,3 +78,4 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 		FROM tblGLFiscalYearPeriod fp
 		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
 	) fiscal
+	LEFT JOIN vyuAPVendor NewVendor ON NewVendor.[intEntityId] = ReceiptCharge.intNewEntityVendorId

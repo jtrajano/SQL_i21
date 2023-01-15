@@ -33,6 +33,7 @@ DECLARE @SourceType_TransferShipment AS INT = 9
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intReturnValue AS INT 		
+		,@ysnNewOtherChargeVendor BIT 
 
 -- Iterate and process records
 DECLARE @Id INT = NULL,
@@ -64,10 +65,19 @@ BEGIN
 						WHEN strReceiptType = 'Inventory Return' THEN @ReceiptType_InventoryReturn
 					END 
 				,@SourceType = intSourceType 
+				,@ysnNewOtherChargeVendor = ysnNewOtherChargeVendor
 		FROM	tblICInventoryReceipt
 		WHERE	intInventoryReceiptId = @ReceiptId
 	END
 END
+
+IF @ysnNewOtherChargeVendor = 1
+BEGIN 
+	EXEC uspICInventoryReceiptChangeOtherChargeVendor
+		@ReceiptId = @ReceiptId
+		,@UserId = @UserId	
+	RETURN;
+END 
 
 -- Create current snapshot of the Receipt Items 
 BEGIN 

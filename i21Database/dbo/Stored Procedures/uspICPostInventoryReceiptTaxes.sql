@@ -3,6 +3,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
+	,@ysnNewVendorId AS BIT = 0 
 AS
 
 -- Get the A/P Clearing account 
@@ -392,7 +393,7 @@ BEGIN
 				) ex
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-				
+				AND (@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL)
 		
 		-- Other Charge taxes for the Receipt Vendor. 
 		UNION ALL 
@@ -459,6 +460,13 @@ BEGIN
 				) ex
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId	
 				AND (ReceiptCharge.ysnAccrue = 1 OR ReceiptCharge.ysnPrice = 1) -- Note: Tax is only computed if ysnAccrue is Y or ysnPrice is Y. 
+				AND (
+					(@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL)
+					OR (
+						@ysnNewVendorId = 1
+						AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
+					)
+				)
 		
 		-- Price Down - Other Charge taxes. This tax is for the 3rd party vendor. 
 		UNION ALL 
@@ -525,6 +533,13 @@ BEGIN
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND ReceiptCharge.ysnAccrue = 1 
 				AND ReceiptCharge.ysnPrice = 1 
+				AND (
+					(@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL)
+					OR (
+						@ysnNewVendorId = 1
+						AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
+					)
+				)	
 	)
 	
 	-------------------------------------------------------------------------------------------
@@ -661,6 +676,7 @@ END
 ;
 
 -- Create the AP Clearing
+IF (@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL) 
 BEGIN 
 	DECLARE 
 	@intVoucherInvoiceNoOption TINYINT
