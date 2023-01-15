@@ -1155,6 +1155,7 @@
     <Build Include="dbo\Views\vyuHDRoughCutCapacity.sql" />
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+    <Build Include="dbo\Views\vyuHDTicketLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
