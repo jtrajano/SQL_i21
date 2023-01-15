@@ -68,7 +68,7 @@ INSERT INTO #tmpGLDetail (
         ,[dblExchangeRate]       = 1
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Forex Difference'    
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
