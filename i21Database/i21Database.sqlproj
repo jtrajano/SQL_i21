@@ -1494,6 +1494,7 @@
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
     <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
+    <Build Include="dbo\Views\vyuHDTicketLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
