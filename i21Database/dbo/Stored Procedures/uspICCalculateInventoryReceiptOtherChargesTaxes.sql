@@ -1,4 +1,4 @@
-﻿alter PROCEDURE [dbo].[uspICCalculateInventoryReceiptOtherChargesTaxes]
+﻿CREATE PROCEDURE [dbo].[uspICCalculateInventoryReceiptOtherChargesTaxes]
 	@intInventoryReceiptId AS INT 
 	,@ysnNewVendorId AS BIT = 0 
 AS
