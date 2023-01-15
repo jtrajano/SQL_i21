@@ -73,7 +73,7 @@ END
 
 IF @ysnNewOtherChargeVendor = 1
 BEGIN 
-	EXEC uspICInventoryReciptChangeOtherChargeVendor
+	EXEC uspICInventoryReceiptChangeOtherChargeVendor
 		@ReceiptId = @ReceiptId
 		,@UserId = @UserId	
 	RETURN;

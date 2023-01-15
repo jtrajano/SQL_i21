@@ -26,6 +26,7 @@
 	[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[intTaxGroupId] INT NULL,
+	[intNewTaxGroupId] INT NULL,
 	[intForexRateTypeId] INT NULL, 
 	[dblForexRate] NUMERIC(18, 6) NULL,
 	[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((1)), 

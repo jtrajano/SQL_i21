@@ -121,6 +121,7 @@ BEGIN
 			LEFT JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = @intTransactionTypeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
 	;
 
 END 
@@ -270,7 +271,8 @@ BEGIN
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId	
 				AND (ReceiptCharge.ysnAccrue = 1 OR ReceiptCharge.ysnPrice = 1) -- Note: Tax is only computed if ysnAccrue is Y or ysnPrice is Y. 
-		
+				AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
+
 		-- Price Down - Other Charge taxes. This tax is for the 3rd party vendor. 
 		UNION ALL 
 		SELECT	dtmDate								= Receipt.dtmReceiptDate
@@ -324,7 +326,8 @@ BEGIN
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND ReceiptCharge.ysnAccrue = 1 
-				AND ReceiptCharge.ysnPrice = 1 					
+				AND ReceiptCharge.ysnPrice = 1
+				AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
 	)
 	
 	-------------------------------------------------------------------------------------------

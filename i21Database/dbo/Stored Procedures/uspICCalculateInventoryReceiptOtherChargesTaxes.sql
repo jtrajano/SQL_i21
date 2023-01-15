@@ -76,16 +76,43 @@ BEGIN
 			,[intConcurrencyId]	INT 
 		)
 
+		-- If there is a new vendor, update the other charge tax group
+		IF @ysnNewVendorId = 1 
+		BEGIN 
+			UPDATE rc
+			SET
+				rc.intNewTaxGroupId = taxHierarcy.intTaxGroupId
+			FROM 
+				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc
+					ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+				-- Get the default tax group (if override was not provided)
+				OUTER APPLY (
+					SELECT	taxGroup.intTaxGroupId, taxGroup.strTaxGroup
+					FROM	tblSMTaxGroup taxGroup
+					WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
+								rc.intNewEntityVendorId	-- @VendorId
+								,r.intLocationId	--,@CompanyLocationId
+								,NULL							--,@ItemId
+								,r.intShipFromId				--,@VendorLocationId
+								,NULL							--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
+								,DEFAULT						--,@FOB
+							)
+				) taxHierarcy 
+			WHERE
+				rc.intInventoryReceiptId = @intInventoryReceiptId
+				AND rc.intNewEntityVendorId IS NOT NULL 
+		END 
+
 		-- Create the cursor
 		DECLARE loopReceiptChargeItems CURSOR LOCAL FAST_FORWARD
 		FOR 
 		SELECT  Charge.intChargeId
 				,Receipt.intLocationId
 				,Receipt.dtmReceiptDate
-				,ISNULL(Charge.intEntityVendorId, Receipt.intEntityVendorId)
+				,COALESCE(Charge.intNewEntityVendorId, Charge.intEntityVendorId, Receipt.intEntityVendorId)
 				,Charge.intInventoryReceiptChargeId
 				,Receipt.intShipFromId
-				,Charge.intTaxGroupId --,ISNULL(Charge.intTaxGroupId, Receipt.intTaxGroupId)
+				,intTaxGroupId = ISNULL(Charge.intNewTaxGroupId, Charge.intTaxGroupId)
 				,Receipt.intFreightTermId
 				,Charge.intCostUOMId 
 				,CostUOM.intUnitMeasureId
@@ -118,7 +145,7 @@ BEGIN
 			-- Clear the contents of the table variable.
 			DELETE FROM @Taxes
 
-			-- Get the taxes from uspICGetInventoryItemTaxes
+			-- Get the taxes from uspSMGetItemTaxes
 			INSERT INTO @Taxes (
 				--id
 				--,intInvoiceDetailId
@@ -147,7 +174,7 @@ BEGIN
 				,[ysnOverrideTaxGroup]
 			)
 			EXEC dbo.uspSMGetItemTaxes
-					@ItemId				= @ItemId
+				@ItemId				= @ItemId
 				,@LocationId			= @LocationId
 				,@TransactionDate		= @TransactionDate
 				,@TransactionType		= @TransactionType
@@ -281,7 +308,7 @@ BEGIN
 				WHERE 
 					intInventoryReceiptChargeId = @InventoryReceiptChargeId
 
-				-- Insert into the other charge. 
+				-- Insert into the other charge taxes
 				INSERT INTO tblICInventoryReceiptChargeTax (
 					[intInventoryReceiptChargeId]
 					,[intTaxGroupId]
@@ -384,9 +411,25 @@ BEGIN
 							AND newTax.ysnTaxAdjusted = oldTax.ysnTaxAdjusted
 							AND newTax.ysnCheckoffTax = oldTax.ysnCheckoffTax
 					WHERE
-						(newTax.intTaxGroupId IS NULL OR oldTax.intTaxGroupId IS NULL) 
-						OR (ISNULL(newTax.dblTax, 0) <> ISNULL(oldTax.dblTax, 0))
-						OR (ISNULL(newTax.dblAdjustedTax, 0) <> ISNULL(oldTax.dblAdjustedTax, 0))
+						(newTax.intTaxCodeId IS NULL OR oldTax.intTaxCodeId IS NULL) 
+						OR (
+							newTax.intTaxCodeId = oldTax.intTaxCodeId
+							AND (
+								newTax.intTaxAccountId <> oldTax.intTaxAccountId
+								OR newTax.intTaxAccountId IS NULL 
+								OR oldTax.intTaxAccountId IS NULL
+							)
+						)
+						OR (
+							newTax.intTaxCodeId = oldTax.intTaxCodeId
+							AND newTax.intTaxAccountId = oldTax.intTaxAccountId
+							AND ISNULL(newTax.dblTax, 0) <> ISNULL(oldTax.dblTax, 0)
+						)
+						OR (
+							newTax.intTaxCodeId = oldTax.intTaxCodeId
+							AND newTax.intTaxAccountId = oldTax.intTaxAccountId
+							AND ISNULL(newTax.dblAdjustedTax, 0) <> ISNULL(oldTax.dblAdjustedTax, 0)
+						)
 				)
 			BEGIN 
 				-- Flag the existing 
@@ -538,7 +581,7 @@ BEGIN
 		-- Update tblAPVoucherPayable
 		UPDATE ap
 		SET
-			ap.intEntityVendorId = rc.intEntityVendorId
+			ap.intEntityVendorId = rc.intEntityVendorId			
 			,ap.strVendorId = v.strVendorId
 			,ap.strName = v.strName
 			,ap.dblTax = rc.dblTax
@@ -618,7 +661,10 @@ BEGIN
 		UPDATE tblICInventoryReceiptCharge 
 		SET intEntityVendorId = intNewEntityVendorId
 			,intNewEntityVendorId = NULL 
-		WHERE intInventoryReceiptId = @intInventoryReceiptId
+			,intTaxGroupId = ISNULL(intNewTaxGroupId, intTaxGroupId) 
+			,intNewTaxGroupId = NULL 
+		WHERE 
+			intInventoryReceiptId = @intInventoryReceiptId
 			AND intNewEntityVendorId IS NOT NULL 
 	END 
 END
