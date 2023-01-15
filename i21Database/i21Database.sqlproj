@@ -1443,6 +1443,7 @@
     <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
      <Build Include="dbo\Views\vyuHDTicketType.sql" />
      <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
