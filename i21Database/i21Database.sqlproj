@@ -1211,6 +1211,8 @@
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
+  
+    <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8023,7 +8025,6 @@
     <Build Include="dbo\Tables\tblGLVendorMappingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationForCStore.sql" />
     <Build Include="dbo\Views\vyuRKGetMatchingLotAvailableQty.sql" />
-    <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInvoiceIdealReport.sql" />
     <Build Include="dbo\Views\vyuGLVendorMapping.sql" />
