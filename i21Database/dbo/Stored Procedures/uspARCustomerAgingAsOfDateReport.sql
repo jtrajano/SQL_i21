@@ -303,10 +303,10 @@ SELECT I.intInvoiceId
 	 , I.dblInterest
 	 , I.ysnForgiven
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
-INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
+INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
+INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 LEFT JOIN (
 	SELECT intTransactionId, dtmDate, strTransactionType
 	FROM dbo.tblARNSFStagingTableDetail
