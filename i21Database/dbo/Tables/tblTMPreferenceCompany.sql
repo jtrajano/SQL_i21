@@ -29,6 +29,7 @@
     [strLeaseBillingIncentiveCalculation] NVARCHAR(25) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT N'Current Season', 
 	[strPortalOrderMessage]                  NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [intPortalMinimumOrderQuantity] INT NOT NULL DEFAULT 0, 
+    [intCompanyCustomerEntityId] INT NULL, 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 

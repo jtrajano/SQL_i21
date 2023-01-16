@@ -16,7 +16,6 @@
     [intConcurrencyId]    INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblTMWork] PRIMARY KEY CLUSTERED ([intWorkOrderID] ASC),
     CONSTRAINT [FK_tblTMWork_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
-    CONSTRAINT [FK_tblTMWork_tblTMCompanyConsumptionSite] FOREIGN KEY ([intCompanyConsumptionSiteId]) REFERENCES [dbo].[tblTMCompanyConsumptionSite] ([intCompanyConsumptionSiteId]),
     CONSTRAINT [FK_tblTMWork_tblTMWorkCloseReason] FOREIGN KEY ([intCloseReasonID]) REFERENCES [dbo].[tblTMWorkCloseReason] ([intCloseReasonID]),
     CONSTRAINT [FK_tblTMWork_tblTMWorkStatus] FOREIGN KEY ([intWorkStatusTypeID]) REFERENCES [dbo].[tblTMWorkStatusType] ([intWorkStatusID]), 
     CONSTRAINT [FK_tblTMWorkOrder_tblTMWorkOrderCategory] FOREIGN KEY ([intWorkOrderCategoryId]) REFERENCES [dbo].[tblTMWorkOrderCategory]([intWorkOrderCategoryId])
