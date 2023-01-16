@@ -238,8 +238,8 @@ FROM (
 		,[ysnApplyTermDiscount]				=	0
 		,[dblDiscount]						=	 C.dblTempDiscount
 		,[dblDiscountAvailable]				=	0
-		,[dblInterest]					=	A.dblTempInterest
-		,[dblPayment]						=	A.dblTempPayment
+		,[dblInterest]					=	C.dblTempInterest
+		,[dblPayment]						=	C.dblTempPayment
 		,[strInvoiceReportNumber]			=	NULL
 		,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
 		,[intCurrencyExchangeRateId]		=	NULL
