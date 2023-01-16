@@ -31,8 +31,8 @@ SELECT
 ,dtmDate
 ,dblRateAmountFrom = BAF.dblRate
 ,dblRateAmountTo = BAT.dblRate
-,dblCrossRate =dblAmountForeignTo/dblAmountForeignFrom
-,dblReverseRate= dblAmountForeignFrom/dblAmountForeignTo
+,dblCrossRate =ROUND(dblAmountForeignTo/dblAmountForeignFrom,6)
+,dblReverseRate= Round(dblAmountForeignFrom/dblAmountForeignTo, 6)
 ,dblAmountForeignFrom = ROUND(dblAmountForeignFrom, 2)
 ,dblAmountForeignTo = ROUND(dblAmountForeignTo, 2)
 ,dblAmountFrom = ROUND(dblAmountForeignFrom * BAF.dblRate, 2)

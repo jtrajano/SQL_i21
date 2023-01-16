@@ -267,7 +267,7 @@ END
         ,[strReference]          = A.strReferenceTo
         ,[intCurrencyId]         = intCurrencyIdAmountFrom
         ,[intCurrencyExchangeRateTypeId] = NULL
-        ,[dblExchangeRate]       = dblReceivableFn/dblReceivableFx
+        ,[dblExchangeRate]       = ROUND(dblReceivableFn/dblReceivableFx,6)
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'Currency Payable'
@@ -297,7 +297,7 @@ END
         ,[strReference]          = A.strReferenceTo
         ,[intCurrencyId]         = intCurrencyIdAmountTo
         ,[intCurrencyExchangeRateTypeId] =  NULL
-        ,[dblExchangeRate]       = dblPayableFn/dblPayableFx
+        ,[dblExchangeRate]       = ROUND(dblPayableFn/dblPayableFx, 6)
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'Currency Receivable'
