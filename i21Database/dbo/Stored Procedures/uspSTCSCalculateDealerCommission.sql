@@ -81,7 +81,7 @@ BEGIN
 	BEGIN
 		SET @strMessage = 'Negative Dealer commissions have been calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' which is an indication that this fuel''s cost basis isn''t correctly set. Please correct the cost basis before processing this day.'
 		INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
-		VALUES (@intCheckoutProcessId, @intCheckoutId, 'S', @strMessage, 1) 
+		VALUES (@intCheckoutProcessId, @intCheckoutId, 'F', @strMessage, 1) 
 	END
   
 	--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
