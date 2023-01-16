@@ -50,6 +50,7 @@ BEGIN TRANSACTION
   strControlType,  
   strContainer,  
   intScreenId,  
+  intParentScreenId,
   intConcurrencyId  
  )  
  SELECT   
@@ -59,6 +60,7 @@ BEGIN TRANSACTION
   A.strControlType,  
   A.strContainer,  
   C.intScreenId,  
+  A.intParentScreenId,
   A.intConcurrencyId  
  FROM tblSMControlStage A  
   INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId  
@@ -67,7 +69,8 @@ BEGIN TRANSACTION
   
  UPDATE tblSMControl  
  SET strControlName = A.strControlName,  
-  strControlType = A.strControlType  
+  strControlType = A.strControlType,
+  intParentScreenId = A.intParentScreenId
  FROM tblSMControlStage A  
   INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId  
   INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace  

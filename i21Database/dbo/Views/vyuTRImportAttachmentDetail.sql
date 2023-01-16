@@ -24,7 +24,7 @@ SELECT
 	--) END  AS strInvoiceNumber
 	, STUFF((SELECT ', ' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT * FROM [dbo].[fnTRSplit] (IAD.strInvoiceId,','))
 		FOR XML PATH('')),1,1,''
-	) AS strInvoiceNumber
+	) COLLATE Latin1_General_CI_AS AS strInvoiceNumber
 	, LH.strTransaction AS strTransportLoadNumber
 FROM
 		dbo.tblTRImportAttachmentDetail AS IAD 

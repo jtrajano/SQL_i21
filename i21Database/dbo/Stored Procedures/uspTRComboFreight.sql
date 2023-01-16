@@ -25,7 +25,7 @@ BEGIN
 				SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit
 				FROM tblTRComboFreightShipVia 
 				WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
-					AND dblMinimumUnit >= @dblMinimumUnit
+					--AND dblMinimumUnit >= @dblMinimumUnit
 					AND intShipViaEntityId = @intShipViaEntityId
 				ORDER BY dtmEffectiveDateTime DESC
 
@@ -34,7 +34,7 @@ BEGIN
 					SELECT TOP 1 @intComboFreightShipViaId = intComboFreightShipViaId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
 					FROM tblTRComboFreightShipVia 
 					WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
-						AND dblMinimumUnit >= @dblMinimumUnit
+						--AND dblMinimumUnit >= @dblMinimumUnit
 					ORDER BY dtmEffectiveDateTime DESC
 				END
 
@@ -65,7 +65,7 @@ BEGIN
 			SELECT TOP 1 @intComboFreightCustomerId = intComboFreightCustomerId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
 			FROM tblTRComboFreightCustomer
 			WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
-				AND dblMinimumUnit >= @dblMinimumUnit
+				--AND dblMinimumUnit >= @dblMinimumUnit
 				AND intCustomerEntityId = @intCustomerEntityId
 				AND intCustomerLocationId = @intCustomerLocationId
 			ORDER BY dtmEffectiveDateTime DESC
@@ -75,7 +75,7 @@ BEGIN
 				SELECT TOP 1 @intComboFreightCustomerId = intComboFreightCustomerId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
 				FROM tblTRComboFreightCustomer
 				WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
-					AND dblMinimumUnit >= @dblMinimumUnit
+					--AND dblMinimumUnit >= @dblMinimumUnit
 					AND intCustomerEntityId = @intCustomerEntityId
 				ORDER BY dtmEffectiveDateTime DESC
 
@@ -84,7 +84,7 @@ BEGIN
 					SELECT TOP 1 @intComboFreightCustomerId = intComboFreightCustomerId, @strFreightRateType = strFreightRateType, @strGallonType = strGallonType, @intCategoryId = intCategoryId, @dblComboMinimumUnit = dblMinimumUnit 
 					FROM tblTRComboFreightCustomer
 					WHERE dtmEffectiveDateTime <= @dtmEffectiveDateTime
-						AND dblMinimumUnit >= @dblMinimumUnit
+						--AND dblMinimumUnit >= @dblMinimumUnit
 					ORDER BY dtmEffectiveDateTime DESC
 				END
 			END

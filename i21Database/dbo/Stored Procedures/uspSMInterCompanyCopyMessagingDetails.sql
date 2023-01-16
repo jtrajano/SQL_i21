@@ -225,15 +225,16 @@ BEGIN
 			--Copy tblSMActivity and all entries in tblSMAttendee, tblSMComment, and tblSMNotification
 			
 			---STARTING NUMBERS--
-			SET @sql = N'
-				SELECT @paramOut = strPrefix + CONVERT(VARCHAR, intNumber) FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMStartingNumber] 
-				WHERE strTransactionType = ''Activity'' AND strModule = ''System Manager''';
-			EXEC sp_executesql @sql, @ParamStringDefinition, @paramOut = @strNewActivityNo OUTPUT;
 
 			SET @sql = N'
 				UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMStartingNumber] SET intNumber = intNumber+1 WHERE strTransactionType = ''Activity'' and strModule = ''System Manager'';
 			';
 			EXEC sp_executesql @sql
+
+			SET @sql = N'
+				SELECT @paramOut = strPrefix + CONVERT(VARCHAR, intNumber) FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMStartingNumber] 
+				WHERE strTransactionType = ''Activity'' AND strModule = ''System Manager''';
+			EXEC sp_executesql @sql, @ParamStringDefinition, @paramOut = @strNewActivityNo OUTPUT;
 			---END STARTING NUMBERS--
 
 			SET @sql = N'INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMActivity]

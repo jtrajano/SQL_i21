@@ -111,6 +111,7 @@ SELECT dblBurnRate = site.dblBurnRate
 	, ysnLostCustomer = site.ysnLostCustomer
 	, dtmLostCustomerDate = site.dtmLostCustomerDate
 	, strFacilityNumber = site.strFacilityNumber
+	,ysnRequireClock = site.ysnRequireClock
 					
 	, strSiteCustomerLocation = EL.strCheckPayeeName
 	, intSiteCustomerLocationId = LCS.intEntityLocationId
@@ -136,15 +137,15 @@ SELECT dblBurnRate = site.dblBurnRate
 	, intOpenWorkOrder = ISNULL(openWorkOrder.intCount, 0)
 	, strLostCustomerReason = lostCustomerReason.strLostCustomerReason
 	, strFirstTankSerialNumber = device.strSerialNumber
-
+	
 FROM tblTMSite site
 LEFT JOIN (tblEMEntityLocationConsumptionSite LCS JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LCS.intEntityLocationId) ON LCS.intSiteID = site.intSiteID	
 JOIN (tblEMEntity driver JOIN tblEMEntityType et ON et.intEntityId = driver.intEntityId AND strType = 'Salesperson') ON driver.intEntityId = site.intDriverID
 JOIN tblTMRoute route ON route.intRouteId = site.intRouteId
 JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = site.intLocationId
 JOIN (tblICItem item JOIN tblICCategory cat ON cat.intCategoryId = item.intCategoryId) ON item.intItemId = site.intProduct
-JOIN tblTMClock clock ON clock.intClockID = site.intClockID
-JOIN tblSMTerm deliverTerm ON deliverTerm.intTermID = site.intDeliveryTermID
+LEFT JOIN tblTMClock clock ON clock.intClockID = site.intClockID
+LEFT JOIN tblSMTerm deliverTerm ON deliverTerm.intTermID = site.intDeliveryTermID
 LEFT JOIN tblSMCompanyLocationPricingLevel pricingLevel ON pricingLevel.intCompanyLocationPricingLevelId = site.intCompanyLocationPricingLevelId
 LEFT JOIN tblSMTaxGroup taxLocale ON taxLocale.intTaxGroupId = site.intTaxStateID				
 LEFT JOIN tblTMFillMethod fillMethod ON fillMethod.intFillMethodId = site.intFillMethodId

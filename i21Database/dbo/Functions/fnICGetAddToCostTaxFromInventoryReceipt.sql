@@ -29,7 +29,7 @@ BEGIN
 			ON ItemTaxes.intTaxCodeId = TaxCode.intTaxCodeId
 		WHERE	
 			ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
-			AND TaxCode.ysnAddToCost = 1
+			AND ItemTaxes.ysnAddToCost = 1
 
 	SELECT	@units = 
 					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, ri.dblNet)

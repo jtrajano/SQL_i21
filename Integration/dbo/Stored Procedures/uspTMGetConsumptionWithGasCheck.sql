@@ -47,7 +47,7 @@ BEGIN
 	
 	
 	SET NOCOUNT ON;
-	IF (ISNULL(@xmlParam,'') = '')
+	IF (ISNULL(@xmlParam COLLATE Latin1_General_CI_AS,'') = '')
 	BEGIN 
 		SELECT 
 		  '' AS strCustomerFirstName

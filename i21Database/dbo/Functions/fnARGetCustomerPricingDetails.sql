@@ -135,14 +135,17 @@ BEGIN
 		,SP.strInvoiceType
 	FROM
 		tblARCustomerSpecialPrice SP
+	INNER JOIN
+		tblARCustomer C
+			ON SP.intEntityCustomerId = C.[intEntityId]
 	WHERE
-		SP.intEntityCustomerId = @CustomerId
+		C.[intEntityId] = @CustomerId
 		AND ((CAST(@TransactionDate AS DATE) BETWEEN CAST(SP.dtmBeginDate AS DATE) AND CAST(ISNULL(SP.dtmEndDate, GETDATE()) AS DATE)) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmEndDate IS NULL))
 		AND ((@LocationId IS NOT NULL) OR (@LocationId IS NULL AND SP.strPriceBasis IN ('F', 'R', 'L', 'O')))
 		AND ISNULL(SP.intCurrencyId, @FunctionalCurrencyId) = @SpecialPricingCurrencyId
 		AND (ISNULL(SP.intCategoryId, 0) = 0 OR SP.intCategoryId = @ItemCategoryId) 
 		AND (ISNULL(SP.intItemId, 0) = 0 OR SP.intItemId = @ItemId)
-		AND (ISNULL(SP.intCustomerLocationId, 0) = 0 OR SP.intCustomerLocationId = @ShipToLocationId)
+		AND (ISNULL(SP.intCustomerLocationId, 0) = 0 OR SP.intCustomerLocationId = C.intShipToId)
 		AND (@InvoiceType IS NULL OR (ISNULL(SP.strInvoiceType, '') = '' OR SP.strInvoiceType = @InvoiceType))
 		ORDER BY SP.intCustomerLocationId DESC, SP.intItemId DESC, SP.intCategoryId DESC, SP.intCurrencyId DESC
 

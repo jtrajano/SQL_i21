@@ -12,12 +12,12 @@ SELECT TL.intLoadHeaderId
 	, strCustomerLocation = NULL
 	, intCustomerCompanyLocationId = NULL
 	, strCustomerCompanyLocation = NULL
-	, intEntityVendorId = CAST(SP.intEntityVendorId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intEntityVendorId = SP.intEntityVendorId
 	, strFuelSupplier = Terminal.strName
-	, intVendorLocationId = CAST(SP.intEntityLocationId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intVendorLocationId = SP.intEntityLocationId
 	, SP.strSupplyPoint
 	, strBOL = TR.strBillOfLading
-	, intReceiptCompanyLocationId = CAST(Location.intCompanyLocationId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intReceiptCompanyLocationId = Location.intCompanyLocationId
 	, strReceiptCompanyLocation = Location.strLocationName
 	, Item.intItemId
 	, strItem = Item.strItemNo
@@ -34,13 +34,17 @@ SELECT TL.intLoadHeaderId
 	, strDriver = Driver.strName
 	, dtmDateTime = TL.dtmLoadDateTime
 	, TL.ysnPosted
-	, intInventoryReceiptId = CAST(Receipt.intInventoryReceiptId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intInventoryReceiptId = Receipt.intInventoryReceiptId
 	, strInventoryReceiptNo = Receipt.strReceiptNumber
-	, intInventoryTransferId = CAST(Transfer.intInventoryTransferId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intInventoryTransferId = Transfer.intInventoryTransferId
 	, strInventoryTransferNo = Transfer.strTransferNo
 	, intInvoiceId = ''
 	, strInvoiceNo = NULL
-	, strLoadNumber = isnull(b.strExternalLoadNumber, b.strLoadNumber)
+	, strLoadNumber = ISNULL(b.strExternalLoadNumber, b.strLoadNumber)
+	, TL.intDispatchOrderId
+	, strDispatchId = LGD.strDispatchOrderNumber
+	, intTMOId = NULL
+	, strTMOrder = ''
 	, strShipVia = c.strName
 	, strSeller = d.strName
 	, strStateName = e.strStateName
@@ -62,6 +66,7 @@ left join tblEMEntity d on d.intEntityId = TL.intSellerId
 left join tblTRState e on e.intStateId = TL.intStateId
 left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
 left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
+LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
 
 
 UNION ALL
@@ -75,13 +80,12 @@ SELECT TL.intLoadHeaderId
 	, strCustomerLocation = EL.strLocationName
 	, intCustomerCompanyLocationId = SM.intCompanyLocationId
 	, strCustomerCompanyLocation = SM.strLocationName
-	, intEntityVendorId = CAST(Receipts.intEntityVendorId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	, intEntityVendorId = Receipts.intEntityVendorId
 	, Receipts.strFuelSupplier
-	, intVendorLocationId = CAST(Receipts.intEntityLocationId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intVendorLocationId = Receipts.intEntityLocationId
 	, Receipts.strSupplyPoint
-	--, strBOL = Receipts.strBillOfLading
 	, strBOL = DD.strBillOfLading
-	, intReceiptCompanyLocationId = CAST(Receipts.intReceiptCompanyLocationId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intReceiptCompanyLocationId = Receipts.intReceiptCompanyLocationId
 	, Receipts.strReceiptCompanyLocation
 	, Item.intItemId
 	, strItem = Item.strItemNo
@@ -94,13 +98,17 @@ SELECT TL.intLoadHeaderId
 	, strDriver = Driver.strName
 	, dtmDateTime = DH.dtmInvoiceDateTime
 	, TL.ysnPosted
-	, intInventoryReceiptId = CAST(Receipts.intInventoryReceiptId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intInventoryReceiptId = Receipts.intInventoryReceiptId
 	, strInventoryReceiptNo = Receipts.strReceiptNumber
-	, intInventoryTransferId = CAST(Receipts.intInventoryTransferId AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS
+	, intInventoryTransferId = Receipts.intInventoryTransferId
 	, strInventoryTransferNo = Receipts.strTransferNo
 	, Invoice.intInvoiceId
 	, strInvoiceNo = Invoice.strInvoiceNumber
-	, strLoadNumber = isnull(b.strExternalLoadNumber, b.strLoadNumber)
+	, strLoadNumber = ISNULL(b.strExternalLoadNumber, b.strLoadNumber)
+	, TL.intDispatchOrderId
+	, strDispatchId = LGD.strDispatchOrderNumber
+	, intTMOId = DD.intTMOId
+	, strTMOrder = TMD.strOrderNumber
 	, strShipVia = c.strName
 	, strSeller = d.strName
 	, strStateName = e.strStateName
@@ -116,93 +124,12 @@ LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = DH.intInvoiceId
 LEFT JOIN vyuEMEntity CS ON CS.intEntityId = DH.intEntityCustomerId AND CS.strType = 'Customer'
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DH.intShipToLocationId
 LEFT JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = DH.intCompanyLocationId
-left join tblLGLoad b on b.intLoadId = TL.intLoadId
-left join tblEMEntity c on c.intEntityId = TL.intShipViaId
-left join tblEMEntity d on d.intEntityId = TL.intSellerId
-left join tblTRState e on e.intStateId = TL.intStateId
-left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
-left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
-left join vyuTRLinkedReceipts Receipts ON Receipts.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
--- LEFT JOIN(
--- 	SELECT DISTINCT intLoadDistributionDetailId
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CAST(CD.intEntityVendorId AS NVARCHAR(10))
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 					AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) intEntityVendorId
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CD.strFuelSupplier
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 					AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) strFuelSupplier
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CAST(CD.intEntityLocationId AS NVARCHAR(10))
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) intEntityLocationId
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CD.strSupplyPoint
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) strSupplyPoint
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CD.strBillOfLading
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId 
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) strBillOfLading
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CAST(CD.intReceiptCompanyLocationId AS NVARCHAR(10))
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) intReceiptCompanyLocationId
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CD.strReceiptCompanyLocation
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) strReceiptCompanyLocation
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CAST(CD.intInventoryReceiptId AS NVARCHAR(10))
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) intInventoryReceiptId
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CD.strReceiptNumber
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) strReceiptNumber
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CAST(CD.intInventoryTransferId AS NVARCHAR(10))
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) intInventoryTransferId
--- 		, STUFF(
--- 				(SELECT	DISTINCT ', ' + CD.strTransferNo
--- 				FROM vyuTRLinkedReceipts CD
--- 				WHERE CD.intLoadHeaderId = CH.intLoadHeaderId
--- 				AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId
--- 				FOR XML PATH('')), 1, 2, ''
--- 				) strTransferNo
--- 		, (SELECT AVG(CD.dblUnitCost)
--- 			FROM vyuTRLinkedReceipts CD
--- 			WHERE CD.intLoadHeaderId = CH.intLoadHeaderId AND CD.intLoadDistributionDetailId = CH.intLoadDistributionDetailId) dblUnitCost
--- 	FROM vyuTRLinkedReceipts CH) Receipts ON Receipts.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+LEFT JOIN tblLGLoad b on b.intLoadId = TL.intLoadId
+LEFT JOIN tblEMEntity c on c.intEntityId = TL.intShipViaId
+LEFT JOIN tblEMEntity d on d.intEntityId = TL.intSellerId
+LEFT JOIN tblTRState e on e.intStateId = TL.intStateId
+LEFT JOIN tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
+LEFT JOIN tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
+LEFT JOIN vyuTRLinkedReceipts Receipts ON Receipts.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
+LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
