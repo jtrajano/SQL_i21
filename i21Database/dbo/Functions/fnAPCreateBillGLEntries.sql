@@ -1264,7 +1264,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intSourceTaxAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CAST((C.dblSourceTransactionTax - B.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+		[dblCredit]						=	CAST((C.dblSourceTransactionTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -1316,7 +1316,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](G.intItemId, ISNULL(H.intItemLocationId, I.intItemLocationId), 'AP Clearing'),
-		[dblDebit]						=	CAST((C.dblSourceTransactionTax - B.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+		[dblDebit]						=	CAST((C.dblSourceTransactionTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
