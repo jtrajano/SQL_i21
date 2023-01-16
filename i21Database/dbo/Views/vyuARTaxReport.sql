@@ -144,7 +144,7 @@ INNER JOIN (
 		,dblRate				= IDT.dblRate
 		,dblPrice				= ID.dblPrice
 		,dblQtyShipped			= ID.dblQtyShipped
-		,dblLineTotal			= ID.dblQtyShipped * ID.dblPrice
+		,dblLineTotal			= ID.dblQtyShipped * ID.dblPrice * ISNULL(ITEMUOMSETUP.dblUnitQty,1)
 		,dblBaseLineTotal		= ID.dblQtyShipped * ID.dblBasePrice
 		,dblAdjustedTax			= IDT.dblAdjustedTax
 		,dblBaseAdjustedTax		= IDT.dblBaseAdjustedTax
@@ -173,7 +173,7 @@ INNER JOIN (
 		,intCategoryId			= ITEM.intCategoryId
 		,intTaxCodeCount		= COALESCE(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount, TAXCLASSTOTALBYINVOICEDETAIL.intTaxClassCount)
 		,intTonnageTaxUOMId		= ITEM.intTonnageTaxUOMId
-		,dblQtyTonShipped		= CASE WHEN ITEM.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ITEMUOMSETUP.intItemUOMId, ID.intItemUOMId), ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
+		,dblQtyTonShipped		= CASE WHEN ITEM.intTonnageTaxUOMId IS NOT NULL THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ITEMUOMSETUPTONNAGE.intItemUOMId, ID.intItemUOMId), ID.dblQtyShipped)) ELSE ID.dblQtyShipped END
 		,strTaxPoint			= TAXCODE.strTaxPoint
 		,strCommodityCode		= ICC.strCommodityCode 
 		,strUnitOfMeasure		= ICUM.strUnitMeasure
@@ -239,8 +239,16 @@ INNER JOIN (
 			 , intItemId
 			 , intUnitMeasureId
 		FROM tblICItemUOM WITH (NOLOCK) 
+	) ITEMUOMSETUPTONNAGE ON ITEMUOMSETUPTONNAGE.intItemId = ITEM.intItemId
+				  AND ITEMUOMSETUPTONNAGE.intUnitMeasureId = ITEM.intTonnageTaxUOMId
+	LEFT JOIN (
+		SELECT intItemUOMId
+			 , intItemId
+			 , intUnitMeasureId
+			 , dblUnitQty
+		FROM tblICItemUOM WITH (NOLOCK) 
 	) ITEMUOMSETUP ON ITEMUOMSETUP.intItemId = ITEM.intItemId
-				  AND ITEMUOMSETUP.intUnitMeasureId = ITEM.intTonnageTaxUOMId
+				  AND ITEMUOMSETUP.intItemUOMId = ID.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ICUM ON ITEMUOMSETUP.intUnitMeasureId = ICUM.intUnitMeasureId
 	INNER JOIN (
 		SELECT intCategoryId
