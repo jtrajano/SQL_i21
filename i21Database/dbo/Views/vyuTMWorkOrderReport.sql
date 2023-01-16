@@ -104,6 +104,7 @@ LEFT JOIN tblTMWorkOrderCategory CAT
 LEFT JOIN (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z on 1=1
 LEFT JOIN (SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A on 1=1
 WHERE STE.ysnActive = 1  AND CUS.vwcus_active_yn = 'Y' 
+/*
 union all
 SELECT 
 	strCustomerNumber = CUS.vwcus_key COLLATE Latin1_General_CI_AS
@@ -209,6 +210,7 @@ LEFT JOIN tblTMWorkOrderCategory CAT
 LEFT JOIN (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z on 1=1
 LEFT JOIN (SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) A on 1=1
 WHERE STE.ysnActive = 1  AND CUS.vwcus_active_yn = 'Y' 
+*/
 
 GO
 
