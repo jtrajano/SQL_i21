@@ -84,6 +84,11 @@
 	[strFacilityNumber]         NVARCHAR (30)   COLLATE Latin1_General_CI_AS NULL,
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     [intRowNumber] INT NULL,
+
+    --[strDeliveryMode]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT('Metered') NOT NULL,
+    [ysnNoRainyDayDelivery]     BIT             DEFAULT 0 NOT NULL,
+    [strDeliveryStatus]         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+
     [ysnCompanySite]			  BIT             DEFAULT 0 NOT NULL,
     [intCompanyLocationSubLocationId] INT NULL,
     CONSTRAINT [PK_tblTMSite] PRIMARY KEY CLUSTERED ([intSiteID] ASC),
