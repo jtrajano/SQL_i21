@@ -1108,6 +1108,14 @@ BEGIN
 																) ILD
 																WHERE intInventoryReceiptId = @intTransactionRecordHeaderId)
 						END
+
+						-- SCENARIO FOR RM-5160 (NO INVENTORY SHIPMENT, NO LOAD SHIPMENT)
+						IF @intTransactionReferenceId IS NULL
+						BEGIN 
+							SELECT @intTransactionReferenceId = (SELECT TOP 1 intInventoryReceiptItemId
+																FROM tblICInventoryReceiptItem
+																WHERE intInventoryReceiptId = @intTransactionRecordHeaderId)
+						END
 					END
 
 				
