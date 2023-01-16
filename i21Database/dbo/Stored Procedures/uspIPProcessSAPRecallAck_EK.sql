@@ -44,7 +44,7 @@ BEGIN TRY
 	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
 	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Recall Ack'
+	WHERE strType = 'Recall BlendSheet Ack'
 		AND intStatusId IS NULL
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
@@ -99,10 +99,10 @@ BEGIN TRY
 				,RecallAllowed
 				,StatusText
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
-					DocNo BIGINT '../CtrlPoint/DocNo'
-					,MsgType NVARCHAR(50) '../CtrlPoint/MsgType'
-					,Sender NVARCHAR(50) '../CtrlPoint/Sender'
-					,Receiver NVARCHAR(50) '../CtrlPoint/Receiver'
+					DocNo BIGINT '../DocNo'
+					,MsgType NVARCHAR(50) '../MsgType'
+					,Sender NVARCHAR(50) '../Sender'
+					,Receiver NVARCHAR(50) '../Receiver'
 					,Plant NVARCHAR(50)
 					,OrderNo NVARCHAR(50)
 					,RecallAllowed INT

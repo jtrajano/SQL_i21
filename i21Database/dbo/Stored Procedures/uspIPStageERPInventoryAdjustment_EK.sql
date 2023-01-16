@@ -22,9 +22,9 @@ BEGIN TRY
 	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
 	WHERE strType IN (
-			'Quantity Adj'
-			,'Consumption'
-			,'Lot Move'
+			'Stock Adjustment'
+			,'Stock Consumption'
+			,'Stock Movement'
 			)
 	AND intStatusId IS NULL
 
@@ -81,11 +81,13 @@ BEGIN TRY
 				,strStatus
 				,strReasonCode
 				,strNotes
+				,strNewLocation
 				,strNewStorageLocation
 				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
 				,dtmExpiryDate 
+				,strTranferOrderStatus
 				)
 			OUTPUT INSERTED.strLotNo
 			INTO @tblIPLot
@@ -112,18 +114,32 @@ BEGIN TRY
 						THEN SourceStorageUnit
 					ELSE StorageUnit
 					END
-				,Quantity
+				,CASE 
+					WHEN TransactionType =8
+						THEN -Quantity
+					ELSE Quantity
+					END
 				,QuantityUOM
-				,NetWeight 
+				,CASE 
+					WHEN TransactionType =8
+						THEN -NetWeight 
+					ELSE NetWeight 
+					END
 				,NetWeightUOM 
 				,Status
 				,ReasonCode
 				,Notes
+				,NewLocation
 				,NewStorageLocation
 				,NewStorageUnit
 				,OrderNo
 				,OrderCompleted
 				,ExpiryDate 
+				,CASE 
+					WHEN TransactionType =12
+						THEN 'Open'
+					ELSE NULL
+					END
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../CtrlPoint/DocNo'
 					,Location NVARCHAR(6)
@@ -146,6 +162,7 @@ BEGIN TRY
 					,SourceLocation NVARCHAR(50)
 					,SourceStorageLocation NVARCHAR(50)
 					,SourceStorageUnit NVARCHAR(50)
+					,NewLocation NVARCHAR(50)
 					,NewStorageLocation NVARCHAR(50)
 					,NewStorageUnit NVARCHAR(50)
 					,OrderNo nvarchar(50)
