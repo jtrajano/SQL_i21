@@ -19,7 +19,7 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [dblExchangeRate]           NUMERIC (38, 20) NOT NULL,
     [dtmDateEntered]            DATETIME         NOT NULL,
     [dtmTransactionDate]        DATETIME         NULL,
-    [strJournalLineDescription] NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
+    [strJournalLineDescription] NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL, 
 	[intJournalLineNo]			INT              NULL,
     [ysnIsUnposted]             BIT              NOT NULL,    
     [intUserId]                 INT              NULL,

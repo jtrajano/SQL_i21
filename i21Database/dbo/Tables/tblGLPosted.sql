@@ -10,7 +10,7 @@
 	[dblDebitUnit]			NUMERIC(20, 6)	NULL,
 	[dblCreditUnit]			NUMERIC(20, 6)	NULL,
 	[strCode]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
-	[intCurrencyId]			INT             NOT NULL,
+	[intCurrencyId]			INT             NOT NULL DEFAULT 0,
 	[intConcurrencyId]		INT             NOT NULL,
 	[intLedgerId]			INT             NOT NULL DEFAULT 0,
 	[intSubledgerId]		INT             NOT NULL DEFAULT 0,
