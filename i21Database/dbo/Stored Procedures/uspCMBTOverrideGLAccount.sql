@@ -153,9 +153,12 @@ BEGIN
     BEGIN
         SET @msg += '<li>' + @newStrAccountId + ' is a  non-existing account for override</li>' 
     END
-    SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
-    UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
-    WHERE A.intAccountId = @intAccountIdLoop
+    ELSE IF @newStrAccountId <> @strAccountId
+    BEGIN
+        SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
+        UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
+        WHERE A.intAccountId = @intAccountIdLoop
+    END
     DELETE FROM @GLEntries WHERE intAccountId = @intAccountIdLoop
 END
 
