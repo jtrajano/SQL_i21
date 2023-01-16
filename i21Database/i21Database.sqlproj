@@ -1120,12 +1120,7 @@
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotArchive.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotError.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotStage.sql" />
-    <Build Include="dbo\Tables\tblTMCompanyConsumptionSite.sql" />
-    <Build Include="dbo\Tables\tblTMCompanySiteDevice.sql" />
     <Build Include="dbo\Views\vyuTMCompanyConsumptionSite.sql" />
-    <Build Include="dbo\Views\vyuTMCompanySiteDevice.sql" />
-    <Build Include="dbo\Views\vyuTMCompanySiteEvent.sql" />
-    <Build Include="dbo\Views\vyuTMCompanySiteWorkOrder.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityLob.sql" />
     <None Include="Scripts\Post-Deployment\SM\2210_EncryptPasswords2.sql" />
     <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
