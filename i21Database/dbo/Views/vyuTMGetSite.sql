@@ -112,6 +112,7 @@ SELECT dblBurnRate = site.dblBurnRate
 	, dtmLostCustomerDate = site.dtmLostCustomerDate
 	, strFacilityNumber = site.strFacilityNumber
 	,ysnRequireClock = site.ysnRequireClock
+	,ysnCompanySite = site.ysnCompanySite
 					
 	, strSiteCustomerLocation = EL.strCheckPayeeName
 	, intSiteCustomerLocationId = LCS.intEntityLocationId
@@ -137,11 +138,19 @@ SELECT dblBurnRate = site.dblBurnRate
 	, intOpenWorkOrder = ISNULL(openWorkOrder.intCount, 0)
 	, strLostCustomerReason = lostCustomerReason.strLostCustomerReason
 	, strFirstTankSerialNumber = device.strSerialNumber
-	
+	, strLocationAddress = location.strAddress
+	, strLocationPhone = location.strPhone
+	, site.intCompanyLocationSubLocationId
+	, sublocation.strSubLocationName
+	, strLocationNumber = location.strLocationNumber
+	, strLocationType = location.strLocationType
+	, strLocationEmail = location.strEmail
+	, ysnLocationActive = ISNULL(location.ysnLocationActive,0)
+	, strLocationInternalNotes = location.strInternalNotes
 FROM tblTMSite site
 LEFT JOIN (tblEMEntityLocationConsumptionSite LCS JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LCS.intEntityLocationId) ON LCS.intSiteID = site.intSiteID	
-JOIN (tblEMEntity driver JOIN tblEMEntityType et ON et.intEntityId = driver.intEntityId AND strType = 'Salesperson') ON driver.intEntityId = site.intDriverID
-JOIN tblTMRoute route ON route.intRouteId = site.intRouteId
+LEFT JOIN (tblEMEntity driver JOIN tblEMEntityType et ON et.intEntityId = driver.intEntityId AND strType = 'Salesperson') ON driver.intEntityId = site.intDriverID
+LEFT JOIN tblTMRoute route ON route.intRouteId = site.intRouteId
 JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = site.intLocationId
 JOIN (tblICItem item JOIN tblICCategory cat ON cat.intCategoryId = item.intCategoryId) ON item.intItemId = site.intProduct
 LEFT JOIN tblTMClock clock ON clock.intClockID = site.intClockID
@@ -159,3 +168,4 @@ LEFT JOIN openWorkOrder ON openWorkOrder.intSiteId = site.intSiteID
 LEFT JOIN tblTMLostCustomerReason lostCustomerReason ON lostCustomerReason.intLostCustomerReasonId = site.intLostCustomerReasonId
 LEFT JOIN device ON device.intSiteId = site.intSiteID
 LEFT JOIN lastLeakCheckEvent ON lastLeakCheckEvent.intSiteId = site.intSiteID
+LEFT JOIN tblSMCompanyLocationSubLocation sublocation ON site.intCompanyLocationSubLocationId = sublocation.intCompanyLocationSubLocationId

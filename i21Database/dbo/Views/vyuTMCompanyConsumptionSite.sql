@@ -1,49 +1,54 @@
 ﻿CREATE VIEW [dbo].[vyuTMCompanyConsumptionSite]
 	AS 
-SELECT CS.intCompanyConsumptionSiteId, 
-C.intCompanyLocationId,
-C.strLocationName strCompanyLocationName,
-C.strPhone strCompanyLocationPhone,
-C.strAddress strCompanyLocationAddress,
-CS.strBillingBy, 
-CS.ysnActive, 
-CS.intSiteNumber,
-CS.intCompanyLocationSubLocationId,
-SL.strSubLocationName,
-CS.strDescription,
-CS.strSiteAddress,
-CS.strZipCode,
-CS.strCity,
-CS.strState,
-CS.strCountry,
-CS.dblLatitude,
-CS.dblLongitude,
-CS.intDriverId,
-SP.strName strDriverName,
-CS.intRouteId,
-R.strRouteId strRoute,
-CS.strSequenceId,
-CS.dtmLastDeliveryDate,
-CS.dblLastGalInTank,
-CS.dblLastDeliveredGal,
-CS.strComment,
-CS.strInstruction,
-CS.intConcurrencyId,
-CS.intItemId,
-I.strItemNo,
-I.strDescription strItemDescription,
-CS.intFillMethodId,
-FM.strFillMethod,
-CS.intFillGroupId,
-FG.strFillGroupCode,
-CS.intGlobalJulianCalendarId,
-JC.strDescription strJulianCalendar
-FROM tblSMCompanyLocation C
-INNER JOIN tblTMCompanyConsumptionSite CS ON CS.intCompanyLocationId = C.intCompanyLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId
-LEFT JOIN tblICItem I ON I.intItemId = CS.intItemId
-LEFT JOIN vyuEMSalesperson SP ON SP.intEntityId = CS.intDriverId
-LEFT JOIN tblTMRoute R ON R.intRouteId = CS.intRouteId
-LEFT JOIN tblTMFillMethod FM ON FM.intFillMethodId = CS.intFillMethodId
-LEFT JOIN tblTMFillGroup FG ON FG.intFillGroupId = CS.intFillGroupId
-LEFT JOIN tblTMGlobalJulianCalendar JC ON JC.intGlobalJulianCalendarId = CS.intGlobalJulianCalendarId
+SELECT 
+	A.intCustomerID
+	,A.intSiteID
+	,B.intCompanyLocationId
+	,B.strLocationName strCompanyLocationName
+	,B.strPhone strCompanyLocationPhone
+	,B.strAddress strCompanyLocationAddress
+	,A.strBillingBy
+	,A.ysnActive
+	,A.intSiteNumber
+	,A.intCompanyLocationSubLocationId
+	,C.strSubLocationName
+	,A.strDescription
+	,A.strSiteAddress
+	,A.strZipCode
+	,A.strCity
+	,A.strState
+	,A.strCountry
+	,A.dblLatitude
+	,A.dblLongitude
+	,intDriverId = A.intDriverID 
+	,SP.strName strDriverName
+	,A.intRouteId
+	,R.strRouteId strRoute
+	,strSequenceId = A.strSequenceID
+	,A.dtmLastDeliveryDate
+	,dblLastGalInTank = A.dblLastGalsInTank
+	,A.dblLastDeliveredGal
+	,A.strComment
+	,A.strInstruction
+	,A.intConcurrencyId
+	,intItemId = A.intProduct
+	,I.strItemNo
+	,I.strDescription strItemDescription
+	,A.intFillMethodId
+	,FM.strFillMethod
+	,A.intFillGroupId
+	,FG.strFillGroupCode
+	,A.intGlobalJulianCalendarId
+	,JC.strDescription strJulianCalendar
+FROM tblTMSite A
+INNER JOIN tblSMCompanyLocation B
+	ON A.intLocationId = B.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation C
+	ON A.intCompanyLocationSubLocationId = C.intCompanyLocationSubLocationId
+LEFT JOIN tblICItem I ON I.intItemId = A.intProduct
+LEFT JOIN tblEMEntity SP ON SP.intEntityId = A.intDriverID
+LEFT JOIN tblTMRoute R ON R.intRouteId = A.intRouteId
+LEFT JOIN tblTMFillMethod FM ON FM.intFillMethodId = A.intFillMethodId
+LEFT JOIN tblTMFillGroup FG ON FG.intFillGroupId = A.intFillGroupId
+LEFT JOIN tblTMGlobalJulianCalendar JC ON JC.intGlobalJulianCalendarId = A.intGlobalJulianCalendarId
+WHERE A.ysnCompanySite = 1
