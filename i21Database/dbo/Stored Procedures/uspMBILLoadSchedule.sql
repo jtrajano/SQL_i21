@@ -375,7 +375,7 @@ FROM tblMBILPickupDetail MBP
 INNER JOIN tblMBILLoadHeader MBL on MBL.intLoadHeaderId = MBP.intLoadHeaderId
 INNER JOIN tblLGDispatchOrder DO on DO.intDispatchOrderId = MBL.intDispatchOrderId
 INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispatchOrderId
-WHERE MBL.intDriverId = @intDriverId
+WHERE MBL.intDriverId = @intDriverId and MBP.ysnPickup = 0
 
 INSERT INTO tblMBILPickupDetail(intDispatchOrderDetailId,strType,intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intSellerId,intSalespersonId,strLoadRefNo,intItemId,dblQuantity)
 Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DO.intVendorId,DO.intVendorLocationId,DO.intCompanyLocationId,DO.intSellerId,DO.intSalespersonId,DO.strLoadRef,DOD.intItemId,DOD.dblQuantity
@@ -471,6 +471,7 @@ DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatch
 Select intLoadHeaderId,intEntityLocationId 
 into #tmpDispatch 
 From vyuMBILPickupHeader
+Where intDriverId = @intDriverId
 Group by intLoadHeaderId,intEntityLocationId 
 having count(1) > 1
 
@@ -499,6 +500,7 @@ SET ysnPickup = 1
 ,pickupdetail.dblQuantity = LGLoadDetail.dblQuantity
 ,pickupdetail.strBOL = b.strBOL
 ,pickupdetail.strPONumber = LGLoadDetail.strPONumber
+,pickupdetail.intCompanyLocationId = b.intCompanyLocationId
 FROM tblMBILPickupDetail pickupdetail
 INNER JOIN tblLGDispatchOrderDetail LGLoadDetail on pickupdetail.intDispatchOrderDetailId = LGLoadDetail.intDispatchOrderDetailId
 INNER JOIN (
