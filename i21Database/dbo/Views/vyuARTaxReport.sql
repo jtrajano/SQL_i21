@@ -150,7 +150,7 @@ INNER JOIN (
 		,dblPrice				= ID.dblPrice
 		,dblQtyShipped			= ID.dblQtyShipped
 		,dblLineTotal			= ID.dblQtyShipped * ID.dblPrice * ISNULL(ITEMUOMSETUP.dblUnitQty,1)
-		,dblBaseLineTotal		= ID.dblQtyShipped * ID.dblBasePrice
+		,dblBaseLineTotal		= ID.dblQtyShipped * ID.dblBasePrice * ISNULL(ITEMUOMSETUP.dblUnitQty,1)
 		,dblAdjustedTax			= IDT.dblAdjustedTax
 		,dblBaseAdjustedTax		= IDT.dblBaseAdjustedTax
 		,dblTax					= IDT.dblTax
