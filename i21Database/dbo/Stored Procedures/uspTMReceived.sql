@@ -22,7 +22,7 @@ JOIN vyuTMCompanyConsumptionSite cs ON cs.intCompanyLocationId = ir.intLocationI
     AND cs.ysnActive = 1
     AND cs.intItemId = iri.intItemId
     AND cs.intCompanyLocationSubLocationId = iri.intSubLocationId
-JOIN tblTMCompanyConsumptionSite tcs ON tcs.intCompanyConsumptionSiteId = cs.intCompanyConsumptionSiteId
+JOIN tblTMSite tcs ON tcs.intSiteID = cs.intSiteID
 where ir.intInventoryReceiptId = @intReceiptId
 
 END 
