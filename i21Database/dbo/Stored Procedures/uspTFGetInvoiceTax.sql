@@ -146,15 +146,15 @@ BEGIN TRY
 					, NULL AS strOriginCounty
 					, CASE WHEN tblCFTransaction.intInvoiceId IS NOT NULL AND tblARInvoice.strType = 'CF Tran' THEN tblCFSite.strTaxState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
 					, tblEMEntity.strName
-					, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
-					, tblSMShipVia.strShipVia
-					, tblSMShipVia.strTransporterLicense
-					, tblSMTransportationMode.strCode
-					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName
-					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId
-					, Seller.str1099Name AS strConsignorName
-					, Seller.strFederalTaxId AS strConsignorFederalTaxId
-					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
+					, ISNULL(tblEMEntity.strFederalTaxId,'') AS strCustomerFederalTaxId  
+					, tblSMShipVia.strShipVia  
+					, ISNULL(tblSMShipVia.strTransporterLicense,'')  strTransporterLicense
+					, tblSMTransportationMode.strCode  
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName  
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId  
+					, Seller.str1099Name AS strConsignorName  
+					, Seller.strFederalTaxId AS strConsignorFederalTaxId  
+					, ISNULL(tblTFTerminalControlNumber.strTerminalControlNumber,'') AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
 					, tblTFCompanyPreference.strCompanyName
@@ -378,15 +378,15 @@ BEGIN TRY
 					, NULL AS strOriginCounty
 					, CASE WHEN tblCFTransaction.intInvoiceId IS NOT NULL AND tblARInvoice.strType = 'CF Tran' THEN tblCFSite.strTaxState ELSE tblSMCompanyLocation.strStateProvince END AS strOriginState
 					, tblEMEntity.strName
-					, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
-					, tblSMShipVia.strShipVia
-					, tblSMShipVia.strTransporterLicense
-					, tblSMTransportationMode.strCode
-					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName
-					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId
-					, Seller.str1099Name AS strConsignorName
-					, Seller.strFederalTaxId AS strConsignorFederalTaxId
-					, tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber
+					, ISNULL(tblEMEntity.strFederalTaxId,'') AS strCustomerFederalTaxId  
+					, tblSMShipVia.strShipVia  
+					, ISNULL(tblSMShipVia.strTransporterLicense,'')  strTransporterLicense
+					, tblSMTransportationMode.strCode  
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strCompanyName ELSE Transporter.strName END) AS strTransporterName  
+					, (CASE WHEN tblARInvoice.strType = 'CF Tran' AND tblARInvoice.intShipViaId IS NULL THEN tblSMCompanySetup.strEin ELSE Transporter.strFederalTaxId END) AS strTransporterFederalTaxId  
+					, Seller.str1099Name AS strConsignorName  
+					, Seller.strFederalTaxId AS strConsignorFederalTaxId  
+					, ISNULL(tblTFTerminalControlNumber.strTerminalControlNumber,'') AS strTerminalControlNumber
 					, tblSMCompanySetup.strCompanyName AS strVendorName
 					, tblSMCompanySetup.strEin AS strVendorFederalTaxId
 					, tblTFCompanyPreference.strCompanyName
@@ -1026,7 +1026,8 @@ BEGIN TRY
 					, strEmail
 					, strTransactionSource
 					, strTransportNumber
-					, strImportVerificationNumber)
+					, strImportVerificationNumber
+					, strOriginTCN)
 				SELECT DISTINCT @Guid
 					, intReportingComponentId
 					, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -1093,6 +1094,7 @@ BEGIN TRY
 					, strTransactionSource
 					, strTransportNumber
 					, strImportVerificationNumber
+					, ''
 				FROM @tmpTransaction Trans
 			END
 		END
