@@ -1464,17 +1464,6 @@ BEGIN
 END
 -- End update of batch
 
- DECLARE @strRowState NVARCHAR(50)
-  SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
-  FROM tblQMSample
-  WHERE intSampleId = @intSampleId
-
-  EXEC uspIPProcessPriceToFeed
-    @intLastModifiedUserId
-    ,@intSampleId
-    ,'Sample'
-    ,@strRowState
-  
  COMMIT TRAN  
 END TRY  
   
