@@ -60,21 +60,21 @@
 		--	RETURN 
 		--END
 	
-		SET @resultLog = @resultLog +  case when @is_wesroc = 1 then 'passed customerid validation' + char(10) else '' end
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS  +  case when @is_wesroc = 1 then 'passed customerid validation' + char(10) else '' end
 	
 		--IF(ISNULL(@ts_cat_1,'') = '')BEGIN
 		--	SET @resultLog = @resultLog +  'Failed Tank Monitor Serial validation' + char(10)
 		--	RETURN
 		--END
 	
-		SET @resultLog = @resultLog + case when @is_wesroc = 1 then 'passed Tank Monitor Serial validation' + char(10) else '' end
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + case when @is_wesroc = 1 then 'passed Tank Monitor Serial validation' + char(10) else '' end
 	
 		--IF(ISNULL(@ts_tankserialnum,'') = '')
 		--BEGIN 
 		--	SET @resultLog = @resultLog + 'Failed Tank Serial validation' + char(10)
 		--	RETURN 
 		--END
-		SET @resultLog = @resultLog +  case when @is_wesroc = 1 then 'passed Tank Serial validation' + char(10) else '' end
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS +  case when @is_wesroc = 1 then 'passed Tank Serial validation' + char(10) else '' end
 	
 		IF(@tx_nosensor <> 0) RETURN 10
 		IF(@tx_lnoxmit <> 0) RETURN 10
@@ -83,16 +83,16 @@
 
 		if (@is_wesroc = 0)
 		begin
-			SET @resultLog = @resultLog +   'ESN = ' + ISNULL(@tx_serialnum,'') + char(10)
+			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS +   'ESN = ' + ISNULL(@tx_serialnum COLLATE Latin1_General_CI_AS,'') + char(10)
 			SET @ExceptionValue = 'Status';
 		end
 
-		SET @resultLog = @resultLog +   'Customer Number = ' + ISNULL(@ts_cat_1,'') + char(10)
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS +   'Customer Number = ' + ISNULL(@ts_cat_1 COLLATE Latin1_General_CI_AS,'') + char(10)
 		--print 'Customer Number = ' + ISNULL(@ts_cat_1,'')
 		--Check by customer and Tank monitor serial number
 
 		DECLARE @intCustomerId INT = NULL
-
+		 
 		SELECT TOP 1 @siteId = A.intSiteID,  @intCustomerId = B.intCustomerNumber FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -104,9 +104,9 @@
 				ON D.intDeviceId = E.intDeviceId
 			INNER JOIN tblTMDeviceType F
 				ON E.intDeviceTypeId = F.intDeviceTypeId		
-			WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vyuTMCustomerEntityView WHERE vwcus_key = @ts_cat_1)
+			WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vyuTMCustomerEntityView WHERE vwcus_key = @ts_cat_1 COLLATE Latin1_General_CI_AS)
 				AND F.strDeviceType = 'Tank Monitor'
-				AND E.strSerialNumber = @tx_serialnum
+				AND E.strSerialNumber = @tx_serialnum COLLATE Latin1_General_CI_AS
 	
 		--Check by customer and Tank device serial number
 		IF(@siteId IS NULL)
@@ -122,34 +122,34 @@
 				ON D.intDeviceId = E.intDeviceId
 			INNER JOIN tblTMDeviceType F
 				ON E.intDeviceTypeId = F.intDeviceTypeId		
-			WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vyuTMCustomerEntityView WHERE vwcus_key = @ts_cat_1)
+			WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vyuTMCustomerEntityView WHERE vwcus_key = @ts_cat_1 COLLATE Latin1_General_CI_AS)
 				AND F.strDeviceType = 'Tank'
-				AND E.strSerialNumber = @ts_tankserialnum
+				AND E.strSerialNumber = @ts_tankserialnum COLLATE Latin1_General_CI_AS
 		END
 		IF(@siteId IS NULL)
 		BEGIN 
-			SET @resultLog = @resultLog + @ExceptionValue + ': Not Matching.' + char(10)
+			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + @ExceptionValue + ': Not Matching.' + char(10)
 			set @resultSavingStatus = 1;
 
 			-- LOG to tblTMImportTankReadingDetail
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intRecord, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intRecord, 0, 'No matched device and customer number')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intRecord, 0, 'No matched device and customer number')
 
 			RETURN 
 		END
 
-		IF ISDATE(@str_rpt_date_ti) = 0
+		IF ISDATE(@str_rpt_date_ti COLLATE Latin1_General_CI_AS) = 0
 		BEGIN
 			-- LOG to tblTMImportTankReadingDetail
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId,  0, 'Invalid Reading Date')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId,  0, 'Invalid Reading Date')
 			RETURN 
 		END
 
-		SET @rpt_date_ti = @str_rpt_date_ti
+		SET @rpt_date_ti = @str_rpt_date_ti COLLATE Latin1_General_CI_AS
 
-		SET @resultLog = @resultLog + 'Site ID = ' + CAST(ISNULL(@siteId,'') AS NVARCHAR(10)) + char(10) 
-		SET @resultLog = @resultLog +  'Date = ' + CAST(@rpt_date_ti AS NVARCHAR(30))  + char(10) 	
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'Site ID = ' + CAST(ISNULL(@siteId,'') AS NVARCHAR(10)) + char(10) 
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS +  'Date = ' + CAST(@rpt_date_ti AS NVARCHAR(30))  + char(10) 	
 	
 		--print 'get DegreeDay'
 		--Get degreeDay reading of for the tank monitor date
@@ -161,12 +161,12 @@
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0) AND intClockID = @SiteClockId) 
 		BEGIN
 			--PRINT 'No clock Reading'
-			SET @resultLog = @resultLog + 'No clock Reading' + char(10);
+			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'No clock Reading' + char(10);
 			set @resultSavingStatus = 1;
 
 			-- LOG to tblTMImportTankReadingDetail
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'No clock reading')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'No clock reading')
 
 			RETURN
 		END
@@ -257,25 +257,25 @@
 		--Check for previous tank monitor reading or duplicate reading
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti AND intSiteID = @siteId ))	
 		BEGIN
-			SET @resultLog = @resultLog + 'Duplicate Reading' + char(10)
-			SET @resultLog = @resultLog + @ExceptionValue + ': Duplicate Reading' + char(10)
+			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'Duplicate Reading' + char(10)
+			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + @ExceptionValue + ': Duplicate Reading' + char(10)
 			set @resultSavingStatus = 1;
 
 			-- LOG to tblTMImportTankReadingDetail
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Duplicate reading')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Duplicate reading')
 
 			RETURN
 		END
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
 					WHERE ((intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti)) AND intSiteID = @siteId)	
 		BEGIN
-			SET @resultLog = @resultLog + 'Reading date is less than the current reading' + char(10)
+			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'Reading date is less than the current reading' + char(10)
 			set @resultSavingStatus = 1;
 
 			-- LOG to tblTMImportTankReadingDetail
 			INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-			VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Reading date is less than the current reading')
+			VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Reading date is less than the current reading')
 
 			RETURN 
 		END
@@ -309,11 +309,11 @@
 								,@siteId
 								,'Consumption Site'
 								,@rpt_date_ti
-								,(	  'Tank Serial Number: ' + ISNULL(@ts_tankserialnum,'') + CHAR(10)
-									+ 'Monitor Serial Number: ' + ISNULL(@tx_serialnum,'') + CHAR(10) 
+								,(	  'Tank Serial Number: ' + ISNULL(@ts_tankserialnum COLLATE Latin1_General_CI_AS,'') + CHAR(10)
+									+ 'Monitor Serial Number: ' + ISNULL(@tx_serialnum COLLATE Latin1_General_CI_AS,'') + CHAR(10) 
 									+ 'Date: ' + CAST (@rpt_date_ti AS NVARCHAR(25)) + CHAR(10)
 									+ 'Percent Full: ' + CAST(ISNULL(@tk_level,0.0) AS NVARCHAR(10)) + CHAR(10) 
-									+ (case when @is_wesroc = 1 then 'Inside Temperature: ' + CAST(ISNULL(@base_temp,'') AS NVARCHAR(20)) + CHAR(10) else '' end)
+									+ (case when @is_wesroc = 1 then 'Inside Temperature: ' + CAST(ISNULL(@base_temp COLLATE Latin1_General_CI_AS,'') AS NVARCHAR(20)) + CHAR(10) else '' end)
 								)
 								,0
 								,0	
@@ -360,7 +360,7 @@
 				-- do not update bun rate if eco green importing
 				if (@is_wesroc = 1)
 				begin
-					SET @resultLog = @resultLog + 'UPDATING burn rate' + char(10) 
+					SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'UPDATING burn rate' + char(10) 
 					UPDATE tblTMSite
 					SET dblBurnRate = @dblNewBurnRate
 					WHERE intSiteID = @siteId
@@ -412,11 +412,11 @@
 					set @dblTankReserve = (select dblTankReserve = sum(isnull(c.dblTankReserve,0.00)) from tblTMSiteDevice b, tblTMDevice c where b.intSiteID = @siteId and c.intDeviceId = b.intDeviceId and isnull(c.ysnAppliance,0) = 0);
 					if (@qty_in_tank >= @dblTankReserve)
 					begin
-						SET @resultLog = @resultLog + 'Import successful';
+						SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'Import successful';
 
 						-- LOG to tblTMImportTankReadingDetail
 						INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
-						VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
+						VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
 
 						return;
 					end
@@ -440,7 +440,7 @@
 				BEGIN
 					-- LOG to tblTMImportTankReadingDetail
 					INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
-					VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
+					VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
 				END
 			END
 
@@ -457,11 +457,11 @@
 				END
 				ELSE
 				BEGIN
-					SET @resultLog = @resultLog + 'Import successful';
+					SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'Import successful';
 
 					-- LOG to tblTMImportTankReadingDetail
 					INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
-					VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
+					VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
 
 				END
 			END
@@ -472,12 +472,12 @@
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 			BEGIN
-				SET @resultLog = @resultLog +  'Already have call entry' + CHAR(10)
+				SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS +  'Already have call entry' + CHAR(10)
 				set @resultSavingStatus = 1;
 				
 				-- LOG to tblTMImportTankReadingDetail
 				INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid, strMessage)
-				VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Already have a call entry')
+				VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 0, 'Already have a call entry')
 
 				RETURN
 			END	
@@ -701,10 +701,10 @@
 		END
 	
 		--print @resultLog
-		SET @resultLog = @resultLog + 'Import successful'
+		SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + 'Import successful'
 
 		-- LOG to tblTMImportTankReadingDetail
 		INSERT INTO tblTMImportTankReadingDetail (intImportTankReadingId, strEsn, strCustomerNumber, intCustomerId, intRecord, intSiteId, dtmReadingDate, ysnValid)
-		VALUES(@intImportTankReadingId, @tx_serialnum, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
+		VALUES(@intImportTankReadingId, @tx_serialnum COLLATE Latin1_General_CI_AS, @ts_cat_1, @intCustomerId, @intRecord, @siteId, @rpt_date_ti, 1)
 
 	END

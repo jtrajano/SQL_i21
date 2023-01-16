@@ -15,7 +15,7 @@ BEGIN
 		FROM tblSMStartingNumber 
 		WHERE strTransactionType = 'Will Call'
 			AND strModule = 'Tank Management'
-	)
+	) COLLATE Latin1_General_CI_AS
 /*
 	DECLARE @intNextNumber INT
 	DECLARE @strPrefix NVARCHAR(50)

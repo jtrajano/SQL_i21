@@ -86,7 +86,8 @@ BEGIN TRANSACTION
 		strControlType, 
 		strContainer, 
 		intScreenStageId, 
-		strChange, 
+		strChange,
+		intParentScreenId, 
 		intConcurrencyId)
 	SELECT 
 		A.strControlId, 
@@ -95,12 +96,14 @@ BEGIN TRANSACTION
 		'' As strContainer, 
 		(SELECT TOP 1 intScreenStageId FROM tblSMScreenStage WHERE strNamespace = A.strNamespace) AS intScreenStageId,
 		'Deleted' AS strChange,
+		A.intParentScreenId,
 		0
 	FROM (
 		SELECT tblSMControl.strControlId, 
 			tblSMControl.strControlName, 
 			tblSMControl.strControlType, 
-			tblSMScreen.strNamespace 
+			tblSMScreen.strNamespace,
+			tblSMControl.intParentScreenId
 		FROM tblSMControl 
 		INNER JOIN tblSMScreen 
 			ON tblSMControl.intScreenId = tblSMScreen.intScreenId

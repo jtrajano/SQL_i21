@@ -318,7 +318,7 @@ BEGIN TRY
 	INNER JOIN #APPLIEDINVOICES B ON A.intPrepaymentId = B.intPrepaymentId
 								 AND A.intInvoiceId = B.intInvoiceId
 								 AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
-		
+
 END TRY
 BEGIN CATCH	
 	SET @intErrorSeverity = ERROR_SEVERITY()

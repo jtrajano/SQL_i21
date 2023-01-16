@@ -40,7 +40,7 @@ BEGIN
 	-- DELETE IF THERE IS EXISTING DISPATCH RECORD
 	DELETE tblTMOrder WHERE intDispatchId = @intDispatchId
 
-	IF(@strSource = 'TM - Generate Order')
+	IF(@strSource COLLATE Latin1_General_CI_AS = 'TM - Generate Order')
 	BEGIN
 		IF(ISNULL(@intContractDetailId,0) > 0)
 		BEGIN
@@ -67,7 +67,7 @@ BEGIN
 					,dblQuantity = (CASE WHEN ISNULL(A.dblMinimumQuantity, 0) = 0 THEN A.dblQuantity ELSE A.dblMinimumQuantity END) - A.dblOverageQty
 					,A.dblPrice
 					,A.dblTotal
-					,@strSource
+					,@strSource COLLATE Latin1_General_CI_AS
 					,GETDATE()
 			FROM tblTMDispatch A
 			INNER JOIN tblCTContractDetail B
@@ -99,7 +99,7 @@ BEGIN
 					,dblQuantity = A.dblOverageQty
 					,dblPrice = A.dblOveragePrice
 					,A.dblTotal
-					,@strSource
+					,@strSource COLLATE Latin1_General_CI_AS
 					,GETDATE()
 					,ysnOverage = 1
 			FROM tblTMDispatch A
@@ -132,7 +132,7 @@ BEGIN
 					,dblQuantity = CASE WHEN ISNULL(A.dblMinimumQuantity, 0) = 0 THEN A.dblQuantity ELSE A.dblMinimumQuantity END
 					,A.dblPrice
 					,A.dblTotal
-					,@strSource
+					,@strSource COLLATE Latin1_General_CI_AS
 					,GETDATE()
 			FROM tblTMDispatch A
 			WHERE intDispatchID = @intDispatchId
@@ -187,7 +187,7 @@ BEGIN
 					@dblBalance,
 					@dblPrice,
 					@dblTotal,
-					@strSource,
+					@strSource COLLATE Latin1_General_CI_AS,
 					GETDATE()
 				)
 
@@ -251,7 +251,7 @@ BEGIN
 						@dblRemainingQty,
 						@dblItemPrice,
 						@dblTotal,
-						@strSource,
+						@strSource COLLATE Latin1_General_CI_AS,
 						GETDATE(),
 						1
 					)
@@ -286,7 +286,7 @@ BEGIN
 					@dblQuantity,
 					@dblPrice,
 					@dblTotal,
-					@strSource,
+					@strSource COLLATE Latin1_General_CI_AS,
 					GETDATE()
 				)
 			END
@@ -315,7 +315,7 @@ BEGIN
 					@dblQuantity,
 					@dblPrice,
 					@dblTotal,
-					@strSource,
+					@strSource COLLATE Latin1_General_CI_AS,
 					GETDATE()
 				)
 		END

@@ -57,9 +57,9 @@ SELECT Trans.intTransactionId
 	, strOriginCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCity ELSE Exception.strOriginCity END
 	, strOriginCounty = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCounty ELSE Exception.strOriginCounty END
 	, strOriginTCN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginTCN ELSE Exception.strOriginTCN END
-	, strTaxPayerName = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerName ELSE Exception.strTaxPayerName END
+	, strTaxPayerName = Trans.strTaxPayerName
 	, strTaxPayerIdentificationNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerIdentificationNumber ELSE Exception.strTaxPayerIdentificationNumber END
-	, strTaxPayerFEIN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerFEIN ELSE Exception.strTaxPayerFEIN END
+	, strTaxPayerFEIN = Trans.strTaxPayerFEIN
 	, strTaxPayerDBA = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerDBA ELSE Exception.strTaxPayerDBA END
 	, strTaxPayerAddress = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerAddress ELSE Exception.strTaxPayerAddress END
 	, strTransporterIdType = Trans.strTransporterIdType
@@ -164,9 +164,9 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, Exception.strOriginCity
 	, Exception.strOriginCounty
 	, Exception.strOriginTCN
-	, Exception.strTaxPayerName
+	, (SELECT TOP 1 strCompanyName FROM tblTFCompanyPreference) strTaxPayerName--Exception.strTaxPayerName
 	, Exception.strTaxPayerIdentificationNumber
-	, Exception.strTaxPayerFEIN
+	, (SELECT TOP 1 REPLACE(strEin,'-','') FROM tblSMCompanySetup) strTaxPayerFEIN--Exception.strTaxPayerFEIN
 	, Exception.strTaxPayerDBA
 	, Exception.strTaxPayerAddress
 	, strTransporterIdType = NULL

@@ -65,6 +65,11 @@ BEGIN TRY
 	WHERE intTaxAuthorityId = @TaxAuthorityId 
 	AND intMasterId NOT IN (SELECT intMasterId FROM @Locality)
 
+	--just delete tax locality with  master id is null, 
+	--as of this writing.. those are the old localities of VA state (Dec 20 , 2022)
+	DELETE FROM tblTFLocality
+	WHERE intMasterId IS NULL AND intTaxAuthorityId = @TaxAuthorityId
+
 
 END TRY
 BEGIN CATCH
