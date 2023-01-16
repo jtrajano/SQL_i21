@@ -413,7 +413,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
-    <Build Include="dbo\Tables\tblCMBankAccountType.sql" /> 
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Functions\fnSTGetSalesRestriction.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
@@ -1285,6 +1285,7 @@
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
     <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
     <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
+    <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -8107,7 +8108,6 @@
     <Build Include="dbo\Tables\tblGLVendorMappingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationForCStore.sql" />
     <Build Include="dbo\Views\vyuRKGetMatchingLotAvailableQty.sql" />
-    <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInvoiceIdealReport.sql" />
     <Build Include="dbo\Views\vyuGLVendorMapping.sql" />
