@@ -40,6 +40,8 @@ AS
 			  ELSE ''
 		 END AS strTransactionType
 		, D.ysnChevronUploaded
+		, D.strReimbursementNo
+		, strCharge = CASE WHEN O.strCharge = 'Inventory' THEN NULL ELSE O.strCharge END
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
