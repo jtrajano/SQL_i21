@@ -463,7 +463,7 @@ BEGIN
 		SELECT intTransactionId, dtmDate, strTransactionType
 		FROM dbo.tblARNSFStagingTableDetail
 		GROUP BY intTransactionId, dtmDate, strTransactionType
-	) NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+	) NSF ON I.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 	WHERE I.ysnPosted = 1  
 	  AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
 	  AND I.strTransactionType <> 'Cash Refund'
