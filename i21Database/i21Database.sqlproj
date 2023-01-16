@@ -1283,6 +1283,8 @@
     <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
     <Build Include="dbo\Views\vyuTMGetOrder.sql" />
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
+    <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10988,7 +10990,6 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutSubReport.sql" />
     <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
-    <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblQMTicketDiscountEstimated.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
@@ -11545,6 +11546,7 @@
     <Build Include="dbo\Tables\tblGLCompanyDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
     <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
+    <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
