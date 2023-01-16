@@ -9780,7 +9780,6 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutSubReport.sql" />
     <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
-    <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
@@ -9906,10 +9905,14 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceAgriCare.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPrintPreviewTicketViewReport.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
+    <Build Include="dbo\Tables\tblRKDPRInTransitHelperLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
-    
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGetInTransitPerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
