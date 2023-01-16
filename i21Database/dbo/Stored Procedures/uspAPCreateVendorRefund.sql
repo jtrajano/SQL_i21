@@ -51,7 +51,7 @@ SELECT intID FROM #tmpBillsId
 INSERT INTO @invoices
 SELECT intID FROM #tmpInvoicesId
 
-SELECT A.* 
+SELECT * 
  INTO #tmpPaymentIntegration 
  FROM tblAPPaymentIntegrationTransaction A
  INNER JOIN @invoices B ON A.intInvoiceId = B.intId    
@@ -218,7 +218,7 @@ FROM (
 		,[intBankAccountId]					=	@bankAccountId
 		,[intWriteOffAccountId]				=	NULL
 		,[dblAmountPaid]					=	payVouchers.dblAmountPaid
-		,[dblAmountDue]						=	(A.dblInvoiceTotal - C.dblTempDiscount + C.dblTempInterest) - (C.dblTempPayment)
+		,[dblAmountDue]						=	A.dblAmountDue --(A.dblTotal - A.dblTempDiscount + A.dblTempInterest) - (A.dblTempPayment)
 		,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
 		,[ysnUseOriginalIdAsPaymentNumber]	=	0
 		,[ysnApplytoBudget]					=	0
@@ -238,8 +238,8 @@ FROM (
 		,[ysnApplyTermDiscount]				=	0
 		,[dblDiscount]						=	 C.dblTempDiscount
 		,[dblDiscountAvailable]				=	0
-		,[dblInterest]					=	C.dblTempInterest
-		,[dblPayment]						=	C.dblTempPayment
+		,[dblInterest]					=	A.dblTempInterest
+		,[dblPayment]						=	A.dblTempPayment
 		,[strInvoiceReportNumber]			=	NULL
 		,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
 		,[intCurrencyExchangeRateId]		=	NULL
