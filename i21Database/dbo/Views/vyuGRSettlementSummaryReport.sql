@@ -259,8 +259,10 @@ FROM
 	WHERE ((
 			BillDtl.intInventoryReceiptChargeId IS NOT NULL
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
-		)
+		)		
 		AND Item.strType <> 'Other Charge' )
+		/* LESLIE'S NOTE: DP should be pulled on the next select statement */
+		AND BillDtl.intSettleStorageId IS NULL
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
@@ -358,6 +360,9 @@ FROM
 	JOIN tblAPBillDetail BillDtl 
 		ON Bill.intBillId = BillDtl.intBillId 
 			AND BillDtl.intInventoryReceiptChargeId IS NULL
+	/* LESLIE'S NOTE: ALL VOUCHERS CREATED ARE SAVED HERE */
+	JOIN tblGRSettleStorageBillDetail SBD
+		ON SBD.intBillId = Bill.intBillId
 	LEFT JOIN tblICItem Item 
 		ON Item.intItemId = BillDtl.intItemId
 	LEFT JOIN (
@@ -419,27 +424,7 @@ FROM
 		FROM tblAPPaymentDetail 		
 		WHERE intInvoiceId IS NOT NULL and dblPayment <> 0
 		GROUP BY intPaymentId
-	) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId			
-	--LEFT JOIN (
-	--	SELECT 
-	--		intPaymentId
-	--		,SUM(APD.dblTotal) dblTotals
-	--		,SUM(APD.dblPayment) dblPayment
-	--	FROM tblAPPaymentDetail APD
-	--	JOIN tblAPBill APB on APB.intBillId = APD.intBillId
-	--	WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
-	--		and APD.dblPayment <> 0
-	--	GROUP BY intPaymentId
-	--	HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
-	--) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
-	--LEFT JOIN (
-	--	SELECT
-	--		a.intBillId
-	--		,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
-	--	FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  in (13, 3)
-	--	WHERE a.ysnApplied = 1
-	--	GROUP BY a.intBillId
-	--) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
+	) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
@@ -486,9 +471,7 @@ FROM
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
 	) DebitMemoApplied ON DebitMemoApplied.intBillId = Bill.intBillId
-	WHERE Item.strType <> 'Other Charge' 
-		AND (intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
-		AND (intSettleStorageId IS NOT NULL OR intCustomerStorageId IS NOT NULL)
+	WHERE Item.strType <> 'Other Charge'
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
