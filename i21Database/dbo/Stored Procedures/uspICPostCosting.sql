@@ -525,6 +525,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@ysnTransferOnSameLocation 
 					,@intSourceEntityId
 					,@strSourceType 
 					,@strSourceNumber 

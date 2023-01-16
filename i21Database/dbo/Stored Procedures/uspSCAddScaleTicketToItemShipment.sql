@@ -59,7 +59,9 @@ SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intContractCostId = SC.intContractCostId
 , @strWhereFinalizedWeight = SC.strWeightFinalized
 , @strWhereFinalizedGrade = SC.strGradeFinalized
+,@intFreightTermId = isnull(CD.intFreightTermId,0)
 FROM vyuSCTicketScreenView SC
+left join tblCTContractDetail CD on CD.intContractDetailId = SC.intContractId
 WHERE SC.intTicketId = @intTicketId
 
 IF(LOWER(ISNULL(@strWhereFinalizedWeight,'origin')) = 'destination' OR LOWER(ISNULL(@strWhereFinalizedGrade,'origin')) = 'destination' )
@@ -75,7 +77,7 @@ BEGIN
     RETURN;
 END
 
-SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId 
+SELECT @intFreightTermId = case when @intFreightTermId <> 0 then @intFreightTermId else intFreightTermId end, @intShipToId = intShipToId 
 FROM tblARCustomer AR
 LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 WHERE AR.intEntityId = @intEntityId
@@ -1760,7 +1762,7 @@ IF @intLotType != 0
 			, dtmShipDate				= SE.dtmShipDate
 			, intShipFromLocationId		= SE.intShipFromLocationId
 			, intShipToLocationId		= SE.intShipToLocationId
-			, intFreightTermId			= SE.intFreightTermId
+			, intFreightTermId			= case when isnull(CD.intFreightTermId, 0) <> 0 then CD.intFreightTermId else SE.intFreightTermId end
 			, intItemLotGroup			= SE.intItemLotGroup
 			, intLotId					= SC.intLotId
 			, dblQuantity				= SE.dblQuantity
@@ -1770,6 +1772,7 @@ IF @intLotType != 0
 			, strWarehouseCargoNumber	= SC.strTicketNumber
 			FROM @ShipmentStagingTable SE 
 			INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
+			left join  tblCTContractDetail CD on SC.intContractId = CD.intContractDetailId
 			INNER JOIN tblICItem IC ON IC.intItemId = SE.intItemId
 	END
 

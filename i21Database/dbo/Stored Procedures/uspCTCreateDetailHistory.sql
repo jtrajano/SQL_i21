@@ -366,7 +366,7 @@ BEGIN TRY
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1 AND 1=0)
 		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory

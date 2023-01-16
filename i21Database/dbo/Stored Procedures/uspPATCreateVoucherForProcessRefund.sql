@@ -293,6 +293,16 @@ BEGIN
 						AND C.strVendorOrderNumber LIKE 'PR-%'
 		WHERE A.intBillId IS NULL
 
+		/* Update script for empty intBillId but have VendorOrder on tblAPBill. */
+		UPDATE A
+		SET A.intBillId = C.intBillId
+		FROM tblPATRefundCustomer A
+		JOIN tblPATRefund B ON A.intRefundId = B.intRefundId
+		JOIN tblAPBill C ON B.strRefundNo = 'PR-' + SUBSTRING(strVendorOrderNumber,CHARINDEX('-',strVendorOrderNumber) + 1, CHARINDEX('-',strVendorOrderNumber,CHARINDEX('-',strVendorOrderNumber) +1) -CHARINDEX('-',strVendorOrderNumber)-1)
+						AND A.intRefundCustomerId =  CAST(SUBSTRING(C.strVendorOrderNumber, 6, LEN(C.strVendorOrderNumber)) AS INT)
+						AND C.strVendorOrderNumber LIKE 'PR-%'
+		WHERE A.intBillId IS NULL
+
 		SELECT @totalRecords = COUNT(*)
 		FROM #tempRefundCustomer
 	END TRY
