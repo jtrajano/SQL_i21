@@ -75,8 +75,8 @@ BEGIN
     
 					EXEC uspHDCreateCoworkerGoalDetail @CoworkerGoalId
 
-					EXEC [dbo].[uspHDUpdateCoworkerWeeklyBudget] @CoworkerGoalId
-					EXEC [dbo].[uspHDSyncAgentTimeEntrySummary] @CoworkerGoalId , 0
+					--EXEC [dbo].[uspHDUpdateCoworkerWeeklyBudget] @CoworkerGoalId
+					--EXEC [dbo].[uspHDSyncAgentTimeEntrySummary] @CoworkerGoalId , 0
 
 					FETCH NEXT FROM CoworkerGoalLoop INTO @CoworkerGoalId
 				END
