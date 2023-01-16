@@ -432,6 +432,11 @@ BEGIN TRY
 
 				SELECT @intWorkOrderId = SCOPE_IDENTITY()
 
+				EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
+									,@intLocationId = @intLocationId
+									,@intUserId = @intUserId
+									,@intWorkOrderId = @intWorkOrderId
+
 				SELECT @intTestId = strAttributeValue
 				FROM tblMFManufacturingProcessAttribute pa
 				JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId

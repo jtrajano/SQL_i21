@@ -212,6 +212,7 @@ BEGIN TRY
 		,@intBusinessShiftId INT
 		,@dtmCurrentDateTime DATETIME
 		,@dtmProductionDate DATETIME
+		,@strReferenceNo NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GetDate()
 
@@ -220,7 +221,7 @@ BEGIN TRY
 		,@intCellId = intCellId
 	FROM @tblBlendSheet
 
-	SELECT @strDemandNo = strDemandNo
+	SELECT @strDemandNo = strDemandNo, @strReferenceNo=strReferenceNo 
 	FROM tblMFBlendRequirement
 	WHERE intBlendRequirementId = @intBlendRequirementId
 
@@ -321,6 +322,7 @@ BEGIN TRY
 			,intTransactionFrom
 			,intPlannedShiftId
 			,dtmPlannedDate
+			,strERPOrderNo 
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -349,6 +351,7 @@ BEGIN TRY
 			,1
 			,intPlannedShiftId
 			,dtmDueDate
+			,@strReferenceNo
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()

@@ -2,6 +2,7 @@
 	@intItemId			INT
   , @intLocationId		INT
   , @intRecipeItemId	INT
+  ,@intWorkOrderId INT=NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -164,8 +165,9 @@ LEFT JOIN tblICUnitMeasure AS UnitOfMeasure ON LotItemWeightUOM.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation AS CompanySubLocation ON CompanySubLocation.intCompanyLocationSubLocationId = Lot.intSubLocationId
 LEFT JOIN tblICStorageLocation AS StorageLocation ON StorageLocation.intStorageLocationId = Lot.intStorageLocationId
 LEFT JOIN tblICStorageUnitType AS StorageUnitType ON StorageLocation.intStorageUnitTypeId = StorageUnitType.intStorageUnitTypeId AND StorageUnitType.strInternalCode <> 'PROD_STAGING'
+LEFT JOIN tblMFWorkOrderRecipeItem AS WorkOrderRecipeItem ON WorkOrderRecipeItem.intItemId = Item.intItemId AND WorkOrderRecipeItem.intWorkOrderId = @intWorkOrderId AND  WorkOrderRecipeItem.intRecipeItemTypeId = 1 AND WorkOrderRecipeItem.intRecipeItemId = @intRecipeItemId
 LEFT JOIN tblMFRecipeItem AS RecipeItem ON RecipeItem.intItemId = Item.intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId
-LEFT JOIN tblICItemUOM AS RecipeItemUOM ON RecipeItem.intItemUOMId = RecipeItemUOM.intItemUOMId
+LEFT JOIN tblICItemUOM AS RecipeItemUOM ON IsNULL(WorkOrderRecipeItem.intItemUOMId,RecipeItem.intItemUOMId) = RecipeItemUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure AS RecipeItemUnitOfMeasure ON RecipeItemUOM.intUnitMeasureId = RecipeItemUnitOfMeasure.intUnitMeasureId 
 LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
 LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = Lot.intLotId
