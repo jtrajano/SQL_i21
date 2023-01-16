@@ -51,18 +51,6 @@ SELECT intID FROM #tmpBillsId
 INSERT INTO @invoices
 SELECT intID FROM #tmpInvoicesId
 
-SELECT * 
- INTO #tmpPaymentIntegration 
- FROM tblAPPaymentIntegrationTransaction A
- INNER JOIN @invoices B ON A.intInvoiceId = B.intId    
- WHERE A.ysnRefundFromPayment = 1
-
- --Remove those records that created from Create Deposit - Pay Voucher Details Screen
- DELETE A
- FROM tblAPPaymentIntegrationTransaction A
- INNER JOIN @invoices B ON A.intInvoiceId = B.intId
- WHERE A.ysnRefundFromPayment = 1
-
 INSERT INTO #tmpVouchersForPay
 SELECT
 	payVouchers.intBillId
@@ -236,10 +224,10 @@ FROM (
 		,[strTransactionNumber]				=	A.strInvoiceNumber
 		,[intTermId]						=	A.intTermId
 		,[ysnApplyTermDiscount]				=	0
-		,[dblDiscount]						=	 C.dblTempDiscount
+		,[dblDiscount]						=	0 --A.dblTempDiscount
 		,[dblDiscountAvailable]				=	0
-		,[dblInterest]					=	A.dblTempInterest
-		,[dblPayment]						=	A.dblTempPayment
+		,[dblInterest]						=	0 --A.dblTempInterest
+		,[dblPayment]						=	A.dblAmountDue --A.dblTempPayment
 		,[strInvoiceReportNumber]			=	NULL
 		,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
 		,[intCurrencyExchangeRateId]		=	NULL
@@ -248,8 +236,7 @@ FROM (
 		,[ysnFromAP]						=	0
 	FROM tblARInvoice A
 	INNER JOIN #tmpVouchersForPay payVouchers ON A.intInvoiceId = payVouchers.intInvoiceId
-	INNER JOIN tblSMCompanyLocation B ON A.intShipToLocationId = B.intCompanyLocationId
-	INNER JOIN #tmpPaymentIntegration C ON A.intInvoiceId = C.intInvoiceId AND C.intInvoiceId IS NOT NULL
+	INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
 	OUTER APPLY (
 		SELECT TOP 1
 			exchangeRateDetail.dblRate
