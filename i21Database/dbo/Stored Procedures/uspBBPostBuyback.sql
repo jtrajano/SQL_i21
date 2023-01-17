@@ -149,7 +149,7 @@ AS
 				'Buybacks',
 				ar.intInvoiceId,
 				ar.strInvoiceNumber,
-				'Debit Memo',
+				'Invoice',
 				'Accounts Receivable',
 				'Post'
 			FROM tblBBBuyback B
@@ -327,7 +327,7 @@ AS
 				'Buybacks',
 				ap.intBillId,
 				ap.strBillId,
-				'Debit Memo',
+				'Voucher',
 				'Accounts Payable',
 				'Post'
 			FROM tblBBBuyback B
