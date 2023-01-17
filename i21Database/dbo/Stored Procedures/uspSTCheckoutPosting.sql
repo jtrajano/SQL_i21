@@ -64,9 +64,9 @@ BEGIN
 								SELECT 
 									@strCheckoutCurrentProcess = CASE
 																	WHEN intCheckoutCurrentProcess = 1
-																		THEN 'Checkout is currently posting, please try again after ' + @strMinuteDiff
+																		THEN 'End of day is currently posting, please try again after ' + @strMinuteDiff
 																	WHEN intCheckoutCurrentProcess = 2
-																		THEN 'Checkout is currently unposting, please try again after ' + @strMinuteDiff
+																		THEN 'End of day is currently unposting, please try again after ' + @strMinuteDiff
 																END
 								FROM tblSTCheckoutHeader 
 								WHERE intCheckoutId = @intCheckoutId 
@@ -405,7 +405,7 @@ BEGIN
 															 ) 
 
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments.'
+						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the End of day Departments.'
 						SET @strErrorCode = 'DT-01'
 
 						-- ROLLBACK
@@ -447,7 +447,7 @@ BEGIN
 															 ) 
 
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments.'
+						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the End of day Departments.'
 						SET @strErrorCode = 'DT-02'
 
 						-- ROLLBACK
@@ -5757,7 +5757,7 @@ IF(@ysnDebug = 1)
 														BEGIN
 															-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
 															SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-															SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
+															SET @strStatusMsg = 'Main End of day was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
 															-- ROLLBACK
 															GOTO ExitWithRollback
@@ -5766,7 +5766,7 @@ IF(@ysnDebug = 1)
 												END
 											ELSE
 												BEGIN
-													SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+													SET @strStatusMsg = 'Post Main End of day has error: ' + @ErrorMessage
 
 													-- ROLLBACK
 													GOTO ExitWithRollback
@@ -6047,7 +6047,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 									BEGIN
 										SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
 										SET @ysnSuccess = CAST(0 AS BIT)
-										SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
+										SET @strStatusMsg = 'Invoice and End of day Total Validation: ' + @strRemark
 								
 								
 										-- ROLLBACK
@@ -6100,8 +6100,8 @@ IF(@ysnDebug = CAST(1 AS BIT))
 								--------------------------------------------------------------------------
 								IF (@ysnConsignmentStore = 1 AND @strCheckoutType = 'Automatic')
 								BEGIN
-									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId) 
-									VALUES (@intCheckoutProcessId, @intCheckoutId, 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1) 
+									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
+									VALUES (@intCheckoutProcessId, @intCheckoutId, 'W', 'Done processing End of day for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
 								END
 								--------------------------------------------------------------------------
 								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
