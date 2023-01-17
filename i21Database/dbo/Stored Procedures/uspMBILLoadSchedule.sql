@@ -503,6 +503,7 @@ SET ysnPickup = 1
 ,pickupdetail.intCompanyLocationId = b.intCompanyLocationId
 ,pickupdetail.dblGross = 0
 ,pickupdetail.dblNet = 0
+,pickupdetail.dblPickupQuantity = 0
 FROM tblMBILPickupDetail pickupdetail
 INNER JOIN tblLGDispatchOrderDetail LGLoadDetail on pickupdetail.intDispatchOrderDetailId = LGLoadDetail.intDispatchOrderDetailId
 INNER JOIN (
