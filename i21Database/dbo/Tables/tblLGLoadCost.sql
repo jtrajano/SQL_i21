@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[tblLGLoadCost]
 	[ysnPrice] [bit] NULL,
 	[intBillId] [int] NULL,
 	[intLoadCostRefId] INT NULL,
+	[ysnInventoryCost] [bit] NULL
 	[intContractDetailId] INT NULL,
 
 
