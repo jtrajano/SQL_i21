@@ -79,7 +79,7 @@ BEGIN
 			, strInternalTradeNo
 			, dblAssignedLots = (ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0))
 			, dblContractPrice = t.dblPrice
-			, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(dblSAllocatedQty) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100
+			, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(dblSAllocatedQty) OVER (PARTITION BY CD.intContractDetailId, t.intFutOptTransactionId) / CD.dblQuantity * 100)) / 100
 			, t.dblPrice
 			, t.intFutureMarketId
 			, t.intFutureMonthId
@@ -110,7 +110,7 @@ BEGIN
 			, strInternalTradeNo
 			, dblAssignedLots = (ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0))
 			, dblContractPrice = t.dblPrice
-			, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100
+			, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId, t.intFutOptTransactionId) / CD.dblQuantity * 100)) / 100
 			, t.dblPrice
 			, t.intFutureMarketId
 			, t.intFutureMonthId
@@ -143,7 +143,7 @@ BEGIN
 			, strInternalTradeNo
 			, dblAssignedLots = (ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0))
 			, dblContractPrice = t.dblPrice
-			, dblNoOfLots = - ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100
+			, dblNoOfLots = - ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId, t.intFutOptTransactionId) / CD.dblQuantity * 100)) / 100
 			, t.dblPrice
 			, t.intFutureMarketId
 			, t.intFutureMonthId
@@ -178,7 +178,7 @@ BEGIN
 	SELECT strContractType = 'Total'
 		, strFutureMonth = SUBSTRING(strFutureMonth,0,CHARINDEX(' -',strFutureMonth))
 		, dblNoOfLots = SUM(dblNoOfLots)
-		, dblPrice = SUM(dblPrice)
+		, dblPrice = NULL--SUM(dblPrice)
 		, dblLatestSettlementPrice = MAX(dblLatestSettlementPrice)
 		, dblFutureImpact = SUM(dblFutureImpact)
 	FROM @ContractImpact
