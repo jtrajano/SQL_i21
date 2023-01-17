@@ -229,7 +229,7 @@ SELECT
     ,billDetail.intItemId      
     ,billDetail.intUnitOfMeasureId AS intItemUOMId  
     ,unitMeasure.strUnitMeasure AS strUOM  
-    ,ROUND(
+    ,(ROUND(
         (
             CASE WHEN ABS(billDetail.dblTotal) <> receiptCharge.dblAmount
                 THEN (
@@ -242,7 +242,16 @@ SELECT
                 )
             ELSE billDetail.dblTotal END
         )
-    + billDetail.dblTax, 2) AS dblVoucherTotal      
+    + billDetail.dblTax, 2))
+    *        
+    (        
+        CASE         
+        WHEN bill.intTransactionType = 3        
+        THEN -1        
+        ELSE 1        
+        END        
+    )    
+    AS dblVoucherTotal      
     ,ROUND(CASE       
         WHEN billDetail.intWeightUOMId IS NULL THEN       
             ISNULL(billDetail.dblQtyReceived, 0)       

@@ -104,9 +104,10 @@ LEFT JOIN (
             rctTax.dblTax AS dblTax
         FROM tblICInventoryReceiptItemTax rctTax
 		INNER JOIN tblICInventoryReceiptItem rctItem ON rctItem.intInventoryReceiptItemId = rctTax.intInventoryReceiptItemId
-        LEFT JOIN tblAPBillDetail billDetail 
+        LEFT JOIN (tblAPBillDetail billDetail INNER JOIN tblAPBill bill ON bill.intBillId = billDetail.intBillId)
             ON billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
             AND billDetail.intInventoryReceiptChargeId IS NULL
+            AND bill.intTransactionType = 1
         -- LEFT JOIN tblAPBillDetailTax billDetailTax
         --         ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
         --         AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
