@@ -10,7 +10,7 @@ ISNULL(CH.dtmCheckoutDate, stcp.dtmCheckoutProcessDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription, 
 ISNULL(stcpew.strMessage, 
-'Store did not automatically run for today, which was stucked on ' +
+'Store did not automatically run for today. It is stuck on ' +
 FORMAT((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
@@ -118,7 +118,7 @@ FORMAT((
 			GROUP BY stcpIn.intStoreId
 		)
 ) AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 
-'Store did not automatically run for today, which was stucked on ' +
+'Store did not automatically run for today. It is stuck on ' +
 FORMAT((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
