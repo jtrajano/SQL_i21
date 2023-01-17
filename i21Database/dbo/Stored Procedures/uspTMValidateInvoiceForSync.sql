@@ -17,6 +17,7 @@ BEGIN
 	DECLARE @strItemType NVARCHAR(50)
 	DECLARE @intScreenId INT
 	DECLARE @intCustomerID INT
+	DECLARE @ysnRequireClock BIT
 
 	SET @ResultLog = ''
 
@@ -61,6 +62,7 @@ BEGIN
 			,@intSiteItemId = intProduct
 			,@strClassFill = strClassFillOption
 			,@intCustomerID = intCustomerID
+			,@ysnRequireClock = ysnRequireClock
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 		
@@ -82,7 +84,7 @@ BEGIN
 			GOTO DONEVALIDATING
 		END
 		
-		IF(NOT EXISTS(SELECT TOP 1 1 FROM tblTMClock WHERE intClockID = @intClockId))
+		IF(@ysnRequireClock  = 1 AND (NOT EXISTS(SELECT TOP 1 1 FROM tblTMClock WHERE intClockID = @intClockId)))
 		BEGIN
 			SET @ResultLog = @ResultLog + 'Exception:The Site Clock Location does not exists in Tank Management.' + CHAR(10)
 			GOTO DONEVALIDATING
@@ -123,7 +125,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmInvoiceDate), 0))
+			IF @ysnRequireClock  = 1 AND (NOT EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmInvoiceDate), 0)))
 			BEGIN 
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDDReadingSeasonResetArchive WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmInvoiceDate), 0))
 				BEGIN

@@ -8,11 +8,22 @@ BEGIN
 	DECLARE @AccumulatedDD INT
 	DECLARE @intClockId INT
 	DECLARE @currentSeason NVARCHAR(10)
+	DECLARE @ysnRequireClock BIT
 	
 	
 
 	---Get Clock Id used in the Site
-	SELECT @intClockId = intClockID FROM tblTMSite WHERE intSiteID = @intSiteId
+	SELECT 
+		@intClockId = intClockID 
+		,@ysnRequireClock = ysnRequireClock
+	FROM tblTMSite 
+	WHERE intSiteID = @intSiteId
+
+	IF(ISNULL(@ysnRequireClock,0) = 0)
+	BEGIN
+		GOTO ENDUPDATE
+	END
+
 	SET @currentSeason = (SELECT (CASE WHEN (MONTH(GETDATE()) >= intBeginSummerMonth AND  MONTH(GETDATE()) < intBeginWinterMonth) THEN 'SUMMER' ELSE 'WINTER' END) FROM tblTMClock WHERE intClockID = @intClockId)
 
 	IF OBJECT_ID('tempdb..#tmpLatestReading') IS NOT NULL DROP TABLE #tmpLatestReading
@@ -185,5 +196,7 @@ BEGIN
 		WHERE intSiteID = @intSiteId	AND dblEstimatedPercentLeft < 0
     
 	END
+
+	ENDUPDATE:
 END
 

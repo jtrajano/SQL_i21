@@ -266,6 +266,7 @@ BEGIN
 	WHERE F.dtmDate IS NULL 
 		AND G.dtmDate IS NULL
 		AND Z.intInvoiceId IS NULL
+		AND C.ysnRequireClock = 1
 
 
 	--------------------------------------------------------------------

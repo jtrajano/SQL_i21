@@ -43,7 +43,7 @@ BEGIN
 										'The Invoice item class is different than the site item class.'
 									WHEN G.strType = 'Service' AND C.intPerformerId IS NULL THEN
 										'Performer is not specified for item'
-									WHEN H.intClockID IS NULL THEN
+									WHEN H.intClockID IS NULL AND D.ysnRequireClock = 1 THEN
 										'Invoice date does not have a matching Clock Reading record.'
 									ELSE ''
 								END)
