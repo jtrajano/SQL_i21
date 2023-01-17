@@ -1281,6 +1281,8 @@
     <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
     <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
