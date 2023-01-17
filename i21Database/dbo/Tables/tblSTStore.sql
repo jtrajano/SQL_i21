@@ -146,7 +146,9 @@
     [intConsDelearCommissionARAccountId] INT NULL,
     [intConsDealerCommissionItemId] INT NULL,
     [dblConsMatchTolerance] DECIMAL(18,6) NOT NULL DEFAULT 0,
-    [intConsFuelDiscountItemId] INT NULL, 
+    [intConsFuelDiscountItemId] INT NULL,
+    [ysnConsIncludeTaxesInCostBasis] BIT NOT NULL DEFAULT 0,
+    [ysnConsIncludeFreightChargesInCostBasis] BIT NOT NULL DEFAULT 0,
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
