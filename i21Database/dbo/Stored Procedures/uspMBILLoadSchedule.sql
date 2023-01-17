@@ -486,7 +486,7 @@ INNER JOIN tblLGDispatchOrderDetail LGLoadDetail on pickupdetail.intDispatchOrde
 INNER JOIN (
 Select pickup.*,dblDeliverQty = delivery.dblQuantity From tblMBILPickupDetail pickup 
 inner join #tmpDispatch t on t.intLoadHeaderId = pickup.intLoadHeaderId and t.intEntityLocationId = isnull(pickup.intEntityLocationId,pickup.intCompanyLocationId)
-inner join tblMBILDeliveryDetail delivery on pickup.intLoadDetailId = delivery.intLoadDetailId
+inner join tblMBILDeliveryDetail delivery on pickup.intDispatchOrderDetailId = delivery.intDispatchOrderDetailId
 Where ysnPickup = 1) b on pickupdetail.intLoadHeaderId = b.intLoadHeaderId and isnull(pickupdetail.intEntityLocationId,0) = isnull(b.intEntityLocationId,0) and isnull(pickupdetail.intCompanyLocationId,0) = isnull(b.intCompanyLocationId,0) and b.intItemId = pickupdetail.intItemId
  
 Where pickupdetail.ysnPickup = 1
@@ -501,11 +501,14 @@ SET ysnPickup = 1
 ,pickupdetail.strBOL = b.strBOL
 ,pickupdetail.strPONumber = LGLoadDetail.strPONumber
 ,pickupdetail.intCompanyLocationId = b.intCompanyLocationId
+,pickupdetail.dblGross = 0
+,pickupdetail.dblNet = 0
+,pickupdetail.dblPickupQuantity = 0
 FROM tblMBILPickupDetail pickupdetail
 INNER JOIN tblLGDispatchOrderDetail LGLoadDetail on pickupdetail.intDispatchOrderDetailId = LGLoadDetail.intDispatchOrderDetailId
 INNER JOIN (
 SELECT pickup.* FROM tblMBILPickupDetail pickup 
 INNER JOIN #tmpDispatch t ON t.intLoadHeaderId = pickup.intLoadHeaderId and t.intEntityLocationId = isnull(pickup.intEntityLocationId,pickup.intCompanyLocationId)
-WHERE ysnPickup = 1) b ON pickupdetail.intLoadHeaderId = b.intLoadHeaderId and isnull(pickupdetail.intEntityLocationId,0) = isnull(b.intEntityLocationId,0) and isnull(pickupdetail.intCompanyLocationId,0) = isnull(b.intCompanyLocationId,0) and b.intItemId = pickupdetail.intItemId
+WHERE ysnPickup = 1) b ON pickupdetail.intLoadHeaderId = b.intLoadHeaderId and isnull(pickupdetail.intEntityLocationId,0) = isnull(b.intEntityLocationId,0) and isnull(pickupdetail.intCompanyLocationId,isnull(b.intCompanyLocationId,0)) = isnull(b.intCompanyLocationId,0) and b.intItemId = pickupdetail.intItemId
 WHERE pickupdetail.ysnPickup = 0
 END
