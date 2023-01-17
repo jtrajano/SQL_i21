@@ -1785,7 +1785,12 @@ USING (
 		 , intReceiveUOMId					= ReceiveUOM.intItemUOMId
 		 , ysnOpenPricePLU					= CASE Pricebook.strOpenPLU WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END
 		 , intAllowNegativeInventory		= ISNULL(CASE Pricebook.strAllowNegativeInventory WHEN 'Y' THEN 1 WHEN 'N' THEN 3 ELSE NULL END, ItemLocation.intAllowNegativeInventory) 
-		 , intAllowZeroCostTypeId			= ISNULL(CASE Pricebook.strAllowZeroCostTypeId WHEN 'Y' THEN 2 WHEN 'N' THEN 1 ELSE NULL END, ItemLocation.intAllowZeroCostTypeId) 
+		 , intAllowZeroCostTypeId			= ISNULL(CASE Pricebook.strAllowZeroCostTypeId 
+													 WHEN 'Y' THEN 2 
+													 WHEN 'N' THEN 1 
+													 WHEN 'W' THEN 3 
+													 WHEN 'P' THEN 4
+													 ELSE NULL END, ItemLocation.intAllowZeroCostTypeId) 
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
 	LEFT JOIN tblICCategory AS Category ON Category.intCategoryId = Item.intCategoryId
