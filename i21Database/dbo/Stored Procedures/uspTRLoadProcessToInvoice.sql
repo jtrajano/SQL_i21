@@ -693,6 +693,7 @@ BEGIN TRY
 		,[intItemUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
+		,[dblFreightQty]
 		,[dblDiscount]
 		,[dblPrice]
 		,[ysnRefreshPrice]
@@ -778,6 +779,7 @@ BEGIN TRY
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= IE.dblQtyOrdered
 		,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN IE.dblMinimumUnits ELSE IE.dblQtyShipped END
+		,[dblFreightQty]						= IE.dblFreightQty
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
 													THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
@@ -869,6 +871,7 @@ BEGIN TRY
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= @dblSumQtyOrdered
 		,[dblQtyShipped]						= CASE WHEN @dblSumQtyShipped <= IE.dblComboMinimumUnits AND ysnComboFreight = 1 THEN IE.dblComboMinimumUnits ELSE @dblSumQtyShipped END
+		,[dblFreightQty]						= IE.dblFreightQty
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
 													THEN ISNULL(IE.[dblComboFreightRate],0) + (ISNULL(IE.[dblComboFreightRate],0) * (IE.dblSurcharge / 100))
@@ -1238,8 +1241,8 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
-			,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
+			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
+			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
@@ -1320,8 +1323,8 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblQtyShipped <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
-			,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblComboSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
