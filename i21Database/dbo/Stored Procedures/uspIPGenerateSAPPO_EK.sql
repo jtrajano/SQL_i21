@@ -71,6 +71,9 @@ BEGIN TRY
 		,@strPlant NVARCHAR(50)
 		,@dtmProductionBatch DATETIME
 		,@dtmExpiration DATETIME
+		,@strBuyingCountry NVARCHAR(50)
+		,@strMixingUnitCountry NVARCHAR(50)
+		,@intMixingUnitCount INT
 	DECLARE @intPOFeedId INT
 	DECLARE @ContractFeedId TABLE (intContractFeedId INT)
 	DECLARE @tmp INT
@@ -303,6 +306,9 @@ BEGIN TRY
 				,@strPlant = NULL
 				,@dtmProductionBatch = NULL
 				,@dtmExpiration = NULL
+				,@strBuyingCountry = NULL
+				,@strMixingUnitCountry = NULL
+				,@intMixingUnitCount = NULL
 
 			SELECT @strContractNumber = strContractNumber
 				,@intContractSeq = intContractSeq
@@ -361,6 +367,44 @@ BEGIN TRY
 			FROM dbo.tblLGLoad L
 			JOIN dbo.tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
 			WHERE intLoadId = @intLoadId
+
+			SELECT @strBuyingCountry = BCL.strCountry
+				,@strMixingUnitCountry = MCL.strCountry
+			FROM tblMFBatch B WITH (NOLOCK)
+			JOIN dbo.tblSMCompanyLocation BCL WITH (NOLOCK) ON BCL.intCompanyLocationId = B.intBuyingCenterLocationId
+			JOIN dbo.tblSMCompanyLocation MCL WITH (NOLOCK) ON MCL.intCompanyLocationId = B.intMixingUnitLocationId
+			WHERE B.intBatchId = @intBatchId
+
+			SELECT @intMixingUnitCount = COUNT(1)
+			FROM (
+				SELECT DISTINCT B.intMixingUnitLocationId
+				FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
+				JOIN dbo.tblMFBatch B WITH (NOLOCK) ON B.intBatchId = LD.intBatchId
+					AND LD.intLoadId = @intLoadId
+				) t
+
+			IF (ISNULL(@intMixingUnitCount, 0) > 1)
+			BEGIN
+				SELECT @strError = @strError + 'Multiple Mixing Unit cannot be used in a single PO. '
+
+				UPDATE tblIPContractFeed
+				SET strMessage = @strError
+					,intStatusId = 1
+				WHERE intContractFeedId = @intContractFeedId
+					AND intLoadDetailId = @intLoadDetailId
+
+				SELECT @strError = ''
+
+				GOTO NextRec
+			END
+
+			IF ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '')
+			BEGIN
+				SELECT @strVirtualPlant = MCL.strVendorRefNoPrefix
+				FROM tblMFBatch B WITH (NOLOCK)
+				JOIN dbo.tblSMCompanyLocation MCL WITH (NOLOCK) ON MCL.intCompanyLocationId = B.intMixingUnitLocationId
+				WHERE B.intBatchId = @intBatchId
+			END
 
 			IF @strDetailRowState <> 'D'
 				AND ISNULL(@ysnPosted, 0) = 0
@@ -706,12 +750,12 @@ BEGIN TRY
 				+ '<OriginOfTea>' + ISNULL(@strISOCode, '') + '</OriginOfTea>'
 				+ '<OriginalTeaLingoItem>' + ISNULL(I.strItemNo, '') + '</OriginalTeaLingoItem>'
 				+ '<PackagesPerPallet>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblPackagesPerPallet, 0))) + '</PackagesPerPallet>'
-				+ '<Plant>' + ISNULL(CL.strVendorRefNoPrefix, '') + '</Plant>'
+				+ '<Plant>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') THEN '' ELSE ISNULL(CL.strVendorRefNoPrefix, '') END + '</Plant>'
 				+ '<TotalQuantity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTotalQuantity, 0))) + '</TotalQuantity>'
 				+ '<SampleBoxNo>' + ISNULL(B.strSampleBoxNumber, '') + '</SampleBoxNo>'
 				+ '<SellingPrice>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblSellingPrice, 0))) + '</SellingPrice>'
 				+ '<StockDate>' + ISNULL(CONVERT(VARCHAR(33), B.dtmStock, 126), '') + '</StockDate>'
-				+ '<StorageLocation>' + ISNULL(B.strStorageLocation, '') + '</StorageLocation>'
+				+ '<StorageLocation>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') THEN '' ELSE ISNULL(B.strStorageLocation, '') END + '</StorageLocation>'
 				+ '<SubChannel>' + ISNULL(B.strSubChannel, '') + '</SubChannel>'
 				+ '<StrategicFlag>' + LTRIM(ISNULL(B.ysnStrategic, '')) + '</StrategicFlag>'
 				+ '<SubClusterTeaLingo>' + ISNULL(B.strTeaLingoSubCluster, '') + '</SubClusterTeaLingo>'
