@@ -282,7 +282,12 @@ BEGIN
 									WHEN OY.ysnSubCurrency = 1 THEN 100
 									ELSE 0.01 END * -1
 				, strCurrency = ISNULL(MY.strCurrency,CY.strCurrency)
-				, dblFX = CASE WHEN @intCurrencyId <>  CC.intCurrencyId THEN ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId, 1), 1) ELSE 1 END
+				, dblFX = CASE WHEN 
+								(CASE WHEN OY.ysnSubCurrency = 1 
+									THEN OY.intMainCurrencyId 
+									ELSE @intCurrencyId END
+								) <> CC.intCurrencyId 
+							THEN ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId, 1), 1) ELSE 1 END
 				, dblBooked = NULL
 				, dblBookedPrice = NULL
 				, dblAccounting = (BL.dblAccounting / (CD.dblQuantity / AD.dblPAllocatedQty)) * -1
