@@ -1506,6 +1506,8 @@
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
     <Build Include="dbo\Views\vyuTMGetOrder.sql" />
     <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
+    <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
