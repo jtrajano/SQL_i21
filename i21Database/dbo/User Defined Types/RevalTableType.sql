@@ -4,6 +4,7 @@ CREATE TYPE [dbo].[RevalTableType] AS TABLE (
 	[intAccountId]              INT              NULL,
 	[dblDebit]                  NUMERIC (18, 6)  NULL,
 	[dblCredit]                 NUMERIC (18, 6)  NULL,
+	[dblExchangeRate]           NUMERIC (38, 20) NULL,
 	[dblDebitForeign]           NUMERIC (18, 6)  NULL,
 	[dblCreditForeign]          NUMERIC (18, 6)  NULL,
 	[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
