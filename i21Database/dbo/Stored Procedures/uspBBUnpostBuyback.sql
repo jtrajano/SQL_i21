@@ -46,7 +46,7 @@ AS
 				BEGIN TRANSACTION
 					-- Unlink from transaction graph
 					SElECT @strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
-					EXEC uspICDeleteTransactionLinks @intInvoiceId, @strInvoiceNumber, 'Debit Memo', 'Accounts Receivable'
+					EXEC uspICDeleteTransactionLinks @intInvoiceId, @strInvoiceNumber, 'Voucher', 'Accounts Receivable'
 
 					UPDATE tblBBBuyback 
 					SET intInvoiceId = NULL
@@ -94,7 +94,7 @@ AS
 				BEGIN TRANSACTION
 					-- Unlink from transaction graph
 					SElECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @intBillId
-					EXEC uspICDeleteTransactionLinks @intBillId, @strBillId, 'Debit Memo', 'Accounts Payable'
+					EXEC uspICDeleteTransactionLinks @intBillId, @strBillId, 'Voucher', 'Accounts Payable'
 
 					UPDATE tblBBBuyback 
 					SET intBillId = NULL
