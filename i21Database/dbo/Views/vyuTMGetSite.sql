@@ -112,6 +112,8 @@ SELECT dblBurnRate = site.dblBurnRate
 	, dtmLostCustomerDate = site.dtmLostCustomerDate
 	, strFacilityNumber = site.strFacilityNumber
 	,ysnRequireClock = site.ysnRequireClock
+	,ysnRequirePump = site.ysnRequirePump
+	,ysnCompanySite = site.ysnCompanySite
 					
 	, strSiteCustomerLocation = EL.strCheckPayeeName
 	, intSiteCustomerLocationId = LCS.intEntityLocationId
