@@ -30,6 +30,7 @@ BEGIN
 	DECLARE @dblCurrentMonthIntervalPerDay NUMERIC(18,6)
 	DECLARE @dblCurrentMonthMaxPercent NUMERIC(18,6)
 	DECLARE @dblCurrentMonthRemainingInterval NUMERIC(18,6)
+	DECLARE @ysnRequireClock BIT
 
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblTMSite 
@@ -42,7 +43,13 @@ BEGIN
 		SELECT TOP 1
 			@intGlobalJulianCalendarId = intGlobalJulianCalendarId
 			,@dtmLastDeliveryDate = dtmLastDeliveryDate
+			,@ysnRequireClock = ysnRequireClock
 		FROM tblTMSite WHERE intSiteID = @intSiteId
+
+		IF(ISNULL(@ysnRequireClock,0) = 0)
+		BEGIN
+			GOTO NoNeedToUpdate
+		END
 
 		---GET JULIAN CAlendar details
 		SELECT 
