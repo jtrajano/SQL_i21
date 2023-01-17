@@ -6,7 +6,8 @@ SELECT		a.intStoreId,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity,
 			FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us')  as dtmCurrentBusinessDay,
-			a.ysnConsignmentStore
+			a.ysnConsignmentStore,
+			reg.strStoreAppFileVersion as strStoreAppVersion
 FROM		tblSTStore a
 LEFT JOIN	(	SELECT		intStoreId,
 							ysnInternetConnectivity,
@@ -18,3 +19,4 @@ LEFT JOIN	(	SELECT		intStoreId,
 													GROUP BY	intStoreId)) b
 ON			a.intStoreId = b.intStoreId AND
 			DATEDIFF(MINUTE, b.dtmStatusDate, GETDATE()) <= 2
+INNER JOIN	vyuSTRegister reg ON a.intStoreId = reg.intStoreId
