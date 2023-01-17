@@ -56,8 +56,20 @@ BEGIN
 	DECLARE @fuelConsumptionPerDay11 NUMERIC(18,6)
 	DECLARE @fuelConsumptionPerDay12 NUMERIC(18,6)
 
+	DECLARE @ysnRequireClock BIT
+
 	---Get Clock Reading Id used by site
-	SELECT @intClockId = intClockID FROM tblTMSite WHERE intSiteID = @intSiteId
+	SELECT 
+		@intClockId = intClockID 
+		,@ysnRequireClock = ysnRequireClock
+	FROM tblTMSite 
+	WHERE intSiteID = @intSiteId
+
+	IF(ISNULL(@ysnRequireClock,0) = 0)
+	BEGIN
+		GOTO ENDUPDATE
+	END
+
 
 	SET @lastReadingDate1 = (SELECT TOP 1 dtmDate FROM tblTMDegreeDayReading ORDER BY dtmDate DESC)
 	SET @currentSeason = (SELECT strCurrentSeason FROM tblTMClock WHERE intClockID = @intClockId)
