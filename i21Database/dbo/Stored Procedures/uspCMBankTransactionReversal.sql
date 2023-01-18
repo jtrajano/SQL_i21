@@ -51,6 +51,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
+		,@BANK_FEE AS INT = 27
+		,@NEGATIVE_AP_ECHECK AS INT = 120
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -239,6 +241,21 @@ ELSE
 				AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
 				AND F.dtmCheckPrinted IS NOT NULL 
+		
+		DECLARE @intTransactionIDFee INT, @strTransactionIDFee NVARCHAR(30)
+
+		SELECT TOP 1 @intTransactionIDFee = F.intTransactionId, @strTransactionIDFee= F.strTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransan TEMP
+		ON F.strTransactionId = TMP.strTransactionId + '-F'
+		WHERE	F.intBankTransactionTypeId = @BANK_FEE
+
+		IF @intTransactionIDFee IS NOT NULL
+		BEGIN
+			UPDATE tblCMBankTransaction SET ysnPosted = 0 WHERE intTransactionId = @intTransactionIDFee
+			DELETE FROM tblCMBankTransaction  WHERE intTransactionId = @intTransactionIDFee
+			DELETE FROM tblGLDetail WHERE strTransactionId = @strTransactionIDFee
+		END
+		
+		
 		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 	END
 
