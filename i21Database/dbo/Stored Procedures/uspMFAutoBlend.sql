@@ -1105,66 +1105,7 @@ BEGIN TRY
 	END
 	COMMIT TRAN
 END TRY   
-BEGIN CATCH  
-INSERT INTO tblInputItem (
-	intRecipeId
-				,intRecipeItemId
-				,intItemId
-				,dblRequiredQty
-				,intItemUOMId
-				,ysnIsSubstitute
-				,ysnMinorIngredient
-				,intConsumptionMethodId
-				,intConsumptionStoragelocationId
-				,intParentItemId
-				,dblCalculatedQuantity)
-	SELECT intRecipeId
-				,intRecipeItemId
-				,intItemId
-				,dblRequiredQty
-				,intItemUOMId
-				,ysnIsSubstitute
-				,ysnMinorIngredient
-				,intConsumptionMethodId
-				,intConsumptionStoragelocationId
-				,intParentItemId
-				,dblCalculatedQuantity FROM @tblInputItem
-
-	INSERT INTO tblMFWorkOrderConsumedLot (
-	intWorkOrderId
-				,intLotId
-				,intItemId
-				,dblQuantity
-				,intItemUOMId
-				,dblIssuedQuantity
-				,intItemIssuedUOMId
-				,intSequenceNo
-				,dtmCreated
-				,intCreatedUserId
-				,dtmLastModified
-				,intLastModifiedUserId
-				,intRecipeItemId
-				,ysnStaged
-				,intSubLocationId
-				,intStorageLocationId)
-	SELECT intWorkOrderId
-				,intLotId
-				,intItemId
-				,dblQuantity
-				,intItemUOMId
-				,dblIssuedQuantity
-				,intItemIssuedUOMId
-				,intSequenceNo
-				,dtmCreated
-				,intCreatedUserId
-				,dtmLastModified
-				,intLastModifiedUserId
-				,intRecipeItemId
-				,ysnStaged
-				,intSubLocationId
-				,intStorageLocationId
-	From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId
-
+BEGIN CATCH
 	COMMIT TRANSACTION
 	 IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
 	--IF @InitialTransaction = 0
