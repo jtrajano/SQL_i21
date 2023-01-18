@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuSTStoreDetail]
 AS
 SELECT ST.* 
-	   , PO.strPaymentOptionId
+	   , ISNULL(PO.strPaymentOptionId, 0) AS strPaymentOptionId
 	   , CAST(CustomerCharge.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForCustomerCharge
 	   , CAST(CashTransaction.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForCashTransaction
 	   , CAST(LoyaltyDiscount.strRegisterMop AS NVARCHAR(100)) AS strRegisterMopForLoyaltyDiscount
