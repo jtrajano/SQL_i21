@@ -198,6 +198,7 @@ BEGIN TRY
 		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](Round(L.dblWeightPerQty,0) ) + '</WeightPerPack>' 
 		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</WeightPerMix>' 
 		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity,0) ) + '</WeightPerBatch>' 
+		+ '<WeightUOM>' + IsNULL(UM.strUnitMeasure,'')  + '</WeightUOM>' 
 		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity ) + '</Bags>' 
 		+ '<FW>' + IsNULL(WI.strFW,'')  + '</FW>' 
 		+ '<UserID>' + US.strUserName  + '</UserID>' 
