@@ -92,7 +92,6 @@ BEGIN TRY
 	SELECT intStageReceiptId
 	FROM tblIPInvReceiptStage
 	WHERE intStatusId IS NULL
-		AND ISNULL(strOrderType, '') = 'PO'
 
 	SELECT @intStageReceiptId = MIN(intStageReceiptId)
 	FROM @tblIPInvReceiptStage
