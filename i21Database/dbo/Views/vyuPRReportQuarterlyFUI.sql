@@ -44,7 +44,8 @@ FROM
 			GROUP BY intPaycheckId, intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) PE
 			LEFT JOIN
 			(SELECT intPaycheckId, intYear = YEAR(dtmPayDate), intQuarter = DATEPART(QQ, dtmPayDate), dblPretax = SUM(dblTotal), dblPretaxYTD = SUM(dblTotalYTD)
-			FROM vyuPRPaycheckDeduction WHERE ysnSUITaxable = 1 AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay'
+			FROM vyuPRPaycheckDeduction WHERE ysnSUITaxable = 1 AND strPaidBy = 'Employee' 
+				AND strDeductFrom = 'Gross Pay'
 			GROUP BY intPaycheckId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) PD
 			ON PE.intPaycheckId = PD.intPaycheckId) tblPRPaycheck
 		ON tblPREmployee.[intEntityId] = tblPRPaycheck.intEntityEmployeeId)

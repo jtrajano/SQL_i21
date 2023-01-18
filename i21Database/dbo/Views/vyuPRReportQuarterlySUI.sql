@@ -55,9 +55,7 @@ INNER JOIN(SELECT
 			,dblPretax = SUM(dblTotal)
 			,dblPretaxYTD = SUM(dblTotalYTD)
 		FROM vyuPRPaycheckDeduction 
-		WHERE ysnSUITaxable = 1 
-			AND strPaidBy = 'Employee'
-			AND strDeductFrom = 'Gross Pay'
+		WHERE ysnSUITaxable = 1 AND strPaidBy = 'Employee' AND strDeductFrom = 'Gross Pay'
 		GROUP BY intPaycheckId
 			,YEAR(dtmPayDate)
 			,DATEPART(QQ, dtmPayDate)
