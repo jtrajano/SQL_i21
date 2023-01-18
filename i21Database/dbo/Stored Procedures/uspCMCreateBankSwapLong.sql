@@ -1,5 +1,6 @@
 CREATE PROCEDURE uspCMCreateBankSwapLong
-	@intSwapShortId INT
+	@intSwapShortId INT,
+	@intEntityId INT
 AS
 
 DECLARE @intBankSwapId INT, @intSwapLongId INT, @strTransactionId NVARCHAR(40)
@@ -52,6 +53,7 @@ dblPayableFn,
 dblPayableFx,
 dblGainLossTo,
 dblGainLossFrom,
+intEntityId,
 intConcurrencyId
 )
 select 
@@ -85,6 +87,7 @@ dblPayableFn=dblReceivableFn,
 dblPayableFx=dblReceivableFx,
 dblGainLossTo=  CASE WHEN intCurrencyIdAmountFrom = @defaultCurrencyId THEN 0 else dblAmountForeignFrom -dblPayableFn  END,
 dblGainLossFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 0 ELSE 0 END,
+@intEntityId,
 1
 from tblCMBankTransfer  A
 OUTER APPLY(
