@@ -407,7 +407,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut
+		FROM #tblInOut 
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -1039,6 +1039,113 @@ GROUP BY strCommodityCode
 	,intCompanyLocationId
 	,strLocationName
 	,strUOM
+
+/***START===STILL ADD TOTAL STORAGE OBLIGATION IF THERE'S NONE ON SPECIFIC LOCATIONS****/
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 2
+	,'TOTAL STORAGE OBLIGATION BEGINNING'
+	,''
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%BEGINNING%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 3
+	,'TOTAL STORAGE OBLIGATION INCREASE'
+	,'+'
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%INCREASE%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 4
+	,'TOTAL STORAGE OBLIGATION DECREASE'
+	,'-'
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%DECREASE%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 5
+	,'TOTAL STORAGE OBLIGATION ENDING'
+	,''
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%ENDING%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+
+INSERT INTO @ReportData
+SELECT
+	@intTotalRowCnt + 6
+	,''
+	,''
+	,0
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,dtmReportDate
+	,strUOM
+FROM @ReportData
+WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%TOTAL%')
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+	,dtmReportDate
+/***END===STILL ADD TOTAL STORAGE OBLIGATION IF THERE'S NONE ON SPECIFIC LOCATIONS****/
 /*==END==STORAGE OBLIGATION==*/
 
 SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
@@ -1317,113 +1424,6 @@ SELECT
 	,@dtmReportDate
 	,strUOM
 FROM @StorageObligationData
-
-/***START===STILL ADD TOTAL STORAGE OBLIGATION IF THERE'S NONE ON SPECIFIC LOCATIONS****/
-INSERT INTO @ReportData
-SELECT
-	@intTotalRowCnt + 2
-	,'TOTAL STORAGE OBLIGATION BEGINNING'
-	,''
-	,0
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,dtmReportDate
-	,strUOM
-FROM @ReportData
-WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%BEGINNING%')
-GROUP BY strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,strUOM
-	,dtmReportDate
-
-INSERT INTO @ReportData
-SELECT
-	@intTotalRowCnt + 3
-	,'TOTAL STORAGE OBLIGATION INCREASE'
-	,'+'
-	,0
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,dtmReportDate
-	,strUOM
-FROM @ReportData
-WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%INCREASE%')
-GROUP BY strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,strUOM
-	,dtmReportDate
-
-INSERT INTO @ReportData
-SELECT
-	@intTotalRowCnt + 4
-	,'TOTAL STORAGE OBLIGATION DECREASE'
-	,'-'
-	,0
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,dtmReportDate
-	,strUOM
-FROM @ReportData
-WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%DECREASE%')
-GROUP BY strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,strUOM
-	,dtmReportDate
-
-INSERT INTO @ReportData
-SELECT
-	@intTotalRowCnt + 5
-	,'TOTAL STORAGE OBLIGATION ENDING'
-	,'-'
-	,0
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,dtmReportDate
-	,strUOM
-FROM @ReportData
-WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%ENDING%')
-GROUP BY strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,strUOM
-	,dtmReportDate
-
-INSERT INTO @ReportData
-SELECT
-	@intTotalRowCnt + 6
-	,''
-	,''
-	,0
-	,strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,dtmReportDate
-	,strUOM
-FROM @ReportData
-WHERE intCompanyLocationId NOT IN (SELECT intCompanyLocationId FROM @StorageObligationData WHERE strLabel LIKE '%TOTAL%')
-GROUP BY strCommodityCode
-	,intCommodityId
-	,intCompanyLocationId
-	,strLocationName
-	,strUOM
-	,dtmReportDate
-/***END===STILL ADD TOTAL STORAGE OBLIGATION IF THERE'S NONE ON SPECIFIC LOCATIONS****/
 /* END COMPANY OWNED */
 
 --BLANK SPACE
@@ -1830,17 +1830,17 @@ UPDATE @ReportData SET dblUnits = 0 WHERE dblUnits IS NULL AND strLabel <> ''
 UPDATE @ReportData SET dblUnits = NULL WHERE dblUnits = 0 AND strLabel = ''
 
 --'TOTAL STORAGE OBLIGATION' should be of same number
--- UPDATE A
--- SET intRowNum = B.intRowNum
--- FROM @ReportData A
--- OUTER APPLY (
--- 	SELECT TOP 1 intRowNum
--- 		,strLabel
--- 	FROM @ReportData
--- 	WHERE strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
--- ) B
--- WHERE A.strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
--- 	AND A.strLabel = B.strLabel
+--UPDATE A
+--SET intRowNum = B.intRowNum
+--FROM @ReportData A
+--OUTER APPLY (
+--	SELECT TOP 1 intRowNum
+--		,strLabel
+--	FROM @ReportData
+--	WHERE strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
+--) B
+--WHERE A.strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
+--	AND A.strLabel = B.strLabel
 
 IF(SELECT COUNT(*) FROM @Locs) > 1
 BEGIN
