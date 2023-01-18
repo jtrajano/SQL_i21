@@ -23,9 +23,14 @@ SET ANSI_WARNINGS ON
 	DECLARE @intDestinationFOBPointId INT
 	DECLARE @ysnIsReturn BIT = 0
 	DECLARE @strCMActualCostId NVARCHAR(100)
+	DECLARE @ValueToPost AS ItemInTransitValueOnlyTableType
+	DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
+	DECLARE @strTransactionId AS NVARCHAR(50)
+	DECLARE @strGLDescription AS NVARCHAR(500) = NULL
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
+		,@strTransactionId = strLoadNumber
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
@@ -310,49 +315,9 @@ SET ANSI_WARNINGS ON
 			WHERE	itemCost.intCurrencyId <> @DefaultCurrencyId 
 		END
 
+		-- Item
 		INSERT INTO @GLEntries (
 			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]	
-			,[dblDebitReport]	
-			,[dblCreditForeign]	
-			,[dblCreditReport]	
-			,[dblReportingRate]	
-			,[dblForeignRate]
-			,[strRateType]
-		)	
-		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
-			@intLoadId
-			,@strBatchId
-			,@intEntityUserSecurityId
-			,@INBOUND_SHIPMENT_TYPE
-			,@ysnPost
-
-		INSERT INTO @GLEntries (
-			[dtmDate]
 			,[strBatchId]
 			,[intAccountId]
 			,[dblDebit]
@@ -392,16 +357,122 @@ SET ANSI_WARNINGS ON
 			,@strAccountToCounterInventory = 'AP Clearing'
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
-		UPDATE @GLEntries
-		SET strCode = 'LG', strModuleName = 'Logistics'
+		-- Inventoried Other Charges
+		INSERT INTO @ValueToPost (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[dtmDate] 
+			,[dblValue] 
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
+			,[intFobPointId] 
+			,[intInTransitSourceLocationId] 
+			,[intCurrencyId] 
+			,[intForexRateTypeId] 
+			,[dblForexRate] 
+			,[intSourceEntityId] 
+			,[strSourceType] 
+			,[strSourceNumber] 
+			,[strBOLNumber] 
+			,[intTicketId]
+		)
+		SELECT 
+			[intItemId] = ShipmentCharges.intItemId
+			,[intItemLocationId] = IL.intItemLocationId
+			,[dtmDate] = L.dtmScheduledDate
+			,[dblValue] = ShipmentCharges.dblAmount 
+			,[intTransactionId] = L.intLoadId
+			,[intTransactionDetailId] = LD.intLoadDetailId
+			,[strTransactionId] = L.strLoadNumber
+			,[intTransactionTypeId] = @INBOUND_SHIPMENT_TYPE
+			,[intLotId] = NULL
+			,[intSourceTransactionId] = L.intLoadId
+			,[strSourceTransactionId] = L.strLoadNumber
+			,[intSourceTransactionDetailId] = LD.intLoadDetailId
+			,[intFobPointId] = FP.intFobPointId
+			,[intInTransitSourceLocationId] = IL.intItemLocationId
+			,[intCurrencyId] = ShipmentCharges.intCurrencyId
+			,[intForexRateTypeId] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
+			,[dblForexRate] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
+			,[intSourceEntityId] = NULL
+			,[strSourceType] = NULL
+			,[strSourceNumber] = NULL 
+			,[strBOLNumber] = NULL 
+			,[intTicketId] = NULL 
+		FROM dbo.tblLGLoad L
+		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
+		INNER JOIN tblICItemLocation IL ON IL.intItemId = ShipmentCharges.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
+		OUTER APPLY (SELECT TOP 1 
+						dblForexRate = ISNULL(dblRate,0),
+						intCurrencyExchangeRateTypeId
+					FROM vyuGLExchangeRate
+					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
+					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
+					ORDER BY dtmValidFromDate DESC) FX
+		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
 
-		IF @intReturnValue < 0
-		BEGIN
-			RAISERROR (@strErrMsg,16,1)
-		END
-	END
-	ELSE
-	BEGIN
+		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
+			@ItemsForInTransitCosting  
+			,@strBatchId  
+			,NULL 
+			,@intEntityUserSecurityId
+			,NULL
+			,@ValueToPost
+
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]					
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm] 
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[intSourceEntityId]
+				,[intCommodityId]
+				,[strRateType]
+		)			
+		EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+			@strBatchId = @strBatchId
+			,@strTransactionId = @strTransactionId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@strGLDescription = @strGLDescription
+			,@AccountCategory_Cost_Adjustment = DEFAULT 
+
+		-- Other Charges
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -443,6 +514,17 @@ SET ANSI_WARNINGS ON
 			,@INBOUND_SHIPMENT_TYPE
 			,@ysnPost
 
+		UPDATE @GLEntries
+		SET strCode = 'LG', strModuleName = 'Logistics'
+
+		IF @intReturnValue < 0
+		BEGIN
+			RAISERROR (@strErrMsg,16,1)
+		END
+	END
+	ELSE
+	BEGIN
+		-- Item
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -485,6 +567,166 @@ SET ANSI_WARNINGS ON
 				,@strBatchId
 				,@intEntityUserSecurityId	
 				,0
+
+		-- Inventoried Other Charges
+		INSERT INTO @ValueToPost (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[dtmDate] 
+			,[dblValue] 
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 
+			,[intSourceTransactionDetailId] 
+			,[intFobPointId] 
+			,[intInTransitSourceLocationId] 
+			,[intCurrencyId] 
+			,[intForexRateTypeId] 
+			,[dblForexRate] 
+			,[intSourceEntityId] 
+			,[strSourceType] 
+			,[strSourceNumber] 
+			,[strBOLNumber] 
+			,[intTicketId]
+		)
+		SELECT 
+			[intItemId] = ShipmentCharges.intItemId
+			,[intItemLocationId] = IL.intItemLocationId
+			,[dtmDate] = L.dtmScheduledDate
+			,[dblValue] = ShipmentCharges.dblAmount * -1
+			,[intTransactionId] = L.intLoadId
+			,[intTransactionDetailId] = LD.intLoadDetailId
+			,[strTransactionId] = L.strLoadNumber
+			,[intTransactionTypeId] = @INBOUND_SHIPMENT_TYPE
+			,[intLotId] = NULL
+			,[intSourceTransactionId] = L.intLoadId
+			,[strSourceTransactionId] = L.strLoadNumber
+			,[intSourceTransactionDetailId] = LD.intLoadDetailId
+			,[intFobPointId] = FP.intFobPointId
+			,[intInTransitSourceLocationId] = IL.intItemLocationId
+			,[intCurrencyId] = ShipmentCharges.intCurrencyId
+			,[intForexRateTypeId] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
+			,[dblForexRate] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
+			,[intSourceEntityId] = NULL
+			,[strSourceType] = NULL
+			,[strSourceNumber] = NULL 
+			,[strBOLNumber] = NULL 
+			,[intTicketId] = NULL 
+		FROM dbo.tblLGLoad L
+		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
+		INNER JOIN tblICItemLocation IL ON IL.intItemId = ShipmentCharges.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
+		OUTER APPLY (SELECT TOP 1 
+						dblForexRate = ISNULL(dblRate,0),
+						intCurrencyExchangeRateTypeId
+					FROM vyuGLExchangeRate
+					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
+					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
+					ORDER BY dtmValidFromDate DESC) FX
+		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
+
+		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
+			@ItemsForInTransitCosting  
+			,@strBatchId  
+			,NULL 
+			,@intEntityUserSecurityId
+			,NULL
+			,@ValueToPost
+
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]					
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm] 
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[intSourceEntityId]
+				,[intCommodityId]
+				,[strRateType]
+		)			
+		EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+			@strBatchId = @strBatchId
+			,@strTransactionId = @strTransactionId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@strGLDescription = @strGLDescription
+			,@AccountCategory_Cost_Adjustment = DEFAULT 
+
+		-- Other Charges
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
+			@intLoadId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INBOUND_SHIPMENT_TYPE
+			,@ysnPost
+		
+		UPDATE @GLEntries
+		SET [ysnIsUnposted] = 1
 
 		IF @intReturnValue < 0
 		BEGIN
