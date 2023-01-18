@@ -302,6 +302,7 @@ BEGIN TRY
 		SELECT TOP 1 TMO.dblQuantity
 			       , TMO.intContractDetailId
 		FROM tblTMOrder TMO 
+		INNER JOIN tblTMDispatch D ON TMO.intDispatchId = D.intDispatchID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
@@ -322,6 +323,7 @@ BEGIN TRY
 	CROSS APPLY ( 
 		SELECT TOP 1 TMO.*
 		FROM tblTMOrder TMO 
+		INNER JOIN tblTMDispatch D ON TMO.intDispatchId = D.intDispatchID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
