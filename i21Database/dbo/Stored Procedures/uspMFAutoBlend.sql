@@ -63,6 +63,7 @@ BEGIN TRY
 			,@strSrcTransactionNo NVARCHAR(50) 
 			,@strSrcModuleName NVARCHAR(50) 
 			,@strSrcTransactionType NVARCHAR(50) 
+			,@intAllowNegativeInventory INT = 0
 
 	DECLARE @tblInputItem TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -97,6 +98,7 @@ BEGIN TRY
 		,intParentLotId INT
 		,intItemUOMId INT
 		,intItemIssuedUOMId INT
+		,intAllowNegativeInventory INT
 	)
 
 	DECLARE @tblPickedLot TABLE(
@@ -559,6 +561,7 @@ BEGIN TRY
 				,intParentLotId
 				,intItemUOMId
 				,intItemIssuedUOMId
+				,intAllowNegativeInventory
 			)
 			SELECT 
 					0
@@ -566,8 +569,8 @@ BEGIN TRY
 					,S.intItemId
 					,S.dblOnHand - S.dblUnitReserved 
 					,@intLocationId
-					,S.intSubLocationId
 					,S.intStorageLocationId
+					,S.intSubLocationId
 					,NULL
 					,NULL
 					,0
@@ -576,6 +579,7 @@ BEGIN TRY
 					,0
 					,S.intItemUOMId
 					,0 
+					,IL.intAllowNegativeInventory
 			FROM dbo.tblICItemStockUOM S
 			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
 				AND S.intItemId = IL.intItemId
@@ -675,6 +679,7 @@ BEGIN TRY
 			SELECT	@intLotId=intLotId
 					,@dblAvailableQty=dblQty 
 					,@intLotItemUOMId=intItemUOMId
+					,@intAllowNegativeInventory = intAllowNegativeInventory
 			FROM	@tblLot 
 			WHERE	intRowNo = @intMinLot
 
@@ -704,6 +709,18 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				DECLARE @dblPickQty NUMERIC(38, 20) 
+
+				IF (@intAllowNegativeInventory) = 1 
+					BEGIN
+						SET @dblPickQty = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intLotItemUOMId, @dblRequiredQty)
+					END
+				ELSE
+					BEGIN
+						SET @dblPickQty = @dblAvailableQty
+					END
+				
+
 				INSERT INTO @tblPickedLot(
 						intLotId
 						,intItemId
@@ -716,7 +733,7 @@ BEGIN TRY
 				SELECT 
 						@intLotId
 						,@intRawItemId
-						,@dblAvailableQty
+						,@dblPickQty
 						,intItemUOMId
 						,intLocationId
 						,intSubLocationId
@@ -1089,6 +1106,7 @@ BEGIN TRY
 	COMMIT TRAN
 END TRY   
 BEGIN CATCH  
+	COMMIT TRANSACTION
 	 IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
 	--IF @InitialTransaction = 0
 	--	IF (XACT_STATE()) <> 0
@@ -1098,4 +1116,6 @@ BEGIN CATCH
 	--		ROLLBACK TRANSACTION @Savepoint
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-END CATCH  
+
+	
+END CATCH
