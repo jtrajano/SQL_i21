@@ -1830,17 +1830,17 @@ UPDATE @ReportData SET dblUnits = 0 WHERE dblUnits IS NULL AND strLabel <> ''
 UPDATE @ReportData SET dblUnits = NULL WHERE dblUnits = 0 AND strLabel = ''
 
 --'TOTAL STORAGE OBLIGATION' should be of same number
-UPDATE A
-SET intRowNum = B.intRowNum
-FROM @ReportData A
-OUTER APPLY (
-	SELECT TOP 1 intRowNum
-		,strLabel
-	FROM @ReportData
-	WHERE strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
-) B
-WHERE A.strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
-	AND A.strLabel = B.strLabel
+-- UPDATE A
+-- SET intRowNum = B.intRowNum
+-- FROM @ReportData A
+-- OUTER APPLY (
+-- 	SELECT TOP 1 intRowNum
+-- 		,strLabel
+-- 	FROM @ReportData
+-- 	WHERE strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
+-- ) B
+-- WHERE A.strLabel LIKE 'TOTAL STORAGE OBLIGATION%'
+-- 	AND A.strLabel = B.strLabel
 
 IF(SELECT COUNT(*) FROM @Locs) > 1
 BEGIN
