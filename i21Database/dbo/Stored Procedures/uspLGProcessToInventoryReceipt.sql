@@ -39,6 +39,28 @@ BEGIN TRY
 			)
 	END
 
+	-- Validate if load other cost already has a voucher but is not yet posted
+	BEGIN
+		DECLARE 
+			@strUnpostedVoucherLoadCostItemNo NVARCHAR(50)
+			,@strUnpostedBillId NVARCHAR(50)
+
+		SELECT TOP 1
+			@strUnpostedVoucherLoadCostItemNo = CV.strItemNo
+			,@strUnpostedBillId = B.strBillId
+		FROM vyuLGLoadCostForVendor CV
+		INNER JOIN tblAPBillDetail BD ON BD.intLoadShipmentCostId = CV.intLoadCostId
+		INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		WHERE CV.intLoadId = @intLoadId
+		AND B.ysnPosted = 0
+
+		IF(@strUnpostedVoucherLoadCostItemNo IS NOT NULL)
+		BEGIN
+			SET @strErrorMessage = 'Cost Item ' + @strUnpostedVoucherLoadCostItemNo + ' has a voucher (' + @strUnpostedBillId + ') that has not yet been posted. Please post the voucher first before creating the receipt.'
+			RAISERROR (@strErrorMessage,16,1)
+		END
+	END
+
 	IF ((SELECT ISNULL(intSourceType, 0) FROM tblLGLoad WHERE intLoadId = @intLoadId) = 1) 
 	BEGIN /* Source Type: None */
 		IF EXISTS (
@@ -224,6 +246,7 @@ BEGIN TRY
 			,[ysnInventoryCost]
 			,[intLoadShipmentId]
 			,[intLoadShipmentCostId]
+			,[ysnLock]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
@@ -250,6 +273,7 @@ BEGIN TRY
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
+			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -258,6 +282,7 @@ BEGIN TRY
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
+		OUTER APPLY (SELECT TOP 1 ysnLock = 1 FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId AND B.ysnPosted = 1) LCK
 		WHERE CV.intLoadId = @intLoadId
 
 		UNION ALL
@@ -285,6 +310,7 @@ BEGIN TRY
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = NULL
+			,[ysnLock] = 0
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
@@ -913,6 +939,7 @@ BEGIN TRY
 			,[ysnInventoryCost]
 			,[intLoadShipmentId]
 			,[intLoadShipmentCostId]
+			,[ysnLock]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
@@ -939,6 +966,7 @@ BEGIN TRY
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
+			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -950,6 +978,7 @@ BEGIN TRY
 		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
+		OUTER APPLY (SELECT TOP 1 ysnLock = 1 FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId AND B.ysnPosted = 1) LCK
 		WHERE CV.intLoadId = @intLoadId
 
 		UNION ALL
@@ -977,6 +1006,7 @@ BEGIN TRY
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = NULL
+			,[ysnLock] = 0
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
