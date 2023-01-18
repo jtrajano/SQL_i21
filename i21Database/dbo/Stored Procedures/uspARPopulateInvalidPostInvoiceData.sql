@@ -1551,6 +1551,7 @@ BEGIN
 	  AND ARID.[intInventoryShipmentItemId] IS NULL
 	  AND ARID.[intLoadDetailId] IS NULL
 	  AND ARID.[ysnBlended] <> 1
+	  AND I.strType <> 'Tax Adjustment'
 	  AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
