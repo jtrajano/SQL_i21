@@ -114,12 +114,15 @@ LEFT JOIN (
         --         AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
         WHERE 
             rctTax.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId 
-        AND EXISTS (
-            SELECT 1 FROM tblAPBillDetailTax billDetailTax
-            INNER JOIN tblAPBillDetail billDetail ON billDetailTax.intBillDetailId = billDetail.intBillDetailId
-            WHERE billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
-            AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
-        )
+        AND (  
+                EXISTS (  
+                    SELECT 1 FROM tblAPBillDetailTax billDetailTax  
+                    INNER JOIN tblAPBillDetail billDetail ON billDetailTax.intBillDetailId = billDetail.intBillDetailId  
+                    WHERE billDetailTax.intTaxCodeId = rctTax.intTaxCodeId  
+                    AND billDetailTax.intTaxClassId = rctTax.intTaxClassId  
+                ) OR  
+                billDetail.intBillDetailId IS NULL  
+        )  
         -- AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
         --         ELSE (
         --             CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
@@ -340,7 +343,7 @@ SELECT
     ,billDetail.intItemId
     ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,(
+    ,((
     --billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
@@ -420,6 +423,11 @@ SELECT
                 END)
             END),0)	
     )
+    
+    +
+    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
+    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
+    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END)
     *
     (
         CASE 
@@ -428,10 +436,6 @@ SELECT
         ELSE 1
         END
     )
-    +
-    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
-    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
-    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
     ,ISNULL(CASE WHEN 
                 receiptItem.dblNet <> 0 AND 
