@@ -270,6 +270,7 @@ WITH ForGLEntries_CTE (
 	,intSourceEntityId
 	,intCommodityId
 	,strRateType
+	,dblForexValue
 )
 AS
 (	
@@ -296,6 +297,7 @@ AS
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
+			,dblForexValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0), 2)
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -386,9 +388,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -404,6 +406,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 
 -- AP Clearing
 UNION ALL 
@@ -438,9 +442,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -456,7 +460,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
-
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 ;
 
 -- Return the GL entries back to the caller. 
