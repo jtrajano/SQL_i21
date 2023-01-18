@@ -57,6 +57,7 @@ INNER JOIN(SELECT
 		FROM vyuPRPaycheckDeduction 
 		WHERE ysnSUITaxable = 1 
 			AND strPaidBy = 'Employee'
+			AND strDeductFrom = 'Gross Pay'
 		GROUP BY intPaycheckId
 			,YEAR(dtmPayDate)
 			,DATEPART(QQ, dtmPayDate)
