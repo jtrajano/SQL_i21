@@ -54,6 +54,8 @@ BEGIN TRY
 				THEN 'c'
 			ELSE cu.strCurrency
 			END + '/' + u2.strUnitMeasure
+		,COST_TYPE = ICost.strItemNo
+		,AMOUNT = CONVERT(NUMERIC(18, 2), ROUND(ISNULL(LCost.dblAmount, 0) / (SELECT COUNT(1) FROM tblLGLoadContainer WHERE intLoadId = ld.intLoadId), 2))
 	FROM (
 		SELECT *
 		FROM tblLGLoadDetailContainerLink
@@ -66,6 +68,8 @@ BEGIN TRY
 	INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId
 	INNER JOIN tblICItem it ON it.intItemId = cd.intItemId
 	INNER JOIN tblICCommodityAttribute att_typ ON att_typ.intCommodityAttributeId = it.intProductTypeId
+	LEFT JOIN tblLGLoadCost LCost ON LCost.intLoadId = ld.intLoadId
+	LEFT JOIN tblICItem ICost ON ICost.intItemId = LCost.intItemId
 	LEFT OUTER JOIN tblICCommodityAttribute att_grd ON att_grd.intCommodityAttributeId = it.intGradeId
 	LEFT OUTER JOIN tblICCommodityAttribute att_org ON att_org.intCommodityAttributeId = it.intOriginId
 	LEFT JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
