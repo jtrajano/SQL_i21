@@ -59,6 +59,26 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+    SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Customer and card information mismatch. Please reselect the credit card then try again.'
+    FROM
+        #ARPostPaymentHeader P
+    INNER JOIN tblEMEntityCardInformation EMECI ON P.intEntityCardInfoId = EMECI.intEntityCardInfoId
+    WHERE P.[ysnPost] = @OneBit
+    AND P.intPaymentMethodId = 11 AND P.intEntityCustomerId <> EMECI.intEntityId
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
         ,[strTransactionId]         = P.[strTransactionId]
