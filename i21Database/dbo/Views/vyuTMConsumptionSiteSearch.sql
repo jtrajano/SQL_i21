@@ -127,4 +127,5 @@ AS
 		ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 	LEFT JOIN tblSMCompanyLocationPricingLevel S
 		ON A.intCompanyLocationPricingLevelId = S.intCompanyLocationPricingLevelId
+	WHERE ysnCompanySite = 0
 GO
