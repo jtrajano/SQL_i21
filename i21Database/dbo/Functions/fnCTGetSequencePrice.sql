@@ -4,7 +4,6 @@
 		,@dblSettlementPrice NUMERIC(24, 6) = NULL
 	)
 RETURNS NUMERIC(24, 6)
-WITH SCHEMABINDING
 AS
 BEGIN
 	DECLARE --@intContractDetailId   INT = 5712,
