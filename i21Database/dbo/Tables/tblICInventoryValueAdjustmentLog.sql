@@ -16,7 +16,7 @@
 		[intInventoryTransactionId] INT NOT NULL, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
-		[intLotId] INT NOT NULL, 
+		[intLotId] INT NULL, 
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 		[dblValue] NUMERIC(38, 20) NULL,
 		[dblForexValue] NUMERIC(38, 20) NULL,
