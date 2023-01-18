@@ -44,7 +44,7 @@ SELECT A.intId, BD.intBookDepreciationId, BD.intBookId
 FROM @Id A 
 JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intId
 LEFT JOIN @tblError B ON A.intId = B.intAssetId AND B.intBookDepreciationId = BD.intBookDepreciationId
-WHERE B.strError IS NULL AND B.intAssetId IS NULL
+WHERE B.strError IS NULL AND B.intAssetId IS NULL AND intBookId = 1
  
 IF NOT EXISTS (SELECT TOP 1 1 FROM @IdGood)
   GOTO LogError
