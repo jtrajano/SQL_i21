@@ -655,7 +655,7 @@ BEGIN TRY
 														INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = ID.intItemId
 														INNER JOIN tblICInventoryReceipt ON tblTRLoadReceipt.intInventoryReceiptId =  tblICInventoryReceipt.intInventoryReceiptId
 														INNER JOIN tblICInventoryReceiptItem ON tblICInventoryReceipt.intInventoryReceiptId =  tblICInventoryReceiptItem.intInventoryReceiptId
-														INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+														LEFT JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 														WHERE tblICInventoryReceiptItemTax.intTaxCodeId IS NULL     
 													)    
 				END
