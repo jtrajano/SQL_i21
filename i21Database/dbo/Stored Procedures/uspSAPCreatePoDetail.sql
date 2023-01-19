@@ -55,7 +55,7 @@ BEGIN TRY
 			ELSE cu.strCurrency
 			END + '/' + u2.strUnitMeasure
 		,COST_TYPE = ICost.strItemNo
-		,AMOUNT = CONVERT(NUMERIC(18, 2), ROUND(ISNULL(LCost.dblAmount, 0) / (SELECT COUNT(1) FROM tblLGLoadContainer WHERE intLoadId = ld.intLoadId), 2))
+		,AMOUNT = CONVERT(NUMERIC(18, 2), ROUND(LCost.dblAmount / (SELECT COUNT(1) FROM tblLGLoadContainer WHERE intLoadId = ld.intLoadId), 2))
 	FROM (
 		SELECT *
 		FROM tblLGLoadDetailContainerLink
