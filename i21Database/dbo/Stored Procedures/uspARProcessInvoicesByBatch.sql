@@ -541,7 +541,7 @@ BEGIN
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
 				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
-				,@SkipRecompute     = 1
+				,@SkipRecompute     = 0
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
@@ -970,7 +970,7 @@ BEGIN
 			,@UserId			= @UserId
 			,@RaiseError		= @RaiseError
 			,@ErrorMessage		= @CurrentErrorMessage	OUTPUT
-			,@SkipRecompute     = 1
+			,@SkipRecompute     = 0
 
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1544,7 +1544,7 @@ BEGIN
 				,@RaiseError		= @RaiseError
 				,@BatchId			= @NewBatchId
 				,@ErrorMessage		= @CurrentErrorMessage OUTPUT
-				,@SkipRecompute     = 1
+				,@SkipRecompute     = 0
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
