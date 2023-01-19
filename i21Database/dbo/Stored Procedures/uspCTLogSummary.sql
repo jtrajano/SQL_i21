@@ -44,7 +44,8 @@ BEGIN TRY
 			@intHeaderPricingTypeId		INT,
 			@ysnInvoicePosted			BIT = 0,
 			@intSequencePricingTypeId INT,
-			@ysnUnlimitedQuantity bit;
+			@ysnUnlimitedQuantity bit,
+			@ysnChangePricingTypeAndQuantity bit = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -569,8 +570,9 @@ BEGIN TRY
 			, ysnQuantityChange = sh.ysnQtyChange
 		FROM tblCTSequenceHistory sh
 		INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
-		WHERE intSequenceUsageHistoryId IS NULL
-			OR (intSequenceUsageHistoryId IS NOT NULL AND ISNULL(sh.ysnQtyChange, 0) = 1 AND sh.dblQuantity > sh.dblOldQuantity AND sh.intPricingTypeId <> 5)
+		WHERE (intSequenceUsageHistoryId IS NULL
+			OR (intSequenceUsageHistoryId IS NOT NULL AND ISNULL(sh.ysnQtyChange, 0) = 1 AND sh.dblQuantity > sh.dblOldQuantity AND sh.intPricingTypeId <> 5))
+			 and sh.ysnSummaryLog = 1
 
 		INSERT INTO @cbLogTemp (strBatchId
 			, dtmTransactionDate
@@ -659,6 +661,10 @@ BEGIN TRY
 
 		IF (ISNULL(@intPricingTypeId, 0) NOT IN (0, 3))
 		BEGIN
+			if exists(select top 1 1 from @cbLogTemp where intPricingTypeId <> @intPricingTypeId and dblQty <> @dblSeqHistoryPreviousQty)
+			begin
+				select @ysnChangePricingTypeAndQuantity = 1;
+			end
 			UPDATE @cbLogTemp SET intPricingTypeId = @intPricingTypeId WHERE dblQty < @dblSeqHistoryPreviousQty;
 		END
 
@@ -1206,7 +1212,7 @@ BEGIN TRY
 					, sh.intSubBookId		
 					, sh.intUserId	
 				FROM vyuCTSequenceUsageHistory suh
-				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId and sh.ysnSummaryLog = 1
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 				LEFT JOIN tblICInventoryShipment shipment ON suh.intExternalHeaderId = shipment.intInventoryShipmentId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
@@ -1972,7 +1978,7 @@ BEGIN TRY
 					, sh.intUserId	
 					, strInvoiceType = invoice.strTransactionType
 				FROM vyuCTSequenceUsageHistory suh
-				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId and sh.ysnSummaryLog = 1
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = suh.intContractDetailId
 				LEFT JOIN tblICInventoryShipment shipment ON suh.intExternalHeaderId = shipment.intInventoryShipmentId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
@@ -2541,7 +2547,7 @@ BEGIN TRY
 							, sh.intBookId
 							, sh.intSubBookId							
 						FROM vyuCTSequenceUsageHistory suh
-						INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+						INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId and sh.ysnSummaryLog = 1
 						INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 						WHERE strFieldName = 'Balance'
 						AND suh.intExternalHeaderId is not null
@@ -3982,7 +3988,7 @@ BEGIN TRY
 
 				SELECT TOP 1 @dblPreviousQtyPriced = dblQtyPriced
 				FROM tblCTSequenceHistory
-				WHERE intContractDetailId = @intContractDetailId
+				WHERE intContractDetailId = @intContractDetailId and ysnSummaryLog = 1
 				ORDER BY intSequenceHistoryId DESC
 
 				SELECT @_dtmCurrent = dtmTransactionDate FROM @cbLogSpecific
@@ -4462,6 +4468,17 @@ BEGIN TRY
 					-- Add current record
 					UPDATE  @cbLogSpecific SET dblQty = @total * CASE WHEN @prevContractStatusId <> 3 AND @intContractStatusId = 3 THEN - 1 ELSE 1 END
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+					if (@ysnChangePricingTypeAndQuantity = 1)
+					begin
+						declare @a numeric(24,10);
+						select @a = sum(dblQty) from tblCTContractBalanceLog where intContractDetailId = @intContractDetailId and strTransactionType = 'Contract Balance' and intPricingTypeId = @intPricingTypeId;
+						update @cbLogSpecific set dblQty = abs(@a) * -1;
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+						update @cbLogSpecific set dblQty = abs(@a), intPricingTypeId = @intSequencePricingTypeId;
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					end
 				END	
 			END
 		END
