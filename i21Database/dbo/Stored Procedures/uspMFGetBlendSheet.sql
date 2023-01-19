@@ -1,5 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheet]
-	@intWorkOrderId int
+﻿CREATE PROCEDURE  [dbo].[uspMFGetBlendSheet]
+(
+	@intWorkOrderId INT
+)
 AS
 SELECT WorkOrder.intWorkOrderId
 	 , WorkOrder.strWorkOrderNo
