@@ -59,7 +59,7 @@ BEGIN
 		DELETE
 		FROM tblLGPendingClaim
 		WHERE intLoadId = @intLoadId
-			AND dblClaimableWt < 0
+			AND dblClaimableWt > 0
 
 		IF EXISTS (
 				/*SELECT *
@@ -70,7 +70,7 @@ BEGIN
 				SELECT *
 				FROM tblLGPendingClaim
 				WHERE intLoadId = @intLoadId
-					AND dblClaimableWt > 0
+					AND dblClaimableWt < 0
 				)
 			AND NOT EXISTS (
 				SELECT *
