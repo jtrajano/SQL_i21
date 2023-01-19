@@ -1,583 +1,607 @@
-﻿CREATE PROCEDURE [dbo].[uspMFSaveBlendSheet] @strXml NVARCHAR(Max)
-	,@intWorkOrderId INT OUT
+﻿CREATE PROCEDURE [dbo].[uspMFSaveBlendSheet]
+(
+	@strXml			NVARCHAR(MAX)
+  , @intWorkOrderId INT OUT
+)
 AS
 BEGIN TRY
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
-	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-	DECLARE @idoc INT
-	DECLARE @ErrMsg NVARCHAR(Max)
-	DECLARE @ysnEnableParentLot BIT = 0
-	DECLARE @intBlendItemId INT
-	DECLARE @intLocationId INT
-	DECLARE @dblPlannedQuantity NUMERIC(38,20)
-	DECLARE @dblBulkReqQuantity NUMERIC(38,20)
-	Declare @intCategoryId int
-	Declare @intCellId int
-	Declare @strPackagingCategoryId NVARCHAR(Max)
-	DECLARE @dblWOQuantity NUMERIC(38,20)
-	Declare @intPlannedShiftId int
+DECLARE @idoc						INT
+	  , @ErrMsg						NVARCHAR(MAX)
+	  , @ysnEnableParentLot			BIT = 0
+	  , @intBlendItemId				INT
+	  , @intLocationId				INT
+	  , @dblPlannedQuantity			NUMERIC(38, 20)
+	  , @dblBulkReqQuantity			NUMERIC(38, 20)
+	  , @intCategoryId				INT
+	  , @intCellId					INT
+	  , @strPackagingCategoryId		NVARCHAR(MAX)
+	  , @dblWOQuantity				NUMERIC(38, 20)
+	  , @intPlannedShiftId			INT
+	  , @intBlendRequirementId		INT
+	  , @strDemandNo				NVARCHAR(50)
+	  , @intManufacturingProcessId	INT
+	  , @dtmBusinessDate			DATETIME
+	  , @intBusinessShiftId			INT
+	  , @dtmCurrentDateTime			DATETIME = GETDATE()
+	  , @dtmProductionDate			DATETIME
+	  , @strReferenceNo				NVARCHAR(50)
+	  , @intMinRowNo				INT
+	  , @strRowState				NVARCHAR(50)
+	  , @intWorkOrderInputLotId		INT
 
-	SET @intWorkOrderId = 0;
+SET @intWorkOrderId = 0;
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXml
+EXEC sp_xml_preparedocument @idoc OUTPUT
+						  , @strXml
 
-	DECLARE @tblBlendSheet TABLE (
-		intWorkOrderId INT
-		,strWorkOrderNo NVARCHAR(50)
-		,intBlendRequirementId INT
-		,intItemId INT
-		,intCellId INT
-		,intMachineId INT
-		,dtmDueDate DATETIME
-		,dblQtyToProduce NUMERIC(38,20)
-		,dblPlannedQuantity NUMERIC(38,20)
-		,intItemUOMId INT
-		,dblBinSize NUMERIC(38,20)
-		,strComment NVARCHAR(Max)
-		,ysnUseTemplate BIT
-		,ysnKittingEnabled BIT
-		,ysnDietarySupplements BIT
-		,intLocationId INT
-		,intPlannedShiftId INT
-		,intUserId INT
-		,intConcurrencyId INT
-		)
-	DECLARE @tblLot TABLE (
-		intRowNo INT Identity(1, 1)
-		,intWorkOrderInputLotId INT
-		,intLotId INT
-		,intItemId INT
-		,dblQty NUMERIC(38,20)
-		,intItemUOMId INT
-		,dblIssuedQuantity NUMERIC(38,20)
-		,intItemIssuedUOMId INT
-		,dblWeightPerUnit NUMERIC(38,20)
-		,intUserId INT
-		,strRowState NVARCHAR(50)
-		,intRecipeItemId INT
-		,intLocationId INT
-		,intStorageLocationId INT
-		,ysnParentLot BIT
-		,strFW nvarchar(3)
-		)
+DECLARE @tblBlendSheet TABLE 
+(
+	intWorkOrderId			INT
+  , strWorkOrderNo			NVARCHAR(50)
+  , intBlendRequirementId	INT
+  , intItemId				INT
+  , intCellId				INT
+  , intMachineId			INT
+  , dtmDueDate				DATETIME
+  , dblQtyToProduce			NUMERIC(38, 20)
+  , dblPlannedQuantity		NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , dblBinSize				NUMERIC(38, 20)
+  , strComment				NVARCHAR(MAX)
+  , ysnUseTemplate			BIT
+  , ysnKittingEnabled		BIT
+  , ysnDietarySupplements	BIT
+  , intLocationId			INT
+  , intPlannedShiftId		INT
+  , intUserId				INT
+  , intConcurrencyId		INT
+  , intIssuedUOMTypeId		INT
+)
+	
+DECLARE @tblLot TABLE 
+(
+	intRowNo				INT Identity(1, 1)
+  , intWorkOrderInputLotId	INT
+  , intLotId				INT
+  , intItemId				INT
+  , dblQty					NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , dblIssuedQuantity		NUMERIC(38, 20)
+  , intItemIssuedUOMId		INT
+  , dblWeightPerUnit		NUMERIC(38, 20)
+  , intUserId				INT
+  , strRowState				NVARCHAR(50)
+  , intRecipeItemId			INT
+  , intLocationId			INT
+  , intStorageLocationId	INT
+  , ysnParentLot			BIT
+  , strFW					NVARCHAR(3)
+)
 
-	Declare @tblPackagingCategoryId Table 
-	(
-		intCategoryId int
-	)
+DECLARE @tblPackagingCategoryId TABLE 
+(
+	intCategoryId INT
+)
 
-	INSERT INTO @tblBlendSheet (
-		intWorkOrderId
-		,strWorkOrderNo
-		,intBlendRequirementId
-		,intItemId
-		,intCellId
-		,intMachineId
-		,dtmDueDate
-		,dblQtyToProduce
-		,dblPlannedQuantity
-		,intItemUOMId
-		,dblBinSize
-		,strComment
-		,ysnUseTemplate
-		,ysnKittingEnabled
-		,ysnDietarySupplements
-		,intLocationId
-		,intPlannedShiftId
-		,intUserId
-		,intConcurrencyId
-		)
-	SELECT intWorkOrderId
-		,strWorkOrderNo
-		,intBlendRequirementId
-		,intItemId
-		,intCellId
-		,intMachineId
-		,dtmDueDate
-		,dblQtyToProduce
-		,dblPlannedQuantity
-		,intItemUOMId
-		,dblBinSize
-		,strComment
-		,ysnUseTemplate
-		,ysnKittingEnabled
-		,ysnDietarySupplements
-		,intLocationId
-		,intPlannedShiftId
-		,intUserId
-		,intConcurrencyId
-	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intWorkOrderId INT
-			,strWorkOrderNo NVARCHAR(50)
-			,intBlendRequirementId INT
-			,intItemId INT
-			,intCellId INT
-			,intMachineId INT
-			,dtmDueDate DATETIME
-			,dblQtyToProduce NUMERIC(38,20)
-			,dblPlannedQuantity NUMERIC(38,20)
-			,intItemUOMId INT
-			,dblBinSize NUMERIC(38,20)
-			,strComment NVARCHAR(Max)
-			,ysnUseTemplate BIT
-			,ysnKittingEnabled BIT
-			,ysnDietarySupplements BIT
-			,intLocationId INT
-			,intPlannedShiftId INT
-			,intUserId INT
-			,intConcurrencyId INT
-			)
+INSERT INTO @tblBlendSheet (intWorkOrderId
+						  , strWorkOrderNo
+						  , intBlendRequirementId
+						  , intItemId
+						  , intCellId
+						  , intMachineId
+						  , dtmDueDate
+						  , dblQtyToProduce
+						  , dblPlannedQuantity
+						  , intItemUOMId
+						  , dblBinSize
+						  , strComment
+						  , ysnUseTemplate
+						  , ysnKittingEnabled
+						  , ysnDietarySupplements
+						  , intLocationId
+						  , intPlannedShiftId
+						  , intUserId
+						  , intConcurrencyId
+						  , intIssuedUOMTypeId)
+SELECT intWorkOrderId
+	 , strWorkOrderNo
+	 , intBlendRequirementId
+	 , intItemId
+	 , intCellId
+	 , intMachineId
+	 , dtmDueDate
+	 , dblQtyToProduce
+	 , dblPlannedQuantity
+	 , intItemUOMId
+	 , dblBinSize
+	 , strComment
+	 , ysnUseTemplate
+	 , ysnKittingEnabled
+	 , ysnDietarySupplements
+	 , intLocationId
+	 , intPlannedShiftId
+	 , intUserId
+	 , intConcurrencyId
+	 , intIssuedUOMTypeId
+FROM OPENXML(@idoc, 'root', 2) 
+WITH 
+(
+	intWorkOrderId			INT
+  , strWorkOrderNo			NVARCHAR(50)
+  , intBlendRequirementId	INT
+  , intItemId				INT
+  , intCellId				INT
+  , intMachineId			INT
+  , dtmDueDate				DATETIME
+  , dblQtyToProduce			NUMERIC(38, 20)
+  , dblPlannedQuantity		NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , dblBinSize				NUMERIC(38, 20)
+  , strComment				NVARCHAR(MAX)
+  , ysnUseTemplate			BIT
+  , ysnKittingEnabled		BIT
+  , ysnDietarySupplements	BIT
+  , intLocationId			INT
+  , intPlannedShiftId		INT
+  , intUserId				INT
+  , intConcurrencyId		INT
+  , intIssuedUOMTypeId		INT
+)
 
-	INSERT INTO @tblLot (
-		intWorkOrderInputLotId
-		,intLotId
-		,intItemId
-		,dblQty
-		,intItemUOMId
-		,dblIssuedQuantity
-		,intItemIssuedUOMId
-		,dblWeightPerUnit
-		,intUserId
-		,strRowState
-		,intRecipeItemId
-		,intLocationId
-		,intStorageLocationId
-		,ysnParentLot
-		,strFW
-		)
-	SELECT intWorkOrderInputLotId
-		,intLotId
-		,intItemId
-		,dblQty
-		,intItemUOMId
-		,dblIssuedQuantity
-		,intItemIssuedUOMId
-		,dblWeightPerUnit
-		,intUserId
-		,strRowState
-		,intRecipeItemId
-		,intLocationId
-		,intStorageLocationId
-		,ysnParentLot
-		,strFW
-	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
-			intWorkOrderInputLotId INT
-			,intLotId INT
-			,intItemId INT
-			,dblQty NUMERIC(38,20)
-			,intItemUOMId INT
-			,dblIssuedQuantity NUMERIC(38,20)
-			,intItemIssuedUOMId INT
-			,dblWeightPerUnit NUMERIC(38,20)
-			,intUserId INT
-			,strRowState NVARCHAR(50)
-			,intRecipeItemId INT
-			,intLocationId INT
-			,intStorageLocationId INT
-			,ysnParentLot BIT
-			,strFW nvarchar(3)
-			)
+INSERT INTO @tblLot (intWorkOrderInputLotId
+				   , intLotId
+				   , intItemId
+				   , dblQty
+				   , intItemUOMId
+				   , dblIssuedQuantity
+				   , intItemIssuedUOMId
+				   , dblWeightPerUnit
+				   , intUserId
+				   , strRowState
+				   , intRecipeItemId
+				   , intLocationId
+				   , intStorageLocationId
+				   , ysnParentLot
+				   , strFW)
+SELECT intWorkOrderInputLotId
+	 , intLotId
+	 , intItemId
+	 , dblQty
+	 , intItemUOMId
+	 , dblIssuedQuantity
+	 , intItemIssuedUOMId
+	 , dblWeightPerUnit
+	 , intUserId
+	 , strRowState
+	 , intRecipeItemId
+	 , intLocationId
+	 , intStorageLocationId
+	 , ysnParentLot
+	 , strFW
+FROM OPENXML(@idoc, 'root/lot', 2) 
+WITH 
+(
+	intWorkOrderInputLotId	INT
+  , intLotId				INT
+  , intItemId				INT
+  , dblQty					NUMERIC(38, 20)
+  , intItemUOMId			INT
+  , dblIssuedQuantity		NUMERIC(38, 20)
+  , intItemIssuedUOMId		INT
+  , dblWeightPerUnit		NUMERIC(38, 20)
+  , intUserId				INT
+  , strRowState				NVARCHAR(50)
+  , intRecipeItemId			INT
+  , intLocationId			INT
+  , intStorageLocationId	INT
+  , ysnParentLot			BIT
+  , strFW					NVARCHAR(3)
+)
 
-	UPDATE @tblLot
-	SET intStorageLocationId = NULL
-	WHERE intStorageLocationId = 0
+UPDATE @tblLot
+SET intStorageLocationId = NULL
+WHERE intStorageLocationId = 0;
 
-	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
-	FROM tblMFCompanyPreference
+SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+FROM tblMFCompanyPreference
 
-	IF @ysnEnableParentLot = 0
-		UPDATE a
-		SET a.dblWeightPerUnit = b.dblWeightPerQty
-		FROM @tblLot a
-		JOIN tblICLot b ON a.intLotId = b.intLotId
-	ELSE
-		UPDATE a
-		SET a.dblWeightPerUnit = (
-				SELECT TOP 1 dblWeightPerQty
-				FROM tblICLot
-				WHERE intParentLotId = b.intParentLotId
-				)
-		FROM @tblLot a
-		JOIN tblICParentLot b ON a.intLotId = b.intParentLotId
+IF @ysnEnableParentLot = 0
+	BEGIN
+		UPDATE VarLot
+		SET VarLot.dblWeightPerUnit = Lot.dblWeightPerQty
+		FROM @tblLot AS VarLot
+		JOIN tblICLot AS Lot ON VarLot.intLotId = Lot.intLotId
+	END
+ELSE
+	BEGIN
+		UPDATE VarLot
+		SET VarLot.dblWeightPerUnit = (SELECT TOP 1 dblWeightPerQty
+									   FROM tblICLot
+									   WHERE intParentLotId = ParentLot.intParentLotId)
+		FROM @tblLot AS VarLot
+		JOIN tblICParentLot AS ParentLot ON VarLot.intLotId = ParentLot.intParentLotId
+	END
 
-	DECLARE @intBlendRequirementId INT
-		,@strDemandNo NVARCHAR(50)
-		,@intManufacturingProcessId INT
-		,@dtmBusinessDate DATETIME
-		,@intBusinessShiftId INT
-		,@dtmCurrentDateTime DATETIME
-		,@dtmProductionDate DATETIME
-		,@strReferenceNo NVARCHAR(50)
+SELECT @intWorkOrderId			= intWorkOrderId
+	 , @intBlendRequirementId	= intBlendRequirementId
+	 , @intCellId				= intCellId
+FROM @tblBlendSheet;
 
-	SELECT @dtmCurrentDateTime = GetDate()
+SELECT @strDemandNo		= strDemandNo
+	 , @strReferenceNo	= strReferenceNo 
+FROM tblMFBlendRequirement
+WHERE intBlendRequirementId = @intBlendRequirementId;
 
-	SELECT @intWorkOrderId = intWorkOrderId
-		,@intBlendRequirementId = intBlendRequirementId
-		,@intCellId = intCellId
-	FROM @tblBlendSheet
+SELECT @intManufacturingProcessId = Recipe.intManufacturingProcessId
+FROM tblMFRecipe AS Recipe
+JOIN @tblBlendSheet AS BlendSheet ON Recipe.intItemId = BlendSheet.intItemId AND Recipe.intLocationId = BlendSheet.intLocationId AND ysnActive = 1
 
-	SELECT @strDemandNo = strDemandNo, @strReferenceNo=strReferenceNo 
-	FROM tblMFBlendRequirement
-	WHERE intBlendRequirementId = @intBlendRequirementId
+SELECT @intBlendItemId = intItemId
+	,@intLocationId = intLocationId
+	,@dblPlannedQuantity = dblPlannedQuantity
+FROM @tblBlendSheet;
 
-	SELECT @intManufacturingProcessId = a.intManufacturingProcessId
-	FROM tblMFRecipe a
-	JOIN @tblBlendSheet b ON a.intItemId = b.intItemId
-		AND a.intLocationId = b.intLocationId
-		AND ysnActive = 1
+SELECT @intCategoryId = intCategoryId 
+FROM tblICItem 
+WHERE intItemId = @intBlendItemId;
 
-	SELECT @intBlendItemId = intItemId
-		,@intLocationId = intLocationId
-		,@dblPlannedQuantity = dblPlannedQuantity
-	FROM @tblBlendSheet
-	Select @intCategoryId=intCategoryId From tblICItem Where intItemId=@intBlendItemId
+SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
-	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
+SELECT @intBusinessShiftId = intShiftId
+FROM dbo.tblMFShift
+WHERE intLocationId = @intLocationId AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset 
+															     AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	SELECT @intBusinessShiftId = intShiftId
-	FROM dbo.tblMFShift
-	WHERE intLocationId = @intLocationId
-		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
-			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+SELECT @strPackagingCategoryId = ISNULL(ProcessAttribute.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute AS ProcessAttribute
+JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId
+  AND intLocationId = @intLocationId
+  AND Attribute.strAttributeName = 'Packaging Category';
 
-	SELECT @strPackagingCategoryId = ISNULL(pa.strAttributeValue, '')
-	FROM tblMFManufacturingProcessAttribute pa
-	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND at.strAttributeName = 'Packaging Category'
+SELECT @intPlannedShiftId = intPlannedShiftId 
+FROM @tblBlendSheet;
 
-	Select @intPlannedShiftId=intPlannedShiftId From @tblBlendSheet
-	IF ISNULL(@intPlannedShiftId,0)=0
+IF ISNULL(@intPlannedShiftId, 0) = 0
 	BEGIN
 		SELECT @intPlannedShiftId = intShiftId
 		FROM dbo.tblMFShift
-		WHERE intLocationId = @intLocationId
-			AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
-				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+		WHERE intLocationId = @intLocationId AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+																		 AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
 		IF @intPlannedShiftId IS NULL
-		BEGIN
-			SELECT @intPlannedShiftId = intShiftId
-			FROM dbo.tblMFShift
-			WHERE intLocationId = @intLocationId
-				AND intShiftSequence = 1
-		END
+			BEGIN
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId AND intShiftSequence = 1;
+			END
 
-		Update @tblBlendSheet set intPlannedShiftId=@intPlannedShiftId
+		UPDATE @tblBlendSheet SET intPlannedShiftId = @intPlannedShiftId
 	END
 
-	BEGIN TRAN
+BEGIN TRANSACTION
 
-	IF @intWorkOrderId = 0
+IF @intWorkOrderId = 0
 	BEGIN
 		DECLARE @strNextWONo NVARCHAR(50)
 
-		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-            ,@intItemId = @intBlendItemId
-            ,@intManufacturingId = @intCellId
-            ,@intSubLocationId = 0
-            ,@intLocationId = @intLocationId
-            ,@intOrderTypeId = NULL
-            ,@intBlendRequirementId = @intBlendRequirementId
-            ,@intPatternCode = 93
-            ,@ysnProposed = 0
-            ,@strPatternString = @strNextWONo OUTPUT
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId			= @intCategoryId
+									  , @intItemId				= @intBlendItemId
+									  , @intManufacturingId		= @intCellId
+									  , @intSubLocationId		= 0
+									  , @intLocationId			= @intLocationId
+									  , @intOrderTypeId			= NULL
+									  , @intBlendRequirementId	= @intBlendRequirementId
+									  , @intPatternCode			= 93
+									  , @ysnProposed			= 0
+									  , @strPatternString		= @strNextWONo OUTPUT
 
-		--Exclude Packing category while summing weight
-		Update @tblBlendSheet Set dblQtyToProduce=(Select SUM(ISNULL(dblQty,0)) 
-		From @tblLot l 
-		join tblICItem i on l.intItemId=i.intItemId Where i.intCategoryId not in (Select * from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId)))
+		/* Exclude Packing category while summing weight. */
+		UPDATE @tblBlendSheet 
+		SET dblQtyToProduce = (SELECT SUM(ISNULL(dblQty, 0)) 
+		FROM @tblLot AS VarLot 
+		JOIN tblICItem AS Item on VarLot.intItemId = Item.intItemId 
+		WHERE Item.intCategoryId NOT IN (SELECT * 
+										 FROM dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId)));
 
-		INSERT INTO tblMFWorkOrder (
-			strWorkOrderNo
-			,intItemId
-			,dblQuantity
-			,intItemUOMId
-			,intStatusId
-			,intManufacturingCellId
-			,intMachineId
-			,intLocationId
-			,dblBinSize
-			,dtmExpectedDate
-			,intExecutionOrder
-			,intProductionTypeId
-			,dblPlannedQuantity
-			,intBlendRequirementId
-			,ysnKittingEnabled
-			,ysnDietarySupplements
-			,ysnUseTemplate
-			,strComment
-			,dtmCreated
-			,intCreatedUserId
-			,dtmLastModified
-			,intLastModifiedUserId
-			,intConcurrencyId
-			,intManufacturingProcessId
-			,intTransactionFrom
-			,intPlannedShiftId
-			,dtmPlannedDate
-			,strERPOrderNo 
-			)
+		INSERT INTO tblMFWorkOrder (strWorkOrderNo
+								  , intItemId
+								  , dblQuantity
+								  , intItemUOMId
+								  , intStatusId
+								  , intManufacturingCellId
+								  , intMachineId
+								  , intLocationId
+								  , dblBinSize
+								  , dtmExpectedDate
+								  , intExecutionOrder
+								  , intProductionTypeId
+								  , dblPlannedQuantity
+								  , intBlendRequirementId
+								  , ysnKittingEnabled
+								  , ysnDietarySupplements
+								  , ysnUseTemplate
+								  , strComment
+								  , dtmCreated
+								  , intCreatedUserId
+								  , dtmLastModified
+								  , intLastModifiedUserId
+								  , intConcurrencyId
+								  , intManufacturingProcessId
+								  , intTransactionFrom
+								  , intPlannedShiftId
+								  , dtmPlannedDate
+								  , strERPOrderNo 
+								  , intIssuedUOMTypeId)
 		SELECT @strNextWONo
-			,intItemId
-			,dblQtyToProduce
-			,intItemUOMId
-			,2
-			,intCellId
-			,intMachineId
-			,intLocationId
-			,dblBinSize
-			,dtmDueDate
-			,0
-			,1
-			,dblPlannedQuantity
-			,intBlendRequirementId
-			,ysnKittingEnabled
-			,ysnDietarySupplements
-			,ysnUseTemplate
-			,strComment
-			,GetDate()
-			,intUserId
-			,GetDate()
-			,intUserId
-			,intConcurrencyId + 1
-			,@intManufacturingProcessId
-			,1
-			,intPlannedShiftId
-			,dtmDueDate
-			,@strReferenceNo
+			, intItemId
+			, dblQtyToProduce
+			, intItemUOMId
+			, 2
+			, intCellId
+			, intMachineId
+			, intLocationId
+			, dblBinSize
+			, dtmDueDate
+			, 0
+			, 1
+			, dblPlannedQuantity
+			, intBlendRequirementId
+			, ysnKittingEnabled
+			, ysnDietarySupplements
+			, ysnUseTemplate
+			, strComment
+			, GetDate()
+			, intUserId
+			, GetDate()
+			, intUserId
+			, intConcurrencyId + 1
+			, @intManufacturingProcessId
+			, 1
+			, intPlannedShiftId
+			, dtmDueDate
+			, @strReferenceNo
+			, intIssuedUOMTypeId
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
 	END
-	ELSE
-		UPDATE a
-		SET  a.intManufacturingCellId = b.intCellId
-			,a.intMachineId = b.intMachineId
-			,a.dblBinSize = b.dblBinSize
-			,a.dtmExpectedDate = b.dtmDueDate
-			,a.dblPlannedQuantity = b.dblPlannedQuantity
-			,a.ysnKittingEnabled = b.ysnKittingEnabled
-			,a.ysnDietarySupplements = b.ysnDietarySupplements
-			,a.ysnUseTemplate = b.ysnUseTemplate
-			,a.strComment = b.strComment
-			,a.intLastModifiedUserId = b.intUserId
-			,a.dtmLastModified = GetDate()
-			,a.intConcurrencyId = a.intConcurrencyId + 1
-			,a.intPlannedShiftId=b.intPlannedShiftId
-			,a.dtmPlannedDate = b.dtmDueDate
-		FROM tblMFWorkOrder a
-		JOIN @tblBlendSheet b ON a.intWorkOrderId = b.intWorkOrderId
-
-	SELECT @dtmProductionDate = dtmExpectedDate
-	FROM tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
-
-	DECLARE @intMinRowNo INT
-
-	SELECT @intMinRowNo = Min(intRowNo)
-	FROM @tblLot
-
-	DECLARE @strRowState NVARCHAR(50)
-		,@intWorkOrderInputLotId INT
-
-	WHILE (@intMinRowNo IS NOT NULL)
+ELSE
 	BEGIN
-		SELECT @strRowState = strRowState
-			,@intWorkOrderInputLotId = intWorkOrderInputLotId
+		UPDATE WorkOrder
+		SET WorkOrder.intManufacturingCellId	= VarBlendSheet.intCellId
+		  , WorkOrder.intMachineId				= VarBlendSheet.intMachineId
+		  , WorkOrder.dblBinSize				= VarBlendSheet.dblBinSize
+		  , WorkOrder.dtmExpectedDate			= VarBlendSheet.dtmDueDate
+		  , WorkOrder.dblPlannedQuantity		= VarBlendSheet.dblPlannedQuantity
+		  , WorkOrder.ysnKittingEnabled			= VarBlendSheet.ysnKittingEnabled
+		  , WorkOrder.ysnDietarySupplements		= VarBlendSheet.ysnDietarySupplements
+		  , WorkOrder.ysnUseTemplate			= VarBlendSheet.ysnUseTemplate
+		  , WorkOrder.strComment				= VarBlendSheet.strComment
+		  , WorkOrder.intLastModifiedUserId		= VarBlendSheet.intUserId
+		  , WorkOrder.dtmLastModified			= GETDATE()
+		  , WorkOrder.intConcurrencyId			= WorkOrder.intConcurrencyId + 1
+		  , WorkOrder.intPlannedShiftId			= VarBlendSheet.intPlannedShiftId
+		  , WorkOrder.dtmPlannedDate			= VarBlendSheet.dtmDueDate
+		FROM tblMFWorkOrder AS WorkOrder
+		JOIN @tblBlendSheet AS VarBlendSheet ON WorkOrder.intWorkOrderId = VarBlendSheet.intWorkOrderId
+	END
+
+SELECT @dtmProductionDate = dtmExpectedDate
+FROM tblMFWorkOrder
+WHERE intWorkOrderId = @intWorkOrderId;
+
+SELECT @intMinRowNo = Min(intRowNo)
+FROM @tblLot;
+
+WHILE (@intMinRowNo IS NOT NULL)
+	BEGIN
+		SELECT @strRowState				= strRowState
+			 , @intWorkOrderInputLotId	= intWorkOrderInputLotId
 		FROM @tblLot
-		WHERE intRowNo = @intMinRowNo
+		WHERE intRowNo = @intMinRowNo;
 
+		/* New Record. */
 		IF @strRowState = 'ADDED'
-		BEGIN
-			IF @ysnEnableParentLot = 0
-				INSERT INTO tblMFWorkOrderInputLot (
-					intWorkOrderId
-					,intLotId
-					,intItemId
-					,dblQuantity
-					,intItemUOMId
-					,dblIssuedQuantity
-					,intItemIssuedUOMId
-					,intSequenceNo
-					,dtmCreated
-					,intCreatedUserId
-					,dtmLastModified
-					,intLastModifiedUserId
-					,intRecipeItemId
-					,dtmProductionDate
-					,dtmBusinessDate
-					,intBusinessShiftId
-					,strFW
-					)
-				SELECT @intWorkOrderId
-					,intLotId
-					,intItemId
-					,dblQty
-					,intItemUOMId
-					,dblIssuedQuantity
-					,intItemIssuedUOMId
-					,NULL
-					,GetDate()
-					,intUserId
-					,GetDate()
-					,intUserId
-					,intRecipeItemId
-					,@dtmProductionDate
-					,@dtmBusinessDate
-					,@intBusinessShiftId
-					,strFW
-				FROM @tblLot
-				WHERE intRowNo = @intMinRowNo
-			ELSE
-				INSERT INTO tblMFWorkOrderInputParentLot (
-					intWorkOrderId
-					,intParentLotId
-					,intItemId
-					,dblQuantity
-					,intItemUOMId
-					,dblIssuedQuantity
-					,intItemIssuedUOMId
-					,intSequenceNo
-					,dtmCreated
-					,intCreatedUserId
-					,dtmLastModified
-					,intLastModifiedUserId
-					,intRecipeItemId
-					,dblWeightPerUnit
-					,intLocationId
-					,intStorageLocationId
-					)
-				SELECT @intWorkOrderId
-					,intLotId
-					,intItemId
-					,dblQty
-					,intItemUOMId
-					,dblIssuedQuantity
-					,intItemIssuedUOMId
-					,NULL
-					,GetDate()
-					,intUserId
-					,GetDate()
-					,intUserId
-					,intRecipeItemId
-					,dblWeightPerUnit
-					,intLocationId
-					,intStorageLocationId
-				FROM @tblLot
-				WHERE intRowNo = @intMinRowNo
-		END
+			BEGIN
+				/* For Enable Parent Lot Configuration. */
+				IF @ysnEnableParentLot = 0
+					BEGIN
+						INSERT INTO tblMFWorkOrderInputLot (intWorkOrderId
+														  , intLotId
+														  , intItemId
+														  , dblQuantity
+														  , intItemUOMId
+														  , dblIssuedQuantity
+														  , intItemIssuedUOMId
+														  , intSequenceNo
+														  , dtmCreated
+														  , intCreatedUserId
+														  , dtmLastModified
+														  , intLastModifiedUserId
+														  , intRecipeItemId
+														  , dtmProductionDate
+														  , dtmBusinessDate
+														  , intBusinessShiftId
+														  , strFW)
+						SELECT @intWorkOrderId
+							, intLotId
+							, intItemId
+							, dblQty
+							, intItemUOMId
+							, dblIssuedQuantity
+							, intItemIssuedUOMId
+							, NULL
+							, GetDate()
+							, intUserId
+							, GetDate()
+							, intUserId
+							, intRecipeItemId
+							, @dtmProductionDate
+							, @dtmBusinessDate
+							, @intBusinessShiftId
+							, strFW
+						FROM @tblLot
+						WHERE intRowNo = @intMinRowNo
+					END
+				/*End of For Enable Parent Lot Configuration. */
+				ELSE
+					BEGIN
+						INSERT INTO tblMFWorkOrderInputParentLot (intWorkOrderId
+																, intParentLotId
+																, intItemId
+																, dblQuantity
+																, intItemUOMId
+																, dblIssuedQuantity
+																, intItemIssuedUOMId
+																, intSequenceNo
+																, dtmCreated
+																, intCreatedUserId
+																, dtmLastModified
+																, intLastModifiedUserId
+																, intRecipeItemId
+																, dblWeightPerUnit
+																, intLocationId
+																, intStorageLocationId)
+						SELECT @intWorkOrderId
+							 , intLotId
+							 , intItemId
+							 , dblQty
+							 , intItemUOMId
+							 , dblIssuedQuantity
+							 , intItemIssuedUOMId
+							 , NULL
+							 , GETDATE()
+							 , intUserId
+							 , GETDATE()
+							 , intUserId
+							 , intRecipeItemId
+							 , dblWeightPerUnit
+							 , intLocationId
+							 , intStorageLocationId
+						FROM @tblLot
+						WHERE intRowNo = @intMinRowNo;
+					END
+			/* End of New Record. */
+			END
 
+		/* Update Record. */
 		IF @strRowState = 'MODIFIED'
-		BEGIN
-			IF @ysnEnableParentLot = 0
-				UPDATE tblMFWorkOrderInputLot
-				SET dblQuantity = (
-						SELECT dblQty
-						FROM @tblLot
-						WHERE intRowNo = @intMinRowNo
-						)
-					,dblIssuedQuantity = (
-						SELECT dblIssuedQuantity
-						FROM @tblLot
-						WHERE intRowNo = @intMinRowNo
-						)
-					,dtmProductionDate = @dtmProductionDate
-					,dtmBusinessDate = @dtmBusinessDate
-					,intBusinessShiftId = @intBusinessShiftId
-					,strFW=(
-						SELECT strFW
-						FROM @tblLot
-						WHERE intRowNo = @intMinRowNo
-						)
-				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
-			ELSE
-				UPDATE tblMFWorkOrderInputParentLot
-				SET dblQuantity = (
-						SELECT dblQty
-						FROM @tblLot
-						WHERE intRowNo = @intMinRowNo
-						)
-					,dblIssuedQuantity = (
-						SELECT dblIssuedQuantity
-						FROM @tblLot
-						WHERE intRowNo = @intMinRowNo
-						)
-				WHERE intWorkOrderInputParentLotId = @intWorkOrderInputLotId
-		END
+			BEGIN
+				/* For Enable Parent Lot Configuration. */
+				IF @ysnEnableParentLot = 0
+					BEGIN
+						UPDATE tblMFWorkOrderInputLot
+						SET dblQuantity			= (SELECT dblQty
+												   FROM @tblLot
+												   WHERE intRowNo = @intMinRowNo)
+						  , dblIssuedQuantity	= (SELECT dblIssuedQuantity
+												   FROM @tblLot
+												   WHERE intRowNo = @intMinRowNo)
+						  , dtmProductionDate	= @dtmProductionDate
+						  , dtmBusinessDate		= @dtmBusinessDate
+						  , intBusinessShiftId	= @intBusinessShiftId
+						  , strFW				= (SELECT strFW
+												   FROM @tblLot
+												   WHERE intRowNo = @intMinRowNo)
+						WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+					END
+				ELSE
+					BEGIN
+						UPDATE tblMFWorkOrderInputParentLot
+						SET dblQuantity			= (SELECT dblQty
+												   FROM @tblLot
+												   WHERE intRowNo = @intMinRowNo)
+						  , dblIssuedQuantity	= (SELECT dblIssuedQuantity
+												   FROM @tblLot
+												   WHERE intRowNo = @intMinRowNo)
+						WHERE intWorkOrderInputParentLotId = @intWorkOrderInputLotId
+					END
+			/* End of Update Record. */
+			END
 
+		/* Delete Record. */
 		IF @strRowState = 'DELETE'
-		BEGIN
-			IF @ysnEnableParentLot = 0
-				DELETE
-				FROM tblMFWorkOrderInputLot
-				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
-			ELSE
-				DELETE
-				FROM tblMFWorkOrderInputParentLot
-				WHERE intWorkOrderInputParentLotId = @intWorkOrderInputLotId
-		END
+			BEGIN
+				IF @ysnEnableParentLot = 0
+					BEGIN
+						DELETE
+						FROM tblMFWorkOrderInputLot
+						WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId;
+					END
+				ELSE
+					BEGIN
+						DELETE
+						FROM tblMFWorkOrderInputParentLot
+						WHERE intWorkOrderInputParentLotId = @intWorkOrderInputLotId;
+					END
+			/* End of Delete Record. */
+			END
 
 		SELECT @intMinRowNo = Min(intRowNo)
 		FROM @tblLot
 		WHERE intRowNo > @intMinRowNo
+
+	/* End of WHILE. */
 	END
 
-	--Update Bulk Item(By Location or FIFO) Standard Required Qty Calculated Using Planned Qty
-	SELECT @dblBulkReqQuantity = ISNULL(SUM((ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity))), 0)
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-	WHERE r.intItemId = @intBlendItemId
-		AND intLocationId = @intLocationId
-		AND ysnActive = 1
-		AND ri.intRecipeItemTypeId = 1
-		AND ri.intConsumptionMethodId IN (
-			2
-			,3
-			)
+	/* Update Bulk Item(By Location or FIFO) Standard Required Qty Calculated Using Planned Qty. */
+	SELECT @dblBulkReqQuantity = ISNULL(SUM((RecipeItem.dblCalculatedQuantity * (@dblPlannedQuantity / Recipe.dblQuantity))), 0)
+	FROM tblMFRecipeItem AS RecipeItem
+	JOIN tblMFRecipe AS Recipe ON Recipe.intRecipeId = RecipeItem.intRecipeId
+	WHERE Recipe.intItemId = @intBlendItemId AND intLocationId = @intLocationId
+											 AND ysnActive = 1
+											 AND RecipeItem.intRecipeItemTypeId = 1
+											 AND RecipeItem.intConsumptionMethodId IN (2, 3);
 
 	IF @ysnEnableParentLot = 0
-	Select @dblWOQuantity = SUM(ISNULL(dblQuantity,0)) 
-		From tblMFWorkOrderInputLot wi 
-		join tblICItem i on wi.intItemId=i.intItemId 
-		Where wi.intWorkOrderId=@intWorkOrderId AND i.intCategoryId not in (Select * from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId))
-	Else
-	Select @dblWOQuantity = SUM(ISNULL(dblQuantity,0)) 
-		From tblMFWorkOrderInputParentLot wi 
-		join tblICItem i on wi.intItemId=i.intItemId 
-		Where wi.intWorkOrderId=@intWorkOrderId AND i.intCategoryId not in (Select * from dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId))
-					
+		BEGIN
+			SELECT @dblWOQuantity = SUM(ISNULL(dblQuantity, 0)) 
+			FROM tblMFWorkOrderInputLot AS InputLot
+			JOIN tblICItem AS Item ON InputLot.intItemId = Item.intItemId 
+			WHERE InputLot.intWorkOrderId=@intWorkOrderId AND Item.intCategoryId NOT IN (SELECT * 
+																						 FROM dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId));
+		END
+
+	ELSE
+		BEGIN	
+			SELECT @dblWOQuantity = SUM(ISNULL(dblQuantity, 0)) 
+			FROM tblMFWorkOrderInputParentLot AS InputLot
+			JOIN tblICItem AS Item ON InputLot.intItemId = Item.intItemId 
+			WHERE InputLot.intWorkOrderId=@intWorkOrderId AND Item.intCategoryId NOT IN (SELECT * 
+																						 FROM dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId));
+		END
+	
 	UPDATE tblMFWorkOrder
-	SET dblQuantity = ISNULL(@dblWOQuantity,0) + ISNULL(@dblBulkReqQuantity,0)
-	WHERE intWorkOrderId = @intWorkOrderId
+	SET dblQuantity = ISNULL(@dblWOQuantity, 0) + ISNULL(@dblBulkReqQuantity, 0)
+	WHERE intWorkOrderId = @intWorkOrderId;
 
 	UPDATE tblMFBlendRequirement
-	SET dblIssuedQty = (
-			SELECT SUM(dblQuantity)
-			FROM tblMFWorkOrder
-			WHERE intBlendRequirementId = @intBlendRequirementId
-			)
-	WHERE intBlendRequirementId = @intBlendRequirementId
+	SET dblIssuedQty = (SELECT SUM(dblQuantity)
+						FROM tblMFWorkOrder
+						WHERE intBlendRequirementId = @intBlendRequirementId)
+	WHERE intBlendRequirementId = @intBlendRequirementId;
 
 	UPDATE tblMFBlendRequirement
 	SET intStatusId = 2
 	WHERE intBlendRequirementId = @intBlendRequirementId
-		AND ISNULL(dblIssuedQty, 0) >= dblQuantity
+				AND ISNULL(dblIssuedQty, 0) >= dblQuantity
 
-	--Create Quality Computations
+	/* Create Quality Computations. */
 	EXEC uspMFCreateBlendRecipeComputation @intWorkOrderId = @intWorkOrderId
-		,@intTypeId = 1
-		,@strXml = @strXml
+										 , @intTypeId	   = 1
+										 , @strXml		   = @strXml
 
-	COMMIT TRAN
+COMMIT TRANSACTION
 
-	SELECT @intWorkOrderId AS intWorkOrderId
+SELECT @intWorkOrderId AS intWorkOrderId
+
 END TRY
 
 BEGIN CATCH
