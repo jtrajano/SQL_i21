@@ -22,6 +22,7 @@
     [intFiscalYearId] INT NULL, 
     [intFiscalPeriodId] INT NULL, 
     [intLocationSegmentId]  INT NULL,
+    [intCompanySegmentId]  INT NULL,
     [intJournalIdToReverse] INT NULL, 
     [intLedgerId] INT NULL, 
     [ysnReversed] BIT NULL, 
