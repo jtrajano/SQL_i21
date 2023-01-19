@@ -1305,7 +1305,6 @@ BEGIN TRY
 	 WHERE
 		[ysnSuccess] = 1
 		AND ISNULL([ysnRecomputeTax], 0) = 1
-		AND [strType] = 'POS'
 
 	EXEC [dbo].[uspARReComputeInvoicesTaxes] @InvoiceIds = @RecomputeTaxIds, @SkipRecompute = @SkipRecompute
 
@@ -1328,7 +1327,6 @@ BEGIN TRY
 		 WHERE
 			[ysnSuccess] = 1
 			AND ISNULL([ysnRecomputeTax], 0) = 0
-			AND [strType] = 'POS'
 
 		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @RecomputeAmountIds
 	END
