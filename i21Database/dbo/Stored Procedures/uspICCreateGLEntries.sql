@@ -373,7 +373,7 @@ AS
 					ELSE 
 						NULL
 				END 
-			,dblLatestForexRate = latestForexRate.dblRate
+			,dblLatestForexRate = ISNULL(latestForexRate.dblRate, t.dblExchangeRate) 
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
