@@ -293,6 +293,7 @@ BEGIN
 		SELECT [dbo].[fnFACountRemainingMonthsInQuarter](T.dtmPlacedInService, CASE WHEN T.intBookId = 1 THEN 1 ELSE 0 END) intRemainingMonthsInQuarter
 	) B
 	WHERE strError IS NULL AND intMonth BETWEEN 1 AND B.intRemainingMonthsInQuarter -- From the month of PlacedInService up to the last month of the quarter of the PlacedInService date
+	AND strConvention = 'Mid Quarter'
 END
 
 -- Mid Year Convention -> Compute Mid Year depreciation take on the year that PlacedInService falls into.
@@ -305,6 +306,7 @@ BEGIN
 		SELECT [dbo].[fnFACountRemainingMonthsInYear](T.dtmPlacedInService, CASE WHEN T.intBookId = 1 THEN 1 ELSE 0 END) intRemainingMonthsInYear
 	) B
 	WHERE strError IS NULL AND intMonth BETWEEN 1 AND B.intRemainingMonthsInYear --from month of PlacedInService up to the last month of year of the PlacedInService date
+	AND strConvention = 'Mid Year'
 END
 
 -- Validate Adjustment to Depreciation
