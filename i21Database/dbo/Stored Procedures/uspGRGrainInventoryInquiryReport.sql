@@ -1354,7 +1354,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED DECREASE (INC DP)'
 	,'-'
-	,ABS(ISNULL(A.dblUnits,0) + ISNULL(C.dblUnits,0)) --- ISNULL(B.dblUnits,0))
+	,ABS(ISNULL(A.dblUnits,0) + ISNULL(C.dblUnits,0) + ISNULL(D.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1409,6 +1409,38 @@ OUTER APPLY (
 		,strFromLocationName
 		,UM.strUnitMeasure
 ) C
+OUTER APPLY (
+	SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
+		,IC.strCommodityCode
+		,CS.intCommodityId
+		,intFromCompanyLocationId
+		,strFromLocationName
+		,UM.strUnitMeasure
+	FROM tblGRStorageHistory SH
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblICCommodity IC
+		ON IC.intCommodityId = CS.intCommodityId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = CS.intCompanyLocationId
+	INNER JOIN tblICItemUOM UOM
+		ON UOM.intItemUOMId = CS.intItemUOMId
+	INNER JOIN tblICUnitMeasure UM
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	/*
+		Transfer from Customer owned to customer owned
+		from one location to another
+	*/
+	WHERE SH.strType = 'Reverse Settlement'
+		AND CS.intCommodityId = A.intCommodityId
+		AND CS.intCompanyLocationId = A.intCompanyLocationId
+		AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+	GROUP BY IC.strCommodityCode
+		,CS.intCommodityId
+		,CS.intCompanyLocationId
+		,CL.strLocationName
+		,UM.strUnitMeasure
+) D
 
 --INSERT IN @ReportData
 INSERT INTO @ReportData
