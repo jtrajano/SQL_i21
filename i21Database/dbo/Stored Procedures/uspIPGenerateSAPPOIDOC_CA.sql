@@ -73,6 +73,38 @@ BEGIN
 				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
 				WHERE TPCF.intContractFeedId = CF.intContractFeedId
 				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM tblCTContractDetail CD
+					WHERE CD.intContractDetailId = CF.intContractDetailId
+					)
+		ORDER BY CF.intContractFeedId ASC
+
+		INSERT INTO dbo.tblIPThirdPartyContractFeed (
+			intContractFeedId
+			,strERPPONumber
+			,strRowState
+			)
+		SELECT CF.intContractFeedId
+			,CF.strERPPONumber
+			,CF.strRowState
+		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
+		WHERE CF.strERPPONumber <> ''
+			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
+			AND CF.strCommodityCode = 'Coffee'
+			AND CF.strRowState = 'Delete'
+			AND CF.strContractBasis = 'FOB'
+			AND NOT EXISTS (
+				SELECT *
+				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
+				WHERE TPCF.intContractFeedId = CF.intContractFeedId
+				)
+			AND EXISTS (
+					SELECT 1
+					FROM tblCTContractDetail CD
+					WHERE CD.intContractDetailId = CF.intContractDetailId
+					AND CD.intContractStatusId=3
+					)
 		ORDER BY CF.intContractFeedId ASC
 
 		INSERT INTO @tblCTContractFeed (intContractFeedId)
@@ -234,6 +266,11 @@ BEGIN
 		IF @strThirdPartyFeedStatus IS NOT NULL
 		BEGIN
 			SELECT @strError = @strError + 'Duplicate Entry. '
+		END
+
+		IF NOT EXISTS(SELECT *FROM tblCTContractFeed WHERE intContractFeedId = @intContractFeedId)
+		BEGIN
+			SELECT @strError = @strError + 'Data is missing in the Contract Feed table. '
 		END
 
 		IF @strError <> ''
