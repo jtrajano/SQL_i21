@@ -2406,9 +2406,7 @@ BEGIN TRY
 			 [intHeaderId]						= [intInvoiceId]
 			,[ysnUpdateAvailableDiscountOnly]	= [ysnUpdateAvailableDiscount]
 			,[intDetailId]						= NULL
-		 FROM @IntegrationLog 
-		 WHERE [ysnSuccess] = 1
-			AND [strType] = 'POS'
+		 FROM @IntegrationLog WHERE [ysnSuccess] = 1
 
 		EXEC [dbo].[uspARReComputeInvoicesAmounts] @InvoiceIds = @CreatedInvoiceIds
 	END
