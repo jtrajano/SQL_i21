@@ -13,7 +13,7 @@ DECLARE @ErrMsg NVARCHAR(MAX);
 
 BEGIN TRY
 	SELECT PO_REF_NUMBER = lk.strIntegrationNumber
-		,PO_LINE_REF_NUMBER = rank() OVER (
+		,PO_LINE_REF_NUMBER = dense_rank() OVER (
 			PARTITION BY ch.strContractNumber ORDER BY lk.intLoadContainerId
 			)
 		,CONTAINER_NET_WT_IN_LB = round(cast(lc.dblNetWt AS FLOAT), 2)
