@@ -28,7 +28,7 @@ RETURNS TABLE AS RETURN
 		,[intItemId]						=	B.intItemId
 		,[ysnSubCurrency]					=	B.ysnSubCurrency
 		,[intAccountId]						=	B.intAccountId
-		,[ysnReturn]						=	CASE WHEN A.intTransactionType != 3 THEN 0 ELSE 1 END
+		,[ysnReturn]						=	CASE WHEN A.intTransactionType NOT IN (3, 11) THEN 0 ELSE 1 END
 		,[intLineNo]						=	B.intLineNo
 		,[intStorageLocationId]				=	B.intStorageLocationId
 		,[dblBasis]							=	B.dblBasis
@@ -49,7 +49,7 @@ RETURNS TABLE AS RETURN
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId
 		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
-		,[intWeightClaimId]					=	B.intLoadId
+		,[intWeightClaimId]					=	B.intWeightClaimId
 		,[intWeightClaimDetailId]			=	B.intWeightClaimDetailId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
@@ -100,7 +100,7 @@ RETURNS TABLE AS RETURN
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
 	LEFT JOIN tblICInventoryReceiptItem D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	WHERE
-	A.intTransactionType IN (1, 3) AND
+	A.intTransactionType IN (1, 3, 11) AND
 	1 = (CASE WHEN @integrationUpdate = 1 THEN 1 ELSE --ALWAYS INCLUDE VOUCHER DETAIL FOR INTEGRATION UPDATE
 			(CASE WHEN ISNULL(D.ysnAddPayable, 1) <> 0 THEN 1 ELSE 0 END) 
 		END) AND
