@@ -11821,6 +11821,8 @@
     <Build Include="dbo\Views\vyuQMAuctionAvailabilityReport.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
+    <Build Include="dbo\Views\vyuARZugInvoiceView.sql" />
+    <Build Include="dbo\Views\vyuARZugInvoiceDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
