@@ -57,13 +57,11 @@ Type the overview for the table here.
 		[intCreatedByUserId] INT NULL,
 		[intModifiedByUserId] INT NULL,
 		[ysnRetailValuation] BIT NULL DEFAULT((0)),
-		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,		
-
-		
 		[ysnNonBulk] BIT NULL DEFAULT((0)),	
 		[intMaxPMServerAutoClose] INT NOT NULL DEFAULT(10),
 		[intMaxUserAutoClose] INT NOT NULL DEFAULT(10),
-
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,	
+		[intRowNumber] INT NULL,	
 		CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
 		CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
 		--CONSTRAINT [FK_tblICCategory_tblICLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblICLineOfBusiness]([intLineOfBusinessId]), 
