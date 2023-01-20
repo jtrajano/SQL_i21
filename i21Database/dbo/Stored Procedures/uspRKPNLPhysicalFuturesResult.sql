@@ -506,7 +506,7 @@ BEGIN
 				, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty)
 				, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty)
 				, dblPrice = CASE WHEN CC.strCostMethod = 'Per Unit' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId, @intUnitMeasureId, CU.intUnitMeasureId, 1) * CC.dblRate
-									WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, CD.intUnitMeasureId, @intUnitMeasureId, CD.dblQuantity) END
+									WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate / dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, CIU.intUnitMeasureId, @intUnitMeasureId, CD.dblQuantity) END
 							* CASE WHEN CC.intCurrencyId = OY.intCurrencyID THEN 1
 									WHEN OY.ysnSubCurrency = 1 THEN 100
 									ELSE 0.01 END * -1
@@ -533,6 +533,7 @@ BEGIN
 			JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
 			JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId
 			LEFT JOIN tblICItemUOM CU ON CU.intItemUOMId = CC.intItemUOMId
+			LEFT JOIN tblICItemUOM CIU ON CIU.intItemUOMId = CD.intItemUOMId
 			LEFT JOIN tblSMCurrency OY ON OY.intCurrencyID = @intCurrencyId
 			LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CC.intCurrencyId
 			LEFT JOIN tblICM2MComputation MC ON MC.intM2MComputationId = IM.intM2MComputationId
