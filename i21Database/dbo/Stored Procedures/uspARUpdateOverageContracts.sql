@@ -415,27 +415,41 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		ELSE IF ISNULL(@ysnFromImport, 0) = 1 AND @intContractDetailId IS NOT NULL AND @intLoadDistributionDetailId IS NOT NULL
 			BEGIN
 				UPDATE ID
-				SET dblQtyShipped 	= CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) ELSE ID.[dblQtyShipped] END
-				  , dblUnitQuantity = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) ELSE ID.[dblQtyShipped] END
-				  , dblQtyOrdered 	= CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) ELSE ID.[dblQtyShipped] END
-				  , @dblQtyOverAged = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) THEN ID.[dblQtyShipped] - ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblTransactionQuantity, 0)) ELSE 0 END
+				SET dblQtyShipped 	= CASE WHEN LH.intLoadId IS NOT NULL
+										   THEN CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) ELSE ID.[dblQtyShipped] END
+										   ELSE CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) ELSE ID.[dblQtyShipped] END
+									  END
+				  , dblUnitQuantity = CASE WHEN LH.intLoadId IS NOT NULL
+										   THEN CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) ELSE ID.[dblQtyShipped] END
+										   ELSE CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) ELSE ID.[dblQtyShipped] END
+									  END
+				  , dblQtyOrdered 	= CASE WHEN LH.intLoadId IS NOT NULL
+										   THEN CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) ELSE ID.[dblQtyShipped] END
+										   ELSE CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) THEN ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) ELSE ID.[dblQtyShipped] END
+									  END
+				  , @dblQtyOverAged = CASE WHEN LH.intLoadId IS NOT NULL
+										   THEN CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) THEN ID.[dblQtyShipped] - ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(S.dblQuantity, 0)) ELSE 0 END
+										   ELSE CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) THEN ID.[dblQtyShipped] - ISNULL(CTD.dblBalance, 0) - (ISNULL(CTD.dblScheduleQty, 0) - ISNULL(ID.dblQtyShipped, 0) - ISNULL(S.dblQuantity, 0)) ELSE 0 END
+									  END
+									  
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+				INNER JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = ID.intLoadDistributionDetailId
+				INNER JOIN tblTRLoadDistributionHeader LDH ON LDD.intLoadDistributionHeaderId = LDH.intLoadDistributionHeaderId
+				INNER JOIN tblTRLoadHeader LH ON LDH.intLoadHeaderId = LH.intLoadHeaderId
 				LEFT JOIN (
 					SELECT S.intSiteID
 						 , CD.intContractDetailId
-						 , CU.dblTransactionQuantity
+						 , TMO.dblQuantity
 					FROM tblTMSite S
 					INNER JOIN tblTMOrder TMO ON S.intSiteID = TMO.intSiteId
 					INNER JOIN tblTMDispatch DD ON DD.intDispatchID = TMO.intDispatchId AND DD.intSiteID = TMO.intSiteId
-					INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId AND TMO.dblQuantity = CU.dblTransactionQuantity
-					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId
-					WHERE CU.strFieldName = 'Scheduled Quantity'
-					  AND CU.strScreenName = 'TM - Create Order'
-					  AND S.intSiteID = @intSiteId
+					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = DD.intContractId
+					WHERE S.intSiteID = @intSiteId
 					  AND CD.intContractDetailId = @intContractDetailId
 				) S ON ID.intSiteId = S.intSiteID
-				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId				  
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId	
+				  AND ID.intLoadDistributionDetailId = @intLoadDistributionDetailId		  
 			END
 
 		IF ISNULL(@ysnFromSalesOrder, 0) = 1
