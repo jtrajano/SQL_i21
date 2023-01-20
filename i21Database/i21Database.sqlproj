@@ -1508,6 +1508,12 @@
     <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
+    <Build Include="dbo\Tables\tblSCTicketApplyLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyCreateTransparency.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcess.sql" />
+    <Build Include="dbo\Views\vyuSCHoldTicketApplyAllowedStorageTypePerTicketPool.sql" />
+    <Build Include="dbo\Views\vyuSCHoldTicketApplyTicketInfo.sql" />
+    <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
