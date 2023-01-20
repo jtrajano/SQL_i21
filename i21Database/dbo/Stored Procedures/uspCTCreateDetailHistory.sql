@@ -417,11 +417,7 @@ BEGIN TRY
 			WHERE intSequenceHistoryId = @intSequenceHistoryId;
 		END
 		ELSE
-		BEGIN			
-			SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
-			FROM tblCTSequenceHistory WITH(NOLOCK)
-			WHERE intSequenceHistoryId < @intSequenceHistoryId
-				AND intContractDetailId = @intContractDetailId;
+		BEGIN
 			
 			IF @intPrevHistoryId IS NOT NULL
 			BEGIN
