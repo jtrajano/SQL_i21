@@ -334,13 +334,13 @@ BEGIN
 		,@intLocationId = @intLocationId
 
 	--for in transit
-	DELETE FROM #tblInTransit2
-	INSERT INTO #tblInTransit2
-	EXEC uspGRGetInTransitPerLocation
-		@dtmDate = @dtmReportDate
-		,@intCommodityId = @intCommodityId
-		,@intLocationId = @intLocationId
-		,@Locations = @Locs
+	--DELETE FROM #tblInTransit2
+	--INSERT INTO #tblInTransit2
+	--EXEC uspGRGetInTransitPerLocation
+	--	@dtmDate = @dtmReportDate
+	--	,@intCommodityId = @intCommodityId
+	--	,@intLocationId = @intLocationId
+	--	,@Locations = @Locs
 
 	--ALL LOCATIONS (#Location) SHOULD HAVE THESE ITEMS
 	WHILE EXISTS(SELECT TOP 1 1 FROM #Locations)
@@ -431,133 +431,133 @@ BEGIN
 		) ADJ
 		
 		/* IN TRANSIT */	
-		INSERT INTO @InventoryData
-		SELECT 
-			9
-			,'INVENTORY IN TRANSIT BEGINNING'
-			,''
-			, SUM(ISNULL(I.TOTAL,0))
-			,ID.strCommodityCode
-			,ID.intCommodityId
-			,ID.intCompanyLocationId
-			,ID.strLocationName
-			,ID.strUOM
-		FROM @InventoryData ID
-		OUTER APPLY (
-			SELECT 
-				TOTAL = ISNULL(dblBeginningSalesInTransit,0)-- - CASE WHEN ISNULL(dblSalesInTransit,0) < 0 THEN 0 ELSE ISNULL(dblSalesInTransit,0) END
-			FROM #tblInTransit2
-			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) < @dtmReportDate
-				AND intLocationId = ID.intCompanyLocationId
-		) I
-		WHERE ID.strLabel = 'PHYSICAL INVENTORY BEGINNING'
-			AND ID.intCompanyLocationId = @intCompanyLocationId
-			AND ID.intCommodityId = @intCommodityId
-		GROUP BY ID.strCommodityCode
-			,ID.intCommodityId
-			,ID.intCompanyLocationId
-			,ID.strLocationName
-			,ID.strUOM
+		--INSERT INTO @InventoryData
+		--SELECT 
+		--	9
+		--	,'INVENTORY IN TRANSIT BEGINNING'
+		--	,''
+		--	, SUM(ISNULL(I.TOTAL,0))
+		--	,ID.strCommodityCode
+		--	,ID.intCommodityId
+		--	,ID.intCompanyLocationId
+		--	,ID.strLocationName
+		--	,ID.strUOM
+		--FROM @InventoryData ID
+		--OUTER APPLY (
+		--	SELECT 
+		--		TOTAL = ISNULL(dblBeginningSalesInTransit,0)-- - CASE WHEN ISNULL(dblSalesInTransit,0) < 0 THEN 0 ELSE ISNULL(dblSalesInTransit,0) END
+		--	FROM #tblInTransit2
+		--	WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) < @dtmReportDate
+		--		AND intLocationId = ID.intCompanyLocationId
+		--) I
+		--WHERE ID.strLabel = 'PHYSICAL INVENTORY BEGINNING'
+		--	AND ID.intCompanyLocationId = @intCompanyLocationId
+		--	AND ID.intCommodityId = @intCommodityId
+		--GROUP BY ID.strCommodityCode
+		--	,ID.intCommodityId
+		--	,ID.intCompanyLocationId
+		--	,ID.strLocationName
+		--	,ID.strUOM
 
-		INSERT INTO @InventoryData
-		SELECT 
-			10
-			,'INVENTORY IN TRANSIT INCREASE'
-			,'+'
-			, SUM(ISNULL(I.TOTAL,0))
-			,ID.strCommodityCode
-			,ID.intCommodityId
-			,ID.intCompanyLocationId
-			,ID.strLocationName
-			,ID.strUOM
-		FROM @InventoryData ID
-		OUTER APPLY (
-			SELECT 
-				TOTAL = ISNULL(dblBeginningSalesInTransit,0)
-			FROM #tblInTransit2
-			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
-				AND intLocationId = ID.intCompanyLocationId
-		) I
-		WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
-			AND ID.intCompanyLocationId = @intCompanyLocationId
-			AND ID.intCommodityId = @intCommodityId
-		GROUP BY ID.strCommodityCode
-			,ID.intCommodityId
-			,ID.intCompanyLocationId
-			,ID.strLocationName
-			,ID.strUOM
+		--INSERT INTO @InventoryData
+		--SELECT 
+		--	10
+		--	,'INVENTORY IN TRANSIT INCREASE'
+		--	,'+'
+		--	, SUM(ISNULL(I.TOTAL,0))
+		--	,ID.strCommodityCode
+		--	,ID.intCommodityId
+		--	,ID.intCompanyLocationId
+		--	,ID.strLocationName
+		--	,ID.strUOM
+		--FROM @InventoryData ID
+		--OUTER APPLY (
+		--	SELECT 
+		--		TOTAL = ISNULL(dblBeginningSalesInTransit,0)
+		--	FROM #tblInTransit2
+		--	WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
+		--		AND intLocationId = ID.intCompanyLocationId
+		--) I
+		--WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
+		--	AND ID.intCompanyLocationId = @intCompanyLocationId
+		--	AND ID.intCommodityId = @intCommodityId
+		--GROUP BY ID.strCommodityCode
+		--	,ID.intCommodityId
+		--	,ID.intCompanyLocationId
+		--	,ID.strLocationName
+		--	,ID.strUOM
 
-		INSERT INTO @InventoryData
-		SELECT 
-			11
-			,'INVENTORY IN TRANSIT DECREASE'
-			,'-'
-			, ABS(SUM(ISNULL(I.TOTAL,0)))
-			,ID.strCommodityCode
-			,ID.intCommodityId
-			,ID.intCompanyLocationId
-			,ID.strLocationName
-			,ID.strUOM
-		FROM @InventoryData ID
-		OUTER APPLY (
-			SELECT 
-				TOTAL = ISNULL(dblSalesInTransit,0)
-			FROM #tblInTransit2
-			WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
-				AND intLocationId = ID.intCompanyLocationId
-		) I
-		WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
-			AND ID.intCompanyLocationId = @intCompanyLocationId
-			AND ID.intCommodityId = @intCommodityId
-		GROUP BY ID.strCommodityCode
-			,ID.intCommodityId
-			,ID.intCompanyLocationId
-			,ID.strLocationName
-			,ID.strUOM
+		--INSERT INTO @InventoryData
+		--SELECT 
+		--	11
+		--	,'INVENTORY IN TRANSIT DECREASE'
+		--	,'-'
+		--	, ABS(SUM(ISNULL(I.TOTAL,0)))
+		--	,ID.strCommodityCode
+		--	,ID.intCommodityId
+		--	,ID.intCompanyLocationId
+		--	,ID.strLocationName
+		--	,ID.strUOM
+		--FROM @InventoryData ID
+		--OUTER APPLY (
+		--	SELECT 
+		--		TOTAL = ISNULL(dblSalesInTransit,0)
+		--	FROM #tblInTransit2
+		--	WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) = @dtmReportDate
+		--		AND intLocationId = ID.intCompanyLocationId
+		--) I
+		--WHERE ID.strLabel = 'INVENTORY IN TRANSIT BEGINNING'
+		--	AND ID.intCompanyLocationId = @intCompanyLocationId
+		--	AND ID.intCommodityId = @intCommodityId
+		--GROUP BY ID.strCommodityCode
+		--	,ID.intCommodityId
+		--	,ID.intCompanyLocationId
+		--	,ID.strLocationName
+		--	,ID.strUOM
 
-		INSERT INTO @InventoryData
-		SELECT 
-			12
-			,'INVENTORY IN TRANSIT ENDING'
-			,''
-			,SUM(ISNULL(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END,0))
-			,strCommodityCode
-			,intCommodityId
-			,intCompanyLocationId
-			,strLocationName
-			,strUOM
-		FROM @InventoryData
-		WHERE strLabel LIKE 'INVENTORY IN TRANSIT%'
-			AND intCompanyLocationId = @intCompanyLocationId
-			AND intCommodityId = @intCommodityId
-		GROUP BY strCommodityCode
-			,intCommodityId
-			,intCompanyLocationId
-			,strLocationName
-			,strUOM
+		--INSERT INTO @InventoryData
+		--SELECT 
+		--	12
+		--	,'INVENTORY IN TRANSIT ENDING'
+		--	,''
+		--	,SUM(ISNULL(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END,0))
+		--	,strCommodityCode
+		--	,intCommodityId
+		--	,intCompanyLocationId
+		--	,strLocationName
+		--	,strUOM
+		--FROM @InventoryData
+		--WHERE strLabel LIKE 'INVENTORY IN TRANSIT%'
+		--	AND intCompanyLocationId = @intCompanyLocationId
+		--	AND intCommodityId = @intCommodityId
+		--GROUP BY strCommodityCode
+		--	,intCommodityId
+		--	,intCompanyLocationId
+		--	,strLocationName
+		--	,strUOM
 
-		--BLANK SPACE
-		INSERT INTO @ReportData
-		SELECT
-			13
-			,''
-			,''
-			,NULL
-			,strCommodityCode
-			,intCommodityId
-			,intCompanyLocationId
-			,strLocationName
-			,@dtmReportDate
-			,strUOM
-		FROM @InventoryData
-		WHERE intCommodityId = @intCommodityId
-			AND intCompanyLocationId = @intCompanyLocationId
-			AND strLabel = 'INVENTORY IN TRANSIT ENDING'
-		GROUP BY strCommodityCode
-			,intCommodityId
-			,intCompanyLocationId
-			,strLocationName
-			,strUOM
+		----BLANK SPACE
+		--INSERT INTO @ReportData
+		--SELECT
+		--	13
+		--	,''
+		--	,''
+		--	,NULL
+		--	,strCommodityCode
+		--	,intCommodityId
+		--	,intCompanyLocationId
+		--	,strLocationName
+		--	,@dtmReportDate
+		--	,strUOM
+		--FROM @InventoryData
+		--WHERE intCommodityId = @intCommodityId
+		--	AND intCompanyLocationId = @intCompanyLocationId
+		--	AND strLabel = 'INVENTORY IN TRANSIT ENDING'
+		--GROUP BY strCommodityCode
+		--	,intCommodityId
+		--	,intCompanyLocationId
+		--	,strLocationName
+		--	,strUOM
 		/* END IN TRANSIT */
 
 		DELETE FROM #Locations WHERE intCompanyLocationId = @intCompanyLocationId
@@ -1224,7 +1224,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED INCREASE (INC DP)'
 	,'+'
-	,ISNULL(A.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
+	,ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1300,54 +1300,40 @@ OUTER APPLY (
 		,strFromLocationName
 		,UM.strUnitMeasure
 ) C
-
-INSERT INTO @InventoryData
-SELECT 
-	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
-	,'TOTAL COMPANY OWNED ENDING (INC DP)'
-	,''
-	,ISNULL(A.dblUnits,0) - ISNULL(B.dblUnits,0)
-	,A.strCommodityCode
-	,A.intCommodityId
-	,A.intCompanyLocationId
-	,A.strLocationName
-	,A.strUOM
-FROM (
-	SELECT SUM(ISNULL(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END,0)) dblUnits
-		,strCommodityCode
-		,intCommodityId
-		,intCompanyLocationId
-		,strLocationName
-		,strUOM
-	FROM @InventoryData
-	WHERE (
-		strLabel IN ('PHYSICAL INVENTORY ENDING')
-	)
-	GROUP BY strCommodityCode
-		,intCommodityId
-		,intCompanyLocationId
-		,strLocationName
-		,strUOM
-) A
 OUTER APPLY (
-	SELECT
-		SUM(ISNULL(dblUnits,0)) dblUnits
-		,strCommodityCode
-		,intCommodityId
-		,intCompanyLocationId
-		,strLocationName
-		,strUOM
-	FROM @StorageObligationData 
-	--WHERE strLabel LIKE '%BALANCE'--= 'TOTAL STORAGE OBLIGATION'
-	WHERE strLabel = 'TOTAL STORAGE OBLIGATION ENDING'
-		AND intCommodityId = A.intCommodityId
-		AND intCompanyLocationId = A.intCompanyLocationId
-	GROUP BY strCommodityCode
-		,intCommodityId
-		,intCompanyLocationId
-		,strLocationName
-		,strUOM
-) B
+	SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
+		,IC.strCommodityCode
+		,CS.intCommodityId
+		,intFromCompanyLocationId
+		,strFromLocationName
+		,UM.strUnitMeasure
+	FROM tblGRStorageHistory SH
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblGRStorageType ST
+		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND ST.ysnDPOwnedType = 1 --(DP only)
+	INNER JOIN tblICCommodity IC
+		ON IC.intCommodityId = CS.intCommodityId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = CS.intCompanyLocationId
+	INNER JOIN tblICItemUOM UOM
+		ON UOM.intItemUOMId = CS.intItemUOMId
+	INNER JOIN tblICUnitMeasure UM
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+	/*
+		Reversed settlement for the day 
+	*/
+	WHERE SH.strType = 'Reverse Settlement'
+		AND CS.intCommodityId = A.intCommodityId
+		AND CS.intCompanyLocationId = A.intCompanyLocationId
+		AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+	GROUP BY IC.strCommodityCode
+		,CS.intCommodityId
+		,CS.intCompanyLocationId
+		,CL.strLocationName
+		,UM.strUnitMeasure
+) D
 
 INSERT INTO @InventoryData
 SELECT 
@@ -1419,6 +1405,9 @@ OUTER APPLY (
 	FROM tblGRStorageHistory SH
 	INNER JOIN tblGRCustomerStorage CS
 		ON CS.intCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblGRStorageType ST
+		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND ST.ysnDPOwnedType = 0
 	INNER JOIN tblICCommodity IC
 		ON IC.intCommodityId = CS.intCommodityId
 	INNER JOIN tblSMCompanyLocation CL
@@ -1428,8 +1417,7 @@ OUTER APPLY (
 	INNER JOIN tblICUnitMeasure UM
 		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
 	/*
-		Transfer from Customer owned to customer owned
-		from one location to another
+		Reversed settlement for the day
 	*/
 	WHERE SH.strType = 'Reverse Settlement'
 		AND CS.intCommodityId = A.intCommodityId
@@ -1441,6 +1429,71 @@ OUTER APPLY (
 		,CL.strLocationName
 		,UM.strUnitMeasure
 ) D
+
+INSERT INTO @InventoryData
+SELECT
+	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
+	,'TOTAL COMPANY OWNED ENDING (INC DP)'
+	,''
+	,SUM(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END)
+	,strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+FROM @InventoryData
+WHERE strLabel LIKE '%TOTAL COMPANY OWNED%'
+GROUP BY strCommodityCode
+	,intCommodityId
+	,intCompanyLocationId
+	,strLocationName
+	,strUOM
+--SELECT 
+--	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
+--	,'TOTAL COMPANY OWNED ENDING (INC DP)'
+--	,''
+--	,ISNULL(A.dblUnits,0) - ISNULL(B.dblUnits,0)
+--	,A.strCommodityCode
+--	,A.intCommodityId
+--	,A.intCompanyLocationId
+--	,A.strLocationName
+--	,A.strUOM
+--FROM (
+--	SELECT SUM(ISNULL(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END,0)) dblUnits
+--		,strCommodityCode
+--		,intCommodityId
+--		,intCompanyLocationId
+--		,strLocationName
+--		,strUOM
+--	FROM @InventoryData
+--	WHERE (
+--		strLabel IN ('PHYSICAL INVENTORY ENDING')
+--	)
+--	GROUP BY strCommodityCode
+--		,intCommodityId
+--		,intCompanyLocationId
+--		,strLocationName
+--		,strUOM
+--) A
+--OUTER APPLY (
+--	SELECT
+--		SUM(ISNULL(dblUnits,0)) dblUnits
+--		,strCommodityCode
+--		,intCommodityId
+--		,intCompanyLocationId
+--		,strLocationName
+--		,strUOM
+--	FROM @StorageObligationData 
+--	--WHERE strLabel LIKE '%BALANCE'--= 'TOTAL STORAGE OBLIGATION'
+--	WHERE strLabel = 'TOTAL STORAGE OBLIGATION ENDING'
+--		AND intCommodityId = A.intCommodityId
+--		AND intCompanyLocationId = A.intCompanyLocationId
+--	GROUP BY strCommodityCode
+--		,intCommodityId
+--		,intCompanyLocationId
+--		,strLocationName
+--		,strUOM
+--) B
 
 --INSERT IN @ReportData
 INSERT INTO @ReportData
