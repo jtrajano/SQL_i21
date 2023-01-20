@@ -316,20 +316,20 @@ BEGIN TRY
 				, strOriginCity
 				, strOriginCounty
 				, strOriginState
-				, strCustomerName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName
 				, REPLACE(strCustomerFederalTaxId, '-', '')
-				, strShipVia
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia 
 				, strTransporterLicense
 				, strTransportationMode
-				, strTransporterName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName
 				, REPLACE(strTransporterFederalTaxId, '-', '')
-				, strConsignorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName 
 				, REPLACE(strConsignorFederalTaxId, '-', '')
 				, strTaxCode
 				, strTerminalControlNumber
-				, strVendorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName  
 				, REPLACE(strVendorFederalTaxId, '-', '')
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
