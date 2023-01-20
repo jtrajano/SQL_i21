@@ -676,20 +676,21 @@ BEGIN TRY
 				, strOriginCity
 				, strOriginCounty
 				, strOriginState
-				, strCustomerName
-				, REPLACE(strCustomerFederalTaxId, '-', '')
-				, strShipVia
-				, strTransporterLicense
-				, strTransportationMode
-				, strTransporterName
-				, REPLACE(strTransporterFederalTaxId, '-', '')
-				, strConsignorName
-				, REPLACE(strConsignorFederalTaxId, '-', '')
-				, strTaxCode
-				, strTerminalControlNumber
-				, strVendorName
-				, REPLACE(strVendorFederalTaxId, '-', '')
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName
+				, REPLACE(strCustomerFederalTaxId, '-', '')  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia  
+				, strTransporterLicense  
+				, strTransportationMode  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName  
+				, REPLACE(strTransporterFederalTaxId, '-', '')  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName  
+				, REPLACE(strConsignorFederalTaxId, '-', '')  
+				, strTaxCode  
+				, strTerminalControlNumber  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName    
+				, REPLACE(strVendorFederalTaxId, '-', '')  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName  
+				, strHeaderAddress
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
