@@ -239,7 +239,7 @@ LEFT JOIN (
 		 , intEntityId
 		 , ysnDefaultLocation
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
-) BILLTOLOCATION ON CUSTOMER.intEntityId = BILLTOLOCATION.intEntityId AND BILLTOLOCATION.ysnDefaultLocation=1
+) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END
