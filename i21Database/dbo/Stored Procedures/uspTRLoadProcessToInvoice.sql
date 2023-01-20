@@ -131,13 +131,8 @@ BEGIN TRY
 																WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
 																ELSE DD.dblUnits END
 														ELSE DD.dblUnits END
-		,[dblQtyShipped]						= CASE WHEN @ysnGrossNet = 1 THEN 
-															CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
-																WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
-																WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
-																WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
-																ELSE DD.dblUnits END
-														ELSE DD.dblUnits END
+		,[dblQtyShipped]						= DD.dblFreightUnit
+		,[dblFreightQty]						= DD.dblFreightUnit
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
