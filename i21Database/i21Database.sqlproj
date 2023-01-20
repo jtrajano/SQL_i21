@@ -1440,6 +1440,7 @@
     <Build Include="dbo\Views\vyuSCHoldTicketApplyAllowedStorageTypePerTicketPool.sql" />
     <Build Include="dbo\Views\vyuSCHoldTicketApplyTicketInfo.sql" />
     <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
+    <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
