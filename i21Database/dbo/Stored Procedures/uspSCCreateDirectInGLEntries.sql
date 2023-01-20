@@ -9,6 +9,7 @@ BEGIN
         DECLARE @ErrMsg NVARCHAR(MAX)
 
         DECLARE @ACCOUNT_CATEGORY_InventoryInTransit NVARCHAR(50) = 'General'
+        DECLARE @ACCOUNT_CATEGORY_InventoryInTransitDirect NVARCHAR(50) = 'In-Transit Direct'
         DECLARE @ACCOUNT_CATEGORY_AP_Clearing NVARCHAR(50) = 'AP Clearing'
         DECLARE @GLDescription nvarchar(150) 
 
@@ -16,6 +17,8 @@ BEGIN
         DECLARE @intItemLocationId INT
         DECLARE @intAPClearingAccountId INT
         DECLARE @intInventoryInTransitAccountId INT
+        DECLARE @intInventoryInTransitDirectAccountId INT
+        DECLARE @ACTUAL_intInventoryInTransitAccountId INT
         DECLARE @strLocationName NVARCHAR(100)
         DECLARE @strItemNo NVARCHAR(100)
         DECLARE @strTicketNumber  NVARCHAR(50)
@@ -68,6 +71,7 @@ BEGIN
             SELECT 
                 @intAPClearingAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_AP_Clearing) 
                 ,@intInventoryInTransitAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) 
+                ,@intInventoryInTransitDirectAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransitDirect) 
             
             
             -- Get the functional currency
@@ -76,6 +80,9 @@ BEGIN
                 SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
             END 
 
+            -- TEMPORARY HOLD THE IN TRANSIT ACCOUNT ID
+            -- IF IT WILL BE NULL, DO SOME VALIDATION
+            SELECT @ACTUAL_intInventoryInTransitAccountId = COALESCE(@intInventoryInTransitDirectAccountId, @intInventoryInTransitAccountId, NULL)
 
             ---------------------Validate Account ids
             BEGIN
@@ -85,16 +92,28 @@ BEGIN
                     EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_AP_Clearing;
                     RETURN -1;
                 END
-
-                IF @intInventoryInTransitAccountId IS NULL
+                
+                IF @ACTUAL_intInventoryInTransitAccountId IS NULL
                 BEGIN
-                    -- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-                    EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_InventoryInTransit;
-                    RETURN -1;
+                    IF @intInventoryInTransitDirectAccountId IS NULL
+                    BEGIN
+                        -- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+                        EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_InventoryInTransitDirect;
+                        RETURN -1;
+                    END
+                    ELSE IF @intInventoryInTransitAccountId IS NULL
+                    BEGIN
+                        -- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+                        EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_InventoryInTransit;
+                        RETURN -1;
+                    END
                 END
+                
             END
             ------------------------------------------------
-
+            -- ASSIGN THE VALUE OF THE ACTUAL ACCOUNT ID TO THE  IN-TRANSIT ACCOUNT TO LESSEN THE CODE CHANGES 
+            SELECT @intInventoryInTransitAccountId = @ACTUAL_intInventoryInTransitAccountId
+            
 
 
             EXEC uspSMGetStartingNumber 
