@@ -587,11 +587,8 @@ BEGIN
 	--DELETE FEES ON UNPOSTING
 	IF @ysnPost =0
 	BEGIN
-		DELETE FROM tblGLDetail WHERE strTransactionId = @strTransactionId + '-F'
-		DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId + '-F'
-		DELETE FROM tblCMBankTransactionAdjustment WHERE intTransactionId = @intTransactionId OR intRelatedId = @intTransactionId
-
-
+		EXEC uspCMRemoveRelatedTransactions @strTransactionId , @intTransactionId
+		
 		-- UNPOST DERIVATIVES ON UNPOSTING
 		IF (@BANK_TRANSACTION_TYPE_Id = 26)
 		BEGIN
