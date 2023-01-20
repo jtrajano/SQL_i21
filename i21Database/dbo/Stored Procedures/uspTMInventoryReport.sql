@@ -9,17 +9,15 @@ BEGIN
 
 	CREATE TABLE #tempInventoryReport(
 		[Id] INT IDENTITY(1, 1) primary key 
-		,[strCustomerNumber] varchar(200)
-        ,[strCustomerName] varchar(200)
-        ,[strUserName] varchar(200)
-        ,[intSiteNumber] int
+		,[dblFullPercent] DECIMAL(18,1)
+        ,[strLocation] varchar(200)
+        ,[strSiteNumber] varchar(50)
         ,[strProduct] varchar(200)
         ,[dtmLastInventoryTime] DATETIME
         ,[dblGrossVolume] DECIMAL(18,6)
         ,[dblNetVolume] DECIMAL(18,6)
         ,[dblUllage] DECIMAL(18,6)
         ,[dblTotalCapacity] DECIMAL(18,6)
-        ,[dblFullPercent] DECIMAL(18,6)
         ,[dblWaterHeight] DECIMAL(18,6)
 	);
 
@@ -33,21 +31,22 @@ BEGIN
 	FETCH NEXT FROM DataCursor INTO @intSiteId
     WHILE @@FETCH_STATUS = 0
     BEGIN
-		DECLARE @strCustomerName varchar(200)
-		DECLARE @intSiteNumber int
+
+		DECLARE @dblFullPercent DECIMAL(18,1)
+		DECLARE @strLocationName varchar(200)
+		DECLARE @strSiteNumber varchar(200)
 		DECLARE @strProduct varchar(200)
 		DECLARE @dtmLastInventoryTime DATETIME
 		DECLARE @dblGrossVolume DECIMAL(18,6)
 		DECLARE @dblNetVolume DECIMAL(18,6)
 		DECLARE @dblUllage DECIMAL(18,6)
 		DECLARE @dblTotalCapacity DECIMAL(18,6)
-		DECLARE @dblFullPercent DECIMAL(18,6)
 		DECLARE @dblWaterHeight DECIMAL(18,6)
 
 		SELECT distinct
-			 @strCustomerName = C.strName
-			,@intSiteNumber = A.intSiteNumber
-			,@strProduct = T.strDescription
+			@strSiteNumber = '0000' + CAST(A.intSiteNumber AS varchar(10)) 
+			,@strProduct = T.strItemNo
+			,@strLocationName = location.strLocationName
 		FROM tblTMSite A
 		INNER JOIN tblTMCustomer B	
 			ON A.intCustomerID = B.intCustomerID
@@ -57,6 +56,7 @@ BEGIN
 			ON A.intProduct = T.intItemId 
 		INNER JOIN tblTMTankMonitor TM
 			ON TM.intSiteId = A.intSiteID
+		JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = A.intLocationId
 		where TM.intSiteId = @intSiteId
 
 		SELECT top 1 @dtmLastInventoryTime = TM.dtmDateTime FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankMonitorId desc
@@ -70,10 +70,10 @@ BEGIN
 		SET @dblFullPercent = CASE WHEN @dblTotalCapacity = 0 THEN @dblGrossVolume ELSE @dblGrossVolume/@dblTotalCapacity END
 	
 		SELECT @dblWaterHeight = sum(TM.dblWaterHeight) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		
+		print @strSiteNumber
 		INSERT INTO #tempInventoryReport
-					(strCustomerName,intSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblFullPercent,dblWaterHeight)VALUES
-					(@strCustomerName,@intSiteNumber,@strProduct,@dtmLastInventoryTime,@dblGrossVolume,@dblNetVolume,@dblUllage,@dblTotalCapacity,@dblFullPercent,@dblWaterHeight)
+					(dblFullPercent,strLocation,strSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblWaterHeight)VALUES
+					(@dblFullPercent,@strLocationName,@strSiteNumber,@strProduct,@dtmLastInventoryTime,@dblGrossVolume,@dblNetVolume,@dblUllage,@dblTotalCapacity,@dblWaterHeight)
 
 	 FETCH NEXT FROM DataCursor INTO @intSiteId
     END
