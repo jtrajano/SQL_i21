@@ -572,7 +572,8 @@ SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Ga
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Clear', intMasterId = 422
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Dyed', intMasterId = 423
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Kerosene', intMasterId = 424
-
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Undyed', intMasterId = 425
+                                                                          
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
 
 DELETE @TaxCategoryTN
