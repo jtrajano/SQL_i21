@@ -212,8 +212,8 @@ BEGIN
 		UNION ALL
 		SELECT		--DISTINCT
 				[intPaymentId]					=	A.intPaymentId,
-				[dblCredit]	 					=	 CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-				[dblCreditForeign]				=	 CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
+				[dblCredit]	 					=	 CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,2)),
+				[dblCreditForeign]				=	 CAST(paymentDetail.dblPayment AS DECIMAL(18,2))
 		FROM	[dbo].tblAPPayment A 
 		INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
 		INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
