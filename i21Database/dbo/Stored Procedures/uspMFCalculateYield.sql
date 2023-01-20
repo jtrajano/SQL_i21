@@ -574,7 +574,7 @@ BEGIN TRY
 			,F.intMachineId
 
 		INSERT INTO @tblMFProcessedItem
-		SELECT @intItemId
+		SELECT ISNULL(@intItemId, @intProductionSummaryId)
 
 		IF @strInstantConsumption = 'False'
 		BEGIN
