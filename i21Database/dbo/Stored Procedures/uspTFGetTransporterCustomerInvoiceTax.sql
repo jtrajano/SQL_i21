@@ -691,7 +691,6 @@ BEGIN TRY
 				, REPLACE(strVendorFederalTaxId, '-', '')  
 				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName  
 				, strHeaderAddress
-				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
 				, strHeaderZip
