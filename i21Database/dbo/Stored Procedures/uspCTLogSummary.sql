@@ -37,6 +37,7 @@ BEGIN TRY
 			@intCurrStatusId		INT = 0,
    			@ysnWithPriceFix 		BIT,
    			@intPricingTypeId       int,
+   			@intPreviousHistoryContractStatusId       int,
    			@dblSeqHistoryPreviousQty		NUMERIC(24, 10),
 			@intSeqHistoryPreviousFutMkt	INT,
 			@intSeqHistoryPreviousFutMonth	INT,
@@ -656,12 +657,13 @@ BEGIN TRY
 			, @dblSeqHistoryPreviousQty = dblQuantity
 			, @intSeqHistoryPreviousFutMkt = intFutureMarketId
 			, @intSeqHistoryPreviousFutMonth = intFutureMonthId
+			, @intPreviousHistoryContractStatusId = intContractStatusId
 		FROM @sequenceHistory
 		WHERE Row_Num = 2
 
 		IF (ISNULL(@intPricingTypeId, 0) NOT IN (0, 3))
 		BEGIN
-			if exists(select top 1 1 from @cbLogTemp where intPricingTypeId <> @intPricingTypeId and dblQty <> @dblSeqHistoryPreviousQty)
+			if exists(select top 1 1 from @cbLogTemp where (intContractStatusId <> @intPreviousHistoryContractStatusId or intPricingTypeId <> @intPricingTypeId) and dblQty <> @dblSeqHistoryPreviousQty)
 			begin
 				select @ysnChangePricingTypeAndQuantity = 1;
 			end
@@ -3900,9 +3902,21 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = @dblBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
+						if (@ysnChangePricingTypeAndQuantity = 1)
+						begin
+							update @cbLogSpecific set dblQty = (@dblBasis - dblQty) * -1;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							UPDATE @cbLogSpecific SET dblQty = (@dblBasis - abs(dblQty)) * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
 																									WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 																									ELSE 2 END, intActionId = @_action
+						end
+						else
+						begin
+							UPDATE @cbLogSpecific SET dblQty = @dblBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
+																									WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
+																									ELSE 2 END, intActionId = @_action
+						end
+
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 					IF ISNULL(@dblPriced, 0) > 0
@@ -3910,7 +3924,17 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = @dblPriced * - 1, intPricingTypeId = 1, intActionId = @_action
+						if (@ysnChangePricingTypeAndQuantity = 1)
+						begin
+							update @cbLogSpecific set dblQty = (@dblPriced - dblQty) * -1;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							UPDATE @cbLogSpecific SET dblQty = (@dblPriced - abs(dblQty)) * - 1, intPricingTypeId = 1, intActionId = @_action;
+						end
+						else
+						begin
+							UPDATE @cbLogSpecific SET dblQty = @dblPriced * - 1, intPricingTypeId = 1, intActionId = @_action
+						end
+						
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 					IF ISNULL(@dblBasis, 0) <= 0 AND ISNULL(@dblPriced, 0) <= 0
