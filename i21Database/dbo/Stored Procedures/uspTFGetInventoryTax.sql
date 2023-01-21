@@ -573,18 +573,18 @@ BEGIN TRY
 				, CONVERT(DECIMAL(18), dblReceived)
 				, dblTax
 				, dtmDate
-				, strShipVia
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia 
 				, strTransporterLicense
 				, strTransportationMode
-				, strVendorName
-				, strTransporterName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName  
 				, REPLACE(strVendorFederalTaxId, '-', '')
 				, REPLACE(strTransporterFederalTaxId, '-', '')
 				, strTerminalControlNumber
 				, @DateFrom
 				, @DateTo
 				--HEADER
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName 
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
@@ -598,7 +598,7 @@ BEGIN TRY
 				, strDestinationState
 				, strDestinationCity
 				, strDestinationCounty
-				, strCustomerName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName  
 				, REPLACE(strCustomerFederalTaxId, '-', '')
 				, strTransporterIdType
 				, strVendorIdType
@@ -615,10 +615,10 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, CONVERT(DECIMAL(18), dblGross)
-				, strContactName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strContactName)), 35) ELSE strContactName END AS strContactName 
 				, strEmail
 				, strImportVerificationNumber
-				, strConsignorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName  
 				, REPLACE(strConsignorFederalTaxId, '-', '')
 			FROM @tmpTransaction Trans
 		END
