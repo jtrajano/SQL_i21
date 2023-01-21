@@ -712,7 +712,7 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strContactName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strContactName)), 35) ELSE strContactName END AS strContactName 
 				, strEmail
 				, strTransactionSource
 				, strTransportNumber
