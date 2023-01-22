@@ -88,6 +88,7 @@ BEGIN
     FROM #ARPostPaymentHeader
 	WHERE (strPaymentMethod = 'Prepay' OR (strPaymentMethod <> 'Prepay' AND dblAmountPaid = dblUnappliedAmount))
 	  AND ISNULL(intSalesAdvAcct, 0) = 0
+      AND dblAmountPaid <> 0
 
     INSERT INTO #ARInvalidPaymentData (
          [intTransactionId]
