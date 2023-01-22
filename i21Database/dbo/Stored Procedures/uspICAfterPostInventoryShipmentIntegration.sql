@@ -153,4 +153,16 @@ BEGIN
 		,@ysnPost
 END
 
+/* Create / Update Sales Order Pick List based on Inventory Shipment */
+IF (@ysnPost = 1)
+	BEGIN
+		EXEC uspMFCreateUpdatePickListFromInventoryShipment @intInventoryShipmentId	 = @intTransactionId
+														  , @intEntityUserSecurityId = @intEntityUserSecurityId
+	END
+ELSE
+	BEGIN
+		EXEC uspMFReducePickListFromInventoryShipment @intInventoryShipmentId	= @intTransactionId
+													, @intEntityUserSecurityId	= @intEntityUserSecurityId
+	END
+
 _Exit: 
