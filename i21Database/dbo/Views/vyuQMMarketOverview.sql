@@ -204,6 +204,7 @@ CurrentWeek AS(
 	A.strSaleNumber = B.strSaleNumber
 	OUTER APPLY(
 		SELECT TOP 1 ISNULL(AveragePrice,0) AveragePrice FROM ItemWeeklySaleStat WHERE strTeaGroup = B.strTeaGroup AND DATEPART(ww, A.dtmSaleDate) = WeekNo
+		AND B.strCurrency= strCurrency
 	)U
 )
 SELECT B.*
@@ -213,4 +214,5 @@ FROM CurrentWeek B
 OUTER APPLY(
 	SELECT TOP 1 ISNULL(AveragePrice,0) AveragePrice FROM ItemWeeklySaleStat 
 	WHERE strTeaGroup = B.strTeaGroup AND WeekNo = B.WeekNo -1
+	AND B.strCurrency= strCurrency
 )V
