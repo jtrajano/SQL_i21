@@ -43,7 +43,8 @@ BEGIN TRY
 			@intSeqHistoryPreviousFutMonth	INT,
 			@dblCurrentBasis				NUMERIC(24, 10),
 			@intHeaderPricingTypeId		INT,
-			@intSequencePricingTypeId INT;
+			@intSequencePricingTypeId INT,
+			@ysnChangePricingTypeAndQuantity bit = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
