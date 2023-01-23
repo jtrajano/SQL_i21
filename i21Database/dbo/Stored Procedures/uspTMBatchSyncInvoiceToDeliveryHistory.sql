@@ -500,6 +500,7 @@ BEGIN
 					
 					SELECT
 						A.*
+						,intRow = ROW_NUMBER() OVER(PARTITION BY A.intSiteId,A.intInvoiceId ORDER BY A.intInvoiceId ASC)
 					INTO #tmpInvoiceDateGreaterThanLastDelivery
 					FROM #tmpFinalNonServiceInvoiceDetail A
 					WHERE A.ysnLessThanLastDeliveryDate = 0
@@ -676,6 +677,7 @@ BEGIN
 						)K
 						WHERE B.ysnLessThanLastDeliveryDate = 0
 							AND B.ysnMultipleInvoiceHeader = 1
+							AND B.intRow = 1
 
 						------------------------------------------------------------------
 						---Insert into out of range table
