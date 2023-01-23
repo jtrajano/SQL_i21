@@ -45,7 +45,8 @@ BEGIN TRY
 			@intHeaderPricingTypeId		INT,
 			@dblInvoicedQuantity				NUMERIC(24, 10),
 			@ysnMissingShipment bit = 0,
-			@intSequencePricingTypeId INT;
+			@intSequencePricingTypeId INT,
+			@ysnChangePricingTypeAndQuantity bit = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
