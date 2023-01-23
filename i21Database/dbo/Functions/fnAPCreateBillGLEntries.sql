@@ -131,6 +131,7 @@ BEGIN
 												WHEN intTransactionType = 3 THEN 'Posted Debit Memo'
 												WHEN intTransactionType = 13 THEN 'Posted Basis Advance'
 												WHEN intTransactionType = 14 THEN 'Posted Deferred Interest'
+												WHEN intTransactionType = 11 THEN 'Posted Claim'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
@@ -143,6 +144,7 @@ BEGIN
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 												WHEN intTransactionType = 13 THEN 'Basis Advance'
 												WHEN intTransactionType = 14 THEN 'Deferred Interest'
+												WHEN intTransactionType = 11 THEN 'Claim'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
