@@ -743,6 +743,7 @@ BEGIN
 				WHEN A.intTransactionType = 2 THEN 'Prepayment'
 				WHEN A.intTransactionType = 3 THEN 'Debit Memo'
 				WHEN A.intTransactionType = 13 THEN 'Basis Advance'
+				WHEN A.intTransactionType = 11 THEN 'Claim'
 			ELSE ''
 			END
 			+ ' cannot be unpost because it is applied to voucher ' + applied.strBillId,
@@ -762,7 +763,7 @@ BEGIN
 		) applied
 		WHERE  
 			A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
-		AND A.intTransactionType IN (2, 3, 13)
+		AND A.intTransactionType IN (2, 3, 13, 11)
 		AND A.ysnPosted = 1
 		AND applied.strBillId IS NOT NULL
 
