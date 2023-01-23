@@ -33,7 +33,8 @@ AS
 			strAddressName = L.strLocationName, -- CT-5315
 			strMainAddress = LL.strLocationName, -- CT-5315
 			intEntitySelectedLocationId = L.intEntityLocationId, -- CT-5315
-			ysnDefaultLocation = isnull(L.ysnDefaultLocation,0)
+			ysnDefaultLocation = isnull(L.ysnDefaultLocation,0),
+			CL.intCompanyLocationId
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
 	CROSS APPLY	(SELECT TOP 1 * FROM tblCTCompanyPreference) CTCP -- CT-5315
@@ -48,6 +49,8 @@ AS
 	LEFT JOIN	tblAPVendor				V	ON	V.intEntityId			=	E.intEntityId			
 	LEFT JOIN	tblARCustomer			U	ON	U.intEntityId			=	E.intEntityId					
 	LEFT JOIN	tblARSalesperson		P	ON	P.intEntityId			=	E.intEntityId
+	LEFT JOIN	tblAPVendorCompanyLocation VL ON E.intEntityId			= VL.intEntityVendorId
+	LEFT JOIN	tblSMCompanyLocation CL ON VL.intCompanyLocationId		= CL.intCompanyLocationId
 	OUTER APPLY (
 		SELECT	EY.intEntityId
 		FROM	tblEMEntity EY INNER JOIN tblEMEntityType ET
