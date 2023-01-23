@@ -1518,6 +1518,7 @@
     <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
+    <None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
