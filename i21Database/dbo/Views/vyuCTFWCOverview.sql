@@ -53,7 +53,7 @@ AS
 				dtmReportRunOn = getdate(),
 				strFCPackageType = ICQM.strUnitMeasure,
 				strLineItemStatus = CTS.strContractStatus,
-				strSalesYear = SY.strSaleYear,
+				strSalesYear =  CONVERT(VARCHAR(20),MFB.intSalesYear, 100),
 				strFCBuyingCenter = CLD.strLocationName,
 				intSalesNo = MFB.intSales,
 				strCatalogueType = MFB.strTeaType,
@@ -89,8 +89,7 @@ AS
 			LEFT JOIN tblCTBook					CTB	 WITH (NOLOCK) ON CTB.intBookId			  = CH.intBookId
 			LEFT JOIN tblSMCity					LP	 WITH (NOLOCK) ON LP.intCityId			  =	CTD.intLoadingPortId
 			LEFT JOIN tblSMCity					DP	 WITH (NOLOCK) ON DP.intCityId			  =	CTD.intDestinationPortId
-			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId
-			LEFT JOIN tblQMSaleYear				SY	 WITH (NOLOCK) ON SY.intSaleYearId		  = MFB.intSalesYear
+			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId		
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
 			WHERE CTD.intContractStatusId IN ( 1,2,4) --Open, Unconfirmed,Re-Open
