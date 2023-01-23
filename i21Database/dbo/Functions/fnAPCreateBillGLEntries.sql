@@ -400,6 +400,7 @@ BEGIN
 												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
 												WHEN C.intTransactionType = 13 THEN 'Applied Basis Advance'
 												WHEN C.intTransactionType = 14 THEN 'Applied Deferred Interest'
+												WHEN C.intTransactionType = 11 THEN 'Applied Claim'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	B.intTransactionId,
 		[ysnIsUnposted]					=	0,
@@ -467,6 +468,7 @@ BEGIN
 												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
 												WHEN C.intTransactionType = 13 THEN 'Applied Basis Advance'
 												WHEN C.intTransactionType = 14 THEN 'Applied Deferred Interest'
+												WHEN C.intTransactionType = 11 THEN 'Applied Claim'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	B.intTransactionId,
 		[ysnIsUnposted]					=	0,
