@@ -1515,6 +1515,7 @@
    <Build Include="dbo\Stored Procedures\uspTMInventoryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInventoryHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketType.sql" />
+    <None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
