@@ -1808,7 +1808,7 @@ IF (@intTableCount = 3)
 			BEGIN
 				SET @strImportFileHeader	= N'Commander Validate'
 				SET @strFileType			= N'Inbound'
-				SET @strFilePrefix			= N'credential'
+				SET @strFilePrefix			= N'validate'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
 				SET @strStoredProcedure		= N'[to be develop]'
 						
