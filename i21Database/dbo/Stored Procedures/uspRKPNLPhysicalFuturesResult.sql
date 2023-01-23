@@ -9,6 +9,9 @@ BEGIN
 	DECLARE	@strPContractDetailId NVARCHAR(MAX)
 		, @strDetailIds NVARCHAR(MAX)
 		, @ysnSubCurrency BIT
+
+ 	IF OBJECT_ID('tempdb..#tempM2MBasisDetail') IS NOT NULL
+ 		DROP TABLE #tempM2MBasisDetail
 	
 	SELECT @ysnSubCurrency = ysnSubCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 
@@ -48,6 +51,74 @@ BEGIN
 	SELECT @strPContractDetailId = COALESCE(@strPContractDetailId + ',', '') + CAST(intPContractDetailId AS NVARCHAR(50)) FROM @tblLGAllocationDetail WHERE intSContractDetailId = @intSContractDetailId
 	SELECT @strDetailIds = @strPContractDetailId + ',' + LTRIM(@intSContractDetailId)
 	
+ 	-- Company Preference values
+ 	DECLARE @ysnEnterForwardCurveForMarketBasisDifferential BIT
+			, @strEvaluationBy NVARCHAR(50)
+ 			, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
+			, @ysnEvaluationByLocation BIT
+			, @ysnEvaluationByMarketZone BIT
+			, @ysnEvaluationByOriginPort BIT
+			, @ysnEvaluationByDestinationPort BIT
+			, @ysnEvaluationByCropYear BIT
+			, @ysnEvaluationByStorageLocation BIT
+			, @ysnEvaluationByStorageUnit BIT
+			, @ysnEnableMTMPoint BIT
+		
+ 	SELECT TOP 1
+ 		  @ysnEnterForwardCurveForMarketBasisDifferential = ysnEnterForwardCurveForMarketBasisDifferential
+ 		, @strEvaluationBy = strEvaluationBy
+ 		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
+		, @ysnEvaluationByLocation = ysnEvaluationByLocation 
+        , @ysnEvaluationByMarketZone = ysnEvaluationByMarketZone 
+        , @ysnEvaluationByOriginPort = ysnEvaluationByOriginPort 
+        , @ysnEvaluationByDestinationPort = ysnEvaluationByDestinationPort 
+        , @ysnEvaluationByCropYear = ysnEvaluationByCropYear 
+        , @ysnEvaluationByStorageLocation = ysnEvaluationByStorageLocation 
+        , @ysnEvaluationByStorageUnit = ysnEvaluationByStorageUnit 
+ 	FROM tblRKCompanyPreference
+
+	SELECT TOP 1 @ysnEnableMTMPoint = ysnEnableMTMPoint FROM tblCTCompanyPreference
+	
+ 	-- Get Latest Market Basis
+ 	DECLARE @intM2MBasisId INT = NULL
+
+ 	SELECT TOP 1 @intM2MBasisId = intM2MBasisId 
+ 	FROM tblRKM2MBasis 
+ 	WHERE strPricingType = 'Mark to Market' 
+ 	ORDER BY dtmM2MBasisDate DESC
+
+ 	SELECT dblRatio
+ 		, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
+ 		, intMarketBasisUOM = intCommodityUnitMeasureId
+ 		, intMarketBasisCurrencyId = c.intCurrencyID
+ 		, strMarketBasisCurrency = c.strCurrency
+ 		, intFutureMarketId = temp.intFutureMarketId
+ 		, intFutureMonthId = temp.intFutureMonthId
+ 		, intItemId = temp.intItemId
+ 		, intContractTypeId = temp.intContractTypeId
+ 		, intCompanyLocationId = temp.intCompanyLocationId
+ 		, strPeriodTo = ISNULL(temp.strPeriodTo, '')
+ 		, temp.strContractInventory
+ 		, temp.intUnitMeasureId
+ 		, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
+ 		, temp.intCurrencyId
+ 		, temp.intCommodityId
+		, temp.intMarketZoneId
+		, temp.intOriginPortId
+		, temp.intDestinationPortId
+		, temp.intCropYearId
+		, temp.intStorageLocationId
+		, temp.intStorageUnitId
+		, temp.intMTMPointId
+ 	INTO #tempM2MBasisDetail
+ 	FROM tblRKM2MBasisDetail temp
+ 	LEFT JOIN tblSMCurrency c ON temp.intCurrencyId = c.intCurrencyID
+ 	JOIN tblICCommodityUnitMeasure cum 
+ 		ON cum.intCommodityId = temp.intCommodityId 
+ 		AND temp.intUnitMeasureId = cum.intUnitMeasureId
+ 	WHERE temp.intM2MBasisId = @intM2MBasisId 
+
+	
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strContractType)) intRowNum
 		, strContractType
 		, strNumber
@@ -80,9 +151,17 @@ BEGIN
 			, strConfirmed = NULL
 			, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intWeightUOMId, AD.dblPAllocatedQty) * -1
 			, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intUnitMeasureId, AD.dblPAllocatedQty) * -1
-			, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
-													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.fnCTCalculateAmountBetweenCurrency(MA.intCurrencyId,@intCurrencyId,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId),0)))))
+			, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN 
+										-- BASIS and ETC.
+										CASE WHEN CH.intPricingTypeId <> 3
+										THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.fnCTCalculateAmountBetweenCurrency(MA.intCurrencyId, @intCurrencyId, dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId),0)))))
 													/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
+										-- HTA
+										ELSE (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(HTAFD.dblBasis, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, marketBasis.intUnitMeasureId, @intUnitMeasureId, dbo.fnCTCalculateAmountBetweenCurrency(marketBasis.intMarketBasisCurrencyId, @intCurrencyId, marketBasis.dblMarketBasis, 0)))))
+													/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId, PU.intUnitMeasureId, CD.dblFutures)
+										END
 					ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
 				* CASE WHEN CD.intCurrencyId = CY.intCurrencyID THEN 1
 						WHEN CY.ysnSubCurrency = 1 THEN 100
@@ -109,12 +188,83 @@ BEGIN
 		LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = CY.intMainCurrencyId
 		LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN PF.intContractDetailId
 																		ELSE CD.intContractDetailId	END	AND PF.intContractHeaderId = CD.intContractHeaderId
-		LEFT JOIN (
-			SELECT intPriceFixationId
-				, dblFutures = SUM(dblFutures)
-			FROM tblCTPriceFixationDetail
-			GROUP BY intPriceFixationId
-		) FD ON FD.intPriceFixationId = PF.intPriceFixationId
+		--LEFT JOIN (
+		--	SELECT intPriceFixationId
+		--		, dblFutures = SUM(dblFutures)
+		--	FROM tblCTPriceFixationDetail
+		--	GROUP BY intPriceFixationId
+		--) FD ON FD.intPriceFixationId = PF.intPriceFixationId
+		OUTER APPLY (
+			SELECT dblFutures = SUM(dblFutures) 
+				FROM
+				(
+					SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / CD.dblQuantity)
+					FROM tblCTPriceFixation pfh
+					INNER JOIN tblCTPriceFixationDetail pfd
+						ON pfh.intPriceFixationId = PF.intPriceFixationId
+					WHERE pfh.intContractDetailId = CD.intContractDetailId
+						AND CD.intPricingTypeId = 2 
+			) t
+		) FD
+		OUTER APPLY (
+		-- Weighted Average Futures Price for HTA (Priced Qty) in Multiple Price Fixations
+			SELECT dblBasis = SUM(dblBasis) 
+			FROM
+			(
+				SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / CD.dblQuantity)
+				FROM tblCTPriceFixation pfh
+				INNER JOIN tblCTPriceFixationDetail pfd
+					ON pfh.intPriceFixationId = PF.intPriceFixationId
+				WHERE pfh.intContractDetailId = CD.intContractDetailId
+					AND CD.intPricingTypeId = 3 
+			) t
+		) HTAFD
+		OUTER APPLY (
+ 			SELECT TOP 1 dblRatio
+ 					, dblMarketBasis
+ 					, intMarketBasisUOM
+ 					, intMarketBasisCurrencyId
+ 					, strMarketBasisCurrency
+					, intUnitMeasureId
+ 			FROM #tempM2MBasisDetail tmp
+			WHERE ISNULL(tmp.intFutureMarketId,0) = ISNULL(CD.intFutureMarketId, ISNULL(tmp.intFutureMarketId,0))	
+				AND ISNULL(tmp.intItemId,0) = CASE WHEN @strEvaluationBy = 'Item' 
+													THEN ISNULL(CD.intItemId, 0)
+													ELSE ISNULL(tmp.intItemId, 0)
+													END
+				AND ISNULL(tmp.intContractTypeId, 0) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+																				THEN ISNULL(CH.intContractTypeId, 0)
+																				ELSE ISNULL(tmp.intContractTypeId, 0) END
+				AND ISNULL(tmp.intCompanyLocationId, 0) = CASE WHEN @ysnEvaluationByLocation = 1 
+																				THEN ISNULL(CD.intCompanyLocationId, 0)
+																				ELSE ISNULL(tmp.intCompanyLocationId, 0) END
+				AND ISNULL(tmp.intMarketZoneId, 0) = CASE WHEN @ysnEvaluationByMarketZone = 1 
+																				THEN ISNULL(CD.intMarketZoneId, 0)
+																				ELSE ISNULL(tmp.intMarketZoneId, 0) END
+				AND ISNULL(tmp.intOriginPortId, 0) = CASE WHEN @ysnEvaluationByOriginPort = 1 
+																				THEN ISNULL(CD.intLoadingPortId, 0)
+																				ELSE ISNULL(tmp.intOriginPortId, 0) END
+				AND ISNULL(tmp.intDestinationPortId, 0) = CASE WHEN @ysnEvaluationByDestinationPort = 1 
+																				THEN ISNULL(CD.intDestinationPortId, 0)
+																				ELSE ISNULL(tmp.intDestinationPortId, 0) END
+				AND ISNULL(tmp.intCropYearId, 0) = CASE WHEN @ysnEvaluationByCropYear = 1 
+																				THEN ISNULL(CH.intCropYearId, 0)
+																				ELSE ISNULL(tmp.intCropYearId, 0) END
+				AND ISNULL(tmp.intStorageLocationId, 0) = CASE WHEN @ysnEvaluationByStorageLocation = 1 
+																				THEN ISNULL(CD.intStorageLocationId, 0)
+																				ELSE ISNULL(tmp.intStorageLocationId, 0) END
+				AND ISNULL(tmp.intStorageUnitId, 0) = CASE WHEN @ysnEvaluationByStorageUnit = 1 
+																				THEN ISNULL(CD.intStorageLocationId, 0)
+																				ELSE ISNULL(tmp.intStorageUnitId, 0) END
+				AND ISNULL(tmp.strPeriodTo, '') = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
+													THEN dbo.fnRKFormatDate(CD.dtmEndDate, 'MMM yyyy')
+													ELSE ISNULL(tmp.strPeriodTo, '')
+													END
+				AND ISNULL(tmp.intMTMPointId, 0) = CASE WHEN @ysnEnableMTMPoint = 1 
+																				THEN ISNULL(CD.intMTMPointId, 0)
+																				ELSE ISNULL(tmp.intMTMPointId, 0) END
+				AND tmp.strContractInventory = 'Contract' 
+ 		) marketBasis
 		WHERE intSContractDetailId = @intSContractDetailId
 		
 		UNION ALL SELECT *
@@ -215,10 +365,18 @@ BEGIN
 				, strConfirmed = NULL
 				, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty)
 				, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty)
-				, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
-																	* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.fnCTCalculateAmountBetweenCurrency(MA.intCurrencyId,@intCurrencyId,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId),0)))))
-																	/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
-									ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
+				, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN 
+										-- BASIS and ETC.
+										CASE WHEN CH.intPricingTypeId <> 3 
+										THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.fnCTCalculateAmountBetweenCurrency(MA.intCurrencyId, @intCurrencyId, dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId),0)))))
+													/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
+										-- HTA
+										ELSE (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(HTAFD.dblBasis, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, marketBasis.intUnitMeasureId, @intUnitMeasureId, dbo.fnCTCalculateAmountBetweenCurrency(marketBasis.intMarketBasisCurrencyId, @intCurrencyId, marketBasis.dblMarketBasis, 0)))))
+													/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId, PU.intUnitMeasureId, CD.dblFutures)
+										END
+							ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
 							* CASE WHEN CD.intCurrencyId = CY.intCurrencyID THEN 1
 									WHEN CY.ysnSubCurrency = 1 THEN 100
 									ELSE 0.01 END
@@ -243,14 +401,85 @@ BEGIN
 			LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = CY.intMainCurrencyId
 			LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN PF.intContractDetailId
 																			ELSE CD.intContractDetailId	END	AND PF.intContractHeaderId = CD.intContractHeaderId
-			LEFT JOIN (
-				SELECT intPriceFixationId
-					, dblFutures = SUM(dblFutures)
-				FROM tblCTPriceFixationDetail
-				GROUP BY intPriceFixationId
-			) FD ON FD.intPriceFixationId = PF.intPriceFixationId
-			WHERE intSContractDetailId = @intSContractDetailId
-		) d
+			--LEFT JOIN (
+			--	SELECT intPriceFixationId
+			--		, dblFutures = SUM(dblFutures)
+			--	FROM tblCTPriceFixationDetail
+			--	GROUP BY intPriceFixationId
+			--) FD ON FD.intPriceFixationId = PF.intPriceFixationId
+			OUTER APPLY (
+			SELECT dblFutures = SUM(dblFutures) 
+					FROM
+					(
+						SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / CD.dblQuantity)
+						FROM tblCTPriceFixation pfh
+						INNER JOIN tblCTPriceFixationDetail pfd
+							ON pfh.intPriceFixationId = PF.intPriceFixationId
+						WHERE pfh.intContractDetailId = CD.intContractDetailId
+							AND CD.intPricingTypeId = 2 
+				) t
+			) FD
+			OUTER APPLY (
+			-- Weighted Average Futures Price for HTA (Priced Qty) in Multiple Price Fixations
+				SELECT dblBasis = SUM(dblBasis) 
+				FROM
+				(
+					SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / CD.dblQuantity)
+					FROM tblCTPriceFixation pfh
+					INNER JOIN tblCTPriceFixationDetail pfd
+						ON pfh.intPriceFixationId = PF.intPriceFixationId
+					WHERE pfh.intContractDetailId = CD.intContractDetailId
+						AND CD.intPricingTypeId = 3 
+				) t
+			) HTAFD
+			OUTER APPLY (
+ 				SELECT TOP 1 dblRatio
+ 						, dblMarketBasis
+ 						, intMarketBasisUOM
+ 						, intMarketBasisCurrencyId
+ 						, strMarketBasisCurrency
+						, intUnitMeasureId
+ 				FROM #tempM2MBasisDetail tmp
+				WHERE ISNULL(tmp.intFutureMarketId,0) = ISNULL(CD.intFutureMarketId, ISNULL(tmp.intFutureMarketId,0))	
+					AND ISNULL(tmp.intItemId,0) = CASE WHEN @strEvaluationBy = 'Item' 
+														THEN ISNULL(CD.intItemId, 0)
+														ELSE ISNULL(tmp.intItemId, 0)
+														END
+					AND ISNULL(tmp.intContractTypeId, 0) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+																					THEN ISNULL(CH.intContractTypeId, 0)
+																					ELSE ISNULL(tmp.intContractTypeId, 0) END
+					AND ISNULL(tmp.intCompanyLocationId, 0) = CASE WHEN @ysnEvaluationByLocation = 1 
+																					THEN ISNULL(CD.intCompanyLocationId, 0)
+																					ELSE ISNULL(tmp.intCompanyLocationId, 0) END
+					AND ISNULL(tmp.intMarketZoneId, 0) = CASE WHEN @ysnEvaluationByMarketZone = 1 
+																					THEN ISNULL(CD.intMarketZoneId, 0)
+																					ELSE ISNULL(tmp.intMarketZoneId, 0) END
+					AND ISNULL(tmp.intOriginPortId, 0) = CASE WHEN @ysnEvaluationByOriginPort = 1 
+																					THEN ISNULL(CD.intLoadingPortId, 0)
+																					ELSE ISNULL(tmp.intOriginPortId, 0) END
+					AND ISNULL(tmp.intDestinationPortId, 0) = CASE WHEN @ysnEvaluationByDestinationPort = 1 
+																					THEN ISNULL(CD.intDestinationPortId, 0)
+																					ELSE ISNULL(tmp.intDestinationPortId, 0) END
+					AND ISNULL(tmp.intCropYearId, 0) = CASE WHEN @ysnEvaluationByCropYear = 1 
+																					THEN ISNULL(CH.intCropYearId, 0)
+																					ELSE ISNULL(tmp.intCropYearId, 0) END
+					AND ISNULL(tmp.intStorageLocationId, 0) = CASE WHEN @ysnEvaluationByStorageLocation = 1 
+																					THEN ISNULL(CD.intStorageLocationId, 0)
+																					ELSE ISNULL(tmp.intStorageLocationId, 0) END
+					AND ISNULL(tmp.intStorageUnitId, 0) = CASE WHEN @ysnEvaluationByStorageUnit = 1 
+																					THEN ISNULL(CD.intStorageLocationId, 0)
+																					ELSE ISNULL(tmp.intStorageUnitId, 0) END
+					AND ISNULL(tmp.strPeriodTo, '') = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
+														THEN dbo.fnRKFormatDate(CD.dtmEndDate, 'MMM yyyy')
+														ELSE ISNULL(tmp.strPeriodTo, '')
+														END
+					AND ISNULL(tmp.intMTMPointId, 0) = CASE WHEN @ysnEnableMTMPoint = 1 
+																					THEN ISNULL(CD.intMTMPointId, 0)
+																					ELSE ISNULL(tmp.intMTMPointId, 0) END
+					AND tmp.strContractInventory = 'Contract' 
+ 				) marketBasis
+				WHERE intSContractDetailId = @intSContractDetailId
+			) d
 		
 		UNION ALL SELECT TOP 100 PERCENT strItemNo
 			, strBillId
