@@ -59,7 +59,10 @@ SELECT lh.intLoadHeaderId,
  dd.dblPrice,      
  dd.dblDeliveredQty,     
  dd.dblPercentFull,    
- dd.ysnDelivered    
+ dd.ysnDelivered,
+ lh.ysnDiversion,
+ lh.strDiversionNumber,
+ lh.intStateId
 FROM     
 tblMBILPickupDetail pd     
 JOIN tblMBILDeliveryDetail dd ON dd.intPickupDetailId = pd.intPickupDetailId     
