@@ -1882,7 +1882,6 @@
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="dbo\Stored Procedures\uspCMRemoveRelatedTransactions.sql"/>
     <Build Include="dbo\Stored Procedures\uspGLSetMultiCompanyId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
