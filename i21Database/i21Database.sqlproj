@@ -895,6 +895,9 @@
     <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptChangeOtherChargeVendor.sql" />
     <Build Include="dbo\Tables\tblLGFreightPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentConditionsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReportForInStore1.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerSalesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
