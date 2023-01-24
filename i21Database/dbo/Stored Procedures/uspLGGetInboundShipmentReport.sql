@@ -580,7 +580,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strSeller = Seller.strLocationName,
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
-			intCustomerEntityId = CASE WHEN (@intCustomerEntityId = 0) THEN 0 ELSE ISNULL(LD.intCustomerEntityId, -1) END
+			intCustomerEntityId = CASE WHEN (@intCustomerEntityId = 0) THEN 0 ELSE ISNULL(LD.intCustomerEntityId, -1) END,
+			strFinancingPledgingInstr = RR.strRemarks
 		FROM tblLGLoad L
 		CROSS APPLY (SELECT intLoadId, intCustomerEntityId, intSContractDetailId, ysnPrintShipper, intVendorEntityId, intPContractDetailId, intPCompanyLocationId 
 				FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId 
@@ -697,6 +698,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		) LOGO
+		LEFT JOIN vyuLGGetReportRemark RR ON RR.intValueId = L.intBorrowingFacilityId AND RR.strType = 'Borrowing Facility' AND RR.intLocationId = LD.intPCompanyLocationId
 		WHERE L.strLoadNumber = @strTrackingNumber
 		AND ((ISNULL(@intCustomerEntityId, 0) = 0 AND LD.intCustomerEntityId IS NOT NULL)
 			OR (ISNULL(@intCustomerEntityId, 0) > 0 AND @intCustomerEntityId = LD.intCustomerEntityId)
@@ -723,7 +725,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.strOriginPort,
 			L.strDestinationPort,
 			L.strDestinationCity,
-			dtmBLDate = LW.dtmDeliveryDate,
+			L.dtmBLDate,
 			L.strBLNumber,
 			L.dtmScheduledDate,
 			L.dtmETAPOL,
@@ -874,7 +876,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strSeller = Seller.strLocationName,
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
-			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0)
+			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0),
+			strFinancingPledgingInstr = RR.strRemarks
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
@@ -943,6 +946,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		) LOGO
+		LEFT JOIN vyuLGGetReportRemark RR ON RR.intValueId = L.intBorrowingFacilityId AND RR.strType = 'Borrowing Facility' AND RR.intLocationId = LD.intPCompanyLocationId
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
 END

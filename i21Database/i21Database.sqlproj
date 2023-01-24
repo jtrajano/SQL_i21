@@ -880,6 +880,9 @@
     <Build Include="dbo\Stored Procedures\uspGLClearAuditorTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByTransactionId.sql" />
     <Build Include="dbo\Tables\tblLGFreightPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentConditionsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReportForInStore1.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerSalesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
