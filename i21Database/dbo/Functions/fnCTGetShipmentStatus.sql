@@ -2,8 +2,14 @@
 (
 	@intContractDetailId	INT
 )
-RETURNS table as return
-	SELECT TOP 1 strShipmentStatus = strShipmentStatus COLLATE Latin1_General_CI_AS
+RETURNS @returntable	TABLE
+(
+	strShipmentStatus	NVARCHAR(100)  COLLATE Latin1_General_CI_AS
+)
+AS
+BEGIN
+	INSERT INTO @returntable	
+	SELECT TOP 1 strShipmentStatus
 	FROM
 	(
 		SELECT ROW_NUMBER() OVER(PARTITION BY intLoadDetailId ORDER BY dtmScheduledDate) AS intNumberId, strShipmentStatus, intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
@@ -13,3 +19,5 @@ RETURNS table as return
 	) tbl
 	WHERE intNumberId = 1
 	ORDER BY intPriorityId ASC
+	RETURN;
+END
