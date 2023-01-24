@@ -24,5 +24,4 @@ INNER JOIN tblTMSite site
 INNER JOIN tblICItem item
 	ON site.intProduct = item.intItemId
 WHERE device.strSerialNumber != '' AND 
-		device.intDeviceTypeId = 1 AND --intDeviceTypeId = 1 means Tank
-		site.ysnCompanySite = 1
+		device.intDeviceTypeId = 1 --intDeviceTypeId = 1 means Tank

@@ -29,7 +29,6 @@ JOIN tblTMSiteDevice sitedevice
 	ON device.intDeviceId = sitedevice.intDeviceId
 INNER JOIN tblTMSite site
 	ON site.intSiteID = sitedevice.intSiteID AND
-		ST.intCompanyLocationId = site.intLocationId AND
-		site.ysnCompanySite = 1
+		ST.intCompanyLocationId = site.intLocationId
 INNER JOIN tblICItem item
 	ON site.intProduct = item.intItemId
