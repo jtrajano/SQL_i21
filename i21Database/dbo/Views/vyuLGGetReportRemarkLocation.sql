@@ -20,4 +20,10 @@ FROM (
 	WHERE EL.intEntityId IN (
 		SELECT intEntityId FROM tblEMEntityType WHERE strType IN ('Vendor', 'Customer')
 	)
+
+	UNION ALL SELECT intLocationId = intCompanyLocationId
+		, strLocation = strLocationName
+		, intReferenceId = NULL
+		, strType = 'Borrowing Facility'
+	FROM tblSMCompanyLocation
 ) tbl
