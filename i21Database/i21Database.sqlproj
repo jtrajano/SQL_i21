@@ -2884,6 +2884,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetContainerTypeCount.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Views\vyuQMUserLocation.sql" />
+    <Build Include="dbo\Views\uspQMGetLot.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
