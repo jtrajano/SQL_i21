@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateDPRRecon]
 	@intDPRReconHeaderId INT = NULL
 	, @dtmFromDate  DATETIME 
-	, @dtmToDate DATETIME 
+	, @dtmToDate DATETIME
+	, @dtmServerFromDate DATETIME
+	, @dtmServerToDate DATETIME
 	, @intCommodityId INT
 	, @intUserId INT
 
@@ -16,16 +18,12 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
  
-	DECLARE @ErrMsg NVARCHAR(MAX),
-			@dtmServerFromDate DATETIME,
-			@dtmServerToDate DATETIME
+	DECLARE @ErrMsg NVARCHAR(MAX)
 
-	SET @dtmServerFromDate = @dtmFromDate
-	SET @dtmServerToDate = @dtmToDate
 
 	--Convert Dates to UTC
-	SET @dtmFromDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmFromDate)
-	SET @dtmToDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmToDate)
+	--SET @dtmFromDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()) - 1, @dtmFromDate)
+	--SET @dtmToDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE())- 1, @dtmToDate)
 
 	DECLARE @tblRKDPRReconContracts TABLE (
 		[intSort] INT NOT NULL,
