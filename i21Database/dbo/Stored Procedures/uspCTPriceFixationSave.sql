@@ -109,6 +109,8 @@ BEGIN TRY
 	FROM	tblCTPriceFixationDetail
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
+	SELECT	@ysnUnlimitedQuantity = ysnUnlimitedQuantity, @intContractTypeId = intContractTypeId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity, @ysnPricingAsAmendment = ysnPricingAsAmendment,@ysnEnableDerivativeInArbitrage = ysnEnableDerivativeInArbitrage, @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing  FROM tblCTCompanyPreference
 
 	declare @intDWGIdId int
@@ -120,15 +122,10 @@ BEGIN TRY
 		@ysnDestinationWeightsAndGrades = (case when ch.intContractTypeId = 2 and (ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId) then 1 else 0 end)
 		,@intMainCurrencyId = cu.intMainCurrencyId
 		,@ysnApplyFuturesFromPricing = case when @ysnEnableFXFieldInContractPricing = 1 and @intFinalCurrencyId <> cd.intCurrencyId and @intFinalCurrencyId <> isnull(cu.intMainCurrencyId,0) then 1 else 0 end
-		,@ysnUnlimitedQuantity = ch.ysnUnlimitedQuantity
-		,@intContractTypeId = ch.intContractTypeId
-		,@strCommodityDescription = cy.strDescription
-		,@intCommodityId = ch.intCommodityId
 	from
 		tblCTContractDetail cd
 		inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 		inner join tblSMCurrency cu on cu.intCurrencyID = cd.intCurrencyId
-		join tblICCommodity cy on cy.intCommodityId = ch.intCommodityId
 	where
 		cd.intContractDetailId = @intContractDetailId
 
@@ -136,8 +133,9 @@ BEGIN TRY
 	BEGIN
 		ProcessContractDetail:
 
-		SELECT	
+		SELECT	@intCommodityId				=	CH.intCommodityId,
 				@intPriceItemUOMId			=	CD.intPriceItemUOMId,
+				@strCommodityDescription	=	CY.strDescription,
 				@intPricingTypeId			=	CD.intPricingTypeId,
 				@dblQuantity				=	CD.dblQuantity,
 				@intBasisUOMId				=	BM.intCommodityUnitMeasureId,
@@ -146,12 +144,14 @@ BEGIN TRY
 				@ysnBasisSubCurrency		=	AY.ysnSubCurrency,
 				@ysnSeqSubCurrency			=	SY.ysnSubCurrency
 
-		FROM	tblCTContractDetail			CD 
+		FROM	tblCTContractDetail			CD
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
    LEFT JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId			=	CD.intBasisUOMId
-   LEFT JOIN	tblICCommodityUnitMeasure	BM	ON	BM.intCommodityId		=	@intCommodityId
+   LEFT JOIN	tblICCommodityUnitMeasure	BM	ON	BM.intCommodityId		=	CH.intCommodityId
 												AND	BM.intUnitMeasureId		=	BU.intUnitMeasureId
    LEFT JOIN	tblSMCurrency				AY	ON	AY.intCurrencyID		=	CD.intBasisCurrencyId
    LEFT JOIN	tblSMCurrency				SY	ON	SY.intCurrencyID		=	CD.intCurrencyId
+   LEFT JOIN 	tblICCommodity				CY	ON	CY.intCommodityId		=	CH.intCommodityId
 		WHERE	intContractDetailId			=	@intContractDetailId
 		
 		IF @strPricingQuantity = 'By Futures Contracts'
@@ -251,6 +251,14 @@ BEGIN TRY
 								@strProcess		 		= 	'Price Delete',
 								@contractDetail 		= 	@contractDetails,
 								@intUserId				= 	@intUserId
+
+			-- EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+			-- 					@intContractDetailId 	= 	@intContractDetailId,
+			-- 					@strSource			 	= 	'Pricing',
+			-- 					@strProcess		 		= 	'Price Delete DWG',
+			-- 					@contractDetail 		= 	@contractDetails,
+			-- 					@intUserId				= 	@intUserId,
+			-- 					@intTransactionId		=   @intPriceFixationId
 
 			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 1, @dtmLocalDate
 
@@ -611,6 +619,7 @@ BEGIN TRY
 															ELSE	0.01 
 													END) + PF.dblOriginalBasis + PF.dblRollArb
 				FROM	tblCTPriceFixation			PF 
+				--JOIN	tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
 				JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 				WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
