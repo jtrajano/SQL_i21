@@ -27,8 +27,9 @@ JOIN tblTMDevice device
 	ON FT.strSerialNumber = device.strSerialNumber
 JOIN tblTMCompanySiteDevice sitedevice
 	ON device.intDeviceId = sitedevice.intDeviceId
-INNER JOIN tblTMCompanyConsumptionSite site
-	ON site.intCompanyConsumptionSiteId = sitedevice.intCompanyConsumptionSiteId AND
-		ST.intCompanyLocationId = site.intCompanyLocationId
+INNER JOIN tblTMSite site
+	ON site.intSiteID = sitedevice.intSiteID AND
+		ST.intCompanyLocationId = site.intLocationId AND
+		site.ysnCompanySite = 1
 INNER JOIN tblICItem item
 	ON site.intItemId = item.intItemId

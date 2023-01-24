@@ -27,8 +27,8 @@ INNER JOIN	tblSTStore c
 ON			a.intStoreId = c.intStoreId
 INNER JOIN	tblSTStoreFuelTanks d
 ON			c.intStoreId = d.intStoreId AND b.intDeviceId = d.intDeviceId
-INNER JOIN	tblTMCompanyConsumptionSite e
-ON			c.intCompanyLocationId = e.intCompanyLocationId
-INNER JOIN	tblTMCompanySiteDevice f
-ON			f.intCompanyConsumptionSiteId = e.intCompanyConsumptionSiteId AND
+INNER JOIN	tblTMSite e
+ON			c.intCompanyLocationId = e.intLocationId AND e.ysnCompanySite = 1
+INNER JOIN	tblTMSiteDevice f
+ON			f.intSiteID = e.intSiteID AND
 			b.intDeviceId = f.intDeviceId
