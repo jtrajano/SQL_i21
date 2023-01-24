@@ -3901,15 +3901,15 @@ BEGIN TRY
 
 						if (@ysnChangePricingTypeAndQuantity = 1)
 						begin
-							update @cbLogSpecific set dblQty = (@dblBasis - dblQty) * -1;
+							update @cbLogSpecific set dblQty = (@TotalBasis - dblQty) * -1;
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
-							UPDATE @cbLogSpecific SET dblQty = (@dblBasis - abs(dblQty)) * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
+							UPDATE @cbLogSpecific SET dblQty = (@TotalBasis - abs(dblQty)) * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
 																									WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 																									ELSE 2 END, intActionId = @_action
 						end
 						else
 						begin
-							UPDATE @cbLogSpecific SET dblQty = @dblBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
+							UPDATE @cbLogSpecific SET dblQty = @TotalBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
 																									WHEN @intHeaderPricingTypeId IN (1, 3) THEN 1
 																									ELSE 2 END, intActionId = @_action
 						end
@@ -3923,13 +3923,13 @@ BEGIN TRY
 
 						if (@ysnChangePricingTypeAndQuantity = 1)
 						begin
-							update @cbLogSpecific set dblQty = (@dblPriced - dblQty) * -1;
+							update @cbLogSpecific set dblQty = (@TotalPriced - dblQty) * -1;
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
-							UPDATE @cbLogSpecific SET dblQty = (@dblPriced - abs(dblQty)) * - 1, intPricingTypeId = 1, intActionId = @_action;
+							UPDATE @cbLogSpecific SET dblQty = (@TotalPriced - abs(dblQty)) * - 1, intPricingTypeId = 1, intActionId = @_action;
 						end
 						else
 						begin
-							UPDATE @cbLogSpecific SET dblQty = @dblPriced * - 1, intPricingTypeId = 1, intActionId = @_action
+							UPDATE @cbLogSpecific SET dblQty = @TotalPriced * - 1, intPricingTypeId = 1, intActionId = @_action
 						end
 						
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
