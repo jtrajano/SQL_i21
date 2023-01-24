@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFStageWorkOrderByLot (
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrderByLot] (
 	@strXML NVARCHAR(MAX)
 	,@intWorkOrderInputLotId INT = NULL OUTPUT
 	)
@@ -446,7 +446,7 @@ BEGIN TRY
 	--*************************************
 	-- Reservation validation
 	--*************************************
-	SELECT @dblReservedQty = dblQty
+	SELECT @dblReservedQty = dblWeight
 	FROM vyuMFStockReservationByWorkOrder
 	WHERE intWorkOrderId <> @intWorkOrderId
 		AND intLotId = @intInputLotId
@@ -454,15 +454,13 @@ BEGIN TRY
 	IF @dblReservedQty IS NULL
 		SELECT @dblReservedQty = 0
 
-	SELECT @dblInputWeight2 = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
-
-	IF @dblInputWeight2 > @dblQty - @dblReservedQty
+	IF @dblInputWeight > @dblWeight - @dblReservedQty
 	BEGIN
-		SELECT @dblRequiredQty = ABS((@dblQty - @dblReservedQty) - @dblInputWeight2)
+		SELECT @dblRequiredQty = ABS((@dblWeight - @dblReservedQty) - @dblInputWeight)
 
 		SELECT @dblReservedQty = NULL
 
-		SELECT @dblReservedQty = SUM(dblQty)
+		SELECT @dblReservedQty = SUM(dblWeight)
 		FROM vyuMFStockReservationByWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intItemId = @intInputItemId
@@ -471,7 +469,7 @@ BEGIN TRY
 		IF @dblReservedQty IS NULL
 			SELECT @dblReservedQty = 0
 
-		IF @dblReservedQty - @dblInputWeight2 < 0
+		IF @dblReservedQty - @dblInputWeight < 0
 		BEGIN
 			SELECT @strErr = 'There is reservation against this lot. Cannot proceed.'
 
