@@ -36,8 +36,6 @@
 	CONSTRAINT [FK_tblGLJournal_tblSMCurrencyExchangeRate] FOREIGN KEY([intCurrencyExchangeRateId])REFERENCES [dbo].[tblSMCurrencyExchangeRate] ([intCurrencyExchangeRateId])
 );
 
-GO
-
 CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
 ON [dbo].[tblGLJournal]
 FOR DELETE 
