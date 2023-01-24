@@ -4639,12 +4639,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Allocated
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Logistics.view.InventoryAllocationViewReport?showSearch=true' WHERE strMenuName = 'Allocated & Unallocated Inventory View' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Freight Payment' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
-    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-    VALUES (N'Freight Payment', N'Logistics', @LogisticsReportParentMenuId, N'Freight Payment', N'Maintenance', N'Screen', N'Logistics.view.FreightPayment', N'small-menu-maintenance', 0, 0, 0, 1, 13, 1)
-ELSE
-    UPDATE tblSMMasterMenu SET intSort = 13, strCommand = N'Logistics.view.FreightPayment' WHERE strMenuName = 'Freight Payment' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
-
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
