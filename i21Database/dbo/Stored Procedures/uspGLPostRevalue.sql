@@ -203,17 +203,13 @@ DECLARE
                           WHEN dblUnrealizedGain < 0 THEN 0  
                           ELSE dblUnrealizedGain END,0)
                   ,[dblExchangeRate] = dblNewForexRate
-                  ,[dblDebitForeign] = (ISNULL(CASE WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)  
-                          WHEN dblUnrealizedLoss < 0 THEN 0  
-                          ELSE dblUnrealizedLoss END,0)) / dblNewForexRate
-                  ,[dblCreditForeign] = (ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
-                          WHEN dblUnrealizedGain < 0 THEN 0  
-                          ELSE dblUnrealizedGain END,0)) / dblNewForexRate
+                  ,[dblDebitForeign] = 0
+                  ,[dblCreditForeign] = 0
                   ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
                   ,[ysnIsUnposted]  = 0   
                   ,[intConcurrencyId]  = 1  
                   ,[intDetailCurrencyId]  = ISNULL(A.intCurrencyId, B.intFunctionalCurrencyId)
-                  ,[intCurrencyId]  = A.intCurrencyId
+                  ,[intCurrencyId]  = B.intFunctionalCurrencyId
                   ,[intUserId]   = 0  
                   ,[intEntityId]   = @intEntityId    
                   ,[dtmDateEntered]  = @dateNow  
