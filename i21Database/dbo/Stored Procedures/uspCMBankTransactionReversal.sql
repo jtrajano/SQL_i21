@@ -51,6 +51,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
+		,@BANK_FEE AS INT = 27
+		,@NEGATIVE_AP_ECHECK AS INT = 120
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -369,6 +371,20 @@ WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH)
 				AND F.dtmCheckPrinted IS NULL 		
 			)
 		)
+
+DELETE GL FROM tblGLDetail GL INNER JOIN
+tblCMBankTransaction F ON GL.strTransactionId = F.strTransactionId
+JOIN #tmpCMBankTransaction TMP
+			ON F.strTransactionId  = TMP.strTransactionId + '-F'
+WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)		
+		
+
+DELETE F FROM
+tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+			ON F.strTransactionId  = TMP.strTransactionId + '-F'
+WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)		
+		
+
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
 Exit_Successfully:
