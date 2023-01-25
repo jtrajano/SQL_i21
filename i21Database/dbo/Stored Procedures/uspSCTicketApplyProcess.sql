@@ -130,7 +130,7 @@ BEGIN
 		INSERT INTO @MANUAL_DISTRIBUTION
 		( intId, intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, intTransactionDetailId, strTransactionId, intTransactionTypeId, intLotId, intSubLocationId, intStorageLocationId, strDistributionOption, intStorageScheduleId, intSourceTransactionId, strSourceTransactionId, ysnIsStorage, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId, intItemContractDetailId, intItemContractHeaderId)
 		SELECT 
-		ROW_NUMBER() OVER(PARTITION BY intMarker ORDER BY intType DESC) 
+		ROW_NUMBER() OVER(PARTITION BY @CURRENT_TICKET_ID  ORDER BY intType DESC) 
 		, intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, intTransactionDetailId, strTransactionId, intTransactionTypeId, intLotId, intSubLocationId, intStorageLocationId, strDistributionOption, intStorageScheduleId, intSourceTransactionId, strSourceTransactionId, ysnIsStorage, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId, intItemContractDetailId, intItemContractHeaderId 
 	
 	
@@ -312,9 +312,16 @@ BEGIN
 			, @ENTITY_USER_NAME
 			, @USER_ID
 		
+
+		EXEC uspSCCheckTicketContractAfterManualDistribution 
+			@intTicketId = @CURRENT_TICKET_ID
+			, @intUserId = @USER_ID
+
 		-- close the ticket	
 		UPDATE tblSCTicket 
-			SET strTicketStatus = 'C'
+			SET strTicketStatus = 'C',
+				intStorageScheduleTypeId = -3,
+				strDistributionOption =	'SPT'
 			WHERE intTicketId = @CURRENT_TICKET_ID
 
 		-- release the ticket from processing
