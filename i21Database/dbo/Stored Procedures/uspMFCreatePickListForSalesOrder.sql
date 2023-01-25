@@ -102,13 +102,13 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 		FROM @tblInputItemCopy AS InputItem 
 		LEFT JOIN (SELECT pld.intItemId
 						, SUM(pld.dblPickQuantity) AS dblQty 
-						, SUM(pld.dblShippedQty) AS dblShippedQty 
+						, SUM(ISNULL(pld.dblShippedQty, 0)) AS dblShippedQty 
 						, pld.intItemUOMId
 				   FROM tblMFPickListDetail pld 
 				   WHERE intPickListId = @intPickListId
 				   GROUP BY pld.intItemId
 						  , pld.intItemUOMId) AS Temp ON InputItem.intItemId = Temp.intItemId AND Temp.intItemUOMId = InputItem.intItemUOMId 
-		WHERE Temp.dblShippedQty < Temp.dblQty
+		WHERE ISNULL(Temp.dblShippedQty, 0) < Temp.dblQty
 
 
 		DELETE FROM @tblInputItem WHERE ISNULL(dblQty, 0) <= 0
