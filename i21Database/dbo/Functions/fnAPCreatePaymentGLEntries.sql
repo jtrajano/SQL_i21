@@ -118,7 +118,7 @@ BEGIN
 		,[strReference]					=	C.strVendorId
 		,[intCurrencyId]				=	P.intCurrencyId
 		,[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId
-		,[dblExchangeRate]				=	P.dblExchangeRate
+		,[dblExchangeRate]				=	ISNULL(NULLIF(P.dblExchangeRate,0),1)
 		,[dtmDateEntered]				=	GETDATE()
 		,[dtmTransactionDate]			=	NULL
 		,[strJournalLineDescription]	=	'Posted Payment'
@@ -137,7 +137,7 @@ BEGIN
 		,[dblCreditForeign]				=	MainQuery.dblCreditForeign
 		,[dblCreditReport]				=	MainQuery.dblCredit
 		,[dblReportingRate]				=	0
-		,[dblForeignRate]				=	P.dblExchangeRate
+		,[dblForeignRate]				=	ISNULL(NULLIF(P.dblExchangeRate,0),1)
 		,[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM (
 		SELECT		
@@ -242,7 +242,7 @@ BEGIN
 											(CAST(
 												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+														- B.dblInterest, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1)
 												AS DECIMAL(18,2))
 											-
 											CAST(
@@ -258,7 +258,7 @@ BEGIN
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	A.dblExchangeRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Posted Gain/Loss',
@@ -277,7 +277,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	A.dblExchangeRate,
+		[dblForeignRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -298,7 +298,7 @@ BEGIN
 	AND (CAST(
 												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-													- B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+													- B.dblInterest, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1)
 												AS DECIMAL(18,2))
 											-
 											CAST(
@@ -335,7 +335,7 @@ BEGIN
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	1,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	A.dblExchangeRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Withheld',
@@ -354,7 +354,7 @@ BEGIN
 		[dblCreditForeign]				=	A.dblWithheld,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	A.dblExchangeRate,
+		[dblForeignRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[strRateType]					=	rateType.strCurrencyExchangeRateType
 		FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON A.intAccountId = GLAccnt.intAccountId
@@ -371,7 +371,7 @@ BEGIN
 			[strBatchId]					=	@batchId,
 			[intAccountId]					=	loc.intDiscountAccountId,
 			[dblDebit]						=	0,
-			[dblCredit]						=	CAST(B.dblDiscount * A.dblExchangeRate AS DECIMAL(18,2)),
+			[dblCredit]						=	CAST(B.dblDiscount * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,2)),
 			[dblDebitUnit]					=	0,
 			[dblCreditUnit]					=	0,
 			[strDescription]				=	'Posted Payment - Discount',
@@ -379,7 +379,7 @@ BEGIN
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
 			[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-			[dblExchangeRate]				=	A.dblExchangeRate,
+			[dblExchangeRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Discount',
@@ -398,7 +398,7 @@ BEGIN
 			[dblCreditForeign]				=	CAST(B.dblDiscount AS DECIMAL(18,2)),
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	A.dblExchangeRate,
+			[dblForeignRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 			[strRateType]					=	rateType.strCurrencyExchangeRateType
 		FROM [dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
@@ -451,7 +451,7 @@ BEGIN
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucher.dblAverageExchangeRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucher.dblAverageExchangeRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	(SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId),
@@ -527,7 +527,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=   CAST(B.dblPayment * A.dblExchangeRate AS DECIMAL(18,2)),
+		[dblDebit]						=   CAST(B.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -536,7 +536,7 @@ BEGIN
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	A.dblExchangeRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	(SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId),
@@ -555,7 +555,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	A.dblExchangeRate,
+		[dblForeignRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[strRateType]					=	NULL
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -581,7 +581,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	loc.intInterestAccountId,
-		[dblDebit]						=	CAST(B.dblInterest * A.dblExchangeRate AS DECIMAL(18,2)),
+		[dblDebit]						=	CAST(B.dblInterest * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -590,7 +590,7 @@ BEGIN
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	A.dblExchangeRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Interest',
@@ -609,7 +609,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	A.dblExchangeRate,
+		[dblForeignRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 		[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM [dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B
@@ -646,7 +646,7 @@ BEGIN
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
 			[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-			[dblExchangeRate]				=	A.dblExchangeRate,
+			[dblExchangeRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Overpayment',
@@ -665,7 +665,7 @@ BEGIN
 			[dblCreditForeign]				=	0,
 			[dblCreditReport]				=	0,
 			[dblReportingRate]				=	0,
-			[dblForeignRate]				=	A.dblExchangeRate,
+			[dblForeignRate]				=	ISNULL(NULLIF(A.dblExchangeRate,0),1),
 			[strRateType]					=	rateType.strCurrencyExchangeRateType
 		FROM [dbo].tblAPPayment A 
 			-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON A.intPaymentId = paymentForex.intPaymentId
