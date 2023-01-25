@@ -255,6 +255,7 @@ SELECT
     ,ysnFinalReleased = L.ysnFinalReleased
     ,dtmProvisionalReleased = L.dtmProvisionalReleased
     ,dtmFinalReleased = L.dtmFinalReleased
+    ,L.strFreightPayment
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
