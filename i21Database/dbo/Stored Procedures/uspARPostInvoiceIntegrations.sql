@@ -781,6 +781,30 @@ DELETE FROM tblARPostInvoiceGLEntries WHERE strSessionId = @strSessionId
 
 END
 
+--AUTO DEBIT MEMO VENDOR REBATE SALES
+DECLARE @InvoicesForIntegration Id
+DECLARE @strTransactionType NVARCHAR(200)
+
+INSERT INTO @InvoicesForIntegration
+SELECT intValue FROM fnCreateTableFromDelimitedValues(@strInvoiceIds, ',')
+
+WHILE EXISTS(SELECT 1 FROM @InvoicesForIntegration)
+BEGIN
+	DECLARE @intInvoiceForIntegration INT
+	SELECT @intInvoiceForIntegration = intId FROM @InvoicesForIntegration
+
+	SELECT @strTransactionType = strTransactionType
+	FROM tblARInvoice 
+	WHERE intInvoiceId = @intInvoiceForIntegration
+
+	IF @strTransactionType = 'Invoice'
+		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @intInvoiceForIntegration, @Post, @UserId, 'Debit Memo'
+	ELSE IF @strTransactionType = 'Credit Memo'
+		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @intInvoiceForIntegration, @Post, @UserId, 'Voucher'
+
+	DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
+END
+
 END TRY
 BEGIN CATCH
     DECLARE @ErrorMerssage NVARCHAR(MAX)
