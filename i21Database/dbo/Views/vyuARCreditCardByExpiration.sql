@@ -1,7 +1,7 @@
 CREATE VIEW  vyuARCreditCardByExpiration 
 AS
 SELECT 
-	 intId				= ROW_NUMBER() OVER (ORDER BY P.intPaymentId)
+	 intId				= CAST(ROW_NUMBER() OVER (ORDER BY P.intPaymentId) AS INT)
 	,strCardExpDate		= CI.strCardExpDate
 	,strCreditCardNumber= CI.strCreditCardNumber
 	,dtmLastInvoiceDate	= I.dtmDate 
