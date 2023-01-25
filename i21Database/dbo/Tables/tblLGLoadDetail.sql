@@ -73,6 +73,7 @@
 	[strTaxGroup] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxGroupId] INT NULL,
 	[intBatchId] INT NULL,
+	[intDetailNumber] INT NULL,
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 
