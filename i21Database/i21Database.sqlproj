@@ -1098,6 +1098,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdatePumpTotals.sql" />
     <None Include="Scripts\Post-Deployment\ST\48_FileFieldMapping_Commander_TierProduct.sql" />
+	<None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
     <None Include="Scripts\Post-Deployment\ST\49_FileFieldMapping_Radiant_Department.sql" />
     <Build Include="dbo\User Defined Types\udtStoreGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
@@ -1285,8 +1286,7 @@
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
-    <None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />    
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
