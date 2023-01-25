@@ -393,7 +393,15 @@ DELETE F FROM
 tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId  = TMP.strTransactionId + '-F'
 WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)		
-		
+
+DELETE F FROM
+tblCMBankTransactionAdjustment F INNER JOIN #tmpCMBankTransaction TMP
+			ON F.intRelatedId  = TMP.intTransactionId
+
+DELETE F FROM
+tblCMBankTransactionAdjustment F INNER JOIN #tmpCMBankTransaction TMP
+			ON F.intTransactionId  = TMP.intTransactionId
+
 
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
