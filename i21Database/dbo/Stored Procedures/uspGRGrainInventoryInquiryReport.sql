@@ -1407,7 +1407,6 @@ OUTER APPLY (
 		ON CS.intCustomerStorageId = SH.intCustomerStorageId
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-			AND ST.ysnDPOwnedType = 0
 	INNER JOIN tblICCommodity IC
 		ON IC.intCommodityId = CS.intCommodityId
 	INNER JOIN tblSMCompanyLocation CL
