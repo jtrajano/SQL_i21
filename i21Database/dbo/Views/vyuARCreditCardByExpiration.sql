@@ -1,13 +1,15 @@
 CREATE VIEW  vyuARCreditCardByExpiration 
 AS
-SELECT intId				= ROW_NUMBER() OVER (ORDER BY P.intPaymentId)
-	 , strCardExpDate		= CI.strCardExpDate
-	 , strCreditCardNumber	= CI.strCreditCardNumber
-	 , dtmLastInvoiceDate	= I.dtmDate 
-	 , ysnOpenInvoices		= CAST(CASE WHEN I.ysnPaid = 1 THEN 0 ELSE 1 END AS BIT) 
-	 , ysnActive			= CI.ysnActive
-	 , strCustomerNumber	= CUS.strEntityNo
-	 , strName				= CUS.strName
+SELECT 
+	 intId				= ROW_NUMBER() OVER (ORDER BY P.intPaymentId)
+	,strCardExpDate		= CI.strCardExpDate
+	,strCreditCardNumber= CI.strCreditCardNumber
+	,dtmLastInvoiceDate	= I.dtmDate 
+	,ysnOpenInvoices	= CAST(CASE WHEN I.ysnPaid = 1 THEN 0 ELSE 1 END AS BIT) 
+	,ysnActive			= CI.ysnActive
+	,strCustomerNumber	= CUS.strEntityNo
+	,strName			= CUS.strName
+	,intEntityCustomerId= CI.intEntityId
 FROM tblARPayment P
 INNER JOIN vyuARPaymentMethodForReceivePayments PMR ON P.intPaymentMethodId = PMR.intPaymentMethodID AND PMR.intPaymentMethodID = 11 AND P.intEntityCustomerId = PMR.intEntityId
 INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
