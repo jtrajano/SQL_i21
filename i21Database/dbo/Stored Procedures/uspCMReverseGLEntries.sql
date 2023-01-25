@@ -116,9 +116,11 @@ UPDATE	tblGLDetail
 SET		ysnIsUnposted = 1
 WHERE	strTransactionId = @strTransactionId
 AND strBatchId = @strBatchId
+
 DECLARE @BankFee INT = 27
-DELETE FROM tblGLDetail WHERE strTransctionId = @strTransactionId+'F'
-DELETE FROM tblCMBankTransaction WHERE strTransctionId = @strTransactionId+'F' AND intBankTransactionTypeId = @BankFee
+DELETE A FROM tblGLDetail A JOIN tblCMBankTransaction B on A.strTransactionId = B.strTransactionId  
+WHERE A.strTransactionId = @strTransactionId+'F' AND intBankTransactionTypeId = @BankFee
+DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId+'F' AND intBankTransactionTypeId = @BankFee
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------
