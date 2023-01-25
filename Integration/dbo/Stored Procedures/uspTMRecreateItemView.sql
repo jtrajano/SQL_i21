@@ -124,7 +124,7 @@ BEGIN
 				,vwitm_loc_no = C.strLocationName
 				,vwitm_class = D.strCategoryCode
 				,vwitm_search = CAST(''''  AS CHAR(13))  COLLATE Latin1_General_CI_AS   
-				,vwitm_desc = CAST(A.strDescription  AS CHAR(33)) COLLATE Latin1_General_CI_AS
+				,vwitm_desc = A.strDescription COLLATE Latin1_General_CI_AS
 				,vwitm_un_desc = '''' COLLATE Latin1_General_CI_AS
 				,vwitm_un_prc1 = ISNULL(E.dblSalePrice,0.0) 
 				,vwitm_un_prc2 = CAST(0.0  AS DECIMAL(18,6))   
