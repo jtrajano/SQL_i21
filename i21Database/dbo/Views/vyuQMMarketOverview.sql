@@ -20,22 +20,23 @@ OverAllWeekStats AS(
 		ISNULL(dblB5QtyBought , 0)
 		)>0 THEN 
 	SUM(
-		ISNULL(dblB1Price *dblB1QtyBought, 0) + 
-		ISNULL(dblB2Price * dblB2QtyBought , 0) + 
-		ISNULL(dblB3Price * dblB3QtyBought , 0) + 
-		ISNULL(dblB4Price * dblB4QtyBought, 0) + 
-		ISNULL(dblB5Price * dblB5QtyBought , 0) 
+		ISNULL(dblB1Price * IU.dblUnitQty * dblB1QtyBought, 0) + 
+		ISNULL(dblB2Price * IU.dblUnitQty * dblB2QtyBought, 0) + 
+		ISNULL(dblB3Price * IU.dblUnitQty * dblB3QtyBought, 0) + 
+		ISNULL(dblB4Price * IU.dblUnitQty * dblB4QtyBought, 0) + 
+		ISNULL(dblB5Price * IU.dblUnitQty * dblB5QtyBought, 0) 
 	)/SUM(
-		ISNULL(dblB1QtyBought , 0) +
-		ISNULL(dblB2QtyBought , 0) +
-		ISNULL(dblB3QtyBought , 0) +
-		ISNULL(dblB4QtyBought , 0) +
-		ISNULL(dblB5QtyBought , 0)
+		ISNULL(dblB1QtyBought * IU.dblUnitQty , 0) +
+		ISNULL(dblB2QtyBought * IU.dblUnitQty , 0) +
+		ISNULL(dblB3QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB4QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB5QtyBought * IU.dblUnitQty, 0)
 		)
 		ELSE 0 END) AveragePrice, 
 	(CASE WHEN SUM(ISNULL(dblB1QtyBought, 0))>0 THEN SUM(dblB1Price * ISNULL(dblB1QtyBought , 0))/SUM(ISNULL(dblB1QtyBought, 0)) ELSE 0 END) AS AveragePrice_UL
 	FROM tblQMSample A
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId =A.intSampleTypeId 
+	LEFT JOIN tblICItemUOM IU ON IU.intItemId = A.intItemId AND IU.intUnitMeasureId  = A.intB1QtyUOMId 
 	WHERE ST.intControlPointId =1
 	GROUP BY DATEPART(ww, dtmSaleDate)
 ),
@@ -53,17 +54,17 @@ ItemSaleStat AS
 		ISNULL(dblB5QtyBought , 0)
 		)>0 THEN 
 	SUM(
-		ISNULL(dblB1Price *dblB1QtyBought, 0) + 
-		ISNULL(dblB2Price * dblB2QtyBought , 0) + 
-		ISNULL(dblB3Price * dblB3QtyBought , 0) + 
-		ISNULL(dblB4Price * dblB4QtyBought, 0) + 
-		ISNULL(dblB5Price * dblB5QtyBought , 0) 
+		ISNULL(dblB1Price * IU.dblUnitQty * dblB1QtyBought, 0) + 
+		ISNULL(dblB2Price * IU.dblUnitQty * dblB2QtyBought, 0) + 
+		ISNULL(dblB3Price * IU.dblUnitQty * dblB3QtyBought, 0) + 
+		ISNULL(dblB4Price * IU.dblUnitQty * dblB4QtyBought, 0) + 
+		ISNULL(dblB5Price * IU.dblUnitQty * dblB5QtyBought, 0) 
 	)/SUM(
-		ISNULL(dblB1QtyBought , 0) +
-		ISNULL(dblB2QtyBought , 0) +
-		ISNULL(dblB3QtyBought , 0) +
-		ISNULL(dblB4QtyBought , 0) +
-		ISNULL(dblB5QtyBought , 0)
+		ISNULL(dblB1QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB2QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB3QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB4QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB5QtyBought * IU.dblUnitQty, 0)
 		)
 		ELSE 0 END) AS AveragePrice,
 	(CASE WHEN SUM(ISNULL(dblB1QtyBought, 0))>0 THEN SUM(dblB1Price * ISNULL(dblB1QtyBought , 0))/SUM(ISNULL(dblB1QtyBought, 0)) ELSE 0 END) AveragePrice_UL,
@@ -114,17 +115,17 @@ ItemWeeklySaleStat AS
 		ISNULL(dblB5QtyBought , 0)
 		)>0 THEN 
 	SUM(
-		ISNULL(dblB1Price *dblB1QtyBought, 0) + 
-		ISNULL(dblB2Price * dblB2QtyBought , 0) + 
-		ISNULL(dblB3Price * dblB3QtyBought , 0) + 
-		ISNULL(dblB4Price * dblB4QtyBought, 0) + 
-		ISNULL(dblB5Price * dblB5QtyBought , 0) 
+		ISNULL(dblB1Price * IU.dblUnitQty * dblB1QtyBought, 0) + 
+		ISNULL(dblB2Price * IU.dblUnitQty * dblB2QtyBought, 0) + 
+		ISNULL(dblB3Price * IU.dblUnitQty * dblB3QtyBought, 0) + 
+		ISNULL(dblB4Price * IU.dblUnitQty * dblB4QtyBought, 0) + 
+		ISNULL(dblB5Price * IU.dblUnitQty * dblB5QtyBought, 0) 
 	)/SUM(
-		ISNULL(dblB1QtyBought , 0) +
-		ISNULL(dblB2QtyBought , 0) +
-		ISNULL(dblB3QtyBought , 0) +
-		ISNULL(dblB4QtyBought , 0) +
-		ISNULL(dblB5QtyBought , 0)
+		ISNULL(dblB1QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB2QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB3QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB4QtyBought * IU.dblUnitQty, 0) +
+		ISNULL(dblB5QtyBought * IU.dblUnitQty, 0)
 		)
 		ELSE 0 END) AveragePrice, 
 	(CASE WHEN SUM(ISNULL(dblB1QtyBought, 0))>0 THEN SUM(dblB1Price * ISNULL(dblB1QtyBought , 0))/SUM(ISNULL(dblB1QtyBought, 0)) ELSE 0 END) AveragePrice_UL,
