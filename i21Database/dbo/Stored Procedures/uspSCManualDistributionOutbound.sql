@@ -218,7 +218,7 @@ OPEN intListCursor;
 			
 			SET @_dblConvertedLoopQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@dblLoopContractUnits)
 
-			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
+			IF @ysnIsStorage = 0 AND (ISNULL(@intStorageScheduleTypeId, 0) <= 0 OR (@strDistributionOption IN ('SPT','CNT','LOD')) )
 				BEGIN
 
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
