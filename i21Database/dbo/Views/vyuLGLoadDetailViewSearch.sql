@@ -287,6 +287,7 @@ SELECT   L.intLoadId
 		,QB.intSalesYear
 		,QCT.strCatalogueType
 		,[strManufacturingLeafType] = QB.strLeafManufacturingType
+		,LD.intDetailNumber
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
