@@ -972,7 +972,7 @@ BEGIN TRY
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId	    = @intContractHeaderId
 				, intContractDetailId	    = CurrentRow.intContractDetailId
-				, intAmendmentApprovalId	= 20
+				, intAmendmentApprovalId	= (SELECT TOP 1 intAmendmentApprovalId FROM  tblCTAmendmentApproval WHERE strDataIndex = 'intBookId')
 				, strItemChanged		    = 'Book'
 				, strOldValue			    =  oldBook.strBook
 				, strNewValue		        =  newBook.strBook
@@ -992,7 +992,7 @@ BEGIN TRY
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId	    = @intContractHeaderId
 				, intContractDetailId	    = CurrentRow.intContractDetailId
-				, intAmendmentApprovalId	= 21
+				, intAmendmentApprovalId	= (SELECT TOP 1 intAmendmentApprovalId FROM  tblCTAmendmentApproval WHERE strDataIndex = 'intSubBookId')
 				, strItemChanged		    = 'Sub Book'
 				, strOldValue			    =  oldSubBook.strSubBook
 				, strNewValue		        =  newSubBook.strSubBook
@@ -1013,7 +1013,7 @@ BEGIN TRY
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId	    = @intContractHeaderId
 				, intContractDetailId	    = CurrentRow.intContractDetailId
-				, intAmendmentApprovalId	= 24
+				, intAmendmentApprovalId	= (SELECT TOP 1 intAmendmentApprovalId FROM  tblCTAmendmentApproval WHERE strDataIndex = 'intGardenMarkId')
 				, strItemChanged		    = 'Garden'
 				, strOldValue			    =  oldGarden.strGardenMark
 				, strNewValue		        =  newGarden.strGardenMark
@@ -1033,7 +1033,7 @@ BEGIN TRY
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId	    = @intContractHeaderId
 				, intContractDetailId		= CurrentRow.intContractDetailId
-				, intAmendmentApprovalId	= 23
+				, intAmendmentApprovalId	= (SELECT TOP 1 intAmendmentApprovalId FROM  tblCTAmendmentApproval WHERE strDataIndex = 'intINCOLocationTypeId')
 				, strItemChanged			= 'Port / City'
 				, strOldValue			    =  PreviousType.strCity
 				, strNewValue		        =  CurrentType.strCity
