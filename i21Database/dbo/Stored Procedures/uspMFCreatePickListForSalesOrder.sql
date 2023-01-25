@@ -108,7 +108,7 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 				   WHERE intPickListId = @intPickListId
 				   GROUP BY pld.intItemId
 						  , pld.intItemUOMId) AS Temp ON InputItem.intItemId = Temp.intItemId AND Temp.intItemUOMId = InputItem.intItemUOMId 
-		WHERE ISNULL(Temp.dblShippedQty, 0) < Temp.dblQty
+		WHERE ISNULL(Temp.dblShippedQty, 0) = 0 OR Temp.dblShippedQty IS NULL
 
 
 		DELETE FROM @tblInputItem WHERE ISNULL(dblQty, 0) <= 0
@@ -309,7 +309,7 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 			 , l.strLotNumber
 			 , pld.intStorageLocationId
 			 , sl.strName			AS strStorageLocationName
-			 , CASE WHEN pld.dblShippedQty > pld.dblQuantity THEN pld.dblShippedQty
+			 , CASE WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty <> 0 THEN pld.dblShippedQty
 					ELSE pld.dblQuantity 
 			   END AS dblPickQuantity
 			 , pld.intItemUOMId		AS intPickUOMId

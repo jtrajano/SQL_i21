@@ -79,6 +79,70 @@ WHILE @intRowPointer IS NOT NULL
 			  				 , ShipmentItem.intItemUOMId) AS SubQuery ON PickListDetail.intItemId = SubQuery.intItemId AND PickListDetail.intItemUOMId = SubQuery.intItemUOMId
 				JOIN tblMFPickList AS PickList ON PickListDetail.intPickListId = PickList.intPickListId
 				WHERE PickList.intSalesOrderId = @intSalesOrderId;
+
+				/*Create Pick List Detail for Remaining Lot. */
+				INSERT INTO tblMFPickListDetail (intPickListId
+											   , intLotId
+											   , intParentLotId
+											   , intItemId
+											   , intStorageLocationId
+											   , intSubLocationId
+											   , intLocationId
+											   , dblQuantity
+											   , intItemUOMId
+											   , dblIssuedQuantity
+											   , intItemIssuedUOMId
+											   , dblPickQuantity
+											   , intPickUOMId
+											   , intStageLotId
+											   , dtmCreated
+											   , intCreatedUserId
+											   , dtmLastModified
+											   , intLastModifiedUserId
+											   , intConcurrencyId
+											   , dblShippedQty)
+				SELECT @intPickListId
+					 , ShipmentItemLot.intLotId
+					 , Lot.intParentLotId
+					 , SalesOrderDetail.intItemId
+					 , ShipmentItem.intStorageLocationId 
+					 , ShipmentItem.intSubLocationId
+					 , Shipment.intShipFromLocationId
+					 , SUM(SalesOrderDetail.dblQtyOrdered)
+					 , SalesOrderDetail.intItemUOMId
+					 , SUM(SalesOrderDetail.dblQtyOrdered)
+					 , SalesOrderDetail.intItemUOMId
+					 , SUM(SalesOrderDetail.dblQtyOrdered)
+					 , SalesOrderDetail.intItemUOMId
+					 , NULL
+					 , Shipment.dtmShipDate
+					 , @intEntityUserSecurityId
+					 , Shipment.dtmShipDate
+					 , @intEntityUserSecurityId
+					 , 1
+					 , SUM(dblShippedQty)
+				FROM tblSOSalesOrderDetail AS SalesOrderDetail
+				JOIN tblICItem AS Item ON SalesOrderDetail.intItemId = Item.intItemId 
+				JOIN tblMFPickList AS PickList ON SalesOrderDetail.intSalesOrderId = PickList.intSalesOrderId   
+				LEFT JOIN tblICInventoryShipmentItem AS ShipmentItem ON ShipmentItem.intOrderId = SalesOrderDetail.intSalesOrderId AND ShipmentItem.intLineNo = SalesOrderDetail.intSalesOrderDetailId
+				LEFT JOIN tblICInventoryShipment AS Shipment ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
+				LEFT JOIN tblICInventoryShipmentItemLot AS ShipmentItemLot ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemLot.intInventoryShipmentItemId
+								LEFT JOIN tblICLot AS Lot ON ShipmentItemLot.intLotId = Lot.intLotId
+				LEFT JOIN tblMFPickListDetail AS PickListDetail ON PickList.intPickListId = PickListDetail.intPickListId 
+															   AND SalesOrderDetail.intItemUOMId = PickListDetail.intItemUOMId
+															   AND SalesOrderDetail.intItemId = PickListDetail.intItemId
+				WHERE SalesOrderDetail.intSalesOrderId = @intSalesOrderId AND Item.strType NOT IN ('Comment', 'Other Charge') AND PickListDetail.intItemId IS NULL 
+				GROUP BY ShipmentItemLot.intLotId
+					   , Lot.intParentLotId
+					   , SalesOrderDetail.intItemId
+					   , ShipmentItem.intStorageLocationId
+					   , ShipmentItem.intSubLocationId
+					   , SalesOrderDetail.intItemUOMId
+					   , ShipmentItem.intItemUOMId
+					   , Shipment.intShipFromLocationId
+					   , Shipment.dtmShipDate
+
+
 			END
 		ELSE	
 			/* Create pick list. */
