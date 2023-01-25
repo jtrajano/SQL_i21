@@ -581,7 +581,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
 			intCustomerEntityId = CASE WHEN (@intCustomerEntityId = 0) THEN 0 ELSE ISNULL(LD.intCustomerEntityId, -1) END,
-			strFinancingPledgingInstr = RR.strRemarks
+			strFinancingPledgingInstr = RR.strRemarks,
+			L.strFreightPayment
 		FROM tblLGLoad L
 		CROSS APPLY (SELECT intLoadId, intCustomerEntityId, intSContractDetailId, ysnPrintShipper, intVendorEntityId, intPContractDetailId, intPCompanyLocationId 
 				FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId 
@@ -877,7 +878,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strProducer = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 THEN Producer.strName ELSE NULL END,
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
 			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0),
-			strFinancingPledgingInstr = RR.strRemarks
+			strFinancingPledgingInstr = RR.strRemarks,
+			L.strFreightPayment
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
