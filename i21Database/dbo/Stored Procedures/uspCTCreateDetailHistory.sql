@@ -1028,7 +1028,7 @@ BEGIN TRY
 			WHERE ISNULL(oldGarden.intGardenMarkId,0) <> ISNULL(newGarden.intGardenMarkId,0)
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	  and tblAmendment.ysnAmendment = 1
 				
-			--intINCOLocationTypeId
+			--intINCOLocationTypeId 
 			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
 				, intContractHeaderId	    = @intContractHeaderId
