@@ -1892,6 +1892,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateFIFOCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateLIFOCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetTaxesForCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
