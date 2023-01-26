@@ -13,7 +13,7 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	--DECLARE @year INT = 2016
+	--DECLARE @year INT = 2022
 	--DECLARE @reprint BIT = 0
 	--DECLARE @corrected BIT = 0
 	--DECLARE @vendorFrom NVARCHAR(100) = NULL
@@ -172,12 +172,13 @@ BEGIN
 					REPLICATE('0',12) 
 				END
 			+ REPLICATE('0',12) 
-			+ REPLICATE('0',12) 
+			+ REPLICATE('0',12) --270
 		END-- 235-246
+		+ SPACE(16)
 		+ ' ' --Foreign Indicator
 		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName)))
 		+ SPACE(40) -- 288-327
-		+ SPACE(40) -- 328-367
+		-- + SPACE(40) -- 328-367
 		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,'')))
 		+ SPACE(40)
 		+ ISNULL(A.strCity,'') + SPACE(40 - LEN(ISNULL(A.strCity,'')))
