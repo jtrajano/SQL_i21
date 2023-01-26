@@ -4,6 +4,7 @@ CREATE PROCEDURE dbo.uspICGetTaxesForCosting (
 	, @TransactionDate DATETIME -- Required. Transaction date
 	, @TaxGroupId INT -- Required. The tax group ID.
 	, @Amount NUMERIC(18, 6) -- Required. Taxable amount
+	, @Tax NUMERIC(18, 6) OUTPUT -- Required. Holds the output tax.
 	, @LocationId INT = NULL -- Optional. Company location id (not itemLocationId)
 	, @CurrencyId INT = NULL -- Optional
 	, @FreightTermId INT = NULL-- Optional
@@ -185,6 +186,6 @@ FROM tblRestApiItemTaxes t
 WHERE t.guiTaxesUniqueId = @guiTaxesUniqueId
     AND t.ysnAddToCost = 1
 
-SELECT ISNULL(@dblTax, 0) as dblTax
-
 DELETE FROM tblRestApiItemTaxes WHERE guiTaxesUniqueId = @guiTaxesUniqueId
+
+SET @Tax = ISNULL(@dblTax, 0)
