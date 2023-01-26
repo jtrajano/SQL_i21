@@ -415,7 +415,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
-    <Build Include="dbo\Tables\tblCMBankAccountType.sql" /> 
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Functions\fnSTGetSalesRestriction.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
@@ -1110,7 +1110,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdatePumpTotals.sql" />
     <None Include="Scripts\Post-Deployment\ST\48_FileFieldMapping_Commander_TierProduct.sql" />
-	<None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
+    <None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
     <None Include="Scripts\Post-Deployment\ST\49_FileFieldMapping_Radiant_Department.sql" />
     <Build Include="dbo\User Defined Types\udtStoreGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
@@ -1518,7 +1518,8 @@
     <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
     <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />    
+    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessDirectShipmentRiskSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6741,7 +6742,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
-    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql"/>
+    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
