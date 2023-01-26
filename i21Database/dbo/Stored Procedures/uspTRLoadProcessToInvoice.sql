@@ -1658,46 +1658,6 @@ BEGIN TRY
 		DROP TABLE #tmpBlendItems
 	END
 
-	
-	-- COPY THE ATTACHMENT FROM TR TO INVOICE
-	IF ((SELECT COUNT(intEntityCustomerId) FROM tblTRLoadDistributionHeader DH 
-		WHERE DH.intLoadHeaderId = @intLoadHeaderId AND DH.strDestination = 'Customer') = 1)
-	BEGIN
-		DECLARE @intTransportAttachmentId INT = NULL,
-			@intAttachmentInvoiceId INT = NULL
-
-		DECLARE @CursorAttachmentTran AS CURSOR
-		SET @CursorAttachmentTran = CURSOR FAST_FORWARD FOR
-			SELECT TA.intAttachmentId, I.intInvoiceId
-		FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId 
-		INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId
-		LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
-		LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName
-		WHERE LH.intLoadHeaderId = @intLoadHeaderId
-		AND DH.intInvoiceId IS NOT NULL
-		AND TA.strScreen = 'Transports.view.TransportLoads'
-		AND IA.strName IS NULL
-		AND DH.strDestination = 'Customer'
-
-		OPEN @CursorAttachmentTran
-		FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			DECLARE @strAttachmentErrorMessage NVARCHAR(MAX) = NULL
-			
-			EXEC dbo.uspSMCopyAttachments @srcNamespace = 'Transports.view.TransportLoads'
-				, @srcRecordId =  @intLoadHeaderId
-				, @destNamespace = 'AccountsReceivable.view.Invoice'
-				, @destRecordId = @intAttachmentInvoiceId
-				, @ErrorMessage = @strAttachmentErrorMessage OUTPUT
-				, @srcIntAttachmentId = @intTransportAttachmentId
-				
-			FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
-		END
-		CLOSE @CursorAttachmentTran  
-		DEALLOCATE @CursorAttachmentTran
-	END
-
 	IF (@ErrorMessage IS NULL)
 	BEGIN
 		COMMIT TRANSACTION
@@ -1748,6 +1708,48 @@ BEGIN TRY
 			WHERE intLoadHeaderId = @intLoadHeaderId
 
 			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
+		END
+	END
+
+	IF(@ErrorMessage IS NULL)
+	BEGIN
+			-- COPY THE ATTACHMENT FROM TR TO INVOICE
+		IF ((SELECT COUNT(intEntityCustomerId) FROM tblTRLoadDistributionHeader DH 
+			WHERE DH.intLoadHeaderId = @intLoadHeaderId AND DH.strDestination = 'Customer') = 1)
+		BEGIN
+			DECLARE @intTransportAttachmentId INT = NULL,
+				@intAttachmentInvoiceId INT = NULL
+
+			DECLARE @CursorAttachmentTran AS CURSOR
+			SET @CursorAttachmentTran = CURSOR FAST_FORWARD FOR
+				SELECT TA.intAttachmentId, I.intInvoiceId
+			FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId 
+			INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId
+			LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
+			LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName
+			WHERE LH.intLoadHeaderId = @intLoadHeaderId
+			AND DH.intInvoiceId IS NOT NULL
+			AND TA.strScreen = 'Transports.view.TransportLoads'
+			AND IA.strName IS NULL
+			AND DH.strDestination = 'Customer'
+
+			OPEN @CursorAttachmentTran
+			FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				DECLARE @strAttachmentErrorMessage NVARCHAR(MAX) = NULL
+			
+				EXEC dbo.uspSMCopyAttachments @srcNamespace = 'Transports.view.TransportLoads'
+					, @srcRecordId =  @intLoadHeaderId
+					, @destNamespace = 'AccountsReceivable.view.Invoice'
+					, @destRecordId = @intAttachmentInvoiceId
+					, @ErrorMessage = @strAttachmentErrorMessage OUTPUT
+					, @srcIntAttachmentId = @intTransportAttachmentId
+				
+				FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
+			END
+			CLOSE @CursorAttachmentTran  
+			DEALLOCATE @CursorAttachmentTran
 		END
 	END
 
