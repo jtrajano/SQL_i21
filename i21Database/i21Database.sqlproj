@@ -1524,6 +1524,8 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessDirectShipmentRiskSummaryLog.sql" />
     <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
+   <Build Include="dbo\Stored Procedures\uspTMInventoryReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMInventoryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
