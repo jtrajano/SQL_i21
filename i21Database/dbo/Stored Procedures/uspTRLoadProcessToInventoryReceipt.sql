@@ -121,7 +121,7 @@ END
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from transport
 		,intSubLocationId			= NULL -- No Sub Location from transport
-		,intStorageLocationId		= TMSite.intCompanyLocationSubLocationId -- No Storage Location from transport unless COmpany Consumption Site
+		,intStorageLocationId		= MIN(TMSite.intCompanyLocationSubLocationId) -- No Storage Location from transport unless COmpany Consumption Site
 		,ysnIsStorage				= 0 -- No Storage from transports
 		,dblFreightRate				= min(TR.dblFreightRate)
 		,intSourceId				= min(TR.intLoadReceiptId)
@@ -131,14 +131,14 @@ END
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
-		,strActualCostId			= ISNULL(min(TLD.strTransaction), min(BID.strTransaction))
+		,strActualCostId			= ISNULL(min(TL.strTransaction), min(BID.strTransaction))
 		,intTaxGroupId				= min(TR.intTaxGroupId)
 		,strVendorRefNo				= min(TR.strBillOfLading)
 		,strSourceId				= min(TL.strTransaction)
 		,strSourceScreenName		= 'Transport Loads'
 		,intPaymentOn				= 1 -- Compute on Qty to Receive
 		,strChargesLink				= MIN(TR.strReceiptLine)
-		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
+		,strDestinationType			= ISNULL(MIN(DH.strDestination), MIN(BID.strDestination))
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
 		,dblMinimumUnits			= MIN(TR.dblMinimumUnits)
 		,dblComboFreightRate		= MIN(TR.dblComboFreightRate)
