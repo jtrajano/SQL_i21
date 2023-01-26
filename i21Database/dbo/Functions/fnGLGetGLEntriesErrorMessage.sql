@@ -30,7 +30,7 @@ BEGIN
 	SELECT 60015 ,'Unable to post/unpost with an inactive account {0}' UNION ALL
 	SELECT 60016 ,'Foreign Debit and credit amounts are not balanced.' UNION ALL
 	SELECT 60017 ,'Debit / Credit value has greater than 2 decimal scale.'  UNION ALL
-	SELECT 60018 ,'Debit/Credit computation is incorrect based in the Foreign Amount * Exchange rate computation.'
+	SELECT 60018 ,'Debit/Credit computation is incorrect for transaction {0} based in the Foreign Amount * Exchange rate computation.'
 
 	RETURN
 END

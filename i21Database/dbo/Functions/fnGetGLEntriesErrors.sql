@@ -24,8 +24,8 @@ BEGIN
 	DECLARE @intDefaultCurrencyId INT
 	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 	;WITH BatchError AS (
-				SELECT  strTransactionId
-					    ,'' strText
+				SELECT   strTransactionId
+					    ,strTransactionId strText
 						,60018 intErrorCode
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
@@ -34,8 +34,8 @@ BEGIN
 				AND intCurrencyId <> @intDefaultCurrencyId
 				AND intCurrencyId IS NOT NULL
 				UNION ALL
-				SELECT  strTransactionId
-					    ,'' strText
+				SELECT   strTransactionId
+					    ,strTransactionId strText
 						,60018 intErrorCode
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
