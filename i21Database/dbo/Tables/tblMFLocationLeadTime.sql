@@ -21,7 +21,8 @@ CREATE TABLE [dbo].[tblMFLocationLeadTime]
 	[dblMUToAvailableForBlending]  NUMERIC(18,6) NULL,
 	[intEntityId] INT  NULL,
 	[dtmDateCreated] DATETIME NULL,
-    [intConcurrencyId]		INT            CONSTRAINT [DF_tblMFLeadTime_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+    [intConcurrencyId] INT CONSTRAINT [DF_tblMFLeadTime_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	[strShippingLine] [nvarchar](150) NULL,
 	CONSTRAINT PK_tblMFLocationLeadTime 
 	PRIMARY KEY (strOrigin, intBuyingCenterId, intReceivingPlantId, intReceivingStorageLocation, intChannelId , intPortOfDispatchId , intPortOfArrivalId)
 
