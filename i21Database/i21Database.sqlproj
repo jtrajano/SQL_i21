@@ -1331,6 +1331,7 @@
     <Build Include="dbo\Functions\fnGetBankCurrentEndingBalance.sql" />
     <Build Include="dbo\Functions\fnGetBankBeginningBalance.sql" />
     <Build Include="dbo\Functions\fnCTGetTransactionForexRate.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractCostTransactionForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconClearedPaymentsSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconClearedDepositsSubReport.sql" />

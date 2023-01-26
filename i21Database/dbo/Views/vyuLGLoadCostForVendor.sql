@@ -57,6 +57,7 @@ SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,intStorageLocationId = ISNULL(LW.intStorageLocationId, CD.intStorageLocationId)
 	,strSubLocationName = ISNULL(LW.strSubLocation, CLSL.strSubLocationName)
 	,strStorageLocationName = ISNULL(LW.strStorageLocation, SL.strName)
+	,LC.dblFX
 FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
@@ -101,3 +102,4 @@ GROUP BY L.[strLoadNumber],LD.intLoadDetailId,EME.[strName],L.intPurchaseSale,
 	,ISNULL(LW.intStorageLocationId, CD.intStorageLocationId)
 	,ISNULL(LW.strSubLocation, CLSL.strSubLocationName)
 	,ISNULL(LW.strStorageLocation, SL.strName)
+	,LC.dblFX

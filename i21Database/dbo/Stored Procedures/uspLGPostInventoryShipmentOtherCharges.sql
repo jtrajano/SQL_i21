@@ -287,7 +287,7 @@ BEGIN
 			,strTransactionForm = 'Logistics'
 			,ShipmentCharges.ysnAccrue
 			,ShipmentCharges.ysnPrice
-			,dblForexRate = CASE WHEN (ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
+			,dblForexRate = CASE WHEN (ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(ShipmentCharges.dblFX,1) END
 			,strRateType = 1
 			,Charge.strItemNo
 			,intEntityId = 1
@@ -316,10 +316,10 @@ BEGIN
 					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
 				END
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
-		OUTER APPLY (SELECT TOP 1 dblForexRate = ISNULL(dblRate,0) FROM vyuGLExchangeRate
-					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
-					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
-					ORDER BY dtmValidFromDate DESC) FX
+		-- OUTER APPLY (SELECT TOP 1 dblForexRate = ISNULL(dblRate,0) FROM vyuGLExchangeRate
+		-- 			OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
+		-- 			WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
+		-- 			ORDER BY dtmValidFromDate DESC) FX
 		WHERE Shipment.intLoadId = @intLoadId
 		)
 

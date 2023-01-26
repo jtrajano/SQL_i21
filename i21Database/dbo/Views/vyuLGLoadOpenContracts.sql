@@ -105,7 +105,7 @@ SELECT CD.intContractDetailId
 	,strSeqPriceUOM = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END 
 	,ysnSubCurrency = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END
 	,intRateTypeId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intRateTypeId ELSE NULL END
-	,dblRate = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.dblRate ELSE NULL END
+	,dblRate = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN dbo.fnCTGetTransactionForexRate(CD.intContractDetailId) ELSE NULL END
 	,intInvoiceCurrencyId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intInvoiceCurrencyId ELSE NULL END
 	,strInvoiceCurrency = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN FXC.strCurrency ELSE NULL END
 	,strCurrencyExchangeRateType = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END

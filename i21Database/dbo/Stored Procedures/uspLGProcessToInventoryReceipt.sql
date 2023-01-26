@@ -708,7 +708,7 @@ BEGIN TRY
 				,[dblForexRate] = CASE --if contract FX tab is setup
 										WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
+												THEN dbo.fnDivide(1, LD.dblForexRate) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
@@ -856,7 +856,7 @@ BEGIN TRY
 				,[dblForexRate] = CASE --if contract FX tab is setup
 										WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, CD.dblRate) --functional price to foreign FX, use inverted contract FX rate
+												THEN dbo.fnDivide(1, LD.dblForexRate) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
@@ -939,6 +939,8 @@ BEGIN TRY
 			,[ysnInventoryCost]
 			,[intLoadShipmentId]
 			,[intLoadShipmentCostId]
+			-- ,[intForexRateTypeId]
+			,[dblForexRate]
 			,[ysnLock]
 			)
 		SELECT 
@@ -966,6 +968,7 @@ BEGIN TRY
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
+			,[dblForexRate] = CV.dblFX
 			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
@@ -1006,6 +1009,7 @@ BEGIN TRY
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = NULL
+			,[dblForexRate] = NULL
 			,[ysnLock] = 0
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId

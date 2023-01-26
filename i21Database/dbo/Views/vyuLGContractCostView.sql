@@ -15,7 +15,7 @@ FROM (
 		,CC.dblRate
 		,CC.intItemUOMId
 		,CC.intRateTypeId
-		,CC.dblFX
+		,[dblFX] = dbo.fnCTGetContractCostTransactionForexRate(CC.intContractCostId)
 		,CC.ysnAccrue
 		,CC.ysnMTM
 		,CC.ysnPrice
@@ -91,7 +91,7 @@ FROM (
 		,CCV.dblRate
 		,CCV.intItemUOMId
 		,CCV.intRateTypeId
-		,CCV.dblFX
+		,[dblFX] = dbo.fnCTGetContractCostTransactionForexRate(CCV.intContractCostId)
 		,CCV.ysnAccrue
 		,CCV.ysnMTM
 		,CCV.ysnPrice

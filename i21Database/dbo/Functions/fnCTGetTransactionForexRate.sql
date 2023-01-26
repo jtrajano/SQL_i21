@@ -20,7 +20,7 @@ BEGIN
 	ELSE
 		SELECT TOP 1 @dblResult = ISNULL(CER.dblRate, 1)
 		FROM tblCTContractDetail CD
-		INNER JOIN vyuSMForex CER ON CER.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId
+		INNER JOIN vyuSMForex CER ON CER.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId AND CER.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 		WHERE CD.intContractDetailId = @intContractDetailId
 		ORDER BY CER.dtmValidFromDate DESC
 	
