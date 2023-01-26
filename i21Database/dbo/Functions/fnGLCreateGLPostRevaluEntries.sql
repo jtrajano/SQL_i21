@@ -22,8 +22,7 @@ AS RETURN(
                             WHEN dblUnrealizedGain < 0 THEN 0  
                             ELSE dblUnrealizedGain END,0)
                     ,[dblExchangeRate] = dblNewForexRate
-                    ,[dblDebitForeign] =0
-                    ,[dblCreditForeign] = 0
+                    
                     ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
                     ,[ysnIsUnposted]  = 0   
                     ,[intConcurrencyId]  = 1  
@@ -57,9 +56,9 @@ AS RETURN(
                         ,[dtmTransactionDate]   
                         ,[dblDebit]   
                         ,[dblCredit]
-                        ,[dblExchangeRate] 
-                        ,[dblDebitForeign]=0
-                        ,[dblCreditForeign]=0
+                        ,[dblExchangeRate] = 1
+                        ,[dblDebitForeign] = [dblCredit]  
+                        ,[dblCreditForeign]= [dblDebit]
                         ,[dtmDate]      
                         ,[ysnIsUnposted]    
                         ,[intConcurrencyId]    
@@ -91,8 +90,8 @@ AS RETURN(
                         ,[dblDebit]    = dblCredit      
                         ,[dblCredit]   = dblDebit  
                         ,[dblExchangeRate] 
-                        ,[dblDebitForeign]    = dblCreditForeign    
-                        ,[dblCreditForeign]   = dblDebitForeign
+                        ,[dblDebitForeign]    = 0    
+                        ,[dblCreditForeign]   = 0
                         ,[dtmDate]  
                         ,[ysnIsUnposted]    
                         ,[intConcurrencyId]   
@@ -103,11 +102,11 @@ AS RETURN(
                         ,strBatchId   
                         ,[strCode]      
                         ,[strJournalLineDescription] = 'Offset Revalue GL '  + @strPeriod   
-                        ,[intJournalLineNo]    
-                        ,[strTransactionType]   
-                        ,[strTransactionForm]   
-                        ,strModule  
-                        ,OffSet = 1  
+                        ,[intJournalLineNo]
+                        ,[strTransactionType]
+                        ,[strTransactionForm]
+                        ,strModule
+                        ,OffSet = 1
                         ,strType = ISNULL(strType,@defaultType)  
                         ,intAccountIdOverride   -- source account
                         ,intLocationSegmentOverrideId  
