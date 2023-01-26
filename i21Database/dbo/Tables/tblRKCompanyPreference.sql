@@ -94,6 +94,7 @@
 	[ysnDropUninvoicedPurchaseAndInvoicedSales] BIT NULL DEFAULT((1)),
 	[ysnEnableCommissionExemptAndOverride] BIT NULL DEFAULT((0)),
     [ysnIncludeProductInformation] BIT NULL DEFAULT ((0)), 
+    [dblFXRateDecimals] NUMERIC(18, 6) DEFAULT ((4)) NULL, 
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblRKInterfaceSystem_intCurrencyId] FOREIGN KEY([intInterfaceSystemId])REFERENCES [dbo].[tblRKInterfaceSystem] ([intInterfaceSystemId]),
