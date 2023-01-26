@@ -113,7 +113,7 @@ CREATE TABLE tblARPostInvoiceHeader (
     ,[dblLineItemGLAmount]                  NUMERIC(18,6)   NULL DEFAULT 0
     ,[dblBaseLineItemGLAmount]              NUMERIC(18,6)   NULL DEFAULT 0
     ,[intCurrencyExchangeRateTypeId]        INT             NULL
-    ,[dblCurrencyExchangeRate]              NUMERIC(18,6)   NULL DEFAULT 1
+    ,[dblCurrencyExchangeRate]              NUMERIC(18,6)   NOT NULL DEFAULT 1
     ,[strCurrencyExchangeRateType]          NVARCHAR(20)    COLLATE Latin1_General_CI_AS    NULL
     ,[intLotId]                             INT             NULL
     ,[intOriginalInvoiceDetailId]           INT             NULL
