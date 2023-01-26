@@ -716,6 +716,10 @@ BEGIN TRY
 				AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
 		END
 
+
+		--RISK SUMMARY LOG
+		EXEC uspSCProcessDirectShipmentRiskSummaryLog @IN_OUT_FLAG = 'I', @TICKET_ID = @intTicketId, @REVERSE = 0
+
 		--Create Voucher
 		EXEC uspSCDirectCreateVoucher 
 			@intTicketId = @intTicketId
@@ -1104,6 +1108,9 @@ BEGIN TRY
 				,@intUserId = @intUserId 
 				,@intInvoiceId = @intBillInvoiceId OUTPUT
 		END
+		
+		--RISK SUMMARY LOG
+		EXEC uspSCProcessDirectShipmentRiskSummaryLog @IN_OUT_FLAG = 'O', @TICKET_ID = @intTicketId, @REVERSE = 0
 
 		---UPDATE DIRECT IN TRANSIT
 		BEGIN
