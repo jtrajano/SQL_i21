@@ -30,7 +30,7 @@ BEGIN
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
 				WHERE (dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
-				AND dblCredit <> 0
+				AND dblCreditForeign <> 0
 				AND intCurrencyId <> @intDefaultCurrencyId
 				AND intCurrencyId IS NOT NULL
 				UNION ALL
@@ -40,7 +40,7 @@ BEGIN
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
 				WHERE (dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
-				AND dblDebit <> 0
+				AND dblDebitForeign <> 0
 				AND intCurrencyId <> @intDefaultCurrencyId
 				AND intCurrencyId IS NOT NULL
 				UNION ALL
