@@ -1306,6 +1306,7 @@
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Views\vyuGLAccountSegmentPartition.sql" />
     <Build Include="dbo\Views\vyuGLOverrideAccount.sql" />
+    <Build Include="dbo\Views\vyuGLISOverrideAccount.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuAPBillBatch.sql" />
     <Build Include="dbo\Views\vyuAPPayments.sql" />
