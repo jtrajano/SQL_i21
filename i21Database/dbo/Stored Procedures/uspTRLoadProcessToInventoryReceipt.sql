@@ -121,7 +121,7 @@ END
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from transport
 		,intSubLocationId			= NULL -- No Sub Location from transport
-		,intStorageLocationId		= NULL -- No Storage Location from transport
+		,intStorageLocationId		= TMSite.intCompanyLocationSubLocationId -- No Storage Location from transport unless COmpany Consumption Site
 		,ysnIsStorage				= 0 -- No Storage from transports
 		,dblFreightRate				= min(TR.dblFreightRate)
 		,intSourceId				= min(TR.intLoadReceiptId)
@@ -154,6 +154,7 @@ END
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = TL.intShipViaId
 	LEFT JOIN vyuTRGetLoadReceiptToDistribution TLD on TLD.intLoadHeaderId = TR.intLoadHeaderId AND TLD.intLoadReceiptId = TR.intLoadReceiptId AND TLD.intItemId = TR.intItemId
 	LEFT JOIN vyuTRGetLoadReceiptToBlendIngredient BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
+	LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = TLD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId --333333
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
