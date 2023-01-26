@@ -30,9 +30,8 @@ BEGIN
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
 				WHERE (dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
-				AND dblCreditForeign <> 0
-				AND intCurrencyId <> @intDefaultCurrencyId
-				AND intCurrencyId IS NOT NULL
+				AND ISNULL(dblCreditForeign,0) <> 0
+				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
 				UNION ALL
 				SELECT   strTransactionId
 					    ,strTransactionId strText
@@ -40,9 +39,8 @@ BEGIN
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
 				WHERE (dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
-				AND dblDebitForeign <> 0
-				AND intCurrencyId <> @intDefaultCurrencyId
-				AND intCurrencyId IS NOT NULL
+				AND ISNULL(dblDebitForeign,0) <> 0
+				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
 				UNION ALL
 				SELECT	strTransactionId
 						,'' strText
