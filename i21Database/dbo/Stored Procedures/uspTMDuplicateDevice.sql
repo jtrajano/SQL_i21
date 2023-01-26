@@ -3,10 +3,6 @@
 	@NewDeviceId INT OUTPUT
 AS
 BEGIN
-	--DECLARE @DeviceId INT 
-	--DECLARE @NewDeviceId INT
-
-	--SET @DeviceId = 4
 
 	DECLARE @strOriginalSerialNumber NVARCHAR(50)
 	DECLARE @strSerialNumberToUse NVARCHAR(50)
