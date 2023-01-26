@@ -206,6 +206,11 @@ BEGIN
 		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
 		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
 		UNION ALL SELECT 68, 'Delete Match Derivatives', 'Delete Match Derivatives.'
+		UNION ALL SELECT 69, 'Distribute Direct In', 'Distribute Direct In.'
+		UNION ALL SELECT 70, 'Distribute Direct Out', 'Distribute Direct Out.'
+		UNION ALL SELECT 71, 'Undistribute Direct In', 'Undistribute Direct In.'
+		UNION ALL SELECT 72, 'Undistribute Direct Out', 'Undistribute Direct Out.'
+
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

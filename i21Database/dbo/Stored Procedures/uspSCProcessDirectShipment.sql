@@ -587,6 +587,10 @@ BEGIN TRY
 					WHERE intTicketId = @intTicketId
 					
 				END
+
+				--RISK SUMMARY LOG
+				EXEC uspSCProcessDirectShipmentRiskSummaryLog @IN_OUT_FLAG = 'I', @TICKET_ID = @intTicketId, @REVERSE = 0
+
 			END
 			ELSE
 			BEGIN
@@ -743,6 +747,7 @@ BEGIN TRY
 
 			--Create Voucher
 			EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
+			
 			
 
 			/*------Increase inventory inbound in transit
@@ -922,6 +927,9 @@ BEGIN TRY
 						WHERE intTicketId = @intTicketId
 						
 					END
+
+					--RISK SUMMARY LOG
+					EXEC uspSCProcessDirectShipmentRiskSummaryLog @IN_OUT_FLAG = 'O', @TICKET_ID = @intTicketId, @REVERSE = 0
 				END
 				ELSE
 				BEGIN
