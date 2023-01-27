@@ -376,6 +376,31 @@ WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH,
 				AND F.dtmCheckPrinted IS NULL 		
 			)
 		)
+DECLARE @BANK_FEE INT = 27 
+
+DELETE GL FROM tblGLDetail GL INNER JOIN
+tblCMBankTransaction F ON GL.strTransactionId = F.strTransactionId
+JOIN #tmpCMBankTransaction TMP ON F.strTransactionId  = TMP.strTransactionId + '-F'
+WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)		
+
+		
+UPDATE F SET ysnPosted = 0 FROM
+tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId  = TMP.strTransactionId + '-F'
+WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)	
+
+DELETE F FROM
+tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId  = TMP.strTransactionId + '-F'
+WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)		
+
+DELETE F FROM
+tblCMBankTransactionAdjustment F INNER JOIN tblCMBankTransaction C ON  F.intRelatedId  = C.intTransactionId
+JOIN #tmpCMBankTransaction TMP ON C.strTransactionId  = TMP.strTransactionId
+
+DELETE F FROM
+tblCMBankTransactionAdjustment F INNER JOIN tblCMBankTransaction C ON  F.intTransactionId  = C.intTransactionId
+JOIN #tmpCMBankTransaction TMP ON C.strTransactionId  = TMP.strTransactionId
+
+
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
 Exit_Successfully:

@@ -102,9 +102,14 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 		FROM @tblInputItemCopy AS InputItem 
 		LEFT JOIN (SELECT pld.intItemId
 						, SUM(pld.dblPickQuantity) AS dblQty 
+						, SUM(ISNULL(pld.dblShippedQty, 0)) AS dblShippedQty 
+						, pld.intItemUOMId
 				   FROM tblMFPickListDetail pld 
-				   WHERE intPickListId = @intPickListId 
-				   GROUP BY pld.intItemId) AS Temp ON InputItem.intItemId = Temp.intItemId
+				   WHERE intPickListId = @intPickListId
+				   GROUP BY pld.intItemId
+						  , pld.intItemUOMId) AS Temp ON InputItem.intItemId = Temp.intItemId AND Temp.intItemUOMId = InputItem.intItemUOMId 
+		WHERE ISNULL(Temp.dblShippedQty, 0) = 0 OR Temp.dblShippedQty IS NULL
+
 
 		DELETE FROM @tblInputItem WHERE ISNULL(dblQty, 0) <= 0
 	END
@@ -304,7 +309,9 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 			 , l.strLotNumber
 			 , pld.intStorageLocationId
 			 , sl.strName			AS strStorageLocationName
-			 , pld.dblQuantity		AS dblPickQuantity
+			 , CASE WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty <> 0 THEN pld.dblShippedQty
+					ELSE pld.dblQuantity 
+			   END AS dblPickQuantity
 			 , pld.intItemUOMId		AS intPickUOMId
 			 , um.strUnitMeasure	AS strPickUOM
 			 , pl.intParentLotId
@@ -312,7 +319,9 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 			 , sbl.strSubLocationName
 			 , pld.intLocationId
 			 , i.strLotTracking
-			 , pld.dblPickQuantity	AS dblItemRequiredQty
+			 , CASE WHEN pld.dblShippedQty > pld.dblPickQuantity THEN pld.dblShippedQty
+					ELSE pld.dblPickQuantity 
+			   END AS dblItemRequiredQty
 		FROM tblMFPickListDetail pld 
 		JOIN tblMFPickList p ON pld.intPickListId = p.intPickListId
 		JOIN tblICItem i ON pld.intItemId = i.intItemId 

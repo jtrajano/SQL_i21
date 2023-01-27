@@ -2,7 +2,7 @@
 AS
 SELECT		a.intPumpTotalsId as intFuelTotalSoldId,
 			a.intCheckoutId,
-			IL.strPassportFuelId1 as intProductNumber,
+			SPI.strRegisterFuelId1 as intProductNumber,
 			a.strDescription,
 			CAST(a.dblPrice AS DECIMAL(18,2)) AS dblPrice,
 			a.dblAmount as dblDollarsSold,
@@ -17,6 +17,6 @@ INNER JOIN tblICItemUOM UOM
 ON			a.intPumpCardCouponId = UOM.intItemUOMId
 INNER JOIN tblICItem Item
 ON			UOM.intItemId = Item.intItemId
-INNER JOIN dbo.tblICItemLocation IL 
-ON			Item.intItemId = IL.intItemId AND 
-			ST.intCompanyLocationId = IL.intLocationId
+INNER JOIN dbo.tblSTPumpItem SPI 
+ON			ST.intStoreId = SPI.intStoreId AND
+			UOM.intItemUOMId = SPI.intItemUOMId
