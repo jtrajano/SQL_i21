@@ -228,14 +228,6 @@ ELSE
 		JOIN tblICParentLot AS ParentLot ON VarLot.intLotId = ParentLot.intParentLotId
 	END
 
-	DECLARE @intBlendRequirementId INT
-		,@strDemandNo NVARCHAR(50)
-		,@intManufacturingProcessId INT
-		,@dtmBusinessDate DATETIME
-		,@intBusinessShiftId INT
-		,@dtmCurrentDateTime DATETIME
-		,@dtmProductionDate DATETIME
-
 	SELECT @dtmCurrentDateTime = GetDate()
 
 	SELECT @intWorkOrderId = intWorkOrderId
