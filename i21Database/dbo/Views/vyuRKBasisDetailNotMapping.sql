@@ -51,7 +51,7 @@ SELECT
 		, i.intProductLineId
 		, strGrade  = Grade.strDescription
 		, i.intGradeId
-		, strCertification = Certification.strCertificationName
+		, strCertification = bd.strCertification
 		, i.intCertificationId
 		, MTMPoint.strMTMPoint
 		, bd.intMTMPointId
@@ -84,7 +84,7 @@ LEFT JOIN tblICStorageLocation storageUnit
 LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityId = c.intCommodityId AND ProductType.strType = 'ProductType' AND ProductType.intCommodityAttributeId = bd.intProductTypeId
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = c.intCommodityId AND ProductLine.intCommodityProductLineId = bd.intProductLineId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = bd.intGradeId
-LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = bd.intCertificationId
+--LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = bd.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = bd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = i.intClassVarietyId
