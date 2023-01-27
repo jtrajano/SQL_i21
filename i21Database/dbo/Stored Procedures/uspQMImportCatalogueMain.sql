@@ -16,6 +16,8 @@ BEGIN TRY
 		,ysnSuccess = 0
 		,ysnProcessed = 1
 	FROM tblQMImportCatalogue IMP
+	-- Company Location
+	LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
 	-- Grade
 	LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.strType = 'Grade'
 		AND GRADE.strDescription = IMP.strGrade
@@ -31,12 +33,10 @@ BEGIN TRY
 	LEFT JOIN (
 		tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID
 		) ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
-	-- Warehouse Code
-	LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode
 	-- Sustainability
 	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.strDescription = IMP.strSustainability
 	-- Evaluator's Code at TBO
-	LEFT JOIN tblEMEntity ECTBO ON ECTBO.strName = IMP.strEvaluatorsCodeAtTBO
+	LEFT JOIN vyuQMSearchEntityUser ECTBO ON ECTBO.strUser = IMP.strEvaluatorsCodeAtTBO
 	-- From Location Code
 	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Channel
@@ -58,10 +58,12 @@ BEGIN TRY
 		AND BROKERS.strName = IMP.strBroker
 	-- Receiving Storage Location
 	LEFT JOIN (
-		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = RSL.intCompanyLocationId
+		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
 		) ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND TBO.strLocationName = IMP.strBuyingCenter
+		AND TBO2.strLocationName = IMP.strBuyingCenter
+	-- Warehouse Code
+	LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode AND WAREHOUSE_CODE.intCompanyLocationId = TBO.intCompanyLocationId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -115,7 +117,7 @@ BEGIN TRY
 				ELSE ''
 				END + CASE 
 				WHEN (
-						ECTBO.intEntityId IS NULL
+						ECTBO.intUserId IS NULL
 						AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> ''
 						)
 					THEN 'EVALUATORS CODE AT TBO, '
@@ -223,7 +225,7 @@ BEGIN TRY
 				AND ISNULL(IMP.strSustainability, '') <> ''
 				)
 			OR (
-				ECTBO.intEntityId IS NULL
+				ECTBO.intUserId IS NULL
 				AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> ''
 				)
 			OR (
@@ -440,8 +442,8 @@ BEGIN TRY
 		,dblBasePrice = IMP.dblBasePrice
 		,ysnBoughtAsReserve = IMP.ysnBoughtAsReserve
 		,ysnEuropeanCompliantFlag = IMP.ysnEuropeanCompliantFlag
-		,intEvaluatorsCodeAtTBOId = ECTBO.intEntityId
-		,strEvaluatorsCodeAtTBO = ECTBO.strName
+		,intEvaluatorsCodeAtTBOId = ECTBO.intUserId
+		,strEvaluatorsCodeAtTBO = ECTBO.strUser
 		,strComments3 = IMP.strEvaluatorsRemarks
 		,intFromLocationCodeId = FROM_LOC_CODE.intCityId
 		,strFromLocationCode = FROM_LOC_CODE.strCity
@@ -493,11 +495,11 @@ BEGIN TRY
 		tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID
 		) ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
 	-- Warehouse Code
-	LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode
+	LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode AND WAREHOUSE_CODE.intCompanyLocationId = TBO.intCompanyLocationId
 	-- Sustainability
 	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.strDescription = IMP.strSustainability
 	-- Evaluator's Code at TBO
-	LEFT JOIN tblEMEntity ECTBO ON ECTBO.strName = IMP.strEvaluatorsCodeAtTBO
+	LEFT JOIN vyuQMSearchEntityUser ECTBO ON ECTBO.strUser = IMP.strEvaluatorsCodeAtTBO
 	-- From Location Code
 	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Channel
