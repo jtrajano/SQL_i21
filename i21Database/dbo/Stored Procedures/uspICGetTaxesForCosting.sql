@@ -1,15 +1,16 @@
 CREATE PROCEDURE dbo.uspICGetTaxesForCosting (
-	  @ItemId INT -- Required. The inventory item ID
+	  @TransactionType NVARCHAR(50) -- Required. Sale/Purchase
+	, @EntityId INT -- Required. (entity Id)
+	, @ItemId INT -- Required. The inventory item ID
 	, @UOMId INT -- Required. The unit measure ID (not itemUOMId)
 	, @TransactionDate DATETIME -- Required. Transaction date
 	, @TaxGroupId INT -- Required. The tax group ID.
 	, @Amount NUMERIC(18, 6) -- Required. Taxable amount
 	, @Tax NUMERIC(18, 6) OUTPUT -- Required. Holds the output tax.
-	, @LocationId INT = NULL -- Optional. Company location id (not itemLocationId)
+	, @CompanyLocationId INT = NULL -- Optional. Company location id (not itemLocationId)
 	, @CurrencyId INT = NULL -- Optional
 	, @FreightTermId INT = NULL-- Optional
-	, @CustomerId INT = NULL-- Optional. (entity Id)
-	, @CustomerLocationId INT = NULL-- Optional. (entity location Id)
+	, @EntityLocationId INT = NULL-- Optional. (entity location Id)
 	, @Price NUMERIC(18, 6) = NULL-- Optional
 )
 AS
@@ -24,6 +25,7 @@ SELECT @ItemUOMId = i.intItemUOMId, @strUnitMeasure = u.strUnitMeasure
 FROM tblICItemUOM i
 JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
 WHERE i.intItemId = @ItemId
+	AND u.intUnitMeasureId = @UOMId
 
 DECLARE @tblRestApiItemTaxes TABLE (
 	  intTransactionDetailTaxId INT NULL
@@ -88,18 +90,19 @@ INSERT INTO @tblRestApiItemTaxes (
 	, strTaxClass
 	, ysnAddToCost
 	, ysnOverrideTaxGroup)
-EXEC [dbo].[uspARGetItemTaxes]
+EXEC [dbo].[uspApiGetItemTaxes]
 	@ItemId= @ItemId,
-	@LocationId= @LocationId,
-	@CustomerId= @CustomerId,
-	@CustomerLocationId= @CustomerLocationId,
+	@LocationId= @CompanyLocationId,
+	@EntityId= @EntityId,
+	@EntityLocationId = @EntityLocationId,
 	@TransactionDate= @TransactionDate,
+	@TransactionType = @TransactionType,
 	@TaxGroupId= @TaxGroupId,
 	@SiteId= default,
 	@FreightTermId= @FreightTermId,
 	@CardId= default,
 	@VehicleId= default,
-	@ItemUOMId= @ItemUOMId,
+	@UOMId= @UOMId,
 	@CurrencyId= @CurrencyId,
 	@CurrencyExchangeRateTypeId= default,
 	@CurrencyExchangeRate= 1
@@ -181,7 +184,7 @@ WHERE it.ysnAddToCost = 1
 DECLARE @dblTax NUMERIC(18, 6)
 
 SELECT
-	@dblTax = SUM(dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, NULL, @guiTaxesUniqueId, t.intRestApiItemTaxesId))
+	@dblTax = SUM(dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, @strUnitMeasure, @guiTaxesUniqueId, t.intRestApiItemTaxesId))
 FROM tblRestApiItemTaxes t
 WHERE t.guiTaxesUniqueId = @guiTaxesUniqueId
     AND t.ysnAddToCost = 1
