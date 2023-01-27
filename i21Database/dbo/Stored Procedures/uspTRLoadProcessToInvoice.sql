@@ -768,7 +768,7 @@ BEGIN TRY
 		,[strActualCostId]						= IE.strActualCostId
 		,[intShipmentId]						= IE.intShipmentId
 		,[intTransactionId]						= IE.intTransactionId
-		,[intEntityId]							= IE.intEntityCustomerId
+		,[intEntityId]							= @UserEntityId
 		,[ysnResetDetails]						= IE.ysnResetDetails
 		,[ysnPost]								= IE.ysnPost
 		,[intInvoiceDetailId]					= IE.intInvoiceDetailId
@@ -860,7 +860,7 @@ BEGIN TRY
 		,[strActualCostId]						= IE.strActualCostId
 		,[intShipmentId]						= IE.intShipmentId
 		,[intTransactionId]						= IE.intTransactionId
-		,[intEntityId]							= IE.intEntityCustomerId
+		,[intEntityId]							= @UserEntityId
 		,[ysnResetDetails]						= IE.ysnResetDetails
 		,[ysnPost]								= IE.ysnPost
 		,[intInvoiceDetailId]					= IE.intInvoiceDetailId
@@ -1232,7 +1232,7 @@ BEGIN TRY
 			,[strActualCostId]						= IE.strActualCostId
 			,[intShipmentId]						= IE.intShipmentId
 			,[intTransactionId]						= IE.intTransactionId
-			,[intEntityId]							= IE.intEntityCustomerId
+			,[intEntityId]							= @UserEntityId
 			,[ysnResetDetails]						= IE.ysnResetDetails
 			,[ysnPost]								= IE.ysnPost
 			,[intInvoiceDetailId]					= IE.intInvoiceDetailId
@@ -1314,7 +1314,7 @@ BEGIN TRY
 			,[strActualCostId]						= IE.strActualCostId
 			,[intShipmentId]						= IE.intShipmentId
 			,[intTransactionId]						= IE.intTransactionId
-			,[intEntityId]							= IE.intEntityCustomerId
+			,[intEntityId]							= @UserEntityId
 			,[ysnResetDetails]						= IE.ysnResetDetails
 			,[ysnPost]								= IE.ysnPost
 			,[intInvoiceDetailId]					= IE.intInvoiceDetailId
@@ -1478,7 +1478,7 @@ BEGIN TRY
 		,[strActualCostId]						= IE.strActualCostId
 		,[intShipmentId]						= IE.intShipmentId
 		,[intTransactionId]						= IE.intTransactionId
-		,[intEntityId]							= IE.intEntityCustomerId
+		,[intEntityId]							= @UserEntityId
 		,[ysnResetDetails]						= IE.ysnResetDetails
 		,[ysnPost]								= IE.ysnPost
 		,[intInvoiceDetailId]					= IE.intInvoiceDetailId
