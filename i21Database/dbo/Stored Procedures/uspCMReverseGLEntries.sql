@@ -119,8 +119,10 @@ AND strBatchId = @strBatchId
 
 DECLARE @BankFee INT = 27
 DELETE A FROM tblGLDetail A JOIN tblCMBankTransaction B on A.strTransactionId = B.strTransactionId  
-WHERE A.strTransactionId = @strTransactionId+'F' AND intBankTransactionTypeId = @BankFee
-DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId+'F' AND intBankTransactionTypeId = @BankFee
+WHERE A.strTransactionId = @strTransactionId+'-F' AND intBankTransactionTypeId = @BankFee
+
+UPDATE  tblCMBankTransaction SET ysnPosted = 0 WHERE strTransactionId = @strTransactionId+'-F' AND intBankTransactionTypeId = @BankFee
+DELETE FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId+'-F' AND intBankTransactionTypeId = @BankFee
 
 DELETE F FROM
 tblCMBankTransactionAdjustment F INNER JOIN tblCMBankTransaction B

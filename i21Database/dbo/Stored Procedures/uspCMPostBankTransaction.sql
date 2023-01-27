@@ -586,9 +586,7 @@ BEGIN
 	
 	--DELETE FEES ON UNPOSTING
 	IF @ysnPost =0
-	BEGIN
-		EXEC uspCMRemoveRelatedTransactions @strTransactionId , @intTransactionId
-		
+	BEGIN		
 		-- UNPOST DERIVATIVES ON UNPOSTING
 		IF (@BANK_TRANSACTION_TYPE_Id = 26)
 		BEGIN
