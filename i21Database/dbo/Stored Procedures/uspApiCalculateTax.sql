@@ -24,6 +24,7 @@ SELECT @ItemUOMId = i.intItemUOMId, @strUnitMeasure = u.strUnitMeasure
 FROM tblICItemUOM i
 JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
 WHERE i.intItemId = @ItemId
+	AND u.intUnitMeasureId = @UOMId
 
 DECLARE @tblRestApiItemTaxes TABLE (
 	  intTransactionDetailTaxId INT NULL
