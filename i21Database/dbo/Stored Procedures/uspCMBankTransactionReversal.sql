@@ -392,6 +392,7 @@ WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH,
 				AND F.dtmCheckPrinted IS NULL 		
 			)
 		)
+DECLARE @BANK_FEE INT = 27 
 
 DELETE GL FROM tblGLDetail GL INNER JOIN
 tblCMBankTransaction F ON GL.strTransactionId = F.strTransactionId
