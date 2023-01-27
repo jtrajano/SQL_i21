@@ -182,7 +182,6 @@ INSERT tblARPostInvoiceHeader WITH (TABLOCK)
     ,[intProfitCenter]
     ,[intLocationSalesAccountId]
     ,[intCurrencyId]
-    ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
     ,[dblShipping]
@@ -269,7 +268,6 @@ SELECT
     ,[intProfitCenter]                  = SMCL.[intProfitCenter]
     ,[intLocationSalesAccountId]        = SMCL.[intSalesAccount]
     ,[intCurrencyId]                    = ARI.[intCurrencyId]
-    ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
@@ -379,7 +377,6 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[intProfitCenter]
     ,[intLocationSalesAccountId]
 	,[intCurrencyId]
-    ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
     ,[dblShipping]
@@ -535,7 +532,6 @@ SELECT
     ,[intProfitCenter]                  = ARI.[intProfitCenter]
     ,[intLocationSalesAccountId]        = ARI.[intLocationSalesAccountId]
     ,[intCurrencyId]                    = ARI.[intCurrencyId]
-    ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
@@ -712,7 +708,6 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[intProfitCenter]
     ,[intLocationSalesAccountId]
     ,[intCurrencyId]
-    ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
     ,[dblShipping]
@@ -864,7 +859,6 @@ SELECT
     ,[intProfitCenter]                  = ARI.[intProfitCenter]
     ,[intLocationSalesAccountId]        = ARI.[intLocationSalesAccountId]
     ,[intCurrencyId]                    = ARI.[intCurrencyId]
-    ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
@@ -1089,7 +1083,6 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[intProfitCenter]
     ,[intLocationSalesAccountId]
     ,[intCurrencyId]
-    ,[dblAverageExchangeRate]
     ,[intTermId]
     ,[dblInvoiceTotal]
     ,[dblShipping]
@@ -1237,7 +1230,6 @@ SELECT
     ,[intProfitCenter]                  = ARI.[intProfitCenter]
     ,[intLocationSalesAccountId]        = ARI.[intLocationSalesAccountId]
     ,[intCurrencyId]                    = ARI.[intCurrencyId]
-    ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
@@ -1412,8 +1404,14 @@ INNER JOIN (
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
 WHERE strSessionId = @strSessionId
 
+UPDATE tblARPostInvoiceHeader
+SET dblAverageExchangeRate = CASE WHEN dblInvoiceTotal <> 0 THEN dbo.fnRoundBanker(dblBaseInvoiceTotal / dblInvoiceTotal, 6) ELSE 1 END
+WHERE strSessionId = @strSessionId
+
 UPDATE ARPID
-SET dblBaseInvoiceTotal = ARPIH.dblBaseInvoiceTotal
+SET 
+     dblBaseInvoiceTotal    = ARPIH.dblBaseInvoiceTotal
+    ,dblAverageExchangeRate = ARPIH.dblAverageExchangeRate
 FROM tblARPostInvoiceDetail ARPID
 INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId AND ARPID.strSessionId = ARPIH.strSessionId
 WHERE ARPID.strSessionId = @strSessionId

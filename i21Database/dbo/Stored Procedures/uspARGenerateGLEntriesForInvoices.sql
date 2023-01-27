@@ -464,8 +464,8 @@ INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
 SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
    ,[strBatchId]                   = I.[strBatchId]
    ,[intAccountId]                 = PPCI.[intAccountId]
-   ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN PPC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-   ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE PPC.[dblBaseAppliedInvoiceDetailAmount] END
+   ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ROUND(PPC.dblAppliedInvoiceDetailAmount * I.dblAverageExchangeRate, dbo.fnARGetDefaultDecimal()) ELSE @ZeroDecimal END
+   ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ROUND(PPC.dblAppliedInvoiceDetailAmount * I.dblAverageExchangeRate, dbo.fnARGetDefaultDecimal()) END
    ,[dblDebitUnit]                 = @ZeroDecimal
    ,[dblCreditUnit]                = @ZeroDecimal
    ,[strDescription]               = I.[strDescription]
@@ -2422,5 +2422,5 @@ INNER JOIN (
     GROUP BY ID.[intInvoiceId], ID.[intItemId], ICIL.[intItemLocationId], ARIFC.[dblCost], ICI.[strDescription]
 ) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
 WHERE I.strSessionId = @strSessionId
-  
+
 RETURN 1 
