@@ -377,7 +377,11 @@ tblCMBankTransaction F ON GL.strTransactionId = F.strTransactionId
 JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId  = TMP.strTransactionId + '-F'
 WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)		
+
 		
+UPDATE F SET ysnPosted = 0 FROM
+tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId  = TMP.strTransactionId + '-F'
+WHERE	F.intBankTransactionTypeId IN (@BANK_FEE)	
 
 DELETE F FROM
 tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
