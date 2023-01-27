@@ -124,7 +124,7 @@ BEGIN
 			dblDiscount = 0,
 			strPaymentScheduleNumber = @strInvoiceNo
 
-		IF(ISNULL(@dblDeferredAmt1, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt1, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -144,7 +144,7 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo1, @strInvoiceNo)
 		END
 
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -164,7 +164,7 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo2, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -184,7 +184,7 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo3, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 AND ISNULL(@dblDeferredAmt4, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 AND ISNULL(@dblDeferredAmt4, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -204,8 +204,8 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo4, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
-			AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -225,9 +225,9 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo5, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
-			AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
-			AND ISNULL(@dblDeferredAmt6, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt6, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -247,9 +247,9 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo6, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
-			AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
-			AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -269,10 +269,10 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo7, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
-			AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
-			AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
-			AND ISNULL(@dblDeferredAmt8, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0
+			AND ISNULL(@dblDeferredAmt8, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -292,10 +292,10 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo8, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
-			AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
-			AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
-			AND ISNULL(@dblDeferredAmt8, 0) > 0 AND ISNULL(@dblDeferredAmt9, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0
+			AND ISNULL(@dblDeferredAmt8, 0) <> 0 AND ISNULL(@dblDeferredAmt9, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
@@ -315,11 +315,11 @@ BEGIN
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo9, @strInvoiceNo)
 		END
 			
-		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
-			AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
-			AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
-			AND ISNULL(@dblDeferredAmt8, 0) > 0 AND ISNULL(@dblDeferredAmt9, 0) > 0
-			AND ISNULL(@dblDeferredAmt10, 0) > 0)
+		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
+			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0
+			AND ISNULL(@dblDeferredAmt8, 0) <> 0 AND ISNULL(@dblDeferredAmt9, 0) <> 0
+			AND ISNULL(@dblDeferredAmt10, 0) <> 0)
 		BEGIN
 			INSERT INTO @PaymentSchedule ([intBillId],
 				[intTermsId],
