@@ -149,9 +149,9 @@ BEGIN /* Inbound Claims */
 			,strRateType
 			,strItemNo
 			,intEntityId
-			,intAPAccountId
 			,intAPClearingAccountId
 			,intExpenseAccountId
+			,ysnWeightLoss
 			)
 		AS (SELECT 
 			dtmDate = GETDATE()
@@ -170,9 +170,9 @@ BEGIN /* Inbound Claims */
 			,strRateType = FX.strRateType
 			,strItemNo = I.strItemNo
 			,intEntityId = WCD.intPartyEntityId
-			,intAPAccountId = CASE WHEN WCD.dblClaimableWt > 0 THEN CL.intAPAccount ELSE NULL END
 			,intAPClearingAccountId = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
-			,intExpenseAccountId = CASE WHEN WCD.dblClaimableWt < 0 THEN V.intGLAccountExpenseId ELSE NULL END
+			,intExpenseAccountId = V.intGLAccountExpenseId
+			,ysnWeightLoss = CAST(CASE WHEN WCD.dblClaimableWt < 0 THEN 1 ELSE 0 END AS BIT)
 		FROM tblLGWeightClaimDetail WCD
 			INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
 			INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
@@ -238,7 +238,7 @@ BEGIN /* Inbound Claims */
 			)
 		-------------------------------------------------------------------------------------------
 		-- Inbound Claim Weight Loss Impact: Dr. AP Clearing, Cr. Expense	
-		-- Inbound Claim Weight Gain Impact: Dr. AP, Cr. AP Clearing
+		-- Inbound Claim Weight Gain Impact: Dr. Expense, Cr. AP Clearing
 		-------------------------------------------------------------------------------------------
 		SELECT dtmDate = ForGLEntries_CTE.dtmDate
 			,strBatchId = @strBatchId
@@ -277,7 +277,7 @@ BEGIN /* Inbound Claims */
 			,dblForeignRate = ForGLEntries_CTE.dblForexRate
 			,strRateType = ForGLEntries_CTE.strRateType
 		FROM ForGLEntries_CTE
-		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ISNULL(ForGLEntries_CTE.intAPClearingAccountId, ForGLEntries_CTE.intAPAccountId)
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = CASE WHEN (ysnWeightLoss = 1) THEN ForGLEntries_CTE.intAPClearingAccountId ELSE ForGLEntries_CTE.intExpenseAccountId END
 		CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 		CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 		WHERE ForGLEntries_CTE.intItemId IS NOT NULL
@@ -321,7 +321,7 @@ BEGIN /* Inbound Claims */
 			,dblForeignRate = ForGLEntries_CTE.dblForexRate
 			,strRateType = ForGLEntries_CTE.strRateType
 		FROM ForGLEntries_CTE
-		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = ISNULL(ForGLEntries_CTE.intExpenseAccountId, ForGLEntries_CTE.intAPClearingAccountId)
+		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = CASE WHEN (ysnWeightLoss = 1) THEN ForGLEntries_CTE.intExpenseAccountId ELSE ForGLEntries_CTE.intAPClearingAccountId END
 		CROSS APPLY dbo.fnGetCreditFunctional(-ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 		CROSS APPLY dbo.fnGetCredit(-ForGLEntries_CTE.dblCost) CreditForeign
 		WHERE ForGLEntries_CTE.intItemId IS NOT NULL
