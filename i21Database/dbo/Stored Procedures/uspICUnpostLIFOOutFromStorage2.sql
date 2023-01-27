@@ -23,7 +23,7 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it to the @InventoryToReverse variable
-INSERT INTO #tmpInventoryTransactionStockToReverse (
+INSERT INTO #tmpInventoryTransactionStorageToReverse (
 	intInventoryTransactionStorageId
 	,intTransactionId
 	,strTransactionId
@@ -101,7 +101,7 @@ SET		dblStockIn = dblStockOut
 FROM	dbo.tblICInventoryLIFOStorage lifoStorageBucket 
 WHERE	EXISTS (
 			SELECT	TOP 1 1 
-			FROM	#tmpInventoryTransactionStockToReverse InventoryToReverse
+			FROM	#tmpInventoryTransactionStorageToReverse InventoryToReverse
 			WHERE	InventoryToReverse.intTransactionId = lifoStorageBucket.intTransactionId
 					AND InventoryToReverse.strTransactionId = lifoStorageBucket.strTransactionId
 					AND InventoryToReverse.intTransactionTypeId NOT IN (
@@ -118,7 +118,7 @@ UPDATE	lifoStorageBucket
 SET		lifoStorageBucket.dblStockOut = ISNULL(lifoStorageBucket.dblStockOut, 0) - lifoStorageOutGrouped.dblQty
 FROM	dbo.tblICInventoryLIFOStorage lifoStorageBucket INNER JOIN (
 			SELECT	LIFOOut.intInventoryLIFOStorageId, dblQty = SUM(LIFOOut.dblQty)
-			FROM	dbo.tblICInventoryLIFOStorageOut LIFOOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
+			FROM	dbo.tblICInventoryLIFOStorageOut LIFOOut INNER JOIN #tmpInventoryTransactionStorageToReverse InventoryToReverse
 						ON LIFOOut.intInventoryTransactionStorageId = InventoryToReverse.intInventoryTransactionStorageId	
 			GROUP BY LIFOOut.intInventoryLIFOStorageId
 		) AS lifoStorageOutGrouped

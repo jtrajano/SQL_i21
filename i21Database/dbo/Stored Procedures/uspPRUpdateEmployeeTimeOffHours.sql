@@ -77,13 +77,19 @@ BEGIN
 							 ELSE NULL 
 						END
 
-	--Calculate if Time Off is Scheduled for Reset
-	UPDATE #tmpEmployees
-	SET ysnForReset = CASE WHEN ((strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR (dtmNextAward)  )
-									OR 
-								  (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
-								) THEN 1 
-							ELSE 0 END
+	 --Calculate if Time Off is Scheduled for Reset    
+	 UPDATE #tmpEmployees    
+	 SET ysnForReset = CASE WHEN ((strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR (dtmNextAward)  )    
+									OR     
+								  (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(GETDATE()) > YEAR(dtmLastAward))    
+								) THEN 1     
+					   ELSE 
+							CASE WHEN CONVERT(DATE ,GETDATE()) >= CONVERT(DATE,dtmNextAward)  AND CONVERT(DATE,dtmLastAward) < CONVERT(DATE,dtmNextAward) THEN
+								1
+							 ELSE
+								0 
+							END
+					   END 
 
 	UPDATE #tmpEmployees 
 		--Calculate Total Accrued Hours
@@ -183,21 +189,15 @@ BEGIN
 								 END
 								
 				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
-				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
-									DATEADD(DD, -1, dtmPaycheckStartDate) 
-								ELSE 
-										CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN
-												CASE WHEN ysnForReset =1 THEN 
-													T.dtmNextAward
-												ELSE
-													tblPREmployeeTimeOff.dtmLastAward
-												END
-										ELSE
-												T.dtmNextAward
-										END
-
-										
-								END
+				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    
+					DATEADD(DD, -1, dtmPaycheckStartDate)     
+					ELSE     
+							CASE WHEN ysnForReset =1 THEN     
+								T.dtmNextAward    
+							ELSE    
+								tblPREmployeeTimeOff.dtmLastAward    
+							END    
+					END
 		FROM
 		#tmpEmployees T
 		WHERE T.[intEntityId] = @intEmployeeId

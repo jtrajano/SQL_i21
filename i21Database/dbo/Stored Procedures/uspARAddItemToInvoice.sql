@@ -303,6 +303,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@SubCurrencyRate				NUMERIC(18,6)
 				,@TermDiscountExempt			BIT
 				,@TermDiscountRate				NUMERIC(18,6)
+				,@OriginalContractHeaderId		INT = NULL
+				,@OriginalContractDetailId		INT = NULL
 
 		BEGIN TRY
 		SELECT 
@@ -324,6 +326,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 			SET @ItemPriceUOMId = ISNULL(@ItemPriceUOMId, @ItemUOMId)
 		END
 
+		SET @OriginalContractHeaderId	= @ContractHeaderId
+		SET @OriginalContractDetailId	= @ContractDetailId
 
 
 		EXEC dbo.[uspARGetItemPrice]  
@@ -478,8 +482,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemOrderUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemPriceUOMId
-				,@ContractHeaderId
-				,@ContractDetailId
+				,CASE WHEN strType = 'Other Charge' AND @OriginalContractHeaderId IS NOT NULL THEN @OriginalContractHeaderId ELSE @ContractHeaderId END
+				,CASE WHEN strType = 'Other Charge' AND @OriginalContractDetailId IS NOT NULL THEN @OriginalContractDetailId ELSE @ContractDetailId END
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
 				,@ItemContract
@@ -559,7 +563,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemAddonParent
 				,@ItemAddOnQuantity
 				,@ItemInventoryShipmentChargeId
-			FROM tblICItem WHERE intItemId = @ItemId
+			FROM tblICItem 
+			WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
 

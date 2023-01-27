@@ -69,9 +69,25 @@ BEGIN TRY
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @LotEntries ReceiptItemLotStagingTable
+	DECLARE @tblIPInvReceiptStage TABLE (intStageReceiptId INT)
 
-	SELECT @intMinRowNo = Min(intStageReceiptId)
-	FROM tblIPInvReceiptStage WITH (NOLOCK)
+	INSERT INTO @tblIPInvReceiptStage (intStageReceiptId)
+	SELECT intStageReceiptId
+	FROM tblIPInvReceiptStage
+	WHERE ISNULL(strImportStatus, '') = ''
+
+	SELECT @intMinRowNo = MIN(intStageReceiptId)
+	FROM @tblIPInvReceiptStage
+
+	IF @intMinRowNo IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strImportStatus = 'In-Progress'
+	FROM tblIPInvReceiptStage t
+	JOIN @tblIPInvReceiptStage pt ON pt.intStageReceiptId = t.intStageReceiptId
 
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
@@ -943,9 +959,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intMinRowNo = Min(intStageReceiptId)
-		FROM tblIPInvReceiptStage WITH (NOLOCK)
+		FROM @tblIPInvReceiptStage
 		WHERE intStageReceiptId > @intMinRowNo
 	END
+
+	UPDATE t
+	SET t.strImportStatus = NULL
+	FROM tblIPInvReceiptStage t
+	JOIN @tblIPInvReceiptStage pt ON pt.intStageReceiptId = t.intStageReceiptId
+		AND t.strImportStatus = 'In-Progress'
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

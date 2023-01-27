@@ -98,7 +98,7 @@ BEGIN
 		,[strChargesLink]					= RE.strChargesLink
 		,[ysnAllowVoucher]				= CASE WHEN RE.intEntityVendorId <> LoadCost.intVendorId AND ISNULL(@ysnAccrue,0) = 1 THEN 1 ELSE RE.ysnAllowVoucher END
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
-		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+		,[intLoadShipmentCostId]		= LoadCost.intLoadCostId
 		,intTaxGroupId = RE.intTaxGroupId
 		FROM tblLGLoadDetail LoadDetail
 		INNER JOIN @ReceiptStagingTable RE 
@@ -184,7 +184,7 @@ BEGIN
 		,[strChargesLink]					= RE.strChargesLink
 		,[ysnAllowVoucher]				= CASE WHEN RE.intEntityVendorId <> ContractCost.intVendorId AND ISNULL(@ysnAccrue,0) = 1 THEN 1 ELSE RE.ysnAllowVoucher END
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
-		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+		,[intLoadShipmentCostId]		= NULL --RE.intLoadShipmentDetailId
 		,intTaxGroupId = RE.intTaxGroupId
 		FROM tblCTContractCost ContractCost
 		INNER JOIN @ReceiptStagingTable RE 

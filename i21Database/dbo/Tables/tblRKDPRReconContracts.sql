@@ -27,6 +27,10 @@
 	[intContractHeaderId] INT NULL,
 	[intTicketId] INT NULL,
 	[intLoadId] INT NULL,
+	[strDistribution] NVARCHAR (50) COLLATE Latin1_General_CI_AS  NULL,
+	[strStorageSchedule] NVARCHAR (100) COLLATE Latin1_General_CI_AS  NULL,
+	[strSettlementTicket] NVARCHAR (100) COLLATE Latin1_General_CI_AS  NULL,
+	[strStatus] NVARCHAR (50) COLLATE Latin1_General_CI_AS  NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKDPRReconContracts] PRIMARY KEY ([intDPRReconContractId]), 
     CONSTRAINT [FK_tblRKDPRReconContracts_tblRKDPRHeader] FOREIGN KEY ([intDPRReconHeaderId]) REFERENCES [tblRKDPRReconHeader]([intDPRReconHeaderId]) ON DELETE CASCADE

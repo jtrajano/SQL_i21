@@ -38,7 +38,7 @@ FROM
 	UNION ALL
 	SELECT vrpa.strTransactionType, vrpa.intTransactionId, vrpa.strTransactionId, vrpa.dblAmount, vrpa.strVendorInvoiceNumber, vrpa.intEntityVendorId, vrpa.intEntityId, vrpa.dtmDate, vrpa.strDescription, vrpa.intCompanyLocationId FROM vyuSTBatchPostingRetailPriceAdjustment vrpa WHERE vrpa.ysnPosted = 0
 	UNION ALL
-	SELECT 'Mobile Billing', MBILI.intInvoiceId, strInvoiceNo, dblTotal, '' AS strVendorInvoiceNumber, MBILI.intEntityCustomerId AS intEntityVendorId, MBILI.intEntityCustomerId, dtmInvoiceDate, MBILI.strComments, intLocationId AS intCompanyLocationId FROM vyuMBILInvoice MBILI LEFT JOIN tblARInvoice I WITH (NOLOCK) ON MBILI.inti21InvoiceId = I.intInvoiceId WHERE ISNULL(ysnVoided, 0) = 0 AND (I.intInvoiceId IS NULL OR inti21InvoiceId IS NULL)
+	SELECT 'Mobile Billing', MBILI.intInvoiceId, strInvoiceNo, dblTotal, '' AS strVendorInvoiceNumber, MBILI.intEntityCustomerId AS intEntityVendorId, MBILI.intEntityCustomerId, dtmInvoiceDate, MBILI.strComments, intLocationId AS intCompanyLocationId FROM vyuMBILInvoice MBILI LEFT JOIN tblARInvoice I ON MBILI.inti21InvoiceId = I.intInvoiceId WHERE ISNULL(ysnVoided, 0) = 0 AND (I.intInvoiceId IS NULL OR inti21InvoiceId IS NULL)
 	UNION ALL
 	SELECT 'Mobile Billing', intPaymentId, strPaymentNo, dblPayment, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmDatePaid, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILPayment WHERE ISNULL(ysnPosted, 0) = 0 AND ISNULL(ysnVoided, 0) = 0 AND inti21PaymentId IS NULL
 ) BatchPosting

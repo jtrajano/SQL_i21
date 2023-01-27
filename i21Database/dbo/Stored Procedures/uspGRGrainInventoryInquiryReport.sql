@@ -407,7 +407,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId

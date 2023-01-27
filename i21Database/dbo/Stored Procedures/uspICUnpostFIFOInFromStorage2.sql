@@ -10,9 +10,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
 -- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStorageToReverse')) 
 BEGIN 
-	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+	CREATE TABLE #tmpInventoryTransactionStorageToReverse (
 		intInventoryTransactionStorageId INT NOT NULL 
 		,intTransactionId INT NULL 
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -65,7 +65,7 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it into the @InventoryToReverse variable
-INSERT INTO #tmpInventoryTransactionStockToReverse (
+INSERT INTO #tmpInventoryTransactionStorageToReverse (
 	intInventoryTransactionStorageId
 	,intTransactionId
 	,strTransactionId
@@ -142,7 +142,7 @@ UPDATE	fifoStorageBucket
 SET		fifoStorageBucket.dblStockIn = ISNULL(fifoStorageBucket.dblStockIn, 0) - fifoOutGrouped.dblQty
 FROM	dbo.tblICInventoryFIFOStorage fifoStorageBucket INNER JOIN (
 			SELECT	fifoOut.intRevalueFifoId, dblQty = SUM(fifoOut.dblQty)
-			FROM	dbo.tblICInventoryFIFOStorageOut fifoOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			FROM	dbo.tblICInventoryFIFOStorageOut fifoOut INNER JOIN #tmpInventoryTransactionStorageToReverse Reversal
 						ON fifoOut.intInventoryTransactionStorageId = Reversal.intInventoryTransactionStorageId
 					INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
 						ON OutTransactions.intInventoryTransactionStorageId = fifoOut.intInventoryTransactionStorageId
@@ -152,6 +152,7 @@ FROM	dbo.tblICInventoryFIFOStorage fifoStorageBucket INNER JOIN (
 		) AS fifoOutGrouped
 			ON fifoOutGrouped.intRevalueFifoId = fifoStorageBucket.intInventoryFIFOStorageId
 ;
+
 
 -- If there are out records, create a negative stock cost bucket 
 INSERT INTO dbo.tblICInventoryFIFOStorage (
@@ -180,21 +181,32 @@ SELECT	intItemId = OutTransactions.intItemId
 		,dtmCreated = GETDATE()
 		,intCreatedUserId = OutTransactions.intCreatedUserId
 		,intConcurrencyId = 1
-FROM	dbo.tblICInventoryFIFOStorage fifo INNER JOIN dbo.tblICInventoryFIFOStorageOut fifoOut
+FROM	dbo.tblICInventoryFIFOStorage fifo 
+		INNER JOIN dbo.tblICInventoryFIFOStorageOut fifoOut
 			ON fifo.intInventoryFIFOStorageId = fifoOut.intInventoryFIFOStorageId
 		INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
 			ON OutTransactions.intInventoryTransactionStorageId = fifoOut.intInventoryTransactionStorageId
 			AND ISNULL(OutTransactions.dblQty, 0) < 0 
-WHERE	fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
+			AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
+		INNER JOIN (
+			SELECT DISTINCT 
+				tmp.intTransactionId
+				,tmp.strTransactionId
+			FROM #tmpInventoryTransactionStorageToReverse tmp
+		) tmp
+			ON tmp.intTransactionId = fifo.intTransactionId
+			AND tmp.strTransactionId = fifo.strTransactionId		
+--WHERE	
+		--fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStorageToReverse)
+		--AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStorageToReverse)
+		--AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 ;
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 -- Mark the record as unposted too. 
 UPDATE	fifoStorageBucket
 SET		dblStockOut = dblStockIn
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryFIFOStorage fifoStorageBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+FROM	dbo.tblICInventoryFIFOStorage fifoStorageBucket INNER JOIN #tmpInventoryTransactionStorageToReverse Reversal
 			ON fifoStorageBucket.intTransactionId = Reversal.intTransactionId
 			AND fifoStorageBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (

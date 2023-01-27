@@ -103,7 +103,7 @@ BEGIN TRY
 		--SELECT '@SettleStorages',* FROM @SettleStorages
 
 	INSERT INTO @billList 
-	SELECT DISTINCT ISNULL(SS.intBillId,SSB.intSettleStorageBillDetailId)
+	SELECT DISTINCT COALESCE(SSB.intBillId,SS.intBillId)
 	FROM tblGRSettleStorage SS
 	INNER JOIN @SettleStorages _SS
 		ON _SS.intId = SS.intSettleStorageId
@@ -164,6 +164,21 @@ BEGIN TRY
 		BEGIN
 			RAISERROR (@ErrMsg, 16, 1);
 			GOTO SettleStorage_Exit;
+		END
+	END
+
+	--6. Voucher deletion
+	BEGIN
+		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
+		BEGIN
+			SELECT @BillId = intId FROM @billListForDeletion
+			delete from tblCTPriceFixationDetailAPAR where intBillId = @BillId;
+			EXEC uspAPDeleteVoucher 
+				@BillId
+				,@UserId
+				,@callerModule = 1					
+
+			DELETE FROM @billListForDeletion WHERE intId = @BillId
 		END
 	END
 
@@ -617,19 +632,19 @@ BEGIN TRY
 	END
 
 	--6. Voucher deletion
-	BEGIN
-		WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
-		BEGIN
-			SELECT @BillId = intId FROM @billListForDeletion
+	--BEGIN
+	--	WHILE EXISTS(SELECT 1 FROM @billListForDeletion)
+	--	BEGIN
+	--		SELECT @BillId = intId FROM @billListForDeletion
 
-			EXEC uspAPDeleteVoucher 
-				@BillId
-				,@UserId
-				,@callerModule = 1					
+	--		EXEC uspAPDeleteVoucher 
+	--			@BillId
+	--			,@UserId
+	--			,@callerModule = 1					
 
-			DELETE FROM @billListForDeletion WHERE intId = @BillId
-		END
-	END
+	--		DELETE FROM @billListForDeletion WHERE intId = @BillId
+	--	END
+	--END
 
 	SettleStorage_Exit:
 END TRY

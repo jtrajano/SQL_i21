@@ -343,7 +343,7 @@ WHERE CUS.intSalespersonId IS NOT NULL
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress	= ISNULL(LTRIM(RTRIM(EL.strAddress)), '') + CHAR(13) + char(10) + ISNULL(LTRIM(RTRIM(EL.strCity)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strState)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strZipCode)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strCountry)), '')
+SET strFullAddress	= ISNULL(NULLIF(LTRIM(RTRIM(EL.strAddress)), ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(LTRIM(RTRIM(EL.strCity)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strState)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strZipCode)), ''), '') + ISNULL(', ' + NULLIF(LTRIM(RTRIM(EL.strCountry)), ''), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 

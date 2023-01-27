@@ -157,7 +157,8 @@ SELECT
 	Item.ysnLotWeightsRequired,
 	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
 	ysnHasSubstitute = CAST(ISNULL(ItemSubstitute.ysnHasSubstitute, 0) AS BIT),
-	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
+	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
+	Item.ysnTankRequired
 FROM	
 	tblICItem Item 
 	LEFT JOIN (

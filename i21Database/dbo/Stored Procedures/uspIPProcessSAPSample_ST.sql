@@ -114,9 +114,25 @@ BEGIN TRY
 		,@strNewResult NVARCHAR(20)
 		,@intTestResultId INT
 		,@strPropertyName NVARCHAR(100)
+	DECLARE @tblIPSampleStage TABLE (intStageSampleId INT)
 
-	SELECT @intMinRowNo = Min(intStageSampleId)
-	FROM tblIPSampleStage WITH (NOLOCK)
+	INSERT INTO @tblIPSampleStage (intStageSampleId)
+	SELECT intStageSampleId
+	FROM tblIPSampleStage
+	WHERE ISNULL(strImportStatus, '') = ''
+
+	SELECT @intMinRowNo = MIN(intStageSampleId)
+	FROM @tblIPSampleStage
+
+	IF @intMinRowNo IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strImportStatus = 'In-Progress'
+	FROM tblIPSampleStage t
+	JOIN @tblIPSampleStage pt ON pt.intStageSampleId = t.intStageSampleId
 
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
@@ -1547,9 +1563,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intMinRowNo = Min(intStageSampleId)
-		FROM tblIPSampleStage WITH (NOLOCK)
+		FROM @tblIPSampleStage
 		WHERE intStageSampleId > @intMinRowNo
 	END
+
+	UPDATE t
+	SET t.strImportStatus = NULL
+	FROM tblIPSampleStage t
+	JOIN @tblIPSampleStage pt ON pt.intStageSampleId = t.intStageSampleId
+		AND t.strImportStatus = 'In-Progress'
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

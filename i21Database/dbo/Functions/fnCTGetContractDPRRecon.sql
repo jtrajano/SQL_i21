@@ -72,6 +72,7 @@ BEGIN
 		, dblQuantity = (sh.dblQtyPriced - sh.dblPrevQtyPriced)
 	FROM SequenceHistory sh
 	WHERE intContractTypeId = 1
+		AND sh.intHeaderPricingTypeId = 2
 		AND (sh.dblQtyPriced - sh.dblPrevQtyPriced) <> 0
 
 	UNION ALL
@@ -170,6 +171,7 @@ BEGIN
 		, dblQuantity = (sh.dblQtyPriced - sh.dblPrevQtyPriced)
 	FROM SequenceHistory sh
 	WHERE intContractTypeId = 2
+		AND sh.intHeaderPricingTypeId = 2
 		AND (sh.dblQtyPriced - sh.dblPrevQtyPriced) <> 0
 
 	UNION ALL

@@ -461,7 +461,27 @@ BEGIN TRY
 			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
+
+			declare
+				@intPreLogCount				INT,
+				@intPreSeqHistoryCount			INT,
+				@intPostLogCount				INT,
+				@intPostSeqHistoryCount			INT,
+				@intLasSequenceHistoryId	INT;
+			
+			select @intPreLogCount = count(*) from tblCTContractBalanceLog where intContractDetailId = @intContractDetailId;
+			select @intPreSeqHistoryCount = count(*) from tblCTSequenceHistory where intContractDetailId = @intContractDetailId;
+
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+
+			select @intPostLogCount = count(*) from tblCTContractBalanceLog where intContractDetailId = @intContractDetailId;
+			select @intPostSeqHistoryCount = count(*) from tblCTSequenceHistory where intContractDetailId = @intContractDetailId;
+
+			if (@intPreLogCount = @intPostLogCount and @intPostSeqHistoryCount > @intPreSeqHistoryCount)
+			begin
+				select top 1 @intLasSequenceHistoryId = intSequenceHistoryId from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc;
+				delete from tblCTSequenceHistory where intSequenceHistoryId = @intLasSequenceHistoryId;
+			end
 		END		
 		
 		-- ADD DERIVATIVES

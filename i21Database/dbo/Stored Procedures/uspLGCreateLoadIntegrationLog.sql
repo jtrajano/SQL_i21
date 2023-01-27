@@ -34,6 +34,7 @@ BEGIN TRY
 	DECLARE @intSContractHeaderId INT
 	DECLARE @strAuditDescription NVARCHAR(MAX)
 	DECLARE @intTransportationMode INT
+	DECLARE @ysnETAPODChanged BIT = 0
 
 	DECLARE @tblLoadDetail TABLE
 			(intDetailRecordId INT Identity(1, 1),
@@ -543,6 +544,7 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO tblLGETATracking (intLoadId, strTrackingType, dtmETAPOD, strETAPODReasonCode, dtmModifiedOn, intConcurrencyId)
 			SELECT @intLoadId, 'ETA POD', @dtmCurrentETAPOD, @strETAPODReasonCode, GETDATE(), 1
+			SET @ysnETAPODChanged = 1
 		END
 		ELSE
 		BEGIN
@@ -553,6 +555,7 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO tblLGETATracking (intLoadId, strTrackingType, dtmETAPOD, strETAPODReasonCode, dtmModifiedOn, intConcurrencyId)
 				SELECT @intLoadId, 'ETA POD', @dtmCurrentETAPOD, @strETAPODReasonCode, GETDATE(), 1
+				SET @ysnETAPODChanged = 1
 			END
 		END
 	END
@@ -579,7 +582,7 @@ BEGIN TRY
 	END
 
 	/* Feed ETA to Contract */
-	IF ((ISNULL(@ysnPOETAFeedToERP,0) = 1 OR ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) AND (@dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete'))
+	IF ((ISNULL(@ysnPOETAFeedToERP,0) = 1 OR ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) AND (@dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete') AND @ysnETAPODChanged = 1)
 	BEGIN
 		SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId) FROM @tblLoadDetail
 
@@ -601,7 +604,7 @@ BEGIN TRY
 				@intContractSeq = intContractSeq
 				,@dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 				,@dtmCurrentUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
-				,@dtmCalculatedUpdatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
+				,@dtmCalculatedUpdatedAvailabilityDate = CASE WHEN @intTransportationMode = 1 THEN @dtmCurrentETAPOD ELSE DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) END
 			FROM tblCTContractDetail
 			WHERE intContractDetailId = @intContractDetailId
 
@@ -631,7 +634,7 @@ BEGIN TRY
 							,@toValue = @dtmCurrentETAPOD
 					END
 
-					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedUpdatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,'') AND @intTransportationMode = 2)
+					IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(@dtmCalculatedUpdatedAvailabilityDate, '') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
 					BEGIN
 						UPDATE tblCTContractDetail 
 						SET dtmUpdatedAvailabilityDate = @dtmCalculatedUpdatedAvailabilityDate

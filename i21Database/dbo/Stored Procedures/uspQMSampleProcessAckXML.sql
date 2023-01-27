@@ -221,6 +221,12 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMSampleAcknowledgementStage t
+	JOIN @tblQMSampleAcknowledgementStage pt ON pt.intSampleAcknowledgementStageId = t.intSampleAcknowledgementStageId
+		AND t.strFeedStatus = 'In-Progress'
+
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (

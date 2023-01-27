@@ -8,7 +8,7 @@
 	intCategoryId INT NULL,		
 	strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,		
 	intLocationId INT NULL,		
-	strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,		
+	strLocationName NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,		
 	strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
 	
 	dblOpeningQty NUMERIC(28, 2) NULL,		

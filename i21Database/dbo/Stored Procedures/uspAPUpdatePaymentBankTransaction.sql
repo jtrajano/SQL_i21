@@ -45,7 +45,8 @@ BEGIN
 		,[intCurrencyId]            
 		,[dblExchangeRate]          
 		,[dtmDate]                  
-		,[strPayee]                 
+		,[strPayee]    
+		,[strCheckPayee]             
 		,[intPayeeId]               
 		,[strAddress]               
 		,[strZipCode]               
@@ -83,6 +84,11 @@ BEGIN
 		[strPayee] = CASE WHEN A.ysnOverrideCheckPayee = 1 THEN A.strOverridePayee
 						ELSE ISNULL(E.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId))
 						END,
+		[strCheckPayee] = CASE WHEN A.ysnOverrideCheckPayee = 1 THEN A.strOverridePayee
+						WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = B.[intEntityId]) > 0 AND ISNULL(A.ysnOverrideLien, 0) = 0 
+						THEN Payee.strName
+						ELSE ISNULL(E.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId))
+						END,
 		[intPayeeId] = B.intEntityId,
 		[strAddress] = E.strAddress,
 		[strZipCode] = E.strZipCode,
@@ -110,6 +116,22 @@ BEGIN
 		INNER JOIN tblAPVendor B
 			ON A.[intEntityVendorId] = B.[intEntityId]
 		INNER JOIN tblEMEntityLocation E ON A.intPayToAddressId = E.intEntityLocationId
+		OUTER APPLY (
+			SELECT ISNULL(RTRIM(E.strCheckPayeeName) + ' ' + 
+					(STUFF((SELECT DISTINCT ' and ' + strName
+                        FROM tblAPVendorLien LIEN
+						INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+						WHERE LIEN.intEntityVendorId = B.intEntityId AND LIEN.ysnActive = 1 
+						AND A.dtmDatePaid BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+						AND LIEN.intCommodityId IN (
+							SELECT intCommodityId 
+							FROM tblAPPayment Pay 
+							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+							WHERE strPaymentRecordNum = A.strPaymentRecordNum)FOR XML PATH(''))
+					,1, 1, ''))
+				,E.strCheckPayeeName) strName
+		) Payee
 		--CROSS APPLY
 		--(
 		--	SELECT 

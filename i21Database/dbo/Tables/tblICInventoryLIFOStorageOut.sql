@@ -27,3 +27,8 @@ Type the overview for the table here.
 		ON [dbo].[tblICInventoryLIFOStorageOut]([intInventoryTransactionStorageId] ASC)
 		INCLUDE(intInventoryLIFOStorageId);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOStorageOut_Unpost]
+		ON [dbo].[tblICInventoryLIFOStorageOut]([intInventoryLIFOStorageId] ASC)
+		INCLUDE(intInventoryTransactionStorageId);
+	GO

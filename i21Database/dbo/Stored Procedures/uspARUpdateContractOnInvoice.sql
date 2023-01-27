@@ -377,6 +377,9 @@ BEGIN TRY
 					 , @strDistributionOption	= strDistributionOption
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END
+
+		IF @dblQty > 0
+		BEGIN
 			
 		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing IN ('Subsystem - Direct', 'MANUAL OVERRIDE')	
 			BEGIN
@@ -401,6 +404,8 @@ BEGIN TRY
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice'
 			END
+
+		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END

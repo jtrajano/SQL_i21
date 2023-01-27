@@ -300,9 +300,8 @@ BEGIN TRY
 			)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId
-			,@strGLDescription = ''
 			,@ysnPost = 0
-			,@AccountCategory_Cost_Adjustment = 'Inventory Adjustment'
+			,@AccountCategory_Cost_Adjustment = @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 			,@strTransactionId = @strWorkOrderNo
 
 		-- Flag it as unposted. 
@@ -864,6 +863,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-GO
-
-

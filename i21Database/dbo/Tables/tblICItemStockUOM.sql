@@ -67,3 +67,9 @@ It only tracks the qty of those non-'Stock UOM's.
 		ON [dbo].[tblICItemStockUOM]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
 		INCLUDE(dblOnHand);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItemStockUOM_intItemId_intLocationId_intItemUOMId_2]
+		ON [dbo].[tblICItemStockUOM]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC)
+		INCLUDE(dblOnHand);
+	GO
+

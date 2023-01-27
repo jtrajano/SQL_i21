@@ -10,7 +10,7 @@
 	[strCommodityCode] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocationName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strBroker] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strBrokerTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strBrokerTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strBrokerAccount] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTrader] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblOrigNoOfLots]  NUMERIC(24, 10) NOT NULL,

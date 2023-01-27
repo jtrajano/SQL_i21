@@ -48,3 +48,8 @@ This table is also used to map the negative fifo stock buckets it was able to re
 		ON [dbo].[tblICInventoryFIFOStorageOut]([intInventoryTransactionStorageId] ASC)
 		INCLUDE(intInventoryFIFOStorageId);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOStorageOut_Unpost]
+		ON [dbo].[tblICInventoryFIFOStorageOut]([intInventoryFIFOStorageId] ASC)
+		INCLUDE(intInventoryTransactionStorageId);
+	GO

@@ -170,14 +170,6 @@ BEGIN
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 		END
 		CLOSE c; DEALLOCATE c;
-		
-		--update the source's customer storage open balance
-		UPDATE A
-		SET A.dblOpenBalance 	= CASE WHEN (ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6)) > A.dblOriginalBalance THEN A.dblOriginalBalance ELSE ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6) END
-		FROM tblGRCustomerStorage A 
-		INNER JOIN tblGRTransferStorageSourceSplit B 
-			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
-		WHERE B.intTransferStorageId = @intTransferStorageId
 		----END----TRANSACTIONS FOR THE SOURCE---------
 		
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
@@ -239,7 +231,7 @@ BEGIN
 			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-			,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblQuantity]						= ROUND(CS.dblOpenBalance * (TransferStorageSplit.dblSplitPercent / 100),6) --SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -269,9 +261,9 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,20)
+			,[dblGrossQuantity]					= ROUND(((CS.dblOpenBalance * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,6)--ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,20)
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
-			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblUnitQty]						= ROUND(CS.dblOpenBalance * (TransferStorageSplit.dblSplitPercent / 100),6) --SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 			,[intShipFromLocationId]			= CS.intShipFromLocationId
 			,[intShipFromEntityId]				= CS.intShipFromEntityId
@@ -499,6 +491,50 @@ BEGIN
 			FETCH c INTO @intId
 		END
 		CLOSE c; DEALLOCATE c;
+
+		--update the source's customer storage open balance
+		SELECT B.*,A.*
+		FROM tblGRCustomerStorage A 
+		INNER JOIN (
+			SELECT intTransferStorageId
+				,intSourceCustomerStorageId
+				,dblTotalTransfer = ROUND(SUM(dblUnitQty),20)
+			FROM tblGRTransferStorageReference
+			GROUP BY intTransferStorageId
+				,intSourceCustomerStorageId
+		) B
+			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
+		WHERE B.intTransferStorageId = @intTransferStorageId
+
+		UPDATE A
+		SET A.dblOpenBalance = ROUND(A.dblOpenBalance - B.dblTotalTransfer,6)
+		FROM tblGRCustomerStorage A 
+		INNER JOIN (
+			SELECT intTransferStorageId
+				,intSourceCustomerStorageId
+				,dblTotalTransfer = ROUND(SUM(dblUnitQty),6)
+			FROM tblGRTransferStorageReference
+			GROUP BY intTransferStorageId
+				,intSourceCustomerStorageId
+		) B
+			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
+		WHERE B.intTransferStorageId = @intTransferStorageId
+
+		--UPDATE tblGRTransferStorageSourceSplit to match the total units in tblGRTransferStorageReference
+		UPDATE A
+		SET dblDeductedUnits = B.dblTotalTransfer
+		FROM tblGRTransferStorageSourceSplit A
+		INNER JOIN (
+			SELECT intTransferStorageId
+				,intSourceCustomerStorageId
+				,dblTotalTransfer = ROUND(SUM(dblUnitQty),6)
+			FROM tblGRTransferStorageReference
+			GROUP BY intTransferStorageId
+				,intSourceCustomerStorageId
+		) B
+			ON B.intTransferStorageId = A.intTransferStorageId
+				AND B.intSourceCustomerStorageId = A.intSourceCustomerStorageId
+		WHERE A.intTransferStorageId = @intTransferStorageId
 
 		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
 		DECLARE @SettleVoucherCreate AS SettleVoucherCreate

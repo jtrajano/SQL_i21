@@ -89,6 +89,7 @@ BEGIN
 			,intStorageTypeId
 			,intCompanyLocationId
 			,intUnitMeasureId
+			,intDiscountTypeId
 		)
 		SELECT 
 			@NewDiscountScheduleId
@@ -109,6 +110,7 @@ BEGIN
 			,intStorageTypeId
 			,intCompanyLocationId
 			,intUnitMeasureId
+			,intDiscountTypeId
 		FROM #tmpDiscountScheduleCode
 		WHERE intDiscountScheduleCodeId = @DiscountScheduleCodeId
 

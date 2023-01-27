@@ -356,6 +356,7 @@ BEGIN TRY
 			, intTransactionReferenceDetailId
 		FROM dbo.fnRKGetBucketContractBalance(@dtmToDate, @intCommodityId, @intVendorId) f
 		WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
+		AND f.strContractStatus in ('Open','Re-Open')
 	)t
 
 	--=============================
@@ -408,32 +409,40 @@ BEGIN TRY
 		, strLocationName
 		, strContractEndMonth
 		, strDeliveryDate
-		, intEntityId
+		, COA.intEntityId
 		, strCustomerName
 		, dblBalance
-		, intCommodityId
+		, COA.intCommodityId
 		, strCommodityCode
 		, strOwnedPhysicalStock
 		, strStorageTypeDescription
 		, ysnReceiptedStorage
 		, ysnActive
-		, intItemId
+		, COA.intItemId
 		, strItemNo
 		, intCategoryId
 		, strCategoryCode
 		, intOrigUOMId
 		, dtmTransactionDate
-		, intTicketId
+		, COA.intTicketId
 		, strTransactionType
-		, strTicketNumber
-		, strContractNumber
+		, COA.strTicketNumber
+		, COA.strContractNumber
 		, intTypeId 
 		, intContractHeaderId
 		, intTransactionRecordId
 		, strTransactionNumber
 		, intTransactionRecordHeaderId
 	INTO #tblCustomerOwned
-	FROM #tblCustomerOwnedAll
+	FROM #tblCustomerOwnedAll COA
+	left join tblSCTicket T ON T.intTicketId = COA.intTicketId
+	left join tblGRCustomerStorage CS ON CS.intCustomerStorageId = COA.intTransactionRecordHeaderId
+	where intTransactionRecordHeaderId in (
+		select  intTransactionRecordHeaderId from #tblCustomerOwnedAll 
+		where strDistributionType = COA.strDistributionType
+		group by intTransactionRecordHeaderId
+		having sum(dblBalance) <> 0
+	)
 	--WHERE ISNULL(ysnExternal, 0) = 0
 
 	SELECT intRowNum
@@ -712,7 +721,7 @@ BEGIN TRY
 		, intOrigUOMId
 		, strTransactionType
 	INTO #tblInTransit
-	FROM dbo.fnRKGetBucketInTransit(@dtmToDate, @intCommodityId, @intVendorId) t
+	FROM dbo.fnRKGetBucketOpenInTransit(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE intLocationId = ISNULL(@intLocationId, intLocationId)
 		AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	
@@ -745,7 +754,7 @@ BEGIN TRY
 		, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 		, t.ysnIncludeInPriceRiskAndCompanyTitled
 	INTO #tempCollateral
-	FROM dbo.fnRKGetBucketCollateral(@dtmToDate, @intCommodityId, @intVendorId) t
+	FROM dbo.fnRKGetBucketOpenCollateral(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 		AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	
@@ -1400,7 +1409,7 @@ BEGIN TRY
 		, strItemNo
 		, strCategory
 		, strCustomerName
-		, strReceiptNo
+		, strDPAReceiptNo
 		, intContractHeaderId
 		, strContractNumber
 		, dtmOpenDate
@@ -1459,7 +1468,7 @@ BEGIN TRY
 		, strItemNo
 		, strCategory
 		, strCustomerName
-		, strReceiptNo
+		, strDPAReceiptNo
 		, intContractHeaderId
 		, strContractNumber
 		, dtmOpenDate
@@ -1724,7 +1733,7 @@ BEGIN TRY
 		, intContractDetailId
 		, strTransactionReference
 	INTO #tempBasisDelivery
-	FROM dbo.fnRKGetBucketBasisDeliveries(@dtmToDate, @intCommodityId, @intVendorId) t
+	FROM dbo.fnRKGetBucketOpenBasisDeliveries(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE intLocationId = ISNULL(@intLocationId, intLocationId)
 		AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
