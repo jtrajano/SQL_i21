@@ -49,7 +49,7 @@ SELECT be.intM2MDifferentialBasisId
 	, strRegion = REGION.strDescription
 	, strProductLine = PRODLINE.strDescription
 	, strClass = CLASS.strDescription
-	, strCertification = CERTI.strCertificationName
+	, strCertification = be.strCertification
 FROM tblRKM2MDifferentialBasis be
 LEFT JOIN tblICCommodity c ON c.intCommodityId = be.intCommodityId
 LEFT JOIN tblICItem i ON i.intItemId = be.intItemId

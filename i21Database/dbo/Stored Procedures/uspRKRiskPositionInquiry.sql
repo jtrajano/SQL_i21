@@ -218,7 +218,8 @@ BEGIN
 		, strRegion = region.strDescription
 		, strSeason = season.strDescription
 		, strClass = class.strDescription
-		, strCertificationName = certification.strCertificationName
+		--, strCertificationName = certification.strCertificationName
+		, strCertificationName = CC.strContractCertifications
 		, strCropYear = cropYear.strCropYear
 		, cv.dblHedgedLots
 		, cv.dblToBeHedgedLots
@@ -236,10 +237,21 @@ BEGIN
 	LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 	LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 	LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
-	LEFT JOIN tblICCertification certification
-		ON certification.intCertificationId = ic.intCertificationId
+	--LEFT JOIN tblICCertification certification
+	--	ON certification.intCertificationId = ic.intCertificationId
 	LEFT JOIN tblCTCropYear cropYear
 		ON cropYear.intCropYearId = cv.intCropYearId
+	OUTER APPLY (
+		SELECT strContractCertifications = (LTRIM(STUFF((
+			SELECT ', ' + ICC.strCertificationName
+			FROM tblCTContractCertification CTC
+			JOIN tblICCertification ICC
+				ON ICC.intCertificationId = CTC.intCertificationId
+			WHERE CTC.intContractDetailId = cv.intContractDetailId
+			ORDER BY ICC.strCertificationName
+			FOR XML PATH('')), 1, 1, ''))
+		) COLLATE Latin1_General_CI_AS
+	) CC
 	WHERE cv.intCommodityId = @intCommodityId
 		AND cv.intFutureMarketId = @intFutureMarketId
 		AND cv.intContractStatusId NOT IN (2, 3)

@@ -96,7 +96,8 @@ SELECT DISTINCT strCommodityCode
 	, im.intProductLineId
 	, strGrade  = Grade.strDescription
 	, im.intGradeId
-	, strCertification = Certification.strCertificationName
+	--, strCertification = Certification.strCertificationName
+	, strCertification = CC.strContractCertifications
 	, im.intCertificationId
 	, MTMPoint.strMTMPoint
 	, cd.intMTMPointId
@@ -206,12 +207,23 @@ OUTER APPLY (
 LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = im.intProductTypeId
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = im.intProductLineId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = im.intGradeId
-LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
+--LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
 LEFT JOIN tblICCommodityAttribute REGION
 	ON REGION.intCommodityAttributeId = im.intRegionId
+OUTER APPLY (
+		SELECT strContractCertifications = (LTRIM(STUFF((
+			SELECT ', ' + ICC.strCertificationName
+			FROM tblCTContractCertification CTC
+			JOIN tblICCertification ICC
+				ON ICC.intCertificationId = CTC.intCertificationId
+			WHERE CTC.intContractDetailId = cd.intContractDetailId
+			ORDER BY ICC.strCertificationName
+			FOR XML PATH('')), 1, 1, ''))
+		) COLLATE Latin1_General_CI_AS
+) CC
 WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
 
 UNION SELECT DISTINCT strCommodityCode
@@ -302,7 +314,8 @@ UNION SELECT DISTINCT strCommodityCode
 	, im.intProductLineId
 	, strGrade  = Grade.strDescription
 	, im.intGradeId
-	, strCertification = Certification.strCertificationName
+	--, strCertification = Certification.strCertificationName
+	, strCertification = CC.strContractCertifications
 	, im.intCertificationId
 	, MTMPoint.strMTMPoint
 	, cd.intMTMPointId
@@ -411,12 +424,23 @@ OUTER APPLY (
 LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = im.intProductTypeId
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = im.intProductLineId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = im.intGradeId
-LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
+--LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = im.intCertificationId
 LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = cd.intMTMPointId
 LEFT JOIN tblICCommodityAttribute CLASS
 	ON CLASS.intCommodityAttributeId = im.intClassVarietyId
 LEFT JOIN tblICCommodityAttribute REGION
 	ON REGION.intCommodityAttributeId = im.intRegionId
+OUTER APPLY (
+	SELECT strContractCertifications = (LTRIM(STUFF((
+		SELECT ', ' + ICC.strCertificationName
+		FROM tblCTContractCertification CTC
+		JOIN tblICCertification ICC
+			ON ICC.intCertificationId = CTC.intCertificationId
+		WHERE CTC.intContractDetailId = cd.intContractDetailId
+		ORDER BY ICC.strCertificationName
+		FOR XML PATH('')), 1, 1, ''))
+	) COLLATE Latin1_General_CI_AS
+) CC
 WHERE cd.intPricingTypeId IN (5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode

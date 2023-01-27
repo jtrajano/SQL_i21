@@ -41,7 +41,7 @@ SELECT A.*
 	, strMarkExpiredMonthPosition = CASE WHEN intMarkExpiredMonthPositionId = 1 THEN 'Validate Expired'
 								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
 								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END COLLATE Latin1_General_CI_AS
-	, rv.strRiskView
+	, strRiskView = rv.strRiskView
 	, strTonnageUOM = UOM.strUnitMeasure
 FROM tblRKCompanyPreference A
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId
