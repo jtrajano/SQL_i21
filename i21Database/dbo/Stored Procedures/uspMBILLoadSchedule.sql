@@ -462,4 +462,75 @@ DELETE FROM tblMBILDeliveryDetail WHERE intDispatchOrderDetailId NOT IN(SELECT i
      intDeliveryHeaderId IN(Select intDeliveryHeaderId from tblMBILDeliveryHeader d join tblMBILLoadHeader l on d.intLoadHeaderId = d.intLoadHeaderId where l.intDriverId = @intDriverId)      
 DELETE FROM tblMBILDeliveryHeader WHERE NOT EXISTS(SELECT intDeliveryHeaderId FROM tblMBILDeliveryDetail WHERE tblMBILDeliveryDetail.intDeliveryHeaderId = tblMBILDeliveryHeader.intDeliveryHeaderId) and intLoadHeaderId IN(SELECT intLoadHeaderId FROM tblMBILLoadHeader where intDriverId = @intDriverId)      
 DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatchOrderId FROM tblLGDispatchOrder) and intDispatchOrderId is not null AND intDriverId = @intDriverId 
+
+
+--RetainAge scenario
+Select intLoadHeaderId,intEntityLocationId 
+into #tmpDispatch 
+From vyuMBILPickupHeader
+Where intDriverId = @intDriverId
+Group by intLoadHeaderId,intEntityLocationId 
+having count(1) > 1
+
+Update pickupdetail
+Set pickupdetail.dtmActualPickupFrom = b.dtmActualPickupFrom
+ ,pickupdetail.dtmActualPickupTo = b.dtmActualPickupTo
+,pickupdetail.intShiftId = b.intShiftId
+,pickupdetail.dblPickupQuantity = LGLoadDetail.dblQuantity 
+,pickupdetail.dblQuantity = LGLoadDetail.dblQuantity
+From tblMBILPickupDetail pickupdetail
+INNER JOIN tblLGDispatchOrderDetail LGLoadDetail on pickupdetail.intDispatchOrderDetailId = LGLoadDetail.intDispatchOrderDetailId
+INNER JOIN (
+Select pickup.*,dblDeliverQty = delivery.dblQuantity From tblMBILPickupDetail pickup 
+inner join #tmpDispatch t on t.intLoadHeaderId = pickup.intLoadHeaderId and t.intEntityLocationId = isnull(pickup.intEntityLocationId,pickup.intCompanyLocationId)
+inner join tblMBILDeliveryDetail delivery on pickup.intDispatchOrderDetailId = delivery.intDispatchOrderDetailId
+Where ysnPickup = 1) b on pickupdetail.intLoadHeaderId = b.intLoadHeaderId and isnull(pickupdetail.intEntityLocationId,0) = isnull(b.intEntityLocationId,0) and isnull(pickupdetail.intCompanyLocationId,0) = isnull(b.intCompanyLocationId,0) and b.intItemId = pickupdetail.intItemId
+ 
+Where pickupdetail.ysnPickup = 1
+
+UPDATE pickupdetail
+SET ysnPickup = 1
+,pickupdetail.dtmActualPickupFrom = b.dtmActualPickupFrom
+,pickupdetail.dtmActualPickupTo = b.dtmActualPickupTo
+,pickupdetail.intShiftId = b.intShiftId
+,pickupdetail.dblPickupQuantity = LGLoadDetail.dblQuantity 
+,pickupdetail.dblQuantity = LGLoadDetail.dblQuantity
+,pickupdetail.strBOL = b.strBOL
+,pickupdetail.strPONumber = LGLoadDetail.strPONumber
+,pickupdetail.intCompanyLocationId = b.intCompanyLocationId
+,pickupdetail.dblGross = 0
+,pickupdetail.dblNet = 0
+FROM tblMBILPickupDetail pickupdetail
+INNER JOIN tblLGDispatchOrderDetail LGLoadDetail on pickupdetail.intDispatchOrderDetailId = LGLoadDetail.intDispatchOrderDetailId
+INNER JOIN (
+SELECT pickup.* FROM tblMBILPickupDetail pickup 
+INNER JOIN #tmpDispatch t ON t.intLoadHeaderId = pickup.intLoadHeaderId and t.intEntityLocationId = isnull(pickup.intEntityLocationId,pickup.intCompanyLocationId)
+WHERE ysnPickup = 1) b ON pickupdetail.intLoadHeaderId = b.intLoadHeaderId and isnull(pickupdetail.intEntityLocationId,0) = isnull(b.intEntityLocationId,0) and isnull(pickupdetail.intCompanyLocationId,isnull(b.intCompanyLocationId,0)) = isnull(b.intCompanyLocationId,0) and b.intItemId = pickupdetail.intItemId
+WHERE pickupdetail.ysnPickup = 0
+
+Update tblMBILDeliveryDetail
+set dblQuantity = t.dblQuantity
+From(
+Select min(intDeliveryDetailId)intDeliveryDetailId ,t.dblQuantity
+From tblMBILDeliveryDetail d
+inner join tblTMOrder t on d.intTMDispatchId = t.intDispatchId
+INNER JOIN tblTMDispatch tm on t.intDispatchId = tm.intDispatchID 
+where t.intContractDetailId is not null and t.ysnOverage is null  and isnull(ysnDelivered,0) = 0 and tm.intDriverID = @intDriverId
+Group by t.dblQuantity
+)t 
+Where tblMBILDeliveryDetail.intDeliveryDetailId = t.intDeliveryDetailId
+
+Update tblMBILDeliveryDetail
+set dblQuantity = t.dblQuantity,
+	intContractDetailId = null
+From(
+Select max(intDeliveryDetailId)intDeliveryDetailId ,t.dblQuantity
+From tblMBILDeliveryDetail d
+inner join tblTMOrder t on d.intTMDispatchId = t.intDispatchId
+INNER JOIN tblTMDispatch tm on t.intDispatchId = tm.intDispatchID
+where t.intContractDetailId is null and t.ysnOverage = 1  and isnull(ysnDelivered,0) = 0 and tm.intDriverID = @intDriverId
+Group by t.dblQuantity
+)t 
+Where tblMBILDeliveryDetail.intDeliveryDetailId = t.intDeliveryDetailId
+
 END
