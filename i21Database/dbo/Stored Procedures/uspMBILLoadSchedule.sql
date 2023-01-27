@@ -510,4 +510,30 @@ SELECT pickup.* FROM tblMBILPickupDetail pickup
 INNER JOIN #tmpDispatch t ON t.intLoadHeaderId = pickup.intLoadHeaderId and t.intEntityLocationId = isnull(pickup.intEntityLocationId,pickup.intCompanyLocationId)
 WHERE ysnPickup = 1) b ON pickupdetail.intLoadHeaderId = b.intLoadHeaderId and isnull(pickupdetail.intEntityLocationId,0) = isnull(b.intEntityLocationId,0) and isnull(pickupdetail.intCompanyLocationId,isnull(b.intCompanyLocationId,0)) = isnull(b.intCompanyLocationId,0) and b.intItemId = pickupdetail.intItemId
 WHERE pickupdetail.ysnPickup = 0
+
+Update tblMBILDeliveryDetail
+set dblQuantity = t.dblQuantity
+From(
+Select min(intDeliveryDetailId)intDeliveryDetailId ,t.dblQuantity
+From tblMBILDeliveryDetail d
+inner join tblTMOrder t on d.intTMDispatchId = t.intDispatchId
+INNER JOIN tblTMDispatch tm on t.intDispatchId = tm.intDispatchID 
+where t.intContractDetailId is not null and t.ysnOverage is null  and isnull(ysnDelivered,0) = 0 and tm.intDriverID = @intDriverId
+Group by t.dblQuantity
+)t 
+Where tblMBILDeliveryDetail.intDeliveryDetailId = t.intDeliveryDetailId
+
+Update tblMBILDeliveryDetail
+set dblQuantity = t.dblQuantity,
+	intContractDetailId = null
+From(
+Select max(intDeliveryDetailId)intDeliveryDetailId ,t.dblQuantity
+From tblMBILDeliveryDetail d
+inner join tblTMOrder t on d.intTMDispatchId = t.intDispatchId
+INNER JOIN tblTMDispatch tm on t.intDispatchId = tm.intDispatchID
+where t.intContractDetailId is null and t.ysnOverage = 1  and isnull(ysnDelivered,0) = 0 and tm.intDriverID = @intDriverId
+Group by t.dblQuantity
+)t 
+Where tblMBILDeliveryDetail.intDeliveryDetailId = t.intDeliveryDetailId
+
 END
