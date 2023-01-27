@@ -45,6 +45,10 @@ BEGIN TRY
 				WHEN ISNULL(IMP.strLotNumber, '') = ''
 					THEN 'LOT NUMBER, '
 				ELSE ''
+				END + CASE 
+				WHEN ISNULL(IMP.strSampleTypeName, '') = ''
+					THEN 'SAMPLE TYPE, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
@@ -57,6 +61,7 @@ BEGIN TRY
 			OR ISNULL(IMP.strCatalogueType, '') = ''
 			OR ISNULL(IMP.strSupplier, '') = ''
 			OR ISNULL(IMP.strLotNumber, '') = ''
+			OR ISNULL(IMP.strSampleTypeName, '') = ''
 			)
 
 	-- End Validation for Auction/Non-Auction Sample
