@@ -25,7 +25,7 @@ SELECT Trans.intTransactionId
 	, dblTax = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblTax ELSE Exception.dblTax END
 	, dblTaxExempt = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblTaxExempt ELSE Exception.dblTaxExempt END
 	, strInvoiceNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strInvoiceNumber ELSE Exception.strInvoiceNumber END
-	, dblQtyShipped = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblQtyShipped ELSE Exception.dblQtyShipped END
+	, dblQtyShipped = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblQtyShipped ELSE Exception.dblNet END --Exception.dblQtyShipped (no mapping in exception screen for qty shipped)
 	, strPONumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strPONumber ELSE Exception.strPONumber END
 	, strTerminalControlNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTerminalControlNumber ELSE Exception.strTerminalControlNumber END
 	, dtmDate = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dtmDate ELSE Exception.dtmDate END
@@ -132,7 +132,7 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, Exception.dblTax
 	, Exception.dblTaxExempt
 	, Exception.strInvoiceNumber
-	, Exception.dblQtyShipped
+	, Exception.dblNet -- Exception.dblQtyShipped (no mapping in exception screen for qty shipped)
 	, Exception.strPONumber
 	, Exception.strTerminalControlNumber
 	, Exception.dtmDate
