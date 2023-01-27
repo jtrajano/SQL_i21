@@ -538,6 +538,9 @@
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
     <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
+    <Build Include="dbo\Functions\fnICValidateCheckDigit.sql" />
+    <Build Include="dbo\Functions\fnICValidateCheckDigitIfExists.sql" />
+    <Build Include="dbo\Functions\fnICValidateUPCCode.sql" />
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />

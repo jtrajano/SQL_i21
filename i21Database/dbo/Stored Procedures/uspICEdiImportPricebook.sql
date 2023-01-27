@@ -1160,10 +1160,9 @@ THEN
 		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
 		     , intModifiedByUserId  = @intUserId 
 		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
-		     , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+		     , intCheckDigit		= dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)
 		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
-			 , strLongUPCCode		= Source_Query.strSellingUpcNumber
-
+			 , strLongUPCCode		= dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber)
 /* If not found and it is allowed, insert a new item uom record. */
 WHEN 
 	NOT MATCHED 
@@ -1188,20 +1187,20 @@ THEN
 		, intDataSourceId
 	)
 	VALUES (
-		Source_Query.intItemId							-- intItemId
-		, Source_Query.intUnitMeasureId					-- intUnitMeasureId
-		, 1												-- dblUnitQty
+		Source_Query.intItemId												-- intItemId
+		, Source_Query.intUnitMeasureId										-- intUnitMeasureId
+		, 1																	-- dblUnitQty
 		, dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
-		, Source_Query.strSellingUpcNumber -- strLongUPCCode
-		, dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
-		, CAST(Source_Query.strUpcModifierNumber AS INT)	-- intModifier
-		, Source_Query.ysnStockUnit						-- ysnStockUnit
-		, 1												-- ysnAllowPurchase
-		, 1												-- ysnAllowSale
-		, 1												-- intConcurrencyId
-		, GETDATE()										-- dtmDateCreated
-		, @intUserId									-- intCreatedByUserId
-		, 2												-- intDataSourceId
+		, dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber)			-- strLongUPCCode
+		, dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)		-- intCheckDigit
+		, CAST(Source_Query.strUpcModifierNumber AS INT)					-- intModifier
+		, Source_Query.ysnStockUnit											-- ysnStockUnit
+		, 1																	-- ysnAllowPurchase
+		, 1																	-- ysnAllowSale
+		, 1																	-- intConcurrencyId
+		, GETDATE()															-- dtmDateCreated
+		, @intUserId														-- intCreatedByUserId
+		, 2																	-- intDataSourceId
 	)
 OUTPUT $action
 	 , inserted.intItemId
@@ -1784,13 +1783,13 @@ USING (
 		 , intIssueUOMId					= SaleUOM.intItemUOMId
 		 , intReceiveUOMId					= ReceiveUOM.intItemUOMId
 		 , ysnOpenPricePLU					= CASE Pricebook.strOpenPLU WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END
-		 , intAllowNegativeInventory		= ISNULL(CASE Pricebook.strAllowNegativeInventory WHEN 'Y' THEN 1 WHEN 'N' THEN 3 ELSE NULL END, ItemLocation.intAllowNegativeInventory) 
+		 , intAllowNegativeInventory		= ISNULL(CASE Pricebook.strAllowNegativeInventory WHEN 'Y' THEN 1 WHEN 'N' THEN 3 ELSE 3 END, ItemLocation.intAllowNegativeInventory) 
 		 , intAllowZeroCostTypeId			= ISNULL(CASE Pricebook.strAllowZeroCostTypeId 
 													 WHEN 'Y' THEN 2 
 													 WHEN 'N' THEN 1 
 													 WHEN 'W' THEN 3 
 													 WHEN 'P' THEN 4
-													 ELSE NULL END, ItemLocation.intAllowZeroCostTypeId) 
+													 ELSE 1 END, ItemLocation.intAllowZeroCostTypeId) 
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
 	LEFT JOIN tblICCategory AS Category ON Category.intCategoryId = Item.intCategoryId
