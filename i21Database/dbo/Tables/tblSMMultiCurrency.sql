@@ -41,7 +41,8 @@
 	[intGainOnForwardOffsetId]						INT NULL,
 	[intGainOnSwapOffsetId]							INT NULL,
 	[intGainOnGLOffsetId]							INT NULL,
-	/* Offset */
+	
+	/* Realized */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
 	[intFixedAssetsRealizedId]						INT NULL,
@@ -50,6 +51,8 @@
 	[intGainOnSwapRealizedId]						INT NULL,
 	[intForexDifferenceRealizedId]					INT NULL,
 	[intGeneralLedgerRealizedId]					INT NULL,
+	[intInventoryRealizedId]						INT NULL,
+	[intInventoryInTransitRealizedId]				INT NULL,
 
 	[ysnGeneralLedgerRevalue]						BIT NULL DEFAULT 1,
 	[ysnSalesRevalue]								BIT NULL DEFAULT 1,
