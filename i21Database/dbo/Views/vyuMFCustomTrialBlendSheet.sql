@@ -16,6 +16,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , FLOOR(WorkOrderInputLotQuantity.dblIssuedQuantity) AS dblIssuedQuantity -- Parts
 	 , BlendRequirement.dblBlenderSize										   -- Net Wt per mix
 	 , FLOOR(WorkOrder.dblQuantity) AS dblQuantity							   -- Total Blend Wt
+	 , WorkOrder.strComment			AS strComment							   -- Comment
 FROM tblMFWorkOrder AS WorkOrder
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON WorkOrder.intLocationId = CompanyLocation.intCompanyLocationId
 LEFT JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId
