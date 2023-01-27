@@ -1000,7 +1000,7 @@ BEGIN
 		ELSE IF @strBucketType = 'Company Owned'
 			 OR @strBucketType = 'Sales In-Transit'
 			 OR @strBucketType = 'Purchase In-Transit'
-
+			 OR @strBucketType = 'Dropship In-Transit'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
@@ -1054,6 +1054,7 @@ BEGIN
 				, strInOut = CASE 
 						WHEN @strBucketType = 'Sales In-Transit' OR
 							 @strBucketType = 'Purchase In-Transit' OR
+							 @strBucketType = 'Dropship In-Transit' OR
 							 @strTransactionType = 'Inventory Receipt' OR
 							 @strTransactionType = 'Produce' OR
 							 @strTransactionType = 'Inventory Transfer' OR
