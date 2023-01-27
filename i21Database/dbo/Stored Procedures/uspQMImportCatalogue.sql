@@ -166,7 +166,21 @@ BEGIN TRY
 			)
 
 	-- End Validate Key Fields for Pre-Shipment Sample
-	-- Catalogue Import
+	
+    -- Prepare temporary table that will be used for audit logs to fix performance issue
+    IF OBJECT_ID('tempdb..##tmpQMSample') IS NULL
+    BEGIN
+        SELECT * INTO ##tmpQMSample FROM tblQMSample WHERE 1 = 0
+        CREATE INDEX [IX_tmpQMSample_intSampleId] ON ##tmpQMSample(intSampleId)
+    END
+
+    IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NULL
+    BEGIN
+        SELECT * INTO ##tmpQMTestResult FROM tblQMTestResult WHERE 1 = 0
+        CREATE INDEX [IX_tmpQMTestResult_intSampleId] ON ##tmpQMTestResult(intSampleId)
+    END
+
+    -- Catalogue Import
 	IF EXISTS (
 			SELECT 1
 			FROM tblQMImportLog
@@ -210,6 +224,13 @@ BEGIN TRY
 				AND strImportType = 'Contract Line Allocation'
 			)
 		EXEC uspQMImportContractAllocation @intImportLogId
+
+    -- Delete temp tables for audit logs
+    IF OBJECT_ID('tempdb..##tmpQMSample') IS NOT NULL
+        DROP TABLE ##tmpQMSample
+
+    IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NOT NULL
+        DROP TABLE ##tmpQMTestResult
 
 	COMMIT TRANSACTION
 END TRY
