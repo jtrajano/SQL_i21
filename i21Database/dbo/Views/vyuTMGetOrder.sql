@@ -22,6 +22,9 @@ SELECT D.intDispatchID
 	, dblOveragePrice = ISNULL(D.dblOveragePrice, 0.00)
 	, D.intDriverID
 	, strDriverName = G.strName
+	, ysnCompanySite = ISNULL(S.ysnCompanySite, 0)
+	, S.intLocationId
+	, intStorageLocationId = S.intCompanyLocationSubLocationId
 FROM tblTMDispatch D
 JOIN tblTMSite S ON S.intSiteID = D.intSiteID
 JOIN tblTMCustomer C ON C.intCustomerID = S.intCustomerID
