@@ -82,7 +82,7 @@ SELECT LG.intLoadId
 	, ysnClosed = CASE WHEN (ISNULL(LG.dblDeliveredQuantity, 0.000000) <= 0) THEN CAST(0 AS BIT)
 						ELSE CAST(1 AS BIT) END
 	, LG.strTransUsedBy
-	, ysnBrokered = CASE WHEN (Config.intSellerId IS NOT NULL AND (Config.intSellerId <> ISNULL(LG.intSellerId, 0))) THEN 1 ELSE 0 END
+	, ysnBrokered = CASE WHEN (Config.intSellerId IS NOT NULL AND (Config.intSellerId <> ISNULL(LG.intSellerId, 0))) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	, LG.intSalespersonId
 	, intTMDispatchId = TMO.intDispatchID
 	, strTMOrder = TMO.strTMOrder
