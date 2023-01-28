@@ -333,7 +333,7 @@ SELECT @LogId
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
-WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strSellingUpcNumber,'') IS NOT NULL;
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strSellingUpcNumber,'') IS NULL;
 
 /* Log the records with invalid Order Case UPC */
 
@@ -356,7 +356,7 @@ SELECT @LogId
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
-WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NOT NULL;
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NULL;
 
 
 -- Log the records with duplicate records
