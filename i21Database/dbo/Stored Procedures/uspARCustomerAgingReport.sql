@@ -128,102 +128,108 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-	
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
-										, @dtmDateTo = @dtmDateTo
-										, @strSalesperson = @strSalesperson
-										, @strSourceTransaction = @strSourceTransaction
-										, @strCompanyLocation = @strCompanyLocation
-										, @strCustomerName	= @strCustomerName
-										, @strAccountStatusCode = @strAccountStatusCode
-										, @intEntityUserId = @intEntityUserId
-EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
-							, @intEntityUserId = @intEntityUserId
 
-IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
-BEGIN
-    DROP TABLE #AGEDBALANCES
-END
-
-SELECT strAgedBalances = ISNULL([from], 'All')
-INTO #AGEDBALANCES
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAgedBalances'
-
-IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = 'ARAGINGSUMMARY' AND GETDATE() BETWEEN dtmDate AND DATEADD(MINUTE, 1, dtmDate))
 	BEGIN
-		IF(OBJECT_ID('tempdb..#CUSTOMERWITHBALANCES') IS NOT NULL)
+		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+		VALUES ('ARAGINGSUMMARY', GETDATE())
+
+		EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
+												, @dtmDateTo = @dtmDateTo
+												, @strSalesperson = @strSalesperson
+												, @strSourceTransaction = @strSourceTransaction
+												, @strCompanyLocation = @strCompanyLocation
+												, @strCustomerName	= @strCustomerName
+												, @strAccountStatusCode = @strAccountStatusCode
+												, @intEntityUserId = @intEntityUserId
+
+		EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
+									, @intEntityUserId = @intEntityUserId
+
+		IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
 		BEGIN
-			DROP TABLE #CUSTOMERWITHBALANCES
+			DROP TABLE #AGEDBALANCES
 		END
 
-		SELECT intEntityCustomerId 
-		INTO #CUSTOMERWITHBALANCES
-		FROM tblARCustomerAgingStagingTable
-		WHERE intEntityUserId = @intEntityUserId
-		AND strAgingType = 'Summary'
-		AND (
-			   ((ISNULL(dbl0Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current')))
-			OR ((ISNULL(dbl10Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days')))
-			OR ((ISNULL(dbl30Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days')))
-			OR ((ISNULL(dbl60Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days')))
-			OR ((ISNULL(dbl90Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days')))
-			OR ((ISNULL(dbl91Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
-		)
+		SELECT strAgedBalances = ISNULL([from], 'All')
+		INTO #AGEDBALANCES
+		FROM	@temp_xml_table
+		WHERE	[fieldname] = 'strAgedBalances'
 
-		DELETE FROM tblARCustomerAgingStagingTable
-		WHERE intEntityUserId = @intEntityUserId 
-		  AND strAgingType = 'Summary'
-		  AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM #CUSTOMERWITHBALANCES)
+		IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
+			BEGIN
+				IF(OBJECT_ID('tempdb..#CUSTOMERWITHBALANCES') IS NOT NULL)
+				BEGIN
+					DROP TABLE #CUSTOMERWITHBALANCES
+				END
 
-		UPDATE GL
-		SET GL.dblTotalAR 				= ISNULL(AGING.dblTotalAR, 0)
-		  , GL.dblTotalReportBalance 	= ISNULL(AGING.dblTotalAR, 0) + ISNULL(AGING.dblTotalPrepayments, 0)
-		FROM tblARGLSummaryStagingTable GL
-		OUTER APPLY (
-			SELECT dblTotalAR 			= SUM((ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblCredits, 0))
-				 , dblTotalPrepayments 	= SUM(ISNULL(dblPrepayments, 0))
-			FROM dbo.tblARCustomerAgingStagingTable
-			WHERE intEntityUserId = @intEntityUserId 
-		  	  AND strAgingType = 'Summary'
-		) AGING
-		WHERE intEntityUserId = @intEntityUserId 
-	END
+				SELECT intEntityCustomerId 
+				INTO #CUSTOMERWITHBALANCES
+				FROM tblARCustomerAgingStagingTable
+				WHERE intEntityUserId = @intEntityUserId
+				AND strAgingType = 'Summary'
+				AND (
+					   ((ISNULL(dbl0Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current')))
+					OR ((ISNULL(dbl10Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days')))
+					OR ((ISNULL(dbl30Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days')))
+					OR ((ISNULL(dbl60Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days')))
+					OR ((ISNULL(dbl90Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days')))
+					OR ((ISNULL(dbl91Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
+				)
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
-											 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
-											 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
-											 AND intEntityUserId = @intEntityUserId
-											 AND strAgingType = 'Summary'
+				DELETE FROM tblARCustomerAgingStagingTable
+				WHERE intEntityUserId = @intEntityUserId 
+				  AND strAgingType = 'Summary'
+				  AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM #CUSTOMERWITHBALANCES)
 
-IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
-	BEGIN
-		DELETE FROM tblARCustomerAgingStagingTable WHERE (ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
-									    OR (ISNULL(dblCreditLimit, 0) = 0 AND ISNULL(dblTotalAR, 0) = 0)
-										OR ISNULL(dblCreditLimit, 0) = 0)
-										AND intEntityUserId = @intEntityUserId
-										AND strAgingType = 'Summary'
-	END
+				UPDATE GL
+				SET GL.dblTotalAR 				= ISNULL(AGING.dblTotalAR, 0)
+				  , GL.dblTotalReportBalance 	= ISNULL(AGING.dblTotalAR, 0) + ISNULL(AGING.dblTotalPrepayments, 0)
+				FROM tblARGLSummaryStagingTable GL
+				OUTER APPLY (
+					SELECT dblTotalAR 			= SUM((ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblCredits, 0))
+						 , dblTotalPrepayments 	= SUM(ISNULL(dblPrepayments, 0))
+					FROM dbo.tblARCustomerAgingStagingTable
+					WHERE intEntityUserId = @intEntityUserId 
+		  			  AND strAgingType = 'Summary'
+				) AGING
+				WHERE intEntityUserId = @intEntityUserId 
+			END
 
-IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary')
-	BEGIN
-		INSERT INTO tblARCustomerAgingStagingTable (
-			  strCompanyName
-			, strCompanyAddress
-			, dtmAsOfDate
-			, intEntityUserId
-			, strAgingType
-		)
-		SELECT strCompanyName		= COMPANY.strCompanyName
-			 , strCompanyAddress	= COMPANY.strCompanyAddress
-			 , dtmAsOfDate			= @dtmDateTo
-			 , intEntityUserId		= @intEntityUserId
-			 , strAgingType			= 'Summary'
-		FROM (
-			SELECT TOP 1 strCompanyName
-					   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-			FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-		) COMPANY
-	END
+		DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
+													 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
+													 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
+													 AND intEntityUserId = @intEntityUserId
+													 AND strAgingType = 'Summary'
 
+		IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
+			BEGIN
+				DELETE FROM tblARCustomerAgingStagingTable WHERE (ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
+												OR (ISNULL(dblCreditLimit, 0) = 0 AND ISNULL(dblTotalAR, 0) = 0)
+												OR ISNULL(dblCreditLimit, 0) = 0)
+												AND intEntityUserId = @intEntityUserId
+												AND strAgingType = 'Summary'
+			END
+
+		IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary')
+			BEGIN
+				INSERT INTO tblARCustomerAgingStagingTable (
+					  strCompanyName
+					, strCompanyAddress
+					, dtmAsOfDate
+					, intEntityUserId
+					, strAgingType
+				)
+				SELECT strCompanyName		= COMPANY.strCompanyName
+					 , strCompanyAddress	= COMPANY.strCompanyAddress
+					 , dtmAsOfDate			= @dtmDateTo
+					 , intEntityUserId		= @intEntityUserId
+					 , strAgingType			= 'Summary'
+				FROM (
+					SELECT TOP 1 strCompanyName
+							   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+					FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+				) COMPANY
+			END
+	END 
 SELECT * FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
