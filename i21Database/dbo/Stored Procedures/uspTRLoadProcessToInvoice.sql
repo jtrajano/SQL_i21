@@ -1241,8 +1241,8 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000)  ELSE ISNULL(IE.dblFreightQty, 0.000000) END
-			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000)  ELSE ISNULL(IE.dblFreightQty, 0.000000) END
+			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
+			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
