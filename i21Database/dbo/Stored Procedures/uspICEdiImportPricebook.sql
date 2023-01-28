@@ -333,7 +333,7 @@ SELECT @LogId
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
-WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL;
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strSellingUpcNumber,'') IS NOT NULL;
 
 /* Log the records with invalid Order Case UPC */
 
@@ -1157,7 +1157,7 @@ WHEN
 	AND Source_Query.ysnUpdateExistingRecords = 1 
 THEN 
 	UPDATE SET intUnitMeasureId		= Source_Query.intUnitMeasureId
-		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
+		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(RIGHT(dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 11)) -- Update the short UPC code. 
 		     , intModifiedByUserId  = @intUserId 
 		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
 		     , intCheckDigit		= dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)
@@ -1190,7 +1190,7 @@ THEN
 		Source_Query.intItemId												-- intItemId
 		, Source_Query.intUnitMeasureId										-- intUnitMeasureId
 		, 1																	-- dblUnitQty
-		, dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
+		, dbo.fnSTConvertUPCaToUPCe(RIGHT(dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 11))
 		, dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber)			-- strLongUPCCode
 		, dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)		-- intCheckDigit
 		, CAST(Source_Query.strUpcModifierNumber AS INT)					-- intModifier
@@ -1230,7 +1230,7 @@ INSERT INTO @valid2ndUOM (intEdiPricebookId
 						, strUpcCode)
 SELECT p.intEdiPricebookId
 	 , p.strOrderCaseUpcNumber
-	 , dbo.fnSTConvertUPCaToUPCe(p.strOrderCaseUpcNumber)
+	 , dbo.fnSTConvertUPCaToUPCe(RIGHT(dbo.fnICValidateUPCCode(p.strOrderCaseUpcNumber), 11))
 FROM tblICEdiPricebook p
 LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 OUTER APPLY (SELECT TOP 1 i.intItemId 
@@ -1273,6 +1273,7 @@ INSERT INTO tblICItemUOM (
 	,dblUnitQty
 	,strUpcCode
 	,strLongUPCCode
+	,intCheckDigit
 	,ysnStockUnit
 	,ysnAllowPurchase
 	,ysnAllowSale
@@ -1287,7 +1288,8 @@ SELECT
 	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 	,strUpcCode = v.strUpcCode
-	,strLongUPCCode = p.strOrderCaseUpcNumber
+	,strLongUPCCode = dbo.fnICValidateUPCCode(p.strOrderCaseUpcNumber)
+	,intCheckDigit = dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber)
 	,ysnStockUnit = 0
 	,ysnAllowPurchase = 1
 	,ysnAllowSale = CASE WHEN CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0 THEN 1 ELSE 0 END 
@@ -1441,6 +1443,7 @@ INSERT INTO tblICItemUOM (intItemId
 						, dblUnitQty
 						, strUpcCode
 						, strLongUPCCode
+						, intCheckDigit
 						, ysnStockUnit
 						, ysnAllowPurchase
 						, ysnAllowSale
@@ -1453,8 +1456,9 @@ INSERT INTO tblICItemUOM (intItemId
 SELECT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity1 AS NUMERIC(38, 20)) 
-	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(strAltUPCNumber1)
-	 , strLongUPCCode = p.strAltUPCNumber1
+	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(dbo.fnICValidateUPCCode(strAltUPCNumber1), 11))
+	 , strLongUPCCode = dbo.fnICValidateUPCCode(p.strAltUPCNumber1)
+	 , intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber1)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale1, '') IS NULL THEN NULL 
 							   WHEN p.strPurchaseSale1 = 'P' OR p.strPurchaseSale1 = 'B' THEN 1
@@ -1526,7 +1530,7 @@ INSERT INTO @validAlternate2UOM (intEdiPricebookId
 )
 SELECT p.intEdiPricebookId
 	 , p.strAltUPCNumber2
-	 , dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2)
+	 , dbo.fnSTConvertUPCaToUPCe(RIGHT(dbo.fnICValidateUPCCode(p.strAltUPCNumber2), 11))
 FROM tblICEdiPricebook p
 LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 OUTER APPLY (SELECT TOP 1 i.intItemId 
@@ -1568,6 +1572,7 @@ INSERT INTO tblICItemUOM (intItemId
 						, dblUnitQty
 						, strUpcCode
 						, strLongUPCCode
+						, intCheckDigit
 						, ysnStockUnit
 						, ysnAllowPurchase
 						, ysnAllowSale
@@ -1580,8 +1585,9 @@ INSERT INTO tblICItemUOM (intItemId
 SELECT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity2 AS NUMERIC(38, 20)) 
-	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(strAltUPCNumber2)
-	 , strLongUPCCode = p.strAltUPCNumber2
+	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(dbo.fnICValidateUPCCode(strAltUPCNumber2), 11))
+	 , strLongUPCCode = dbo.fnICValidateUPCCode(p.strAltUPCNumber2)
+	 , intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber2)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale2, '') IS NULL THEN NULL 
 							   WHEN p.strPurchaseSale2 = 'P' OR p.strPurchaseSale2 = 'B' THEN 1
