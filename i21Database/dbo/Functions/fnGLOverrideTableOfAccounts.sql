@@ -1,6 +1,6 @@
   
-CREATE FUNCTION fnGLOverridePostAccounts(  
-    @PostGLEntries RevalTableType READONLY,
+CREATE FUNCTION fnGLOverrideTableOfAccounts(  
+    @OverrideTableType [OverrideTableType] READONLY,
     @ysnOverrideLocation BIT =0,
     @ysnOverrideLOB BIT = 0,
     @ysnOverrideCompany BIT = 0
@@ -8,31 +8,9 @@ CREATE FUNCTION fnGLOverridePostAccounts(
  )  
 RETURNS   
  @tbl  TABLE (  
-    [dtmDate]                   DATETIME         NOT NULL,
-	[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
+   
 	[intAccountId]              INT              NULL,
-	[dblDebit]                  NUMERIC (18, 6)  NULL,
-	[dblCredit]                 NUMERIC (18, 6)  NULL,
-    [dblExchangeRate]           NUMERIC (38, 20) NULL,
-	[dblDebitForeign]           NUMERIC (18, 6)  NULL,
-	[dblCreditForeign]          NUMERIC (18, 6)  NULL,
-    [strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-	[dtmTransactionDate]        DATETIME         NULL,
-	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL, 
-	[intCurrencyId]             INT              NULL,
-	[dtmDateEntered]            DATETIME         NOT NULL,
-	[strJournalLineDescription] NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
-	[intJournalLineNo]			INT              NULL,
-	[ysnIsUnposted]             BIT              NOT NULL,    
-	[intUserId]                 INT              NULL,
-	[intEntityId]				INT              NULL,
-	[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
-	[intTransactionId]          INT              NULL,
-	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
-	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
-	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
-	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
-    intAccountIdOverride INT NULL,
+	intAccountIdOverride INT NULL,
     intLocationSegmentOverrideId INT NULL,
     intLOBSegmentOverrideId INT NULL,
     intCompanySegmentOverrideId INT NULL,
@@ -45,30 +23,9 @@ BEGIN
   
   
 INSERT INTO @tbl (  
- dtmDate,  
- strBatchId,  
+
  intAccountId,  
- dblDebit,  
- dblCredit, 
- dblExchangeRate,
- dblDebitForeign,
- dblCreditForeign,
- strDescription,      
- dtmTransactionDate,   
- strCode, 
- intCurrencyId,  
- dtmDateEntered,  
- strJournalLineDescription,  
- intJournalLineNo,  
- ysnIsUnposted,  
- intUserId,  
- intEntityId,  
- strTransactionId,  
- intTransactionId,  
- strTransactionType,  
- strTransactionForm,  
- strModuleName,  
- intConcurrencyId,  
+ 
  intAccountIdOverride,  
  intLocationSegmentOverrideId,  
  intLOBSegmentOverrideId,  
@@ -78,43 +35,20 @@ INSERT INTO @tbl (
  strOverrideAccountError
 )  
 SELECT   
- dtmDate,  
- strBatchId,  
  intAccountId,  
- dblDebit,  
- dblCredit, 
- dblExchangeRate,
- dblDebitForeign,
- dblCreditForeign,
- strDescription,      
- dtmTransactionDate, 
- strCode, 
- intCurrencyId,  
- dtmDateEntered,  
- strJournalLineDescription,  
- intJournalLineNo,  
- ysnIsUnposted,  
- intUserId,  
- intEntityId,  
- strTransactionId,  
- intTransactionId,  
- strTransactionType,  
- strTransactionForm,  
- strModuleName,  
- intConcurrencyId,  
  intAccountIdOverride,  
  intLocationSegmentOverrideId,  
  intLOBSegmentOverrideId,  
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
- intNewAccountIdOverride,  
+ intNewAccountIdOverride = intAccountIdOverride, -- default to base account 
  strOverrideAccountError
-from @PostGLEntries  
+from @OverrideTableType 
 
 IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
     RETURN
 
-  
+ 
   
 UPDATE A   
 SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
@@ -124,7 +58,7 @@ FROM @tbl A
 WHERE ISNULL(intAccountIdOverride,0) <> 0  
   
  UPDATE A   
- SET A.intAccountId = U.intAccountId,  
+ SET A.intNewAccountIdOverride = U.intAccountId,  
  strOverrideAccountError = CASE WHEN ISNULL(U.intAccountId,0) = 0 THEN 'Account Override Error. ' +  
  A.strNewAccountIdOverride + ' is not an existing GL Account Id.' ELSE NULL END  
  FROM @tbl A   
@@ -151,7 +85,7 @@ OR ISNULL(intCompanySegmentOverrideId,0) <> 0)
   
   
 UPDATE A   
-SET A.intAccountId = U.intAccountId,  
+SET A.intNewAccountIdOverride = U.intAccountId,  
 strOverrideAccountError = CASE WHEN ISNULL(U.intAccountId,0) =0 THEN 'Segment Override Error. ' +  
 A.strNewAccountIdOverride + ' is not an existing GL Account Id.' ELSE NULL END  
 FROM @tbl A   
