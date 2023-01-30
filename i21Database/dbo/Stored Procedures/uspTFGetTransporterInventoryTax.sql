@@ -25,7 +25,7 @@ BEGIN TRY
 		DELETE FROM tblTFTransaction
 	END
 
-	EXEC uspTFGetTransporterBulkInvoiceTax @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom =@DateFrom , @DateTo =@DateTo  , @IsEdi = @IsEdi, @Refresh =0 
+	EXEC uspTFGetTransporterBulkInvoiceTax @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom =@DateFrom , @DateTo =@DateTo  , @IsEdi = @IsEdi, @Refresh =0   , @IsTransporter = 1  
 	
 	EXEC uspTFGetTransporterCustomerInvoiceTax @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom =@DateFrom , @DateTo =@DateTo  , @IsEdi = @IsEdi, @Refresh =0 , @IsTransporter = 1
 
