@@ -110,12 +110,39 @@ DECLARE
   
  IF @ysnPost =1   
  BEGIN  
-
+    IF @strTransactionType = 'CM Forwards'
+    BEGIN
+      SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_Forward,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_Forward,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_Forward,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE IF @strTransactionType = 'CM In-Transit'
+      
+    BEGIN
+       SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_InTransit,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_InTransit,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_InTransit,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE IF @strTransactionType = 'CM Swaps' 
+    BEGIN
+       SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_Swap,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_Swap,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_Swap,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE
+    BEGIN
     SELECT TOP 1 
-    @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
-    @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
-    @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
+      @ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0),
+      @ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0),
+      @ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0)
     FROM tblGLCompanyPreferenceOption
+    END
 
     DECLARE @defaultType NVARCHAR(20)   
     SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable(DEFAULT) f   
@@ -483,11 +510,25 @@ DECLARE
 
 
 declare @OverrideTableType [OverrideTableType]
-INSERT INTO @OverrideTableType(intAccountId, intAccountIdOverride)
-select intAccountId, intAccountIdOverride from @RevalTable
-GROUP BY intAccountId,intAccountIdOverride
+INSERT INTO @OverrideTableType(
+    intAccountId, 
+    intAccountIdOverride, 
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+)
+select intAccountId, 
+    intAccountIdOverride,
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+from @RevalTable
+GROUP BY intAccountId,intAccountIdOverride,
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
 
- 
+ select * into tblGLRevalTable from @OverrideTableType
 
   IF @ysnRecap = 0   
   BEGIN  
@@ -590,7 +631,6 @@ GROUP BY intAccountId,intAccountIdOverride
   END  
   ELSE  
   BEGIN  
- 
    INSERT INTO @RecapTable  (
     dtmDate,  
     strBatchId,  
