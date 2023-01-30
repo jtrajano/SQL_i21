@@ -5,7 +5,8 @@ CREATE PROCEDURE [dbo].[uspICCalculateLIFOCost] (
     @Date DATETIME,                  -- The date of transaction. This is optional and will default to the current date.
     @Cost NUMERIC(18, 6) OUTPUT,     -- The cost of the item. This is the output value of this procedure.
     @ItemUOMId INT,                  -- The item UOM ID. This is optional and will default to ID of the GALLONS uom.
-    @ShowBucket BIT = 0              -- Lists the cost bucket
+    @ShowBucket BIT = 0,              -- Lists the cost bucket
+    @MiscellaneousCost NUMERIC(18, 6) = 0
 )
 AS
 
@@ -97,7 +98,7 @@ SELECT
     , @Date
     , -@Quantity
     , @UnitQty
-    , COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost, @StandardCost, 0)
+    , COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost, @StandardCost, 0) + ISNULL(@MiscellaneousCost, 0)
     , 0
     , 0
     , @DefaultCurrencyId
