@@ -139,7 +139,7 @@ BEGIN
 			SELECT NULL intBillId, 
 			       NULL strVendorOrderNumber, 
 				   'Initial Balance' strTransactionType, 
-				   @dtmDateFrom dtmBillDate, 
+				   DATEADD(DAY, -1, @dtmDateFrom) dtmBillDate, 
 				   NULL dtmDueDate, 
 				   intCurrencyId, 
 				   SUM(dblTotal) dblTotal, 
@@ -151,12 +151,12 @@ BEGIN
 			FROM (
 				SELECT *
 				FROM vyuAPVendorStatement
-				WHERE dtmBillDate BETWEEN '1/1/1900' AND @dtmDateFrom
+				WHERE dtmBillDate BETWEEN '1/1/1900' AND DATEADD(DAY, -1, @dtmDateFrom)
 			) IB
 			GROUP BY intShipToId, intEntityVendorId, intCurrencyId
 			UNION ALL
 			--DETAILS
-			SELECT * FROM vyuAPVendorStatement WHERE dtmBillDate BETWEEN DATEADD(DAY, 1, @dtmDateFrom) AND @dtmDateTo
+			SELECT * FROM vyuAPVendorStatement WHERE dtmBillDate BETWEEN @dtmDateFrom AND @dtmDateTo
 		) A
 		CROSS APPLY tblSMCompanySetup CS
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intShipToId
