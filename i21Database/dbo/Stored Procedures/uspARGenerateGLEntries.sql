@@ -37,7 +37,7 @@ DECLARE @TempGLEntries AS TABLE (
 	, [strCode]							NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL 
 	, [strReference]					NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
 	, [intCurrencyId]					INT              NULL
-	, [dblExchangeRate]					NUMERIC (38, 20) NOT NULL DEFAULT 1
+	, [dblExchangeRate]					NUMERIC (38, 20) NULL DEFAULT 1
 	, [dtmDateEntered]					DATETIME         NOT NULL
 	, [dtmTransactionDate]				DATETIME         NULL
 	, [strJournalLineDescription]		NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL
