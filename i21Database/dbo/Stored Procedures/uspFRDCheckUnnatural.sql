@@ -36,7 +36,7 @@ BEGIN
  --MAIN REPORT      
  
 	INSERT INTO #tempFormula      
-	SELECT intRowId,intRowDetailId,strName,strCondition,strCriteria FROM tblFRRowDesignFilterAccount WHERE  intRowDetailId = @intRowDetailId      
+	SELECT intRowId,intRowDetailId,strName,strCondition,strCriteria FROM tblFRRowDesignFilterAccount WHERE  intRowDetailId = @intRowDetailId AND strName <> 'LOB'        
       
 --CREATE A PREDEFINED TABLE      
 	WHILE EXISTS(SELECT 1 FROM #tempFormula)        
