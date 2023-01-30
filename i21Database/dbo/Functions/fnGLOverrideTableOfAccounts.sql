@@ -64,7 +64,9 @@ WHERE ISNULL(intAccountIdOverride,0) <> 0
  WHERE   
  ISNULL(strNewAccountIdOverride,'') <> '' AND ISNULL(intAccountIdOverride,0) <> 0  
 
-  
+IF EXISTS(SELECT 1 FROM  @tbl WHERE strOverrideAccountError IS NOT NULL)
+    RETURN
+
 UPDATE A   
 SET strNewAccountIdOverride =   
 dbo.fnGLGetOverrideAccountBySegment(   
