@@ -7,8 +7,7 @@ CREATE FUNCTION fnGLOverrideTableOfAccounts(
 
  )  
 RETURNS   
- @tbl  TABLE (  
-   
+ @tbl  TABLE (
 	[intAccountId]              INT              NULL,
 	intAccountIdOverride INT NULL,
     intLocationSegmentOverrideId INT NULL,
@@ -22,10 +21,8 @@ AS
 BEGIN  
   
   
-INSERT INTO @tbl (  
-
- intAccountId,  
- 
+INSERT INTO @tbl (
+ intAccountId,
  intAccountIdOverride,  
  intLocationSegmentOverrideId,  
  intLOBSegmentOverrideId,  
@@ -48,7 +45,6 @@ from @OverrideTableType
 IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
     RETURN
 
- 
   
 UPDATE A   
 SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
@@ -72,7 +68,7 @@ WHERE ISNULL(intAccountIdOverride,0) <> 0
 UPDATE A   
 SET strNewAccountIdOverride =   
 dbo.fnGLGetOverrideAccountBySegment(   
-    A.intAccountId,  
+    A.intNewAccountIdOverride,  
      A.intLocationSegmentOverrideId ,   
      A.intLOBSegmentOverrideId,   
      A.intCompanySegmentOverrideId)  
