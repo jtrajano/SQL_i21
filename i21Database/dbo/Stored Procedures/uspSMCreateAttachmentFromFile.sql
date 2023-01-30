@@ -7,7 +7,8 @@
 	@useDocumentWatcher BIT = 0,
 	@throwError BIT = 1,
 	@attachmentId INT OUTPUT,
-	@error NVARCHAR(1000) = NULL OUTPUT 
+	@error NVARCHAR(1000) = NULL OUTPUT,
+	@strComment NVARCHAR(MAX) = NULL
 AS
 BEGIN
 
@@ -278,6 +279,7 @@ BEGIN
 					, intSize
 					, intConcurrencyId
 					,intTransactionId
+					, strComment
 				)
 				VALUES (
 					@fileName + '.' + @fileExtension
@@ -288,7 +290,8 @@ BEGIN
 					, GETDATE()
 					, DATALENGTH(@fileContent)
 					, 1
-					,@transactionId
+					, @transactionId
+					, @strComment
 				)
 				
 				SET @attachmentId = SCOPE_IDENTITY()
@@ -329,7 +332,8 @@ BEGIN
 					, intSize
 					, intEntityId
 					, intConcurrencyId
-					,intTransactionId
+					, intTransactionId
+					, strComment
 				)
 				SELECT doc.strName
 					, doc.strType
@@ -340,7 +344,8 @@ BEGIN
 					, doc.intSize
 					, doc.intEntityId
 					, 1
-					,@transactionId
+					, @transactionId
+					, @strComment
 				FROM tblSMNewDocument doc 
 				INNER JOIN tblSMUpload upload ON doc.intUploadId = upload.intUploadId
 				WHERE doc.intUploadId = @uploadId
