@@ -1493,6 +1493,7 @@
     <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
+    <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
