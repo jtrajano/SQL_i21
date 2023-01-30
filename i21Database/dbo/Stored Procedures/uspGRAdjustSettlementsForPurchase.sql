@@ -76,7 +76,7 @@ BEGIN
 									ELSE CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN ADJ.intItemId ELSE NULL END
 								END
 		,intWeightUOMId			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
-		,dblNetWeight			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE 0 END
+		,dblNetWeight			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN 1 ELSE 0 END
 		,intCostUOMId			= CASE WHEN ADJ.dblCkoffAdjustment <> 0 THEN b.intItemUOMId ELSE NULL END
 		,dblQuantityToBill		= CASE 
 									WHEN @intAdjustmentTypeId = 1 AND ADJ.intContractDetailId IS NOT NULL THEN ROUND(ADJ.dblAdjustmentAmount / CD.dblCashPrice,6)
@@ -169,6 +169,8 @@ BEGIN
 		,@error = @ErrMsg
 		,@createdVouchersId = @createdVouchersId OUTPUT
 
+		--SELECT TOP 1 'aa',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
+
 	IF @intAdjustmentTypeId = 3 AND ISNULL((SELECT dblCkoffAdjustment FROM @AdjustSettlementsStagingTable),0) <> 0
 	BEGIN
 		INSERT INTO @detailCreated
@@ -194,57 +196,53 @@ BEGIN
 			ON APD.intBillId = APB.intBillId
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 		INNER JOIN @detailCreated ON intBillDetailId = intId
-		WHERE APD.intTaxGroupId IS NULL
+		WHERE APD.intTaxGroupId IS NULL		
+
+		--SELECT TOP 1 'bb',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
 
 		--calculate the tax first to get the rate
 		EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
+		--SELECT TOP 1 'cc',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
+
 		--update qty, cost and tax based on the rate above
-		--NO SPLIT
-		IF EXISTS(SELECT 1 FROM @AdjustSettlementsStagingTable WHERE intSplitId IS NULL)
-		BEGIN
-			UPDATE APD
-			SET dblQtyOrdered	= ROUND(ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) / BDT.dblRate,6)
-				,dblCost		= ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) / ABS(ISNULL(ADJ.dblCkoffAdjustment,0))
-			FROM tblAPBillDetail APD 
-			INNER JOIN tblAPBill APB
-				ON APD.intBillId = APB.intBillId
-			INNER JOIN tblAPBillDetailTax BDT
-				ON BDT.intBillDetailId = APD.intBillDetailId
-			INNER JOIN @detailCreated 
-				ON APD.intBillDetailId = intId
-			INNER JOIN @AdjustSettlementsStagingTable ADJ
-				ON ADJ.intEntityId = APB.intEntityVendorId
-			WHERE APD.dblTax <> 0
-		END
-		ELSE
-		--WITH SPLIT
-		BEGIN			
-			UPDATE APD
-			SET dblQtyOrdered	= ROUND((ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ADJ.dblSplitPercent / 100)) / BDT.dblRate,6)
-				,dblCost		= (ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) * (ADJ.dblSplitPercent / 100))
-									/ 
-								ROUND((ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ADJ.dblSplitPercent / 100)) / BDT.dblRate,6)
-			FROM tblAPBillDetail APD 
-			INNER JOIN tblAPBill APB
-				ON APD.intBillId = APB.intBillId
-			INNER JOIN tblAPBillDetailTax BDT
-				ON BDT.intBillDetailId = APD.intBillDetailId
-			INNER JOIN @detailCreated 
-				ON APD.intBillDetailId = intId
-			OUTER APPLY (
-				SELECT A.dblCkoffAdjustment,A.dblAdjustmentAmount,ESD.dblSplitPercent
-				FROM @AdjustSettlementsStagingTable A
-				INNER JOIN (
-					tblEMEntitySplit ES
-					INNER JOIN tblEMEntitySplitDetail ESD
-						ON ESD.intSplitId = ES.intSplitId
-					INNER JOIN tblEMEntity EM
-						ON EM.intEntityId = ESD.intEntityId
-				) ON ES.intSplitId = A.intSplitId
-			) ADJ
-			WHERE APD.dblTax <> 0
-		END
+		UPDATE APD
+		SET dblQtyOrdered	= CASE WHEN ISNULL(ADJ.dblCkoffAdjustment,0) = 0 OR BDT.strCalculationMethod = 'Unit' 
+								THEN 
+									ROUND(
+										(ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ISNULL(ESD.dblSplitPercent,100) / 100)) / BDT.dblRate
+									,6)
+								ELSE 1 END
+			,dblCost		= CASE WHEN ISNULL(ADJ.dblCkoffAdjustment,0) = 0 OR BDT.strCalculationMethod = 'Unit' 
+								THEN 
+									(
+										(ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) * (ISNULL(ESD.dblSplitPercent,100) / 100)) 
+										/ 
+										ROUND((ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ISNULL(ESD.dblSplitPercent,100) / 100)) / BDT.dblRate, 6)
+									)
+							ELSE 							
+								ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) * (ISNULL(ESD.dblSplitPercent,100) / 100)
+							END
+		FROM tblAPBillDetail APD 
+		INNER JOIN tblAPBill APB
+			ON APD.intBillId = APB.intBillId
+		INNER JOIN tblAPBillDetailTax BDT
+			ON BDT.intBillDetailId = APD.intBillDetailId
+		INNER JOIN @detailCreated 
+			ON APD.intBillDetailId = intId
+		INNER JOIN @AdjustSettlementsStagingTable ADJ
+			ON ADJ.intEntityId = APB.intEntityVendorId
+		LEFT JOIN (
+			tblEMEntitySplit ES
+			INNER JOIN tblEMEntitySplitDetail ESD
+				ON ESD.intSplitId = ES.intSplitId
+			INNER JOIN tblEMEntity EM
+				ON EM.intEntityId = ESD.intEntityId
+		) ON ES.intSplitId = ADJ.intSplitId
+		WHERE APD.dblTax <> 0
+
+		
+		--SELECT TOP 1 'dd',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
 
 		UPDATE APD
 		SET dblQtyReceived = dblQtyOrdered
@@ -254,8 +252,63 @@ BEGIN
 			ON APD.intBillDetailId = intId
 		WHERE APD.dblTax <> 0
 
+		--SELECT TOP 1 'ee',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
+
 		--recalculate the tax with the updated qty
 		EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+		--SELECT TOP 1 'ff',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
+
+		/*START *** NOTE: If the Tax's calculation method is Percentage, Override the tax with the CKOFF Adjustment*/
+		UPDATE APD
+		SET dblTax = CASE 
+						WHEN BDT.strCalculationMethod = 'Unit' THEN APD.dblTax 
+						ELSE ISNULL(ADJ.dblCkoffAdjustment,0) * (ISNULL(ESD.dblSplitPercent,100) / 100) * CASE WHEN APD.dblTax < 0 THEN -1 ELSE 1 END
+					END
+		FROM tblAPBillDetail APD 
+		INNER JOIN tblAPBill APB
+			ON APD.intBillId = APB.intBillId
+		INNER JOIN tblAPBillDetailTax BDT
+			ON BDT.intBillDetailId = APD.intBillDetailId
+		INNER JOIN @detailCreated 
+			ON APD.intBillDetailId = intId
+		INNER JOIN @AdjustSettlementsStagingTable ADJ
+			ON ADJ.intEntityId = APB.intEntityVendorId
+		LEFT JOIN (
+			tblEMEntitySplit ES
+			INNER JOIN tblEMEntitySplitDetail ESD
+				ON ESD.intSplitId = ES.intSplitId
+			INNER JOIN tblEMEntity EM
+				ON EM.intEntityId = ESD.intEntityId
+		) ON ES.intSplitId = ADJ.intSplitId
+
+		UPDATE BDT
+		SET dblAdjustedTax = CASE 
+								WHEN BDT.strCalculationMethod = 'Unit' THEN BDT.dblAdjustedTax
+								ELSE ISNULL(ADJ.dblCkoffAdjustment,0) * (ISNULL(ESD.dblSplitPercent,100) / 100) * CASE WHEN APD.dblTax < 0 THEN -1 ELSE 1 END
+							END
+			,ysnTaxAdjusted = CAST(CASE 
+								WHEN BDT.strCalculationMethod = 'Unit' THEN 0
+								ELSE 1
+							END AS BIT)
+		FROM tblAPBillDetail APD 
+		INNER JOIN tblAPBill APB
+			ON APD.intBillId = APB.intBillId
+		INNER JOIN tblAPBillDetailTax BDT
+			ON BDT.intBillDetailId = APD.intBillDetailId
+		INNER JOIN @detailCreated 
+			ON APD.intBillDetailId = intId
+		INNER JOIN @AdjustSettlementsStagingTable ADJ
+			ON ADJ.intEntityId = APB.intEntityVendorId
+		LEFT JOIN (
+			tblEMEntitySplit ES
+			INNER JOIN tblEMEntitySplitDetail ESD
+				ON ESD.intSplitId = ES.intSplitId
+			INNER JOIN tblEMEntity EM
+				ON EM.intEntityId = ESD.intEntityId
+		) ON ES.intSplitId = ADJ.intSplitId
+		/*END *** NOTE: If the Tax's calculation method is Percentage, Override the tax with the CKOFF Adjustment*/
+		--SELECT TOP 1 'GG',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail ORDER BY intBillDetailId DESC
 	END
 
 	IF @createdVouchersId IS NOT NULL
