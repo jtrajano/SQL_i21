@@ -591,8 +591,6 @@ GROUP BY intAccountId,intAccountIdOverride,
     intLOBSegmentOverrideId,
     intCompanySegmentOverrideId
 
- select * into tblGLRevalTable from @OverrideTableType
-
   IF @ysnRecap = 0   
   BEGIN  
    INSERT INTO @RecapTable  (
