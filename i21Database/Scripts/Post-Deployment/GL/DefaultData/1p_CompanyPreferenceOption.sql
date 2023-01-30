@@ -77,9 +77,3 @@ IF EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnREOverrideLocatio
     UPDATE tblGLCompanyPreferenceOption SET ysnREOverride =1
 
 GO
-
-IF EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnRevalOverrideLocation =1 OR ysnRevalOverrideLOB = 1 OR ysnRevalOverrideCompany =1 )
-    UPDATE tblGLCompanyPreferenceOption SET ysnRevalOverride =1
-
-GO
-
