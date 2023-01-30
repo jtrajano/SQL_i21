@@ -66,6 +66,7 @@ DECLARE @intId AS INT
 		,@strSourceNumber AS NVARCHAR(100)
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
+		,@dblForexCost AS NUMERIC(38, 20)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -99,6 +100,7 @@ INSERT INTO @StockToPost (
     ,[dblQty]
 	,[dblUOMQty]
     ,[dblCost]
+	,[dblForexCost]
 	,[dblValue]
 	,[dblSalesPrice]
 	,[intCurrencyId]
@@ -128,7 +130,7 @@ INSERT INTO @StockToPost (
 	,[strSourceType] 
 	,[strSourceNumber]
 	,[strBOLNumber]
-	,[intTicketId] 
+	,[intTicketId] 	
 )
 SELECT
 	[intItemId] = p.intItemId 
@@ -146,6 +148,7 @@ SELECT
     ,[dblQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateQtyBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblQty) ELSE p.dblQty END 
 	,[dblUOMQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN iu.dblUnitQty ELSE p.dblUOMQty END 
     ,[dblCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblCost) ELSE p.dblCost END 
+	,[dblForexCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblForexCost) ELSE p.dblForexCost END 
 	,[dblValue] = p.dblValue 
 	,[dblSalesPrice] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblSalesPrice) ELSE p.dblSalesPrice END 
 	,[intCurrencyId] = p.intCurrencyId
@@ -175,7 +178,7 @@ SELECT
 	,[strSourceType] = p.strSourceType 
 	,[strSourceNumber] = p.strSourceNumber 
 	,[strBOLNumber] = p.strBOLNumber 
-	,[intTicketId] = p.intTicketId
+	,[intTicketId] = p.intTicketId	
 FROM 
 	@ItemsToPost p 
 	INNER JOIN tblICItem i 
@@ -215,6 +218,7 @@ SELECT  p.intId
 		,p.dblQty
 		,p.dblUOMQty
 		,p.dblCost
+		,p.dblForexCost
 		,p.dblSalesPrice
 		,p.intCurrencyId
 		,p.intTransactionId
@@ -254,6 +258,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblQty
 	,@dblUOMQty
 	,@dblCost
+	,@dblForexCost
 	,@dblSalesPrice
 	,@intCurrencyId
 	,@intTransactionId
@@ -275,7 +280,6 @@ FETCH NEXT FROM loopItems INTO
 	,@strSourceNumber 
 	,@strBOLNumber 
 	,@intTicketId
-
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -318,6 +322,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -353,6 +358,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -387,6 +393,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -422,6 +429,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			,@intTransactionId
@@ -457,6 +465,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblUnitRetail
 			,@dblSalesPrice
 			,@intCurrencyId
@@ -511,6 +520,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -523,6 +533,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@ysnTransferOnSameLocation 
 					,@intSourceEntityId
 					,@strSourceType 
 					,@strSourceNumber 
@@ -544,6 +555,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -577,6 +589,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -611,6 +624,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblSalesPrice
 					,@intCurrencyId
 					,@intTransactionId
@@ -645,6 +659,7 @@ BEGIN
 					,@dblQty
 					,@dblUOMQty
 					,@dblCost
+					,@dblForexCost
 					,@dblUnitRetail
 					,@dblSalesPrice
 					,@intCurrencyId
@@ -681,6 +696,7 @@ BEGIN
 				,@dblQty 
 				,@dblUOMQty 
 				,@dblCost 
+				,@dblForexCost
 				,@dblSalesPrice 
 				,@intCurrencyId 
 				,@intTransactionId 
@@ -829,6 +845,7 @@ BEGIN
 		,@dblQty
 		,@dblUOMQty
 		,@dblCost
+		,@dblForexCost
 		,@dblSalesPrice
 		,@intCurrencyId
 		,@intTransactionId
@@ -974,6 +991,7 @@ BEGIN
 				,@dblQty  = @dblQty
 				,@dblUOMQty = 0
 				,@dblCost = 0
+				,@dblForexCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
 				,@intCurrencyId = NULL 
@@ -1097,6 +1115,7 @@ BEGIN
 				,@dblQty  = @dblQty
 				,@dblUOMQty = 0
 				,@dblCost = 0
+				,@dblForexCost = 0
 				,@dblValue = @dblAutoVariance
 				,@dblSalesPrice = 0
 				,@intCurrencyId = NULL 

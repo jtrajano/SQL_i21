@@ -1,7 +1,7 @@
 CREATE PROCEDURE uspCMCreateBankTransferSwapShortPostEntries  
 @strTransactionId NVARCHAR(20),  
 @strBatchId NVARCHAR(40),  
-@intDefaultCurrencyId INT = 3,  
+@intDefaultCurrencyId INT,  
 @ysnPostedInTransit BIT = 0  
 AS  
   
@@ -10,21 +10,21 @@ DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
  ,@MODULE_NAME AS NVARCHAR(100)    = 'Cash Management' -- Module where this posting code belongs.      
  ,@TRANSACTION_FORM AS NVARCHAR(100)   = 'Bank Transfer'      
  ,@intBTInTransitAccountId INT  
- ,@intBTForexDiffAccountId INT
+ ,@intRealizedGainOnSwap INT
  ,@dtmDate DATETIME  
   
   
 SELECT TOP 1 @intBTInTransitAccountId = intBTInTransitAccountId FROM tblCMCompanyPreferenceOption    
-  IF @intBTInTransitAccountId IS NULL    
+  IF ISNULL(@intBTInTransitAccountId,0) = 0
 BEGIN    
     RAISERROR('Cannot find the in transit GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
-SELECT TOP 1 @intBTForexDiffAccountId = intBTForexDiffAccountId FROM tblCMCompanyPreferenceOption    
-  IF @intBTForexDiffAccountId IS NULL    
+SELECT TOP 1 @intRealizedGainOnSwap = intGainOnSwapRealizedId FROM tblSMMultiCurrency
+  IF ISNULL(@intRealizedGainOnSwap,0) = 0
 BEGIN    
-    RAISERROR('Cannot find the Forex Difference GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Realized Gin on Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
@@ -141,21 +141,21 @@ BEGIN
 END  
 ELSE  
 BEGIN  
-DECLARE @intBTForwardToFXGLAccountId INT  -- payable
-, @intBTForwardFromFXGLAccountId INT -- receivable
+DECLARE @intBTSwapToFXGLAccountId INT  -- payable
+, @intBTSwapFromFXGLAccountId INT -- receivable
 
-SELECT TOP 1 @intBTForwardToFXGLAccountId = intBTForwardToFXGLAccountId,@intBTForwardFromFXGLAccountId = intBTForwardFromFXGLAccountId 
+SELECT TOP 1 @intBTSwapToFXGLAccountId = intBTSwapToFXGLAccountId, @intBTSwapFromFXGLAccountId = intBTSwapFromFXGLAccountId 
 FROM tblCMCompanyPreferenceOption    
 
-IF @intBTForwardToFXGLAccountId IS NULL    
+IF @intBTSwapToFXGLAccountId IS NULL    
 BEGIN    
-    RAISERROR('Cannot find the Accrued Payable Forward GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Account Payable Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
-IF @intBTForwardFromFXGLAccountId IS NULL    
+IF @intBTSwapFromFXGLAccountId IS NULL    
 BEGIN    
-    RAISERROR('Cannot find the Accrued Receivable Forward GL Account ID Setting in Company Configuration.', 11, 1)      
+    RAISERROR('Cannot find the Account Receivable Swap GL Account ID Setting in Company Configuration.', 11, 1)      
     RETURN  
 END   
 
@@ -257,7 +257,7 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForexDiffAccountId  
+        ,[intAccountId]          = @intRealizedGainOnSwap  
         ,[dblDebit]              = 0  
         ,[dblCredit]             = dblDifference  
         ,[dblDebitForeign]       = 0  
@@ -267,7 +267,7 @@ END
         ,[strDescription]        = A.strDescription      
         ,[strCode]               = @GL_DETAIL_CODE      
         ,[strReference]          = A.strReferenceTo  
-        ,[intCurrencyId]         = intCurrencyIdAmountFrom
+        ,[intCurrencyId]         = @intDefaultCurrencyId
         ,[intCurrencyExchangeRateTypeId] =  NULL
         ,[dblExchangeRate]       = 1
         ,[dtmDateEntered]        = GETDATE()      
@@ -287,11 +287,11 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForwardToFXGLAccountId
+        ,[intAccountId]          = @intBTSwapToFXGLAccountId
         ,[dblDebit]              = 0
-        ,[dblCredit]             = dblAmountFrom
+        ,[dblCredit]             = dblPayableFn -- dblAmountFrom
         ,[dblDebitForeign]       = 0
-        ,[dblCreditForeign]      = dblAmountFrom/dblRateAmountTo  
+        ,[dblCreditForeign]      = dblPayableFx -- dblAmountFrom/dblRateAmountTo  
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -299,7 +299,7 @@ END
         ,[strReference]          = A.strReferenceTo  
         ,[intCurrencyId]         = intCurrencyIdAmountTo
         ,[intCurrencyExchangeRateTypeId] =  intRateTypeIdAmountTo
-        ,[dblExchangeRate]       = dblRateAmountTo
+        ,[dblExchangeRate]       = dblPayableFn/dblPayableFx
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'Currency Payable'
@@ -317,10 +317,10 @@ END
         ,[intTransactionId]      = intTransactionId      
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
-        ,[intAccountId]          = @intBTForwardFromFXGLAccountId
-        ,[dblDebit]              = dblAmountFrom
+        ,[intAccountId]          = @intBTSwapFromFXGLAccountId
+        ,[dblDebit]              = dblReceivableFn-- dblAmountFrom
         ,[dblCredit]             = 0
-        ,[dblDebitForeign]       = dblAmountFrom
+        ,[dblDebitForeign]       = dblReceivableFx-- dblAmountForeignFrom
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
@@ -329,7 +329,7 @@ END
         ,[strReference]          = A.strReferenceTo  
         ,[intCurrencyId]         = intCurrencyIdAmountFrom
         ,[intCurrencyExchangeRateTypeId] =  intRateTypeIdAmountFrom
-        ,[dblExchangeRate]       = dblRateAmountFrom
+        ,[dblExchangeRate]       = dblReceivableFn/dblReceivableFx
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'Currency Receivable'

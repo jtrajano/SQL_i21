@@ -19,13 +19,13 @@ DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
   
     IF ISNULL(@intBTForwardToFXGLAccountId ,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
         RETURN
     END  
   
     IF ISNULL(@intBTForwardFromFXGLAccountId,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
         RETURN
     END  
 
@@ -86,7 +86,7 @@ BEGIN
         ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom  END  
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Payable'
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
@@ -124,7 +124,7 @@ BEGIN
                                         ELSE dblRateAmountTo END  
         ,[dtmDateEntered]       = GETDATE()    
         ,[dtmTransactionDate]   = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Receivable'  
         ,[ysnIsUnposted]        = 0     
         ,[intConcurrencyId]     = 1    
         ,[intUserId]            = A.intLastModifiedUserId    
@@ -194,7 +194,7 @@ BEGIN
         ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountFrom  END  
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Payable'
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
@@ -232,7 +232,7 @@ BEGIN
                                         ELSE dblRateAmountTo END  
         ,[dtmDateEntered]       = GETDATE()    
         ,[dtmTransactionDate]   = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Accrued Receivable'    
         ,[ysnIsUnposted]        = 0     
         ,[intConcurrencyId]     = 1    
         ,[intUserId]            = A.intLastModifiedUserId    
@@ -254,10 +254,10 @@ BEGIN
         ,[dtmDate]              = @dtmDate
         ,[strBatchId]           = @strBatchId    
         ,[intAccountId]         = A.intGLAccountIdTo
-        ,[dblDebit]             = dblAmountSettlementTo
+        ,[dblDebit]             = ISNULL(dblAmountSettlementTo, dblAmountTo)
         ,[dblCredit]            = 0     
         ,[dblDebitForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo   
-                                    THEN dblAmountSettlementTo ELSE  dblAmountForeignTo END  
+                                    THEN ISNULL(dblAmountSettlementTo, dblAmountTo) ELSE  dblAmountForeignTo END  
         ,[dblCreditForeign]     = 0    
         ,[dblDebitUnit]         = 0    
         ,[dblCreditUnit]        = 0    
@@ -289,10 +289,10 @@ BEGIN
         ,[strBatchId]            = @strBatchId    
         ,[intAccountId]          = A.intGLAccountIdFrom
         ,[dblDebit]              = 0    
-        ,[dblCredit]             = dblAmountSettlementFrom
+        ,[dblCredit]             = ISNULL(dblAmountSettlementFrom, dblAmountFrom)
         ,[dblDebitForeign]       = 0    
         ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom   
-                                    THEN dblAmountSettlementFrom ELSE  dblAmountForeignFrom END  
+                                    THEN ISNULL(dblAmountSettlementFrom, dblAmountFrom) ELSE  dblAmountForeignFrom END  
         ,[dblDebitUnit]          = 0    
         ,[dblCreditUnit]         = 0    
         ,[strDescription]        = A.strDescription    

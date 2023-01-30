@@ -18,7 +18,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strCustomerNumber		= C.strCustomerNumber	
 	 , strItemNo 				= ITEM.strItemNo 
 	 , strUnitCostCurrency		= ID.strUnitCostCurrency
-	 , strItemDescription		= ITEM.strDescription
+	 , strItemDescription		= ISNULL(ITEM.strDescription, ID.strItemDescription)
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
 	 , strUnitMeasure 			= ID.[strUnitMeasure]
@@ -32,7 +32,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , ysnPosted				= ISNULL(I.ysnPosted, 0)
 	 , ysnImpactInventory		= ISNULL(I.ysnImpactInventory, 0)
 	 , strAccountingPeriod      = AccPeriod.strAccountingPeriod
-	 , intDaysOld				= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
+	 , intDaysOld				= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETUTCDATE() AS DATE))
 	 , intDaysToPay				= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 								   	   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 							  	  END
@@ -70,6 +70,7 @@ INNER JOIN (
 		 , strFeedDiet
 		 , dblShipmentNetWt
 		 , intEntitySalespersonId
+		 , strItemDescription
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID

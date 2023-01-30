@@ -45,7 +45,9 @@ RETURNS @returntable	TABLE
 	dblBalance				NUMERIC(18,6),
 	dblAppliedQty			NUMERIC(18,6),
 	intNoOfLoad				INT,
-	dblQuantityPerLoad		NUMERIC(18,6)
+	dblQuantityPerLoad		NUMERIC(18,6),
+	intInvoiceCurrencyId	INT,
+	strInvoiceCurrency		NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -62,7 +64,7 @@ BEGIN
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
 				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
 				dblRatio,						dblBalance,					dblAppliedQty,					intNoOfLoad,
-				dblQuantityPerLoad
+				dblQuantityPerLoad,				intInvoiceCurrencyId,		strInvoiceCurrency
 
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -77,7 +79,7 @@ BEGIN
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
 				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
 				dblRatio,						dblBalance,					dblAppliedQty,					intNoOfLoad,
-				dblQuantityPerLoad
+				dblQuantityPerLoad,				intInvoiceCurrencyId,		strInvoiceCurrency
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

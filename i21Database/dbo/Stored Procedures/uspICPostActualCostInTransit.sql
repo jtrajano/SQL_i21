@@ -11,6 +11,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
+	,@dblForexCost AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -30,6 +31,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@strSourceNumber NVARCHAR(100) = NULL 
 	,@strBOLNumber NVARCHAR(100) = NULL 
 	,@intTicketId INT = NULL 
+	,@dblValue AS NUMERIC(38,20) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -61,6 +63,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @ForexCostUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -68,11 +71,13 @@ DECLARE @NewActualCostId AS INT
 DECLARE @UpdatedActualCostId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
-DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
 DECLARE @intReturnValue AS INT 
 DECLARE @dtmCreated DATETIME 
+
+DECLARE @InTransitAdjustmentTypeId AS INT 
+SELECT TOP 1 @InTransitAdjustmentTypeId = intTransactionTypeId FROM tblICInventoryTransactionType typ WHERE typ.strName = 'In-Transit Adjustment'
 
 IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
 BEGIN 	
@@ -120,12 +125,18 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedActualCostId OUTPUT 
+				,@intCurrencyId OUTPUT  
+				,@intForexRateTypeId OUTPUT 
+				,@dblForexRate OUTPUT 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblForexCostToUse AS NUMERIC(38,20) = ISNULL(@ForexCostUsed, @dblForexCost)
 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
@@ -137,6 +148,7 @@ BEGIN
 					,@dblQty = @dblComputedQty
 					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
+					,@dblForexCost = @dblForexCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
@@ -207,6 +219,7 @@ BEGIN
 				,@dtmDate = @dtmDate
 				,@dblQty = @FullQty
 				,@dblCost = @dblCost
+				,@dblForexCost = @dblForexCost
 				,@dblUOMQty = @dblUOMQty
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -264,6 +277,11 @@ BEGIN
 				,@UpdatedActualCostId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@intCurrencyId 
+				,@intForexRateTypeId 
+				,@dblForexRate 
+				,@dblForexCost 
+				,@ForexCostUsed OUTPUT
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -307,6 +325,7 @@ BEGIN
 							,@dblQty = 0
 							,@dblUOMQty = 0
 							,@dblCost = 0
+							,@dblForexCost = 0 
 							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
 							,@dblSalesPrice = @dblSalesPrice
 							,@intCurrencyId = @intCurrencyId
@@ -374,5 +393,96 @@ BEGIN
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewActualCostId IS NOT NULL 
+	END 
+
+	-- Adjust Value
+	ELSE IF (ISNULL(@dblValue, 0) <> 0)
+	BEGIN 
+		-- Convert the @dblValue (in foreign) to functional currency. 
+		DECLARE @dblValueInFunctionalCurrency AS NUMERIC(38, 20) 
+		SET @dblValueInFunctionalCurrency = dbo.fnMultiply(@dblValue, ISNULL(@dblForexRate, 1)) 	
+
+		-- Insert the inventory transaction record
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
+				@intItemId = @intItemId
+				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
+				,@intSubLocationId = NULL -- @intSubLocationId
+				,@intStorageLocationId = NULL -- @intStorageLocationId
+				,@dtmDate = @dtmDate
+				,@dblQty = NULL 
+				,@dblUOMQty = NULL 
+				,@dblCost = NULL 
+				,@dblForexCost = NULL 
+				,@dblValue = @dblValueInFunctionalCurrency
+				,@dblSalesPrice = @dblSalesPrice
+				,@intCurrencyId = @intCurrencyId
+				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
+				,@strTransactionId = @strTransactionId
+				,@strBatchId = @strBatchId
+				,@intTransactionTypeId = @InTransitAdjustmentTypeId -- In-Transit Adjustment Type Id
+				,@intLotId = NULL  
+				,@intRelatedInventoryTransactionId = NULL 
+				,@intRelatedTransactionId = NULL 
+				,@strRelatedTransactionId = NULL 
+				,@strTransactionForm = @strTransactionForm
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@intCostingMethod = @LOTCOST
+				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 	
+				,@intFobPointId = @intFobPointId	
+				,@intInTransitSourceLocationId = @intInTransitSourceLocationId	
+				,@intForexRateTypeId = @intForexRateTypeId
+				,@dblForexRate = @dblForexRate
+				,@strActualCostId = @strActualCostId
+				,@intSourceEntityId = @intSourceEntityId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
+				,@dtmCreated = @dtmCreated OUTPUT 
+				,@dblForexValue = @dblValue 
+
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
+		-- Log the Value changes for the in-transit
+		IF @InventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			INSERT INTO tblICInventoryValueAdjustmentLog (
+				[intInventoryTransactionId]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intLotId]
+				,[strActualCostId]
+				,[dblValue]
+				,[dblForexValue]
+				,[intCurrencyId]
+				,[dblForexRate]
+				,[ysnIsUnposted]
+				,[dtmCreated]
+				,[strRelatedTransactionId]
+				,[intRelatedTransactionId]
+				,[intRelatedTransactionDetailId]
+				,[intCreatedUserId]
+				,[intConcurrencyId]
+			)
+			SELECT 
+				[intInventoryTransactionId] = @InventoryTransactionIdentityId
+				,[intItemId] = @intItemId
+				,[intItemLocationId] = @intItemLocationId
+				,[intLotId] = NULL
+				,[strActualCostId] = @strActualCostId
+				,[dblValue] = @dblValueInFunctionalCurrency
+				,[dblForexValue] = @dblValue 
+				,[intCurrencyId] = @intCurrencyId
+				,[dblForexRate] = @dblForexRate
+				,[ysnIsUnposted] = 0 
+				,[dtmCreated] = GETDATE()
+				,[strRelatedTransactionId] = @strTransactionId
+				,[intRelatedTransactionId] = @intTransactionId
+				,[intRelatedTransactionDetailId] = @intTransactionDetailId 
+				,[intCreatedUserId] = @intEntityUserSecurityId
+				,[intConcurrencyId] = 1
+		END 
 	END 
 END 

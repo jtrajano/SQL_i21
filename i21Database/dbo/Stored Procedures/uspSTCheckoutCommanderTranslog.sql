@@ -73,7 +73,7 @@ BEGIN
 						@strRegisterClass	NVARCHAR(50),
 						@intRegisterClassId INT
 
-				SELECT
+				SELECT TOP 1
 					@intStoreId			= chk.intStoreId,
 					@strRegisterClass	= r.strRegisterClass,
 					@intRegisterClassId = setup.intRegisterSetupId

@@ -134,7 +134,7 @@ BEGIN
 			, H.intCommodityId
 			, M.intMatchFuturesPSDetailId
 			, intSort = 1
-			, strSourceTransactionNo = M.strLInternalTradeNo + ' and ' + M.strSInternalTradeNo
+			, strSourceTransactionNo = M.strLInternalTradeNo + ', ' + M.strSInternalTradeNo
 		FROM tblRKMatchFuturesPSHeader H
 		INNER JOIN vyuRKMatchedPSTransaction M ON M.intMatchFuturesPSHeaderId = H.intMatchFuturesPSHeaderId
 		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId

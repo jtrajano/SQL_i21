@@ -60,9 +60,14 @@
 	[strLocationRoute]				NVARCHAR (1000)   COLLATE Latin1_General_CI_AS NULL,
 	[dtmOperatingHoursStartTime]	DATETIME        NULL,
 	[dtmOperatingHoursEndTime]      DATETIME        NULL,
-	[strVATNo]						NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	[strVATNo]						NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
+	[strSaleUnits]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strOurFiscalRepName]			NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+	[strOurFiscalRepAddress]		NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
+	[strRemarks]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+
     CONSTRAINT [PK_dbo.tblEMEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblEMEntityLocation_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),

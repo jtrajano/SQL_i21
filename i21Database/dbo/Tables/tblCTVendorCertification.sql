@@ -3,7 +3,7 @@
 	[intCertificationProgramId] [int] IDENTITY(1,1) NOT NULL,
 	[intCertificationId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
-	[strCertificationId] nvarchar(50) NULL,
+	[strCertificationId] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmValidFrom] datetime NOT NULL,
 	[dtmValidTo] datetime NOT NULL,
 	[intSort] [int] NULL,

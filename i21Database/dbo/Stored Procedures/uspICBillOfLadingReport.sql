@@ -49,6 +49,8 @@ BEGIN TRY
 			, '' AS 'strCustomerName'
 			, '' AS 'strShipFromLocation'
 			, '' AS 'strReferenceNumber'
+			, '' AS 'blbHeaderLogo'
+			, '' AS 'strLogoType'
 		RETURN
 	END
 
@@ -95,6 +97,30 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strOrderType'
 
+	DECLARE 
+		@imgLogo VARBINARY(MAX)
+		,@strLogoType NVARCHAR(50)
+		,@intCompanyLocationId INT
+
+	SELECT @intCompanyLocationId = intShipFromLocationId
+	FROM vyuICGetInventoryShipmentBillOfLading  
+	WHERE strShipmentNumber = @strShipmentNo 
+
+	SELECT TOP 1 
+		@imgLogo = imgLogo
+		,@strLogoType = 'Logo'
+	FROM 
+		tblSMLogoPreference
+	WHERE 
+		ysnAllOtherReports = 1
+		AND intCompanyLocationId = @intCompanyLocationId
+
+	IF @imgLogo IS NULL
+	BEGIN
+		SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header') ,@strLogoType = 'Attachment'
+	END
+
+
 	IF @strShipmentNo IS NOT NULL
 	BEGIN
 		SELECT *
@@ -132,14 +158,18 @@ BEGIN TRY
 				,Lot.strLotAlias
 				,ISNULL(ShipmentItemLot.dblQuantityShipped, ISNULL(ShipmentItem.dblQtyToShip, 0)) AS dblQty
 				,ISNULL(ShipmentItemLot.strLotUOM, ShipmentItem.strUnitMeasure) AS strUOM
-				,ISNULL(ShipmentItemLot.dblNetWeight,0) AS dblNetWeight
+				,ISNULL(ShipmentItemLot.dblNetWeight, ShipmentItem.dblNet) AS dblNetWeight
 				,SUM(ShipmentItemLot.dblNetWeight) OVER() AS dblTotalWeight
 				,intWarehouseInstructionHeaderId = ISNULL(WarehouseInstruction.intWarehouseInstructionHeaderId, 0)
 				,Shipment.strCompanyName
 				,Shipment.strCompanyAddress
 				,ParentLot.strParentLotNumber
 				,Shipment.strCustomerName
-				,Shipment.strReferenceNumber, Shipment.intShipToCompanyLocationId, Shipment.intShipToLocationId
+				,Shipment.strReferenceNumber
+				,Shipment.intShipToCompanyLocationId
+				,Shipment.intShipToLocationId
+				,blbHeaderLogo = @imgLogo 
+				,strLogoType = @strLogoType 
 			FROM vyuICGetInventoryShipmentBillOfLading Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId

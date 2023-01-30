@@ -28,10 +28,10 @@ DELETE tblFRRowDesignCurrencies WHERE intRowId = @intRowId
   
 SET @Currency = ( SELECT intCurrencyID FROM tblFRRowDesignCurrencies WHERE intRowDetailId = @intRowId)  
           
-INSERT INTO tblFRRowDesignCurrencies          
+INSERT INTO tblFRRowDesignCurrencies (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency,ysnUnnaturalAccount)                
 SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,            
 NULL as strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,            
-ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,'0' intCurrencyID,strCurrency            
+ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,0 intCurrencyID,strCurrency,ysnUnnaturalAccount
 FROM tblFRRowDesignDrillDown            
 WHERE intRowId = @intRowId AND ysnShowCurrencies = 1          
             
@@ -53,10 +53,10 @@ BEGIN
   END            
             
  --Final Query            
- INSERT INTO tblFRRowDesignCurrencies            
+ INSERT INTO tblFRRowDesignCurrencies (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency,ysnUnnaturalAccount)                  
  SELECT T0.intRowId,intRefNo,strDescription + ' - ' + T1.strCurrency collate SQL_Latin1_General_CP1_CI_AS,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,            
  NULL as strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,            
- ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,T1.intCurrencyID,T1.strCurrency    
+ ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,T1.intCurrencyID,T1.strCurrency,T0.ysnUnnaturalAccount    
  FROM tblFRRowDesignDrillDown T0            
  INNER JOIN #TMPCURRENCIES T1             
  ON T0.intRowDetailId = T1.intRowDetailId            

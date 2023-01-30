@@ -101,7 +101,7 @@
 			,a.intGrossProfit
 			,a.intGrossRevenue
 			,a.strOpportunityDescription
-			,a.intBrandId
+			,a.intBrandMaintenanceId
 			,t.strIndustrySegment
 			,u.strOpportunityType
 			,v.strBrand
@@ -127,4 +127,4 @@
 			left join notclosed s on s.intRecordId = a.intOpportunityId
 			left join tblCRMIndustrySegment t on t.intIndustrySegmentId = a.intIndustrySegmentId
 			left join tblCRMOpportunityType u on u.intOpportunityTypeId = a.intOpportunityTypeId
-			left join tblCRMBrand v on v.intBrandId = a.intBrandId
+			left join tblCRMBrandMaintenance v on v.intBrandMaintenanceId = a.intBrandMaintenanceId

@@ -5,6 +5,7 @@
 	[strBrandFieldName]			 NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strI21FieldName]			 NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strComment]				 NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strCustomValue]			 NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int]	 NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblCRMBrandFieldMapping_intBrandFieldMappingId] PRIMARY KEY CLUSTERED ([intBrandFieldMappingId] ASC),
 	CONSTRAINT [UQ_tblCRMBrandFieldMapping_intBrandId_strBrandFieldName] UNIQUE ([intBrandId], [strBrandFieldName]),

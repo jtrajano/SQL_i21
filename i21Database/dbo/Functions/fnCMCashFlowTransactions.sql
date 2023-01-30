@@ -5,8 +5,6 @@
     @dtmTo DATETIME
 )
 RETURNS TABLE
-WITH
-    SCHEMABINDING
 AS
 RETURN
     SELECT
@@ -63,7 +61,7 @@ RETURN
         BTR.strTransactionId,
         BTR.intBankAccountIdFrom,
         BTR.intCurrencyIdAmountFrom,
-        BTR.dtmAccrual,
+        BTR.dtmDate,
         BTR.dblAmountForeignFrom  * -1,
         BTR.intGLAccountIdFrom,
         NULL,
@@ -75,7 +73,7 @@ RETURN
         AND BTR.intBankAccountIdFrom = @intBankAccountId
         AND (CASE 
                 WHEN @dtmFrom IS NULL
-                    THEN CASE WHEN BTR.dtmAccrual <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
+                    THEN CASE WHEN BTR.dtmDate <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
                 WHEN BTR.ysnPosted = 0 
                     THEN 1
                 ELSE 0 
@@ -83,8 +81,8 @@ RETURN
         ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
-            THEN CASE WHEN (BTR.dtmAccrual BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
-            ELSE CASE WHEN (BTR.dtmAccrual <= @dtmTo) THEN 1 ELSE 0 END
+            THEN CASE WHEN (BTR.dtmDate BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
+            ELSE CASE WHEN (BTR.dtmDate <= @dtmTo) THEN 1 ELSE 0 END
             END
         ) = 1
      UNION ALL -- Bank Forward To
@@ -117,3 +115,15 @@ RETURN
             ELSE CASE WHEN (BTR.dtmDate <= @dtmTo) THEN 1 ELSE 0 END
             END
         ) = 1
+    UNION ALL
+    SELECT 
+        intTransactionId,
+        strTransactionId,
+        intBankAccountId,
+        intCurrencyId,
+        dtmDate,
+        dblAmount,
+        intGLAccountId,
+		intCompanyLocationId,
+        strTransactionType
+    FROM [dbo].[fnCMGetUndepositedFundsForCashFlowReport](@intBankAccountId, @dtmFrom, @dtmTo)

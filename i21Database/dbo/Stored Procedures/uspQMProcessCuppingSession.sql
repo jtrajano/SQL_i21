@@ -3,6 +3,12 @@ CREATE PROCEDURE [dbo].[uspQMProcessCuppingSession]
     , @intEntityUserId          INT
 AS
 
+DELETE S
+FROM tblQMSample S
+INNER JOIN tblQMCuppingSessionDetail CSD ON S.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
+INNER JOIN tblQMCuppingSession CS ON CSD.intCuppingSessionId = CS.intCuppingSessionId
+WHERE CS.intCuppingSessionId = @intCuppingSessionId
+
 INSERT INTO tblQMSample (
 	  intCompanyId
 	, intSampleTypeId
@@ -82,11 +88,12 @@ INSERT INTO tblQMSample (
 	, intCuppingSessionDetailId
 	, intCreatedUserId
 	, intLastModifiedUserId
+	, intConcurrencyId
 )
 SELECT intCompanyId						= S.intCompanyId
 	, intSampleTypeId					= S.intSampleTypeId
 	, strSampleNumber					= CS.strCuppingSessionNumber + '/' + S.strSampleNumber
-	, intParentSampleId					= S.intParentSampleId
+	, intParentSampleId					= S.intSampleId
 	, strSampleRefNo					= S.strSampleRefNo
 	, intProductTypeId					= S.intProductTypeId
 	, intProductValueId					= S.intProductValueId
@@ -156,16 +163,18 @@ SELECT intCompanyId						= S.intCompanyId
 	, intSamplingCriteriaId				= S.intSamplingCriteriaId
 	, strSendSampleTo					= S.strSendSampleTo
 	, strRepresentLotNumber				= S.strRepresentLotNumber
-	, intRelatedSampleId				= S.intSampleId
+	, intRelatedSampleId				= NULL
 	, intTypeId							= 2
 	, intCuppingSessionDetailId			= CSD.intCuppingSessionDetailId
 	, intCreatedUserId					= @intEntityUserId
 	, intLastModifiedUserId				= @intEntityUserId
+	, intConcurrencyId					= 1
 FROM tblQMCuppingSession CS 
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 WHERE CS.intCuppingSessionId = @intCuppingSessionId
 
+--INSERT ADDITIONAL ATTRIBUTES
 INSERT INTO tblQMSampleDetail (
 	  intSampleId
 	, intAttributeId
@@ -175,6 +184,7 @@ INSERT INTO tblQMSampleDetail (
 	, intSampleDetailRefId
 	, intCreatedUserId
 	, intLastModifiedUserId
+	, intConcurrencyId
 )
 SELECT intSampleId				= NEWSAMPLE.intSampleId
 	, intAttributeId			= SD.intAttributeId
@@ -184,10 +194,98 @@ SELECT intSampleId				= NEWSAMPLE.intSampleId
 	, intSampleDetailRefId		= SD.intSampleDetailRefId
 	, intCreatedUserId			= @intEntityUserId
 	, intLastModifiedUserId		= @intEntityUserId
+	, intConcurrencyId			= 1
 FROM tblQMCuppingSession CS 
 INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
 INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
 INNER JOIN tblQMSampleDetail SD ON S.intSampleId = SD.intSampleId
-INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intRelatedSampleId
+INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intParentSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
 WHERE CS.intCuppingSessionId = @intCuppingSessionId
 
+--INSERT TEST RESULT
+INSERT INTO tblQMTestResult (
+	   intConcurrencyId
+	 , intSampleId
+	 , intProductId
+	 , intProductTypeId
+	 , intTestId
+	 , intPropertyId
+	 , strPanelList
+	 , strPropertyValue
+	 , dtmCreateDate
+	 , strResult
+	 , ysnFinal
+	 , strComment
+	 , intSequenceNo
+	 , dtmValidFrom
+	 , dtmValidTo
+	 , strPropertyRangeText
+	 , dblMinValue
+	 , dblMaxValue
+	 , dblLowValue
+	 , dblHighValue
+	 , intUnitMeasureId
+	 , strFormulaParser
+	 , dblCrdrPrice
+	 , dblCrdrQty
+	 , intProductPropertyValidityPeriodId
+	 , intPropertyValidityPeriodId
+	 , intControlPointId
+	 , intParentPropertyId
+	 , intRepNo
+	 , strFormula
+	 , intListItemId
+	 , strIsMandatory
+	 , intPropertyItemId
+	 , dtmPropertyValueCreated
+	 , intTestResultRefId
+	 , intCreatedUserId
+	 , dtmCreated
+	 , intLastModifiedUserId
+	 , dtmLastModified
+)
+SELECT intConcurrencyId						= 1
+	 , intSampleId							= NEWSAMPLE.intSampleId
+	 , intProductId							= TR.intProductId
+	 , intProductTypeId						= TR.intProductTypeId
+	 , intTestId							= TR.intTestId
+	 , intPropertyId						= TR.intPropertyId
+	 , strPanelList							= TR.strPanelList
+	 , strPropertyValue						= NULL
+	 , dtmCreateDate						= TR.dtmCreateDate
+	 , strResult							= NULL
+	 , ysnFinal								= TR.ysnFinal
+	 , strComment							= TR.strComment
+	 , intSequenceNo						= TR.intSequenceNo
+	 , dtmValidFrom							= TR.dtmValidFrom
+	 , dtmValidTo							= TR.dtmValidTo
+	 , strPropertyRangeText					= TR.strPropertyRangeText
+	 , dblMinValue							= TR.dblMinValue
+	 , dblMaxValue							= TR.dblMaxValue
+	 , dblLowValue							= TR.dblLowValue
+	 , dblHighValue							= TR.dblHighValue
+	 , intUnitMeasureId						= TR.intUnitMeasureId
+	 , strFormulaParser						= TR.strFormulaParser
+	 , dblCrdrPrice							= TR.dblCrdrPrice
+	 , dblCrdrQty							= TR.dblCrdrQty
+	 , intProductPropertyValidityPeriodId	= TR.intProductPropertyValidityPeriodId
+	 , intPropertyValidityPeriodId			= TR.intPropertyValidityPeriodId
+	 , intControlPointId					= TR.intControlPointId
+	 , intParentPropertyId					= TR.intParentPropertyId
+	 , intRepNo								= TR.intRepNo
+	 , strFormula							= TR.strFormula
+	 , intListItemId						= TR.intListItemId
+	 , strIsMandatory						= TR.strIsMandatory
+	 , intPropertyItemId					= TR.intPropertyItemId
+	 , dtmPropertyValueCreated				= NULL
+	 , intTestResultRefId					= TR.intTestResultRefId
+	 , intCreatedUserId						= @intEntityUserId
+	 , dtmCreated							= TR.dtmCreated
+	 , intLastModifiedUserId				= @intEntityUserId
+	 , dtmLastModified						= TR.dtmLastModified
+FROM tblQMCuppingSession CS 
+INNER JOIN tblQMCuppingSessionDetail CSD ON CS.intCuppingSessionId = CSD.intCuppingSessionId
+INNER JOIN tblQMSample S ON CSD.intSampleId = S.intSampleId
+INNER JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
+INNER JOIN tblQMSample NEWSAMPLE ON S.intSampleId = NEWSAMPLE.intParentSampleId AND NEWSAMPLE.intCuppingSessionDetailId = CSD.intCuppingSessionDetailId
+WHERE CS.intCuppingSessionId = @intCuppingSessionId

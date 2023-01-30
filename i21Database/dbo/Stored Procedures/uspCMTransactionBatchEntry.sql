@@ -202,6 +202,7 @@ FROM @BankTransactionBatchDetailEntries
 					,[strDescription]
 					,[dblDebit]
 					,[dblCredit]
+					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[dblDebitForeign]
 					,[dblCreditForeign]
@@ -219,7 +220,8 @@ FROM @BankTransactionBatchDetailEntries
 					,@intGLAccountId	
 					,@strDescriptionDetail	
 					,@dblDebit			
-					,@dblCredit			
+					,@dblCredit		
+					,@intCurrencyId	
 					,@dblExchangeRate
 					,@dblDebitForeign
 					,@dblCreditForeign
@@ -267,6 +269,7 @@ FROM @BankTransactionBatchDetailEntries
 						,[strDescription] = @strDescriptionDetail
 						,[dblDebit] = @dblDebit
 						,[dblCredit] = @dblCredit
+						,[intCurrencyId] = @intCurrencyId
 						,[intCurrencyExchangeRateTypeId] = @intCurrencyExchangeRateTypeId
 						,[dblExchangeRate] 		= @dblExchangeRate
 						,[dblDebitForeign]		= @dblDebitForeign

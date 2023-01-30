@@ -503,12 +503,12 @@ BEGIN TRY
 			,Credit.Value
 			,A.[dblDebitUnit]
 			,A.[dblCreditUnit]
-			,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblDebitForeign] END
-			,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblCreditForeign] END 		
+			,[dblDebitForeign]					= A.[dblDebitForeign]
+			,[dblCreditForeign]					= A.[dblCreditForeign]
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.dblForeignRate END 
+			,[dblExchangeRate]					= A.dblForeignRate
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]

@@ -117,6 +117,14 @@ RETURNS @table TABLE
 , [intBankValuationRuleId]			INT NULL --OVERRIDE FACILITY VALUATION
 , [strComments]						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL --COMMENTS
 
+, [strTaxPoint]						NVARCHAR(50) NULL
+, [intTaxLocationId]				INT NULL 
+, [ysnOverrideTaxGroup]				BIT NULL 
+
+/*Quality and Optionality Premium*/
+,[dblQualityPremium]				NUMERIC(18, 6) DEFAULT 0
+,[dblOptionalityPremium]			NUMERIC(18, 6) DEFAULT 0
+
 )
 AS
 BEGIN
@@ -381,6 +389,14 @@ SELECT DISTINCT
 	, [strReferenceNo]					= A.strReferenceNo
 	, [intBankValuationRuleId]			= A.intOverrideFacilityValuation
 	, [strComments]						= A.strComments
+	, [strTaxPoint]						= A.strTaxPoint
+	, [intTaxLocationId]				= A.intTaxLocationId
+	, [ysnOverrideTaxGroup]				= B.ysnOverrideTaxGroup
+
+	/*Quality and Optionality Premium*/
+	,[dblQualityPremium] = LogisticsView.[dblQualityPremium] 
+ 	,[dblOptionalityPremium] = LogisticsView.[dblOptionalityPremium] 
+
 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C 
@@ -472,6 +488,8 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			,ctUOM.strUnitMeasure
 			,J.dblFranchise
 			,CD.intPricingStatus
+			,CD.dblQualityPremium
+			,CD.dblOptionalityPremium
 		FROM 
 			tblCTContractHeader CH INNER JOIN tblCTContractDetail CD 
 				ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -543,6 +561,8 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		SELECT	
 				LogisticsView.strLoadNumber
 				,LogisticsView.dblNetWt
+				,LogisticsView.dblQualityPremium
+				,LogisticsView.dblOptionalityPremium
 		FROM	vyuICLoadContainersSearch LogisticsView 
 		WHERE	
 				(
@@ -617,6 +637,7 @@ WHERE
 	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
+		AND @strType != 'provisional voucher'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
 		AND ISNULL(Contracts.intPricingStatus, 0) = 0 -- NOT IN (1, 2) -- 1 is Partially Priced, 2 is Fully Priced. 
 	)
@@ -847,6 +868,14 @@ SELECT DISTINCT
 		, [strReferenceNo]					= A.[strReferenceNo]
 		, [intBankValuationRuleId]			= A.[intBankValuationRuleId]
 		, [strComments]						= A.[strComments]
+		, [strTaxPoint]						= A.strTaxPoint
+		, [intTaxLocationId]				= A.intTaxLocationId
+		, [ysnOverrideTaxGroup]				= A.ysnOverrideTaxGroup
+
+		/*Quality and Optionality Premium*/
+		,[dblQualityPremium] = NULL
+ 		,[dblOptionalityPremium] = NULL
+
 FROM 
 	[vyuICChargesForBilling] A
 	INNER JOIN (

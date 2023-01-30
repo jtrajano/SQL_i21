@@ -31,7 +31,8 @@
     [intConcurrencyId]			INT             DEFAULT 1 NOT NULL,
     [ysnShowCurrencies]	        BIT             DEFAULT 0 NULL,
     [intCurrencyID]				INT             DEFAULT 0 NULL,
-    [strCurrency]		        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,    
+    [strCurrency]		        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,   
+    [ysnUnnaturalAccount]	    BIT             DEFAULT 0 NULL,
     CONSTRAINT [PK_tblFRRowDesign] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),
     CONSTRAINT [FK_tblFRRowDesign_tblFRRow] FOREIGN KEY([intRowId]) REFERENCES [dbo].[tblFRRow] ([intRowId]) ON DELETE CASCADE
 );

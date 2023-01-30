@@ -554,6 +554,8 @@ BEGIN
 				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
 				,intShipFromEntityId	= ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
 				,dtmLastCargoInsuranceDate  = IntegrationData.dtmLastCargoInsuranceDate
+				,strTaxPoint			= IntegrationData.strTaxPoint
+				,intTaxLocationId		= IntegrationData.intTaxLocationId
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -598,6 +600,8 @@ BEGIN
 				,strDataSource
 				,intShipFromEntityId
 				,dtmLastCargoInsuranceDate
+				,strTaxPoint
+				,intTaxLocationId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -642,6 +646,8 @@ BEGIN
 				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
 				/*intShipFromEntityId*/			,ISNULL(NULLIF(IntegrationData.intShipFromEntityId, -1), NULLIF(IntegrationData.intEntityVendorId, -1))
 				/*dtmLastCargoInsuranceDate*/   ,IntegrationData.dtmLastCargoInsuranceDate
+				/*strTaxPoint*/					,IntegrationData.strTaxPoint
+				/*intTaxLocationId*/			,IntegrationData.intTaxLocationId
 			)
 		;
 				
@@ -951,6 +957,8 @@ BEGIN
 				,intConcurrencyId
 				,intOwnershipType
 				,dblGross
+				,dblTare
+				,dblTarePerQuantity
 				,dblNet
 				,intCostUOMId
 				,intDiscountSchedule
@@ -958,6 +966,7 @@ BEGIN
 				,intTaxGroupId
 				,intForexRateTypeId
 				,dblForexRate 
+				,dblOriginalForexRate 
 				,intContainerId 
 				,strChargesLink
 				,intLoadReceive
@@ -1040,6 +1049,8 @@ BEGIN
 										  END
 				,dblGross				= --CASE WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL ELSE RawData.dblGross END
 										  RawData.dblGross
+				,dblTare				= RawData.dblTare
+				,dblTarePerQuantity		= dbo.fnDivide(ISNULL(RawData.dblTare, 0), ISNULL(RawData.dblQty, 0)) 
 				,dblNet					= --CASE WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL ELSE RawData.dblNet END
 										  RawData.dblNet
 				,intCostUOMId			= RawData.intCostUOMId
@@ -1054,6 +1065,7 @@ BEGIN
 										END
 				,intForexRateTypeId		= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
+				,dblOriginalForexRate   = CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 				,intContainerId			= RawData.intContainerId 
 				,strChargesLink			= RawData.strChargesLink
 				,intLoadReceive			= RawData.intLoadReceive
@@ -1126,15 +1138,24 @@ BEGIN
 				) forexRate
 
 				-- Get the default tax group (if override was not provided)
+				LEFT JOIN tblSMCompanyLocation taxPointCompanyLocation
+					ON taxPointCompanyLocation.intCompanyLocationId = RawData.intTaxLocationId
+					AND RawData.strTaxPoint = 'Destination'
+
+				LEFT JOIN tblEMEntityLocation taxPointEntityLocation
+					ON taxPointEntityLocation.intEntityLocationId = RawData.intTaxLocationId
+					AND RawData.strTaxPoint = 'Origin'
+
 				OUTER APPLY (
 					SELECT	taxGroup.intTaxGroupId, taxGroup.strTaxGroup
 					FROM	tblSMTaxGroup taxGroup
 					WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
 								RawData.intEntityVendorId	-- @VendorId
-								,RawData.intLocationId		--,@CompanyLocationId
+								,ISNULL(taxPointCompanyLocation.intCompanyLocationId, RawData.intLocationId) --,@CompanyLocationId
 								,NULL						--,@ItemId
-								,RawData.intShipFromId		--,@VendorLocationId
+								,ISNULL(taxPointEntityLocation.intEntityLocationId, RawData.intShipFromId) --,@VendorLocationId
 								,RawData.intFreightTermId	--,@FreightTermId
+								,RawData.strTaxPoint		--,@FOB
 							)
 							AND RawData.intTaxGroupId IS NULL
 				) taxHierarcy 
@@ -1175,6 +1196,8 @@ BEGIN
 				-- 5. Transport Loads (New tables)
 				LEFT JOIN vyuICGetLoadReceipt TransportView 
 					ON TransportView.intLoadReceiptId = RawData.intSourceId
+
+			
 
 		WHERE RawHeaderData.intId = @intId
 		ORDER BY RawData.intSort, RawData.intId
@@ -1518,6 +1541,12 @@ BEGIN
 				,intLoadShipmentCostId
 				,intSort
 				,dblQuantity
+				,ysnLock
+				,ysnWithGLReversal
+				,dblOriginalQuantity
+				,dblOriginalRate
+				,dblOriginalAmount
+				,dblOriginalForexRate
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1552,6 +1581,13 @@ BEGIN
 				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
 				,intSort					= RawData.intSort
 				,dblQuantity				= RawData.dblQuantity 
+				,ysnLock					= RawData.ysnLock
+				,ysnWithGLReversal			= RawData.ysnWithGLReversal
+				,dblOriginalQuantity		= RawData.dblQuantity 
+				,dblOriginalRate			= RawData.dblRate
+				,dblOriginalAmount			= ROUND(RawData.dblAmount, 2)
+				,dblOriginalForexRate		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 			
+
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1587,6 +1623,7 @@ BEGIN
 								,NULL							--,@ItemId
 								,RawData.intShipFromId			--,@VendorLocationId
 								,NULL							--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
+								,default						--,@FOB
 							)
 							AND RawData.intTaxGroupId IS NULL 			
 				) taxHierarcy 
@@ -1974,6 +2011,9 @@ BEGIN
 				,[intConcurrencyId]
 				,dtmDateCreated
 				,intCreatedByUserId
+				,dblStatedNetPerUnit
+				,dblStatedTotalNet
+				,dblPhysicalVsStated
 			)
 			SELECT
 				[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
@@ -2024,6 +2064,19 @@ BEGIN
 				,[intConcurrencyId] = 1
 				,[dtmDateCreated] = GETDATE()
 				,[intCreatedByUserId] = @intUserId
+				,dblStatedNetPerUnit = ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+				,dblStatedTotalNet = 
+					dbo.fnMultiply( 
+						ISNULL(ItemLot.dblQuantity, 0) 
+						,ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+					) 
+ 				,dblPhysicalVsStated = 
+					(ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0))
+					- dbo.fnMultiply( 
+						ISNULL(ItemLot.dblQuantity, 0) 
+						,ISNULL(ItemLot.dblStatedGrossPerUnit, 0) - ISNULL(ItemLot.dblStatedTarePerUnit, 0) 
+					) 
+
 			FROM	
 				@LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
@@ -2216,6 +2269,12 @@ BEGIN
 				@inventoryReceiptId,
 				true
 		END
+
+		-- Add the Log & History for the IR Trade Finance
+		EXEC uspICInventoryReceiptTradeFinance 
+				@ReceiptId = @inventoryReceiptId
+				,@UserId = @intUserId
+				,@strAction = 'Created'
 
 		-- Create an Audit Log
 		BEGIN 

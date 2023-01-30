@@ -19,6 +19,7 @@ BEGIN
 		@intDefaultCurrencyId INT,
 		@strCurrentAccountId NVARCHAR(100),
 		@dblBeginBalance NUMERIC(18, 6) = 0,
+		@dblUndepositedFundTotal NUMERIC(18, 6) = 0,
 		@dblBucket2 DECIMAL(18, 6) = 0,
 		@dblBucket3 DECIMAL(18, 6) = 0,
 		@dblBucket4 DECIMAL(18, 6) = 0,
@@ -112,6 +113,21 @@ BEGIN
 		OUTER APPLY (
 			SELECT dblRateBucket1 FROM @tblRateFilters WHERE intFilterCurrencyId = Accounts.intCurrencyId
 		) FilterTable
+
+		-- Get Total Amount of Undeposited Funds of Bank Account for bucket 1 (current)
+		SELECT 
+			@dblUndepositedFundTotal = SUM(ISNULL(dblAmount,0)) * (ISNULL(FilterTable.dblRateBucket1, 1))
+		FROM [dbo].[fnCMGetUndepositedFundsForCashFlowReport](@intCurrentBankAccountId, NULL, @dtmReportDate)
+		OUTER APPLY (
+			SELECT intCurrencyId FROM #tblAccounts WHERE strAccountId = @strCurrentAccountId AND intAccountId = @intCurrentAccountId
+		) Accounts
+		OUTER APPLY (
+			SELECT dblRateBucket1 FROM @tblRateFilters WHERE intFilterCurrencyId = Accounts.intCurrencyId
+		) FilterTable
+		GROUP BY FilterTable.dblRateBucket1
+
+		-- Add Total Amount of Undeposited Funds to Beginning Balance
+		SET @dblBeginBalance = @dblBeginBalance + @dblUndepositedFundTotal
 
 		--- Insert each transactions of each bucket to the drilldown table		
 		INSERT INTO tblCMCashFlowReportSummaryDetail (
@@ -505,6 +521,7 @@ BEGIN
 
 		-- Reset values
 		SET @dblBeginBalance = 0
+		SET @dblUndepositedFundTotal = 0
 		SET @dblBucket2 = 0
 		SET @dblBucket3 = 0
 		SET @dblBucket4 = 0

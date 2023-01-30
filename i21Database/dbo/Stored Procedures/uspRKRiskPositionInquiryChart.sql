@@ -12,6 +12,7 @@
 	, @strPositionBy nvarchar(100) = NULL
 	, @dtmPositionAsOf datetime = NULL
 	, @strUomType nvarchar(100) = NULL
+	, @strOriginIds NVARCHAR(500) = NULL
 
 AS
 
@@ -82,6 +83,8 @@ BEGIN
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, dblHedgedLots DECIMAL(24, 10)
+		, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 	
 	INSERT INTO @RiskPositionInquiryTable 
@@ -95,6 +98,8 @@ BEGIN
 		, @intForecastWeeklyConsumptionUOMId=@intForecastWeeklyConsumptionUOMId
 		, @intBookId  = @intBookId
 		, @intSubBookId = @intSubBookId
+		, @strPositionBy = @strPositionBy
+		, @strOriginIds = @strOriginIds
 	
 	INSERT INTO @tblFinalDetail (intRowNumber
 		, Selection

@@ -46,6 +46,8 @@ BEGIN
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND C.ysnStage = 1
@@ -87,6 +89,8 @@ BEGIN
 			,[intContractHeaderId]				=	A.intContractHeaderId
 			,[intContractDetailId]				=	A.intContractDetailId
 			,[intPriceFixationDetailId]			=	A.intPriceFixationDetailId
+			,[intInsuranceChargeDetailId]		=	A.intInsuranceChargeDetailId
+			,[intStorageChargeId]				=	A.intStorageChargeId
 			,[intContractSeqId]					=	A.intContractSeqId
 			,[intContractCostId]				=	A.intContractCostId
 			,[strContractNumber]				=	ctDetail.strContractNumber
@@ -109,6 +113,7 @@ BEGIN
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 			,[strTaxGroup]						=	taxGroup.strTaxGroup
+			,[ysnOverrideTaxGroup]				=	A.ysnOverrideTaxGroup
 			,[strMiscDescription]				=	A.strMiscDescription
 			,[dblOrderQty]						=	CASE 
 													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 --Consider contract logic if voucher only
@@ -169,42 +174,45 @@ BEGIN
 			,[dblQtyToBillUnitQty]				=	A.dblQtyToBillUnitQty
 			,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
 			,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
-			,[dblCost]							=	CASE 
-													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
-													THEN 
-													(
-														CASE 
-														WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0 AND ctDetail.intPricingTypeId <> 5
-														THEN ctDetail.dblSeqPrice
-														ELSE A.dblCost
-														END
-													)
-													ELSE A.dblCost
-													END
-			,[dblCostUnitQty]					=	CASE 
-													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
-													THEN
-													(
-														CASE 
-														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
-														THEN contractItemCostUOM.dblUnitQty
-														ELSE A.dblCostUnitQty 
-														END
-													)
-													ELSE A.dblCostUnitQty 
-													END
-			,[intCostUOMId]						=	CASE 
-													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN 
-													(
-														CASE 
-														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
-														THEN ctDetail.intPriceItemUOMId
-														ELSE A.intCostUOMId 
-														END
-													)
-													ELSE A.intCostUOMId 
-													END
+			,[dblCost]							=	A.dblCost
+													-- CASE 
+													-- WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
+													-- THEN 
+													-- (
+													-- 	CASE 
+													-- 	WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0 AND ctDetail.intPricingTypeId <> 5
+													-- 	THEN ctDetail.dblSeqPrice
+													-- 	ELSE A.dblCost
+													-- 	END
+													-- )
+													-- ELSE A.dblCost
+													-- END
+			,[dblCostUnitQty]					=	A.dblCostUnitQty 
+													-- CASE 
+													-- WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
+													-- THEN
+													-- (
+													-- 	CASE 
+													-- 	WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
+													-- 	THEN contractItemCostUOM.dblUnitQty
+													-- 	ELSE A.dblCostUnitQty 
+													-- 	END
+													-- )
+													-- ELSE A.dblCostUnitQty 
+													-- END
+			,[intCostUOMId]						=	A.intCostUOMId
+													-- CASE 
+													-- WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+													-- THEN 
+													-- (
+													-- 	CASE 
+													-- 	WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
+													-- 	THEN ctDetail.intPriceItemUOMId
+													-- 	ELSE A.intCostUOMId 
+													-- 	END
+													-- )
+													-- ELSE A.intCostUOMId 
+													-- END
 			,[strCostUOM]						=	CASE 
 													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
@@ -241,6 +249,7 @@ BEGIN
 			,[strTerm]							=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.strTerm
 														ELSE term.strTerm END
 			,[intFreightTermId]					=	A.intFreightTermId
+			,[strFreightTerm]					=	freightTerm.strFreightTerm
 			,[strBillOfLading]					=	A.strBillOfLading
 			,[int1099Form]						=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 																AND A.intItemId > 0
@@ -278,10 +287,33 @@ BEGIN
 			,[intLineNo]						=	A.intLineNo
 			,[intBookId]						=	A.intBookId
 			,[intSubBookId]						=	A.intSubBookId
-			,[intComputeTotalOption]			=	A.intComputeTotalOption
+			,[intComputeTotalOption]			=	ISNULL(item.intComputeItemTotalOption, 0)
 			,[intLotId]							=	A.intLotId
-			,[intPayFromBankAccountId]			=	A.intPayFromBankAccountId
-			,[strPayFromBankAccount]			=	bankAccount.strBankAccountNo
+			,[intPayFromBankAccountId]				=	A.intPayFromBankAccountId
+			,[strPayFromBankAccount]				=	bankAccount.strBankAccountNo
+			,[strFinancingSourcedFrom]				=	A.strFinancingSourcedFrom
+			,[strFinancingTransactionNumber]		= 	A.strFinancingTransactionNumber
+			,[strFinanceTradeNo]					=	A.strFinanceTradeNo
+			,[intBankId]							=	A.intBankId
+			,[strBankName]							=	bank.strBankName
+			,[intBankAccountId]						=	A.intBankAccountId
+			,[strBankAccountNo]						=	bankAccount2.strBankAccountNo
+			,[intBorrowingFacilityId]				=	A.intBorrowingFacilityId
+			,[strBorrowingFacilityId]				=	borrowingFacility.strBorrowingFacilityId
+			,[strBankReferenceNo]					= 	ISNULL(A.strBankReferenceNo, borrowingFacility.strBankReferenceNo)
+			,[intBorrowingFacilityLimitId]			=	A.intBorrowingFacilityLimitId
+			,[strBorrowingFacilityLimit]			=	borrowingFacilityLimit.strBorrowingFacilityLimit
+			,[intBorrowingFacilityLimitDetailId]	=	A.intBorrowingFacilityLimitDetailId
+			,[strLimitDescription]					=	borrowingFacilityLimitDetail.strLimitDescription
+			,[strReferenceNo]						=	A.strReferenceNo
+			,[intBankValuationRuleId]				=	A.intBankValuationRuleId
+			,[strBankValuationRule]					=	bankValuationRule.strBankValuationRule
+			,[strComments]							=	A.strComments
+			,[dblQualityPremium]					=	A.dblQualityPremium
+			,[dblOptionalityPremium]				=	A.dblOptionalityPremium
+			,[strTaxPoint]							=	A.strTaxPoint
+			,[intTaxLocationId]						=	A.intTaxLocationId
+			,[strTaxLocation]						=	taxLocation.strLocationName
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -294,6 +326,7 @@ BEGIN
 		LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 		LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 		LEFT JOIN tblSMTerm term ON term.intTermID = A.intTermId
+		LEFT JOIN tblSMFreightTerms freightTerm ON freightTerm.intFreightTermId = A.intFreightTermId
 		LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = A.intShipViaId
 		LEFT JOIN tblSMCurrency tranCur ON A.intCurrencyId = tranCur.intCurrencyID
 		LEFT JOIN tblSMCurrency costCur ON A.intCostCurrencyId = costCur.intCurrencyID
@@ -319,6 +352,13 @@ BEGIN
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
 		LEFT JOIN tblSMTaxGroup taxGroup ON taxGroup.intTaxGroupId = A.intPurchaseTaxGroupId
 		LEFT JOIN vyuCMBankAccount bankAccount ON bankAccount.intBankAccountId = A.intPayFromBankAccountId
+		LEFT JOIN tblCMBank bank ON bank.intBankId = A.intBankId
+		LEFT JOIN vyuCMBankAccount bankAccount2 ON bankAccount2.intBankAccountId = A.intBankAccountId
+		LEFT JOIN tblCMBorrowingFacility borrowingFacility ON borrowingFacility.intBorrowingFacilityId = A.intBorrowingFacilityId
+		LEFT JOIN tblCMBorrowingFacilityLimit borrowingFacilityLimit ON borrowingFacilityLimit.intBorrowingFacilityLimitId = A.intBorrowingFacilityLimitId
+		LEFT JOIN tblCMBorrowingFacilityLimitDetail borrowingFacilityLimitDetail ON borrowingFacilityLimitDetail.intBorrowingFacilityLimitDetailId = A.intBorrowingFacilityLimitDetailId
+		LEFT JOIN tblCMBankValuationRule bankValuationRule ON bankValuationRule.intBankValuationRuleId = A.intBankValuationRuleId
+		LEFT JOIN vyuARTaxLocation taxLocation ON taxLocation.intTaxLocationId = A.intTaxLocationId AND taxLocation.strFobPoint = (CASE WHEN A.strTaxPoint = 'Origin' THEN 'Destination' ELSE 'Origin' END)
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -342,7 +382,9 @@ BEGIN
 		,[strPurchaseOrderNumber]		
 		,[intContractHeaderId]			
 		,[intContractDetailId]
-		,[intPriceFixationDetailId]			
+		,[intPriceFixationDetailId]	
+		,[intStorageChargeId]		
+		,[intInsuranceChargeDetailId]		
 		,[intContractSeqId]		
 		,[intContractCostId]		
 		,[strContractNumber]				
@@ -365,6 +407,7 @@ BEGIN
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	
+		,[ysnOverrideTaxGroup]
 		,[strMiscDescription]			
 		,[dblOrderQty]					
 		,[dblOrderUnitQty]				
@@ -400,6 +443,7 @@ BEGIN
 		,[intTermId]						
 		,[strTerm]	
 		,[intFreightTermId]					
+		,[strFreightTerm]					
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
@@ -416,6 +460,29 @@ BEGIN
 		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
+		,[strFinancingSourcedFrom]
+		,[strFinancingTransactionNumber]
+		,[strFinanceTradeNo]
+		,[intBankId]
+		,[strBankName]
+		,[intBankAccountId]
+		,[strBankAccountNo]
+		,[intBorrowingFacilityId]
+		,[strBorrowingFacilityId]
+		,[strBankReferenceNo]
+		,[intBorrowingFacilityLimitId]
+		,[strBorrowingFacilityLimit]
+		,[intBorrowingFacilityLimitDetailId]
+		,[strLimitDescription]
+		,[strReferenceNo]
+		,[intBankValuationRuleId]
+		,[strBankValuationRule]
+		,[strComments]
+		,[dblQualityPremium]
+		,[dblOptionalityPremium]
+		,[strTaxPoint]
+		,[intTaxLocationId]
+		,[strTaxLocation]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -436,7 +503,9 @@ BEGIN
 		,[strPurchaseOrderNumber]		
 		,[intContractHeaderId]			
 		,[intContractDetailId]	
-		,[intPriceFixationDetailId]		
+		,[intPriceFixationDetailId]	
+		,[intStorageChargeId]		
+		,[intInsuranceChargeDetailId]			
 		,[intContractSeqId]		
 		,[intContractCostId]		
 		,[strContractNumber]				
@@ -458,7 +527,8 @@ BEGIN
 		,[intTicketDistributionAllocationId]			
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
-		,[strTaxGroup]	
+		,[strTaxGroup]
+		,[ysnOverrideTaxGroup]	
 		,[strMiscDescription]			
 		,[dblOrderQty]					
 		,[dblOrderUnitQty]				
@@ -494,6 +564,7 @@ BEGIN
 		,[intTermId]						
 		,[strTerm]		
 		,[intFreightTermId]				
+		,[strFreightTerm]
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
@@ -510,6 +581,29 @@ BEGIN
 		,[intLotId]
 		,[intPayFromBankAccountId]
 		,[strPayFromBankAccount]
+		,[strFinancingSourcedFrom]
+		,[strFinancingTransactionNumber]
+		,[strFinanceTradeNo]
+		,[intBankId]
+		,[strBankName]
+		,[intBankAccountId]
+		,[strBankAccountNo]
+		,[intBorrowingFacilityId]
+		,[strBorrowingFacilityId]
+		,[strBankReferenceNo]
+		,[intBorrowingFacilityLimitId]
+		,[strBorrowingFacilityLimit]
+		,[intBorrowingFacilityLimitDetailId]
+		,[strLimitDescription]
+		,[strReferenceNo]
+		,[intBankValuationRuleId]
+		,[strBankValuationRule]
+		,[strComments]
+		,[dblQualityPremium]
+		,[dblOptionalityPremium]
+		,[strTaxPoint]
+		,[intTaxLocationId]
+		,[strTaxLocation]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

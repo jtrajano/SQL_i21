@@ -1,10 +1,9 @@
 ﻿CREATE VIEW vyuLGPickOpenInventoryLots
 AS 
 SELECT *, 
-	dblAllocReserved = (dblAllocatedQty + dblReservedQty),
-	dblBalance = (dblOriginalQty - (dblAllocatedQty + dblReservedQty)), 
-	dblAvailToSell = CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblOriginalQty - (dblAllocatedQty + dblReservedQty)))) 
-						THEN (dblOriginalQty - (dblAllocatedQty + dblReservedQty)) ELSE dblUnPickedQty END,
+	dblBalance = (dblOriginalQty - dblAllocReserved), 
+	dblAvailToSell = CASE WHEN ((dblAllocReserved > 0) AND (dblUnPickedQty > (dblOriginalQty - dblAllocReserved))) 
+						THEN (dblOriginalQty - dblAllocReserved) ELSE dblUnPickedQty END,
 	dblNetWeight = dbo.fnMultiply(dbo.fnDivide(dblNetWeightFull, dblQty), dblUnPickedQty),
 	dblGrossWeight = dbo.fnMultiply(dbo.fnDivide(dblGrossWeightFull, dblQty), dblUnPickedQty),
 	dblTareWeight = dbo.fnMultiply(dbo.fnDivide(dblTareWeightFull, dblQty), dblUnPickedQty)
@@ -35,9 +34,25 @@ FROM (
        ,intStorageLocationId = Lot.intStorageLocationId
        ,strStorageLocation = StorageLocation.strName
        ,dblQty = Lot.dblQty
-       ,dblUnPickedQty = CASE WHEN Lot.dblQty > 0.0 THEN 
-							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
-						 ELSE 0.0 END
+       ,dblUnPickedQty =	CASE WHEN Lot.intWarrantStatus = 2 THEN
+	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
+										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+								ELSE
+									CASE WHEN Lot.dblQty > 0.0 THEN 
+										Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+							END
+	   ,dblQtyInContractUOM = ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0)
+       ,dblUnPickedQtyInContractUOM = CASE WHEN Lot.intWarrantStatus = 2 THEN
+	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
+										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+								ELSE
+									CASE WHEN Lot.dblQty > 0.0 THEN 
+										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0) - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+							END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
        ,strLotAlias = Lot.strLotAlias
@@ -143,7 +158,13 @@ FROM (
 	   ,strClass = Class.strDescription
 	   ,strProductLine = ProductLine.strDescription
 	   ,Item.strMarketValuation
+	   ,Lot.strWarrantNo
+	   ,Lot.intWarrantStatus
+	   ,WS.strWarrantStatus
+	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - ISNULL(PL.dblLotPickedQty, 0)
+	   ,strMarks = Lot.strMarkings
 	FROM tblICLot Lot
+		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -207,7 +228,11 @@ FROM (
 					WHERE SR.intLotId = Lot.intLotId AND SR.ysnPosted <> 1) SR
 		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
+		OUTER APPLY (SELECT dblLotPickedQty = SUM(PLD.dblLotPickedQty) FROM tblLGPickLotDetail PLD
+					LEFT JOIN tblLGAllocationDetail AL ON AL.intAllocationDetailId = PLD.intAllocationDetailId
+					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) PL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
+		AND Receipt.ysnPosted = 1
 	) InvLots
 GO

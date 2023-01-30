@@ -278,7 +278,7 @@ BEGIN
 			,[dblForeignRate]
 			,[strRateType]
 		)	
-		EXEC @intReturnValue = dbo.uspLGPostInventoryShipmentOtherCharges 
+		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
@@ -359,6 +359,8 @@ BEGIN
 			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
+			,intForexRateTypeId
+			,dblForexRate
 			)
 		SELECT intItemId = ISNULL(Lot.intItemId, LoadDetail.intItemId)
 			,intItemLocationId = dbo.fnICGetItemLocation(ISNULL(Lot.intItemId, LoadDetail.intItemId), LoadDetail.intSCompanyLocationId)
@@ -385,8 +387,8 @@ BEGIN
 				ELSE LotItemUOM.dblUnitQty
 				END
 			,dblSalesPrice = 0.00
-			,intCurrencyId = @DefaultCurrencyId
-			,dblExchangeRate = 1
+			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
+			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LoadDetail.intLoadDetailId
 			,strTransactionId = L.strLoadNumber
@@ -394,12 +396,53 @@ BEGIN
 			,intLotId = Lot.intLotId
 			,intSubLocationId = Lot.intSubLocationId
 			,intStorageLocationId = Lot.intStorageLocationId
+			,intForexRateTypeId = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN NULL --foreign price to functional FX, use NULL
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
+										ELSE LoadDetail.intForexRateTypeId END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN FX.intForexRateTypeId
+										ELSE LoadDetail.intForexRateTypeId END
+									END
+			,dblForexRate = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE ISNULL(LoadDetail.dblForexRate,1) END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE ISNULL(LoadDetail.dblForexRate,1) END
+									END
 		FROM tblLGLoad L
 		INNER JOIN tblLGLoadDetail LoadDetail ON L.intLoadId = LoadDetail.intLoadId
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
 		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LoadDetail.intSContractDetailId
+		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+		OUTER APPLY (SELECT	TOP 1  
+						intForexRateTypeId = RD.intRateTypeId
+						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+									THEN 1/RD.[dblRate] 
+									ELSE RD.[dblRate] END 
+						FROM tblSMCurrencyExchangeRate ER JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						WHERE @DefaultCurrencyId <> CD.intInvoiceCurrencyId
+							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
+						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intTransactionId
 
 		-- Call the post routine 
@@ -592,6 +635,7 @@ BEGIN
 				,[dblCreditReport]
 				,[dblReportingRate]
 				,[dblForeignRate]
+				,[strRateType]
 				,[intSourceEntityId]
 				,[intCommodityId]
 			)
@@ -706,7 +750,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 			)	
-			EXEC @intReturnValue = dbo.uspLGPostInventoryShipmentOtherCharges 
+			EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
@@ -1017,7 +1061,7 @@ BEGIN
 		,@ysnPost
 
 	-- Add/Remove Pending Claim entry
-	EXEC uspLGAddPendingClaim @intTransactionId, 2, @ysnPost
+	EXEC uspLGAddPendingClaim @intTransactionId, 2, NULL, @ysnPost
 
 	COMMIT TRAN @TransactionName
 END

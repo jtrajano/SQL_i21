@@ -14,7 +14,7 @@ DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
 
 
 SELECT TOP 1 @intBTInTransitAccountId = intBTInTransitAccountId FROM tblCMCompanyPreferenceOption  
-  IF @intBTInTransitAccountId IS NULL  
+  IF ISNULL(@intBTInTransitAccountId,0) = 0
 BEGIN  
     RAISERROR('Cannot find the in transit GL Account ID Setting in Company Configuration.', 11, 1)    
     RETURN
@@ -99,7 +99,7 @@ BEGIN
         ,[dblDebit]             = dblAmountFrom
         ,[dblCredit]            = 0     
         ,[dblDebitForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom
-                                    THEN dblAmountTo ELSE  dblAmountForeignFrom END  
+                                    THEN dblAmountFrom ELSE  dblAmountForeignFrom END  
         ,[dblCreditForeign]     = 0    
         ,[dblDebitUnit]         = 0    
         ,[dblCreditUnit]        = 0    

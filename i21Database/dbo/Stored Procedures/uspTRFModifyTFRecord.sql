@@ -33,6 +33,7 @@ BEGIN
 			, @strApprovalStatus NVARCHAR(100)
 			, @strCommnents NVARCHAR(MAX)
 			, @intConcurrencyId INT
+			, @strTradeFinanceNumber NVARCHAR(100)
 
 		SELECT * 
 		INTO #tmpTRFModified 
@@ -60,8 +61,10 @@ BEGIN
 				, @strApprovalStatus = NULL
 				, @strCommnents = NULL
 				, @intConcurrencyId = NULL
+				, @strTradeFinanceNumber = NULL
 
 			SELECT TOP 1 @intId = intId 
+			    , @strTradeFinanceNumber = strTradeFinanceNumber
 				, @intTradeFinanceId = intTradeFinanceId
 				, @strTransactionType = strTransactionType
 				, @strTransactionNumber = strTransactionNumber
@@ -97,6 +100,7 @@ BEGIN
 					UPDATE tblTRFTradeFinance 
 					SET 
 						  strTransactionType = ISNULL(@strTransactionType, strTransactionType)
+						, strTradeFinanceNumber = ISNULL(@strTradeFinanceNumber, strTradeFinanceNumber)
 						, strTransactionNumber = ISNULL(@strTransactionNumber, strTransactionNumber)
 						, intTransactionHeaderId = CASE WHEN @intTransactionHeaderId = 0 THEN NULL ELSE ISNULL(@intTransactionHeaderId, intTransactionHeaderId) END
 						, intTransactionDetailId = CASE WHEN @intTransactionDetailId = 0 THEN NULL ELSE ISNULL(@intTransactionDetailId, intTransactionDetailId) END

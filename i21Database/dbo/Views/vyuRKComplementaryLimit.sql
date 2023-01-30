@@ -15,6 +15,8 @@
 		CInsurance.intInsuranceTypeId,
 		CInsurance.strInsuranceType,
 		CInsurance.strPolicyNumber,
-		CInsurance.dblAggregatedPolicyAmount
+		CInsurance.dblAggregatedPolicyAmount,
+		dblRate = CASE WHEN CMLimit.intCurrencyID = CInsurance.intCurrencyID THEN 1
+								ELSE dbo.fnRKGetCurrencyConvertion(CMLimit.intCurrencyID, CInsurance.intCurrencyID, DEFAULT) END 
 		FROM tblRKComplementaryLimit CMLimit
 		LEFT JOIN tblRKCreditInsurance CInsurance ON CInsurance.intCreditInsuranceId = CMLimit.intCreditInsuranceId

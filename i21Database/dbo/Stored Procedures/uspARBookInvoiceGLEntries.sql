@@ -3,6 +3,7 @@
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@raiseError		AS BIT			= 0
+    ,@strSessionId	    NVARCHAR(50) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -118,7 +119,8 @@ SELECT
     ,[intCommodityId]
     ,[intSourceEntityId]
     ,[ysnRebuild]
-FROM ##ARInvoiceGLEntries
+FROM tblARPostInvoiceGLEntries
+WHERE strSessionId = @strSessionId
 
 IF @Post = 0
     BEGIN
@@ -148,10 +150,11 @@ IF @Post = 0
 		)
         SELECT DISTINCT [intInvoiceId]
 			, [strInvoiceNumber]
-        FROM ##ARPostInvoiceDetail
+        FROM tblARPostInvoiceDetail
         WHERE [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
           AND [intItemId] IS NOT NULL
           AND ISNULL([strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
+          AND strSessionId = @strSessionId
 
 		DELETE FROM @GLPost WHERE strCode <> 'AR'
         
@@ -162,8 +165,8 @@ IF @Post = 0
 			FROM @UnPostICInvoiceData
             ORDER BY [intInvoiceId]
 
-            SELECT @WStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
-            SELECT @WOStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
+            SELECT @WStorageCount = COUNT(1) FROM tblARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0) AND strSessionId = @strSessionId	
+            SELECT @WOStorageCount = COUNT(1) FROM tblARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0) AND strSessionId = @strSessionId
             IF @WOStorageCount > 0
             BEGIN
 				-- Unpost onhand stocks. 

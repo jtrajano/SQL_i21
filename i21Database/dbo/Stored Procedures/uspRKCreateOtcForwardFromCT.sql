@@ -29,27 +29,30 @@ BEGIN TRY
 	DECLARE @intCommodityId INT
 		, @strBuyCurrency NVARCHAR(200)
 		, @strSellCurrency NVARCHAR(200)
-		, @intCurrencyPair INT = NULL
+		, @intCurrencyPairId INT = NULL
 		, @ErrMsg NVARCHAR(MAX) = NULL
 		
 	SELECT @strBuyCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intBuyCurrencyId
 	SELECT @strSellCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSellCurrencyId
 	
-	SELECT @intCurrencyPair = intRateTypeId 
+	SELECT @intCurrencyPairId = intCurrencyPairId 
 	FROM 
 	(
-		SELECT TOP 1 intRateTypeId
-		FROM tblSMCurrencyExchangeRateDetail fxRateDetail
-		CROSS APPLY (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate fxr
-			WHERE fxr.intFromCurrencyId = @intBuyCurrencyId 
-			AND fxr.intToCurrencyId = @intSellCurrencyId 
-			AND fxr.intCurrencyExchangeRateId = fxRateDetail.intCurrencyExchangeRateId
-		) fxRate
-		WHERE dtmValidFromDate <= GETDATE()
-		ORDER BY dtmValidFromDate DESC
+		--SELECT TOP 1 intRateTypeId
+		--FROM tblSMCurrencyExchangeRateDetail fxRateDetail
+		--CROSS APPLY (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate fxr
+		--	WHERE fxr.intFromCurrencyId = @intBuyCurrencyId 
+		--	AND fxr.intToCurrencyId = @intSellCurrencyId 
+		--	AND fxr.intCurrencyExchangeRateId = fxRateDetail.intCurrencyExchangeRateId
+		--) fxRate
+		--WHERE dtmValidFromDate <= GETDATE()
+		--ORDER BY dtmValidFromDate DESC
+
+		SELECT TOP 1 intCurrencyPairId = intCurrencyPairId
+		FROM vyuRKCurrencyPairSetup
+		WHERE intFromCurrencyId = @intSellCurrencyId 
+		AND intToCurrencyId = @intBuyCurrencyId 
 	) t
-	JOIN tblSMCurrencyExchangeRateType fxRateType
-	ON fxRateType.intCurrencyExchangeRateTypeId = t.intRateTypeId
 
 	SELECT TOP 1 @intCommodityId = intCommodityId FROM tblICCommodity
 	WHERE strCommodityCode = 'Currency'
@@ -110,7 +113,8 @@ BEGIN TRY
 		, dblContractAmount
 		, dblMatchAmount
 		, intOrderTypeId
-		, intCurrencyExchangeRateTypeId
+		--, intCurrencyExchangeRateTypeId
+		, intCurrencyPairId
 		, dblLimitRate
 		, dtmMarketDate
 		, ysnGTC
@@ -140,7 +144,8 @@ BEGIN TRY
 		, dblContractAmount = @dblBuyAmount
 		, dblMatchAmount = @dblSellAmount
 		, intOrderTypeId = @intOrderTypeId
-		, intCurrencyExchangeRateTypeId = @intCurrencyPair
+		--, intCurrencyExchangeRateTypeId = @intCurrencyPair
+		, intCurrencyPairId = @intCurrencyPairId
 		, dblLimitRate = @dblLimitRate 
 		, dtmMarketDate = @dtmMarketDate 
 		, ysnGTC = @ysnGTC 
@@ -149,6 +154,14 @@ BEGIN TRY
 	SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
 	EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'FutOptTransaction', @intUserId, 'ADD', 0
+	
+	EXEC dbo.uspSMAuditLog @keyValue = @intFutOptTransactionHeaderId				-- Primary Key Value of the Derivative Entry. 
+		, @screenName = 'RiskManagement.view.DerivativeEntry'						-- Screen Namespace
+		, @entityId = @intUserId                   									-- Entity Id
+		, @actionType = 'Created'													-- Action Type
+		, @changeDescription = ''													-- Description
+		, @fromValue = ''															-- Previous Value
+		, @toValue = ''																-- New Value
 
 END TRY
 BEGIN CATCH

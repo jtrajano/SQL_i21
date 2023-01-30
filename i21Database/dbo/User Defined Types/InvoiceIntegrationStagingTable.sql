@@ -219,9 +219,17 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intFacilityId]						INT												NULL
 	,[intLoanLimitId]						INT												NULL
 	,[strBankReferenceNo]					NVARCHAR(100)									NULL
-	,[strBankTransactionId]					NVARCHAR(100)									NULL
+	,[strBankTradeReference]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[dblLoanAmount]						NUMERIC(18, 6)									NULL
 	,[intBankValuationRuleId]				INT												NULL
-	,[strTradeFinanceComments]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS		NULL
-	,[strGoodsStatus]						NVARCHAR(100) COLLATE Latin1_General_CI_AS		NULL
+	,[strTradeFinanceComments]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGoodsStatus]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[dblComputedGrossPrice]				NUMERIC(18, 6)									NULL
+	,[intTaxLocationId]						INT												NULL
+	,[strTaxPoint]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnOverrideTaxGroup]					BIT												NULL
+	,[intDefaultPayToBankAccountId]			INT												NULL
+	,[intPayToCashBankAccountId]			INT												NULL
+	,[strPaymentInstructions]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSourcedFrom]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 )

@@ -23,6 +23,7 @@ This table logs all inventory transactions related to Lot
 		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[intItemUOMId] INT NULL,
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblForexCost] NUMERIC(38, 20) NULL, 
 		[intTransactionId] INT NOT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionTypeId] INT NOT NULL, 

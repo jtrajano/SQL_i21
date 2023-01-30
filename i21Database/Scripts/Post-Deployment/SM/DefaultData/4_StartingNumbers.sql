@@ -1695,8 +1695,33 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Cupping Session')
-
-
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 174
+				,[strTransactionType]	= N'Allocated Contracts Gain or Loss'
+				,[strPrefix]			= N'AC-'
+				,[intNumber]			= 0
+				,[strModule]			= 'Risk Management'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Allocated Contracts Gain or Loss')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 175
+				,[strTransactionType]	= N'Insurance Charge'
+				,[strPrefix]			= N'INC-'
+				,[intNumber]			= 1
+				,[strModule]			= 'Inventory'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Insurance Charge' AND [strModule] = 'Inventory')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 177
+			,[strTransactionType]	= N'Change Account Category'
+			,[strPrefix]			= N'CAC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'General Ledger'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category' AND [strModule] = 'General Ledger')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

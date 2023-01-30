@@ -1,10 +1,12 @@
 ﻿GO
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+IF  (SELECT TOP 1 ysnUsed FROM #tblOriginMod WHERE strPrefix = 'AP') = 1
+AND EXISTS (select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'apcbkmst_origin' )
 BEGIN
 	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
 	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_delete_vyuCMBankAccount') DROP TRIGGER dbo.trg_delete_vyuCMBankAccount;
 	IF EXISTS (SELECT 1 FROM sys.triggers WHERE Name = 'trg_insert_vyuCMBankAccount') DROP TRIGGER dbo.trg_insert_vyuCMBankAccount;
 	IF EXISTS (select 1 FROM sys.views where name = 'vyuCMBankAccount') DROP VIEW dbo.vyuCMBankAccount;
+
 
 
 	EXEC('CREATE VIEW [dbo].vyuCMBankAccount
@@ -38,6 +40,8 @@ BEGIN
 				,i21.strEmail
 				,i21.strIBAN
 				,i21.strSWIFT
+				,i21.strBICCode
+				,i21.strBranchCode
 				,i21.intCheckStartingNo
 				,i21.intCheckEndingNo
 				,i21.intCheckNextNo
@@ -110,12 +114,16 @@ BEGIN
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				,i21.intPayToDown
+				,i21.strMT101ACH_FileNameFormat
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
+				,i21.strCorrespondingBank
 				--Advanced Bank Recon
 				,i21.ysnABREnable
 				,i21.intABRDaysNoRef
+				,i21.strPaymentInstructions
 				--Advanced Bank Recon
+				,i21.strNickname
 				-- The following fields are from the origin system		
 				,apcbk_comment = origin.apcbk_comment COLLATE Latin1_General_CI_AS			-- CHAR (30) 
 				,apcbk_password =  ISNULL(origin.apcbk_password, '''') COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -274,6 +282,8 @@ BEGIN
 					,strEmail
 					,strIBAN
 					,strSWIFT
+					,strBICCode
+					,strBranchCode
 					,intCheckStartingNo
 					,intCheckEndingNo
 					,intCheckNextNo
@@ -335,9 +345,13 @@ BEGIN
 					,intConcurrencyId
 					,strCbkNo
 					,intPayToDown
+					,strMT101ACH_FileNameFormat
 					,intResponsibleEntityId
+					,strCorrespondingBank
 					,ysnABREnable
 					,intABRDaysNoRef
+					,strPaymentInstructions
+					,strNickname
 			)
 			OUTPUT 	inserted.intBankAccountId
 			SELECT	intBankId							= i.intBankId
@@ -361,6 +375,8 @@ BEGIN
 					,strEmail							= i.strEmail
 					,strIBAN							= i.strIBAN
 					,strSWIFT							= i.strSWIFT
+					,strBICCode							= i.strBICCode
+					,strBranchCode						= i.strBranchCode
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
@@ -422,9 +438,13 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,strMT101ACH_FileNameFormat						= i.strMT101ACH_FileNameFormat
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
+					,strPaymentInstructions				= i.strPaymentInstructions
+					,strNickname						= i.strNickname
 			FROM	inserted i 
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -566,6 +586,8 @@ BEGIN
 					,strEmail							= i.strEmail
 					,strIBAN							= i.strIBAN
 					,strSWIFT							= i.strSWIFT
+					,strBICCode							= i.strBICCode
+					,strBranchCode						= i.strBranchCode
 					,intCheckStartingNo					= i.intCheckStartingNo
 					,intCheckEndingNo					= i.intCheckEndingNo
 					,intCheckNextNo						= i.intCheckNextNo
@@ -627,9 +649,13 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,strMT101ACH_FileNameFormat						= i.strMT101ACH_FileNameFormat
 					,intResponsibleEntityId				= i.intResponsibleEntityId
+					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
 					,intABRDaysNoRef					= i.intABRDaysNoRef
+					,strPaymentInstructions				= i.strPaymentInstructions
+					,strNickname						= i.strNickname
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 

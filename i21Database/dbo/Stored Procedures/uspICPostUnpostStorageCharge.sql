@@ -22,10 +22,16 @@ DECLARE @billList Id
 DECLARE @ysnBillPosted BIT
 DECLARE @_intBillId INT
 DECLARE @strBillNumber NVARCHAR(100)
-
+DECLARE @logDescriotion NVARCHAR(MAX)
+DECLARE @strBillIds NVARCHAR(MAX)
+DECLARE @strVoucherNumbers NVARCHAR(MAX)
 
 BEGIN TRY
-	
+	IF ISNULL(@intStorageChargeId,0) = 0
+	BEGIN
+		GOTO COMPLETEPROCESS
+	END
+
 	IF (@ysnPost = 1)
 	BEGIN
 		---------Create Voucher
@@ -64,35 +70,36 @@ BEGIN TRY
 					intCurrencyId
 					,ysnStage
 					,intStorageChargeId
+					,intLotId
 					)
 			SELECT
 					[intTransactionType]			=	1,
 					[intAccountId]					=	dbo.[fnGetItemGLAccount](B.intItemChargeId, C.intItemLocationId, 'Other Charge Expense'),
 					[intItemId]						=	B.intItemChargeId,					
-					[strMiscDescription]			=	D.strDescription,
+					[strMiscDescription]			=	B.strTransactionId,
 					[intQtyToBillUOMId]				=	B.intItemChargeUOMId
-					,[dblQuantityToBill]			=	B.dblChargeQuantity
+					,[dblQuantityToBill]			=	1
 					,[dblQtyToBillUnitQty]			=	E.dblUnitQty
-					,[dblOrderQty]					=	B.dblChargeQuantity
+					,[dblOrderQty]					=	1
 					,[dblDiscount]					=	0
 					,[intCostUOMId]					=	B.intItemChargeUOMId
-					,[dblCost]						=	B.dblRate
+					,[dblCost]						=	B.dblStorageCharge
 					,[dblCostUnitQty]				=	E.dblUnitQty
-					,[int1099Form]					=	(CASE WHEN COALESCE(G.intEntityId, M.intEntityId) IS NOT NULL 
+					,[int1099Form]					=	(CASE WHEN G.intEntityId IS NOT NULL 
 																	AND C.intItemId > 0
 																	AND D.ysn1099Box3 = 1
-																	AND COALESCE(G.ysnStockStatusQualified,M.ysnStockStatusQualified) = 1 
+																	AND G.ysnStockStatusQualified = 1 
 																	THEN 4
-																WHEN COALESCE(J.str1099Form, O.str1099Form) = '1099-MISC' THEN 1
-																WHEN COALESCE(J.str1099Form, O.str1099Form) = '1099-INT' THEN 2
-																WHEN COALESCE(J.str1099Form, O.str1099Form) = '1099-B' THEN 3
+																WHEN J.str1099Form = '1099-MISC' THEN 1
+																WHEN J.str1099Form = '1099-INT' THEN 2
+																WHEN J.str1099Form = '1099-B' THEN 3
 															ELSE 0 END)
-					,[int1099Category]				=	CASE 	WHEN COALESCE(G.intEntityId, M.intEntityId) IS NOT NULL 
+					,[int1099Category]				=	CASE 	WHEN G.intEntityId IS NOT NULL 
 																	AND D.intItemId > 0
 																	AND D.ysn1099Box3 = 1
-																	AND COALESCE(G.ysnStockStatusQualified,M.ysnStockStatusQualified) = 1 
+																	AND G.ysnStockStatusQualified = 1 
 																	THEN 3
-														ELSE ISNULL(COALESCE(I.int1099CategoryId,P.int1099CategoryId), 0) END
+														ELSE ISNULL(int1099CategoryId, 0) END
 					,[intLineNo]					=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 					,[intContractDetailId]			=	NULL
 					,[intContractHeaderId]			=	NULL
@@ -100,18 +107,19 @@ BEGIN TRY
 					,[intLoadId]					=	NULL
 					,[intScaleTicketId]				=	NULL
 					,[intPurchaseTaxGroupId]		=	NULL
-					,[intEntityVendorId]			=	COALESCE(F.intEntityVendorId,L.intEntityVendorId)
+					,[intEntityVendorId]			=	F.intVendorId
 					,[strVendorOrderNumber]			=	'Storage Charge-' + A.strStorageChargeNumber
 					,strReference					=	'Storage Charge-' + A.strStorageChargeNumber
 					,strSourceNumber				=	A.strStorageChargeNumber
-					,intLocationId					=	COALESCE(F.intLocationId,L.intLocationId)
+					,intLocationId					=	A.intCompanyLocationId
 					,intSubLocationId				=	A.intStorageLocationId
-					,intStorageLocationId			=   NULL
+					,intStorageLocationId  			= 	Q.intStorageLocationId
 					,intItemLocationId				=	C.intItemLocationId
 					,ysnSubCurrency					=	0
 					,intCurrencyId					=	A.intCurrencyId
 					,ysnStage 						=	0
 					,intStorageChargeId				=	B.intStorageChargeDetailId
+					,intLotId						= 	B.intLotId
 			FROM tblICStorageCharge A
 			INNER JOIN tblICStorageChargeDetail B
 				ON A.intStorageChargeId = B.intStorageChargeId
@@ -122,41 +130,23 @@ BEGIN TRY
 				ON D.intItemId = B.intItemChargeId
 			LEFT JOIN tblICItemUOM E
 				ON E.intItemUOMId = B.intItemChargeUOMId
-			--------Start Inventory Receipt----------------
-			--------Inbound
-			LEFT JOIN tblICInventoryReceipt F
-				ON B.intTransactionId = F.intInventoryReceiptId
-					AnD B.intTransactionTypeId = 4 --- Inventory Receipt filter
+			---------------Vendor Info-----------------
+			-------------------------------------------
+			LEFT JOIN tblICStorageRate F
+				ON A.intStorageRateId = F.intStorageRateId
 			LEFT JOIN vyuPATEntityPatron G
-				ON F.intEntityVendorId = G.intEntityId
-			LEFT JOIN vyuICGetItemStock H 
-				ON H.intItemId = D.intItemId 
-					AND H.intLocationId = A.intCompanyLocationId
-			LEFT JOIN tblEMEntity J
-				ON J.intEntityId = F.intEntityVendorId
-			LEFT JOIN tblAP1099Category I 
-				ON I.strCategory = J.str1099Type
-			--------END Inventory Receipt----------------
-			---------------------------------------------
-
-			---------Start Inventory Receipt---------------
-			-----------Used by outbound
-			LEFT JOIN tblICInventoryStockMovement K
-				ON B.intInventoryStockMovementIdUsed = K.intInventoryStockMovementId
-					AND B.intInventoryStockMovementIdUsed IS NOT NULL
-			LEFT JOIN tblICInventoryReceipt L
-				ON K.intTransactionId = L.intInventoryReceiptId
-			LEFT JOIN vyuPATEntityPatron M
-				ON L.intEntityVendorId = M.intEntityId
-			LEFT JOIN vyuICGetItemStock N 
-				ON N.intItemId = D.intItemId 
-					AND N.intLocationId = A.intCompanyLocationId
-			LEFT JOIN tblEMEntity O
-				ON O.intEntityId = L.intEntityVendorId
-			LEFT JOIN tblAP1099Category P 
-				ON P.strCategory = O.str1099Type
-			---------End Inventory Receipt ---------------
-			---------------------------------------------------
+			 	ON F.intVendorId = G.intEntityId
+			 LEFT JOIN vyuICGetItemStock H 
+			 	ON H.intItemId = D.intItemId 
+			 		AND H.intLocationId = A.intCompanyLocationId
+			 LEFT JOIN tblEMEntity J
+			 	ON J.intEntityId = F.intVendorId
+			 LEFT JOIN tblAP1099Category I 
+			 	ON I.strCategory = J.str1099Type
+			-------------------------------------------
+			-------------------------------------------
+			LEFT JOIN tblICLot Q
+				ON B.intLotId = Q.intLotId
 			WHERE B.dblStorageCharge <> 0
 				AND A.intStorageChargeId = @intStorageChargeId
 
@@ -207,18 +197,41 @@ BEGIN TRY
 					,@userId = @intUserId
 					,@throwError = 1
 					,@error = @ErrorMessage OUT
-					,@createdVouchersId = @intBillId OUT
+					,@createdVouchersId = @strBillIds OUT
 
 				
 			END
 		END
 
 		---Update Storage Charge
-		IF(ISNULL(@intBillId,0) > 0)
+		IF(ISNULL(@strBillIds,'') <> '')
 		BEGIN
+			SELECT @strVoucherNumbers = STUFF((
+				SELECT 
+					',' + strBillId
+				FROM tblAPBill
+				WHERE intBillId IN (	SELECT											
+											A.Item
+										FROM dbo.fnSplitString (@strBillIds,',') A																							
+									)
+				FOR XML PATH('')),1,1,'')				
+			
 			UPDATE tblICStorageCharge 
 			SET ysnPosted = 1
 			WHERE intStorageChargeId = @intStorageChargeId
+
+			SET @logDescriotion = 'Posted with Voucher ' + @strVoucherNumbers
+			
+			EXEC dbo.uspSMAuditLog 
+				@keyValue			= @intStorageChargeId					-- Primary Key Value of the Ticket. 
+				,@screenName		= 'Inventory.view.StorageCharge'		-- Screen Namespace
+				,@entityId			= @intUserId				-- Entity Id.
+				,@actionType		= 'Posted'					-- Action Type
+				,@changeDescription	= @logDescriotion	-- Description
+				,@fromValue			= ''						-- Old Value
+				,@toValue			= ''			-- New Value
+				,@details			= '';
+			
 		END
 
 	END
@@ -275,8 +288,20 @@ BEGIN TRY
 		UPDATE tblICStorageCharge 
 		SET ysnPosted = 0
 		WHERE intStorageChargeId = @intStorageChargeId
+
 		
+		EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intStorageChargeId					-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Inventory.view.StorageCharge'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= 'Unposted'					-- Action Type
+			,@changeDescription	= 'Unposted Storage Charge.'	-- Description
+			,@fromValue			= ''						-- Old Value
+			,@toValue			= ''			-- New Value
+			,@details			= '';
+	
 	END
+	COMPLETEPROCESS:
 END TRY
 BEGIN CATCH
 	SELECT 

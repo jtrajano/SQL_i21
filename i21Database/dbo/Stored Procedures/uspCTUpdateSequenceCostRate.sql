@@ -7,19 +7,19 @@ BEGIN TRY
 	declare  
 		@ErrMsg nvarchar(max)  
 		,@intDaysForFinance int
-		,@dblInterestRate numeric(18,6)  
+		,@dblInterestRate numeric(38,20)  
 		,@intFinanceCostId int  
-		,@dblCalculatedRate numeric(18,6)  
-		,@principal numeric(18,6)  
-		,@rate numeric(18,6)  
-		,@time numeric(18,6);  
+		,@dblCalculatedRate numeric(38,20) 
+		,@principal numeric(38,20) 
+		,@rate numeric(38,20)  
+		,@time numeric(38,20);  
 
 	select  
 		@intDaysForFinance = ch.intDaysForFinance
 		,@dblInterestRate = cd.dblInterestRate  
 		,@principal = cd.dblTotalCost
-		,@rate = convert(numeric(18,6),isnull(cd.dblInterestRate,0)) / 100.00  
-		,@time = convert(numeric(18,6),isnull(ch.intDaysForFinance,0)) / 360.00  
+		,@rate = convert(numeric(38,20),isnull(cd.dblInterestRate,0.00)) / 100.00  
+		,@time = convert(numeric(38,20),isnull(ch.intDaysForFinance,0.00)) / 365.00  
 	from
 		tblCTContractDetail cd  
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId  

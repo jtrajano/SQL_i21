@@ -30,7 +30,9 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intShipFromEntityId] INT NULL 
 	,[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strWarehouseRefNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	,[dtmLastCargoInsuranceDate] DATETIME NULL			
+	,[dtmLastCargoInsuranceDate] DATETIME NULL
+	,[strTaxPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intTaxLocationId]	INT NULL
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
@@ -43,6 +45,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 	,[intGrossNetUOMId] INT NULL							-- The Gross/Net UOM used for the item.
 	,[dblGross] NUMERIC(38, 20) NULL 
+	,[dblTare] NUMERIC(38, 20) NULL 
 	,[dblNet] NUMERIC(38, 20) NULL 
 	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0			-- Fuel Surcharge	
 	,[ysnFreightInPrice] BIT NULL DEFAULT 0					-- Freight should be included In Price
@@ -51,7 +54,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnSubCurrency] BIT NULL 
 	,[intPaymentOn] INT NULL								-- Reserved for PaymentOn option
 	,[intForexRateTypeId] INT NULL							-- Currency Forex Rate Type Id
-	,[dblForexRate] NUMERIC(38, 20) NULL						-- Forex Rate (Exchange Rate)
+	,[dblForexRate] NUMERIC(38, 20) NULL					-- Forex Rate (Exchange Rate)
 	,[intContainerId] INT NULL								-- Container id. Used by LG Inbound Shipment. 
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,[intLoadReceive] INT NULL								-- For Load Contracts. Number of Load to Receive

@@ -33,7 +33,7 @@ BankInfo AS (
     D.strBankTransactionTypeName
     FROM BankTrans A 
     JOIN vyuCMBankAccount B ON
-    A.intBankAccountId = A.intBankAccountId
+    A.intBankAccountId = B.intBankAccountId
     JOIN tblCMBank C ON C.intBankId = B.intBankId
     JOIN tblCMBankTransactionType D ON D.intBankTransactionTypeId = A.intBankTransactionTypeId
 ),
@@ -81,7 +81,7 @@ GetLastOne AS (
     , intContractHeaderId
     , intContractDetailId
     FROM tblTRFTradeFinanceLog A JOIN
-    BankInfo B ON A.strTransactionNumber = A.strTransactionNumber
+    BankInfo B ON A.strTransactionNumber = B.strTransactionNumber
     WHERE strAction = 'Posted Payment'
 )
 INSERT INTO @TradeFinanceLogs (

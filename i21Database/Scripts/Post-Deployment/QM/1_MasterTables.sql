@@ -1312,3 +1312,8 @@ UPDATE tblQMSample
 SET ysnImpactPricing = 0
 WHERE ysnImpactPricing IS NULL
 GO
+
+UPDATE tblQMCompanyPreference
+SET ysnSetDefaultReceivedDateInSampleScreen = 1
+WHERE ysnSetDefaultReceivedDateInSampleScreen IS NULL
+GO

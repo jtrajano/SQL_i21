@@ -22,8 +22,11 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.intItemId
 	,Lot.intCommodityId
 	,Lot.strWarehouseRefNo
-	,strWarrantNo = ISNULL(IRIL.strWarrantNo, IR.strWarrantNo)
-	,strWarrantStatus = CASE ISNULL(IRIL.intWarrantStatus, IR.intWarrantStatus)
+	,BA.intBankAccountId
+	,BA.strBankAccountNo
+	,BA.strBankName
+	,strWarrantNo = Lot.strWarrantNo
+	,strWarrantStatus = CASE Lot.intWarrantStatus
 		WHEN 1 THEN 'Pledged' 
 		WHEN 2 THEN 'Partially Released' 
 		WHEN 3 THEN 'Released'
@@ -42,7 +45,9 @@ SELECT DISTINCT Lot.intLotId
 	,Lot.dtmReceiptDate
 	,Lot.strLotStatus
 	,Lot.strCondition
+	,Lot.strMarks
 FROM vyuLGPickOpenInventoryLots Lot
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Lot.intInventoryReceiptItemLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = IR.intBankAccountId

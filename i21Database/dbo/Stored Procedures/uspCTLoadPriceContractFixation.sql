@@ -6,7 +6,10 @@ AS
 
 BEGIN TRY
 	
-	DECLARE	@ErrMsg	NVARCHAR(MAX)
+	DECLARE
+		@ErrMsg	NVARCHAR(MAX)
+		,@ysnEnableFXFieldInContractPricing bit = 0
+		;
 	
 		--DECLARE @temp AS TABLE
 		--(
@@ -81,6 +84,7 @@ BEGIN TRY
 			DROP TABLE #MultiPriceFixation					
 
 		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
+		select @ysnEnableFXFieldInContractPricing = ysnEnableFXFieldInContractPricing from tblCTCompanyPreference;
 
 		--INSERT INTO @temp 
 
@@ -169,7 +173,8 @@ BEGIN TRY
 				ICC.strRegion,
 				ICC.strSeason,
 				ICC.strClass,
-				ICC.strProductLine
+				ICC.strProductLine,
+				dblDefaultFx = (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId and erd.dtmValidFromDate <= getdate() order by erd.dtmValidFromDate desc)
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -261,7 +266,8 @@ BEGIN TRY
 				ICC.strRegion,
 				ICC.strSeason,
 				ICC.strClass,
-				ICC.strProductLine
+				ICC.strProductLine,
+				dblDefaultFx = null
 		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 

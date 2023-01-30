@@ -21,6 +21,7 @@ BEGIN TRY
 		,strPricingType						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
 		,strShipVia							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strLocationName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,lblLocationName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,intContractHeaderId				INT
 		,intContractDetailId				INT
 		,lblRemark							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -61,6 +62,7 @@ BEGIN TRY
 				,strPricingType				
 				,strShipVia					
 				,strLocationName			
+				,lblLocationName
 				,intContractHeaderId
 				,intContractDetailId
 				,lblRemark		
@@ -91,7 +93,8 @@ BEGIN TRY
 			,dtmEndDate					 = dtmEndDate
 			,strPricingType				 = strPricingType
 			,strShipVia					 = strShipVia
-			,strLocationName			 = strLocationName
+			,strLocationName			 = CASE WHEN CP.strDefaultContractReport = 'GrainLSM' THEN '' ELSE strLocationName  END
+			,lblLocationName			 = CASE WHEN CP.strDefaultContractReport = 'GrainLSM' THEN '' ELSE 'Location : '  END 
 			,intContractHeaderId		 = intContractHeaderId
 			,intContractDetailId		 = @intContractDetailId
 			,lblRemark					 = NULL
@@ -130,7 +133,7 @@ BEGIN TRY
 										   + ' ' + strCurrency
 			FROM	vyuCTContractDetailView DV
 			LEFT JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId = DV.intFutureMonthId
-
+			CROSS JOIN tblCTCompanyPreference   CP
 			WHERE	DV.intContractDetailId	=	@intContractDetailId
 
 			INSERT INTO @ContractDetailGrain

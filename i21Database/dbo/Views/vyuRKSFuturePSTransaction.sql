@@ -36,13 +36,14 @@ FROM (
 			, intFutOptTransactionId
 			, fm.dblContractSize
 			--This filter is to get the correct commission based on date
-			, dblFutCommission = ISNULL((SELECT TOP 1 (CASE WHEN isnull(bc.intFuturesRateType,2) = 2 THEN 
-															isnull(bc.dblFutCommission,0)* 2 / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
-															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END) as dblFutCommission
+			, dblFutCommission = CASE WHEN (SELECT TOP 1 ysnEnableCommissionExemptAndOverride FROM tblRKCompanyPreference) = 1 THEN ISNULL(ot.dblCommission, 0) / ot.dblNoOfContract
+								ELSE (ISNULL((SELECT TOP 1 (CASE WHEN isnull(bc.intFuturesRateType,2) = 2 THEN 
+															isnull(bc.dblFutCommission,0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
+															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 2 END END) as dblFutCommission
 										FROM tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 										WHERE bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
-											and cast(getdate() as date) between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,cast(getdate() as date))),0) * -1 --commision is always negative (RM-1174)
+											and cast(getdate() as date) between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,cast(getdate() as date))),0) * -1) END --commision is always negative (RM-1174)
 			, dtmFilledDate
 			, ot.intFutOptTransactionHeaderId
 			, intCurrencyId = c.intCurrencyID

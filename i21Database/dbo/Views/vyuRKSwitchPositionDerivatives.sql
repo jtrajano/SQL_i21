@@ -19,5 +19,9 @@ SELECT
 	,intCommodityId
 	,intFutureMarketId
 	,intFutureMonthId
+	,strBook
+	,strSubBook
+	,intBookId
+	,intSubBookId
 FROM vyuRKFutOptTransaction
 WHERE dblOpenContract <> 0

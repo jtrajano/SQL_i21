@@ -478,7 +478,10 @@ BEGIN TRY
 		[intBorrowingFacilityLimitDetailId]	,
 		[strReferenceNo]					,
 		[intBankValuationRuleId]			,
-		[strComments]
+		[strComments]			,
+		[strTaxPoint]			,
+		[intTaxLocationId]		,
+		[intProfitCenter]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -534,7 +537,10 @@ BEGIN TRY
 		[intBorrowingFacilityLimitDetailId]	,
 		[strReferenceNo]					,
 		[intBankValuationRuleId]			,
-		[strComments]
+		[strComments]			,
+		[strTaxPoint]			,
+		[intTaxLocationId]		,
+		[intProfitCenter]
 	)
 	OUTPUT 
 		inserted.intBillId 
@@ -605,6 +611,27 @@ BEGIN TRY
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
+	--UPDATE AP ACCOUNT IF AP LOB OVERRIDE IS ENABLED
+	UPDATE B
+	SET B.intAccountId = O.intOverrideAccount
+	FROM tblAPBill B
+	INNER JOIN @voucherIds I ON I.intId = B.intBillId
+	OUTER APPLY (
+		SELECT TOP 1 intItemId
+		FROM tblAPBillDetail
+		WHERE intBillId = B.intBillId
+		ORDER BY intLineNo
+	) BD
+	OUTER APPLY (
+		SELECT TOP 1 intOverrideAccount
+		FROM dbo.fnAPGetOverrideLineOfBusinessAccount(B.intAccountId, BD.intItemId) O
+	) O
+	CROSS APPLY (
+		SELECT TOP 1 ysnOverrideAPLineOfBusinessSegment
+		FROM tblAPCompanyPreference
+		WHERE ysnOverrideAPLineOfBusinessSegment = 1
+	) CP
+
 	-- DECLARE @billDetailIds AS Id
 	-- INSERT INTO @billDetailIds
 	-- SELECT
@@ -626,7 +653,9 @@ BEGIN TRY
 	DECLARE @billCounter INT = 0;
 	DECLARE @totalRecords INT;
 	DECLARE @billId INT;
+	DECLARE @tranType INT;
 	DECLARE @tmpBillDetailDelete TABLE(intBillId INT)
+	DECLARE @screenName NVARCHAR(100);
 	SELECT @actionType = 'Deleted'
 
 	INSERT INTO @tmpBillDetailDelete
@@ -637,17 +666,23 @@ BEGIN TRY
 	WHILE(@billCounter != (@totalRecords))
 	BEGIN
 
-		SELECT TOP(1) @billId = A.intBillId
+		SELECT TOP(1) @billId = A.intBillId, @tranType = B.intTransactionType
 		FROM @tmpBillDetailDelete A
-			
-		EXEC dbo.uspSMAuditLog 
-			@screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
-			,@keyValue = @billId								-- Primary Key Value of the Voucher. 
-			,@entityId = @userId									-- Entity Id.
-			,@actionType = 'Created'                        -- Action Type
-			,@changeDescription = 'Integration'				-- Description
-			,@fromValue = ''									-- Previous Value
-			,@toValue = ''									-- New Value
+		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+
+		SET @screenName = CASE WHEN @tranType IN (1,2,13) THEN 'AccountsPayable.view.Voucher' ELSE 'AccountsPayable.view.DebitMemo' END 		
+
+		IF @tranType IN (1,2,3,13)
+		BEGIN
+			EXEC dbo.uspSMAuditLog 
+				@screenName = @screenName		-- Screen Namespace
+				,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+				,@entityId = @userId									-- Entity Id.
+				,@actionType = 'Created'                        -- Action Type
+				,@changeDescription = 'Integration'				-- Description
+				,@fromValue = ''									-- Previous Value
+				,@toValue = ''	
+		END							-- New Value
 
 	SET @billCounter = @billCounter + 1
 	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId

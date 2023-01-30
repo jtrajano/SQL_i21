@@ -11,26 +11,29 @@ BEGIN
     FROM tblICTransactionLinks
     WHERE 
     (
-        intDestId = @intTransactionId AND 
-        strDestTransactionNo = @strTransactionNo AND
-        strDestTransactionType = @strTransactionType AND
-        strDestModuleName = @strModuleName
+        intDestId = @intTransactionId 
+        AND strDestTransactionNo = @strTransactionNo 
+        AND strDestTransactionType = @strTransactionType 
+        AND strDestModuleName = @strModuleName
     ) 
-    OR 
+
+	DELETE tblICTransactionLinks 
+    FROM tblICTransactionLinks
+    WHERE 
     (
-        intSrcId = @intTransactionId AND 
-        strSrcTransactionNo = @strTransactionNo AND
-        strSrcTransactionType = @strTransactionType AND
-        strSrcModuleName = @strModuleName
+        intSrcId = @intTransactionId 
+        AND strSrcTransactionNo = @strTransactionNo 
+        AND strSrcTransactionType = @strTransactionType 
+        AND strSrcModuleName = @strModuleName
     )
 
     DELETE tblICTransactionNodes
     FROM tblICTransactionNodes 
     WHERE 
-    intTransactionId = @intTransactionId AND
-    strTransactionNo = @strTransactionNo AND
-    strTransactionType = @strTransactionType AND
-    strModuleName = @strModuleName
+		intTransactionId = @intTransactionId 
+		AND strTransactionNo = @strTransactionNo 
+		AND strTransactionType = @strTransactionType 
+		AND strModuleName = @strModuleName
 
 END
 

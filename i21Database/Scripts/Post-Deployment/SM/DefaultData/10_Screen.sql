@@ -86,7 +86,8 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Voucher', N'Voucher', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0, N'Transaction')
 	ELSE
-		UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction' WHERE strNamespace = 'AccountsPayable.view.Voucher'
+		UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction', strScreenName = 'Voucher'
+		WHERE strNamespace = 'AccountsPayable.view.Voucher'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.PurchaseOrder') 
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
@@ -940,6 +941,12 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Weight/Grades', N'Weight/Grades', N'ContractManagement.view.WeightGrades', N'Contract Management', N'tblCTWeightGrade', 1, N'Contract Management')
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.MTMPoint') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'MTM Point', N'MTM Point', N'ContractManagement.view.MTMPoint', N'Contract Management', N'tblCTMTMPoint', 1, N'Contract Management')
+	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.Banks') 
 	BEGIN
@@ -1224,7 +1231,65 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Warrant', N'Warrant', N'Inventory.view.Warrant', N'Inventory', NULL, 1, N'Inventory')
 	END
-	
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.CreditLine') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Credit Line', N'Credit Line', N'RiskManagement.view.CreditLine', N'Risk Management', 'tblRKCreditLine', 1, N'Risk Management')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] 
+		SET strScreenId = 'Credit Line', 
+		strScreenName = 'Credit Line', 
+		strModule = N'Risk Management', 
+		ysnAvailable = 1, 
+		strGroupName = N'Risk Management',
+		strTableName = 'tblRKCreditLine'
+		WHERE strNamespace = N'RiskManagement.view.CreditLine'
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.CreditInsurance') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Credit Insurance', N'Credit Insurance', N'RiskManagement.view.CreditInsurance', N'Risk Management', 'tblRKCreditInsurance', 1, N'Risk Management')
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] 
+		SET strScreenId = 'Credit Insurance', 
+		strScreenName = 'Credit Insurance', 
+		strModule = N'Risk Management', 
+		ysnAvailable = 1, 
+		strGroupName = N'Risk Management',
+		strTableName = 'tblRKCreditInsurance'
+		WHERE strNamespace = N'RiskManagement.view.CreditInsurance'
+	END
+
+	-- UPDATE strModule on Risk Management so that it would show on Screen Permissions in User Roles
+	UPDATE [tblSMScreen] SET strModule = 'Risk Management' WHERE strModule = 'Riskmanagement'
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.DebitMemo')
+    BEGIN
+        INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
+        VALUES (N'Debit Memo', N'Debit Memo', N'AccountsPayable.view.DebitMemo', N'Accounts Payable', N'', 1,  0)
+    END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET  ysnApproval = 1
+		WHERE strNamespace = 'AccountsPayable.view.DebitMemo'
+	END
+
+	--IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance')
+	--BEGIN
+	--	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
+	--	VALUES (N'Voucher/Vendor Prepayment/Basis Advance', N'Voucher/Vendor Prepayment/Basis Advance', N'AccountsPayable.view.Voucher', N'Accounts Payable', N'tblAPBill',  1, 1,  0, N'Transaction')
+	--END
+	--ELSE
+	--BEGIN
+	--	UPDATE tblSMScreen SET strTableName = 'tblAPBill', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction'
+	--	WHERE strNamespace = 'AccountsPayable.view.Voucher' AND strScreenName = 'Voucher/Vendor Prepayment/Basis Advance'
+	--END
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
 	-- BEGIN
@@ -1249,4 +1314,10 @@ GO
     --     SET  ysnApproval = 1
     --     WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders'
 	-- END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.Allocation') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'', N'Allocation', N'Logistics.view.Allocation', N'Logistics', NULL, 1, N'Logistics')
+	END
 GO

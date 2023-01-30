@@ -63,7 +63,8 @@ ISNULL(c.strReference,'') COLLATE Latin1_General_CI_AS strReference,
 ISNULL(c.strDocument,'') COLLATE Latin1_General_CI_AS strDocument,
 ISNULL(c.strComments,'') COLLATE Latin1_General_CI_AS strComments,
 ISNULL(c.strUserName,'') COLLATE Latin1_General_CI_AS strUserName,
-ISNULL(c.strSourceEntity,'') COLLATE Latin1_General_CI_AS strSourceEntity
+ISNULL(c.strSourceEntity,'') COLLATE Latin1_General_CI_AS strSourceEntity,
+ISNULL(c.strCurrency,'') COLLATE Latin1_General_CI_AS strCurrency
 FROM u a LEFT JOIN
 vyuGLDetail c ON a.intGLDetailId = c.intGLDetailId
 GO

@@ -12,6 +12,19 @@ BEGIN TRY
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@intUserId INT
 		,@strError NVARCHAR(MAX)
+		,@strContainerNo nvarchar(50)=NULL
+		,@strMarkings nvarchar(50)=NULL
+		,@intEntityVendorId int=NULL
+		,@strCondition NVARCHAR(50)=NULL
+		,@strCertificate NVARCHAR(50)=NULL
+		,@strCertificateId NVARCHAR(50)=NULL
+		,@intContractHeaderId	INT =NULL -- Contract Header Id
+		,@intContractDetailId	INT =NULL
+		,@strLotAlias NVARCHAR(50)=NULL
+		,@strParentLotNumber NVARCHAR(50)
+		,@intParentLotId INT
+		,@dtmExpiryDate datetime
+
 	DECLARE @intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@dtmCreatedDate DATETIME
@@ -343,6 +356,38 @@ BEGIN TRY
 					,@ysnProposed = 0
 					,@strPatternString = @intBatchId OUTPUT
 
+				SELECT @strContainerNo =NULL
+					,@strMarkings=NULL
+					,@intEntityVendorId =NULL 
+					,@strCondition=NULL
+					,@strCertificate=NULL
+					,@strCertificateId=NULL
+					,@intContractHeaderId=NULL
+					,@intContractDetailId=NULL	
+					,@strLotAlias=NULL
+					,@strParentLotNumber=NULL
+					,@intParentLotId=NULL
+					,@dtmExpiryDate=NULL
+
+				SELECT @strContainerNo =strContainerNo
+					,@strMarkings=strMarkings
+					,@intEntityVendorId =intEntityVendorId 
+					,@strCondition=strCondition
+					,@strCertificate=strCertificate
+					,@strCertificateId=strCertificateId
+					,@intContractHeaderId=intContractHeaderId
+					,@intContractDetailId=intContractDetailId
+					,@strLotAlias=strLotAlias
+					,@intParentLotId=intParentLotId 
+					,@dtmExpiryDate=dtmExpiryDate 
+				FROM tblICLot L WITH (NOLOCK)
+				WHERE L.strLotNumber = @strLotNumber
+				AND strContainerNo<>''
+
+				Select @strParentLotNumber=strParentLotNumber 
+				from tblICParentLot 
+				Where intParentLotId=@intParentLotId
+
 				EXEC uspMFPostProduction 1
 					,0
 					,NULL
@@ -359,9 +404,9 @@ BEGIN TRY
 					,@strLotNumber
 					,@intBatchId
 					,@intLotId OUTPUT
+					,@strLotAlias
 					,NULL
-					,NULL
-					,@strLotNumber
+					,@strParentLotNumber
 					,NULL
 					,NULL
 					,NULL
@@ -374,6 +419,15 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,@intOriginId
+					,@strContainerNo
+					,@strMarkings
+					,@intEntityVendorId
+					,@strCondition
+					,@dtmExpiryDate
+					,@strCertificate
+					,@strCertificateId
+					,@intContractHeaderId 
+					,@intContractDetailId 
 			END
 			ELSE
 			BEGIN

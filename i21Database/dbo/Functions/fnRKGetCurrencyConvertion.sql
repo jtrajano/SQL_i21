@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetCurrencyConvertion] (
 	@intFromCurrencyId INT
-	, @intToCurrencyId INT)
+	, @intToCurrencyId INT
+	,@intRateTypeId INT = NULL)
 
 RETURNS NUMERIC(18, 6)
 
@@ -16,6 +17,7 @@ BEGIN
 		JOIN tblSMCurrencyExchangeRateDetail rd ON er.intCurrencyExchangeRateId = rd.intCurrencyExchangeRateId
 		WHERE intFromCurrencyId = @intFromCurrencyId AND intToCurrencyId = @intToCurrencyId
 			AND dtmValidFromDate <= GETDATE()
+			AND intRateTypeId = ISNULL(@intRateTypeId,intRateTypeId)
 		ORDER BY dtmValidFromDate DESC
 	END
 	ELSE

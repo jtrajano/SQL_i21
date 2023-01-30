@@ -30,6 +30,9 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 	,@IsEscalate AS BIT = 0 
 	,@intSourceEntityId AS INT = NULL 
+	,@intCurrencyId AS INT = NULL 
+	,@intForexRateTypeId AS INT = NULL
+	,@dblForexRate AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -115,7 +118,8 @@ BEGIN
 			,@OriginalRunningValue AS NUMERIC(38, 20)
 			,@CurrentValue AS NUMERIC(38, 20)
 
-			,@CostAdjustment AS NUMERIC(38, 20)			
+			,@CostAdjustment AS NUMERIC(38, 20)	
+			,@ForexCostAdjustment AS NUMERIC(38, 20)
 			,@OriginalAverageCost AS NUMERIC(38, 20)
 			,@NewAverageCost AS NUMERIC(38, 20)
 
@@ -135,13 +139,19 @@ BEGIN
 			,@t_intLocationId AS INT 
 			,@t_strRelatedTransactionId AS NVARCHAR(50)
 			,@t_intRelatedTransactionId AS INT 
+			,@t_NegativeStockQty AS NUMERIC(38, 20)
 			,@t_NegativeStockCost AS NUMERIC(38, 20)
+			
+			,@t_strNegativeStockTransactionId AS NVARCHAR(50)
+			,@t_intNegativeStockTransactionId AS INT 
+			,@t_intNegativeStockTransactionDetailId AS INT 
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
 			,@EscalateCostAdjustment AS NUMERIC(38, 20)
 
 			,@InventoryTransactionIdentityId AS INT 
+			,@AccumulatedCostAdjustment AS NUMERIC(38, 20) 
 
 	DECLARE	@StockItemUOMId AS INT
 			,@strDescription AS NVARCHAR(255)
@@ -161,11 +171,21 @@ END
 
 -- Compute the cost adjustment
 BEGIN 
-	SET @CostAdjustment = 
+	SET @ForexCostAdjustment = 
 		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
 				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
 				ELSE NULL 
-		END 
+		END 	
+	
+	IF ISNULL(NULLIF(@dblForexRate, 0), 1) = 1 
+	BEGIN 
+		SET @CostAdjustment = @ForexCostAdjustment 
+		SET @ForexCostAdjustment = NULL 
+	END 
+	ELSE IF NULLIF(@dblForexRate, 0) <> 1 
+	BEGIN 
+		SET @CostAdjustment = @ForexCostAdjustment * @dblForexRate	
+	END 
 
 	-- If there is no cost adjustment, exit immediately. 
 	IF @CostAdjustment IS NULL 
@@ -216,6 +236,8 @@ BEGIN
 			,@CostBucketOriginalCost AS NUMERIC(38, 20)
 			,@CostBucketOriginalValue AS NUMERIC(38, 20) 
 			,@CostBucketDate AS DATETIME 
+			,@CostBucketOriginalForexCost AS NUMERIC(38, 20)
+			,@CostBucketOriginalForexValue AS NUMERIC(38, 20) 
 
 	SELECT	TOP 1 
 			@InventoryTransactionStartId = t.intInventoryTransactionId 
@@ -233,6 +255,8 @@ BEGIN
 			,@CostBucketOriginalCost = cb.dblCost
 			,@CostBucketOriginalValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblCost), 2) 
 			,@CostBucketDate = cb.dtmDate
+			,@CostBucketOriginalForexCost = cb.dblForexCost
+			,@CostBucketOriginalForexValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblForexCost), 2) 
 	FROM	tblICInventoryFIFO cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -284,6 +308,7 @@ BEGIN
 			,[intInventoryCostAdjustmentTypeId] 
 			,[dblQty] 
 			,[dblCost] 
+			,[dblForexCost]
 			,[dblValue] 
 			,[ysnIsUnposted] 
 			,[dtmCreated] 
@@ -299,6 +324,7 @@ BEGIN
 			,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_Original_Cost
 			,[dblQty] = cb.dblStockIn
 			,[dblCost] = cb.dblCost
+			,[dblForexCost] = cb.dblForexCost
 			,[dblValue] = NULL 
 			,[ysnIsUnposted]  = 0 
 			,[dtmCreated] = GETDATE()
@@ -351,7 +377,7 @@ BEGIN
 	SELECT @OriginalAverageCost = dbo.fnICGetMovingAverageCost (
 				@intItemId
 				,@intItemLocationId
-				,@InventoryTransactionStartId
+				,(@InventoryTransactionStartId - 1)
 			)
 				
 		--CASE	WHEN @RunningQty > 0 AND ISNULL(@OriginalRunningValue, 0) / @RunningQty > 0 THEN 
@@ -396,7 +422,11 @@ BEGIN
 			,il.intLocationId
 			,t.strRelatedTransactionId
 			,t.intRelatedTransactionId
-			,[negative stock cost] = cb.dblCost 
+			,negativeStock.dblQty
+			,negativeStock.dblCost
+			,negativeStock.strTransactionId
+			,negativeStock.intTransactionId
+			,negativeStock.intTransactionDetailId
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
@@ -411,18 +441,46 @@ BEGIN
 				AND cb.intTransactionId = t.intTransactionId
 				AND cb.intTransactionDetailId = t.intTransactionDetailId
 				AND cb.ysnIsUnposted = 0 
+
 			--LEFT JOIN tblICInventoryFIFOOut cbOut 
 			--	ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
 			--	AND cbOut.intRevalueFifoId IS NOT NULL 
 			--LEFT JOIN tblICInventoryFIFO cb
 			--	ON cb.intInventoryFIFOId = cbOut.intRevalueFifoId
+
+			OUTER APPLY (
+				SELECT TOP 1 
+					negativeCBOut.dblQty
+					,negativeCB.intItemUOMId
+					,cbRevalue.dblCost
+					,cbRevalue.strTransactionId
+					,cbRevalue.intTransactionId
+					,cbRevalue.intTransactionDetailId
+				FROM 
+					tblICInventoryFIFO negativeCB INNER JOIN tblICInventoryFIFOOut negativeCBOut
+						ON negativeCB.intInventoryFIFOId = negativeCBOut.intInventoryFIFOId	
+						AND negativeCBOut.intRevalueFifoId IS NOT NULL
+					INNER JOIN tblICInventoryFIFO cbRevalue
+						ON cbRevalue.intInventoryFIFOId = negativeCBOut.intRevalueFifoId
+				WHERE
+					negativeCB.strTransactionId = t.strTransactionId
+					AND negativeCBOut.intInventoryTransactionId = t.intInventoryTransactionId
+					AND negativeCB.intItemId = t.intItemId
+					AND negativeCB.intItemLocationId = t.intItemLocationId
+					AND t.intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock			
+			) negativeStock
+
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
 			--AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
 			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
-			--AND t.dblQty <> 0 
+			AND (
+				t.dblQty <> 0 
+				OR negativeStock.dblQty <> 0
+				OR (t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment)
+			) 
 
 	ORDER BY t.intInventoryTransactionId ASC 
 
@@ -445,7 +503,11 @@ BEGIN
 		,@t_intLocationId
 		,@t_strRelatedTransactionId
 		,@t_intRelatedTransactionId 
+		,@t_NegativeStockQty
 		,@t_NegativeStockCost
+		,@t_strNegativeStockTransactionId 
+		,@t_intNegativeStockTransactionId 
+		,@t_intNegativeStockTransactionDetailId 
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -588,6 +650,33 @@ BEGIN
 		SET @NewAverageCost = 
 				CASE WHEN ISNULL(@NewAverageCost, 0) < 0 THEN @OriginalAverageCost ELSE @NewAverageCost END 
 
+		-- Calculate the running qty. 
+		SET @RunningQty += dbo.fnCalculateQtyBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblQty)
+
+		-- Get accumulated cost adjustment for negative stocks
+		IF	@costAdjustmentType = @costAdjustmentType_SUMMARIZED 
+			AND @t_NegativeStockQty <> 0 
+			AND @t_NegativeStockQty IS NOT NULL 
+		BEGIN 
+			SET @AccumulatedCostAdjustment = 0 
+			
+			SELECT 
+				@AccumulatedCostAdjustment = SUM(cbLog.dblValue) 
+			FROM 
+				tblICInventoryFIFO cb INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+					ON cb.intInventoryFIFOId = cbLog.intInventoryFIFOId				
+			WHERE
+				cb.strTransactionId = @t_strTransactionId
+				AND cb.intItemId = @t_intItemId
+				AND cb.intItemLocationId = @t_intItemLocationId
+				AND	cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Sold
+				AND cbLog.strRelatedTransactionId = @t_strNegativeStockTransactionId
+				AND cbLog.intRelatedTransactionId = @t_intNegativeStockTransactionId
+				AND cbLog.intRelatedTransactionDetailId = @t_intNegativeStockTransactionDetailId
+
+			SET @AccumulatedCostAdjustment = ISNULL(@AccumulatedCostAdjustment, 0)
+		END 
+
 		-- Update the cost bucket cost. 
 		IF	@t_dblQty > 0 
 			AND @t_intTransactionId = @intSourceTransactionId
@@ -608,6 +697,7 @@ BEGIN
 
 			UPDATE	cb
 			SET		cb.dblCost = dbo.fnDivide((@CostBucketOriginalValue + @CostAdjustment), cb.dblStockIn)
+					,cb.dblForexCost = dbo.fnDivide((@CostBucketOriginalForexValue + @ForexCostAdjustment), cb.dblStockIn)
 			FROM	tblICInventoryFIFO cb
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryFIFOId = @CostBucketId
@@ -693,6 +783,10 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intCreatedEntityUserId] 
 				,[intOtherChargeItemId] 
+				,[dblForexValue]
+				,[intCurrencyId]
+				,[intForexRateTypeId]
+				,[dblForexRate]
 			)
 			SELECT
 				[intInventoryFIFOId] = @CostBucketId
@@ -758,6 +852,35 @@ BEGIN
 											ELSE 
 												@COST_ADJ_TYPE_Adjust_Sold
 									END 
+							WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN 
+								CASE 
+									WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+										@COST_ADJ_TYPE_Adjust_Sold									
+									WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
+										@COST_ADJ_TYPE_Adjust_WIP
+									WHEN @EscalateInventoryTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
+										@COST_ADJ_TYPE_Adjust_InTransit_Inventory	
+									WHEN @t_intLocationId IS NULL AND @t_intTransactionTypeId = @INV_TRANS_TYPE_Invoice THEN 
+										@COST_ADJ_TYPE_Adjust_InTransit_Sold
+									WHEN @t_intLocationId IS NULL THEN 
+										@COST_ADJ_TYPE_Adjust_InTransit
+									WHEN @t_intTransactionTypeId IN (
+											@INV_TRANS_TYPE_ADJ_Item_Change
+											,@INV_TRANS_TYPE_ADJ_Split_Lot
+											,@INV_TRANS_TYPE_ADJ_Lot_Merge
+											,@INV_TRANS_TYPE_ADJ_Lot_Move
+										) THEN 
+											@COST_ADJ_TYPE_Adjust_InventoryAdjustment
+									WHEN @t_intTransactionTypeId IN (@INV_TRANS_Inventory_Transfer, @INV_TRANS_Inventory_Transfer_With_Shipment) THEN 
+										@COST_ADJ_TYPE_Adjust_InTransit_Inventory
+									WHEN (
+										@t_intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt 
+										AND @strReceiptType = 'Transfer Order' 
+									)THEN 
+										@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce
+									ELSE 
+										@COST_ADJ_TYPE_Adjust_Sold
+								END 
 						END 
 				,[dblQty] = NULL 
 				,[dblCost] = NULL 
@@ -766,23 +889,60 @@ BEGIN
 								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
 								(@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
+							WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN
+								(-@t_NegativeStockQty * @NewAverageCost) - (-@t_NegativeStockQty * @t_NegativeStockCost) - @CurrentValue - @AccumulatedCostAdjustment
 							ELSE 
 								0
 					END 
 				,[ysnIsUnposted]  = CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 				,[dtmCreated] = GETDATE()
-				,[strRelatedTransactionId] = ISNULL(@t_strRelatedTransactionId, @t_strTransactionId)
-				,[intRelatedTransactionId] = ISNULL(@t_intRelatedTransactionId, @t_intTransactionId) 
-				,[intRelatedTransactionDetailId] = CASE WHEN @t_strRelatedTransactionId IS NULL THEN @t_intTransactionDetailId ELSE NULL END 
+				,[strRelatedTransactionId] = 
+					CASE 
+						WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN
+							@t_strNegativeStockTransactionId
+						ELSE 
+							ISNULL(@t_strRelatedTransactionId, @t_strTransactionId)
+					END 					
+				,[intRelatedTransactionId] = 
+					CASE
+						WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN
+							@t_intNegativeStockTransactionId
+						ELSE	
+							ISNULL(@t_intRelatedTransactionId, @t_intTransactionId) 
+					END 
+					
+				,[intRelatedTransactionDetailId] = 
+					CASE
+						WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN
+							@t_intNegativeStockTransactionDetailId
+						ELSE	
+							CASE WHEN @t_strRelatedTransactionId IS NULL THEN @t_intTransactionDetailId ELSE NULL END 							
+					END
+					
 				,[intRelatedInventoryTransactionId] = @t_intInventoryTransactionId
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intCreatedEntityUserId] = @intEntityUserSecurityId
 				,[intOtherChargeItemId] = @intOtherChargeItemId 
+				,[dblForexValue] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@ForexCostAdjustment
+							--WHEN @t_dblQty < 0 THEN 
+							--	(@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
+							--WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN
+							--	(-@t_NegativeStockQty * @NewAverageCost) - (-@t_NegativeStockQty * @t_NegativeStockCost) - @CurrentValue - @AccumulatedCostAdjustment
+							ELSE 
+								0
+					END 
+				,[intCurrencyId] = @intCurrencyId
+				,[intForexRateTypeId] = @intForexRateTypeId
+				,[dblForexRate] = @dblForexRate
 			WHERE		
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostAdjustment
 						WHEN @t_dblQty < 0 THEN 
 							(@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
+						WHEN @t_NegativeStockQty <> 0 AND @t_NegativeStockQty IS NOT NULL THEN 
+							(-@t_NegativeStockQty * @NewAverageCost) - (-@t_NegativeStockQty * @t_NegativeStockCost) - @CurrentValue - @AccumulatedCostAdjustment
 						ELSE 
 							0
 				END <> 0 
@@ -805,7 +965,11 @@ BEGIN
 			,@t_intLocationId
 			,@t_strRelatedTransactionId
 			,@t_intRelatedTransactionId 
+			,@t_NegativeStockQty
 			,@t_NegativeStockCost
+			,@t_strNegativeStockTransactionId 
+			,@t_intNegativeStockTransactionId 
+			,@t_intNegativeStockTransactionDetailId 
 		;		
 	END 
 
@@ -842,9 +1006,10 @@ BEGIN
 			,@dblQty								= 0
 			,@dblUOMQty								= 0
 			,@dblCost								= 0
+			,@dblForexCost							= 0 
 			,@dblValue								= @CurrentValue
 			,@dblSalesPrice							= 0
-			,@intCurrencyId							= NULL 
+			,@intCurrencyId							= @intCurrencyId
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -860,8 +1025,8 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			,@intForexRateTypeId					= NULL
-			,@dblForexRate							= 1
+			,@intForexRateTypeId					= @intForexRateTypeId
+			,@dblForexRate							= @dblForexRate
 			,@strDescription						= @strDescription
 			,@intSourceEntityId						= @intSourceEntityId
 
@@ -921,7 +1086,7 @@ BEGIN
 			,@dblCost								= 0
 			,@dblValue								= @CurrentValue
 			,@dblSalesPrice							= 0
-			,@intCurrencyId							= NULL 
+			,@intCurrencyId							= @intCurrencyId
 			,@intTransactionId						= @intTransactionId
 			,@intTransactionDetailId				= @intTransactionDetailId
 			,@strTransactionId						= @strTransactionId
@@ -937,8 +1102,8 @@ BEGIN
 			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			,@intFobPointId							= @intFobPointId 
 			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-			,@intForexRateTypeId					= NULL
-			,@dblForexRate							= 1
+			,@intForexRateTypeId					= @intForexRateTypeId
+			,@dblForexRate							= @dblForexRate
 			,@strDescription						= @strDescription
 			,@intSourceEntityId						= @intSourceEntityId
 
@@ -1098,7 +1263,7 @@ BEGIN
 			,@dblCost = 0
 			,@dblValue = @dblAutoVariance
 			,@dblSalesPrice = 0
-			,@intCurrencyId = NULL 
+			,@intCurrencyId = @intCurrencyId 
 			,@intTransactionId = @intTransactionId
 			,@intTransactionDetailId = @intTransactionDetailId
 			,@strTransactionId = @strTransactionId
@@ -1112,8 +1277,8 @@ BEGIN
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 			,@intCostingMethod = @AVERAGECOST
 			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			,@intForexRateTypeId = NULL
-			,@dblForexRate = 1
+			,@intForexRateTypeId = @intForexRateTypeId
+			,@dblForexRate = @dblForexRate
 			,@strDescription = @strAutoVarianceDescription 
 			,@intSourceEntityId = @intSourceEntityId
 			

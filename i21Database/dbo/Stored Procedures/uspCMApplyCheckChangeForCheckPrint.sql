@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMApplyCheckChangeForCheckPrint]
-	@intBankAccountId INT = NULL,
 	@intBankTransactionTypeId INT = NULL,
 	@strTransactionId NVARCHAR(MAX) = NULL,
 	@strProcessType NVARCHAR(100),
@@ -54,9 +53,8 @@ BEGIN
 	INNER JOIN tblCMBankTransaction B ON U.intBankDepositId = B.intTransactionId
 	CROSS apply (
 		SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where U.intUndepositedFundId = Item ) b
-	WHERE 
-	U.intBankAccountId = @intBankAccountId
-	AND U.ysnCommitted is null
+	WHERE
+	U.ysnCommitted is null
 	AND U.intBankDepositId IS NOT NULL
 	
 END
@@ -71,8 +69,8 @@ BEGIN
 			,intConcurrencyId = intConcurrencyId + 1
 	FROM [dbo].[tblCMBankTransaction] B
 	CROSS apply (SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where intTransactionId = Item ) S
-	WHERE	intBankAccountId = @intBankAccountId
-			AND ( intBankTransactionTypeId = @intBankTransactionTypeId OR intBankTransactionTypeId = @intBankTransactionTypeId + 100)
+	WHERE	
+			( intBankTransactionTypeId = @intBankTransactionTypeId OR intBankTransactionTypeId = @intBankTransactionTypeId + 100)
 			AND ysnPosted = 1
 			AND dtmCheckPrinted IS NULL
 			AND dblAmount <> 0

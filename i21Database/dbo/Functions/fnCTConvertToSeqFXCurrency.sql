@@ -47,7 +47,16 @@ BEGIN
 			SELECT @dblRate = 1 / CASE WHEN ISNULL(@dblRate,0) = 0 THEN 1 ELSE @dblRate END
 		END
 
-		SELECT @dblResult =	dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intValueUOMId,@dblMainValuePrice) * @dblRate
+		--CT-7022 DETAIL CASH PRICE MULTIPLY BY FX RATE
+		--IF (@ysnUseFXPrice = 1)
+		--BEGIN 
+		--	SELECT @dblResult = @dblMainValuePrice * @dblRate
+		--END
+		--ELSE 
+		--Revert CT7022 Because of CT-7172
+		BEGIN 
+			SELECT  @dblResult =	dbo.fnCTConvertQtyToTargetItemUOM(@intFXPriceUOMId,@intValueUOMId,@dblMainValuePrice) * @dblRate
+		END
 				
 	END
 

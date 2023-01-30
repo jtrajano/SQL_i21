@@ -468,10 +468,10 @@ BEGIN
 
 	IF(@transactionContractDetailId > 0 OR @transactionItemContractDetailId > 0)
 	BEGIN 
-
+		
 		SET @transactionCurrentQty = @transactionCurrentQty * -1
 
-		IF(LOWER(@transactionPriceMethod) = 'item contract pricing')
+		IF(LOWER(@transactionPriceMethod) = 'item contracts' OR LOWER(@transactionPriceMethod) = 'item contract pricing')
 		BEGIN
 			print 'itc'
 			EXEC uspCTItemContractUpdateScheduleQuantity
@@ -481,7 +481,7 @@ BEGIN
 			@intTransactionDetailId = @intTransactionId,
 			@strScreenName = 'Card Fueling Transaction Screen'
 		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contract')
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contracts' OR LOWER(@transactionPriceMethod) = 'contract pricing')
 		BEGIN
 			EXEC uspCTUpdateScheduleQuantity 
 			@intContractDetailId = @transactionContractDetailId
@@ -539,7 +539,7 @@ BEGIN
 
 		SET @transactionCurrentQty = @transactionCurrentQty * -1
 
-		IF(LOWER(@transactionPriceMethod) = 'item contract pricing')
+		IF(LOWER(@transactionPriceMethod) = 'item contracts' OR LOWER(@transactionPriceMethod) = 'item contract pricing')
 		BEGIN
 			print 'itc'
 			EXEC uspCTItemContractUpdateScheduleQuantity
@@ -549,7 +549,7 @@ BEGIN
 			@intTransactionDetailId = @intTransactionId,
 			@strScreenName = 'Card Fueling Transaction Screen'
 		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contract')
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contracts' OR LOWER(@transactionPriceMethod) = 'contract pricing')
 		BEGIN
 			EXEC uspCTUpdateScheduleQuantity 
 			@intContractDetailId = @transactionContractDetailId
@@ -6693,10 +6693,16 @@ BEGIN
 
 		END
 	END
-	ELSE IF (LOWER(@strPriceMethod) = 'item contracts')
+	ELSE IF (LOWER(@strPriceMethod) = 'item contracts' OR LOWER(@strPriceMethod) = 'item contract pricing')
 		BEGIN
 
-		
+		--COMPUTES TAX AND PRICES BASED IN AVAILABLE QTY IF QTY IS BIGGER THAN AVAILABLE QTY
+		IF (ISNULL(@dblAvailableQuantity,0) < ISNULL(@dblQuantity,0))
+		BEGIN
+			SET @dblQuantity = @dblAvailableQuantity
+			GOTO TAXCOMPUTATION
+		END
+
 		SET @dblNetTotalAmount = [dbo].[fnRoundBanker](((@dblPrice + @dblAdjustments) * @dblQuantity) ,2) 
 					
 		SET @dblCalculatedTotalPrice	 =	   @dblNetTotalAmount + @totalCalculatedTax
@@ -6709,11 +6715,20 @@ BEGIN
 
 		SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
 		SET @dblQuoteNetPrice			 =   @dblPrice
+
+		--SET BACK TO ORIGINAL QTY
+		SET @dblQuantity = @Quantity
 
 	END
-	ELSE IF (LOWER(@strPriceMethod) = 'contracts') OR (LOWER(@strPriceMethod) = 'contract pricing') 
+	ELSE IF (LOWER(@strPriceMethod) = 'contracts' OR LOWER(@strPriceMethod) = 'contract pricing')
 		BEGIN
 
+		--COMPUTES TAX AND PRICES BASED IN AVAILABLE QTY IF QTY IS BIGGER THAN AVAILABLE QTY
+		IF (ISNULL(@dblAvailableQuantity,0) < ISNULL(@dblQuantity,0))
+		BEGIN
+			SET @dblQuantity = @dblAvailableQuantity
+			GOTO TAXCOMPUTATION
+		END
 		
 		SET @dblNetTotalAmount = [dbo].[fnRoundBanker](((@dblPrice + @dblAdjustments) * @dblQuantity) ,2) 
 					
@@ -6728,7 +6743,9 @@ BEGIN
 		SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
 		SET @dblQuoteNetPrice			 =   @dblPrice
 
-
+		--SET BACK TO ORIGINAL QTY
+		SET @dblQuantity = @Quantity
+		
 		--old computation 022520--
 		--changed for CF-2498--
 
@@ -7273,6 +7290,18 @@ BEGIN
 			,@intOldContractDetailId	= intContractDetailId
 			FROM tblCFTransaction
 			WHERE intTransactionId = @TransactionId	
+
+
+			IF(@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
+			BEGIN
+				SET @strPriceMethod = 'Contract Pricing'
+			END
+
+			IF(@strOldPriceMethod = 'Contracts' OR @strOldPriceMethod = 'Contract Pricing')
+			BEGIN
+				SET @strOldPriceMethod = 'Contract Pricing'
+			END
+
 
 
 			IF(@strOldPriceMethod = 'Contracts' OR @strOldPriceMethod = 'Contract Pricing')

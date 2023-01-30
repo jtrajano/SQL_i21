@@ -44,6 +44,9 @@ IF NOT EXISTS(
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
@@ -68,6 +71,9 @@ IF NOT EXISTS(
 			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+			AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(A.intPriceFixationDetailId,-1)
+			AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(A.intInsuranceChargeDetailId,-1)
+			AND ISNULL(C.intStorageChargeId,-1) = ISNULL(A.intStorageChargeId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -92,6 +98,8 @@ SELECT TOP 100 PERCENT
 												THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
 											ELSE A.intLineNo END
 	,intStorageLocationId				=	A.intStorageLocationId
+	,intStorageChargeId					=	A.intStorageChargeId
+	,intInsuranceChargeDetailId			=	A.intInsuranceChargeDetailId
 	,intSubLocationId					=	A.intSubLocationId
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				=	A.intDeferredVoucherId
@@ -121,7 +129,7 @@ SELECT TOP 100 PERCENT
 	,intPriceFixationDetailId			=	A.intPriceFixationDetailId
 	,intContractSeq						=	ctDetail.intContractSeq
 	,intLinkingId						=	A.intLinkingId
-	,intComputeTotalOption				=	A.intComputeTotalOption
+	,intComputeTotalOption				=	ISNULL(item.intComputeItemTotalOption, 0)
 	,intLotId							=	A.intLotId
 	,intTicketDistributionAllocationId	=	A.intTicketDistributionAllocationId
 	/*Prepaid info*/					
@@ -145,15 +153,17 @@ SELECT TOP 100 PERCENT
 	,dblNetWeight						=	A.dblNetWeight
 	,dblWeight							=	A.dblWeight
 	/*Cost info*/						
-	,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
-											ELSE A.intCostUOMId END
-	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
-											ELSE A.dblCostUnitQty END
+	,intCostUOMId						=	A.intCostUOMId
+	-- ,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
+	-- 											THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
+	-- 										ELSE A.intCostUOMId END
+	-- ,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
+	-- 											THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
+	-- 										ELSE A.dblCostUnitQty END
+	,dblCostUnitQty						=	A.dblCostUnitQty
 	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
 	,dblCost							=	A.dblCost + ISNULL(A.dblQualityPremium, 0) + ISNULL(A.dblOptionalityPremium, 0)
-	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
 	-- 													THEN ctDetail.dblSeqPrice
 	-- 												ELSE 
@@ -165,10 +175,10 @@ SELECT TOP 100 PERCENT
 	-- 										ELSE A.dblCost END
 	,dblOldCost							=	A.dblOldCost
 	/*Quantity info*/					
-	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 												THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
 											ELSE A.intQtyToBillUOMId END
-	,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 												THEN 
 												(
 													CASE WHEN ctDetail.intContractDetailId IS NOT NULL
@@ -178,7 +188,7 @@ SELECT TOP 100 PERCENT
 											ELSE A.dblQtyToBillUnitQty END
 	/*Ordered and Received should always the same*/
 	,dblQtyOrdered						=	CASE WHEN A.dblQuantityToBill < 0 THEN ABS(A.dblOrderQty) * -1 ELSE ABS(A.dblOrderQty) END
-	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 												THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 														THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
 													ELSE A.dblQuantityToBill END)
@@ -266,6 +276,7 @@ SELECT TOP 100 PERCENT
 	,dblCashPrice 						= 	A.dblCost
 	,dblQualityPremium					=	ISNULL(A.dblQualityPremium, 0)
 	,dblOptionalityPremium				= 	ISNULL(A.dblOptionalityPremium, 0)
+	,ysnOverrideTaxGroup				=	A.ysnOverrideTaxGroup
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -327,21 +338,21 @@ DECLARE @qtyToBillFromDev DECIMAL(38,15);
 UPDATE A
 	SET 
 		@qtyToBill = ISNULL(
-							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityToBill)
 									ELSE vp.dblQuantityToBill END)
 							ELSE vp.dblQuantityToBill END
 							,0),
 		@qtyBilled = ISNULL(
-							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityBilled)
 									ELSE vp.dblQuantityBilled END)
 							ELSE vp.dblQuantityBilled END
 							,0),
 		@qtyToBillFromDev = ISNULL(
-							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType IN (1, 16)
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, A.dblQtyReceived)
 									ELSE A.dblQtyReceived END)
@@ -394,7 +405,9 @@ INSERT
 	,ysnSubCurrency	
 	,intCurrencyId					
 	,intLineNo							
-	,intStorageLocationId				
+	,intStorageLocationId		
+	,intStorageChargeId		
+	,intInsuranceChargeDetailId
 	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
@@ -469,7 +482,8 @@ INSERT
 	,intCurrencyExchangeRateTypeId		
 	,dblRate							
 	/*Tax info*/						
-	,intTaxGroupId						
+	,intTaxGroupId	
+	,ysnOverrideTaxGroup					
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					
@@ -494,7 +508,9 @@ VALUES
 	,ysnSubCurrency		
 	,intCurrencyId				
 	,intLineNo		
-	,intStorageLocationId						
+	,intStorageLocationId	
+	,intStorageChargeId			
+	,intInsuranceChargeDetailId		
 	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
@@ -569,7 +585,8 @@ VALUES
 	,intCurrencyExchangeRateTypeId		
 	,dblRate							
 	/*Tax info*/						
-	,intTaxGroupId						
+	,intTaxGroupId	
+	,ysnOverrideTaxGroup					
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					
@@ -635,7 +652,7 @@ FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
 LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
-WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL OR A.intPriceFixationDetailId > 0
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 

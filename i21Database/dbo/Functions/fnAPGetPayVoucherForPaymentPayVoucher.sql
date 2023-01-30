@@ -92,6 +92,7 @@ RETURNS TABLE AS RETURN
 		,account.strBankAccountNo strPayFromBankAccount
 		,voucher.intPayToBankAccountId
 		,eft.strAccountNumber strPayToBankAccount
+		,accountDetail.strAccountId strAPAccount
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
@@ -99,6 +100,7 @@ RETURNS TABLE AS RETURN
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	LEFT JOIN vyuCMBankAccount account ON account.intBankAccountId = voucher.intPayFromBankAccountId
 	LEFT JOIN vyuAPEntityEFTInformation eft ON eft.intEntityEFTInfoId = voucher.intPayToBankAccountId
+	LEFT JOIN vyuGLAccountDetail accountDetail ON accountDetail.intAccountId = voucher.intAccountId
 	LEFT JOIN tblSMCurrency currency ON currency.intCurrencyID = voucher.intCurrencyId
 	OUTER APPLY (
 		SELECT TOP 1
@@ -113,7 +115,7 @@ RETURNS TABLE AS RETURN
 		FROM tblAPAppliedPrepaidAndDebit APD
 		WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
 	) appliedPrepays
-	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
+	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR (forPay.intPaymentMethodId IS NULL AND @paymentMethodId = 0))
 	AND forPay.ysnDeferredPay = @showDeferred
 	AND 1 = (CASE WHEN @currencyId > 0
 					THEN (CASE WHEN forPay.intCurrencyId = @currencyId THEN 1 ELSE 0 END)

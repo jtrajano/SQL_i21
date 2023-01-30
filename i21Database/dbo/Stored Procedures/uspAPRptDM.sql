@@ -28,14 +28,15 @@ SET ANSI_WARNINGS ON
 DECLARE @intBillId INT 
 DECLARE @query NVARCHAR(MAX);
 DECLARE @xmlDocumentId AS INT;
-DECLARE @intReportLogoHeight INT, @intReportLogoWidth INT;
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM [vyuAPRptDM] WHERE intBillId = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, NULL AS strLogoType, NULL AS imgLogo, NULL AS imgFooter FROM [vyuAPRptDM] WHERE intBillId = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
+
+DECLARE @imgLogo VARBINARY(MAX);
 
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -71,12 +72,15 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'intBillId'
 END
 
---SET @intPurchaseId = @intBillId;
-SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference WITH (NOLOCK)
+-- GET LOGO
+SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
 
 SELECT 
-	A.* 
-	,intReportLogoHeight = @intReportLogoHeight
-	,intReportLogoWidth = @intReportLogoWidth
+	A.*,
+	CASE WHEN LP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END strLogoType,
+	ISNULL(LP.imgLogo, @imgLogo) imgLogo,
+	LPF.imgLogo imgFooter
 FROM [vyuAPRptDM] A
+LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = A.intShipToId AND LP.ysnDefault = 1
+LEFT JOIN tblSMLogoPreferenceFooter LPF ON LPF.intCompanyLocationId = A.intShipToId AND LPF.ysnDefault = 1
 WHERE intBillId = (CASE WHEN @intBillId IS NOT NULL THEN @intBillId ELSE 0 END)

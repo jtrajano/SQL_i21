@@ -189,8 +189,11 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblOptionalityPremium				= INV.dblOptionalityPremium
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
-	 , dblItemPrice							= ISNULL(INV.dblItemPrice, 0)
-	 , dblTotalByItemPrice					= ISNULL(INV.dblTotalByItemPrice, 0)
+	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
+	 , dblPercentage						= INV.dblPercentage
+	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
+	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
+	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -344,6 +347,7 @@ LEFT JOIN (
 	SELECT intCategoryId
 		 , strCategoryCode
 		 , strDescription
+		 , intLineOfBusinessId
 	FROM tblICCategory WITH(NOLOCK)
 ) ICATEGORY ON INV.intCategoryId = ICATEGORY.intCategoryId
 LEFT JOIN (

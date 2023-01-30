@@ -92,6 +92,7 @@ RETURNS @returntable TABLE
 	[dblExchangeRate]				DECIMAL(18,6) DEFAULT(1),
 	/*Tax info*/
 	[intPurchaseTaxGroupId]			INT NULL,
+	[ysnOverrideTaxGroup] 			BIT NULL,
 	[dblTax]						DECIMAL(18,2) NOT NULL DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
 	/*Discount Info*/
 	[dblDiscount]					DECIMAL(18,2) NOT NULL DEFAULT(0),
@@ -115,7 +116,28 @@ RETURNS @returntable TABLE
 	[int1099Form]					INT NULL,
 	[int1099Category]				INT NULL,
 	[dbl1099]						DECIMAL(18,6) NOT NULL DEFAULT(0),
-	[ysnStage]						BIT DEFAULT(1)
+	[ysnStage]						BIT DEFAULT(1),
+	/*Payment Info*/
+	[intPayFromBankAccountId]			INT NULL, --DEFAULT PAY FROM BANK ACCOUNT
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --MODULE OR PROCESS WHERE THE INFORMATION CAME FROM E.G. LOGISTICS
+	[strFinancingTransactionNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --TRANSACTION WHERE THE INFORMATION CAME FORM E.G. LS-0001
+	/*Trade Finance Info*/
+	[strFinanceTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --TRANSACTION NUMBER
+	[intBankId] INT NULL, --BANK NAME
+	[intBankAccountId] INT NULL, --BANK ACCOUNT NO.
+	[intBorrowingFacilityId] INT NULL, --FACILITY
+	[strBankReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK REFERENCE NO.
+	[intBorrowingFacilityLimitId] INT NULL, --LIMIT
+	[intBorrowingFacilityLimitDetailId] INT NULL, --SUBLIMIT
+	[strReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --BANK TRADE REFERENCE NO.
+	[intBankValuationRuleId] INT NULL, --OVERRIDE FACILITY VALUATION
+	[strComments] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, --COMMENTS
+	/*Quality and Optionality Premium*/
+	[dblQualityPremium] DECIMAL(18, 6) DEFAULT 0,
+ 	[dblOptionalityPremium] DECIMAL(18, 6) DEFAULT 0,
+	 /*Tax Override*/
+	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] INT NULL
 )
 AS
 BEGIN
@@ -200,6 +222,7 @@ BEGIN
 		,[dblExchangeRate]				= A.[dblExchangeRate]
 		/*Tax info*/					
 		,[intPurchaseTaxGroupId]		= A.[intPurchaseTaxGroupId]	
+		,[ysnOverrideTaxGroup]			= A.[ysnOverrideTaxGroup]
 		,[dblTax]						= A.[dblTax]
 		/*Discount Info*/				
 		,[dblDiscount]					= A.[dblDiscount]				
@@ -224,6 +247,23 @@ BEGIN
 		,[int1099Category]				= A.[int1099Category]				
 		,[dbl1099]						= A.[dbl1099]						
 		,[ysnStage]						= 1
+		,[intPayFromBankAccountId]				=	A.intPayFromBankAccountId
+		,[strFinancingSourcedFrom]				=	A.strFinancingSourcedFrom
+		,[strFinancingTransactionNumber]		= 	A.strFinancingTransactionNumber
+		,[strFinanceTradeNo]					=	A.strFinanceTradeNo
+		,[intBankId]							=	A.intBankId
+		,[intBankAccountId]						=	A.intBankAccountId
+		,[intBorrowingFacilityId]				=	A.intBorrowingFacilityId
+		,[strBankReferenceNo]					= 	A.strBankReferenceNo
+		,[intBorrowingFacilityLimitId]			=	A.intBorrowingFacilityLimitId
+		,[intBorrowingFacilityLimitDetailId]	=	A.intBorrowingFacilityLimitDetailId
+		,[strReferenceNo]						=	A.strReferenceNo
+		,[intBankValuationRuleId]				=	A.intBankValuationRuleId
+		,[strComments]							=	A.strComments
+		,[dblQualityPremium]					=	A.dblQualityPremium
+		,[dblOptionalityPremium]				=	A.dblOptionalityPremium
+		,[strTaxPoint]							=	A.strTaxPoint
+		,[intTaxLocationId]						=	A.intTaxLocationId
 	FROM tblAPVoucherPayable A
 	INNER JOIN @payableIds B ON A.intVoucherPayableId = B.intId
 	RETURN;

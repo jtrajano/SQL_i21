@@ -311,10 +311,39 @@ BEGIN
 			,strSealNo
 			,[dblTare]
 			,[dblTarePerQty]
-
+			,intTradeFinanceId
 	)
 	SELECT	intLotId				= ItemLot.intLotId
-			,strLotNumber			= ItemLot.strLotNumber
+			,strLotNumber			= --ItemLot.strLotNumber
+				CASE 					
+					WHEN 
+						Item.strLotTracking IN ('Yes - Manual', 'Yes - Manual/Serial Number') 
+						AND NULLIF(ItemLot.strLotNumber, '') IS NOT NULL 
+						AND ItemLot.strLotNumber NOT LIKE '%SWP'
+						AND ItemLot.strCondition = 'Swept'
+					THEN 
+						ItemLot.strLotNumber + '-SWP'
+					WHEN 
+						Item.strLotTracking IN ('Yes - Manual', 'Yes - Manual/Serial Number') 
+						AND NULLIF(ItemLot.strLotNumber, '') IS NOT NULL 
+						AND ItemLot.strLotNumber NOT LIKE '%SKM'
+						AND ItemLot.strCondition = 'Skimmed'
+					THEN 
+						ItemLot.strLotNumber + '-SKM'
+
+					WHEN 
+						Item.strLotTracking IN ('Yes - Manual', 'Yes - Manual/Serial Number') 
+						AND NULLIF(ItemLot.strLotNumber, '') IS NOT NULL 
+						AND ItemLot.strLotNumber NOT LIKE '%ML'
+						AND ItemLot.strCondition = 'Missing'
+					THEN 
+						ItemLot.strLotNumber + '-ML'
+
+					ELSE 
+						ItemLot.strLotNumber
+				END 
+					
+				
 			,strLotAlias			= ItemLot.strLotAlias
 			,intItemId				= ReceiptItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
@@ -376,6 +405,7 @@ BEGIN
 			,strSealNo				= ISNULL(SourceLot.strSealNo, Receipt.strSealNo) 
 			,[dblTare]				= ISNULL(NULLIF(SourceLot.dblTare, 0), ItemLot.dblTareWeight) 
 			,[dblTarePerQty]		= ISNULL(NULLIF(SourceLot.dblTarePerQty, 0), ItemLot.dblTarePerQuantity) 
+			,tf.intTradeFinanceId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -389,6 +419,9 @@ BEGIN
 				ON StorageLocation.intStorageLocationId = ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
 			LEFT JOIN tblICLot SourceLot
 				ON SourceLot.intLotId = ItemLot.intSourceLotId
+			LEFT JOIN tblTRFTradeFinance tf
+				ON tf.strTradeFinanceNumber = Receipt.strTradeFinanceNumber
+				AND tf.strTransactionNumber = Receipt.strReceiptNumber
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 
 END 

@@ -170,7 +170,17 @@ BEGIN
 		ysnLotWeightsRequired, 
 		dtmDateCreated,
 		ysnSeparateStockForUOMs,
-		intComputeItemTotalOption
+		intComputeItemTotalOption,
+		intCertificationId,
+		ysnAutoAdjustAccrualDiff,
+		ysnAvgLocked,
+		intItemRefId,
+		intCommodityAttributeId1,
+		intCommodityAttributeId2,
+		intCommodityAttributeId3,
+		intCommodityAttributeId4,
+		ysnProducePartialPacking,
+		intValuationGroupId
 	)
 	SELECT @NewItemNo,
 		strType,
@@ -310,7 +320,17 @@ BEGIN
 		ysnLotWeightsRequired = CASE WHEN strLotTracking = 'No' THEN 0 ELSE ysnLotWeightsRequired END,
 		GETUTCDATE(),
 		ysnSeparateStockForUOMs,
-		intComputeItemTotalOption
+		intComputeItemTotalOption,
+		intCertificationId,
+		ysnAutoAdjustAccrualDiff,
+		ysnAvgLocked,
+		intItemRefId,
+		intCommodityAttributeId1,
+		intCommodityAttributeId2,
+		intCommodityAttributeId3,
+		intCommodityAttributeId4,
+		ysnProducePartialPacking,
+		intValuationGroupId
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------

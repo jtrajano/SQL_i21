@@ -371,11 +371,16 @@ BEGIN
 								ON AggregrateLot.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 					WHERE	
 						AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId 
+						AND (
+							AggregrateLot.strCondition NOT IN ('Swept', 'Skimmed') -- Do not include the Swept or Skimmed in the total.
+							OR AggregrateLot.strCondition IS NULL
+						)
 				) ItemLot					
 		WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
 				AND Receipt.strReceiptNumber = @strTransactionId
 				AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
 				AND Item.strType IN ('Inventory', 'Bundle')
+				
 			
 		IF @intItemId IS NOT NULL 
 		BEGIN 
@@ -641,13 +646,6 @@ END
 -- END Validate  
 --------------------------------------------------------------------------------------------  
 
--- Get the next batch number
-BEGIN 
-	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
-	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
-END
-
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
 	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
@@ -655,13 +653,24 @@ BEGIN
 	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
 END 
 
+-- Get the next batch number
+BEGIN 
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
+	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
+END
+
+
 -- Create and validate the lot numbers
 IF @ysnPost = 1
 BEGIN 	
 	DECLARE @intCreateUpdateLotError AS INT 
 
 	UPDATE lot
-	SET lot.strWarehouseRefNo = r.strWarehouseRefNo
+	SET 
+		lot.strWarehouseRefNo = r.strWarehouseRefNo
+		,lot.strWarrantNo = ISNULL(NULLIF(RTRIM(LTRIM(lot.strWarrantNo)), ''), r.strWarrantNo) -- Ensure the lot is using the same warrant number when posting the IR. 
+		,lot.intWarrantStatus = ISNULL(lot.intWarrantStatus, r.intWarrantStatus) -- Ensure the lot is using the same warrant status when posting the IR.
 	FROM tblICInventoryReceiptItemLot lot 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
@@ -770,7 +779,7 @@ BEGIN
 				,dtmDate  
 				,dblQty  
 				,dblUOMQty  
-				,dblCost  
+				,dblCost
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -900,17 +909,19 @@ BEGIN
 
 										-- (B) Other Charge
 										+ 
-										CASE 
-											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-												-- Convert the other charge to the currency used by the detail item. 
-												dbo.fnDivide(
-													dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
-													,DetailItem.dblForexRate
-												)
-											ELSE 
-												-- No conversion. Detail item is already in functional currency. 
-												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
-										END 									
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
+										--CASE 
+										--	WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+
+										--		-- Convert the other charge to the currency used by the detail item. 
+										--		dbo.fnDivide(
+										--			dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
+										--			,DetailItem.dblForexRate
+										--		)
+										--	ELSE 
+										--		-- No conversion. Detail item is already in functional currency. 
+										--		dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
+										--END 									
 										+
 										CASE 
 											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
@@ -943,17 +954,18 @@ BEGIN
 										)
 										-- (B) Other Charge
 										+ 
-										CASE 
-											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-												-- Convert the other charge to the currency used by the detail item. 
-												dbo.fnDivide(
-													dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
-													,DetailItem.dblForexRate
-												)
-											ELSE 
-												-- No conversion. Detail item is already in functional currency. 
-												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
-										END	 									
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
+										--CASE 
+										--	WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+										--		-- Convert the other charge to the currency used by the detail item. 
+										--		dbo.fnDivide(
+										--			dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
+										--			,DetailItem.dblForexRate
+										--		)
+										--	ELSE 
+										--		-- No conversion. Detail item is already in functional currency. 
+										--		dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
+										--END	 									
 										+
 										CASE 
 											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
@@ -966,7 +978,6 @@ BEGIN
 										END
 									)							
 							END
-
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = ISNULL(DetailItem.dblForexRate, 1)   
@@ -1070,6 +1081,7 @@ BEGIN
 			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
 					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+					,dblForexCost = dblCost
 			FROM	@ItemsForPost itemCost
 			WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
 		END
@@ -1085,6 +1097,7 @@ BEGIN
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[dblCost] 
+			,[dblForexCost]
 			,[dblValue]
 			,[dblSalesPrice] 
 			,[intCurrencyId] 
@@ -1123,6 +1136,7 @@ BEGIN
 			,dblQty = -itemsToPost.dblQty
 			,itemsToPost.dblUOMQty
 			,itemsToPost.dblCost
+			,itemsToPost.dblForexCost 
 			,itemsToPost.dblValue
 			,itemsToPost.dblSalesPrice
 			,itemsToPost.intCurrencyId
@@ -1170,6 +1184,7 @@ BEGIN
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[dblCost] 
+			,[dblForexCost]
 			,[dblValue]
 			,[dblSalesPrice] 
 			,[intCurrencyId] 
@@ -1208,6 +1223,7 @@ BEGIN
 			,itemsToPost.dblQty
 			,itemsToPost.dblUOMQty
 			,itemsToPost.dblCost
+			,itemsToPost.dblForexCost 
 			,itemsToPost.dblValue
 			,itemsToPost.dblSalesPrice
 			,itemsToPost.intCurrencyId
@@ -1299,6 +1315,7 @@ BEGIN
 					,dblQty  
 					,dblUOMQty  
 					,dblCost  
+					,dblForexCost 
 					,dblSalesPrice  
 					,intCurrencyId  
 					,dblExchangeRate  
@@ -1329,6 +1346,7 @@ BEGIN
 					,dblQty  
 					,dblUOMQty  
 					,dblCost  
+					,dblForexCost 
 					,dblSalesPrice  
 					,intCurrencyId  
 					,dblExchangeRate  
@@ -1625,6 +1643,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -1655,6 +1674,7 @@ BEGIN
 					,dblQty = -ri.dblOpenReceive
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
+					,t.[dblForexCost]
 					,t.[dblValue] 
 					,t.[dblSalesPrice] 
 					,t.[intCurrencyId] 
@@ -1753,6 +1773,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -1856,7 +1877,7 @@ BEGIN
 								dbo.fnDivide(
 									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
 									,SUM(ISNULL(t.dblQty, 0))
-								)
+								)							
 						FROM 				
 							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
 								ON th.intInventoryTransferId = td.intInventoryTransferId
@@ -1947,6 +1968,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -1991,6 +2013,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
@@ -2020,6 +2043,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[intCurrencyId] 
 					,[dblExchangeRate] 
 					,[intTransactionId] 
@@ -2063,6 +2087,7 @@ BEGIN
 									
 					,[dblUOMQty]			= t.dblUOMQty
 					,[dblCost]				= valuationCost.dblCost 							
+					,[dblForexCost]			= valuationCost.dblForexCost 
 					,[intCurrencyId]		= t.intCurrencyId
 					,[dblExchangeRate]		= t.dblExchangeRate
 					,[intTransactionId]		= r.intInventoryReceiptId
@@ -2096,6 +2121,11 @@ BEGIN
 							dblCost = 
 								dbo.fnDivide(
 									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+									,SUM(ISNULL(t.dblQty, 0))
+								)
+							,dblForexCost = 
+								dbo.fnDivide(
+									SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblForexCost, 0)))
 									,SUM(ISNULL(t.dblQty, 0))
 								)
 						FROM 				
@@ -2160,6 +2190,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -2204,6 +2235,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
 			)
@@ -2352,14 +2384,15 @@ BEGIN
 
 										-- (B) Other Charge
 										+ 
-										CASE 
-											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-												-- Convert the other charge to the currency used by the detail item. 
-												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) / DetailItem.dblForexRate
-											ELSE 
-												-- No conversion. Detail item is already in functional currency. 
-												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
-										END 									
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
+										--CASE 
+										--	WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+										--		-- Convert the other charge to the currency used by the detail item. 
+										--		dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) / DetailItem.dblForexRate
+										--	ELSE 
+										--		-- No conversion. Detail item is already in functional currency. 
+										--		dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
+										--END 									
 
 									)										
 								ELSE 
@@ -2383,14 +2416,15 @@ BEGIN
 										)
 										-- (B) Other Charge
 										+ 
-										CASE 
-											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-												-- Convert the other charge to the currency used by the detail item. 
-												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) / DetailItem.dblForexRate
-											ELSE 
-												-- No conversion. Detail item is already in functional currency. 
-												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
-										END
+										dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
+										--CASE 
+										--	WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+										--		-- Convert the other charge to the currency used by the detail item. 
+										--		dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) / DetailItem.dblForexRate
+										--	ELSE 
+										--		-- No conversion. Detail item is already in functional currency. 
+										--		dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
+										--END
 									)
 							END
 
@@ -2469,6 +2503,7 @@ BEGIN
 			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
 					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+					,dblForexCost = dblCost 
 			FROM	@StorageItemsForPost storageCost
 			WHERE	storageCost.intCurrencyId <> @intFunctionalCurrencyId 
 		END
@@ -2577,53 +2612,6 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 	
-	-- Process the decimal discrepancy
-	BEGIN 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]	
-				,[dblDebitReport]	
-				,[dblCreditForeign]	
-				,[dblCreditReport]	
-				,[dblReportingRate]	
-				,[dblForeignRate]
-				,[strRateType]
-				,[intSourceEntityId]
-				,[intCommodityId]
-		)
-		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
-			@strReceiptNumber = @strTransactionId
-			,@strBatchId = @strBatchId
-			,@GLEntries = @GLEntries
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	END	
-
 	-- Process the GL entries for Missing Stocks
 	BEGIN 
 		IF EXISTS (SELECT TOP 1 1 FROM @MissingLotsForPost)
@@ -2670,6 +2658,53 @@ BEGIN
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 		END
 	END 
+
+	-- Process the decimal discrepancy
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+			@strReceiptNumber = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@GLEntries = @GLEntries
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -2729,7 +2764,7 @@ BEGIN
 				,@intEntityUserSecurityId
 			;
 		END 
-		
+
 		-- Unpost the company owned stocks. 
 		-- This will also include the unposting of the missing lots. 
 		INSERT INTO @GLEntries (
@@ -2882,6 +2917,54 @@ BEGIN
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
+		---- Unpost the the decimal discrepancy
+		--BEGIN 
+		--	INSERT INTO @GLEntries (
+		--			[dtmDate] 
+		--			,[strBatchId]
+		--			,[intAccountId]
+		--			,[dblDebit] 
+		--			,[dblCredit]					
+		--			,[dblDebitUnit]
+		--			,[dblCreditUnit]
+		--			,[strDescription]
+		--			,[strCode]
+		--			,[strReference]
+		--			,[intCurrencyId]
+		--			,[dblExchangeRate]
+		--			,[dtmDateEntered]
+		--			,[dtmTransactionDate]
+		--			,[strJournalLineDescription]
+		--			,[intJournalLineNo]
+		--			,[ysnIsUnposted]
+		--			,[intUserId]
+		--			,[intEntityId]
+		--			,[strTransactionId]
+		--			,[intTransactionId]
+		--			,[strTransactionType]
+		--			,[strTransactionForm]
+		--			,[strModuleName]
+		--			,[intConcurrencyId]
+		--			,[dblDebitForeign]
+		--			,[dblDebitReport]	
+		--			,[dblCreditForeign]	
+		--			,[dblCreditReport]	
+		--			,[dblReportingRate]	
+		--			,[dblForeignRate]
+		--			,[strRateType]
+		--			,[intSourceEntityId]
+		--			,[intCommodityId]
+		--	)
+		--	EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+		--		@strReceiptNumber = @strTransactionId
+		--		,@strBatchId = @strBatchId
+		--		,@GLEntries = @GLEntries
+		--		,@intEntityUserSecurityId = @intEntityUserSecurityId
+		--		,@ysnPost = 0 
+
+		--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		--END	
+
 		-- Reduce the Gross weight for the lots when unposting the receipt. 
 		UPDATE dbo.tblICLot
 		SET		dblGrossWeight = Lot.dblGrossWeight - ItemLot.dblGrossWeight
@@ -2976,7 +3059,7 @@ BEGIN
 			WHERE
 				strTransactionId = @strTransactionId
 				AND ysnIsUnposted = 0 
-		END 
+		END 		
 	END 	
 END   
 

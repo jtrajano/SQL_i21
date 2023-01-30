@@ -6,20 +6,63 @@ CREATE PROCEDURE [dbo].[uspCMBTOverrideGLAccount]
 )
 AS
 BEGIN
-DECLARE @ysnOverrideLocation BIT , @ysnOverrideCompany BIT
+DECLARE @ysnOverrideLocation BIT = 0 , @ysnOverrideLOB BIT = 0, @ysnOverrideCompany BIT = 0, @msg NVARCHAR(MAX) = ''
 
+IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  3)
 SELECT TOP 1 @ysnOverrideLocation=ISNULL(
 CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideLocationSegment_InTransit
     WHEN @intBankTransferTypeId = 3 THEN ysnOverrideLocationSegment_Forward
     WHEN @intBankTransferTypeId IN (4,5) THEN ysnOverrideLocationSegment_Swap ELSE 0 END,0)
+FROM tblCMCompanyPreferenceOption  
+
+IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  5)
+SELECT TOP 1 @ysnOverrideLOB=ISNULL(
+CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideLOBSegment_InTransit
+    WHEN @intBankTransferTypeId = 3 THEN ysnOverrideLOBSegment_Forward
+    WHEN @intBankTransferTypeId IN (4,5) THEN ysnOverrideLOBSegment_Swap ELSE 0 END,0)
 FROM tblCMCompanyPreferenceOption
 
 
+IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  6)
 SELECT TOP 1 @ysnOverrideCompany= ISNULL(
 CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideCompanySegment_InTransit
     WHEN @intBankTransferTypeId = 3 THEN ysnOverrideCompanySegment_Forward
     WHEN @intBankTransferTypeId IN (4,5) THEN ysnOverrideCompanySegment_Swap ELSE 0 END,0)
 FROM tblCMCompanyPreferenceOption
+
+
+-- OVERRIDE BY Bank GL Account Id WITH CONTRACT ITEM LOB----
+-- GL-9908
+IF @intBankTransferTypeId  = 3 AND @ysnOverrideLOB = 1
+BEGIN
+    DECLARE @intLOBSegmentIdFromContract INT
+    SELECT TOP 1 @intLOBSegmentIdFromContract = SM.intSegmentCodeId
+    FROM tblRKFutOptTransaction der
+    JOIN tblCMBankTransfer BT ON der.intFutOptTransactionId = BT.intFutOptTransactionId OR der.intFutOptTransactionHeaderId = BT.intFutOptTransactionHeaderId
+    JOIN tblCTContractHeader CT on CT.intContractHeaderId = der.intContractHeaderId
+	JOIN tblICCommodity IC ON IC.intCommodityId = CT.intCommodityId
+	JOIN tblSMLineOfBusiness SM ON SM.intLineOfBusinessId = IC.intLineOfBusinessId 
+    JOIN #tmpGLDetail GL ON GL.strTransactionId = BT.strTransactionId
+ 
+    IF @intLOBSegmentIdFromContract IS NOT NULL
+    BEGIN
+        DECLARE @strAccountId2 NVARCHAR(30)
+        SELECT @strAccountId2 = dbo.fnGLGetOverrideAccountBySegment(@intAccountId,NULL,@intLOBSegmentIdFromContract,NULL)
+        IF @strAccountId2 IS NULL OR LEN(@strAccountId2) = 0
+            SET @msg += '<li>Building an override account encountered an error.</li>'
+
+		DECLARE @intAccountId1 INT
+        SELECT TOP 1 @intAccountId1 = intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId2
+        IF @intAccountId1 IS NULL
+            SET @msg += '<li>' + @strAccountId2 + ' is not an existing account id.</li>'
+
+        IF @msg <> ''
+            GOTO _RaiseError
+
+		SET @intAccountId = @intAccountId1		
+    END
+    
+END
 
 DECLARE @GLEntries AS RecapTableType 
 
@@ -84,7 +127,7 @@ INSERT INTO @GLEntries(
       ,[strModuleName]      
     FROM #tmpGLDetail  
 
-DECLARE @strAccountId NVARCHAR(30) ,@strAccountId1 NVARCHAR(30) , @msg NVARCHAR(MAX) = ''
+DECLARE @strAccountId NVARCHAR(30) ,@strAccountId1 NVARCHAR(30) 
 SELECT @strAccountId = strAccountId from tblGLAccount where intAccountId = @intAccountId
 
 
@@ -100,14 +143,7 @@ BEGIN
     JOIN  tblGLAccount GL ON G.intAccountId = GL.intAccountId
     WHERE GL.intAccountId <> @intAccountId
     GROUP BY GL.intAccountId, strAccountId
-
-    IF @ysnOverrideLocation = 1 
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(3,@strAccountId,@strAccountId1)
-    
-    IF @ysnOverrideCompany = 1
-        SELECT @newStrAccountId= dbo.fnGLGetOverrideAccount(6,@strAccountId,@newStrAccountId)
-        
-
+    SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
     IF @newStrAccountId = ''
     BEGIN
 	    SET @msg += '<li>Overriding ' + @strAccountId1 + ' encountered an unknow error.</li>'
@@ -117,30 +153,21 @@ BEGIN
     BEGIN
         SET @msg += '<li>' + @newStrAccountId + ' is a  non-existing account for override</li>' 
     END
-    ELSE
-    IF @newStrAccountId = @strAccountId
-    BEGIN
-        SET @msg += '<li>Overriding ' + @strAccountId1 + ' will result to the same account id.</li>'
-    END
-    ELSE
+    ELSE IF @newStrAccountId <> @strAccountId1
     BEGIN
         SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
-
         UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
         WHERE A.intAccountId = @intAccountIdLoop
     END
-
     DELETE FROM @GLEntries WHERE intAccountId = @intAccountIdLoop
-
 END
+
 
 IF @msg <> ''
 BEGIN
+    _RaiseError:
     SET @msg = '<ul style="text-indent:-40px">' + @msg + '</ul>'
 	RAISERROR (@msg ,16,1)
 END
-
-
-
 
 END

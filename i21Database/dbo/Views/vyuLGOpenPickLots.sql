@@ -61,7 +61,9 @@ SELECT DISTINCT (SELECT COUNT(*) FROM tblLGPickLotDetail WHERE intPickLotHeaderI
   ysnDelivered = CONVERT(BIT,(CASE WHEN ISNULL(L.strLoadNumber,'') = '' THEN 0 ELSE 1 END)),
   intSaleItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intSaleUnitMeasureId),
   intPurchaseItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intLotUnitMeasureId),
-  ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = SCD.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
+  ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = SCD.intContractDetailId) THEN 1 ELSE 0 END AS BIT),
+  SCH.intFreightTermId,
+  FT.strFreightTerm
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
@@ -79,4 +81,5 @@ LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryRecei
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = SCH.intFreightTermId
 WHERE PL.intPickLotDetailId NOT IN (SELECT IsNull(LD.intPickLotDetailId, 0) FROM tblLGLoadDetail LD)

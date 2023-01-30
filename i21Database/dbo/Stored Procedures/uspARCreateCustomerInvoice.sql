@@ -152,11 +152,19 @@
 	,@BorrowingFacilityId					INT				= NULL
 	,@BorrowingFacilityLimitId				INT				= NULL
 	,@BankReferenceNo						NVARCHAR(100)	= NULL
-	,@BankTransactionId						NVARCHAR(100)	= NULL
+	,@BankTradeReference					NVARCHAR(100)	= NULL
 	,@LoanAmount							NUMERIC(18, 6)	= NULL
 	,@BankValuationRuleId					INT				= NULL
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
+	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@SourcedFrom							NVARCHAR(100)	= NULL
+	,@TaxLocationId							INT				= NULL
+	,@TaxPoint								NVARCHAR(50)	= NULL
+	,@ItemOverrideTaxGroup					BIT				= 0
+	,@DefaultPayToBankAccountId				INT				= NULL
+	,@PayToCashBankAccountId				INT				= NULL
+	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
 AS
 
 BEGIN
@@ -169,12 +177,13 @@ SET ANSI_WARNINGS OFF
 IF @RaiseError = 1
 	SET XACT_ABORT ON
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@DateOnly DATETIME
-		,@DefaultCurrency INT
-		,@ARAccountId INT
-		,@InitTranCount INT
-		,@Savepoint NVARCHAR(32)
+DECLARE @ZeroDecimal						NUMERIC(18, 6)
+		,@DateOnly							DATETIME
+		,@DefaultCurrency					INT
+		,@ARAccountId						INT
+		,@InitTranCount						INT
+		,@Savepoint							NVARCHAR(32)
+		,@ImpactForProvisional				BIT = 0
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -218,10 +227,7 @@ BEGIN
 END
 
 IF ISNULL(@EntityContactId, 0) = 0
-	BEGIN
-		--SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityId = @EntityCustomerId
-	END
+	SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityId = @EntityCustomerId
 
 IF ISNULL(@TransactionType, '') = ''
 	SET @TransactionType = 'Invoice'
@@ -229,12 +235,10 @@ IF ISNULL(@TransactionType, '') = ''
 IF ISNULL(@Type, '') = ''
 	SET @Type = 'Standard'
 
-
 IF @AccountId IS NOT NULL
 	SET @ARAccountId = @AccountId
 ELSE
 	SET @ARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@TransactionType, @CompanyLocationId)
-
 
 IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash')
 	BEGIN		
@@ -367,9 +371,6 @@ IF @CurrencyId IS NOT NULL
 ELSE
 	SET @DefaultCurrency = [dbo].[fnARGetCustomerDefaultCurrency](@EntityCustomerId)
 
---IF @TransactionType = 'Credit Memo'
---	SET @ImpactInventory = 1
-
 IF @ItemDescription like 'Washout net diff: Original Contract%' and @TransactionType = 'Credit Memo'
 BEGIN
 	SET @ImpactInventory = 0
@@ -423,28 +424,30 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
-DECLARE	@ImpactForProvisional BIT
-
-SELECT TOP 1
-	 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
-FROM
-	tblARCompanyPreference
+SELECT TOP 1 @ImpactForProvisional = CASE WHEN @Type = 'Provisional' THEN ISNULL([ysnImpactForProvisional], 0) ELSE 0 END
+FROM tblARCompanyPreference
 
 DECLARE @BorrowingFacilityLimitDetailId INT = NULL
 
-SELECT TOP 1
-	  @BorrowingFacilityLimitId = intBorrowingFacilityLimitId
-FROM
-	tblCMBorrowingFacilityLimit
-WHERE intBorrowingFacilityId = @BorrowingFacilityId
-  AND strBorrowingFacilityLimit = 'Receivables'
+IF ISNULL(@TransactionNo, '') <> ''
+BEGIN
+	SELECT TOP 1
+		@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
+	FROM
+		tblCMBorrowingFacilityLimit
+	WHERE intBorrowingFacilityId = @BorrowingFacilityId
+	  AND strBorrowingFacilityLimit = 'Receivables'
 
-SELECT TOP 1
-	  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
-FROM
-	tblCMBorrowingFacilityLimitDetail
-WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
-  AND ysnDefault = 1
+	SELECT TOP 1
+		  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
+	FROM
+		tblCMBorrowingFacilityLimitDetail
+	WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
+	  AND ysnDefault = 1
+
+	SET @DefaultPayToBankAccountId = dbo.fnARGetCustomerDefaultPayToBankAccount(@EntityCustomerId, @DefaultCurrency, @CompanyLocationId)
+	SET @PayToCashBankAccountId = ISNULL(@PayToCashBankAccountId, ISNULL(@BankAccountId, @DefaultPayToBankAccountId))
+END
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -538,12 +541,20 @@ BEGIN TRY
 		,[intBorrowingFacilityId]
 		,[intBorrowingFacilityLimitId]
 		,[strBankReferenceNo]
-		,[strBankTransactionId]
+		,[strBankTradeReference]
 		,[dblLoanAmount]
 		,[intBankValuationRuleId]
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
-		,[intBorrowingFacilityLimitDetailId])
+		,[intBorrowingFacilityLimitDetailId]
+		,[intDefaultPayToBankAccountId]
+		,[strSourcedFrom]
+		,[intTaxLocationId]
+		,[strTaxPoint]
+		,[strPaymentInstructions]
+		,[intPayToCashBankAccountId]
+		,strPrintFormat
+	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
 		,[strType]							= @Type
@@ -566,7 +577,6 @@ BEGIN TRY
 		,[dblDiscount]						= @ZeroDecimal
 		,[dblAmountDue]						= @ZeroDecimal
 		,[dblPayment]						= @ZeroDecimal
-		
 		,[intEntitySalespersonId]			= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[intEntityContactId]				= @EntityContactId
 		,[intFreightTermId]					= ISNULL(@FreightTermId, ISNULL(SL.[intFreightTermId],SL1.[intFreightTermId]))
@@ -635,12 +645,26 @@ BEGIN TRY
 		,[intBorrowingFacilityId]			= @BorrowingFacilityId
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
-		,[strBankTransactionId]				= @BankTransactionId
-		,[dblLoanAmount]					= @LoanAmount
+		,[strBankTradeReference]			= @BankTradeReference
+		,[dblLoanAmount]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @LoanAmount ELSE NULL END
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[intDefaultPayToBankAccountId]  	= @DefaultPayToBankAccountId
+		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
+												THEN @SourcedFrom 
+												ELSE 
+													CASE WHEN ISNULL(@BankAccountId, '') = '' AND ISNULL([dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId), '') <> '' 
+														THEN 'Customer'
+														ELSE NULL
+													END
+											  END
+		,[intTaxLocationId]					= @TaxLocationId
+		,[strTaxPoint]						= @TaxPoint
+		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
+		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
+		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -674,7 +698,8 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
-			ON C.intBillToId = BL1.intEntityLocationId	
+			ON C.intBillToId = BL1.intEntityLocationId
+	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  @PayToCashBankAccountId
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
@@ -790,6 +815,8 @@ BEGIN TRY
 		,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 		,@ItemQualityPremium			= @ItemQualityPremium
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
+		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+		,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
@@ -884,5 +911,3 @@ RETURN 1;
 	
 END
 GO
-
-

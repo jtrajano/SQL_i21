@@ -273,6 +273,72 @@ BEGIN TRY
 		END
 	END
 
+	-- Call IC SP to monitor the rejected samples at lot level
+	IF @intProductTypeId = 6
+		OR @intProductTypeId = 11
+	BEGIN
+		DECLARE @intLotLocationId INT
+		DECLARE @LotRecords TABLE (
+			intSeqNo INT IDENTITY(1, 1)
+			,intLotId INT
+			,strLotNumber NVARCHAR(50)
+			)
+
+		DELETE
+		FROM @LotRecords
+
+		IF @intProductTypeId = 11
+		BEGIN
+			INSERT INTO @LotRecords (
+				intLotId
+				,strLotNumber
+				)
+			SELECT intLotId
+				,strLotNumber
+			FROM tblICLot
+			WHERE intParentLotId = @intProductValueId
+				AND dblQty > 0
+		END
+		ELSE
+		BEGIN
+			SELECT @strLotNumber = strLotNumber
+				,@intLotLocationId = intLocationId
+			FROM tblICLot
+			WHERE intLotId = @intProductValueId
+
+			INSERT INTO @LotRecords (
+				intLotId
+				,strLotNumber
+				)
+			SELECT intLotId
+				,strLotNumber
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND dblQty > 0
+				--AND intLocationId = @intLotLocationId
+		END
+
+		SELECT @intSeqNo = MIN(intSeqNo)
+		FROM @LotRecords
+
+		WHILE (@intSeqNo > 0)
+		BEGIN
+			SELECT @intLotId = NULL
+
+			SELECT @intLotId = intLotId
+			FROM @LotRecords
+			WHERE intSeqNo = @intSeqNo
+
+			EXEC uspICRejectLot @intLotId = @intLotId
+				,@intEntityId = @intLastModifiedUserId
+				,@ysnAdd = 1
+
+			SELECT @intSeqNo = MIN(intSeqNo)
+			FROM @LotRecords
+			WHERE intSeqNo > @intSeqNo
+		END
+	END
+
 	-- Sample Approve by Container in Sample Type / Approve by Lot / Parent Lot based on Company Preference
 	IF (
 			@intProductTypeId = 6
@@ -578,12 +644,16 @@ BEGIN TRY
 				AND intStorageLocationId is not null
 		END
 
+		SELECT @intSeqNo = NULL
+
 		SELECT @intSeqNo = MIN(intSeqNo)
 		FROM @LotData
 
 		WHILE (@intSeqNo > 0)
 		BEGIN
 			SELECT @intLotStatusId = @intOrgLotStatusId
+
+			SELECT @intLotId = NULL
 
 			SELECT @intLotId = intLotId
 				,@strLotNumber = strLotNumber

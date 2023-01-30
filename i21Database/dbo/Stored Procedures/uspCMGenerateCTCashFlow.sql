@@ -54,6 +54,7 @@ BEGIN
 		,[intCurrencyExchangeRateTypeId]
 		,[dblRate]
 		,[intAccountId]
+		,[intBankId]
 		,[intBankAccountId]
 		,[intCompanyLocationId]
 		,[intConcurrencyId]
@@ -79,6 +80,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket1,
 		RateFilter.dblRateBucket1,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -99,6 +101,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -126,6 +135,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket2,
 		RateFilter.dblRateBucket2,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -146,6 +156,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -173,6 +190,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket3,
 		RateFilter.dblRateBucket3,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -193,6 +211,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -220,6 +245,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket4,
 		RateFilter.dblRateBucket4,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -240,6 +266,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -267,6 +300,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket5,
 		RateFilter.dblRateBucket5,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -287,6 +321,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -314,6 +355,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket6,
 		RateFilter.dblRateBucket6,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -334,6 +376,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -361,6 +410,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket7,
 		RateFilter.dblRateBucket7,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -381,6 +431,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -408,6 +465,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket8,
 		RateFilter.dblRateBucket8,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -428,6 +486,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType
@@ -455,6 +520,7 @@ BEGIN
 		RateTypeFilter.intRateTypeBucket9,
 		RateFilter.dblRateBucket9,
 		intGLAccountId,
+		intBankId,
 		intBankAccountId,
 		intCompanyLocationId,
 		1
@@ -475,6 +541,13 @@ BEGIN
 			CASE WHEN @intCompanyLocationId IS NULL
 				THEN 1
 				ELSE CASE WHEN intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
+		AND
+		(
+			CASE WHEN @intBankId IS NULL
+				THEN 1
+				ELSE CASE WHEN intBankId = @intBankId THEN 1 ELSE 0 END
 				END
 		) = 1
 		AND strTransactionType = @strContractType

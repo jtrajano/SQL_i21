@@ -13,10 +13,10 @@ SELECT strCustomerName				= CUSTOMER.strName
      , dblInvoiceTotal				= ISNULL(AGING.dblInvoiceTotal, 0)
      , dblYTDSales					= ISNULL(YTDSALES.dblYTDSales, 0)
      , dblYDTServiceCharge			= ISNULL(YTDSERVICECHARGE.dblYDTServiceCharge, 0)
-     , dblHighestAR					= ISNULL(HIGHESTAR.dblInvoiceTotal, 0)
-     , dtmHighestARDate				= HIGHESTAR.dtmDate
-     , dblHighestDueAR				= ISNULL(HIGHESTDUEAR.dblInvoiceTotal, 0)
-     , dtmHighestDueARDate			= HIGHESTDUEAR.dtmDate
+     , dblHighestAR					= ISNULL(CUSTOMER.dblHighestAR, 0)
+     , dtmHighestARDate				= CUSTOMER.dtmHighestARDate
+     , dblHighestDueAR				= ISNULL(CUSTOMER.dblHighestDueAR, 0)
+     , dtmHighestDueARDate			= CUSTOMER.dtmHighestDueARDate
      , dblLastYearSales				= ISNULL(LASTYEARSALES.dblLastYearSales, 0)
      , dblLastPayment				= ISNULL(PAYMENT.dblAmountPaid, 0)
      , dtmLastPaymentDate			= PAYMENT.dtmDatePaid
@@ -35,7 +35,7 @@ SELECT strCustomerName				= CUSTOMER.strName
      , dblNextPaymentAmount			= ISNULL(CB.dblBudgetAmount, 0)
      , dblAmountPastDue				= ISNULL(BUDGETPASTDUE.dblAmountPastDue, 0)
      , intRemainingBudgetPeriods	= ISNULL(BUDGETPERIODS.intRemainingBudgetPeriods, 0)
-     , intAveragePaymentDays		= 0
+     , intAveragePaymentDays		= ISNULL(DAYSTOPAY.intDaysToPay, 0)
      , strBudgetStatus				= CASE WHEN 1 = 1 THEN 'Past Due' ELSE 'Current' END COLLATE Latin1_General_CI_AS
      , strTerm						= CUSTOMER.strTerm
      , strContact					= dbo.fnARFormatCustomerAddress(CONTACT.strPhone, CONTACT.strEmail, CUSTOMER.strBillToLocationName, CUSTOMER.strBillToAddress, CUSTOMER.strBillToCity, CUSTOMER.strBillToState, CUSTOMER.strBillToZipCode, CUSTOMER.strBillToCountry, NULL, 0) COLLATE Latin1_General_CI_AS
@@ -167,52 +167,6 @@ OUTER APPLY (
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 LEFT JOIN (
-	SELECT dblInvoiceTotal		= MAX(dblInvoiceTotal)
-		 , dtmDate				= MAX(dtmDate)
-		 , intEntityCustomerId
-	FROM (
-		SELECT dblInvoiceTotal		
-			 , dtmDate				
-			 , intEntityCustomerId
-			 , intRowNumber			=  ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ORDER BY dblInvoiceTotal DESC) 
-		FROM dbo.tblARInvoice
-		WHERE ysnPosted = 1
-			AND strTransactionType IN ('Invoice', 'Debit Memo')
-			AND strType <> 'CF Tran'
-	) I 
-	WHERE I.intRowNumber = 1
-	GROUP BY intEntityCustomerId	  
-) HIGHESTAR ON HIGHESTAR.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN (
-	SELECT dblInvoiceTotal		= MAX(dblInvoiceTotal)
-		 , dtmDate				= MAX(dtmDate)
-		 , intEntityCustomerId
-	FROM (
-		SELECT dblInvoiceTotal		
-			 , dtmDate				
-			 , intEntityCustomerId
-			 , intRowNumber			=  ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) DESC) 
-		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		LEFT JOIN (
-			SELECT intInvoiceId
-				 , dtmDatePaid = MAX(P.dtmDatePaid)
-			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-			INNER JOIN (
-				SELECT intPaymentId
-					 , dtmDatePaid
-				FROM dbo.tblARPayment P WITH (NOLOCK)
-			) P ON P.intPaymentId = PD.intPaymentId 
-			GROUP BY intInvoiceId
-		) PD ON PD.intInvoiceId = I.intInvoiceId
-		WHERE I.ysnPosted = 1
-		  AND I.strTransactionType IN ('Invoice', 'Debit Memo')
-		  AND I.strType <> 'CF Tran'
-		  AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) > 0
-	) I 
-	WHERE I.intRowNumber = 1
-	GROUP BY intEntityCustomerId
-) HIGHESTDUEAR ON HIGHESTDUEAR.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN (
 	SELECT dblYDTServiceCharge = SUM(ISNULL(dblInvoiceTotal, 0))
 		 , intEntityCustomerId
 	FROM dbo.tblARInvoice WITH (NOLOCK)	
@@ -222,3 +176,22 @@ LEFT JOIN (
 	  AND YEAR(dtmPostDate) = DATEPART(year, GETDATE())
 	GROUP BY intEntityCustomerId
 ) YTDSERVICECHARGE ON CUSTOMER.intEntityCustomerId = YTDSERVICECHARGE.intEntityCustomerId
+LEFT JOIN (
+	SELECT intEntityCustomerId	= I.intEntityCustomerId
+		 , intDaysToPay = AVG(CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
+								   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
+						      END)
+	FROM tblARInvoice I
+	CROSS APPLY (
+		SELECT TOP 1 P.dtmDatePaid
+		FROM tblARPaymentDetail PD
+		INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+		WHERE PD.intInvoiceId = I.intInvoiceId
+		AND P.ysnPosted = 1
+		AND P.ysnInvoicePrepayment = 0
+		ORDER BY P.dtmDatePaid DESC
+	) FULLPAY
+	WHERE I.ysnPosted = 1
+	  AND I.ysnPaid = 1
+	GROUP BY I.intEntityCustomerId
+) DAYSTOPAY ON DAYSTOPAY.intEntityCustomerId = CUSTOMER.intEntityCustomerId

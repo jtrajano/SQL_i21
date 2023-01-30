@@ -32,7 +32,12 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@strContainerNo nvarchar(50)=NULL
 	,@strMarkings nvarchar(50)=NULL
 	,@intEntityVendorId int=NULL
-	,@strCondition NVARCHAR(50)
+	,@strCondition NVARCHAR(50)=NULL
+	,@dtmExpiryDate Datetime=NULL
+	,@strCertificate NVARCHAR(50)=NULL
+	,@strCertificateId NVARCHAR(50)=NULL
+	,@intContractHeaderId INT =NULL -- Contract Header Id
+	,@intContractDetailId INT =NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -56,7 +61,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 	,@strLifeTimeType NVARCHAR(50)
 	,@intLifeTime INT
-	,@dtmExpiryDate DATETIME
+	--,@dtmExpiryDate DATETIME
 	,@ItemsForPost AS ItemCostingTableType
 	,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 	,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
@@ -323,6 +328,10 @@ BEGIN
 		,strContainerNo
 		,dblWeightPerQty
 		,strCondition
+		,strCertificate
+		,strCertificateId
+		,intContractHeaderId
+	    ,intContractDetailId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -358,6 +367,10 @@ BEGIN
 		,strContainerNo = @strContainerNo
 		,dblWeightPerQty=@dblUnitQty
 		,strCondition=@strCondition
+		,strCertificate=@strCertificate
+		,strCertificateId=@strCertificateId
+		,intContractHeaderId=@intContractHeaderId
+	    ,intContractDetailId=@intContractDetailId
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId

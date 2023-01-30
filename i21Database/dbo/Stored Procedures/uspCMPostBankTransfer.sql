@@ -1,14 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMPostBankTransfer]    
- @ysnPost      BIT  = 0    
- ,@ysnRecap      BIT  = 0    
- ,@strTransactionId  NVARCHAR(40) = NULL     
- ,@strBatchId     NVARCHAR(40) = NULL     
- ,@intUserId      INT  = NULL     
- ,@intEntityId    INT  = NULL    
- ,@isSuccessful    BIT  = 0 OUTPUT     
- ,@message_id     INT  = 0 OUTPUT     
- ,@outBatchId     NVARCHAR(40) = NULL OUTPUT    
- ,@ysnBatch      BIT  = 0    
+   @ysnPost      BIT  = 0    
+  ,@ysnRecap      BIT  = 0    
+  ,@strTransactionId  NVARCHAR(40) = NULL     
+  ,@strBatchId     NVARCHAR(40) = NULL     
+  ,@intUserId      INT  = NULL     
+  ,@intEntityId    INT  = NULL    
+  ,@isSuccessful    BIT  = 0 OUTPUT     
+  ,@message_id     INT  = 0 OUTPUT     
+  ,@outBatchId     NVARCHAR(40) = NULL OUTPUT    
+  ,@ysnBatch      BIT  = 0    
 AS    
     
 SET QUOTED_IDENTIFIER OFF    
@@ -45,7 +45,7 @@ CREATE TABLE #tmpGLDetail (
  ,[dblExchangeRate] [numeric](38, 20) NOT NULL    
  ,[dtmDateEntered] [datetime] NOT NULL    
  ,[dtmTransactionDate] [datetime] NULL    
- ,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL    
+ ,[strJournalLineDescription] [nvarchar](300)  COLLATE Latin1_General_CI_AS NULL    
  ,[intJournalLineNo] [int]    
  ,[ysnIsUnposted] [bit] NOT NULL    
  ,[intUserId] [int] NULL    
@@ -55,10 +55,7 @@ CREATE TABLE #tmpGLDetail (
  ,[strModuleName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL      
  ,[intConcurrencyId] [int] NULL    
 )    
---CREATE FEES TABLE  
---SELECT * INTO #tmpGLDetailFees FROM #tmpGLDetail  
-  
--- Declare the variables     
+   
 DECLARE     
  -- Constant Variables.     
  @BANK_TRANSACTION_TYPE_Id AS INT   = 4 -- Bank Transfer Type Id is 4 (See tblCMBankTransactionType).     
@@ -115,6 +112,8 @@ DECLARE
  ,@strReferenceTo NVARCHAR(150)
  ,@dblAmountSettlementTo DECIMAL(18,6)
  ,@dblRateAmountSettlementTo DECIMAL(18,6)
+ ,@intBankLoanIdFrom INT 
+ ,@intBankLoanIdTo INT
  
  -- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.     
      
@@ -157,13 +156,20 @@ SELECT TOP 1
   ,@intGLAccountIdTo = intGLAccountIdTo  
   ,@strReferenceFrom = strReferenceFrom
   ,@strReferenceTo =  strReferenceTo
-
+  ,@intBankLoanIdFrom = CASE WHEN intBankLoanIdFrom = 0 THEN NULL ELSE intBankLoanIdFrom END
+  ,@intBankLoanIdTo =CASE WHEN intBankLoanIdTo = 0 THEN NULL ELSE intBankLoanIdTo END
 FROM [dbo].tblCMBankTransfer A JOIN    
 [dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN    
 [dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo    
 WHERE strTransactionId = @strTransactionId     
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
+
+IF ISNULL(@intDefaultCurrencyId,0) = 0 
+BEGIN  
+    RAISERROR ('Default Currency was not set in Company Configuration screen.',11,1)  
+    GOTO Post_Rollback    
+END
 
 IF @ysnPost = 1 AND @ysnRecap = 0
 BEGIN
@@ -267,13 +273,13 @@ BEGIN
   
     IF ISNULL(@intBTForwardToFXGLAccountId ,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
         GOTO Post_Rollback  
     END  
   
     IF ISNULL(@intBTForwardFromFXGLAccountId,0) = 0  
     BEGIN  
-        RAISERROR('Accrued Payable Forward GL Account is not assigned.', 11, 1)    
+        RAISERROR('Accrued Receivable Forward GL Account is not assigned.', 11, 1)    
         GOTO Post_Rollback  
     END  
 END  
@@ -334,30 +340,30 @@ BEGIN -- VALIDATION
   IF  @ysnRecap = 0    
   BEGIN    
   -- Validate the date against the FY Periods    
-  IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0    
-  BEGIN     
-    -- Unable to find an open fiscal year period to match the transaction date.    
-    RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)    
-    GOTO Post_Rollback    
-  END    
+  -- IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0    
+  -- BEGIN     
+  --   -- Unable to find an open fiscal year period to match the transaction date.    
+  --   RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)    
+  --   GOTO Post_Rollback    
+  -- END    
       
   -- Validate the date against the FY Periods per module    
-  IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0    
-  BEGIN     
-    -- Unable to find an open fiscal year period to match the transaction date and the given module.    
-    IF @ysnPost = 1    
-    BEGIN    
-    --You cannot %s transaction under a closed module.    
-    RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')    
-    GOTO Post_Rollback    
-    END    
-    ELSE    
-    BEGIN    
-    --You cannot %s transaction under a closed module.    
-    RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')    
-    GOTO Post_Rollback    
-    END    
-  END    
+  -- IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0) AND @ysnRecap = 0    
+  -- BEGIN     
+  --   -- Unable to find an open fiscal year period to match the transaction date and the given module.    
+  --   IF @ysnPost = 1    
+  --   BEGIN    
+  --   --You cannot %s transaction under a closed module.    
+  --   RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Post')    
+  --   GOTO Post_Rollback    
+  --   END    
+  --   ELSE    
+  --   BEGIN    
+  --   --You cannot %s transaction under a closed module.    
+  --   RAISERROR('You cannot %s transaction under a closed module.', 11, 1, 'Unpost')    
+  --   GOTO Post_Rollback    
+  --   END    
+  -- END    
   -- Check if the transaction is already cleared or reconciled    
   IF @ysnPost = 0 AND @ysnRecap = 0    
   BEGIN    
@@ -537,18 +543,48 @@ END
   --BEGIN  
     --IF @dblDifference <> 0  
   
-      IF @ysnPost =1
-        EXEC [uspCMInsertGainLossBankTransfer] 
-          @intDefaultCurrencyId, 
-          'Gain / Loss from Bank Transfer',
-          @intBankTransferTypeId,
-          @intGLAccountIdTo,
-          @intRealizedAccountId
+  IF @ysnPost =1
+    EXEC [uspCMInsertGainLossBankTransfer] 
+      @intDefaultCurrencyId,
+      @intBankTransferTypeId,
+      @intGLAccountIdTo,
+      @strTransactionId,
+      @intRealizedAccountId
 
-      IF @@ERROR <> 0 GOTO Post_Rollback
+  IF @@ERROR <> 0 GOTO Post_Rollback
+
+
+  DECLARE @dblDiff DECIMAL(18,6)
+ 
+  --  IF isnull(@dblFeesFrom,0) > 0
+  --  BEGIN
       
-  --END  
-  
+  --    SELECT @dblDiff = SUM(dblDebit-dblCredit) FROM #tmpGLDetail
+
+  --    IF ABS(@dblDiff) = .01 
+  --    BEGIN
+  --      UPDATE A SET dblCredit = dblCredit + @dblDiff 
+		--  ,dblExchangeRate = (dblCredit + @dblDiff)/ dblCreditForeign
+		--FROM #tmpGLDetail A JOIN  tblCMBankTransfer B
+		--ON B.intGLAccountIdFeesFrom = A.intAccountId
+		--WHERE B.strTransactionId=@strTransactionId
+  --    END
+  --  END
+
+
+    IF isnull(@dblFeesTo,0) > 0
+    BEGIN
+      SELECT @dblDiff = SUM(dblCredit-dblDebit) FROM #tmpGLDetail
+      IF ABS(@dblDiff) = .01
+      BEGIN
+        UPDATE A SET dblDebit = dblDebit + @dblDiff ,
+        dblExchangeRate = (dblDebit + @dblDiff)/ dblDebitForeign
+        FROM #tmpGLDetail A JOIN  tblCMBankTransfer B 
+        ON B.intGLAccountIdFeesTo = A.intAccountId
+        WHERE B.strTransactionId=@strTransactionId
+      END
+    END
+
     
 END  
 ELSE IF @ysnPost = 0    
@@ -716,12 +752,13 @@ IF @ysnPost = 1
     
     IF @ysnPost = 1   
     BEGIN    
-      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId =2 OR @intBankTransferTypeId = 4
-      BEGIN  
+      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId IN (2,4,5)
+      BEGIN
             INSERT INTO tblCMBankTransaction (    
             strTransactionId    
             ,intBankTransactionTypeId    
             ,intBankAccountId    
+            ,intBankLoanId
             ,intCurrencyId    
             ,intCurrencyExchangeRateTypeId    
             ,dblExchangeRate    
@@ -753,9 +790,10 @@ IF @ysnPost = 1
             ,intConcurrencyId     
             )    
             -- Bank Transaction Credit    
-            SELECT strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
+            SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_WD    
               ,intBankAccountId      = @intBankAccountIdFrom
+              ,intBankLoanId =  @intBankLoanIdFrom
               ,intCurrencyId        = intCurrencyId    
               ,intCurrencyExchangeRateTypeId  = intCurrencyExchangeRateTypeId
               ,dblExchangeRate      = dblExchangeRate
@@ -767,8 +805,8 @@ IF @ysnPost = 1
               ,strCity            = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblCreditForeign    
-              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblCreditForeign)    
+              ,dblAmount          = dblCreditForeign 
+              ,strAmountInWords     = dbo.fnConvertNumberToWord( dblCreditForeign )    
               ,strMemo            = CASE WHEN ISNULL(strReference,'') = '' THEN strDescription     
                                         WHEN ISNULL(strDescription,'') = '' THEN strReference    
                                         ELSE strDescription + ' / ' + strReference END    
@@ -799,9 +837,10 @@ IF @ysnPost = 1
               
             -- Bank Transaction Debit    
             UNION ALL    
-            SELECT strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
+            SELECT TOP 1 strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_DEP    
               ,intBankAccountId      = @intBankAccountIdTo
+              ,intBankLoanId = @intBankLoanIdTo
               ,intCurrencyId        = intCurrencyId
               ,intCurrencyExchangeRateTypeId  =intCurrencyExchangeRateTypeId
               ,dblExchangeRate       =  dblExchangeRate
@@ -840,69 +879,39 @@ IF @ysnPost = 1
               CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F    
               WHERE intAccountId = @intGLAccountIdTo
 
-            -- FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt    
-            --   ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
-            --   INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp    
-            --   ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId    
-                  
-              
-              
+ 
         
             IF @intBankTransferTypeId = 4 AND ISNULL(@ysnPostedInTransit,0) =1
-              EXEC uspCMCreateBankSwapLong @intTransactionId
+              EXEC uspCMCreateBankSwapLong @intTransactionId, @intEntityId
         END  -- @ysnPostedInTransit = 1
       END    -- @ysnPost =1
     ELSE    
     BEGIN    
-      IF @intBankTransferTypeId = 2
-      BEGIN
-        IF @ysnPosted = 1
-          DELETE FROM tblCMBankTransaction    
-          WHERE strLink = @strTransactionId    
-          AND ysnClr = 0    
-          AND intBankTransactionTypeId IN (@BANK_TRANSFER_DEP)      
-        ELSE
-          DELETE FROM tblCMBankTransaction    
-          WHERE strLink = @strTransactionId    
-          AND ysnClr = 0    
-          AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)      
-
-      END
-      ELSE
       IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
       BEGIN  
-        DELETE FROM tblCMBankTransaction    
-        WHERE strLink = @strTransactionId    
-        AND ysnClr = 0    
-        AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)    
+        IF @intBankTransferTypeId IN (1,3)
+        BEGIN
+          		DELETE FROM tblCMBankTransaction
+              WHERE	strLink = @strTransactionId
+              AND ysnClr = 0
+              AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+
+              
+        END
+        ELSE
+        BEGIN
+            
+              DELETE FROM tblCMBankTransaction    
+              WHERE strLink = @strTransactionId    
+              AND ysnClr = 0    
+              AND intBankTransactionTypeId  = CASE WHEN @ysnPosted = 1 THEN @BANK_TRANSFER_DEP ELSE  @BANK_TRANSFER_WD  END  
+         
+        END
+     
       END  
+      
     END    
     IF @@ERROR <> 0 GOTO Post_Rollback    
-
-    -- SWAP IN TRANSACTION WILL CREATE SWAP OUT AFTER POSTING
-    -- IF @intBankTransferTypeId = 4 AND @ysnPostedInTransit = 1
-    -- BEGIN
-    --   IF @ysnPost = 1
-    --   BEGIN
-    --   -- CREATE SWAP OUT HERE
-    --   -- DISABLE SWAP IN WINDOW
-    --   -- ENABLE SWAP OUT WINDOW
-    --   END
-    --   ELSE
-    --   BEGIN
-      
-    --     -- IF SWAP OUT IS POSTED THROW ERROR 'UNPOST SWAP OUT BEFORE UNPOSTING SWAP IN'
-        
-    --     -- DELETE SWAP OUT   
-    --     -- DISABLE SWAP IN WINDOW
-    --     -- ENABLE SWAP OUT WINDOW
-       
-      
-      
-    --   END
-      
-
-    -- END
 END    
 --=====================================================================================================================================    
 --  Check if process is only a RECAP    

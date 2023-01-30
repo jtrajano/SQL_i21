@@ -344,7 +344,6 @@ AS
 							,ri.dblOpenReceive
 						)	
 					)
-			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,intReference = CAST(1 AS TINYINT)
@@ -384,143 +383,143 @@ AS
 				ON lot.intLotId = t.intLotId
 	WHERE	t.strBatchId = @strBatchId
 
-	-- Resolve the 0.01 discrepancy between the inventory transaction value and the receipt line total. 
-	UNION ALL
-	SELECT	t.dtmDate
-			,t.intItemId
-			,t.intItemLocationId 
-			,t.intInTransitSourceLocationId
-			,t.intTransactionId
-			,t.strTransactionId
-			,dblQty = 0
-			,dblUOMQty = 0 
-			,dblCost = 0 
-			,dblValue = ROUND(ri.[dblRecomputeLineTotal] - topRi.dblLineTotal, 2) 
-			,t.intTransactionTypeId
-			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
-			,t.dblExchangeRate
-			,t.intInventoryTransactionId
-			,strInventoryTransactionTypeName = t.strTransactionType
-			,t.strTransactionForm 
-			,strDescription = 
-				dbo.fnFormatMessage(
-					'Resolve the decimal discrepancy for %s.'
-					,ri.strItemNo
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-					,DEFAULT 
-				)
-			,t.dblForexRate	
-			,ri.strItemNo
-			,strRateType = currencyRateType.strCurrencyExchangeRateType
-			,dblLineTotal = NULL
-			,t.intSourceEntityId
-			,i.intCommodityId
-			,intReference = CAST(2 AS TINYINT)
-			,lot.strLotNumber
-	FROM	(
-				SELECT 
-					i.strItemNo
-					,ri.intInventoryReceiptItemId
-					,r.strReceiptNumber
-					,r.intInventoryReceiptId
-					,dblRecomputeLineTotal = SUM(
-						     ROUND(
-								 t.dblQty * 
-								 dbo.fnCalculateReceiptUnitCost (
-									ri.intItemId
-									,ri.intUnitMeasureId		
-									,ri.intCostUOMId
-									,ri.intWeightUOMId
-									,ri.dblUnitCost
-									,ri.dblNet
-									,t.intLotId
-									,t.intItemUOMId
-									,AggregrateItemLots.dblTotalNet
-									,ri.ysnSubCurrency
-									,r.intSubCurrencyCents
-									,t.intItemUOMId
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
-								)
-								,2 
-							)
-						)					
-				FROM 
-					tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceipt r
-						ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-					INNER JOIN tblICItem i 
-						ON ri.intItemId = i.intItemId
-					INNER JOIN #tmpRebuildList list	
-						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
-						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-					INNER JOIN tblICInventoryTransaction t 
-						ON t.intTransactionId = r.intInventoryReceiptId
-						AND t.strTransactionId = r.strReceiptNumber
-						AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
-					OUTER APPLY (
-						SELECT  dblTotalNet = SUM(
-									CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
-												ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
-											ELSE 
-												ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
-									END 
-								)
-						FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
-									ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
-						WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-					) AggregrateItemLots
-				WHERE
-					t.strBatchId = @strBatchId
-				GROUP BY
-					i.strItemNo
-					,ri.intInventoryReceiptItemId
-					,r.strReceiptNumber
-					,r.intInventoryReceiptId
+	---- Resolve the 0.01 discrepancy between the inventory transaction value and the receipt line total. 
+	--UNION ALL
+	--SELECT	t.dtmDate
+	--		,t.intItemId
+	--		,t.intItemLocationId 
+	--		,t.intInTransitSourceLocationId
+	--		,t.intTransactionId
+	--		,t.strTransactionId
+	--		,dblQty = 0
+	--		,dblUOMQty = 0 
+	--		,dblCost = 0 
+	--		,dblValue = ROUND(ri.[dblRecomputeLineTotal] - topRi.dblLineTotal, 2) 
+	--		,t.intTransactionTypeId
+	--		,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
+	--		,t.dblExchangeRate
+	--		,t.intInventoryTransactionId
+	--		,strInventoryTransactionTypeName = t.strTransactionType
+	--		,t.strTransactionForm 
+	--		,strDescription = 
+	--			dbo.fnFormatMessage(
+	--				'Resolve the decimal discrepancy for %s.'
+	--				,ri.strItemNo
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--				,DEFAULT 
+	--			)
+	--		,t.dblForexRate	
+	--		,ri.strItemNo
+	--		,strRateType = currencyRateType.strCurrencyExchangeRateType
+	--		,dblLineTotal = NULL
+	--		,t.intSourceEntityId
+	--		,i.intCommodityId
+	--		,intReference = CAST(2 AS TINYINT)
+	--		,lot.strLotNumber
+	--FROM	(
+	--			SELECT 
+	--				i.strItemNo
+	--				,ri.intInventoryReceiptItemId
+	--				,r.strReceiptNumber
+	--				,r.intInventoryReceiptId
+	--				,dblRecomputeLineTotal = SUM(
+	--					     ROUND(
+	--							 t.dblQty * 
+	--							 dbo.fnCalculateReceiptUnitCost (
+	--								ri.intItemId
+	--								,ri.intUnitMeasureId		
+	--								,ri.intCostUOMId
+	--								,ri.intWeightUOMId
+	--								,ri.dblUnitCost
+	--								,ri.dblNet
+	--								,t.intLotId
+	--								,t.intItemUOMId
+	--								,AggregrateItemLots.dblTotalNet
+	--								,ri.ysnSubCurrency
+	--								,r.intSubCurrencyCents
+	--								,t.intItemUOMId
+	--								,ri.intComputeItemTotalOption
+	--								,ri.dblOpenReceive
+	--							)
+	--							,2 
+	--						)
+	--					)					
+	--			FROM 
+	--				tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceipt r
+	--					ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	--				INNER JOIN tblICItem i 
+	--					ON ri.intItemId = i.intItemId
+	--				INNER JOIN #tmpRebuildList list	
+	--					ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+	--					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+	--				INNER JOIN tblICInventoryTransaction t 
+	--					ON t.intTransactionId = r.intInventoryReceiptId
+	--					AND t.strTransactionId = r.strReceiptNumber
+	--					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+	--				OUTER APPLY (
+	--					SELECT  dblTotalNet = SUM(
+	--								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+	--											ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+	--										ELSE 
+	--											ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+	--								END 
+	--							)
+	--					FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+	--								ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+	--					WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+	--				) AggregrateItemLots
+	--			WHERE
+	--				t.strBatchId = @strBatchId
+	--			GROUP BY
+	--				i.strItemNo
+	--				,ri.intInventoryReceiptItemId
+	--				,r.strReceiptNumber
+	--				,r.intInventoryReceiptId
 										
-			) ri
-			CROSS APPLY (
-				SELECT 
-					TOP 1 
-					topRi.* 
-				FROM 
-					tblICInventoryReceiptItem topRi 
-				WHERE
-					topRi.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			) topRi 		
+	--		) ri
+	--		CROSS APPLY (
+	--			SELECT 
+	--				TOP 1 
+	--				topRi.* 
+	--			FROM 
+	--				tblICInventoryReceiptItem topRi 
+	--			WHERE
+	--				topRi.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+	--		) topRi 		
 
-			CROSS APPLY (
-				SELECT TOP 1 
-					t.* 
-					,strTransactionType = ty.strName
-				FROM 
-					tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-						ON t.intTransactionTypeId = ty.intTransactionTypeId
-				WHERE
-					t.strTransactionId = ri.strReceiptNumber
-					AND t.intTransactionId = ri.intInventoryReceiptId
-					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
-					AND ty.strName = 'Inventory Receipt'
-				ORDER BY t.intInventoryTransactionId DESC 
-			) t
+	--		CROSS APPLY (
+	--			SELECT TOP 1 
+	--				t.* 
+	--				,strTransactionType = ty.strName
+	--			FROM 
+	--				tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+	--					ON t.intTransactionTypeId = ty.intTransactionTypeId
+	--			WHERE
+	--				t.strTransactionId = ri.strReceiptNumber
+	--				AND t.intTransactionId = ri.intInventoryReceiptId
+	--				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+	--				AND ty.strName = 'Inventory Receipt'
+	--			ORDER BY t.intInventoryTransactionId DESC 
+	--		) t
 
-			INNER JOIN tblICItem i 
-				ON i.intItemId = t.intItemId
+	--		INNER JOIN tblICItem i 
+	--			ON i.intItemId = t.intItemId
 
-			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+	--		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+	--			ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 
-			LEFT JOIN tblICLot lot
-				ON lot.intLotId = t.intLotId
+	--		LEFT JOIN tblICLot lot
+	--			ON lot.intLotId = t.intLotId
 
-	WHERE	
-			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 
+	--WHERE	
+	--		ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0 
 
 	UNION ALL 
 	SELECT	
@@ -1719,7 +1718,7 @@ BEGIN
 		,[intItemUOMId] = ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId) 			
 		,[dblQuantity] = 
 			CASE 
-				WHEN ri.intWeightUOMId IS NOT NULL THEN ri.dblNet 
+				WHEN ri.intWeightUOMId IS NOT NULL AND i.intComputeItemTotalOption = 0 THEN ri.dblNet 
 				ELSE ri.dblOpenReceive
 			END 
 		,[dblAmount] = ri.dblLineTotal

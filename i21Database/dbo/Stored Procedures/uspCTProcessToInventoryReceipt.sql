@@ -18,6 +18,7 @@ AS
 			@intInventoryReceiptId	INT,
 			@ysnRequireProducerQty	BIT,
 			@ysnLoad				BIT,
+			@ysnEnableBudgetForBasisPricing	BIT,
 
 			@ReceiptStagingTable		ReceiptStagingTable,
 			@OtherCharges				ReceiptOtherChargesTableType,
@@ -25,6 +26,7 @@ AS
 			@ReceiptTradeFinance		ReceiptTradeFinance
 	
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
+	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
 
 	SELECT	@ysnLoad	=	ISNULL(CH.ysnLoad, 0) 
 	FROM	tblCTContractDetail CD 
@@ -83,7 +85,10 @@ AS
 				intBookId,
 				intSubBookId,
 				intLoadReceive,
-				dblUnitRetail
+				dblUnitRetail,
+				strTaxPoint,
+				intTaxLocationId,
+				intTaxGroupId
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -100,12 +105,22 @@ AS
 				intGrossNetUOMId			=	ISNULL(CD.intNetWeightUOMId,0),	
 				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
+				--CT-7100 (ECOM commented this line for ECOM) --dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
+				--CT-7100 (ECOM commented this line for ECOM) --										THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
+				--CT-7100 (ECOM commented this line for ECOM) --												ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis),0)
+				--CT-7100 (ECOM commented this line for ECOM) --										ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
+				--CT-7100 (ECOM commented this line for ECOM) --								END,
+				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
-														THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
-																ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis),0)
-														ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
+														THEN	((CASE WHEN @ysnEnableBudgetForBasisPricing = 0 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) ELSE CD.dblBudgetPrice END + 
+																ISNULL(CD.dblBasis,0))  / CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = CAST(1 AS BIT)   THEN 100 ELSE 1 END) * ISNULL(CD.dblRate, 1 )
+														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
-				intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
+				intCostUOMId				=	CASE WHEN CD.intPricingTypeId = 2 OR ISNULL(CD.intCurrencyExchangeRateId, 0) = 0 THEN 
+													CD.intBasisUOMId 
+												ELSE
+													CD.intFXPriceUOMId 
+												END,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,
@@ -124,12 +139,14 @@ AS
 				intBookId					=	CD.intBookId,
 				intSubBookId				=	CD.intSubBookId,
 				intLoadReceive				=	ISNULL(CD.dblBalanceLoad,0)		-	ISNULL(CD.dblScheduleLoad,0),
-				dblUnitRetail				=	CD.dblCashPrice
+				dblUnitRetail				=	CD.dblCashPrice,
+				strTaxPoint					=	case when isnull(CD.ysnTaxOverride,0) = 0 then null else CD.strTaxPoint end,
+				intTaxLocationId			=	case when isnull(CD.ysnTaxOverride,0) = 0 then null else CD.intTaxLocationId end,
+				intTaxGroupId				=	case when isnull(CD.ysnTaxOverride,0) = 0 then null else CD.intTaxGroupId end
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CD.intItemId	
-												AND	IU.ysnStockUnit			=	1		
+		--CT-7100 (ECOM commented this line for ECOM) --JOIN tblICItemUOM IU ON IU.intItemId = CD.intItemId AND IU.ysnStockUnit = 1		
 
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 
@@ -139,6 +156,8 @@ AS
 												AND	SK.intLocationId		=	CD.intCompanyLocationId
   LEFT  JOIN	tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
   LEFT  JOIN	tblSMCurrency				SY  ON	SY.intCurrencyID		=	CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
+	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
+	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CU.intMainCurrencyId
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges
@@ -161,7 +180,9 @@ AS
 				[ysnPrice],
 				[ysnSubCurrency],
 				[intCostCurrencyId],
-				[ysnInventoryCost]
+				[ysnInventoryCost],
+				[dblForexRate],
+				[intForexRateTypeId]
 		) 
 		
 		SELECT	CC.intVendorId,
@@ -182,7 +203,9 @@ AS
 				CC.ysnPrice,
 				CY.ysnSubCurrency,
 				CY.intCurrencyID,
-				CC.ysnInventoryCost
+				CC.ysnInventoryCost,
+				CC.dblFX,
+				CC.intRateTypeId
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	vyuCTContractDetailView	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -225,6 +248,7 @@ AS
 				,[intSourceType]
 				,[intContractHeaderId]
 				,[intContractDetailId]
+				,intSeasonCropYear
 			)
 
 			SELECT	 [strReceiptType]		=   'Purchase Contract'
@@ -263,6 +287,7 @@ AS
 					,[intSourceType]		=   0
 					,[intContractHeaderId]	=   CD.intContractHeaderId
 					,[intContractDetailId]	=   CD.intContractDetailId
+					,intSeasonCropYear		=	CH.intCropYearId
 
 			FROM	tblCTContractDetail			CD 
 			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId

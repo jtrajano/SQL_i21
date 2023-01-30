@@ -20,17 +20,18 @@ AS
 			THEN (SELECT TOP 1 SC.intTicketId FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
 		ELSE INVRCPTITEM.intSourceId
 		END),
-	strTicketNumber =
-		(CASE 
-		WHEN INVRCPT.intSourceType = 5 
-			THEN (SELECT TOP 1 SCD.strDeliverySheetNumber FROM tblSCDeliverySheet SCD WHERE intDeliverySheetId = INVRCPTITEM.intSourceId)
-		WHEN INVRCPT.intSourceType = 4 
-			THEN (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
-		WHEN INVRCPT.intSourceType IS NULL 
-			THEN (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
-		ELSE 
-		(SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
-		END),
+	-- strTicketNumber =
+	-- 	(CASE 
+	-- 	WHEN INVRCPT.intSourceType = 5 
+	-- 		THEN (SELECT TOP 1 SCD.strDeliverySheetNumber FROM tblSCDeliverySheet SCD WHERE intDeliverySheetId = INVRCPTITEM.intSourceId)
+	-- 	WHEN INVRCPT.intSourceType = 4 
+	-- 		THEN (SELECT TOP 1 SC.strTicketNumber FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
+	-- 	WHEN INVRCPT.intSourceType IS NULL 
+	-- 		THEN (SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = GRH.intTicketId)
+	-- 	ELSE 
+	-- 	(SELECT TOP 1 SC.strTicketNumber FROM tblSCTicket SC WHERE intTicketId = INVRCPTITEM.intSourceId)
+	-- 	END),
+	strTicketNumber = ISNULL(DS.strDeliverySheetNumber, ISNULL(SC.strTicketNumber, CS.strStorageTicketNumber)),
 	INVRCPT.strReceiptNumber,
 	INVRCPTITEM.intInventoryReceiptItemId,
 	Bill.strBillId as RecordId,
@@ -135,6 +136,9 @@ AS
 	LEFT JOIN tblGRStorageHistory GRH ON GRH.intCustomerStorageId = BillDtl.intCustomerStorageId AND GRH.strType = 'From Scale'
 	LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+	LEFT JOIN tblSCTicket SC ON INVRCPTITEM.intSourceId = SC.intTicketId AND INVRCPT.intSourceType = 1
+	LEFT JOIN tblSCDeliverySheet DS ON SC.intDeliverySheetId = DS.intDeliverySheetId
+	LEFT JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = BillDtl.intCustomerStorageId
 	LEFT JOIN tblCTContractHeader CNTRCT ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId

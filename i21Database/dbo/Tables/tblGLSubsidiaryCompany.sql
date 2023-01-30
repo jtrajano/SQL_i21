@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[intLastGLDetailId] INT NULL,
 	[ysnMergedCOA] BIT NULL,
 	[hasCompanySegment] BIT NULL,
+	[intConcurrencyId] INT NULL,
  CONSTRAINT [PK_tblGLSubsidiaryCompany] PRIMARY KEY CLUSTERED 
 (
 	[intSubsidiaryCompanyId] ASC

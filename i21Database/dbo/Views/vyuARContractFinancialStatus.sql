@@ -9,13 +9,22 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strFinalInvoiceNumber	= I.strInvoiceNumber
 	 , strContractNumber		= CHD.strContractNumber
 	 , intContractSeq			= CTD.intContractSeq
-	 , strStatus				= CASE WHEN ISNULL(CTD.dblBalance, 0) = 0 OR I.strType = 'Provisional' THEN 
-									CASE WHEN I.strType <> 'Provisional' AND I.ysnFinalized = 0 THEN 'Direct Invoiced' 
-									ELSE 
-										CASE WHEN I.ysnFinalized = 0 THEN 'Provisionally Invoiced' 
-										ELSE 'Final Invoiced' END 
+	 , strStatus				= CASE WHEN ISNULL(CTD.dblBalance, 0) = 0 OR I.strType = 'Provisional' 
+									   THEN 
+											CASE WHEN I.strType <> 'Provisional' AND I.ysnFinalized = 0 
+												 THEN 'Direct Invoiced' 
+												 ELSE 
+													CASE WHEN I.ysnFinalized = 0 
+														 THEN 'Provisionally Invoiced' 
+														 ELSE 'Final Invoiced' 
+													END 
+									   END
+								  ELSE 
+									CASE WHEN I.ysnFinalized = 1 
+										 THEN 'Final Invoiced'
+										 ELSE NULL
 									END
-								  ELSE NULL END
+								  END COLLATE Latin1_General_CI_AS 
 FROM (
 	SELECT intInvoiceId				= I.intInvoiceId
 		 , intFinalInvoiceId		= NULL

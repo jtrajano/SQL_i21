@@ -40,13 +40,14 @@ FROM (
 			, ISNULL(ot.intSubBookId,0) as intSubBookId
 			, intFutOptTransactionId
 			, fm.dblContractSize
-			, dblFutCommission = ISNULL((select TOP 1 (case when isnull(bc.intFuturesRateType,2) = 2 then 
-														isnull(bc.dblFutCommission,0)* 2 / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
-															else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 1 then cur.intCent else 1 end end) as dblFutCommission
+			, dblFutCommission = CASE WHEN (SELECT TOP 1 ysnEnableCommissionExemptAndOverride FROM tblRKCompanyPreference) = 1 THEN ISNULL(ot.dblCommission, 0) / ot.dblNoOfContract  
+									ELSE (ISNULL((select TOP 1 (case when isnull(bc.intFuturesRateType,2) = 2 then 
+														isnull(bc.dblFutCommission,0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
+															else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 1 then cur.intCent else 2 end end) as dblFutCommission
 										from tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 										where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
-											and cast(getdate() as date) between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,cast(getdate() as date))),0) * -1
+											and cast(getdate() as date) between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,cast(getdate() as date))),0) * -1) END
 			, ot.intBrokerageCommissionId
 			, dtmFilledDate
 			, ot.intFutOptTransactionHeaderId

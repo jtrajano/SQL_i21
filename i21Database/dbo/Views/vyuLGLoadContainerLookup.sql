@@ -28,8 +28,20 @@ FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblCTWeightGrade PWG 
 			ON PWG.intWeightGradeId = CH.intWeightId
-		OUTER APPLY 
-			(SELECT LC.intLoadContainerId, LC.strContainerNumber, LC.dblNetWt, LDCL.dblQuantity, LDCL.dblReceivedQty, LC.strMarks FROM tblLGLoadDetailContainerLink LDCL 
-				INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
-			 WHERE LD.intLoadDetailId = LDCL.intLoadDetailId AND ISNULL(LC.ysnRejected, 0) = 0) LC
-		WHERE L.intShipmentType = 1
+		OUTER APPLY (
+			SELECT 
+				LC.intLoadContainerId
+				, LC.strContainerNumber
+				, LC.dblNetWt
+				, LDCL.dblQuantity
+				, LDCL.dblReceivedQty
+				, LC.strMarks 
+			FROM 
+				tblLGLoadDetailContainerLink LDCL INNER JOIN tblLGLoadContainer LC 
+					ON LDCL.intLoadContainerId = LC.intLoadContainerId
+			 WHERE 
+				LD.intLoadDetailId = LDCL.intLoadDetailId 
+				AND ISNULL(LC.ysnRejected, 0) = 0
+		) LC
+WHERE 
+	L.intShipmentType = 1

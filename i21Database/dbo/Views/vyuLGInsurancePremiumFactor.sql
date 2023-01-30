@@ -10,8 +10,9 @@ SELECT IP.intInsurancePremiumFactorId
 	, IP.dtmValidTo
 	, IP.dblInboundWarehouse
 	, IP.intCommodityId
-
+	, strCommodity = com.strCommodityCode
 	, IP.intCommodityAttributeId
+	, strProductType = comAtt.strDescription
 FROM tblLGInsurancePremiumFactor IP
 JOIN tblEMEntity E ON E.intEntityId = IP.intEntityId
 LEFT JOIN tblICCommodity com ON com.intCommodityId = IP.intCommodityId

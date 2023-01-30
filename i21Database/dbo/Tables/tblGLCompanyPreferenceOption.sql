@@ -12,13 +12,24 @@
 	[ysnHistoricalJournalImported] BIT NULL,
 	[ysnShowAccountingPeriod] BIT NULL,
 	[ysnRequireLocation] BIT NULL,
-	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
+	[strSubsidiaryCompanyJson] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL ,
 	/*Override RE Settings*/
 	[ysnREOverride] BIT NULL,
 	[ysnREOverrideLocation] BIT NULL,
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
+	[ysnISOverrideLocation] BIT NULL,
+	[ysnISOverrideLOB] BIT NULL,
+	[ysnISOverrideCompany] BIT NULL,
 	[strOverrideREArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+	[strOverrideISArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+	[ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT((0)),
+	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT((0)),
+	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT((0)),
+	[intDueToAccountId]				INT NULL,
+	[intDueFromAccountId]			INT NULL,
+	[ysnRequireRERefresh]			BIT NOT NULL DEFAULT(1),
+	[strRequireRefreshReason]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO

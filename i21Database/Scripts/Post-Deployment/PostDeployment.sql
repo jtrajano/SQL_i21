@@ -101,11 +101,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_CreateIDPGridLayout.sql
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
-:r .\SM\2120_AddUserPortalSettingsToContactImport.sql
 :r .\SM\2120_InsertLanguages.sql
 :r .\SM\2120_UpdateAddonComponents.sql
 :r .\SM\2120_InsertOtherLabels.sql
 :r .\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql
+:r .\SM\2110_FixUserSecurityAdminData.sql
 
 
 -- Canned Report
@@ -219,6 +219,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FA\DefaultData\FixedAssetGroup.sql
 :r .\FA\01_UpdateMultiCurrencyFields.sql
 :r .\FA\02_UpdateMonthlyAssetDepreciation.sql
+:r .\FA\03_UpdateAssetDepreciationCurrency.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
@@ -247,8 +248,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
+:r .\GL\03_UpdateForeignDebitCredit.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
-
+:r .\GL\Views\vyuGLLineOfBusinessAccountId.sql
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
 
@@ -267,6 +269,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\13_InsertDefaultCashFlowReportBucketType.sql
 :r .\CM\14_BankAccountTypes.sql
 :r .\CM\15_CompanyPreferenceOptions.sql
+:r .\CM\16_UpdateNextEFTNo.sql
+:r .\CM\17_InsertResponsiblePartyOption.sql
+:r .\CM\18_BankDepositForeignDebitCredit.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 
@@ -302,7 +307,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
-:r .\AR\DefaultData\97_RefreshARTempTable.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
 
 --Accounts Payable
@@ -388,6 +392,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\29_CleanupObjects.sql
 :r .\IC\30_InventoryValuationAccountIds.sql
 :r .\IC\31_WarrantStatus.sql
+:r .\IC\32_InventoryJournalLineDescription.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -545,9 +550,13 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1810_Fix_Check_Payee_Name.sql
 :r .\EM\1910_Set_Contact_Location.sql
 :r .\EM\2210_AddDefaultEFTBank.sql
+:r .\EM\2210_CompanyPreference.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
+:r .\QM\2_SetDefaultData.sql
+:r .\QM\3_CreateOfferSampleOutbound.sql
+
 
 -- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql
@@ -587,10 +596,16 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 :r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\41_Checkout_Radiant_POSJournal.sql
+:r .\ST\42_FileFieldMapping_Commander_TankMonitor.sql
+:r .\ST\43_FileFieldMapping_Commander_FuelTotals.sql
+:r .\ST\44_FileFieldMapping_Commander_AppInfo.sql
+:r .\ST\45_FileFieldMapping_Commander_PopCfg.sql
+:r .\ST\46_FileFieldMapping_Commander_Tank.sql
+:r .\ST\47_FileFieldMapping_Commander_Loyalty.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
-:r .\ST\41_Checkout_Radiant_POSJournal.sql
 
 
 

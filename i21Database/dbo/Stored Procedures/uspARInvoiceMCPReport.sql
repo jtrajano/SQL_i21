@@ -18,6 +18,7 @@ END
 
 DECLARE @blbLogo 				VARBINARY (MAX)  = NULL
       , @blbStretchedLogo 		VARBINARY (MAX)  = NULL	  
+	  , @ysnPrintInvoicePaymentDetail	BIT = 0
 	  , @strEmail				NVARCHAR(100) = NULL
 	  , @strPhone				NVARCHAR(100) = NULL
 	  , @strCompanyName			NVARCHAR(200) = NULL
@@ -28,7 +29,7 @@ DECLARE @blbLogo 				VARBINARY (MAX)  = NULL
 SELECT TOP 1 @blbLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
   AND A.strComment = 'Header'
 ORDER BY A.intAttachmentId DESC
 
@@ -36,12 +37,17 @@ ORDER BY A.intAttachmentId DESC
 SELECT TOP 1 @blbStretchedLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
   AND A.strComment = 'Stretched Header'
 ORDER BY A.intAttachmentId DESC
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 SET @dtmDateNow = GETDATE()
+
+--AR PREFERENCE
+SELECT TOP 1 @ysnPrintInvoicePaymentDetail	= ysnPrintInvoicePaymentDetail
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
@@ -64,7 +70,7 @@ FROM tblSMCompanyLocation L
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
   AND strRequestId = @strRequestId 
-  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2')
 
 --MAIN QUERY
 SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
@@ -114,7 +120,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' THEN ISNULL(INV.strComments, '') ELSE ISNULL(INV.strFooterComments, '') END
 	 , strItemComments          = CAST('' AS NVARCHAR(500))
 	 , strOrigin				= CAST(REPLACE(INV.strComments, 'Origin:', '') AS NVARCHAR(MAX))
-	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
+	 , blbLogo					= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
@@ -131,6 +137,8 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
 	 , dtmCreated				= @dtmDateNow
 	 , strType					= INV.strType
+	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
+	 , strLogoType				= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -166,6 +174,7 @@ LEFT JOIN tblEMEntity EMST ON SHIPTO.intEntityId = EMST.intEntityId
 LEFT JOIN tblSMShipVia SHIPVIA WITH (NOLOCK) ON INV.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN tblSMPaymentMethod PAYMENTMETHOD ON INV.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
 LEFT JOIN tblSOSalesOrder SO ON INV.intSalesOrderId = SO.intSalesOrderId
+LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
 
 --CUSTOMERS
 SELECT intEntityCustomerId	= C.intEntityId
@@ -327,6 +336,8 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , strSalesOrderNumber
 	 , strPaymentInfo
 	 , dtmCreated
+	 , ysnPrintInvoicePaymentDetail
+	 , strLogoType
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -388,6 +399,8 @@ SELECT strCompanyName
 	 , strSalesOrderNumber
 	 , strPaymentInfo
 	 , dtmCreated
+	 , ysnPrintInvoicePaymentDetail
+	 , strLogoType
 FROM #INVOICES
 
 UPDATE STAGING

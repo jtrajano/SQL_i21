@@ -63,6 +63,7 @@ INSERT INTO tblGLPostRecap (
 		,[strRateType]
 		,strOverrideAccountError
 		,strNewAccountIdOverride
+		,intLOBSegmentOverrideId
 		,[intConcurrencyId]
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
@@ -90,7 +91,7 @@ SELECT	[dtmDate]
 		,[strCode]
 		,[strReference]
 		,[intCurrencyId] = udtRecap.intCurrencyId
-		,[intCurrencyExchangeRateTypeId] = udtRecap.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateTypeId] = ISNULL(udtRecap.[intCurrencyExchangeRateTypeId], forexRateType.intCurrencyExchangeRateTypeId) 
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
@@ -104,15 +105,17 @@ SELECT	[dtmDate]
 		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[strRateType] =  Rate.strCurrencyExchangeRateType
+		,[strRateType] = ISNULL(Rate.strCurrencyExchangeRateType, forexRateType.strCurrencyExchangeRateType) 
 		,strOverrideAccountError
 		,strNewAccountIdOverride
+		,intLOBSegmentOverrideId
 		,[intConcurrencyId] = 1
 FROM	@RecapTable udtRecap LEFT JOIN tblGLAccount gl
 			ON udtRecap.intAccountId = gl.intAccountId
 		LEFT JOIN tblSMCurrencyExchangeRateType Rate on udtRecap.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		LEFT JOIN tblGLAccountGroup gg
 			ON gg.intAccountGroupId = gl.intAccountGroupId
+		LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON forexRateType.strCurrencyExchangeRateType = udtRecap.strRateType
 
 
 

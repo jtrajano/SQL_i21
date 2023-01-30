@@ -2,7 +2,8 @@
 	 @InvoiceIds			InvoiceId	READONLY,
 	 @Post					BIT = NULL,
 	 @Payment				BIT = 0,
-	 @PaymentStaging		PaymentIntegrationStagingTable READONLY
+	 @PaymentStaging		PaymentIntegrationStagingTable READONLY,
+	 @strSessionId			NVARCHAR(50) = NULL
 AS
 	--INVOICE
 	IF @Payment = 0
@@ -138,7 +139,8 @@ AS
 						SELECT intTransactionId
 							 , intTransactionDetailId
 							 , dblCost					= SUM(dblCost)
-						FROM ##ARItemsForCosting
+						FROM tblARPostItemsForCosting
+						WHERE strSessionId = @strSessionId
 						GROUP BY intTransactionId, intTransactionDetailId
 
 						UNION ALL
@@ -146,7 +148,8 @@ AS
 						SELECT intTransactionId
 							 , intTransactionDetailId
 							 , dblCost					= SUM(dblCost)
-						FROM ##ARItemsForInTransitCosting
+						FROM tblARPostItemsForInTransitCosting
+						WHERE strSessionId = @strSessionId
 						GROUP BY intTransactionId, intTransactionDetailId
 
 						UNION ALL
@@ -154,7 +157,8 @@ AS
 						SELECT intTransactionId
 							 , intTransactionDetailId
 							 , dblCost					= SUM(dblCost)
-						FROM ##ARItemsForStorageCosting
+						FROM tblARPostItemsForStorageCosting
+						WHERE strSessionId = @strSessionId
 						GROUP BY intTransactionId, intTransactionDetailId
 						--SELECT intTransactionId
 						--     , intTransactionDetailId

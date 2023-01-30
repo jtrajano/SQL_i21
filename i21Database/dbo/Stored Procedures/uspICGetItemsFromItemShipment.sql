@@ -31,9 +31,15 @@ SELECT
 		,[intItemUOMId]					= ShipmentItem.intItemUOMId
 		,[intWeightUOMId]				= ShipmentItem.intWeightUOMId
 		,[dblQty]						= --ShipmentItem.dblQuantity
-		  CASE WHEN ShipmentItemLot.intInventoryShipmentItemLotId > 0
-			   THEN ShipmentItemLot.dblQuantityShipped
-			   ELSE ShipmentItem.dblQuantity
+		  CASE 
+			WHEN Lot.intLotId IS NOT NULL THEN 
+				dbo.fnCalculateQtyBetweenUOM(
+					Lot.intItemUOMId
+					,ShipmentItem.intItemUOMId
+					,ShipmentItemLot.dblQuantityShipped
+				) 
+			ELSE 
+				ShipmentItem.dblQuantity
 		  END
 		,[dblUOMQty]					= ItemUOM.dblUnitQty
 		,[dblNetWeight]					= ShipmentItemLot.dblGrossWeight - ShipmentItemLot.dblTareWeight

@@ -122,6 +122,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	strPackingDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dblYield NUMERIC(18, 6) NULL, 
 	intCurrencyExchangeRateId INT NULL,
+	intRevaluationCurrencyExchangeRateId INT NULL,
 	intRateTypeId INT NULL,
     intCreatedById INT,
 	dtmCreated DATETIME,
@@ -149,6 +150,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dtmFinalPNL DATETIME NULL,
 	intPricingStatus INT,
 	dtmStartDateUTC datetime NULL,
+	intLogisticsLeadId INT NULL,
 	-- Reference Pricing
 	dblRefFuturesQty NUMERIC(18, 6) NULL,
 	intRefFuturesItemUOMId INT NULL,
@@ -160,16 +162,16 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dtmCashFlowDate datetime NULL,
 
 	-- Trade Finance Fields
-	strFinanceTradeNo NVARCHAR(50) NULL,
+	strFinanceTradeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intBankAccountId INT NULL,
 	intBankId INT NULL,
 	intBorrowingFacilityId INT NULL,
 	intBorrowingFacilityLimitId INT NULL,
 	intBorrowingFacilityLimitDetailId INT NULL,
-	strReferenceNo NVARCHAR(100) NULL,
+	strReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	dblLoanAmount NUMERIC(18, 6) NULL,
 	intBankValuationRuleId INT NULL,
-	strBankReferenceNo NVARCHAR(100) NULL,
+	strBankReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intFacilityId INT NULL,
 	intLoanLimitId INT NULL,
@@ -182,6 +184,11 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblInterestRate numeric(18, 6) NULL,
 	dtmPrepaymentDate datetime NULL,
 	dblPrepaymentAmount numeric(18, 6) NULL,
+
+	-- Historical FX Data (CT-7406
+	dtmHistoricalDate DATETIME NULL,
+	dblHistoricalRate NUMERIC(18, 6) NULL,
+	intHistoricalRateTypeId INT NULL,
 
 	 
 	-- Quality/Optionality
@@ -227,7 +234,13 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblAmountMinValue numeric (18,6),
 	dblQuantityMaxValue numeric (18,6),
 	dblAmountMaxValue numeric (18,6),
-
+	ysnApplyDefaultTradeFinance bit null,
+	[ysnTaxOverride] [bit] NULL,
+	[strTaxPoint] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxGroupId] [int] NULL,
+	[strTaxLocation] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] [int] NULL,
+	[intMTMPointId] [int] NULL,
 
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
@@ -240,7 +253,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intRefFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intRefFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
+	--CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractStatus_intContractStatusId] FOREIGN KEY ([intContractStatusId]) REFERENCES [tblCTContractStatus]([intContractStatusId]),
@@ -296,6 +309,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRateType_intRateTypeId_intCurrencyExchangeRateId] FOREIGN KEY (intRateTypeId) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+
+
 	--CONSTRAINT [FK_tblCTContractDetail_tblEMEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMPurchasingGroup_intPurchasingGroupId] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup]([intPurchasingGroupId]),

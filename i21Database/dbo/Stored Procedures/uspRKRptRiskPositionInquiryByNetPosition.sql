@@ -36,7 +36,7 @@ EXEC sp_xml_preparedocument @idoc OUTPUT,
 
 INSERT INTO @temp_xml_table
 SELECT *
-FROM OPENXML(@idoc, 'xmlparam/filters/filter', 2) WITH (
+FROM OPENXML(@idoc, 'xmlparam/filters/filter', 2) WITH ( 
 		fieldname NVARCHAR(50),
 		condition NVARCHAR(20),
 		[from] NVARCHAR(50),
@@ -193,6 +193,14 @@ DECLARE @temp AS TABLE (
 	intItemId INT,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblHedgedLots DECIMAL(24, 10)
+	, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 
 DECLARE @intRiskViewId INT
@@ -229,6 +237,14 @@ BEGIN
 		intItemId,
 		strItemNo,
 		strItemDescription
+		, strGrade
+		, strRegion
+		, strSeason
+		, strClass
+		, strCertificationName 
+		, strCropYear 
+		, dblHedgedLots
+		, dblToBeHedgedLots
 		)
 	EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,
@@ -330,7 +346,9 @@ BEGIN
 		intBookId INT,
 		strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		intSubBookId INT,
-		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+		strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 
 	INSERT INTO @MonthOrder (
@@ -363,6 +381,8 @@ BEGIN
 		strBook,
 		intSubBookId,
 		strSubBook
+		, strCertificationName
+		, strCropYear
 		)
 	EXEC uspRKRiskPositionInquiryBySummary @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,
@@ -381,6 +401,8 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#temp') IS NOT NULL
 		DROP TABLE #temp
+	IF OBJECT_ID('tempdb..#temp1') IS NOT NULL
+		DROP TABLE #temp1
 
 	SELECT intRowNumber1 intRowNumber,
 		strGroup,

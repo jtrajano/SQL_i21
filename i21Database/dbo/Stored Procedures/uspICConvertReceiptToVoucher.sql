@@ -130,7 +130,8 @@ BEGIN
 			,[intSubCurrencyCents]				
 			,[intAccountId]						
 			,[intShipViaId]						
-			,[intTermId]						
+			,[intTermId]	
+			,[intFreightTermId]					
 			,[strBillOfLading]					
 			,[ysnReturn]
 			,[dtmVoucherDate]
@@ -154,6 +155,12 @@ BEGIN
 			, [strReferenceNo]
 			, [intBankValuationRuleId]
 			, [strComments]
+			, [strTaxPoint]
+			, [intTaxLocationId]
+			, [ysnOverrideTaxGroup]
+			/*Quality and Optionality Premium*/
+			,[dblQualityPremium] 
+ 			,[dblOptionalityPremium] 
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -205,7 +212,8 @@ BEGIN
 		,GP.[intSubCurrencyCents]				
 		,GP.[intAccountId]						
 		,GP.[intShipViaId]						
-		,GP.[intTermId]						
+		,GP.[intTermId]			
+		,GP.[intFreightTermId]								
 		,GP.[strBillOfLading]					
 		,GP.[ysnReturn]	
 		,GP.dtmDate
@@ -229,6 +237,12 @@ BEGIN
 		, [strReferenceNo]
 		, [intBankValuationRuleId]
 		, [strComments]
+		, [strTaxPoint]
+		, [intTaxLocationId]
+		, [ysnOverrideTaxGroup]
+		/*Quality and Optionality Premium*/
+		,GP.[dblQualityPremium] 
+ 		,GP.[dblOptionalityPremium] 
 	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1, @strType) GP
 
 	END 

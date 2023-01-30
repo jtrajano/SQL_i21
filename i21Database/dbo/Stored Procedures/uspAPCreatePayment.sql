@@ -26,7 +26,8 @@ CREATE PROCEDURE [dbo].[uspAPCreatePayment]
 	@isPost BIT = 0,
 	@post BIT = 0,
 	@billId AS NVARCHAR(MAX),
-	@createdPaymentId INT = NULL OUTPUT
+	@createdPaymentId INT = NULL OUTPUT,
+	@bankToAccount INT = NULL
 AS
 BEGIN
 
@@ -186,6 +187,12 @@ BEGIN
 		END
 	END
 
+	--If pay to bank account is not existing use the default if ACH
+	IF @bankToAccount IS NULL AND @paymentMethodId = 2
+	BEGIN
+		SELECT TOP 1 @bankToAccount = intEntityEFTInfoId FROM tblEMEntityEFTInformation WHERE intEntityId = @vendorId AND ysnActive = 1 AND ysnDefaultAccount = 1 AND intCurrencyId = @currency
+	END
+
 	--Compute Discount Here, if there is no value computed or added
 	UPDATE A
 		SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmBillDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
@@ -324,7 +331,8 @@ BEGIN
 		[intEntityId],
 		[ysnLienExists],
 		[intConcurrencyId],
-		[intInstructionCode])
+		[intInstructionCode],
+		[intPayToBankAccountId])
 	SELECT
 		[intAccountId]			= @bankGLAccountId,
 		[intBankAccountId]		= @bankAccount,
@@ -347,7 +355,8 @@ BEGIN
 		[intEntityId]			= @userId,
 		[ysnLienExists]			= @lienExists,
 		[intConcurrencyId]		= 0,
-		[intInstructionCode]	= @instructionCode
+		[intInstructionCode]	= @instructionCode,
+		[intPayToBankAccountId]	= @bankToAccount
 	
 	SELECT @paymentId = SCOPE_IDENTITY()'
 
@@ -445,6 +454,7 @@ BEGIN
 	 @lienExists BIT,
 	 @location INT,
 	 @instructionCode INT,
+	 @bankToAccount INT,
 	 @paymentId INT OUTPUT',
 	 @location = @location,
 	 @userId = @userId,
@@ -467,6 +477,7 @@ BEGIN
 	 @payee = @payee,
 	 @lienExists = @lienExists,
 	 @instructionCode = @instructionCode,
+	 @bankToAccount = @bankToAccount,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 

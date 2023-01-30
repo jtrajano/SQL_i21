@@ -8,37 +8,12 @@ BEGIN
 	DECLARE @cost DECIMAL(38,20);
 
 	SELECT
-		@cost = CASE WHEN B.intTransactionType = 2 OR B.intTransactionType = 13
-					THEN	[dbo].[fnCalculateCostBetweenUOM](A.intCostUOMId, A.intUnitOfMeasureId, ((A.dblCost / 
-								(CASE WHEN A.ysnSubCurrency = 1 THEN B.intSubCurrencyCents ELSE 1 END) --check if sub currency
-							)))
-							*
-							(
-								(CASE WHEN A.dblUnitQty > 0 THEN CAST(A.dblUnitQty AS DECIMAL(30, 20)) ELSE 1 END) --Contract already sent converted UOM unit qty
-							)
-					 ELSE
-						 CAST(CASE WHEN A.dblNetWeight > 0 
-								THEN
-								(A.dblCost /
-								(CASE WHEN A.ysnSubCurrency = 1 THEN B.intSubCurrencyCents ELSE 1 END)) 
-								*
-								(
-									(CASE WHEN A.dblWeightUnitQty > 0 THEN A.dblWeightUnitQty ELSE 1 END) 
-									/
-									(CASE WHEN A.dblCostUnitQty > 0 THEN A.dblCostUnitQty ELSE 1 END)
-								)
-								ELSE
-								(A.dblCost /
-								(CASE WHEN A.ysnSubCurrency = 1 THEN B.intSubCurrencyCents ELSE 1 END)) 
-								*
-								(
-									(CASE WHEN A.dblUnitQty > 0 THEN A.dblUnitQty ELSE 1 END) 
-									/
-									(CASE WHEN A.dblCostUnitQty > 0 THEN A.dblCostUnitQty ELSE 1 END)
-								)
-								END
-							AS DECIMAL(30,20))
-					 END
+		@cost =	
+			CASE 
+				WHEN A.ysnSubCurrency <> 0
+					THEN A.dblCost / ISNULL(B.intSubCurrencyCents, 1)
+				ELSE A.dblCost
+			END / ISNULL(A.dblCostUnitQty, 1)
 	FROM tblAPBillDetail A
 	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 	WHERE A.intBillDetailId = @voucherDetailId

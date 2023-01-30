@@ -229,11 +229,17 @@ DECLARE  @Id									INT
 		,@BorrowingFacilityId					INT
 		,@BorrowingFacilityLimitId				INT
 		,@BankReferenceNo						NVARCHAR(100)
-		,@BankTransactionId						NVARCHAR(100)
+		,@BankTradeReference					NVARCHAR(100)
 		,@LoanAmount							NUMERIC(18, 6)
 		,@BankValuationRuleId					INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
+		,@SourcedFrom							NVARCHAR(100)
+		,@TaxLocationId							INT
+		,@TaxPoint								NVARCHAR(50)
+		,@DefaultPayToBankAccountId				INT
+		,@PayToCashBankAccountId				INT
+		,@PaymentInstructions					NVARCHAR(MAX)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -329,6 +335,8 @@ DECLARE  @Id									INT
 		,@NewInvoiceNumber						NVARCHAR(50) = ''
 		,@ItemQualityPremium					NUMERIC(18, 6)
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
+		,@ItemComputedGrossPrice				NUMERIC(18, 6)
+		,@ItemOverrideTaxGroup					BIT
 
 --INSERT
 BEGIN TRY
@@ -447,11 +455,17 @@ BEGIN
 		,@BorrowingFacilityId			= [intBorrowingFacilityId]
 		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
 		,@BankReferenceNo				= [strBankReferenceNo]
-		,@BankTransactionId				= [strBankTransactionId]
+		,@BankTradeReference			= [strBankTradeReference]
 		,@LoanAmount					= [dblLoanAmount]
 		,@BankValuationRuleId			= [intBankValuationRuleId]
 		,@TradeFinanceComments			= [strTradeFinanceComments]
 		,@GoodsStatus					= [strGoodsStatus]
+		,@TaxLocationId					= [intTaxLocationId]
+		,@TaxPoint						= [strTaxPoint]
+		,@DefaultPayToBankAccountId		= [intDefaultPayToBankAccountId]
+		,@PayToCashBankAccountId		= [intPayToCashBankAccountId]
+		,@PaymentInstructions			= [strPaymentInstructions]
+		,@SourcedFrom					= [strSourcedFrom]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -525,7 +539,7 @@ BEGIN
 		,@ItemPerformerId				= (CASE WHEN @GroupingOption = 0 THEN [intPerformerId] ELSE NULL END)
 		,@ItemLeaseBilling				= (CASE WHEN @GroupingOption = 0 THEN [ysnLeaseBilling] ELSE NULL END)
 		,@ItemVirtualMeterReading		= (CASE WHEN @GroupingOption = 0 THEN [ysnVirtualMeterReading] ELSE NULL END)
-		,@ItemCurrencyExchangeRateTypeId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
+		,@ItemCurrencyExchangeRateTypeId= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateTypeId] ELSE NULL END)
 		,@ItemCurrencyExchangeRateId	= (CASE WHEN @GroupingOption = 0 THEN [intCurrencyExchangeRateId] ELSE NULL END)
 		,@ItemCurrencyExchangeRate		= (CASE WHEN @GroupingOption = 0 THEN [dblCurrencyExchangeRate] ELSE 1 END)
 		,@ItemSubCurrencyId				= (CASE WHEN @GroupingOption = 0 THEN [intSubCurrencyId] ELSE NULL END)
@@ -541,6 +555,8 @@ BEGIN
         ,@ItemAddOnQuantity             = (CASE WHEN @GroupingOption = 0 THEN [dblAddOnQuantity] ELSE NULL END)
 		,@ItemQualityPremium			= (CASE WHEN @GroupingOption = 0 THEN [dblQualityPremium] ELSE NULL END)
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
+		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
+		,@ItemOverrideTaxGroup			= (CASE WHEN @GroupingOption = 0 THEN [ysnOverrideTaxGroup] ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -569,58 +585,66 @@ BEGIN
 		IF ISNULL(@SourceTransaction, '') <> 'Import'
 			BEGIN
 				IF ISNULL(@SourceTransaction,'') = 'Transport Load'
-					BEGIN
-						SET @SourceColumn = 'intLoadDistributionHeaderId'
-						SET @SourceTable = 'tblTRLoadDistributionHeader'
-					END
+				BEGIN
+					SET @SourceColumn = 'intLoadDistributionHeaderId'
+					SET @SourceTable = 'tblTRLoadDistributionHeader'
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
-					BEGIN
-						SET @SourceColumn = 'intShipmentId'
-						SET @SourceTable = 'tblLGShipment'
-					END
+				BEGIN
+					SET @SourceColumn = 'intShipmentId'
+					SET @SourceTable = 'tblLGShipment'
+					SET @SourcedFrom = 'Logistics'
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction' OR ISNULL(@SourceTransaction,'') = 'CF Tran'
-					BEGIN
-						SET @SourceColumn = 'intTransactionId'
-						SET @SourceTable = 'tblCFTransaction'
-					END
+				BEGIN
+					SET @SourceColumn = 'intTransactionId'
+					SET @SourceTable = 'tblCFTransaction'
+				END
+
 				IF ISNULL(@SourceTransaction, '') = 'Meter Billing'
-					BEGIN
-						SET @SourceColumn = 'intMeterReadingId'
-						SET @SourceTable = 'tblMBMeterReading' 
-					END
+				BEGIN
+					SET @SourceColumn = 'intMeterReadingId'
+					SET @SourceTable = 'tblMBMeterReading' 
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Provisional'
-					BEGIN
-						SET @SourceColumn = 'intInvoiceId'
-						SET @SourceTable = 'tblARInvoice'
-					END					
+				BEGIN
+					SET @SourceColumn = 'intInvoiceId'
+					SET @SourceTable = 'tblARInvoice'
+				END
+
 				IF ISNULL(@SourceTransaction,'') = 'Inventory Shipment'
-					BEGIN
-						SET @SourceColumn = 'intInventoryShipmentId'
-						SET @SourceTable = 'tblICInventoryShipment'
-					END		
+				BEGIN
+					SET @SourceColumn = 'intInventoryShipmentId'
+					SET @SourceTable = 'tblICInventoryShipment'
+					SET @SourcedFrom = 'Inventory Shipment'
+				END
 
 				IF ISNULL(@SourceTransaction,'') = 'Sales Contract'
-					BEGIN
-						SET @SourceColumn = 'intContractHeaderId'
-						SET @SourceTable = 'tblCTContractHeader'
-					END
+				BEGIN
+					SET @SourceColumn = 'intContractHeaderId'
+					SET @SourceTable = 'tblCTContractHeader'
+				END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule')
-					BEGIN
-						SET @SourceColumn = 'intLoadId'
-						SET @SourceTable = 'tblLGLoad'
-					END
+				BEGIN
+					SET @SourceColumn = 'intLoadId'
+					SET @SourceTable = 'tblLGLoad'
+					SET @SourcedFrom = 'Logistics'
+				END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
-					BEGIN
-						SET @SourceColumn = 'intWeightClaimId'
-						SET @SourceTable = 'tblLGWeightClaim'
-					END
+				BEGIN
+					SET @SourceColumn = 'intWeightClaimId'
+					SET @SourceTable = 'tblLGWeightClaim'
+				END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
-					BEGIN
-						EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
-					END
+				BEGIN
+					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+				END
 			END		
 	END TRY
 	BEGIN CATCH
@@ -657,7 +681,11 @@ BEGIN
 
 	IF ISNULL(@NewSourceId, 0) = 16
 	BEGIN
-		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intLoadId = @LoadId
+		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber 
+		FROM tblARInvoice 
+		WHERE intLoadId = @LoadId
+		AND strTransactionType <> 'Proforma Invoice'
+
 		IF (@NewInvoiceNumber <> '')
 		BEGIN
 			SET @ErrorMessage = 'Invoice (' + @NewInvoiceNumber + ') was already created for ' + ISNULL(ISNULL(@SourceNumber, @ItemDocumentNumber), '')
@@ -728,11 +756,17 @@ BEGIN
 			,@BorrowingFacilityId			= @BorrowingFacilityId
 			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
 			,@BankReferenceNo				= @BankReferenceNo
-			,@BankTransactionId				= @BankTransactionId
+			,@BankTradeReference			= @BankTradeReference
 			,@LoanAmount					= @LoanAmount
 			,@BankValuationRuleId			= @BankValuationRuleId
 			,@TradeFinanceComments			= @TradeFinanceComments
 			,@GoodsStatus					= @GoodsStatus
+			,@SourcedFrom					= @SourcedFrom
+			,@TaxLocationId					= @TaxLocationId
+			,@TaxPoint						= @TaxPoint
+			,@DefaultPayToBankAccountId		= @DefaultPayToBankAccountId
+			,@PayToCashBankAccountId		= @PayToCashBankAccountId
+			,@PaymentInstructions			= @PaymentInstructions
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -821,6 +855,8 @@ BEGIN
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 			,@ItemQualityPremium			= @ItemQualityPremium
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
+			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1004,6 +1040,8 @@ BEGIN
                     ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 					,@ItemQualityPremium            = [dblQualityPremium]
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
+					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+					,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1091,7 +1129,7 @@ BEGIN
 						,@ItemPerformerId				= @ItemPerformerId
 						,@ItemLeaseBilling				= @ItemLeaseBilling
 						,@ItemConversionAccountId		= @ItemConversionAccountId
-						,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+						,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 						,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 						,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 						,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -1106,6 +1144,8 @@ BEGIN
                         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 						,@ItemQualityPremium            = @ItemQualityPremium
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
+						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+						,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1773,7 +1813,7 @@ BEGIN TRY
 						,@ItemVirtualMeterReading		= [ysnVirtualMeterReading]
 						,@TempDetailIdForTaxes			= [intTempDetailIdForTaxes]
 						,@ItemConversionAccountId		= [intConversionAccountId]
-						,@ItemCurrencyExchangeRateTypeId	= [intCurrencyExchangeRateTypeId]
+						,@ItemCurrencyExchangeRateTypeId= [intCurrencyExchangeRateTypeId]
 						,@ItemCurrencyExchangeRateId	= [intCurrencyExchangeRateId]
 						,@ItemCurrencyExchangeRate		= [dblCurrencyExchangeRate]
 						,@ItemSubCurrencyId				= [intSubCurrencyId]
@@ -1787,6 +1827,8 @@ BEGIN TRY
                         ,@ItemAddOnQuantity             = [dblAddOnQuantity]
 						,@ItemQualityPremium            = [dblQualityPremium]
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
+						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
+						,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1864,7 +1906,7 @@ BEGIN TRY
 							,@ItemPerformerId				= @ItemPerformerId
 							,@ItemLeaseBilling				= @ItemLeaseBilling
 							,@ItemConversionAccountId		= @ItemConversionAccountId
-							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+							,@ItemCurrencyExchangeRateTypeId= @ItemCurrencyExchangeRateTypeId
 							,@ItemCurrencyExchangeRateId	= @ItemCurrencyExchangeRateId
 							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 							,@ItemSubCurrencyId				= @ItemSubCurrencyId
@@ -1881,6 +1923,8 @@ BEGIN TRY
                             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 							,@ItemQualityPremium            = @ItemQualityPremium
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
+							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
+							,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
@@ -2355,7 +2399,7 @@ BEGIN TRY
 						AND @UpdateAvailableDiscount = 0
 						
 					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
-									@TaxDetails	= @TaxDetails
+								 @TaxDetails	= @TaxDetails
 								,@UserId		= @EntityId
 								,@ClearExisting	= @ClearDetailTaxes
 								,@RaiseError	= @RaiseError
@@ -2721,7 +2765,7 @@ SELECT EFP.* INTO #TempPrepaymentEntries FROM #EntriesForProcessing EFP JOIN tbl
 WHILE EXISTS(SELECT intInvoiceId  FROM #TempPrepaymentEntries)
 BEGIN 
 	DECLARE @PrePayInvoiceId INT , @PrepayPaymentId INT 
-		SELECT TOP 1 @PrePayInvoiceId =EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
+		SELECT TOP 1 @PrePayInvoiceId = EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
 
 		EXEC [dbo].[uspARProcessPaymentFromInvoice]
 			 @InvoiceId		= @PrePayInvoiceId 
@@ -2753,47 +2797,60 @@ END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)
+
 DELETE FROM @TempInvoiceIdTable
+
 INSERT INTO @TempInvoiceIdTable
-SELECT DISTINCT
-	[intInvoiceId]
+SELECT DISTINCT intInvoiceId
 FROM
 	#EntriesForProcessing
 WHERE
-	ISNULL([ysnForInsert],0) = 1
-	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceId],0) <> 0
+	ISNULL(ysnForInsert, 0) = 1
+	AND ISNULL(ysnProcessed, 0) = 1
+	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
 	@CreateIds = COALESCE(@CreateIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
-	
 SET @CreatedIvoices = @CreateIds
 
+IF EXISTS(SELECT 1 FROM tblARCompanyPreference WHERE ysnOverrideARAccountLineOfBusinessSegment = 1)
+BEGIN
+	UPDATE ARI
+	SET intLineOfBusinessId = LOB.intLineOfBusinessId
+	FROM tblARInvoice ARI
+	OUTER APPLY (
+		SELECT TOP 1 ICC.intLineOfBusinessId
+		FROM tblARInvoiceDetail ARID
+		INNER JOIN tblICItem ICI ON ARID.intItemId = ICI.intItemId AND ARID.intInvoiceId = ARI.intInvoiceId
+		INNER JOIN tblICCommodity ICC ON ICI.intCommodityId = ICC.intCommodityId
+		ORDER BY intInvoiceDetailId
+	) LOB
+	WHERE ARI.intInvoiceId IN (SELECT intInvoiceId FROM @TempInvoiceIdTable)
+	AND ISNULL(ARI.intLineOfBusinessId, 0) = 0
+END
 
 DECLARE @UpdatedIds VARCHAR(MAX)
+
 DELETE FROM @TempInvoiceIdTable
+
 INSERT INTO @TempInvoiceIdTable
-SELECT DISTINCT
-	[intInvoiceId]
+SELECT DISTINCT intInvoiceId
 FROM
 	#EntriesForProcessing
 WHERE
-	ISNULL([ysnForUpdate],0) = 1
-	AND ISNULL([ysnProcessed],0) = 1
-	AND ISNULL([intInvoiceId],0) <> 0
+	ISNULL(ysnForUpdate, 0) = 1
+	AND ISNULL(ysnProcessed, 0) = 1
+	AND ISNULL(intInvoiceId, 0) <> 0
 
 SELECT
 	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
 
-	
 SET @UpdatedIvoices = @UpdatedIds
-
-
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN

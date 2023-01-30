@@ -28,7 +28,8 @@
     [ysnValidateReceiptTotal] BIT NULL DEFAULT(0),
 	[intItemIdHolderForReceiptImport] INT NULL, 
 	[ysnUpdateSMTransaction] BIT NULL DEFAULT(0),
-	[ysnUpdateInventoryTransactionAccountId] BIT NULL DEFAULT(0),
+	[ysnUpdateInventoryTransactionAccountId] BIT NULL DEFAULT(0),	
 	[strSingleOrMultipleLots] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnUpdateJournalLineDescription] BIT NULL DEFAULT(0),
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

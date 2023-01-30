@@ -1258,7 +1258,13 @@ SELECT
 			,[strModuleName]	 
 FROM #tmpGLDetail
 
-EXEC uspGLBookEntries @GLEntries, @ysnPost
+DECLARE @intReturnCode AS INT = 0;
+
+EXEC @intReturnCode = uspGLBookEntries @GLEntries, @ysnPost
+IF ISNULL(@intReturnCode, 0) <> 0 
+BEGIN 
+	GOTO Post_Rollback
+END
 		
 IF @@ERROR <> 0	GOTO Post_Rollback
 

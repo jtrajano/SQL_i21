@@ -841,7 +841,7 @@ BEGIN TRY
 		,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
-		,[ysnImpactInventory]					= IE.ysnImpactInventory
+		,[ysnImpactInventory]					= 0
 		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
 		,[ysnBlended]							= IE.ysnBlended
 		,[ysnComboFreight]						= IE.ysnComboFreight

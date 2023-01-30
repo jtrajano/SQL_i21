@@ -47,7 +47,8 @@ SELECT DE.intFutOptTransactionId
 										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
 										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
 										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0))
-										OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null))
+										OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null)
+										OR ysnPosted = 1)
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
 	, dblAvailableContract = ISNULL(DE.dblPContractBalanceLots, 0.00)
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
@@ -78,6 +79,7 @@ SELECT DE.intFutOptTransactionId
 	, strOTCSource = CASE WHEN DE.intSelectedInstrumentTypeId = 2 
 							THEN CASE WHEN ISNULL(DE.strSource, '') <> '' THEN DE.strSource ELSE 'Manual' END 
 							ELSE '' END COLLATE Latin1_General_CI_AS
+	, strCurrencyPair = CPS.strCurrencyPair
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -132,3 +134,5 @@ LEFT JOIN tblCTContractHeader contractH
 	ON contractH.intContractHeaderId = DE.intContractHeaderId
 LEFT JOIN tblCTContractDetail contractD
 	ON contractD.intContractDetailId = DE.intContractDetailId
+LEFT JOIN vyuRKCurrencyPairSetup CPS
+	ON CPS.intCurrencyPairId = DE.intCurrencyPairId

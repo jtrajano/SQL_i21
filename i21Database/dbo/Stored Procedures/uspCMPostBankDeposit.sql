@@ -78,7 +78,7 @@ DECLARE
 		,[dblExchangeRate] [numeric](38, 20) NOT NULL
 		,[dtmDateEntered] [datetime] NOT NULL
 		,[dtmTransactionDate] [datetime] NULL
-		,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+		,[strJournalLineDescription] [nvarchar](300)  COLLATE Latin1_General_CI_AS NULL
 		,[intJournalLineNo] [int]
 		,[ysnIsUnposted] [bit] NOT NULL
 		,[intUserId] [int] NULL
@@ -350,7 +350,7 @@ BEGIN
 			,[intAccountId]			= BankAccnt.intGLAccountId
 			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblAmount,2) ELSE A.dblAmount END
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblAmount ELSE 0 END
+			,[dblDebitForeign]		= A.dblAmount
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -388,7 +388,7 @@ BEGIN
 			,[intAccountId]			= A.intShortGLAccountId
 			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblShortAmount,2) ELSE A.dblShortAmount END
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblShortAmount ELSE 0 END
+			,[dblDebitForeign]		= A.dblAmount
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0

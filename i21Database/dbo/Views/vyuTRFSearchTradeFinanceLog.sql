@@ -22,6 +22,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC)
 	, tf.intStatusId
 	, strStatus = CASE WHEN  tf.intStatusId = 1 THEN 'Active' 
 						WHEN tf.intStatusId = 2 THEN 'Completed'
+						WHEN tf.intStatusId = 3 THEN 'Inactive'
 						WHEN tf.intStatusId = 0 THEN 'Cancelled'
 						ELSE '' END
 	, tf.intWarrantId
@@ -41,11 +42,15 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY tf.dtmCreatedDate DESC)
 	, tf.strSublimit
 	, tf.dblSublimit
 	, tf.strBankTradeReference
-	, tf.dblFinanceQty
-	, tf.dblFinancedAmount
+	, dblFinanceQty = ROUND(tf.dblFinanceQty, 2)
+	, dblFinancedAmount = ROUND(tf.dblFinancedAmount, 2)
 	, tf.strBankApprovalStatus
+	, wStatus.strWarrantStatus
 FROM tblTRFTradeFinanceLog tf
-LEFT JOIN tblEMEntity U ON U.intEntityId = tf.intUserId
+LEFT JOIN tblEMEntity U 
+	ON U.intEntityId = tf.intUserId
+LEFT JOIN tblICWarrantStatus wStatus
+	ON wStatus.intWarrantStatus = tf.intWarrantStatusId
 
 OUTER APPLY(
 	SELECT TOP 1 
@@ -69,7 +74,6 @@ OUTER APPLY(
 		ON allocd.intSContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblCTContractHeader cth
 		ON ctd.intContractHeaderId = cth.intContractHeaderId
-	WHERE  tf.strTransactionType = 'Contract'
-	AND	intPContractDetailId = tf.intTransactionDetailId
+	WHERE intPContractDetailId = tf.intContractDetailId
 	ORDER BY allocd.dtmAllocatedDate DESC
 ) sold_to

@@ -90,7 +90,7 @@ BEGIN TRY
 				, intDetailSubBookId = NULL
 				, CD.intContractStatusId
 				, CH.ysnReadOnlyInterCoContract
-				, dblFX = CD.dblRate
+				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> isnull(CD.intMainCurrencyId,0) then CD.dblRate else 1 end
 				, CD.strItemNo
 				, CD.strOrigin
 				, CD.strProductType
@@ -99,6 +99,8 @@ BEGIN TRY
 				, CD.strSeason
 				, CD.strClass
 				, CD.strProductLine
+				, dblDefaultFx = null
+				, CD.strExchangeRate
 			FROM tblCTContractHeader			CH	
 			JOIN tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 			JOIN tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
@@ -136,6 +138,9 @@ BEGIN TRY
 					, ICC.strSeason
 					, ICC.strClass
 					, ICC.strProductLine
+					, CDetail.intInvoiceCurrencyId
+					, intMainCurrencyId = CU.intMainCurrencyId
+					, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CDetail.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 				FROM tblCTContractDetail CDetail
 				JOIN tblCTContractHeader header ON header.intContractHeaderId = CDetail.intContractHeaderId
 				LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
@@ -190,7 +195,7 @@ BEGIN TRY
 				, dblOriginalBasis = CD.dblBasis
 				, dblTotalLots = ISNULL(tblLots.dblNoOfLots, 0)
 				, dblAdditionalCost = CAST(NULL AS NUMERIC(18, 6))
-				, intFinalPriceUOMId = CD.intPriceCommodityUOMId
+				, intFinalPriceUOMId = ISNULL(CD.intPriceCommodityUOMId,CD.intPriceItemUOMId) --WILLGET THE PRICE SEQUENCE UOM IF THE UOM IS NOT EXISTING IN THE COMMODITY.
 				, dblQuantity = ISNULL(tblQuantity.dblQuantity, 0)
 				, CD.intItemUOMId
 				, CD.strPriceUOM
@@ -230,7 +235,7 @@ BEGIN TRY
 				, intDetailSubBookId = CD.intSubBookId
 				, CD.intContractStatusId
 				, CD.ysnReadOnlyInterCoContract
-				, dblFX = CD.dblRate
+				, dblFX = case when CD.intInvoiceCurrencyId <> CD.intCurrencyId and CD.intInvoiceCurrencyId <> isnull(CD.intMainCurrencyId,0) then CD.dblRate else 1 end
 				, ICC.strItemNo
 				, ICC.strOrigin
 				, ICC.strProductType
@@ -239,9 +244,11 @@ BEGIN TRY
 				, ICC.strSeason
 				, ICC.strClass
 				, ICC.strProductLine
+				, dblDefaultFx = case when isnull(CD.intCurrencyExchangeRateId,0) = 0 then 1 else (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId order by erd.dtmValidFromDate desc) end
+				, CD.strExchangeRate
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
-			JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
+			LEFT JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 
 			 									AND PU.intUnitMeasureId =	IM.intUnitMeasureId
 			JOIN tblRKFutureMarket			MA	ON	MA.intFutureMarketId=	CD.intFutureMarketId
 			JOIN tblSMCurrency				CY	ON	CY.intCurrencyID	=	MA.intCurrencyId

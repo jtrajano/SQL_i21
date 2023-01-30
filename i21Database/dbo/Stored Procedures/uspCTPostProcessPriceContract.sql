@@ -70,15 +70,7 @@ BEGIN
 			AND intScreenId = @intScreenId
 
 		select top 1  @ysnEnableArbitrageDerivative = ysnEnableDerivativeInArbitrage from tblCTCompanyPreference;
-
-		if exists (select top 1 1 from tblCTPriceFixation pf join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId where pf.intPriceContractId = @intPriceContractId and isnull(ch.ysnMultiplePriceFixation,0) = 1)
-		begin
-
-			exec uspCTProcessPriceFixationMultiplePrice
-				@intPriceContractId = @intPriceContractId
-				,@intUserId = @intUserId
-		end
-
+		
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intUserId AND intScreenId = @intScreenId)
 		BEGIN
 			RETURN
@@ -135,22 +127,24 @@ BEGIN
 					@ysnHedge				=	FD.ysnHedge,
 					@dtmFixationDate		=	FD.dtmFixationDate,
 					@intContractHeaderId	=	PF.intContractHeaderId,
-					@intContractDetailId	= isnull(PF.intContractDetailId,TS1.intContractDetailId), 
+					@intContractDetailId	=	cd.intContractDetailId, 
 					@intCommodityId			=	CH.intCommodityId,					
 					@intTraderId			=	CH.intSalespersonId,
 					@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,
-					@intCurrencyId			= (case when PF.intContractDetailId is null then TS1.intCurrencyId else TS.intCurrencyId end),
-					@intBookId				= (case when PF.intContractDetailId is null then TS1.intBookId else TS.intBookId end),
-					@intSubBookId			= (case when PF.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end),
-					@intLocationId			= (case when PF.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end),
+					@intCurrencyId			=	cd.intCurrencyId,
+					@intBookId				=	cd.intBookId,
+					@intSubBookId			=	cd.intSubBookId,
+					@intLocationId			=	cd.intCompanyLocationId,
 					@ysnAA					=	FD.ysnAA,
 					@dblHedgeNoOfLots		= 	FD.dblHedgeNoOfLots
 				FROM
 					tblCTPriceFixationDetail FD WITH (UPDLOCK)
 					JOIN tblCTPriceFixation PF WITH (UPDLOCK) ON PF.intPriceFixationId = FD.intPriceFixationId
-					JOIN tblCTContractHeader CH WITH (UPDLOCK) ON CH.intContractHeaderId = PF.intContractHeaderId 
-					left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = PF.intContractDetailId  
-					CROSS APPLY fnCTGetTopOneSequence(PF.intContractHeaderId,isnull(PF.intContractDetailId,0)) TS1 
+					JOIN tblCTContractHeader CH WITH (UPDLOCK) ON CH.intContractHeaderId = PF.intContractHeaderId
+					join tblCTContractDetail cd on
+						cd.intContractHeaderId = PF.intContractHeaderId
+						and cd.intContractDetailId = case when CH.ysnMultiplePriceFixation = 1 then cd.intContractDetailId else PF.intContractDetailId end
+						and cd.intContractSeq = case when CH.ysnMultiplePriceFixation = 1 then 1 else cd.intContractSeq end
 				WHERE
 					FD.intPriceFixationDetailId = @intPriceFixationDetailId
 
@@ -256,12 +250,12 @@ BEGIN
 					select
 						@ysnDerivative = a.ysnDerivative
 						,@intFutOptTransactionId = a.intInternalTradeNumberId
-						,@dblHedgeNoOfLots = a.dblNoOfLots
+						,@dblHedgeNoOfLots = isnull(a.dblNoOfLots,0)
 						,@intBrokerId = a.intBrokerId
 						,@intBrokerageAccountId = a.intBrokerAccountId
 						,@intFutureMarketId = a.intNewFutureMarketId
 						,@intCommodityId = c.intCommodityId
-						,@intLocationId = (case when b.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end)
+						,@intLocationId = cd.intCompanyLocationId
 						,@intTraderId = c.intSalespersonId
 						,@intCurrencyId = a.intCurrencyId
 						,@strBuySell = a.strBuySell
@@ -269,22 +263,25 @@ BEGIN
 						,@dblHedgePrice = a.dblSpreadPrice
 						,@dtmFixationDate = a.dtmSpreadArbitrageDate
 						,@ysnAA = 0
-						,@intBookId				= (case when b.intContractDetailId is null then TS1.intBookId else TS.intBookId end)
-						,@intSubBookId			= (case when b.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end)
+						,@intBookId				= cd.intBookId
+						,@intSubBookId			= cd.intSubBookId
 					from
 						tblCTSpreadArbitrage a
 						join tblCTPriceFixation b on b.intPriceFixationId = a.intPriceFixationId
 						join tblCTContractHeader c on c.intContractHeaderId = b.intContractHeaderId
-						left join tblCTContractDetail TS WITH (UPDLOCK) on TS.intContractDetailId = b.intContractDetailId  
-						CROSS APPLY fnCTGetTopOneSequence(b.intContractHeaderId,isnull(b.intContractDetailId,0)) TS1 
+						join tblCTContractDetail cd on
+							cd.intContractHeaderId = b.intContractHeaderId
+							and cd.intContractDetailId = case when c.ysnMultiplePriceFixation = 1 then cd.intContractDetailId else b.intContractDetailId end
+							and cd.intContractSeq = case when c.ysnMultiplePriceFixation = 1 then 1 else cd.intContractSeq end
 					where
 						a.intSpreadArbitrageId = @intSpreadArbitrageId;
 
 					if (@ysnDerivative = 1)
 					begin
 
+						SELECT @dblDerivativeNoOfContract = 0;
 						SELECT @dblDerivativeNoOfContract = ISNULL(dblNoOfContract,0), @ysnFreezed = isnull(ysnFreezed,0) FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
-						IF @dblHedgeNoOfLots = @dblDerivativeNoOfContract
+						IF ( @dblDerivativeNoOfContract > 0 and @dblHedgeNoOfLots = @dblDerivativeNoOfContract)
 						BEGIN
 							select @intSpreadArbitrageId = min(intSpreadArbitrageId) from tblCTSpreadArbitrage where intPriceFixationId = @intPriceFixationId and strTradeType = 'Arbitrage' and intSpreadArbitrageId > @intSpreadArbitrageId;
 							CONTINUE

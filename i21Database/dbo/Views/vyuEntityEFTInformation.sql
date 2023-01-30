@@ -24,6 +24,7 @@ select
 	Vendor,
 	Customer,
 	Employee,
+	intCurrencyId,
 	strCurrency,
 	strIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIBAN), 4),
     strIBAN = dbo.fnAESDecryptASym(strIBAN),
@@ -42,7 +43,12 @@ select
     strFiftySixFormat,
 	strIntermediaryIBANWithMask = '**********' + RIGHT(dbo.fnAESDecryptASym(strIntermediaryIBAN), 4),
     strIntermediaryIBAN = dbo.fnAESDecryptASym(strIntermediaryIBAN),
-	intEntityEFTHeaderId
+	intEntityEFTHeaderId,
+	strDistributionType,
+	dblAmount,
+	intOrder,
+	ysnDomestic,
+	intConcurrencyId
 
 
 FROM tblEMEntityEFTInformation EFT

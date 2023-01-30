@@ -38,7 +38,7 @@ AS
 					, intSubCurrencyId					=   AD.intSeqCurrencyId
 					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE 1.000000 END
 					, strSubCurrency					=	AD.strSeqCurrency
-					, dblOrderPrice						=	AD.dblSeqPrice
+					, dblOrderPrice						=	AD.dblSeqPrice * dblQtyToPriceUOMConvFactor
 					, intPriceItemUOMId					=	AD.intSeqPriceUOMId
 					, strPriceUnitMeasure				=	AD.strSeqPriceUOM
 					, dblBalance						=	CD.dblBalance
@@ -73,7 +73,9 @@ AS
 					, intSubLocationId					= 	CASE WHEN CD.intSubLocationId IS NULL THEN IL.intSubLocationId ELSE CD.intSubLocationId END
 					, strStorageLocation				=	SL.strName
 					, strSubLocation					=	UL.strSubLocationName
-    
+					, strTaxPoint						=   CD.strTaxPoint
+					, intTaxGroupId						=   CD.intTaxGroupId
+					, intTaxLocationId					=   CD.intTaxLocationId
 			FROM	tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON  CH.intContractHeaderId				=   CD.intContractHeaderId
 														AND CH.intContractTypeId				=	2
@@ -85,8 +87,8 @@ AS
 			JOIN	tblICItemUOM					QU	ON  QU.intItemUOMId						=   CD.intItemUOMId
 			JOIN	tblICUnitMeasure				QM	ON  QM.intUnitMeasureId					=   QU.intUnitMeasureId
 
-	OUTER	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)			AD
-
+	--OUTER	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)			AD
+	LEFT	JOIN	dbo.vyuCTGetAdditionalColumnForDetailView AD ON AD.intContractDetailId 		=   CD.intContractDetailId
 	LEFT	JOIN	tblICItemUOM					WU	ON  WU.intItemUOMId						=   CD.intNetWeightUOMId
 	LEFT	JOIN	tblICUnitMeasure				WM	ON  WM.intUnitMeasureId					=   WU.intUnitMeasureId
 	LEFT	JOIN	tblICItemUOM					PU	ON  PU.intItemUOMId						=   AD.intSeqPriceUOMId

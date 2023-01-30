@@ -13,10 +13,16 @@ SELECT tc.intTermCostId
 	, strDestinationTerm = DestinationTerm.strFreightTerm
 	, tc.intMarketZoneId
 	, strMarketZone = mz.strMarketZoneCode
+	, tc.intCommodityId
+	, strCommodity = com.strCommodityCode
+	, tc.intProductTypeId
+	, strProductType = pt.strDescription
+	, tc.intProductLineId
+	, strProductLine = pl.strDescription
 	, tcd.intTermCostDetailId
 	, tcd.intCostId
 	, strCostItem = it.strItemNo
-	, tcd.strCostMethod
+	, tcd.strCostMethod  COLLATE Latin1_General_CI_AS AS strCostMethod
 	, tcd.intCurrencyId
 	, cur.strCurrency
 	, tcd.dblValue
@@ -36,3 +42,6 @@ LEFT JOIN tblICItem it ON it.intItemId = tcd.intCostId
 LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = tcd.intCurrencyId
 LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = tcd.intItemUOMId
 LEFT JOIN tblICUnitMeasure uom ON uom.intUnitMeasureId = iUOM.intUnitMeasureId
+LEFT JOIN tblICCommodity com ON com.intCommodityId = tc.intCommodityId
+LEFT JOIN tblICCommodityAttribute pt ON pt.intCommodityAttributeId = tc.intProductTypeId AND pt.strType = 'ProductType'
+LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = tc.intProductLineId

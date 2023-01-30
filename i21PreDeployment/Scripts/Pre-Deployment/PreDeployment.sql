@@ -80,6 +80,7 @@
 :r .\6_GL\5_1710.sql
 :r .\6_GL\6_1910.sql
 :r .\6_GL\7_2110.sql
+:r .\6_GL\8_2210.sql
 
 -- AR
 :r .\7_AR\00_DropTriggers.sql
@@ -95,7 +96,6 @@
 :r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
 :r .\7_AR\13_FixCustomerBillToShipTo.sql
-:r .\7_AR\14_RefreshARTempTables.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql

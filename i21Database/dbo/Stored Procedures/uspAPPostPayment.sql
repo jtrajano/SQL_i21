@@ -60,7 +60,7 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Payable'
 DECLARE @TRAN_TYPE NVARCHAR(25) = 'Payable'
-DECLARE @paymentIds NVARCHAR(MAX) = @param
+DECLARE @paymentIds NVARCHAR(MAX)
 DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @count INT = 0;
@@ -758,7 +758,7 @@ BEGIN
 	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
 	--INSERT THE RESULT FOR SHOWING ON THE USER
-	DECLARE @invalidGLEntries AS Id
+	DECLARE @invalidGLEntries AS TABLE(intId INT)
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
 	OUTPUT inserted.intTransactionId INTO @invalidGLEntries
 	SELECT 
@@ -784,9 +784,12 @@ BEGIN
 		DECLARE @postVarGL BIT = ~@post
 		--ROLLBACK THE UPDATING OF AMOUNT DUE IF IF THERE IS NO VALID
 		--UPDATE tblAPPaymentDetail
-		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidGLEntries, @post = @postVarGL
+		DECLARE @invalidPayIds AS Id
+		INSERT INTO @invalidPayIds
+		SELECT DISTINCT intId FROM @invalidGLEntries
+		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidPayIds, @post = @postVarGL
 		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @invalidGLEntries, @post = @postVarGL
+		EXEC uspAPUpdateBillPayment @paymentIds = @invalidPayIds, @post = @postVarGL
 	END
 	
 	--DELETE THE FAILED POST ENTRIES
@@ -825,7 +828,8 @@ BEGIN
 	--CREATE BANK TRANSACTION
 	DECLARE @paymentForBankTransaction AS Id
 	INSERT INTO @paymentForBankTransaction
-	SELECT intPaymentId FROM #tmpPayablePostData
+	-- SELECT intPaymentId FROM #tmpPayablePostData
+	SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds
 	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @paymentForBankTransaction, @post = @post, @userId = @userId, @batchId = @batchIdUsed
 
 	--Insert Successfully posted transactions.
@@ -961,6 +965,7 @@ ELSE
 			,[strDescription]
 			,[strJournalLineDescription]
 			,[strReference]	
+			,[intCurrencyId]
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -990,6 +995,7 @@ ELSE
 			,A.[strDescription]
 			,A.[strJournalLineDescription]
 			,A.[strReference]	
+			,A.[intCurrencyId]
 			,A.[dtmTransactionDate]
 			,Debit.Value--[dblDebit]
 			,Credit.Value--[dblCredit]

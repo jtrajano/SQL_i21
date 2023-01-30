@@ -152,10 +152,11 @@ WHERE B.intId IS NULL
 --BUT uspAPPostBill calls again for the same intBillId
 --DELETE THE intBillId ON THE LIST OF FOR POST VOUCHERS
 --THAT IS ALREADY PART OF tblAPBillForPosting
-DELETE A
-FROM #tmpPostBillData A
-LEFT JOIN @idForPost B ON A.intBillId = B.intId
-WHERE B.intId IS NULL
+DELETE A  
+FROM #tmpPostBillData A  
+LEFT JOIN @idForPost B ON A.intBillId = B.intId  
+LEFT JOIN tblAPBill C ON A.intBillId = C.intBillId
+WHERE B.intId IS NULL OR (C.ysnPosted = 1 AND @post = 1) OR (C.ysnPosted = 0 AND @post = 0)
 
 --SET THE UPDATED @billIds
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
@@ -164,7 +165,7 @@ ORDER BY intBillId
 
 IF NULLIF(@billIds, '') IS NULL
 BEGIN
-	RAISERROR('Posting/unposting already in process.', 16, 1);
+	RAISERROR('Posting/unposting already in process or already posted.', 16, 1);
 	GOTO Post_Rollback
 END
 
@@ -241,7 +242,7 @@ BEGIN
 	BEGIN
 		DECLARE @invalidAmountAppliedIds NVARCHAR(MAX);
 		--undo updating of transactions for those invalid only
-		SELECT 
+		SELECT DISTINCT
 			@invalidAmountAppliedIds = COALESCE(@invalidAmountAppliedIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId)
 		FROM #tmpInvalidBillData
 		EXEC uspAPUpdatePrepayAndDebitMemo @invalidAmountAppliedIds, @reversedPost
@@ -284,6 +285,16 @@ END
 
 SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
 
+IF EXISTS(SELECT 1 FROM #tmpPostBillData)
+BEGIN
+	--CREATE TEMP GL ENTRIES
+	SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+	FROM #tmpPostBillData
+	ORDER BY intBillId
+
+	EXEC uspAPUpdateAccountOnPost @validBillIds
+END
+
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
@@ -304,11 +315,6 @@ BEGIN
 	SET @success = 0
 	GOTO Post_Exit
 END
-
---CREATE TEMP GL ENTRIES
-SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
-FROM #tmpPostBillData
-ORDER BY intBillId
 
 BEGIN TRANSACTION
 
@@ -375,6 +381,8 @@ INSERT INTO @adjustedEntries (
 	,[strSourceTransactionId] 
 	,[intFobPointId]
 	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId] 
+	,[dblForexRate] 
 )
 SELECT 
 	[intItemId] 
@@ -402,6 +410,8 @@ SELECT
 	,[strSourceTransactionId] 
 	,[intFobPointId]
 	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId] 
+	,[dblForexRate] 
 FROM dbo.fnAPCreateReceiptItemCostAdjustment(@voucherIds, @intFunctionalCurrencyId)
 
 -- Remove zero cost adjustments. 
@@ -677,6 +687,7 @@ BEGIN
 			,dblForeignRate
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
@@ -1049,6 +1060,7 @@ BEGIN
 			,dblForeignRate
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
@@ -1094,6 +1106,7 @@ BEGIN
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
 END
+
 
 --QUANTITY ADJUSTMENT
 DECLARE @qtyAdjustmentTable AS TABLE (
@@ -1147,7 +1160,11 @@ SELECT B.intBillId,
 		L.intSubLocationId,
 		L.intStorageLocationId,
 		L.strLotNumber,
-		BD.dblQtyReceived - BD.dblQtyOrdered,
+		--BD.dblQtyReceived - BD.dblQtyOrdered,
+		CASE 
+			WHEN @ysnPost = 1 THEN BD.dblQtyReceived - ri.dblOpenReceive
+			WHEN @ysnPost = 0 THEN -(BD.dblQtyReceived - ri.dblOpenReceive)
+		END,
 		BD.dblCost,
 		BD.intUnitOfMeasureId,
 		B.intBillId,
@@ -1159,7 +1176,11 @@ FROM tblAPBill B
 INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
-WHERE B.ysnFinalVoucher = 1 AND BD.dblQtyReceived <> BD.dblQtyOrdered
+INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+WHERE 
+	B.ysnFinalVoucher = 1 
+	--AND BD.dblQtyReceived <> BD.dblQtyOrdered
+	AND (BD.dblQtyReceived - ri.dblOpenReceive) <> 0 
 
 IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
 BEGIN
@@ -1221,7 +1242,11 @@ SELECT B.intBillId,
 		L.intSubLocationId,
 		L.intStorageLocationId,
 		L.strLotNumber,
-		BD.dblNetWeight,
+		--dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived),
+		CASE 
+			WHEN @ysnPost = 1 THEN dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived)
+			WHEN @ysnPost = 0 THEN dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) 
+		END,
 		BD.dblCost,
 		BD.intUnitOfMeasureId,
 		B.intBillId,
@@ -1233,7 +1258,28 @@ FROM tblAPBill B
 INNER JOIN #tmpPostBillData IDS ON IDS.intBillId = B.intBillId
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 INNER JOIN tblICLot L ON L.intLotId = BD.intLotId
-WHERE B.ysnFinalVoucher = 1 AND BD.ysnNetWeightChanged = 1
+INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+WHERE 
+	B.ysnFinalVoucher = 1 
+	AND BD.ysnNetWeightChanged = 1
+	-- compare the weight change between IR and final voucher
+	AND (
+		ROUND(
+			dbo.fnMultiply(
+				dbo.fnDivide(BD.dblNetWeight, BD.dblQtyReceived) -- wgt/qty in final voucher
+				,BD.dblQtyReceived
+			)
+			,2
+		) 
+		<> 
+		ROUND(
+			dbo.fnMultiply(
+				dbo.fnDivide(ri.dblNet, ri.dblOpenReceive) -- wgt/qty from receipt
+				,BD.dblQtyReceived
+			)
+			,2
+		)
+	)
 
 IF EXISTS(SELECT 1 FROM @qtyAdjustmentTable)
 BEGIN
@@ -1965,3 +2011,4 @@ Post_Exit:
 	--CLEAN UP TRACKER FOR POSTING
 	DELETE A
 	FROM tblAPBillForPosting A
+

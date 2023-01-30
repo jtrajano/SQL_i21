@@ -168,6 +168,9 @@ BEGIN
 				, [strReferenceNo]
 				, [intBankValuationRuleId]
 				, [strComments]
+				/*Quality and Optionality Premium*/
+				, [dblQualityPremium] 
+ 				, [dblOptionalityPremium] 
 			)
 			SELECT 
 				[intEntityVendorId]			
@@ -238,6 +241,10 @@ BEGIN
 				, [strReferenceNo]
 				, [intBankValuationRuleId]
 				, [strComments]
+				/*Quality and Optionality Premium*/
+				, [dblQualityPremium] 
+ 				, [dblOptionalityPremium] 
+
 			FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1, DEFAULT)
 
 		END 

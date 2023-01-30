@@ -240,11 +240,11 @@ BEGIN TRY
 	FROM
 		(
 		SELECT		
-			intCreatedById = a.intCreatedById
+			intSalespersonId = a.intSalespersonId
 		FROM
 			tblCTContractHeader a WHERE a.intContractHeaderId = @intContractHeaderId
 		) t
-	LEFT join tblEMEntitySignature ems on ems.intEntityId = t.intCreatedById
+	LEFT join tblEMEntitySignature ems on ems.intEntityId = t.intSalespersonId
 	LEFT join tblSMSignature sms  on sms.intEntityId = ems.intEntityId and sms.intSignatureId = ems.intElectronicSignatureId 
 
 	if exists (select top 1 1 from tblCTCompanyPreference where isnull(ysnListAllCustomerVendorLocations,0) = 1) and isnull(@intContractDetailId,0) > 0
@@ -325,7 +325,8 @@ BEGIN TRY
 		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END
 		   --OLD
 		   --,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
-		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @CreatorSign ELSE NULL END 
+		   ,strLogoType							= CASE WHEN @CreatorSign IS NOT NULL  THEN 'System' ELSE 'SalesAttachment' END
+		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN ISNULL(@CreatorSign, (SELECT TOP 1 Sig.blbFile FROM tblSMUpload Sig  WITH (NOLOCK) WHERE Sig.intAttachmentId=CH.intAttachmentSignatureId)) ELSE NULL  END 
 		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
 		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END 
 	FROM	vyuCTContractHeaderView CH

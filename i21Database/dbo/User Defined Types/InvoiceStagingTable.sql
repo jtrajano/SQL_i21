@@ -105,6 +105,8 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strNutrientAnalysis]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strBillingMethod]						NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 	,[strApplicatorLicense]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,intTaxLocationId						INT												NULL
+	,strTaxPoint							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
@@ -221,4 +223,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[dtmCalculated]						DATETIME										NULL
 	,[ysnImportedFromOrigin]				BIT												NULL
 	,[ysnImportedAsPosted] 				    BIT												NULL
+	,ysnOverrideTaxGroup					BIT												NULL
 )

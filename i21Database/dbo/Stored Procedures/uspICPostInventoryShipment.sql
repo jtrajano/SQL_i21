@@ -455,6 +455,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblForexCost 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -513,6 +514,7 @@ BEGIN
 												END
 
 				,dblCost					= ISNULL(originalShipment.dblCost, 0)
+				,dblForexCost				= ISNULL(originalShipment.dblForexCost, 0)
 
 				,dblSalesPrice              = 
 												CASE	
@@ -723,6 +725,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -753,6 +756,7 @@ BEGIN
 					,-[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -791,6 +795,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -821,6 +826,7 @@ BEGIN
 					,-t.[dblQty] 
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
+					,t.[dblForexCost]
 					,t.[dblValue] 
 					,t.[dblSalesPrice] 
 					,t.[intCurrencyId] 
@@ -891,6 +897,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -915,6 +922,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblForexCost 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -962,6 +970,7 @@ BEGIN
 												END
 
 				,dblCost					= 0.00 
+				,dblForexRate				= 0.00
 				,dblSalesPrice              = 
 											dbo.fnCalculateCostBetweenUOM (
 												ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 

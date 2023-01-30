@@ -37,7 +37,7 @@ FROM (
 		 , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(CAST(CC.dtmStartDate AS DATE), CC.intTermId)
 		 , strContractStatus		= CC.strContractStatus
 		 , intEntityCustomerId		= CC.intEntityCustomerId		 
-		 , intCurrencyId			= CC.intCurrencyId
+		 , intCurrencyId			= SMC.intCurrencyId
 		 , strCurrency				= CC.strSubCurrency
 		 , intCompanyLocationId		= CC.intCompanyLocationId		 
 		 , intItemId				= CC.intItemId
@@ -55,6 +55,7 @@ FROM (
 		 , dblSubCurrencyRate		= CC.dblSubCurrencyRate
 		 , strSubCurrency			= CC.strSubCurrency
 		 , intPriceItemUOMId		= CC.intPriceItemUOMId
+		 , strPriceUnitMeasure		= CC.strPriceUnitMeasure
 		 , dblBalance				= CC.dblBalance
 		 , dblScheduleQty			= ISNULL(CC.dblScheduleQty, 0.000000)
 		 , dblAvailableQty			= CC.dblAvailableQty
@@ -76,14 +77,14 @@ FROM (
 		 , intEntitySalespersonId	= NULL
 		 , intFreightTermId			= CC.intFreightTermId
 	FROM vyuCTCustomerContract CC
-	WHERE CC.intCurrencyId = (
-		SELECT TOP 1 intCurrencyID = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
+	OUTER APPLY (
+		SELECT TOP 1 intCurrencyId = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
 		FROM tblCTContractDetail CTD 
 		INNER JOIN tblSMCurrency SMC ON CTD.intCurrencyId IN (SMC.intCurrencyID, SMC.intMainCurrencyId)
 		WHERE CC.intContractHeaderId = CTD.intContractHeaderId
 		ORDER BY intContractSeq ASC
-	) 
-	AND CC.strContractStatus NOT IN ('Complete','Cancelled')
+	) SMC
+	WHERE CC.strContractStatus NOT IN ('Complete','Cancelled')
 
 	UNION ALL
 
@@ -119,6 +120,7 @@ FROM (
 		 , dblSubCurrencyRate		= NULL
 		 , strSubCurrency			= NULL
 		 , intPriceItemUOMId		= ICD.intItemUOMId
+		 , strPriceUnitMeasure		= UOM.strUnitMeasure
 		 , dblBalance				= ICD.dblBalance
 		 , dblScheduleQty			= ISNULL(ICD.dblScheduled, 0.000000)
 		 , dblAvailableQty			= ICD.dblAvailable
@@ -180,6 +182,7 @@ FROM (
 		 , dblSubCurrencyRate		= NULL
 		 , strSubCurrency			= NULL
 		 , intPriceItemUOMId		= NULL
+		 , strPriceUnitMeasure		= NULL
 		 , dblBalance				= CAST(1 AS NUMERIC(18, 6))
 		 , dblScheduleQty			= CAST(1 AS NUMERIC(18, 6))
 		 , dblAvailableQty			= CAST(1 AS NUMERIC(18, 6))

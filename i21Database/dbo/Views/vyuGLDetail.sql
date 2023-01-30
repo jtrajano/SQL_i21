@@ -61,7 +61,11 @@ AS
         A.intSourceEntityId,
         A.ysnPostAction,
         A.dtmDateEnteredMin,
-        FP.strPeriod
+        FP.strPeriod,
+        CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
+        RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS strCurrencyExchangeRateType,
+        ISNULL(LocationSegment.strChartDesc, '') COLLATE Latin1_General_CI_AS strLocationSegmentDescription,
+        ISNULL(LOBSegment.strChartDesc, '')  COLLATE Latin1_General_CI_AS strLOBSegmentDescription
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -70,6 +74,8 @@ AS
      LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
      LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
      LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
+     LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
+     LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
@@ -79,4 +85,18 @@ AS
 	 OUTER APPLY (
 		SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
 	 )SE
+     OUTER APPLY (
+        SELECT TOP 1 AccSeg.strChartDesc FROM tblGLAccountSegment AccSeg 
+        JOIN tblGLAccountSegmentMapping AccSegMap ON AccSegMap.intAccountSegmentId = AccSeg.intAccountSegmentId
+        JOIN tblGLAccountStructure AccStruct ON AccStruct.intAccountStructureId = AccSeg.intAccountStructureId
+        WHERE AccSegMap.intAccountId = A.intAccountId
+            AND AccStruct.intStructureType = 3
+     ) LocationSegment
+     OUTER APPLY (
+        SELECT TOP 1 AccSeg.strChartDesc FROM tblGLAccountSegment AccSeg 
+        JOIN tblGLAccountSegmentMapping AccSegMap ON AccSegMap.intAccountSegmentId = AccSeg.intAccountSegmentId
+        JOIN tblGLAccountStructure AccStruct ON AccStruct.intAccountStructureId = AccSeg.intAccountStructureId
+        WHERE AccSegMap.intAccountId = A.intAccountId
+            AND AccStruct.intStructureType = 5
+     ) LOBSegment
 GO

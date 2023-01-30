@@ -107,7 +107,7 @@ BEGIN
 		[dtmLastModified] = GETDATE(),
 		[intConcurrencyId] = 1,
 		[intAPPaymentId] = A.intPaymentId,
-		[intEFTInfoId] = C.intEntityEFTInfoId
+		[intEFTInfoId] = ISNULL(C.intEntityEFTInfoId, A.intPayToBankAccountId)
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
 			ON A.[intEntityVendorId] = B.[intEntityId]

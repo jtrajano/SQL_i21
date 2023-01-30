@@ -330,6 +330,10 @@ BEGIN TRY
 
 	BEGIN TRAN
 
+	--unlink existing related sample if related sample have value
+	IF @intRelatedSampleId IS NOT NULL
+		UPDATE tblQMSample SET intRelatedSampleId = NULL WHERE @intRelatedSampleId = intRelatedSampleId
+
 	INSERT INTO dbo.tblQMSample (
 		intConcurrencyId
 		,intSampleTypeId

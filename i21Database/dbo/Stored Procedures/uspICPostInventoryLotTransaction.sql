@@ -8,6 +8,7 @@
 	,@dtmDate DATETIME
 	,@dblQty NUMERIC(38,20)
 	,@dblCost NUMERIC(38,20)
+	,@dblForexCost NUMERIC(38,20)
 	,@intTransactionId INT
 	,@strTransactionId NVARCHAR(40)
 	,@strBatchId NVARCHAR(40)
@@ -42,6 +43,7 @@ INSERT INTO dbo.tblICInventoryLotTransaction (
 		,[dblQty]
 		,[intItemUOMId]
 		,[dblCost]
+		,[dblForexCost]
 		,[intTransactionId]
 		,[strTransactionId]
 		,[intTransactionTypeId]
@@ -68,6 +70,7 @@ SELECT	[intItemId]					= @intItemId
 		,[dblQty]					= ISNULL(@dblQty, 0)
 		,[intItemUOMId]				= @intItemUOMId
 		,[dblCost]					= ISNULL(@dblCost, 0)
+		,[dblForexCost]				= ISNULL(@dblForexCost, 0)
 		,[intTransactionId]			= @intTransactionId
 		,[strTransactionId]			= @strTransactionId
 		,[intTransactionTypeId]		= @intTransactionTypeId

@@ -16,12 +16,16 @@ CREATE TABLE [dbo].[tblGRAppliedChargeAndPremium] (
 	[dblCost] NUMERIC(38, 20) NULL,
     [intOtherChargeItemId] INT NULL,
     [intInventoryItemId] INT NULL,
+    [intCtOtherChargeItemId] INT NULL,
     [dblInventoryItemNetUnits] NUMERIC(38, 20) NULL,
     [dblInventoryItemGrossUnits] NUMERIC(38, 20) NULL,
+    --[dblCtOtherChargeRate] NUMERIC(18,6) NULL,
+    [dblGradeReading] NUMERIC(18,6) NULL,
     CONSTRAINT [PK_tblGRAppliedChargeAndPremium_intAppliedChargeAndPremiumId] PRIMARY KEY ([intAppliedChargeAndPremiumId]),
     CONSTRAINT [FK_tblGRAppliedChargeAndPremium_tblGRCalculationType_intCalculationTypeId] FOREIGN KEY ([intCalculationTypeId]) REFERENCES [tblGRCalculationType]([intCalculationTypeId]),
     CONSTRAINT [FK_tblGRAppliedChargeAndPremium_tblICItem_intOtherChargeItemId] FOREIGN KEY ([intOtherChargeItemId]) REFERENCES [tblICItem]([intItemId]),
-    CONSTRAINT [FK_tblGRAppliedChargeAndPremium_tblICItem_intInventoryItemId] FOREIGN KEY ([intInventoryItemId]) REFERENCES [tblICItem]([intItemId])
+    CONSTRAINT [FK_tblGRAppliedChargeAndPremium_tblICItem_intInventoryItemId] FOREIGN KEY ([intInventoryItemId]) REFERENCES [tblICItem]([intItemId]),
+    CONSTRAINT [FK_tblGRAppliedChargeAndPremium_tblICItem_intCtOtherChargeItemId] FOREIGN KEY ([intCtOtherChargeItemId]) REFERENCES [tblICItem]([intItemId])
 )
 GO
 

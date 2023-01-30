@@ -644,9 +644,11 @@ WITH ForGLEntries_CTE (
 	,intTransactionId
 	,strTransactionId
 	,dblValue
+	,dblForexValue 
 	,intTransactionTypeId
 	,intCurrencyId
-	,dblExchangeRate
+	,dblExchangeRate	
+	,intForexRateTypeId
 	,intInventoryTransactionId
 	,strInventoryTransactionTypeName
 	,strTransactionForm
@@ -673,9 +675,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -713,9 +717,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -739,6 +745,7 @@ AS
 			CROSS APPLY (
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2))
 					,cbLog.intInventoryCostAdjustmentTypeId 
 					,cbLog.intOtherChargeItemId
 				FROM
@@ -765,9 +772,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -805,9 +814,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -831,6 +842,7 @@ AS
 			CROSS APPLY(
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2)) 
 					,cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
 				FROM 
@@ -857,9 +869,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -897,9 +911,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -923,6 +939,7 @@ AS
 			CROSS APPLY(
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2)) 
 					,cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
 				FROM 
@@ -949,9 +966,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -989,9 +1008,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,dblForexValue = ROUND(ISNULL(cbLog.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1015,6 +1036,7 @@ AS
 			CROSS APPLY (
 				SELECT 
 					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,dblForexValue = SUM(ROUND(ISNULL(cbLog.dblForexValue, 0), 2)) 
 					,cbLog.intInventoryCostAdjustmentTypeId
 					,cbLog.intOtherChargeItemId
 				FROM
@@ -1041,9 +1063,11 @@ AS
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)
+			,dblForexValue = ROUND(ISNULL(t.dblForexValue, 0), 2)
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
 			,t.dblExchangeRate
+			,t.intForexRateTypeId
 			,t.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
@@ -1081,6 +1105,7 @@ INSERT INTO @GLEntries (
 	,strReference
 	,intCurrencyId
 	,dblExchangeRate
+	,intCurrencyExchangeRateTypeId
 	,dtmDateEntered
 	,dtmTransactionDate
 	,strJournalLineDescription
@@ -1129,6 +1154,7 @@ SELECT
 		,strReference				= '1' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1142,9 +1168,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1159,6 +1185,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
 
 -- Cost Adjustment from Item cost change. 
@@ -1181,6 +1209,7 @@ SELECT
 		,strReference				= '2' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1194,9 +1223,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1211,6 +1240,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
 		AND ForGLEntries_CTE.intOtherChargeItemId IS NULL 
 
@@ -1234,6 +1265,7 @@ SELECT
 		,strReference				= '3' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1247,9 +1279,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1266,10 +1298,11 @@ FROM	ForGLEntries_CTE
 			ON il.intItemLocationId =  ForGLEntries_CTE.intItemLocationId
 		INNER JOIN tblICItemLocation ocl
 			ON ocl.intItemId = ForGLEntries_CTE.intOtherChargeItemId
-			AND ocl.intLocationId = il.intLocationId			
-		
+			AND ocl.intLocationId = il.intLocationId					
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value
 		AND ForGLEntries_CTE.intOtherChargeItemId IS NOT NULL 
 		AND GLAccounts.intItemLocationId = ocl.intItemLocationId
@@ -1298,6 +1331,7 @@ SELECT
 		,strReference				= '4' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1311,9 +1345,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1328,6 +1362,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_WIP
 
 UNION ALL 
@@ -1349,6 +1385,7 @@ SELECT
 		,strReference				= '5' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1362,9 +1399,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate
@@ -1379,6 +1416,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueWIP
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_WIP
 
 /*-----------------------------------------------------------------------------------
@@ -1405,6 +1444,7 @@ SELECT
 		,strReference				= '6' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1418,9 +1458,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1435,6 +1475,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory --@COST_ADJ_TYPE_Adjust_InTransit 
 UNION ALL
 SELECT	
@@ -1455,6 +1497,7 @@ SELECT
 		,strReference				= '7' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1468,9 +1511,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1485,6 +1528,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory --@COST_ADJ_TYPE_Adjust_InTransit
 
 /*-----------------------------------------------------------------------------------
@@ -1511,6 +1556,7 @@ SELECT
 		,strReference				= '9' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1524,9 +1570,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1541,6 +1587,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add --@COST_ADJ_TYPE_Adjust_InTransit_Inventory
 UNION ALL 
 SELECT	
@@ -1561,6 +1609,7 @@ SELECT
 		,strReference				= '8' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1574,9 +1623,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1591,6 +1640,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce --@COST_ADJ_TYPE_Adjust_InTransit_Inventory
 
 /*-----------------------------------------------------------------------------------
@@ -1617,6 +1668,7 @@ SELECT
 		,strReference				= '10' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1630,9 +1682,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1647,6 +1699,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Sold
 UNION ALL 
 SELECT	
@@ -1667,6 +1721,7 @@ SELECT
 		,strReference				= '11' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1680,9 +1735,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1697,6 +1752,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Sold
 
 
@@ -1729,6 +1786,7 @@ SELECT
 		,strReference				= '12' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1742,9 +1800,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1759,6 +1817,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InventoryAdjustment
 
 /*-----------------------------------------------------------------------------------
@@ -1785,6 +1845,7 @@ SELECT
 		,strReference				= '13' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1798,9 +1859,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1815,6 +1876,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Sold
 
 UNION ALL 
@@ -1836,6 +1899,7 @@ SELECT
 		,strReference				= '14' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1849,9 +1913,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1866,6 +1930,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Sold
 
 /*-------------------------------------------------------------------------------------------
@@ -1892,6 +1958,7 @@ SELECT
 		,strReference				= '15' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1905,9 +1972,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= DebitForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= CreditForeign.Value
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1922,6 +1989,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 		AND ysnFixInventoryRoundingDiscrepancy = 0
 
@@ -1944,6 +2013,7 @@ SELECT
 		,strReference				= '16' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intForexRateTypeId
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -1957,9 +2027,9 @@ SELECT
 		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= NULL 
+		,dblDebitForeign			= CreditForeign.Value  
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1974,6 +2044,8 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 		AND ysnFixInventoryRoundingDiscrepancy = 0
 ;
@@ -2581,6 +2653,7 @@ SELECT
 		,dblForeignRate 
 		,intSourceEntityId
 		,intCommodityId
+		,intCurrencyExchangeRateTypeId
 FROM	@GLEntries
 
 --IF @ysnPost = 0 

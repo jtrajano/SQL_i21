@@ -16,6 +16,7 @@ BEGIN TRY
 		,@strReferenceNo NVARCHAR(50)
 		,@intItemUOMId INT
 		,@intManufacturingCellId INT
+		,@dblBatchSize NUMERIC(18, 6)
 		,@intLocationId INT
 		,@dtmPlannedDate DATETIME
 		,@intPlannedShiftId INT
@@ -61,6 +62,7 @@ BEGIN TRY
 		,@dtmOrderDate = dtmOrderDate
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intManufacturingCellId = intManufacturingCellId
+		,@dblBatchSize = dblBatchSize
 		,@dtmPlannedDate = dtmPlannedDate
 		,@intPlannedShiftId = intPlannedShiftId
 		,@intItemId = intItemId
@@ -96,6 +98,7 @@ BEGIN TRY
 			,dtmExpectedDate DATETIME
 			,intManufacturingProcessId INT
 			,intManufacturingCellId INT
+			,dblBatchSize NUMERIC(18, 6)
 			,dtmPlannedDate DATETIME
 			,intPlannedShiftId INT
 			,intItemId INT
@@ -214,6 +217,7 @@ BEGIN TRY
 		,dblQuantity = @dblQuantity
 		,intItemUOMId = @intItemUOMId
 		,intManufacturingCellId = @intManufacturingCellId
+		,dblBatchSize = @dblBatchSize
 		,intStorageLocationId = @intStorageLocationId
 		,intSubLocationId = @intSubLocationId
 		,intLocationId = @intLocationId

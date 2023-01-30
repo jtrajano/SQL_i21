@@ -862,7 +862,11 @@ BEGIN
 				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE
-		GLDetail.strCode IN ('IC', 'ICA', 'IAN', 'IAV', 'ICA')
+		GLDetail.strCode IN ('IC', 'ICA', 'IAN', 'IAV', 'ICA', 'ITA')
+		AND (
+			GLDetail.strJournalLineDescription = '' 
+			OR GLDetail.strJournalLineDescription IS NULL
+		)
 
 END 
 
@@ -950,6 +954,7 @@ BEGIN
 			LEFT JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId
 	WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
+						WHEN ty.strName = 'In-Transit Adjustment' THEN 1 
 						WHEN ISNULL(dblQty, 0) <> 0 THEN 1
 						ELSE 0
 				END 	
@@ -1002,6 +1007,7 @@ BEGIN
 		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblForexCost] NUMERIC(38, 20) NULL, 
 		[dblValue] NUMERIC(38, 20) NULL, 
 		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intCurrencyId] INT NULL,
@@ -1035,7 +1041,8 @@ BEGIN
 		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-		[intTicketId] INT NULL		
+		[intTicketId] INT NULL,
+		[dblForexValue] NUMERIC(38, 20) NULL
 	)
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
@@ -1078,6 +1085,7 @@ BEGIN
 						WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.		
 						/*
 							8	Produce
+							9	Consume
 							12	Inventory Transfer	Inventory Transfer
 							13	Inventory Transfer with Shipment	Inventory Transfer
 							14	Inventory Adjustment - UOM Change	Inventory Adjustment
@@ -1128,6 +1136,7 @@ BEGIN
 				,dblQty
 				,dblUOMQty
 				,dblCost
+				,dblForexCost
 				,dblValue
 				,dblSalesPrice
 				,t.intCurrencyId
@@ -1162,6 +1171,7 @@ BEGIN
 				,strSourceNumber
 				,strBOLNumber
 				,intTicketId
+				,t.dblForexValue
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 				LEFT JOIN tblICInventoryTransactionType  ty
@@ -1183,6 +1193,7 @@ BEGIN
 				WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
 				/*
 					8	Produce
+					9	Consume
 					12	Inventory Transfer	Inventory Transfer
 					13	Inventory Transfer with Shipment	Inventory Transfer
 					14	Inventory Adjustment - UOM Change	Inventory Adjustment
@@ -1194,6 +1205,7 @@ BEGIN
 				*/
 				WHEN t.intTransactionTypeId IN (
 					8
+					, 9 
 					, 12
 					, 13
 					, 14
@@ -1741,6 +1753,7 @@ BEGIN
 			,@dblCategoryRetailValue NUMERIC(38, 20)
 			,@strReceiptType AS NVARCHAR(50)
 			,@intReceiptSourceType AS INT
+			,@ValueToPost AS ItemInTransitValueOnlyTableType 
 
 	DECLARE @AVERAGECOST AS INT = 1
 			,@FIFO AS INT = 2
@@ -1852,6 +1865,157 @@ BEGIN
 			DELETE FROM @ItemsToPost
 			DELETE FROM @ItemsForInTransitCosting
 			DELETE FROM @MissingLotsForPost
+			DELETE FROM @ValueToPost
+
+			-- Repost 'In-Transit Adjustment'. Call this always because a transaction like Voucher cna have both "Cost Adjustment" and "In-Transit Adjustment" in the same batch id. 
+			BEGIN 
+					INSERT INTO @ValueToPost (
+						[intItemId] 
+						,[intItemLocationId] 
+						,[dtmDate] 
+						,[dblValue] 
+						,[intTransactionId] 
+						,[intTransactionDetailId] 
+						,[strTransactionId] 
+						,[intTransactionTypeId] 
+						,[intLotId] 
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId] 
+						,[intFobPointId] 
+						,[intInTransitSourceLocationId] 
+						,[intCurrencyId] 
+						,[intForexRateTypeId] 
+						,[dblForexRate] 
+						,[intSourceEntityId] 
+						,[strSourceType] 
+						,[strSourceNumber] 
+						,[strBOLNumber] 
+						,[intTicketId] 					
+					)
+					SELECT 	
+						[intItemId] = t.intItemId
+						,[intItemLocationId] = t.intItemLocationId
+						,[dtmDate] = t.dtmDate
+						,[dblValue] = t.dblForexValue 
+						,[intTransactionId] = t.intTransactionId
+						,[intTransactionDetailId] = t.intTransactionDetailId
+						,[strTransactionId] = t.strTransactionId
+						,[intTransactionTypeId] = t.intTransactionTypeId
+						,[intLotId] = t.intLotId
+						,[intSourceTransactionId] = NULL 
+						,[strSourceTransactionId] = t.strActualCostId 
+						,[intSourceTransactionDetailId] = NULL 
+						,[intFobPointId] = t.intFobPointId
+						,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+						,[intCurrencyId] = t.intCurrencyId
+						,[intForexRateTypeId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
+						,[intSourceEntityId] = t.intSourceEntityId
+						,[strSourceType] = t.strSourceType
+						,[strSourceNumber] = t.strSourceNumber
+						,[strBOLNumber] = t.strBOLNumber
+						,[intTicketId] = t.intTicketId
+					FROM	
+						#tmpICInventoryTransaction t INNER JOIN tblICItem i 
+							ON i.intItemId = t.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+						INNER JOIN tblICInventoryTransactionType typ
+							ON typ.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	
+						t.strTransactionId = @strTransactionId
+						AND t.strBatchId = @strBatchId
+						AND typ.strName = 'In-Transit Adjustment'
+
+					IF EXISTS (SELECT TOP 1 1 FROM @ValueToPost)					
+					BEGIN 
+						EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
+							@ItemsForInTransitCosting
+							,@strBatchId
+							,NULL -- @strAccountToCounterInventory
+							,@intEntityUserSecurityId
+							,@strGLDescription
+							,@ValueToPost
+							,@strTransactionForm
+
+						IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+						-- If the transaction is posted only for "In-Transit Adjustment", then generate its GL entries now. 
+						IF NOT EXISTS (
+						SELECT TOP 1 1 
+						FROM
+							#tmpICInventoryTransaction t INNER JOIN tblICInventoryTransactionType typ
+								ON typ.intTransactionTypeId = t.intTransactionTypeId
+						WHERE 
+							t.strTransactionId = @strTransactionId
+							AND t.strBatchId = @strBatchId
+							AND typ.strName <> 'In-Transit Adjustment'
+						)
+						BEGIN 
+							SET @intReturnValue = NULL 
+							INSERT INTO @GLEntries (
+									[dtmDate] 
+									,[strBatchId]
+									,[intAccountId]
+									,[dblDebit]
+									,[dblCredit]
+									,[dblDebitUnit]
+									,[dblCreditUnit]
+									,[strDescription]
+									,[strCode]
+									,[strReference]
+									,[intCurrencyId]
+									,[dblExchangeRate]
+									,[dtmDateEntered]
+									,[dtmTransactionDate]
+									,[strJournalLineDescription]
+									,[intJournalLineNo]
+									,[ysnIsUnposted]
+									,[intUserId]
+									,[intEntityId]
+									,[strTransactionId]					
+									,[intTransactionId]
+									,[strTransactionType]
+									,[strTransactionForm] 
+									,[strModuleName]
+									,[intConcurrencyId]
+									,[dblDebitForeign]
+									,[dblDebitReport]
+									,[dblCreditForeign]
+									,[dblCreditReport]
+									,[dblReportingRate]
+									,[dblForeignRate]
+									,[intSourceEntityId]
+									,[intCommodityId]
+									,[strRateType]
+							)			
+							EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+								@strBatchId = @strBatchId
+								,@strTransactionId = @strTransactionId
+								,@intEntityUserSecurityId = @intEntityUserSecurityId
+								,@strGLDescription = @strGLDescription
+								,@AccountCategory_Cost_Adjustment = DEFAULT 
+								,@intRebuildItemId = @intItemId
+								,@strRebuildTransactionId = @strTransactionId
+								,@intRebuildCategoryId = @intCategoryId
+								,@dtmRebuildDate = DEFAULT 
+
+							IF @intReturnValue <> 0 
+							BEGIN 
+								--PRINT 'Error found in uspICCreateGLEntries'
+								GOTO _EXIT_WITH_ERROR
+							END 
+						END
+					END 
+
+					-- After processing it, remove the "In-Transit Adjustment" from #tmpICInventoryTransaction. 
+					DELETE	FROM #tmpICInventoryTransaction
+					WHERE	strBatchId = @strBatchId
+							AND strTransactionId = @strTransactionId 
+							AND intTransactionTypeId IN (63) 
+			END 
 
 			-- Repost the Bill cost adjustments
 			IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND ISNULL(@strTransactionForm, 'Bill') IN ('Bill'))
@@ -2209,7 +2373,8 @@ BEGIN
 						,dtmDate  
 						,dblQty  
 						,dblUOMQty  
-						,dblCost  
+						,dblCost
+						,dblForexCost
 						,dblSalesPrice  
 						,intCurrencyId  
 						,dblExchangeRate  
@@ -2242,6 +2407,7 @@ BEGIN
 									,ICTrans.intItemUOMId
 									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
 								)
+						,ICTrans.dblForexCost
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -2314,6 +2480,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -2332,7 +2499,9 @@ BEGIN
 						,[strSourceType]
 						,[strSourceNumber]
 						,[strBOLNumber]
-						,[intTicketId]						
+						,[intTicketId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
 					)
 					SELECT 	
 							[intItemId] = t.intItemId
@@ -2342,6 +2511,7 @@ BEGIN
 							,[dblQty] = -t.dblQty
 							,[dblUOMQty] = t.dblUOMQty
 							,[dblCost] = t.dblCost
+							,[dblForexCost] = t.dblForexCost
 							,[dblValue] = t.dblValue
 							,[dblSalesPrice] = t.dblSalesPrice
 							,[intCurrencyId] = t.intCurrencyId
@@ -2361,6 +2531,8 @@ BEGIN
 							,[strSourceNumber] = t.strSourceNumber
 							,[strBOLNumber] = t.strBOLNumber
 							,[intTicketId] = t.intTicketId
+							,[intForexRateTypeId] = t.intForexRateTypeId
+							,[dblForexRate] = t.dblForexRate
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i 
@@ -2401,6 +2573,7 @@ BEGIN
 							,dblQty  
 							,dblUOMQty  
 							,dblCost  
+							,dblForexCost
 							,dblSalesPrice  
 							,intCurrencyId  
 							,dblExchangeRate  
@@ -2428,6 +2601,7 @@ BEGIN
 							,-TransferSource.dblQty
 							,ISNULL(ItemUOM.dblUnitQty, TransferSource.dblUOMQty)
 							,TransferSource.dblCost 
+							,TransferSource.dblForexCost  
 							,0
 							,NULL
 							,1
@@ -2581,6 +2755,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 					)			
@@ -3623,7 +3798,8 @@ BEGIN
 						,dtmDate  
 						,dblQty  
 						,dblUOMQty  
-						,dblCost  
+						,dblCost
+						,dblForexCost
 						,dblSalesPrice  
 						,intCurrencyId  
 						,dblExchangeRate  
@@ -3656,6 +3832,7 @@ BEGIN
 									,ICTrans.intItemUOMId
 									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
 								)
+						,ICTrans.dblForexCost 
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
 						,ICTrans.dblExchangeRate  
@@ -3780,6 +3957,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -3799,6 +3977,8 @@ BEGIN
 						,[strSourceNumber] 
 						,[strBOLNumber] 
 						,[intTicketId] 
+						,[intForexRateTypeId]
+						,[dblForexRate]
 					)
 					SELECT 	
 							t.[intItemId] 
@@ -3808,6 +3988,7 @@ BEGIN
 							,-t.[dblQty] 
 							,t.[dblUOMQty] 
 							,t.[dblCost] 
+							,t.[dblForexCost]
 							,t.[dblValue] 
 							,t.[dblSalesPrice] 
 							,t.[intCurrencyId] 
@@ -3827,6 +4008,8 @@ BEGIN
 							,t.strSourceNumber
 							,t.strBOLNumber
 							,t.intTicketId
+							,t.intForexRateTypeId
+							,t.dblForexRate
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON t.intItemId = i.intItemId 
 							INNER JOIN #tmpRebuildList list
@@ -3880,6 +4063,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 					)
@@ -3914,6 +4098,7 @@ BEGIN
 						,dblQty  
 						,dblUOMQty  
 						,dblCost  
+						,dblForexCost
 						,dblSalesPrice  
 						,intCurrencyId  
 						,dblExchangeRate  
@@ -3955,6 +4140,7 @@ BEGIN
 									)
 									,RebuildInvTrans.dblCost
 								)
+						,dblForexCost = RebuildInvTrans.dblForexCost 
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
@@ -4105,6 +4291,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -4123,7 +4310,9 @@ BEGIN
 						,[strSourceType] 
 						,[strSourceNumber] 
 						,[strBOLNumber] 
-						,[intTicketId] 
+						,[intTicketId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
 				)
 				SELECT
 						[intItemId]					= t.intItemId
@@ -4133,6 +4322,7 @@ BEGIN
 						,[dblQty]					= t.dblQty
 						,[dblUOMQty]				= t.dblUOMQty
 						,[dblCost]					= t.dblCost
+						,[dblForexCost]				= t.dblForexCost
 						,[dblValue]					= 0
 						,[dblSalesPrice]			= id.dblPrice
 						,[intCurrencyId]			= i.intCurrencyId
@@ -4158,6 +4348,8 @@ BEGIN
 						,[strSourceNumber] = t.strSourceNumber
 						,[strBOLNumber] = t.strBOLNumber
 						,[intTicketId] = t.intTicketId
+						,[intForexRateTypeId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
 				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
@@ -4243,6 +4435,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 					)
@@ -4342,17 +4535,18 @@ BEGIN
 
 												-- (B) Other Charge
 												+ 
-												CASE 
-													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-														-- Convert the other charge to the currency used by the detail item. 
-														dbo.fnDivide(
-															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-															,ReceiptItem.dblForexRate
-														)
-													ELSE 
-														-- No conversion. Detail item is already in functional currency. 
-														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-												END 									
+												dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+												--CASE 
+												--	WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+												--		-- Convert the other charge to the currency used by the detail item. 
+												--		dbo.fnDivide(
+												--			dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+												--			,ReceiptItem.dblForexRate
+												--		)
+												--	ELSE 
+												--		-- No conversion. Detail item is already in functional currency. 
+												--		dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												--END 									
 												+
 												CASE 
 													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
@@ -4385,17 +4579,18 @@ BEGIN
 												)
 												-- (B) Other Charge
 												+ 
-												CASE 
-													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-														-- Convert the other charge to the currency used by the detail item. 
-														dbo.fnDivide(
-															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-															,ReceiptItem.dblForexRate
-														)
-													ELSE 
-														-- No conversion. Detail item is already in functional currency. 
-														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-												END	 									
+												dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												--CASE 
+												--	WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+												--		-- Convert the other charge to the currency used by the detail item. 
+												--		dbo.fnDivide(
+												--			dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+												--			,ReceiptItem.dblForexRate
+												--		)
+												--	ELSE 
+												--		-- No conversion. Detail item is already in functional currency. 
+												--		dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												--END	 									
 												+
 												CASE 
 													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
@@ -4489,6 +4684,7 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
+						AND RebuildInvTrans.dblQty <> 0 
 				ORDER BY
 					ReceiptItem.intInventoryReceiptItemId ASC 
 
@@ -4512,6 +4708,7 @@ BEGIN
 					SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
 							,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
 							,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+							,dblForexCost = dblCost 
 					FROM	@ItemsToPost itemCost
 					WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
 				END
@@ -4744,6 +4941,7 @@ BEGIN
 								,[dblCreditReport]	
 								,[dblReportingRate]	
 								,[dblForeignRate]
+								,[strRateType]
 								,[intSourceEntityId]
 								,[intCommodityId]
 						)
@@ -4834,7 +5032,6 @@ BEGIN
 							,[strSourceNumber] = tp.strSourceNumber
 							,[strBOLNumber] = tp.strBOLNumber
 							,[intTicketId] = tp.intTicketId
-
 					FROM	(
 								SELECT DISTINCT 
 									dtp.strTransactionId
@@ -4962,6 +5159,7 @@ BEGIN
 							,[dblQty] 
 							,[dblUOMQty] 
 							,[dblCost] 
+							,[dblForexCost]
 							,[dblSalesPrice] 
 							,[intCurrencyId] 
 							,[dblExchangeRate] 
@@ -4980,7 +5178,7 @@ BEGIN
 							,[strSourceType] 
 							,[strSourceNumber] 
 							,[strBOLNumber] 
-							,[intTicketId] 
+							,[intTicketId]
 					)
 					SELECT 
 							[intItemId]				= t.intItemId  
@@ -4990,6 +5188,7 @@ BEGIN
 							,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, -ri.dblOpenReceive)
 							,[dblUOMQty]			= t.dblUOMQty
 							,[dblCost]				= t.dblCost
+							,[dblForexCost]			= t.dblForexCost
 							,[dblSalesPrice]		= tp.dblSalesPrice
 							,[intCurrencyId]		= tp.intCurrencyId
 							,[dblExchangeRate]		= tp.dblExchangeRate
@@ -5375,6 +5574,7 @@ BEGIN
 							,[dblCreditReport]
 							,[dblReportingRate]
 							,[dblForeignRate]
+							,[strRateType]
 							,[intSourceEntityId]
 							,[intCommodityId]
 						)
@@ -5626,6 +5826,65 @@ BEGIN
 					WHERE
 						gd.strBatchId = @strMissingLotBatchId		
 				END
+
+				-------------------------------------------------------
+				-- Fix the decimal discrepancy in Inventory Receipt
+				-------------------------------------------------------
+				BEGIN 
+					SET @intReturnValue = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+							,[intSourceEntityId]
+							,[intCommodityId]
+					)			
+					EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+						@strTransactionId 
+						,@strBatchId
+						,@GLEntries	
+						,@intEntityUserSecurityId
+						,NULL -- @strGLDescription
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
+						,@ysnRebuild = 1 
+
+					IF @intReturnValue <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy'
+						GOTO _EXIT_WITH_ERROR
+					END
+				END
 			END
 
 			-- Repost 'Outbound Shipment' and 'Transfer Shipment'
@@ -5785,6 +6044,7 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
+					,[dblForexCost]
 					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
@@ -5803,7 +6063,9 @@ BEGIN
 					,[strSourceType] 
 					,[strSourceNumber] 
 					,[strBOLNumber] 
-					,[intTicketId] 
+					,[intTicketId]
+					,[intForexRateId]
+					,[dblForexRate]
 				)
 				SELECT 	
 						t.[intItemId] 
@@ -5813,6 +6075,7 @@ BEGIN
 						,-t.[dblQty] 
 						,t.[dblUOMQty] 
 						,t.[dblCost] 
+						,t.[dblForexCost] 
 						,t.[dblValue] 
 						,t.[dblSalesPrice] 
 						,t.[intCurrencyId] 
@@ -5832,6 +6095,8 @@ BEGIN
 						,[strSourceNumber] = t.strSourceNumber
 						,[strBOLNumber] = t.strBOLNumber
 						,[intTicketId] = t.intTicketId
+						,[intForexRateId] = t.intForexRateId
+						,[dblForexRate] = t.dblForexRate
 				FROM	tblICInventoryTransaction t INNER JOIN tblICItem  i
 							ON t.intItemId = i.intItemId 					
 						INNER JOIN #tmpRebuildList list
@@ -5884,6 +6149,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[strRateType]
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
@@ -5915,6 +6181,7 @@ BEGIN
 						,[dblQty] 
 						,[dblUOMQty] 
 						,[dblCost] 
+						,[dblForexCost]
 						,[dblValue] 
 						,[dblSalesPrice] 
 						,[intCurrencyId] 
@@ -5929,49 +6196,56 @@ BEGIN
 						,[intSourceTransactionDetailId]
 						,[intFobPointId]
 						,[intInTransitSourceLocationId]
-						,[intSourceEntityId] 
-						,[strSourceType] 
-						,[strSourceNumber] 
-						,[strBOLNumber] 
-						,[intTicketId] 
+						,[intForexRateTypeId]
+						,[dblForexRate]
+						,[intSourceEntityId]
+						,[strBOLNumber]
+						,[intTicketId]
+						,[strSourceType]
+						,[strSourceNumber]
 					)
 					SELECT 	
-							[intItemId] = t.intItemId
-							,[intItemLocationId] = t.intItemLocationId
-							,[intItemUOMId] = t.intItemUOMId
-							,[dtmDate] = t.dtmDate
-							,[dblQty] = t.dblQty
-							,[dblUOMQty] = t.dblUOMQty
-							,[dblCost] = t.dblCost
-							,[dblValue] = t.dblValue
-							,[dblSalesPrice] = t.dblSalesPrice
-							,[intCurrencyId] = t.intCurrencyId
-							,[dblExchangeRate] = t.dblExchangeRate
-							,[intTransactionId] = t.intTransactionId
-							,[intTransactionDetailId] = t.intTransactionDetailId
-							,[strTransactionId] = t.strTransactionId
-							,[intTransactionTypeId] = t.intTransactionTypeId
-							,[intLotId] = t.intLotId
-							,[intSourceTransactionId] = t.intTransactionId
-							,[strSourceTransactionId] = t.strTransactionId
-							,[intSourceTransactionDetailId] = t.intTransactionDetailId
-							,[intFobPointId] = t.intFobPointId
-							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-							,[intSourceEntityId] = t.intSourceEntityId
-							,[strSourceType] = t.strSourceType
-							,[strSourceNumber] = t.strSourceNumber
-							,[strBOLNumber] = t.strBOLNumber
-							,[intTicketId] = t.intTicketId
-					FROM	#tmpICInventoryTransaction t INNER JOIN tblICItem i 
-								ON i.intItemId = t.intItemId 
-							INNER JOIN #tmpRebuildList list
-								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
-								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 								
-							LEFT JOIN dbo.tblICItemUOM ItemUOM
-								ON t.intItemId = ItemUOM.intItemId
-								AND t.intItemUOMId = ItemUOM.intItemUOMId
-					WHERE	t.strTransactionId = @strTransactionId
-							AND t.strBatchId = @strBatchId
+						[intItemId] = t.intItemId
+						,[intItemLocationId] = t.intItemLocationId
+						,[intItemUOMId] = t.intItemUOMId
+						,[dtmDate] = t.dtmDate
+						,[dblQty] = t.dblQty
+						,[dblUOMQty] = t.dblUOMQty
+						,[dblCost] = t.dblCost
+						,[dblForexCost] = t.dblForexCost 
+						,[dblValue] = t.dblValue
+						,[dblSalesPrice] = t.dblSalesPrice
+						,[intCurrencyId] = t.intCurrencyId
+						,[dblExchangeRate] = t.dblExchangeRate
+						,[intTransactionId] = t.intTransactionId
+						,[intTransactionDetailId] = t.intTransactionDetailId
+						,[strTransactionId] = t.strTransactionId
+						,[intTransactionTypeId] = t.intTransactionTypeId
+						,[intLotId] = t.intLotId
+						,[intSourceTransactionId] = t.intTransactionId
+						,[strSourceTransactionId] = t.strTransactionId
+						,[intSourceTransactionDetailId] = t.intTransactionDetailId
+						,[intFobPointId] = t.intFobPointId
+						,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+						,[intForexRateTypeId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
+						,[intSourceEntityId] = t.intSourceEntityId
+						,[strBOLNumber] = t.strBOLNumber
+						,[intTicketId] = t.intTicketId
+						,[strSourceType] = t.strSourceType
+						,[strSourceNumber] = t.strSourceNumber
+					FROM	
+						#tmpICInventoryTransaction t INNER JOIN tblICItem i 
+							ON i.intItemId = t.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 								
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON t.intItemId = ItemUOM.intItemId
+							AND t.intItemUOMId = ItemUOM.intItemUOMId
+					WHERE	
+						t.strTransactionId = @strTransactionId
+						AND t.strBatchId = @strBatchId
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
@@ -5981,7 +6255,7 @@ BEGIN
 						,@strGLDescription
 
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-			END 
+			END 			
 
 			-- Settle Storage 
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionForm IN ('Settle Storage', 'Storage Settlement')) 
@@ -6841,7 +7115,7 @@ BEGIN
 					,@ItemsToPost
 					,@strTransactionId
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR				
 			END 
 
 			/*	Re-create the Post g/l entries 
@@ -6858,7 +7132,8 @@ BEGIN
 					, 'Inventory Adjustment - Opening Inventory'
 					, 'Storage Settlement'
 					, 'Consume'
-					, 'Produce'					
+					, 'Produce'
+					, 'In-Transit Adjustment'
 			*/
 			IF EXISTS (
 				SELECT	TOP 1 1 
@@ -6876,6 +7151,7 @@ BEGIN
 							, 'Storage Settlement'
 							, 'Consume'
 							, 'Produce'
+							, 'In-Transit Adjustment'
 						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
@@ -7103,6 +7379,7 @@ BEGIN
 		DELETE	FROM #tmpICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
 				AND strTransactionId = @strTransactionId 
+				AND intTransactionTypeId NOT IN (63) -- Do not remove "In-Transit Adjustment" from the list. It will have its own special delete process. 
 	END 
 END 
 

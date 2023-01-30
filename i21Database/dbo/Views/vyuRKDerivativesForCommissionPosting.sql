@@ -9,7 +9,7 @@ SELECT
 	,strInstrumentType
 	,fm.strFutMarketName
 	,c.strCurrency
-	,strLocationName
+	,ot.strLocationName
 	,strBrokerTradeNo
 	,strBroker = ot.strName
 	,strBrokerageAccount
@@ -27,6 +27,8 @@ SELECT
 	,ysnCommissionExempt
 	,ysnCommissionOverride
 	,ysnPosted
+	,intLocationSegmentId = CL.intProfitCenter
+	,ot.intCommodityId
 	--,intLFutOptTransactionId = CASE WHEN strBuySell = 'Buy' THEN intFutOptTransactionId ELSE NULL END
 	--,intSFutOptTransactionId = CASE WHEN strBuySell = 'Sell' THEN intFutOptTransactionId ELSE NULL END
 FROM vyuRKFutOptTransaction ot
@@ -34,6 +36,7 @@ FROM vyuRKFutOptTransaction ot
 	JOIN tblSMCurrency c ON c.intCurrencyID=fm.intCurrencyId
 	LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 	LEFT JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = ot.intLocationId
 WHERE intSelectedInstrumentTypeId IN(1,3) AND  ot.intInstrumentTypeId = 1
 --AND ysnPosted = 0
 AND strCommissionRateType = 'Half-turn'
@@ -67,7 +70,9 @@ SELECT
 	, dblCommission = sum(Lng.dblLongCommission + Shrt.dblShortCommission)
 	, ysnCommissionExempt = NULL
 	, ysnCommissionOverride = NULL
-	, Lng.ysnPosted
+	, ysnPosted = ISNULL(A.ysnCommissionPosted, 0)
+	, intLocationSegmentId = CL.intProfitCenter
+	, A.intCommodityId
 	--, AD.intLFutOptTransactionId
 	--, AD.intSFutOptTransactionId
 FROM vyuRKMatchedPSTransaction AD
@@ -80,6 +85,7 @@ INNER JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = A.intBrokerage
 INNER JOIN tblRKTradersbyBrokersAccountMapping T ON T.intBrokerageAccountId = BA.intBrokerageAccountId
 INNER JOIN tblEMEntity E ON E.intEntityId = T.intEntitySalespersonId
 INNER JOIN tblEMEntity B ON B.intEntityId = BA.intEntityId
+LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
 CROSS APPLY (
 	select
 	
@@ -126,4 +132,6 @@ GROUP BY
 	,strFutureMonth
 	,A.dtmMatchDate
 	,Lng.strCommissionRateType
-	,Lng.ysnPosted
+	,A.ysnCommissionPosted
+	,CL.intProfitCenter
+	,A.intCommodityId

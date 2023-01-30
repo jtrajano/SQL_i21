@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspGLBookEntries
+﻿CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
 	,@SkipGLValidation BIT = 0
@@ -101,6 +100,7 @@ BEGIN
 			,[intConcurrencyId]
 			,[ysnPostAction]
 			,dtmDateEnteredMin
+			,[intCompanyLocationId]
 	)
 	SELECT 
 			dbo.fnRemoveTimeOnDate(dtmDate)
@@ -111,13 +111,13 @@ BEGIN
 			,[dblCredit] = Credit.Value 
 			,[dblDebitUnit]
 			,[dblCreditUnit]
-			,[strDescription]
+			,GLEntries.[strDescription]
 			,[strCode]
 			,[strReference]
 			,[strDocument]
 			,[strComments]
 			,[intCurrencyId]
-			,[intCurrencyExchangeRateTypeId]
+			,ISNULL(GLEntries.[intCurrencyExchangeRateTypeId], forexRateType.intCurrencyExchangeRateTypeId) 
 			,[dblExchangeRate]
 			,@dtmDateEntered
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
@@ -131,8 +131,8 @@ BEGIN
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]
-			,DebitForeign.Value
-            ,CreditForeign.Value
+			,[dblDebitForeign] = CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN Debit.Value ELSE DebitForeign.Value END -- Exchange Rate is 1, Debit/Credit should be the same as Foreign Debit/Credit (GL-9147)
+            ,[dblCreditForeign] = CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN Credit.Value ELSE CreditForeign.Value END
             ,ISNULL([dblDebitReport],0)
             ,ISNULL([dblCreditReport],0)
             ,[dblForeignRate]
@@ -145,15 +145,17 @@ BEGIN
 			,ISNULL(dblSourceUnitCredit,0)
 			,intCommodityId
 			,intSourceEntityId
-			,[intConcurrencyId]
+			,GLEntries.[intConcurrencyId]
 			,@ysnPost
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
+			,[intCompanyLocationId]
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
 			CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F
+			LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON forexRateType.strCurrencyExchangeRateType = GLEntries.strRateType
 
 END
 ;
@@ -163,6 +165,8 @@ EXEC uspGLUpdateTrialBalance @GLEntries
 --=====================================================================================================================================
 -- 	UPSERT DATA TO THE SUMMARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
+
+
 BEGIN
 	MERGE
 	INTO	dbo.tblGLSummary
@@ -181,8 +185,10 @@ BEGIN
 				FROM	@GLEntries GLEntries
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
-						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
-						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
+						CROSS APPLY dbo.fnGetDebit(ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblDebit ELSE GLEntries.dblDebitForeign END, 0)
+												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0)) DebitForeign
+						CROSS APPLY dbo.fnGetCredit(ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblDebit ELSE GLEntries.dblDebitForeign END, 0)
+												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0))  CreditForeign
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
 				GROUP BY intAccountId, dbo.fnRemoveTimeOnDate(GLEntries.dtmDate), strCode
@@ -231,5 +237,89 @@ BEGIN
 			,1
 		);
 END;
+
+
+
+
+--=====================================================================================================================================
+-- 	UPSERT DATA TO THE FRD SUMMARY TABLE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+BEGIN
+	MERGE
+	INTO	dbo.tblGLPosted
+	WITH	(HOLDLOCK)
+	AS		gl_summary
+	USING (
+				SELECT	intAccountId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GLEntries.dtmDate)
+						,strCode
+						,dblDebit = SUM(CASE WHEN @ysnPost = 1 THEN Debit.Value ELSE Credit.Value * -1 END)
+						,dblCredit = SUM(CASE WHEN @ysnPost = 1 THEN Credit.Value ELSE Debit.Value * -1 END)
+						,dblDebitForeign = SUM(CASE WHEN @ysnPost = 1 THEN DebitForeign.Value ELSE CreditForeign.Value * -1 END)
+						,dblCreditForeign = SUM(CASE WHEN @ysnPost = 1 THEN CreditForeign.Value ELSE DebitForeign.Value * -1 END)
+						,dblDebitUnit = SUM(CASE WHEN @ysnPost = 1 THEN DebitUnit.Value ELSE CreditUnit.Value * -1 END)
+						,dblCreditUnit = SUM(CASE WHEN @ysnPost = 1 THEN CreditUnit.Value ELSE DebitUnit.Value * -1 END)	
+						,intCurrencyId					
+				FROM	@GLEntries GLEntries
+						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
+						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
+						CROSS APPLY dbo.fnGetDebit(ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblDebit ELSE GLEntries.dblDebitForeign END, 0)
+												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0)) DebitForeign
+						CROSS APPLY dbo.fnGetCredit(ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblDebit ELSE GLEntries.dblDebitForeign END, 0)
+												- ISNULL(CASE WHEN GLEntries.[dblExchangeRate] = 1 THEN GLEntries.dblCredit ELSE GLEntries.dblCreditForeign END, 0))  CreditForeign
+						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
+						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
+				GROUP BY intAccountId, dbo.fnRemoveTimeOnDate(GLEntries.dtmDate), strCode, intCurrencyId
+	) AS Source_Query  
+		ON gl_summary.intAccountId = Source_Query.intAccountId
+		AND gl_summary.strCode = Source_Query.strCode 
+		AND gl_summary.intCurrencyId = Source_Query.intCurrencyId
+		AND FLOOR(CAST(gl_summary.dtmDate AS FLOAT)) = FLOOR(CAST(Source_Query.dtmDate AS FLOAT))
+
+	
+
+	-- Update an existing gl summary record
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET		dblDebit = gl_summary.dblDebit + Source_Query.dblDebit 
+				,dblCredit = gl_summary.dblCredit + Source_Query.dblCredit 
+				,dblDebitForeign = gl_summary.dblDebitForeign + Source_Query.dblDebitForeign
+				,dblCreditForeign = gl_summary.dblCreditForeign + Source_Query.dblCreditForeign
+				,dblCreditUnit = gl_summary.dblCreditUnit + Source_Query.dblCreditUnit
+				,dblDebitUnit = gl_summary.dblDebitUnit + Source_Query.dblDebitUnit
+				,intCurrencyId = gl_summary.intCurrencyId 
+				,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+
+	-- Insert a new gl summary record 
+	WHEN NOT MATCHED  THEN 
+		INSERT (
+			intAccountId
+			,dtmDate
+			,dblDebit
+			,dblCredit
+			,dblDebitForeign
+			,dblCreditForeign
+			,dblDebitUnit
+			,dblCreditUnit
+			,strCode
+			,intCurrencyId
+			,intConcurrencyId
+		)
+		VALUES (
+			Source_Query.intAccountId
+			,Source_Query.dtmDate
+			,Source_Query.dblDebit
+			,Source_Query.dblCredit
+			,Source_Query.dblDebitForeign
+			,Source_Query.dblCreditForeign
+			,Source_Query.dblDebitUnit
+			,Source_Query.dblCreditUnit
+			,Source_Query.strCode
+			,Source_Query.intCurrencyId
+			,1
+		);
+END;
+
 
 RETURN 0

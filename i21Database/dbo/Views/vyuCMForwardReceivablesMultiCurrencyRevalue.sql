@@ -27,13 +27,35 @@ SELECT DISTINCT
     dblUnrealizedCreditGain =   0, -- Calcuate By GL
     dblDebit                =   0, -- Calcuate By GL
     dblCredit               =   0,  -- Calcuate By GL
-	intCompanyLocationId	=	NULL
+	intCompanyLocationId	=	NULL,
+	intAccountId			=	BT.intGLAccountIdTo,
+	intLOBSegmentCodeId		= 	ISNULL(DER.intSegmentCodeId, DER1.intSegmentCodeId)
 FROM tblCMBankTransfer BT
 LEFT JOIN tblSMCurrencyExchangeRateType RateType
 	ON RateType.intCurrencyExchangeRateTypeId = BT.intRateTypeIdAmountTo
 OUTER APPLY (
 	SELECT TOP 1 ysnRevalue_Forward FROM tblCMCompanyPreferenceOption
 ) RevalueOptions
+OUTER APPLY(
+    SELECT TOP 1 SM.intSegmentCodeId
+    FROM tblRKFutOptTransaction der
+    JOIN tblICCommodity C
+        ON C.intCommodityId = der.intCommodityId
+    JOIN tblSMLineOfBusiness SM ON SM.intLineOfBusinessId = C.intLineOfBusinessId
+    WHERE der.strInternalTradeNo = BT.strDerivativeId
+)DER
+OUTER APPLY(
+    SELECT TOP 1 SM.intSegmentCodeId
+    FROM tblRKFutOptTransaction der
+    JOIN tblCTContractDetail CD
+        ON CD.intContractDetailId = der.intContractDetailId
+    JOIN tblCTContractHeader CH
+        ON CH.intContractHeaderId = CD.intContractDetailId
+    JOIN tblICCommodity C
+        ON C.intCommodityId = CH.intCommodityId
+    JOIN tblSMLineOfBusiness SM ON SM.intLineOfBusinessId = C.intLineOfBusinessId
+    WHERE der.strInternalTradeNo = BT.strDerivativeId
+)DER1
 WHERE
 	BT.ysnPosted = 0
 	AND BT.ysnPostedInTransit = 1

@@ -6,6 +6,9 @@
 	[intLoadingTermId] INT NOT NULL,
 	[intDestinationTermId] INT NOT NULL,
 	[intMarketZoneId] INT NOT NULL,
+	[intCommodityId] INT NULL,
+	[intProductTypeId] INT NULL,
+	[intProductLineId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT((0)), 
     CONSTRAINT [PK_tblCTTermCost] PRIMARY KEY ([intTermCostId]),
 	CONSTRAINT [UQ_tblCTTermCost] UNIQUE ([intLoadingPortId], [intDestinationPortId], [intLoadingTermId], [intDestinationTermId], [intMarketZoneId]), 
@@ -14,4 +17,7 @@
     CONSTRAINT [FK_tblCTTermCost_DestinationPort] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]), 
 	CONSTRAINT [FK_tblCTTermCost_LoadingTerm] FOREIGN KEY ([intLoadingTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
     CONSTRAINT [FK_tblCTTermCost_DestinationTerm] FOREIGN KEY ([intDestinationTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
+	CONSTRAINT [FK_tblCTTermCost_Commodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+	CONSTRAINT [FK_tblCTTermCost_ProductType] FOREIGN KEY ([intProductTypeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
+	CONSTRAINT [FK_tblCTTermCost_ProductLine] FOREIGN KEY ([intProductLineId]) REFERENCES [tblICCommodityProductLine]([intCommodityProductLineId]), 
 )

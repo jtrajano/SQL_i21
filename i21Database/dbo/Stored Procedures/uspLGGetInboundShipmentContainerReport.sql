@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetInboundShipmentContainerReport] 
-	@xmlParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL,
+	@xmlParam2 INT = NULL
 AS
 BEGIN
 	DECLARE @ysnLoadNumber BIT
@@ -181,7 +182,7 @@ BEGIN
 		OUTER APPLY (SELECT TOP 1 intPickLotDetailId FROM tblLGPickLotDetail WHERE intContainerId = LC.intLoadContainerId) PL
 		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LDV.intPContractDetailId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(LV.intPurchaseSale = 2) THEN LDV.intSContractDetailId ELSE LDV.intPContractDetailId END
 		LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		LEFT JOIN tblCTApprovalBasis AB ON AB.intApprovalBasisId = CH.intApprovalBasisId
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
@@ -191,6 +192,9 @@ BEGIN
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = LDL.intLotId
 		LEFT JOIN tblSMCountry SMC ON ITM.intCountryId = SMC.intCountryID
 		WHERE LDV.strLoadNumber = @xmlParam
+			AND (ISNULL(@xmlParam2, 0) = 0 
+				OR (ISNULL(@xmlParam2, 0) > 0 AND @xmlParam2 = LDV.intCustomerEntityId)
+				OR (ISNULL(@xmlParam2, 0) < 0 AND LDV.intCustomerEntityId IS NULL))
 			AND (@ysnHasPickContainer = 0
 				 OR (@ysnHasPickContainer = 1 AND LC.intLoadContainerId IN 
 						(SELECT intContainerId FROM tblLGPickLotDetail PLD 
@@ -250,7 +254,7 @@ BEGIN
 		JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WC.intLoadContainerId
 		JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		JOIN vyuLGLoadDetailViewSearch LDV ON LDV.intLoadDetailId = LDCL.intLoadDetailId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LDV.intPContractDetailId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LDV.intSContractDetailId ELSE LDV.intPContractDetailId END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblCTApprovalBasis AB ON AB.intApprovalBasisId = CH.intApprovalBasisId

@@ -53,6 +53,7 @@ Type the overview for the table here.
 		[dblNetReturned] NUMERIC(38, 15) NULL DEFAULT ((0)),		
 		[intForexRateTypeId] INT NULL, 
 		[dblForexRate] NUMERIC(38, 15) NULL,
+		[dblOriginalForexRate] NUMERIC(38, 15) NULL,
 		[ysnLotWeightsRequired] BIT NULL DEFAULT((0)),
 		[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 		[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -80,6 +81,7 @@ Type the overview for the table here.
 		[strImportDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		[ysnAllowEditCost] BIT NULL DEFAULT ((0)),
+		[ysnOverrideTaxGroup] BIT NULL DEFAULT ((0)),
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]), -- ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
@@ -114,7 +116,16 @@ Type the overview for the table here.
 		ON [dbo].[tblICInventoryReceiptItem] ([intInventoryTransferId])
 
 	GO
+
+	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_Lookup1
+		ON tblICInventoryReceiptItem (intInventoryReceiptId ASC)
+		INCLUDE (intLineNo, intOrderId, intSourceId, intContainerId, intSubLocationId, intStorageLocationId, intUnitMeasureId, intWeightUOMId)
+	GO
 		
+	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_Lookup2
+		ON tblICInventoryReceiptItem (intItemId ASC)
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Inventory Receipt Id',
 		@level0type = N'SCHEMA',

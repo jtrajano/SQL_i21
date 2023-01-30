@@ -1,12 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGRejectLoadSchedule]
 	@intLoadId INT,
 	@ysnReject BIT, /* 1 = Reject, 0 = Unreject */
+	@intRejectLocationId INT,
 	@intEntityUserSecurityId INT
 AS
 BEGIN
 	DECLARE @strLoadNumber NVARCHAR(50)
 		,@InTransit_Inbound InTransitTableType
 		,@strErrMsg NVARCHAR(MAX)
+		,@ysnInvoiced BIT = 0
 
 	/* Validate Parameters */
 	IF (@ysnReject IS NULL) RETURN;
@@ -47,7 +49,7 @@ BEGIN
 
 		--S.Company Location is reset for user entry (destination location)
 		UPDATE tblLGLoadDetail
-			SET intSCompanyLocationId = NULL
+			SET intSCompanyLocationId = @intRejectLocationId
 				,intSSubLocationId = NULL 
 				,intSStorageLocationId = NULL
 				,dblDeliveredQuantity = 0
@@ -67,8 +69,15 @@ BEGIN
 	/* Begin Unreject Process */
 	ELSE IF (@ysnReject = 0)
 	BEGIN
-		--Set Shipment Status to "Rejected"
-		UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
+		/* Check if Load Shipment has associated Invoice */
+		SELECT @ysnInvoiced = 1 FROM tblARInvoiceDetail IVD 
+			INNER JOIN tblARInvoice IV ON IV.intInvoiceId = IVD.intInvoiceId 
+		WHERE IV.ysnPosted = 1
+		AND IVD.intLoadDetailId IS NOT NULL
+		AND IVD.intLoadDetailId IN (SELECT intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId)
+
+		--Set Shipment Status back to "Delivered" or "Invoiced"
+		UPDATE tblLGLoad SET intShipmentStatus = CASE WHEN (@ysnInvoiced = 1) THEN 11 ELSE 6 END WHERE intLoadId = @intLoadId
 
 		--P.Company Location moves back to S.Company Location, Delivered Quantities are restored
 		UPDATE tblLGLoadDetail 
@@ -96,5 +105,82 @@ BEGIN
 			,@fromValue = ''
 			,@toValue = ''
 	END
+
+	/* In-Transit Inbound Stock Movement */
+	INSERT INTO @InTransit_Inbound (
+		[intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[dblQty]
+		,[intTransactionId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intFOBPointId]
+	)
+	SELECT	[intItemId]				= d.intItemId
+			,[intItemLocationId]	= itemLocation.intItemLocationId
+			,[intItemUOMId]			= d.intItemUOMId
+			,[intLotId]				= l.intLotId
+			,[intSubLocationId]		= ISNULL(wh.intSubLocationId, d.intSSubLocationId)
+			,[intStorageLocationId]	= ISNULL(wh.intStorageLocationId, d.intSStorageLocationId)
+			,[dblQty]				= ISNULL(l.dblLotQuantity, d.dblQuantity) * CASE WHEN @ysnReject = 1 THEN 1 ELSE -1 END 
+			,[intTransactionId]		= h.intLoadId
+			,[strTransactionId]		= h.strLoadNumber
+			,[intTransactionTypeId] = 12 
+			,[intFOBPointId]		= 2
+	FROM dbo.tblLGLoad h
+		INNER JOIN dbo.tblLGLoadDetail d ON h.intLoadId = d.intLoadId
+		INNER JOIN dbo.tblLGLoadDetailLot l ON l.intLoadDetailId = d.intLoadDetailId
+		OUTER APPLY (
+			SELECT TOP 1 clsl.intCompanyLocationId, lw.intSubLocationId, lw.intStorageLocationId FROM tblLGLoadWarehouse lw 
+			INNER JOIN tblSMCompanyLocationSubLocation clsl ON lw.intSubLocationId = clsl.intCompanyLocationSubLocationId
+			WHERE lw.intLoadId = h.intLoadId) wh
+		INNER JOIN dbo.tblICItem Item ON Item.intItemId = d.intItemId
+		INNER JOIN dbo.tblICItemLocation itemLocation 
+			ON itemLocation.intItemId = d.intItemId
+			AND itemLocation.intLocationId = @intRejectLocationId
+	WHERE h.intLoadId = @intLoadId
+		AND Item.strType <> 'Comment'
+
+	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
+
+	/* Contract Balance Movement */
+	SELECT 
+		intContractDetailId = intSContractDetailId
+		,dblConvertedQty = CASE WHEN ISNULL(L.ysnLoadBased, 0) = 1 THEN LD.dblQuantity 
+							ELSE dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, CD.intItemUOMId, LD.dblQuantity) END 
+							* CASE WHEN @ysnReject = 1 THEN -1 ELSE 1 END
+		,intLoadDetailId
+	INTO #tmpLoadDetails
+	FROM tblLGLoadDetail LD
+	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	WHERE LD.intLoadId = @intLoadId
+
+	DECLARE @intLoadDetailId INT
+		,@intContractDetailId INT
+		,@dblConvertedQty NUMERIC(18, 6)
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpLoadDetails)
+	BEGIN
+		SELECT TOP 1 
+			@intLoadDetailId = intLoadDetailId 
+			,@intContractDetailId = intContractDetailId
+			,@dblConvertedQty = dblConvertedQty
+		FROM #tmpLoadDetails
+		
+		EXEC uspCTUpdateSequenceBalance
+			@intContractDetailId	=	@intContractDetailId,
+			@dblQuantityToUpdate	=	@dblConvertedQty,
+			@intUserId				=	@intEntityUserSecurityId,
+			@intExternalId			=	@intLoadDetailId,
+			@strScreenName			=	'Load Schedule'
+
+		DELETE FROM #tmpLoadDetails WHERE intLoadDetailId = @intLoadDetailId
+	END
+
 END
 GO

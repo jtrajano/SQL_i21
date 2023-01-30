@@ -11,6 +11,7 @@ WITH FA AS (
 		,dblSalvageValue
 		,dtmCreateAssetPostDate
 		,ysnImported
+		,intFunctionalCurrencyId
 	FROM tblFAFixedAsset
 	--GROUP BY intAssetId, strAssetId, dtmDateInService, intDepreciationMethodId, dblForexRate, dblCost, dblSalvageValue
 ),
@@ -54,10 +55,15 @@ SELECT
 	0 dblFunctionalSection179,
 	0 dblBonusDepreciation,
 	0 dblFunctionalBonusDepreciation,
+	CAST(0 AS BIT) ysnAddToBasis,
+	strCurrencyForeign = Currency.strCurrency,
+	strFunctionalCurrency = CurrencyFN.strCurrency,
 	1 intConcurrencyId
  FROM FA
  LEFT JOIN tblGLDetail GL ON GL.intTransactionId = FA.intAssetId AND GL.strReference = FA.strAssetId
  LEFT JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = FA.intDepreciationMethodId
+ LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = GL.intCurrencyId
+ LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = FA.intFunctionalCurrencyId
  WHERE GL.strTransactionType = 'Purchase' AND GL.ysnIsUnposted = 0
  GROUP BY 
 	FA.intAssetId, 
@@ -74,7 +80,9 @@ SELECT
 	FA.dblSalvageValue,
 	DM.intDepreciationMethodId,
 	DM.strDepreciationType,
-	GL.dtmTransactionDate
+	GL.dtmTransactionDate,
+	Currency.strCurrency,
+	CurrencyFN.strCurrency
 UNION ALL
 SELECT 
 	G.dtmDepreciationToDate, 
@@ -116,6 +124,9 @@ SELECT
 	CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblFunctionalSection179, 0) ELSE 0 END dblFunctionalSection179,
 	CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblBonusDepreciation, 0) ELSE 0 END dblBonusDepreciation,
 	CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblFunctionalBonusDepreciation, 0) ELSE 0 END dblFunctionalBonusDepreciation,
+	CAST(ISNULL(GAAP.ysnAddToBasis, ISNULL(Tax.ysnAddToBasis, 0)) AS BIT) ysnAddToBasis,
+	GAAP.strCurrency strCurrencyForeign,
+	ISNULL(GAAP.strFunctionalCurrency, Tax.strFunctionalCurrency) strFunctionalCurrency,
 	ISNULL(GAAP.intConcurrencyId, Tax.intConcurrencyId) intConcurrencyId
 FROM G 
 outer apply(
@@ -140,9 +151,14 @@ outer apply(
 	dblRate,
 	dblDepreciation,
 	dblFunctionalDepreciation,
+	ysnAddToBasis,
+	Currency.strCurrency,
+	CurrencyFN.strCurrency strFunctionalCurrency,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B ON A.intDepreciationMethodId = B.intDepreciationMethodId
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = A.intCurrencyId
+	LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = A.intFunctionalCurrencyId
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 1
@@ -170,9 +186,14 @@ OUTER APPLY(
 	A.dblRate,
 	dblDepreciation,
 	dblFunctionalDepreciation,
+	ysnAddToBasis,
+	Currency.strCurrency,
+	CurrencyFN.strCurrency strFunctionalCurrency,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = A.intCurrencyId
+	LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = A.intFunctionalCurrencyId
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
 	AND A.intBookId = 2

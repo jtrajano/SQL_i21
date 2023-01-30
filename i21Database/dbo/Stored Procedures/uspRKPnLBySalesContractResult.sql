@@ -422,7 +422,7 @@ BEGIN
 				, strInternalTradeNo
 				, dblAssignedLots = (ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0))
 				, dblContractPrice = t.dblPrice
-				, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(dblSAllocatedQty) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100
+				, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(dblSAllocatedQty) OVER (PARTITION BY CD.intContractDetailId, t.intFutOptTransactionId) / CD.dblQuantity * 100)) / 100
 				, t.dblPrice
 				, t.intFutureMarketId
 				, t.intFutureMonthId
@@ -453,7 +453,7 @@ BEGIN
 				, strInternalTradeNo
 				, dblAssignedLots = (ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0))
 				, dblContractPrice = t.dblPrice
-				, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100
+				, dblNoOfLots = ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId, t.intFutOptTransactionId) / CD.dblQuantity * 100)) / 100
 				, t.dblPrice
 				, t.intFutureMarketId
 				, t.intFutureMonthId
@@ -474,6 +474,7 @@ BEGIN
 			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = m.intCurrencyId
 			LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
 			WHERE intSContractDetailId = @intSContractDetailId
+			AND AD.intShipmentType = 1
 		
 			UNION ALL SELECT DISTINCT TP.strContractType
 				, strContractNumber = CH.strContractNumber + ' - ' + CONVERT(NVARCHAR(100),CD.intContractSeq)
@@ -485,7 +486,7 @@ BEGIN
 				, strInternalTradeNo
 				, dblAssignedLots = (ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0))
 				, dblContractPrice = t.dblPrice
-				, dblNoOfLots = - ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100
+				, dblNoOfLots = - ((ISNULL(cs.dblAssignedLots, 0) + ISNULL(cs.dblHedgedLots, 0)) * (SUM(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId, t.intFutOptTransactionId) / CD.dblQuantity * 100)) / 100
 				, t.dblPrice
 				, t.intFutureMarketId
 				, t.intFutureMonthId

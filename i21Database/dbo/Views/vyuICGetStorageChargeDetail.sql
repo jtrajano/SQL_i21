@@ -38,9 +38,12 @@ SELECT
 	,A.strRateType
 	,A.intConcurrencyId
 	,A.intInventoryStockMovementIdUsed
+	,A.intTotalAccumulatedDays
 	----Details from other table
 	,C.strItemNo
 	,D.strLotNumber
+	,D.strLotAlias
+	,D.strWarrantNo
 	,strStorageLocation = E.strSubLocationName
 	,strItemUOM = G.strUnitMeasure
 	,strWeightUOMId = I.strUnitMeasure

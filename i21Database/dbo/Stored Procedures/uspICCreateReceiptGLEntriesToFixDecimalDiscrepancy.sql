@@ -3,7 +3,11 @@
 	,@strBatchId AS NVARCHAR(50) = NULL 
 	,@GLEntries RecapTableType READONLY
 	,@intEntityUserSecurityId AS INT 
-	,@strGLDescription AS NVARCHAR(255) = NULL 	
+	,@strGLDescription AS NVARCHAR(255) = NULL
+	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
+	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@ysnRebuild AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -13,34 +17,38 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
+DECLARE @ysnIsUnposted AS BIT = 0; 
+DECLARE @GLEntriesForTheDiscrepancy AS RecapTableType
+
+-- Get the functional currency
+BEGIN 
+	DECLARE @intFunctionalCurrencyId AS INT
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+END 
+;
+
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)	
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList)
+BEGIN 
+	INSERT INTO #tmpRebuildList VALUES (@intRebuildItemId, @intRebuildCategoryId) 
+END 
 
 DECLARE @icGLAccounts TABLE (
 	intItemId INT
 	,intItemLocationId INT 
 	,intInventoryAccountId INT NULL 
+	,intInTransitAccountId INT NULL 
 	,intInventoryAdjustmentAccountId INT NULL 
+	,intAPClearingAccountId INT NULL
 )
-
--- Create the temp table for the specific items/categories to rebuild
-IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_result') IS NOT NULL  
-BEGIN 
-	DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_result
-END 
-
-IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_result') IS NULL  
-BEGIN 
-	CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_result (
-		intId INT IDENTITY(1, 1) 
-		,strTransactionType NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dblICAmount NUMERIC(18, 6) NULL 
-		,dblGLAmount NUMERIC(18, 6) NULL 
-		,intAccountId INT NULL 
-		,strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-		,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-	)
-END 
 
 -- Get the GL Account Id
 BEGIN 
@@ -48,13 +56,17 @@ BEGIN
 		intItemId
 		,intItemLocationId
 		,intInventoryAccountId
+		,intInTransitAccountId 
 		,intInventoryAdjustmentAccountId 
+		,intAPClearingAccountId
 	)
 	SELECT 
 		query.intItemId
 		,query.intItemLocationId
 		,intInventoryAccountId = dbo.fnGetItemGLAccount(query.intItemId, query.intItemLocationId, 'Inventory')
+		,intInTransitAccountId = dbo.fnGetItemGLAccount(query.intItemId, query.intItemLocationId, 'Inventory In-Transit')
 		,intInventoryAdjustmentAccountId = dbo.fnGetItemGLAccount(query.intItemId, query.intItemLocationId, 'Inventory Adjustment')
+		,intAPClearingAccountId = dbo.fnGetItemGLAccount(query.intItemId, query.intItemLocationId, 'AP Clearing')
 	FROM (
 		SELECT
 			DISTINCT 
@@ -72,324 +84,1106 @@ BEGIN
 	) query
 END 
 
--- Get the inventory value from the Inventory Valuation 
-BEGIN 
-	INSERT INTO #uspICReceiptGLEntriesForDecimalDiscrepancy_result (
-		strTransactionType 
-		,strTransactionId
-		,strBatchId
-		,dblICAmount
-		,intAccountId  
-	)
-	SELECT	
-		[strTransactionType] = ty.strName
-		,[strTransactionId] = t.strTransactionId
-		,[strBatchId] = t.strBatchId			
-		,[dblICAmount] = 
-			SUM (
-				ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
-			)
-		,[intAccountId] = icGLAccount.intInventoryAccountId
-	FROM	
-		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-			ON t.intTransactionTypeId = ty.intTransactionTypeId			
-		INNER JOIN tblICItem i
-			ON i.intItemId = t.intItemId 
-		INNER JOIN @icGLAccounts icGLAccount
-			ON icGLAccount.intItemId = t.intItemId
-			AND icGLAccount.intItemLocationId = t.intItemLocationId
-	WHERE	
-		t.strTransactionId = @strReceiptNumber
-		AND t.strBatchId = @strBatchId
-		AND t.ysnIsUnposted = 0 
-	GROUP BY 
-		ty.strName 
-		,t.strTransactionId
-		,t.strBatchId
-		,icGLAccount.intInventoryAccountId
-END 
-	
--- Get the inventory value from @GLEntries 
-IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
-BEGIN 		
-	MERGE INTO #uspICReceiptGLEntriesForDecimalDiscrepancy_result 
-	AS result
-	USING (
-		SELECT 
-			[strTransactionType] = gd.strTransactionType
-			,[strTransactionId] = gd.strTransactionId
-			,[strBatchId] = gd.strBatchId
-			,[intAccountId] = gd.intAccountId 
-			,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
-			,[strAccountDescription] = ga.strDescription
-		FROM	
-			@GLEntries gd INNER JOIN tblGLAccount ga
-				ON gd.intAccountId = ga.intAccountId
-			INNER JOIN tblGLAccountSegmentMapping gs
-				ON gs.intAccountId = ga.intAccountId
-			INNER JOIN tblGLAccountSegment gm
-				ON gm.intAccountSegmentId = gs.intAccountSegmentId
-			INNER JOIN tblGLAccountCategory ac 
-				ON ac.intAccountCategoryId = gm.intAccountCategoryId 
-		WHERE 			
-			ac.strAccountCategory IN ('Inventory')
-		GROUP BY 				
-			gd.strTransactionType
-			,gd.strTransactionId
-			,gd.strBatchId
-			,gd.intAccountId 
-			,ga.strDescription
-	) AS glResult 
-		ON 
-			result.strTransactionId = glResult.strTransactionId
-			AND result.strBatchId = glResult.strBatchId
-			AND result.strTransactionType = glResult.strTransactionType
-			AND result.intAccountId = glResult.intAccountId
-				
-	WHEN MATCHED THEN 
-		UPDATE 
-		SET 
-			dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
-	WHEN NOT MATCHED THEN
-		INSERT (
-			strTransactionType 
-			,strTransactionId
-			,dblGLAmount
-			,strAccountDescription
-		)	 
-		VALUES (
-			glResult.[strTransactionType]
-			,glResult.[strTransactionId]
-			,glResult.[dblGLAmount]
-			,glResult.[strAccountDescription]
-		)
-	;		
-END 
+DECLARE @threshold NUMERIC(38, 20) = 0.05
 
-
-
-DECLARE @Threshold NUMERIC(38, 20)
-DECLARE @Variance NUMERIC(38, 20)
-DECLARE @OverThresholdLimit BIT
-SET @Threshold = 0.05
-SET @OverThresholdLimit = 0
-
-SELECT TOP 1 @Variance = SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
-FROM #uspICReceiptGLEntriesForDecimalDiscrepancy_result 
-GROUP BY intAccountId
-
-IF ABS(@Variance) <= @Threshold
-	SET @OverThresholdLimit = 1
-
-IF @OverThresholdLimit = 1
+-- Fix the discrepancy for the In-Transit
 BEGIN
-	-- Generate the G/L Entries here: 
-	WITH ForGLEntries_CTE (
-		strTransactionId
-		,strBatchId
-		,intAccountId
-		,dblDiscrepancy
-	)
-	AS 
-	(
+
+	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy') IS NOT NULL  
+	BEGIN 
+		DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy
+	END 
+
+	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy') IS NULL  
+	BEGIN 
+		CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy (
+			intId INT IDENTITY(1, 1) 
+			,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,intInventoryReceiptId INT NULL
+			,intInventoryReceiptItemId INT NULL
+			,strReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,intSourceType INT NULL 
+			,intFreightTermId INT NULL 
+			,strFobPoint NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,dblDebit NUMERIC(18, 6) NULL 
+			,dblCredit NUMERIC(18, 6) NULL 
+			,dblDebitForeign NUMERIC(18, 6) NULL 
+			,dblCreditForeign NUMERIC(18, 6) NULL 
+			,dblForexRate NUMERIC(18, 6) NULL 
+			,intItemId INT 
+		)
+	END 
+	
+	-- Get the discrepancy per receipt line item
+	BEGIN 
+		INSERT INTO #uspICReceiptGLEntriesForDecimalDiscrepancy (
+			strReceiptNumber 
+			,strBatchId 
+			,intInventoryReceiptId
+			,intInventoryReceiptItemId 
+			,strReceiptType 
+			,intSourceType 
+			,intFreightTermId 
+			,strFobPoint 
+			,intItemId 
+			,dblForexRate 
+			,dblDebit 
+			,dblCredit 
+			,dblDebitForeign 
+			,dblCreditForeign 
+		)
 		SELECT 
-			strTransactionId
-			,strBatchId
-			,intAccountId
-			,dblDiscrepancy = SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
+			t.strTransactionId
+			,t.strBatchId 
+			,t.intTransactionId
+			,t.intTransactionDetailId
+			,r.strReceiptType 
+			,r.intSourceType 
+			,r.intFreightTermId 
+			,ft.strFobPoint 		
+			,t.intItemId
+			,dblForexRate = t.dblForexRate
+			,dblDebit = SUM(ISNULL(dblDebit, 0))
+			,dblCredit = SUM(ISNULL(dblCredit, 0)) 
+			,dblDebitForeign = SUM(ISNULL(dblDebitForeign, 0))
+			,dblCreditForeign = SUM(ISNULL(dblCreditForeign, 0))				
 		FROM 
-			#uspICReceiptGLEntriesForDecimalDiscrepancy_result 
-		GROUP BY 
-			strTransactionId
-			,strBatchId
-			,intAccountId
-		HAVING 
-			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)) <> 0
-	)
-	-----------------------------------------------------------------------------------
-	-- This part creates the GL entries for the decimal discrepancy. 
-	-----------------------------------------------------------------------------------
-	/*
-		Debit ........... Inventory
-		Credit .............................. COGS (Auto Variance aka Inventory Adjustment)
-	*/
+			tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN tblICItem i 
+				ON ri.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			INNER JOIN tblICInventoryTransaction t 
+				ON t.strTransactionId = r.strReceiptNumber
+				AND t.intTransactionId = r.intInventoryReceiptId
+				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+			INNER JOIN @GLEntries gd
+				ON gd.strTransactionId = t.strTransactionId
+				AND gd.strBatchId = t.strBatchId
+				AND gd.intJournalLineNo = t.intInventoryTransactionId
+				AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
+			LEFT JOIN tblSMFreightTerms ft
+				ON r.intFreightTermId = ft.intFreightTermId
+		WHERE
+			t.strTransactionId = @strReceiptNumber
+			AND t.strBatchId = @strBatchId
+			AND t.ysnIsUnposted = 0 
+		GROUP BY
+			t.strTransactionId
+			,t.strBatchId 
+			,t.intTransactionId
+			,t.intTransactionDetailId
+			,r.strReceiptType 
+			,r.intSourceType 
+			,r.intFreightTermId 
+			,ft.strFobPoint 		
+			,t.intItemId
+			,t.dblForexRate
+	END 
 
-	SELECT 
-		[dtmDate] = t.dtmDate
-		,[strBatchId] = t.strBatchId
-		,[intAccountId] = ga.intAccountId
-		,[dblDebit] = Debit.[Value]
-		,[dblCredit] = Credit.[Value]
-		,[dblDebitUnit] = 0 
-		,[dblCreditUnit] = 0 
-		,[strDescription] = 
-			ISNULL(@strGLDescription, ISNULL(ga.strDescription, '')) + ' ' 
-			+ dbo.fnFormatMessage(
-				'Resolve the decimal discrepancy for %s.'
-				,i.strItemNo
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-			)
-		,[strCode] = 'IC'
-		,[strReference] = ''
-		,[intCurrencyId] = t.intCurrencyId
-		,[dblExchangeRate] = t.dblForexRate
-		,[dtmDateEntered] = GETDATE()
-		,[dtmTransactionDate] = t.dtmDate
-		,[strJournalLineDescription] = ''
-		,[intJournalLineNo] = t.intInventoryTransactionId
-		,[ysnIsUnposted] = 0 
-		,[intUserId] = @intEntityUserSecurityId
-		,[intEntityId] = @intEntityUserSecurityId 
-		,[strTransactionId] = t.strTransactionId
-		,[intTransactionId] = t.intTransactionId
-		,[strTransactionType] = ty.strName
-		,[strTransactionForm] = ty.strTransactionForm
-		,[strModuleName] = @ModuleName
-		,[intConcurrencyId] = 1
-		,[dblDebitForeign] = NULL 
-		,[dblDebitReport] = NULL 
-		,[dblCreditForeign]	= NULL 
-		,[dblCreditReport] = NULL 
-		,[dblReportingRate] = NULL 
-		,[dblForeignRate] = t.dblForexRate
-		,[strRateType] = currencyRateType.strCurrencyExchangeRateType
-		,[intSourceEntityId] = t.intSourceEntityId
-		,[intCommodityId] = i.intCommodityId
-	FROM 
-		ForGLEntries_CTE cte CROSS APPLY (
-			SELECT TOP 1 
-				icGLAccnts.*
-			FROM 
-				@icGLAccounts icGLAccnts 
-			WHERE 
-				icGLAccnts.intInventoryAccountId = cte.intAccountId
-		) icGLAccnts
-		INNER JOIN dbo.tblGLAccount ga 
-			ON ga.intAccountId = icGLAccnts.intInventoryAccountId
-		CROSS APPLY (
-			SELECT TOP 1 
-				t.*
-			FROM 
-				tblICInventoryTransaction t 
-			WHERE
-				t.strTransactionId = cte.strTransactionId
-				AND t.strBatchId = cte.strBatchId
-				AND t.intItemId = icGLAccnts.intItemId 
-				AND t.intItemLocationId = icGLAccnts.intItemLocationId 
-				AND t.dblQty <> 0 
-				AND t.intInTransitSourceLocationId IS NULL 
-			ORDER BY
-				t.intInventoryTransactionId DESC 
-		) t 
-		INNER JOIN tblICItem i 
-			ON i.intItemId = t.intItemId
-		CROSS APPLY dbo.fnGetDebit(
-			cte.dblDiscrepancy 
-		) Debit
-		CROSS APPLY dbo.fnGetCredit(
-			cte.dblDiscrepancy 
-		) Credit
-		LEFT JOIN tblICInventoryTransactionType ty
-			ON t.intTransactionTypeId = ty.intTransactionTypeId
-		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-			ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
+	IF EXISTS (SELECT TOP 1 1 FROM #uspICReceiptGLEntriesForDecimalDiscrepancy) 
+	BEGIN 
+		-------------------------------------------------------------------------------------
+		---- 1. Add GL entry to correct discrepancy in the foreign currency during In-Transit
+		-------------------------------------------------------------------------------------
+		--/*
+		--	Debit or Credit ........... Inventory Adjustment 
+		--*/
+		INSERT INTO @GLEntriesForTheDiscrepancy (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]	
+		) 
+		SELECT 
+			[dtmDate] = t.dtmDate
+			,[strBatchId] = t.strBatchId
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] = 0
+			,[dblCredit] = 0
+			,[dblDebitUnit] = 0
+			,[dblCreditUnit] = 0 
+			,[strDescription] = 
+				ISNULL(@strGLDescription, ISNULL(ga.strDescription, '')) + ' ' 
+				+ dbo.fnFormatMessage(
+					'Resolve the decimal discrepancy for %s.'
+					,i.strItemNo
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode] = 'IC'
+			,[strReference] = ''
+			,[intCurrencyId] = t.intCurrencyId 
+			,[dblExchangeRate] = t.dblForexRate
+			,[dtmDateEntered] = GETDATE()
+			,[dtmTransactionDate] = t.dtmDate
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo] = t.intInventoryTransactionId
+			,[ysnIsUnposted] = 0 
+			,[intUserId] = @intEntityUserSecurityId
+			,[intEntityId] = @intEntityUserSecurityId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionId] = t.intTransactionId
+			,[strTransactionType] = ty.strName
+			,[strTransactionForm] = ty.strTransactionForm
+			,[strModuleName] = @ModuleName
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] = CreditForeign.[Value]	
+			,[dblDebitReport] = NULL 
+			,[dblCreditForeign]	= DebitForeign.[Value]
+			,[dblCreditReport]	= NULL
+			,[dblReportingRate]	= t.dblForexRate
+			,[dblForeignRate] = t.dblForexRate
+			,[strRateType] = currencyRateType.strCurrencyExchangeRateType
+			,[intSourceEntityId] = t.intSourceEntityId
+			,[intCommodityId] = i.intCommodityId
+		FROM 
+			#uspICReceiptGLEntriesForDecimalDiscrepancy d
+			INNER JOIN tblICItem i 
+				ON d.intItemId = i.intItemId
+			CROSS APPLY (
+				SELECT TOP 1 
+					ga.* 
+				FROM 
+					@icGLAccounts ga
+				WHERE 
+					ga.intItemId = d.intItemId 
+			) glAccnt 
+			CROSS APPLY (
+				SELECT TOP 1 
+					t.*
+				FROM 
+					tblICInventoryTransaction t INNER JOIN @GLEntries gd
+						ON gd.strTransactionId = t.strTransactionId
+						AND gd.strBatchId = t.strBatchId
+						AND gd.intJournalLineNo = t.intInventoryTransactionId
+						AND gd.intAccountId = glAccnt.intInTransitAccountId
+						AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
+				WHERE
+					t.strTransactionId = d.strReceiptNumber
+					AND t.strBatchId = d.strBatchId
+					AND t.intTransactionId = d.intInventoryReceiptId
+					AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+					AND t.intItemId = d.intItemId
+					--AND t.intCurrencyId <> @intFunctionalCurrencyId
+					AND t.intCurrencyId IS NOT NULL 
 
-	UNION ALL
-	SELECT 
-		[dtmDate] = t.dtmDate
-		,[strBatchId] = t.strBatchId
-		,[intAccountId] = ga.intAccountId
-		,[dblDebit] = Credit.[Value]
-		,[dblCredit] = Debit.[Value]
-		,[dblDebitUnit] = 0 
-		,[dblCreditUnit] = 0 
-		,[strDescription] = 
-			ISNULL(@strGLDescription, ISNULL(ga.strDescription, '')) + ' ' 
-			+ dbo.fnFormatMessage(
-				'Resolve the decimal discrepancy for %s.'
-				,i.strItemNo
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-				,DEFAULT 
-			)
-		,[strCode] = 'IC'
-		,[strReference] = ''
-		,[intCurrencyId] = t.intCurrencyId
-		,[dblExchangeRate] = t.dblForexRate
-		,[dtmDateEntered] = GETDATE()
-		,[dtmTransactionDate] = t.dtmDate
-		,[strJournalLineDescription] = ''
-		,[intJournalLineNo] = t.intInventoryTransactionId
-		,[ysnIsUnposted] = 0 
-		,[intUserId] = @intEntityUserSecurityId
-		,[intEntityId] = @intEntityUserSecurityId 
-		,[strTransactionId] = t.strTransactionId
-		,[intTransactionId] = t.intTransactionId
-		,[strTransactionType] = ty.strName
-		,[strTransactionForm] = ty.strTransactionForm
-		,[strModuleName] = @ModuleName
-		,[intConcurrencyId] = 1
-		,[dblDebitForeign] = NULL 
-		,[dblDebitReport] = NULL 
-		,[dblCreditForeign]	= NULL 
-		,[dblCreditReport] = NULL 
-		,[dblReportingRate] = NULL 
-		,[dblForeignRate] = t.dblForexRate
-		,[strRateType] = currencyRateType.strCurrencyExchangeRateType
-		,[intSourceEntityId] = t.intSourceEntityId
-		,[intCommodityId] = i.intCommodityId
-	FROM 
-		ForGLEntries_CTE cte CROSS APPLY (
-			SELECT TOP 1 
-				icGLAccnts.*
+			) t
+			CROSS APPLY dbo.fnGetDebit(
+				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
+			) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(
+				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
+			) CreditForeign
+			INNER JOIN tblGLAccount ga 
+				ON ga.intAccountId = glAccnt.intInventoryAdjustmentAccountId
+			LEFT JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
+		WHERE
+			ABS(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0) ) <> 0 
+			AND ABS(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) BETWEEN 0.01 AND @threshold
+
+		------------------------------------------------------------------------------------------
+		---- 2. Add GL entry to correct discrepancy in the functional currency during In-Transit
+		------------------------------------------------------------------------------------------
+		--/*
+		--	Debit or Credit ........... Inventory Adjustment 
+		--*/	
+		INSERT INTO @GLEntriesForTheDiscrepancy (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]	
+		) 
+		SELECT 
+			[dtmDate] = t.dtmDate
+			,[strBatchId] = t.strBatchId
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] = Credit.[Value]	
+			,[dblCredit] = Debit.[Value]
+			,[dblDebitUnit] = 0
+			,[dblCreditUnit] = 0 
+			,[strDescription] = 
+				ISNULL(@strGLDescription, ISNULL(ga.strDescription, '')) + ' ' 
+				+ dbo.fnFormatMessage(
+					'Resolve the decimal discrepancy for %s.'
+					,i.strItemNo
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode] = 'IC'
+			,[strReference] = ''
+			,[intCurrencyId] = t.intCurrencyId 
+			,[dblExchangeRate] = t.dblForexRate
+			,[dtmDateEntered] = GETDATE()
+			,[dtmTransactionDate] = t.dtmDate
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo] = t.intInventoryTransactionId
+			,[ysnIsUnposted] = 0 
+			,[intUserId] = @intEntityUserSecurityId
+			,[intEntityId] = @intEntityUserSecurityId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionId] = t.intTransactionId
+			,[strTransactionType] = ty.strName
+			,[strTransactionForm] = ty.strTransactionForm
+			,[strModuleName] = @ModuleName
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] = NULL 
+			,[dblDebitReport] = NULL 
+			,[dblCreditForeign]	= NULL 
+			,[dblCreditReport]	= NULL
+			,[dblReportingRate]	= t.dblForexRate
+			,[dblForeignRate] = t.dblForexRate
+			,[strRateType] = currencyRateType.strCurrencyExchangeRateType
+			,[intSourceEntityId] = t.intSourceEntityId
+			,[intCommodityId] = i.intCommodityId
+		FROM 
+			#uspICReceiptGLEntriesForDecimalDiscrepancy d
+			INNER JOIN tblICItem i 
+				ON d.intItemId = i.intItemId
+			CROSS APPLY (
+				SELECT TOP 1 
+					ga.* 
+				FROM 
+					@icGLAccounts ga
+				WHERE 
+					ga.intItemId = d.intItemId 
+			) glAccnt 
+			CROSS APPLY (
+				SELECT TOP 1 
+					t.*
+				FROM 
+					tblICInventoryTransaction t INNER JOIN @GLEntries gd
+						ON gd.strTransactionId = t.strTransactionId
+						AND gd.strBatchId = t.strBatchId
+						AND gd.intJournalLineNo = t.intInventoryTransactionId
+						AND gd.intAccountId = glAccnt.intInTransitAccountId
+						AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
+				WHERE
+					t.strTransactionId = d.strReceiptNumber
+					AND t.strBatchId = d.strBatchId
+					AND t.intTransactionId = d.intInventoryReceiptId
+					AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+					AND t.intItemId = d.intItemId
+			) t
+			CROSS APPLY dbo.fnGetDebit(
+				ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0)
+			) Debit
+			CROSS APPLY dbo.fnGetCredit(
+				ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0)
+			) Credit
+			INNER JOIN tblGLAccount ga 
+				ON ga.intAccountId = glAccnt.intInventoryAdjustmentAccountId
+			LEFT JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
+		WHERE
+			ABS(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0) ) <> 0 
+			AND ABS(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0)) BETWEEN 0.01 AND @threshold	
+	END 
+END 
+
+-- Fix the discrepancy for the AP Clearing
+BEGIN
+
+	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing') IS NOT NULL  
+	BEGIN 
+		DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing
+	END 
+
+	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing') IS NULL  
+	BEGIN 
+		CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (
+			intId INT IDENTITY(1, 1) 
+			,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,intInventoryReceiptId INT NULL
+			,intInventoryReceiptItemId INT NULL
+			,strReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,intSourceType INT NULL 
+			,intFreightTermId INT NULL 
+			,strFobPoint NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			,dblGLAPClearing NUMERIC(18, 6) NULL 
+			,dblGLAPClearingForeign NUMERIC(18, 6) NULL 
+			,dblAPClearing NUMERIC(18, 6) NULL 
+			,dblAPClearingForeign NUMERIC(18, 6) NULL 
+			,dblForexRate NUMERIC(18, 6) NULL 
+			,intItemId INT 
+		)
+	END 
+
+	-- Get the discrepancy per receipt line item
+	BEGIN 
+		INSERT INTO #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (
+			strReceiptNumber 
+			,strBatchId 
+			,intInventoryReceiptId
+			,intInventoryReceiptItemId 
+			,strReceiptType 
+			,intSourceType 
+			,intFreightTermId 
+			,strFobPoint 
+			,intItemId 
+			,dblForexRate 
+			,dblGLAPClearing 
+			,dblGLAPClearingForeign 
+		)
+		SELECT 
+			t.strTransactionId
+			,t.strBatchId 
+			,t.intTransactionId
+			,t.intTransactionDetailId
+			,r.strReceiptType 
+			,r.intSourceType 
+			,r.intFreightTermId 
+			,ft.strFobPoint 		
+			,t.intItemId
+			,dblForexRate = t.dblForexRate
+			,dblGLAPClearing = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
+			,dblGLAPClearingForeign = SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)) 
+		FROM 
+			tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			INNER JOIN tblICItem i 
+				ON ri.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			INNER JOIN tblICInventoryTransaction t 
+				ON t.strTransactionId = r.strReceiptNumber
+				AND t.intTransactionId = r.intInventoryReceiptId
+				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+			INNER JOIN @GLEntries gd
+				ON gd.strTransactionId = t.strTransactionId
+				AND gd.strBatchId = t.strBatchId
+				AND gd.intJournalLineNo = t.intInventoryTransactionId
+			INNER JOIN @icGLAccounts ga 
+				ON ga.intItemId = ri.intItemId
+				AND ga.intAPClearingAccountId = gd.intAccountId
+			LEFT JOIN tblSMFreightTerms ft
+				ON r.intFreightTermId = ft.intFreightTermId
+		WHERE
+			t.strTransactionId = @strReceiptNumber
+			AND t.strBatchId = @strBatchId
+			AND t.ysnIsUnposted = 0 
+		GROUP BY
+			t.strTransactionId
+			,t.strBatchId 
+			,t.intTransactionId
+			,t.intTransactionDetailId
+			,r.strReceiptType 
+			,r.intSourceType 
+			,r.intFreightTermId 
+			,ft.strFobPoint 		
+			,t.intItemId
+			,t.dblForexRate
+
+		-- Recompute the expected AP Clearing amount. 
+		UPDATE ap
+		SET
+			dblAPClearing = ROUND(dbo.fnMultiply(ri.dblLineTotal, ap.dblForexRate), 2) 
+			,dblAPClearingForeign = ri.dblLineTotal
+		FROM 
+			#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing ap INNER JOIN tblICInventoryReceiptItem ri
+				ON ap.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 
+			INNER JOIN tblICInventoryReceipt r 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		WHERE
+			r.intCurrencyId <> @intFunctionalCurrencyId
+
+		-- Recompute the expected AP Clearing amount. 
+		UPDATE ap
+		SET
+			dblAPClearing = ri.dblLineTotal
+			,dblAPClearingForeign = NULL 
+		FROM 
+			#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing ap INNER JOIN tblICInventoryReceiptItem ri
+				ON ap.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 
+			INNER JOIN tblICInventoryReceipt r 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+		WHERE
+			r.intCurrencyId = @intFunctionalCurrencyId			
+	END 
+
+
+	IF EXISTS (SELECT TOP 1 1 FROM #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing)
+	BEGIN 
+		----------------------------------------------------------------------------------------
+		-- 3. Add GL entry to correct discrepancy in the foreign currency during AP Clearing
+		----------------------------------------------------------------------------------------
+		--	Debit ........... AP Clearing
+		--  Credit ........................... Inventory Adjustment 
+
+		;WITH ForGLEntries_CTE (
+				[dtmDate] 
+				,[strBatchId] 
+				,[intAccountId] 
+				,[dblDebit] 
+				,[dblCredit] 
+				,[dblDebitUnit] 
+				,[dblCreditUnit]
+				,[strDescription] 
+				,[strCode]
+				,[strReference] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[dtmDateEntered] 
+				,[dtmTransactionDate] 
+				,[strJournalLineDescription] 
+				,[intJournalLineNo] 
+				,[ysnIsUnposted] 
+				,[intUserId] 
+				,[intEntityId] 
+				,[strTransactionId] 
+				,[intTransactionId] 
+				,[strTransactionType] 
+				,[strTransactionForm] 
+				,[strModuleName] 
+				,[dblDebitForeign] 
+				,[dblDebitReport] 
+				,[dblCreditForeign]	
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+				,intAPClearingAccountId
+				,intInventoryAdjustmentAccountId
+		)
+		AS (
+			SELECT 
+				[dtmDate] = t.dtmDate
+				,[strBatchId] = t.strBatchId
+				,[intAccountId] = NULL 
+				,[dblDebit] = 0
+				,[dblCredit] = 0
+				,[dblDebitUnit] = 0
+				,[dblCreditUnit] = 0 
+				,[strDescription] = 
+					ISNULL(@strGLDescription, '%s') + ' ' 
+					+ dbo.fnFormatMessage(
+						'Resolve the decimal discrepancy for %s.'
+						,i.strItemNo
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+					)
+				,[strCode] = 'IC'
+				,[strReference] = ''
+				,[intCurrencyId] = t.intCurrencyId 
+				,[dblExchangeRate] = t.dblForexRate
+				,[dtmDateEntered] = GETDATE()
+				,[dtmTransactionDate] = t.dtmDate
+				,[strJournalLineDescription] = ''
+				,[intJournalLineNo] = t.intInventoryTransactionId
+				,[ysnIsUnposted] = 0 
+				,[intUserId] = @intEntityUserSecurityId
+				,[intEntityId] = @intEntityUserSecurityId
+				,[strTransactionId] = t.strTransactionId
+				,[intTransactionId] = t.intTransactionId
+				,[strTransactionType] = ty.strName
+				,[strTransactionForm] = ty.strTransactionForm
+				,[strModuleName] = @ModuleName
+				,[dblDebitForeign] = Debit.[Value]	
+				,[dblDebitReport] = NULL 
+				,[dblCreditForeign]	= Credit.[Value]
+				,[dblCreditReport]	= NULL
+				,[dblReportingRate]	= t.dblForexRate
+				,[dblForeignRate] = t.dblForexRate
+				,[strRateType] = currencyRateType.strCurrencyExchangeRateType
+				,[intSourceEntityId] = t.intSourceEntityId
+				,[intCommodityId] = i.intCommodityId
+				,glAccnt.intAPClearingAccountId
+				,glAccnt.intInventoryAdjustmentAccountId
 			FROM 
-				@icGLAccounts icGLAccnts 
-			WHERE 
-				icGLAccnts.intInventoryAccountId = cte.intAccountId
-		) icGLAccnts
-		INNER JOIN dbo.tblGLAccount ga 
-			ON ga.intAccountId = icGLAccnts.intInventoryAdjustmentAccountId
-		CROSS APPLY (
-			SELECT TOP 1 
-				t.*
-			FROM 
-				tblICInventoryTransaction t 
+				#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing d
+				INNER JOIN tblICItem i 
+					ON d.intItemId = i.intItemId
+				CROSS APPLY (
+					SELECT TOP 1 
+						ga.* 
+					FROM 
+						@icGLAccounts ga
+					WHERE 
+						ga.intItemId = d.intItemId 
+				) glAccnt 
+				CROSS APPLY (
+					SELECT TOP 1 
+						t.*
+					FROM 
+						tblICInventoryTransaction t INNER JOIN @GLEntries gd
+							ON gd.strTransactionId = t.strTransactionId
+							AND gd.strBatchId = t.strBatchId
+							AND gd.intJournalLineNo = t.intInventoryTransactionId
+							AND gd.intAccountId = glAccnt.intAPClearingAccountId
+							AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
+					WHERE
+						t.strTransactionId = d.strReceiptNumber
+						AND t.strBatchId = d.strBatchId
+						AND t.intTransactionId = d.intInventoryReceiptId
+						AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+						AND t.intItemId = d.intItemId
+						--AND t.intCurrencyId <> @intFunctionalCurrencyId
+				) t
+				CROSS APPLY dbo.fnGetDebit(
+					ISNULL(dblGLAPClearingForeign, 0) - ISNULL(d.dblAPClearingForeign , 0)
+				) Debit
+				CROSS APPLY dbo.fnGetCredit(
+					ISNULL(dblGLAPClearingForeign, 0) - ISNULL(d.dblAPClearingForeign , 0)
+				) Credit
+				LEFT JOIN tblICInventoryTransactionType ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
 			WHERE
-				t.strTransactionId = cte.strTransactionId
-				AND t.strBatchId = cte.strBatchId
-				AND t.intItemId = icGLAccnts.intItemId 
-				AND t.intItemLocationId = icGLAccnts.intItemLocationId 
-				AND t.dblQty <> 0 
-				AND t.intInTransitSourceLocationId IS NULL 
-			ORDER BY
-				t.intInventoryTransactionId DESC 
-		) t 
-		INNER JOIN tblICItem i 
-			ON i.intItemId = t.intItemId
-		CROSS APPLY dbo.fnGetDebit(
-			cte.dblDiscrepancy 
-		) Debit
-		CROSS APPLY dbo.fnGetCredit(
-			cte.dblDiscrepancy 
-		) Credit
-		LEFT JOIN tblICInventoryTransactionType ty
-			ON t.intTransactionTypeId = ty.intTransactionTypeId
-		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-			ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
+				ABS(ISNULL(dblGLAPClearingForeign, 0) - ISNULL(d.dblAPClearingForeign , 0)) <> 0 
+				AND ABS(ISNULL(dblGLAPClearingForeign, 0) - ISNULL(dblAPClearingForeign, 0)) BETWEEN 0.01 AND @threshold	
+		)
+		INSERT INTO @GLEntriesForTheDiscrepancy (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]	
+		) 
+		SELECT
+			[dtmDate] 
+			,[strBatchId] 
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] 
+			,[dblCredit] 
+			,[dblDebitUnit] 
+			,[dblCreditUnit]
+			,[strDescription] = 
+				dbo.fnFormatMessage(
+					cte.strDescription
+					,ga.strDescription
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode]
+			,[strReference] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[dtmDateEntered] 
+			,[dtmTransactionDate] 
+			,[strJournalLineDescription] 
+			,[intJournalLineNo] 
+			,[ysnIsUnposted] 
+			,[intUserId] 
+			,[intEntityId] 
+			,[strTransactionId] 
+			,[intTransactionId] 
+			,[strTransactionType] 
+			,[strTransactionForm] 
+			,[strModuleName] 
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] 
+			,[dblDebitReport] 
+			,[dblCreditForeign]	
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]
+		FROM 
+			ForGLEntries_CTE cte INNER JOIN tblGLAccount ga
+				ON cte.intAPClearingAccountId = ga.intAccountId
+		UNION ALL
+		SELECT
+			[dtmDate] 
+			,[strBatchId] 
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] = [dblCredit] 
+			,[dblCredit] = [dblDebit]
+			,[dblDebitUnit] 
+			,[dblCreditUnit]
+			,[strDescription] = 
+				dbo.fnFormatMessage(
+					cte.strDescription
+					,ga.strDescription
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode]
+			,[strReference] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[dtmDateEntered] 
+			,[dtmTransactionDate] 
+			,[strJournalLineDescription] 
+			,[intJournalLineNo] 
+			,[ysnIsUnposted] 
+			,[intUserId] 
+			,[intEntityId] 
+			,[strTransactionId] 
+			,[intTransactionId] 
+			,[strTransactionType] 
+			,[strTransactionForm] 
+			,[strModuleName] 
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] = [dblCreditForeign] 
+			,[dblDebitReport] = [dblCreditReport]
+			,[dblCreditForeign]	= [dblDebitForeign]
+			,[dblCreditReport] = [dblDebitReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]
+		FROM 
+			ForGLEntries_CTE cte INNER JOIN tblGLAccount ga
+				ON cte.intInventoryAdjustmentAccountId = ga.intAccountId
+
+
+
+		----------------------------------------------------------------------------------------
+		-- 4. Add GL entry to correct discrepancy in the functional currency during AP clearing
+		----------------------------------------------------------------------------------------
+		--	Debit ........... AP Clearing
+		--  Credit ........................... Inventory Adjustment 	
+
+		;WITH ForGLEntries_CTE (
+				[dtmDate] 
+				,[strBatchId] 
+				,[intAccountId] 
+				,[dblDebit] 
+				,[dblCredit] 
+				,[dblDebitUnit] 
+				,[dblCreditUnit]
+				,[strDescription] 
+				,[strCode]
+				,[strReference] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[dtmDateEntered] 
+				,[dtmTransactionDate] 
+				,[strJournalLineDescription] 
+				,[intJournalLineNo] 
+				,[ysnIsUnposted] 
+				,[intUserId] 
+				,[intEntityId] 
+				,[strTransactionId] 
+				,[intTransactionId] 
+				,[strTransactionType] 
+				,[strTransactionForm] 
+				,[strModuleName] 
+				,[dblDebitForeign] 
+				,[dblDebitReport] 
+				,[dblCreditForeign]	
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+				,intAPClearingAccountId
+				,intInventoryAdjustmentAccountId
+		)
+		AS (
+			SELECT 
+				[dtmDate] = t.dtmDate
+				,[strBatchId] = t.strBatchId
+				,[intAccountId] = NULL 
+				,[dblDebit] = Debit.[Value]
+				,[dblCredit] = Credit.[Value]
+				,[dblDebitUnit] = 0
+				,[dblCreditUnit] = 0 
+				,[strDescription] = 
+					ISNULL(@strGLDescription, '%s') + ' ' 
+					+ dbo.fnFormatMessage(
+						'Resolve the decimal discrepancy for %s.'
+						,i.strItemNo
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+						,DEFAULT 
+					)
+				,[strCode] = 'IC'
+				,[strReference] = ''
+				,[intCurrencyId] = t.intCurrencyId 
+				,[dblExchangeRate] = t.dblForexRate
+				,[dtmDateEntered] = GETDATE()
+				,[dtmTransactionDate] = t.dtmDate
+				,[strJournalLineDescription] = ''
+				,[intJournalLineNo] = t.intInventoryTransactionId
+				,[ysnIsUnposted] = 0 
+				,[intUserId] = @intEntityUserSecurityId
+				,[intEntityId] = @intEntityUserSecurityId
+				,[strTransactionId] = t.strTransactionId
+				,[intTransactionId] = t.intTransactionId
+				,[strTransactionType] = ty.strName
+				,[strTransactionForm] = ty.strTransactionForm
+				,[strModuleName] = @ModuleName
+				,[dblDebitForeign] = NULL 
+				,[dblDebitReport] = NULL 
+				,[dblCreditForeign]	= NULL 
+				,[dblCreditReport]	= NULL
+				,[dblReportingRate]	= t.dblForexRate
+				,[dblForeignRate] = t.dblForexRate
+				,[strRateType] = currencyRateType.strCurrencyExchangeRateType
+				,[intSourceEntityId] = t.intSourceEntityId
+				,[intCommodityId] = i.intCommodityId
+				,glAccnt.intAPClearingAccountId
+				,glAccnt.intInventoryAdjustmentAccountId
+			FROM 
+				#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing d
+				INNER JOIN tblICItem i 
+					ON d.intItemId = i.intItemId
+				CROSS APPLY (
+					SELECT TOP 1 
+						ga.* 
+					FROM 
+						@icGLAccounts ga
+					WHERE 
+						ga.intItemId = d.intItemId 
+				) glAccnt 
+				CROSS APPLY (
+					SELECT TOP 1 
+						t.*
+					FROM 
+						tblICInventoryTransaction t INNER JOIN @GLEntries gd
+							ON gd.strTransactionId = t.strTransactionId
+							AND gd.strBatchId = t.strBatchId
+							AND gd.intJournalLineNo = t.intInventoryTransactionId
+							AND gd.intAccountId = glAccnt.intAPClearingAccountId
+							AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
+					WHERE
+						t.strTransactionId = d.strReceiptNumber
+						AND t.strBatchId = d.strBatchId
+						AND t.intTransactionId = d.intInventoryReceiptId
+						AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+						AND t.intItemId = d.intItemId
+						--AND t.intCurrencyId = @intFunctionalCurrencyId
+				) t
+				CROSS APPLY dbo.fnGetDebit(
+					ISNULL(dblGLAPClearing, 0) - ISNULL(d.dblAPClearing, 0)
+				) Debit
+				CROSS APPLY dbo.fnGetCredit(
+					ISNULL(dblGLAPClearing, 0) - ISNULL(d.dblAPClearing, 0)
+				) Credit
+				LEFT JOIN tblICInventoryTransactionType ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
+			WHERE
+				ABS(ISNULL(dblGLAPClearing, 0) - ISNULL(d.dblAPClearing, 0)) <> 0 
+				AND ABS(ISNULL(dblGLAPClearing, 0) - ISNULL(dblAPClearing, 0)) BETWEEN 0.01 AND @threshold	
+		)
+		INSERT INTO @GLEntriesForTheDiscrepancy (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]	
+		) 
+		SELECT
+			[dtmDate] 
+			,[strBatchId] 
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] 
+			,[dblCredit] 
+			,[dblDebitUnit] 
+			,[dblCreditUnit]
+			,[strDescription] = 
+				dbo.fnFormatMessage(
+					cte.strDescription
+					,ga.strDescription
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode]
+			,[strReference] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[dtmDateEntered] 
+			,[dtmTransactionDate] 
+			,[strJournalLineDescription] 
+			,[intJournalLineNo] 
+			,[ysnIsUnposted] 
+			,[intUserId] 
+			,[intEntityId] 
+			,[strTransactionId] 
+			,[intTransactionId] 
+			,[strTransactionType] 
+			,[strTransactionForm] 
+			,[strModuleName] 
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] 
+			,[dblDebitReport] 
+			,[dblCreditForeign]	
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]
+		FROM 
+			ForGLEntries_CTE cte INNER JOIN tblGLAccount ga
+				ON cte.intAPClearingAccountId = ga.intAccountId
+		UNION ALL
+		SELECT
+			[dtmDate] 
+			,[strBatchId] 
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] = [dblCredit] 
+			,[dblCredit] = [dblDebit]
+			,[dblDebitUnit] 
+			,[dblCreditUnit]
+			,[strDescription] = 
+				dbo.fnFormatMessage(
+					cte.strDescription
+					,ga.strDescription
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode]
+			,[strReference] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[dtmDateEntered] 
+			,[dtmTransactionDate] 
+			,[strJournalLineDescription] 
+			,[intJournalLineNo] 
+			,[ysnIsUnposted] 
+			,[intUserId] 
+			,[intEntityId] 
+			,[strTransactionId] 
+			,[intTransactionId] 
+			,[strTransactionType] 
+			,[strTransactionForm] 
+			,[strModuleName] 
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] = [dblCreditForeign] 
+			,[dblDebitReport] = [dblCreditReport]
+			,[dblCreditForeign]	= [dblDebitForeign]
+			,[dblCreditReport] = [dblDebitReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]
+		FROM 
+			ForGLEntries_CTE cte INNER JOIN tblGLAccount ga
+				ON cte.intInventoryAdjustmentAccountId = ga.intAccountId
+	END 
 END
 
+-- Return the GL entries to correct the discrepancy back to the caller. 
+SELECT 
+	[dtmDate] 
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]	
+	,[dblDebitReport]	
+	,[dblCreditForeign]	
+	,[dblCreditReport]	
+	,[dblReportingRate]	
+	,[dblForeignRate]
+	,[strRateType]
+	,[intSourceEntityId]
+	,[intCommodityId]	
+FROM 
+	@GLEntriesForTheDiscrepancy

@@ -65,10 +65,16 @@ BEGIN
 	DECLARE	 @AllowIntraEntries BIT
 			,@DueToAccountId	INT
 			,@DueFromAccountId  INT
+			,@OverrideCompanySegment  BIT
+			,@OverrideLocationSegment  BIT
+			,@OverrideLineOfBusinessSegment BIT
 	SELECT TOP 1
-		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END
-		, @DueToAccountId	= ISNULL([intDueToAccountId], 0)
-		, @DueFromAccountId = ISNULL([intDueFromAccountId], 0)
+		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END, 
+		  @DueToAccountId	= ISNULL([intDueToAccountId], 0), 
+		  @DueFromAccountId = ISNULL([intDueFromAccountId], 0),
+		  @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+		  @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
 	FROM tblAPCompanyPreference
 	-- Get Total Value of Other Charges Taxes
 	 --SELECT @ReceiptId = IRI.intInventoryReceiptId
@@ -112,7 +118,7 @@ BEGIN
 													 ELSE Details.dblTotal END)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	ISNULL(Details.dblUnits,0),--ISNULL(units.dblTotalUnits,0),
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(Details.intBillDetailId, Details.intFormat),
+		[strDescription]				=	'',
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -125,6 +131,7 @@ BEGIN
 												WHEN intTransactionType = 3 THEN 'Posted Debit Memo'
 												WHEN intTransactionType = 13 THEN 'Posted Basis Advance'
 												WHEN intTransactionType = 14 THEN 'Posted Deferred Interest'
+												WHEN intTransactionType = 11 THEN 'Posted Claim'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
@@ -137,6 +144,7 @@ BEGIN
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 												WHEN intTransactionType = 13 THEN 'Basis Advance'
 												WHEN intTransactionType = 14 THEN 'Deferred Interest'
+												WHEN intTransactionType = 11 THEN 'Claim'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -255,7 +263,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	DUEACCOUNT.intDueFromAccountId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=	CAST((CASE WHEN A.intTransactionType IN (2, 3, 11, 13) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
 													 ELSE Details.dblTotal END)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
@@ -361,17 +369,13 @@ BEGIN
                 WHERE R.intBillId = A.intBillId
             ) Details
 			OUTER APPLY (
-				SELECT TOP 1 intDueFromAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueFromAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-				FROM tblGLAccountSegmentMapping GLASM
-				INNER JOIN tblGLAccountSegment GLAS
-				ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-				WHERE intAccountStructureId = 3
-				AND intAccountId = A.[intAccountId]
-			) DUEACCOUNT
+				SELECT intOverrideAccount
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
           AND @DueFromAccountId <> 0
-          AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId]) = 0
+          AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
 		  AND A.intTransactionType <> 15
 
 	--PREPAY, DEBIT MEMO ENTRIES
@@ -396,6 +400,7 @@ BEGIN
 												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
 												WHEN C.intTransactionType = 13 THEN 'Applied Basis Advance'
 												WHEN C.intTransactionType = 14 THEN 'Applied Deferred Interest'
+												WHEN C.intTransactionType = 11 THEN 'Applied Claim'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	B.intTransactionId,
 		[ysnIsUnposted]					=	0,
@@ -463,6 +468,7 @@ BEGIN
 												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
 												WHEN C.intTransactionType = 13 THEN 'Applied Basis Advance'
 												WHEN C.intTransactionType = 14 THEN 'Applied Deferred Interest'
+												WHEN C.intTransactionType = 11 THEN 'Applied Claim'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	B.intTransactionId,
 		[ysnIsUnposted]					=	0,
@@ -513,7 +519,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	voucherDetails.intAccountId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=	voucherDetails.dblTotal,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(voucherDetails.dblTotalUnits,0),
@@ -523,7 +529,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
@@ -549,7 +555,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
 		[strComments]					=	D.strName + ' - ' + voucherDetails.strComment,
@@ -563,6 +569,10 @@ BEGIN
 			CROSS APPLY dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId) voucherDetails
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
 	
@@ -571,7 +581,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	DUEACCOUNT.intDueToAccountId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=	0,
 		[dblCredit]						=	voucherDetails.dblTotal,
 		[dblDebitUnit]					=	0,
@@ -581,7 +591,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
@@ -607,7 +617,7 @@ BEGIN
 		[dblCreditForeign]				=	voucherDetails.dblForeignTotal,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
 		[strComments]					=	D.strName + ' - ' + voucherDetails.strComment,
@@ -622,17 +632,13 @@ BEGIN
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 	OUTER APPLY (
-		SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-		FROM tblGLAccountSegmentMapping GLASM
-		INNER JOIN tblGLAccountSegment GLAS
-		ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		WHERE intAccountStructureId = 3
-		AND intAccountId = voucherDetails.intAccountId
-	) DUEACCOUNT
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	      AND @AllowIntraEntries = 1
 	      AND @DueToAccountId <> 0
-	      AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
+	      AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId, 3) = 0
 		  AND A.intTransactionType <> 15
 
 	-- UNION ALL
@@ -708,7 +714,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
@@ -731,7 +737,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	D.strName,
@@ -764,7 +770,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	'Negative Qty Clearing Adjustment',
@@ -787,7 +793,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	D.strName,
@@ -823,7 +829,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
@@ -846,7 +852,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	D.strName,
@@ -881,7 +887,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
@@ -904,7 +910,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	E.strName,
@@ -937,7 +943,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	'Posted Tax Adjustment',
@@ -955,7 +961,7 @@ BEGIN
 		[dblCreditForeign]				=	voucherDetails.dblForeignTotal,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	E.strName,
@@ -979,7 +985,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	voucherDetails.intAccountId, --AP-3227 always use the AP Clearing Account,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=	voucherDetails.dblTotal,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -989,7 +995,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	'Purchase Tax',
@@ -999,7 +1005,7 @@ BEGIN
 		[intEntityId]					=	@intUserId,
 		[strTransactionId]				=	A.strBillId, 
 		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Tax Adjustment',
+		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,
@@ -1007,7 +1013,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	E.strName,
@@ -1021,6 +1027,10 @@ BEGIN
 			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
+			OUTER APPLY (
+			SELECT intOverrideAccount
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	/*AND 1 = (
 		--create tax only from item receipt if it is adjusted / Cost is Adjusted  / third party vendor tax in other charge of receipt (AP-3227) // third party inv shipment vendor tax // PO Tax
@@ -1056,7 +1066,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	DUEACCOUNT.intDueToAccountId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=	0,
 		[dblCredit]						=	voucherDetails.dblTotal,
 		[dblDebitUnit]					=	0,
@@ -1066,7 +1076,7 @@ BEGIN
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	'Purchase Tax',
@@ -1084,7 +1094,7 @@ BEGIN
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
 		[strComments]					=	E.strName,
@@ -1101,17 +1111,13 @@ BEGIN
 			INNER JOIN [dbo].tblAPBillDetail B 
 				ON voucherDetails.intBillDetailId = B.intBillDetailId
 			OUTER APPLY (
-				SELECT TOP 1 intDueToAccountId = ISNULL(dbo.[fnGetGLAccountIdFromProfitCenter](@DueToAccountId, ISNULL(GLAS.intAccountSegmentId, 0)), 0)
-				FROM tblGLAccountSegmentMapping GLASM
-				INNER JOIN tblGLAccountSegment GLAS
-				ON GLASM.intAccountSegmentId = GLAS.intAccountSegmentId
-				WHERE intAccountStructureId = 3
-				AND intAccountId = voucherDetails.intAccountId
-			) DUEACCOUNT
+				SELECT intOverrideAccount
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
 	  	  AND @DueToAccountId <> 0
-	  	  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId) = 0
+	  	  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId, 3) = 0
 		  AND A.intTransactionType <> 15
 	
 	--TAX ADJUSTMENT
@@ -1255,11 +1261,119 @@ BEGIN
 	,E.strName
 	,B.strComment
 
+	--TAX ADJUSTMENT FOR OVERRIDE TAX LOCATION CREDIT
+	UNION ALL 
+	SELECT
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	C.intSourceTaxAccountId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	CAST((C.dblSourceTransactionTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	D.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	F.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	C.intSourceTransactionDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,   
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	CAST((C.dblSourceTransactionTax - B.dblTax)  AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblCreditReport]				=	CAST(C.dblSourceTransactionTax - B.dblTax AS DECIMAL(18,2)),
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	F.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+	CROSS APPLY dbo.fnAPGetDetailSourceTransactionTaxes(B.intInventoryReceiptItemId, B.intInventoryReceiptChargeId, B.intInventoryShipmentChargeId) C
+	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+
+	--TAX ADJUSTMENT FOR OVERRIDE TAX LOCATION DEBIT
+	UNION ALL 
+	SELECT
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	dbo.[fnGetItemGLAccount](G.intItemId, ISNULL(H.intItemLocationId, I.intItemLocationId), 'AP Clearing'),
+		[dblDebit]						=	CAST((C.dblSourceTransactionTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	D.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	F.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	C.intSourceTransactionDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	CAST(C.dblSourceTransactionTax - B.dblTax AS DECIMAL(18,2)),   
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	F.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+	CROSS APPLY dbo.fnAPGetDetailSourceTransactionTaxes(B.intInventoryReceiptItemId, B.intInventoryReceiptChargeId, B.intInventoryShipmentChargeId) C
+	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+	LEFT JOIN tblICItem G ON G.intItemId = B.intItemId
+	LEFT JOIN tblICItemLocation H ON H.intItemId = B.intItemId AND H.intLocationId = B.intLocationId
+	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A
 	INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-	WHERE A.strDescription IS NULL
+	WHERE NULLIF(A.strDescription, '') IS NULL
 	
 	RETURN
 END

@@ -34,8 +34,10 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT *, NULL AS strCorrected FROM [vyuAPRptPurchase] WHERE intPurchaseId = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, NULL AS strCorrected, NULL AS strLogoType, NULL AS imgLogo, NULL AS imgFooter FROM [vyuAPRptPurchase] WHERE intPurchaseId = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
+
+DECLARE @imgLogo VARBINARY(MAX);
 
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -71,9 +73,16 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'intPurchaseId'
 END
 
---SET @intPurchaseId = @intPurchaseId;
+-- GET LOGO
+SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
 
 SELECT 
-* 
-FROM [vyuAPRptPurchase]
+	A.*,
+	NULL strCorrected,
+	CASE WHEN LP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END strLogoType,
+	ISNULL(LP.imgLogo, @imgLogo) imgLogo,
+	LPF.imgLogo imgFooter
+FROM [vyuAPRptPurchase] A
+LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = A.intShipToId AND LP.ysnDefault = 1
+LEFT JOIN tblSMLogoPreferenceFooter LPF ON LPF.intCompanyLocationId = A.intShipToId AND LPF.ysnDefault = 1
 WHERE intPurchaseId = (CASE WHEN @intPurchaseId IS NOT NULL THEN @intPurchaseId ELSE 0 END)

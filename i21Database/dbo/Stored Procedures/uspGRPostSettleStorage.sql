@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
-	@intSettleStorageId INT
+@intSettleStorageId INT
 	,@ysnPosted BIT
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
@@ -279,7 +279,7 @@ BEGIN TRY
 
 		WHILE EXISTS(SELECT 1 FROM @CustomerStorageIds)
 		BEGIN
-			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
+			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds		
 
 			IF (SELECT ysnTransferStorage FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId) = 1
 			BEGIN
@@ -287,7 +287,9 @@ BEGIN TRY
 				INSERT INTO @Transfers
 				SELECT * FROM [dbo].[fnGRFindOriginalCustomerStorage](@intId)
 
-				IF EXISTS(SELECT 1 FROM @Transfers WHERE ABS(dblTotalTransactions) > 1)
+				--select '@Transfers',* from @Transfers
+
+				IF EXISTS(SELECT 1 FROM @Transfers WHERE ABS(ROUND(dblTotalTransactions,4) - ROUND(dblOpenBalance,4)) > 1 )
 				BEGIN
 					RAISERROR('Unable to settle storage. Please check the storage and try again.',16,1,1)
 					RETURN;
@@ -299,13 +301,13 @@ BEGIN TRY
 				,@dblHistoryTotal		= ISNULL(dblHistoryTotalUnits,0)
 			FROM [dbo].[fnGRCheckStorageBalance](@intId, NULL)
 
-			IF (@dblSettlementTotal + @dblTransferTotal) > @dblHistoryTotal OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
+			IF ROUND((@dblSettlementTotal + @dblTransferTotal),4) > ROUND(@dblHistoryTotal,4) OR (@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
 			END
 			DELETE FROM @CustomerStorageIds WHERE intId = @intId
-		END	
+		END
 	END
 
 	IF @ysnFromPriceBasisContract = 0 
@@ -2320,6 +2322,7 @@ BEGIN TRY
 							,@dtmCalculateChargeAndPremiumOn --Calculate On
 							,@SettleStorageChargeAndPremium
 							,CS.intCustomerStorageId
+							,SVC.intContractDetailId
 						) CAP
 					) CAP
 					LEFT JOIN @SettleStorageChargeAndPremium SSCP
@@ -2366,7 +2369,9 @@ BEGIN TRY
 						[intOtherChargeItemId],
 						[intInventoryItemId],
 						[dblInventoryItemNetUnits],
-						[dblInventoryItemGrossUnits]
+						[dblInventoryItemGrossUnits],
+						[dblGradeReading],
+						[intCtOtherChargeItemId]
 					)
 					SELECT
 						[intTransactionId]				= @intSettleStorageId
@@ -2395,14 +2400,19 @@ BEGIN TRY
 						,[intInventoryItemId]			= CAP.intInventoryItemId
 						,[dblInventoryItemNetUnits]		= SVC.dblUnits
 						,[dblInventoryItemGrossUnits]	= SVC.dblUnits + ((1 - (CS.dblOriginalBalance/CS.dblGrossQuantity)) * SVC.dblUnits)
+						,[dblGradeReading]				= CAP.dblGradeReading
+						,[intCtOtherChargeItemId]		= CAP.intCtOtherChargeItemId
 					FROM (
 						SELECT
 							[dblUnits]			= SUM(SVC.dblUnits)
 							,[dblTotalAmount]	= SUM(SVC.dblUnits * SVC.dblCashPrice)
 							,SVC.intCustomerStorageId
+							,SVC.intContractDetailId
 						FROM @SettleVoucherCreate SVC
 						WHERE SVC.intItemType = 1
 						GROUP BY SVC.intCustomerStorageId
+							,SVC.intContractDetailId
+							
 					) SVC
 					INNER JOIN tblGRCustomerStorage CS
 						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
@@ -2423,6 +2433,7 @@ BEGIN TRY
 							,@dtmCalculateChargeAndPremiumOn
 							,@SettleStorageChargeAndPremium
 							,CS.intCustomerStorageId
+							,SVC.intContractDetailId
 						) CAP
 					) CAP
 					LEFT JOIN @SettleStorageChargeAndPremium SSCP
@@ -2716,7 +2727,8 @@ BEGIN TRY
 																								@LocationId,
 																								a.intItemId,
 																								coalesce(@intShipFrom, EM.intEntityLocationId),
-																								EM.intFreightTermId
+																								EM.intFreightTermId,
+																								default
 																							)
 														ELSE RI.intTaxGroupId
 													END
@@ -2724,11 +2736,7 @@ BEGIN TRY
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
 
-					, intLinkingId		= case when a.intSettleContractId is not null then 
-											isnull(availableQtyForVoucher.intPriceFixationDetailId, a.intSettleContractId)
-										else 
-											-90
-										end
+					, intLinkingId		= isnull(a.intSettleContractId, -90)
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -2748,7 +2756,23 @@ BEGIN TRY
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-										AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
+										AND 
+											CASE WHEN (SH.strType = 'From Transfer') THEN 
+												CASE WHEN SH.intContractHeaderId is not null then  
+													case when SH.intContractHeaderId = RI.intContractHeaderId then 
+														1 
+													else
+														0
+													end
+												else 
+													1 
+												end
+											ELSE 
+												(CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) 
+													THEN 1 
+												ELSE 0 												
+												END) 
+											END = 1
 				)  
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
@@ -2762,7 +2786,17 @@ BEGIN TRY
 						tblICInventoryReceiptCharge RC
 						INNER JOIN tblGRStorageHistory SHC
 								ON SHC.intInventoryReceiptId = RC.intInventoryReceiptId
-										AND CASE WHEN (SHC.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
+										AND CASE WHEN (SHC.strType = 'From Transfer') THEN
+											CASE WHEN SHC.intContractHeaderId is not null then  
+												case when SHC.intContractHeaderId = RC.intContractId then 
+													1 
+												else
+													0
+												end
+											else 
+												1
+											end
+										ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
 				)  
 						ON SHC.intCustomerStorageId = CS.intCustomerStorageId AND a.intItemType = 3 and @ysnDPOwnedType = 1 and a.intItemId = RC.intChargeId
 				LEFT JOIN tblCTContractDetail CD
@@ -2846,7 +2880,7 @@ BEGIN TRY
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= ITEM.[strItemNo]
 					,[intItemId]					= ITEM.[intItemId]
-					,[intAccountId]					= [dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'Other Charge Expense')
+					,[intAccountId]					= COALESCE([dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'Other Charge Expense'),[dbo].[fnGetItemGLAccount](ITEM.intItemId,@ItemLocationId, 'General'))
 					,[intContractHeaderId]			= NULL
 					,[intContractDetailId]			= NULL
 					,[intInventoryReceiptItemId]	= NULL
@@ -2870,7 +2904,8 @@ BEGIN TRY
 															@LocationId,
 															ACAP.intChargeAndPremiumItemId,
 															coalesce(@intShipFrom, EM.intEntityLocationId),
-															EM.intFreightTermId
+															EM.intFreightTermId,
+															default
 														)
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
@@ -2890,6 +2925,24 @@ BEGIN TRY
 				WHERE ACAP.intTransactionId = @intSettleStorageId
 					AND ACAP.intTransactionDetailId = @intSettleStorageTicketId
 				ORDER BY SST.intSettleStorageTicketId
+
+				--CHECK IF THERE'S A CHARGE AND PREMIUM WITH NO ACCOUNT ID
+				BEGIN
+					DECLARE @strCharges NVARCHAR(500)					
+
+					SELECT @strCharges = STUFF((
+					SELECT ', ' + (strMiscDescription)
+					FROM @voucherPayable
+					WHERE intAccountId IS NULL
+					FOR XML PATH('')) COLLATE Latin1_General_CI_AS,1,1,'')
+
+					IF @strCharges IS NOT NULL
+					BEGIN 
+						SET @ErrMsg = 'Account is missing for item/s ' + @strCharges + '.'
+						RAISERROR (@ErrMsg, 16, 1);
+					END
+
+				END
 				
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
@@ -3254,7 +3307,8 @@ BEGIN TRY
 							APB.intShipToId,
 							APD.intItemId,
 							APB.intShipFromId,
-							EM.intFreightTermId
+							EM.intFreightTermId,
+							default
 						)
 					FROM tblAPBillDetail APD 
 					INNER JOIN tblAPBill APB
@@ -3887,7 +3941,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				INSERT INTO @VoucherIdError
-				SELECT intTransactionId FROM tblAPPostResult WHERE intTransactionId = @intVoucherId2 AND strMessage <> 'Posting of negative voucher is not allowed.'
+				SELECT TOP 1 intTransactionId FROM tblAPPostResult WHERE intTransactionId = @intVoucherId2 AND strMessage <> 'Posting of negative voucher is not allowed.'
 			END
 
 			DELETE FROM @VoucherIds WHERE intId = @intVoucherId2

@@ -27,7 +27,7 @@ BEGIN
             END
             ELSE
             BEGIN
-                SELECT @str+= SUBSTRING(@strAccountId1, @i, 1)
+                SELECT @str+= SUBSTRING(ISNULL(@strAccountId1, ''), @i, 1)
                 SET @i=@i+1
             END
         

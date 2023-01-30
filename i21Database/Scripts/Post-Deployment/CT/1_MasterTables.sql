@@ -566,6 +566,14 @@ END
 GO
 
 GO
+IF NOT EXISTS(SELECT 1 FROM tblCTAction WHERE strActionName = 'Late Shipment')
+BEGIN
+	INSERT INTO tblCTAction(strActionName, strInternalCode, intConcurrencyId, strRoute)
+	VALUES('Late Shipment','Late Shipment Contracts',1,'ContractManagement.view.Contract?routeId=')
+END
+GO
+
+GO
 IF NOT EXISTS(SELECT * FROM tblCTAmendment)
 BEGIN
     INSERT INTO tblCTAmendment(intConcurrencyId)
@@ -844,6 +852,17 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE intApprovalStatusId = 4)
+BEGIN
+	INSERT INTO tblCTApprovalStatusTF
+	select 4, 'Cancelled', 1
+END
+ELSE 
+BEGIN
+	UPDATE tblCTApprovalStatusTF SET strApprovalStatus = 'Cancelled' WHERE intApprovalStatusId = 4
+END
+GO
+
 IF EXISTS(SELECT TOP 1 1 FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed')
 BEGIN
 	DELETE  FROM tblCTApprovalStatusTF WHERE strApprovalStatus = 'Closed'
@@ -939,3 +958,10 @@ GO
 GO
 	PRINT N'END UPDATE'  
 GO 
+
+--=====================================================================================================================================
+-- 	CT-7438
+---------------------------------------------------------------------------------------------------------------------------------------
+GO
+UPDATE tblCTCompanyPreference SET intPriceCalculationTypeId = 3 WHERE intPriceCalculationTypeId = 0
+GO

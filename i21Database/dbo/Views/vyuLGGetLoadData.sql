@@ -183,7 +183,7 @@ SELECT
 	,strDispatcher = SE.strUserName
 	,strShippingInstructionNo = SI.strLoadNumber
 	,FT.strFreightTerm
-	,FT.strFobPoint
+	,strFobPoint = ISNULL(L.strFobPoint, FT.strFobPoint)
 	,CU.strCurrency
 	,CONT.strContainerType
 	,intLeadTime = ISNULL(DPort.intLeadTime, 0)
@@ -246,6 +246,16 @@ SELECT
 		WHEN 2 THEN 'Partially Released'
 		WHEN 3 THEN 'Released'
 		END COLLATE Latin1_General_CI_AS
+    ,strTaxPoint = L.strTaxPoint
+    ,strLocationName = L.strLocationName
+    ,intTaxLocationId = L.intTaxLocationId
+    ,ysnTaxPointOverride = L.ysnTaxPointOverride
+    ,ysnTaxLocationOverride = L.ysnTaxLocationOverride
+    ,ysnProvisionalReleased = L.ysnProvisionalReleased
+    ,ysnFinalReleased = L.ysnFinalReleased
+    ,dtmProvisionalReleased = L.dtmProvisionalReleased
+    ,dtmFinalReleased = L.dtmFinalReleased
+    ,L.strFreightPayment
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -281,7 +291,7 @@ LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
 LEFT JOIN tblICItem INS ON INS.intItemId = L.intInsuranceItemId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = L.intTermId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
-LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+LEFT JOIN tblCMBank BK ON BK.intBankId = L.intBankId
 LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = L.intBorrowingFacilityId
 LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = L.intBorrowingFacilityLimitId
 LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = L.intBorrowingFacilityLimitDetailId

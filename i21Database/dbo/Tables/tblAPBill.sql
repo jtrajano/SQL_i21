@@ -118,7 +118,10 @@
 	[dblRoundingTotal] DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblAverageExchangeRate] DECIMAL (18, 6) NULL,
 	[dblProvisionalPercentage] DECIMAL (18, 6) NOT NULL DEFAULT 100,
-	[ysnFinalVoucher] BIT NULL DEFAULT 0
+	[ysnFinalVoucher] BIT NULL DEFAULT 0,
+	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] INT NULL,
+	[intProfitCenter] INT NULL
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     -- CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),

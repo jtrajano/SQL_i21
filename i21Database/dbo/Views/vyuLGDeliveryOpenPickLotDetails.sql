@@ -30,6 +30,9 @@ SELECT DISTINCT PL.intPickLotDetailId,
   intWeightItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId),
   PL.dtmPickedDate,
   Lot.strLotNumber,
+  Lot.strLotAlias,
+  ICL.strWarrantNo,
+  WS.strWarrantStatus,
   Lot.strReceiptNumber,
   Lot.strMarkings,
   Con.strContainerNumber,
@@ -105,6 +108,8 @@ JOIN tblICItem IM ON IM.intItemId = SCD.intItemId
 LEFT JOIN tblLGLoadContainer Con ON Con.intLoadContainerId = PL.intContainerId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
 LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = PL.intLotId
+LEFT JOIN tblICLot ICL ON ICL.intLotId = Lot.intLotId
+LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = ICL.intWarrantStatus
 LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

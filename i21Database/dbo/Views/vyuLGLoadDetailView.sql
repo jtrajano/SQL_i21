@@ -63,6 +63,7 @@ SELECT LD.intLoadDetailId
 	, ysnPSubCurrency = AD.ysnSeqSubCurrency
 	, dblPMainCashPrice = PDetail.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
 	, dblPFranchise = CASE WHEN PWG.dblFranchise > 0 THEN PWG.dblFranchise / 100 ELSE 0 END
+	, intSellerId = LD.intSellerId
 	, strSeller = Seller.strName
 
 -- Inbound Company Location

@@ -23,6 +23,7 @@ BEGIN TRY
 			,@dblBalance						NUMERIC(18,6)
 			,@dblBalanceLoad					NUMERIC(18,6)
 			,@ysnLoad							BIT
+			,@strBillIds 						nvarchar(100);
 			;
 
 	SELECT	@intPricingTypeId			=	intPricingTypeId,
@@ -139,10 +140,14 @@ BEGIN TRY
 				else
 				begin
 					update tblICInventoryReceiptItem set ysnAllowVoucher = 1 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
+					select @strBillIds = null;
 					exec uspICConvertReceiptToVoucher
-						@intInventoryReceiptId
-						,@intUserId
-						,@intNewBillId OUTPUT
+						@intReceiptId = @intInventoryReceiptId
+						,@intEntityUserSecurityId = @intUserId
+						,@strType = default
+						,@intBillId = @intNewBillId OUTPUT
+						,@strBillIds = @strBillIds OUTPUT
+						,@intScreenId = default
 
 					if (@intPricingTypeId = 2)
 					begin

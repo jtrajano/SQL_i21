@@ -9,6 +9,8 @@
     [intAccountsReceivableRateTypeId]				INT NULL, 
 	[intGeneralJournalRateTypeId]					INT NULL, 
 	[intFixedAssetsRateTypeId]						INT NULL, 
+	[intHelpdeskRateTypeId]							INT NULL,
+	[intMarkToMarketRateTypeId]						INT NULL,
 	/* Unrealized */
 	[intAccountsPayableUnrealizedId]				INT NULL,
 	[intAccountsReceivableUnrealizedId]				INT NULL, 
@@ -39,7 +41,8 @@
 	[intGainOnForwardOffsetId]						INT NULL,
 	[intGainOnSwapOffsetId]							INT NULL,
 	[intGainOnGLOffsetId]							INT NULL,
-	/* Offset */
+	
+	/* Realized */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
 	[intFixedAssetsRealizedId]						INT NULL,
@@ -47,6 +50,21 @@
 	[intGainOnForwardRealizedId]					INT NULL,
 	[intGainOnSwapRealizedId]						INT NULL,
 	[intForexDifferenceRealizedId]					INT NULL,
+	[intGeneralLedgerRealizedId]					INT NULL,
+	[intInventoryRealizedId]						INT NULL,
+	[intInventoryInTransitRealizedId]				INT NULL,
+
+	[ysnGeneralLedgerRevalue]						BIT NULL DEFAULT 1,
+	[ysnSalesRevalue]								BIT NULL DEFAULT 1,
+	[ysnPurchasingRevalue]							BIT NULL DEFAULT 1,
+	[ysnCashManagementRevalue]						BIT NULL DEFAULT 1,
+	[ysnContractRevalue]							BIT NULL DEFAULT 1,
+	[ysnInventoryRevalue]							BIT NULL DEFAULT 1,
+	[ysnPayrollRevalue]								BIT NULL DEFAULT 1,
+	[ysnFixedAssetsRevalue]							BIT NULL DEFAULT 1,
+	[ysnInTransitRevalue]							BIT NULL DEFAULT 1,
+	[ysnSwapRevalue]								BIT NULL DEFAULT 1,
+	[ysnForwardRevalue]								BIT NULL DEFAULT 1,
 	/* Bank Transfer */
 
 	[intConcurrencyId]								INT NOT NULL DEFAULT 1, 
@@ -76,5 +94,22 @@
 	CONSTRAINT [FK_tblSMMultiCurrency_Offset_RiskManagementFuture] FOREIGN KEY ([intRiskManagementFutureOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Offset_RiskManagementCash] FOREIGN KEY ([intRiskManagementCashOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Realized_RiskManagementFuture] FOREIGN KEY ([intAccountsPayableRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
-	CONSTRAINT [FK_tblSMMultiCurrency_Realized_RiskManagementCash] FOREIGN KEY ([intAccountsReceivableRealizedId]) REFERENCES [tblGLAccount]([intAccountId])
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_RiskManagementCash] FOREIGN KEY ([intAccountsReceivableRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_FixedAssets] FOREIGN KEY ([intFixedAssetsRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_FixedAssets] FOREIGN KEY ([intFixedAssetsUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_GainOnForward] FOREIGN KEY ([intGainOnForwardUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_GainOnSwap] FOREIGN KEY ([intGainOnSwapUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_GainOnGL] FOREIGN KEY ([intGainOnGLUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Offset_FixedAssets] FOREIGN KEY ([intFixedAssetsOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Offset_GainOnForward] FOREIGN KEY ([intGainOnForwardOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Offset_GainOnSwap] FOREIGN KEY ([intGainOnSwapOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Offset_GainOnGL] FOREIGN KEY ([intGainOnGLOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_FixedAssets] FOREIGN KEY ([intFixedAssetsRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_CashManagement] FOREIGN KEY ([intCashManagementRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_GainOnForward] FOREIGN KEY ([intGainOnForwardRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_GainOnSwap] FOREIGN KEY ([intGainOnSwapRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_ForexDifference] FOREIGN KEY ([intForexDifferenceRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_GeneralLedger] FOREIGN KEY ([intGeneralLedgerRealizedId]) REFERENCES [tblGLAccount]([intAccountId])
+	
 )

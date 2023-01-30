@@ -102,7 +102,10 @@ SELECT  L.intLoadId
 	   ,BO.strBook
 	   ,L.intSubBookId
 	   ,SB.strSubBook
+	   ,strVendor = VEN.strName
+	   ,LD.intVendorEntityId
 FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
@@ -113,4 +116,5 @@ LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
 WHERE ISNULL(L.strBLNumber,'') <> ''

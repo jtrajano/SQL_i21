@@ -24,7 +24,10 @@ BEGIN
 			@strUserPhoneNo				NVARCHAR(100),
 			@strUserEmailId				NVARCHAR(100),
 			@strContainerQtyUOM			NVARCHAR(100),
-			@strPackingUOM				NVARCHAR(100)
+			@strPackingUOM				NVARCHAR(100),
+			@Condition					VARCHAR(8000) ,
+			@intVendorCustomerLocId		INT,
+			@intPSCompanyLocId			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -102,6 +105,33 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE intLoadId = @intLoadId
 	GROUP BY UOM.strUnitMeasure
+
+	SET @Condition = '<ol>'
+	SELECT @Condition = COALESCE(@Condition + '<li>', '') + CTC.strConditionName + ' - ' + LC.strConditionDescription + '</li>'
+	FROM tblLGLoadCondition LC
+	INNER JOIN tblCTCondition CTC ON LC.intConditionId = CTC.intConditionId
+	WHERE intLoadId = @intLoadId
+	SET @Condition = @Condition +'</ol>'
+
+	IF @Condition = '<ol></ol>'
+	BEGIN
+		SET @Condition = NULL
+	END
+
+	SELECT
+		@intVendorCustomerLocId = 
+			CASE WHEN intPurchaseSale = 1 
+				THEN LD.intVendorEntityLocationId ELSE
+				intCustomerEntityLocationId
+			END,
+		@intPSCompanyLocId =
+			CASE WHEN intPurchaseSale = 1 
+				THEN LD.intPCompanyLocationId ELSE
+				intSCompanyLocationId
+			END
+	FROM tblLGLoad L
+	INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	WHERE L.intLoadId = @intLoadId
 
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
@@ -186,6 +216,7 @@ SELECT *
 	,strShipmentPeriod
 	,strDestinationCity
 	,strMarkingInstruction
+	,strConditions = @Condition
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
@@ -488,8 +519,10 @@ FROM (
 		,strDischargeUnit = DisUnit.strUnitMeasure
 		,L.strLoadingPerUnit
 		,L.strDischargePerUnit
-		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
-		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+		,blbHeaderLogo = LOGO.blbHeaderLogo
+		,blbFooterLogo = LOGO.blbFooterLogo
+		,LOGO.strHeaderLogoType
+		,LOGO.strFooterLogoType
 		,strShippingInstructionStandardText = (SELECT TOP 1 strShippingInstructionText FROM tblLGCompanyPreference)
 		,strContractText = (SELECT TOP 1 strInboundText FROM tblSMCity WHERE strCity = L.strDestinationPort)
 		,L.strDestinationCity
@@ -609,18 +642,42 @@ FROM (
 	
 	LEFT JOIN tblLGReportRemark strItemRemarks ON 
 		strItemRemarks.intValueId = LD.intItemId 
-		AND ISNULL(strItemRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND ISNULL(strItemRemarks.intLocationId, 1) = ISNULL(@intPSCompanyLocId,1)
 		AND strItemRemarks.strType = 'Item'
 
 	LEFT JOIN tblLGReportRemark strEntityRemarks ON 
 		strEntityRemarks.intValueId = LD.intVendorEntityId
-		AND ISNULL(strEntityRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND ISNULL(strEntityRemarks.intLocationId, 1) = ISNULL(@intVendorCustomerLocId,1)
 		AND strEntityRemarks.strType = 'Entity'
 
 	CROSS APPLY tblLGCompanyPreference CP
 	OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 			 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
+	
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+		FROM tblSMLogoPreference
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = CD.intCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLH
+	OUTER APPLY (
+		SELECT TOP 1 [blbLogo] = imgLogo
+		FROM tblSMLogoPreferenceFooter
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = CD.intCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLF
+	OUTER APPLY (
+		SELECT
+			blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+			,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+			,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+			,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	) LOGO
+
 	WHERE L.intLoadId = @intLoadId
 	) tbl
 END

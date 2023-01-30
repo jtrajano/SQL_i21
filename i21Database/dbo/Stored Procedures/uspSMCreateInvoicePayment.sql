@@ -9,6 +9,8 @@
 	,@intEntityCardInfoId 	AS INT 				= NULL
 	,@intPaymentId 			AS INT 				= NULL
 	,@strPaymentMethod 		AS NVARCHAR(50)		= NULL
+	,@ysnScheduledPayment	AS BIT 				= 0
+	,@dtmScheduledPayment	AS DATETIME 		= NULL
 	,@strPaymentIdNew 		AS NVARCHAR(50) 	= NULL OUTPUT
 	,@intPaymentIdNew 		AS INT 				= NULL OUTPUT
 	,@ErrorMessage 			AS NVARCHAR(250)	= NULL OUTPUT
@@ -48,7 +50,7 @@ BEGIN
 	FROM tblSMPaymentMethod
 	WHERE strPaymentMethod = @strPaymentMethod
 
-	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
+	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@ysnScheduledPayment, 0) = 0
 		BEGIN
 			SET @intCompanyLocationId	= NULL
 			SET @intUndepositedFundId	= NULL
@@ -78,6 +80,9 @@ BEGIN
 			SELECT @intPaymentsLocationId = intPaymentsLocationId,
 				   @strCreditCardConvenienceFee = strCreditCardConvenienceFee
 			FROM tblSMCompanyPreference
+
+			IF @ysnScheduledPayment = 1 AND @strCreditCardNumber IS NULL
+				SELECT @strCreditCardNumber = strCreditCardNumber FROM tblEMEntityCardInformation WHERE intEntityCardInfoId = @intEntityCardInfoId
 
 			IF @intPaymentsLocationId IS NOT NULL
 			BEGIN
@@ -177,6 +182,8 @@ BEGIN
 				, dblCurrencyExchangeRate
 				, ysnAllowOverpayment
 				, ysnFromAP
+				, ysnScheduledPayment
+				, dtmScheduledPayment
 			)
 			SELECT 
 				intId							= INVOICE.intInvoiceId
@@ -187,15 +194,15 @@ BEGIN
 				, intEntityCustomerId			= INVOICE.intEntityCustomerId
 				, intCompanyLocationId			= @intCompanyLocationId
 				, intCurrencyId					= INVOICE.intCurrencyId
-				, dtmDatePaid					= GETDATE()
-				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
+				, dtmDatePaid					= CASE WHEN @ysnScheduledPayment = 1 THEN @dtmScheduledPayment ELSE GETDATE() END
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
 				, strPaymentMethod				= ISNULL(@strCreditCardNumber, @strPaymentMethod)
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
-				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intBankAccountId ELSE NULL END
+				, intBankAccountId				= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
-				, ysnPost						= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
+				, ysnPost						= CASE WHEN (ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0) OR ISNULL(@ysnScheduledPayment, 0) = 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 				, intInvoiceId					= INVOICE.intInvoiceId
@@ -221,6 +228,8 @@ BEGIN
 				, dblCurrencyExchangeRate		= INVOICE.dblCurrencyExchangeRate
 				, ysnAllowOverpayment			= 0
 				, ysnFromAP						= 0
+				, ysnScheduledPayment			= ISNULL(@ysnScheduledPayment, 0)
+				, dtmScheduledPayment			= CASE WHEN @ysnScheduledPayment = 1 THEN @dtmScheduledPayment ELSE NULL END
 			FROM vyuARInvoicesForPayment INVOICE
 			INNER JOIN #INVOICEANDPAYMENT PAYMENTS ON INVOICE.strInvoiceNumber = PAYMENTS.strInvoiceNumber
 			WHERE INVOICE.strInvoiceNumber IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceNumber))
@@ -306,6 +315,19 @@ BEGIN
 		,@fromValue			= ''			
 		,@toValue			= ''
 
+	-- Start: New way of audit logging
+	BEGIN TRY
+		DECLARE @auditLogsParam SingleAuditLogParam
+
+		INSERT INTO @auditLogsParam ([Id], [Action], [Change], [From], [To], [Alias], [Field], [Hidden], [ParentId])
+		SELECT 1, 'Created', '', NULL, NULL, NULL, NULL, NULL, NULL
+
+		EXEC uspSMSingleAuditLog 'AccountsReceivable.view.ReceivePaymentsDetail', @intPaymentIdNew, @intUserId, @auditLogsParam
+	END TRY
+	BEGIN CATCH
+	END CATCH
+	-- End: New way of audit logging
+
 	GOTO Exit_Routine
 END
 --================================================================
@@ -318,26 +340,31 @@ BEGIN
 	  , intCurrentStatus = 5
 	WHERE intPaymentId = @intPaymentId
 
-	EXEC [dbo].[uspARPostPayment]
-			@batchId = NULL,
-			@post = 1,
-			@recap = 0,
-			@param = @intPaymentId,
-			@userId = @intUserId,
-			@beginDate = NULL,
-			@endDate = NULL,
-			@beginTransaction = NULL,
-			@endTransaction = NULL,
-			@exclude = NULL,
-			@raiseError = 1,
-			@bankAccountId = NULL
+	BEGIN TRY
+		EXEC [dbo].[uspARPostPayment] @post			= 1
+									, @recap		= 0
+									, @param		= @intPaymentId
+									, @userId		= @intUserId
+									, @raiseError	= 1
+	END TRY
+	BEGIN CATCH
+		DECLARE @strErrorMsg NVARCHAR(250) = ERROR_MESSAGE()
+
+		UPDATE tblARPayment 
+		SET intEntityCardInfoId		= @intEntityCardInfoId
+		  , ysnProcessCreditCard	= 0 
+		  , intCurrentStatus		= 5
+		  , strCreditCardNote		= @strErrorMsg
+		  , strCreditCardStatus		= 'Failed'
+		WHERE intPaymentId = @intPaymentId
+
+	END CATCH
 
 	SET @intPaymentIdNew = @intPaymentId
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentId
-	--Set the Card Info Id and Process Credit Card
+	
 	UPDATE tblARPayment 
 	SET intEntityCardInfoId = @intEntityCardInfoId
-	  --, ysnProcessCreditCard = 1 
 	  , intCurrentStatus = 5
 	WHERE intPaymentId = @intPaymentId
 

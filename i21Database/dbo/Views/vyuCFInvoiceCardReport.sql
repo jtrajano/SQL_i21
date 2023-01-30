@@ -1,7 +1,7 @@
 ﻿
 CREATE VIEW [dbo].[vyuCFInvoiceCardReport]
 AS
-SELECT        cfCard.intAccountId, cfTrans.intCardId, cfCard.strCardNumber, cfTrans.intProductId, cfTrans.intARItemId, cfItem.strProductNumber, cfItem.strProductDescription, cfCard.strCardDescription, 
+SELECT        cfCard.intAccountId, cfTrans.intCardId, cfCard.strCardNumber, cfTrans.intProductId, cfItem.intARItemId, cfItem.strProductNumber, cfItem.strProductDescription, cfCard.strCardDescription, 
                          cfTrans.strMiscellaneous, ISNULL(SUM(cfTrans.dblQuantity), 0) AS dblTotalQuantity, ISNULL(SUM(cfTrans.dblCalculatedGrossPrice), 0) AS dblTotalGrossAmount, 
                          ISNULL(SUM(cfTrans.dblCalculatedNetPrice), 0) AS dblTotalNetAmount, ISNULL(SUM(cfTrans.dblCalculatedTotalPrice), 0) AS dblTotalAmount, ISNULL(SUM(FETTaxes.dblTaxCalculatedAmount), 0) 
                          AS TotalFET, ISNULL(SUM(SETTaxes.dblTaxCalculatedAmount), 0) AS TotalSET, ISNULL(SUM(SSTTaxes.dblTaxCalculatedAmount), 0) AS TotalSST, ISNULL(SUM(LCTaxes.dblTaxCalculatedAmount), 0) 
@@ -44,5 +44,5 @@ FROM            dbo.tblCFTransaction AS cfTrans INNER JOIN
                                                          dbo.tblSMTaxCode AS ismTaxCode ON icfTramsactionTax.intTaxCodeId = ismTaxCode.intTaxCodeId
                                WHERE        (ismTaxCode.strTaxCode LIKE 'LC%')
                                GROUP BY icfTramsactionTax.intTransactionId) AS LCTaxes ON cfTrans.intTransactionId = LCTaxes.intTransactionId
-GROUP BY cfCard.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId, cfTrans.intProductId, cfCard.strCardNumber, cfCard.strCardDescription, cfTrans.intProductId, cfTrans.intARItemId, cfItem.strProductNumber, 
+GROUP BY cfCard.intAccountId, cfTrans.strMiscellaneous, cfTrans.intCardId, cfTrans.intProductId, cfCard.strCardNumber, cfCard.strCardDescription, cfTrans.intProductId, cfItem.intARItemId, cfItem.strProductNumber, 
                          cfItem.strProductDescription

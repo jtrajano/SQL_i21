@@ -6,25 +6,21 @@
 RETURNS INT
 AS
 BEGIN
-	DECLARE @ARAccountId INT
-		, @ProfitCenterId INT
+	DECLARE 
+		 @intARAccountId 	INT = NULL
+		,@strARAccountId	NVARCHAR (40)
 
-	SET @ARAccountId = NULL
-	SET @ProfitCenterId = (SELECT TOP 1 intProfitCenter FROM tblSMCompanyLocation where intCompanyLocationId = @CompanyLocationId)
+	SELECT TOP 1 
+		 @intARAccountId	= CASE @TransactionType WHEN 'Cash Refund' THEN intAPAccount
+								WHEN 'Cash' THEN intUndepositedFundsId
+								WHEN 'Customer Prepayment' THEN intSalesAdvAcct
+								ELSE intARAccount
+							  END
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @CompanyLocationId
 
-	IF @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
-		SET @ARAccountId = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0)
+	IF @intARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
+		SELECT TOP 1 @intARAccountId = [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0
 
-	IF @TransactionType = 'Cash Refund'
-		SET @ARAccountId = (SELECT TOP 1 [intAPAccount] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
-
-	IF @TransactionType = 'Cash'
-		SET @ARAccountId = (SELECT TOP 1 [intUndepositedFundsId] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
-		
-	IF @TransactionType = 'Customer Prepayment'
-		SET @ARAccountId = (SELECT TOP 1 [intSalesAdvAcct] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId)
-		
-	SET @ARAccountId = ISNULL([dbo].[fnGetGLAccountIdFromProfitCenter](@ARAccountId, @ProfitCenterId), @ARAccountId)
-
-	RETURN @ARAccountId
+	RETURN @intARAccountId
 END

@@ -8,7 +8,8 @@ BEGIN TRY
  
 	DECLARE
 		@ErrMsg NVARCHAR(MAX)
-		,@intContractTypeId int;
+		,@intContractTypeId int
+		,@intScreenId int;
 
 
 	DECLARE @tblShipment TABLE (
@@ -32,17 +33,9 @@ BEGIN TRY
 		intContractDetailId INT
 		, ysnOpenLoad BIT
 	);
+	Select @intScreenId=intScreenId from tblSMScreen Where strNamespace = 'ContractManagement.view.PriceContracts'
 
 	select top 1 @intContractTypeId = intContractTypeId from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
-	
-	SELECT
-		*
-	INTO
-		#tmpContractDetail
-	FROM
-		tblCTContractDetail WITH (NOLOCK)
-	WHERE
-		intContractHeaderId = @intContractHeaderId;
 
 	if (@intContractTypeId = 1)
 	begin
@@ -58,7 +51,7 @@ BEGIN TRY
 			JOIN tblICInventoryReceipt Receipt WITH (NOLOCK)
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				AND Receipt.strReceiptType = 'Purchase Contract'
-			JOIN #tmpContractDetail CD
+			JOIN tblCTContractDetail CD
 				ON CD.intContractDetailId = ReceiptItem.intLineNo
 				AND CD.intContractHeaderId = ReceiptItem.intOrderId
 		WHERE
@@ -114,7 +107,7 @@ BEGIN TRY
 			JOIN tblICInventoryShipment Shipment WITH (NOLOCK)
 				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId 
 				AND Shipment.intOrderType = 1
-			JOIN #tmpContractDetail CD 
+			JOIN tblCTContractDetail CD 
 				ON CD.intContractDetailId = ShipmentItem.intLineNo 
 				AND CD.intContractHeaderId = ShipmentItem.intOrderId
 			LEFT JOIN (
@@ -148,10 +141,10 @@ BEGIN TRY
 		GROUP BY
 			ShipmentItem.intOrderId
 			, ShipmentItem.intLineNo
-	end
+	end;
 
-	INSERT INTO
-		@OpenLoad
+	WITH OpenLoad as
+	(
 	SELECT
 		intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
 		, ysnOpenLoad = CAST(LD.intLoadDetailId AS BIT)
@@ -159,16 +152,17 @@ BEGIN TRY
 		tblLGLoad LO
 		JOIN tblLGLoadDetail LD
 			ON LD.intLoadId = LO.intLoadId
-		JOIN #tmpContractDetail CD
+		JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
 	WHERE
 		intTicketId IS NULL
 		AND LO.intShipmentStatus NOT IN(4, 10)
 		AND LO.intShipmentType <> 2
-		AND CD.intContractHeaderId = @intContractHeaderId;
-	
-	WITH CTE1 AS (
-		SELECT CD.intContractDetailId
+		AND CD.intContractHeaderId = @intContractHeaderId
+	),
+	CTE1 AS (
+		SELECT
+			CD.intContractDetailId
 			, AD.intSeqCurrencyId
 			, AD.strSeqCurrency
 			, AD.ysnSeqSubCurrency
@@ -213,17 +207,19 @@ BEGIN TRY
 			, CH.ysnMultiplePriceFixation
 			, FI.dblRollArb
 		FROM
-			#tmpContractDetail CD
+			tblCTContractDetail CD
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			left join @OpenLoad LG on LG.intContractDetailId = CD.intContractDetailId
+			left join OpenLoad LG on LG.intContractDetailId = CD.intContractDetailId
 			OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
 			OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
 			OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
 			OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
 			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		WHERE
+			CD.intContractHeaderId = @intContractHeaderId
 	)
 	
-	SELECT DISTINCT CD.intContractDetailId
+	SELECT CD.intContractDetailId
 		, CD.intSplitFromId
 		, CD.intParentDetailId
 		, CD.ysnSlice
@@ -343,7 +339,7 @@ BEGIN TRY
 		, CD.intInvoiceCurrencyId
 		, CD.dtmFXValidFrom
 		, CD.dtmFXValidTo
-		, dblRate = isnull(CD.dblRate,1)
+		, dblRate = case when CD.intInvoiceCurrencyId = CD.intCurrencyId or CD.intInvoiceCurrencyId = CY.intCurrencyID then 1 else CD.dblRate end
 		, CD.dblFXPrice
 		, CD.ysnUseFXPrice
 		, CD.intFXPriceUOMId
@@ -353,6 +349,7 @@ BEGIN TRY
 		, CD.strPackingDescription
 		, CD.dblYield
 		, CD.intCurrencyExchangeRateId
+		, CD.intRevaluationCurrencyExchangeRateId
 		, CD.intRateTypeId
 		, CD.intCreatedById
 		, CD.dtmCreated
@@ -405,10 +402,29 @@ BEGIN TRY
 		, strIndex = dbo.[fnCTGetSeqDisplayField](CD.intIndexId, 'tblCTIndex')
 		, CS.strContractStatus
 		, strShipmentStatus = ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open')
-		, strFinancialStatus = CASE WHEN CT.intContractTypeId = 1 THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
-														WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
-														ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END END
-				ELSE CD.strFinancialStatus END
+		, strFinancialStatus = (
+			CASE
+			WHEN CT.intContractTypeId = 1
+			THEN
+				CASE
+				WHEN CD.ysnFinalPNL = 1
+				THEN 'Final P&L Created'
+				WHEN CD.ysnProvisionalPNL = 1
+				THEN 'Provisional P&L Created'
+				ELSE
+					CASE
+					WHEN BDB.intTransactionType IS NOT NULL
+					THEN
+						case
+						when BDB.intTransactionType = 1
+						then 'Purchase Invoice Received'
+						else 'Prepayment - Purchase Invoice Received'
+						end
+					END
+				END
+			ELSE CD.strFinancialStatus
+			END
+		)
 		, strFutureMarket = MA.strFutMarketName
 		, strFutureMonth = REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ')
 		, dblConversionFactor = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1)
@@ -425,6 +441,7 @@ BEGIN TRY
 										ELSE (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)) END END
 		, dblExchangeRate = dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0)
 		, IM.intProductTypeId
+		, intExtensionId = IM.intCommodityAttributeId4
 		, ysnItemUOMIdExist = CAST(1 AS BIT)
 		, strSubLocationName = dbo.[fnCTGetSeqDisplayField](CD.intSubLocationId, 'tblSMCompanyLocationSubLocation')
 		, strStorageLocationName = dbo.[fnCTGetSeqDisplayField](CD.intStorageLocationId, 'tblICStorageLocation')
@@ -449,6 +466,7 @@ BEGIN TRY
 		, strDestinationCity = dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId, 'tblSMCity')
 		, strInvoiceCurrency = IY.strCurrency
 		, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
+		, strRevaluationExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intRevaluationCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 		, strPurchasingGroup = PG.strName
 		, strFXPriceUOM = dbo.[fnCTGetSeqDisplayField](CD.intFXPriceUOMId, 'tblICItemUOM')
 		, RT.strCurrencyExchangeRateType
@@ -482,7 +500,7 @@ BEGIN TRY
 		, CT.dblPFQuantityUOMId
 		, dblTotalLots = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblNoOfLots
 								ELSE CT.[dblTotalLots] END
-		, dblLotsFixed = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN CD.dblNoOfLots
+		, dblLotsFixed = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN ISNULL(CD.dblNoOfLots,AP.dblLotsFixed)
 								ELSE CT.[dblLotsFixed] END
 		, dblUnpricedLots = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN NULL
 								ELSE CT.dblUnpricedLots END
@@ -529,12 +547,11 @@ BEGIN TRY
 		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
 		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
 		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
-
 		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
-		, BA.intBankId
+		, BK.intBankId
 		, BK.strBankName
-		, BA.strBankAccountNo
+		, strBankAccountNo = ISNULL(dbo.fnAESDecryptASym(BA.strBankAccountNo),BA.strBankAccountNo) COLLATE Latin1_General_CI_AS
 		, CD.intBorrowingFacilityId
 		, FA.strBorrowingFacilityId
 		, CD.intBorrowingFacilityLimitId
@@ -558,12 +575,12 @@ BEGIN TRY
 		, CD.dblOptionalityPremium
 		, CD.intCostTermId
 		, strCostTerm = CostTerm.strFreightTerm
-		, ICC.strProductType
-		, ICC.strGrade AS strGradeCommodity
-		, ICC.strRegion
-		, ICC.strSeason
-		, ICC.strClass
-		, ICC.strProductLine
+		, strProductType = ProductType.strDescription
+		, strGradeCommodity = Grade.strDescription
+		, strRegion = Region.strDescription
+		, strSeason = Season.strDescription
+		, strClass = Class.strDescription
+		, strProductLine = ProductLine.strDescription
 		, CD.dblInterestRate
 		, CD.dtmPrepaymentDate
 		, CD.dblPrepaymentAmount
@@ -612,7 +629,23 @@ BEGIN TRY
 		, strLCTreasuryBank = credB.strBankName
 		, strLCBank = credB2.strBankName
 		, CT.dblRollArb
-	FROM #tmpContractDetail CD
+		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.intTaxGroupId
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
+		, TG.strTaxGroup
+		, CD.intTaxLocationId
+		, CD.dtmHistoricalDate
+		, CD.dblHistoricalRate
+		, CD.intHistoricalRateTypeId
+		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
+		, CD.intMTMPointId
+		, strMTMPoint = mtmp.strMTMPoint
+		, strLogisticsLeadName = LL.strName
+		, CD.intLogisticsLeadId
+	FROM tblCTContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
 	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
@@ -623,6 +656,12 @@ BEGIN TRY
 	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 	LEFT JOIN tblCTPricingType PTH ON PTH.intPricingTypeId = CT.intHeaderPricingTypeId
 	LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+	LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId
+	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = IM.intGradeId
+	LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = IM.intRegionId
+	LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = IM.intSeasonId
+	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = IM.intClassVarietyId
+	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = IM.intProductLineId
 	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	LEFT JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
@@ -631,7 +670,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
 	-- Trade Finance
-	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN tblCMBankAccount BA on BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BK ON BK.intBankId = CD.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
@@ -649,6 +688,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
+	LEFT JOIN tblSMCurrencyExchangeRateType HRT ON HRT.intCurrencyExchangeRateTypeId = CD.intHistoricalRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CT.intCommodityUOMId
@@ -661,7 +701,19 @@ BEGIN TRY
 		AND FRM.strDestinationCity = DestinationPort.strCity
 		AND FRM.intType = 2 -- General type
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
+	outer apply (
+		select top 1
+			b.intTransactionType
+		from
+			tblAPBillDetail  bd
+			join tblAPBill b on b.intBillId = bd.intBillId
+		where
+			bd.intContractDetailId = CD.intContractDetailId
+			and bd.intItemId = CD.intItemId
+			and b.intTransactionType in (1,2)
+		order by
+			b.intTransactionType
+	) BDB
     outer apply (
         select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
     ) AD
@@ -680,23 +732,27 @@ BEGIN TRY
 		SELECT TOP 1 a.intContractHeaderId
 			, a.intContractDetailId
 			, c.strApprovalStatus
+			, a.dblLotsFixed
 		FROM tblCTPriceFixation a
-		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL
-		LEFT JOIN tblSMScreen d ON d.strNamespace = 'ContractManagement.view.PriceContracts' AND d.intScreenId = c.intScreenId AND d.ysnApproval = 1
+		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL and c.intScreenId =@intScreenId
 		WHERE a.intContractHeaderId = @intContractHeaderId
 			AND ISNULL(a.intContractDetailId, 0) = CASE WHEN CT.ysnMultiplePriceFixation = 1 THEN ISNULL(a.intContractDetailId, 0) ELSE ISNULL(CD.intContractDetailId, 0) END
 		ORDER BY c.intTransactionId DESC
 	) AP
 	-- Commodity Attributes
-	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
 	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
 	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
-	ORDER BY CD.intContractSeq
+	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
+	LEFT JOIN tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId	
+	LEFT JOIN tblCTMTMPoint mtmp on mtmp.intMTMPointId = CD.intMTMPointId
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 
-	DROP TABLE #tmpContractDetail
+
+	WHERE CD.intContractHeaderId = @intContractHeaderId
+
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

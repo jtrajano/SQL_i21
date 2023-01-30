@@ -290,7 +290,7 @@ BEGIN TRY
 						,strMessage = @StatusText
 						,strERPTransferOrderNo = @ERPReferenceNo
 					WHERE intReceiptFeedHeaderId = @TrxSequenceNo
-						AND intStatusId = 2
+						--AND intStatusId = 2
 
 					--UPDATE tblIPInvReceiptFeed
 					--SET strERPTransferOrderNo = @ERPReferenceNo
@@ -330,7 +330,7 @@ BEGIN TRY
 						,strMessage = @StatusText
 						,strERPVoucherNo = @ERPVoucherNo
 					WHERE intBillId = @intBillId
-						AND intStatusId = 2
+						--AND intStatusId = 2
 
 					--Update the ERP Voucher No in UnPost / Repost records
 					UPDATE tblAPBillPreStage
@@ -373,7 +373,7 @@ BEGIN TRY
 						,strMessage = @StatusText
 						,strERPTransferOrderNo = @ERPTransferOrderNo
 					WHERE intInventoryTransferId = @intInventoryTransferId
-						AND intStatusId = 2
+						--AND intStatusId = 2
 
 					UPDATE tblIPInvTransferFeed
 					SET strERPTransferOrderNo = @ERPTransferOrderNo

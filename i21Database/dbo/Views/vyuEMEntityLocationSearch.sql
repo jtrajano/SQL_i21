@@ -58,6 +58,10 @@ SELECT intEntityId				= EL.intEntityId
      , strFederalTaxId			= EL.strFederalTaxId
      , dtmW9Signed				= EL.dtmW9Signed
 	 , strVATNo					= EL.strVATNo
+	 , strSaleUnits				= EL.strSaleUnits
+	 , strOurFiscalRepName		= EL.strOurFiscalRepName
+	 , strOurFiscalRepAddress	= EL.strOurFiscalRepAddress
+	 , strRemarks				= EL.strRemarks
 FROM tblEMEntityLocation EL
 LEFT JOIN tblSMTaxClass TC ON EL.intTaxClassId = TC.intTaxClassId
 LEFT JOIN tblSMTaxGroup TG ON EL.intTaxGroupId = TG.intTaxGroupId

@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICGetLotAsOfDate]
-	@intItemId AS INT,
+	@intItemId AS INT = NULL,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
 	@intStorageLocationId AS INT = NULL,
@@ -145,6 +145,7 @@ SELECT
 	,ItemUOM.intItemUOMId
 	,strItemUOM						= iUOM.strUnitMeasure
 	,strItemUOMType					= iUOM.strUnitType
+	,iUOM.intUnitMeasureId
 	,ItemUOM.ysnStockUnit
 	,ItemUOM.dblUnitQty
 	,t.intCostingMethod
@@ -239,6 +240,7 @@ GROUP BY i.intItemId
 		,ItemUOM.intItemUOMId
 		,iUOM.strUnitMeasure 
 		,iUOM.strUnitType
+		,iUOM.intUnitMeasureId
 		,ItemUOM.ysnStockUnit
 		,ItemUOM.dblUnitQty
 		,ItemLocation.intLocationId

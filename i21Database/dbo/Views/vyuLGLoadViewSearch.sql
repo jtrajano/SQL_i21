@@ -155,6 +155,14 @@ SELECT L.intLoadId
 	,SB.strSubBook
 	,L.ysnAllowReweighs
 	,L.ysnShowOptionality
+	,strReleaseStatus = CASE WHEN (ISNULL(L.ysnFinalReleased, 0) = 1) THEN 'Final Released'
+							WHEN (ISNULL(L.ysnProvisionalReleased, 0) = 1) THEN 'Provisional Released'
+							ELSE NULL
+						END
+	,strProvisionalInvoice = ARProvisional.strInvoiceNumber
+	,strFinalInvoice = ARFinal.strInvoiceNumber
+	,ysnPInvoicePaid = ARProvisional.ysnPaid
+	,ysnFInvoicePaid = ARFinal.ysnPaid
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
@@ -208,3 +216,12 @@ LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReas
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+OUTER APPLY (SELECT TOP 1 intLoadDetailId FROM tblLGLoadDetail LD WHERE LD.intLoadId = L.intLoadId) LD
+OUTER APPLY (SELECT TOP 1 AR.strInvoiceNumber, AR.intLoadId, AD.intLoadDetailId, AR.ysnPaid
+			FROM tblARInvoice AR
+			LEFT JOIN tblARInvoiceDetail AD ON AD.intInvoiceId = AR.intInvoiceId
+			WHERE strType = 'Provisional' AND AD.intLoadDetailId = LD.intLoadDetailId) ARProvisional
+OUTER APPLY (SELECT TOP 1 AR.strInvoiceNumber, AR.intLoadId, AD.intLoadDetailId, AR.ysnPaid
+			FROM tblARInvoice AR
+			LEFT JOIN tblARInvoiceDetail AD ON AD.intInvoiceId = AR.intInvoiceId
+			WHERE strType = 'Standard' AND AD.intLoadDetailId = LD.intLoadDetailId) ARFinal

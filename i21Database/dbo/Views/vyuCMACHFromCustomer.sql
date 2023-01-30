@@ -28,14 +28,8 @@ Unde.ysnHold,
 Unde.strHoldReason,
 Unde.intConcurrencyId,
 EFT.intEntityEFTInfoId,
-ysnPayeeEFTInfoActive = ISNULL((
-		SELECT TOP 1 ysnActive FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
-),0),
-dtmEFTEffectiveDate = 
-		(SELECT TOP 1 dtmEffectiveDate  FROM [tblEMEntityEFTInformation] EFTInfo 
-			WHERE EFTInfo.ysnActive = 1 
-			AND intEntityId =  Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc),
+ysnPayeeEFTInfoActive = CAST( CASE WHEN EFT.intEntityEFTInfoId IS NULL THEN 0 ELSE 1 END AS BIT),
+dtmEFTEffectiveDate = EFT.dtmEffectiveDate,
 ysnPrenoteSent = ISNULL((
 		SELECT TOP 1 ysnPrenoteSent FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
@@ -56,13 +50,12 @@ FROM            dbo.tblCMBankTransaction AS BT INNER JOIN
                          dbo.tblCMUndepositedFund AS Unde ON BTD.intUndepositedFundId = Unde.intUndepositedFundId INNER JOIN
                          dbo.tblARPayment AS Pay ON Unde.intSourceTransactionId = Pay.intPaymentId
 OUTER APPLY(
-		SELECT TOP 1 intEntityEFTInfoId, strRTN,
-		strAccountNumber , EFTInfo.strBankName FROM [tblEMEntityEFTInformation] EFTInfo 
+		SELECT TOP 1 intEntityEFTInfoId, strRTN,dtmEffectiveDate,
+		dbo.fnAESDecryptASym(strAccountNumber) strAccountNumber , EFTInfo.strBankName FROM [tblEMEntityEFTInformation] EFTInfo 
 		JOIN vyuCMBank B ON B.intBankId = EFTInfo.intBankId
-		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
+		WHERE intEntityId = Pay.intEntityCustomerId  AND EFTInfo.ysnActive = 1 
+		ORDER BY dtmEffectiveDate desc
 
-)EFT
-
-						 
+)EFT						 
 WHERE        (Pay.intPaymentMethodId = 2)
 GO

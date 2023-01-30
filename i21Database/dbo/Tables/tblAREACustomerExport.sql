@@ -57,5 +57,17 @@
 	dblShipToLongitude NUMERIC(18, 6) NULL,
 	dtmDateCreated DATETIME2 NULL,
 	dtmDateModified DATETIME2 NULL,
-	dtmDateLastUpdated AS COALESCE(dtmDateModified, dtmDateCreated)
+	dtmDateLastUpdated AS COALESCE(dtmDateModified, dtmDateCreated),
+	intFreightTermId INT NULL,
+	strFreightTerm NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intTermId INT NULL,
+	strTerm NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strCurrency NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intCurrencyId INT NULL,
+	intShipViaId INT NULL,
+	strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intBillToLocationId INT NULL,
+	strBillToLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intShipToLocationId INT NULL,
+	strShipToLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 )

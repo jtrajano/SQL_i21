@@ -11,6 +11,9 @@ SET ANSI_WARNINGS ON
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX) = NULL
 	DECLARE @derivativeTable TABLE (intFutOptTransactionId INT NULL)
+	DECLARE @intCashManagementRateTypeId INT = NULL
+
+	SELECT TOP 1 @intCashManagementRateTypeId = intCashManagementRateTypeId FROM tblSMMultiCurrency
 
 	DECLARE @sql_xml XML = Cast('<root><U>'+ Replace(@strFutOptTransactionIds, ',', '</U><U>')+ '</U></root>' AS XML)
 
@@ -57,15 +60,15 @@ BEGIN TRY
 		SELECT 
 			intEntityId = 1
 		, strDescription = otc.strReference -- Notes
-		, intBankAccountIdFrom = otc.intBuyBankAccountId
-		, intBankAccountIdTo = otc.intBankAccountId 
-		, intGLAccountIdFrom = buyBA.intGLAccountId
-		, intGLAccountIdTo = sellBA.intGLAccountId
-		, intCurrencyExchangeRateTypeId = otc.intCurrencyExchangeRateTypeId -- Currency Pair
+		, intBankAccountIdFrom = otc.intBankAccountId 
+		, intBankAccountIdTo = otc.intBuyBankAccountId
+		, intGLAccountIdFrom = sellBA.intGLAccountId
+		, intGLAccountIdTo = buyBA.intGLAccountId
+		, intCurrencyExchangeRateTypeId = @intCashManagementRateTypeId -- otc.intCurrencyExchangeRateTypeId -- Currency Pair
 		, dtmAccrual = otc.dtmTransactionDate
 		, dtmDate = otc.dtmMaturityDate
-		, dblAmountForeignFrom = otc.dblContractAmount -- Buy Amount
-		, dblAmountForeignTo = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignFrom = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignTo = otc.dblContractAmount -- Buy Amount
 		, intFutOptTransactionId = otc.intFutOptTransactionId
 		, intFutOptTransactionHeaderId = otc.intFutOptTransactionHeaderId
 		, strDerivativeId = otc.strInternalTradeNo

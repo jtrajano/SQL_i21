@@ -102,7 +102,7 @@ SELECT S.intSampleId
 	,S.intTypeId
 	,S.intCuppingSessionDetailId
 	,strMethodology = ''
-	,strExtension = EX.strAttribute1
+	,strExtension = EX.strDescription
 	,intContractSequence = CD.intContractSeq
 	,strContractType = CT.strContractType
 	,strPacking = ''
@@ -147,8 +147,8 @@ LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
 LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
 LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
-LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId
+LEFT JOIN vyuCTEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
 LEFT JOIN tblQMSample RS ON RS.intSampleId = S.intRelatedSampleId
 LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
-LEFT JOIN tblICCommodityAttribute1 EX ON I.intCommodityAttributeId1 = EX.intCommodityAttributeId1
+LEFT JOIN tblICCommodityProductLine EX ON I.intProductLineId = EX.intCommodityProductLineId
 WHERE S.intTypeId = 1

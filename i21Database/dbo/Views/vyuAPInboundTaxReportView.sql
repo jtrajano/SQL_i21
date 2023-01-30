@@ -22,7 +22,12 @@ SELECT
 	,strVendorPhone = ISNULL(vendor.strPhone, vendor.strPhone2)
 
 	--TAXES
+	,APB.strTaxPoint
+	,CASE WHEN APB.strTaxPoint IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ysnOverrideTaxPoint
+	,TL.strLocationName strTaxLocation
+	,CASE WHEN TL.strLocationName IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ysnOverrideTaxLocation
 	,RT.strTaxGroup
+	,APBD.ysnOverrideTaxGroup
 	,RT.strCalculationMethod
 	,RT.strTaxCode
 	,strTaxAgency = RT.strTaxAgency
@@ -81,13 +86,15 @@ SELECT
 	,dblTaxRate = RT.dblRate
 	
 	--FUNCTIONAL TOTAL AMOUNTS
+	,dblFunctionalTax = ISNULL(APB.dblAverageExchangeRate, 1) * RT.dblAdjustedTax
+    ,dblFunctionalGross = ISNULL(APB.dblAverageExchangeRate, 1) * APBD.dblTotal
 	,dblFunctionalTotalAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblTotal
 	,dblFunctionalPaymentAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblPayment
 	,dblFunctionalNontaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0 END)
 	,dblFunctionalTaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0 ELSE APBD.dblTotal END)
 	
 	--PAYMENT HEADERS
-	,ysnPaid = APB.ysnPaid
+	,ysnPaid = CASE WHEN APB.intTransactionType IN (15) THEN CAST(0 AS BIT) ELSE APB.ysnPaid END
 	,strCheckNumber = payment.strPaymentInfo
 FROM tblAPBillDetail APBD
 INNER JOIN tblAPBill APB ON APBD.intBillId = APB.intBillId AND APB.ysnPosted = CAST(1 AS BIT)
@@ -121,9 +128,9 @@ INNER JOIN (
 		,APBDT.dblAdjustedTax
     FROM tblAPBillDetailTax APBDT
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = APBDT.intTaxGroupId
-    LEFT JOIN tblSMTaxCode STC ON APBDT.intTaxCodeId = STC.intTaxCodeId
-	LEFT JOIN tblGLAccount GL ON STC.intPurchaseTaxAccountId = GL.intAccountId
-    LEFT JOIN tblSMTaxClass SMTC ON APBDT.intTaxClassId = SMTC.intTaxClassId
+    LEFT JOIN tblSMTaxCode STC ON STC.intTaxCodeId = APBDT.intTaxCodeId
+	LEFT JOIN tblGLAccount GL ON GL.intAccountId = APBDT.intAccountId
+    LEFT JOIN tblSMTaxClass SMTC ON SMTC.intTaxClassId = APBDT.intTaxClassId
 	WHERE APBDT.ysnCheckOffTax = 0
 ) RT ON APBD.intBillDetailId = RT.intBillDetailId
 LEFT OUTER JOIN tblSMTaxGroup SMTG ON ISNULL(APBD.intTaxGroupId, RT.intTaxGroupId) = SMTG.intTaxGroupId
@@ -157,5 +164,6 @@ OUTER APPLY (
 	FROM tblGLAccount
 	WHERE intAccountId = APBD.intAccountId
 ) account
+LEFT JOIN vyuARTaxLocation TL ON TL.intTaxLocationId = APB.intTaxLocationId AND TL.strFobPoint = (CASE WHEN APB.strTaxPoint = 'Origin' THEN 'Destination' ELSE 'Origin' END)
 
 GO

@@ -14,9 +14,9 @@ DECLARE @ysnOverrideLocation BIT = 1, @ysnOverrideLOB BIT = 1, @ysnOverrideCompa
 
 SELECT @strAccountId = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId
 
-IF @intLocationSegmentId IS NULL SET @ysnOverrideLocation = 0
-IF @intLOBSegmentId IS NULL SET @ysnOverrideLOB = 0
-IF @intCompanySegmentId IS NULL SET @ysnOverrideCompany = 0
+IF ISNULL(@intLocationSegmentId,0) = 0 SET @ysnOverrideLocation = 0
+IF ISNULL(@intLOBSegmentId,0) = 0 SET @ysnOverrideLOB = 0
+IF ISNULL(@intCompanySegmentId,0) = 0 SET @ysnOverrideCompany = 0
 
 WHILE @ysnOverrideLocation = 1
     OR @ysnOverrideLOB  =1 
@@ -30,12 +30,14 @@ WHILE @ysnOverrideLocation = 1
         , @intDividerCount INT
         , @strSegment NVARCHAR(10) 
         , @intStructureType INT
+        , @intAccountSegmentId INT
 
 
         IF @ysnOverrideLocation =1
 		BEGIN
            SET @intStructureType = 3
 		   SET @ysnOverrideLocation = 0
+           SET @intAccountSegmentId = @intLocationSegmentId
 		END
 		ELSE
         
@@ -43,6 +45,7 @@ WHILE @ysnOverrideLocation = 1
 		BEGIN
            SET @intStructureType = 5
 		   SET  @ysnOverrideLOB = 0
+           SET @intAccountSegmentId = @intLOBSegmentId
 		END
 		ELSE
 
@@ -50,6 +53,7 @@ WHILE @ysnOverrideLocation = 1
           	BEGIN
            SET @intStructureType = 6
 		   SET  @ysnOverrideCompany = 0
+           SET @intAccountSegmentId = @intCompanySegmentId
 		END
         
 
@@ -58,6 +62,7 @@ WHILE @ysnOverrideLocation = 1
         FROM tblGLAccountSegment A JOIN tblGLAccountStructure B 
         ON A.intAccountStructureId = B.intAccountStructureId
         WHERE intStructureType = @intStructureType 
+        AND intAccountSegmentId= @intAccountSegmentId
 
         SELECT @intDividerCount = COUNT(1)  FROM tblGLAccountStructure 
         WHERE strType <> 'Divider' and intStructureType < @intStructureType
@@ -74,7 +79,7 @@ WHILE @ysnOverrideLocation = 1
         DECLARE @i int = 1
         WHILE @i <= @intL
         BEGIN
-            if @i > @intStart and @i < @intEnd
+            if @i > @intStart and @i <= @intEnd
             BEGIN
                 SELECT @str+= @strSegment
                 SET @i = @i + @intLength

@@ -9,6 +9,7 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intLocationId INT
 		,@intCountStatusId INT
+		,@strCycleCountMandatory NVARCHAR(50)
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = intLocationId
@@ -26,7 +27,13 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
-	IF @intCountStatusId = 13
+	SELECT @strCycleCountMandatory = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 7
+
+	IF @intCountStatusId = 13 and @strCycleCountMandatory = 'True'
 	BEGIN
 		RAISERROR (
 				'You cannot undo the cycle count since the data is already updated by another user. Please refresh.'

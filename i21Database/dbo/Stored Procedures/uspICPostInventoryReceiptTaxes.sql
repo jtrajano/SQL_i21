@@ -3,6 +3,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
+	,@ysnNewVendorId AS BIT = 0 
 AS
 
 -- Get the A/P Clearing account 
@@ -18,64 +19,99 @@ BEGIN
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 	-- Get Vendor Tax Exemptions
-	DECLARE @TaxExemptions TABLE(strTaxCode NVARCHAR(200), ysnAddToCost BIT, 
-		intPurchaseTaxExemptionAccountId INT, intPurchaseAccountId INT,
-		intItemId INT, intReceiptId INT, intReceiptItemId INT, intTaxCodeId INT)
+	DECLARE @TaxExemptions TABLE(
+		strTaxCode NVARCHAR(200)
+		, ysnAddToCost BIT
+		, intPurchaseTaxExemptionAccountId INT
+		, intPurchaseAccountId INT
+		, intItemId INT
+		, intReceiptId INT
+		, intReceiptItemId INT
+		, intTaxCodeId INT
+	)
+
 	INSERT INTO @TaxExemptions
-	SELECT tc.strTaxCode, tc.ysnAddToCost,
-		tc.intPurchaseTaxExemptionAccountId, tc.intPurchaseTaxAccountId,
-		i.intItemId, r.intInventoryReceiptId, ri.intInventoryReceiptItemId, tc.intTaxCodeId
-	FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
-	INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
-	INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
-	CROSS APPLY (
-		SELECT *
-		FROM dbo.fnGetVendorTaxCodeExemption(
-			r.intEntityVendorId, 
-			r.dtmReceiptDate, 
-			tgc.intTaxGroupId, 
-			tc.intTaxCodeId,
-			tc.intTaxClassId,
-			tc.strState,
-			i.intItemId,
-			i.intCategoryId,
-			r.intShipFromId)
-	) ex
-	WHERE r.intInventoryReceiptId = @intInventoryReceiptId
+	SELECT 
+		tc.strTaxCode
+		, tc.ysnAddToCost
+		, tc.intPurchaseTaxExemptionAccountId
+		, tc.intPurchaseTaxAccountId
+		, i.intItemId
+		, r.intInventoryReceiptId
+		, ri.intInventoryReceiptItemId
+		, tc.intTaxCodeId
+	FROM 
+		tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+		INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
+		INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
+		CROSS APPLY (
+			SELECT *
+			FROM dbo.fnGetVendorTaxCodeExemption(
+				r.intEntityVendorId, 
+				r.dtmReceiptDate, 
+				tgc.intTaxGroupId, 
+				tc.intTaxCodeId,
+				tc.intTaxClassId,
+				tc.strState,
+				i.intItemId,
+				i.intCategoryId,
+				r.intShipFromId
+			)
+		) ex
+	WHERE 
+		r.intInventoryReceiptId = @intInventoryReceiptId
 		AND ex.ysnTaxExempt = 1
+		AND (ex.ysnInvalidSetup IS NULL OR ex.ysnInvalidSetup = 0)
 		AND tc.intPurchaseTaxExemptionAccountId IS NOT NULL
 
-	DECLARE @ChargeTaxExemptions TABLE(strTaxCode NVARCHAR(200), ysnAddToCost BIT, 
-		intPurchaseTaxExemptionAccountId INT, intPurchaseAccountId INT,
-		intItemId INT, intReceiptId INT, intChargeId INT, intTaxCodeId INT)
+	DECLARE @ChargeTaxExemptions TABLE(
+		strTaxCode NVARCHAR(200)
+		, ysnAddToCost BIT
+		, intPurchaseTaxExemptionAccountId INT
+		, intPurchaseAccountId INT
+		, intItemId INT
+		, intReceiptId INT
+		, intChargeId INT
+		, intTaxCodeId INT
+	)
+	
 	INSERT INTO @ChargeTaxExemptions
-	SELECT tc.strTaxCode, tc.ysnAddToCost,
-		tc.intPurchaseTaxExemptionAccountId, tc.intPurchaseTaxAccountId,
-		i.intItemId, r.intInventoryReceiptId, ri.intInventoryReceiptChargeId, tc.intTaxCodeId
-	FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptCharge ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICItem i ON i.intItemId = ri.intChargeId
-	INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
-	INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
-	CROSS APPLY (
-		SELECT *
-		FROM dbo.fnGetVendorTaxCodeExemption(
-			r.intEntityVendorId, 
-			r.dtmReceiptDate, 
-			tgc.intTaxGroupId, 
-			tc.intTaxCodeId,
-			tc.intTaxClassId,
-			tc.strState,
-			i.intItemId,
-			i.intCategoryId,
-			r.intShipFromId)
-	) ex
-	WHERE r.intInventoryReceiptId = @intInventoryReceiptId
+	SELECT 
+		tc.strTaxCode
+		, tc.ysnAddToCost
+		, tc.intPurchaseTaxExemptionAccountId
+		, tc.intPurchaseTaxAccountId
+		, i.intItemId
+		, r.intInventoryReceiptId
+		, ri.intInventoryReceiptChargeId
+		, tc.intTaxCodeId
+	FROM 
+		tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptCharge ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN tblICItem i ON i.intItemId = ri.intChargeId
+		INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
+		INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
+		CROSS APPLY (
+			SELECT *
+			FROM dbo.fnGetVendorTaxCodeExemption(
+				r.intEntityVendorId, 
+				r.dtmReceiptDate, 
+				tgc.intTaxGroupId, 
+				tc.intTaxCodeId,
+				tc.intTaxClassId,
+				tc.strState,
+				i.intItemId,
+				i.intCategoryId,
+				r.intShipFromId)
+		) ex
+	WHERE 
+		r.intInventoryReceiptId = @intInventoryReceiptId
 		AND ex.ysnTaxExempt = 1
+		AND (ex.ysnInvalidSetup IS NULL OR ex.ysnInvalidSetup = 0)
 		AND tc.intPurchaseTaxExemptionAccountId IS NOT NULL
-
+	
 	INSERT INTO @GLAccounts (
 		intItemId 
 		,intItemLocationId 
@@ -292,6 +328,7 @@ BEGIN
 		,strItemNo
 		,intSourceEntityId
 		,intCommodityId
+		,strJournalLineDescription
 	)
 	AS 
 	(
@@ -328,6 +365,7 @@ BEGIN
 				,strItemNo							= item.strItemNo
 				,intSourceEntityId					= Receipt.intEntityVendorId 
 				,intCommodityId						= item.intCommodityId
+				,strJournalLineDescription			= 'InventoryReceiptItemTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -355,7 +393,7 @@ BEGIN
 				) ex
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-				
+				AND (@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL)
 		
 		-- Other Charge taxes for the Receipt Vendor. 
 		UNION ALL 
@@ -396,6 +434,7 @@ BEGIN
 				,strItemNo							= item.strItemNo
 				,intSourceEntityId					= Receipt.intEntityVendorId
 				,intCommodityId						= item.intCommodityId
+				,strJournalLineDescription			= 'InventoryReceiptChargeTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -421,6 +460,13 @@ BEGIN
 				) ex
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId	
 				AND (ReceiptCharge.ysnAccrue = 1 OR ReceiptCharge.ysnPrice = 1) -- Note: Tax is only computed if ysnAccrue is Y or ysnPrice is Y. 
+				AND (
+					(@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL)
+					OR (
+						@ysnNewVendorId = 1
+						AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
+					)
+				)
 		
 		-- Price Down - Other Charge taxes. This tax is for the 3rd party vendor. 
 		UNION ALL 
@@ -460,6 +506,7 @@ BEGIN
 				,strItemNo							= item.strItemNo
 				,intSourceEntityId					= ReceiptCharge.intEntityVendorId
 				,intCommodityId						= item.intCommodityId
+				,strJournalLineDescription			= 'InventoryReceiptChargeTaxId'
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -486,6 +533,13 @@ BEGIN
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND ReceiptCharge.ysnAccrue = 1 
 				AND ReceiptCharge.ysnPrice = 1 
+				AND (
+					(@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL)
+					OR (
+						@ysnNewVendorId = 1
+						AND (ChargeTaxes.ysnReversed = 0 OR ChargeTaxes.ysnReversed IS NULL) 
+					)
+				)	
 	)
 	
 	-------------------------------------------------------------------------------------------
@@ -507,7 +561,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = ForGLEntries_CTE.strJournalLineDescription
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -564,7 +618,7 @@ BEGIN
 			,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-			,strJournalLineDescription  = '' 
+			,strJournalLineDescription  = ForGLEntries_CTE.strJournalLineDescription
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
@@ -622,6 +676,7 @@ END
 ;
 
 -- Create the AP Clearing
+IF (@ysnNewVendorId = 0 OR @ysnNewVendorId IS NULL) 
 BEGIN 
 	DECLARE 
 	@intVoucherInvoiceNoOption TINYINT

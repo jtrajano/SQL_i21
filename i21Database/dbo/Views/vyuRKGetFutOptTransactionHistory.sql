@@ -62,8 +62,9 @@ SELECT intFutOptTransactionHistoryId
 	, strBankTransferNo 
 	, dtmBankTransferDate 
 	, ysnBankTransferPosted 
+	, dblCommission
 FROM (
-	SELECT intFutOptTransactionHistoryId
+	SELECT History.intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
 		, History.intFutOptTransactionHeaderId
 		, History.dtmTransactionDate
@@ -97,7 +98,10 @@ FROM (
 									AND PrevRec.strCommodity = History.strCommodity
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
-		, dblNewNoOfLots = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
+		, dblNewNoOfLots = CASE WHEN ISNULL(HistoryDelete.intFutOptTransactionHistoryId, 0) <> 0 
+							THEN 0
+							ELSE CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
+							END
 		, History.strScreenName
 		, History.strOldBuySell
 		, History.strNewBuySell	
@@ -130,6 +134,7 @@ FROM (
 		, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 		, dtmBankTransferDate = BT.dtmDate	
 		, ysnBankTransferPosted = BT.ysnPosted
+		, Trans.dblCommission
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
@@ -161,6 +166,16 @@ FROM (
 	LEFT JOIN tblCMBank AS BuyBank ON History.intBuyBankId = BuyBank.intBankId
 	LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON History.intBuyBankAccountId = BuyBankAcct.intBankAccountId
 	LEFT JOIN tblCMBankTransfer BT ON History.intBankTransferId = BT.intTransactionId 
+	LEFT JOIN (
+		SELECT histDel.intFutOptTransactionHistoryId
+			, intFutOptTransactionId
+			, dtmTransactionDate
+		FROM tblRKFutOptTransactionHistory histDel
+		WHERE histDel.strAction = 'DELETE'
+	) HistoryDelete
+		ON HistoryDelete.intFutOptTransactionId = History.intFutOptTransactionId
+		AND History.strAction = 'ADD'
+		AND History.dtmTransactionDate > HistoryDelete.dtmTransactionDate
 	WHERE ISNULL(History.strAction, '') <> ''
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
@@ -236,6 +251,7 @@ FROM (
 		, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 		, dtmBankTransferDate = BT.dtmDate	
 		, ysnBankTransferPosted = BT.ysnPosted
+		, Trans.dblCommission
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.strCommodityCode = History.strCommodity

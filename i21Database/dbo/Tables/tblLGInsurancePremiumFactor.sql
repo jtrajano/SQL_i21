@@ -6,7 +6,7 @@
 	[dtmValidFrom] DATETIME NULL,
 	intCommodityId INT NULL,
 	intCommodityAttributeId INT NULL,
-	strPolicyNumber NVARCHAR(50) NOT NULL,
+	strPolicyNumber NVARCHAR(100) NOT NULL,
 	dblInboundWarehouse NUMERIC(18, 6) NULL DEFAULT((0)),	
 	dtmValidTo DATETIME NULL,
 

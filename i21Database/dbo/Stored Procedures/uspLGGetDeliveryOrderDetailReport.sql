@@ -36,6 +36,7 @@ BEGIN
 		,strPONo = PCH.strContractNumber + '-' + CONVERT(NVARCHAR,PCD.intContractSeq)
 		,strSONo = CH.strContractNumber + '-' + CONVERT(NVARCHAR,CD.intContractSeq)
 		,R.strWarehouseRefNo
+		,WS.strWarrantStatus
 	FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -56,5 +57,6 @@ BEGIN
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
 		LEFT JOIN tblLGLoadContainer LC2 ON LC2.intLoadId = L.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LC2.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = LOT.intWarrantStatus
 	WHERE strLoadNumber = @strLoadNumber 
 END

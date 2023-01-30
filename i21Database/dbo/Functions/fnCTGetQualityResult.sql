@@ -22,7 +22,7 @@ BEGIN
 					ELSE NULL END
 	if (@strEscalatedBy = 'Exact Factor')
 	BEGIN 
-		SET @dblResult = cast(@dblResult as int)
+		SET @dblResult = @dblResult - (@dblResult % CASE WHEN @dblActualValue < @dblTargetValue THEN @dblDiscount ELSE @dblPremium END)
 	END
 
 	return @dblResult

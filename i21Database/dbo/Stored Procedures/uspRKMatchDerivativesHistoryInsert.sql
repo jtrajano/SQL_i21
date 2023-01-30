@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspRKMatchDerivativesHistoryInsert
-	 @intMatchFuturesPSHeaderId INT
-	,@action NVARCHAR(20)
-	,@userId INT
+	  @intMatchFuturesPSHeaderId INT
+	, @action NVARCHAR(20)
+	, @userId INT
+	, @intMatchFuturesPSDetailId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,119 +15,213 @@ BEGIN TRANSACTION
 
 DECLARE @SummaryLog AS RKSummaryLog
 
--- Create the entry for Match Derivative History
-IF @action = 'ADD' 
+-- MATCH HEADER CREATE/DELETE
+IF (ISNULL(@intMatchFuturesPSDetailId, 0) = 0)
 BEGIN
-	INSERT INTO tblRKMatchDerivativesHistory(
-		 intMatchFuturesPSHeaderId
-		,intMatchFuturesPSDetailId
-		,dblMatchQty
-		,dtmMatchDate
-		,dblFutCommission
-		,intLFutOptTransactionId
-		,intSFutOptTransactionId
-		,dtmTransactionDate
-		,strUserName
-	)
-	SELECT
-		 H.intMatchFuturesPSHeaderId	
-		,D.intMatchFuturesPSDetailId
-		,D.dblMatchQty
-		,H.dtmMatchDate
-		,D.dblFutCommission
-		,D.intLFutOptTransactionId
-		,D.intSFutOptTransactionId
-		,GETDATE()
-		,(SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @userId)
-	FROM 
-	tblRKMatchFuturesPSHeader H
-	INNER JOIN tblRKMatchFuturesPSDetail D ON H.intMatchFuturesPSHeaderId = D.intMatchFuturesPSHeaderId
-	WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+	-- Create the entry for Match Derivative History
+	IF @action = 'ADD' 
+	BEGIN
+		INSERT INTO tblRKMatchDerivativesHistory(
+			 intMatchFuturesPSHeaderId
+			,intMatchFuturesPSDetailId
+			,dblMatchQty
+			,dtmMatchDate
+			,dblFutCommission
+			,intLFutOptTransactionId
+			,intSFutOptTransactionId
+			,dtmTransactionDate
+			,strUserName
+		)
+		SELECT
+			 H.intMatchFuturesPSHeaderId	
+			,D.intMatchFuturesPSDetailId
+			,D.dblMatchQty
+			,H.dtmMatchDate
+			,D.dblFutCommission
+			,D.intLFutOptTransactionId
+			,D.intSFutOptTransactionId
+			,GETDATE()
+			,(SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @userId)
+		FROM 
+		tblRKMatchFuturesPSHeader H
+		INNER JOIN tblRKMatchFuturesPSDetail D ON H.intMatchFuturesPSHeaderId = D.intMatchFuturesPSHeaderId
+		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
-	IF @@ERROR <> 0	GOTO _Rollback
+		IF @@ERROR <> 0	GOTO _Rollback
+	END
+	ELSE --FOR DELETE
+	BEGIN
+	
+		SELECT intFutOptTransactionId
+		INTO #tmpDerivativesToDelete 
+		FROM (
+			SELECT intFutOptTransactionId = intLFutOptTransactionId
+			FROM tblRKMatchDerivativesHistory H
+			WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+
+			UNION ALL
+
+			SELECT intFutOptTransactionId = intSFutOptTransactionId
+			FROM tblRKMatchDerivativesHistory H
+			WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+		) t
+
+		INSERT INTO tblRKMatchDerivativesHistory(
+			 intMatchFuturesPSHeaderId
+			,intMatchFuturesPSDetailId
+			,dblMatchQty
+			,dtmMatchDate
+			,dblFutCommission
+			,intLFutOptTransactionId
+			,intSFutOptTransactionId
+			,dtmTransactionDate
+			,strUserName
+		)
+		SELECT
+			 intMatchFuturesPSHeaderId	
+			,intMatchFuturesPSDetailId
+			,dblMatchQty * -1
+			,dtmMatchDate
+			,dblFutCommission * -1
+			,intLFutOptTransactionId
+			,intSFutOptTransactionId
+			,GETDATE()
+			,(SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @userId)
+		FROM 
+		tblRKMatchDerivativesHistory H
+		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+
+		INSERT INTO @SummaryLog(strBucketType
+			, strTransactionType
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intFutOptTransactionId
+			, intCommodityId
+			, intLocationId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblPrice
+			, dblContractSize
+			, intEntityId
+			, intUserId
+			, intCommodityUOMId
+			, strMiscFields
+			, intActionId)
+		SELECT strBucketType
+			, strTransactionType
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intFutOptTransactionId
+			, intCommodityId
+			, intLocationId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots =  dblOrigNoOfLots * -1
+			, dblPrice
+			, dblContractSize
+			, intEntityId
+			, intUserId = @userId
+			, intCommodityUOMId = intOrigUOMId
+			, strMiscFields = strMiscField
+			, intActionId = 68
+		FROM tblRKSummaryLog  
+		WHERE strTransactionType = 'Match Derivatives'  
+		AND intTransactionRecordHeaderId = @intMatchFuturesPSHeaderId
+		AND intFutOptTransactionId IN (SELECT intFutOptTransactionId
+										 FROM #tmpDerivativesToDelete)
+
+		EXEC uspRKLogRiskPosition @SummaryLog
+	
+
+		DROP TABLE #tmpDerivativesToDelete
+
+		IF @@ERROR <> 0	GOTO _Rollback
+	END
 END
-ELSE --FOR DELETE
+-- MATCH DETAIL CREATE/DELETE
+ELSE 
+BEGIN 
+	DECLARE @strName NVARCHAR(200) = '' 
+		, @dtmCurrentDate DATETIME = GETDATE()
 
-	INSERT INTO tblRKMatchDerivativesHistory(
-		 intMatchFuturesPSHeaderId
-		,intMatchFuturesPSDetailId
-		,dblMatchQty
-		,dtmMatchDate
-		,dblFutCommission
-		,intLFutOptTransactionId
-		,intSFutOptTransactionId
-		,dtmTransactionDate
-		,strUserName
-	)
-	SELECT
-		 intMatchFuturesPSHeaderId	
-		,intMatchFuturesPSDetailId
-		,dblMatchQty * -1
-		,dtmMatchDate
-		,dblFutCommission * -1
-		,intLFutOptTransactionId
-		,intSFutOptTransactionId
-		,GETDATE()
-		,(SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @userId)
-	FROM 
-	tblRKMatchDerivativesHistory H
-	WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+	SELECT TOP 1 @strName = strName FROM tblEMEntity WHERE intEntityId = @userId
 
+	-- Create the entry for Match Derivative History
+	IF @action = 'ADD DETAIL' 
+	BEGIN
+		INSERT INTO tblRKMatchDerivativesHistory(
+			  intMatchFuturesPSHeaderId
+			, intMatchFuturesPSDetailId
+			, dblMatchQty
+			, dtmMatchDate
+			, dblFutCommission
+			, intLFutOptTransactionId
+			, intSFutOptTransactionId
+			, dtmTransactionDate
+			, strUserName
+		)
+		SELECT
+			  H.intMatchFuturesPSHeaderId	
+			, D.intMatchFuturesPSDetailId
+			, D.dblMatchQty
+			, H.dtmMatchDate
+			, D.dblFutCommission
+			, D.intLFutOptTransactionId
+			, D.intSFutOptTransactionId
+			, @dtmCurrentDate
+			, @strName
+		FROM 
+		tblRKMatchFuturesPSHeader H
+		INNER JOIN tblRKMatchFuturesPSDetail D ON H.intMatchFuturesPSHeaderId = D.intMatchFuturesPSHeaderId
+		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+		AND D.intMatchFuturesPSDetailId = @intMatchFuturesPSDetailId
 
+		IF @@ERROR <> 0	GOTO _Rollback
+	END
 
-	INSERT INTO @SummaryLog(strBucketType
-		, strTransactionType
-		, intTransactionRecordId
-		, intTransactionRecordHeaderId
-		, strDistributionType
-		, strTransactionNumber
-		, dtmTransactionDate
-		, intFutOptTransactionId
-		, intCommodityId
-		, intLocationId
-		, intBookId
-		, intSubBookId
-		, intFutureMarketId
-		, intFutureMonthId
-		, dblNoOfLots
-		, dblPrice
-		, dblContractSize
-		, intEntityId
-		, intUserId
-		, intCommodityUOMId
-		, strMiscFields
-		, intActionId)
-	SELECT strBucketType
-		, strTransactionType
-		, intTransactionRecordId
-		, intTransactionRecordHeaderId
-		, strDistributionType
-		, strTransactionNumber
-		, dtmTransactionDate
-		, intFutOptTransactionId
-		, intCommodityId
-		, intLocationId
-		, intBookId
-		, intSubBookId
-		, intFutureMarketId
-		, intFutureMonthId
-		, dblNoOfLots =  dblOrigNoOfLots * -1
-		, dblPrice
-		, dblContractSize
-		, intEntityId
-		, intUserId = @userId
-		, intCommodityUOMId = intOrigUOMId
-		, strMiscFields = strMiscField
-		, intActionId = 68
-	FROM tblRKSummaryLog  
-	WHERE strTransactionType = 'Match Derivatives'  
-	AND intTransactionRecordHeaderId = @intMatchFuturesPSHeaderId
+	ELSE IF @action = 'DELETE DETAIL'
+	BEGIN
 
-	EXEC uspRKLogRiskPosition @SummaryLog
+		INSERT INTO tblRKMatchDerivativesHistory(
+			  intMatchFuturesPSHeaderId
+			, intMatchFuturesPSDetailId
+			, dblMatchQty
+			, dtmMatchDate
+			, dblFutCommission
+			, intLFutOptTransactionId
+			, intSFutOptTransactionId
+			, dtmTransactionDate
+			, strUserName
+		)
+		SELECT
+			  intMatchFuturesPSHeaderId	
+			, intMatchFuturesPSDetailId
+			, dblMatchQty * -1
+			, dtmMatchDate
+			, dblFutCommission * -1
+			, intLFutOptTransactionId
+			, intSFutOptTransactionId
+			, @dtmCurrentDate
+			, @strName
+		FROM 
+		tblRKMatchDerivativesHistory H
+		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+		AND H.intMatchFuturesPSDetailId = @intMatchFuturesPSDetailId
 
-
-	IF @@ERROR <> 0	GOTO _Rollback
-
+		IF @@ERROR <> 0	GOTO _Rollback
+	END
+END
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------

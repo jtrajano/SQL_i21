@@ -265,6 +265,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		,dblLotTotalTare = ISNULL(receiptLot.dblLotTotalTare, 0)
 		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
 		,ReceiptItem.intComputeItemTotalOption
+		,strLongUPCCode = COALESCE(ItemWeightUOM.strLongUPCCode, ItemUOM.strLongUPCCode, '')
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -400,11 +401,63 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 
 		-- 4. Logistics
 		OUTER APPLY (
-			SELECT	* 
-			FROM	vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
-			WHERE	LogisticsView.intLoadDetailId = ReceiptItem.intSourceId 
-					AND intLoadContainerId = ReceiptItem.intContainerId
-					AND Receipt.intSourceType = 2
+			--SELECT	* 
+			--FROM	vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+			--WHERE	LogisticsView.intLoadDetailId = ReceiptItem.intSourceId 
+			--		AND LogisticsView.intLoadContainerId = ReceiptItem.intContainerId
+			--		AND LogisticsView.intContractDetailId = ReceiptItem.intContractDetailId
+			--		AND Receipt.intSourceType = 2
+			--		AND (
+			--			Receipt.strReceiptType = 'Purchase Contract'
+			--			OR (
+			--				Receipt.strReceiptType = 'Inventory Return'
+			--				AND rtn.strReceiptType = 'Purchase Contract'
+			--			)
+			--		)
+
+			SELECT	L.strLoadNumber 
+					,LD.intLoadDetailId
+					,intLoadContainerId = ISNULL(LC.intLoadContainerId, -1)
+					,WeightUOM.strUnitMeasure
+					,dblQuantity = CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN LD.dblQuantity ELSE LC.dblQuantity END 
+					,dblDeliveredQuantity = CASE WHEN ISNULL(LC.dblReceivedQty, 0) = 0 THEN LD.dblDeliveredQuantity ELSE ISNULL(LC.dblReceivedQty, 0) END  
+					,ItemUOM.dblUnitQty AS dblItemUOMCF
+					,LC.strContainerNumber
+					,dblFranchise = CASE WHEN ISNULL(PWG.dblFranchise, 0) > 0 THEN PWG.dblFranchise / 100 ELSE 0 END 
+					,dblContainerWeightPerQty = CASE WHEN ISNULL(LC.dblQuantity, 0) = 0 THEN LC.dblNetWt ELSE LC.dblNetWt / LC.dblQuantity END -- (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
+					,intWeightUOMId = WeightItemUOM.intItemUOMId
+					,dblWeightUOMConvFactor = WeightItemUOM.dblUnitQty 
+					,LC.dblNetWt
+					,strMarkings = LC.strMarks 
+			FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
+						ON L.intLoadId = LD.intLoadId
+					LEFT JOIN tblICItemUOM ItemUOM 
+						ON ItemUOM.intItemUOMId = LD.intItemUOMId
+					LEFT JOIN tblICUnitMeasure WeightUOM 
+						ON WeightUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+					LEFT JOIN tblICItemUOM WeightItemUOM 
+						ON WeightItemUOM.intItemUOMId = LD.intWeightItemUOMId
+					--LEFT JOIN tblCTContractDetail CD 
+					--	ON CD.intContractDetailId = LD.intPContractDetailId
+					LEFT JOIN tblCTContractHeader CH 
+						ON CH.intContractHeaderId = ReceiptItem.intContractHeaderId --CD.intContractHeaderId
+					LEFT JOIN tblCTWeightGrade PWG 
+						ON PWG.intWeightGradeId = CH.intWeightId
+					OUTER APPLY (
+						SELECT 
+							LC.intLoadContainerId
+							, LC.strContainerNumber
+							, LC.dblNetWt
+							, LDCL.dblQuantity
+							, LDCL.dblReceivedQty
+							, LC.strMarks 
+						FROM 
+							tblLGLoadDetailContainerLink LDCL INNER JOIN tblLGLoadContainer LC 
+								ON LDCL.intLoadContainerId = LC.intLoadContainerId
+						 WHERE 
+							LD.intLoadDetailId = LDCL.intLoadDetailId 
+							AND ISNULL(LC.ysnRejected, 0) = 0) LC					
+			WHERE	Receipt.intSourceType = 2
 					AND (
 						Receipt.strReceiptType = 'Purchase Contract'
 						OR (
@@ -412,6 +465,9 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 							AND rtn.strReceiptType = 'Purchase Contract'
 						)
 					)
+					AND LD.intLoadDetailId = ReceiptItem.intSourceId 
+					AND ISNULL(LC.intLoadContainerId, -1) = ReceiptItem.intContainerId
+					AND L.intShipmentType = 1
 		) LogisticsView
 
 		-- 5. Scale Tickets

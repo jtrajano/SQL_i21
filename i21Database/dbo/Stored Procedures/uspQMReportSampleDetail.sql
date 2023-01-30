@@ -27,6 +27,12 @@ BEGIN TRY
 		,@strCountry = strCountry
 	FROM tblSMCompanySetup
 
+	DECLARE @imgLogo VARBINARY(MAX)
+		,@strLogoType NVARCHAR(50)
+		,@intCompanyLocationId INT
+		,@imgFooterLogo VARBINARY(MAX)
+		,@strLogoFooterType NVARCHAR(50)
+
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -57,6 +63,10 @@ BEGIN TRY
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
 			,@strCountry AS strCompanyCountry
+			,@imgLogo AS blbHeaderLogo
+			,@strLogoType AS strLogoType
+			,@imgFooterLogo AS blbFooterLogo
+			,@strLogoFooterType AS strLogoFooterType
 
 		RETURN
 	END
@@ -126,8 +136,40 @@ BEGIN TRY
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
 			,@strCountry AS strCompanyCountry
+			,@imgLogo AS blbHeaderLogo
+			,@strLogoType AS strLogoType
+			,@imgFooterLogo AS blbFooterLogo
+			,@strLogoFooterType AS strLogoFooterType
 
 		RETURN
+	END
+
+	SELECT @intCompanyLocationId = intLocationId
+	FROM tblQMSample
+	WHERE intSampleId = @intSampleId
+
+	SELECT TOP 1 @imgLogo = imgLogo
+		,@strLogoType = 'Logo'
+	FROM tblSMLogoPreference
+	WHERE ysnAllOtherReports = 1
+		AND intCompanyLocationId = @intCompanyLocationId
+
+	IF @imgLogo IS NULL
+	BEGIN
+		SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
+			,@strLogoType = 'Attachment'
+	END
+
+	SELECT TOP 1 @imgFooterLogo = imgLogo
+		,@strLogoFooterType = 'Logo'
+	FROM tblSMLogoPreferenceFooter
+	WHERE ysnAllOtherReports = 1
+		AND intCompanyLocationId = @intCompanyLocationId
+
+	IF @imgFooterLogo IS NULL
+	BEGIN
+		SELECT @imgFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+			,@strLogoFooterType = 'Attachment'
 	END
 
 	SELECT S.intSampleId
@@ -155,6 +197,10 @@ BEGIN TRY
 		,@strCompanyAddress AS strCompanyAddress
 		,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
 		,@strCountry AS strCompanyCountry
+		,blbHeaderLogo = @imgLogo
+		,strLogoType = @strLogoType
+		,blbFooterLogo = @imgFooterLogo
+		,strLogoFooterType = @strLogoFooterType
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 		AND S.intSampleId = @intSampleId

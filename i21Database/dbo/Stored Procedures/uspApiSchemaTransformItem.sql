@@ -12,6 +12,25 @@ guiApiUniqueId = @guiApiUniqueId
 AND
 strPropertyName = 'Overwrite'
 
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Category'
+    , strValue = sr.strCategory
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sr.intRowNumber
+    , strMessage = 'The Category ' + ISNULL(sr.strCategory, '') + ' does not exist.'
+FROM tblApiSchemaTransformItem sr
+OUTER APPLY (
+  SELECT TOP 1 * 
+  FROM tblICCategory ii
+  WHERE ii.strCategoryCode = sr.strCategory OR ii.strDescription = sr.strCategory
+) e
+WHERE sr.guiApiUniqueId = @guiApiUniqueId
+AND e.intCategoryId IS NULL
+
 DECLARE @tblFilteredItem TABLE(
 	intKey INT NOT NULL,
     guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
@@ -332,6 +351,20 @@ BEGIN
 		FilteredItem.strCommodity IS NOT NULL 		
 		AND LOWER(Commodity.strCommodityCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCommodity)))
 		AND dbo.fnAllowCommodityToChange(Item.intItemId, Item.intCommodityId) = 0
+	UNION ALL
+	SELECT
+		FilteredItem.strItemNo,
+		FilteredItem.intRowNumber,
+		4 -- Category Error
+	FROM 
+		@tblFilteredItem FilteredItem		
+		INNER JOIN tblICItem Item 
+			ON FilteredItem.strItemNo = Item.strItemNo
+		INNER JOIN tblICCategory Category
+			ON Category.intCategoryId = Item.intCategoryId
+	WHERE
+		FilteredItem.strCommodity IS NOT NULL 		
+		AND LOWER(Category.strCategoryCode) <> LTRIM(RTRIM(LOWER(FilteredItem.strCategory)))
 
 	INSERT INTO tblApiImportLogDetail 
 	(
@@ -352,7 +385,9 @@ BEGIN
 				THEN 'Lot Tracking'
 			WHEN ErrorItem.intErrorType = 2
 				THEN 'Item Type'
-			ELSE 'Commodity'
+			WHEN ErrorItem.intErrorType = 3
+				THEN 'Commodity'
+			ELSE 'Category'
 		END,
 		strValue = ErrorItem.strItemNo,
 		strLogLevel = 'Error',
@@ -363,10 +398,12 @@ BEGIN
 				THEN 'Lot Tracking change is not allowed for item "' + ErrorItem.strItemNo + '"'
 			WHEN ErrorItem.intErrorType = 2
 				THEN 'Item Type change is not allowed for item "' + ErrorItem.strItemNo + '"'
-			ELSE 'Commodity change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			WHEN ErrorItem.intErrorType = 3
+				THEN 'Commodity change is not allowed for item "' + ErrorItem.strItemNo + '"'
+			ELSE 'Category is required for item "' + ErrorItem.strItemNo + '"'
 		END
 	FROM @tblErrorItem ErrorItem
-	WHERE ErrorItem.intErrorType IN(1, 2, 3)
+	WHERE ErrorItem.intErrorType IN(1, 2, 3, 4)
 
 END
 
@@ -501,6 +538,7 @@ USING
 		LEFT OUTER JOIN tblICTag MedicationTag ON MedicationTag.strTagNumber = FilteredItem.strMedicationTag AND MedicationTag.strType = 'Medication Tag'
 		LEFT OUTER JOIN tblICTag IngredientTag ON IngredientTag.strTagNumber = FilteredItem.strIngredientTag AND IngredientTag.strType = 'Ingredient Tag'
 		LEFT OUTER JOIN tblICRinFuelCategory Rin ON Rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(FilteredItem.strFuelCategory)))	
+		WHERE Category.intCategoryId IS NOT NULL
 ) AS SOURCE
 ON LTRIM(RTRIM(TARGET.strItemNo)) = LTRIM(RTRIM(SOURCE.strItemNo))
 WHEN MATCHED AND @ysnAllowOverwrite = 1 
@@ -720,27 +758,27 @@ OUTPUT INSERTED.strItemNo, $action AS strAction INTO @tblItemOutput;
 
 --Log skipped items when overwrite is not enabled.
 
-INSERT INTO tblApiImportLogDetail 
-(
-	guiApiImportLogDetailId,
-	guiApiImportLogId,
-	strField,
-	strValue,
-	strLogLevel,
-	strStatus,
-	intRowNo,
-	strMessage
-)
-SELECT
-	guiApiImportLogDetailId = NEWID(),
-	guiApiImportLogId = @guiLogId,
-	strField = 'Item No',
-	strValue = FilteredItem.strItemNo,
-	strLogLevel = 'Warning',
-	strStatus = 'Skipped',
-	intRowNo = FilteredItem.intRowNumber,
-	strMessage = 'Item No "' + FilteredItem.strItemNo + '" already exists and overwrite is not enabled.'
-FROM @tblFilteredItem FilteredItem
-LEFT JOIN @tblItemOutput ItemOutput
-	ON FilteredItem.strItemNo = ItemOutput.strItemNo
-WHERE ItemOutput.strItemNo IS NULL
+--INSERT INTO tblApiImportLogDetail 
+--(
+--	guiApiImportLogDetailId,
+--	guiApiImportLogId,
+--	strField,
+--	strValue,
+--	strLogLevel,
+--	strStatus,
+--	intRowNo,
+--	strMessage
+--)
+--SELECT
+--	guiApiImportLogDetailId = NEWID(),
+--	guiApiImportLogId = @guiLogId,
+--	strField = 'Item No',
+--	strValue = FilteredItem.strItemNo,
+--	strLogLevel = 'Warning',
+--	strStatus = 'Skipped',
+--	intRowNo = FilteredItem.intRowNumber,
+--	strMessage = 'Item No "' + FilteredItem.strItemNo + '" already exists and overwrite is not enabled.'
+--FROM @tblFilteredItem FilteredItem
+--LEFT JOIN @tblItemOutput ItemOutput
+--	ON FilteredItem.strItemNo = ItemOutput.strItemNo
+--WHERE ItemOutput.strItemNo IS NULL

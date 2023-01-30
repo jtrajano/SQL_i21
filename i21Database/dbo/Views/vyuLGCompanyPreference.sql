@@ -124,6 +124,10 @@ SELECT CP.intCompanyPreferenceId
 	,strPreArrivalNotificationReportFormat = CASE WHEN CP.intPreArrivalNotificationReportFormat IS NOT NULL 
 		THEN 'Pre Arrival Notification Report Format - ' + CAST(CP.intPreArrivalNotificationReportFormat AS NVARCHAR(10)) 
 		ELSE '' END COLLATE Latin1_General_CI_AS
+	,CP.intTransferOrderReportFormat
+	,strTransferOrderReportFormat = CASE WHEN CP.intTransferOrderReportFormat IS NOT NULL 
+		THEN 'Transfer Order Report Format - ' + CAST(CP.intPreArrivalNotificationReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intBOLReportFormat
 	,strBOLReportFormat = CASE WHEN CP.intBOLReportFormat IS NOT NULL 
 		THEN 'BOL Report Format - ' + CAST(CP.intBOLReportFormat AS NVARCHAR(10)) 
@@ -186,6 +190,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnIncludeArrivedInPortStatus
 	,CP.ysnIncludeStrippingInstructionStatus
 	,CP.ysnWeightClaimsByContainer
+	,CP.ysnWeightClaimsImpactGL
 	,CP.intExpirationDays
 	,CP.intExpirationDateBasis
 	,strExpirationDateBasis = CASE CP.intExpirationDateBasis

@@ -102,6 +102,7 @@ AS
 			NM.strSampleTypeName,
 			NM.strWeight,
 			NM.strTerm,
+			NM.intBalanceDue,
 			NM.strEntityName,
 			NM.strSalesperson,
 			NM.strContact,
@@ -158,7 +159,12 @@ AS
 			NM.strLocationName,
 			CH.intDaysForFinance,
 			CH.ysnLocalCurrency,
-			CH.ysnPrintCropYear
+			NM.ysnProvisionalVoucher,
+			NM.strProvisionalVoucherIds,
+			CH.ysnPrintCropYear,
+			NM.ysnCheckMissingStandardPriceInContract,
+			CH.intTransactionForexId,
+			strTransactionForex = case when CH.intTransactionForexId = 2 then 'Current' else 'Contract' end
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY

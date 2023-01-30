@@ -134,7 +134,7 @@ SELECT CD.intContractDetailId
 	, BK.strBook
 	, SK.strSubBook
 	, CD.strInvoiceNo
-	, cc.strCertifications AS strCertificationName
+	, cc.strCertifications  COLLATE Latin1_General_CI_AS AS strCertificationName
 	, CH.intContractHeaderId
 	, ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	, ysnInvoice = CASE WHEN ISNULL(CD.ysnInvoice, 0) = 0 THEN 'N'
@@ -172,7 +172,7 @@ SELECT CD.intContractDetailId
 	, dblLoadQuantity = ISNULL(LG1.dblQuantity, LG.dblQuantity)
 	, intShipmentType = ISNULL(LG1.intShipmentType, LG.intShipmentType)
 	, strShipmentType = ISNULL(LG1.strShipmentType, LG.strShipmentType)
-	, strContainerNumber = ISNULL(LG1.strContainerNumber, LG.strContainerNumber)
+	, strContainerNumber = ISNULL(LG1.strContainerNumber, LG.strContainerNumber) COLLATE Latin1_General_CI_AS
 	, dtmStuffingDate = ISNULL(LG1.dtmStuffingDate, LG.dtmStuffingDate)
 	, dtmETSPOL = ISNULL(LG1.dtmETSPOL, LG.dtmETSPOL)
 	, dtmETAPOL = ISNULL(LG1.dtmETAPOL, LG.dtmETAPOL)
@@ -206,6 +206,7 @@ SELECT CD.intContractDetailId
 	, CH.intSubBookId AS intHeaderSubBookId
 	, CD.intBookId AS intDetailBookId
 	, CD.intSubBookId AS intDetailSubBookId
+	, LL.strName AS strLogisticsLeadName
 FROM tblCTContractDetail CD WITH(NOLOCK)
 JOIN tblCTContractHeader CH WITH(NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
@@ -257,4 +258,5 @@ LEFT JOIN tblRKFutureMarket AS FM ON FM.intFutureMarketId = CD.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth AS MO ON MO.intFutureMonthId = CD.intFutureMonthId
 LEFT JOIN tblICCommodity AS CO ON CO.intCommodityId = CH.intCommodityId
 LEFT JOIN tblSMCompanyLocation AS CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 WHERE CD.intContractStatusId IN(1, 2, 4);

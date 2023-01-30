@@ -1,12 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuGLSearchGJ]
 AS
-SELECT strJournalType ,
+SELECT strJournalType,
            strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,
            strSourceType COLLATE Latin1_General_CI_AS strSourceType,
            j.strJournalId COLLATE Latin1_General_CI_AS strJournalId,
            j.strDescription COLLATE Latin1_General_CI_AS strDescription,
            j.intJournalId,
-           ysnPosted,
+           ISNULL(ysnPosted,0) ysnPosted,
            dtmDate,
            dtmReverseDate,
            dtmDateEntered,
@@ -15,7 +15,9 @@ SELECT strJournalType ,
            total.dblDebit,
            strCurrency COLLATE Latin1_General_CI_AS strCurrency,
            ysnRecurringTemplate,
-           fp.strPeriod
+           fp.strPeriod,
+           j.intCompanyLocationId,
+           CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation
    FROM tblGLJournal j
    OUTER APPLY (SELECT  j.strJournalId,
           SUM(ISNULL(d.dblCredit,0.0)) dblCredit,
@@ -24,6 +26,7 @@ SELECT strJournalType ,
    LEFT JOIN tblEMEntity e ON e.intEntityId = j.intEntityId
    LEFT JOIN tblSMCurrency C ON C.intCurrencyID = j.intCurrencyId
    LEFT JOIN tblGLFiscalYearPeriod fp ON fp.intGLFiscalYearPeriodId = j.intFiscalPeriodId
+   LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = j.intCompanyLocationId
    WHERE  strTransactionType IN ('General Journal','Recurring')
    AND  ISNULL(strSourceType,'') <> 'AA'
 GO

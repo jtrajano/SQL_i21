@@ -234,4 +234,5 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intContractDetailId]		INT NULL -- Contract Detail Id
 	,[ysnWeighed]				BIT DEFAULT((0))
 	,[strSealNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[intTradeFinanceId]		INT NULL 
 )

@@ -4,7 +4,8 @@
     ,@BatchId           NVARCHAR(40)
     ,@PostDate          DATETIME                
     ,@UserId            INT
-	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
+	,@BatchIdUsed		NVARCHAR(40)	= NULL OUTPUT
+	,@strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -47,11 +48,12 @@ BEGIN TRY
 	SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 	SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
 	
-	EXEC dbo.uspARGenerateGLEntries @Post		= @Post
-								  , @Recap		= 1
-								  , @PostDate	= @PostDate
-								  , @BatchId	= @BatchIdUsed
-								  , @UserId		= @UserId 
+	EXEC dbo.uspARGenerateGLEntries @Post			= @Post
+								  , @Recap			= 1
+								  , @PostDate		= @PostDate
+								  , @BatchId		= @BatchIdUsed
+								  , @UserId			= @UserId
+								  , @strSessionId 	= @strSessionId 
 
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -139,7 +141,8 @@ BEGIN TRY
 		,[intCommodityId]
 		,[intSourceEntityId]
 		,[ysnRebuild]
-	FROM ##ARInvoiceGLEntries
+	FROM tblARPostInvoiceGLEntries
+	WHERE strSessionId = @strSessionId
 
 	IF @InitTranCount = 0
 		ROLLBACK TRANSACTION
@@ -148,7 +151,8 @@ BEGIN TRY
     
     DELETE  Q
     FROM tblARPostingQueue Q
-    INNER JOIN ##ARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
+    INNER JOIN tblARPostInvoiceHeader I ON Q.strTransactionNumber = I.strInvoiceNumber
+	WHERE I.strSessionId = @strSessionId
     
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchIdUsed
 		 
@@ -181,6 +185,7 @@ BEGIN TRY
 		,[strAccountId]
 		,[strAccountGroup]
 		,[strRateType]
+		,[intCurrencyExchangeRateTypeId]
 	)
 	SELECT [strTransactionId]				= A.[strTransactionId]
 		,[intTransactionId]					= A.[intTransactionId]
@@ -193,8 +198,8 @@ BEGIN TRY
 		,[dblCredit]						= Credit.[Value]
 		,[dblDebitUnit]						= DebitUnit.[Value]
 		,[dblCreditUnit]					= CreditUnit.[Value]
-		,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN @ZeroDecimal ELSE A.[dblDebitForeign] END
-		,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN @ZeroDecimal ELSE A.[dblCreditForeign]	 END 		
+		,[dblDebitForeign]					= A.dblDebitForeign
+		,[dblCreditForeign]					= A.dblCreditForeign	
 		,[intCurrencyId]					= A.[intCurrencyId]
 		,[dtmDate]							= A.[dtmDate]
 		,[ysnIsUnposted]					= A.[ysnIsUnposted]
@@ -210,6 +215,7 @@ BEGIN TRY
 		,[strAccountId]						= B.[strAccountId]
 		,[strAccountGroup]					= C.[strAccountGroup]
 		,[strRateType]						= RATETYPE.strCurrencyExchangeRateType
+		,[intCurrencyExchangeRateTypeId]	= RATETYPE.[intCurrencyExchangeRateTypeId]
 	FROM @GLEntries A
 	INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
 	INNER JOIN dbo.tblGLAccountGroup C ON B.intAccountGroupId = C.intAccountGroupId			
@@ -218,7 +224,7 @@ BEGIN TRY
 	CROSS APPLY dbo.fnGetDebitUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) DebitUnit
 	CROSS APPLY dbo.fnGetCreditUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) CreditUnit
 	OUTER APPLY (
-		SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal,dblCurrencyExchangeRate
+		SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal,dblCurrencyExchangeRate,ID.[intCurrencyExchangeRateTypeId]
 		FROM dbo.tblARInvoice I
 		CROSS APPLY (
 			SELECT TOP 1 intCurrencyExchangeRateTypeId = ISNULL(intCurrencyExchangeRateTypeId, @DefaultCurrencyExchangeRateTypeId)

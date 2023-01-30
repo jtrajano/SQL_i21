@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
 	[dblTransactionAmount] [numeric](18, 6) NULL,
 	[intCurrencyId] [int] NULL,
 	[intCurrencyExchangeRateTypeId] [int] NULL,
+	[strForexRateType] NVARCHAR(20) COLLATE Latin1_General_CI_AS, 
 	[dblHistoricForexRate] [numeric](18, 6) NOT NULL,
 	[dblHistoricAmount] [numeric](18, 6) NOT NULL,
 	[dblNewForexRate] [numeric](18, 6) NOT NULL,
@@ -30,6 +31,7 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
     intLocationSegmentOverrideId INT,
     intLOBSegmentOverrideId INT,
     intCompanySegmentOverrideId INT,
+	intNewCurrencyExchangeRateTypeId INT NULL,
  CONSTRAINT [PK_tblGLRevalueDetails] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationDetailId] ASC

@@ -179,7 +179,10 @@ INSERT INTO @InvoicesToGenerate (
 	,[strAcresApplied]					
 	,[strNutrientAnalysis]				
 	,[strBillingMethod]					
-	,[strApplicatorLicense])
+	,[strApplicatorLicense]
+	,intTaxLocationId
+	,strTaxPoint
+)
 SELECT
 	 [intId]							= [intId]
 	,[strTransactionType]				= [strTransactionType]
@@ -333,6 +336,8 @@ SELECT
 	,[strNutrientAnalysis]				= [strNutrientAnalysis]	
 	,[strBillingMethod]					= [strBillingMethod]
 	,[strApplicatorLicense]				= [strApplicatorLicense]
+	,intTaxLocationId					= intTaxLocationId
+	,strTaxPoint						= strTaxPoint
 FROM
 	@InvoiceEntries 
 
@@ -1330,7 +1335,10 @@ CREATE TABLE #CustomerInvoice
 	,[strAcresApplied]				NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
-	,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL)
+	,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,intTaxLocationId				INT												NULL
+	,strTaxPoint					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	)
 
 INSERT INTO #CustomerInvoice
 	([intInvoiceId]
@@ -1437,7 +1445,10 @@ INSERT INTO #CustomerInvoice
 	,[strAcresApplied]				
 	,[strNutrientAnalysis]		
 	,[strBillingMethod]			
-	,[strApplicatorLicense]	)
+	,[strApplicatorLicense]
+	,intTaxLocationId
+    ,strTaxPoint
+)
 SELECT
 	 [intInvoiceId]					= NULL
 	,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 AND RTRIM(LTRIM(ISNULL(ITG.strInvoiceOriginId,''))) <> '' THEN RTRIM(LTRIM(ITG.strInvoiceOriginId)) ELSE NULL END
@@ -1547,6 +1558,8 @@ SELECT
 	,[strNutrientAnalysis]			= ITG.[strNutrientAnalysis]
 	,[strBillingMethod]				= ITG.[strBillingMethod]
 	,[strApplicatorLicense]			= ITG.[strApplicatorLicense]
+	,intTaxLocationId				= ITG.intTaxLocationId
+    ,strTaxPoint					= ITG.strTaxPoint
 FROM	
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 --INNER JOIN
@@ -1729,7 +1742,9 @@ USING
 		,[strAcresApplied]				
 		,[strNutrientAnalysis]			
 		,[strBillingMethod]				
-		,[strApplicatorLicense]			
+		,[strApplicatorLicense]
+		,intTaxLocationId
+		,strTaxPoint
 	FROM
 		#CustomerInvoice
 	)
@@ -1831,7 +1846,9 @@ INSERT(
 	,[strAcresApplied]				
 	,[strNutrientAnalysis]		
 	,[strBillingMethod]			
-	,[strApplicatorLicense]		
+	,[strApplicatorLicense]
+	,[intTaxLocationId]
+	,[strTaxPoint]
 	)
 VALUES(
 	 [strInvoiceNumber]
@@ -1928,7 +1945,9 @@ VALUES(
 	,[strAcresApplied]				
 	,[strNutrientAnalysis]			
 	,[strBillingMethod]				
-	,[strApplicatorLicense]			
+	,[strApplicatorLicense]
+	,[intTaxLocationId]
+	,[strTaxPoint]
 )
 	OUTPUT  
 			@IntegrationLogId						--[intIntegrationLogId]
@@ -2180,7 +2199,9 @@ BEGIN TRY
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
-        ,[dblAddOnQuantity])
+        ,[dblAddOnQuantity]
+		,ysnOverrideTaxGroup
+	)
 	SELECT
 		 [intId]								= IL.[intId]
 		,[strTransactionType]					= ITG.[strTransactionType]
@@ -2330,6 +2351,7 @@ BEGIN TRY
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
+		,ysnOverrideTaxGroup					= ITG.ysnOverrideTaxGroup
 	FROM
 		@InvoicesToGenerate ITG
 	INNER JOIN

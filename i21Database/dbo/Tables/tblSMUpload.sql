@@ -16,4 +16,4 @@
 
 GO
 
-CREATE INDEX [IX_tblSMUpload_intAttachmentId] ON [dbo].[tblSMUpload] ([intAttachmentId]) INCLUDE([blbFile])
+--CREATE INDEX [IX_tblSMUpload_intAttachmentId] ON [dbo].[tblSMUpload] ([intAttachmentId]) INCLUDE([blbFile])

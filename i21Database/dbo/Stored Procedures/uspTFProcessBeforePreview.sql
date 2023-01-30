@@ -446,7 +446,24 @@ BEGIN TRY
 			INNER JOIN tblTFCountyLocation CL ON CL.intCountyLocationId = TCL.intCountyLocationId
 			WHERE Trans.uniqTransactionGuid = @Guid
 				AND Trans.intTransactionId IS NOT NULL
+		END
+		ELSE IF (@TaxAuthorityCode = 'IL' AND @ScheduleCode = 'DD-1')
+        BEGIN
+            DELETE FROM tblTFTransactionDynamicIL
+            WHERE intTransactionId IN (
+                SELECT intTransactionId FROM #tmpTransaction
+            )
 
+            INSERT INTO tblTFTransactionDynamicIL (intTransactionId, strILCustomerBillToAddress, strILCustomerBillToCity, strILCustomerBillToState, strILCustomerBillToZipCode)
+			SELECT Trans.intTransactionId, tblEMEntityLocation.strAddress, tblEMEntityLocation.strCity, tblEMEntityLocation.strState, tblEMEntityLocation.strZipCode
+            FROM tblTFTransaction Trans
+            INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+            INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+            INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intBillToLocationId
+            WHERE Trans.uniqTransactionGuid = @Guid
+            AND Trans.intReportingComponentId = @ReportingComponentId
+            AND Trans.strTransactionType = 'Invoice'
+            AND Trans.intTransactionId IS NOT NULL
 		END
 		ELSE IF (@TaxAuthorityCode = 'WV' AND @FormCode = 'MFT-507')
 		BEGIN

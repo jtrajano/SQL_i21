@@ -44,16 +44,22 @@ AND ISNULL(A.dblAmountFrom,0) = 0
 -- Local to local FROM currency
 
 UPDATE A 
-SET dblAmountFrom = A.dblAmount , dblAmountTo = A.dblAmount
-,dblRateAmountFrom = 1 , dblRateAmountTo =1
+SET dblAmountFrom = A.dblAmountForeignFrom 
+,dblRateAmountFrom = 1 
  FROM
 tblCMBankTransfer A 
-WHERE A.intCurrencyIdAmountFrom = A.intCurrencyIdAmountFrom
-AND A.intCurrencyIdAmountFrom = @intDefaultCurrencyId
-AND (ISNULL(A.dblAmount,0) = 0 OR ISNULL(A.dblAmountFrom,0) = 0 OR
-ISNULL(A.dblRateAmountFrom,0) = 0 OR ISNULL(A.dblRateAmountTo,0) = 0
-)
---Local to Foreign
+WHERE A.intCurrencyIdAmountFrom = @intDefaultCurrencyId
+AND ISNULL(A.dblAmountFrom,0) = 0 
+
+UPDATE A 
+SET dblAmountTo = A.dblAmountForeignTo 
+,dblRateAmountTo = 1 
+FROM
+tblCMBankTransfer A 
+WHERE A.intCurrencyIdAmountTo = @intDefaultCurrencyId
+AND ISNULL(A.dblAmountTo,0) = 0 
+
+-- Local to Foreign
 
  UPDATE A SET 
  dblRateAmountFrom = dblRateAmountTo,

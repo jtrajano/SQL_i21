@@ -39,6 +39,9 @@ DECLARE
 	@costAdjustmentType_DETAILED AS TINYINT = 1
 	,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
 
+-- Get the default currency ID
+DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 -- Clean-up for the temp tables. 
 IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
 	DROP TABLE #tmpRevalueProducedItems  
@@ -73,6 +76,8 @@ BEGIN
 		,[intInTransitSourceLocationId] INT NULL 
 		,[dblNewAverageCost] NUMERIC(38,20) NULL
 		,[intSourceEntityId] INT NULL
+		,[intForexRateTypeId] INT NULL
+		,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1
 	)
 END 
 
@@ -106,6 +111,8 @@ DECLARE @intId AS INT
 
 		,@strTransactionId_Batch AS NVARCHAR(40) 
 		,@intSourceEntityId INT 
+		,@intForexRateTypeId INT 
+		,@dblForexRate NUMERIC(38, 20) 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionFormName AS NVARCHAR(200)
@@ -156,6 +163,8 @@ BEGIN
 			,[intOtherChargeItemId]
 			,[dblNewAverageCost]
 			,[intSourceEntityId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 	)
 	SELECT 
 			[intItemId] 
@@ -186,6 +195,8 @@ BEGIN
 			,[intOtherChargeItemId]
 			,[dblNewAverageCost]
 			,[intSourceEntityId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 	FROM	@ItemsToAdjust 
 	ORDER BY	
 		[intItemId]
@@ -279,6 +290,9 @@ SELECT  intId
 		,intOtherChargeItemId
 		,dblNewAverageCost
 		,intSourceEntityId
+		,intForexRateTypeId
+		,dblForexRate
+
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -312,6 +326,8 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intOtherChargeItemId
 	,@dblNewAverageCost
 	,@intSourceEntityId
+	,@intForexRateTypeId
+	,@dblForexRate
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -355,6 +371,23 @@ BEGIN
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
+	-- Initialize the forex fields
+	IF @intFunctionalCurrencyId = ISNULL(@intCurrencyId, @intFunctionalCurrencyId)
+	BEGIN 
+		SET @dblForexRate = 1
+		SET @intForexRateTypeId = NULL 
+		SET @intCurrencyId = @intFunctionalCurrencyId
+	END 
+	
+	-- Validate the forex rate 
+	IF @intFunctionalCurrencyId <> ISNULL(@intCurrencyId, @intFunctionalCurrencyId)
+	AND NULLIF(@dblForexRate, 0) IS NULL 
+	BEGIN 		
+		-- 'Forex Rate for the Cost Adjustment is missing.'
+		EXEC uspICRaiseError 80274;
+		RETURN -80274;		
+	END 
+	
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
@@ -407,6 +440,9 @@ BEGIN
 				,@ysnUpdateItemCostAndPrice
 				,@IsEscalate
 				,@intSourceEntityId
+				,@intCurrencyId
+				,@intForexRateTypeId
+				,@dblForexRate
 		END 
 		-- Do the retroactive average cost if cost adjustment is within a month. 
 		ELSE 
@@ -440,6 +476,9 @@ BEGIN
 				,@ysnUpdateItemCostAndPrice
 				,@IsEscalate
 				,@intSourceEntityId
+				,@intCurrencyId
+				,@intForexRateTypeId
+				,@dblForexRate
 		END 
 	END TRY
 	BEGIN CATCH
@@ -485,6 +524,9 @@ BEGIN
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
 			,@intSourceEntityId
+			,@intCurrencyId
+			,@intForexRateTypeId
+			,@dblForexRate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -529,6 +571,9 @@ BEGIN
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
 			,@intSourceEntityId
+			,@intCurrencyId
+			,@intForexRateTypeId
+			,@dblForexRate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -574,6 +619,9 @@ BEGIN
 			,@intLotId 
 			,@IsEscalate
 			,@intSourceEntityId
+			,@intCurrencyId
+			,@intForexRateTypeId
+			,@dblForexRate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -620,6 +668,9 @@ BEGIN
 			,@IsEscalate
 			,@dblNewAverageCost
 			,@intSourceEntityId
+			,@intCurrencyId
+			,@intForexRateTypeId
+			,@dblForexRate
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -683,6 +734,8 @@ BEGIN
 		,@intOtherChargeItemId
 		,@dblNewAverageCost
 		,@intSourceEntityId
+		,@intForexRateTypeId
+		,@dblForexRate
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

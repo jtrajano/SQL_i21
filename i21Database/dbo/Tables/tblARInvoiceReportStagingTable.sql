@@ -143,5 +143,12 @@
 	[strEDICode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strDestinationCity]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strMVessel]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[ysnCustomsReleased]				BIT             NULL
+	[ysnCustomsReleased]				BIT             NULL,
+	[strBankName]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strIBAN]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strSWIFT]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strBICCode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[dblServiceChargeAPR]				NUMERIC (18, 6)	NULL,
+	[strLogoType]						NVARCHAR (10)	COLLATE Latin1_General_CI_AS NULL,
+	[dtmDueDateSC]						DATETIME		NULL
 );

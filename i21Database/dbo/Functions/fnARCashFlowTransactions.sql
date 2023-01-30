@@ -1,27 +1,56 @@
 ﻿CREATE FUNCTION [dbo].[fnARCashFlowTransactions]
 (
-	@dtmDateFrom DATETIME = NULL,
-	@dtmDateTo DATETIME = NULL
+	 @dtmDateFrom	DATETIME = NULL
+	,@dtmDateTo		DATETIME = NULL
 )
-RETURNS TABLE
+RETURNS @returntable TABLE (
+	 intTransactionId		INT NOT NULL
+	,strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,strTransactionType		NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,intCurrencyId			INT NOT NULL
+	,dtmDate				DATETIME NOT NULL
+	,dblAmount				DECIMAL(18, 6)
+	,intBankAccountId		INT NULL
+	,intGLAccountId			INT NOT NULL
+	,intCompanyLocationId	INT NOT NULL
+	,ysnPosted				BIT NOT NULL
+)
 AS
-RETURN SELECT
-	 intTransactionId		= ARI.intInvoiceId
-	,strTransactionId		= ARI.strInvoiceNumber
-	,strTransactionType		= ARI.strTransactionType
-	,intCurrencyId			= ARI.intCurrencyId
-	,dtmDate				= ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate)
-	,dblAmount				= CASE WHEN ARI.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(ARI.dblAmountDue, 0) * -1 ELSE ISNULL(ARI.dblAmountDue, 0) END
-	,intBankAccountId		= CMUF.intBankAccountId
-	,intGLAccountId			= ARI.intAccountId
-	,intCompanyLocationId	= ARI.intCompanyLocationId
-	,ysnPosted				= ISNULL(ARI.ysnPosted, 0)
-FROM tblARInvoice ARI
-LEFT JOIN tblCMUndepositedFund CMUF
-ON ARI.strInvoiceNumber = CMUF.strSourceTransactionId
-AND strSourceSystem = 'AR'
-WHERE (@dtmDateFrom IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) >= @dtmDateFrom)
-  AND (@dtmDateTo IS NULL OR ISNULL(ARI.dtmCashFlowDate, ARI.dtmDate) <= @dtmDateTo)
-  AND ARI.ysnPaid = 0
+BEGIN
+	DECLARE	 @intEntityUserId	INT = 1
+
+	SELECT @intEntityUserId = intEntityId
+	FROM tblEMEntityCredential
+	WHERE strUserName = 'irelyadmin'
+
+	INSERT INTO @returntable
+	SELECT
+		 intTransactionId		= ARCAST.intInvoiceId
+		,strTransactionId		= ARCAST.strInvoiceNumber
+		,strTransactionType		= ARCAST.strTransactionType
+		,intCurrencyId			= ARCAST.intCurrencyId
+		,dtmDate				= ARCAST.dtmDueDate
+		,dblAmount				= SUM(dblTotalAR)
+		,intBankAccountId		= CMUF.intBankAccountId
+		,intGLAccountId			= ARCAST.intAccountId
+		,intCompanyLocationId	= ARCAST.intCompanyLocationId
+		,ysnPosted				= 1
+	FROM [dbo].[fnARCustomerAgingDetail](NULL, @dtmDateTo, NULL, NULL, NULL, NULL, NULL, @intEntityUserId, NULL, 0, 0, 0, 1) ARCAST
+	LEFT JOIN tblCMUndepositedFund CMUF ON strInvoiceNumber = CMUF.strSourceTransactionId AND strSourceSystem = 'AR'
+	WHERE intEntityUserId = @intEntityUserId
+	AND (@dtmDateFrom IS NULL OR ARCAST.dtmDueDate >= @dtmDateFrom)
+	AND (@dtmDateTo IS NULL OR ARCAST.dtmDueDate <= @dtmDateTo)
+	GROUP BY
+		 ARCAST.intInvoiceId
+		,ARCAST.strInvoiceNumber
+		,ARCAST.strTransactionType
+		,ARCAST.intCurrencyId
+		,ARCAST.dtmDueDate
+		,CMUF.intBankAccountId
+		,ARCAST.intAccountId
+		,ARCAST.intCompanyLocationId
+
+	RETURN
+END
 
 GO

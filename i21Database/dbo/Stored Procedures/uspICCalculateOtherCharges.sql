@@ -8,8 +8,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS ON    
 
-BEGIN
+-- Do not recompute the other charge if the receipt is already posted. 
+IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt r WHERE r.intInventoryReceiptId = @intInventoryReceiptId AND r.ysnPosted = 1) 
+BEGIN 
+	RETURN 0; 
+END 
 
+BEGIN
 	-- Update the currency fields 
 	UPDATE	ReceiptCharges
 	SET		intCent = Currency.intCent

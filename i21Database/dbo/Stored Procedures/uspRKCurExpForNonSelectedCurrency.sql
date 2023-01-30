@@ -17,7 +17,7 @@ BEGIN
 								JOIN tblARInvoiceDetail id ON i.intInvoiceId = id.intInvoiceId
 								WHERE id.intContractDetailId = cd.intContractDetailId) dblQuantity
 			, um.strUnitMeasure strUnitMeasure
-			, dblOrigPrice = [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId, @intCurrencyId) * (dbo.fnRKGetSequencePrice(cd.intContractDetailId, dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId, @dtmClosingPrice), @dtmClosingPrice))
+			, dblOrigPrice = [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId, @intCurrencyId, DEFAULT) * (dbo.fnRKGetSequencePrice(cd.intContractDetailId, dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId, @dtmClosingPrice), @dtmClosingPrice))
 			, (c.strCurrency + '/' + um.strUnitMeasure) COLLATE Latin1_General_CI_AS strOrigPriceUOM
 			, (CONVERT(VARCHAR(11), cd.dtmStartDate, 106) + '-' + CONVERT(VARCHAR(11), cd.dtmEndDate, 106)) COLLATE Latin1_General_CI_AS dtmPeriod
 			, 'S' COLLATE Latin1_General_CI_AS strContractType

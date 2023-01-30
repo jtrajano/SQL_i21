@@ -54,7 +54,6 @@ BEGIN
 	SELECT * INTO #tmpCMBankTransactions 
 	FROM tblCMBankTransaction 
 	WHERE intTransactionId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strTransactionIds))
-		AND ISNULL(strReferenceNo,'') = ''
 
 	WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactions) 
 	BEGIN

@@ -17,27 +17,32 @@ BEGIN
 	DELETE tblMBILOrder WHERE intDriverId = @intDriverId AND intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL)
 END
 
--- ++++++ CALL TM SP FOR OVERRAGE ++++++
-DECLARE  @TMDispatchId INT = NULL
-
-SELECT intDispatchID 
-INTO #TMOrderDispatch
-FROM tblTMDispatch
-WHERE intDriverID = @intDriverId
-AND strWillCallStatus IN ('Dispatched','Routed')
-
-WHILE EXISTS(SELECT 1 FROM #TMOrderDispatch)
+-- ++++++ CLEAN-OUT ORDERS WITH POSTED INVOICE  ++++++ --
 BEGIN
-	SELECT TOP 1 @TMDispatchId = [intDispatchID] FROM #TMOrderDispatch
-
-	DELETE tblTMOrder WHERE intDispatchId =  @TMDispatchId and strSource = 'Mobile Billing'
-	EXEC uspTMCreateOrder @TMDispatchId, 'Mobile Billing'
-
-	DELETE #TMOrderDispatch WHERE [intDispatchID] = @TMDispatchId
+	DELETE tblMBILOrder WHERE intOrderId IN (SELECT intOrderId FROM tblMBILInvoice WHERE ysnPosted = 1)
 END
 
+---- ++++++ CALL TM SP FOR OVERRAGE ++++++
+--DECLARE  @TMDispatchId INT = NULL
 
--- ++++++ PREPARE FINAL TM ORDER ++++++
+--SELECT intDispatchID 
+--INTO #TMOrderDispatch
+--FROM tblTMDispatch
+--WHERE intDriverID = @intDriverId
+--AND strWillCallStatus IN ('Dispatched','Routed')
+
+--WHILE EXISTS(SELECT 1 FROM #TMOrderDispatch)
+--BEGIN
+--	SELECT TOP 1 @TMDispatchId = [intDispatchID] FROM #TMOrderDispatch
+
+--	DELETE tblTMOrder WHERE intDispatchId =  @TMDispatchId and strSource = 'Mobile Billing'
+--	EXEC uspTMCreateOrder @TMDispatchId, 'Mobile Billing'
+
+--	DELETE #TMOrderDispatch WHERE [intDispatchID] = @TMDispatchId
+--END
+
+
+-- ++++++ PREPARE TM ORDER ++++++
 SELECT intDispatchId = TMOrder.intDispatchId
 	, strOrderNumber = TMOrder.strOrderNumber
 	, strOrderStatus = Dispatch.strWillCallStatus

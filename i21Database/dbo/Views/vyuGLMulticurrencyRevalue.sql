@@ -24,7 +24,7 @@ SELECT
 	,intCompanyLocationId
 	,intLOBSegmentCodeId
 FROM vyuCTMultiCurrencyRevalue
- UNION ALL
+UNION ALL
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,strTransactionId  COLLATE Latin1_General_CI_AS strTransactionId,strTransactionDate dtmDate,
 	strTransactionDueDate dtmDueDate,strVendorName  COLLATE Latin1_General_CI_AS strVendorName,strCommodity  COLLATE Latin1_General_CI_AS strCommodity,
@@ -46,7 +46,7 @@ SELECT
 	dblHistoricAmount, dblAmountDifference = 0, strModule = 'INV'  COLLATE Latin1_General_CI_AS , strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueReceipt
 UNION ALL
 SELECT 
@@ -58,7 +58,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueReceiptOtherCharges
 UNION ALL
 SELECT 
@@ -70,7 +70,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables' COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipment
 UNION ALL
 SELECT 
@@ -83,7 +83,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnPayable = 1
 UNION ALL
 SELECT 
@@ -96,7 +96,7 @@ SELECT
 	strModule = 'INV'  COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId
+	,intLOBSegmentCodeId = NULL
 FROM vyuICMultiCurrencyRevalueShipmentOtherCharges WHERE ysnReceivable = 1
 UNION ALL
 SELECT 
@@ -135,7 +135,7 @@ SELECT
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId
 FROM vyuCMForwardPayablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -148,7 +148,7 @@ SELECT
 	strModule = 'CM Forwards' COLLATE Latin1_General_CI_AS, strType = 'Receivables'  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
+	,intLOBSegmentCodeId
 FROM vyuCMForwardReceivablesMultiCurrencyRevalue
 UNION ALL
 SELECT 
@@ -223,7 +223,7 @@ SELECT
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'GL'  COLLATE Latin1_General_CI_AS, 
 	strType = 'Receivables'  COLLATE Latin1_General_CI_AS
-	,intAccountId = NULL
+	,intAccountId = intAccountId
 	,intCompanyLocationId = NULL
 	,intLOBSegmentCodeId = NULL
 FROM vyuGLMulticurrencyRevalueGJ
@@ -253,7 +253,7 @@ A.strModule,
 A.strType,
 B.strCurrency,
 intAccountIdOverride = A.intAccountId,
-intLOBSegmentOverrideId = A.intLOBSegmentCodeId,
+intLOBSegmentOverrideId  = NULL,
 CL.* 
 FROM CTE A 
 LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID

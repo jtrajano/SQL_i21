@@ -66,6 +66,8 @@ INSERT INTO @PaymentsToGenerate (
 	,[ysnRecap]
 	,[intEntityId]
 	,[intEntityCardInfoId]
+	,[ysnScheduledPayment]
+	,[dtmScheduledPayment]
 	,[intPaymentDetailId]
 	,[intInvoiceId]
 	,[intBillId]
@@ -119,6 +121,8 @@ SELECT
 	,[ysnRecap]								= [ysnRecap]
 	,[intEntityId]							= [intEntityId]
 	,[intEntityCardInfoId]					= [intEntityCardInfoId]
+	,[ysnScheduledPayment]					= [ysnScheduledPayment]
+	,[dtmScheduledPayment]					= [dtmScheduledPayment]
 	,[intPaymentDetailId]					= [intPaymentDetailId]
 	,[intInvoiceId]							= [intInvoiceId]
 	,[intBillId]							= [intBillId]
@@ -447,6 +451,8 @@ USING
 		,[ysnImportedAsPosted]				= ITG.[ysnImportedAsPosted]
 		,[intEntityId]						= ITG.[intEntityId]
 		,[intEntityCardInfoId]				= ITG.[intEntityCardInfoId]
+		,[ysnScheduledPayment]				= ITG.[ysnScheduledPayment]
+		,[dtmScheduledPayment]				= ITG.[dtmScheduledPayment]
 		,[intWriteOffAccountId]				= ITG.[intWriteOffAccountId]
 		,[strPaymentMethod]					= ITG.[strPaymentMethod]
 		,[dblTotalAR]						= @ZeroDecimal
@@ -458,7 +464,8 @@ USING
 		,[ysnPost]							= ITG.[ysnPost]
 		,[ysnRecap]							= ITG.[ysnRecap]
 		,[intPaymentId]						= ITG.[intPaymentId]
-		,[ysnPosted]						= ITG.[ysnImportedAsPosted]	
+		,[ysnPosted]						= ITG.[ysnImportedAsPosted]
+		,[strCreditCardStatus]				= CASE WHEN intEntityCardInfoId IS NOT NULL THEN 'Ready' ELSE NULL END
 	FROM @PaymentsToGenerate ITG
 	)
 AS Source
@@ -493,9 +500,12 @@ INSERT(
 	,[ysnImportedAsPosted]
 	,[intEntityId]
 	,[intEntityCardInfoId]
+	,[ysnScheduledPayment]
+	,[dtmScheduledPayment]
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
+	,[strCreditCardStatus]
 	,[intConcurrencyId]
 	)
 VALUES(
@@ -527,9 +537,12 @@ VALUES(
 	,[ysnImportedAsPosted]
 	,[intEntityId]
 	,[intEntityCardInfoId]
+	,[ysnScheduledPayment]
+	,[dtmScheduledPayment]
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
+	,[strCreditCardStatus]
 	,[intConcurrencyId]
 )
 	OUTPUT  

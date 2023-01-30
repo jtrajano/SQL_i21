@@ -58,7 +58,8 @@ BEGIN TRY
 			@ysnEnableLetterOfCredit    BIT = 0,
 			@intLCApplicantId			INT,
             @strLCType					NVARCHAR(100),
-            @strLCNumber				NVARCHAR(50)
+            @strLCNumber				NVARCHAR(50),
+			@intCostTermId				INT
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
@@ -72,7 +73,7 @@ BEGIN TRY
 	) pricing
 	where cd.intContractHeaderId = @intContractHeaderId
 	and cd.intPricingTypeId = 1
-	and ch.intPricingTypeId <> 1
+	and ch.intPricingTypeId in (2,3)
 	and ch.ysnMultiplePriceFixation <> 1
 	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
 
@@ -94,9 +95,11 @@ BEGIN TRY
 	) pricing
 	where cd.intContractHeaderId = @intContractHeaderId
 	and cd.intPricingTypeId = 1
-	and ch.intPricingTypeId <> 1
+	and ch.intPricingTypeId = 2
 	and ch.ysnMultiplePriceFixation <> 1
-	and cd.dblQuantity > isnull(pricing.dblPricedQty,0);
+	and isnull(pricing.dblPricedQty,0) > 0
+	and cd.dblQuantity > isnull(pricing.dblPricedQty,0)
+	and ISNULL(cd.intSplitFromId,0) = 0;
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -247,12 +250,35 @@ BEGIN TRY
 	
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+
+		if (isnull(@ysnMultiplePriceFixation,0) <> 1 AND @intHeaderPricingTypeId = 2)
+		begin
+			update cd
+			set
+				cd.intPricingTypeId = 2
+				,cd.dblFutures = NULL
+				,cd.dblCashPrice = NULL
+				,cd.dblTotalCost = NULL
+			from @CDTableUpdate cd
+			left join (
+				select pf.intContractDetailId, dblPricedQuantity = sum(fd.dblQuantity)
+				from tblCTPriceFixation pf
+				join tblCTPriceFixationDetail fd on fd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractDetailId = @intContractDetailId
+				group by pf.intContractDetailId
+			)p on p.intContractDetailId = cd.intContractDetailId
+			where cd.intContractDetailId = @intContractDetailId
+			and isnull(p.dblPricedQuantity,0) < cd.dblQuantity
+			and isnull(p.dblPricedQuantity,0) > 0
+		end
+
 		SELECT	@intPricingTypeId	=	NULL,
 				@dblCashPrice		=	NULL,
 				@dblBasis			=	NULL,
 				@dblOriginalBasis	=	NULL,
 				@ysnSlice			=	NULL,
-				@strLCNumber		=	null
+				@strLCNumber		=	null,
+				@intCostTermId		=	NULL
 
 		SELECT	@intPricingTypeId	=	intPricingTypeId,
 				@dblCashPrice		=	dblCashPrice,
@@ -273,7 +299,8 @@ BEGIN TRY
 				@intCurrencyId		=	intCurrencyId,
 				@strLCNumber		=	strLCNumber,
 				@intLCApplicantId	=	intLCApplicantId,
-				@strLCType			=	strLCType
+				@strLCType			=	strLCType,
+				@intCostTermId		=	intCostTermId
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
@@ -322,6 +349,103 @@ BEGIN TRY
 				, @strModuleName = 'Contract Management'
 
 			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
+
+			-- RECALCULATE Cost Term
+			IF (ISNULL(@intCostTermId, 0) <> 0)
+			BEGIN
+				DECLARE @intCommodityId INT
+					, @intItemId INT
+					, @intFromPortId INT
+					, @intToPortId INT
+					, @intFromTermId INT
+					, @intToTermId INT
+					, @dtmDate DATETIME
+					, @intMarketZoneId INT
+					, @intInvoiceCurrencyId INT
+					, @intRateTypeId INT
+					, @intSequenceCurrencyId INT
+					, @intDefaultFreightId INT
+					, @intDefaultInsuranceId INT
+					, @intDetailPricingTypeId INT
+					, @ysnEnableBudgetForBasisPricing BIT
+					, @dblTotalBudget NUMERIC(18, 6)
+					, @dblTotalCost NUMERIC(18, 6)
+					, @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost bit
+
+				DECLARE @CostItems AS TABLE (intCostItemId INT
+					, strCostItem NVARCHAR(100)
+					, intEntityId INT
+					, strEntityName NVARCHAR(100)
+					, intCurrencyId INT
+					, strCurrency NVARCHAR(100)
+					, intItemUOMId INT
+					, strUnitMeasure NVARCHAR(100)
+					, strCostMethod NVARCHAR(50)
+					, dblRate NUMERIC(18, 6)
+					, dblAmount NUMERIC(18, 6)
+					, dblFX NUMERIC(18, 6))
+				
+				SELECT @intCommodityId = ch.intCommodityId
+					, @intItemId = cd.intItemId
+					, @intFromPortId = cd.intLoadingPortId
+					, @intToPortId = cd.intDestinationPortId
+					, @intFromTermId = ch.intFreightTermId
+					, @intToTermId = cd.intCostTermId
+					, @dtmDate = ch.dtmContractDate
+					, @intMarketZoneId = cd.intMarketZoneId
+					, @intInvoiceCurrencyId = cd.intInvoiceCurrencyId
+					, @intRateTypeId = cd.intRateTypeId
+					, @intSequenceCurrencyId = cd.intCurrencyId
+					, @dblTotalBudget = dblTotalBudget
+					, @dblTotalCost = dblTotalCost
+				FROM tblCTContractDetail cd
+				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+
+				SELECT @intDefaultFreightId = intDefaultFreightItemId
+					, @intDefaultInsuranceId = intDefaultInsuranceItemId
+					, @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing
+					, @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost = ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost
+				FROM tblCTCompanyPreference
+
+				INSERT INTO @CostItems
+				EXEC uspCTGetFreightTermCost
+					@intContractTypeId = @intContractTypeId
+					, @intCommodityId = @intCommodityId
+					, @intItemId = @intItemId
+					, @intFromPortId = @intFromPortId
+					, @intToPortId = @intToPortId
+					, @intFromTermId = @intFromTermId
+					, @intToTermId = @intToTermId
+					, @dtmDate = @dtmDate
+					, @intMarketZoneId = @intMarketZoneId
+					, @intInvoiceCurrencyId = @intInvoiceCurrencyId
+					, @intRateTypeId = @intRateTypeId
+					, @ysnWarningMessage = 0
+					, @intSequenceCurrencyId = @intSequenceCurrencyId
+
+				IF EXISTS (SELECT TOP 1 1 FROM @CostItems)
+				BEGIN
+					UPDATE tblCTContractCost
+					SET intItemUOMId = tblUpdate.intItemUOMId
+						, dblFX = tblUpdate.dblFX
+						, dblRate = tblUpdate.dblRate						
+					FROM (
+						SELECT cc.intContractCostId
+							, ci.intItemUOMId
+							, dblFX = case when @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost = 1 then cc.dblFX else ci.dblFX end
+							, dblRate = CASE WHEN cc.intItemId = @intDefaultInsuranceId THEN 
+												CASE WHEN @intDetailPricingTypeId = 2 AND @ysnEnableBudgetForBasisPricing = 1 THEN @dblTotalBudget * ci.dblAmount
+													ELSE CASE WHEN ci.dblAmount <> 0 THEN @dblTotalCost * ci.dblAmount ELSE cc.dblRate END END
+											ELSE ci.dblRate END
+							, dblRemainingPercent = 100
+							, dtmAccrualDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+						FROM tblCTContractCost cc
+						JOIN @CostItems ci ON ci.intCostItemId = cc.intItemId
+						WHERE intContractDetailId = @intContractDetailId
+					) tblUpdate WHERE tblUpdate.intContractCostId = tblCTContractCost.intContractCostId
+
+				END
+			END
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
@@ -424,6 +548,7 @@ BEGIN TRY
 			, dblOriginalBasis = CD.dblOriginalBasis
 			, dblConvertedBasis = CD.dblConvertedBasis
 			, strLCNumber = @strLCNumber
+			, ysnApplyDefaultTradeFinance = 0
 		FROM @CDTableUpdate CD
 		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
@@ -547,7 +672,7 @@ BEGIN TRY
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
-			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
+			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId IN(1,2))
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 		END		

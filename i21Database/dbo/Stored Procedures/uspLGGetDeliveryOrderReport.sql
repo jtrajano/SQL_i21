@@ -23,7 +23,8 @@ BEGIN
 			@strHaulerZip			NVARCHAR(MAX),
 			@strUserFullName		NVARCHAR(100),
 			@strUserEmailId			NVARCHAR(100),
-			@strUserPhoneNo			NVARCHAR(50)
+			@strUserPhoneNo			NVARCHAR(50),
+			@intReleaseOrderType	INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -63,6 +64,10 @@ BEGIN
 	SELECT	@strUserName = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strUserName' 
+
+	SELECT	@intReleaseOrderType = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intReleaseOrderType' 
 
 	SELECT TOP 1 @strCompanyName = strCompanyName
 		,@strCompanyAddress = strAddress
@@ -156,10 +161,18 @@ BEGIN
 		  ,strUserPhoneNo = @strUserPhoneNo
 		  ,LD.dtmDeliveryFrom
 		  ,LD.dtmDeliveryTo
+		  ,blbHeaderLogo = LOGO.blbHeaderLogo
+		  ,blbFooterLogo = LOGO.blbFooterLogo
+		  ,strHeaderLogoType = LOGO.strHeaderLogoType
+		  ,strFooterLogoType = LOGO.strFooterLogoType
+		  ,strReleaseOrderType = CASE 
+									WHEN @intReleaseOrderType = 1 THEN 'Provisional Release Order'
+									WHEN @intReleaseOrderType = 2 THEN 'Final Release Order'
+								ELSE NULL END
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
-	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblEMEntity WHVendor ON WHVendor.intEntityId = CLSL.intVendorId
 	LEFT JOIN tblEMEntityToContact WHVendorContact ON WHVendorContact.intEntityId = WHVendor.intEntityId
 	LEFT JOIN tblEMEntity ContactEntity ON ContactEntity.intEntityId = WHVendorContact.intEntityContactId
@@ -207,5 +220,30 @@ BEGIN
 						AND SMP.intTypeId = 1
 						AND LOWER(SMPT.strSampleTypeName) IN ('arrival sample', 'approval sample', 'stock sample')) SMPL
 	CROSS APPLY tblLGCompanyPreference CP
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+			,[strLogoType] = 'Logo'
+		FROM tblSMLogoPreference
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = LD.intSCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLH
+	OUTER APPLY (
+		SELECT TOP 1
+			[blbLogo] = imgLogo
+			,[strLogoType] = 'Logo'
+		FROM tblSMLogoPreferenceFooter
+		WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+			AND intCompanyLocationId = LD.intSCompanyLocationId
+		ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC
+	) CLLF
+	OUTER APPLY (
+		SELECT
+			blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+			,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+			,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+			,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	) LOGO
 	WHERE strLoadNumber = @strLoadNumber
 END

@@ -123,7 +123,7 @@ RETURNS TABLE AS RETURN
 		WHERE F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
-	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
+	CROSS JOIN  dbo.fnSplitString('0',',') RT
 	-- FOR REVIEW
 	OUTER APPLY 
 	(

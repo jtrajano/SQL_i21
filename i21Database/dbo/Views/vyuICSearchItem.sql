@@ -67,6 +67,7 @@ SELECT Item.intItemId
 , CommodityAttribute2.strAttribute2
 , CommodityAttribute3.strAttribute3
 , CommodityAttribute4.strAttribute4
+, Item.intCommodityAttributeId1
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

@@ -13,6 +13,8 @@ SELECT
 	,strSeason 		= Season.strDescription
 	,strClass 		= Class.strDescription
 	,strProductLine = ProductLine.strDescription
+	,dtmFiscalEndDate = FiscalPeriod.dtmEndDate
+	,dtmFiscalStartDate = FiscalPeriod.dtmStartDate
 FROM
 	tblICInventoryValuationSummary s LEFT JOIN tblICInventoryValuationSummaryLog sl
 		ON s.strPeriod = sl.strPeriod
@@ -34,6 +36,7 @@ FROM
 		ON Class.intCommodityAttributeId = i.intClassVarietyId
 	LEFT JOIN tblICCommodityProductLine ProductLine
 		ON ProductLine.intCommodityProductLineId = i.intProductLineId
+	LEFT JOIN tblGLFiscalYearPeriod AS FiscalPeriod ON s.strPeriod = FiscalPeriod.strPeriod
 
 
 --CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]

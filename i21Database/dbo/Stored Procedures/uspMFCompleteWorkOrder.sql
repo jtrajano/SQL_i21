@@ -74,6 +74,8 @@ BEGIN TRY
 		,@intAttributeId INT
 		,@strYieldAdjustmentAllowed NVARCHAR(50)
 		,@strComment NVARCHAR(MAX)
+		,@strCertificationName NVARCHAR(100)
+		,@strCertificationId NVARCHAR(50)
 		,@strParentLotNumber NVARCHAR(50)
 		,@ysnIgnoreTolerance BIT
 		,@intCategoryId INT
@@ -175,6 +177,8 @@ BEGIN TRY
 		,@ysnExcessConsumptionAllowed = ysnExcessConsumptionAllowed
 		,@intLotStatusId = intLotStatusId
 		,@strComment = strComment
+		,@strCertificationName = strCertificationName
+		,@strCertificationId = strCertificationId
 		,@strParentLotNumber = strParentLotNumber
 		,@ysnIgnoreTolerance = ysnIgnoreTolerance
 		,@ysnFillPartialPallet = ysnFillPartialPallet
@@ -217,6 +221,8 @@ BEGIN TRY
 			,ysnExcessConsumptionAllowed BIT
 			,intLotStatusId INT
 			,strComment NVARCHAR(MAX)
+			,strCertificationName NVARCHAR(100)
+			,strCertificationId NVARCHAR(50)
 			,strParentLotNumber NVARCHAR(50)
 			,ysnIgnoreTolerance BIT
 			,ysnFillPartialPallet BIT
@@ -1196,6 +1202,9 @@ BEGIN TRY
 					,@ysnRecap = @ysnRecap
 					,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId OUTPUT
 					,@intLotStatusId = @intLotStatusId
+					,@intWorkOrderProducedLotParentId = NULL
+					,@strCertificationName = @strCertificationName
+					,@strCertificationId = @strCertificationId
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -1275,6 +1284,9 @@ BEGIN TRY
 				,@ysnRecap = @ysnRecap
 				,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId OUTPUT
 				,@intLotStatusId = @intLotStatusId
+				,@intWorkOrderProducedLotParentId = NULL
+				,@strCertificationName = @strCertificationName
+				,@strCertificationId = @strCertificationId
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (
@@ -1442,6 +1454,8 @@ BEGIN TRY
 						,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId OUTPUT
 						,@intLotStatusId = @intLotStatusId
 						,@intWorkOrderProducedLotParentId = @intWorkOrderProducedLotParentId
+						,@strCertificationName = @strCertificationName
+						,@strCertificationId = @strCertificationId
 
 					IF @intLotStatusId IS NOT NULL
 						AND NOT EXISTS (
