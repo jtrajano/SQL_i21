@@ -702,7 +702,7 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 		)
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0
 
--- Fix the in-transit discrepancy with the received stock
+-- Fix the in-transit discrepancy with the received stock.
 BEGIN 
 	;WITH DiscrepanyCTE (
 		dtmDate
@@ -731,7 +731,7 @@ BEGIN
 				,intItemLocationId = ISNULL(inTransit.intInTransitSourceLocationId, inTransit.intItemLocationId)
 				,inTransit.intTransactionId
 				,inTransit.strTransactionId
-				,dblValue = inventory.dblValue
+				,dblValue = inventory.dblValue - isnull(othercharge.dblValue, 0)
 				,inTransit.intTransactionTypeId
 				,r.intCurrencyId 
 				,dblExchangeRate = ISNULL(NULLIF(ri.dblForexRate, 0), 1)
@@ -773,10 +773,35 @@ BEGIN
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			OUTER APPLY (
+				SELECT	
+					dblValue = SUM(
+						ROUND(
+							CASE 
+								WHEN ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+									-- Other charge is using a foreign currency. Convert the other charge to functional currency. 
+									dbo.fnMultiply(
+										CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
+										, ISNULL(Charge.dblForexRate, 0)
+									) 
+								ELSE 
+									-- No conversion. Other charge is already in functional currency. 
+									CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
+							END
+							,2
+						)
+					)
+				FROM	tblICInventoryReceiptItemAllocatedCharge ItemOtherCharges 						
+						INNER JOIN tblICInventoryReceiptCharge Charge
+							ON Charge.intInventoryReceiptChargeId = ItemOtherCharges.intInventoryReceiptChargeId
+				WHERE	ItemOtherCharges.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+						AND ItemOtherCharges.ysnInventoryCost = 1				
+			) othercharge
 		WHERE	
 			inTransit.strBatchId = @strBatchId
 			AND inTransit.strTransactionId = ISNULL(@strRebuildTransactionId, inTransit.strTransactionId) 
 			AND inTransit.intInTransitSourceLocationId IS NOT NULL 
+			AND inventory.dblValue - isnull(othercharge.dblValue, 0) <> 0
 	) 
 	/*
 		Create the GL-Entries for the discrepancy received from the in-transit
@@ -986,3 +1011,4 @@ SELECT
 	,[intCommodityId]
 FROM
 	@resultGLEntries
+
