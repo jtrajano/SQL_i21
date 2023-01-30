@@ -9,10 +9,10 @@ SELECT
                                             END
                                             ELSE CD.intCurrencyId
                                         END
-    ,ysnSeqSubCurrency              =   CAST(CASE WHEN FX.ysnUseFXPrice = 1
-                                            THEN 0
+    ,ysnSeqSubCurrency              =   CASE WHEN FX.ysnUseFXPrice = 1
+                                            THEN convert(bit,0)
                                             ELSE CY.ysnSubCurrency
-                                        END AS BIT)
+                                            END
     ,intSeqPriceUOMId               =   CASE WHEN FX.ysnUseFXPrice = 1
                                             THEN CD.intFXPriceUOMId
                                             ELSE ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
