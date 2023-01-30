@@ -1520,6 +1520,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessDirectShipmentRiskSummaryLog.sql" />
+    <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
