@@ -32,6 +32,7 @@ BEGIN
 				WHERE (dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
 				AND ISNULL(dblCreditForeign,0) <> 0
 				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
+				AND @ynsPost = 1
 				UNION ALL
 				SELECT   strTransactionId
 					    ,strTransactionId strText
@@ -41,6 +42,7 @@ BEGIN
 				WHERE (dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
 				AND ISNULL(dblDebitForeign,0) <> 0
 				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
+				AND @ynsPost = 1
 				UNION ALL
 				SELECT	strTransactionId
 						,'' strText
