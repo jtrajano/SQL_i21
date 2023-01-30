@@ -19,7 +19,7 @@ SELECT DISTINCT h.intImportDtnId
 	, ysnVarianceIssue = CASE WHEN d.strMessage LIKE '%Variance is greater than allowed%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblTRImportDtn h
 JOIN tblTRImportDtnDetail d ON d.intImportDtnId = h.intImportDtnId
-LEFT JOIN tblICInventoryReceipt ir ON ir.intInventoryReceiptId = d.intInventoryReceiptId
+LEFT JOIN vyuICGetInventoryReceipt ir ON ir.intInventoryReceiptId = d.intInventoryReceiptId
 LEFT JOIN tblEMEntity em ON em.intEntityId = ir.intEntityVendorId
 LEFT JOIN tblAPBill v ON v.intBillId = d.intBillId
 LEFT JOIN tblTRLoadReceipt lr ON lr.intInventoryReceiptId = ir.intInventoryReceiptId
