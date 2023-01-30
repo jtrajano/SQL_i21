@@ -15,7 +15,6 @@ BEGIN
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strLocationName AS NVARCHAR(50)
 		,@intPurchaseSale AS INT
-		,@DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 END
 
 SELECT @intPurchaseSale = intPurchaseSale FROM tblLGLoad WHERE intLoadId = @intLoadId
@@ -94,7 +93,7 @@ END
 -- Create the G/L Entries
 BEGIN
 	-- Create the variables used by fnGetItemGLAccount
-	DECLARE @ACCOUNT_CATEGORY_InventoryInTransit AS NVARCHAR(30) = 'Inventory In-transit'
+	DECLARE @ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@ACCOUNT_CATEGORY_APClearing AS NVARCHAR(30) = 'AP Clearing'
 		,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 		,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
@@ -256,7 +255,6 @@ BEGIN
 		,dblCost
 		,intTransactionTypeId
 		,intCurrencyId
-		,intShipmentCurrencyId
 		,dblExchangeRate
 		,intShipmentItemId
 		,strTransactionTypeName
@@ -267,7 +265,6 @@ BEGIN
 		,strRateType
 		,strItemNo
 		,intEntityId
-		,ysnInventoryCost
 		)
 	AS (
 		SELECT dtmDate = GETDATE()
@@ -280,18 +277,29 @@ BEGIN
 			,dblCost = ShipmentCharges.dblAmount * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 			,intTransactionTypeId = @intTransactionTypeId
 			,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId)
-			,intShipmentCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
 			,dblExchangeRate = ISNULL(1, 1)
 			,ShipmentItem.intLoadDetailId
 			,strTransactionTypeName = TransType.strName
 			,strTransactionForm = 'Logistics'
 			,ShipmentCharges.ysnAccrue
 			,ShipmentCharges.ysnPrice
-			,dblForexRate = CASE WHEN (ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(ShipmentCharges.dblFX,1) END
+			,dblForexRate = CASE --if contract FX tab is setup
+									WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @intFunctionalCurrencyId AND CD.intInvoiceCurrencyId <> @intFunctionalCurrencyId) 
+											THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @intFunctionalCurrencyId AND CD.intInvoiceCurrencyId = @intFunctionalCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @intFunctionalCurrencyId AND CD.intInvoiceCurrencyId <> @intFunctionalCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE ISNULL(ShipmentItem.dblForexRate,1) END
+									ELSE  --if contract FX tab is not setup
+									CASE WHEN (@intFunctionalCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE ISNULL(ShipmentItem.dblForexRate,1) END
+									END
 			,strRateType = 1
 			,Charge.strItemNo
 			,intEntityId = 1
-			,ShipmentCharges.ysnInventoryCost
 		FROM dbo.tblLGLoad Shipment
 		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
@@ -316,10 +324,16 @@ BEGIN
 					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
 				END
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
-		-- OUTER APPLY (SELECT TOP 1 dblForexRate = ISNULL(dblRate,0) FROM vyuGLExchangeRate
-		-- 			OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
-		-- 			WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
-		-- 			ORDER BY dtmValidFromDate DESC) FX
+		OUTER APPLY (SELECT	TOP 1  
+						intForexRateTypeId = RD.intRateTypeId
+						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @intFunctionalCurrencyId  
+									THEN 1/RD.[dblRate] 
+									ELSE RD.[dblRate] END 
+						FROM tblSMCurrencyExchangeRate ER JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						WHERE @intFunctionalCurrencyId <> CD.intInvoiceCurrencyId
+							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @intFunctionalCurrencyId) 
+								OR (ER.intFromCurrencyId = @intFunctionalCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
+						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE Shipment.intLoadId = @intLoadId
 		)
 
@@ -357,126 +371,6 @@ BEGIN
 		,[dblForeignRate]
 		,[strRateType]
 		)
-	-- Inventoried Other Charge Wash Over
-	SELECT dtmDate = ForGLEntries_CTE.dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccount.intAccountId
-		,dblDebit = Credit.Value
-		,dblCredit = Debit.Value
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = ISNULL(GLAccount.strDescription, '') + ' (' + ForGLEntries_CTE.strItemNo + ')'
-		,strCode = @strCode
-		,strReference = ''
-		,intCurrencyId = ForGLEntries_CTE.intCurrencyId
-		,dblExchangeRate = ForGLEntries_CTE.dblForexRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
-		,ysnIsUnposted = 0
-		,intUserId = @intEntityUserSecurityId
-		,intEntityId = ForGLEntries_CTE.intEntityId
-		,strTransactionId = ForGLEntries_CTE.strTransactionId
-		,intTransactionId = ForGLEntries_CTE.intTransactionId
-		,strTransactionType = ForGLEntries_CTE.strTransactionTypeName
-		,strTransactionForm = ForGLEntries_CTE.strTransactionForm
-		,strModuleName = @ModuleName
-		,intConcurrencyId = 1
-		,dblDebitForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
-				THEN CreditForeign.Value
-			ELSE 0
-			END
-		,dblDebitReport = NULL
-		,dblCreditForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
-				THEN DebitForeign.Value
-			ELSE 0
-			END
-		,dblCreditReport = NULL
-		,dblReportingRate = NULL
-		,dblForeignRate = ForGLEntries_CTE.dblForexRate
-		,strRateType = ForGLEntries_CTE.strRateType
-	FROM ForGLEntries_CTE
-	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-		AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
-	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = Account.intAccountId
-	CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
-	CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
-	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
-	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
-
-	UNION ALL
-
-	-- Inventoried Other Charge CConvert to Shipment Currency
-	SELECT dtmDate = ForGLEntries_CTE.dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccount.intAccountId
-		,dblDebit = Debit.Value
-		,dblCredit = Credit.Value
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = ISNULL(GLAccount.strDescription, '') + ' (' + ForGLEntries_CTE.strItemNo + ')'
-		,strCode = @strCode
-		,strReference = ''
-		,intCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
-		,dblExchangeRate = ISNULL(FX.dblForexRate,1)
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
-		,ysnIsUnposted = 0
-		,intUserId = @intEntityUserSecurityId
-		,intEntityId = ForGLEntries_CTE.intEntityId
-		,strTransactionId = ForGLEntries_CTE.strTransactionId
-		,intTransactionId = ForGLEntries_CTE.intTransactionId
-		,strTransactionType = ForGLEntries_CTE.strTransactionTypeName
-		,strTransactionForm = ForGLEntries_CTE.strTransactionForm
-		,strModuleName = @ModuleName
-		,intConcurrencyId = 1
-		,dblDebitForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
-				THEN DebitForeign.Value
-			ELSE 0
-			END
-		,dblDebitReport = NULL
-		,dblCreditForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
-				THEN CreditForeign.Value
-			ELSE 0
-			END
-		,dblCreditReport = NULL
-		,dblReportingRate = NULL
-		,dblForeignRate = ISNULL(FX.dblForexRate,1)
-		,strRateType = FX.intCurrencyExchangeRateTypeId
-	FROM ForGLEntries_CTE
-	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-		AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
-	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = Account.intAccountId
-	OUTER APPLY (SELECT TOP 1 
-					dblForexRate = ISNULL(dblRate,0),
-					intCurrencyExchangeRateTypeId
-				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId AND intToCurrencyId = @intFunctionalCurrencyId
-				ORDER BY dtmValidFromDate DESC) FX
-	OUTER APPLY (SELECT TOP 1 
-					dblForexRate = ISNULL(dblRate,0),
-					intCurrencyExchangeRateTypeId
-				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = ForGLEntries_CTE.intCurrencyId AND intToCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
-				ORDER BY dtmValidFromDate DESC) ShipmentToChargeCurrency
-	CROSS APPLY dbo.fnGetDebitFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Debit
-	CROSS APPLY dbo.fnGetCreditFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Credit
-	CROSS APPLY dbo.fnGetDebit(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1))) DebitForeign
-	CROSS APPLY dbo.fnGetCredit(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1))) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
-
-	UNION ALL
-
 	-------------------------------------------------------------------------------------------
 	-- Accrue Other Charge to Vendor 
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
@@ -531,7 +425,7 @@ BEGIN
 	CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
 	
 	UNION ALL
 	
@@ -583,7 +477,7 @@ BEGIN
 	CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1
 
 	SELECT [dtmDate]
 		,[strBatchId]

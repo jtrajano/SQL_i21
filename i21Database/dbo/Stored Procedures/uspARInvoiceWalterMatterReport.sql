@@ -156,10 +156,10 @@ SELECT
 									WHEN ARIR.strType = 'Provisional' THEN 'Commercial ' 
 									WHEN ISNULL(ARI.strPrintFormat, '') <> '' THEN ARI.strPrintFormat + ' '
 									ELSE ''
-								  END + 'Invoice No: ' + ARI.strInvoiceNumber
+								  END + 'Invoice No: ' + ARI.strInvoiceNumber COLLATE Latin1_General_CI_AS
 	,strRelatedInvoiceRemarks	= CASE 
 									WHEN ARIR.strType = 'Provisional' THEN 'Replaces Provisional Invoice: ' + + ARIR.strInvoiceNumber
-									WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.intOriginalInvoiceId, 0) <> 0 THEN 'Cancels Invoice: ' + + ARIR.strInvoiceNumber
+									WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.intOriginalInvoiceId, 0) <> 0 THEN 'Cancels Invoice: ' + ARIR.strInvoiceNumber
 									ELSE ''
 								  END
 	,dblAmountDue				= ARI.dblAmountDue
@@ -167,12 +167,13 @@ SELECT
 	,dblQtyShipped				= ARGID.dblQtyShipped
 	,strUnitMeasure				= ARGID.strUnitMeasure
 	,dblUnitPrice				= ARGID.dblUnitPrice
-	,dtmRelatedDate				= ARIR.dtmDate
-	,dblRelatedPayment			= ARIR.dblPayment
-	,dblRelatedShipmentNetWt	= ARGIDP.dblShipmentNetWt
-	,dblRelatedQtyShipped		= ARGIDP.dblQtyShipped
-	,strRelatedUnitMeasure		= ARGIDP.strUnitMeasure
-	,dblRelatedUnitPrice		= ARGIDP.dblUnitPrice
+	,strProvisionalInvoiceNumber= ISNULL(ARIR.strInvoiceNumber, '')
+	,dtmProvisionalDate			= ARIR.dtmDate
+	,dblProvisionalPayment		= ARIR.dblPayment
+	,dblProvisionalShipmentNetWt= ARGIDP.dblShipmentNetWt
+	,dblProvisionalQtyShipped	= ARGIDP.dblQtyShipped
+	,strProvisionalUnitMeasure	= ARGIDP.strUnitMeasure
+	,dblProvisionalUnitPrice	= ARGIDP.dblUnitPrice
 	,strRelatedType				= ARIR.strType
 	,strTransactionType			= ARI.strTransactionType
 	,strBuyer					= ISNULL(RTRIM(EMELB.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(ARI.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToState, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToCountry, ''), '')

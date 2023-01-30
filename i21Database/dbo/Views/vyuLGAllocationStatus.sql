@@ -8,7 +8,6 @@ AS
 		V.strAllocationNumber,
 		dblAllocatedQuantity = ALD.dblPAllocatedQty,
 		V.strPurchaseContractNumber,
-		V.intPContractDetailId AS intContractDetailId,
 		V.strSalesContractNumber,
 		dblReservedQuantity = NULL
 	FROM vyuLGAllocatedContracts V
@@ -22,7 +21,6 @@ AS
 		strAllocationNumber = NULL,
 		dblAllocatedQuantity,
 		strPurchaseContractNumber = CASE WHEN intPurchaseSale = 1 THEN strContractNumber ELSE NULL END,
-		intContractDetailId,
 		strSalesContractNumber = CASE WHEN intPurchaseSale = 2 THEN strContractNumber ELSE NULL END,
 		dblReservedQuantity = NULL
 	FROM vyuLGAllocationOpenContracts WHERE dblAllocatedQuantity = 0
@@ -35,7 +33,6 @@ AS
 		strAllocationNumber = NULL,
 		dblAllocatedQuantity = NULL,
 		strPurchaseContractNumber = CASE WHEN intPurchaseSale = 1 THEN strContractNumber ELSE NULL END,
-		R.intContractDetailId,
 		strSalesContractNumber = CASE WHEN intPurchaseSale = 2 THEN strContractNumber ELSE NULL END ,
 		R.dblReservedQuantity
 	FROM tblLGReservation R

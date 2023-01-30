@@ -3,6 +3,7 @@
 	 ,@UserId				INT
 	 ,@TransactionType		NVARCHAR(15)
 	 ,@ForDelete			BIT = 0
+	 ,@Post					BIT = 0
 	 ,@FromPosting			BIT = 0
 	 ,@LogTradeFinanceInfo	BIT = 0
 AS
@@ -11,9 +12,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
-
-IF @FromPosting = 1
-	RETURN
 
 DECLARE @intTranCount INT = @@trancount
 
@@ -27,6 +25,20 @@ BEGIN TRY
 			,@TradeFinanceLogs	TRFLog
 			,@strAction			NVARCHAR(30) = ''
 			,@intStatusId		INT = 0
+
+	IF @TransactionType = 'Payment'
+	BEGIN
+		IF @Post = 1
+			BEGIN
+				SET @strAction = 'Posted Payment'
+				SET @intStatusId = 2
+			END
+		ELSE
+		BEGIN
+			SET @strAction = 'Unposted Payment'
+			SET @intStatusId = 1
+		END
+	END
 
 	INSERT INTO @TradeFinanceLogs (
 		 strAction
@@ -62,15 +74,25 @@ BEGIN TRY
 		,intOverrideBankValuationId
 	)
 	SELECT
-		 strAction						= CASE WHEN @ForDelete = 1 THEN 'Deleted ' ELSE ISNULL(ARAL.strActionType, 'Created') END + ' ' + @TransactionType
+		  strAction						= CASE WHEN @strAction = '' 
+											   THEN CASE WHEN @FromPosting = 1 
+														 THEN CASE WHEN @Post = 1 THEN 'Posted ' ELSE ' Unposted ' END
+														 ELSE
+															CASE WHEN @ForDelete = 1 
+																 THEN 'Deleted ' 
+																 ELSE ISNULL(ARAL.strActionType, 'Created') 
+															END
+														 END   + ' ' + @TransactionType
+											   ELSE @strAction 
+										  END
 		,strTransactionType				= 'Sales'
 		,intTransactionHeaderId			= CASE WHEN @TransactionType = 'Payment' THEN ARP.intPaymentId ELSE ARI.intInvoiceId END
 		,intTransactionDetailId			= CASE WHEN @TransactionType = 'Payment' THEN ARPD.intPaymentDetailId ELSE ARID.intInvoiceDetailId END
 		,strTransactionNumber			= CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
 		,strTradeFinanceTransaction		= ARI.strTransactionNo
 		,dtmTransactionDate				= GETDATE()
-		,intBankId						= CASE WHEN @TransactionType = 'Payment' THEN CMBP.intBankId ELSE ARI.intBankId END
-		,intBankAccountId				= CASE WHEN @TransactionType = 'Payment' THEN ARP.intBankAccountId ELSE ARI.intBankAccountId END
+		,intBankId						= ARI.intBankId
+		,intBankAccountId				= ARI.intBankAccountId
 		,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
 		,dblTransactionAmountAllocated	= CTCD.dblLoanAmount
 		,dblTransactionAmountActual		= CTCD.dblLoanAmount
@@ -79,11 +101,21 @@ BEGIN TRY
 		,strBankTradeReference			= ARI.strBankTradeReference
 		,strBankApprovalStatus			= ISNULL(LS.strApprovalStatus, '')
 		,dtmAppliedToTransactionDate	= GETDATE() 
-		,intStatusId					= CASE WHEN @ForDelete = 1 THEN 3 ELSE 1 END
+		,intStatusId					= CASE WHEN @intStatusId = 0
+											   THEN CASE WHEN @FromPosting = 1 
+														 THEN 1
+														 ELSE
+															CASE WHEN @ForDelete = 1 
+																 THEN 3
+																 ELSE 1
+															END
+														 END
+											   ELSE @intStatusId 
+										  END
 		,intUserId						= @UserId
 		,intConcurrencyId				= 1 
 		,dblFinanceQty					= dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intOrderUOMId, ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped))
-		,dblFinancedAmount				= CASE WHEN @TransactionType = 'Payment' THEN ARPD.dblPayment ELSE ARID.dblTotal + ARID.dblTotalTax END
+		,dblFinancedAmount				= ARID.dblTotal + ARID.dblTotalTax
 		,intContractHeaderId			= LS.intContractHeaderId
 		,intContractDetailId			= LS.intContractDetailId
 		,intSublimitId					= ARI.intBorrowingFacilityLimitDetailId
@@ -105,7 +137,7 @@ BEGIN TRY
 	OUTER APPLY (
 		SELECT TOP 1 strActionType
 		FROM tblARAuditLog
-		WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = CASE WHEN @TransactionType = 'Payment' THEN ARP.strRecordNumber ELSE ARI.strInvoiceNumber END
+		WHERE strRecordNo COLLATE SQL_Latin1_General_CP1_CS_AS = ARI.strInvoiceNumber
 		ORDER BY intAuditLogId DESC
 	) ARAL
 	OUTER APPLY (
@@ -121,11 +153,6 @@ BEGIN TRY
 		LEFT JOIN tblICInventoryReceipt ICIR ON ICIR.intInventoryReceiptId = ICIRI.intInventoryReceiptId
 		WHERE LGLD.intLoadDetailId = ARID.intLoadDetailId
 	) LS
-	OUTER APPLY (
-		SELECT TOP 1 intBankId
-		FROM tblCMBankAccount
-		WHERE intBankAccountId = ARP.intBankAccountId
-	) CMBP
 	WHERE ARI.intInvoiceId IN (SELECT intHeaderId FROM @InvoiceIds)
 	AND (
 		(ISNULL(ARPD.intPaymentDetailId, 0) <> 0 AND @TransactionType = 'Payment')
@@ -147,6 +174,7 @@ BEGIN TRY
 			)
 		)
 		OR @ForDelete = 1
+		OR @FromPosting = 1
 		OR @LogTradeFinanceInfo = 1
 	)
 	AND ISNULL(ARI.strTransactionNo, '') <> ''
@@ -178,56 +206,60 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		DECLARE	 @intTradeFinanceId	INT = NULL
+		DECLARE	 @intTradeFinanceId			INT = NULL
+				,@strNewTradeFinanceNumber	NVARCHAR(100)
 
-		SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
-		FROM tblTRFTradeFinance TRTF
-		INNER JOIN @TradeFinanceLogs TRFL 
-		ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
-		WHERE strTradeFinanceNumber = @strTradeFinanceNumber
-
-		DELETE FROM @TRFTradeFinance
-
-		INSERT INTO @TRFTradeFinance 
-		(
-			 intTradeFinanceId
-			,strTradeFinanceNumber
-			,strTransactionType
-			,strTransactionNumber
-			,intTransactionHeaderId
-			,intTransactionDetailId
-			,intBankId
-			,intBankAccountId
-			,intBorrowingFacilityId
-			,strRefNo
-			,intOverrideFacilityValuation
-			,strCommnents
-			,dtmCreatedDate
-			,intConcurrencyId
-		)
-		SELECT
-			 intTradeFinanceId				= @intTradeFinanceId
-			,strTradeFinanceNumber			= TFL.strTradeFinanceTransaction
-			,strTransactionType				= TFL.strTransactionType
-			,strTransactionNumber			= TFL.strTransactionNumber
-			,intTransactionHeaderId			= TFL.intTransactionHeaderId
-			,intTransactionDetailId			= TFL.intTransactionDetailId
-			,intBankId						= ARI.intBankId
-			,intBankAccountId				= ARI.intBankAccountId
-			,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
-			,strRefNo						= ARI.strBankTradeReference
-			,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
-			,strCommnents					= ARI.strTradeFinanceComments
-			,dtmCreatedDate					= GETDATE()
-			,intConcurrencyId				= 1
-		FROM @TradeFinanceLogs TFL
-		INNER JOIN tblARInvoice ARI WITH (NOLOCK)
-		ON ARI.intInvoiceId = TFL.intTransactionHeaderId
-		WHERE ARI.intInvoiceId = @intTransactionHeaderId
-
-		IF ISNULL(@intTradeFinanceId, 0) <> 0
+		IF @FromPosting = 0
 		BEGIN
-			EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = 'UPDATE'
+			SELECT TOP 1 @intTradeFinanceId = intTradeFinanceId 
+			FROM tblTRFTradeFinance TRTF
+			INNER JOIN @TradeFinanceLogs TRFL 
+			ON TRTF.strTransactionNumber = TRFL.strTransactionNumber AND TRTF.strTransactionType = 'Sales' AND TRTF.intTransactionHeaderId = TRFL.intTransactionHeaderId
+			WHERE strTradeFinanceNumber = @strTradeFinanceNumber
+
+			DELETE FROM @TRFTradeFinance
+
+			INSERT INTO @TRFTradeFinance 
+			(
+				 intTradeFinanceId
+				,strTradeFinanceNumber
+				,strTransactionType
+				,strTransactionNumber
+				,intTransactionHeaderId
+				,intTransactionDetailId
+				,intBankId
+				,intBankAccountId
+				,intBorrowingFacilityId
+				,strRefNo
+				,intOverrideFacilityValuation
+				,strCommnents
+				,dtmCreatedDate
+				,intConcurrencyId
+			)
+			SELECT
+				 intTradeFinanceId				= @intTradeFinanceId
+				,strTradeFinanceNumber			= TFL.strTradeFinanceTransaction
+				,strTransactionType				= TFL.strTransactionType
+				,strTransactionNumber			= TFL.strTransactionNumber
+				,intTransactionHeaderId			= TFL.intTransactionHeaderId
+				,intTransactionDetailId			= TFL.intTransactionDetailId
+				,intBankId						= ARI.intBankId
+				,intBankAccountId				= ARI.intBankAccountId
+				,intBorrowingFacilityId			= ARI.intBorrowingFacilityId
+				,strRefNo						= ARI.strBankTradeReference
+				,intOverrideFacilityValuation	= ARI.intBankValuationRuleId
+				,strCommnents					= ARI.strTradeFinanceComments
+				,dtmCreatedDate					= GETDATE()
+				,intConcurrencyId				= 1
+			FROM @TradeFinanceLogs TFL
+			INNER JOIN tblARInvoice ARI WITH (NOLOCK)
+			ON ARI.intInvoiceId = TFL.intTransactionHeaderId
+			WHERE ARI.intInvoiceId = @intTransactionHeaderId
+
+			IF ISNULL(@intTradeFinanceId, 0) <> 0
+			BEGIN
+				EXEC [uspTRFModifyTFRecord] @records = @TRFTradeFinance, @intUserId = @UserId, @strAction = 'UPDATE'
+			END
 		END
 
 		FETCH NEXT FROM TFLogCursor INTO 
@@ -249,14 +281,17 @@ BEGIN CATCH
 	DECLARE @strErrorMsg varchar(4000) = ERROR_MESSAGE()
 	DECLARE @strThrow	 NVARCHAR(MAX) = 'RAISERROR(''' + @strErrorMsg + ''', 11, 1)'
 	
-	SET @strThrow = 'THROW 51000, ''' + @strErrorMsg + ''', 1'
+	IF (@@version NOT LIKE '%2008%')
+	BEGIN
+		SET @strThrow = 'THROW 51000, ''' + @strErrorMsg + ''', 1'
 		
-	IF XACT_STATE() = -1
-		ROLLBACK;
-	IF XACT_STATE() = 1 AND @intTranCount = 0
-		ROLLBACK
-	IF XACT_STATE() = 1 AND @intTranCount > 0
-		ROLLBACK TRANSACTION uspARProcessTradeFinanceLog;
+		IF XACT_STATE() = -1
+			ROLLBACK;
+		IF XACT_STATE() = 1 AND @intTranCount = 0
+			ROLLBACK
+		IF XACT_STATE() = 1 AND @intTranCount > 0
+			ROLLBACK TRANSACTION uspARProcessTradeFinanceLog;
+	END
 
 	EXEC sp_executesql @strThrow
 

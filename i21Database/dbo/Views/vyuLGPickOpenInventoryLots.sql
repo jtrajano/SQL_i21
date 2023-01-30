@@ -33,14 +33,14 @@ FROM (
        ,strSubLocationName = SubLocation.strSubLocationName
        ,intStorageLocationId = Lot.intStorageLocationId
        ,strStorageLocation = StorageLocation.strName
-       ,dblQty = Lot.dblQty
+       ,dblQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0)
        ,dblUnPickedQty =	CASE WHEN Lot.intWarrantStatus = 2 THEN
 	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
 										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
 									ELSE 0.0 END
 								ELSE
 									CASE WHEN Lot.dblQty > 0.0 THEN 
-										Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0) - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
 									ELSE 0.0 END
 							END
 	   ,dblQtyInContractUOM = ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0)

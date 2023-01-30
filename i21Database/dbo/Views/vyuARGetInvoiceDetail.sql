@@ -190,10 +190,10 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
-	 , dblPercentage						= INV.dblPercentage
-	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
+	 , dblPercentage						= INV.dblPercentage
+	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (

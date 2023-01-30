@@ -1,15 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuAPDiscrepancy]
 AS 
 
-SELECT ISNULL(AP.intBillId, GL.intTransactionId) intTransactionId,  
-    ISNULL(AP.strBillId, GL.strTransactionId) strTransactionId,  
-    ISNULL(ISNULL(GL.dtmTransactionDate, AP.dtmBillDate), GETDATE()) dtmTransactionDate,  
-    ISNULL(E.strName, 'Unknown') strVendorName,  
-    ISNULL( ISNULL(AP.dtmDate, GL.dtmDate), GETDATE()) dtmDate,  
-    ISNULL(GL.dblAmountDue, 0) dblGLAmount,  
-    ISNULL(AP.dblAmountDue, 0) dblAPAmount,  
-    (ISNULL(GL.dblAmountDue, 0) - ISNULL(AP.dblAmountDue, 0)) dblDifference,  
-    ISNULL(E2.strName, 'Unknown') strUserName
+SELECT ISNULL(AP.intBillId, GL.intTransactionId) intTransactionId,
+	   ISNULL(AP.strBillId, GL.strTransactionId) strTransactionId,
+	   ISNULL(GL.dtmTransactionDate, ISNULL(AP.dtmBillDate, GETDATE())) dtmTransactionDate,
+	   ISNULL(E.strName, 'Unknown') strVendorName,
+	   ISNULL(AP.dtmDate, ISNULL(GL.dtmDate, GETDATE())) dtmDate,
+	   ISNULL(GL.dblAmountDue, 0) dblGLAmount,
+	   ISNULL(AP.dblAmountDue, 0) dblAPAmount,
+	   (ISNULL(GL.dblAmountDue, 0) - ISNULL(AP.dblAmountDue, 0)) dblDifference,
+	   ISNULL(E2.strName, 'Unknown') strUserName
 FROM (
 	SELECT P.intBillId, B.strBillId, B.dtmBillDate, B.intEntityVendorId, B.dtmDate, P.dblAmountDue, B.intEntityId, B.ysnOrigin
 	FROM (

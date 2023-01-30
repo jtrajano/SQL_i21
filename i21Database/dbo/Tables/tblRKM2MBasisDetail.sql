@@ -31,7 +31,6 @@
 	[intGradeId] INT NULL,
 	[intCertificationId] INT NULL,
 	[intMTMPointId] INT NULL,
-	[strCertification] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblRKM2MBasisDetail_intM2MBasisDetailId] PRIMARY KEY (intM2MBasisDetailId),
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblRKM2MBasis_intM2MBasisId] FOREIGN KEY([intM2MBasisId])REFERENCES [dbo].[tblRKM2MBasis] ([intM2MBasisId]) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblRKM2MBasisDetail_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),  

@@ -304,8 +304,8 @@ BEGIN TRY
 				, intProductLineId
 				, strGrade 
 				, intGradeId
-				, strCertification = (CASE WHEN @ysnIncludeProductInformation = 1 THEN strCertification ELSE NULL END)
-				, intCertificationId = NULL
+				, strCertification
+				, intCertificationId
 				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
 				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
 				, strClass
@@ -364,8 +364,8 @@ BEGIN TRY
 				, intProductLineId
 				, strGrade 
 				, intGradeId
-				, strCertification = (CASE WHEN @ysnIncludeProductInformation = 1 THEN strCertification ELSE NULL END)
-				, intCertificationId = NULL
+				, strCertification
+				, intCertificationId
 				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
 				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
 				, strClass
@@ -396,7 +396,6 @@ BEGIN TRY
 				AND ISNULL(a.intStorageLocationId, 0) = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN ISNULL(b.intStorageLocationId, 0) ELSE ISNULL(a.intStorageLocationId, 0) END)
 				AND ISNULL(a.intStorageUnitId, 0) = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN ISNULL(b.intStorageUnitId, 0) ELSE ISNULL(a.intStorageUnitId, 0) END)
 				AND ISNULL(a.intMTMPointId, 0) = (CASE WHEN @ysnEnableMTMPoint = 1 THEN ISNULL(b.intMTMPointId, 0) ELSE ISNULL(a.intMTMPointId, 0) END)
-				AND ISNULL(a.strCertification, '') = (CASE WHEN @ysnIncludeProductInformation = 1 THEN ISNULL(b.strCertification, '') ELSE ISNULL(a.strCertification, '') END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
@@ -404,7 +403,7 @@ BEGIN TRY
 	
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo, intFutureMarketId, intCurrencyId, strPeriodTo, intContractTypeId
 												, intCompanyLocationId, intMarketZoneId, intOriginPortId, intDestinationPortId
-												, intCropYearId, intStorageLocationId, intStorageUnitId, intMTMPointId, strCertification)) AS intRowNumber
+												, intCropYearId, intStorageLocationId, intStorageUnitId, intMTMPointId, intCertificationId)) AS intRowNumber
 		, *
 		, ysnEvaluationByLocation = @ysnEvaluationByLocation 
 		, ysnEvaluationByMarketZone = @ysnEvaluationByMarketZone 

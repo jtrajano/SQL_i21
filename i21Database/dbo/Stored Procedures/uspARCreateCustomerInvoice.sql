@@ -429,25 +429,19 @@ FROM tblARCompanyPreference
 
 DECLARE @BorrowingFacilityLimitDetailId INT = NULL
 
-IF ISNULL(@TransactionNo, '') <> ''
-BEGIN
-	SELECT TOP 1
-		@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
-	FROM
-		tblCMBorrowingFacilityLimit
-	WHERE intBorrowingFacilityId = @BorrowingFacilityId
-	  AND strBorrowingFacilityLimit = 'Receivables'
+SELECT TOP 1
+	@BorrowingFacilityLimitId = intBorrowingFacilityLimitId
+FROM
+	tblCMBorrowingFacilityLimit
+WHERE intBorrowingFacilityId = @BorrowingFacilityId
+  AND strBorrowingFacilityLimit = 'Receivables'
 
-	SELECT TOP 1
-		  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
-	FROM
-		tblCMBorrowingFacilityLimitDetail
-	WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
-	  AND ysnDefault = 1
-
-	SET @DefaultPayToBankAccountId = dbo.fnARGetCustomerDefaultPayToBankAccount(@EntityCustomerId, @DefaultCurrency, @CompanyLocationId)
-	SET @PayToCashBankAccountId = ISNULL(@PayToCashBankAccountId, ISNULL(@BankAccountId, @DefaultPayToBankAccountId))
-END
+SELECT TOP 1
+	  @BorrowingFacilityLimitDetailId = intBorrowingFacilityLimitDetailId
+FROM
+	tblCMBorrowingFacilityLimitDetail
+WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
+  AND ysnDefault = 1
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -646,12 +640,12 @@ BEGIN TRY
 		,[intBorrowingFacilityLimitId]		= @BorrowingFacilityLimitId
 		,[strBankReferenceNo]				= @BankReferenceNo
 		,[strBankTradeReference]			= @BankTradeReference
-		,[dblLoanAmount]					= CASE WHEN ISNULL(@TransactionNo, '') <> '' THEN @LoanAmount ELSE NULL END
+		,[dblLoanAmount]					= @LoanAmount
 		,[intBankValuationRuleId]			= @BankValuationRuleId
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
-		,[intDefaultPayToBankAccountId]  	= @DefaultPayToBankAccountId
+		,[intDefaultPayToBankAccountId]  	= ISNULL(@DefaultPayToBankAccountId, ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId)))
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
 												THEN @SourcedFrom 
 												ELSE 
@@ -699,7 +693,7 @@ BEGIN TRY
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
 			ON C.intBillToId = BL1.intEntityLocationId
-	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  @PayToCashBankAccountId
+	LEFT JOIN vyuCMBankAccount CMBA ON CMBA.intBankAccountId =  ISNULL(@BankAccountId, [dbo].[fnARGetCustomerDefaultPayToBankAccount](C.[intEntityId], @DefaultCurrency, @CompanyLocationId))
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()

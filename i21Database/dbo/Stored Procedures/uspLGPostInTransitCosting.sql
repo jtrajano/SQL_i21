@@ -23,14 +23,9 @@ SET ANSI_WARNINGS ON
 	DECLARE @intDestinationFOBPointId INT
 	DECLARE @ysnIsReturn BIT = 0
 	DECLARE @strCMActualCostId NVARCHAR(100)
-	DECLARE @ValueToPost AS ItemInTransitValueOnlyTableType
-	DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
-	DECLARE @strTransactionId AS NVARCHAR(50)
-	DECLARE @strGLDescription AS NVARCHAR(500) = NULL
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
-		,@strTransactionId = strLoadNumber
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
@@ -155,79 +150,42 @@ SET ANSI_WARNINGS ON
 			,dtmDate = L.dtmScheduledDate
 			,dblQty = LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
-			--,dblCost = 
-			--	dbo.fnDivide (
-			--		dbo.fnMultiply (
-			--			LD.dblNet,
-			--			dbo.fnMultiply (
-			--				dbo.fnCalculateCostBetweenUOM (
-			--					AD.intSeqPriceUOMId
-			--					,ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-			--					,CASE 
-			--						WHEN (AD.dblSeqPrice IS NULL) THEN
-			--							CASE 
-			--								WHEN (LD.dblUnitPrice > 0) THEN 
-			--									LD.dblUnitPrice 
-			--									/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
-			--								ELSE 
-			--									dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
-			--									/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-			--							END
-			--						ELSE 
-			--							AD.dblSeqPrice 
-			--							/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-			--					END
-			--				) 
-			--				,CASE --if contract FX tab is setup
-			--					WHEN AD.ysnValidFX = 1 THEN 
-			--						CASE 
-			--							WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) THEN 
-			--								dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
-			--							WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId) THEN 
-			--								1 --foreign price to functional FX, use 1
-			--							WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) THEN 
-			--								ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-			--							ELSE 
-			--								ISNULL(LD.dblForexRate,1) 
-			--						END
-			--					ELSE  --if contract FX tab is not setup
-			--						CASE 
-			--							WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) THEN 
-			--								ISNULL(FX.dblFXRate, 1)
-			--							ELSE 1 
-			--						END
-			--				END
-			--			)
-			--		)
-			--		, LD.dblQuantity
-			--	)
-
-			-- Cost is in foreign currency. 
-			,dblCost = 
-				dbo.fnDivide (
-					dbo.fnMultiply (
-						LD.dblNet
-						,dbo.fnCalculateCostBetweenUOM (
-							AD.intSeqPriceUOMId
-							,ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-							,CASE 
-								WHEN (AD.dblSeqPrice IS NULL) THEN
-									CASE 
-										WHEN (LD.dblUnitPrice > 0) THEN 
-											LD.dblUnitPrice 
-											/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
-										ELSE 
-											dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
-											/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-									END
-								ELSE 
-									AD.dblSeqPrice 
-									/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-							END
-						) 
-					)
-					, LD.dblQuantity
-				)
+			,dblCost = dbo.fnDivide(
+						dbo.fnMultiply(LD.dblNet,
+							dbo.fnMultiply(
+									dbo.fnCalculateCostBetweenUOM(
+										AD.intSeqPriceUOMId
+										, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+										, CASE 
+											WHEN (AD.dblSeqPrice IS NULL) THEN
+												CASE 
+													WHEN (LD.dblUnitPrice > 0) THEN 
+														LD.dblUnitPrice 
+														/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
+													ELSE 
+														dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+														/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+												END
+											ELSE 
+												AD.dblSeqPrice 
+												/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+											END) 
+									, CASE --if contract FX tab is setup
+										 WHEN AD.ysnValidFX = 1 THEN 
+											CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+													THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+												WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+													THEN 1 --foreign price to functional FX, use 1
+												WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+													THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+												ELSE ISNULL(LD.dblForexRate,1) END
+										 ELSE  --if contract FX tab is not setup
+											CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+												THEN ISNULL(FX.dblFXRate, 1)
+												ELSE 1 END
+										 END
+									))
+								 , LD.dblQuantity)
 			,dblValue = 0
 			,dblSalesPrice = 0.0
 			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
@@ -259,7 +217,7 @@ SET ANSI_WARNINGS ON
 			,dblForexRate = CASE --if contract FX tab is setup
 									 WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, ISNULL(LD.dblForexRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+												THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
@@ -296,183 +254,6 @@ SET ANSI_WARNINGS ON
 						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId
 
-		
-		-- Update currency fields to functional currency. 
-		BEGIN 
-			UPDATE	itemCost
-			SET		dblExchangeRate = 1
-					,dblForexRate = 1
-					,intCurrencyId = @DefaultCurrencyId
-			FROM	@ItemsToPost itemCost
-			WHERE	ISNULL(itemCost.intCurrencyId, @DefaultCurrencyId) = @DefaultCurrencyId 
-
-			UPDATE	itemCost
-			SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
-					,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
-					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
-					,dblForexCost = dblCost
-			FROM	@ItemsToPost itemCost
-			WHERE	itemCost.intCurrencyId <> @DefaultCurrencyId 
-		END
-
-		-- Item
-		INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,[intSourceEntityId]
-			,[intCommodityId]
-			)
-		EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
-			,@strBatchId = @strBatchIdUsed
-			,@strAccountToCounterInventory = 'AP Clearing'
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-		-- Inventoried Other Charges
-		INSERT INTO @ValueToPost (
-			[intItemId] 
-			,[intItemLocationId] 
-			,[dtmDate] 
-			,[dblValue] 
-			,[intTransactionId] 
-			,[intTransactionDetailId] 
-			,[strTransactionId] 
-			,[intTransactionTypeId] 
-			,[intLotId] 
-			,[intSourceTransactionId] 
-			,[strSourceTransactionId] 
-			,[intSourceTransactionDetailId] 
-			,[intFobPointId] 
-			,[intInTransitSourceLocationId] 
-			,[intCurrencyId] 
-			,[intForexRateTypeId] 
-			,[dblForexRate] 
-			,[intSourceEntityId] 
-			,[strSourceType] 
-			,[strSourceNumber] 
-			,[strBOLNumber] 
-			,[intTicketId]
-		)
-		SELECT 
-			[intItemId] = ShipmentCharges.intItemId
-			,[intItemLocationId] = IL.intItemLocationId
-			,[dtmDate] = L.dtmScheduledDate
-			,[dblValue] = ShipmentCharges.dblAmount 
-			,[intTransactionId] = L.intLoadId
-			,[intTransactionDetailId] = LD.intLoadDetailId
-			,[strTransactionId] = L.strLoadNumber
-			,[intTransactionTypeId] = @INBOUND_SHIPMENT_TYPE
-			,[intLotId] = NULL
-			,[intSourceTransactionId] = L.intLoadId
-			,[strSourceTransactionId] = L.strLoadNumber
-			,[intSourceTransactionDetailId] = LD.intLoadDetailId
-			,[intFobPointId] = FP.intFobPointId
-			,[intInTransitSourceLocationId] = IL.intItemLocationId
-			,[intCurrencyId] = ShipmentCharges.intCurrencyId
-			,[intForexRateTypeId] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
-			,[dblForexRate] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
-			,[intSourceEntityId] = NULL
-			,[strSourceType] = NULL
-			,[strSourceNumber] = NULL 
-			,[strBOLNumber] = NULL 
-			,[intTicketId] = NULL 
-		FROM dbo.tblLGLoad L
-		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItemLocation IL ON IL.intItemId = ShipmentCharges.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
-		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
-		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
-		OUTER APPLY (SELECT TOP 1 
-						dblForexRate = ISNULL(dblRate,0),
-						intCurrencyExchangeRateTypeId
-					FROM vyuGLExchangeRate
-					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
-					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
-					ORDER BY dtmValidFromDate DESC) FX
-		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
-
-		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
-			@ItemsForInTransitCosting  
-			,@strBatchId  
-			,NULL 
-			,@intEntityUserSecurityId
-			,NULL
-			,@ValueToPost
-
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]					
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm] 
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[intSourceEntityId]
-				,[intCommodityId]
-				,[strRateType]
-		)			
-		EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
-			@strBatchId = @strBatchId
-			,@strTransactionId = @strTransactionId
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@strGLDescription = @strGLDescription
-			,@AccountCategory_Cost_Adjustment = DEFAULT 
-
-		-- Other Charges
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -514,6 +295,47 @@ SET ANSI_WARNINGS ON
 			,@INBOUND_SHIPMENT_TYPE
 			,@ysnPost
 
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]
+			)
+		EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
+			,@strBatchId = @strBatchIdUsed
+			,@strAccountToCounterInventory = 'AP Clearing'
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
 		UPDATE @GLEntries
 		SET strCode = 'LG', strModuleName = 'Logistics'
 
@@ -524,7 +346,47 @@ SET ANSI_WARNINGS ON
 	END
 	ELSE
 	BEGIN
-		-- Item
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)	
+		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
+			@intLoadId
+			,@strBatchId
+			,@intEntityUserSecurityId
+			,@INBOUND_SHIPMENT_TYPE
+			,@ysnPost
+
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -567,166 +429,6 @@ SET ANSI_WARNINGS ON
 				,@strBatchId
 				,@intEntityUserSecurityId	
 				,0
-
-		-- Inventoried Other Charges
-		INSERT INTO @ValueToPost (
-			[intItemId] 
-			,[intItemLocationId] 
-			,[dtmDate] 
-			,[dblValue] 
-			,[intTransactionId] 
-			,[intTransactionDetailId] 
-			,[strTransactionId] 
-			,[intTransactionTypeId] 
-			,[intLotId] 
-			,[intSourceTransactionId] 
-			,[strSourceTransactionId] 
-			,[intSourceTransactionDetailId] 
-			,[intFobPointId] 
-			,[intInTransitSourceLocationId] 
-			,[intCurrencyId] 
-			,[intForexRateTypeId] 
-			,[dblForexRate] 
-			,[intSourceEntityId] 
-			,[strSourceType] 
-			,[strSourceNumber] 
-			,[strBOLNumber] 
-			,[intTicketId]
-		)
-		SELECT 
-			[intItemId] = ShipmentCharges.intItemId
-			,[intItemLocationId] = IL.intItemLocationId
-			,[dtmDate] = L.dtmScheduledDate
-			,[dblValue] = ShipmentCharges.dblAmount * -1
-			,[intTransactionId] = L.intLoadId
-			,[intTransactionDetailId] = LD.intLoadDetailId
-			,[strTransactionId] = L.strLoadNumber
-			,[intTransactionTypeId] = @INBOUND_SHIPMENT_TYPE
-			,[intLotId] = NULL
-			,[intSourceTransactionId] = L.intLoadId
-			,[strSourceTransactionId] = L.strLoadNumber
-			,[intSourceTransactionDetailId] = LD.intLoadDetailId
-			,[intFobPointId] = FP.intFobPointId
-			,[intInTransitSourceLocationId] = IL.intItemLocationId
-			,[intCurrencyId] = ShipmentCharges.intCurrencyId
-			,[intForexRateTypeId] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
-			,[dblForexRate] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
-			,[intSourceEntityId] = NULL
-			,[strSourceType] = NULL
-			,[strSourceNumber] = NULL 
-			,[strBOLNumber] = NULL 
-			,[intTicketId] = NULL 
-		FROM dbo.tblLGLoad L
-		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItemLocation IL ON IL.intItemId = ShipmentCharges.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
-		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
-		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
-		OUTER APPLY (SELECT TOP 1 
-						dblForexRate = ISNULL(dblRate,0),
-						intCurrencyExchangeRateTypeId
-					FROM vyuGLExchangeRate
-					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
-					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
-					ORDER BY dtmValidFromDate DESC) FX
-		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
-
-		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
-			@ItemsForInTransitCosting  
-			,@strBatchId  
-			,NULL 
-			,@intEntityUserSecurityId
-			,NULL
-			,@ValueToPost
-
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]					
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm] 
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[intSourceEntityId]
-				,[intCommodityId]
-				,[strRateType]
-		)			
-		EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
-			@strBatchId = @strBatchId
-			,@strTransactionId = @strTransactionId
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@strGLDescription = @strGLDescription
-			,@AccountCategory_Cost_Adjustment = DEFAULT 
-
-		-- Other Charges
-		INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]	
-			,[dblDebitReport]	
-			,[dblCreditForeign]	
-			,[dblCreditReport]	
-			,[dblReportingRate]	
-			,[dblForeignRate]
-			,[strRateType]
-		)	
-		EXEC @intReturnValue = dbo.uspLGPostOtherCharges 
-			@intLoadId
-			,@strBatchId
-			,@intEntityUserSecurityId
-			,@INBOUND_SHIPMENT_TYPE
-			,@ysnPost
-		
-		UPDATE @GLEntries
-		SET [ysnIsUnposted] = 1
 
 		IF @intReturnValue < 0
 		BEGIN

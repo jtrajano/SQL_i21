@@ -347,6 +347,7 @@
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnCMGetDetailsOfCharges.sql" />
     <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
@@ -826,7 +827,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateAccountOnPost.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
     <Build Include="dbo\Stored Procedures\uspQMDeleteContractSamplePremium.sql" />
     <Build Include="dbo\Tables\tblEMCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblARCompanyDefaultPayToBankAccount.sql" />
@@ -857,6 +857,23 @@
     <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
     <Build Include="dbo\Tables\tblCTMTMPoint.sql" />
     <Build Include="dbo\Functions\fnAPGetOverrideLineOfBusinessAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMDeleteBankForwardDerivate.sql" />
+    <Build Include="dbo\Functions\fnFRDGetGroupIntSort.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCreditLineCurrencyRate.sql" />
+    <Build Include="dbo\Tables\tblRKPaymentCondition.sql" />
+    <Build Include="dbo\Views\vyuRKGetPaymentCondition.sql" />
+    <Build Include="dbo\Tables\tblRKAcceptableCurrency.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerDefaultPayToBankAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinancePickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
+    <Build Include="dbo\Views\vyuGLSummaryCompare.sql" />
+    <Build Include="dbo\Tables\tblGLPostedCompare.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
+    <None Include="Scripts\Post-Deployment\IC\32_InventoryJournalLineDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostOtherCharges.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationStatus.sql" />
+    <Build Include="dbo\Tables\tblCTMTMPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTHedgeContractPrice.sql" />
     <Build Include="dbo\Tables\tblGLChangeAccountCategory.sql" />
     <Build Include="dbo\Tables\tblGLChangeAccountCategoryDetail.sql" />
     <Build Include="dbo\Views\vyuGLChangeAccountCategory.sql" />
@@ -10377,7 +10394,6 @@
     <Build Include="dbo\Stored Procedures\uspQMPreStageSample.sql" />
     <Build Include="dbo\Views\vyuQMGetSampleType.sql" />
     <Build Include="dbo\Views\vyuQMContractSamplesMonitoring.sql" />
-    <Build Include="dbo\Views\vyuQMSampleNotAllocated.sql" />
     <Build Include="dbo\Tables\tblIPSampleType.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTransferOrderWithoutBOL.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />

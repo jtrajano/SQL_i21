@@ -141,8 +141,8 @@ AS
 			,CP.intCIFInstoreId
 			,strCIFInstore = CIFI.strItemNo
 			,CP.ysnSpreadValueNotToBeAddedToFuturesInRollContract
-			,CP.ysnEnableHedgingInAssignDerivatives
 			,CP.ysnEnableMTMPoint
+			,CP.ysnEnableHedgingInAssignDerivatives
 			,CP.ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost
 			,CP.intTransactionForexId
 			,strTransactionForex = case when CP.intTransactionForexId = 2 then 'Current' else 'Contract' end

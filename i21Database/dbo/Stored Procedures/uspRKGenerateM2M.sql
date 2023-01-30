@@ -134,7 +134,6 @@ BEGIN TRY
 		, @dtmCurrentDay DATETIME = DATEADD(DD, DATEDIFF(DD, 0, GETDATE()), 0)
 		, @intMarkToMarketRateTypeId INT
 		, @ysnEnableMTMPoint BIT
-		, @ysnIncludeProductInformation BIT
 
 	SELECT TOP 1 @strM2MView = strM2MView
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
@@ -157,7 +156,6 @@ BEGIN TRY
         , @ysnEvaluationByStorageLocation = ysnEvaluationByStorageLocation 
         , @ysnEvaluationByStorageUnit = ysnEvaluationByStorageUnit 
 		, @ysnEnableAllocatedContractsGainOrLoss = ysnEnableAllocatedContractsGainOrLoss
-		, @ysnIncludeProductInformation = ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
@@ -545,7 +543,7 @@ BEGIN TRY
 			, intClassVarietyId INT	
 			, intProductLineId INT	
 			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			, strCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -638,7 +636,7 @@ BEGIN TRY
 			, intClassVarietyId INT	
 			, intProductLineId INT	
 			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			, strCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -1237,11 +1235,7 @@ BEGIN TRY
 			, IM.intClassVarietyId		
 			, IM.intProductLineId			
 			, strProductType = PTC.strDescription
-			--, strCertification = CERTI.strCertificationName
-			, strCertification = CASE WHEN @ysnIncludeProductInformation = 0
-									THEN NULL
-									ELSE CC.strContractCertifications
-									END
+			, strCertification = CERTI.strCertificationName
 			, strGrade = GRADE.strDescription
 			, strRegion = REGION.strDescription
 			, strSeason = SEASON.strDescription
@@ -1297,7 +1291,7 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityAttribute SEASON ON SEASON.intCommodityAttributeId = IM.intSeasonId
 		LEFT JOIN tblICCommodityAttribute CLASS ON CLASS.intCommodityAttributeId = IM.intClassVarietyId
 		LEFT JOIN tblICCommodityAttribute C ON GRADE.intCommodityAttributeId = IM.intGradeId
-		--LEFT JOIN tblICCertification CERTI ON CERTI.intCertificationId = IM.intCertificationId
+		LEFT JOIN tblICCertification CERTI ON CERTI.intCertificationId = IM.intCertificationId
 		OUTER APPLY (
 				SELECT strShipmentStatus = ISNULL(NULLIF(ctShipStatus.strShipmentStatus, ''), 'Open')  
 				FROM  dbo.fnCTGetShipmentStatus(CD.intContractDetailId) ctShipStatus 
@@ -1378,17 +1372,6 @@ BEGIN TRY
 			AND shipment.ysnPosted = 1
 		) invShipWarehouse
 		LEFT JOIN tblCTMTMPoint mtm on mtm.intMTMPointId = CD.intMTMPointId
-		OUTER APPLY (
-			SELECT strContractCertifications = (LTRIM(STUFF((
-				SELECT ', ' + ICC.strCertificationName
-				FROM tblCTContractCertification CTC
-				JOIN tblICCertification ICC
-					ON ICC.intCertificationId = CTC.intCertificationId
-				WHERE CTC.intContractDetailId = CD.intContractDetailId
-				ORDER BY ICC.strCertificationName
-				FOR XML PATH('')), 1, 1, ''))
-			) COLLATE Latin1_General_CI_AS
-		) CC
 		WHERE CH.intCommodityId = @intCommodityId
 			AND CL.intCompanyLocationId = ISNULL(@intLocationId, CL.intCompanyLocationId)
 			AND ISNULL(CD.intMarketZoneId, 0) = ISNULL(@intMarketZoneId, ISNULL(CD.intMarketZoneId, 0))
@@ -1604,7 +1587,7 @@ BEGIN TRY
 			, intClassVarietyId INT	
 			, intProductLineId INT	
 			, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			, strCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -1642,7 +1625,6 @@ BEGIN TRY
 			, temp.intStorageLocationId
 			, temp.intStorageUnitId
 			, temp.intMTMPointId
-			, temp.strCertification
 		INTO #tmpM2MBasisDetail
 		FROM tblRKM2MBasisDetail temp
 		LEFT JOIN tblSMCurrency c ON temp.intCurrencyId=c.intCurrencyID
@@ -2079,9 +2061,6 @@ BEGIN TRY
 					AND ISNULL(tmp.intMTMPointId, 0) = CASE WHEN @ysnEnableMTMPoint = 1 
 																					THEN ISNULL(cd.intMTMPointId, 0)
 																					ELSE ISNULL(tmp.intMTMPointId, 0) END
-					AND ISNULL(tmp.strCertification, '') = CASE WHEN @ysnIncludeProductInformation = 1 
-																					THEN ISNULL(cd.strCertification, '')
-																					ELSE ISNULL(tmp.strCertification, '') END
 					AND tmp.strContractInventory = 'Contract' ) basisDetail
 			LEFT JOIN tblCTContractHeader cth
 				ON cd.intContractHeaderId = cth.intContractHeaderId
@@ -4544,7 +4523,6 @@ BEGIN TRY
 			, bd.intStorageLocationId 
 			, bd.intStorageUnitId
 			, bd.intMTMPointId
-			, bd.strCertification
 		INTO #tmpM2MDifferentialBasis
 		FROM tblRKM2MBasis b
 		JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
@@ -4606,7 +4584,6 @@ BEGIN TRY
 			, intStorageLocationId 
 			, intStorageUnitId
 			, intMTMPointId
-			, strCertification
 		)
 		SELECT intM2MHeaderId
 			, intM2MBasisDetailId
@@ -4632,7 +4609,6 @@ BEGIN TRY
 			, intStorageLocationId 
 			, intStorageUnitId
 			, intMTMPointId
-			, strCertification
 		FROM #tmpM2MDifferentialBasis
 
 		-- Settlement Price
@@ -6232,7 +6208,7 @@ BEGIN TRY
 			, strItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, strCropYear NVARCHAR(50) COLLATE Latin1_General_CI_AS
 			, strProductionLine NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			, strCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+			, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strTerms NVARCHAR(50) COLLATE Latin1_General_CI_AS	
 			, strPosition NVARCHAR(50) COLLATE Latin1_General_CI_AS
 			, dtmStartDate DATETIME

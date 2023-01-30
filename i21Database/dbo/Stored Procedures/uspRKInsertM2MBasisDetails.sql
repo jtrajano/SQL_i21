@@ -99,7 +99,6 @@ INSERT INTO tblRKM2MBasisDetail (intM2MBasisId
 	, intProductTypeId 
 	, intProductLineId
 	, intGradeId
-	, strCertification
 	, intCertificationId
 	, intMTMPointId)
 SELECT @intM2MBasisId
@@ -128,7 +127,6 @@ SELECT @intM2MBasisId
 	, intProductTypeId 
 	, intProductLineId
 	, intGradeId
-	, strCertification
 	, intCertificationId
 	, intMTMPointId
 FROM @tempBasis
