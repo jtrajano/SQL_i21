@@ -110,12 +110,39 @@ DECLARE
   
  IF @ysnPost =1   
  BEGIN  
-
+    IF @strTransactionType = 'CM Forwards'
+    BEGIN
+      SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_Forward,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_Forward,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_Forward,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE IF @strTransactionType = 'CM In-Transit'
+      
+    BEGIN
+       SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_InTransit,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_InTransit,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_InTransit,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE IF @strTransactionType = 'CM Swaps' 
+    BEGIN
+       SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_Swap,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_Swap,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_Swap,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE
+    BEGIN
     SELECT TOP 1 
-    @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
-    @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
-    @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
+      @ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0),
+      @ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0),
+      @ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0)
     FROM tblGLCompanyPreferenceOption
+    END
 
     DECLARE @defaultType NVARCHAR(20)   
     SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable(DEFAULT) f   
@@ -480,9 +507,29 @@ DECLARE
   AND ysnIsUnposted = 0  
   
  END  
+
+
+declare @OverrideTableType [OverrideTableType]
+INSERT INTO @OverrideTableType(
+    intAccountId, 
+    intAccountIdOverride, 
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+)
+select intAccountId, 
+    intAccountIdOverride,
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+from @RevalTable
+GROUP BY intAccountId,intAccountIdOverride,
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+
   IF @ysnRecap = 0   
   BEGIN  
-  
    INSERT INTO @RecapTable  (
     dtmDate,  
     strBatchId,  
@@ -519,7 +566,7 @@ DECLARE
    SELECT 
     dtmDate,  
     strBatchId,  
-    intAccountId,  
+    intAccountId =B.intNewAccountIdOverride,  
     strDescription, 
     dtmTransactionDate,
     dblDebit,  
@@ -545,10 +592,21 @@ DECLARE
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
     intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
-    from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
+    B.strNewAccountIdOverride,  
+    B.intNewAccountIdOverride,  
+    B.strOverrideAccountError 
+    from --nGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
+	@RevalTable A
+	OUTER APPLY(
+		SELECT 
+		fn.intNewAccountIdOverride,
+		fn.strOverrideAccountError,
+		fn.strNewAccountIdOverride
+		from
+		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
+		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+	
+	)B
      
       
     IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
@@ -608,7 +666,7 @@ DECLARE
    SELECT 
     dtmDate,  
     strBatchId,  
-    intAccountId,  
+    intAccountId =B.intNewAccountIdOverride,  
     strDescription, 
     dtmTransactionDate,  
     dblDebit,  
@@ -634,11 +692,23 @@ DECLARE
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
     intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
-   from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A  
-  
+    B.strNewAccountIdOverride,  
+    B.intNewAccountIdOverride,  
+    B.strOverrideAccountError
+	FROM
+	@RevalTable A
+	OUTER APPLY(
+		SELECT 
+		fn.intNewAccountIdOverride,
+		fn.strOverrideAccountError,
+		fn.strNewAccountIdOverride
+		from
+		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
+		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+	)B
+
+ 
+
    EXEC uspGLPostRecap @RecapTable, @intEntityId  
   
    IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' )  

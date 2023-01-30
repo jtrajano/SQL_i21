@@ -184,6 +184,7 @@ BEGIN
 					BEGIN
 						--Add contract prepayment to voucher
 						BEGIN
+							/*
 							IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
 								DROP TABLE #tmpContractPrepay
 
@@ -221,6 +222,8 @@ BEGIN
 								END							
 								update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 							END
+							*/
+							update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 						END
 
 						SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
