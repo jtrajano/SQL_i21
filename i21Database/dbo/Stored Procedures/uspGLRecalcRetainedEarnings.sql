@@ -55,11 +55,11 @@ FROM tblGLCompanyPreferenceOption
 DECLARE @ysnREOverride BIT , @ysnISOverride BIT 
 
 SET  @ysnREOverride =  @ysnREOverrideLocation | @ysnREOverrideLOB | @ysnREOverrideCompany 
-SET  @ysnIsOverride =  @ysnISOverrideLocation | @ysnISOverrideLOB | @ysnISOverrideCompany 
+SET  @ysnISOverride =  @ysnISOverrideLocation | @ysnISOverrideLOB | @ysnISOverrideCompany 
 
 	
 	
-IF @ysnREOverride= 0 OR @ysnIsOverride = 0 
+IF @ysnREOverride= 0 OR @ysnISOverride = 0 
 BEGIN
 	SET @result = 'Please Override Retained Earnings and Income Summary Account to continue.'   
 	GOTO _end
