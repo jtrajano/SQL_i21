@@ -219,7 +219,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 															WHEN ARID.strMaintenanceType IN ('Maintenance Only', 'SaaS') 
 																THEN ARID.dblMaintenanceAmount
 														END
-											ELSE ARID.dblPrice
+											ELSE ARID.dblPrice * CASE WHEN ARID.intPriceUOMId IS NOT NULL AND ARID.intItemUOMId <> ARID.intPriceUOMId THEN ARIDUOM.dblUnitQty ELSE 1 END
 										END
 			, dblTax					= ARID.dblTotalTax
 			, dblLineTotal				= CASE WHEN ICI.strType = 'Software' AND ISNULL(ARID.strMaintenanceType, '') <> ''
