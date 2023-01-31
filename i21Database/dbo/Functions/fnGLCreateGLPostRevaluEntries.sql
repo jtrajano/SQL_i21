@@ -57,12 +57,12 @@ AS RETURN(
                         ,[dblDebit]   
                         ,[dblCredit]
                         ,[dblExchangeRate] = 1
-                        ,[dblDebitForeign] = [dblCredit]  
-                        ,[dblCreditForeign]= [dblDebit]
+                        ,[dblDebitForeign] = [dblDebit]  
+                        ,[dblCreditForeign]= [dblCredit]
                         ,[dtmDate]      
                         ,[ysnIsUnposted]    
                         ,[intConcurrencyId]    
-                        ,[intCurrencyId]  --functional gain/loss
+                        ,intFunctionalCurrencyId  --functional gain/loss
                         ,[intUserId]     
                         ,[intEntityId]     
                         ,[dtmDateEntered]    
@@ -95,7 +95,7 @@ AS RETURN(
                         ,[dtmDate]  
                         ,[ysnIsUnposted]    
                         ,[intConcurrencyId]   
-                        ,intFunctionalCurrencyId -- offset is in source currency 
+                        ,intCurrencyId -- offset is in source currency 
                         ,[intUserId]     
                         ,[intEntityId]     
                         ,[dtmDateEntered]   
