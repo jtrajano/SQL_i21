@@ -11,19 +11,18 @@ BEGIN
     DECLARE @out INT
     IF @ysnOffset = 1
     BEGIN
-        SELECT @out = intGeneralLedgerRealizedId FROM tblSMMultiCurrency
-        IF @intAccountCategoryId = 27  AND  @ysnOffset = 1 --inventory
-            SELECT @out = intGainOnForwardRealizedId FROM tblSMMultiCurrency --REPLACE WITH NEW SETTING
+        IF @intAccountCategoryId = 27  --inventory
+            SELECT @out = intInventoryRealizedId FROM tblSMMultiCurrency --REPLACE WITH NEW SETTING
         ELSE
         IF @intAccountCategoryId = 46 -- inventory intransit
-            SELECT @out = intGainOnSwapRealizedId FROM tblSMMultiCurrency -- REPLACE WITH NEW SETTING
-  
+            SELECT @out = intInventoryInTransitRealizedId FROM tblSMMultiCurrency -- REPLACE WITH NEW SETTING
+        ELSE
+            SELECT @out = intGeneralLedgerRealizedId FROM tblSMMultiCurrency
     END
     ELSE
-        RETURN @offsetAccountId
+        SELECT @out = @offsetAccountId
 
 
     RETURN @out
-
 
 END
