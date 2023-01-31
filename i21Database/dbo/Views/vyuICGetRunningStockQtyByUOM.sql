@@ -40,7 +40,7 @@ FROM
 				,t.intSubLocationId
 				,t.intStorageLocationId
 				,t.intItemUOMId
-				,dtmDate = CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
+				,dtmDate --= CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
 				,dblOnHand = SUM(t.dblQty)				
 		FROM 
 			tblICInventoryTransaction t
@@ -52,7 +52,7 @@ FROM
 			, t.intSubLocationId
 			, t.intStorageLocationId
 			, t.intItemUOMId
-			, CONVERT(VARCHAR(10),t.dtmDate,112)
+			, t.dtmDate --CONVERT(VARCHAR(10),t.dtmDate,112)
 	) ItemStock	
 	INNER JOIN tblICItem Item 	
 		ON Item.intItemId = ItemStock.intItemId
