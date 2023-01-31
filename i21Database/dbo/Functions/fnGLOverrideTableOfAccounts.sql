@@ -38,9 +38,10 @@ SELECT
  intLOBSegmentOverrideId,  
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
- intNewAccountIdOverride = intAccountIdOverride, -- default to base account 
+ intNewAccountIdOverride = intAccountId, -- default to base account 
  strOverrideAccountError
 from @OverrideTableType 
+
 
 IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
     RETURN

@@ -138,9 +138,9 @@ DECLARE
     ELSE
     BEGIN
     SELECT TOP 1 
-      @ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0),
-      @ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0),
-      @ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0)
+      @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
+      @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
+      @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
     FROM tblGLCompanyPreferenceOption
     END
 
@@ -505,7 +505,7 @@ DECLARE
           DECLARE @dtmReverseDate DATETIME  
           SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
           IF EXISTS(Select TOP 1 1 FROM @RevalTable WHERE intAccountId IS NULL)  
-          BEGIN  
+          BEGIN
             GOTO _error
           END  
 

@@ -14,10 +14,13 @@
 	[ysnRequireLocation] BIT NULL,
 	[strSubsidiaryCompanyJson] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL ,
 	/*Override RE Settings*/
-	[ysnREOverride] BIT NULL,
+	[ysnREOverride] BIT NULL, --Retained Earnings
 	[ysnREOverrideLocation] BIT NULL,
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
+	[ysnRevalOverrideLocation] BIT NULL, --Revaluation
+	[ysnRevalOverrideLOB] BIT NULL,
+	[ysnRevalOverrideCompany] BIT NULL,
 	[ysnISOverrideLocation] BIT NULL,
 	[ysnISOverrideLOB] BIT NULL,
 	[ysnISOverrideCompany] BIT NULL,
