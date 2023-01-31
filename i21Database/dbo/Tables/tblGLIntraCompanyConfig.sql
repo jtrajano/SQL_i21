@@ -5,5 +5,6 @@ CREATE TABLE tblGLIntraCompanyConfig
     intTargeCompanySegmentId INT NOT NULL,
     intDueFromAccountId INT NOT NULL,
     intDueToAccountId INT NOT NULL,
-    intConcurrencyId INT NOT NULL
+    intConcurrencyId INT NULL,
+	CONSTRAINT [PK_tblGLIntraCompanyConfig] PRIMARY KEY CLUSTERED (intIntraCompanyConfigId ASC)
 )
