@@ -208,7 +208,7 @@ BEGIN
 										<strRowState>Delete</strRowState>
 									</tblCTPriceFixation>
 								</tblCTPriceFixations>';
-				EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = @strXML, @ysnDeleteFromInvoice = 1;
+				EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = @strXML, @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 				delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 				EXEC uspCTSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -240,7 +240,7 @@ BEGIN
 				if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
 				begin
 					update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pf.intPriceContractId = @intContractPriceId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
-					EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1;
+					EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 					delete from tblCTPriceContract where intPriceContractId = @intContractPriceId;
 					EXEC uspCTSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -264,7 +264,7 @@ BEGIN
 										<strRowState>Delete</strRowState>
 									</tblCTPriceFixationDetail>
 								</tblCTPriceFixationDetails>';
-				EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = @strXML, @ysnDeleteFromInvoice = 1;
+				EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = @strXML, @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 				delete from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
 				EXEC uspCTSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -444,7 +444,7 @@ BEGIN
 						if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intCurrentPriceContractId) = 1)
 						begin
 							update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pf.intPriceContractId = @intCurrentPriceContractId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
-							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1;
+							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 							delete from tblCTPriceContract where intPriceContractId = @intCurrentPriceContractId;
 							EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -467,7 +467,7 @@ BEGIN
 													<strRowState>Delete</strRowState>
 												</tblCTPriceFixation>
 											</tblCTPriceFixations>';
-							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1;
+							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 							delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 							EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -506,7 +506,7 @@ BEGIN
 												<strRowState>Delete</strRowState>
 											</tblCTPriceFixationDetail>
 										</tblCTPriceFixationDetails>';
-						EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1;
+						EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 						delete from tblCTPriceFixationDetail where intPriceFixationDetailId = @intDetailId;
 						EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -719,7 +719,7 @@ BEGIN
 						if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intCurrentPriceContractId) = 1)
 						begin
 							update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pf.intPriceContractId = @intCurrentPriceContractId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
-							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1;
+							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 							delete from tblCTPriceContract where intPriceContractId = @intCurrentPriceContractId;
 							EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -743,7 +743,7 @@ BEGIN
 													<strRowState>Delete</strRowState>
 												</tblCTPriceFixation>
 											</tblCTPriceFixations>';
-							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1;
+							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 							delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 							EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
@@ -783,7 +783,7 @@ BEGIN
 												<strRowState>Delete</strRowState>
 											</tblCTPriceFixationDetail>
 										</tblCTPriceFixationDetails>';
-						EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1;
+						EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = @strXML, @ysnDeleteFromInvoice = 1, @intUserId = @UserId;
 						delete from tblCTPriceFixationDetail where intPriceFixationDetailId = @intDetailId;
 						EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
 
