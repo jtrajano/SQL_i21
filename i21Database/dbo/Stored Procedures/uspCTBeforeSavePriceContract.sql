@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspCTBeforeSavePriceContract]
+﻿CREATE PROCEDURE [dbo].[uspCTBeforeSavePriceContract]
 		
 	@intPriceContractId INT,
 	@strXML				NVARCHAR(MAX),
