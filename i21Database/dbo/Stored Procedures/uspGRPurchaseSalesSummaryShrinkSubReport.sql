@@ -52,6 +52,7 @@ BEGIN TRY
 	DECLARE @tblEntityId Id
 	DECLARE @tblCommodityId Id
 	DECLARE @tblMarketZoneId Id
+    DECLARE @tblItemId Id
 
 	SELECT @dtmDeliveryDateFromParam = ISNULL([from], DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())))
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDeliveryDate'
@@ -79,6 +80,11 @@ BEGIN TRY
         INSERT INTO @tblMarketZoneId
 		SELECT intMarketZoneId
 		FROM tblARMarketZone
+    
+    INSERT INTO @tblItemId
+	SELECT Z.intItemId FROM @temp_xml_table X
+	INNER JOIN tblICItem Z ON Z.strItemNo = X.[from] COLLATE Latin1_General_CI_AS
+	WHERE [fieldname] = 'strItemNo'
 	-- End extraction of parameters from XML
 
     IF @ysnPurchase = 1
@@ -127,6 +133,8 @@ BEGIN TRY
                 OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
             AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
                 OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
+            AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
         GROUP BY DT.intDiscountTypeId, DT.strDiscountType
     END
     ELSE
@@ -172,6 +180,8 @@ BEGIN TRY
                 OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
             AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
                 OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+            AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
         GROUP BY DT.intDiscountTypeId, DT.strDiscountType
     END
 
