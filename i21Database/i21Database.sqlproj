@@ -1504,6 +1504,7 @@
     <Build Include="dbo\Tables\tblGLFiscalYear.sql" />
     <Build Include="dbo\Tables\tblGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Tables\tblGLIjemst.sql" />
+    <Build Include="dbo\Tables\tblGLIntraCompanyConfig.sql" />
     <Build Include="dbo\Tables\tblGLImportFile.sql" />
     <Build Include="dbo\Tables\tblGLJournal.sql" />
     <Build Include="dbo\Tables\tblGLJournalDetail.sql" />
