@@ -33,7 +33,9 @@ BEGIN
 			AND C.intAccountCategoryId IN (1, 53)
 	) glEntries
 	WHERE
-		A.dblTotal != ISNULL(glEntries.dblTotal,0)
+		CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalTotal
+		WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN
+		 A.dblTotal - A.dblProvisionalPayment ELSE A.dblTotal  END != ISNULL(glEntries.dblTotal,0) 
 	GROUP BY A.intBillId, A.strBillId
 	RETURN;
 END

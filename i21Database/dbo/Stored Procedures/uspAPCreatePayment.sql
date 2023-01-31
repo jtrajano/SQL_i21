@@ -1,4 +1,4 @@
-﻿/*
+/*
 Usage:
 1. Creating payment from Bill screen.
 2. Creating payment from Importing of bills.
@@ -392,18 +392,19 @@ BEGIN
 				[intAccountId]	= CASE WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN details.intAccountId ELSE A.intAccountId END,
 				[dblDiscount]	= ISNULL(C.dblDiscount, A.dblDiscount),
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
-				[dblAmountDue]	= ISNULL(C.dblPayment, A.dblAmountDue
-									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
+				[dblAmountDue]	= ISNULL(C.dblPayment, (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalAmountDue ELSE A.dblAmountDue END)
+									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalTotal ELSE A.dblTotal END)) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
 								) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[dblPayment]	= ISNULL(C.dblPayment,
-									((A.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - A.dblPaymentTemp)
-									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
+									(((CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalTotal ELSE A.dblTotal END) - ISNULL(appliedPrepays.dblPayment, 0)) - A.dblPaymentTemp)
+									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / (A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
 								  ) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[dblInterest]	= A.dblInterest,
-				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
+				[dblTotal]= ISNULL(C.dblPayment, (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalTotal ELSE A.dblTotal - A.dblProvisionalPayment END)) 
+				* (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[ysnOffset]		= CAST
 									(
-										CASE WHEN A.intTransactionType IN (1, 14) THEN 0
+										CASE WHEN A.intTransactionType IN (1, 14, 16) THEN 0
 										ELSE
 											(
 												CASE WHEN A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 0

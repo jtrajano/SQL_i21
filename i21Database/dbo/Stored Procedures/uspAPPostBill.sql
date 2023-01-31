@@ -213,6 +213,7 @@ BEGIN
 												WHEN B.intTransactionType = 3 THEN 'Debit Memo'
 												WHEN B.intTransactionType = 13 THEN 'Basis Advance'
 												WHEN B.intTransactionType = 14 THEN 'Deferred Interest'
+												WHEN B.intTransactionType = 16 THEN 'Provisional Voucher'
 											ELSE 'NONE' END
 		,B.strBillId
 		,B.intBillId

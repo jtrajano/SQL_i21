@@ -59,8 +59,18 @@ BEGIN
 	BEGIN
 		EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
 
+		DECLARE @dblProvisionalPercentage AS DECIMAL(18,6)
+					,@dblTotal AS DECIMAL(18,6)
+		
+		SELECT @dblTotal = dblProvisionalTotal
+					,@dblProvisionalPercentage = dblProvisionalPercentage
+					FROM tblAPBill WHERE intBillId = @billId
+
 		UPDATE B 
 		SET B.strReference = 'Final Voucher of ' + B2.strBillId,
+			B.dblProvisionalPayment = @dblTotal,
+			B.dblProvisionalTotal = @dblTotal,
+			B.dblProvisionalPercentage = @dblProvisionalPercentage,
 			B.ysnFinalVoucher = 1
 		FROM tblAPBill B
 		INNER JOIN tblAPBill B2 ON B2.intBillId = @billId
@@ -86,6 +96,10 @@ BEGIN
 
 		UPDATE BD
 		SET BD.intLotId = BD2.intLotId,
+			BD.dblProvisionalFinalCost = BD2.dblCost,
+			BD.dblProvisionalFinalWeight = BD2.dblNetWeight * (@dblProvisionalPercentage / 100),
+			BD.dblProvisionalPayment = (@dblProvisionalPercentage / 100) * BD2.dblTotal,
+			BD.dblProvisionalPercentage = @dblProvisionalPercentage,
 			BD.ysnStage = 0
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD2.intBillId = @billId

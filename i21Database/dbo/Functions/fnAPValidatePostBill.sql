@@ -543,7 +543,7 @@ BEGIN
 		AND 
 		(
 			--amount due should be total less payment
-			(A.dblAmountDue != (A.dblTotal - A.dblPayment))
+			(A.dblAmountDue != (A.dblTotal - A.dblPayment) - (CASE WHEN A.intTransactionType = 1 AND ISNULL(A.ysnFinalVoucher,0) = 1 THEN A.dblProvisionalPayment ELSE 0 END))
 			OR
 			--amount due cannot be greater than the total
 			(A.dblAmountDue > A.dblTotal)

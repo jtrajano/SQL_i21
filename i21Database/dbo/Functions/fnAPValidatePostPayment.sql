@@ -547,7 +547,7 @@ BEGIN
 		AND (
 			A2.dblAmountDue < A2.dblTotal
 			)
-		AND A2.ysnOffset = 1
+		AND A2.ysnOffset = CASE WHEN B.intTransactionType = 16 THEN 0 ELSE 1 END
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
@@ -581,7 +581,7 @@ BEGIN
 		AND (
 			ROUND((A2.dblPayment - A2.dblInterest + A2.dblDiscount),2) < A2.dblTotal
 			)
-		AND A2.ysnOffset = 1
+		AND A2.ysnOffset = CASE WHEN B.intTransactionType = 16 THEN 0 ELSE 1 END
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 

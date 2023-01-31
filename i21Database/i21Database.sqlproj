@@ -915,6 +915,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentConditionsReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReportForInStore1.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerSalesReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertFinalVoucherToDebitMemo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
