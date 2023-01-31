@@ -1441,6 +1441,7 @@
     <Build Include="dbo\Views\vyuSCHoldTicketApplyTicketInfo.sql" />
     <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
     <Build Include="dbo\Tables\tblSCTicketManualDistribution.sql" />
+     <Build Include="dbo\Views\vyuHDTicketType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
