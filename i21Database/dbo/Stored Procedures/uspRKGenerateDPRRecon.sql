@@ -788,7 +788,7 @@ BEGIN TRY
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
-		,dtmCreatedDate =  DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()),B.dtmDateCreated)
+		,dtmCreatedDate =  DATEADD(hh, DATEDIFF(hh, @dtmServerFromDate, @dtmFromDate),B.dtmDateCreated)
 		,SL.dtmTransactionDate
 		,dblVariance  =  CASE WHEN SL.dblOrigQty < 0 THEN CH.dblQuantityPerLoad - ABS(SL.dblOrigQty)  ELSE  SL.dblOrigQty - CH.dblQuantityPerLoad END
 		,UM.strUnitMeasure
@@ -1494,7 +1494,7 @@ BEGIN TRY
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
-		,dtmCreatedDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()),IV.dtmDateCreated)
+		,dtmCreatedDate = DATEADD(hh, DATEDIFF(hh, @dtmServerFromDate, @dtmFromDate),IV.dtmDateCreated)
 		,SL.dtmTransactionDate
 		,dblVariance  = CASE WHEN SL.dblOrigQty < 0 THEN ABS(SL.dblOrigQty) - CH.dblQuantityPerLoad ELSE CH.dblQuantityPerLoad - SL.dblOrigQty END
 		,UM.strUnitMeasure
