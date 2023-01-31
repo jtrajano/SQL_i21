@@ -29,9 +29,6 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[intClassId] [int] NULL,
 	[intProductCodeId] [int] NULL,
 	[intFuelTankId] [int] NULL,
-	[strPassportFuelId1] [nvarchar](50) NULL,
-	[strPassportFuelId2] [nvarchar](50) NULL,
-	[strPassportFuelId3] [nvarchar](50) NULL,
 	[ysnTaxFlag1] [bit] NULL,
 	[ysnTaxFlag2] [bit] NULL,
 	[ysnTaxFlag3] [bit] NULL,
@@ -92,7 +89,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 		, intIssueUOMId
 		, intReceiveUOMId
 		, intFamilyId
-		, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+		, intClassId, intProductCodeId, intFuelTankId, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
@@ -110,7 +107,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 		, intIssueUOMId
 		, intReceiveUOMId
 		, intFamilyId
-		, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+		, intClassId, intProductCodeId, intFuelTankId, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
@@ -137,7 +134,7 @@ INSERT INTO tblICItemLocation(
 	, intIssueUOMId
 	, intReceiveUOMId
 	, intFamilyId
-	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+	, intClassId, intProductCodeId, intFuelTankId, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
@@ -155,7 +152,7 @@ SELECT
 	, NewDetails.intIssueUOMId
 	, NewDetails.intReceiveUOMId
 	, NewDetails.intFamilyId
-	, NewDetails.intClassId, NewDetails.intProductCodeId, NewDetails.intFuelTankId, NewDetails.strPassportFuelId1, NewDetails.strPassportFuelId2, NewDetails.strPassportFuelId3, NewDetails.ysnTaxFlag1, NewDetails.ysnTaxFlag2, NewDetails.ysnTaxFlag3, NewDetails.ysnTaxFlag4, NewDetails.ysnPromotionalItem, NewDetails.intMixMatchId
+	, NewDetails.intClassId, NewDetails.intProductCodeId, NewDetails.intFuelTankId, NewDetails.ysnTaxFlag1, NewDetails.ysnTaxFlag2, NewDetails.ysnTaxFlag3, NewDetails.ysnTaxFlag4, NewDetails.ysnPromotionalItem, NewDetails.intMixMatchId
 	, NewDetails.ysnDepositRequired, NewDetails.intDepositPLUId, NewDetails.intBottleDepositNo, NewDetails.ysnSaleable, NewDetails.ysnQuantityRequired, NewDetails.ysnScaleItem, NewDetails.ysnFoodStampable, NewDetails.ysnReturnable, NewDetails.ysnPrePriced, NewDetails.ysnOpenPricePLU, NewDetails.ysnLinkedItem, NewDetails.strVendorCategory
 	, NewDetails.ysnCountBySINo, NewDetails.strSerialNoBegin, NewDetails.strSerialNoEnd, NewDetails.ysnIdRequiredLiquor, NewDetails.ysnIdRequiredCigarette, NewDetails.intMinimumAge, NewDetails.ysnApplyBlueLaw1, NewDetails.ysnApplyBlueLaw2, NewDetails.ysnCarWash, NewDetails.intItemTypeCode, NewDetails.intItemTypeSubCode
 	, NewDetails.ysnAutoCalculateFreight, NewDetails.intFreightMethodId, NewDetails.dblFreightRate, NewDetails.intShipViaId, NewDetails.intNegativeInventory, NewDetails.dblReorderPoint, NewDetails.dblMinOrder, NewDetails.dblSuggestedQty, NewDetails.dblLeadTime, NewDetails.strCounted, NewDetails.intCountGroupId, NewDetails.ysnCountedDaily

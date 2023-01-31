@@ -851,6 +851,8 @@ BEGIN TRANSACTION
 								,dblPrice
 								,intTaxGroupId
 								,intCategoryId
+								,strRegisterFuelId1
+								,strRegisterFuelId2
 								,intConcurrencyId
 							)
 							SELECT 
@@ -859,6 +861,8 @@ BEGIN TRANSACTION
 								,dblPrice
 								,intTaxGroupId
 								,intCategoryId
+								,strRegisterFuelId1
+								,strRegisterFuelId2
 								,intConcurrencyId
 							FROM tblSTPumpItem
 							WHERE intStoreId = @intStoreId
