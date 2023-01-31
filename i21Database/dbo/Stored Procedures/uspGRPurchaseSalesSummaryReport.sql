@@ -80,6 +80,7 @@ BEGIN TRY
 	DECLARE @tblLocationId Id
 	DECLARE @tblEntityId Id
 	DECLARE @tblCommodityId Id
+	DECLARE @tblItemId Id
 	DECLARE @tblMarketZoneId Id
 
 	SELECT @dtmDeliveryDateFromParam = ISNULL([from], DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())))
@@ -118,6 +119,11 @@ BEGIN TRY
 		INSERT INTO @tblCommodityId
 		SELECT intCommodityId
 		FROM tblICCommodity
+
+	INSERT INTO @tblItemId
+	SELECT Z.intItemId FROM @temp_xml_table X
+	INNER JOIN tblICItem Z ON Z.strItemNo = X.[from] COLLATE Latin1_General_CI_AS
+	WHERE [fieldname] = 'strItemNo'
 
 	INSERT INTO @tblMarketZoneId
 	SELECT Z.intMarketZoneId FROM @temp_xml_table X
@@ -201,6 +207,8 @@ BEGIN TRY
 				ON CD.intContractHeaderId = IRI.intContractHeaderId
 				AND CD.intContractDetailId = IRI.intContractDetailId
 			WHERE T.dtmTicketDateTime BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE IRI.intItemId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblMarketZoneId)
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
@@ -243,6 +251,8 @@ BEGIN TRY
 			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE IRI.intItemId = intId))
 			GROUP BY IR.intLocationId, I.intCommodityId
 		) WAP_SPOT
 			ON MC.intCommodityId = WAP_SPOT.intCommodityId
@@ -283,6 +293,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE IRI.intItemId = intId))
 			GROUP BY IR.intLocationId, I.intCommodityId
 		) WAP_CONTRACT
 			ON MC.intCommodityId = WAP_CONTRACT.intCommodityId
@@ -306,6 +318,8 @@ BEGIN TRY
 			WHERE T.dtmTicketDateTime BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND TT.intListTicketTypeId = 3 -- Transfer In
 				AND IT.ysnPosted = 1
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY IT.intToLocationId, I.intCommodityId		
 		) TRANS
 			ON MC.intCommodityId = TRANS.intCommodityId
@@ -383,6 +397,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE IR.intEntityVendorId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY IR.intLocationId, I.intCommodityId		
 		) PAID_TICKET
 			ON MC.intCommodityId = PAID_TICKET.intCommodityId
@@ -461,6 +477,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE B.intEntityVendorId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 		) PAID_STORAGE
 		OUTER APPLY (
 			SELECT
@@ -502,6 +520,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE B.intEntityVendorId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 		) STORAGE_EARNED
 		OUTER APPLY (
 			SELECT
@@ -567,6 +587,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) OUTBOUND
 			ON MC.intCommodityId = OUTBOUND.intCommodityId
@@ -596,6 +618,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) OUTBOUND_D
 			ON MC.intCommodityId = OUTBOUND_D.intCommodityId
@@ -631,6 +655,8 @@ BEGIN TRY
 			WHERE P.dtmDatePaid BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) WAP_SPOT
 			ON MC.intCommodityId = WAP_SPOT.intCommodityId
@@ -668,6 +694,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) WAP_CONTRACT
 			ON MC.intCommodityId = WAP_CONTRACT.intCommodityId
@@ -691,6 +719,8 @@ BEGIN TRY
 			WHERE T.dtmTicketDateTime BETWEEN @dtmDeliveryDateFromParam AND @dtmDeliveryDateToParam
 				AND TT.intListTicketTypeId = 3 -- Transfer In
 				AND IT.ysnPosted = 1
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY IT.intToLocationId, I.intCommodityId
 		) TRANS
 			ON MC.intCommodityId = TRANS.intCommodityId
@@ -736,6 +766,8 @@ BEGIN TRY
 					OR EXISTS (SELECT 1 FROM @tblMarketZoneId WHERE CD.intMarketZoneId = intId))
 				AND (NOT EXISTS(SELECT 1 FROM @tblEntityId)
 					OR EXISTS (SELECT 1 FROM @tblEntityId WHERE S.intEntityCustomerId = intId))
+				AND (NOT EXISTS(SELECT 1 FROM @tblItemId)
+					OR EXISTS (SELECT 1 FROM @tblItemId WHERE I.intItemId = intId))
 			GROUP BY S.intShipFromLocationId, CO.intCommodityId
 		) PAID_TICKET
 			ON MC.intCommodityId = PAID_TICKET.intCommodityId
