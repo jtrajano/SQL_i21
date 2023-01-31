@@ -219,6 +219,11 @@ AS
 					AND I.intPartitionType > 0
 					AND ysnInvalid = 0
 
+				IF EXISTS(SELECT 1 FROM tblGLAccount A LEFT JOIN tblGLTempCOASegment B 
+				on A.intAccountId = B.intAccountId
+				where B.intAccountId IS  NULL)
+					EXEC uspGLBuildTempCOASegment
+
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType > 3)
 				BEGIN
 				-- Check COA Cross Reference
@@ -256,7 +261,7 @@ AS
 				WHERE B.strPartitionGroup = @strGroup
 					AND A.strAccountId NOT IN (SELECT stri21Id
 											  FROM   tblGLCOACrossReference
-											  WHERE  strCompanyId = 'Legacy')
+											  WHERE  strCompanyId = 'Legacy')			
 				END
 			END
 		END
