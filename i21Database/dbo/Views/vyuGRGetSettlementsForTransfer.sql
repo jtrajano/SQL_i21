@@ -7,7 +7,7 @@ SELECT AP.intBillId
 	,intEntityId = AP.intEntityVendorId
 	,intCompanyLocationId = AP.intShipToId
 	,dblAmountDue = AP.dblAmountDue - ISNULL(TSR.dblTransferredAmount,0)
-	,BD.intCurrencyId
+	,AP.intCurrencyId
 	,AP.dtmDate
 	,IC.intCommodityId
 	,IC.intItemId
@@ -21,7 +21,7 @@ SELECT AP.intBillId
 	,BD.intBillDetailId
 	--,dblQtyReceived2= ISNULL(BD.dblQtyReceived,0)
 	--,dblTransferredAmount =ISNULL(TSR.dblTransferredAmount,0)
-FROM vyuAPBill AP
+FROM tblAPBill AP
 LEFT JOIN (
 	tblAPBillDetail BD
 	INNER JOIN tblICItem IC
