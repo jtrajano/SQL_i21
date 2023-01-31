@@ -234,12 +234,36 @@ IF ISNULL(@ysnRecap, 0) = 0
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 		DECLARE @SkipICValidation BIT = 0
 
-		GOTO _insertIntra
-
-		_continuePost:
 		
-		--IF @@ERROR <> 0 
-		GOTO Post_Rollback;
+		INSERT INTO @GLEntries
+		(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,strOverrideAccountError
+			,strNewAccountIdOverride
+		)
+		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
+		
+		IF @@ERROR <> 0 GOTO Post_Rollback;
 
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
@@ -327,12 +351,35 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
-		GOTO _insertIntra
+		INSERT INTO @GLEntries
+		(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,strOverrideAccountError
+			,strNewAccountIdOverride
+		)
+		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
 		
-		_continueRecap:
-		
-		IF @@ERROR <>  0 
-		GOTO Post_Rollback;
+		IF @@ERROR <>  0 GOTO Post_Rollback;
 		
 
 		EXEC dbo.uspGLPostRecap 
