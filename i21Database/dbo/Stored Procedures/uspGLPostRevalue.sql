@@ -110,12 +110,39 @@ DECLARE
   
  IF @ysnPost =1   
  BEGIN  
-
+    IF @strTransactionType = 'CM Forwards'
+    BEGIN
+      SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_Forward,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_Forward,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_Forward,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE IF @strTransactionType = 'CM In-Transit'
+      
+    BEGIN
+       SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_InTransit,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_InTransit,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_InTransit,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE IF @strTransactionType = 'CM Swaps' 
+    BEGIN
+       SELECT TOP 1 
+        @ysnOverrideLocation = ISNULL(ysnOverrideLocationSegment_Swap,0),
+        @ysnOverrideLOB = ISNULL(ysnOverrideLOBSegment_Swap,0),
+        @ysnOverrideCompany = ISNULL(ysnOverrideCompanySegment_Swap,0)
+      FROM tblCMCompanyPreferenceOption
+    END
+    ELSE
+    BEGIN
     SELECT TOP 1 
-    @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
-    @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
-    @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
+      @ysnOverrideLocation = ISNULL(ysnRevalOverrideLocation,0),
+      @ysnOverrideLOB = ISNULL(ysnRevalOverrideLOB,0),
+      @ysnOverrideCompany = ISNULL(ysnRevalOverrideCompany,0)
     FROM tblGLCompanyPreferenceOption
+    END
 
     DECLARE @defaultType NVARCHAR(20)   
     SELECT TOP 1 @defaultType = f.strType  from dbo.fnGLGetRevalueAccountTable(DEFAULT) f   
@@ -124,270 +151,361 @@ DECLARE
     IF @ysnHasDetails = 1
     BEGIN
           IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyPostGLEntries') DROP TABLE iRelyPostGLEntries;
-          WITH cte as(  
-          SELECT   
-            [strTransactionId]  = B.strConsolidationNumber  
-          ,[intTransactionId]  = B.intConsolidationId  
-          ,[strDescription]  = A.strTransactionId   
-          ,[dtmTransactionDate] = B.dtmDate  
-          ,[dblDebit]    = ISNULL(CASE WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)  
-                  WHEN dblUnrealizedLoss < 0 THEN 0  
-                  ELSE dblUnrealizedLoss END,0)  
-          ,[dblCredit]   = ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
-                  WHEN dblUnrealizedGain < 0 THEN 0  
-                  ELSE dblUnrealizedGain END,0)
-          ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
-          ,[ysnIsUnposted]  = 0   
-          ,[intConcurrencyId]  = 1  
-          ,[intDetailCurrencyId]  = ISNULL(A.intCurrencyId, B.intFunctionalCurrencyId)
-          ,[intCurrencyId]  = B.intFunctionalCurrencyId
-          ,[intUserId]   = 0  
-          ,[intEntityId]   = @intEntityId    
-          ,[dtmDateEntered]  = @dateNow  
-          ,[strBatchId]   = @strPostBatchId  
-          ,[strCode]    = 'REVAL'  
-          ,[intJournalLineNo]  = A.[intConsolidationDetailId]     
-          ,[strTransactionType] = 'Revalue Currency'  
-          ,[strTransactionForm] = 'Revalue Currency'  
-          ,B.dtmReverseDate  
-          ,strModule = B.strTransactionType  
-          ,A.strType  
-          ,Offset = 0  
-          ,A.intAccountIdOverride  
-          ,A.intLocationSegmentOverrideId  
-          ,A.intLOBSegmentOverrideId  
-          ,A.intCompanySegmentOverrideId
-          FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B   
-          ON A.intConsolidationId = B.intConsolidationId  
-          WHERE B.intConsolidationId = @intConsolidationId  
-          ),cte1 AS  
-          (  
-          SELECT   
-            [strTransactionId]    
-            ,[intTransactionId]    
-            ,[strDescription]    
-            ,[dtmTransactionDate]   
-            ,[dblDebit]   
-            ,[dblCredit]
-            ,[dtmDate]      
-            ,[ysnIsUnposted]    
-            ,[intConcurrencyId]    
-            ,[intDetailCurrencyId]    
-            ,[intCurrencyId]    
-            ,[intUserId]     
-            ,[intEntityId]     
-            ,[dtmDateEntered]    
-            ,strBatchId  
-            ,[strCode]      
-            ,[strJournalLineDescription] = 'Revalue '+ @strTransactionType + ' '  + @strPeriod   
-            ,[intJournalLineNo]    
-            ,[strTransactionType]   
-            ,[strTransactionForm]  
-            ,strModule   
-            ,OffSet = 0  
-            ,strType = ISNULL(strType,@defaultType)  
-            ,intAccountIdOverride  
-            ,intLocationSegmentOverrideId  
-            ,intLOBSegmentOverrideId  
-            ,intCompanySegmentOverrideId
-          FROM  
-          cte   
-          UNION ALL  
-          SELECT   
-            [strTransactionId]    
-            ,[intTransactionId]    
-            ,[strDescription]    
-            ,[dtmTransactionDate]   
-            ,[dblDebit]    = dblCredit      
-            ,[dblCredit]   = dblDebit     
-            ,[dtmDate]  
-            ,[ysnIsUnposted]    
-            ,[intConcurrencyId]   
-            ,[intDetailCurrencyId]  
-            ,[intCurrencyId]    
-            ,[intUserId]     
-            ,[intEntityId]     
-            ,[dtmDateEntered]   
-            ,strBatchId   
-            ,[strCode]      
-            ,[strJournalLineDescription] = 'Offset Revalue '+ @strTransactionType + ' '  + @strPeriod   
-            ,[intJournalLineNo]    
-            ,[strTransactionType]   
-            ,[strTransactionForm]   
-            ,strModule  
-            ,OffSet = 1  
-            ,strType = ISNULL(strType,@defaultType)  
-            ,intAccountIdOverride  
-            ,intLocationSegmentOverrideId  
-            ,intLOBSegmentOverrideId  
-            ,intCompanySegmentOverrideId
-          FROM cte   
-          )  
-       
-          SELECT   
-            [strTransactionId]    
-          ,[intTransactionId]    
-          ,[intAccountId] = CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit', 'CM Swaps') THEN BankTransferAccount.AccountId ELSE G.AccountId END  
-          ,[strDescription]    
-          ,[dtmTransactionDate]   
-          ,[dblDebit]      
-          ,[dblCredit]
-          ,[dtmDate]      
-          ,[ysnIsUnposted]    
-          ,[intConcurrencyId]    
-          ,[intCurrencyId] 
-          ,[intUserId]     
-          ,[intEntityId]     
-          ,[dtmDateEntered]    
-          ,[strBatchId]   
-          ,[strCode]      
-          ,[strJournalLineDescription]   
-          ,[intJournalLineNo]    
-          ,[strTransactionType]   
-          ,[strTransactionForm]  
-          ,strModuleName = 'General Ledger'  
-          ,intAccountIdOverride  
-          ,intLocationSegmentOverrideId  
-          ,intLOBSegmentOverrideId  
-          ,intCompanySegmentOverrideId
-          ,A.strModule
-          ,OffSet
-          INTO #iRelyPostGLEntries
-          FROM cte1 A  
-          OUTER APPLY (  
-          SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable(intAccountIdOverride) f   
-          WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
-          AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
-          AND f.OffSet  = A.OffSet  
-          )G  
-          OUTER APPLY (  
-          SELECT TOP 1 AccountId from @tblBankTransferAccounts f   
-          WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
-          AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
-          AND f.Offset = A.OffSet  
-          ) BankTransferAccount  
 
--- Insert Unreealized Gain/Loss  (Realized for GL using fnGLGetRevalueAccountTable) with offset
-          INSERT INTO @RevalTable(  
-           [strTransactionId]  
-          ,[intTransactionId]  
-          ,[intAccountId]  
-          ,[strDescription]  
-          ,[dtmTransactionDate]  
-          ,[dblDebit]  
-          ,[dblCredit]
-          ,[dtmDate]  
-          ,[ysnIsUnposted]  
-          ,[intConcurrencyId]   
-          ,[intCurrencyId]  
-          ,[intUserId]  
-          ,[intEntityId]     
-          ,[dtmDateEntered]  
-          ,[strBatchId]  
-          ,[strCode]     
-          ,[strJournalLineDescription]  
-          ,[intJournalLineNo]  
-          ,[strTransactionType]  
-          ,[strTransactionForm]  
-          ,strModuleName  
-          ,intAccountIdOverride  
-          ,intLocationSegmentOverrideId  
-          ,intLOBSegmentOverrideId  
-          ,intCompanySegmentOverrideId
-          ) 
-          SELECT
-           [strTransactionId]  
-          ,[intTransactionId]  
-          ,[intAccountId]  
-          ,[strDescription]  
-          ,[dtmTransactionDate]  
-          ,[dblDebit]  
-          ,[dblCredit]
-          ,[dtmDate]  
-          ,[ysnIsUnposted]  
-          ,[intConcurrencyId]   
-          ,[intCurrencyId]  
-          ,[intUserId]  
-          ,[intEntityId]     
-          ,[dtmDateEntered]  
-          ,[strBatchId]  
-          ,[strCode]     
-          ,[strJournalLineDescription]  
-          ,[intJournalLineNo]  
-          ,[strTransactionType]  
-          ,[strTransactionForm]  
-          ,strModuleName  
-          ,intAccountIdOverride  
-          ,intLocationSegmentOverrideId  
-          ,intLOBSegmentOverrideId  
-          ,intCompanySegmentOverrideId
-          FROM #iRelyPostGLEntries
+          IF @strTransactionType = 'GL'
+          BEGIN
+                INSERT INTO @RevalTable (  
+                  [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
+                  ,[dblDebit]  
+                  ,[dblCredit]
+                  ,[dblExchangeRate] 
+                  ,[dblDebitForeign]
+                  ,[dblCreditForeign] 
+                  ,[dtmDate]  
+                  ,[ysnIsUnposted]  
+                  ,[intConcurrencyId]   
+                  ,[intCurrencyId]  
+                  ,[intUserId]  
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]  
+                  ,[strBatchId]  
+                  ,[strCode]     
+                  ,[strJournalLineDescription]  
+                  ,[intJournalLineNo]  
+                  ,[strTransactionType]  
+                  ,[strTransactionForm]  
+                  ,strModuleName  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId  
+                  )  
+                  SELECT   
+                    [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
+                  ,[dblCredit]  
+                  ,[dblDebit]
+                  ,[dblExchangeRate] 
+                  ,[dblDebitForeign]
+                  ,[dblCreditForeign] 
+                  ,[dtmDate]
+                  ,[ysnIsUnposted]  
+                  ,[intConcurrencyId]   
+                  ,[intCurrencyId]  
+                  ,[intUserId]  
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]  
+                  ,[strBatchId]  
+                  ,[strCode]     
+                  ,[strJournalLineDescription] 
+                  ,[intJournalLineNo]  
+                  ,[strTransactionType]  
+                  ,[strTransactionForm]  
+                  ,strModuleName  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId  
+                  FROM dbo.fnGLCreateGLPostRevaluEntries(@intConsolidationId,@strPeriod,@dateNow,@strPostBatchId,@defaultType,@intEntityId)
+          END
+          ELSE
+          BEGIN
+                  WITH cte as(  
+                  SELECT   
+                    [strTransactionId]  = B.strConsolidationNumber  
+                  ,[intTransactionId]  = B.intConsolidationId  
+                  ,[strDescription]  = A.strTransactionId   
+                  ,[dtmTransactionDate] = B.dtmDate  
+                  ,[dblDebit]    = ISNULL(CASE WHEN dblUnrealizedGain < 0 THEN ABS(dblUnrealizedGain)  
+                          WHEN dblUnrealizedLoss < 0 THEN 0  
+                          ELSE dblUnrealizedLoss END,0)  
+                  ,[dblCredit]   = ISNULL(CASE WHEN dblUnrealizedLoss < 0 THEN ABS(dblUnrealizedLoss)  
+                          WHEN dblUnrealizedGain < 0 THEN 0  
+                          ELSE dblUnrealizedGain END,0)
+                  ,[dblExchangeRate] = dblNewForexRate
+                  ,[dblDebitForeign] = 0
+                  ,[dblCreditForeign] = 0
+                  ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
+                  ,[ysnIsUnposted]  = 0   
+                  ,[intConcurrencyId]  = 1  
+                  ,[intDetailCurrencyId]  = ISNULL(A.intCurrencyId, B.intFunctionalCurrencyId)
+                  ,[intCurrencyId]  = B.intFunctionalCurrencyId
+                  ,[intUserId]   = 0  
+                  ,[intEntityId]   = @intEntityId    
+                  ,[dtmDateEntered]  = @dateNow  
+                  ,[strBatchId]   = @strPostBatchId  
+                  ,[strCode]    = 'REVAL'  
+                  ,[intJournalLineNo]  = A.[intConsolidationDetailId]     
+                  ,[strTransactionType] = 'Revalue Currency'  
+                  ,[strTransactionForm] = 'Revalue Currency'  
+                  ,B.dtmReverseDate  
+                  ,strModule = B.strTransactionType  
+                  ,A.strType  
+                  ,Offset = 0  
+                  ,A.intAccountIdOverride  
+                  ,A.intLocationSegmentOverrideId  
+                  ,A.intLOBSegmentOverrideId  
+                  ,A.intCompanySegmentOverrideId
+                  FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B   
+                  ON A.intConsolidationId = B.intConsolidationId  
+                  WHERE B.intConsolidationId = @intConsolidationId  
+                  ),cte1 AS  
+                  (  
+                  SELECT   
+                    [strTransactionId]    
+                    ,[intTransactionId]    
+                    ,[strDescription]    
+                    ,[dtmTransactionDate]   
+                    ,[dblDebit]   
+                    ,[dblCredit]
+                    ,[dblExchangeRate] 
+                    ,[dblDebitForeign]
+                    ,[dblCreditForeign]
+                    ,[dtmDate]      
+                    ,[ysnIsUnposted]    
+                    ,[intConcurrencyId]    
+                    ,[intDetailCurrencyId]
+                    ,[intCurrencyId]    
+                    ,[intUserId]     
+                    ,[intEntityId]     
+                    ,[dtmDateEntered]    
+                    ,strBatchId  
+                    ,[strCode]      
+                    ,[strJournalLineDescription] = 'Revalue '+ @strTransactionType + ' '  + @strPeriod   
+                    ,[intJournalLineNo]    
+                    ,[strTransactionType]   
+                    ,[strTransactionForm]  
+                    ,strModule   
+                    ,OffSet = 0  
+                    ,strType = ISNULL(strType,@defaultType)  
+                    ,intAccountIdOverride  
+                    ,intLocationSegmentOverrideId  
+                    ,intLOBSegmentOverrideId  
+                    ,intCompanySegmentOverrideId
+                  FROM  
+                  cte   
+                  UNION ALL  
+                  SELECT   
+                    [strTransactionId]    
+                    ,[intTransactionId]    
+                    ,[strDescription]    
+                    ,[dtmTransactionDate]   
+                    ,[dblDebit]    = dblCredit      
+                    ,[dblCredit]   = dblDebit  
+                    ,[dblExchangeRate] 
+                    ,[dblDebitForeign]    = dblCreditForeign    
+                    ,[dblCreditForeign]   = dblDebitForeign
+                    ,[dtmDate]  
+                    ,[ysnIsUnposted]    
+                    ,[intConcurrencyId]   
+                    ,[intDetailCurrencyId]  
+                    ,[intCurrencyId]    
+                    ,[intUserId]     
+                    ,[intEntityId]     
+                    ,[dtmDateEntered]   
+                    ,strBatchId   
+                    ,[strCode]      
+                    ,[strJournalLineDescription] = 'Offset Revalue '+ @strTransactionType + ' '  + @strPeriod   
+                    ,[intJournalLineNo]    
+                    ,[strTransactionType]   
+                    ,[strTransactionForm]   
+                    ,strModule  
+                    ,OffSet = 1  
+                    ,strType = ISNULL(strType,@defaultType)  
+                    ,intAccountIdOverride  
+                    ,intLocationSegmentOverrideId  
+                    ,intLOBSegmentOverrideId  
+                    ,intCompanySegmentOverrideId
+                  FROM cte   
+                  )  
+              
+                  SELECT   
+                    [strTransactionId]    
+                  ,[intTransactionId]    
+                  ,[intAccountId] = CASE WHEN A.strModule IN ('CM Forwards', 'CM In-Transit', 'CM Swaps') THEN BankTransferAccount.AccountId ELSE G.AccountId END  
+                  ,[strDescription]    
+                  ,[dtmTransactionDate]   
+                  ,[dblDebit]      
+                  ,[dblCredit]
+                  ,[dblExchangeRate] 
+                  ,[dblDebitForeign]      
+                  ,[dblCreditForeign]
+                  ,[dtmDate]      
+                  ,[ysnIsUnposted]    
+                  ,[intConcurrencyId]    
+                  ,[intCurrencyId] 
+                  ,[intUserId]     
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]    
+                  ,[strBatchId]   
+                  ,[strCode]      
+                  ,[strJournalLineDescription]   
+                  ,[intJournalLineNo]    
+                  ,[strTransactionType]   
+                  ,[strTransactionForm]  
+                  ,strModuleName = 'General Ledger'  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId
+                  ,A.strModule
+                  ,OffSet
+                  INTO #iRelyPostGLEntries
+                  FROM cte1 A  
+                  OUTER APPLY (  
+                  SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable(intAccountIdOverride) f   
+                  WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
+                  AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
+                  AND f.OffSet  = A.OffSet  
+                  )G  
+                  OUTER APPLY (  
+                  SELECT TOP 1 AccountId from @tblBankTransferAccounts f   
+                  WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
+                  AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
+                  AND f.Offset = A.OffSet  
+                  ) BankTransferAccount  
+
+        -- Insert Unreealized Gain/Loss  (Realized for GL using fnGLGetRevalueAccountTable) with offset
+                  INSERT INTO @RevalTable(  
+                  [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
+                  ,[dblDebit]  
+                  ,[dblCredit]
+                  ,[dblExchangeRate]  
+                  ,[dblDebitForeign]
+                  ,[dblCreditForeign] 
+                  ,[dtmDate]  
+                  ,[ysnIsUnposted]  
+                  ,[intConcurrencyId]   
+                  ,[intCurrencyId]  
+                  ,[intUserId]  
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]  
+                  ,[strBatchId]  
+                  ,[strCode]     
+                  ,[strJournalLineDescription]  
+                  ,[intJournalLineNo]  
+                  ,[strTransactionType]  
+                  ,[strTransactionForm]  
+                  ,strModuleName  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId
+                  ) 
+                  SELECT
+                  [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
+                  ,[dblDebit]  
+                  ,[dblCredit]
+                  ,[dblExchangeRate] 
+                  ,[dblDebitForeign]
+                  ,[dblCreditForeign] 
+                  ,[dtmDate]  
+                  ,[ysnIsUnposted]  
+                  ,[intConcurrencyId]   
+                  ,[intCurrencyId]  
+                  ,[intUserId]  
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]  
+                  ,[strBatchId]  
+                  ,[strCode]     
+                  ,[strJournalLineDescription]  
+                  ,[intJournalLineNo]  
+                  ,[strTransactionType]  
+                  ,[strTransactionForm]  
+                  ,strModuleName  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId
+                  FROM #iRelyPostGLEntries
 
 
---Insert Reverse Entries ( Except GL )
-          INSERT INTO @RevalTable (  
-            [strTransactionId]  
-          ,[intTransactionId]  
-          ,[intAccountId]  
-          ,[strDescription]  
-          ,[dtmTransactionDate]  
-          ,[dblDebit]  
-          ,[dblCredit]
-          ,[dtmDate]  
-          ,[ysnIsUnposted]  
-          ,[intConcurrencyId]   
-          ,[intCurrencyId]  
-          ,[intUserId]  
-          ,[intEntityId]     
-          ,[dtmDateEntered]  
-          ,[strBatchId]  
-          ,[strCode]     
-          ,[strJournalLineDescription]  
-          ,[intJournalLineNo]  
-          ,[strTransactionType]  
-          ,[strTransactionForm]  
-          ,strModuleName  
-          ,intAccountIdOverride  
-          ,intLocationSegmentOverrideId  
-          ,intLOBSegmentOverrideId  
-          ,intCompanySegmentOverrideId  
-          )  
-          SELECT   
-            [strTransactionId]  
-          ,[intTransactionId]  
-          ,[intAccountId]  
-          ,[strDescription]  
-          ,[dtmTransactionDate]  
-          ,[dblCredit]  
-          ,[dblDebit]
-          ,[dtmDate] = U.dtmReverseDate  
-          ,[ysnIsUnposted]  
-          ,[intConcurrencyId]   
-          ,[intCurrencyId]  
-          ,[intUserId]  
-          ,[intEntityId]     
-          ,[dtmDateEntered]  
-          ,[strBatchId]  
-          ,[strCode]     
-          ,[strJournalLineDescription] = CASE WHEN Offset = 1 THEN  'Reverse Offset Revalue '+ @strTransactionType + ' '  + @strPeriod ELSE 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod END
-          ,[intJournalLineNo]  
-          ,[strTransactionType]  
-          ,[strTransactionForm]  
-          ,strModuleName  
-          ,intAccountIdOverride  
-          ,intLocationSegmentOverrideId  
-          ,intLOBSegmentOverrideId  
-          ,intCompanySegmentOverrideId  
-          FROM #iRelyPostGLEntries
-          OUTER APPLY(  
-          SELECT dtmReverseDate FROM tblGLRevalue  WHERE intConsolidationId = @intConsolidationId  
-          )U  
-		      WHERE strModule NOT IN ('GL', 'CM')  
+        --Insert Reverse Entries ( Except GL )
+                  INSERT INTO @RevalTable (  
+                    [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
+                  ,[dblDebit]  
+                  ,[dblCredit]
+                  ,[dblExchangeRate] 
+                  ,[dblDebitForeign]
+                  ,[dblCreditForeign] 
+                  ,[dtmDate]  
+                  ,[ysnIsUnposted]  
+                  ,[intConcurrencyId]   
+                  ,[intCurrencyId]  
+                  ,[intUserId]  
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]  
+                  ,[strBatchId]  
+                  ,[strCode]     
+                  ,[strJournalLineDescription]  
+                  ,[intJournalLineNo]  
+                  ,[strTransactionType]  
+                  ,[strTransactionForm]  
+                  ,strModuleName  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId  
+                  )  
+                  SELECT   
+                    [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
+                  ,[dblCredit]  
+                  ,[dblDebit]
+                  ,[dblExchangeRate] 
+                  ,[dblDebitForeign]
+                  ,[dblCreditForeign] 
+                  ,[dtmDate] = U.dtmReverseDate  
+                  ,[ysnIsUnposted]  
+                  ,[intConcurrencyId]   
+                  ,[intCurrencyId]  
+                  ,[intUserId]  
+                  ,[intEntityId]     
+                  ,[dtmDateEntered]  
+                  ,[strBatchId]  
+                  ,[strCode]     
+                  ,[strJournalLineDescription] = CASE WHEN Offset = 1 THEN  'Reverse Offset Revalue '+ @strTransactionType + ' '  + @strPeriod ELSE 'Reverse Revalue '+ @strTransactionType + ' '  + @strPeriod END
+                  ,[intJournalLineNo]  
+                  ,[strTransactionType]  
+                  ,[strTransactionForm]  
+                  ,strModuleName  
+                  ,intAccountIdOverride  
+                  ,intLocationSegmentOverrideId  
+                  ,intLOBSegmentOverrideId  
+                  ,intCompanySegmentOverrideId  
+                  FROM #iRelyPostGLEntries
+                  OUTER APPLY(  
+                  SELECT dtmReverseDate FROM tblGLRevalue  WHERE intConsolidationId = @intConsolidationId  
+                  )U  
+                  WHERE strModule <> 'CM'  
+          END
     
           DECLARE @dtmReverseDate DATETIME  
           SELECT TOP 1 @dtmReverseDate = dtmReverseDate , @strMessage = 'Forex Gain/Loss account setting is required in Company Configuration screen for ' +  strTransactionType + ' transaction type.' FROM tblGLRevalue WHERE intConsolidationId = @intConsolidationId
           IF EXISTS(Select TOP 1 1 FROM @RevalTable WHERE intAccountId IS NULL)  
-          BEGIN  
+          BEGIN
             GOTO _error
           END  
 
@@ -404,6 +522,9 @@ DECLARE
    ,[dtmTransactionDate]  
    ,[dblDebit]  
    ,[dblCredit]
+   ,[dblExchangeRate] 
+   ,[dblDebitForeign]
+   ,[dblCreditForeign] 
    ,[dtmDate]  
    ,[ysnIsUnposted]  
    ,[intConcurrencyId]   
@@ -427,6 +548,9 @@ DECLARE
    ,[dtmTransactionDate]  
    ,[dblCredit]   
    ,[dblDebit]
+   ,[dblExchangeRate] 
+   ,[dblDebitForeign]
+   ,[dblCreditForeign] 
    ,[dtmDate]      
    ,[ysnIsUnposted] = 1  
    ,[intConcurrencyId]    
@@ -446,9 +570,29 @@ DECLARE
   AND ysnIsUnposted = 0  
   
  END  
+
+
+declare @OverrideTableType [OverrideTableType]
+INSERT INTO @OverrideTableType(
+    intAccountId, 
+    intAccountIdOverride, 
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+)
+select intAccountId, 
+    intAccountIdOverride,
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+from @RevalTable
+GROUP BY intAccountId,intAccountIdOverride,
+    intLocationSegmentOverrideId,
+    intLOBSegmentOverrideId,
+    intCompanySegmentOverrideId
+
   IF @ysnRecap = 0   
   BEGIN  
-  
    INSERT INTO @RecapTable  (
     dtmDate,  
     strBatchId,  
@@ -458,6 +602,8 @@ DECLARE
     dblDebit,  
     dblCredit,
     dblExchangeRate,
+    dblDebitForeign,
+    dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -483,12 +629,14 @@ DECLARE
    SELECT 
     dtmDate,  
     strBatchId,  
-    intAccountId,  
+    intAccountId =B.intNewAccountIdOverride,  
     strDescription, 
     dtmTransactionDate,
     dblDebit,  
     dblCredit,
-    1,
+    dblExchangeRate,
+    dblDebitForeign,
+    dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -507,10 +655,21 @@ DECLARE
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
     intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
-    from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
+    B.strNewAccountIdOverride,  
+    B.intNewAccountIdOverride,  
+    B.strOverrideAccountError 
+    from --nGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
+	@RevalTable A
+	OUTER APPLY(
+		SELECT 
+		fn.intNewAccountIdOverride,
+		fn.strOverrideAccountError,
+		fn.strNewAccountIdOverride
+		from
+		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
+		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+	
+	)B
      
       
     IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
@@ -542,6 +701,8 @@ DECLARE
     dblDebit,  
     dblCredit,
     dblExchangeRate,
+    dblDebitForeign,
+    dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -568,12 +729,14 @@ DECLARE
    SELECT 
     dtmDate,  
     strBatchId,  
-    intAccountId,  
+    intAccountId =B.intNewAccountIdOverride,  
     strDescription, 
     dtmTransactionDate,  
     dblDebit,  
     dblCredit, 
-    1,
+    dblExchangeRate,
+    dblDebitForeign,
+    dblCreditForeign,
     strCode, 
     intCurrencyId,  
     dtmDateEntered,  
@@ -592,11 +755,23 @@ DECLARE
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
     intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
-   from fnGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A  
-  
+    B.strNewAccountIdOverride,  
+    B.intNewAccountIdOverride,  
+    B.strOverrideAccountError
+	FROM
+	@RevalTable A
+	OUTER APPLY(
+		SELECT 
+		fn.intNewAccountIdOverride,
+		fn.strOverrideAccountError,
+		fn.strNewAccountIdOverride
+		from
+		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
+		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+	)B
+
+ 
+
    EXEC uspGLPostRecap @RecapTable, @intEntityId  
   
    IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' )  

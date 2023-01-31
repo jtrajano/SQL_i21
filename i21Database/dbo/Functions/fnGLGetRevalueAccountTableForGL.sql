@@ -9,7 +9,7 @@ BEGIN
 
 
     DECLARE @out INT
-    IF @ysnOffset = 1
+    IF @ysnOffset = 0
     BEGIN
         IF @intAccountCategoryId = 27  --inventory
             SELECT @out = intInventoryRealizedId FROM tblSMMultiCurrency --REPLACE WITH NEW SETTING
