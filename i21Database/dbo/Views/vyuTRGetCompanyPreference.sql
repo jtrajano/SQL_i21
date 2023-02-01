@@ -43,6 +43,7 @@ SELECT CP.intCompanyPreferenceId
 	, CP.intAdjustmentAccountId
 	, GLA.strAccountId strAdjustmentAccountId
 	, CP.dblAdjustmentTolerance
+	, CP.ysnIncludeSurchargeInQuote
 FROM tblTRCompanyPreference CP
 LEFT JOIN tblSMImportFileHeader Import on Import.intImportFileHeaderId = CP.intRackPriceImportMappingId
 LEFT JOIN tblSMImportFileHeader ImportBol ON ImportBol.intImportFileHeaderId = CP.intBolImportFormatId 

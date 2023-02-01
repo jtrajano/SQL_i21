@@ -23,10 +23,10 @@ SELECT TOP 100 PERCENT intQuoteDetailId = ISNULL(QD.intQuoteDetailId, 0)
 	--						WHEN CustomerTransports.ysnShowTaxDetail = 0 AND CustomerTransports.ysnShowFeightDetail = 1 THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0) - ISNULL(QD.dblFreightRate, 0) END)--Rollup
 
 	, dblQuotePrice = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Roll-up' THEN ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
-							ELSE ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0) END)
+							ELSE ISNULL(QD.dblQuotePrice, 0) - (ISNULL(QD.dblFreightRate, 0) + (CASE WHEN TransportsCompanyPreference.ysnIncludeSurchargeInQuote = 1 THEN ISNULL(dblSurcharge, 0) ELSE 0 END)) END)
 
 	--, dblTotalPrice = ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0)
-	, dblTotalPrice = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Exclude' THEN ISNULL(QD.dblQuotePrice, 0) - ISNULL(QD.dblFreightRate, 0)
+	, dblTotalPrice = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Exclude' THEN ISNULL(QD.dblQuotePrice, 0) - (ISNULL(QD.dblFreightRate, 0) + (CASE WHEN TransportsCompanyPreference.ysnIncludeSurchargeInQuote = 1 THEN ISNULL(dblSurcharge, 0) ELSE 0 END))
 							ELSE ISNULL(QD.dblQuotePrice, 0) + ISNULL(QD.dblTax, 0) END)
 	, ysnHasEmailSetup = CASE WHEN (SELECT COUNT(*) 
 									FROM vyuARCustomerContacts CC 
@@ -43,8 +43,11 @@ SELECT TOP 100 PERCENT intQuoteDetailId = ISNULL(QD.intQuoteDetailId, 0)
 	--, CustomerTransports.ysnShowFeightDetail
 	, ysnShowFeightDetail = (CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Itemize' THEN convert(bit,1) ELSE convert(bit,0) END)
 	, dblFreight = ISNULL(QD.dblFreightRate, 0)
+	, dblSurcharge = ISNULL(QD.dblFreightRate, 0)
+	, ysnShowSurcharge = CASE WHEN ((CASE WHEN CustomerTransports.strShowTaxFeeDetail = 'Itemize' THEN convert(bit,1) ELSE convert(bit,0) END) = 1 AND ISNULL(TransportsCompanyPreference.ysnIncludeSurchargeInQuote, 0) = 1) THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM tblTRQuoteHeader QH
 CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) CompanySetup
+CROSS APPLY (SELECT TOP 1 * FROM tblTRCompanyPreference) TransportsCompanyPreference
 LEFT JOIN tblTRQuoteDetail QD ON QD.intQuoteHeaderId = QH.intQuoteHeaderId
 LEFT JOIN vyuARCustomerSearch AR ON QH.intEntityCustomerId = AR.intEntityId
 LEFT JOIN tblARCustomerRackQuoteHeader CustomerTransports ON CustomerTransports.intEntityCustomerId = AR.intEntityId
