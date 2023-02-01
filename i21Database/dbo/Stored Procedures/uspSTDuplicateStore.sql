@@ -223,6 +223,22 @@ BEGIN TRANSACTION
 						--,strHandheldScannerServerFolderPath
 						,intConcurrencyId
 						,ysnLotterySetupMode
+						,ysnActive
+						,ysnConsignmentStore
+						,ysnConsStopAutoProcessIfValuesDontMatch
+						,ysnConsMeterReadingsForDollars
+						,ysnConsAddOutsideFuelDiscounts
+						,dblConsCommissionRawMarkup
+						,dblConsCommissionDealerPercentage
+						,ysnConsBankDepositDraft
+						,intConsFuelOverShortItemId
+						,intConsBankDepositDraftId
+						,intConsDelearCommissionARAccountId
+						,intConsDealerCommissionItemId
+						,dblConsMatchTolerance
+						,intConsFuelDiscountItemId
+						,ysnConsIncludeTaxesInCostBasis
+						,ysnConsIncludeFreightChargesInCostBasis
 					)
 					SELECT TOP 1
 						@newStoreTransactionId
@@ -350,6 +366,22 @@ BEGIN TRANSACTION
 						--,intATMFundWithdrawalItemId
 						,intConcurrencyId
 						,ysnLotterySetupMode
+						,ysnActive
+						,ysnConsignmentStore
+						,ysnConsStopAutoProcessIfValuesDontMatch
+						,ysnConsMeterReadingsForDollars
+						,ysnConsAddOutsideFuelDiscounts
+						,dblConsCommissionRawMarkup
+						,dblConsCommissionDealerPercentage
+						,ysnConsBankDepositDraft
+						,intConsFuelOverShortItemId
+						,intConsBankDepositDraftId
+						,intConsDelearCommissionARAccountId
+						,intConsDealerCommissionItemId
+						,dblConsMatchTolerance
+						,intConsFuelDiscountItemId
+						,ysnConsIncludeTaxesInCostBasis
+						,ysnConsIncludeFreightChargesInCostBasis
 					FROM tblSTStore
 					WHERE ISNULL(intStoreId,0) = ISNULL(@intStoreId,0)
 
@@ -581,8 +613,13 @@ BEGIN TRANSACTION
 					DECLARE @intRegisterId INT
 					SET @intRegisterId = SCOPE_IDENTITY()
 
+					DECLARE @NewRegisterName NVARCHAR(50)
+					SELECT @NewRegisterName = strRegisterName
+					FROM tblSTRegister
+					WHERE intRegisterId = @intRegisterId
+
 					UPDATE tblSTStore 
-					SET intRegisterId = NULL
+					SET intRegisterId = @intRegisterId, strRegisterName = @NewRegisterName
 					WHERE intStoreId = @NewStoreId
 
 					DECLARE @intOldRegisterId INT
