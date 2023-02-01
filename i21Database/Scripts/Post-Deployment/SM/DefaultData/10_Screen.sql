@@ -639,40 +639,20 @@ GO
 	BEGIN
 		UPDATE tblSMScreen SET strScreenName = 'Amendment' WHERE strNamespace = 'ContractManagement.view.AmendmentSearch'
 	END
-	ELSE
-	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [ysnDocumentSource], [ysnAvailable], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Amendment', N'Amendment', N'ContractManagement.view.AmendmentSearch', N'Contract Management', NULL, NULL, NULL, NULL, NULL, 1, 1, N'Contract Management')
-	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.GardenMark')
 	BEGIN
 		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Quality.view.GardenMark'
-	END
-	ELSE
-	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [ysnDocumentSource], [ysnAvailable], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Garden Mark', N'Garden Mark', N'Quality.view.GardenMark', N'Quality', NULL, NULL, NULL, NULL, NULL, 1, 1, N'Quality')
 	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ManufacturingCell')
 	BEGIN
 		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Manufacturing.view.ManufacturingCell'
 	END
-	ELSE
-	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [ysnDocumentSource], [ysnAvailable], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Manufacturing Cell', N'Manufacturing Cell', N'Manufacturing.view.ManufacturingCell', N'Manufacturing', NULL, NULL, NULL, NULL, NULL, 1, 1, N'Manufacturing')
-	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ManufacturingProcess')
 	BEGIN
 		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Manufacturing.view.ManufacturingProcess'
-	END
-	ELSE
-	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [ysnDocumentSource], [ysnAvailable], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Manufacturing Process', N'Manufacturing Process', N'Manufacturing.view.ManufacturingProcess', N'Manufacturing', NULL, NULL, NULL, NULL, NULL, 1, 1, N'Manufacturing')
 	END
 
 	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory')
