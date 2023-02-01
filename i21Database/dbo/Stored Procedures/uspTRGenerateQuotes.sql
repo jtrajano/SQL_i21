@@ -27,6 +27,9 @@ BEGIN TRY
 		[strQuoteNumber] NVARCHAR(200)
 	)
 
+	DECLARE @ysnIncludeSurcharge BIT
+	SELECT TOP 1 @ysnIncludeSurcharge = ISNULL(ysnIncludeSurchargeInQuote, 0) FROM tblTRCompanyPreference
+
 	IF(@strSource = 'AUTO')
 	BEGIN
 		INSERT INTO @tmpQuotes
@@ -122,6 +125,7 @@ BEGIN TRY
 				, dblDeviationAmount
 				, dblTempAdjustment
 				, dblFreightRate
+				, dblSurcharge
 				, dblQuotePrice
 				, dblMargin
 				, dblQtyOrdered
@@ -136,6 +140,7 @@ BEGIN TRY
 				, QD.intItemId
 				, SP.intEntityVendorId
 				, QD.intSupplyPointId
+				, NULL
 				, NULL
 				, NULL
 				, NULL
@@ -201,6 +206,7 @@ BEGIN TRY
 					, @Tax NUMERIC(18,6) = 0
 					, @ZipCode NVARCHAR(20)	= NULL
 					, @ItemUOMId INT = NULL	
+					, @dblSurchargeRate NUMERIC(18,6) = 0
 
 				SELECT TOP 1 @QuoteDetailId = intQuoteDetailId
 					, @QuoteHeaderId = intQuoteHeaderId
@@ -214,6 +220,7 @@ BEGIN TRY
 					, @RackPrice = dblRackPrice
 					, @DeviationAmount = dblDeviationAmount
 					, @FreightRate = dblFreightRate
+					, @SurchargeRate = dblSurcharge
 					, @QuotePrice = dblQuotePrice
 					, @Margin = dblMargin
 					, @QtyOrdered = dblQtyOrdered
@@ -258,8 +265,10 @@ BEGIN TRY
 					 @ysnFreightOnly = NULL,
 					 @dblMinimumUnitsIn = NULL,
 					 @dblMinimumUnitsOut = NULL
+ 
+				SET @dblSurchargeRate = CASE WHEN (@ysnIncludeSurcharge = 1 AND ISNULL(@SurchargeRate, 0) != 0 AND @FreightRate != 0) THEN @FreightRate * (@SurchargeRate / 100) ELSE 0 END
 
-				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate
+				SET @QuotePrice = @RackPrice + @DeviationAmount + @FreightRate + @dblSurchargeRate
 				SET @Margin = @QuotePrice - @RackPrice
 				SET @ExtProfit = @QtyOrdered * @Margin
 
@@ -351,6 +360,7 @@ BEGIN TRY
 					, dblDeviationAmount = @DeviationAmount
 					, dblTempAdjustment = 0.000000
 					, dblFreightRate = ISNULL(@FreightRate, 0.000000)
+					, dblSurcharge =  @dblSurchargeRate
 					, dblQuotePrice = @QuotePrice
 					, dblMargin = @Margin
 					, dblQtyOrdered = @QtyOrdered
