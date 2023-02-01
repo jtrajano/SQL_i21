@@ -1408,6 +1408,10 @@
     <Build Include="dbo\Tables\tblMFRecallPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecallPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessDirectShipmentRiskSummaryLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessTransferSettlements.sql" />
+    <Build Include="dbo\User Defined Types\TransferFromSettlementStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TransferSettlementReferenceStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TransferToSettlementStagingTable.sql" />
   <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
   <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
   <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
