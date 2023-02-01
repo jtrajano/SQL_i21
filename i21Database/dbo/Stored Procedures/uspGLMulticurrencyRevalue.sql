@@ -379,7 +379,7 @@ SELECT
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
-WHERE strTransactionDate <= @dtmDate
+WHERE dtmDate <= @dtmDate
 --AND ISNULL(dblForexRate, 1) <> 1
 END
 

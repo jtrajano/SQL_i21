@@ -26,6 +26,7 @@ SELECT   strTransactionType
 			,dblDebit				=	0
 			,dblCredit				=	0
 			,intAccountId			= 	GJ.intAccountId
+			,GJ.dtmDate	
 FROM tblGLDetail GJ JOIN vyuGLAccountDetail COA ON COA.intAccountId = GJ.intAccountId
 LEFT JOIN tblSMCompanyPreference CP on CP.intDefaultCurrencyId = GJ.intCurrencyId
 JOIN tblSMCurrency SM ON SM.intCurrencyID = GJ.intCurrencyId
