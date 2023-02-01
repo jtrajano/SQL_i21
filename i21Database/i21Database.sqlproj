@@ -1292,6 +1292,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInventoryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInventoryHistory.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
