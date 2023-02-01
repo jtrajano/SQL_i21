@@ -30,7 +30,9 @@ CREATE TABLE [dbo].[tblMBILPickupDetail]
 	[intShiftId] [int] NULL,
 	[ysnPickup] bit default 0 NULL,
 	[intDispatchOrderDetailId] int NULL,
-	[intConcurrencyId] [int] DEFAULT(1) NULL
- CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED (intPickupDetailId),
- CONSTRAINT [FK_tblMBILPickupDetail_tblMBILLoadHeader] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblMBILLoadHeader]([intLoadHeaderId])
+	[intConcurrencyId] [int] DEFAULT(1) NULL,
+	[intDispatchOrderRouteId] INT NULL
+	CONSTRAINT [PK_tblMBILPickupDetail] PRIMARY KEY CLUSTERED (intPickupDetailId), 
+    CONSTRAINT [FK_tblMBILPickupDetail_tblMBILLoadHeader] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblMBILLoadHeader]([intLoadHeaderId]),
+	CONSTRAINT [FK_tblMBILPickupDetail_tblLGDispatchRouteId] FOREIGN KEY ([intDispatchOrderRouteId]) REFERENCES [tblLGDispatchOrderRoute]([intDispatchOrderRouteId]) ON DELETE SET NULL
 )
