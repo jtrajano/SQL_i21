@@ -61,8 +61,8 @@ BEGIN TRANSACTION
 		,dblPriceProfileRate
 		,dblPriceIndexRate
 		,dtmPriceIndexDate
-		,intContractDetailId
-		,intContractId
+		--,intContractDetailId
+		--,intContractId
 		,dblQuantity
 		,dtmBillingDate
 		,dtmTransactionDate
@@ -136,8 +136,8 @@ BEGIN TRANSACTION
 		,dblPriceProfileRate
 		,dblPriceIndexRate
 		,dtmPriceIndexDate
-		,intContractDetailId
-		,intContractId
+		--,intContractDetailId
+		--,intContractId
 		,dblQuantity
 		,dtmBillingDate
 		,dtmTransactionDate
@@ -267,7 +267,50 @@ BEGIN TRANSACTION
 		,@strFromPriceMethod			= @strAuditPriceMethod			
 		,@strFromPriceBasis				= @strAuditPriceBasis			
 		,@strFromPriceProfileId			= @strAuditPriceProfileId		
-		,@strFromPriceIndexId			= @strAuditPriceIndexId			
+		,@strFromPriceIndexId			= @strAuditPriceIndexId		
+
+
+	DECLARE @strPriceMethod			NVARCHAR(100)
+	SELECT TOP 1 
+	 @strPriceMethod		   =  strPriceMethod
+	FROM tblCFTransaction
+	WHERE intTransactionId = @newId
+
+
+	IF(@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
+	BEGIN
+		UPDATE tblCFTransaction SET strPriceMethod = '' WHERE intTransactionId = @newId
+		EXEC uspCFRunRecalculateTransaction 
+		 @TransactionId			 = 		@newId
+		,@ContractsOverfill		 = 		1
+		,@UserId				 = 		@UserId
+
+	END
+
+
+	--DECLARE @strPriceMethod			NVARCHAR(100)
+	--DECLARE @intContractHeaderId	INT
+	--DECLARE @intContractDetailId	INT
+	--DECLARE @dblQuantity			NUMERIC(18,6) 
+	
+	--SELECT TOP 1 
+	-- @strPriceMethod		   =  strPriceMethod
+	--,@intContractHeaderId	   =  intContractId
+	--,@intContractDetailId	   =  intContractDetailId
+	--,@dblQuantity			   =  dblQuantity
+	--FROM tblCFTransaction
+	--WHERE intTransactionId = @newId
+
+	
+
+
+	--EXEC uspCTItemContractUpdateScheduleQuantity
+	--				@intItemContractDetailId = @intPrcItemContractDetailId,
+	--				@dblQuantityToUpdate = @dblCalcQuantity,
+	--				@intUserId = 0,
+	--				@intTransactionDetailId = @Pk,
+	--				@strScreenName = 'Card Fueling Transaction Screen'
+
 
 
 	COMMIT TRANSACTION

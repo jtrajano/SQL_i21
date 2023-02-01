@@ -534,34 +534,34 @@ BEGIN
 
 	SET @dblPriceZeroQty = @dblPrice
 
-	IF(@transactionContractDetailId > 0 OR @transactionItemContractDetailId > 0)
-	BEGIN 
+	 IF(@transactionContractDetailId > 0 OR @transactionItemContractDetailId > 0)
+	 BEGIN 
 
-		SET @transactionCurrentQty = @transactionCurrentQty * -1
+	 	SET @transactionCurrentQty = @transactionCurrentQty * -1
 
-		IF(LOWER(@transactionPriceMethod) = 'item contracts' OR LOWER(@transactionPriceMethod) = 'item contract pricing')
-		BEGIN
-			print 'itc'
-			EXEC uspCTItemContractUpdateScheduleQuantity
-			@intItemContractDetailId = @transactionItemContractDetailId,
-			@dblQuantityToUpdate = @transactionCurrentQty,
-			@intUserId = 1,
-			@intTransactionDetailId = @intTransactionId,
-			@strScreenName = 'Card Fueling Transaction Screen'
-		END
-		ELSE IF(LOWER(@transactionPriceMethod) = 'contracts' OR LOWER(@transactionPriceMethod) = 'contract pricing')
-		BEGIN
-			EXEC uspCTUpdateScheduleQuantity 
-			@intContractDetailId = @transactionContractDetailId
-			,@dblQuantityToUpdate = @transactionCurrentQty
-			,@intUserId = 1
-			,@intExternalId = @intTransactionId
-			,@strScreenName = 'Card Fueling Transaction Screen'
-		END
+	 	IF(LOWER(@transactionPriceMethod) = 'item contracts' OR LOWER(@transactionPriceMethod) = 'item contract pricing')
+	 	BEGIN
+	 		print 'itc'
+	 		EXEC uspCTItemContractUpdateScheduleQuantity
+	 		@intItemContractDetailId = @transactionItemContractDetailId,
+	 		@dblQuantityToUpdate = @transactionCurrentQty,
+	 		@intUserId = 1,
+	 		@intTransactionDetailId = @intTransactionId,
+	 		@strScreenName = 'Card Fueling Transaction Screen'
+	 	END
+	 	ELSE IF(LOWER(@transactionPriceMethod) = 'contracts' OR LOWER(@transactionPriceMethod) = 'contract pricing')
+	 	BEGIN
+	 		EXEC uspCTUpdateScheduleQuantity 
+	 		@intContractDetailId = @transactionContractDetailId
+	 		,@dblQuantityToUpdate = @transactionCurrentQty
+	 		,@intUserId = 1
+	 		,@intExternalId = @intTransactionId
+	 		,@strScreenName = 'Card Fueling Transaction Screen'
+	 	END
 
 		
 
-	END
+	 END
 	
 	
 	IF(LOWER(@strPriceMethod) = 'network cost' OR LOWER(@strPriceBasis) = 'transfer cost')
