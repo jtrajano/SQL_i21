@@ -2,7 +2,7 @@
 	@intWeightClaimsId INT,
 	@intEntityUserSecurityId INT,
 	@ysnPost BIT,
-	@ysnRecap BIT = 0,
+	@ysnRecap BIT,
 	@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS
 BEGIN
