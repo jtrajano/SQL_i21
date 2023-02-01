@@ -20,9 +20,12 @@ DECLARE @ErrorState INT;
 
 BEGIN TRY
   
+  DECLARE @ysnIncludeSurcharge BIT
+  SELECT TOP 1 @ysnIncludeSurcharge = ISNULL(ysnIncludeSurchargeInQuote, 0) FROM tblTRCompanyPreference
+
   if @intSupplyPointId != 0
   BEGIN 
-       select top 1 @dblQuotePrice = (QD.dblQuotePrice - ISNULL(QD.dblFreightRate, 0)) from dbo.tblTRQuoteHeader QH
+       select top 1 @dblQuotePrice = (QD.dblQuotePrice - (ISNULL(QD.dblFreightRate, 0) + CASE WHEN @ysnIncludeSurcharge = 1 THEN ISNULL(QD.dblSurcharge, 0) ELSE 0 END)) from dbo.tblTRQuoteHeader QH
 	      join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
        where QH.intEntityCustomerId =@intEntityCustomerId
          and QD.intItemId = @intItemId
@@ -34,7 +37,7 @@ BEGIN TRY
   END
   else
   BEGIN
-     select top 1 @dblQuotePrice = (QD.dblQuotePrice - ISNULL(QD.dblFreightRate, 0)) from dbo.tblTRQuoteHeader QH
+     select top 1 @dblQuotePrice = (QD.dblQuotePrice - (ISNULL(QD.dblFreightRate, 0) + CASE WHEN @ysnIncludeSurcharge = 1 THEN ISNULL(QD.dblSurcharge, 0) ELSE 0 END)) from dbo.tblTRQuoteHeader QH
 	      join dbo.tblTRQuoteDetail QD on QD.intQuoteHeaderId = QH.intQuoteHeaderId
        where QH.intEntityCustomerId =@intEntityCustomerId
          and QD.intItemId = @intItemId

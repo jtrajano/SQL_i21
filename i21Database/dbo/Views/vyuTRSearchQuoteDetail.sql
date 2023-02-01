@@ -24,6 +24,7 @@
 			, dblDeviationAmount = ISNULL(Detail.dblDeviationAmount, 0.000000)
 			, dblTempAdjustment = ISNULL(Detail.dblTempAdjustment, 0.000000)
 			, dblFreightRate = ISNULL(Detail.dblFreightRate, 0.000000)
+			, dblSurcharge = ISNULL(Detail.dblSurcharge, 0.000000)
 			, dblMargin = ISNULL(Detail.dblMargin, 0.000000)
 			, dblQtyOrdered = ISNULL(Detail.dblQtyOrdered, 0.000000)
 			, dblExtProfit = ISNULL(Detail.dblExtProfit, 0.000000)

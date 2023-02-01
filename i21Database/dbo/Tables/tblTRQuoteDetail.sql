@@ -10,6 +10,7 @@
 	[dblTempAdjustment] DECIMAL(18, 6) NULL DEFAULT 0,
 	[intShipViaId] INT NULL, 
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0, 
+	[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblQuotePrice] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblMargin] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblQtyOrdered]  NUMERIC (18, 6) NULL  DEFAULT 0,
