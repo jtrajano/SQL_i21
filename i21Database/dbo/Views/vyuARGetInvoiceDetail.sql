@@ -280,7 +280,7 @@ LEFT JOIN (
 	SELECT intCompanyLocationSubLocationId
 		 , strSubLocationName
 	FROM tblSMCompanyLocationSubLocation WITH(NOLOCK)
-) SMSLOC ON INV.intCompanyLocationSubLocationId = SMSLOC.intCompanyLocationSubLocationId
+) SMSLOC ON INV.intSubLocationId = SMSLOC.intCompanyLocationSubLocationId
 LEFT JOIN (
 	SELECT intStorageScheduleTypeId
 		 , strStorageTypeDescription
