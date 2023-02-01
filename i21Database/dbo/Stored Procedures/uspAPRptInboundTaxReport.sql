@@ -415,6 +415,7 @@ ELSE
                                                  ON SP.intEntityId = E.intEntityId
                                ) S ON I.intEntityVendorId = S.intEntityId
          WHERE (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
+         AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            --AND I.dblTax <> 0.000000
     END
 
