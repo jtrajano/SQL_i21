@@ -62,7 +62,9 @@ SELECT lh.intLoadHeaderId
 	, dd.ysnDelivered
 	, lh.ysnDiversion
 	, lh.strDiversionNumber
-	, lh.intStateId	
+	, lh.intStateId
+	, pd.intDispatchOrderRouteId
+	, dd.intDispatchOrderDetailId
 FROM tblMBILPickupDetail pd
 JOIN tblMBILDeliveryDetail dd ON dd.intPickupDetailId = pd.intPickupDetailId
 LEFT JOIN tblTRSupplyPoint sp ON sp.intEntityVendorId = pd.intEntityId AND sp.intEntityLocationId = pd.intEntityLocationId
