@@ -11016,6 +11016,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBTOverrideGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMForwardBTOverrideGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_AddDefaultEFTBank.sql" />

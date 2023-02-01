@@ -8,6 +8,12 @@ AS
 BEGIN
 DECLARE @ysnOverrideLocation BIT = 0 , @ysnOverrideLOB BIT = 0, @ysnOverrideCompany BIT = 0, @msg NVARCHAR(MAX) = ''
 
+IF @intBankTransferTypeId = 3
+BEGIN
+    EXEC uspCMForwardBTOverrideGLAccount @intAccountId
+    RETURN
+END
+
 IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  3)
 SELECT TOP 1 @ysnOverrideLocation=ISNULL(
 CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideLocationSegment_InTransit
@@ -33,7 +39,7 @@ FROM tblCMCompanyPreferenceOption
 
 -- OVERRIDE BY Bank GL Account Id WITH CONTRACT ITEM LOB----
 -- GL-9908
-IF @intBankTransferTypeId  = 3 AND @ysnOverrideLOB = 1
+IF @intBankTransferTypeId  = 3
 BEGIN
     DECLARE @intLOBSegmentIdFromContract INT
     SELECT TOP 1 @intLOBSegmentIdFromContract = SM.intSegmentCodeId

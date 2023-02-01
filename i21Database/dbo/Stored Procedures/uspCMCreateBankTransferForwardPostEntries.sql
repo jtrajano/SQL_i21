@@ -271,7 +271,7 @@ BEGIN
                                         ELSE dblRateAmountSettlementTo END  
         ,[dtmDateEntered]       = GETDATE()    
         ,[dtmTransactionDate]   = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Bank Account Entries'   
         ,[ysnIsUnposted]        = 0     
         ,[intConcurrencyId]     = 1    
         ,[intUserId]            = A.intLastModifiedUserId    
@@ -303,7 +303,7 @@ BEGIN
         ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateAmountSettlementFrom  END  
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = GLAccnt.strDescription    
+        ,[strJournalLineDescription]  = 'Bank Account Entries'    
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
@@ -317,5 +317,4 @@ BEGIN
 
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', @dtmDate, @strBatchId, @intDefaultCurrencyId
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  , @dtmDate, @strBatchId, @intDefaultCurrencyId
-
 END

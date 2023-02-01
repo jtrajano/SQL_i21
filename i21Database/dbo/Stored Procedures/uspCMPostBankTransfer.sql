@@ -499,28 +499,21 @@ END
 -- BANK TRANSFER FORWARD POSTING
   IF @intBankTransferTypeId = 3
   BEGIN 
-    
     EXEC uspCMCreateBankTransferForwardPostEntries
     @strTransactionId,
     @strBatchId,
     @intDefaultCurrencyId,
     @ysnPostedInTransit
-
   END
 
   IF @intBankTransferTypeId = 4
   BEGIN
-    
     DELETE FROM #tmpGLDetail
       EXEC uspCMCreateBankTransferSwapShortPostEntries
       @strTransactionId,
       @strBatchId,
       @intDefaultCurrencyId,
       @ysnPostedInTransit
-
-  
-
-    
   END
   
   IF @intBankTransferTypeId = 5
@@ -602,6 +595,7 @@ END
 IF @ysnRecap = 0    
 BEGIN    
 IF @ysnPost = 1
+  
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
@@ -920,6 +914,8 @@ IF @ysnRecap = 1
 BEGIN     
 
 IF @ysnPost = 1
+
+  
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
