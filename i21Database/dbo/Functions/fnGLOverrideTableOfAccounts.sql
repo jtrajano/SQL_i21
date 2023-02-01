@@ -43,16 +43,16 @@ SELECT
 from @OverrideTableType 
 
 
-IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
-    RETURN
+IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 1 )
+BEGIN
+    UPDATE A   
+    SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
+        A.intAccountIdOverride,   
+        A.intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)  
+    FROM @tbl A   
+    WHERE ISNULL(intAccountIdOverride,0) <> 0  
 
-  
-UPDATE A   
-SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
-    A.intAccountIdOverride,   
-    A.intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)  
-FROM @tbl A   
-WHERE ISNULL(intAccountIdOverride,0) <> 0  
+END
   
  UPDATE A   
  SET A.intNewAccountIdOverride = U.intAccountId,  
