@@ -187,9 +187,9 @@ SELECT
     ,[ysnApplytoBudget]                 = ARP.[ysnApplytoBudget]
 
     ,[dblAmountPaid]                    = ARP.[dblAmountPaid]
-    ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal])
+    ,[dblBaseAmountPaid]                = ROUND(ARP.[dblAmountPaid] * ARP.[dblExchangeRate], dbo.fnARGetDefaultDecimal())
     ,[dblUnappliedAmount]               = ARP.[dblUnappliedAmount]
-    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseUnappliedAmount]           = ROUND(ARP.[dblUnappliedAmount] * ARP.[dblExchangeRate], dbo.fnARGetDefaultDecimal())
     ,[dblPayment]                       = @ZeroDecimal
     ,[dblBasePayment]                   = @ZeroDecimal
     ,[dblDiscount]                      = @ZeroDecimal
