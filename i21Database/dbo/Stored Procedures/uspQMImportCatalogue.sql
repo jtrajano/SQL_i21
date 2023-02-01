@@ -123,6 +123,7 @@ BEGIN TRY
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
+		AND ysnSuccess = 1
 		AND (
 			CL.intCompanyLocationId IS NULL
 			OR ST.intSampleTypeId IS NULL
