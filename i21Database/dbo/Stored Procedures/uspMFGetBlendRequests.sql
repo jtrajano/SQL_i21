@@ -70,7 +70,7 @@ IF @intWorkOrderId > 0
 		 , h.dblStandardCost
 		 , f.intManufacturingProcessId
 		 , CompanyLocation.strLocationName AS strCompanyLocationName
-		 , f.strERPOrderNo AS strERPOrderNo
+		 , ISNULL(NULLIF(f.strERPOrderNo, ''), a.strReferenceNo) AS strERPOrderNo
 		 , ISNULL(WorkOrderStatus.strName, 'Not Released')	AS strWorkOrderStatus
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
