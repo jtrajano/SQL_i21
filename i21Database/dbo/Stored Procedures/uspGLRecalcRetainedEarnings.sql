@@ -237,7 +237,9 @@ INSERT INTO @RecapTableType(
     intTransactionId,      
     strTransactionType,      
     strTransactionForm,      
-    strModuleName   
+    strModuleName,
+    strOverrideAccountError,
+    strNewAccountIdOverride
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
@@ -268,7 +270,9 @@ SELECT
     intTransactionId=REPLACE( CONVERT(date, dtmDate,100),'-', ''),      
     strTransactionType='Fiscal Year RE',      
     strTransactionForm ='Fiscal year',      
-    strModuleName='General Ledger'      
+    strModuleName='General Ledger',  
+     strOverrideAccountError,
+    strNewAccountIdOverride   
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
@@ -297,7 +301,7 @@ group by dtmDate,
     --intTransactionId,      
     --strTransactionType,      
     --strTransactionForm,      
-    strModuleName     
+    strModuleName,   
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
@@ -305,7 +309,8 @@ group by dtmDate,
     --intCompanySegmentOverrideId,      
     --strNewAccountIdOverride,      
     --intNewAccountIdOverride,      
-    --strOverrideAccountError 
+    strOverrideAccountError,
+    strNewAccountIdOverride 
         
 IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 BEGIN
