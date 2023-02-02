@@ -4,7 +4,7 @@ SELECT
 A.intSampleId,
 B.intBatchId,  
 B.strBatchId,  
-dtmSaleDate,  
+REPLACE(CONVERT(VARCHAR, dtmSaleDate,101),'/','.') AS dtmSaleDate,  
 CASE WHEN A.strMarketZoneCode= 'AUC' THEN B.strTeaGardenChopInvoiceNumber ELSE CT.strTeaGardenChopInvoiceNumber END strTeaGardenChopInvoiceNumber,  
 B.strBroker,  
 CASE WHEN A.strMarketZoneCode= 'AUC' THEN B.strLeafGrade ELSE CT.strLeafGrade END strLeafGrade,  
@@ -12,12 +12,12 @@ CASE WHEN intSampleTypeId =2 THEN A.dblB1QtyBought ELSE A.dblRepresentingQty END
 A.strGardenMark,  
 CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.strTeaType ELSE CT.strTeaType END strTeaType,  
 CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.dblWeightPerUnit ELSE CT.dblWeightPerUnit END dblWeightPerUnit,
-CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.dblWeightPerUnit * B.dblTotalQuantity ELSE CT.dblWeightPerUnit* CT.dblTotalQuantity END dblTotalWeight,
+CASE WHEN A.strMarketZoneCode = 'AUC' THEN B.dblWeightPerUnit* B.dblTotalQuantity ELSE CT.dblWeightPerUnit* CT.dblTotalQuantity END dblTotalWeight,
 A.strRepresentLotNumber,
 A.strSaleNumber,
-A.dblB1Price, 
+A.dblB1Price,
 CASE WHEN A.strMarketZoneCode = 'AUC'  THEN B.strMixingUnitLocation ELSE CT.strMixingUnitLocation END strMixingUnitLocation,
-CASE WHEN A.strMarketZoneCode = 'AUC'  THEN REPLACE(B.strLeafStyle +  ' ' + B.strLeafSize  + ' ' + Taste.Val, '  ', ' ') ELSE replace(CT.strLeafStyle +  ' ' + CT.strLeafSize  + ' ' + Taste.Val, '  ', ' ') END
+CASE WHEN A.strMarketZoneCode = 'AUC'  THEN replace(B.strLeafStyle +  ' ' + B.strLeafSize  + ' ' + Taste.Val, '  ', ' ') ELSE replace(CT.strLeafStyle +  ' ' + CT.strLeafSize  + ' ' + Taste.Val, '  ', ' ') END
 strTestResult,
 IC.strItemNo
 FROM vyuQMSampleList A JOIN vyuMFBatch B ON A.intSampleId = B.intSampleId AND A.intLocationId =B.intLocationId 
@@ -29,7 +29,6 @@ OUTER APPLY(
 	AND P.strPropertyName = 'Taste'
 )Taste
 OUTER APPLY(
-	SELECT TOP 1 	
-	strTeaType, dblWeightPerUnit,dblTotalQuantity,strMixingUnitLocation,strLeafStyle, strLeafSize, strLeafGrade, strTeaGardenChopInvoiceNumber
+	SELECT TOP 1 strTeaType, dblWeightPerUnit,dblTotalQuantity,strMixingUnitLocation,strLeafStyle, strLeafSize, strLeafGrade, strTeaGardenChopInvoiceNumber
 	FROM tblCTContractDetail C  WHERE intContractDetailId = A.intContractDetailId
 ) CT

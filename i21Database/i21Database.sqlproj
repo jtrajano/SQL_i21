@@ -1493,6 +1493,7 @@
     <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
+    <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11795,6 +11796,8 @@
     <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
     <Build Include="dbo\Views\vyuQMAuctionAvailabilityReport.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
+    <Build Include="dbo\Views\vyuARZugInvoiceView.sql" />
+    <Build Include="dbo\Views\vyuARZugInvoiceDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

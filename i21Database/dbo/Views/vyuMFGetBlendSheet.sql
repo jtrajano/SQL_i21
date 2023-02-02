@@ -1,37 +1,42 @@
 ﻿CREATE VIEW [dbo].[vyuMFGetBlendSheet]
 AS 
-SELECT w.intWorkOrderId
-	 , w.strWorkOrderNo
-	 , i.strItemNo
-	 , i.strDescription
-	 , w.dblQuantity
-	 , um.strUnitMeasure AS strUOM
-	 , w.dtmExpectedDate
-	 , w.intStatusId
-	 , w.ysnUseTemplate
-	 , CompanyLocation.strLocationName AS strCompanyLocationName
-	 , CASE WHEN intTrialBlendSheetStatusId =17 THEN s.strName  ELSE 'Unapproved' END [strStatus]
-	 , em.strName [strCreatedBy]
-	 , w.dtmCreated
-	 , em2.strName [strApprovedBy]
-	 , w.dtmApprovedDate
-	 , Printed.strName AS strPrintedBy
-	 , w.dtmPrintedDate AS dtmPrintDate
-	 , ws.strName AS strWorkOrderStatus
-	 ,w.dtmReleasedDate
-	 ,ReleasedBy.strName As strReleasedBy
-	 ,w.strERPOrderNo AS strERPOrderNo
-	 ,w.strERPComment AS strERPComment
-from tblMFWorkOrder w 
-Join tblICItem i on w.intItemId=i.intItemId 
-Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId 
-Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-JOIN tblSMCompanyLocation AS CompanyLocation ON ISNULL(w.intCompanyId, intLocationId) = CompanyLocation.intCompanyLocationId
-LEFT JOIN tblMFWorkOrderStatus s on s.intStatusId = w.intTrialBlendSheetStatusId
-LEFT JOIN tblEMEntity em on em.intEntityId=w.intCreatedUserId
-LEFT JOIN tblEMEntity em2 on em2.intEntityId=w.intApprovedBy
-LEFT JOIN tblEMEntity ReleasedBy on ReleasedBy.intEntityId=w.intSupervisorId
-LEFT JOIN tblMFWorkOrderStatus ws on w.intStatusId = ws.intStatusId
+SELECT WorkOrder.intWorkOrderId
+	 , WorkOrder.strWorkOrderNo
+	 , Item.strItemNo
+	 , Item.strDescription
+	 , WorkOrder.dblQuantity
+	 , UnitMeasure.strUnitMeasure		AS strUOM
+	 , WorkOrder.dtmExpectedDate
+	 , WorkOrder.intStatusId
+	 , WorkOrder.ysnUseTemplate
+	 , CompanyLocation.strLocationName	AS strCompanyLocationName
+	 , CASE WHEN intTrialBlendSheetStatusId = 17 THEN TrialBlendSheetStatus.strName  
+			ELSE '' 
+	   END AS strStatus
+	 , WorkOrderCreate.strName			AS strCreatedBy
+	 , WorkOrder.dtmCreated
+	 , WorkOrderApprove.strName			AS strApprovedBy
+	 , WorkOrder.dtmApprovedDate
+	 , Printed.strName					AS strPrintedBy
+	 , WorkOrder.dtmPrintedDate			AS dtmPrintDate
+	 , WorkOrderStatus.strName			AS strWorkOrderStatus
+	 , WorkOrder.dtmReleasedDate
+	 , ReleasedBy.strName				As strReleasedBy
+	 , WorkOrder.strERPOrderNo			AS strERPOrderNo
+	 , WorkOrder.strERPComment			AS strERPComment
+FROM tblMFWorkOrder AS WorkOrder 
+JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId 
+JOIN tblICItemUOM AS ItemUOM ON WorkOrder.intItemUOMId = ItemUOM.intItemUOMId 
+JOIN tblICUnitMeasure AS UnitMeasure ON ItemUOM.intUnitMeasureId = UnitMeasure.intUnitMeasureId
+JOIN tblSMCompanyLocation AS CompanyLocation ON ISNULL(WorkOrder.intCompanyId, intLocationId) = CompanyLocation.intCompanyLocationId
+LEFT JOIN tblMFWorkOrderStatus AS TrialBlendSheetStatus ON TrialBlendSheetStatus.intStatusId = WorkOrder.intTrialBlendSheetStatusId
+LEFT JOIN tblEMEntity AS WorkOrderCreate ON WorkOrderCreate.intEntityId = WorkOrder.intCreatedUserId
+LEFT JOIN tblEMEntity AS WorkOrderApprove ON WorkOrderApprove.intEntityId = WorkOrder.intApprovedBy
+LEFT JOIN tblEMEntity AS ReleasedBy ON ReleasedBy.intEntityId=WorkOrder.intSupervisorId
+LEFT JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrder.intStatusId = WorkOrderStatus.intStatusId
 OUTER APPLY (SELECT strName
 			 FROM tblEMEntity
-			 WHERE intEntityId = w.intPrintedBy) AS Printed
+			 WHERE intEntityId = WorkOrder.intPrintedBy) AS Printed
+GO
+
+
