@@ -98,7 +98,7 @@ BEGIN
 		END
 
 		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
-		SET @dtmDateTo = ISNULL(@dtmDateTo, '12/31/2100')
+		SET @dtmDateTo = ISNULL(@dtmDateTo, GETDATE())
 
 		-- GET LOGO
 		 SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -139,7 +139,7 @@ BEGIN
 			SELECT NULL intBillId, 
 			       NULL strVendorOrderNumber, 
 				   'Initial Balance' strTransactionType, 
-				   @dtmDateFrom dtmBillDate, 
+				   DATEADD(DAY, -1, @dtmDateFrom) dtmBillDate, 
 				   NULL dtmDueDate, 
 				   intCurrencyId, 
 				   SUM(dblTotal) dblTotal, 
@@ -151,7 +151,7 @@ BEGIN
 			FROM (
 				SELECT *
 				FROM vyuAPVendorStatement
-				WHERE dtmBillDate BETWEEN '1/1/1900' AND @dtmDateFrom
+				WHERE dtmBillDate BETWEEN '1/1/1900' AND DATEADD(DAY, -1, @dtmDateFrom)
 			) IB
 			GROUP BY intShipToId, intEntityVendorId, intCurrencyId
 			UNION ALL
