@@ -643,8 +643,8 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
-		, strQualityCode = QCC.strQualityDescNo
-		, strQualityDescription = QCC.strQualityDesc
+		, strQualityCode = IBB.strItemNo
+		, strQualityDescription = IBB.strDescription
 		, CD.dtmEtaPol
 		, CD.dtmEtaPod
 		, CD.intGardenMarkId
@@ -767,7 +767,8 @@ BEGIN TRY
 	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
 	LEFT JOIN tblCTReasonCode RC on RC.intReasonCodeId = CD.intReasonCodeId
-	LEFT JOIN QualityCodes QCC ON QCC.intItemId = CD.intItemId
+	LEFT JOIN tblICItemBundle BI ON CD.intItemId = BI.intItemId
+	LEFT JOIN tblICItem IBB ON IBB.intItemId = BI.intBundleItemId
 	
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 
