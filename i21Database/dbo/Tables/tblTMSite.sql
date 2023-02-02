@@ -84,6 +84,8 @@
 	[strFacilityNumber]         NVARCHAR (30)   COLLATE Latin1_General_CI_AS NULL,
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     [intRowNumber] INT NULL,
+    [ysnCompanySite]			  BIT             DEFAULT 0 NOT NULL,
+    [intCompanyLocationSubLocationId] INT NULL,
     CONSTRAINT [PK_tblTMSite] PRIMARY KEY CLUSTERED ([intSiteID] ASC),
     CONSTRAINT [FK_tblTMSite_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]),
     CONSTRAINT [FK_tblTMSite_tblTMCustomer] FOREIGN KEY ([intCustomerID]) REFERENCES [dbo].[tblTMCustomer] ([intCustomerID]),
