@@ -1,7 +1,7 @@
 CREATE VIEW vyuGLMulticurrencyRevalueGJ
 AS
 SELECT   strTransactionType		    
-			,strTransactionId		--=	COA.strAccountId + '_' + SM.strCurrency + '_' + substring(convert(nvarchar(10),  GJ.dtmDate , 102),1,7)
+			,strTransactionId		=	''--COA.strAccountId + '_' + SM.strCurrency + '_' + substring(convert(nvarchar(10),  GJ.dtmDate , 102),1,7)
 			,strTransactionDate		=	CONVERT(nvarchar(10),  GJ.dtmDate , 102)
 			,strTransactionDueDate	=	NULL
 			,strVendorName			=	'' COLLATE Latin1_General_CI_AS 
@@ -27,6 +27,7 @@ SELECT   strTransactionType
 			,dblCredit				=	0
 			,intAccountId			= 	GJ.intAccountId
 			,GJ.dtmDate	
+			,SM.strCurrency
 FROM tblGLDetail GJ JOIN vyuGLAccountDetail COA ON COA.intAccountId = GJ.intAccountId
 LEFT JOIN tblSMCompanyPreference CP on CP.intDefaultCurrencyId = GJ.intCurrencyId
 JOIN tblSMCurrency SM ON SM.intCurrencyID = GJ.intCurrencyId
@@ -34,7 +35,3 @@ LEFT JOIN tblSMCurrencyExchangeRateType SMC ON SMC.intCurrencyExchangeRateTypeId
 WHERE ysnIsUnposted = 0
 AND CP.intDefaultCurrencyId IS NULL
 AND ISNULL(COA.ysnRevalue,0) = 1
-AND GJ.dblDebit - GJ.dblCredit > 0
---GROUP BY intCurrencyId, SM.strCurrency ,GJ.intAccountId, COA.strAccountId,substring(convert(nvarchar(10), dtmDate , 102),1,7)
---,COA.intAccountCategoryId
-
