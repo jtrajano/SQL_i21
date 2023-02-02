@@ -61,4 +61,5 @@ FROM
 	INNER JOIN tblEMEntity [EM] ON [EM].intEntityId = [EMP].[intEntityId]
 	INNER JOIN tblEMEntityLocation [EML] ON [EM].intEntityId = [EML].intEntityId AND [EML].ysnDefaultLocation = 1
 	OUTER APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) [COM]
+
 GO
