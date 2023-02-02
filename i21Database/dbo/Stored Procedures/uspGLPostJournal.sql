@@ -261,6 +261,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,strOverrideAccountError
 			,strNewAccountIdOverride
 		)
+
 		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
 		
 		IF @@ERROR <> 0 GOTO Post_Rollback;
