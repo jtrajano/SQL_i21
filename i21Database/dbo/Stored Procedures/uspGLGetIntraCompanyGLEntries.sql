@@ -2,7 +2,7 @@ CREATE PROCEDURE uspGLGetIntraCompanyGLEntries
 (
     @GLEntries RecapTableType READONLY,
     @ysnRecap BIT,
-    @ysnPost BIT 
+    @ysnPost BIT
 )
 AS
 BEGIN
@@ -10,14 +10,14 @@ BEGIN
     DECLARE @IntraGLEntries RecapTableType
     
     IF ISNULL(@ysnPost,0) = 0 
-          GOTO _ExitNoError
+          GOTO _Exit
 
     IF NOT EXISTS( SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnAllowIntraCompanyEntries = 1)
-        GOTO _ExitNoError
+        GOTO _Exit
 
 	--CHECK IF COMPANY DOES NOT EXIST
 	IF NOT EXISTS(SELECT 1 FROM tblGLAccountStructure A JOIN tblGLSegmentType B ON A.intStructureType = B.intSegmentTypeId WHERE strSegmentType='Company')
-		 GOTO _ExitNoError
+		 GOTO _Exit
 
     DECLARE @intDueToAccountId INT,@intDueFromAccountId INT, @intJournalId INT, @intCompanySegmentId INT,@strJournalId NVARCHAR(30)
     SELECT TOP 1 @intCompanySegmentId=J.intCompanySegmentId,@strJournalId =G.strTransactionId,@intJournalId = J.intJournalId  FROM @GLEntries G
@@ -26,7 +26,19 @@ BEGIN
     )J
 
     IF @intCompanySegmentId IS NULL
-        GOTO _ExitNoError
+        GOTO _Exit
+
+    SELECT TOP 1 @intDueToAccountId=intDueToAccountId, 
+	@intDueFromAccountId =intDueFromAccountId  
+    FROM tblGLIntraCompanyConfig
+    WHERE @intCompanySegmentId = intParentCompanySegmentId
+
+    IF @intDueToAccountId IS NULL OR @intDueFromAccountId IS NULL   
+    BEGIN
+        RAISERROR( 'Missing Due To/From Accounts setting in Intra Company Config',16,1)
+		GOTO _Exit
+    END
+
 
 	--count parent company
 	DECLARE @intParentCompanyCount INT,@intNonParentCompanyCount INT
@@ -62,11 +74,7 @@ BEGIN
 			END
 	END
 
-    SELECT TOP 1 @intDueToAccountId=intDueToAccountId, 
-	@intDueFromAccountId =intDueFromAccountId  
-    FROM tblGLIntraCompanyConfig
-    WHERE @intCompanySegmentId = intParentCompanySegmentId
-
+  
 DECLARE @strJournalDescPrefix NVARCHAR(30) = 'Intra Company Entries -'
 DECLARE @CreditParent RevalTableType
 DECLARE @DebitParent RevalTableType
@@ -553,7 +561,7 @@ BEGIN
     END
 END
 
-_ExitNoError:
+_Exit:
 
 SELECT 
     [strTransactionId]
@@ -583,4 +591,4 @@ SELECT
 
  
 END
-_Exit:
+
