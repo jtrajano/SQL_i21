@@ -39,6 +39,38 @@ BEGIN TRY
 		[datatype]		NVARCHAR(50)
 	)
 
+	INSERT INTO @temp_xml_table
+    SELECT *
+    FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2) WITH 
+    (
+        [fieldname] NVARCHAR(50)
+        ,condition NVARCHAR(20)
+        ,[from] NVARCHAR(4000)
+        ,[to] NVARCHAR(4000)
+        ,[join] NVARCHAR(10)
+        ,[begingroup] NVARCHAR(50)
+        ,[endgroup] NVARCHAR(50)
+        ,[datatype] NVARCHAR(50)
+    )
+
+	DECLARE @strReportLogId AS NVARCHAR(100)
+
+    SELECT @strReportLogId = [from]
+    FROM @temp_xml_table
+    WHERE [fieldname] = 'strReportLogId'
+
+    IF @strReportLogId IS NOT NULL
+    BEGIN
+        IF EXISTS (SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+        BEGIN
+            RETURN
+        END
+        ELSE
+        BEGIN
+            INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
+        END
+    END
+
 	DECLARE
 		@dtmDeliveryDateFromParam DATETIME
 		,@dtmDeliveryDateToParam DATETIME
@@ -111,7 +143,10 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intCommodityId = CM.intCommodityId AND CUOM.ysnStockUnit = 1
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUOM.intUnitMeasureId
 		WHERE CL.intCompanyLocationId IN (SELECT intId FROM @tblLocationId)
-		AND CM.intCommodityId IN (SELECT intId FROM @tblCommodityId)
+		AND (
+			(NOT EXISTS(SELECT 1 FROM @tblItemId) AND EXISTS (SELECT 1 FROM @tblCommodityId WHERE intId = CM.intCommodityId))
+			OR EXISTS(SELECT 1 FROM @tblItemId) AND EXISTS (SELECT 1 FROM @tblItemId I INNER JOIN tblICItem IC ON IC.intItemId = I.intId WHERE IC.intCommodityId = CM.intCommodityId)
+		)
 	),	
 	PurchaseCTE AS (
 		SELECT
