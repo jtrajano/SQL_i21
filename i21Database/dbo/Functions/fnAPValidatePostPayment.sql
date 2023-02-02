@@ -22,11 +22,13 @@ BEGIN
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	SET @gainLossAccount = (SELECT TOP 1 intAccountsPayableRealizedId FROM tblSMMultiCurrency)
 
-	DECLARE	@OverrideCompanySegment BIT,
+	DECLARE	@AllowSingleEntries BIT,
+			@OverrideCompanySegment BIT,
 			@OverrideLocationSegment BIT,
 			@OverrideLineOfBusinessSegment BIT
 
-	SELECT TOP 1 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+	SELECT TOP 1 @AllowSingleEntries = ysnAllowSingleLocationEntries,
+				 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
 				 @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
 				 @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
 	FROM tblAPCompanyPreference
@@ -684,6 +686,21 @@ BEGIN
 		FROM tblAPPayment P
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND P.intPayToBankAccountId IS NULL AND P.intPaymentMethodId = 2
+
+		--DIFFERENT LOCATION AND PAY FROM BANK ACCOUNT ON SINGLE LOCATION ENTRIES
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Location and Pay From Bank Account should have the same location segment.',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intCompanyLocationId
+		INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = P.intAccountId
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND @AllowSingleEntries = 1
+		AND AD.intLocationSegmentId <> CL.intProfitCenter
+		
 	END
 	ELSE
 	BEGIN
