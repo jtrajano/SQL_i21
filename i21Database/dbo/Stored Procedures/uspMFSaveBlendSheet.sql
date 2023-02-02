@@ -321,6 +321,7 @@ BEGIN TRY
 			,intTransactionFrom
 			,intPlannedShiftId
 			,dtmPlannedDate
+			,intIssuedUOMTypeId
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -349,6 +350,7 @@ BEGIN TRY
 			,1
 			,intPlannedShiftId
 			,dtmDueDate
+			,intIssuedUOMTypeId
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
