@@ -35,3 +35,4 @@ LEFT JOIN tblSMCurrencyExchangeRateType SMC ON SMC.intCurrencyExchangeRateTypeId
 WHERE ysnIsUnposted = 0
 AND CP.intDefaultCurrencyId IS NULL
 AND ISNULL(COA.ysnRevalue,0) = 1
+
