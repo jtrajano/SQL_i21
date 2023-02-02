@@ -12,8 +12,16 @@ BEGIN TRY
 	DECLARE	@intPContractDetailId AS INT
 	DECLARE	@dblQuantity AS NUMERIC(18,6)
 	DECLARE	@intScreenId AS INT
+	DECLARE @ysnCancelled AS BIT
 
-	--Validate if the LS associated with the Allocation, if it exists, is cancelled
+	-- Validate if the Cancellation/Reversal is valid
+	SELECT @ysnCancelled = ysnCancelled FROM tblLGAllocationHeader
+	IF (ISNULL(@ysnCancelled, 0) = ISNULL(@ysnCancel, 0))
+	BEGIN
+		RETURN
+	END	
+
+	-- Validate if the LS associated with the Allocation, if it exists, is cancelled
 	IF EXISTS (
 		SELECT L.strLoadNumber 
 		FROM tblLGAllocationHeader AH
@@ -25,6 +33,11 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('Cannot cancel the Allocation. The Load associated with it is being used. Try cancelling the Load first.', 16, 1)  
 	END
+
+	If(OBJECT_ID('tempdb..#temp') Is Not Null)
+	Begin
+		Drop Table #Temp
+	End
 
 	CREATE TABLE #Temp
 	(
@@ -119,11 +132,6 @@ BEGIN TRY
 
 		SET @Counter = @Counter  + 1
 	END  
-
-	If(OBJECT_ID('tempdb..#temp') Is Not Null)
-	Begin
-		Drop Table #Temp
-	End
 
 END TRY
 
