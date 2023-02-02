@@ -339,6 +339,7 @@ IF @intWorkOrderId = 0
 			,intTransactionFrom
 			,intPlannedShiftId
 			,dtmPlannedDate
+			,intIssuedUOMTypeId
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -367,6 +368,7 @@ IF @intWorkOrderId = 0
 			,1
 			,intPlannedShiftId
 			,dtmDueDate
+			,intIssuedUOMTypeId
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
