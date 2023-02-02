@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARUpdateContractOnInvoice]  
+﻿CREATE PROCEDURE [dbo].[uspARUpdateContractOnInvoice]
 	  @TransactionId	INT   
 	, @ForDelete		BIT = 0
 	, @UserId			INT = NULL	
@@ -342,8 +342,6 @@ BEGIN TRY
 	  AND P.ysnMobileBilling = 0
 	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
-
-	SELECT '@tblToProcess', * FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
 	BEGIN
