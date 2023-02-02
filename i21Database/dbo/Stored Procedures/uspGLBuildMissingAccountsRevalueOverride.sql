@@ -74,5 +74,5 @@ AS
     GROUP  BY intAccountSegmentId
 
     EXEC uspGLBuildAccountTemporary
-      1
+      @intEntityId
 
