@@ -217,5 +217,6 @@ FROM (
 	WHERE ((AD.dblPAllocatedQty - CASE WHEN (ShipType.intShipmentType = 2) THEN IsNull(LDSI.dblPShippedQuantity, 0) ELSE IsNull(LDS.dblPShippedQuantity, 0) END + IsNull(PL.dblLotPickedQty, 0)) > 0)
 		AND ((AD.dblSAllocatedQty - CASE WHEN (ShipType.intShipmentType = 2) THEN IsNull(LDSI.dblSShippedQuantity, 0) ELSE IsNull(LDS.dblSShippedQuantity, 0) END - IsNull(PL.dblSalePickedQty, 0)) > 0)
 		AND ISNULL(APRV.ysnUnapproved, 0) = 0
+		AND ISNULL(AH.ysnCancelled, 0) = 0
 	  ) tbl 
 WHERE dblAvailableAllocationQty > 0
