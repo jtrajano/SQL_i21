@@ -135,6 +135,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						,intCurrencyExchangeRateTypeId
 						,intCurrencyExchangeRateId
 						,dblCurrencyExchangeRate
+						,intSalesAccountId
 					)
 					SELECT 
 						 strTransactionType				= 'Credit Memo'
@@ -168,6 +169,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						,intCurrencyExchangeRateTypeId	= ARID.intCurrencyExchangeRateTypeId
 						,intCurrencyExchangeRateId		= ARID.intCurrencyExchangeRateId
 						,dblCurrencyExchangeRate		= ARID.dblCurrencyExchangeRate
+						,intSalesAccountId				= ARID.intSalesAccountId
 					FROM tblARInvoice INV
 					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
 					INNER JOIN tblARInvoiceDetail ARID ON INV.intInvoiceId = ARID.intInvoiceId
