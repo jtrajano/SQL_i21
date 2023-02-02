@@ -32,39 +32,23 @@ If @intWorkOrderId=0
 	Where a.intStatusId=1
 
 --Positive means WorkOrderId
-IF @intWorkOrderId > 0
-	SELECT a.intBlendRequirementId
-		 , a.strDemandNo
-		 , a.intItemId
-		 , b.strItemNo
-		 , b.strDescription
-		 , CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
-				ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
-		   END AS dblQuantity
-		 , c.intItemUOMId
-		 , d.strUnitMeasure AS strUOM
-		 , a.dtmDueDate
-		 , a.intLocationId
-		 , a.intManufacturingCellId
-		 , h.dblStandardCost
-		 , f.intManufacturingProcessId
-		 , CompanyLocation.strLocationName AS strCompanyLocationName
-		 , ISNULL(NULLIF(f.strERPOrderNo, ''), a.strReferenceNo) AS strERPOrderNo
-		 , ISNULL(WorkOrderStatus.strName, 'Not Released')	AS strWorkOrderStatus
-	FROM tblMFBlendRequirement a 
-	JOIN tblICItem b ON a.intItemId = b.intItemId 
-	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId = c.intUnitMeasureId 
-	JOIN tblICUnitMeasure d ON c.intUnitMeasureId = d.intUnitMeasureId 
-	LEFT JOIN tblMFRecipe e ON a.intItemId = e.intItemId AND a.intLocationId = e.intLocationId AND e.ysnActive=1 
-	JOIN tblMFWorkOrder f ON a.intBlendRequirementId = f.intBlendRequirementId
-	LEFT JOIN tblICItemLocation g ON b.intItemId = g.intItemId AND g.intLocationId = a.intLocationId
-	LEFT JOIN tblICItemPricing h ON h.intItemId = b.intItemId AND g.intItemLocationId = h.intItemLocationId
-	LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
-	OUTER APPLY (SELECT WorkOrderStatus.strName
-				 FROM tblMFWorkOrder AS WorkOrder
-				 JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrder.intStatusId = WorkOrderStatus.intStatusId
-				 WHERE WorkOrder.intBlendRequirementId = a.intBlendRequirementId) AS WorkOrderStatus
-	WHERE f.intWorkOrderId = @intWorkOrderId
+If @intWorkOrderId>0
+	Select a.intBlendRequirementId,a.strDemandNo,a.intItemId,b.strItemNo,b.strDescription,
+	Case When (a.dblQuantity - ISNULL(a.dblIssuedQty,0))<=0 then 0 Else (a.dblQuantity - ISNULL(a.dblIssuedQty,0)) End AS dblQuantity,
+	c.intItemUOMId,d.strUnitMeasure AS strUOM,a.dtmDueDate,a.intLocationId,a.intManufacturingCellId,
+	h.dblStandardCost,f.intManufacturingProcessId,
+	CompanyLocation.strLocationName AS strCompanyLocationName
+	,f.strERPOrderNo AS strERPOrderNo
+	from tblMFBlendRequirement a 
+	Join tblICItem b on a.intItemId=b.intItemId 
+	Join tblICItemUOM c on b.intItemId=c.intItemId and a.intUOMId=c.intUnitMeasureId 
+	Join tblICUnitMeasure d on c.intUnitMeasureId=d.intUnitMeasureId 
+	Left Join tblMFRecipe e on a.intItemId=e.intItemId And a.intLocationId=e.intLocationId And e.ysnActive=1 
+	Join tblMFWorkOrder f on a.intBlendRequirementId=f.intBlendRequirementId
+	Left Join tblICItemLocation g on b.intItemId=g.intItemId and g.intLocationId=a.intLocationId
+	Left Join tblICItemPricing h on h.intItemId=b.intItemId And g.intItemLocationId=h.intItemLocationId
+	left join tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
+	Where f.intWorkOrderId=@intWorkOrderId
 
 --Negative means BlendRequirementId
 If @intWorkOrderId<0
