@@ -377,70 +377,31 @@ SELECT
 	,intLOBSegmentCodeId = NULL
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
-	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
-FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
-WHERE strTransactionDate <= @dtmDate
---AND ISNULL(dblForexRate, 1) <> 1
+	,A.strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuGLMulticurrencyRevalueGJ A
+WHERE dtmDate <= @dtmDate
 END
 
-
-
 IF @strModule = 'GL' -- GL will average
-	WITH finalQuery AS(
 	SELECT  
-	A.strTransactionType,
-	A.dblTransactionAmount,
+	strTransactionType = '',
+	SUM(A.dblTransactionAmount)dblTransactionAmount,
 	A.intCurrencyId,
-	A.dblHistoricForexRate,
-	A.dblHistoricAmount, 
-	A.dblAmountDifference,
-	A.strType,
-	B.strCurrency,
-	intAccountIdOverride = A.intAccountId,
-	intLOBSegmentOverrideId = intLOBSegmentCodeId,
-	A.intNewCurrencyExchangeRateTypeId,
-	A.strNewForexRateType,
-	C.strAccountId,
-	CL.* 
-	FROM @tblMulti A 
-	JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
-	LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
-	OUTER APPLY(
-		SELECT	
-		intLocationSegmentCodeId = intProfitCenter,
-		intCompanySegmentCodeId = intCompanySegment 
-		FROM dbo.tblSMCompanyLocation 
-		WHERE intCompanyLocationId = A.intCompanyLocationId
-	)CL
-	)
-	SELECT 
-	strTransactionType,
-	intAccountIdOverride,
-	strForexRateType = 'Avg',
-	intCurrencyId,
-	strCurrency,
-	strAccountId,
-	AVG(dblTransactionAmount) dblTransactionAmount,
-	AVG(dblHistoricAmount) dblHistoricAmount,
 	AVG(dblHistoricForexRate) dblHistoricForexRate,
-	AVG(dblAmountDifference) dblAmountDifference,
-	intLOBSegmentOverrideId,
-	intLocationSegmentCodeId,
-	intCompanySegmentCodeId,
-	strType
-	FROM 
-	finalQuery
+	SUM(A.dblHistoricAmount)dblHistoricAmount, 
+	SUM(A.dblAmountDifference)dblAmountDifference,
+	strForexRateType = 'Avg',
+	A.strType,
+	A.strCurrency,
+	intAccountIdOverride = A.intAccountId,
+	strAccountId
+	FROM @tblMulti A JOIN tblGLAccount B ON B.intAccountId = A.intAccountId
 	GROUP BY
 	intCurrencyId,
 	strCurrency,
-	intAccountIdOverride,
-	intLOBSegmentOverrideId,
-	intLocationSegmentCodeId,
-	intCompanySegmentCodeId,
-	strType,
 	strAccountId,
-	strTransactionType
-
+	A.intAccountId,
+	A.strType
 ELSE
 	SELECT 
 	A.strTransactionType,
