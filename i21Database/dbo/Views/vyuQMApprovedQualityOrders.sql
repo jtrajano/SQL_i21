@@ -42,9 +42,9 @@ SELECT
     ,CH.strContractNumber
     ,CD.intContractSeq
     ,[intVendorEntityId] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.intEntityId ELSE V.intEntityId END
-    ,[strVendorName] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.strEntityName ELSE V.strEntityName END
-    ,[intVendorLocationId] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.intDefaultLocationId ELSE V.intDefaultLocationId END
-    ,[strVendorLocation] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.strDefaultLocation ELSE V.strDefaultLocation END
+    ,[strVendorName] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.strName ELSE V.strName END
+    ,[intVendorLocationId] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.intDefaultLocationId ELSE VL.intEntityLocationId END
+    ,[strVendorLocation] = CASE WHEN CD.intContractDetailId IS NULL THEN SVL.strLocationName ELSE VL.strLocationName END
     ,[strEntityContract] = CH.strCustomerContract
     ,[strVendorRef] = CASE WHEN CD.intContractDetailId IS NULL THEN S.strAdditionalSupplierReference ELSE CH.strCustomerContract END
     ,[strPricingStatus] =   CASE
@@ -83,13 +83,15 @@ LEFT JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = QIUOM.intUnitMeasureId
 -- Weight UOM
 LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = I.intItemId
-LEFT JOIN vyuQMGetSupplier SV ON SV.intEntityId = S.intEntityId
+LEFT JOIN vyuAPVendor SV ON SV.intEntityId = S.intEntityId
+LEFT JOIN tblEMEntityLocation SVL ON SVL.intEntityLocationId = SV.intDefaultLocationId
 LEFT JOIN tblICItemUOM SPIUOM ON SPIUOM.intItemId = I.intItemId AND SPIUOM.intUnitMeasureId = S.intB1PriceUOMId
 LEFT JOIN tblICUnitMeasure SPUOM ON SPUOM.intUnitMeasureId = SPIUOM.intUnitMeasureId
 -- Contract side tables
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN vyuQMGetSupplier V ON V.intEntityId = CH.intEntityId
+LEFT JOIN tblEMEntity V ON V.intEntityId = CH.intEntityId
+LEFT JOIN tblEMEntityLocation VL ON VL.intEntityId = V.intEntityId AND VL.intEntityLocationId= CH.intEntitySelectedLocationId
 LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM PIUOM ON PIUOM.intItemUOMId = CD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureId
