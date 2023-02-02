@@ -885,6 +885,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerSalesReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessClaimPayables.sql" />
     <Build Include="dbo\Functions\fnLGGetDelimitedContractCertificates.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCancelAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
