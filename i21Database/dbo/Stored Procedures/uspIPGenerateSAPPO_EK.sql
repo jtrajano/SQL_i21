@@ -6,7 +6,6 @@ BEGIN TRY
 	--Status Id: -1(Processing), 1(Internal Error), 2(Waiting Ack), 3(Failure Ack), 4 (Success Ack)
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strError NVARCHAR(MAX) = ''
-		,@strRowState NVARCHAR(50)
 		,@strHeaderRowState NVARCHAR(50)
 		,@strHeaderXML NVARCHAR(MAX) = ''
 		,@strItemXML NVARCHAR(MAX) = ''
@@ -34,9 +33,9 @@ BEGIN TRY
 		,@strCommodityCode NVARCHAR(100)
 		,@strERPPONumber NVARCHAR(100)
 	DECLARE @tblIPContractFeed TABLE (intContractFeedId INT)
-	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strContractNumber NVARCHAR(100)
 		,@intContractSeq INT
+		,@intDetailNumber INT
 		,@strERPContractNumber NVARCHAR(100)
 		,@strERPItemNumber NVARCHAR(100)
 		,@strItemNo NVARCHAR(100)
@@ -76,6 +75,8 @@ BEGIN TRY
 		,@intMixingUnitCount INT
 	DECLARE @intPOFeedId INT
 	DECLARE @ContractFeedId TABLE (intContractFeedId INT)
+	DECLARE @tblLGLoad TABLE (intLoadId INT)
+	DECLARE @intMainLoadId INT
 	DECLARE @tmp INT
 
 	SELECT @tmp = strValue
@@ -87,189 +88,199 @@ BEGIN TRY
 		SELECT @tmp = 50
 
 	DELETE
-	FROM @ContractFeedId
+	FROM @tblLGLoad
 
 	DELETE
-	FROM @tblIPContractFeed
+	FROM @ContractFeedId
 
-	INSERT INTO @tblIPContractFeed (intContractFeedId)
-	SELECT DISTINCT TOP (@tmp) intContractFeedId
+	INSERT INTO @tblLGLoad (intLoadId)
+	SELECT DISTINCT TOP (@tmp) intLoadId
 	FROM tblIPContractFeed CF
 	WHERE CF.intStatusId IS NULL
 
-	SELECT @intContractFeedId = MIN(intContractFeedId)
-	FROM @tblIPContractFeed
+	SELECT @intMainLoadId = MIN(intLoadId)
+	FROM @tblLGLoad
 
-	IF @intContractFeedId IS NULL
+	IF @intMainLoadId IS NULL
 	BEGIN
 		RETURN
 	END
 
 	UPDATE tblIPContractFeed
 	SET intStatusId = - 1
-	WHERE intContractFeedId IN (
-			SELECT intContractFeedId
-			FROM @tblIPContractFeed
+	WHERE intLoadId IN (
+			SELECT intLoadId
+			FROM @tblLGLoad
 			)
 
-	WHILE @intContractFeedId IS NOT NULL
+	WHILE @intMainLoadId IS NOT NULL
 	BEGIN
-		SELECT @strRowState = NULL
-			,@strHeaderRowState = NULL
-			,@strError = ''
-
-		SELECT @intLoadId = NULL
-			,@intLoadDetailId = NULL
-			,@intCompanyLocationId = NULL
-			,@ysnPosted = 0
-
-		SELECT @strLoadNumber = NULL
-			,@strVendorAccountNum = NULL
-			,@strLocationName = NULL
-			,@strCommodityCode = NULL
-			,@strERPPONumber = NULL
-
-		SELECT @intLoadId = intLoadId
-			,@intLoadDetailId = intLoadDetailId
-			,@intCompanyLocationId = intCompanyLocationId
-			,@strLoadNumber = strLoadNumber
-			,@strVendorAccountNum = strVendorAccountNum
-			,@strLocationName = strLocationName
-			,@strCommodityCode = strCommodityCode
-			,@strERPPONumber = strERPPONumber
-		FROM dbo.tblIPContractFeed
-		WHERE intContractFeedId = @intContractFeedId
-
-		IF EXISTS (
-				SELECT 1
-				FROM tblIPContractFeed
-				WHERE intLoadId = @intLoadId
-					AND intLoadDetailId = @intLoadDetailId
-					AND intContractFeedId < @intContractFeedId
-					AND ISNULL(intStatusId, 0) IN (
-						2
-						,4
-						)
-				)
-		BEGIN
-			SELECT @strHeaderRowState = 'U'
-		END
-		ELSE
-		BEGIN
-			SELECT @strHeaderRowState = 'C'
-		END
-
-		IF @strHeaderRowState = 'C'
-			AND ISNULL(@strERPPONumber, '') <> ''
-		BEGIN
-			SELECT @strHeaderRowState = 'U'
-		END
-
-		IF ISNULL(@strLoadNumber, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Load Number cannot be blank. '
-		END
-
-		IF ISNULL(@strVendorAccountNum, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Vendor Account Number cannot be blank. '
-		END
-
-		IF ISNULL(@strLocationName, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Location cannot be blank. '
-		END
-
-		IF ISNULL(@strCommodityCode, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Commodity cannot be blank. '
-		END
-
-		IF @strError <> ''
-		BEGIN
-			UPDATE dbo.tblIPContractFeed
-			SET strMessage = @strError
-				,intStatusId = 1
-			WHERE intContractFeedId = @intContractFeedId
-
-			GOTO NextRec
-		END
-
-		IF @strHeaderRowState <> 'C'
-			AND ISNULL(@strERPPONumber, '') = ''
-		BEGIN
-			UPDATE dbo.tblIPContractFeed
-			SET strMessage = 'ERP PO Number is not available. '
-			WHERE intContractFeedId = @intContractFeedId
-
-			GOTO NextRec
-		END
-
-		-- If previous feed is waiting for acknowledgement then do not send the current feed
-		IF EXISTS (
-				SELECT TOP 1 1
-				FROM tblIPContractFeed CF
-				WHERE CF.intLoadId = @intLoadId
-					AND CF.intLoadDetailId = @intLoadDetailId
-					AND CF.intContractFeedId < @intContractFeedId
-					AND CF.intStatusId = 2
-				ORDER BY CF.intContractFeedId DESC
-				)
-		BEGIN
-			UPDATE dbo.tblIPContractFeed
-			SET strMessage = 'Previous feed is waiting for acknowledgement. '
-			WHERE intContractFeedId = @intContractFeedId
-
-			GOTO NextRec
-		END
-
-		-- Vendor should be same for all the details in a LS
-		IF EXISTS (
-				SELECT 1
-				FROM tblIPContractFeed CF WITH (NOLOCK)
-				WHERE CF.intLoadId = @intLoadId
-					AND CF.strVendorAccountNum <> @strVendorAccountNum
-				)
-		BEGIN
-			UPDATE dbo.tblIPContractFeed
-			SET strMessage = 'Vendor should be same for all the order details in a LS. '
-			WHERE intContractFeedId = @intContractFeedId
-
-			GOTO NextRec
-		END
-
 		SELECT @strHeaderXML = ''
-
-		SELECT @strHeaderXML += '<Header>'
-
-		SELECT @strHeaderXML += '<RefNo>' + @strLoadNumber + '</RefNo>'
-
-		SELECT @strHeaderXML += '<VendorAccountNo>' + @strVendorAccountNum + '</VendorAccountNo>'
-
-		SELECT @strHeaderXML += '<Location>' + @strLocationName + '</Location>'
-
-		SELECT @strHeaderXML += '<HeaderRowState>' + @strHeaderRowState + '</HeaderRowState>'
-
-		SELECT @strHeaderXML += '<Commodity>' + @strCommodityCode + '</Commodity>'
+			,@strLineXML = ''
 
 		DELETE
-		FROM @tblLGLoadDetail
+		FROM @tblIPContractFeed
 
-		SELECT @strLineXML = ''
+		INSERT INTO @tblIPContractFeed (intContractFeedId)
+		SELECT CF.intContractFeedId
+		FROM tblIPContractFeed CF
+		WHERE CF.intLoadId = @intMainLoadId
+			AND CF.intStatusId = - 1
 
-		INSERT INTO @tblLGLoadDetail (intLoadDetailId)
-		SELECT LD.intLoadDetailId
-		FROM tblLGLoadDetail LD
-		WHERE LD.intLoadDetailId = @intLoadDetailId
-			AND LD.intLoadId = @intLoadId
+		SELECT @intContractFeedId = MIN(intContractFeedId)
+		FROM @tblIPContractFeed
 
-		SELECT @intLoadDetailId = MIN(intLoadDetailId)
-		FROM @tblLGLoadDetail
-
-		WHILE @intLoadDetailId IS NOT NULL
+		IF @intContractFeedId IS NULL
 		BEGIN
+			GOTO NextLoad
+		END
+
+		WHILE @intContractFeedId IS NOT NULL
+		BEGIN
+			SELECT @strHeaderRowState = NULL
+				,@strError = ''
+
+			SELECT @intLoadId = NULL
+				,@intLoadDetailId = NULL
+				,@intCompanyLocationId = NULL
+				,@ysnPosted = 0
+
+			SELECT @strLoadNumber = NULL
+				,@strVendorAccountNum = NULL
+				,@strLocationName = NULL
+				,@strCommodityCode = NULL
+				,@strERPPONumber = NULL
+
+			SELECT @intLoadId = intLoadId
+				,@intLoadDetailId = intLoadDetailId
+				,@intCompanyLocationId = intCompanyLocationId
+				,@strLoadNumber = strLoadNumber
+				,@strVendorAccountNum = strVendorAccountNum
+				,@strLocationName = strLocationName
+				,@strCommodityCode = strCommodityCode
+				,@strERPPONumber = strERPPONumber
+			FROM dbo.tblIPContractFeed
+			WHERE intContractFeedId = @intContractFeedId
+
+			IF EXISTS (
+					SELECT 1
+					FROM tblIPContractFeed
+					WHERE intLoadId = @intLoadId
+						--AND intLoadDetailId = @intLoadDetailId
+						AND intContractFeedId < @intContractFeedId
+						AND ISNULL(intStatusId, 0) IN (
+							2
+							,4
+							)
+					)
+			BEGIN
+				SELECT @strHeaderRowState = 'U'
+			END
+			ELSE
+			BEGIN
+				SELECT @strHeaderRowState = 'C'
+			END
+
+			IF @strHeaderRowState = 'C'
+				AND ISNULL(@strERPPONumber, '') <> ''
+			BEGIN
+				SELECT @strHeaderRowState = 'U'
+			END
+
+			IF ISNULL(@strLoadNumber, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Load Number cannot be blank. '
+			END
+
+			IF ISNULL(@strVendorAccountNum, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Vendor Account Number cannot be blank. '
+			END
+
+			IF ISNULL(@strLocationName, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Location cannot be blank. '
+			END
+
+			IF ISNULL(@strCommodityCode, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Commodity cannot be blank. '
+			END
+
+			IF @strError <> ''
+			BEGIN
+				UPDATE dbo.tblIPContractFeed
+				SET strMessage = @strError
+					,intStatusId = 1
+				WHERE intContractFeedId = @intContractFeedId
+
+				GOTO NextRec
+			END
+
+			IF @strHeaderRowState <> 'C'
+				AND ISNULL(@strERPPONumber, '') = ''
+			BEGIN
+				UPDATE dbo.tblIPContractFeed
+				SET strMessage = 'ERP PO Number is not available. '
+				WHERE intContractFeedId = @intContractFeedId
+
+				GOTO NextRec
+			END
+
+			-- If previous feed is waiting for acknowledgement then do not send the current feed
+			IF EXISTS (
+					SELECT TOP 1 1
+					FROM tblIPContractFeed CF
+					WHERE CF.intLoadId = @intLoadId
+						AND CF.intLoadDetailId = @intLoadDetailId
+						AND CF.intContractFeedId < @intContractFeedId
+						AND CF.intStatusId = 2
+					ORDER BY CF.intContractFeedId DESC
+					)
+			BEGIN
+				UPDATE dbo.tblIPContractFeed
+				SET strMessage = 'Previous feed is waiting for acknowledgement. '
+				WHERE intContractFeedId = @intContractFeedId
+
+				GOTO NextRec
+			END
+
+			-- Vendor should be same for all the details in a LS
+			IF EXISTS (
+					SELECT 1
+					FROM tblIPContractFeed CF WITH (NOLOCK)
+					WHERE CF.intLoadId = @intLoadId
+						AND CF.strVendorAccountNum <> @strVendorAccountNum
+					)
+			BEGIN
+				UPDATE dbo.tblIPContractFeed
+				SET strMessage = 'Vendor should be same for all the order details in a LS. '
+					,intStatusId = 1
+				WHERE intContractFeedId = @intContractFeedId
+
+				GOTO NextRec
+			END
+
+			IF ISNULL(@strHeaderXML, '') = ''
+			BEGIN
+				SELECT @strHeaderXML = ''
+
+				SELECT @strHeaderXML += '<Header>'
+
+				SELECT @strHeaderXML += '<RefNo>' + @strLoadNumber + '</RefNo>'
+
+				SELECT @strHeaderXML += '<VendorAccountNo>' + @strVendorAccountNum + '</VendorAccountNo>'
+
+				SELECT @strHeaderXML += '<Location>' + @strLocationName + '</Location>'
+
+				SELECT @strHeaderXML += '<HeaderRowState>' + @strHeaderRowState + '</HeaderRowState>'
+
+				SELECT @strHeaderXML += '<Commodity>' + @strCommodityCode + '</Commodity>'
+			END
+
 			SELECT @strContractNumber = NULL
 				,@intContractSeq = NULL
+				,@intDetailNumber = NULL
 				,@strERPContractNumber = NULL
 				,@strERPPONumber = NULL
 				,@strERPItemNumber = NULL
@@ -357,15 +368,14 @@ BEGIN TRY
 				SELECT @strDetailRowState = 'U'
 			END
 
-			IF @strHeaderRowState = 'C'
-			BEGIN
-				SELECT @strDetailRowState = 'C'
-			END
+			SELECT @intDetailNumber = LD.intDetailNumber
+			FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
+			WHERE LD.intLoadDetailId = @intLoadDetailId
 
 			SELECT @strMarketZoneCode = strMarketZoneCode
 				,@ysnPosted = L.ysnPosted
-			FROM dbo.tblLGLoad L
-			JOIN dbo.tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
+			FROM dbo.tblLGLoad L WITH (NOLOCK)
+			JOIN dbo.tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = L.intMarketZoneId
 			WHERE intLoadId = @intLoadId
 
 			SELECT @strBuyingCountry = BCL.strCountry
@@ -508,11 +518,6 @@ BEGIN TRY
 				BEGIN
 					SELECT @strError = @strError + 'ERP PO Number cannot be blank. '
 				END
-
-				IF ISNULL(@strERPItemNumber, '') = ''
-				BEGIN
-					SELECT @strError = @strError + 'ERP PO Line Item No. cannot be blank. '
-				END
 			END
 
 			IF ISNULL(@strItemNo, '') = ''
@@ -570,6 +575,28 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Virtual Plant cannot be blank. '
 			END
 
+			IF ISNULL(@intDetailNumber, 0) = 0
+			BEGIN
+				SELECT @strError = @strError + 'Sequence No cannot be blank. '
+			END
+
+			IF @strDetailRowState = 'C'
+				AND ISNULL(@strERPItemNumber, '') = ''
+				AND ISNULL(@intDetailNumber, 0) > 0
+			BEGIN
+				SELECT @strERPItemNumber = RIGHT('000' + CONVERT(NVARCHAR, (@intDetailNumber * 10)), 5)
+
+				UPDATE tblIPContractFeed
+				SET strERPItemNumber = @strERPItemNumber
+				WHERE intContractFeedId = @intContractFeedId
+					AND intLoadDetailId = @intLoadDetailId
+			END
+
+			IF ISNULL(@strERPItemNumber, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'ERP PO Line Item No. cannot be blank. '
+			END
+
 			IF @strError <> ''
 			BEGIN
 				UPDATE tblIPContractFeed
@@ -580,7 +607,7 @@ BEGIN TRY
 
 				SELECT @strError = ''
 
-				GOTO NextItemRec
+				GOTO NextRec
 			END
 
 			SELECT @strItemXML = ''
@@ -598,7 +625,7 @@ BEGIN TRY
 			ELSE
 				SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'
 
-			SELECT @strItemXML += '<SequenceNo>' + ISNULL(LTRIM(@intContractSeq), '') + '</SequenceNo>'
+			SELECT @strItemXML += '<SequenceNo>' + ISNULL(LTRIM(@intDetailNumber), '') + '</SequenceNo>'
 
 			SELECT @strItemXML += '<PONumber>' + ISNULL(@strERPPONumber, '') + '</PONumber>'
 
@@ -644,11 +671,9 @@ BEGIN TRY
 				WHERE intContractFeedId = @intContractFeedId
 					AND intLoadDetailId = @intLoadDetailId
 
-				GOTO NextItemRec
-					--GOTO NextRec
+				GOTO NextRec
 			END
 
-			-- Batch fields validations
 			IF ISNULL(@strBatchId, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Batch Id cannot be blank. '
@@ -697,7 +722,7 @@ BEGIN TRY
 
 				SELECT @strError = ''
 
-				GOTO NextItemRec
+				GOTO NextRec
 			END
 
 			SELECT @strBatchXML = ''
@@ -801,7 +826,6 @@ BEGIN TRY
 				+ '</Batch>'
 			FROM vyuMFBatch B WITH (NOLOCK)
 			--LEFT JOIN dbo.tblQMSample S WITH (NOLOCK) ON S.intSampleId = B.intSampleId
-			--LEFT JOIN dbo.tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = S.intMarketZoneId
 			LEFT JOIN dbo.tblSMCurrency C WITH (NOLOCK) ON C.intCurrencyID = B.intCurrencyId
 			LEFT JOIN dbo.tblSMCity CITY WITH (NOLOCK) ON CITY.intCityId = B.intFromPortId
 			LEFT JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = B.intOriginalItemId
@@ -818,8 +842,7 @@ BEGIN TRY
 				WHERE intContractFeedId = @intContractFeedId
 					AND intLoadDetailId = @intLoadDetailId
 
-				--GOTO NextRec
-				GOTO NextItemRec
+				GOTO NextRec
 			END
 
 			SELECT @strLineXML += @strItemXML + @strBatchXML + '</Line>'
@@ -827,32 +850,32 @@ BEGIN TRY
 			INSERT INTO @ContractFeedId (intContractFeedId)
 			SELECT @intContractFeedId
 
-			NextItemRec:
+			IF @ysnUpdateFeedStatus = 1
+			BEGIN
+				UPDATE tblIPContractFeed
+				SET intStatusId = 2
+					,strMessage = NULL
+					,strFeedStatus = 'Awt Ack'
+				WHERE intContractFeedId = @intContractFeedId
+			END
 
-			SELECT @intLoadDetailId = MIN(intLoadDetailId)
-			FROM @tblLGLoadDetail
-			WHERE intLoadDetailId > @intLoadDetailId
+			NextRec:
+
+			SELECT @intContractFeedId = MIN(intContractFeedId)
+			FROM @tblIPContractFeed
+			WHERE intContractFeedId > @intContractFeedId
 		END
-
+		
 		IF ISNULL(@strLineXML, '') <> ''
 		BEGIN
 			SELECT @strXML += @strHeaderXML + @strLineXML + '</Header>'
 		END
 
-		IF @ysnUpdateFeedStatus = 1
-		BEGIN
-			UPDATE tblIPContractFeed
-			SET intStatusId = 2
-				,strMessage = NULL
-				,strFeedStatus = 'Awt Ack'
-			WHERE intContractFeedId = @intContractFeedId
-		END
+		NextLoad:
 
-		NextRec:
-
-		SELECT @intContractFeedId = MIN(intContractFeedId)
-		FROM @tblIPContractFeed
-		WHERE intContractFeedId > @intContractFeedId
+		SELECT @intMainLoadId = MIN(intLoadId)
+		FROM @tblLGLoad
+		WHERE intLoadId > @intMainLoadId
 	END
 
 	IF @strXML <> ''
@@ -905,9 +928,9 @@ BEGIN TRY
 
 	UPDATE tblIPContractFeed
 	SET intStatusId = NULL
-	WHERE intContractFeedId IN (
-			SELECT intContractFeedId
-			FROM @tblIPContractFeed
+	WHERE intLoadId IN (
+			SELECT intLoadId
+			FROM @tblLGLoad
 			)
 		AND intStatusId = - 1
 
