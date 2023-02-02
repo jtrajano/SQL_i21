@@ -89,11 +89,11 @@ BEGIN TRY
 					, intCommodityId = c.intCommodityId
 					, intCompanyLocationId = l.intCompanyLocationId
 					, strBuySell = ti.strBuySell
-					, intCurrencyExchangeRateTypeId = currencyPair.intCurrencyExchangeRateTypeId
-					, intFromCurrencyId = currencyPair.intFromCurrencyId
-					, intToCurrencyId = currencyPair.intToCurrencyId
-					, strFromCurrency = currencyPair.strFromCurrency
-					, strToCurrency = currencyPair.strToCurrency
+					, intCurrencyPairId = currencyPair.intCurrencyPairId
+					, intFromCurrencyId = currencyPair.intToCurrencyId
+					, intToCurrencyId = currencyPair.intFromCurrencyId
+					, strFromCurrency = currencyPair.strToCurrency
+					, strToCurrency = currencyPair.strFromCurrency
 					, intBankId = bank.intBankId
 					, intBuyBankAccountId = buyBankAcct.intBankAccountId
 					, intBankAccountId = sellBankAcct.intBankAccountId
@@ -120,7 +120,7 @@ BEGIN TRY
 				LEFT JOIN tblCTSubBook sb ON sb.strSubBook = ti.strSubBook AND b.intBookId = sb.intBookId
 				LEFT JOIN @tmpInstrumentTypeTable instrument ON instrument.strSelectedInstrumentType = ti.strSelectedInstrumentType
 				LEFT JOIN @tmpInstrumentType2Table instrument2 ON instrument2.strInstrumentType = ti.strInstrumentType
-				LEFT JOIN vyuRKGetCurrencyPair currencyPair ON currencyPair.strCurrencyExchangeRateType = ti.strCurrencyExchangeRateTypeId
+				LEFT JOIN vyuRKCurrencyPairSetup currencyPair ON currencyPair.strCurrencyPair = ti.strCurrencyExchangeRateTypeId
 				LEFT JOIN tblCMBank bank ON bank.strBankName = ti.strBank
 				LEFT JOIN vyuCMBankAccount buyBankAcct ON buyBankAcct.strBankAccountNo = ti.strBuyBankAccount
 				LEFT JOIN vyuCMBankAccount sellBankAcct ON sellBankAcct.strBankAccountNo = ti.strBankAccount
@@ -171,7 +171,7 @@ BEGIN TRY
 					, intCommodityId 
 					, intLocationId
 					, strBuySell
-					, intCurrencyExchangeRateTypeId 
+					, intCurrencyPairId 
 					, intFromCurrencyId
 					, intToCurrencyId
 					, strFromCurrency
@@ -205,7 +205,7 @@ BEGIN TRY
 					, intCommodityId 
 					, intLocationId = intCompanyLocationId
 					, strBuySell
-					, intCurrencyExchangeRateTypeId 
+					, intCurrencyPairId 
 					, intFromCurrencyId
 					, intToCurrencyId
 					, strFromCurrency

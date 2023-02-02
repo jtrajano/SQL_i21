@@ -31,9 +31,11 @@ BEGIN TRY
 		, @strSellCurrency NVARCHAR(200)
 		, @intCurrencyPairId INT = NULL
 		, @ErrMsg NVARCHAR(MAX) = NULL
+		, @dblFXRateDecimals NUMERIC(16, 8)
 		
 	SELECT @strBuyCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intBuyCurrencyId
 	SELECT @strSellCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSellCurrencyId
+	SELECT @dblFXRateDecimals = dblFXRateDecimals FROM tblRKCompanyPreference
 	
 	SELECT @intCurrencyPairId = intCurrencyPairId 
 	FROM 
@@ -54,13 +56,46 @@ BEGIN TRY
 		AND intToCurrencyId = @intBuyCurrencyId 
 	) t
 
+	IF (ISNULL(@intCurrencyPairId, 0) = 0)
+	BEGIN
+		SET @ErrMsg = 'The Currency Pair Setup for Sell (' + @strSellCurrency + ') and Buy (' + @strBuyCurrency + ') Currencies is not existing.'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
+	END
+
 	SELECT TOP 1 @intCommodityId = intCommodityId FROM tblICCommodity
 	WHERE strCommodityCode = 'Currency'
 
 	IF (ISNULL(@intCommodityId, '') = '')
 	BEGIN
 		SET @ErrMsg = 'The Commodity ''Currency'' is not existing.'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
+	END
 
+	DECLARE @dblDecimalCount INT
+		, @strDecimalValues NVARCHAR(100)
+
+	-- CONTRACT RATE DECIMAL PLACE VALIDATION
+	SELECT @strDecimalValues = CAST(CAST(@dblContractRate AS float) AS NVARCHAR(100))
+	SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+
+	IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+	BEGIN
+		SET @ErrMsg = 'Contract Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ').'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
+	END
+	
+	-- LIMIT RATE DECIMAL PLACE VALIDATION
+	SELECT @strDecimalValues = CAST(CAST(@dblLimitRate AS float) AS NVARCHAR(100))
+	SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+
+	IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+	BEGIN
+		SET @ErrMsg = 'Limit Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ').'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
 	END
 
 	IF (ISNULL(@ErrMsg, '') <> '')
