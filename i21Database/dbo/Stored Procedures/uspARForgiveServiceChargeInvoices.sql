@@ -132,6 +132,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						, strItemDescription
 						, dblQtyShipped
 						, dblPrice
+						, intSalesAccountId
 					)
 					SELECT strTransactionType		= 'Credit Memo'
 						, strType					= 'Standard'
@@ -160,9 +161,11 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						, strDocumentNumber			= INV.strInvoiceNumber
 						, strItemDescription		= INV.strInvoiceNumber + ' Forgiven'
 						, dblQtyShipped				= 1
-						, dblPrice					= INV.dblInvoiceTotal				 
+						, dblPrice					= INV.dblInvoiceTotal
+						, intSalesAccountId			= ARID.intSalesAccountId				 
 					FROM tblARInvoice INV
 					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
+					INNER JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = INV.intInvoiceId
 
 					IF EXISTS (SELECT TOP 1 NULL FROM @tblCreditMemoEntries)
 						EXEC dbo.uspARProcessInvoices @InvoiceEntries 	= @tblCreditMemoEntries
