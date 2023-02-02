@@ -7,6 +7,8 @@
     [dblPrice] NUMERIC(18, 6) NULL  DEFAULT 0, 
     [intTaxGroupId] int NULL,
 	[intCategoryId] int NULL,
+	[strRegisterFuelId1] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strRegisterFuelId2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL,
 	CONSTRAINT [PK_tblSTPumpItem] PRIMARY KEY ([intStorePumpItemId]),
     CONSTRAINT [AK_tblSTPumpItem_intStoreId_intItemUOMId] UNIQUE NONCLUSTERED ([intStoreId],[intItemUOMId] ASC),

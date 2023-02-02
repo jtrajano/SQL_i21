@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @ErrorSeverity INT
 	DECLARE @ErrorState INT
 	DECLARE @ErrorNumber INT
+	DECLARE @newAttachmentId INT
 
 	BEGIN TRANSACTION
 
@@ -112,6 +113,19 @@ BEGIN TRY
 			AND	b.intRecordId = @srcRecordId
 			AND (@srcIntAttachmentId IS NULL OR a.intAttachmentId = @srcIntAttachmentId)
 	-- END - COPY ATTACHMENTS		
+
+	SET @newAttachmentId = (SELECT SCOPE_IDENTITY())
+	IF ISNULL(@newAttachmentId, 0) <> 0
+	BEGIN
+		INSERT INTO tblSMUpload(intAttachmentId, strFileIdentifier, blbFile, dtmDateUploaded, intConcurrencyId)
+		VALUES (
+			@newAttachmentId
+			, NEWID()
+			, (SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = @srcIntAttachmentId)
+			, GETUTCDATE()
+			, 1
+		)
+	END
 
 	COMMIT TRANSACTION
 END TRY
