@@ -46,15 +46,12 @@ BEGIN
 	LEFT JOIN	previous_day_reading a
 	ON			a.intProductNumber = b.intProductNumber AND
 				a.intFuelingPositionId = b.intFuelingPositionId
-	JOIN dbo.tblICItemLocation IL 
-	ON ISNULL(CAST(b.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, '')) AND
-				IL.intLocationId = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
+	JOIN dbo.tblSTPumpItem SPI 
+		ON ISNULL(CAST(b.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, '')) AND SPI.intStoreId =  @intStoreId
+	JOIN dbo.tblICItemUOM UOM 
+		ON UOM.intItemId = SPI.intItemUOMId
 	 JOIN dbo.tblICItem I 
-		ON I.intItemId = IL.intItemId
-	 JOIN dbo.tblICItemUOM UOM 
-		ON UOM.intItemId = I.intItemId
-	 JOIN dbo.tblSMCompanyLocation CL 
-		ON CL.intCompanyLocationId = IL.intLocationId
+		ON I.intItemId = UOM.intItemId
 	 JOIN dbo.tblSTStore S 
-		ON S.intCompanyLocationId = CL.intCompanyLocationId
+		ON S.intStoreId = SPI.intStoreId
 END

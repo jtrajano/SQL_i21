@@ -44,7 +44,7 @@ BEGIN TRY
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
-		IF  NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0')
+		IF  NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0')
 		BEGIN
 			INSERT INTO @tmpTransaction(intId
 				, intTransactionDetailId
@@ -100,7 +100,9 @@ BEGIN TRY
 				, strEmail
 				, strImportVerificationNumber
 				, strConsignorName
-				, strConsignorFederalTaxId)
+				, strConsignorFederalTaxId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intLoadDistributionDetailId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblTRLoadDistributionDetail.intLoadDistributionDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -156,6 +158,8 @@ BEGIN TRY
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 					, Seller.str1099Name
 					, Seller.strFederalTaxId
+					, strOriginFacilityNumber = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+					, strDestinationFacilityNumber = DestinationLoc.strOregonFacilityNumber
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -293,7 +297,9 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -320,20 +326,20 @@ BEGIN TRY
 				, strOriginCity
 				, strOriginCounty
 				, strOriginState
-				, strCustomerName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName
 				, REPLACE(strCustomerFederalTaxId, '-', '')
-				, strShipVia
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia 
 				, strTransporterLicense
 				, strTransportationMode
-				, strTransporterName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName
 				, REPLACE(strTransporterFederalTaxId, '-', '')
-				, strConsignorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName 
 				, REPLACE(strConsignorFederalTaxId, '-', '')
 				, strTaxCode
 				, strTerminalControlNumber
-				, strVendorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName  
 				, REPLACE(strVendorFederalTaxId, '-', '')
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
@@ -359,6 +365,8 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strImportVerificationNumber
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
 			FROM @tmpTransaction Trans
 		END
 

@@ -10,11 +10,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
-
 	DECLARE @ErrorMessage NVARCHAR(4000)
 	DECLARE @ErrorSeverity INT
 	DECLARE @ErrorState INT
-
 		
 	BEGIN TRY
 
@@ -26,35 +24,52 @@ BEGIN
 			DD.strInvoiceNo,
 			DD.dtmDueDate,
 			DD.dblInvoiceAmount,
-			DD.intEntityVendorId
+			DD.intEntityVendorId,
+			DD.strBillOfLading
 		FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
 
 		DECLARE @intImportDtnDetailId INT = NULL,
 			@intInventoryReceiptId INT = NULL,
 			@intTermId INT = NULL,
-			@strInvoiceNo NVARCHAR(100) = NULL,
+			@strInvoiceNo NVARCHAR(50) = NULL,
 			@dtmDueDate DATETIME = NULL,
 			@dblInvoiceAmount DECIMAL(18,6) = NULL,
-			@intEntityVendorId INT = NULL
+			@intEntityVendorId INT = NULL,
+			@strBillOfLading NVARCHAR(50) = NULL
 	
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId
+		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @strBillOfLading
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
+			-- Handle previous successful duplicates
+			IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess
+						WHERE strBillOfLading = @strBillOfLading
+							AND intImportDtnDetailId <> @intImportDtnDetailId
+							AND ysnSuccess = 1)
+			BEGIN
+				UPDATE tblTRImportDtnDetail
+				SET ysnReImport = 1
+					, ysnValid = 0
+					, strMessage = 'Bill of Lading has been previously processed.'
+				WHERE intImportDtnDetailId = @intImportDtnDetailId
+			END
+			ELSE
+			BEGIN
+				EXEC uspTRInsertLoadFromImport 
+					@intImportLoadId = @intImportLoadId
+					, @intImportDtnDetailId = @intImportDtnDetailId
+					, @intInventoryReceiptId = @intInventoryReceiptId
+					, @intTermId = @intTermId
+					, @strInvoiceNo = @strInvoiceNo
+					, @dtmDueDate = @dtmDueDate
+					, @dblInvoiceAmount = @dblInvoiceAmount
+					, @intEntityVendorId = @intEntityVendorId
+					, @intUserId = @intUserId
+					, @strBillOfLading = @strBillOfLading
+					, @ysnOverrideTolerance = 0
+			END
 
-			EXEC uspTRInsertLoadFromImport 
-				@intImportLoadId = @intImportLoadId
-				, @intImportDtnDetailId = @intImportDtnDetailId
-				, @intInventoryReceiptId = @intInventoryReceiptId
-				, @intTermId = @intTermId
-				, @strInvoiceNo = @strInvoiceNo
-				, @dtmDueDate = @dtmDueDate
-				, @dblInvoiceAmount = @dblInvoiceAmount
-				, @intEntityVendorId = @intEntityVendorId
-				, @intUserId = @intUserId
-				, @ysnOverrideTolerance = 0
-
-			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId
+			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @strBillOfLading
 		END
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran

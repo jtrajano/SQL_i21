@@ -54,7 +54,8 @@ BEGIN
 			,@IntegrationLogId	= @IntegrationLogId
 			,@UserId			= @UserId
 			,@RaiseError		= @RaiseError
-			,@ErrorMessage		= @AddDetailError OUTPUT			 
+			,@ErrorMessage		= @AddDetailError OUTPUT
+			,@SkipRecompute		= @SkipRecompute
 
 	IF LEN(ISNULL(@AddDetailError,'')) > 0
 		BEGIN
@@ -113,7 +114,8 @@ IF EXISTS(SELECT TOP 1 NULL FROM @NonInventory)
 				,@IntegrationLogId	= @IntegrationLogId
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
-				,@ErrorMessage		= @AddDetailError OUTPUT			 
+				,@ErrorMessage		= @AddDetailError OUTPUT
+				,@SkipRecompute		= @SkipRecompute
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
@@ -174,6 +176,7 @@ IF EXISTS(SELECT TOP 1 NULL FROM @MiscItem)
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
 				,@ErrorMessage		= @AddDetailError OUTPUT
+				,@SkipRecompute		= @SkipRecompute
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -210,25 +213,6 @@ IF EXISTS(SELECT TOP 1 NULL FROM @MiscItem)
 			RETURN 0;
 		END CATCH	
 	END
-	
-		
---UPDATE tblARInvoiceDetail SET intStorageScheduleTypeId = ABC.intStorageScheduleTypeId, intCompanyLocationSubLocationId = ABC.intSubLocationId, intStorageLocationId = ABC.intStorageLocationId
---FROM 
---(SELECT intInvoiceId FROM tblARInvoiceDetail) ARID
---INNER JOIN
---(
---SELECT intInvoiceId, intStorageScheduleTypeId, intStorageLocationId, intSubLocationId FROM tblICInventoryShipment ICIS WITH (NOLOCK)
---INNER JOIN (SELECT intInventoryShipmentId, intItemId, intItemUOMId, intOrderId, intStorageLocationId, intSubLocationId FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI ON ICIS.intInventoryShipmentId = ICISI.intInventoryShipmentId
---INNER JOIN (SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, intStorageScheduleTypeId, intItemId, intItemUOMId FROM tblSOSalesOrder SO  WITH (NOLOCK)
---			INNER JOIN (SELECT intSalesOrderId, intStorageScheduleTypeId, intItemId, intItemUOMId  FROM tblSOSalesOrderDetail WITH (NOLOCK)) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId) SO ON ICIS.strReferenceNumber = SO.strSalesOrderNumber AND ICISI.intItemId = SO.intItemId AND ICISI.intItemUOMId = SO.intItemUOMId
---INNER JOIN (SELECT ARI.intInvoiceId, ARID.strDocumentNumber, strInvoiceNumber, intItemId, intItemUOMId FROM tblARInvoice ARI   WITH (NOLOCK)
---			INNER JOIN (SELECT intInvoiceId, strDocumentNumber, intItemId, intItemUOMId FROM tblARInvoiceDetail WITH (NOLOCK)) ARID ON ARI.intInvoiceId = ARID.intInvoiceId 
---						WHERE strDocumentNumber IS NOT NULL AND ISNULL(strDocumentNumber,'') <> '' AND ARI.intInvoiceId = @InvoiceId ) ARI ON ICIS.strShipmentNumber = ARI.strDocumentNumber AND ICISI.intItemId = ARI.intItemId AND ICISI.intItemUOMId = ARI.intItemUOMId
---) ABC ON ARID.intInvoiceId = ABC.intInvoiceId
---WHERE ARID.intInvoiceId = @InvoiceId
-
-
---EXEC [dbo].[uspARReComputeInvoiceAmounts] @InvoiceId
 
 DECLARE @strInvoiceIds NVARCHAR(MAX) = NULL
 DECLARE @strSessionId NVARCHAR(200) = NEWID()

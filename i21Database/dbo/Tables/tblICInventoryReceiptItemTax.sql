@@ -28,6 +28,7 @@ Type the overview for the table here.
 		[ysnSeparateOnInvoice] BIT NULL DEFAULT ((0)),
 		[ysnCheckoffTax] BIT NULL DEFAULT ((0)),
 		[ysnTaxExempt] BIT NULL DEFAULT ((0)),
+		[ysnAddToCost] BIT NULL DEFAULT ((0)),
 		[strTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[dblQty] NUMERIC(38, 20) NULL DEFAULT ((1)),
 		[dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
@@ -45,6 +46,10 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblSMTaxGroup] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroup]([intTaxGroupId]),
 		CONSTRAINT [FK_tblICInventoryReceiptItemTax_tblGLAccount] FOREIGN KEY ([intTaxAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItemTax]
+		ON [dbo].[tblICInventoryReceiptItemTax]([intInventoryReceiptItemId] ASC);
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',

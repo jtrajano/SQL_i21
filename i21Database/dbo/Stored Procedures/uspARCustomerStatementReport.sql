@@ -48,8 +48,6 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @intWriteOffPaymentMethodId			AS INT				= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
 	  , @ysnStretchLogo						AS BIT				= 0
-	  , @blbLogo							AS VARBINARY(MAX)	= NULL
-	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 	  , @dblTotalAR							NUMERIC(18,6)		= NULL
@@ -154,9 +152,6 @@ SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 SELECT TOP 1  @ysnStretchLogo = ysnStretchLogo
 			, @ysnUseInvoiceDateAsDue = CASE WHEN strCustomerAgingBy = 'Invoice Create Date' AND @strStatementFormatLocal = 'Zeeland Open Item' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblARCompanyPreference WITH (NOLOCK)
-
-SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
-SELECT @blbStretchedLogo = dbo.fnSMGetCompanyLogo('Stretched Header')
 
 SELECT TOP 1 @strCompanyName = strCompanyName
 		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
@@ -304,7 +299,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom				= @dtmDateFromLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 
 UPDATE C
-SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strBillToLocationName ELSE NULL END, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+SET strFullAddress				= CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strBillToLocationName ELSE '' END + CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(CS.strBillToAddress)), '') + CHAR(13) + char(10) + ISNULL(NULLIF(CS.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(CS.strBillToState, ''), '') + ISNULL(', ' + NULLIF(CS.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(CS.strBillToCountry, ''), '')
   , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
 FROM #CUSTOMERS C
 INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
@@ -677,7 +672,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strStatementFormat
 	, ysnStatementCreditLimit
 	, strLogoType
-	, blbLogo
 )
 SELECT MAINREPORT.* 
 	 , dblCreditAvailable	= CASE WHEN (MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)) < 0 THEN 0 ELSE MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0) END
@@ -695,7 +689,6 @@ SELECT MAINREPORT.*
 	 , strStatementFormat	= @strStatementFormatLocal
 	 , ysnStatementCreditLimit	= CUSTOMER.ysnStatementCreditLimit
 	 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
-	 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
 FROM (
 	SELECT STATEMENTREPORT.strReferenceNumber
 		 , STATEMENTREPORT.intEntityCustomerId
@@ -773,7 +766,6 @@ LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = @strCompanyLoc
 
 UPDATE tblARCustomerStatementStagingTable
 SET strComment			= dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
-  , blbLogo				= ISNULL(blbLogo, CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN ISNULL(@blbStretchedLogo, @blbLogo) ELSE @blbLogo END)
   , strCompanyName		= @strCompanyName
   , strCompanyAddress	= @strCompanyAddress
   , ysnStretchLogo 		= ISNULL(@ysnStretchLogo, 0)

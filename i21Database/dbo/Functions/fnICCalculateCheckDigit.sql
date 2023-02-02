@@ -9,6 +9,11 @@ BEGIN
     DECLARE @intTotal AS INT = 0
 	DECLARE @intCheckDigit AS INT 
 
+	IF (LEN(@UPC) = 10 AND ISNUMERIC(@UPC) = 1)
+	BEGIN 
+		SET @UPC = '0' + @UPC
+	END 
+
     IF (LEN(@UPC) = 11 AND ISNUMERIC(@UPC) = 1)
     BEGIN
 

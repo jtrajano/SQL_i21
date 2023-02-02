@@ -132,6 +132,70 @@ BEGIN
 	LEFT JOIN tblAP1099DIVCategory C ON C.strCategory = VL.str1099Type
 	OUTER APPLY vyuAPGuidGenerator 
 	WHERE guiApiUniqueId = @guiApiUniqueId AND (NULLIF(VL.str1099Type, '') IS NOT NULL AND C.int1099CategoryId IS NULL)
+
+	-- Remove duplicate location from file
+	;WITH cte AS
+	(
+		SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.strEntityNo, sr.strLocationName ORDER BY sr.strEntityNo, sr.strLocationName) AS RowNumber
+		FROM tblApiSchemaVendorLocation sr
+		WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	)
+	INSERT @returntable
+	SELECT
+		  g.strNewId
+		, @guiLogId
+		, 'Error'
+		, 'Failed'
+		, 'Skipped'
+		, sr.intRowNumber
+		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name')
+		, sr.strLocationName
+		, 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + sr.strLocationName + ' of the vendor ' + dbo.fnApiSchemaTransformMapField(g.strNewId, 'Entity No')  + ' has duplicates in the file.'
+	FROM cte sr
+	OUTER APPLY vyuAPGuidGenerator g
+	WHERE sr.guiApiUniqueId = @guiApiUniqueId
+	AND sr.RowNumber > 1
+
+	INSERT @returntable
+	SELECT
+		  g.strNewId
+		, @guiLogId
+		, 'Error'
+		, 'Failed'
+		, 'Skipped'
+		, vts.intRowNumber
+		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') 
+		, vts.strLocationName
+		, 'The vendor location with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ' "' + vts.strLocationName + '" already exists.'
+	FROM tblApiSchemaVendorLocation vts
+	JOIN tblEMEntity e ON e.strEntityNo = vts.strEntityNo
+	JOIN tblEMEntityLocation el ON el.intEntityId = e.intEntityId
+		AND ISNULL(vts.strLocationName, '') = ISNULL(el.strLocationName, '')
+	OUTER APPLY vyuAPGuidGenerator g
+	WHERE vts.guiApiUniqueId = @guiApiUniqueId
+		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
 	
+	INSERT @returntable
+	SELECT
+		  g.strNewId
+		, @guiLogId
+		, 'Error'
+		, 'Failed'
+		, 'Skipped'
+		, vts.intRowNumber
+		, dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') 
+		, vts.strLocationName
+		, 'The vendor location with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Location Name') + ' "' + vts.strLocationName + '" with a ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Farm Field Number')  + ' ' + vts.strFarmFieldNumber + ' already exists.'
+	FROM tblApiSchemaVendorLocation vts
+	JOIN tblEMEntity e ON e.strEntityNo = vts.strEntityNo
+	JOIN tblEMEntityLocation el ON el.intEntityId = e.intEntityId
+		AND vts.strLocationName = el.strLocationName
+		AND ISNULL(vts.strFarmFieldNumber, '') = ISNULL(el.strFarmFieldNumber, '')
+	OUTER APPLY vyuAPGuidGenerator g
+	WHERE vts.guiApiUniqueId = @guiApiUniqueId
+		AND NULLIF(vts.strEntityNo, '') IS NOT NULL
+		AND NULLIF(vts.strLocationName, '') IS NOT NULL
+		AND NULLIF(vts.strFarmFieldNumber, '') IS NOT NULL
+
 	RETURN
 END

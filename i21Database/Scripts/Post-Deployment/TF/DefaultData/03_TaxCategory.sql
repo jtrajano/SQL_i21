@@ -571,7 +571,9 @@ INSERT INTO @TaxCategoryTN(
 SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Gasoline', intMasterId = 421
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Clear', intMasterId = 422
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Dyed', intMasterId = 423
-
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Kerosene', intMasterId = 424
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Undyed', intMasterId = 425
+                                                                          
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
 
 DELETE @TaxCategoryTN
@@ -628,4 +630,27 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'VA', @TaxCategories = @TaxCategoryVA
 
 DELETE @TaxCategoryVA
+GO
+
+PRINT ('Deploying WY Tax Category')
+GO
+
+DECLARE @TaxCategoryWY AS TFTaxCategory
+
+INSERT INTO @TaxCategoryWY(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+	      SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY Excise Tax Gasoline/Gasohol/Propane/CNG'	, intMasterId =	500001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY Excise Tax Blending Compenents'	, intMasterId =	500002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY Excise Tax Aviation Gas'	, intMasterId =	500003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY Excise Tax Jet Fuel'	, intMasterId =	500004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY Excise Tax Undyed Diesel/Kero/Bio Blend/LNG'	, intMasterId =	500005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY Excise Tax Dyed Diesel/Kero/Bio Blend'	, intMasterId =	500006
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WY', @TaxCategories = @TaxCategoryWY
+
+DELETE @TaxCategoryWY
 GO

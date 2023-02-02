@@ -2,18 +2,24 @@ CREATE PROCEDURE uspGLRebuildSegmentMapping
 AS
 SET XACT_ABORT ON
 
-DELETE FROM tblGLAccountSegmentMapping
+truncate table tblGLAccountSegmentMapping
 
 DECLARE @tbl TABLE(
-	intAccountStructureId int
+	intAccountStructureId int,
+	intLength INT,
+	intSort int
 )
-INSERT INTO @tbl select intAccountStructureId from tblGLAccountStructure where strType <> 'Divider' order by  intSort
+declare @strMask nvarchar(1)
+SELECT  @strMask = strMask from tblGLAccountStructure where strType = 'Divider'
+INSERT INTO @tbl (intAccountStructureId, intLength,intSort) 
+select intAccountStructureId, intLength,intSort from tblGLAccountStructure where strType <> 'Divider' order by  intSort
 
 DECLARE @i int
-DECLARE @x INT = 1
-WHILE EXISTS (SELECT TOP 1 1 FROM @tbl)
+DECLARE @x INT = 1, @intLength int
+WHILE EXISTS (SELECT TOP 1 1 FROM @tbl )
 BEGIN
-	SELECT TOP 1 @i = intAccountStructureId from @tbl
+	SELECT TOP 1 @i = intAccountStructureId ,@intLength = intLength from @tbl order by intSort
+
 	INSERT INTO tblGLAccountSegmentMapping(intAccountId, intAccountSegmentId, intConcurrencyId)
 	SELECT 
 	intAccountId,
@@ -22,13 +28,12 @@ BEGIN
 	FROM dbo.tblGLAccount A
 	OUTER APPLY(
 		SELECT intAccountSegmentId FROM tblGLAccountSegment WHERE intAccountStructureId = @i AND strCode = 
-		REVERSE(PARSENAME(REPLACE(REVERSE(A.strAccountId), '-', '.'), @x)) 
+		substring(REPLACE(A.strAccountId, @strMask,''), @x, @intLength)
 	)S
-	SET @x +=1
+	SET @x += @intLength
+	
 	DELETE FROM @tbl where intAccountStructureId = @i
 END
 
-	
 
-
-
+--sele

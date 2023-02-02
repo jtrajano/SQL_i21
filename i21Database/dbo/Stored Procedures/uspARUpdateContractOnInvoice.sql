@@ -312,6 +312,7 @@ BEGIN TRY
 		SELECT TOP 1 TMO.dblQuantity
 			       , TMO.intContractDetailId
 		FROM tblTMOrder TMO 
+		INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
@@ -332,14 +333,17 @@ BEGIN TRY
 	CROSS APPLY ( 
 		SELECT TOP 1 TMO.*
 		FROM tblTMOrder TMO 
+		INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
 		WHERE TMO.intSiteId = P.intSiteId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
 	) TMO 
 	WHERE P.intSiteId IS NOT NULL
-	AND P.ysnMobileBilling = 0
+	  AND P.ysnMobileBilling = 0
 	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
+
+	SELECT '@tblToProcess', * FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
 	BEGIN

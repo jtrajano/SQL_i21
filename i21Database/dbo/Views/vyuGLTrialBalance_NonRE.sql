@@ -9,7 +9,7 @@ WITH DETAIL AS(
 		tblGLAccount A
 		inner join tblGLFiscalYear F on 1=1
 		JOIN tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
-	WHERE A.intAccountId <> F.intRetainAccount
+	--WHERE A.intAccountId <> F.intRetainAccount
 )
 ,ACCOUNTTYPE AS
 (
@@ -20,6 +20,7 @@ WITH DETAIL AS(
 SELECT
 	A.intAccountId, A.intFiscalYearId,A.intGLFiscalYearPeriodId
 	,A.PeriodStart
+	,D.intCurrencyId
 	,YTD =	SUM(ISNULL(D.dblDebit, 0) - ISNULL(D.dblCredit,0))
 	,MTD =	SUM(CASE WHEN D.dtmDate BETWEEN A.PeriodStart AND A.PeriodEnd
 				THEN ISNULL(D.dblDebit, 0) - ISNULL(D.dblCredit,0)
@@ -40,3 +41,4 @@ GROUP BY
 	,A.intFiscalYearId
 	,A.intGLFiscalYearPeriodId
 	,A.PeriodStart
+	,D.intCurrencyId

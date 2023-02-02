@@ -796,8 +796,62 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
+--LEVEL 29
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 29 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+  INSERT INTO [dbo].[tblSMImportFileColumnDetail]
+      ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileHeaderId,NULL,29,2,'radiant:SalesRestrictionStrategyID','tblSTstgPricebookSendFile','SalesRestrictionStrategyID',NULL,27,NULL,2,17)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 29 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 29
+  UPDATE [dbo].[tblSMImportFileColumnDetail]
+  SET [intImportFileHeaderId] = @intImportFileHeaderId
+       ,[intImportFileRecordMarkerId] = NULL
+       ,[intLevel] = 29
+       ,[intPosition] = 2
+       ,[strXMLTag] = 'radiant:SalesRestrictionStrategyID'
+       ,[strTable] = 'tblSTstgPricebookSendFile'
+       ,[strColumnName] = 'SalesRestrictionStrategyID'
+       ,[strDataType] = NULL
+       ,[intLength] = 27
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 18
+  WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+END
+
+--LEVEL 30
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 30 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+  INSERT INTO [dbo].[tblSMImportFileColumnDetail]
+      ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileHeaderId,NULL,30,3,'radiant:SalesRestrictionStrategyID','tblSTstgPricebookSendFile','SalesRestrictionStrategyID2',NULL,27,NULL,2,17)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 30 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 30
+  UPDATE [dbo].[tblSMImportFileColumnDetail]
+  SET [intImportFileHeaderId] = @intImportFileHeaderId
+       ,[intImportFileRecordMarkerId] = NULL
+       ,[intLevel] = 30
+       ,[intPosition] = 3
+       ,[strXMLTag] = 'radiant:SalesRestrictionStrategyID'
+       ,[strTable] = 'tblSTstgPricebookSendFile'
+       ,[strColumnName] = 'SalesRestrictionStrategyID2'
+       ,[strDataType] = NULL
+       ,[intLength] = 27
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 18
+  WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+END
+
 --Delete Rows Not Included
-DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28)
+DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30)
 
 
 

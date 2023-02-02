@@ -13,7 +13,7 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	--DECLARE @year INT = 2016
+	--DECLARE @year INT = 2022
 	--DECLARE @reprint BIT = 0
 	--DECLARE @corrected BIT = 0
 	--DECLARE @vendorFrom NVARCHAR(100) = NULL
@@ -147,7 +147,16 @@ BEGIN
 					+ CAST(FLOOR((CAST(ISNULL(A.dblDeferredCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblDeferredCompensation,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
-			+ REPLICATE('0',12) 
+			+ CASE WHEN ISNULL(A.dblFishResale,0) > @maxAmount 
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFishResale,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFishResale,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+					+ CAST(PARSENAME(CAST(ISNULL(A.dblFishResale,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+				ELSE 
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblFishResale,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblFishResale,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+					+ CAST(PARSENAME(CAST(ISNULL(A.dblFishResale,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			END
+			-- + REPLICATE('0',12) 
 			+ CASE WHEN @year < YEAR(GETDATE())
 				THEN
 					CASE WHEN ISNULL(A.dblNonemployeeCompensation,0) > @maxAmount 
@@ -162,11 +171,14 @@ BEGIN
 				ELSE
 					REPLICATE('0',12) 
 				END
+			+ REPLICATE('0',12) 
+			+ REPLICATE('0',12) --270
 		END-- 235-246
+		+ SPACE(16)
 		+ ' ' --Foreign Indicator
 		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName)))
 		+ SPACE(40) -- 288-327
-		+ SPACE(40) -- 328-367
+		-- + SPACE(40) -- 328-367
 		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,'')))
 		+ SPACE(40)
 		+ ISNULL(A.strCity,'') + SPACE(40 - LEN(ISNULL(A.strCity,'')))

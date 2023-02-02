@@ -116,11 +116,11 @@ CASE WHEN LOWER(strStatus) = 'sold'
 			CASE 
 			WHEN strCountDirection = 'Low to High' 
 				THEN 
-				CASE WHEN intEndingNumber =  intBeginCount
+				CASE WHEN intEndingNumber =  intBeginCount AND intLotteryBookId IN (SELECT intLotteryBookId FROM #tempSoldOutLotteryCount)
 					THEN 'Yes' ELSE 'No'
 				END
 			ELSE 
-				CASE WHEN intStartingNumber = intBeginCount
+				CASE WHEN intStartingNumber = intBeginCount AND intLotteryBookId IN (SELECT intLotteryBookId FROM #tempSoldOutLotteryCount)
 					THEN 'Yes' ELSE 'No'
 				END
 		END

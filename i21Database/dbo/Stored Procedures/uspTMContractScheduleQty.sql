@@ -5,6 +5,8 @@
 	@intContractDetailId INT = NULL,
 	@intUserId INT = NULL,
 	@ysnThrowError BIT = 1,
+	@ysnFromDelete BIT = 0,
+	@intDispatchId INT = NULL,
 	@dblOverage NUMERIC(18,6) = 0 OUTPUT,
 	@strErrorMessage NVARCHAR(MAX) = '' OUTPUT
 AS
@@ -21,6 +23,7 @@ BEGIN
 	DECLARE @ErrorSeverity INT;
 	DECLARE @ErrorState INT;
 	DECLARE @transCount INT = @@TRANCOUNT;
+	DECLARE @intLoadDistributionDetailId INT
 
 	BEGIN TRY
 		IF @transCount = 0 BEGIN TRANSACTION
@@ -121,6 +124,8 @@ BEGIN
 							, @intUserId = @intUserId
 							, @intExternalId = @intSiteId
 							, @strScreenName = @strScreenName
+
+					
 				END
 			END
 			ELSE
@@ -128,11 +133,39 @@ BEGIN
 				IF(@dblScheduleQty <> 0)
 				BEGIN
 					SET @dblScheduleQty = @dblScheduleQty * -1
+					SET @dblQuantity = @dblScheduleQty
 					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
 							, @dblQuantityToUpdate = @dblScheduleQty
 							, @intUserId = @intUserId
 							, @intExternalId = @intSiteId
 							, @strScreenName = @strScreenName
+
+				END
+			END
+
+			--if tmo deletion then transfer the schedule to transport if already been used in TR
+			IF(@ysnFromDelete = 1)
+			BEGIN
+				SELECT TOP 1	
+					@intLoadDistributionDetailId = DD.intLoadDistributionDetailId
+				FROM tblLGLoad LG
+				JOIN tblTRLoadHeader LH ON LH.intLoadId = LG.intLoadId
+				JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+				JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+				JOIN tblLGLoadDetail LD ON LD.intLoadId = LD.intLoadId
+					AND LD.intLoadDetailId = DD.intLoadDetailId        
+				WHERE LD.intTMDispatchId = @intDispatchId
+					AND DD.intContractDetailId = @intContractDetailId
+					AND LH.ysnPosted <> 1
+				
+				SET @dblQuantity = (SELECT ABS(@dblQuantity))
+				IF(ISNULL(@intLoadDistributionDetailId,0) >0)
+				BEGIN
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
+						, @dblQuantityToUpdate = @dblQuantity 
+						, @intUserId = @intUserId
+						, @intExternalId = @intLoadDistributionDetailId
+						, @strScreenName = 'Transport Sale'
 				END
 			END
 

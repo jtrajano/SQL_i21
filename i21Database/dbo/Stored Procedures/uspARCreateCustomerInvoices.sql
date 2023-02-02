@@ -677,7 +677,7 @@ SELECT
 FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
-	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'POS', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout', 'Agronomy', 'Dealer Credit Card')
+	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'POS', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store End of Day', 'Agronomy', 'Dealer Credit Card')
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -1093,7 +1093,7 @@ INNER JOIN (
 	GROUP BY strSourceId 
 ) ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
 WHERE ID.SourceCount > 1
-  AND [strType] NOT IN ('POS', 'Store Checkout')
+  AND [strType] NOT IN ('POS', 'Store End of Day')
   AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 INSERT INTO #ARInvalidInvoiceRecords

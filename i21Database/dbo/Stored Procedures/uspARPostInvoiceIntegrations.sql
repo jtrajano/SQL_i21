@@ -127,6 +127,38 @@ BEGIN
 
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
 	EXEC dbo.uspARCreateRCVForCreditMemo @intUserId = @UserId, @strSessionId = @strSessionId
+
+	--UPDATE PREPAIDS/CREDIT MEMO FOR CASH REFUND
+	UPDATE I
+	SET 
+		 dblAmountDue		= dblAmountDue - dblAppliedInvoiceAmount
+		,dblBaseAmountDue	= dblBaseAmountDue - dblAppliedInvoiceAmount
+		,dblPayment			= dblPayment + dblAppliedInvoiceAmount
+		,dblBasePayment		= dblBasePayment + dblAppliedInvoiceAmount
+		,ysnPaid			= CASE WHEN dblInvoiceTotal = dblPayment + dblAppliedInvoiceAmount THEN 1 ELSE 0 END
+		,ysnRefundProcessed	= CASE WHEN dblInvoiceTotal = dblPayment + dblAppliedInvoiceAmount THEN 1 ELSE 0 END
+	FROM tblARInvoice I
+	INNER JOIN (										
+		SELECT 
+			 intPrepaymentId		= PC.intPrepaymentId
+			,dblAppliedInvoiceAmount= PC.dblAppliedInvoiceDetailAmount
+		FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK)
+		INNER JOIN (
+			SELECT DISTINCT intInvoiceId 
+			FROM tblARPostInvoiceHeader I
+			CROSS APPLY (
+				SELECT TOP 1 intPrepaymentId
+				FROM tblARPrepaidAndCredit WITH (NOLOCK)
+				WHERE intInvoiceId = I.intInvoiceId 
+				  AND ysnApplied = 1
+				  AND dblAppliedInvoiceDetailAmount > 0
+			) PREPAIDS
+			WHERE I.strTransactionType = 'Cash Refund'
+			  AND I.strSessionId = @strSessionId
+		) CR ON PC.intInvoiceId = CR.intInvoiceId
+		WHERE PC.ysnApplied = 1
+		  AND PC.dblAppliedInvoiceDetailAmount > 0
+	) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
 	
 	--AUTO APPLY PREPAIDS
 	EXEC dbo.uspARAutoApplyPrepaids @intEntityUserId = @UserId, @strSessionId = @strSessionId
@@ -174,7 +206,7 @@ BEGIN
 	BEGIN
 		UPDATE ARI
 		SET ARI.ysnPosted					= 0
-			, ARI.ysnPaid						= 0
+			, ARI.ysnPaid					= 0
 			, ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
 												THEN @ZeroDecimal
 												ELSE (
@@ -212,11 +244,6 @@ BEGIN
 			, ARI.intPeriodId				= NULL
 		FROM tblARPostInvoiceHeader PID
 		INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId 					
-		CROSS APPLY (
-			SELECT COUNT(intPrepaidAndCreditId) PPC 
-			FROM tblARPrepaidAndCredit 
-			WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
-		) PPC
 		LEFT OUTER JOIN (
 			SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
 			FROM	tblARPaymentDetail PD
@@ -232,7 +259,6 @@ BEGIN
 	WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM tblARPostInvoiceHeader WHERE [ysnPost] = 0 AND strSessionId = @strSessionId)
 								
 	--UPDATE PREPAIDS/CREDIT MEMO FOR CASH REFUND
-	BEGIN
 	UPDATE I
 	SET dblAmountDue		= dblAmountDue + dblAppliedInvoiceAmount
 	  , dblBaseAmountDue	= dblBaseAmountDue + dblAppliedInvoiceAmount
@@ -261,7 +287,6 @@ BEGIN
 		WHERE PC.ysnApplied = 1
 		  AND PC.dblAppliedInvoiceDetailAmount > 0
 	) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
-	END
 
 	--DELETE UNDEPOSITED FUND FOR CASH
 	DELETE CF 
@@ -744,7 +769,7 @@ FROM tblARInvoiceIntegrationLogDetail ILD
 INNER JOIN tblARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
 WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
 	AND ILD.[ysnPost] IS NOT NULL
-	--AND PID.strType = 'Store Checkout'
+	--AND PID.strType = 'Store End of Day'
 	AND PID.strSessionId = @strSessionId
 
 DELETE FROM tblARPostInvoiceHeader WHERE strSessionId = @strSessionId
@@ -757,6 +782,30 @@ DELETE FROM tblARPostItemsForContracts WHERE strSessionId = @strSessionId
 DELETE FROM tblARPostItemsForStorageCosting WHERE strSessionId = @strSessionId
 DELETE FROM tblARPostInvoiceGLEntries WHERE strSessionId = @strSessionId
 
+END
+
+--AUTO DEBIT MEMO VENDOR REBATE SALES
+DECLARE @InvoicesForIntegration Id
+DECLARE @strTransactionType NVARCHAR(200)
+
+INSERT INTO @InvoicesForIntegration
+SELECT intValue FROM fnCreateTableFromDelimitedValues(@strInvoiceIds, ',')
+
+WHILE EXISTS(SELECT 1 FROM @InvoicesForIntegration)
+BEGIN
+	DECLARE @intInvoiceForIntegration INT
+	SELECT @intInvoiceForIntegration = intId FROM @InvoicesForIntegration
+
+	SELECT @strTransactionType = strTransactionType
+	FROM tblARInvoice 
+	WHERE intInvoiceId = @intInvoiceForIntegration
+
+	IF @strTransactionType = 'Invoice'
+		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @intInvoiceForIntegration, @Post, @UserId, 'Debit Memo'
+	ELSE IF @strTransactionType = 'Credit Memo'
+		EXEC dbo.[uspVRCreateDebitMemoOrVoucher] @intInvoiceForIntegration, @Post, @UserId, 'Voucher'
+
+	DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
 END
 
 END TRY

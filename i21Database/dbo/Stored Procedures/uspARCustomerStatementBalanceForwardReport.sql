@@ -19,7 +19,7 @@
 	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
 	, @dblTotalAR				    AS NUMERIC(18,6)    = 0.00
-	, @strStatementFormat			AS NVARCHAR(50)		= NULL
+	, @strStatementFormat			AS NVARCHAR(50)		= 'Balance Forward'
 AS
 
 SET ANSI_NULLS ON
@@ -343,7 +343,7 @@ WHERE CUS.intSalespersonId IS NOT NULL
 
 --CUSTOMER_ADDRESS
 UPDATE C
-SET strFullAddress	= EL.strAddress + CHAR(13) + char(10) + EL.strCity + ', ' + EL.strState + ', ' + EL.strZipCode + ', ' + EL.strCountry 
+SET strFullAddress	= ISNULL(LTRIM(RTRIM(EL.strAddress)), '') + CHAR(13) + char(10) + ISNULL(LTRIM(RTRIM(EL.strCity)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strState)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strZipCode)), '') + ', ' + ISNULL(LTRIM(RTRIM(EL.strCountry)), '')
 FROM #CUSTOMERS C
 INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 

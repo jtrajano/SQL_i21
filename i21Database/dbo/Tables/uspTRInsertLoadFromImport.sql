@@ -8,6 +8,7 @@
 	, @dblInvoiceAmount NUMERIC(18, 6)
 	, @intEntityVendorId INT
 	, @intUserId INT
+	, @strBillOfLading NVARCHAR(50)
 	, @ysnOverrideTolerance BIT = 0
 
 AS
@@ -18,7 +19,7 @@ BEGIN
 	DECLARE @ErrorSeverity INT
 	DECLARE @ErrorState INT
 
-	BEGIN TRANSACTION
+	--BEGIN TRANSACTION
 	
 	BEGIN TRY
 		DECLARE @strMessage NVARCHAR(MAX) = NULL
@@ -99,11 +100,11 @@ BEGIN
 					END
 				END
 
+				DECLARE @ysnSuccessPayables BIT = 1
 				IF(@intBillId IS NOT NULL)
 				BEGIN
 					IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intBillId AND ysnPosted = 0)
-					BEGIN
-
+					BEGIN						
 						IF( @dblAdjustment > 0)
 						BEGIN
 							DECLARE @VoucherPayable AS VoucherPayable
@@ -120,24 +121,46 @@ BEGIN
 								,dblQtyOrdered				= @intQtyToBill
 								,ysnStage					= 0
 
-
-							EXEC [dbo].[uspAPAddVoucherDetail] 
-								@voucherDetails = @VoucherPayable
-								,@voucherPayableTax = @VoucherDetailTax
-								,@throwError = 0
-								,@error = @errorAdjustment OUTPUT
+							BEGIN TRY
+								EXEC [dbo].[uspAPAddVoucherDetail] 
+									@voucherDetails = @VoucherPayable
+									,@voucherPayableTax = @VoucherDetailTax
+									,@throwError = 0
+									,@error = @errorAdjustment OUTPUT
+							END TRY
+							BEGIN CATCH
+								SET @ysnSuccessPayables = 0
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher Payable is not created')
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
+							END CATCH
 								
-							IF (@errorAdjustment IS NOT NULL)
+							IF (@errorAdjustment IS NOT NULL) AND (@ysnSuccessPayables = 1)
 							BEGIN	
 								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @errorAdjustment)
 							END
+
 						END
 
-						-- ADD PAYMENT
-						EXEC [dbo].[uspTRImportDtnVoucherPayment] 
-							@intBillId = @intBillId
-							, @intImportLoadId = @intImportLoadId
-							, @intImportDtnDetailId = @intImportDtnDetailId
+						IF (@ysnSuccessPayables = 1)
+						BEGIN
+							BEGIN TRY
+								DECLARE @strErrMsg NVARCHAR(MAX)
+								-- ADD PAYMENT
+								EXEC [dbo].[uspTRImportDtnVoucherPayment] 
+									@intBillId = @intBillId
+									, @intImportLoadId = @intImportLoadId
+									, @intImportDtnDetailId = @intImportDtnDetailId
+									, @strErrMsg = @strErrMsg OUT
+
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher Payable is not created')
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
+							END TRY
+							BEGIN CATCH
+								SET @ysnSuccessPayables = 0
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher Payable is not created')
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
+							END CATCH
+						END						
 
 						--TR-1730
 						UPDATE tblAPBill SET strVendorOrderNumber = @strInvoiceNo where intBillId = @intBillId
@@ -147,7 +170,7 @@ BEGIN
 				-- POST VOUCHER
 				DECLARE @success BIT = NULL
 
-				IF (@intBillId IS NOT NULL)
+				IF (@intBillId IS NOT NULL) AND (@ysnSuccessPayables = 1)
 				BEGIN
 					BEGIN TRY
 						EXEC [dbo].[uspAPPostBill]
@@ -176,7 +199,7 @@ BEGIN
 				END
 			END
 
-			IF (@dblAdjustment <> 0) AND (ISNULL(@intBillId, 0) <> 0)
+			IF (@dblAdjustment <> 0) AND (ISNULL(@intBillId, 0) <> 0) AND (ISNULL(@intExistBillId, 0) = 0)
 			BEGIN
 				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ' (With Variance)')
 			END
@@ -221,16 +244,30 @@ BEGIN
 			SET strMessage = @strMessage + CASE WHEN @ysnOverrideTolerance = 1 THEN ' (Reprocess)' ELSE '' END
 				, ysnValid = CASE WHEN @strMessage LIKE '%Voucher successfully posted%' OR @strMessage LIKE '%Voucher create but not posted%' THEN 1 ELSE 0 END
 			WHERE intImportDtnDetailId = @intImportDtnDetailId
-		END	
+		END
 
-		IF @@TRANCOUNT > 0 COMMIT TRANSACTION
+		UPDATE tblTRImportDtnDetail
+		SET ysnReImport = 1
+		WHERE intImportDtnDetailId IN (
+			SELECT intImportDtnDetailId FROM vyuTRGetImportDTNForReprocess
+			WHERE strBillOfLading = @strBillOfLading
+				AND intImportDtnDetailId <> @intImportDtnDetailId
+				AND ISNULL(ysnSuccess, 0) = 0)
+
+		--IF @@TRANCOUNT > 0 COMMIT TRANSACTION
 
 	END TRY
 	BEGIN CATCH
-		IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+		--IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
 		SELECT @ErrorMessage = ERROR_MESSAGE(),
 			@ErrorSeverity = ERROR_SEVERITY(),
 			@ErrorState = ERROR_STATE()
-		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
+
+		UPDATE tblTRImportDtnDetail
+		SET ysnValid = 0
+			, strMessage = ERROR_MESSAGE()
+		WHERE intImportDtnDetailId = @intImportDtnDetailId
+
+		--RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
 	END CATCH
 END

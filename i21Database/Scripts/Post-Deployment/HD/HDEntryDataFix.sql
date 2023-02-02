@@ -938,4 +938,65 @@ BEGIN
 END
 GO
 	PRINT N'End Update Existing status of tblHDTimeEntryPeriodDetail to closed';
+	PRINT N'Start Update Existing ysnActive in Coworker Goal Detail';
+GO
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDCoworkerGoalDetail' AND COLUMN_NAME = 'ysnActive') AND
+   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDCoworkerGoalDetail ysnActive')
+BEGIN
+
+	DECLARE @CoworkerGoalId INT 
+	      , @Active BIT
+
+	DECLARE EmployeeLoop CURSOR 
+	  LOCAL STATIC READ_ONLY FORWARD_ONLY
+	FOR 
+
+	SELECT Agent.intCoworkerGoalId, Agent.ysnActive
+	FROM tblHDCoworkerGoal Agent
+	WHERE Agent.intEntityId IS NOT NULL
+	GROUP BY Agent.intCoworkerGoalId, Agent.ysnActive
+
+	OPEN EmployeeLoop
+	FETCH NEXT FROM EmployeeLoop INTO @CoworkerGoalId, @Active
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 
+
+		IF CONVERT(BIT, @Active) = 0
+		BEGIN
+			UPDATE tblHDCoworkerGoalDetail
+			SET ysnActive = CONVERT(BIT, 0)
+			WHERE intCoworkerGoalId = @CoworkerGoalId
+		END
+
+		FETCH NEXT FROM EmployeeLoop INTO @CoworkerGoalId, @Active
+	END
+	CLOSE EmployeeLoop
+	DEALLOCATE EmployeeLoop
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDCoworkerGoalDetail ysnActive','1')
+
+END
+
+GO
+	PRINT N'End Update Existing ysnActive in Coworker Goal Detail';
+	PRINT N'Start Update Existing tblHDTicketJIRAIssue';
+GO
+
+IF  EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketJIRAIssue' AND COLUMN_NAME = 'strJiraTypeIconUrl') AND
+	EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketJIRAIssue' AND COLUMN_NAME = 'strJiraPriorityIconUrl') AND
+	EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketJIRAIssue' AND COLUMN_NAME = 'strJiraStatusIconUrl') AND
+    NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDTicketJIRAIssue')
+BEGIN
+
+	EXEC uspHDUpdateJiraIconUrl
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDTicketJIRAIssue','1')
+
+END
+
+GO
+	PRINT N'End Update Existing tblHDTicketJIRAIssue';
 GO

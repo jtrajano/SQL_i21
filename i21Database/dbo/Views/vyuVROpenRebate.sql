@@ -51,6 +51,8 @@ FROM (
 		, invoice.intInvoiceId
 		, program.ysnActive
 		, strInvoiceUnitMeasure = invoiceUnitMeasure.strUnitMeasure
+		, dm.strBillId strDebitMemoVoucherNumber
+		, dm.intBillId intDebitMemoVoucherId
 	FROM tblARInvoiceDetail invoiceDetail
 		INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
 		INNER JOIN tblICItem item ON item.intItemId = invoiceDetail.intItemId
@@ -97,6 +99,11 @@ FROM (
 		LEFT OUTER JOIN tblICItemUOM itemUOM ON itemUOM.intItemId = invoiceDetail.intItemId
 			and itemUOM.intUnitMeasureId = pi.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure itemUnitMeasure ON itemUnitMeasure.intUnitMeasureId = pi.intUnitMeasureId
+		OUTER APPLY (
+			SELECT TOP 1 b.strBillId, b.intBillId
+			FROM tblAPBill b
+			WHERE b.strVendorOrderNumber = invoice.strInvoiceNumber
+		) dm
 	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = invoiceDetail.intInvoiceDetailId)
 		AND invoice.ysnPosted = 1
 		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo', 'Cash')

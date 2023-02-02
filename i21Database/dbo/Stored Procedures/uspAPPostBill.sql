@@ -613,7 +613,7 @@ BEGIN
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblSourceUnitDebit, 0) - ISNULL(A.dblSourceUnitCredit, 0))  SourceCreditUnit
 	OUTER APPLY dbo.fnAPGetVoucherCommodity(A.intTransactionId) commodity
 	ORDER BY intTransactionId
-
+	
 	-- Call the Item's Cost Adjustment
 	DECLARE @intReturnValue AS INT 
 	DECLARE @errorAdjustment NVARCHAR(200) 
@@ -1536,6 +1536,9 @@ BEGIN
 		-- 		DELETE FROM @miscItemId WHERE intBillId = @billIdReceived
 		-- 	END
 		-- END
+
+		-- Vendor Rebate Integrations
+		EXEC uspVRVoucherIntegration @validBillIds, @post, @userId
 	END TRY
 	BEGIN CATCH
 		DECLARE @integrationError NVARCHAR(200) = ERROR_MESSAGE()

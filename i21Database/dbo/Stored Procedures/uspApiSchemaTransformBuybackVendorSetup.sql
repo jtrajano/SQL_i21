@@ -73,34 +73,17 @@ INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, s
 SELECT
 	  NEWID()
 	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') 
-	, strValue = vts.strVendorCustomerLocation
-	, strLogLevel = 'Error'
-	, strStatus = 'Failed'
-	, intRowNo = vts.intRowNumber
-	, strMessage = 'The customer location "' + vts.strLocation + '" does not exist.'
-	, strAction = 'Skipped'
-FROM tblApiSchemaTransformBuybackVendorSetup vts
-LEFT JOIN tblEMEntityLocation el ON el.strLocationName = vts.strLocation
-WHERE vts.guiApiUniqueId = @guiApiUniqueId
-	AND NULLIF(vts.strLocation, '') IS NOT NULL
-	AND el.intEntityLocationId IS NULL
-
-INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
-SELECT
-	  NEWID()
-	, guiApiImportLogId = @guiLogId
-	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Vendor''s Customer Location') 
+	, strField = dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location')
 	, strValue = vts.strLocation
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The vendor''s customer location "' + vts.strLocation + '" is not setup for the vendor .'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Customer Location') + ' "' + ISNULL(vts.strLocation, '') + '" is not setup for the vendor ' + ISNULL(vts.strVendor, '') + '.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
 LEFT JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 LEFT JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
-LEFT JOIN tblEMEntityLocation el ON el.strLocationName = vts.strLocation
+LEFT JOIN tblEMEntityLocation el ON (el.strLocationName = vts.strLocation)
 	AND el.intEntityId = v.intEntityId
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vts.strLocation, '') IS NOT NULL
@@ -115,7 +98,7 @@ SELECT
 	, strLogLevel = 'Warning'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The GL account "' + vts.strGLAccount + '" is invalid.'
+	, strMessage = 'The ' + dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Income GL Account') + ' "' + ISNULL(vts.strGLAccount, '') + '" is invalid.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformBuybackVendorSetup vts
 OUTER APPLY (
@@ -278,7 +261,7 @@ WHERE vs.guiApiUniqueId = @guiApiUniqueId
 
 UPDATE xc
 SET   xc.guiApiUniqueId = @guiApiUniqueId
-	, xc.intEntityLocationId = l.intEntityLocationId
+	-- , xc.intEntityLocationId = l.intEntityLocationId
 	, xc.strVendorCustomerLocation = vs.strVendorCustomerLocation
 	, xc.strVendorShipTo = vs.strVendorShipTo
 	, xc.strVendorSoldTo = vs.strVendorSoldTo
@@ -324,7 +307,7 @@ JOIN tblEMEntity e ON e.strEntityNo = vts.strVendor OR e.strName = vts.strVendor
 JOIN tblAPVendor v ON e.intEntityId = v.intEntityId
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblEMEntityLocation l ON e.intEntityId = l.intEntityId
-	AND vts.strLocation = l.strLocationName
+	AND (vts.strLocation = l.strLocationName)
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 
 ;WITH cte AS
@@ -406,16 +389,11 @@ JOIN @ForUpdates u ON u.strVendorNumber = v.strVendorId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 
 UPDATE log
-SET log.intTotalRowsImported = ISNULL(rv.intCount, 0) + ISNULL(rc.intCount, 0)
+SET log.intTotalRowsImported = ISNULL(rv.intCount, 0)
 FROM tblApiImportLog log
 OUTER APPLY (
 	SELECT COUNT(*) intCount
 	FROM tblApiSchemaTransformBuybackVendorSetup
 	WHERE guiApiUniqueId = log.guiApiUniqueId
 ) rv
-OUTER APPLY (
-	SELECT COUNT(*) intCount
-	FROM tblBBCustomerLocationXref
-	WHERE guiApiUniqueId = log.guiApiUniqueId
-) rc
 WHERE log.guiApiImportLogId = @guiLogId

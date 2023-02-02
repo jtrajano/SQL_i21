@@ -22,6 +22,9 @@ BEGIN TRY
 
 	DECLARE @UserEntityID INT
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
+		RETURN;
 		
 	IF(EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId AND ISNULL(ysnPosted,0) = 1))
 		RAISERROR('Posted invoice cannot be deleted!', 16, 1);

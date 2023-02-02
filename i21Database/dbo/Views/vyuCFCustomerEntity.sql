@@ -7,7 +7,7 @@ SELECT       CustomerEntity.strDocumentDelivery ,Entity.intEntityId, Entity.strN
                          BillToLoc.strCity AS strBillToCity, BillToLoc.strState AS strBillToState, BillToLoc.strZipCode AS strBillToZipCode, BillToLoc.strCountry AS strBillToCountry
 						 
 FROM            dbo.vyuEMSearch AS Entity INNER JOIN
-                         dbo.tblARCustomer AS Cus ON Entity.intEntityId = Cus.[intEntityId] INNER JOIN
+                         dbo.tblARCustomer AS Cus ON Entity.intEntityId = Cus.[intEntityId] LEFT OUTER JOIN    
                          dbo.[tblEMEntityToContact] AS CusToCon ON Cus.[intEntityId] = CusToCon.intEntityId AND CusToCon.ysnDefaultContact = 1 LEFT OUTER JOIN
                          dbo.tblEMEntity AS Con ON CusToCon.intEntityContactId = Con.intEntityId LEFT OUTER JOIN
                          dbo.[tblEMEntityLocation] AS Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId LEFT OUTER JOIN

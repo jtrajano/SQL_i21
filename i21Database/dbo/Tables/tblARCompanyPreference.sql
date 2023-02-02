@@ -83,10 +83,10 @@
 	[ysnEnableCustomStatement]              BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnEnableCustomStatement] DEFAULT ((0)),
 	[ysnOverrideARAccountCompanySegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountCompanySegment] DEFAULT((0)),
 	[ysnOverrideARAccountLocationSegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLocationSegment] DEFAULT((0)),
-	[intExpressAccountID]					INT NULL,
-	[intExpressApplicationID]				INT NULL,
-	[intExpressAcceptorID]					INT NULL,
-	[strExpressAccountToken]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strExpressAccountID]					NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+	[strExpressApplicationID]				NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	[strExpressAcceptorID]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strExpressAccountToken]				NVARCHAR(140) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intWriteOffAccountId] FOREIGN KEY ([intWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -100,7 +100,7 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightRevenueAccount] FOREIGN KEY ([intFreightRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFreightExpenseAccount] FOREIGN KEY ([intFreightExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intFeeGeneralLedgerAccountId] FOREIGN KEY ([intFeeGeneralLedgerAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblSMCompanyLocation_intPaymentsLocationId] FOREIGN KEY ([intPaymentsLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeRevenueAccount] FOREIGN KEY ([intSurchargeRevenueAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intSurchargeExpenseAccount] FOREIGN KEY ([intSurchargeExpenseAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )

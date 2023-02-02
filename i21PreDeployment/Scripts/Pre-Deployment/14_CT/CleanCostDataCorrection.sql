@@ -134,3 +134,19 @@ GO
 		');
 	END
 GO
+exec('
+		CREATE OR ALTER FUNCTION [dbo].[fnCTGetSequencePrice]
+			(
+				 @intContractDetailId INT
+				,@dblSettlementPrice NUMERIC(24, 6) = NULL
+			)
+		RETURNS NUMERIC(24, 6)
+		AS
+		BEGIN
+			DECLARE @dblSeqPrice NUMERIC(18, 6);
+			select @dblSeqPrice = dblCashPrice from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+
+			RETURN @dblSeqPrice
+		END
+');
+GO

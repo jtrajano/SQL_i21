@@ -221,9 +221,11 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Fixed Assets
 :r .\FA\DefaultData\FixedAssetGroup.sql
+:r .\FA\DefaultData\FixedAssetBooks.sql
 :r .\FA\01_UpdateMultiCurrencyFields.sql
 :r .\FA\02_UpdateMonthlyAssetDepreciation.sql
 :r .\FA\03_UpdateAssetDepreciationCurrency.sql
+:r .\FA\05_AssetBookDepreciation.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
@@ -254,7 +256,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1x_RecurringTransaction.sql
 :r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 :r .\GL\03_UpdateForeignDebitCredit.sql
+:r .\GL\04_ClearImportCOAFromCSV.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
+:r .\GL\vyuGLTrialBalance.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -312,6 +316,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\38_UpdateDefaultData.sql
 :r .\AR\DefaultData\39_UpdateCreditCardCompanyPreference.sql
+:r .\AR\DefaultData\41_UpdateSourceType.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 :r .\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql
 :r .\AR\DefaultData\96_RebuildReportFields.sql
@@ -485,6 +490,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
 :r .\PR\DefaultData\2_ElectronicFileFormats.sql
+:r .\PR\DefaultData\3_SchoolDistrictCodes.sql
 --:r .\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql
 --:r .\PR\DataFixes\AddPaycheckDirectDepositEntries.sql
 --:r .\PR\DataFixes\ResetEaningHoursToProcess.sql
@@ -617,6 +623,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
+:r .\ST\50_TransferMappingFromIcToSt.sql
 
 
 
@@ -658,6 +665,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\FL_Florida.sql
 :r .\TF\DefaultData\AL_Alabama.sql
 :r .\TF\DefaultData\WV_WestVirginia.sql
+:r .\TF\DefaultData\WY_Wyoming.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

@@ -60,9 +60,6 @@ RETURNS @returntable TABLE (
 	,[dblEndOfMonthRate]		NUMERIC(18, 6) NULL
 	,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 	,[intAccountId]			    INT NULL
-	,[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
-	,[blbLogo]					VARBINARY (MAX) NULL
-	,[blbFooterLogo]			VARBINARY (MAX) NULL
 )
 AS
 BEGIN
@@ -79,8 +76,7 @@ BEGIN
 			@intEntityUserIdLocal		INT = NULL,
 			@intGracePeriodLocal		INT = 0,
 			@ysnOverrideCashFlowLocal  	BIT = 0,
-			@strCustomerAgingBy		    NVARCHAR(250) = NULL, 
-			@blbLogo     VARBINARY (MAX) = NULL
+			@strCustomerAgingBy		    NVARCHAR(250) = NULL
 
 	DECLARE  @DELCUSTOMERS		Id
 			,@ADLOCATION		Id
@@ -197,8 +193,6 @@ BEGIN
 	SET @ysnOverrideCashFlowLocal  	= ISNULL(@ysnOverrideCashFlow, 0)
 	SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 	SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
-
-	 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 
 	SELECT TOP 1 @strCompanyName	= strCompanyName
 			   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
@@ -596,9 +590,6 @@ BEGIN
 		 , dblEndOfMonthRate	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN AGING.dblCurrencyExchangeRate ELSE AGING.dblCurrencyRevalueRate END
 		 , dblEndOfMonthAmount	= CASE WHEN AGING.dblCurrencyRevalueRate = 0 THEN ISNULL(AGING.dblBaseTotalAR, 0) ELSE AGING.dblCurrencyRevalueAmount END
 		 , intAccountId			= AGING.intAccountId
-		 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
-		 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
-		 , blbFooterLogo		= SMLPF.imgLogo
 	FROM
 	(SELECT A.strInvoiceNumber
 		 , B.strRecordNumber
@@ -835,8 +826,6 @@ BEGIN
 
 	WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 	INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-	LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
-	LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
 
 	INSERT INTO @UNPAIDINVOICES
 	SELECT DISTINCT intInvoiceId 

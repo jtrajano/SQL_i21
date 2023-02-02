@@ -389,10 +389,10 @@ UPDATE vs
 SET 
 	  vs.guiApiUniqueId = @guiApiUniqueId
 	, vs.intRowNumber = sr.intRowNumber
-	, vs.strExportFilePath = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Path') WHEN 1 THEN sr.strExportFilePath ELSE vs.strExportFilePath END
-	, vs.strExportFileType = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Export File Type') WHEN 1 THEN sr.strExportFileType ELSE vs.strExportFileType END
-	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Company ID1') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
-	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformMapField(@guiApiUniqueId, 'Company ID2') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
+	, vs.strExportFilePath = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Export File Path') WHEN 1 THEN sr.strExportFilePath ELSE vs.strExportFilePath END
+	, vs.strExportFileType = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Export File Type') WHEN 1 THEN sr.strExportFileType ELSE vs.strExportFileType END
+	, vs.strCompany1Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company ID1') WHEN 1 THEN sr.strCompany1Id ELSE vs.strCompany1Id END
+	, vs.strCompany2Id = CASE dbo.fnApiSchemaTransformHasField(@guiApiUniqueId, 'Company ID2') WHEN 1 THEN sr.strCompany2Id ELSE vs.strCompany2Id END
 	, vs.intConcurrencyId = ISNULL(vs.intConcurrencyId, 1) + 1
 FROM tblVRVendorSetup vs
 JOIN vyuAPVendor v ON v.intEntityId = vs.intEntityId

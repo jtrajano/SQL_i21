@@ -4,10 +4,12 @@
 )
 AS
 BEGIN
-	DECLARE  @intTimeEntryPeriodDetail INT = NULL,
-			  @strFiscalYear NVARCHAR(10)
+	DECLARE   @intTimeEntryPeriodDetail INT = NULL,
+			  @strFiscalYear NVARCHAR(10),
+			  @ysnActive BIT = 0
 
-	SELECT TOP 1 @strFiscalYear = strFiscalYear
+	SELECT TOP 1  @strFiscalYear = strFiscalYear
+				 ,@ysnActive     = ysnActive
 	FROM tblHDCoworkerGoal
 	WHERE intCoworkerGoalId = @CoworkerGoalId
 
@@ -44,6 +46,7 @@ BEGIN
 		,[dblBudget]
 		,[intUtilization]
 		,[intTimeEntryPeriodDetailId]
+		,[ysnActive]
 	)
 	SELECT  [intCoworkerGoalId]			 = @CoworkerGoalId
 		   ,[intBillingPeriod]			 = TimeEntryPeriodDetail.intBillingPeriod
@@ -51,6 +54,7 @@ BEGIN
 		   ,[dblBudget]					 = 0
 		   ,[intUtilization]			 = 0
 		   ,[intTimeEntryPeriodDetailId] = TimeEntryPeriodDetail.[intTimeEntryPeriodDetailId]
+		   ,[ysnActive]					 = CONVERT(BIT, @ysnActive)
     FROM tblHDTimeEntryPeriodDetail TimeEntryPeriodDetail
 	WHERE intTimeEntryPeriodId = @intTimeEntryPeriodDetail
 END

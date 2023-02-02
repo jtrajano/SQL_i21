@@ -48,6 +48,12 @@ SELECT
 FROM @paySchedules A
 WHERE A.intBillId NOT IN (SELECT intBillId FROM @invalidPaySchedules)
 
+UPDATE A
+SET A.ysnIsPaymentScheduled = 1
+FROM tblAPBill A
+INNER JOIN @paySchedules B ON A.intBillId = B.intBillId
+WHERE A.intBillId NOT IN (SELECT intBillId FROM @invalidPaySchedules)
+
 SELECT TOP 1 
 	@error = strError
 FROM @invalidPaySchedules

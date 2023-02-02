@@ -73,7 +73,7 @@ SET @Recap = ISNULL(@Recap, 0)
 
 DECLARE @StartingNumberId INT
 SET @StartingNumberId = 3
-IF(LEN(RTRIM(LTRIM(ISNULL(@BatchId,'')))) = 0) AND @Recap = 0
+IF(LEN(RTRIM(LTRIM(ISNULL(@BatchId,'')))) = 0)
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber @StartingNumberId, @BatchId OUT
 END
@@ -421,8 +421,6 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			END				
 		GOTO Post_Exit	
 	END
-
-	
 
 BEGIN TRY
 

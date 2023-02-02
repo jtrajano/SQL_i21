@@ -269,7 +269,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 				INNER JOIN tblMBILInvoiceItem InvoiceItem
 					ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
 				INNER JOIN tblMBILInvoiceTaxCode InvoiceTaxCode
-					ON InvoiceItem.intInvoiceId = InvoiceTaxCode.intInvoiceItemId
+					ON InvoiceItem.intInvoiceItemId = InvoiceTaxCode.intInvoiceItemId
 				INNER JOIN tblSMTaxCode smTaxCode
 					ON InvoiceTaxCode.intTaxCodeId = smTaxCode.intTaxCodeId
 				WHERE Invoice.intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)

@@ -80,7 +80,7 @@ AS
 			,intItemId = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN BuybackDetail.intItemId ELSE NULL END
 			,[dblQtyShipped] = BuybackDetail.dblBuybackQuantity
 			,[dblPrice] = BuybackDetail.dblBuybackRate
-			,[intSalesAccountId] = ISNULL(@intDetailAccount, [dbo].[fnGetItemGLAccount](BuybackDetail.intItemId, salesAccount.intItemLocationId, 'Sales Account'))
+			,[intSalesAccountId] = dbo.fnGetLocationAwareGLAccount(@intDetailAccount, salesAccount.intLocationId)--[dbo].[fnGetItemGLAccount](BuybackDetail.intItemId, salesAccount.intItemLocationId, 'Sales Account')
 			,[strItemDescription] = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN NULL ELSE BuybackDetail.strCharge END
 		FROM tblBBBuybackDetail BuybackDetail
 		INNER JOIN tblBBBuyback Buyback ON BuybackDetail.intBuybackId = Buyback.intBuybackId
@@ -94,7 +94,7 @@ AS
 			WHERE intInvoiceDetailId = BuybackDetail.intInvoiceDetailId
 		) customerLocation
 		OUTER APPLY (
-			SELECT TOP 1 intItemLocationId 
+			SELECT TOP 1 intItemLocationId, intLocationId
 			FROM tblICItemLocation 
 			WHERE intItemId = BuybackDetail.intItemId 
 			AND intLocationId = @CompanyLocation
@@ -154,25 +154,12 @@ AS
 		-----AP Reimbursement Type
 		SELECT TOP 1
 			@strReimbursementNo = strReimbursementNo
-		FROM tblBBBuyback
-
-		---Check for AP account int company location
-		SELECT TOP 1 
-			@intAPAccount = intAPAccount 
-			,@strCompanyLocation = strLocationName
-		FROM tblSMCompanyLocation WHERE intCompanyLocationId =  @CompanyLocation
-
-		IF(@intAPAccount IS NULL)
-		BEGIN
-			SET @strPostingError = 'Invalid default AP Account for company location "' + @strCompanyLocation + '".'
-			GOTO ENDPOST
-		END
+		FROM tblBBBuyback 
+		WHERE intBuybackId = @intBuyBackId
 
 		---Staging 
 		SELECT 
-			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](	B.intItemId
-																						, C.intItemLocationId
-																						, 'Sales Account'))
+			[intAccountId]	= dbo.fnGetLocationAwareGLAccount(@intDetailAccount, C.intLocationId) --[dbo].[fnGetItemGLAccount](B.intItemId, C.intItemLocationId, 'Sales Account')
 			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
 			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
 			,[dblQtyReceived] = A.dblBuybackQuantity	
@@ -181,11 +168,12 @@ AS
 		FROM tblBBBuybackDetail A
 		INNER JOIN tblICItem B
 			ON A.intItemId = B.intItemId
+		JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = A.intInvoiceDetailId
+		JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
 		INNER JOIN tblICItemLocation C
 			ON B.intItemId = C.intItemId
-				AND intLocationId =  @CompanyLocation
+				AND intLocationId = iv.intCompanyLocationId
 		WHERE intBuybackId = @intBuyBackId
-
 
 		---Check for Other Charge income account.
 		IF EXISTS(SELECT TOP 1 1 FROM #tmpStagingInsert WHERE intAccountId IS NULL)

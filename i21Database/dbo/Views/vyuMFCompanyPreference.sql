@@ -101,6 +101,8 @@ SELECT CP.intCompanyPreferenceId
 	,C.strControlPointName AS strPreProductionControlPointName
 	,CT.strContainerType
 	,CP.ysnRecipeBySite
+	,CP.ysnDisplayPickTicketItemXref
+
 FROM tblMFCompanyPreference CP
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CP.intDefaultShipmentStagingLocation
 LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = CP.intDefaultShipmentDockDoorLocation

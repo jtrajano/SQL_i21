@@ -17,6 +17,7 @@ DECLARE @vouchers AS TABLE(
 	,intEntityVendorId INT NULL
 	,intPurchaseDetailId INT NULL
 	,intContractDetailId INT NULL
+	,intContractCostId INT NULL
 	,intScaleTicketId INT NULL
 	,intInventoryReceiptChargeId INT NULL
 	,intInventoryReceiptItemId INT NULL
@@ -37,6 +38,7 @@ DECLARE @payablesDeleted AS TABLE(
 	,intEntityVendorId INT NULL
 	,intPurchaseDetailId INT NULL
 	,intContractDetailId INT NULL
+	,intContractCostId INT NULL
 	,intScaleTicketId INT NULL
 	,intInventoryReceiptChargeId INT NULL
 	,intInventoryReceiptItemId INT NULL
@@ -78,6 +80,7 @@ BEGIN
 		,A.intEntityVendorId
 		,B.intPurchaseDetailId
 		,B.intContractDetailId
+		,B.intContractCostId
 		,B.intScaleTicketId
 		,B.intInventoryReceiptChargeId
 		,B.intInventoryReceiptItemId
@@ -98,6 +101,7 @@ BEGIN
 		ON 	C.intTransactionType = A.intTransactionType
 		AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 		AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+		AND ISNULL(C.intContractCostId,-1) = ISNULL(B.intContractCostId,-1)
 		AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
 		AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
 		AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
@@ -122,6 +126,7 @@ BEGIN
 			,deleted.intEntityVendorId
 			,deleted.intPurchaseDetailId
 			,deleted.intContractDetailId
+			,deleted.intContractCostId
 			,deleted.intScaleTicketId
 			,deleted.intInventoryReceiptChargeId
 			,deleted.intInventoryReceiptItemId
@@ -142,6 +147,7 @@ BEGIN
 			AND	ISNULL(A.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			AND ISNULL(A.intContractCostId,-1) = ISNULL(B.intContractCostId,-1)
 			AND ISNULL(A.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
 			AND ISNULL(A.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
@@ -172,6 +178,7 @@ BEGIN
 			AND	ISNULL(A.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			AND ISNULL(A.intContractCostId,-1) = ISNULL(B.intContractCostId,-1)
 			AND ISNULL(A.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
 			AND ISNULL(A.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
@@ -203,6 +210,7 @@ BEGIN
 			,deleted.intEntityVendorId
 			,deleted.intPurchaseDetailId
 			,deleted.intContractDetailId
+			,deleted.intContractCostId
 			,deleted.intScaleTicketId
 			,deleted.intInventoryReceiptChargeId
 			,deleted.intInventoryReceiptItemId
@@ -223,6 +231,7 @@ BEGIN
 			AND ISNULL(A.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			AND ISNULL(A.intContractCostId,-1) = ISNULL(B.intContractCostId,-1)
 			AND ISNULL(A.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
 			AND ISNULL(A.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
@@ -239,6 +248,7 @@ BEGIN
 		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,-1) = ISNULL(C.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(C.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(C.intContractDetailId,-1)
+			AND ISNULL(A.intContractCostId,-1) = ISNULL(C.intContractCostId,-1)
 			AND ISNULL(A.intScaleTicketId,-1) = ISNULL(C.intScaleTicketId,-1)
 			AND ISNULL(A.intInventoryReceiptChargeId,-1) = ISNULL(C.intInventoryReceiptChargeId,-1)
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(C.intInventoryReceiptItemId,-1)

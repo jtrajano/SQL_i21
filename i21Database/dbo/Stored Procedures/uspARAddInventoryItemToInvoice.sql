@@ -122,6 +122,7 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@ItemName				NVARCHAR(50)
 		,@LocationName			NVARCHAR(50)
 		,@ItemLocationError		NVARCHAR(255)
+		,@SourceType			NVARCHAR(50)
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARAddInventoryItemToInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -139,6 +140,7 @@ SELECT
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
 	,@CurrencyId		= [intCurrencyId]
+	,@SourceType		= [strType]
 FROM
 	tblARInvoice
 WHERE
@@ -185,6 +187,14 @@ IF NOT EXISTS(	SELECT NULL
 			RETURN 0;
 		end
 	END
+
+-- IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND NOT EXISTS (SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @ItemSiteId)
+-- 	BEGIN		
+-- 		IF ISNULL(@RaiseError,0) = 1
+-- 			RAISERROR('Tank Delivery has no available Order!', 16, 1);
+-- 		SET @ErrorMessage = 'Tank Delivery has no available Order!'
+-- 		RETURN 0;
+-- 	END
 	
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
@@ -263,6 +273,23 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			SET @ContractHeaderId				= @intContractHeaderId
 		END
 	END
+
+IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractHeaderId IS NULL AND @ContractDetailId IS NULL
+BEGIN
+	SELECT TOP 1 @ContractDetailId 	= TMO.intContractDetailId
+				, @ContractHeaderId 	= CH.intContractHeaderId
+				, @ItemPrice			= ISNULL(CD.dblCashPrice, 0)
+	FROM tblTMSite S
+	INNER JOIN tblTMOrder TMO ON S.intSiteID = TMO.intSiteId
+	INNER JOIN tblTMDispatch TMD ON TMD.intSiteID = S.intSiteID
+	INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId
+	INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+	WHERE S.intSiteID = @ItemSiteId
+		AND CU.strFieldName = 'Scheduled Quantity'
+		AND CU.strScreenName = 'TM - Create Order'
+		AND CD.intItemId = @ItemId
+END
 		
 END TRY
 BEGIN CATCH
@@ -588,6 +615,29 @@ BEGIN
 	) ID
 	WHERE
 		intLoadDetailId = @ItemLoadDetailId 
+END
+
+--OVERAGE TRANSPORT AND TM ORDER
+IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractDetailId IS NOT NULL
+BEGIN
+	IF EXISTS (
+		SELECT TOP 1 1 
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+		WHERE ID.intInvoiceId = @InvoiceId
+			AND ID.intLoadDistributionDetailId IS NOT NULL
+			AND ID.intContractDetailId IS NOT NULL
+			AND ID.intSiteId IS NOT NULL
+			AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+	)
+	BEGIN
+	 	EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 			= @InvoiceId
+	 										, @intScaleUOMId 		= NULL
+	 										, @intUserId 			= 1
+	 										, @dblNetWeight 			= 0
+	 										, @ysnFromSalesOrder 	= 0
+	 										, @ysnFromImport			= 1
+	END
 END
 		
 BEGIN TRY

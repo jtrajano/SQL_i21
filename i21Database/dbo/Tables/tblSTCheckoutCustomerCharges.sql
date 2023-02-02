@@ -11,6 +11,7 @@
     [intProduct] INT NULL, 
     [dblUnitPrice] DECIMAL(18, 6) NULL, 
     [dblQuantity] DECIMAL(18, 6) NULL, 
+    [dblTax] DECIMAL(18, 6) NULL, 
 	[intCustomerChargesInvoiceId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutCustomerCharges_intCustChargeId] PRIMARY KEY ([intCustChargeId]), 

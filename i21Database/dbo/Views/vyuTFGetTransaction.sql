@@ -25,7 +25,7 @@ SELECT Trans.intTransactionId
 	, dblTax = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblTax ELSE Exception.dblTax END
 	, dblTaxExempt = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblTaxExempt ELSE Exception.dblTaxExempt END
 	, strInvoiceNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strInvoiceNumber ELSE Exception.strInvoiceNumber END
-	, dblQtyShipped = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblQtyShipped ELSE Exception.dblQtyShipped END
+	, dblQtyShipped = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblQtyShipped ELSE Exception.dblNet END --Exception.dblQtyShipped (no mapping in exception screen for qty shipped)
 	, strPONumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strPONumber ELSE Exception.strPONumber END
 	, strTerminalControlNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTerminalControlNumber ELSE Exception.strTerminalControlNumber END
 	, dtmDate = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dtmDate ELSE Exception.dtmDate END
@@ -57,9 +57,9 @@ SELECT Trans.intTransactionId
 	, strOriginCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCity ELSE Exception.strOriginCity END
 	, strOriginCounty = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCounty ELSE Exception.strOriginCounty END
 	, strOriginTCN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginTCN ELSE Exception.strOriginTCN END
-	, strTaxPayerName = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerName ELSE Exception.strTaxPayerName END
+	, strTaxPayerName = Trans.strTaxPayerName
 	, strTaxPayerIdentificationNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerIdentificationNumber ELSE Exception.strTaxPayerIdentificationNumber END
-	, strTaxPayerFEIN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerFEIN ELSE Exception.strTaxPayerFEIN END
+	, strTaxPayerFEIN = Trans.strTaxPayerFEIN
 	, strTaxPayerDBA = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerDBA ELSE Exception.strTaxPayerDBA END
 	, strTaxPayerAddress = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerAddress ELSE Exception.strTaxPayerAddress END
 	, strTransporterIdType = Trans.strTransporterIdType
@@ -85,6 +85,9 @@ SELECT Trans.intTransactionId
 	, strTransactionSource = Trans.strTransactionSource
 	, strImportVerificationNumber = Trans.strImportVerificationNumber
 	, strTransportNumber = Trans.strTransportNumber
+	, strOriginFacilityNumber = Trans.strOriginFacilityNumber
+	, strDestinationFacilityNumber = Trans.strDestinationFacilityNumber
+	, strTransportationModeDescription = tblSMTransportationMode.strDescription
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Trans.intProductCodeId
@@ -92,6 +95,7 @@ LEFT JOIN tblICItem Item ON Item.intItemId = Trans.intItemId
 LEFT JOIN tblTFException Exception ON Exception.intReportingComponentId = Trans.intReportingComponentId
 	AND Exception.strTransactionType = Trans.strTransactionType
 	AND Exception.intTransactionNumberId = Trans.intTransactionNumberId
+LEFT JOIN tblSMTransportationMode ON Trans.strTransportationMode = tblSMTransportationMode.strCode
 WHERE ISNULL(Exception.ysnDeleted, 0) != 1
 	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include') = 0
 		OR Exception.strOriginState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include'))
@@ -128,7 +132,7 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, Exception.dblTax
 	, Exception.dblTaxExempt
 	, Exception.strInvoiceNumber
-	, Exception.dblQtyShipped
+	, Exception.dblNet -- Exception.dblQtyShipped (no mapping in exception screen for qty shipped)
 	, Exception.strPONumber
 	, Exception.strTerminalControlNumber
 	, Exception.dtmDate
@@ -160,9 +164,9 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, Exception.strOriginCity
 	, Exception.strOriginCounty
 	, Exception.strOriginTCN
-	, Exception.strTaxPayerName
+	, (SELECT TOP 1 strCompanyName FROM tblTFCompanyPreference) strTaxPayerName--Exception.strTaxPayerName
 	, Exception.strTaxPayerIdentificationNumber
-	, Exception.strTaxPayerFEIN
+	, (SELECT TOP 1 REPLACE(strEin,'-','') FROM tblSMCompanySetup) strTaxPayerFEIN--Exception.strTaxPayerFEIN
 	, Exception.strTaxPayerDBA
 	, Exception.strTaxPayerAddress
 	, strTransporterIdType = NULL
@@ -188,6 +192,9 @@ SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10
 	, strTransactionSource = NULL
 	, strImportVerificationNumber = NULL
 	, strTransportNumber = Exception.strTransportNumber
+	, strOriginFacilityNumber = Exception.strOriginFacilityNumber
+	, strDestinationFacilityNumber = Exception.strDestinationFacilityNumber
+	, strTransportationModeDescription = NULL
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Exception.intProductCodeId

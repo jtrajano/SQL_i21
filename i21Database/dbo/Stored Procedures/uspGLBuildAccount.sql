@@ -40,71 +40,48 @@
 	--      	SELECT * INTO glactmst_bak FROM glactmst
 
 	-- +++++ INSERT CROSS REFERENCE +++++ --
-	IF (select SUM(intLength) from tblGLAccountStructure where strType = 'Segment') <= 8
-	BEGIN
-		INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])
-		SELECT (SELECT intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
-				B.strAccountId as stri21Id,
-				CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50))  + '.' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strExternalId , 	   
-				B.strPrimary + '-' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strCurrentExternalId,
-				'Legacy' as strCompanyId,
-				1
-		FROM tblGLTempAccount B
-		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE strCompanyId='Legacy')	
-		ORDER BY strAccountId
-	END
-	ELSE
-	BEGIN
-		-- HANDLE OUT OF STANDARD ACCOUNT STRUCTURE (e.i REPowell)
-		INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])
-		SELECT (SELECT intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
-				B.strAccountId as stri21Id,
-				CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '.' + 
-					REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment' and intAccountStructureId <> (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Segment' order by intSort))) +  
-					SUBSTRING(B.strSegment,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort),(select SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) as strExternalId , 	   								
-				CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '-' + 
-					REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment' and intAccountStructureId <> (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Segment' order by intSort))) +  
-					SUBSTRING(B.strSegment,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort),(select SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) as strCurrentExternalId,
-				'Legacy' as [strCompanyIdFrom],
-				1
-		FROM tblGLTempAccount B
-		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference where strCompanyId = 'Legacy')	
-		ORDER BY strAccountId
-	END
+	DECLARE @strType NVARCHAR(20), @updateCrossReference BIT = 1
+	SELECT TOP 1 @strType = strType FROM tblGLAccountStructure ORDER BY intSort -- check if primary is the first segment
 
-	-- +++++ INSERT SEGMENT MAPPING +++++ --
-	WHILE EXISTS(SELECT 1 FROM tblGLTempAccount WHERE intUserId = @intUserId)
-	BEGIN
-		Declare @Id INT = (SELECT TOP 1 cntId FROM tblGLTempAccount WHERE intUserId = @intUserId)
-		Declare @segmentcodes varchar(200) = (SELECT TOP 1 strAccountSegmentId FROM tblGLTempAccount WHERE intUserId = @intUserId)
-		Declare @segmentId varchar(200) = null
-		Declare @accountId INT = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = (SELECT TOP 1 strAccountId FROM tblGLTempAccount WHERE intUserId = @intUserId))
+	IF @strType <> 'Primary'
+		SET @updateCrossReference = 0
 
-		WHILE LEN(@segmentcodes) > 0
+	IF @updateCrossReference = 1 		
+	BEGIN
+		IF (select SUM(intLength) from tblGLAccountStructure where strType = 'Segment') <= 8
 		BEGIN
-			IF PATINDEX('%;%',@segmentcodes) > 0
-			BEGIN
-				SET @segmentId = SUBSTRING(@segmentcodes, 0, PATINDEX('%;%',@segmentcodes))
-			
-				INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@accountId, @segmentId)
-				UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountSegment WHERE intAccountSegmentId = @segmentId)
-
-				SET @segmentcodes = SUBSTRING(@segmentcodes, LEN(@segmentId + ';') + 1, LEN(@segmentcodes))
-			END
-			ELSE
-			BEGIN
-				SET @segmentId = @segmentcodes
-				SET @segmentcodes = NULL
-			
-				INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@accountId, @segmentId)
-				UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountSegment WHERE intAccountSegmentId = @segmentId)
-					
-			END
-		
-			DELETE FROM tblGLTempAccount WHERE cntId = @Id
+			INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])
+			SELECT (SELECT intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
+					B.strAccountId as stri21Id,
+					CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50))  + '.' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strExternalId , 	   
+					B.strPrimary + '-' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strCurrentExternalId,
+					'Legacy' as strCompanyId,
+					1
+			FROM tblGLTempAccount B
+			WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE strCompanyId='Legacy')	
+			ORDER BY strAccountId
+		END
+		ELSE
+		BEGIN
+			-- HANDLE OUT OF STANDARD ACCOUNT STRUCTURE (e.i REPowell)
+			INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])
+			SELECT (SELECT intAccountId FROM tblGLAccount A WHERE A.strAccountId = B.strAccountId) as inti21Id,
+					B.strAccountId as stri21Id,
+					CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '.' + 
+						REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment' and intAccountStructureId <> (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Segment' order by intSort))) +  
+						SUBSTRING(B.strSegment,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort),(select SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) as strExternalId , 	   								
+					CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '-' + 
+						REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment' and intAccountStructureId <> (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Segment' order by intSort))) +  
+						SUBSTRING(B.strSegment,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort),(select SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) as strCurrentExternalId,
+					'Legacy' as [strCompanyIdFrom],
+					1
+			FROM tblGLTempAccount B
+			WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference where strCompanyId = 'Legacy')	
+			ORDER BY strAccountId
 		END
 	END
 
+	EXEC uspGLInsertSegmentMappingAfterAccountBuild @intUserId
 
 	--DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
 	IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))

@@ -142,7 +142,7 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED] OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA State' 
-				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') 
+				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND ISNULL(strVal1, 'None') = 'None' AND ISNULL(strVal2, 'None') = 'None') 
 					OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Local' ) TXBLLOCAL OUTER APPLY
@@ -182,7 +182,7 @@ BEGIN
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT strState = st.strCode
-				,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal1
+				,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN SDC.strSchoolDistrictCode + ' ' + tax.strVal1  
 								 WHEN (tax.intTypeTaxStateId = 45) THEN 
 									ISNULL((SELECT TOP 1 
 												CASE WHEN (tax.strVal3 = 'None (None)') 
@@ -196,11 +196,12 @@ BEGIN
 				dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
+				INNER JOIN tblPRSchoolDistricts SDC on LTRIM(RTRIM(SDC.strSchoolDistrict)) = LTRIM(RTRIM(tax.strVal1))
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal1 <> 'None')
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 <> 'None (None)'))
-			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2, tax.strVal3) SCHOOLTAX OUTER APPLY
+			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2, tax.strVal3, SDC.strSchoolDistrictCode) SCHOOLTAX OUTER APPLY
 		(SELECT strState = st.strCode
 		,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal2
 						 WHEN (tax.intTypeTaxStateId = 45) THEN 
@@ -289,7 +290,7 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED] OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA State' 
-				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') 
+				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND ISNULL(strVal1, 'None') = 'None' AND ISNULL(strVal2, 'None') = 'None') 
 					OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Local' ) TXBLLOCAL OUTER APPLY
@@ -329,7 +330,7 @@ BEGIN
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA Local' AND ysnVoid = 0 GROUP BY st.strCode, strEmployerStateTaxID, lc.strLocalName) LOCALTAX OUTER APPLY
 		(SELECT strState = st.strCode
-				,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal1
+				,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN SDC.strSchoolDistrictCode + ' ' + tax.strVal1  
 								 WHEN (tax.intTypeTaxStateId = 45) THEN 
 									ISNULL((SELECT TOP 1 
 												CASE WHEN (tax.strVal3 = 'None (None)') 
@@ -343,11 +344,12 @@ BEGIN
 				dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
+				INNER JOIN tblPRSchoolDistricts SDC on LTRIM(RTRIM(SDC.strSchoolDistrict)) = LTRIM(RTRIM(tax.strVal1))
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 			AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
 			AND ((tax.intTypeTaxStateId = 41 AND tax.strVal1 <> 'None')
 				OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 <> 'None (None)'))
-			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2, tax.strVal3) SCHOOLTAX OUTER APPLY
+			GROUP BY st.strCode, tax.intTypeTaxStateId, strEmployerStateTaxID, tax.strVal1, tax.strVal2, tax.strVal3, SDC.strSchoolDistrictCode) SCHOOLTAX OUTER APPLY
 		(SELECT strState = st.strCode
 		,strLocal = CASE WHEN (tax.intTypeTaxStateId = 41) THEN tax.strVal2
 						 WHEN (tax.intTypeTaxStateId = 45) THEN 

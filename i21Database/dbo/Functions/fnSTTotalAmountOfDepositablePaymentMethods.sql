@@ -11,7 +11,7 @@ AS BEGIN
     FROM            tblSTCheckoutPaymentOptions a
     INNER JOIN      tblSTPaymentOption b
     ON              a.intPaymentOptionId = b.intPaymentOptionId
-    WHERE           b.ysnDepositable = 0 AND
+    WHERE           ISNULL(b.ysnDepositable,0) = 0 AND
                     a.intCheckoutId = @intCheckoutId
 
     RETURN @dblTotalAmountOfDepositablePaymentMethods

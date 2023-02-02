@@ -110,10 +110,20 @@ AS (SELECT intEdiPricebookId
 DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
 
+--Update 4 UOMs to validate if last digit is check digit
+
+UPDATE tblICEdiPricebook
+SET 
+	strSellingUpcNumber = dbo.fnICValidateUPCCode(strSellingUpcNumber),
+	strOrderCaseUpcNumber = dbo.fnICValidateUPCCode(strOrderCaseUpcNumber),
+	strAltUPCNumber1 = dbo.fnICValidateUPCCode(strAltUPCNumber1),
+	strAltUPCNumber2 = dbo.fnICValidateUPCCode(strAltUPCNumber2)
+WHERE strUniqueId = @UniqueId
+
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
 DELETE p
 FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS INT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1))
+LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS BIGINT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1))
 OUTER APPLY (SELECT TOP 1 i.intItemId 
 			 FROM tblICItem i 
 			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
@@ -333,7 +343,7 @@ SELECT @LogId
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
-WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL;
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strSellingUpcNumber,'') IS NULL;
 
 /* Log the records with invalid Order Case UPC */
 
@@ -356,7 +366,7 @@ SELECT @LogId
 	 , 'Record is imported.'
 	 , 1
 FROM tblICEdiPricebook p
-WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NOT NULL;
+WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULLIF(strOrderCaseUpcNumber,'') IS NULL;
 
 
 -- Log the records with duplicate records
@@ -1157,13 +1167,12 @@ WHEN
 	AND Source_Query.ysnUpdateExistingRecords = 1 
 THEN 
 	UPDATE SET intUnitMeasureId		= Source_Query.intUnitMeasureId
-		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber) -- Update the short UPC code. 
+		     , strUpcCode			= dbo.fnSTConvertUPCaToUPCe(RIGHT(Source_Query.strSellingUpcNumber, 11)) -- Update the short UPC code. 
 		     , intModifiedByUserId  = @intUserId 
 		     , intConcurrencyId		= ItemUOM.intConcurrencyId + 1
-		     , intCheckDigit		= dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
+		     , intCheckDigit		= dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)
 		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
 			 , strLongUPCCode		= Source_Query.strSellingUpcNumber
-
 /* If not found and it is allowed, insert a new item uom record. */
 WHEN 
 	NOT MATCHED 
@@ -1188,20 +1197,20 @@ THEN
 		, intDataSourceId
 	)
 	VALUES (
-		Source_Query.intItemId							-- intItemId
-		, Source_Query.intUnitMeasureId					-- intUnitMeasureId
-		, 1												-- dblUnitQty
-		, dbo.fnSTConvertUPCaToUPCe(Source_Query.strSellingUpcNumber)
-		, Source_Query.strSellingUpcNumber -- strLongUPCCode
-		, dbo.fnICCalculateCheckDigit(Source_Query.strSellingUpcNumber)
-		, CAST(Source_Query.strUpcModifierNumber AS INT)	-- intModifier
-		, Source_Query.ysnStockUnit						-- ysnStockUnit
-		, 1												-- ysnAllowPurchase
-		, 1												-- ysnAllowSale
-		, 1												-- intConcurrencyId
-		, GETDATE()										-- dtmDateCreated
-		, @intUserId									-- intCreatedByUserId
-		, 2												-- intDataSourceId
+		Source_Query.intItemId												-- intItemId
+		, Source_Query.intUnitMeasureId										-- intUnitMeasureId
+		, 1																	-- dblUnitQty
+		, dbo.fnSTConvertUPCaToUPCe(RIGHT(Source_Query.strSellingUpcNumber, 11))
+		, Source_Query.strSellingUpcNumber									-- strLongUPCCode
+		, dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)		-- intCheckDigit
+		, CAST(Source_Query.strUpcModifierNumber AS INT)					-- intModifier
+		, Source_Query.ysnStockUnit											-- ysnStockUnit
+		, 1																	-- ysnAllowPurchase
+		, 1																	-- ysnAllowSale
+		, 1																	-- intConcurrencyId
+		, GETDATE()															-- dtmDateCreated
+		, @intUserId														-- intCreatedByUserId
+		, 2																	-- intDataSourceId
 	)
 OUTPUT $action
 	 , inserted.intItemId
@@ -1231,7 +1240,7 @@ INSERT INTO @valid2ndUOM (intEdiPricebookId
 						, strUpcCode)
 SELECT p.intEdiPricebookId
 	 , p.strOrderCaseUpcNumber
-	 , dbo.fnSTConvertUPCaToUPCe(p.strOrderCaseUpcNumber)
+	 , dbo.fnSTConvertUPCaToUPCe(RIGHT(p.strOrderCaseUpcNumber, 11))
 FROM tblICEdiPricebook p
 LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 OUTER APPLY (SELECT TOP 1 i.intItemId 
@@ -1274,6 +1283,7 @@ INSERT INTO tblICItemUOM (
 	,dblUnitQty
 	,strUpcCode
 	,strLongUPCCode
+	,intCheckDigit
 	,ysnStockUnit
 	,ysnAllowPurchase
 	,ysnAllowSale
@@ -1289,6 +1299,7 @@ SELECT
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 	,strUpcCode = v.strUpcCode
 	,strLongUPCCode = p.strOrderCaseUpcNumber
+	,intCheckDigit = dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber)
 	,ysnStockUnit = 0
 	,ysnAllowPurchase = 1
 	,ysnAllowSale = CASE WHEN CAST(NULLIF(p.strCaseRetailPrice, '') AS NUMERIC(38, 20)) <> 0 THEN 1 ELSE 0 END 
@@ -1442,6 +1453,7 @@ INSERT INTO tblICItemUOM (intItemId
 						, dblUnitQty
 						, strUpcCode
 						, strLongUPCCode
+						, intCheckDigit
 						, ysnStockUnit
 						, ysnAllowPurchase
 						, ysnAllowSale
@@ -1454,8 +1466,9 @@ INSERT INTO tblICItemUOM (intItemId
 SELECT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity1 AS NUMERIC(38, 20)) 
-	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(strAltUPCNumber1)
+	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber1, 11))
 	 , strLongUPCCode = p.strAltUPCNumber1
+	 , intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber1)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale1, '') IS NULL THEN NULL 
 							   WHEN p.strPurchaseSale1 = 'P' OR p.strPurchaseSale1 = 'B' THEN 1
@@ -1501,7 +1514,7 @@ OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 WHERE iu.intItemId = i.intItemId AND (iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId) OR (iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '0')) AND NULLIF(p.strAltUPCModifier1, '') = iu.intModifier)) existUOM
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 FROM tblICItemUOM iu
-			 WHERE iu.strLongUPCCode = p.strAltUPCNumber1 AND iu.intModifier = CAST(ISNULL(NULLIF(p.strAltUPCModifier1, ''), 1) AS INT)) existUPCCode
+			 WHERE iu.strLongUPCCode = p.strAltUPCNumber1 AND iu.intModifier = CAST(ISNULL(NULLIF(p.strAltUPCModifier1, ''), 1) AS BIGINT)) existUPCCode
 WHERE p.strUniqueId = @UniqueId
   AND i.intItemId IS NOT NULL 
   AND NULLIF(p.strAltUPCQuantity1, '') IS NOT NULL 
@@ -1527,7 +1540,7 @@ INSERT INTO @validAlternate2UOM (intEdiPricebookId
 )
 SELECT p.intEdiPricebookId
 	 , p.strAltUPCNumber2
-	 , dbo.fnSTConvertUPCaToUPCe(p.strAltUPCNumber2)
+	 , dbo.fnSTConvertUPCaToUPCe(RIGHT(p.strAltUPCNumber2, 11))
 FROM tblICEdiPricebook p
 LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 OUTER APPLY (SELECT TOP 1 i.intItemId 
@@ -1569,6 +1582,7 @@ INSERT INTO tblICItemUOM (intItemId
 						, dblUnitQty
 						, strUpcCode
 						, strLongUPCCode
+						, intCheckDigit
 						, ysnStockUnit
 						, ysnAllowPurchase
 						, ysnAllowSale
@@ -1581,8 +1595,9 @@ INSERT INTO tblICItemUOM (intItemId
 SELECT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity2 AS NUMERIC(38, 20)) 
-	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(strAltUPCNumber2)
+	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber2, 11))
 	 , strLongUPCCode = p.strAltUPCNumber2
+	 , intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber2)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale2, '') IS NULL THEN NULL 
 							   WHEN p.strPurchaseSale2 = 'P' OR p.strPurchaseSale2 = 'B' THEN 1
@@ -1784,6 +1799,13 @@ USING (
 		 , intIssueUOMId					= SaleUOM.intItemUOMId
 		 , intReceiveUOMId					= ReceiveUOM.intItemUOMId
 		 , ysnOpenPricePLU					= CASE Pricebook.strOpenPLU WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END
+		 , intAllowNegativeInventory		= ISNULL(CASE Pricebook.strAllowNegativeInventory WHEN 'Y' THEN 1 WHEN 'N' THEN 3 ELSE 3 END, ItemLocation.intAllowNegativeInventory) 
+		 , intAllowZeroCostTypeId			= ISNULL(CASE Pricebook.strAllowZeroCostTypeId 
+													 WHEN 'Y' THEN 2 
+													 WHEN 'N' THEN 1 
+													 WHEN 'W' THEN 3 
+													 WHEN 'P' THEN 4
+													 ELSE 1 END, ItemLocation.intAllowZeroCostTypeId) 
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
 	LEFT JOIN tblICCategory AS Category ON Category.intCategoryId = Item.intCategoryId
@@ -1831,33 +1853,35 @@ USING (
 
 /* If matched, update the existing item location. */
 WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN 
-	UPDATE SET ItemLocation.intClassId				= Source_Query.intClassId
-			 , ItemLocation.intFamilyId				= Source_Query.intFamilyId
-			 , ItemLocation.ysnDepositRequired		= Source_Query.ysnDepositRequired
-			 , ItemLocation.ysnPromotionalItem		= Source_Query.ysnPromotionalItem
-			 , ItemLocation.ysnPrePriced			= Source_Query.ysnPrePriced
-			 , ItemLocation.dblSuggestedQty			= Source_Query.dblSuggestedQty
-			 , ItemLocation.dblMinOrder				= Source_Query.dblMinOrder
-			 , ItemLocation.intBottleDepositNo		= Source_Query.intBottleDepositNo
-			 , ItemLocation.ysnTaxFlag1				= Source_Query.ysnTaxFlag1
-			 , ItemLocation.ysnTaxFlag2				= Source_Query.ysnTaxFlag2
-			 , ItemLocation.ysnTaxFlag3				= Source_Query.ysnTaxFlag3
-			 , ItemLocation.ysnTaxFlag4				= Source_Query.ysnTaxFlag4
-			 , ItemLocation.ysnApplyBlueLaw1		= Source_Query.ysnApplyBlueLaw1
-			 , ItemLocation.ysnApplyBlueLaw2		= Source_Query.ysnApplyBlueLaw2
-			 , ItemLocation.intProductCodeId		= Source_Query.intProductCodeId
-			 , ItemLocation.ysnFoodStampable		= Source_Query.ysnFoodStampable
-			 , ItemLocation.ysnReturnable			= Source_Query.ysnReturnable
-			 , ItemLocation.ysnSaleable				= Source_Query.ysnSaleable
-			 , ItemLocation.ysnIdRequiredCigarette	= Source_Query.ysnIdRequiredCigarette
-			 , ItemLocation.ysnIdRequiredLiquor		= Source_Query.ysnIdRequiredLiquor
-			 , ItemLocation.intMinimumAge			= Source_Query.intMinimumAge
-			 , ItemLocation.intCountGroupId			= Source_Query.intCountGroupId
-			 , ItemLocation.intConcurrencyId		= ItemLocation.intConcurrencyId + 1
-			 , ItemLocation.intIssueUOMId			= Source_Query.intIssueUOMId
-			 , ItemLocation.intReceiveUOMId			= Source_Query.intReceiveUOMId
-			 , ItemLocation.intVendorId				= Source_Query.intEntityId
-			 , ItemLocation.ysnOpenPricePLU			= Source_Query.ysnOpenPricePLU
+	UPDATE SET ItemLocation.intClassId					= Source_Query.intClassId
+			 , ItemLocation.intFamilyId					= Source_Query.intFamilyId
+			 , ItemLocation.ysnDepositRequired			= Source_Query.ysnDepositRequired
+			 , ItemLocation.ysnPromotionalItem			= Source_Query.ysnPromotionalItem
+			 , ItemLocation.ysnPrePriced				= Source_Query.ysnPrePriced
+			 , ItemLocation.dblSuggestedQty				= Source_Query.dblSuggestedQty
+			 , ItemLocation.dblMinOrder					= Source_Query.dblMinOrder
+			 , ItemLocation.intBottleDepositNo			= Source_Query.intBottleDepositNo
+			 , ItemLocation.ysnTaxFlag1					= Source_Query.ysnTaxFlag1
+			 , ItemLocation.ysnTaxFlag2					= Source_Query.ysnTaxFlag2
+			 , ItemLocation.ysnTaxFlag3					= Source_Query.ysnTaxFlag3
+			 , ItemLocation.ysnTaxFlag4					= Source_Query.ysnTaxFlag4
+			 , ItemLocation.ysnApplyBlueLaw1			= Source_Query.ysnApplyBlueLaw1
+			 , ItemLocation.ysnApplyBlueLaw2			= Source_Query.ysnApplyBlueLaw2
+			 , ItemLocation.intProductCodeId			= Source_Query.intProductCodeId
+			 , ItemLocation.ysnFoodStampable			= Source_Query.ysnFoodStampable
+			 , ItemLocation.ysnReturnable				= Source_Query.ysnReturnable
+			 , ItemLocation.ysnSaleable					= Source_Query.ysnSaleable
+			 , ItemLocation.ysnIdRequiredCigarette		= Source_Query.ysnIdRequiredCigarette
+			 , ItemLocation.ysnIdRequiredLiquor			= Source_Query.ysnIdRequiredLiquor
+			 , ItemLocation.intMinimumAge				= Source_Query.intMinimumAge
+			 , ItemLocation.intCountGroupId				= Source_Query.intCountGroupId
+			 , ItemLocation.intConcurrencyId			= ItemLocation.intConcurrencyId + 1
+			 , ItemLocation.intIssueUOMId				= Source_Query.intIssueUOMId
+			 , ItemLocation.intReceiveUOMId				= Source_Query.intReceiveUOMId
+			 , ItemLocation.intVendorId					= Source_Query.intEntityId
+			 , ItemLocation.ysnOpenPricePLU				= Source_Query.ysnOpenPricePLU
+			 , ItemLocation.intAllowNegativeInventory	= Source_Query.intAllowNegativeInventory
+			 , ItemLocation.intAllowZeroCostTypeId		= Source_Query.intAllowZeroCostTypeId
 
 /* If none is found, insert a new item location. */
 WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 THEN 
@@ -1933,74 +1957,74 @@ INSERT (intItemId
 	  , intCreatedByUserId
 	  , intModifiedByUserId
 	  , intDataSourceId)
-VALUES (Source_Query.intItemId				-- intItemId
-      , Source_Query.intLocationId			-- intLocationId
-      , Source_Query.intEntityId			-- intVendorId
-      , DEFAULT								-- strDescription
-      , 1									-- intCostingMethod
-      , 3									-- intAllowNegativeInventory
-      , DEFAULT								-- intSubLocationId
-      , DEFAULT								-- intStorageLocationId
-      , Source_Query.intIssueUOMId			-- intIssueUOMId
-      , Source_Query.intReceiveUOMId		-- intReceiveUOMId
-      , DEFAULT								-- intGrossUOMId
-      , Source_Query.intFamilyId			-- intFamilyId
-      , Source_Query.intClassId				-- intClassId
-      , Source_Query.intProductCodeId		-- intProductCodeId
-      , DEFAULT								-- intFuelTankId
-      , DEFAULT								-- strPassportFuelId1
-      , DEFAULT								-- strPassportFuelId2
-      , DEFAULT								-- strPassportFuelId3
-      , Source_Query.ysnTaxFlag1			-- ysnTaxFlag1
-      , Source_Query.ysnTaxFlag2			-- ysnTaxFlag2
-      , Source_Query.ysnTaxFlag3			-- ysnTaxFlag3
-      , Source_Query.ysnTaxFlag4			-- ysnTaxFlag4
-      , Source_Query.ysnPromotionalItem		-- ysnPromotionalItem
-      , DEFAULT								-- intMixMatchId
-      , Source_Query.ysnDepositRequired		-- ysnDepositRequired
-      , DEFAULT								-- intDepositPLUId
-      , Source_Query.intBottleDepositNo		-- intBottleDepositNo
-      , Source_Query.ysnSaleable			-- ysnSaleable
-      , DEFAULT								-- ysnQuantityRequired
-      , DEFAULT								-- ysnScaleItem
-      , Source_Query.ysnFoodStampable		-- ysnFoodStampable
-      , Source_Query.ysnReturnable			-- ysnReturnable
-      , Source_Query.ysnPrePriced			-- ysnPrePriced
-      , Source_Query.ysnOpenPricePLU		-- ysnOpenPricePLU
-      , DEFAULT								-- ysnLinkedItem
-      , DEFAULT								-- strVendorCategory
-      , DEFAULT								-- ysnCountBySINo
-      , DEFAULT								-- strSerialNoBegin
-      , DEFAULT								-- strSerialNoEnd
-      , Source_Query.ysnIdRequiredLiquor	-- ysnIdRequiredLiquor
-      , Source_Query.ysnIdRequiredCigarette	-- ysnIdRequiredCigarette
-      , Source_Query.intMinimumAge			-- intMinimumAge
-      , Source_Query.ysnApplyBlueLaw1		-- ysnApplyBlueLaw1
-      , Source_Query.ysnApplyBlueLaw2		-- ysnApplyBlueLaw2
-     , DEFAULT								-- ysnCarWash
-      , DEFAULT								-- intItemTypeCode
-      , DEFAULT								-- intItemTypeSubCode
-      , DEFAULT								-- ysnAutoCalculateFreight
-      , DEFAULT								-- intFreightMethodId
-      , DEFAULT								-- dblFreightRate
-      , DEFAULT								-- intShipViaId
-      , DEFAULT								-- intNegativeInventory
-      , DEFAULT								-- dblReorderPoint
-      , Source_Query.dblMinOrder			-- dblMinOrder
-      , Source_Query.dblSuggestedQty		-- dblSuggestedQty
-      , DEFAULT								-- dblLeadTime
-      , DEFAULT								-- strCounted
-      , Source_Query.intCountGroupId		-- intCountGroupId
-      , DEFAULT								-- ysnCountedDaily
-      , 1									-- intAllowZeroCostTypeId
-      , DEFAULT								-- ysnLockedInventory
-      , 0									-- ysnStorageUnitRequired
-      , DEFAULT								-- strStorageUnitNo
-      , DEFAULT								-- intCostAdjustmentType
-      , 1									-- ysnActive
-      , DEFAULT								-- intSort
-      , 1									-- intConcurrencyId
-      , GETDATE()							-- dtmDateCreated
+VALUES (Source_Query.intItemId					-- intItemId
+      , Source_Query.intLocationId				-- intLocationId
+      , Source_Query.intEntityId				-- intVendorId
+      , DEFAULT									-- strDescription
+      , 1										-- intCostingMethod
+      , Source_Query.intAllowNegativeInventory	-- intAllowNegativeInventory
+      , DEFAULT									-- intSubLocationId
+      , DEFAULT									-- intStorageLocationId
+      , Source_Query.intIssueUOMId				-- intIssueUOMId
+      , Source_Query.intReceiveUOMId			-- intReceiveUOMId
+      , DEFAULT									-- intGrossUOMId
+      , Source_Query.intFamilyId				-- intFamilyId
+      , Source_Query.intClassId					-- intClassId
+      , Source_Query.intProductCodeId			-- intProductCodeId
+      , DEFAULT									-- intFuelTankId
+      , DEFAULT									-- strPassportFuelId1
+      , DEFAULT									-- strPassportFuelId2
+      , DEFAULT									-- strPassportFuelId3
+      , Source_Query.ysnTaxFlag1				-- ysnTaxFlag1
+      , Source_Query.ysnTaxFlag2				-- ysnTaxFlag2
+      , Source_Query.ysnTaxFlag3				-- ysnTaxFlag3
+      , Source_Query.ysnTaxFlag4				-- ysnTaxFlag4
+      , Source_Query.ysnPromotionalItem			-- ysnPromotionalItem
+      , DEFAULT									-- intMixMatchId
+      , Source_Query.ysnDepositRequired			-- ysnDepositRequired
+      , DEFAULT									-- intDepositPLUId
+      , Source_Query.intBottleDepositNo			-- intBottleDepositNo
+      , Source_Query.ysnSaleable				-- ysnSaleable
+      , DEFAULT									-- ysnQuantityRequired
+      , DEFAULT									-- ysnScaleItem
+      , Source_Query.ysnFoodStampable			-- ysnFoodStampable
+      , Source_Query.ysnReturnable				-- ysnReturnable
+      , Source_Query.ysnPrePriced				-- ysnPrePriced
+      , Source_Query.ysnOpenPricePLU			-- ysnOpenPricePLU
+      , DEFAULT									-- ysnLinkedItem
+      , DEFAULT									-- strVendorCategory
+      , DEFAULT									-- ysnCountBySINo
+      , DEFAULT									-- strSerialNoBegin
+      , DEFAULT									-- strSerialNoEnd
+      , Source_Query.ysnIdRequiredLiquor		-- ysnIdRequiredLiquor
+      , Source_Query.ysnIdRequiredCigarette		-- ysnIdRequiredCigarette
+      , Source_Query.intMinimumAge				-- intMinimumAge
+      , Source_Query.ysnApplyBlueLaw1			-- ysnApplyBlueLaw1
+      , Source_Query.ysnApplyBlueLaw2			-- ysnApplyBlueLaw2
+     , DEFAULT									-- ysnCarWash
+      , DEFAULT									-- intItemTypeCode
+      , DEFAULT									-- intItemTypeSubCode
+      , DEFAULT									-- ysnAutoCalculateFreight
+      , DEFAULT									-- intFreightMethodId
+      , DEFAULT									-- dblFreightRate
+      , DEFAULT									-- intShipViaId
+      , DEFAULT									-- intNegativeInventory
+      , DEFAULT									-- dblReorderPoint
+      , Source_Query.dblMinOrder				-- dblMinOrder
+      , Source_Query.dblSuggestedQty			-- dblSuggestedQty
+      , DEFAULT									-- dblLeadTime
+      , DEFAULT									-- strCounted
+      , Source_Query.intCountGroupId			-- intCountGroupId
+      , DEFAULT									-- ysnCountedDaily
+      , Source_Query.intAllowZeroCostTypeId		-- intAllowZeroCostTypeId
+      , DEFAULT									-- ysnLockedInventory
+      , 0										-- ysnStorageUnitRequired
+      , DEFAULT									-- strStorageUnitNo
+      , DEFAULT									-- intCostAdjustmentType
+      , 1										-- ysnActive
+      , DEFAULT									-- intSort
+      , 1										-- intConcurrencyId
+      , GETDATE()								-- dtmDateCreated
       , DEFAULT--,dtmDateModified
       , @intUserId--,intCreatedByUserId
       , DEFAULT--,intModifiedByUserId
@@ -2508,8 +2532,23 @@ SELECT [Changes].strAction
 FROM (MERGE	INTO dbo.tblICEffectiveItemCost WITH (HOLDLOCK) AS EffectiveItemCost
 USING (
 	SELECT Item.intItemId
+		 , ItemLocation.intItemLocationId
+		 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
+		 , dblCost			    = CAST(NULLIF(Pricebook.strCaseCost, '') AS NUMERIC(38, 20)) 
+		 , dtmEffectiveDate	    = CAST(GETUTCDATE() AS DATE)
+		 , dtmDateCreated	    = GETUTCDATE()		
+		 , intCreatedByUserId   = @intUserId
+		 , ysnUpdatePrice	    = Pricebook.ysnUpdatePrice
+	FROM tblICEdiPricebook AS Pricebook
+	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+	OUTER APPLY (SELECT loc.intCompanyLocationId 					
+				 FROM @ValidLocations loc 
+				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strCaseCost, '') AS NUMERIC(38, 20)) <> 0 
+	UNION
+	SELECT Item.intItemId
 		, ItemLocation.intItemLocationId
-		, ItemUOM.intItemUOMId
 		, intCompanyLocationId = ValidLocation.intCompanyLocationId 
 		, dblCost			   = CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) 
 		, dtmEffectiveDate	   = CAST(GETUTCDATE() AS DATE)
@@ -2522,12 +2561,10 @@ USING (
 				 FROM @ValidLocations loc 
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1)))
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0 AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber1) IS NOT NULL
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0
 	UNION
 	SELECT Item.intItemId
 		 , ItemLocation.intItemLocationId
-		 , ItemUOM.intItemUOMId
 		 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
 		 , dblCost				= CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) 
 		 , dtmEffectiveDate		= CAST(GETUTCDATE() AS DATE)
@@ -2540,11 +2577,7 @@ USING (
 				 FROM @ValidLocations loc 
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
-	WHERE 
-		Pricebook.strUniqueId = @UniqueId 
-		AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
-		--AND dbo.fnSTConvertUPCaToUPCe(Pricebook.strAltUPCNumber2) IS NOT NULL
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
 ) AS Source_Query ON EffectiveItemCost.intItemId = Source_Query.intItemId 
 			     AND EffectiveItemCost.intItemLocationId = Source_Query.intItemLocationId
 			     AND CONVERT(DATE, EffectiveItemCost.dtmEffectiveCostDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 

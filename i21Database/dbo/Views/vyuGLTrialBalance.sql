@@ -8,9 +8,9 @@ ISNULL(strAccountGroup,'') COLLATE Latin1_General_CI_AS strAccountGroup,
 ISNULL( A.strAccountId,'')  COLLATE Latin1_General_CI_AS strAccountId,
 ISNULL(strAccountType,'') COLLATE Latin1_General_CI_AS strAccountType ,
 ISNULL(A.strCashFlow,'') COLLATE Latin1_General_CI_AS strCashFlow,
-SUBSTRING(A.strAccountId, 1, P1.intLength)COLLATE Latin1_General_CI_AS strPrimaryCode ,
-SUBSTRING(A.strAccountId, P1.intLength+ 2, P2.intLength)COLLATE Latin1_General_CI_AS strLocationCode ,
-SUBSTRING(A.strAccountId, P1.intLength + P3.intLength + 4, P3.intLength)COLLATE Latin1_General_CI_AS strLOBCode ,
+Segment.[Primary Account] COLLATE Latin1_General_CI_AS strPrimaryCode ,
+Segment.[Location] COLLATE Latin1_General_CI_AS strLocationCode ,
+'' COLLATE Latin1_General_CI_AS strLOBCode ,
 ISNULL(A.strComments,'') COLLATE Latin1_General_CI_AS strComments,
 ISNULL(strCurrency,'') COLLATE Latin1_General_CI_AS strCurrency,
 ISNULL(coa.strCurrentExternalId,'') COLLATE Latin1_General_CI_AS  strCurrentExternalId,
@@ -25,15 +25,9 @@ TBSum.intGLFiscalYearPeriodId,
 TBSum.strPeriod
 FROM vyuGLAccountDetail A
 LEFT JOIN tblGLCOACrossReference coa ON A.intAccountId =coa.inti21Id 
-outer APPLY(
-	SELECT top 1 intLength, intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Primary'
-)P1 
-outer APPLY(
-	SELECT top 1 intLength, intAccountStructureId FROM tblGLAccountStructure WHERE strStructureName = 'Location'
-)P2 
-outer APPLY(
-	SELECT top 1 intLength, intAccountStructureId FROM tblGLAccountStructure WHERE strStructureName = 'LOB'
-)P3
+OUTER APPLY(
+	SELECT TOP 1 [Primary Account],[Location] FROM tblGLTempCOASegment WHERE intAccountId = A.intAccountId
+)Segment
 OUTER APPLY (
 
 	SELECT SUM(ISNULL(MTDBalance,0))MTDBalance, 

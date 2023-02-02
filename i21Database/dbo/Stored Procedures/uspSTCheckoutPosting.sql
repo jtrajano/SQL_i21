@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
 	@intCurrentUserId					INT,
 	@intCheckoutId						INT,
+	@intCheckoutProcessId				INT,
 	@strDirection						NVARCHAR(50),
 	@ysnRecap							BIT,
 	@strStatusMsg						NVARCHAR(1000)	OUTPUT,
@@ -63,9 +64,9 @@ BEGIN
 								SELECT 
 									@strCheckoutCurrentProcess = CASE
 																	WHEN intCheckoutCurrentProcess = 1
-																		THEN 'Checkout is currently posting, please try again after ' + @strMinuteDiff
+																		THEN 'End of day is currently posting, please try again after ' + @strMinuteDiff
 																	WHEN intCheckoutCurrentProcess = 2
-																		THEN 'Checkout is currently unposting, please try again after ' + @strMinuteDiff
+																		THEN 'End of day is currently unposting, please try again after ' + @strMinuteDiff
 																END
 								FROM tblSTCheckoutHeader 
 								WHERE intCheckoutId = @intCheckoutId 
@@ -138,6 +139,7 @@ BEGIN
 		DECLARE @dblInvoiceAndCheckoutDifference DECIMAL(18,6) = 0
 		DECLARE @dblConsTolerance DECIMAL(18,6) = 0.01
 		DECLARE @dblOutsideFuelDiscount DECIMAL(18,6) = 0
+		DECLARE @dblInsideFuelDiscount DECIMAL(18,6) = 0
 		DECLARE @ysnConsMeterReadingsForDollars BIT = 0
 		DECLARE @ysnConsIncludeInsideDiscount BIT = 0
 		DECLARE @ysnConsAddOutsideFuelDiscounts BIT = 0
@@ -155,10 +157,10 @@ BEGIN
 		DECLARE @intCompanyLocationId INT
 		DECLARE @intTaxGroupId INT
 		DECLARE @intStoreId INT
-		DECLARE @strComments NVARCHAR(MAX) = 'Store Checkout' -- All comments should be same to create a single Invoice
-		DECLARE @strInvoiceTypeMain AS NVARCHAR(100) = 'Store Checkout' --'Standard' --'Store Checkout'
-		DECLARE @strInvoiceTransactionTypeMain AS NVARCHAR(100) --= 'Store Checkout'
-		DECLARE @strInvoiceTypeCustomerCharges AS NVARCHAR(100) --= 'Store Checkout'
+		DECLARE @strComments NVARCHAR(MAX) = 'Store End of Day' -- All comments should be same to create a single Invoice
+		DECLARE @strInvoiceTypeMain AS NVARCHAR(100) = 'Store End of Day' --'Standard' --'Store End of Day'
+		DECLARE @strInvoiceTransactionTypeMain AS NVARCHAR(100) --= 'Store End of Day'
+		DECLARE @strInvoiceTypeCustomerCharges AS NVARCHAR(100) --= 'Store End of Day'
 		DECLARE @strInvoicePaymentMethodMain AS NVARCHAR(100) = 'Cash'
 		DECLARE @intPaymentMethodIdMain AS INT = (
 													SELECT intPaymentMethodID 
@@ -220,6 +222,7 @@ BEGIN
 				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
 				, @strCheckoutType = strCheckoutType
 				, @dblOutsideFuelDiscount = dblEditableOutsideFuelDiscount
+				, @dblInsideFuelDiscount = dblEditableInsideFuelDiscount
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -274,6 +277,7 @@ BEGIN
 		DECLARE @tblTempInvoiceIds TABLE
 		(
 			intInvoiceId INT,
+			intEntityId INT,
 			ysnPosted BIT,
 			strTransactionType NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CS_AS
 		)
@@ -401,7 +405,7 @@ BEGIN
 															 ) 
 
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments.'
+						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the End of day Departments.'
 						SET @strErrorCode = 'DT-01'
 
 						-- ROLLBACK
@@ -443,7 +447,7 @@ BEGIN
 															 ) 
 
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments.'
+						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the End of day Departments.'
 						SET @strErrorCode = 'DT-02'
 
 						-- ROLLBACK
@@ -520,7 +524,7 @@ BEGIN
 						GOTO ExitWithRollback
 					END	
 
-					IF @intPaymentMethod != @intCustomerPaymentMethod
+					IF @intPaymentMethod != @intCustomerPaymentMethod OR @intCustomerPaymentMethod IS NULL
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
 						SET @strStatusMsg = 'Missing or Incorrect Payment Method for the customer ' + @strCustomerName + '.'
@@ -640,20 +644,20 @@ BEGIN
 									,[strCalculationMethod] = TAX.strCalculationMethod
 									,[dblRate] = TAX.dblRate
 									,[intTaxAccountId] = TAX.intTaxAccountId
-									,[dblTax] = TAX.dblTax
-									,[dblAdjustedTax] = TAX.dblAdjustedTax
-									--,[dblTax] = CASE
-									--				WHEN @strInvoiceTransactionTypeMain = @strCASH
-									--					THEN TAX.dblTax
-									--				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-									--					THEN TAX.dblTax * -1
-									--			END
-									--,[dblAdjustedTax] = CASE
-									--						WHEN @strInvoiceTransactionTypeMain = @strCASH
-									--							THEN TAX.dblAdjustedTax
-									--						WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-									--							THEN TAX.dblAdjustedTax * -1
-									--					END
+									--,[dblTax] = TAX.dblTax
+									--,[dblAdjustedTax] = TAX.dblAdjustedTax
+									,[dblTax] = CASE
+													WHEN @strInvoiceTransactionTypeMain = @strCASH
+														THEN TAX.dblTax
+													WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+														THEN TAX.dblTax * -1
+												END
+									,[dblAdjustedTax] = CASE
+															WHEN @strInvoiceTransactionTypeMain = @strCASH
+																THEN TAX.dblAdjustedTax
+															WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																THEN TAX.dblAdjustedTax * -1
+														END
 
 									,[ysnTaxAdjusted] = 1
 									,[ysnSeparateOnInvoice] = 0
@@ -897,7 +901,12 @@ BEGIN
 																						
 
 										,[dblDiscount]				= 0
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6)
+										,[dblPrice]					= CASE
+																		WHEN @strInvoiceTransactionTypeMain = @strCASH
+																		THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6)
+																		WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																		THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) + Tax.[dblAdjustedTax])/ CPT.dblQuantity, 6)
+																		END
 										--,[dblPrice]					= CASE WHEN @ysnConsignmentStore = 1 THEN ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity																		
 										--								ELSE ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) END
 										,[ysnRefreshPrice]			= 0
@@ -3341,8 +3350,8 @@ BEGIN
 												--										THEN ISNULL(CH.dblCashOverShort, 0)
 												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
 												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
-												,[dblPrice]					= ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0))
-
+												,[dblPrice]					= CASE WHEN @ysnConsIncludeInsideDiscount = 1 THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
+																				ELSE ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0)) END
 												,[ysnRefreshPrice]			= 0
 												,[strMaintenanceType]		= NULL
 												,[strFrequency]				= NULL
@@ -3393,7 +3402,7 @@ BEGIN
 									JOIN vyuEMEntityCustomerSearch vC 
 										ON ST.intCheckoutCustomerId = vC.intEntityId									
 									WHERE CH.intCheckoutId = @intCheckoutId
-										AND ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0
+										AND (ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0 OR ISNULL(CH.dblEditableInsideFuelDiscount,0) <> 0)
 						END
 				END
 				----------------------------------------------------------------------
@@ -4794,7 +4803,7 @@ BEGIN
 											,[strPONumber]				= NULL								-- not sure
 											,[strBOLNumber]				= NULL								-- not sure
 
-											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + '][' + CAST(CC.intInvoice AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
+											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
 																															  -- if  row 1 = Customer 1, Invoice = 1234
 																															  -- and row 2 = Customer 2, Invoice = 1234
 																															  -- then create 1 invoice for both
@@ -4963,14 +4972,12 @@ BEGIN
 									SELECT SUM(cc.dblAmount) AS dblAmountSUM
 										   , cc.intCheckoutId
 										   , cc.strComment
-										   , cc.intInvoice
 										   , cc.intCustomerId
 									FROM tblSTCheckoutCustomerCharges cc
-									GROUP BY cc.intCheckoutId, cc.strComment, cc.intInvoice, cc.intCustomerId
+									GROUP BY cc.intCheckoutId, cc.strComment, cc.intCustomerId
 								) CCMerge
 									ON CC.intCheckoutId = CCMerge.intCheckoutId
 									AND CC.strComment = CCMerge.strComment
-									AND CC.intInvoice = CCMerge.intInvoice
 									AND CC.intCustomerId = CCMerge.intCustomerId
 
 								INNER JOIN tblSTCheckoutHeader CH 
@@ -5674,11 +5681,13 @@ IF(@ysnDebug = 1)
 															INSERT INTO @tblTempInvoiceIds
 															(
 																intInvoiceId,
+																intEntityId,
 																ysnPosted,
 																strTransactionType
 															)
 															SELECT DISTINCT 
 																LogDetail.intInvoiceId,
+																Inv.intEntityCustomerId,
 																Inv.ysnPosted,
 																LogDetail.strTransactionType
 															FROM tblARInvoiceIntegrationLogDetail LogDetail
@@ -5748,7 +5757,7 @@ IF(@ysnDebug = 1)
 														BEGIN
 															-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
 															SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-															SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
+															SET @strStatusMsg = 'Main End of day was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
 															-- ROLLBACK
 															GOTO ExitWithRollback
@@ -5757,7 +5766,7 @@ IF(@ysnDebug = 1)
 												END
 											ELSE
 												BEGIN
-													SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+													SET @strStatusMsg = 'Post Main End of day has error: ' + @ErrorMessage
 
 													-- ROLLBACK
 													GOTO ExitWithRollback
@@ -5963,13 +5972,13 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 								DECLARE @ysnEqual AS BIT
                                 DECLARE @strRemark AS NVARCHAR(500)
-
+								
 								------------------------------------------------------------------------------------------------------
 								---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
 								------------------------------------------------------------------------------------------------------
 								SELECT @ysnEqual = A.ysnEqual
 										, @strRemark = A.strRemark
-
+								
 								FROM
 								(
 									SELECT
@@ -5985,15 +5994,15 @@ IF(@ysnDebug = CAST(1 AS BIT))
 												END
 												WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
 													THEN CASE
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 																THEN CAST(1 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 																THEN CAST(0 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															WHEN Inv.dblInvoiceTotal < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 																THEN CAST(0 AS BIT)
 												END
 											END AS ysnEqual
--- QQ
+-- QQ							
 										, CASE
 											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
 													THEN CASE
@@ -6012,16 +6021,16 @@ IF(@ysnDebug = CAST(1 AS BIT))
 												END
 												WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
 													THEN CASE
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														WHEN Inv.dblInvoiceTotal = ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														WHEN Inv.dblInvoiceTotal > ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														WHEN Inv.dblInvoiceTotal < ((CH.dblTotalDeposits - CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
 												END
@@ -6038,9 +6047,9 @@ IF(@ysnDebug = CAST(1 AS BIT))
 									BEGIN
 										SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
 										SET @ysnSuccess = CAST(0 AS BIT)
-										SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
-
-
+										SET @strStatusMsg = 'Invoice and End of day Total Validation: ' + @strRemark
+								
+								
 										-- ROLLBACK
 										GOTO ExitWithRollback
 								END
@@ -6091,8 +6100,8 @@ IF(@ysnDebug = CAST(1 AS BIT))
 								--------------------------------------------------------------------------
 								IF (@ysnConsignmentStore = 1 AND @strCheckoutType = 'Automatic')
 								BEGIN
-									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
-								VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'W', 'Done processing checkout for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
+									INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
+									VALUES (@intCheckoutProcessId, @intCheckoutId, 'W', 'Done processing End of day for store: ' + @strStoreName + ' for ' + CONVERT(VARCHAR(12),@dtmCheckoutDate,0), 1)
 								END
 								--------------------------------------------------------------------------
 								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
@@ -7218,11 +7227,13 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				INSERT INTO @tblTempInvoiceIds
 				(
 					intInvoiceId,
+					intEntityId,
 					ysnPosted,
 					strTransactionType
 				)
 				SELECT DISTINCT 
 					Inv.intInvoiceId,
+					Inv.intEntityCustomerId,
 					Inv.ysnPosted,
 					LogDetail.strTransactionType
 				FROM tblARInvoiceIntegrationLogDetail LogDetail
@@ -7719,46 +7730,21 @@ IF(@ysnDebug = CAST(1 AS BIT))
 									BEGIN
 										-- Update customer charges invoices on table tblSTCheckoutCustomerCharges
 										UPDATE CC
-											SET intCustomerChargesInvoiceId = IX.intInvoiceId
+											SET intCustomerChargesInvoiceId = CCX.intInvoiceId
 										FROM tblSTCheckoutCustomerCharges CC
 										JOIN
 										(
 											SELECT 
-												ROW_NUMBER() OVER (ORDER BY intCustChargeId ASC) as intRowNumber
-												,intCustChargeId 
+												intCustChargeId,
+												inv.intInvoiceId
 											FROM tblSTCheckoutCustomerCharges C
-											LEFT JOIN tblICItemUOM UOM 
-												ON C.intProduct = UOM.intItemUOMId
-											JOIN tblICItem I 
-												ON UOM.intItemId = I.intItemId
-											JOIN tblSTCheckoutHeader CH 
-												ON C.intCheckoutId = CH.intCheckoutId
-											JOIN tblICItemLocation IL 
-												ON I.intItemId = IL.intItemId
-
-											-- http://jira.irelyserver.com/browse/ST-1316
-											--JOIN tblICItemPricing IP 
-											--	ON I.intItemId = IP.intItemId
-											--	AND IL.intItemLocationId = IP.intItemLocationId
-
-											JOIN tblSTStore ST 
-												ON IL.intLocationId = ST.intCompanyLocationId
-												AND CH.intStoreId = ST.intStoreId
+											JOIN @tblTempInvoiceIds inv 
+												ON C.intCustomerId = inv.intEntityId
 											WHERE C.intCheckoutId = @intCheckoutId
 												AND C.dblAmount > 0
 												-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 
 										) CCX ON CC.intCustChargeId = CCX.intCustChargeId
-										JOIN
-										(
-											SELECT
-												ROW_NUMBER() OVER (ORDER BY intInvoiceId ASC) as intRowNumber
-												, intInvoiceId
-											FROM @tblTempInvoiceIds 
-											WHERE strTransactionType != @strInvoiceTransactionTypeMain
-											-- FROM #tmpCustomerInvoiceIdList
-
-										) IX ON CCX.intRowNumber = IX.intRowNumber
 									END
 								
 							END

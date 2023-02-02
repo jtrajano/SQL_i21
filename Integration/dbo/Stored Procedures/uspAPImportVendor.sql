@@ -310,6 +310,7 @@ BEGIN
 	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
 	FROM ssvndmst A
 		where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
+		and ssvnd_vnd_no in (SELECT ssvnd_vnd_no FROM ssvndmst B WHERE B.ssvnd_vnd_no = B.ssvnd_pay_to)
 
 
 	INSERT INTO #tmpssvndmst  (ssvnd_vnd_no)	
@@ -619,83 +620,87 @@ BEGIN
 			VALUES(@originVendor, 1)
 		
 
-
-		INSERT INTO @tblAPTemp
-		SELECT
-					--ssvnd_pay_to,
-					@EntityId, 
-					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-								END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
-					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-								END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
-					dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
-					ssvnd_city,
-					''United States'',
-					ssvnd_st,
-					dbo.fnTrim(ssvnd_zip),
-					NULL,
-					NULL,
-					CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
-							   AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'')
-							   WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
-															WHERE dblDiscountEP = ssvnd_terms_disc_pct
-															AND intBalanceDue = ssvnd_terms_due_day
-															AND intDiscountDay = ssvnd_terms_disc_day)
-											WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
-															WHERE intBalanceDue = ssvnd_terms_due_day
-															AND intDiscountDay = ssvnd_terms_disc_day
-															AND intDayofMonthDue = ssvnd_terms_cutoff_day)
-											ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END,
-					NULL,
-					0
-	 from ssvndmst  where ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to and rtrim(ltrim(ssvnd_pay_to)) = @originVendor
+	--commented duplicate, coded on AP-7765
+	-- 	INSERT INTO @tblAPTemp
+	-- 	SELECT
+	-- 				--ssvnd_pay_to,
+	-- 				@EntityId, 
+	-- 				RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+	-- 					   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+	-- 								+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+	-- 							END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
+	-- 				RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+	-- 					   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+	-- 								+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+	-- 							END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR),
+	-- 				dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
+	-- 				ssvnd_city,
+	-- 				''United States'',
+	-- 				ssvnd_st,
+	-- 				dbo.fnTrim(ssvnd_zip),
+	-- 				NULL,
+	-- 				NULL,
+	-- 				CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
+	-- 						   AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'')
+	-- 						   WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+	-- 														WHERE dblDiscountEP = ssvnd_terms_disc_pct
+	-- 														AND intBalanceDue = ssvnd_terms_due_day
+	-- 														AND intDiscountDay = ssvnd_terms_disc_day)
+	-- 										WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+	-- 														WHERE intBalanceDue = ssvnd_terms_due_day
+	-- 														AND intDiscountDay = ssvnd_terms_disc_day
+	-- 														AND intDayofMonthDue = ssvnd_terms_cutoff_day)
+	-- 										ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END,
+	-- 				NULL,
+	-- 				0
+	--  from ssvndmst  where ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to and rtrim(ltrim(ssvnd_pay_to)) = @originVendor
 	 	 	 
-	 --INSERT Vendor Location to Origin Pay to Vendor		
-		INSERT INTO @tblAPTemp
-		SELECT
-					ENT.intEntityId, 
-					SUBSTRING ( 
-						RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
-					, 0 , 100),
-					SUBSTRING ( 
-						RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-						   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-									+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-								END,'''')) + ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
-					, 0 , 100),			
-								--+ CAST(A4GLIdentity AS NVARCHAR),
-					dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
-					ssvnd_city,
-					''United States'',
-					ssvnd_st,
-					dbo.fnTrim(ssvnd_zip),
-					NULL,
-					NULL,
-					CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
-							   AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'')
-							   WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
-															WHERE dblDiscountEP = ssvnd_terms_disc_pct
-															AND intBalanceDue = ssvnd_terms_due_day
-															AND intDiscountDay = ssvnd_terms_disc_day)
-											WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
-															WHERE intBalanceDue = ssvnd_terms_due_day
-															AND intDiscountDay = ssvnd_terms_disc_day
-															AND intDayofMonthDue = ssvnd_terms_cutoff_day)
-											ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END,
-					NULL,
-					0
-	 from ssvndmst  
-	 INNER JOIN tblEMEntity ENT on ENT.strEntityNo COLLATE Latin1_General_CI_AS = ssvnd_pay_to COLLATE Latin1_General_CI_AS
-	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 WHERE ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
-
+	--  --INSERT Vendor Location to Origin Pay to Vendor		
+	-- 	INSERT INTO @tblAPTemp
+	-- 	SELECT
+	-- 				ENT.intEntityId, 
+	-- 				SUBSTRING ( 
+	-- 					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+	-- 					   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+	-- 								+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+	-- 							END,'''')) --+ ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
+	-- 				, 0 , 100),
+	-- 				SUBSTRING ( 
+	-- 					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+	-- 					   ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+	-- 								+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+	-- 							END,'''')) --+ ''_'' + SUBSTRING(CONVERT(VARCHAR(MAX), CONVERT(VARBINARY,CURRENT_TIMESTAMP), 1) ,11,8)
+	-- 				, 0 , 100),			
+	-- 							--+ CAST(A4GLIdentity AS NVARCHAR),
+	-- 				dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
+	-- 				ssvnd_city,
+	-- 				''United States'',
+	-- 				ssvnd_st,
+	-- 				dbo.fnTrim(ssvnd_zip),
+	-- 				NULL,
+	-- 				NULL,
+	-- 				CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
+	-- 						   AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'')
+	-- 						   WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+	-- 														WHERE dblDiscountEP = ssvnd_terms_disc_pct
+	-- 														AND intBalanceDue = ssvnd_terms_due_day
+	-- 														AND intDiscountDay = ssvnd_terms_disc_day)
+	-- 										WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+	-- 														WHERE intBalanceDue = ssvnd_terms_due_day
+	-- 														AND intDiscountDay = ssvnd_terms_disc_day
+	-- 														AND intDayofMonthDue = ssvnd_terms_cutoff_day)
+	-- 										ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END,
+	-- 				NULL,
+	-- 				0
+	--  from ssvndmst  
+	--  INNER JOIN tblEMEntity ENT on ENT.strEntityNo COLLATE Latin1_General_CI_AS = ssvnd_pay_to COLLATE Latin1_General_CI_AS
+	--  INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
+	--  WHERE ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
+	-- 	and (
+	-- 	RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+	-- 	ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+	-- 	+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+	-- 	END,'''')) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation WHERE intEntityId = ENT.intEntityId)) 
 
 		INSERT [dbo].[tblEMEntityLocation]
 		([intEntityId],

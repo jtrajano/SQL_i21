@@ -11,9 +11,9 @@ BEGIN
 		)
 	DECLARE @tblIPInitialAck TABLE (intTrxSequenceNo BIGINT);
 
-	SELECT @intEntityId = intEntityId
-	FROM tblSMUserSecurity
-	WHERE strUserName = 'IRELYADMIN'
+	SELECT TOP 1 @intEntityId = intEntityId
+    FROM tblEMEntityCredential
+    ORDER BY intEntityId ASC;
 
 	INSERT INTO @tblMFSession
 	SELECT DISTINCT strSessionId

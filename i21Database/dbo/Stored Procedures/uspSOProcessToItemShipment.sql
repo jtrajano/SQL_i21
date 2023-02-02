@@ -166,7 +166,8 @@ ELSE
 		 
 		DECLARE @Items				ShipmentStagingTable
 			  , @Charges			ShipmentChargeStagingTable
-			  , @Lots				ShipmentItemLotStagingTable			  
+			  , @Lots				ShipmentItemLotStagingTable	
+			  , @LotsOnly			ShipmentItemLotsOnlyStagingTable
 			  , @SALES_ORDER		NVARCHAR(50) = 'Sales Order'
 			  , @SALES_ORDER_TYPE	INT = 2
 			  , @intReturn			INT 
@@ -370,10 +371,19 @@ ELSE
 		EXEC dbo.uspSOUpdateReservedStock @SalesOrderId, 1
 
 		--PROCESS TO INVENTORY SHIPMENT
-		EXEC @intReturn = dbo.uspICAddItemShipment @Items		= @Items
-												 , @Charges		= @Charges
-												 , @Lots		= @Lots
-												 , @intUserId	= @UserId	
+		BEGIN TRY
+			EXEC  dbo.uspICAddItemShipment @Items		= @Items
+												     , @Charges		= @Charges
+												     , @Lots		= @Lots
+												     , @LotsOnly	= @LotsOnly
+												     , @intUserId	= @UserId	
+		END TRY
+		BEGIN CATCH
+			SET @strErrorMessage	= ERROR_MESSAGE()
+				
+			RAISERROR(@strErrorMessage, 11, 1)
+			RETURN
+		END CATCH		
 				
 		IF @intReturn <> 0 
 			RETURN @intReturn

@@ -2,7 +2,7 @@
  AS
   WITH BT AS(
  SELECT ysnPosted, dblAmount, dtmDate, intTransactionId, strTransactionId FROM tblCMBankTransaction union
- select ysnPosted, dblAmount, dtmDate, intTransactionId, strTransactionId from tblCMBankTransfer
+ select ysnPosted, dblAmountFrom dblAmount, dtmDate, intTransactionId, strTransactionId from tblCMBankTransfer
  )
  SELECT                 
     S.intBankStatementImportId,
@@ -32,7 +32,7 @@
 
  FROM tblCMResponsiblePartyTask T
  JOIN tblCMBankStatementImport S ON S.intBankStatementImportId = T.intBankStatementImportId
- JOIN tblEMEntity E on E.intEntityId = T.intEntityId
+ LEFT JOIN tblEMEntity E on E.intEntityId = T.intEntityId
  LEFT JOIN BT on BT.strTransactionId = T.strTransactionId
  LEFT JOIN vyuCMBankAccount BA on BA.intBankAccountId = T.intResponsibleBankAccountId
 

@@ -7,6 +7,7 @@
 	[strProgramDescription] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblBBProgram_intConcurrencyId]  DEFAULT ((0)),
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intRowNumber] INT NULL,
 	CONSTRAINT [PK_tblBBProgram] PRIMARY KEY CLUSTERED ([intProgramId] ASC),
 	CONSTRAINT [FK_tblBBProgram_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [dbo].[tblVRVendorSetup] ([intVendorSetupId]) 
 )

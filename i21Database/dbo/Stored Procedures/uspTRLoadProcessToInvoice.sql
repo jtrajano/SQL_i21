@@ -30,6 +30,9 @@ BEGIN TRY
 	  , @HasBlend BIT = 0
 	  , @strFreightItemNo NVARCHAR(300) = NULL
 	  , @strSurchargeItemNo NVARCHAR(300) = NULL
+	  , @ysnComboFreight BIT = 0  
+	  , @intComboFreightDistId INT = NULL
+	  , @ysnGrossNet BIT = 0
 
 	SELECT @intFreightItemId = intFreightItemId, @strFreightItemNo = I.strItemNo
 	FROM tblTRLoadHeader H INNER JOIN tblICItem I ON I.intItemId = H.intFreightItemId
@@ -38,7 +41,7 @@ BEGIN TRY
 	SELECT TOP 1 @intSurchargeItemId = intItemId, @strSurchargeItemNo = strItemNo 
 	FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0), @ysnGrossNet = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
 
@@ -121,8 +124,15 @@ BEGIN TRY
 		,[strItemDescription]					= Item.strItemDescription
 		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
-		,[dblQtyOrdered]						= DD.dblUnits
+		,[dblQtyOrdered]						= CASE WHEN @ysnGrossNet = 1 THEN 
+															CASE WHEN EL.strSaleUnits = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+																WHEN EL.strSaleUnits = 'Net' THEN DD.dblDistributionNetSalesUnits
+																WHEN TR.strGrossOrNet = 'Net' THEN DD.dblDistributionNetSalesUnits
+																WHEN TR.strGrossOrNet = 'Gross' THEN DD.dblDistributionGrossSalesUnits 
+																ELSE DD.dblUnits END
+														ELSE DD.dblUnits END
 		,[dblQtyShipped]						= DD.dblFreightUnit
+		,[dblFreightQty]						= DD.dblFreightUnit
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
@@ -683,6 +693,7 @@ BEGIN TRY
 		,[intItemUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
+		,[dblFreightQty]
 		,[dblDiscount]
 		,[dblPrice]
 		,[ysnRefreshPrice]
@@ -768,6 +779,7 @@ BEGIN TRY
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= IE.dblQtyOrdered
 		,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN IE.dblMinimumUnits ELSE IE.dblQtyShipped END
+		,[dblFreightQty]						= IE.dblFreightQty
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
 													THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
@@ -817,7 +829,7 @@ BEGIN TRY
 		0 AS intId
 		,[strType] 								= IE.strType
 		,[strSourceTransaction]					= IE.strSourceTransaction
-		,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
+		,[intLoadDistributionDetailId]			= CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END
 		,[intSourceId]							= IE.intSourceId
 		,[strSourceId]							= IE.strSourceId
 		,[intInvoiceId]							= IE.intInvoiceId --NULL Value will create new invoice
@@ -859,6 +871,7 @@ BEGIN TRY
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= @dblSumQtyOrdered
 		,[dblQtyShipped]						= CASE WHEN @dblSumQtyShipped <= IE.dblComboMinimumUnits AND ysnComboFreight = 1 THEN IE.dblComboMinimumUnits ELSE @dblSumQtyShipped END
+		,[dblFreightQty]						= IE.dblFreightQty
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 
 													THEN ISNULL(IE.[dblComboFreightRate],0) + (ISNULL(IE.[dblComboFreightRate],0) * (IE.dblSurcharge / 100))
@@ -912,6 +925,27 @@ BEGIN TRY
 	-- 	WHERE intId = 0 AND ysnComboFreight = 1
 	-- 	GROUP BY intId) AS ComboCounts ON ComboCounts.intId = TF.intId 
 	-- WHERE TF.intId = 0 AND TF.ysnComboFreight = 1
+
+	-- FOR COMBO FREIGHT, ONLY PASS THE FREIGHT OF THE ITEM THAT THE COMBO FREIGHT RATE WAS BASED ON  
+	IF (@ysnComboFreight = 1)  
+	BEGIN  
+	 --  DELETE IE   
+	 --  FROM   #tmpSourceTableFinal IE   
+		--INNER JOIN tblICItem IT ON IE.intItemId = IT.intItemId  
+	 --  WHERE IT.strType != 'Inventory'   
+		--AND IE.intId = 0   
+		--AND IE.intLoadDistributionDetailId != (SELECT TOP 1 intLoadDistributionDetailId   
+		--	FROM #tmpSourceTableFinal   
+		--	WHERE dblFreightRate = dblComboFreightRate AND intId != 0)  
+		SELECT @intComboFreightDistId = (SELECT TOP 1 intLoadDistributionDetailId FROM #tmpSourceTableFinal WHERE dblFreightRate = dblComboFreightRate AND intId != 0)
+	
+		UPDATE IE 
+			SET IE.intLoadDistributionDetailId = @intComboFreightDistId
+		FROM   #tmpSourceTableFinal IE   
+			INNER JOIN tblICItem IT ON IE.intItemId = IT.intItemId  
+		WHERE IT.strType != 'Inventory'   
+			AND IE.intId = 0   
+	END  
 
 	INSERT INTO @EntriesForInvoice(
 		 [strSourceTransaction]
@@ -1207,8 +1241,8 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
-			,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
+			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
+			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblMinimumUnits THEN ISNULL(IE.dblMinimumUnits, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblFreightRate], 0.000000) END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
@@ -1243,7 +1277,7 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
-			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
+			,[intLoadDistributionDetailId]   = CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnComboFreight = 0 AND IE.intId > 0)
@@ -1289,8 +1323,8 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblQtyShipped <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
-			,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblQtyShipped, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblComboSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
@@ -1325,10 +1359,18 @@ BEGIN TRY
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 			,[ysnBlended]							= IE.ysnBlended
-			,[intLoadDistributionDetailId]			= IE.intLoadDistributionDetailId
+			,[intLoadDistributionDetailId]   = CASE WHEN @ysnComboFreight = 1 THEN NULL ELSE IE.intLoadDistributionDetailId END    
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnComboFreight = 1 AND IE.intId > 0)
+	END
+
+	IF (@ysnComboFreight = 1)
+	BEGIN
+	UPDATE IE   
+		SET IE.intLoadDistributionDetailId = @intComboFreightDistId
+	FROM   @FreightSurchargeEntries IE   
+		INNER JOIN tblICItem IT ON IE.intItemId = IT.intItemId  
 	END
 
 	--Group and Summarize Freight and Surcharge Entries before adding to Invoice Entries

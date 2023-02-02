@@ -34,14 +34,15 @@ BEGIN TRY
 			@intSequenceUsageHistoryId	INT,
 			@intContractStatusId	INT,
 			@ysnQuantityAtHeaderLevel bit = 0,
-			@dblSequenceOrigSchedule NUMERIC(18,6)
+			@dblSequenceOrigSchedule NUMERIC(18,6),
+			@intQuantityDecimals int = 2
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
 		RAISERROR('Sequence is deleted by other user.',16,1)
 	END 
 	
-	SELECT @ysnAllowOverSchedule = ysnAllowOverSchedule FROM tblCTCompanyPreference
+	SELECT @ysnAllowOverSchedule = ysnAllowOverSchedule, @intQuantityDecimals = case when intQuantityDecimals = 0 then 2 else isnull(intQuantityDecimals,2) end FROM tblCTCompanyPreference
 
 	BEGINING:
 
@@ -102,6 +103,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				if (@strBalanceQty is not null and (CHARINDEX('.',@strBalanceQty) + @intQuantityDecimals) > @intQuantityDecimals)begin select @strBalanceQty = SUBSTRING(@strBalanceQty,1,CHARINDEX('.',@strBalanceQty) + @intQuantityDecimals); end
+				if (@strQuantityToUpdate is not null and (CHARINDEX('.',@strQuantityToUpdate) + @intQuantityDecimals) > @intQuantityDecimals)begin select @strQuantityToUpdate = SUBSTRING(@strQuantityToUpdate,1,CHARINDEX('.',@strQuantityToUpdate) + @intQuantityDecimals); end
 				RAISERROR('Balance quantity for the contract %s and sequence %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strContractNumber,@strContractSeq,@strBalanceQty,@strQuantityToUpdate)
 			END
 		END
@@ -109,6 +112,8 @@ BEGIN TRY
 		BEGIN
 			IF ((@dblScheduleQty + @dblQuantityToUpdate) - @dblBalance) > @dblTolerance
 			BEGIN
+				if (@strAvailableQty is not null and (CHARINDEX('.',@strAvailableQty) + @intQuantityDecimals) > @intQuantityDecimals)begin select @strAvailableQty = SUBSTRING(@strAvailableQty,1,CHARINDEX('.',@strAvailableQty) + @intQuantityDecimals); end
+				if (@strQuantityToUpdate is not null and (CHARINDEX('.',@strQuantityToUpdate) + @intQuantityDecimals) > @intQuantityDecimals)begin select @strQuantityToUpdate = SUBSTRING(@strQuantityToUpdate,1,CHARINDEX('.',@strQuantityToUpdate) + @intQuantityDecimals); end
 				RAISERROR('Available quantity for the contract %s and sequence %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strContractNumber,@strContractSeq,@strAvailableQty,@strQuantityToUpdate)
 			END
 			ELSE

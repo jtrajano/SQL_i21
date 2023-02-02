@@ -35,6 +35,17 @@
     [intManufacturerId] INT NULL, 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     [intRowNumber] INT NULL,
+    [strDeviceManufacturer]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    --[strCommunicationType]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [strIPAddress]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [strPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    --[strSerialPortNumber]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [strTimeOut]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [intPollingIntervalMinute] INT NULL, 
+    --[intTankMonitorId]          INT NULL,
+   
+
+
     CONSTRAINT [PK_tblTMDevice] PRIMARY KEY CLUSTERED ([intDeviceId] ASC),
     CONSTRAINT [FK_tblTMDevice_tblTMApplianceType] FOREIGN KEY ([intApplianceTypeID]) REFERENCES [dbo].[tblTMApplianceType] ([intApplianceTypeID]),
     CONSTRAINT [FK_tblTMDevice_tblTMDeployedStatus] FOREIGN KEY ([intDeployedStatusID]) REFERENCES [dbo].[tblTMDeployedStatus] ([intDeployedStatusID]) ON DELETE SET NULL,
@@ -45,6 +56,7 @@
     CONSTRAINT [FK_tblTMDevice_tblTMMeterType] FOREIGN KEY ([intMeterTypeId]) REFERENCES [dbo].[tblTMMeterType] ([intMeterTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMRegulatorType] FOREIGN KEY ([intRegulatorTypeId]) REFERENCES [dbo].[tblTMRegulatorType] ([intRegulatorTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeId]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeId])
+    --CONSTRAINT [FK_tblTMDevice_tblTMTankMonitor] FOREIGN KEY ([intTankMonitorId]) REFERENCES [dbo].[tblTMTankMonitor] ([intTankMonitorId])
 );
 
 

@@ -19,6 +19,56 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 
+--PARAMETER SNIFFING
+DECLARE @dtmDateFromLocal				DATETIME = NULL
+	  , @dtmDateToLocal					DATETIME = NULL
+      , @strSourceTransactionLocal		NVARCHAR(100) = NULL	
+	  , @strCustomerIdsLocal			NVARCHAR(MAX) = NULL
+	  , @strSalespersonIdsLocal			NVARCHAR(MAX) = NULL
+	  , @strCompanyLocationIdsLocal		NVARCHAR(MAX) = NULL
+	  , @strAccountStatusIdsLocal		NVARCHAR(MAX) = NULL	
+	  , @intEntityUserIdLocal			INT = NULL
+	  , @ysnPaidInvoiceLocal			BIT = NULL
+	  , @ysnInclude120DaysLocal			BIT = 0
+	  , @ysnExcludeAccountStatusLocal	BIT = 0
+	  , @intGracePeriodLocal			INT = 0
+	  , @ysnOverrideCashFlowLocal  		BIT = 0
+	
+SET @dtmDateFromLocal				= ISNULL(@dtmDateFrom, CAST('01/01/1900' AS DATE))
+SET @dtmDateToLocal					= ISNULL(@dtmDateTo, CAST(GETDATE() AS DATE))
+SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')	
+SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')	
+SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')	
+SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')	
+SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')		
+SET @intEntityUserIdLocal			= NULLIF(@intEntityUserId, 0)
+SET @ysnPaidInvoiceLocal			= ISNULL(@ysnPaidInvoice, 0)
+SET @ysnInclude120DaysLocal			= ISNULL(@ysnInclude120Days, 0)
+SET @ysnExcludeAccountStatusLocal	= ISNULL(@ysnExcludeAccountStatus, 0)
+SET @intGracePeriodLocal			= NULLIF(@intGracePeriodLocal, 0)
+SET @ysnOverrideCashFlowLocal  		= ISNULL(@ysnOverrideCashFlow, 0)
+
+IF(OBJECT_ID('tempdb..#TEMPAGINGDETAILS') IS NOT NULL) DROP TABLE #TEMPAGINGDETAILS
+
+SELECT *
+     , strReportLogId	= NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
+INTO #TEMPAGINGDETAILS
+FROM [dbo].[fnARCustomerAgingDetail] (
+	 @dtmDateFromLocal
+	,@dtmDateToLocal
+	,@strSourceTransactionLocal
+	,@strCustomerIdsLocal
+	,@strSalespersonIdsLocal
+	,@strCompanyLocationIdsLocal
+	,@strAccountStatusIdsLocal
+	,@intEntityUserIdLocal
+	,@ysnPaidInvoiceLocal
+	,@ysnInclude120DaysLocal
+	,@ysnExcludeAccountStatusLocal
+	,@intGracePeriodLocal
+	,@ysnOverrideCashFlowLocal
+) 
+
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 	  strCustomerName
@@ -66,24 +116,7 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 	, dblEndOfMonthRate
 	, dblEndOfMonthAmount
 	, intAccountId
-	, strLogoType
-	, blbLogo
-	, blbFooterLogo
 	, strReportLogId
 )
-SELECT *, NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
-FROM [dbo].[fnARCustomerAgingDetail](
-	 @dtmDateFrom
-	,@dtmDateTo
-	,@strSourceTransaction
-	,@strCustomerIds
-	,@strSalespersonIds
-	,@strCompanyLocationIds
-	,@strAccountStatusIds
-	,@intEntityUserId
-	,@ysnPaidInvoice
-	,@ysnInclude120Days
-	,@ysnExcludeAccountStatus
-	,@intGracePeriod
-	,@ysnOverrideCashFlow
-) 
+SELECT * 
+FROM #TEMPAGINGDETAILS

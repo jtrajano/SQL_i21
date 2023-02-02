@@ -6,15 +6,18 @@
 		,a.strProjectName
 		,c.intTicketId
 		,c.strTicketNumber
-		,d.strKey
-		,REPLACE(d.strTypeIconUrl, 'https:', 'http:') strTypeIconUrl
+		,strKey = CASE WHEN ISNULL(d.strJiraKey, '') = ''
+							THEN d.strKey
+						ELSE d.strJiraKey
+				  END
+		,strTypeIconUrl				= d.strJiraTypeIconUrl
 		,d.strSummary
 		,strOriginalEstimate
 		,d.strReporter
 		,d.strAssignee
 		,d.strFixedBy
-		,REPLACE(d.strPriorityIconUrl, 'https:', 'http:') strPriorityIconUrl
-		,REPLACE(d.strStatusIconUrl, 'https:', 'http:') strStatusIconUrl
+		,strPriorityIconUrl			= d.strJiraPriorityIconUrl
+		,strStatusIconUrl			= d.strJiraStatusIconUrl
 		,d.dtmJiraCreated
 		,d.dtmJiraUpdated
 		,d.strFixedVersion
@@ -23,7 +26,7 @@
 		,strOriginalProjectName = a1.strProjectName
 	from 
 		tblHDProject a
-		inner join tblHDProjectTask b on 1=1
+		inner join tblHDProjectTask b on b.intProjectId = a.intProjectId
 		inner join tblHDTicket c on c.intTicketId = b.intTicketId
 		inner join tblHDTicketJIRAIssue d on d.intTicketId = c.intTicketId
 		inner join tblHDProjectTask b1 on b1.intTicketId = c.intTicketId

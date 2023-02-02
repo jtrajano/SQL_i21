@@ -82,7 +82,7 @@ BEGIN TRY
 	DECLARE @Country NVARCHAR(100)
 	DECLARE @UserRole NVARCHAR(100)
 	DECLARE @Active BIT
-	DECLARE @ErrorMessage NVARCHAR(500) = ''
+	DECLARE @ErrorMessage NVARCHAR(4000) = ''
 	DECLARE @ExistingCountryId INT = 0
 	DECLARE @ExistingLocationId INT = 0
 	DECLARE @ExistingUserRoleId INT = 0 
@@ -315,7 +315,7 @@ BEGIN TRY
 		BEGIN
 			IF (NOT EXISTS (SELECT TOP 1 1 FROM #tmpUserLocationRolesForChecking WHERE strLocation = @LocationName AND strRole = @UserRole))
 			BEGIN
-				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Default Location (' + @LocationName + ') and User Role (' + @UserRole + ') must be included in the details. '	
+				SET		@ErrorMessage = ISNULL(@ErrorMessage, '') + 'Default Location (' + ISNULL(@LocationName, '') + ') and User Role (' + ISNULL(@UserRole, '') + ') must be included in the details. '	
 			END
 		END
 
