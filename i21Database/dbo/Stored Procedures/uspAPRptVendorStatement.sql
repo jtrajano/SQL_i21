@@ -98,7 +98,7 @@ BEGIN
 		END
 
 		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
-		SET @dtmDateTo = ISNULL(@dtmDateTo, GETDATE())
+		SET @dtmDateTo = ISNULL(@dtmDateTo, '12/31/2100')
 
 		-- GET LOGO
 		 SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
