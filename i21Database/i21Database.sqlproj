@@ -1289,6 +1289,7 @@
     <Build Include="dbo\Views\vyuQMItemLocation.sql" />
     <Build Include="dbo\Views\vyuQMShipmentContainerContract.sql" />
     <Build Include="dbo\Tables\tblGLIntraCompanyAccountSegment.sql" />
+    <Build Include="dbo\Tables\tblGLIntraCompanyConfig.sql" />
     <Build Include="dbo\Views\vyuGLIntraCompanyAccountSegment.sql" />
     <Build Include="dbo\Tables\tblGLMaskedAccountStructureTemp.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountStructureWithMaskedPrimaryAndCompany.sql" />
