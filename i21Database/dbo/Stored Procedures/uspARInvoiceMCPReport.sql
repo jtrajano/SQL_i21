@@ -122,6 +122,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
+	 , dblInvoiceSubtotal		= ISNULL(INV.dblInvoiceSubtotal, 0)
 	 , dblTotalTax				= INVOICEDETAIL.dblTotalTax
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' THEN ISNULL(INV.strComments, '') ELSE ISNULL(INV.strFooterComments, '') END
 	 , strItemComments          = CAST('' AS NVARCHAR(500))
@@ -234,6 +235,7 @@ SET dblPrice				= dblPrice * -1
   , dblTotalPriceWithTax	= dblTotalPriceWithTax * -1
   , dblInvoiceTotal			= dblInvoiceTotal * -1
   , dblQtyShipped			= dblQtyShipped * -1
+  , dblInvoiceSubtotal		= dblInvoiceSubtotal * -1
 FROM #INVOICES I
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 
@@ -324,6 +326,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , dblItemPrice
 	 , dblPriceWithTax
 	 , dblTotalPriceWithTax
+	 , dblInvoiceSubtotal
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , dblInvoiceTax
@@ -387,6 +390,7 @@ SELECT strCompanyName
 	 , dblItemPrice
 	 , dblPriceWithTax
 	 , dblTotalPriceWithTax
+	 , dblInvoiceSubtotal
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , dblInvoiceTax
@@ -653,7 +657,7 @@ BEGIN
 		, [strRequestId]				= @strRequestId
 		, [strTaxTransactionType]		= 'Invoice'
 		, [strCalculationMethod]		= IDT.strCalculationMethod
-		, [strTaxCode]					= SMT.strTaxCode
+		, [strTaxCode]					= NULL
 		, [strDescription]				= SMT.strDescription
 		, [strTaxClass]					= TC.strTaxClass
 		, [strInvoiceFormat]			= I.strInvoiceFormat
