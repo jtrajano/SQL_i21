@@ -178,7 +178,7 @@ GROUP BY A.intEntityVendorId
 	,strFilerType
 	,strTransactionType
 	,strMerchantCode
-	,A.intYear
+	,intYear
 	,dblCardNotPresent
 	,dblGrossThirdParty
 HAVING SUM(ISNULL(dblJanuary,0)
