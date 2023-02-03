@@ -139,7 +139,7 @@ FROM vyuAP1099K A
 OUTER APPLY 
 (
 	SELECT TOP 1 * FROM tblAP1099History B
-	WHERE A.intYear = B.intYear AND B.int1099Form = 1
+	WHERE A.intYear = B.intYear AND B.int1099Form = 6
 	AND B.intEntityVendorId = A.intEntityVendorId
 	ORDER BY B.dtmDatePrinted DESC
 ) History
