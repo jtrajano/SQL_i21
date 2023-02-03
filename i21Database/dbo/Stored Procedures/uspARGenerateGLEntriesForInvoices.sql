@@ -3087,7 +3087,7 @@ INNER JOIN (
 ) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
 WHERE I.strSessionId = @strSessionId  
 
---DIRECT OUT TICKET (General)
+--DIRECT OUT TICKET (In-Transit Direct / General)
 INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
@@ -3162,7 +3162,7 @@ INNER JOIN (
          [dblUnitQtyShipped]	= SUM(ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
 		,[dblTotal]				= SUM(ID.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
-		,[intAccountId]			= dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'General')
+		,[intAccountId]			= ISNULL(dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'In-Transit Direct'), dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'General'))
 		,[dblCost]				= SUM(ISNULL(ARIFC.[dblCost], @ZeroDecimal) * ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
 		,[strDescription]		= ICI.[strDescription]
     FROM tblARPostInvoiceDetail ID
