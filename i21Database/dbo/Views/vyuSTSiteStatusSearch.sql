@@ -5,6 +5,7 @@ SELECT		a.intStoreId,
 			a.strDescription,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity,
+			ISNULL(b.dblUploadSpeed,0) as dblUploadSpeed,
 			FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us')  as dtmCurrentBusinessDay,
 			a.ysnConsignmentStore,
 			reg.strStoreAppFileVersion as strStoreAppVersion
@@ -12,6 +13,7 @@ FROM		tblSTStore a
 LEFT JOIN	(	SELECT		intStoreId,
 							ysnInternetConnectivity,
 							ysnRegisterConnectivity,
+							dblUploadSpeed,
 							dtmStatusDate
 				FROM		tblSTSiteStatus
 				WHERE		intSiteStatusId IN (	SELECT		MAX(intSiteStatusId) 
