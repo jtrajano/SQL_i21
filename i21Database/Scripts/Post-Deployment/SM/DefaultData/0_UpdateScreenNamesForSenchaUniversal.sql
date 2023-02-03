@@ -117,11 +117,17 @@ GO
 PRINT '*** Start Updating LightningTable and DatabaseConnection namespaces on tblSMScreen ***'
 GO
 
+DELETE TRN
+FROM tblSMScreen AS MAIN
+INNER JOIN tblSMTransaction AS TRN
+     ON MAIN.intScreenId = TRN.intScreenId
+WHERE 
+     RIGHT(MAIN.strNamespace, CHARINDEX('.', REVERSE(MAIN.strNamespace) + '.') - 1) IN ('LightningTable', 'DatabaseConnection')
+
 DELETE MAIN 
 FROM tblSMScreen AS MAIN
 WHERE 
-      RIGHT(MAIN.strNamespace, CHARINDEX('.', REVERSE(MAIN.strNamespace) + '.') - 1) IN ('LightningTable', 'DatabaseConnection') -- This are the duplicate records
-
+     RIGHT(MAIN.strNamespace, CHARINDEX('.', REVERSE(MAIN.strNamespace) + '.') - 1) IN ('LightningTable', 'DatabaseConnection') -- This are the duplicate records
 PRINT '*** End deleting LightningTable and DatabaseConnection namespaces on tblSMScreen ***'
 GO
 ----------------------------------------------------------------
