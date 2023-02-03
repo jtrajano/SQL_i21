@@ -286,7 +286,7 @@ FROM
 
 	UNION ALL
 	--manually added item in the voucher but as a misc field only
-	SELECT
+	SELECT DISTINCT
 		intBillDetailIdItem				= BD_ITEM.intBillDetailId
 		,strId							= AP.strBillId
 		,intBillId						= AP.intBillId
