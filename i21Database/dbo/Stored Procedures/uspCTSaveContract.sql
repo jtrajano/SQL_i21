@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCTSaveContract]
+﻿
+Create PROCEDURE [dbo].[uspCTSaveContract]
 	
 	@intContractHeaderId INT,
 	@userId INT,
@@ -61,9 +62,11 @@ BEGIN TRY
             @strLCNumber				NVARCHAR(50),
 			@ysnRoll				    BIT = 0,
 			@intCostTermId				INT,
-			@ysnCancelledLoad			bit = 0;
+			@ysnCancelledLoad			bit = 0	;
 
-	DECLARE @xmlDocumentId INT
+
+		
+		DECLARE @xmlDocumentId INT
 		DECLARE @ModifiedSequence TABLE(
 			intContractDetailId INT
 		) 
@@ -84,7 +87,7 @@ BEGIN TRY
 			)
 		END
 
-
+		
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
 	from tblCTContractDetail cd
@@ -275,6 +278,7 @@ BEGIN TRY
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 
+		
 		if (isnull(@ysnMultiplePriceFixation,0) <> 1 AND @intHeaderPricingTypeId = 2)
 		begin
 			update cd
@@ -330,15 +334,21 @@ BEGIN TRY
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
-
+		
 		if (@ysnEnableLetterOfCredit = 1 and @strLCNumber is null and @intLCApplicantId > 0 and isnull(@strLCType,'') <> '')
 		begin
+
 			exec uspSMGetStartingNumber
 				@intStartingNumberId = 170,
 				@strID = @strLCNumber OUTPUT,
 				@intCompanyLocationId = default
-		end
 
+
+			UPDATE tblCTContractDetail
+			SET  strLCNumber = @strLCNumber
+			WHERE intContractDetailId = @intContractDetailId
+		end
+		
 		
 		IF EXISTS (SELECT TOP 1 1 FROM tblCTCompanyPreference where ysnEnablePackingWeightAdjustment = 0 and ysnEnableNetWeightAdjustment = 0)
 		BEGIN
@@ -349,7 +359,7 @@ BEGIN TRY
 				UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight where intContractDetailId = @intContractDetailId;
 			END
 		END
-
+		
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
 		BEGIN
 			--UPDATE @CDTableUpdate SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)
@@ -471,7 +481,7 @@ BEGIN TRY
 				END
 			END
 		END
-
+	
 		--CT-8256
 		IF @intConcurrencyId = 1
 		BEGIN
@@ -487,6 +497,8 @@ BEGIN TRY
 				EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Modified'
 			END
 		END
+
+		
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
@@ -542,7 +554,7 @@ BEGIN TRY
 				ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 			END	
 		END
-
+		
 		IF @intPricingTypeId IN (1,2,8)
 		BEGIN
 			UPDATE	CD 
@@ -577,56 +589,52 @@ BEGIN TRY
 			UPDATE	@CDTableUpdate SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
 		END
 
-		UPDATE tblCTContractDetail
-		SET intPricingTypeId = CD.intPricingTypeId
-			, dblFutures = CD.dblFutures
-			, dblCashPrice = CD.dblCashPrice
-			, dblTotalCost = CD.dblTotalCost
-			, intProducerId = CD.intProducerId
-			, dblNetWeight = CD.dblNetWeight
-			, dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
-			, intFutureMonthId = CD.intFutureMonthId
-			, dblOriginalQty = CD.dblOriginalQty
-			, ysnPriceChanged = CD.ysnPriceChanged
-			, dblOriginalBasis = CD.dblOriginalBasis
-			, dblConvertedBasis = CD.dblConvertedBasis
-			, strLCNumber = @strLCNumber
-		FROM @CDTableUpdate CD
-		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
+		
 
+	
+
+		
 		EXEC uspLGUpdateLoadItem @intContractDetailId
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
+
+		
+		DECLARE @previousQty NUMERIC(38, 20)
+			, @previousLocation INT
+			, @curQty NUMERIC(38, 20)
+			, @curLocation INT
+
+		SELECT TOP 1 @previousQty = dblQuantity
+			, @previousLocation = intCompanyLocationId
+		FROM tblCTSequenceHistory WITH (UPDLOCK)
+		WHERE intContractDetailId = @intContractDetailId
+		ORDER BY dtmHistoryCreated DESC
+
+		SELECT TOP 1 @curQty = dblQuantity
+			, @curLocation = intCompanyLocationId
+		FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
+
+		IF (@previousQty != @curQty OR @previousLocation != @curLocation)
 		BEGIN
-			DECLARE @previousQty NUMERIC(38, 20)
-				, @previousLocation INT
-				, @curQty NUMERIC(38, 20)
-				, @curLocation INT
-
-			SELECT TOP 1 @previousQty = dblQuantity
-				, @previousLocation = intCompanyLocationId
-			FROM tblCTSequenceHistory WITH (UPDLOCK)
-			WHERE intContractDetailId = @intContractDetailId
-			ORDER BY dtmHistoryCreated DESC
-
-			SELECT TOP 1 @curQty = dblQuantity
-				, @curLocation = intCompanyLocationId
-			FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
-			
-			IF (@previousQty != @curQty OR @previousLocation != @curLocation)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 			BEGIN
-				EXEC uspLGUpdateCompanyLocation @intContractDetailId;
-				-- Update Shipping Intruction Quantity
-				DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			
+			
+			
+				IF (@previousQty != @curQty OR @previousLocation != @curLocation)
+				BEGIN
+					EXEC uspLGUpdateCompanyLocation @intContractDetailId;
+					-- Update Shipping Intruction Quantity
+					DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 				
-				UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
-				FROM tblCTContractDetail T 
-				WHERE intContractDetailId = @intContractDetailId
-				AND dblShippingInstructionQty > 0;
+					UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
+					FROM tblCTContractDetail T 
+					WHERE intContractDetailId = @intContractDetailId
+					AND dblShippingInstructionQty > 0;
 
-				ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+					ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+				END
 			END
 		END
-		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
+		
 
 		if (@ysnMultiplePriceFixation = 1)
 		begin
@@ -733,6 +741,31 @@ BEGIN TRY
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 
+	UPDATE tblCTContractDetail
+	SET intPricingTypeId = CD.intPricingTypeId
+		, dblFutures = CD.dblFutures
+		, dblCashPrice = CD.dblCashPrice
+		, dblTotalCost = CD.dblTotalCost
+		, intProducerId = CD.intProducerId
+		, dblNetWeight = CD.dblNetWeight
+		, dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+		, intFutureMonthId = CD.intFutureMonthId
+		, dblOriginalQty = CD.dblOriginalQty
+		, ysnPriceChanged = CD.ysnPriceChanged
+		, dblOriginalBasis = CD.dblOriginalBasis
+		, dblConvertedBasis = CD.dblConvertedBasis
+	FROM @CDTableUpdate CD
+	WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblQMSample Where intContractHeaderId = @intContractHeaderId)
+	BEGIN
+		UPDATE tblQMSample 
+		SET intLocationId = CD.intCompanyLocationId
+		FROM tblCTContractDetail CD
+		WHERE CD.intContractHeaderId = @intContractHeaderId and tblQMSample.intContractDetailId = CD.intContractDetailId
+		AND tblQMSample.intContractHeaderId = CD.intContractHeaderId
+	END
+
 	IF ISNULL(@ysnMultiplePriceFixation,0) = 0
 	BEGIN
 		UPDATE	PF
@@ -816,4 +849,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-GO
