@@ -21,7 +21,7 @@ SELECT lh.intLoadHeaderId,
  sp.strFreightSalesUnit,    
  el.intTaxGroupId as intOutboundTaxGroupId,     
  pd.intLoadDetailId,     
- pd.intSalespersonId,     
+ isnull(pd.intSalespersonId,isnull(el.intSalespersonId,arc.intSalespersonId)) AS intSalespersonId,     
  isnull(pd.intSellerId,trc.intSellerId)intSellerId,     
  pd.intTaxGroupId,    
  pd.intContractDetailId as intReceiptContractDetailId,
@@ -48,7 +48,7 @@ SELECT lh.intLoadHeaderId,
  dh.intEntityId as intCustomerId,     
  dh.intEntityLocationId as intCustomerLocationId,     
  dh.intCompanyLocationId as intDistributionCompanyLocationId,     
- dh.intSalesPersonId,     
+ isnull(dh.intSalesPersonId,isnull(el.intSalespersonId,arc.intSalespersonId)) AS intSalesPersonId,  
  dh.dtmActualDelivery,     
  dd.intDeliveryDetailId,     
  dd.intTMDispatchId,     
@@ -76,3 +76,4 @@ LEFT JOIN tblSMCompanyLocation RCL ON RCL.intCompanyLocationId = pd.intCompanyLo
 JOIN tblMBILDeliveryHeader dh ON dh.intDeliveryHeaderId = dd.intDeliveryHeaderId     
 OUTER APPLY tblTRCompanyPreference trc  
 JOIN tblMBILLoadHeader lh ON lh.intLoadHeaderId = dh.intLoadHeaderId
+LEFT JOIN tblARCustomer arc ON arc.intEntityId = dh.intEntityId
