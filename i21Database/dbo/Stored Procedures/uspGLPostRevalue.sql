@@ -514,65 +514,66 @@ DECLARE
  END  
  ELSE  
  BEGIN  
-  INSERT INTO @RevalTable(  
-   [strTransactionId]  
-   ,[intTransactionId]  
-   ,[intAccountId]
-   ,[strDescription]  
-   ,[dtmTransactionDate]  
-   ,[dblDebit]  
-   ,[dblCredit]
-   ,[dblExchangeRate] 
-   ,[dblDebitForeign]
-   ,[dblCreditForeign] 
-   ,[dtmDate]  
-   ,[ysnIsUnposted]  
-   ,[intConcurrencyId]   
-   ,[intCurrencyId]  
-   ,[intUserId]  
-   ,[intEntityId]     
-   ,[dtmDateEntered]  
-   ,[strBatchId]  
-   ,[strCode]     
-   ,[strJournalLineDescription]  
-   ,[intJournalLineNo]  
-   ,[strTransactionType]  
-   ,[strTransactionForm]  
-   ,strModuleName  
-   )     
-  SELECT   
-   [strTransactionId]    
-   ,[intTransactionId]    
-   ,[intAccountId]
-   ,[strDescription]  
-   ,[dtmTransactionDate]  
-   ,[dblCredit]   
-   ,[dblDebit]
-   ,[dblExchangeRate] 
-   ,[dblDebitForeign]
-   ,[dblCreditForeign] 
-   ,[dtmDate]      
-   ,[ysnIsUnposted] = 1  
-   ,[intConcurrencyId]    
-   ,[intCurrencyId]    
-   ,[intUserId]     
-   ,[intEntityId]     
-   ,[dtmDateEntered]    
-   ,[strBatchId] = @strPostBatchId  
-   ,[strCode]      
-   ,[strJournalLineDescription]   
-   ,[intJournalLineNo]    
-   ,[strTransactionType]   
-   ,[strTransactionForm]  
-   ,strModuleName  
-  FROM tblGLDetail A   
-  WHERE strTransactionId = @strConsolidationNumber  
-  AND ysnIsUnposted = 0  
+        INSERT INTO @RevalTable(  
+        [strTransactionId]  
+        ,[intTransactionId]  
+        ,[intAccountId]
+        ,[strDescription]  
+        ,[dtmTransactionDate]  
+        ,[dblDebit]  
+        ,[dblCredit]
+        ,[dblExchangeRate] 
+        ,[dblDebitForeign]
+        ,[dblCreditForeign] 
+        ,[dtmDate]  
+        ,[ysnIsUnposted]  
+        ,[intConcurrencyId]   
+        ,[intCurrencyId]  
+        ,[intUserId]  
+        ,[intEntityId]     
+        ,[dtmDateEntered]  
+        ,[strBatchId]  
+        ,[strCode]     
+        ,[strJournalLineDescription]  
+        ,[intJournalLineNo]  
+        ,[strTransactionType]  
+        ,[strTransactionForm]  
+        ,strModuleName  
+        )     
+        SELECT   
+        [strTransactionId]    
+        ,[intTransactionId]    
+        ,[intAccountId]
+        ,[strDescription]  
+        ,[dtmTransactionDate]  
+        ,[dblCredit]   
+        ,[dblDebit]
+        ,[dblExchangeRate] 
+        ,[dblDebitForeign]
+        ,[dblCreditForeign] 
+        ,[dtmDate]      
+        ,[ysnIsUnposted] = 1  
+        ,[intConcurrencyId]    
+        ,[intCurrencyId]    
+        ,[intUserId]     
+        ,[intEntityId]     
+        ,[dtmDateEntered]    
+        ,[strBatchId] = @strPostBatchId  
+        ,[strCode]      
+        ,[strJournalLineDescription]   
+        ,[intJournalLineNo]    
+        ,[strTransactionType]   
+        ,[strTransactionForm]  
+        ,strModuleName  
+        FROM tblGLDetail A   
+        WHERE strTransactionId = @strConsolidationNumber  
+        AND ysnIsUnposted = 0  
   
  END  
 
 
 declare @OverrideTableType [OverrideTableType]
+IF @ysnPost = 1
 INSERT INTO @OverrideTableType(
     intAccountId, 
     intAccountIdOverride, 
@@ -621,15 +622,12 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
+    intCompanySegmentOverrideId
    )
    SELECT 
     dtmDate,  
     strBatchId,  
-    intAccountId =B.intNewAccountIdOverride,  
+    intAccountId,  
     strDescription, 
     dtmTransactionDate,
     dblDebit,  
@@ -654,23 +652,14 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,  
-    B.strNewAccountIdOverride,  
-    B.intNewAccountIdOverride,  
-    B.strOverrideAccountError 
-    from --nGLOverridePostAccounts(@RevalTable,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A   
-	@RevalTable A
-	OUTER APPLY(
-		SELECT 
-		fn.intNewAccountIdOverride,
-		fn.strOverrideAccountError,
-		fn.strNewAccountIdOverride
-		from
-		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
-		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
-	
-	)B
-     
+    intCompanySegmentOverrideId
+    from @RevalTable A
+  
+  
+  IF @ysnPost = 1
+    GOTO _updateRecapOverride
+
+  _postOverrided:
       
     IF EXISTS(SELECT 1 FROM @RecapTable WHERE ISNULL(strOverrideAccountError,'') <> '' ) 
     BEGIN 
@@ -684,7 +673,7 @@ GROUP BY intAccountId,intAccountIdOverride,
   
    IF @@ERROR <> 0 RETURN  
   
-   IF @ysnPost = 0  
+   IF @ysnPost = 0  AND @ysnRecap = 0
     UPDATE GL SET ysnIsUnposted = 1  
     FROM tblGLDetail GL  
     WHERE strTransactionId = @strConsolidationNumber  
@@ -720,16 +709,12 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,  
-    strNewAccountIdOverride,  
-    intNewAccountIdOverride,  
-    strOverrideAccountError 
-   
+    intCompanySegmentOverrideId
    )
    SELECT 
     dtmDate,  
     strBatchId,  
-    intAccountId =B.intNewAccountIdOverride,  
+    intAccountId,  
     strDescription, 
     dtmTransactionDate,  
     dblDebit,  
@@ -754,23 +739,16 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,  
-    B.strNewAccountIdOverride,  
-    B.intNewAccountIdOverride,  
-    B.strOverrideAccountError
+    intCompanySegmentOverrideId
 	FROM
 	@RevalTable A
-	OUTER APPLY(
-		SELECT 
-		fn.intNewAccountIdOverride,
-		fn.strOverrideAccountError,
-		fn.strNewAccountIdOverride
-		from
-		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
-		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
-	)B
 
- 
+
+
+  IF @ysnPost = 1
+    GOTO _updateRecapOverride
+
+  _recapOverrided:
 
    EXEC uspGLPostRecap @RecapTable, @intEntityId  
   
@@ -781,8 +759,8 @@ GROUP BY intAccountId,intAccountIdOverride,
   
   
   
-  if @ysnRecap = 0  
-  BEGIN  
+IF @ysnRecap = 0  
+BEGIN  
    UPDATE tblGLRevalue SET ysnPosted = @ysnPost WHERE intConsolidationId in ( @intConsolidationId, @intReverseID)  
      
      
@@ -819,10 +797,8 @@ GROUP BY intAccountId,intAccountIdOverride,
      ysnCMForwardsRevalued =  @ysnPost,  
      ysnCMInTransitRevalued = @ysnPost,  
      ysnCMSwapsRevalued =  @ysnPost  
-    WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId  
-  
-     
-  END  
+    WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId   
+END  
    
   
  SET @strMessage = @strPostBatchId
@@ -833,6 +809,30 @@ GROUP BY intAccountId,intAccountIdOverride,
   SET @strMessage = 'Error Posting Revalue:'  + @strMessage
 
   RETURN
+
+  _updateRecapOverride:
+
+  IF @ysnPost = 1
+  UPDATE A SET intAccountId = B.intNewAccountIdOverride ,
+    strNewAccountIdOverride = B.strNewAccountIdOverride, 
+    intNewAccountIdOverride =  B.intNewAccountIdOverride, 
+    strOverrideAccountError =  B.strOverrideAccountError 
+  FROM @RecapTable A 
+	OUTER APPLY(
+		SELECT 
+		fn.intNewAccountIdOverride,
+		fn.strOverrideAccountError,
+		fn.strNewAccountIdOverride
+		from
+		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)fn
+		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+	)B
+  IF @ysnRecap = 1  
+    GOTO _recapOverrided
+  ELSE
+    GOTO _postOverrided
+
+ 
 
  _overrideError:
   SET @strMessage = 'Error Overriding Accounts'  
