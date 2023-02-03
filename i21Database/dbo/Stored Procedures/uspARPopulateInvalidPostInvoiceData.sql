@@ -18,10 +18,6 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
- --IC Reserve Stock
-IF @Recap = @ZeroBit	
-	EXEC dbo.uspARPostItemResevation @strSessionId = @strSessionId
-
 DECLARE @ItemsForContracts					[InvoicePostingTable]
 EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post, @strSessionId = @strSessionId
 
