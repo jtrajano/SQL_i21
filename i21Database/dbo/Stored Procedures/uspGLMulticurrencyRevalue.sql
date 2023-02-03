@@ -402,7 +402,7 @@ IF @strModule = 'GL' -- GL will average
 	strAccountId,
 	A.intAccountId,
 	A.strType
-	HAVING SUM(dblHistoricAmount)> 0
+	HAVING SUM(dblHistoricAmount)<> 0
 ELSE
 	SELECT 
 	A.strTransactionType,
