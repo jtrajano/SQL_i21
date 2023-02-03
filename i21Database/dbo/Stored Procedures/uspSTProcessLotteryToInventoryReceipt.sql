@@ -686,22 +686,28 @@ BEGIN TRY
 				,strCountDirection
 				,intLotteryGameId
 				,dtmReceiptDate
+				,intStartingNumber
+				,intEndingNumber
 				,dblQuantityRemaining
 				,intItemUOMId
 				,strStatus
 				,intConcurrencyId
 			)
 			SELECT TOP 1 
-			intStoreId,
-			strBookNumber,
+			RL.intStoreId,
+			RL.strBookNumber,
 			'Low to High',
-			intLotteryGameId,
-			dtmReceiptDate,
-			intTicketPerPack,
-			intItemUOMId,
+			RL.intLotteryGameId,
+			RL.dtmReceiptDate,
+			LG.intStartingNumber,
+			LG.intEndingNumber,
+			RL.intTicketPerPack,
+			RL.intItemUOMId,
 			'Inactive',
 			1
-			FROM tblSTReceiveLottery
+			FROM tblSTReceiveLottery RL
+			JOIN tblSTLotteryGame LG
+				ON RL.intLotteryGameId = LG.intLotteryGameId
 			WHERE intReceiveLotteryId = @Id
 
 			DECLARE @lotteryBookPK INT
@@ -716,12 +722,16 @@ BEGIN TRY
 			SET  tblSTLotteryBook.intStoreId				= tblSTReceiveLottery.intStoreId			
 				,tblSTLotteryBook.strBookNumber				= tblSTReceiveLottery.strBookNumber			
 				,tblSTLotteryBook.intLotteryGameId			= tblSTReceiveLottery.intLotteryGameId		
+				,tblSTLotteryBook.intStartingNumber			= LG.intStartingNumber		
+				,tblSTLotteryBook.intEndingNumber			= LG.intEndingNumber		
 				,tblSTLotteryBook.dtmReceiptDate			= tblSTReceiveLottery.dtmReceiptDate		
 				,tblSTLotteryBook.dblQuantityRemaining		= tblSTReceiveLottery.intTicketPerPack
 			FROM 
 			tblSTLotteryBook
 			INNER JOIN tblSTReceiveLottery
 			ON tblSTLotteryBook.intLotteryBookId = tblSTReceiveLottery.intLotteryBookId
+			JOIN tblSTLotteryGame LG
+				ON tblSTReceiveLottery.intLotteryGameId = LG.intLotteryGameId
 			WHERE tblSTReceiveLottery.intReceiveLotteryId = @Id
 			
 		END
