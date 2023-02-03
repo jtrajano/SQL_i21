@@ -67,7 +67,7 @@ BEGIN TRY
 		, intCurrencyExchangeRateTypeId = @intCashManagementRateTypeId -- otc.intCurrencyExchangeRateTypeId -- Currency Pair
 		, dtmAccrual = otc.dtmTransactionDate
 		, dtmDate = otc.dtmMaturityDate
-		, dblAmountForeignFrom = otc.dblContractAmount * otc.dblExchangeRate -- Buy Amount * Forward Rate
+		, dblAmountForeignFrom = ROUND(otc.dblContractAmount * otc.dblExchangeRate, 2) -- Buy Amount * Forward Rate
 		, dblAmountForeignTo = otc.dblContractAmount -- Buy Amount
 		, intFutOptTransactionId = otc.intFutOptTransactionId
 		, intFutOptTransactionHeaderId = otc.intFutOptTransactionHeaderId
