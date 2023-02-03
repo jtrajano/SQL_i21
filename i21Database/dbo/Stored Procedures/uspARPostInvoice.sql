@@ -385,9 +385,6 @@ IF((@totalInvalid >= 1 AND @totalRecords <= 0) OR (@totalInvalid >= 1 AND @rollb
 
 BEGIN TRY
 
-	IF @recap = 0
-		EXEC [dbo].[uspARPostItemResevation] @strSessionId = @strRequestId
-
 	IF @recap = 1
     BEGIN
         EXEC [dbo].[uspARPostInvoiceRecap]
@@ -653,6 +650,9 @@ BEGIN TRY
 		   ,@UserId  		= @userId
 		   ,@raiseError 	= @raiseError
 		   ,@strSessionId 	= @strRequestId
+
+	IF @recap = 0
+		EXEC [dbo].[uspARPostItemResevation]
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    		= @post
