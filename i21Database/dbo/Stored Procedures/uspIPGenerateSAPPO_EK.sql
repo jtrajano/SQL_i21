@@ -117,6 +117,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @strHeaderXML = ''
 			,@strLineXML = ''
+			,@strHeaderRowState = NULL
 
 		DELETE
 		FROM @tblIPContractFeed
@@ -137,8 +138,7 @@ BEGIN TRY
 
 		WHILE @intContractFeedId IS NOT NULL
 		BEGIN
-			SELECT @strHeaderRowState = NULL
-				,@strError = ''
+			SELECT @strError = ''
 
 			SELECT @intLoadId = NULL
 				,@intLoadDetailId = NULL
@@ -162,23 +162,45 @@ BEGIN TRY
 			FROM dbo.tblIPContractFeed
 			WHERE intContractFeedId = @intContractFeedId
 
-			IF EXISTS (
-					SELECT 1
-					FROM tblIPContractFeed
-					WHERE intLoadId = @intLoadId
-						--AND intLoadDetailId = @intLoadDetailId
-						AND intContractFeedId < @intContractFeedId
-						AND ISNULL(intStatusId, 0) IN (
-							2
-							,4
-							)
-					)
+			-- If the first record is delete feed then do not send the feed
+			--IF EXISTS (
+			--	SELECT 1
+			--	FROM tblIPContractFeed
+			--	WHERE intLoadId = @intLoadId
+			--		AND intContractFeedId < @intContractFeedId
+			--		AND ISNULL(strRowState, '') IN (
+			--			'Cancelled'
+			--			,'Deleted'
+			--			)
+			--	)
+			--BEGIN
+			--	UPDATE dbo.tblIPContractFeed
+			--	SET strMessage = 'Cannot send delete feed since create Feed is not yet sent. '
+			--		,intStatusId = 1
+			--	WHERE intContractFeedId = @intContractFeedId
+
+			--	GOTO NextRec
+			--END
+
+			IF ISNULL(@strHeaderRowState, '') = ''
 			BEGIN
-				SELECT @strHeaderRowState = 'U'
-			END
-			ELSE
-			BEGIN
-				SELECT @strHeaderRowState = 'C'
+				IF EXISTS (
+						SELECT 1
+						FROM tblIPContractFeed
+						WHERE intLoadId = @intLoadId
+							AND intContractFeedId < @intContractFeedId
+							AND ISNULL(intStatusId, 0) IN (
+								2
+								,4
+								)
+						)
+				BEGIN
+					SELECT @strHeaderRowState = 'U'
+				END
+				ELSE
+				BEGIN
+					SELECT @strHeaderRowState = 'C'
+				END
 			END
 
 			IF @strHeaderRowState = 'C'
@@ -366,6 +388,23 @@ BEGIN TRY
 			ELSE IF @strDetailRowState = 'Modified'
 			BEGIN
 				SELECT @strDetailRowState = 'U'
+			END
+
+			IF @strDetailRowState = 'U'
+			BEGIN
+				IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPContractFeed
+					WHERE intLoadId = @intLoadId
+						AND intContractFeedId < @intContractFeedId
+						AND ISNULL(intStatusId, 0) IN (
+							2
+							,4
+							)
+					)
+				BEGIN
+					SELECT @strDetailRowState = 'C'
+				END
 			END
 
 			SELECT @intDetailNumber = LD.intDetailNumber
