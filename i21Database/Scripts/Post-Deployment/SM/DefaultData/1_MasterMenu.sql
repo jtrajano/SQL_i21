@@ -1192,12 +1192,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Recurrin
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'i21.view.RecurringTransaction?type=General Journal' WHERE strMenuName = N'Recurring Journals' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendor Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
---	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
---	VALUES (N'Vendor Mapping', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Vendor Mapping', N'Maintenance', N'Screen', N'GeneralLedger.view.VendorMapping?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
---ELSE
---	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'GeneralLedger.view.VendorMapping?showSearch=true' WHERE strMenuName = N'Vendor Mapping' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
-
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Intra Company Config' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Intra Company Config', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Intra Company Config', N'Maintenance', N'Screen', N'GeneralLedger.view.IntraCompanyConfig?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'GeneralLedger.view.IntraCompanyConfig?showSearch=true' WHERE strMenuName = N'Intra Company Config' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
+	
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Change Category' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Change Category', N'General Ledger', @GeneralLedgerMaintenanceParentMenuId, N'Change Category', N'Maintenance', N'Screen', N'GeneralLedger.view.ChangeCategory?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
