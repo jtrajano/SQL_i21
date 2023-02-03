@@ -8,6 +8,8 @@
     [intBinNumber]           INT			  NULL,
     [dtmReceiptDate]         DATETIME         NULL,
     [dtmSoldDate]            DATETIME         NULL,
+    [intStartingNumber]		 INT              NULL,
+    [intEndingNumber]		 INT              NULL,
     [dblQuantityRemaining]   NUMERIC (18, 6) NULL,
     [dtmActivateDate]        DATETIME         NULL,
     [strStatus]              NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
@@ -27,6 +29,3 @@
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [tblSTLotteryBook_UniqueGameAndBookNumber]
     ON [dbo].[tblSTLotteryBook]([intLotteryGameId] ASC, [strBookNumber] ASC);
-
-
-
