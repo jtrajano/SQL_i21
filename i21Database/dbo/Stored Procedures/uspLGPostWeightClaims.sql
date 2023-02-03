@@ -43,19 +43,22 @@ BEGIN
 		END
 	END
 
-	UPDATE tblLGWeightClaim
-	SET ysnPosted = @ysnPost
-		,dtmPosted = GETDATE()
-	WHERE intWeightClaimId = @intWeightClaimsId
+	IF (@ysnRecap = 0)
+	BEGIN
+		UPDATE tblLGWeightClaim
+		SET ysnPosted = @ysnPost
+			,dtmPosted = GETDATE()
+		WHERE intWeightClaimId = @intWeightClaimsId
 
-	SET @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted' WHEN @ysnPost = 0 THEN 'Unposted' END
-	EXEC uspSMAuditLog
-        @keyValue = @intWeightClaimsId,
-        @screenName = 'Logistics.view.WeightClaims',
-        @entityId = @intEntityUserSecurityId,
-        @actionType = @actionType
+		SET @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted' WHEN @ysnPost = 0 THEN 'Unposted' END
+		EXEC uspSMAuditLog
+			@keyValue = @intWeightClaimsId,
+			@screenName = 'Logistics.view.WeightClaims',
+			@entityId = @intEntityUserSecurityId,
+			@actionType = @actionType
 
-	RETURN;
+		RETURN;
+	END
 END
 
 /* Weight Claims Impact GL */
