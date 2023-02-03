@@ -35,7 +35,7 @@ INNER JOIN tblICItem IC
 		AND IC.strType <> 'Other Charge'
 LEFT JOIN (
 			tblAPBillDetail BD2
-			INNER JOIN tblICItem IC2
+			LEFT JOIN tblICItem IC2
 				ON IC2.intItemId = BD2.intItemId
 					AND IC2.strType <> 'Inventory'
 	)	
