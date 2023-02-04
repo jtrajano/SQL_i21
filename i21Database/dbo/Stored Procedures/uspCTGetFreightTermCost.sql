@@ -12,6 +12,7 @@
 	, @intRateTypeId INT
 	, @ysnWarningMessage BIT = 1
 	, @intSequenceCurrencyId INT
+	, @intContainerTypeId INT
 
 AS
 	
@@ -134,6 +135,7 @@ BEGIN TRY
 															AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
 															AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
 															AND DP.intCityId = @intToPortId)
+					AND FRM.intContainerTypeId = @intContainerTypeId
 			END
 
 			if (ISNULL(@intFreightRateMatrixId, 0) > 0)begin select @ysnFreightRateMatrix = 1; end
