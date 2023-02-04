@@ -1712,8 +1712,12 @@ BEGIN TRY
 	IF(@ErrorMessage IS NULL)
 	BEGIN
 			-- COPY THE ATTACHMENT FROM TR TO INVOICE
-		IF ((SELECT COUNT(intEntityCustomerId) FROM tblTRLoadDistributionHeader DH 
-			WHERE DH.intLoadHeaderId = @intLoadHeaderId AND DH.strDestination = 'Customer') = 1)
+		DECLARE @LoadInvoiceCount INT = 0
+		SELECT @LoadInvoiceCount = COUNT(intInvoiceId) 
+		FROM tblTRLoadDistributionHeader DH 
+		WHERE DH.intLoadHeaderId = @intLoadHeaderId AND DH.strDestination = 'Customer'
+
+		IF (@LoadInvoiceCount = 1)
 		BEGIN
 			DECLARE @intTransportAttachmentId INT = NULL,
 				@intAttachmentInvoiceId INT = NULL
@@ -1736,6 +1740,43 @@ BEGIN TRY
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				DECLARE @strAttachmentErrorMessage NVARCHAR(MAX) = NULL
+			
+				EXEC dbo.uspSMCopyAttachments @srcNamespace = 'Transports.view.TransportLoads'
+					, @srcRecordId =  @intLoadHeaderId
+					, @destNamespace = 'AccountsReceivable.view.Invoice'
+					, @destRecordId = @intAttachmentInvoiceId
+					, @ErrorMessage = @strAttachmentErrorMessage OUTPUT
+					, @srcIntAttachmentId = @intTransportAttachmentId
+				
+				FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
+			END
+			CLOSE @CursorAttachmentTran  
+			DEALLOCATE @CursorAttachmentTran
+		END
+		ELSE IF (@LoadInvoiceCount > 1)
+		BEGIN
+			DECLARE @intTransportAttachmentIdForMultiple INT = NULL,
+				@intAttachmentInvoiceIdForMultiple INT = NULL
+
+			DECLARE @CursorAttachmentTranForMultiple AS CURSOR
+			SET @CursorAttachmentTran = CURSOR FAST_FORWARD FOR
+				SELECT TA.intAttachmentId, I.intInvoiceId
+			FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId 
+			INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId
+			LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
+			LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName
+			WHERE LH.intLoadHeaderId = @intLoadHeaderId
+			AND DH.intInvoiceId IS NOT NULL
+			AND TA.strScreen = 'Transports.view.TransportLoads'
+			AND IA.strName IS NULL
+			AND DH.strDestination = 'Customer'
+			AND CONVERT(NVARCHAR(10), DH.intShipToLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)
+
+			OPEN @CursorAttachmentTran
+			FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				DECLARE @strAttachmentErrorMessageForMultiple NVARCHAR(MAX) = NULL
 			
 				EXEC dbo.uspSMCopyAttachments @srcNamespace = 'Transports.view.TransportLoads'
 					, @srcRecordId =  @intLoadHeaderId
