@@ -59,6 +59,8 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , strPreInvoiceGarden					= PIGM.strGardenMark
      , strGrade							= CA.strDescription
      , strPreInvoiceGrade					= PGCA.strDescription
+     , dblValue                                   = ISNULL(CRD.dblBasePrice, 0) * ISNULL(CRD.dblQuantity, 0)
+     , dblInvoiceValue                            = ISNULL(CRD.dblPreInvoicePrice, 0) * ISNULL(CRD.dblPreInvoiceQuantity, 0)
 FROM tblQMCatalogueReconciliationDetail CRD 
 INNER JOIN tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId
 INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = CRD.intBillDetailId
