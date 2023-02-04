@@ -69,7 +69,10 @@ RETURNS @returntable TABLE
     [ysnOrigin]				BIT NOT NULL DEFAULT 0,
 	[ysnDeleted]			BIT NULL DEFAULT 0 ,
 	[dtmDateDeleted]		DATETIME NULL,
-    [dtmDateCreated]		DATETIME NULL DEFAULT GETDATE()
+    [dtmDateCreated]		DATETIME NULL DEFAULT GETDATE(),
+	[intPayFromBankAccountId]		INT NULL,
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intPayToBankAccountId]			INT NULL
 )
 AS
 BEGIN
@@ -103,6 +106,10 @@ BEGIN
 	DECLARE @shipToCountry NVARCHAR(25)
 	DECLARE @shipToPhone NVARCHAR(25)
 	DECLARE @shipToAttention NVARCHAR(200)
+
+	DECLARE @payFromBankAccount INT;
+	DECLARE @financingSourcedFrom NVARCHAR(50);
+	DECLARE @payToBankAccountId INT;
 
 	IF ISNULL(@userId, 0) > 0
 	SELECT TOP 1 
@@ -165,6 +172,13 @@ BEGIN
 	FROM tblSMCurrency
 	WHERE intMainCurrencyId = @currency AND ysnSubCurrency = 1
 
+	SELECT @payFromBankAccount = BA.intPayFromBankAccountId,
+		   @financingSourcedFrom = BA.strSourcedFrom,
+		   @payToBankAccountId = VD.intEntityEFTInfoId
+	FROM vyuAPVendorDefault VD
+	OUTER APPLY dbo.fnAPGetVendorPayFromBankAccount(@vendorId, @shipTo, @currency) BA
+	WHERE VD.intEntityId = @vendorId
+
 	INSERT @returntable
 	(
 		[intTermsId]			,
@@ -196,7 +210,10 @@ BEGIN
 		[intOrderById]			,
 		[intCurrencyId]			,
 		[intSubCurrencyCents]	,
-		[intShipFromEntityId]
+		[intShipFromEntityId]	,
+		[intPayFromBankAccountId]	,
+		[strFinancingSourcedFrom]	,
+		[intPayToBankAccountId]		
 	)
 	SELECT 
 		@term, 
@@ -228,6 +245,9 @@ BEGIN
 		@userId,
 		@currency,		
 		ISNULL(@subCurrencyCents,1),
-		@vendorId
+		@vendorId,
+		@payFromBankAccount,
+		@financingSourcedFrom,
+		@payToBankAccountId
 	RETURN;
 END
