@@ -59,7 +59,8 @@ BEGIN TRY
 			@intLCApplicantId			INT,
             @strLCType					NVARCHAR(100),
             @strLCNumber				NVARCHAR(50),
-			@intCostTermId				INT
+			@intCostTermId				INT,
+			@intContainerTypeId			INT
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
@@ -399,6 +400,7 @@ BEGIN TRY
 					, @dblTotalBudget = dblTotalBudget
 					, @dblTotalCost = dblTotalCost
 					, @intDetailPricingTypeId = cd.intPricingTypeId
+					, @intContainerTypeId = cd.intContainerTypeId
 				FROM tblCTContractDetail cd
 				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				where cd.intContractDetailId = @intContractDetailId
@@ -424,6 +426,7 @@ BEGIN TRY
 					, @intRateTypeId = @intRateTypeId
 					, @ysnWarningMessage = 0
 					, @intSequenceCurrencyId = @intSequenceCurrencyId
+					, @intContainerTypeId = @intContainerTypeId
 
 				IF EXISTS (SELECT TOP 1 1 FROM @CostItems)
 				BEGIN

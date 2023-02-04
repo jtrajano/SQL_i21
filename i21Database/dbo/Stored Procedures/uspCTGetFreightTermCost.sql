@@ -12,6 +12,7 @@
 	, @intRateTypeId INT
 	, @ysnWarningMessage BIT = 1
 	, @intSequenceCurrencyId INT
+	, @intContainerTypeId INT
 
 AS
 	
