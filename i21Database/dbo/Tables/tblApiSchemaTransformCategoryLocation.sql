@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblApiSchemaTransformCategoryLocation](
-	[intKey] [int] IDENTITY(1,1) NOT NULL,
-	[guiApiUniqueId] [uniqueidentifier] NOT NULL,
-	[intRowNumber] [int] NULL
+	  [intKey] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY
+	, [guiApiUniqueId] [uniqueidentifier] NOT NULL
+	, [intRowNumber] [int] NULL
 	, strCategory NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL			
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 	, strCashRegisterDepartment NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
@@ -39,10 +39,4 @@ CREATE TABLE [dbo].[tblApiSchemaTransformCategoryLocation](
 	, ysnReturnable BIT NULL
 	, ysnSaleable BIT NULL
 	, ysnUpdatePrices BIT NULL
-
-PRIMARY KEY CLUSTERED 
-(
-	[intKey] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
+)
