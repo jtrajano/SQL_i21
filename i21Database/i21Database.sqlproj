@@ -1494,6 +1494,12 @@
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
     <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
+
+    <Build Include="dbo\Stored Procedures\uspGRProcessTransferSettlements.sql" />
+    <Build Include="dbo\User Defined Types\TransferFromSettlementStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TransferSettlementReferenceStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TransferToSettlementStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractDetailImport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
