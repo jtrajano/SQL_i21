@@ -165,12 +165,15 @@ AS
 	, [Broker].strName AS strBroker
 	, [Transfer].strTrailerId
 	, [Transfer].strERPTransferNo
-	, TransferDetail.strComment 	
+	, TransferDetail.strComment
+	, [Transfer].strDiversionNo
+	, Tag.strTagNumber
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
 		LEFT JOIN tblEMEntity [Broker] ON [Broker].intEntityId = [Transfer].intBrokerId
 		LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
+		LEFT JOIN tblICTag Tag ON Item.intHazmatTag = Tag.intTagId
 		LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 		LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 		LEFT JOIN tblICStatus stat ON stat.intStatusId = [Transfer].intStatusId

@@ -29,7 +29,7 @@ BEGIN
 			ON			a.intEntityId = b.intEntityId
 			WHERE		a.intEntityId = @intEntityCustomerId
 
-			IF @intPaymentMethod != @intCustomerPaymentMethod
+			IF @intPaymentMethod != @intCustomerPaymentMethod OR @intCustomerPaymentMethod IS NULL
 			BEGIN
 				INSERT INTO tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, strMessageType, strMessage, intConcurrencyId)
 				VALUES (dbo.fnSTGetLatestProcessId(@intStoreId), 'S', 'Missing or Incorrect Payment Method for the customer ' + @strCustomerName + '.', 1)

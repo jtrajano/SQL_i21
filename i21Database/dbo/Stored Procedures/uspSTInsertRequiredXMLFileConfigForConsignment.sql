@@ -58,7 +58,8 @@ BEGIN
 										'Commander Pop Cfg',
 										'Commander Tank',
 										'Commander Loyalty',
-										'Commander Tier Product'
+										'Commander Tier Product',
+										'Commander Validate'
 										) AND 
 				x.intImportFileHeaderId NOT IN (	SELECT		y.intImportFileHeaderId 
 													FROM		tblSTRegisterFileConfiguration y

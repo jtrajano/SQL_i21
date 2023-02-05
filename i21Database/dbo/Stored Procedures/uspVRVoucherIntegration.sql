@@ -25,7 +25,7 @@ BEGIN
         WHERE b.intBillId = @intBillId
 
         UPDATE invd
-        SET invd.dblRebateAmount = CASE @ysnPost WHEN 1 THEN ABS(vr.dblRebateAmount) ELSE 0.0 END
+        SET invd.dblRebateAmount = CASE @ysnPost WHEN 1 THEN CASE WHEN inv.strTransactionType = 'Credit Memo' THEN vr.dblRebateAmount ELSE ABS(vr.dblRebateAmount) END ELSE 0.0 END
         FROM tblARInvoiceDetail invd
         JOIN vyuVROpenRebate vr ON invd.intInvoiceId = vr.intInvoiceId AND vr.intInvoiceDetailId = invd.intInvoiceDetailId
         JOIN tblARInvoice inv ON inv.intInvoiceId = vr.intInvoiceId
@@ -33,6 +33,12 @@ BEGIN
         LEFT JOIN tblICItemLocation il ON il.intItemId = invd.intItemId
             AND il.intLocationId = inv.intCompanyLocationId
         WHERE vr.intInvoiceId = @intInvoiceId
+
+        UPDATE sar
+        SET sar.dblRebateAmount = invd.dblRebateAmount
+        FROM tblARSalesAnalysisStagingReport sar
+        JOIN tblARInvoiceDetail invd ON invd.intInvoiceDetailId = sar.intInvoiceDetailId
+        WHERE invd.intInvoiceId = @intInvoiceId
 
         FETCH NEXT FROM cur INTO @intBillId
     END

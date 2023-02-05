@@ -4,7 +4,7 @@ SELECT
 	W2.intEmployeeW2Id
 	,W2.intYear
 	,W2.intEntityEmployeeId
-	,strSSN = LEFT(dbo.fnAPRemoveSpecialChars(ISNULL(EMP.strSocialSecurity, '')), 9) COLLATE Latin1_General_CI_AS 
+	,strSSN = ISNULL(LEFT(dbo.fnAPRemoveSpecialChars(ISNULL(dbo.fnAESDecryptASym(EMP.strSocialSecurity), '')), 9),'') COLLATE Latin1_General_CI_AS 
 	,strFirstName = LEFT(ISNULL(EMP.strFirstName, ''), 15)
 	,strMiddleName = LEFT(ISNULL(EMP.strMiddleName, ''), 15)
 	,strLastName = LEFT(ISNULL(EMP.strLastName, ''), 20)

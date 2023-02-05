@@ -22,6 +22,7 @@
     [intFiscalYearId] INT NULL, 
     [intFiscalPeriodId] INT NULL, 
     [intLocationSegmentId]  INT NULL,
+    [intCompanySegmentId]  INT NULL,
     [intJournalIdToReverse] INT NULL, 
     [intLedgerId] INT NULL, 
     [ysnReversed] BIT NULL, 
@@ -34,9 +35,7 @@
 	CONSTRAINT [FK_tblGLJournal_tblGLFiscalYearPeriod] FOREIGN KEY([intFiscalPeriodId], [intFiscalYearId])REFERENCES [dbo].[tblGLFiscalYearPeriod] ([intGLFiscalYearPeriodId], [intFiscalYearId]),
 	CONSTRAINT [FK_tblGLJournal_tblSMCurrencyExchangeRate] FOREIGN KEY([intCurrencyExchangeRateId])REFERENCES [dbo].[tblSMCurrencyExchangeRate] ([intCurrencyExchangeRateId])
 );
-
 GO
-
 CREATE TRIGGER [dbo].[trg_tblGLJournalDelete]
 ON [dbo].[tblGLJournal]
 FOR DELETE 

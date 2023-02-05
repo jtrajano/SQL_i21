@@ -63,6 +63,7 @@ BEGIN TRY
 			,@strSrcTransactionNo NVARCHAR(50) 
 			,@strSrcModuleName NVARCHAR(50) 
 			,@strSrcTransactionType NVARCHAR(50) 
+			,@intAllowNegativeInventory INT = 0
 
 	DECLARE @tblInputItem TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -97,6 +98,7 @@ BEGIN TRY
 		,intParentLotId INT
 		,intItemUOMId INT
 		,intItemIssuedUOMId INT
+		,intAllowNegativeInventory INT
 	)
 
 	DECLARE @tblPickedLot TABLE(
@@ -559,6 +561,7 @@ BEGIN TRY
 				,intParentLotId
 				,intItemUOMId
 				,intItemIssuedUOMId
+				,intAllowNegativeInventory
 			)
 			SELECT 
 					0
@@ -566,8 +569,8 @@ BEGIN TRY
 					,S.intItemId
 					,S.dblOnHand - S.dblUnitReserved 
 					,@intLocationId
-					,S.intSubLocationId
 					,S.intStorageLocationId
+					,S.intSubLocationId
 					,NULL
 					,NULL
 					,0
@@ -576,6 +579,7 @@ BEGIN TRY
 					,0
 					,S.intItemUOMId
 					,0 
+					,IL.intAllowNegativeInventory
 			FROM dbo.tblICItemStockUOM S
 			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
 				AND S.intItemId = IL.intItemId
@@ -675,6 +679,7 @@ BEGIN TRY
 			SELECT	@intLotId=intLotId
 					,@dblAvailableQty=dblQty 
 					,@intLotItemUOMId=intItemUOMId
+					,@intAllowNegativeInventory = intAllowNegativeInventory
 			FROM	@tblLot 
 			WHERE	intRowNo = @intMinLot
 
@@ -704,6 +709,18 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				DECLARE @dblPickQty NUMERIC(38, 20) 
+
+				IF (@intAllowNegativeInventory) = 1 
+					BEGIN
+						SET @dblPickQty = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intLotItemUOMId, @dblRequiredQty)
+					END
+				ELSE
+					BEGIN
+						SET @dblPickQty = @dblAvailableQty
+					END
+				
+
 				INSERT INTO @tblPickedLot(
 						intLotId
 						,intItemId
@@ -716,7 +733,7 @@ BEGIN TRY
 				SELECT 
 						@intLotId
 						,@intRawItemId
-						,@dblAvailableQty
+						,@dblPickQty
 						,intItemUOMId
 						,intLocationId
 						,intSubLocationId
@@ -1051,22 +1068,54 @@ BEGIN TRY
 			,@strLotNumber = @strLotNumber OUT
 			,@ysnAutoBlend=1
 			
-		If @strOrderType='LOAD DISTRIBUTION'
-		Begin
-			If (Select Count(1) From tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId) 
-				> (Select Count(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
-				RAISERROR('There is not enough stock of an ingredient required to blend. Please review Inventory On-Hand count.',16,1)
+		IF @strOrderType='LOAD DISTRIBUTION'
+			BEGIN
+				IF (SELECT COUNT(1) FROM tblTRLoadBlendIngredient WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId) > (SELECT COUNT(1) FROM tblMFWorkOrderConsumedLot WHERE intWorkOrderId = @intWorkOrderId)
+					BEGIN
+						RAISERROR('There is not enough stock of an ingredient required to blend. Please review Inventory On-Hand count.', 16, 1);
+					END
 
-			If Exists(
-				Select 1 From
-					(Select intItemId,SUM(dblRequiredQty) dblQuantity From @tblInputItem group by intItemId) t1
-				Join 
-					(Select intItemId,SUM(dblQuantity) dblQuantity From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId group by intItemId) t2
-					on t1.intItemId=t2.intItemId
-					Where t1.dblQuantity<>t2.dblQuantity
-				)
-				RAISERROR('Quantity mismatch between Transport Ingredient and Blend Consumption.',16,1)
-		End
+				IF EXISTS(SELECT 1 
+						  FROM (SELECT intItemId
+									 , SUM(dblRequiredQty) AS dblQuantity 
+								FROM @tblInputItem 
+								GROUP BY intItemId) AS t1
+						  JOIN (SELECT intItemId
+									 , SUM(dblQuantity) AS dblQuantity 
+								FROM tblMFWorkOrderConsumedLot 
+								WHERE intWorkOrderId = @intWorkOrderId 
+								GROUP BY intItemId) AS t2 ON t1.intItemId = t2.intItemId
+						  WHERE t1.dblQuantity <> t2.dblQuantity)
+					BEGIN
+						DECLARE @intMismatchItemId		INT
+							  , @strMismatchItemNumber	NVARCHAR(MAX)
+							  , @dblBlendQuantity		NUMERIC(38, 2)
+							  , @dblPickQuantity		NUMERIC(38, 2)
+							  , @strErrorMsg			NVARCHAR(MAX)
+
+						SELECT TOP 1 @intMismatchItemId		= t1.intItemId
+								   , @dblBlendQuantity		= t1.dblQuantity
+								   , @dblPickQuantity		= t2.dblQuantity 
+						FROM (SELECT intItemId
+									 , SUM(dblRequiredQty) AS dblQuantity 
+							  FROM @tblInputItem 
+							  GROUP BY intItemId) AS t1
+						JOIN (SELECT intItemId
+									 , SUM(dblQuantity) AS dblQuantity 
+							  FROM tblMFWorkOrderConsumedLot 
+							  WHERE intWorkOrderId = @intWorkOrderId 
+							  GROUP BY intItemId) AS t2 ON t1.intItemId = t2.intItemId
+						WHERE t1.dblQuantity <> t2.dblQuantity;
+
+						SELECT @strMismatchItemNumber = strItemNo 
+						FROM tblICItem
+						WHERE intItemId = @intMismatchItemId;
+
+						SET @strErrorMsg = 'Quantity mismatch on Item: '+ @strMismatchItemNumber  + ' between Transport Ingredient and Blend Consumption. <br/> <br/> Transport Qty: '+ CAST(ROUND(@dblBlendQuantity, 2) AS NVARCHAR(MAX)) +'<br/> Blend Qty: ' + CAST(ROUND(@dblPickQuantity, 2) AS NVARCHAR(MAX)) +'<br/> <br/> Check item qty Stock On hand and Reserved Qty';
+
+						RAISERROR(@strErrorMsg, 16, 1);
+					END
+			END
 
 		IF @strOrderType='SALES ORDER'
 			SELECT	@intWorkOrderId = MIN(intWorkOrderId) 
@@ -1098,4 +1147,5 @@ BEGIN CATCH
 	--		ROLLBACK TRANSACTION @Savepoint
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
-END CATCH  
+END CATCH
+GO

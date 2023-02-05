@@ -21,7 +21,8 @@ AS
 			dblGross * dblDefaultCurrencyFactor	AS  dblGrossImpactInDefCurrency,
 			dblNet * dblDefaultCurrencyFactor		AS  dblNetImpactInDefCurrency,
 			CASE WHEN o.dblLots < 0 THEN o.dblLots ELSE 0 END dblNegLots,
-			CASE WHEN o.dblLots > 0 THEN o.dblLots ELSE 0 END dblPosLots
+			CASE WHEN o.dblLots > 0 THEN o.dblLots ELSE 0 END dblPosLots,
+			strHedgeImpactCurrency
 	FROM
 	(
 		SELECT	intAssignFuturesToContractSummaryId,
@@ -38,7 +39,8 @@ AS
 				dblLots * dblCommission / intCent AS dblCommission,
 				((dblContractSize * dblLots * (dblLatestPrice - dblPrice ))- (dblLots *  ISNULL(dblCommission,0)))  * intProffitLoss AS dblNet,
 				dblDefaultCurrencyFactor,
-				intCent
+				intCent,
+				strHedgeImpactCurrency
 		FROM
 		(
 				SELECT	intAssignFuturesToContractSummaryId = FT.intFutOptTransactionId,
@@ -55,7 +57,8 @@ AS
 						MA.dblContractSize,
 						CASE WHEN FT.strBuySell = 'Sell' THEN -1 ELSE 1 END intProffitLoss,
 						dbo.fnCTCalculateAmountBetweenCurrency(FT.intCurrencyId,null,1,1)									AS	dblDefaultCurrencyFactor,
-						ISNULL(CY.intCent,1) AS intCent
+						ISNULL(CY.intCent,1) AS intCent,
+						strHedgeImpactCurrency = CY.strCurrency
 				FROM	dbo.tblCTContractDetail CD
 				LEFT JOIN	dbo.tblRKAssignFuturesToContractSummary	SY ON SY.intContractDetailId		=	CD.intContractDetailId
 				left join (

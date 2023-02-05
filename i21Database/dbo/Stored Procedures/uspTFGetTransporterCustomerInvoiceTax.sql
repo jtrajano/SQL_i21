@@ -127,7 +127,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -360,7 +360,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber )  ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -655,7 +655,7 @@ BEGIN TRY
 														INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = ID.intItemId
 														INNER JOIN tblICInventoryReceipt ON tblTRLoadReceipt.intInventoryReceiptId =  tblICInventoryReceipt.intInventoryReceiptId
 														INNER JOIN tblICInventoryReceiptItem ON tblICInventoryReceipt.intInventoryReceiptId =  tblICInventoryReceiptItem.intInventoryReceiptId
-														INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+														LEFT JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 														WHERE tblICInventoryReceiptItemTax.intTaxCodeId IS NULL     
 													)    
 				END
@@ -800,20 +800,20 @@ BEGIN TRY
 				, strOriginCity
 				, strOriginCounty
 				, strOriginState
-				, strCustomerName
-				, REPLACE(strCustomerFederalTaxId, '-', '')
-				, strShipVia
-				, strTransporterLicense
-				, strTransportationMode
-				, strTransporterName
-				, REPLACE(strTransporterFederalTaxId, '-', '')
-				, strConsignorName
-				, REPLACE(strConsignorFederalTaxId, '-', '')
-				, strTaxCode
-				, strTerminalControlNumber
-				, strVendorName
-				, REPLACE(strVendorFederalTaxId, '-', '')
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName
+				, REPLACE(strCustomerFederalTaxId, '-', '')  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia  
+				, strTransporterLicense  
+				, strTransportationMode  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName  
+				, REPLACE(strTransporterFederalTaxId, '-', '')  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName  
+				, REPLACE(strConsignorFederalTaxId, '-', '')  
+				, strTaxCode  
+				, strTerminalControlNumber  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName    
+				, REPLACE(strVendorFederalTaxId, '-', '')  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName  
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
@@ -836,7 +836,7 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strContactName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strContactName)), 35) ELSE strContactName END AS strContactName 
 				, strEmail
 				, strTransactionSource
 				, strTransportNumber

@@ -1,11 +1,11 @@
-  CREATE PROCEDURE uspGLRecalcRetainedEarnings    
+CREATE PROCEDURE uspGLRecalcRetainedEarnings    
     @intFiscalYearId INT,    
-    @intGLFiscalYearPeriodId INT ,
+    @intGLFiscalYearPeriodId INT,
 	@ysnAllFiscalYear BIT,
     @intOpen SMALLINT,    
     @intEntityId INT,    
     @result NVARCHAR(100) OUTPUT      
-AS 
+AS
 DECLARE @dtmStartDate DATETIME        
 DECLARE @dtmEndDate DATETIME        
 DECLARE @intRetainAccount INT        
@@ -15,6 +15,53 @@ DECLARE @RecapTableType  RecapTableType
 DECLARE @strPeriod NVARCHAR(30)        
 DECLARE @dtmNow DATETIME  = GETDATE()        
 DECLARE @intDefaultCurrencyId INT
+
+IF NOT EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnREOverride = 1)
+BEGIN
+     SET @result = 'Recalc RE is not enabled in System Manager.'  
+    GOTO _end   
+END
+
+
+DECLARE    
+@ysnOverrideLocation BIT = 0,    
+@ysnOverrideLOB BIT = 0,    
+@ysnOverrideCompany BIT = 0,
+@ysnHasLocation BIT = 0,
+@ysnHasLOB BIT = 0,
+@ysnHasCompany BIT = 0
+       
+SELECT 
+    TOP 1 @ysnHasLocation = 1
+    from tblGLAccountStructure A join tblGLSegmentType B on A.intStructureType = B.intSegmentTypeId
+    WHERE  B.strSegmentType = 'Location'
+
+SELECT 
+    TOP 1 @ysnHasLOB = 1
+    from tblGLAccountStructure A join tblGLSegmentType B on A.intStructureType = B.intSegmentTypeId
+    WHERE  B.strSegmentType = 'Line Of Business'
+
+SELECT 
+    TOP 1 @ysnHasCompany = 1
+    from tblGLAccountStructure A join tblGLSegmentType B on A.intStructureType = B.intSegmentTypeId
+    WHERE  B.strSegmentType = 'Company'
+    
+SELECT TOP 1     
+@ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0) & @ysnHasLocation,    
+@ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0) & @ysnHasLOB,    
+@ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0) & @ysnHasCompany    
+FROM tblGLCompanyPreferenceOption    
+
+
+DECLARE @ysnREOverride BIT 
+SET  @ysnREOverride =  @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany 
+
+IF @ysnREOverride= 0 
+BEGIN
+	SET @result = 'Please override an existing segment in Company Config - Override Retained Earnings.'   
+	GOTO _end
+END
+
         
 DECLARE @tblPeriod TABLE (     
 intGLFiscalYearPeriodId INT,      
@@ -27,7 +74,8 @@ dtmEndDate  DATETIME)
     
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 
-DECLARE @strGUID NVARCHAR(40)        
+DECLARE @strGUID NVARCHAR(40)      
+
 
 IF @ysnAllFiscalYear = 1
 BEGIN	
@@ -69,6 +117,7 @@ BEGIN
 		    
 	END  
 END
+select * from @tblPeriod
 
 IF EXISTS(SELECT 1 FROM @tblPeriod where ISNULL(intIncomeSummaryAccount,0) = 0 )
 BEGIN
@@ -206,17 +255,7 @@ SELECT
 FROM @RevalTableType        
         
     
-DECLARE    
-@ysnOverrideLocation BIT = 0,    
-@ysnOverrideLOB BIT = 0,    
-@ysnOverrideCompany BIT = 0     
-    
-SELECT TOP 1     
-@ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0),    
-@ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0),    
-@ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0)    
-FROM tblGLCompanyPreferenceOption    
-     
+
 INSERT INTO @RecapTableType(    
     dtmDate,      
     strBatchId,      
@@ -237,7 +276,9 @@ INSERT INTO @RecapTableType(
     intTransactionId,      
     strTransactionType,      
     strTransactionForm,      
-    strModuleName   
+    strModuleName,
+    strOverrideAccountError,
+    strNewAccountIdOverride
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
@@ -268,15 +309,17 @@ SELECT
     intTransactionId=REPLACE( CONVERT(date, dtmDate,100),'-', ''),      
     strTransactionType='Fiscal Year RE',      
     strTransactionForm ='Fiscal year',      
-    strModuleName='General Ledger'      
+    strModuleName='General Ledger',  
+     strOverrideAccountError,
+    strNewAccountIdOverride   
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
     --intLOBSegmentOverrideId,      
     --intCompanySegmentOverrideId,      
     --strNewAccountIdOverride,      
-    ---intNewAccountIdOverride,      
-    --strOverrideAccountError    
+    --intNewAccountIdOverride,      
+        
 FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A         
 group by dtmDate,      
     strBatchId,      
@@ -297,7 +340,7 @@ group by dtmDate,
     --intTransactionId,      
     --strTransactionType,      
     --strTransactionForm,      
-    strModuleName     
+    strModuleName,     
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
@@ -305,7 +348,8 @@ group by dtmDate,
     --intCompanySegmentOverrideId,      
     --strNewAccountIdOverride,      
     --intNewAccountIdOverride,      
-    --strOverrideAccountError 
+     strOverrideAccountError,
+    strNewAccountIdOverride 
         
 IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 BEGIN

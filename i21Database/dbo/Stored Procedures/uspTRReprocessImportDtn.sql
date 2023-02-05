@@ -32,7 +32,7 @@ BEGIN
 			WHERE CR.intVendorId <> ID.intEntityVendorId
 				AND ID.intImportDtnDetailId IN (SELECT Item FROM #tmpIds)
 		) tblPatch
-		WHERE intImportDtnDetailId = tblPatch.intImportDtnDetailId
+		WHERE tblTRImportDtnDetail.intImportDtnDetailId = tblPatch.intImportDtnDetailId
 
 		DECLARE @CursorTran AS CURSOR
 		SET @CursorTran = CURSOR FOR

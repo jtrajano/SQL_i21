@@ -27,8 +27,6 @@
 	[ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT((0)),
 	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT((0)),
 	[ysnAllowSingleLocationEntries]	BIT NOT NULL DEFAULT((0)),
-	[intDueToAccountId]				INT NULL,
-	[intDueFromAccountId]			INT NULL,
 	[ysnRequireRERefresh]			BIT NOT NULL DEFAULT(1),
 	[strRequireRefreshReason]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])

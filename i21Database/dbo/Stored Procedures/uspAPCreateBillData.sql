@@ -176,7 +176,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContactId]			=	A.[intContactId],
 		[intOrderById]			=	A.[intOrderById],
 		[intCurrencyId]			=	A.[intCurrencyId],
-		[intSubCurrencyCents]	=	A.[intSubCurrencyCents]
+		[intSubCurrencyCents]	=	A.[intSubCurrencyCents],
+		[intDefaultPayFromBankAccountId]	=	A.[intPayFromBankAccountId],
+		[intPayFromBankAccountId]			=	A.[intPayFromBankAccountId],
+		[strFinancingSourcedFrom]			=	A.[strFinancingSourcedFrom],
+		[intPayToBankAccountId]				=	A.[intPayToBankAccountId]
 	INTO #tmpBillData
 	FROM dbo.fnAPCreateBillData(@vendorId, @userId, @type, DEFAULT, @currencyId, DEFAULT, @shipFrom, @shipTo, @shipFromEntityId) A
 
@@ -215,7 +219,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContactId]			,
 		[intOrderById]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]
+		[intSubCurrencyCents]	,
+		[intDefaultPayFromBankAccountId]	,
+		[intPayFromBankAccountId]			,
+		[strFinancingSourcedFrom]			,
+		[intPayToBankAccountId]
 	)
 	SELECT * FROM #tmpBillData
 

@@ -22,8 +22,9 @@ SELECT lh.intLoadHeaderId,
  pd.intLoadDetailId,     
  pd.intSalespersonId,     
  isnull(pd.intSellerId,trc.intSellerId)intSellerId,     
- pd.intTaxGroupId,     
- pd.intContractDetailId,     
+ pd.intTaxGroupId,    
+ pd.intContractDetailId as intReceiptContractDetailId,
+ dd.intContractDetailId,     
  pd.intItemId,     
  pd.intCompanyLocationId as intReceiptCompanyLocationId,     
  RCL.strZipPostalCode,    
@@ -58,7 +59,12 @@ SELECT lh.intLoadHeaderId,
  dd.dblPrice,      
  dd.dblDeliveredQty,     
  dd.dblPercentFull,    
- dd.ysnDelivered    
+ dd.ysnDelivered,
+ lh.ysnDiversion,
+ lh.strDiversionNumber,
+ lh.intStateId,
+ pd.intDispatchOrderRouteId,
+ dd.intDispatchOrderDetailId
 FROM     
 tblMBILPickupDetail pd     
 JOIN tblMBILDeliveryDetail dd ON dd.intPickupDetailId = pd.intPickupDetailId     

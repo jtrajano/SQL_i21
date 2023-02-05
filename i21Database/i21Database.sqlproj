@@ -259,8 +259,12 @@
     <Build Include="dbo\Functions\fnApiSchemaTransformHasField.sql" />
     <Build Include="dbo\Functions\fnApiSchemaTransformMapField.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryLocation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryVendor.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformSourceField.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformMappedField.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
@@ -376,6 +380,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessTFLogs.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportSummaryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnCMCashFlowTransactions.sql" />
     <Build Include="dbo\Functions\fnCMGetFEINByCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
@@ -536,6 +541,9 @@
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiUserCompanyLocations.sql" />
     <Build Include="dbo\Functions\fnICIsUpcExists2.sql" />
+    <Build Include="dbo\Functions\fnICValidateCheckDigit.sql" />
+    <Build Include="dbo\Functions\fnICValidateCheckDigitIfExists.sql" />
+    <Build Include="dbo\Functions\fnICValidateUPCCode.sql" />
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
@@ -1097,6 +1105,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGLBulkPostingCompare.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdatePumpTotals.sql" />
     <None Include="Scripts\Post-Deployment\ST\48_FileFieldMapping_Commander_TierProduct.sql" />
+    <None Include="Scripts\Post-Deployment\ST\51_FileFieldMapping_Commander_Validate.sql" />
     <None Include="Scripts\Post-Deployment\ST\49_FileFieldMapping_Radiant_Department.sql" />
     <Build Include="dbo\User Defined Types\udtStoreGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCancelTradeFinance.sql" />
@@ -1283,6 +1292,11 @@
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMInventoryReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMInventoryHistory.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1483,6 +1497,7 @@
     <Build Include="dbo\Tables\tblGLFiscalYear.sql" />
     <Build Include="dbo\Tables\tblGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Tables\tblGLIjemst.sql" />
+    <Build Include="dbo\Tables\tblGLIntraCompanyConfig.sql" />
     <Build Include="dbo\Tables\tblGLImportFile.sql" />
     <Build Include="dbo\Tables\tblGLJournal.sql" />
     <Build Include="dbo\Tables\tblGLJournalDetail.sql" />
@@ -2024,6 +2039,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateLIFOCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateFIFOCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetTaxesForCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
@@ -10799,6 +10815,7 @@
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiCalculateTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetTaxDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspApiUpdateTaxDetails.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
@@ -11247,6 +11264,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetOverrideGLAccount.sql" />
+     <Build Include="dbo\Stored Procedures\uspGLGetIntraCompanyGLEntries.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />

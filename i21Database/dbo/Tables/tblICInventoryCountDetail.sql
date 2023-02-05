@@ -48,3 +48,10 @@
 	CONSTRAINT [FK_tblICInventoryCountDetail_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
     CONSTRAINT [FK_tblICInventoryCountDetail_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]) 
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryCountDetail]
+	ON [dbo].[tblICInventoryCountDetail]([intInventoryCountId] ASC, [intInventoryCountDetailId] ASC);
+
+GO
