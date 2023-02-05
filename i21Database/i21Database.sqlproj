@@ -259,8 +259,12 @@
     <Build Include="dbo\Functions\fnApiSchemaTransformHasField.sql" />
     <Build Include="dbo\Functions\fnApiSchemaTransformMapField.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryLocation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryVendor.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformSourceField.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformMappedField.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
