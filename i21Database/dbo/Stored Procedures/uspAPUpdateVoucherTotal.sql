@@ -32,11 +32,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 											 		THEN A.dblNetWeight * A.dblWeightUnitQty
 												ELSE A.dblQtyReceived * A.dblUnitQty 
 											END,
-		@cost							=	CASE 
-												WHEN A.ysnSubCurrency <> 0
-													THEN A.dblCost / ISNULL(C.intSubCurrencyCents, 1)
-												ELSE A.dblCost
-											END / ISNULL(A.dblCostUnitQty, 1),
+		@cost							=	CAST(
+												CASE 
+													WHEN A.ysnSubCurrency <> 0
+														THEN A.dblCost / ISNULL(C.intSubCurrencyCents, 1)
+													ELSE A.dblCost
+												END
+											AS FLOAT) / ISNULL(A.dblCostUnitQty, 1),
 		@detailTotal					=	CAST(@qty *  @cost  AS DECIMAL(18,2)),
 		[dblTotal]						=	@detailTotal,
 		[dblClaimAmount]				=	@detailTotal,
