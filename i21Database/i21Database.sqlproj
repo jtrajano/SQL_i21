@@ -1495,6 +1495,8 @@
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
     <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
     <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
+ 
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractDetailImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
