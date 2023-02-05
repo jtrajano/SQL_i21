@@ -1,20 +1,19 @@
-
 CREATE TABLE [dbo].[tblApiSchemaTransformCategoryVendor](
 	[intKey] [int] IDENTITY(1,1) NOT NULL,
 	[guiApiUniqueId] [uniqueidentifier] NOT NULL,
 	[intRowNumber] [int] NULL,
-	[strCategory] [nvarchar](200) NOT NULL,
-	[strVendor] [nvarchar](200) NOT NULL,
-	[strLocation] [nvarchar](200) NULL,
-	[strVendorCategory] [nvarchar](200) NULL,
-	[ysnAddOrderingUPCtoPricebook] [nvarchar](3) NULL,
-	[ysnUpdateExistingRecords] [nvarchar](3) NULL,
-	[ysnAddNewRecords] [nvarchar](3) NULL,
-	[ysnUpdatePrice] [nvarchar](3) NULL,
-	[strDefaultFamily] [nvarchar](200) NULL,
-	[strDefaultSellClass] [nvarchar](200) NULL,
-	[strDefaultOrderClass] [nvarchar](200) NULL,
-	[strComments] [nvarchar](200) NULL,
+	[strCategory] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strVendor] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strLocation] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strVendorCategory] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[ysnAddOrderingUPCtoPricebook] BIT NULL,
+	[ysnUpdateExistingRecords] BIT NULL,
+	[ysnAddNewRecords] BIT NULL,
+	[ysnUpdatePrice] BIT NULL,
+	[strDefaultFamily] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strDefaultSellClass] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strDefaultOrderClass] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strComments] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[intKey] ASC
