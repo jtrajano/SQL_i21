@@ -643,7 +643,7 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
-		, strQualityCode = IBB.strItemNo
+		, strQualityCode = ICB.strItemNo
 		, strQualityDescription = IBB.strDescription
 		, CD.dtmEtaPol
 		, CD.dtmEtaPod
@@ -769,7 +769,8 @@ BEGIN TRY
 	LEFT JOIN tblCTReasonCode RC on RC.intReasonCodeId = CD.intReasonCodeId
 	LEFT JOIN tblICItemBundle BI ON CD.intItemBundleId = BI.intItemId
 	LEFT JOIN tblICItem IBB ON IBB.intItemId = BI.intBundleItemId
-	
+	LEFT JOIN tblICItem ICB ON ICB.intItemId = BI.intItemId
+
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 
 END TRY
