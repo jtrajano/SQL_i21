@@ -32,7 +32,7 @@ BTransfer AS(
 		intBankTransferTypeId,
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( ysnPosted, 0) = 0 and intBankTransferTypeId in( 2,4,5) UNION
+	WHERE ISNULL( ysnPosted, 0) = 0 and intBankTransferTypeId in( 2,4,5) UNION ALL
 	SELECT 
 		intTransactionId,
 		strTransactionId,
@@ -43,7 +43,7 @@ BTransfer AS(
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
 	WHERE ISNULL( ysnPostedInTransit, 0) = 0
-	AND intBankTransferTypeId IN (2,4,5) UNION
+	AND intBankTransferTypeId IN (2,4,5) UNION ALL
 	SELECT 
 		intTransactionId,
 		strTransactionId,
@@ -53,7 +53,7 @@ BTransfer AS(
 		intBankTransferTypeId,
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( ysnPosted, 0) = 0 AND intBankTransferTypeId in( 1,3) UNION
+	WHERE ISNULL( ysnPosted, 0) = 0 AND intBankTransferTypeId in( 1,3) UNION  ALL
 	-- bank intransit
 	SELECT 
 		intTransactionId,
@@ -77,7 +77,7 @@ strUserName,
 intEntityId,
 dblAmount
 FROM BT
-UNION
+UNION ALL
 SELECT 
 intTransactionId,
 strTransactionId,
@@ -91,4 +91,3 @@ FROM BTransfer A
 OUTER  APPLY(
  	SELECT TOP 1 strName from tblEMEntity where intEntityId = A.intEntityId
  )T
- GROUP BY intTransactionId, strTransactionId, strDescription, T.strName, intEntityId,dblAmount
