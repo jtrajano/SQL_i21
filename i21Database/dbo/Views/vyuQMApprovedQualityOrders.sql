@@ -69,6 +69,7 @@ SELECT
     ,MZ.strMarketZoneCode
 FROM tblMFBatch B
 INNER JOIN tblQMSample S ON S.intSampleId = B.intSampleId -- Auction or Non-Auction Sample
+LEFT JOIN tblLGLoadDetail LD ON LD.intBatchId = B.intBatchId
 LEFT JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = B.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = B.intBrokerId
@@ -105,6 +106,7 @@ OUTER APPLY (
 OUTER APPLY (
     SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblTotalQuantity)
 ) WQTY
+WHERE LD.intLoadDetailId IS NULL
 
 GO
 
