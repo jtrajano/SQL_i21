@@ -3,8 +3,9 @@
 AS     
     
 SELECT lh.intLoadHeaderId,     
- lh.strLoadNumber,     
- lh.strType,     
+ lh.strLoadNumber,   
+ CASE WHEN dh.intEntityId IS NOT NULL THEN 'Drop Ship'
+ ELSE lh.strType END as strType,
  lh.intDispatchOrderId,    
  lh.intLoadId,     
  lh.intDriverId,     
