@@ -61,7 +61,10 @@ BEGIN TRANSACTION
 	DECLARE @NewStoreId INT
 	DECLARE @intLocationId INT
 	DECLARE @intSourceLocationId INT
+	DECLARE @intLocationCount INT
 	DECLARE @ysnValidateSuccess BIT = 'false'
+
+	SET @intLocationCount = (SELECT COUNT('') FROM #tmpToLocation)
 
 	--Validate first if selected TO Locations are already existing. If ALL LOCATIONS are existing, do not proceed
 	WHILE EXISTS (SELECT * FROM #tmpToLocationValidate)
@@ -1192,7 +1195,11 @@ BEGIN TRANSACTION
 	
 	SET @ysnSuccess = 'true'
 
-	IF (@newRegisterCreated = 0)
+	IF (@intLocationCount > 1)
+	BEGIN
+		SET @strResultMessage = 'Successfully created new Stores and new Registers to use with them. Credentials for the new Registers, however, still need to be manually entered.'
+	END 
+	ELSE IF (@newRegisterCreated = 0)
 	BEGIN
 		SET @strResultMessage = 'Successfully created new store'
 	END
