@@ -88,6 +88,9 @@ DECLARE @InventoryTransactionType_WriteOff AS INT = 50
 DECLARE @intReturnValue AS INT 
 		,@intInventoryTransactionIdentityId AS INT 
 
+
+DECLARE @TransactionType_InventoryAdjustment_OpeningInventory AS INT = 47
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
 -----------------------------------------------------------------------------------------------------------------------------
@@ -903,7 +906,10 @@ BEGIN
 	FROM	@StockToPost
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
-			AND intTransactionTypeId NOT IN (@InventoryTransactionType_MarkUpOrDown)
+			AND intTransactionTypeId NOT IN (
+				@InventoryTransactionType_MarkUpOrDown
+				,@TransactionType_InventoryAdjustment_OpeningInventory
+			)
 
 	SET @intInventoryTransactionId = NULL 
 
