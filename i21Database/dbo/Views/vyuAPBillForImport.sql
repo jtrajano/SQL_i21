@@ -149,7 +149,7 @@ FROM (
 					AS BIT)
 		,voucher.dblPaymentTemp
 		,voucher.ysnInPayment
-		,paySched.ysnInPayment AS ysnInPaymentSched
+		,voucher.ysnIsPaymentScheduled AS ysnInPaymentSched
 		,ISNULL(paySched.strPaymentScheduleNumber, '')
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
