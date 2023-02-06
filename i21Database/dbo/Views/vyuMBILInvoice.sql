@@ -39,10 +39,10 @@ SELECT Invoice.intInvoiceId
  , isnull(tax.dblTaxTotal,0) dblTotalTaxAmount      
  , isnull(tax.dblItemTotal,0) dblTotalBefTax    
  , strAccountStatus = REPLACE(REPLACE(CustomerAS.strCustomerAccountStatus,'<strCustomerAccountStatus>',''),'</strCustomerAccountStatus>','')  
- , ysnTransport = cast(case when isnull(transportDelivery.intOrderId,0) = 0 then 0 else 1 end as bit)  
-     
-    
-    
+ , ysnTransport = cast(case when isnull(transportDelivery.intOrderId,0) = 0 then 0 else 1 end as bit)
+ , Invoice.strDiversionNumber
+ , Invoice.intStateId
+ , trstate.strStateName
 FROM tblMBILInvoice Invoice    
 --LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId    
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId    
@@ -52,7 +52,8 @@ LEFT JOIN tblMBILShift InvoiceShift ON InvoiceShift.intShiftId = Invoice.intShif
 LEFT JOIN tblMBILOrder InvoiceOrder ON InvoiceOrder.intOrderId = Invoice.intOrderId    
 LEFT JOIN tblSMTerm Term ON Term.intTermID = Invoice.intTermId    
 LEFT JOIN tblSMPaymentMethod PaymentMethod ON PaymentMethod.intPaymentMethodID = Invoice.intPaymentMethodId    
-LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId    
+LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId 
+LEFT JOIN tblTRState trstate on trstate.intStateId = Invoice.intStateId
 LEFT JOIN (    
  select    
  intEntityCustomerId,    
