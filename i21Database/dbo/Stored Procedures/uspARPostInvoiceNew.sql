@@ -413,7 +413,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 BEGIN TRY
 
 	IF @Recap = 0
-		EXEC [dbo].[uspARPostItemResevation]
+		EXEC [dbo].[uspARPostItemReservation]
 
 	IF @Recap = 1
     BEGIN
