@@ -131,7 +131,8 @@ BEGIN TRY
 	LEFT JOIN	 tblCTBook				BK  ON  BK.strBook			=		AO.strBook
 	LEFT JOIN	 tblCTSubBook			SB  ON  SB.strSubBook		=		AO.strSubBook
 											AND SB.intBookId		=		BK.intBookId
-	LEFT JOIN	 tblSMCompanyLocationSubLocation	SL	ON	SL.strSubLocationName = AO.strStorageLocation
+
+	LEFT JOIN	 tblSMCompanyLocationSubLocation	SL	ON	SL.strSubLocationName = AO.strStorageLocation AND CL.intCompanyLocationId = SL.intCompanyLocationId
 	WHERE		 intImportAOPId	 = @intExternalId
 
     INSERT INTO @Component
