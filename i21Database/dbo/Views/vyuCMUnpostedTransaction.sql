@@ -25,7 +25,7 @@ BTransfer AS(
 		intBankTransferTypeId,
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( ysnPosted, 0) = 0 and intBankTransferTypeId = 2 UNION
+	WHERE ISNULL( ysnPosted, 0) = 0 and intBankTransferTypeId in( 2,4,5) UNION
 	SELECT 
 		intTransactionId,
 		strTransactionId,
@@ -36,7 +36,7 @@ BTransfer AS(
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
 	WHERE ISNULL( ysnPostedInTransit, 0) = 0
-	AND intBankTransferTypeId = 2 UNION
+	AND intBankTransferTypeId IN (2,4,5) UNION
 	SELECT 
 		intTransactionId,
 		strTransactionId,
@@ -46,18 +46,8 @@ BTransfer AS(
 		intBankTransferTypeId,
 		dblAmountTo dblAmount
 	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( ysnPosted, 0) = 0 AND intBankTransferTypeId in( 1,3,4) UNION
+	WHERE ISNULL( ysnPosted, 0) = 0 AND intBankTransferTypeId in( 1,3) UNION
 	-- bank intransit
-	SELECT 
-		intTransactionId,
-		strTransactionId,
-		dtmInTransit dtmDate,
-		strDescription,
-		intEntityId,
-		intBankTransferTypeId,
-		dblAmountTo dblAmount
-	FROM tblCMBankTransfer BTransfer
-	WHERE ISNULL( ysnPostedInTransit, 0) = 0 AND intBankTransferTypeId = 4 UNION
 	SELECT 
 		intTransactionId,
 		strTransactionId,
