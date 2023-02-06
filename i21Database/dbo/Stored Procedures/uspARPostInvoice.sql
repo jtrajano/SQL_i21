@@ -643,7 +643,7 @@ BEGIN TRY
 		   ,@strSessionId 	= @strRequestId
 
 	IF @recap = 0
-		EXEC [dbo].[uspARPostItemResevation]
+		EXEC [dbo].[uspARPostItemReservation]
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    		= @post
