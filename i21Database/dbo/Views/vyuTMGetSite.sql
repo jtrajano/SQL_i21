@@ -149,6 +149,9 @@ SELECT dblBurnRate = site.dblBurnRate
 	, strLocationEmail = location.strEmail
 	, ysnLocationActive = ISNULL(location.ysnLocationActive,0)
 	, strLocationInternalNotes = location.strInternalNotes
+	, dtmLastInvDeliveryDate = invDeliveries.dtmDate
+	, dblLastInvDeliveredGal = ISNULL(invDeliveries.dblQuantity,0.0)
+	, dblLastInvGalsInTank = ISNULL(invValuation.dblRunningQuantity,0.0)
 FROM tblTMSite site
 LEFT JOIN (tblEMEntityLocationConsumptionSite LCS JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LCS.intEntityLocationId) ON LCS.intSiteID = site.intSiteID	
 LEFT JOIN (tblEMEntity driver JOIN tblEMEntityType et ON et.intEntityId = driver.intEntityId AND strType = 'Salesperson') ON driver.intEntityId = site.intDriverID
@@ -171,3 +174,29 @@ LEFT JOIN tblTMLostCustomerReason lostCustomerReason ON lostCustomerReason.intLo
 LEFT JOIN device ON device.intSiteId = site.intSiteID
 LEFT JOIN lastLeakCheckEvent ON lastLeakCheckEvent.intSiteId = site.intSiteID
 LEFT JOIN tblSMCompanyLocationSubLocation sublocation ON site.intCompanyLocationSubLocationId = sublocation.intCompanyLocationSubLocationId
+OUTER APPLY (
+	SELECT TOP 1
+		dtmDate
+		,dblQuantity
+	FROM vyuICGetInventoryValuation
+	WHERE strTransactionType = 'Inventory Receipt' 
+			OR strTransactionType = 'Inventory Transfer'
+			OR strTransactionType = 'Inventory Transfer with Shipment'
+			OR strTransactionType = 'Inventory Adjustment - Quantity'
+			OR strTransactionType = 'Inventory Adjustment - Item'
+		AND site.ysnCompanySite = 1
+		AND intLocationId = site.intLocationId AND site.intLocationId IS NOT NULL
+		AND intSubLocationId = site.intCompanyLocationSubLocationId AND site.intCompanyLocationSubLocationId IS NOT NULL
+		AND intItemId = site.intProduct AND site.intProduct IS NOT NULL
+	ORDER BY dtmDate DESC
+)invDeliveries
+OUTER APPLY (
+	SELECT dblRunningQuantity = SUM(dblQuantity)
+	FROM vyuICGetInventoryValuation
+	WHERE site.ysnCompanySite = 1
+		AND intLocationId = site.intLocationId
+		AND intLocationId = site.intLocationId AND site.intLocationId IS NOT NULL
+		AND intSubLocationId = site.intCompanyLocationSubLocationId AND site.intCompanyLocationSubLocationId IS NOT NULL
+		AND intItemId = site.intProduct AND site.intProduct IS NOT NULL
+)invValuation
+
