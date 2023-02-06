@@ -113,7 +113,7 @@ UNION ALL
 
 SELECT
 	 [intId]					= TD.[intId]
-	,[strMessage]				= ISNULL(TD.[strCalculationMethod],'') + ' is not a valid calculation method!'
+	,[strMessage]				= CASE WHEN ISNULL(TD.[strCalculationMethod],0) = 0 THEN 'There''s no calculation method found!' ELSE TD.strCalculationMethod + ' is not a valid calculation method!' END
 	,[strTransactionType]		= TD.[strTransactionType]
 	,[strType]					= TD.[strType]
 	,[strSourceTransaction]		= TD.[strSourceTransaction]
