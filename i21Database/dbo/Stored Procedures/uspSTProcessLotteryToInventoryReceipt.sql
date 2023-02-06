@@ -688,6 +688,7 @@ BEGIN TRY
 				,dtmReceiptDate
 				,intStartingNumber
 				,intEndingNumber
+				,intReceiptEndingNumber
 				,dblQuantityRemaining
 				,intItemUOMId
 				,strStatus
@@ -701,6 +702,7 @@ BEGIN TRY
 			RL.dtmReceiptDate,
 			LG.intStartingNumber,
 			LG.intEndingNumber,
+			LG.intEndingNumber AS intReceiptEndingNumber,
 			RL.intTicketPerPack,
 			RL.intItemUOMId,
 			'Inactive',
@@ -724,6 +726,7 @@ BEGIN TRY
 				,tblSTLotteryBook.intLotteryGameId			= tblSTReceiveLottery.intLotteryGameId		
 				,tblSTLotteryBook.intStartingNumber			= LG.intStartingNumber		
 				,tblSTLotteryBook.intEndingNumber			= LG.intEndingNumber		
+				,tblSTLotteryBook.intReceiptEndingNumber	= LG.intEndingNumber	
 				,tblSTLotteryBook.dtmReceiptDate			= tblSTReceiveLottery.dtmReceiptDate		
 				,tblSTLotteryBook.dblQuantityRemaining		= tblSTReceiveLottery.intTicketPerPack
 			FROM 

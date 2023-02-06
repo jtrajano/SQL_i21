@@ -10,6 +10,7 @@
     [dtmSoldDate]            DATETIME         NULL,
     [intStartingNumber]		 INT              NULL,
     [intEndingNumber]		 INT              NULL,
+    [intReceiptEndingNumber] INT              NULL,
     [dblQuantityRemaining]   NUMERIC (18, 6) NULL,
     [dtmActivateDate]        DATETIME         NULL,
     [strStatus]              NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
