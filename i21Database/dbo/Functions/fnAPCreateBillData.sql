@@ -172,11 +172,8 @@ BEGIN
 	FROM tblSMCurrency
 	WHERE intMainCurrencyId = @currency AND ysnSubCurrency = 1
 
-	SELECT @payFromBankAccount = BA.intPayFromBankAccountId,
-		   @financingSourcedFrom = BA.strSourcedFrom,
-		   @payToBankAccountId = VD.intEntityEFTInfoId
+	SELECT @payToBankAccountId = VD.intEntityEFTInfoId
 	FROM vyuAPVendorDefault VD
-	OUTER APPLY dbo.fnAPGetVendorPayFromBankAccount(@vendorId, @shipTo, @currency) BA
 	WHERE VD.intEntityId = @vendorId
 
 	INSERT @returntable
@@ -249,5 +246,37 @@ BEGIN
 		@payFromBankAccount,
 		@financingSourcedFrom,
 		@payToBankAccountId
+
+	--UPDATE PAY FROM BANK ACCOUNT
+	UPDATE A
+	SET A.intPayFromBankAccountId = ISNULL(B.intPayFromBankAccountId, ISNULL(C.intPayFromBankAccountId, ISNULL(D.intPayFromBankAccountId, NULL))),
+		A.strFinancingSourcedFrom = CASE WHEN B.strSourcedFrom IS NULL 
+										THEN CASE WHEN C.strSourcedFrom IS NULL
+											 THEN CASE WHEN D.strSourcedFrom IS NULL
+											 	  THEN 'None'
+												  ELSE D.strSourcedFrom END
+											 ELSE C.strSourcedFrom END
+										ELSE B.strSourcedFrom END
+	FROM @returntable A
+	OUTER APPLY (
+		SELECT VANL.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
+		FROM tblAPVendor V
+		INNER JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = V.intEntityId
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = VANL.intPayFromBankAccountId
+		WHERE V.intEntityId = A.intEntityVendorId AND VANL.intCompanyLocationId = A.intShipToId AND BA.intCurrencyId = A.intCurrencyId
+	) B
+	OUTER APPLY (
+		SELECT V.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
+		FROM tblAPVendor V
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = V.intPayFromBankAccountId
+		WHERE V.intEntityId = A.intEntityVendorId AND BA.intCurrencyId = A.intCurrencyId
+	) C
+	OUTER APPLY (
+		SELECT DPFBA.intBankAccountId intPayFromBankAccountId, 'Company Default' strSourcedFrom
+		FROM tblAPDefaultPayFromBankAccount DPFBA
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = DPFBA.intBankAccountId
+		WHERE DPFBA.intCurrencyId = A.intCurrencyId
+	) D	
+	
 	RETURN;
 END
