@@ -1282,6 +1282,9 @@ BEGIN
 					t.dblQty > 0 
 					AND t.intCostingMethod = 1
 					AND t.intItemId = i.intItemId
+					AND t.intTransactionTypeId NOT IN (
+						47 -- Inventory Adjustment - Opening Inventory
+					)
 			) t
 			CROSS APPLY (
 				SELECT TOP 1 
