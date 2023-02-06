@@ -1249,6 +1249,9 @@ BEGIN
 				AND tmp.strBatchId = @strBatchId
 	WHERE	dbo.fnGetCostingMethod(tp.intItemId, tp.intItemLocationId) = @AVERAGECOST
 			AND tp.dblQty > 0 
+			AND tp.intTransactionTypeId NOT IN (
+				47 -- Opening Balance 
+			)
 
 	--SET @intInventoryTransactionId = NULL 
 
