@@ -112,6 +112,7 @@ BEGIN TRY
 			SELECT intLoadId
 			FROM @tblLGLoad
 			)
+		AND intStatusId IS NULL
 
 	WHILE @intMainLoadId IS NOT NULL
 	BEGIN
@@ -396,6 +397,7 @@ BEGIN TRY
 					SELECT 1
 					FROM tblIPContractFeed
 					WHERE intLoadId = @intLoadId
+						AND intLoadDetailId = @intLoadDetailId
 						AND intContractFeedId < @intContractFeedId
 						AND ISNULL(intStatusId, 0) IN (
 							2
@@ -404,6 +406,10 @@ BEGIN TRY
 					)
 				BEGIN
 					SELECT @strDetailRowState = 'C'
+
+					UPDATE tblIPContractFeed
+					SET strRowState = 'Added'
+					WHERE intContractFeedId = @intContractFeedId
 				END
 			END
 
