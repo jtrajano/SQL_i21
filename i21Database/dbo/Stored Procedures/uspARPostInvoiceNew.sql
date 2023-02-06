@@ -425,7 +425,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 BEGIN TRY
 
 	IF @Recap = 0
-		EXEC [dbo].[uspARPostItemResevation] @strSessionId = @strRequestId
+		EXEC [dbo].[uspARPostItemReservation] @strSessionId = @strRequestId
 
 	IF @Recap = 1
     BEGIN

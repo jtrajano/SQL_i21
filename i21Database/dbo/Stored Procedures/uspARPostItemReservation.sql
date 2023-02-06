@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspARPostItemResevation]
-  @strSessionId		NVARCHAR(50)	= NULL
+﻿CREATE PROCEDURE [dbo].[uspARPostItemReservation]
+    @strSessionId		NVARCHAR(50)	= NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
