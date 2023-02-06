@@ -164,24 +164,26 @@ WHERE ItemLocation.intItemLocationId IS NULL
 
 SET @intNewItemLocationId = SCOPE_IDENTITY()
 
-
-INSERT INTO tblICItemPricing (intItemId, intItemLocationId) 
-SELECT  NewDetails.intItemId
-	, @intNewItemLocationId
-FROM @New NewDetails
-LEFT JOIN tblICItemPricing ItemPricing
-	ON ItemPricing.intItemLocationId = @intNewItemLocationId AND ItemPricing.intItemId = NewDetails.intItemId
-WHERE ItemPricing.intItemPricingId IS NULL
-
--- Add the audit logs
+IF (@intNewItemLocationId IS NOT NULL)
 BEGIN
-DECLARE @strDescription NVARCHAR(400)
-
-SET @strDescription = 'Duplicated item location from Copy to Store screen'
-EXEC	dbo.uspSMAuditLog 
-			@keyValue = @intSourceItemId			 -- Item Id. 
-			,@screenName = 'Inventory.view.Item'     -- Screen Namespace
-			,@entityId = @intEntityUserSecurityId		 -- Entity Id.
-			,@actionType = 'Duplicated'                  -- Action Type
-			,@changeDescription = @strDescription
+	INSERT INTO tblICItemPricing (intItemId, intItemLocationId) 
+	SELECT  NewDetails.intItemId
+		, @intNewItemLocationId
+	FROM @New NewDetails
+	LEFT JOIN tblICItemPricing ItemPricing
+		ON ItemPricing.intItemLocationId = @intNewItemLocationId AND ItemPricing.intItemId = NewDetails.intItemId
+	WHERE ItemPricing.intItemPricingId IS NULL
+	
+	-- Add the audit logs
+	BEGIN
+	DECLARE @strDescription NVARCHAR(400)
+	
+	SET @strDescription = 'Duplicated item location from Copy to Store screen'
+	EXEC	dbo.uspSMAuditLog 
+				@keyValue = @intSourceItemId			 -- Item Id. 
+				,@screenName = 'Inventory.view.Item'     -- Screen Namespace
+				,@entityId = @intEntityUserSecurityId		 -- Entity Id.
+				,@actionType = 'Duplicated'                  -- Action Type
+				,@changeDescription = @strDescription
+	END
 END
