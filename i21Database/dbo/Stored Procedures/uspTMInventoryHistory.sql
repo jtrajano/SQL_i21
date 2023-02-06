@@ -4,6 +4,7 @@ CREATE PROCEDURE [dbo].[uspTMInventoryHistory]
 AS
 BEGIN
 
+	DECLARE @dtmDateTimeOrder DATETIME
 	DECLARE @dtmDateTime DATETIME
     DECLARE @intHour int
 	DECLARE @dblFuelVolume DECIMAL(18,6)
@@ -43,120 +44,155 @@ BEGIN
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
 
-   		SELECT distinct
+	SELECT distinct
+		B.dtmDateTime,
 		CONVERT(VARCHAR(10), B.dtmDateTime, 111)
 		,DATEPART(HOUR, B.dtmDateTime)
 		,B.dblFuelVolume
 	FROM tblTMSite A
 		INNER JOIN tblTMTankMonitor B
 		ON B.intSiteId = A.intSiteID
-	where A.intSiteNumber = @intSiteNumber
+	where A.intSiteNumber = @intSiteNumber and ((DATEDIFF (day, B.dtmDateTime, getdate())) <= 28)
+	order by B.dtmDateTime desc
 
     OPEN DataCursor
-	FETCH NEXT FROM DataCursor INTO @dtmDateTime, @intHour,@dblFuelVolume
+	FETCH NEXT FROM DataCursor INTO @dtmDateTimeOrder, @dtmDateTime, @intHour,@dblFuelVolume
     WHILE @@FETCH_STATUS = 0
     BEGIN
 		DECLARE @tempdtmDateTime DATETIME
 		DECLARE @IdTemp int
+		DECLARE @dblZero DECIMAL(18,6)
+		DECLARE @dblOne		DECIMAL(18,6)
+		DECLARE @dblTwo		DECIMAL(18,6)
+		DECLARE @dblThree		DECIMAL(18,6)
+		DECLARE @dblFour		DECIMAL(18,6)
+		DECLARE @dblFive		DECIMAL(18,6)
+		DECLARE @dblSix		DECIMAL(18,6)
+		DECLARE @dblSeven		DECIMAL(18,6)
+		DECLARE @dblEight		DECIMAL(18,6)
+		DECLARE @dblNine		DECIMAL(18,6)
+		DECLARE @dblTen		DECIMAL(18,6)
+		DECLARE @dblEleven	DECIMAL(18,6)
+		DECLARE @dblTwelve	DECIMAL(18,6)
+		DECLARE @dblThirteen  DECIMAL(18,6)
+		DECLARE @dblFourteen  DECIMAL(18,6)
+		DECLARE @dblFifteen   DECIMAL(18,6) 
+		DECLARE @dblSixteen   DECIMAL(18,6) 
+		DECLARE @dblSeventeen  DECIMAL(18,6) 
+		DECLARE @dblEighteen   DECIMAL(18,6) 
+		DECLARE @dblNineteen   DECIMAL(18,6) 
+		DECLARE @dblTwenty   DECIMAL(18,6) 
+		DECLARE @dblTwentyOne DECIMAL(18,6)
+		DECLARE @dblTwentyTwo   DECIMAL(18,6) 
+		DECLARE @dblTwentyThree   DECIMAL(18,6) 
+
+
+		select @dblZero = dblZero,@dblOne = dblOne,@dblTwo = dblTwo,@dblThree = dblThree,@dblFour = dblFour,@dblFive = dblFive,@dblSix = dblSix,@dblSeven = dblSeven,@dblEight = dblEight,
+		@dblNine = dblNine,@dblTen = dblTen,@dblEleven = dblEleven,@dblTwelve = dblTwelve,@dblThirteen = dblThirteen,@dblFourteen = dblFourteen,@dblFifteen = dblFifteen,@dblSixteen = dblSixteen,
+		@dblSeventeen = dblSeventeen,@dblEighteen = dblEighteen,@dblNineteen = dblNineteen,@dblTwenty = dblTwenty,@dblTwentyOne = dblTwentyOne,@dblTwentyTwo = dblTwentyTwo,@dblTwentyThree = dblTwentyThree 
+		from #tempInventoryHistory
 
 		select top 1 @tempdtmDateTime = CONVERT(VARCHAR(10), dtmTempDateTime, 111), @IdTemp = Id from  #tempInventoryHistory order by Id desc
+
 		if @tempdtmDateTime = @dtmDateTime
 			BEGIN
-			IF @intHour = 1
+			print @tempdtmDateTime
+			print @dtmDateTime 
+				IF @intHour = 1 and @dblOne is null
 				BEGIN
 					update #tempInventoryHistory set dblOne = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 2
+				ELSE IF @intHour = 2 and @dblTwo is null
 				BEGIN
 					update #tempInventoryHistory set dblTwo = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 3
+				ELSE IF @intHour = 3 and @dblThree is null
 				BEGIN
 					update #tempInventoryHistory set dblThree = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 4
+				ELSE IF @intHour = 4 and @dblFour is null
 				BEGIN
 					update #tempInventoryHistory set dblFour = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 5
+				ELSE IF @intHour = 5 and @dblFive is null
 				BEGIN
 					update #tempInventoryHistory set dblFive = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 6
+				ELSE IF @intHour = 6 and @dblSix is null
 				BEGIN
 					update #tempInventoryHistory set dblSix = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 7
+				ELSE IF @intHour = 7 and @dblSeven is null
 				BEGIN
 					update #tempInventoryHistory set dblSeven = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 8
+				ELSE IF @intHour = 8 and @dblEight is null
 				BEGIN
 					update #tempInventoryHistory set dblEight = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 9
+				ELSE IF @intHour = 9 and @dblNine is null
 				BEGIN
 					update #tempInventoryHistory set dblNine = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 10
+				ELSE IF @intHour = 10 and @dblTen is null
 				BEGIN
 					update #tempInventoryHistory set dblTen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 11
+				ELSE IF @intHour = 11 and @dblEleven is null
 				BEGIN
 					update #tempInventoryHistory set dblEleven = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 12
+				ELSE IF @intHour = 12 and @dblTwelve is null
 				BEGIN
 					update #tempInventoryHistory set dblTwelve = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 13
+				ELSE IF @intHour = 13 and @dblThirteen is null
 				BEGIN
 					update #tempInventoryHistory set dblThirteen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 14
+				ELSE IF @intHour = 14 and @dblFourteen is null
 				BEGIN
 					update #tempInventoryHistory set dblFourteen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 15
+				ELSE IF @intHour = 15 and @dblFifteen is null
 				BEGIN
 					update #tempInventoryHistory set dblFifteen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 16
+				ELSE IF @intHour = 16 and @dblSixteen is null
 				BEGIN
 					update #tempInventoryHistory set dblSixteen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 17
+				ELSE IF @intHour = 17 and @dblSeventeen is null
 				BEGIN
 					update #tempInventoryHistory set dblSeventeen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 18
+				ELSE IF @intHour = 18 and @dblEighteen is null
 				BEGIN
 					update #tempInventoryHistory set dblEighteen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 19
+				ELSE IF @intHour = 19 and @dblNineteen is null
 				BEGIN
 					update #tempInventoryHistory set dblNineteen = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 20
+				ELSE IF @intHour = 20 and @dblTwenty is null
 				BEGIN
 					update #tempInventoryHistory set dblTwenty = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 21
+				ELSE IF @intHour = 21 and @dblTwentyOne is null
 				BEGIN
 					update #tempInventoryHistory set dblTwentyOne = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 22
+				ELSE IF @intHour = 22 and @dblTwentyTwo is null
 				BEGIN
 					update #tempInventoryHistory set dblTwentyTwo = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 23
+				ELSE IF @intHour = 23 and @dblTwentyThree is null
 				BEGIN
-					update #tempInventoryHistory set dblTwentyThree = dblTwentyThree where Id = @IdTemp
+					update #tempInventoryHistory set dblTwentyThree = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 24
+				ELSE IF @intHour = 24 and @dblZero is null
 				BEGIN
-					update #tempInventoryHistory set dblZero = dblTwentyThree where Id = @IdTemp
+					update #tempInventoryHistory set dblZero = @dblFuelVolume where Id = @IdTemp
 				END
 			END
 		else
@@ -259,7 +295,7 @@ BEGIN
 				END
 			END
 
-	 FETCH NEXT FROM DataCursor INTO @dtmDateTime, @intHour,@dblFuelVolume
+	 FETCH NEXT FROM DataCursor INTO @dtmDateTimeOrder, @dtmDateTime, @intHour,@dblFuelVolume
     END
     CLOSE DataCursor
 	DEALLOCATE DataCursor
