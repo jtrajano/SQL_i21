@@ -2,7 +2,7 @@
 GO
 
 -- Incorrect spelling. This will be replaced by uspARPostItemReservation.
-IF EXISTS(SELECT 1 1 from sys.procedures WHERE name = 'uspARPostItemResevation')
+IF EXISTS(SELECT TOP 1 1 from sys.procedures WHERE name = 'uspARPostItemResevation')
 	DROP PROCEDURE uspARPostItemResevation
 GO
 
