@@ -155,7 +155,13 @@ SELECT
 		+ ISNULL(dblNovember,0)
 		+ ISNULL(dblDecember,0)) AS dblTotalPayment
 FROM K1099 A
-INNER JOIN grossThirdParty B ON A.intEntityVendorId = B.intEntityVendorId AND A.intYear = B.intYear
+CROSS APPLY (
+	SELECT 
+		SUM(B.dblCardNotPresent) dblCardNotPresent,
+		SUM(B.dblGrossThirdParty) dblGrossThirdParty
+	FROM grossThirdParty B 
+	WHERE A.intEntityVendorId = B.intEntityVendorId AND A.intYear = B.intYear
+) gtp
 GROUP BY A.intEntityVendorId
 	,strEmployerAddress
 	,strCompanyName
@@ -172,7 +178,7 @@ GROUP BY A.intEntityVendorId
 	,strFilerType
 	,strTransactionType
 	,strMerchantCode
-	,A.intYear
+	,intYear
 	,dblCardNotPresent
 	,dblGrossThirdParty
 HAVING SUM(ISNULL(dblJanuary,0)
