@@ -27,6 +27,9 @@ BEGIN
 	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
 	DECLARE @ItemsForCosting 					[ItemCostingTableType]
 	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
+
+	IF @Recap = @ZeroBit	
+		EXEC dbo.uspARPostItemReservation
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]
