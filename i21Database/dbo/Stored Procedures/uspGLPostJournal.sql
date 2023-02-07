@@ -10,6 +10,10 @@ CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@ysnAudit			AS BIT				= 0	
 AS
 
+
+
+
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -127,8 +131,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		DECLARE @GLEntries RecapTableType
 		
-		
-		
 		DELETE FROM @GLEntries
 		INSERT INTO @GLEntries (
 			 [strTransactionId]
@@ -232,37 +234,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 		DECLARE @SkipICValidation BIT = 0
 
-		
-		INSERT INTO @GLEntries
-		(
-			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]
-			,[intCurrencyId]
-			,[intUserId]
-			,[intEntityId]
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,strModuleName
-			,strOverrideAccountError
-			,strNewAccountIdOverride
-		)
+		GOTO _insertIntra
 
-		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
+		_continuePost:
 		
-		IF @@ERROR <> 0 GOTO Post_Rollback;
+		--IF @@ERROR <> 0 
+		GOTO Post_Rollback;
 
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
@@ -348,35 +325,12 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
-		INSERT INTO @GLEntries
-		(
-			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]
-			,[intCurrencyId]
-			,[intUserId]
-			,[intEntityId]
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,strModuleName
-			,strOverrideAccountError
-			,strNewAccountIdOverride
-		)
-		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
+		GOTO _insertIntra
 		
-		IF @@ERROR <>  0 GOTO Post_Rollback;
+		_continueRecap:
+		
+		IF @@ERROR <>  0 
+		GOTO Post_Rollback;
 		
 
 		EXEC dbo.uspGLPostRecap 
@@ -592,5 +546,134 @@ Post_Commit:
 Post_Rollback:
 	ROLLBACK TRANSACTION	
 	GOTO Post_Exit
+
+_insertIntra:
+		DECLARE @intTraGLEntries RecapTableType
+		INSERT INTO @intTraGLEntries
+		(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,strOverrideAccountError
+			,strNewAccountIdOverride
+
+		)
+		SELECT  
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,strOverrideAccountError
+			,strNewAccountIdOverride
+
+		FROM
+		dbo.fnGLGetIntraCompanyGLEntries( @GLEntries,@ysnRecap, @ysnPost)
+
+		IF EXISTS(SELECT 1 FROM @intTraGLEntries WHERE ISNULL(strOverrideAccountError,'') <> '' )          
+		BEGIN
+			EXEC uspGLPostRecap @intTraGLEntries, @intEntityId          
+			EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
+			RAISERROR( 'Error overriding accounts.' , 16,1)
+			GOTO Post_Commit      
+		END  
+
+		INSERT INTO @GLEntries
+		(
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,strOverrideAccountError
+			,strNewAccountIdOverride
+
+		)
+		SELECT  
+			[strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strDescription]
+			,[dtmTransactionDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dtmDate]
+			,[ysnIsUnposted]
+			,[intConcurrencyId]
+			,[intCurrencyId]
+			,[intUserId]
+			,[intEntityId]
+			,[dtmDateEntered]
+			,[strBatchId]
+			,[strCode]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,strModuleName
+			,strOverrideAccountError
+			,strNewAccountIdOverride
+
+		FROM @intTraGLEntries
+
+		-- IF EXISTS(SELECT 1 FROM @intTraGLEntries WHERE ISNULL(strOverrideAccountError,'') <> '' )          
+		-- BEGIN
+		-- 	EXEC uspGLPostRecap @GLEntries, @intEntityId          
+		-- 	EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
+		-- 	RAISERROR( 'Error overriding accounts.' , 16,1)
+		-- 	GOTO Post_Commit      
+		-- END              
+	IF @ysnRecap = 1  GOTO _continueRecap
+	ELSE  GOTO _continuePost
 
 Post_Exit:
