@@ -424,6 +424,28 @@ BEGIN TRANSACTION
 							@intToLocationId 			= @intLocationId
 						END
 
+					--intConsDealerCommissionItemId
+					IF EXISTS (SELECT TOP 1 1 FROM tblSTStore WHERE intConsDealerCommissionItemId IS NOT NULL AND intStoreId = @intStoreId)
+						BEGIN
+							DECLARE @intConsDealerCommissionItemId AS INT = (SELECT TOP 1 intConsDealerCommissionItemId FROM tblSTStore WHERE intConsDealerCommissionItemId IS NOT NULL AND intStoreId = @intStoreId)
+
+							EXEC dbo.uspSTCopyItemLocation
+							@intSourceItemId 			= @intConsDealerCommissionItemId,
+							@intSourceLocationId		= @intSourceLocationId,
+							@intToLocationId 			= @intLocationId
+						END
+
+					--@intConsFuelDiscountItemId
+					IF EXISTS (SELECT TOP 1 1 FROM tblSTStore WHERE intConsFuelDiscountItemId IS NOT NULL AND intStoreId = @intStoreId)
+						BEGIN
+							DECLARE @intConsFuelDiscountItemId AS INT = (SELECT TOP 1 intConsFuelDiscountItemId FROM tblSTStore WHERE intConsFuelDiscountItemId IS NOT NULL AND intStoreId = @intStoreId)
+
+							EXEC dbo.uspSTCopyItemLocation
+							@intSourceItemId 			= @intConsFuelDiscountItemId,
+							@intSourceLocationId		= @intSourceLocationId,
+							@intToLocationId 			= @intLocationId
+						END
+
 					--REGISTER TAB--
 					INSERT INTO tblSTRegister
 					(
