@@ -901,6 +901,9 @@
     <Build Include="dbo\Stored Procedures\uspLGCancelAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationContract.sql" />
     <Build Include="dbo\Tables\tblCTContractImportTemp.sql" />
+    <Build Include="dbo\Tables\tblCTContractPriceImportTemp.sql" />
+    <Build Include="dbo\Tables\tblCTContractPriceImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationPriceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

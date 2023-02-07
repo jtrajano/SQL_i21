@@ -6,6 +6,13 @@ AS
 		@guiUniqueId uniqueidentifier = newid()
 		,@intUserId int = 1;
 
+	SELECT TOP 1 
+		@intUserId = intEntityId 
+	FROM 
+		tblSMUserSecurity 		
+	WHERE 
+		lower(strUserName) IN ('irelyadmin', 'aussup');
+
 	if (isnull(ltrim(rtrim(@FileLocation)),'') = '')
 	begin
 		select @FileLocation = 'C:\Import\Contract\Contracts.csv';
@@ -291,7 +298,8 @@ AS
 		intRevaluationCurrencyExchangeRateId int,
 		dblHistoricalRate numeric(18,6),
 		intHistoricalRateTypeId int,
-		intBasisUOMId int
+		intBasisUOMId int,
+		dblNoOfLots numeric(18,6)
 	); 
 
 	IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -346,6 +354,7 @@ AS
 		,dblHistoricalRate
 		,intHistoricalRateTypeId
 		,intBasisUOMId
+		,dblNoOfLots
 	)
 	SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 			intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -412,6 +421,8 @@ AS
 			,dblHistoricalRate = CI.dblHistoricRate
 			,intHistoricalRateTypeId = ert.intCurrencyExchangeRateTypeId
 			,intBasisUOMId = QU.intItemUOMId
+			,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,MA.intUnitMeasureId, MA.dblContractSize)
+			
 
 	FROM	tblCTContractImport			CI	LEFT
 	JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -965,7 +976,8 @@ AS
 					,intBasisCurrencyId
 					,intBasisUOMId
 					,dblTotalBudget
-					,dblTotalCost)
+					,dblTotalCost
+					,dblNoOfLots)
 				SELECT
 						@intContractHeaderId
 					, intItemId
@@ -1022,6 +1034,7 @@ AS
 					,intBasisUOMId = intItemUOMId
 					,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dblQuantity * dblBudgetPrice else null end
 					,dblTotalCost = case when intPricingTypeId = 1 then dblQuantity * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dblQuantity * isnull(dblCashPrice,1) else null end
+					,dblNoOfLots = dblNoOfLots
 				FROM #tmpExtracted
 				WHERE
 						ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
