@@ -18,7 +18,7 @@ RETURN (
 				FROM tblGLJournal A 
 				WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
 				AND ISNULL(A.strSourceType,'') <> 'AA'
-				AND ISNULL(A.strJournalType,'') NOT IN('Origin Journal','Adjusted Origin Journal')
+				AND CHARINDEX(ISNULL(A.strJournalType,''), 'Origin Journal Adjusted Origin Journal') = 0 
 				UNION 
 			
 				SELECT 
@@ -26,8 +26,8 @@ RETURN (
 				FROM vyuGLJournalDetail A
 				JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
 				JOIN @JournalIds C on C.intJournalId = A.intJournalId
-				WHERE ISNULL(B.strAccountCategory,'') in ('AR Account','Cash Account','AP Account','Inventory')  
-				AND A.strJournalType NOT IN('Origin Journal','Adjusted Origin Journal','Historical Journal','Imported Journal')
+				WHERE CHARINDEX(ISNULL(B.strAccountCategory,''), 'AR Account Cash Account AP Account Inventory')> 0
+				AND CHARINDEX(A.strJournalType ,'Origin Journal Adjusted Origin Journal Historical Journal Imported Journal') = 0
 				GROUP BY A.intJournalId	,B.strAccountId,B.strAccountCategory
 				--REGION @ysnPost = 1
 				UNION

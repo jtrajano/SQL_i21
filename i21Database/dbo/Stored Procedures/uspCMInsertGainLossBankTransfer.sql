@@ -71,14 +71,14 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[dblCreditForeign]		= case when BankFrom.gainLoss >= 0 then BankFrom.gainLoss  else 0 end
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= 'Gain / Loss Bank Transfer From'
+			,[strDescription]		= BankFrom.strDescription
 			,[strCode]				= A.strCode
 			,[strReference]			= BankFrom.strReferenceFrom
 			,[intCurrencyId]		= @intDefaultCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GL.strDescription
+			,[strJournalLineDescription] = 'Gain / Loss Bank Transfer From'
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.[intUserId]
@@ -89,7 +89,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			FROM	#tmpGLDetail A
 			CROSS APPLY(
 				SELECT dblGainLossFrom * -1 
-				gainLoss, strReferenceFrom FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossFrom <> 0
+				gainLoss, strReferenceFrom, strDescription FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossFrom <> 0
 			)BankFrom
 			CROSS APPLY (
 				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
@@ -107,14 +107,14 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[dblCreditForeign]		= case when BankTo.gainLoss >= 0 then BankTo.gainLoss  else 0 end
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= 'Gain / Loss Bank Transfer To' --'Gain / Loss on Multicurrency Bank Transfer'
+			,[strDescription]		= BankTo.strDescription --'Gain / Loss on Multicurrency Bank Transfer'
 			,[strCode]				= A.strCode
 			,[strReference]			= BankTo.strReferenceTo
 			,[intCurrencyId]		= @intDefaultCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GL.strDescription
+			,[strJournalLineDescription] = 'Gain / Loss Bank Transfer To'
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.[intUserId]
@@ -124,7 +124,7 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 			,[intEntityId]			= A.intEntityId
 			FROM	#tmpGLDetail A
 			CROSS APPLY(
-				SELECT dblGainLossTo gainLoss, strReferenceTo FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
+				SELECT dblGainLossTo gainLoss, strReferenceTo, strDescription FROM tblCMBankTransfer WHERE strTransactionId = A.strTransactionId AND dblGainLossTo <> 0
 			)BankTo
 			CROSS APPLY (
 				SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId

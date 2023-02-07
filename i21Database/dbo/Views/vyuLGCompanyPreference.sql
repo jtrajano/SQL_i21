@@ -18,6 +18,7 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 1 THEN 'None'
 		WHEN 2 THEN 'Contracts'
 		WHEN 3 THEN 'Orders'
+		WHEN 9 THEN 'Approved Quality'
 		END COLLATE Latin1_General_CI_AS
 	,CP.intCreateShipmentDefaultSourceType
 	,strCreateShipmentDefaultSourceType = CASE CP.intCreateShipmentDefaultSourceType

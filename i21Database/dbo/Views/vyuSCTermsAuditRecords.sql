@@ -8,7 +8,7 @@ INNER JOIN tblSMAudit E ON E.intLogId  = A.intLogId
 INNER JOIN tblSMTransaction B ON B.intTransactionId = A.intTransactionId 
 INNER JOIN tblSMTerm F on F.intTermID = B.intRecordId
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId  
-WHERE C.strNamespace = 'i21.view.Term' 
+WHERE C.strNamespace = 'SystemManager.view.Term' 
 
 AND F.ysnSent = 0 
 AND E.intParentAuditId IS NULL  
@@ -30,7 +30,7 @@ INNER JOIN tblSMTransaction B ON B.intTransactionId = A.intTransactionId
 inner join tblSMTerm F on F.intTermID = B.intRecordId  
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId  
 INNER JOIN tblSMAudit E ON E.intLogId = A.intLogId  
-WHERE C.strNamespace = 'i21.view.Term'    
+WHERE C.strNamespace = 'SystemManager.view.Term'    
 AND E.strAction = 'Deleted' AND E.intParentAuditId IS NULL  
   
 )

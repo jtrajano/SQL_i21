@@ -318,8 +318,8 @@ SELECT
     --intLOBSegmentOverrideId,      
     --intCompanySegmentOverrideId,      
     --strNewAccountIdOverride,      
-    ---intNewAccountIdOverride,      
-    --strOverrideAccountError    
+    --intNewAccountIdOverride,      
+        
 FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A         
 group by dtmDate,      
     strBatchId,      
@@ -340,7 +340,7 @@ group by dtmDate,
     --intTransactionId,      
     --strTransactionType,      
     --strTransactionForm,      
-    strModuleName,   
+    strModuleName,     
     --intConcurrencyId,      
     --intAccountIdOverride,      
     --intLocationSegmentOverrideId,      
@@ -348,7 +348,7 @@ group by dtmDate,
     --intCompanySegmentOverrideId,      
     --strNewAccountIdOverride,      
     --intNewAccountIdOverride,      
-    strOverrideAccountError,
+     strOverrideAccountError,
     strNewAccountIdOverride 
         
 IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          

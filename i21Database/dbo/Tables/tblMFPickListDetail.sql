@@ -20,6 +20,7 @@
 	[dtmLastModified] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFKitPickListDetail_intConcurrencyId] DEFAULT 0,
+	[dblShippedQty] NUMERIC(38, 20)
 	CONSTRAINT [PK_tblMFPickListDetail_intPickListDetailId] PRIMARY KEY (intPickListDetailId),
 	CONSTRAINT [FK_tblMFPickListDetail_intPickListId] FOREIGN KEY ([intPickListId]) REFERENCES [tblMFPickList]([intPickListId]),
 	CONSTRAINT [FK_tblMFPickListDetail_tblICLot_inLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),

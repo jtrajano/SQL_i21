@@ -4,7 +4,7 @@ SELECT
 A.intSampleId,
 B.intBatchId,  
 B.strBatchId,  
-dtmSaleDate,  
+REPLACE(CONVERT(VARCHAR, dtmSaleDate,101),'/','.') AS dtmSaleDate,  
 CASE WHEN A.strMarketZoneCode= 'AUC' THEN B.strTeaGardenChopInvoiceNumber ELSE CT.strTeaGardenChopInvoiceNumber END strTeaGardenChopInvoiceNumber,  
 B.strBroker,  
 CASE WHEN A.strMarketZoneCode= 'AUC' THEN B.strLeafGrade ELSE CT.strLeafGrade END strLeafGrade,  

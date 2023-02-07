@@ -31,6 +31,7 @@ BEGIN TRY
 		,@strActualLocationName NVARCHAR(100)
 	DECLARE @strERPPONumber NVARCHAR(50)
 		,@strERPItemNumber NVARCHAR(50)
+		,@strERPPONumber2 NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
 		,@strSubLocationName NVARCHAR(50)
 		,@strStorageLocationName NVARCHAR(50)
@@ -92,7 +93,6 @@ BEGIN TRY
 	SELECT intStageReceiptId
 	FROM tblIPInvReceiptStage
 	WHERE intStatusId IS NULL
-		AND ISNULL(strOrderType, '') = 'PO'
 
 	SELECT @intStageReceiptId = MIN(intStageReceiptId)
 	FROM @tblIPInvReceiptStage
@@ -251,6 +251,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @strERPPONumber = NULL
 					,@strERPItemNumber = NULL
+					,@strERPPONumber2 = NULL
 					,@strItemNo = NULL
 					,@strSubLocationName = NULL
 					,@strStorageLocationName = NULL
@@ -289,6 +290,7 @@ BEGIN TRY
 
 				SELECT @strERPPONumber = RIS.strERPPONumber
 					,@strERPItemNumber = RIS.strERPItemNumber
+					,@strERPPONumber2 = RIS.strERPPONumber
 					,@strItemNo = RIS.strItemNo
 					,@strSubLocationName = RIS.strSubLocationName
 					,@strStorageLocationName = RIS.strStorageLocationName
@@ -587,6 +589,12 @@ BEGIN TRY
 								,1
 								)
 					END
+
+					UPDATE B
+					SET B.strERPPONumber2 = @strERPPONumber2
+					FROM tblMFBatch B
+					WHERE B.strBatchId = @strLotNo
+						AND B.intLocationId = @intCompanyLocationId
 
 					SELECT TOP 1 @intLoadId = L.intLoadId
 						,@intLoadDetailId = LD.intLoadDetailId

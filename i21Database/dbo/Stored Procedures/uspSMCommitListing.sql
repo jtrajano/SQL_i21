@@ -40,7 +40,7 @@ BEGIN TRANSACTION
   
  -- DELETE Screens  
  DELETE FROM tblSMScreen   
- WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted') AND strNamespace <> 'ContractManagement.view.ContractAmendment' AND (ysnApproval = 0 OR ysnApproval IS NULL)
+ WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted') AND strNamespace <> 'ContractManagement.view.ContractAmendment' AND strNamespace <> 'GlobalComponentEngine.view.EmailHistory' AND (ysnApproval = 0 OR ysnApproval IS NULL)
  --AND intScreenId NOT IN (SELECT intScreenId FROM tblSMTransaction)  
    
  -- INSERT Controls  
@@ -108,12 +108,12 @@ BEGIN TRANSACTION
   
  UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN   
  (   
-  'i21.view.UserRole',  
-  'i21.view.Letters',  
-  'i21.view.FileFieldMapping',  
-  'i21.view.SecurityPolicy',  
-  'i21.view.Signatures'  
-  --'i21.view.EntityUser'  
+  'SystemManager.view.UserRole',  
+  'SystemManager.view.Letters',  
+  'SystemManager.view.FileFieldMapping',  
+  'SystemManager.view.SecurityPolicy',  
+  'SystemManager.view.Signatures'  
+  --'SystemManager.view.EntityUser'  
  )  
   
  --*************UPDATE tblSMScreen GroupName WHEN generating listing for contact user*************--  

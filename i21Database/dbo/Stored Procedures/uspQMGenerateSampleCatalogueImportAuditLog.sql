@@ -7,21 +7,13 @@ CREATE PROCEDURE uspQMGenerateSampleCatalogueImportAuditLog
 AS
 
 BEGIN TRY
-	BEGIN TRANSACTION
+	-- BEGIN TRANSACTION
         DECLARE
             @tblLog SingleAuditLogParam
             ,@tblHeaderLog SingleAuditLogParam
             ,@tblLogTestResult SingleAuditLogParam
-            ,@strSampleNumber NVARCHAR(50)
             ,@intKey INT = 0
             ,@intTestResultKey INT = 0
-        
-        DELETE FROM @tblLog
-        DELETE FROM @tblLogTestResult
-
-        SELECT @strSampleNumber = strSampleNumber
-        FROM tblQMSample
-        WHERE intSampleId = @intSampleId
 
         -- If the sample is just being created, add created audit log
         IF @ysnCreate = 1
@@ -39,7 +31,7 @@ BEGIN TRY
             SELECT
                 [Id]            = 1
                 ,[Action]       = 'Created'
-                ,[Change]       = 'Created - Record' + CASE WHEN ISNULL(@strRemarks, '') <> '' THEN ' (' + @strRemarks + ')' ELSE '' END + ': ' + @strSampleNumber
+                ,[Change]       = NULL--'Created - Record' + CASE WHEN ISNULL(@strRemarks, '') <> '' THEN ' (' + @strRemarks + ')' ELSE '' END + ': ' + @strSampleNumber
                 ,[From]         = NULL
                 ,[To]           = NULL
                 ,[ParentId]     = NULL
@@ -48,16 +40,233 @@ BEGIN TRY
         END
 
         -- Store the original values in a temp table before the sample is updated
-        IF @ysnBeforeUpdate = 1
+        IF @ysnBeforeUpdate = 1 AND @ysnCreate = 0
         BEGIN
-            IF OBJECT_ID('tempdb..##tmpQMSample') IS NOT NULL
-                DROP TABLE ##tmpQMSample
+            IF OBJECT_ID('tempdb..##tmpQMSample') IS NULL
+            BEGIN
+                SELECT * INTO ##tmpQMSample FROM tblQMSample WHERE 1 = 0
+            END
 
-            IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NOT NULL
-                DROP TABLE ##tmpQMTestResult
+            IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NULL
+            BEGIN
+                SELECT * INTO ##tmpQMTestResult FROM tblQMTestResult WHERE 1 = 0
+            END
 
-            SELECT * INTO ##tmpQMSample FROM tblQMSample WHERE intSampleId = @intSampleId
-            SELECT * INTO ##tmpQMTestResult FROM tblQMTestResult WHERE intSampleId = @intSampleId
+            SET IDENTITY_INSERT ##tmpQMSample ON
+            INSERT INTO ##tmpQMSample (
+                [intSampleId],
+                [intConcurrencyId],
+                [intCompanyId],
+                [intSampleTypeId],
+                [strSampleNumber],
+                [intCompanyLocationId],
+                [intParentSampleId],
+                [strSampleRefNo],
+                [intProductTypeId],
+                [intProductValueId],
+                [intSampleStatusId],
+                [intPreviousSampleStatusId],
+                [intItemId],
+                [intItemContractId],
+                [intContractHeaderId],
+                [intContractDetailId],
+                [intShipmentBLContainerId],
+                [intShipmentBLContainerContractId],
+                [intShipmentId],
+                [intShipmentContractQtyId],
+                [intCountryID],
+                [ysnIsContractCompleted],
+                [intLotStatusId],
+                [intEntityId],
+                [intShipperEntityId],
+                [strShipmentNumber],
+                [strLotNumber],
+                [strSampleNote],
+                [dtmSampleReceivedDate],
+                [dtmTestedOn],
+                [intTestedById],
+                [dblSampleQty],
+                [intSampleUOMId],
+                [dblRepresentingQty],
+                [intRepresentingUOMId],
+                [strRefNo],
+                [dtmTestingStartDate],
+                [dtmTestingEndDate],
+                [dtmSamplingEndDate],
+                [strSamplingMethod],
+                [strContainerNumber],
+                [strMarks],
+                [intCompanyLocationSubLocationId],
+                [strCountry],
+                [intItemBundleId],
+                [intLoadContainerId],
+                [intLoadDetailContainerLinkId],
+                [intLoadId],
+                [intLoadDetailId],
+                [dtmBusinessDate],
+                [intShiftId],
+                [intLocationId],
+                [intInventoryReceiptId],
+                [intInventoryShipmentId],
+                [intWorkOrderId],
+                [strComment],
+                [ysnAdjustInventoryQtyBySampleQty],
+                [intStorageLocationId],
+                [intBookId],
+                [intSubBookId],
+                [strChildLotNumber],
+                [strCourier],
+                [strCourierRef],
+                [intForwardingAgentId],
+                [strForwardingAgentRef],
+                [strSentBy],
+                [intSentById],
+                [intSampleRefId],
+                [ysnParent],
+                [ysnIgnoreContract],
+                [ysnImpactPricing],
+                [dtmRequestedDate],
+                [dtmSampleSentDate],
+                [intSamplingCriteriaId],
+                [strSendSampleTo],
+                [strRepresentLotNumber],
+                [intRelatedSampleId],
+                [intTypeId],
+                [intCuppingSessionDetailId],
+                [intCreatedUserId],
+                [dtmCreated],
+                [intLastModifiedUserId],
+                [dtmLastModified],
+                [intSaleYearId],
+                [strSaleNumber],
+                [dtmSaleDate],
+                [intCatalogueTypeId],
+                [dtmPromptDate],
+                [strChopNumber],
+                [intBrokerId],
+                [intGradeId],
+                [intLeafCategoryId],
+                [intManufacturingLeafTypeId],
+                [intSeasonId],
+                [intGardenMarkId],
+                [dtmManufacturingDate],
+                [intTotalNumberOfPackageBreakups],
+                [intNetWtPerPackagesUOMId],
+                [intNoOfPackages],
+                [intNetWtSecondPackageBreakUOMId],
+                [intNoOfPackagesSecondPackageBreak],
+                [intNetWtThirdPackageBreakUOMId],
+                [intNoOfPackagesThirdPackageBreak],
+                [intProductLineId],
+                [ysnOrganic],
+                [dblSupplierValuationPrice],
+                [intProducerId],
+                [intPurchaseGroupId],
+                [strERPRefNo],
+                [dblGrossWeight],
+                [dblTareWeight],
+                [dblNetWeight],
+                [strBatchNo],
+                [str3PLStatus],
+                [strAdditionalSupplierReference],
+                [intAWBSampleReceived],
+                [strAWBSampleReference],
+                [dblBasePrice],
+                [ysnBoughtAsReserve],
+                [intCurrencyId],
+                [ysnEuropeanCompliantFlag],
+                [intEvaluatorsCodeAtTBOId],
+                [intFromLocationCodeId],
+                [strSampleBoxNumber],
+                [intBrandId],
+                [intValuationGroupId],
+                [strMusterLot],
+                [strMissingLot],
+                [intMarketZoneId],
+                [intDestinationStorageLocationId],
+                [strComments2],
+                [strComments3],
+                [strBuyingOrderNo],
+                [intTINClearanceId],
+                [intBuyer1Id],
+                [dblB1QtyBought],
+                [intB1QtyUOMId],
+                [dblB1Price],
+                [intB1PriceUOMId],
+                [intBuyer2Id],
+                [dblB2QtyBought],
+                [intB2QtyUOMId],
+                [dblB2Price],
+                [intB2PriceUOMId],
+                [intBuyer3Id],
+                [dblB3QtyBought],
+                [intB3QtyUOMId],
+                [dblB3Price],
+                [intB3PriceUOMId],
+                [intBuyer4Id],
+                [dblB4QtyBought],
+                [intB4QtyUOMId],
+                [dblB4Price],
+                [intB4PriceUOMId],
+                [intBuyer5Id],
+                [dblB5QtyBought],
+                [intB5QtyUOMId],
+                [dblB5Price],
+                [intB5PriceUOMId],
+                [strB5PriceUOM],
+                [ysnBought]
+            )
+            SELECT * FROM tblQMSample WHERE intSampleId = @intSampleId
+            SET IDENTITY_INSERT ##tmpQMSample OFF
+
+            SET IDENTITY_INSERT ##tmpQMTestResult ON
+            INSERT INTO ##tmpQMTestResult (
+                [intTestResultId],
+                [intConcurrencyId],
+                [intSampleId],
+                [intProductId],
+                [intProductTypeId],
+                [intProductValueId],
+                [intTestId],
+                [intPropertyId],
+                [strPanelList],
+                [strPropertyValue],
+                [dtmCreateDate],
+                [strResult],
+                [ysnFinal],
+                [strComment],
+                [intSequenceNo],
+                [dtmValidFrom],
+                [dtmValidTo],
+                [strPropertyRangeText],
+                [dblMinValue],
+                [dblPinpointValue],
+                [dblMaxValue],
+                [dblLowValue],
+                [dblHighValue],
+                [intUnitMeasureId],
+                [strFormulaParser],
+                [dblCrdrPrice],
+                [dblCrdrQty],
+                [intProductPropertyValidityPeriodId],
+                [intPropertyValidityPeriodId],
+                [intControlPointId],
+                [intParentPropertyId],
+                [intRepNo],
+                [strFormula],
+                [intListItemId],
+                [strIsMandatory],
+                [intPropertyItemId],
+                [dtmPropertyValueCreated],
+                [intTestResultRefId],
+                [intCreatedUserId],
+                [dtmCreated],
+                [intLastModifiedUserId],
+                [dtmLastModified]
+            )
+            SELECT * FROM tblQMTestResult WHERE intSampleId = @intSampleId
+            SET IDENTITY_INSERT ##tmpQMTestResult OFF
+
         END
         -- Compare the updated sample with the original values to determine which field needs audit logs
         ELSE
@@ -396,7 +605,7 @@ BEGIN TRY
             SELECT
                 [Id]            = @intKey
                 ,[Action]       = 'Updated'
-                ,[Change]       = 'Updated - Record' + CASE WHEN ISNULL(@strRemarks, '') <> '' THEN ' (' + @strRemarks + ')' ELSE '' END + ': ' + @strSampleNumber
+                ,[Change]       = NULL--'Updated - Record' + CASE WHEN ISNULL(@strRemarks, '') <> '' THEN ' (' + @strRemarks + ')' ELSE '' END + ': ' + @strSampleNumber
                 ,[From]         = NULL
                 ,[To]           = NULL
                 ,[ParentId]     = NULL
@@ -451,7 +660,7 @@ BEGIN TRY
                     ,[To] = C.strNewValue
                     ,[ParentId] = CTE.Id
                 FROM tblQMTestResult TRN
-                INNER JOIN ##tmpQMTestResult TRO ON TRO.intPropertyId = TRN.intPropertyId
+                INNER JOIN ##tmpQMTestResult TRO ON TRO.intPropertyId = TRN.intPropertyId AND TRO.intSampleId = TRN.intSampleId
                 -- Unpivot columns to rows
                 CROSS APPLY (
                     SELECT 'Actual Value', TRO.strPropertyValue, TRN.strPropertyValue
@@ -531,13 +740,12 @@ BEGIN TRY
         END
 
         POST:
-        IF @intKey > 1
+        IF @intKey > 1 AND (@ysnCreate = 1 OR (@ysnCreate = 0 AND @ysnBeforeUpdate = 0))
             EXEC uspSMSingleAuditLog
                 @screenName     = 'Quality.view.QualitySample',
                 @recordId       = @intSampleId,
                 @entityId       = @intUserEntityId,
                 @AuditLogParam  = @tblLog
-	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
 	DECLARE @strErrorMsg NVARCHAR(MAX) = NULL

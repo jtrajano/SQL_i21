@@ -90,6 +90,7 @@ BEGIN TRY
 		,@strdblTeaTaste NUMERIC(38, 20)
 		,@strdblTeaHue NUMERIC(38, 20)
 		,@ysnEnabledPreShipmentSampleByBatch BIT
+		,@intWorkOrderId INT
 	DECLARE @intPropertyId INT
 		,@strPropertyName NVARCHAR(100)
 		,@dblMinValue NUMERIC(38, 20)
@@ -228,20 +229,20 @@ BEGIN TRY
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 		,@ysnRecipeHeaderValidation = IsNULL(ysnRecipeHeaderValidation, 0)
-		,@ysnEnabledPreShipmentSampleByBatch=IsNULL(ysnEnabledPreShipmentSampleByBatch,0)
+		,@ysnEnabledPreShipmentSampleByBatch = IsNULL(ysnEnabledPreShipmentSampleByBatch, 0)
 	FROM tblMFCompanyPreference
 
-	if @ysnEnabledPreShipmentSampleByBatch =1
-	Begin
+	IF @ysnEnabledPreShipmentSampleByBatch = 1
+	BEGIN
 		SET @intProductTypeId = 13
-	End
-	Else
-	BEgin
-	IF @ysnEnableParentLot = 0
-		SET @intProductTypeId = 6
+	END
 	ELSE
-		SET @intProductTypeId = 11
-	End
+	BEGIN
+		IF @ysnEnableParentLot = 0
+			SET @intProductTypeId = 6
+		ELSE
+			SET @intProductTypeId = 11
+	END
 
 	SELECT @strBlendItemNo = i.strItemNo
 		,@intBlendItemId = i.intItemId
@@ -616,84 +617,165 @@ BEGIN TRY
 		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
-	INSERT INTO @tblInputItem (
-		intRecipeId
-		,intRecipeItemId
-		,intItemId
-		,dblRequiredQty
-		,ysnIsSubstitute
-		,ysnMinorIngredient
-		,intConsumptionMethodId
-		,intConsumptionStoragelocationId
-		,intParentItemId
-		,dblUpperToleranceQty
-		,dblLowerToleranceQty
-		,ysnComplianceItem
-		,dblCompliancePercent
-		,dblNoOfPallets
-		)
-	SELECT @intRecipeId
-		,ri.intRecipeItemId
-		,ri.intItemId
-		,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
-		,0
-		,ri.ysnMinorIngredient
-		,ri.intConsumptionMethodId
-		,ri.intStorageLocationId
-		,0
-		,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
-		,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
-		,ri.ysnComplianceItem
-		,ri.dblCompliancePercent
-		,IsNULL(I.intUnitPerLayer * I.intLayerPerPallet, 0)
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-	JOIN tblICItem I ON I.intItemId = ri.intItemId
-	WHERE r.intRecipeId = @intRecipeId
-		AND ri.intRecipeItemTypeId = 1
-		AND (
-			(
-				ri.ysnYearValidationRequired = 1
-				AND @dtmDate BETWEEN ri.dtmValidFrom
-					AND ri.dtmValidTo
-				)
-			OR (
-				ri.ysnYearValidationRequired = 0
-				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-					AND DATEPART(dy, ri.dtmValidTo)
-				)
+	SELECT @intWorkOrderId = intWorkOrderId
+	FROM tblMFWorkOrder
+	WHERE intBlendRequirementId = @intBlendRequirementId
+
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFWorkOrderRecipe
+			WHERE intWorkOrderId = @intWorkOrderId
 			)
-		AND ri.intConsumptionMethodId IN (
-			1
-			,2
-			,3
+	BEGIN
+		INSERT INTO @tblInputItem (
+			intRecipeId
+			,intRecipeItemId
+			,intItemId
+			,dblRequiredQty
+			,ysnIsSubstitute
+			,ysnMinorIngredient
+			,intConsumptionMethodId
+			,intConsumptionStoragelocationId
+			,intParentItemId
+			,dblUpperToleranceQty
+			,dblLowerToleranceQty
+			,ysnComplianceItem
+			,dblCompliancePercent
+			,dblNoOfPallets
 			)
-	
-	UNION
-	
-	SELECT @intRecipeId
-		,ri.intRecipeItemId
-		,rs.intSubstituteItemId AS intItemId
-		,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
-		,1
-		,0
-		,1
-		,0
-		,ri.intItemId
-		,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
-		,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
-		,ri.ysnComplianceItem
-		,ri.dblCompliancePercent
-		,IsNULL(I.intUnitPerLayer * I.intLayerPerPallet, 0)
-	FROM tblMFRecipeSubstituteItem rs
-	JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
-	JOIN tblMFRecipeItem ri ON rs.intRecipeItemId = ri.intRecipeItemId
-	JOIN tblICItem I ON I.intItemId = rs.intSubstituteItemId
-	WHERE r.intRecipeId = @intRecipeId
-		AND rs.intRecipeItemTypeId = 1
-	ORDER BY 4 DESC
-		,5
-		,6
+		SELECT @intRecipeId
+			,ri.intRecipeItemId
+			,ri.intItemId
+			,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
+			,0
+			,ri.ysnMinorIngredient
+			,ri.intConsumptionMethodId
+			,ri.intStorageLocationId
+			,0
+			,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+			,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+			,ri.ysnComplianceItem
+			,ri.dblCompliancePercent
+			,IsNULL(i.intUnitPerLayer * i.intLayerPerPallet, 0)
+		FROM tblMFWorkOrderRecipeItem ri
+		JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
+		JOIN tblICItem i ON ri.intItemId = i.intItemId
+		WHERE r.intWorkOrderId = @intWorkOrderId
+			AND ri.intRecipeItemTypeId = 1
+			AND ri.intConsumptionMethodId IN (
+				1
+				,2
+				,3
+				)
+		
+		UNION
+		
+		SELECT @intRecipeId
+			,ri.intRecipeItemId
+			,rs.intSubstituteItemId AS intItemId
+			,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
+			,1
+			,0
+			,1
+			,0
+			,ri.intItemId
+			,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+			,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+			,ri.ysnComplianceItem
+			,ri.dblCompliancePercent
+			,IsNULL(i.intUnitPerLayer * i.intLayerPerPallet, 0)
+		FROM tblMFWorkOrderRecipeSubstituteItem rs
+		JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
+		JOIN tblMFWorkOrderRecipeItem ri ON rs.intRecipeItemId = ri.intRecipeItemId
+			AND ri.intWorkOrderId = r.intWorkOrderId
+		JOIN tblICItem i ON rs.intSubstituteItemId = i.intItemId
+		WHERE r.intWorkOrderId = @intWorkOrderId
+			AND rs.intRecipeItemTypeId = 1
+		ORDER BY 4 DESC
+			,5
+			,ysnMinorIngredient
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblInputItem (
+			intRecipeId
+			,intRecipeItemId
+			,intItemId
+			,dblRequiredQty
+			,ysnIsSubstitute
+			,ysnMinorIngredient
+			,intConsumptionMethodId
+			,intConsumptionStoragelocationId
+			,intParentItemId
+			,dblUpperToleranceQty
+			,dblLowerToleranceQty
+			,ysnComplianceItem
+			,dblCompliancePercent
+			,dblNoOfPallets
+			)
+		SELECT @intRecipeId
+			,ri.intRecipeItemId
+			,ri.intItemId
+			,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
+			,0
+			,ri.ysnMinorIngredient
+			,ri.intConsumptionMethodId
+			,ri.intStorageLocationId
+			,0
+			,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+			,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+			,ri.ysnComplianceItem
+			,ri.dblCompliancePercent
+			,IsNULL(I.intUnitPerLayer * I.intLayerPerPallet, 0)
+		FROM tblMFRecipeItem ri
+		JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		JOIN tblICItem I ON I.intItemId = ri.intItemId
+		WHERE r.intRecipeId = @intRecipeId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId IN (
+				1
+				,2
+				,3
+				)
+		
+		UNION
+		
+		SELECT @intRecipeId
+			,ri.intRecipeItemId
+			,rs.intSubstituteItemId AS intItemId
+			,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
+			,1
+			,0
+			,1
+			,0
+			,ri.intItemId
+			,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+			,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+			,ri.ysnComplianceItem
+			,ri.dblCompliancePercent
+			,IsNULL(I.intUnitPerLayer * I.intLayerPerPallet, 0)
+		FROM tblMFRecipeSubstituteItem rs
+		JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+		JOIN tblMFRecipeItem ri ON rs.intRecipeItemId = ri.intRecipeItemId
+		JOIN tblICItem I ON I.intItemId = rs.intSubstituteItemId
+		WHERE r.intRecipeId = @intRecipeId
+			AND rs.intRecipeItemTypeId = 1
+		ORDER BY 4 DESC
+			,5
+			,6
+	END
 
 	IF (
 			SELECT ISNULL(COUNT(1), 0)
@@ -945,7 +1027,7 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
-				,intBatchId int
+				,intBatchId INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL
@@ -967,7 +1049,7 @@ BEGIN TRY
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
 				,intPreference INT
-				,intBatchId int
+				,intBatchId INT
 				)
 
 			IF EXISTS (
@@ -1018,13 +1100,13 @@ BEGIN TRY
 							ELSE 99
 							END
 						) AS intPreference
-						,B.intBatchId
+					,B.intBatchId
 				FROM tblICLot L
 				LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 				JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 				JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
-				JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
-				JOIN tblICItem I on I.intItemId=L.intItemId
+				JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN tblICItem I ON I.intItemId = L.intItemId
 				LEFT JOIN vyuMFBatchDetail B ON B.intBatchId = LI.intBatchId
 				LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = L.intSubLocationId
 				LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
@@ -1154,13 +1236,13 @@ BEGIN TRY
 							ELSE 99
 							END
 						) AS intPreference
-						,B.intBatchId
+					,B.intBatchId
 				FROM tblICLot L
 				LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 				JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 				LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
-				JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
-				JOIN tblICItem I on I.intItemId=L.intItemId
+				JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN tblICItem I ON I.intItemId = L.intItemId
 				LEFT JOIN vyuMFBatchDetail B ON B.intBatchId = LI.intBatchId
 				LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = L.intSubLocationId
 				LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
@@ -1181,7 +1263,7 @@ BEGIN TRY
 						ISNULL(@intKitStagingLocationId, 0)
 						,ISNULL(@intBlendStagingLocationId, 0)
 						) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
-						AND SL.strSubLocationName = CASE 
+					AND SL.strSubLocationName = CASE 
 						WHEN isNULL(@strStorageLocation, '') = ''
 							THEN SL.strSubLocationName
 						ELSE @strStorageLocation
@@ -1453,17 +1535,22 @@ BEGIN TRY
 						FROM #tblProductProperty p
 						INNER JOIN tblQMTestResult AS r ON p.intPropertyId=r.intPropertyId
 							AND ISNUMERIC(r.strPropertyValue) = 1
-						INNER JOIN #tblParentLot pl ON r.intProductValueId='+Case When @ysnEnabledPreShipmentSampleByBatch =1 Then ' intBatchId ' Else ' pl.intParentLotId ' End
-							+'AND r.intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
+						INNER JOIN #tblParentLot pl ON r.intProductValueId=' + CASE 
+					WHEN @ysnEnabledPreShipmentSampleByBatch = 1
+						THEN ' intBatchId '
+					ELSE ' pl.intParentLotId '
+					END + 'AND r.intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
 							AND (pl.dtmExpiryDate IS NULL OR pl.dtmExpiryDate >= getdate())
 							AND r.intSampleId = (
 								SELECT MAX(intSampleId)
 								FROM tblQMTestResult
-								WHERE intProductValueId = '+Case When @ysnEnabledPreShipmentSampleByBatch =1 Then ' intBatchId ' Else ' pl.intParentLotId ' End
-									+'AND intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
+								WHERE intProductValueId = ' + CASE 
+					WHEN @ysnEnabledPreShipmentSampleByBatch = 1
+						THEN ' intBatchId '
+					ELSE ' pl.intParentLotId '
+					END + 'AND intProductTypeId = ' + CONVERT(VARCHAR, @intProductTypeId) + '
 								)
-						WHERE pl.intItemId = ' + CONVERT(VARCHAR, 
-					@intRawItemId) + '
+						WHERE pl.intItemId = ' + CONVERT(VARCHAR, @intRawItemId) + '
 							AND pl.dblQty > 0
 							AND pl.intLocationId = ' + CONVERT(VARCHAR, @intLocationId) + '
 							) t Where ABS(ISNULL(

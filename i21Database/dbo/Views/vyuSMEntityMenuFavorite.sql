@@ -22,7 +22,7 @@ CASE
 	) 
 END AS strType,
 CASE 
-	WHEN Favorite.ysnCustomView = 1 THEN ('GlobalComponentEngine.view.SystemDashboard?id=' + CAST(Favorite.intCustomId AS NVARCHAR)) 
+	WHEN Favorite.ysnCustomView = 1 THEN ('SystemManager.view.SystemDashboard?id=' + CAST(Favorite.intCustomId AS NVARCHAR)) 
 	ELSE (
 		CASE WHEN Favorite.ysnMenuLink = 1 OR Favorite.ysnPBIReport = 1
 			THEN Favorite.strMenuLinkCommand 

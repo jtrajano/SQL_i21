@@ -93,7 +93,7 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry))) END
 	FROM	tblSMCompanySetup WITH (NOLOCK)
 	LEFT JOIN tblSMCountry				rtc9 WITH (NOLOCK) on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	LEFT JOIN tblSMScreen				rts9 WITH (NOLOCK) on rts9.strNamespace = 'i21.view.Country'
+	LEFT JOIN tblSMScreen				rts9 WITH (NOLOCK) on rts9.strNamespace = 'SystemManager.view.Country'
 	LEFT JOIN tblSMTransaction			rtt9 WITH (NOLOCK) on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	LEFT JOIN tblSMReportTranslation	rtrt9 WITH (NOLOCK) on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 

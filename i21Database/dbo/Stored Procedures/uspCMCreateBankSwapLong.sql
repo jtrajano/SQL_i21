@@ -1,5 +1,6 @@
 CREATE PROCEDURE uspCMCreateBankSwapLong
-	@intSwapShortId INT
+	@intSwapShortId INT,
+	@intEntityId INT
 AS
 
 DECLARE @intBankSwapId INT, @intSwapLongId INT, @strTransactionId NVARCHAR(40)
@@ -44,6 +45,14 @@ dblCrossRate,
 dblReverseRate,
 dblAmountSettlementFrom,
 dblRateAmountSettlementFrom,
+dblRateAmountSettlementTo,
+dblReceivableFn,
+dblReceivableFx,
+dblPayableFn,
+dblPayableFx,
+dblGainLossTo,
+dblGainLossFrom,
+intEntityId,
 intConcurrencyId
 )
 select 
@@ -69,6 +78,14 @@ ROUND(dblAmountTo/dblAmountFrom,6),
 ROUND(dblAmountFrom/dblAmountTo,6),
 dblAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN GLDetail.dblCreditForeign ELSE 0 END,
 dblRateAmountSettlementFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 1 ELSE 0 END,
+dblRateAmountSettlementTo = CASE WHEN intCurrencyIdAmountFrom = @defaultCurrencyId THEN 1 ELSE 0 END,
+dblReceivableFn=dblPayableFn,
+dblReceivableFx=dblPayableFx,
+dblPayableFn=dblReceivableFn,
+dblPayableFx=dblReceivableFx,
+dblGainLossTo=  CASE WHEN intCurrencyIdAmountFrom = @defaultCurrencyId THEN 0 else dblAmountForeignFrom -dblPayableFn  END,
+dblGainLossFrom = CASE WHEN intCurrencyIdAmountTo = @defaultCurrencyId THEN 0 ELSE 0 END,
+@intEntityId,
 1
 from tblCMBankTransfer  A
 OUTER APPLY(

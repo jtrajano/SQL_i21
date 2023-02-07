@@ -1,10 +1,10 @@
 ﻿GO
 	PRINT N'BEGIN INSERT DEFAULT SCREEN'
 GO
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.Activity') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Activity') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'Activity', N'Activity', N'GlobalComponentEngine.view.Activity', N'System Manager', N'tblSMActivity', 0, N'Account')
+			VALUES (N'Activity', N'Activity', N'SystemManager.view.Activity', N'System Manager', N'tblSMActivity', 0, N'Account')
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.GeneralJournal') 
@@ -184,10 +184,10 @@ GO
 			WHERE strNamespace = 'Payroll.view.TimeOffRequest'
 		END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.ActivityEmail') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ActivityEmail') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'Activity Email', N'Activity Email', N'GlobalComponentEngine.view.ActivityEmail', N'System Manager', N'tblSMActivity', 0, N'System Manager')
+			VALUES (N'Activity Email', N'Activity Email', N'SystemManager.view.ActivityEmail', N'System Manager', N'tblSMActivity', 0, N'System Manager')
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CRM.view.Opportunity') 
@@ -633,126 +633,161 @@ ELSE
 		WHERE strNamespace = 'Manufacturing.view.Recipe'
 	END
 GO
+	PRINT 'Update tblSMScreen missing in screen permissions'
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.AmendmentSearch')
+	BEGIN
+		UPDATE tblSMScreen SET strScreenName = 'Amendment' WHERE strNamespace = 'ContractManagement.view.AmendmentSearch'
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.GardenMark')
+	BEGIN
+		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Quality.view.GardenMark'
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ManufacturingCell')
+	BEGIN
+		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Manufacturing.view.ManufacturingCell'
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ManufacturingProcess')
+	BEGIN
+		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Manufacturing.view.ManufacturingProcess'
+	END
+
+	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory')
+	-- BEGIN
+	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [ysnDocumentSource], [intConcurrencyId], [strGroupName]) 
+	-- 	VALUES (N'Email Log', N'Email Log', N'GlobalComponentEngine.view.EmailHistory', N'Global Component Engine', NULL, NULL, NULL, NULL, NULL, 1, N'System Manager')
+	-- END
+	-- ELSE
+	-- BEGIN
+	-- 	UPDATE	tblSMScreen
+	-- 	SET		strScreenId = 'Email Log',
+	-- 			strScreenName = 'Email Log'
+	-- 	WHERE	strNamespace = 'GlobalComponentEngine.view.EmailHistory'
+	-- END
+GO
 	------------------------ START REPLICATION SCREEN ------------------------
 
 	-- Parent
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.EntityUser') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.EntityUser') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Users', N'Users', N'i21.view.EntityUser', N'System Manager', N'tblSMUserSecurity', 1, N'System Manager')
+		VALUES (N'Users', N'Users', N'SystemManager.view.EntityUser', N'System Manager', N'tblSMUserSecurity', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Users', strScreenName = 'Users', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.EntityUser'
+		UPDATE [tblSMScreen] SET strScreenId = 'Users', strScreenName = 'Users', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.EntityUser'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.UserRole') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.UserRole') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'User Roles', N'User Roles', N'i21.view.UserRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
+		VALUES (N'User Roles', N'User Roles', N'SystemManager.view.UserRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'User Roles', strScreenName = 'User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'i21.view.UserRole'
+		UPDATE [tblSMScreen] SET strScreenId = 'User Roles', strScreenName = 'User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'SystemManager.view.UserRole'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Country') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Country') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Countries', N'Countries', N'i21.view.Country', N'System Manager', N'tblSMCountry', 1, N'System Manager')
+		VALUES (N'Countries', N'Countries', N'SystemManager.view.Country', N'System Manager', N'tblSMCountry', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Countries', strScreenName = 'Countries', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Country'
+		UPDATE [tblSMScreen] SET strScreenId = 'Countries', strScreenName = 'Countries', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.Country'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Currency') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Currency') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Currencies', N'Currencies', N'i21.view.Currency', N'System Manager', N'tblSMCurrency', 1, N'System Manager')
+		VALUES (N'Currencies', N'Currencies', N'SystemManager.view.Currency', N'System Manager', N'tblSMCurrency', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Currencies', strScreenName = 'Currencies', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Currency'
+		UPDATE [tblSMScreen] SET strScreenId = 'Currencies', strScreenName = 'Currencies', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.Currency'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.EntityShipVia') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.EntityShipVia') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Ship Via', N'Ship Via', N'i21.view.EntityShipVia', N'System Manager', N'tblSMShipVia', 1, N'System Manager')
+		VALUES (N'Ship Via', N'Ship Via', N'SystemManager.view.EntityShipVia', N'System Manager', N'tblSMShipVia', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Ship Via', strScreenName = 'Ship Via', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.EntityShipVia'
+		UPDATE [tblSMScreen] SET strScreenId = 'Ship Via', strScreenName = 'Ship Via', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.EntityShipVia'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.PaymentMethod') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.PaymentMethod') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Payment Methods', N'Payment Methods', N'i21.view.PaymentMethod', N'System Manager', N'tblSMPaymentMethod', 1, N'System Manager')
+		VALUES (N'Payment Methods', N'Payment Methods', N'SystemManager.view.PaymentMethod', N'System Manager', N'tblSMPaymentMethod', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Term') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Term') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Terms', N'Terms', N'i21.view.Term', N'System Manager', N'tblSMTerm', 1, N'System Manager')
+		VALUES (N'Terms', N'Terms', N'SystemManager.view.Term', N'System Manager', N'tblSMTerm', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.CompanyLocation') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.CompanyLocation') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Company Locations', N'Company Locations', N'i21.view.CompanyLocation', N'System Manager', N'tblSMCompanyLocation', 1, N'System Manager')
+		VALUES (N'Company Locations', N'Company Locations', N'SystemManager.view.CompanyLocation', N'System Manager', N'tblSMCompanyLocation', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerm') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.FreightTerm') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Freight Term', N'Freight Term', N'i21.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
+		VALUES (N'Freight Term', N'Freight Term', N'SystemManager.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Freight Term', strScreenName = 'Freight Term' WHERE strNamespace = 'i21.view.FreightTerm'
+		UPDATE [tblSMScreen] SET strScreenId = 'Freight Term', strScreenName = 'Freight Term' WHERE strNamespace = 'SystemManager.view.FreightTerm'
 	END
-	DELETE FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerms'
+	DELETE FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.FreightTerms'
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.City') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.City') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Cities', N'Cities', N'i21.view.City', N'System Manager', N'tblSMCity', 1, N'System Manager')
+		VALUES (N'Cities', N'Cities', N'SystemManager.view.City', N'System Manager', N'tblSMCity', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Cities', strScreenName = 'Cities', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.City'
+		UPDATE [tblSMScreen] SET strScreenId = 'Cities', strScreenName = 'Cities', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.City'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.CurrencyExchangeRate') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.CurrencyExchangeRate') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Currency Exchange Rates', N'Currency Exchange Rates', N'i21.view.CurrencyExchangeRate', N'System Manager', N'tblSMCurrencyExchangeRate', 1, N'System Manager')
+		VALUES (N'Currency Exchange Rates', N'Currency Exchange Rates', N'SystemManager.view.CurrencyExchangeRate', N'System Manager', N'tblSMCurrencyExchangeRate', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.CurrencyExchangeRateType') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.CurrencyExchangeRateType') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Currency Exchange Rate Types', N'Currency Exchange Rate Types', N'i21.view.CurrencyExchangeRateType', N'System Manager', N'tblSMCurrencyExchangeRateType', 1, N'System Manager')
+		VALUES (N'Currency Exchange Rate Types', N'Currency Exchange Rate Types', N'SystemManager.view.CurrencyExchangeRateType', N'System Manager', N'tblSMCurrencyExchangeRateType', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.LineOfBusiness') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.LineOfBusiness') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Lines of Business', N'Lines of Business', N'i21.view.LineOfBusiness', N'System Manager', N'tblSMLineOfBusiness', 1, N'System Manager')
+		VALUES (N'Lines of Business', N'Lines of Business', N'SystemManager.view.LineOfBusiness', N'System Manager', N'tblSMLineOfBusiness', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.ScreenLabel') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ScreenLabel') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Screen Labels', N'Screen Labels', N'GlobalComponentEngine.view.ScreenLabel', N'System Manager', N'tblSMScreenLabel', 1, N'System Manager')
+		VALUES (N'Screen Labels', N'Screen Labels', N'SystemManager.view.ScreenLabel', N'System Manager', N'tblSMScreenLabel', 1, N'System Manager')
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.ReportLabel') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ReportLabel') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Report Labels', N'Report Labels', N'GlobalComponentEngine.view.ReportLabel', N'System Manager', N'tblSMReportLabel', 1, N'System Manager')
+		VALUES (N'Report Labels', N'Report Labels', N'SystemManager.view.ReportLabel', N'System Manager', N'tblSMReportLabel', 1, N'System Manager')
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.BrokerageAccount') 
@@ -935,10 +970,10 @@ GO
 		VALUES (N'INCO/Ship Term', N'INCO/Ship Term', N'ContractManagement.view.INCOShipTerm', N'Contract Management', N'tblCTContractBasis', 1, N'Contract Management')
 	END
 		
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Reporting.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Reports.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'AOP Vs Actual', N'AOP Vs Actual', N'Reporting.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true', N'Contract Management', N'tblCTAOP', 1, N'Contract Management')
+		VALUES (N'AOP Vs Actual', N'AOP Vs Actual', N'Reports.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true', N'Contract Management', N'tblCTAOP', 1, N'Contract Management')
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.WeightGrades') 
@@ -1103,114 +1138,114 @@ GO
 	--END
 
 	
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.ApprovalList') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ApprovalList') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Approval List', N'Approval List', N'i21.view.ApprovalList', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Approval List', N'Approval List', N'SystemManager.view.ApprovalList', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Approval List', strScreenName = 'Approval List', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.ApprovalList'
+		UPDATE [tblSMScreen] SET strScreenId = 'Approval List', strScreenName = 'Approval List', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.ApprovalList'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.ApproverConfiguration') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ApproverConfiguration') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Approver Configuration', N'Approver Configuration', N'i21.view.ApproverConfiguration', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Approver Configuration', N'Approver Configuration', N'SystemManager.view.ApproverConfiguration', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Approver Configuration', strScreenName = 'Approver Configuration', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.ApproverConfiguration'
+		UPDATE [tblSMScreen] SET strScreenId = 'Approver Configuration', strScreenName = 'Approver Configuration', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.ApproverConfiguration'
 	END
 	
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.ApproverGroup') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ApproverGroup') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Approver Groups', N'Approver Groups', N'i21.view.ApproverGroup', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Approver Groups', N'Approver Groups', N'SystemManager.view.ApproverGroup', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Approver Groups', strScreenName = 'Approver Groups', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.ApproverGroup'
+		UPDATE [tblSMScreen] SET strScreenId = 'Approver Groups', strScreenName = 'Approver Groups', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.ApproverGroup'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.TaxCode') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.TaxCode') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Tax Codes', N'Tax Codes', N'i21.view.TaxCode', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Tax Codes', N'Tax Codes', N'SystemManager.view.TaxCode', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Tax Codes', strScreenName = 'Tax Codes', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.TaxCode'
+		UPDATE [tblSMScreen] SET strScreenId = 'Tax Codes', strScreenName = 'Tax Codes', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.TaxCode'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.TaxGroup') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.TaxGroup') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Tax Groups', N'Tax Groups', N'i21.view.TaxGroup', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Tax Groups', N'Tax Groups', N'SystemManager.view.TaxGroup', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Tax Groups', strScreenName = 'Tax Groups', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.TaxGroup'
+		UPDATE [tblSMScreen] SET strScreenId = 'Tax Groups', strScreenName = 'Tax Groups', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.TaxGroup'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Letters') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Letters') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Letters', N'Letters', N'i21.view.Letters', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Letters', N'Letters', N'SystemManager.view.Letters', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Letters', strScreenName = 'Letters', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Letters'
+		UPDATE [tblSMScreen] SET strScreenId = 'Letters', strScreenName = 'Letters', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.Letters'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.FileFieldMapping') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.FileFieldMapping') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'File Field Mapping', N'File Field Mapping', N'i21.view.FileFieldMapping', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'File Field Mapping', N'File Field Mapping', N'SystemManager.view.FileFieldMapping', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'File Field Mapping', strScreenName = 'File Field Mapping', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.FileFieldMapping'
+		UPDATE [tblSMScreen] SET strScreenId = 'File Field Mapping', strScreenName = 'File Field Mapping', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.FileFieldMapping'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.SecurityPolicy') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.SecurityPolicy') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Security Policies', N'Security Policies', N'i21.view.SecurityPolicy', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Security Policies', N'Security Policies', N'SystemManager.view.SecurityPolicy', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Security Policies', strScreenName = 'Security Policies', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.SecurityPolicy'
+		UPDATE [tblSMScreen] SET strScreenId = 'Security Policies', strScreenName = 'Security Policies', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.SecurityPolicy'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Signatures') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.Signatures') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Signatures', N'Signatures', N'i21.view.Signatures', N'System Manager', NULL, 1, N'System Manager')
+		VALUES (N'Signatures', N'Signatures', N'SystemManager.view.Signatures', N'System Manager', NULL, 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Signatures', strScreenName = 'Signatures', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'i21.view.Signatures'
+		UPDATE [tblSMScreen] SET strScreenId = 'Signatures', strScreenName = 'Signatures', strModule = 'System Manager', ysnAvailable = 1 WHERE strNamespace = 'SystemManager.view.Signatures'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.PortalRole') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.PortalRole') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Portal User Roles', N'Portal User Roles', N'i21.view.PortalRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
+		VALUES (N'Portal User Roles', N'Portal User Roles', N'SystemManager.view.PortalRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Portal User Roles', strScreenName = 'Portal User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'i21.view.PortalRole'
+		UPDATE [tblSMScreen] SET strScreenId = 'Portal User Roles', strScreenName = 'Portal User Roles', strModule = 'System Manager', ysnAvailable = 1  WHERE strNamespace = 'SystemManager.view.PortalRole'
 	END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.EmailHistory') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Email History', N'Email History', N'GlobalComponentEngine.view.EmailHistory', N'Global Component Engine', N'tblSMScreen', 1, N'System Manager')
+		VALUES (N'Email History', N'Email History', N'SystemManager.view.EmailHistory', N'Global Component Engine', N'tblSMScreen', 1, N'System Manager')
 	END
 	ELSE
 	BEGIN
-		UPDATE [tblSMScreen] SET strScreenId = 'Email History', strScreenName = 'Email History', strModule = 'Global Component Engine', ysnAvailable = 1  WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory'
+		UPDATE [tblSMScreen] SET strScreenId = 'Email History', strScreenName = 'Email History', strModule = 'Global Component Engine', ysnAvailable = 1  WHERE strNamespace = 'SystemManager.view.EmailHistory'
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.StorageCharge') 

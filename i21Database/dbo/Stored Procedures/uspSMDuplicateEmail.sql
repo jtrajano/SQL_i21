@@ -64,7 +64,7 @@ BEGIN
 
 	-- LOOP THROUGH ATTACHMENTS
 
-	SET @screen = 'GlobalComponentEngine.view.ActivityEmail'
+	SET @screen = 'SystemManager.view.ActivityEmail'
 
 	DECLARE @currentRow1 INT
 	DECLARE @totalRows1 INT

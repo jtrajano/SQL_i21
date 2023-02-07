@@ -21,12 +21,12 @@ OUTER APPLY (
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = t.intTermID
 		AND au.strAction = 'Created'
-		AND au.strNamespace = 'i21.view.Term'
+		AND au.strNamespace = 'SystemManager.view.Term'
 ) created
 OUTER APPLY (
 	SELECT TOP 1 au.dtmDate
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = t.intTermID
 		AND au.strAction = 'Updated'
-		AND au.strNamespace = 'i21.view.Term'
+		AND au.strNamespace = 'SystemManager.view.Term'
 ) updated

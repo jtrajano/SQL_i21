@@ -15,6 +15,7 @@ BEGIN TRY
 		,@strXml NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@dtmCurrentDate DATETIME
+
 	DECLARE @tblIPInvReceipt TABLE (strReceiptNumber NVARCHAR(50))
 	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 

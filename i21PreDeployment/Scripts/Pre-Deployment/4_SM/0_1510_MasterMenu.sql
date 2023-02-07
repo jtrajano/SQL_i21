@@ -27,24 +27,24 @@ BEGIN
 
 				SET IDENTITY_INSERT tblSMMasterMenu ON
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (1, N''System Manager'', N''System Manager'', 0, N''System Manager'', N''Folder'', N''i21'', N''small-folder'', 1, 0, 0, 0, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (2, N''User Security'', N''System Manager'', 1, N''User Security'', N''Screen'', N''i21.controller.UserSecurity'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (3, N''User Roles'', N''System Manager'', 1, N''User Roles'', N''Screen'', N''i21.controller.UserRole'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (2, N''User Security'', N''System Manager'', 1, N''User Security'', N''Screen'', N''SystemManager.controller.UserSecurity'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (3, N''User Roles'', N''System Manager'', 1, N''User Roles'', N''Screen'', N''SystemManager.controller.UserRole'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (4, N''Report Manager'', N''System Manager'', 1, N''Report Manager'', N''Screen'', N''Reports.controller.ReportManager'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (5, N''Motor Fuel Tax Cycle'', N''System Manager'', 1, N''Motor Fuel Tax Cycle'', N''Screen'', N''Reports.controller.RunTaxCycle'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (6, N''Company Preferences'', N''System Manager'', 1, N''Company Preferences'', N''Screen'', N''i21.controller.CompanyPreferences'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (7, N''Starting Numbers'', N''System Manager'', 1, N''Starting Numbers'', N''Screen'', N''i21.controller.StartingNumbers'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (8, N''Custom Fields'', N''System Manager'', 1, N''Custom Fields'', N''Screen'', N''GlobalComponentEngine.controller.CustomField'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (6, N''Company Preferences'', N''System Manager'', 1, N''Company Preferences'', N''Screen'', N''SystemManager.controller.CompanyPreferences'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (7, N''Starting Numbers'', N''System Manager'', 1, N''Starting Numbers'', N''Screen'', N''SystemManager.controller.StartingNumbers'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (8, N''Custom Fields'', N''System Manager'', 1, N''Custom Fields'', N''Screen'', N''SystemManager.controller.CustomField'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (9, N''Customer Portal User Configuration'', N''Customer Portal'', 1, N''Customer Portal User Configuration'', N''Screen'', N''CustomerPortal.controller.CustomerPortalUserConfiguration'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (10, N''Utilities'', N''System Manager'', 1, N''Utilities'', N''Folder'', N'''', N''small-folder'', 1, 0, 0, 0, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (11, N''Origin Conversions'', N''System Manager'', 10, N''Origin Conversions'', N''Screen'', N''i21.controller.OriginUtility'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (12, N''Import Legacy Users'', N''System Manager'', 10, N''Import Legacy Users'', N''Screen'', N''i21.controller.ImportLegacyUsers'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (11, N''Origin Conversions'', N''System Manager'', 10, N''Origin Conversions'', N''Screen'', N''SystemManager.controller.OriginUtility'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (12, N''Import Legacy Users'', N''System Manager'', 10, N''Import Legacy Users'', N''Screen'', N''SystemManager.controller.ImportLegacyUsers'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (13, N''Common Info'', N''System Manager'', 0, N''Common Info'', N''Folder'', N'''', N''small-folder'', 1, 0, 0, 0, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (14, N''Country'', N''System Manager'', 13, N''Country'', N''Screen'', N''i21.controller.Country'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (15, N''Zip Code'', N''System Manager'', 13, N''Zip Code'', N''Screen'', N''i21.controller.ZipCode'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (16, N''Currency'', N''System Manager'', 13, N''Currency'', N''Screen'', N''i21.controller.Currency'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (17, N''Ship Via'', N''System Manager'', 13, N''Ship Via'', N''Screen'', N''i21.controller.ShipVia'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (18, N''Payment Methods'', N''System Manager'', 13, N''Payment Methods'', N''Screen'', N''i21.controller.PaymentMethod'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
-				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (19, N''Terms'', N''System Manager'', 13, N''Terms'', N''Screen'', N''i21.controller.Term'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (14, N''Country'', N''System Manager'', 13, N''Country'', N''Screen'', N''SystemManager.controller.Country'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (15, N''Zip Code'', N''System Manager'', 13, N''Zip Code'', N''Screen'', N''SystemManager.controller.ZipCode'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (16, N''Currency'', N''System Manager'', 13, N''Currency'', N''Screen'', N''SystemManager.controller.Currency'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (17, N''Ship Via'', N''System Manager'', 13, N''Ship Via'', N''Screen'', N''SystemManager.controller.ShipVia'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (18, N''Payment Methods'', N''System Manager'', 13, N''Payment Methods'', N''Screen'', N''SystemManager.controller.PaymentMethod'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (19, N''Terms'', N''System Manager'', 13, N''Terms'', N''Screen'', N''SystemManager.controller.Term'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (20, N''Dashboard'', N''Dashboard'', 0, N''Dashboard'', N''Folder'', N'''', N''small-folder'', 1, 0, 0, 0, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (21, N''Add Panel'', N''Dashboard'', 20, N''Add Panel'', N''Screen'', N''Dashboard.Controller.PanelSettings'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (22, N''Connections'', N''Dashboard'', 20, N''Connections'', N''Screen'', N''Dashboard.Controller.DashboardConnection'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
@@ -310,7 +310,7 @@ BEGIN
 		EXEC
 		('
 			IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = ''Company Location'' AND strType = ''Screen'' AND strModuleName = ''System Manager'')
-			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N''Company Location'', N''System Manager'', 13, N''Company Location'', N''Screen'', N''i21.controller.CompanyLocation'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N''Company Location'', N''System Manager'', 13, N''Company Location'', N''Screen'', N''SystemManager.controller.CompanyLocation'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 		')
 
 		EXEC
@@ -355,7 +355,7 @@ BEGIN
 		EXEC
 		('
 			IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = ''Import Origin Menus'' AND strType = ''Screen'' AND strModuleName = ''System Manager'')
-			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N''Import Origin Menus'', N''System Manager'', 10, N''Import Origin Menus'', N''Screen'', N''i21.controller.ImportLegacyMenus'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N''Import Origin Menus'', N''System Manager'', 10, N''Import Origin Menus'', N''Screen'', N''SystemManager.controller.ImportLegacyMenus'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 		')
 
 		EXEC
@@ -638,7 +638,7 @@ BEGIN
 		EXEC
 		('
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strDescription = ''Freight Terms'')
-			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N''Freight Terms'', N''System Manager'', 13, N''Freight Terms'', N''Screen'', N''i21.controller.FreightTerms'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N''Freight Terms'', N''System Manager'', 13, N''Freight Terms'', N''Screen'', N''SystemManager.controller.FreightTerms'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 		')
 
 		EXEC
@@ -1156,7 +1156,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Recurring Transactions'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Recurring Transactions'', N''System Manager'', 13, N''Recurring Transactions'', N''Screen'', N''i21.view.RecurringTransaction'', N''small-screen'', 0, 0, 0, 1, 8, 1)
+					VALUES (N''Recurring Transactions'', N''System Manager'', 13, N''Recurring Transactions'', N''Screen'', N''SystemManager.view.RecurringTransaction'', N''small-screen'', 0, 0, 0, 1, 8, 1)
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 8
@@ -1164,11 +1164,11 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Group Master'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Tax Group Master'', N''System Manager'', 13, N''Tax Group Master'', N''Screen'', N''i21.view.TaxGroupMaster'', N''small-screen'', 0, 0, 0, 1, 9, 1) 
+					VALUES (N''Tax Group Master'', N''System Manager'', 13, N''Tax Group Master'', N''Screen'', N''SystemManager.view.TaxGroupMaster'', N''small-screen'', 0, 0, 0, 1, 9, 1) 
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Group'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Tax Group'', N''System Manager'', 13, N''Tax Group'', N''Screen'', N''i21.view.TaxGroup'', N''small-screen'', 0, 0, 0, 1, 10, 1) 
+					VALUES (N''Tax Group'', N''System Manager'', 13, N''Tax Group'', N''Screen'', N''SystemManager.view.TaxGroup'', N''small-screen'', 0, 0, 0, 1, 10, 1) 
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 10
@@ -1176,7 +1176,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Code'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Tax Code'', N''System Manager'', 13, N''Tax Code'', N''Screen'', N''i21.view.TaxCode'', N''small-screen'', 0, 0, 0, 1, 11, 1) 
+					VALUES (N''Tax Code'', N''System Manager'', 13, N''Tax Code'', N''Screen'', N''SystemManager.view.TaxCode'', N''small-screen'', 0, 0, 0, 1, 11, 1) 
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 11
@@ -1184,13 +1184,13 @@ BEGIN
 
 				--IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Type'')
 				--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-				--	VALUES (N''Tax Type'', N''System Manager'', 13, N''Tax Type'', N''Screen'', N''i21.view.TaxType'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
+				--	VALUES (N''Tax Type'', N''System Manager'', 13, N''Tax Type'', N''Screen'', N''SystemManager.view.TaxType'', N''small-screen'', 0, 0, 0, 1, NULL, 1)
 				IF EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Type'')
 					DELETE FROM [dbo].[tblSMMasterMenu] WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Type''
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Tax Class'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Tax Class'', N''System Manager'', 13, N''Tax Class'', N''Screen'', N''i21.view.TaxClass'', N''small-screen'', 0, 0, 0, 1, 12, 1) 
+					VALUES (N''Tax Class'', N''System Manager'', 13, N''Tax Class'', N''Screen'', N''SystemManager.view.TaxClass'', N''small-screen'', 0, 0, 0, 1, 12, 1) 
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 12
@@ -1198,7 +1198,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''City'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''City'', N''System Manager'', 13, N''City'', N''Screen'', N''i21.view.City'', N''small-screen'', 0, 0, 0, 1, 13, 1) 
+					VALUES (N''City'', N''System Manager'', 13, N''City'', N''Screen'', N''SystemManager.view.City'', N''small-screen'', 0, 0, 0, 1, 13, 1) 
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 13
@@ -1206,7 +1206,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Currency Exchange Rate'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Currency Exchange Rate'', N''System Manager'', 13, N''Currency Exchange Rate'', N''Screen'', N''i21.view.CurrencyExchangeRate'', N''small-screen'', 0, 0, 0, 1, 14, 1) 
+					VALUES (N''Currency Exchange Rate'', N''System Manager'', 13, N''Currency Exchange Rate'', N''Screen'', N''SystemManager.view.CurrencyExchangeRate'', N''small-screen'', 0, 0, 0, 1, 14, 1) 
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 14
@@ -1214,7 +1214,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Currency Exchange Rate Type'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Currency Exchange Rate Type'', N''System Manager'', 13, N''Currency Exchange Rate Type'', N''Screen'', N''i21.view.CurrencyExchangeRateType'', N''small-screen'', 0, 0, 0, 1, 15, 1)
+					VALUES (N''Currency Exchange Rate Type'', N''System Manager'', 13, N''Currency Exchange Rate Type'', N''Screen'', N''SystemManager.view.CurrencyExchangeRateType'', N''small-screen'', 0, 0, 0, 1, 15, 1)
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 15
@@ -1222,7 +1222,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID IN (1, 13) AND strMenuName = ''User Preferences'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''User Preferences'', N''System Manager'', 13, N''User Preferences'', N''Screen'', N''i21.view.UserPreferences'', N''small-screen'', 0, 0, 0, 1, 16, 1)
+					VALUES (N''User Preferences'', N''System Manager'', 13, N''User Preferences'', N''Screen'', N''SystemManager.view.UserPreferences'', N''small-screen'', 0, 0, 0, 1, 16, 1)
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intParentMenuID = 13, intSort = 16
@@ -1230,7 +1230,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Reminder List'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Reminder List'', N''System Manager'', 13, N''Reminder List'', N''Screen'', N''i21.view.ReminderList'', N''small-screen'', 0, 0, 0, 1, 17, 1)
+					VALUES (N''Reminder List'', N''System Manager'', 13, N''Reminder List'', N''Screen'', N''SystemManager.view.ReminderList'', N''small-screen'', 0, 0, 0, 1, 17, 1)
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 17
@@ -1238,7 +1238,7 @@ BEGIN
 
 				IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = ''System Manager'' AND intParentMenuID = 13 AND strMenuName = ''Batch Posting'')
 					INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-					VALUES (N''Batch Posting'', N''System Manager'', 13, N''Batch Posting'', N''Screen'', N''i21.view.BatchPosting'', N''small-screen'', 0, 0, 0, 1, 18, 1)
+					VALUES (N''Batch Posting'', N''System Manager'', 13, N''Batch Posting'', N''Screen'', N''SystemManager.view.BatchPosting'', N''small-screen'', 0, 0, 0, 1, 18, 1)
 				ELSE
 					UPDATE tblSMMasterMenu
 					SET intSort = 18
@@ -1644,7 +1644,7 @@ BEGIN
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Company Setup'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES (''Company Setup'', ''System Manager'', @SystemManagerAdminMenuId, ''Company Setup'', ''Screen'', ''i21.view.CompanySetup'', ''small-screen'', 0, 0, 0, 1, 7, 1)
+			VALUES (''Company Setup'', ''System Manager'', @SystemManagerAdminMenuId, ''Company Setup'', ''Screen'', ''SystemManager.view.CompanySetup'', ''small-screen'', 0, 0, 0, 1, 7, 1)
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Utilities'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId)
 			UPDATE tblSMMasterMenu SET intSort = 8 WHERE strMenuName = ''Utilities'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId
@@ -2416,7 +2416,7 @@ BEGIN
 			/* --- Update GCE Menu Commands for MVVM ----- */
 			/* ------------------------------------------------- */
 
-			UPDATE tblSMMasterMenu SET strCommand = ''GlobalComponentEngine.view.CustomField'' WHERE strCommand = ''GlobalComponentEngine.controller.CustomField''
+			UPDATE tblSMMasterMenu SET strCommand = ''SystemManager.view.CustomField'' WHERE strCommand = ''SystemManager.controller.CustomField''
 
 			/* ------------------------------------------------- */
 			/* -- End Update GCE Menu Commands for MVVM -- */
@@ -2595,19 +2595,19 @@ BEGIN
 				/* --------------------------------- */
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''User Security'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'', ''view'') 
-				WHERE strMenuName = ''User Security'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.UserSecurity''
+				WHERE strMenuName = ''User Security'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.UserSecurity''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''User Roles'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'', ''view'') 
-				WHERE strMenuName = ''User Roles'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.UserRole''
+				WHERE strMenuName = ''User Roles'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.UserRole''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Starting Numbers'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'', ''view'') 
-				WHERE strMenuName = ''Starting Numbers'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.StartingNumbers''
+				WHERE strMenuName = ''Starting Numbers'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.StartingNumbers''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Company Preferences'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'', ''view'') 
-				WHERE strMenuName = ''Company Preferences'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.CompanyPreferences''
+				WHERE strMenuName = ''Company Preferences'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.CompanyPreferences''
 	
 			DECLARE @SystemManagerAdminUtilitiesMenuId INT
 			SELECT @SystemManagerAdminUtilitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = ''Utilities'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminMenuId
@@ -2617,15 +2617,15 @@ BEGIN
 				/* ---------------------------------- */
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Import Origin Users'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Import Origin Users'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.ImportLegacyUsers''
+				WHERE strMenuName = ''Import Origin Users'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.ImportLegacyUsers''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Import Origin Menus'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Import Origin Menus'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.ImportLegacyMenus''
+				WHERE strMenuName = ''Import Origin Menus'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.ImportLegacyMenus''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Origin Conversions'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller.OriginUtility'',''view.OriginConversions'') 
-				WHERE strMenuName = ''Origin Conversions'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.OriginUtility''
+				WHERE strMenuName = ''Origin Conversions'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.OriginUtility''
 
 
 			DECLARE @SystemManagerModuleId INT
@@ -2636,35 +2636,35 @@ BEGIN
 				/* ------------------------------ */
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Country'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Country'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.Country''
+				WHERE strMenuName = ''Country'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.Country''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Currency'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Currency'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.Currency''
+				WHERE strMenuName = ''Currency'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.Currency''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Ship Via'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Ship Via'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.ShipVia''
+				WHERE strMenuName = ''Ship Via'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.ShipVia''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Payment Methods'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Payment Methods'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.PaymentMethod''
+				WHERE strMenuName = ''Payment Methods'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.PaymentMethod''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Freight Terms'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Freight Terms'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.FreightTerms''
+				WHERE strMenuName = ''Freight Terms'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.FreightTerms''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Terms'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Terms'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.Term''
+				WHERE strMenuName = ''Terms'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.Term''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Company Location'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Company Location'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.CompanyLocation''
+				WHERE strMenuName = ''Company Location'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.CompanyLocation''
 
 				IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Zip Code'' AND strModuleName = ''System Manager'' AND intParentMenuID = @SystemManagerModuleId)
 				UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,''controller'',''view'') 
-				WHERE strMenuName = ''Zip Code'' AND strModuleName = ''System Manager'' AND strCommand = ''i21.controller.ZipCode''
+				WHERE strMenuName = ''Zip Code'' AND strModuleName = ''System Manager'' AND strCommand = ''SystemManager.controller.ZipCode''
 
 			/*-------------------------------  */
 			/*-- End Update System Manager Menu */

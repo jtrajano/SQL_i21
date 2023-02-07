@@ -23,8 +23,10 @@ BEGIN TRY
 				 , strBatchId			= B.strBatchId	
 			FROM tblQMTINClearance TIN
 			INNER JOIN fnGetRowsFromDelimitedValues(@strTINIds) ID ON TIN.intTINClearanceId = ID.intID
-			LEFT JOIN tblMFBatch B ON TIN.intBatchId = B.intBatchId
-			WHERE ISNULL(B.dblTotalQuantity, 0) = 0
+			LEFT JOIN tblMFLotInventory LI on LI.intBatchId =TIN.intBatchId
+			LEFT JOIN tblICLot L on L.intLotId =LI.intLotId 
+			LEFT JOIN tblMFBatch B ON B.intBatchId = TIN.intBatchId
+			WHERE ISNULL(L.dblQty, 0) = 0 AND L.intLotId IS NOT NULL
 		END
 	ELSE
 		BEGIN
@@ -33,8 +35,10 @@ BEGIN TRY
 				 , intBatchId			= TIN.intBatchId
 				 , strBatchId			= B.strBatchId	
 			FROM tblQMTINClearance TIN
-			LEFT JOIN tblMFBatch B ON TIN.intBatchId = B.intBatchId
-			WHERE ISNULL(B.dblTotalQuantity, 0) = 0
+			LEFT JOIN tblMFLotInventory LI on LI.intBatchId =TIN.intBatchId
+			LEFT JOIN tblICLot L on L.intLotId =LI.intLotId
+			LEFT JOIN tblMFBatch B ON B.intBatchId = TIN.intBatchId
+			WHERE ISNULL(L.dblQty, 0) = 0 AND L.intLotId IS NOT NULL
 		END
 
 	UPDATE TIN

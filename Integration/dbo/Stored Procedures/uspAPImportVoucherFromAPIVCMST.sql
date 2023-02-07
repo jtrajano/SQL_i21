@@ -181,6 +181,7 @@ SELECT
 	[strShipToZipCode]		=	@shipToZipCode,
 	[intCurrencyId]			=	@defaultCurrencyId,
 	[ysnOrigin]				=	1,
+	[intPayToBankAccountId]	=	EFT.intEntityEFTInfoId,
 	[ysnOldPrepayment]		=	1,
 	[intBackupId]			=	A.intBackupId
 FROM tmp_apivcmstImport A
@@ -190,6 +191,7 @@ FROM tmp_apivcmstImport A
 		ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 	LEFT JOIN tblEMEntityLocation loc
 		ON D.intEntityId = loc.intEntityId AND loc.ysnDefaultLocation = 1
+	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = D.intEntityId AND EFT.intCurrencyId = @defaultCurrencyId AND EFT.ysnDefaultAccount = 1
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
@@ -236,6 +238,7 @@ INSERT
 	[strShipToZipCode],		
 	[intCurrencyId],
 	[ysnOrigin],
+	[intPayToBankAccountId],
 	[ysnOldPrepayment]
 )
 VALUES
@@ -281,6 +284,7 @@ VALUES
 	[strShipToZipCode],		
 	[intCurrencyId],
 	[ysnOrigin],
+	[intPayToBankAccountId],
 	[ysnOldPrepayment]
 )
 OUTPUT inserted.intBillId intBillId, SourceData.intBackupId intBackupId INTO #tmpVoucherTransactions;

@@ -86,6 +86,7 @@ SELECT S.intSampleId
 	,PUOM4.strUnitMeasure AS strB4PriceUOM
 	,PUOM5.strUnitMeasure AS strB5PriceUOM
 	,TC.strTINNumber
+	,ISNULL(S.intProductValueId, 0) AS intBatchId
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId

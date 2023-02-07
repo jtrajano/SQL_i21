@@ -16,12 +16,12 @@ OUTER APPLY (
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = c.intCountryID
 		AND au.strAction = 'Created'
-		AND au.strNamespace = 'i21.view.Country'
+		AND au.strNamespace = 'SystemManager.view.Country'
 ) created
 OUTER APPLY (
 	SELECT TOP 1 au.dtmDate
 	FROM vyuApiRecordAudit au
 	WHERE au.intRecordId = c.intCountryID
 		AND au.strAction = 'Updated'
-		AND au.strNamespace = 'i21.view.Country'
+		AND au.strNamespace = 'SystemManager.view.Country'
 ) updated

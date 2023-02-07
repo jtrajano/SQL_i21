@@ -89,6 +89,12 @@ IF ISNULL(@intPaymentMethodId, 0) = 0
 		WHERE strPaymentMethod = 'Manual Credit Card'
 	END
 
+--ACTIVATE PAYMENT METHOD
+UPDATE tblSMPaymentMethod 
+SET ysnActive = 1 
+WHERE intPaymentMethodID = @intPaymentMethodId
+  AND (ysnActive = 0 OR ysnActive IS NULL)
+
 --GET INVOICES TO POST
 INSERT INTO #AAPINVOICES WITH (TABLOCK) (
 	  intInvoiceId

@@ -27,6 +27,8 @@ BEGIN TRY
 	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
 	-- Strategy
 	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+	-- Currency
+	LEFT JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -58,6 +60,13 @@ BEGIN TRY
 						)
 					THEN 'STRATEGY, '
 				ELSE ''
+				END + CASE 
+				WHEN (
+						CUR.intCurrencyID IS NULL
+						AND ISNULL(IMP.strCurrency, '') <> ''
+						)
+					THEN 'CURRENCY, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
@@ -77,6 +86,10 @@ BEGIN TRY
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
 				)
+			OR (
+				CUR.intCurrencyID IS NULL
+				AND ISNULL(IMP.strCurrency, '') <> ''
+				)
 			)
 
 	-- End Validation   
@@ -90,6 +103,7 @@ BEGIN TRY
 		,@dblCashPrice NUMERIC(18, 6)
 		,@ysnSampleContractItemMatch BIT
 		,@strSampleNumber NVARCHAR(30)
+		,@intCurrencyID INT
 	DECLARE @MFBatchTableType MFBatchTableType
 	-- Loop through each valid import detail
 	DECLARE @C AS CURSOR;
@@ -111,6 +125,7 @@ BEGIN TRY
 			ELSE 0
 			END
 		,strSampleNumber = S.strSampleNumber
+		,intCurrencyID = CUR.intCurrencyID
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -131,6 +146,8 @@ BEGIN TRY
 		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
 		-- Strategy
 		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+		-- Currency
+		LEFT JOIN tblSMCurrency CUR ON IMP.strCurrency IS NOT NULL AND CUR.strCurrency = IMP.strCurrency
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -154,6 +171,7 @@ BEGIN TRY
 		,@dblCashPrice
 		,@ysnSampleContractItemMatch
 		,@strSampleNumber
+		,@intCurrencyID
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -186,6 +204,7 @@ BEGIN TRY
 			,intSampleStatusId = @intSampleStatusId
 			,intBookId = @intBookId
 			,intSubBookId = @intSubBookId
+			,intCurrencyId = @intCurrencyID
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -560,6 +579,7 @@ BEGIN TRY
 			,@dblCashPrice
 			,@ysnSampleContractItemMatch
 			,@strSampleNumber
+			,@intCurrencyID
 	END
 
 	CLOSE @C

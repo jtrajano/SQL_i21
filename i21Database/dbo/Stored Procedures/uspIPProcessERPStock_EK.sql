@@ -391,15 +391,6 @@ BEGIN TRY
 						)
 			END
 
-			IF ISNULL(@intLotId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Invalid Batch. '
-						,16
-						,1
-						)
-			END
-
 			BEGIN TRAN
 
 			-- Lot Create / Update
@@ -410,14 +401,27 @@ BEGIN TRY
 					GOTO NextRec
 				END
 
-				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
-					,@intQtyItemUOMId = L.intItemUOMId
-				FROM tblICLot L WITH (NOLOCK)
-				WHERE L.strLotNumber = @strLotNumber
-					AND L.intItemId = @intItemId
-					AND L.intSubLocationId = @intSubLocationId
+				-- Take Qty from Batch
+				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0)
+					,@intQtyItemUOMId = IUOM.intItemUOMId
+				FROM tblMFBatch B WITH (NOLOCK)
+				JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
+					AND IUOM.intUnitMeasureId = B.intItemUOMId
+					AND B.strBatchId = @strLotNumber
+					AND B.intTealingoItemId = @intItemId
+					AND B.intLocationId = @intCompanyLocationId
 
-				IF @dblQty IS NULL
+				IF ISNULL(@dblQty, 0) = 0
+				BEGIN
+					SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+						,@intQtyItemUOMId = L.intItemUOMId
+					FROM tblICLot L WITH (NOLOCK)
+					WHERE L.strLotNumber = @strLotNumber
+						AND L.intItemId = @intItemId
+						AND L.intSubLocationId = @intSubLocationId
+				END
+
+				IF ISNULL(@dblQty, 0) = 0
 				BEGIN
 					SELECT @dblQty = @dblNetWeight
 						,@intQtyItemUOMId = @intNetWeightItemUOMId

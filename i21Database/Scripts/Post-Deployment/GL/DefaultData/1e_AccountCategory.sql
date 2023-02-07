@@ -140,7 +140,8 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			-- GL Revalue Accounts
 			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
 			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' UNION ALL --GL-8450
-			SELECT id = 164, name = 'In-Transit Direct'
+			SELECT id = 164, name = 'In-Transit Direct' UNION ALL
+			SELECT id = 165, name = 'Inter Company'--GL-9005
 
 
 	) AS CategoryHardCodedValues

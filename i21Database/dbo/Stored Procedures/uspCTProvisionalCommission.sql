@@ -113,7 +113,7 @@ BEGIN TRY
 			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 	FROM	vyuCTEntity CH
 	left join tblSMCountry				rtc9 on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(CH.strEntityCountry)))
-	left join tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
+	left join tblSMScreen				rts9 on rts9.strNamespace = 'SystemManager.view.Country'
 	left join tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
@@ -162,11 +162,11 @@ BEGIN TRY
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = BD.intRateUOMId
 	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'Name'
 	
-	left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
+	left join tblSMScreen				rts4 on rts4.strNamespace = 'SystemManager.view.Country'
 	left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = IG.intCountryID
 	left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
 	
-	left join tblSMScreen				rts5 on rts5.strNamespace = 'i21.view.Country'
+	left join tblSMScreen				rts5 on rts5.strNamespace = 'SystemManager.view.Country'
 	left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = OG.intCountryID
 	left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
 

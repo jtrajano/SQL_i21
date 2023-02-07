@@ -1292,7 +1292,7 @@ BEGIN
 		)
 		(
 			select
-				intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'GlobalComponentEngine.view.Activity' and strScreenName = 'Activity')
+				intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = 'SystemManager.view.Activity' and strScreenName = 'Activity')
 				,intRecordId =  @intGeneratedActivityIdentityAct
 				,strTransactionNo = @strActivityNoAct
 				,intEntityId = @intEntityIdAct
@@ -1334,7 +1334,7 @@ END
 CLOSE @queryResultAct
 DEALLOCATE @queryResultAct
 
-update tblSMAttachment set tblSMAttachment.strScreen = 'GlobalComponentEngine.view.Activity', tblSMAttachment.strRecordNo = (select top 1 convert(nvarchar(50),tblCRMOpportunityActivityTmp.intActivityId) from tblCRMOpportunityActivityTmp where tblCRMOpportunityActivityTmp.intTicketIdId = convert(int,tblSMAttachment.strRecordNo)) where tblSMAttachment.strScreen = 'HelpDesk.view.Ticket' and tblSMAttachment.strRecordNo in (select convert(nvarchar(50),tblCRMOpportunityActivityTmp.intTicketIdId) from tblCRMOpportunityActivityTmp);
+update tblSMAttachment set tblSMAttachment.strScreen = 'SystemManager.view.Activity', tblSMAttachment.strRecordNo = (select top 1 convert(nvarchar(50),tblCRMOpportunityActivityTmp.intActivityId) from tblCRMOpportunityActivityTmp where tblCRMOpportunityActivityTmp.intTicketIdId = convert(int,tblSMAttachment.strRecordNo)) where tblSMAttachment.strScreen = 'HelpDesk.view.Ticket' and tblSMAttachment.strRecordNo in (select convert(nvarchar(50),tblCRMOpportunityActivityTmp.intTicketIdId) from tblCRMOpportunityActivityTmp);
 
 PRINT N'Creating Activity Note from Activity Details...'
 
@@ -1369,7 +1369,7 @@ SET @queryResultComment = CURSOR FOR
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
-		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'SystemManager.view.Activity'))
 		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
 		,intConcurrencyId = 1
 		,tblHDTicketComment.intTicketCommentId
@@ -1391,7 +1391,7 @@ SET @queryResultComment = CURSOR FOR
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketComment.intCreatedUserEntityId
-		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'SystemManager.view.Activity'))
 		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
 		,intConcurrencyId = 1
 		,tblHDTicketComment.intTicketCommentId
@@ -1536,7 +1536,7 @@ SET @queryResultNote = CURSOR FOR
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
-		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'SystemManager.view.Activity'))
 		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
 		,intConcurrencyId = 1
 		,tblHDTicketNote.intTicketNoteId
@@ -1558,7 +1558,7 @@ SET @queryResultNote = CURSOR FOR
 		,ysnPublic = convert(bit,1)
 		,ysnEdited = null
 		,intEntityId = tblHDTicketNote.intCreatedUserEntityId
-		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'GlobalComponentEngine.view.Activity'))
+		,intTransactionId = (select top 1 tblSMTransaction.intTransactionId from tblSMTransaction where tblSMTransaction.intRecordId = tblCRMOpportunityActivityTmp.intActivityId and tblSMTransaction.intScreenId = (select top 1 tblSMScreen.intScreenId from tblSMScreen where tblSMScreen.strNamespace = 'SystemManager.view.Activity'))
 		,intActivityId = tblCRMOpportunityActivityTmp.intActivityId
 		,intConcurrencyId = 1
 		,tblHDTicketNote.intTicketNoteId
