@@ -514,4 +514,7 @@ BEGIN
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 END
 
+IF @Recap = 0 AND @Post = 0
+	EXEC [dbo].[uspARPostItemReservation]
+
 RETURN 0
