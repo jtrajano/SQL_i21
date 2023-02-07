@@ -10,6 +10,10 @@ CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@ysnAudit			AS BIT				= 0	
 AS
 
+
+
+
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -272,6 +276,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 
 		DECLARE @SkipICValidation BIT = 0
 
+		GOTO _insertIntra
+
+		_continuePost:
+		
+		IF @@ERROR <> 0 
+		GOTO Post_Rollback;
+
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
 		
@@ -356,45 +367,14 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
-		-- Intra Company Entries
-		IF (ISNULL(@ysnIntraCompanyEntries, 0) = 1)
-		BEGIN
-			INSERT INTO @GLEntries (
-				 [strTransactionId]
-				,[intTransactionId]
-				,[intAccountId]
-				,[strDescription]
-				,[dtmTransactionDate]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitForeign]			
-				,[dblCreditForeign]
-				,[dblDebitReport]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[dtmDate]
-				,[ysnIsUnposted]
-				,[intConcurrencyId]	
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[intUserId]
-				,[intEntityId]			
-				,[dtmDateEntered]
-				,[strBatchId]
-				,[strCode]			
-				,[strJournalLineDescription]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intCompanyLocationId]
-				,[ysnIntraCompanyEntry]
-			)
-			EXEC [dbo].[uspGLCreateIntraCompanyEntries] @JournalIds = @tmpValidJournals, @strBatchId = @strBatchId, @intEntityId = @intEntityId, @ysnAudit = @ysnAudit
-		END
+		GOTO _insertIntra
 		
+		_continueRecap:
+		
+		IF @@ERROR <>  0 
+		GOTO Post_Rollback;
+		
+
 		EXEC dbo.uspGLPostRecap 
 			@GLEntries
 			,@intEntityId
