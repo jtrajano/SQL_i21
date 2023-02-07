@@ -1266,6 +1266,7 @@ AS
  									ELSE @dblZero
  									END
 								)
+		, intConcurrencyId = 1
 
  	FROM #tempPurchaseContractInfo pContract
  	LEFT JOIN #tempShipmentDetails pShipment

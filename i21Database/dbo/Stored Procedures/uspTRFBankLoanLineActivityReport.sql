@@ -36,6 +36,7 @@ BEGIN
 		, dblFinanceQty
 		, strBankApprovalStatus
 		, strBankValuationRule
+		, intConcurrencyId = 1
 	FROM 
 	(
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY t1.strTradeFinanceTransaction, t1.strBank, t1.strLimit, t1.strSublimit
