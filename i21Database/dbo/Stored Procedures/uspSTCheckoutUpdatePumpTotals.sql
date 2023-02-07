@@ -23,8 +23,8 @@ BEGIN
 		FROM			dbo.tblSTCheckoutPumpTotals CPT
 		INNER JOIN		(	SELECT		intCheckoutId, 
 										intItemUOMId, 
-										SUM(dblDollarsSold) as dblSumDollarsSold, 
-										SUM(dblGallonsSold) as dblSumGallonsSold 
+										SUM(dblDollarsSold - dblPumpTestDollars) as dblSumDollarsSold, 
+										SUM(dblGallonsSold - dblPumpTestGallons) as dblSumGallonsSold 
 							FROM		tblSTCheckoutFuelSalesByGradeAndPricePoint
 							WHERE		intCheckoutId = @intCheckoutId
 							GROUP BY	intCheckoutId, 
@@ -44,8 +44,8 @@ BEGIN
 					0
 		FROM		(	SELECT		intCheckoutId, 
 									intItemUOMId, 
-									SUM(dblDollarsSold) as dblSumDollarsSold, 
-									SUM(dblGallonsSold) as dblSumGallonsSold 
+									SUM(dblDollarsSold - dblPumpTestDollars) as dblSumDollarsSold, 
+									SUM(dblGallonsSold - dblPumpTestGallons) as dblSumGallonsSold 
 						FROM		tblSTCheckoutFuelSalesByGradeAndPricePoint
 						WHERE		intCheckoutId = @intCheckoutId AND 
 									intItemUOMId NOT IN (	SELECT		intPumpCardCouponId 
