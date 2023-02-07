@@ -34,6 +34,9 @@ BEGIN
 	DECLARE @ItemsForCosting 					[ItemCostingTableType]
 	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
 	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
+
+	IF @Recap = @ZeroBit	
+		EXEC dbo.uspARPostItemReservation
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]

@@ -619,9 +619,6 @@ BEGIN TRY
 		   ,@UserId  = @userId
 		   ,@raiseError = @raiseError
 
-	IF @recap = 0
-		EXEC [dbo].[uspARPostItemResevation]
-
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    = @post
            ,@BatchId = @batchIdUsed

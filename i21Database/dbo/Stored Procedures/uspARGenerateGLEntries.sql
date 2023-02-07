@@ -372,5 +372,8 @@ FROM ##ARInvoiceGLEntries GL
 INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 						 AND GL.intTransactionId = I.intInvoiceId
 WHERE GL.intSourceEntityId IS NULL
- 
+
+IF @Recap = 0 AND @Post = 0
+	EXEC [dbo].[uspARPostItemReservation]
+
 RETURN 0
