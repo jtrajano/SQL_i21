@@ -883,6 +883,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentConditionsReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReportForInStore1.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerSalesReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessClaimPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1895,7 +1896,6 @@
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForReversePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspNRScheduleHistoryReversePayment.sql" />
     <Build Include="dbo\Views\vyuARGetInventoryItem.sql" />
-   
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForAdjustment.sql" />
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
