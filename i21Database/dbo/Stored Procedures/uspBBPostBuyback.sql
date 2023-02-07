@@ -162,7 +162,7 @@ AS
 			[intAccountId]	= dbo.fnGetLocationAwareGLAccount(@intDetailAccount, C.intLocationId) --[dbo].[fnGetItemGLAccount](B.intItemId, C.intItemLocationId, 'Sales Account')
 			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
 			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
-			,[dblQtyReceived] = A.dblBuybackQuantity	
+			,[dblQtyReceived] = dbo.fnCalculateQtyBetweenUOM(iu.intItemUOMId, su.intItemUOMId, A.dblBuybackQuantity)--A.dblBuybackQuantity	
 			,[dblCost]	 = A.dblBuybackRate	
 		INTO #tmpStagingInsert
 		FROM tblBBBuybackDetail A
@@ -170,6 +170,9 @@ AS
 			ON A.intItemId = B.intItemId
 		JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = A.intInvoiceDetailId
 		JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
+		LEFT JOIN tblICItemUOM iu ON iu.intItemUOMId = id.intItemUOMId
+		LEFT JOIN tblICItemUOM su ON su.intItemId = id.intItemId
+			AND su.ysnStockUnit = 1
 		INNER JOIN tblICItemLocation C
 			ON B.intItemId = C.intItemId
 				AND intLocationId = iv.intCompanyLocationId
