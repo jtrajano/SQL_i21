@@ -17,7 +17,7 @@ SELECT   strTransactionType
 			,intCurrencyId			=	GJ.intCurrencyId
 			,intForexRateType		=	NULL
 			,strForexRateType		=	''--SMC.strCurrencyExchangeRateType
-			,dblForexRate			=	ISNULL(dblExchangeRate, CASE WHEN (GJ.dblDebitForeign - GJ.dblCreditForeign)<> 0 THEN (GJ.dblDebit - GJ.dblCredit)/(GJ.dblDebitForeign - GJ.dblCreditForeign) ELSE 0 END)
+			,dblForexRate			=	0 --ISNULL(dblExchangeRate, CASE WHEN (GJ.dblDebitForeign - GJ.dblCreditForeign)<> 0 THEN (GJ.dblDebit - GJ.dblCredit)/(GJ.dblDebitForeign - GJ.dblCreditForeign) ELSE 0 END)
 			,dblHistoricAmount		=	GJ.dblDebit - GJ.dblCredit
 			,dblNewForexRate		=	0
 			,dblNewAmount			=	0
