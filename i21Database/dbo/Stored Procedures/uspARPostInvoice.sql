@@ -642,9 +642,6 @@ BEGIN TRY
 		   ,@raiseError 	= @raiseError
 		   ,@strSessionId 	= @strRequestId
 
-	IF @recap = 0
-		EXEC [dbo].[uspARPostItemReservation]
-
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    		= @post
            ,@BatchId 		= @batchIdUsed

@@ -36,6 +36,9 @@ BEGIN
 	DECLARE @ItemsForCostingZeroCostValidation 	[ItemCostingTableType]
 	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
 	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
+
+	IF @Recap = @ZeroBit	
+		EXEC dbo.uspARPostItemReservation
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting] @strSessionId = @strSessionId
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting] @strSessionId = @strSessionId
