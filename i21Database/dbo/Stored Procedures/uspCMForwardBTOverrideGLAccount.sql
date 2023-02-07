@@ -223,7 +223,7 @@ BEGIN
 
     UPDATE A SET intAccountId = @intAccountId1  FROM #tmpGLDetail A
     WHERE intAccountId = @intAccountId
-    AND strJournalLineDescription NOT IN('Bank Fees', 'Bank Account Entries')
+    AND strJournalLineDescription NOT IN('Bank Transfer Fees', 'Bank Account Entries')
 
     DELETE FROM @GLEntries WHERE @intAccountId = intAccountId
 END
