@@ -109,5 +109,6 @@
     [strMonitorId] 				    				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [ysnHubspotIntegration]							BIT NOT NULL DEFAULT 0,
 	[ysnEnableFrontEndMonitoring]                   BIT NOT NULL DEFAULT 0,
+	[ysnCompanyLocationNumberOpenDigit]				BIT NOT NULL DEFAULT 0,
     [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )
