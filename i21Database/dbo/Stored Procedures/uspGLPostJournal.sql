@@ -234,37 +234,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 		DECLARE @SkipICValidation BIT = 0
 
-		
-		INSERT INTO @GLEntries
-		(
-			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]
-			,[intCurrencyId]
-			,[intUserId]
-			,[intEntityId]
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,strModuleName
-			,strOverrideAccountError
-			,strNewAccountIdOverride
-		)
+		GOTO _insertIntra
 
-		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
+		_continuePost:
 		
-		IF @@ERROR <> 0 GOTO Post_Rollback;
+		IF @@ERROR <> 0 
+			GOTO Post_Rollback;
 
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
@@ -352,35 +327,11 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
-		INSERT INTO @GLEntries
-		(
-			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]
-			,[intCurrencyId]
-			,[intUserId]
-			,[intEntityId]
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,strModuleName
-			,strOverrideAccountError
-			,strNewAccountIdOverride
-		)
-		EXEC dbo.uspGLGetIntraCompanyGLEntries @GLEntries,@ysnRecap, @ysnPost
+		GOTO _insertIntra
+		_continueRecap:
 		
-		IF @@ERROR <>  0 GOTO Post_Rollback;
+		IF @@ERROR <>  0 
+		GOTO Post_Rollback;
 		
 
 		EXEC dbo.uspGLPostRecap 
@@ -666,8 +617,14 @@ _insertIntra:
 
 		IF EXISTS(SELECT 1 FROM @intTraGLEntries WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 		BEGIN
-			EXEC uspGLPostRecap @intTraGLEntries, @intEntityId          
-			EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
+			EXEC uspGLPostRecap @intTraGLEntries, @intEntityId     
+			DECLARE  @MissingAccounts GLMissingAccounts 
+			INSERT INTO @MissingAccounts (strAccountId)
+			SELECT strNewAccountIdOverride
+             FROM   tblGLPostRecap
+             WHERE  strOverrideAccountError IS NOT NULL
+             GROUP  BY strNewAccountIdOverride     
+			EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId,@MissingAccounts    
 			RAISERROR( 'Error overriding accounts.' , 16,1)
 			GOTO Post_Commit      
 		END  
