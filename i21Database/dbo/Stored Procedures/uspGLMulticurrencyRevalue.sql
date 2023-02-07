@@ -383,11 +383,11 @@ WHERE dtmDate <= @dtmDate
 END
 
 IF @strModule = 'GL' -- GL will average
+WITH CTE AS(
 	SELECT  
 	strTransactionType = '',
 	SUM(A.dblTransactionAmount)dblTransactionAmount,
 	A.intCurrencyId,
-	AVG(dblHistoricForexRate) dblHistoricForexRate,
 	SUM(A.dblHistoricAmount)dblHistoricAmount, 
 	SUM(A.dblAmountDifference)dblAmountDifference,
 	strForexRateType = 'Avg',
@@ -402,7 +402,11 @@ IF @strModule = 'GL' -- GL will average
 	strAccountId,
 	A.intAccountId,
 	A.strType
-	HAVING SUM(dblHistoricAmount)<> 0
+	HAVING SUM(dblTransactionAmount)<> 0
+)
+SELECT *,
+dblHistoricForexRate = dblHistoricAmount/dblTransactionAmount
+FROM CTE
 ELSE
 	SELECT 
 	A.strTransactionType,
