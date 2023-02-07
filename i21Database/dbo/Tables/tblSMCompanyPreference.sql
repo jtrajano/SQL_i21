@@ -127,5 +127,6 @@
 	[ysnO365AllowNewTimeProposal] 				    BIT NOT NULL DEFAULT 1,
 	[strO365TimeZone] 								NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strO365CalendarDeltaToken] 					NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
+	[ysnCompanyLocationNumberOpenDigit]				BIT NOT NULL DEFAULT 0,
     [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )
