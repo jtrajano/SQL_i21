@@ -109,8 +109,8 @@ SELECT
 	,dtmReceiptDate			= FORMAT(CS.dtmDeliveryDate,'MM/yyyy')
 	,dblDelivered 			= NULL
 	,dblDirect 				= NULL
-	,dblFromStorage 		= dbo.fnCTConvertQuantityToTargetCommodityUOM(CO_UOM_FROM.intCommodityUnitMeasureId,CO_UOM_TO.intCommodityUnitMeasureId,CS.dblOpenBalance)
-	,dblUnpricedReceipts 	= NULL
+	,dblFromStorage 		= NULL
+	,dblUnpricedReceipts 	= dbo.fnCTConvertQuantityToTargetCommodityUOM(CO_UOM_FROM.intCommodityUnitMeasureId,CO_UOM_TO.intCommodityUnitMeasureId,CS.dblOpenBalance)
 	,dblAllSales 			= NULL
 	,dblBuyBasis			= NULL
 	,dblSellBasis			= NULL
