@@ -3921,7 +3921,7 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						if (@ysnChangePricingTypeAndQuantity = 1 and exists (select top 1 1 from @cbLogSpecific where ((@dblPriced - dblQty) * -1) <> 0))
+						if (@ysnChangePricingTypeAndQuantity = 1 and exists (select top 1 1 from @cbLogSpecific where ((@TotalPriced - dblQty) * -1) <> 0))
 						begin
 							update @cbLogSpecific set dblQty = (@TotalPriced - dblQty) * -1;
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
