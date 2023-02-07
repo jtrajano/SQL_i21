@@ -238,8 +238,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 
 		_continuePost:
 		
-		--IF @@ERROR <> 0 
-		GOTO Post_Rollback;
+		IF @@ERROR <> 0 
+			GOTO Post_Rollback;
 
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
@@ -328,7 +328,6 @@ ELSE
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 
 		GOTO _insertIntra
-		
 		_continueRecap:
 		
 		IF @@ERROR <>  0 
