@@ -593,7 +593,26 @@ SELECT TOP 1
 	@GainLossAccount = intAccountsPayableRealizedId 
 FROM tblSMMultiCurrency
 
-IF EXISTS(SELECT 1 FROM @GLEntries WHERE intAccountId = @GainLossAccount)
+DECLARE	@OverrideCompanySegment BIT,
+			  @OverrideLocationSegment BIT,
+			  @OverrideLineOfBusinessSegment BIT
+
+SELECT TOP 1 
+	@OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+	@OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+	@OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+FROM tblAPCompanyPreference
+
+
+IF EXISTS(SELECT 1 FROM tblAPPayment A
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT 
+	INNER JOIN @GLEntries GL ON GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
+	WHERE GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
+	AND	A.intPaymentId IN (SELECT intId FROM @payments)
+)
 BEGIN
 --HANDLE DECIMAL LOSS FOR MULTI CURRENCY
 INSERT INTO @GLEntries(
