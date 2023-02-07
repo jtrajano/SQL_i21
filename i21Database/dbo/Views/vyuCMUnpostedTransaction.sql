@@ -14,13 +14,6 @@ WITH BT AS(
 	FROM tblCMBankTransaction BT
 	WHERE ISNULL(ysnPosted,0) = 0 and  ISNULL(ysnCheckVoid,0) = 0
 ),
--- BTransferType AS(
--- 	SELECT intBankTransferTypeId = 1 , strType = 'Bank Transfer'  UNION
--- 	SELECT intBankTransferTypeId = 2 , strType = 'Bank Transfer With In transit' UNION
--- 	SELECT intBankTransferTypeId = 3 , strType = 'Bank Forward' UNION
--- 	SELECT intBankTransferTypeId = 4 , strType = 'Swap Short'  UNION
--- 	SELECT intBankTransferTypeId = 5 , strType = 'Swap Long'
--- ),
 BTransfer AS(
 	-- reg bank transfer
 	SELECT 
@@ -82,7 +75,7 @@ SELECT
 intTransactionId,
 strTransactionId,
 'Bank Transfer' strTransactionType,
-MIN(dtmDate) dtmDate,
+dtmDate,
 strDescription,
 T.strName strUserName,
 intEntityId,
