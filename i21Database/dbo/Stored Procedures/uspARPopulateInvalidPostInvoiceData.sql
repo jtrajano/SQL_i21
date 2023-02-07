@@ -49,6 +49,10 @@ BEGIN
 			,@OverrideCompanySegment		BIT
 			,@OverrideLocationSegment		BIT
 	
+
+	IF @Recap = @ZeroBit	
+		EXEC dbo.uspARPostItemReservation
+	
 	EXEC [dbo].[uspARPopulateItemsForCosting] @strSessionId = @strSessionId
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting] @strSessionId = @strSessionId
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting] @strSessionId = @strSessionId
