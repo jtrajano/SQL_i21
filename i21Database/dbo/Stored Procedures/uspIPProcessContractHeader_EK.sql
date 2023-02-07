@@ -241,12 +241,26 @@ BEGIN TRY
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-			WHERE strLocationNumber = @strLocation
+			WHERE strOregonFacilityNumber = @strLocation
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN
 				RAISERROR (
 						'Invalid Location. '
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblAPVendorCompanyLocation V
+					WHERE V.intEntityVendorId = @intEntityId
+						AND V.intCompanyLocationId = @intCompanyLocationId
+					)
+			BEGIN
+				RAISERROR (
+						'Location is not maintained in Vendor. '
 						,16
 						,1
 						)
@@ -483,7 +497,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @dtmOldContractDate = CH.dtmContractDate
 					,@strOldVendorName = E.strName
-					,@strOldLocation = CL.strLocationNumber
+					,@strOldLocation = CL.strOregonFacilityNumber
 					,@strOldTermsCode = T.strTermCode
 					,@strOldIncoTerm = FT.strFreightTerm
 					,@strOldIncoTermLocation = CITY.strCity

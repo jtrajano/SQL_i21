@@ -379,21 +379,91 @@ ELSE IF @intProductTypeId = 12
 ELSE IF @intProductTypeId = 13 
 BEGIN
 
-	SELECT @intProductTypeId				 AS intProductTypeId
-		 , @intProductValueId				 AS intProductValueId
-		 , strBatchId						 
-		 , intTealingoItemId				 AS intItemId
-		 , Item.strItemNo					 
-		 , Batch.dblTotalQuantity			 AS dblRepresentingQty
-		 , Item.intOriginId					 AS intCountry
-		 , CommodityAttribute.strDescription AS strCountry
-		 , Item.strDescription				 AS strItemSpecification
-		 , UnitOfMeasure.strUnitMeasure		 AS strRepresentingUOM
-		 , ItemUOM.intUnitMeasureId			 AS intRepresentingUOMId
+	SELECT @intProductTypeId						    AS intProductTypeId
+		 , @intProductValueId						    AS intProductValueId
+		 , strBatchId								    
+		 , intTealingoItemId						    AS intItemId
+		 , Item.strItemNo							    
+		 , Batch.dblTotalQuantity					    AS dblRepresentingQty
+		 , Item.intOriginId							    AS intCountry
+		 , CommodityAttribute.strDescription		    AS strCountry
+		 , Item.strDescription						    AS strItemSpecification
+		 , UnitOfMeasure.strUnitMeasure				    AS strRepresentingUOM
+		 , ItemUOM.intUnitMeasureId					    AS intRepresentingUOMId
+		 , CAST(Batch.intSales AS NVARCHAR(50))		    AS strSaleNumber
+		 , Batch.dtmSalesDate							AS dtmSaleDate
+		 , SaleYear.strSaleYear							
+		 , SaleYear.intSaleYearId						AS intSaleYearId
+		 , Lot.strLotNumber							    AS strBatchNo
+		 , GardenMark.strGardenMark					    
+		 , Batch.intGardenMarkId					    
+		 , Batch.strLeafStyle						    
+		 , Color.intCommodityAttributeId			    AS intSeasonId 
+		 , Color.strDescription						    AS strSeason
+		 , BatchBroker.strName						    AS strBroker
+		 , BatchBroker.intEntityId					    AS intBrokerId
+		 , Batch.strTeaGardenChopInvoiceNumber		    AS strChopNumber
+		 , Batch.strLeafCategory					    
+		 , LeafCategory.intCommodityAttributeId2	    AS intLeafCategoryId
+		 , LeafSize.intBrandId						    
+		 , LeafSize.strBrandCode					    
+		 , Batch.intCurrencyId						    
+		 , Currency.strCurrency						    
+		 , ProductLine.strDescription				    AS strProductLine
+		 , ProductLine.intCommodityProductLineId	    AS intProductLineId
+		 , LeafType.intCommodityAttributeId			    AS intManufacturingLeafTypeId
+		 , LeafType.strDescription					    AS strManufacturingLeafType
+		 , Grade.strDescription						    AS strGrade
+		 , Grade.intCommodityAttributeId			    AS intGradeId
+		 , Batch.strTeaGardenChopInvoiceNumber		    AS strChopNumber
+		 , CAST(Batch.dblTareWeight AS NUMERIC(18, 2))  AS dblTareWeight
+		 , CAST(Batch.dblGrossWeight AS NUMERIC(18, 2)) AS dblGrossWeight
+		 , Batch.str3PLStatus
+		 , Batch.strERPPONumber							AS strERPRefNo
+		 , Batch.strSupplierReference					AS strAdditionalSupplierReference
 	FROM tblMFBatch AS Batch
 	LEFT JOIN tblICItem AS Item ON Batch.intTealingoItemId = Item.intItemId
 	LEFT JOIN tblICCommodityAttribute AS CommodityAttribute ON Item.intOriginId = CommodityAttribute.intCommodityAttributeId
 	LEFT JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND ItemUOM.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure AS UnitOfMeasure ON ItemUOM.intUnitMeasureId = UnitOfMeasure.intUnitMeasureId
+	LEFT JOIN tblMFLotInventory AS LotInventory ON Batch.intBatchId = LotInventory.intBatchId
+	LEFT JOIN tblICLot AS Lot ON LotInventory.intLotId = Lot.intLotId
+	LEFT JOIN tblQMGardenMark AS GardenMark ON Batch.intGardenMarkId = GardenMark.intGardenMarkId
+	OUTER APPLY (SELECT intCommodityAttributeId
+					  , strDescription
+				 FROM vyuQMSearchCommodityAttributeAuction
+				 WHERE strDescription = Batch.strTeaColour AND strType = 'Season') AS Color
+	OUTER APPLY (SELECT intEntityId
+					  , strName
+				 FROM vyuEMSearchEntityBroker
+				 WHERE intEntityId = Batch.intBrokerId) AS BatchBroker
+	OUTER APPLY (SELECT intCommodityAttributeId2
+					  , strAttribute2
+				 FROM vyuQMSearchCommodityAttribute2
+				 WHERE strAttribute2 = Batch.strLeafCategory) AS LeafCategory
+	OUTER APPLY (SELECT intBrandId
+					  , strBrandCode
+				 FROM vyuQMSearchBrand
+				 WHERE strBrandCode = Batch.strLeafSize) AS LeafSize
+	OUTER APPLY (SELECT intCurrencyId
+					  , strCurrency
+				 FROM tblSMCurrency
+				 WHERE intCurrencyId = Batch.intCurrencyId) AS Currency
+	OUTER APPLY (SELECT intCommodityProductLineId
+					  , strDescription
+				 FROM vyuQMSearchCommodityProductLine
+				 WHERE strDescription = Batch.strSustainability) AS ProductLine /* Product Type / Sustainability. */
+	OUTER APPLY (SELECT intCommodityAttributeId
+					  , strDescription
+				 FROM vyuQMSearchCommodityAttributeAuction
+				 WHERE strDescription = Batch.strLeafManufacturingType AND strType = 'Product Type') AS LeafType 
+	OUTER APPLY (SELECT intCommodityAttributeId
+					  , strDescription
+				 FROM vyuQMSearchCommodityAttributeAuction
+				 WHERE strDescription = Batch.strLeafGrade AND strType = 'Grade') AS Grade
+	OUTER APPLY (SELECT intSaleYearId
+					  , strSaleYear
+				 FROM tblQMSaleYear
+				 WHERE strSaleYear = CAST(Batch.intSalesYear AS NVARCHAR(50))) AS SaleYear
 	WHERE Batch.intBatchId = @intProductValueId
 END

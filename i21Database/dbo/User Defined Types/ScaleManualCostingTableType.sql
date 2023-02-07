@@ -1,5 +1,8 @@
 ﻿/*
 	This is a user-defined table type used in the manual scale ticket distribution for inventory costing stored procedures. 
+	There is a physical table as well tblSCTicketManualDistribution
+	if there is an update here please update the table as well 
+	Reason - Just to make the scale table expensive
 */
 CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
 (

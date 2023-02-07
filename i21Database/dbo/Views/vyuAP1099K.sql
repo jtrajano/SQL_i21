@@ -94,18 +94,19 @@ AS
 ),
 grossThirdParty (
 	intEntityVendorId,
+	intYear,
 	dblGrossThirdParty,
 	dblCardNotPresent
 )
 AS 
 (
 	SELECT
-		A.intEntityId AS intEntityVendorId,
+		A.intEntityId AS intEntityVendorId, A.intYear,
 		CASE WHEN A.int1099Category = 1 THEN SUM(dbl1099K) ELSE NULL END AS dblCardNotPresent,
 		CASE WHEN A.int1099Category = 2 THEN SUM(dbl1099K) ELSE NULL END AS dblGrossThirdParty
 	FROM vyuAP1099 A
 	WHERE A.int1099Form = 6
-	GROUP BY A.intEntityId, A.int1099Category
+	GROUP BY A.intEntityId, A.int1099Category, A.intYear
 )
 
 SELECT
@@ -126,8 +127,8 @@ SELECT
 	,A.strFilerType
 	,A.strTransactionType
 	,A.strMerchantCode
-	,B.dblCardNotPresent AS dblCardNotPresent
-	,B.dblGrossThirdParty AS dblGrossThirdParty
+	,gtp.dblCardNotPresent AS dblCardNotPresent
+	,gtp.dblGrossThirdParty AS dblGrossThirdParty
 	,0 AS dblFederalIncomeTax
 	,SUM(dblJanuary) dblJanuary
 	,SUM(dblFebruary) dblFebruary
@@ -154,7 +155,13 @@ SELECT
 		+ ISNULL(dblNovember,0)
 		+ ISNULL(dblDecember,0)) AS dblTotalPayment
 FROM K1099 A
-INNER JOIN grossThirdParty B ON A.intEntityVendorId = B.intEntityVendorId
+CROSS APPLY (
+	SELECT 
+		SUM(B.dblCardNotPresent) dblCardNotPresent,
+		SUM(B.dblGrossThirdParty) dblGrossThirdParty
+	FROM grossThirdParty B 
+	WHERE A.intEntityVendorId = B.intEntityVendorId AND A.intYear = B.intYear
+) gtp
 GROUP BY A.intEntityVendorId
 	,strEmployerAddress
 	,strCompanyName

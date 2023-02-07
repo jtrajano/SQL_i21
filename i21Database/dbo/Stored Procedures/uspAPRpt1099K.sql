@@ -73,7 +73,7 @@ DECLARE @xmlDocumentId AS INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT *, NULL AS strCorrected FROM vyuAP1099K WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT *, NULL AS strCorrected, NULL AS strYear FROM vyuAP1099K WHERE intYear = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		
@@ -133,12 +133,13 @@ END
 
 SELECT 
 A.* ,
-(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected
+(CASE WHEN ISNULL(@correctedParam,0) = 0 THEN NULL ELSE 'X' END) AS strCorrected,
+(SELECT RIGHT(@yearParam,2)) AS strYear
 FROM vyuAP1099K A
 OUTER APPLY 
 (
 	SELECT TOP 1 * FROM tblAP1099History B
-	WHERE A.intYear = B.intYear AND B.int1099Form = 1
+	WHERE A.intYear = B.intYear AND B.int1099Form = 6
 	AND B.intEntityVendorId = A.intEntityVendorId
 	ORDER BY B.dtmDatePrinted DESC
 ) History

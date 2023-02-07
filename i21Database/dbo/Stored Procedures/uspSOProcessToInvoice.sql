@@ -24,12 +24,12 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 		RETURN;
 	END
 
---VALIDATE IF SO HAS ZERO TOTAL AMOUNT
-IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [dblSalesOrderTotal]  = 0)
-	BEGIN
-		RAISERROR('Cannot process Sales Order with zero(0) amount.', 16, 1)
-		RETURN;
-	END
+-- --VALIDATE IF SO HAS ZERO TOTAL AMOUNT
+-- IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [dblSalesOrderTotal]  = 0)
+-- 	BEGIN
+-- 		RAISERROR('Cannot process Sales Order with zero(0) amount.', 16, 1)
+-- 		RETURN;
+-- 	END
 
 --VALIDATE IF SO IS FOR APPROVAL
 IF EXISTS(SELECT NULL FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order' AND intTransactionId = @SalesOrderId)
@@ -127,7 +127,13 @@ ELSE
 												   , @intScaleUOMId = NULL
 												   , @intUserId = @UserId
 												   , @dblNetWeight = 0
-												   , @ysnFromSalesOrder = 1												   
+												   , @ysnFromSalesOrder = 1		
+												   
+				EXEC dbo.uspARUpdateInvoiceIntegrations	 @InvoiceId			= @NewInvoiceId
+														,@ForDelete			= 0    
+														,@UserId			= @UserId
+														,@InvoiceDetailId 	= NULL
+														,@ysnLogRisk		= 0
 			END
 
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTItemContractDetail ICTD ON ICTD.intItemContractDetailId = SOD.intItemContractDetailId AND SOD.dblQtyOrdered > ICTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
@@ -160,8 +166,8 @@ ELSE
 					, strSrcModuleName          = 'Accounts Receivable'
 					, intDestId                 = I.intInvoiceId
 					, strDestTransactionNo      = I.strInvoiceNumber
-					, strDestTransactionType    = 'Inventory Shipment'
-					, strDestModuleName         = 'Inventory'
+					, strDestTransactionType    = 'Invoice'
+					, strDestModuleName         = 'Accounts Receivable'
 					, strOperation              = 'Process'
 				FROM tblSOSalesOrder SO
 				CROSS APPLY (

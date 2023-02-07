@@ -69,12 +69,12 @@ RETURNS TABLE AS RETURN
 		,[strBillOfLading]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)	
 	FROM vyuCTContractCostView CC	
-	CROSS APPLY ( select ysnMultiplePriceFixation from tblCTCompanyPreference ) CPT
+	CROSS APPLY ( select ysnMultiplePriceFixation, ysnCreateOtherCostPayable from tblCTCompanyPreference ) CPT
 	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) 
 			OR CC.ysnAccrue = CASE 
 				WHEN CPT.ysnMultiplePriceFixation = 0 AND @accrue = 1 THEN 1 
 				ELSE CC.ysnAccrue 
-			END
+			END OR CPT.ysnCreateOtherCostPayable = 1
 		) 
 		AND (CASE WHEN @remove = 0 AND CC.intConcurrencyId <> CC.intPrevConcurrencyId THEN 1 ELSE @remove END = 1)
 	JOIN tblCTContractHeader CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -140,7 +140,7 @@ RETURNS TABLE AS RETURN
 		SELECT intEntityId 
 		FROM tblEMEntity
 	) entity ON entity.intEntityId = CC.intVendorId OR entity.intEntityId = (CASE WHEN CC.ysnPrice = 1 AND CH.intContractTypeId = 1 THEN CH.intEntityId ELSE CC.intVendorId END)
-	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND --CC.ysnBasis = 0 AND
+	WHERE RC.intInventoryReceiptChargeId IS NULL AND (CC.ysnAccrue = @accrue OR CPT.ysnCreateOtherCostPayable = 1) AND --CC.ysnBasis = 0 AND
 	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
 		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1

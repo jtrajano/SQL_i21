@@ -44,7 +44,7 @@ BEGIN TRY
 
 		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
-		IF  NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0')
+		IF  NOT EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0')
 		BEGIN
 			INSERT INTO @tmpTransaction(intId
 				, intTransactionDetailId
@@ -100,7 +100,9 @@ BEGIN TRY
 				, strEmail
 				, strImportVerificationNumber
 				, strConsignorName
-				, strConsignorFederalTaxId)
+				, strConsignorFederalTaxId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intLoadDistributionDetailId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblTRLoadDistributionDetail.intLoadDistributionDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -156,6 +158,8 @@ BEGIN TRY
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 					, Seller.str1099Name
 					, Seller.strFederalTaxId
+					, strOriginFacilityNumber = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+					, strDestinationFacilityNumber = DestinationLoc.strOregonFacilityNumber
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -293,7 +297,9 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -359,6 +365,8 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strImportVerificationNumber
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
 			FROM @tmpTransaction Trans
 		END
 

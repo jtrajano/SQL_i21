@@ -2160,16 +2160,12 @@ BEGIN
 	
 	
 	SELECT 
-		@dblStorageDueTotalPerUnit = case when ISNULL(CS.dblStorageDue,0) = 0 then ISNULL(CS.dblStoragePaid,0) else ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0) end
+		@dblStorageDueTotalPerUnit = case 
+										when ISNULL(CS.dblStorageDue,0) = 0 then ISNULL(CS.dblStoragePaid,0) 
+										else ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
+									end
 		,@dblStorageBilledPerUnit  = ISNULL(CS.dblStoragePaid,0) - @dblOldStoragePaid
 	FROM tblGRCustomerStorage CS
-		outer apply
-		( select top 1 (dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
-			where intCustomerStorageId = CS.intCustomerStorageId 
-				and dtmHistoryDate <=  @dtmCalculationDate 
-				and intTransactionTypeId = 6
-			order by intStorageHistoryId desc
-		) SH
 	WHERE intCustomerStorageId = @intCustomerStorageId
 
 

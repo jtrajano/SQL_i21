@@ -15,7 +15,7 @@
 	[intAttachmentId] INT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	[intLoadHeaderId] INT NULL,
-	[strInvoiceId] NVARCHAR(300) NULL,
+	[strInvoiceId] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDelete] BIT NULL,
 	CONSTRAINT [PK_tblTRImportAttachmentDetail] PRIMARY KEY (intImportAttachmentDetailId),
 	CONSTRAINT [FK_tblTRImportAttachmentDetail_tblTRImportAttachment_intImportAttachmentId] FOREIGN KEY ([intImportAttachmentId]) REFERENCES [dbo].[tblTRImportAttachment] ([intImportAttachmentId]) ON DELETE CASCADE

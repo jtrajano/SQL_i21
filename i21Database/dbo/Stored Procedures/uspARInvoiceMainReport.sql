@@ -197,7 +197,7 @@ SET @strGrainInvoiceFormat = ISNULL(@strGrainInvoiceFormat, 'Standard')
 SET @strMeterBillingInvoiceFormat = ISNULL(@strMeterBillingInvoiceFormat, 'Standard')
 SET @strCreditMemoReportName = ISNULL(@strInvoiceReportName, 'Standard')
 SET @strServiceChargeFormat = ISNULL(@strServiceChargeFormat, 'Standard')
-SET @ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
+SET @ysnStretchLogo = 0
 SET @strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup WHERE strCompanyName LIKE '%Cel Oil%')
 
 --GET INVOICES WITH FILTERS

@@ -251,6 +251,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblPurchasePrice NUMERIC(18, 6) NULL DEFAULT(0),
 	dblLandedPrice NUMERIC(18, 6) NULL DEFAULT(0),
 	dblSalesPrice NUMERIC(18, 6) NULL DEFAULT(0),
+	[intFeedPriceItemUOMId] [int] NULL,
+	[intFeedPriceCurrencyId] [int] NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
@@ -765,12 +767,12 @@ CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
     AFTER DELETE
 AS
 BEGIN	
-	ALTER TABLE tblCTContractCost DISABLE TRIGGER trgCTContractCostInstedOfDelete
+	--ALTER TABLE tblCTContractCost DISABLE TRIGGER trgCTContractCostInstedOfDelete
 
 	DELETE FROM tblCTContractCost 
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM DELETED)
 
-	ALTER TABLE tblCTContractCost ENABLE TRIGGER trgCTContractCostInstedOfDelete
+	--ALTER TABLE tblCTContractCost ENABLE TRIGGER trgCTContractCostInstedOfDelete
 
     DECLARE @contractDetails AS [dbo].[ContractDetailTable]
     INSERT INTO @contractDetails ([intContractDetailId],[intContractHeaderId],[dtmCreated],[intContractSeq],[intBasisCurrencyId],[intBasisUOMId])

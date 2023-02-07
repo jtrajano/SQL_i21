@@ -57,7 +57,7 @@ BEGIN
 
 		-- ================================================================================================================== 
 		-- Get Error logs. Check Register XML that is not configured in i21
-		-- Compare <strFuelGradeId> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
+		-- Compare <strFuelGradeId> tag of (RegisterXML) and (Store->Pump Items->strRegisterFuelId1 or strRegisterFuelId2)
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
@@ -85,16 +85,14 @@ BEGIN
 				SELECT DISTINCT
 					Chk.strFuelGradeId AS strXmlRegisterFuelGradeID
 				FROM @UDT_FGM Chk
-				JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT   IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-				JOIN dbo.tblICItem I 
-					ON I.intItemId = IL.intItemId
+				JOIN dbo.tblSTPumpItem SPI 
+					ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT   IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, ''))
 				JOIN dbo.tblICItemUOM UOM 
-					ON UOM.intItemId = I.intItemId
-				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
+					ON UOM.intItemUOMId = SPI.intItemUOMId
+				JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
 				JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
+					ON S.intStoreId = SPI.intStoreId
 				WHERE S.intStoreId = @intStoreId
 				AND ISNULL(Chk.strFuelGradeId, '') != ''
 			) AS tbl
@@ -138,25 +136,14 @@ BEGIN
 					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.dblFuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.dblFuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.dblFuelGradeSalesVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
 					, [intConcurrencyId]			= 0
 				 FROM @UDT_FGM Chk
-				 JOIN dbo.tblICItemLocation IL 
-						ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT  IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-					AND Chk.dblFuelGradeSalesAmount <> '0'
-				 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
-					--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
-					--																								THEN IL.strPassportFuelId1
-					--																							WHEN ISNULL(IL.strPassportFuelId2, '') <> '' 
-					--																								THEN IL.strPassportFuelId2
-					--																							WHEN ISNULL(IL.strPassportFuelId3, '') <> '' 
-					--																								THEN IL.strPassportFuelId3
-					--																						 END
-				 JOIN dbo.tblICItem I 
-					ON I.intItemId = IL.intItemId
+				 JOIN dbo.tblSTPumpItem SPI 
+						ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT  IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, '')) AND Chk.dblFuelGradeSalesAmount <> '0'
 				 JOIN dbo.tblICItemUOM UOM 
-					ON UOM.intItemId = I.intItemId
-				 JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
+					ON UOM.intItemUOMId = SPI.intItemUOMId
+				 JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
 				 JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
+					ON S.intStoreId = SPI.intStoreId
 				 WHERE S.intStoreId = @intStoreId
 			END
 		ELSE
@@ -177,11 +164,11 @@ BEGIN
 						ON CPT.intPumpCardCouponId = UOM.intItemUOMId
 					INNER JOIN tblICItem Item
 						ON UOM.intItemId = Item.intItemId
-					INNER JOIN dbo.tblICItemLocation IL 
-						ON Item.intItemId = IL.intItemId
-						AND ST.intCompanyLocationId = IL.intLocationId
+					INNER JOIN dbo.tblSTPumpItem SPI 
+						ON SPI.intStoreId = ST.intStoreId AND
+						SPI.intItemUOMId = UOM.intItemUOMId
 					INNER JOIN @UDT_FGM Chk
-						ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT  IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						ON ISNULL(Chk.strFuelGradeId, '') COLLATE DATABASE_DEFAULT  IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId1, ''))
 						AND Chk.dblFuelGradeSalesAmount <> '0'
 					WHERE CPT.intCheckoutId = @intCheckoutId
 

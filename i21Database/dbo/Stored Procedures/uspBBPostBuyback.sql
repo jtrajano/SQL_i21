@@ -30,6 +30,7 @@ AS
 	DECLARE @intAPAccount INT
 	DECLARE @strCompanyLocation NVARCHAR(100)
 	SET @ysnSuccess = 0
+	DECLARE @TransactionLinks udtICTransactionLinks
 
 	SET @strReimbursementType = 'AR'
 	SELECT TOP 1 
@@ -129,6 +130,34 @@ AS
 				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intBuybackId = @intBuyBackId
 
+			-- Add to transaction graph
+			INSERT INTO @TransactionLinks (
+				intSrcId,
+				strSrcTransactionNo,
+				strSrcTransactionType,
+				strSrcModuleName,
+				intDestId,
+				strDestTransactionNo,
+				strDestTransactionType,
+				strDestModuleName,
+				strOperation
+			)
+			SELECT
+				B.intBuybackId,
+				B.strReimbursementNo,
+				'Buyback',
+				'Buybacks',
+				ar.intInvoiceId,
+				ar.strInvoiceNumber,
+				'Invoice',
+				'Accounts Receivable',
+				'Post'
+			FROM tblBBBuyback B
+			LEFT JOIN tblARInvoice ar ON ar.intInvoiceId = B.intInvoiceId
+			WHERE B.intBuybackId = @intBuyBackId
+
+			EXEC uspICAddTransactionLinks @TransactionLinks
+
 			UPDATE tblARInvoiceDetail
 			SET dblBuybackAmount = A.dblReimbursementAmount
 				,dblBaseBuybackAmount = A.dblReimbursementAmount * dblCurrencyExchangeRate
@@ -162,7 +191,7 @@ AS
 			[intAccountId]	= dbo.fnGetLocationAwareGLAccount(@intDetailAccount, C.intLocationId) --[dbo].[fnGetItemGLAccount](B.intItemId, C.intItemLocationId, 'Sales Account')
 			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
 			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
-			,[dblQtyReceived] = A.dblBuybackQuantity	
+			,[dblQtyReceived] = dbo.fnCalculateQtyBetweenUOM(iu.intItemUOMId, su.intItemUOMId, A.dblBuybackQuantity)--A.dblBuybackQuantity	
 			,[dblCost]	 = A.dblBuybackRate	
 		INTO #tmpStagingInsert
 		FROM tblBBBuybackDetail A
@@ -170,6 +199,9 @@ AS
 			ON A.intItemId = B.intItemId
 		JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = A.intInvoiceDetailId
 		JOIN tblARInvoice iv ON iv.intInvoiceId = id.intInvoiceId
+		LEFT JOIN tblICItemUOM iu ON iu.intItemUOMId = id.intItemUOMId
+		LEFT JOIN tblICItemUOM su ON su.intItemId = id.intItemId
+			AND su.ysnStockUnit = 1
 		INNER JOIN tblICItemLocation C
 			ON B.intItemId = C.intItemId
 				AND intLocationId = iv.intCompanyLocationId
@@ -239,7 +271,7 @@ AS
 		,@userId = @intUserId
 		,@success = @ysnSuccess OUTPUT
 		,@batchIdUsed = @batchIdUsed OUTPUT
-
+		
 		IF(@ysnSuccess = 0)
 		BEGIN
 			SELECT TOP 1
@@ -255,6 +287,34 @@ AS
 				,ysnPosted = 1
 				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intBuybackId = @intBuyBackId
+
+			-- Add to transaction graph
+			INSERT INTO @TransactionLinks (
+				intSrcId,
+				strSrcTransactionNo,
+				strSrcTransactionType,
+				strSrcModuleName,
+				intDestId,
+				strDestTransactionNo,
+				strDestTransactionType,
+				strDestModuleName,
+				strOperation
+			)
+			SELECT
+				B.intBuybackId,
+				B.strReimbursementNo,
+				'Buyback',
+				'Buybacks',
+				ap.intBillId,
+				ap.strBillId,
+				'Voucher',
+				'Accounts Payable',
+				'Post'
+			FROM tblBBBuyback B
+			JOIN tblAPBill ap ON ap.intBillId = B.intBillId
+			WHERE B.intBuybackId = @intBuyBackId
+
+			EXEC uspICAddTransactionLinks @TransactionLinks
 
 			UPDATE tblARInvoiceDetail
 			SET dblBuybackAmount = A.dblReimbursementAmount

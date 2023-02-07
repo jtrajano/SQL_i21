@@ -56,6 +56,11 @@ BEGIN
 		FROM dbo.tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
 
+		DELETE
+		FROM tblLGPendingClaim
+		WHERE intLoadId = @intLoadId
+			AND dblClaimableWt > 0
+
 		IF EXISTS (
 				/*SELECT *
 				FROM dbo.vyuIPGetOpenWeightClaim
@@ -65,6 +70,7 @@ BEGIN
 				SELECT *
 				FROM tblLGPendingClaim
 				WHERE intLoadId = @intLoadId
+					AND dblClaimableWt < 0
 				)
 			AND NOT EXISTS (
 				SELECT *
@@ -76,7 +82,7 @@ BEGIN
 				FROM tblLGLoadContainer LC
 				JOIN tblLGLoadDetailContainerLink LCL ON LCL.intLoadContainerId = LC.intLoadContainerId
 				WHERE LC.intLoadId = @intLoadId
-					AND IsNULL(LCL.dblReceivedQty,0)=0
+					AND IsNULL(LCL.dblReceivedQty, 0) = 0
 				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId

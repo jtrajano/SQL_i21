@@ -1,4 +1,4 @@
-CREATE  TABLE tblMFBatch
+CREATE TABLE tblMFBatch
 (
 	intBatchId INT IDENTITY(1,1) NOT NULL,
 	strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -26,6 +26,7 @@ CREATE  TABLE tblMFBatch
 	dblBasePrice  NUMERIC(18,6)  NULL,
 	ysnBoughtAsReserved BIT  NULL,
 	dblBoughtPrice NUMERIC(18,6),
+	intBoughtPriceUOMId INT,
 	dblBulkDensity  NUMERIC(18,6)  NULL,
 	strBuyingOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
 	intSubBookId INT  NULL,
@@ -118,6 +119,8 @@ CREATE  TABLE tblMFBatch
 	,dblTeaIntensityPinpoint NUMERIC(18,6)  NULL
 	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
 	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
+	,dtmShippingDate DATETIME 
+	,strERPPONumber2 NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL
 	,CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC

@@ -175,7 +175,8 @@ BEGIN
 					, strMiscDescription
 					, dblCost
 					, dblQuantityToBill
-					, ysnStage)
+					, ysnStage
+					, dbl1099)
 				VALUES(
 					9
 					, @dtmDate1099K
@@ -190,16 +191,20 @@ BEGIN
 					, @dblCost1099K
 					, @dblQuantityToBill1099K
 					, 0
+					, @dblCost1099K
 				)
 			END
 
 			IF(ISNULL(@str1099Form,'') = '')
 			BEGIN
-				SET @strNo1099Setup = @strCustomerName 
-			END
-			ELSE
-			BEGIN
-				SET @strNo1099Setup = @strNo1099Setup + ', ' + @strCustomerName 
+				IF(ISNULL(@strNo1099Setup,'') = '')
+				BEGIN
+					SET @strNo1099Setup = @strCustomerName 
+				END
+				ELSE
+				BEGIN
+					SET @strNo1099Setup= @strNo1099Setup + ', ' + @strCustomerName 
+				END
 			END
 					
 			FETCH NEXT FROM @Cursor1099KTran INTO @dtmDate1099K, @dtmVoucherDate1099K, @intCustomerId1099K, @intShipToId1099K, @strVendorOrderNumber1099K, @intAccountId, @intLocationId1099K

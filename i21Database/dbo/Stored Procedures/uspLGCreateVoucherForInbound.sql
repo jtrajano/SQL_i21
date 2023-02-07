@@ -145,7 +145,7 @@ BEGIN TRY
 	ELSE
 	BEGIN
 	--If Shipment is not yet received, create Voucher normally
-		IF (@strFOBPoint = 'Destination' AND @intShipmentStatus <> 4)
+		IF (@intPurchaseSale = 1 AND @strFOBPoint = 'Destination' AND @intShipmentStatus <> 4)
 		BEGIN
 			RAISERROR('Load/Shipment has FOB Point of ''Destination''. Create and post Inventory Receipt first before creating Voucher.',16,1)
 		END

@@ -27,7 +27,7 @@
 	strAccountStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,	-- Account Status Cocde
 	strDeliveryTerm NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,		-- Delivery Term
 	dblPriceAdj NUMERIC(18,6) NULL,											-- Price Adjustment
-	strPriceLevel NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,			-- Pricing Level
+	strPriceLevel NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,			-- Pricing Level 
 	ysnSaleTax BIT NULL,													-- Sale Tax
 	strRecurringPONo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,		-- Recurring PO Number
 	strTaxGroup NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,			-- Tax Group
@@ -61,7 +61,13 @@
 	dblLastGalsInTank NUMERIC(18,6) NULL,									--Last Gallon In Tank
 	ysnDeliveryTicketPrinted BIT NULL,										--Delivery Ticket Printed?
 	ysnPrintARBalance BIT NULL,												--Print AR Balance?
-	intNextDeliveryDegreeDay INT NULL										--Next Delivery Degree Day
+	intNextDeliveryDegreeDay INT NULL,										--Next Delivery Degree Day
+	ysnRequireClock			  BIT             DEFAULT 1 NOT NULL,
+	ysnRoutingAlert bit NOT NULL,
+	ysnRequirePump bit NOT NULL,
+	dblLastDeliveredGal numeric(18, 6) NULL,
+	dblEstimatedGallonsLeft numeric(18, 6) NULL,
+	dblEstimatedPercentLeft numeric(18, 6) NULL
 
 	-- DEVICE
 	--strDeviceType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,		-- Device Type

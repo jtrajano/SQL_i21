@@ -154,6 +154,7 @@ BEGIN
 	DECLARE @SourceType_InventoryReceipt NVARCHAR(50) = 'Inventory Receipt'
 	DECLARE @SourceType_InventoryTransfer NVARCHAR(50) = 'Inventory Transfer'
 	DECLARE @SourceType_Invoice NVARCHAR(50) = 'Invoice'
+	DECLARE @intLoadId INT = NULL
 
 	DECLARE @tblToProcess TABLE
 			(
@@ -564,6 +565,17 @@ BEGIN
 			, @intContractDetailId = intContractDetailId
 		FROM	@tblToProcess 
 
+		SELECT TOP 1 @intLoadId = LG.intLoadId
+		FROM tblLGLoad LG
+		JOIN tblTRLoadHeader LH ON LH.intLoadId = LG.intLoadId
+		JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+		JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND DD.intLoadDistributionDetailId = @intTransactionId
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = LD.intLoadId
+			AND LD.intLoadDetailId = DD.intLoadDetailId		
+		WHERE LH.intLoadHeaderId = @intLoadHeaderId
+			AND LG.intSourceType NOT IN (2, 4, 5)
+			AND ISNULL(LD.intTMDispatchId, 0) <> 0
+
 		IF (@intActivity = 1 OR @intActivity = 2)
 		BEGIN
 			IF (@strTransactionType = @SourceType_InventoryReceipt OR @strTransactionType = @SourceType_InventoryTransfer)
@@ -571,7 +583,7 @@ BEGIN
 			ELSE IF (@strTransactionType = @SourceType_Invoice)
 				SET @strScreenName = 'Transport Sale'
 
-			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer))
+			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer) AND (ISNULL(@intLoadId, 0) = 0))
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 
@@ -613,12 +625,12 @@ BEGIN
 				SET @strScreenName = 'Transport Sale'
 			END
 
-			IF (ISNULL(@intContractDetailId, '') <> '')
+			IF (ISNULL(@intContractDetailId, '') <> '' AND (ISNULL(@intLoadId, 0) = 0))
 			BEGIN
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-					, @dblQuantityToUpdate = @dblQuantity
-					, @intUserId = @UserId
-					, @intExternalId = @intTransactionId
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
+					, @dblQuantityToUpdate = @dblQuantity 
+					, @intUserId = @UserId 
+					, @intExternalId = @intTransactionId 
 					, @strScreenName = @strScreenName
 			END
 		END		

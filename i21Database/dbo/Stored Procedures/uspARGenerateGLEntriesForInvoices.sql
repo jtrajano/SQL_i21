@@ -288,7 +288,7 @@ SELECT [dtmDate]                    = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) 
     ,[dblForeignRate]               = I.[dblAverageExchangeRate]    
     ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[strSessionId]                 = @strSessionId    
-FROM tblARPostInvoiceHeader I
+FROM tblARPostInvoiceDetail I
 LEFT OUTER JOIN (
     SELECT 
          [dblUnitQtyShipped]    = SUM([dblUnitQtyShipped])
@@ -296,6 +296,9 @@ LEFT OUTER JOIN (
         ,[intSalesAccountId]
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
+	    AND strItemType NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+	    AND intItemId IS NOT NULL
+	    AND strType <> 'Tax Adjustment'
     GROUP BY 
          [intInvoiceId]
         ,[intSalesAccountId]
@@ -317,6 +320,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueToAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)
+  AND I.intItemId IS NOT NULL
   AND I.strSessionId = @strSessionId
 
 --PROVISIONAL INVOICES
@@ -968,6 +972,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
+  AND I.intItemId IS NOT NULL
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE MAINTENANCE/SAAS CREDIT
@@ -2913,6 +2918,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND (@AllowIntraCompanyEntries = 1 OR @AllowIntraLocationEntries = 1)
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
+  AND I.intItemId IS NOT NULL
   AND I.strSessionId = @strSessionId
 
 --SALES DISCOUNT
@@ -3081,7 +3087,7 @@ INNER JOIN (
 ) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
 WHERE I.strSessionId = @strSessionId  
 
---DIRECT OUT TICKET (General)
+--DIRECT OUT TICKET (In-Transit Direct / General)
 INSERT tblARPostInvoiceGLEntries  (
      [dtmDate]
     ,[strBatchId]
@@ -3156,7 +3162,7 @@ INNER JOIN (
          [dblUnitQtyShipped]	= SUM(ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
 		,[dblTotal]				= SUM(ID.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
-		,[intAccountId]			= dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'General')
+		,[intAccountId]			= ISNULL(dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'In-Transit Direct'), dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'General'))
 		,[dblCost]				= SUM(ISNULL(ARIFC.[dblCost], @ZeroDecimal) * ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
 		,[strDescription]		= ICI.[strDescription]
     FROM tblARPostInvoiceDetail ID

@@ -6,60 +6,45 @@
 )
 AS
 BEGIN
-	--To get all the input item for the selected workorder
-	DECLARE @dtmCurrentDate				DATETIME
-		  , @dtmCurrentDateTime			DATETIME
-		  , @intDayOfYear				INT
-		  , @intManufacturingProcessId	INT
-		  , @strPackagingCategory		NVARCHAR(50)
-		  , @intPMCategoryId			INT
-		  , @dblCalculatedQuantity		DECIMAL(24, 10)
-		  , @intItemUOMId				INT
-		  , @intUnitMeasureId			INT
-		  , @ysnRecipeHeaderValidation  BIT = 0
 
+DECLARE @dtmCurrentDate				DATETIME = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+	  , @dtmCurrentDateTime			DATETIME = GETDATE()
+	  , @intDayOfYear				INT = DATEPART(dy, GETDATE())
+	  , @ysnRecipeHeaderValidation  BIT = 0
 
-	SELECT @dtmCurrentDateTime = GETDATE(), @dtmPlannedDate = ISNULL(@dtmPlannedDate, GETDATE()) 
-
-	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
-
-	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
-
-	SELECT @ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
-	FROM tblMFCompanyPreference;
-
-	IF @intWorkOrderId = 0
+SELECT @ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
+FROM tblMFCompanyPreference;
+/* Existing Record. */
+IF @intWorkOrderId = 0
 	BEGIN
 		SELECT I.strItemNo
-			,I.strDescription
-			,ri.dblCalculatedQuantity
-			,UM.strUnitMeasure
-			,ri.strItemGroupName
-			,ri.dblUpperTolerance
-			,ri.dblLowerTolerance
-			,ri.dblCalculatedUpperTolerance
-			,ri.dblCalculatedLowerTolerance
-			,ri.dblShrinkage
-			,ri.ysnScaled
-			,CM.strName AS strConsumptionMethodName
-			,SL.strName AS strStorageLocationName
-			,ri.dtmValidFrom
-			,ri.dtmValidTo
-			,ri.ysnYearValidationRequired
-			,U.strUserName AS strCreatedUserName
-			,ri.dtmCreated
-			,U1.strUserName AS strLastModifiedUserName
-			,ri.dtmLastModified
-			,r.intVersionNo
-			,ri.ysnPartialFillConsumption
-			,CONVERT(BIT, 0) AS ysnSubstituteItem
-			,I.strItemNo AS strMainRecipeItem
-			,ri.intRecipeItemId
-			,rt.strName AS strRecipeItemType
-			,ri.intRecipeId
-			,Convert(NVARCHAR(50), 'I' + Ltrim(ROW_NUMBER() OVER (
-						ORDER BY ri.intRecipeItemId ASC
-						))) AS strId
+			 , I.strDescription
+			 , ri.dblCalculatedQuantity
+			 , UM.strUnitMeasure
+			 , ri.strItemGroupName
+			 , ri.dblUpperTolerance
+			 , ri.dblLowerTolerance
+			 , ri.dblCalculatedUpperTolerance
+			 , ri.dblCalculatedLowerTolerance
+			 , ri.dblShrinkage
+			 , ri.ysnScaled
+			 , CM.strName AS strConsumptionMethodName
+			 , SL.strName AS strStorageLocationName
+			 , ri.dtmValidFrom
+			 , ri.dtmValidTo
+			 , ri.ysnYearValidationRequired
+			 , U.strUserName AS strCreatedUserName
+			 , ri.dtmCreated
+			 , U1.strUserName AS strLastModifiedUserName
+			 , ri.dtmLastModified
+			 , r.intVersionNo
+			 , ri.ysnPartialFillConsumption
+			 , CONVERT(BIT, 0) AS ysnSubstituteItem
+			 , I.strItemNo AS strMainRecipeItem
+			 , ri.intRecipeItemId
+			 , rt.strName AS strRecipeItemType
+			 , ri.intRecipeId
+			 , Convert(NVARCHAR(50), 'I' + Ltrim(ROW_NUMBER() OVER (ORDER BY ri.intRecipeItemId ASC))) AS strId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
@@ -170,8 +155,16 @@ BEGIN
 		ORDER BY rt.strName
 			,ri.intRecipeItemId
 	END
-	ELSE
+ELSE
 	BEGIN
+		DECLARE @intManufacturingProcessId INT
+			  , @intPMCategoryId		   INT
+			  , @intItemUOMId			   INT
+			  , @dblCalculatedQuantity	   DECIMAL(24, 10)
+			  , @intUnitMeasureId		   INT
+
+		
+
 		SELECT @intManufacturingProcessId = intManufacturingProcessId
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
@@ -200,9 +193,9 @@ BEGIN
 			AND RI.intItemId <> @intItemId
 
 		IF @dblCalculatedQuantity IS NULL
-		BEGIN
-			SELECT @dblCalculatedQuantity = 0
-		END
+			BEGIN
+				SELECT @dblCalculatedQuantity = 0;
+			END
 
 		SELECT I.strItemNo
 			,I.strDescription
@@ -213,7 +206,7 @@ BEGIN
 								CASE 
 									WHEN I.intCategoryId = @intPMCategoryId
 										THEN Convert(DECIMAL(18, 2), CEILING((ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity))
-									ELSE (ri.dblCalculatedQuantity / (r.dblQuantity - @dblCalculatedQuantity)) * W.dblQuantity
+									ELSE ri.dblCalculatedQuantity
 									END
 								)
 					ELSE (

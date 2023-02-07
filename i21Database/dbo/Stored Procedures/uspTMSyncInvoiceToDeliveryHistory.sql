@@ -44,12 +44,13 @@ BEGIN
 	DECLARE @intAccumulatedDDAfterLastDeliveryBeforeReset INT
 	DECLARE @intCustomerId INT
 	DECLARE @intScreenId INT
+	DECLARE @ysnRequireClock BIT
 	
 
 
 	EXEC uspTMValidateInvoiceForSync @InvoiceId, @ResultLog OUT
 	
-	IF((SELECT CASE WHEN @ResultLog LIKE '%Exception%' THEN 1 ELSE 0 END) = 1)
+	IF((SELECT CASE WHEN @ResultLog COLLATE Latin1_General_CI_AS LIKE '%Exception%' THEN 1 ELSE 0 END) = 1)
 	BEGIN
 		GOTO DONESYNCHING
 	END
@@ -87,10 +88,10 @@ BEGIN
 
 
 	---Get Invoice detail for Deliveries
-	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
+	IF OBJECT_ID('tempdb..#tmpTMInvoiceDetail') IS NOT NULL DROP TABLE #tmpTMInvoiceDetail
 	SELECT *
 		,ysnTMProcessed = 0
-	INTO #tmpInvoiceDetail
+	INTO #tmpTMInvoiceDetail
 	FROM tblARInvoiceDetail
 	WHERE intInvoiceId = @InvoiceId
 		AND intSiteId IS NOT NULL
@@ -98,7 +99,7 @@ BEGIN
 		AND ISNULL(ysnVirtualMeterReading,0) <> 1
 	
 	-- Process Delivery
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInvoiceDetail)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTMInvoiceDetail)
 	BEGIN
 		SET @intPerformerId = NULL
 		SELECT TOP 1 
@@ -110,19 +111,19 @@ BEGIN
 			,@dblQuantityShipped = dblQtyShipped
 			,@dblTotalTax = dblTotalTax
 			,@dblItemTotal = dblTotal
-		FROM #tmpInvoiceDetail
+		FROM #tmpTMInvoiceDetail
 
 		SELECT @strBillingBy = strBillingBy FROM tblTMSite WHERE intSiteID = @intSiteId
 		
 		print 'Check ysnProcessed'
 		---Check ysnProcessed
-		IF((SELECT TOP 1 ysnTMProcessed FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId) = 1)
+		IF((SELECT TOP 1 ysnTMProcessed FROM #tmpTMInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId) = 1)
 		BEGIN
 			GOTO CONTINUELOOP
 		END
 
 		---- Set ysnProcessed to 1 for the current item
-		UPDATE #tmpInvoiceDetail
+		UPDATE #tmpTMInvoiceDetail
 		SET ysnTMProcessed = 1
 		WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -130,6 +131,7 @@ BEGIN
 		SELECT @intClockId = intClockID
 		,@dtmLastDeliveryDate = dtmLastDeliveryDate
 		,@intCustomerId = intCustomerID
+		,@ysnRequireClock = ysnRequireClock
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 		
@@ -207,7 +209,12 @@ BEGIN
 
 		
 		PRINT 'BEGIN'
-		
+		 IF(@strBillingBy = 'Flow Meter' and EXISTS(SELECT TOP 1 1 FROM tblTMSite WHERE intSiteID = @intSiteId))
+		 BEGIN
+		 		update tblTMSite 
+				set dblLastMeterReading = (select dblNewMeterReading FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND intSiteId IS NOT NULL AND ISNULL(ysnLeaseBilling,0) <> 1 AND ISNULL(ysnVirtualMeterReading,0) <> 1)
+				WHERE intSiteID = @intSiteId
+		 END
 		----Check for service item
 		IF((SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @intItemId) = 'Service')
 		BEGIN
@@ -248,7 +255,7 @@ BEGIN
 			IF OBJECT_ID('tempdb..#tmpSiteInvoiceLineItems') IS NOT NULL DROP TABLE #tmpSiteInvoiceLineItems
 
 			SELECT A.* INTO #tmpSiteInvoiceLineItems
-			FROM #tmpInvoiceDetail A
+			FROM #tmpTMInvoiceDetail A
 			INNER JOIN tblICItem B
 				ON A.intItemId = B.intItemId
 			WHERE intSiteId = @intSiteId
@@ -259,10 +266,10 @@ BEGIN
 			SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId FROM #tmpSiteInvoiceLineItems
 			
 			-----Mark Invoice detail that are of the same site as processed
-			UPDATE #tmpInvoiceDetail 
+			UPDATE #tmpTMInvoiceDetail 
 			SET ysnTMProcessed = 1
 			FROM  #tmpSiteInvoiceLineItems A
-			WHERE #tmpInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
+			WHERE #tmpTMInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
 			
 			
 			
@@ -391,31 +398,39 @@ BEGIN
 					SET @ysnMaxExceed = 0
 					SET @dblNewBurnRate = 0.0
 
-					SELECT TOP 1 
-						@dblNewBurnRate = dblBurnRate
-						,@ysnMaxExceed = ysnMaxExceed
-					FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId)
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						SELECT TOP 1 
+							@dblNewBurnRate = dblBurnRate
+							,@ysnMaxExceed = ysnMaxExceed
+						FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId)
+					END
 					
 					
 					---Update Site Burn Rate, dblDegreeDayBetweenDelivery,intNextDeliveryDegreeDay based on the new calculated burn rate
-					UPDATE tblTMSite
-					SET dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-											THEN ISNULL(@dblNewBurnRate,0.0)
-											ELSE dblBurnRate 
-										END)
-						,dblDegreeDayBetweenDelivery = ISNULL(@dblNewBurnRate,0.0) * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
-						,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
-					WHERE intSiteID = @intSiteId
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						UPDATE tblTMSite
+						SET dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
+												THEN ISNULL(@dblNewBurnRate,0.0)
+												ELSE dblBurnRate 
+											END)
+							,dblDegreeDayBetweenDelivery = ISNULL(@dblNewBurnRate,0.0) * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
+							,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+						WHERE intSiteID = @intSiteId
+					END
 
 
 
 					----UPDATE Delivery history header for the new calc burnrate 
-					UPDATE tblTMDeliveryHistory
-						SET 
-						dblBurnRateAfterDelivery = @dblNewBurnRate
-						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intNewDeliveryHistoryId)
-					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
-
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						UPDATE tblTMDeliveryHistory
+							SET 
+							dblBurnRateAfterDelivery = @dblNewBurnRate
+							,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intNewDeliveryHistoryId)
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+					END
 					---Check Max exceed
 					IF(@ysnMaxExceed = 1 OR (SELECT TOP 1 dblCalculatedBurnRate FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId) < 0)
 					BEGIN
@@ -437,9 +452,12 @@ BEGIN
 					END
 					
 					---- Update forecasted nad estimated % left
-					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
-					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
-					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					END
 				END
 				ELSE
 				BEGIN
@@ -591,14 +609,18 @@ BEGIN
 							,dtmInvoiceDate = C.dtmDate
 							,strProductDelivered = E.strItemNo
 							,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) END
-							,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
-							,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-							,dblBurnRateAfterDelivery = A.dblBurnRate
-							,dblCalculatedBurnRate = A.dblBurnRate
+							,intDegreeDayOnDeliveryDate = CASE WHEN @ysnRequireClock = 1 THEN @dblAccumulatedDegreeDay ELSE 0 END
+							,intDegreeDayOnLastDeliveryDate = CASE WHEN @ysnRequireClock = 1 THEN @dblLastAccumulatedDegreeDay ELSE 0 END
+							,dblBurnRateAfterDelivery = CASE WHEN @ysnRequireClock = 1 THEN A.dblBurnRate ELSE 0 END
+							,dblCalculatedBurnRate = CASE WHEN @ysnRequireClock = 1 THEN A.dblBurnRate ELSE 0 END
 							,ysnAdjustBurnRate = 0
 							,intElapsedDegreeDaysBetweenDeliveries = 0
 							,intElapsedDaysBetweenDeliveries = 0
-							,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+							,strSeason = CASE WHEN A.ysnRequireClock = 1 THEN 
+											(CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+										 ELSE
+										 	'N/A'
+										 END
 							,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 							,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
 							,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
@@ -653,7 +675,7 @@ BEGIN
 							ON B.intInvoiceDetailId = F.intInvoiceDetailId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
-						INNER JOIN tblTMClock H
+						LEFT JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
 							ON I.intEntityId = C.intEntitySalespersonId
@@ -702,7 +724,10 @@ BEGIN
 				
 					END
 
-					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					IF(@ysnRequireClock = 1) 
+					BEGiN
+						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					END
 				END
 			END
 			ELSE
@@ -711,11 +736,13 @@ BEGIN
 				SET @ysnMaxExceed = 0
 				SET @dblNewBurnRate = 0.0
 
-				SELECT TOP 1 
-					@dblNewBurnRate = dblBurnRate
-					,@ysnMaxExceed = ysnMaxExceed
-				FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
-
+				IF(@ysnRequireClock = 1) 
+				BEGiN
+					SELECT TOP 1 
+						@dblNewBurnRate = dblBurnRate
+						,@ysnMaxExceed = ysnMaxExceed
+					FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
+				END
 
 				IF(@strTransactionType = 'Invoice' OR @strTransactionType = 'Cash')
 				BEGIN
@@ -796,14 +823,18 @@ BEGIN
 						,dtmInvoiceDate = C.dtmDate
 						,strProductDelivered = E.strItemNo
 						,dblQuantityDelivered = (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems)
-						,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
-						,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
+						,intDegreeDayOnDeliveryDate = CASE WHEN @ysnRequireClock = 1 THEN @dblAccumulatedDegreeDay ELSE 0 END
+						,intDegreeDayOnLastDeliveryDate = CASE WHEN @ysnRequireClock = 1 THEN @dblLastAccumulatedDegreeDay ELSE 0 END
 						,dblBurnRateAfterDelivery = ISNULL(@dblNewBurnRate,0.0)
-						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null)
+						,dblCalculatedBurnRate = CASE WHEN @ysnRequireClock = 1 THEN dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null) ELSE 0 END
 						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
-						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intClockReadingId,null)
+						,intElapsedDegreeDaysBetweenDeliveries = CASE WHEN @ysnRequireClock = 1 THEN dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intClockReadingId,null) ELSE 0 END
 						,intElapsedDaysBetweenDeliveries = @intElapseDays
-						,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+						,strSeason = CASE WHEN A.ysnRequireClock = 1 THEN 
+										(CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+									 ELSE
+										'N/A'
+									 END	
 						,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 						,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
 						,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
@@ -872,7 +903,7 @@ BEGIN
 						ON B.intInvoiceDetailId = F.intInvoiceDetailId
 					LEFT JOIN tblTMDispatch G
 						ON A.intSiteID = G.intSiteID
-					INNER JOIN tblTMClock H
+					LEFT JOIN tblTMClock H
 						ON A.intClockID = H.intClockID
 					LEFT JOIN tblEMEntity I
 						ON I.intEntityId = C.intEntitySalespersonId
@@ -947,53 +978,64 @@ BEGIN
 						,dtmLastDeliveryDate = @dtmInvoiceDate
 						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 						,ysnDeliveryTicketPrinted = 0
-						,dblEstimatedPercentLeft = @dblPercentAfterDelivery
-						,dblEstimatedGallonsLeft = dblTotalCapacity * @dblPercentAfterDelivery /100
-						,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-													THEN dblBurnRate 
-													ELSE dblPreviousBurnRate 
-												END)
-						,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-											THEN @dblNewBurnRate
-											ELSE dblBurnRate 
-										END)
 						
 						
 						,dtmLastReadingUpdate = @dtmInvoiceDate
 					WHERE intSiteID = @intSiteId
+
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						UPDATE tblTMSite
+						SET dblEstimatedPercentLeft = @dblPercentAfterDelivery
+							,dblEstimatedGallonsLeft = dblTotalCapacity * @dblPercentAfterDelivery /100
+							,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
+														THEN dblBurnRate 
+														ELSE dblPreviousBurnRate 
+													END)
+							,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
+												THEN @dblNewBurnRate
+												ELSE dblBurnRate 
+											END)
+						WHERE intSiteID = @intSiteId
+					END
 
 
 					----------------------- checking for season reset-------------------------
 					SET @intAccumulatedDDAfterLastDeliveryBeforeReset = 0
 					SET @dtmCurrentSeasonStart = NULL
 					
-					--Check Current season 
-					SELECT TOP 1 @dtmCurrentSeasonStart = dtmDate 
-					FROM tblTMDegreeDayReading
-					WHERE ysnSeasonStart = 1 
-						AND intClockID = @intClockId
-						AND dtmDate > @dtmInvoiceDate
-					ORDER BY dtmDate DESC
-
-					IF(@dtmCurrentSeasonStart IS NOT NULL)
+					IF(@ysnRequireClock = 1)
 					BEGIN
-						SELECT @intAccumulatedDDAfterLastDeliveryBeforeReset = SUM(intDegreeDays)
+						--Check Current season 
+						SELECT TOP 1 @dtmCurrentSeasonStart = dtmDate 
 						FROM tblTMDegreeDayReading
-						WHERE intClockID = @intClockId
-							AND dtmDate < @dtmCurrentSeasonStart
+						WHERE ysnSeasonStart = 1 
+							AND intClockID = @intClockId
 							AND dtmDate > @dtmInvoiceDate
+						ORDER BY dtmDate DESC
 
-						SET @intAccumulatedDDAfterLastDeliveryBeforeReset = @dblAccumulatedDegreeDay + @intAccumulatedDDAfterLastDeliveryBeforeReset
+						IF(@dtmCurrentSeasonStart IS NOT NULL)
+						BEGIN
+							SELECT @intAccumulatedDDAfterLastDeliveryBeforeReset = SUM(intDegreeDays)
+							FROM tblTMDegreeDayReading
+							WHERE intClockID = @intClockId
+								AND dtmDate < @dtmCurrentSeasonStart
+								AND dtmDate > @dtmInvoiceDate
+
+							SET @intAccumulatedDDAfterLastDeliveryBeforeReset = @dblAccumulatedDegreeDay + @intAccumulatedDDAfterLastDeliveryBeforeReset
+						END
 					END
-
 					
 					------------------------------------------------------------------------------
 
+					IF(@ysnRequireClock = 1)
+					BEGIN
 					--Update Next Delivery Degree Day and degree day Between
-					UPDATE tblTMSite
-						SET	intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay - @intAccumulatedDDAfterLastDeliveryBeforeReset + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
-						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
-					WHERE intSiteID = @intSiteId
+						UPDATE tblTMSite
+							SET	intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay - @intAccumulatedDDAfterLastDeliveryBeforeReset + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+							,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
+						WHERE intSiteID = @intSiteId
+					END
 
 				
 			
@@ -1004,10 +1046,13 @@ BEGIN
 					--	,intConcurrencyId = intConcurrencyId + 1
 					--WHERE intSiteID = @intSiteId
 					
-					---- Update forecasted nad estimated % left
-					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
-					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
-					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						---- Update forecasted nad estimated % left
+						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					END
 					
 
 					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId)
@@ -1127,7 +1172,7 @@ BEGIN
 		-------------------------------------------------------
 		
 
-		DELETE FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
+		DELETE FROM #tmpTMInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 		PRINT 'DONE'
 	END
 
@@ -1230,7 +1275,11 @@ BEGIN
 			,ysnAdjustBurnRate = A.ysnAdjustBurnRate
 			,intElapsedDegreeDaysBetweenDeliveries = 0
 			,intElapsedDaysBetweenDeliveries = 0
-			,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+			,strSeason = CASE WHEN A.ysnRequireClock = 1 THEN
+							(CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+						 ELSE
+							'N/A'
+						 END	
 			,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 			,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
 			,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
@@ -1287,7 +1336,7 @@ BEGIN
 			ON B.intItemId = E.intItemId
 		LEFT JOIN tblTMDispatch G
 			ON A.intSiteID = G.intSiteID
-		INNER JOIN tblTMClock H
+		LEFT JOIN tblTMClock H
 			ON A.intClockID = H.intClockID
 		LEFT JOIN tblEMEntity I
 			ON I.intEntityId = C.intEntitySalespersonId
@@ -1299,7 +1348,10 @@ BEGIN
 		--	,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		--WHERE intSiteID = @intSiteId
 
-		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+		IF(@ysnRequireClock = 1)
+		BEGIN
+			EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+		END
 
 		
 		DELETE FROM #tmpVirtualMeterInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId

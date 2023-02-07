@@ -167,7 +167,7 @@ SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDat
 SET @strReportLogId					= NULLIF(@strReportLogId, CAST(NEWID() AS NVARCHAR(100)))
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
+		   , @strCompanyAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -401,9 +401,15 @@ INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
+LEFT JOIN (
+	SELECT intTransactionId, dtmDate, strTransactionType
+	FROM dbo.tblARNSFStagingTableDetail
+	GROUP BY intTransactionId, dtmDate, strTransactionType
+) NSF ON I.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE ysnPosted = 1
-  AND ysnProcessedToNSF = 0	
-  AND strTransactionType <> 'Cash Refund'
+  AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))	
+  AND I.strTransactionType <> 'Cash Refund'
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
   AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
@@ -636,7 +642,7 @@ FROM (
 	SELECT intEntityCustomerId		= TBL.intEntityCustomerId
 		, intInvoiceId				= TBL.intInvoiceId
 		, dblAmountPaid				= TBL.dblAmountPaid
-		, dblTotalDue				= CASE WHEN strType = 'CF Tran' AND @ysnPrintFromCFLocal = 0 THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
+		, dblTotalDue				= CASE WHEN strType = 'CF Tran' AND @ysnPrintFromCFLocal = 0 AND @dtmBalanceForwardDate IS NOT NULL THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
 		, dblAvailableCredit		= TBL.dblAvailableCredit
 		, dblPrepayments			= TBL.dblPrepayments
 		, dblFuture					= CASE WHEN strType = 'CF Tran' 

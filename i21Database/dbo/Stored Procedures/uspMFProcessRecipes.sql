@@ -4,6 +4,10 @@ BEGIN
 	DECLARE @strSessionId NVARCHAR(50)
 		,@intRecordId INT
 		,@intEntityId INT
+		,@strInfo1 NVARCHAR(MAX)  
+		,@strInfo2 NVARCHAR(MAX) 
+		,@intNoOfRowsAffected INT 
+
 	DECLARE @tblMFSession TABLE (
 		intRecordId INT identity(1, 1)
 		,strSessionId NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -11,9 +15,9 @@ BEGIN
 		)
 	DECLARE @tblIPInitialAck TABLE (intTrxSequenceNo BIGINT);
 
-	SELECT @intEntityId = intEntityId
-	FROM tblSMUserSecurity
-	WHERE strUserName = 'IRELYADMIN'
+	SELECT TOP 1 @intEntityId = intEntityId
+	FROM tblEMEntityCredential
+	ORDER BY intEntityId ASC;
 
 	INSERT INTO @tblMFSession
 	SELECT DISTINCT strSessionId
@@ -77,6 +81,11 @@ BEGIN
 			,@intEntityId
 			,@ysnMinOneInputItemRequired
 
+		EXEC [dbo].[uspIPProcessERPProductionOrder] @strInfo1 = @strInfo1 OUT
+			,@strInfo2 = @strInfo2 OUT
+			,@intNoOfRowsAffected = @intNoOfRowsAffected OUT
+			,@strSessionId = @strSessionId
+
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFSession
 		WHERE intRecordId > @intRecordId
@@ -127,8 +136,9 @@ BEGIN
 			END
 	FROM tblMFRecipeStage R
 	JOIN tblSMCompanyLocation CL ON CL.strLocationName = R.strLocationName
-	WHERE R.ysnInitialAckSent IS NULL AND R.intTrxSequenceNo IS NOT NULL
-	AND R.strSessionId IN (
+	WHERE R.ysnInitialAckSent IS NULL
+		AND R.intTrxSequenceNo IS NOT NULL
+		AND R.strSessionId IN (
 			SELECT strSessionId
 			FROM @tblMFSession
 			)

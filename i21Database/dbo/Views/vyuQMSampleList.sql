@@ -176,7 +176,7 @@ SELECT S.intSampleId
 	,S.intMarketZoneId
 	,MarketZone.strMarketZoneCode AS strMarketZoneCode
 	,S.intDestinationStorageLocationId
-	,DSL.strName AS strDestinationStorageLocationName
+	,CLSL.strSubLocationName AS strDestinationStorageLocationName
 	,S.strComments2
 	,S.strComments3
 	,S.strBuyingOrderNo
@@ -303,6 +303,7 @@ LEFT JOIN tblSMCity City ON City.intCityId = S.intFromLocationCodeId
 LEFT JOIN tblICBrand Size ON Size.intBrandId = S.intBrandId
 LEFT JOIN tblARMarketZone MarketZone ON MarketZone.intMarketZoneId = S.intMarketZoneId
 LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinationStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON S.intDestinationStorageLocationId = CLSL.intCompanyLocationSubLocationId
 LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
 LEFT JOIN tblQMTINClearance TC ON TC.intTINClearanceId = S.intTINClearanceId
 WHERE S.intTypeId = 1

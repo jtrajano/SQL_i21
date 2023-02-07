@@ -2,6 +2,7 @@ CREATE PROCEDURE uspQMImportInitialBuy @intImportLogId INT
 AS
 BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(50)
+	 ,@intPlantId INT 
 
 	BEGIN TRANSACTION
 
@@ -339,6 +340,7 @@ BEGIN TRY
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
 		,@intSampleId INT
+		,@intEntityUserId INT
 		,@intPurchasingGroupId INT
 		,@strPurchasingGroup NVARCHAR(150)
 		,@intBookId INT
@@ -377,6 +379,13 @@ BEGIN TRY
 		,@intB5QtyUOMId INT
 		,@dblB5Price NUMERIC(18, 6)
 		,@intB5PriceUOMId INT
+
+		,@intETAPOL INT
+		,@intStockDate INT
+		,@dtmStock Datetime
+		,@dtmShippingDate Datetime
+		,@dtmCurrentDate DATETIME
+
 	DECLARE @MFBatchTableType MFBatchTableType
 	-- Loop through each valid import detail
 	DECLARE @C AS CURSOR;
@@ -386,6 +395,7 @@ BEGIN TRY
 
 	SELECT intImportCatalogueId = IMP.intImportCatalogueId
 		,intSampleId = S.intSampleId
+		,intEntityUserId = IL.intEntityId
 		,intPurchasingGroupId = COMPANY_CODE.intPurchasingGroupId
 		,strPurchasingGroup = COMPANY_CODE.strName
 		,intBookId = BOOK.intBookId
@@ -433,6 +443,7 @@ BEGIN TRY
 	INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 	INNER JOIN (
 		tblQMImportCatalogue IMP
+		INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 		-- Buyer1 Quantity UOM
 		LEFT JOIN tblICUnitMeasure B1QUOM ON B1QUOM.strSymbol = IMP.strB1QtyUOM
 		-- Buyer1 Price UOM
@@ -486,6 +497,7 @@ BEGIN TRY
 	FROM @C
 	INTO @intImportCatalogueId
 		,@intSampleId
+		,@intEntityUserId
 		,@intPurchasingGroupId
 		,@strPurchasingGroup
 		,@intBookId
@@ -527,6 +539,13 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Initial Buy Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 1
+
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
 			,intCurrencyId = @intCurrencyId
@@ -575,6 +594,40 @@ BEGIN TRY
 		-- Call uspMFUpdateInsertBatch
 		DELETE
 		FROM @MFBatchTableType
+
+		SELECT TOP 1 @intPlantId = CL.intCompanyLocationId  
+		FROM dbo.tblQMSample S WITH (NOLOCK)  
+		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = S.intBookId  
+		AND S.intSampleId = @intSampleId  
+		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook  
+    
+		SELECT TOP 1 @intETAPOL=IsNULL(LLT.dblPurchaseToShipment,0)
+				,@intStockDate= IsNULL(LLT.dblPurchaseToShipment,0)+IsNULL(LLT.dblPortToPort,0)+ IsNULL(LLT.dblPortToMixingUnit,0) +IsNULL(LLT.dblMUToAvailableForBlending,0) 
+		FROM dbo.tblQMSample S WITH (NOLOCK)  
+		JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = S.intItemId  
+		AND S.intSampleId = @intSampleId  
+		JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId  
+		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intOriginId = CA.intCountryID  
+		AND LLT.intBuyingCenterId = S.intCompanyLocationId  
+		AND LLT.intReceivingPlantId = @intPlantId  
+		AND LLT.intReceivingStorageLocation = S.intDestinationStorageLocationId  
+		AND LLT.intChannelId = S.intMarketZoneId  
+		AND LLT.intPortOfDispatchId = S.intFromLocationCodeId  
+		JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = LLT.intPortOfArrivalId 
+		
+		IF @intETAPOL IS NULL
+		BEGIN
+			SELECT  @intETAPOL=0
+		END
+
+		IF @intStockDate IS NULL
+		BEGIN
+			SELECT  @intStockDate=0
+		END
+		Select @dtmCurrentDate=Convert(Char, GETDATE(),101)
+		SELECT @dtmStock=DateAdd(d,@intStockDate,@dtmCurrentDate)
+
+		SELECT @dtmShippingDate=DateAdd(d,@intETAPOL,@dtmCurrentDate)
 
 		INSERT INTO @MFBatchTableType (
 			strBatchId
@@ -680,12 +733,13 @@ BEGIN TRY
 			,dblTeaIntensityPinpoint
 			,dblTeaMouthFeelPinpoint
 			,dblTeaAppearancePinpoint
+			,dtmShippingDate
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
 			,intSalesYear = CAST(SY.strSaleYear AS INT)
 			,dtmSalesDate = S.dtmSaleDate
-			,strTeaType = LEAF_TYPE.strDescription
+			,strTeaType = CT.strCatalogueType
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
@@ -701,9 +755,9 @@ BEGIN TRY
 			,strAirwayBillCode = S.strCourierRef
 			,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 			,strAWBSampleReference = S.strAWBSampleReference
-			,dblBasePrice = S.dblBasePrice
+			,dblBasePrice = @dblB1Price
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-			,dblBoughtPrice = NULL
+			,dblBoughtPrice = @dblB1Price
 			,dblBulkDensity = NULL
 			,strBuyingOrderNumber = S.strBuyingOrderNo
 			,intSubBookId = S.intSubBookId
@@ -716,9 +770,9 @@ BEGIN TRY
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
-			,intFromPortId = NULL
+			,intFromPortId = S.intFromLocationCodeId
 			,dblGrossWeight = S.dblGrossWeight
-			,dtmInitialBuy = NULL
+			,dtmInitialBuy = @dtmCurrentDate 
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
@@ -730,13 +784,13 @@ BEGIN TRY
 			,intItemUOMId = S.intRepresentingUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = NULL
+			,intOriginalItemId = S.intItemId
 			,dblPackagesPerPallet = NULL
 			,strPlant = NULL
 			,dblTotalQuantity = S.dblB1QtyBought
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
-			,dtmStock = NULL
+			,dtmStock = @dtmStock
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = NULL
 			,dtmSupplierPreInvoiceDate = NULL
@@ -804,9 +858,11 @@ BEGIN TRY
 			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
 			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
+			,dtmShippingDate=@dtmShippingDate
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
@@ -895,7 +951,7 @@ BEGIN TRY
 			UPDATE B
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
-				,intSampleId = NULL
+				--,intSampleId = NULL
 				,dblOriginalTeaTaste = dblTeaTaste
 				,dblOriginalTeaHue = dblTeaHue
 				,dblOriginalTeaIntensity = dblTeaIntensity
@@ -910,12 +966,35 @@ BEGIN TRY
 				,@intInputSuccess
 				,NULL
 				,1
+
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
+
+			DECLARE @strRowState NVARCHAR(50)
+			SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
+			FROM tblQMSample
+			WHERE intSampleId = @intSampleId
+
+			EXEC uspIPProcessPriceToFeed
+				@intEntityUserId
+				,@intSampleId
+				,'Sample'
+				,@strRowState
 		END
+
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Initial Buy Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 0
 
 		FETCH NEXT
 		FROM @C
 		INTO @intImportCatalogueId
 			,@intSampleId
+			,@intEntityUserId
 			,@intPurchasingGroupId
 			,@strPurchasingGroup
 			,@intBookId

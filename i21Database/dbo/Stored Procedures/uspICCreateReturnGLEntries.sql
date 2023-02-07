@@ -288,6 +288,13 @@ DECLARE @ReturnValuation AS TABLE (
 	,dblQty NUMERIC(38, 20)
 	,dblReturnUnitCost NUMERIC(38, 20)
 	,dblReturnUnitCostInFunctionalCurrency NUMERIC(38, 20)
+	,intLotId INT 
+	,intItemId INT 
+	,intItemLocationId INT 
+	,dblUOMQty NUMERIC(38, 20)
+	,dblCost NUMERIC(38, 20)
+	,intTransactionTypeId INT
+	,intSourceEntityId INT 
 )
 
 -- Load the Inventory Returns
@@ -298,6 +305,13 @@ INSERT INTO @ReturnValuation (
 	,strReceiptNumber 
 	,dblQty 
 	,dblReturnUnitCost 
+	,intLotId
+	,intItemId
+	,intItemLocationId
+	,dblUOMQty 
+	,dblCost
+	,intTransactionTypeId
+	,intSourceEntityId
 )
 SELECT
 	intInventoryReceiptId = r.intInventoryReceiptId
@@ -324,6 +338,13 @@ SELECT
 						,ri.dblOpenReceive
 					)
 				)
+	,t.intLotId
+	,t.intItemId
+	,t.intItemLocationId
+	,t.dblUOMQty 
+	,t.dblCost
+	,t.intTransactionTypeId
+	,t.intSourceEntityId
 FROM	tblICInventoryReceipt r INNER JOIN (
 			tblICInventoryReceiptItem ri LEFT JOIN tblICInventoryReceiptItemLot ril
 				ON ri.intInventoryReceiptItemId  = ril.intInventoryReceiptItemId
@@ -332,7 +353,7 @@ FROM	tblICInventoryReceipt r INNER JOIN (
 
 		CROSS APPLY (
 			SELECT	dblQty = -rtn.dblQtyReturned
-					,dblUOMQty = t.dblUOMQty 
+					,dblUOMQty = cb.dblUOMQty 
 					,rtn.dblCost
 					,rtn.strBatchId
 					,rtn.intTransactionId
@@ -459,18 +480,18 @@ AS
 (
 	-- Load the Inventory Returns
 	SELECT	dtmDate	= r.dtmReceiptDate
-			,t.intItemId
-			,t.intItemLocationId
+			,rv.intItemId
+			,rv.intItemLocationId
 			,intTransactionId = r.intInventoryReceiptId
 			,strTransactionId = r.strReceiptNumber
-			,dblQty = t.dblQty
-			,dblUOMQty = t.dblUOMQty
-			,dblCost = t.dblCost
+			,dblQty = rv.dblQty
+			,dblUOMQty = rv.dblUOMQty
+			,dblCost = rv.dblCost
 			,dblValue = CAST(0  AS NUMERIC(18, 6)) 
-			,t.intTransactionTypeId
+			,rv.intTransactionTypeId
 			,intCurrencyId = r.intCurrencyId
 			,dblExchangeRate = ISNULL(ri.dblForexRate, 1) 
-			,intInventoryTransactionId = t.intInventoryTransactionId 
+			,intInventoryTransactionId = rv.intInventoryTransactionId 
 			,ty.strTransactionType
 			,ty.strTransactionForm 
 			,strDescription = NULL  
@@ -479,7 +500,7 @@ AS
 			,i.strItemNo
 			,dblReceiptUnitCost = rv.dblReturnUnitCost					
 			,dblReturnUnitCostInFunctionalCurrency = NULL --rv.dblReturnUnitCostInFunctionalCurrency
-			,intSourceEntityId = t.intSourceEntityId 
+			,intSourceEntityId = rv.intSourceEntityId 
 			,i.intCommodityId
 			,intReference = CAST(1 AS TINYINT)
 			,lot.strLotNumber
@@ -487,15 +508,16 @@ AS
 				ON rv.strReceiptNumber = r.strReceiptNumber	 
 			INNER JOIN tblICInventoryReceiptItem ri 
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId							
-			INNER JOIN tblICInventoryTransaction t 
-				ON t.intInventoryTransactionId = rv.intInventoryTransactionId
-				AND t.strTransactionId = rv.strReceiptNumber
-				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+				AND ri.intInventoryReceiptItemId = rv.intInventoryReceiptItemId
 			INNER JOIN tblICItem i
 				ON i.intItemId = ri.intItemId
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			--LEFT JOIN tblICInventoryTransaction t 
+			--	ON t.intInventoryTransactionId = rv.intInventoryTransactionId
+			--	AND t.strTransactionId = rv.strReceiptNumber
+			--	AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
 			OUTER APPLY (
 				SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
 			) stockUOM
@@ -512,7 +534,7 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
 
 			LEFT JOIN tblICLot lot
-				ON lot.intLotId = t.intLotId
+				ON lot.intLotId = rv.intLotId
 
 	-- Resolve the 0.01 discrepancy between the inventory transaction value and the return line total. 
 	UNION ALL
@@ -781,6 +803,7 @@ AS
 						ON rv.strReceiptNumber = r.strReceiptNumber
 					INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+						AND ri.intInventoryReceiptItemId = rv.intInventoryReceiptItemId
 					INNER JOIN tblICItem i 
 						ON ri.intItemId = i.intItemId
 					INNER JOIN #tmpRebuildList list	

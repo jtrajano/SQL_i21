@@ -189,7 +189,7 @@ USING	(
 		UNION ALL
 		SELECT id = 45
 				,name = 'Credit Memo'
-				,form = 'Credit Memo'
+				,form = 'Invoice'
 		UNION ALL
 		SELECT id = 46
 				,name = 'Outbound Shipment'

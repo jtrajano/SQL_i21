@@ -1324,3 +1324,8 @@ UPDATE tblQMCompanyPreference
 SET ysnSetDefaultReceivedDateInSampleScreen = 1
 WHERE ysnSetDefaultReceivedDateInSampleScreen IS NULL
 GO
+
+UPDATE tblQMCompanyPreference
+SET ysnSendPriceFeed = 0
+WHERE ysnSendPriceFeed IS NULL
+GO

@@ -86,7 +86,7 @@ SELECT
 																	)
 																	ELSE
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
-																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
+																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], CASE WHEN ITEM.ysnSeparateStockForUOMs = 0 THEN ICIUOM_STOCK.[intItemUOMId] ELSE ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) END) 
 																				ELSE 
 																					ARID.[dblLastCost]  
 																		END 
@@ -135,7 +135,7 @@ LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARID.intItemUOMId = ICIUOM.
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
-	AND (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 		
+	AND (ARID.[strImportFormat] IS NULL OR ((ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 		
 	AND (
 		(ARID.[intInventoryShipmentItemId] IS NULL AND ARID.[intLoadDetailId] IS NULL AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR 
@@ -241,7 +241,7 @@ LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARIC.[intItemUnitMeasureId]
 LEFT JOIN tblICCategory CAT ON ICI.intCategoryId = CAT.intCategoryId
 LEFT JOIN tblICItemPricing IPP ON IPP.intItemId = ICI.intItemId AND IPP.intItemLocationId = ILOC.intItemLocationId
 LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]				 				 
-WHERE (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], ILOC.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
+WHERE (ARID.[strImportFormat] IS NULL OR ((ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], ILOC.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 
 	AND (
 		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR

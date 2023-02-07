@@ -29,9 +29,6 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[intClassId] [int] NULL,
 	[intProductCodeId] [int] NULL,
 	[intFuelTankId] [int] NULL,
-	[strPassportFuelId1] [nvarchar](50) NULL,
-	[strPassportFuelId2] [nvarchar](50) NULL,
-	[strPassportFuelId3] [nvarchar](50) NULL,
 	[ysnTaxFlag1] [bit] NULL,
 	[ysnTaxFlag2] [bit] NULL,
 	[ysnTaxFlag3] [bit] NULL,
@@ -92,7 +89,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 		, intIssueUOMId
 		, intReceiveUOMId
 		, intFamilyId
-		, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+		, intClassId, intProductCodeId, intFuelTankId, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
@@ -110,7 +107,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 		, intIssueUOMId
 		, intReceiveUOMId
 		, intFamilyId
-		, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+		, intClassId, intProductCodeId, intFuelTankId, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
@@ -137,7 +134,7 @@ INSERT INTO tblICItemLocation(
 	, intIssueUOMId
 	, intReceiveUOMId
 	, intFamilyId
-	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
+	, intClassId, intProductCodeId, intFuelTankId, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
@@ -155,7 +152,7 @@ SELECT
 	, NewDetails.intIssueUOMId
 	, NewDetails.intReceiveUOMId
 	, NewDetails.intFamilyId
-	, NewDetails.intClassId, NewDetails.intProductCodeId, NewDetails.intFuelTankId, NewDetails.strPassportFuelId1, NewDetails.strPassportFuelId2, NewDetails.strPassportFuelId3, NewDetails.ysnTaxFlag1, NewDetails.ysnTaxFlag2, NewDetails.ysnTaxFlag3, NewDetails.ysnTaxFlag4, NewDetails.ysnPromotionalItem, NewDetails.intMixMatchId
+	, NewDetails.intClassId, NewDetails.intProductCodeId, NewDetails.intFuelTankId, NewDetails.ysnTaxFlag1, NewDetails.ysnTaxFlag2, NewDetails.ysnTaxFlag3, NewDetails.ysnTaxFlag4, NewDetails.ysnPromotionalItem, NewDetails.intMixMatchId
 	, NewDetails.ysnDepositRequired, NewDetails.intDepositPLUId, NewDetails.intBottleDepositNo, NewDetails.ysnSaleable, NewDetails.ysnQuantityRequired, NewDetails.ysnScaleItem, NewDetails.ysnFoodStampable, NewDetails.ysnReturnable, NewDetails.ysnPrePriced, NewDetails.ysnOpenPricePLU, NewDetails.ysnLinkedItem, NewDetails.strVendorCategory
 	, NewDetails.ysnCountBySINo, NewDetails.strSerialNoBegin, NewDetails.strSerialNoEnd, NewDetails.ysnIdRequiredLiquor, NewDetails.ysnIdRequiredCigarette, NewDetails.intMinimumAge, NewDetails.ysnApplyBlueLaw1, NewDetails.ysnApplyBlueLaw2, NewDetails.ysnCarWash, NewDetails.intItemTypeCode, NewDetails.intItemTypeSubCode
 	, NewDetails.ysnAutoCalculateFreight, NewDetails.intFreightMethodId, NewDetails.dblFreightRate, NewDetails.intShipViaId, NewDetails.intNegativeInventory, NewDetails.dblReorderPoint, NewDetails.dblMinOrder, NewDetails.dblSuggestedQty, NewDetails.dblLeadTime, NewDetails.strCounted, NewDetails.intCountGroupId, NewDetails.ysnCountedDaily
@@ -167,24 +164,26 @@ WHERE ItemLocation.intItemLocationId IS NULL
 
 SET @intNewItemLocationId = SCOPE_IDENTITY()
 
-
-INSERT INTO tblICItemPricing (intItemId, intItemLocationId) 
-SELECT  NewDetails.intItemId
-	, @intNewItemLocationId
-FROM @New NewDetails
-LEFT JOIN tblICItemPricing ItemPricing
-	ON ItemPricing.intItemLocationId = @intNewItemLocationId AND ItemPricing.intItemId = NewDetails.intItemId
-WHERE ItemPricing.intItemPricingId IS NULL
-
--- Add the audit logs
+IF (@intNewItemLocationId IS NOT NULL)
 BEGIN
-DECLARE @strDescription NVARCHAR(400)
-
-SET @strDescription = 'Duplicated item location from Copy to Store screen'
-EXEC	dbo.uspSMAuditLog 
-			@keyValue = @intSourceItemId			 -- Item Id. 
-			,@screenName = 'Inventory.view.Item'     -- Screen Namespace
-			,@entityId = @intEntityUserSecurityId		 -- Entity Id.
-			,@actionType = 'Duplicated'                  -- Action Type
-			,@changeDescription = @strDescription
+	INSERT INTO tblICItemPricing (intItemId, intItemLocationId) 
+	SELECT  NewDetails.intItemId
+		, @intNewItemLocationId
+	FROM @New NewDetails
+	LEFT JOIN tblICItemPricing ItemPricing
+		ON ItemPricing.intItemLocationId = @intNewItemLocationId AND ItemPricing.intItemId = NewDetails.intItemId
+	WHERE ItemPricing.intItemPricingId IS NULL
+	
+	-- Add the audit logs
+	BEGIN
+	DECLARE @strDescription NVARCHAR(400)
+	
+	SET @strDescription = 'Duplicated item location from Copy to Store screen'
+	EXEC	dbo.uspSMAuditLog 
+				@keyValue = @intSourceItemId			 -- Item Id. 
+				,@screenName = 'Inventory.view.Item'     -- Screen Namespace
+				,@entityId = @intEntityUserSecurityId		 -- Entity Id.
+				,@actionType = 'Duplicated'                  -- Action Type
+				,@changeDescription = @strDescription
+	END
 END

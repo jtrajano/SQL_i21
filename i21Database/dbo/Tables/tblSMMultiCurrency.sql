@@ -42,8 +42,8 @@
 	[intGainOnForwardOffsetId]						INT NULL,
 	[intGainOnSwapOffsetId]							INT NULL,
 	[intGainOnGLOffsetId]							INT NULL,
-
-	/* Offset */
+	
+	/* Realized */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
 	[intFixedAssetsRealizedId]						INT NULL,
@@ -52,6 +52,20 @@
 	[intGainOnSwapRealizedId]						INT NULL,
 	[intForexDifferenceRealizedId]					INT NULL,
 	[intGeneralLedgerRealizedId]					INT NULL,
+	[intInventoryRealizedId]						INT NULL,
+	[intInventoryInTransitRealizedId]				INT NULL,
+
+	[ysnGeneralLedgerRevalue]						BIT NULL DEFAULT 1,
+	[ysnSalesRevalue]								BIT NULL DEFAULT 1,
+	[ysnPurchasingRevalue]							BIT NULL DEFAULT 1,
+	[ysnCashManagementRevalue]						BIT NULL DEFAULT 1,
+	[ysnContractRevalue]							BIT NULL DEFAULT 1,
+	[ysnInventoryRevalue]							BIT NULL DEFAULT 1,
+	[ysnPayrollRevalue]								BIT NULL DEFAULT 1,
+	[ysnFixedAssetsRevalue]							BIT NULL DEFAULT 1,
+	[ysnInTransitRevalue]							BIT NULL DEFAULT 1,
+	[ysnSwapRevalue]								BIT NULL DEFAULT 1,
+	[ysnForwardRevalue]								BIT NULL DEFAULT 1,
 	/* Bank Transfer */
 
 	[intConcurrencyId]								INT NOT NULL DEFAULT 1, 

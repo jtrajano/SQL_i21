@@ -67,6 +67,39 @@ BEGIN
 
 END
 
+	-- Validate Freight Only Distribution
+	SELECT DISTINCT LR.strReceiptLine
+	INTO #tmpList
+	FROM tblTRLoadDistributionDetail DD
+	JOIN tblTRLoadDistributionHeader DH ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	JOIN tblICItem I ON I.intItemId = DD.intItemId
+	JOIN tblTRLoadReceipt LR ON LR.strReceiptLine = DD.strReceiptLink AND LR.intLoadHeaderId = DH.intLoadHeaderId
+	JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = LR.intSupplyPointId
+	JOIN vyuTRCustomerFreightList CF ON CF.intCustomerId = DH.intEntityCustomerId
+										AND CF.inCustomerLocationId = DH.intShipToLocationId
+										AND CF.intCategoryId = I.intCategoryId
+										AND CF.strZipCode = SP.strZipCode
+	WHERE ISNULL(CF.ysnFreightOnly, 0) = 1
+		AND (ISNULL(LR.dblUnitCost, 0) != 0 OR ISNULL(LR.dblFreightRate, 0) != 0 OR ISNULL(LR.dblPurSurcharge, 0) != 0)
+		AND DH.intLoadHeaderId = @intLoadHeaderId
+
+	IF EXISTS (SELECT TOP 1 1 FROM #tmpList)
+	BEGIN
+		DECLARE	@ids AS NVARCHAR(MAX)
+
+		SELECT	@ids = STUFF((SELECT DISTINCT ', ' + RTRIM(LTRIM(strReceiptLine))
+								FROM #tmpList
+								FOR XML PATH('')), 1, 2, '')
+
+		SET @ErrMsg = 'Receipts (' + @ids + ') that was distributed as Freight Only should not have any cost, freight, or surcharge.'
+		RAISERROR(@ErrMsg, 16, 1)
+	END
+
+	DROP TABLE #tmpList
+	-- End of Freight Only Validation
+
+
+
 	SELECT strReceiptType			= CASE WHEN min(TR.intContractDetailId) IS NULL THEN 'Direct'
 											WHEN min(TR.intContractDetailId) IS NOT NULL THEN 'Purchase Contract' END
 		,intEntityVendorId			= min(TR.intTerminalId)
@@ -124,7 +157,7 @@ END
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId --333333
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
-			--AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
+			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
     group by TR.intLoadReceiptId
 	ORDER BY intEntityVendorId
 		,strBillOfLadding
@@ -135,8 +168,6 @@ END
 		,intSourceType
 		,intTaxGroupId
 	
-
-
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
 	INSERT into @ReceiptStagingTable(
 			strReceiptType

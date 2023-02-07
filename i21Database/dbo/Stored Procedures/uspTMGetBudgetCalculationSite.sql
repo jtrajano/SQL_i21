@@ -51,17 +51,17 @@ BEGIN
 		,dblSiteBurnRate = A.dblBurnRate
 		,dblSiteEstimatedGallonsLeft = A.dblEstimatedGallonsLeft
 		,dblSeasonExpectedUsage = CAST((CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) AS NUMERIC(18,6))
-		,dblRequiredQuantity = CAST((CASE WHEN @strCalculateBudgetFor = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 1 
+		,dblRequiredQuantity = CAST((CASE WHEN @strCalculateBudgetFor COLLATE Latin1_General_CI_AS = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 1 
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - dblEstimatedGallonsLeft
-									WHEN @strCalculateBudgetFor = 'This Year' AND @ysnIncludeEstimatedTankInventory = 1
+									WHEN @strCalculateBudgetFor COLLATE Latin1_General_CI_AS = 'This Year' AND @ysnIncludeEstimatedTankInventory = 1
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE  F.intProjectedDegreeDay / A.dblBurnRate END) - (ISNULL(H.dblTotalGallons,0.0) - A.dblEstimatedGallonsLeft)
-									WHEN @strCalculateBudgetFor = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 0
+									WHEN @strCalculateBudgetFor COLLATE Latin1_General_CI_AS = 'Next Year' AND @ysnIncludeEstimatedTankInventory = 0
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END)
-									WHEN @strCalculateBudgetFor = 'This Year' AND @ysnIncludeEstimatedTankInventory = 0
+									WHEN @strCalculateBudgetFor COLLATE Latin1_General_CI_AS = 'This Year' AND @ysnIncludeEstimatedTankInventory = 0
 										THEN (CASE WHEN ISNULL(A.dblBurnRate,0)= 0 THEN 0 ELSE F.intProjectedDegreeDay / A.dblBurnRate END) - ISNULL(H.dblTotalGallons,0.0)
 									ELSE 0
 									END) AS NUMERIC(18,6))
-								+ (CASE WHEN @strCalculateBudgetFor = 'Next Year'
+								+ (CASE WHEN @strCalculateBudgetFor COLLATE Latin1_General_CI_AS = 'Next Year'
 								THEN
 									(365 * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END))
 								ELSE
@@ -83,7 +83,7 @@ BEGIN
 		,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) 
 		,intDeliveryTermId = (CASE WHEN A.intDeliveryTermID IS NULL THEN K.intTermsId ELSE A.intDeliveryTermID END)
 		,intStartBudgetMonth = MONTH(K.dtmBudgetBeginDate)
-		,dblNonHeatUsage = (CASE WHEN @strCalculateBudgetFor = 'Next Year'
+		,dblNonHeatUsage = (CASE WHEN @strCalculateBudgetFor COLLATE Latin1_General_CI_AS = 'Next Year'
 								THEN
 									(365 * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END))
 								ELSE

@@ -855,7 +855,7 @@ IF @ysnPost = 1
  
         
             IF @intBankTransferTypeId = 4 AND ISNULL(@ysnPostedInTransit,0) =1
-              EXEC uspCMCreateBankSwapLong @intTransactionId
+              EXEC uspCMCreateBankSwapLong @intTransactionId, @intEntityId
         END  -- @ysnPostedInTransit = 1
       END    -- @ysnPost =1
     ELSE    

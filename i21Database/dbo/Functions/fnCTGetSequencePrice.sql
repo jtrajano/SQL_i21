@@ -1,4 +1,5 @@
-﻿CREATE FUNCTION [dbo].[fnCTGetSequencePrice] 
+﻿
+CREATE FUNCTION [dbo].[fnCTGetSequencePrice] 
 	(
 		 @intContractDetailId INT
 		,@dblSettlementPrice NUMERIC(24, 6) = NULL

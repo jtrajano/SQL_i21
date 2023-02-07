@@ -57,6 +57,15 @@ BEGIN TRY
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
 
+	INSERT INTO @InvoiceIds(
+		  intHeaderId
+		, ysnForDelete
+		, strBatchId
+	) 
+	SELECT intHeaderId 	= @intInvoiceId
+		 , ysnForDelete = ISNULL(@ForDelete, 0)
+		 , strBatchId 	= @strBatchId
+
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
 			IF @intTranCount = 0

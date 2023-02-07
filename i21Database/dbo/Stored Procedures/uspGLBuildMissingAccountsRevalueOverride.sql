@@ -18,8 +18,8 @@ AS
     DECLARE @tbl TABLE
       (
          id           INT IDENTITY(1, 1),
-         strAccountId NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
-         strSegment   NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL
+         strAccountId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+         strSegment   NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
       );
 
     WITH d
@@ -74,5 +74,5 @@ AS
     GROUP  BY intAccountSegmentId
 
     EXEC uspGLBuildAccountTemporary
-      1
+      @intEntityId
 

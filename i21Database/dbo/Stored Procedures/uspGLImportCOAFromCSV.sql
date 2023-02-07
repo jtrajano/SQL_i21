@@ -93,8 +93,11 @@ AS
 		FROM @tblImport A
 		LEFT JOIN tblGLAccountSegment AcctSeg
 			ON AcctSeg.strCode = A.strAccountPartition
+		LEFT JOIN tblGLAccountStructure ST
+			ON ST.intStructureType = A.intPartitionType
 		WHERE A.strPartitionGroup = @strGroup
 			AND A.intPartitionType > 0
+			AND AcctSeg.intAccountStructureId = ST.intAccountStructureId
 
 		IF EXISTS(SELECT TOP 1 1 FROM @tblImport WHERE strPartitionGroup = @strGroup AND strError IS NOT NULL)
 		BEGIN
@@ -214,6 +217,12 @@ AS
 					ON G.strPartitionGroup = I.strPartitionGroup
 				WHERE  G.strPartitionGroup = @strGroup
 					AND I.intPartitionType > 0
+					AND ysnInvalid = 0
+
+				IF EXISTS(SELECT 1 FROM tblGLAccount A LEFT JOIN tblGLTempCOASegment B 
+				on A.intAccountId = B.intAccountId
+				where B.intAccountId IS  NULL)
+					EXEC uspGLBuildTempCOASegment
 
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType > 3)
 				BEGIN
@@ -252,7 +261,7 @@ AS
 				WHERE B.strPartitionGroup = @strGroup
 					AND A.strAccountId NOT IN (SELECT stri21Id
 											  FROM   tblGLCOACrossReference
-											  WHERE  strCompanyId = 'Legacy')
+											  WHERE  strCompanyId = 'Legacy')			
 				END
 			END
 		END

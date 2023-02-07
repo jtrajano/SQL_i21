@@ -2,7 +2,7 @@
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN
-	IF(ISNULL(@xmlParam,'') ='')
+	IF(ISNULL(@xmlParam COLLATE Latin1_General_CI_AS,'') ='')
 	BEGIN
 		SELECT 
 		strCompanyName = ''

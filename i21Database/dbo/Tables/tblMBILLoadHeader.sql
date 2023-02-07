@@ -7,10 +7,12 @@ strLoadNumber nvarchar(100)COLLATE Latin1_General_CI_AS NULL,
 intDriverId int,
 intTruckId int,
 intHaulerId int,
+intDispatchOrderId int NULL,
 intTrailerId int NULL,
 strTrailerNo nvarchar(100)COLLATE Latin1_General_CI_AS NULL,
 dtmScheduledDate datetime,
 ysnPosted bit default (0),
 intConcurrencyId int default(0)
-CONSTRAINT PK_tblMBILLoadHeaderHeader PRIMARY KEY CLUSTERED(intLoadHeaderId)
+CONSTRAINT PK_tblMBILLoadHeaderHeader PRIMARY KEY CLUSTERED(intLoadHeaderId), 
+    [ysnDispatched] BIT NULL DEFAULT (1)
 )

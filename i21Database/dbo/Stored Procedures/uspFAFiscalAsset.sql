@@ -1,18 +1,22 @@
 CREATE PROCEDURE uspFAFiscalAsset
   @intAssetId INT,
-  @intBookId INT
+  @intBookDepreciationId INT
 AS
 DECLARE 
-@intDepMethodId INT, 
-@dtmPlacedInService DATETIME,
-@totalMonths INT 
+	@intDepMethodId INT, 
+	@dtmPlacedInService DATETIME,
+	@totalMonths INT,
+	@intBookId INT
 
-DELETE FROM  tblFAFiscalAsset where intAssetId = @intAssetId and @intBookId = intBookId
 
-SELECT @intDepMethodId =intDepreciationMethodId,
-@dtmPlacedInService =dtmPlacedInService
+SELECT 
+	  @intDepMethodId =intDepreciationMethodId
+	, @dtmPlacedInService =dtmPlacedInService
+	, @intBookId = intBookId
+FROM tblFABookDepreciation WHERE @intAssetId = intAssetId AND intBookDepreciationId = @intBookDepreciationId
 
-FROM tblFABookDepreciation WHERE @intAssetId = intAssetId AND intBookId = @intBookId
+DELETE FROM  tblFAFiscalAsset WHERE intAssetId = @intAssetId AND intBookDepreciationId = @intBookDepreciationId
+
 
 IF @intDepMethodId IS NULL RETURN
 
@@ -29,8 +33,8 @@ DECLARE @Rows INT
 WHILE @i < @totalMonths
 BEGIN
 	 SELECT @dtmDep = CAST(DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1, @dtmPlacedInService)) + @i,0)) AS DATE)
-	 INSERT INTO tblFAFiscalAsset (intFiscalYearId, intFiscalPeriodId, intAssetId, intBookId )
-	 SELECT  intFiscalYearId, intGLFiscalYearPeriodId , @intAssetId, @intBookId
+	 INSERT INTO tblFAFiscalAsset (intFiscalYearId, intFiscalPeriodId, intAssetId, intBookId, intBookDepreciationId )
+	 SELECT  intFiscalYearId, intGLFiscalYearPeriodId , @intAssetId, @intBookId, @intBookDepreciationId
 	 FROM tblGLFiscalYearPeriod WHERE @dtmDep BETWEEN dtmStartDate AND dtmEndDate
 	SET @i = @i+1
 END

@@ -37,16 +37,13 @@ SELECT
     L.[strLedgerName],
     GJ.[intCompanyLocationId],
     CL.[strLocationName] COLLATE Latin1_General_CI_AS strCompanyLocation,
-    GJ.[intCompanySegmentId],
-    AccSeg.strCode COLLATE Latin1_General_CI_AS strCompanySegment
+    GJ.intCompanySegmentId,
+	SGC.strCode strCompanySegment,
+    SGC.strChartDesc strCompanySegmentDesc
     FROM   [dbo].[tblGLJournal] AS GJ
     LEFT JOIN [dbo].[tblSMCurrency] AS SM ON GJ.[intCurrencyId] = SM.[intCurrencyID]
     LEFT JOIN [dbo].[tblGLFiscalYearPeriod] AS FP ON GJ.[intFiscalPeriodId] = FP.[intGLFiscalYearPeriodId]
     LEFT JOIN tblGLAccountSegment SG ON SG.intAccountSegmentId = GJ.intLocationSegmentId
+    LEFT JOIN tblGLAccountSegment SGC ON SGC.intAccountSegmentId = GJ.intCompanySegmentId
     LEFT JOIN [dbo].[tblGLLedger] L ON L.intLedgerId = GJ.intLedgerId    
     LEFT JOIN [dbo].[tblSMCompanyLocation] CL ON CL.intCompanyLocationId = GJ.intCompanyLocationId
-    LEFT JOIN [dbo].[tblGLAccountSegment] AccSeg ON AccSeg.intAccountSegmentId = GJ.intCompanySegmentId
-    
-
-
-	

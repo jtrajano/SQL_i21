@@ -125,6 +125,7 @@ BEGIN TRY
 																									  , 'Non-Inventory'
 																									  , 'Finished Good'
 																									  , 'Raw Material')
+																					  AND ysnProcessed = 0
 	ORDER BY PD.intPurchaseDetailId
 
 	IF EXISTS (SELECT * FROM @ReceiptStagingTable)
@@ -150,7 +151,7 @@ BEGIN TRY
 		FROM tblPOPurchaseDetail PurchaseOrderDetail
 		INNER JOIN tblMFPODetail AS ManufactureOrderDetail ON PurchaseOrderDetail.intPurchaseDetailId = ManufactureOrderDetail.intPurchaseDetailId
 		LEFT JOIN tblICItem i ON i.intItemId = PurchaseOrderDetail.intItemId
-		WHERE PurchaseOrderDetail.intPurchaseId = 7 AND PurchaseOrderDetail.intItemId IS NOT NULL	/* Exclude Misc Type. */
+		WHERE PurchaseOrderDetail.intPurchaseId = @intPurchaseId AND PurchaseOrderDetail.intItemId IS NOT NULL	/* Exclude Misc Type. */
 													AND i.strType NOT IN ('Other Charge')		    /* Exclue Other Charge Item. */
 		
 		-- Update the PO Status 

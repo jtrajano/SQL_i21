@@ -1,120 +1,131 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPickListReport]
-@xmlParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
-	DECLARE @intPickListId			INT,
-			@idoc					INT,
-			@intSalesOrderId		INT, 
-			@intRecipeGuideId		INT
+	DECLARE @intPickListId								INT
+	      , @idoc										INT
+		  , @intSalesOrderId							INT
+		  , @intRecipeGuideId							INT
+		  , @intWorkOrderCount							INT
+		  , @intRecipeId								INT
+		  , @intBlendItemId								INT
+		  , @intLocationId								INT
+		  , @dblQtyToProduce							NUMERIC(18, 6)
+		  , @strPickListNo								NVARCHAR(50)
+		  , @strBlendItemNoDesc							NVARCHAR(MAX)
+		  , @strWorkOrderNo								NVARCHAR(MAX)
+		  , @dblTotalPickQty							NUMERIC(18, 6)
+		  , @intWorkOrderId								INT
+		  , @intMinRemainingItem						INT
+		  , @intBlendRequirementId						INT
+		  , @intKitStatusId								INT
+		  , @dblTotalCost								NUMERIC(38, 20)
+		  , @strUOM										NVARCHAR(50)
+		  , @strSONo									NVARCHAR(50)
+		  , @strShipTo									NVARCHAR(MAX)
+		  , @strCustomerComments						NVARCHAR(MAX)
+		  , @strFooterComments							NVARCHAR(MAX)
+		  , @ysnShowCostInSalesOrderPickList			BIT = 0
+		  , @ysnShowAddOnItemQtyInSalesOrderPickList	BIT = 0
+		  , @intMaxOtherChargeId						INT
+		  , @ysnIncludeEntityName						BIT = 0
+		  , @strCustomerName							NVARCHAR(250)
+		  , @intNoOfBatches								INT
+		  , @intNoOfBatchesCopy							INT
+		  , @dblBatchSize								NUMERIC(38, 20)
+		  , @intMinItem									INT
+		  , @intItemId									INT
+		  , @dblRequiredQty								NUMERIC(38, 20)
+		  , @intMinLot									INT
+		  , @intLotId									INT
+		  , @dblAvailableQty							NUMERIC(38, 20)
+		  , @intPickListDetailId						INT
+		  , @intBatchCounter							INT = 1
+		  , @strCustomerMessages						NVARCHAR(max)
+		  , @ysnShowRunningWeight						BIT = 0
+		  , @strCompanyName								NVARCHAR(100)
+		  , @strCompanyAddress							NVARCHAR(100)
+		  , @strCity									NVARCHAR(25)
+		  , @strState									NVARCHAR(50)
+		  , @strZip										NVARCHAR(12)
+		  , @strCountry									NVARCHAR(25)
+		  , @ysnDisplayPickTicketItemXref				BIT = 0
+
+
+	DECLARE @tblInputItem TABLE (intRowNo				INT IDENTITY
+							   , intItemId				INT
+							   , dblRequiredQty			NUMERIC(18, 6)
+							   , ysnIsSubstitute		BIT
+							   , intConsumptionMethodId INT
+							   , intStorageLocationId	INT
+							   , intParentItemId		INT);
+
+	DECLARE @tblLot TABLE (intRowNo				INT IDENTITY
+						 , intPickListDetailId	INT
+						 , intLotId				INT
+						 , intItemId			INT
+						 , dblQty				NUMERIC(38, 20)
+						 , intItemUOMId			INT
+						 , intLocationId		INT
+						 , intSubLocationId		INT
+						 , intStorageLocationId INT)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
       
 	DECLARE @temp_xml_table TABLE 
 	(  
-			[fieldname]		NVARCHAR(50),  
-			condition		NVARCHAR(20),        
-			[from]			NVARCHAR(50), 
-			[to]			NVARCHAR(50),  
-			[join]			NVARCHAR(10),  
-			[begingroup]	NVARCHAR(50),  
-			[endgroup]		NVARCHAR(50),  
-			[datatype]		NVARCHAR(50) 
+		[fieldname]	 NVARCHAR(50)
+	  , condition	 NVARCHAR(20)
+	  , [from]		 NVARCHAR(50)
+	  , [to]		 NVARCHAR(50)
+	  , [join]		 NVARCHAR(10)
+	  , [begingroup] NVARCHAR(50)
+	  , [endgroup]	 NVARCHAR(50)
+	  , [datatype]	 NVARCHAR(50) 
 	)  
   
 	EXEC sp_xml_preparedocument @idoc output, @xmlParam  
   
 	INSERT INTO @temp_xml_table  
 	SELECT	*  
-	FROM	OPENXML(@idoc, 'xmlparam/filters/filter', 2)  
-	WITH (  
-				[fieldname]		NVARCHAR(50),  
-				condition		NVARCHAR(20),        
-				[from]			NVARCHAR(50), 
-				[to]			NVARCHAR(50),  
-				[join]			NVARCHAR(10),  
-				[begingroup]	NVARCHAR(50),  
-				[endgroup]		NVARCHAR(50),  
-				[datatype]		NVARCHAR(50)  
-	)  
+	FROM OPENXML(@idoc, 'xmlparam/filters/filter', 2)  
+	WITH ([fieldname]  NVARCHAR(50)
+	    , condition	   NVARCHAR(20)
+		, [from]	   NVARCHAR(50)
+		, [to]		   NVARCHAR(50)
+		, [join]	   NVARCHAR(10)
+		, [begingroup] NVARCHAR(50)
+		, [endgroup]   NVARCHAR(50)
+		, [datatype]   NVARCHAR(50))  
     
 	SELECT	@intPickListId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intPickListId'
+	WHERE	[fieldname] = 'intPickListId';
 
 	SELECT	@intSalesOrderId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intSalesOrderId'
+	WHERE	[fieldname] = 'intSalesOrderId';
 
 	SELECT	@intRecipeGuideId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intRecipeGuideId'
 
-	Set @intSalesOrderId = ISNULL(@intSalesOrderId,0)
+	SET @intSalesOrderId = ISNULL(@intSalesOrderId, 0);
 
-	Declare @intWorkOrderCount int  
-	SELECT  @intWorkOrderCount = COUNT(1) FROM tblMFWorkOrder WHERE intPickListId = @intPickListId 
-   
-Declare @intRecipeId int
-Declare @intBlendItemId int
-Declare @intLocationId int
-Declare @dblQtyToProduce numeric(18,6)
-Declare @strPickListNo nvarchar(50)
-Declare @strBlendItemNoDesc nvarchar(max)
-Declare @strWorkOrderNo nvarchar(max)
-Declare @dblTotalPickQty numeric(18,6)
-Declare @intWorkOrderId int
-Declare @intMinRemainingItem int
-Declare @intBlendRequirementId int
-Declare @intKitStatusId int
-Declare @dblTotalCost NUMERIC(38,20)
-Declare @strUOM nvarchar(50)
-Declare @strSONo nvarchar(50)
-Declare @strShipTo nvarchar(max)
-Declare @strCustomerComments nvarchar(max)
-Declare @strFooterComments nvarchar(max)
-Declare @ysnShowCostInSalesOrderPickList bit=0
-Declare @ysnShowAddOnItemQtyInSalesOrderPickList bit=0
-Declare @intMaxOtherChargeId int
-Declare @ysnIncludeEntityName bit=0
-Declare @strCustomerName nvarchar(250)
-Declare @intNoOfBatches INT
-Declare @intNoOfBatchesCopy INT
-Declare @dblBatchSize NUMERIC(38,20)
-Declare @intMinItem int
-Declare @intItemId int
-Declare @dblRequiredQty numeric(38,20)
-Declare @intMinLot int
-Declare @intLotId int
-Declare @dblAvailableQty numeric(38,20)
-Declare @intPickListDetailId int
-Declare @intBatchCounter INT=1
-Declare @strCustomerMessages nvarchar(max)
-Declare @ysnShowRunningWeight bit=0
+	SELECT  @intWorkOrderCount = COUNT(1) 
+	FROM tblMFWorkOrder 
+	WHERE intPickListId = @intPickListId;   
 
-	DECLARE @strCompanyName NVARCHAR(100)
-		,@strCompanyAddress NVARCHAR(100)
-		,@strCity NVARCHAR(25)
-		,@strState NVARCHAR(50)
-		,@strZip NVARCHAR(12)
-		,@strCountry NVARCHAR(25)
+	SELECT TOP 1 @strCompanyName	= strCompanyName
+			   , @strCompanyAddress = strAddress
+			   , @strCity			= strCity
+			   , @strState			= strState
+			   , @strZip			= strZip
+			   , @strCountry		= strCountry
+	FROM dbo.tblSMCompanySetup;
 
-	SELECT TOP 1 @strCompanyName = strCompanyName
-		,@strCompanyAddress = strAddress
-		,@strCity = strCity
-		,@strState = strState
-		,@strZip = strZip
-		,@strCountry = strCountry
-	FROM dbo.tblSMCompanySetup
-
-DECLARE @tblInputItem TABLE (
-	intRowNo INT IDENTITY,
-	intItemId INT
-	,dblRequiredQty NUMERIC(18, 6)
-	,ysnIsSubstitute BIT
-	,intConsumptionMethodId INT
-	,intStorageLocationId INT
-	,intParentItemId INT
-	)
+	SELECT @ysnDisplayPickTicketItemXref = ysnDisplayPickTicketItemXref
+	FROM tblMFCompanyPreference;	
 
 Declare @tblItems AS TABLE
 (
@@ -184,27 +195,20 @@ Declare @tblItems AS TABLE
 	[strMethodOfApp] nvarchar(MAX) null,
 	[dblCubicFeet] [numeric](38, 20) NULL,
 	[strEPANumber] nvarchar(MAX) null
+	, strItemXref nvarchar(MAX) null
+	, ysnDisplayPickTicketItemXref BIT
 )
 
-DECLARE @tblLot TABLE (
-	 intRowNo INT IDENTITY
-    ,intPickListDetailId INT
-	,intLotId INT
-	,intItemId INT
-	,dblQty NUMERIC(38,20)
-	,intItemUOMId INT
-	,intLocationId INT
-	,intSubLocationId INT
-	,intStorageLocationId INT
-	)
 
-If ISNULL(@xmlParam,'')=''
-Begin
-	Select * from @tblItems
-	Return
-End
 
-If @intSalesOrderId=0 --Kit Pick List
+	IF ISNULL(@xmlParam, '') = ''
+		BEGIN
+			SELECT * FROM @tblItems
+			RETURN
+		END
+
+	/* Kit Pick List. */
+	IF @intSalesOrderId = 0 
 Begin
 	Select @intLocationId=intLocationId,@strPickListNo=strPickListNo,@strWorkOrderNo=strWorkOrderNo from tblMFPickList Where intPickListId=@intPickListId
 	Select TOP 1 @intBlendItemId=w.intItemId,@strBlendItemNoDesc=(i.strItemNo + ' - '  + ISNULL(i.strDescription,'')),@intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId,@intKitStatusId=intKitStatusId,
@@ -461,8 +465,10 @@ Begin --Sales Order Pick List
 									JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
 									)
 						ELSE ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '')
-						END COLLATE Latin1_General_CI_AS AS strDescription,
-					dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
+						END COLLATE Latin1_General_CI_AS AS strDescription
+				  , CASE WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty <> 0 THEN  dbo.fnRemoveTrailingZeroes(pld.dblShippedQty) 
+						 ELSE  dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity)
+					END AS dblPickQuantity,
 					um.strUnitMeasure AS strPickUOM,
 					l.strGarden,
 					@intWorkOrderCount AS intWorkOrderCount,
@@ -522,6 +528,8 @@ Begin --Sales Order Pick List
 					,null
 					,null
 					,null
+					, CustomerXref.strCustomerProduct + ' - ' + CustomerXref.strProductDescription + CHAR(13) + CHAR(10) + CustomerXref.strPickTicketNotes
+					, @ysnDisplayPickTicketItemXref
 			FROM tblMFPickList pl  
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -541,6 +549,11 @@ Begin --Sales Order Pick List
 						 FROM tblEMEntity as Entity
 						 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 						 WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
+			OUTER APPLY (SELECT TOP 1 strCustomerProduct, strProductDescription, strPickTicketNotes
+						 FROM tblICItemCustomerXref AS Xref
+						 LEFT JOIN tblICItemLocation AS ItemLocation ON Xref.intItemLocationId = ItemLocation.intItemLocationId 
+						 WHERE Xref.intItemId = i.intItemId AND Xref.intCustomerId = so.intEntityCustomerId AND (ItemLocation.intLocationId = @intLocationId OR Xref.intItemLocationId IS NULL)
+						 ORDER BY Xref.intItemLocationId DESC) AS CustomerXref
 			WHERE pl.intPickListId=@intPickListId 
 
 			--Delete duplicate item records
@@ -649,6 +662,8 @@ Begin --Sales Order Pick List
 			,ma.strName
 			,null
 			,i.strEPANumber
+			, CustomerXref.strCustomerProduct + ' - ' + CustomerXref.strProductDescription + CHAR(13) + CHAR(10) + CustomerXref.strPickTicketNotes
+			, @ysnDisplayPickTicketItemXref
 			FROM tblSOSalesOrderDetail sd  
 			JOIN tblICItem i on sd.intItemId=i.intItemId
 			Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
@@ -671,6 +686,11 @@ Begin --Sales Order Pick List
 						FROM tblEMEntity as Entity
 						INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 						WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
+			OUTER APPLY (SELECT TOP 1 strCustomerProduct, strProductDescription, strPickTicketNotes
+						 FROM tblICItemCustomerXref AS Xref
+						 LEFT JOIN tblICItemLocation AS ItemLocation ON Xref.intItemLocationId = ItemLocation.intItemLocationId 
+						 WHERE Xref.intItemId = i.intItemId AND Xref.intCustomerId = so.intEntityCustomerId AND (ItemLocation.intLocationId = @intLocationId OR Xref.intItemLocationId IS NULL)
+						 ORDER BY Xref.intItemLocationId DESC) AS CustomerXref
 			WHERE so.intSalesOrderId=@intSalesOrderId AND i.strType<>'Other Charge'
 		End
 
@@ -754,7 +774,7 @@ Begin --Sales Order Pick List
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
-				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'',@ysnDisplayPickTicketItemXref
 				From tblSOSalesOrderDetail sd join tblICItem i on sd.intItemId=i.intItemId
 				Where intSalesOrderId=@intSalesOrderId AND i.strType='Other Charge'
 
@@ -918,6 +938,8 @@ Begin --Sales Order Pick List
 								,null
 								,null
 								,null
+								, CustomerXref.strCustomerProduct + ' - ' + CustomerXref.strProductDescription + CHAR(13) + CHAR(10) + CustomerXref.strPickTicketNotes
+								, @ysnDisplayPickTicketItemXref
 						FROM tblMFPickList pl  
 						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 						JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -937,6 +959,11 @@ Begin --Sales Order Pick List
 									FROM tblEMEntity as Entity
 									INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 									WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
+						OUTER APPLY (SELECT TOP 1 strCustomerProduct, strProductDescription, strPickTicketNotes
+									 FROM tblICItemCustomerXref AS Xref
+									 LEFT JOIN tblICItemLocation AS ItemLocation ON Xref.intItemLocationId = ItemLocation.intItemLocationId 
+									 WHERE Xref.intItemId = i.intItemId AND Xref.intCustomerId = so.intEntityCustomerId AND (ItemLocation.intLocationId = @intLocationId OR Xref.intItemLocationId IS NULL)
+									 ORDER BY Xref.intItemLocationId DESC) AS CustomerXref
 						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
 
 						Update @tblLot Set dblQty=@dblAvailableQty - @dblRequiredQty Where intRowNo=@intMinLot
@@ -1033,6 +1060,8 @@ Begin --Sales Order Pick List
 								,null
 								,null
 								,null
+								, CustomerXref.strCustomerProduct + ' - ' + CustomerXref.strProductDescription + CHAR(13) + CHAR(10) + CustomerXref.strPickTicketNotes
+								, @ysnDisplayPickTicketItemXref
 						FROM tblMFPickList pl  
 						JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 						JOIN tblICItem i on pld.intItemId=i.intItemId
@@ -1052,6 +1081,11 @@ Begin --Sales Order Pick List
 									FROM tblEMEntity as Entity
 									INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]
 									WHERE Entity.intEntityId = so.intEntityCustomerId) AS CustomerName
+						OUTER APPLY (SELECT TOP 1 strCustomerProduct, strProductDescription, strPickTicketNotes
+									 FROM tblICItemCustomerXref AS Xref
+									 LEFT JOIN tblICItemLocation AS ItemLocation ON Xref.intItemLocationId = ItemLocation.intItemLocationId 
+									 WHERE Xref.intItemId = i.intItemId AND Xref.intCustomerId = so.intEntityCustomerId AND (ItemLocation.intLocationId = @intLocationId OR Xref.intItemLocationId IS NULL)
+									 ORDER BY Xref.intItemLocationId DESC) AS CustomerXref
 						WHERE pl.intPickListId=@intPickListId AND pld.intPickListDetailId=@intPickListDetailId
 
 						Set @dblRequiredQty = @dblRequiredQty - @dblAvailableQty

@@ -89,7 +89,7 @@ AS
 			and F.ysnDefaultContact = 1
 	INNER JOIN tblEMEntity G 
 		ON F.intEntityContactId = G.intEntityId
-	INNER JOIN tblTMClock	T
+	LEFT JOIN tblTMClock	T
 		ON A.intClockID = T.intClockID
 	LEFT JOIN tblICItem I
 		ON A.intProduct = I.intItemId
@@ -127,4 +127,5 @@ AS
 		ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 	LEFT JOIN tblSMCompanyLocationPricingLevel S
 		ON A.intCompanyLocationPricingLevelId = S.intCompanyLocationPricingLevelId
+	WHERE ysnCompanySite = 0
 GO

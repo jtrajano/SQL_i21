@@ -218,7 +218,8 @@ BEGIN
 			,dblTeaHuePinpoint			= T.dblTeaHuePinpoint
 			,dblTeaIntensityPinpoint	= T.dblTeaIntensityPinpoint	
 			,dblTeaMouthFeelPinpoint	= T.dblTeaMouthFeelPinpoint	
-			,dblTeaAppearancePinpoint	= T.dblTeaAppearancePinpoint	
+			,dblTeaAppearancePinpoint	= T.dblTeaAppearancePinpoint
+			,dtmShippingDate	= T.dtmShippingDate	
 		FROM tblMFBatch A
 		OUTER APPLY (
 			SELECT *
@@ -226,6 +227,7 @@ BEGIN
 			WHERE @id = intId
 			) T
 		WHERE @strBatchId = A.strBatchId
+			AND A.intLocationId = T.intLocationId
 			--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult, intBatchId, dtmDate)
 			--SELECT @guidBatchLogId, 'Updated ' + @strBatchId, @intBatchId, @dtmCurrent
 	END
@@ -348,6 +350,7 @@ BEGIN
 			,dblTeaIntensityPinpoint
 			,dblTeaMouthFeelPinpoint
 			,dblTeaAppearancePinpoint
+			,dtmShippingDate
 			)
 		SELECT (
 				CASE 
@@ -467,6 +470,7 @@ BEGIN
 			,dblTeaIntensityPinpoint
 			,dblTeaMouthFeelPinpoint
 			,dblTeaAppearancePinpoint
+			,dtmShippingDate
 		FROM @MFBatchTableType
 		WHERE intId = @id
 			--INSERT INTO tblMFBatchLog(guidBatchLogId,strResult, intBatchId, dtmDate)

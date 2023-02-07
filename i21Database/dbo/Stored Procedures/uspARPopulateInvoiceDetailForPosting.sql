@@ -1394,12 +1394,12 @@ WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
 
 UPDATE ARPIH
-SET dblBaseInvoiceTotal = ARPID.dblBaseTotal
+SET dblBaseInvoiceTotal = ARPID.dblBaseLineItemGLAmount + ISNULL(ARPIH.dblBaseTax, 0)
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
          intInvoiceId = intInvoiceId
-        ,dblBaseTotal = SUM(dblBaseLineItemGLAmount ) + SUM(dblBaseTax)
+        ,dblBaseLineItemGLAmount = SUM(dblBaseLineItemGLAmount)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
@@ -1422,19 +1422,19 @@ FROM tblARPostInvoiceDetail ARPID
 INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId AND ARPID.strSessionId = ARPIH.strSessionId
 WHERE ARPID.strSessionId = @strSessionId
 
-UPDATE ARPIH
-SET dblBaseInvoiceTotal = ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax
-FROM tblARPostInvoiceHeader ARPIH
-INNER JOIN (
-    SELECT
-         intInvoiceId               = intInvoiceId
-        ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
-        ,dblBaseTax                 = SUM(dblBaseTax)
-    FROM tblARPostInvoiceDetail
-    WHERE strSessionId = @strSessionId
-    GROUP BY intInvoiceId
-) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
-WHERE strSessionId = @strSessionId
+-- UPDATE ARPIH
+-- SET dblBaseInvoiceTotal = ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax
+-- FROM tblARPostInvoiceHeader ARPIH
+-- INNER JOIN (
+--     SELECT
+--          intInvoiceId               = intInvoiceId
+--         ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
+--         ,dblBaseTax                 = SUM(dblBaseTax)
+--     FROM tblARPostInvoiceDetail
+--     WHERE strSessionId = @strSessionId
+--     GROUP BY intInvoiceId
+-- ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+-- WHERE strSessionId = @strSessionId
 
 UPDATE ARPID
 SET dblBaseInvoiceTotal = ARPIH.dblBaseInvoiceTotal

@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFGenerateERPProductionOrder_EK (
-	@limit INT = 0
+	@limit INT = 100
 	,@offset INT = 0
 	,@ysnUpdateFeedStatus BIT = 1
 	)
@@ -53,15 +53,15 @@ BEGIN TRY
 		AND strTag = 'Count'
 
 	IF ISNULL(@tmp, 0) = 0
-		SELECT @tmp = 50
+		SELECT @tmp = 100
 
-	IF @offset > @tmp
+	IF @limit > @tmp
 	BEGIN
-		SELECT @offset = @tmp
+		SELECT @limit = @tmp
 	END
 
 	INSERT INTO @tblMFWorkOrderPreStage (intWorkOrderPreStageId)
-	SELECT TOP (@offset) PS.intWorkOrderPreStageId
+	SELECT TOP (@limit) PS.intWorkOrderPreStageId
 	FROM dbo.tblMFWorkOrderPreStage PS
 	WHERE PS.intStatusId IS NULL
 	ORDER BY intWorkOrderPreStageId
@@ -124,41 +124,46 @@ BEGIN TRY
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Taste'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblHue = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Hue'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblIntensity = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Intensity'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblMouthfeel = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Mouth feel'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblAppearance = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
 		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
 		WHERE P.strPropertyName = 'Appearance'
+		AND intWorkOrderId = @intWorkOrderId
 
 		SELECT @strXML = @strXML + '<Header>'
 		+ '<Status>'+Case When @strRowState = 'Modified' then 'U' Else 'C' End	  + '</Status>'
-		+ '<Plant>' + CL.strLocationNumber  + '</Plant>'
+		+ '<Plant>' + IsNULL(CL.strVendorRefNoPrefix,'')   + '</Plant>'
 		+ '<OrderNo>' + IsNULL(BR.strReferenceNo,'')   + '</OrderNo>' 
 			+ '<BlendCode>' + I.strItemNo + '</BlendCode>' 
 				+ '<BlendDescription>' + I.strDescription  + '</BlendDescription>' 
 				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), W.dtmApprovedDate , 126),'') + '</DateApproved>' 
 				+ '<Mixes>' + [dbo].[fnRemoveTrailingZeroes]( BR.dblEstNoOfBlendSheet) + '</Mixes>'
-				--+ '<Parts>' + CONVERT(VARCHAR(33), BR.dblEstNoOfBlendSheet , 126) + '</Parts>'
-				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](W.dblQuantity/BR.dblEstNoOfBlendSheet ) + '</NetWtPerMix>'
-				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](W.dblQuantity ) + '</TotalBlendWt>'
-				+ '<Volume></Volume>'
-				+ '<DustLevel></DustLevel>'
-				+ '<Moisture></Moisture>'
+				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](ROUND(P.dblTotalPart,0)) + '</Parts>'
+				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</NetWtPerMix>'
+				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblQuantity,0) ) + '</TotalBlendWt>'
+				+ '<Volume>0</Volume>'
+				+ '<DustLevel>0</DustLevel>'
+				+ '<Moisture>0</Moisture>'
 				+ '<T>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblTaste ),0) + '</T>'
 				+ '<H>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblHue ),0) + '</H>'
 				+ '<I>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblIntensity ),0) + '</I>'
@@ -170,6 +175,10 @@ BEGIN TRY
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 		JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
+		OUTER APPLY(SELECT SUM(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet) dblTotalPart
+					FROM dbo.tblMFWorkOrderInputLot WI
+					JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
+					WHERE WI.intWorkOrderId = W.intWorkOrderId) P
 		WHERE W.intWorkOrderId = @intWorkOrderId
 
 		SELECT @strDetailXML = ''
@@ -179,16 +188,18 @@ BEGIN TRY
 		+ '<Batch>' + L.strLotNumber   + '</Batch>' 
 		+ '<Chop>' + IsNULL(B.strTeaGardenChopInvoiceNumber,'') + '</Chop>' 
 		+ '<Mark>' + IsNULL(GM.strGardenMark ,'' ) + '</Mark>' 
-		+ '<Grade></Grade>' 
+		+ '<Grade>'+IsNULL(B.strLeafGrade,'')+'</Grade>' 
 		+ '<TeaItem>' +  I.strItemNo + '</TeaItem>' 
 		+ '<Material>' + IsNULL(I.strShortName,'' ) + '</Material>' 
 		+ '<MaterialDescription>' + I.strDescription  + '</MaterialDescription>' 
-		+ '<Location>' + CS.strSubLocationName  + '</Location>' 
-		+ '<Parts>' +  [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet  ) + '</Parts>' 
-		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](L.dblWeightPerQty ) + '</WeightPerPack>' 
-		+ '<WeightPerMix>' + ltrim(WI.dblQuantity/BR.dblEstNoOfBlendSheet) + '</WeightPerMix>' 
-		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](L.dblWeight ) + '</WeightPerBatch>' 
-		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity ) + '</Bags>' 
+		+ '<Origin>'+IsNULL(B.strTeaOrigin,'')+'</Origin>' 
+		+ '<Location>' + IsNULL(LTRIM(SUBSTRING(ISNULL(CS.strSubLocationName, ''), CHARINDEX('/', CS.strSubLocationName) + 1, LEN(CS.strSubLocationName))) , '')  + '</Location>' 
+		+ '<Parts>' +  [dbo].[fnRemoveTrailingZeroes](Round(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet,0)  ) + '</Parts>' 
+		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](Round(L.dblWeightPerQty,0) ) + '</WeightPerPack>' 
+		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</WeightPerMix>' 
+		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity,0) ) + '</WeightPerBatch>' 
+		+ '<WeightUOM>' + IsNULL(UM.strUnitMeasure,'')  + '</WeightUOM>' 
+		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblIssuedQuantity ,3)) + '</Bags>' 
 		+ '<FW>' + IsNULL(WI.strFW,'')  + '</FW>' 
 		+ '<UserID>' + US.strUserName  + '</UserID>' 
 		+ '<UserName>' + US.strFullName  + '</UserName>' 

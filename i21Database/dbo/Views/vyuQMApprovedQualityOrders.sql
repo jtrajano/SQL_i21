@@ -4,6 +4,9 @@ SELECT
     -- Batch fields
     B.intBatchId
     ,B.strBatchId
+    ,B.intSalesYear
+    ,B.intSales
+    ,CT.strCatalogueType
     ,B.strTeaGardenChopInvoiceNumber
     ,B.strVendorLotNumber
     ,B.intBrokerId
@@ -32,15 +35,17 @@ SELECT
     ,[intWeightItemUOMId] = WIUOM.intItemUOMId
     ,[strWeightUnitMeasure] = WUM.strSymbol
     ,[dblWeightPerUnit] = ISNULL(dbo.fnLGGetItemUnitConversion(I.intItemId, QIUOM.intItemUOMId, WUM.intUnitMeasureId), 0)
+    ,[strManufacturingLeafType] = LEAF_TYPE.strDescription
 
     ,CH.intContractHeaderId
     ,CD.intContractDetailId
     ,CH.strContractNumber
     ,CD.intContractSeq
     ,[intVendorEntityId] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.intEntityId ELSE V.intEntityId END
-    ,[strVendorName] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.strName ELSE V.strName END
-    ,[intVendorLocationId] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.intDefaultLocationId ELSE VL.intEntityLocationId END
-    ,[strVendorLocation] = CASE WHEN CD.intContractDetailId IS NULL THEN SVL.strLocationName ELSE VL.strLocationName END
+    ,[strVendorName] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.strEntityName ELSE V.strEntityName END
+    ,[intVendorLocationId] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.intDefaultLocationId ELSE V.intDefaultLocationId END
+    ,[strVendorLocation] = CASE WHEN CD.intContractDetailId IS NULL THEN SV.strDefaultLocation ELSE V.strDefaultLocation END
+    ,[strEntityContract] = CH.strCustomerContract
     ,[strVendorRef] = CASE WHEN CD.intContractDetailId IS NULL THEN S.strAdditionalSupplierReference ELSE CH.strCustomerContract END
     ,[strPricingStatus] =   CASE
                                 WHEN CD.intContractDetailId IS NULL THEN 'Fully Priced'
@@ -64,27 +69,28 @@ SELECT
     ,MZ.strMarketZoneCode
 FROM tblMFBatch B
 INNER JOIN tblQMSample S ON S.intSampleId = B.intSampleId -- Auction or Non-Auction Sample
-LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
+LEFT JOIN tblLGLoadDetail LD ON LD.intBatchId = B.intBatchId
+LEFT JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = B.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = B.intBrokerId
 LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intDestinationStorageLocationId
 LEFT JOIN tblICItem I ON I.intItemId = B.intTealingoItemId
+LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.intCommodityAttributeId = S.intManufacturingLeafTypeId
 -- Qty UOM Auction
 LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intItemUOMId AND QIUOM.intItemId = I.intItemId
 LEFT JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = QIUOM.intUnitMeasureId
 -- Weight UOM
 LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = I.intItemId
-LEFT JOIN vyuAPVendor SV ON SV.intEntityId = S.intEntityId
-LEFT JOIN tblEMEntityLocation SVL ON SVL.intEntityLocationId = SV.intDefaultLocationId
+LEFT JOIN vyuQMGetSupplier SV ON SV.intEntityId = S.intEntityId
 LEFT JOIN tblICItemUOM SPIUOM ON SPIUOM.intItemId = I.intItemId AND SPIUOM.intUnitMeasureId = S.intB1PriceUOMId
 LEFT JOIN tblICUnitMeasure SPUOM ON SPUOM.intUnitMeasureId = SPIUOM.intUnitMeasureId
 -- Contract side tables
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN tblEMEntity V ON V.intEntityId = CH.intEntityId
-LEFT JOIN tblEMEntityLocation VL ON VL.intEntityId = V.intEntityId AND VL.intEntityLocationId= CH.intEntitySelectedLocationId
+LEFT JOIN vyuQMGetSupplier V ON V.intEntityId = CH.intEntityId
 LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM PIUOM ON PIUOM.intItemUOMId = CD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureId
@@ -100,6 +106,7 @@ OUTER APPLY (
 OUTER APPLY (
     SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblTotalQuantity)
 ) WQTY
+WHERE LD.intLoadDetailId IS NULL
 
 GO
 

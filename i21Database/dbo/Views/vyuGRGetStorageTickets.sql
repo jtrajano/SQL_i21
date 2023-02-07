@@ -25,7 +25,7 @@ SELECT DISTINCT
     ,strContractNumber					= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
     ,intTicketId						= SC.intTicketId
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
-    ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
+    ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) --- ISNULL(dblStoragePaid,0)
     ,strReceiptNumber					= IR.strReceiptNumber
     ,ysnReadyForTransfer				= CAST(
 											CASE 

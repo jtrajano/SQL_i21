@@ -998,6 +998,13 @@ BEGIN TRY
 							  )
 							  AND @dblTicketStorageDue > 0
 				BEGIN
+
+					IF @intStorageChargeItemId IS NULL
+					BEGIN
+						RAISERROR('Item is missing for Storage Charge.',16,1,1)
+						GOTO SettleStorage_Exit
+					END
+					
 					INSERT INTO @SettleVoucherCreate 
 					(
 						 intCustomerStorageId
@@ -2544,7 +2551,7 @@ BEGIN TRY
 					,[intContractHeaderId]			= case WHEN a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= case WHEN a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] =  CASE 
-														WHEN @ysnDPOwnedType = 0 THEN case when @strItemNo = c.[strItemNo] then  IRI.intInventoryReceiptItemId else null end
+														WHEN @ysnDPOwnedType = 0 THEN case when @strItemNo = c.[strItemNo] then  RI.intInventoryReceiptItemId else null end
 														ELSE 
 															CASE 
 																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
@@ -2737,7 +2744,7 @@ BEGIN TRY
 														END																							
 					,[dblWeightUnitQty]				= 1 
 					,[intWeightUOMId]				= CASE
-														WHEN a.[intContractHeaderId] IS NOT NULL  or @origdblSpotUnits > 0 THEN b.intItemUOMId
+														WHEN a.[intContractHeaderId] IS NOT NULL OR (ISNULL(@origdblSpotUnits,0) > 0 AND a.intItemType = 1) THEN b.intItemUOMId
 														ELSE NULL
 													END
 					,[intPurchaseTaxGroupId]		= 
@@ -2756,13 +2763,9 @@ BEGIN TRY
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
 
-					, intLinkingId		= case when a.intSettleContractId is not null then 
-											isnull(availableQtyForVoucher.intPriceFixationDetailId, a.intSettleContractId)
-										else 
-											-90
-										end
-					,intStorageLocationId =  case when @strItemNo = c.[strItemNo] then  SC.intStorageLocationId else null end
-					,intSubLocationId =  case when @strItemNo = c.[strItemNo] then  SC.intSubLocationId  else null end 
+					, intLinkingId		= isnull(a.intSettleContractId, -90)
+					,intStorageLocationId =  case when @strItemNo = c.[strItemNo] then  CS.intStorageLocationId else null end
+					,intSubLocationId =  case when @strItemNo = c.[strItemNo] then  CS.intCompanyLocationSubLocationId  else null end 
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -2773,8 +2776,9 @@ BEGIN TRY
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
-				left join tblSCTicket SC on SC.intTicketId = CS.intTicketId
-				left join tblICInventoryReceiptItem IRI on SC.intTicketId = IRI.intSourceId
+				--left join tblICInventoryReceipt IR ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
+				--	AND IR.intEntityVendorId = CS.intEntityId
+				--left join tblICInventoryReceiptItem IRI on IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IRI.intContractHeaderId IS NOT NULL
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
 						AND DSC.intItemId = a.intItemId

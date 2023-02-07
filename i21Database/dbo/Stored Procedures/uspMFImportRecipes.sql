@@ -719,8 +719,6 @@ BEGIN
 				,@ysnVirtualRecipe
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
-			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
-				AND iu.ysnStockUnit = 1
 			LEFT JOIN tblSMCompanyLocation cl ON s.strLocationName = cl.strLocationName
 			LEFT JOIN tblMFRecipeType rt ON s.strRecipeType = rt.strName
 			LEFT JOIN tblMFManufacturingProcess mp ON s.strManufacturingProcess = mp.strProcessName
@@ -728,6 +726,8 @@ BEGIN
 			LEFT JOIN tblMFMarginBy m ON s.strMarginBy = m.strName
 			LEFT JOIN tblICUnitMeasure um ON s.strUOM = um.strUnitMeasure
 			LEFT JOIN tblMFOneLinePrint p ON s.strOneLinePrint = p.strName
+			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+				AND um.intUnitMeasureId =iu.intUnitMeasureId 
 			WHERE s.intRecipeStageId = @intMinId
 
 			SELECT @intRecipeId = SCOPE_IDENTITY()
@@ -810,8 +810,9 @@ BEGIN
 					,1 AS intConcurrencyId
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
+				LEFT JOIN tblICUnitMeasure um ON s.strUOM = um.strUnitMeasure
 				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
-					AND iu.ysnStockUnit = 1
+				AND um.intUnitMeasureId =iu.intUnitMeasureId 
 				WHERE s.intRecipeStageId = @intMinId
 		END
 		ELSE
@@ -854,8 +855,6 @@ BEGIN
 					,s.strValidTo
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
-				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
-					AND iu.ysnStockUnit = 1
 				LEFT JOIN tblSMCompanyLocation cl ON s.strLocationName = cl.strLocationName
 				LEFT JOIN tblMFRecipeType rt ON s.strRecipeType = rt.strName
 				LEFT JOIN tblMFManufacturingProcess mp ON s.strManufacturingProcess = mp.strProcessName
@@ -863,6 +862,8 @@ BEGIN
 				LEFT JOIN tblMFMarginBy m ON s.strMarginBy = m.strName
 				LEFT JOIN tblICUnitMeasure um ON s.strUOM = um.strUnitMeasure
 				LEFT JOIN tblMFOneLinePrint p ON s.strOneLinePrint = p.strName
+				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+					AND um.intUnitMeasureId =iu.intUnitMeasureId 
 				WHERE s.intRecipeStageId = @intMinId
 				) t
 			WHERE r.intRecipeId = @intRecipeId

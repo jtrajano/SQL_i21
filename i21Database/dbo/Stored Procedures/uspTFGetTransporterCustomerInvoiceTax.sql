@@ -106,7 +106,10 @@ BEGIN TRY
 				, strTransportNumber
 				, intAccountStatusId
 				, strImportVerificationNumber
-				, intCustomerId)
+				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
+				, strTransportationModeDescription)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 				FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 						, tblTFReportingComponent.intTaxAuthorityId
@@ -121,7 +124,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -170,6 +173,9 @@ BEGIN TRY
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
 						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 						, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
+						, strOriginFacilityNumber = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+						, strDestinationFacilityNumber = tblEMEntityLocation.strOregonFacilityNumber
+						, strTransportationModeDescription = tblSMTransportationMode.strDescription
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -190,8 +196,9 @@ BEGIN TRY
 						LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId 
 					INNER JOIN tblSMShipVia SellerShipVia ON SellerShipVia.intEntityId = tblTRLoadHeader.intSellerId
 						INNER JOIN tblEMEntity Seller ON Seller.intEntityId = SellerShipVia.intEntityId
-					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-						LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblARInvoiceDetail.intItemId
+						LEFT JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = tblARInvoiceDetail.intLoadDistributionDetailId 
+						LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId AND tblTRLoadReceipt.strReceiptLine = LDD.strReceiptLink  
 						LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId
 						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
 						LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId
@@ -332,6 +339,9 @@ BEGIN TRY
 				, intAccountStatusId
 				, strImportVerificationNumber
 				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
+				, strTransportationModeDescription
 				)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
@@ -347,7 +357,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber )  ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -396,6 +406,9 @@ BEGIN TRY
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
 						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 						, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
+						, strOriginFacilityNumber = CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strOregonFacilityNumber ELSE OriginBulkLoc.strOregonFacilityNumber END
+						, strDestinationFacilityNumber = tblEMEntityLocation.strOregonFacilityNumber
+						, strTransportationModeDescription = tblSMTransportationMode.strDescription
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -415,8 +428,9 @@ BEGIN TRY
 						LEFT JOIN tblTRState ON tblTRState.intStateId = tblTRLoadHeader.intStateId 
 					INNER JOIN tblSMShipVia SellerShipVia ON SellerShipVia.intEntityId = tblTRLoadHeader.intSellerId
 						INNER JOIN tblEMEntity Seller ON Seller.intEntityId = SellerShipVia.intEntityId
-					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-						LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+						INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblARInvoiceDetail.intItemId
+						LEFT JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = tblARInvoiceDetail.intLoadDistributionDetailId 
+						LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId AND tblTRLoadReceipt.strReceiptLine = LDD.strReceiptLink  
 						LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId
 						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
 						LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId
@@ -545,7 +559,7 @@ BEGIN TRY
 		BEGIN
 
 			-- TRANSACTION WITHOUT TAX CODE
-			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
+			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0'))
 			BEGIN	
 				DELETE @tmpTransaction WHERE intTransactionDetailId IN (
 					SELECT DISTINCT InvTran.intTransactionDetailId 
@@ -571,7 +585,7 @@ BEGIN TRY
 
 				SELECT TOP 1 @InvoiceDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
 
-				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
+				IF(LTRIM(RTRIM(@strCriteria)) = '<> 0' AND @dblTax = 0)	
 				BEGIN
 					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
 				END
@@ -587,7 +601,7 @@ BEGIN TRY
 			DELETE @tmpDetailTax
 
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
-			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
+			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND LTRIM(RTRIM(strCriteria)) = '<> 0'))
 			BEGIN 	
 				DELETE @tmpTransaction WHERE intTransactionDetailId NOT IN (
 					SELECT DISTINCT InvTran.intTransactionDetailId
@@ -665,6 +679,9 @@ BEGIN TRY
 				, strTransportNumber
 				, strImportVerificationNumber
 				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
+				, strTransportationModeDescription
 				)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
@@ -733,6 +750,9 @@ BEGIN TRY
 				, strTransportNumber
 				, strImportVerificationNumber
 				, intCustomerId
+				, strOriginFacilityNumber
+				, strDestinationFacilityNumber
+				, strTransportationModeDescription
 			FROM @tmpTransaction Trans
 		END
 		

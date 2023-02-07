@@ -27,6 +27,8 @@ BEGIN TRY
 	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
 	-- Strategy
 	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+	-- Currency
+	LEFT JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -58,6 +60,13 @@ BEGIN TRY
 						)
 					THEN 'STRATEGY, '
 				ELSE ''
+				END + CASE 
+				WHEN (
+						CUR.intCurrencyID IS NULL
+						AND ISNULL(IMP.strCurrency, '') <> ''
+						)
+					THEN 'CURRENCY, '
+				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
@@ -77,6 +86,10 @@ BEGIN TRY
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
 				)
+			OR (
+				CUR.intCurrencyID IS NULL
+				AND ISNULL(IMP.strCurrency, '') <> ''
+				)
 			)
 
 	-- End Validation   
@@ -90,6 +103,7 @@ BEGIN TRY
 		,@dblCashPrice NUMERIC(18, 6)
 		,@ysnSampleContractItemMatch BIT
 		,@strSampleNumber NVARCHAR(30)
+		,@intCurrencyID INT
 	DECLARE @MFBatchTableType MFBatchTableType
 	-- Loop through each valid import detail
 	DECLARE @C AS CURSOR;
@@ -111,6 +125,7 @@ BEGIN TRY
 			ELSE 0
 			END
 		,strSampleNumber = S.strSampleNumber
+		,intCurrencyID = CUR.intCurrencyID
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -131,6 +146,8 @@ BEGIN TRY
 		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
 		-- Strategy
 		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+		-- Currency
+		LEFT JOIN tblSMCurrency CUR ON IMP.strCurrency IS NOT NULL AND CUR.strCurrency = IMP.strCurrency
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -154,6 +171,7 @@ BEGIN TRY
 		,@dblCashPrice
 		,@ysnSampleContractItemMatch
 		,@strSampleNumber
+		,@intCurrencyID
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -169,6 +187,13 @@ BEGIN TRY
 			GOTO CONT
 		END
 
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Contract Line Allocation Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 1
+
 		-- Update Sample
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -179,6 +204,7 @@ BEGIN TRY
 			,intSampleStatusId = @intSampleStatusId
 			,intBookId = @intBookId
 			,intSubBookId = @intSubBookId
+			,intCurrencyId = @intCurrencyID
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -302,16 +328,17 @@ BEGIN TRY
 			,intLocationId
 			,intMixingUnitLocationId
 			,intMarketZoneId
+			,dtmShippingDate 
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
 			,intSalesYear = CAST(SY.strSaleYear AS INT)
 			,dtmSalesDate = S.dtmSaleDate
-			,strTeaType = LEAF_TYPE.strDescription
+			,strTeaType = CT.strCatalogueType
 			,intBrokerId = S.intBrokerId
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = S.intCompanyLocationId
-			,intStorageLocationId = S.intStorageLocationId
+			,intStorageLocationId = CD.intSubLocationId
 			,intStorageUnitId = NULL
 			,intBrokerWarehouseId = NULL
 			,intParentBatchId = NULL
@@ -323,11 +350,11 @@ BEGIN TRY
 			,strAirwayBillCode = S.strCourierRef
 			,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 			,strAWBSampleReference = S.strAWBSampleReference
-			,dblBasePrice = S.dblBasePrice
+			,dblBasePrice = CD.dblCashPrice
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-			,dblBoughtPrice = NULL
+			,dblBoughtPrice = CD.dblCashPrice 
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = IMP.strBuyingOrderNumber
+			,strBuyingOrderNumber = CH.strExternalContractNumber
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
@@ -338,7 +365,7 @@ BEGIN TRY
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
-			,intFromPortId = NULL
+			,intFromPortId = CD.intLoadingPortId
 			,dblGrossWeight = S.dblGrossWeight
 			,dtmInitialBuy = NULL
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
@@ -352,13 +379,13 @@ BEGIN TRY
 			,intItemUOMId = S.intRepresentingUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = NULL
+			,intOriginalItemId = S.intItemId
 			,dblPackagesPerPallet = NULL
 			,strPlant = NULL
 			,dblTotalQuantity = S.dblRepresentingQty
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
-			,dtmStock = NULL
+			,dtmStock = CD.dtmUpdatedAvailabilityDate 
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = NULL
 			,dtmSupplierPreInvoiceDate = NULL
@@ -421,10 +448,14 @@ BEGIN TRY
 			,intLocationId = S.intCompanyLocationId
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
+			,dtmShippingDate=CD.dtmEtaPol
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
@@ -506,7 +537,7 @@ BEGIN TRY
 			UPDATE B
 			SET B.intLocationId = L.intCompanyLocationId
 				,strBatchId = @strBatchId
-				,intSampleId=NULL
+				--,intSampleId=NULL
 				,dblOriginalTeaTaste = dblTeaTaste
 				,dblOriginalTeaHue = dblTeaHue
 				,dblOriginalTeaIntensity = dblTeaIntensity
@@ -521,7 +552,18 @@ BEGIN TRY
 				,@intInputSuccess
 				,NULL
 				,1
+
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
 		END
+
+		EXEC uspQMGenerateSampleCatalogueImportAuditLog
+			@intSampleId  = @intSampleId
+			,@intUserEntityId = @intEntityUserId
+			,@strRemarks = 'Updated from Contract Line Allocation Import'
+			,@ysnCreate = 0
+			,@ysnBeforeUpdate = 0
 
 		CONT:
 
@@ -537,6 +579,7 @@ BEGIN TRY
 			,@dblCashPrice
 			,@ysnSampleContractItemMatch
 			,@strSampleNumber
+			,@intCurrencyID
 	END
 
 	CLOSE @C

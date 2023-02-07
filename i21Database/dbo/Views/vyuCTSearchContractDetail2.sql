@@ -354,6 +354,10 @@ SELECT a.intContractDetailId
 	, a.dblPurchasePrice
 	, a.dblLandedPrice
 	, a.dblSalesPrice
+	, a.intFeedPriceItemUOMId
+	, a.intFeedPriceCurrencyId
+	, strFeedPriceItemUOM = FUM.strUnitMeasure
+	, strFeedPriceCurrency = FCU.strCurrency
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
@@ -371,6 +375,9 @@ LEFT JOIN tblSMCompanyLocation n WITH(NOLOCK) ON n.intCompanyLocationId = a.intC
 LEFT JOIN tblSMCurrency o WITH(NOLOCK) ON o.intCurrencyID = a.intCurrencyId
 LEFT JOIN tblCTContractStatus p WITH(NOLOCK) ON p.intContractStatusId = a.intContractStatusId
 LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId
+	LEFT JOIN tblICItemUOM FUOM on FUOM.intItemUOMId = a.intFeedPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure FUM on FUM.intUnitMeasureId = FUOM.intUnitMeasureId
+	LEFT JOIN tblSMCurrency FCU on FCU.intCurrencyID = a.intFeedPriceCurrencyId
 
 	-- Trade Finance
 	LEFT JOIN vyuCMBankAccount CBA ON CBA.intBankAccountId = a.intBankAccountId

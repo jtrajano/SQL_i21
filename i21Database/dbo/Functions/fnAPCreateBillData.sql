@@ -69,7 +69,10 @@ RETURNS @returntable TABLE
     [ysnOrigin]				BIT NOT NULL DEFAULT 0,
 	[ysnDeleted]			BIT NULL DEFAULT 0 ,
 	[dtmDateDeleted]		DATETIME NULL,
-    [dtmDateCreated]		DATETIME NULL DEFAULT GETDATE()
+    [dtmDateCreated]		DATETIME NULL DEFAULT GETDATE(),
+	[intPayFromBankAccountId]		INT NULL,
+	[strFinancingSourcedFrom] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intPayToBankAccountId]			INT NULL
 )
 AS
 BEGIN
@@ -103,6 +106,10 @@ BEGIN
 	DECLARE @shipToCountry NVARCHAR(25)
 	DECLARE @shipToPhone NVARCHAR(25)
 	DECLARE @shipToAttention NVARCHAR(200)
+
+	DECLARE @payFromBankAccount INT;
+	DECLARE @financingSourcedFrom NVARCHAR(50);
+	DECLARE @payToBankAccountId INT;
 
 	IF ISNULL(@userId, 0) > 0
 	SELECT TOP 1 
@@ -165,6 +172,10 @@ BEGIN
 	FROM tblSMCurrency
 	WHERE intMainCurrencyId = @currency AND ysnSubCurrency = 1
 
+	SELECT @payToBankAccountId = VD.intEntityEFTInfoId
+	FROM vyuAPVendorDefault VD
+	WHERE VD.intEntityId = @vendorId
+
 	INSERT @returntable
 	(
 		[intTermsId]			,
@@ -196,7 +207,10 @@ BEGIN
 		[intOrderById]			,
 		[intCurrencyId]			,
 		[intSubCurrencyCents]	,
-		[intShipFromEntityId]
+		[intShipFromEntityId]	,
+		[intPayFromBankAccountId]	,
+		[strFinancingSourcedFrom]	,
+		[intPayToBankAccountId]		
 	)
 	SELECT 
 		@term, 
@@ -228,6 +242,41 @@ BEGIN
 		@userId,
 		@currency,		
 		ISNULL(@subCurrencyCents,1),
-		@vendorId
+		@vendorId,
+		@payFromBankAccount,
+		@financingSourcedFrom,
+		@payToBankAccountId
+
+	--UPDATE PAY FROM BANK ACCOUNT
+	UPDATE A
+	SET A.intPayFromBankAccountId = ISNULL(B.intPayFromBankAccountId, ISNULL(C.intPayFromBankAccountId, ISNULL(D.intPayFromBankAccountId, NULL))),
+		A.strFinancingSourcedFrom = CASE WHEN B.strSourcedFrom IS NULL 
+										THEN CASE WHEN C.strSourcedFrom IS NULL
+											 THEN CASE WHEN D.strSourcedFrom IS NULL
+											 	  THEN 'None'
+												  ELSE D.strSourcedFrom END
+											 ELSE C.strSourcedFrom END
+										ELSE B.strSourcedFrom END
+	FROM @returntable A
+	OUTER APPLY (
+		SELECT VANL.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
+		FROM tblAPVendor V
+		INNER JOIN tblAPVendorAccountNumLocation VANL ON VANL.intEntityVendorId = V.intEntityId
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = VANL.intPayFromBankAccountId
+		WHERE V.intEntityId = A.intEntityVendorId AND VANL.intCompanyLocationId = A.intShipToId AND BA.intCurrencyId = A.intCurrencyId
+	) B
+	OUTER APPLY (
+		SELECT V.intPayFromBankAccountId intPayFromBankAccountId, 'Vendor Default' strSourcedFrom
+		FROM tblAPVendor V
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = V.intPayFromBankAccountId
+		WHERE V.intEntityId = A.intEntityVendorId AND BA.intCurrencyId = A.intCurrencyId
+	) C
+	OUTER APPLY (
+		SELECT DPFBA.intBankAccountId intPayFromBankAccountId, 'Company Default' strSourcedFrom
+		FROM tblAPDefaultPayFromBankAccount DPFBA
+		INNER JOIN vyuCMBankAccount BA ON BA.intBankAccountId = DPFBA.intBankAccountId
+		WHERE DPFBA.intCurrencyId = A.intCurrencyId
+	) D	
+	
 	RETURN;
 END

@@ -934,6 +934,9 @@ BEGIN TRY
 					---REVERSE GL ENTRIES
 					EXEC uspSCCreateDirectInGLEntries @intTicketId, 0 , @intUserId
 
+					--RISK SUMMARY LOG
+					EXEC uspSCProcessDirectShipmentRiskSummaryLog @IN_OUT_FLAG = @strInOutFlag, @TICKET_ID = @intTicketId, @REVERSE = 1
+
 
 					--- REMOVE 3RD PARTY ADD PAYABLES
 					BEGIN
@@ -1177,6 +1180,9 @@ BEGIN TRY
 							
 						END*/
 					END
+
+					--RISK SUMMARY LOG
+					EXEC uspSCProcessDirectShipmentRiskSummaryLog @IN_OUT_FLAG = @strInOutFlag, @TICKET_ID = @intTicketId, @REVERSE = 1
 
 					EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 

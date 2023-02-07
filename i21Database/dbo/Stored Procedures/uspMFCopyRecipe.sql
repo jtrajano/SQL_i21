@@ -20,6 +20,7 @@ BEGIN TRY
 		,@intManufacturingCellId INT
 		,@strSubLocationName NVARCHAR(50)
 		,@ysnRecipeBySite INT
+		,@ysnRecipeHeaderValidation BIT
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intWorkOrderRecipeItemId INT
 		,[intWorkOrderId] INT
@@ -88,6 +89,7 @@ BEGIN TRY
 		)
 
 	SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
+			,@ysnRecipeHeaderValidation = IsNULL(ysnRecipeHeaderValidation, 0)
 	FROM tblMFCompanyPreference
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
@@ -271,7 +273,18 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	IF @ysnRecipeBySite = 1
+	IF @ysnRecipeHeaderValidation = 1
+	BEGIN
+		/* Get Recipe and Manufacturing Process ID based on blend output, location and active status. */
+		SELECT @intRecipeId = intRecipeId
+		FROM tblMFRecipe
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND @dtmCurrentDate BETWEEN dtmValidFrom
+				AND dtmValidTo
+	END
+	ELSE IF @ysnRecipeBySite = 1
 	BEGIN
 		SELECT @strSubLocationName = Left(strSubLocationName, 2)
 		FROM tblSMCompanyLocationSubLocation

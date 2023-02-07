@@ -133,6 +133,7 @@ BEGIN TRY
 					FROM dbo.tblIPBendDemandArchive
 					WHERE intLineTrxSequenceNo = @intLineTrxSequenceNo
 					)
+				AND @strProductionOrder = 'False'
 			BEGIN
 				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intLineTrxSequenceNo) + ' is already processed in i21.'
 
@@ -158,7 +159,13 @@ BEGIN TRY
 
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
-			WHERE strLotOrigin = @strCompanyLocation
+			WHERE (
+					CASE 
+						WHEN @strProductionOrder = 'True'
+							THEN strVendorRefNoPrefix
+						ELSE strLotOrigin
+						END
+					) = @strCompanyLocation
 
 			SELECT @intCompanyLocationSubLocationId = NULL
 
@@ -168,6 +175,7 @@ BEGIN TRY
 				AND intCompanyLocationId = @intLocationId
 
 			IF @intCompanyLocationSubLocationId IS NULL
+				AND @strProductionOrder = 'False'
 			BEGIN
 				SELECT @strError = 'Storage Location cannot be blank.'
 
@@ -258,11 +266,21 @@ BEGIN TRY
 
 			SELECT @intManufacturingCellId = NULL
 
-			SELECT @intManufacturingCellId = intManufacturingCellId
-			FROM dbo.tblMFManufacturingCell
-			WHERE strCellName = @strWorkCenter
-				AND intSubLocationId = @intCompanyLocationSubLocationId
-				AND intLocationId = @intLocationId
+			IF @strProductionOrder = 'False'
+			BEGIN
+				SELECT @intManufacturingCellId = intManufacturingCellId
+				FROM dbo.tblMFManufacturingCell
+				WHERE strCellName = @strWorkCenter
+					AND intSubLocationId = @intCompanyLocationSubLocationId
+					AND intLocationId = @intLocationId
+			END
+			ELSE
+			BEGIN
+				SELECT @intManufacturingCellId = intManufacturingCellId
+				FROM dbo.tblMFManufacturingCell
+				WHERE strCellName = @strWorkCenter
+					AND intLocationId = @intLocationId
+			END
 
 			IF @intManufacturingCellId IS NULL
 			BEGIN
@@ -299,11 +317,21 @@ BEGIN TRY
 
 			SELECT @intMachineId = NULL
 
-			SELECT @intMachineId = intMachineId
-			FROM dbo.tblMFMachine M
-			WHERE strName = @strMachine
-				AND intSubLocationId = @intCompanyLocationSubLocationId
-				AND intLocationId = @intLocationId
+			IF @strProductionOrder = 'False'
+			BEGIN
+				SELECT @intMachineId = intMachineId
+				FROM dbo.tblMFMachine M
+				WHERE strName = @strMachine
+					AND intSubLocationId = @intCompanyLocationSubLocationId
+					AND intLocationId = @intLocationId
+			END
+			ELSE
+			BEGIN
+				SELECT @intMachineId = intMachineId
+				FROM dbo.tblMFMachine M
+				WHERE strName = @strMachine
+					AND intLocationId = @intLocationId
+			END
 
 			IF @intMachineId IS NULL
 			BEGIN

@@ -61,7 +61,10 @@ BEGIN TRANSACTION
 	DECLARE @NewStoreId INT
 	DECLARE @intLocationId INT
 	DECLARE @intSourceLocationId INT
+	DECLARE @intLocationCount INT
 	DECLARE @ysnValidateSuccess BIT = 'false'
+
+	SET @intLocationCount = (SELECT COUNT('') FROM #tmpToLocation)
 
 	--Validate first if selected TO Locations are already existing. If ALL LOCATIONS are existing, do not proceed
 	WHILE EXISTS (SELECT * FROM #tmpToLocationValidate)
@@ -223,6 +226,22 @@ BEGIN TRANSACTION
 						--,strHandheldScannerServerFolderPath
 						,intConcurrencyId
 						,ysnLotterySetupMode
+						,ysnActive
+						,ysnConsignmentStore
+						,ysnConsStopAutoProcessIfValuesDontMatch
+						,ysnConsMeterReadingsForDollars
+						,ysnConsAddOutsideFuelDiscounts
+						,dblConsCommissionRawMarkup
+						,dblConsCommissionDealerPercentage
+						,ysnConsBankDepositDraft
+						,intConsFuelOverShortItemId
+						,intConsBankDepositDraftId
+						,intConsDelearCommissionARAccountId
+						,intConsDealerCommissionItemId
+						,dblConsMatchTolerance
+						,intConsFuelDiscountItemId
+						,ysnConsIncludeTaxesInCostBasis
+						,ysnConsIncludeFreightChargesInCostBasis
 					)
 					SELECT TOP 1
 						@newStoreTransactionId
@@ -350,6 +369,22 @@ BEGIN TRANSACTION
 						--,intATMFundWithdrawalItemId
 						,intConcurrencyId
 						,ysnLotterySetupMode
+						,ysnActive
+						,ysnConsignmentStore
+						,ysnConsStopAutoProcessIfValuesDontMatch
+						,ysnConsMeterReadingsForDollars
+						,ysnConsAddOutsideFuelDiscounts
+						,dblConsCommissionRawMarkup
+						,dblConsCommissionDealerPercentage
+						,ysnConsBankDepositDraft
+						,intConsFuelOverShortItemId
+						,intConsBankDepositDraftId
+						,intConsDelearCommissionARAccountId
+						,intConsDealerCommissionItemId
+						,dblConsMatchTolerance
+						,intConsFuelDiscountItemId
+						,ysnConsIncludeTaxesInCostBasis
+						,ysnConsIncludeFreightChargesInCostBasis
 					FROM tblSTStore
 					WHERE ISNULL(intStoreId,0) = ISNULL(@intStoreId,0)
 
@@ -402,7 +437,6 @@ BEGIN TRANSACTION
 						,ysnComboBuild
 						,ysnMixMatchBuild
 						,ysnItemListBuild
-						,strRegisterPassword
 						,strRubyPullType
 						,intPortNumber
 						,intLineSpeed
@@ -431,17 +465,12 @@ BEGIN TRANSACTION
 						,intPeriodNo
 						,intSetNo
 						,strSapphirePullType
-						,strSapphireIpAddress
-						,strSAPPHIREUserName
-						,strSAPPHIREPassword
 						,ysnSAPPHIRECaptureTransactionLog
 						,intSAPPHIRECaptureIntervalMinutes
 						,strSAPPHIRECheckoutPullTime
 						,intSAPPHIRECheckoutPullTimePeriodId
 						,intSAPPHIRECheckoutPullTimeSetId
 						,ysnSAPPHIREAutoUpdatePassword
-						,dtmSAPPHIRELastPasswordChangeDate
-						,strSAPPHIREBasePassword
 						,intSAPPHIREPasswordIntervalDays
 						,intSAPPHIREPasswordIncrementNo
 						,ysnDealTotals
@@ -460,7 +489,6 @@ BEGIN TRANSACTION
 						,intBaudRate
 						,intWayneComPort
 						,intPCIriqForComPort
-						,strWaynePassWord
 						,intWayneSequenceNo
 						,strXmlVersion
 						--,strRegisterInboxPath
@@ -475,9 +503,6 @@ BEGIN TRANSACTION
 						,intDebitCardMopId
 						,intLotteryWinnersMopId
 						,ysnCreateCfnAtImport
-						,strFTPPath
-						,strFTPUserName
-						,strFTPPassword
 						--,strArchivePath
 						,intPurgeInterval
 						,intConcurrencyId
@@ -496,7 +521,6 @@ BEGIN TRANSACTION
 						,ysnComboBuild
 						,ysnMixMatchBuild
 						,ysnItemListBuild
-						,strRegisterPassword
 						,strRubyPullType
 						,intPortNumber
 						,intLineSpeed
@@ -525,17 +549,12 @@ BEGIN TRANSACTION
 						,intPeriodNo
 						,intSetNo
 						,strSapphirePullType
-						,strSapphireIpAddress
-						,strSAPPHIREUserName
-						,strSAPPHIREPassword
 						,ysnSAPPHIRECaptureTransactionLog
 						,intSAPPHIRECaptureIntervalMinutes
 						,strSAPPHIRECheckoutPullTime
 						,intSAPPHIRECheckoutPullTimePeriodId
 						,intSAPPHIRECheckoutPullTimeSetId
 						,ysnSAPPHIREAutoUpdatePassword
-						,dtmSAPPHIRELastPasswordChangeDate
-						,strSAPPHIREBasePassword
 						,intSAPPHIREPasswordIntervalDays
 						,intSAPPHIREPasswordIncrementNo
 						,ysnDealTotals
@@ -554,7 +573,6 @@ BEGIN TRANSACTION
 						,intBaudRate
 						,intWayneComPort
 						,intPCIriqForComPort
-						,strWaynePassWord
 						,intWayneSequenceNo
 						,strXmlVersion
 						--,strRegisterInboxPath
@@ -569,53 +587,60 @@ BEGIN TRANSACTION
 						,intDebitCardMopId
 						,intLotteryWinnersMopId
 						,ysnCreateCfnAtImport
-						,strFTPPath
-						,strFTPUserName
-						,strFTPPassword
 						--,strArchivePath
 						,intPurgeInterval
 						,intConcurrencyId
 						FROM tblSTRegister 
 						WHERE intStoreId = @intStoreId
 
-					DECLARE @intRegisterId INT
-					SET @intRegisterId = SCOPE_IDENTITY()
+					DECLARE @intRegisterId INT = 0
+					DECLARE @newRegisterCreated BIT = 0
 
-					UPDATE tblSTStore 
-					SET intRegisterId = NULL
-					WHERE intStoreId = @NewStoreId
+					IF (EXISTS(SELECT '' FROM tblSTRegister WHERE intStoreId = @intStoreId))
+					BEGIN
+						DECLARE @NewRegisterName NVARCHAR(50)
 
-					DECLARE @intOldRegisterId INT
-					SELECT TOP 1 @intOldRegisterId = intRegisterId
-					FROM tblSTRegister 
-					WHERE intStoreId = @intStoreId
+						SET @intRegisterId = SCOPE_IDENTITY()
+						SET @newRegisterCreated = 1
 
+						SELECT @NewRegisterName = strRegisterName
+						FROM tblSTRegister
+						WHERE intRegisterId = @intRegisterId
 
+						UPDATE tblSTStore 
+						SET intRegisterId = SCOPE_IDENTITY(), strRegisterName = @NewRegisterName
+						WHERE intStoreId = @NewStoreId
 
-					INSERT INTO tblSTRegisterFileConfiguration
-					(
-							intRegisterId
-						,intImportFileHeaderId
-						,strFileType
-						,strFilePrefix
-						,strFileNamePattern
-						,strFolderPath
-						,strURICommand
-						,strStoredProcedure
-						,intConcurrencyId
-					)
-					SELECT
-						@intRegisterId
-						,intImportFileHeaderId
-						,strFileType
-						,strFilePrefix
-						,strFileNamePattern
-						,strFolderPath
-						,strURICommand
-						,strStoredProcedure
-						,intConcurrencyId
-					FROM 
-					tblSTRegisterFileConfiguration WHERE intRegisterId = @intOldRegisterId
+						DECLARE @intOldRegisterId INT
+						SELECT TOP 1 @intOldRegisterId = intRegisterId
+						FROM tblSTRegister 
+						WHERE intStoreId = @intStoreId
+
+						INSERT INTO tblSTRegisterFileConfiguration
+						(
+								intRegisterId
+							,intImportFileHeaderId
+							,strFileType
+							,strFilePrefix
+							,strFileNamePattern
+							,strFolderPath
+							,strURICommand
+							,strStoredProcedure
+							,intConcurrencyId
+						)
+						SELECT
+							@intRegisterId
+							,intImportFileHeaderId
+							,strFileType
+							,strFilePrefix
+							,strFileNamePattern
+							,strFolderPath
+							,strURICommand
+							,strStoredProcedure
+							,intConcurrencyId
+						FROM 
+						tblSTRegisterFileConfiguration WHERE intRegisterId = @intOldRegisterId
+					END
 
 					IF @chkDepartment = 'true'
 						BEGIN
@@ -851,6 +876,8 @@ BEGIN TRANSACTION
 								,dblPrice
 								,intTaxGroupId
 								,intCategoryId
+								,strRegisterFuelId1
+								,strRegisterFuelId2
 								,intConcurrencyId
 							)
 							SELECT 
@@ -859,6 +886,8 @@ BEGIN TRANSACTION
 								,dblPrice
 								,intTaxGroupId
 								,intCategoryId
+								,strRegisterFuelId1
+								,strRegisterFuelId2
 								,intConcurrencyId
 							FROM tblSTPumpItem
 							WHERE intStoreId = @intStoreId
@@ -1165,7 +1194,20 @@ BEGIN TRANSACTION
 	DROP TABLE #tmpToLocationValidate
 	
 	SET @ysnSuccess = 'true'
-	SET @strResultMessage = 'Successfully created new store/s'
+
+	IF (@intLocationCount > 1)
+	BEGIN
+		SET @strResultMessage = 'Successfully created new Stores and new Registers to use with them. Credentials for the new Registers, however, still need to be manually entered.'
+	END 
+	ELSE IF (@newRegisterCreated = 0)
+	BEGIN
+		SET @strResultMessage = 'Successfully created new store'
+	END
+	ELSE
+	BEGIN
+		SET @strResultMessage = 'Successfully created new store and a new Register to use with it. Credentials for the new Register, however, still need to be manually entered. The new Register is called ' + @NewRegisterName
+	END
+	
 	COMMIT TRANSACTION
 
 	END TRY

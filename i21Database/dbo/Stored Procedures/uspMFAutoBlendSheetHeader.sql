@@ -88,6 +88,8 @@ SELECT 0								AS intWorkOrderId
 	 , Recipe.intManufacturingProcessId
 	 , Machine.intIssuedUOMTypeId
 	 , MachineIssuedUOM.strName			AS strIssuedUOMType
+	 , BlendRequirement.strReferenceNo
+	 , 'Not Released'	AS strWorkOrderStatus
 FROM tblMFBlendRequirement AS BlendRequirement 
 JOIN tblICItem AS Item ON BlendRequirement.intItemId = Item.intItemId 
 JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND BlendRequirement.intUOMId = ItemUOM.intUnitMeasureId 
