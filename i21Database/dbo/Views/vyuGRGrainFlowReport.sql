@@ -32,6 +32,9 @@ INNER JOIN tblICCommodityUnitMeasure CO_UOM_FROM
 INNER JOIN tblICCommodityUnitMeasure CO_UOM_TO
 	ON CO_UOM_TO.intCommodityId = ICRI.intCommodityId
 		AND CO_UOM_TO.ysnStockUnit = 1
+INNER JOIN tblGRStorageType ST
+	ON ST.intStorageScheduleTypeId = SC.intStorageScheduleTypeId
+		AND ST.intStorageScheduleTypeId < 0
 UNION ALL
 --DIRECT
 --DIRECT IN
