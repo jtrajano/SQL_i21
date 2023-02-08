@@ -136,12 +136,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate1, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate1,
 				dblPayment = @dblDeferredAmt1,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo1, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo1
 		END
 
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0)
@@ -156,12 +156,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate2, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate2,
 				dblPayment = @dblDeferredAmt2,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo2, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo2
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0)
@@ -176,12 +176,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate3, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate3,
 				dblPayment = @dblDeferredAmt3,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo3, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo3
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 AND ISNULL(@dblDeferredAmt4, 0) > 0)
@@ -196,12 +196,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate4, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate4,
 				dblPayment = @dblDeferredAmt4,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo4, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo4
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
@@ -217,12 +217,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate5, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate5,
 				dblPayment = @dblDeferredAmt5,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo5, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo5
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
@@ -239,12 +239,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate6, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate6,
 				dblPayment = @dblDeferredAmt6,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo6, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo6
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
@@ -261,12 +261,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate7, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate7,
 				dblPayment = @dblDeferredAmt7,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo7, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo7
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
@@ -284,12 +284,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate8, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate8,
 				dblPayment = @dblDeferredAmt8,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo8, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo8
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
@@ -307,12 +307,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate9, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate9,
 				dblPayment = @dblDeferredAmt9,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo9, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo9
 		END
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
@@ -331,12 +331,12 @@ BEGIN
 				strPaymentScheduleNumber)
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				dtmDueDate = ISNULL(@dtmDeferredDate10, @dtmDueDate),
+				dtmDueDate = @dtmDeferredDate10,
 				dblPayment = @dblDeferredAmt10,
 				ysnPaid = 0,
 				ysnScheduleDiscountOverride = 0,
 				dblDiscount = 0,
-				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo10, @strInvoiceNo)
+				strPaymentScheduleNumber = @strDeferredInvoiceNo10
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM @PaymentSchedule)
