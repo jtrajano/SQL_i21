@@ -380,9 +380,6 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 BEGIN TRY
 
-	IF @recap = 0
-		EXEC [dbo].[uspARPostItemResevation] @strSessionId = @strRequestId
-
 	IF @recap = 1
     BEGIN
         EXEC [dbo].[uspARPostInvoiceRecap]

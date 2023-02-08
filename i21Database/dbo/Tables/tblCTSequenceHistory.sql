@@ -76,7 +76,8 @@
 	ysnCashPriceChange		BIT,
 	intSequenceUsageHistoryId	INT,
 	dtmDateAdded			DATETIME NULL,
-    intFreightTermId        INT
+    intFreightTermId        INT,
+    ysnSummaryLog			BIT not null default 1,
 	
 
     CONSTRAINT [PK_tblCTSequenceHistory_intSequenceHistoryId] PRIMARY KEY CLUSTERED (intSequenceHistoryId ASC)--,

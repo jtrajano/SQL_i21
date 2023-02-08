@@ -53,7 +53,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICISI.dblQuantity)), @ZeroDecimal) * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
+	,[dblQty]						= dbo.fnRoundBanker(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICISI.dblQuantity)), @ZeroDecimal) * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -106,8 +106,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/AVGT.dblTotalQty, 2) * ICIT.[dblQty]
-	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10)) / CAST(AVGT.dblTotalQty AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
+	,[dblQty]						= - dbo.fnRoundBanker((CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10)) / CAST(AVGT.dblTotalQty AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10)), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -176,10 +175,9 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	--,[dblQty]                       = - ROUND(ARID.dblQtyShipped/ CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
-	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
+	,[dblQty]                       = - dbo.fnRoundBanker((CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
 										THEN CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId = 1 THEN CTD.dblQuantity 
-										ELSE ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) END ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10))
+										ELSE ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) END ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10)), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -234,7 +232,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(CAST(ICIT.[dblQty] AS NUMERIC(18, 10)) * CAST(ICIT.[dblUOMQty] AS NUMERIC(18, 10)) AS NUMERIC(18, 10))
+	,[dblQty]						= - dbo.fnRoundBanker((CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(CAST(ICIT.[dblQty] AS NUMERIC(18, 10)) * CAST(ICIT.[dblUOMQty] AS NUMERIC(18, 10)) AS NUMERIC(18, 10)), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -303,7 +301,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], CASE WHEN ARID.[strType] = 'Provisional' THEN LGD.[dblQuantity] ELSE ARID.[dblShipmentNetWt] END), @ZeroDecimal)
+	,[dblQty]						= - dbo.fnRoundBanker(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], CASE WHEN ARID.[strType] = 'Provisional' THEN LGD.[dblQuantity] ELSE ARID.[dblShipmentNetWt] END), @ZeroDecimal), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -357,7 +355,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ARID.[dblShipmentNetWt] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
+	,[dblQty]						= dbo.fnRoundBanker((CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ARID.[dblShipmentNetWt] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END, 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -426,7 +424,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal) --ICIT.[dblQty]
+	,[dblQty]						= dbo.fnRoundBanker(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -490,7 +488,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN ICIT.[dblQty] ELSE -ICIT.[dblQty] END
+	,[dblQty]						= dbo.fnRoundBanker(CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN ICIT.[dblQty] ELSE -ICIT.[dblQty] END, 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
