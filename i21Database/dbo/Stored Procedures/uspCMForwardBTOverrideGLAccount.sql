@@ -135,7 +135,7 @@ BEGIN
         SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
         UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
         WHERE A.intAccountId = @intAccountIdLoop
-         AND strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Fees' )
+         AND strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Transfer Fees' )
     END
     DELETE FROM @GLEntries WHERE intAccountId = @intAccountIdLoop
 END
