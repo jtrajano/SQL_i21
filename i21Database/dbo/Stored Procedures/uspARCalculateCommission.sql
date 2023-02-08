@@ -163,11 +163,14 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			INSERT INTO @tmpTransactionTable
 			SELECT 
 				 intSourceId	= I.intInvoiceId
-				,dblAmount		= ISNULL(I.dblInvoiceTotal, 0)
+				,dblAmount		= ID.dblTotalTax + ID.dblTotal
 				,dtmSourceDate	= I.dtmPostDate
 			FROM tblARInvoice I
 			INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+			INNER JOIN tblARCommissionPlanItemCategory PIC ON SP.intCommissionPlanId = PIC.intCommissionPlanId
+			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 			WHERE I.ysnPosted = 1
+			  AND PIC.intItemCategoryId = ID.intCategoryId
 			  AND I.intEntitySalespersonId IS NOT NULL
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND SP.intCommissionPlanId = @intCommissionPlanId
