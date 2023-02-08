@@ -18,6 +18,8 @@ BEGIN
     SELECT @strAccountId = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId
     SELECT @strAccountId1 = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId1
 
+    IF @ysnOverrideCompany | @ysnOverrideLOB | @ysnOverrideLocation = 0
+        RETURN @strAccountId1
 
     WHILE  @ysnOverrideCompany = 1 OR @ysnOverrideLOB = 1 OR @ysnOverrideLocation = 1
     BEGIN

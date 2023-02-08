@@ -346,7 +346,7 @@
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
     <Build Include="dbo\Functions\fnCMGetDetailsOfCharges.sql" />
-    <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
@@ -1268,6 +1268,7 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
+    <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
     <Build Include="dbo\User Defined Types\RevalTableType.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -10997,6 +10998,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBTOverrideGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMForwardBTOverrideGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_AddDefaultEFTBank.sql" />

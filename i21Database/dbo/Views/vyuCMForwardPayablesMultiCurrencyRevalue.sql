@@ -45,16 +45,11 @@ OUTER APPLY (
 --     WHERE der.strInternalTradeNo = BT.strDerivativeId
 -- )DER
 OUTER APPLY(
-    SELECT TOP 1 SM.intSegmentCodeId
-    FROM tblRKFutOptTransaction der
-    JOIN tblCTContractDetail CD
-        ON CD.intContractDetailId = der.intContractDetailId
-    JOIN tblCTContractHeader CH
-        ON CH.intContractHeaderId = CD.intContractDetailId
-    JOIN tblICCommodity C
-        ON C.intCommodityId = CH.intCommodityId
-    JOIN tblSMLineOfBusiness SM ON SM.intLineOfBusinessId = C.intLineOfBusinessId
-    WHERE der.strInternalTradeNo = BT.strDerivativeId
+	SELECT TOP 1 SM.intSegmentCodeId FROM tblCTContractHeader A 
+	JOIN tblRKFutOptTransaction der ON der.intContractHeaderId = A.intContractHeaderId
+	JOIN tblICCommodity I ON I.intCommodityId = A.intCommodityId
+	JOIN tblSMLineOfBusiness SM on SM.intLineOfBusinessId = I.intLineOfBusinessId
+	where  der.strInternalTradeNo = BT.strDerivativeId
 )DER
 WHERE
 	BT.ysnPosted = 0
