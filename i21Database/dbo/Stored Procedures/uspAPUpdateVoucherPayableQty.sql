@@ -32,6 +32,7 @@ DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
 DECLARE @recordCountToReturn INT = 0;
 DECLARE @recordCountReturned INT = 0;
 DECLARE @taxCompleted INT = 0;
+DECLARE @payableIds AS Id  
 
 --uncomment if integrated modules already implemented the new approach
 -- --VALIDATE
@@ -594,6 +595,16 @@ ELSE SAVE TRAN @SavePoint
 			RAISERROR('Invalid tax record deleted/inserted.', 16, 1);
 			RETURN;
 		END
+
+
+		INSERT INTO @payableIds  
+		SELECT B.intVoucherPayableId
+		FROM tblAPVoucherPayable B
+		INNER JOIN @payablesKey B2
+			ON B2.intNewPayableId = B.intVoucherPayableId
+		INNER JOIN @voucherPayable C
+			ON C.intVoucherPayableId = B2.intOldPayableId  
+		EXEC uspAPUpdatePayableTaxForTexasLoadingFee @payableIds
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -1035,6 +1046,14 @@ ELSE SAVE TRAN @SavePoint
 		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
 		-- ) taxData
 
+		INSERT INTO @payableIds  
+		SELECT B.intVoucherPayableId
+		FROM tblAPVoucherPayable B
+		INNER JOIN @payablesKey B2
+			ON B2.intNewPayableId = B.intVoucherPayableId
+		INNER JOIN @voucherPayable C
+			ON C.intVoucherPayableId = B2.intOldPayableId  
+		EXEC uspAPUpdatePayableTaxForTexasLoadingFee @payableIds
 	END
 	ELSE
 	BEGIN
