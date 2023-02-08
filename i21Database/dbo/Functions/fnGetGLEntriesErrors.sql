@@ -21,29 +21,7 @@ RETURNS  @tbl TABLE (
 	)
 AS
 BEGIN 
-	DECLARE @intDefaultCurrencyId INT
-	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 	;WITH BatchError AS (
-				SELECT   strTransactionId
-					    ,strTransactionId strText
-						,60018 intErrorCode
-						,strModuleName		
-				FROM @GLEntriesToValidate GLEntries
-				WHERE (dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
-				AND ISNULL(dblCreditForeign,0) <> 0
-				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
-				AND @ysnPost = 1
-				UNION ALL
-				SELECT   strTransactionId
-					    ,strTransactionId strText
-						,60018 intErrorCode
-						,strModuleName		
-				FROM @GLEntriesToValidate GLEntries
-				WHERE (dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
-				AND ISNULL(dblDebitForeign,0) <> 0
-				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
-				AND @ysnPost = 1
-				UNION ALL
 				SELECT	strTransactionId
 						,'' strText
 						,60001 intErrorCode
@@ -135,7 +113,6 @@ BEGIN
 					REPLACE(PostError.strMessage,'{0}',a.strText) END strText
 		,a.intErrorCode, strModuleName FROM BatchError a
 		CROSS APPLY (SELECT strMessage from dbo.fnGLGetGLEntriesErrorMessage() where intErrorCode = a.intErrorCode)AS  PostError
-		GROUP BY strTransactionId,PostError.strMessage,a.strText,a.intErrorCode,strModuleName
 		ORDER BY strTransactionId
 
 		RETURN
