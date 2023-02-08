@@ -1418,6 +1418,8 @@
   <Build Include="dbo\Views\vyuHDTicketLink.sql" />
   <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketDropshipInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareDropshipInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
