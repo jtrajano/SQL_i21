@@ -195,4 +195,38 @@ INNER JOIN tblICCommodityUnitMeasure CO_UOM_FROM
 INNER JOIN tblICCommodityUnitMeasure CO_UOM_TO
 	ON CO_UOM_TO.intCommodityId = ICSI.intCommodityId
 		AND CO_UOM_TO.ysnStockUnit = 1
-WHERE SC.strDistributionOption = 'Contract'
+UNION ALL
+--all sales
+--DIRECT OUT
+SELECT
+	strCommodityCode		= CO.strCommodityCode
+	,dtmReceiptDate			= FORMAT(SC.dtmTicketDateTime,'MM/yyyy')
+	,dblDelivered 			= NULL
+	,dblDirect 				= NULL
+	,dblFromStorage 		= NULL
+	,dblUnpricedReceipts 	= NULL
+	,dblAllSales 			= dbo.fnCTConvertQuantityToTargetCommodityUOM(CO_UOM_FROM.intCommodityUnitMeasureId,CO_UOM_TO.intCommodityUnitMeasureId,SC.dblNetUnits)
+	,dblBuyBasis			= NULL
+	,dblSellBasis			= CASE WHEN ISNULL(CD.dblBasis,0) = 0 THEN SC.dblUnitBasis ELSE CD.dblBasis END
+	,strFuturesMonth		= REPLACE(FM.strFutureMonth, ' ','')
+FROM tblSCTicket SC
+LEFT JOIN (
+	tblCTContractDetail CD
+	INNER JOIN tblRKFuturesMonth FM
+		ON FM.intFutureMonthId = CD.intFutureMonthId
+	)	
+	ON CD.intContractHeaderId = SC.intContractId
+		AND CD.intContractSeq = SC.intContractSequence
+INNER JOIN tblICCommodity CO
+	ON CO.intCommodityId = SC.intCommodityId
+INNER JOIN tblICItemUOM UOM 
+	ON UOM.intItemUOMId = SC.intItemUOMIdTo
+INNER JOIN tblICCommodityUnitMeasure CO_UOM_FROM
+	ON CO_UOM_FROM.intCommodityId = SC.intCommodityId
+		AND CO_UOM_FROM.intUnitMeasureId = UOM.intUnitMeasureId
+INNER JOIN tblICCommodityUnitMeasure CO_UOM_TO
+	ON CO_UOM_TO.intCommodityId = SC.intCommodityId
+		AND CO_UOM_TO.ysnStockUnit = 1
+WHERE SC.intTicketType = 6
+	AND SC.strInOutFlag = 'O'
+	AND SC.strTicketStatus NOT IN ('O','V')
