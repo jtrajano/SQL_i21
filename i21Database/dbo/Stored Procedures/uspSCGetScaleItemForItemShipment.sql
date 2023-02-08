@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[uspSCGetScaleItemForItemShipment]
 	 @intTicketId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL (13,3)
+	,@dblNetUnits AS DECIMAL (13,4)
 	,@dblCost AS DECIMAL (9,5)
 	,@intEntityId AS INT
 	,@intContractId INT
