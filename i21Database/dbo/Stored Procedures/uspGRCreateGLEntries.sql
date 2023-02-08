@@ -658,7 +658,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
-			,strCode					= @strCode
+			,strCode					= 'IC'
 			,strReference				= @EntityNo
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
@@ -724,7 +724,7 @@ BEGIN
 			,dblDebitUnit				= InventoryCostCharges.dblUnits
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
-			,strCode					= @strCode
+			,strCode					= 'IC'
 			,strReference				= @EntityNo
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
@@ -793,7 +793,7 @@ BEGIN
 				,dblDebitUnit				= NonInventoryCostCharges.dblUnits
 				,dblCreditUnit				= 0
 				,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
-				,strCode					= @strCode
+				,strCode					= 'IC'
 				,strReference				= @EntityNo
 				,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 				,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
@@ -851,7 +851,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
-			,strCode					= @strCode
+			,strCode					= 'IC'
 			,strReference				= @EntityNo
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate

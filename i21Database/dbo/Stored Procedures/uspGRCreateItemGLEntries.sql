@@ -267,7 +267,12 @@ AS
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - (dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty)) 
+		,dblCost = SUM(t.dblCost - 
+						ISNULL(dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty)),0)
+							+ ISNULL(CASE WHEN DiscountCost.ysnDiscountFromGrossWeight = 1 THEN dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblGrossUnits, t.dblQty) ) ELSE 0 END ,0)
+							
+					  
+					  )
 		,dblItemCost = t.dblCost
 		,t.dblValue
 		,t.intTransactionTypeId
@@ -305,6 +310,7 @@ AS
 					, 2) 
 				) 
 			,0) AS dblTotalDiscountCost
+			,SV2.ysnDiscountFromGrossWeight
 		FROM tblGRSettleVoucherCreateReferenceTable SV2
 		INNER JOIN tblICItem I
 			ON I.intItemId = SV2.intItemId				
@@ -312,6 +318,7 @@ AS
 		WHERE SV2.strBatchId = t.strBatchId
 			AND isnull(SV2.ysnItemInventoryCost,I.ysnInventoryCost) = 1
 			AND ISNULL(SV2.intTransactionId ,0) = ISNULL(@intSettleStorageId,0)
+		GROUP BY SV2.ysnDiscountFromGrossWeight
 	) DiscountCost
 	LEFT JOIN tblICLot lot
 		ON lot.intLotId = t.intLotId
@@ -320,6 +327,25 @@ AS
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
 		AND t.intTransactionId = ISNULL(@intSettleStorageId, t.intTransactionId)
+	GROUP BY t.dtmDate
+		,t.intItemId
+		,t.intItemLocationId
+		,t.intTransactionId
+		,t.strTransactionId
+		,t.dblQty
+		,t.dblUOMQty
+		,t.dblCost
+		,t.dblValue
+		,t.intTransactionTypeId
+		,t.intCurrencyId
+		,t.dblExchangeRate
+		,t.intInventoryTransactionId
+		,TransType.strName
+		,t.strTransactionForm 
+		,t.strDescription
+		,t.dblForexRate
+		,i.strItemNo
+		,currencyRateType.strCurrencyExchangeRateType
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
