@@ -166,7 +166,7 @@ BEGIN TRY
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 	        AND IC.strType != 'Non-Inventory'
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
-			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' )--AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId))
 			AND TR.intItemId = DD.intItemId /* If distribution item is different from the received item, then this is an auto-blend scenario where received items are blended together to be distributed as a new item (ex. E10 is 10% ethanol and 90% gasoline). */
