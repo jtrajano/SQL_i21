@@ -6454,7 +6454,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				------------------------------------------------------
 				
 				--SUBTRACT QTY ON LOTTERY BOOK--
-				UPDATE tblSTLotteryBook SET tblSTLotteryBook.dblQuantityRemaining = tblSTLotteryBook.dblQuantityRemaining - tblSTCheckoutLotteryCount.dblQuantitySold
+				UPDATE tblSTLotteryBook SET tblSTLotteryBook.intEndingNumber = tblSTCheckoutLotteryCount.intEndingCount
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
