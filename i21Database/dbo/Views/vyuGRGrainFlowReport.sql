@@ -159,7 +159,6 @@ LEFT JOIN tblICCommodityUnitMeasure CO_UOM_TO
 	ON CO_UOM_TO.intCommodityId = SL.intCommodityId
 		AND CO_UOM_TO.ysnStockUnit = 1
 WHERE SL.strDistributionType = 'Hold'
-AND SC.intCommodityId = 11
 UNION ALL
 --all sales
 SELECT
