@@ -32,13 +32,10 @@ BEGIN
 			DECLARE @voucherItem AS VoucherPayable
 			DECLARE @intExistBillId INT = NULL
 
-			SELECT TOP 1 @intExistBillId = BD.intBillId
+			SELECT TOP 1 @intExistBillId = intBillId
 			FROM tblAPBillDetail BD
-			JOIN tblAPBill Bill ON Bill.intBillId = BD.intBillId
 			JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-			JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = RI.intInventoryReceiptId
-			WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
-				AND IR.intEntityVendorId = Bill.intEntityVendorId				
+			WHERE RI.intInventoryReceiptId = @intInventoryReceiptId			
 					
 			-- ADD ADJUSTMENT
 			DECLARE @dblAdjustment DECIMAL(18,6) = NULL
