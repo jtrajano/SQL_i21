@@ -173,19 +173,30 @@ BEGIN
 			SELECT 
 				strCommodityCode
 				,dtmReceiptDate
-				,dblDelivered = SUM(dblDelivered)
-				,dblDirect = SUM(dblDirect)
-				,dblFromStorage = SUM(dblFromStorage)
-				,dblUnpricedReceipts = SUM(dblUnpricedReceipts)
-				,dblAllSales = SUM(dblAllSales)
-				,dblBuyBasis = SUM(del_x_buyBasis + dir_x_buyBasis + stor_x_buyBasis) / 
-					CASE WHEN SUM(@dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage) = 0 THEN 1 ELSE SUM(@dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage) END
-				,dblSellBasis = SUM(sales_x_sellBasis) / CASE WHEN @dblTotalAllSales = 0 THEN 1 ELSE @dblTotalAllSales END
-				,strFuturesMonth = @strFuturesMonth
+				,dblDelivered
+				,dblDirect
+				,dblFromStorage
+				,dblUnpricedReceipts
+				,dblAllSales
+				,dblBuyBasis		= dblBuyBasis / CASE WHEN @dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage = 0 THEN 1 ELSE @dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage END
+				,dblSellBasis		= dblSellBasis / CASE WHEN @dblTotalAllSales = 0 THEN 1 ELSE @dblTotalAllSales END
+				,strFuturesMonth	= @strFuturesMonth
 			INTO #tmpFinal
-			FROM #tmpGrain
-			GROUP BY strCommodityCode
-				,dtmReceiptDate
+			FROM (
+				SELECT 
+					strCommodityCode
+					,dtmReceiptDate
+					,dblDelivered = SUM(dblDelivered)
+					,dblDirect = SUM(dblDirect)
+					,dblFromStorage = SUM(dblFromStorage)
+					,dblUnpricedReceipts = SUM(dblUnpricedReceipts)
+					,dblAllSales = SUM(dblAllSales)
+					,dblBuyBasis = SUM(del_x_buyBasis + dir_x_buyBasis + stor_x_buyBasis)
+					,dblSellBasis = SUM(sales_x_sellBasis)	
+				FROM #tmpGrain
+				GROUP BY strCommodityCode
+					,dtmReceiptDate
+			) A
 				
 			INSERT INTO @FinalTable
 			SELECT 
