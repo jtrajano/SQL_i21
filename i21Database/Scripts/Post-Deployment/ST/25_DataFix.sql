@@ -201,5 +201,47 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTCompanyPreference)
 -- [END]: Add default value on tblSTCompanyPreferencce
 ----------------------------------------------------------------------------------------------------------------------------------
 
+PRINT N'BEGIN - Lottery Book fix ending number'
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Lottery Book fix ending number
+----------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblSTLotteryBook
+SET tblSTLotteryBook.intStartingNumber = tbl_Update.intStartingNumber,
+tblSTLotteryBook.intEndingNumber = tbl_Update.intEndingNumber
+FROM 
+(
+	SELECT 
+		LB.intLotteryBookId,
+		LG.intLotteryGameId,
+		LG.intStartingNumber,
+		ISNULL(LC.intEndingCount, LG.intEndingNumber) AS intEndingNumber
+	FROM tblSTLotteryBook LB
+	LEFT JOIN tblSTLotteryGame LG
+		ON LB.intLotteryGameId = LG.intLotteryGameId
+	LEFT JOIN (
+	SELECT * FROM (
+		SELECT  tmp_LB.intLotteryBookId, 
+				tmp_CH.intCheckoutId,
+				tmp_CL.intEndingCount,
+				row_number() OVER (PARTITION BY tmp_LB.intStoreId, tmp_LB.intLotteryBookId ORDER BY tmp_CH.dtmCheckoutDate DESC) AS intRowNum
+		FROM tblSTLotteryBook tmp_LB
+		INNER JOIN tblSTCheckoutLotteryCount AS tmp_CL
+			ON tmp_LB.intLotteryBookId = tmp_CL.intLotteryBookId
+		INNER JOIN tblSTCheckoutHeader AS tmp_CH
+			ON tmp_CL.intCheckoutId = tmp_CH.intCheckoutId
+		INNER JOIN tblSTLotteryGame tmp_LG
+			ON tmp_LB.intLotteryGameId = tmp_LG.intLotteryGameId
+	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1) LC
+	ON LB.intLotteryBookId = LC.intLotteryBookId
+) tbl_Update
+WHERE tblSTLotteryBook.intLotteryBookId = tbl_Update.intLotteryBookId
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Lottery Book fix ending number
+----------------------------------------------------------------------------------------------------------------------------------
+
+PRINT N'BEGIN - Lottery Book fix ending number'
 
 GO
