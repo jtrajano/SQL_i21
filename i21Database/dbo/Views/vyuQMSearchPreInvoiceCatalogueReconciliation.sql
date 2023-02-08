@@ -60,8 +60,7 @@ LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblQMGardenMark GM ON BD.intGardenMarkId = GM.intGardenMarkId
 LEFT JOIN tblICCommodityAttribute CA ON BD.strComment = CA.strDescription AND CA.strType = 'Grade'
 LEFT JOIN tblSMTransaction SMT ON CR.strReconciliationNumber = SMT.strTransactionNo AND CR.intCatalogueReconciliationId = SMT.intRecordId
-WHERE B.ysnPosted = 0
-  AND (CRD.intCatalogueReconciliationDetailId IS NULL
+WHERE (CRD.intCatalogueReconciliationDetailId IS NULL
     OR (CRD.intCatalogueReconciliationDetailId IS NOT NULL 
 	  AND (SMT.intTransactionId IS NOT NULL AND SMT.strApprovalStatus NOT IN ('No Need for Approval', 'Approved')))
 	  )
