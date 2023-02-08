@@ -18,7 +18,8 @@ CREATE TABLE [dbo].[tblTMTankMonitor] (
 	[intSiteId]					INT				NULL,
 	[dblInventoryReading] NUMERIC (18, 6) DEFAULT 0 NULL,
 	[dtmInventoryReadingDateTime]				DATETIME 		NULL,
-    [ysnManual]  bit NULL
+    [ysnManual]  bit NULL,
+	[intCheckoutId] int NULL
 	CONSTRAINT [PK_tblTMTankMonitor_intTankMonitorId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC)
 	)
 
