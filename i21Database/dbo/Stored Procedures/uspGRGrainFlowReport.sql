@@ -98,7 +98,148 @@ BEGIN
 					WHERE ' + @final_condition
 	exec (@sqlcmd)
 
+	--calculate wgt avg buy/sell basis
+	SELECT DISTINCT strCommodityCode
+	INTO #Commodities
+	FROM #tmpSampleExport
 
-	SELECT * FROM #tmpSampleExport
+	SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY strFuturesMonth ASC) AS intRowNum
+		,strFuturesMonth
+	INTO #FuturesMonth
+	FROM #tmpSampleExport
+	WHERE strFuturesMonth IS NOT NULL
+	GROUP BY strFuturesMonth
 
+	DECLARE @strFuturesMonth NVARCHAR(100)
+	DECLARE @dblTotalDelivered DECIMAL(18,6)
+	DECLARE @dblTotalDirect DECIMAL(18,6)
+	DECLARE @dblTotalFromStorage DECIMAL(18,6)
+	DECLARE @dblTotalAllSales DECIMAL(18,6)
+	DECLARE @dblTotalPurchaseBasis DECIMAL(18,6)
+	DECLARE @dblTotalSellBasis DECIMAL(18,6)
+	DECLARE @commodity NVARCHAR(100)
+	--DECLARE @intRowNumReceiptDate INT
+	DECLARE @intRowNumFuturesMonth INT
+
+	DECLARE @FinalTable AS TABLE(
+		strCommodityCode NVARCHAR(100)
+		,dtmReceiptDate NVARCHAR(200)
+		,dblDelivered DECIMAL(18,6)
+		,dblDirect DECIMAL(18,6)
+		,dblFromStorage DECIMAL(18,6)
+		,dblUnpricedReceipts DECIMAL(18,6)
+		,dblAllSales DECIMAL(18,6)
+		,dblBuyBasis DECIMAL(18,6)
+		,dblSellBasis DECIMAL(18,6)
+		,strFuturesMonth NVARCHAR(100)
+	)
+
+	WHILE EXISTS(SELECT 1 FROM #Commodities)
+	BEGIN
+		SELECT TOP 1 @commodity = strCommodityCode FROM #Commodities
+
+		SELECT @intRowNumFuturesMonth = MIN(intRowNum) FROM #FuturesMonth
+
+		WHILE @intRowNumFuturesMonth > 0
+		BEGIN
+			IF OBJECT_ID('tempdb..#tmpGrain') IS NOT NULL DROP TABLE #tmpGrain
+			IF OBJECT_ID('tempdb..#tmpFinal') IS NOT NULL DROP TABLE #tmpFinal
+
+			SELECT @strFuturesMonth = strFuturesMonth FROM #FuturesMonth WHERE intRowNum = @intRowNumFuturesMonth
+
+			SELECT *
+				,del_x_buyBasis		= ISNULL(dblDelivered,0) * ISNULL(dblBuyBasis,0)
+				,dir_x_buyBasis		= ISNULL(dblDirect,0) * ISNULL(dblBuyBasis,0)
+				,stor_x_buyBasis	= ISNULL(dblFromStorage,0) * ISNULL(dblBuyBasis,0)
+				,sales_x_sellBasis	= ISNULL(dblAllSales,0) * ISNULL(dblSellBasis,0)				
+			INTO #tmpGrain
+			FROM #tmpSampleExport
+			WHERE strCommodityCode = @commodity
+				AND strFuturesMonth = @strFuturesMonth
+
+			SELECT 
+				@dblTotalDelivered		= ISNULL(SUM(dblDelivered),0)
+				,@dblTotalDirect		= ISNULL(SUM(dblDirect),0)
+				,@dblTotalFromStorage	= ISNULL(SUM(dblFromStorage),0)
+				,@dblTotalAllSales		= ISNULL(SUM(dblAllSales),0)
+				,@dblTotalPurchaseBasis = ISNULL(SUM(dblBuyBasis),0)
+				,@dblTotalSellBasis		= ISNULL(SUM(dblSellBasis),0)
+			FROM #tmpSampleExport
+			WHERE strCommodityCode = @commodity
+				AND strFuturesMonth = @strFuturesMonth
+			GROUP BY strCommodityCode
+				,strFuturesMonth
+
+			SELECT 
+				strCommodityCode
+				,dtmReceiptDate
+				,dblDelivered
+				,dblDirect
+				,dblFromStorage
+				,dblUnpricedReceipts
+				,dblAllSales
+				,dblBuyBasis		= dblBuyBasis / CASE WHEN @dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage = 0 THEN 1 ELSE @dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage END
+				,dblSellBasis		= dblSellBasis / CASE WHEN @dblTotalAllSales = 0 THEN 1 ELSE @dblTotalAllSales END
+				,strFuturesMonth	= @strFuturesMonth
+			INTO #tmpFinal
+			FROM (
+				SELECT 
+					strCommodityCode
+					,dtmReceiptDate
+					,dblDelivered = SUM(dblDelivered)
+					,dblDirect = SUM(dblDirect)
+					,dblFromStorage = SUM(dblFromStorage)
+					,dblUnpricedReceipts = SUM(dblUnpricedReceipts)
+					,dblAllSales = SUM(dblAllSales)
+					,dblBuyBasis = SUM(del_x_buyBasis + dir_x_buyBasis + stor_x_buyBasis)
+					,dblSellBasis = SUM(sales_x_sellBasis)	
+				FROM #tmpGrain
+				GROUP BY strCommodityCode
+					,dtmReceiptDate
+			) A
+				
+			INSERT INTO @FinalTable
+			SELECT 
+				strCommodityCode
+				,dtmReceiptDate
+				,dblDelivered = SUM(dblDelivered)
+				,dblDirect = SUM(dblDirect)
+				,dblFromStorage = SUM(dblFromStorage)
+				,dblUnpricedReceipts = SUM(dblUnpricedReceipts)
+				,dblAllSales = SUM(dblAllSales)
+				,dblBuyBasis = SUM(dblBuyBasis)
+				,dblSellBasis = SUM(dblSellBasis)
+				,strFuturesMonth
+			FROM #tmpFinal
+			GROUP BY strCommodityCode
+				,dtmReceiptDate	
+				,strFuturesMonth
+			
+
+			SELECT @intRowNumFuturesMonth = MIN(intRowNum) FROM #FuturesMonth WHERE intRowNum > @intRowNumFuturesMonth			
+		END
+
+		INSERT INTO @FinalTable
+		SELECT
+			strCommodityCode
+			,dtmReceiptDate
+			,ISNULL(SUM(dblDelivered),0)
+			,ISNULL(SUM(dblDirect),0)
+			,ISNULL(SUM(dblFromStorage),0)
+			,ISNULL(SUM(dblUnpricedReceipts),0)
+			,ISNULL(SUM(dblAllSales),0)
+			,0
+			,0
+			,NULL
+		FROM #tmpSampleExport
+		WHERE strCommodityCode = @commodity
+			AND strFuturesMonth IS NULL
+		GROUP BY strCommodityCode
+			,dtmReceiptDate		
+
+		DELETE FROM #Commodities WHERE strCommodityCode = @commodity
+	END
+
+	
+	SELECT * FROM @FinalTable ORDER BY strFuturesMonth
 END
