@@ -177,7 +177,7 @@ BEGIN
 				,dblDirect = SUM(dblDirect)
 				,dblFromStorage = SUM(dblFromStorage)
 				,dblUnpricedReceipts = SUM(dblUnpricedReceipts)
-				,dblAllSales = SUM(dblSellBasis)
+				,dblAllSales = SUM(dblAllSales)
 				,dblBuyBasis = SUM(del_x_buyBasis + dir_x_buyBasis + stor_x_buyBasis) / 
 					CASE WHEN SUM(@dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage) = 0 THEN 1 ELSE SUM(@dblTotalDelivered + @dblTotalDirect + @dblTotalFromStorage) END
 				,dblSellBasis = SUM(sales_x_sellBasis) / CASE WHEN @dblTotalAllSales = 0 THEN 1 ELSE @dblTotalAllSales END
@@ -195,7 +195,7 @@ BEGIN
 				,dblDirect = SUM(dblDirect)
 				,dblFromStorage = SUM(dblFromStorage)
 				,dblUnpricedReceipts = SUM(dblUnpricedReceipts)
-				,dblAllSales = SUM(dblSellBasis)
+				,dblAllSales = SUM(dblAllSales)
 				,dblBuyBasis = SUM(dblBuyBasis)
 				,dblSellBasis = SUM(dblSellBasis)
 				,strFuturesMonth
