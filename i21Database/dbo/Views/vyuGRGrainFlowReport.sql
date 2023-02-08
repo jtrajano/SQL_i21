@@ -214,8 +214,7 @@ LEFT JOIN (
 	INNER JOIN tblRKFuturesMonth FM
 		ON FM.intFutureMonthId = CD.intFutureMonthId
 	)	
-	ON CD.intContractHeaderId = SC.intContractId
-		AND CD.intContractSeq = SC.intContractSequence
+	ON CD.intContractDetailId = SC.intContractId
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = SC.intCommodityId
 INNER JOIN tblICItemUOM UOM 
