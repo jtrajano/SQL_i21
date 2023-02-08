@@ -110,32 +110,38 @@ DECLARE @intStart INT, @intEnd INT, @intLength INT, @intDividerCount INT
 DECLARE @strSegment NVARCHAR(10) 
 DECLARE @newAccountId INT
 DECLARE @newStrAccountId NVARCHAR(40)
+DECLARE @strJournalLineDescription NVARCHAR(500)
 
 IF  @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany = 1
 BEGIN
 WHILE EXISTS (SELECT 1 FROM @GLEntries WHERE intAccountId <> @intAccountId)
 BEGIN
-    SELECT TOP 1 @strAccountId1 = strAccountId, @intAccountIdLoop = GL.intAccountId FROM @GLEntries G
+
+    SELECT TOP 1 @strAccountId1 = strAccountId, @intAccountIdLoop = GL.intAccountId , @strJournalLineDescription = strJournalLineDescription
+    FROM @GLEntries G
     JOIN  tblGLAccount GL ON G.intAccountId = GL.intAccountId
     WHERE GL.intAccountId <> @intAccountId
-    GROUP BY GL.intAccountId, strAccountId
-    SET @newStrAccountId =''
-    SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
-    IF @newStrAccountId = ''
+    GROUP BY GL.intAccountId, strAccountId, strJournalLineDescription
+    IF @strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Transfer Fees' )
     BEGIN
-	    SET @msg += '<li>Overriding ' + @strAccountId1 + ' encountered an unknow error.</li>'
-    END
-    ELSE
-    IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount WHERE strAccountId = @newStrAccountId)
-    BEGIN
-        SET @msg += '<li>' + @newStrAccountId + ' is a  non-existing account for override</li>' 
-    END
-    ELSE IF @newStrAccountId <> @strAccountId1
-    BEGIN
-        SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
-        UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
-        WHERE A.intAccountId = @intAccountIdLoop
-         AND strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Transfer Fees' )
+        SET @newStrAccountId =''
+        SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
+        IF @newStrAccountId = ''
+        BEGIN
+            SET @msg += '<li>Overriding ' + @strAccountId1 + ' encountered an unknow error.</li>'
+        END
+        ELSE
+        IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount WHERE strAccountId = @newStrAccountId)
+        BEGIN
+            SET @msg += '<li>' + @newStrAccountId + ' is a  non-existing account for override</li>' 
+        END
+        ELSE IF @newStrAccountId <> @strAccountId1
+        BEGIN
+            SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
+            UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
+            WHERE A.intAccountId = @intAccountIdLoop
+            AND strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Transfer Fees' )
+        END
     END
     DELETE FROM @GLEntries WHERE intAccountId = @intAccountIdLoop
 END
@@ -208,22 +214,26 @@ INSERT INTO @GLEntries(
 
 DECLARE @intAccountId1 INT
 DECLARE @strAccountId2 NVARCHAR(30)
+
 IF @intLOBSegmentIdFromContract IS NOT NULL
 BEGIN
 WHILE EXISTS (SELECT 1 FROM @GLEntries)
 BEGIN
-    SELECT TOP 1 @intAccountId = intAccountId FROM @GLEntries
-    SELECT @strAccountId2 = dbo.fnGLGetOverrideAccountBySegment(@intAccountId,NULL,@intLOBSegmentIdFromContract,NULL)
-    IF @strAccountId2 IS NULL OR LEN(@strAccountId2) = 0
-        SET @msg += '<li>Building an override account encountered an error.</li>'
-    SET  @intAccountId1 = NULL
-    SELECT TOP 1 @intAccountId1 = intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId2
-    IF @intAccountId1 IS NULL
-        SET @msg += '<li>' + @strAccountId2 + ' is not an existing account id.</li>'
+    SELECT TOP 1 @intAccountId = intAccountId , @strJournalLineDescription = strJournalLineDescription FROM @GLEntries
+    IF @strJournalLineDescription NOT IN ('Bank Transfer Fees', 'Bank Account Entries')
+    BEGIN
+        SELECT @strAccountId2 = dbo.fnGLGetOverrideAccountBySegment(@intAccountId,NULL,@intLOBSegmentIdFromContract,NULL)
+        IF @strAccountId2 IS NULL OR LEN(@strAccountId2) = 0
+            SET @msg += '<li>Building an override account encountered an error.</li>'
+        SET  @intAccountId1 = NULL
+        SELECT TOP 1 @intAccountId1 = intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId2
+        IF @intAccountId1 IS NULL
+            SET @msg += '<li>' + @strAccountId2 + ' is not an existing account id.</li>'
 
-    UPDATE A SET intAccountId = @intAccountId1  FROM #tmpGLDetail A
-    WHERE intAccountId = @intAccountId
-    AND strJournalLineDescription NOT IN('Bank Transfer Fees', 'Bank Account Entries')
+        UPDATE A SET intAccountId = @intAccountId1  FROM #tmpGLDetail A
+        WHERE intAccountId = @intAccountId
+        AND strJournalLineDescription NOT IN('Bank Transfer Fees', 'Bank Account Entries')
+    END
 
     DELETE FROM @GLEntries WHERE @intAccountId = intAccountId
 END
