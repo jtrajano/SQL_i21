@@ -346,6 +346,7 @@ AS
 		,t.dblForexRate
 		,i.strItemNo
 		,currencyRateType.strCurrencyExchangeRateType
+		,lot.strLotNumber
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
