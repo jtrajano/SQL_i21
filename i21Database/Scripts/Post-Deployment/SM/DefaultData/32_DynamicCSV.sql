@@ -2755,6 +2755,8 @@ UPDATE tblSMCSVDynamicImport SET
 		DECLARE @strInvoiceType				NVARCHAR(MAX)
 
 
+		SET @strCostToUse = @cost_to_use
+
 		DECLARE @IsValid INT = 1
 
 		SELECT @IsValid = 1,
