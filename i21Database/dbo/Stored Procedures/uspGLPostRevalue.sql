@@ -185,16 +185,16 @@ DECLARE
                   ,intCompanySegmentOverrideId  
                   )  
                   SELECT   
-                    [strTransactionId]  
+                   [strTransactionId]  
                   ,[intTransactionId]  
                   ,[intAccountId]  
                   ,[strDescription]  
                   ,[dtmTransactionDate]  
-                  ,[dblCredit]  
                   ,[dblDebit]
+                  ,[dblCredit]  
                   ,[dblExchangeRate] 
-                  ,[dblDebitForeign]
                   ,[dblCreditForeign] 
+                  ,[dblDebitForeign]
                   ,[dtmDate]
                   ,[ysnIsUnposted]  
                   ,[intConcurrencyId]   
@@ -549,8 +549,8 @@ DECLARE
         ,[dblCredit]   
         ,[dblDebit]
         ,[dblExchangeRate] 
-        ,[dblDebitForeign]
         ,[dblCreditForeign] 
+        ,[dblDebitForeign]
         ,[dtmDate]      
         ,[ysnIsUnposted] = 1  
         ,[intConcurrencyId]    
