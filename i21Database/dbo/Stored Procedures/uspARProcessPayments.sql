@@ -218,8 +218,8 @@ BEGIN TRY
 		GROUP BY [intId], [intPaymentId], [intPaymentDetailId], [intEntityCustomerId], [intCompanyLocationId], [intCurrencyId], [dtmDatePaid], [intPaymentMethodId], [strPaymentInfo], [strNotes], [strPaymentOriginalId], [intExchangeRateTypeId], [dblExchangeRate], [strReceivePaymentType]
 
 	UPDATE @tmpEntriesForProcessing
-	SET ysnForInsert = CASE WHEN ISNULL([intPaymentId], 0) > 1 THEN 0 ELSE 1 END
-	  , ysnForUpdate = CASE WHEN ISNULL([intPaymentId], 0) > 1 THEN 1 ELSE 0 END
+	SET ysnForInsert = CASE WHEN ISNULL([intPaymentId], 0) > 0 THEN 0 ELSE 1 END
+	  , ysnForUpdate = CASE WHEN ISNULL([intPaymentId], 0) > 0 THEN 1 ELSE 0 END
 
 END TRY
 BEGIN CATCH
