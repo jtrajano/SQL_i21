@@ -215,8 +215,9 @@ FROM
 	SELECT 
 		LB.intLotteryBookId,
 		LG.intLotteryGameId,
-		LG.intStartingNumber,
-		ISNULL(LC.intEndingCount, LG.intEndingNumber) AS intEndingNumber
+		ISNULL(LC.intEndingCount, LG.intStartingNumber) AS intStartingNumber,
+		LG.intEndingNumber intEndingNumber,
+		LG.intEndingNumber AS intReceiptEndingNumber
 	FROM tblSTLotteryBook LB
 	LEFT JOIN tblSTLotteryGame LG
 		ON LB.intLotteryGameId = LG.intLotteryGameId
@@ -225,7 +226,7 @@ FROM
 		SELECT  tmp_LB.intLotteryBookId, 
 				tmp_CH.intCheckoutId,
 				tmp_CL.intEndingCount,
-				row_number() OVER (PARTITION BY tmp_LB.intStoreId, tmp_LB.intLotteryBookId ORDER BY tmp_CH.dtmCheckoutDate DESC) AS intRowNum
+				ROW_NUMBER() OVER (PARTITION BY tmp_LB.intStoreId, tmp_LB.intLotteryBookId ORDER BY tmp_CH.dtmCheckoutDate DESC) AS intRowNum
 		FROM tblSTLotteryBook tmp_LB
 		INNER JOIN tblSTCheckoutLotteryCount AS tmp_CL
 			ON tmp_LB.intLotteryBookId = tmp_CL.intLotteryBookId
@@ -233,6 +234,7 @@ FROM
 			ON tmp_CL.intCheckoutId = tmp_CH.intCheckoutId
 		INNER JOIN tblSTLotteryGame tmp_LG
 			ON tmp_LB.intLotteryGameId = tmp_LG.intLotteryGameId
+		WHERE tmp_CH.strCheckoutStatus = 'Posted'
 	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1) LC
 	ON LB.intLotteryBookId = LC.intLotteryBookId
 ) tbl_Update
