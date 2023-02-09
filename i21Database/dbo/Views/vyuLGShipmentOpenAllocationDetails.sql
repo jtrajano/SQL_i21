@@ -122,6 +122,8 @@ FROM (
 		,intShipmentType = ShipType.intShipmentType
 		,CHP.intFreightTermId
 		,FT.strFreightTerm
+		,strSCertificate = SCC.strCertificates
+		,strSCropYear = SCY.strCropYear
 	FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 	CROSS JOIN tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -204,6 +206,8 @@ FROM (
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CHP.intFreightTermId
+	LEFT JOIN tblCTCropYear SCY ON SCY.intCropYearId = CHS.intCropYearId
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(CDS.intContractDetailId) SCC
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
 					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
 					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
