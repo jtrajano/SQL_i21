@@ -135,6 +135,7 @@ BEGIN TRY
 		, @intMarkToMarketRateTypeId INT
 		, @ysnEnableMTMPoint BIT
 		, @ysnIncludeProductInformation BIT
+		, @intFunctionalCurrencyId INT
 
 	SELECT TOP 1 @strM2MView = strM2MView
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
@@ -159,6 +160,8 @@ BEGIN TRY
 		, @ysnEnableAllocatedContractsGainOrLoss = ysnEnableAllocatedContractsGainOrLoss
 		, @ysnIncludeProductInformation = ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
+
+	SELECT @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 	SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -5498,6 +5501,8 @@ BEGIN TRY
 				, strAccountId
 				, dblDebit
 				, dblCredit
+				, dblDebitForeign
+				, dblCreditForeign
 				, dblDebitUnit
 				, dblCreditUnit
 				, strDescription
@@ -5517,507 +5522,586 @@ BEGIN TRY
 				, intUserId
 				, intSourceLocationId
 				, intSourceUOMId)
-			SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnBasisId ELSE @intUnrealizedLossOnBasisId END intAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnBasisId ELSE @strUnrealizedLossOnBasisId END strAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
-				, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Basis'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Basis'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
+
+			SELECT intM2MHeaderId
+				, dtmDate
+				, intAccountId
+				, strAccountId
+				, dblDebit = CASE WHEN @intCurrencyId = @intFunctionalCurrencyId THEN dblDebit ELSE ISNULL(dblDebit, 0) * ISNULL(dblExchangeRate, 1) END
+				, dblCredit = CASE WHEN @intCurrencyId = @intFunctionalCurrencyId THEN dblCredit ELSE ISNULL(dblCredit, 0) * ISNULL(dblExchangeRate, 1) END
+				, dblDebitForeign = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN dblDebit ELSE ISNULL(dblDebit, 0) * ISNULL(dblExchangeRate, 1) END
+				, dblCredit = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN dblCredit ELSE ISNULL(dblCredit, 0) * ISNULL(dblExchangeRate, 1) END
+				, dblDebitUnit
+				, dblCreditUnit
+				, strDescription
+				, intCurrencyId
+				, dtmTransactionDate
+				, strTransactionId
+				, intTransactionId
+				, strTransactionType
+				, strTransactionForm
+				, strModuleName
+				, intConcurrencyId
+				, dblExchangeRate
+				, dtmDateEntered
+				, ysnIsUnposted
 				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblResultBasis, 0) <> 0
+				, strReference
+				, intUserId
+				, intSourceLocationId
+				, intSourceUOMId
+			FROM (
+				SELECT intM2MHeaderId = @intM2MHeaderId 
+					, dtmDate = @dtmPostDate
+					, intAccountId = CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnBasisId ELSE @intUnrealizedLossOnBasisId END 
+					, strAccountId = CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnBasisId ELSE @strUnrealizedLossOnBasisId END
+					, dblDebit = CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END
+					, dblCredit = CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END 
+					, dblDebitUnit = CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END
+					, dblCreditUnit = CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END 
+					, strDescription = 'Mark To Market-Basis'
+					, intCurrencyId = @intCurrencyId
+					, dtmTransactionDate = @dtmPostDate
+					, strTransactionId = strContractSeq
+					, intTransactionId = intContractDetailId
+					, strTransactionType = 'Mark To Market-Basis'
+					, strTransactionForm = 'Mark To Market'
+					, strModuleName = 'Risk Management'
+					, intConcurrencyId = 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, dtmDateEntered = @dtmCurrentDate
+					, ysnIsUnposted = 0
+					, intEntityId
+					, strReference = @strRecordName
+					, intUserId = @intUserId
+					, intSourceLocationId = @intLocationId
+					, intSourceUOMId = @intQuantityUOMId
+				FROM tblRKM2MTransaction t
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID = @intCurrencyId
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblResultBasis, 0) <> 0
 	
-			--Basis entry Offset
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryBasisIOSId ELSE @intUnrealizedLossOnInventoryBasisIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryBasisIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Basis Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Basis Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblResultBasis, 0) <> 0
+				--Basis entry Offset
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryBasisIOSId ELSE @intUnrealizedLossOnInventoryBasisIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryBasisIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Basis Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Basis Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblResultBasis, 0) <> 0
 		
-			-- Futures
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Futures'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Futures'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblMarketFuturesResult, 0) <> 0
+				-- Futures
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Futures'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Futures'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblMarketFuturesResult, 0) <> 0
 	
-			--Futures Offset
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnInventoryFuturesIOSId ELSE @intUnrealizedLossOnInventoryFuturesIOSId END intAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnInventoryFuturesIOSId ELSE @strUnrealizedLossOnInventoryFuturesIOSId END strAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Futures Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Futures Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblMarketFuturesResult, 0) <> 0
+				--Futures Offset
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnInventoryFuturesIOSId ELSE @intUnrealizedLossOnInventoryFuturesIOSId END intAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnInventoryFuturesIOSId ELSE @strUnrealizedLossOnInventoryFuturesIOSId END strAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Futures Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Futures Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblMarketFuturesResult, 0) <> 0
 
-			--Cash
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
-				, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Cash'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Cash'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(strPricingType, '') = 'Cash'
-				AND ISNULL(dblResultCash, 0) <> 0
+				--Cash
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Cash'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Cash'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(strPricingType, '') = 'Cash'
+					AND ISNULL(dblResultCash, 0) <> 0
 	
-			--Cash Offset
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryCashIOSId ELSE @intUnrealizedLossOnInventoryCashIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryCashIOSId ELSE @strUnrealizedLossOnInventoryCashIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Cash Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Cash Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(strPricingType, '') = 'Cash'
-				AND ISNULL(dblResultCash, 0) <> 0
+				--Cash Offset
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryCashIOSId ELSE @intUnrealizedLossOnInventoryCashIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryCashIOSId ELSE @strUnrealizedLossOnInventoryCashIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Cash Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Cash Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(strPricingType, '') = 'Cash'
+					AND ISNULL(dblResultCash, 0) <> 0
 
-			--Ratio
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @intUnrealizedGainOnRatioId ELSE @intUnrealizedLossOnRatioId END intAccountId
-				, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @strUnrealizedGainOnRatioId ELSE @strUnrealizedLossOnRatioId END strAccountId
-				, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblDebit
-				, CASE WHEN ISNULL(dblResultRatio, 0) <= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Ratio'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Ratio'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(dblResultRatio, 0) <> 0
+				--Ratio
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @intUnrealizedGainOnRatioId ELSE @intUnrealizedLossOnRatioId END intAccountId
+					, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @strUnrealizedGainOnRatioId ELSE @strUnrealizedLossOnRatioId END strAccountId
+					, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblDebit
+					, CASE WHEN ISNULL(dblResultRatio, 0) <= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Ratio'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Ratio'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(dblResultRatio, 0) <> 0
 		
-			--Ratio Offset
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @intUnrealizedGainOnInventoryRatioIOSId ELSE @intUnrealizedLossOnInventoryRatioIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @strUnrealizedGainOnInventoryRatioIOSId ELSE @strUnrealizedLossOnInventoryRatioIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultRatio, 0) <= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblDebit
-				, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Ratio Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Ratio Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
-				AND ISNULL(dblResultRatio, 0) <> 0
+				--Ratio Offset
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @intUnrealizedGainOnInventoryRatioIOSId ELSE @intUnrealizedLossOnInventoryRatioIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN @strUnrealizedGainOnInventoryRatioIOSId ELSE @strUnrealizedLossOnInventoryRatioIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultRatio, 0) <= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblDebit
+					, CASE WHEN ISNULL(dblResultRatio, 0) >= 0 THEN 0.0 ELSE ABS(dblResultRatio) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) * CASE WHEN strContractOrInventoryType = 'Contract(S)' THEN -1 ELSE 1 END >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Ratio Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Ratio Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
+					AND ISNULL(dblResultRatio, 0) <> 0
 	
-			-------- intransit Offset
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryBasisIOSId ELSE @intUnrealizedLossOnInventoryBasisIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryBasisIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
-				, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Basis Intransit'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Basis Intransit'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblResultBasis, 0) <> 0
+				-------- intransit Offset
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryBasisIOSId ELSE @intUnrealizedLossOnInventoryBasisIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryBasisIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
+					, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Basis Intransit'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Basis Intransit'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblResultBasis, 0) <> 0
 
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
-				, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Basis Intransit Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Basis Intransit Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblResultBasis, 0) <> 0
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Basis Intransit Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Basis Intransit Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblResultBasis, 0) <> 0
 	
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Futures Intransit'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Futures Intransit'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblMarketFuturesResult, 0) <> 0
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Futures Intransit'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Futures Intransit'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblMarketFuturesResult, 0) <> 0
 
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
-				, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Futures Intransit Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Futures Intransit Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
-				AND ISNULL(strPricingType, '') <> 'Cash'
-				AND ISNULL(dblMarketFuturesResult, 0) <> 0
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Futures Intransit Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Futures Intransit Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
+					AND ISNULL(strPricingType, '') <> 'Cash'
+					AND ISNULL(dblMarketFuturesResult, 0) <> 0
 
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
-				, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Cash Intransit'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Cash Intransit'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
-				AND ISNULL(strPricingType, '') = 'Cash'
-				AND ISNULL(dblResultCash, 0) <> 0
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Cash Intransit'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Cash Intransit'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
+					AND ISNULL(strPricingType, '') = 'Cash'
+					AND ISNULL(dblResultCash, 0) <> 0
 		
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryIntransitIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Cash Intransit Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq
-				, intContractDetailId
-				, 'Mark To Market-Cash Intransit Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1 
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
-				AND ISNULL(strPricingType, '') = 'Cash'
-				AND ISNULL(dblResultCash, 0) <> 0
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryIntransitIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Cash Intransit Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq
+					, intContractDetailId
+					, 'Mark To Market-Cash Intransit Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1 
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
+					AND ISNULL(strPricingType, '') = 'Cash'
+					AND ISNULL(dblResultCash, 0) <> 0
 
-			--Inventory Cash
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
-				, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Cash Inventory'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq = @strRecordName
-				, intContractDetailId = @intM2MHeaderId
-				, 'Mark To Market-Cash Inventory'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Inventory','In-transit(I)')
-				AND ISNULL(dblResultCash, 0) <> 0
+				--Inventory Cash
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Cash Inventory'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq = @strRecordName
+					, intContractDetailId = @intM2MHeaderId
+					, 'Mark To Market-Cash Inventory'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Inventory','In-transit(I)')
+					AND ISNULL(dblResultCash, 0) <> 0
 	
-			--Inventory Cash Offset	
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryIOSId ELSE @intUnrealizedLossOnInventoryIOSId END intAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryIOSId ELSE @strUnrealizedLossOnInventoryIOSId END strAccountId
-				, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
-				, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
-				, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
-				, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-				, 'Mark To Market-Cash Inventory Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, strContractSeq = @strRecordName
-				, intContractDetailId = @intM2MHeaderId
-				, 'Mark To Market-Cash Inventory Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1 
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-			FROM tblRKM2MTransaction
-			WHERE intM2MHeaderId = @intM2MHeaderId
-				AND strContractOrInventoryType IN ('Inventory','In-transit(I)')
-				AND ISNULL(dblResultCash, 0) <> 0
-
+				--Inventory Cash Offset	
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryIOSId ELSE @intUnrealizedLossOnInventoryIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryIOSId ELSE @strUnrealizedLossOnInventoryIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+					, 'Mark To Market-Cash Inventory Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, strContractSeq = @strRecordName
+					, intContractDetailId = @intM2MHeaderId
+					, 'Mark To Market-Cash Inventory Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1 
+					, dblExchangeRate = CASE WHEN ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+											THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+				FROM tblRKM2MTransaction
+				WHERE intM2MHeaderId = @intM2MHeaderId
+					AND strContractOrInventoryType IN ('Inventory','In-transit(I)')
+					AND ISNULL(dblResultCash, 0) <> 0
+			) z
 
 
 			-- Derivative Transaction
@@ -6027,6 +6111,8 @@ BEGIN TRY
 				, strAccountId
 				, dblDebit
 				, dblCredit
+				, dblDebitForeign
+				, dblCreditForeign
 				, dblDebitUnit
 				, dblCreditUnit
 				, strDescription
@@ -6047,65 +6133,110 @@ BEGIN TRY
 				, intSourceLocationId
 				, intSourceUOMId
 				, dblPrice)
-			SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblDebit
-				, CASE WHEN ISNULL(dblGrossPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblCredit
-				, CASE WHEN ISNULL(dblNetPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblDebitUnit
-				, CASE WHEN ISNULL(dblNetPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblCreditUnit
-				, 'Mark To Market-Futures Derivative'
-				, @intCurrencyId
-				, @dtmPostDate
-				, t.strInternalTradeNo
-				, t.intFutOptTransactionId
-				, 'Mark To Market-Futures Derivative'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
+			SELECT intM2MInquiryId
+				, dtmDate
+				, intAccountId
+				, strAccountId
+				, dblDebit
+				, dblCredit
+				, dblDebitForeign = ISNULL(dblDebit, 0) * ISNULL(dblExchangeRate, 1)
+				, dblCreditForeign = ISNULL(dblCredit, 0) * ISNULL(dblExchangeRate, 1)
+				, dblDebitUnit
+				, dblCreditUnit
+				, strDescription
+				, intCurrencyId
+				, dtmTransactionDate
+				, strTransactionId
+				, intTransactionId
+				, strTransactionType
+				, strTransactionForm
+				, strModuleName
+				, intConcurrencyId
+				, dblExchangeRate
+				, dtmDateEntered
+				, ysnIsUnposted
 				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-				, t.dblPrice
-			FROM @Result t
-			JOIN tblEMEntity e ON t.strName = e.strName
-			WHERE ISNULL(dblGrossPnL, 0) <> 0
+				, strReference
+				, intUserId
+				, intSourceLocationId
+				, intSourceUOMId
+				, dblPrice
+			FROM 
+			(
+				SELECT intM2MInquiryId = @intM2MHeaderId
+					, dtmDate = @dtmPostDate
+					, intAccountId = CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END
+					, strAccountId = CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END
+					, dblDebit = CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END
+					, dblCredit = CASE WHEN ISNULL(dblGrossPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END 
+					, dblDebitUnit = CASE WHEN ISNULL(dblNetPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblNetPnL) END 
+					, dblCreditUnit = CASE WHEN ISNULL(dblNetPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblNetPnL) END 
+					, strDescription = 'Mark To Market-Futures Derivative'
+					, intCurrencyId = @intCurrencyId
+					, dtmTransactionDate = @dtmPostDate
+					, strTransactionId = t.strInternalTradeNo
+					, intTransactionId = t.intFutOptTransactionId
+					, strTransactionType = 'Mark To Market-Futures Derivative'
+					, strTransactionForm = 'Mark To Market'
+					, strModuleName = 'Risk Management'
+					, intConcurrencyId = 1
+					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(c.intMainCurrencyId, 0) <> 0 AND c.intMainCurrencyId <> @intFunctionalCurrencyId
+												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, dtmDateEntered = @dtmCurrentDate
+					, ysnIsUnposted = 0
+					, intEntityId
+					, strReference = @strRecordName 
+					, intUserId = @intUserId 
+					, intSourceLocationId = @intLocationId 
+					, intSourceUOMId = @intQuantityUOMId
+					, dblPrice = t.dblPrice
+				FROM @Result t
+				JOIN tblEMEntity e ON t.strName = e.strName
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID = @intCurrencyId
+				WHERE ISNULL(dblGrossPnL, 0) <> 0
 	
-			UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
-				, @dtmPostDate AS dtmPostDate
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
-				, CASE WHEN ISNULL(dblGrossPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblDebit
-				, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblCredit
-				, CASE WHEN ISNULL(dblNetPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblDebitUnit
-				, CASE WHEN ISNULL(dblNetPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblCreditUnit
-				, 'Mark To Market-Futures Derivative Offset'
-				, @intCurrencyId
-				, @dtmPostDate
-				, t.strInternalTradeNo
-				, t.intFutOptTransactionId
-				, 'Mark To Market-Futures Derivative Offset'
-				, 'Mark To Market'
-				, 'Risk Management'
-				, 1
-				, 1
-				, @dtmCurrentDate
-				, 0
-				, intEntityId
-				, @strRecordName strRecordName
-				, @intUserId intUserId
-				, @intLocationId intLocationId
-				, @intQuantityUOMId intQtyUOMId
-				, t.dblPrice
-			FROM @Result t
-			JOIN tblEMEntity e on t.strName = e.strName
-			WHERE ISNULL(dblGrossPnL, 0) <> 0
+				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
+					, @dtmPostDate AS dtmPostDate
+					, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
+					, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END strAccountId
+					, CASE WHEN ISNULL(dblGrossPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblDebit
+					, CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblGrossPnL) END dblCredit
+					, CASE WHEN ISNULL(dblNetPnL, 0) <= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblDebitUnit
+					, CASE WHEN ISNULL(dblNetPnL, 0) >= 0 THEN 0.0 ELSE ABS(dblNetPnL) END dblCreditUnit
+					, 'Mark To Market-Futures Derivative Offset'
+					, @intCurrencyId
+					, @dtmPostDate
+					, t.strInternalTradeNo
+					, t.intFutOptTransactionId
+					, 'Mark To Market-Futures Derivative Offset'
+					, 'Mark To Market'
+					, 'Risk Management'
+					, 1
+					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, NULL) 
+											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(c.intMainCurrencyId, 0) <> 0 AND c.intMainCurrencyId <> @intFunctionalCurrencyId
+												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, @intFunctionalCurrencyId, NULL) 
+											ELSE 1
+											END
+					, @dtmCurrentDate
+					, 0
+					, intEntityId
+					, @strRecordName strRecordName
+					, @intUserId intUserId
+					, @intLocationId intLocationId
+					, @intQuantityUOMId intQtyUOMId
+					, t.dblPrice
+				FROM @Result t
+				JOIN tblEMEntity e on t.strName = e.strName
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID = @intCurrencyId
+				WHERE ISNULL(dblGrossPnL, 0) <> 0
+			) z
 		END		
 	END
 	ELSE
