@@ -904,6 +904,7 @@
     <Build Include="dbo\Tables\tblCTContractPriceImportTemp.sql" />
     <Build Include="dbo\Tables\tblCTContractPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayableVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -371,15 +371,15 @@ BEGIN
 				SourceData.[dtmDateEntered]
 			);
 
-			--DELETE PAYABLE	
-			DELETE P
-			FROM tblAPVoucherPayable P
-			INNER JOIN @id ID ON ID.intVoucherPayableId = P.intVoucherPayableId
+			--REMOVE PAYABLE
+			DECLARE @loadId INT
 
-			--DELETE TAXES
-			DELETE T
-			FROM tblAPVoucherPayableTaxStaging PT
-			INNER JOIN @id ID ON ID.intVoucherPayableId = PT.intVoucherPayableId
+			SELECT @loadId = L.intLoadId
+			FROM @voucherPayable P
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = P.intLoadShipmentDetailId
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+
+			EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, NULL, @loadId, NULL, @intUserId
 
 			--CREATE NEW PAYABLE
 			EXEC uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
@@ -761,7 +761,7 @@ BEGIN
 
 			--DELETE TAXES
 			DELETE T
-			FROM tblAPVoucherPayableTaxStaging PT
+			FROM tblAPVoucherPayableTaxReversed PT
 			INNER JOIN @id ID ON ID.intReversedVoucherPayableId = PT.intVoucherPayableId
 
 			--REMOVE NEW PAYABLE
@@ -772,7 +772,7 @@ BEGIN
 			INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = P.intInventoryReceiptItemId
 			INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 
-			EXEC uspAPRemoveVoucherPayableTransaction @inventoryReceiptId, NULL, @intUserId
+			EXEC uspAPRemoveVoucherPayableTransaction @inventoryReceiptId, NULL, NULL, NULL, NULL, @intUserId
 		END
 	END TRY
 

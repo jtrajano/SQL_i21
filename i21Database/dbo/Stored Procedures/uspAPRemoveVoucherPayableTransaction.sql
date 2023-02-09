@@ -1,6 +1,9 @@
 ﻿	CREATE PROCEDURE [dbo].[uspAPRemoveVoucherPayableTransaction]
-		@intTransactionId INT = NULL,
-		@intShipmentId INT = NULL,
+		@intInventoryReceiptId INT = NULL,
+		@intInventoryShipmentId INT = NULL,
+		@intInventoryReceiptChargeId INT = NULL,
+		@intLoadShipmentId INT = NULL,
+		@intLoadShipmentCostId INT = NULL,
 		@intUserId INT
 	AS
 	BEGIN
@@ -12,7 +15,7 @@
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
-		IF @intTransactionId IS NOT NULL OR @intShipmentId IS NOT NULL
+		IF @intInventoryReceiptId IS NOT NULL OR @intInventoryShipmentId IS NOT NULL OR @intInventoryReceiptChargeId IS NOT NULL OR @intLoadShipmentId IS NOT NULL OR @intLoadShipmentCostId IS NOT NULL
 		BEGIN
 
 			--DELETING TRANSACTIONS FOR RECEIPTS WITHOUT RECORDS ON tblAPVoucherPayableCompleted, WE ARE FORCED TO ADD 
@@ -61,9 +64,9 @@
 				,P.intItemId
 				,P.intTransactionType
 			FROM tblAPVoucherPayable P 
-			INNER JOIN (tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptItem IRItem ON IR.intInventoryReceiptId = IRItem.intInventoryReceiptId)
-				ON P.intInventoryReceiptItemId = IRItem.intInventoryReceiptItemId
-			WHERE IR.intInventoryReceiptId = @intTransactionId AND P.intInventoryReceiptChargeId IS NULL
+			INNER JOIN (tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId)
+				ON P.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+			WHERE IR.intInventoryReceiptId = @intInventoryReceiptId AND P.intInventoryReceiptChargeId IS NULL
 
 			--ADD RECEIPT CHARGE
 			INSERT INTO @intPayableIds
@@ -86,9 +89,15 @@
 			FROM tblAPVoucherPayable P 
 			INNER JOIN (tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptCharge IRCharge ON IR.intInventoryReceiptId = IRCharge.intInventoryReceiptId)
 				ON P.intInventoryReceiptChargeId = IRCharge.intInventoryReceiptChargeId
-			WHERE IR.intInventoryReceiptId = @intTransactionId AND P.intInventoryReceiptChargeId > 0
+			WHERE IR.intInventoryReceiptId = @intInventoryReceiptId AND P.intInventoryReceiptChargeId > 0
+			AND 1 = (
+				CASE WHEN @intInventoryReceiptChargeId IS NULL OR @intInventoryReceiptChargeId = P.intInventoryReceiptChargeId
+				THEN 1 
+				ELSE 0
+				END
+			)
 
-			--ADD SHIPMENT CHARGE
+			--ADD INVENTORY SHIPMENT CHARGE
 			INSERT INTO @intPayableIds
 			SELECT P.intVoucherPayableId, IIS.strShipmentNumber, P.dblQuantityToBill
 			--START PAYABLE LINKS TO VOUCHER
@@ -107,9 +116,61 @@
 			,P.intItemId
 			,P.intTransactionType
 			FROM tblAPVoucherPayable P
-			INNER JOIN (tblICInventoryShipment IIS INNER JOIN tblICInventoryShipmentCharge ISCharge ON IIS.intInventoryShipmentId = ISCharge.intInventoryShipmentId)
-				ON P.intInventoryShipmentChargeId = ISCharge.intInventoryShipmentChargeId
-			WHERE IIS.intInventoryShipmentId = @intShipmentId AND P.intInventoryShipmentChargeId > 0
+			INNER JOIN (tblICInventoryShipment IIS INNER JOIN tblICInventoryShipmentCharge ISC ON IIS.intInventoryShipmentId = ISC.intInventoryShipmentId)
+				ON P.intInventoryShipmentChargeId = ISC.intInventoryShipmentChargeId
+			WHERE IIS.intInventoryShipmentId = @intInventoryShipmentId AND P.intInventoryShipmentChargeId > 0
+
+			--ADD LOAD SHIPMENT DETAIL
+			INSERT INTO @intPayableIds
+			SELECT P.intVoucherPayableId, L.strLoadNumber, P.dblQuantityToBill
+				--START PAYABLE LINKS TO VOUCHER
+				,P.intEntityVendorId
+				,P.intPurchaseDetailId
+				,P.intContractDetailId
+				,P.intScaleTicketId
+				,P.intInventoryReceiptChargeId
+				,P.intInventoryReceiptItemId
+				,P.intInventoryShipmentChargeId
+				,P.intLoadShipmentDetailId
+				,P.intLoadShipmentCostId
+				,P.intWeightClaimDetailId
+				,P.intCustomerStorageId
+				,P.intSettleStorageId
+				,P.intItemId
+				,P.intTransactionType
+			FROM tblAPVoucherPayable P 
+			INNER JOIN (tblLGLoad L INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId)
+				ON P.intLoadShipmentDetailId = LD.intLoadDetailId
+			WHERE L.intLoadId = @intLoadShipmentId AND P.intLoadShipmentCostId IS NULL
+
+			--ADD LOAD SHIPMENT DETAIL COST
+			INSERT INTO @intPayableIds
+			SELECT P.intVoucherPayableId, L.strLoadNumber, P.dblQuantityToBill
+				--START PAYABLE LINKS TO VOUCHER
+				,P.intEntityVendorId
+				,P.intPurchaseDetailId
+				,P.intContractDetailId
+				,P.intScaleTicketId
+				,P.intInventoryReceiptChargeId
+				,P.intInventoryReceiptItemId
+				,P.intInventoryShipmentChargeId
+				,P.intLoadShipmentDetailId
+				,P.intLoadShipmentCostId
+				,P.intWeightClaimDetailId
+				,P.intCustomerStorageId
+				,P.intSettleStorageId
+				,P.intItemId
+				,P.intTransactionType
+			FROM tblAPVoucherPayable P 
+			INNER JOIN (tblLGLoad L INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId)
+				ON P.intLoadShipmentDetailId = LD.intLoadDetailId
+			WHERE L.intLoadId = @intLoadShipmentId AND P.intLoadShipmentCostId > 0
+			AND 1 = (
+				CASE WHEN @intLoadShipmentCostId IS NULL OR @intLoadShipmentCostId = P.intLoadShipmentCostId
+				THEN 1 
+				ELSE 0
+				END
+			)
 			
 			--VALIDATE IF PAYABLE IS ALREADY VOUCHERED
 			DECLARE @vouchers AS TABLE(
