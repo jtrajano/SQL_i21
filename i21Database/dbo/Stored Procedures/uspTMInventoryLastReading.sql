@@ -24,6 +24,7 @@ BEGIN
 					intDeviceId = B.intDeviceId,
 					intSiteId = B.intSiteId,
 					dblInventoryReading = B.dblInventoryReading,
+					dtmInventoryReadingDateTime = B.dtmInventoryReadingDateTime,
 					ysnManual = B.ysnManual
 			,dtmdate = CONVERT(VARCHAR(10), B.dtmDateTime, 111)
 			,dtmHour = DATEPART(HOUR, B.dtmDateTime)
@@ -52,6 +53,7 @@ BEGIN
 			,intDeviceId
 			,intSiteId
 			,dblInventoryReading
+			,dtmInventoryReadingDateTime
 			,ysnManual
 	FROM CTE 
 	WHERE RowNumber = 1
