@@ -158,16 +158,16 @@ DECLARE
                   ,intCompanySegmentOverrideId  
                   )  
                   SELECT   
-                    [strTransactionId]  
+                   [strTransactionId]  
                   ,[intTransactionId]  
                   ,[intAccountId]  
                   ,[strDescription]  
                   ,[dtmTransactionDate]  
-                  ,[dblCredit]  
                   ,[dblDebit]
+                  ,[dblCredit]  
                   ,[dblExchangeRate] 
-                  ,[dblDebitForeign]
                   ,[dblCreditForeign] 
+                  ,[dblDebitForeign]
                   ,[dtmDate]
                   ,[ysnIsUnposted]  
                   ,[intConcurrencyId]   
@@ -491,54 +491,60 @@ DECLARE
  END  
  ELSE  
  BEGIN  
-  INSERT INTO @RevalTable(  
-   [strTransactionId]  
-   ,[intTransactionId]  
-   ,[intAccountId]
-   ,[strDescription]  
-   ,[dtmTransactionDate]  
-   ,[dblDebit]  
-   ,[dblCredit]  
-   ,[dtmDate]  
-   ,[ysnIsUnposted]  
-   ,[intConcurrencyId]   
-   ,[intCurrencyId]  
-   ,[intUserId]  
-   ,[intEntityId]     
-   ,[dtmDateEntered]  
-   ,[strBatchId]  
-   ,[strCode]     
-   ,[strJournalLineDescription]  
-   ,[intJournalLineNo]  
-   ,[strTransactionType]  
-   ,[strTransactionForm]  
-   ,strModuleName  
-   )     
-  SELECT   
-   [strTransactionId]    
-   ,[intTransactionId]    
-   ,[intAccountId]
-   ,[strDescription]  
-   ,[dtmTransactionDate]  
-   ,[dblCredit]   
-   ,[dblDebit]      
-   ,[dtmDate]      
-   ,[ysnIsUnposted] = 1  
-   ,[intConcurrencyId]    
-   ,[intCurrencyId]    
-   ,[intUserId]     
-   ,[intEntityId]     
-   ,[dtmDateEntered]    
-   ,[strBatchId] = @strPostBatchId  
-   ,[strCode]      
-   ,[strJournalLineDescription]   
-   ,[intJournalLineNo]    
-   ,[strTransactionType]   
-   ,[strTransactionForm]  
-   ,strModuleName  
-  FROM tblGLDetail A   
-  WHERE strTransactionId = @strConsolidationNumber  
-  AND ysnIsUnposted = 0  
+        INSERT INTO @RevalTable(  
+        [strTransactionId]  
+        ,[intTransactionId]  
+        ,[intAccountId]
+        ,[strDescription]  
+        ,[dtmTransactionDate]  
+        ,[dblDebit]  
+        ,[dblCredit]
+        ,[dblExchangeRate] 
+        ,[dblDebitForeign]
+        ,[dblCreditForeign] 
+        ,[dtmDate]  
+        ,[ysnIsUnposted]  
+        ,[intConcurrencyId]   
+        ,[intCurrencyId]  
+        ,[intUserId]  
+        ,[intEntityId]     
+        ,[dtmDateEntered]  
+        ,[strBatchId]  
+        ,[strCode]     
+        ,[strJournalLineDescription]  
+        ,[intJournalLineNo]  
+        ,[strTransactionType]  
+        ,[strTransactionForm]  
+        ,strModuleName  
+        )     
+        SELECT   
+        [strTransactionId]    
+        ,[intTransactionId]    
+        ,[intAccountId]
+        ,[strDescription]  
+        ,[dtmTransactionDate]  
+        ,[dblCredit]   
+        ,[dblDebit]
+        ,[dblExchangeRate] 
+        ,[dblCreditForeign] 
+        ,[dblDebitForeign]
+        ,[dtmDate]      
+        ,[ysnIsUnposted] = 1  
+        ,[intConcurrencyId]    
+        ,[intCurrencyId]    
+        ,[intUserId]     
+        ,[intEntityId]     
+        ,[dtmDateEntered]    
+        ,[strBatchId] = @strPostBatchId  
+        ,[strCode]      
+        ,[strJournalLineDescription]   
+        ,[intJournalLineNo]    
+        ,[strTransactionType]   
+        ,[strTransactionForm]  
+        ,strModuleName  
+        FROM tblGLDetail A   
+        WHERE strTransactionId = @strConsolidationNumber  
+        AND ysnIsUnposted = 0  
   
  END  
   IF @ysnRecap = 0   

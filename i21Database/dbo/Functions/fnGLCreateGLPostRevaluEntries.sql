@@ -53,7 +53,7 @@ AS RETURN(
                     SELECT   
                         [strTransactionId]    
                         ,[intTransactionId]    
-                        ,[strDescription]    
+                        ,[strDescription]= 'Revalue GL '  + @strPeriod 
                         ,[dtmTransactionDate]   
                         ,[dblDebit]   
                         ,[dblCredit]
@@ -86,7 +86,7 @@ AS RETURN(
                     SELECT   
                         [strTransactionId]    
                         ,[intTransactionId]    
-                        ,[strDescription]    
+                        ,[strDescription] = 'Offset Revalue GL '  + @strPeriod      
                         ,[dtmTransactionDate]   
                         ,[dblDebit]    = dblCredit      
                         ,[dblCredit]   = dblDebit  
