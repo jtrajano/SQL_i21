@@ -11500,6 +11500,7 @@
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
     <Build Include="dbo\Functions\fnGLCheckScale.sql" />
+    <Build Include="dbo\Functions\fnGLCreateGLPostRevaluEntries.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
