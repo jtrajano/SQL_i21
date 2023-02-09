@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRLoadProcessTransportLoad]
 	 @intLoadHeaderId AS INT	 
 	 , @ysnPostOrUnPost AS BIT
+	 , @intUserId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -43,6 +44,26 @@ BEGIN TRY
 		JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 		JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId
 	WHERE DH.intLoadHeaderId = @intLoadHeaderId AND ISNULL(intLoadDetailId, 0) != 0
+
+	SELECT DISTINCT LGD.intDispatchOrderId
+	INTO #tmpDispatchOrders
+	FROM tblTRLoadDistributionDetail TRD
+	JOIN tblLGDispatchOrderDetail LGD ON LGD.intDispatchOrderDetailId = TRD.intDispatchOrderDetailId
+	JOIN tblTRLoadDistributionHeader TRH ON TRH.intLoadDistributionHeaderId = TRD.intLoadDistributionHeaderId
+	WHERE TRH.intLoadHeaderId = @intLoadHeaderId
+
+	DECLARE @intDispatchOrderId INT
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDispatchOrders)
+	BEGIN
+		SELECT TOP 1 @intDispatchOrderId = intDispatchOrderId FROM #tmpDispatchOrders
+
+		EXEC uspLGDispatchUpdateOrders @intDispatchOrderId, @intUserId
+		
+		DELETE FROM #tmpDispatchOrders WHERE intDispatchOrderId = @intDispatchOrderId
+	END
+
+	DROP TABLE #tmpDispatchOrders
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @LoadTable)
 	BEGIN
