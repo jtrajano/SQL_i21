@@ -1534,6 +1534,7 @@
     <Build Include="dbo\Stored Procedures\uspIPDeleteStageLog_EK.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareDropshipInTransit.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDropshipInTransit.sql" />
+    <Build Include="dbo\Views\vyuCTGetQualityCodes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
