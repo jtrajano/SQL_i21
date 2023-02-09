@@ -106,6 +106,7 @@ BEGIN
 			+ ISNULL(@dblDeferredAmt10, 0))
 
 		DECLARE @PaymentSchedule PaymentSchedule
+		DECLARE @PaymentScheduleDetail PaymentSchedule
 						
 		INSERT INTO @PaymentSchedule ([intBillId],
 			[intTermsId],
@@ -126,7 +127,7 @@ BEGIN
 
 		IF(ISNULL(@dblDeferredAmt1, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -146,7 +147,7 @@ BEGIN
 
 		IF(ISNULL(@dblDeferredAmt2, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -166,7 +167,7 @@ BEGIN
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -186,7 +187,7 @@ BEGIN
 			
 		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 AND ISNULL(@dblDeferredAmt4, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -207,7 +208,7 @@ BEGIN
 		IF(ISNULL(@dblDeferredAmt2, 0) <> 0 AND ISNULL(@dblDeferredAmt3, 0) <> 0 
 			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -229,7 +230,7 @@ BEGIN
 			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
 			AND ISNULL(@dblDeferredAmt6, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -251,7 +252,7 @@ BEGIN
 			AND ISNULL(@dblDeferredAmt4, 0) <> 0 AND ISNULL(@dblDeferredAmt5, 0) <> 0 
 			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -274,7 +275,7 @@ BEGIN
 			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0
 			AND ISNULL(@dblDeferredAmt8, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -297,7 +298,7 @@ BEGIN
 			AND ISNULL(@dblDeferredAmt6, 0) <> 0 AND ISNULL(@dblDeferredAmt7, 0) <> 0
 			AND ISNULL(@dblDeferredAmt8, 0) <> 0 AND ISNULL(@dblDeferredAmt9, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -321,7 +322,7 @@ BEGIN
 			AND ISNULL(@dblDeferredAmt8, 0) <> 0 AND ISNULL(@dblDeferredAmt9, 0) <> 0
 			AND ISNULL(@dblDeferredAmt10, 0) <> 0)
 		BEGIN
-			INSERT INTO @PaymentSchedule ([intBillId],
+			INSERT INTO @PaymentScheduleDetail ([intBillId],
 				[intTermsId],
 				[dtmDueDate],
 				[dblPayment],
@@ -338,6 +339,28 @@ BEGIN
 				dblDiscount = 0,
 				strPaymentScheduleNumber = ISNULL(@strDeferredInvoiceNo10, @strInvoiceNo)
 		END
+
+		INSERT INTO @PaymentSchedule ([intBillId],
+			[intTermsId],
+			[dtmDueDate],
+			[dblPayment],
+			[ysnPaid],
+			[ysnScheduleDiscountOverride],
+			[dblDiscount],
+			strPaymentScheduleNumber)
+		SELECT intBillId
+			, intTermsId
+			, dtmDueDate
+			, dblPayment = SUM(dblPayment)
+			, 0
+			, 0
+			, 0
+			, strPaymentScheduleNumber
+		FROM @PaymentScheduleDetail
+		GROUP BY intBillId
+			, intTermsId
+			, dtmDueDate
+			, strPaymentScheduleNumber
 
 		IF EXISTS(SELECT TOP 1 1 FROM @PaymentSchedule)
 		BEGIN
