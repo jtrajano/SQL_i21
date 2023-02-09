@@ -113,6 +113,15 @@ FROM (
 							THEN ISNULL(PLD.dblLotPickedQty, 0)
 							ELSE ISNULL(CD.dblAllocatedQty, 0) END
 							+ ISNULL(ICL.dblQty, 0)
+		
+		,strCropYear = NULL
+		,strCertificate = NULL
+		-- Item Quality Segmentation
+		,I.strProductType
+		,I.strRegion
+		,I.strSeason
+		,I.strClass
+		,I.strProductLine
 	FROM vyuLGInboundShipmentView Shipment
 		LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -139,6 +148,7 @@ FROM (
             WHERE S.intContractDetailId = Shipment.intContractDetailId AND S.intTypeId = 1) S
 		LEFT JOIN tblAPBillDetail BD ON BD.intLoadDetailId = Shipment.intLoadDetailId
 		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		LEFT JOIN vyuICGetCompactItem I ON I.intItemId = Shipment.intItemId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
 	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice WHERE intLoadId IS NOT NULL)
@@ -230,6 +240,15 @@ FROM (
 		,LWC.strID3
 
 		,dblBalToPick = ISNULL(PLD.dblLotPickedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
+
+		,strCropYear = CY.strCropYear
+		,strCertificate = IRIL.strCertificate
+		-- Item Quality Segmentation
+		,I.strProductType
+		,I.strRegion
+		,I.strSeason
+		,I.strClass
+		,I.strProductLine
 	FROM vyuLGPickOpenInventoryLots Spot
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = Spot.intLotId
 		LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = Spot.intLotId
@@ -246,6 +265,7 @@ FROM (
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = PLD.intLotId AND ICL.intWarrantStatus = 1
 		OUTER APPLY 
 			(SELECT TOP 1
@@ -261,6 +281,8 @@ FROM (
 					WHERE PLD2.intType = 1 AND PLD1.intLotId = Spot.intLotId) HP
 		LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		LEFT JOIN vyuICGetCompactItem I ON I.intItemId = Spot.intItemId
+		LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
 	WHERE Spot.dblQty > 0.0
 
 	UNION ALL
@@ -350,6 +372,15 @@ FROM (
 		,LWC.strID2
 		,LWC.strID3
 		,dblBalToPick = CAST(0 AS NUMERIC(18, 6))
+
+		,strCropYear = NULL
+		,strCertificate = NULL
+
+		,CI.strProductType
+		,CI.strRegion
+		,CI.strSeason
+		,CI.strClass
+		,CI.strProductLine
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -387,6 +418,7 @@ FROM (
 		LEFT JOIN tblEMEntity C ON C.intEntityId = LD.intCustomerEntityId
 		LEFT JOIN tblARInvoiceDetail ID ON SCD.intContractDetailId = ID.intContractDetailId AND LD.intLoadDetailId = ID.intLoadDetailId
 		LEFT JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId
+		LEFT JOIN vyuICGetCompactItem CI ON CI.intItemId = I.intItemId
 	WHERE L.intPurchaseSale = 3 AND L.ysnPosted = 1
 		AND IV.strInvoiceNumber IS NULL
 		AND LD.intPickLotDetailId IS NULL

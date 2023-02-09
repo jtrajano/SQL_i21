@@ -99,6 +99,7 @@ FROM (
 							END
 		,[dblPricedLots] =  CASE WHEN CD.intPricingTypeId IN(1,6) THEN ISNULL(CD.dblNoOfLots, 0) ELSE PF.dblLotsFixed END
 		,[dblUnpricedLots] = CASE WHEN CD.intPricingTypeId IN(1,6) THEN NULL ELSE ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) END
+		,[strCertificates] = CC.strCertificates
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -145,5 +146,6 @@ FROM (
 	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
 	OUTER APPLY dbo.fnCTGetFinancialStatus(CD.intContractDetailId) SFS
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) SSS
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(CD.intContractDetailId) CC
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
 ) tbl

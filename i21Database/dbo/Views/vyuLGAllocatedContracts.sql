@@ -142,7 +142,15 @@ SELECT
 		CASE WHEN (ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty) > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
 	,dblBalanceToDeliver = dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty) - ISNULL(LSB.dblBatchQuantity, 0)
-	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END COLLATE Latin1_General_CI_AS 
+	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END COLLATE Latin1_General_CI_AS
+
+	-- Certificates
+	,strPCertificates = PCC.strCertificates
+	,strSCertificates = SCC.strCertificates
+
+	-- Crop Year
+	,strPCropYear = PCY.strCropYear
+	,strSCropYear = SCY.strCropYear
 	
 	--Load Shipment
 	,strLoadNumber = LS.strLoadNumber
@@ -227,6 +235,12 @@ LEFT JOIN (
 ) ON SPID.intLoadDetailId = SLSD.intLoadDetailId
 LEFT JOIN ( tblARInvoiceDetail SDID INNER JOIN tblARInvoice SDIH ON SDIH.intInvoiceId = SDID.intInvoiceId AND SDIH.ysnFromProvisional = 0) ON SDID.intLoadDetailId = SLSD.intLoadDetailId
 OUTER APPLY dbo.fnCTGetFinancialStatus(SCT.intContractDetailId) SFS
+-- Crop Year
+LEFT JOIN tblCTCropYear PCY ON PCY.intCropYearId = PCH.intCropYearId
+LEFT JOIN tblCTCropYear SCY ON SCY.intCropYearId = SCH.intCropYearId
+-- Certificates
+OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(PCT.intContractDetailId) PCC
+OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(SCT.intContractDetailId) SCC
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
 LEFT JOIN tblCTPriceFixation PFI ON PFI.intContractDetailId = PCT.intContractDetailId

@@ -143,7 +143,7 @@ FROM (
 	   ,intDefaultUOMId = UM.intUnitMeasureId
 	   ,strDefaultUOM = UM.strUnitMeasure
 	   ,intDefaultItemUOMId = IU.intItemUOMId
-	   ,strCropYear = '' COLLATE Latin1_General_CI_AS 
+	   ,strCropYear = CY.strCropYear --'' COLLATE Latin1_General_CI_AS 
 	   ,strProducer = '' COLLATE Latin1_General_CI_AS
 	   ,strCertification = '' COLLATE Latin1_General_CI_AS
 	   ,strCertificationId = '' COLLATE Latin1_General_CI_AS
@@ -163,6 +163,7 @@ FROM (
 	   ,WS.strWarrantStatus
 	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - ISNULL(PL.dblLotPickedQty, 0)
 	   ,strMarks = Lot.strMarkings
+	   ,strCertificate = ReceiptLot.strCertificate
 	FROM tblICLot Lot
 		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
 		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
@@ -170,6 +171,7 @@ FROM (
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
+		LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = ReceiptLot.intSeasonCropYear
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CTDetail.intContractDetailId) AD
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId

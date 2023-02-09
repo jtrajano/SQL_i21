@@ -65,6 +65,8 @@ BEGIN
 		,strPriceUOM = PUM.strUnitMeasure
 		,ysnSubCurrency = PCU.ysnSubCurrency
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
+		,strCertificate = PCC.strCertificates
+		,strSCertificate = SCC.strCertificates
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -112,4 +114,6 @@ BEGIN
 																								THEN ISNULL(CA.intCountryID, 0)
 																							ELSE ICI.intCountryId
 																							END)
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(PDetail.intContractDetailId) PCC
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(SDetail.intContractDetailId) SCC
 END
