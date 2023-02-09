@@ -122,7 +122,7 @@ BEGIN
     JOIN  tblGLAccount GL ON G.intAccountId = GL.intAccountId
     WHERE GL.intAccountId <> @intAccountId
     GROUP BY GL.intAccountId, strAccountId, strJournalLineDescription
-    IF @strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Transfer Fees' )
+    IF @strJournalLineDescription = 'Bank Account Entries' 
     BEGIN
         SET @newStrAccountId =''
         SELECT @newStrAccountId = dbo.fnGLGetOverrideAccountByAccount( @intAccountId,@intAccountIdLoop, @ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)
@@ -140,7 +140,7 @@ BEGIN
             SELECT TOP 1 @newAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @newStrAccountId
             UPDATE A set intAccountId = @newAccountId from #tmpGLDetail A 
             WHERE A.intAccountId = @intAccountIdLoop
-            AND strJournalLineDescription NOT IN ( 'Bank Account Entries','Bank Transfer Fees' )
+            AND strJournalLineDescription = 'Bank Account Entries'
         END
     END
     DELETE FROM @GLEntries WHERE intAccountId = @intAccountIdLoop
@@ -220,7 +220,7 @@ BEGIN
 WHILE EXISTS (SELECT 1 FROM @GLEntries)
 BEGIN
     SELECT TOP 1 @intAccountId = intAccountId , @strJournalLineDescription = strJournalLineDescription FROM @GLEntries
-    IF @strJournalLineDescription NOT IN ('Bank Transfer Fees', 'Bank Account Entries')
+    IF @strJournalLineDescription = 'Bank Account Entries'
     BEGIN
         SELECT @strAccountId2 = dbo.fnGLGetOverrideAccountBySegment(@intAccountId,NULL,@intLOBSegmentIdFromContract,NULL)
         IF @strAccountId2 IS NULL OR LEN(@strAccountId2) = 0
@@ -232,7 +232,7 @@ BEGIN
 
         UPDATE A SET intAccountId = @intAccountId1  FROM #tmpGLDetail A
         WHERE intAccountId = @intAccountId
-        AND strJournalLineDescription NOT IN('Bank Transfer Fees', 'Bank Account Entries')
+        AND strJournalLineDescription = 'Bank Account Entries'
     END
 
     DELETE FROM @GLEntries WHERE @intAccountId = intAccountId
