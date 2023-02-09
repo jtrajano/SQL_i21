@@ -379,7 +379,7 @@ BEGIN
 		, intSourceId)
 	SELECT strBatchId
 		, intActionId
-		, strAction = A.strActionIn 
+		, strAction = case when F.strTransactionReference = 'Scale' then replace(A.strActionIn, 'Inventory ', '') else A.strActionIn  end
 		, dtmTransactionDate
 		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), dtmTransactionDate) ELSE GETUTCDATE() END
 		, strTransactionType
