@@ -60,6 +60,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intPrevSalesOffsetAccountId]	INT NULL,
 	[ysnHasNewAccountPosted]		BIT DEFAULT (0) NOT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
+	[strTaxJurisdiction]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intAssetTaxJurisdictionId]		INT NULL,
 	[intFixedAssetJournalId] INT NULL,
 	[ysnOverrideLocation] BIT NULL,
