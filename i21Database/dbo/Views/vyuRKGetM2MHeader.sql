@@ -43,6 +43,7 @@ SELECT H.intM2MHeaderId
 	, ysnEvaluationByStorageUnit = ISNULL(companyConfig.ysnEvaluationByStorageUnit, CAST(0 AS BIT))
 	, ysnEnableMTMPoint = ISNULL(CTcompanyConfig.ysnEnableMTMPoint, CAST(0 AS BIT))
 	, ysnIncludeProductInformation = ISNULL(companyConfig.ysnIncludeProductInformation, CAST(0 AS BIT))
+	, ysnM2MFunctionalCurrency = CAST(CASE WHEN H.intCurrencyId <> SMcompanyConfig.intFunctionalCurrencyId THEN 1 ELSE 0 END AS BIT)
 FROM tblRKM2MHeader H
 LEFT JOIN tblICCommodity c ON c.intCommodityId = H.intCommodityId
 LEFT JOIN tblRKM2MType t ON t.intM2MTypeId = H.intM2MTypeId
@@ -70,3 +71,8 @@ OUTER APPLY (
 	  ysnEnableMTMPoint
 	FROM tblCTCompanyPreference
 ) CTcompanyConfig
+OUTER APPLY (
+	SELECT TOP 1 
+	  intFunctionalCurrencyId = intDefaultCurrencyId
+	FROM tblSMCompanyPreference
+) SMcompanyConfig
