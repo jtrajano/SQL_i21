@@ -30,19 +30,14 @@ FROM (
 		@strTransactionNo COLLATE Latin1_General_CI_AS AS strDestTransactionNo, 
 		@strTransactionType COLLATE Latin1_General_CI_AS AS strDestTransactionType,
 		@strModuleName COLLATE Latin1_General_CI_AS AS strDestModuleName
-) AS TransactionOrigin
-LEFT JOIN
-tblICTransactionNodes Nodes
-ON
-TransactionOrigin.intDestId = Nodes.intTransactionId
-AND
-TransactionOrigin.strDestTransactionNo = Nodes.strTransactionNo
-AND
-TransactionOrigin.strDestTransactionType = Nodes.strTransactionType
-AND
-TransactionOrigin.strDestModuleName = Nodes.strModuleName
+	) AS TransactionOrigin LEFT JOIN tblICTransactionNodes Nodes
+		ON TransactionOrigin.intDestId = Nodes.intTransactionId
+		AND TransactionOrigin.strDestTransactionNo = Nodes.strTransactionNo
+		AND TransactionOrigin.strDestTransactionType = Nodes.strTransactionType
+		AND TransactionOrigin.strDestModuleName = Nodes.strModuleName
 WHERE
-Nodes.intTransactionId IS NULL
+	Nodes.intTransactionId IS NULL
+	AND TransactionOrigin.intDestId IS NOT NULL 
 
 
 INSERT INTO tblICTransactionLinks(
@@ -63,25 +58,26 @@ FROM (
 		@strTransactionNo COLLATE Latin1_General_CI_AS AS strDestTransactionNo, 
 		@strModuleName COLLATE Latin1_General_CI_AS AS strDestModuleName, 
 		@strTransactionType COLLATE Latin1_General_CI_AS AS strDestTransactionType
-) AS TransactionOrigin
-OUTER APPLY (
-	SELECT TOP 1 nodes.guiTransactionGraphId
-	FROM tblICTransactionNodes nodes
-	WHERE nodes.strTransactionNo = TransactionOrigin.strDestTransactionNo
-) related
-WHERE NOT EXISTS(
-	SELECT TOP 1 1 FROM tblICTransactionLinks
-	WHERE intSrcId IS NULL AND
-	(
-		intDestId = @intTransactionId 
-		AND 
-		strDestTransactionNo = @strTransactionNo COLLATE Latin1_General_CI_AS
-		AND 
-		strDestTransactionType = @strTransactionType COLLATE Latin1_General_CI_AS
-		AND
-		strDestModuleName = @strModuleName COLLATE Latin1_General_CI_AS
+	) AS TransactionOrigin
+	OUTER APPLY (
+		SELECT TOP 1 nodes.guiTransactionGraphId
+		FROM tblICTransactionNodes nodes
+		WHERE nodes.strTransactionNo = TransactionOrigin.strDestTransactionNo
+	) related
+WHERE 
+	NOT EXISTS(
+		SELECT TOP 1 1 FROM tblICTransactionLinks
+		WHERE intSrcId IS NULL AND
+		(
+			intDestId = @intTransactionId 
+			AND 
+			strDestTransactionNo = @strTransactionNo COLLATE Latin1_General_CI_AS
+			AND 
+			strDestTransactionType = @strTransactionType COLLATE Latin1_General_CI_AS
+			AND
+			strDestModuleName = @strModuleName COLLATE Latin1_General_CI_AS
+		)
 	)
-)
 
 END
 
