@@ -36,6 +36,26 @@ BEGIN TRY
 		IF (@action = 'Added')
 		BEGIN
 			EXEC uspLGUpdateLoadDetails @intLoadDetailId, 1, @intLoadHeaderId, null, null
+
+			SELECT DISTINCT LGD.intDispatchOrderId
+			INTO #tmpDispatchOrders
+			FROM tblTRLoadDistributionDetail TRD
+			JOIN tblLGDispatchOrderDetail LGD ON LGD.intDispatchOrderDetailId = TRD.intDispatchOrderDetailId
+			JOIN tblTRLoadDistributionHeader TRH ON TRH.intLoadDistributionHeaderId = TRD.intLoadDistributionHeaderId
+			WHERE TRH.intLoadHeaderId = @intLoadHeaderId
+
+			DECLARE @intDispatchOrderId INT
+
+			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDispatchOrders)
+			BEGIN
+				SELECT TOP 1 @intDispatchOrderId = intDispatchOrderId FROM #tmpDispatchOrders
+
+				EXEC uspLGDispatchUpdateOrders @intDispatchOrderId, @intUserId
+		
+				DELETE FROM #tmpDispatchOrders WHERE intDispatchOrderId = @intDispatchOrderId
+			END
+
+			DROP TABLE #tmpDispatchOrders
 		END
 		
 		SELECT @intPContractDetailId = intPContractDetailId
