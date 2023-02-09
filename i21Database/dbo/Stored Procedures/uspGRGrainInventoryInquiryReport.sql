@@ -769,7 +769,7 @@ BEGIN
 			SELECT strTransactionNumber,strStorageTypeCode
 				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
 			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
-			WHERE strTransactionType <> 'Storage Settlement'
+			WHERE strTransactionType NOT IN ('Storage Settlement','Inventory Shipment')
 			GROUP BY strTransactionNumber,strStorageTypeCode
 		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
 		GROUP BY
@@ -792,7 +792,7 @@ BEGIN
 			,strLocationName
 			,strCommodityCode	
 		FROM #CustomerOwnershipALL AA
-		WHERE strTransactionType = 'Storage Settlement'
+		WHERE strTransactionType IN ('Storage Settlement','Inventory Shipment')
 		GROUP BY
 			dtmDate
 			,strDistributionType
