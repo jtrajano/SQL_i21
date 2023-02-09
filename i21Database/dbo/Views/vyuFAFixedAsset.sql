@@ -99,7 +99,8 @@ NewGLDepreciation.strAccountId strNewDepreciationAccountId,
 NewGLAccumulation.strAccountId strNewAccumulatedAccountId,        
 NewGLGainLoss.strAccountId strNewGainLossAccountId,
 NewGLARAccount.strAccountId strNewSalesOffsetAccountId,
-FA.intConcurrencyId  
+FA.intConcurrencyId,
+FA.strTaxJurisdiction 
 FROM tblFAFixedAsset FA       
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId        
 LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccountId        
