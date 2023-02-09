@@ -1580,6 +1580,7 @@
     <Build Include="dbo\Tables\tblTMSiteDeviceTankMonitor.sql" />
     <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
+      <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11573,6 +11574,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetOverrideGLAccount.sql" />
+     <Build Include="dbo\Functions\fnGLGetIntraCompanyGLEntries.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
