@@ -153,21 +153,16 @@ BEGIN
 		,@ysnPost
 END
 
-/* Inventory Shipment Sales Order Type. */
-IF (SELECT intOrderType FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intTransactionId) = 2
-	/* Create / Update Sales Order Pick List based on Inventory Shipment */
+/* Create / Update Sales Order Pick List based on Inventory Shipment */
+IF (@ysnPost = 1)
 	BEGIN
-		IF (@ysnPost = 1)
-			BEGIN
-				EXEC uspMFCreateUpdatePickListFromInventoryShipment @intInventoryShipmentId	 = @intTransactionId
-																  , @intEntityUserSecurityId = @intEntityUserSecurityId
-			END
-		ELSE
-			BEGIN
-				EXEC uspMFReducePickListFromInventoryShipment @intInventoryShipmentId	= @intTransactionId
-															, @intEntityUserSecurityId	= @intEntityUserSecurityId
-		END
+		EXEC uspMFCreateUpdatePickListFromInventoryShipment @intInventoryShipmentId	 = @intTransactionId
+														  , @intEntityUserSecurityId = @intEntityUserSecurityId
 	END
-
+ELSE
+	BEGIN
+		EXEC uspMFReducePickListFromInventoryShipment @intInventoryShipmentId	= @intTransactionId
+													, @intEntityUserSecurityId	= @intEntityUserSecurityId
+	END
 
 _Exit: 
