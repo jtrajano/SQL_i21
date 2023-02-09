@@ -11,8 +11,10 @@ BEGIN
         DECLARE @ACCOUNT_CATEGORY_InventoryInTransit NVARCHAR(50) = 'General'
         DECLARE @ACCOUNT_CATEGORY_InventoryInTransitDirect NVARCHAR(50) = 'In-Transit Direct'
         DECLARE @ACCOUNT_CATEGORY_AP_Clearing NVARCHAR(50) = 'AP Clearing'
+        DECLARE @ACCOUNT_CATEGORY_Charge_Income NVARCHAR(50) = 'Other Charge Income'
+        DECLARE @ACCOUNT_CATEGORY_Charge_Expense NVARCHAR(50) = 'Other Charge Expense'
         DECLARE @GLDescription nvarchar(150) 
-
+        --Other Charge Income
         DECLARE @intTicketProcessingLocation INT
         DECLARE @intItemLocationId INT
         DECLARE @intAPClearingAccountId INT
@@ -27,7 +29,11 @@ BEGIN
         DECLARE @strBatchId NVARCHAR(50)
         DECLARE @CurrentDate DATETIME 
         DECLARE @dblTicketFees NUMERIC(18,6)
+		DECLARE @intTicketFeeIncomeAccountId INT
+		DECLARE @intTicketFeeExpenseAccountId INT
         DECLARE @dblTicketFreight NUMERIC(18,6)
+		DECLARE @intTicketFreightIncomeAccountId INT
+		DECLARE @intTicketFreightExpenseAccountId INT
         DECLARE @intTicketStorageScheduleTypeId INT
 
         DECLARE @ticketDistributionAllocation ScaleManualDistributionAllocation
@@ -69,7 +75,7 @@ BEGIN
 
             --Get the Accounts
             SELECT 
-                @intAPClearingAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_AP_Clearing) 
+                @intAPClearingAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_AP_Clearing)                 
                 ,@intInventoryInTransitAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) 
                 ,@intInventoryInTransitDirectAccountId = dbo.fnGetItemGLAccount(@intTicketItemId, @intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransitDirect) 
             
@@ -512,6 +518,8 @@ BEGIN
                                                 WHEN B.intAllocationType = 3 THEN 'Storage'
                                                 WHEN B.intAllocationType = 4 THEN 'Spot'
                                             END
+						,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(GR.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+						,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(GR.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                     INTO #tmpComputedTicketInfoDiscount
                     FROM tblSCTicket A
                     JOIN @ticketDistributionAllocation B
@@ -520,6 +528,9 @@ BEGIN
                         ON QM.intTicketId = A.intTicketId
                     LEFT JOIN tblGRDiscountScheduleCode GR 
                         ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+					
+
+						
               
                     WHERE A.intTicketId = @intTicketId
                         AND QM.strSourceType = 'Scale'
@@ -565,7 +576,7 @@ BEGIN
                 SELECT	
                     dtmDate						= A.dtmTicketDateTime
                     ,strBatchId					= @strBatchId
-                    ,intAccountId				= @intInventoryInTransitAccountId
+                    ,intAccountId				= CASE WHEN B.dblAmount < 0 THEN  B.intChargeExpenseAccountId ELSE B.intChargeIncomeAccountId END
                     ,dblDebit					= CASE WHEN B.dblAmount < 0 THEN B.dblAmount * -1 ELSE 0 END
                     ,dblCredit					= CASE WHEN B.dblAmount > 0 THEN B.dblAmount ELSE 0 END
                     ,dblDebitUnit				= 0
@@ -601,7 +612,7 @@ BEGIN
                     SELECT TOP 1
                         strDescription
                     FROM tblGLAccount
-                    WHERE intAccountId = @intInventoryInTransitAccountId
+                    WHERE intAccountId = CASE WHEN B.dblAmount < 0 THEN  B.intChargeExpenseAccountId ELSE B.intChargeIncomeAccountId END
                 ) GLAccount
                 WHERE A.intTicketId = @intTicketId
 
@@ -692,6 +703,8 @@ BEGIN
                 SELECT
                     @dblTicketFees = A.dblTicketFees
                     ,@_strCostMethod = IC.strCostMethod
+					,@intTicketFeeIncomeAccountId =  dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+					,@intTicketFeeExpenseAccountId =  dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                 FROM tblSCTicket A
                 INNER JOIN tblSCScaleSetup B
                     ON A.intScaleSetupId = B.intScaleSetupId
@@ -709,7 +722,9 @@ BEGIN
                     BEGIN
                         SELECT	
                             dblAmount = ROUND((@dblTicketFees * B.dblQuantity),2)
-                            ,A.intTicketId  
+                            ,A.intTicketId 
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFee
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -763,7 +778,7 @@ BEGIN
                             SELECT	
                                 dtmDate						= A.dtmTicketDateTime
                                 ,strBatchId					= @strBatchId
-                                ,intAccountId				= @intInventoryInTransitAccountId
+                                ,intAccountId				= B.intChargeIncomeAccountId
                                 ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(B.dblAmount,0),2) END
                                 ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END   
                                 ,dblDebitUnit				= 0
@@ -799,7 +814,7 @@ BEGIN
                                 SELECT TOP 1
                                     strDescription
                                 FROM tblGLAccount
-                                WHERE intAccountId = @intInventoryInTransitAccountId
+                                WHERE intAccountId = B.intChargeIncomeAccountId
                             ) GLAccount
                             WHERE A.intTicketId = @intTicketId
 
@@ -924,7 +939,7 @@ BEGIN
                     SELECT	
                         dtmDate						= A.dtmTicketDateTime
                         ,strBatchId					= @strBatchId
-                        ,intAccountId				= @intInventoryInTransitAccountId
+                        ,intAccountId				= @intTicketFeeIncomeAccountId
                         ,dblDebit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN 0 ELSE ROUND(ISNULL(@dblTicketFees,0),2) END
                         ,dblCredit					= CASE WHEN A.ysnCusVenPaysFees = 1 THEN ROUND(ISNULL(@dblTicketFees,0),2) ELSE 0 END
                         ,dblDebitUnit				= 0
@@ -958,7 +973,7 @@ BEGIN
                         SELECT TOP 1
                             strDescription
                         FROM tblGLAccount
-                        WHERE intAccountId = @intInventoryInTransitAccountId
+                        WHERE intAccountId = @intTicketFeeIncomeAccountId
                     ) GLAccount
                     WHERE A.intTicketId = @intTicketId
                         AND A.dblTicketFees > 0
@@ -1053,6 +1068,8 @@ BEGIN
                 SELECT
                     @dblTicketFreight = A.dblFreightRate
                     ,@_strCostMethod = IC.strCostMethod
+					,@intTicketFreightIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+					,@intTicketFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                 FROM tblSCTicket A
                 INNER JOIN tblSCScaleSetup B
                     ON A.intScaleSetupId = B.intScaleSetupId
@@ -1071,6 +1088,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((LDCTC.dblRate * B.dblQuantity),2)
                             ,A.intTicketId
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFreightLoad1
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -1131,7 +1150,7 @@ BEGIN
                         SELECT	
                             dtmDate						= A.dtmTicketDateTime
                             ,strBatchId					= @strBatchId
-                            ,intAccountId				= @intInventoryInTransitAccountId
+                            ,intAccountId				= B.intChargeIncomeAccountId
                             ,dblDebit					= ROUND(ISNULL(B.dblAmount,0),2)
                             ,dblCredit					= 0
                             ,dblDebitUnit				= 0
@@ -1167,7 +1186,7 @@ BEGIN
                             SELECT TOP 1
                                 strDescription
                             FROM tblGLAccount
-                            WHERE intAccountId = @intInventoryInTransitAccountId
+                            WHERE intAccountId = B.intChargeIncomeAccountId
                         ) GLAccount
                         WHERE A.intTicketId = @intTicketId
 
@@ -1256,6 +1275,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((LDCTC.dblRate * B.dblQuantity),2)
                             ,A.intTicketId
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFreightLoad2
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -1313,7 +1334,7 @@ BEGIN
                         SELECT	
                             dtmDate						= A.dtmTicketDateTime
                             ,strBatchId					= @strBatchId
-                            ,intAccountId				= @intInventoryInTransitAccountId
+                            ,intAccountId				= B.intChargeIncomeAccountId
                             ,dblDebit					= ROUND(ISNULL(B.dblAmount,0),2)
                             ,dblCredit					= 0
                             ,dblDebitUnit				= 0
@@ -1349,7 +1370,7 @@ BEGIN
                             SELECT TOP 1
                                 strDescription
                             FROM tblGLAccount
-                            WHERE intAccountId = @intInventoryInTransitAccountId
+                            WHERE intAccountId = B.intChargeIncomeAccountId
                         ) GLAccount
                         WHERE A.intTicketId = @intTicketId
 
@@ -1441,6 +1462,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((@dblTicketFreight * B.dblQuantity),2)
                             ,A.intTicketId  
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFreight
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -1492,7 +1515,7 @@ BEGIN
                         SELECT	
                             dtmDate						= A.dtmTicketDateTime
                             ,strBatchId					= @strBatchId
-                            ,intAccountId				= @intInventoryInTransitAccountId
+                            ,intAccountId				= B.intChargeIncomeAccountId
                             ,dblDebit					= CASE WHEN ysnFarmerPaysFreight <> 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END
                             ,dblCredit					= CASE WHEN ysnFarmerPaysFreight = 1 THEN ROUND(ISNULL(B.dblAmount,0),2) ELSE 0 END
                             ,dblDebitUnit				= 0
@@ -1528,7 +1551,7 @@ BEGIN
                             SELECT TOP 1
                                 strDescription
                             FROM tblGLAccount
-                            WHERE intAccountId = @intInventoryInTransitAccountId
+                            WHERE intAccountId = B.intChargeIncomeAccountId
                         ) GLAccount
                         WHERE A.intTicketId = @intTicketId
 
@@ -1652,7 +1675,7 @@ BEGIN
                         SELECT	
                             dtmDate						= A.dtmTicketDateTime
                             ,strBatchId					= @strBatchId
-                            ,intAccountId				= @intInventoryInTransitAccountId
+                            ,intAccountId				= @intTicketFreightIncomeAccountId
                             ,dblDebit					= CASE WHEN ysnFarmerPaysFreight <> 1 THEN ROUND(ISNULL(@dblTicketFreight,0),2) ELSE 0 END
                             ,dblCredit					= CASE WHEN ysnFarmerPaysFreight = 1 THEN ROUND(ISNULL(@dblTicketFreight,0),2) ELSE 0 END
                             ,dblDebitUnit				= 0
@@ -1686,7 +1709,7 @@ BEGIN
                             SELECT TOP 1
                                 strDescription
                             FROM tblGLAccount
-                            WHERE intAccountId = @intInventoryInTransitAccountId
+                            WHERE intAccountId = @intTicketFreightIncomeAccountId
                         ) GLAccount
                         WHERE A.intTicketId = @intTicketId
                             AND A.dblFreightRate <> 0
@@ -1778,6 +1801,8 @@ BEGIN
                 SELECT	
                     dblAmount = ROUND((CTDC.dblRate * B.dblQuantity),2)
                     ,A.intTicketId
+					,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(CTDC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+					,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(CTDC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                 INTO #tmpComputedTicketInfoContractCost
                 FROM tblSCTicket A
                 INNER JOIN @ticketDistributionAllocation B
@@ -1835,7 +1860,7 @@ BEGIN
                 SELECT	
                     dtmDate						= A.dtmTicketDateTime
                     ,strBatchId					= @strBatchId
-                    ,intAccountId				= @intInventoryInTransitAccountId
+                    ,intAccountId				= B.intChargeIncomeAccountId
                     ,dblDebit					= 0
                     ,dblCredit					= ROUND(ISNULL(B.dblAmount,0),2)
                     ,dblDebitUnit				= 0
@@ -1871,7 +1896,7 @@ BEGIN
                     SELECT TOP 1
                         strDescription
                     FROM tblGLAccount
-                    WHERE intAccountId = @intInventoryInTransitAccountId
+                    WHERE intAccountId = B.intChargeIncomeAccountId
                 ) GLAccount
                 WHERE A.intTicketId = @intTicketId
 
