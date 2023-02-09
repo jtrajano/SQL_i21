@@ -209,7 +209,8 @@ PRINT N'BEGIN - Lottery Book fix ending number'
 
 UPDATE tblSTLotteryBook
 SET tblSTLotteryBook.intStartingNumber = tbl_Update.intStartingNumber,
-tblSTLotteryBook.intEndingNumber = tbl_Update.intEndingNumber
+tblSTLotteryBook.intEndingNumber = tbl_Update.intEndingNumber,
+tblSTLotteryBook.intReceiptEndingNumber = tbl_Update.intReceiptEndingNumber
 FROM 
 (
 	SELECT 
