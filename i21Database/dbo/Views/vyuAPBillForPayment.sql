@@ -155,7 +155,7 @@ FROM (
 					AS BIT)
 		,voucher.dblPaymentTemp
 		,voucher.ysnInPayment
-		,voucher.ysnIsPaymentScheduled AS ysnInPaymentSched
+		,paySched.ysnInPayment AS ysnInPaymentSched
 		,paySched.strPaymentScheduleNumber
 		,voucher.intPayFromBankAccountId
 		,voucher.intPayToBankAccountId
