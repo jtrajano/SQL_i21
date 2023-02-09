@@ -77,26 +77,51 @@ AS (
 )
 DELETE FROM CTE WHERE RN > 1;
 
-INSERT INTO tblICTransactionNodes (guiTransactionGraphId, intTransactionId, strTransactionNo, strTransactionType, strModuleName)
-SELECT DISTINCT COALESCE(related.guiTransactionGraphId, @GraphId), intSrcId, strSrcTransactionNo, strSrcTransactionType, strSrcModuleName
+INSERT INTO tblICTransactionNodes (
+	guiTransactionGraphId
+	, intTransactionId
+	, strTransactionNo
+	, strTransactionType
+	, strModuleName
+)
+SELECT DISTINCT 
+	COALESCE(related.guiTransactionGraphId, @GraphId)
+	, intSrcId
+	, strSrcTransactionNo
+	, strSrcTransactionType
+	, strSrcModuleName
 FROM @TransactionLinks l
 OUTER APPLY (
 	SELECT TOP 1 nodes.guiTransactionGraphId
 	FROM tblICTransactionNodes nodes
 	WHERE nodes.strTransactionNo = l.strSrcTransactionNo
 ) related
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICTransactionNodes WHERE strTransactionNo = l.strSrcTransactionNo)
+WHERE 
+	NOT EXISTS(SELECT TOP 1 1 FROM tblICTransactionNodes WHERE strTransactionNo = l.strSrcTransactionNo)
+	AND intSrcId IS NOT NULL 
 
-UNION
-
-SELECT DISTINCT COALESCE(related.guiTransactionGraphId, @GraphId), intDestId, strDestTransactionNo, strDestTransactionType, strDestModuleName
+INSERT INTO tblICTransactionNodes (
+	guiTransactionGraphId
+	, intTransactionId
+	, strTransactionNo
+	, strTransactionType
+	, strModuleName
+)
+SELECT DISTINCT 
+	COALESCE(related.guiTransactionGraphId, @GraphId)
+	, intDestId
+	, strDestTransactionNo
+	, strDestTransactionType
+	, strDestModuleName
 FROM @TransactionLinks l
 OUTER APPLY (
 	SELECT TOP 1 nodes.guiTransactionGraphId
 	FROM tblICTransactionNodes nodes
 	WHERE nodes.strTransactionNo = l.strSrcTransactionNo
 ) related
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICTransactionNodes WHERE strTransactionNo = l.strDestTransactionNo)
+WHERE 
+	NOT EXISTS(SELECT TOP 1 1 FROM tblICTransactionNodes WHERE strTransactionNo = l.strDestTransactionNo)
+	AND intDestId IS NOT NULL 
 
 END
 
