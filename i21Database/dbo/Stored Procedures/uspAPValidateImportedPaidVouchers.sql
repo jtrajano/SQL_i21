@@ -177,7 +177,7 @@ OUTER APPLY	(
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
 			--AND ISNULL(forImport.dblTempDiscount, 0) = A.dblDiscount
 			AND forImport.dtmDate = A.dtmBillDate
-			AND forImport.intTransactionType = 3 AND forImport.strVendorOrderNumber = A.strVendorOrderNumber
+			AND forImport.intTransactionType = 3
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
