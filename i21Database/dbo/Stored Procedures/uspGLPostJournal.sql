@@ -271,6 +271,7 @@ ELSE
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
+			,[intCurrencyId]
 			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
@@ -307,6 +308,7 @@ ELSE
 									END 				
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
+			,[intCurrencyId]		= ISNULL(A.intCurrencyId, B.intCurrencyId)
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(ISNULL(A.dblDebitRate, A.dblCreditRate),1)
 			,[intUserId]			= 0
@@ -549,6 +551,7 @@ Post_Rollback:
 
 _insertIntra:
 		DECLARE @intTraGLEntries RecapTableType
+		BEGIN TRY
 		INSERT INTO @intTraGLEntries
 		(
 			[strTransactionId]
@@ -585,13 +588,13 @@ _insertIntra:
 			,[dblDebit]
 			,[dblCredit]
 			,[dtmDate]
-			,[ysnIsUnposted]
+			,[ysnIsUnposted]=0
 			,[intConcurrencyId]
 			,[intCurrencyId]
 			,[intUserId]
 			,[intEntityId]
-			,[dtmDateEntered]
-			,[strBatchId]
+			,[dtmDateEntered] = GETDATE()
+			,[strBatchId] = @strBatchId
 			,[strCode]
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
@@ -603,6 +606,15 @@ _insertIntra:
 
 		FROM
 		dbo.fnGLGetIntraCompanyGLEntries( @GLEntries,@ysnRecap, @ysnPost)
+		END TRY
+		BEGIN CATCH
+			DECLARE @ERROR NVARCHAR(800)
+			SELECT @ERROR  = ERROR_MESSAGE()
+			SELECT @ERROR = REPLACE(@ERROR, 'Conversion failed when converting the nvarchar value ', '')
+			SELECT @ERROR = REPLACE(@ERROR, 'to data type int.','')
+			RAISERROR( @ERROR , 16,1)
+			GOTO Post_Rollback
+		END CATCH
 
 		IF EXISTS(SELECT 1 FROM @intTraGLEntries WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 		BEGIN
@@ -617,7 +629,7 @@ _insertIntra:
 			[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
-			,[strDescription]
+			,[strDescription] 
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -637,13 +649,12 @@ _insertIntra:
 			,strModuleName
 			,strOverrideAccountError
 			,strNewAccountIdOverride
-
 		)
 		SELECT  
 			[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
-			,[strDescription]
+			,[strJournalLineDescription]
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
@@ -652,10 +663,10 @@ _insertIntra:
 			,[intConcurrencyId]
 			,[intCurrencyId]
 			,[intUserId]
-			,[intEntityId]
+			,@intEntityId
 			,[dtmDateEntered]
 			,[strBatchId]
-			,[strCode]
+			,'GJ'
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
 			,[strTransactionType]
@@ -663,7 +674,6 @@ _insertIntra:
 			,strModuleName
 			,strOverrideAccountError
 			,strNewAccountIdOverride
-
 		FROM @intTraGLEntries
 
 		-- IF EXISTS(SELECT 1 FROM @intTraGLEntries WHERE ISNULL(strOverrideAccountError,'') <> '' )          
