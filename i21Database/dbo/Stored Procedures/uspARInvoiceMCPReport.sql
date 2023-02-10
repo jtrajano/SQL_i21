@@ -16,9 +16,7 @@ BEGIN
     DROP TABLE #LOCATIONS
 END
 
-DECLARE @blbLogo 				VARBINARY (MAX)  = NULL
-      , @blbStretchedLogo 		VARBINARY (MAX)  = NULL	  
-	  , @ysnPrintInvoicePaymentDetail	BIT = 0
+DECLARE @ysnPrintInvoicePaymentDetail	BIT = 0
 	  , @strEmail				NVARCHAR(100) = NULL
 	  , @strPhone				NVARCHAR(100) = NULL
 	  , @strCompanyName			NVARCHAR(200) = NULL
@@ -26,23 +24,6 @@ DECLARE @blbLogo 				VARBINARY (MAX)  = NULL
 	  , @strBerryOilAddress		NVARCHAR(500) = NULL
 	  , @dtmDateNow				DATETIME = NULL
 
---LOGO
-SELECT TOP 1 @blbLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
-  AND A.strComment = 'Header'
-ORDER BY A.intAttachmentId DESC
-
---STRETCHED LOGO
-SELECT TOP 1 @blbStretchedLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
-  AND A.strComment = 'Stretched Header'
-ORDER BY A.intAttachmentId DESC
-
-SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 SET @dtmDateNow = GETDATE()
 
 --AR PREFERENCE
@@ -98,8 +79,14 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , intShipToLocationId		= INV.intShipToLocationId
 	 , strBillToLocationName	= EMBT.strEntityNo
 	 , strShipToLocationName	= EMST.strEntityNo
-	 , strBillToAddress			= ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(', ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(', ' + INV.strBillToCountry), '')
-	 , strShipToAddress			= CAST(ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(', ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(', ' + INV.strShipToCountry), '') AS NVARCHAR(MAX))
+	 , strBillToAddress			= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 9 - Berry Oil' 
+									   THEN ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(' ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(' ' + INV.strBillToCountry), '')
+	 							  	   ELSE ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(', ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(', ' + INV.strBillToCountry), '')
+								  END
+	 , strShipToAddress			= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 9 - Berry Oil'
+	 								   THEN CAST(ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(' ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(' ' + INV.strShipToCountry), '') AS NVARCHAR(MAX))
+									   ELSE CAST(ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(', ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(', ' + INV.strShipToCountry), '') AS NVARCHAR(MAX))
+								  END
 	 , strSource				= INV.strType
 	 , intTermId				= INV.intTermId
 	 , strTerm					= TERM.strTerm
@@ -127,7 +114,6 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' THEN ISNULL(INV.strComments, '') ELSE ISNULL(INV.strFooterComments, '') END
 	 , strItemComments          = CAST('' AS NVARCHAR(500))
 	 , strOrigin				= CAST(REPLACE(INV.strComments, 'Origin:', '') AS NVARCHAR(MAX))
-	 , blbLogo					= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
@@ -136,7 +122,6 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , dtmLoadedDate			= INV.dtmShipDate
 	 , dtmScaleDate				= INV.dtmPostDate
 	 , strCommodity				= CAST('' AS NVARCHAR(100))
-	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , blbSignature				= INV.blbSignature
 	 , strTicketType			= INV.strTransactionType
 	 , strLocationNumber		= L.strLocationNumber
@@ -145,7 +130,6 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , dtmCreated				= @dtmDateNow
 	 , strType					= INV.strType
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
-	 , strLogoType				= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -181,12 +165,6 @@ LEFT JOIN tblEMEntity EMST ON SHIPTO.intEntityId = EMST.intEntityId
 LEFT JOIN tblSMShipVia SHIPVIA WITH (NOLOCK) ON INV.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN tblSMPaymentMethod PAYMENTMETHOD ON INV.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
 LEFT JOIN tblSOSalesOrder SO ON INV.intSalesOrderId = SO.intSalesOrderId
-OUTER APPLY (
-	SELECT TOP 1 imgLogo
-	FROM tblSMLogoPreference
-	WHERE intCompanyLocationId = INV.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
-	ORDER BY ysnARInvoice DESC
-) SMLP
 
 --CUSTOMERS
 SELECT intEntityCustomerId	= C.intEntityId
@@ -334,7 +312,6 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , strComments
 	 , strItemComments
 	 , strOrigin
-	 , blbLogo
 	 , intEntityUserId
 	 , strRequestId
 	 , strInvoiceFormat
@@ -343,7 +320,6 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , dtmLoadedDate
 	 , dtmScaleDate
 	 , strCommodity
-	 , ysnStretchLogo
 	 , blbSignature
 	 , strTicketType
 	 , strLocationNumber
@@ -351,7 +327,6 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , strPaymentInfo
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
-	 , strLogoType
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -398,7 +373,6 @@ SELECT strCompanyName
 	 , strComments
 	 , strItemComments
 	 , strOrigin
-	 , blbLogo
 	 , intEntityUserId
 	 , strRequestId
 	 , strInvoiceFormat
@@ -407,7 +381,6 @@ SELECT strCompanyName
 	 , dtmLoadedDate
 	 , dtmScaleDate
 	 , strCommodity
-	 , ysnStretchLogo
 	 , blbSignature
 	 , strTicketType
 	 , strLocationNumber
@@ -415,7 +388,6 @@ SELECT strCompanyName
 	 , strPaymentInfo
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
-	 , strLogoType
 FROM #INVOICES
 
 UPDATE STAGING
@@ -582,10 +554,8 @@ BEGIN
 		, dblInvoiceTax			= ORIG.dblInvoiceTax
 		, dblPriceWithTax			= ORIG.dblPriceWithTax
 		, dblTotalPriceWithTax	= ORIG.dblTotalPriceWithTax
-		, ysnStretchLogo			= ORIG.ysnStretchLogo
 		, dtmDate					= ORIG.dtmDate
 		, dtmDueDate				= ORIG.dtmDueDate
-		, blbLogo					= ORIG.blbLogo
 		, strUnitMeasure			= ORIG.strUnitMeasure
 		, strSalesOrderNumber		= ORIG.strSalesOrderNumber
 	FROM tblARInvoiceReportStagingTable STAGING
@@ -595,7 +565,6 @@ BEGIN
 		WHERE intEntityUserId = @intEntityUserId
 		  	AND strRequestId = @strRequestId
 		    AND strInvoiceFormat = 'Format 5 - Honstein'
-			AND blbLogo IS NOT NULL
 	) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.strItemNo = 'State Sales Tax')
 	WHERE STAGING.intEntityUserId = @intEntityUserId
 		AND STAGING.strRequestId = @strRequestId
@@ -672,5 +641,73 @@ BEGIN
 	INNER JOIN tblARInvoiceDetailTax IDT WITH (NOLOCK) ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
 	INNER JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 	INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId
+	LEFT JOIN tblSMTaxReportType TREPORT ON TC.intTaxReportTypeId = TREPORT.intTaxReportTypeId		 
 	WHERE IDT.dblAdjustedTax <> 0
+	  AND (TREPORT.strType IS NULL OR TREPORT.strType <> 'State Sales Tax')
+
+	UPDATE STAGING
+	SET dblPriceTotal	= ISNULL(TOTALPRICE.dblPriceTotal, 0)
+	  , dblLineTotal	= ISNULL(TOTALPRICE.dblLineTotal, 0)
+	FROM tblARInvoiceReportStagingTable STAGING
+	INNER JOIN (
+		SELECT dblPriceTotal		= SUM(ISNULL(ITEMPRICE.dblPrice, 0) + ISNULL(TAXPRICE.dblRate, 0))
+		     , dblLineTotal			= SUM(ISNULL(ITEMPRICE.dblItemPrice, 0) + ISNULL(TAXPRICE.dblAdjustedTax, 0))
+			 , intInvoiceId			= ITEMPRICE.intInvoiceId
+			 , intInvoiceDetailId	= ITEMPRICE.intInvoiceDetailId
+		FROM tblARInvoiceReportStagingTable ITEMPRICE
+		LEFT JOIN (
+			SELECT intInvoiceId			= intTransactionId	
+				 , intInvoiceDetailId	= intTransactionDetailId
+				 , dblAdjustedTax 		= SUM(dblAdjustedTax)
+				 , dblRate				= SUM(dblRate)
+			FROM tblARInvoiceTaxReportStagingTable			
+			WHERE strInvoiceFormat = 'Format 9 - Berry Oil'
+			  AND intEntityUserId = @intEntityUserId
+			  AND strRequestId = @strRequestId
+			GROUP BY intTransactionId, intTransactionDetailId
+		) TAXPRICE ON ITEMPRICE.intInvoiceId = TAXPRICE.intInvoiceId
+				  AND ITEMPRICE.intInvoiceDetailId = TAXPRICE.intInvoiceDetailId
+		WHERE ITEMPRICE.intEntityUserId = @intEntityUserId
+		  AND ITEMPRICE.strRequestId = @strRequestId
+		  AND ITEMPRICE.strInvoiceFormat = 'Format 9 - Berry Oil'
+		GROUP BY ITEMPRICE.intInvoiceId, ITEMPRICE.intInvoiceDetailId
+	) TOTALPRICE ON STAGING.intInvoiceId = TOTALPRICE.intInvoiceId
+	            AND STAGING.intInvoiceDetailId = TOTALPRICE.intInvoiceDetailId
+	WHERE STAGING.intEntityUserId = @intEntityUserId
+	  AND STAGING.strRequestId = @strRequestId
+	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
+
+	UPDATE STAGING
+	SET dblInvoiceSubtotal = ISNULL(DETAIL.dblLineTotal, 0)
+	FROM tblARInvoiceReportStagingTable STAGING
+	INNER JOIN (
+		SELECT intInvoiceId	= intInvoiceId
+			 , dblLineTotal = SUM(dblLineTotal) 
+		FROM tblARInvoiceReportStagingTable DETAIL		
+		WHERE DETAIL.intEntityUserId = @intEntityUserId
+		  AND DETAIL.strRequestId = @strRequestId
+		  AND DETAIL.strInvoiceFormat = 'Format 9 - Berry Oil'
+		GROUP BY DETAIL.intInvoiceId
+	) DETAIL ON STAGING.intInvoiceId = DETAIL.intInvoiceId
+	WHERE STAGING.intEntityUserId = @intEntityUserId
+	  AND STAGING.strRequestId = @strRequestId
+	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
+	  
+	UPDATE STAGING
+	SET dblInvoiceTax = ISNULL(SST.dblTotalSST, 0)
+	FROM tblARInvoiceReportStagingTable STAGING
+	LEFT JOIN (
+		SELECT ID.intInvoiceId
+			 , dblTotalSST = SUM(dblAdjustedTax) 
+		FROM tblARInvoiceDetailTax IDT
+		INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
+		INNER JOIN tblSMTaxClass TCLASS ON IDT.intTaxClassId = TCLASS.intTaxClassId
+		INNER JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
+		WHERE TREPORT.strType = 'State Sales Tax'
+		  AND IDT.dblAdjustedTax <> 0			  
+		GROUP BY ID.intInvoiceId
+	) SST ON STAGING.intInvoiceId = SST.intInvoiceId
+	WHERE STAGING.intEntityUserId = @intEntityUserId
+	  AND STAGING.strRequestId = @strRequestId
+	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
 END
