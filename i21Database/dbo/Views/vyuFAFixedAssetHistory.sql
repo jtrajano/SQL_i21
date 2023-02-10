@@ -112,30 +112,11 @@ LEFT JOIN tblGLLedger L ON L.intLedgerId = BD.intLedgerId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = FAD.intCurrencyId
 LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = FAD.intFunctionalCurrencyId
 OUTER APPLY (
-	SELECT TOP 1 FAD.dblDepreciationToDate, FAD.intAssetDepreciationId, FAD.dblFunctionalDepreciationToDate, FAD.dtmDepreciationToDate
-	FROM tblFAFixedAssetDepreciation FAD
-	JOIN tblFABookDepreciation BD ON BD.intAssetId = FAD.intAssetId AND BD.intBookId = FAD.intBookId
-	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND BD.intBookId = 2 AND FAD.strTransaction = 'Depreciation' AND BD.ysnFullyDepreciated = 1
-	AND (
-			CASE WHEN G.intLedgerId IS NOT NULL 
-			THEN CASE WHEN (FAD.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
-			ELSE 1 END
-        ) = 1
-	ORDER BY FAD.dtmDepreciationToDate DESC
-) FullyDepreciatedTax
-
-OUTER APPLY (
-	SELECT TOP 1 BD.dblSection179, BD.dblFunctionalSection179, BD.dblBonusDepreciation, BD.dblFunctionalBonusDepreciation, dtmDepreciationToDate
-	FROM tblFABookDepreciation BD 
-	LEFT JOIN tblFAFixedAssetDepreciation A on A.intAssetId = BD.intAssetId AND A.intBookId = 2
-	AND (
-			CASE WHEN G.intLedgerId IS NOT NULL 
-			THEN CASE WHEN (BD.intLedgerId = G.intLedgerId) THEN 1 ELSE 0 END
-			ELSE 1 END
-        ) = 1
-	WHERE BD.intAssetId = G.intAssetId
-	AND BD.intBookId = 2
-	AND A.strTransaction = G.strTransaction
+	SELECT TOP 1 B.dblSection179, B.dblFunctionalSection179, B.dblBonusDepreciation, B.dblFunctionalBonusDepreciation, dtmDepreciationToDate
+	FROM tblFABookDepreciation B
+	JOIN tblFAFixedAssetDepreciation A ON A.intAssetId = B.intAssetId AND A.intBookDepreciationId = B.intBookDepreciationId
+	WHERE B.intAssetId = FAD.intAssetId
+	AND B.intBookId <> 1
 	AND A.strTransaction = 'Depreciation'
 	AND B.intBookDepreciationId = FAD.intBookDepreciationId
 	ORDER BY dtmDepreciationToDate
