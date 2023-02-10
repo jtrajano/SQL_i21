@@ -769,7 +769,7 @@ BEGIN
 			SELECT strTransactionNumber,strStorageTypeCode
 				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
 			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
-			WHERE strTransactionType <> 'Storage Settlement'
+			WHERE strTransactionType NOT IN ('Storage Settlement','Inventory Shipment')
 			GROUP BY strTransactionNumber,strStorageTypeCode
 		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
 		GROUP BY
@@ -792,7 +792,7 @@ BEGIN
 			,strLocationName
 			,strCommodityCode	
 		FROM #CustomerOwnershipALL AA
-		WHERE strTransactionType = 'Storage Settlement'
+		WHERE strTransactionType IN ('Storage Settlement','Inventory Shipment')
 		GROUP BY
 			dtmDate
 			,strDistributionType
@@ -829,6 +829,26 @@ BEGIN
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
 			AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 		GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
+
+		--CREATE BEGINNING IF IT'S NOT AVAILABLE
+		IF NOT EXISTS(SELECT 1 FROM @StorageObligationDataDUMMY)
+		BEGIN
+			INSERT INTO @StorageObligationDataDUMMY
+			SELECT @intTotalRowCnt + 2
+				,@intStorageScheduleTypeId
+				,strDistribution + ' BEGINNING'
+				,''
+				,NET = 0
+				,strCommodityCode
+				,@intCommodityId2
+				,intLocationId
+				,strLocationName
+				,@strUOM
+			FROM #CustomerOwnershipBal 
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) >= CONVERT(DATETIME, @dtmReportDate)
+				AND intStorageScheduleTypeId = @intStorageScheduleTypeId
+			GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
+		END
 		
 		--INCREASE FOR THE DAY
 		INSERT INTO @StorageObligationDataDUMMY
@@ -1292,7 +1312,7 @@ OUTER APPLY (
 		AND ST_TO.strOwnedPhysicalStock = 'Customer'
 		AND TS.intCommodityId = A.intCommodityId
 		AND TS.intFromCompanyLocationId = A.intCompanyLocationId
-		AND TS.intToCompanyLocationId <> A.intCompanyLocationId
+		--AND TS.intToCompanyLocationId <> A.intCompanyLocationId
 		AND TS.dtmTransferStorageDate = @dtmReportDate
 	GROUP BY TS.strCommodityCode
 		,TS.intCommodityId
