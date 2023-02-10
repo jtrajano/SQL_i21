@@ -34,6 +34,9 @@
 			,d.strFixedVersion
 			,d.strOriginalEstimate
 			,d.intOriginalEstimateSeconds
+			,strJiraPriority			= d.strJiraPriority
+			,strJiraStatus				= d.strJiraStatus
+			,strJiraType				= d.strJiraType
 		from
 			tblHDTicket b
 			inner join tblHDTicketJIRAIssue d on d.intTicketId = b.intTicketId

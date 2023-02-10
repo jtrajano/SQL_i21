@@ -1037,4 +1037,23 @@ END
 
 GO
 	PRINT N'End Update Existing tblHDTicketJIRAIssue';
+	PRINT N'Start Update Existing tblHDTicketJIRAIssue Icons';
 GO
+
+IF  EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketJIRAIssue' AND COLUMN_NAME = 'strJiraType') AND
+	EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketJIRAIssue' AND COLUMN_NAME = 'strJiraPriority') AND
+	EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDTicketJIRAIssue' AND COLUMN_NAME = 'strJiraStatus') AND
+    NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDTicketJIRAIssue Icons')
+BEGIN
+
+	EXEC uspHDUpdateJiraIcon
+
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDTicketJIRAIssue Icons','1')
+
+END
+
+GO
+	PRINT N'End Update Existing tblHDTicketJIRAIssue Icons';
+GO
+

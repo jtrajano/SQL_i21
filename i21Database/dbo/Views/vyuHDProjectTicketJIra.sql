@@ -24,6 +24,9 @@
 		,a.intConcurrencyId
 		,intOriginalProjectId = a1.intProjectId
 		,strOriginalProjectName = a1.strProjectName
+		,strJiraPriority			= d.strJiraPriority
+		,strJiraStatus				= d.strJiraStatus
+		,strJiraType				= d.strJiraType
 	from 
 		tblHDProject a
 		inner join tblHDProjectTask b on b.intProjectId = a.intProjectId

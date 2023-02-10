@@ -25,6 +25,9 @@
 			,dtmJiraCreated
 			,dtmJiraUpdated
 			,strFixedVersion
+			,strJiraPriority			= strJiraPriority
+			,strJiraStatus				= strJiraStatus
+			,strJiraType				= strJiraType
 		from
 		(
 			select distinct
@@ -54,6 +57,9 @@
 				,d.strJiraPriorityIconUrl
 				,d.strJiraStatusIconUrl
 				,d.strJiraTypeIconUrl
+				,d.strJiraPriority
+				,d.strJiraStatus
+				,d.strJiraType
 			from
 				tblHDProject a
 				inner join tblHDTicket b on 1=1
