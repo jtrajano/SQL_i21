@@ -43,16 +43,18 @@ BEGIN
         DECLARE @_strCostMethod NVARCHAR(50)
         
         
+		--Get Ticket Details
+        SELECT TOP 1
+            @intTicketProcessingLocation = intProcessingLocationId
+            ,@intTicketItemId = intItemId
+            ,@strTicketNumber = strTicketNumber
+            ,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+        FROM tblSCTicket
+        WHERE intTicketId = @intTicketId
+
         IF(@ysnDistribute = 1)
         BEGIN
-            --Get Ticket Details
-            SELECT TOP 1
-                @intTicketProcessingLocation = intProcessingLocationId
-                ,@intTicketItemId = intItemId
-                ,@strTicketNumber = strTicketNumber
-                ,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
-            FROM tblSCTicket
-            WHERE intTicketId = @intTicketId
+            
 
             -- Get Item Location Id
             SELECT TOP 1
@@ -2000,13 +2002,97 @@ BEGIN
             
                 EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT
 
-                EXEC uspGLInsertReverseGLEntry 
-                    @strTransactionId = @intTicketId 
-                    ,@intEntityId = @intUserId
-                    ,@dtmDateReverse  = @CurrentDate
-                    ,@strBatchId = @strBatchId
-                    ,@strCode = 'SCTKT'
-                    ,@ysnUseIntegerTransactionId = 1
+                                
+
+
+                --EXEC uspGLInsertReverseGLEntry 
+                --    @strTransactionId = @intTicketId 
+                --    ,@intEntityId = @intUserId
+                --    ,@dtmDateReverse  = @CurrentDate
+                --    ,@strBatchId = @strBatchId
+                --    ,@strCode = 'SCTKT'
+                --    ,@ysnUseIntegerTransactionId = 1
+				DELETE FROM @GLEntries
+				INSERT INTO @GLEntries (
+					[strTransactionId]
+					,[intTransactionId]
+					,[dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[dblDebitForeign]
+					,[dblCreditForeign]
+					,[dblForeignRate]
+					,dblReportingRate
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[intCurrencyExchangeRateTypeId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intConcurrencyId]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+				)
+				SELECT	 
+					[strTransactionId]
+					,[intTransactionId]
+					,dtmDate			= ISNULL(@CurrentDate, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
+					,[strBatchId]		= @strBatchId
+					,[intAccountId]
+					,[dblCredit]
+					,[dblDebit]
+					,[dblCreditUnit]
+					,[dblDebitUnit]
+					,[dblCreditForeign]
+					,[dblDebitForeign]
+					,dblForeignRate
+					,dblReportingRate
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[intCurrencyExchangeRateTypeId]
+					,[dblExchangeRate]
+					,dtmDateEntered		= GETDATE()
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,ysnIsUnposted		= 1
+					,[intConcurrencyId]
+					,[intUserId]		= NULL
+					,[intEntityId]		= @intUserId
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+				FROM	tblGLDetail
+				WHERE	intTransactionId =  @intTicketId 
+					AND ysnIsUnposted = 0
+					AND strTransactionId = @strTicketNumber
+					AND strCode = 'SCTKT'
+				ORDER BY intGLDetailId
+
+				EXEC uspGLBookEntries @GLEntries, 0
+
+			
+				UPDATE	tblGLDetail
+				SET		ysnIsUnposted = 1
+				WHERE	strTransactionId = @strTicketNumber
+					AND intTransactionId = @intTicketId
+					AND strCode = 'SCTKT'
+
+
 
                 EXEC [dbo].[uspICUnpostCosting]
                     @intTransactionId = @intTicketId 
