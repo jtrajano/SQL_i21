@@ -876,7 +876,7 @@ BEGIN TRY
 	SELECT
 		dtmCreateDate
 		,dtmTransactionDate
-		,dblTotal
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId, @intCommodityUnitMeasureId, ISNULL(dblTotal, 0))
 		,intEntityId
 		,strEntityName
 		,intLocationId
