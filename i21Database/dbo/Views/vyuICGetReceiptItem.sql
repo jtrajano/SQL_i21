@@ -1,8 +1,7 @@
 CREATE VIEW [dbo].[vyuICGetReceiptItem]
 AS 
 
-SELECT
-	intKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intItemId, ItemLocation.intLocationId) AS INT),
+SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intItemId, ItemLocation.intLocationId) AS INT),
 	Item.intItemId,
 	Item.strItemNo,
 	Item.strDescription,
@@ -113,3 +112,46 @@ OR
 )
 OR
 ItemUOM.ysnStockUnit = 1
+GROUP BY Item.intItemId
+	   , Item.strItemNo
+	   , Item.strDescription
+	   , Item.strType
+	   , Item.strStatus
+	   , Item.intCommodityId
+	   , Item.intLifeTime
+	   , Item.strLifeTimeType
+	   , Item.strLotTracking
+	   , Item.ysnLotWeightsRequired
+	   , ItemPricing.strPricingMethod
+	   , GrossUOM.intItemUOMId
+	   , gUOM.strUnitMeasure
+	   , GrossUOM.intUnitMeasureId
+	   , GrossUOM.dblUnitQty
+	   , ItemLocation.intLocationId
+	   , ItemLocation.intSubLocationId
+	   , ItemLocation.intStorageLocationId
+	   , ItemLocation.ysnStorageUnitRequired
+	   , StorageLocation.strName
+	   , SubLocation.strSubLocationName 
+	   , Item.intComputeItemTotalOption
+	   , COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(Item.intItemId, ItemLocation.intItemLocationId, COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId, GrossUOM.intItemUOMId), GETDATE()), EffectiveCost.dblCost, ItemPricing.dblLastCost, 0)
+	   , COALESCE(ItemPricing.dblStandardCost, 0)
+	   , COALESCE(EffectivePrice.dblRetailPrice, ItemPricing.dblSalePrice, 0)
+	   , COALESCE(ReceiveUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
+	   , COALESCE(rUOM.strUnitMeasure, iUOM.strUnitMeasure)
+	   , COALESCE(rUOM.strUnitType, iUOM.strUnitType)
+	   , COALESCE(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId)
+	   , COALESCE(ReceiveUOM.ysnAllowPurchase, ItemUOM.ysnAllowPurchase)
+	   , COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, ''))
+	   , COALESCE(ReceiveUOM.strLongUPCCode, ItemUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode, ''))
+	   , ISNULL(ReceiveUOM.strUpcCode, ItemUOM.strUpcCode)
+	   , ISNULL(ReceiveUOM.strUPCDescription, ItemUOM.strUPCDescription) 
+	   , ISNULL(ReceiveUOM.intCheckDigit, ItemUOM.intCheckDigit)
+	   , ISNULL(ReceiveUOM.intModifier, ItemUOM.intModifier) 
+	   , COALESCE(ReceiveUOM.intUnitMeasureId, ItemUOM.intUnitMeasureId)
+	   , CASE WHEN ISNULL(Item.strLotTracking, 'No') <> 'No' THEN 4 
+			  ELSE ItemLocation.intCostingMethod
+		 END
+	   , CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT)
+	   , CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
+GO
