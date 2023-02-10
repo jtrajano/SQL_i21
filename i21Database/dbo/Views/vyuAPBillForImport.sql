@@ -166,5 +166,5 @@ FROM (
 	AND voucher.ysnIsPaymentScheduled = 1
 	--http://inet.irelyserver.com/display/AP/Deferred+taxes+can+have+same+invoice+number
 	--EXCLUSION BASE ON SPEC, THIS WILL NOT SHOW ON VALIDATION RESULT AS ALREADY PAID
-	-- AND paySched.ysnPaid = 0
+	AND paySched.ysnPaid = 0
 ) forPayment
