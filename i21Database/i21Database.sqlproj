@@ -1298,6 +1298,7 @@
     <Build Include="dbo\Tables\tblGLMaskedAccountStructureTemp.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountStructureWithMaskedPrimaryAndCompany.sql" />
     <Build Include="dbo\Functions\fnGLGetIntraCompanyAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLGetIntraCompanyGLEntries.sql" />
     <Build Include="dbo\Functions\fnGLBuildIntraCompanyAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateIntraCompanyEntries.sql" />
     <Build Include="dbo\Views\vyuMFUserLocation.sql" />
