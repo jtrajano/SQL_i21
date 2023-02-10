@@ -2,7 +2,7 @@
 (
 	[intCurrencyExchangeRateDetailId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intCurrencyExchangeRateId] INT NOT NULL, 
-    [dblRate] NUMERIC(18, 6) NOT NULL, 
+    [dblRate] NUMERIC(38, 20) NOT NULL, 
     [intRateTypeId] INT NOT NULL, 
     [dtmValidFromDate] DATETIME NOT NULL, 
 	[strSource] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
