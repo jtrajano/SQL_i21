@@ -1542,7 +1542,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 			UNION ALL
 
-			SELECT strName			= RTRIM(LTRIM(sscon_last_name)) + '', '' + RTRIM(LTRIM(sscon_first_name)) 
+			SELECT strName			= ISNULL(RTRIM(LTRIM(sscon_last_name)), '''') + '', '' + ISNULL(RTRIM(LTRIM(sscon_first_name)), '''')
 				, strEmail			= RTRIM(LTRIM(isnull(sscon_email, '''')))
 				, strWebsite		= NULL
 				, strInternalNotes	= C.strInternalNotes
