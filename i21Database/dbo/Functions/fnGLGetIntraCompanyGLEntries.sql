@@ -104,27 +104,43 @@ BEGIN
 		
 	END
 
+    
+    DECLARE @strCodeNoConfig NVARCHAR(10) =''
+    SELECT @strCodeNoConfig =  B.strCode  FROM @GLEntries A JOIN vyuGLCompanyAccountId B ON
+    A.intAccountId = B.intAccountId
+    OUTER APPLY(
+        SELECT Count(*) Cnt  FROM tblGLIntraCompanyConfig WHERE intParentCompanySegmentId = @intCompanySegmentId
+        AND intTargetCompanySegmentId = B.intAccountSegmentId
+    ) Intra
+    WHERE Intra.Cnt = 0
+    AND B.intAccountSegmentId <>  @intCompanySegmentId
+    
+    IF ( @strCodeNoConfig <> '' )
+        SET @i = CAST( @strCodeNoConfig  + ' is missing in the Intra Company Config' AS INT)
 
 
-	IF @intParentCompanyCount > 0 AND @intNonParentCompanyCount > 0
-	BEGIN -- entry here should be balanced between parent and non parent
-			DECLARE @dblParentSum DECIMAL(18,6), @dblNonParentSum DECIMAL(18,6)
 
-			
-            SELECT @dblNonParentSum = SUM(dblDebit-dblCredit)
-			from @GLEntries A JOIN vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
-			WHERE intAccountSegmentId <> @intCompanySegmentId
 
-			SELECT @dblParentSum = SUM(dblCredit- dblDebit)
-			from @GLEntries A JOIN vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
-			WHERE intAccountSegmentId = @intCompanySegmentId
 
-			IF @dblNonParentSum <> @dblParentSum
-			BEGIN
-				SET @i = CAST( 'Parent company amount should be equal to the sum of non-parent company amount.' AS INT)
-				
-			END
-	END
+IF @intParentCompanyCount > 0 AND @intNonParentCompanyCount > 0
+BEGIN -- entry here should be balanced between parent and non parent
+        DECLARE @dblParentSum DECIMAL(18,6), @dblNonParentSum DECIMAL(18,6)
+
+        
+        SELECT @dblNonParentSum = SUM(dblDebit-dblCredit)
+        from @GLEntries A JOIN vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
+        WHERE intAccountSegmentId <> @intCompanySegmentId
+
+        SELECT @dblParentSum = SUM(dblCredit- dblDebit)
+        from @GLEntries A JOIN vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
+        WHERE intAccountSegmentId = @intCompanySegmentId
+
+        IF @dblNonParentSum <> @dblParentSum
+        BEGIN
+            SET @i = CAST( 'Parent company amount should be equal to the sum of non-parent company amount.' AS INT)
+            
+        END
+END
 
   
 DECLARE @strJournalDescPrefix NVARCHAR(30) = 'Intra Company Entries -'
@@ -183,7 +199,7 @@ BEGIN
             ,dtmDateEntered
             ,strBatchId
             ,A.[strCode]
-            ,@strJournalDescPrefix + strJournalLineDescription
+            ,@strJournalDescPrefix + ' Due To Account'
             ,[intJournalLineNo]
             ,[strTransactionType]
             ,[strTransactionForm]
@@ -222,7 +238,7 @@ BEGIN
             ,dtmDateEntered
             ,strBatchId
             ,A.strCode
-            ,strJournalLineDescription
+            ,@strJournalDescPrefix + ' Due To Account'
             ,[intJournalLineNo]
             ,[strTransactionType]
             ,[strTransactionForm]
@@ -289,7 +305,7 @@ BEGIN
                 ,dtmDateEntered
                 ,strBatchId
                 ,A.strCode
-                ,strJournalLineDescription
+                ,@strJournalDescPrefix + ' Due From Account'
                 ,[intJournalLineNo]
                 ,[strTransactionType]
                 ,[strTransactionForm]
@@ -328,7 +344,7 @@ BEGIN
             ,dtmDateEntered
             ,strBatchId
             ,A.[strCode]
-            ,@strJournalDescPrefix + strJournalLineDescription
+            ,@strJournalDescPrefix + ' Due From Account'
             ,[intJournalLineNo]
             ,[strTransactionType]
             ,[strTransactionForm]
@@ -393,75 +409,7 @@ BEGIN
             ,strNewAccountIdOverride
             ,intAccountIdOverride
     )
-    SELECT
-            [strTransactionId]
-            ,[intTransactionId]
-            ,DueToOverrideCompany.intAccountId
-            ,A.[strDescription]
-            ,[dtmTransactionDate]
-            ,[dblDebit] = 0
-            ,[dblCredit] = dblDebit - dblCredit
-            ,dtmDate
-            ,[ysnIsUnposted]
-            ,1
-            ,[intCurrencyId]
-            ,intUserId
-            ,intEntityId
-            ,dtmDateEntered
-            ,strBatchId
-            ,A.[strCode]
-            ,@strJournalDescPrefix + strJournalLineDescription
-            ,[intJournalLineNo]
-            ,[strTransactionType]
-            ,[strTransactionForm]
-            ,'General Ledger'
-            ,OverrideString.Value
-            ,intAccountIdOverride=@intDueToAccountId
-    FROM @GLEntries A join vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
-    OUTER APPLY ( SELECT dbo.fnGLGetOverrideAccountBySegment(@intDueToAccountId, NULL, NULL, B.intAccountSegmentId ) Value ) OverrideString
-    OUTER APPLY
-    (
-        SELECT TOP 1 intAccountId FROM  tblGLAccount
-        WHERE strAccountId = OverrideString.Value
-    ) DueToOverrideCompany
-    WHERE (dblDebit - dblCredit) > 0
-    AND B.intAccountSegmentId = @intCompanySegmentId
-    UNION
-    SELECT
-        [strTransactionId]
-        ,[intTransactionId]
-        ,DueFromOverrideCompany.intAccountId
-        ,A.[strDescription]
-        ,[dtmTransactionDate]
-        ,[dblDebit] = dblCredit - dblDebit
-        ,[dblCredit] = 0
-        ,dtmDate
-        ,[ysnIsUnposted]
-        ,1
-        ,[intCurrencyId]
-        ,intUserId
-        ,intEntityId
-        ,dtmDateEntered
-        ,strBatchId
-        ,A.[strCode]
-        ,@strJournalDescPrefix + strJournalLineDescription
-        ,[intJournalLineNo]
-        ,[strTransactionType]
-        ,[strTransactionForm]
-        ,'General Ledger'
-        ,OverrideString.Value
-        ,intAccountIdOverride=@intDueFromAccountId
-    FROM @GLEntries A join vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
-    OUTER APPLY ( SELECT dbo.fnGLGetOverrideAccountBySegment(@intDueFromAccountId, NULL, NULL, B.intAccountSegmentId ) Value ) OverrideString
-    OUTER APPLY
-    (
-        SELECT TOP 1 intAccountId FROM  tblGLAccount
-        WHERE strAccountId = OverrideString.Value
-    ) DueFromOverrideCompany
-    WHERE (dblCredit - dblDebit) > 0
-    AND B.intAccountSegmentId = @intCompanySegmentId
-    -- NON PARENT COMPANY SEGMENT
-    UNION 
+   
     SELECT
             [strTransactionId]
             ,[intTransactionId]
@@ -479,7 +427,7 @@ BEGIN
             ,dtmDateEntered
             ,strBatchId
             ,A.[strCode]
-            ,@strJournalDescPrefix + strJournalLineDescription
+            ,@strJournalDescPrefix + ' Due To Account'
             ,[intJournalLineNo]
             ,[strTransactionType]
             ,[strTransactionForm]
@@ -502,7 +450,7 @@ BEGIN
     ) DueToOverrideCompany
     WHERE (dblDebit - dblCredit) > 0
     AND B.intAccountSegmentId <> @intCompanySegmentId
-    UNION
+    UNION ALL
     SELECT
             [strTransactionId]
             ,[intTransactionId]
@@ -520,7 +468,7 @@ BEGIN
             ,dtmDateEntered
             ,strBatchId
             ,A.[strCode]
-            ,@strJournalDescPrefix + strJournalLineDescription
+            ,@strJournalDescPrefix + ' Due From Account'
             ,[intJournalLineNo]
             ,[strTransactionType]
             ,[strTransactionForm]
@@ -543,6 +491,115 @@ BEGIN
     ) DueFromOverrideCompany
     WHERE (dblCredit - dblDebit) > 0
     AND B.intAccountSegmentId <> @intCompanySegmentId 
+
+
+    INSERT INTO @IntraGLEntries(
+            [strTransactionId]
+            ,[intTransactionId]
+            ,[intAccountId]
+            ,[strDescription]
+            ,[dtmTransactionDate]
+            ,[dblDebit]
+            ,[dblCredit]
+            ,[dtmDate]
+            ,[ysnIsUnposted]
+            ,[intConcurrencyId]
+            ,[intCurrencyId]
+            ,[intUserId]
+            ,[intEntityId]
+            ,[dtmDateEntered]
+            ,[strBatchId]
+            ,[strCode]
+            ,[strJournalLineDescription]
+            ,[intJournalLineNo]
+            ,[strTransactionType]
+            ,[strTransactionForm]
+            ,strModuleName
+            ,strNewAccountIdOverride
+            ,intAccountIdOverride
+        )  SELECT
+            [strTransactionId]
+            ,[intTransactionId]
+            ,DueFromOverrideCompany.intAccountId
+            ,A.[strDescription]
+            ,[dtmTransactionDate]
+            ,[dblDebit] = (dblDebit -  dblCredit)
+            ,[dblCredit] =0
+            ,dtmDate
+            ,[ysnIsUnposted]
+            ,1
+            ,[intCurrencyId]
+            ,intUserId
+            ,intEntityId
+            ,dtmDateEntered
+            ,strBatchId
+            ,A.[strCode]
+            ,@strJournalDescPrefix + ' Due From Account'
+            ,[intJournalLineNo]
+            ,[strTransactionType]
+            ,[strTransactionForm]
+            ,'General Ledger'
+            ,OverrideString.Value
+            ,intAccountIdOverride= Intra.intDueFromAccountId
+    FROM @GLEntries A join vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
+    OUTER APPLY(
+
+        SELECT TOP 1 intDueFromAccountId  FROM tblGLIntraCompanyConfig WHERE intParentCompanySegmentId = @intCompanySegmentId 
+        AND intTargetCompanySegmentId = B.intAccountSegmentId
+    )Intra
+
+    OUTER APPLY ( SELECT dbo.fnGLGetOverrideAccountBySegment(Intra.intDueFromAccountId, NULL, NULL, @intCompanySegmentId ) Value ) OverrideString
+    OUTER APPLY
+    (
+        SELECT TOP 1 intAccountId FROM  tblGLAccount
+        WHERE strAccountId = OverrideString.Value
+    ) DueFromOverrideCompany
+    WHERE (dblDebit -  dblCredit) > 0
+    AND B.intAccountSegmentId <> @intCompanySegmentId 
+    UNION ALL
+    SELECT
+            [strTransactionId]
+            ,[intTransactionId]
+            ,DueToOverrideCompany.intAccountId
+            ,A.[strDescription]
+            ,[dtmTransactionDate]
+            ,[dblDebit] = 0
+            ,[dblCredit] =dblCredit -  dblDebit
+            ,dtmDate
+            ,[ysnIsUnposted]
+            ,1
+            ,[intCurrencyId]
+            ,intUserId
+            ,intEntityId
+            ,dtmDateEntered
+            ,strBatchId
+            ,A.[strCode]
+            ,@strJournalDescPrefix + ' Due To Account'
+            ,[intJournalLineNo]
+            ,[strTransactionType]
+            ,[strTransactionForm]
+            ,'General Ledger'
+            ,OverrideString.Value
+            ,intAccountIdOverride= Intra.intDueToAccountId
+    FROM @GLEntries A join vyuGLCompanyAccountId B ON A.intAccountId = B.intAccountId
+    OUTER APPLY(
+
+        SELECT TOP 1 intDueToAccountId  FROM tblGLIntraCompanyConfig WHERE intParentCompanySegmentId = @intCompanySegmentId 
+        AND intTargetCompanySegmentId = B.intAccountSegmentId
+    )Intra
+
+    OUTER APPLY ( SELECT dbo.fnGLGetOverrideAccountBySegment(Intra.intDueToAccountId, NULL, NULL, @intCompanySegmentId ) Value ) OverrideString
+    OUTER APPLY
+    (
+        SELECT TOP 1 intAccountId FROM  tblGLAccount
+        WHERE strAccountId = OverrideString.Value
+    ) DueToOverrideCompany
+    WHERE (dblCredit -  dblDebit) > 0
+    AND B.intAccountSegmentId <> @intCompanySegmentId 
+  
+
+
+
 END
 
 UPDATE @IntraGLEntries SET strOverrideAccountError = strNewAccountIdOverride  + ' is not an existing GL Account.'
