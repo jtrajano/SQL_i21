@@ -45,6 +45,9 @@
     [strBarcode]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strInternalId]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     
+    [intTankSiteNumber] INT NULL, 
+
+   
 
 
     CONSTRAINT [PK_tblTMDevice] PRIMARY KEY CLUSTERED ([intDeviceId] ASC),
