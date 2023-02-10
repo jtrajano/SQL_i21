@@ -14,15 +14,17 @@
 	[ysnRequireLocation] BIT NULL,
 	[strSubsidiaryCompanyJson] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL ,
 	/*Override RE Settings*/
-	[ysnREOverride] BIT NULL,
+	[ysnREOverride] BIT NULL, --Retained Earnings
 	[ysnREOverrideLocation] BIT NULL,
 	[ysnREOverrideLOB] BIT NULL,
 	[ysnREOverrideCompany] BIT NULL,
+	[ysnRevalOverrideLocation] BIT NULL, --Revaluation
+	[ysnRevalOverrideLOB] BIT NULL,
+	[ysnRevalOverrideCompany] BIT NULL,
 	[ysnISOverrideLocation] BIT NULL,
 	[ysnISOverrideLOB] BIT NULL,
 	[ysnISOverrideCompany] BIT NULL,
 	[strOverrideREArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
-	[strParentCompanyCode] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strOverrideISArray] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAllowIntraCompanyEntries]	BIT NOT NULL DEFAULT((0)),
 	[ysnAllowIntraLocationEntries]	BIT NOT NULL DEFAULT((0)),
@@ -31,7 +33,6 @@
 	[intDueFromAccountId]			INT NULL,
 	[ysnRequireRERefresh]			BIT NOT NULL DEFAULT(1),
 	[strRequireRefreshReason]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strMaskedSegment]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
