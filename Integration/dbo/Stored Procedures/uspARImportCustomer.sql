@@ -1488,6 +1488,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				, intCompanyLocationPricingLevelId		= C.intCompanyLocationPricingLevelId
 			FROM #CUSTOMERS C
 			INNER JOIN tblEMEntity E ON C.strCustomerNumber = E.strEntityNo
+			LEFT JOIN tblEMEntityType ET ON E.intEntityId  = ET.intEntityId AND ET.strType = ''Customer''
+            WHERE ET.intEntityTypeId IS NULL
 
 			--UPDATE TEMP TABLE ENTITY ID
 			UPDATE CC
