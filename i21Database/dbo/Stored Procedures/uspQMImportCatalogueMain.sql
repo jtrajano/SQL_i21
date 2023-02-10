@@ -7,6 +7,8 @@ BEGIN TRY
 		,@dblB1Price NUMERIC(18, 6)
 		,@intB1PriceUOMId INT
 		,@intBookId INT
+		,@strItemLog			NVARCHAR(MAX)
+		, @strUnitMeasureLog	NVARCHAR(MAX) 
 
 	BEGIN TRANSACTION
 
@@ -750,302 +752,354 @@ BEGIN TRY
 			SELECT @intProductValueId = intBatchId
 			FROM tblMFBatch
 			WHERE strBatchId = @strBatchNo
-				AND intLocationId = @intMixingUnitLocationId
+				AND intLocationId = @intMixingUnitLocationId			
 
 			-- Insert new sample with product type = 13
-			IF @intBatchSampleId IS NULL
-				AND @intProductValueId IS NOT NULL
-			BEGIN
-				--New Sample Creation
-				EXEC uspMFGeneratePatternId @intCategoryId = NULL
-					,@intItemId = NULL
-					,@intManufacturingId = NULL
-					,@intSubLocationId = NULL
-					,@intLocationId = @intMixingUnitLocationId
-					,@intOrderTypeId = NULL
-					,@intBlendRequirementId = NULL
-					,@intPatternCode = 62
-					,@ysnProposed = 0
-					,@strPatternString = @strSampleNumber OUTPUT
+			IF @intBatchSampleId IS NULL AND @intProductValueId IS NOT NULL
+				BEGIN
+					DECLARE @intItemInsert				INT
+						  , @intRepresentingUOMInsert	INT;
 
-				SET @ysnCreate = 1
+					SELECT @intItemInsert = S.intItemId
+						 , @intRepresentingUOMInsert = S.intRepresentingUOMId
+					FROM tblQMSample S
+					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+					WHERE B.intBatchId = @intBatchId
+				
+					/* Item UOM Validation. */
+					IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+						BEGIN	
+							SELECT @strItemLog = strItemNo
+							FROM tblICItem 
+							WHERE intItemId = @intItemId;
 
-				-- Insert Entry in Sample Table
-				INSERT INTO tblQMSample (
-					intConcurrencyId
-					,intSampleTypeId
-					,strSampleNumber
-					,intProductTypeId
-					,intProductValueId
-					,intSampleStatusId
-					,intItemId
-					,intCountryID
-					,intEntityId
-					,dtmSampleReceivedDate
-					,dblSampleQty
-					,dblRepresentingQty
-					,intSampleUOMId
-					,intRepresentingUOMId
-					,strRepresentLotNumber
-					,dtmTestingStartDate
-					,dtmTestingEndDate
-					,dtmSamplingEndDate
-					,strCountry
-					,intLocationId
-					,intCompanyLocationId
-					,intCompanyLocationSubLocationId
-					,strComment
-					,intCreatedUserId
-					,dtmCreated
-					,intSubBookId
-					-- Auction Fields
-					,intSaleYearId
-					,strSaleNumber
-					,dtmSaleDate
-					,intCatalogueTypeId
-					,dtmPromptDate
-					,strChopNumber
-					,intGradeId
-					,intManufacturingLeafTypeId
-					,intSeasonId
-					,intGardenMarkId
-					,dtmManufacturingDate
-					,intTotalNumberOfPackageBreakups
-					,intNetWtPerPackagesUOMId
-					,intNoOfPackages
-					,intNetWtSecondPackageBreakUOMId
-					,intNoOfPackagesSecondPackageBreak
-					,intNetWtThirdPackageBreakUOMId
-					,intNoOfPackagesThirdPackageBreak
-					,intProductLineId
-					,ysnOrganic
-					,dblGrossWeight
-					,strBatchNo
-					,str3PLStatus
-					,strAdditionalSupplierReference
-					,intAWBSampleReceived
-					,strAWBSampleReference
-					,dblBasePrice
-					,ysnBoughtAsReserve
-					,ysnEuropeanCompliantFlag
-					,intEvaluatorsCodeAtTBOId
-					,intFromLocationCodeId
-					,intDestinationStorageLocationId
-					,strSampleBoxNumber
-					,strComments3
-					,intBrokerId
-					)
-				-- ,intTINClearanceId
-				SELECT intConcurrencyId = 1
-					,intSampleTypeId = @intSampleTypeId
-					,strSampleNumber = @strSampleNumber
-					,intProductTypeId = 13 -- Batch
-					,intProductValueId = @intProductValueId
-					,intSampleStatusId = 1 -- Received
-					,intItemId = S.intItemId
-					,intCountryID = S.intCountryID
-					,intEntityId = S.intEntityId
-					,dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-					,dblSampleQty = S.dblSampleQty
-					,dblRepresentingQty = S.dblRepresentingQty
-					,intSampleUOMId = S.intSampleUOMId
-					,intRepresentingUOMId = S.intRepresentingUOMId
-					,strRepresentLotNumber = S.strRepresentLotNumber
-					,dtmTestingStartDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-					,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-					,dtmSamplingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
-					,strCountry = S.strCountry
-					,intLocationId = B.intMixingUnitLocationId
-					,intCompanyLocationId = B.intMixingUnitLocationId
-					,intCompanyLocationSubLocationId = NULL
-					,strComment = S.strComment
-					,intCreatedUserId = @intEntityUserId
-					,dtmCreated = @dtmDateCreated
-					,intSubBookId = S.intSubBookId
-					-- Auction Fields
-					,intSaleYearId = S.intSaleYearId
-					,strSaleNumber = S.strSaleNumber
-					,dtmSaleDate = S.dtmSaleDate
-					,intCatalogueTypeId = S.intCatalogueTypeId
-					,dtmPromptDate = S.dtmPromptDate
-					,strChopNumber = S.strChopNumber
-					,intGradeId = S.intGradeId
-					,intManufacturingLeafTypeId = S.intManufacturingLeafTypeId
-					,intSeasonId = S.intSeasonId
-					,intGardenMarkId = S.intGardenMarkId
-					,dtmManufacturingDate = S.dtmManufacturingDate
-					,intTotalNumberOfPackageBreakups = S.intTotalNumberOfPackageBreakups
-					,intNetWtPerPackagesUOMId = S.intNetWtPerPackagesUOMId
-					,intNoOfPackages = S.intNoOfPackages
-					,intNetWtSecondPackageBreakUOMId = S.intNetWtSecondPackageBreakUOMId
-					,intNoOfPackagesSecondPackageBreak = S.intNoOfPackagesSecondPackageBreak
-					,intNetWtThirdPackageBreakUOMId = S.intNetWtThirdPackageBreakUOMId
-					,intNoOfPackagesThirdPackageBreak = S.intNoOfPackagesThirdPackageBreak
-					,intProductLineId = S.intProductLineId
-					,ysnOrganic = S.ysnOrganic
-					,dblGrossWeight = S.dblGrossWeight
-					,strBatchNo = @strBatchNo
-					,str3PLStatus = S.str3PLStatus
-					,strAdditionalSupplierReference = S.strAdditionalSupplierReference
-					,intAWBSampleReceived = S.intAWBSampleReceived
-					,strAWBSampleReference = S.strAWBSampleReference
-					,dblBasePrice = S.dblBasePrice
-					,ysnBoughtAsReserve = S.ysnBoughtAsReserve
-					,ysnEuropeanCompliantFlag = S.ysnEuropeanCompliantFlag
-					,intEvaluatorsCodeAtTBOId = S.intEvaluatorsCodeAtTBOId
-					,intFromLocationCodeId = S.intFromLocationCodeId
-					,intDestinationStorageLocationId = S.intDestinationStorageLocationId
-					,strSampleBoxNumber = S.strSampleBoxNumber
-					,strComments3 = S.strComments3
-					,intBrokerId = S.intBrokerId
-				-- ,intTINClearanceId = @intTINClearanceId
-				FROM tblQMSample S
-				INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
-				WHERE B.intBatchId = @intBatchId
+							SELECT @strUnitMeasureLog = strUnitMeasure
+							FROM tblICUnitMeasure 
+							WHERE intUnitMeasureId = @intRepresentingUOMId;
 
-				SET @intSampleId = SCOPE_IDENTITY()
+							UPDATE tblQMImportCatalogue
+							SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+								,ysnProcessed = 1
+								,ysnSuccess = 0
+							WHERE intImportCatalogueId = @intImportCatalogueId;
 
-				EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intSampleId
-					,@intUserEntityId = @intEntityUserId
-					,@strRemarks = 'Created from Catalogue Import'
-					,@ysnCreate = 1
-					,@ysnBeforeUpdate = 1
+							GOTO CONT
+						END
 
-				SELECT @intOriginalItemId = NULL
+					--New Sample Creation
+					EXEC uspMFGeneratePatternId @intCategoryId = NULL
+						,@intItemId = NULL
+						,@intManufacturingId = NULL
+						,@intSubLocationId = NULL
+						,@intLocationId = @intMixingUnitLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 62
+						,@ysnProposed = 0
+						,@strPatternString = @strSampleNumber OUTPUT
 
-				SELECT @intOriginalItemId = intTealingoItemId
-				FROM tblMFBatch
-				WHERE intBatchId = @intProductValueId
+					SET @ysnCreate = 1
 
-				UPDATE dbo.tblMFBatch
-				SET intSampleId = @intSampleId
-					,intTealingoItemId = @intItemId
-					,intOriginalItemId = @intOriginalItemId
-				WHERE intBatchId = @intProductValueId
-
-				-- Sample Detail
-				INSERT INTO tblQMSampleDetail (
-					intConcurrencyId
-					,intSampleId
-					,intAttributeId
-					,strAttributeValue
-					,intListItemId
-					,ysnIsMandatory
-					,intCreatedUserId
-					,dtmCreated
-					,intLastModifiedUserId
-					,dtmLastModified
-					)
-				SELECT 1
-					,@intSampleId
-					,A.intAttributeId
-					,ISNULL(A.strAttributeValue, '') AS strAttributeValue
-					,A.intListItemId
-					,ST.ysnIsMandatory
-					,@intEntityUserId
-					,@dtmDateCreated
-					,@intEntityUserId
-					,@dtmDateCreated
-				FROM tblQMSampleTypeDetail ST
-				JOIN tblQMAttribute A ON A.intAttributeId = ST.intAttributeId
-				WHERE ST.intSampleTypeId = @intSampleTypeId
-			END
-					-- Update if existing sample exists
-			ELSE
-			BEGIN
-				EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
-					,@intUserEntityId = @intEntityUserId
-					,@strRemarks = 'Updated from Catalogue Import'
-					,@ysnCreate = 0
-					,@ysnBeforeUpdate = 1
-
-				SELECT @intOriginalItemId = NULL
-
-				SELECT @intOriginalItemId = intItemId
-				FROM tblQMSample
-				WHERE intSampleId = @intBatchSampleId
-
-				UPDATE S
-				SET intConcurrencyId = S.intConcurrencyId + 1
-					,intLastModifiedUserId = @intEntityUserId
-					,dtmLastModified = @dtmDateCreated
-					-- Auction Fields
-					-- ,intTINClearanceId = @intTINClearanceId
-					,intItemId = @intItemId
-				FROM tblQMSample S
-				WHERE S.intSampleId = @intBatchSampleId
-
-				SET @intSampleId = @intBatchSampleId
-
-				UPDATE tblMFBatch
-				SET intTealingoItemId = @intItemId
-					,intOriginalItemId = @intOriginalItemId
-				WHERE intBatchId = @intProductValueId
-			END
-
-			IF @strTINNumber IS NOT NULL
-			BEGIN
-				DECLARE @strOldTINNumber NVARCHAR(100)
-					,@intOldCompanyLocationId INT
-
-				-- Insert / Update TIN number linked to the sample / batch
-				SELECT @strOldTINNumber = TIN.strTINNumber
-					,@intOldCompanyLocationId = B.intLocationId
-				FROM tblQMTINClearance TIN
-				INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
-				OUTER APPLY (
-					SELECT intBatchId
+					-- Insert Entry in Sample Table
+					INSERT INTO tblQMSample (
+						intConcurrencyId
+						,intSampleTypeId
+						,strSampleNumber
+						,intProductTypeId
+						,intProductValueId
+						,intSampleStatusId
+						,intItemId
+						,intCountryID
+						,intEntityId
+						,dtmSampleReceivedDate
+						,dblSampleQty
+						,dblRepresentingQty
+						,intSampleUOMId
+						,intRepresentingUOMId
+						,strRepresentLotNumber
+						,dtmTestingStartDate
+						,dtmTestingEndDate
+						,dtmSamplingEndDate
+						,strCountry
 						,intLocationId
+						,intCompanyLocationId
+						,intCompanyLocationSubLocationId
+						,strComment
+						,intCreatedUserId
+						,dtmCreated
+						,intSubBookId
+						-- Auction Fields
+						,intSaleYearId
+						,strSaleNumber
+						,dtmSaleDate
+						,intCatalogueTypeId
+						,dtmPromptDate
+						,strChopNumber
+						,intGradeId
+						,intManufacturingLeafTypeId
+						,intSeasonId
+						,intGardenMarkId
+						,dtmManufacturingDate
+						,intTotalNumberOfPackageBreakups
+						,intNetWtPerPackagesUOMId
+						,intNoOfPackages
+						,intNetWtSecondPackageBreakUOMId
+						,intNoOfPackagesSecondPackageBreak
+						,intNetWtThirdPackageBreakUOMId
+						,intNoOfPackagesThirdPackageBreak
+						,intProductLineId
+						,ysnOrganic
+						,dblGrossWeight
+						,strBatchNo
+						,str3PLStatus
+						,strAdditionalSupplierReference
+						,intAWBSampleReceived
+						,strAWBSampleReference
+						,dblBasePrice
+						,ysnBoughtAsReserve
+						,ysnEuropeanCompliantFlag
+						,intEvaluatorsCodeAtTBOId
+						,intFromLocationCodeId
+						,intDestinationStorageLocationId
+						,strSampleBoxNumber
+						,strComments3
+						,intBrokerId
+						)
+					-- ,intTINClearanceId
+					SELECT intConcurrencyId = 1
+						,intSampleTypeId = @intSampleTypeId
+						,strSampleNumber = @strSampleNumber
+						,intProductTypeId = 13 -- Batch
+						,intProductValueId = @intProductValueId
+						,intSampleStatusId = 1 -- Received
+						,intItemId = S.intItemId
+						,intCountryID = S.intCountryID
+						,intEntityId = S.intEntityId
+						,dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+						,dblSampleQty = S.dblSampleQty
+						,dblRepresentingQty = S.dblRepresentingQty
+						,intSampleUOMId = S.intSampleUOMId
+						,intRepresentingUOMId = S.intRepresentingUOMId
+						,strRepresentLotNumber = S.strRepresentLotNumber
+						,dtmTestingStartDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+						,dtmTestingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+						,dtmSamplingEndDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
+						,strCountry = S.strCountry
+						,intLocationId = B.intMixingUnitLocationId
+						,intCompanyLocationId = B.intMixingUnitLocationId
+						,intCompanyLocationSubLocationId = NULL
+						,strComment = S.strComment
+						,intCreatedUserId = @intEntityUserId
+						,dtmCreated = @dtmDateCreated
+						,intSubBookId = S.intSubBookId
+						-- Auction Fields
+						,intSaleYearId = S.intSaleYearId
+						,strSaleNumber = S.strSaleNumber
+						,dtmSaleDate = S.dtmSaleDate
+						,intCatalogueTypeId = S.intCatalogueTypeId
+						,dtmPromptDate = S.dtmPromptDate
+						,strChopNumber = S.strChopNumber
+						,intGradeId = S.intGradeId
+						,intManufacturingLeafTypeId = S.intManufacturingLeafTypeId
+						,intSeasonId = S.intSeasonId
+						,intGardenMarkId = S.intGardenMarkId
+						,dtmManufacturingDate = S.dtmManufacturingDate
+						,intTotalNumberOfPackageBreakups = S.intTotalNumberOfPackageBreakups
+						,intNetWtPerPackagesUOMId = S.intNetWtPerPackagesUOMId
+						,intNoOfPackages = S.intNoOfPackages
+						,intNetWtSecondPackageBreakUOMId = S.intNetWtSecondPackageBreakUOMId
+						,intNoOfPackagesSecondPackageBreak = S.intNoOfPackagesSecondPackageBreak
+						,intNetWtThirdPackageBreakUOMId = S.intNetWtThirdPackageBreakUOMId
+						,intNoOfPackagesThirdPackageBreak = S.intNoOfPackagesThirdPackageBreak
+						,intProductLineId = S.intProductLineId
+						,ysnOrganic = S.ysnOrganic
+						,dblGrossWeight = S.dblGrossWeight
+						,strBatchNo = @strBatchNo
+						,str3PLStatus = S.str3PLStatus
+						,strAdditionalSupplierReference = S.strAdditionalSupplierReference
+						,intAWBSampleReceived = S.intAWBSampleReceived
+						,strAWBSampleReference = S.strAWBSampleReference
+						,dblBasePrice = S.dblBasePrice
+						,ysnBoughtAsReserve = S.ysnBoughtAsReserve
+						,ysnEuropeanCompliantFlag = S.ysnEuropeanCompliantFlag
+						,intEvaluatorsCodeAtTBOId = S.intEvaluatorsCodeAtTBOId
+						,intFromLocationCodeId = S.intFromLocationCodeId
+						,intDestinationStorageLocationId = S.intDestinationStorageLocationId
+						,strSampleBoxNumber = S.strSampleBoxNumber
+						,strComments3 = S.strComments3
+						,intBrokerId = S.intBrokerId
+					-- ,intTINClearanceId = @intTINClearanceId
+					FROM tblQMSample S
+					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+					WHERE B.intBatchId = @intBatchId
+
+					SET @intSampleId = SCOPE_IDENTITY()
+
+					EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intSampleId
+						,@intUserEntityId = @intEntityUserId
+						,@strRemarks = 'Created from Catalogue Import'
+						,@ysnCreate = 1
+						,@ysnBeforeUpdate = 1
+
+					SELECT @intOriginalItemId = NULL
+
+					SELECT @intOriginalItemId = intTealingoItemId
 					FROM tblMFBatch
 					WHERE intBatchId = @intProductValueId
-					) B
-				WHERE S.intSampleId = @intSampleId
 
-				IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '')
-					OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
+					UPDATE dbo.tblMFBatch
+					SET intSampleId = @intSampleId
+						,intTealingoItemId = @intItemId
+						,intOriginalItemId = @intOriginalItemId
+					WHERE intBatchId = @intProductValueId
+
+					-- Sample Detail
+					INSERT INTO tblQMSampleDetail (
+						intConcurrencyId
+						,intSampleId
+						,intAttributeId
+						,strAttributeValue
+						,intListItemId
+						,ysnIsMandatory
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						)
+					SELECT 1
+						,@intSampleId
+						,A.intAttributeId
+						,ISNULL(A.strAttributeValue, '') AS strAttributeValue
+						,A.intListItemId
+						,ST.ysnIsMandatory
+						,@intEntityUserId
+						,@dtmDateCreated
+						,@intEntityUserId
+						,@dtmDateCreated
+					FROM tblQMSampleTypeDetail ST
+					JOIN tblQMAttribute A ON A.intAttributeId = ST.intAttributeId
+					WHERE ST.intSampleTypeId = @intSampleTypeId
+
+				/* End of Insert new sample with product type = 13 */
+				END
+
+			/* Update if existing sample exists. */
+			ELSE
 				BEGIN
-					-- Delink old TIN number if there's an existing one and the TIN number has changed.
-					IF @strOldTINNumber IS NOT NULL
+					EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
+						,@intUserEntityId = @intEntityUserId
+						,@strRemarks = 'Updated from Catalogue Import'
+						,@ysnCreate = 0
+						,@ysnBeforeUpdate = 1
+
+					SELECT @intOriginalItemId = NULL
+
+					SELECT @intOriginalItemId = intItemId
+					FROM tblQMSample
+					WHERE intSampleId = @intBatchSampleId
+
+					UPDATE S
+					SET intConcurrencyId = S.intConcurrencyId + 1
+						,intLastModifiedUserId = @intEntityUserId
+						,dtmLastModified = @dtmDateCreated
+						-- Auction Fields
+						-- ,intTINClearanceId = @intTINClearanceId
+						,intItemId = @intItemId
+					FROM tblQMSample S
+					WHERE S.intSampleId = @intBatchSampleId
+
+					SET @intSampleId = @intBatchSampleId
+
+					UPDATE tblMFBatch
+					SET intTealingoItemId = @intItemId
+						,intOriginalItemId = @intOriginalItemId
+					WHERE intBatchId = @intProductValueId
+				END
+
+				/* Item UOM Validation. */
+				IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
 					BEGIN
-						EXEC uspQMUpdateTINBatchId @strTINNumber = @strOldTINNumber
-							,@intBatchId = @intProductValueId
-							,@intCompanyLocationId = @intOldCompanyLocationId
-							,@intEntityId = @intEntityUserId
-							,@ysnDelink = 1
+						SELECT @strItemLog = strItemNo
+						FROM tblICItem 
+						WHERE intItemId = @intItemId;
+
+						SELECT @strUnitMeasureLog = strUnitMeasure
+						FROM tblICUnitMeasure 
+						WHERE intUnitMeasureId = @intRepresentingUOMId;
+
+						UPDATE tblQMImportCatalogue
+						SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+							,ysnProcessed = 1
+							,ysnSuccess = 0
+						WHERE intImportCatalogueId = @intImportCatalogueId;
+
+						GOTO CONT
 					END
 
-					-- Link new TIN number with the pre-shipment sample / batch
-					EXEC uspQMUpdateTINBatchId @strTINNumber = @strTINNumber
-						,@intBatchId = @intProductValueId
-						,@intCompanyLocationId = @intMixingUnitLocationId
-						,@intEntityId = @intEntityUserId
-						,@ysnDelink = 0
+				IF @strTINNumber IS NOT NULL
+					BEGIN
+						DECLARE @strOldTINNumber NVARCHAR(100)
+							,@intOldCompanyLocationId INT
 
-					UPDATE tblQMSample
-					SET intTINClearanceId = (
-							SELECT TOP 1 intTINClearanceId
-							FROM tblQMTINClearance
-							WHERE strTINNumber = @strTINNumber
-								AND intBatchId = @intProductValueId
-								AND intCompanyLocationId = @intMixingUnitLocationId
-							)
-					WHERE intSampleId = @intSampleId
+						-- Insert / Update TIN number linked to the sample / batch
+						SELECT @strOldTINNumber = TIN.strTINNumber
+							,@intOldCompanyLocationId = B.intLocationId
+						FROM tblQMTINClearance TIN
+						INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
+						OUTER APPLY (
+							SELECT intBatchId
+								,intLocationId
+							FROM tblMFBatch
+							WHERE intBatchId = @intProductValueId
+							) B
+						WHERE S.intSampleId = @intSampleId
 
-					IF @ysnCreate = 0
-						EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
-							,@intUserEntityId = @intEntityUserId
-							,@strRemarks = 'Updated from Catalogue Import'
-							,@ysnCreate = 0
+						IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') 
+							OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
+						BEGIN
+							-- Delink old TIN number if there's an existing one and the TIN number has changed.
+							IF @strOldTINNumber IS NOT NULL
+							BEGIN
+								EXEC uspQMUpdateTINBatchId @strTINNumber = @strOldTINNumber
+									,@intBatchId = @intProductValueId
+									,@intCompanyLocationId = @intOldCompanyLocationId
+									,@intEntityId = @intEntityUserId
+									,@ysnDelink = 1
+							END
+
+							-- Link new TIN number with the pre-shipment sample / batch
+							EXEC uspQMUpdateTINBatchId @strTINNumber = @strTINNumber
+								,@intBatchId = @intProductValueId
+								,@intCompanyLocationId = @intMixingUnitLocationId
+								,@intEntityId = @intEntityUserId
+								,@ysnDelink = 0
+
+							UPDATE tblQMSample
+							SET intTINClearanceId = (
+									SELECT TOP 1 intTINClearanceId
+									FROM tblQMTINClearance
+									WHERE strTINNumber = @strTINNumber
+										AND intBatchId = @intProductValueId
+										AND intCompanyLocationId = @intMixingUnitLocationId
+									)
+							WHERE intSampleId = @intSampleId
+
+							IF @ysnCreate = 0
+								EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
+									,@intUserEntityId = @intEntityUserId
+									,@strRemarks = 'Updated from Catalogue Import'
+									,@ysnCreate = 0
 							,@ysnBeforeUpdate = 0
+						END
+					END
+
+				UPDATE tblQMImportCatalogue
+				SET intSampleId = @intSampleId
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+
 				END
-			END
-
-			UPDATE tblQMImportCatalogue
-			SET intSampleId = @intSampleId
-			WHERE intImportCatalogueId = @intImportCatalogueId
-
-			GOTO CONT
-		END
 
 		SELECT @intSampleId = S.intSampleId
 		FROM tblQMSample S
@@ -1084,6 +1138,26 @@ BEGIN TRY
 				,@intPatternCode = 62
 				,@ysnProposed = 0
 				,@strPatternString = @strSampleNumber OUTPUT
+
+			/* Item UOM Validation. */
+			IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+				BEGIN
+					SELECT @strItemLog = strItemNo
+					FROM tblICItem 
+					WHERE intItemId = @intItemId;
+
+					SELECT @strUnitMeasureLog = strUnitMeasure
+					FROM tblICUnitMeasure 
+					WHERE intUnitMeasureId = @intRepresentingUOMId;
+
+					UPDATE tblQMImportCatalogue
+					SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+						,ysnProcessed = 1
+						,ysnSuccess = 0
+					WHERE intImportCatalogueId = @intImportCatalogueId;
+
+					GOTO CONT
+				END
 
 			-- Insert Entry in Sample Table
 			INSERT INTO tblQMSample (
@@ -1430,6 +1504,26 @@ BEGIN TRY
 				-- Update if combination exists
 		ELSE
 		BEGIN
+			/* Item UOM Validation. */
+			IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+				BEGIN
+					SELECT @strItemLog = strItemNo
+					FROM tblICItem 
+					WHERE intItemId = @intItemId;
+
+					SELECT @strUnitMeasureLog = strUnitMeasure
+					FROM tblICUnitMeasure 
+					WHERE intUnitMeasureId = @intRepresentingUOMId;
+
+					UPDATE tblQMImportCatalogue
+					SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+						,ysnProcessed = 1
+						,ysnSuccess = 0
+					WHERE intImportCatalogueId = @intImportCatalogueId;
+
+					GOTO CONT
+				END
+			
 			EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intSampleId
 				,@intUserEntityId = @intEntityUserId
 				,@strRemarks = 'Updated from Catalogue Import'
