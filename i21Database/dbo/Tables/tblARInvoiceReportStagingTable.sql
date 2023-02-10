@@ -109,6 +109,8 @@
 	[dblInvoiceTax]						NUMERIC (18, 6)	NULL,
 	[dblPriceWithTax]					NUMERIC (18, 6)	NULL,
 	[dblTotalPriceWithTax]				NUMERIC (18, 6)	NULL,
+	[dblLineTotal]						NUMERIC (18, 6)	NULL,
+	[dblPriceTotal]						NUMERIC (18, 6)	NULL,
 	[ysnHasEmailSetup]					BIT             NULL,
 	[ysnHasRecipeItem]					BIT             NULL,
 	[ysnHasVFDDrugItem]					BIT             NULL,
