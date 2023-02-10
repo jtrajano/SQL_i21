@@ -106,6 +106,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = IMP.strB1GroupNumber
 	LEFT JOIN tblQMSampleType ST ON ST.strSampleTypeName = IMP.strSampleTypeName
 	LEFT JOIN tblMFBatch B ON B.strBatchId = IMP.strBatchNo
+	LEFT JOIN tblQMControlPoint AS ControlPoint ON ST.intControlPointId = ControlPoint.intControlPointId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -124,10 +125,8 @@ BEGIN TRY
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND ysnSuccess = 1
-		AND (
-			CL.intCompanyLocationId IS NULL
-			OR ST.intSampleTypeId IS NULL
-			)
+		AND (CL.intCompanyLocationId IS NULL OR ST.intSampleTypeId IS NULL)
+		AND (ControlPoint.intControlPointId NOT IN (1, 5))
 
 	-- End Validate Key Fields for Auction/Non-Auction Sample
 	-- Validate Key Fields for Auction/Non-Auction Sample
