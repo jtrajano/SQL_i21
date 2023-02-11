@@ -1231,8 +1231,9 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
     <Build Include="dbo\Views\vyuTMGetOrder.sql" />
-<Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
