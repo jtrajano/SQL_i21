@@ -107,7 +107,7 @@ BEGIN
 	GROUP BY UOM.strUnitMeasure
 
 	SET @Condition = '<ol>'
-	SELECT @Condition = COALESCE(@Condition + '<li>', '') + CTC.strConditionName + ' - ' + LC.strConditionDescription + '</li>'
+	SELECT @Condition = COALESCE(@Condition + '<li>', '') + CTC.strConditionName + ' - ' + REPLACE(REPLACE(LC.strConditionDescription, char(13), '<br/>'), CHAR(10), '<br/>') + '</li>'
 	FROM tblLGLoadCondition LC
 	INNER JOIN tblCTCondition CTC ON LC.intConditionId = CTC.intConditionId
 	WHERE intLoadId = @intLoadId
@@ -264,12 +264,14 @@ FROM (
 		,L.strServiceContractNumber
 		,strServiceContractOwner = SLSC.strOwner
 		,SLSC.strFreightClause
+		,strServiceConNumFreightClause = L.strServiceContractNumber + ' ' + SLSC.strFreightClause
 		,strShipper = Shipper.strName
 		,L.strPackingDescription
 		,L.intNumberOfContainers
 		,strNumberOfContainers = CONVERT(NVARCHAR, L.intNumberOfContainers) + ' (' + L.strPackingDescription + ')'
 		,ContType.strContainerType
 		,L.strShippingMode
+		,strShippingModeContType = ContType.strContainerType + ' ' + L.strShippingMode
 		,L.strMVessel
 		,L.strMVoyageNumber
 		,L.strFVessel
@@ -535,6 +537,7 @@ FROM (
 		,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
 		,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)			
 		,strShipmentPeriod = UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106))
+		,strLSShipmentPeriod = CONVERT(NVARCHAR,L.dtmStartDate,101) + ' - ' + CONVERT(NVARCHAR,L.dtmEndDate,101)
 		,strMarkingInstruction = L.strMarks
 		,strPositionInfo = DATENAME(mm, CD.dtmEndDate) + ' / ' + CAST(DATEPART(yy, CD.dtmEndDate) AS NVARCHAR(10)) + ' ' + POS.strPosition
 		,strInstructionText = CASE
