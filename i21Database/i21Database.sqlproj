@@ -393,6 +393,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningView.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractToFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
