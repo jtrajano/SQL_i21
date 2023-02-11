@@ -1220,6 +1220,7 @@
     <Build Include="dbo\Tables\tblFABookDepreciationReport.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
+    <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
@@ -1228,10 +1229,10 @@
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
-    <Folder Include="dbo\" />
     <Folder Include="dbo\Tables\" />
     <Folder Include="dbo\Views\" />
     <Folder Include="Security\" />
