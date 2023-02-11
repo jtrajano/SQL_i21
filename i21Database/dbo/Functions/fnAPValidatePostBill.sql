@@ -830,6 +830,22 @@ BEGIN
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.ysnPosted = 1
 
+		--OTHER CHARGE IS ALREADY REVERSED IN IC
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'You cannot unpost this voucher. ' + BD.strMiscDescription + ' is already reversed in ' + IR.strReceiptNumber + '.',
+			'Bill',
+			B.strBillId,
+			B.intBillId,
+			22
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN tblICInventoryReceiptCharge IRC ON IRC.intLoadShipmentCostId = BD.intLoadShipmentCostId
+		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRC.intInventoryReceiptId
+		WHERE  B.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND B.ysnPosted = 1
+		AND IRC.ysnWithGLReversal = 1
+
 		-- --BILL WAS POSTED FROM SETTLE STORAGE
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		-- SELECT 

@@ -15,7 +15,7 @@ BEGIN TRY
 	DECLARE @ysnCancelled AS BIT
 
 	-- Validate if the Cancellation/Reversal is valid
-	SELECT @ysnCancelled = ysnCancelled FROM tblLGAllocationHeader
+	SELECT @ysnCancelled = ysnCancelled FROM tblLGAllocationHeader WHERE @intAllocationHeaderId = intAllocationHeaderId
 	IF (ISNULL(@ysnCancelled, 0) = ISNULL(@ysnCancel, 0))
 	BEGIN
 		RETURN
