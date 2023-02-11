@@ -9201,7 +9201,7 @@
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
-	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
@@ -9257,6 +9257,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
