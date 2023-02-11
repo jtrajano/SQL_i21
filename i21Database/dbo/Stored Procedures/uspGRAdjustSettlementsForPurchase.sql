@@ -250,7 +250,7 @@ BEGIN
 					ON EM.intEntityId = ESD.intEntityId
 			) ON ES.intSplitId = A.intSplitId				
 		) ADJ
-			ON ADJ.intEntityId = APB.intEntityId
+			ON ADJ.intEntityId = APB.intEntityVendorId
 		WHERE APD.dblTax <> 0
 
 		
@@ -299,7 +299,7 @@ BEGIN
 					ON EM.intEntityId = ESD.intEntityId
 			) ON ES.intSplitId = A.intSplitId				
 		) ADJ
-			ON ADJ.intEntityId = APB.intEntityId
+			ON ADJ.intEntityId = APB.intEntityVendorId
 
 		UPDATE BDT
 		SET dblAdjustedTax = CASE 
@@ -332,7 +332,7 @@ BEGIN
 					ON EM.intEntityId = ESD.intEntityId
 			) ON ES.intSplitId = A.intSplitId				
 		) ADJ
-			ON ADJ.intEntityId = APB.intEntityId
+			ON ADJ.intEntityId = APB.intEntityVendorId
 		/*END *** NOTE: If the Tax's calculation method is Percentage, Override the tax with the CKOFF Adjustment*/
 		-- select 'GG',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail a inner join @detailCreated b on b.intId = a.intBillDetailId ORDER BY intBillDetailId DESC
 	END
