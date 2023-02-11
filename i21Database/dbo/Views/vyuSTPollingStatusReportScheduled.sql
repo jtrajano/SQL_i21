@@ -8,7 +8,7 @@ FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 stcp.dtmCheckoutProcessDate, 
 ISNULL(CH.dtmCheckoutDate, stcp.dtmCheckoutProcessDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
-sts.strDescription, 
+CAST(sts.intStoreNo AS VARCHAR(20)) + ' - ' + sts.strDescription AS strDescription, 
 ISNULL(stcpew.strMessage, 
 'Store did not automatically run for today. It is stuck on ' +
 FORMAT((
