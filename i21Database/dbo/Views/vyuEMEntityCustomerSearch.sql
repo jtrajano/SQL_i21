@@ -87,6 +87,7 @@ LEFT JOIN tblEMEntityLocation custLocation ON CUSTOMER.intEntityId = custLocatio
 LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocation.intEntityLocationId AND shipLocation.ysnActive = 1
 LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId AND billLocation.ysnActive = 1
 LEFT JOIN tblEMEntity entityToSalesperson ON entityToSalesperson.intEntityId = ISNULL(shipLocation.intSalespersonId, CUSTOMER.intSalespersonId)
+LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
 LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.intCurrencyID
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
 LEFT JOIN vyuEMEntityType entityType ON CUSTOMER.intEntityId = entityType.intEntityId
@@ -95,12 +96,6 @@ LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = en
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm LOCATIONTERM ON custLocation.intTermsId = LOCATIONTERM.intTermID
 LEFT JOIN tblSMTerm CUSTOMERTERM ON CUSTOMER.intTermsId = CUSTOMERTERM.intTermID
-OUTER APPLY (
-	SELECT TOP 1 strPhone
-	FROM tblEMEntityPhoneNumber EPN
-	WHERE entityToContact.intEntityContactId = EPN.intEntityId
-	ORDER BY intEntityPhoneNumberId
-) entityPhone
 OUTER APPLY (
 	SELECT TOP 1 intTermId	= P.intTermId
 			   , strTerm	= T.strTerm
