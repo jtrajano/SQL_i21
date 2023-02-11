@@ -300,6 +300,74 @@ GROUP BY Commodity.strCommodityCode
 		,OP.intLocationId
 	   ,OP.strLocationName
 	   ,OP.strUnitMeasure
+
+IF NOT EXISTS(SELECT 1 FROM @InventoryData)
+BEGIN
+INSERT INTO @InventoryData
+SELECT 1,
+	   'PHYSICAL INVENTORY BEGINNING' AS label
+	   ,'' AS [Sign]
+	   ,0
+	   ,Commodity.strCommodityCode
+	   ,Commodity.intCommodityId
+	   ,OP.intLocationId
+	   ,OP.strLocationName
+	   ,OP.strUnitMeasure
+FROM (SELECT	1 intItemId
+		,I.intCommodityId
+		,intLocationId
+		,CL.strLocationName
+		,t.intInTransitSourceLocationId
+		,CL.ysnLicensed
+		,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty))
+		,UOM.strUnitMeasure
+FROM tblICInventoryTransaction t
+INNER JOIN (
+			tblICItemLocation ItemLocation 
+			LEFT JOIN tblICItemUOM UOML
+				ON UOML.intItemUOMId = ItemLocation.intReceiveUOMId
+			)
+		ON ItemLocation.intItemLocationId = t.intItemLocationId
+LEFT JOIN tblICItemUOM UOM2
+	ON UOM2.intItemId = t.intItemId
+		AND UOM2.ysnStockUnit = 1
+INNER JOIN tblICItem I 
+	ON I.intItemId = t.intItemId
+INNER JOIN tblICCommodityUnitMeasure UM
+	ON UM.intCommodityId = I.intCommodityId
+		AND UM.ysnStockUnit = 1
+OUTER APPLY (
+	SELECT TOP 1 intCommodityUnitMeasureId
+	FROM tblICCommodityUnitMeasure
+	WHERE intCommodityId = I.intCommodityId
+		AND intUnitMeasureId = ISNULL(UOML.intUnitMeasureId,UOM2.intUnitMeasureId)
+) UM_REF
+INNER JOIN tblICUnitMeasure UOM
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+INNER JOIN tblSMCompanyLocation CL 
+	ON CL.intCompanyLocationId = ItemLocation.intLocationId
+WHERE t.ysnIsUnposted <> 1
+	AND t.dtmDate >= @dtmReportDate 
+	AND I.intCommodityId = ISNULL(@intCommodityId, I.intCommodityId)
+	AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
+			OR CL.intCompanyLocationId = @intLocationId
+		)
+GROUP BY t.intItemId
+		,ItemLocation.intLocationId
+		,t.intLotId
+		,t.intInTransitSourceLocationId
+		,CL.ysnLicensed
+		,I.intCommodityId
+		,CL.strLocationName
+		,UOM.strUnitMeasure) OP
+LEFT JOIN tblICCommodity Commodity
+	ON Commodity.intCommodityId = OP.intCommodityId
+GROUP BY Commodity.strCommodityCode
+		,Commodity.intCommodityId
+		,OP.intLocationId
+	   ,OP.strLocationName
+	   ,OP.strUnitMeasure
+END
 /*end inventory opening balance */
 
 /* Received, Shipped, Adjustments */
@@ -962,6 +1030,11 @@ BEGIN
 END
 
 SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
+
+IF @intTotalRowCnt IS NULL
+BEGIN
+	SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @ReportData)
+END
 
 INSERT INTO @StorageObligationData
 SELECT
