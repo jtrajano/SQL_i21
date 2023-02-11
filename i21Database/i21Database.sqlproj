@@ -1538,6 +1538,7 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetailImport.sql" />
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIcon.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
