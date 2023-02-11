@@ -209,7 +209,12 @@ PRINT N'BEGIN - Lottery Book fix ending number'
 
 UPDATE tblSTLotteryBook
 SET tblSTLotteryBook.intStartingNumber = tbl_Update.intStartingNumber,
-tblSTLotteryBook.intEndingNumber = tbl_Update.intEndingNumber
+tblSTLotteryBook.intEndingNumber = tbl_Update.intEndingNumber,
+tblSTLotteryBook.intReceiptEndingNumber = tbl_Update.intReceiptEndingNumber,
+tblSTLotteryBook.dblQuantityRemaining = CASE WHEN tbl_Update.strStatus = 'Sold'
+											THEN 0
+										ELSE ABS(tbl_Update.intEndingNumber - tbl_Update.intStartingNumber) + 1
+										END
 FROM 
 (
 	SELECT 
@@ -217,7 +222,8 @@ FROM
 		LG.intLotteryGameId,
 		ISNULL(LC.intEndingCount, LG.intStartingNumber) AS intStartingNumber,
 		LG.intEndingNumber intEndingNumber,
-		LG.intEndingNumber AS intReceiptEndingNumber
+		LG.intEndingNumber AS intReceiptEndingNumber,
+		LB.strStatus AS strStatus
 	FROM tblSTLotteryBook LB
 	LEFT JOIN tblSTLotteryGame LG
 		ON LB.intLotteryGameId = LG.intLotteryGameId

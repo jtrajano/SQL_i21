@@ -6457,7 +6457,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				UPDATE tblSTLotteryBook 
 				SET tblSTLotteryBook.intStartingNumber = tblSTCheckoutLotteryCount.intEndingCount,
 				tblSTLotteryBook.dblQuantityRemaining = CASE WHEN strSoldOut = 'Yes' THEN 0 
-														ELSE ABS(tblSTCheckoutLotteryCount.intEndingCount - tblSTLotteryBook.intEndingNumber)
+														ELSE ABS(tblSTCheckoutLotteryCount.intEndingCount - tblSTLotteryBook.intEndingNumber) + 1
 														END
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
@@ -7523,7 +7523,12 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				----------------- LOTTERY COUNT  ---------------------
 				------------------------------------------------------
 				
-				UPDATE tblSTLotteryBook SET tblSTLotteryBook.dblQuantityRemaining = ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) + ISNULL(tblSTCheckoutLotteryCount.dblQuantitySold,0)
+				UPDATE tblSTLotteryBook 
+				SET tblSTLotteryBook.dblQuantityRemaining = ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) + ISNULL(tblSTCheckoutLotteryCount.dblQuantitySold,0),
+				tblSTLotteryBook.intStartingNumber = CASE WHEN (tblSTLotteryBook.strCountDirection = 'Low to High')
+															THEN ISNULL(tblSTLotteryBook.intStartingNumber,0) - ISNULL(tblSTCheckoutLotteryCount.dblQuantitySold,0)
+														ELSE ISNULL(tblSTLotteryBook.intStartingNumber,0) + ISNULL(tblSTCheckoutLotteryCount.dblQuantitySold,0)
+													END
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
