@@ -358,7 +358,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= ARIDL.dblQuantityShipped
+	,[dblQty]						= ARIDL.dblQuantityShipped * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
