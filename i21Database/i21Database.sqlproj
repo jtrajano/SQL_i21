@@ -1298,6 +1298,7 @@
     <Build Include="dbo\Stored Procedures\uspTMInventoryHistory.sql" />
     <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
