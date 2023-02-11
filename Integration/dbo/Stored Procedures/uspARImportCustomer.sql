@@ -1759,14 +1759,20 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				, strUserType
 			)
 			SELECT intEntityId			= E.intEntityId
-				, intEntityContactId	= CONTACT.intEntityId --NOT SURE
-				, intEntityLocationId	= LOC.intEntityLocationId --NOT SURE
+				, intEntityContactId	= CONTACT.intEntityId
+				, intEntityLocationId	= LOC.intEntityLocationId
 				, ysnDefaultContact		= C.ysnDefault
 				, ysnPortalAccess		= 0
 				, strUserType			= ''User''
 			FROM #CUSTOMERS C
 			INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
-			INNER JOIN tblEMEntity CONTACT ON C.strContactName = CONTACT.strName
+			CROSS APPLY (
+				SELECT TOP 1 intEntityId
+				FROM tblEMEntity CONTACT 
+				WHERE C.strContactName = CONTACT.strName 
+				  AND C.strPhone = CONTACT.strPhone 
+				  AND C.strPhone2 = CONTACT.strPhone2
+			) CONTACT
 			LEFT JOIN tblEMEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND CONTACT.intEntityId = ETC.intEntityContactId
 			CROSS APPLY (
 				SELECT TOP 1 EL.intEntityLocationId
