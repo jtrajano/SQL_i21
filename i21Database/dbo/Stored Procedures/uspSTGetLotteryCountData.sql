@@ -136,7 +136,8 @@ intBeginCount = CASE
 		CASE WHEN ISNULL(intPriorCheckoutCount,0) != 0 
 		THEN intPriorCheckoutBeginCount 
 		ELSE 
-			CASE WHEN strCountDirection = 'Low to High' THEN intStartingNumber ELSE CAST(intEndingNumber AS INT) END
+			--CASE WHEN strCountDirection = 'Low to High' THEN intStartingNumber ELSE CAST(intEndingNumber AS INT) END
+			intStartingNumber
 		END
 	END
 ,dtmSoldDate	
