@@ -122,7 +122,7 @@ BEGIN TRY
 	
 	INSERT	INTO @tblPricing
 	SELECT	RP.intReassignPricingId,
-			dblReassign = RP.dblReassign / isnull(RP.dblLot,1.00),
+			dblReassign = RP.dblReassign,
 			RP.intPriceFixationDetailId,
 			F1.intPriceFixationId,
 			F1.[dblNoOfLots],
