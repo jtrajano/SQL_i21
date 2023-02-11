@@ -1222,7 +1222,6 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
     <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
-  
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
@@ -1234,10 +1233,10 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
-    <Folder Include="dbo\" />
     <Folder Include="dbo\Tables\" />
     <Folder Include="dbo\Views\" />
     <Folder Include="Security\" />
