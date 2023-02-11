@@ -456,6 +456,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
     <Build Include="dbo\Tables\tblMFRecipeExclude.sql" />
     <Build Include="dbo\Tables\tblMFStorageLocationExclude.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
