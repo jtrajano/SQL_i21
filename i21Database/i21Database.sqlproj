@@ -1537,6 +1537,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareDropshipInTransit.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDropshipInTransit.sql" />
     <Build Include="dbo\Views\vyuCTGetQualityCodes.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
