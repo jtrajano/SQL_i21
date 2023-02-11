@@ -284,12 +284,13 @@
     <Build Include="dbo\Views\vyuApiTaxGroup.sql" />
     <Build Include="dbo\Views\vyuApiTerm.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
-	<Build Include="dbo\Tables\tblTMOrder.sql" />
+	  <Build Include="dbo\Tables\tblTMOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateOrder.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetAccountSegmentPartition.sql" />
     <Build Include="dbo\Tables\tblGLCOAImportStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportCOAFromCSV.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
