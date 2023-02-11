@@ -329,6 +329,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
