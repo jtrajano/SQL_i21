@@ -906,6 +906,7 @@
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationPriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayableVendor.sql" />
     <Build Include="dbo\Functions\fnLGGetDelimitedContractCertificates.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCancelPickLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
