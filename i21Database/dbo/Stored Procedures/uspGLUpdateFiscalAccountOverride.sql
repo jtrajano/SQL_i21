@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspGLUpdateFiscalAccountOverride
+CREATE PROCEDURE uspGLUpdateFiscalAccountOverride ( @strType NVARCHAR(5))
 AS
 BEGIN
 
@@ -6,7 +6,8 @@ declare @columns NVARCHAR(500)
 declare @columnnumber NVARCHAR(30)
 
 DECLARE @strOverrideREArray NVARCHAR(10)
-SELECT TOP 1 @strOverrideREArray = strOverrideREArray FROM tblGLCompanyPreferenceOption
+
+SELECT TOP 1 @strOverrideREArray =  case when @strType = 'RE' THEN strOverrideREArray ELSE strOverrideISArray END FROM tblGLCompanyPreferenceOption
 DECLARE @tbl TABLE (Item INT)
 INSERT INTO @tbl(Item)
 select cast( Item as int) Item from  dbo.fnSplitString(@strOverrideREArray,',');
@@ -130,7 +131,10 @@ FROM QUERY
 
 _execute:
 
- EXEC ('TRUNCATE TABLE tblGLREMaskAccount insert into tblGLREMaskAccount(intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment')
+DECLARE @tblName NVARCHAR(30) = 'tblGLREMaskAccount'
+SELECT @tblName = CASE WHEN  @strType = 'RE' THEN 'tblGLREMaskAccount' ELSE 'tblGLISMaskAccount' END 
+
+ EXEC ('TRUNCATE TABLE '+ @tblName +' insert into '+ @tblName +' (intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment')
 
 
 END
