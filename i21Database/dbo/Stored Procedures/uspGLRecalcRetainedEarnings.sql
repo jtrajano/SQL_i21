@@ -1,11 +1,11 @@
 CREATE PROCEDURE uspGLRecalcRetainedEarnings    
     @intFiscalYearId INT,    
-    @intGLFiscalYearPeriodId INT,
+    @intGLFiscalYearPeriodId INT ,
 	@ysnAllFiscalYear BIT,
     @intOpen SMALLINT,    
     @intEntityId INT,    
     @result NVARCHAR(100) OUTPUT      
-AS
+AS 
 DECLARE @dtmStartDate DATETIME        
 DECLARE @dtmEndDate DATETIME        
 DECLARE @intRetainAccount INT        
@@ -15,53 +15,6 @@ DECLARE @RecapTableType  RecapTableType
 DECLARE @strPeriod NVARCHAR(30)        
 DECLARE @dtmNow DATETIME  = GETDATE()        
 DECLARE @intDefaultCurrencyId INT
-
-IF NOT EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnREOverride = 1)
-BEGIN
-     SET @result = 'Recalc RE is not enabled in System Manager.'  
-    GOTO _end   
-END
-
-
-DECLARE    
-@ysnOverrideLocation BIT = 0,    
-@ysnOverrideLOB BIT = 0,    
-@ysnOverrideCompany BIT = 0,
-@ysnHasLocation BIT = 0,
-@ysnHasLOB BIT = 0,
-@ysnHasCompany BIT = 0
-       
-SELECT 
-    TOP 1 @ysnHasLocation = 1
-    from tblGLAccountStructure A join tblGLSegmentType B on A.intStructureType = B.intSegmentTypeId
-    WHERE  B.strSegmentType = 'Location'
-
-SELECT 
-    TOP 1 @ysnHasLOB = 1
-    from tblGLAccountStructure A join tblGLSegmentType B on A.intStructureType = B.intSegmentTypeId
-    WHERE  B.strSegmentType = 'Line Of Business'
-
-SELECT 
-    TOP 1 @ysnHasCompany = 1
-    from tblGLAccountStructure A join tblGLSegmentType B on A.intStructureType = B.intSegmentTypeId
-    WHERE  B.strSegmentType = 'Company'
-    
-SELECT TOP 1     
-@ysnOverrideLocation = ISNULL(ysnREOverrideLocation,0) & @ysnHasLocation,    
-@ysnOverrideLOB = ISNULL(ysnREOverrideLOB,0) & @ysnHasLOB,    
-@ysnOverrideCompany = ISNULL(ysnREOverrideCompany,0) & @ysnHasCompany    
-FROM tblGLCompanyPreferenceOption    
-
-
-DECLARE @ysnREOverride BIT 
-SET  @ysnREOverride =  @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany 
-
-IF @ysnREOverride= 0 
-BEGIN
-	SET @result = 'Please override an existing segment in Company Config - Override Retained Earnings.'   
-	GOTO _end
-END
-
         
 DECLARE @tblPeriod TABLE (     
 intGLFiscalYearPeriodId INT,      
@@ -74,8 +27,43 @@ dtmEndDate  DATETIME)
     
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 
-DECLARE @strGUID NVARCHAR(40)      
+DECLARE @strGUID NVARCHAR(40)        
 
+IF NOT EXISTS (SELECT 1 FROM tblGLCompanyPreferenceOption WHERE ysnREOverride = 1)
+BEGIN
+     SET @result = 'Recalc RE is not enabled in System Manager.'  
+    GOTO _end   
+END
+
+DECLARE    
+@ysnREOverrideLocation BIT = 0,    
+@ysnREOverrideLOB BIT = 0,    
+@ysnREOverrideCompany BIT = 0,
+@ysnISOverrideLocation BIT = 0,    
+@ysnISOverrideLOB BIT = 0,    
+@ysnISOverrideCompany BIT = 0    
+    
+SELECT TOP 1     
+@ysnREOverrideLocation = ISNULL(ysnREOverrideLocation,0),    
+@ysnREOverrideLOB = ISNULL(ysnREOverrideLOB,0),    
+@ysnREOverrideCompany = ISNULL(ysnREOverrideCompany,0)
+-- @ysnISOverrideLocation = ISNULL(ysnISOverrideLocation,0),    
+-- @ysnISOverrideLOB = ISNULL(ysnISOverrideLOB,0),    
+-- @ysnISOverrideCompany = ISNULL(ysnISOverrideCompany,0)    
+FROM tblGLCompanyPreferenceOption  
+
+DECLARE @ysnREOverride BIT --, @ysnISOverride BIT 
+
+SET  @ysnREOverride =  @ysnREOverrideLocation | @ysnREOverrideLOB | @ysnREOverrideCompany 
+--SET  @ysnISOverride =  @ysnISOverrideLocation | @ysnISOverrideLOB | @ysnISOverrideCompany 
+
+	
+	
+IF @ysnREOverride= 0 --OR @ysnISOverride = 0 
+BEGIN
+	SET @result = 'Please Override Retained Earnings and Income Summary Account to continue.'   
+	GOTO _end
+END
 
 IF @ysnAllFiscalYear = 1
 BEGIN	
@@ -117,7 +105,6 @@ BEGIN
 		    
 	END  
 END
-select * from @tblPeriod
 
 IF EXISTS(SELECT 1 FROM @tblPeriod where ISNULL(intIncomeSummaryAccount,0) = 0 )
 BEGIN
@@ -131,7 +118,8 @@ BEGIN
 END
 
 --select * from @tblPeriod
-    
+
+DECLARE @RevalTableTypeRE RevalTableType
 WHILE EXISTS (SELECT 1 FROM  @tblPeriod)        
 BEGIN        
     SELECT TOP 1 @intGLFiscalYearPeriodId =intGLFiscalYearPeriodId,@strPeriod = strPeriod,        
@@ -141,7 +129,7 @@ BEGIN
         
     DELETE FROM tblGLDetail WHERE strBatchId  = @strGUID    
     
-    INSERT INTO @RevalTableType(          
+    INSERT INTO @RevalTableTypeRE(          
             [strTransactionId]          
             ,[intTransactionId]          
             ,[intAccountId]          
@@ -189,8 +177,7 @@ BEGIN
             ,'General Ledger'          
             ,A.intAccountId        
          FROM tblGLDetail A         
-  JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId     
-  
+  JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId
   WHERE         
         B.strAccountType in ('Expense','Revenue')         
         AND ISNULL(ysnIsUnposted,0) = 0        
@@ -200,12 +187,78 @@ BEGIN
         
 END
 
---select * from @RevalTableType
+  
 
+DECLARE @OverrideTableType [OverrideTableType]
+INSERT INTO @OverrideTableType(intAccountId, intAccountIdOverride)
+select intAccountId, intAccountIdOverride from @RevalTableTypeRE
+GROUP BY intAccountId,intAccountIdOverride
 
-
---REVERSED BY INCOME SUMMARY ACCOUNT        
 INSERT INTO @RevalTableType(          
+            [strTransactionId]          
+            ,[intTransactionId]          
+            ,[intAccountId]          
+            ,[strDescription]          
+            ,[dtmTransactionDate]    
+            ,[dblDebit]          
+            ,[dblCredit]          
+            ,[dtmDate]          
+            ,[ysnIsUnposted]          
+            ,[intConcurrencyId]           
+            ,[intCurrencyId]          
+            ,[intUserId]          
+            ,[intEntityId]             
+            ,[dtmDateEntered]          
+            ,[strBatchId]          
+            ,[strCode]   
+            ,[strJournalLineDescription]          
+            ,[intJournalLineNo]          
+            ,[strTransactionType]          
+            ,[strTransactionForm]          
+            ,strModuleName    
+            ,strOverrideAccountError    
+            ,strNewAccountIdOverride   
+        )
+SELECT
+            [strTransactionId]          
+            ,[intTransactionId]          
+            ,[intAccountId] = B.intNewAccountIdOverride         
+            ,[strDescription]          
+            ,[dtmTransactionDate]    
+            ,[dblDebit]          
+            ,[dblCredit]          
+            ,[dtmDate]          
+            ,[ysnIsUnposted]          
+            ,[intConcurrencyId]           
+            ,[intCurrencyId]          
+            ,[intUserId]          
+            ,[intEntityId]             
+            ,[dtmDateEntered]          
+            ,[strBatchId]          
+            ,[strCode]   
+            ,[strJournalLineDescription]          
+            ,[intJournalLineNo]          
+            ,[strTransactionType]          
+            ,[strTransactionForm]          
+            ,strModuleName          
+			,B.strOverrideAccountError
+            ,B.strNewAccountIdOverride  
+FROM 
+@RevalTableTypeRE A
+OUTER APPLY(
+		SELECT 
+		fn.intNewAccountIdOverride,
+		fn.strOverrideAccountError,
+		fn.strNewAccountIdOverride
+		from
+		fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnREOverrideLocation,@ysnREOverrideLOB,@ysnREOverrideCompany)fn
+		where intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+	
+)B
+
+--REVERSED BY INCOME SUMMARY ACCOUNT    
+DECLARE @RevalTableTypeIS RevalTableType
+INSERT INTO @RevalTableTypeIS(          
     [strTransactionId]          
     ,[intTransactionId]          
     ,[intAccountId]          
@@ -252,9 +305,73 @@ SELECT
     ,[strTransactionForm]          
     ,strModuleName          
     ,intAccountIdOverride        
-FROM @RevalTableType        
-        
-    
+FROM @RevalTableTypeRE 
+
+DELETE FROM @OverrideTableType
+INSERT INTO @OverrideTableType(intAccountId, intAccountIdOverride)
+select intAccountId, intAccountIdOverride from @RevalTableTypeIS
+GROUP BY intAccountId,intAccountIdOverride
+
+ INSERT INTO @RevalTableType(          
+            [strTransactionId]          
+            ,[intTransactionId]          
+            ,[intAccountId]          
+            ,[strDescription]          
+            ,[dtmTransactionDate]    
+            ,[dblDebit]          
+            ,[dblCredit]          
+            ,[dtmDate]          
+            ,[ysnIsUnposted]          
+            ,[intConcurrencyId]           
+            ,[intCurrencyId]          
+            ,[intUserId]          
+            ,[intEntityId]             
+            ,[dtmDateEntered]          
+            ,[strBatchId]          
+            ,[strCode]   
+            ,[strJournalLineDescription]          
+            ,[intJournalLineNo]          
+            ,[strTransactionType]          
+            ,[strTransactionForm]          
+            ,strModuleName    
+            ,strOverrideAccountError
+            ,strNewAccountIdOverride  
+        )
+SELECT
+            [strTransactionId]          
+            ,[intTransactionId]          
+            ,[intAccountId]=B.intNewAccountIdOverride         
+            ,[strDescription]          
+            ,[dtmTransactionDate]    
+            ,[dblDebit]          
+            ,[dblCredit]          
+            ,[dtmDate]          
+            ,[ysnIsUnposted]          
+            ,[intConcurrencyId]           
+            ,[intCurrencyId]          
+            ,[intUserId]          
+            ,[intEntityId]             
+            ,[dtmDateEntered]          
+            ,[strBatchId]          
+            ,[strCode]   
+            ,[strJournalLineDescription]          
+            ,[intJournalLineNo]          
+            ,[strTransactionType]          
+            ,[strTransactionForm]          
+            ,strModuleName          
+			,B.strOverrideAccountError
+            ,B.strNewAccountIdOverride
+FROM
+@RevalTableTypeIS A 
+OUTER APPLY(
+		SELECT 
+            fn.intNewAccountIdOverride,
+            fn.strOverrideAccountError,
+            fn.strNewAccountIdOverride
+		FROM fnGLOverrideTableOfAccounts(@OverrideTableType, @ysnREOverrideLocation,@ysnREOverrideLOB,@ysnREOverrideCompany)fn
+		WHERE intAccountId =A.intAccountId and A.intAccountIdOverride = intAccountIdOverride
+)B
+
 
 INSERT INTO @RecapTableType(    
     dtmDate,      
@@ -267,8 +384,7 @@ INSERT INTO @RecapTableType(
     strCode,     
     intCurrencyId,      
     dtmDateEntered,      
-    strJournalLineDescription,      
-    --intJournalLineNo,      
+    strJournalLineDescription,
     ysnIsUnposted,      
     intUserId,      
     intEntityId,      
@@ -276,17 +392,9 @@ INSERT INTO @RecapTableType(
     intTransactionId,      
     strTransactionType,      
     strTransactionForm,      
-    strModuleName,
+    strModuleName,    
     strOverrideAccountError,
-    strNewAccountIdOverride
-    --intConcurrencyId,      
-    --intAccountIdOverride,      
-    --intLocationSegmentOverrideId,      
-    --intLOBSegmentOverrideId,      
-    --intCompanySegmentOverrideId,      
-    --strNewAccountIdOverride,      
-    --intNewAccountIdOverride,      
-    --strOverrideAccountError    
+    strNewAccountIdOverride  
 )    
     
 SELECT     
@@ -300,8 +408,7 @@ SELECT
     strCode = 'GL',     
     intCurrencyId = @intDefaultCurrencyId,      
     dtmDateEntered,      
-    strJournalLineDescription,      
-    --intJournalLineNo,      
+    strJournalLineDescription, 
     0 ysnIsUnposted,      
     intUserId,      
     intEntityId,      
@@ -309,49 +416,25 @@ SELECT
     intTransactionId=REPLACE( CONVERT(date, dtmDate,100),'-', ''),      
     strTransactionType='Fiscal Year RE',      
     strTransactionForm ='Fiscal year',      
-    strModuleName='General Ledger',  
-     strOverrideAccountError,
-    strNewAccountIdOverride   
-    --intConcurrencyId,      
-    --intAccountIdOverride,      
-    --intLocationSegmentOverrideId,      
-    --intLOBSegmentOverrideId,      
-    --intCompanySegmentOverrideId,      
-    --strNewAccountIdOverride,      
-    --intNewAccountIdOverride,      
-        
-FROM fnGLOverridePostAccounts(@RevalTableType,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany) A         
+    strModuleName='General Ledger',     
+    strOverrideAccountError,
+    strNewAccountIdOverride  
+FROM @RevalTableType A         
 group by dtmDate,      
     strBatchId,      
-    intAccountId,     
-    --strDescription,        
-    dtmTransactionDate,     
-    --dblDebit,      
-    --dblCredit,     
-    strCode,     
-    --intCurrencyId,      
+    intAccountId,   
+    dtmTransactionDate, 
+    strCode,    
     dtmDateEntered,      
-    strJournalLineDescription,      
-    --intJournalLineNo,      
+    strJournalLineDescription,  
     ysnIsUnposted,      
     intUserId,      
-    intEntityId,      
-    --strTransactionId,      
-    --intTransactionId,      
-    --strTransactionType,      
-    --strTransactionForm,      
-    strModuleName,     
-    --intConcurrencyId,      
-    --intAccountIdOverride,      
-    --intLocationSegmentOverrideId,      
-    --intLOBSegmentOverrideId,      
-    --intCompanySegmentOverrideId,      
-    --strNewAccountIdOverride,      
-    --intNewAccountIdOverride,      
-     strOverrideAccountError,
-    strNewAccountIdOverride 
+    intEntityId,       
+    strModuleName,   
+    strOverrideAccountError,
+    strNewAccountIdOverride  
         
-IF EXISTS(SELECT 1 FROM @RecapTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
+IF EXISTS(SELECT 1 FROM @RevalTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 BEGIN
     EXEC uspGLPostRecap @RecapTableType, @intEntityId          
     EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
