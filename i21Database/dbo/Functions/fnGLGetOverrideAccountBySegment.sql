@@ -31,6 +31,7 @@ WHILE @ysnOverrideLocation = 1
         , @strSegment NVARCHAR(10) 
         , @intStructureType INT
         , @intAccountSegmentId INT
+        , @intSort INT
 
 
         IF @ysnOverrideLocation =1
@@ -58,19 +59,20 @@ WHILE @ysnOverrideLocation = 1
         
 
         SELECT TOP 1 
-        @strSegment =  strCode
+        @strSegment =  strCode,
+        @intSort = B.intSort,
+        @intLength = intLength
         FROM tblGLAccountSegment A JOIN tblGLAccountStructure B 
         ON A.intAccountStructureId = B.intAccountStructureId
         WHERE intStructureType = @intStructureType 
         AND intAccountSegmentId= @intAccountSegmentId
 
         SELECT @intDividerCount = COUNT(1)  FROM tblGLAccountStructure 
-        WHERE strType <> 'Divider' and intStructureType < @intStructureType
+        WHERE strType <> 'Divider' and intSort < @intSort
 
         SELECT @intStart = SUM(intLength) + @intDividerCount FROM tblGLAccountStructure 
-        WHERE strType <> 'Divider' and intStructureType < @intStructureType -- location
+        WHERE strType <> 'Divider' and intSort < @intSort -- location
 
-        SELECT @intLength = intLength FROM tblGLAccountStructure WHERE intStructureType = @intStructureType -- lob
         SELECT @intEnd = @intStart + @intLength
 
         
