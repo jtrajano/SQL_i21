@@ -1510,6 +1510,7 @@
     <Build Include="dbo\Tables\tblGLModuleList.sql" />
     <Build Include="dbo\Tables\tblGLPostHistory.sql" />
     <Build Include="dbo\Tables\tblGLRecurringHistory.sql" />
+    <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
     <Build Include="dbo\Tables\tblGLSummary.sql" />
     <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLSubsidiaryAccountMapping.sql" />
@@ -2243,6 +2244,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateParentCompany.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateInterCompanyBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
