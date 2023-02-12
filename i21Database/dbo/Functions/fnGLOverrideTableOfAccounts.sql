@@ -38,20 +38,21 @@ SELECT
  intLOBSegmentOverrideId,  
  intCompanySegmentOverrideId,  
  strNewAccountIdOverride,  
- intNewAccountIdOverride = intAccountIdOverride, -- default to base account 
+ intNewAccountIdOverride = intAccountId, -- default to base account 
  strOverrideAccountError
 from @OverrideTableType 
 
-IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
-    RETURN
 
-  
-UPDATE A   
-SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
-    A.intAccountIdOverride,   
-    A.intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)  
-FROM @tbl A   
-WHERE ISNULL(intAccountIdOverride,0) <> 0  
+IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 1 )
+BEGIN
+    UPDATE A   
+    SET strNewAccountIdOverride = dbo.fnGLGetOverrideAccountByAccount(   
+        A.intAccountIdOverride,   
+        A.intAccountId,@ysnOverrideLocation,@ysnOverrideLOB,@ysnOverrideCompany)  
+    FROM @tbl A   
+    WHERE ISNULL(intAccountIdOverride,0) <> 0  
+
+END
   
  UPDATE A   
  SET A.intNewAccountIdOverride = U.intAccountId,  
