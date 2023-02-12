@@ -17,6 +17,7 @@
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
 	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnCancelled] BIT NULL,
     CONSTRAINT [PK_tblLGPickLotHeader_intPickLotHeaderId] PRIMARY KEY ([intPickLotHeaderId]), 
 	CONSTRAINT [UK_tblLGPickLotHeader_intReferenceNumber] UNIQUE ([strPickLotNumber]),
 	CONSTRAINT [FK_tblLGPickLotHeader_tblEMEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),
