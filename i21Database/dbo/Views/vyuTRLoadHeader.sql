@@ -108,7 +108,7 @@ SELECT TL.intLoadHeaderId
 	, TL.intDispatchOrderId
 	, strDispatchId = LGD.strDispatchOrderNumber
 	, intTMOId = DD.intTMOId
-	, strTMOrder = TMD.strOrderNumber
+	, strTMOrder = ISNULL(TMD.strOrderNumber, TMH.strOrderNumber)
 	, strShipVia = c.strName
 	, strSeller = d.strName
 	, strStateName = e.strStateName
@@ -132,4 +132,5 @@ LEFT JOIN tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intT
 LEFT JOIN tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
 LEFT JOIN vyuTRLinkedReceipts Receipts ON Receipts.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
+LEFT JOIN tblTMDispatchHistory TMH ON TMH.intDispatchId = DD.intTMOId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
