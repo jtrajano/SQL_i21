@@ -1,5 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuMFGetItemUOM]
 AS 
+/**
+ * Created By: Jonathan Valenzuela
+ * Created Date: 02/13/2023
+ * Title: Item UOM 
+ * JIRA: MFG-4852
+ * Return all UOM of an item.
+ **/
 SELECT ItemUOM.intItemUOMId
 	 , ItemUOM.intItemId
 	 , Item.strItemNo
