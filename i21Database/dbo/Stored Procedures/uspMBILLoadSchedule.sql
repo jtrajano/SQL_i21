@@ -104,7 +104,7 @@ Delete From tblMBILPickupDetail Where intLoadDetailId NOT IN (Select intLoadDeta
 ,[intEntityId]= loadDtl.[intEntityId] 
 ,[intEntityLocationId]= loadDtl.[intEntityLocationId] 
 ,[intCompanyLocationId]= isnull([intPCompanyLocationId],intSCompanyLocationId)
-,[intContractDetailId]= isnull(intPContractDetailId,intSContractDetailId)
+,[intContractDetailId]= intPContractDetailId
 ,[intTaxGroupId]= isnull(intOutboundTaxGroupId,intInboundTaxGroupId)
 ,[dtmPickupFrom]= loadDtl.[dtmPickUpFrom] 
 ,[dtmPickupTo]= loadDtl.[dtmPickUpTo] 
@@ -150,7 +150,7 @@ Delete From tblMBILPickupDetail Where intLoadDetailId NOT IN (Select intLoadDeta
 ,[intEntityId] 
 ,[intEntityLocationId] 
 ,isnull([intPCompanyLocationId],intSCompanyLocationId)
-,isnull(intPContractDetailId,intSContractDetailId)
+,intPContractDetailId
 ,isnull(intOutboundTaxGroupId,intInboundTaxGroupId)
 ,[dtmPickUpFrom] 
 ,[dtmPickUpTo] 
@@ -223,7 +223,7 @@ Set delivery.intItemId = a.intItemId
  ,delivery.intTMDispatchId = a.intTMDispatchId
  ,delivery.intTMSiteId = a.intTMSiteId
  ,delivery.intDeliveryHeaderId = deliveryHdr.intDeliveryHeaderId
- ,delivery.intContractDetailId = t.intContractDetailId
+ ,delivery.intContractDetailId = isnull(a.intSContractDetailId,t.intContractDetailId)
 FROM tblMBILDeliveryDetail delivery
 INNER JOIN #loadOrder a on a.intLoadDetailId = delivery.intLoadDetailId
 INNER JOIN tblMBILLoadHeader load on load.intLoadId = a.intLoadId
@@ -254,7 +254,7 @@ SELECT a.intLoadDetailId
 ,a.intTMDispatchId
 ,a.intTMSiteId
  ,0 as dblDeliveredQty
-,t.intContractDetailId
+,isnull(a.intSContractDetailId,t.intContractDetailId)
 FROM #loadOrder a
 INNER JOIN tblMBILLoadHeader load on a.intLoadId = load.intLoadId
 INNER JOIN tblMBILDeliveryHeader delivery on load.intLoadHeaderId = delivery.intLoadHeaderId and 
