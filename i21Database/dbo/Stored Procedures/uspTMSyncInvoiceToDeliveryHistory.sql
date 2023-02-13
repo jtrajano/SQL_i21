@@ -45,6 +45,7 @@ BEGIN
 	DECLARE @intCustomerId INT
 	DECLARE @intScreenId INT
 	DECLARE @ysnRequireClock BIT
+	DECLARE @intDispatchId INT
 	
 
 
@@ -111,6 +112,7 @@ BEGIN
 			,@dblQuantityShipped = dblQtyShipped
 			,@dblTotalTax = dblTotalTax
 			,@dblItemTotal = dblTotal
+			,@intDispatchId = intDispatchId
 		FROM #tmpTMInvoiceDetail
 
 		SELECT @strBillingBy = strBillingBy FROM tblTMSite WHERE intSiteID = @intSiteId
@@ -1154,7 +1156,7 @@ BEGIN
 					END
 					
 
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId)
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID = @intDispatchId)
 					BEGIN
 						--- Insert Dispatch to tblTMDispatchHistory table
 						INSERT INTO tblTMDispatchHistory (
@@ -1251,6 +1253,7 @@ BEGIN
 
 					DELETE FROM tblTMDispatch
 					WHERE intSiteID = @intSiteId
+						AND intDispatchID = @intDispatchId
 				END
 				
 			END
