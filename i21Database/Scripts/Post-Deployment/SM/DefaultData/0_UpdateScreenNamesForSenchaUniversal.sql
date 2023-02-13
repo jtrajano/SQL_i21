@@ -102,19 +102,20 @@ GO
 ---------------------------------------------------------------------------------------------------------------------------------------
 ----------- Delete record for SystemManager.view.SecurityListingGenerator as it has a duplicate record on SM Module -----------
 ---------------------------------------------------------------------------------------------------------------------------------------
-PRINT '*** Start Deleting SecurityListingGenerator namespace on tblSMScreen ***'
+PRINT '*** Start Deleting obsolete GCE namespace on tblSMScreen ***'
 GO
 
 DELETE A 
 FROM tblSMScreen AS A
 WHERE A.strNamespace = 'GlobalComponentEngine.view.SecurityListingGenerator'
+     OR A.strNamespace = 'GlobalComponentEngine.view.CompanyPreferenceOption'
 
-PRINT '*** End Deleting SecurityListingGenerator namespace on tblSMScreen ***'
+PRINT '*** End Deleting obsolete GCE namespace on tblSMScreen ***'
 GO
 -----------------------------------------------------------------
 ------ Delete records that has both existing on GCE and SM ------
 -----------------------------------------------------------------
-PRINT '*** Start Updating LightningTable and DatabaseConnection namespaces on tblSMScreen ***'
+PRINT '*** Start deleting obsolete GCE screens on tblSMTransaction ***'
 GO
 
 DELETE TRN
@@ -123,12 +124,13 @@ INNER JOIN tblSMTransaction AS TRN
      ON MAIN.intScreenId = TRN.intScreenId
 WHERE 
      RIGHT(MAIN.strNamespace, CHARINDEX('.', REVERSE(MAIN.strNamespace) + '.') - 1) IN ('LightningTable', 'DatabaseConnection')
+     OR MAIN.strNamespace = 'GlobalComponentEngine.view.CompanyPreferenceOption'
 
 DELETE MAIN 
 FROM tblSMScreen AS MAIN
 WHERE 
      RIGHT(MAIN.strNamespace, CHARINDEX('.', REVERSE(MAIN.strNamespace) + '.') - 1) IN ('LightningTable', 'DatabaseConnection') -- This are the duplicate records
-PRINT '*** End deleting LightningTable and DatabaseConnection namespaces on tblSMScreen ***'
+PRINT '*** End deleting obsolete GCE screens on tblSMTransaction ***'
 GO
 ----------------------------------------------------------------
 ------ Update all Sencha Universal iRely Package screens  ------
