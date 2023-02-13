@@ -131,6 +131,6 @@ FROM QUERY
 _execute:
 declare @sql nvarchar(max) =
  'TRUNCATE TABLE tblGLREMaskAccount insert into tblGLREMaskAccount(intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment'
- select @sql
+EXEC (@sql)
 
 END
