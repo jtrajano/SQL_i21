@@ -144,14 +144,14 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
-						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
-
 						-- Automatic Allocation Reverse Cancellation
 						EXEC uspLGCancelAllocation
 							@intAllocationHeaderId = @intAllocationHeaderId,
 							@ysnCancel = 0,
 							@UserId = @UserId
+
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
 					END
 				END
 			END
