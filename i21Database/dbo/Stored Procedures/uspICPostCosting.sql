@@ -867,6 +867,11 @@ DEALLOCATE loopItems;
 
 IF @intReturnValue < 0 RETURN @intReturnValue;
 
+DECLARE 
+	@dblAutoVariance AS NUMERIC(18, 6) 
+	,@strAutoVarianceDescription NVARCHAR(255) 
+	,@InventoryTransactionIdentityId AS INT 
+
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
@@ -919,11 +924,6 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
-
-	DECLARE 
-		@dblAutoVariance AS NUMERIC(18, 6) 
-		,@strAutoVarianceDescription NVARCHAR(255) 
-		,@InventoryTransactionIdentityId AS INT 
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
 	BEGIN 
