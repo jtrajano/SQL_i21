@@ -67,7 +67,7 @@ BEGIN
 			SELECT TOP 1 @intInvoiceForSyncId = intId FROM @InvoicesToProcess
 
 			EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @intUserId, @ResultLogForSync OUT
-			RETURN
+			GOTO NEXTREC
 		END
 
 		--Get Validation result
@@ -119,6 +119,7 @@ BEGIN
 			,A.intPerformerId
 			,A.dblPercentFull
 			,A.dblNewMeterReading
+			,A.intDispatchId
 		INTO #tmpInvoiceDetail
 		FROM tblARInvoiceDetail A
 		INNER JOIN @processingTable B
@@ -571,7 +572,12 @@ BEGIN
 
 						--Delete Order
 						DELETE FROM tblTMDispatch
-						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1 WHERE intSiteId IS NOT NULL)
+						-- WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1)
+						WHERE intDispatchID IN (SELECT A.intDispatchId 
+												FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
+												INNER JOIN tblARInvoice B
+													ON A.intInvoiceId = B.intInvoiceId
+												WHERE B.ysnPosted = 1)
 
 
 						---- Update forecasted and estimated % left
@@ -998,12 +1004,17 @@ BEGIN
 							ON A.intSiteID = B.intSiteId
 						INNER JOIN tblTMDeliveryHistory C
 							ON A.intSiteID = C.intSiteID
-								AND C.dtmInvoiceDate = @dtmDateToProcess
+								AND B.intInvoiceId = C.intInvoiceId
+						
 
 
 						--Delete Order
 						DELETE FROM tblTMDispatch
-						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList)
+						WHERE intDispatchID IN (SELECT A.intDispatchId 
+												FROM #tmpInvoiceDateGreaterThanLastDelivery A
+												INNER JOIN tblARInvoice B
+													ON A.intInvoiceId = B.intInvoiceId
+												WHERE B.ysnPosted = 1)
 
 
 						---- Update forecasted and estimated % left
@@ -1192,6 +1203,7 @@ BEGIN
 		------------------------------- END Virtual Billing
 		-----------------------------------------------------------------------------------------------
 
+		NEXTREC:
 		--- Loop Iterator
 		SET @dtmDateToProcess = (SELECT TOP 1 dtmDate FROM #tmpTMInvoiceDateList WHERE dtmDate > @dtmDateToProcess ORDER BY dtmDate ASC)
 	END			
