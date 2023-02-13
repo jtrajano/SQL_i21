@@ -1,10 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceIntegrations]
-     @Post              BIT				= 0
-	,@BatchId           NVARCHAR(40)
-    ,@UserId            INT
-	,@IntegrationLogId	INT             = NULL
-	,@raiseError  		BIT   = 0
-	,@strSessionId		NVARCHAR(50) 	= NULL
+     @Post					BIT			= 0
+	,@BatchId				NVARCHAR(40)
+    ,@UserId				INT
+	,@IntegrationLogId		INT			= NULL
+	,@raiseError  			BIT			= 0
+	,@strSessionId			NVARCHAR(50)= NULL
+	,@ysnCancelAllocation	BIT			= 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -14,11 +15,12 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 --PARAMETER SNIFFING
-DECLARE @PostTemp           	BIT				= @Post
-	  , @BatchIdTemp           	NVARCHAR(40) 	= @BatchId
-      , @UserIdTemp            	INT				= @UserId
-	  , @IntegrationLogIdTemp	INT             = @IntegrationLogId
-	  , @raiseErrorTemp  		BIT   			= @raiseError
+DECLARE  @PostTemp           		BIT			= @Post
+		,@BatchIdTemp				NVARCHAR(40)= @BatchId
+		,@UserIdTemp				INT			= @UserId
+		,@IntegrationLogIdTemp		INT         = @IntegrationLogId
+		,@raiseErrorTemp  			BIT   		= @raiseError
+		,@ysnCancelAllocationLocal	BIT			= @ysnCancelAllocation
 
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
@@ -41,7 +43,7 @@ END
 
 BEGIN TRY
 
-DECLARE @tblInvoicesToUpdate	AS InvoiceId
+DECLARE  @tblInvoicesToUpdate	InvoiceId
 
 INSERT INTO @tblInvoicesToUpdate (intHeaderId, ysnPost, strTransactionType)
 SELECT DISTINCT intHeaderId			= intInvoiceId
@@ -367,63 +369,41 @@ END
 --LOAD SHIPMENT POST
 BEGIN
 DECLARE @tblLoadShipment TABLE (
-	  [intInvoiceId]			INT
-	, [intLoadId]				INT
-	, [intPurchaseSale]			INT
-	, [ysnFromProvisional]		BIT
-	, [ysnProvisionalWithGL]	BIT
-	, [ysnFromReturn]			BIT
+	 intInvoiceId			INT
+	,intLoadId				INT
+	,ysnFromProvisional		BIT
+	,ysnProvisionalWithGL	BIT
 )
 
-INSERT INTO @tblLoadShipment (
-	  [intInvoiceId]
-	, [intLoadId]
-	, [intPurchaseSale]
-	, [ysnFromProvisional]
-	, [ysnProvisionalWithGL]
-	, [ysnFromReturn]
-)
-SELECT [intInvoiceId]			= I.[intInvoiceId]
-	 , [intLoadId]				= I.[intLoadId]
-	 , [intPurchaseSale]		= LG.[intPurchaseSale]
-	 , [ysnFromProvisional]		= I.[ysnFromProvisional]
-	 , [ysnProvisionalWithGL]	= I.[ysnProvisionalWithGL]
-	 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN 1 ELSE 0 END
+INSERT INTO @tblLoadShipment
+SELECT 
+	 intInvoiceId			= I.intInvoiceId
+	,intLoadId				= I.intLoadId
+	,ysnFromProvisional		= I.ysnFromProvisional
+	,ysnProvisionalWithGL	= I.ysnProvisionalWithGL
 FROM tblARPostInvoiceHeader I
-INNER JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
-OUTER APPLY (
-	SELECT TOP 1 intInvoiceId 
-	FROM tblARInvoice RET
-	WHERE RET.strTransactionType = 'Invoice'
-	  AND RET.ysnReturned = 1
-	  AND I.strInvoiceOriginId = RET.strInvoiceNumber
-	  AND I.intOriginalInvoiceId = RET.intInvoiceId
-) RI
 WHERE I.strSessionId = @strSessionId
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @tblLoadShipment)
 BEGIN
-	DECLARE @intInvoiceId 			INT = NULL
-		  , @intLoadId 				INT = NULL
-		  , @intPurchaseSaleId		INT = NULL
-		  , @ysnFromProvisional 	BIT = 0
-		  , @ysnProvisionalWithGL	BIT = 0
-		  , @ysnFromReturn 			BIT = 0				
+	DECLARE  @intInvoiceId 			INT = NULL
+			,@intLoadId 			INT = NULL
+			,@ysnFromProvisional 	BIT = 0
+			,@ysnProvisionalWithGL	BIT = 0
 
-	SELECT TOP 1 @intInvoiceId			= [intInvoiceId]
-			   , @intLoadId				= [intLoadId]
-			   , @intPurchaseSaleId		= [intPurchaseSale]
-			   , @ysnFromProvisional	= [ysnFromProvisional]
-			   , @ysnProvisionalWithGL 	= [ysnProvisionalWithGL]
-			   , @ysnFromReturn			= [ysnFromReturn]
+	SELECT TOP 1 
+		 @intInvoiceId			= intInvoiceId
+		,@intLoadId				= intLoadId
+		,@ysnFromProvisional	= ysnFromProvisional
+		,@ysnProvisionalWithGL 	= ysnProvisionalWithGL
 	FROM @tblLoadShipment 
-	ORDER BY [intInvoiceId]
+	ORDER BY intInvoiceId
 
 	--LOAD SHIPMENT
 	IF @ysnFromProvisional = 0 OR @ysnProvisionalWithGL = 0
-		EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost] @InvoiceId = @intInvoiceId, @Post = @Post, @LoadId = @intLoadId, @UserId = @UserId
+		EXEC dbo.uspLGUpdateLoadShipmentOnInvoicePost @InvoiceId = @intInvoiceId, @Post = @Post, @LoadId = @intLoadId, @UserId = @UserId, @ysnCancelAllocation = @ysnCancelAllocationLocal
 
-	DELETE FROM @tblLoadShipment WHERE [intInvoiceId] = @intInvoiceId
+	DELETE FROM @tblLoadShipment WHERE intInvoiceId = @intInvoiceId
 END
 END
 
