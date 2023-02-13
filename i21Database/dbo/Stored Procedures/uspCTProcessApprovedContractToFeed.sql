@@ -42,7 +42,7 @@ BEGIN TRY
 		EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE') AND strRowState = 'Added')
 	BEGIN
 		SELECT @strRowState= 'Added'
-		--DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
+		DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
 		INSERTBLOCK:
 		INSERT INTO tblCTContractFeed
 		(
@@ -95,7 +95,7 @@ BEGIN TRY
         BEGIN  
             IF EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Modified' AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE'))
             BEGIN
-                --DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
+                DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
 				SELECT TOP 1 @intLastFeedId =  intContractFeedId FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0) ORDER BY intContractFeedId DESC
             END
             SELECT @strRowState= 'Modified'
