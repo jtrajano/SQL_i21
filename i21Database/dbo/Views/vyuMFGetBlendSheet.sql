@@ -24,6 +24,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , ReleasedBy.strName				As strReleasedBy
 	 , WorkOrder.strERPOrderNo			AS strERPOrderNo
 	 , WorkOrder.strERPComment			AS strERPComment
+	 , ISNULL(WorkOrder.intCompanyId, WorkOrder.intLocationId) AS intCompanyLocationId
 FROM tblMFWorkOrder AS WorkOrder 
 JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId 
 JOIN tblICItemUOM AS ItemUOM ON WorkOrder.intItemUOMId = ItemUOM.intItemUOMId 
