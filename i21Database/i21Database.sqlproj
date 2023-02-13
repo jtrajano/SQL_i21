@@ -1301,6 +1301,7 @@
     <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
