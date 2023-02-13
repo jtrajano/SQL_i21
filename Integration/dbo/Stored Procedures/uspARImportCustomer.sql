@@ -1488,7 +1488,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				, intCompanyLocationPricingLevelId		= C.intCompanyLocationPricingLevelId
 			FROM #CUSTOMERS C
 			INNER JOIN tblEMEntity E ON C.strCustomerNumber = E.strEntityNo
-			LEFT JOIN tblEMEntityType ET ON E.intEntityId  = ET.intEntityId
+			LEFT JOIN tblEMEntityType ET ON E.intEntityId  = ET.intEntityId AND ET.strType = ''Customer''
             WHERE ET.intEntityTypeId IS NULL
 
 			--UPDATE TEMP TABLE ENTITY ID
@@ -1544,7 +1544,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 			UNION ALL
 
-			SELECT strName			= RTRIM(LTRIM(sscon_last_name)) + '', '' + RTRIM(LTRIM(sscon_first_name)) 
+			SELECT strName			= ISNULL(RTRIM(LTRIM(sscon_last_name)), '''') + '', '' + ISNULL(RTRIM(LTRIM(sscon_first_name)), '''')
 				, strEmail			= RTRIM(LTRIM(isnull(sscon_email, '''')))
 				, strWebsite		= NULL
 				, strInternalNotes	= C.strInternalNotes
@@ -1759,14 +1759,20 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				, strUserType
 			)
 			SELECT intEntityId			= E.intEntityId
-				, intEntityContactId	= CONTACT.intEntityId --NOT SURE
-				, intEntityLocationId	= LOC.intEntityLocationId --NOT SURE
+				, intEntityContactId	= CONTACT.intEntityId
+				, intEntityLocationId	= LOC.intEntityLocationId
 				, ysnDefaultContact		= C.ysnDefault
 				, ysnPortalAccess		= 0
 				, strUserType			= ''User''
 			FROM #CUSTOMERS C
 			INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
-			INNER JOIN tblEMEntity CONTACT ON C.strContactName = CONTACT.strName
+			CROSS APPLY (
+				SELECT TOP 1 intEntityId
+				FROM tblEMEntity CONTACT 
+				WHERE C.strContactName = CONTACT.strName 
+				  AND C.strPhone = CONTACT.strPhone 
+				  AND C.strPhone2 = CONTACT.strPhone2
+			) CONTACT
 			LEFT JOIN tblEMEntityToContact ETC ON E.intEntityId = ETC.intEntityId AND CONTACT.intEntityId = ETC.intEntityContactId
 			CROSS APPLY (
 				SELECT TOP 1 EL.intEntityLocationId

@@ -13,11 +13,14 @@ BEGIN
     DECLARE 
     @strAccountId NVARCHAR(40), -- used to override
     @strAccountId1 NVARCHAR(40) ,
-    @intStructureType INT
+    @intStructureType INT,
+    @intSort INT
 
     SELECT @strAccountId = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId
     SELECT @strAccountId1 = strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId1
 
+    IF @ysnOverrideCompany | @ysnOverrideLOB | @ysnOverrideLocation = 0
+        RETURN @strAccountId1
 
     WHILE  @ysnOverrideCompany = 1 OR @ysnOverrideLOB = 1 OR @ysnOverrideLocation = 1
     BEGIN
@@ -27,6 +30,7 @@ BEGIN
         IF @ysnOverrideLocation =1 
 		BEGIN
            SET @intStructureType = 3
+           SELECT @intSort = intSort FROM tblGLAccountStructure WHERE intStructureType =@intStructureType
 		   SET @ysnOverrideLocation = 0
 		END
 		ELSE
@@ -34,6 +38,7 @@ BEGIN
         IF @ysnOverrideLOB =1 
 		BEGIN
            SET @intStructureType = 5
+           SELECT @intSort = intSort FROM tblGLAccountStructure WHERE intStructureType =@intStructureType
 		   SET  @ysnOverrideLOB = 0
 		END
 		ELSE
@@ -41,15 +46,16 @@ BEGIN
         IF @ysnOverrideCompany =1 
           	BEGIN
            SET @intStructureType = 6
+           SELECT @intSort = intSort FROM tblGLAccountStructure WHERE intStructureType =@intStructureType
 		   SET  @ysnOverrideCompany = 0
 		END
 
         IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =@intStructureType)
         BEGIN
 
-            SELECT @intDividerCount = COUNT(1)  FROM tblGLAccountStructure WHERE strType <> 'Divider' and intStructureType < @intStructureType
+            SELECT @intDividerCount = COUNT(1)  FROM tblGLAccountStructure WHERE strType <> 'Divider' and intSort < @intSort
 
-            SELECT @intStart = SUM(intLength) + @intDividerCount FROM tblGLAccountStructure WHERE strType <> 'Divider' and intStructureType < @intStructureType -- location
+            SELECT @intStart = SUM(intLength) + @intDividerCount FROM tblGLAccountStructure WHERE strType <> 'Divider' and intSort < @intSort -- location
             SELECT @intLength = intLength FROM tblGLAccountStructure WHERE intStructureType = @intStructureType -- lob
             SELECT @intEnd = @intStart + @intLength
 

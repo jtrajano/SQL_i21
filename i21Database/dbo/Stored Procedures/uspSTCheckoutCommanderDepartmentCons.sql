@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderDepartment]
+﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderDepartmentCons]
 	@intCheckoutId							INT,
 	@UDT_TransDept							StagingCommanderDepartment		READONLY,
 	@UDT_TransCashier						StagingCommanderCashier			READONLY,
@@ -87,10 +87,11 @@ BEGIN
 				FROM @UDT_TransDept Chk
 				JOIN dbo.tblICCategoryLocation Cat 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				LEFT JOIN dbo.tblICItem I 
+				JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
+					AND Cat.intLocationId = IL.intLocationId
 				JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
 				JOIN dbo.tblSTStore S 
@@ -165,11 +166,11 @@ BEGIN
 				FROM @UDT_TransDept Chk
 				JOIN dbo.tblICCategoryLocation Cat 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
-				LEFT JOIN dbo.tblICItem I 
+				JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
+					AND Cat.intLocationId = IL.intLocationId
 				JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
 				JOIN dbo.tblSTStore S 
@@ -218,10 +219,11 @@ BEGIN
 					ON Cat.intCategoryId = CatLoc.intCategoryId
 				JOIN @UDT_TransDept Chk 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				LEFT JOIN dbo.tblICItem I 
+				JOIN dbo.tblICItem I 
 					ON CatLoc.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
+					AND CatLoc.intLocationId = IL.intLocationId
 				JOIN dbo.tblSMCompanyLocation CL 
 					ON CL.intCompanyLocationId = IL.intLocationId
 				JOIN dbo.tblSTStore S 

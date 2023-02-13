@@ -5,6 +5,7 @@
     [dtmStatusDate] DATETIME NOT NULL,
     [ysnInternetConnectivity] BIT NOT NULL,
     [ysnRegisterConnectivity] BIT NOT NULL,
+    [dblUploadSpeed] DECIMAL(18,6) NULL,
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTSiteStatus] PRIMARY KEY CLUSTERED ([intSiteStatusId] ASC),
     CONSTRAINT [FK_tblSTSiteStatus_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),    

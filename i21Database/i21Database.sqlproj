@@ -358,6 +358,7 @@
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
     <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Functions\fnGLOverridePostAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
@@ -1221,7 +1222,6 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceDandDEnergyTDReport.sql" />
     <Build Include="dbo\Functions\fnFAGetAssetExport.sql" />
     <Build Include="dbo\Views\vyuHDTicketLink.sql" />
-  
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
@@ -1230,12 +1230,13 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
     <Build Include="dbo\Views\vyuTMGetOrder.sql" />
-<Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
+    <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
-    <Folder Include="dbo\" />
     <Folder Include="dbo\Tables\" />
     <Folder Include="dbo\Views\" />
     <Folder Include="Security\" />
@@ -1441,6 +1442,7 @@
     <Build Include="dbo\Tables\tblGLModuleList.sql" />
     <Build Include="dbo\Tables\tblGLPostHistory.sql" />
     <Build Include="dbo\Tables\tblGLRecurringHistory.sql" />
+    <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
     <Build Include="dbo\Tables\tblGLSummary.sql" />
     <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLSubsidiaryAccountMapping.sql" />
@@ -1621,6 +1623,7 @@
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <Build Include="dbo\User Defined Types\RevalTableType.sql" />
+    <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
@@ -2171,6 +2174,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateParentCompany.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateInterCompanyBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
@@ -3220,7 +3224,6 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeItem.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeSubstituteItem.sql" />
     <Build Include="dbo\Tables\tblSTRegisterFileConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuCTCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblSMComment.sql" />
     <Build Include="dbo\Tables\tblRKCompanyPreference.sql" />
@@ -3445,6 +3448,7 @@
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
     <Build Include="dbo\Views\vyuGLJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalYearStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
     <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOrderCommitted.sql" />
@@ -11156,6 +11160,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetOverrideGLAccount.sql" />
+     <Build Include="dbo\Functions\fnGLGetIntraCompanyGLEntries.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />

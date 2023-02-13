@@ -69,7 +69,7 @@ BEGIN TRY
   
  IF @ysnRecap = 0   
  BEGIN  
-    EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost
+    EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost, @intUserId
  END  
   
  IF(@@TRANCOUNT > 0)  
