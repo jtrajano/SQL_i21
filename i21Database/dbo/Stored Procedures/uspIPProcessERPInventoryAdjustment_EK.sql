@@ -429,12 +429,14 @@ BEGIN TRY
 
 			SELECT @intLotId = NULL
 				,@dblQty = NULL
+				,@dblWeight = NULL
 
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
 				,@intLotItemUOMId = intItemUOMId
 				,@dblWeightPerQty = dblWeightPerQty
 				,@dblQty = dblQty
+				,@dblWeight =(CASE WHEN dblWeight IS NULL OR dblWeight =0 THEN dblQty ELSE dblWeight END)
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
@@ -874,6 +876,11 @@ BEGIN TRY
 			END
 			ELSE IF @intTransactionTypeId = 20--Lot Move
 			BEGIN
+				IF @dblWeight-@dblQuantity<0 AND ABS(@dblWeight-@dblQuantity)<1
+				BEGIN
+					SELECT @dblQuantity=@dblWeight
+				END
+
 				IF @dblWeightPerQty > 0
 				BEGIN
 					SELECT @dblQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
@@ -1101,6 +1108,10 @@ BEGIN TRY
 					IF @dblLastCost IS NULL
 					BEGIN
 						SELECT @dblLastCost = 0
+					END
+					IF @dblWeight-@dblQuantity<0 AND ABS(@dblWeight-@dblQuantity)<1
+					BEGIN
+						SELECT @dblQuantity=@dblWeight
 					END
 
 					--Lot Tracking
