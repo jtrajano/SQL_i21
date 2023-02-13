@@ -17,6 +17,7 @@
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@accrueLicense		AS BIT				= 0
 	,@raiseError		AS BIT				= 0
+	,@cancelAllocation	BIT					= 0
 
  WITH RECOMPILE
 AS
@@ -646,11 +647,12 @@ BEGIN TRY
 		   ,@strSessionId 	= @strRequestId
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
-            @Post    		= @post
-           ,@BatchId 		= @batchIdUsed
-		   ,@UserId  		= @userId
-		   ,@raiseError 	= @raiseError
-		   ,@strSessionId 	= @strRequestId
+            @Post    			= @post
+           ,@BatchId 			= @batchIdUsed
+		   ,@UserId  			= @userId
+		   ,@raiseError 		= @raiseError
+		   ,@strSessionId 		= @strRequestId
+		   ,@ysnCancelAllocation= @cancelAllocation
 
 --LOG PERFORMANCE END
 IF @transType <> 'all'
