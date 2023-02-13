@@ -221,7 +221,7 @@ FROM
 		LB.intLotteryBookId,
 		LG.intLotteryGameId,
 		ISNULL(LC.intEndingCount, LG.intStartingNumber) AS intStartingNumber,
-		LG.intEndingNumber intEndingNumber,
+		ISNULL(LB.intEndingNumber, LG.intEndingNumber) AS intEndingNumber,
 		LG.intEndingNumber AS intReceiptEndingNumber,
 		LB.strStatus AS strStatus
 	FROM tblSTLotteryBook LB
