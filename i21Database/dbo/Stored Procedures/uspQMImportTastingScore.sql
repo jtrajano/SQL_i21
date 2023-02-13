@@ -6,6 +6,11 @@ BEGIN TRY
 		,@MFBatchTableType MFBatchTableType
 		,@dtmCurrentDate DATETIME
 		,@strBatchId NVARCHAR(50)
+		,@strBulkDensity NVARCHAR(50)
+		,@strTeaMoisture NVARCHAR(50)
+		,@strFines NVARCHAR(50)
+		,@strTeaVolume NVARCHAR(50)
+		,@strDustContent NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
@@ -198,6 +203,11 @@ BEGIN TRY
 		,strIntensity = IMP.strIntensity
 		,strTaste = IMP.strTaste
 		,strMouthFeel = IMP.strMouthfeel
+		,[strBulkDensity] = IMP.strBulkDensity
+		,[strTeaMoisture] = IMP.strTeaMoisture
+		,[strFines] = IMP.strFines
+		,[strTeaVolume] = IMP.strTeaVolume
+		,[strDustContent] = IMP.strDustContent
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -263,6 +273,11 @@ BEGIN TRY
 		,strIntensity = IMP.strIntensity
 		,strTaste = IMP.strTaste
 		,strMouthFeel = IMP.strMouthfeel
+		,[strBulkDensity] = IMP.strBulkDensity
+		,[strTeaMoisture] = IMP.strTeaMoisture
+		,[strFines] = IMP.strFines
+		,[strTeaVolume] = IMP.strTeaVolume
+		,[strDustContent] = IMP.strDustContent
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -340,6 +355,11 @@ BEGIN TRY
 		,@strIntensity
 		,@strTaste
 		,@strMouthFeel
+		,@strBulkDensity
+		,@strTeaMoisture
+		,@strFines
+		,@strTeaVolume
+		,@strDustContent
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -852,11 +872,22 @@ BEGIN TRY
 			,PP.intTestId
 			,PP.intPropertyId
 			,''
-			,''
+			,CASE 
+				WHEN PRT.strPropertyName = 'Density'
+					THEN @strBulkDensity
+				WHEN PRT.strPropertyName = 'Moisture'
+					THEN @strTeaMoisture
+				WHEN PRT.strPropertyName = 'Fines'
+					THEN @strFines
+				WHEN PRT.strPropertyName = 'Volume'
+					THEN @strTeaVolume
+				WHEN PRT.strPropertyName = 'Dust Level'
+					THEN @strDustContent
+				END
 			,@dtmDateCreated
 			,''
 			,0
-			,''
+			,@strComments 
 			,PP.intSequenceNo
 			,PPV.dtmValidFrom
 			,PPV.dtmValidTo
@@ -1300,6 +1331,7 @@ BEGIN TRY
 				,dblTeaMouthFeelPinpoint
 				,dblTeaAppearancePinpoint
 				,dtmShippingDate
+				,strFines
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1324,14 +1356,18 @@ BEGIN TRY
 				,dblBasePrice = S.dblB1Price
 				,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 				,dblBoughtPrice = S.dblB1Price
-				,dblBulkDensity = NULL
+				,dblBulkDensity = CASE 
+					WHEN ISNULL(Density.strPropertyValue, '') = ''
+						THEN NULL
+					ELSE CAST(Density.strPropertyValue AS NUMERIC(18, 6))
+					END
 				,strBuyingOrderNumber = S.strBuyingOrderNo
 				,intSubBookId = S.intSubBookId
 				,strContainerNumber = S.strContainerNumber
 				,intCurrencyId = S.intCurrencyId
 				,dtmProductionBatch = S.dtmManufacturingDate
 				,dtmTeaAvailableFrom = NULL
-				,strDustContent = NULL
+				,strDustContent = DustLevel.strPropertyValue
 				,ysnEUCompliant = S.ysnEuropeanCompliantFlag
 				,strTBOEvaluatorCode = ECTBO.strName
 				,strEvaluatorRemarks = S.strComments3
@@ -1383,7 +1419,11 @@ BEGIN TRY
 					ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18, 6))
 					END
 				,strLeafGrade = GRADE.strDescription
-				,dblTeaMoisture = NULL
+				,dblTeaMoisture = CASE 
+					WHEN ISNULL(Moisture.strPropertyValue, '') = ''
+						THEN NULL
+					ELSE CAST(Moisture.strPropertyValue AS NUMERIC(18, 6))
+					END
 				,dblTeaMouthFeel = CASE 
 					WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = ''
 						THEN NULL
@@ -1395,7 +1435,11 @@ BEGIN TRY
 						THEN NULL
 					ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
 					END
-				,dblTeaVolume = NULL
+				,dblTeaVolume = CASE 
+					WHEN ISNULL(Volume.strPropertyValue, '') = ''
+						THEN NULL
+					ELSE CAST(Volume.strPropertyValue AS NUMERIC(18, 6))
+					END
 				,intTealingoItemId = S.intItemId
 				,dtmWarehouseArrival = NULL
 				,intYearManufacture = NULL
@@ -1425,6 +1469,7 @@ BEGIN TRY
 				,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 				,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 				,dtmShippingDate = @dtmCurrentDate
+				,strFines = Fines.strPropertyValue 
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -1480,6 +1525,57 @@ BEGIN TRY
 					AND P.strPropertyName = 'Mouth Feel'
 				WHERE TR.intSampleId = S.intSampleId
 				) MOUTH_FEEL
+
+			-- Density
+			OUTER APPLY (
+				SELECT TR.strPropertyValue
+					,TR.dblPinpointValue
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND P.strPropertyName = 'Density'
+				WHERE TR.intSampleId = S.intSampleId
+				) Density
+
+			-- Moisture
+			OUTER APPLY (
+				SELECT TR.strPropertyValue
+					,TR.dblPinpointValue
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND P.strPropertyName = 'Moisture'
+				WHERE TR.intSampleId = S.intSampleId
+				) Moisture
+
+			-- Fines
+			OUTER APPLY (
+				SELECT TR.strPropertyValue
+					,TR.dblPinpointValue
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND P.strPropertyName = 'Fines'
+				WHERE TR.intSampleId = S.intSampleId
+				) Fines
+
+			-- Volume
+			OUTER APPLY (
+				SELECT TR.strPropertyValue
+					,TR.dblPinpointValue
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND P.strPropertyName = 'Volume'
+				WHERE TR.intSampleId = S.intSampleId
+				) Volume
+
+			-- Dust Level
+			OUTER APPLY (
+				SELECT TR.strPropertyValue
+					,TR.dblPinpointValue
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND P.strPropertyName = 'Dust Level'
+				WHERE TR.intSampleId = S.intSampleId
+				) DustLevel
+
 			-- Colour
 			LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 			-- Manufacturing Leaf Type
@@ -1575,6 +1671,11 @@ BEGIN TRY
 			,@strIntensity
 			,@strTaste
 			,@strMouthFeel
+			,@strBulkDensity
+			,@strTeaMoisture
+			,@strFines
+			,@strTeaVolume
+			,@strDustContent
 	END
 
 	CLOSE @C

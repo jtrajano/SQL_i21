@@ -424,7 +424,7 @@ BEGIN TRY
 		JOIN @tblLot tl ON l.intLotId = tl.intLotId
 		WHERE l.intLotId = @intInputLotId
 
-		IF @dblInputReqQty > @dblInputAvlQty
+		IF @dblInputReqQty > @dblInputAvlQty AND ABS(@dblInputReqQty-@dblInputAvlQty)>1
 		BEGIN
 			SELECT @strInputLotNumber = strLotNumber
 			FROM tblICLot
