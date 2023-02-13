@@ -90,6 +90,7 @@ SELECT
 	,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
 	,strRecurringPONumber = C.strRecurringPONumber
 	,ysnOnHold = CAST(ISNULL(C.ysnOnHold,0) AS BIT)
+	,intDispatchId = F.intDispatchID
 FROM tblTMCustomer A 
 INNER JOIN vyuTMCustomerEntityView B 
 	ON A.intCustomerNumber = B.A4GLIdentity 
