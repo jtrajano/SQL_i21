@@ -11,6 +11,7 @@ RETURNS @returntable TABLE
 	, strBankAccountNo NVARCHAR(MAX)
 	, intBankId INT
 	, intCurrencyId INT
+	, strNickname NVARCHAR(100)
 )
 AS
 BEGIN
@@ -39,11 +40,13 @@ BEGIN
 			, strBankAccountNo 
 			, intBankId
 			, intCurrencyId 
+			, strNickname
 		)
 		SELECT	bankAcct.intBankAccountId
 			, bankAcct.strBankAccountNo
 			, bankAcct.intBankId
 			, bankAcct.intCurrencyId
+			, bankAcct.strNickname
 		FROM	vyuCMBankAccount bankAcct
 		JOIN	tblGLAccount glAcct
 			ON glAcct.intAccountId = bankAcct.intGLAccountId
@@ -58,11 +61,13 @@ BEGIN
 			, strBankAccountNo 
 			, intBankId
 			, intCurrencyId 
+			, strNickname
 		)
 		SELECT	bankAcct.intBankAccountId
 			, bankAcct.strBankAccountNo
 			, bankAcct.intBankId
 			, bankAcct.intCurrencyId
+			, bankAcct.strNickname
 		FROM	vyuCMBankAccount bankAcct
 		WHERE bankAcct.intCurrencyId = ISNULL(@intCurrencyId, bankAcct.intCurrencyId)
 		AND bankAcct.intBankId = ISNULL(@intBankId, bankAcct.intBankId)
