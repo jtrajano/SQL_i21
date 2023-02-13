@@ -349,6 +349,16 @@ BEGIN TRY
 					SELECT TOP 1 @intStorageLocationId = t.intStorageLocationId
 					FROM tblICStorageLocation t WITH (NOLOCK)
 					WHERE t.intSubLocationId = @intSubLocationId
+						AND t.strName = 'SU'
+				
+					IF ISNULL(@intStorageLocationId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Default Storage Unit is not configured. '
+								,16
+								,1
+								)
+					END
 				END
 
 				IF @dblQuantity <= 0

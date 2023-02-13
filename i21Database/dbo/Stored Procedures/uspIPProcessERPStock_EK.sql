@@ -263,6 +263,16 @@ BEGIN TRY
 				SELECT TOP 1 @intStorageLocationId = t.intStorageLocationId
 				FROM tblICStorageLocation t WITH (NOLOCK)
 				WHERE t.intSubLocationId = @intSubLocationId
+					AND t.strName = 'SU'
+
+				IF ISNULL(@intStorageLocationId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Default Storage Unit is not configured. '
+							,16
+							,1
+							)
+				END
 			END
 
 			SELECT @intQtyUnitMeasureId = t.intUnitMeasureId
@@ -402,7 +412,7 @@ BEGIN TRY
 				END
 
 				-- Take Qty from Batch
-				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0)
+				SELECT TOP 1 @dblQty = CEILING(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0))
 					,@intQtyItemUOMId = IUOM.intItemUOMId
 				FROM tblMFBatch B WITH (NOLOCK)
 				JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
@@ -514,7 +524,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF @dblOrgQty <> @dblQty
+				IF ISNULL(@dblQty, 0) <> 0
 				BEGIN
 					--SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
 					SELECT @dblAdjustByQuantity = @dblQty
