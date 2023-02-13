@@ -56,7 +56,7 @@ PIVOT(
 ) DAS
 )
 SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '[' + [4] + '] + ''-''' end  + 
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
 case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[5] + '])) + ''-'''  else  '+ [' + [5] + '] + ''-''' end  + 
 case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [6] + '])) + ''-'''  else  '+ [' + [6] + '] + ''-''' end  + 
  '+ [' + [7] + ']'   
@@ -80,7 +80,7 @@ PIVOT(
 ) DAS
 )
 SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '[' + [4] + '] + ''-''' end  + 
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
 case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[5] + '])) + ''-'''  else  '+ [' + [5] + '] + ''-''' end  + 
 case when @ysnOverrideThirdColumn = 1 then '+ replicate(''X'', LEN([' + [6] + ']))'  else  '+ [' + [6] + ']' end  
 FROM QUERY
@@ -103,7 +103,7 @@ PIVOT(
 ) DAS
 )
 SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '[' + [4] + '] + ''-''' end  + 
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + '])) + ''-'''  else  '+ [' + [4] + '] + ''-''' end  + 
 case when @ysnOverrideSecondColumn = 1 then '+ replicate(''X'', LEN([' +[5] + ']))'  else  '+ [' + [5] + ']' end
 FROM QUERY
 GOTO _execute
@@ -125,12 +125,12 @@ PIVOT(
 ) DAS
 )
 SELECT @columns ='[' + [3] + '] + ''-''' +
-case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + ']))'  else  '[' + [4] + ']' end 
+case when @ysnOverrideFirstColumn = 1 then '+ replicate(''X'', LEN([' + [4] + ']))'  else  '+ [' + [4] + ']' end 
 FROM QUERY
 
 _execute:
-
- EXEC ('TRUNCATE TABLE tblGLREMaskAccount insert into tblGLREMaskAccount(intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment')
-
+declare @sql nvarchar(max) =
+ 'TRUNCATE TABLE tblGLREMaskAccount insert into tblGLREMaskAccount(intAccountId, strAccountId, intConcurrencyId, dtmModified) select intAccountId,' + @columns +', 1, getdate()  from tblGLTempCOASegment'
+ select @sql
 
 END
