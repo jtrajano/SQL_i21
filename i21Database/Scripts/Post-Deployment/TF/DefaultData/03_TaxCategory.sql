@@ -654,3 +654,26 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WY', @TaxCategories = @TaxCa
 
 DELETE @TaxCategoryWY
 GO
+
+
+PRINT ('Deploying UT Tax Category')
+GO
+
+DECLARE @TaxCategoryUT AS TFTaxCategory
+
+INSERT INTO @TaxCategoryUT(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+	      SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Motor Fuel'			, intMasterId = 440001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Undyed Diesel Fuel'	, intMasterId =	440002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Dyed Diesel Fuel'	, intMasterId =	440003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Aviation Fuel'		, intMasterId = 440004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Alternative Fuels'	, intMasterId =	440005
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'UT', @TaxCategories = @TaxCategoryUT
+
+DELETE @TaxCategoryUT
+GO
