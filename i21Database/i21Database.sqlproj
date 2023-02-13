@@ -3294,7 +3294,6 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeItem.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeSubstituteItem.sql" />
     <Build Include="dbo\Tables\tblSTRegisterFileConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuCTCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblSMComment.sql" />
     <Build Include="dbo\Tables\tblRKCompanyPreference.sql" />
@@ -3519,6 +3518,7 @@
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
     <Build Include="dbo\Views\vyuGLJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalYearStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
     <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOrderCommitted.sql" />
