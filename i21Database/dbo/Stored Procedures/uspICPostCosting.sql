@@ -870,6 +870,11 @@ DEALLOCATE loopItems;
 
 IF @intReturnValue < 0 RETURN @intReturnValue;
 
+DECLARE 
+	@dblAutoVariance AS NUMERIC(18, 6) 
+	,@strAutoVarianceDescription NVARCHAR(255) 
+	,@InventoryTransactionIdentityId AS INT 
+
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
@@ -928,11 +933,6 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
-
-	DECLARE 
-		@dblAutoVariance AS NUMERIC(18, 6) 
-		,@strAutoVarianceDescription NVARCHAR(255) 
-		,@InventoryTransactionIdentityId AS INT 
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
 	BEGIN 
@@ -1014,141 +1014,6 @@ BEGIN
 				AND intItemLocationId = @intItemLocationId
 	END 
 END
-
-
----------------------------------------------------------------------------------------
--- On Lotted Items, make sure valuation is zero if the lot qty is going to be zero. 
----------------------------------------------------------------------------------------
-BEGIN 
-	DECLARE @LotsWithZeroStock AS ItemCostingZeroStockTableType
-			,@LotCurrentValue AS NUMERIC(38, 20)
-
-	-- Get the qualified items for auto-negative. 
-	INSERT INTO @LotsWithZeroStock (
-			intItemId
-			,intItemLocationId
-			,intLotId
-	)
-	SELECT	DISTINCT 
-			i2p.intItemId
-			,i2p.intItemLocationId
-			,i2p.intLotId
-	FROM	@ItemsToPost i2p INNER JOIN tblICLot lot
-				ON i2p.intLotId = lot.intLotId
-	WHERE	ROUND(lot.dblQty, 6) = 0 
-			AND dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @CATEGORY
-			AND i2p.intLotId IS NOT NULL 
-
-	SELECT	TOP 1 
-			@dtmDate					= i2p.dtmDate
-			,@intTransactionId			= i2p.intTransactionId
-			,@strTransactionId			= i2p.strTransactionId
-			,@intCurrencyId				= i2p.intCurrencyId
-	FROM	@ItemsToPost i2p INNER JOIN tblICLot lot
-				ON i2p.intLotId = lot.intLotId
-	WHERE	ROUND(lot.dblQty, 6) = 0
-
-	IF EXISTS (SELECT TOP 1 1 FROM @LotsWithZeroStock) 
-	BEGIN 
-		INSERT INTO dbo.tblICInventoryTransaction (
-					[intItemId]
-					,[intItemLocationId]
-					,[intItemUOMId]
-					,[intSubLocationId]
-					,[intStorageLocationId]
-					,[dtmDate]
-					,[dblQty]
-					,[dblUOMQty]
-					,[dblCost]
-					,[dblValue]
-					,[dblSalesPrice]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[intTransactionId]
-					,[strTransactionId]
-					,[strBatchId]
-					,[intTransactionTypeId]
-					,[intLotId]
-					,[ysnIsUnposted]
-					,[intRelatedInventoryTransactionId]
-					,[intRelatedTransactionId]
-					,[strRelatedTransactionId]
-					,[strTransactionForm]
-					,[dtmCreated]
-					,[intCreatedEntityId]
-					,[intConcurrencyId]
-					,[intCostingMethod]
-					,[strDescription]
-					,[intForexRateTypeId]
-					,[dblForexRate]
-			)			
-		SELECT	
-				[intItemId]								= iWithZeroStock.intItemId
-				,[intItemLocationId]					= iWithZeroStock.intItemLocationId
-				,[intItemUOMId]							= NULL 
-				,[intSubLocationId]						= NULL 
-				,[intStorageLocationId]					= NULL 
-				,[dtmDate]								= @dtmDate
-				,[dblQty]								= 0
-				,[dblUOMQty]							= 0
-				,[dblCost]								= 0
-				,[dblValue]								= -currentValuation.floatingValue
-				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= @intCurrencyId -- @intCurrencyId
-				,[dblExchangeRate]						= 1 -- @dblExchangeRate
-				,[intTransactionId]						= @intTransactionId
-				,[strTransactionId]						= @strTransactionId
-				,[strBatchId]							= @strBatchId
-				,[intTransactionTypeId]					= @AUTO_VARIANCE
-				,[intLotId]								= iWithZeroStock.intLotId 
-				,[ysnIsUnposted]						= 0
-				,[intRelatedInventoryTransactionId]		= NULL 
-				,[intRelatedTransactionId]				= NULL 
-				,[strRelatedTransactionId]				= NULL 
-				,[strTransactionForm]					= @strTransactionForm
-				,[dtmCreated]							= GETDATE()
-				,[intCreatedEntityId]					= @intEntityUserSecurityId
-				,[intConcurrencyId]						= 1
-				,[intCostingMethod]						= il.intCostingMethod -- @intCostingMethod
-				,[strDescription]						=	
-														-- 'Quantity in lot number {Lot Number} is now zero on {Item No} in {Location}. Auto variance is posted to zero out its inventory valuation.'
-														dbo.fnFormatMessage(
-															dbo.fnICGetErrorMessage(80273) 
-															, lot.strLotNumber
-															, i.strItemNo
-															, cl.strLocationName
-															, DEFAULT
-															, DEFAULT
-															, DEFAULT
-															, DEFAULT
-															, DEFAULT
-															, DEFAULT
-															, DEFAULT
-														)
-				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
-				,[dblForexRate]							= 1 -- @dblForexRate
-		FROM	@LotsWithZeroStock iWithZeroStock INNER JOIN tblICLot lot
-						ON iWithZeroStock.intLotId = lot.intLotId
-				INNER JOIN tblICItem i
-					ON i.intItemId = iWithZeroStock.intItemId
-				INNER JOIN tblICItemLocation il
-					ON il.intItemId = iWithZeroStock.intItemId
-					AND il.intItemLocationId = iWithZeroStock.intItemLocationId
-				INNER JOIN tblSMCompanyLocation cl
-					ON cl.intCompanyLocationId = il.intLocationId
-				OUTER APPLY (
-					SELECT	floatingValue = SUM(
-								ROUND(t.dblQty * t.dblCost + t.dblValue, 2)
-							)
-					FROM	tblICInventoryTransaction t
-					WHERE	t.intItemId = iWithZeroStock.intItemId
-							AND t.intItemLocationId = iWithZeroStock.intItemLocationId
-							AND t.intLotId = lot.intLotId
-				) currentValuation
-		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
-	END 
-END 
-
 
 ---------------------------------------------------------------------------------------
 -- On Lotted Items, make sure valuation is zero if the lot qty is going to be zero. 
