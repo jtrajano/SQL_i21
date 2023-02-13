@@ -9,7 +9,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , CAST(WorkOrder.dtmApprovedDate AS DATE)				AS dtmApprovedDate
 	 , WorkOrder.strWorkOrderNo								AS strOrder
 	 , Batch.strBatchId										AS strBatchId
-	 , WorkOrderItem.strItemNo								AS strBlendCode
+	 , BlendItem.strItemNo								AS strBlendCode
 	 , CAST(BlendRequirement.dblEstNoOfBlendSheet AS NUMERIC(18, 6)) AS dblNoOfMixes
 	 , InputLotItem.strItemNo								AS strTeaItem
 	 , CAST(InputLot.dblIssuedQuantity AS NUMERIC(18, 6))	AS dblNoOfPackages
@@ -19,7 +19,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , CAST(ISNULL((InputLotItem.intUnitPerLayer * InputLotItem.intLayerPerPallet), 0.000000) AS NUMERIC(18,6)) AS dblPackagesPerPaller
 	 , BuyingCenterLocation.strLocationName			 AS strAuction
 	 , Batch.strTeaOrigin							 AS strOrigin
-	 , BatchLocation.strLocationName				 AS strPlant
+	 , ISNULL(LocationPlant.strVendorRefNoPrefix, LocationPlant.strOregonFacilityNumber) AS strPlant
 	 , BuyingCenterLocation.strLocationName			 AS strTBO
 	 , InputLotItem.strModelNo						 AS	strMaterial
 	 , ''											 AS strPurchasingDocument
@@ -54,10 +54,12 @@ SELECT WorkOrder.intWorkOrderId
 	 , CASE WHEN MarketZone.strMarketZoneCode = 'AUC' THEN 'Yes'
 			ELSE 'No'
 	   END AS strChannel
+	 , ISNULL(WorkOrder.intCompanyId, WorkOrder.intLocationId) AS intCompanyLocationId
 FROM tblMFWorkOrder AS WorkOrder
 INNER JOIN tblMFWorkOrderInputLot AS InputLot ON WorkOrder.intWorkOrderId = InputLot.intWorkOrderId
 INNER JOIN tblICLot AS Lot ON Lot.intLotId = InputLot.intLotId
 INNER JOIN tblMFBlendRequirement AS BlendRequirement ON BlendRequirement.intBlendRequirementId = WorkOrder.intBlendRequirementId
+INNER JOIN tblICItem AS BlendItem ON BlendRequirement.intItemId = BlendItem.intItemId
 INNER JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = InputLot.intLotId
 INNER JOIN tblMFBatch AS Batch ON Batch.intBatchId = LotInventory.intBatchId
 INNER JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrder.intStatusId = WorkOrderStatus.intStatusId
@@ -70,4 +72,5 @@ LEFT JOIN tblSMCompanyLocation AS BuyingCenterLocation ON Batch.intBuyingCenterL
 LEFT JOIN tblSMCompanyLocation AS BatchLocation ON Batch.intLocationId = BuyingCenterLocation.intCompanyLocationId
 LEFT JOIN tblEMEntity AS Entity on Entity.intEntityId = WorkOrder.intApprovedBy
 LEFT JOIN tblICCommodityAttribute AS Region ON InputLotItem.intRegionId = Region.intCommodityAttributeId
+LEFT JOIN tblSMCompanyLocation AS LocationPlant ON ISNULL(WorkOrder.intCompanyId, WorkOrder.intLocationId) = LocationPlant.intCompanyLocationId 
 GO
