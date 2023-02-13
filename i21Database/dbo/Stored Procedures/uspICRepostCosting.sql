@@ -1249,6 +1249,7 @@ BEGIN
 			,tp.intTransactionId
 			,tp.strTransactionId
 			,tp.intTransactionTypeId
+			,tp.intSourceEntityId
 	FROM	@ItemsToPostRaw tp INNER JOIN #tmpAutoVarianceBatchesForAVGCosting tmp 
 				ON tp.intItemId = tmp.intItemId
 				AND tp.intItemLocationId = tmp.intItemLocationId
