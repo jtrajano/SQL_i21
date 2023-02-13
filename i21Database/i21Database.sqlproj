@@ -1494,6 +1494,7 @@
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
     <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
