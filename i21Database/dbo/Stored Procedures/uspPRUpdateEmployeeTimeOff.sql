@@ -120,12 +120,12 @@ BEGIN
 		UPDATE EOT
 			SET dblHoursUsed = CASE WHEN (T.ysnForReset = 1) THEN 0 ELSE EOT.dblHoursUsed END
 				,dblHoursCarryover = CASE WHEN (T.ysnForReset = 1) THEN 
-											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < dblMaxCarryover) 
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsedReset, 0)) < dblMaxCarryover) 
 												THEN 
-													CASE WHEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < 0 --check if negative if so  set to 0
+													CASE WHEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsedReset, 0)) < 0 --check if negative if so  set to 0
 															THEN 0
 														ELSE
-															(dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))
+															(dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsedReset, 0))
 														END
 											ELSE dblMaxCarryover END
 									ELSE dblHoursCarryover END
