@@ -220,7 +220,7 @@ FROM
 	SELECT 
 		LB.intLotteryBookId,
 		LG.intLotteryGameId,
-		ISNULL(LC.intEndingCount, LG.intStartingNumber) AS intStartingNumber,
+		COALESCE(LC.intEndingCount, LB.intStartingNumber, LG.intStartingNumber) AS intStartingNumber,
 		ISNULL(LB.intEndingNumber, LG.intEndingNumber) AS intEndingNumber,
 		LG.intEndingNumber AS intReceiptEndingNumber,
 		LB.strStatus AS strStatus
