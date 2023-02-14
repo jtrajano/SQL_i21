@@ -64,7 +64,7 @@ BEGIN
 	END
 
 			DECLARE @Segments NVARCHAR(MAX)
-			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']','[Primary Account]')
+			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' ORDER BY intSort FOR XML PATH('')),3,200000) + ']','[Primary Account]')
 			DECLARE @Query NVARCHAR(MAX)
 			SET @Query = @InsertString +
 			'INNER JOIN (
@@ -92,16 +92,6 @@ BEGIN
 	IF (@tblGLTempCOAExist=0)
 		ALTER TABLE dbo.[tblGLTempCOASegment] ADD CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY ([intAccountId])
 	
-	--this will ensure there is company column in tblGLTempCOASegment
-	IF NOT EXISTS(
-
-		SELECT 1 
-          FROM   INFORMATION_SCHEMA.COLUMNS
-          WHERE  TABLE_NAME = 'tblGLTempCOASegment'
-                 AND COLUMN_NAME = 'Company'
-	)
-
-	ALTER TABLE tblGLTempCOASegment ADD [Company] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 
 	--this will ensure there is [Primary Account] column in tblGLTempCOASegmen
 	IF NOT EXISTS(
