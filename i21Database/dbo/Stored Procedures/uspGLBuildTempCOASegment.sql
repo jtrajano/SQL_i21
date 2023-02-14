@@ -172,7 +172,7 @@ BEGIN
 	END
 
 	IF (OBJECT_ID('uspGLUpdateFiscalAccountOverride') IS NOT NULL)
-  		EXEC dbo.uspGLUpdateFiscalAccountOverride
+  		EXEC('EXEC dbo.uspGLUpdateFiscalAccountOverride')
 	
 	
 
