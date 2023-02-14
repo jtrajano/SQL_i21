@@ -89,7 +89,7 @@
 			FROM tblAPVoucherPayable P 
 			INNER JOIN (tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptCharge IRCharge ON IR.intInventoryReceiptId = IRCharge.intInventoryReceiptId)
 				ON P.intInventoryReceiptChargeId = IRCharge.intInventoryReceiptChargeId
-			WHERE IR.intInventoryReceiptId = @intInventoryReceiptId AND P.intInventoryReceiptChargeId > 0
+			WHERE (IR.intInventoryReceiptId = @intInventoryReceiptId OR @intInventoryReceiptId IS NULL) AND P.intInventoryReceiptChargeId > 0
 			AND 1 = (
 				CASE WHEN @intInventoryReceiptChargeId IS NULL OR @intInventoryReceiptChargeId = P.intInventoryReceiptChargeId
 				THEN 1 
@@ -164,7 +164,7 @@
 			FROM tblAPVoucherPayable P 
 			INNER JOIN (tblLGLoad L INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId)
 				ON P.intLoadShipmentDetailId = LD.intLoadDetailId
-			WHERE L.intLoadId = @intLoadShipmentId AND P.intLoadShipmentCostId > 0
+			WHERE (L.intLoadId = @intLoadShipmentId OR @intLoadShipmentId IS NULL) AND P.intLoadShipmentCostId > 0
 			AND 1 = (
 				CASE WHEN @intLoadShipmentCostId IS NULL OR @intLoadShipmentCostId = P.intLoadShipmentCostId
 				THEN 1 
