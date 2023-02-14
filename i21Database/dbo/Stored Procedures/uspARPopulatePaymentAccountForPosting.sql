@@ -14,13 +14,18 @@ INSERT INTO #ARPaymentAccount
 SELECT  DISTINCT
      [intAccountId]         = GLAD.[intAccountId]
     ,[strAccountId]         = GLAD.[strAccountId]
-    ,[strAccountCategory]   = GLAD.[strAccountCategory]
+    ,[strAccountCategory]   = GLS.[strAccountCategory]
     ,[ysnActive]            = GLAD.[ysnActive]
-FROM
-    #ARPostPaymentHeader ARPH
-INNER JOIN
-    vyuGLAccountDetail GLAD
-        ON ARPH.[intUndepositedFundsId] = GLAD.[intAccountId]
+FROM #ARPostPaymentHeader ARPH
+INNER JOIN tblGLAccount GLAD ON ARPH.[intUndepositedFundsId] = GLAD.[intAccountId]
+CROSS APPLY (
+	SELECT CAT.strAccountCategory
+	FROM dbo.tblGLAccountSegmentMapping M 
+	LEFT JOIN dbo.tblGLAccountSegment S ON S.intAccountSegmentId = M.intAccountSegmentId
+	LEFT JOIN dbo.tblGLAccountCategory CAT ON S.intAccountCategoryId = CAT.intAccountCategoryId
+	INNER JOIN dbo.tblGLAccountStructure ST ON S.intAccountStructureId = ST.intAccountStructureId AND ST.strType = 'Primary'
+	WHERE intAccountId = GLAD.intAccountId
+) GLS
 
 
 
@@ -34,19 +39,21 @@ INSERT INTO #ARPaymentAccount
 SELECT DISTINCT
      [intAccountId]         = GLAD.[intAccountId]
     ,[strAccountId]         = GLAD.[strAccountId]
-    ,[strAccountCategory]   = GLAD.[strAccountCategory]
+    ,[strAccountCategory]   = GLS.[strAccountCategory]
     ,[ysnActive]            = GLAD.[ysnActive]
-FROM
-    #ARPostPaymentHeader ARPH
-INNER JOIN
-	tblCMBankAccount CMBA
-        ON ARPH.[intBankAccountId] = CMBA.[intBankAccountId]
-INNER JOIN
-    vyuGLAccountDetail GLAD
-        ON CMBA.[intGLAccountId] = GLAD.[intAccountId]
-WHERE
-	ARPH.[intBankAccountId] IS NULL
-	AND NOT EXISTS (SELECT NULL FROM #ARPaymentAccount A WHERE GLAD.[intAccountId] = A.[intAccountId])
+FROM #ARPostPaymentHeader ARPH
+INNER JOIN tblCMBankAccount CMBA ON ARPH.[intBankAccountId] = CMBA.[intBankAccountId]
+INNER JOIN tblGLAccount GLAD ON CMBA.[intGLAccountId] = GLAD.[intAccountId]
+CROSS APPLY (
+	SELECT CAT.strAccountCategory
+	FROM dbo.tblGLAccountSegmentMapping M 
+	LEFT JOIN dbo.tblGLAccountSegment S ON S.intAccountSegmentId = M.intAccountSegmentId
+	LEFT JOIN dbo.tblGLAccountCategory CAT ON S.intAccountCategoryId = CAT.intAccountCategoryId
+	INNER JOIN dbo.tblGLAccountStructure ST ON S.intAccountStructureId = ST.intAccountStructureId AND ST.strType = 'Primary'
+	WHERE intAccountId = GLAD.intAccountId
+) GLS
+WHERE ARPH.[intBankAccountId] IS NULL
+ AND NOT EXISTS (SELECT NULL FROM #ARPaymentAccount A WHERE GLAD.[intAccountId] = A.[intAccountId])
 
 
 --INSERT INTO #ARPaymentAccount
