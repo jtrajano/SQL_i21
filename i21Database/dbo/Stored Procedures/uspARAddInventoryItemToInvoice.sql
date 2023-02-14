@@ -361,7 +361,7 @@ BEGIN TRY
 				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[intTaxGroupId]
-				,[intCompanyLocationSubLocationId]
+				,[intSubLocationId]
 				,[intStorageLocationId]
 				,[intSCInvoiceId]
 				,[strSCInvoiceNumber]
@@ -371,7 +371,6 @@ BEGIN TRY
 				,[strSubFormula]
 				,[intRecipeItemId] 
 				,[intRecipeId]
-				,[intSubLocationId]
 				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
@@ -485,7 +484,7 @@ BEGIN TRY
 				,[dblMaintenanceAmount]				= @ItemMaintenanceAmount
 				,[dblLicenseAmount]					= @ItemLicenseAmount
 				,[intTaxGroupId]					= @ItemTaxGroupId
-				,[intCompanyLocationSubLocationId]	= @ItemCompanyLocationSubLocationId
+				,[intSubLocationId]					= ISNULL(@ItemCompanyLocationSubLocationId, @ItemSublocationId)
 				,[intStorageLocationId]				= @ItemStorageLocationId
 				,[intSCInvoiceId]					= @ItemSCInvoiceId
 				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
@@ -495,7 +494,6 @@ BEGIN TRY
 				,[strSubFormula]					= @ItemSubFormula 
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
-				,[intSubLocationId]					= @ItemSublocationId
 				,[intPriceFixationDetailId]			= @ItemPriceFixationDetailId
 				,[intCostTypeId]					= @ItemCostTypeId
 				,[intMarginById]					= @ItemMarginById
