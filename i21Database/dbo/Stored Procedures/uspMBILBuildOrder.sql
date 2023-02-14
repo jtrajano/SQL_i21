@@ -346,6 +346,12 @@ BEGIN
 
 	DELETE #tempOrderTaxCode
 	DELETE #tempDriverOrder WHERE intOrderItemId = @MBILOrderId
+
+	UPDATE t
+	set t.ysnReceived = 1
+	FROM tblTMDispatch t
+	INNER JOIN #Dispatch d on t.intDispatchID = d.intDispatchId
+	WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Dispatched','Routed')
 END
 
 COMMIT TRANSACTION
