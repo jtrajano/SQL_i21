@@ -8,7 +8,7 @@ FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 stcp.dtmCheckoutProcessDate, 
 ISNULL(CH.dtmCheckoutDate, stcp.dtmCheckoutProcessDate) AS dtmCheckoutDate,
 sts.intStoreNo, 
-sts.strDescription, 
+CAST(sts.intStoreNo AS VARCHAR(20)) + ' - ' + sts.strDescription AS strDescription, 
 ISNULL(stcpew.strMessage, 
 'Store did not automatically run for today. It is stuck on ' +
 FORMAT((
@@ -117,7 +117,8 @@ FORMAT((
 			AND stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
-) AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 
+) AS dtmCheckoutDate, a.intStoreNo, 
+CAST(a.intStoreNo AS VARCHAR(20)) + ' - ' + a.strDescription AS strDescription, 
 'Store did not automatically run for today. It is stuck on ' +
 FORMAT((
 	SELECT MAX(dtmCheckoutDate)
@@ -222,7 +223,8 @@ ISNULL((
 			AND stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
-), FORMAT(GETDATE(), 'd','us')) AS dtmCheckoutDate, a.intStoreNo, a.strDescription, 
+), FORMAT(GETDATE(), 'd','us')) AS dtmCheckoutDate, a.intStoreNo, 
+CAST(a.intStoreNo AS VARCHAR(20)) + ' - ' + a.strDescription AS strDescription, 
 'Store did not automatically run for today. No End of Day record found. '
 AS strMessage
 FROM tblSTStore a
