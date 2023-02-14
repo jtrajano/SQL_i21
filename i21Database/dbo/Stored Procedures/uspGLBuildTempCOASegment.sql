@@ -163,6 +163,14 @@ BEGIN
 					LEFT JOIN dbo.tblGLTempCOASegment AS C ON C.intAccountId = A.intAccountId')
 	END
 
+	IF (OBJECT_ID('uspGLUpdateFiscalAccountOverride') IS NOT NULL)
+	BEGIN
+		EXEC('EXEC dbo.uspGLUpdateFiscalAccountOverride ''RE''')
+  		EXEC('EXEC dbo.uspGLUpdateFiscalAccountOverride ''IS''')
+	END
+	
+	
+
 	-- REMOVED DUE TO GL-3434 Location description does not show in build account
     --   IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type in (N'U')) 
 	--   IF  (SELECT TOP 1 ysnLegacyIntegration FROM tblSMCompanyPreference WHERE ysnLegacyIntegration = 1) = 1
