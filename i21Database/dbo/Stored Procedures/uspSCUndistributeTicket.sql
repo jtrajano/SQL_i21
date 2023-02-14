@@ -221,7 +221,7 @@ BEGIN TRY
 						<intEntityUserSecurityId>' + CAST(@intUserId as nvarchar(20)) + '</intEntityUserSecurityId></root>';
 
 						--EXEC [dbo].[uspGRUnPostSettleStorage] @strXml;
-						EXEC [dbo].[uspGRUnPostSettleStorage] @intSettleStorageId, @intUserId, @CurrentDate
+						EXEC [dbo].[uspGRUnPostSettleStorage] @intSettleStorageId, @intUserId
 
 						FETCH NEXT FROM settleStorageCursor INTO @intSettleStorageId;
 					END
