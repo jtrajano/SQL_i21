@@ -75,7 +75,6 @@ SELECT dblBurnRate = site.dblBurnRate
 	, intRouteId = site.intRouteId
 	, intSiteID = site.intSiteID
 	, intSiteNumber = site.intSiteNumber
-	, strSiteNumber = RIGHT('000' + CAST(site.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
 	, intTankTownshipId = site.intTankTownshipId
 	, intTaxLocale1 = site.intTaxLocale1
 	, intTaxLocale2 = site.intTaxLocale2
