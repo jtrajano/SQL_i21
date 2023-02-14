@@ -174,7 +174,8 @@ FROM	tblICItem i
 WHERE	i.intItemId = @intItemId
 		AND @intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
-		AND @intItemUOMId IS NOT NULL 
+		--AND @intItemUOMId IS NOT NULL 
+		AND (ISNULL(@dblQty, 0) <> 0 OR ISNULL(@dblValue, 0) <> 0)
 
 SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
