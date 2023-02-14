@@ -246,7 +246,7 @@ BEGIN /* Inbound Claims */
 		SELECT dtmDate = ForGLEntries_CTE.dtmDate
 			,strBatchId = @strBatchId
 			,intAccountId = GLAccount.intAccountId
-			,dblDebit = Debit.Value
+			,dblDebit = DebitForeign.Value * ForGLEntries_CTE.dblForexRate
 			,dblCredit = 0
 			,dblDebitUnit = 0
 			,dblCreditUnit = 0
@@ -281,7 +281,7 @@ BEGIN /* Inbound Claims */
 			,strRateType = ForGLEntries_CTE.strRateType
 		FROM ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = CASE WHEN (ysnWeightLoss = 1) THEN ForGLEntries_CTE.intAPClearingAccountId ELSE ForGLEntries_CTE.intExpenseAccountId END
-		CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
+		-- CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 		CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 		WHERE ForGLEntries_CTE.intItemId IS NOT NULL
 	
@@ -291,7 +291,7 @@ BEGIN /* Inbound Claims */
 			,strBatchId = @strBatchId
 			,intAccountId = GLAccount.intAccountId
 			,dblDebit = 0
-			,dblCredit = Credit.Value
+			,dblCredit = CreditForeign.Value * ForGLEntries_CTE.dblForexRate --Credit.Value
 			,dblDebitUnit = 0
 			,dblCreditUnit = 0
 			,strDescription = ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo
@@ -325,7 +325,7 @@ BEGIN /* Inbound Claims */
 			,strRateType = ForGLEntries_CTE.strRateType
 		FROM ForGLEntries_CTE
 		INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = CASE WHEN (ysnWeightLoss = 1) THEN ForGLEntries_CTE.intExpenseAccountId ELSE ForGLEntries_CTE.intAPClearingAccountId END
-		CROSS APPLY dbo.fnGetCreditFunctional(-ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
+		-- CROSS APPLY dbo.fnGetCreditFunctional(-ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 		CROSS APPLY dbo.fnGetCredit(-ForGLEntries_CTE.dblCost) CreditForeign
 		WHERE ForGLEntries_CTE.intItemId IS NOT NULL
 	END
