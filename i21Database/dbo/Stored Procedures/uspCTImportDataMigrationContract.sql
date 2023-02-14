@@ -299,7 +299,8 @@ AS
 		dblHistoricalRate numeric(18,6),
 		intHistoricalRateTypeId int,
 		intBasisUOMId int,
-		dblNoOfLots numeric(18,6)
+		dblNoOfLots numeric(18,6),
+		intCurrencyExchangeRateId int
 	); 
 
 	IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -355,6 +356,7 @@ AS
 		,intHistoricalRateTypeId
 		,intBasisUOMId
 		,dblNoOfLots
+		,intCurrencyExchangeRateId
 	)
 	SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 			intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -374,16 +376,7 @@ AS
 			intFutureMarketId	=	MA.intFutureMarketId,	intFutureMonthId			=	MO.intFutureMonthId,
 			dblFutures			=	CI.dblFutures,			dblBasis					=	CI.dblBasis,
 			dblCashPrice		=	CI.dblCashPrice,		strRemark					=	CI.strRemark,
-			intPricingTypeId	=	CASE	WHEN	MA.intFutureMarketId IS NOT NULL AND CI.dblCashPrice IS NOT NULL
-											THEN	1
-											WHEN	MA.intFutureMarketId IS NOT NULL AND CI.dblCashPrice IS NULL AND CI.dblFutures IS NOT NULL
-											THEN	3
-											WHEN	MA.intFutureMarketId IS NOT NULL AND CI.dblCashPrice IS NULL AND CI.dblBasis IS NOT NULL
-											THEN	2
-											WHEN	MA.intFutureMarketId IS NULL AND CI.dblCashPrice IS NOT NULL
-											THEN	6
-											ELSE	4
-									END,
+			intPricingTypeId	=	pt.intPricingTypeId,
 			dblTotalCost		=	CI.dblCashPrice * CI.dblQuantity,
 			intCurrencyId		=	CY.intCurrencyID,
 			intUnitMeasureId	=	QU.intUnitMeasureId,
@@ -422,7 +415,7 @@ AS
 			,intHistoricalRateTypeId = ert.intCurrencyExchangeRateTypeId
 			,intBasisUOMId = QU.intItemUOMId
 			,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,MA.intUnitMeasureId, MA.dblContractSize)
-			
+			,cp.intCurrencyExchangeRateId
 
 	FROM	tblCTContractImport			CI	LEFT
 	JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -475,6 +468,8 @@ AS
 			join tblSMCurrency tcu on tcu.intCurrencyID = cer.intToCurrencyId
 	)cero on cero.strCurrencyExchangeRate = CI.strRevolutionCurrencyPair
 	left join tblSMCurrencyExchangeRateType ert on ert.strCurrencyExchangeRateType = CI.strHistoricType
+	left join tblCTPricingType pt on pt.strPricingType = CI.strPricingType
+	left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
 	WHERE CI.guiUniqueId = @guiUniqueId;
 
 	BEGIN TRY
@@ -977,7 +972,9 @@ AS
 					,intBasisUOMId
 					,dblTotalBudget
 					,dblTotalCost
-					,dblNoOfLots)
+					,dblNoOfLots
+					,intCurrencyExchangeRateId
+					)
 				SELECT
 						@intContractHeaderId
 					, intItemId
@@ -1034,7 +1031,8 @@ AS
 					,intBasisUOMId = intItemUOMId
 					,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dblQuantity * dblBudgetPrice else null end
 					,dblTotalCost = case when intPricingTypeId = 1 then dblQuantity * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dblQuantity * isnull(dblCashPrice,1) else null end
-					,dblNoOfLots = dblNoOfLots
+					,dblNoOfLots = ceiling(dblNoOfLots)
+					,intCurrencyExchangeRateId
 				FROM #tmpExtracted
 				WHERE
 						ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
