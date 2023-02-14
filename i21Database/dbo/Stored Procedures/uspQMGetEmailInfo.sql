@@ -104,8 +104,9 @@ IF @intEmailTemplate = 1
 		SET @body += '<p style="margin-left:30px">Comments: <strong>'+ @strComment +'</strong></p>'
 		SET @body += '<br><br>'
 		SET @body +='Sincerely, <br>'
-		SET @body +=(select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId)
+		SET @body +=(select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId) + '<br>'
 		SET @body +='#LOGO#'
+		SET @body +='<br>'
 		SET @body +='</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 	
