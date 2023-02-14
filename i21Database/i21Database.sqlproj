@@ -1234,7 +1234,7 @@
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
-    <Build Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
