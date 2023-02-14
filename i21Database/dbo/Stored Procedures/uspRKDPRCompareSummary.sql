@@ -64,7 +64,7 @@ FROM (
 		,dblDPRRun2 = isnull(b.dblTotal,0)
 		,dblDifference =  isnull(b.dblTotal,0) - isnull(a.dblTotal,0)
 	from #temp1 a
-	right join #temp2 b on b.strType = a.strType
+	left join #temp2 b on b.strType = a.strType
 ) t
 
 
