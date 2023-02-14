@@ -12,14 +12,26 @@ BEGIN
 
 	BEGIN TRY
 		--DELETE INITIAL CHARGE PAYABLE
-		DECLARE @inventoryReceiptChargeId INT
-		DECLARE @loadShipmentCostId INT
+		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherPayable')) DROP TABLE #tmpVoucherPayable
+		SELECT *
+		INTO #tmpVoucherPayable
+		FROM @voucherPayable
 
-		SELECT @inventoryReceiptChargeId = P.intInventoryReceiptChargeId,
-			   @loadShipmentCostId = P.intLoadShipmentCostId
-		FROM @voucherPayable P
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpVoucherPayable)
+		BEGIN
+			DECLARE @voucherPayableId INT
+			DECLARE @inventoryReceiptChargeId INT
+			DECLARE @loadShipmentCostId INT
 
-		EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, @inventoryReceiptChargeId, NULL, @loadShipmentCostId, @intUserId
+			SELECT TOP 1 @voucherPayableId = P.intVoucherPayableId,
+					     @inventoryReceiptChargeId = P.intInventoryReceiptChargeId,
+					     @loadShipmentCostId = P.intLoadShipmentCostId
+			FROM #tmpVoucherPayable P
+
+			EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, @inventoryReceiptChargeId, NULL, @loadShipmentCostId, @intUserId
+
+			DELETE FROM #tmpVoucherPayable WHERE intVoucherPayableId = @voucherPayableId
+		END
 
 		--CREATE PAYABLE WITH NEW VENDOR
 		EXEC uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
