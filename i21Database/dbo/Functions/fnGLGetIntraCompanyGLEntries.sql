@@ -104,6 +104,10 @@ BEGIN
 		
 	END
 
+    -- RETURN IF IntraCompany is turned off
+    IF EXISTS( SELECT 1 from tblGLCompanyPreferenceOption WHERE  ISNULL(ysnAllowIntraCompanyEntries,0) = 0)
+        RETURN
+
     
     DECLARE @strCodeNoConfig NVARCHAR(10) =''
     SELECT @strCodeNoConfig =  B.strCode  FROM @GLEntries A JOIN vyuGLCompanyAccountId B ON
