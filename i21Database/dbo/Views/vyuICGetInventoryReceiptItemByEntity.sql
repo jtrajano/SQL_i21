@@ -97,6 +97,10 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.intBookId
 	, Receipt.intSubBookId
+	, ReceiptItem.ysnWeighed
+	, ReceiptItem.dblTare
+	, ReceiptItem.dblTarePerQuantity
+	, ReceiptItem.ysnOverrideTaxGroup
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
