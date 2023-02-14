@@ -6,10 +6,10 @@ CREATE VIEW dbo.vyuGLCompanyAccountId
 AS
 SELECT
 A.intAccountSegmentId,
-S.intAccountId,
+0 intAccountId ,
 A.strCode,
 A.strDescription,
-S.strAccountId COLLATE Latin1_General_CI_AS strAccountId,
+'' COLLATE Latin1_General_CI_AS strAccountId,
 B.strStructureName
 FROM 
 tblGLAccountSegment A
