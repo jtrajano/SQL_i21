@@ -121,7 +121,7 @@ BEGIN
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
 									 WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, ISNULL(CT.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+												THEN dbo.fnDivide(1, ISNULL(LD.dblForexRate, 1)) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId = @DefaultCurrencyId)
 												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId)
