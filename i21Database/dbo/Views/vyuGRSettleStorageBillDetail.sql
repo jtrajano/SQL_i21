@@ -17,8 +17,8 @@ SELECT
 	,APD.dblQtyOrdered
 	,APD.dblQtyReceived
 	,APD.dblCost
-	,dblSubtotal = APD.dblTotal + APD.dblTax
-	,APD.dblTotal
+	,dblTotal = APD.dblTotal + APD.dblTax
+	,dblSubtotal = APD.dblTotal
 	,APD.dblTax
 	,strUOM = CASE WHEN (APD.intWeightUOMId > 0) THEN weightUOM.strUnitMeasure ELSE uom.strUnitMeasure END
 	,GLA.strAccountId
