@@ -869,6 +869,63 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
 
+	--REVERSAL
+	UNION ALL
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	B.intAccountId,
+		[dblDebit]						=	0, -- Bill
+		[dblCredit]						=	voucherDetails.dblTotal,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	voucherDetails.dblTotalUnits,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3),
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
+		[intJournalLineNo]				=	voucherDetails.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,  
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	voucherDetails.dblForeignTotal, 
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			CROSS APPLY dbo.fnAPGetVoucherChargeItemGLEntry(A.intBillId) voucherDetails
+			INNER JOIN tblAPBillDetail B ON B.intBillDetailId = voucherDetails.intBillDetailId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND voucherDetails.intBillDetailId IS NOT NULL
+		  AND A.intTransactionType <> 15
+
 	--CHARGES
 	UNION ALL
 	SELECT	
@@ -1811,6 +1868,8 @@ BEGIN
 	FROM @returntable A
 	INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 	WHERE NULLIF(A.strDescription, '') IS NULL
+
+	DELETE FROM @returntable WHERE dblDebit = 0 AND dblCredit = 0 AND dblDebitForeign = 0 AND dblCreditForeign = 0
 	
 	RETURN
 END
