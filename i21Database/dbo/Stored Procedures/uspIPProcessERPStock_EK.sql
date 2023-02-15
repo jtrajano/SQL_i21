@@ -235,6 +235,14 @@ BEGIN TRY
 
 			IF ISNULL(@intSubLocationId, 0) = 0
 			BEGIN
+				SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
+				FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
+				WHERE t.strSubLocationName = @strSubLocationName
+					AND t.intCompanyLocationId = @intCompanyLocationId
+			End
+
+			IF ISNULL(@intSubLocationId, 0) = 0
+			BEGIN
 				RAISERROR (
 						'Invalid Storage Location. '
 						,16
