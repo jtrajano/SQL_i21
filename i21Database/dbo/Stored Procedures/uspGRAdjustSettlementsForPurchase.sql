@@ -275,7 +275,7 @@ BEGIN
 		UPDATE APD
 		SET dblTax = CASE 
 						WHEN BDT.strCalculationMethod = 'Unit' THEN APD.dblTax 
-						ELSE ISNULL(ADJ.dblCkoffAdjustment,0) * (ISNULL(ADJ.dblSplitPercent,100) / 100) * CASE WHEN APD.dblTax < 0 THEN -1 ELSE 1 END
+						ELSE ISNULL(ADJ.dblCkoffAdjustment,0) * (ISNULL(ADJ.dblSplitPercent,100) / 100) * CASE WHEN APD.dblTax < 0 AND APB.intTransactionType = 1 THEN -1 ELSE 1 END
 					END
 		FROM tblAPBillDetail APD 
 		INNER JOIN tblAPBill APB
@@ -304,7 +304,7 @@ BEGIN
 		UPDATE BDT
 		SET dblAdjustedTax = CASE 
 								WHEN BDT.strCalculationMethod = 'Unit' THEN BDT.dblAdjustedTax
-								ELSE ISNULL(ADJ.dblCkoffAdjustment,0) * (ISNULL(ADJ.dblSplitPercent,100) / 100) * CASE WHEN APD.dblTax < 0 THEN -1 ELSE 1 END
+								ELSE ISNULL(ADJ.dblCkoffAdjustment,0) * (ISNULL(ADJ.dblSplitPercent,100) / 100) * CASE WHEN APD.dblTax < 0 AND APB.intTransactionType = 1 THEN -1 ELSE 1 END
 							END
 			,ysnTaxAdjusted = CAST(CASE 
 								WHEN BDT.strCalculationMethod = 'Unit' THEN 0
