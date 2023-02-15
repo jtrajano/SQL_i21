@@ -4761,6 +4761,7 @@ BEGIN
 								,NULL -- 'Inventory' 
 								,@intEntityUserSecurityId
 					END 
+
 				END
 
 				-- Reduce In-Transit stocks coming from Transfer Order 
@@ -5226,7 +5227,7 @@ BEGIN
 							,[intSourceEntityId]
 							,[intCommodityId]
 					)			
-					EXEC @intReturnValue = dbo.uspICCreateGLEntries
+					EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntries
 						@strBatchId 
 						,NULL--@strAccountToCounterInventory
 						,@intEntityUserSecurityId
@@ -5871,7 +5872,9 @@ BEGIN
 					,[strSourceType] 
 					,[strSourceNumber] 
 					,[strBOLNumber] 
-					,[intTicketId] 
+					,[intTicketId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 				)
 				SELECT 	
 						t.[intItemId] 
@@ -5900,6 +5903,8 @@ BEGIN
 						,[strSourceNumber] = t.strSourceNumber
 						,[strBOLNumber] = t.strBOLNumber
 						,[intTicketId] = t.intTicketId
+						,[intForexRateId] = t.intForexRateTypeId
+						,[dblForexRate] = t.dblForexRate
 				FROM	tblICInventoryTransaction t INNER JOIN tblICItem  i
 							ON t.intItemId = i.intItemId 					
 						INNER JOIN #tmpRebuildList list

@@ -368,7 +368,7 @@ AS
 				END 
 			,dblComputedBaseValue2 = 
 				CASE 
-					WHEN @intFunctionalCurrencyId <> t.intCurrencyId THEN 
+					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND latestForexRate.dblRate <> t.dblForexRate THEN 
 						ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0)), 2) * latestForexRate.dblRate
 					ELSE 
 						NULL

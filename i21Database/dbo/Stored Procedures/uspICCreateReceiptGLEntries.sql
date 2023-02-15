@@ -382,6 +382,7 @@ AS
 			LEFT JOIN tblICLot lot
 				ON lot.intLotId = t.intLotId
 	WHERE	t.strBatchId = @strBatchId
+			AND t.intInTransitSourceLocationId IS NULL 
 
 	---- Resolve the 0.01 discrepancy between the inventory transaction value and the receipt line total. 
 	--UNION ALL
