@@ -16,7 +16,7 @@ BEGIN TRANSACTION
 BEGIN TRY
 
 SELECT @intTypeId = intTypeId
-	,@intBillId = strBillId
+	,@intBillId = strBillNumbers
 	,@intUserId = intCreatedUserId
 	,@ysnBillPosted = ysnBillPosted
 FROM vyuGRSearchAdjustSettlements
