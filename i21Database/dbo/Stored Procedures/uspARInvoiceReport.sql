@@ -842,10 +842,10 @@ SELECT
 	, strComments
 	, strInvoiceHeaderComment
 	, strInvoiceFooterComment
-	, dblInvoiceSubtotal
+	, dblInvoiceSubtotal = CASE WHEN A.ysnForgiven = 1 THEN 0 ELSE A.dblInvoiceSubtotal END
 	, dblShipping
 	, dblTax
-	, dblInvoiceTotal
+	, dblInvoiceTotal = CASE WHEN A.ysnForgiven = 1 THEN 0 ELSE A.dblInvoiceTotal END
 	, dblAmountDue
 	, strItemNo
 	, intInvoiceDetailId
@@ -859,7 +859,7 @@ SELECT
 	, dblQtyOrdered
 	, dblDiscount
 	, dblTotalTax
-	, dblPrice
+	, dblPrice = CASE WHEN A.ysnForgiven = 1 THEN 0 ELSE A.dblPrice END
 	, dblItemPrice
 	, strPaid
 	, strPosted
