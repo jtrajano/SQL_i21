@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuQMApprovedQualityOrders]
 AS
-SELECT
+SELECT 
     -- Batch fields
     B.intBatchId
     ,B.strBatchId
@@ -84,13 +84,13 @@ LEFT JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = QIUOM.intUnitMeasureId
 -- Weight UOM
 LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = I.intItemId
-LEFT JOIN vyuQMGetSupplier SV ON SV.intEntityId = S.intEntityId
+--LEFT JOIN vyuQMGetSupplier SV ON SV.intEntityId = S.intEntityId
 LEFT JOIN tblICItemUOM SPIUOM ON SPIUOM.intItemId = I.intItemId AND SPIUOM.intUnitMeasureId = S.intB1PriceUOMId
 LEFT JOIN tblICUnitMeasure SPUOM ON SPUOM.intUnitMeasureId = SPIUOM.intUnitMeasureId
 -- Contract side tables
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN vyuQMGetSupplier V ON V.intEntityId = CH.intEntityId
+--LEFT JOIN vyuQMGetSupplier V ON V.intEntityId = CH.intEntityId
 LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM PIUOM ON PIUOM.intItemUOMId = CD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureId
@@ -106,6 +106,9 @@ OUTER APPLY (
 OUTER APPLY (
     SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblTotalQuantity)
 ) WQTY
+OUTER Apply (Select Top 1 V1.intEntityId,V1.strEntityName,V1.intDefaultLocationId,V1.strDefaultLocation  from vyuQMGetSupplier V1 Where V1.intEntityId = CH.intEntityId) V
+OUTER Apply (Select Top 1 SV1.intEntityId,SV1.strEntityName,SV1.intDefaultLocationId,SV1.strDefaultLocation  from vyuQMGetSupplier SV1 Where SV1.intEntityId = CH.intEntityId) SV
+
 WHERE LD.intLoadDetailId IS NULL
 
 GO
