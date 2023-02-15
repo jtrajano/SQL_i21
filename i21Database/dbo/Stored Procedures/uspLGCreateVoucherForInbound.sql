@@ -346,10 +346,19 @@ BEGIN TRY
 						AND BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge'
 						AND BD.intLoadId = L.intLoadId AND BD.intLoadDetailId = LD.intLoadDetailId) B
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
-		OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
-					LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
-					LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
-					WHERE intLoadId = L.intLoadId) LW
+		LEFT JOIN (
+			SELECT 
+				W.intLoadId,
+				W.intLoadWarehouseId,
+				W.intSubLocationId,
+				W.intStorageLocationId,
+				strSubLocation = CLSL.strSubLocationName,
+				strStorageLocation = SL.strName
+			FROM tblLGLoadWarehouse W
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
+			) LW ON LW.intLoadId = L.intLoadId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadWarehouseId = LW.intLoadWarehouseId
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
 			OUTER APPLY (SELECT	TOP 1  
 							intForexRateTypeId = RD.intRateTypeId
@@ -364,7 +373,7 @@ BEGIN TRY
 							ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadContainerId = LWC.intLoadContainerId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		WHERE L.intLoadId = @intLoadId
 			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
