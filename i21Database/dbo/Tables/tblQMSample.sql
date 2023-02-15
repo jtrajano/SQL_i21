@@ -239,5 +239,3 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_CatalogueImport]
 ON [dbo].[tblQMSample] ([intEntityId],[intLocationId],[strRepresentLotNumber],[strSaleNumber],[intCatalogueTypeId])
 GO
-CREATE NONCLUSTERED INDEX [IX_tblQMSample_intSampleStatusId_intContractDetailId_intTypeId] ON [dbo].[tblQMSample] ([intSampleStatusId],[intContractDetailId],[intTypeId])
-GO
