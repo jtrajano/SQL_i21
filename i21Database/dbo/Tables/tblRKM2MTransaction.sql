@@ -86,6 +86,7 @@
 	[intMTMPointId] INT,
 	[strMTMPoint] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
     [dblRate] NUMERIC(24, 6) NULL,    
+	[intTransactionCurrencyId] INT,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKM2MTransaction] PRIMARY KEY ([intM2MTransactionId]), 
     CONSTRAINT [FK_tblRKM2MTransaction_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE, 
