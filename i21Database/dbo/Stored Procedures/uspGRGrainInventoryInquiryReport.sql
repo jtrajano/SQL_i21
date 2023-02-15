@@ -458,6 +458,19 @@ BEGIN
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
 
+		INSERT INTO @InventoryDataCompanyOwned
+		SELECT ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
+			,@strCommodityCode
+			,@intCommodityId2
+			,@intCompanyLocationId
+			,@strLocationName
+			,@strUOM
+		FROM #tblInOut
+		WHERE strTransactionType = 'Inventory Receipt'
+			AND dtmDate IS NOT NULL
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND strOwnership = 'Company Owned'
+
 		INSERT INTO @InventoryData
 		SELECT 3
 			,'SHIPPED'
@@ -1392,6 +1405,9 @@ OUTER APPLY (
 		,strUOM
 ) B
 OUTER APPLY (
+	/*
+		Transfer from Customer owned to customer owned
+	*/
 	SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
 		,TS.strCommodityCode
 		,TS.intCommodityId
@@ -1408,16 +1424,11 @@ OUTER APPLY (
 	INNER JOIN tblICItemUOM UOM
 		ON UOM.intItemUOMId = CS.intItemUOMId
 	INNER JOIN tblICUnitMeasure UM
-		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	/*
-		Transfer from Customer owned to customer owned
-		from one location to another
-	*/
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId	
 	WHERE ST_FROM.strOwnedPhysicalStock = 'Customer'
 		AND ST_TO.strOwnedPhysicalStock = 'Customer'
 		AND TS.intCommodityId = A.intCommodityId
 		AND TS.intFromCompanyLocationId = A.intCompanyLocationId
-		--AND TS.intToCompanyLocationId <> A.intCompanyLocationId
 		AND TS.dtmTransferStorageDate = @dtmReportDate
 		AND ST_FROM.intStorageScheduleTypeId <> ST_TO.intStorageScheduleTypeId --do not include the transfer on the same storage type (different entity)
 	GROUP BY TS.strCommodityCode
@@ -1427,6 +1438,9 @@ OUTER APPLY (
 		,UM.strUnitMeasure
 ) C
 OUTER APPLY (
+	/*
+		Reversed settlement for the day 
+	*/
 	SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
 		,IC.strCommodityCode
 		,CS.intCommodityId
@@ -1446,10 +1460,7 @@ OUTER APPLY (
 	INNER JOIN tblICItemUOM UOM
 		ON UOM.intItemUOMId = CS.intItemUOMId
 	INNER JOIN tblICUnitMeasure UM
-		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	/*
-		Reversed settlement for the day 
-	*/
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId	
 	WHERE SH.strType = 'Reverse Settlement'
 		AND CS.intCommodityId = A.intCommodityId
 		AND CS.intCompanyLocationId = A.intCompanyLocationId
