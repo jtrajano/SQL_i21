@@ -85,6 +85,16 @@ DECLARE @InventoryData TABLE
 	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
 )
 
+DECLARE @InventoryDataCompanyOwned TABLE
+(
+	dblUnits DECIMAL(18,6)
+	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,intCommodityId INT
+	,intCompanyLocationId INT
+	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
 DECLARE @intCommodityId2 INT
 DECLARE @strCommodityCode NVARCHAR(20)
 DECLARE @strUOM NVARCHAR(20)
@@ -435,6 +445,19 @@ BEGIN
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
 
+		INSERT INTO @InventoryDataCompanyOwned
+		SELECT ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
+			,@strCommodityCode
+			,@intCommodityId2
+			,@intCompanyLocationId
+			,@strLocationName
+			,@strUOM
+		FROM #tblInOut
+		WHERE strTransactionType = 'Inventory Receipt'
+			AND dtmDate IS NOT NULL
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND strOwnership = 'Company Owned'
+
 		INSERT INTO @InventoryData
 		SELECT 3
 			,'SHIPPED'
@@ -475,7 +498,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -1317,7 +1340,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED INCREASE (INC DP)'
 	,'+'
-	,ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
+	,ISNULL(E.dblUnits,0) + ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1360,6 +1383,9 @@ OUTER APPLY (
 		,strUOM
 ) B
 OUTER APPLY (
+	/*
+		Transfer from Customer owned to customer owned
+	*/
 	SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
 		,TS.strCommodityCode
 		,TS.intCommodityId
@@ -1376,16 +1402,11 @@ OUTER APPLY (
 	INNER JOIN tblICItemUOM UOM
 		ON UOM.intItemUOMId = CS.intItemUOMId
 	INNER JOIN tblICUnitMeasure UM
-		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	/*
-		Transfer from Customer owned to customer owned
-		from one location to another
-	*/
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId	
 	WHERE ST_FROM.strOwnedPhysicalStock = 'Customer'
 		AND ST_TO.strOwnedPhysicalStock = 'Customer'
 		AND TS.intCommodityId = A.intCommodityId
 		AND TS.intFromCompanyLocationId = A.intCompanyLocationId
-		--AND TS.intToCompanyLocationId <> A.intCompanyLocationId
 		AND TS.dtmTransferStorageDate = @dtmReportDate
 	GROUP BY TS.strCommodityCode
 		,TS.intCommodityId
@@ -1394,6 +1415,9 @@ OUTER APPLY (
 		,UM.strUnitMeasure
 ) C
 OUTER APPLY (
+	/*
+		Reversed settlement for the day 
+	*/
 	SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
 		,IC.strCommodityCode
 		,CS.intCommodityId
@@ -1413,10 +1437,7 @@ OUTER APPLY (
 	INNER JOIN tblICItemUOM UOM
 		ON UOM.intItemUOMId = CS.intItemUOMId
 	INNER JOIN tblICUnitMeasure UM
-		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	/*
-		Reversed settlement for the day 
-	*/
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId	
 	WHERE SH.strType = 'Reverse Settlement'
 		AND CS.intCommodityId = A.intCommodityId
 		AND CS.intCompanyLocationId = A.intCompanyLocationId
@@ -1427,6 +1448,23 @@ OUTER APPLY (
 		,CL.strLocationName
 		,UM.strUnitMeasure
 ) D
+OUTER APPLY (
+	/*
+		RECEIVED Company Owned stocks for the day 
+	*/
+	SELECT SUM(dblUnits) dblUnits
+		,strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+	FROM @InventoryDataCompanyOwned
+	GROUP BY strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+) E
 
 INSERT INTO @InventoryData
 SELECT 
