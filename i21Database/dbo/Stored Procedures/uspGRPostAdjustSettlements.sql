@@ -96,7 +96,7 @@ BEGIN
 		,[intTicketId]
 		,[strTicketNumber]
 		,[intAdjustmentTypeId]
-		,[intSplitId]
+		,[intSplitId]		= NULL
 		,[dtmAdjustmentDate]
 		,[dblAdjustmentAmount] = dblAdjustmentAmount * -1
 		,[dblWithholdAmount] = dblWithholdAmount * -1
