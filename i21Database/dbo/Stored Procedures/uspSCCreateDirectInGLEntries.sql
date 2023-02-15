@@ -520,8 +520,8 @@ BEGIN
                                                 WHEN B.intAllocationType = 3 THEN 'Storage'
                                                 WHEN B.intAllocationType = 4 THEN 'Spot'
                                             END
-						,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(GR.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-						,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(GR.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+						,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(GR.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+						,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(GR.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                     INTO #tmpComputedTicketInfoDiscount
                     FROM tblSCTicket A
                     JOIN @ticketDistributionAllocation B
@@ -530,6 +530,11 @@ BEGIN
                         ON QM.intTicketId = A.intTicketId
                     LEFT JOIN tblGRDiscountScheduleCode GR 
                         ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+                    LEFT JOIN tblICItem DiscountItem
+                        ON GR.intItemId = DiscountItem.intItemId
+                    JOIN tblICItemLocation ITEM_LOCATION
+                        ON DiscountItem.intItemId =  ITEM_LOCATION.intItemId
+                            AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
 					
 
 						
@@ -705,13 +710,17 @@ BEGIN
                 SELECT
                     @dblTicketFees = A.dblTicketFees
                     ,@_strCostMethod = IC.strCostMethod
-					,@intTicketFeeIncomeAccountId =  dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-					,@intTicketFeeExpenseAccountId =  dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+					,@intTicketFeeIncomeAccountId =  dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+					,@intTicketFeeExpenseAccountId =  dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                 FROM tblSCTicket A
                 INNER JOIN tblSCScaleSetup B
                     ON A.intScaleSetupId = B.intScaleSetupId
                 INNER JOIN tblICItem IC 
-                    ON IC.intItemId = B.intDefaultFeeItemId
+                    ON IC.intItemId = B.intDefaultFeeItemId                
+                JOIN tblICItemLocation ITEM_LOCATION
+                    ON IC.intItemId =  ITEM_LOCATION.intItemId
+                        AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
+
                 WHERE A.intTicketId = @intTicketId
                     AND A.dblTicketFees > 0
                     AND A.ysnCusVenPaysFees = 1
@@ -725,8 +734,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((@dblTicketFees * B.dblQuantity),2)
                             ,A.intTicketId 
-							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-							,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFee
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -735,6 +744,9 @@ BEGIN
                             ON A.intScaleSetupId = C.intScaleSetupId
                         INNER JOIN tblICItem IC 
                             ON IC.intItemId = C.intDefaultFeeItemId
+                        JOIN tblICItemLocation ITEM_LOCATION
+                            ON IC.intItemId =  ITEM_LOCATION.intItemId
+                                AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
                         WHERE A.intTicketId = @intTicketId
                             AND A.dblTicketFees > 0
                             AND A.ysnCusVenPaysFees = 1
@@ -1070,13 +1082,18 @@ BEGIN
                 SELECT
                     @dblTicketFreight = A.dblFreightRate
                     ,@_strCostMethod = IC.strCostMethod
-					,@intTicketFreightIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-					,@intTicketFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+					,@intTicketFreightIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+					,@intTicketFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                 FROM tblSCTicket A
                 INNER JOIN tblSCScaleSetup B
                     ON A.intScaleSetupId = B.intScaleSetupId
                 INNER JOIN tblICItem IC 
                     ON IC.intItemId = B.intFreightItemId
+                
+                JOIN tblICItemLocation ITEM_LOCATION
+                    ON IC.intItemId =  ITEM_LOCATION.intItemId
+                        AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
+
                 WHERE A.intTicketId = @intTicketId
                     AND A.dblFreightRate <> 0
                     -- AND ysnFarmerPaysFreight = 1
@@ -1090,8 +1107,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((LDCTC.dblRate * B.dblQuantity),2)
                             ,A.intTicketId
-							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFreightLoad1
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -1109,7 +1126,10 @@ BEGIN
                                 AND LDCTC.intItemId = C.intFreightItemId
                                 AND LDCTC.ysnPrice = 1
                         INNER JOIN tblICItemUOM LDCTCITM		
-                            ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId
+                            ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId                        
+                        JOIN tblICItemLocation ITEM_LOCATION
+                            ON IC.intItemId =  ITEM_LOCATION.intItemId
+                                AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
                         WHERE A.intTicketId = @intTicketId
                             AND B.intLoadDetailId IS NOT NULL
                             AND B.intLoadDetailId > 0
@@ -1277,8 +1297,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((LDCTC.dblRate * B.dblQuantity),2)
                             ,A.intTicketId
-							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFreightLoad2
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -1294,7 +1314,10 @@ BEGIN
                                 AND LDCTC.intItemId = C.intFreightItemId
                                 AND LDCTC.ysnPrice = 1
                         INNER JOIN tblICItemUOM LDCTCITM		
-                            ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId
+                            ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId     
+                        JOIN tblICItemLocation ITEM_LOCATION
+                            ON IC.intItemId =  ITEM_LOCATION.intItemId
+                                AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
                         WHERE A.intTicketId = @intTicketId
                             AND (B.intLoadDetailId IS NULL OR B.intLoadDetailId > 0)
 
@@ -1464,8 +1487,8 @@ BEGIN
                         SELECT	
                             dblAmount = ROUND((@dblTicketFreight * B.dblQuantity),2)
                             ,A.intTicketId  
-							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+							,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+							,intChargeFreightExpenseAccountId = dbo.fnGetItemGLAccount(IC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                         INTO #tmpComputedTicketInfoFreight
                         FROM tblSCTicket A
                         INNER JOIN @ticketDistributionAllocation B
@@ -1474,6 +1497,9 @@ BEGIN
                             ON A.intScaleSetupId = C.intScaleSetupId
                         INNER JOIN tblICItem IC 
                             ON IC.intItemId = C.intFreightItemId
+                        JOIN tblICItemLocation ITEM_LOCATION
+                            ON IC.intItemId =  ITEM_LOCATION.intItemId
+                                AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
                         WHERE A.intTicketId = @intTicketId
                             AND A.dblFreightRate <> 0
                             AND C.intFreightItemId IS NOT NULL
@@ -1803,8 +1829,8 @@ BEGIN
                 SELECT	
                     dblAmount = ROUND((CTDC.dblRate * B.dblQuantity),2)
                     ,A.intTicketId
-					,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(CTDC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
-					,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(CTDC.intItemId, @intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
+					,intChargeIncomeAccountId = dbo.fnGetItemGLAccount(CTDC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Income) 
+					,intChargeExpenseAccountId = dbo.fnGetItemGLAccount(CTDC.intItemId, ITEM_LOCATION.intItemLocationId, @ACCOUNT_CATEGORY_Charge_Expense) 
                 INTO #tmpComputedTicketInfoContractCost
                 FROM tblSCTicket A
                 INNER JOIN @ticketDistributionAllocation B
@@ -1815,6 +1841,10 @@ BEGIN
                     ON B.intContractDetailId = CTD.intContractDetailId
                 INNER JOIN tblCTContractCost CTDC
                     ON CTD.intContractDetailId = CTDC.intContractDetailId
+                
+                JOIN tblICItemLocation ITEM_LOCATION
+                    ON CTDC.intItemId =  ITEM_LOCATION.intItemId
+                        AND A.intProcessingLocationId = ITEM_LOCATION.intLocationId 
                 WHERE A.intTicketId = @intTicketId
                     AND B.intContractDetailId IS NOT NULL
                     AND B.intContractDetailId > 0

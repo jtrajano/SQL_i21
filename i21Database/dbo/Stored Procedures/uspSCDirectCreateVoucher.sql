@@ -1324,6 +1324,25 @@ BEGIN TRY
 		EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges,@voucherDetailDirectInventory
 		IF EXISTS(SELECT TOP 1 NULL FROM @voucherPayable)
 		BEGIN
+
+
+			UPDATE 
+				VOUCHER_PAYABLE
+				SET intPurchaseTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
+											VOUCHER_PAYABLE.intEntityVendorId
+											,VOUCHER_PAYABLE.intLocationId
+											,VOUCHER_PAYABLE.intItemId
+											,ENTITY_LOCATION.intEntityLocationId
+											,VOUCHER_PAYABLE.intFreightTermId
+											,default
+										) 
+
+			FROM @voucherPayable VOUCHER_PAYABLE
+				JOIN tblEMEntityLocation ENTITY_LOCATION
+					ON VOUCHER_PAYABLE.intEntityVendorId = ENTITY_LOCATION.intEntityId 
+						AND isnull(ENTITY_LOCATION.ysnDefaultLocation,0) = 1
+			WHERE VOUCHER_PAYABLE.intPurchaseTaxGroupId IS NULL
+			
 			INSERT INTO @voucherTaxDetail(
 			[intVoucherPayableId]
 			,[intTaxGroupId]				

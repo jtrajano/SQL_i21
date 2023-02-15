@@ -18,6 +18,7 @@ SELECT
     , strLedgerRight = LR.strLedgerName
     , strDepreciationMethodIdLeft = DML.strDepreciationMethodId
     , strDepreciationMethodIdRight = DMR.strDepreciationMethodId
+    , strTaxJurisdiction = FA.strTaxJurisdiction
 
 FROM tblFABookDepreciationReport BDR
 JOIN tblFAFixedAsset FA ON FA.intAssetId = BDR.intAssetId
