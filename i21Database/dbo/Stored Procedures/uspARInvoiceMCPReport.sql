@@ -33,7 +33,7 @@ ORDER BY intCompanyPreferenceId DESC
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
-		   , @strBerryOilAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strPhone, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strEmail, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strWebSite, ''), '')
+		   , @strBerryOilAddress	= strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(' ' + NULLIF(strZip, ''), '') + ISNULL(' ' + NULLIF(strCountry, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strPhone, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strEmail, ''), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strWebSite, ''), '')
 		   , @strCompanyName		= strCompanyName
 		   , @strPhone				= strPhone
 		   , @strEmail				= strEmail
