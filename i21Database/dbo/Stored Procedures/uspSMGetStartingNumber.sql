@@ -140,7 +140,7 @@ BEGIN
 		--WHERE	intStartingNumberId = @intStartingNumberId
 
 		-- START: FRM-10204  
-		 IF (REPLICATE('9', ISNULL(@digit, 0)) = (SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId))  
+		 IF (REPLICATE('9', ISNULL(@digit, 0)) = CAST((SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId) AS BIGINT))  
 		 BEGIN  
 		  SET		@digit = @digit + 1  
 
@@ -165,7 +165,7 @@ END
 ELSE
 BEGIN
 	-- START: FRM-10204  
-	 IF (REPLICATE('9', ISNULL(@digit, 0)) = (SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId))  
+	 IF (REPLICATE('9', ISNULL(@digit, 0)) = CAST((SELECT intNumber FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId) AS BIGINT))  
 	 BEGIN  
 	  SET		@digit = @digit + 1  
 
