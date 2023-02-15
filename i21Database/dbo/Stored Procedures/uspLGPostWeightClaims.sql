@@ -246,7 +246,7 @@ BEGIN /* Inbound Claims */
 		SELECT dtmDate = ForGLEntries_CTE.dtmDate
 			,strBatchId = @strBatchId
 			,intAccountId = GLAccount.intAccountId
-			,dblDebit = DebitForeign.Value * ForGLEntries_CTE.dblForexRate
+			,dblDebit = ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			,dblCredit = 0
 			,dblDebitUnit = 0
 			,dblCreditUnit = 0
@@ -291,7 +291,7 @@ BEGIN /* Inbound Claims */
 			,strBatchId = @strBatchId
 			,intAccountId = GLAccount.intAccountId
 			,dblDebit = 0
-			,dblCredit = CreditForeign.Value * ForGLEntries_CTE.dblForexRate --Credit.Value
+			,dblCredit = ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Credit.Value
 			,dblDebitUnit = 0
 			,dblCreditUnit = 0
 			,strDescription = ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo

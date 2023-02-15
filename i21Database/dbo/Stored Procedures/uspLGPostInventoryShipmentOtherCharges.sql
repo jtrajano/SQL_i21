@@ -363,8 +363,8 @@ BEGIN
 	SELECT dtmDate = ForGLEntries_CTE.dtmDate
 		,strBatchId = @strBatchId
 		,intAccountId = GLAccount.intAccountId
-		,dblDebit = CreditForeign.Value * ForGLEntries_CTE.dblForexRate --Credit.Value
-		,dblCredit = DebitForeign.Value * ForGLEntries_CTE.dblForexRate --Debit.Value
+		,dblDebit = ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Credit.Value
+		,dblCredit = ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Debit.Value
 		,dblDebitUnit = 0
 		,dblCreditUnit = 0
 		,strDescription = ISNULL(GLAccount.strDescription, '') + ' (' + ForGLEntries_CTE.strItemNo + ')'
@@ -417,8 +417,8 @@ BEGIN
 	SELECT dtmDate = ForGLEntries_CTE.dtmDate
 		,strBatchId = @strBatchId
 		,intAccountId = GLAccount.intAccountId
-		,dblDebit = DebitForeign.Value * ForGLEntries_CTE.dblForexRate --Debit.Value
-		,dblCredit = CreditForeign.Value * ForGLEntries_CTE.dblForexRate --Credit.Value
+		,dblDebit = ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Debit.Value
+		,dblCredit = ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Credit.Value
 		,dblDebitUnit = 0
 		,dblCreditUnit = 0
 		,strDescription = ISNULL(GLAccount.strDescription, '') + ' (' + ForGLEntries_CTE.strItemNo + ')'
@@ -488,8 +488,8 @@ BEGIN
 	SELECT dtmDate = ForGLEntries_CTE.dtmDate
 		,strBatchId = @strBatchId
 		,intAccountId = GLAccount.intAccountId
-		,dblDebit = DebitForeign.Value * ForGLEntries_CTE.dblForexRate --Debit.Value
-		,dblCredit = CreditForeign.Value * ForGLEntries_CTE.dblForexRate --Credit.Value
+		,dblDebit = ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Debit.Value
+		,dblCredit = ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Credit.Value
 		,dblDebitUnit = 0
 		,dblCreditUnit = 0
 		,strDescription = ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo
@@ -540,8 +540,8 @@ BEGIN
 	SELECT dtmDate = ForGLEntries_CTE.dtmDate
 		,strBatchId = @strBatchId
 		,intAccountId = GLAccount.intAccountId
-		,dblDebit = CreditForeign.Value * ForGLEntries_CTE.dblForexRate --Credit.Value
-		,dblCredit = DebitForeign.Value * ForGLEntries_CTE.dblForexRate --Debit.Value
+		,dblDebit = ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Credit.Value
+		,dblCredit = ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2) --Debit.Value
 		,dblDebitUnit = 0
 		,dblCreditUnit = 0
 		,strDescription = ISNULL(GLAccount.strDescription, '') + ', ' + ForGLEntries_CTE.strItemNo
