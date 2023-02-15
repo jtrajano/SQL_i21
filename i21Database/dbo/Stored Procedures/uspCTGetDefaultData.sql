@@ -247,6 +247,21 @@ BEGIN
 		END
 	END
 
+	IF @strType = 'FXCost'
+	BEGIN
+		SELECT @intCurrencyId = ISNULL(intMainCurrencyId,intCurrencyID) FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
+		IF @intCurrencyId <> @intInvoiceCurrencyId
+		BEGIN
+			SELECT	intCurrencyExchangeRateId ,
+					'From ' + FC.strCurrency +' To ' + TC.strCurrency strExchangeRate,
+					(SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			FROM	tblSMCurrencyExchangeRate ER
+			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
+			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			WHERE	intToCurrencyId = @intCurrencyId  AND intFromCurrencyId = @intInvoiceCurrencyId
+		END
+	END
+
 	
 	IF @strType = 'Revaluation'
 	BEGIN
