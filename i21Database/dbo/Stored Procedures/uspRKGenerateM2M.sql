@@ -3994,6 +3994,7 @@ BEGIN TRY
 			, strMTMPoint
 			, intMTMPointId
 			, t.dblRate
+			, intTransactionCurrencyId = t.intCurrencyId
 		INTO #tmpM2MTransaction
 		FROM (
 			SELECT intContractHeaderId
@@ -4122,7 +4123,8 @@ BEGIN TRY
 				, t.intSubBookId
 				, t.strMTMPoint
 				, t.intMTMPointId
-				, t.dblRate
+				, dblRate = t.dblRateCT
+				, t.intCurrencyId
 			FROM (
 				SELECT t.*
 					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
@@ -4156,7 +4158,7 @@ BEGIN TRY
 											ELSE dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END
 									  END
 
-						-- RATE FOR MARKET BASIS (BASIS ENTRY) CURRENCY TO M2M CURRENCY
+						-- RATE FOR MARKET BASIS (BASIS ENTRY) CURRENCY TO M2M CURRENCY 
 						, dblRateMB = CASE WHEN MBCurrency.intCurrencyID = @intCurrencyId
 									  THEN 1
 									  ELSE
@@ -4314,6 +4316,7 @@ BEGIN TRY
 				, strMTMPoint
 				, intMTMPointId
 				, dblRate
+				, intCurrencyId
 			FROM #Temp 
 			WHERE dblOpenQty <> 0 AND intContractHeaderId IS NULL
 		)t 
@@ -4404,6 +4407,7 @@ BEGIN TRY
 			, strMTMPoint
 			, intMTMPointId
 			, dblRate
+			, intTransactionCurrencyId
 		)
 		SELECT * FROM #tmpM2MTransaction
 
@@ -5532,10 +5536,10 @@ BEGIN TRY
 				, dtmDate
 				, intAccountId
 				, strAccountId
-				, dblDebit = CASE WHEN @intCurrencyId = @intFunctionalCurrencyId THEN dblDebit ELSE ISNULL(dblDebit, 0) * ISNULL(dblExchangeRate, 1) END
-				, dblCredit = CASE WHEN @intCurrencyId = @intFunctionalCurrencyId THEN dblCredit ELSE ISNULL(dblCredit, 0) * ISNULL(dblExchangeRate, 1) END
-				, dblDebitForeign = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN dblDebit ELSE ISNULL(dblDebit, 0) * ISNULL(dblExchangeRate, 1) END
-				, dblCredit = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN dblCredit ELSE ISNULL(dblCredit, 0) * ISNULL(dblExchangeRate, 1) END
+				, dblDebit 
+				, dblCredit
+				, dblDebitForeign = ISNULL(dblDebit, 0) * ISNULL(dblExchangeRate, 1)
+				, dblCredit = ISNULL(dblCredit, 0) * ISNULL(dblExchangeRate, 1)
 				, dblDebitUnit
 				, dblCreditUnit
 				, strDescription
@@ -5574,9 +5578,9 @@ BEGIN TRY
 					, strModuleName = 'Risk Management'
 					, intConcurrencyId = 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, dtmDateEntered = @dtmCurrentDate
@@ -5613,9 +5617,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5625,7 +5629,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
@@ -5650,9 +5654,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5662,7 +5666,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
@@ -5687,9 +5691,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5699,7 +5703,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
@@ -5724,9 +5728,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5736,7 +5740,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(strPricingType, '') = 'Cash'
@@ -5761,9 +5765,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5773,7 +5777,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(strPricingType, '') = 'Cash'
@@ -5798,9 +5802,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5810,7 +5814,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(dblResultRatio, 0) <> 0
@@ -5834,9 +5838,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5846,7 +5850,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(dblResultRatio, 0) <> 0
@@ -5870,9 +5874,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5882,7 +5886,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
@@ -5906,9 +5910,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5918,7 +5922,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
@@ -5942,9 +5946,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5954,7 +5958,8 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction WHERE intM2MHeaderId = @intM2MHeaderId
+				FROM tblRKM2MTransaction t
+				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
 					AND ISNULL(dblMarketFuturesResult, 0) <> 0
@@ -5977,9 +5982,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5989,7 +5994,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
@@ -6013,9 +6018,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6025,7 +6030,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') = 'Cash'
@@ -6049,9 +6054,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1 
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6061,7 +6066,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') = 'Cash'
@@ -6086,9 +6091,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6098,7 +6103,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Inventory','In-transit(I)')
 					AND ISNULL(dblResultCash, 0) <> 0
@@ -6122,9 +6127,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1 
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
-												THEN ISNULL(dblRate, 0)
-											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN 1 / ISNULL(dblRate, 1)
+											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6134,7 +6139,7 @@ BEGIN TRY
 					, @intUserId intUserId
 					, @intLocationId intLocationId
 					, @intQuantityUOMId intQtyUOMId
-				FROM tblRKM2MTransaction
+				FROM tblRKM2MTransaction t
 				WHERE intM2MHeaderId = @intM2MHeaderId
 					AND strContractOrInventoryType IN ('Inventory','In-transit(I)')
 					AND ISNULL(dblResultCash, 0) <> 0
@@ -6217,9 +6222,9 @@ BEGIN TRY
 					, strTransactionForm = 'Mark To Market'
 					, strModuleName = 'Risk Management'
 					, intConcurrencyId = 1
-					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> fm.intCurrencyId
 												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
-											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(c.intMainCurrencyId, 0) <> 0 AND c.intMainCurrencyId <> @intFunctionalCurrencyId
+											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> c.intMainCurrencyId
 												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
@@ -6233,8 +6238,10 @@ BEGIN TRY
 					, dblPrice = t.dblPrice
 				FROM @Result t
 				JOIN tblEMEntity e ON t.strName = e.strName
+				LEFT JOIN tblRKFutureMarket fm
+					ON fm.intFutureMarketId = t.intFutureMarketId
 				LEFT JOIN tblSMCurrency c
-					ON c.intCurrencyID = @intCurrencyId
+					ON c.intCurrencyID = fm.intFutureMarketId
 				WHERE ISNULL(dblGrossPnL, 0) <> 0
 	
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
@@ -6254,9 +6261,9 @@ BEGIN TRY
 					, 'Mark To Market'
 					, 'Risk Management'
 					, 1
-					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> @intFunctionalCurrencyId 
+					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> fm.intCurrencyId
 												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
-											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(c.intMainCurrencyId, 0) <> 0 AND c.intMainCurrencyId <> @intFunctionalCurrencyId
+											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> c.intMainCurrencyId
 												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
@@ -6270,8 +6277,10 @@ BEGIN TRY
 					, t.dblPrice
 				FROM @Result t
 				JOIN tblEMEntity e on t.strName = e.strName
+				LEFT JOIN tblRKFutureMarket fm
+					ON fm.intFutureMarketId = t.intFutureMarketId
 				LEFT JOIN tblSMCurrency c
-					ON c.intCurrencyID = @intCurrencyId
+					ON c.intCurrencyID = fm.intFutureMarketId
 				WHERE ISNULL(dblGrossPnL, 0) <> 0
 			) z
 		END		

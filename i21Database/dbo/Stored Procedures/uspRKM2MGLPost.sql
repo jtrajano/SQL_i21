@@ -338,8 +338,8 @@ BEGIN TRY
 			, [intAccountId]
 			, ROUND([dblDebit],2)
 			, ROUND([dblCredit],2)
-			, [dblDebitForeign] = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN ROUND([dblDebitForeign], 2) ELSE 0 END
-			, [dblCreditForeign] = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN ROUND([dblCreditForeign], 2) ELSE 0 END
+			, [dblDebitForeign] = ROUND([dblDebitForeign], 2)
+			, [dblCreditForeign] = ROUND([dblCreditForeign], 2)
 			, ROUND([dblDebitUnit],2)
 			, ROUND([dblCreditUnit],2)
 			, [strDescription]
@@ -409,8 +409,8 @@ BEGIN TRY
 			,[intAccountId]
 			,ROUND([dblCredit],2) --Reversal - credit value will become debit value
 			,ROUND([dblDebit],2)
-			, [dblDebitForeign] = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN ROUND([dblCreditForeign], 2) ELSE 0 END  --Reversal - credit value will become debit value
-			, [dblCreditForeign] = CASE WHEN @intCurrencyId <> @intFunctionalCurrencyId THEN ROUND([dblDebitForeign], 2) ELSE 0 END
+			, [dblDebitForeign] = ROUND([dblCreditForeign], 2)  --Reversal - credit value will become debit value
+			, [dblCreditForeign] = ROUND([dblDebitForeign], 2)
 			,ROUND([dblCreditUnit],2)
 			,ROUND([dblDebitUnit],2)
 			,[strDescription]
@@ -437,7 +437,6 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @ReverseGLEntries,1 
 	
 		UPDATE tblRKM2MPostPreview SET strReversalBatchId = @strReversalBatchId WHERE intM2MHeaderId = @intM2MHeaderId
-	
 
 	COMMIT TRAN	
 END TRY
