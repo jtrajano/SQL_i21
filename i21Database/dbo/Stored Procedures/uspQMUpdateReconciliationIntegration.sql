@@ -37,7 +37,8 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 	LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intItemUOMId AND QIUOM.intItemId = B.intTealingoItemId
 	LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = B.intTealingoItemId
-	WHERE B.intSampleId IS NOT NULL
+	WHERE CRD.intCatalogueReconciliationId = @intCatalogueReconciliationId
+	    AND B.intSampleId IS NOT NULL
 		AND ((B.strTeaGardenChopInvoiceNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
 		OR (B.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
 		OR (B.strLeafGrade <> CA.strDescription AND CRD.intPreInvoiceGradeId = CRD.intGradeId)
