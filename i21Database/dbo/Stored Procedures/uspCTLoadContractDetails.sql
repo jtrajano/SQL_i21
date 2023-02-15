@@ -537,7 +537,12 @@ BEGIN TRY
 	LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
-	LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
+	LEFT	JOIN	(
+		SELECT APBD.* 
+		FROM tblAPBillDetail APBD
+		JOIN tblICItem ICI on ICI.intItemId = APBD.intItemId
+		where ICI.strType <> 'Other Charge'
+	)												BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
 	--LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intSContractDetailId = CD.intContractDetailId	
 	outer apply (
 		select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
