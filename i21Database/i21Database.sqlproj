@@ -1302,6 +1302,8 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
+    <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
