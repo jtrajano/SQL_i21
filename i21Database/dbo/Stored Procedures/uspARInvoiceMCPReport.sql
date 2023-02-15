@@ -53,7 +53,7 @@ FROM tblSMCompanyLocation L
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
   AND strRequestId = @strRequestId 
-  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil')
+  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
 
 --MAIN QUERY
 SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
@@ -710,4 +710,52 @@ BEGIN
 	WHERE STAGING.intEntityUserId = @intEntityUserId
 	  AND STAGING.strRequestId = @strRequestId
 	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
+END
+
+IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 2 - With Laid in Cost')
+BEGIN
+
+	--UPDATE LAID IN COST
+	UPDATE I
+	SET dblLaidInCost = LIC.LaidInCost
+	FROM tblARInvoiceReportStagingTable I
+	LEFT JOIN (
+		SELECT 
+			  ID.intInvoiceDetailId
+			, (ID.dblPrice
+				+ (Freight.dblPrice * Freight.dblQtyShipped / ID.dblQtyShipped)
+				+ ((Freight.dblPrice * Freight.dblQtyShipped / ID.dblQtyShipped) * Surgecharge.dblPrice)
+				+ Taxes.taxRate
+			) [LaidInCost]
+		FROM tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblICItem I WITH (NOLOCK) ON ID.intItemId = I.intItemId
+		LEFT JOIN (
+			SELECT 
+				intLoadDistributionDetailId
+				, intInvoiceId
+				, dblQtyShipped
+				, dblPrice
+			FROM tblARInvoiceDetail LD WITH (NOLOCK)
+			INNER JOIN tblTRLoadHeader H WITH (NOLOCK) ON H.strTransaction = LD.strDocumentNumber AND LD.intItemId = H.intFreightItemId
+		) Freight ON Freight.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Freight.intInvoiceId = ID.intInvoiceId
+		LEFT JOIN (
+			SELECT 
+				intLoadDistributionDetailId
+				, intInvoiceId
+				, dblQtyShipped
+				, dblPrice
+			FROM tblARInvoiceDetail LD WITH (NOLOCK)
+			INNER JOIN tblTRLoadHeader H WITH (NOLOCK) ON H.strTransaction = LD.strDocumentNumber
+			INNER JOIN vyuICGetOtherCharges GOC WITH (NOLOCK) ON GOC.intOnCostTypeId = H.intFreightItemId AND LD.intItemId = GOC.intItemId
+		) Surgecharge ON Surgecharge.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Surgecharge.intInvoiceId = ID.intInvoiceId
+		LEFT JOIN (
+			SELECT 
+				SUM(dblRate) [taxRate]
+				, intInvoiceId
+			FROM vyuARTaxDetailMCPReport
+			GROUP BY intInvoiceId
+		) Taxes ON ID.intInvoiceId = Taxes.intInvoiceId
+		WHERE I.strType IN ('Bundle','Inventory')
+	) LIC ON I.intInvoiceDetailId = LIC.intInvoiceDetailId
+
 END
