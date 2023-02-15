@@ -185,7 +185,7 @@ WHERE
 (
    intEntityUserId = @intEntityUserId 
    AND strRequestId = @strRequestId 
-   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil')
+   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
 )
 OR		dtmCreated < DATEADD(DAY, DATEDIFF(DAY, 0, @dtmCurrentDate), 0) 
 OR		dtmCreated IS NULL
@@ -991,7 +991,7 @@ OUTER APPLY (
 ) SUBFORMULA
 WHERE STAGING.intEntityUserId = @intEntityUserId 
   AND STAGING.strRequestId = @strRequestId 
-  AND STAGING.strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 2')
+  AND STAGING.strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 2', 'Format 2 - With Laid in Cost')
   
 EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId
 
@@ -1000,4 +1000,4 @@ WHERE intEntityUserId = @intEntityUserId
   AND strRequestId = @strRequestId 
   AND ysnIncludeInvoicePrice = 1
   AND strInvoiceType = 'Transport Delivery'
-  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil')
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
