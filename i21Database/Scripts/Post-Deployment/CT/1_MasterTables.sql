@@ -968,12 +968,3 @@ GO
 GO
 UPDATE tblCTCompanyPreference SET intPriceCalculationTypeId = 3 WHERE intPriceCalculationTypeId = 0
 GO
-
-
-
---=====================================================================================================================================
--- 	Clean import table after upgrade
----------------------------------------------------------------------------------------------------------------------------------------
-Go
-Truncate table tblCTContractDetailImport
-Go
