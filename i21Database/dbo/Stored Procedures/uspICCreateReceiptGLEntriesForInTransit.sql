@@ -313,6 +313,8 @@ DECLARE @resultGLEntries AS RecapTableType
 	,intCommodityId
 	,intInTransitSourceLocationId
 	,intForexRateTypeId
+	,strItemNo 
+	,strLotNumber
 )
 AS 
 (
@@ -337,6 +339,8 @@ AS
 			,i.intCommodityId
 			,t.intInTransitSourceLocationId
 			,t.intForexRateTypeId
+			,i.strItemNo
+			,lot.strLotNumber
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
@@ -344,6 +348,8 @@ AS
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			LEFT JOIN tblICLot lot
+				ON lot.intLotId = t.intLotId
 	WHERE	t.strBatchId = @strBatchId
 			--AND t.intFobPointId IS NOT NULL 	
 			--AND t.intInTransitSourceLocationId IS NOT NULL 
@@ -723,6 +729,8 @@ BEGIN
 		,intCommodityId
 		,intInTransitSourceLocationId
 		,intForexRateTypeId
+		,strItemNo 
+		,strLotNumber
 	)
 	AS 
 	(
@@ -744,6 +752,8 @@ BEGIN
 				,i.intCommodityId
 				,inTransit.intInTransitSourceLocationId
 				,inTransit.intForexRateTypeId
+				,i.strItemNo 
+				,lot.strLotNumber
 		FROM
 			tblICInventoryTransaction inTransit 
 			INNER JOIN tblICItem i
@@ -773,6 +783,8 @@ BEGIN
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			LEFT JOIN tblICLot lot
+				ON lot.intLotId = inTransit.intLotId
 		WHERE	
 			inTransit.strBatchId = @strBatchId
 			AND inTransit.strTransactionId = ISNULL(@strRebuildTransactionId, inTransit.strTransactionId) 
@@ -827,7 +839,7 @@ BEGIN
 		,dblCredit					= Credit.[Value]
 		,dblDebitUnit				= NULL
 		,dblCreditUnit				= NULL
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber)
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, 0, 0, strLotNumber)
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= DiscrepanyCTE.intCurrencyId
@@ -891,7 +903,7 @@ BEGIN
 		,dblCredit					= Debit.[Value]
 		,dblDebitUnit				= NULL
 		,dblCreditUnit				= NULL
-		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost, strLotNumber)
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, 0, 0, strLotNumber)
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= DiscrepanyCTE.intCurrencyId
@@ -986,3 +998,4 @@ SELECT
 	,[intCommodityId]
 FROM
 	@resultGLEntries
+

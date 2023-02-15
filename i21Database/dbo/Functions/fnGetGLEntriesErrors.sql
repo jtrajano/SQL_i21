@@ -29,7 +29,9 @@ BEGIN
 						,60018 intErrorCode
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
-				WHERE (dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
+				WHERE 
+				--(dblCredit <> (ROUND(dblCreditForeign * dblExchangeRate, 2)))
+				ABS(dblCredit - (ROUND(dblCreditForeign * dblExchangeRate, 2))) NOT BETWEEN 0.00 AND 0.01
 				AND ISNULL(dblCreditForeign,0) <> 0
 				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
 				AND @ysnPost = 1
@@ -39,7 +41,9 @@ BEGIN
 						,60018 intErrorCode
 						,strModuleName		
 				FROM @GLEntriesToValidate GLEntries
-				WHERE (dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
+				WHERE 
+				--(dblDebit <> (ROUND(dblDebitForeign * dblExchangeRate, 2)))
+				ABS (dblDebit - (ROUND(dblDebitForeign * dblExchangeRate, 2))) NOT BETWEEN 0.00 AND 0.01
 				AND ISNULL(dblDebitForeign,0) <> 0
 				AND ISNULL(intCurrencyId,@intDefaultCurrencyId) <> @intDefaultCurrencyId
 				AND @ysnPost = 1
