@@ -1230,6 +1230,7 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
+    <Build Include="dbo\Views\vyuTMGetSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
