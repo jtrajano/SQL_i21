@@ -847,6 +847,30 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--Prepayment Date vs Invoice Post Date
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]	
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]      = 'Payment Date(' + CONVERT(NVARCHAR(30), I.dtmPostDate, 101) + ') cannot be earlier than the Invoice(' + CREDIT.strInvoiceNumber + ') Post Date(' + CONVERT(NVARCHAR(30), CREDIT.dtmPostDate, 101) + ')!'
+	FROM 
+		##ARPostInvoiceHeader I
+	INNER JOIN tblARPrepaidAndCredit ARPAC ON I.intInvoiceId = ARPAC.intInvoiceId
+	INNER JOIN tblARInvoice CREDIT ON ARPAC.intPrepaymentId = CREDIT.intInvoiceId
+    WHERE CAST(CREDIT.dtmPostDate AS DATE) > CAST(I.dtmPostDate AS DATE)
+
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--AP Account
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
