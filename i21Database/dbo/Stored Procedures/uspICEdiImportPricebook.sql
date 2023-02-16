@@ -820,11 +820,11 @@ SELECT @LogId
 	 , 'Record not imported.'
 	 , 1
 FROM tblICEdiPricebook AS PriceBook
-WHERE ISNULL(strAltUPCNumber2, '') = ''
+WHERE (ISNULL(strAltUPCNumber2, '') = ''
 OR ISNULL(strAltUPCUOM2, '') = ''
 OR ISNULL(strAltUPCQuantity2, '') = ''
 OR ISNULL(strAltUPCCost2, '') = ''
-OR ISNULL(strAltUPCPrice2, '') = '' AND
+OR ISNULL(strAltUPCPrice2, '') = '') AND
 (ISNULL(strAltUPCNumber2, '') != ''
 OR ISNULL(strAltUPCUOM2, '') != ''
 OR ISNULL(strAltUPCQuantity2, '') != ''
@@ -833,11 +833,11 @@ OR ISNULL(strPurchaseSale2, '') != '')
 
 DELETE 
 FROM tblICEdiPricebook 
-WHERE ISNULL(strAltUPCNumber2, '') = ''
+WHERE (ISNULL(strAltUPCNumber2, '') = ''
 OR ISNULL(strAltUPCUOM2, '') = ''
 OR ISNULL(strAltUPCQuantity2, '') = ''
 OR ISNULL(strAltUPCCost2, '') = ''
-OR ISNULL(strAltUPCPrice2, '') = '' AND
+OR ISNULL(strAltUPCPrice2, '') = '') AND
 (ISNULL(strAltUPCNumber2, '') != ''
 OR ISNULL(strAltUPCUOM2, '') != ''
 OR ISNULL(strAltUPCQuantity2, '') != ''
@@ -1108,6 +1108,13 @@ USING (
 		 , intStoreFamilyId		= sf.intSubcategoryId
 		 , intStoreClassId		= sc.intSubcategoryId
 		 , intSubcategoriesId   = ItemSubCategories.intSubcategoriesId
+		 , strStatusId			= CASE WHEN Pricebook.strActiveInactiveDeleteIndicator = 'Y'
+										THEN 'Active'
+									WHEN Pricebook.strActiveInactiveDeleteIndicator = 'P'
+										THEN 'Phased Out'
+									WHEN Pricebook.strActiveInactiveDeleteIndicator = 'D'
+										THEN 'Discontinued'
+									ELSE 'Active' END
 		 , Pricebook.* 
 	FROM tblICEdiPricebook AS Pricebook
 	LEFT JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LOWER(Pricebook.strItemNo), '')
@@ -1127,6 +1134,7 @@ WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN
 		     , strDescription		= LEFT(Source_Query.strDescription, 250)
 		     , strShortName			= LEFT(Source_Query.strShortName, 50)
 		     , strItemNo			= (LEFT(Source_Query.strItemNo, 50))
+		     , strStatus			= Source_Query.strStatusId
 		     , dtmDateModified		= GETDATE()
 		     , intModifiedByUserId = @intUserId
 		     , intConcurrencyId		= Item.intConcurrencyId + 1
@@ -1161,7 +1169,7 @@ WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intDupli
 		  , Source_Query.intManufacturerId					-- intManufacturerId
 		  , Source_Query.intBrandId							-- intBrandId
 		  , Source_Query.intCategoryId						-- intCategoryId
-		  , 'Active'										-- strStatus
+		  , Source_Query.strStatusId						-- strStatus
 		  , 'Item Level'									-- strInventoryTracking
 		  , 'No'											-- strLotTracking
 		  , 0												-- intLifeTime
