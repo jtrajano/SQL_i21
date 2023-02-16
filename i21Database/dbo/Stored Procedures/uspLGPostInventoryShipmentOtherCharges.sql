@@ -293,7 +293,21 @@ BEGIN
 			,Charge.strItemNo
 			,intEntityId = 1
 			,ShipmentCharges.ysnInventoryCost
-			,intShipmentExchangeRateTypeId = CD.intRateTypeId
+			-- This is used for inventoried other charge that is converted to shipment currency
+			,intShipmentExchangeRateTypeId = CASE --if contract FX tab is setup
+									 WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+												THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
+											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+												THEN NULL --foreign price to functional FX, use NULL
+											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+												THEN NULL --foreign price to foreign FX, use master FX rate
+											ELSE ShipmentItem.intForexRateTypeId END
+									 ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+											THEN NULL
+											ELSE ShipmentItem.intForexRateTypeId END
+									 END
 		FROM dbo.tblLGLoad Shipment
 		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
@@ -467,7 +481,7 @@ BEGIN
 				FROM vyuGLExchangeRate
 				WHERE intFromCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
 					AND intToCurrencyId = @intFunctionalCurrencyId
-					AND intCurrencyExchangeRateTypeId = ForGLEntries_CTE.intShipmentExchangeRateTypeId
+					AND intCurrencyExchangeRateTypeId = ISNULL(ForGLEntries_CTE.intShipmentExchangeRateTypeId, intCurrencyExchangeRateTypeId)
 				ORDER BY dtmValidFromDate DESC) FX
 	OUTER APPLY (SELECT TOP 1 
 					dblForexRate = ISNULL(dblRate,0),
