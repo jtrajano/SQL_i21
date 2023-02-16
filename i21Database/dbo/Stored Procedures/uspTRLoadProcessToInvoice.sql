@@ -1734,6 +1734,7 @@ BEGIN TRY
 			AND TA.strScreen = 'Transports.view.TransportLoads'
 			AND IA.strName IS NULL
 			AND DH.strDestination = 'Customer'
+			--AND  TA.strName NOT LIKE 'BOL_%'
 
 			OPEN @CursorAttachmentTran
 			FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
@@ -1755,9 +1756,6 @@ BEGIN TRY
 		END
 		ELSE IF (@LoadInvoiceCount > 1)
 		BEGIN
-			DECLARE @intTransportAttachmentIdForMultiple INT = NULL,
-				@intAttachmentInvoiceIdForMultiple INT = NULL
-
 			DECLARE @CursorAttachmentTranForMultiple AS CURSOR
 			SET @CursorAttachmentTran = CURSOR FAST_FORWARD FOR
 				SELECT TA.intAttachmentId, I.intInvoiceId
@@ -1770,7 +1768,35 @@ BEGIN TRY
 			AND TA.strScreen = 'Transports.view.TransportLoads'
 			AND IA.strName IS NULL
 			AND DH.strDestination = 'Customer'
-			AND CONVERT(NVARCHAR(10), DH.intShipToLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)
+			AND CONVERT(NVARCHAR(20), DH.intShipToLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)
+			AND  TA.strName NOT LIKE 'BOL_%'
+			--FOR BOL Attachment
+			UNION
+			SELECT TA.intAttachmentId, I.intInvoiceId
+			FROM tblTRLoadDistributionHeader DH 
+			INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId
+			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+			INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId
+			LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
+			LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName
+			WHERE LH.intLoadHeaderId = @intLoadHeaderId
+			AND DH.intInvoiceId IS NOT NULL
+			AND TA.strScreen = 'Transports.view.TransportLoads'
+			AND IA.strName IS NULL
+			AND DH.strDestination = 'Customer'
+			AND TA.strName LIKE 'BOL_%'
+			AND DH.intInvoiceId in (
+				SELECT DH1.intInvoiceId
+				FROM tblTRLoadDistributionHeader DH1
+				INNER JOIN tblTRLoadDistributionDetail DD1 ON DH1.intLoadDistributionHeaderId = DD1.intLoadDistributionHeaderId
+				WHERE DH1.intLoadHeaderId = @intLoadHeaderId
+				AND DD1.strReceiptLink in 
+					(SELECT strReceiptLine 
+					FROM tblTRLoadReceipt LR3 INNER JOIN tblTRSupplyPoint SP ON LR3.intSupplyPointId = SP.intSupplyPointId
+					WHERE intLoadHeaderId = @intLoadHeaderId
+					AND (CONVERT(NVARCHAR(20), SP.intEntityLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)))
+			)
+
 
 			OPEN @CursorAttachmentTran
 			FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
