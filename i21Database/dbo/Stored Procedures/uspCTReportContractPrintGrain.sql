@@ -17,6 +17,8 @@ BEGIN TRY
 			@strState				NVARCHAR(500),
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
+			@strCompanyPhone		NVARCHAR(500),
+			@strCustomerPhone		NVARCHAR(500),
 			@intContractHeaderId	NVARCHAR(MAX),
 			@xmlDocumentId			INT,
 			@intDecimalDPR			INT
@@ -63,20 +65,23 @@ BEGIN TRY
 			@strCity		=	CASE WHEN LTRIM(RTRIM(strCity)) = '' THEN NULL ELSE LTRIM(RTRIM(strCity)) END,
 			@strState		=	CASE WHEN LTRIM(RTRIM(strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,
 			@strZip			=	CASE WHEN LTRIM(RTRIM(strZip)) = '' THEN NULL ELSE LTRIM(RTRIM(strZip)) END,
-			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
+			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END,
+			@strCompanyPhone	=	CASE WHEN LTRIM(RTRIM(strPhone)) = '' THEN NULL ELSE LTRIM(RTRIM(strPhone)) END
 	FROM	tblSMCompanySetup
 
 	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') +ISNULL(', '+@strState,'') + ISNULL('  '+@strZip,'') + CHAR(13)+CHAR(10) +  
-			ISNULL(@strCountry,'')
+			ISNULL(@strCountry,'') +  CHAR(13)+CHAR(10) + 
+			ISNULL(@strCompanyPhone,'')
 			AS	strA,
 			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
 			ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
-			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
+			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'') +  CHAR(13)+CHAR(10) + 
+			ISNULL(CASE WHEN LTRIM(RTRIM(EM.strPhone)) = '' THEN NULL ELSE LTRIM(RTRIM(EM.strPhone)) END,'') 
 			AS	strB,
 			CH.dtmContractDate,
 			CH.strContractNumber,
@@ -122,6 +127,8 @@ BEGIN TRY
 	FROM	vyuCTContractHeaderView CH
 	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
+	LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = CH.intEntityId and ysnDefaultContact = 1
+	LEFT JOIN	tblEMEntity EM ON ETC.intEntityContactId= EM.intEntityId
 	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
