@@ -1655,6 +1655,10 @@ BEGIN TRY
 						,strContainerNumber = ''
 					WHERE intSampleId = @intNewSampleId
 				END
+
+				UPDATE tblQMSample
+				SET intCompanyLocationId = intLocationId
+				WHERE intCompanyLocationId IS NULL
 			END
 
 			IF @strRowState = 'Modified'
