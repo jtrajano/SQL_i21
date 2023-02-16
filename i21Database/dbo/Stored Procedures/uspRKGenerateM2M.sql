@@ -3855,7 +3855,7 @@ BEGIN TRY
 				, strBroker
 				, intEntityId
 				, strCommodityCode
-				, intCommodityId
+				, DER.intCommodityId
 				, strLocationName
 				, intLocationId
 				, strFutureMonth
@@ -3863,13 +3863,19 @@ BEGIN TRY
 				, strFutureMarket
 				, DER.intFutureMarketId
 				, dblPrice
-				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
+				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(CUOM.intCommodityUnitMeasureId, CUOM2.intCommodityUnitMeasureId, dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId
 			FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', @dtmEndDate, 1) DER
 			LEFT JOIN @tblGetSettlementPrice SP ON SP.intFutureMarketId = DER.intFutureMarketId AND SP.intFutureMonthId = DER.intFutureMonthId
 			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = DER.intFutureMarketId
-			WHERE intCommodityId = @intCommodityId 
+			LEFT JOIN tblICCommodityUnitMeasure CUOM
+				ON CUOM.intCommodityId = DER.intCommodityId
+				AND CUOM.intUnitMeasureId = fm.intUnitMeasureId
+			LEFT JOIN tblICCommodityUnitMeasure CUOM2
+				ON CUOM2.intCommodityId = DER.intCommodityId
+				AND CUOM2.intUnitMeasureId = @intQuantityUOMId
+			WHERE DER.intCommodityId = @intCommodityId 
 				AND ysnExpired = 0
 				AND intInstrumentTypeId = 1
 				AND dblOpenContract <> 0
@@ -5500,6 +5506,7 @@ BEGIN TRY
 				, @strBuySell  = NULL
 				, @intBookId  = NULL
 				, @intSubBookId  = NULL
+				, @intSelectedInstrumentTypeId = 1
 	
 			--------- end
 	
@@ -6147,7 +6154,7 @@ BEGIN TRY
 
 
 			-- Derivative Transaction
-			INSERT INTO tblRKM2MPostRecap (intM2MInquiryId
+			INSERT INTO tblRKM2MPostPreview (intM2MHeaderId
 				, dtmDate
 				, intAccountId
 				, strAccountId
@@ -6175,7 +6182,7 @@ BEGIN TRY
 				, intSourceLocationId
 				, intSourceUOMId
 				, dblPrice)
-			SELECT intM2MInquiryId
+			SELECT intM2MHeaderId
 				, dtmDate
 				, intAccountId
 				, strAccountId
@@ -6205,7 +6212,7 @@ BEGIN TRY
 				, dblPrice
 			FROM 
 			(
-				SELECT intM2MInquiryId = @intM2MHeaderId
+				SELECT intM2MHeaderId = @intM2MHeaderId
 					, dtmDate = @dtmPostDate
 					, intAccountId = CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END
 					, strAccountId = CASE WHEN ISNULL(dblGrossPnL, 0) >= 0 THEN @strUnrealizedGainOnFuturesId ELSE @strUnrealizedLossOnFuturesId END
@@ -6223,9 +6230,9 @@ BEGIN TRY
 					, strModuleName = 'Risk Management'
 					, intConcurrencyId = 1
 					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> fm.intCurrencyId
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, fm.intCurrencyId, @intMarkToMarketRateTypeId) 
 											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> c.intMainCurrencyId
-												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, c.intMainCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, dtmDateEntered = @dtmCurrentDate
@@ -6241,7 +6248,7 @@ BEGIN TRY
 				LEFT JOIN tblRKFutureMarket fm
 					ON fm.intFutureMarketId = t.intFutureMarketId
 				LEFT JOIN tblSMCurrency c
-					ON c.intCurrencyID = fm.intFutureMarketId
+					ON c.intCurrencyID = fm.intCurrencyId
 				WHERE ISNULL(dblGrossPnL, 0) <> 0
 	
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
@@ -6262,9 +6269,9 @@ BEGIN TRY
 					, 'Risk Management'
 					, 1
 					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> fm.intCurrencyId
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, fm.intCurrencyId, @intMarkToMarketRateTypeId) 
 											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> c.intMainCurrencyId
-												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, @intFunctionalCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, c.intMainCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6280,7 +6287,7 @@ BEGIN TRY
 				LEFT JOIN tblRKFutureMarket fm
 					ON fm.intFutureMarketId = t.intFutureMarketId
 				LEFT JOIN tblSMCurrency c
-					ON c.intCurrencyID = fm.intFutureMarketId
+					ON c.intCurrencyID = fm.intCurrencyId
 				WHERE ISNULL(dblGrossPnL, 0) <> 0
 			) z
 		END		
