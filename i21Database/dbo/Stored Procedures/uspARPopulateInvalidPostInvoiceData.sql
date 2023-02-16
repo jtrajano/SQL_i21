@@ -912,6 +912,31 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
+	--Prepayment Date vs Invoice Post Date
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]	
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]      = 'Payment Date(' + CONVERT(NVARCHAR(30), I.dtmPostDate, 101) + ') cannot be earlier than the Invoice(' + CREDIT.strInvoiceNumber + ') Post Date(' + CONVERT(NVARCHAR(30), CREDIT.dtmPostDate, 101) + ')!'
+		,[strSessionId]
+	FROM 
+		tblARPostInvoiceHeader I
+	INNER JOIN tblARPrepaidAndCredit ARPAC ON I.intInvoiceId = ARPAC.intInvoiceId
+	INNER JOIN tblARInvoice CREDIT ON ARPAC.intPrepaymentId = CREDIT.intInvoiceId
+    WHERE CAST(CREDIT.dtmPostDate AS DATE) > CAST(I.dtmPostDate AS DATE)
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
 	--Accrual Not in Fiscal Year
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
