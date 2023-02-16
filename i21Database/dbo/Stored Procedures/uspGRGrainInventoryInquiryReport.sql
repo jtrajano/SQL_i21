@@ -1459,6 +1459,8 @@ OUTER APPLY (
 		,strLocationName
 		,strUOM
 	FROM @InventoryDataCompanyOwned
+	WHERE intCommodityId = A.intCommodityId
+		AND intCompanyLocationId = A.intCompanyLocationId
 	GROUP BY strCommodityCode
 		,intCommodityId
 		,intCompanyLocationId
