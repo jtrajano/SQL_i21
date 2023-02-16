@@ -21,7 +21,43 @@ SELECT [Order].intOrderId
 	, OrderItem.intSiteId
 	, Site.intSiteNumber
 	, strSiteDescription = Site.strDescription
-	, Site.strSiteAddress
+	, case when RTRIM(
+		LTRIM(
+		  REPLACE(
+			ISNULL(Site.strSiteAddress  , ''), 
+			CHAR(10), 
+			''
+		  )
+		)
+	  ) <> '' then RTRIM(
+		LTRIM(
+		  REPLACE(
+			REPLACE(
+			  REPLACE(
+				REPLACE(
+				  REPLACE(
+					REPLACE(
+					  ISNULL(Site.strSiteAddress  , ''), 
+					  CHAR(10), 
+					  ''
+					), 
+					'''', 
+					'.'
+				  ), 
+				  '\"', 
+				  '.'
+				), 
+				CHAR(92), 
+				''
+			  ), 
+			  '/', 
+			  '.'
+			), 
+			CHAR(9), 
+			''
+		  )
+		)
+	  ) else '.' end strSiteAddress
 	, Site.strCity
 	, Site.strState
 	, Site.strZipCode
