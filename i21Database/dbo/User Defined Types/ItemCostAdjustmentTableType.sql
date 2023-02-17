@@ -13,6 +13,7 @@ CREATE TYPE [dbo].[ItemCostAdjustmentTableType] AS TABLE
 	,[intCostUOMId] INT NULL								-- The uom related to the cost of the item. Ex: A box can be priced as $4 per LB. 
 	,[dblVoucherCost] NUMERIC(38, 20) NULL DEFAULT 0		-- Cost of the item. It must be related to the cost uom. Ex: $4/LB. 
 	,[dblNewValue] NUMERIC(38, 20) NULL
+	,[dblNewForexValue] NUMERIC(38, 20) NULL
 	,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 	--,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 	,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
