@@ -76,7 +76,7 @@ BEGIN
    WHERE intImportLoadId = @intImportLoadId   
    AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)  
    AND intCarrierId = @intCarrierId   
-   AND intDriverId = @intDriverId   
+   AND ISNULL(intDriverId,0) = ISNULL(@intDriverId,0)
    AND ISNULL(intTrailerId, 0) =  ISNULL(@intTrailerId, 0)   
    AND dtmPullDate = @dtmPullDate  
    AND ysnValid = 1  
@@ -660,7 +660,7 @@ BEGIN
    WHERE intImportLoadId = @intImportLoadId   
    AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)  
    AND intCarrierId = @intCarrierId   
-   AND intDriverId = @intDriverId   
+   AND ISNULL(intDriverId,0) = ISNULL(@intDriverId,0)
    AND ISNULL(intTrailerId, 0) =  ISNULL(@intTrailerId, 0)   
    AND dtmPullDate = @dtmPullDate  
    AND ysnValid = 1  

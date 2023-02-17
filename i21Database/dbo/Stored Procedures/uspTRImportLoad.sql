@@ -145,13 +145,9 @@ BEGIN
     WHERE CRB.strType = 'Driver' AND CRB.strImportValue = @strDriver  
    END    
   
-            IF (@intDriverId IS NULL)  
+   IF (@intDriverId IS NOT NULL)  
    BEGIN  
-    SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Driver')  
-   END  
-   ELSE  
-   BEGIN  
-    UPDATE tblTRImportLoadDetail SET intDriverId = @intDriverId WHERE intImportLoadDetailId = @intImportLoadDetailId  
+    UPDATE tblTRImportLoadDetail SET intDriverId = @intDriverId WHERE intImportLoadDetailId = @intImportLoadDetailId 
    END  
   
    -- TRUCK  
