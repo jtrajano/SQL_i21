@@ -575,6 +575,7 @@ BEGIN
 		, @dblQuantity			NUMERIC(18, 6)
 		, @intContractDetailId	INT
 		, @strScreenName		NVARCHAR(50)
+		, @TMOId INT
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblToProcess)
 	BEGIN
@@ -598,6 +599,12 @@ BEGIN
 			AND LG.intSourceType NOT IN (2, 4, 5)
 			AND ISNULL(LD.intTMDispatchId, 0) <> 0
 
+		SELECT TOP 1 @TMOId = DD.intTMOId
+		FROM tblTRLoadDistributionDetail DD
+		JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
+		WHERE intLoadDistributionDetailId = @intTransactionId
+
+
 		IF (@intActivity = 1 OR @intActivity = 2)
 		BEGIN
 			IF (@strTransactionType = @SourceType_InventoryReceipt OR @strTransactionType = @SourceType_InventoryTransfer)
@@ -605,7 +612,7 @@ BEGIN
 			ELSE IF (@strTransactionType = @SourceType_Invoice)
 				SET @strScreenName = 'Transport Sale'
 
-			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer) AND (ISNULL(@intLoadId, 0) = 0))
+			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer) AND (ISNULL(@intLoadId, 0) = 0) AND ISNULL(@TMOId, 0) = 0)
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 
