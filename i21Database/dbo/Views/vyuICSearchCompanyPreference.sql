@@ -6,7 +6,6 @@ SELECT
 	-- Get the company preference from the other modules that is related with IC. 
 	,ysnImposeReversalTransaction = CAST(0 AS BIT) --rk.ysnImposeReversalTransaction
 	,i.strItemNo
-	,(SELECT ysnEnable FROM tblSMStartingNumber WHERE intStartingNumberId = '183') AS ysnEnable
 FROM 
 	tblICCompanyPreference ic
 	OUTER APPLY (
