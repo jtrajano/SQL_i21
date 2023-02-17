@@ -460,7 +460,7 @@ INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeade
 INNER JOIN tblMBILDeliveryDetail MBDL ON MBDL.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and MBDL.intDeliveryHeaderId = MBDH.intDeliveryHeaderId
 LEFT JOIN tblMBILPickupDetail MBP on MBP.intDispatchOrderDetailId = MBDL.intDispatchOrderDetailId
 LEFT JOIN tblTMOrder t on MBDL.intTMDispatchId = t.intDispatchId
-WHERE DO.intDriverEntityId = @intDriverId AND intStopType = 2 and intDispatchStatus = 3
+WHERE DO.intDriverEntityId = @intDriverId AND intStopType = 2 and intDispatchStatus = 3 and MBDL.ysnDelivered = 0
 
 
 DELETE FROM tblMBILPickupDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and intLoadHeaderId IN(Select intLoadHeaderId from tblMBILLoadHeader where intDriverId = @intDriverId)
