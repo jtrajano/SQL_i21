@@ -64,6 +64,53 @@ RETURNS @returntable TABLE (
 )
 AS
 BEGIN
+	DECLARE @tempReturntable TABLE (
+		 [strCustomerName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+		,[strCustomerNumber]		NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL
+		,[strCustomerInfo]			NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		,[strInvoiceNumber]			NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL 
+		,[strRecordNumber]			NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL 
+		,[intInvoiceId]				INT NULL
+		,[intPaymentId]				INT NULL
+		,[strBOLNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,[intEntityCustomerId]		INT NULL
+		,[intEntityUserId]			INT NULL
+		,[dblCreditLimit]			NUMERIC(18, 6) NULL
+		,[dblTotalAR]				NUMERIC(18, 6) NULL
+		,[dblTotalCustomerAR]       NUMERIC(18, 6) NULL
+		,[dblFuture]				NUMERIC(18, 6) NULL
+		,[dbl0Days]					NUMERIC(18, 6) NULL
+		,[dbl10Days]				NUMERIC(18, 6) NULL
+		,[dbl30Days]				NUMERIC(18, 6) NULL
+		,[dbl60Days]				NUMERIC(18, 6) NULL
+		,[dbl90Days]				NUMERIC(18, 6) NULL
+		,[dbl120Days]				NUMERIC(18, 6) NULL
+		,[dbl121Days]				NUMERIC(18, 6) NULL
+		,[dblTotalDue]				NUMERIC(18, 6) NULL 
+		,[dblAmountPaid]			NUMERIC(18, 6) NULL 
+		,[dblInvoiceTotal]			NUMERIC(18, 6) NULL
+		,[dblCredits]				NUMERIC(18, 6) NULL 
+		,[dblPrepayments]			NUMERIC(18, 6) NULL
+		,[dblPrepaids]				NUMERIC(18, 6) NULL
+		,[dtmDate]					DATETIME NULL
+		,[dtmDueDate]				DATETIME NULL 
+		,[dtmAsOfDate]				DATETIME NULL 
+		,[strSalespersonName]		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+		,[intCompanyLocationId]		INT NULL
+		,[strSourceTransaction]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[strType]					NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+		,[strTransactionType]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+		,[strCompanyName]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[strCompanyAddress]        NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		,[strAgingType]				NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL
+		,[intCurrencyId]			INT NULL
+		,[strCurrency]              NVARCHAR(40)
+		,[dblHistoricRate]			NUMERIC(18, 6) NULL
+		,[dblHistoricAmount]		NUMERIC(18, 6) NULL
+		,[dblEndOfMonthRate]		NUMERIC(18, 6) NULL
+		,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
+		,[intAccountId]			    INT NULL
+	)
 
 	DECLARE @dtmDateFromLocal			DATETIME = NULL,
 			@dtmDateToLocal				DATETIME = NULL,
@@ -553,7 +600,7 @@ BEGIN
 			WHERE SALESPERSON.intId IS NULL 
 		END
 
-	INSERT INTO @returntable
+	INSERT INTO @tempReturntable
 	SELECT strCustomerName		= CUSTOMER.strCustomerName
 		 , strCustomerNumber	= CUSTOMER.strCustomerNumber
 		 , strCustomerInfo		= CUSTOMER.strCustomerName + CHAR(13) + CUSTOMER.strCustomerNumber
@@ -662,7 +709,7 @@ BEGIN
 
 	LEFT JOIN
     
-	(SELECT DISTINCT 
+	(SELECT  
 		intEntityCustomerId
 	  , intInvoiceId
 	  , intPaymentId
@@ -768,7 +815,7 @@ BEGIN
 
 	UNION ALL      
       
-	SELECT DISTINCT
+	SELECT 
 		I.intInvoiceId
 	  , intPaymentId			= PAYMENT.intPaymentId
 	  , dblAmountPaid			= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
@@ -838,7 +885,7 @@ BEGIN
 
 	INSERT INTO @UNPAIDINVOICES
 	SELECT DISTINCT intInvoiceId 
-	FROM @returntable 
+	FROM @tempReturntable 
 	GROUP BY intInvoiceId 
 	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
 
@@ -849,11 +896,14 @@ BEGIN
 	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
 
 	DELETE AGING
-	FROM @returntable AGING
+	FROM @tempReturntable AGING
 	LEFT JOIN @UNPAIDINVOICES UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
 	WHERE ISNULL(UNPAID.intInvoiceId, 0) = 0
 	AND intEntityUserId = @intEntityUserId 
 	AND strAgingType = 'Detail'
+
+	INSERT INTO @returntable
+	SELECT * FROM @tempReturntable
 
 	RETURN
 END
