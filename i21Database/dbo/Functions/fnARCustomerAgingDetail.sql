@@ -110,6 +110,7 @@ BEGIN
 		,[dblEndOfMonthRate]		NUMERIC(18, 6) NULL
 		,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 		,[intAccountId]			    INT NULL
+		,[intAge]                   INT NULL DEFAULT 0
 	)
 
 	DECLARE @dtmDateFromLocal			DATETIME = NULL,
