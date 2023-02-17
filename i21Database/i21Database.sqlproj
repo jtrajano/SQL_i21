@@ -1254,7 +1254,6 @@
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
     <Build Include="dbo\Views\vyuSTCSLatestCheckoutWithError.sql" />
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
-    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <Build Include="dbo\Views\vyuSTPollingStatusReportScheduled.sql" />
     <Build Include="dbo\Views\vyuMBILGetLoads.sql" />
