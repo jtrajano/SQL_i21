@@ -7,7 +7,7 @@ BEGIN
 	(
 		SELECT distinct
 					intConcurrencyId = B.intConcurrencyId,
-					intTankMonitorId = B.intTankMonitorId,
+					intTankReadingId = B.intTankReadingId,
 					dtmDateTime = B.dtmDateTime,
 					--strReadingSource = B.strReadingSource,
 					intTankNumber = B.intTankNumber,
@@ -30,13 +30,13 @@ BEGIN
 			,dtmHour = DATEPART(HOUR, B.dtmDateTime)
 			,RowNumber = ROW_NUMBER() OVER (PARTITION BY DATEPART(HOUR, B.dtmDateTime) ORDER BY dtmDateTime DESC) 
 		FROM tblTMSite A
-			INNER JOIN tblTMTankMonitor B
+			INNER JOIN tblTMTankReading B
 			ON B.intSiteId = A.intSiteID
 		where A.intSiteID = @intSiteId and ((DATEDIFF (day, B.dtmDateTime, getdate())) <= 28)
 	)
 	SELECT 
 			intConcurrencyId
-			,intTankMonitorId
+			,intTankReadingId
 			,dtmDateTime
 			--,strReadingSource
 			,intTankNumber

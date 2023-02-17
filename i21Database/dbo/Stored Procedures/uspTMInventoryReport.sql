@@ -24,7 +24,7 @@ BEGIN
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
 
-   		SELECT distinct B.intSiteId FROM  tblTMTankMonitor B
+   		SELECT distinct B.intSiteId FROM  tblTMTankReading B
 		
 
     OPEN DataCursor
@@ -54,22 +54,22 @@ BEGIN
 			ON B.intCustomerNumber = C.intEntityId
 		LEFT JOIN tblICItem T
 			ON A.intProduct = T.intItemId 
-		INNER JOIN tblTMTankMonitor TM
+		INNER JOIN tblTMTankReading TM
 			ON TM.intSiteId = A.intSiteID
 		JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = A.intLocationId
 		where TM.intSiteId = @intSiteId
 
-		SELECT top 1 @dtmLastInventoryTime = TM.dtmDateTime FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankMonitorId desc
-		SELECT @dblGrossVolume = sum(TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		SELECT @dblNetVolume = sum(TM.dblTempCompensatedVolume) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		SELECT @dblUllage = sum(TM.dblUllage) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		SELECT top 1 @dblTotalCapacity = A.dblTotalCapacity FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT top 1 @dtmLastInventoryTime = TM.dtmDateTime FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
+		SELECT @dblGrossVolume = sum(TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT @dblNetVolume = sum(TM.dblTempCompensatedVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT @dblUllage = sum(TM.dblUllage) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT top 1 @dblTotalCapacity = A.dblTotalCapacity FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
 
-		--SELECT (TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId
+		--SELECT (TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId
 
 		SET @dblFullPercent = CASE WHEN @dblTotalCapacity = 0 THEN @dblGrossVolume ELSE @dblGrossVolume/@dblTotalCapacity END
 	
-		SELECT @dblWaterHeight = sum(TM.dblWaterHeight) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT @dblWaterHeight = sum(TM.dblWaterHeight) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
 		print @strSiteNumber
 		INSERT INTO #tempInventoryReport
 					(dblFullPercent,strLocation,strSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblWaterHeight)VALUES

@@ -1,6 +1,6 @@
-CREATE TABLE [dbo].[tblTMTankMonitor] (
+CREATE TABLE [dbo].[tblTMTankReading] (
     [intConcurrencyId]    		INT             DEFAULT 1 NOT NULL,
-    [intTankMonitorId]          INT             IDENTITY (1, 1) NOT NULL,
+    [intTankReadingId]          INT             IDENTITY (1, 1) NOT NULL,
 	[dtmDateTime]				DATETIME 		NULL,
 	[intReadingSource]			INT NULL,
 	[intTankNumber]				INT				NULL,
@@ -20,8 +20,8 @@ CREATE TABLE [dbo].[tblTMTankMonitor] (
 	[dtmInventoryReadingDateTime]				DATETIME 		NULL,
     [ysnManual]  bit NULL,
 	[intCheckoutId] int NULL
-	CONSTRAINT [PK_tblTMTankMonitor_intTankMonitorId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC),
-	CONSTRAINT [FK_tblTMTankMonitor_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId])
+	CONSTRAINT [PK_tblTMTankReading_intTankReadingId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC),
+	CONSTRAINT [FK_tblTMTankReading_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId])
 	)
 
 

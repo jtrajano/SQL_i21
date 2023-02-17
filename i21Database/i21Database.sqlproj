@@ -1241,7 +1241,7 @@
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
-    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
+    <Build Include="dbo\Tables\tblTMTankReading.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
@@ -1305,7 +1305,6 @@
     <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
     <Build Include="dbo\Stored Procedures\uspTRChangeException.sql" />
-    <Build Include="dbo\Tables\tblSTCheckoutTierProducts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
