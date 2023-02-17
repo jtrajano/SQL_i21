@@ -23,7 +23,7 @@ AS
 		ON A.intSiteID = IH.intSiteId
 	LEFT JOIN tblICItem T
 		ON A.intProduct = T.intItemId 
-	LEFT JOIN tblTMTankMonitor TM
+	LEFT JOIN tblTMTankReading TM
 		ON TM.intSiteId = A.intSiteID
 
 	
