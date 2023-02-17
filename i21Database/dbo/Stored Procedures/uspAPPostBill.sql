@@ -366,7 +366,6 @@ INSERT INTO @adjustedEntries (
 	,[intCostUOMId] 
 	--,[dblVoucherCost] 
 	,[dblNewValue]
-	,[dblNewForexValue]
 	,[intCurrencyId] 
 	--,[dblExchangeRate] 
 	,[intTransactionId] 
@@ -396,7 +395,6 @@ SELECT
 	,[intCostUOMId] 
 	--,[dblVoucherCost] 
 	,[dblNewValue]
-	,[dblNewForexValue]
 	,[intCurrencyId] 
 	--,[dblExchangeRate] 
 	,[intTransactionId] 
@@ -426,14 +424,10 @@ INSERT INTO @ChargesToAdjust
 (
 	[intInventoryReceiptChargeId] 
 	,[dblNewValue] 
-	,[dblNewForexValue]
 	,[dtmDate] 
 	,[intTransactionId] 
 	,[intTransactionDetailId] 
 	,[strTransactionId] 
-	,[intCurrencyId] 
-	,[intForexRateTypeId] 
-	,[dblForexRate] 
 )
 SELECT 
 	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
@@ -480,42 +474,11 @@ SELECT
 				CAST(
 				(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
 				AS DECIMAL(18,2))
-			END 
-	,[dblNewForexValue] = --B.dblCost - B.dblOldCost
-			CASE 
-			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-			-- 2. and then convert into functional currency. 
-			CAST(
-				(
-					(B.dblQtyReceived * B.dblCost)
-					/ ISNULL(r.intSubCurrencyCents, 1) )  
-			AS DECIMAL(18,2))
-				- 
-				CAST(
-				(
-					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-					/ ISNULL(r.intSubCurrencyCents, 1))
-				AS DECIMAL(18,2))
-			ELSE
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-				CAST(
-				(B.dblQtyReceived * B.dblCost )  
-				AS DECIMAL(18,2))
-				- 
-				CAST(
-				(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
-				AS DECIMAL(18,2))
-			END  			
+			END  
 	,[dtmDate] = A.dtmDate
 	,[intTransactionId] = A.intBillId
 	,[intTransactionDetailId] = B.intBillDetailId
 	,[strTransactionId] = A.strBillId
-	,[intCurrencyId] = rc.intCurrencyId
-	,[intForexRateTypeId] = rc.intForexRateTypeId
-	,[dblForexRate] = B.dblRate
 FROM tblAPBill A INNER JOIN tblAPBillDetail B
 ON A.intBillId = B.intBillId
 INNER JOIN (

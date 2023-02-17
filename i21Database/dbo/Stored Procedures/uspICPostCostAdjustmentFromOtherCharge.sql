@@ -71,25 +71,17 @@ BEGIN
 	INSERT INTO @ApprovedChargesToAdjust(
 		intInventoryReceiptChargeId
 		,dblNewValue
-		,dblNewForexValue
 		,dtmDate
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
-		,intCurrencyId 
-		,intForexRateTypeId 
-		,dblForexRate 
 	)
 	SELECT  c.intInventoryReceiptChargeId
 			,c.dblNewValue
-			,c.dblNewForexValue
 			,c.dtmDate
 			,c.intTransactionId
 			,c.intTransactionDetailId
 			,c.strTransactionId
-			,c.intCurrencyId 
-			,c.intForexRateTypeId 
-			,c.dblForexRate 
 	FROM	tblICInventoryReceiptCharge rc INNER JOIN @ChargesToAdjust c
 				ON rc.intInventoryReceiptChargeId = c.intInventoryReceiptChargeId
 	WHERE	rc.ysnInventoryCost = 1	
@@ -117,7 +109,6 @@ BEGIN
 				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblNewValue]
-				,[dblNewForexValue]
 				,[intTransactionId]
 				,[intTransactionDetailId] 
 				,[strTransactionId] 
@@ -130,9 +121,6 @@ BEGIN
 				,[strSourceTransactionId]
 				,[intOtherChargeItemId] 
 				,[strActualCostId]
-				,[intCurrencyId] 
-				,[intForexRateTypeId] 
-				,[dblForexRate] 
 		)
 		SELECT
 				[intItemId]						= ReceiptItem.intItemId
@@ -147,14 +135,6 @@ BEGIN
 														END 
 														,TotalUnitsPerContract.dblTotalUnits)
 												) 		
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
-																ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
-														END 
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -167,9 +147,6 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId 
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -224,23 +201,7 @@ BEGIN
 																	)	
 														END 
 														,TotalCostPerContract.dblTotalCost)
-												)
-				,[dblNewForexValue]				= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblNet, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-																ELSE 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblOpenReceive, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-														END 
-														,TotalCostPerContract.dblTotalCost)
-												)												
+												) 		
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -253,9 +214,6 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -311,16 +269,6 @@ BEGIN
 														END
 														,TotalUnitsPerContract.dblTotalUnits)
 												) 		
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
-																ELSE 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
-														END
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -333,9 +281,6 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -383,7 +328,6 @@ BEGIN
 				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblNewValue]
-				,[dblNewForexValue]
 				,[intTransactionId]
 				,[intTransactionDetailId] 
 				,[strTransactionId] 
@@ -396,9 +340,6 @@ BEGIN
 				,[strSourceTransactionId] 
 				,[intOtherChargeItemId]
 				,[strActualCostId]
-				,[intCurrencyId]
-				,[intForexRateTypeId]
-				,[dblForexRate]
 		)
 		SELECT
 				[intItemId]						= ReceiptItem.intItemId
@@ -412,15 +353,7 @@ BEGIN
 																ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
 														END 
 														,TotalUnitsPerContract.dblTotalUnits)
-												) 	
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
-																ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
-														END 
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 													
+												) 		
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -433,9 +366,6 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -493,23 +423,7 @@ BEGIN
 																	)	
 														END 
 														,TotalCostPerContract.dblTotalCost)
-												) 
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblNet, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-																ELSE 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblOpenReceive, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-														END 
-														,TotalCostPerContract.dblTotalCost)
-												) 												
+												) 		
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -522,9 +436,6 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -582,17 +493,7 @@ BEGIN
 																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
 														END
 														,TotalUnitsPerContract.dblTotalUnits)
-												) 	
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
-																ELSE 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
-														END
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 													
+												) 		
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -605,9 +506,6 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 

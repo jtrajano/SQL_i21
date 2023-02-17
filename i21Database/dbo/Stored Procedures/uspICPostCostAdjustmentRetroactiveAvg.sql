@@ -12,7 +12,6 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@intCostUOMId AS INT 
 	,@dblNewCost AS NUMERIC(38,20)
 	,@dblNewValue AS NUMERIC(38,20)
-	,@dblNewForexValue AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -173,17 +172,20 @@ END
 -- Compute the cost adjustment
 BEGIN 
 	SET @ForexCostAdjustment = 
-		CASE	WHEN @dblNewForexValue IS NOT NULL THEN @dblNewForexValue
-				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
-				ELSE NULL 
-		END 	
-
-	SET @CostAdjustment = 
 		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
-				WHEN @dblQty IS NOT NULL AND NULLIF(@dblForexRate, 0) <> 1 THEN @dblQty * ISNULL(@dblNewCost, 0) * @dblForexRate
 				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
 				ELSE NULL 
 		END 	
+	
+	IF ISNULL(NULLIF(@dblForexRate, 0), 1) = 1 
+	BEGIN 
+		SET @CostAdjustment = @ForexCostAdjustment 
+		SET @ForexCostAdjustment = NULL 
+	END 
+	ELSE IF NULLIF(@dblForexRate, 0) <> 1 
+	BEGIN 
+		SET @CostAdjustment = @ForexCostAdjustment * @dblForexRate	
+	END 
 
 	-- If there is no cost adjustment, exit immediately. 
 	IF @CostAdjustment IS NULL 
