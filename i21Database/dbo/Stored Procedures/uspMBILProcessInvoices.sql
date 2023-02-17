@@ -138,7 +138,6 @@ CREATE TABLE #TempMBILInvoiceItem (
 	BEGIN
 		DECLARE @EntriesForInvoice AS InvoiceStagingTable
 		DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
-		DECLARE @LogId INT
 
 		INSERT INTO @EntriesForInvoice (
 				  [intId]
