@@ -49,7 +49,7 @@ AS
 	LEFT JOIN	tblAPVendor				V	ON	V.intEntityId			=	E.intEntityId			
 	LEFT JOIN	tblARCustomer			U	ON	U.intEntityId			=	E.intEntityId					
 	LEFT JOIN	tblARSalesperson		P	ON	P.intEntityId			=	E.intEntityId
-	LEFT JOIN	tblAPVendorCompanyLocation VL ON E.intEntityId			= VL.intEntityVendorId
+	LEFT JOIN	tblAPVendorCompanyLocation VL ON E.intEntityId			= VL.intEntityVendorId and 1 = (case when isnull(CTCP.ysnListAllCustomerVendorLocations,0) = 0 then 0 else 1 end)
 	LEFT JOIN	tblSMCompanyLocation CL ON VL.intCompanyLocationId		= CL.intCompanyLocationId
 	OUTER APPLY (
 		SELECT	EY.intEntityId
