@@ -767,15 +767,15 @@ BEGIN TRY
 					WHERE B.intBatchId = @intBatchId
 				
 					/* Item UOM Validation. */
-					IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+					IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemInsert AND intUnitMeasureId = @intRepresentingUOMInsert)
 						BEGIN	
 							SELECT @strItemLog = strItemNo
 							FROM tblICItem 
-							WHERE intItemId = @intItemId;
+							WHERE intItemId = @intItemInsert;
 
 							SELECT @strUnitMeasureLog = strUnitMeasure
 							FROM tblICUnitMeasure 
-							WHERE intUnitMeasureId = @intRepresentingUOMId;
+							WHERE intUnitMeasureId = @intRepresentingUOMInsert;
 
 							UPDATE tblQMImportCatalogue
 							SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
