@@ -58,6 +58,7 @@ BEGIN
 		,[dblUOMQty] NUMERIC(38,20) NULL DEFAULT 1				-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
 		,[dblNewCost] NUMERIC(38,20) NULL DEFAULT 0				-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 		,[dblNewValue] NUMERIC(38,20) NULL						-- Or you can specify the adjustment using an amount. Let's say you want to increase the item cost by $100. You can just pass a $100 value and zero qty and cost. 
+		,[dblNewForexValue] NUMERIC(38,20) NULL					-- Or you can specify the adjustment using an amount (foreign currency). Let's say you want to increase the item cost by $100. You can just pass a $100 value and zero qty and cost. 
 		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
 		,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
@@ -93,6 +94,7 @@ DECLARE @intId AS INT
 		,@intCostUOMId AS INT 
 		,@dblNewCost AS NUMERIC(38,20)
 		,@dblNewValue AS NUMERIC(38,20)
+		,@dblNewForexValue AS NUMERIC(38,20)
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
@@ -144,6 +146,7 @@ BEGIN
 			,[intCostUOMId]
 			,[dblVoucherCost] 
 			,[dblNewValue]
+			,[dblNewForexValue]
 			,[intCurrencyId]
 			,[intTransactionId]
 			,[intTransactionDetailId] 
@@ -176,6 +179,7 @@ BEGIN
 			,[intCostUOMId]
 			,[dblVoucherCost] = CASE WHEN @ysnPost = 1 THEN [dblVoucherCost] ELSE -[dblVoucherCost] END 
 			,[dblNewValue] = CASE WHEN @ysnPost = 1 THEN [dblNewValue] ELSE -[dblNewValue] END 
+			,[dblNewForexValue] = CASE WHEN @ysnPost = 1 THEN [dblNewForexValue] ELSE -[dblNewForexValue] END 
 			,[intCurrencyId] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
@@ -274,6 +278,7 @@ SELECT  intId
 		,intCostUOMId
 		,dblVoucherCost
 		,dblNewValue
+		,dblNewForexValue
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -310,6 +315,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intCostUOMId
 	,@dblNewCost
 	,@dblNewValue
+	,@dblNewForexValue
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -377,6 +383,7 @@ BEGIN
 		SET @dblForexRate = 1
 		SET @intForexRateTypeId = NULL 
 		SET @intCurrencyId = @intFunctionalCurrencyId
+		SET @dblNewForexValue = NULL 
 	END 
 	
 	-- Validate the forex rate 
@@ -422,6 +429,7 @@ BEGIN
 				,@intCostUOMId 
 				,@dblNewCost
 				,@dblNewValue 
+				,@dblNewForexValue
 				,@intTransactionId 
 				,@intTransactionDetailId 
 				,@strTransactionId 
@@ -458,6 +466,7 @@ BEGIN
 				,@intCostUOMId 
 				,@dblNewCost
 				,@dblNewValue 
+				,@dblNewForexValue
 				,@intTransactionId 
 				,@intTransactionDetailId 
 				,@strTransactionId 
@@ -506,6 +515,7 @@ BEGIN
 			,@intCostUOMId 
 			,@dblNewCost
 			,@dblNewValue 
+			,@dblNewForexValue
 			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
@@ -553,6 +563,7 @@ BEGIN
 			,@intCostUOMId 
 			,@dblNewCost
 			,@dblNewValue 
+			,@dblNewForexValue
 			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
@@ -599,7 +610,8 @@ BEGIN
 			,@dblQty 
 			,@intCostUOMId 
 			,@dblNewCost 
-			,@dblNewValue 
+			,@dblNewValue
+			,@dblNewForexValue
 			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
@@ -648,6 +660,7 @@ BEGIN
 			,@intCostUOMId 
 			,@dblNewCost
 			,@dblNewValue 
+			,@dblNewForexValue
 			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
@@ -718,6 +731,7 @@ BEGIN
 		,@intCostUOMId
 		,@dblNewCost
 		,@dblNewValue
+		,@dblNewForexValue
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -783,6 +797,7 @@ BEGIN
 			,[intCostUOMId]
 			,[dblVoucherCost] 
 			,[dblNewValue]
+			,[dblNewForexValue]
 			,[intCurrencyId] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
@@ -801,6 +816,8 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[dblNewAverageCost]
 			,[intSourceEntityId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 	)
 	SELECT 
 			[intItemId] 
@@ -812,6 +829,7 @@ BEGIN
 			,[intItemUOMId] -- Use the cost bucket item uom id as the Cost UOM id. 
 			,[dblNewCost] 
 			,[dblNewValue]
+			,[dblNewForexValue]
 			,[intCurrencyId] 
 			,[intTransactionId]
 			,[intTransactionDetailId] 
@@ -830,6 +848,8 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[dblNewAverageCost]
 			,[intSourceEntityId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
 	FROM	#tmpRevalueProducedItems
 	ORDER BY [intItemId]
 			,[intItemLocationId]
