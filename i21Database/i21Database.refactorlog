@@ -7770,4 +7770,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDispatchOrderDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="56e4d067-61a3-4974-a533-e304c0c3545a" ChangeDateTime="02/17/2023 05:07:18">
+    <Property Name="ElementName" Value="[dbo].[tblSTCheckoutTierProducts].[inTierProductId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTCheckoutTierProducts]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTierProductId" />
+  </Operation>
 </Operations>
