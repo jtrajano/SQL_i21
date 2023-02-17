@@ -38,6 +38,8 @@ BEGIN
 		,@dtmEndDate DATETIME
 		,@intNumberOfContainers INT
 		,@strThirdPartyFeedStatus NVARCHAR(50)
+		,@intItemId INT
+		,@strDescription NVARCHAR(200)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -192,6 +194,8 @@ BEGIN
 			,@strSeq = NULL
 			,@dtmStartDate = NULL
 			,@dtmEndDate = NULL
+			,@intItemId = NULL
+			,@strDescription = NULL
 
 		SELECT @intEntityId = NULL
 			,@strVendorRefNo = NULL
@@ -223,6 +227,7 @@ BEGIN
 			,@strSeq = intContractSeq
 			,@dtmStartDate = dtmStartDate
 			,@dtmEndDate = dtmEndDate
+			,@intItemId = intItemId
 		FROM dbo.tblCTContractFeed WITH (NOLOCK)
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -240,6 +245,10 @@ BEGIN
 			,@intNumberOfContainers = intNumberOfContainers
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
+
+		SELECT @strDescription = strDescription
+		FROM dbo.tblICItem WITH (NOLOCK)
+		WHERE intItemId = @intItemId
 
 		SELECT @strERPPONumber = @strContractNo
 			,@strERPItemNumber = @strSeq
@@ -291,10 +300,10 @@ BEGIN
 				SELECT @strError = @strError + 'Planned Availability date cannot be blank. '
 			END
 
-			IF @strContractItemNo IS NULL
-				OR @strContractItemNo = ''
+			IF @strDescription IS NULL
+				OR @strDescription = ''
 			BEGIN
-				SELECT @strError = @strError + 'Contract Item cannot be blank. '
+				SELECT @strError = @strError + 'Item Description cannot be blank. '
 			END
 		END
 
@@ -351,9 +360,9 @@ BEGIN
 
 			SELECT @strXML = '<Shipment>'
 
-			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+			--SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
 
-			SELECT @strXML = @strXML + '<ReferenceItemNumber>' + @strERPItemNumber + '</ReferenceItemNumber>'
+			--SELECT @strXML = @strXML + '<ReferenceItemNumber>' + @strERPItemNumber + '</ReferenceItemNumber>'
 
 			SELECT @strXML = @strXML + '<ContractNumber>' + @strContractNo + '</ContractNumber>'
 
@@ -373,9 +382,9 @@ BEGIN
 		BEGIN
 			SELECT @strXML = '<Shipment>'
 
-			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+			--SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
 
-			SELECT @strXML = @strXML + '<ReferenceItemNumber>' + @strERPItemNumber + '</ReferenceItemNumber>'
+			--SELECT @strXML = @strXML + '<ReferenceItemNumber>' + @strERPItemNumber + '</ReferenceItemNumber>'
 
 			SELECT @strXML = @strXML + '<ContractNumber>' + @strContractNo + '</ContractNumber>'
 
@@ -446,7 +455,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<ArticleCode>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</ArticleCode>'
 
-			SELECT @strXML = @strXML + '<ArticleDescription>' + dbo.fnEscapeXML(ISNULL(@strContractItemNo, '')) + '</ArticleDescription>'
+			SELECT @strXML = @strXML + '<ArticleDescription>' + dbo.fnEscapeXML(ISNULL(@strDescription, '')) + '</ArticleDescription>'
 
 			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
