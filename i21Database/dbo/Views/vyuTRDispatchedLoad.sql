@@ -35,7 +35,7 @@ SELECT LG.intLoadId
 	, intEntitySalespersonId = Customer.intSalespersonId
 	, strCustomerNumber = Customer.strName
 	, strOutboundLocationName = ISNULL(LG.strSLocationName, LG.strPLocationName)
-	, strOutboundSalespersonId = Salesperson.strName
+	, strOutboundSalespersonId = ISNULL(LGSalesperson.strName, ISNULL(CLSalesperson.strName, CSalesperson.strName))
 	, LG.strShipTo
 	, intOutboundItemId = LG.intItemId
 	, dblOutboundQuantity = ISNULL(TMO.dblQuantity, ISNULL(LG.dblQuantity, 0.000000))
