@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblTMTankReading] (
 	[dtmInventoryReadingDateTime]				DATETIME 		NULL,
     [ysnManual]  bit NULL,
 	[intCheckoutId] int NULL
-	CONSTRAINT [PK_tblTMTankReading_intTankReadingId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC),
+	CONSTRAINT [PK_tblTMTankReading_intTankReadingId] PRIMARY KEY CLUSTERED ([intTankReadingId] ASC),
 	CONSTRAINT [FK_tblTMTankReading_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId])
 	)
 
