@@ -538,6 +538,28 @@ BEGIN
 		BEGIN
 			EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Added', @UserId
 		END
+		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intDispatchOrderId, '') <> '' AND intConcurrencyId <= 1)
+		BEGIN
+			SELECT DISTINCT LGD.intDispatchOrderId
+			INTO #tmpDispatchOrders
+			FROM tblTRLoadDistributionDetail TRD
+			JOIN tblLGDispatchOrderDetail LGD ON LGD.intDispatchOrderDetailId = TRD.intDispatchOrderDetailId
+			JOIN tblTRLoadDistributionHeader TRH ON TRH.intLoadDistributionHeaderId = TRD.intLoadDistributionHeaderId
+			WHERE TRH.intLoadHeaderId = @LoadHeaderId
+
+			DECLARE @intDispatchOrderId INT
+
+			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDispatchOrders)
+			BEGIN
+				SELECT TOP 1 @intDispatchOrderId = intDispatchOrderId FROM #tmpDispatchOrders
+
+				EXEC uspLGDispatchUpdateOrders @intDispatchOrderId, @UserId
+		
+				DELETE FROM #tmpDispatchOrders WHERE intDispatchOrderId = @intDispatchOrderId
+			END
+
+			DROP TABLE #tmpDispatchOrders
+		END
 
 		---- Add Blend Ingredients if needed
 		--EXEC uspTRUpdateLoadBlendIngredient @LoadHeaderId
