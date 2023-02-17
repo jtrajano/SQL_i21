@@ -47,6 +47,12 @@
 			,cc.intItemUOMId
 			,cc.intItemId
 			,bd.intBillDetailId
+			,cd.intTaxGroupId
+			,tg.strTaxGroup
+			,strItemDescription = it.strDescription
+			,ia.intAccountId
+			,gla.strAccountId
+			,strAccountDescription = gla.strDescription
 		from
 			tblCTContractCost cc
 			join tblICItem it on it.intItemId = cc.intItemId
@@ -75,6 +81,9 @@
 			outer apply (
 				select top 1 1 ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
 			)pf
+			left join tblSMTaxGroup tg on tg.intTaxGroupId = cd.intTaxGroupId
+			left join tblICItemAccount ia on ia.intItemId = it.intItemId
+			left join tblGLAccount gla on gla.intAccountId = ia.intAccountId
 		where
 			ch.intContractTypeId = 1
 		) otherCosts
