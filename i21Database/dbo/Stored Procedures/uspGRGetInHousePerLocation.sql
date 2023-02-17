@@ -24,7 +24,8 @@ BEGIN
 	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
 		,@intCommodityStockUOMId = intUnitMeasureId
 	FROM tblICCommodityUnitMeasure
-	WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
+	WHERE intCommodityId = @intCommodityId 
+		AND ysnStockUnit = 1
 
 	
 	DECLARE @tblResult TABLE (
@@ -75,6 +76,42 @@ BEGIN
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+
+	--=================================
+	-- Company Owned *** Sales Order
+	--=================================
+	INSERT INTO @tblResult (
+		dtmDate
+		,dblTotal
+		,strTransactionNo
+		,strTransactionType
+		,strDistribution
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT
+		dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),SC.dtmTicketDateTime,110),110)
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(CO.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SC.dblNetUnits)
+		,AR.strInvoiceNumber
+		,'Invoice'
+		,'SO'
+		,strOwnership = 'Company Owned'
+		,AR.intCompanyLocationId
+		,CL.strLocationName
+	FROM tblSCTicket SC
+	INNER JOIN tblICItemUOM UOM
+		ON UOM.intItemUOMId = SC.intItemUOMIdTo
+	INNER JOIN tblARInvoice AR
+		ON AR.intSalesOrderId = SC.intSalesOrderId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = AR.intCompanyLocationId
+	INNER JOIN tblICCommodityUnitMeasure CO
+		ON CO.intCommodityId = SC.intCommodityId
+			AND CO.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE SC.intItemId = ISNULL(@intItemId,SC.intItemId)
+		AND (AR.intCompanyLocationId= ISNULL(@intLocationId,AR.intCompanyLocationId)
+			OR AR.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 
 	--=============================
 	-- Company Owned *** Invoices that are not linked to scale tickets
@@ -434,7 +471,44 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Inventory Shipment', 'Invoice')
+		WHERE strTransactionType = 'Inventory Shipment'
+		GROUP BY dtmDate
+			,strDistribution 
+			,strTransactionType
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+	) t
+	WHERE dblTotal <> 0
+
+	INSERT INTO @tblResultInventory
+	(
+		dtmDate
+		,dblInvIn
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT dtmDate
+		,ABS(dblTotal)
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	FROM (
+		SELECT dtmDate 
+			,dblTotal = SUM(ISNULL(dblTotal,0))
+			,strDistribution 
+			,strTransactionType
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResult
+		WHERE strTransactionType = 'Invoice'
+			AND strDistribution = 'SO'
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType
@@ -470,7 +544,7 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Outbound Shipment')
+		WHERE strTransactionType = 'Outbound Shipment'
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType
