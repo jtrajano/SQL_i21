@@ -25,7 +25,6 @@
 
 	[strOrderNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strOrderType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-	[intItemId] INT NULL,
 	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantity] NUMERIC(18, 6) NULL,
 	[dblStandardWeight] NUMERIC(18, 6) NULL,
@@ -35,6 +34,5 @@
 	[intConcurrencyId] INT NULL DEFAULT((1)),
 
     CONSTRAINT [PK_tblLGDispatchOrderRoute] PRIMARY KEY ([intDispatchOrderRouteId]),
-    CONSTRAINT [FK_tblLGDispatchOrderRoute_tblLGDispatchOrder_intDispatchOrderId] FOREIGN KEY ([intDispatchOrderId]) REFERENCES [tblLGDispatchOrder]([intDispatchOrderId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblLGDispatchOrderRoute_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+    CONSTRAINT [FK_tblLGDispatchOrderRoute_tblLGDispatchOrder_intDispatchOrderId] FOREIGN KEY ([intDispatchOrderId]) REFERENCES [tblLGDispatchOrder]([intDispatchOrderId]) ON DELETE CASCADE
 )

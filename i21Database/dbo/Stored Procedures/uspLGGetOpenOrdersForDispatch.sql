@@ -80,6 +80,6 @@ BEGIN
 	WHERE TMO.strOrderStatus = 'Generated'
 		AND NOT EXISTS (SELECT 1 FROM tblLGDispatchOrderDetail DOD 
 			INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = DOD.intDispatchOrderId 
-			WHERE DO.intSourceType = 2 AND DOD.intTMDispatchId = TMO.intDispatchId AND DO.intDispatchStatus NOT IN (6))
+			WHERE DO.intSourceType = 2 AND DOD.intTMDispatchId = TMO.intDispatchId)
 END
 GO
