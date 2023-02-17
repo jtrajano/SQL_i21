@@ -86,7 +86,6 @@ GO
 			,[strTransactionType]
 			,[strPrefix]
 			,[intNumber]
-			,[intDigits]
 			,[strModule]
 			,[ysnEnable]
 			,[intConcurrencyId]
@@ -95,7 +94,6 @@ GO
 			,[strTransactionType]	= N'Audit Adjustment'
 			,[strPrefix]			=  N'AA-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -105,7 +103,6 @@ GO
 			,[strTransactionType]	= N'General Journal'
 			,[strPrefix]			=  N'GJ-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -115,7 +112,6 @@ GO
 			,[strTransactionType]	= N'Batch Post'
 			,[strPrefix]			= N'BATCH-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'Posting'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -125,7 +121,6 @@ GO
 			,[strTransactionType]	= N'Recurring Journal'
 			,[strPrefix]			= N'REC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -135,7 +130,6 @@ GO
 			,[strTransactionType]	= N'General Journal Reversal'
 			,[strPrefix]			= N'REV-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId] = 1
@@ -145,7 +139,6 @@ GO
 			,[strTransactionType]	= N'COA Adjustment'
 			,[strPrefix]			= N'GLADJ-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -155,7 +148,6 @@ GO
 			,[strTransactionType]	= N'Bill Batch'
 			,[strPrefix]			= N'BB-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -165,7 +157,6 @@ GO
 			,[strTransactionType]	= N'Payable'
 			,[strPrefix]			= N'PAY-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -175,7 +166,6 @@ GO
 			,[strTransactionType]	= N'Bill'
 			,[strPrefix]			= N'BL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -185,7 +175,6 @@ GO
 			,[strTransactionType]	= N'Bank Deposit'
 			,[strPrefix]			= N'BDEP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -195,7 +184,6 @@ GO
 			,[strTransactionType]	= N'Bank Withdrawal'
 			,[strPrefix]			= N'BWD-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -205,7 +193,6 @@ GO
 			,[strTransactionType]	= N'Bank Transfer'
 			,[strPrefix]			= N'BTFR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -215,7 +202,6 @@ GO
 			,[strTransactionType]	= N'Bank Transaction'
 			,[strPrefix]			= N'BTRN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -225,7 +211,6 @@ GO
 			,[strTransactionType]	= N'Misc Checks'
 			,[strPrefix]			= N'MCHK-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -235,7 +220,6 @@ GO
 			,[strTransactionType]	= N'Bank Stmt Import'
 			,[strPrefix]			= N'BSI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -245,7 +229,6 @@ GO
 			,[strTransactionType]	= N'Ticket Number'
 			,[strPrefix]			= N'HDTN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Help Desk'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -255,7 +238,6 @@ GO
 			,[strTransactionType]	= N'Receive Payments'
 			,[strPrefix]			= N'RCV-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -265,7 +247,6 @@ GO
 			,[strTransactionType]	= N'Debit Memo'
 			,[strPrefix]			= N'DM-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Purchasing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -275,7 +256,6 @@ GO
 			,[strTransactionType]	= N'Invoice'
 			,[strPrefix]			= N'SI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -285,7 +265,6 @@ GO
 			,[strTransactionType]	= N'Vendor Prepayment'
 			,[strPrefix]			= N'VPRE-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -295,7 +274,6 @@ GO
 			,[strTransactionType]	= N'Lease'
 			,[strPrefix]			= N'LEASE-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Tank Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -305,7 +283,6 @@ GO
 			,[strTransactionType]	= N'Purchase Order'
 			,[strPrefix]			= N'PO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -315,7 +292,6 @@ GO
 			,[strTransactionType]	= N'Inventory Receipt'
 			,[strPrefix]			= N'IR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -325,7 +301,6 @@ GO
 			,[strTransactionType]	= N'Lot Number'
 			,[strPrefix]			= N'LOT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -335,7 +310,6 @@ GO
 			,[strTransactionType]	= N'PurchaseContract'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -345,7 +319,6 @@ GO
 			,[strTransactionType]	= N'SaleContract'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -355,7 +328,6 @@ GO
 			,[strTransactionType]	= N'Notes Receivable'
 			,[strPrefix]			= N'NR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Notes Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -365,7 +337,6 @@ GO
 			,[strTransactionType]	= N'Sales Order'
 			,[strPrefix]			= N'SO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -375,7 +346,6 @@ GO
 			,[strTransactionType]	= N'Inventory Adjustment'
 			,[strPrefix]			= N'IA-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -385,7 +355,6 @@ GO
 			,[strTransactionType]	= N'Inventory Shipment'
 			,[strPrefix]			= N'IS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -395,7 +364,6 @@ GO
 			,[strTransactionType]	= N'Paycheck'
 			,[strPrefix]			= N'PCHK-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Payroll'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -405,7 +373,6 @@ GO
 			,[strTransactionType]	= N'Batch Production'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -415,7 +382,6 @@ GO
 			,[strTransactionType]	= N'Work Order'
 			,[strPrefix]			= N'WO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -425,7 +391,6 @@ GO
 			,[strTransactionType]	= N'ContractAdjNo'
 			,[strPrefix]			= N'Adj - '
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -435,7 +400,6 @@ GO
 			,[strTransactionType]	= N'Allocations'
 			,[strPrefix]			= N'AL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -445,7 +409,6 @@ GO
 			,[strTransactionType]	= N'Load Schedule'
 			,[strPrefix]			= N'LS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -455,7 +418,6 @@ GO
 		   	,[strTransactionType] 	= N'Batch Load'
 		   	,[strPrefix]   			= N'BLS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -465,7 +427,6 @@ GO
 			,[strTransactionType]	= N'Inventory Transfer'
 			,[strPrefix]			= N'IT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -475,7 +436,6 @@ GO
 			,[strTransactionType]	= N'Will Call'
 			,[strPrefix]			= N'TMO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Tank Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -485,7 +445,6 @@ GO
 			,[strTransactionType]	= N'Entity Number'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1005001
-			,[intDigits]			= Null
 			,[strModule]			= 'Entity Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -495,7 +454,6 @@ GO
 			,[strTransactionType]	= N'Match No'
 			,[strPrefix]			= N'S-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -505,7 +463,6 @@ GO
 			,[strTransactionType]	= N'Derivative Entry'
 			,[strPrefix]			= N'DER-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -515,7 +472,6 @@ GO
 			,[strTransactionType]	= N'Demand Number'
 			,[strPrefix]			= N'DN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -525,7 +481,6 @@ GO
 			,[strTransactionType]	= N'Site Number'
 			,[strPrefix]			= N''
 			,[intNumber]			= 99
-			,[intDigits]			= Null
 			,[strModule]			= 'Entity Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -535,7 +490,6 @@ GO
 			,[strTransactionType]	= N'Pick Lots'
 			,[strPrefix]			= N'PL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -545,7 +499,6 @@ GO
 			,[strTransactionType]	= N'Quote'
 			,[strPrefix]			= N'QU-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -555,7 +508,6 @@ GO
 			,[strTransactionType]	= N'Detailed Transaction'
 			,[strPrefix]			= N'CFDT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Card Fueling'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -565,7 +517,6 @@ GO
 			,[strTransactionType]	= N'Summarized Invoice'
 			,[strPrefix]			= N'CFSI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Card Fueling'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -575,7 +526,6 @@ GO
 			,[strTransactionType]	= N'Transport Load'
 			,[strPrefix]			= N'TR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Transports'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -585,7 +535,6 @@ GO
 			,[strTransactionType]	= N'Stage Lot Number'
 			,[strPrefix]			= N'STG-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -595,7 +544,6 @@ GO
 			,[strTransactionType]	= N'Transport Quote'
 			,[strPrefix]			= N'TRQ-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Transports'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -605,7 +553,6 @@ GO
 			,[strTransactionType]	= N'Collateral'
 			,[strPrefix]			= N'M-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -615,7 +562,6 @@ GO
 			,[strTransactionType]	= N'Collateral Header'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -625,7 +571,6 @@ GO
 			,[strTransactionType]	= N'Bag Off Order'
 			,[strPrefix]			= N'BO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -635,7 +580,6 @@ GO
 			,[strTransactionType]	= N'Price Fixation Trade No'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -645,7 +589,6 @@ GO
 			,[strTransactionType]	= N'Stock Sales'
 			,[strPrefix]			= N'SS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -655,7 +598,6 @@ GO
 			,[strTransactionType]	= N'Sample Number'
 			,[strPrefix]			= N'QS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Quality'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -665,7 +607,6 @@ GO
 			,[strTransactionType]	= N'Schedule Number'
 			,[strPrefix]			= N'WS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -675,7 +616,6 @@ GO
 			,[strTransactionType]	= N'Customer Prepayment'
 			,[strPrefix]			= N'CPP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -685,7 +625,6 @@ GO
 			,[strTransactionType]	= N'Customer Overpayment'
 			,[strPrefix]			= N'COP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -695,7 +634,6 @@ GO
 			,[strTransactionType]	= N'Vendor Overpayment'
 			,[strPrefix]			= N'VOP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -705,7 +643,6 @@ GO
 			,[strTransactionType]	= N'Report Messages'
 			,[strPrefix]			= N'REP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'System Manager'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -715,7 +652,6 @@ GO
 			,[strTransactionType]	= N'Pick List Number'
 			,[strPrefix]			= N'PK-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -725,7 +661,6 @@ GO
 			,[strTransactionType]	= N'Storage Measurement Reading'
 			,[strPrefix]			= N'SMR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -735,7 +670,6 @@ GO
 			,[strTransactionType]	= N'Sanitization Order Number'
 			,[strPrefix]			= N'S-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -746,7 +680,6 @@ GO
 			,[strTransactionType]	= N'StorageTicketNumber'
 			,[strPrefix]			= N'STR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -757,7 +690,6 @@ GO
 			,[strTransactionType]	= N'TransferTicketNumber'
 			,[strPrefix]			= N'TRA-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -768,7 +700,6 @@ GO
 			,[strTransactionType]	= N'WarehouseSKUNumber'
 			,[strPrefix]			= N'SKU-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Warehouse'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -779,7 +710,6 @@ GO
 			,[strTransactionType]	= N'WarehouseContainerNumber'
 			,[strPrefix]			= N'CON-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Warehouse'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -790,7 +720,6 @@ GO
 			,[strTransactionType]	= N'WarehouseBOLNo'
 			,[strPrefix]			= N'PK-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Warehouse'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -801,7 +730,6 @@ GO
 			,[strTransactionType]	= N'Inventory Count'
 			,[strPrefix]			= N'IC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -813,18 +741,16 @@ GO
 			,[strTransactionType]	= N'1099 Adjustment'
 			,[strPrefix]			= N'ADJ1099-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'1099 Adjustment')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjustment1099')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 78
 			,[strTransactionType]	= N'Parent Lot Number'
 			,[strPrefix]			= N'PLOT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -835,7 +761,6 @@ GO
             ,[strTransactionType]   = N'ScaleTicket'
             ,[strPrefix]			= N'SCT-'
             ,[intNumber]            = 1
-			,[intDigits]			= Null
             ,[strModule]			= 'Ticket Management'
             ,[ysnEnable]			= 1
             ,[intConcurrencyId]		= 1
@@ -846,7 +771,6 @@ GO
             ,[strTransactionType]   = N'Transfer'
             ,[strPrefix]			= N'PTR-'
             ,[intNumber]            = 1
-			,[intDigits]			= Null
             ,[strModule]			= 'Patronage'
             ,[ysnEnable]			= 1
             ,[intConcurrencyId]		= 1
@@ -857,7 +781,6 @@ GO
 			,[strTransactionType]	= N'Provisional'
 			,[strPrefix]			= N'PI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -868,7 +791,6 @@ GO
 			,[strTransactionType]	= N'Dividend Number'
 			,[strPrefix]			= N'PDIV-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -879,7 +801,6 @@ GO
 			,[strTransactionType]	= N'Certificate Number'
 			,[strPrefix]			= N'PCRT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -890,7 +811,6 @@ GO
 			,[strTransactionType]	= N'Service Charge'
 			,[strPrefix]			= N'SC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -901,7 +821,6 @@ GO
 			,[strTransactionType]	= N'Adjustment Number'
 			,[strPrefix]			= N'PADJ-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -912,7 +831,6 @@ GO
 			,[strTransactionType]	= N'Delivery Notice'
 			,[strPrefix]			= N'WC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -923,7 +841,6 @@ GO
 			,[strTransactionType]	= N'Change Stock Status Number'
 			,[strPrefix]			= N'PSS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -934,7 +851,6 @@ GO
 			,[strTransactionType]	= N'Currency Contract'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -945,7 +861,6 @@ GO
 			,[strTransactionType]	= N'Cancel Equity'
 			,[strPrefix]			= N'PCE-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -956,7 +871,6 @@ GO
 			,[strTransactionType]	= N'Bag Mark'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -967,7 +881,6 @@ GO
 			,[strTransactionType]	= N'CRM Number'
 			,[strPrefix]			= N'CRMN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Help Desk'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -978,7 +891,6 @@ GO
 			,[strTransactionType]	= N'OffSiteTicketNumber'
 			,[strPrefix]			= N'OFF-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -989,7 +901,6 @@ GO
 			,[strTransactionType]	= N'Blend Sheet Number'
 			,[strPrefix]			= N'BS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1000,7 +911,6 @@ GO
 			,[strTransactionType]	= N'Shipment Integration'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1011,7 +921,6 @@ GO
 			,[strTransactionType]	= N'Meter Readings'
 			,[strPrefix]			= N'MR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Meter Billing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1022,7 +931,6 @@ GO
 			,[strTransactionType]	= N'Least Cost Routing'
 			,[strPrefix]			= N'LCR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1033,7 +941,6 @@ GO
 			,[strTransactionType]	= N'Clean Cost'
 			,[strPrefix]			= N'CC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1044,7 +951,6 @@ GO
 			,[strTransactionType]	= N'Dealer Credit Cards'
 			,[strPrefix]			= N'DDC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Credit Card Recon'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1055,7 +961,6 @@ GO
 			,[strTransactionType]	= N'Sales Receipt'
 			,[strPrefix]			= N'SR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1066,7 +971,6 @@ GO
 			,[strTransactionType]	= N'Time Off Request'
 			,[strPrefix]			= N'TOR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Payroll'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1076,7 +980,6 @@ GO
 			,[strTransactionType]	= N'Claim'
 			,[strPrefix]			= N'CL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1086,7 +989,6 @@ GO
 			,[strTransactionType]	= N'Shift Activity Number'
 			,[strPrefix]			= N'SA-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1097,7 +999,6 @@ GO
 			,[strTransactionType]	= N'Activity'
 			,[strPrefix]			= N'ACT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'System Manager'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1108,7 +1009,6 @@ GO
 			,[strTransactionType]	= N'Truck Billing'
 			,[strPrefix]			= N'TB-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Energy Trac'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1119,7 +1019,6 @@ GO
             ,[strTransactionType]   = N'Ticket Management'
             ,[strPrefix]			= N'TKT-'
             ,[intNumber]            = 1
-			,[intDigits]			= Null
             ,[strModule]			= 'Ticket Management'
             ,[ysnEnable]			= 1
             ,[intConcurrencyId]		= 1
@@ -1130,7 +1029,6 @@ GO
 			,[strTransactionType]	= N'Load Shipping Instruction'
 			,[strPrefix]			= N'LSI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1141,7 +1039,6 @@ GO
 			,[strTransactionType]	= N'Inventory Return'
 			,[strPrefix]			= N'RTN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1152,7 +1049,6 @@ GO
 			,[strTransactionType]	= N'Process Refund'
 			,[strPrefix]			= N'PATR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1163,7 +1059,6 @@ GO
 			,[strTransactionType]	= N'Equity Payment'
 			,[strPrefix]			= N'EP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1174,7 +1069,6 @@ GO
 			,[strTransactionType]	= N'Asset'
 			,[strPrefix]			= N'AM-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Fixed Assets'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1185,7 +1079,6 @@ GO
 			,[strTransactionType]	= N'Disposition'
 			,[strPrefix]			= N'AMDIS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Fixed Assets'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1196,7 +1089,6 @@ GO
 			,[strTransactionType]	= N'Purchase'
 			,[strPrefix]			= N'AMPUR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Fixed Assets'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1207,7 +1099,6 @@ GO
 			,[strTransactionType]	= N'Depreciation'
 			,[strPrefix]			= N'AMDPR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Fixed Assets'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1218,7 +1109,6 @@ GO
 			,[strTransactionType]	= N'Weight Claims'
 			,[strPrefix]			= N'WC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1229,7 +1119,6 @@ GO
 			,[strTransactionType]	= N'Price Contract'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1240,7 +1129,6 @@ GO
 			,[strTransactionType]	= N'Revalue Transaction'
 			,[strPrefix]			= N'REVAL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1251,7 +1139,6 @@ GO
 			,[strTransactionType]	= N'Truck Billing Payment'
 			,[strPrefix]			= N'TBP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Energy Trac'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1262,7 +1149,6 @@ GO
 			,[strTransactionType]	= N'Storage Statement FormNo'
 			,[strPrefix]			= N'L '
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1273,7 +1159,6 @@ GO
 			,[strTransactionType]	= N'SSCC Label Serial No'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1284,7 +1169,6 @@ GO
 			,[strTransactionType]	= N'CPE Receipt'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1295,7 +1179,6 @@ GO
 			,[strTransactionType]	= N'Delivery Sheet'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1306,7 +1189,6 @@ GO
 			,[strTransactionType]	= N'Prepayment Reversal'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1327,7 +1209,6 @@ GO
 			,[strTransactionType]	= N'Basis Advance'
 			,[strPrefix]			= N'BA-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1338,7 +1219,6 @@ GO
 			,[strTransactionType]	= N'Vendor Rebate Program'
 			,[strPrefix]			= N'VRP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Vendor Rebates'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1349,7 +1229,6 @@ GO
 			,[strTransactionType]	= N'Issue Stock'
 			,[strPrefix]			= N'ISTK-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1360,7 +1239,6 @@ GO
 			,[strTransactionType]	= N'Retire Stock'
 			,[strPrefix]			= N'RSTK-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1371,7 +1249,6 @@ GO
 			,[strTransactionType]	= N'ZeroPriceTicket'
 			,[strPrefix]			= N'ZPT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1382,7 +1259,6 @@ GO
 			,[strTransactionType]	= N'Buybacks Program'
 			,[strPrefix]			= N'BBP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Buybacks'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1393,7 +1269,6 @@ GO
 			,[strTransactionType]	= N'Buybacks Reimbursement'
 			,[strPrefix]			= N'BBR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Buybacks'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1404,7 +1279,6 @@ GO
 			,[strTransactionType]	= N'Amendment Number'
 			,[strPrefix]			= N'AMD-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1415,7 +1289,6 @@ GO
 			,[strTransactionType]	= N'Deferred Interest'
 			,[strPrefix]			= N'DI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1426,7 +1299,6 @@ GO
 			,[strTransactionType]	= N'Mark To Market'
 			,[strPrefix]			= N'M2M-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1437,7 +1309,6 @@ GO
 			,[strTransactionType]	= N'Allocation Detail'
 			,[strPrefix]			= N'ALD-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1448,7 +1319,6 @@ GO
 			,[strTransactionType]	= N'Commission'
 			,[strPrefix]			= N'COMM-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1459,7 +1329,6 @@ GO
 			,[strTransactionType]	= N'Mark Up/Down'
 			,[strPrefix]			= N'MUD-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Store'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1470,7 +1339,6 @@ GO
 			,[strTransactionType]	= N'POS End Of Day'
 			,[strPrefix]			= N'EOD-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Receivable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1481,7 +1349,6 @@ GO
 			,[strTransactionType]	= N'Shift Number'
 			,[strPrefix]			= N'SN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Mobile Billing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1492,7 +1359,6 @@ GO
 			,[strTransactionType]	= N'Bank Interest'
 			,[strPrefix]			= N'BINT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1503,7 +1369,6 @@ GO
 			,[strTransactionType]	= N'Bank Loan'
 			,[strPrefix]			= N'LN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1514,7 +1379,6 @@ GO
 			,[strTransactionType]	= N'Not Sufficient Fund'
 			,[strPrefix]			= N'NSF-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1526,7 +1390,6 @@ GO
 			,[strTransactionType]	= N'Currency Exposure'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1537,7 +1400,6 @@ GO
 			,[strTransactionType]	= N'Daily Average Price'
 			,[strPrefix]			= N'DAP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1548,7 +1410,6 @@ GO
 			,[strTransactionType]	= N'Item Contract'
 			,[strPrefix]			= N'ITM-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1559,7 +1420,6 @@ GO
 			,[strTransactionType]	= N'Demand'
 			,[strPrefix]			= N'DN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1570,7 +1430,6 @@ GO
 			,[strTransactionType]	= N'Retail Price Adjustment'
 			,[strPrefix]			= N'RPA-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Store'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1581,7 +1440,6 @@ GO
 			,[strTransactionType]	= N'Demand Plan'
 			,[strPrefix]			= N'DP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1592,7 +1450,6 @@ GO
 			,[strTransactionType]	= N'Summary Log Batch'
 			,[strPrefix]			= N'BATCH-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1603,7 +1460,6 @@ GO
 			,[strTransactionType]	= N'PO Export'
 			,[strPrefix]			= N'PO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1614,7 +1470,6 @@ GO
 			,[strTransactionType]	= N'PO-Sequence-Cancel'
 			,[strPrefix]			= N'PO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1625,7 +1480,6 @@ GO
 			,[strTransactionType]	= N'LSI and LS Acknowledgement'
 			,[strPrefix]			= N'LS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1635,7 +1489,6 @@ GO
 			,[strTransactionType]	= N'Pick Containers'
 			,[strPrefix]			= N'PC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1645,7 +1498,6 @@ GO
 			,[strTransactionType]	= N'Dispatch Schedule'
 			,[strPrefix]			= N'DS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1656,7 +1508,6 @@ GO
 			,[strTransactionType]	= N'Receipt Item and Charge Update'
 			,[strPrefix]			= N'RIDetail-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1667,7 +1518,6 @@ GO
 			,[strTransactionType]	= N'Responsible Party Task'
 			,[strPrefix]			= N'Task-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1677,18 +1527,16 @@ GO
 			,[strTransactionType]	= N'AG Work Order'
 			,[strPrefix]			= N'AGWO-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Agronomy'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'AG Work Order' and strModule = 'Agronomy')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order' and strModule = 'Agronomy')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 158
 			,[strTransactionType]	= N'Contract Release Instruction'
 			,[strPrefix]			= N'REL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1698,7 +1546,6 @@ GO
 			,[strTransactionType]	= N'Pricing Number'
 			,[strPrefix]			= N'CP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1708,7 +1555,6 @@ GO
 			,[strTransactionType]	= N'Grain Receipt'
 			,[strPrefix]			= N'GR-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1718,7 +1564,6 @@ GO
 			,[strTransactionType]	= N'Bank Activity'
 			,[strPrefix]			= N'BACT-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1728,7 +1573,6 @@ GO
 			,[strTransactionType]	= N'Bank Matching'
 			,[strPrefix]			= N'BM-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1738,7 +1582,6 @@ GO
 			,[strTransactionType]	= N'Borrowing Facility'
 			,[strPrefix]			= N'BF-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1748,7 +1591,6 @@ GO
 			,[strTransactionType]	= N'Split Number'
 			,[strPrefix]			= N'SN-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Entity Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1758,7 +1600,6 @@ GO
 			,[strTransactionType]	= N'Receipt Feed Id'
 			,[strPrefix]			= N''
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1768,7 +1609,6 @@ GO
 			,[strTransactionType]	= N'Trade Finance Transaction No'
 			,[strPrefix]			= N'TF-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1778,7 +1618,6 @@ GO
 			,[strTransactionType]	= N'Bank Swap'
 			,[strPrefix]			= N'BSWAP-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1788,7 +1627,6 @@ GO
 			,[strTransactionType]	= N'Credit Insurance'
 			,[strPrefix]			= N'CI-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1798,7 +1636,6 @@ GO
 			,[strTransactionType]	= N'Storage Charge'
 			,[strPrefix]			= N'SC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1808,7 +1645,6 @@ GO
 			,[strTransactionType]	= N'Letter of Credit'
 			,[strPrefix]			= N'LC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Contract Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1818,7 +1654,6 @@ GO
 			,[strTransactionType]	= N'Provisional Voucher'
 			,[strPrefix]			= N'PROV-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1828,7 +1663,6 @@ GO
 			,[strTransactionType]	= N'Credit Line'
 			,[strPrefix]			= N'CL-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Risk Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1838,7 +1672,6 @@ GO
 			,[strTransactionType]	= N'Cupping Session'
 			,[strPrefix]			= N'CS-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'Quality'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
@@ -1848,7 +1681,6 @@ GO
 				,[strTransactionType]	= N'Allocated Contracts Gain or Loss'
 				,[strPrefix]			= N'AC-'
 				,[intNumber]			= 0
-				,[intDigits]			= Null
 				,[strModule]			= 'Risk Management'
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
@@ -1858,7 +1690,6 @@ GO
 				,[strTransactionType]	= N'Insurance Charge'
 				,[strPrefix]			= N'INC-'
 				,[intNumber]			= 1
-				,[intDigits]			= Null
 				,[strModule]			= 'Inventory'
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
@@ -1868,7 +1699,6 @@ GO
 				,[strTransactionType]	= N'Recost Formulation'
 				,[strPrefix]			= N'RF-'
 				,[intNumber]			= 1
-				,[intDigits]			= Null
 				,[strModule]			= 'Inventory'
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
@@ -1878,41 +1708,10 @@ GO
 			,[strTransactionType]	= N'Change Account Category'
 			,[strPrefix]			= N'CAC-'
 			,[intNumber]			= 1
-			,[intDigits]			= Null
 			,[strModule]			= 'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category' AND [strModule] = 'General Ledger')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 180
-			,[strTransactionType]	= N'Opportunity'
-			,[strPrefix]			= N'OP-'
-			,[intNumber]			= 0
-			,[intDigits]			= Null
-			,[strModule]			= 'CRM'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Opportunity' AND [strModule] = 'CRM')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 182
-			,[strTransactionType]	= N'Catalogue Reconciliation'
-			,[strPrefix]			= N'CR-'
-			,[intNumber]			= 0
-			,[intDigits]			= Null
-			,[strModule]			= 'Quality'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Catalogue Reconciliation' AND [strModule] = 'Quality')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 183
-			,[strTransactionType]	= N'Item No'
-			,[strPrefix]			= N'C-'
-			,[intNumber]			= 0
-			,[intDigits]			= 10
-			,[strModule]			= 'Inventory'
-			,[ysnEnable]			= 0
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Item No' AND [strModule] = 'Inventory')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
