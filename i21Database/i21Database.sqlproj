@@ -1541,6 +1541,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_DA.sql" />
+    <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
