@@ -144,7 +144,7 @@ BEGIN
 		AND (ISNULL(SP.intItemId, 0) = 0 OR SP.intItemId = @ItemId)
 		AND (ISNULL(SP.intCustomerLocationId, 0) = 0 OR SP.intCustomerLocationId = @ShipToLocationId)
 		AND (@InvoiceType IS NULL OR (ISNULL(SP.strInvoiceType, '') = '' OR SP.strInvoiceType = @InvoiceType))
-		ORDER BY SP.intCustomerLocationId DESC, SP.intItemId DESC, SP.intCategoryId DESC, SP.intCurrencyId DESC
+		ORDER BY SP.intCustomerLocationId DESC, SP.intItemId DESC, SP.intCategoryId DESC, SP.intCurrencyId DESC, strInvoiceType DESC
 
 	--Customer Special Pricing
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialPricing))
