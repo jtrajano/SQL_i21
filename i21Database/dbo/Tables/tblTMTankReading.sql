@@ -19,15 +19,11 @@ CREATE TABLE [dbo].[tblTMTankReading] (
 	[intSiteId]					INT		NOT		NULL,
 	[dblInventoryReading] NUMERIC (18, 6) DEFAULT 0 NULL,
 	[dtmInventoryReadingDateTime]				DATETIME 		NULL,
-<<<<<<<< HEAD:i21Database/dbo/Tables/tblTMTankMonitor.sql
-    [ysnManual]  bit NULL
-	CONSTRAINT [PK_tblTMTankMonitor_intTankMonitorId] PRIMARY KEY CLUSTERED ([intTankMonitorId] ASC)
-========
+
     [ysnManual]  bit NULL,
 	[intCheckoutId] int NULL
 	CONSTRAINT [PK_tblTMTankReading_intTankReadingId] PRIMARY KEY CLUSTERED ([intTankReadingId] ASC),
-	CONSTRAINT [FK_tblTMTankReading_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId]),
-	CONSTRAINT [FK_tblTMTankReading_tblTMDeviceTankMonitor] FOREIGN KEY ([intDeviceTankMonitorId]) REFERENCES [dbo].[tblTMDeviceTankMonitor] ([intDeviceTankMonitorId])
+	CONSTRAINT [FK_tblTMTankReading_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId])
 	)
 
 GO
