@@ -14,6 +14,7 @@ RETURNS @returntable TABLE (
 	,[intCostUOMId] INT NULL								-- The uom related to the cost of the item. Ex: A box can be priced as $4 per LB. 
 	--,[dblVoucherCost] NUMERIC(38, 20) NULL DEFAULT 0		-- Cost of the item. It must be related to the cost uom. Ex: $4/LB. 
 	,[dblNewValue] NUMERIC(38, 20) NULL
+	,[dblNewForexValue] NUMERIC(38, 20) NULL
 	,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
 	--,[dblExchangeRate] NUMERIC (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 	,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
@@ -32,6 +33,8 @@ RETURNS @returntable TABLE (
 	,[intFobPointId] TINYINT NULL
 	,[intInTransitSourceLocationId] INT NULL 
 	,[intOtherChargeItemId] INT NULL
+	,[intForexRateTypeId] INT NULL
+	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1
 )
 AS
 BEGIN
@@ -45,8 +48,8 @@ BEGIN
 		,[intCostUOMId] 
 		--,[dblVoucherCost] 
 		,[dblNewValue]
-		,[intCurrencyId] 
-		--,[dblExchangeRate] 
+		,[dblNewForexValue]
+		,[intCurrencyId] 		
 		,[intTransactionId] 
 		,[intTransactionDetailId] 
 		,[strTransactionId] 
@@ -61,6 +64,8 @@ BEGIN
 		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
 	)
 	--INVENTORY RECEIPT
 	SELECT
@@ -82,7 +87,7 @@ BEGIN
 												/*
 													New Formula: 
 													Cost Adjustment Value = 
-													[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
+													[Voucher Qty x Voucher Cost x Voucher Forex Rate] - [Voucher Qty x Receipt Cost x Receipt Forex Rate]												
 												*/
 												CAST(
 												dbo.fnMultiply(
@@ -91,18 +96,19 @@ BEGIN
 													
 													,--[Voucher Cost]
 													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
-														CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
-																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) 
-																	/ E1.intSubCurrencyCents
-																	* ISNULL(B.dblRate, 0) 
-															ELSE 
-																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
-																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
-																	/ E1.intSubCurrencyCents
-															END 
+															CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
+																	dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+																		COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																		(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) 
+																		/ E1.intSubCurrencyCents
+																		* ISNULL(B.dblRate, 0) 
+																ELSE 
+																	dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																		COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																		(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+																		/ E1.intSubCurrencyCents
+																END 
+
 														ELSE
 															CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
 																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
@@ -114,6 +120,7 @@ BEGIN
 																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
 															END 
+
 													END													
 												)
 												AS DECIMAL(18,2))
@@ -125,7 +132,8 @@ BEGIN
 													
 													,--[Receipt Cost]
 													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
-															CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
+															CASE 
+																WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
 																	dbo.fnCalculateCostBetweenUOM(
 																		receiptCostUOM.intItemUOMId
 																		, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
@@ -155,12 +163,62 @@ BEGIN
 																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
 																	, E2.dblUnitCost
 																) 
-														END 
+															END 
 													END
 												)
 												AS DECIMAL(18,2))
-		,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
-		--,[dblExchangeRate] 					=	1 -- Exchange rate is always 1. 
+
+			,[dblNewForexValue]						= 
+
+												/*
+													New Formula: 
+													Cost Adjustment Value = 
+													[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
+												*/
+												CAST(
+												dbo.fnMultiply(
+													--[Voucher Qty]
+													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+													
+													,--[Voucher Cost]
+													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+																/ E1.intSubCurrencyCents
+
+														ELSE
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+
+													END													
+												)
+												AS DECIMAL(18,2))
+												- 
+												CAST(
+												dbo.fnMultiply(
+													--[Voucher Qty]
+													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+													
+													,--[Receipt Cost]
+													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
+															dbo.fnCalculateCostBetweenUOM(
+																receiptCostUOM.intItemUOMId
+																, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+																, E2.dblUnitCost
+															) 
+															/ E1.intSubCurrencyCents
+														ELSE
+															dbo.fnCalculateCostBetweenUOM(
+																receiptCostUOM.intItemUOMId
+																, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+																, E2.dblUnitCost
+															) 														
+													END
+												)
+												AS DECIMAL(18,2))
+		,[intCurrencyId] 					=	E1.intCurrencyId --@intFunctionalCurrencyId -- It is always in functional currency. 
 		,[intTransactionId]					=	A.intBillId
 		,[intTransactionDetailId] 			=	B.intBillDetailId
 		,[strTransactionId] 				=	A.strBillId
@@ -175,6 +233,9 @@ BEGIN
 		,[strSourceTransactionId] 			=	E1.strReceiptNumber
 		,[intFobPointId]					=	fp.intFobPointId
 		,[intInTransitSourceLocationId]		=	NULL --sourceLocation.intItemLocationId
+		,[intForexRateTypeId]				=	E2.intForexRateTypeId
+		,[dblForexRate]						=	B.dblRate
+
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B
@@ -257,7 +318,27 @@ BEGIN
 														,sh.dblOldCost													
 													)
 													AS DECIMAL(18,2))  )
-			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[dblNewForexValue]					=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]											
+														,dbo.fnCalculateCostBetweenUOM(
+															voucherCostUOM.intItemUOMId, 
+															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))
+														)
+													)
+													AS DECIMAL(18,2)) 
+													- (CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,sh.dblOldCost													
+													)
+													AS DECIMAL(18,2))  )
+			,[intCurrencyId] 					=	A.intCurrencyId --@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
@@ -272,6 +353,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	C3.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	B.intCurrencyExchangeRateTypeId
+			,[dblForexRate]						=	ISNULL(NULLIF(B.dblRate, 0), 1)
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -332,7 +415,27 @@ BEGIN
 														,sh.dblOldCost													
 													)
 													AS DECIMAL(18,2))  )
-			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[dblNewForexValue]					=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))
+														)
+
+													)
+													AS DECIMAL(18,2)) 
+													- (CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,sh.dblOldCost													
+													)
+													AS DECIMAL(18,2))  )
+			,[intCurrencyId] 					=	A.intCurrencyId --@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
@@ -347,6 +450,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	C3.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	B.intCurrencyExchangeRateTypeId
+			,[dblForexRate]						=	ISNULL(NULLIF(B.dblRate, 0), 1) 
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -442,7 +547,7 @@ BEGIN
 																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
 																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
-														END 													
+														END
 													)
 													AS DECIMAL(18,2)) 
 													- CAST(
@@ -450,7 +555,23 @@ BEGIN
 														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END --[Voucher Qty]
 														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Transfer Cost]
 													) AS DECIMAL(18,2)) 
-			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[dblNewForexValue]					=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))
+														)
+													)
+													AS DECIMAL(18,2)) 
+													- CAST(
+													dbo.fnMultiply(
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END --[Voucher Qty]
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Transfer Cost]
+													) AS DECIMAL(18,2)) 
+			,[intCurrencyId] 					=	A.intCurrencyId -- @intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
@@ -465,6 +586,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	TS.strTransferStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	B.intCurrencyExchangeRateTypeId
+			,[dblForexRate]						=	ISNULL(NULLIF(B.dblRate, 0), 1) 
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -524,7 +647,23 @@ BEGIN
 														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END --[Voucher Qty]
 														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Transfer Cost]
 													) AS DECIMAL(18,2)) 
-			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[dblNewForexValue]					=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))
+														)
+													)
+													AS DECIMAL(18,2)) 
+													- CAST(
+													dbo.fnMultiply(
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END --[Voucher Qty]
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Transfer Cost]
+													) AS DECIMAL(18,2)) 
+			,[intCurrencyId] 					=	A.intCurrencyId -- @intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
@@ -539,6 +678,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	ISNULL(IR.strReceiptNumber, TS2.strTransferStorageTicket)
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	B.intCurrencyExchangeRateTypeId
+			,[dblForexRate]						=	ISNULL(NULLIF(B.dblRate, 0), 1) 
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -597,6 +738,18 @@ BEGIN
 														,ISNULL(CS.dblBasis,0) + ISNULL(CS.dblSettlementPrice,0) --[Receipt Cost]
 													)
 												AS DECIMAL(18,2))
+			,[dblNewForexValue]					= CAST(
+													dbo.fnMultiply(
+														SIR.dblTransactionUnits --[Voucher Qty]
+														,B.dblCost --[Voucher Cost]
+													) AS DECIMAL(18,2))
+													-
+												CAST(
+													dbo.fnMultiply(
+														SIR.dblTransactionUnits --[Voucher Qty]
+														,ISNULL(CS.dblBasis,0) + ISNULL(CS.dblSettlementPrice,0) --[Receipt Cost]
+													)
+												AS DECIMAL(18,2))
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
@@ -612,6 +765,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	SIR.strReceiptNumber
 			,[intFobPointId]					=	SIR.intFobPointId
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	NULL 
+			,[dblForexRate]						=	1
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -683,7 +838,7 @@ BEGIN
 																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
 																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
-														END 													
+														END
 													)
 													AS DECIMAL(18,2)) 
 													- dbo.fnMultiply(
@@ -692,7 +847,24 @@ BEGIN
 														--[Voucher Cost]
 														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)
 													)
-			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[dblNewForexValue]					=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))
+														)
+													)
+													AS DECIMAL(18,2)) 
+													- dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)
+													)
+			,[intCurrencyId] 					=	A.intCurrencyId --@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
@@ -707,6 +879,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	TS.strTransferStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	B.intCurrencyExchangeRateTypeId
+			,[dblForexRate]						=	ISNULL(NULLIF(B.dblRate, 0), 1) 
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -757,6 +931,20 @@ BEGIN
 														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Receipt Cost]
 													)
 												AS DECIMAL(18,2))
+			,[dblNewForexValue]					=	CAST(
+													dbo.fnMultiply(
+														 --[Voucher Qty]
+														ISNULL(SIR.dblTransactionUnits,(CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END))
+														,B.dblCost --[Voucher Cost]
+													) AS DECIMAL(18,2))
+													-
+												CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														ISNULL(SIR.dblTransactionUnits,(CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END))
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Receipt Cost]
+													)
+												AS DECIMAL(18,2))
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
@@ -772,6 +960,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	ISNULL(SIR.strReceiptNumber,TS_FROM.strTransferStorageTicket)
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
+			,[intForexRateTypeId]				=	NULL
+			,[dblForexRate]						=	1
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
