@@ -1,6 +1,9 @@
 ﻿CREATE PROCEDURE uspICZeroLotStockForSAPIntegration
 	@intEntityUserSecurityId AS INT = NULL 
+	,@dtmCustomDate AS DATETIME = NULL 
 AS 
+
+SET @dtmCustomDate = ISNULL(@dtmCustomDate, GETDATE()) 
 
 DECLARE @locations AS TABLE (
 	intLocationId INT 
@@ -55,7 +58,7 @@ BEGIN
 				,intInvoiceId
 		)
 		SELECT	intLocationId				= @intLocationId
-				,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(GETDATE()) 
+				,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmCustomDate) 
 				,intAdjustmentType			= @ADJUSTMENT_TYPE_QuantityChange
 				,strAdjustmentNo			= @strAdjustmentNo
 				,strDescription				= 'Zero the stocks on all active lots in the system.'
@@ -152,10 +155,11 @@ BEGIN
 				,@strTransactionId = @strAdjustmentNo
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 
-		--SELECT 
-		--	a.strAdjustmentNo
-		--	,ad.* 
-		--FROM tblICInventoryAdjustment a inner join tblICInventoryAdjustmentDetail ad on a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId where a.strAdjustmentNo = @strAdjustmentNo
+		SELECT 
+			a.strAdjustmentNo
+			,a.dtmAdjustmentDate
+			,ad.* 
+		FROM tblICInventoryAdjustment a inner join tblICInventoryAdjustmentDetail ad on a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId where a.strAdjustmentNo = @strAdjustmentNo
 
 		SET @strAdjustmentNo = NULL 
 		SET @intInventoryAdjustmentId = NULL 
@@ -163,4 +167,3 @@ BEGIN
 	
 	DELETE FROM @locations WHERE intLocationId = @intLocationId
 END 
-GO
