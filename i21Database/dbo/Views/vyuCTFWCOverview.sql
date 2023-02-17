@@ -5,7 +5,7 @@ AS
 		SELECT	DISTINCT
 				CH.intContractHeaderId,
 				CTD.intContractDetailId,
-				strPONumber = LGL.strCustomerReference,	
+				strPONumber = LGL.strExternalShipmentNumber,	
 				dtmOriginalETD = LGL.dtmETAPOD,
 				dtmCurrentETD = CTD.dtmEtaPod,
 				dtmOriginalStockDate = LGL.dtmPlannedAvailabilityDate,
@@ -66,7 +66,7 @@ AS
 			FROM	tblCTContractHeader	CH	
 			INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CTD.intContractHeaderId = CH.intContractHeaderId
 			LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = LGD.intPContractDetailId
-			LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
+			LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intLoadId = LGD.intLoadId
 			LEFT JOIN tblCTContractStatus		CTS  WITH (NOLOCK) ON CTS.intContractStatusId = CTD.intContractStatusId
 			LEFT JOIN tblSMCompanyLocation		CL   WITH (NOLOCK) ON CL.intCompanyLocationId = CH.intCompanyLocationId
 			LEFT JOIN tblSMCompanyLocation		CLD  WITH (NOLOCK) ON CLD.intCompanyLocationId = CTD.intCompanyLocationId
