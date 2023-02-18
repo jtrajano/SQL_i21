@@ -170,7 +170,15 @@ SELECT a.intContractDetailId
 	, z.dblAllocatedQty
 	, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
-	, dblApprovedQty = QA.dblApprovedQty
+	, dblApprovedQty =	case
+							when qa3.intSampleStatusId is not null
+							then
+								case when dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,qa3.intRepresentingUOMId,a.intUnitMeasureId, qa3.dblRepresentingQty) >= a.dblQuantity then a.dblQuantity else dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,qa4.intRepresentingUOMId,a.intUnitMeasureId, qa4.dblRepresentingQty) end
+							when qa4.intSampleStatusId is not null
+							then
+								case when dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,qa4.intRepresentingUOMId,a.intUnitMeasureId, qa4.dblRepresentingQty) >= a.dblQuantity then a.dblQuantity else dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,qa4.intRepresentingUOMId,a.intUnitMeasureId, qa4.dblRepresentingQty) end
+							else null
+							end 
 	, strAssociationName = zb.strName
 	, a.dblAssumedFX
 	, dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)
@@ -268,7 +276,15 @@ SELECT a.intContractDetailId
 	, dblQtyInCommodityDefaultUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bt.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bt.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bt.dblUnitQty, 0)) END)
-	, strQualityApproval = QA1.strSampleStatus
+	, strQualityApproval =	case
+							when qa3.intSampleStatusId is not null
+							then
+								case when dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,qa3.intRepresentingUOMId,a.intUnitMeasureId, qa3.dblRepresentingQty) >= a.dblQuantity then 'Approved' else 'Partially Approved' end
+							when qa4.intSampleStatusId is not null
+							then
+								case when dbo.fnCTConvertQuantityToTargetItemUOM(a.intItemId,qa4.intRepresentingUOMId,a.intUnitMeasureId, qa4.dblRepresentingQty) >= a.dblQuantity then 'Rejected' else 'Partially Rejected' end
+							else ''
+							end COLLATE Latin1_General_CI_AS
 	, dblQtyInCommodityStockUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bu.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bu.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bu.dblUnitQty, 0)) END)
@@ -405,7 +421,6 @@ LEFT JOIN tblCTWeightGrade cl WITH(NOLOCK) ON cl.intWeightGradeId = b.intWeightI
 LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
-OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
 LEFT JOIN (
     SELECT *
     FROM
@@ -418,15 +433,31 @@ LEFT JOIN (
 		WHERE SC.strNamespace IN('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
 	) t WHERE intRowNum = 1
 ) TR ON TR.intRecordId = b.intContractHeaderId
-OUTER APPLY (
-	SELECT TOP 1 strSampleStatus = CASE WHEN s.intSampleStatusId = 3 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId, s.intRepresentingUOMId, c.intUnitMeasureId, s.dblRepresentingQty)) >= 100 THEN 'Approved'
-																				ELSE 'Partially Approved' END)
-										WHEN s.intSampleStatusId = 4 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId, s.intRepresentingUOMId, c.intUnitMeasureId, s.dblRepresentingQty)) >= 100 THEN 'Rejected'
-																				ELSE 'Partially Rejected' END) END
-	FROM tblQMSample s
-	INNER JOIN tblCTContractDetail c ON s.intContractDetailId = c.intContractDetailId
-	WHERE c.intContractDetailId = a.intContractDetailId
-	GROUP BY s.intSampleId
-		, s.intSampleStatusId
-	ORDER BY s.intSampleId DESC
-) QA1
+outer apply (
+	select
+		dblRepresentingQty = sum(s.dblRepresentingQty)
+		,s.intSampleStatusId
+		,s.intRepresentingUOMId
+	from
+		tblQMSample s
+	where
+		s.intContractDetailId = a.intContractDetailId
+		and s.intSampleStatusId = 3
+	group by
+		s.intSampleStatusId
+		,s.intRepresentingUOMId
+)qa3
+outer apply (
+	select
+		dblRepresentingQty = sum(s.dblRepresentingQty)
+		,s.intSampleStatusId
+		,s.intRepresentingUOMId
+	from
+		tblQMSample s
+	where
+		s.intContractDetailId = a.intContractDetailId
+		and s.intSampleStatusId = 4
+	group by
+		s.intSampleStatusId
+		,s.intRepresentingUOMId
+)qa4
