@@ -10,13 +10,14 @@ SELECT	@intStoreId = intStoreId
 FROM	dbo.tblSTCheckoutHeader 
 WHERE	intCheckoutId = @intCheckoutId
 
-INSERT INTO tblSTCheckoutFuelSalesByGradeAndPricePoint (intCheckoutId, intProductNumber, dblPrice, dblDollarsSold, dblGallonsSold, intItemUOMId, intConcurrencyId)
+INSERT INTO tblSTCheckoutFuelSalesByGradeAndPricePoint (intCheckoutId, intProductNumber, dblPrice, dblDollarsSold, dblGallonsSold, intItemUOMId, dblRegularPrice, intConcurrencyId)
 SELECT	@intCheckoutId,
 		a.intProductNumber,
 		a.dblPrice,
 		a.dblDollarsSold,
 		a.dblGallonsSold,
 		UOM.intItemUOMId,
+		a.dblRegularPrice,
 		1
 FROM	@UDT_Translog a
 JOIN dbo.tblSTPumpItem SPI 
