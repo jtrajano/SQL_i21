@@ -1031,7 +1031,7 @@ AS
 					,intBasisUOMId = intItemUOMId
 					,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dblQuantity * dblBudgetPrice else null end
 					,dblTotalCost = case when intPricingTypeId = 1 then dblQuantity * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dblQuantity * isnull(dblCashPrice,1) else null end
-					,dblNoOfLots = ceiling(dblNoOfLots)
+					,dblNoOfLots = case when round(1*dblNoOfLots,0) = 0 then 1 else round(1*dblNoOfLots,0) end
 					,intCurrencyExchangeRateId
 				FROM #tmpExtracted
 				WHERE
