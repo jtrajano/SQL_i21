@@ -392,8 +392,17 @@ BEGIN
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
-		WHERE C.intEntityVendorId <> A.intEntityVendorId
+		INNER JOIN tblAPVendor childVend
+			ON childVend.intEntityId = C.intEntityVendorId
+		INNER JOIN tblAPVendor parentVend
+			ON parentVend.intEntityId = A.intEntityVendorId
+		WHERE 
+		(
+			(C.intEntityVendorId != A.intEntityVendorId AND childVend.strVendorPayToId IS NULL) --parent vouchers
+			OR (C.intEntityVendorId != A.intEntityVendorId AND childVend.strVendorPayToId != parentVend.strVendorId AND childVend.strVendorPayToId IS NOT NULL) --child vouchers
+		)
 		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND B.dblPayment != 0
 
 		--DO NOT ALLOW TO POST DEBIT MEMOS AND PAYMENTS IF AMOUNT PAID IS NOT EQUAL TO ZERO
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
