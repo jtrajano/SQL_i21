@@ -309,7 +309,10 @@ BEGIN
 		--CS-105 - First Day Setup for a Consignment Store does not show any values for Summary Totals or Aggregate Meter Readings by Fuel Grade
 		IF ((SELECT COUNT('') FROM tblSTCheckoutHeader WHERE intStoreId = @intStoreId AND strCheckoutType = 'Automatic') = 1)
 		BEGIN
-			EXEC uspSTCheckoutUpdatePumpTotals @intCheckoutId, @ysnSuccess OUT, @strMessage OUT
+			DECLARE @ysnFromEdit BIT
+			SET @ysnFromEdit = 0
+
+			EXEC uspSTCheckoutUpdatePumpTotals @intCheckoutId, @ysnFromEdit, @ysnSuccess OUT, @strMessage OUT
 
 			UPDATE		tblSTCheckoutHeader
 			SET			dblEditableAggregateMeterReadingsForDollars = (	SELECT		ISNULL(SUM(dblAmount),0)
