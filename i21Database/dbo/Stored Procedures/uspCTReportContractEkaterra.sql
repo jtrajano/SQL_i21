@@ -171,12 +171,12 @@ BEGIN TRY
 	SELECT TOP 1 @strGeneralConditionName = DM.strConditionName							
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-					WHERE	CD.intContractHeaderId	=	@intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION')
+					WHERE	CD.intContractHeaderId	=	@intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) =	'GENERAL_CONDITION')
 					
 	SELECT	TOP 1 @strGeneralCondition = CASE WHEN dbo.fnTrim(CD.strConditionDescription) = '' THEN  DM.strConditionDesc ELSE CD.strConditionDescription END							
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-					WHERE	CD.intContractHeaderId	=	@intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION') 
+					WHERE	CD.intContractHeaderId	=	@intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) =	'GENERAL_CONDITION') 
 									
 	--LOGO SETUP TAB IMPLEMENTATION
 	DECLARE @imgLocationLogo vARBINARY (MAX),
