@@ -48,7 +48,7 @@ BEGIN TRY
 	DECLARE @fontBoldQuantityUOM NVARCHAR(MAX)
 	DECLARE @fontBoldStartDate NVARCHAR(MAX)
 	DECLARE @fontBoldEndDate NVARCHAR(MAX)
-	DECLARE @fontBoldDefault NVARCHAR(MAX)
+	DECLARE @fontBold NVARCHAR(MAX)
 
 	SELECT  @strAmendedColumnsDetails = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
@@ -59,7 +59,7 @@ BEGIN TRY
 											FOR XML PATH('')
 											), 1, 1, '')
 
-	SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;font-weight:bold;">'
+	SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;">'
 	IF CHARINDEX('dblCashPrice',@strAmendedColumnsDetails, 0) > 0 
 		BEGIN
 			SET @fontBoldCashPrice = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
@@ -242,10 +242,10 @@ BEGIN TRY
 			 									+ CASE WHEN CD.dblBasis < 0 THEN  @fontBold + ' minus ' + '</span>'  ELSE  @fontBold +  ' plus ' + '</span>' END
 			 									+ @fontBoldCurrency + BCU.strCurrency+  '</span>' + ' '
 			 									+ @fontBoldBasis + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)+'</span>' + '/' + @fontBold + BUM.strUnitMeasure + '</span>'
-			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
-			 									+  @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)  + '</span>'
-			 									+  '<span style="font-family:Arial;font-size:13px;">'+ ' or prior to presentation of documents,whichever is earlier.' 
-			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + ' per ' + PU.strUnitMeasure
+			 									+ @fontBold + ' at ' + CD.strFixationBy + '''s option prior to FND of ' + '</span>'
+			 									+ @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)  + '</span>'
+			 									+ @fontBold + ' or prior to presentation of documents,whichever is earlier.' + '</span>'
+			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + @fontBold + ' per ' + '</span>' + PU.strUnitMeasure
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
