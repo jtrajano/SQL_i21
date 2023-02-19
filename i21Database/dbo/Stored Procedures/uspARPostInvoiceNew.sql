@@ -113,14 +113,14 @@ IF @Post = 1 AND @Recap = 0
 		, @strSessionId	= @strRequestId
 
 --Removed excluded Invoices to post/unpost
-IF ISNULL(@exclude, '') <> ''
+IF ISNULL(@Exclude, '') <> ''
 	BEGIN
 		DECLARE @InvoicesExclude TABLE  (
 			intInvoiceId INT PRIMARY KEY
 		);
 
 		INSERT INTO @InvoicesExclude
-		SELECT DISTINCT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@exclude)
+		SELECT DISTINCT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@Exclude)
 
 		IF EXISTS (SELECT TOP 1 1 FROM @InvoicesExclude)
 			BEGIN
