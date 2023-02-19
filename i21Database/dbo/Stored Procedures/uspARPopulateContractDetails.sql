@@ -94,7 +94,7 @@ SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 	, intContractHeaderId			= ID.intContractHeaderId
 	, intItemUOMId					= ID.intItemUOMId
 	, intOrderUOMId					= IDD.intOrderUOMId
-	, intTicketId					= NULL--ID.intTicketId
+	, intTicketId					= NULL
 	, intLoadDetailId				= ID.intLoadDetailId
 	, intPurchaseSale				= LG.intPurchaseSale		
 	, dblQty						= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
@@ -281,15 +281,23 @@ INSERT INTO tblARPostItemsForContracts (
 )
 SELECT intInvoiceId					= intInvoiceId
 	, intInvoiceDetailId			= intInvoiceDetailId
-	, intItemId						= intItemId
-	, intContractDetailId			= intContractDetailId
+	, intItemId						= TBL.intItemId
+	, intContractDetailId			= TBL.intContractDetailId
 	, intContractHeaderId			= intContractHeaderId
 	, intEntityId					= intEntityId
 	, intUserId						= intEntityId
 	, dtmDate						= dtmDate
-	, dblQuantity					= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
+	, dblQuantity					= CASE 
+										WHEN ISNULL(TMO.dblQuantity, 0) > ABS(TBL.dblQty) THEN TMO.dblQuantity * (CASE WHEN @Post = 1 THEN -1 ELSE 1 END)
+										WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) 
+										ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) 
+									  END
 	, dblBalanceQty					= 0
-	, dblSheduledQty				= CASE WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty) END-- @dblSchQuantityToUpdate
+	, dblSheduledQty				= CASE 
+										WHEN ISNULL(TMO.dblQuantity, 0) > ABS(TBL.dblQty) THEN TMO.dblQuantity * (CASE WHEN @Post = 1 THEN -1 ELSE 1 END)
+										WHEN ABS(dblQtyOrdered) > 0 AND ABS(dblQty) > ABS(dblQtyOrdered) THEN -dbo.fnCalculateQtyBetweenUOM(intOrderUOMId, intContractItemUOMId, dblQtyOrdered) 
+										ELSE -dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intContractItemUOMId, dblQty)
+									  END
 	, dblRemainingQty				= 0
 	, strType						= 'Contract Scheduled'
 	, strTransactionType			= strTransactionType
@@ -297,51 +305,17 @@ SELECT intInvoiceId					= intInvoiceId
 	, strItemNo						= strItemNo
 	, strBatchId					= strBatchId
 	, strSessionId					= @strSessionId
-FROM #TBLTOPROCESS
+FROM #TBLTOPROCESS TBL
+LEFT JOIN tblTRLoadDistributionDetail TRLDD ON TBL.intLoadDistributionDetailId = TRLDD.intLoadDistributionDetailId
+LEFT JOIN tblTMOrder TMO ON TRLDD.intTMOId = TMO.intDispatchId AND strPricingMethod = 'Contract'
 WHERE (
 	   ysnDestWtGrd = 0 AND ((intTicketTypeId <> 9 AND (intTicketType <> 6 AND strInOutFlag <> 'O')) OR (intTicketTypeId = 2 AND (intTicketType = 1 AND strInOutFlag = 'O'))) 
    OR (ysnDestWtGrd = 1 AND (strPricing = 'Subsystem - Direct' OR (intTicketTypeId = 9 AND intTicketType = 6 AND strInOutFlag = 'O')))
    OR intTicketId IS NULL
 )
 AND ysnFromReturn = 0
-AND (intLoadDetailId IS NULL OR (intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
+AND (TBL.intLoadDetailId IS NULL OR (TBL.intLoadDetailId IS NOT NULL AND intPurchaseSale = 3))
 
-UNION ALL
-
-SELECT intInvoiceId					= TBL.intInvoiceId
-	, intInvoiceDetailId			= TBL.intInvoiceDetailId
-	, intItemId						= TBL.intItemId
-	, intContractDetailId			= TBL.intContractDetailId
-	, intContractHeaderId			= TBL.intContractHeaderId
-	, intEntityId					= TBL.intEntityId
-	, intUserId						= TBL.intEntityId
-	, dtmDate						= TBL.dtmDate
-	, dblQuantity					= CASE WHEN TBL.dblQty > 0 THEN (TMO.dblQuantity - TBL.dblQty) * -1 ELSE (TMO.dblQuantity + TBL.dblQty) END
-	, dblBalanceQty					= 0
-	, dblSheduledQty				= CASE WHEN TBL.dblQty > 0 THEN (TMO.dblQuantity - TBL.dblQty) * -1 ELSE (TMO.dblQuantity + TBL.dblQty) END
-	, dblRemainingQty				= 0
-	, strType						= 'Contract Scheduled'
-	, strTransactionType			= TBL.strTransactionType
-	, strInvoiceNumber				= TBL.strInvoiceNumber
-	, strItemNo						= TBL.strItemNo
-	, strBatchId					= TBL.strBatchId
-	, strSessionId					= @strSessionId
-FROM #TBLTOPROCESS TBL
-INNER JOIN tblTMOrder TMO ON TBL.intSiteId = TMO.intSiteId
-INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
-INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId 
-INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId AND CD.intItemId = TBL.intItemId
-INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-INNER JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = TBL.intLoadDistributionDetailId
-WHERE CU.strFieldName = 'Scheduled Quantity'
-  AND CU.strScreenName = 'TM - Create Order'
-  AND TBL.intLoadDistributionDetailId IS NOT NULL 
-  AND LDD.intContractDetailId IS NULL
-  AND TBL.intSiteId IS NOT NULL
-  AND TMO.dblQuantity > ABS(TBL.dblQty)
-  AND TBL.strPricing = 'Subsystem - Transport Load'
-  AND @Post = 1
-  
 --CONTRACT BALANCE
 INSERT INTO tblARPostItemsForContracts (
 	  intInvoiceId
