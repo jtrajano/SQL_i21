@@ -127,24 +127,27 @@ IF @post = 1 AND @recap = 0
 		, @strSessionId	= @strRequestId
 
 --Removed excluded Invoices to post/unpost
-IF(@exclude IS NOT NULL)
+IF ISNULL(@exclude, '') <> ''
 	BEGIN
 		DECLARE @InvoicesExclude TABLE  (
-			intInvoiceId INT
+			intInvoiceId INT PRIMARY KEY
 		);
 
 		INSERT INTO @InvoicesExclude
-		SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@exclude)
+		SELECT DISTINCT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@exclude)
 
-		DELETE FROM A
-		FROM tblARPostInvoiceHeader A
-		INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
-		WHERE A.strSessionId = @strRequestId
+		IF EXISTS (SELECT TOP 1 1 FROM @InvoicesExclude)
+			BEGIN
+				DELETE FROM A
+				FROM tblARPostInvoiceHeader A
+				INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
+				WHERE A.strSessionId = @strRequestId
 
-		DELETE FROM A
-		FROM tblARPostInvoiceDetail A
-		INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
-		WHERE A.strSessionId = @strRequestId
+				DELETE FROM A
+				FROM tblARPostInvoiceDetail A
+				INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
+				WHERE A.strSessionId = @strRequestId
+			END
 	END
 
 --------------------------------------------------------------------------------------------  
