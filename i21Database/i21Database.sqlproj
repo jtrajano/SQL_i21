@@ -1501,6 +1501,7 @@
     <Build Include="dbo\User Defined Types\TransferToSettlementStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetailImport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
