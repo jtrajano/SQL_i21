@@ -1324,43 +1324,7 @@ BEGIN TRY
 		EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges,@voucherDetailDirectInventory
 		IF EXISTS(SELECT TOP 1 NULL FROM @voucherPayable)
 		BEGIN
-			INSERT INTO @voucherTaxDetail(
-			[intVoucherPayableId]
-			,[intTaxGroupId]				
-			,[intTaxCodeId]				
-			,[intTaxClassId]				
-			,[strTaxableByOtherTaxes]	
-			,[strCalculationMethod]		
-			,[dblRate]					
-			,[intAccountId]				
-			,[dblTax]					
-			,[dblAdjustedTax]			
-			,[ysnTaxAdjusted]			
-			,[ysnSeparateOnBill]			
-			,[ysnCheckOffTax]		
-			,[ysnTaxExempt]	
-			,[ysnTaxOnly]
-			)
-			SELECT	[intVoucherPayableId]
-					,[intTaxGroupId]				
-					,[intTaxCodeId]				
-					,[intTaxClassId]				
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]					
-					,[intAccountId]				
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[ysnTaxAdjusted]			
-					,[ysnSeparateOnBill]			
-					,[ysnCheckOffTax]		
-					,[ysnTaxExempt]	
-					,[ysnTaxOnly]
-			FROM dbo.fnICGeneratePayablesTaxes(
-					@voucherPayable
-					,1
-					,DEFAULT 
-				)
+		
 			BEGIN /* Create Voucher */
 				DECLARE @createVoucher BIT = 0
 				DECLARE @postVoucher   BIT = 0
