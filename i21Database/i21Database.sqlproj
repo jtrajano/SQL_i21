@@ -1250,6 +1250,7 @@
     <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutTierProducts.sql" />
     <Build Include="dbo\Stored Procedures\uspTRChangeException.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSProcessPaymentsForPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
