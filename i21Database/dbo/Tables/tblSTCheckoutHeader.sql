@@ -75,6 +75,7 @@
     [intLockType] INT NULL,
     [intSort] INT NULL,
     [intInvoiceId] INT NULL,
+    [intConsCreditMemoId] INT NULL,    
 	[strAllInvoiceIdList] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[strXml] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[strMarkUpDownBatchNo] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
