@@ -8,7 +8,7 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,D.intBillDetailTaxId
 		,B.strMiscDescription
-		,CAST((ISNULL(D.dblAdjustedTax, D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1)) 
+		,CAST((D.dblTax * ISNULL(NULLIF(B.dblRate,0),1)) 
 			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
 			--TAXES RECORD IS NOT AFFECTED BY ysnPrice, IT IS ONLY AFFECTED BY ysnCheckOffTax
 			-- * (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
@@ -16,7 +16,7 @@ RETURNS TABLE AS RETURN
 			-- 	  THEN -1 ELSE 1 END) 
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblTotal
-		,CAST((ISNULL(D.dblAdjustedTax, D.dblTax)) 
+		,CAST((D.dblTax) 
 			* (CASE WHEN A.intTransactionType NOT IN (1, 15) THEN -1 ELSE 1 END) 
 			-- * (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
 			-- 	 AND charges.ysnPrice = 1
