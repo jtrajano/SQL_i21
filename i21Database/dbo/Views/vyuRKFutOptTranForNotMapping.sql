@@ -115,6 +115,7 @@ OUTER APPLY (
 	SELECT TOP 1 ftcs.intContractDetailId
 	FROM tblRKAssignFuturesToContractSummary ftcs
 	WHERE ftcs.intFutOptTransactionId = DE.intFutOptTransactionId
+	AND ISNULL(ftcs.ysnIsHedged, 0) = 1
 ) hedgecontract
 LEFT JOIN tblCTContractDetail hedgecontractdetail
 	ON hedgecontract.intContractDetailId = hedgecontractdetail.intContractDetailId

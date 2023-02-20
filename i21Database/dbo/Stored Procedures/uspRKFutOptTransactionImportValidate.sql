@@ -1017,7 +1017,13 @@ BEGIN TRY
 
 							IF @dblNoOfContract > @dblToBeAssignedLots
 							BEGIN
-								SET @ErrMsg = @ErrMsg + ' Derivative lots (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
+								UPDATE #tmpAssignPhysicalTransaction SET dblToBeAssignedLots = @dblToBeAssignedLots WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence
+
+								UPDATE tblRKFutOptTransactionImport
+								SET dblToAssignOrHedgeLots = ABS(@dblToBeAssignedLots)
+								WHERE intFutOptTransactionId = @mRowNumber
+
+								--SET @ErrMsg = @ErrMsg + ' Derivative lots (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
 							END
 							ELSE
 							BEGIN
@@ -1042,9 +1048,19 @@ BEGIN TRY
 								SET @ErrMsg = @ErrMsg +' Market, Month, Commodity and Locations should be the same for both Derivative and Contract for hedging.'
 							END
 
-							IF @dblNoOfContract > @dblToBeHedgedLots 
+							IF ISNULL(@dblToBeHedgedLots, 0) = 0
 							BEGIN
-								SET @ErrMsg = @ErrMsg + ' Derivative lot (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
+								SET @ErrMsg = @ErrMsg + ' Selected Contract has been fully Hedged, Derivative has not been created.'
+							END
+							ELSE IF @dblNoOfContract > @dblToBeHedgedLots 
+							BEGIN
+								UPDATE #tmpAssignPhysicalTransaction SET dblToBeHedgedLots = @dblToBeHedgedLots WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence
+
+								UPDATE tblRKFutOptTransactionImport
+								SET dblToAssignOrHedgeLots = ABS(@dblToBeHedgedLots)
+								WHERE intFutOptTransactionId = @mRowNumber
+
+								--SET @ErrMsg = @ErrMsg + ' Derivative lot (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
 							END
 							ELSE
 							BEGIN

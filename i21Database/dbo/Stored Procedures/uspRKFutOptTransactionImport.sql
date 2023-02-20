@@ -298,6 +298,7 @@ BEGIN TRY
 					, ysnCommissionExempt
 					, ysnCommissionOverride
 					, dblCommission
+					, ti.dblToAssignOrHedgeLots
 				FROM tblRKFutOptTransactionImport ti
 				JOIN tblRKFutureMarket fm ON fm.strFutMarketName = ti.strFutMarketName
 				JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = ti.strAccountNumber
@@ -333,6 +334,7 @@ BEGIN TRY
 					, @dblCommissionRate NUMERIC(18,6)
 					, @strCommissionRateType NVARCHAR(50)
 					, @intBrokerageCommissionId INT
+					, @dblToAssignOrHedgeLots NUMERIC(18,6)
 					
 					
 				
@@ -348,6 +350,7 @@ BEGIN TRY
 					, @intFutureMarketId = intFutureMarketId
 					, @dtmTransactionDate = GETDATE()
 					, @intInstrumentTypeId = intInstrumentTypeId
+					, @dblToAssignOrHedgeLots = dblToAssignOrHedgeLots
 				FROM #temp
 
 				--Call uspRKGetCommission
@@ -443,13 +446,18 @@ BEGIN TRY
 				
 				IF @ysnAllowDerivativeAssignToMultipleContracts = 0 
 				BEGIN
+					DECLARE @dblLotsToAssignOrHedge NUMERIC(18, 6)
+					SELECT @dblLotsToAssignOrHedge = CASE WHEN ISNULL(@dblToAssignOrHedgeLots, 0) <> 0 
+														THEN @dblToAssignOrHedgeLots
+														ELSE @dblNoOfContract 
+														END
 
 					SELECT @intFutOptTransactionId = SCOPE_IDENTITY()
 
 					IF @strAssignOrHedge = 'Assign'
 					BEGIN
 						
-						EXEC uspRKAutoAssignDerivative @strContractNumber, @strContractSequence, @intFutOptTransactionId, @strInternalTradeNo, @dblNoOfContract, @strResultOutput OUTPUT
+						EXEC uspRKAutoAssignDerivative @strContractNumber, @strContractSequence, @intFutOptTransactionId, @strInternalTradeNo, @dblLotsToAssignOrHedge, @strResultOutput OUTPUT
 
 						IF ISNULL(@strResultOutput,'') <> ''
 						BEGIN
@@ -457,7 +465,6 @@ BEGIN TRY
 							SELECT @strResultOutput, @strInternalTradeNo
 						END
 					END
-
 
 					IF @strAssignOrHedge = 'Hedge'
 					BEGIN
