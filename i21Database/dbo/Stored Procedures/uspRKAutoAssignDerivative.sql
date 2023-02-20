@@ -26,7 +26,7 @@ DECLARE @dblToBeAssignedLots NUMERIC(18,6)
 	,@dtmCurrentDate DATETIME  = GETDATE()
 
 select
-	@dblToBeAssignedLots = dblToBeAssignedLots
+	@dblToBeAssignedLots = ABS(dblToBeAssignedLots)
 	,@intContractDetailId = intContractDetailId
 	,@intContractHeaderId = intContractHeaderId
 from vyuRKGetAssignPhysicalTransaction where strContractNumber = @strContractNumber and intContractSeq = @strContractSequence
