@@ -24,6 +24,6 @@ WHERE ISNULL(T4.ysnUseTaxFlag2, 0) = 0 AND ISNULL (T0.intInvoiceId,0) <> 0
 AND T0.dtmCheckoutDate BETWEEN @dtmFromDate AND @dtmToDate      
 GROUP BY T0.intStoreId, T2.intStoreNo,    
 T2.strDescription,T4.ysnUseTaxFlag2     
-ORDER BY ysnUseTaxFlag2, intStoreId    
+ORDER BY T4.ysnUseTaxFlag2, T0.intStoreId    
       
 END
