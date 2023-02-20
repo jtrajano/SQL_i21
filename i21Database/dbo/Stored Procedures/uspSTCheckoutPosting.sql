@@ -10,7 +10,9 @@
 	@ysnCustomerChargesInvoiceStatus	BIT OUTPUT,
 	@strBatchIdForNewPostRecap			NVARCHAR(1000)	OUTPUT,
 	@strErrorCode						NVARCHAR(50)	OUTPUT,
-	@ysnDebug							BIT =	0
+	@ysnDebug							BIT =	0,
+	@strConsInvoiceType					NVARCHAR(50),
+	@dblConsTotalDeposits				DECIMAL (18,6)
 AS
 BEGIN
 
@@ -33,10 +35,6 @@ BEGIN
 			,strError					nvarchar(max)	  NULL
 			,strProcess					nvarchar(max)	  NULL
 		)
-
-
-
-
 
 		DECLARE @ysnSetToReady BIT = CAST(0 AS BIT)
 
@@ -2339,7 +2337,18 @@ BEGIN
 											--										THEN ISNULL(CPO.dblAmount, 0)
 											--									WHEN ISNULL(CPO.dblAmount, 0) < 0 
 											--										THEN (ISNULL(CPO.dblAmount, 0) * -1)
-											,[dblPrice]					= ISNULL(CPO.dblAmount, 0)
+											,[dblPrice]					= CASE 
+																			-- Reference: http://jira.irelyserver.com/browse/CS-327
+																			WHEN @ysnConsignmentStore = 1 
+																				THEN (CASE 
+																					WHEN @strConsInvoiceType = 'Invoice' --CPO.ysnConsMOPForInvoice = 1
+																						THEN CPO.dblConsAmountForInvoice
+																					WHEN @strConsInvoiceType = 'Credit Memo' --CPO.ysnConsMOPForInvoice = 0
+																						THEN ISNULL(CPO.dblConsAmountForCreditMemo, 0)
+																				END)																				
+																			WHEN @ysnConsignmentStore = 0
+																				THEN ISNULL(CPO.dblAmount, 0)
+																		END
 
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
@@ -5961,7 +5970,18 @@ IF(@ysnDebug = CAST(1 AS BIT))
 	BEGIN
 		SELECT 'RESULT',
 			dblInvoiceTotal				= Inv.dblInvoiceTotal
-			, dblCheckoutTotalDeposits	= CH.dblTotalDeposits
+			, dblCheckoutTotalDeposits	= CASE 
+											WHEN @ysnConsignmentStore = 1
+												THEN (CASE
+														WHEN @strConsInvoiceType = 'Invoice' AND @dblConsTotalDeposits > 0
+															THEN CH.dblTotalDeposits
+														WHEN @strConsInvoiceType = 'Credit Memo' AND @dblConsTotalDeposits < 1
+															THEN @dblConsTotalDeposits
+														ELSE CH.dblTotalDeposits
+													END)
+											WHEN @ysnConsignmentStore = 0
+												THEN CH.dblTotalDeposits
+										END							
 			, dblCustomerPayments		= CH.dblCustomerPayments
 		FROM tblARInvoice Inv
 		OUTER APPLY dbo.tblSTCheckoutHeader CH
