@@ -50,6 +50,8 @@ BEGIN
 		,strPONo NVARCHAR(100)
 		)
 
+	EXEC uspIPValidateContractFeed_CA
+
 	SELECT @dtmCurrentDate = GetDATE()
 
 	SELECT @intThirdPartyContractWaitingPeriod = IsNULL(intThirdPartyContractWaitingPeriod, 60)
@@ -163,11 +165,6 @@ BEGIN
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
-
-	IF @intContractFeedId IS NULL
-	BEGIN
-		RETURN
-	END
 
 	UPDATE tblIPThirdPartyContractFeed
 	SET intStatusId = - 1
