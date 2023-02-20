@@ -54,6 +54,7 @@ FROM (
 			, compactItem.strSeason
 			, compactItem.strClass
 			, compactItem.strProductLine
+			, dtmEndDate = CAST(CD.dtmEndDate AS DATE)
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId <> 3
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
@@ -138,6 +139,7 @@ FROM (
 			, compactItem.strSeason
 			, compactItem.strClass
 			, compactItem.strProductLine
+			, dtmEndDate = CAST(CDD.dtmEndDate AS DATE)
 		FROM tblCTContractHeader CH
 		INNER JOIN (SELECT DISTINCT intContractHeaderId, intContractStatusId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
@@ -175,4 +177,13 @@ FROM (
 			AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
 )t1
-WHERE intContractStatusId NOT IN (3, 5, 6)
+OUTER APPLY (
+	SELECT TOP 1 ysnAllowCompletedContractForAssign = ISNULL(ysnAllowCompletedContractForAssign, CAST(0 AS BIT))
+	FROM tblRKCompanyPreference
+) rkc
+WHERE intContractStatusId NOT IN (3, 6)
+AND ( ysnAllowCompletedContractForAssign = 1
+	  OR
+	  ( ysnAllowCompletedContractForAssign = 0
+	    AND intContractStatusId <> 5 )
+	)
