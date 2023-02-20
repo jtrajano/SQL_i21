@@ -4,6 +4,9 @@ SELECT DISTINCT
 sts.intStoreId,
 stcp.intCheckoutProcessId,
 stcp.strGuid, 
+FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
+CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
+FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 stcp.dtmCheckoutProcessDate,
 ISNULL(CH.dtmCheckoutDate, stcp.dtmCheckoutProcessDate) AS dtmCheckoutDate,
@@ -64,6 +67,9 @@ stcpew.strMessage
 --HAVING CH.dtmCheckoutDate IS NOT NULL
 UNION
 SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, 
+FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
+CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
+FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,
 FORMAT((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
@@ -170,6 +176,9 @@ AND
 a.ysnConsignmentStore = 1
 UNION
 SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, 
+FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
+CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
+FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,
 ISNULL(FORMAT((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
