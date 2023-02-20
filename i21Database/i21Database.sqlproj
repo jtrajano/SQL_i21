@@ -10279,6 +10279,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuGLLocationAccountId.sql" />
     <Build Include="dbo\Views\vyuGLCompanyAccountId.sql" />
+    <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMigrateM2M.sql" />
@@ -11567,6 +11568,10 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
     <Build Include="dbo\Tables\tblPRSchoolDistricts.sql" />
     <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
+    <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
+    <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
+    <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
