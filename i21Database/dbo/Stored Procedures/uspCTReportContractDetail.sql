@@ -59,7 +59,7 @@ BEGIN TRY
 											FOR XML PATH('')
 											), 1, 1, '')
 
-	SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;">'
+	SET @fontBold = '<span style="font-family:Arial;font-size:13px;">'
 	IF CHARINDEX('dblCashPrice',@strAmendedColumnsDetails, 0) > 0 
 		BEGIN
 			SET @fontBoldCashPrice = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
@@ -233,7 +233,7 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 
-			strStraussQuantity		= @fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + ' ' + @fontBoldQuantityUOM +UM.strUnitMeasure + '</span>' +(CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END),
+			strStraussQuantity		= '<p>'+@fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + ' ' + @fontBoldQuantityUOM +UM.strUnitMeasure + '</span>' +(CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END)+'</p>',
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
@@ -245,7 +245,7 @@ BEGIN TRY
 			 									+ @fontBold + ' at ' + CD.strFixationBy + '''s option prior to FND of ' + '</span>'
 			 									+ @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)  + '</span>'
 			 									+ @fontBold + ' or prior to presentation of documents,whichever is earlier.' + '</span>'
-			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + @fontBold + ' per ' + '</span>' + PU.strUnitMeasure
+			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + @fontBold + ' per ' + '</span>' +  @fontBold + PU.strUnitMeasure + '</span>' 
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
