@@ -3611,26 +3611,27 @@ BEGIN
 			-- Repost 'Inventory Shipment'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Shipment')) 
 			BEGIN 
-				-- Check how the shipment was originally posted
-				BEGIN 
-					SET @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
+				---- Check how the shipment was originally posted
+				--BEGIN 
+				--	SET @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
 
-					IF EXISTS (
-						SELECT	TOP 1 1
-						FROM	tblICBackupDetailInventoryTransaction b INNER JOIN tblICItem i
-									ON b.intItemId = i.intItemId 
-								INNER JOIN #tmpRebuildList list
-									ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
-									AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
-						WHERE	b.intBackupId = @intBackupId 
-								AND b.strTransactionId = @strTransactionId
-								AND b.intInTransitSourceLocationId IS NOT NULL 
-								AND b.ysnIsUnposted = 0 
-					)
-					BEGIN 
-						SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
-					END 
-				END 
+				--	IF EXISTS (
+				--		SELECT	TOP 1 1
+				--		FROM	tblICBackupDetailInventoryTransaction b INNER JOIN tblICItem i
+				--					ON b.intItemId = i.intItemId 
+				--				INNER JOIN #tmpRebuildList list
+				--					ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				--					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+				--		WHERE	b.intBackupId = @intBackupId 
+				--				AND b.strTransactionId = @strTransactionId
+				--				AND b.intInTransitSourceLocationId IS NOT NULL 
+				--				AND b.ysnIsUnposted = 0 
+				--	)
+				--	BEGIN 
+				--		SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
+				--	END 
+				--END 
+				SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
 
 				-- Force rebuild as in-transit if @ysnRebuildShipmentAndInvoiceAsInTransit set to true. 
 				IF @ysnRebuildShipmentAndInvoiceAsInTransit = 1
@@ -7308,5 +7309,5 @@ BEGIN
 		DROP TABLE #tmpLogRiskPosition		
 END 
 
-RETURN @intReturnValue; 
+RETURN @intReturnValue;
 
