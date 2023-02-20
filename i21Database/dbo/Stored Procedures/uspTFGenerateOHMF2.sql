@@ -445,7 +445,7 @@ BEGIN TRY
 		SELECT @LowSulfur_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'Low Sulfur Dyed Diesel'
 		SELECT @LowSulfur_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'Low Sulfur Dyed Diesel'
 		SELECT @LowSulfur_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'Low Sulfur Dyed Diesel'
-		SET @LowSulfur_14 = @LowSulfur_7 + @LowSulfur_8 + @LowSulfur_9 + @LowSulfur_10 + @LowSulfur_11 + @LowSulfur_13
+		SET @LowSulfur_14 = @LowSulfur_7 + @LowSulfur_8 + @LowSulfur_9 + @LowSulfur_10 + @LowSulfur_11 + @LowSulfur_12  +@LowSulfur_13
 		SET @LowSulfur_15 = @LowSulfur_6 - @LowSulfur_14
 		SET @LowSulfur_17 = @LowSulfur_16 - @LowSulfur_15
 		SET @LowSulfur_18 = @LowSulfur_14 - (@LowSulfur_9 + @LowSulfur_10 + @LowSulfur_11 + @LowSulfur_12 + @LowSulfur_13)
@@ -469,7 +469,7 @@ BEGIN TRY
 		SELECT @HighSulfur_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'High Sulfur Dyed Diesel'
 		SELECT @HighSulfur_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'High Sulfur Dyed Diesel'
 		SELECT @HighSulfur_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'High Sulfur Dyed Diesel'
-		SET @HighSulfur_14 = @HighSulfur_7 + @HighSulfur_8 + @HighSulfur_9 + @HighSulfur_10 + @HighSulfur_11 + @HighSulfur_13
+		SET @HighSulfur_14 = @HighSulfur_7 + @HighSulfur_8 + @HighSulfur_9 + @HighSulfur_10 + @HighSulfur_11 + @HighSulfur_12 + @HighSulfur_13
 		SET @HighSulfur_15 = @HighSulfur_6 - @HighSulfur_14
 		SET @HighSulfur_17 = @HighSulfur_16 - @HighSulfur_15
 		SET @HighSulfur_18 = @HighSulfur_14 - (@HighSulfur_9 + @HighSulfur_10 + @HighSulfur_11 + @HighSulfur_12 + @HighSulfur_13)
@@ -493,7 +493,7 @@ BEGIN TRY
 		SELECT @Kerosene_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'Kerosene'
 		SELECT @Kerosene_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'Kerosene'
 		SELECT @Kerosene_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'Kerosene'
-		SET @Kerosene_14 = @Kerosene_7 + @Kerosene_8 + @Kerosene_9 + @Kerosene_10 + @Kerosene_11 + @Kerosene_13
+		SET @Kerosene_14 = @Kerosene_7 + @Kerosene_8 + @Kerosene_9 + @Kerosene_10 + @Kerosene_11 + @Kerosene_12 + @Kerosene_13
 		SET @Kerosene_15 = @Kerosene_6 - @Kerosene_14
 		SET @Kerosene_17 = @Kerosene_16 - @Kerosene_15
 		SET @Kerosene_18 = @Kerosene_14 - (@Kerosene_9 + @Kerosene_10 + @Kerosene_11 + @Kerosene_12 + @Kerosene_13)
@@ -517,7 +517,7 @@ BEGIN TRY
 		SELECT @CNG_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'CNG'
 		SELECT @CNG_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'CNG'
 		SELECT @CNG_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'CNG'
-		SET @CNG_14 = @CNG_7 + @CNG_8 + @CNG_9 + @CNG_10 + @CNG_11 + @CNG_13
+		SET @CNG_14 = @CNG_7 + @CNG_8 + @CNG_9 + @CNG_10 + @CNG_11 + @CNG_12 + @CNG_13
 		SET @CNG_15 = @CNG_6 - @CNG_14
 		SET @CNG_17 = @CNG_16 - @CNG_15
 		SET @CNG_18 = @CNG_14 - (@CNG_9 + @CNG_10 + @CNG_11 + @CNG_12 + @CNG_13)
@@ -541,7 +541,7 @@ BEGIN TRY
 		SELECT @LNG_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'LNG'
 		SELECT @LNG_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'LNG'
 		SELECT @LNG_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'LNG'
-		SET @LNG_14 = @LNG_7 + @LNG_8 + @LNG_9 + @LNG_10 + @LNG_11 + @LNG_13
+		SET @LNG_14 = @LNG_7 + @LNG_8 + @LNG_9 + @LNG_10 + @LNG_11 + @LNG_12 + @LNG_13
 		SET @LNG_15 = @LNG_6 - @LNG_14
 		SET @LNG_17 = @LNG_16 - @LNG_15
 		SET @LNG_18 = @LNG_14 - (@LNG_9 + @LNG_10 + @LNG_11 + @LNG_12 + @LNG_13)
@@ -565,7 +565,7 @@ BEGIN TRY
 		SELECT @Propane_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'Propane'
 		SELECT @Propane_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'Propane'
 		SELECT @Propane_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'Propane'
-		SET @Propane_14 = @Propane_7 + @Propane_8 + @Propane_9 + @Propane_10 + @Propane_11 + @Propane_13
+		SET @Propane_14 = @Propane_7 + @Propane_8 + @Propane_9 + @Propane_10 + @Propane_11 + @Propane_12 + @Propane_13
 		SET @Propane_15 = @Propane_6 - @Propane_14
 		SET @Propane_17 = @Propane_16 - @Propane_15
 		SET @Propane_18 = @Propane_14 - (@Propane_9 + @Propane_10 + @Propane_11 + @Propane_12 + @Propane_13)
@@ -589,7 +589,7 @@ BEGIN TRY
 		SELECT @Other_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '8' AND strType = 'Other'
 		SELECT @Other_12 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10' AND strType = 'Other'
 		SELECT @Other_13 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'MF2' AND strScheduleCode = '10B' AND strType = 'Other'
-		SET @Other_14 = @Other_7 + @Other_8 + @Other_9 + @Other_10 + @Other_11 + @Other_13
+		SET @Other_14 = @Other_7 + @Other_8 + @Other_9 + @Other_10 + @Other_11 + @Other_12 + @Other_13
 		SET @Other_15 = @Other_6 - @Other_14
 		SET @Other_17 = @Other_16 - @Other_15
 		SET @Other_18 = @Other_14 - (@Other_9 + @Other_10 + @Other_11 + @Other_12 + @Other_13)
