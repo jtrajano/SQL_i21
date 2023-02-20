@@ -1872,7 +1872,18 @@ GO
 				,[strModule]			= 'Inventory'
 				,[ysnEnable]			= 1
 				,[intConcurrencyId]		= 1
+
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recost Formulation' AND [strModule] = 'Inventory')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 177
+				,[strTransactionType]	= N'Adjust Settlements'
+				,[strPrefix]			= N'ASTR-'
+				,[intNumber]			= 1
+				,[intDigits]			= Null
+				,[strModule]			= 'Ticket Management'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjust Settlements' AND [strModule] = 'Ticket Management')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 178
 			,[strTransactionType]	= N'Change Account Category'
@@ -1884,6 +1895,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Change Account Category' AND [strModule] = 'General Ledger')
 	UNION ALL
+	SELECT	[intStartingNumberId]	= 179
+				,[strTransactionType]	= N'Transfer Settlements'
+				,[strPrefix]			= N'TSTR-'
+				,[intNumber]			= 1
+				,[intDigits]			= Null
+				,[strModule]			= 'Ticket Management'
+				,[ysnEnable]			= 1
+				,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjust Settlements' AND [strModule] = 'Ticket Management')
+	UNION ALL
 	SELECT	[intStartingNumberId]	= 180
 			,[strTransactionType]	= N'Opportunity'
 			,[strPrefix]			= N'OP-'
@@ -1893,6 +1914,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Opportunity' AND [strModule] = 'CRM')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 181
+			,[strTransactionType]	= N'Batch'
+			,[strPrefix]			= N'B-'
+			,[intNumber]			= 0
+			,[intDigits]			= Null
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch' AND [strModule] = 'Manufacturing')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 182
 			,[strTransactionType]	= N'Catalogue Reconciliation'
@@ -1905,6 +1936,26 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Catalogue Reconciliation' AND [strModule] = 'Quality')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 183
+			,[strTransactionType]	= N'PO Feed Id'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[intDigits]			= Null
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO Feed Id' AND [strModule] = 'Manufacturing')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 184
+		,[strTransactionType]	= N'On-Hold ticket apply'
+		,[strPrefix]			=  N'OHTA-'
+		,[intNumber]			= 1
+		,[intDigits]			= Null
+		,[strModule]			= N'Ticket Management'
+		,[ysnEnable]			= 1
+		,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'On-Hold ticket apply')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 185
 			,[strTransactionType]	= N'Item No'
 			,[strPrefix]			= N'C-'
 			,[intNumber]			= 0
