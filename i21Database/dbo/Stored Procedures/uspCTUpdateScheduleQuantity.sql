@@ -127,7 +127,8 @@ BEGIN TRY
 	BEGIN
 		IF @ysnAllowOverSchedule = 1
 		BEGIN
-			SET @dblScheduleQty = ABS(@dblQuantityToUpdate) + @dblScheduleQty
+			SET @dblScheduleQty = 0;
+			SET @dblQuantityToUpdate = 0;
 			SELECT @strReason = 'Over Schedule'
 		END
 		ELSE
