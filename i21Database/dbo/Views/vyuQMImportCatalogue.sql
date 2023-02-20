@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuQMImportCatalogue]
 AS
-
 /* Created By: Jonathan Valenzuela
  * Created Date: 02/17/2023
  * Title: Catalogue Import Log
