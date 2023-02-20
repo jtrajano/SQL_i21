@@ -9,7 +9,7 @@ BEGIN
 					intConcurrencyId = B.intConcurrencyId,
 					intTankReadingId = B.intTankReadingId,
 					dtmDateTime = B.dtmDateTime,
-					--strReadingSource = B.strReadingSource,
+					intReadingSource = B.intReadingSource,
 					intTankNumber = B.intTankNumber,
 					strTankStatus = B.strTankStatus,
 					intFuelGrade = B.intFuelGrade,
@@ -38,7 +38,7 @@ BEGIN
 			intConcurrencyId
 			,intTankReadingId
 			,dtmDateTime
-			--,strReadingSource
+			,intReadingSource
 			,intTankNumber
 			,strTankStatus
 			,intFuelGrade
