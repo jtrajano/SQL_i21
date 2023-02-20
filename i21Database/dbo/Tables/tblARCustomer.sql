@@ -154,6 +154,7 @@
 	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intPriceChangeApprovalId] FOREIGN KEY ([intPriceChangeApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),	
 	CONSTRAINT [FK_tblARCustomer_tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_tblARCustomer_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID]),
+    CONSTRAINT [FK_tblARCustomer_tblSMInterCompany_intInterCompanyId] FOREIGN KEY ([intInterCompanyId]) REFERENCES [dbo].[tblSMInterCompany] ([intInterCompanyId]),
 
 	
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
