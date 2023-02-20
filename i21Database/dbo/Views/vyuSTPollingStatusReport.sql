@@ -7,6 +7,9 @@ stcpew.intCheckoutProcessId,
 stcpew.intCheckoutProcessErrorWarningId, 
 stcpew.intCheckoutId, 
 stcp.strGuid, 
+FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
+CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
+FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') AS strReportDate,
 (
 	SELECT COUNT('') FROM (SELECT DISTINCT  intStoreId 
