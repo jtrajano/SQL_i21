@@ -77,6 +77,11 @@ BEGIN TRY
 	FROM tblRKM2MPostPreview 
 	WHERE intM2MHeaderId = @intM2MHeaderId
 
+	IF (@dtmCurrenctGLPostDate IS NULL)
+	BEGIN
+		SELECT TOP 1 @dtmCurrenctGLPostDate = dtmDate FROM #tmpPostRecap
+	END
+
 	DECLARE @tblResult TABLE (Result NVARCHAR(200))
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPostRecap)
@@ -366,7 +371,7 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
 
 		UPDATE tblRKM2MPostPreview SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MHeaderId = @intM2MHeaderId
-		UPDATE tblRKM2MHeader SET ysnPosted=1,dtmPostDate=getdate(),strBatchId=@batchId,dtmUnpostDate=null WHERE intM2MHeaderId = @intM2MHeaderId
+		UPDATE tblRKM2MHeader SET ysnPosted=1,dtmPostDate=@dtmCurrenctGLPostDate,strBatchId=@batchId,dtmUnpostDate=null WHERE intM2MHeaderId = @intM2MHeaderId
 
 
 		--Post Reversal using the reversal date
