@@ -26,12 +26,18 @@ BEGIN
 		GROUP BY 
 			intConditionId
 	) LC ON LC.intLoadId = L.intLoadId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
+		CASE 
+			WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId
+			WHEN L.intPurchaseSale = 2 THEN LD.intSContractDetailId
+		END
+	INNER JOIN tblCTContractCertification CC ON CC.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTCondition CTC ON CTC.intConditionId = LC.intConditionId
 	WHERE
 		ICI.intOriginId = @intOriginId AND
 		L.strOriginPort = @strOriginPort AND
 		L.strDestinationPort = @strDestinationPort AND
-		ICI.intCertificationId = @intCertificationId AND
+		CC.intCertificationId = @intCertificationId AND
 		LD.intVendorEntityId = @intVendorEntityId AND
 		COALESCE(L.intShippingLineEntityId, 1) = CASE WHEN @intShippingLineEntityId = 0 THEN COALESCE(L.intShippingLineEntityId, 1) ELSE @intShippingLineEntityId END AND
 		COALESCE(LD.intPSubLocationId, 1) = CASE WHEN @intPSubLocationId = 0 THEN COALESCE(LD.intPSubLocationId, 1) ELSE @intPSubLocationId END AND
