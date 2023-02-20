@@ -25,8 +25,7 @@ BEGIN
 					intSiteId = B.intSiteId,
 					dblInventoryReading = B.dblInventoryReading,
 					dtmInventoryReadingDateTime = B.dtmInventoryReadingDateTime,
-					ysnManual = B.ysnManual,
-					intDeviceTankMonitorId = B.intDeviceTankMonitorId
+					ysnManual = B.ysnManual
 			,dtmdate = CONVERT(VARCHAR(10), B.dtmDateTime, 111)
 			,dtmHour = DATEPART(HOUR, B.dtmDateTime)
 			,RowNumber = ROW_NUMBER() OVER (PARTITION BY DATEPART(HOUR, B.dtmDateTime) ORDER BY dtmDateTime DESC) 
