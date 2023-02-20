@@ -118,6 +118,7 @@ CREATE TABLE #INVOICES (
 	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
 	 , strLogoType					NVARCHAR(10)
 	 , dtmDueDateSC					DATETIME		NULL
+	 , ysnForgiven					BIT				NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -293,6 +294,7 @@ INSERT INTO #INVOICES WITH (TABLOCK) (
 	, dblServiceChargeAPR
 	, strLogoType
 	, dtmDueDateSC
+	, ysnForgiven
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -425,6 +427,7 @@ SELECT
 	, dblServiceChargeAPR			= ISNULL(INVOICEDETAIL.dblServiceChargeAPR, 0.00)
 	, strLogoType					= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 	, dtmDueDateSC					= INVOICEDETAIL.dtmDueDateSC
+	, ysnForgiven					= INV.ysnForgiven
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -913,7 +916,7 @@ SELECT
 	, dblServiceChargeAPR
 	, strLogoType
 	, dtmDueDateSC
-FROM #INVOICES
+FROM #INVOICES A
 
 --UPDATE STAGING
 UPDATE STAGING
