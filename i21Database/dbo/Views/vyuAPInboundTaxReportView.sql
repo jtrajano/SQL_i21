@@ -88,7 +88,8 @@ SELECT
 	--FUNCTIONAL TOTAL AMOUNTS
 	,dblFunctionalTax = ISNULL(APB.dblAverageExchangeRate, 1) * RT.dblAdjustedTax
     ,dblFunctionalGross = ISNULL(APB.dblAverageExchangeRate, 1) * APBD.dblTotal
-	,dblFunctionalTotalAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblTotal
+	-- ,dblFunctionalTotalAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblTotal
+	,dblFunctionalTotalAmount = (ISNULL(APB.dblAverageExchangeRate, 1) * RT.dblAdjustedTax) + (ISNULL(APB.dblAverageExchangeRate, 1) * APBD.dblTotal)
 	,dblFunctionalPaymentAmount = ISNULL(APB.dblAverageExchangeRate, 1) * APB.dblPayment
 	,dblFunctionalNontaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN APBD.dblTotal ELSE 0 END)
 	,dblFunctionalTaxablePurchase = ISNULL(APB.dblAverageExchangeRate, 1) * (CASE WHEN ISNULL(APBD.dblTax, 0) = 0 THEN 0 ELSE APBD.dblTotal END)
