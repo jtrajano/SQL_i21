@@ -43,7 +43,7 @@ SELECT 1
 	 , PP.dtmCreated
 	 , PP.intLastModifiedUserId
 	 , PP.dtmLastModified
-	 , PV.dblPinpointValue
+	 , ISNULL(PV.dblPinpointValue, 0)
 FROM dbo.tblQMPropertyValidityPeriod AS PV
 JOIN dbo.tblQMProductProperty AS PP ON PP.intPropertyId = PV.intPropertyId
 JOIN tblQMProperty AS P ON P.intPropertyId = PP.intPropertyId
