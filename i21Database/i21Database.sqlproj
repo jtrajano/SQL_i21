@@ -1187,7 +1187,6 @@
     <Build Include="dbo\Stored Procedures\uspSTInsertRequiredXMLFileConfigForConsignment.sql" />
     <Build Include="dbo\Stored Procedures\uspHDDuplicateCoworkerGoalByFiscalYear.sql" />
     <Build Include="dbo\Views\vyuCTContractDetail.sql" />
-    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
@@ -1200,7 +1199,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\41_UpdateSourceType.sql" />
     <Build Include="dbo\Views\vyuHDEntityLineOfBusiness.sql" />
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
-    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\3_SchoolDistrictCodes.sql" />
     <Build Include="dbo\Tables\tblApiSchemaVendorTaxException.sql" />
