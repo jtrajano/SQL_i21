@@ -25,6 +25,6 @@ BEGIN
      T0.intStoreId, T3.intItemId,  
      T4.strDescription, T6.intTaxCodeId, T6.strDescription,  
      T5.dblRate   
-     ORDER BY intStoreId  
+     ORDER BY T0.intStoreId  
   
 END  
