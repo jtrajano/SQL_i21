@@ -21,7 +21,7 @@ BEGIN
 	FROM tblSCTicket 
 	WHERE intTicketId = @intTicketId
 		and intStorageScheduleTypeId = -2 -- CONTRACT DISTRIBUTION TYPE
-
+		AND (intTicketTypeId <> 9)
 	IF(ISNULL(@intTicketContractDetailId,0) > 0)
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketContractUsed WHERE intTicketId = @intTicketId
