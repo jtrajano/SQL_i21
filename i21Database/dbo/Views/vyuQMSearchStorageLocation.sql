@@ -6,3 +6,4 @@ SELECT intCompanyLocationId					= CL.intCompanyLocationId
 	 , strSubLocationName					= CLSL.strSubLocationName
 FROM tblSMCompanyLocation CL
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CL.intCompanyLocationId = CLSL.intCompanyLocationId
+WHERE intCompanyLocationSubLocationId IS NOT NULL
