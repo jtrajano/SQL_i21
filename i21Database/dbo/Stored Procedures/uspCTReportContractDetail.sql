@@ -49,7 +49,8 @@ BEGIN TRY
 	DECLARE @fontBoldStartDate NVARCHAR(MAX)
 	DECLARE @fontBoldEndDate NVARCHAR(MAX)
 	DECLARE @fontBold NVARCHAR(MAX)
-
+	DECLARE @fontBoldItem NVARCHAR(MAX)
+	
 	SELECT  @strAmendedColumnsDetails = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
 											FROM tblCTAmendmentApproval AAP
@@ -139,7 +140,16 @@ BEGIN TRY
 		ELSE
 		BEGIN 
 			SET @fontBoldEndDate = '<span style="font-family:Arial;font-size:13px;">'
-		END		
+		END
+	IF CHARINDEX('intItemId',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldItem = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldItem = '<span style="font-family:Arial;font-size:13px;">'
+		END	
+		
 		
 
 	SET @space = '                      '
