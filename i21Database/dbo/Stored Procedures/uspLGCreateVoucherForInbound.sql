@@ -374,7 +374,7 @@ BEGIN TRY
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadContainerId = LWC.intLoadContainerId
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+		INNER JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		WHERE L.intLoadId = @intLoadId
 			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
 
