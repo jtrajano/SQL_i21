@@ -4,6 +4,5 @@
 	[intProductNumber] INT NOT NULL,
 	[dblPrice] DECIMAL(18,2) NOT NULL,
 	[dblDollarsSold] DECIMAL(18, 2) NOT NULL,
-	[dblGallonsSold] DECIMAL(18, 3) NOT NULL,
-	[dblRegularPrice] DECIMAL(18, 2) NOT NULL
+	[dblGallonsSold] DECIMAL(18, 3) NOT NULL
 )
