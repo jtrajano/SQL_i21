@@ -16,6 +16,7 @@ SELECT
 	ISNULL(I.dtmBillDate,J.dtmDate) AS dtmVoucherDate,
 	ISNULL(I.dtmDueDate,J.dtmDueDate) AS dtmDueDate,
 	ISNULL(I.strBillId, J.strInvoiceNumber) AS strVoucherId,
+	F2.strName AS strVoucherVendor,
 	I.strVendorOrderNumber AS strInvoice,
 	K.strCommodityCode,
 	L.strTerm,
@@ -34,6 +35,8 @@ INNER JOIN (tblAPVendor E INNER JOIN tblEMEntity F ON E.intEntityId = F.intEntit
 	ON E.intEntityId = A.intEntityVendorId
 LEFT JOIN tblAPBill I ON ISNULL(B.intBillId, B.intOrigBillId) = I.intBillId
 LEFT JOIN tblARInvoice J ON ISNULL(B.intInvoiceId, B.intOrigInvoiceId) = J.intInvoiceId
+LEFT JOIN (tblAPVendor E2 INNER JOIN tblEMEntity F2 ON E2.intEntityId = F2.intEntityId)
+	ON E2.intEntityId = ISNULL(I.intEntityVendorId, J.intEntityCustomerId)
 LEFT JOIN tblEMEntityLocation G ON G.intEntityLocationId = A.intPayToAddressId
 LEFT JOIN tblSMCompanyLocation C ON A.intCompanyLocationId = C.intCompanyLocationId
 LEFT JOIN vyuCMBankAccount D ON A.intBankAccountId = D.intBankAccountId
