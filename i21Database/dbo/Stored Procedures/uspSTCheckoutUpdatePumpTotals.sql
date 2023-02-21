@@ -98,7 +98,8 @@ BEGIN
 			JOIN dbo.tblSTStore S 
 				ON S.intStoreId = SPI.intStoreId
 			WHERE S.intStoreId = @intStoreId AND 
-				UOM.intItemUOMId IN (SELECT intItemUOMId FROM tblSTPumpItem WHERE intStoreId = @intStoreId) 
+				UOM.intItemUOMId IN (SELECT intItemUOMId FROM tblSTPumpItem WHERE intStoreId = @intStoreId) AND
+				a.intCheckoutId = @intCheckoutId
 		END	
 
 		SET @strMessage = 'Success'
