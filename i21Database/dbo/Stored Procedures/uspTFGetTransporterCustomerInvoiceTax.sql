@@ -132,9 +132,9 @@ BEGIN TRY
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
 						, tblARInvoice.strShipToState AS strDestinationState
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCity ELSE OriginBulkLoc.strCity END AS strOriginCity
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCountry ELSE OriginBulkLoc.strCountry END AS strOriginCounty
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strState ELSE OriginBulkLoc.strStateProvince END AS strOriginState
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN ISNULL(SupplyPointLoc.strCity, '')	ELSE OriginBulkLoc.strCity END AS strOriginCity
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN ISNULL(SupplyPointLoc.strCountry, '') ELSE OriginBulkLoc.strCountry END AS strOriginCounty
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN ISNULL(SupplyPointLoc.strState, '') ELSE OriginBulkLoc.strStateProvince END AS strOriginState
 						, tblEMEntity.strName
 						, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
 						, tblSMShipVia.strShipVia
@@ -365,9 +365,9 @@ BEGIN TRY
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
 						, tblARInvoice.strShipToState AS strDestinationState
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCity ELSE OriginBulkLoc.strCity END AS strOriginCity
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCountry ELSE OriginBulkLoc.strCountry END AS strOriginCounty
-						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strState ELSE OriginBulkLoc.strStateProvince END AS strOriginState
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN ISNULL(SupplyPointLoc.strCity, '')	ELSE OriginBulkLoc.strCity END AS strOriginCity
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN ISNULL(SupplyPointLoc.strCountry, '') ELSE OriginBulkLoc.strCountry END AS strOriginCounty
+						, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN ISNULL(SupplyPointLoc.strState, '') ELSE OriginBulkLoc.strStateProvince END AS strOriginState
 						, tblEMEntity.strName
 						, tblEMEntity.strFederalTaxId AS strCustomerFederalTaxId
 						, tblSMShipVia.strShipVia
