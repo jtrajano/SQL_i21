@@ -33,7 +33,7 @@ begin
 			,dblRequest
 			,intNoOfDays = datediff(day, dtmDateFrom, dtmDateTo) + 1
 		from
-			tblPRTimeOffRequest
+			vyuPRTimeOffRequest
 			order by intTimeOffRequestId desc
 
 	OPEN @queryResult
@@ -59,7 +59,7 @@ begin
 			,dblRequest
 			,intNoOfDays = datediff(day, dtmDateFrom, dtmDateTo) + 1
 		from
-			tblPRTimeOffRequest
+			vyuPRTimeOffRequest
 		where
 			intEntityEmployeeId = @intEntityId
 
