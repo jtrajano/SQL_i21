@@ -241,6 +241,12 @@ BEGIN TRY
 							,intStatusId = 3
 						WHERE intContractFeedId = @intContractFeedId
 							AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+							
+						UPDATE tblLGLoad
+						SET strComments = @StatusText
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intLoadId = @intLoadId
+							AND ISNULL(strComments, '') <> ISNULL(@StatusText, '')
 
 						INSERT INTO @tblMessage (
 							strMessageType
