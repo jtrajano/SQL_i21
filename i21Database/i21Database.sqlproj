@@ -1326,6 +1326,7 @@
     <Build Include="dbo\Stored Procedures\uspCMBankReconUnclearedPaymentsSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconUnclearedDepositsSubReport.sql" />
     <Build Include="dbo\Functions\fnGLIsOpenAccountingDate.sql" />
+    <Build Include="dbo\Functions\fnGLCreateGLPostRevaluEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankAccountsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
@@ -6087,6 +6088,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
+    <Build Include="dbo\Functions\fnGLGetRevalueAccountTableForGL.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
