@@ -118,14 +118,26 @@ BEGIN
 		where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId
 		group by intPRTimeOffRequestId
 
+	
+		--check if PR time off request is over 8 hrs per day
+		declare @ysnHasOverRequestHours bit = 0
+
+		--check if all request hours are distributed in hd time off request table
+		declare @ysnDistributeCompleted bit = 0
+
+		if  @dblRequest > @intFixEightHours * @intNoOfDays
+		begin
+			set @ysnHasOverRequestHours = convert(bit, 1)
+		end
+	
 		--time off was edited, delete the record
 		--if time off hours is changed, delete the record
-		--there is a more than 8 hours 
+		--there are more than 8 hours in the record
 		if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId 
 			and intPRNoOfDays != @intNoOfDays 
 		) or not exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId 
 			and dtmPRDate != @dtmDateFrom 
-		) or @dblTotalHours <> @dblRequest
+		) or ( ( @dblTotalHours <> @dblRequest ) and @ysnHasOverRequestHours = convert(bit, 0) )
 		or exists (
 			select top 1 ''
 			from tblHDTimeOffRequest
@@ -149,20 +161,28 @@ BEGIN
 				--insert when payroll timeoff does not exist based on current entity, timeOff id and date
 				if not exists (select * from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and dtmPRDate = @dtmPRDate and intPRTimeOffRequestId = @intTimeOffRequestId)
 				begin
-					if (@intI < @intNoOfDays)
+					if (@intI < @intNoOfDays and @ysnDistributeCompleted = convert(bit, 0))
 					begin
 						set @dblRequest = @dblRequest - 8;
 						set @dblRequestToInsert = @intFixEightHours;
+
+						if (sign(@dblRequest) = -1)
+						begin
+							--set @dblRequest = @intFixEightHours;
+							set @dblRequestToInsert = @intFixEightHours - ( @dblRequest * -1 );
+							set @ysnDistributeCompleted = convert(bit, 1)
+						end
+						if (sign(@dblRequest) = 0)
+						begin
+							set @dblRequestToInsert = @intFixEightHours;
+							set @ysnDistributeCompleted = convert(bit, 1)
+						end
 					end
-					if (sign(@dblRequest) = -1)
+					else
 					begin
-						--set @dblRequest = @intFixEightHours;
-						set @dblRequestToInsert = @intFixEightHours - ( @dblRequest * -1 );
+						set @dblRequestToInsert = 0;
 					end
-					if (sign(@dblRequest) = 0)
-					begin
-						set @dblRequestToInsert = @intFixEightHours;
-					end
+					
 					begin
 						INSERT INTO [dbo].[tblHDTimeOffRequest]
 								   ([intPRTimeOffRequestId]
