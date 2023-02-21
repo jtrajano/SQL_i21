@@ -250,7 +250,7 @@ ELSE
 		
 		DECLARE @intTransactionIDFee INT, @strTransactionIDFee NVARCHAR(30)
 
-		SELECT TOP 1 @intTransactionIDFee = F.intTransactionId, @strTransactionIDFee= F.strTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TEMP
+		SELECT TOP 1 @intTransactionIDFee = F.intTransactionId, @strTransactionIDFee= F.strTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 		ON F.strTransactionId = TMP.strTransactionId + '-F'
 		WHERE	F.intBankTransactionTypeId = @BANK_FEE
 
