@@ -246,6 +246,21 @@ ELSE
 				AND ISNULL(F.strReferenceNo,'') NOT IN (@CASH_PAYMENT) 
 				-- Condition #2:		
 				AND F.dtmCheckPrinted IS NOT NULL 
+		
+		DECLARE @intTransactionIDFee INT, @strTransactionIDFee NVARCHAR(30)
+
+		SELECT TOP 1 @intTransactionIDFee = F.intTransactionId, @strTransactionIDFee= F.strTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+		ON F.strTransactionId = TMP.strTransactionId + '-F'
+		WHERE	F.intBankTransactionTypeId = @BANK_FEE
+
+		IF @intTransactionIDFee IS NOT NULL
+		BEGIN
+			UPDATE tblCMBankTransaction SET ysnPosted = 0 WHERE intTransactionId = @intTransactionIDFee
+			DELETE FROM tblCMBankTransaction  WHERE intTransactionId = @intTransactionIDFee
+			DELETE FROM tblGLDetail WHERE strTransactionId = @strTransactionIDFee
+		END
+		
+		
 		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 	END
 
