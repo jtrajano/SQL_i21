@@ -259,6 +259,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\04_ClearImportCOAFromCSV.sql
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 :r .\GL\vyuGLTrialBalance.sql
+:r .\GL\vyuGLCompanyAccountId.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
