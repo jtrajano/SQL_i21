@@ -57,7 +57,7 @@ BEGIN
 	END
 	ELSE IF @dblTotalSalesRemaining < 0
 	BEGIN				
-		UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 0, dblConsAmountForInvoice = CASE WHEN @dblPreviousRemainingPayment < 0 THEN 0 ELSE @dblPreviousRemainingPayment END, dblConsAmountForCreditMemo = @dblTotalSalesRemaining * -1 WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId 
+		UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 0, dblConsAmountForInvoice = (CASE WHEN @dblPreviousRemainingPayment < 0 THEN 0 ELSE @dblPreviousRemainingPayment END), dblConsAmountForCreditMemo = (CASE WHEN @dblPreviousRemainingPayment < 0 THEN @dblAmount ELSE @dblTotalSalesRemaining * -1 END)  WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId 
 	END
 
 	SET @dblPreviousRemainingPayment = @dblTotalSalesRemaining;
