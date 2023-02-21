@@ -45,11 +45,7 @@ SELECT
 	,ASTR.intConcurrencyId
 	,ASTR.intCreatedUserId
 	,ASTR.intParentAdjustSettlementId
-	,strBillNumbers = CASE
-						WHEN ASTR.intTypeId = 1 THEN 
-							ISNULL(CAST(ASTR.intBillId AS NVARCHAR),_strBillIds.strBillIds) 
-						ELSE ISNULL(CAST(ASTR.intBillId AS NVARCHAR),_strBillIdsInvoice.strBillIds) 
-					END
+	,strBillNumbers = ISNULL(CAST(ASTR.intBillId AS NVARCHAR),_strBillIds.strBillIds) 
 	,strBillId = CASE 
 					WHEN ASTR.intTypeId = 1 THEN 
 						ISNULL(AP.strBillId,STUFF(_strVoucherNumbers.strVoucherNumbers,1,1,'')) 
@@ -120,13 +116,6 @@ OUTER APPLY (
 		WHERE ADJS.intAdjustSettlementId = ASTR.intAdjustSettlementId
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strVoucherNumbers
 ) AS _strVoucherNumbers
-OUTER APPLY (
-	SELECT (
-		SELECT CONVERT(VARCHAR(40), intBillId) + '|^|'
-		FROM tblGRAdjustSettlementsSplit
-		WHERE intAdjustSettlementId = ASTR.intAdjustSettlementId
-		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strBillIds
-) AS _strBillIdsInvoice
 OUTER APPLY (
 	SELECT (
 		SELECT ',' + AR.strInvoiceNumber

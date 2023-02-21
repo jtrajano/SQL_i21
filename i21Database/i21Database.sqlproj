@@ -1070,7 +1070,6 @@
     <Build Include="dbo\Tables\tblGRAdjustSettlements.sql" />
     <Build Include="dbo\Views\vyuGRSearchAdjustSettlements.sql" />
     <Build Include="dbo\User Defined Types\AdjustSettlementsStagingTable.sql" />
-    <Build Include="dbo\Tables\tblGRDeletedAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRAdjustSettlementsForPurchase.sql" />
