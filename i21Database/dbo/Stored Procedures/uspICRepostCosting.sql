@@ -1260,7 +1260,9 @@ BEGIN
 			AND tp.dblQty > 0 
 			AND tp.intTransactionTypeId NOT IN (
 				47 -- Opening Balance 
-			)	
+				,49 -- Mark Up or Down
+			)
+			AND strActualCostId IS NULL 
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
 	BEGIN 
