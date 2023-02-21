@@ -127,7 +127,7 @@ BEGIN TRY
 	FROM	vyuCTContractHeaderView CH
 	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
-	LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = CH.intEntityId
+	LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = CH.intEntityId and ysnDefaultContact = 1
 	LEFT JOIN	tblEMEntity EM ON ETC.intEntityContactId= EM.intEntityId
 	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	

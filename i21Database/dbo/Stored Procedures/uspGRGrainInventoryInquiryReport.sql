@@ -85,6 +85,16 @@ DECLARE @InventoryData TABLE
 	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
 )
 
+DECLARE @InventoryDataCompanyOwned TABLE
+(
+	dblUnits DECIMAL(18,6)
+	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,intCommodityId INT
+	,intCompanyLocationId INT
+	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
 DECLARE @intCommodityId2 INT
 DECLARE @strCommodityCode NVARCHAR(20)
 DECLARE @strUOM NVARCHAR(20)
@@ -297,6 +307,74 @@ GROUP BY Commodity.strCommodityCode
 		,OP.intLocationId
 	   ,OP.strLocationName
 	   ,OP.strUnitMeasure
+
+IF NOT EXISTS(SELECT 1 FROM @InventoryData)
+BEGIN
+INSERT INTO @InventoryData
+SELECT 1,
+	   'PHYSICAL INVENTORY BEGINNING' AS label
+	   ,'' AS [Sign]
+	   ,0
+	   ,Commodity.strCommodityCode
+	   ,Commodity.intCommodityId
+	   ,OP.intLocationId
+	   ,OP.strLocationName
+	   ,OP.strUnitMeasure
+FROM (SELECT	1 intItemId
+		,I.intCommodityId
+		,intLocationId
+		,CL.strLocationName
+		,t.intInTransitSourceLocationId
+		,CL.ysnLicensed
+		,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty))
+		,UOM.strUnitMeasure
+FROM tblICInventoryTransaction t
+INNER JOIN (
+			tblICItemLocation ItemLocation 
+			LEFT JOIN tblICItemUOM UOML
+				ON UOML.intItemUOMId = ItemLocation.intReceiveUOMId
+			)
+		ON ItemLocation.intItemLocationId = t.intItemLocationId
+LEFT JOIN tblICItemUOM UOM2
+	ON UOM2.intItemId = t.intItemId
+		AND UOM2.ysnStockUnit = 1
+INNER JOIN tblICItem I 
+	ON I.intItemId = t.intItemId
+INNER JOIN tblICCommodityUnitMeasure UM
+	ON UM.intCommodityId = I.intCommodityId
+		AND UM.ysnStockUnit = 1
+OUTER APPLY (
+	SELECT TOP 1 intCommodityUnitMeasureId
+	FROM tblICCommodityUnitMeasure
+	WHERE intCommodityId = I.intCommodityId
+		AND intUnitMeasureId = ISNULL(UOML.intUnitMeasureId,UOM2.intUnitMeasureId)
+) UM_REF
+INNER JOIN tblICUnitMeasure UOM
+	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+INNER JOIN tblSMCompanyLocation CL 
+	ON CL.intCompanyLocationId = ItemLocation.intLocationId
+WHERE t.ysnIsUnposted <> 1
+	AND t.dtmDate >= @dtmReportDate 
+	AND I.intCommodityId = ISNULL(@intCommodityId, I.intCommodityId)
+	AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
+			OR CL.intCompanyLocationId = @intLocationId
+		)
+GROUP BY t.intItemId
+		,ItemLocation.intLocationId
+		,t.intLotId
+		,t.intInTransitSourceLocationId
+		,CL.ysnLicensed
+		,I.intCommodityId
+		,CL.strLocationName
+		,UOM.strUnitMeasure) OP
+LEFT JOIN tblICCommodity Commodity
+	ON Commodity.intCommodityId = OP.intCommodityId
+GROUP BY Commodity.strCommodityCode
+		,Commodity.intCommodityId
+		,OP.intLocationId
+	   ,OP.strLocationName
+	   ,OP.strUnitMeasure
+END
 /*end inventory opening balance */
 
 /* Received, Shipped, Adjustments */
@@ -367,6 +445,19 @@ BEGIN
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
 
+		INSERT INTO @InventoryDataCompanyOwned
+		SELECT ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
+			,@strCommodityCode
+			,@intCommodityId2
+			,@intCompanyLocationId
+			,@strLocationName
+			,@strUOM
+		FROM #tblInOut
+		WHERE strTransactionType = 'Inventory Receipt'
+			AND dtmDate IS NOT NULL
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND strOwnership = 'Company Owned'
+
 		INSERT INTO @InventoryData
 		SELECT 3
 			,'SHIPPED'
@@ -407,7 +498,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@strLocationName
 			,@strUOM
-		FROM #tblInOut 
+		FROM #tblInOut
 		WHERE strTransactionType = 'Inventory Transfer' 
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
@@ -769,7 +860,7 @@ BEGIN
 			SELECT strTransactionNumber,strStorageTypeCode
 				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
 			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
-			WHERE strTransactionType <> 'Storage Settlement'
+			WHERE strTransactionType NOT IN ('Storage Settlement','Inventory Shipment')
 			GROUP BY strTransactionNumber,strStorageTypeCode
 		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeCode = AA.strStorageTypeCode
 		GROUP BY
@@ -792,7 +883,7 @@ BEGIN
 			,strLocationName
 			,strCommodityCode	
 		FROM #CustomerOwnershipALL AA
-		WHERE strTransactionType = 'Storage Settlement'
+		WHERE strTransactionType IN ('Storage Settlement','Inventory Shipment')
 		GROUP BY
 			dtmDate
 			,strDistributionType
@@ -829,6 +920,26 @@ BEGIN
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
 			AND intStorageScheduleTypeId = @intStorageScheduleTypeId
 		GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
+
+		--CREATE BEGINNING IF IT'S NOT AVAILABLE
+		IF NOT EXISTS(SELECT 1 FROM @StorageObligationDataDUMMY)
+		BEGIN
+			INSERT INTO @StorageObligationDataDUMMY
+			SELECT @intTotalRowCnt + 2
+				,@intStorageScheduleTypeId
+				,strDistribution + ' BEGINNING'
+				,''
+				,NET = 0
+				,strCommodityCode
+				,@intCommodityId2
+				,intLocationId
+				,strLocationName
+				,@strUOM
+			FROM #CustomerOwnershipBal 
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) >= CONVERT(DATETIME, @dtmReportDate)
+				AND intStorageScheduleTypeId = @intStorageScheduleTypeId
+			GROUP BY strDistribution,intLocationId,strLocationName,strCommodityCode
+		END
 		
 		--INCREASE FOR THE DAY
 		INSERT INTO @StorageObligationDataDUMMY
@@ -939,6 +1050,11 @@ BEGIN
 END
 
 SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @StorageObligationData)
+
+IF @intTotalRowCnt IS NULL
+BEGIN
+	SET @intTotalRowCnt = (SELECT MAX(intRowNum) FROM @ReportData)
+END
 
 INSERT INTO @StorageObligationData
 SELECT
@@ -1229,7 +1345,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED INCREASE (INC DP)'
 	,'+'
-	,ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
+	,ISNULL(E.dblUnits,0) + ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1272,6 +1388,9 @@ OUTER APPLY (
 		,strUOM
 ) B
 OUTER APPLY (
+	/*
+		Transfer from Customer owned to customer owned
+	*/
 	SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
 		,TS.strCommodityCode
 		,TS.intCommodityId
@@ -1288,16 +1407,11 @@ OUTER APPLY (
 	INNER JOIN tblICItemUOM UOM
 		ON UOM.intItemUOMId = CS.intItemUOMId
 	INNER JOIN tblICUnitMeasure UM
-		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	/*
-		Transfer from Customer owned to customer owned
-		from one location to another
-	*/
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId	
 	WHERE ST_FROM.strOwnedPhysicalStock = 'Customer'
 		AND ST_TO.strOwnedPhysicalStock = 'Customer'
 		AND TS.intCommodityId = A.intCommodityId
 		AND TS.intFromCompanyLocationId = A.intCompanyLocationId
-		AND TS.intToCompanyLocationId <> A.intCompanyLocationId
 		AND TS.dtmTransferStorageDate = @dtmReportDate
 	GROUP BY TS.strCommodityCode
 		,TS.intCommodityId
@@ -1306,6 +1420,9 @@ OUTER APPLY (
 		,UM.strUnitMeasure
 ) C
 OUTER APPLY (
+	/*
+		Reversed settlement for the day 
+	*/
 	SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
 		,IC.strCommodityCode
 		,CS.intCommodityId
@@ -1325,10 +1442,7 @@ OUTER APPLY (
 	INNER JOIN tblICItemUOM UOM
 		ON UOM.intItemUOMId = CS.intItemUOMId
 	INNER JOIN tblICUnitMeasure UM
-		ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-	/*
-		Reversed settlement for the day 
-	*/
+		ON UM.intUnitMeasureId = UOM.intUnitMeasureId	
 	WHERE SH.strType = 'Reverse Settlement'
 		AND CS.intCommodityId = A.intCommodityId
 		AND CS.intCompanyLocationId = A.intCompanyLocationId
@@ -1339,6 +1453,25 @@ OUTER APPLY (
 		,CL.strLocationName
 		,UM.strUnitMeasure
 ) D
+OUTER APPLY (
+	/*
+		RECEIVED Company Owned stocks for the day 
+	*/
+	SELECT SUM(dblUnits) dblUnits
+		,strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+	FROM @InventoryDataCompanyOwned
+	WHERE intCommodityId = A.intCommodityId
+		AND intCompanyLocationId = A.intCompanyLocationId
+	GROUP BY strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+) E
 
 INSERT INTO @InventoryData
 SELECT 
@@ -1412,7 +1545,6 @@ OUTER APPLY (
 		ON CS.intCustomerStorageId = SH.intCustomerStorageId
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-			AND ST.ysnDPOwnedType = 0
 	INNER JOIN tblICCommodity IC
 		ON IC.intCommodityId = CS.intCommodityId
 	INNER JOIN tblSMCompanyLocation CL

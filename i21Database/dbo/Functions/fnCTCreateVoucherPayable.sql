@@ -78,9 +78,9 @@ RETURNS TABLE AS RETURN
 		,[strBillOfLading]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)	
 	FROM tblCTContractCost CC	
-	CROSS APPLY ( select ysnMultiplePriceFixation from tblCTCompanyPreference ) CPT
+	CROSS APPLY ( select ysnMultiplePriceFixation, ysnCreateOtherCostPayable from tblCTCompanyPreference ) CPT
 	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) 
-			OR (CPT.ysnMultiplePriceFixation = 0 AND @accrue = 1)
+			OR (CPT.ysnMultiplePriceFixation = 0 AND @accrue = 1) OR (  CPT.ysnCreateOtherCostPayable = 1)
 		) 
 		AND (@remove = 0 AND CC.intConcurrencyId <> CC.intPrevConcurrencyId OR @remove = 1)
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -140,7 +140,7 @@ RETURNS TABLE AS RETURN
 		WHERE intEntityId = CC.intVendorId OR (CC.ysnPrice = 1 AND CH.intContractTypeId = 1 AND intEntityId = CH.intEntityId)
 	) entity 
 
-	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND --CC.ysnBasis = 0 AND
+	WHERE RC.intInventoryReceiptChargeId IS NULL AND (CC.ysnAccrue = @accrue OR CPT.ysnCreateOtherCostPayable = 1) AND --CC.ysnBasis = 0 AND
 	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
 		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1

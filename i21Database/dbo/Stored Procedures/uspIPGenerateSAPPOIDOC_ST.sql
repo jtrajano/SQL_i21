@@ -361,9 +361,9 @@ BEGIN
 											WHERE PFD.intPriceFixationId = PF.intPriceFixationId
 											)
 									END
-								), 112), ''))) + '</FIXATION_DATE>' Else  '<PRICE_TYPE>' + IsNULL(PT.strPricingType, 0) + '</PRICE_TYPE>'+'<PRICE_MARKET></PRICE_MARKET>' 
+								), 112), ''))) + '</FIXATION_DATE>' Else  '<PRICE_TYPE>Basis</PRICE_TYPE>'+'<PRICE_MARKET></PRICE_MARKET>' 
 				+ '<PRICE_MONTH></PRICE_MONTH>' 
-				+ '<PRICE></PRICE>' 
+				+ '<PRICE>0</PRICE>' 
 				+ '<PRICE_UOM></PRICE_UOM>' 
 				+ '<PRICE_CURRENCY></PRICE_CURRENCY>' 
 				+ '<BASIS>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>' 

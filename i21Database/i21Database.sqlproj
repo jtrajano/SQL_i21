@@ -7113,7 +7113,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateItemsForInTransitCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateItemsForStorageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceRecap.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostItemResevation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostItemReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspARPrePostInvoiceIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />
@@ -9173,7 +9173,7 @@
     <Build Include="dbo\Views\vyuGRReportSplitView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportSplitView.sql" />
     <Build Include="dbo\Views\vyuGRSettlementChargeAndPremium.sql" />
-	  <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
+    <Build Include="dbo\Tables\tblTMDeliveryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMContractScheduleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePaymentInvoiceField.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeDeductions.sql" />
@@ -9234,6 +9234,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

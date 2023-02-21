@@ -713,8 +713,8 @@ FROM
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
 	) DebitMemoApplied ON DebitMemoApplied.intBillId = Bill.intBillId
-	WHERE (BillDtl.intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
-		AND (intSettleStorageId IS NULL AND intCustomerStorageId IS NULL)
+	WHERE (Bill.intTransactionType = 1 AND (BillDtl.intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
+		AND (intSettleStorageId IS NULL AND intCustomerStorageId IS NULL))
 		AND Item.strType <> 'Other Charge'
 	GROUP BY 
 		PYMT.intPaymentId

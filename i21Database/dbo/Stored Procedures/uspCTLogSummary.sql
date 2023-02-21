@@ -3924,7 +3924,7 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						if (@ysnChangePricingTypeAndQuantity = 1)
+						if (@ysnChangePricingTypeAndQuantity = 1 and exists (select top 1 1 from @cbLogSpecific where ((@dblPriced - dblQty) * -1) <> 0))
 						begin
 							update @cbLogSpecific set dblQty = (@dblPriced - dblQty) * -1;
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
@@ -4507,11 +4507,14 @@ BEGIN TRY
 					begin
 						declare @a numeric(24,10);
 						select @a = sum(dblQty) from tblCTContractBalanceLog where intContractDetailId = @intContractDetailId and strTransactionType = 'Contract Balance' and intPricingTypeId = @intPricingTypeId;
-						update @cbLogSpecific set dblQty = abs(@a) * -1;
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						if (@a <> 0)
+						begin
+							update @cbLogSpecific set dblQty = abs(@a) * -1;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-						update @cbLogSpecific set dblQty = abs(@a), intPricingTypeId = @intSequencePricingTypeId;
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							update @cbLogSpecific set dblQty = abs(@a), intPricingTypeId = @intSequencePricingTypeId;
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						end
 					end
 				END	
 			END

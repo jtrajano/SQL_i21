@@ -286,7 +286,7 @@ FROM
 
 	UNION ALL
 	--manually added item in the voucher but as a misc field only
-	SELECT
+	SELECT DISTINCT
 		intBillDetailIdItem				= BD_ITEM.intBillDetailId
 		,strId							= AP.strBillId
 		,intBillId						= AP.intBillId
@@ -302,7 +302,6 @@ FROM
 		,dblNetTotal					= BD.dblTotal + ISNULL(BD.dblTax,0)
 		,strTaxClass					= TaxClass.strTaxClass
 	FROM tblAPBillDetail BD
-	--) BON BD.intBillId = B.intBillId
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
 	LEFT JOIN (
@@ -310,11 +309,14 @@ FROM
 		INNER JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND IC.strType = 'Inventory'	
 	) ON (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL)
 		AND BD_ITEM.intBillId = BD.intBillId
+	OUTER APPLY dbo.fnGRSettlementManualChargeItem(BD.intBillId) MC
 	LEFT JOIN vyuAPBillDetailTax Tax
 		ON BD.intBillDetailId = Tax.intBillDetailId
 	LEFT JOIN tblSMTaxClass TaxClass
 		ON Tax.intTaxClassId = TaxClass.intTaxClassId
-	WHERE BD.intItemId IS NULL AND BD.ysnStage = 0	
+	WHERE BD.intItemId IS NULL 
+		AND BD.ysnStage = 0
+		AND (MC.intBillDetailItemId = BD_ITEM.intBillDetailId AND MC.ysnShow = 1)
 )t
 GO
 

@@ -453,30 +453,30 @@ INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
-OUTER APPLY
-(
-	SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit
-	FROM tblGLDetail GD
-	INNER JOIN vyuGLAccountDetail AD
-		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
-	WHERE GD.strTransactionId = TS.strTransferStorageTicket
-		AND GD.intTransactionId = TS.intTransferStorageId
-		-- AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
-		AND GD.ysnIsUnposted = 0
-		AND GD.intAccountId NOT IN (
-			SELECT GD.intAccountId
-			FROM tblGLDetail		
-			WHERE strTransactionId = GD.strTransactionId
-				AND intTransactionId = GD.intTransactionId
-				AND strDescription = GD.strDescription
-				AND ysnIsUnposted = 0
-				AND intAccountId = GD.intAccountId
-				AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
-                -- Exclude DP to DP for this checking
-                AND NOT (ST_FROM.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 1)
-	)
-) GLDetail
+-- OUTER APPLY
+-- (
+-- 	SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit
+-- 	FROM tblGLDetail GD
+-- 	INNER JOIN vyuGLAccountDetail AD
+-- 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+-- 	WHERE GD.strTransactionId = TS.strTransferStorageTicket
+-- 		AND GD.intTransactionId = TS.intTransferStorageId
+-- 		-- AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+-- 		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
+-- 		AND GD.ysnIsUnposted = 0
+-- 		AND GD.intAccountId NOT IN (
+-- 			SELECT GD.intAccountId
+-- 			FROM tblGLDetail		
+-- 			WHERE strTransactionId = GD.strTransactionId
+-- 				AND intTransactionId = GD.intTransactionId
+-- 				AND strDescription = GD.strDescription
+-- 				AND ysnIsUnposted = 0
+-- 				AND intAccountId = GD.intAccountId
+-- 				AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
+--                 -- Exclude DP to DP for this checking
+--                 AND NOT (ST_FROM.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 1)
+-- 	)
+-- ) GLDetail
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -486,7 +486,7 @@ LEFT JOIN
 -- WHERE GL.strDescription NOT LIKE '%Charges from %'
 WHERE GL.strCode = 'IC'
 AND QM.dblDiscountDue <> 0
-AND GLDetail.intAccountId IS NOT NULL
+--AND GLDetail.intAccountId IS NOT NULL
 UNION ALL
 --DP TRANSFER STORAGE TO OS (AND DP)
 SELECT DISTINCT '7',

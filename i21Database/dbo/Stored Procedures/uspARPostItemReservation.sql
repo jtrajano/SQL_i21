@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPostItemResevation]
+﻿CREATE PROCEDURE [dbo].[uspARPostItemReservation]
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
