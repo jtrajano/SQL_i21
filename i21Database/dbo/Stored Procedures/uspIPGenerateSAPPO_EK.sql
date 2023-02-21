@@ -78,6 +78,7 @@ BEGIN TRY
 	DECLARE @tblLGLoad TABLE (intLoadId INT)
 	DECLARE @intMainLoadId INT
 	DECLARE @tmp INT
+	DECLARE @strErrorMessage NVARCHAR(MAX)
 
 	SELECT @tmp = strValue
 	FROM tblIPSAPIDOCTag
@@ -136,6 +137,11 @@ BEGIN TRY
 		BEGIN
 			GOTO NextLoad
 		END
+
+		UPDATE tblLGLoad
+		SET strComments = ''
+			,intConcurrencyId = intConcurrencyId + 1
+		WHERE intLoadId = @intMainLoadId
 
 		WHILE @intContractFeedId IS NOT NULL
 		BEGIN
@@ -917,6 +923,22 @@ BEGIN TRY
 		END
 
 		NextLoad:
+
+		SELECT @strErrorMessage =  ''
+
+		SELECT @strErrorMessage = @strErrorMessage + ISNULL(strBatchId, '') + ' - ' + ISNULL(strMessage, '') + CHAR(13) + CHAR(10)
+		FROM tblIPContractFeed
+		WHERE intLoadId = @intMainLoadId
+			AND intStatusId = 1
+			AND ISNULL(strMessage, '') <> ''
+
+		IF ISNULL(@strErrorMessage, '') <> ''
+		BEGIN
+			UPDATE tblLGLoad
+			SET strComments = 'Internal: ' + CHAR(13) + CHAR(10) + @strErrorMessage
+				,intConcurrencyId = intConcurrencyId + 1
+			WHERE intLoadId = @intMainLoadId
+		END
 
 		SELECT @intMainLoadId = MIN(intLoadId)
 		FROM @tblLGLoad
