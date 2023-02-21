@@ -24,6 +24,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , ysnHasEmailSetup		= ISNULL(EMAILSETUP.ysnHasEmailSetup, CAST(0 AS BIT))
 	 , ysnMailSent			= ISNULL(EMAILSTATUS.ysnMailSent, CAST(0 AS BIT))
 	 , ysnHasInventory		= CASE WHEN ISNULL(INVENTORY.intInventoryCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	 , intTicketId			= SCALETICKETID.intTicketId
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN tblEMEntity EM WITH (NOLOCK) ON I.intEntityCustomerId = EM.intEntityId
 INNER JOIN tblARCustomer C WITH (NOLOCK) ON I.intEntityCustomerId = C.intEntityId
@@ -54,4 +55,11 @@ LEFT JOIN (
 	INNER JOIN (SELECT intTransactionId, strType, strStatus FROM tblSMActivity WITH (NOLOCK) WHERE strType = 'Email' and strStatus = 'Sent') SMA ON SMA.intTransactionId = SMT.intTransactionId 
 	GROUP BY SMT.intRecordId
 ) EMAILSTATUS ON I.intInvoiceId = EMAILSTATUS.intInvoiceId
+LEFT JOIN (
+	SELECT intTicketId	= MIN(ID.intTicketId)
+		 , intInvoiceId	= ID.intInvoiceId
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)	
+	WHERE ID.intTicketId IS NOT NULL
+	GROUP BY ID.intInvoiceId
+) SCALETICKETID ON SCALETICKETID.intInvoiceId = I.intInvoiceId
 WHERE I.strType NOT IN ('CF Tran', 'CF Invoice')
