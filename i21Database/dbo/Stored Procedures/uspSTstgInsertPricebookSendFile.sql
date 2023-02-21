@@ -369,7 +369,7 @@ BEGIN
 																END,
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= PCF.strUPCwthOrwthOutCheckDigit, --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCode]						= dbo.fnICValidateUPCCode(PCF.strUPCwthOrwthOutCheckDigit), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= '0',
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -644,7 +644,7 @@ BEGIN
 												(
 													SELECT DISTINCT
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-														, IUOM.strLongUPCCode AS strUpcCode
+														, dbo.fnICValidateUPCCode(IUOM.strLongUPCCode) AS strUpcCode
 														, I.strDescription AS strDescription
 														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
@@ -759,7 +759,7 @@ BEGIN
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [strITTDetailRecordActionType] 
 							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [strICPOSCodeFormatFormat]
 							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-									ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
+									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(IUOM.strLongUPCCode),''),11) 
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
@@ -849,7 +849,7 @@ BEGIN
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [strITTDetailRecordActionType] 
 							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [strICPOSCodeFormatFormat]
 							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-									ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
+									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(IUOM.strLongUPCCode),''),11) 
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
@@ -991,7 +991,7 @@ BEGIN
 							(
 								SELECT DISTINCT
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-									, IUOM.strLongUPCCode AS strUpcCode
+									, dbo.fnICValidateUPCCode(IUOM.strLongUPCCode) AS strUpcCode
 									, I.strDescription AS strDescription
 									, IUM.strUnitMeasure AS strUnitMeasure
 									, itemPricing.dblSalePrice AS dblSalePrice
@@ -1234,7 +1234,7 @@ BEGIN
 					[intCommanderOutboundPLUsId]	=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 					, [intItemLocationId]			=	ItemLoc.intItemLocationId
 					, [strSource]					=	'keyboard'
-					, [strUpc]						=	PCF.strUPCwthOrwthOutCheckDigit -- IF COMMANDER/SAPPHIRE include check digit
+					, [strUpc]						=	dbo.fnICValidateUPCCode(PCF.strUPCwthOrwthOutCheckDigit) -- IF COMMANDER/SAPPHIRE include check digit
 					, [strUpcModifier]				=	CAST(ISNULL(UOM.intModifier, '000') AS VARCHAR(100))
 					, [strDescription]				=	LEFT(REPLACE(REPLACE(REPLACE(REPLACE(ISNULL(NULLIF(UOM.strUPCDescription, ''), Item.strDescription), '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
 					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
@@ -1377,7 +1377,7 @@ BEGIN
 					AND UOM.strLongUPCCode IS NOT NULL
 					AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
 					AND ISNULL(SUBSTRING(PCF.strUPCwthOrwthOutCheckDigit, PATINDEX('%[^0]%', PCF.strUPCwthOrwthOutCheckDigit), LEN(PCF.strUPCwthOrwthOutCheckDigit)), 0) NOT IN ('')
-				ORDER BY PCF.strUPCwthOrwthOutCheckDigit ASC
+				ORDER BY dbo.fnICValidateUPCCode(PCF.strUPCwthOrwthOutCheckDigit) ASC
 
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderUPLUs)
