@@ -457,7 +457,9 @@ BEGIN TRY
 
 				SELECT @_dblTicketScheduledQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketScheduledQty) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
 				SELECT @_dblDestinationQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketNetUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
-
+				/*SELECT @_dblTicketScheduledQty =  ROUND(ISNULL(@_dblTicketScheduledQty, 0), 4)
+					, @_dblDestinationQuantity =  ROUND(ISNULL(@_dblDestinationQuantity, 0), 4)
+				*/
 				---Contract Distribution
 				IF(@intTicketStorageScheduleTypeId = -2) 
 				BEGIN
@@ -830,21 +832,25 @@ BEGIN TRY
 
 						if @dblTicketScheduledQty <> 0
 						begin
+							SELECT @_dblTicketScheduledQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketScheduledQty) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
+							SELECT @_dblTicketScheduledQty =  ROUND(ISNULL(@_dblTicketScheduledQty, 0), 4)
 
-							set @dblTicketScheduledQty = -1 * @dblTicketScheduledQty
+							set @_dblTicketScheduledQty = -1 * @_dblTicketScheduledQty
 
 							EXEC uspSCUpdateContractSchedule
 								@intContractDetailId = @intTicketContractDetailId
-								,@dblQuantity = @dblTicketScheduledQty
+								,@dblQuantity = @_dblTicketScheduledQty
 								,@intUserId = @intUserId
 								,@intExternalId = @intTicketId
 								,@strScreenName = 'Scale'
 
-							set @dblTicketScheduledQty = abs(@dblTicketScheduledQty)
+							set @_dblTicketScheduledQty = abs(@_dblTicketScheduledQty)
+
+							
 
 							EXEC uspCTUpdateSequenceBalance 
 								@intContractDetailId = @intTicketContractDetailId
-								,@dblQuantityToUpdate = @dblTicketScheduledQty
+								,@dblQuantityToUpdate = @_dblTicketScheduledQty
 								,@intUserId	= @intUserId
 								,@intExternalId	= @intTicketId
 								,@strScreenName	= 'Scale'

@@ -60,7 +60,8 @@ BEGIN TRY
 	
 	DECLARE @_intTicketContractDetailId int
 	DECLARE @_dblTicketScheduleQuantity NUMERIC(38,20)
-
+	DECLARE @_dblCovertedQty NUMERIC(38,20)
+	
 	SET @ysnDropShip = 0
 
 	---GET TICKET DETAILS
@@ -901,9 +902,14 @@ BEGIN TRY
 
 			set @_dblTicketScheduleQuantity = -1 * @_dblTicketScheduleQuantity
 
+
+			SELECT @_dblCovertedQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMIdTo, intItemUOMId, @_dblTicketScheduleQuantity) FROM tblCTContractDetail WHERE intContractDetailId = @_intTicketContractDetailId
+			-- SELECT @_dblCovertedQty = ROUND(@_dblCovertedQty, 4)
+
+
 			EXEC uspSCUpdateContractSchedule
 				@intContractDetailId = @_intTicketContractDetailId
-				,@dblQuantity = @_dblTicketScheduleQuantity
+				,@dblQuantity = @_dblCovertedQty
 				,@intUserId = @intUserId
 				,@intExternalId = @intTicketId
 				,@strScreenName = 'Scale'
@@ -924,10 +930,12 @@ BEGIN TRY
 					,@intExternalId = @intTicketId
 					,@strScreenName = 'Scale'
 				*/
+				SELECT @_dblCovertedQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMIdTo, intItemUOMId, @_dblLoopQuantity) FROM tblCTContractDetail WHERE intContractDetailId = @_intLoopContractDetailId
+				--SELECT @_dblCovertedQty = ROUND(@_dblCovertedQty, 4)
 
 				EXEC uspCTUpdateSequenceBalance 
 					@intContractDetailId = @_intLoopContractDetailId
-					,@dblQuantityToUpdate = @_dblLoopQuantity
+					,@dblQuantityToUpdate = @_dblCovertedQty
 					,@intUserId	= @intUserId
 					,@intExternalId	= @intTicketId
 					,@strScreenName	= 'Scale'
