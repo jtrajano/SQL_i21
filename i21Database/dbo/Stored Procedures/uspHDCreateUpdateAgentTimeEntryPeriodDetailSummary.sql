@@ -124,8 +124,8 @@ BEGIN
 			ON TimeEntryPeriod.intTimeEntryPeriodId = TimeEntryPeriodDetail.intTimeEntryPeriodId
 				OUTER APPLY(
 					SELECT SUM(a.dblPRRequest)  dblRequest FROM tblHDTimeOffRequest a
-					INNER JOIN  tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
-					INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+					INNER JOIN  vyuPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+					--INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
 					INNER JOIN  tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
 					WHERE d.intEntityId = @EntityId AND
 						  a.dtmPRDate >= TimeEntryPeriodDetail.[dtmBillingPeriodStart] AND
@@ -134,8 +134,8 @@ BEGIN
 				) WeeklyVacationHolidaySick
 				OUTER APPLY(
 					SELECT SUM(a.dblPRRequest)  dblRequest FROM tblHDTimeOffRequest a
-					INNER JOIN  tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
-					INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+					INNER JOIN  vyuPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+					--INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
 					INNER JOIN  tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
 					WHERE d.intEntityId = @EntityId AND
 						  DATEPART(YEAR, a.dtmPRDate) = TimeEntryPeriod.strFiscalYear
@@ -143,8 +143,8 @@ BEGIN
 				) AnnuallyVacationHolidaySick
 				OUTER APPLY(
 					SELECT SUM(a.dblPRRequest)  dblRequest FROM tblHDTimeOffRequest a
-					INNER JOIN  tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
-					INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+					INNER JOIN  vyuPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+					--INNER JOIN  tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
 					INNER JOIN  tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
 					WHERE d.intEntityId = @EntityId AND
 						  DATEPART(YEAR, a.dtmPRDate) = TimeEntryPeriod.strFiscalYear AND
