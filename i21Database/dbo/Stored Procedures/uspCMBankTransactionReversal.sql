@@ -52,6 +52,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
 		,@NEGATIVE_AP_ECHECK AS INT = 120
+	    ,@BANK_FEE INT = 27 
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -391,7 +392,7 @@ WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK, @ACH,
 				AND F.dtmCheckPrinted IS NULL 		
 			)
 		)
-DECLARE @BANK_FEE INT = 27 
+
 
 DELETE GL FROM tblGLDetail GL INNER JOIN
 tblCMBankTransaction F ON GL.strTransactionId = F.strTransactionId
