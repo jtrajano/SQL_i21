@@ -2,8 +2,8 @@
 AS 
 
 SELECT     
-      BDR.dblCostLeft - BDR.dblDepreciationLTDLeft AS dblNetBookValueGaap
-	, BDR.dblCostRight - BDR.dblDepreciationLTDRight AS dblNetBookValueTax
+      BDR.dblCostLeft - BDR.dblDepreciationYTDLeft AS dblNetBookValueGaap
+	, BDR.dblCostRight - BDR.dblDepreciationYTDRight AS dblNetBookValueTax
 	, BDR.*    
 	, strAssetId = FA.strAssetId       
     , strAssetDescription = FA.strAssetDescription    
@@ -20,7 +20,7 @@ SELECT
     , strLedgerRight = LR.strLedgerName    
     , strDepreciationMethodIdLeft = DML.strDepreciationMethodId    
     , strDepreciationMethodIdRight = DMR.strDepreciationMethodId    
-    , strTaxJurisdiction = TaxJurisdiction.strTaxJurisdiction      
+ , strTaxJurisdiction = FA.strTaxJurisdiction  
 
 FROM tblFABookDepreciationReport BDR
 JOIN tblFAFixedAsset FA ON FA.intAssetId = BDR.intAssetId
