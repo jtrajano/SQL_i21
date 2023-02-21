@@ -1237,7 +1237,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
     <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
     <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
-    <Build Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
+    <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
