@@ -20,7 +20,7 @@ SELECT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM
 	, ItemLocation.strVendorName
 	, UOM.strUnitMeasure
 	, ItemUOM.strUpcCode
-	, ItemUOM.strLongUPCCode
+	, dbo.fnICValidateUPCCode(ItemUOM.strLongUPCCode) AS strLongUPCCode
 	, dblLastCost = CAST(ItemPricing.dblLastCost AS NUMERIC(18, 6))
 	, dblSalePrice = CAST(itemHierarchyPricing.dblSalePrice AS NUMERIC(18, 6))
 	, dblUnitQty = CAST(ItemUOM.dblUnitQty AS NUMERIC(18, 6))
