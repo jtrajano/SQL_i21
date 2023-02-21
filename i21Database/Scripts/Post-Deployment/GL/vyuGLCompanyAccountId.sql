@@ -1,6 +1,7 @@
+GO
 IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType = 6)
 IF EXISTS(
-SELECT *
+SELECT 1
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_NAME = N'tblGLTempCOASegment'
 AND COLUMN_NAME = 'Company'
@@ -21,3 +22,5 @@ ON S.[Company] COLLATE Latin1_General_CI_AS = A.strCode
 JOIN tblGLAccountStructure B ON B.intAccountStructureId = A.intAccountStructureId
 WHERE B.strStructureName = ''Company''
 ')
+
+GO
