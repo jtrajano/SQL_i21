@@ -33,7 +33,7 @@ BEGIN
 			FOR 
 
 			SELECT intEntityEmployeeId 
-			FROM tblPRTimeOffRequest TimeOffRequest
+			FROM vyuPRTimeOffRequest TimeOffRequest
 			WHERE TimeOffRequest.dtmDateFrom <= @dtmDateTo AND 
 				  TimeOffRequest.dtmDateFrom >= @dtmDateFrom
 			GROUP BY intEntityEmployeeId
