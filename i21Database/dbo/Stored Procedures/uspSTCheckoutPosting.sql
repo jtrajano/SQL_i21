@@ -4112,7 +4112,7 @@ BEGIN
 
 
 
-				IF @ysnConsignmentStore = 1 AND @ysnConsAddOutsideFuelDiscounts = 0
+				IF @ysnConsignmentStore = 1 AND @ysnConsAddOutsideFuelDiscounts = 1
 				BEGIN
 					--PRINT 'FUEL DISCOUNT'
 					----------------------------------------------------------------------
@@ -4269,9 +4269,9 @@ BEGIN
 												,[dblQtyShipped]			= 1
 												,[dblDiscount]				= 0
 												,[dblPrice]					= CASE 
-																				WHEN @ysnConsAddOutsideFuelDiscounts = 1 AND @ysnConsMeterReadingsForDollars = 0
+																				WHEN @ysnConsMeterReadingsForDollars = 0
 																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
-																				WHEN @ysnConsAddOutsideFuelDiscounts = 1 AND @ysnConsMeterReadingsForDollars = 1
+																				WHEN @ysnConsMeterReadingsForDollars = 1
 																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0))
 																				ELSE 
 																					0
