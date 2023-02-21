@@ -1,24 +1,26 @@
 ﻿CREATE VIEW [dbo].[vyuFABookDepreciationReport]
 AS 
 
-SELECT 
-	  BDR.*
-	, strAssetId = FA.strAssetId   
-    , strAssetDescription = FA.strAssetDescription
-    , strSerialNumber = FA.strSerialNumber
-    , strNotes = FA.strNotes
-    , dtmDateAcquired = FA.dtmDateAcquired
-    , dtmDateInService = FA.dtmDateInService
-    , strGroupCode = AssetGroup.strGroupCode
-    , strGroupDescription = AssetGroup.strGroupDescription
-    , strAssetAccountId = GLAsset.strAccountId
-    , strDepreciationAccountId = GLDepreciation.strAccountId     
-    , strCompanyLocation = Company.strLocationName
-    , strLedgerLeft = LL.strLedgerName
-    , strLedgerRight = LR.strLedgerName
-    , strDepreciationMethodIdLeft = DML.strDepreciationMethodId
-    , strDepreciationMethodIdRight = DMR.strDepreciationMethodId
-    , strTaxJurisdiction = FA.strTaxJurisdiction
+SELECT     
+      BDR.dblCostLeft - BDR.dblDepreciationYTDLeft AS dblNetBookValueGaap
+	, BDR.dblCostRight - BDR.dblDepreciationYTDRight AS dblNetBookValueTax
+	, BDR.*    
+	, strAssetId = FA.strAssetId       
+    , strAssetDescription = FA.strAssetDescription    
+    , strSerialNumber = FA.strSerialNumber    
+    , strNotes = FA.strNotes    
+    , dtmDateAcquired = FA.dtmDateAcquired    
+    , dtmDateInService = FA.dtmDateInService    
+    , strGroupCode = AssetGroup.strGroupCode    
+    , strGroupDescription = AssetGroup.strGroupDescription    
+    , strAssetAccountId = GLAsset.strAccountId    
+    , strDepreciationAccountId = GLDepreciation.strAccountId         
+    , strCompanyLocation = Company.strLocationName    
+    , strLedgerLeft = LL.strLedgerName    
+    , strLedgerRight = LR.strLedgerName    
+    , strDepreciationMethodIdLeft = DML.strDepreciationMethodId    
+    , strDepreciationMethodIdRight = DMR.strDepreciationMethodId    
+ , strTaxJurisdiction = FA.strTaxJurisdiction  
 
 FROM tblFABookDepreciationReport BDR
 JOIN tblFAFixedAsset FA ON FA.intAssetId = BDR.intAssetId
