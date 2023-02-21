@@ -252,12 +252,20 @@ BEGIN
 		SELECT @intCurrencyId = ISNULL(intMainCurrencyId,intCurrencyID) FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 		IF @intCurrencyId <> @intInvoiceCurrencyId
 		BEGIN
-			SELECT	intCurrencyExchangeRateId ,
-					'From ' + FC.strCurrency +' To ' + TC.strCurrency strExchangeRate,
-					(SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			SELECT	ER.intCurrencyExchangeRateId ,
+					'From ' + FC.strCurrency +' To ' + TC.strCurrency strExchangeRate, 
+					ERD.dblRate, 
+					ERD.intRateTypeId,
+					ERD.strCurrencyExchangeRateType
 			FROM	tblSMCurrencyExchangeRate ER
 			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
 			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			CROSS APPLY (
+				SELECT TOP 1 ERT.strCurrencyExchangeRateType, CERD.* 
+				FROM tblSMCurrencyExchangeRateDetail  CERD
+				JOIN tblSMCurrencyExchangeRateType ERT on CERD.intRateTypeId = ERT.intCurrencyExchangeRateTypeId
+				WHERE CERD.intCurrencyExchangeRateId =   ER.intCurrencyExchangeRateId ORDER BY dtmValidFromDate DESC
+			)  ERD 
 			WHERE	intToCurrencyId = @intCurrencyId  AND intFromCurrencyId = @intInvoiceCurrencyId
 		END
 	END
