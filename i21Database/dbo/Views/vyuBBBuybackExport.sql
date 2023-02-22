@@ -24,7 +24,7 @@ AS
 		,M.strCompany1Id
 		,SO.dtmDate dtmSalesOrderDate
 		,SO.strBOLNumber strSalesOrderBOLNumber
-		,M.strMarketerAccountNo
+		,COALESCE(M.strMarketerAccountNo, M.strCompany2Id) strMarketerAccountNo
 		,M.strMarketerEmail
 		,M.strDataFileTemplate
 		,M.strExportFilePath
