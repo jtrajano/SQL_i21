@@ -5,7 +5,8 @@ CREATE PROCEDURE [dbo].[uspGLInsertReverseGLEntry]
 	@dtmDateReverse DATETIME = NULL,
 	@strBatchId NVARCHAR(100) = '',
 	@strCode NVARCHAR(50) = NULL,
-	@ysnUseIntegerTransactionId BIT = 0
+	@ysnUseIntegerTransactionId BIT = 0,
+	@SkipICValidation BIT = 0
 )
 AS
 BEGIN
@@ -85,7 +86,7 @@ BEGIN
 			ORDER BY intGLDetailId
 
 			
-			EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = 0, @SkipICValidation = 1
+			EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = 0, @SkipICValidation = @SkipICValidation
 
 			UPDATE	tblGLDetail
 			SET		ysnIsUnposted = 1
