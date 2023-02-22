@@ -70,6 +70,7 @@ SELECT
 FROM tblMFBatch B
 INNER JOIN tblQMSample S ON S.intSampleId = B.intSampleId -- Auction or Non-Auction Sample
 LEFT JOIN tblLGLoadDetail LD ON LD.intBatchId = B.intBatchId
+LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = B.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = B.intBrokerId
@@ -109,7 +110,7 @@ OUTER APPLY (
 OUTER Apply (Select Top 1 V1.intEntityId,V1.strEntityName,V1.intDefaultLocationId,V1.strDefaultLocation  from vyuQMGetSupplier V1 Where V1.intEntityId = CH.intEntityId) V
 OUTER Apply (Select Top 1 SV1.intEntityId,SV1.strEntityName,SV1.intDefaultLocationId,SV1.strDefaultLocation  from vyuQMGetSupplier SV1 Where SV1.intEntityId = S.intEntityId) SV
 
-WHERE LD.intLoadDetailId IS NULL
+WHERE LD.intLoadDetailId IS NULL OR L.ysnCancelled = 1
 
 GO
 
