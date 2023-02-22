@@ -15,7 +15,7 @@ AS
 
 	if (isnull(ltrim(rtrim(@FileLocation)),'') = '')
 	begin
-		select @FileLocation = 'C:\Import\Contract\Contracts.csv';
+		select @FileLocation = 'C:\Import\Contract\Contracts.txt';
 	end
 
 	exec('
@@ -24,7 +24,7 @@ AS
 		WITH
 		(
 			FIRSTROW = 2,
-			FIELDTERMINATOR = '','',
+			FIELDTERMINATOR = ''\t'',
 			ROWTERMINATOR = ''\n'',
 			CODEPAGE = ''ACP'',
 			TABLOCK
