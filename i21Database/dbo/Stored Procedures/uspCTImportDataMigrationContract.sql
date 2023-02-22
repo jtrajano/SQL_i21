@@ -32,10 +32,8 @@ AS
 	');
 
 
-
 	insert into tblCTContractImport (
 		strContractType
-		,strEntityName
 		,strEntityNo
 		,strCommodity
 		,strContractNumber
@@ -49,7 +47,7 @@ AS
 		,dtmStartDate
 		,dtmEndDate
 		,dtmM2MDate
-		,strItem
+		,intItemId
 		,dblQuantity
 		,strQuantityUOM
 		,strPricingType
@@ -63,7 +61,6 @@ AS
 		,strPriceUOM
 		,strRemark
 		,strShipperId
-		,strShipper
 		,strBook
 		,strVendorRef
 		,strFreightTerm
@@ -100,7 +97,6 @@ AS
 	)
 	select
 		strContractType = substring(ltrim(rtrim(src.strContractType)),1,50)
-		,strEntityName = substring(ltrim(rtrim(src.strEntityName)),1,100)
 		,strEntityNo = substring(ltrim(rtrim(src.strEntityNo)),1,100)
 		,strCommodity = substring(ltrim(rtrim(src.strCommodity)),1,100)
 		,strContractNumber = substring(ltrim(rtrim(src.strContractNumber)),1,50)
@@ -114,7 +110,7 @@ AS
 		,dtmStartDate = src.dtmStartDate
 		,dtmEndDate = src.dtmEndDate
 		,dtmM2MDate = src.dtmM2MDate
-		,strItem = substring(ltrim(rtrim(src.strItem)),1,256)
+		,intItemId = src.intItemId
 		,dblQuantity = src.dblQuantity
 		,strQuantityUOM = substring(ltrim(rtrim(src.strQuantityUOM)),1,100)
 		,strPricingType = substring(ltrim(rtrim(src.strPricingType)),1,50)
@@ -128,7 +124,6 @@ AS
 		,strPriceUOM = substring(ltrim(rtrim(src.strPriceUOM)),1,50)
 		,strRemark = ltrim(rtrim(src.strRemark))
 		,strShipperId = substring(ltrim(rtrim(src.strShipperId)),1,100)
-		,strShipper = substring(ltrim(rtrim(src.strShipper)),1,100)
 		,strBook = substring(ltrim(rtrim(src.strBook)),1,100)
 		,strVendorRef = substring(ltrim(rtrim(src.strVendorRef)),1,30)
 		,strFreightTerm = substring(ltrim(rtrim(src.strFreightTerm)),1,100)
@@ -418,7 +413,7 @@ AS
 			,cp.intCurrencyExchangeRateId
 
 	FROM	tblCTContractImport			CI	LEFT
-	JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
+	JOIN	tblICItem					IM	ON	IM.intItemId		=	CI.intItemId			LEFT
 	JOIN	tblICUnitMeasure			IU	ON	IU.strUnitMeasure	=	CI.strQuantityUOM		LEFT
 	JOIN	tblICItemUOM				QU	ON	QU.intItemId		=	IM.intItemId		
 											AND	QU.intUnitMeasureId	=	IU.intUnitMeasureId		LEFT
@@ -434,12 +429,11 @@ AS
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
 											AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 											AND	((YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear or YEAR(MO.dtmFutureMonthsDate) = CI.intYear)		LEFT
-	JOIN	vyuCTEntity					EY	ON	EY.strEntityName				=	CI.strEntityName	
-											AND ISNULL(EY.strEntityNumber,'')	= ISNULL(CI.strEntityNo,'')	
+	JOIN	vyuCTEntity					EY	ON	ISNULL(EY.strEntityNumber,'')	= ISNULL(CI.strEntityNo,'')	
 											AND	EY.strEntityType	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 'Vendor' ELSE 'Customer' END LEFT
 	JOIN	vyuCTEntity					SY	ON	SY.strEntityName	=	CI.strSalesperson
 											AND	SY.strEntityType	=	'Salesperson'	
-	left join tblEMEntity s on s.strEntityNo = CI.strShipperId and s.strName = CI.strShipper
+	left join tblEMEntity s on s.strEntityNo = CI.strShipperId
 	left join tblCTBook b on b.strBook = CI.strBook
 	left join tblSMFreightTerms ft on ft.strFreightTerm = CI.strFreightTerm
 	left join tblSMCity lp on lp.strCity = CI.strLoadingPort
@@ -480,7 +474,9 @@ AS
 			select
 				@validationErrorMsg = 
 				case
-				when (isnull(c.strShipperId,'') <> '' or isnull(c.strShipper,'') <> '') and t.intShipperId is null then 'Shipper ID: "' + c.strShipperId + '" with Shipper Name: "' + c.strShipper + '" does not exists.'
+				when isnull(c.strEntityNo,'') <> '' and t.intEntityId is null then 'Entity No: "' + c.strEntityNo + '" does not exists.'
+				when t.intItemId is null then 'Item ID: "' + convert(nvarchar(20),c.intItemId) + '" does not exists.'
+				when isnull(c.strShipperId,'') <> '' and t.intShipperId is null then 'Shipper ID: "' + c.strShipperId + '" does not exists.'
 				when isnull(c.strBook,'') <> '' and t.intBookId is null then 'Book: "' + c.strBook + '" does not exists.'
 				when isnull(c.strFreightTerm,'') <> '' and t.intFreightTermId is null then 'Freight Term: "' + c.strFreightTerm + '" does not exists.'
 				when isnull(c.strLoadingPort,'') <> '' and t.intLoadingPortId is null then 'Loading Port: "' + c.strLoadingPort + '" does not exists.'
