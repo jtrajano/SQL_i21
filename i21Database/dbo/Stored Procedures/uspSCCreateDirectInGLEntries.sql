@@ -1963,6 +1963,7 @@ BEGIN
                     ,@strBatchId = @strBatchId
                     ,@strCode = 'SCTKT'
                     ,@ysnUseIntegerTransactionId = 1
+                    ,@SkipICValidation = 1
 
                 EXEC [dbo].[uspICUnpostCosting]
                     @intTransactionId = @intTicketId 
