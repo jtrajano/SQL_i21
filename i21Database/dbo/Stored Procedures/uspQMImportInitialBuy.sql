@@ -211,13 +211,6 @@ BEGIN TRY
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
-				END + CASE 
-				WHEN (
-						STRATEGY.intSubBookId IS NULL
-						AND ISNULL(IMP.strStrategy, '') <> ''
-						)
-					THEN 'STRATEGY, '
-				ELSE ''
 				END
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
