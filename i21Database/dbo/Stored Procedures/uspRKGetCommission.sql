@@ -19,6 +19,7 @@ BEGIN
 		WHERE bc.intFutureMarketId = @intFutureMarketId
 			AND bc.intBrokerageAccountId = @intBrokerageAccountId
 			AND @dtmTransactionDate BETWEEN bc.dtmEffectiveDate AND isnull(bc.dtmEndDate,getdate())
+		ORDER BY bc.dtmEffectiveDate DESC
 	END
 	ELSE
 	BEGIN
@@ -32,6 +33,7 @@ BEGIN
 		WHERE bc.intFutureMarketId = @intFutureMarketId
 			AND bc.intBrokerageAccountId = @intBrokerageAccountId
 			AND @dtmTransactionDate BETWEEN bc.dtmEffectiveDate AND isnull(bc.dtmEndDate,getdate())
+		ORDER BY bc.dtmEffectiveDate DESC
 	END
 	
 END
