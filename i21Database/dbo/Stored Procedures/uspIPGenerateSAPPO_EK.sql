@@ -498,7 +498,10 @@ BEGIN TRY
 				GOTO NextRec
 			END
 
-			IF ISNULL(@strMarketZoneCode, '') = 'AUC'
+			IF ISNULL(@strMarketZoneCode, '') IN (
+					'AUC'
+					,'SPT'
+					)
 			BEGIN
 				IF ISNULL(@intSampleId, 0) = 0
 				BEGIN
@@ -671,7 +674,10 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ERPContractNo>' + ISNULL(@strERPContractNumber, '') + '</ERPContractNo>'
 
-			IF ISNULL(@strMarketZoneCode, '') = 'AUC'
+			IF ISNULL(@strMarketZoneCode, '') IN (
+					'AUC'
+					,'SPT'
+					)
 				SELECT @strItemXML += '<ContractNo>' + '' + '</ContractNo>'
 			ELSE
 				SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'
@@ -908,6 +914,13 @@ BEGIN TRY
 					,strMessage = NULL
 					,strFeedStatus = 'Awt Ack'
 				WHERE intContractFeedId = @intContractFeedId
+
+				UPDATE tblLGLoad
+				SET dtmDispatchMailSent = GETDATE()
+					,ysnDispatchMailSent = 1
+					,intConcurrencyId = intConcurrencyId + 1
+				WHERE intLoadId = @intLoadId
+					AND dtmDispatchMailSent IS NULL
 			END
 
 			NextRec:
