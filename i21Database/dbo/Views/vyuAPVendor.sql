@@ -71,8 +71,7 @@ SELECT
 	ysnTransportTerminal,
 	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END as intTermsId,
 	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm,
-	B.strVATNo,
-	L.strChildVendorIds
+	B.strVATNo
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -102,6 +101,3 @@ FROM
 		ON B.intTermsId = J.intTermID
 	LEFT JOIN tblSMTerm K
 		ON C.intTermsId = K.intTermID
-	OUTER APPLY(
-		select STUFF( (SELECT DISTINCT  strVendorId + ', '   from vyuAPVendor where strVendorPayToId = ''  FOR XML PATH('')),1,1, '') strChildVendorIds
-	)L
