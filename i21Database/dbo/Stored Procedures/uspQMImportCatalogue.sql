@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspQMImportCatalogue @intImportLogId INT
+CREATE PROCEDURE [dbo].[uspQMImportCatalogue] @intImportLogId INT
 AS
 -- Check if API errors already exists in the log table
 IF EXISTS (
@@ -130,6 +130,26 @@ BEGIN TRY
 
 	-- End Validate Key Fields for Auction/Non-Auction Sample
 	-- Validate Key Fields for Auction/Non-Auction Sample
+
+	/** Title: Past Sale Date Validation 
+	 *  Description: Skip sale date earlier than todays date.
+	 *  JIRA: QC-990 
+	 */
+	UPDATE IMP
+	SET strLogResult = 'Sale Date cannot be earlier than date Today.'   
+	  , ysnSuccess = 0
+	  , ysnProcessed = 1
+	FROM tblQMImportCatalogue IMP
+	LEFT JOIN tblQMSampleType ST ON ST.strSampleTypeName = IMP.strSampleTypeName
+	LEFT JOIN tblQMControlPoint AS ControlPoint ON ST.intControlPointId = ControlPoint.intControlPointId
+	WHERE IMP.intImportLogId = @intImportLogId
+		/* Having no batch number indicates that the import is an Auction or Non-Action sample. */
+	    AND ISNULL(IMP.strBatchNo, '') = '' 
+		AND ysnSuccess = 1
+		AND CONVERT(DATE, IMP.dtmSaleDate) < CONVERT(DATE, GETDATE());
+	/* End of Past Sale Date Validation */
+
+
 	UPDATE IMP
 	SET strLogResult = 'Incorrect Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage), charindex(',', reverse(MSG.strLogMessage)) + 1, len(MSG.strLogMessage)))
 		,ysnSuccess = 0
