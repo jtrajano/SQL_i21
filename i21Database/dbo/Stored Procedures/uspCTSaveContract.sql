@@ -398,8 +398,10 @@ BEGIN TRY
 					, @intSequenceCurrencyId = cd.intCurrencyId
 					, @dblTotalBudget = dblTotalBudget
 					, @dblTotalCost = dblTotalCost
+					, @intDetailPricingTypeId = cd.intPricingTypeId
 				FROM tblCTContractDetail cd
 				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				where cd.intContractDetailId = @intContractDetailId
 
 				SELECT @intDefaultFreightId = intDefaultFreightItemId
 					, @intDefaultInsuranceId = intDefaultInsuranceItemId
