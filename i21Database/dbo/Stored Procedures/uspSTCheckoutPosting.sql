@@ -3677,7 +3677,7 @@ BEGIN
 						BEGIN
 							IF @strConsInvoiceType = 'CSFuelInvoice'
 							BEGIN
-								INSERT INTO @EntriesForCSCreditMemo(
+								INSERT INTO @EntriesForInvoice(
 												 [strSourceTransaction]
 												,[strTransactionType]
 												,[strType]
@@ -3769,7 +3769,7 @@ BEGIN
 											)
 											SELECT 
 												 [strSourceTransaction]		= 'Invoice'
-												,[strTransactionType]		= 'Credit Memo'
+												,[strTransactionType]		= 'Invoice'
 												,[strType]					= @strInvoiceTypeMain
 												,[intSourceId]				= @intCheckoutId
 												,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
@@ -3818,21 +3818,15 @@ BEGIN
 												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
 												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
-
 												--,[dblQtyShipped]			= CASE
-												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-												--										THEN 1
-												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--									-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+												--									WHEN @strInvoiceTransactionTypeMain = @strCASH
 												--										THEN -1
-												--							END
-												,[dblQtyShipped]			= 1
+												--									WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+												--										THEN 1
+												--								END
+												,[dblQtyShipped]			= -1
 												,[dblDiscount]				= 0
-
-												--,[dblPrice]					= CASE
-												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-												--										THEN ISNULL(CH.dblCashOverShort, 0)
-												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
-												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
 												,[dblPrice]					= ISNULL(DC.dblCommissionAmount, 0)
 												,[ysnRefreshPrice]			= 0
 												,[strMaintenanceType]		= NULL
