@@ -36,10 +36,6 @@ BEGIN TRY
 		, @ysnFreight BIT
 		, @ysnInsurance BIT
 		, @intOriginCountryId INT
-		, @ysnFreightRateMatrix bit = 0
-		, @ysnWithInsurance BIT = 0
-		--, @intProductTypeId INT
-		--, @intProductLineId INT
 
 	DECLARE @CostItems AS TABLE (intCostItemId INT
 		, strCostItem NVARCHAR(100)
@@ -65,11 +61,6 @@ BEGIN TRY
 
 	SELECT @intOriginCountryId = intCountryId FROM tblSMCity
 	WHERE intCityId = @intFromPortId
-
-	--SELECT TOP 1 @intProductTypeId = intProductTypeId
-	--	, @intProductLineId = intProductLineId
-	--FROM tblICItem
-	--WHERE intItemId = @intItemId
 	
 	IF (@ysnFreightTermCost = 0)
 	BEGIN
@@ -84,8 +75,6 @@ BEGIN TRY
 		AND intDestinationTermId = @intToTermId
 		AND intMarketZoneId = @intMarketZoneId
 		AND intCommodityId = @intCommodityId
-		--AND ISNULL(intProductTypeId, ISNULL(@intProductTypeId, 0)) = ISNULL(@intProductTypeId, 0)
-		--AND ISNULL(intProductLineId, ISNULL(@intProductLineId, 0)) = ISNULL(@intProductLineId, 0)
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCosts)
 	BEGIN
@@ -101,8 +90,6 @@ BEGIN TRY
 			, @ysnFreight = ysnFreight
 			, @ysnInsurance = ysnInsurance
 		FROM #tmpCosts
-
-		if (@ysnInsurance = 1)begin select @ysnWithInsurance = 1; end
 
 		IF (@intCostItemId = @intFreightItemId) OR (@ysnFreight = 1)
 		BEGIN			
@@ -136,8 +123,6 @@ BEGIN TRY
 															AND DP.intCityId = @intToPortId)
 			END
 
-			if (ISNULL(@intFreightRateMatrixId, 0) > 0)begin select @ysnFreightRateMatrix = 1; end
-
 			IF ISNULL(@intFreightRateMatrixId, 0) <> 0 AND ISNULL(@intCostItemId, 0) <> 0
 			BEGIN
 				INSERT INTO @CostItems
@@ -164,22 +149,6 @@ BEGIN TRY
 				WHERE ctq.intCommodityId = @intCommodityId
 					AND cat.intCountryID = @intOriginCountryId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
-			END
-			ELSE
-			BEGIN
-				INSERT INTO @CostItems
-				SELECT @intCostItemId
-					, @strCostItem
-					, NULL
-					, NULL
-					, @intSequenceCurrencyId
-					, @strSequenceCurrency
-					, NULL
-					, NULL
-					, 'Per Unit'
-					, dblRate = 0
-					, dblAmount = 0
-					, dblFX = NULL
 			END
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
@@ -236,11 +205,6 @@ BEGIN TRY
 	END
 
 	DROP TABLE #tmpCosts
-
-	IF ISNULL(@ysnFreightRateMatrix, 0) = 0 AND ISNULL(@ysnWithInsurance, 0) = 0
-	BEGIN
-		delete @CostItems;
-	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM @CostItems WHERE ISNULL(dblRate, 0) <> 0)
 	BEGIN
