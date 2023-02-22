@@ -75,6 +75,7 @@ SELECT intDispatchId = TMOrder.intDispatchId
 	, Customer.intShipToId	
 	, Site.intLocationId
 	, intShiftId = @intShiftId
+	, Dispatch.ysnLockPrice
 INTO #Dispatch
 FROM tblTMOrder TMOrder
 INNER JOIN tblTMDispatch Dispatch ON TMOrder.intDispatchId = Dispatch.intDispatchID
@@ -112,7 +113,8 @@ INSERT INTO tblMBILOrder(intDispatchId
 	, intStopNumber
 	, intTaxStateId
 	, intShipToId
-	, intLocationId)
+	, intLocationId
+	, ysnLockPrice)
 SELECT DISTINCT intDispatchId
 	, strOrderNumber
 	, strOrderStatus
@@ -126,6 +128,7 @@ SELECT DISTINCT intDispatchId
 	, intTaxStateID
 	, intShipToId
 	, intLocationId
+	, ysnLockPrice
 FROM #Dispatch
 LEFT JOIN tblSMTerm ON tblSMTerm.intTermID = #Dispatch.intTermId
 WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Dispatched','Routed')
@@ -346,6 +349,12 @@ BEGIN
 
 	DELETE #tempOrderTaxCode
 	DELETE #tempDriverOrder WHERE intOrderItemId = @MBILOrderId
+
+	UPDATE t
+	set t.ysnReceived = 1
+	FROM tblTMDispatch t
+	INNER JOIN #Dispatch d on t.intDispatchID = d.intDispatchId
+	WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Dispatched','Routed')
 END
 
 COMMIT TRANSACTION
