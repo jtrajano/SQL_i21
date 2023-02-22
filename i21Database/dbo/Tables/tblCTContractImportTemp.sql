@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCTContractImportTemp]
 (
 	[strContractType] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
+	[strEntityName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
 	[strEntityNo] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
 	[strCommodity] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
 	[strContractNumber] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
@@ -13,7 +14,7 @@
 	[strLocationName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmStartDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
-	[intItemId] int null,
+	[strItem] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantity] [numeric](18, 6),
 	[strQuantityUOM] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
 	[strPricingType] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL,
@@ -28,6 +29,7 @@
 	[strRemark] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmM2MDate] [datetime] NULL,
 	[strShipperId] nvarchar(255)  COLLATE Latin1_General_CI_AS NULL,
+	[strShipper] nvarchar(255)  COLLATE Latin1_General_CI_AS NULL,
 	[strBook] nvarchar(255)  COLLATE Latin1_General_CI_AS NULL,
 	[strVendorRef] nvarchar(255)  COLLATE Latin1_General_CI_AS NULL,
 	[strFreightTerm] nvarchar(255)  COLLATE Latin1_General_CI_AS NULL,
