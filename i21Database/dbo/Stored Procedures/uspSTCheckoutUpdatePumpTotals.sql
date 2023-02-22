@@ -70,6 +70,15 @@ BEGIN
 			ON			Chk.intItemUOMId = UOM.intItemUOMId
 			JOIN		tblICItem I
 			ON			I.intItemId = UOM.intItemId
+
+			IF @ysnFromEdit = 0
+			BEGIN
+				UPDATE		tblSTCheckoutHeader
+				SET			dblEditableAggregateMeterReadingsForDollars = (	SELECT		ISNULL(SUM(dblDollarsSold),0)
+																			FROM		tblSTCheckoutFuelSalesByGradeAndPricePoint 
+																			WHERE		intCheckoutId = @intCheckoutId)
+				WHERE intCheckoutId = @intCheckoutId
+			END
 		END
 		ELSE
 		BEGIN
