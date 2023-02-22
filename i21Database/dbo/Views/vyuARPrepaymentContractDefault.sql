@@ -1,27 +1,80 @@
 ﻿CREATE VIEW [dbo].[vyuARPrepaymentContractDefault]
 AS
-SELECT CONTRACTS.*
-	 , intPrepayContractId		= CAST(ROW_NUMBER() OVER (ORDER BY CONTRACTS.strContractNumber) AS INT)
-	 , strCustomerName			= ARC.strName
-	 , intBillToId				= ARC.intBillToId
-	 , intShipToId				= ARC.intShipToId
-	 , intEntityContactId		= ARC.intEntityContactId
-	 , strShipToLocationName	= ARC.strShipToLocationName
-	 , strShipToAddress 		= ARC.strShipToAddress
-	 , strShipToCity			= ARC.strShipToCity
-	 , strShipToState			= ARC.strShipToState
-	 , strShipToZipCode			= ARC.strShipToZipCode
-	 , strShipToCountry			= ARC.strShipToCountry
-	 , strBillToLocationName	= ARC.strBillToLocationName
-	 , strBillToAddress			= ARC.strBillToAddress
-	 , strBillToCity			= ARC.strBillToCity
-	 , strBillToState			= ARC.strBillToState
-	 , strBillToZipCode			= ARC.strBillToZipCode
-	 , strBillToCountry			= ARC.strBillToCountry 
-	 , strTerm					= SMT.strTerm
-	 , strCompanyLocationName	= LOC.strLocationName
-	 , strSalespersonName		= SP.strName
-	 , strFreightTerm			= FT.strFreightTerm
+SELECT 
+	 intContractHeaderId	= CONTRACTS.intContractHeaderId
+	,intContractDetailId	= CONTRACTS.intContractDetailId
+	,intItemContractHeaderId= CONTRACTS.intItemContractHeaderId
+	,intItemContractDetailId= CONTRACTS.intItemContractDetailId
+	,intItemCategoryId		= CONTRACTS.intItemCategoryId
+	,strContractNumber		= CONTRACTS.strContractNumber
+	,intContractSeq			= CONTRACTS.intContractSeq
+	,strContractType		= CONTRACTS.strContractType
+	,strContractCategoryId	= CONTRACTS.strContractCategoryId
+	,dtmStartDate			= CONTRACTS.dtmStartDate
+	,dtmEndDate				= CONTRACTS.dtmEndDate
+	,dtmDueDate				= CONTRACTS.dtmDueDate
+	,strContractStatus		= CONTRACTS.strContractStatus
+	,intEntityCustomerId	= CONTRACTS.intEntityCustomerId
+	,intCurrencyId			= CONTRACTS.intCurrencyId
+	,strCurrency			= CONTRACTS.strCurrency
+	,intCompanyLocationId	= CONTRACTS.intCompanyLocationId
+	,intItemId				= CONTRACTS.intItemId
+	,strItemNo				= CONTRACTS.strItemNo
+	,strItemDescription		= CONTRACTS.strItemDescription
+	,intOrderUOMId			= CONTRACTS.intOrderUOMId
+	,strOrderUnitMeasure	= CONTRACTS.strOrderUnitMeasure
+	,intItemUOMId			= CONTRACTS.intItemUOMId
+	,strUnitMeasure			= CONTRACTS.strUnitMeasure
+	,intPricingTypeId		= CONTRACTS.intPricingTypeId
+	,strPricingType			= CONTRACTS.strPricingType
+	,dblOrderPrice			= CONTRACTS.dblOrderPrice
+	,dblCashPrice			= CONTRACTS.dblCashPrice
+	,intSubCurrencyId		= CONTRACTS.intSubCurrencyId
+	,dblSubCurrencyRate		= CONTRACTS.dblSubCurrencyRate
+	,strSubCurrency			= CONTRACTS.strSubCurrency
+	,intPriceItemUOMId		= CONTRACTS.intPriceItemUOMId
+	,strPriceUnitMeasure	= CONTRACTS.strPriceUnitMeasure
+	,dblBalance				= CONTRACTS.dblBalance
+	,dblScheduleQty			= CONTRACTS.dblScheduleQty
+	,dblAvailableQty		= CONTRACTS.dblAvailableQty
+	,dblDetailQuantity		= CONTRACTS.dblDetailQuantity
+	,dblOrderQuantity		= CONTRACTS.dblOrderQuantity
+	,dblShipQuantity		= CONTRACTS.dblShipQuantity - ISNULL(PREPAYMENT.dblQtyShipped, 0)
+	,ysnUnlimitedQuantity	= CONTRACTS.ysnUnlimitedQuantity
+	,ysnLoad				= CONTRACTS.ysnLoad
+	,ysnAllowedToShow		= CONTRACTS.ysnAllowedToShow
+	,intTermId				= CONTRACTS.intTermId
+	,intShipViaId			= CONTRACTS.intShipViaId
+	,intDestinationGradeId	= CONTRACTS.intDestinationGradeId
+	,strDestinationGrade	= CONTRACTS.strDestinationGrade
+	,intDestinationWeightId	= CONTRACTS.intDestinationWeightId
+	,strDestinationWeight	= CONTRACTS.strDestinationWeight
+	,intCategoryId			= CONTRACTS.intCategoryId
+	,strCategoryCode		= CONTRACTS.strCategoryCode
+	,strCategoryDescription	= CONTRACTS.strCategoryDescription
+	,intEntitySalespersonId	= CONTRACTS.intEntitySalespersonId
+	,intFreightTermId		= CONTRACTS.intFreightTermId
+	,intPrepayContractId	= CAST(ROW_NUMBER() OVER (ORDER BY CONTRACTS.strContractNumber) AS INT)
+	,strCustomerName		= ARC.strName
+	,intBillToId			= ARC.intBillToId
+	,intShipToId			= ARC.intShipToId
+	,intEntityContactId		= ARC.intEntityContactId
+	,strShipToLocationName	= ARC.strShipToLocationName
+	,strShipToAddress 		= ARC.strShipToAddress
+	,strShipToCity			= ARC.strShipToCity
+	,strShipToState			= ARC.strShipToState
+	,strShipToZipCode		= ARC.strShipToZipCode
+	,strShipToCountry		= ARC.strShipToCountry
+	,strBillToLocationName	= ARC.strBillToLocationName
+	,strBillToAddress		= ARC.strBillToAddress
+	,strBillToCity			= ARC.strBillToCity
+	,strBillToState			= ARC.strBillToState
+	,strBillToZipCode		= ARC.strBillToZipCode
+	,strBillToCountry		= ARC.strBillToCountry 
+	,strTerm				= SMT.strTerm
+	,strCompanyLocationName	= LOC.strLocationName
+	,strSalespersonName		= SP.strName
+	,strFreightTerm			= FT.strFreightTerm
 FROM (
 	SELECT intContractHeaderId		= CC.intContractHeaderId
 		 , intContractDetailId		= CC.intContractDetailId
@@ -213,3 +266,15 @@ LEFT OUTER JOIN tblSMTerm SMT ON CONTRACTS.intTermId = SMT.intTermID
 LEFT OUTER JOIN tblSMCompanyLocation LOC ON CONTRACTS.intCompanyLocationId = LOC.intCompanyLocationId
 LEFT OUTER JOIN tblSMFreightTerms FT ON CONTRACTS.intFreightTermId = FT.intFreightTermId
 LEFT OUTER JOIN tblEMEntity SP ON CONTRACTS.intEntitySalespersonId = SP.intEntityId
+OUTER APPLY (
+	SELECT
+		dblQtyShipped = SUM(dblQtyShipped)
+	FROM tblARInvoiceDetail ARID
+	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+	WHERE (
+		(ISNULL(intContractDetailId, 0) <> 0 AND ISNULL(intContractDetailId, 0) = ISNULL(CONTRACTS.intContractDetailId, 0))
+		OR 
+		(ISNULL(intItemContractDetailId, 0) <> 0 AND ISNULL(intItemContractDetailId, 0) = ISNULL(CONTRACTS.intItemContractDetailId, 0))
+	)
+	AND strTransactionType = 'Customer Prepayment'
+) PREPAYMENT
