@@ -11,6 +11,7 @@ AS
 BEGIN
 	DECLARE @GLEntries RecapTableType
 	DECLARE @intTransactionId INT
+	DECLARE @PostResult INT
 
 	SET @strCode = ISNULL(@strCode,'')
 	IF(@ysnUseIntegerTransactionId = 0)
@@ -83,7 +84,8 @@ BEGIN
 			WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
 			ORDER BY intGLDetailId
 
-			EXEC uspGLBookEntries @GLEntries, 0
+			
+			EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = 0, @SkipICValidation = 1
 
 			UPDATE	tblGLDetail
 			SET		ysnIsUnposted = 1
@@ -159,7 +161,7 @@ BEGIN
 				AND strCode = @strCode
 			ORDER BY intGLDetailId
 
-			EXEC uspGLBookEntries @GLEntries, 0
+			EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = 0, @SkipICValidation = 1
 
 			UPDATE	tblGLDetail
 			SET		ysnIsUnposted = 1
@@ -241,7 +243,7 @@ BEGIN
 				AND ysnIsUnposted = 0
 			ORDER BY intGLDetailId
 
-			EXEC uspGLBookEntries @GLEntries, 0
+			EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = 0, @SkipICValidation = 1
 
 			UPDATE	tblGLDetail
 			SET		ysnIsUnposted = 1
@@ -318,7 +320,7 @@ BEGIN
 				AND strCode = @strCode
 			ORDER BY intGLDetailId
 
-			EXEC uspGLBookEntries @GLEntries, 0
+			EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = 0, @SkipICValidation = 1
 
 			UPDATE	tblGLDetail
 			SET		ysnIsUnposted = 1
