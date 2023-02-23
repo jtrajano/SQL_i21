@@ -1303,6 +1303,7 @@
     <Build Include="dbo\Stored Procedures\uspSTMechandiseSaleSummaryNonTaxable.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutTierProducts.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSProcessPaymentsForPosting.sql" />
+    <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
