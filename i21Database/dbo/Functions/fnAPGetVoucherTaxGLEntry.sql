@@ -71,7 +71,7 @@ RETURNS TABLE AS RETURN
 		WHERE shipmentChargeTax.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 	) shipmentChargeTax
 	WHERE A.intBillId = @billId
-	AND A.intTransactionType IN (1,3,15)
+	AND A.intTransactionType IN (1,3,15,11)
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
