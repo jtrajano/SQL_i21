@@ -11735,6 +11735,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleAmendment.sql" />
     <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
     <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
