@@ -338,7 +338,9 @@ AS
 				intHistoricalRateTypeId int,
 				intBasisUOMId int,
 				dblNoOfLots numeric(18,6),
-				intCurrencyExchangeRateId int
+				intCurrencyExchangeRateId int,
+				intMarketUOMId int,
+				intItemItemUOMId int
 			); 
 
 			IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -395,6 +397,8 @@ AS
 				,intBasisUOMId
 				,dblNoOfLots
 				,intCurrencyExchangeRateId
+				,intMarketUOMId
+				,intItemItemUOMId
 			)
 			SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 					intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -454,6 +458,8 @@ AS
 					,intBasisUOMId = QU.intItemUOMId
 					,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,MA.intUnitMeasureId, MA.dblContractSize)
 					,cp.intCurrencyExchangeRateId
+					,intMarketUOMId = MA.intUnitMeasureId
+					,intItemItemUOMId = MAUOM.intUnitMeasureId
 
 			FROM	tblCTContractImport			CI	LEFT
 			JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -468,7 +474,9 @@ AS
 			JOIN	tblCTCropYear				CP	ON	CP.strCropYear		=	CI.strCropYear			
 													AND	CP.intCommodityId	=	CM.intCommodityId		LEFT
 			JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT
-			JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(RTRIM(LOWER(CI.strFutMarketName)))		LEFT
+			JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(RTRIM(LOWER(CI.strFutMarketName)))
+			left join tblICItemUOM MAUOM on MAUOM.intItemId = IM.intItemId and MAUOM.intUnitMeasureId = MA.intUnitMeasureId
+			LEFT
 			JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
 													AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 													AND	((YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear or YEAR(MO.dtmFutureMonthsDate) = CI.intYear)		LEFT
@@ -539,6 +547,7 @@ AS
 					when isnull(c.strRevolutionCurrencyPair,'') <> '' and t.intRevaluationCurrencyExchangeRateId is null then 'Revaluation Currency Pair does not exists.'
 					when isnull(c.strHistoricType,'') <> '' and t.intHistoricalRateTypeId is null then 'Historic Type: "' + c.strHistoricType + '" does not exists.'
 					when isnull(c.strLocationName,'') <> '' and t.intCompanyLocationId is null then ' Location: "' + c.strLocationName + '" does not exists.'
+					when t.intItemItemUOMId is null then ' Lot Calculation: Future Market UOM is missing in Item UOM.'
 					when t.intPricingTypeId = 1 and t.dblFutures is null then 'Missing Futures Price.'
 					else @validationErrorMsg
 					end
