@@ -516,14 +516,20 @@ BEGIN
 								(CASE WHEN OY.ysnSubCurrency = 1 
 									THEN OY.intMainCurrencyId 
 									ELSE @intCurrencyId END
-								) <> CC.intCurrencyId 
+								) <> 
+								(CASE WHEN CY.ysnSubCurrency = 1
+									THEN CY.intMainCurrencyId
+									ELSE CC.intCurrencyId 
+									END)
 							THEN ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId, 1), 1) ELSE 1 END
 				, dblBooked = NULL
 				, dblBookedPrice = NULL
 				, dblAccounting = (BL.dblAccounting / (CD.dblQuantity / AD.dblPAllocatedQty)) * -1
 				, CH.dtmContractDate
 				, strType = CC.strCostMethod
-				, dblTranValue = CASE WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate / CD.dblQuantity * AD.dblPAllocatedQty WHEN CC.strCostMethod = 'Per Unit' THEN CC.dblRate * AD.dblPAllocatedQty ELSE dblTranValue END * -1
+				, dblTranValue = CASE WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate / CD.dblQuantity * AD.dblPAllocatedQty 
+									WHEN CC.strCostMethod = 'Per Unit' THEN (CC.dblRate * ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId, @intUnitMeasureId, CU.intUnitMeasureId, 1), 1)) * AD.dblPAllocatedQty ELSE dblTranValue 
+									END * -1
 				, intSort = 99999999 + AD.intPContractDetailId
 				, ysnPosted = CAST(0 AS BIT)
 			FROM @tblLGAllocationDetail AD
