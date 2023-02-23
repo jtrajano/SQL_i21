@@ -833,7 +833,7 @@ BEGIN TRY
 						if @dblTicketScheduledQty <> 0
 						begin
 							SELECT @_dblTicketScheduledQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketScheduledQty) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
-							SELECT @_dblTicketScheduledQty =  ROUND(ISNULL(@_dblTicketScheduledQty, 0), 4)
+							--SELECT @_dblTicketScheduledQty =  ROUND(ISNULL(@_dblTicketScheduledQty, 0), 4)
 
 							set @_dblTicketScheduledQty = -1 * @_dblTicketScheduledQty
 
