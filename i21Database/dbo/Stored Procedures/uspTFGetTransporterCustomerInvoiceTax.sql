@@ -127,7 +127,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), ISNULL(tblARInvoice.strBOLNumber ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -360,7 +360,7 @@ BEGIN TRY
 						, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty
 						, tblARInvoice.strInvoiceNumber
 						, tblARInvoice.strPONumber
-						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber ) ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+						, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), ISNULL(tblARInvoice.strBOLNumber ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(LDD.strBillOfLading,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
 						, tblARInvoice.dtmDate
 						, tblARInvoice.strShipToCity AS strDestinationCity
 						, DestinationCounty.strCounty AS strDestinationCounty
@@ -692,8 +692,9 @@ BEGIN TRY
 													INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 													INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = I.intLoadDistributionHeaderId
 													INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
-
-													INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = ID.intItemId
+													INNER JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
+													INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblTRLoadDistributionDetail.intItemId AND tblTRLoadDistributionDetail.strReceiptLink = tblTRLoadReceipt.strReceiptLine
+													--INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = ID.intItemId
 													INNER JOIN tblICInventoryReceipt ON tblTRLoadReceipt.intInventoryReceiptId =  tblICInventoryReceipt.intInventoryReceiptId
 													INNER JOIN tblICInventoryReceiptItem ON tblICInventoryReceipt.intInventoryReceiptId =  tblICInventoryReceiptItem.intInventoryReceiptId
 													INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
