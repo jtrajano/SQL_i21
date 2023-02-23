@@ -369,7 +369,7 @@ BEGIN
 																END,
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= dbo.fnICValidateUPCCode(PCF.strUPCwthOrwthOutCheckDigit), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCode]						= dbo.fnICValidateUPCCode(PCF.strLongUPCCode), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= '0',
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -477,7 +477,7 @@ BEGIN
 
 
 ----TEST 
---SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT								
+SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT								
 								
 
 								IF EXISTS(SELECT TOP 1 1 FROM @tblTempPassportITT)
@@ -1250,7 +1250,7 @@ BEGIN
 					[intCommanderOutboundPLUsId]	=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 					, [intItemLocationId]			=	ItemLoc.intItemLocationId
 					, [strSource]					=	'keyboard'
-					, [strUpc]						=	dbo.fnICValidateUPCCode(PCF.strUPCwthOrwthOutCheckDigit) -- IF COMMANDER/SAPPHIRE include check digit
+					, [strUpc]						=	PCF.strLongUPCCode -- IF COMMANDER/SAPPHIRE include check digit
 					, [strUpcModifier]				=	CAST(ISNULL(UOM.intModifier, '000') AS VARCHAR(100))
 					, [strDescription]				=	LEFT(REPLACE(REPLACE(REPLACE(REPLACE(ISNULL(NULLIF(UOM.strUPCDescription, ''), Item.strDescription), '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
 					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
@@ -1393,7 +1393,7 @@ BEGIN
 					AND UOM.strLongUPCCode IS NOT NULL
 					AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
 					AND ISNULL(SUBSTRING(PCF.strUPCwthOrwthOutCheckDigit, PATINDEX('%[^0]%', PCF.strUPCwthOrwthOutCheckDigit), LEN(PCF.strUPCwthOrwthOutCheckDigit)), 0) NOT IN ('')
-				ORDER BY dbo.fnICValidateUPCCode(PCF.strUPCwthOrwthOutCheckDigit) ASC
+				ORDER BY PCF.strLongUPCCode ASC
 
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderUPLUs)

@@ -1305,7 +1305,7 @@ THEN
 		, Source_Query.intUnitMeasureId										-- intUnitMeasureId
 		, 1																	-- dblUnitQty
 		, dbo.fnSTConvertUPCaToUPCe(RIGHT(Source_Query.strSellingUpcNumber, 11))
-		, Source_Query.strSellingUpcNumber + CAST(dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber) AS VARCHAR(2))		-- strLongUPCCode
+		, RIGHT('00000' + Source_Query.strSellingUpcNumber + CAST(dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber) AS VARCHAR(2)), 12) 		-- strLongUPCCode
 		--, dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)		-- intCheckDigit
 		, CAST(Source_Query.strUpcModifierNumber AS INT)					-- intModifier
 		, Source_Query.ysnStockUnit											-- ysnStockUnit
@@ -1402,7 +1402,7 @@ SELECT
 	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 	,strUpcCode = v.strUpcCode
-	,strLongUPCCode = p.strOrderCaseUpcNumber + CAST(dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber) AS VARCHAR(2))
+	,strLongUPCCode =  RIGHT('00000' + p.strOrderCaseUpcNumber + CAST(dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber) AS VARCHAR(2)), 12) 
 	--,intCheckDigit = dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber)
 	,ysnStockUnit = 0
 	,ysnAllowPurchase = 1
@@ -1571,7 +1571,7 @@ SELECT intItemId = i.intItemId
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity1 AS NUMERIC(38, 20)) 
 	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber1, 11))
-	 , strLongUPCCode = p.strAltUPCNumber1 + CAST(dbo.fnICValidateCheckDigit(p.strAltUPCNumber1) AS VARCHAR(2))
+	 , strLongUPCCode = RIGHT('00000' + p.strAltUPCNumber1 + CAST(dbo.fnICValidateCheckDigit(p.strAltUPCNumber1) AS VARCHAR(2)), 12)
 	 --, intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber1)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale1, '') IS NULL THEN NULL 
@@ -1700,7 +1700,7 @@ SELECT intItemId = i.intItemId
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity2 AS NUMERIC(38, 20)) 
 	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber2, 11))
-	 , strLongUPCCode = p.strAltUPCNumber2 + CAST(dbo.fnICValidateCheckDigit(p.strAltUPCNumber2) AS VARCHAR(2))
+	 , strLongUPCCode = RIGHT('00000' + p.strAltUPCNumber2 + CAST(dbo.fnICValidateCheckDigit(p.strAltUPCNumber2) AS VARCHAR(2)), 12)
 	 --, intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber2)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale2, '') IS NULL THEN NULL 
