@@ -151,6 +151,7 @@ BEGIN TRY
 				WHERE ctq.intCommodityId = @intCommodityId
 					AND cat.intCountryID = @intOriginCountryId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
+					AND frm.intContainerTypeId = @intContainerTypeId
 			END
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
