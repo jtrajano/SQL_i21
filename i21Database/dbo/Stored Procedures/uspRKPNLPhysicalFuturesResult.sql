@@ -289,7 +289,7 @@ BEGIN
 				, dblTranValue = 0.00
 				, IV.ysnPosted
 			FROM tblARInvoiceDetail ID
-			JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId
+			JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId 
 			JOIN tblCTContractDetail CD	ON CD.intContractDetailId = ID.intContractDetailId 
 			JOIN tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId
 			JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
@@ -301,6 +301,7 @@ BEGIN
 			LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = CY.intMainCurrencyId
 			WHERE ID.intContractDetailId = @intSContractDetailId
 				AND NOT EXISTS(SELECT * FROM tblARInvoiceDetail WHERE strDocumentNumber = IV.strInvoiceNumber)
+				AND IV.strTransactionType <> 'Proforma Invoice'
 		) d
 		
 		UNION ALL SELECT DISTINCT strContractType = NULL
