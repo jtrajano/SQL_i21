@@ -63,6 +63,7 @@
 	CONSTRAINT [FK_tblCMBankTransactiontblGLAccount] FOREIGN KEY ([intShortGLAccountId]) REFERENCES [dbo].[tblGLAccount] (intAccountId),
 	CONSTRAINT [FK_tblCMBankTransaction_tblCMBankLoan] FOREIGN KEY ([intBankLoanId]) REFERENCES [dbo].[tblCMBankLoan] (intBankLoanId),
     CONSTRAINT [FK_tblCMBankTransactionPayment] FOREIGN KEY([intAPPaymentId]) REFERENCES [dbo].[tblAPPayment] ([intPaymentId]),
+    CONSTRAINT [FK_tblEMEntityEFTInformationtblCMBankTransaction] FOREIGN KEY ([intEFTInfoId]) REFERENCES [dbo].[tblEMEntityEFTInformation] ([intEntityEFTInfoId]),
     UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
 
