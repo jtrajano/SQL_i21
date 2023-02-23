@@ -1250,6 +1250,11 @@
     <Build Include="dbo\Tables\tblSTCheckoutFuelInventory.sql" />
     <Build Include="dbo\Views\vyuSTGetFuelInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
+    <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
+    <Build Include="dbo\Tables\tblTMDeviceTankMonitor.sql" />
+    <Build Include="dbo\Tables\tblTMSiteDeviceTankMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
+    <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
