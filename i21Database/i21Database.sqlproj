@@ -11736,6 +11736,9 @@
     <Build Include="dbo\Stored Procedures\uspQMUpdateReconciliationIntegration.sql" />
     <Build Include="dbo\Views\vyuQMTINLabelReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
+    <Build Include="dbo\Stored Procedures\fnGRDPRvsGrain.sql" />
+    <Build Include="dbo\Stored Procedures\fnGRInventoryStocksVSDPRStorage.sql" />
+    <Build Include="dbo\Stored Procedures\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
