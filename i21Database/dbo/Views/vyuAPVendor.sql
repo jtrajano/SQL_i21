@@ -102,5 +102,9 @@ FROM
 	LEFT JOIN tblSMTerm K
 		ON C.intTermsId = K.intTermID
 	OUTER APPLY(
-		select STUFF( (SELECT DISTINCT  strVendorId + ', '  from tblAPVendor where strVendorPayToId = B.strVendorId  FOR XML PATH('')),1,1, '') strChildVendorIds
+		SELECT STUFF( (SELECT DISTINCT ' {"name":"' + EM.strName + '", "vendorid":' + strVendorId + '}, '  from tblAPVendor AV join tblEMEntity EM
+		on AV.intEntityId = EM.intEntityId
+		where strVendorPayToId = B.strVendorId  
+		FOR XML PATH('')),1,1, '') strChildVendorIds
+	
 	)L
