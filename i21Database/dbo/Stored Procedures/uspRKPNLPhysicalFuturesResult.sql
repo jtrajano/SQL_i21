@@ -527,8 +527,12 @@ BEGIN
 				, dblAccounting = (BL.dblAccounting / (CD.dblQuantity / AD.dblPAllocatedQty)) * -1
 				, CH.dtmContractDate
 				, strType = CC.strCostMethod
-				, dblTranValue = CASE WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate / CD.dblQuantity * AD.dblPAllocatedQty 
-									WHEN CC.strCostMethod = 'Per Unit' THEN (CC.dblRate * ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId, @intUnitMeasureId, CU.intUnitMeasureId, 1), 1)) * AD.dblPAllocatedQty ELSE dblTranValue 
+				, dblTranValue = CASE WHEN CC.strCostMethod = 'Amount' 
+										THEN CC.dblRate / CD.dblQuantity * AD.dblPAllocatedQty 
+									WHEN CC.strCostMethod = 'Per Unit' 
+										THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId, @intUnitMeasureId, CU.intUnitMeasureId, 1) * CC.dblRate) 
+											* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty)
+									ELSE dblTranValue 
 									END * -1
 				, intSort = 99999999 + AD.intPContractDetailId
 				, ysnPosted = CAST(0 AS BIT)
