@@ -2,8 +2,8 @@
 AS 
 
 SELECT     
-      BDR.dblCostLeft - BDR.dblDepreciationYTDLeft AS dblNetBookValueGaap
-	, BDR.dblCostRight - BDR.dblDepreciationYTDRight AS dblNetBookValueTax
+      BDR.dblCostLeft - BDR.dblDepreciationLTDLeft AS dblNetBookValueGaap
+	, BDR.dblCostRight - BDR.dblDepreciationLTDRight AS dblNetBookValueTax
 	, BDR.*    
 	, strAssetId = FA.strAssetId       
     , strAssetDescription = FA.strAssetDescription    
