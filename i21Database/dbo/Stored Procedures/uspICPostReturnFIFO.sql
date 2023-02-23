@@ -12,7 +12,6 @@ CREATE PROCEDURE [dbo].[uspICPostReturnFIFO]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)
-	,@dblForexCost AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	--,@dblExchangeRate AS NUMERIC(38,20)
@@ -66,7 +65,6 @@ DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryFIFOOutId AS INT 
-DECLARE @ForexCostUsed AS NUMERIC(38,20);
 
 DECLARE @intReturnValue AS INT 
 		,@dtmCreated AS DATETIME
@@ -118,11 +116,6 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
-				,@intCurrencyId OUTPUT 
-				,@intForexRateTypeId OUTPUT
-				,@dblForexRate OUTPUT
-				,@dblForexCost 
-				,@ForexCostUsed OUTPUT 
 
 			IF @intReturnValue < 0 GOTO _Exit_With_Error
 
@@ -141,7 +134,6 @@ BEGIN
 						,@dblQty  = @QtyOffset --@dblQty
 						,@dblUOMQty = @dblUOMQty
 						,@dblCost = @CostUsed -- @dblCost
-						,@dblForexCost = @ForexCostUsed
 						,@dblValue = NULL
 						,@dblSalesPrice = @dblSalesPrice
 						,@intCurrencyId = @intCurrencyId
