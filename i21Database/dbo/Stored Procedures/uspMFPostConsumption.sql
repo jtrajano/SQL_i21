@@ -254,6 +254,7 @@ BEGIN
 					THEN NULL
 				END
 			)
+		 , LoadHeader.strTransaction
 	INTO #tmpBlendIngredients
 	FROM tblTRLoadDistributionDetail DistItem
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
@@ -286,6 +287,8 @@ BEGIN
 		,intSourceTransactionId
 		,strSourceTransactionId
 		,strActualCostId
+		,strSourceNumber
+		,strSourceType
 		)
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
@@ -306,11 +309,11 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-		,strActualCostId = (
-								SELECT TOP 1 BlendItems.strActualCostId
-								FROM #tmpBlendIngredients BlendItems
-								WHERE BlendItems.intItemId = cl.intItemId
-							)
+		,strActualCostId = (SELECT TOP 1 BlendItems.strActualCostId FROM #tmpBlendIngredients BlendItems WHERE BlendItems.intItemId = cl.intItemId )
+		,strTransaction = (SELECT TOP 1 BlendItems.strTransaction FROM #tmpBlendIngredients BlendItems WHERE BlendItems.intItemId = cl.intItemId)
+		,CASE WHEN (SELECT TOP 1 BlendItems.strTransaction FROM #tmpBlendIngredients BlendItems WHERE BlendItems.intItemId = cl.intItemId) IS NOT NULL THEN 'Transports'
+			  ELSE NULL
+		 END
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
