@@ -68,7 +68,7 @@ BEGIN TRY
 		SELECT TOP 1 E.intEntityId 
 		FROM tblEMEntity E 
 		INNER JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId AND ET.strType = 'Producer'
-		WHERe GM.strProducer = E.strEntityNo
+		WHERe GM.strProducer = E.strName
 	) E 
 	WHERE GM.strProducer IS NOT NULL
 
