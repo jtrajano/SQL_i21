@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[tblTMTankReading] (
     [intTankReadingId]          INT             IDENTITY (1, 1) NOT NULL,
 	[dtmDateTime]				DATETIME 		NULL,
 	[intReadingSource]			INT NULL,
+	[intDeviceTankMonitorId]	INT NOT NULL,
 	[intTankNumber]				INT				NULL,
 	[strTankStatus]				NVARCHAR (100)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 	[intFuelGrade]				INT				NULL,
@@ -21,7 +22,8 @@ CREATE TABLE [dbo].[tblTMTankReading] (
     [ysnManual]  bit NULL,
 	[intCheckoutId] int NULL
 	CONSTRAINT [PK_tblTMTankReading_intTankReadingId] PRIMARY KEY CLUSTERED ([intTankReadingId] ASC),
-	CONSTRAINT [FK_tblTMTankReading_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId])
+	CONSTRAINT [FK_tblTMTankReading_tblTMReadingSourceType] FOREIGN KEY ([intReadingSource]) REFERENCES [dbo].[tblTMReadingSourceType] ([intReadingSourceTypeId]),
+	CONSTRAINT [FK_tblTMTankReading_tblTMDeviceTankMonitor] FOREIGN KEY ([intDeviceTankMonitorId]) REFERENCES [dbo].[tblTMDeviceTankMonitor] ([intDeviceTankMonitorId])
 	)
 
 
