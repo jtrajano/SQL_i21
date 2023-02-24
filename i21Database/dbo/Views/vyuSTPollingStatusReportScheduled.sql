@@ -36,23 +36,33 @@ FORMAT((
 FROM tblSTCheckoutProcessErrorWarning cpewOutMsg
 WHERE cpewOutMsg.intCheckoutProcessErrorWarningId =
 (
-	SELECT MAX(intCheckoutProcessErrorWarningId) 
+	SELECT TOP 1 MAX(intCheckoutProcessErrorWarningId) 
 	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
 	JOIN tblSTCheckoutProcess cpInMsg
 		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId
 	WHERE cpInMsg.intStoreId = sts.intStoreId
+	--SELECT * FROM tblSTStore WHERE intStoreNo = 113
 	GROUP BY cpInMsg.intStoreId
 )))
 AS strMessage
 FROM dbo.tblSTStore AS sts 
-FULL OUTER JOIN dbo.tblSTCheckoutProcess AS stcp 
+JOIN dbo.tblSTCheckoutProcess AS stcp 
 	ON stcp.intStoreId = sts.intStoreId
-FULL OUTER  JOIN dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
+JOIN dbo.tblSTCheckoutProcessErrorWarning AS stcpew 
 	ON stcp.intCheckoutProcessId = stcpew.intCheckoutProcessId 
-FULL OUTER  JOIN dbo.tblSTCheckoutHeader CH
+JOIN dbo.tblSTCheckoutHeader CH
 	ON stcpew.intCheckoutId = CH.intCheckoutId
 WHERE 
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') = FORMAT(GETDATE(), 'd','us')
+AND stcpew.intCheckoutProcessErrorWarningId IN
+(
+	SELECT MAX(intCheckoutProcessErrorWarningId) 
+	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
+	JOIN tblSTCheckoutProcess cpInMsg
+		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId
+	WHERE cpInMsg.intStoreId IN (SELECT intStoreId FROM tblSTStore)
+	GROUP BY cpInMsg.intStoreId
+)
 --AND stcpew.strMessageType <> 'F'
 GROUP BY
 sts.intStoreId,
@@ -64,7 +74,7 @@ CH.dtmCheckoutDate,
 sts.intStoreNo, 
 sts.strDescription,
 stcpew.strMessage
---HAVING CH.dtmCheckoutDate IS NOT NULL
+HAVING CH.dtmCheckoutDate IS NOT NULL
 UNION
 SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, 
 FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
