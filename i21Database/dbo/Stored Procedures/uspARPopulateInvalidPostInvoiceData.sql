@@ -18,8 +18,9 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
-DECLARE @ItemsForContracts					[InvoicePostingTable]
-EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post, @strSessionId = @strSessionId
+DECLARE @ItemsForContracts InvoicePostingTable
+
+EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
 
 DECLARE @strDatabaseName NVARCHAR(50)
 DECLARE @strCompanyName NVARCHAR(50)
@@ -30,12 +31,12 @@ SELECT @strDatabaseName = strDatabaseName, @strCompanyName = strCompanyName FROM
 
 IF @Post = @OneBit
 BEGIN
-    DECLARE @InvoiceIds 						[InvoiceId]
-	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
-	DECLARE @ItemsForCosting 					[ItemCostingTableType]
-	DECLARE @ItemsForCostingZeroCostValidation 	[ItemCostingTableType]
-	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
-	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
+    DECLARE @InvoiceIds 						InvoiceId
+	DECLARE @PostInvoiceDataFromIntegration		InvoicePostingTable
+	DECLARE @ItemsForCosting 					ItemCostingTableType
+	DECLARE @ItemsForCostingZeroCostValidation 	ItemCostingTableType
+	DECLARE @ItemsForInTransitCosting 			ItemInTransitCostingTableType
+	DECLARE @ItemsForStoragePosting 			ItemCostingTableType
 	DECLARE  @DueToAccountId				INT
 			,@DueFromAccountId				INT
 			,@AllowSingleLocationEntries	BIT
@@ -48,7 +49,6 @@ BEGIN
 			,@OverrideLineOfBusinessSegment	BIT
 			,@OverrideCompanySegment		BIT
 			,@OverrideLocationSegment		BIT
-	
 
 	IF @Recap = @ZeroBit	
 		EXEC dbo.uspARPostItemReservation
@@ -149,6 +149,29 @@ BEGIN
 	FROM tblARPostInvoiceHeader I
 	WHERE I.[ysnPosted] = @OneBit
 	  AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData (
+		  [intInvoiceId]
+		, [strInvoiceNumber]
+		, [strTransactionType]
+		, [intInvoiceDetailId]
+		, [intItemId]
+		, [strBatchId]
+		, [strPostingError]
+		,[strSessionId]
+	)
+	SELECT [intInvoiceId]			= I.[intInvoiceId]
+		 , [strInvoiceNumber]		= I.[strInvoiceNumber]		
+		 , [strTransactionType]		= I.[strTransactionType]
+		 , [intInvoiceDetailId]		= I.[intInvoiceDetailId] 
+		 , [intItemId]				= I.[intItemId] 
+		 , [strBatchId]				= I.[strBatchId]
+		 , [strPostingError]		= 'Post date cannot be earlier than load shipment scheduled date.'
+		 ,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	INNER JOIN tblLGLoadDetail LGLD ON I.intLoadDetailId = LGLD.intLoadDetailId
+	INNER JOIN tblLGLoad LGL ON LGLD.intLoadId = LGL.intLoadId
+	WHERE I.dtmPostDate < CAST(LGL.dtmScheduledDate AS DATE)
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
