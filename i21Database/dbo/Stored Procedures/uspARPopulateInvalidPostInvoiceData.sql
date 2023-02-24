@@ -17,7 +17,8 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
-DECLARE @ItemsForContracts					[InvoicePostingTable]
+DECLARE @ItemsForContracts InvoicePostingTable
+
 EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
 
 DECLARE @strDatabaseName NVARCHAR(50)
@@ -29,11 +30,11 @@ SELECT @strDatabaseName = strDatabaseName, @strCompanyName = strCompanyName FROM
 
 IF @Post = @OneBit
 BEGIN
-    DECLARE @InvoiceIds 						[InvoiceId]
-	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
-	DECLARE @ItemsForCosting 					[ItemCostingTableType]
-	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
-	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
+    DECLARE @InvoiceIds 					InvoiceId
+	DECLARE @PostInvoiceDataFromIntegration	InvoicePostingTable
+	DECLARE @ItemsForCosting 				ItemCostingTableType
+	DECLARE @ItemsForInTransitCosting 		ItemInTransitCostingTableType
+	DECLARE @ItemsForStoragePosting 		ItemCostingTableType
 
 	IF @Recap = @ZeroBit	
 		EXEC dbo.uspARPostItemReservation
@@ -92,6 +93,27 @@ BEGIN
 	) IL
 	WHERE I.strTransactionType = 'Invoice'
 	AND (I.[ysnFromProvisional] = 0 OR (I.[ysnFromProvisional] = 1 AND IL.[intLoadId] IS NULL))
+
+	INSERT INTO ##ARInvalidInvoiceData (
+		  [intInvoiceId]
+		, [strInvoiceNumber]
+		, [strTransactionType]
+		, [intInvoiceDetailId]
+		, [intItemId]
+		, [strBatchId]
+		, [strPostingError]
+	)
+	SELECT [intInvoiceId]			= I.[intInvoiceId]
+		 , [strInvoiceNumber]		= I.[strInvoiceNumber]		
+		 , [strTransactionType]		= I.[strTransactionType]
+		 , [intInvoiceDetailId]		= I.[intInvoiceDetailId] 
+		 , [intItemId]				= I.[intItemId] 
+		 , [strBatchId]				= I.[strBatchId]
+		 , [strPostingError]		= 'Post date cannot be earlier than load shipment scheduled date.'
+	FROM ##ARPostInvoiceDetail I
+	INNER JOIN tblLGLoadDetail LGLD ON I.intLoadDetailId = LGLD.intLoadDetailId
+	INNER JOIN tblLGLoad LGL ON LGLD.intLoadId = LGL.intLoadId
+	WHERE I.dtmPostDate < CAST(LGL.dtmScheduledDate AS DATE)
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
