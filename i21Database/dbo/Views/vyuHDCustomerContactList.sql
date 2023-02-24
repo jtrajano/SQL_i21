@@ -29,3 +29,5 @@
 			  left join tblEMEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 			  inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 			  left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
+			where c.strCustomerNumber is not null
+GO
