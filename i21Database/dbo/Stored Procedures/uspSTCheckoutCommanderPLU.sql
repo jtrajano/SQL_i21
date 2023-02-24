@@ -123,12 +123,12 @@ BEGIN
 
 				-- Remove last digit(check digit)
 				-- Assumption is COMMANDER xml has check digit
-				UPDATE #tblTemp
-				SET intRegisterUpcCode = CASE
-											WHEN (strpluBaseupc IS NOT NULL AND strpluBaseupc != '')
-												THEN LEFT (intRegisterUpcCode, LEN (intRegisterUpcCode)-1) -- Remove Check digit on last character
-											ELSE intRegisterUpcCode
-										END
+				--UPDATE #tblTemp
+				--SET intRegisterUpcCode = CASE
+				--							WHEN (strpluBaseupc IS NOT NULL AND strpluBaseupc != '')
+				--								THEN LEFT (intRegisterUpcCode, LEN (intRegisterUpcCode)-1) -- Remove Check digit on last character
+				--							ELSE intRegisterUpcCode
+				--						END
 			END TRY
 			BEGIN CATCH
 				SET @intCountRows = 0
