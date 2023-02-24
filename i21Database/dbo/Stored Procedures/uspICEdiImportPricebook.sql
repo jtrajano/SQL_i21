@@ -971,7 +971,7 @@ WHERE (PriceBook.strAltUPCUOM1 = PriceBook.strAltUPCUOM2)
 
 DELETE 
 FROM tblICEdiPricebook
-WHERE (strAltUPCUOM1 = strAltUPCUOM2)
+WHERE (strAltUPCUOM1 = strAltUPCUOM2) AND ISNULL(strAltUPCUOM1, '') != ''
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
 /* Log Existing UPC and Modifier */
