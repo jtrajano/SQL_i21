@@ -1312,7 +1312,7 @@ BEGIN
 			,@intSubLocationId = NULL
 			,@intStorageLocationId = NULL 
 			,@dtmDate = @dtmDate
-			,@dblQty  = @dblQty
+			,@dblQty  = 0
 			,@dblUOMQty = 0
 			,@dblCost = 0
 			,@dblValue = @dblAutoVariance
@@ -1537,7 +1537,7 @@ BEGIN
 			,@intSubLocationId = NULL
 			,@intStorageLocationId = NULL 
 			,@dtmDate = @dtmDate
-			,@dblQty  = @dblQty
+			,@dblQty  = 0
 			,@dblUOMQty = 0
 			,@dblCost = 0
 			,@dblValue = @dblAutoVariance
@@ -1766,7 +1766,7 @@ BEGIN
 			,@intSubLocationId = NULL
 			,@intStorageLocationId = NULL 
 			,@dtmDate = @dtmDate
-			,@dblQty  = @dblQty
+			,@dblQty  = 0
 			,@dblUOMQty = 0
 			,@dblCost = 0
 			,@dblValue = @dblAutoVariance
