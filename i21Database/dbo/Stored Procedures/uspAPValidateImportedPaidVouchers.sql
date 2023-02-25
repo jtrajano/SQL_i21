@@ -184,7 +184,12 @@ OUTER APPLY	(
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
 			--IF PAYMENT SCHEDULE COMPARE DISCOUNT ON PAYMENT TEMP
 			--ELSE DISCOUNT WILL BE 0, DISCOUNT HAS BEEN HANDLED ABOVE (A.dblPayment + A.dblDiscount)
-			AND ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
+			--forImport.ysnInPaymentSched > THIS IS EXPECTING THAT THE DISCOUNT WHAS PART OF PAYMENT SCHEDULE tblAPVoucherPaymentSchedule.dblDiscount
+			--HOWEVER, DISCOUNT MAY STILL EXISTS ON IMPORT BUT NOT ON tblAPVoucherPaymentSchedule.dblDiscount
+			--IT IS BETTER TO NO CHECK FOR DISCOUNT, JUST COMPARE THE PAYMENT
+			--ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
+			--PAYMENT FIELD SHOULD BE THE GROSS PAYMENT ON CSV
+			--AND ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
