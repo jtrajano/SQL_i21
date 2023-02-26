@@ -6,7 +6,7 @@ SELECT intPaymentId				= P.intPaymentId
 	 , intEntityCustomerId		= P.intEntityCustomerId
 	 , intBankAccountId			= P.intBankAccountId
 	 , strBankName				= LTRIM(RTRIM(B.strBankName))
-	 , strBankAccountNo			= dbo.fnAESDecryptASym(BA.strBankAccountNo)
+	 , strBankAccountNo			= PBA.strBankAccountNo
 	 , strBankAccountNoEncrypt  = ISNULL(LTRIM(RTRIM(BA.strBankAccountNo)), '')
 	 , strCustomerName			= LTRIM(RTRIM(E.strName))
 	 , strCustomerNumber		= ISNULL(C.strCustomerNumber, E.strEntityNo)
@@ -24,8 +24,8 @@ SELECT intPaymentId				= P.intPaymentId
 	 , strBatchId				= P.strBatchId
 	 , strUserEntered			= POSTEDBY.strName
 	 , strEnteredBy				= EM.strName
-	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
-	 , strCustomerReferences	= CUSTOMERREFERENCES.strCustomerReferences
+	 , strTicketNumbers			= P.strTicketNumbers
+	 , strCustomerReferences	= P.strCustomerReferences
 	 , intCurrencyId			= P.intCurrencyId
 	 , strCurrency				= SMC.strCurrency
      , strCurrencyDescription	= SMC.strDescription
@@ -49,6 +49,7 @@ LEFT OUTER JOIN tblEMEntity POSTEDBY WITH (NOLOCK) ON P.intPostedById = POSTEDBY
 LEFT OUTER JOIN tblSMCurrency SMC WITH (NOLOCK) ON P.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
 LEFT JOIN tblGLFiscalYearPeriod AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
+LEFT JOIN tblARPaymentBankAccount PBA ON P.intBankAccountId = PBA.intBankAccountId
 LEFT JOIN (
      SELECT intPaymentId
           , dblDiscount = SUM(ISNULL(dblDiscount, 0))
@@ -56,25 +57,3 @@ LEFT JOIN (
      WHERE ISNULL(dblDiscount, 0) <> 0
      GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
-OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(I.strTicketNumbers AS VARCHAR(200))  + ', '
-		FROM tblARPaymentDetail PD WITH(NOLOCK)
-		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-		WHERE PD.intPaymentId = P.intPaymentId
-		  AND I.strTicketNumbers IS NOT NULL
-		FOR XML PATH ('')
-	) INV (strTicketNumber)
-) SCALETICKETS
-OUTER APPLY (
-	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
-	FROM (
-		SELECT CAST(I.strCustomerReferences AS VARCHAR(200))  + ', '
-		FROM tblARPaymentDetail PD WITH(NOLOCK)
-		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-		WHERE PD.intPaymentId = P.intPaymentId
-		  AND I.strCustomerReferences IS NOT NULL
-		FOR XML PATH ('')
-	) INV (strCustomerReference)
-) CUSTOMERREFERENCES
