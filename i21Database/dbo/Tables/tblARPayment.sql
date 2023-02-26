@@ -41,6 +41,8 @@
 	[intCurrentStatus]		INT				NULL,
 	[ysnShowAPTransaction]	BIT				CONSTRAINT [DF_tblARPayment_ysnShowAPTransaction] DEFAULT ((0)) NULL,
 	[strInvoices]			VARCHAR(MAX)    COLLATE Latin1_General_CI_AS NULL,
+	[strTicketNumbers]		NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+	[strCustomerReferences]	NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]		INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
 	[ysnIntraCompany]		BIT				CONSTRAINT [DF_tblARPayment_ysnIntraCompany] DEFAULT((0)) NULL,
 	[ysnScheduledPayment]	BIT				CONSTRAINT [DF_tblARPayment_ysnScheduledPayment] DEFAULT ((0)) NULL,
