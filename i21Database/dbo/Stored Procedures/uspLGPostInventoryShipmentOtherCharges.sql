@@ -16,9 +16,23 @@ BEGIN
 		,@strLocationName AS NVARCHAR(50)
 		,@intPurchaseSale AS INT
 		,@DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+		,@intInvoiceCurrency AS INT
 END
 
 SELECT @intPurchaseSale = intPurchaseSale FROM tblLGLoad WHERE intLoadId = @intLoadId
+
+-- Get the invoice currency
+SELECT @intInvoiceCurrency =
+	CASE WHEN AD.ysnValidFX = 1
+		THEN CD.intInvoiceCurrencyId
+		ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
+	END
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+WHERE L.intLoadId = @intLoadId
 
 -- Get the functional currency
 BEGIN
@@ -281,7 +295,7 @@ BEGIN
 			,dblCost = ShipmentCharges.dblAmount * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 			,intTransactionTypeId = @intTransactionTypeId
 			,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId)
-			,intShipmentCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
+			,intShipmentCurrencyId = @intInvoiceCurrency
 			,dblExchangeRate = ISNULL(1, 1)
 			,ShipmentItem.intLoadDetailId
 			,strTransactionTypeName = TransType.strName
@@ -425,7 +439,7 @@ BEGIN
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1 AND ForGLEntries_CTE.intCurrencyId <> @intInvoiceCurrency
 
 	UNION ALL
 
@@ -493,7 +507,7 @@ BEGIN
 	-- CROSS APPLY dbo.fnGetCreditFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1))) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1))) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1 AND ForGLEntries_CTE.intCurrencyId <> @intInvoiceCurrency
 
 	UNION ALL
 
@@ -551,7 +565,7 @@ BEGIN
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND (ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0 OR ForGLEntries_CTE.intCurrencyId = @intInvoiceCurrency)
 	
 	UNION ALL
 	
@@ -603,7 +617,7 @@ BEGIN
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND (ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0 OR ForGLEntries_CTE.intCurrencyId = @intInvoiceCurrency)
 
 	SELECT [dtmDate]
 		,[strBatchId]

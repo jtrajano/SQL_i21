@@ -27,6 +27,7 @@ SET ANSI_WARNINGS ON
 	DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
 	DECLARE @strTransactionId AS NVARCHAR(50)
 	DECLARE @strGLDescription AS NVARCHAR(500) = NULL
+	DECLARE @intInvoiceCurrency AS INT
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
@@ -47,6 +48,19 @@ SET ANSI_WARNINGS ON
 	SELECT @intDestinationFOBPointId = intFobPointId
 	FROM tblICFobPoint
 	WHERE strFobPoint = 'Destination'
+
+	SELECT @intInvoiceCurrency =
+		CASE WHEN AD.ysnValidFX = 1
+			THEN CD.intInvoiceCurrencyId
+			ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
+		END
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+	JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+	WHERE L.intLoadId = @intLoadId
+
 
 	IF (ISNULL(@ysnPost, 0) = 1)
 	BEGIN
@@ -230,7 +244,7 @@ SET ANSI_WARNINGS ON
 				)
 			,dblValue = 0
 			,dblSalesPrice = 0.0
-			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
+			,intCurrencyId = @intInvoiceCurrency
 			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LD.intLoadDetailId
@@ -419,7 +433,7 @@ SET ANSI_WARNINGS ON
 					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
 					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
 					ORDER BY dtmValidFromDate DESC) FX
-		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
+		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1 AND ShipmentCharges.intCurrencyId <> @intInvoiceCurrency
 
 		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
 			@ItemsForInTransitCosting  
