@@ -243,7 +243,7 @@ BEGIN TRY
 		, CD.dblQuantity
 		, CD.intItemUOMId
 		, CD.dblOriginalQty 
-		, dblBalance =  CASE WHEN Pref.ysnEnableValueBasedContract = 1 THEN  CD.dblBalance - CT.dblApprovedQty ELSE CD.dblBalance END 
+		, dblBalance =  CASE WHEN Pref.ysnEnableValueBasedContract = 1 THEN  CD.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE CD.dblBalance END 
 		, CD.dblIntransitQty
 		, CD.dblScheduleQty
 		, CD.dblBalanceLoad
