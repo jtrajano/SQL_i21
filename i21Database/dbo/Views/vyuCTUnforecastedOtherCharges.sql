@@ -86,5 +86,6 @@
 			left join tblGLAccount gla on gla.intAccountId = ia.intAccountId
 		where
 			ch.intContractTypeId = 1
+			and  isnull(cd.dblBalance,0) < cd.dblQuantity
 		) otherCosts
 	where isnull(intBillDetailId,0) = 0
