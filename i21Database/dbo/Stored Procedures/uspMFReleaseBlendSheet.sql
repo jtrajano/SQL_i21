@@ -67,6 +67,9 @@ BEGIN TRY
 		,@dtmPrintedDate DATETIME
 		,@intPrintedBy INT
 		,@strERPComment NVARCHAR(max)
+		,@strERPOrderNo nvarchar(50)
+		,@ysnOverrideRecipe BIT
+
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -122,6 +125,7 @@ BEGIN TRY
 		,intPlannedShiftId INT
 		,dblNoOfPallet NUMERIC(38, 20)
 		,strFW NVARCHAR(3)
+		,ysnOverrideRecipe BIT
 		)
 	DECLARE @tblPreItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -170,6 +174,7 @@ BEGIN TRY
 		,dtmDateCreated DATETIME
 		,dblNoOfPallet NUMERIC(18, 6)
 		,strFW NVARCHAR(3)
+		,ysnOverrideRecipe BIT
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
@@ -188,6 +193,7 @@ BEGIN TRY
 		,dtmDateCreated DATETIME
 		,dblNoOfPallet NUMERIC(18, 6)
 		,strFW NVARCHAR(3)
+		,ysnOverrideRecipe BIT
 		)
 	DECLARE @tblBSLot TABLE (
 		intLotId INT
@@ -202,6 +208,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,dblNoOfPallet NUMERIC(18, 6)
 		,strFW NVARCHAR(3)
+		,ysnOverrideRecipe BIT
 		)
 
 	INSERT INTO @tblBlendSheet (
@@ -224,6 +231,7 @@ BEGIN TRY
 		,intPlannedShiftId
 		,dblNoOfPallet
 		,strFW
+		,ysnOverrideRecipe
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -244,6 +252,7 @@ BEGIN TRY
 		,intPlannedShiftId
 		,dblNoOfPallet
 		,strFW
+		,ysnOverrideRecipe
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -264,6 +273,7 @@ BEGIN TRY
 			,intPlannedShiftId INT
 			,dblNoOfPallet NUMERIC(38, 20)
 			,strFW NVARCHAR(50)
+			,ysnOverrideRecipe BIT
 			)
 
 	INSERT INTO @tblPreLot (
@@ -281,6 +291,7 @@ BEGIN TRY
 		,ysnParentLot
 		,dblNoOfPallet
 		,strFW
+		,ysnOverrideRecipe 
 		)
 	SELECT x.intLotId
 		,x.intItemId
@@ -300,6 +311,7 @@ BEGIN TRY
 			ELSE NULL
 			END
 		,x.strFW
+		,x.ysnOverrideRecipe
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
@@ -316,6 +328,7 @@ BEGIN TRY
 			,ysnParentLot BIT
 			,dblNoOfPallet NVARCHAR(50)
 			,strFW NVARCHAR(3)
+			,ysnOverrideRecipe BIT
 			) x
 
 	UPDATE a
@@ -344,6 +357,7 @@ BEGIN TRY
 		,ysnParentLot
 		,dblNoOfPallet
 		,strFW
+		,ysnOverrideRecipe
 		)
 	SELECT intLotId
 		,intItemId
@@ -359,6 +373,7 @@ BEGIN TRY
 		,ysnParentLot
 		,dblNoOfPallet
 		,strFW
+		,ysnOverrideRecipe
 	FROM @tblPreLot
 	ORDER BY dtmDateCreated
 
@@ -920,6 +935,8 @@ BEGIN TRY
 			,@dtmPrintedDate = dtmPrintedDate
 			,@intPrintedBy = intPrintedBy
 			,@strERPComment = strERPComment
+			,@strERPOrderNo = strERPOrderNo 
+			,@ysnOverrideRecipe=ysnOverrideRecipe
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -1742,6 +1759,8 @@ BEGIN TRY
 			,dtmPrintedDate
 			,intPrintedBy
 			,strERPComment
+			,strERPOrderNo
+			,ysnOverrideRecipe 
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -1787,6 +1806,8 @@ BEGIN TRY
 			,@dtmPrintedDate
 			,@intPrintedBy
 			,@strERPComment
+			,@strERPOrderNo
+			,ysnOverrideRecipe
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -1852,6 +1873,7 @@ BEGIN TRY
 					,intBusinessShiftId
 					,dblNoOfPallet
 					,strFW
+					,ysnOverrideRecipe
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1871,6 +1893,7 @@ BEGIN TRY
 					,@intBusinessShiftId
 					,dblNoOfPallet
 					,strFW
+					,ysnOverrideRecipe
 				FROM @tblBSLot
 
 				INSERT INTO tblMFWorkOrderConsumedLot (
@@ -1926,6 +1949,7 @@ BEGIN TRY
 					,intBusinessShiftId
 					,dblNoOfPallet
 					,strFW
+					,ysnOverrideRecipe
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -1945,6 +1969,7 @@ BEGIN TRY
 					,@intBusinessShiftId
 					,dblNoOfPallet
 					,strFW
+					,ysnOverrideRecipe
 				FROM @tblBSLot
 			END
 		END

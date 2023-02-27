@@ -161,6 +161,7 @@ BEGIN TRY
 	  , dblCalculatedUpperTolerance	 NUMERIC(38, 20) NULL
 	  , dblCalculatedLowerTolerance	 NUMERIC(38, 20) NULL
 	)
+
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
 		,intWorkOrderInputLotId INT
@@ -263,6 +264,7 @@ BEGIN TRY
 	  , dblCalculatedUpperTolerance	 NVARCHAR(MAX) 
 	  , dblCalculatedLowerTolerance	 NVARCHAR(MAX) 
 	)
+
 
 	INSERT INTO @tblLot (
 		intWorkOrderInputLotId

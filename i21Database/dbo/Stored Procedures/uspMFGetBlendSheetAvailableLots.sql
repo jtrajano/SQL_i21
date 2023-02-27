@@ -86,18 +86,25 @@ ELSE
 /* End of Create Lot Status. */
 
 /* Get Recipe ID based on Location, Active and Item selected. */
-SELECT TOP 1 @intRecipeId  = Recipe.intRecipeId 
-		   , @dblRecipeQty = Recipe.dblQuantity 
-FROM tblMFRecipe AS Recipe 
-JOIN tblMFRecipeItem AS RecipeItem ON Recipe.intRecipeId = RecipeItem.intRecipeId
-WHERE RecipeItem.intItemId = @intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId AND Recipe.intLocationId = @intLocationId AND Recipe.ysnActive = 1;
-
+IF @intItemId IS NOT NULL
+BEGIN
+	SELECT TOP 1 @intRecipeId  = Recipe.intRecipeId 
+			   , @dblRecipeQty = Recipe.dblQuantity 
+	FROM tblMFRecipe AS Recipe 
+	JOIN tblMFRecipeItem AS RecipeItem ON Recipe.intRecipeId = RecipeItem.intRecipeId
+	WHERE RecipeItem.intItemId = @intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId AND Recipe.intLocationId = @intLocationId AND Recipe.ysnActive = 1;
+END
+ELSE
+BEGIN
+	SELECT TOP 1 @intRecipeId  = NULL 
+		   , @dblRecipeQty = 1
+END
 /* Create Reserved Quantity based on Manufacturing Configuration Enable Parent Lot. */
 INSERT INTO @tblReservedQty
 SELECT CASE WHEN @ysnEnableParentLot = 0 THEN intLotId ELSE intParentLotId END 
 	 , SUM(dblQty) AS dblReservedQty 
 FROM tblICStockReservation 
-WHERE intItemId = @intItemId AND ISNULL(ysnPosted, 0) = 0
+WHERE intItemId = (CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END) AND ISNULL(ysnPosted, 0) = 0
 GROUP BY CASE WHEN @ysnEnableParentLot = 0 THEN intLotId ELSE intParentLotId END;
 	
 
