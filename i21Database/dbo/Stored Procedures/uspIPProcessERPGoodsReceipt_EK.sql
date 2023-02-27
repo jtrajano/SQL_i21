@@ -332,6 +332,14 @@ BEGIN TRY
 
 				IF ISNULL(@intSubLocationId, 0) = 0
 				BEGIN
+					SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
+					FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
+					WHERE t.strSubLocationName = @strSubLocationName
+						AND t.intCompanyLocationId = @intCompanyLocationId
+				END
+
+				IF ISNULL(@intSubLocationId, 0) = 0
+				BEGIN
 					RAISERROR (
 							'Invalid Sub Location. '
 							,16

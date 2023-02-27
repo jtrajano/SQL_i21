@@ -705,7 +705,7 @@ BEGIN TRY
 		WHERE intSampleId = @intSampleId
 
 		IF @intItemId IS NULL
-			SELECT TOP 1 @intItemId = ITEM.intItemId
+			SELECT TOP 1 @intItemId=ITEM.intItemId
 			FROM tblQMSample S
 			INNER JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
 			INNER JOIN (
@@ -717,49 +717,75 @@ BEGIN TRY
 				+ @strValuationGroup -- Leaf Style
 				+ ORIGIN.strISOCode -- Origin
 				+ '-' + SUSTAINABILITY.strDescription -- Rain Forest / Sustainability
+			 JOIN tblQMProduct P ON P.intProductValueId = ITEM.intItemId AND P.intProductTypeId =  2 -- Item
+             JOIN tblQMProductProperty PP ON PP.intProductId = P.intProductId
+             JOIN tblQMProperty PROP ON PROP.intPropertyId = PP.intPropertyId
+			 JOIN tblQMProductPropertyValidityPeriod PPVP
+                ON PP.intProductPropertyId = PPVP.intProductPropertyId
+                AND DATEPART(dayofyear , GETDATE()) BETWEEN DATEPART(dayofyear , PPVP.dtmValidFrom) AND DATEPART(dayofyear , PPVP.dtmValidTo)
+           
+    		    AND PPVP.dblPinpointValue = Case 
+				When PROP.strPropertyName = 'Appearance' then Case When @strAppearance is not null and IsNUmeric(@strAppearance)=1 Then CAST(@strAppearance AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End
+				When PROP.strPropertyName = 'Hue' then  Case When @strHue is not null and IsNUmeric(@strHue)=1 Then CAST(@strHue AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
+				When PROP.strPropertyName = 'Intensity' then  Case When @strIntensity is not null and IsNUmeric(@strIntensity)=1 Then CAST(@strIntensity AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
+				When PROP.strPropertyName = 'Taste' then  Case When @strTaste is not null and IsNUmeric(@strTaste)=1 Then CAST(@strTaste AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
+				When PROP.strPropertyName = 'Mouth Feel' then Case When @strMouthFeel is not null and IsNUmeric(@strMouthFeel)=1 Then CAST(@strMouthFeel AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
+				END
 			WHERE S.intSampleId = @intSampleId
-			ORDER BY ITEM.strItemNo
+			Group by ITEM.intItemId
+			ORDER BY COUNT(1) Desc
+			--ORDER BY ITEM.strItemNo
 
-		-- If Tealingo Item is provided in the template but does not match the testing score, throw an error
-		IF (
-				@intItemId IS NOT NULL
-				AND dbo.fnQMValidateTealingoItemTastingScore(@intItemId, CASE 
-						WHEN ISNULL(@strAppearance, '') = ''
-							THEN NULL
-						ELSE CAST(@strAppearance AS NUMERIC(18, 6))
-						END -- APPEARANCE
-					, CASE 
-						WHEN ISNULL(@strHue, '') = ''
-							THEN NULL
-						ELSE CAST(@strHue AS NUMERIC(18, 6))
-						END -- HUE
-					, CASE 
-						WHEN ISNULL(@strIntensity, '') = ''
-							THEN NULL
-						ELSE CAST(@strIntensity AS NUMERIC(18, 6))
-						END -- INTENSITY
-					, CASE 
-						WHEN ISNULL(@strTaste, '') = ''
-							THEN NULL
-						ELSE CAST(@strTaste AS NUMERIC(18, 6))
-						END -- TASTE
-					, CASE 
-						WHEN ISNULL(@strMouthFeel, '') = ''
-							THEN NULL
-						ELSE CAST(@strMouthFeel AS NUMERIC(18, 6))
-						END -- MOUTH FEEL
-				) = 0
-				)
-		BEGIN
-			UPDATE tblQMImportCatalogue
-			SET strLogResult = 'WARNING: Import successful but the tasting score does not match the Tealingo item''s pinpoint values.'
-			WHERE intImportCatalogueId = @intImportCatalogueId
-		END
+		---- If Tealingo Item is provided in the template but does not match the testing score, throw an error
+		--IF (
+		--		@intItemId IS NOT NULL
+		--		AND dbo.fnQMValidateTealingoItemTastingScore(@intItemId, CASE 
+		--				WHEN ISNULL(@strAppearance, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strAppearance AS NUMERIC(18, 6))
+		--				END -- APPEARANCE
+		--			, CASE 
+		--				WHEN ISNULL(@strHue, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strHue AS NUMERIC(18, 6))
+		--				END -- HUE
+		--			, CASE 
+		--				WHEN ISNULL(@strIntensity, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strIntensity AS NUMERIC(18, 6))
+		--				END -- INTENSITY
+		--			, CASE 
+		--				WHEN ISNULL(@strTaste, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strTaste AS NUMERIC(18, 6))
+		--				END -- TASTE
+		--			, CASE 
+		--				WHEN ISNULL(@strMouthFeel, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strMouthFeel AS NUMERIC(18, 6))
+		--				END -- MOUTH FEEL
+		--		) = 0
+		--		)
+		--BEGIN
+		--	UPDATE tblQMImportCatalogue
+		--	SET strLogResult = 'WARNING: Import successful but the tasting score does not match the Tealingo item''s pinpoint values.'
+		--	WHERE intImportCatalogueId = @intImportCatalogueId
+		--END
 
 		-- If Tealingo item cannot be determined, fallback to default item.
-		IF @intItemId IS NULL
-			SELECT @intItemId = @intDefaultItemId
-				,@intCategoryId = @intDefaultCategoryId
+		IF @intItemId IS NULL 
+		BEGIN
+		 IF @intImportType=1
+			BEGIN
+				SELECT @intItemId = @intDefaultItemId
+					,@intCategoryId = @intDefaultCategoryId
+			END
+			ELSE
+			BEGIN
+				SELECT @intItemId = @intOriginalItemId
+					,@intCategoryId = @intDefaultCategoryId
+			END
+		END
 
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -883,6 +909,26 @@ BEGIN TRY
 					THEN @strTeaVolume
 				WHEN PRT.strPropertyName = 'Dust Level'
 					THEN @strDustContent
+				WHEN PRT.strPropertyName = 'Appearance' AND isNumeric(@strAppearance)=1 
+					THEN @strAppearance
+				WHEN PRT.strPropertyName = 'Appearance' AND isNumeric(@strAppearance)=0
+					THEN PPV.dblPinpointValue
+				WHEN PRT.strPropertyName = 'Hue' AND isNumeric(@strHue)=1 
+					THEN @strHue
+					WHEN PRT.strPropertyName = 'Hue' AND isNumeric(@strHue)=0
+					THEN PPV.dblPinpointValue
+				WHEN PRT.strPropertyName = 'Intensity' AND isNumeric(@strIntensity)=1 
+					THEN @strIntensity
+					WHEN PRT.strPropertyName = 'Intensity' AND isNumeric(@strIntensity)=0 
+					THEN PPV.dblPinpointValue
+				WHEN PRT.strPropertyName = 'Taste' AND isNumeric(@strTaste)=1 
+					THEN @strTaste
+					WHEN PRT.strPropertyName = 'Taste' AND isNumeric(@strTaste)=0
+					THEN PPV.dblPinpointValue
+				WHEN PRT.strPropertyName = 'Mouth Feel' AND isNumeric(@strMouthFeel)=1 
+					THEN @strMouthFeel
+					WHEN PRT.strPropertyName = 'Mouth Feel' AND isNumeric(@strMouthFeel)=0 
+					THEN PPV.dblPinpointValue
 				END
 			,@dtmDateCreated
 			,''
@@ -934,151 +980,151 @@ BEGIN TRY
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo
 
-		-- Begin Update Actual Test Result
-		-- Appearance
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strAppearance)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strAppearance
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strAppearance, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Appearance'
+		---- Begin Update Actual Test Result
+		---- Appearance
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strAppearance)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strAppearance
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strAppearance, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Appearance'
 
-		-- Hue
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strHue)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strHue
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strHue, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Hue'
+		---- Hue
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strHue)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strHue
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strHue, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Hue'
 
-		-- Intensity
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strIntensity)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strIntensity
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strIntensity, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Intensity'
+		---- Intensity
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strIntensity)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strIntensity
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strIntensity, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Intensity'
 
-		-- Taste
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strTaste)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strTaste
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strTaste, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Taste'
+		---- Taste
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strTaste)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strTaste
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strTaste, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Taste'
 
-		-- Mouth Feel
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strMouthFeel)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strMouthFeel
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strMouthFeel, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Mouth Feel'
+		---- Mouth Feel
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strMouthFeel)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strMouthFeel
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strMouthFeel, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Mouth Feel'
 
 		-- Calculate and update formula property value
 		DECLARE @FormulaProperty TABLE (
@@ -1382,19 +1428,19 @@ BEGIN TRY
 				,strLeafSize = BRAND.strBrandCode
 				,strLeafStyle = STYLE.strName
 				,intBookId = S.intBookId
-				,dblPackagesBought = NULL
-				,intItemUOMId = S.intRepresentingUOMId
+				,dblPackagesBought = S.dblB1QtyBought
+				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
 				,intOriginalItemId = S.intItemId
-				,dblPackagesPerPallet = NULL
-				,strPlant = NULL
-				,dblTotalQuantity = S.dblB1QtyBought
+				,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
+				,strPlant = MU.strVendorRefNoPrefix 
+				,dblTotalQuantity = S.dblSampleQty 
 				,strSampleBoxNumber = S.strSampleBoxNumber
 				,dblSellingPrice = NULL
 				,dtmStock = @dtmCurrentDate
 				,ysnStrategic = NULL
-				,strTeaLingoSubCluster = NULL
+				,strTeaLingoSubCluster = REGION.strDescription
 				,dtmSupplierPreInvoiceDate = NULL
 				,strSustainability = SUSTAINABILITY.strDescription
 				,strTasterComments = S.strComments2
@@ -1442,8 +1488,8 @@ BEGIN TRY
 					END
 				,intTealingoItemId = S.intItemId
 				,dtmWarehouseArrival = NULL
-				,intYearManufacture = NULL
-				,strPackageSize = NULL
+				,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
+				,strPackageSize = PT.strUnitMeasure
 				,intPackageUOMId = S.intNetWtPerPackagesUOMId
 				,dblTareWeight = S.dblTareWeight
 				,strTaster = IMP.strTaster
@@ -1480,6 +1526,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 			LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
+			LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
 			-- Appearance
 			OUTER APPLY (
 				SELECT TR.strPropertyValue

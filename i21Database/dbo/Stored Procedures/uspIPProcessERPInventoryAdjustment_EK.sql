@@ -267,6 +267,14 @@ BEGIN TRY
 
 			IF @intCompanyLocationSubLocationId IS NULL
 			BEGIN
+				SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+				FROM dbo.tblSMCompanyLocationSubLocation
+				WHERE strSubLocationName = @strStorageLocation
+					AND intCompanyLocationId = @intCompanyLocationId
+			END
+
+			IF @intCompanyLocationSubLocationId IS NULL
+			BEGIN
 				SELECT @strError = 'Storage Location ' + @strStorageLocation + ' is not available.'
 
 				RAISERROR (

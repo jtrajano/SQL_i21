@@ -151,7 +151,7 @@ BEGIN TRY
                                              , @ysnPost                 = 0
                                              , @ysnRecap                = 0
 
-                IF ISNULL(@strMarketZone, '') <> 'AUC'
+                IF @intContractDetailId IS NOT NULL
                     BEGIN
 						--UPDATE LOAD SHIPMENT
                         UPDATE tblLGLoadDetail

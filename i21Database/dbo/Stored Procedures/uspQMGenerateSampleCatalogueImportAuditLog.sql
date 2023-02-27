@@ -214,7 +214,8 @@ BEGIN TRY
                 [dblB5Price],
                 [intB5PriceUOMId],
                 [strB5PriceUOM],
-                [ysnBought]
+                [ysnBought],
+				intPackageTypeId
             )
             SELECT * FROM tblQMSample WHERE intSampleId = @intSampleId
             SET IDENTITY_INSERT ##tmpQMSample OFF
