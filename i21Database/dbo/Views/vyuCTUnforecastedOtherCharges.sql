@@ -165,5 +165,6 @@
 		where
 			cc.ysnUnforcasted = 1
 			and ch.intContractTypeId = 1
+			and  isnull(cd.dblBalance,0) < cd.dblQuantity
 		) otherCosts
 	where isnull(intBillDetailId,0) = 0 and isnull(intCount,0) = 0 and isnull(intIRCount,0) = 0
