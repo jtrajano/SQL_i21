@@ -100,7 +100,7 @@ NewGLAccumulation.strAccountId strNewAccumulatedAccountId,
 NewGLGainLoss.strAccountId strNewGainLossAccountId,
 NewGLARAccount.strAccountId strNewSalesOffsetAccountId,
 FA.intConcurrencyId,
-TaxJurisdiction.strTaxJurisdiction
+FA.strTaxJurisdiction 
 FROM tblFAFixedAsset FA       
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId        
 LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccountId        
@@ -121,7 +121,6 @@ LEFT JOIN tblGLAccount NewGLDepreciation ON NewGLDepreciation.intAccountId = FA.
 LEFT JOIN tblGLAccount NewGLAccumulation ON NewGLAccumulation.intAccountId = FA.intNewAccumulatedAccountId        
 LEFT JOIN tblGLAccount NewGLGainLoss ON NewGLGainLoss.intAccountId = FA.intNewGainLossAccountId        
 LEFT JOIN tblGLAccount NewGLARAccount ON NewGLARAccount.intAccountId = FA.intNewSalesOffsetAccountId    
-LEFT JOIN tblFAFixedAssetTaxJurisdiction TaxJurisdiction ON TaxJurisdiction.intAssetTaxJurisdictionId = FA.intAssetTaxJurisdictionId     
 OUTER APPLY(  
     SELECT COUNT(*) Cnt FROM tblFABookDepreciation   
     WHERE intAssetId = FA.intAssetId  
