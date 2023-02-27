@@ -7,11 +7,5 @@ CREATE TABLE tblFAFixedAssetJournal
     dtmDateEntered DATETIME NOT NULL,
     intEntityId INT NOT NULL,
     CONSTRAINT [PK_tblFAFixedAssetJournal] PRIMARY KEY CLUSTERED ([intFixedAssetJournalId] ASC),
-    CONSTRAINT [FK_tblFAFixedAssetJournal_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
-    CONSTRAINT [DF_tblFAFixedAssetJournal_dtmDateEntered]  DEFAULT (getdate()) FOR [dtmDateEntered]
+    CONSTRAINT [FK_tblFAFixedAssetJournal_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
 )
-GO
-
-ALTER TABLE tblFAFixedAssetJournal
-add  CONSTRAINT [DF_tblFAFixedAssetJournal_dtmDateEntered]  DEFAULT (getdate()) FOR [dtmDateEntered]
-GO
