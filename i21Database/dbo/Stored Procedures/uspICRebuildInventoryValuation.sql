@@ -3175,13 +3175,51 @@ BEGIN
 							,FromStock.strSourceNumber
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
-
-							INNER JOIN dbo.tblICInventoryTransaction FromStock 
-								ON FromStock.intLotId = AdjDetail.intLotId 
-								AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
-								AND FromStock.strTransactionId = Adj.strAdjustmentNo
-								AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
-								AND FromStock.dblQty < 0
+							--INNER JOIN dbo.tblICInventoryTransaction FromStock 
+							--	ON FromStock.intLotId = AdjDetail.intLotId 
+							--	AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
+							--	AND FromStock.strTransactionId = Adj.strAdjustmentNo
+							--	AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+							--	AND FromStock.dblQty < 0
+							INNER JOIN tblICItem i
+								ON i.intItemId = AdjDetail.intItemId 
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 							
+							CROSS APPLY (
+								SELECT 
+									dblQty = SUM(FromStock.dblQty)
+									,dblCost = SUM(FromStock.dblQty * FromStock.dblCost + FromStock.dblValue) / SUM(FromStock.dblQty)
+									,strActualCostId
+									,intCostingMethod
+									,intSourceEntityId
+									,strBOLNumber
+									,intTicketId
+									,strSourceType
+									,strSourceNumber
+									,intLotId
+									,strBatchId
+									,intItemUOMId
+								FROM 
+									dbo.tblICInventoryTransaction FromStock
+								WHERE 
+									FromStock.intLotId = AdjDetail.intLotId 
+									AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
+									AND FromStock.strTransactionId = Adj.strAdjustmentNo
+									AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+									AND FromStock.dblQty < 0
+								GROUP BY
+									strActualCostId
+									,intCostingMethod
+									,intSourceEntityId
+									,strBOLNumber
+									,intTicketId
+									,strSourceType
+									,strSourceNumber
+									,intLotId
+									,strBatchId
+									,intItemUOMId
+							) FromStock
 
 							-- Source Lot
 							LEFT JOIN (
