@@ -247,13 +247,6 @@ BEGIN
 							,@success = @success OUTPUT
 						END
 					END
-					IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=1 AND intBillId = @intBillId)
-					BEGIN
-						update  IRI set IRI.ysnAddPayable = 1 from tblAPBill bill
-						inner join tblAPBillDetail dtl on bill.intBillId = dtl.intBillId
-						left join tblICInventoryReceiptItem IRI on dtl.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-						where bill.intBillId= @intBillId
-					END	
 				END
 
 			
