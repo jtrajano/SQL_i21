@@ -153,6 +153,7 @@ BEGIN TRY
 		,intUserId INT
 		,intConcurrencyId INT
 		,intIssuedUOMTypeId INT
+		,ysnOverrideRecipe BIT
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
@@ -171,6 +172,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,ysnParentLot BIT
 		,strFW NVARCHAR(3)
+		,ysnOverrideRecipe BIT
 		)
 	DECLARE @tblPackagingCategoryId TABLE (intCategoryId INT)
 
@@ -195,6 +197,7 @@ BEGIN TRY
 		,intUserId
 		,intConcurrencyId
 		,intIssuedUOMTypeId
+		,ysnOverrideRecipe
 		)
 	SELECT intWorkOrderId
 		,strWorkOrderNo
@@ -216,6 +219,7 @@ BEGIN TRY
 		,intUserId
 		,intConcurrencyId
 		,intIssuedUOMTypeId
+		,ysnOverrideRecipe
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -237,6 +241,7 @@ BEGIN TRY
 			,intUserId INT
 			,intConcurrencyId INT
 			,intIssuedUOMTypeId INT
+			,ysnOverrideRecipe BIT
 			)
 
 	INSERT INTO @tblLot (
@@ -255,6 +260,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnParentLot
 		,strFW
+		,ysnOverrideRecipe
 		)
 	SELECT intWorkOrderInputLotId
 		,intLotId
@@ -271,6 +277,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnParentLot
 		,strFW
+		,ysnOverrideRecipe
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intWorkOrderInputLotId INT
 			,intLotId INT
@@ -287,6 +294,7 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,ysnParentLot BIT
 			,strFW NVARCHAR(3)
+			,ysnOverrideRecipe BIT
 			)
 
 	UPDATE @tblLot
@@ -445,6 +453,7 @@ BEGIN TRY
 			,dtmPlannedDate
 			,strERPOrderNo
 			,intIssuedUOMTypeId
+			,ysnOverrideRecipe
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -475,6 +484,7 @@ BEGIN TRY
 			,dtmDueDate
 			,@strReferenceNo
 			,intIssuedUOMTypeId
+			,ysnOverrideRecipe
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -496,6 +506,7 @@ BEGIN TRY
 			,WorkOrder.intConcurrencyId = WorkOrder.intConcurrencyId + 1
 			,WorkOrder.intPlannedShiftId = VarBlendSheet.intPlannedShiftId
 			,WorkOrder.dtmPlannedDate = VarBlendSheet.dtmDueDate
+			,WorkOrder.ysnOverrideRecipe =VarBlendSheet.ysnOverrideRecipe
 		FROM tblMFWorkOrder AS WorkOrder
 		JOIN @tblBlendSheet AS VarBlendSheet ON WorkOrder.intWorkOrderId = VarBlendSheet.intWorkOrderId
 	END
@@ -611,6 +622,7 @@ BEGIN TRY
 					,dtmBusinessDate
 					,intBusinessShiftId
 					,strFW
+					,ysnOverrideRecipe
 					)
 				SELECT @intWorkOrderId
 					,intLotId
@@ -629,6 +641,7 @@ BEGIN TRY
 					,@dtmBusinessDate
 					,@intBusinessShiftId
 					,@strFW
+					,ysnOverrideRecipe
 				FROM @tblLot
 				WHERE intRowNo = @intMinRowNo
 			END
@@ -801,6 +814,124 @@ BEGIN TRY
 	EXEC uspMFCreateBlendRecipeComputation @intWorkOrderId = @intWorkOrderId
 		,@intTypeId = 1
 		,@strXml = @strXml
+
+	--IF @ysnOverrideRecipe=1
+	--BEGIN
+	--				IF NOT EXISTS (
+	--				SELECT *
+	--				FROM tblMFWorkOrderRecipeItem RI
+	--				Where RI.intWorkOrderId = @intWorkOrderId
+	--				and not exists(Select *from tblMFWorkOrderInputItem WI
+	--				Where WI.intWorkOrderId = @intWorkOrderId and ysnOverrideRecipe=1)
+	--				)
+	--		BEGIN
+	--			SELECT @intRecipeId = intRecipeId
+	--				,@intRecipeItemUOMId = intItemUOMId
+	--			FROM tblMFWorkOrderRecipe
+	--			WHERE intWorkOrderId = @intWorkOrderId
+
+	--			SELECT @intUnitMeasureId = intUnitMeasureId
+	--			FROM tblICItemUOM
+	--			WHERE intItemUOMId = @intRecipeItemUOMId
+
+	--			SELECT @intInputItemUOMId = intItemUOMId
+	--			FROM tblICItemUOM
+	--			WHERE intItemId = @intItemId
+	--				AND intUnitMeasureId = @intUnitMeasureId
+
+	--			IF NOT EXISTS (
+	--					SELECT *
+	--					FROM tblMFWorkOrderRecipeItem RI
+	--					WHERE RI.intWorkOrderId = @intWorkOrderId
+	--						AND RI.dblCalculatedQuantity <> 0
+	--						AND RI.intRecipeItemTypeId = 1
+	--					)
+	--			BEGIN
+	--				SELECT @intRecipeItemId = Max(intRecipeItemId) + 1
+	--				FROM tblMFWorkOrderRecipeItem
+
+	--				INSERT INTO tblMFWorkOrderRecipeItem (
+	--					intRecipeItemId
+	--					,intRecipeId
+	--					,intItemId
+	--					,dblQuantity
+	--					,dblCalculatedQuantity
+	--					,[intItemUOMId]
+	--					,intRecipeItemTypeId
+	--					,strItemGroupName
+	--					,dblUpperTolerance
+	--					,dblLowerTolerance
+	--					,dblCalculatedUpperTolerance
+	--					,dblCalculatedLowerTolerance
+	--					,dblShrinkage
+	--					,ysnScaled
+	--					,intConsumptionMethodId
+	--					,intStorageLocationId
+	--					,dtmValidFrom
+	--					,dtmValidTo
+	--					,ysnYearValidationRequired
+	--					,ysnMinorIngredient
+	--					,intReferenceRecipeId
+	--					,ysnOutputItemMandatory
+	--					,dblScrap
+	--					,ysnConsumptionRequired
+	--					,dblPercentage
+	--					,intMarginById
+	--					,dblMargin
+	--					,ysnCostAppliedAtInvoice
+	--					,ysnPartialFillConsumption
+	--					,intManufacturingCellId
+	--					,intWorkOrderId
+	--					,intCreatedUserId
+	--					,dtmCreated
+	--					,intLastModifiedUserId
+	--					,dtmLastModified
+	--					,intConcurrencyId
+	--					,intCostDriverId
+	--					,dblCostRate
+	--					,ysnLock
+	--					)
+	--				SELECT intRecipeItemId = @intRecipeItemId
+	--					,intRecipeId = @intRecipeId
+	--					,intItemId = @intItemId
+	--					,dblQuantity = 1
+	--					,dblCalculatedQuantity = 1
+	--					,[intItemUOMId] = @intInputItemUOMId
+	--					,intRecipeItemTypeId = 1
+	--					,strItemGroupName = ''
+	--					,dblUpperTolerance = 100
+	--					,dblLowerTolerance = 100
+	--					,dblCalculatedUpperTolerance = 2
+	--					,dblCalculatedLowerTolerance = 1
+	--					,dblShrinkage = 0
+	--					,ysnScaled = 1
+	--					,intConsumptionMethodId = 1
+	--					,intStorageLocationId = NULL
+	--					,dtmValidFrom = '2018-01-01'
+	--					,dtmValidTo = '2018-12-31'
+	--					,ysnYearValidationRequired = 0
+	--					,ysnMinorIngredient = 0
+	--					,intReferenceRecipeId = NULL
+	--					,ysnOutputItemMandatory = 0
+	--					,dblScrap = 0
+	--					,ysnConsumptionRequired = 0
+	--					,[dblCostAllocationPercentage] = NULL
+	--					,intMarginById = NULL
+	--					,dblMargin = NULL
+	--					,ysnCostAppliedAtInvoice = NULL
+	--					,ysnPartialFillConsumption = 1
+	--					,intManufacturingCellId = @intManufacturingCellId
+	--					,intWorkOrderId = @intWorkOrderId
+	--					,intCreatedUserId = @intUserId
+	--					,dtmCreated = @dtmDate
+	--					,intLastModifiedUserId = @intUserId
+	--					,dtmLastModified = @dtmDate
+	--					,intConcurrencyId = 1
+	--					,intCostDriverId = NULL
+	--					,dblCostRate = NULL
+	--					,ysnLock = 1
+
+	--END
 
 	COMMIT TRANSACTION
 

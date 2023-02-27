@@ -107,5 +107,8 @@
 	ysnEnabledPreShipmentSampleByBatch BIT,
 	ysnBlendRecall BIT,
 	ysnDisplayPickTicketItemXref BIT,
+	ysnOverrideRecipeInBM BIT,
+	ysnAllowMultiLotSelectionInBM BIT,
+	ysnCopyLowertoleranceFromUpperToleranceInBM BIT
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetAvailableLots]
-	@intItemId			INT
+	@intItemId			INT=NULL
   , @intLocationId		INT
-  , @intRecipeItemId	INT
+  , @intRecipeItemId	INT=NULL
   ,@intWorkOrderId INT=NULL
 AS
 
@@ -86,18 +86,25 @@ ELSE
 /* End of Create Lot Status. */
 
 /* Get Recipe ID based on Location, Active and Item selected. */
-SELECT TOP 1 @intRecipeId  = Recipe.intRecipeId 
-		   , @dblRecipeQty = Recipe.dblQuantity 
-FROM tblMFRecipe AS Recipe 
-JOIN tblMFRecipeItem AS RecipeItem ON Recipe.intRecipeId = RecipeItem.intRecipeId
-WHERE RecipeItem.intItemId = @intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId AND Recipe.intLocationId = @intLocationId AND Recipe.ysnActive = 1;
-
+IF @intItemId IS NOT NULL
+BEGIN
+	SELECT TOP 1 @intRecipeId  = Recipe.intRecipeId 
+			   , @dblRecipeQty = Recipe.dblQuantity 
+	FROM tblMFRecipe AS Recipe 
+	JOIN tblMFRecipeItem AS RecipeItem ON Recipe.intRecipeId = RecipeItem.intRecipeId
+	WHERE RecipeItem.intItemId = @intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId AND Recipe.intLocationId = @intLocationId AND Recipe.ysnActive = 1;
+END
+ELSE
+BEGIN
+	SELECT TOP 1 @intRecipeId  = NULL 
+		   , @dblRecipeQty = 1
+END
 /* Create Reserved Quantity based on Manufacturing Configuration Enable Parent Lot. */
 INSERT INTO @tblReservedQty
 SELECT CASE WHEN @ysnEnableParentLot = 0 THEN intLotId ELSE intParentLotId END 
 	 , SUM(dblQty) AS dblReservedQty 
 FROM tblICStockReservation 
-WHERE intItemId = @intItemId AND ISNULL(ysnPosted, 0) = 0
+WHERE intItemId = (CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END) AND ISNULL(ysnPosted, 0) = 0
 GROUP BY CASE WHEN @ysnEnableParentLot = 0 THEN intLotId ELSE intParentLotId END;
 	
 
@@ -183,7 +190,7 @@ LEFT JOIN tblQMGardenMark AS GardenMark ON Batch.intGardenMarkId = GardenMark.in
 LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=Item.intProductTypeId
 LEFT JOIN tblICBrand B on B.intBrandId=Item.intBrandId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
-WHERE Lot.intItemId = @intItemId AND Lot.dblQty > 0 AND LotStatus.intLotStatusId IN (SELECT intLotStatusId FROM @tblLotStatus)
+WHERE Lot.intItemId = (CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE Lot.intItemId END) AND Lot.dblQty > 0 AND LotStatus.intLotStatusId IN (SELECT intLotStatusId FROM @tblLotStatus)
   And Lot.intLocationId = (CASE WHEN @ysnShowOtherFactoryLots = 1 THEN Lot.intLocationId ELSE @intLocationId END)
 ORDER BY Lot.dtmExpiryDate
 	   , Lot.dtmDateCreated;
