@@ -492,7 +492,9 @@ BEGIN TRY
 				GOTO NextRec
 			END
 
-			IF ISNULL(@strMarketZoneCode, '') = 'AUC'
+			IF ISNULL(@strMarketZoneCode, '') IN (
+					'AUC'
+					) OR EXISTS (SELECT *FROM tblLGLoadDetail WHERE intLoadDetailId=@intLoadDetailId AND intPContractDetailId IS NULL)
 			BEGIN
 				IF ISNULL(@intSampleId, 0) = 0
 				BEGIN
@@ -665,7 +667,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ERPContractNo>' + ISNULL(@strERPContractNumber, '') + '</ERPContractNo>'
 
-			IF ISNULL(@strMarketZoneCode, '') = 'AUC'
+			IF ISNULL(@strContractNumber, '')=''
 				SELECT @strItemXML += '<ContractNo>' + '' + '</ContractNo>'
 			ELSE
 				SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'

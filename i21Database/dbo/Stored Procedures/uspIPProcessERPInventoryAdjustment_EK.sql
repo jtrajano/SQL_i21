@@ -274,7 +274,7 @@ BEGIN TRY
 					AND intCompanyLocationId = @intCompanyLocationId
 			END
 
-			IF @intCompanyLocationSubLocationId IS NULL AND @intTransactionTypeId <>12
+			IF @intCompanyLocationSubLocationId IS NULL
 			BEGIN
 				SELECT @strError = 'Storage Location ' + @strStorageLocation + ' is not available.'
 

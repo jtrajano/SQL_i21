@@ -25,7 +25,7 @@ BEGIN TRY
 	JOIN dbo.tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = L.intMarketZoneId
 	WHERE intLoadId = @intLoadId
 
-	IF ISNULL(@strMarketZoneCode, '') = 'AUC'
+	IF EXISTS (SELECT *FROM tblLGLoadDetail WHERE intLoadDetailId=@intLoadDetailId AND intPContractDetailId IS NULL)
 	BEGIN
 		INSERT INTO tblIPContractFeed
 		(

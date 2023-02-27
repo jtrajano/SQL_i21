@@ -3,7 +3,10 @@ AS
 BEGIN TRY
 	-- B1
 	DECLARE @strItemLog			NVARCHAR(MAX)
-		  , @strUnitMeasureLog	NVARCHAR(MAX) 
+		  , @strUnitMeasureLog	NVARCHAR(MAX)
+		  ,@strPackageType nvarchar(50) 
+		  ,@intPackageTypeId int
+		  ,@dblTareWeight Numeric(18,6)
 
 	BEGIN TRANSACTION
 
@@ -33,7 +36,7 @@ BEGIN TRY
 	-- Evaluator's Code at TBO
 	LEFT JOIN vyuQMSearchEntityUser ECTBO ON ECTBO.strUser = IMP.strEvaluatorsCodeAtTBO
 	-- From Location Code
-	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
+	--LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Channel
 	LEFT JOIN tblARMarketZone MARKET_ZONE ON MARKET_ZONE.strMarketZoneCode = IMP.strChannel
 	-- Sample Type
@@ -51,12 +54,12 @@ BEGIN TRY
 	-- Broker
 	LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL
 		AND BROKERS.strName = IMP.strBroker
-	-- Receiving Storage Location
-	LEFT JOIN (
-		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
-		) ON IMP.strReceivingStorageLocation IS NOT NULL
-		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND TBO2.strLocationName = IMP.strBuyingCenter
+	---- Receiving Storage Location
+	--LEFT JOIN (
+	--	tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
+	--	) ON IMP.strReceivingStorageLocation IS NOT NULL
+	--	AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
+	--	AND TBO2.strLocationName = IMP.strBuyingCenter
 	-- Warehouse Code
 	LEFT JOIN tblSMCompanyLocationSubLocation WAREHOUSE_CODE ON WAREHOUSE_CODE.strSubLocationName = IMP.strWarehouseCode AND WAREHOUSE_CODE.intCompanyLocationId = TBO.intCompanyLocationId
 	-- Format log message
@@ -64,14 +67,14 @@ BEGIN TRY
 		SELECT strLogMessage = CASE 
 				WHEN (
 						GRADE.intCommodityAttributeId IS NULL
-						AND ISNULL(IMP.strGrade, '') <> ''
+						--AND ISNULL(IMP.strGrade, '') <> ''
 						)
 					THEN 'GRADE, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						LEAF_TYPE.intCommodityAttributeId IS NULL
-						AND ISNULL(IMP.strManufacturingLeafType, '') <> ''
+						--AND ISNULL(IMP.strManufacturingLeafType, '') <> ''
 						)
 					THEN 'MANUFACTURING LEAF TYPE, '
 				ELSE ''
@@ -85,21 +88,21 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						GARDEN.intGardenMarkId IS NULL
-						AND ISNULL(IMP.strGardenMark, '') <> ''
+						--AND ISNULL(IMP.strGardenMark, '') <> ''
 						)
 					THEN 'GARDEN MARK, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						ORIGIN.intCountryID IS NULL
-						AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
+						--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
 						)
 					THEN 'GARDEN GEO ORIGIN, '
 				ELSE ''
 				END + CASE 
 				WHEN (
 						WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
-						AND ISNULL(IMP.strWarehouseCode, '') <> ''
+						--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 						)
 					THEN 'WAREHOUSE CODE, '
 				ELSE ''
@@ -117,17 +120,19 @@ BEGIN TRY
 						)
 					THEN 'EVALUATORS CODE AT TBO, '
 				ELSE ''
-				END + CASE 
-				WHEN (
-						FROM_LOC_CODE.intCityId IS NULL
-						AND ISNULL(IMP.strFromLocationCode, '') <> ''
-						)
-					THEN 'FROM LOCATION CODE, '
-				ELSE ''
-				END + CASE 
+				END 
+				--+ CASE 
+				--WHEN (
+				--		FROM_LOC_CODE.intCityId IS NULL
+				--		AND ISNULL(IMP.strFromLocationCode, '') <> ''
+				--		)
+				--	THEN 'FROM LOCATION CODE, '
+				--ELSE ''
+				--END 
+				+ CASE 
 				WHEN (
 						MARKET_ZONE.intMarketZoneId IS NULL
-						AND ISNULL(IMP.strChannel, '') <> ''
+						--AND ISNULL(IMP.strChannel, '') <> ''
 						)
 					THEN 'CHANNEL, '
 				ELSE ''
@@ -141,7 +146,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						UOM.intUnitMeasureId IS NULL
-						AND ISNULL(IMP.strNoOfPackagesUOM, '') <> ''
+						--AND ISNULL(IMP.strNoOfPackagesUOM, '') <> ''
 						)
 					OR (
 						ISNULL(IMP.intNoOfPackages, 0) <> 0
@@ -178,14 +183,65 @@ BEGIN TRY
 						)
 					THEN 'BROKER, '
 				ELSE ''
-				END + CASE 
+				END 
+				--+ CASE 
+				--WHEN (
+				--		RSL.intCompanyLocationSubLocationId IS NULL
+				--		AND ISNULL(IMP.strReceivingStorageLocation, '') <> ''
+				--		)
+				--	THEN 'RECEIVING STORAGE LOCATION, '
+				--ELSE ''
+				--END
+				+ CASE 
 				WHEN (
-						RSL.intCompanyLocationSubLocationId IS NULL
-						AND ISNULL(IMP.strReceivingStorageLocation, '') <> ''
+						IMP.strPackageType = ''
 						)
-					THEN 'RECEIVING STORAGE LOCATION, '
+					THEN 'PACKAGE TYPE, '
 				ELSE ''
 				END
+				+ CASE 
+				WHEN (
+						IMP.strChopNumber  = ''
+						)
+					THEN 'CHOP NUMBER, '
+				ELSE ''
+				END
+				+ CASE 
+				WHEN (
+						IsDate(IMP.dtmManufacturingDate)=0
+						)
+					THEN 'MANUFACTURING DATE, '
+				ELSE ''
+				END
+				+ CASE 
+				WHEN (
+						IsNumeric(IMP.dblTotalQtyOffered )=0
+						)
+					THEN 'TOTAL QTY OFFERED, '
+				ELSE ''
+				END
+				+ CASE 
+				WHEN (
+						IsNumeric(IMP.intTotalNumberOfPackageBreakups)=0
+						)
+					THEN 'TOTAL NUMBER OF PACKAGE BREAKUPS, '
+				ELSE ''
+				END
+				+ CASE 
+				WHEN (
+						 IsNumeric(IMP.intNoOfPackages )=0
+						)
+					THEN 'NO OF PACKAGES, '
+				ELSE ''
+				END
+				+ CASE 
+				WHEN (
+						IsDate(IMP.dtmSaleDate)=0
+						)
+					THEN 'SALE DATE, '
+				ELSE ''
+				END
+				
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
@@ -193,11 +249,11 @@ BEGIN TRY
 		AND (
 			(
 				GRADE.intCommodityAttributeId IS NULL
-				AND ISNULL(IMP.strGrade, '') <> ''
+				--AND ISNULL(IMP.strGrade, '') <> ''
 				)
 			OR (
 				LEAF_TYPE.intCommodityAttributeId IS NULL
-				AND ISNULL(IMP.strManufacturingLeafType, '') <> ''
+				--AND ISNULL(IMP.strManufacturingLeafType, '') <> ''
 				)
 			OR (
 				SEASON.intCommodityAttributeId IS NULL
@@ -205,15 +261,15 @@ BEGIN TRY
 				)
 			OR (
 				GARDEN.intGardenMarkId IS NULL
-				AND ISNULL(IMP.strGardenMark, '') <> ''
+				--AND ISNULL(IMP.strGardenMark, '') <> ''
 				)
 			OR (
 				ORIGIN.intCountryID IS NULL
-				AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
+				--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
 				)
 			OR (
 				WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
-				AND ISNULL(IMP.strWarehouseCode, '') <> ''
+				--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 				)
 			OR (
 				SUSTAINABILITY.intCommodityProductLineId IS NULL
@@ -223,13 +279,13 @@ BEGIN TRY
 				ECTBO.intUserId IS NULL
 				AND ISNULL(IMP.strEvaluatorsCodeAtTBO, '') <> ''
 				)
-			OR (
-				FROM_LOC_CODE.intCityId IS NULL
-				AND ISNULL(IMP.strFromLocationCode, '') <> ''
-				)
+			--OR (
+			--	FROM_LOC_CODE.intCityId IS NULL
+			--	AND ISNULL(IMP.strFromLocationCode, '') <> ''
+			--	)
 			OR (
 				MARKET_ZONE.intMarketZoneId IS NULL
-				AND ISNULL(IMP.strChannel, '') <> ''
+				--AND ISNULL(IMP.strChannel, '') <> ''
 				)
 			OR (
 				SAMPLE_TYPE.intSampleTypeId IS NULL
@@ -238,7 +294,7 @@ BEGIN TRY
 			OR (
 				(
 					UOM.intUnitMeasureId IS NULL
-					AND ISNULL(IMP.strNoOfPackagesUOM, '') <> ''
+					--AND ISNULL(IMP.strNoOfPackagesUOM, '') <> ''
 					)
 				OR (
 					ISNULL(IMP.intNoOfPackages, 0) <> 0
@@ -269,10 +325,17 @@ BEGIN TRY
 				BROKERS.intEntityId IS NULL
 				AND ISNULL(IMP.strBroker, '') <> ''
 				)
-			OR (
-				RSL.intCompanyLocationSubLocationId IS NULL
-				AND ISNULL(IMP.strReceivingStorageLocation, '') <> ''
-				)
+			--OR (
+			--	RSL.intCompanyLocationSubLocationId IS NULL
+			--	AND ISNULL(IMP.strReceivingStorageLocation, '') <> ''
+			--	)
+				OR ISNULL(IMP.strPackageType , '') = ''
+				OR ISNULL(IMP.strChopNumber , '') = ''
+				OR IsDate(IMP.dtmManufacturingDate)=0
+				OR IsNumeric(IMP.dblTotalQtyOffered )=0
+				OR IsNumeric(IMP.intTotalNumberOfPackageBreakups)=0
+				OR IsNumeric(IMP.intNoOfPackages )=0
+				OR IsDate(IMP.dtmSaleDate )=0
 			)
 
 	-- Check if vendor is mapped to the TBO
@@ -456,6 +519,7 @@ BEGIN TRY
 		,intBatchId = NULL
 		,strTINNumber = NULL
 		,intSubBookId = STRATEGY.intSubBookId
+		,strPackageType=strPackageType
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sale Year
@@ -509,10 +573,10 @@ BEGIN TRY
 	LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL
 		AND BROKERS.strName = IMP.strBroker
 	-- Receiving Storage Location
+	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
 	LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND RSL.intCompanyLocationId = TBO.intCompanyLocationId
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
 	LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 		AND BATCH_MU.intLocationId = MU.intCompanyLocationId
 	-- Buyer1 Quantity UOM
@@ -598,6 +662,7 @@ BEGIN TRY
 		,intBatchId = BATCH_TBO.intBatchId
 		,strTINNumber = IMP.strTINNumber
 		,intSubBookId = NULL
+		,strPackageType=NULL
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sample Type
@@ -688,9 +753,18 @@ BEGIN TRY
 		,@intBatchId
 		,@strTINNumber
 		,@intSubBookId
+		,@strPackageType
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		Select @intPackageTypeId=NULL,@dblTareWeight=0
+		SELECT @intPackageTypeId = intUnitMeasureId
+		FROM tblICUnitMeasure 
+		WHERE strUnitMeasure = @strPackageType;
+
+		Select @dblTareWeight=dblConversionToStock  from tblICUnitMeasureConversion 
+		Where intUnitMeasureId=@intPackageTypeId
+
 		SET @intSampleId = NULL
 
 		-- Check if Batch ID is supplied in the template
@@ -743,7 +817,7 @@ BEGIN TRY
 					WHERE B.intBatchId = @intBatchId
 				
 					/* Item UOM Validation. */
-					IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+					IF @intImportType =1 AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
 						BEGIN	
 							SELECT @strItemLog = strItemNo
 							FROM tblICItem 
@@ -754,7 +828,7 @@ BEGIN TRY
 							WHERE intUnitMeasureId = @intRepresentingUOMId;
 
 							UPDATE tblQMImportCatalogue
-							SET strLogResult = 'Unit of Measure '''+ @strUnitMeasureLog +''' does not exists on Item ''' + @strItemLog +'''.' 
+							SET strLogResult = 'Unit of Measure '''+ IsNULL(@strUnitMeasureLog,'') +''' does not exists on Item ''' + IsNULL(@strItemLog,'') +'''.' 
 								,ysnProcessed = 1
 								,ysnSuccess = 0
 							WHERE intImportCatalogueId = @intImportCatalogueId;
@@ -840,6 +914,9 @@ BEGIN TRY
 						,strSampleBoxNumber
 						,strComments3
 						,intBrokerId
+						,intPackageTypeId
+						,dblTareWeight
+						,strCourierRef
 						)
 					-- ,intTINClearanceId
 					SELECT intConcurrencyId = 1
@@ -904,6 +981,9 @@ BEGIN TRY
 						,strSampleBoxNumber = S.strSampleBoxNumber
 						,strComments3 = S.strComments3
 						,intBrokerId = S.intBrokerId
+						,intPackageTypeId=@intPackageTypeId
+						,dblTareWeight=@dblTareWeight
+						,strCourierRef = @strCourierRef
 					FROM tblQMSample S
 					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 					WHERE B.intBatchId = @intBatchId
@@ -986,6 +1066,8 @@ BEGIN TRY
 					  , dblB1Price = null
 					  , intB1PriceUOMId = null
 					  , intBookId = null
+					  ,intPackageTypeId=@intPackageTypeId
+					  ,dblTareWeight=@dblTareWeight
 					FROM tblQMSample S
 					WHERE S.intSampleId = @intBatchSampleId
 
@@ -1002,7 +1084,7 @@ BEGIN TRY
 				END
 
 				/* Item UOM Validation. */
-				IF NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
+				IF @intImportType =1 AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intRepresentingUOMId)
 					BEGIN
 						SELECT @strItemLog = strItemNo
 						FROM tblICItem 
@@ -1209,6 +1291,8 @@ BEGIN TRY
 				,strSampleBoxNumber
 				,strComments3
 				,intBrokerId
+				,intPackageTypeId 
+				,dblTareWeight
 				)
 			-- ,strBuyingOrderNo
 			SELECT intConcurrencyId = 1
@@ -1304,6 +1388,8 @@ BEGIN TRY
 				,strSampleBoxNumber = @strSampleBoxNumber
 				,strComments3 = @strComments3
 				,intBrokerId = @intBrokerId
+				,intPackageTypeId =@intPackageTypeId
+				,dblTareWeight=@dblTareWeight
 
 			SET @intSampleId = SCOPE_IDENTITY()
 
@@ -1587,6 +1673,8 @@ BEGIN TRY
 				,dblB1Price = null
 				,intB1PriceUOMId = null
 				,intBookId = null
+				,intPackageTypeId=@intPackageTypeId
+				,strCourierRef = @strCourierRef
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 
@@ -1672,6 +1760,7 @@ BEGIN TRY
 			,@intBatchId
 			,@strTINNumber
 			,@intSubBookId
+			,@strPackageType
 
 	END
 

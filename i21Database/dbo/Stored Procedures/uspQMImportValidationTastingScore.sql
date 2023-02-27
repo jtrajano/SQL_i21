@@ -27,30 +27,30 @@ BEGIN TRY
 	  , Catalogue.ysnProcessed	= 1
 	FROM tblQMImportCatalogue AS Catalogue
 	LEFT JOIN (SELECT SaleYear.strSaleYear
-				    , CompanyLocation.strLocationName	AS strBuyingCenter
-				    , QSample.strSaleNumber			
-				    , CatalogueType.strCatalogueType	AS strCatalogueType
-				    , Supplier.strName					AS strSupplier
-				    , MarketZone.strMarketZoneCode		AS strChannel
-				    , QSample.strRepresentLotNumber		AS strLotNumber
-				    , TealingoItem.strItemNo			AS strTealingoItem
-				    , QSample.intSampleId
-			   FROM tblQMSample AS QSample
-			   LEFT JOIN tblQMSaleYear AS SaleYear ON QSample.intSaleYearId = SaleYear.intSaleYearId
-			   LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON QSample.intCompanyLocationId = CompanyLocation.intCompanyLocationId
-			   LEFT JOIN tblQMCatalogueType AS CatalogueType ON QSample.intCatalogueTypeId = CatalogueType.intCatalogueTypeId
-			   LEFT JOIN tblAPVendor AS Vendor ON QSample.intEntityId = Vendor.intEntityId
-			   LEFT JOIN tblEMEntity AS Supplier ON QSample.intEntityId = Supplier.intEntityId AND Supplier.intEntityId = Vendor.intEntityId
-			   LEFT JOIN tblARMarketZone AS MarketZone ON QSample.intMarketZoneId = MarketZone.intMarketZoneId
-			   LEFT JOIN tblICItem AS TealingoItem ON QSample.intItemId = TealingoItem.intItemId
-			   ) AS QualitySample ON Catalogue.strSaleYear		= QualitySample.strSaleYear
-			   				     AND Catalogue.strBuyingCenter	= QualitySample.strBuyingCenter	
-			   				     AND Catalogue.strSaleNumber	= QualitySample.strSaleNumber	
-			   				     AND Catalogue.strCatalogueType = QualitySample.strCatalogueType	
-			   				     AND Catalogue.strSupplier		= QualitySample.strSupplier	
-			   				     AND Catalogue.strChannel		= QualitySample.strChannel	
-			   				     AND Catalogue.strLotNumber		= QualitySample.strLotNumber
-			   				     AND Catalogue.strTealingoItem	= QualitySample.strTealingoItem	
+				 , CompanyLocation.strLocationName	AS strBuyingCenter
+				 , QSample.strSaleNumber			
+				 , CatalogueType.strCatalogueType	AS strCatalogueType
+				 , Supplier.strName					AS strSupplier
+				 , MarketZone.strMarketZoneCode		AS strChannel
+				 , QSample.strRepresentLotNumber	AS strLotNumber
+				 , TealingoItem.strItemNo			AS strTealingoItem
+				 , QSample.intSampleId
+			FROM tblQMSample AS QSample
+			LEFT JOIN tblQMSaleYear AS SaleYear ON QSample.intSaleYearId = SaleYear.intSaleYearId
+			LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON QSample.intCompanyLocationId = CompanyLocation.intCompanyLocationId
+			LEFT JOIN tblQMCatalogueType AS CatalogueType ON QSample.intCatalogueTypeId = CatalogueType.intCatalogueTypeId
+			LEFT JOIN tblAPVendor AS Vendor ON QSample.intEntityId = Vendor.intEntityId
+			LEFT JOIN tblEMEntity AS Supplier ON QSample.intEntityId = Supplier.intEntityId AND Supplier.intEntityId = Vendor.intEntityId
+			LEFT JOIN tblARMarketZone AS MarketZone ON QSample.intMarketZoneId = MarketZone.intMarketZoneId
+			LEFT JOIN tblICItem AS TealingoItem ON QSample.intItemId = TealingoItem.intItemId
+			) AS QualitySample ON Catalogue.strSaleYear		= QualitySample.strSaleYear
+							  AND Catalogue.strBuyingCenter = QualitySample.strBuyingCenter	
+							  AND Catalogue.strSaleNumber	= QualitySample.strSaleNumber	
+							  AND Catalogue.strCatalogueType = QualitySample.strCatalogueType	
+							  AND Catalogue.strSupplier		= QualitySample.strSupplier	
+							  AND Catalogue.strChannel		= QualitySample.strChannel	
+							  AND Catalogue.strLotNumber	= QualitySample.strLotNumber
+							  AND Catalogue.strTealingoItem	= QualitySample.strTealingoItem	
 	WHERE Catalogue.intImportLogId = @intImportLogId
 	  AND ISNULL(Catalogue.strBatchNo, '') = ''
 	  AND Catalogue.ysnSuccess = 1
