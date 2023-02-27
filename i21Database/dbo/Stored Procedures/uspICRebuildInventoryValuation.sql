@@ -1069,7 +1069,7 @@ BEGIN
 						ELSE
 							CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 					END 
-				,id2 = intInventoryTransactionId
+				,id2 = t.intInventoryTransactionId
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
@@ -1088,6 +1088,7 @@ BEGIN
 						*/
 						WHEN t.intTransactionTypeId IN (
 							8
+							, 9
 							, 12
 							, 13
 							, 14
@@ -1096,15 +1097,24 @@ BEGIN
 							, 19
 							, 20
 						) THEN 4 
+						WHEN t.intTransactionTypeId = 10 AND t2.intInventoryTransactionId IS NOT NULL THEN 4 
 						WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
 						WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
-						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
-						WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
-						WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
-						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
-						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
+						WHEN 
+							t.dblQty > 0 
+							AND t.strTransactionForm NOT IN (
+								'Invoice
+								','Inventory Shipment'
+								,'Inventory Count'
+								,'Credit Memo'
+								,'Outbound Shipment') 
+							THEN 3 
+						WHEN t.dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
+						WHEN t.dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
+						WHEN t.dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
+						WHEN t.dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
 						WHEN t.strTransactionForm IN ('Inventory Count') THEN 11
-						WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
+						WHEN t.dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
 						ELSE 10
 					END
 				,intItemId
@@ -1119,7 +1129,7 @@ BEGIN
 				,dblCost
 				,dblValue
 				,dblSalesPrice
-				,intCurrencyId
+				,t.intCurrencyId
 				,dblExchangeRate
 				,intTransactionId
 				,t.strTransactionId
@@ -1133,14 +1143,14 @@ BEGIN
 				,strRelatedTransactionId
 				,t.strTransactionForm
 				,intCostingMethod
-				,dtmCreated
+				,t.dtmCreated
 				,strDescription
-				,intCreatedUserId
+				,t.intCreatedUserId
 				,intCreatedEntityId
-				,intConcurrencyId  
+				,t.intConcurrencyId  
 				,intForexRateTypeId
 				,dblForexRate 
-				,strActualCostId
+				,t.strActualCostId
 				,intCategoryId
 				,dblUnitRetail
 				,dblCategoryCostValue
@@ -1158,6 +1168,22 @@ BEGIN
 				LEFT JOIN tblICInventoryReceipt r 
 					ON r.strReceiptNumber = t.strTransactionId
 					AND t.strTransactionForm = 'Inventory Receipt'
+				OUTER APPLY (
+					SELECT TOP 1 
+						t2.intInventoryTransactionId
+					FROM 
+						#tmpUnOrderedICTransaction t2
+					WHERE
+						t2.strTransactionId = t.strTransactionId
+						AND t2.strBatchId = t.strBatchId
+						AND t2.strTransactionForm = t.strTransactionForm
+						AND t.strTransactionForm = 'Inventory Adjustment'					
+						AND t2.intItemId <> t.intItemId
+						AND SIGN(t2.dblQty) <> SIGN(t.dblQty)
+						AND t2.dblQty <> 0 
+						AND t.dblQty <> 0 
+				) t2 
+
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
@@ -1192,13 +1218,14 @@ BEGIN
 					, 19
 					, 20
 				) THEN 4 
+				WHEN t.intTransactionTypeId = 10 AND t2.intInventoryTransactionId IS NOT NULL THEN 4 
 				WHEN ty.strName = 'Cost Adjustment' and t.strTransactionForm = 'Produce' THEN 4
 				WHEN t.strTransactionForm = 'Inventory Receipt' and r.strReceiptType = 'Transfer Order' THEN 4
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo', 'Outbound Shipment') THEN 3 
-				WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
-				WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
-				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
-				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
+				--WHEN dblQty < 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 5
+				--WHEN dblQty > 0 AND t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment') THEN 6
+				--WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
+				--WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
 				WHEN t.strTransactionForm IN ('Inventory Count') THEN 11
 				WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
 				ELSE 10
@@ -1209,7 +1236,7 @@ BEGIN
 					CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 				ELSE
 					1
-			END ASC 			
+			END ASC
 			
 		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
 			intItemId
@@ -1264,7 +1291,10 @@ BEGIN
 					--AND dbo.fnDateGreaterThanEquals(t2.dtmDate, t.[dtmStartOfMonth]) = 1
 					--AND dbo.fnDateLessThanEquals(t2.dtmDate, t.[dtmEndOfMonth]) = 1
 				ORDER BY
-					t2.dtmDate DESC, t2.id DESC, t2.intSortByQty DESC
+					t2.dtmDate DESC
+					,t2.sortId DESC 
+					--, t2.id DESC
+					--, t2.intSortByQty DESC
 			) t2
 	END
 	ELSE 
@@ -1857,18 +1887,18 @@ BEGIN
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END
 
-			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Produce', 'Consume'))
-			BEGIN 
-				--PRINT 'Reposting MFG Cost Adjustments: ' + @strTransactionId
+			--ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Produce', 'Consume'))
+			--BEGIN 
+			--	--PRINT 'Reposting MFG Cost Adjustments: ' + @strTransactionId
 				
-				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
-				EXEC @intReturnValue = uspMFRepostCostAdjustment
-					@strBatchId
-					,@intEntityUserSecurityId
-					,@dtmDate
+			--	-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
+			--	EXEC @intReturnValue = uspMFRepostCostAdjustment
+			--		@strBatchId
+			--		,@intEntityUserSecurityId
+			--		,@dtmDate
 
-				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-			END
+			--	IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+			--END
 
 			-- Repost 'Consume' and 'Produce'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Consume', 'Produce'))
@@ -1955,26 +1985,26 @@ BEGIN
 							OR intTransactionTypeId = 8 
 						)
 
-				-- Check if lot is involved in an item change. 
-				-- If it is, then update the consume to the new lot id, item id, and item uom id. 
-				BEGIN 
-					UPDATE	ItemsToConsume
-					SET		ItemsToConsume.intItemId = Lot.intItemId
-							,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
-							,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
-							,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
-							,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
-							,ItemsToConsume.intLotId = Lot.intLotId 
-					FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
-								ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
-					WHERE	EXISTS (
-								SELECT	TOP 1 1
-								FROM	#tmpICInventoryTransaction InvTrans
-								WHERE	InvTrans.intLotId = Lot.intLotId 
-										AND InvTrans.intTransactionTypeId = 15
-							)
-							AND Lot.intLotId IS NOT NULL
-				END 
+				---- Check if lot is involved in an item change. 
+				---- If it is, then update the consume to the new lot id, item id, and item uom id. 
+				--BEGIN 
+				--	UPDATE	ItemsToConsume
+				--	SET		ItemsToConsume.intItemId = Lot.intItemId
+				--			,ItemsToConsume.intItemUOMId = dbo.fnGetMatchingItemUOMId(Lot.intItemId, ItemsToConsume.intItemUOMId)
+				--			,ItemsToConsume.intItemLocationId = Lot.intItemLocationId 
+				--			,ItemsToConsume.intSubLocationId = Lot.intSubLocationId
+				--			,ItemsToConsume.intStorageLocationId = Lot.intStorageLocationId							
+				--			,ItemsToConsume.intLotId = Lot.intLotId 
+				--	FROM	@ItemsToPost ItemsToConsume LEFT JOIN dbo.tblICLot Lot
+				--				ON ItemsToConsume.intLotId = Lot.intSplitFromLotId
+				--	WHERE	EXISTS (
+				--				SELECT	TOP 1 1
+				--				FROM	#tmpICInventoryTransaction InvTrans
+				--				WHERE	InvTrans.intLotId = Lot.intLotId 
+				--						AND InvTrans.intTransactionTypeId = 15
+				--			)
+				--			AND Lot.intLotId IS NOT NULL
+				--END 
 
 				EXEC @intReturnValue = dbo.uspICRepostCosting
 					@strBatchId
@@ -2078,6 +2108,20 @@ BEGIN
 					,@strTransactionId
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+
+				-- Call the MFG Cost Adjustment if Produce has zero cost and Consume has non-zero cost. 
+				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId AND t.strTransactionForm = 'Produce' AND t.dblCost = 0 AND t.dblQty > 0)
+				AND EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId AND t.strTransactionForm = 'Consume' AND t.dblCost <> 0 AND t.dblQty < 0)
+				AND EXISTS (SELECT TOP 1 1 FROM tblMFWorkOrder wo WHERE strWorkOrderNo = @strTransactionId AND strCostAdjustmentBatchId IS NOT NULL) 
+				AND NOT EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId AND t.dblQty <> 0 AND t.strBatchId <> @strBatchId)
+				BEGIN 
+					EXEC uspMFRepostCostAdjustment 
+						@strCostAdjustmentBatchId = NULL 
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@dtmDate = @dtmDate
+						,@strWorkOrderNo = @strTransactionId
+				END 
 
 				-- Special delete on #tmpICInventoryTransaction
 				-- Produce and Consume transactions typically shares a batch but hold different transaction ids. 
@@ -3590,7 +3634,7 @@ BEGIN
 								ON s.intFreightTermId = ft.intFreightTermId
 							LEFT JOIN tblICFobPoint fp
 								ON fp.strFobPoint = ft.strFobPoint
-					WHERE	s.strShipmentNumber = @strTransactionId  		
+					WHERE	s.strShipmentNumber = @strTransactionId 		
 
 					SELECT	@strAccountToCounterInventory = NULL 
 					WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
@@ -4763,7 +4807,7 @@ BEGIN
 							) t																
 					WHERE	i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					ORDER BY 
-						ri.intInventoryReceiptItemId ASC
+						ri.intInventoryReceiptItemId ASC					
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
@@ -4775,58 +4819,6 @@ BEGIN
 							,@strGLDescription
 
 						IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-
-						SET @intReturnValue = NULL 
-						INSERT INTO @GLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]					
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm] 
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]
-							,[dblDebitReport]
-							,[dblCreditForeign]
-							,[dblCreditReport]
-							,[dblReportingRate]
-							,[dblForeignRate]
-							,[intSourceEntityId]
-							,[intCommodityId]
-						)
-						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
-							@strBatchId
-							,'Inventory'
-							,@intEntityUserSecurityId
-							,@strGLDescription
-							,@receiptLocationId
-							,@intItemId
-							,@strTransactionId
-							,@intCategoryId
-
-						IF @intReturnValue <> 0 
-						BEGIN 
-							--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Receipt - Transfer Order'
-							GOTO _EXIT_WITH_ERROR
-						END 
 					END
 				END			
 
@@ -5009,61 +5001,60 @@ BEGIN
 								ON t.intInventoryTransactionId = lastRecord.intInventoryTransactionId
 					END 
 
-					--SET @intReturnValue = NULL 
-					--DELETE FROM @DummyGLEntries
-					--INSERT INTO @DummyGLEntries (
-					--		[dtmDate] 
-					--		,[strBatchId]
-					--		,[intAccountId]
-					--		,[dblDebit]
-					--		,[dblCredit]
-					--		,[dblDebitUnit]
-					--		,[dblCreditUnit]
-					--		,[strDescription]
-					--		,[strCode]
-					--		,[strReference]
-					--		,[intCurrencyId]
-					--		,[dblExchangeRate]
-					--		,[dtmDateEntered]
-					--		,[dtmTransactionDate]
-					--		,[strJournalLineDescription]
-					--		,[intJournalLineNo]
-					--		,[ysnIsUnposted]
-					--		,[intUserId]
-					--		,[intEntityId]
-					--		,[strTransactionId]
-					--		,[intTransactionId]
-					--		,[strTransactionType]
-					--		,[strTransactionForm] 
-					--		,[strModuleName]
-					--		,[intConcurrencyId]
-					--		,[dblDebitForeign]
-					--		,[dblDebitReport]
-					--		,[dblCreditForeign]
-					--		,[dblCreditReport]
-					--		,[dblReportingRate]
-					--		,[dblForeignRate]
-					--		,[strRateType]
-					--		,[intSourceEntityId]
-					--		,[intCommodityId]
-					--)			
-					--EXEC @intReturnValue = dbo.uspICCreateGLEntries
-					--	@strBatchId 
-					--	,@strAccountToCounterInventory
-					--	,@intEntityUserSecurityId
-					--	,@strGLDescription
-					--	,NULL 
-					--	,@intItemId -- This is only used when rebuilding the stocks.
-					--	,@strTransactionId -- This is only used when rebuilding the stocks.
-					--	,@intCategoryId
+					
+					BEGIN 
+						SET @intReturnValue = NULL 
+						INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[intSourceEntityId]
+							,[intCommodityId]
+						)
+						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
+							@strBatchId
+							,'Inventory'
+							,@intEntityUserSecurityId
+							,@strGLDescription
+							,@receiptLocationId
+							,@intItemId
+							,@strTransactionId
+							,@intCategoryId
 
-					--IF @intReturnValue <> 0 
-					--BEGIN 
-					--	--PRINT 'Error found in uspICCreateGLEntries for Transfer Orders'
-					--	GOTO _EXIT_WITH_ERROR
-					--END 
-
-					--select 'debug @DummyGLEntries', * from @DummyGLEntries
+						IF @intReturnValue <> 0 
+						BEGIN 
+							--PRINT 'Error found in uspICCreateGLEntriesForInTransitCosting - Inventory Receipt - Transfer Order'
+							GOTO _EXIT_WITH_ERROR
+						END 
+					END
 				END
 
 				-- Receive the other types of Inventory Receipt. 
@@ -6780,5 +6771,4 @@ BEGIN
 		DROP TABLE #tmpLogRiskPosition		
 END 
 
-RETURN @intReturnValue; 
-
+RETURN @intReturnValue;
