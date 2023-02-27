@@ -175,7 +175,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
 
 			FROM tblFAFixedAsset A
-			WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+			WHERE A.[intAssetId] IN (@intCurrentAssetId)
 
 			-- EXPENSE ACCOUNT
 			UNION ALL
@@ -218,7 +218,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
 
 			FROM tblFAFixedAsset A
-			WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+			WHERE A.[intAssetId] IN (@intCurrentAssetId)
 					
 				BEGIN TRY
 					EXEC uspGLBookEntries @GLEntries, @ysnPost
