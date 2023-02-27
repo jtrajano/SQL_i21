@@ -99,6 +99,7 @@ BEGIN TRY
 		,@strIntensity NVARCHAR(MAX)
 		,@strTaste NVARCHAR(MAX)
 		,@strMouthFeel NVARCHAR(MAX)
+		,@strAirwayBillNumberCode NVARCHAR(MAX)
 	DECLARE @intValidDate INT
 		,@intDefaultItemId INT
 		,@intDefaultCategoryId INT
@@ -114,159 +115,178 @@ BEGIN TRY
 	FROM tblQMCatalogueImportDefaults CID
 	INNER JOIN tblICItem I ON I.intItemId = CID.intDefaultItemId
 
+	IF OBJECT_ID('tempdb..##tmpQMCatalogueImport') IS NOT NULL
+        DROP TABLE ##tmpQMCatalogueImport
+
+	;WITH CTE AS (
+		SELECT intImportType = 1 -- Auction/Non-Action Sample Import
+			,intImportCatalogueId = IMP.intImportCatalogueId
+			,intSampleTypeId = S.intSampleTypeId
+			,intTemplateSampleTypeId = NULL
+			,intCompanyLocationId = NULL
+			,intColourId = COLOUR.intCommodityAttributeId
+			,strColour = COLOUR.strDescription
+			,intBrandId = SIZE.intBrandId
+			,strBrand = SIZE.strBrandCode
+			,strComments = IMP.strRemarks
+			,intSampleId = S.intSampleId
+			,intValuationGroupId = STYLE.intValuationGroupId
+			,strValuationGroup = STYLE.strName
+			,strOrigin = ORIGIN.strISOCode
+			,strSustainability = SUSTAINABILITY.strDescription
+			,strMusterLot = IMP.strMusterLot
+			,strMissingLot = IMP.strMissingLot
+			,strComments2 = IMP.strTastersRemarks
+			,intItemId = ITEM.intItemId
+			,intCategoryId = ITEM.intCategoryId
+			,dtmDateCreated = IL.dtmImportDate
+			,intEntityUserId = IL.intEntityId
+			,intBatchId = NULL
+			,strBatchNo = NULL
+			,strTINNumber = NULL
+			-- Test Properties
+			,strAppearance = IMP.strAppearance
+			,strHue = IMP.strHue
+			,strIntensity = IMP.strIntensity
+			,strTaste = IMP.strTaste
+			,strMouthFeel = IMP.strMouthfeel
+			,[strBulkDensity] = IMP.strBulkDensity
+			,[strTeaMoisture] = IMP.strTeaMoisture
+			,[strFines] = IMP.strFines
+			,[strTeaVolume] = IMP.strTeaVolume
+			,[strDustContent] = IMP.strDustContent
+			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
+		FROM tblQMSample S
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+		INNER JOIN (
+			tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+			) ON V.intEntityId = S.intEntityId
+		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+		INNER JOIN (
+			tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
+			-- Colour
+			LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
+				AND COLOUR.strDescription = IMP.strColour
+			-- Size
+			LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
+			-- Style
+			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
+			-- Tealingo Item
+			LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
+			-- TBO
+			LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
+			) ON SY.strSaleYear = IMP.strSaleYear
+			AND CL.strLocationName = IMP.strBuyingCenter
+			AND S.strSaleNumber = IMP.strSaleNumber
+			AND CT.strCatalogueType = IMP.strCatalogueType
+			AND E.strName = IMP.strSupplier
+			AND S.strRepresentLotNumber = IMP.strLotNumber
+		WHERE IMP.intImportLogId = @intImportLogId
+			AND ISNULL(IMP.strBatchNo, '') = ''
+			AND IMP.ysnSuccess = 1
+		
+		UNION ALL
+		
+		SELECT intImportTypeId = 2 -- Pre-Shipment Sample Import
+			,intImportCatalogueId = IMP.intImportCatalogueId
+			,intSampleTypeId = S.intSampleTypeId
+			,intTemplateSampleTypeId = TEMPLATE_SAMPLE_TYPE.intSampleTypeId
+			,intCompanyLocationId = MU.intCompanyLocationId
+			,intColourId = COLOUR.intCommodityAttributeId
+			,strColour = COLOUR.strDescription
+			,intBrandId = SIZE.intBrandId
+			,strBrand = SIZE.strBrandCode
+			,strComments = IMP.strRemarks
+			,intSampleId = S.intSampleId
+			,intValuationGroupId = STYLE.intValuationGroupId
+			,strValuationGroup = STYLE.strName
+			,strOrigin = IMP.strGardenGeoOrigin 
+			,strSustainability = IMP.strSustainability
+			,strMusterLot = IMP.strMusterLot
+			,strMissingLot = IMP.strMissingLot
+			,strComments2 = IMP.strTastersRemarks
+			,intItemId = ITEM.intItemId
+			,intCategoryId = ITEM.intCategoryId
+			,dtmDateCreated = IL.dtmImportDate
+			,intEntityUserId = IL.intEntityId
+			,intBatchId = BATCH_TBO.intBatchId
+			,strBatchNo = IMP.strBatchNo
+			,strTINNumber = IMP.strTINNumber
+			-- Test Properties
+			,strAppearance = IMP.strAppearance
+			,strHue = IMP.strHue
+			,strIntensity = IMP.strIntensity
+			,strTaste = IMP.strTaste
+			,strMouthFeel = IMP.strMouthfeel
+			,[strBulkDensity] = IMP.strBulkDensity
+			,[strTeaMoisture] = IMP.strTeaMoisture
+			,[strFines] = IMP.strFines
+			,[strTeaVolume] = IMP.strTeaVolume
+			,[strDustContent] = IMP.strDustContent
+			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
+		FROM tblQMSample S
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+		INNER JOIN (
+			tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+			) ON V.intEntityId = S.intEntityId
+		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+		LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+		INNER JOIN (
+			tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
+			-- Colour
+			LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
+				AND COLOUR.strDescription = IMP.strColour
+			-- Size
+			LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
+			-- Style
+			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
+			-- Tealingo Item
+			LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
+			-- Template Sample Type
+			LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+			-- Mixing Location
+			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+			-- Batch MU
+			LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
+				AND BATCH_MU.intLocationId = MU.intCompanyLocationId
+			-- Company Location
+			LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = BATCH_MU.intBuyingCenterLocationId
+			-- Batch TBO
+			LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId
+				AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
+			) ON SY.strSaleYear = IMP.strSaleYear
+			AND CL.strLocationName = IMP.strBuyingCenter
+			AND S.strSaleNumber = IMP.strSaleNumber
+			AND CT.strCatalogueType = IMP.strCatalogueType
+			AND E.strName = IMP.strSupplier
+			AND S.strRepresentLotNumber = IMP.strLotNumber
+		WHERE IMP.intImportLogId = @intImportLogId
+			AND ISNULL(IMP.strBatchNo, '') <> ''
+			AND IMP.ysnSuccess = 1
+	)
+	SELECT *
+	INTO ##tmpQMCatalogueImport
+	FROM CTE
+
+	-- Clear test properties of the previous item
+	DELETE TR
+	FROM tblQMTestResult TR
+	INNER JOIN ##tmpQMCatalogueImport R ON TR.intSampleId = R.intSampleId
+	WHERE R.intSampleId IS NOT NULL
+	AND R.intImportType = 1
+
 	-- Loop through each valid import detail
 	DECLARE @C AS CURSOR;
 
-	SET @C = CURSOR FAST_FORWARD
+	SET @C = CURSOR LOCAL FAST_FORWARD
 	FOR
 
-	SELECT intImportType = 1 -- Auction/Non-Action Sample Import
-		,intImportCatalogueId = IMP.intImportCatalogueId
-		,intSampleTypeId = S.intSampleTypeId
-		,intTemplateSampleTypeId = NULL
-		,intCompanyLocationId = NULL
-		,intColourId = COLOUR.intCommodityAttributeId
-		,strColour = COLOUR.strDescription
-		,intBrandId = SIZE.intBrandId
-		,strBrand = SIZE.strBrandCode
-		,strComments = IMP.strRemarks
-		,intSampleId = S.intSampleId
-		,intValuationGroupId = STYLE.intValuationGroupId
-		,strValuationGroup = STYLE.strName
-		,strOrigin = ORIGIN.strISOCode
-		,strSustainability = SUSTAINABILITY.strDescription
-		,strMusterLot = IMP.strMusterLot
-		,strMissingLot = IMP.strMissingLot
-		,strComments2 = IMP.strTastersRemarks
-		,intItemId = ITEM.intItemId
-		,intCategoryId = ITEM.intCategoryId
-		,dtmDateCreated = IL.dtmImportDate
-		,intEntityUserId = IL.intEntityId
-		,intBatchId = NULL
-		,strBatchNo = NULL
-		,strTINNumber = NULL
-		-- Test Properties
-		,strAppearance = IMP.strAppearance
-		,strHue = IMP.strHue
-		,strIntensity = IMP.strIntensity
-		,strTaste = IMP.strTaste
-		,strMouthFeel = IMP.strMouthfeel
-		,[strBulkDensity] = IMP.strBulkDensity
-		,[strTeaMoisture] = IMP.strTeaMoisture
-		,[strFines] = IMP.strFines
-		,[strTeaVolume] = IMP.strTeaVolume
-		,[strDustContent] = IMP.strDustContent
-	FROM tblQMSample S
-	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
-	INNER JOIN (
-		tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
-		) ON V.intEntityId = S.intEntityId
-	INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
-	INNER JOIN (
-		tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
-		-- Colour
-		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
-			AND COLOUR.strDescription = IMP.strColour
-		-- Size
-		LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
-		-- Style
-		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
-		-- Tealingo Item
-		LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
-		-- TBO
-		LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
-		) ON SY.strSaleYear = IMP.strSaleYear
-		AND CL.strLocationName = IMP.strBuyingCenter
-		AND S.strSaleNumber = IMP.strSaleNumber
-		AND CT.strCatalogueType = IMP.strCatalogueType
-		AND E.strName = IMP.strSupplier
-		AND S.strRepresentLotNumber = IMP.strLotNumber
-	WHERE IMP.intImportLogId = @intImportLogId
-		AND ISNULL(IMP.strBatchNo, '') = ''
-		AND IMP.ysnSuccess = 1
-	
-	UNION ALL
-	
-	SELECT intImportTypeId = 2 -- Pre-Shipment Sample Import
-		,intImportCatalogueId = IMP.intImportCatalogueId
-		,intSampleTypeId = S.intSampleTypeId
-		,intTemplateSampleTypeId = TEMPLATE_SAMPLE_TYPE.intSampleTypeId
-		,intCompanyLocationId = MU.intCompanyLocationId
-		,intColourId = COLOUR.intCommodityAttributeId
-		,strColour = COLOUR.strDescription
-		,intBrandId = SIZE.intBrandId
-		,strBrand = SIZE.strBrandCode
-		,strComments = IMP.strRemarks
-		,intSampleId = S.intSampleId
-		,intValuationGroupId = STYLE.intValuationGroupId
-		,strValuationGroup = STYLE.strName
-		,strOrigin = IMP.strGardenGeoOrigin 
-		,strSustainability = IMP.strSustainability
-		,strMusterLot = IMP.strMusterLot
-		,strMissingLot = IMP.strMissingLot
-		,strComments2 = IMP.strTastersRemarks
-		,intItemId = ITEM.intItemId
-		,intCategoryId = ITEM.intCategoryId
-		,dtmDateCreated = IL.dtmImportDate
-		,intEntityUserId = IL.intEntityId
-		,intBatchId = BATCH_TBO.intBatchId
-		,strBatchNo = IMP.strBatchNo
-		,strTINNumber = IMP.strTINNumber
-		-- Test Properties
-		,strAppearance = IMP.strAppearance
-		,strHue = IMP.strHue
-		,strIntensity = IMP.strIntensity
-		,strTaste = IMP.strTaste
-		,strMouthFeel = IMP.strMouthfeel
-		,[strBulkDensity] = IMP.strBulkDensity
-		,[strTeaMoisture] = IMP.strTeaMoisture
-		,[strFines] = IMP.strFines
-		,[strTeaVolume] = IMP.strTeaVolume
-		,[strDustContent] = IMP.strDustContent
-	FROM tblQMSample S
-	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
-	INNER JOIN (
-		tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
-		) ON V.intEntityId = S.intEntityId
-	INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
-	INNER JOIN (
-		tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
-		-- Colour
-		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
-			AND COLOUR.strDescription = IMP.strColour
-		-- Size
-		LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
-		-- Style
-		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
-		-- Tealingo Item
-		LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
-		-- Template Sample Type
-		LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
-		-- Mixing Location
-		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
-		-- Batch MU
-		LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
-			AND BATCH_MU.intLocationId = MU.intCompanyLocationId
-		-- Company Location
-		LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = BATCH_MU.intBuyingCenterLocationId
-		-- Batch TBO
-		LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId
-			AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
-		) ON SY.strSaleYear = IMP.strSaleYear
-		AND CL.strLocationName = IMP.strBuyingCenter
-		AND S.strSaleNumber = IMP.strSaleNumber
-		AND CT.strCatalogueType = IMP.strCatalogueType
-		AND E.strName = IMP.strSupplier
-		AND S.strRepresentLotNumber = IMP.strLotNumber
-	WHERE IMP.intImportLogId = @intImportLogId
-		AND ISNULL(IMP.strBatchNo, '') <> ''
-		AND IMP.ysnSuccess = 1
+	SELECT * FROM ##tmpQMCatalogueImport
 
 	OPEN @C
 
@@ -308,15 +328,14 @@ BEGIN TRY
 		,@strFines
 		,@strTeaVolume
 		,@strDustContent
+		,@strAirwayBillNumberCode
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		SET @ysnCreate = 0
 		SET @intBatchSampleId = NULL
-		Select @intSampleId	= NULL
 
-		--SELECT @intBatchId
-
+		
 		-- Check if Batch ID is supplied in the template
 		IF @intBatchId IS NOT NULL
 		BEGIN
@@ -550,6 +569,10 @@ BEGIN TRY
 					-- Update if existing sample exists
 			ELSE
 			BEGIN
+				DELETE TR
+				FROM tblQMTestResult TR
+				WHERE TR.intSampleId = @intBatchSampleId
+
 				EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
 					,@intUserEntityId = @intEntityUserId
 					,@strRemarks = 'Updated from Tasting Score Import'
@@ -652,7 +675,7 @@ BEGIN TRY
 		WHERE intSampleId = @intSampleId
 
 		IF @intItemId IS NULL
-			SELECT TOP 1 @intItemId = ITEM.intItemId
+			SELECT TOP 1 @intItemId=ITEM.intItemId
 			FROM tblQMSample S
 			INNER JOIN tblICItem ITEM ON ITEM.strItemNo LIKE @strBrand -- Leaf Size
 				-- TODO: To update filter once Sub Cluster is provided
@@ -667,56 +690,68 @@ BEGIN TRY
                 ON PP.intProductPropertyId = PPVP.intProductPropertyId
                 AND DATEPART(dayofyear , GETDATE()) BETWEEN DATEPART(dayofyear , PPVP.dtmValidFrom) AND DATEPART(dayofyear , PPVP.dtmValidTo)
            
-    		    AND PPVP.dblPinpointValue = Case 
+    		    AND (Case 
 				When PROP.strPropertyName = 'Appearance' then Case When @strAppearance is not null and IsNUmeric(@strAppearance)=1 Then CAST(@strAppearance AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End
 				When PROP.strPropertyName = 'Hue' then  Case When @strHue is not null and IsNUmeric(@strHue)=1 Then CAST(@strHue AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
 				When PROP.strPropertyName = 'Intensity' then  Case When @strIntensity is not null and IsNUmeric(@strIntensity)=1 Then CAST(@strIntensity AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
 				When PROP.strPropertyName = 'Taste' then  Case When @strTaste is not null and IsNUmeric(@strTaste)=1 Then CAST(@strTaste AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
 				When PROP.strPropertyName = 'Mouth Feel' then Case When @strMouthFeel is not null and IsNUmeric(@strMouthFeel)=1 Then CAST(@strMouthFeel AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
-				END
+				END) BETWEEN PPVP.dblMinValue  AND PPVP.dblMaxValue
 			WHERE S.intSampleId = @intSampleId
-			ORDER BY ITEM.strItemNo
+			Group by ITEM.intItemId
+			ORDER BY COUNT(1) Desc
+			--ORDER BY ITEM.strItemNo
 
-		-- If Tealingo Item is provided in the template but does not match the testing score, throw an error
-		IF (
-				@intItemId IS NOT NULL
-				AND dbo.fnQMValidateTealingoItemTastingScore(@intItemId, CASE 
-						WHEN ISNULL(@strAppearance, '') = ''
-							THEN NULL
-						ELSE CAST(@strAppearance AS NUMERIC(18, 6))
-						END -- APPEARANCE
-					, CASE 
-						WHEN ISNULL(@strHue, '') = ''
-							THEN NULL
-						ELSE CAST(@strHue AS NUMERIC(18, 6))
-						END -- HUE
-					, CASE 
-						WHEN ISNULL(@strIntensity, '') = ''
-							THEN NULL
-						ELSE CAST(@strIntensity AS NUMERIC(18, 6))
-						END -- INTENSITY
-					, CASE 
-						WHEN ISNULL(@strTaste, '') = ''
-							THEN NULL
-						ELSE CAST(@strTaste AS NUMERIC(18, 6))
-						END -- TASTE
-					, CASE 
-						WHEN ISNULL(@strMouthFeel, '') = ''
-							THEN NULL
-						ELSE CAST(@strMouthFeel AS NUMERIC(18, 6))
-						END -- MOUTH FEEL
-				) = 0
-				)
-		BEGIN
-			UPDATE tblQMImportCatalogue
-			SET strLogResult = 'WARNING: Import successful but the tasting score does not match the Tealingo item''s pinpoint values.'
-			WHERE intImportCatalogueId = @intImportCatalogueId
-		END
+		---- If Tealingo Item is provided in the template but does not match the testing score, throw an error
+		--IF (
+		--		@intItemId IS NOT NULL
+		--		AND dbo.fnQMValidateTealingoItemTastingScore(@intItemId, CASE 
+		--				WHEN ISNULL(@strAppearance, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strAppearance AS NUMERIC(18, 6))
+		--				END -- APPEARANCE
+		--			, CASE 
+		--				WHEN ISNULL(@strHue, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strHue AS NUMERIC(18, 6))
+		--				END -- HUE
+		--			, CASE 
+		--				WHEN ISNULL(@strIntensity, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strIntensity AS NUMERIC(18, 6))
+		--				END -- INTENSITY
+		--			, CASE 
+		--				WHEN ISNULL(@strTaste, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strTaste AS NUMERIC(18, 6))
+		--				END -- TASTE
+		--			, CASE 
+		--				WHEN ISNULL(@strMouthFeel, '') = ''
+		--					THEN NULL
+		--				ELSE CAST(@strMouthFeel AS NUMERIC(18, 6))
+		--				END -- MOUTH FEEL
+		--		) = 0
+		--		)
+		--BEGIN
+		--	UPDATE tblQMImportCatalogue
+		--	SET strLogResult = 'WARNING: Import successful but the tasting score does not match the Tealingo item''s pinpoint values.'
+		--	WHERE intImportCatalogueId = @intImportCatalogueId
+		--END
 
 		-- If Tealingo item cannot be determined, fallback to default item.
-		IF @intItemId IS NULL
-			SELECT @intItemId = @intDefaultItemId
-				,@intCategoryId = @intDefaultCategoryId
+		IF @intItemId IS NULL 
+		BEGIN
+		 IF @intImportType=1
+			BEGIN
+				SELECT @intItemId = @intDefaultItemId
+					,@intCategoryId = @intDefaultCategoryId
+			END
+			ELSE
+			BEGIN
+				SELECT @intItemId = @intOriginalItemId
+					,@intCategoryId = @intDefaultCategoryId
+			END
+		END
 
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -776,10 +811,9 @@ BEGIN TRY
 						)
 		END
 
-		-- Clear test properties of the previous item
-		DELETE
-		FROM tblQMTestResult
-		WHERE intSampleId = @intSampleId
+		
+		Begin
+
 
 		-- Insert Test Result
 		INSERT INTO tblQMTestResult (
@@ -850,6 +884,26 @@ BEGIN TRY
 					THEN @strTeaVolume
 				WHEN PRT.strPropertyName = 'Dust Level'
 					THEN @strDustContent
+				WHEN PRT.strPropertyName = 'Appearance' AND isNumeric(@strAppearance)=1 
+					THEN @strAppearance
+				WHEN PRT.strPropertyName = 'Appearance' AND isNumeric(@strAppearance)=0
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
+				WHEN PRT.strPropertyName = 'Hue' AND isNumeric(@strHue)=1 
+					THEN @strHue
+					WHEN PRT.strPropertyName = 'Hue' AND isNumeric(@strHue)=0
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
+				WHEN PRT.strPropertyName = 'Intensity' AND isNumeric(@strIntensity)=1 
+					THEN @strIntensity
+					WHEN PRT.strPropertyName = 'Intensity' AND isNumeric(@strIntensity)=0 
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
+				WHEN PRT.strPropertyName = 'Taste' AND isNumeric(@strTaste)=1 
+					THEN @strTaste
+					WHEN PRT.strPropertyName = 'Taste' AND isNumeric(@strTaste)=0
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
+				WHEN PRT.strPropertyName = 'Mouth Feel' AND isNumeric(@strMouthFeel)=1 
+					THEN @strMouthFeel
+					WHEN PRT.strPropertyName = 'Mouth Feel' AND isNumeric(@strMouthFeel)=0 
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
 				END
 			,@dtmDateCreated
 			,''
@@ -900,281 +954,152 @@ BEGIN TRY
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo
+		
+		---- Begin Update Actual Test Result
+		---- Appearance
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strAppearance)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strAppearance
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strAppearance, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Appearance'
 
-		-- Begin Update Actual Test Result
-		-- Appearance
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strAppearance)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strAppearance
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strAppearance, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Appearance'
+		---- Hue
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strHue)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strHue
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strHue, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Hue'
 
-		-- Hue
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strHue)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strHue
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strHue, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Hue'
+		---- Intensity
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strIntensity)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strIntensity
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strIntensity, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Intensity'
 
-		-- Intensity
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strIntensity)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strIntensity
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strIntensity, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Intensity'
+		---- Taste
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strTaste)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strTaste
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strTaste, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Taste'
 
-		-- Taste
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strTaste)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strTaste
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strTaste, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Taste'
-
-		-- Mouth Feel
-		UPDATE tblQMTestResult
-		SET strPropertyValue = (
-				CASE P.intDataTypeId
-					WHEN 4
-						THEN LOWER(@strMouthFeel)
-					ELSE (
-							CASE 
-								WHEN ISNULL(TR.strFormula, '') <> ''
-									THEN ''
-								ELSE @strMouthFeel
-								END
-							)
-					END
-				)
-			,strComment = @strComments
-			,dtmPropertyValueCreated = (
-				CASE 
-					WHEN ISNULL(@strMouthFeel, '') <> ''
-						THEN GETDATE()
-					ELSE NULL
-					END
-				)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-		WHERE TR.intSampleId = @intSampleId
-			AND P.strPropertyName = 'Mouth Feel'
-
-		-- Calculate and update formula property value
-		DECLARE @FormulaProperty TABLE (
-			intTestResultId INT
-			,strFormula NVARCHAR(MAX)
-			,strFormulaParser NVARCHAR(MAX)
-			)
-		DECLARE @intTestResultId INT
-			,@strFormula NVARCHAR(MAX)
-			,@strFormulaParser NVARCHAR(MAX)
-			,@strPropertyValue NVARCHAR(MAX)
-
-		DELETE
-		FROM @FormulaProperty
-
-		INSERT INTO @FormulaProperty
-		SELECT intTestResultId
-			,strFormula
-			,strFormulaParser
-		FROM tblQMTestResult
-		WHERE intSampleId = @intSampleId
-			AND ISNULL(strFormula, '') <> ''
-			AND ISNULL(strFormulaParser, '') <> ''
-		ORDER BY intTestResultId
-
-		SELECT @intTestResultId = MIN(intTestResultId)
-		FROM @FormulaProperty
-
-		WHILE (ISNULL(@intTestResultId, 0) > 0)
-		BEGIN
-			SELECT @strFormula = NULL
-				,@strFormulaParser = NULL
-				,@strPropertyValue = ''
-
-			SELECT @strFormula = strFormula
-				,@strFormulaParser = strFormulaParser
-			FROM @FormulaProperty
-			WHERE intTestResultId = @intTestResultId
-
-			SELECT @strFormula = REPLACE(REPLACE(REPLACE(@strFormula, @strFormulaParser, ''), '{', ''), '}', '')
-
-			IF @strFormulaParser = 'MAX'
-			BEGIN
-				SELECT @strPropertyValue = MAX(CONVERT(NUMERIC(18, 6), strPropertyValue))
-				FROM tblQMTestResult
-				WHERE intSampleId = @intSampleId
-					AND ISNULL(strPropertyValue, '') <> ''
-					AND intPropertyId IN (
-						SELECT intPropertyId
-						FROM tblQMProperty
-						WHERE strPropertyName IN (
-								SELECT Item COLLATE Latin1_General_CI_AS
-								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
-								)
-						)
-			END
-			ELSE IF @strFormulaParser = 'MIN'
-			BEGIN
-				SELECT @strPropertyValue = MIN(CONVERT(NUMERIC(18, 6), strPropertyValue))
-				FROM tblQMTestResult
-				WHERE intSampleId = @intSampleId
-					AND ISNULL(strPropertyValue, '') <> ''
-					AND intPropertyId IN (
-						SELECT intPropertyId
-						FROM tblQMProperty
-						WHERE strPropertyName IN (
-								SELECT Item COLLATE Latin1_General_CI_AS
-								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
-								)
-						)
-			END
-			ELSE IF @strFormulaParser = 'AVG'
-			BEGIN
-				SELECT @strPropertyValue = AVG(CONVERT(NUMERIC(18, 6), strPropertyValue))
-				FROM tblQMTestResult
-				WHERE intSampleId = @intSampleId
-					AND ISNULL(strPropertyValue, '') <> ''
-					AND intPropertyId IN (
-						SELECT intPropertyId
-						FROM tblQMProperty
-						WHERE strPropertyName IN (
-								SELECT Item COLLATE Latin1_General_CI_AS
-								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
-								)
-						)
-			END
-			ELSE IF @strFormulaParser = 'SUM'
-			BEGIN
-				SELECT @strPropertyValue = SUM(CONVERT(NUMERIC(18, 6), strPropertyValue))
-				FROM tblQMTestResult
-				WHERE intSampleId = @intSampleId
-					AND ISNULL(strPropertyValue, '') <> ''
-					AND intPropertyId IN (
-						SELECT intPropertyId
-						FROM tblQMProperty
-						WHERE strPropertyName IN (
-								SELECT Item COLLATE Latin1_General_CI_AS
-								FROM dbo.fnSplitStringWithTrim(@strFormula, ',')
-								)
-						)
-			END
-
-			IF @strPropertyValue <> ''
-			BEGIN
-				UPDATE tblQMTestResult
-				SET strPropertyValue = dbo.fnRemoveTrailingZeroes(@strPropertyValue)
-				WHERE intTestResultId = @intTestResultId
-			END
-
-			SELECT @intTestResultId = MIN(intTestResultId)
-			FROM @FormulaProperty
-			WHERE intTestResultId > @intTestResultId
-		END
-
-		-- Setting result for formula properties and the result which is not sent in excel
-		UPDATE tblQMTestResult
-		SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
-		FROM tblQMTestResult TR
-		WHERE TR.intSampleId = @intSampleId
-			AND ISNULL(TR.strResult, '') = ''
-
-		-- Setting correct date format
-		UPDATE tblQMTestResult
-		SET strPropertyValue = CONVERT(DATETIME, TR.strPropertyValue, 120)
-		FROM tblQMTestResult TR
-		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-			AND TR.intSampleId = @intSampleId
-			AND ISNULL(TR.strPropertyValue, '') <> ''
-			AND P.intDataTypeId = 12
+		---- Mouth Feel
+		--UPDATE tblQMTestResult
+		--SET strPropertyValue = (
+		--		CASE P.intDataTypeId
+		--			WHEN 4
+		--				THEN LOWER(@strMouthFeel)
+		--			ELSE (
+		--					CASE 
+		--						WHEN ISNULL(TR.strFormula, '') <> ''
+		--							THEN ''
+		--						ELSE @strMouthFeel
+		--						END
+		--					)
+		--			END
+		--		)
+		--	,strComment = @strComments
+		--	,dtmPropertyValueCreated = (
+		--		CASE 
+		--			WHEN ISNULL(@strMouthFeel, '') <> ''
+		--				THEN GETDATE()
+		--			ELSE NULL
+		--			END
+		--		)
+		--FROM tblQMTestResult TR
+		--JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		--	AND TR.intSampleId = @intSampleId
+		--WHERE TR.intSampleId = @intSampleId
+		--	AND P.strPropertyName = 'Mouth Feel'
 
 		UPDATE tblQMImportCatalogue
 		SET intSampleId = @intSampleId
@@ -1185,6 +1110,7 @@ BEGIN TRY
 			,@strRemarks = 'Updated from Tasting Score Import'
 			,@ysnCreate = 0
 			,@ysnBeforeUpdate = 0
+		End
 
 		IF @intImportType = 2
 			AND NOT EXISTS (
@@ -1317,7 +1243,7 @@ BEGIN TRY
 				,intContractDetailId = S.intContractDetailId
 				,str3PLStatus = S.str3PLStatus
 				,strSupplierReference = S.strAdditionalSupplierReference
-				,strAirwayBillCode = S.strCourierRef
+				,strAirwayBillCode = ISNULL(S.strCourierRef, @strAirwayBillNumberCode)
 				,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 				,strAWBSampleReference = S.strAWBSampleReference
 				,dblBasePrice = S.dblB1Price
@@ -1349,19 +1275,19 @@ BEGIN TRY
 				,strLeafSize = BRAND.strBrandCode
 				,strLeafStyle = STYLE.strName
 				,intBookId = S.intBookId
-				,dblPackagesBought = NULL
-				,intItemUOMId = S.intRepresentingUOMId
+				,dblPackagesBought = IsNULL(S.dblB1QtyBought, S.dblRepresentingQty)
+				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
 				,intOriginalItemId = S.intItemId
-				,dblPackagesPerPallet = NULL
-				,strPlant = NULL
-				,dblTotalQuantity = S.dblB1QtyBought
+				,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
+				,strPlant = MU.strVendorRefNoPrefix 
+				,dblTotalQuantity = S.dblSampleQty 
 				,strSampleBoxNumber = S.strSampleBoxNumber
 				,dblSellingPrice = NULL
 				,dtmStock = @dtmCurrentDate
 				,ysnStrategic = NULL
-				,strTeaLingoSubCluster = NULL
+				,strTeaLingoSubCluster = REGION.strDescription
 				,dtmSupplierPreInvoiceDate = NULL
 				,strSustainability = SUSTAINABILITY.strDescription
 				,strTasterComments = S.strComments2
@@ -1409,8 +1335,8 @@ BEGIN TRY
 					END
 				,intTealingoItemId = S.intItemId
 				,dtmWarehouseArrival = NULL
-				,intYearManufacture = NULL
-				,strPackageSize = NULL
+				,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
+				,strPackageSize = PT.strUnitMeasure
 				,intPackageUOMId = S.intNetWtPerPackagesUOMId
 				,dblTareWeight = S.dblTareWeight
 				,strTaster = IMP.strTaster
@@ -1447,6 +1373,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 			LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
+			LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
 			-- Appearance
 			OUTER APPLY (
 				SELECT TR.strPropertyValue
@@ -1560,7 +1487,7 @@ BEGIN TRY
 				AND WIUOM.intUnitMeasureId = S.intSampleUOMId
 			-- Qty Item UOM
 			LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId
-				AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
+				AND QIUOM.intUnitMeasureId = IsNULL(S.intB1QtyUOMId,S.intRepresentingUOMId)
 			WHERE S.intSampleId = @intSampleId
 				AND IMP.intImportLogId = @intImportLogId
 				AND IsNULL(S.dblB1QtyBought, 0) > 0
@@ -1643,11 +1570,31 @@ BEGIN TRY
 			,@strFines
 			,@strTeaVolume
 			,@strDustContent
+			,@strAirwayBillNumberCode
 	END
 
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	-- Setting correct date format
+	UPDATE TR
+	SET strPropertyValue = CONVERT(DATETIME, TR.strPropertyValue, 120)
+	FROM tblQMTestResult TR
+	INNER JOIN tblQMImportCatalogue IC ON IC.intSampleId = TR.intSampleId
+	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		AND IC.intImportLogId = @intImportLogId
+		AND ISNULL(TR.strPropertyValue, '') <> ''
+		AND P.intDataTypeId = 12
+		
+	-- Setting result for formula properties and the result which is not sent in excel
+	UPDATE TR
+	SET strResult = T.strResult
+	FROM tblQMTestResult TR
+	INNER JOIN tblQMImportCatalogue IC ON IC.intSampleId = TR.intSampleId
+	OUTER APPLY dbo.fnQMGetPropertyTestResult2(TR.intTestResultId) T
+	WHERE IC.intImportLogId = @intImportLogId
+		AND ISNULL(TR.strResult, '') = ''
 
 	COMMIT TRANSACTION
 END TRY

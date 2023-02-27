@@ -28,7 +28,7 @@ BEGIN TRY
 	-- Sample Status
 	LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 	-- Group Number
-	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+	LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strGroupNumber OR BOOK.strBookDescription = IMP.strGroupNumber)
 	-- Strategy
 	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 	-- Currency
@@ -53,7 +53,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						BOOK.intBookId IS NULL
-						AND ISNULL(IMP.strGroupNumber, '') <> ''
+				--		AND ISNULL(IMP.strGroupNumber, '') <> ''
 						)
 					THEN 'GROUP NUMBER, '
 				ELSE ''
@@ -67,11 +67,18 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						CUR.intCurrencyID IS NULL
-						AND ISNULL(IMP.strCurrency, '') <> ''
+						--AND ISNULL(IMP.strCurrency, '') <> ''
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
-				END
+				END+ CASE 
+				WHEN (
+						CD.intBookId<>BOOK.intBookId
+				--		AND ISNULL(IMP.strGroupNumber, '') <> ''
+						)
+					THEN 'MIXING UNIT, '
+				ELSE ''
+				END 
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
@@ -84,7 +91,7 @@ BEGIN TRY
 				)
 			OR (
 				BOOK.intBookId IS NULL
-				AND ISNULL(IMP.strGroupNumber, '') <> ''
+			--	AND ISNULL(IMP.strGroupNumber, '') <> ''
 				)
 			OR (
 				STRATEGY.intSubBookId IS NULL
@@ -92,8 +99,9 @@ BEGIN TRY
 				)
 			OR (
 				CUR.intCurrencyID IS NULL
-				AND ISNULL(IMP.strCurrency, '') <> ''
+				--AND ISNULL(IMP.strCurrency, '') <> ''
 				)
+			OR CD.intBookId<>BOOK.intBookId
 			)
 
 	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
@@ -132,6 +140,7 @@ BEGIN TRY
 			END
 		,strSampleNumber = S.strSampleNumber
 		,intCurrencyID = CUR.intCurrencyID
+		,strPlantCode=CL.strOregonFacilityNumber
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -149,7 +158,7 @@ BEGIN TRY
 		-- Sample Status
 		LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 		-- Group Number
-		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+		LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strGroupNumber OR BOOK.strBookDescription = IMP.strGroupNumber)
 		-- Strategy
 		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
 		-- Currency
@@ -178,6 +187,7 @@ BEGIN TRY
 		,@ysnSampleContractItemMatch
 		,@strSampleNumber
 		,@intCurrencyID
+		,@strPlantCode
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -372,7 +382,7 @@ BEGIN TRY
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
 			,intFromPortId = CD.intLoadingPortId
-			,dblGrossWeight = S.dblGrossWeight
+			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = NULL
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
@@ -382,18 +392,18 @@ BEGIN TRY
 			,strLeafStyle = STYLE.strName
 			,intBookId = S.intBookId
 			,dblPackagesBought = S.dblRepresentingQty
-			,intItemUOMId = S.intRepresentingUOMId
+			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
 			,intOriginalItemId = S.intItemId
-			,dblPackagesPerPallet = NULL
-			,strPlant = NULL
-			,dblTotalQuantity = S.dblRepresentingQty
+			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
+			,strPlant = @strPlantCode
+			,dblTotalQuantity = S.dblSampleQty 
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
 			,dtmStock = CD.dtmUpdatedAvailabilityDate 
 			,ysnStrategic = NULL
-			,strTeaLingoSubCluster = NULL
+			,strTeaLingoSubCluster = REGION.strDescription
 			,dtmSupplierPreInvoiceDate = NULL
 			,strSustainability = SUSTAINABILITY.strDescription
 			,strTasterComments = S.strComments2
@@ -433,7 +443,7 @@ BEGIN TRY
 			,dblTeaVolume = NULL
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
-			,intYearManufacture = NULL
+			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
 			,strPackageSize = NULL
 			,intPackageUOMId = S.intRepresentingUOMId
 			,dblTareWeight = S.dblTareWeight
@@ -549,6 +559,7 @@ BEGIN TRY
 				,dblOriginalTeaIntensity = dblTeaIntensity
 				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
 				,dblOriginalTeaAppearance = dblTeaAppearance
+				,strPlant=L.strVendorRefNoPrefix
 			FROM @MFBatchTableType B
 			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
 			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
@@ -586,6 +597,7 @@ BEGIN TRY
 			,@ysnSampleContractItemMatch
 			,@strSampleNumber
 			,@intCurrencyID
+			,@strPlantCode
 	END
 
 	CLOSE @C
