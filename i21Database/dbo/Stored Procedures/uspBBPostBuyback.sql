@@ -297,6 +297,8 @@ AS
 		
 		IF(@ysnSuccess = 0)
 		BEGIN
+			EXEC uspAPDeleteVoucher @intCreatedBillId, @intUserId, 10
+
 			SELECT TOP 1
 				@strPostingError = strMessage
 			FROM tblAPPostResult
