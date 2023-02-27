@@ -14,6 +14,8 @@ BEGIN TRY
 		,@strXML NVARCHAR(MAX) = ''
 		,@strRootXML NVARCHAR(MAX) = ''
 		,@strFinalXML NVARCHAR(MAX) = ''
+		,@ysnTrackMFTActivity BIT
+		,@strLocalForLocal nvarchar(50)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -429,8 +431,12 @@ BEGIN TRY
 			JOIN dbo.tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = L.intMarketZoneId
 			WHERE intLoadId = @intLoadId
 
+			SELECT @ysnTrackMFTActivity = 0,@strLocalForLocal=''
+
 			SELECT @strBuyingCountry = BCL.strCountry
 				,@strMixingUnitCountry = MCL.strCountry
+				,@ysnTrackMFTActivity = IsNULL(BCL.ysnTrackMFTActivity,0)
+				,@strLocalForLocal	=	BCL.strVendorRefNoPrefix
 			FROM tblMFBatch B WITH (NOLOCK)
 			JOIN dbo.tblSMCompanyLocation BCL WITH (NOLOCK) ON BCL.intCompanyLocationId = B.intBuyingCenterLocationId
 			JOIN dbo.tblSMCompanyLocation MCL WITH (NOLOCK) ON MCL.intCompanyLocationId = B.intMixingUnitLocationId
@@ -465,6 +471,10 @@ BEGIN TRY
 				FROM tblMFBatch B WITH (NOLOCK)
 				JOIN dbo.tblSMCompanyLocation MCL WITH (NOLOCK) ON MCL.intCompanyLocationId = B.intMixingUnitLocationId
 				WHERE B.intBatchId = @intBatchId
+			END
+			ELSE IF IsNULL(@ysnTrackMFTActivity,0)=1
+			BEGIN
+				SELECT @strVirtualPlant = @strLocalForLocal
 			END
 
 			IF @strDetailRowState <> 'D'
@@ -828,12 +838,12 @@ BEGIN TRY
 				+ '<OriginOfTea>' + ISNULL(@strISOCode, '') + '</OriginOfTea>'
 				+ '<OriginalTeaLingoItem>' + ISNULL(I.strItemNo, '') + '</OriginalTeaLingoItem>'
 				+ '<PackagesPerPallet>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblPackagesPerPallet, 0))) + '</PackagesPerPallet>'
-				+ '<Plant>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') THEN '' ELSE ISNULL(CL.strVendorRefNoPrefix, '') END + '</Plant>'
+				+ '<Plant>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') OR @ysnTrackMFTActivity=1 THEN '' ELSE ISNULL(CL.strVendorRefNoPrefix, '') END + '</Plant>'
 				+ '<TotalQuantity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTotalQuantity, 0))) + '</TotalQuantity>'
 				+ '<SampleBoxNo>' + ISNULL(B.strSampleBoxNumber, '') + '</SampleBoxNo>'
 				+ '<SellingPrice>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblSellingPrice, 0))) + '</SellingPrice>'
 				+ '<StockDate>' + ISNULL(CONVERT(VARCHAR(33), B.dtmStock, 126), '') + '</StockDate>'
-				+ '<StorageLocation>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') THEN '' ELSE ISNULL(B.strStorageLocation, '') END + '</StorageLocation>'
+				+ '<StorageLocation>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') OR @ysnTrackMFTActivity=1 THEN '' ELSE ISNULL(B.strStorageLocation, '') END + '</StorageLocation>'
 				+ '<SubChannel>' + ISNULL(B.strSubChannel, '') + '</SubChannel>'
 				+ '<StrategicFlag>' + LTRIM(ISNULL(B.ysnStrategic, '')) + '</StrategicFlag>'
 				+ '<SubClusterTeaLingo>' + ISNULL(B.strTeaLingoSubCluster, '') + '</SubClusterTeaLingo>'

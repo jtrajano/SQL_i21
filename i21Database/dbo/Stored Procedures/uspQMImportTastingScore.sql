@@ -36,7 +36,8 @@ BEGIN TRY
 	-- Template Sample Type
 	LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
 	-- Buyer1 Group Number
-	LEFT JOIN tblSMCompanyLocation B1GN ON B1GN.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strB1GroupNumber OR BOOK.strBookDescription = IMP.strB1GroupNumber)
+	LEFT JOIN tblSMCompanyLocation B1GN ON B1GN.strLocationName = BOOK.strBook
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
