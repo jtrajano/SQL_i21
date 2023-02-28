@@ -79,8 +79,8 @@ outer apply(
 where C.intAccountId = @intAccountId
 ),
 cteRunningBalance AS(
-        select  sum(dblAmount) over (partition by intAccountId order by intCurrencyID,intGLDetailId ) functionalRunningBalance,
-		sum(dblAmountForeign) over (partition by intAccountId, intCurrencyID order by intCurrencyID, intGLDetailId ) foreignRunningBalance,
+        select  sum(dblAmount) over (partition by intAccountId order by intCurrencyID,dtmDate,intTransactionId, intGLDetailId ) functionalRunningBalance,
+		sum(dblAmountForeign) over (partition by intAccountId, intCurrencyID order by intCurrencyID,dtmDate,intTransactionId, intGLDetailId ) foreignRunningBalance,
 		*
 		from GLQuery
 ),

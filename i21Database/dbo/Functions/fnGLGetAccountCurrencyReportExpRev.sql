@@ -85,8 +85,8 @@ where C.intAccountId = 53 and strFiscalYear = '2022'
 --order by C.intAccountId, intCurrencyID, intGLDetailId
 ),
 cteRunningBalance AS(
-        select  sum(dblAmount) over (partition by intAccountId, strFiscalYear order by strFiscalYear,intCurrencyID, intGLDetailId ) functionalRunningBalance,
-		sum(dblAmountForeign) over (partition by intAccountId,strFiscalYear, intCurrencyID order by strFiscalYear, intCurrencyID, intGLDetailId ) foreignRunningBalance,
+        select  sum(dblAmount) over (partition by intAccountId, strFiscalYear order by strFiscalYear,intCurrencyID,dtmDate,intTransactionId, intGLDetailId ) functionalRunningBalance,
+		sum(dblAmountForeign) over (partition by intAccountId,strFiscalYear, intCurrencyID order by strFiscalYear, intCurrencyID,dtmDate,intTransactionId, intGLDetailId ) foreignRunningBalance,
 		*
 		from GLQuery
 ),
