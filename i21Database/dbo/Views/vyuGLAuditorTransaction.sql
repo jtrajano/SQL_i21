@@ -57,6 +57,7 @@ SELECT
 	,A.intConcurrencyId
 	,A.strCurrency
 	,A.strAccountId
+	,A.strLOBSegmentDescription
 	,ACC.strDescription strAccountDescription
 	,AG.strAccountGroup
 	,CASE WHEN (A.strTotalTitle = 'Total') THEN '' ELSE A.strUserName END COLLATE Latin1_General_CI_AS strUserName
