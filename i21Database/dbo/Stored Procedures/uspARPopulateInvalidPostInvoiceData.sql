@@ -1468,33 +1468,41 @@ BEGIN
 	WHERE I.strTransactionType = 'Cash Refund'
 	  AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 
-	DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
- 
-	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
+	INSERT INTO ##ARInvalidInvoiceData
+	(
+		 [intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+	)
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= NULL
+		,[intItemId]			= NULL
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + 
+								  STUFF((
+										SELECT ', ' + strItemNo
+										FROM tblICItem ICI
+										INNER JOIN tblARInvoiceDetail ARID ON ICI.intItemId = ARID.intItemId
+										WHERE ARID.intInvoiceId = I.intInvoiceId
+										GROUP BY strItemNo
+										FOR XML PATH('')
+								  ), 1, 1, '') 
+								  + ') and make the appropriate edits.'
 	FROM ##ARPostInvoiceDetail I
 	WHERE ISNULL(I.intStorageLocationId, 0) > 0
 	AND ISNULL(I.intSubLocationId, 0) = 0
- 
-	IF (@strItemBlankStorageLocation IS NOT NULL)
-	BEGIN
-		INSERT INTO ##ARInvalidInvoiceData
-			([intInvoiceId]
-			,[strInvoiceNumber]
-			,[strTransactionType]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[strBatchId]
-			,[strPostingError])
-		SELECT
-			 [intInvoiceId]   = I.[intInvoiceId]
-			,[strInvoiceNumber]  = I.[strInvoiceNumber]  
-			,[strTransactionType] = I.[strTransactionType]
-			,[intInvoiceDetailId] = I.[intInvoiceDetailId]
-			,[intItemId]   = I.[intItemId]
-			,[strBatchId]   = I.[strBatchId]
-			,[strPostingError]  = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
-		FROM ##ARPostInvoiceDetail I
-	END
+	GROUP BY 
+		 I.intInvoiceId
+		,I.strInvoiceNumber
+		,I.strTransactionType
+		,I.strBatchId
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
