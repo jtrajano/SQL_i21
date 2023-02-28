@@ -24,7 +24,13 @@ BEGIN TRY
  DECLARE @tmpRC TABLE (intReportingComponentId INT)      
  DECLARE @tmpDetailTax TFCommonDetailTax      
       
- DECLARE @tmpInventoryDetailTax TFInventoryDetailTax      
+ DECLARE @tmpInventoryDetailTax TFInventoryDetailTax
+ 
+ DECLARE @tmpDetailTaxGrouped TABLE
+(intTransactionDetailId INT
+, strCriteria NVARCHAR(20)
+, dblTax DECIMAL(18, 6)
+)
       
  IF @Refresh = 1      
  BEGIN      
@@ -597,6 +603,16 @@ BEGIN TRY
      INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId      
      INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId       
     WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId      
+
+	INSERT INTO @tmpDetailTaxGrouped (intTransactionDetailId, strCriteria, dblTax)      
+    SELECT InvTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria, SUM(tblARInvoiceDetailTax.dblAdjustedTax)      
+    FROM @tmpTransaction InvTran      
+     INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId      
+     INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId      
+     INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId      
+     INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId       
+    WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId   
+	GROUP BY InvTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria
       
     WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDetailTax)      
     BEGIN        
@@ -608,12 +624,18 @@ BEGIN TRY
      SELECT TOP 1 @InvoiceDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax      
       
      IF(LTRIM(RTRIM(@strCriteria)) = '<> 0' AND @dblTax = 0)       
-     BEGIN      
-      DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId                 
+     BEGIN
+		IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InvoiceDetailId ) = 0)
+		BEGIN
+			DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId
+		END       
      END      
      ELSE IF (@strCriteria = '= 0' AND @dblTax > 0)      
-     BEGIN      
-      DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId                 
+     BEGIN
+	 IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InvoiceDetailId ) > 0)
+		BEGIN
+			DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId   
+		END         
      END      
       
      DELETE @tmpDetailTax WHERE intTransactionDetailId = @InvoiceDetailId AND intTaxCodeId = @intTaxCodeId      
