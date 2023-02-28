@@ -264,18 +264,10 @@ SET ANSI_WARNINGS OFF
 	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
 	OUTER APPLY (
 		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](ARID.[intAccountId], ARITD.intSalesTaxAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
+		FROM dbo.fnARGetOverrideAccount(ARID.intAccountId, ARITD.intSalesTaxAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
 	) OVERRIDESEGMENT
 	WHERE ARID.strSessionId = @strSessionId
-	  AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
-	  AND ARID.strType <> 'Tax Adjustment'
-
-	--UPDATE FINAL
-	UPDATE PIH
-	SET PIH.intAccountId = ARI.intAccountId
-	FROM tblARPostInvoiceHeader PIH
-	INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PIH.intInvoiceId = ARI.intInvoiceId
-	WHERE PIH.strSessionId = @strSessionId
+	AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
 
     UPDATE PID
     SET  

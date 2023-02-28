@@ -21,7 +21,8 @@ SELECT [Order].intOrderId
  , [Order].intStopNumber    
  , [Order].intConcurrencyId    
  , [Order].intShiftId    
- , Shift.intShiftNumber    
+ , Shift.intShiftNumber
+ , [Order].ysnLockPrice
 FROM tblMBILOrder [Order]    
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = [Order].intEntityId    
 LEFT JOIN tblSMTerm Term ON Term.intTermID = [Order].intTermId    

@@ -274,23 +274,23 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 		END
 	END
 
-IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractHeaderId IS NULL AND @ContractDetailId IS NULL
-BEGIN
-	SELECT TOP 1 @ContractDetailId 	= TMO.intContractDetailId
-				, @ContractHeaderId 	= CH.intContractHeaderId
-				, @ItemPrice			= ISNULL(CD.dblCashPrice, 0)
-	FROM tblTMSite S
-	INNER JOIN tblTMOrder TMO ON S.intSiteID = TMO.intSiteId
-	INNER JOIN tblTMDispatch TMD ON TMD.intSiteID = S.intSiteID
-	INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId
-	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId
-	INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-	WHERE S.intSiteID = @ItemSiteId
-		AND CU.strFieldName = 'Scheduled Quantity'
-		AND CU.strScreenName = 'TM - Create Order'
-		AND CD.intItemId = @ItemId
-END
-		
+--IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractHeaderId IS NULL AND @ContractDetailId IS NULL
+--BEGIN
+--	SELECT TOP 1 @ContractDetailId 	= TMO.intContractDetailId
+--				, @ContractHeaderId 	= CH.intContractHeaderId
+--				, @ItemPrice			= ISNULL(CD.dblCashPrice, 0)
+--	FROM tblTMSite S
+--	INNER JOIN tblTMOrder TMO ON S.intSiteID = TMO.intSiteId
+--	INNER JOIN tblTMDispatch TMD ON TMD.intSiteID = S.intSiteID
+--	INNER JOIN tblCTSequenceUsageHistory CU ON TMO.intContractDetailId = CU.intContractDetailId AND TMO.intSiteId = CU.intExternalId
+--	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CU.intContractDetailId
+--	INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+--	WHERE S.intSiteID = @ItemSiteId
+--		AND CU.strFieldName = 'Scheduled Quantity'
+--		AND CU.strScreenName = 'TM - Create Order'
+--		AND CD.intItemId = @ItemId
+--END
+	
 END TRY
 BEGIN CATCH
 	SET @ErrorMessage = ERROR_MESSAGE();
@@ -361,7 +361,7 @@ BEGIN TRY
 				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[intTaxGroupId]
-				,[intCompanyLocationSubLocationId]
+				,[intSubLocationId]
 				,[intStorageLocationId]
 				,[intSCInvoiceId]
 				,[strSCInvoiceNumber]
@@ -371,7 +371,6 @@ BEGIN TRY
 				,[strSubFormula]
 				,[intRecipeItemId] 
 				,[intRecipeId]
-				,[intSubLocationId]
 				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
@@ -485,7 +484,7 @@ BEGIN TRY
 				,[dblMaintenanceAmount]				= @ItemMaintenanceAmount
 				,[dblLicenseAmount]					= @ItemLicenseAmount
 				,[intTaxGroupId]					= @ItemTaxGroupId
-				,[intCompanyLocationSubLocationId]	= @ItemCompanyLocationSubLocationId
+				,[intSubLocationId]					= ISNULL(@ItemCompanyLocationSubLocationId, @ItemSublocationId)
 				,[intStorageLocationId]				= @ItemStorageLocationId
 				,[intSCInvoiceId]					= @ItemSCInvoiceId
 				,[strSCInvoiceNumber]				= @ItemSCInvoiceNumber 
@@ -495,7 +494,6 @@ BEGIN TRY
 				,[strSubFormula]					= @ItemSubFormula 
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
-				,[intSubLocationId]					= @ItemSublocationId
 				,[intPriceFixationDetailId]			= @ItemPriceFixationDetailId
 				,[intCostTypeId]					= @ItemCostTypeId
 				,[intMarginById]					= @ItemMarginById
@@ -617,28 +615,28 @@ BEGIN
 		intLoadDetailId = @ItemLoadDetailId 
 END
 
---OVERAGE TRANSPORT AND TM ORDER
-IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractDetailId IS NOT NULL
-BEGIN
-	IF EXISTS (
-		SELECT TOP 1 1 
-		FROM tblARInvoiceDetail ID
-		INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
-		WHERE ID.intInvoiceId = @InvoiceId
-			AND ID.intLoadDistributionDetailId IS NOT NULL
-			AND ID.intContractDetailId IS NOT NULL
-			AND ID.intSiteId IS NOT NULL
-			AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
-	)
-	BEGIN
-	 	EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 			= @InvoiceId
-	 										, @intScaleUOMId 		= NULL
-	 										, @intUserId 			= 1
-	 										, @dblNetWeight 			= 0
-	 										, @ysnFromSalesOrder 	= 0
-	 										, @ysnFromImport			= 1
-	END
-END
+----OVERAGE TRANSPORT AND TM ORDER
+--IF ISNULL(@ItemSiteId, 0) <> 0 AND @SourceType = 'Tank Delivery' AND @ItemLoadDistributionDetailId IS NOT NULL AND @ContractDetailId IS NOT NULL
+--BEGIN
+--	IF EXISTS (
+--		SELECT TOP 1 1 
+--		FROM tblARInvoiceDetail ID
+--		INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+--		WHERE ID.intInvoiceId = @InvoiceId
+--			AND ID.intLoadDistributionDetailId IS NOT NULL
+--			AND ID.intContractDetailId IS NOT NULL
+--			AND ID.intSiteId IS NOT NULL
+--			AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
+--	)
+--	BEGIN
+--	 	EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 			= @InvoiceId
+--	 										, @intScaleUOMId 		= NULL
+--	 										, @intUserId 			= 1
+--	 										, @dblNetWeight 			= 0
+--	 										, @ysnFromSalesOrder 	= 0
+--	 										, @ysnFromImport			= 1
+--	END
+--END
 		
 BEGIN TRY
  	IF @RecomputeTax = 1

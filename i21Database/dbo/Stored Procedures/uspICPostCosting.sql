@@ -919,6 +919,7 @@ BEGIN
 				@InventoryTransactionType_MarkUpOrDown
 				,@TransactionType_InventoryAdjustment_OpeningInventory
 			)
+			AND strActualCostId IS NULL 
 
 	SET @intInventoryTransactionId = NULL 
 

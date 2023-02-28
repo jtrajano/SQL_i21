@@ -80,6 +80,7 @@ DECLARE @dblScheduleQtyToUpdate NUMERIC(18,6)
 DECLARE @dblContractAvailableQty NUMERIC(38,20)
 
 DECLARE @_dblCovertedLoadQtyUsed NUMERIC(38,20)
+DECLARE @_dblCovertedQty NUMERIC(38,20)
 DECLARE @_dblLoadItemUOMId INT
 DECLARE @_dblLoadQuantity NUMERIC(38,20)
 DECLARE @_dblLoadQtyVsUsedDiff NUMERIC(38,20)
@@ -228,7 +229,7 @@ BEGIN TRY
 						<intEntityUserSecurityId>' + CAST(@intUserId as nvarchar(20)) + '</intEntityUserSecurityId></root>';
 
 						--EXEC [dbo].[uspGRUnPostSettleStorage] @strXml;
-						EXEC [dbo].[uspGRUnPostSettleStorage] @intSettleStorageId, @intUserId
+						EXEC [dbo].[uspGRUnPostSettleStorage] @intSettleStorageId, @intUserId, @CurrentDate
 
 						FETCH NEXT FROM settleStorageCursor INTO @intSettleStorageId;
 					END
@@ -1085,6 +1086,7 @@ BEGIN TRY
 						from tblSCTicketContractUsed
 						where intTicketContractUsed = @CurrentTicketContractUsedId
 
+
 						-- EXEC uspSCUpdateContractSchedule
 						-- 	@intContractDetailId = @intLoopContractDetailId
 						-- 	,@dblQuantity = @dblLoopScheduleQty
@@ -1092,9 +1094,13 @@ BEGIN TRY
 						-- 	,@intExternalId = @intTicketId
 						-- 	,@strScreenName = 'Scale'
 
+
+						
+						SELECT @_dblCovertedQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblLoopScheduleQty) FROM tblCTContractDetail WHERE intContractDetailId = @intLoopContractDetailId
+						-- SELECT @_dblCovertedQty = ROUND(@_dblCovertedQty, 4)
 						EXEC uspCTUpdateSequenceBalance 
 							@intContractDetailId = @intLoopContractDetailId
-							,@dblQuantityToUpdate = @dblLoopScheduleQty
+							,@dblQuantityToUpdate = @_dblCovertedQty
 							,@intUserId	= @intUserId
 							,@intExternalId	= @intTicketId
 							,@strScreenName	= 'Scale'
@@ -1107,9 +1113,14 @@ BEGIN TRY
 				
 					end
 
+					
+					SELECT @_dblCovertedQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketScheduledQty) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
+					SELECT @_dblCovertedQty = ROUND(@_dblCovertedQty, 4)
+
+
 					EXEC uspSCUpdateContractSchedule
 						@intContractDetailId = @intTicketContractDetailId
-						,@dblQuantity = @dblTicketScheduledQty
+						,@dblQuantity = @_dblCovertedQty
 						,@intUserId = @intUserId
 						,@intExternalId = @intTicketId
 						,@strScreenName = 'Scale'

@@ -113,6 +113,35 @@ BEGIN TRY
 	
 	DELETE FROM @billList WHERE intId IS NULL
 
+	DECLARE @TransferredSettlements AS TABLE
+	(
+		intBillId INT
+		,strTransferSettlement NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	)
+	DECLARE @strTransferSettlement NVARCHAR(40)
+
+	INSERT INTO @TransferredSettlements
+	SELECT TSTR.intBillDetailId
+		,TSH.strTransferSettlementNumber
+	FROM tblGRTransferFromSettlements TSTR
+	INNER JOIN tblGRTransferSettlementsHeader TSH
+		ON TSH.intTransferSettlementHeaderId = TSTR.intTransferSettlementHeaderId
+	INNER JOIN @billList B
+		ON B.intId = TSTR.intBillId
+
+	IF EXISTS(SELECT 1 FROM @TransferredSettlements)
+	BEGIN
+		SELECT @strTransferSettlement = (
+			SELECT ',' + strTransferSettlement
+			FROM @TransferredSettlements
+		FOR XML PATH('')) COLLATE Latin1_General_CI_AS
+
+		SET @ErrMsg = 'Settlement has been transferred to another vendor. <br/>Please go to Ticket Management > Activities - Transfer Settlement and unpost <b>' + STUFF(@strTransferSettlement,1,1,'')  + '</b> to unpost this settlement successfully.'
+
+		RAISERROR (@ErrMsg, 16, 1);
+		GOTO SettleStorage_Exit;
+	END
+
 	--will be used at the end of the loop to delete the vouchers
 	INSERT INTO @billListForDeletion
 	SELECT intId FROM @billList

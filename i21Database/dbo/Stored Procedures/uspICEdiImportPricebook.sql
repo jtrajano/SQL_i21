@@ -750,6 +750,102 @@ WHERE strUniqueId = @UniqueId AND NULLIF(strInventoryType,'') IS NOT NULL AND st
 
 /* End of Log and remove invalid Item Type */
 
+/* Log and remove if there is null in required fields of ALT UPC 1 */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Error'
+	 , PriceBook.intRecordNumber
+	 , 'ALT UPC 1'
+	 , PriceBook.strAltUPCNumber1
+	 , 'All fields should have a value for ALT UPC 1 if any of the columns for Alt UPC 1 has value'
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook AS PriceBook
+WHERE (ISNULL(strAltUPCNumber1, '') = ''
+OR ISNULL(strAltUPCUOM1, '') = ''
+OR ISNULL(strAltUPCQuantity1, '') = ''
+OR ISNULL(strAltUPCPrice1, '') = ''
+OR ISNULL(strPurchaseSale1, '') = '') AND
+(ISNULL(strAltUPCNumber1, '') != ''
+OR ISNULL(strAltUPCUOM1, '') != ''
+OR ISNULL(strAltUPCQuantity1, '') != ''
+OR ISNULL(strAltUPCPrice1, '') != ''
+OR ISNULL(strPurchaseSale1, '') != '')
+
+DELETE 
+FROM tblICEdiPricebook 
+WHERE (ISNULL(strAltUPCNumber1, '') = ''
+OR ISNULL(strAltUPCUOM1, '') = ''
+OR ISNULL(strAltUPCQuantity1, '') = ''
+OR ISNULL(strAltUPCPrice1, '') = ''
+OR ISNULL(strPurchaseSale1, '') = '') AND
+(ISNULL(strAltUPCNumber1, '') != ''
+OR ISNULL(strAltUPCUOM1, '') != ''
+OR ISNULL(strAltUPCQuantity1, '') != ''
+OR ISNULL(strAltUPCPrice1, '') != ''
+OR ISNULL(strPurchaseSale1, '') != '')
+
+/* End of Log and remove if there is null in required fields of ALT UPC 1 */
+
+/* Log and remove if there is null in required fields of ALT UPC 2 */
+
+INSERT INTO tblICImportLogDetail(intImportLogId
+							   , strType
+							   , intRecordNo
+							   , strField
+							   , strValue
+							   , strMessage
+							   , strStatus
+							   , strAction
+							   , intConcurrencyId
+)
+SELECT @LogId
+	 , 'Error'
+	 , PriceBook.intRecordNumber
+	 , 'ALT UPC 2'
+	 , PriceBook.strAltUPCNumber2
+	 , 'All fields should have a value for ALT UPC 2 if any of the columns for Alt UPC 2 has value'
+	 , 'Skipped'
+	 , 'Record not imported.'
+	 , 1
+FROM tblICEdiPricebook AS PriceBook
+WHERE (ISNULL(strAltUPCNumber2, '') = ''
+OR ISNULL(strAltUPCUOM2, '') = ''
+OR ISNULL(strAltUPCQuantity2, '') = ''
+OR ISNULL(strAltUPCCost2, '') = ''
+OR ISNULL(strAltUPCPrice2, '') = '') AND
+(ISNULL(strAltUPCNumber2, '') != ''
+OR ISNULL(strAltUPCUOM2, '') != ''
+OR ISNULL(strAltUPCQuantity2, '') != ''
+OR ISNULL(strAltUPCPrice2, '') != ''
+OR ISNULL(strPurchaseSale2, '') != '')
+
+DELETE 
+FROM tblICEdiPricebook 
+WHERE (ISNULL(strAltUPCNumber2, '') = ''
+OR ISNULL(strAltUPCUOM2, '') = ''
+OR ISNULL(strAltUPCQuantity2, '') = ''
+OR ISNULL(strAltUPCCost2, '') = ''
+OR ISNULL(strAltUPCPrice2, '') = '') AND
+(ISNULL(strAltUPCNumber2, '') != ''
+OR ISNULL(strAltUPCUOM2, '') != ''
+OR ISNULL(strAltUPCQuantity2, '') != ''
+OR ISNULL(strAltUPCPrice2, '') != ''
+OR ISNULL(strPurchaseSale2, '') != '')
+
+/* End of Log and remove if there is null in required fields of ALT UPC 2 */
+
 /* Log and remove invalid UOM */
 
 INSERT INTO tblICImportLogDetail(intImportLogId
@@ -875,7 +971,7 @@ WHERE (PriceBook.strAltUPCUOM1 = PriceBook.strAltUPCUOM2)
 
 DELETE 
 FROM tblICEdiPricebook
-WHERE (strAltUPCUOM1 = strAltUPCUOM2)
+WHERE (strAltUPCUOM1 = strAltUPCUOM2) AND ISNULL(strAltUPCUOM1, '') != ''
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
 /* Log Existing UPC and Modifier */
@@ -1012,6 +1108,13 @@ USING (
 		 , intStoreFamilyId		= sf.intSubcategoryId
 		 , intStoreClassId		= sc.intSubcategoryId
 		 , intSubcategoriesId   = ItemSubCategories.intSubcategoriesId
+		 , strStatusId			= CASE WHEN Pricebook.strActiveInactiveDeleteIndicator = 'Y'
+										THEN 'Active'
+									WHEN Pricebook.strActiveInactiveDeleteIndicator = 'P'
+										THEN 'Phased Out'
+									WHEN Pricebook.strActiveInactiveDeleteIndicator = 'D'
+										THEN 'Discontinued'
+									ELSE 'Active' END
 		 , Pricebook.* 
 	FROM tblICEdiPricebook AS Pricebook
 	LEFT JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LOWER(Pricebook.strItemNo), '')
@@ -1031,6 +1134,7 @@ WHEN MATCHED AND Source_Query.ysnUpdateExistingRecords = 1 THEN
 		     , strDescription		= LEFT(Source_Query.strDescription, 250)
 		     , strShortName			= LEFT(Source_Query.strShortName, 50)
 		     , strItemNo			= (LEFT(Source_Query.strItemNo, 50))
+		     , strStatus			= Source_Query.strStatusId
 		     , dtmDateModified		= GETDATE()
 		     , intModifiedByUserId = @intUserId
 		     , intConcurrencyId		= Item.intConcurrencyId + 1
@@ -1065,7 +1169,7 @@ WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intDupli
 		  , Source_Query.intManufacturerId					-- intManufacturerId
 		  , Source_Query.intBrandId							-- intBrandId
 		  , Source_Query.intCategoryId						-- intCategoryId
-		  , 'Active'										-- strStatus
+		  , Source_Query.strStatusId						-- strStatus
 		  , 'Item Level'									-- strInventoryTracking
 		  , 'No'											-- strLotTracking
 		  , 0												-- intLifeTime
@@ -2304,6 +2408,43 @@ USING (
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strItemUnitOfMeasure)))
 	WHERE Pricebook.strUniqueId = @UniqueId AND Pricebook.strRetailPrice IS NOT NULL
+	
+	UNION
+	SELECT Item.intItemId
+		, ItemLocation.intItemLocationId
+		, ItemUOM.intItemUOMId
+		, intCompanyLocationId = ValidLocation.intCompanyLocationId 
+		, dblPrice			   = CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) 
+		, dtmEffectiveDate	   = CAST(GETUTCDATE() AS DATE)
+		, dtmDateCreated	   = GETUTCDATE()		
+		, intCreatedByUserId   = @intUserId
+		, ysnUpdatePrice	   = Pricebook.ysnUpdatePrice
+	FROM tblICEdiPricebook AS Pricebook
+	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+	OUTER APPLY (SELECT loc.intCompanyLocationId 					
+				 FROM @ValidLocations loc 
+				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM1)))
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice1, '') AS NUMERIC(38, 20)) <> 0
+	UNION
+	SELECT Item.intItemId
+		 , ItemLocation.intItemLocationId
+		 , ItemUOM.intItemUOMId
+		 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
+		 , dblPrice				= CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) 
+		 , dtmEffectiveDate		= CAST(GETUTCDATE() AS DATE)
+		 , dtmDateCreated		= GETUTCDATE()		
+		 , intCreatedByUserId	= @intUserId
+		 , ysnUpdatePrice		= Pricebook.ysnUpdatePrice
+	FROM tblICEdiPricebook AS Pricebook
+	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+	OUTER APPLY (SELECT loc.intCompanyLocationId 					
+				 FROM @ValidLocations loc 
+				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2)))
+	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0 
 ) AS Source_Query ON EffectiveItemPrice.intItemId		  = Source_Query.intItemId 
 				 AND EffectiveItemPrice.intItemLocationId = Source_Query.intItemLocationId
 				 AND EffectiveItemPrice.intItemUOMId	  = Source_Query.intItemUOMId
@@ -2546,38 +2687,38 @@ USING (
 				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
 	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strCaseCost, '') AS NUMERIC(38, 20)) <> 0 
-	UNION
-	SELECT Item.intItemId
-		, ItemLocation.intItemLocationId
-		, intCompanyLocationId = ValidLocation.intCompanyLocationId 
-		, dblCost			   = CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) 
-		, dtmEffectiveDate	   = CAST(GETUTCDATE() AS DATE)
-		, dtmDateCreated	   = GETUTCDATE()		
-		, intCreatedByUserId   = @intUserId
-		, ysnUpdatePrice	   = Pricebook.ysnUpdatePrice
-	FROM tblICEdiPricebook AS Pricebook
-	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 					
-				 FROM @ValidLocations loc 
-				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
-	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0
-	UNION
-	SELECT Item.intItemId
-		 , ItemLocation.intItemLocationId
-		 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
-		 , dblCost				= CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) 
-		 , dtmEffectiveDate		= CAST(GETUTCDATE() AS DATE)
-		 , dtmDateCreated		= GETUTCDATE()		
-		 , intCreatedByUserId	= @intUserId
-		 , ysnUpdatePrice		= Pricebook.ysnUpdatePrice
-	FROM tblICEdiPricebook AS Pricebook
-	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	OUTER APPLY (SELECT loc.intCompanyLocationId 					
-				 FROM @ValidLocations loc 
-				 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
-	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
-	WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
+	--UNION
+	--SELECT Item.intItemId
+	--	, ItemLocation.intItemLocationId
+	--	, intCompanyLocationId = ValidLocation.intCompanyLocationId 
+	--	, dblCost			   = CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) 
+	--	, dtmEffectiveDate	   = CAST(GETUTCDATE() AS DATE)
+	--	, dtmDateCreated	   = GETUTCDATE()		
+	--	, intCreatedByUserId   = @intUserId
+	--	, ysnUpdatePrice	   = Pricebook.ysnUpdatePrice
+	--FROM tblICEdiPricebook AS Pricebook
+	--INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+	--OUTER APPLY (SELECT loc.intCompanyLocationId 					
+	--			 FROM @ValidLocations loc 
+	--			 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	--INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
+	--WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost1, '') AS NUMERIC(38, 20)) <> 0
+	--UNION
+	--SELECT Item.intItemId
+	--	 , ItemLocation.intItemLocationId
+	--	 , intCompanyLocationId = ValidLocation.intCompanyLocationId 
+	--	 , dblCost				= CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) 
+	--	 , dtmEffectiveDate		= CAST(GETUTCDATE() AS DATE)
+	--	 , dtmDateCreated		= GETUTCDATE()		
+	--	 , intCreatedByUserId	= @intUserId
+	--	 , ysnUpdatePrice		= Pricebook.ysnUpdatePrice
+	--FROM tblICEdiPricebook AS Pricebook
+	--INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
+	--OUTER APPLY (SELECT loc.intCompanyLocationId 					
+	--			 FROM @ValidLocations loc 
+	--			 INNER JOIN tblSMCompanyLocation cl ON loc.intCompanyLocationId = cl.intCompanyLocationId) AS ValidLocation
+	--INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId 
+	--WHERE Pricebook.strUniqueId = @UniqueId AND CAST(NULLIF(Pricebook.strAltUPCCost2, '') AS NUMERIC(38, 20)) <> 0 
 ) AS Source_Query ON EffectiveItemCost.intItemId = Source_Query.intItemId 
 			     AND EffectiveItemCost.intItemLocationId = Source_Query.intItemLocationId
 			     AND CONVERT(DATE, EffectiveItemCost.dtmEffectiveCostDate, 101) = CONVERT(DATE, Source_Query.dtmEffectiveDate, 101) 

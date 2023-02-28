@@ -96,9 +96,7 @@ OUTER APPLY	(
 		WHERE forImport.intEntityVendorId = A.intEntityVendorId 
 			AND LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
-			--IF PAYMENT SCHEDULE COMPARE DISCOUNT ON PAYMENT TEMP
-			--ELSE DISCOUNT WILL BE 0, DISCOUNT HAS BEEN HANDLED ABOVE (A.dblPayment + A.dblDiscount)
-			AND ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
+			AND ISNULL(forImport.dblTempDiscount, 0) = ISNULL(A.dblDiscount, 0)
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
@@ -173,11 +171,8 @@ OUTER APPLY	(
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM vyuAPBillForImport forImport
 		WHERE forImport.intEntityVendorId = A.intEntityVendorId 
-			--AND LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
-			--AND ISNULL(forImport.dblTempDiscount, 0) = A.dblDiscount
-			AND forImport.dtmDate = A.dtmBillDate
-			AND forImport.intTransactionType = 3 AND forImport.strVendorOrderNumber = A.strVendorOrderNumber
+			AND forImport.intTransactionType = 3
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B

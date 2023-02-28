@@ -86,155 +86,6 @@ IF (@TransType IS NULL OR RTRIM(LTRIM(@TransType)) = '')
 DECLARE @dtmStartWait    DATETIME
 SET @dtmStartWait = GETDATE()
 
--- DELETE PQ
--- FROM tblARPostingQueue PQ
--- WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) >= 60
-
--- --CHECK IF THERE'S ON GOING POSTING IN QUEUE
--- IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60)
---     --IF HAS QUEUE TRY TO WAIT FOR 1 MINUTE
---     BEGIN
---         DECLARE @intQueueCount INT = 0
-
---         --CHECK EVERY 5 SECS.
---         WHILE @intQueueCount <= 12
---             BEGIN
---                 --IF WAITING TIME IS > 1 MINUTE, THROW TIME OUT ERROR
---                 IF @intQueueCount >= 12
---                     BEGIN
---                         SET @intQueueCount = 13
-
---                         IF @RaiseError = 0
---                             BEGIN
---                                 IF @InitTranCount = 0
---                                     BEGIN
---                                         IF (XACT_STATE()) = -1
---                                             ROLLBACK TRANSACTION
---                                         IF (XACT_STATE()) = 1
---                                             COMMIT TRANSACTION
---                                     END        
---                                 ELSE
---                                     BEGIN
---                                         IF (XACT_STATE()) = -1
---                                             ROLLBACK TRANSACTION  @Savepoint
---                                     END    
-
---                                 INSERT INTO tblARPostResult (
---                                         strMessage
---                                       , strTransactionType
---                                       , strTransactionId
---                                       , strBatchNumber
---                                       , intTransactionId
---                                 )
---                                 SELECT strMessage    		= 'There''s an on-going posting for other transactions. Please try again later.'
---                                     , strTransactionType	= ARI.strTransactionType
---                                     , strInvoiceNumber		= ARI.strInvoiceNumber
---                                     , strBatchId			= @BatchIdUsed
---                                     , intInvoiceId			= ARI.intInvoiceId
---                                 FROM tblARInvoice ARI
---                                 INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
--- 								WHERE ILD.intIntegrationLogId = @IntegrationLogId
-
--- 								UNION ALL
-
--- 								SELECT strMessage    		= 'There''s an on-going posting for other transactions. Please try again later.'
---                                     , strTransactionType	= ARI.strTransactionType
---                                     , strInvoiceNumber		= ARI.strInvoiceNumber
---                                     , strBatchId			= @BatchIdUsed
---                                     , intInvoiceId			= ARI.intInvoiceId
---                                 FROM tblARInvoice ARI
--- 								INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
---                             END
-
---                             IF @RaiseError = 1
---                                 BEGIN
---                                     RAISERROR('There''s an on-going posting for other transactions. Please try again later.', 11, 1)                            
---                                 END
---                             GOTO Post_Exit
---                     END
-                
---                 IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60) AND @intQueueCount < 12
---                     BEGIN
---                         SET @intQueueCount += 1
---                         WAITFOR DELAY '00:00:05'
---                     END
---                 ELSE IF @intQueueCount < 12
---                     BEGIN
---                         SET @intQueueCount = 13
-
---                         INSERT INTO tblARPostingQueue (
---                             intTransactionId
---                             , strTransactionNumber
---                             , strBatchId
---                             , dtmPostingdate
---                             , intEntityId
---                             , strTransactionType
---                         )
---                         SELECT DISTINCT 
---                               intTransactionId      = ARI.intInvoiceId
---                             , strTransactionNumber  = ARI.strInvoiceNumber
---                             , strBatchId            = @BatchIdUsed
---                             , dtmPostingdate        = @dtmStartWait
---                             , intEntityId           = ARI.intEntityId
---                             , strTransactionType    = 'Invoice'
---                         FROM tblARInvoice ARI
---                         INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
--- 						WHERE ILD.intIntegrationLogId = @IntegrationLogId
--- 						  AND ISNULL(ARI.intLoadId, 0) = 0
-
--- 						UNION ALL
-
--- 						SELECT DISTINCT 
---                               intTransactionId      = ARI.intInvoiceId
---                             , strTransactionNumber  = ARI.strInvoiceNumber
---                             , strBatchId            = @BatchIdUsed
---                             , dtmPostingdate        = @dtmStartWait
---                             , intEntityId           = ARI.intEntityId
---                             , strTransactionType    = 'Invoice'
---                         FROM tblARInvoice ARI
---                         INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
--- 						WHERE ISNULL(ARI.intLoadId, 0) = 0	
---                     END
---             END        
---     END
--- ELSE 
---     --IF NONE
---     BEGIN    
---         --INSERT INVOICES TO POSTING QUEUE
---         INSERT INTO tblARPostingQueue (
---             intTransactionId
---             , strTransactionNumber
---             , strBatchId
---             , dtmPostingdate
---             , intEntityId
---             , strTransactionType
---         )
---         SELECT DISTINCT 
---               intTransactionId      = ARI.intInvoiceId
---             , strTransactionNumber  = ARI.strInvoiceNumber
---             , strBatchId           	= @BatchIdUsed
---             , dtmPostingdate        = @dtmStartWait
---             , intEntityId           = ARI.intEntityId
---             , strTransactionType    = 'Invoice'
---         FROM tblARInvoice ARI
--- 		INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
--- 		WHERE ILD.intIntegrationLogId = @IntegrationLogId
--- 		  AND ISNULL(ARI.intLoadId, 0) = 0
-
--- 		UNION ALL
-
--- 		SELECT DISTINCT 
--- 			  intTransactionId      = ARI.intInvoiceId
--- 			, strTransactionNumber  = ARI.strInvoiceNumber
--- 			, strBatchId            = @BatchIdUsed
--- 			, dtmPostingdate        = @dtmStartWait
--- 			, intEntityId           = ARI.intEntityId
--- 			, strTransactionType    = 'Invoice'
--- 		FROM tblARInvoice ARI
--- 		INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
--- 		WHERE ISNULL(ARI.intLoadId, 0) = 0	
---     END
-
 EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
      @Param             = NULL
     ,@BeginDate         = @BeginDate
@@ -262,24 +113,27 @@ IF @Post = 1 AND @Recap = 0
 		, @strSessionId	= @strRequestId
 
 --Removed excluded Invoices to post/unpost
-IF(@Exclude IS NOT NULL)
+IF ISNULL(@Exclude, '') <> ''
 	BEGIN
 		DECLARE @InvoicesExclude TABLE  (
-			intInvoiceId INT
+			intInvoiceId INT PRIMARY KEY
 		);
 
 		INSERT INTO @InvoicesExclude
-		SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@Exclude)
+		SELECT DISTINCT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@Exclude)
 
-		DELETE FROM A
-		FROM tblARPostInvoiceHeader A
-		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
-		  AND A.strSessionId = @strRequestId
+		IF EXISTS (SELECT TOP 1 1 FROM @InvoicesExclude)
+			BEGIN
+				DELETE FROM A
+				FROM tblARPostInvoiceHeader A
+				INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
+				WHERE A.strSessionId = @strRequestId
 
-		DELETE FROM A
-		FROM tblARPostInvoiceDetail A
-		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
-		  AND A.strSessionId = @strRequestId
+				DELETE FROM A
+				FROM tblARPostInvoiceDetail A
+				INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
+				WHERE A.strSessionId = @strRequestId
+			END
 	END
 
 --------------------------------------------------------------------------------------------  
@@ -363,11 +217,6 @@ IF(@totalInvalid > 0)
   		INNER JOIN tblARPostInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId] AND GL.[strTransactionId] = B.[strInvoiceNumber]
 		WHERE GL.strSessionId = @strRequestId
 		AND B.strSessionId = @strRequestId
-
-		-- DELETE PQ
-		-- FROM tblARPostingQueue PQ
-		-- INNER JOIN tblARPostInvalidInvoiceData B ON PQ.[intTransactionId] = B.[intInvoiceId] AND PQ.[strTransactionNumber] = B.[strInvoiceNumber]
-		-- WHERE PQ.strTransactionType = 'Invoice'
 
         DELETE FROM tblARPostInvalidInvoiceData
 		WHERE strSessionId = @strRequestId

@@ -3195,13 +3195,51 @@ BEGIN
 							,FromStock.strSourceNumber
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
-
-							INNER JOIN dbo.tblICInventoryTransaction FromStock 
-								ON FromStock.intLotId = AdjDetail.intLotId 
-								AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
-								AND FromStock.strTransactionId = Adj.strAdjustmentNo
-								AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
-								AND FromStock.dblQty < 0
+							--INNER JOIN dbo.tblICInventoryTransaction FromStock 
+							--	ON FromStock.intLotId = AdjDetail.intLotId 
+							--	AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
+							--	AND FromStock.strTransactionId = Adj.strAdjustmentNo
+							--	AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+							--	AND FromStock.dblQty < 0
+							INNER JOIN tblICItem i
+								ON i.intItemId = AdjDetail.intItemId 
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 							
+							CROSS APPLY (
+								SELECT 
+									dblQty = SUM(FromStock.dblQty)
+									,dblCost = SUM(FromStock.dblQty * FromStock.dblCost + FromStock.dblValue) / SUM(FromStock.dblQty)
+									,strActualCostId
+									,intCostingMethod
+									,intSourceEntityId
+									,strBOLNumber
+									,intTicketId
+									,strSourceType
+									,strSourceNumber
+									,intLotId
+									,strBatchId
+									,intItemUOMId
+								FROM 
+									dbo.tblICInventoryTransaction FromStock
+								WHERE 
+									FromStock.intLotId = AdjDetail.intLotId 
+									AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
+									AND FromStock.strTransactionId = Adj.strAdjustmentNo
+									AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+									AND FromStock.dblQty < 0
+								GROUP BY
+									strActualCostId
+									,intCostingMethod
+									,intSourceEntityId
+									,strBOLNumber
+									,intTicketId
+									,strSourceType
+									,strSourceNumber
+									,intLotId
+									,strBatchId
+									,intItemUOMId
+							) FromStock
 
 							-- Source Lot
 							LEFT JOIN (
@@ -3611,26 +3649,27 @@ BEGIN
 			-- Repost 'Inventory Shipment'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Shipment')) 
 			BEGIN 
-				-- Check how the shipment was originally posted
-				BEGIN 
-					SET @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
+				---- Check how the shipment was originally posted
+				--BEGIN 
+				--	SET @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
 
-					IF EXISTS (
-						SELECT	TOP 1 1
-						FROM	tblICBackupDetailInventoryTransaction b INNER JOIN tblICItem i
-									ON b.intItemId = i.intItemId 
-								INNER JOIN #tmpRebuildList list
-									ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
-									AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
-						WHERE	b.intBackupId = @intBackupId 
-								AND b.strTransactionId = @strTransactionId
-								AND b.intInTransitSourceLocationId IS NOT NULL 
-								AND b.ysnIsUnposted = 0 
-					)
-					BEGIN 
-						SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
-					END 
-				END 
+				--	IF EXISTS (
+				--		SELECT	TOP 1 1
+				--		FROM	tblICBackupDetailInventoryTransaction b INNER JOIN tblICItem i
+				--					ON b.intItemId = i.intItemId 
+				--				INNER JOIN #tmpRebuildList list
+				--					ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				--					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+				--		WHERE	b.intBackupId = @intBackupId 
+				--				AND b.strTransactionId = @strTransactionId
+				--				AND b.intInTransitSourceLocationId IS NOT NULL 
+				--				AND b.ysnIsUnposted = 0 
+				--	)
+				--	BEGIN 
+				--		SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
+				--	END 
+				--END 
+				SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
 
 				-- Force rebuild as in-transit if @ysnRebuildShipmentAndInvoiceAsInTransit set to true. 
 				IF @ysnRebuildShipmentAndInvoiceAsInTransit = 1
@@ -7308,5 +7347,5 @@ BEGIN
 		DROP TABLE #tmpLogRiskPosition		
 END 
 
-RETURN @intReturnValue; 
+RETURN @intReturnValue;
 

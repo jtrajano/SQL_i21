@@ -10,7 +10,8 @@ BEGIN
 																			ON			a.intTransactionId = b.intTransactionId
 																			INNER JOIN	dbo.tblSMScreen AS c
 																			ON			b.intScreenId = c.intScreenId
-																			WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference' AND
+																			WHERE		(c.strNamespace = 'SystemManager.view.CompanyPreference' OR
+																						 c.strNamespace = 'i21.view.CompanyPreferenceOption') AND
 																						a.strComment = @strCompanyLogoName
 																			ORDER BY	intAttachmentId DESC)
 

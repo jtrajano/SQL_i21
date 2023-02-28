@@ -64,7 +64,7 @@ BEGIN
 	END
 
 			DECLARE @Segments NVARCHAR(MAX)
-			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']','[Primary Account]')
+			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' ORDER BY intSort FOR XML PATH('')),3,200000) + ']','[Primary Account]')
 			DECLARE @Query NVARCHAR(MAX)
 			SET @Query = @InsertString +
 			'INNER JOIN (
@@ -92,14 +92,6 @@ BEGIN
 	IF (@tblGLTempCOAExist=0)
 		ALTER TABLE dbo.[tblGLTempCOASegment] ADD CONSTRAINT [PK_tblGLTempCOASegment] PRIMARY KEY ([intAccountId])
 	
-	--this will ensure there is company column in tblGLTempCOASegment
-	IF NOT EXISTS(
-		SELECT 1 
-          FROM   INFORMATION_SCHEMA.COLUMNS
-          WHERE  TABLE_NAME = 'tblGLTempCOASegment'
-                 AND COLUMN_NAME = 'Company'
-	)
-	ALTER TABLE tblGLTempCOASegment ADD [Company] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 
 	--this will ensure there is [Primary Account] column in tblGLTempCOASegmen
 	IF NOT EXISTS(
@@ -178,6 +170,11 @@ BEGIN
 					INNER JOIN dbo.tblGLAccountGroup AS B ON B.intAccountGroupId = A.intAccountGroupId
 					LEFT JOIN dbo.tblGLTempCOASegment AS C ON C.intAccountId = A.intAccountId')
 	END
+
+	IF (OBJECT_ID('uspGLUpdateFiscalAccountOverride') IS NOT NULL)
+  		EXEC('EXEC dbo.uspGLUpdateFiscalAccountOverride')
+	
+	
 
 	-- REMOVED DUE TO GL-3434 Location description does not show in build account
     --   IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type in (N'U')) 

@@ -439,7 +439,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblPercentFull]
 				,[intPerformerId]
 				,[intTaxGroupId]
-				,[intCompanyLocationSubLocationId] 
+				,[intSubLocationId] 
 				,[intStorageLocationId] 
 				,[intEntitySalespersonId]
 				,[intSalesOrderDetailId]
@@ -455,7 +455,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[ysnBlended]
 				,[strSubFormula]
 				,[intRecipeId]
-				,[intSubLocationId]
 				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
@@ -532,7 +531,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemPercentFull
 				,@ItemPerformerId							
 				,@ItemTaxGroupId
-				,@ItemCompanyLocationSubLocationId
+				,ISNULL(@ItemCompanyLocationSubLocationId, @ItemSublocationId)
 				,@ItemStorageLocationId
 				,@EntitySalespersonId					
 				,@ItemSalesOrderDetailId
@@ -548,7 +547,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemIsBlended
 				,@ItemSubFormula
 				,@ItemRecipeId
-				,@ItemSublocationId
 				,@ItemPriceFixationDetailId
 				,@ItemCostTypeId
 				,@ItemMarginById
@@ -701,7 +699,10 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 		
 SET @NewInvoiceDetailId = @NewDetailId
 
-UPDATE tblARInvoiceDetail SET intStorageScheduleTypeId = ABC.intStorageScheduleTypeId, intCompanyLocationSubLocationId = ABC.intSubLocationId, intStorageLocationId = ABC.intStorageLocationId
+UPDATE tblARInvoiceDetail 
+SET  intStorageScheduleTypeId	= ABC.intStorageScheduleTypeId
+	,intSubLocationId			= ABC.intSubLocationId
+	,intStorageLocationId		= ABC.intStorageLocationId
 FROM tblARInvoiceDetail
 INNER JOIN
 (

@@ -67,19 +67,15 @@ BEGIN TRY
 			PD.intInvoiceId,
 			I.strTransactionType
 
-		ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentDelete
-		ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentUpdate
-		ALTER TABLE tblARPaymentDetail DISABLE TRIGGER trg_tblARPaymentDetailUpdate
 		--Recompute amount due
-		UPDATE tblARPaymentDetail 
-		SET 
-			 dblAmountDue		= dblInvoiceTotal + dblInterest - dblPayment - @dblPostedPayment
-			,dblBaseAmountDue	= dblBaseInvoiceTotal + dblBaseInterest - dblBasePayment - @dblPostedBasePayment
-		WHERE intPaymentDetailId = @intPaymentDetailId
+		UPDATE tblARPayment
+		SET intCurrentStatus = 5
+		WHERE intPaymentId = @intPaymentId
 
-		ALTER TABLE tblARPayment ENABLE TRIGGER trg_tblARPaymentDelete
-		ALTER TABLE tblARPayment ENABLE TRIGGER trg_tblARPaymentUpdate
-		ALTER TABLE tblARPaymentDetail ENABLE TRIGGER trg_tblARPaymentDetailUpdate
+		UPDATE tblARPaymentDetail 
+		SET dblAmountDue		= dblInvoiceTotal + dblInterest - dblPayment - @dblPostedPayment
+		  , dblBaseAmountDue	= dblBaseInvoiceTotal + dblBaseInterest - dblBasePayment - @dblPostedBasePayment
+		WHERE intPaymentDetailId = @intPaymentDetailId
 
 		EXEC uspARRebuildInvoice 
 			 @intInvoiceId			 = @intInvoiceId

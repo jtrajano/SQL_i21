@@ -75,13 +75,6 @@ BEGIN
 			SELECT 1
 			FROM @MFBatchTableType
 			WHERE @id = intId
-				AND ISNULL(intSubBookId, 0) = 0
-			)
-		SELECT @errorMessage = 'Strategy (intSubBookId) is missing'
-	ELSE IF EXISTS (
-			SELECT 1
-			FROM @MFBatchTableType
-			WHERE @id = intId
 				AND ISNULL(intLocationId, 0) = 0
 			)
 		SELECT @errorMessage = 'Location (intLocationId) is missing'

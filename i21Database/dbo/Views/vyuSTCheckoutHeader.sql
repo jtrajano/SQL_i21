@@ -161,6 +161,7 @@ SELECT
       ,chk.[intLockType]  
       ,chk.[intSort]  
       ,chk.[intInvoiceId]  
+	  ,chk.[intConsCreditMemoId] 
       ,chk.[strAllInvoiceIdList]  
       ,chk.[strXml]  
       ,chk.[strMarkUpDownBatchNo]  
@@ -214,6 +215,7 @@ SELECT
       ,st.ysnConsignmentStore  
 	  ,chk.[dblCustomerChargeMOP]  
 	  ,ISNULL(Inv.strInvoiceNumber,'---') AS strInvoiceNumber
+	  ,ISNULL(InvConsCR.strInvoiceNumber,'---') AS strCreditMemoNumber
 FROM tblSTCheckoutHeader chk  
 INNER JOIN vyuSTStoreOnUserRole vst  
  ON chk.intStoreId = vst.intStoreId  
@@ -230,7 +232,9 @@ LEFT JOIN tblICCategory cat
 LEFT JOIN tblICCommodity comm  
  ON chk.intCommodityId = comm.intCommodityId  
 LEFT JOIN tblARInvoice Inv  
- ON chk.intInvoiceId = Inv.intInvoiceId  
+ ON chk.intInvoiceId = Inv.intInvoiceId 
+LEFT JOIN tblARInvoice InvConsCR  
+ ON chk.intConsCreditMemoId = InvConsCR.intInvoiceId   
 LEFT JOIN tblSTCheckoutPaymentOptions po
  ON po.intCheckoutId = chk.intCheckoutId
  AND po.intPaymentOptionId = st.intCustomerChargeMopId
@@ -304,6 +308,7 @@ GROUP BY
       ,chk.[intLockType]  
       ,chk.[intSort]  
       ,chk.[intInvoiceId]  
+	  ,chk.[intConsCreditMemoId] 
       ,chk.[strAllInvoiceIdList]  
       ,chk.[strXml]  
       ,chk.[strMarkUpDownBatchNo]  
@@ -339,3 +344,4 @@ GROUP BY
       ,st.ysnConsignmentStore
 	  ,po.dblAmount
 	  ,Inv.strInvoiceNumber
+	  ,InvConsCR.strInvoiceNumber

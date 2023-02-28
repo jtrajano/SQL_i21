@@ -1,14 +1,9 @@
-CREATE PROCEDURE uspQMImportCatalogueMain @intImportLogId INT
+CREATE PROCEDURE [dbo].[uspQMImportCatalogueMain] @intImportLogId INT
 AS
 BEGIN TRY
 	-- B1
-	DECLARE @dblB1QtyBought NUMERIC(18, 6)
-		,@intB1QtyUOMId INT
-		,@dblB1Price NUMERIC(18, 6)
-		,@intB1PriceUOMId INT
-		,@intBookId INT
-		,@strItemLog			NVARCHAR(MAX)
-		, @strUnitMeasureLog	NVARCHAR(MAX) 
+	DECLARE @strItemLog			NVARCHAR(MAX)
+		  , @strUnitMeasureLog	NVARCHAR(MAX) 
 
 	BEGIN TRANSACTION
 
@@ -462,12 +457,6 @@ BEGIN TRY
 		,strBuyingOrderNumber = IMP.strBuyingOrderNumber
 		,intBatchId = NULL
 		,strTINNumber = NULL
-		-- B1
-		,dblB1QtyBought = IMP.dblB1QtyBought
-		,intB1QtyUOMId = B1QUOM.intUnitMeasureId
-		,dblB1Price = IMP.dblB1Price
-		,intB1PriceUOMId = B1PUOM.intUnitMeasureId
-		,intBookId = BOOK.intBookId
 		,intSubBookId = STRATEGY.intSubBookId
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
@@ -610,11 +599,6 @@ BEGIN TRY
 		,strBuyingOrderNumber = NULL
 		,intBatchId = BATCH_TBO.intBatchId
 		,strTINNumber = IMP.strTINNumber
-		,dblB1QtyBought = NULL
-		,intB1QtyUOMId = NULL
-		,dblB1Price = NULL
-		,intB1PriceUOMId = NULL
-		,intBookId = NULL
 		,intSubBookId = NULL
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
@@ -705,12 +689,6 @@ BEGIN TRY
 		,@strBuyingOrderNumber
 		,@intBatchId
 		,@strTINNumber
-		-- B1
-		,@dblB1QtyBought
-		,@intB1QtyUOMId
-		,@dblB1Price
-		,@intB1PriceUOMId
-		,@intBookId
 		,@intSubBookId
 
 	WHILE @@FETCH_STATUS = 0
@@ -928,7 +906,6 @@ BEGIN TRY
 						,strSampleBoxNumber = S.strSampleBoxNumber
 						,strComments3 = S.strComments3
 						,intBrokerId = S.intBrokerId
-					-- ,intTINClearanceId = @intTINClearanceId
 					FROM tblQMSample S
 					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 					WHERE B.intBatchId = @intBatchId
@@ -1000,11 +977,14 @@ BEGIN TRY
 
 					UPDATE S
 					SET intConcurrencyId = S.intConcurrencyId + 1
-						,intLastModifiedUserId = @intEntityUserId
-						,dtmLastModified = @dtmDateCreated
-						-- Auction Fields
-						-- ,intTINClearanceId = @intTINClearanceId
-						,intItemId = @intItemId
+					  , intLastModifiedUserId = @intEntityUserId
+					  , dtmLastModified = @dtmDateCreated
+					  , intItemId = @intItemId
+					  , dblB1QtyBought = null
+					  , intB1QtyUOMId = null
+					  , dblB1Price = null
+					  , intB1PriceUOMId = null
+					  , intBookId = null
 					FROM tblQMSample S
 					WHERE S.intSampleId = @intBatchSampleId
 
@@ -1224,12 +1204,6 @@ BEGIN TRY
 				,strSampleBoxNumber
 				,strComments3
 				,intBrokerId
-				-- B1
-				,dblB1QtyBought
-				,intB1QtyUOMId
-				,dblB1Price
-				,intB1PriceUOMId
-				,intBookId
 				)
 			-- ,strBuyingOrderNo
 			SELECT intConcurrencyId = 1
@@ -1325,13 +1299,7 @@ BEGIN TRY
 				,strSampleBoxNumber = @strSampleBoxNumber
 				,strComments3 = @strComments3
 				,intBrokerId = @intBrokerId
-				,dblB1QtyBought = @dblB1QtyBought
-				,intB1QtyUOMId = @intB1QtyUOMId
-				,dblB1Price = @dblB1Price
-				,intB1PriceUOMId = @intB1PriceUOMId
-				,intBookId = @intBookId
 
-			-- ,strBuyingOrderNo = @strBuyingOrderNumber
 			SET @intSampleId = SCOPE_IDENTITY()
 
 			-- Sample Detail
@@ -1609,11 +1577,11 @@ BEGIN TRY
 				,intBrokerId = @intBrokerId
 				-- ,strBuyingOrderNo = @strBuyingOrderNumber
 				-- B1
-				,dblB1QtyBought = @dblB1QtyBought
-				,intB1QtyUOMId = @intB1QtyUOMId
-				,dblB1Price = @dblB1Price
-				,intB1PriceUOMId = @intB1PriceUOMId
-				,intBookId = @intBookId
+				,dblB1QtyBought = null
+				,intB1QtyUOMId = null
+				,dblB1Price = null
+				,intB1PriceUOMId = null
+				,intBookId = null
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 
@@ -1698,13 +1666,8 @@ BEGIN TRY
 			,@strBuyingOrderNumber
 			,@intBatchId
 			,@strTINNumber
-			-- B1
-			,@dblB1QtyBought
-			,@intB1QtyUOMId
-			,@dblB1Price
-			,@intB1PriceUOMId
-			,@intBookId
 			,@intSubBookId
+
 	END
 
 	CLOSE @C

@@ -53,6 +53,8 @@ BEGIN
 		DECLARE @dblSettlementAmountTransferred DECIMAL(18,6)
 		DECLARE @dblUnits DECIMAL(18,6)
 
+		DECLARE @refId INT
+
 		--SAVE THE SPLITS IN tblGRTransferSettlementReference
 		WHILE(SELECT TOP 1 1 FROM @TransferToSettlements) = 1
 		BEGIN
@@ -102,6 +104,33 @@ BEGIN
 					,NULL
 					,NULL
 
+				SET @refId = SCOPE_IDENTITY()
+
+				DECLARE @dblTotalSettlementAmount2 DECIMAL(18,6)
+				DECLARE @dblTotalUnits2 DECIMAL(18,6)
+				DECLARE @dblTotalTransferPercent2 DECIMAL(18,6)
+
+				SELECT @dblTotalSettlementAmount2	= SUM(dblSettlementAmount)
+					,@dblTotalUnits2				= SUM(dblUnits)
+					,@dblTotalTransferPercent2		= SUM(dblTransferPercent)
+				FROM tblGRTransferSettlementReference
+				WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
+				GROUP BY intBillFromId, intBillDetailFromId
+
+				IF @dblTotalSettlementAmount2 > @dblSettlementAmountTransferred
+					OR @dblTotalUnits2 > @dblUnits
+					OR @dblTotalTransferPercent2 > 100
+				BEGIN
+					UPDATE tblGRTransferSettlementReference
+					SET dblTransferPercent = dblTransferPercent - (100 - @dblTotalTransferPercent2)
+						,dblSettlementAmount = dblSettlementAmount - (@dblTotalSettlementAmount2 - @dblSettlementAmountTransferred)
+						,dblUnits = dblUnits - (@dblTotalUnits2 - @dblUnits)
+					WHERE intTransferSettlementReferenceId = @refId
+				END
+
+
+				--select 'test',* from tblGRTransferSettlementReference where intTransferSettlementHeaderId = @intTransferSettlementHeaderId
+
 				SELECT @intTransferFromSettlementId = MIN(intTransferFromSettlementId)
 				FROM @TransferFromSettlements
 				WHERE intTransferFromSettlementId > @intTransferFromSettlementId
@@ -145,7 +174,7 @@ BEGIN
 			,[intAccountId]
 		FROM tblGRTransferSettlementReference
 		WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
-
+		--SELECT '@TransferSettlementReference',* FROM @TransferSettlementReference
 		--WHILE(SELECT TOP 1 1 FROM @TransferSettlementReference) = 1
 		BEGIN
 			--DM 
@@ -171,7 +200,7 @@ BEGIN
 				,intItemId				= NULL
 				,dblQuantityToBill		= TSR.dblUnits
 				,dblOrderQty			= TSR.dblUnits
-				,dblCost				= ROUND(TSR.dblSettlementAmount / TSR.dblUnits,2)
+				,dblCost				= ROUND(TSR.dblSettlementAmount / TSR.dblUnits,6)
 				,intAccountId			= TSFROM.intAccountId
 				,strVendorOrderNumber	= TS.strTransferSettlementNumber
 				,strMiscDescription		= AP.strVendorOrderNumber
@@ -211,7 +240,7 @@ BEGIN
 				,intItemId				= NULL
 				,dblQuantityToBill		= TSR.dblUnits
 				,dblOrderQty			= TSR.dblUnits
-				,dblCost				= ROUND(TSR.dblSettlementAmount / TSR.dblUnits,2)
+				,dblCost				= ROUND(TSR.dblSettlementAmount / TSR.dblUnits,6)
 				,intAccountId			= TSFROM.intAccountId
 				,strVendorOrderNumber	= TS.strTransferSettlementNumber
 				,strMiscDescription		= AP.strVendorOrderNumber

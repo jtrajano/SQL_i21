@@ -562,9 +562,6 @@ BEGIN
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
 
-	IF @ysnPost = 0
-		EXEC uspCMRemoveRelatedTransactions @strTransactionId, 0
-
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
 END -- @ysnRecap = 0

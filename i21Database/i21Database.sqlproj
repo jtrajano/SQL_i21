@@ -1080,7 +1080,6 @@
     <Build Include="dbo\Tables\tblGRAdjustSettlements.sql" />
     <Build Include="dbo\Views\vyuGRSearchAdjustSettlements.sql" />
     <Build Include="dbo\User Defined Types\AdjustSettlementsStagingTable.sql" />
-    <Build Include="dbo\Tables\tblGRDeletedAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRPostAdjustSettlements.sql" />
     <Build Include="dbo\Stored Procedures\uspGRAdjustSettlementsForPurchase.sql" />
@@ -1539,6 +1538,10 @@
     <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIcon.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTierProducts.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSProcessPaymentsForPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1952,6 +1955,8 @@
     <Build Include="dbo\Views\vyuFAUndepreciatedAssetAllPeriods.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
+    <Build Include="dbo\Views\vyuCMProcessPaymentArchive.sql" />
+    <Build Include="dbo\Views\vyuCMProcessPaymentArchiveAR.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroup.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Views\vyuGLAccountSegmentPartition.sql" />
@@ -7412,6 +7417,7 @@
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
     <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
@@ -11852,6 +11858,7 @@
     <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
     <Build Include="dbo\Views\vyuARZugInvoiceView.sql" />
     <Build Include="dbo\Views\vyuARZugInvoiceDetailView.sql" />
+    <Build Include="dbo\Tables\tblARPaymentBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

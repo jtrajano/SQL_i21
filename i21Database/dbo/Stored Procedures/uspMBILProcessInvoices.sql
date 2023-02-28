@@ -138,7 +138,6 @@ CREATE TABLE #TempMBILInvoiceItem (
 	BEGIN
 		DECLARE @EntriesForInvoice AS InvoiceStagingTable
 		DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
-		DECLARE @LogId INT
 
 		INSERT INTO @EntriesForInvoice (
 				  [intId]
@@ -272,66 +271,69 @@ CREATE TABLE #TempMBILInvoiceItem (
 		LEFT JOIN tblARInvoice II ON InvoiceItem.inti21InvoiceId = II.intInvoiceId
 		WHERE InvoiceItem.inti21InvoiceId IS NULL OR II.intInvoiceId IS NULL
 
-		INSERT INTO @TaxDetails
-						(
-						[intDetailId] 
-						,[intTaxGroupId]
-						,[intTaxCodeId]
-						,[intTaxClassId]
-						,[strTaxableByOtherTaxes]
-						,[strCalculationMethod]
-						,[dblRate]
-						,[intTaxAccountId]
-						,[dblTax]
-						,[dblAdjustedTax]
-						,[ysnTaxAdjusted]
-						,[ysnSeparateOnInvoice]
-						,[ysnCheckoffTax]
-						,[ysnTaxExempt]
-						,[ysnTaxOnly]
-						,[strNotes]
-						,[intTempDetailIdForTaxes]
-						,[ysnClearExisting])
-					SELECT
-					 [intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = Invoice.intInvoiceId ORDER BY dblQtyShipped DESC),Invoice.intInvoiceId)
-					,[intTaxGroupId]			= NULL
-					,[intTaxCodeId]				= smTaxCode.intTaxCodeId
-					,[intTaxClassId]			= smTaxCode.intTaxClassId
-					,[strTaxableByOtherTaxes]	= smTaxCode.strTaxableByOtherTaxes
-					,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < Invoice.dtmInvoiceDate AND intTaxCodeId = InvoiceTaxCode.intTaxCodeId order by dtmEffectiveDate desc)
-					,[dblRate]					= InvoiceTaxCode.dblRate
-					,[intTaxAccountId]			= smTaxCode.intSalesTaxAccountId
-					,[dblTax]					= ABS(InvoiceTaxCode.dblTax)
-					,[dblAdjustedTax]			= ABS(InvoiceTaxCode.dblAdjustedTax)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
-					,[ysnTaxAdjusted]			= 0
-					,[ysnSeparateOnInvoice]		= 0 
-					,[ysnCheckoffTax]			= smTaxCode.ysnCheckoffTax
-					,[ysnTaxExempt]				= InvoiceTaxCode.ysnTaxExempt
-					,[ysnTaxOnly]				= smTaxCode.[ysnTaxOnly]
-					,[strNotes]					= ''
-					,[intTempDetailIdForTaxes]	= Invoice.intInvoiceId
-					,[ysnClearExisting]			= 1
-					FROM 
-					tblMBILInvoice Invoice
-					INNER JOIN tblMBILInvoiceItem InvoiceItem
-						ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
-					INNER JOIN tblMBILInvoiceTaxCode InvoiceTaxCode
-						ON InvoiceItem.intInvoiceId = InvoiceTaxCode.intInvoiceItemId
-					INNER JOIN tblSMTaxCode smTaxCode
-						ON InvoiceTaxCode.intTaxCodeId = smTaxCode.intTaxCodeId
-					WHERE Invoice.intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
-		
-		EXEC [dbo].[uspARProcessInvoicesByBatch]
-				 @InvoiceEntries	= @EntriesForInvoice
-				,@LineItemTaxEntries= @TaxDetails
-				,@UserId			= @UserId
-				,@GroupingOption	= 8
-				,@RaiseError		= 0
-				,@BatchId			= @BatchId
-				,@ErrorMessage		= @ErrorMessage OUTPUT
-				--,@CreatedIvoices	= @CreatedInvoices OUTPUT
-				--,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
-				,@LogId				= @LogId OUTPUT
+	INSERT INTO @TaxDetails
+					(
+					[intDetailId] 
+					,[intTaxGroupId]
+					,[intTaxCodeId]
+					,[intTaxClassId]
+					,[strTaxableByOtherTaxes]
+					,[strCalculationMethod]
+					,[dblRate]
+					,[intTaxAccountId]
+					,[dblTax]
+					,[dblAdjustedTax]
+					,[ysnTaxAdjusted]
+					,[ysnSeparateOnInvoice]
+					,[ysnCheckoffTax]
+					,[ysnTaxExempt]
+					,[ysnTaxOnly]
+					,[strNotes]
+					,[intTempDetailIdForTaxes]
+					,[ysnClearExisting])
+				SELECT
+				 [intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = Invoice.intInvoiceId ORDER BY dblQtyShipped DESC),Invoice.intInvoiceId)
+				,[intTaxGroupId]			= NULL
+				,[intTaxCodeId]				= smTaxCode.intTaxCodeId
+				,[intTaxClassId]			= smTaxCode.intTaxClassId
+				,[strTaxableByOtherTaxes]	= smTaxCode.strTaxableByOtherTaxes
+				,[strCalculationMethod]		= (select top 1 strCalculationMethod from tblSMTaxCodeRate where dtmEffectiveDate < Invoice.dtmInvoiceDate AND intTaxCodeId = InvoiceTaxCode.intTaxCodeId order by dtmEffectiveDate desc)
+				,[dblRate]					= InvoiceTaxCode.dblRate
+				,[intTaxAccountId]			= smTaxCode.intSalesTaxAccountId
+				,[dblTax]					= ABS(InvoiceTaxCode.dblTax)
+				,[dblAdjustedTax]			= ABS(InvoiceTaxCode.dblAdjustedTax)--(cfTransactionTax.dblTaxCalculatedAmount * cfTransaction.dblQuantity) -- REMOTE TAXES ARE NOT RECOMPUTED ON INVOICE
+				,[ysnTaxAdjusted]			= 0
+				,[ysnSeparateOnInvoice]		= 0 
+				,[ysnCheckoffTax]			= smTaxCode.ysnCheckoffTax
+				,[ysnTaxExempt]				= InvoiceTaxCode.ysnTaxExempt
+				,[ysnTaxOnly]				= smTaxCode.[ysnTaxOnly]
+				,[strNotes]					= ''
+				,[intTempDetailIdForTaxes]	= Invoice.intInvoiceId
+				,[ysnClearExisting]			= 1
+				FROM 
+				tblMBILInvoice Invoice
+				INNER JOIN tblMBILInvoiceItem InvoiceItem
+					ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
+				INNER JOIN tblMBILInvoiceTaxCode InvoiceTaxCode
+					ON InvoiceItem.intInvoiceItemId = InvoiceTaxCode.intInvoiceItemId
+				INNER JOIN tblSMTaxCode smTaxCode
+					ON InvoiceTaxCode.intTaxCodeId = smTaxCode.intTaxCodeId
+				WHERE Invoice.intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+
+
+	DECLARE @LogId INT
+
+	EXEC [dbo].[uspARProcessInvoicesByBatch]
+			 @InvoiceEntries	= @EntriesForInvoice
+			,@LineItemTaxEntries= @TaxDetails
+			,@UserId			= @UserId
+			,@GroupingOption	= 8
+			,@RaiseError		= 0
+			,@BatchId			= @BatchId
+			,@ErrorMessage		= @ErrorMessage OUTPUT
+			--,@CreatedIvoices	= @CreatedInvoices OUTPUT
+			--,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
+			,@LogId				= @LogId OUTPUT
 
 		IF (ISNULL(@ysnRecap,0) = 0 AND (@ysnPost = 1))
 		BEGIN

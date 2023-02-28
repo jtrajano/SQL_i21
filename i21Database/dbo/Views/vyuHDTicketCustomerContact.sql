@@ -36,3 +36,5 @@
 			inner join tblEMEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 			left join tblEMEntityPhoneNumber ph on ec.intEntityId = ph.intEntityId
 			left join tblEMEntityMobileNumber mob on ec.intEntityId = mob.intEntityId
+		where c.strCustomerNumber is not null
+GO

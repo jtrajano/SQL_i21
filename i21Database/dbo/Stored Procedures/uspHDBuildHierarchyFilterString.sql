@@ -52,7 +52,7 @@ BEGIN
 		UPDATE tblHDCoworkerHierarchyDetail SET strFilterString = '' WHERE intCoworkerHierarchyDetailId = @intCoworkerHierarchyDetailId		
 	END
 
-	DELETE #TemphDHierarchy WHERE intCoworkerHierarchyDetailId = @intCoworkerHierarchyDetailId
+	DELETE #TempHDHierarchy WHERE intCoworkerHierarchyDetailId = @intCoworkerHierarchyDetailId
 END
 
 -- ++++++++++++++++++++++++++++++

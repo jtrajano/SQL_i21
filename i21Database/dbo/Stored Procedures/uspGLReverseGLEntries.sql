@@ -34,7 +34,7 @@ BEGIN TRANSACTION;
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
 		
-		EXEC uspGLInsertReverseGLEntry @strTransactionId,@intEntityId,@dtmDateReverse, @strBatchId
+		EXEC uspGLInsertReverseGLEntry @strTransactionId=@strTransactionId,@intEntityId=@intEntityId,@dtmDateReverse=@dtmDateReverse, @strBatchId=@strBatchId,@SkipICValidation = 1
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 ELSE
