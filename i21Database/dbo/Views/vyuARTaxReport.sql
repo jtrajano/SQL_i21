@@ -135,8 +135,8 @@ SELECT
 	,ysnOverrideTaxLocation     = CAST(CASE WHEN ISNULL(INVOICE.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
-	,dblTotalAmount				= DETAIL.dblLineTotal + DETAIL.dblTax
-	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+	,dblTotalAmount				= (DETAIL.dblLineTotal + DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal()) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
