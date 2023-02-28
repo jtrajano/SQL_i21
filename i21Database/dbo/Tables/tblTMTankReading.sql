@@ -26,8 +26,11 @@ CREATE TABLE [dbo].[tblTMTankReading] (
 	CONSTRAINT [FK_tblTMTankReading_tblTMDeviceTankMonitor] FOREIGN KEY ([intDeviceTankMonitorId]) REFERENCES [dbo].[tblTMDeviceTankMonitor] ([intDeviceTankMonitorId])
 	)
 
-
-
+GO
+CREATE INDEX [IX_tblTMTankReading_intDeviceTankMonitorId] ON [dbo].[tblTMTankReading] ([intDeviceTankMonitorId])
+GO
+CREATE INDEX [IX_tblTMTankReading_intSiteId] ON [dbo].[tblTMTankReading] ([intSiteId])
+GO
 
 
 
