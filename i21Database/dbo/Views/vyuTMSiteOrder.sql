@@ -52,6 +52,8 @@ SELECT
 	,A.intFillGroupId
 	,N.strFillGroupCode
 	,A.dtmOnHoldEndDate
+	,A.ysnCompanySite
+	,A.ysnRequireClock
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
