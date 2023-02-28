@@ -1542,6 +1542,12 @@
     <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutTierProducts.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSProcessPaymentsForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCBasisContractValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntriesForAPAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketContractUsedValidation.sql" />
+    <Build Include="dbo\Tables\tblSCScaleDirectInDistributionAllocationForGL.sql" />
+    <Build Include="dbo\Views\vyuSCTicketDirectInDistributionAllocationAndVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
