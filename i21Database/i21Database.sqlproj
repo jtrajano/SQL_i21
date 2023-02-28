@@ -5962,6 +5962,7 @@
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReport.sql" />
     <Build Include="dbo\Views\vyuPATCalculateFiscalPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerPatronageHistory.sql" />
