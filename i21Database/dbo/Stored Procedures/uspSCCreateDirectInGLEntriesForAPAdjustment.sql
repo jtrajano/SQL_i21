@@ -1,6 +1,7 @@
 CREATE PROCEDURE uspSCCreateDirectInGLEntriesForAPAdjustment
-	@TICKET_ID INT , --= 12192 --13194 
-	@USER_ID INT --= 1
+	@TICKET_ID INT , --= 12192 --13194 	
+	@USER_ID INT, --= 1
+	@BILL_ID INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON 
@@ -22,12 +23,39 @@ BEGIN
 	DECLARE @strTicketNumber  NVARCHAR(50)
 	DECLARE @GLDescription nvarchar(150) 
 
+
+	DECLARE @GL_CODE NVARCHAR(50)
+	DECLARE @GL_TRANSACTION_ID INT
+	DECLARE @GL_TRANSACTION_STR NVARCHAR(100)
+	DECLARE @GL_TRANSACTION_TYPE NVARCHAR(50)
+	DECLARE @GL_MODULE NVARCHAR(100)
+	DECLARE @GL_DATE NVARCHAR(100)
+
 	SELECT TOP 1
 				@intTicketProcessingLocation = intProcessingLocationId
 				,@intTicketItemId = intItemId
 				,@strTicketNumber = strTicketNumber
+				,@GL_CODE = 'SCTKT'
+				,@GL_TRANSACTION_ID = intTicketId
+				,@GL_TRANSACTION_STR = strTicketNumber
+				,@GL_TRANSACTION_TYPE = 'Scale Ticket'
+				,@GL_MODULE = 'Scale'
+				,@GL_DATE = dtmTicketDateTime
 			FROM tblSCTicket
 			WHERE intTicketId = @TICKET_ID 
+
+
+
+	IF ISNULL(@BILL_ID, 0) > 0 
+	SELECT
+		@GL_CODE = 'AP',
+		@GL_TRANSACTION_ID = intBillId,
+		@GL_TRANSACTION_STR = strBillId,
+		@GL_TRANSACTION_TYPE = 'Bill', 
+		@GL_MODULE = 'Accounts Payable',
+		@GL_DATE = dtmDate
+	FROM tblAPBill
+	WHERE intBillId = @BILL_ID
 
 
 	-- Get Item Location Id
@@ -135,30 +163,30 @@ BEGIN
 			,[dblForeignRate]			
 		)
 		SELECT	
-			dtmDate						= A.dtmTicketDateTime
+			dtmDate						= @GL_DATE
 			,strBatchId					= @strBatchId
-			,intAccountId				= @intInventoryInTransitAccountId
+			,intAccountId				= ISNULL(@intInventoryInTransitDirectAccountId, @intInventoryInTransitAccountId)
 			,dblDebit					= CASE WHEN B.dblAmount < 0 THEN 0 ELSE ABS(B.dblAmount) END
 			,dblCredit					= CASE WHEN B.dblAmount < 0 THEN ABS(B.dblAmount) ELSE 0 END
 			,dblDebitUnit				= CASE WHEN B.dblAmount < 0 THEN 0 ELSE ABS(B.dblUnit) END
 			,dblCreditUnit				= CASE WHEN B.dblAmount < 0 THEN ABS(B.dblUnit) ELSE 0 END
 			,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - ' + B.strAllocationType
-			,strCode					= 'SCTKT'
+			,strCode					= @GL_CODE
 			,strReference				= '' 
 			,intCurrencyId				= A.intCurrencyId
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= A.dtmTicketDateTime
+			,dtmTransactionDate			= @GL_DATE
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= 52
 			,ysnIsUnposted				= 0
 			,intUserId					= @USER_ID
 			,intEntityId				= NULL 
-			,strTransactionId			= A.strTicketNumber
-			,intTransactionId			= A.intTicketId 
-			,strTransactionType			= 'Scale Ticket'
-			,strTransactionForm			= 'Scale Ticket'
-			,strModuleName				= 'Scale'
+			,strTransactionId			= @GL_TRANSACTION_STR
+			,intTransactionId			= @GL_TRANSACTION_ID
+			,strTransactionType			= @GL_TRANSACTION_TYPE
+			,strTransactionForm			= @GL_TRANSACTION_TYPE
+			,strModuleName				= @GL_MODULE
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE WHEN B.dblAmount < 0 THEN 0 ELSE ABS(B.dblAmount) END
 			,dblDebitReport				= NULL 
@@ -173,7 +201,7 @@ BEGIN
 			SELECT TOP 1
 				strDescription
 			FROM tblGLAccount
-			WHERE intAccountId = @intInventoryInTransitAccountId
+			WHERE intAccountId = ISNULL(@intInventoryInTransitDirectAccountId, @intInventoryInTransitAccountId)
 		) GLAccount
 		WHERE A.intTicketId = @TICKET_ID 
 			AND B.dblAmount != 0
@@ -222,22 +250,22 @@ BEGIN
 			,dblDebitUnit				= CASE WHEN B.dblAmount < 0 THEN ABS(B.dblUnit)  ELSE 0 END
 			,dblCreditUnit				= CASE WHEN B.dblAmount < 0 THEN 0 ELSE ABS(B.dblUnit)  END
 			,strDescription				= GLAccount.strDescription + '. ' + @GLDescription + ' - ' + B.strAllocationType
-			,strCode					= 'SCTKT'
+			,strCode					= @GL_CODE
 			,strReference				= '' 
 			,intCurrencyId				= A.intCurrencyId
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= A.dtmTicketDateTime
+			,dtmTransactionDate			= @GL_DATE
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= 52
 			,ysnIsUnposted				= 0
 			,intUserId					= @USER_ID
 			,intEntityId				= NULL 
-			,strTransactionId			= A.strTicketNumber
-			,intTransactionId			= A.intTicketId 
-			,strTransactionType			= 'Scale Ticket'
-			,strTransactionForm			= 'Scale Ticket'
-			,strModuleName				= 'Scale'
+			,strTransactionId			= @GL_TRANSACTION_STR
+			,intTransactionId			= @GL_TRANSACTION_ID
+			,strTransactionType			= @GL_TRANSACTION_TYPE
+			,strTransactionForm			= @GL_TRANSACTION_TYPE
+			,strModuleName				= @GL_MODULE
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE WHEN B.dblAmount < 0 THEN ABS(B.dblAmount) ELSE 0 END
 			,dblDebitReport				= NULL 
@@ -256,14 +284,9 @@ BEGIN
 		) GLAccount
 		WHERE A.intTicketId = @TICKET_ID 
 			AND B.dblAmount != 0
-
-
-	
 		
 		IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)
 			EXEC uspGLBookEntries @GLEntries, 1	
-
-		
 
 	END
 
