@@ -81,7 +81,7 @@ outer apply(
 )GL
 
 
-where C.intAccountId = 53 and strFiscalYear = '2022'
+-- where C.intAccountId = 53 and strFiscalYear = '2022'
 --order by C.intAccountId, intCurrencyID, intGLDetailId
 ),
 cteRunningBalance AS(
@@ -94,24 +94,18 @@ cteOpeningBalance AS(
 
 	SELECT 
 	strCurrency
-	, strFiscalYear
 	,strAccountId
-	,functionalRunningBalance - dblAmount dblFunctionalOpeningBalance
-	,dblAmount
-	,functionalRunningBalance
+	,functionalRunningBalance - dblAmount dblBeginningBalance
+	,functionalRunningBalance dblEndingBalance
 	,dblDebit, dblCredit
-	,foreignRunningBalance - dblAmountForeign dblForeignOpeningBalance
+	,foreignRunningBalance - dblAmountForeign dblBeginningBalanceForeign
 	,dblAmountForeign
-	,foreignRunningBalance
+	,foreignRunningBalance dblEndingBalanceForeign
 	,dblDebitForeign
 	,dblCreditForeign
-	,intGLDetailId
 	,dblCreditReport
 	,dtmDate
 	,strBatchId
-	,strAccountDescription
-	,strAccountGroup
-	,strAccountType
 	,dblDebitUnit
 	,dblCreditUnit
 	,strDescription
@@ -119,22 +113,17 @@ cteOpeningBalance AS(
 	,strReference
 	,dblExchangeRate
 	,dtmDateEntered
-	,dtmTransactionDate
 	,strJournalLineDescription
-	,strStatus
 	,strUserName
 	,strTransactionId
 	,strTransactionType
 	,strTransactionForm
 	,strModuleName
 	,dblDebitReport
-	,dblReportingRate
-	,dblForeignRate
-	,intJournalLineNo
 	,strDocument
-	,ysnIsUnposted
+	--,ysnIsUnposted
 	,intTransactionId
-	,intEntityId
+	--,intEntityId
 	,strComments
 	,strUOMCode
 	,strLocationName
@@ -144,15 +133,16 @@ cteOpeningBalance AS(
 	,dblSourceUnitCredit
 	,strSourceEntity
 	,strSourceDocumentId
-	,strSourceEntityNo
-	,intSourceEntityId
-	,ysnPostAction
-	,dtmDateEnteredMin
-	,strPeriod
+	--,strSourceEntityNo
+	--,intSourceEntityId
+	--,ysnPostAction
+	--,dtmDateEnteredMin
+	--,strPeriod
 	,strCompanyLocation
-	,strCurrencyExchangeRateType
-	,strLocationSegmentDescription
-	,strLOBSegmentDescription
+	--,strCurrencyExchangeRateType
+	--,strLocationSegmentDescription
+	--,strLOBSegmentDescription
+    ,intCurrencyID
 	FROM cteRunningBalance
 )
 
