@@ -1419,6 +1419,12 @@
   <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDropshipInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCBasisContractValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntriesForAPAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketContractUsedValidation.sql" />
+    <Build Include="dbo\Tables\tblSCScaleDirectInDistributionAllocationForGL.sql" />
+    <Build Include="dbo\Views\vyuSCTicketDirectInDistributionAllocationAndVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareDropshipInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />

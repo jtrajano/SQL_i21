@@ -24,7 +24,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
 DECLARE @ErrMsg NVARCHAR(MAX);
-DECLARE @DoContractValidation BIT = 0
+
 
 DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@strWhereFinalizedWeight NVARCHAR(20)
@@ -522,18 +522,13 @@ BEGIN TRY
 						,[intEntityId] = @intEntityId
 						,[dblScheduleQty] = @dblTicketNetUnits
 
-					INSERT INTO tblSCTicketDistributionAllocation(
-						intTicketId
-						,intSourceId
-						,intSourceType
-					)
-					SELECT 
-						intTicketId = @intTicketId
-						,intSourceId = intTicketContractUsed
-						,intSourceType = 1
-					FROM tblSCTicketContractUsed
-					WHERE intTicketId = @intTicketId
 					
+					EXEC uspSCBasisContractValidation 
+						@CONTRACT_DETAIL = @intTicketContractDetailId
+						, @QUANTITY_TO_CHECK = @dblTicketNetUnits
+						, @SCREEN = 'Voucher'
+						
+						
 				END
 
 				---Load Distribution
@@ -585,19 +580,7 @@ BEGIN TRY
 						@intTicketId
 						,@intTicketLoadDetailId
 						,@intEntityId
-						,@dblTicketNetUnits
-
-					INSERT INTO tblSCTicketDistributionAllocation(
-						intTicketId
-						,intSourceId
-						,intSourceType
-					)
-					SELECT 
-						intTicketId = @intTicketId
-						,intSourceId = intTicketLoadUsedId
-						,intSourceType = 2
-					FROM tblSCTicketLoadUsed
-					WHERE intTicketId = @intTicketId
+						,@dblTicketNetUnits					
 					
 				END
 
@@ -625,18 +608,7 @@ BEGIN TRY
 						,dblQty = dblNetUnits
 					FROM tblSCTicket
 					WHERE intTicketId = @intTicketId
-
-					INSERT INTO tblSCTicketDistributionAllocation(
-						intTicketId
-						,intSourceId
-						,intSourceType
-					)
-					SELECT 
-						intTicketId = @intTicketId
-						,intSourceId = intTicketSpotUsedId
-						,intSourceType = 4
-					FROM tblSCTicketSpotUsed
-					WHERE intTicketId = @intTicketId
+					
 				END
 				---STORAGE DISTRIBUTION
 				ELSE
@@ -657,17 +629,7 @@ BEGIN TRY
 					FROM tblSCTicket
 					WHERE intTicketId = @intTicketId
 
-					INSERT INTO tblSCTicketDistributionAllocation(
-						intTicketId
-						,intSourceId
-						,intSourceType
-					)
-					SELECT 
-						intTicketId = @intTicketId
-						,intSourceId = intTicketStorageUsedId
-						,intSourceType = 3
-					FROM tblSCTicketStorageUsed
-					WHERE intTicketId = @intTicketId
+					
 				END
 			END
 
@@ -755,6 +717,9 @@ BEGIN TRY
 					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
 			END
 
+
+			EXEC uspSCConsolidateTicketUsedBy @TICKET_ID = @intTicketId
+
 			---Create GL Entries
 			EXEC uspSCCreateDirectInGLEntries @intTicketId, 1, @intUserId 
 
@@ -837,19 +802,7 @@ BEGIN TRY
 							,[intEntityId] = @intEntityId
 							,[dblScheduleQty] = @dblTicketNetUnits
 
-						INSERT INTO tblSCTicketDistributionAllocation(
-							intTicketId
-							,intSourceId
-							,intSourceType
-						)
-						SELECT 
-							intTicketId = @intTicketId
-							,intSourceId = intTicketContractUsed
-							,intSourceType = 1
-						FROM tblSCTicketContractUsed
-						WHERE intTicketId = @intTicketId
 						
-
 
 						if @dblTicketScheduledQty <> 0
 						begin
@@ -876,52 +829,14 @@ BEGIN TRY
 								,@intExternalId	= @intTicketId
 								,@strScreenName	= 'Scale'
 
-						end
+						end					
 						
 						
-						if @DoContractValidation = 1
-						begin
-							declare @ContractAvailablePricedQuantity numeric(38,20)												
-							declare @ContractNumberAffected nvarchar(500)
-			
-							select 
-								@intContractHeaderId = ContractHeader.intContractHeaderId 							
-								,@ContractNumberAffected = ContractHeader.strContractNumber
-							from tblCTContractDetail ContractDetail
-								join tblCTContractHeader ContractHeader
-									on ContractDetail.intContractHeaderId = ContractHeader.intContractHeaderId 
-							where intContractDetailId = @intContractDetailId
-
-							IF OBJECT_ID (N'tempdb.dbo.#tmpContractPriceChecking') IS NOT NULL DROP TABLE #tmpContractPriceChecking
-							CREATE TABLE #tmpContractPriceChecking (
-								intIdentityId INT
-								,intContractHeaderId int
-								,intContractDetailId int
-								,ysnLoad bit
-								,intPriceContractId int
-								,intPriceFixationId int
-								,intPriceFixationDetailId int
-								,dblQuantity numeric(38,20)
-								,dblPrice numeric(38,20)
-							)
-			
-							delete from #tmpContractPriceChecking
-							INSERT INTO #tmpContractPriceChecking 
-							EXEC uspCTGetContractPrice @intContractHeaderId,@intContractDetailId, @dblTicketNetUnits, 'Invoice'
-
-							select @ContractAvailablePricedQuantity = sum(dblQuantity) 
-							from #tmpContractPriceChecking
-
-							IF OBJECT_ID (N'tempdb.dbo.#tmpContractPriceChecking') IS NOT NULL DROP TABLE #tmpContractPriceChecking
-							if(@ContractAvailablePricedQuantity < @dblTicketNetUnits)
-							begin
-
-								declare @error_message nvarchar(200) = 'Cannot distribute to contract with not enough Priced Quantity (' + @ContractNumberAffected + ' has ' + cast(cast(@ContractAvailablePricedQuantity as numeric(18, 2)) as nvarchar) + ' priced units) .'
-								RAISERROR(@error_message, 11, 1);
-							end
-
-						end
 						
+						EXEC uspSCBasisContractValidation 
+							@CONTRACT_DETAIL = @intTicketContractDetailId
+							, @QUANTITY_TO_CHECK = @dblTicketNetUnits
+							, @SCREEN = 'Invoice'
 
 
 					END
@@ -939,19 +854,7 @@ BEGIN TRY
 							@intTicketId
 							,@intTicketLoadDetailId
 							,@intEntityId
-							,@dblTicketNetUnits
-
-						INSERT INTO tblSCTicketDistributionAllocation(
-							intTicketId
-							,intSourceId
-							,intSourceType
-						)
-						SELECT 
-							intTicketId = @intTicketId
-							,intSourceId = intTicketLoadUsedId
-							,intSourceType = 2
-						FROM tblSCTicketLoadUsed
-						WHERE intTicketId = @intTicketId
+							,@dblTicketNetUnits						
 						
 					END
 
@@ -978,18 +881,7 @@ BEGIN TRY
 							,dblQty = dblNetUnits
 						FROM tblSCTicket
 						WHERE intTicketId = @intTicketId
-
-						INSERT INTO tblSCTicketDistributionAllocation(
-							intTicketId
-							,intSourceId
-							,intSourceType
-						)
-						SELECT 
-							intTicketId = @intTicketId
-							,intSourceId = intTicketSpotUsedId
-							,intSourceType = 4
-						FROM tblSCTicketSpotUsed
-						WHERE intTicketId = @intTicketId
+						
 					END
 					---STORAGE DISTRIBUTION
 					ELSE
@@ -1009,39 +901,12 @@ BEGIN TRY
 							,dblQty = dblNetUnits
 						FROM tblSCTicket
 						WHERE intTicketId = @intTicketId
-
-						INSERT INTO tblSCTicketDistributionAllocation(
-							intTicketId
-							,intSourceId
-							,intSourceType
-						)
-						SELECT 
-							intTicketId = @intTicketId
-							,intSourceId = intTicketStorageUsedId
-							,intSourceType = 3
-						FROM tblSCTicketStorageUsed
-						WHERE intTicketId = @intTicketId
+						
 					END
 				END
-			END
-		
-			-- SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
-			-- INNER JOIN tblCTPriceFixation CPX
-			-- 	ON CPX.intPriceFixationId = CTP.intPriceFixationId
-			-- INNER JOIN tblCTContractDetail CT
-			-- 	ON CPX.intContractDetailId = CT.intContractDetailId
-			-- INNER JOIN tblSCTicket SC
-			-- 	ON SC.intContractId = CT.intContractDetailId
-			-- WHERE CT.intContractDetailId = @intTicketId
-
-			-- IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
-			-- INNER JOIN tblCTPriceFixation CPX
-			-- 	ON CPX.intPriceFixationId = CTP.intPriceFixationId
-			-- INNER JOIN tblCTContractDetail CT
-			-- 	ON CPX.intContractDetailId = CT.intContractDetailId
-			-- INNER JOIN tblSCTicket SC
-			-- 	ON SC.intContractId = CT.intContractDetailId
-			-- WHERE  SC.intTicketId = @intTicketId))
+			END		
+			
+			EXEC uspSCConsolidateTicketUsedBy @TICKET_ID = @intTicketId
 
 			---CREATE INVOICE
 			BEGIN

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSCUndistributeTicket]
+CREATE PROCEDURE [dbo].[uspSCUndistributeTicket]
 	@intTicketId INT,
 	@intUserId INT,
 	@intEntityId INT,
@@ -966,6 +966,10 @@ BEGIN TRY
 
 						DELETE FROM tblSCTicketDirectBasisContract
 						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCScaleDirectInDistributionAllocationForGL
+						WHERE intTicketId = @intTicketId
+
 					END
 				END
 			END
@@ -1222,6 +1226,9 @@ BEGIN TRY
 						WHERE intTicketId = @intTicketId
 
 						DELETE FROM tblSCTicketDirectBasisContract
+						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCScaleDirectInDistributionAllocationForGL
 						WHERE intTicketId = @intTicketId
 					END
 				END 

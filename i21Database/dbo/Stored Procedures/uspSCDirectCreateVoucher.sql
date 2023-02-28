@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSCDirectCreateVoucher]
+CREATE PROCEDURE [dbo].[uspSCDirectCreateVoucher]
 	@intTicketId INT,
 	@intEntityId INT,
 	@intLocationId INT,
@@ -1333,6 +1333,13 @@ BEGIN TRY
 				IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
 				BEGIN
 					EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage OUT, @createdVouchersId = @intBillId OUT
+
+
+					IF EXISTS(SELECT TOP 1 1 FROM @voucherDetailDirectInventory)
+					BEGIN
+						EXEC uspSCCreateDirectInGLEntriesForAPAdjustment @TICKET_ID = @intTicketId, @USER_ID = @intUserId
+
+					END
 
 					---- LINK Voucher and PriceFixation
 					BEGIN

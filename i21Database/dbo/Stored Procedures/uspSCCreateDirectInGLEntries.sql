@@ -121,137 +121,7 @@ BEGIN
                 ,@strID = @strBatchId OUT
 
             ----GET Ticket Distribution of Units
-            BEGIN
-                /*
-                ---SPOT
-                BEGIN
-                    INSERT INTO @ticketDistributionAllocation (
-                        [intAllocationType]
-                        ,[dblQuantity] 
-                        ,[intEntityId] 
-                        ,[intContractDetailId]
-                        ,[intLoadDetailId]  
-                        ,[intStorageScheduleId]
-                        ,[intStorageScheduleTypeId]
-                        ,[dblFuture] 
-                        ,[dblBasis] 
-                    )
-                    SELECT 
-                         [intAllocationType] = 4
-                        ,[dblQuantity] = B.dblQty
-                        ,[intEntityId] = B.intEntityId
-                        ,[intContractDetailId] = NULL
-                        ,[intLoadDetailId] = NULL 
-                        ,[intStorageScheduleId] = NULL
-                        ,[intStorageScheduleTypeId] = NULL
-                        ,[dblFuture] = ISNULL(B.dblUnitFuture,0)
-                        ,[dblBasis] = ISNULL(B.dblUnitBasis,0)
-                    FROM tblSCTicket A
-                    INNER JOIN tblSCTicketSpotUsed B
-                        ON A.intTicketId = B.intTicketId
-                    WHERE A.intTicketId = @intTicketId 
-                END
-
-                ---CONTRACT
-                BEGIN
-                    --Priced Contract
-                    INSERT INTO @ticketDistributionAllocation (
-                        [intAllocationType]
-                        ,[dblQuantity] 
-                        ,[intEntityId] 
-                        ,[intContractDetailId]
-                        ,[intLoadDetailId]  
-                        ,[intStorageScheduleId]
-                        ,[intStorageScheduleTypeId]
-                        ,[dblFuture] 
-                        ,[dblBasis] 
-                    )
-                    SELECT 
-                         [intAllocationType] = 1
-                        ,[dblQuantity] = B.dblScheduleQty
-                        ,[intEntityId] = B.intEntityId
-                        ,[intContractDetailId] = B.intContractDetailId
-                        ,[intLoadDetailId] = NULL 
-                        ,[intStorageScheduleId] = NULL
-                        ,[intStorageScheduleTypeId] = NULL
-                        ,[dblFuture] = ISNULL(C.dblFutures,0)
-                        ,[dblBasis] = ISNULL(C.dblBasis,0)
-                    FROM tblSCTicket A
-                    INNER JOIN tblSCTicketContractUsed B
-                        ON A.intTicketId = B.intTicketId
-                    INNER JOIN tblCTContractDetail C
-                        ON B.intContractDetailId = C.intContractDetailId
-                    WHERE A.intTicketId = @intTicketId 
-                END
-
-                ---LOAD
-                BEGIN
-                    --Priced Contract
-                    INSERT INTO @ticketDistributionAllocation (
-                        [intAllocationType]
-                        ,[dblQuantity] 
-                        ,[intEntityId] 
-                        ,[intContractDetailId]
-                        ,[intLoadDetailId]  
-                        ,[intStorageScheduleId]
-                        ,[intStorageScheduleTypeId]
-                        ,[dblFuture] 
-                        ,[dblBasis] 
-                    )
-                    SELECT 
-                         [intAllocationType] = 2
-                        ,[dblQuantity] = B.dblQty
-                        ,[intEntityId] = B.intEntityId
-                        ,[intContractDetailId] = D.intContractDetailId
-                        ,[intLoadDetailId] = B.intLoadDetailId 
-                        ,[intStorageScheduleId] = NULL
-                        ,[intStorageScheduleTypeId] = NULL
-                        ,[dblFuture] = ISNULL(D.dblFutures,0)
-                        ,[dblBasis] = ISNULL(D.dblBasis,0)
-                    FROM tblSCTicket A
-                    INNER JOIN tblSCTicketLoadUsed B
-                        ON A.intTicketId = B.intTicketId
-                    INNER JOIN tblLGLoadDetail C
-                        ON B.intLoadDetailId = C.intLoadDetailId
-                    LEFT JOIN tblCTContractDetail D 
-                        ON C.intPContractDetailId = D.intContractDetailId
-                    LEFT JOIN tblCTContractHeader E
-                        ON D.intContractHeaderId = E.intContractHeaderId
-                    WHERE A.intTicketId = @intTicketId 
-                        AND E.intPricingTypeId = 1
-                END
-
-                -- STORAGE(DP)
-                BEGIN
-                    INSERT INTO @ticketDistributionAllocation (
-                        [intAllocationType]
-                        ,[dblQuantity] 
-                        ,[intEntityId] 
-                        ,[intContractDetailId]
-                        ,[intLoadDetailId]  
-                        ,[intStorageScheduleId]
-                        ,[intStorageScheduleTypeId]
-                        ,[dblFuture] 
-                        ,[dblBasis] 
-                    )
-                    SELECT 
-                         [intAllocationType] = 3
-                        ,[dblQuantity] = B.dblQty
-                        ,[intEntityId] = B.intEntityId
-                        ,[intContractDetailId] = B.intContractDetailId
-                        ,[intLoadDetailId] = NULL 
-                        ,[intStorageScheduleId] = B.intStorageScheduleId
-                        ,[intStorageScheduleTypeId] = B.intStorageTypeId
-                        ,[dblFuture] = ISNULL(C.dblFutures,0)
-                        ,[dblBasis] = ISNULL(C.dblBasis,0)
-                    FROM tblSCTicket A
-                    INNER JOIN tblSCTicketStorageUsed B
-                        ON A.intTicketId = B.intTicketId
-                    LEFT JOIN tblCTContractDetail C
-                        ON B.intContractDetailId = C.intContractDetailId
-                    WHERE A.intTicketId = @intTicketId 
-                END
-                */
+            BEGIN               
               
                 INSERT INTO @ticketDistributionAllocation (
                     [intAllocationType]
@@ -266,7 +136,36 @@ BEGIN
                     ,intTicketDistributionAllocationId
                 )
                 EXEC uspSCGetTicketDistributionAllocation @intTicketId
-          
+
+
+                INSERT INTO tblSCScaleDirectInDistributionAllocationForGL(
+                    [intAllocationType]
+                    ,[dblQuantity] 
+                    ,[intEntityId] 
+                    ,[intContractDetailId]
+                    ,[intLoadDetailId]  
+                    ,[intStorageScheduleId]
+                    ,[intStorageScheduleTypeId]
+                    ,[dblFuture] 
+                    ,[dblBasis] 
+                    ,intTicketDistributionAllocationId
+                    ,intTicketId
+                )
+                SELECT 
+                
+                    [intAllocationType]
+                    ,[dblQuantity] 
+                    ,[intEntityId] 
+                    ,[intContractDetailId]
+                    ,[intLoadDetailId]  
+                    ,[intStorageScheduleId]
+                    ,[intStorageScheduleTypeId]
+                    ,[dblFuture] 
+                    ,[dblBasis] 
+                    ,intTicketDistributionAllocationId
+                    ,@intTicketId
+                FROM @ticketDistributionAllocation
+                
             END
 
             SELECT   
