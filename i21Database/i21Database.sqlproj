@@ -1292,6 +1292,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcRetainedEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRefreshREEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRefreshAuditorReportByAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
