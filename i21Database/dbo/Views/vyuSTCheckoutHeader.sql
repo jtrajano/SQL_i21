@@ -179,6 +179,18 @@ SELECT
             THEN 'Gross'  
            WHEN st.strReportDepartmentAtGrossOrNet = 'N'  
             THEN 'Net'  
+          END  COLLATE Latin1_General_CI_AS
+   ,strDepartmentOrCategory = CASE   
+           WHEN st.strDepartmentOrCategory = 'D'  
+            THEN 'Department'  
+           WHEN st.strDepartmentOrCategory = 'C'  
+            THEN 'Category'  
+          END  COLLATE Latin1_General_CI_AS
+   ,strCategoriesOrSubcategories = CASE   
+           WHEN st.strCategoriesOrSubcategories = 'C'  
+            THEN 'Categories'  
+           WHEN st.strCategoriesOrSubcategories = 'S'  
+            THEN 'Subcategories'  
           END  COLLATE Latin1_General_CI_AS  
    ,strAllowRegisterMarkUpDown = CASE   
           WHEN st.strAllowRegisterMarkUpDown = 'I'  
@@ -325,7 +337,9 @@ GROUP BY
    ,vst.[strState]  
    ,vst.[strRegisterClass]  
    ,vst.[ysnIsUserStoreManager]  
-   ,st.[strReportDepartmentAtGrossOrNet]  
+   ,st.[strReportDepartmentAtGrossOrNet]
+   ,st.[strDepartmentOrCategory]
+   ,st.[strCategoriesOrSubcategories]
    ,st.[strAllowRegisterMarkUpDown]  
    ,st.[intCompanyLocationId]  
    ,cl.[strLocationName]     

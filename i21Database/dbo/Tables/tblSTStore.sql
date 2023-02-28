@@ -149,6 +149,8 @@
     [intConsFuelDiscountItemId] INT NULL,
     [ysnConsIncludeTaxesInCostBasis] BIT NOT NULL DEFAULT 0,
     [ysnConsIncludeFreightChargesInCostBasis] BIT NOT NULL DEFAULT 0,
+    [strDepartmentOrCategory] CHAR(1) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'D', 
+    [strCategoriesOrSubcategories] CHAR(1) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'C', 
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
