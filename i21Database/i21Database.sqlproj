@@ -1310,6 +1310,7 @@
     <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
+    <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
