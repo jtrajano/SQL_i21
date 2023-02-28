@@ -81,7 +81,7 @@ BEGIN
                     ELSE NULL     
                   END    
     
-	 --Calculate if Time Off is Scheduled for Reset    
+ --Calculate if Time Off is Scheduled for Reset    
 	 UPDATE #tmpEmployees    
 	 SET ysnForReset = CASE WHEN ((strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR (dtmNextAward)  )    
 									OR     
@@ -93,126 +93,136 @@ BEGIN
 							 ELSE
 								0 
 							END
-					   END 
+					   END    
+    
+ UPDATE #tmpEmployees     
+  --Calculate Total Accrued Hours    
+  SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour' AND strAwardPeriod <> 'Paycheck') THEN     
+			CASE WHEN ysnForReset = 1 THEN
+				0
+			ELSE
+				ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))    
+				   FROM tblPRPaycheck P     
+					LEFT JOIN tblPRPaycheckEarning PE     
+					 ON P.intPaycheckId = PE.intPaycheckId    
+					INNER JOIN tblPREmployeeEarning EE     
+					 ON PE.intEmployeeEarningId = EE.intEmployeeEarningId    
+					INNER JOIN tblPREmployeeTimeOff ET     
+					 ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId     
+					  AND ET.intEntityEmployeeId = P.intEntityEmployeeId     
+					WHERE P.ysnPosted = 1    
+					   AND P.intEntityEmployeeId = #tmpEmployees.intEntityId    
+					   AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo < GETDATE()     
+					   AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+			END
 
-	UPDATE #tmpEmployees 
-		--Calculate Total Accrued Hours
-		SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour' AND strAwardPeriod <> 'Paycheck') THEN 
-									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
-											FROM tblPRPaycheck P 
-												LEFT JOIN tblPRPaycheckEarning PE 
-													ON P.intPaycheckId = PE.intPaycheckId
-												INNER JOIN tblPREmployeeEarning EE 
-													ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-												INNER JOIN tblPREmployeeTimeOff ET 
-													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
-														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
-												WHERE P.ysnPosted = 1
-													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
-													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward --AND P.dtmDateTo <= GETDATE() 
-													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
-								ELSE 0
-							END * dblRate * dblRateFactor
-		--Calculate Total Earned Hours
-		,dblEarnedHours = CASE WHEN (GETDATE() >= dtmNextAward OR strAwardPeriod = 'Paycheck' ) THEN
-								CASE WHEN (strPeriod = 'Hour') THEN 
-									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
-											FROM tblPRPaycheck P 
-												LEFT JOIN tblPRPaycheckEarning PE 
-													ON P.intPaycheckId = PE.intPaycheckId
-												INNER JOIN tblPREmployeeEarning EE 
-													ON PE.intEmployeeEarningId = EE.intEmployeeEarningId
-												INNER JOIN tblPREmployeeTimeOff ET 
-													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
-														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
-												WHERE 
-														(	
-														--(#tmpEmployees.intPaycheckId IS NOT NULL AND P.intPaycheckId = #tmpEmployees.intPaycheckId)
-														--OR 
-														(
-														--#tmpEmployees.intPaycheckId IS NULL AND 
-														P.ysnPosted = 1 AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward)
-														)
-														
-														AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
-														AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId
-													  ), 0)
-
-
-								WHEN (strPeriod = 'Day') THEN 
-									DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Week') THEN 
-									DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Month') THEN
-									DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Quarter') THEN
-									DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								WHEN (strPeriod = 'Year') THEN
-									CASE WHEN (DATEDIFF(YY, dtmLastAward, dtmNextAward) <= 0) THEN 1 ELSE (DATEDIFF(YY, dtmLastAward, dtmNextAward)) END
-										/ ISNULL(NULLIF(dblPerPeriod, 0), 1)
-								ELSE 0
-							END * dblRate * dblRateFactor ---* CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END -->>> earned hours get negative when paycheck unposted
-						ELSE 0
-					END
-
-	--Update Each Employee Hours
-	DECLARE @intEmployeeId INT
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEmployees)
-	BEGIN
-		SELECT TOP 1 
-			@intEmployeeId = [intEntityId]
-		FROM #tmpEmployees 
-
-		--Update Accrued Hours
-		UPDATE tblPREmployeeTimeOff
-			SET dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN T.dblAccruedHours ELSE 0 END
-		FROM
-		#tmpEmployees T
-		WHERE T.[intEntityId] = @intEmployeeId
-				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
-				AND intTypeTimeOffId = @intTypeTimeOffId
-
-		--Update Earned Hours
-		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
-										CASE WHEN (T.ysnForReset = 1) THEN
-											CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-												dblMaxEarned
-											ELSE
-												(dblHoursEarned + T.dblEarnedHours)
-											END
-										Else
-											dblHoursEarned
-										END
-								 ELSE 
-								 		CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-												dblMaxEarned
-											ELSE
-												(dblHoursEarned + T.dblEarnedHours)
-										END
-								 END
-								
-				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
-				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    
-					DATEADD(DD, -1, dtmPaycheckStartDate)     
-					ELSE     
-							CASE WHEN ysnForReset =1 THEN     
-								T.dtmNextAward    
-							ELSE    
-								tblPREmployeeTimeOff.dtmLastAward    
-							END    
-					END
-		FROM
-		#tmpEmployees T
-		WHERE T.[intEntityId] = @intEmployeeId
-				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
-				AND intTypeTimeOffId = @intTypeTimeOffId 
-				--AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() >= T.dtmNextAward)
-				--	OR (T.strAwardPeriod IN ('Paycheck') AND T.dtmNextAward >= T.dtmLastAward)
-				--	OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Start of Year', 'Paycheck') AND GETDATE() > T.dtmLastAward))
-
-		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
-	END
-
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees
+        ELSE 0    
+       END * dblRate * dblRateFactor   
+  --Calculate Total Earned Hours    
+  ,dblEarnedHours = CASE WHEN (GETDATE() >= dtmNextAward) THEN    
+                        CASE WHEN (strPeriod = 'Hour') THEN     
+                                ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))    
+                                                FROM tblPRPaycheck P     
+                                                LEFT JOIN tblPRPaycheckEarning PE ON P.intPaycheckId = PE.intPaycheckId    
+                                                INNER JOIN tblPREmployeeEarning EE ON PE.intEmployeeEarningId = EE.intEmployeeEarningId    
+                                                INNER JOIN tblPREmployeeTimeOff ET ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId AND ET.intEntityEmployeeId = P.intEntityEmployeeId     
+                                                WHERE     
+                                                  (     
+                                                  --(#tmpEmployees.intPaycheckId IS NOT NULL AND P.intPaycheckId = #tmpEmployees.intPaycheckId)    
+                                                  --OR     
+                                                  (    
+                                                  --#tmpEmployees.intPaycheckId IS NULL AND     
+                                                  P.ysnPosted = 1 AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward)    
+                                                  )    
+                  
+                                                  AND P.intEntityEmployeeId = #tmpEmployees.intEntityId    
+                                                  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId    
+                                                   ), 0)    
+                        WHEN (strPeriod = 'Day') THEN     
+                         DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)    
+                        WHEN (strPeriod = 'Week') THEN     
+                         DATEDIFF(WK, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)    
+                        WHEN (strPeriod = 'Month') THEN    
+                         DATEDIFF(MM, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)    
+                        WHEN (strPeriod = 'Quarter') THEN    
+                         DATEDIFF(QQ, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)    
+                        WHEN (strPeriod = 'Year') THEN    
+                         CASE WHEN (DATEDIFF(YY, dtmLastAward, dtmNextAward) <= 0) THEN 1 ELSE (DATEDIFF(YY, dtmLastAward, dtmNextAward)) END    
+                          / ISNULL(NULLIF(dblPerPeriod, 0), 1)    
+                        ELSE 0    
+                        END * dblRate * dblRateFactor ---* CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END -->>> earned hours get negative when paycheck unposted    
+                 ELSE 0    
+                 END    
+    
+ --Update Each Employee Hours    
+ DECLARE @intEmployeeId INT    
+ WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEmployees)    
+ BEGIN    
+  SELECT TOP 1     
+   @intEmployeeId = [intEntityId]    
+  FROM #tmpEmployees     
+    
+  --Update Accrued Hours    
+  UPDATE tblPREmployeeTimeOff    
+   SET dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN T.dblAccruedHours ELSE 0 END    
+  FROM    
+  #tmpEmployees T    
+  WHERE T.[intEntityId] = @intEmployeeId    
+    AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId    
+    AND intTypeTimeOffId = @intTypeTimeOffId    
+    
+  --Update Earned Hours    
+  UPDATE tblPREmployeeTimeOff    
+      SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
+                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) >= dblMaxEarned) THEN          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover >= dblMaxBalance) THEN
+									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
+								ELSE
+									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)
+								END
+                            ELSE          
+								CASE WHEN (NULLIF(dblMaxBalance,0) IS NOT NULL AND Carryover + T.dblEarnedHours >= dblMaxBalance) THEN          
+									T.dblEarnedHours - ((T.dblEarnedHours + Carryover) - dblMaxBalance)  
+								ELSE          
+									(dblHoursEarned + T.dblEarnedHours)          
+								END          
+                            END          
+						Else          
+							dblHoursEarned      
+                        END  
+            
+    ,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') 
+			THEN 
+				CASE WHEN ysnForReset = 1 THEN
+					T.dblAccruedHours
+				ELSE
+					dblHoursAccrued - T.dblEarnedHours
+				END
+			ELSE 
+				0 
+			END     
+    ,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    
+	DATEADD(DD, -1, dtmPaycheckStartDate)     
+	ELSE     
+			CASE WHEN ysnForReset =1 THEN     
+				T.dtmNextAward    
+			ELSE    
+				tblPREmployeeTimeOff.dtmLastAward    
+			END    
+	END    
+  FROM    
+  #tmpEmployees T    
+  WHERE T.[intEntityId] = @intEmployeeId    
+    AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId    
+    AND intTypeTimeOffId = @intTypeTimeOffId     
+    --AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() >= T.dtmNextAward)    
+    -- OR (T.strAwardPeriod IN ('Paycheck') AND T.dtmNextAward >= T.dtmLastAward)    
+    -- OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Start of Year', 'Paycheck') AND GETDATE() > T.dtmLastAward))    
+    
+  DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId    
+ END    
+    
+ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployees')) DROP TABLE #tmpEmployees    
 END
+
+GO
