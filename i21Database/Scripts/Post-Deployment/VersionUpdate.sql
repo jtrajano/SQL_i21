@@ -5,7 +5,7 @@ GO
 	WHERE strVersionNo = '' OR strVersionNo = NULL
 
 	INSERT INTO tblSMBuildNumber (strVersionNo, dtmLastUpdate)
-	SELECT '22.2', getdate()
+	SELECT '23.1', getdate()
 GO
 	PRINT N'END INSERT VERSION UPDATE'
 GO
