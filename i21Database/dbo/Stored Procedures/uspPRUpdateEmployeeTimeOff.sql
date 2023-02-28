@@ -69,7 +69,13 @@ BEGIN
 								 (strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR(dtmNextAward)  )
 								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(GETDATE()) > YEAR(dtmLastAward))
 								) THEN 1 
-							ELSE 0 END
+							ELSE
+								CASE WHEN CONVERT(DATE ,GETDATE()) >= CONVERT(DATE,dtmNextAward)  AND CONVERT(DATE,dtmLastAward) < CONVERT(DATE,dtmNextAward) THEN  
+									1  
+								ELSE  
+									0   
+								END 
+							END
 
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
