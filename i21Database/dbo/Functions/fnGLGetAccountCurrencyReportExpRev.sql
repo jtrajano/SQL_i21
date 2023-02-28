@@ -1,4 +1,4 @@
-CREATE FUNCTION fnGLGetAccountCurrencyReportExpRev(@intDefaultCurrencyId INT, @intAccountId INT)
+CREATE FUNCTION fnGLGetAccountCurrencyReportExpRev(@intDefaultCurrencyId INT)
 RETURNS TABLE
 AS
 
@@ -10,15 +10,19 @@ SELECT
 C.intCurrencyID,
 C.strCurrency,
 A.intAccountId,
-F.strFiscalYear
-FROM tblGLAccount A ,
+F.strFiscalYear,
+A.strAccountId,
+F.dtmDateFrom,
+F.dtmDateTo
+FROM vyuGLAccountDetail A ,
 tblSMCurrency C,
 tblGLFiscalYear F
+where strAccountType IN('Revenue','Expense')
 
 ),
 GLQuery as(
 select * from cteAccountCurrency C 
-outer apply(
+cross apply(
 	select 
 	intGLDetailId
 	,A.dblDebit
@@ -27,7 +31,6 @@ outer apply(
 	,A.dblCreditReport
 	,A.dtmDate
 	,A.strBatchId
-	,A.strAccountId
 	,A.strAccountDescription
 	,A.strAccountGroup
 	,A.strAccountType
@@ -76,72 +79,61 @@ outer apply(
 	,(dblDebit - dblCredit) dblAmount 
     ,case when isnull(C.intCurrencyID,@intDefaultCurrencyId) <> @intDefaultCurrencyId 
         then (dblDebitForeign - dblCreditForeign) else 0 end dblAmountForeign
-	from vyuGLDetail A where intAccountId = C.intAccountId and intCurrencyID = C.intCurrencyID
+	from vyuGLDetail A where intAccountId = C.intAccountId and A.intCurrencyId = C.intCurrencyID
+    AND dtmDate between C.dtmDateFrom and C.dtmDateTo
 	and ysnIsUnposted = 0
 )GL
-
-
--- where C.intAccountId = 53 and strFiscalYear = '2022'
---order by C.intAccountId, intCurrencyID, intGLDetailId
 ),
 cteRunningBalance AS(
-        select  sum(dblAmount) over (partition by intAccountId, strFiscalYear order by strFiscalYear,intCurrencyID, intGLDetailId ) functionalRunningBalance,
-		sum(dblAmountForeign) over (partition by intAccountId,strFiscalYear, intCurrencyID order by strFiscalYear, intCurrencyID, intGLDetailId ) foreignRunningBalance,
+        select  sum(dblAmount) over (partition by intAccountId, strFiscalYear order by intCurrencyID, dtmDate, intGLDetailId ) functionalRunningBalance,
+		sum(dblAmountForeign) over (partition by intAccountId,strFiscalYear, intCurrencyID order by intCurrencyID,dtmDate, intGLDetailId ) foreignRunningBalance,
 		*
 		from GLQuery
 ),
 cteOpeningBalance AS(
 
 	SELECT 
-	strCurrency
+    intGLDetailId
+	,strCurrency
 	,strAccountId
 	,functionalRunningBalance - dblAmount dblBeginningBalance
 	,functionalRunningBalance dblEndingBalance
 	,dblDebit, dblCredit
 	,foreignRunningBalance - dblAmountForeign dblBeginningBalanceForeign
-	,dblAmountForeign
 	,foreignRunningBalance dblEndingBalanceForeign
 	,dblDebitForeign
 	,dblCreditForeign
+    ,intEntityId
+    ,strBatchId
+    ,intAccountId
+    ,strTransactionId
+    ,dtmDate
+    ,dtmDateEntered
+    ,dblDebitReport
 	,dblCreditReport
-	,dtmDate
-	,strBatchId
-	,dblDebitUnit
-	,dblCreditUnit
-	,strDescription
-	,strCode
-	,strReference
-	,dblExchangeRate
-	,dtmDateEntered
-	,strJournalLineDescription
-	,strUserName
-	,strTransactionId
-	,strTransactionType
-	,strTransactionForm
-	,strModuleName
-	,dblDebitReport
-	,strDocument
-	--,ysnIsUnposted
-	,intTransactionId
-	--,intEntityId
+    ,strUserName
+    ,strDescription
+    ,strCode
+    ,strReference
 	,strComments
+	,strJournalLineDescription
 	,strUOMCode
-	,strLocationName
-	,strSourceUOMId
-	,strCommodityCode
+	,intTransactionId   
+	,strTransactionType	    
+	,strModuleName
+	,strTransactionForm
+	,strDocument
+	,dblExchangeRate
 	,dblSourceUnitDebit
 	,dblSourceUnitCredit
-	,strSourceEntity
+	,dblDebitUnit
+	,dblCreditUnit
+	,strCommodityCode
 	,strSourceDocumentId
-	--,strSourceEntityNo
-	--,intSourceEntityId
-	--,ysnPostAction
-	--,dtmDateEnteredMin
-	--,strPeriod
+	,strLocationName strLocation
 	,strCompanyLocation
-	--,strCurrencyExchangeRateType
-	--,strLocationSegmentDescription
-	--,strLOBSegmentDescription
+	,strSourceUOMId
+	,strSourceEntity
     ,intCurrencyID
 	FROM cteRunningBalance
 )
