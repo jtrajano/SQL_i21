@@ -429,8 +429,8 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblCTContractCost
 					SET intItemUOMId = tblUpdate.intItemUOMId
-						, dblFX = tblUpdate.dblFX
-						, dblRate = tblUpdate.dblRate						
+						, dblFX = ISNULL(tblUpdate.dblFX,0)
+						, dblRate = ISNULL(tblUpdate.dblRate,0)						
 					FROM (
 						SELECT cc.intContractCostId
 							, ci.intItemUOMId
