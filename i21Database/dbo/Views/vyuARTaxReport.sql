@@ -136,7 +136,7 @@ SELECT
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
 	,dblTotalAmount				= DETAIL.dblLineTotal + DETAIL.dblTax
-	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * INVOICE.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -188,6 +188,7 @@ INNER JOIN (
 		,ysnOverrideTaxGroup    = ISNULL(ID.ysnOverrideTaxGroup, 0)
 		,strDebitTaxAccount		= DEBITTAXACCOUNT.strAccountId 
 		,strCreditTaxAccount	= CREDITTAXACCOUNT.strAccountId 
+		,dblCurrencyExchangeRate = ID.dblCurrencyExchangeRate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT 
