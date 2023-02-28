@@ -44,6 +44,8 @@ CREATE TABLE [dbo].[tblGLAuditorReportByAccountId](
 	[strSourceUOMId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strSourceEntity] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyID] [int] NOT NULL,
+	[strSourceEntityNo] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strLOBSegmentDescription] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblGLAuditorReportByAccountId] PRIMARY KEY CLUSTERED 
 (
 	[intAuditorReportId] ASC
