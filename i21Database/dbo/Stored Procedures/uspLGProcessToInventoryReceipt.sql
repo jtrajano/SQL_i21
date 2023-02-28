@@ -247,6 +247,7 @@ BEGIN TRY
 			,[intLoadShipmentId]
 			,[intLoadShipmentCostId]
 			,[ysnLock]
+			,[ysnWithGLReversal]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
@@ -274,6 +275,7 @@ BEGIN TRY
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
 			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
+			,[ysnWithGLReversal] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -281,6 +283,7 @@ BEGIN TRY
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		OUTER APPLY (SELECT TOP 1 ysnLock = 1 FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId AND B.ysnPosted = 1) LCK
 		WHERE CV.intLoadId = @intLoadId
@@ -311,6 +314,7 @@ BEGIN TRY
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentCostId] = NULL
 			,[ysnLock] = 0
+			,[ysnWithGLReversal] = 0
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
@@ -942,6 +946,7 @@ BEGIN TRY
 			-- ,[intForexRateTypeId]
 			,[dblForexRate]
 			,[ysnLock]
+			,[ysnWithGLReversal]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
@@ -970,6 +975,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = CV.intLoadCostId
 			,[dblForexRate] = CV.dblFX
 			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
+			,[ysnWithGLReversal] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -980,6 +986,7 @@ BEGIN TRY
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		OUTER APPLY (SELECT TOP 1 ysnLock = 1 FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId AND B.ysnPosted = 1) LCK
 		WHERE CV.intLoadId = @intLoadId
@@ -1011,6 +1018,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = NULL
 			,[dblForexRate] = NULL
 			,[ysnLock] = 0
+			,[ysnWithGLReversal] = 0
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
