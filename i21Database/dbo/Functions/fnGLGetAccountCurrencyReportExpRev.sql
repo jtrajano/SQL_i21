@@ -135,6 +135,8 @@ cteOpeningBalance AS(
 	,strSourceUOMId
 	,strSourceEntity
     ,intCurrencyID
+	,strSourceEntityNo
+	,strLOBSegmentDescription
 	FROM cteRunningBalance
 )
 

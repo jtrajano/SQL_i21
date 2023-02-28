@@ -57,5 +57,6 @@
 	[intConcurrencyId] INT DEFAULT 1 NOT NULL,
 	[strUserName] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strCurrency] NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
+	[strLOBSegmentDescription] NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblGLAuditorTransaction] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
 )

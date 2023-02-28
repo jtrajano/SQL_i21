@@ -128,6 +128,8 @@ RETURN
         ,strSourceUOMId
         ,strSourceEntity
         ,intCurrencyID
+        ,strSourceEntityNo
+	    ,strLOBSegmentDescription
         FROM cteRunningBalance
     )
     select * from cteOpeningBalance
