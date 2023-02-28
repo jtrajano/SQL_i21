@@ -1356,4 +1356,16 @@ GO
 			SET  ysnApproval = 1
 			WHERE strNamespace = 'Quality.view.CatalogueReconciliation'
 		END
+		
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.LotteryBook')
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [ysnApproval], [intConcurrencyId], [ysnAvailable])
+		VALUES (N'Lottery Book', N'Lottery Book', N'Store.view.LotteryBook', N'Store', 0, 1, 1)
+	END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strScreenName = N'Lottery Book', ysnAvailable = 1
+		WHERE strNamespace = 'Store.view.LotteryBook'
+	END
 GO
