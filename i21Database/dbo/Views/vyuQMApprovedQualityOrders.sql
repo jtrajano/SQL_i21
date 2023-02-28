@@ -107,9 +107,9 @@ OUTER APPLY (
 OUTER APPLY (
     SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblTotalQuantity)
 ) WQTY
-OUTER Apply (Select Top 1 V1.intEntityId,V1.strEntityName,V1.intDefaultLocationId,V1.strDefaultLocation  from vyuQMGetSupplier V1 Where V1.intEntityId = CH.intEntityId) V
-OUTER Apply (Select Top 1 SV1.intEntityId,SV1.strEntityName,SV1.intDefaultLocationId,SV1.strDefaultLocation  from vyuQMGetSupplier SV1 Where SV1.intEntityId = S.intEntityId) SV
-LEFT JOIN (tblLGLoadDetail LD INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ISNULL(L.ysnCancelled, 0) = 0)
+OUTER Apply (Select Top 1 V1.intEntityId,V1.strEntityName,V1.intDefaultLocationId,V1.strDefaultLocation  from vyuQMGetSupplier V1 Where V1.intEntityId = CH.intEntityId) VV
+OUTER Apply (Select Top 1 SV1.intEntityId,SV1.strEntityName,SV1.intDefaultLocationId,SV1.strDefaultLocation  from vyuQMGetSupplier SV1 Where SV1.intEntityId = S.intEntityId) SVV
+LEFT JOIN (tblLGLoadDetail LDD INNER JOIN tblLGLoad L ON L.intLoadId = LDD.intLoadId AND ISNULL(L.ysnCancelled, 0) = 0)
     ON LD.intBatchId = B.intBatchId
 inner join 
 ( select  intSampleId from  tblQMCatalogueReconciliationDetail CRD INNER JOIN
