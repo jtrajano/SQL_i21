@@ -19,11 +19,11 @@ BEGIN
             DROP TABLE #AuditorTransactions
 
         ;WITH T AS (
-            SELECT
+           SELECT
                 A.intEntityId
-                , strBatchId = ISNULL(A.strBatchId, '')
+                , A.strBatchId
                 , A.intAccountId
-                , strTransactionId = ISNULL(A.strTransactionId, '')
+                , A.strTransactionId
                 , A.intTransactionId
                 , A.intCurrencyId
                 , A.dtmDate
@@ -32,47 +32,38 @@ BEGIN
                 , dblCredit = ISNULL(A.dblCredit, 0)
                 , dblDebitForeign = ISNULL(A.dblDebitForeign, 0)
                 , dblCreditForeign = ISNULL(A.dblCreditForeign, 0)
-                , strPeriod = ISNULL(FP.strPeriod, '')
-                , strDescription = ISNULL(A.strDescription, '')
-                , strCode = ISNULL(A.strCode, '')
-                , strReference = ISNULL(A.strReference, '')
-                , strComments = ISNULL(A.strComments, '')
-                , strJournalLineDescription = ISNULL(A.strJournalLineDescription, '')
-                , strUOMCode = ISNULL(U.strUOMCode, '')
-                , strTransactionType = ISNULL(A.strTransactionType, '')
-                , strModuleName = ISNULL(A.strModuleName, '')
-                , strTransactionForm = ISNULL(A.strTransactionForm, '')
-                , strDocument = ISNULL(A.strDocument, '')
+                , A.strPeriod 
+                , A.strDescription
+                , A.strCode
+                , A.strReference
+                , A.strComments
+                , A.strJournalLineDescription
+                , A.strUOMCode 
+                , A.strTransactionType 
+                , A.strModuleName 
+                , A.strTransactionForm 
+                , A.strDocument
                 , A.dblExchangeRate
-                , strStatus = CASE WHEN A.ysnIsUnposted = 0 THEN 'Posted' ELSE 'Audit Record ' END
+                , A.strStatus 
                 , A.dblDebitReport
                 , A.dblCreditReport
                 , A.dblSourceUnitDebit
                 , A.dblSourceUnitCredit
                 , A.dblDebitUnit
                 , A.dblCreditUnit
-                , strCommodityCode = ISNULL(ICCom.strCommodityCode, '')
-                , strSourceDocumentId = ISNULL(A.strSourceDocumentId, '')
-                , strLocation = ISNULL(Loc.strLocationName, '')
-                , strCompanyLocation = ISNULL(CL.strLocationName, '')
-                , strSourceUOMId = ISNULL(ICUOM.strUnitMeasure, '')
+                , A.strCommodityCode 
+                , A.strSourceDocumentId
+                , A.strLocationName strLocation
+                , A.strCompanyLocation 
+                , A.strSourceUOMId 
                 , A.intSourceEntityId
-                , strSourceEntity = ISNULL(SE.strName, '')
-                , strSourceEntityNo = ISNULL(SE.strEntityNo, '')
-            FROM tblGLDetail A
-	        LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
-            LEFT JOIN tblSMCompanyLocation Loc ON A.intSourceLocationId = Loc.intCompanyLocationId
-            LEFT JOIN tblICUnitMeasure ICUOM ON ICUOM.intUnitMeasureId = A.intSourceUOMId
-            LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
-            LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
-            LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
-            LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
-            OUTER APPLY (
-		        SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
-	         )U
-            OUTER APPLY (
-		        SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
-	         )SE
+                , A.strSourceEntity 
+                , A.strSourceEntityNo 
+                , A.strLOBSegmentDescription
+                , A.strCurrency
+                , A.strAccountId
+            FROM  
+			vyuGLDetail A 
             WHERE 
                 A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
         )
@@ -87,6 +78,8 @@ BEGIN
         BEGIN
             SELECT 
                 strTransactionId
+                , intCurrencyId
+                , strCurrency
                 , dblDebit = SUM(ISNULL(dblDebit, 0))
                 , dblCredit = SUM(ISNULL(dblCredit, 0))
                 , dblDebitForeign = SUM(ISNULL(dblDebitForeign, 0))
@@ -95,18 +88,20 @@ BEGIN
                 , dblAmountForeign = (SUM(ISNULL(dblDebitForeign, 0)) - SUM(ISNULL(dblCreditForeign, 0)))
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
-            GROUP BY strTransactionId
+            GROUP BY strTransactionId, intCurrencyId, strCurrency
+            
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
                 DECLARE 
                     @strTransactionId NVARCHAR(40) = '',
+                    @intCurrencyId INT = NULL,
                     @dblAmount NUMERIC(18, 6) = 0,
                     @dblAmountForeign NUMERIC(18, 6) = 0
 
-                SELECT TOP 1 @strTransactionId = strTransactionId
+                SELECT TOP 1 @strTransactionId = strTransactionId , @intCurrencyId = intCurrencyId
                 FROM #TransactionGroup 
-                ORDER BY strTransactionId
+                ORDER BY strTransactionId, intCurrencyId
 
                 INSERT INTO tblGLAuditorTransaction (
                     intType
@@ -147,6 +142,9 @@ BEGIN
                     , intSourceEntityId
                     , strSourceEntity
                     , strSourceEntityNo
+                    , strLOBSegmentDescription
+                    , strCurrency
+                    , strAccountId
                 )
                 SELECT 
                     1 -- By TransactionId, 0 - by AccountId
@@ -187,14 +185,18 @@ BEGIN
                     , intSourceEntityId
                     , strSourceEntity
                     , strSourceEntityNo
+                    , strLOBSegmentDescription
+                    , strCurrency
+                    , strAccountId
                 FROM #AuditorTransactions 
-                WHERE strTransactionId = @strTransactionId
+                WHERE @strTransactionId =strTransactionId 
+                AND @intCurrencyId = intCurrencyId
                 ORDER BY dtmDate
 
                 -- Total record
                 INSERT INTO tblGLAuditorTransaction (
                     intType
-                    , intGeneratedBy
+                    , intGeneratedBy      
                     , dtmDateGenerated
                     , strTransactionId
                     , strTotalTitle
@@ -206,6 +208,7 @@ BEGIN
                     , dblCreditForeign
                     , dblTotal
                     , dblTotalForeign
+                    , strCurrency
                 )
                 SELECT TOP 1
                     1
@@ -221,10 +224,13 @@ BEGIN
                     , dblCreditForeign
                     , dblAmount
                     , dblAmountForeign
+                    , strCurrency
                     FROM #TransactionGroup 
                     WHERE strTransactionId = @strTransactionId
+                    AND @intCurrencyId = intCurrencyId
+            
 
-                DELETE #TransactionGroup WHERE strTransactionId = @strTransactionId
+                DELETE #TransactionGroup WHERE @strTransactionId = strTransactionId AND @intCurrencyId = intCurrencyId
             END
         END
     END TRY
