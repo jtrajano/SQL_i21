@@ -641,7 +641,7 @@ BEGIN
 	INNER JOIN tblARPrepaidAndCredit ARPAC ON I.intInvoiceId = ARPAC.intInvoiceId
 	INNER JOIN tblARInvoice CREDIT ON ARPAC.intPrepaymentId = CREDIT.intInvoiceId
     WHERE CAST(CREDIT.dtmPostDate AS DATE) > CAST(I.dtmPostDate AS DATE)
-
+	AND ARPAC.dblAppliedInvoiceDetailAmount > 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
