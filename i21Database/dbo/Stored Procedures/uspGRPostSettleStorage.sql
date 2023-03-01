@@ -2554,7 +2554,7 @@ BEGIN TRY
 					,[intContractHeaderId]			= case WHEN a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= case WHEN a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] =  CASE 
-														WHEN @ysnDPOwnedType = 0 THEN case when @strItemNo = c.[strItemNo] then  RI.intInventoryReceiptItemId else null end
+														WHEN @ysnDPOwnedType = 0 THEN NULL
 														ELSE 
 															CASE 
 																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
