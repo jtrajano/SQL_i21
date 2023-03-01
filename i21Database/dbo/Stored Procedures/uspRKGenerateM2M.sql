@@ -4034,10 +4034,10 @@ BEGIN TRY
 														THEN (CASE WHEN intCurrencyId = @intCurrencyId 
 																-- CONTRACT CURRENCY = M2M CURRENCY
 																THEN dblContractBasis
-																ELSE ISNULL(dblContractBasis, 0) * dblRateCT
+																ELSE ISNULL(dblContractBasis, 0) * dblFinalRate
 																END
 															  )
-														ELSE dblContractBasis * dblRateCT END)
+														ELSE dblContractBasis * dblFinalRate END)
 										ELSE 0 END)
 				--Contract Futures
 				, dblActualFutures = dblCalculatedFutures
