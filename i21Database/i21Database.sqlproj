@@ -11412,6 +11412,7 @@
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureSalesContracts.sql" />
     <Build Include="dbo\Functions\fnGREndOfMonthProcedurePurchaseContracts.sql" />
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureInventory.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
