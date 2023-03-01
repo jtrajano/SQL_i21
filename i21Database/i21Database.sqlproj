@@ -9927,6 +9927,9 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
+    <Build Include="dbo\Functions\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
+    <Build Include="dbo\Functions\fnGRDPRvsGrain.sql" />
+    <Build Include="dbo\Functions\fnGRInventoryStocksVSDPRStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10261,9 +10264,6 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
     <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
-    <Build Include="dbo\Stored Procedures\fnGRDPRvsGrain.sql" />
-    <Build Include="dbo\Stored Procedures\fnGRInventoryStocksVSDPRStorage.sql" />
-    <Build Include="dbo\Stored Procedures\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
