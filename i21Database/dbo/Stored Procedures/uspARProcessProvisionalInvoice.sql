@@ -247,7 +247,7 @@ BEGIN TRY
 		,[dblQtyShipped]						= ARID.[dblQtyShipped]
 		,[dblDiscount]							= ARID.[dblDiscount]
 		,[dblPrice]								= ISNULL(ARID.[dblPrice], 0) 
-		,[dblUnitPrice]							= ISNULL(ARID.[dblUnitPrice], 0) 
+		,[dblUnitPrice]							= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblUnitPrice, 0))
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ARID.[strMaintenanceType]
 		,[strFrequency]							= ARID.[strFrequency]
