@@ -630,6 +630,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\48_FileFieldMapping_Commander_TierProduct.sql
 :r .\ST\49_FileFieldMapping_Radiant_Department.sql
 :r .\ST\51_FileFieldMapping_Commander_Validate.sql
+:r .\ST\52_FileFieldMapping_Commander_Category.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql

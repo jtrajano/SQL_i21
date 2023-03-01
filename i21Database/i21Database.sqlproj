@@ -1555,6 +1555,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
+    <Build Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
