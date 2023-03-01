@@ -478,14 +478,5 @@ BEGIN
 	END
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnM2MAllowGLPostToNonFunctionalCurrency')
-BEGIN
-	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnM2MAllowGLPostToNonFunctionalCurrency IS NULL)
-	BEGIN
-		UPDATE tblRKCompanyPreference 
-		SET ysnM2MAllowGLPostToNonFunctionalCurrency = 0
-	END
-END
-
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
