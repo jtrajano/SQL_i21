@@ -1854,8 +1854,8 @@ IF (@intTableCount = 3)
 										FROM tblSTRegisterSetupDetail
 										WHERE intRegisterSetupId = @intRegisterSetupId 
 											AND strFilePrefix = @strFilePrefix
-										-- UPDATE
-										SELECT @intImportFileHeaderId, @strImportFileHeader, @strFileType, @strFileNamePattern, @strStoredProcedure, @intRegisterSetupDetailId, @intRegisterSetupId
+
+										-- UPDATE										
 										UPDATE tblSTRegisterSetupDetail
 										SET intImportFileHeaderId		= @intImportFileHeaderId,
 											strImportFileHeaderName		= @strImportFileHeader, 
