@@ -53,8 +53,6 @@
 			,ia.intAccountId
 			,gla.strAccountId
 			,strAccountDescription = gla.strDescription
-			,ld.intCount
-			,ir.intIRCount
 		from
 			tblCTContractCost cc
 			join tblICItem it on it.intItemId = cc.intItemId
@@ -86,31 +84,8 @@
 			left join tblSMTaxGroup tg on tg.intTaxGroupId = cd.intTaxGroupId
 			left join tblICItemAccount ia on ia.intItemId = it.intItemId
 			left join tblGLAccount gla on gla.intAccountId = ia.intAccountId
-			left join (
-				select
-					ld.intPContractDetailId
-					,ldc.intItemId
-					,ldc.intVendorId
-					,intCount = count(ldc.intLoadCostId)
-				from tblLGLoadDetail ld
-				join tblLGLoadCost ldc on ldc.intLoadId = ld.intLoadId
-				group by
-					ld.intPContractDetailId
-					,ldc.intItemId
-					,ldc.intVendorId
-			) ld on ld.intPContractDetailId = cc.intContractDetailId and ld.intItemId = cc.intItemId and ld.intVendorId = cc.intVendorId
-			left join (
-				select
-					irc.intContractDetailId
-					,irc.intChargeId
-					,irc.intEntityVendorId
-					,intIRCount = count(irc.intInventoryReceiptChargeId)
-				from
-					tblICInventoryReceiptCharge irc
-				group by irc.intContractDetailId, irc.intChargeId, irc.intEntityVendorId
-			)ir on ir.intContractDetailId = cc.intContractDetailId and ir.intChargeId = cc.intItemId and ir.intEntityVendorId = cc.intVendorId
 		where
-			cc.ysnUnforcasted = 1
-			and ch.intContractTypeId = 1
+			ch.intContractTypeId = 1
+			and  isnull(cd.dblBalance,0) < cd.dblQuantity
 		) otherCosts
-	where isnull(intBillDetailId,0) = 0 and isnull(intCount,0) = 0 and isnull(intIRCount,0) = 0
+	where isnull(intBillDetailId,0) = 0

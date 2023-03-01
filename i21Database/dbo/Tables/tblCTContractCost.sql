@@ -36,8 +36,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[strReferenceNo]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intContractCostRefId]		INT,
 	[ysnFromBasisComponent]					BIT NULL,
-	[ysnUnforcasted] BIT NOT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
+	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
 	--CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intVendorId_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity](intEntityId),
 	CONSTRAINT [FK_tblCTContractCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
@@ -62,15 +61,3 @@ CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_002] ON [dbo].tbl
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 
 GO
-
-
-CREATE TRIGGER [dbo].[trgAfterInsertCTContractCost]
-    ON [dbo].[tblCTContractCost]
-    FOR INSERT
-    AS
-    BEGIN
-        if exists (select top 1 1 from tblCTContractDetail cd join inserted i on i.intContractDetailId = cd.intContractDetailId where isnull(cd.dblBalance,0) < cd.dblQuantity or isnull(cd.dblScheduleQty,0) > 0 and i.ysnUnforcasted <> 1)
-		begin
-			update cc set cc.ysnUnforcasted = 1 from tblCTContractCost cc join inserted i on i.intContractCostId = cc.intContractCostId;
-		end
-    END
