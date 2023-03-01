@@ -18,5 +18,5 @@ BEGIN
 END
 
 GO
-	PRINT N'END INSERT DEFAULT TM Reading Source Type'
+	print N'END INSERT DEFAULT TM Reading Source Type'
 GO
