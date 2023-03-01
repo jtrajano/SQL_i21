@@ -58,5 +58,6 @@
 	[strUserName] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strCurrency] NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
 	[strLOBSegmentDescription] NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
+	[ysnGroupHeader] BIT NULL
 	CONSTRAINT [PK_tblGLAuditorTransaction] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
 )
