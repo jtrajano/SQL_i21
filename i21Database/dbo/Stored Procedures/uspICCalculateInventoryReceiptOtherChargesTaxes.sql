@@ -210,6 +210,7 @@ BEGIN
 
 			-- Compute Taxes
 			-- Insert the data from the table variable into Inventory Receipt Charge tax table. 
+			DELETE FROM @ChargeTaxes
 			INSERT INTO @ChargeTaxes (
 				[intInventoryReceiptChargeId]
 				,[intTaxGroupId]
