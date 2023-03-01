@@ -11180,6 +11180,9 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
+    <Build Include="dbo\Functions\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
+    <Build Include="dbo\Functions\fnGRDPRvsGrain.sql" />
+    <Build Include="dbo\Functions\fnGRInventoryStocksVSDPRStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11600,9 +11603,6 @@
     <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
     <Build Include="dbo\Tables\tblARPaymentBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
-    <Build Include="dbo\Stored Procedures\fnGRDPRvsGrain.sql" />
-    <Build Include="dbo\Stored Procedures\fnGRInventoryStocksVSDPRStorage.sql" />
-    <Build Include="dbo\Stored Procedures\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
