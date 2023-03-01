@@ -216,7 +216,7 @@ BEGIN
                     , @dtmNow
                     , @strTransactionId
                     , 'Total'
-                    , 'Transaction ID: ' + @strTransactionId + ", Currency: " + strCurrency
+                    , 'Transaction ID: ' + @strTransactionId + ', Currency: ' + strCurrency
                     , @intEntityId
                     , dblDebit
                     , dblCredit
