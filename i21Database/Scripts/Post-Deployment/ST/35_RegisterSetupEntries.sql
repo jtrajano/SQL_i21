@@ -16,13 +16,13 @@ IF (@intTableCount = 3)
 			  , @strXmlVersion	AS NVARCHAR(30)
 
 		-- Detail
-		DECLARE @intImportFileHeaderId	AS INT
+		DECLARE @intImportFileHeaderId		AS INT
 			  , @intRegisterSetupDetailId	AS INT
-			  , @strImportFileHeader	AS NVARCHAR(50)
-			  , @strFileType			AS NVARCHAR(20)
-			  , @strFilePrefix			AS NVARCHAR(50)
-			  , @strFileNamePattern		AS NVARCHAR(50)
-			  , @strStoredProcedure		AS NVARCHAR(50)
+			  , @strImportFileHeader		AS NVARCHAR(50)
+			  , @strFileType				AS NVARCHAR(20)
+			  , @strFilePrefix				AS NVARCHAR(50)
+			  , @strFileNamePattern			AS NVARCHAR(50)
+			  , @strStoredProcedure			AS NVARCHAR(50)
 
 
 		-- ============================================================================================================
@@ -1822,28 +1822,51 @@ IF (@intTableCount = 3)
 
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
 							BEGIN
-								-- INSERT
-								INSERT INTO tblSTRegisterSetupDetail 
-								(
-									intRegisterSetupId, 
-									intImportFileHeaderId, 
-									strImportFileHeaderName, 
-									strFileType, strFilePrefix, 
-									strFileNamePattern, 
-									strURICommand, 
-									strStoredProcedure, 
-									intConcurrencyId
-								)
-								SELECT 
-									intRegisterSetupId			= @intRegisterSetupId, 
-									intImportFileHeaderId		= @intImportFileHeaderId, 
-									strImportFileHeaderName		= @strImportFileHeader, 
-									strFileType					= @strFileType, 
-									strFilePrefix				= @strFilePrefix, 
-									strFileNamePattern			= @strFileNamePattern, 
-									strURICommand				= NULL, 
-									strStoredProcedure			= @strStoredProcedure, 
-									intConcurrencyId			= 1
+								IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND strFilePrefix = @strFilePrefix)
+									BEGIN
+										-- INSERT
+										INSERT INTO tblSTRegisterSetupDetail 
+										(
+											intRegisterSetupId, 
+											intImportFileHeaderId, 
+											strImportFileHeaderName, 
+											strFileType, strFilePrefix, 
+											strFileNamePattern, 
+											strURICommand, 
+											strStoredProcedure, 
+											intConcurrencyId
+										)
+										SELECT 
+											intRegisterSetupId			= @intRegisterSetupId, 
+											intImportFileHeaderId		= @intImportFileHeaderId, 
+											strImportFileHeaderName		= @strImportFileHeader, 
+											strFileType					= @strFileType, 
+											strFilePrefix				= @strFilePrefix, 
+											strFileNamePattern			= @strFileNamePattern, 
+											strURICommand				= NULL, 
+											strStoredProcedure			= @strStoredProcedure, 
+											intConcurrencyId			= 1
+									END
+								ELSE
+									BEGIN
+										SELECT TOP 1
+											@intRegisterSetupDetailId = intRegisterSetupDetailId
+										FROM tblSTRegisterSetupDetail
+										WHERE intRegisterSetupId = @intRegisterSetupId 
+											AND strFilePrefix = @strFilePrefix
+										-- UPDATE
+										SELECT @intImportFileHeaderId, @strImportFileHeader, @strFileType, @strFileNamePattern, @strStoredProcedure, @intRegisterSetupDetailId, @intRegisterSetupId
+										UPDATE tblSTRegisterSetupDetail
+										SET intImportFileHeaderId		= @intImportFileHeaderId,
+											strImportFileHeaderName		= @strImportFileHeader, 
+											strFileType					= @strFileType, 
+											strFilePrefix				= @strFilePrefix, 
+											strFileNamePattern			= @strFileNamePattern, 
+											strURICommand				= NULL, 
+											strStoredProcedure			= @strStoredProcedure, 
+											intConcurrencyId			= 1
+										WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+									END
 							END
 						ELSE
 							BEGIN
