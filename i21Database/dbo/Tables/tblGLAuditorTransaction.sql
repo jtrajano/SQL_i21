@@ -42,7 +42,7 @@
 	[dblCreditReport] NUMERIC(18, 6) NULL,
 	[strCommodityCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSourceDocumentId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyLocation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSourceUOMId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strJournalLineDescription] NVARCHAR (300) COLLATE Latin1_General_CI_AS NULL,
