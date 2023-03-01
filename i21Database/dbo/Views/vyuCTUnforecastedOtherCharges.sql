@@ -47,12 +47,13 @@
 			,cc.intItemUOMId
 			,cc.intItemId
 			,bd.intBillDetailId
-			,cd.intTaxGroupId
-			,tg.strTaxGroup
+			,vtg.intTaxGroupId
+			,vtg.strTaxGroup
 			,strItemDescription = it.strDescription
-			,ia.intAccountId
-			,gla.strAccountId
-			,strAccountDescription = gla.strDescription
+			,intAccountId = isnull(lga.intAccountId,lgac.intAccountId)
+			,strAccountId = isnull(lga.strAccountId,lgac.strAccountId)
+			,strAccountDescription = isnull(lga.strDescription,lgac.strDescription)
+			,strAccountCategory = isnull(lga.strAccountCategory,lgac.strAccountCategory)
 			,ld.intCount
 			,ir.intIRCount
 		from
@@ -83,9 +84,47 @@
 			outer apply (
 				select top 1 1 ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
 			)pf
-			left join tblSMTaxGroup tg on tg.intTaxGroupId = cd.intTaxGroupId
-			left join tblICItemAccount ia on ia.intItemId = it.intItemId
-			left join tblGLAccount gla on gla.intAccountId = ia.intAccountId
+			left join (
+				select
+					v.intEntityId
+					,el.intTaxGroupId
+					,tg.strTaxGroup
+				from
+					tblAPVendor v
+					join tblEMEntityLocation el on el.intEntityId = v.intEntityId
+					join tblSMTaxGroup tg on tg.intTaxGroupId = el.intTaxGroupId
+				where
+					el.ysnDefaultLocation = 1
+			)vtg on vtg.intEntityId = cc.intVendorId
+			left join (
+				select
+					ia.intItemId
+					,ga.intAccountId
+					,ga.strAccountId
+					,ga.strDescription
+					,ac.strAccountCategory
+				from
+					tblICItemAccount ia
+					join tblGLAccountCategory ac on ac.intAccountCategoryId =ia.intAccountCategoryId
+					join tblGLAccount ga on ga.intAccountId = ia.intAccountId
+				where
+					ac.strAccountCategory = 'Other Charge Expense'
+			) lga on lga.intItemId = cc.intItemId
+			left join (
+				select 
+					ic.intCategoryId
+					,ga.intAccountId
+					,ga.strAccountId
+					,ga.strDescription
+					,ac.strAccountCategory
+				from
+					tblICCategory ic
+					join tblICCategoryAccount ca on ca.intCategoryId = ic.intCategoryId
+					join tblGLAccount ga on ga.intAccountId = ca.intAccountId
+					join tblGLAccountCategory ac on ac.intAccountCategoryId = ca.intAccountCategoryId
+				where
+					ac.strAccountCategory = 'Other Charge Expense'
+			) lgac on lgac.intCategoryId = it.intCategoryId
 			left join (
 				select
 					ld.intPContractDetailId
