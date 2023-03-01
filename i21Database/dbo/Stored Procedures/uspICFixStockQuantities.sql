@@ -1,4 +1,5 @@
-﻿/*
+﻿---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
 	CAUTION: Execute this stored procedure with extreme care.
 
 	This is a utility stored procedure used to fix the stock quantities. 
@@ -72,7 +73,7 @@ BEGIN
 			SELECT
 				ItemTransactions.intItemId
 				,ItemTransactions.intItemLocationId
-				,SUM(ItemTransactions.dblOnOrder) dblOnOrder
+				,SUM(ISNULL(ItemTransactions.dblOnOrder,0)) dblOnOrder
 			FROM (
 				SELECT	
 					B.intItemId
@@ -140,15 +141,18 @@ BEGIN
 			,B.intStorageLocationId
 			,dblOnOrder = 
 				CASE 
-					WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 
+					WHEN SUM(ISNULL(dblQtyReceived, 0)) > SUM(ISNULL(dblQtyOrdered, 0)) THEN 
 						0 
 					ELSE
 						SUM(						
-							dbo.fnCalculateQtyBetweenUOM(
-								B.intUnitOfMeasureId
-								,StockUOM.intItemUOMId
-								,dblQtyOrdered - dblQtyReceived
-							)						
+							ISNULL(
+								dbo.fnCalculateQtyBetweenUOM(
+									B.intUnitOfMeasureId
+									,StockUOM.intItemUOMId
+									,dblQtyOrdered - dblQtyReceived
+								)
+								,0
+							)
 						)
 				END
 		FROM 
@@ -192,7 +196,7 @@ BEGIN
 			,C.intItemLocationId
 			,B.intSubLocationId
 			,B.intStorageLocationId
-			,dblOnOrder =  (CASE WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 0 ELSE SUM(dblQtyOrdered) - SUM(dblQtyReceived) END)
+			,dblOnOrder =  (CASE WHEN SUM(ISNULL(dblQtyReceived, 0)) > SUM(ISNULL(dblQtyOrdered, 0)) THEN 0 ELSE SUM(ISNULL(dblQtyOrdered, 0)) - SUM(ISNULL(dblQtyReceived, 0)) END)
 		FROM 
 			tblPOPurchase A INNER JOIN tblPOPurchaseDetail B 
 				ON A.intPurchaseId = B.intPurchaseId
@@ -292,7 +296,7 @@ BEGIN
 					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				OUTER APPLY (
 					SELECT	dblQuantity = --SUM(dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)) 
-								SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty))
+								SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty), 0))
 					FROM	tblICInventoryTransaction t
 							INNER JOIN tblICItemUOM stockUOM 
 								ON t.intItemId = stockUOM.intItemId
@@ -415,7 +419,7 @@ BEGIN
 				,uom.intItemUOMId 
 				,intSubLocationId = null 
 				,intStorageLocationId = null 
-				,dblInTransitOutbound = SUM(t.dblQuantity) 
+				,dblInTransitOutbound = SUM(ISNULL(t.dblQuantity, 0)) 
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
 				INNER JOIN #tmpRebuildList list	
@@ -512,7 +516,7 @@ BEGIN
 			,r.intItemLocationId
 			,r.intItemUOMId
 			,r.intLotId
-			,SUM(r.dblQty)
+			,SUM(ISNULL(r.dblQty, 0))
 			,r.intTransactionId
 			,r.strTransactionId
 			,r.intInventoryTransactionType
@@ -553,4 +557,4 @@ END
 --------------------------------------
 BEGIN 
 	EXEC uspICFixStorageQty
-END 
+END
