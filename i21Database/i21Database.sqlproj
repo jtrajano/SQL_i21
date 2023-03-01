@@ -1270,9 +1270,9 @@
     <Build Include="dbo\Stored Procedures\uspSTMechandiseSaleSummaryNonTaxable.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
     <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
-    <Build Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateNewJob.sql" />
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
+    <None Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
