@@ -879,6 +879,83 @@ BEGIN
 		and ysnBasisChange = 1
 		and ysnCashPriceChange = 1
 		and strPricingType IN ('Priced','HTA')
+
+		-- Header is Unit
+		UNION ALL
+		SELECT
+			dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  = CASE WHEN strPricingType = 'Priced' THEN dblQtyPriced * -1 ELSE dblQtyUnpriced  END 
+			, strTransactionReference = 'Unit - Price Fixation'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, @intHeaderPricingType
+			, intTransactionReferenceId = intContractHeaderId
+			, strTransactionReferenceNo = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		FROM tblCTSequenceHistory 
+		WHERE intContractDetailId = @intContractDetailId
+		AND @intHeaderPricingType = 4
+		AND ysnFuturesChange = 1
+		AND strPricingType IN ('Priced','Unit')
+
+		UNION ALL --Counter entry when price fixing an Unit
+		SELECT
+			dtmHistoryCreated
+			, @strContractNumber
+			, @intContractSeq
+			, @intContractTypeId
+			, dblBalance  =  CASE WHEN strPricingType = 'Priced' THEN dblQtyPriced ELSE dblQtyUnpriced * -1 END 
+			, strTransactionReference = 'Unit - Price Fixation'
+			, @intContractHeaderId
+			, @intContractDetailId
+			, 1 --Priced
+			, intTransactionReferenceId = intContractHeaderId
+			, strTransactionReferenceNo = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
+			, @intCommodityId
+			, @strCommodityCode
+			, @intItemId
+			, intEntityId
+			, @intLocationId
+			, @intFutureMarketId 
+			, @intFutureMonthId 
+			, @dtmStartDate 
+			, @dtmEndDate 
+			, @intQtyUOMId
+			, @dblFutures
+			, @dblBasis
+			, @intBasisUOMId 
+			, @intBasisCurrencyId 
+			, @intPriceUOMId 
+			, @intContractStatusId 
+			, @intBookId 
+			, @intSubBookId
+			, @intUserId 
+		FROM tblCTSequenceHistory 
+		WHERE intContractDetailId = @intContractDetailId
+		AND @intHeaderPricingType = 4
+		AND ysnFuturesChange = 1
+		AND strPricingType IN ('Priced','Unit')
 			
 		union all  -- Header is Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 		select 
