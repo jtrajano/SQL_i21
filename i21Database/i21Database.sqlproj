@@ -1311,7 +1311,7 @@
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
-    <None Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
+    <Build Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
