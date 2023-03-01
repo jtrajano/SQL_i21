@@ -5104,7 +5104,7 @@ BEGIN TRY
 
 
 			-- Derivative Transaction
-			INSERT INTO tblRKM2MPostRecap (intM2MInquiryId
+			INSERT INTO tblRKM2MPostPreview (intM2MHeaderId
 				, dtmDate
 				, intAccountId
 				, strAccountId
