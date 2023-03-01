@@ -9237,6 +9237,7 @@
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
