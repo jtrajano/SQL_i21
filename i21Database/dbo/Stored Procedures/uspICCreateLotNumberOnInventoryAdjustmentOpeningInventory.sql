@@ -66,6 +66,27 @@ BEGIN
 			,[strTransactionId]
 			,[strSourceTransactionId]
 			,[intSourceTransactionTypeId]
+			,[strLotAlias] 
+			,[strWarehouseRefNo]	
+			,[intLotStatusId] 
+			,[intOriginId] 
+			,[strBOLNo] 
+			,[strVessel] 
+			,[strMarkings] 
+			,[strNotes] 
+			,[intEntityVendorId] 
+			,[strVendorLotNo] 
+			,[strGarden] 
+			,[dtmManufacturedDate] 
+			,[strContainerNo] 
+			,[strCondition] 
+			,[intSeasonCropYear] 
+			,[intBookId] 
+			,[intSubBookId] 
+			,[strCertificate] 
+			,[intProducerId] 
+			,[strTrackingNumber]	
+			,[strCargoNo] 
 	)
 	SELECT	[intItemId]					= Detail.intItemId
 			,[intItemLocationId]		= ItemLocation.intItemLocationId
@@ -84,6 +105,28 @@ BEGIN
 			,[strTransactionId]			= Header.strAdjustmentNo
 			,[strSourceTransactionId]	= Header.strAdjustmentNo
 			,[intSourceTransactionTypeId]= @INVENTORY_ADJUSTMENT_OpeningInventory
+			,[strLotAlias]				= Detail.strLotAlias
+			,[strWarehouseRefNo]		= Detail.strWarehouseRefNo
+			,[intLotStatusId]			= Detail.intNewLotStatusId
+			,[intOriginId]				= Detail.intOriginId
+			,[strBOLNo]					= Detail.strBOLNo
+			,[strVessel]				= Detail.strVessel
+			,[strMarkings]				= Detail.strMarkings
+			,[strNotes]					= Detail.strNotes
+			,[intEntityVendorId]		= Detail.intEntityVendorId
+			,[strVendorLotNo]			= Detail.strVendorLotNo
+			,[strGarden]				= Detail.strGarden
+			,[dtmManufacturedDate]		= Detail.dtmManufacturedDate
+			,[strContainerNo]			= Detail.strContainerNo
+			,[strCondition]				= Detail.strCondition
+			,[intSeasonCropYear]		= Detail.intSeasonCropYear
+			,[intBookId]				= Detail.intBookId
+			,[intSubBookId]				= Detail.intSubBookId
+			,[strCertificate]			= Detail.strCertificate
+			,[intProducerId]			= Detail.intProducerId
+			,[strTrackingNumber]		= Detail.strTrackingNumber
+			,[strCargoNo]				= Detail.strCargoNo
+
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItem Item

@@ -55,7 +55,9 @@ BEGIN
 			,dblCost  
 			,dblSalesPrice  
 			,intCurrencyId  
+			,intForexRateTypeId
 			,dblExchangeRate  
+			,dblForexRate
 			,intTransactionId 
 			,intTransactionDetailId
 			,strTransactionId  
@@ -72,8 +74,10 @@ BEGIN
 			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
@@ -112,8 +116,10 @@ BEGIN
 										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
 									), 0)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
@@ -165,8 +171,10 @@ BEGIN
 			,dblUOMQty			
 			,dblCost  
 			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
+			,intCurrencyId
+			,intForexRateTypeId
+			,dblExchangeRate
+			,dblForexRate
 			,intTransactionId 
 			,intTransactionDetailId
 			,strTransactionId  
@@ -183,8 +191,10 @@ BEGIN
 			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
@@ -223,8 +233,10 @@ BEGIN
 										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
 									), 0)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
-			,dblExchangeRate		= 1
+			,intCurrencyId			= Detail.intCurrencyId 
+			,intForexRateTypeId		= Detail.intForexRateTypeId
+			,dblExchangeRate		= ISNULL(Detail.dblForexRate, 1) 
+			,dblForexRate			= ISNULL(Detail.dblForexRate, 1) 
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo

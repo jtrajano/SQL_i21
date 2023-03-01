@@ -67,7 +67,7 @@ SELECT
 								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTotalSales 				= DETAIL.dblLineTotal * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTotalSalesFunctional	= DETAIL.dblBaseLineTotal * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblTaxCollected			= INVOICE.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTaxCollected			= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,strCustomerNumber	    	= CUSTOMER.strCustomerNumber
 	,strCustomerName			= CUSTOMER.strCustomerName
 	,strCustomerCity			= CUSTOMER.strCustomerCity
@@ -118,9 +118,9 @@ SELECT
 	,strUnitOfMeasure			= DETAIL.strUnitOfMeasure
 	,ysnPaid					= INVOICE.ysnPaid
 	,intARAccountId				= INVOICE.intAccountId
-	,strARAccountId				= ARACCOUNT.strAccountId
+	,strARAccountId				= CASE WHEN INVOICE.strType IN ('Tax Adjustment') THEN DETAIL.strDebitTaxAccount ELSE ARACCOUNT.strAccountId END
 	,intSalesAccountId			= DETAIL.intSalesAccountId
-	,strSalesAccountId			= DETAIL.strAccountId
+	,strSalesAccountId			= CASE WHEN INVOICE.strType IN ('Tax Adjustment') THEN DETAIL.strCreditTaxAccount ELSE DETAIL.strAccountId END
 	,strShipToName				= SHIPTO.strCheckPayeeName
 	,strShipToAddress			= SHIPTO.strAddress
 	,strShipToCity				= SHIPTO.strCity
@@ -135,8 +135,8 @@ SELECT
 	,ysnOverrideTaxLocation     = CAST(CASE WHEN ISNULL(INVOICE.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
-	,dblTotalAmount				= INVOICE.dblInvoiceTotal
-	,dblTotalAmountFunctional	= ROUND(INVOICE.dblInvoiceTotal * INVOICE.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+	,dblTotalAmount				= (DETAIL.dblLineTotal + DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal()) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -186,6 +186,9 @@ INNER JOIN (
 		,strAccountId			= SALESACCOUNT.strAccountId
 		,intSalesAccountId		= ID.intSalesAccountId
 		,ysnOverrideTaxGroup    = ISNULL(ID.ysnOverrideTaxGroup, 0)
+		,strDebitTaxAccount		= DEBITTAXACCOUNT.strAccountId 
+		,strCreditTaxAccount	= CREDITTAXACCOUNT.strAccountId 
+		,dblCurrencyExchangeRate = ID.dblCurrencyExchangeRate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT 
@@ -294,6 +297,16 @@ INNER JOIN (
 		FROM tblGLAccount
 		WHERE intAccountId = ID.intSalesAccountId
 	) SALESACCOUNT
+	OUTER APPLY (	
+		SELECT TOP 1 strAccountId	
+		FROM tblGLAccount	
+		WHERE intAccountId = (select TOP 1 intAccountId from tblGLDetail where dblDebit <> 0 and intTransactionId = ID.intInvoiceId order by dtmDateEntered desc)	
+	) DEBITTAXACCOUNT
+	OUTER APPLY (	
+		SELECT TOP 1 strAccountId	
+		FROM tblGLAccount	
+		WHERE intAccountId = (select TOP 1 intAccountId from tblGLDetail where dblCredit <> 0 and intTransactionId = ID.intInvoiceId order by dtmDateEntered desc)	
+	) CREDITTAXACCOUNT
 ) DETAIL ON INVOICE.intInvoiceId = DETAIL.intInvoiceId
 INNER JOIN (
 	SELECT 

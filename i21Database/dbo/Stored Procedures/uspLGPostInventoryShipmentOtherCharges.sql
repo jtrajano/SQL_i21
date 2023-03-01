@@ -565,7 +565,7 @@ BEGIN
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND (ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0 OR ForGLEntries_CTE.intCurrencyId = @intInvoiceCurrency)
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
 	
 	UNION ALL
 	
@@ -617,7 +617,7 @@ BEGIN
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
 	CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) DebitForeign
 	CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) CreditForeign
-	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND (ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0 OR ForGLEntries_CTE.intCurrencyId = @intInvoiceCurrency)
+	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
 
 	SELECT [dtmDate]
 		,[strBatchId]

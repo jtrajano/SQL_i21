@@ -276,7 +276,7 @@ BEGIN
 		WHEN @msgId = 80260 THEN 'Bill Quantity as charge (or discount) for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80261 THEN 'The Storage Location invalid in %s for %s.'
 		WHEN @msgId = 80262 THEN 'Unable to Post. The following contract(s) needs to be Priced:<p><br><div style="list-style-position: inside;"><ul>%s</ul></div></p>'
-		WHEN @msgId = 80263 THEN 'Category changed for item %s.'
+		WHEN @msgId = 80263 THEN 'Category changed for item %s. Rebuild the category %s instead of the item.'
 		WHEN @msgId = 80264 THEN 'The item type for %s is not "stockable". Costing is not allowed.'
 		WHEN @msgId = 80265 THEN 'Cost adjustment for %s is missing. Stock rebuild will abort.'
 		WHEN @msgId = 80266 THEN 'Invoice Control Total and Receipt Total does not match. Unable to post.'

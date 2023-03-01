@@ -1292,6 +1292,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcRetainedEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRefreshREEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRefreshAuditorReportByAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
@@ -5308,6 +5309,8 @@
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReport.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReportExpRev.sql" />
     <Build Include="dbo\Views\vyuPATCalculateFiscalPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerPatronageHistory.sql" />

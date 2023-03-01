@@ -433,7 +433,7 @@ SET ANSI_WARNINGS ON
 					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
 					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
 					ORDER BY dtmValidFromDate DESC) FX
-		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1 AND ShipmentCharges.intCurrencyId <> @intInvoiceCurrency
+		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
 
 		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
 			@ItemsForInTransitCosting  
