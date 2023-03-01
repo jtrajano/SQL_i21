@@ -9918,6 +9918,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

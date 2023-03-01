@@ -5,7 +5,7 @@ AS
 	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
 	-- any modification here should be applied to vyuGRSettlementSubNoTaxReport as well
 
-SELECT 
+SELECT --TEST,--aa,bb,cc,dd,ee,
 	intBillDetailId
 	,strId
 	,intItemId
@@ -21,7 +21,7 @@ SELECT
 FROM
 (
 	--SCALE
-	 SELECT 
+	 SELECT --TEST= 'A',
 		 t1.intBillDetailId
 		,t3.strId
 		,t3.intBillId
@@ -36,6 +36,7 @@ FROM
 		,t3.dblTax * (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
 		,t3.dblNetTotal * (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 		,t3.strTaxClass
+		--,aa=null,bb=null,cc=null,dd=null,ee=null
 	FROM (
 			 SELECT 
 				 BillDtl.intBillDetailId
@@ -169,7 +170,7 @@ FROM
 	UNION ALL
 
 	--CONTRACT
-	SELECT DISTINCT
+	SELECT DISTINCT --'B',
 		 t3.intBillDetailIdItem
 		,t3.strId
 		,t3.intBillId
@@ -184,6 +185,7 @@ FROM
 		,t3.dblTax --* (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
 		,t3.dblNetTotal --* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 		,t3.strTaxClass
+		--,null,null,null,null,null
 	FROM (
 			 SELECT 
 				 strId						= Bill.strBillId
@@ -286,7 +288,7 @@ FROM
 
 	UNION ALL
 	--manually added item in the voucher but as a misc field only
-	SELECT DISTINCT
+	SELECT DISTINCT --'C',
 		intBillDetailIdItem				= BD_ITEM.intBillDetailId
 		,strId							= AP.strBillId
 		,intBillId						= AP.intBillId
@@ -301,15 +303,19 @@ FROM
 		,dblTax							= BD.dblTax
 		,dblNetTotal					= BD.dblTotal + ISNULL(BD.dblTax,0)
 		,strTaxClass					= TaxClass.strTaxClass
+		--,MC.*
+		--,null,null,null,null,null
 	FROM tblAPBillDetail BD
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
 	LEFT JOIN (
 		tblAPBillDetail BD_ITEM
-		INNER JOIN tblICItem IC ON IC.intItemId = BD_ITEM.intItemId AND IC.strType = 'Inventory'	
+		INNER JOIN tblICItem IC 
+			ON IC.intItemId = BD_ITEM.intItemId 
+				AND IC.strType = 'Inventory'	
 	) ON (BD_ITEM.intInventoryReceiptItemId IS NOT NULL OR BD_ITEM.intCustomerStorageId IS NOT NULL)
 		AND BD_ITEM.intBillId = BD.intBillId
-	OUTER APPLY dbo.fnGRSettlementManualChargeItem(BD.intBillId) MC
+	OUTER APPLY dbo.fnGRSettlementMiscCharges(BD.intBillId) MC
 	LEFT JOIN vyuAPBillDetailTax Tax
 		ON BD.intBillDetailId = Tax.intBillDetailId
 	LEFT JOIN tblSMTaxClass TaxClass
