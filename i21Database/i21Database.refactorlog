@@ -7763,4 +7763,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strTerm" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="769f56e2-323d-444c-8dc9-5fde2a9d99b8" ChangeDateTime="03/01/2023 00:49:40">
+    <Property Name="ElementName" Value="[dbo].[trg_tblCTContractCost_insert]" />
+    <Property Name="ElementType" Value="SqlDmlTrigger" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractCost]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[trgAfterInsertCTContractCost]" />
+  </Operation>
 </Operations>
