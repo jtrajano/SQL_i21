@@ -5587,7 +5587,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, dtmDateEntered = @dtmCurrentDate
@@ -5626,7 +5626,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5663,7 +5663,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5700,7 +5700,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5737,7 +5737,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5774,7 +5774,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5811,7 +5811,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5847,7 +5847,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5883,7 +5883,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5919,7 +5919,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5955,7 +5955,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -5991,7 +5991,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6027,7 +6027,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6063,7 +6063,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6100,7 +6100,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6136,7 +6136,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblRate, 0) <> 0 
 												THEN 1 / ISNULL(dblRate, 1)
 											WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> t.intTransactionCurrencyId 
-												THEN ISNULL(dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId), 1)
+												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, t.intTransactionCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
@@ -6232,7 +6232,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> fm.intCurrencyId
 												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, fm.intCurrencyId, @intMarkToMarketRateTypeId) 
 											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> c.intMainCurrencyId
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, c.intMainCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, c.intMainCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, dtmDateEntered = @dtmCurrentDate
@@ -6271,7 +6271,7 @@ BEGIN TRY
 					, dblExchangeRate = CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 0 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> fm.intCurrencyId
 												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, fm.intCurrencyId, @intMarkToMarketRateTypeId) 
 											WHEN ISNULL(c.ysnSubCurrency, 0) = 1 AND ISNULL(@intCurrencyId, 0) <> 0 AND @intCurrencyId <> c.intMainCurrencyId
-												THEN dbo.fnRKGetCurrencyConvertion(@intCurrencyId, c.intMainCurrencyId, @intMarkToMarketRateTypeId) 
+												THEN dbo.fnRKGetCurrencyConvertion(c.intMainCurrencyId, c.intMainCurrencyId, @intMarkToMarketRateTypeId) 
 											ELSE 1
 											END
 					, @dtmCurrentDate
