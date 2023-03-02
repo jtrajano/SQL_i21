@@ -8,7 +8,7 @@ SELECT DISTINCT
 , CatLoc.intGeneralItemId AS intItemId
 , Item.strItemNo
 , Item.strDescription AS strItemDescription
-, CatLoc.strCashRegisterDepartment
+, StoreDepartments.strRegisterCode
 , Item.strLotTracking
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
@@ -22,3 +22,14 @@ INNER JOIN dbo.tblICItemLocation AS ItemLoc
 INNER JOIN dbo.tblSTStore AS ST 
 	ON ST.intCompanyLocationId = L.intCompanyLocationId
 	AND ItemLoc.intLocationId = ST.intCompanyLocationId
+INNER JOIN  (	SELECT		x.intStoreDepartmentId, 
+							x.intStoreId, 
+							CASE 
+								WHEN x.intCategoryId IS NULL
+								THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
+								ELSE intCategoryId
+								END AS intCategoryId,
+							x.intSubcategoriesId,
+							x.strRegisterCode
+				FROM		tblSTStoreDepartments x) StoreDepartments
+	ON Cat.intCategoryId = StoreDepartments.intCategoryId AND ST.intStoreId = StoreDepartments.intStoreId
