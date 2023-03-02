@@ -61,6 +61,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[ysnHasNewAccountPosted]		BIT DEFAULT (0) NOT NULL,
     [intConcurrencyId]				INT DEFAULT 1 NOT NULL,
 	[intAssetTaxJurisdictionId]		INT NULL,
+	[intFixedAssetJournalId] INT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -74,6 +75,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrency2] FOREIGN KEY([intFunctionalCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetDepartment] FOREIGN KEY([intAssetDepartmentId]) REFERENCES [dbo].[tblFAFixedAssetDepartment] ([intAssetDepartmentId]),
-	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetTaxJurisdiction] FOREIGN KEY([intAssetTaxJurisdictionId]) REFERENCES [dbo].[tblFAFixedAssetTaxJurisdiction] ([intAssetTaxJurisdictionId])
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetTaxJurisdiction] FOREIGN KEY([intAssetTaxJurisdictionId]) REFERENCES [dbo].[tblFAFixedAssetTaxJurisdiction] ([intAssetTaxJurisdictionId]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetJournal] FOREIGN KEY([intFixedAssetJournalId]) REFERENCES [dbo].[tblFAFixedAssetJournal] ([intFixedAssetJournalId])
 );
 
