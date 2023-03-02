@@ -283,7 +283,7 @@ BEGIN TRY
 				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
 				WHERE (cer.intFromCurrencyId = @intInvoiceCurrencyId and cer.intToCurrencyId = @intSequenceCurrencyId )
 					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
-			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId AND intRowId = 1
+			) tbl ON tbl.intFromCurrencyId = ci.intCurrencyId AND intRowId = 1
 			cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
 		END
 	END
