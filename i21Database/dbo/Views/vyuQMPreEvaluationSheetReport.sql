@@ -2,9 +2,9 @@ CREATE VIEW vyuQMPreEvaluationSheetReport
 AS
 SELECT intBatchId			= B.intBatchId 
 	 , strLocationCode1		= B.strPlant
-	 , strLocationCode2		= IL.strName
+	 , strLocationCode2		= IL.strSubLocationName
 	 , strL1PONo			= B.strERPPONumber
-	 , strSupplierCode		= E.strEntityNo
+	 , strSupplierCode		= E.strName
 	 , strShipmentNo		= CAST('SHIP#123' AS NVARCHAR(100))
 	 , dtmDeliveryDate		= CAST(GETDATE() AS DATE)
 	 , dtmLandedDate		= CAST(GETDATE() AS DATE)	 
@@ -31,7 +31,7 @@ SELECT intBatchId			= B.intBatchId
 FROM tblMFBatch B
 LEFT JOIN tblICItem I ON B.intTealingoItemId = I.intItemId
 LEFT JOIN tblQMGardenMark GM ON B.intGardenMarkId = GM.intGardenMarkId
-LEFT JOIN tblICStorageLocation IL ON B.intStorageLocationId = IL.intStorageLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation IL ON B.intStorageLocationId = IL.intCompanyLocationSubLocationId
 LEFT JOIN tblLGLoadDetail LD ON B.intBatchId = LD.intBatchId
 LEFT JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
 OUTER APPLY (
