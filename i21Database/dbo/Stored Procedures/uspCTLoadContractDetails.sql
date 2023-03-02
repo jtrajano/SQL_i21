@@ -362,7 +362,7 @@ BEGIN TRY
 		, CD.ysnClaimsToProducer
 		, CD.ysnRiskToProducer
 		, CD.ysnBackToBack
-		, CD.dblAllocatedQty
+		--, CD.dblAllocatedQty
 		, CD.dblReservedQty
 		, CD.dblAllocationAdjQty
 		, CD.dblInvoicedQty
@@ -634,7 +634,7 @@ BEGIN TRY
 		, CD.ysnApplyDefaultTradeFinance
 		, CD.ysnTaxOverride
 		, CD.strTaxPoint
-		, CD.intTaxGroupId
+		--, CD.intTaxGroupId
 		, CD.strTaxLocation
 		, CD.intTaxGroupId
 		, TG.strTaxGroup
