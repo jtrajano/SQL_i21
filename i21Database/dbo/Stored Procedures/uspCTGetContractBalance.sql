@@ -354,7 +354,7 @@ BEGIN
 					, strContractType				=	CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, CBL.intCommodityId
 					, strCommodityCode				=	CM.strCommodityCode
-					, strCommodity					=	CM.strDescription + ' ' + UOM.strUnitMeasure
+					, strCommodity					=	CM.strCommodityCode + ' ' + UOM.strUnitMeasure
 					, CBL.intItemId
 					, strItemNo						=	IM.strItemNo
 					, intCompanyLocationId			=	CBL.intLocationId
