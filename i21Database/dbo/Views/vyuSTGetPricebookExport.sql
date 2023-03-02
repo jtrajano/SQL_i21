@@ -34,7 +34,7 @@ SELECT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM
 	, ItemUOM.ysnStockUnit
 	, dblAvailableQty = CAST(ItemStock.dblAvailableQty AS NUMERIC(18, 6))
 	, dblOnHand = CAST(ItemStock.dblOnHand AS NUMERIC(18, 6))
-	, StoreDepartments.strRegisterCode
+	, CategoryLocation.strCashRegisterDepartment 
 	, CASE 
 			WHEN ItemUOM.strLongUPCCode NOT LIKE '%[^0-9]%' 
 				THEN CAST(1 AS BIT)
@@ -63,17 +63,6 @@ LEFT JOIN vyuICGetItemStockUOM ItemStock
 LEFT JOIN vyuICCategoryLocation CategoryLocation 
 	ON CategoryLocation.intCategoryId = Item.intCategoryId 
 	AND CategoryLocation.intLocationId = ItemLocation.intLocationId
-LEFT JOIN  (	SELECT		x.intStoreDepartmentId, 
-							x.intStoreId, 
-							CASE 
-								WHEN x.intCategoryId IS NULL
-								THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-								ELSE intCategoryId
-								END AS intCategoryId,
-							x.intSubcategoriesId,
-							x.strRegisterCode
-				FROM		tblSTStoreDepartments x) StoreDepartments
-	ON Item.intCategoryId = StoreDepartments.intCategoryId AND ST.intStoreId = StoreDepartments.intStoreId
 WHERE ItemPricing.intItemPricingId IS NOT NULL
 AND ItemUOM.intItemUOMId IS NOT NULL
 AND ST.intStoreId IS NOT NULL
