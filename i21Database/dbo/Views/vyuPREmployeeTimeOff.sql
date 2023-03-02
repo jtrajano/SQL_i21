@@ -98,7 +98,7 @@ INNER JOIN(
 						OR (dtmDateFrom  <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) AND PC.dtmPosted >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired))THEN
 						CASE WHEN ET.dtmLastAward = CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE) AND dtmDateFrom <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) THEN
 							0
-						ELSE dblHours END
+						ELSE CASE WHEN DATEPART(QQ,ISNULL(ET.dtmLastAward,EMP.dtmDateHired)) != DATEPART(QQ, GETDATE()) THEN 0 ELSE dblHours END END
 
 					WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'End of Quarter') AND dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) 
 						OR (dtmDateFrom  <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) AND PC.dtmPosted >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired)) THEN
@@ -282,7 +282,7 @@ INNER JOIN(
 				   WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'Start of Quarter') AND TOR.dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired)   THEN
 						CASE WHEN ET.dtmLastAward = CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE) AND dtmDateFrom <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) THEN
 							0
-						ELSE dblRequest END
+						ELSE CASE WHEN DATEPART(QQ,ISNULL(ET.dtmLastAward,EMP.dtmDateHired)) != DATEPART(QQ, GETDATE()) THEN 0 ELSE dblRequest END END
 
 					WHEN YEAR(dtmDateFrom) IS NOT NULL  AND (ET.strAwardPeriod = 'End of Quarter') AND TOR.dtmDateFrom >= ISNULL(ET.dtmLastAward,EMP.dtmDateHired)   THEN
 						CASE WHEN ET.dtmLastAward = CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE) AND dtmDateFrom <= ISNULL(ET.dtmLastAward,EMP.dtmDateHired) THEN
