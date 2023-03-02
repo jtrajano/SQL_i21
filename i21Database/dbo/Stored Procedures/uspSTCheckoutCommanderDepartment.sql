@@ -10,10 +10,15 @@ BEGIN
 	BEGIN TRY
 		
 		DECLARE @intStoreId INT
+		DECLARE @strCategoriesOrSubcategories CHAR(1)
 
-		SELECT @intStoreId = intStoreId 
-		FROM dbo.tblSTCheckoutHeader 
-		WHERE intCheckoutId = @intCheckoutId
+		SELECT	@intStoreId = intStoreId 
+		FROM	dbo.tblSTCheckoutHeader 
+		WHERE	intCheckoutId = @intCheckoutId
+
+		SELECT	@strCategoriesOrSubcategories = strCategoriesOrSubcategories
+		FROM	tblSTStore
+		WHERE	intStoreId = @intStoreId
 
 		BEGIN TRANSACTION 
 
@@ -228,9 +233,7 @@ BEGIN
 				WHERE DT.intCheckoutId = @intCheckoutId 
 					AND StoreDepartments.intStoreId = @intStoreId
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
-					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
-
-				
+					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000	
 			END
 
 --Cashier Department Totals Part
