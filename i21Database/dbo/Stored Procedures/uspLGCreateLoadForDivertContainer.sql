@@ -13,6 +13,12 @@ BEGIN
 	RAISERROR('No quantity specified for diversion.', 16, 1);
 END
 
+/* Check if any Divert Quantity exceeds quantity */
+IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE ISNULL(dblDivertQuantity, 0) > dblQuantity AND intLoadId = @intLoadId)
+BEGIN
+	RAISERROR('Divert quantity cannot be greater than original quantity.', 16, 1);
+END
+
 /* Get Load Info */
 SELECT
 	@strLoadNumber = strLoadNumber
@@ -29,7 +35,7 @@ WHILE EXISTS (SELECT 1 FROM tblLGLoad WHERE strLoadNumber = @strNewLoadNumber)
 BEGIN
 	IF (@intSerial < 20) --Loop Control, diversion shouldn't exceed 20
 	BEGIN
-		SELECT @strNewLoadNumber = @strNewLoadNumber + '.' + CAST(@intSerial AS NVARCHAR(10)), @intSerial = @intSerial + 1
+		SELECT @strNewLoadNumber = @strLoadNumber + '.' + CAST(@intSerial AS NVARCHAR(10)), @intSerial = @intSerial + 1
 	END
 	ELSE
 	BEGIN
@@ -701,7 +707,7 @@ DELETE FROM tblLGLoadContainer WHERE intLoadId = @intLoadId AND dblQuantity <= 0
 DELETE FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND dblQuantity <= 0
 
 /* Repost the Transfer */
-IF (@ysnIsPosted = 1)
+IF (@ysnIsPosted = 1 AND EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadId = @intLoadId))
 	EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1, 0
 
 GO
