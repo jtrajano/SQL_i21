@@ -25,6 +25,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , WorkOrder.strERPOrderNo			AS strERPOrderNo
 	 , WorkOrder.strERPComment			AS strERPComment
 	 , ISNULL(WorkOrder.intCompanyId, WorkOrder.intLocationId) AS intCompanyLocationId
+	 , WorkOrderRecipe.intRecipeId
 FROM tblMFWorkOrder AS WorkOrder 
 JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId 
 JOIN tblICItemUOM AS ItemUOM ON WorkOrder.intItemUOMId = ItemUOM.intItemUOMId 
@@ -35,6 +36,7 @@ LEFT JOIN tblEMEntity AS WorkOrderCreate ON WorkOrderCreate.intEntityId = WorkOr
 LEFT JOIN tblEMEntity AS WorkOrderApprove ON WorkOrderApprove.intEntityId = WorkOrder.intApprovedBy
 LEFT JOIN tblEMEntity AS ReleasedBy ON ReleasedBy.intEntityId=WorkOrder.intSupervisorId
 LEFT JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrder.intStatusId = WorkOrderStatus.intStatusId
+LEFT JOIN tblMFWorkOrderRecipe AS WorkOrderRecipe ON WorkOrder.intWorkOrderId = WorkOrderRecipe.intWorkOrderId
 OUTER APPLY (SELECT strName
 			 FROM tblEMEntity
 			 WHERE intEntityId = WorkOrder.intPrintedBy) AS Printed

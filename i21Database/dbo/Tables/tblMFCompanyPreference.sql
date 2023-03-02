@@ -109,6 +109,9 @@
 	ysnDisplayPickTicketItemXref BIT,
 	ysnOverrideRecipeInBM BIT,
 	ysnAllowMultiLotSelectionInBM BIT,
-	ysnCopyLowertoleranceFromUpperToleranceInBM BIT
+	ysnCopyLowertoleranceFromUpperToleranceInBM BIT,
+	ysnOverrideRecipeInBlendManagement BIT,
+	ysnAllowMultiLotInBlendManagement BIT,
+	ysnRecomputeExpectedValueInBlendManagement BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
