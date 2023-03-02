@@ -26,7 +26,6 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICCertificationCommodity] PRIMARY KEY ([intCertificationCommodityId]), 
-		CONSTRAINT [FK_tblICCertificationCommodity_tblICCertification] FOREIGN KEY ([intCertificationId]) REFERENCES [tblICCertification]([intCertificationId]), 
 		CONSTRAINT [FK_tblICCertificationCommodity_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICCertificationCommodity_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
 		CONSTRAINT [FK_tblICCertificationCommodity_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
