@@ -40,17 +40,6 @@ JOIN
 	 OR dtmDateCreated IS NOT NULL
 ) AS x 
 	ON x.intCategoryId = Cat.intCategoryId 
-JOIN (	SELECT	x.intStoreDepartmentId, 
-				x.intStoreId, 
-				CASE 
-					WHEN x.intCategoryId IS NULL
-					THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-					ELSE intCategoryId
-					END AS intCategoryId,
-				x.intSubcategoriesId,
-				x.strRegisterCode
-		FROM		tblSTStoreDepartments x) StoreDepartments 
-	ON Cat.intCategoryId = StoreDepartments.intCategoryId
-WHERE StoreDepartments.strRegisterCode IS NOT NULL
+WHERE CL.strCashRegisterDepartment IS NOT NULL
 AND Cat.strDescription IS NOT NULL 
 AND Cat.strDescription != ''

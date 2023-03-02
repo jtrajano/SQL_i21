@@ -177,7 +177,7 @@ BEGIN
 						, 'update' [TableActionType]
 						, 'addchange' [RecordActionType] 
 						, 'addchange' AS [MCTDetailRecordActionType] 
-						, StoreDepartments.strRegisterCode AS [MerchandiseCode] 
+						, CatLoc.strCashRegisterDepartment AS [MerchandiseCode] 
 						, 'yes' AS [ActiveFlagValue] 
 						, Cat.strDescription AS [strDescription] 
 						, ISNULL(SR.strRegProdCode, 0) AS [SalesRestrictCode]
@@ -200,17 +200,6 @@ BEGIN
 						ON tmpItem.intCategoryId = Cat.intCategoryId 
 					JOIN tblICCategoryLocation CatLoc 
 						ON Cat.intCategoryId = CatLoc.intCategoryId
-					JOIN (	SELECT	x.intStoreDepartmentId, 
-									x.intStoreId, 
-									CASE 
-										WHEN x.intCategoryId IS NULL
-										THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-										ELSE intCategoryId
-										END AS intCategoryId,
-									x.intSubcategoriesId,
-									x.strRegisterCode
-						FROM		tblSTStoreDepartments x) StoreDepartments 
-						ON Cat.intCategoryId = StoreDepartments.intCategoryId
 					JOIN tblICItem I
 						ON CatLoc.intGeneralItemId = I.intItemId
 					JOIN tblICItemLocation IL 

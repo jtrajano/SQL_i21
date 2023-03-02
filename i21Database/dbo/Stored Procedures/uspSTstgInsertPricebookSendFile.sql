@@ -378,7 +378,7 @@ BEGIN
 																	ELSE 'no' 
 																END,
 							[dblITTDataInventoryValuePrice]		= itemPricing.dblSalePrice, 
-							[strITTDataMerchandiseCode]			= StoreDepartments.strRegisterCode,
+							[strITTDataMerchandiseCode]			= CatLoc.strCashRegisterDepartment,
 							[dblITTDataRegularSellPrice]		= itemPricing.dblSalePrice,
 							[strITTDataDescription]				= item.strDescription,
 							[strITTDataLinkCode]				= CASE
@@ -417,17 +417,6 @@ BEGIN
 							ON Cat.intCategoryId = item.intCategoryId
 						INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
 							ON CatLoc.intCategoryId = Cat.intCategoryId 
-						INNER JOIN (	SELECT	x.intStoreDepartmentId, 
-												x.intStoreId, 
-												CASE 
-												WHEN x.intCategoryId IS NULL
-												THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-												ELSE intCategoryId
-												END AS intCategoryId,
-												x.intSubcategoriesId,
-												x.strRegisterCode
-										FROM		tblSTStoreDepartments x) StoreDepartments 
-							ON Cat.intCategoryId = StoreDepartments.intCategoryId
 						INNER JOIN 
 						(
 							SELECT DISTINCT intItemId FROM @tempTableItems 
@@ -774,7 +763,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
-							, StoreDepartments.strRegisterCode [strITTDataMerchandiseCode]
+							, CategoryLoc.strCashRegisterDepartment [strITTDataMerchandiseCode]
 							, itemPricing.dblSalePrice AS [dblITTDataRegularSellPrice]
 							, I.strDescription [strITTDataDescription]
 							, CASE WHEN IL.intItemTypeCode = 0 THEN 1 WHEN (@XMLGatewayVersion = '3.3' AND IL.ysnCarWash = 1) 
@@ -802,17 +791,6 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							ON Cat.intCategoryId = I.intCategoryId
 						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
 							ON Cat.intCategoryId = CategoryLoc.intCategoryId
-						INNER JOIN (	SELECT	x.intStoreDepartmentId, 
-												x.intStoreId, 
-												CASE 
-												WHEN x.intCategoryId IS NULL
-												THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-												ELSE intCategoryId
-												END AS intCategoryId,
-												x.intSubcategoriesId,
-												x.strRegisterCode
-										FROM		tblSTStoreDepartments x) StoreDepartments 
-							ON Cat.intCategoryId = StoreDepartments.intCategoryId
 						JOIN 
 						(
 							SELECT DISTINCT intItemId FROM @tempTableItems 
@@ -875,7 +853,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
-							, StoreDepartments.strRegisterCode [strITTDataMerchandiseCode]
+							, CategoryLoc.strCashRegisterDepartment [strITTDataMerchandiseCode]
 							, itemPricing.dblSalePrice AS [dblITTDataRegularSellPrice]
 							, I.strDescription [strITTDataDescription]
 							, CASE WHEN IL.intItemTypeCode = 0 THEN 1 WHEN (@XMLGatewayVersion = '3.3' AND IL.ysnCarWash = 1) 
@@ -910,17 +888,6 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							ON IL.intItemId = I.intItemId
 						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
 							ON Cat.intCategoryId = CategoryLoc.intCategoryId
-						INNER JOIN (	SELECT	x.intStoreDepartmentId, 
-												x.intStoreId, 
-												CASE 
-												WHEN x.intCategoryId IS NULL
-												THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-												ELSE intCategoryId
-												END AS intCategoryId,
-												x.intSubcategoriesId,
-												x.strRegisterCode
-										FROM		tblSTStoreDepartments x) StoreDepartments 
-							ON Cat.intCategoryId = StoreDepartments.intCategoryId
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
@@ -1270,7 +1237,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 					, [strUpc]						=	PCF.strLongUPCCode -- IF COMMANDER/SAPPHIRE include check digit
 					, [strUpcModifier]				=	CAST(ISNULL(UOM.intModifier, '000') AS VARCHAR(100))
 					, [strDescription]				=	LEFT(REPLACE(REPLACE(REPLACE(REPLACE(ISNULL(NULLIF(UOM.strUPCDescription, ''), Item.strDescription), '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
-					, [strDepartment]				=	CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50))
+					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
 					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
 					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
 					, [dblPrice]					=	itemPricing.dblSalePrice
@@ -1325,17 +1292,6 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 					ON Item.intCategoryId = Category.intCategoryId
 				INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
 					ON Category.intCategoryId = CategoryLoc.intCategoryId
-				INNER JOIN (	SELECT	x.intStoreDepartmentId, 
-										x.intStoreId, 
-										CASE 
-										WHEN x.intCategoryId IS NULL
-										THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-										ELSE intCategoryId
-										END AS intCategoryId,
-										x.intSubcategoriesId,
-										x.strRegisterCode
-								FROM		tblSTStoreDepartments x) StoreDepartments 
-					ON Category.intCategoryId = StoreDepartments.intCategoryId
 				INNER JOIN tblSTStore Store
 					ON CategoryLoc.intLocationId = Store.intCompanyLocationId
 				INNER JOIN tblICItemLocation ItemLoc
