@@ -74,9 +74,12 @@ AS
 		ON B.intItemUOMId = I.intItemUOMId
 	INNER JOIN tblICUnitMeasure J
 		ON I.intUnitMeasureId =  J.intUnitMeasureId
-	LEFT JOIN tblVRUOMXref K
-		ON J.intUnitMeasureId = K.intUnitMeasureId
-			AND M.intVendorSetupId = K.intVendorSetupId
+	OUTER APPLY (
+        SELECT TOP 1 xK.*
+        FROM tblVRUOMXref xK
+		WHERE J.intUnitMeasureId = xK.intUnitMeasureId
+			AND M.intVendorSetupId = xK.intVendorSetupId
+    ) K
 	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = A.intSalesOrderId
 	LEFT JOIN tblICItemUOM vendorItemUOM ON vendorItemUOM.intItemUOMId = H.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure vendorUOM ON vendorUOM.intUnitMeasureId = vendorItemUOM.intUnitMeasureId
