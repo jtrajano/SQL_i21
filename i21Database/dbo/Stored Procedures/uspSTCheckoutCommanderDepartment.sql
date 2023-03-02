@@ -249,7 +249,7 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intStoreId = StoreDepartments.intStoreId
 				LEFT JOIN dbo.tblICCategoryLocation CatLoc
-					ON Cat.intCategoryId = StoreDepartments.intCategoryId AND CatLoc.intLocationId = S.intCompanyLocationId AND @strCategoriesOrSubcategories = 'C'
+					ON CatLoc.intCategoryId = StoreDepartments.intCategoryId AND CatLoc.intLocationId = S.intCompanyLocationId AND @strCategoriesOrSubcategories = 'C'
 				LEFT JOIN dbo.tblICItem I 
 					ON I.intItemId = (SELECT TOP 1 x.intItemId FROM tblICItem x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId) AND @strCategoriesOrSubcategories = 'S'
 				JOIN dbo.tblSMCompanyLocation CL 
