@@ -11,15 +11,11 @@ BEGIN
 
 
 		DECLARE @intStoreId INT
-		DECLARE @strCategoriesOrSubcategories CHAR(1)
 
 		SELECT @intStoreId = intStoreId 
 		FROM dbo.tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
-		SELECT	@strCategoriesOrSubcategories = strCategoriesOrSubcategories
-		FROM	tblSTStore
-		WHERE	intStoreId = @intStoreId
 
 		-- ==================================================================================================================  
 		-- Start Validate if MCM xml file matches the Mapping on i21 
@@ -88,12 +84,16 @@ BEGIN
 				SELECT DISTINCT
 					Chk.intMerchandiseCode AS strXmlRegisterMerchandiseCode
 				FROM @UDT_MCM Chk
-				JOIN dbo.tblSTStoreDepartments StoreDepartments 
-					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				JOIN dbo.tblSTStore S 
-					ON S.intStoreId = StoreDepartments.intStoreId
+				JOIN dbo.tblICCategoryLocation Cat 
+					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
+				LEFT JOIN dbo.tblICItem I 
+					ON Cat.intGeneralItemId = I.intItemId
+				JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
 				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = S.intCompanyLocationId
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
 				AND ISNULL(Chk.intMerchandiseCode, '') != ''
 			) AS tbl
@@ -110,13 +110,7 @@ BEGIN
 			BEGIN
 				INSERT INTO dbo.tblSTCheckoutDepartmetTotals
 				SELECT @intCheckoutId [intCheckoutId]
-					, CASE 
-						WHEN @strCategoriesOrSubcategories = 'C'
-						THEN Cat.intCategoryId
-						WHEN @strCategoriesOrSubcategories = 'S'
-						THEN (SELECT TOP 1 intCategoryId FROM tblSTStoreDepartments x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId)
-						ELSE NULL
-						END AS [intCategoryId]
+					, Cat.intCategoryId [intCategoryId]
 					, ISNULL(Chk.dblSalesAmount, 0) [dblTotalSalesAmountRaw]
 					, ISNULL(Chk.dblSalesAmount, 0) [dblRegisterSalesAmountRaw]
 					, (
@@ -143,28 +137,23 @@ BEGIN
 					, 0 [dblTaxAmount2]
 					, 0 [dblTaxAmount3]
 					, 0 [dblTaxAmount4]
-					, CASE 
-						WHEN @strCategoriesOrSubcategories = 'C'
-						THEN Cat.intGeneralItemId
-						WHEN @strCategoriesOrSubcategories = 'S'
-						THEN I.intItemId
-						ELSE NULL
-						END AS [intItemId]
+					, I.intItemId [intItemId]
 					, 1 [intConcurrencyId]
 					, 0 [dblTotalLotterySalesAmountComputed]
 					, NULL [intLotteryItemsSold]
 					, 0 [ysnLotteryItemAdded] 
 				FROM @UDT_MCM Chk
-				JOIN dbo.tblSTStoreDepartments StoreDepartments
-					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50))
-				JOIN dbo.tblSTStore S 
-					ON S.intStoreId = StoreDepartments.intStoreId
-				LEFT JOIN dbo.tblICCategoryLocation Cat 
-					ON Cat.intCategoryId = StoreDepartments.intCategoryId AND Cat.intLocationId = S.intCompanyLocationId
+				JOIN dbo.tblICCategoryLocation Cat 
+					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
+				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 				LEFT JOIN dbo.tblICItem I 
-					ON I.intItemId = (SELECT TOP 1 x.intItemId FROM tblICItem x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId)
+					ON Cat.intGeneralItemId = I.intItemId
+				JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
 				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = S.intCompanyLocationId
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
 
 			END
@@ -192,38 +181,22 @@ BEGIN
 					, [dblRefundAmount] = ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)), 0) 
 					, [intItemsSold] = ISNULL(CAST(Chk.dblSalesQuantity AS INT), 0) 
 					, [intTotalSalesCount] = ISNULL(CAST(Chk.dblTransactionCount AS INT), 0) 
-					, [intItemId] = CASE 
-										WHEN @strCategoriesOrSubcategories = 'C'
-										THEN CatLoc.intGeneralItemId
-										WHEN @strCategoriesOrSubcategories = 'S'
-										THEN I.intItemId
-										ELSE NULL
-										END
+					, [intItemId] = I.intItemId
 				FROM tblSTCheckoutDepartmetTotals DT
 				JOIN tblICCategory Cat 
 					ON DT.intCategoryId = Cat.intCategoryId
-				JOIN (	SELECT		x.intStoreDepartmentId, 
-									x.intStoreId, 
-									CASE 
-										WHEN x.intCategoryId IS NULL
-										THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-										ELSE intCategoryId
-										END AS intCategoryId,
-									x.intSubcategoriesId,
-									x.strRegisterCode
-						FROM		tblSTStoreDepartments x
-						WHERE		x.intStoreId = @intStoreId) StoreDepartments 
-					ON Cat.intCategoryId = StoreDepartments.intCategoryId
+				JOIN tblICCategoryLocation CatLoc 
+					ON Cat.intCategoryId = CatLoc.intCategoryId
 				JOIN @UDT_MCM Chk 
-					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50))
-				JOIN dbo.tblSTStore S 
-					ON S.intStoreId = StoreDepartments.intStoreId
-				LEFT JOIN dbo.tblICCategoryLocation CatLoc
-					ON CatLoc.intCategoryId = StoreDepartments.intCategoryId AND CatLoc.intLocationId = S.intCompanyLocationId AND @strCategoriesOrSubcategories = 'C'
+					ON CAST(ISNULL(Chk.intMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
-					ON I.intItemId = (SELECT TOP 1 x.intItemId FROM tblICItem x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId) AND @strCategoriesOrSubcategories = 'S'
+					ON CatLoc.intGeneralItemId = I.intItemId
+				JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
 				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = S.intCompanyLocationId
+					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE DT.intCheckoutId = @intCheckoutId 
 					AND S.intStoreId = @intStoreId
 

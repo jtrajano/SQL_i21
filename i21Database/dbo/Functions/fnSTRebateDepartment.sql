@@ -5,7 +5,7 @@ RETURNS @TempTableDepartments TABLE
 	, strStatusMessage NVARCHAR(200)
 	, intStoreId INT NULL
 	--, intRegisterDepartmentId INT NULL -- Change to strCashRegisterDepartment ST-2050
-	, strRegisterCode nvarchar(50) NULL 
+	, strCashRegisterDepartment nvarchar(50) NULL 
 	, intCategoryId INT NULL
 	, strCategoryCode NVARCHAR(30) NULL
 	, strCategoryDescription NVARCHAR(150) NULL
@@ -22,7 +22,7 @@ BEGIN
 				, strStatusMessage
 				, intStoreId
 				--, intRegisterDepartmentId -- Change to strCashRegisterDepartment ST-2050
-				, strRegisterCode
+				, strCashRegisterDepartment
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
@@ -33,7 +33,7 @@ BEGIN
 				, strMessage						= NULL
 				, intStoreId						= Rebates.intStoreId
 				--, intRegisterDepartmentId			= CatLoc.intRegisterDepartmentId
-				, strRegisterCode					= StoreDepartments.strRegisterCode -- Change to strCashRegisterDepartment ST-2050
+				, strCashRegisterDepartment			= CatLoc.strCashRegisterDepartment -- Change to strCashRegisterDepartment ST-2050
 				, intCategoryId						= Category.intCategoryId
 				, strCategoryCode					= Category.strCategoryCode
 				, strCategoryDescription			= Category.strDescription
@@ -43,17 +43,9 @@ BEGIN
 				ON Rebates.intStoreId = Store.intStoreId
 			INNER JOIN tblICCategory Category
 				ON Rebates.intCategoryId = Category.intCategoryId
-			INNER JOIN  (	SELECT		x.intStoreDepartmentId, 
-							x.intStoreId, 
-							CASE 
-								WHEN x.intCategoryId IS NULL
-								THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-								ELSE intCategoryId
-								END AS intCategoryId,
-							x.intSubcategoriesId,
-							x.strRegisterCode
-				FROM		tblSTStoreDepartments x) StoreDepartments
-				ON Category.intCategoryId = StoreDepartments.intCategoryId AND Store.intStoreId = StoreDepartments.intStoreId
+			INNER JOIN tblICCategoryLocation CatLoc
+				ON Category.intCategoryId = CatLoc.intCategoryId
+				AND Store.intCompanyLocationId = CatLoc.intLocationId
 			WHERE Rebates.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 
 			RETURN
@@ -67,7 +59,7 @@ BEGIN
 				, strStatusMessage
 				, intStoreId
 				--, intRegisterDepartmentId -- Change to strCashRegisterDepartment ST-2050
-				, strRegisterCode
+				, strCashRegisterDepartment
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
