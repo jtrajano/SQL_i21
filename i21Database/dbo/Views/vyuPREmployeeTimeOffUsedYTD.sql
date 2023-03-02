@@ -5,7 +5,6 @@ SELECT
 	,intEntityEmployeeId
 	,intTypeTimeOffId
 	,dblHoursUsed = SUM(dblHoursUsed)
-	,dblHoursUsedReset = SUM(dblHoursUsedReset)
 FROM
 		(
 		
@@ -14,7 +13,6 @@ FROM
 			,intEntityEmployeeId
 			,intTypeTimeOffId
 			,dblHoursUsed
-			,dblHoursUsedReset
 		FROM 
 			vyuPREmployeeTimeOff			
 
