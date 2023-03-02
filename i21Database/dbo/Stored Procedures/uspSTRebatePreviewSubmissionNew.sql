@@ -284,16 +284,24 @@ BEGIN
 					INNER JOIN (
 						SELECT DISTINCT intStoreId = Rebates.intStoreId
 							,ysnTobacco = Rebates.ysnTobacco
-							,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
+							,strRegisterCode = StoreDepartments.strRegisterCode
 						FROM tblSTStoreRebates Rebates
 						INNER JOIN tblSTStore Store
 							ON Rebates.intStoreId = Store.intStoreId
 						INNER JOIN tblICCategory Category
 							ON Rebates.intCategoryId = Category.intCategoryId
-						INNER JOIN tblICCategoryLocation CatLoc
-							ON Category.intCategoryId = CatLoc.intCategoryId
-							AND Store.intCompanyLocationId = CatLoc.intLocationId
-					) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
+						INNER JOIN (	SELECT		x.intStoreDepartmentId, 
+									x.intStoreId, 
+									CASE 
+										WHEN x.intCategoryId IS NULL
+										THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
+										ELSE intCategoryId
+										END AS intCategoryId,
+									x.intSubcategoriesId,
+									x.strRegisterCode
+						FROM		tblSTStoreDepartments x) StoreDepartments 
+					ON Category.intCategoryId = StoreDepartments.intCategoryId AND Store.intStoreId = StoreDepartments.intStoreId
+					) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strRegisterCode = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
 
 					 WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
 						AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
@@ -398,7 +406,7 @@ BEGIN
 				, CAST(intScanTransactionId AS NVARCHAR(20)) as strScanTransactionId
 				, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 				, dblTrlQty as intQuantity
-				,CASE WHEN TR.intTrlDeptNumber IN (SELECT strCashRegisterDepartment FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
+				,CASE WHEN TR.intTrlDeptNumber IN (SELECT strRegisterCode FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 							AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 							AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
 							AND (TR.dblTrlQty >= 2 OR tblSumQty.dblSumTrlQty >= 2) -- 2 Can Deal
@@ -549,16 +557,24 @@ BEGIN
 			INNER JOIN (
 				SELECT DISTINCT intStoreId = Rebates.intStoreId
 					,ysnTobacco = Rebates.ysnTobacco
-					,strCashRegisterDepartment = CatLoc.strCashRegisterDepartment
+					,strRegisterCode = StoreDepartments.strRegisterCode
 				FROM tblSTStoreRebates Rebates
 				INNER JOIN tblSTStore Store
 					ON Rebates.intStoreId = Store.intStoreId
 				INNER JOIN tblICCategory Category
 					ON Rebates.intCategoryId = Category.intCategoryId
-				INNER JOIN tblICCategoryLocation CatLoc
-					ON Category.intCategoryId = CatLoc.intCategoryId
-					AND Store.intCompanyLocationId = CatLoc.intLocationId
-			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strCashRegisterDepartment = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
+				INNER JOIN (	SELECT		x.intStoreDepartmentId, 
+									x.intStoreId, 
+									CASE 
+										WHEN x.intCategoryId IS NULL
+										THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
+										ELSE intCategoryId
+										END AS intCategoryId,
+									x.intSubcategoriesId,
+									x.strRegisterCode
+						FROM		tblSTStoreDepartments x) StoreDepartments 
+					ON Category.intCategoryId = StoreDepartments.intCategoryId AND Store.intStoreId = StoreDepartments.intStoreId
+			) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.strRegisterCode = TR.strTrlDeptNumber COLLATE Latin1_General_CI_AS
 			LEFT JOIN (
 				SELECT 
 					intTermMsgSN,
