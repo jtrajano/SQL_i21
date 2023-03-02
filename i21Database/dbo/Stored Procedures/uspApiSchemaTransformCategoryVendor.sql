@@ -131,6 +131,39 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND s.intSubcategoryId IS NULL
 	AND NULLIF(vts.strDefaultOrderClass, '') IS NOT NULL
 
+
+Update cv
+SET
+	cv.intCategoryLocationId = cl.intCategoryLocationId,
+	cv.intVendorId = v.intEntityId,
+	cv.strVendorDepartment  = vts.strVendorCategory,
+	cv.ysnAddOrderingUPC = vts.ysnAddOrderingUPCtoPricebook,
+	cv.ysnUpdateExistingRecords = vts.ysnUpdateExistingRecords,
+	cv.ysnAddNewRecords = vts.ysnAddNewRecords,
+	cv.ysnUpdatePrice = vts.ysnUpdatePrice,
+	cv.intFamilyId = f.intSubcategoryId,
+	cv.intSellClassId = sc.intSubcategoryId,
+	cv.intOrderClassId = oc.intSubcategoryId,
+	cv.strComments = vts.strComments
+FROM tblICCategoryVendor cv
+JOIN tblICCategory c ON c.intCategoryId = cv.intCategoryId
+JOIN tblApiSchemaTransformCategoryVendor vts ON (vts.strCategory = c.strCategoryCode OR vts.strCategory = c.strDescription)
+JOIN vyuAPVendor v ON v.strVendorId  = vts.strVendor  
+	OR v.strName  = vts.strVendor
+LEFT JOIN tblSMCompanyLocation l ON l.strLocationNumber  = vts.strLocation 
+	OR l.strLocationName  = vts.strLocation 
+LEFT JOIN tblICCategoryLocation cl ON cl.intCategoryId = c.intCategoryId
+	AND cl.intLocationId = l.intCompanyLocationId
+LEFT JOIN tblSTSubcategory f ON f.strSubcategoryId  = vts.strDefaultFamily
+	AND f.strSubcategoryType = 'F'
+LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId  = vts.strDefaultSellClass
+	AND sc.strSubcategoryType = 'C'
+LEFT JOIN tblSTSubcategory oc ON oc.strSubcategoryId  = vts.strDefaultOrderClass
+	AND oc.strSubcategoryType = 'C'
+WHERE vts.guiApiUniqueId = @guiApiUniqueId
+AND @OverwriteExisting = 1
+
+
 INSERT INTO tblICCategoryVendor (
 	  intCategoryId
 	, intVendorId
@@ -182,6 +215,14 @@ LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId  = vts.strDefaultSellClass
 LEFT JOIN tblSTSubcategory oc ON oc.strSubcategoryId  = vts.strDefaultOrderClass
 	AND oc.strSubcategoryType = 'C'
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
+AND NOT EXISTS (
+		SELECT TOP 1 1
+		FROM tblICCategoryVendor xx
+		WHERE xx.intCategoryId = c.intCategoryId
+			AND xx.intCategoryLocationId = cl.intCategoryLocationId
+			AND xx.intVendorId = v.intEntityId
+	)
+
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
@@ -198,6 +239,7 @@ FROM tblICCategoryVendor cv
 JOIN tblICCategory c ON c.intCategoryId = cv.intCategoryId
 JOIN vyuAPVendor v ON v.intEntityId = cv.intVendorId
 WHERE cv.guiApiUniqueId = @guiApiUniqueId
+
 
 UPDATE log
 SET log.intTotalRowsImported = r.intCount
