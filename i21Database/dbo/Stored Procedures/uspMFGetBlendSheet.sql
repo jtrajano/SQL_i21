@@ -39,6 +39,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , WorkOrder.intIssuedUOMTypeId
 	 , IssuedUOMType.strName			AS strIssuedUOMType
 	 , ISNULL(WorkOrderStatus.strName, 'Not Released')	AS strWorkOrderStatus
+	 , CompanyLocation.strLocationName  AS strLocationName
 FROM tblMFWorkOrder AS WorkOrder 
 JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId
 JOIN tblICItemUOM AS ItemUOM ON WorkOrder.intItemUOMId = ItemUOM.intItemUOMId
@@ -51,4 +52,5 @@ OUTER APPLY (SELECT strName
 			 FROM tblMFMachineIssuedUOMType 
 			 WHERE intIssuedUOMTypeId = WorkOrder.intIssuedUOMTypeId) AS IssuedUOMType
 LEFT JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrderStatus.intStatusId = WorkOrder.intStatusId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON WorkOrder.intLocationId = CompanyLocation.intCompanyLocationId
 WHERE WorkOrder.intWorkOrderId = @intWorkOrderId
