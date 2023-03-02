@@ -246,7 +246,7 @@ BEGIN TRY
 		,[intPriceUOMId]						= ARID.[intPriceUOMId]
 		,[dblQtyShipped]						= ARID.[dblQtyShipped]
 		,[dblDiscount]							= ARID.[dblDiscount]
-		,[dblPrice]								= ISNULL(ARID.[dblPrice], 0) 
+		,[dblPrice]								= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblPrice, 0))
 		,[dblUnitPrice]							= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblUnitPrice, 0))
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ARID.[strMaintenanceType]
@@ -292,7 +292,7 @@ BEGIN TRY
 		,[dblSubCurrencyRate]					= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]					= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-		,[dblComputedGrossPrice]				= ARID.[dblComputedGrossPrice]
+		,[dblComputedGrossPrice]				= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblComputedGrossPrice, 0))
 		,[intBankId]							= ARI.[intBankId]
 		,[intBankAccountId]						= ARI.[intBankAccountId]
 		,[intBorrowingFacilityId]				= ARI.[intBorrowingFacilityId]
