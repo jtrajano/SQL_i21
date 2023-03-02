@@ -30,8 +30,8 @@ SELECT DE.intFutOptTransactionId
 	, strFutureMonthYearWOSymbol = FMonth.strFutureMonth
 	, strOptionMonthYear = (SUBSTRING(OMonth.strOptionMonth, 0, 4) + '(' + OMonth.strOptMonthSymbol + ')' + CONVERT(NVARCHAR, OMonth.intYear)) COLLATE Latin1_General_CI_AS
 	, strOptionMonthYearWOSymbol = strOptionMonth
-	, strContractSeq = (ch.strContractNumber + ' - ' + CAST(cd.intContractSeq AS NVARCHAR(10))) COLLATE Latin1_General_CI_AS
-	, strContractNumber = ch.strContractNumber
+	, strContractSeq = CAST(assigncontractdetail.intContractSeq AS NVARCHAR(10)) COLLATE Latin1_General_CI_AS --(assigncontractheader.strContractNumber + ' - ' + CAST(assigncontractdetail.intContractSeq AS NVARCHAR(10))) COLLATE Latin1_General_CI_AS
+	, strContractNumber = assigncontractheader.strContractNumber
 	, strRollingMonth = RMonth.strFutureMonth
 	, DE.intRollingMonthId
 	, strSelectedInstrumentType = CASE WHEN ISNULL(DE.intSelectedInstrumentTypeId,1) =1  THEN 'Exchange Traded'
@@ -117,10 +117,20 @@ OUTER APPLY (
 	WHERE ftcs.intFutOptTransactionId = DE.intFutOptTransactionId
 	AND ISNULL(ftcs.ysnIsHedged, 0) = 1
 ) hedgecontract
+OUTER APPLY (
+	SELECT TOP 1 ftcs.intContractDetailId
+	FROM tblRKAssignFuturesToContractSummary ftcs
+	WHERE ftcs.intFutOptTransactionId = DE.intFutOptTransactionId
+	AND ISNULL(ftcs.ysnIsHedged, 0) = 0
+) assigncontract
 LEFT JOIN tblCTContractDetail hedgecontractdetail
 	ON hedgecontract.intContractDetailId = hedgecontractdetail.intContractDetailId
 LEFT JOIN tblCTContractHeader hedgecontractheader
 	ON hedgecontractdetail.intContractHeaderId = hedgecontractheader.intContractHeaderId
+LEFT JOIN tblCTContractDetail assigncontractdetail
+	ON assigncontract.intContractDetailId = assigncontractdetail.intContractDetailId
+LEFT JOIN tblCTContractHeader assigncontractheader
+	ON assigncontractdetail.intContractHeaderId = assigncontractheader.intContractHeaderId
 OUTER APPLY (
 	SELECT TOP 1 intScreenId FROM tblSMScreen 
 	WHERE strModule = 'Risk Management' 
