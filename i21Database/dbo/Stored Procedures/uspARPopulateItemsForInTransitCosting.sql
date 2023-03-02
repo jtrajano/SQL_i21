@@ -17,6 +17,11 @@ FROM tblICInventoryTransactionType WITH (NOLOCK)
 WHERE [strName] = 'Invoice'
 ORDER BY intTransactionTypeId
 
+DECLARE @CREDIT_MEMO_INVOICE_TYPE AS INT = 45
+SELECT	@CREDIT_MEMO_INVOICE_TYPE = intTransactionTypeId 
+FROM	tblICInventoryTransactionType WITH (NOLOCK)
+WHERE	strName = 'Credit Memo'
+
 INSERT INTO tblARPostItemsForInTransitCosting WITH (TABLOCK)
 	([intItemId] 
 	,[intItemLocationId] 
@@ -417,7 +422,7 @@ SELECT
 	,[intTransactionId]				= ARID.[intInvoiceId]
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARID.[strInvoiceNumber]
-	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
+	,[intTransactionTypeId]			= @CREDIT_MEMO_INVOICE_TYPE
 	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
 	,[intSourceTransactionId]		= ICIT.[intTransactionId]
 	,[strSourceTransactionId]		= ICIT.[strTransactionId]
@@ -481,7 +486,7 @@ SELECT
 	,[intTransactionId]				= ARID.[intInvoiceId]
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARID.[strInvoiceNumber]
-	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
+	,[intTransactionTypeId]			= @CREDIT_MEMO_INVOICE_TYPE
 	,[intLotId]						= ICIT.[intLotId]
 	,[intSourceTransactionId]		= ICIT.[intTransactionId]
 	,[strSourceTransactionId]		= ICIT.[strTransactionId]
