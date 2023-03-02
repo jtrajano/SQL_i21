@@ -161,6 +161,13 @@ BEGIN TRY
 					FROM dbo.tblLGLoad L
 					WHERE L.strLoadNumber = @RefNo
 
+					IF @intLoadId IS NULL
+					BEGIN
+						SELECT TOP 1 @intLoadId = CF.intLoadId
+						FROM dbo.tblIPContractFeed CF
+						WHERE CF.strLoadNumber = @RefNo
+					END
+
 					SELECT @intLoadDetailId = CF.intLoadDetailId
 						,@intContractFeedId = CF.intContractFeedId
 						,@strBatchId = CF.strBatchId

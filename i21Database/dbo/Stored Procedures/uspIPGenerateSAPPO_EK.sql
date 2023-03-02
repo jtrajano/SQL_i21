@@ -382,6 +382,8 @@ BEGIN TRY
 				,@intSampleId = intSampleId
 				,@intBatchId = intBatchId
 				,@strDetailRowState = strRowState
+				,@strMarketZoneCode = strMarketZoneCode
+				,@intDetailNumber = intDetailNumber
 			FROM dbo.tblIPContractFeed
 			WHERE intContractFeedId = @intContractFeedId
 
@@ -421,12 +423,11 @@ BEGIN TRY
 				END
 			END
 
-			SELECT @intDetailNumber = LD.intDetailNumber
-			FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
-			WHERE LD.intLoadDetailId = @intLoadDetailId
+			--SELECT @intDetailNumber = LD.intDetailNumber
+			--FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
+			--WHERE LD.intLoadDetailId = @intLoadDetailId
 
-			SELECT @strMarketZoneCode = strMarketZoneCode
-				,@ysnPosted = L.ysnPosted
+			SELECT @ysnPosted = L.ysnPosted
 			FROM dbo.tblLGLoad L WITH (NOLOCK)
 			JOIN dbo.tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = L.intMarketZoneId
 			WHERE intLoadId = @intLoadId
