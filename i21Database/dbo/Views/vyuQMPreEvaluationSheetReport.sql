@@ -13,7 +13,7 @@ SELECT intBatchId			= B.intBatchId
 	 , strTeaLingo			= I.strItemNo
 	 , strTeaLingoDesc		= I.strDescription
 	 , strBatchId			= B.strBatchId
-	 , strTasteRange		= CAST(CAST(ISNULL(TASTE.dblMinValue, 0) AS DECIMAL(18,2)) AS NVARCHAR(100)) + ' - ' + CAST(CAST(ISNULL(TASTE.dblMaxValue, 0) AS DECIMAL(18,2)) AS NVARCHAR(100))
+	 , strTasteRange		= CAST(CAST(ISNULL(TASTE.dblMinValue, 0) AS DECIMAL(18,1)) AS NVARCHAR(100)) + '-' + CAST(CAST(ISNULL(TASTE.dblMaxValue, 0) AS DECIMAL(18,1)) AS NVARCHAR(100))
 	 , strLeafDescription	= B.strLeafStyle
 	 , strLeafSize			= B.strLeafSize
 	 , strGardenMark		= GM.strGardenMark
@@ -60,3 +60,4 @@ OUTER APPLY (
 ) COMP
 WHERE B.strContainerNumber != ''
   AND B.strContainerNumber IS NOT NULL
+  AND B.intLocationId = B.intBuyingCenterLocationId
