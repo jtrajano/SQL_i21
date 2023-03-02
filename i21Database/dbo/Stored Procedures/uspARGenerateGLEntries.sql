@@ -194,9 +194,9 @@ BEGIN
 		,@UserId
 END
 
-DECLARE  @InTransitItems                ItemInTransitCostingTableType 
-		,@FOB_ORIGIN                    INT = 1
-		,@FOB_DESTINATION               INT = 2	
+DECLARE  @InTransitItems    ItemInTransitCostingTableType 
+		,@FOB_ORIGIN		INT = 1
+		,@FOB_DESTINATION   INT = 2	
 
 IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM tblARPostInvoiceDetail WHERE intSourceId = 2 AND strSessionId = @strSessionId))
 	INSERT INTO @InTransitItems(
@@ -446,6 +446,8 @@ INSERT INTO tblARPostInvoiceGLEntries (
 	,[intSourceEntityId]
 	,[intCommodityId]
 	,[strSessionId]
+	,strRateType
+	,intCurrencyExchangeRateTypeId
 )
 SELECT [dtmDate] 
 	,[strBatchId]					= @BatchId
@@ -481,6 +483,8 @@ SELECT [dtmDate]
 	,[intSourceEntityId]
 	,[intCommodityId]
 	,[strSessionId]					= @strSessionId
+	,strRateType
+	,intCurrencyExchangeRateTypeId
 FROM @TempGLEntries
 
 UPDATE tblARPostInvoiceGLEntries
