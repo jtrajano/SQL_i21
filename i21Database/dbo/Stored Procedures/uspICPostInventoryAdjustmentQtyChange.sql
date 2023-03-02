@@ -161,8 +161,8 @@ BEGIN
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId  = @INVENTORY_ADJUSTMENT_QuantityChange
 			,intLotId				= Detail.intLotId
-			,intSubLocationId		= Detail.intSubLocationId
-			,intStorageLocationId	= Detail.intStorageLocationId
+			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId) 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
@@ -244,8 +244,8 @@ BEGIN
 			,strTransactionId = Header.strAdjustmentNo  
 			,intTransactionTypeId = @INVENTORY_ADJUSTMENT_QuantityChange  
 			,intLotId = DetailItem.intLotId 
-			,intSubLocationId = DetailItem.intSubLocationId -- ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
-			,intStorageLocationId = DetailItem.intStorageLocationId
+			,intSubLocationId = ISNULL(DetailItem.intNewSubLocationId, DetailItem.intSubLocationId)
+			,intStorageLocationId = ISNULL(DetailItem.intNewStorageLocationId, DetailItem.intStorageLocationId) 
 			,intInTransitSourceLocationId = NULL
 			,intForexRateTypeId = NULL
 			,dblForexRate = NULL
@@ -292,3 +292,4 @@ BEGIN
 END
 
 Post_Exit:
+
