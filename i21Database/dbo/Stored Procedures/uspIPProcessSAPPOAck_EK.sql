@@ -207,6 +207,11 @@ BEGIN TRY
 							,strERPPOLineNo = @POLineItemNo
 						WHERE strBatchId = @strBatchId
 
+						UPDATE tblMFBatch
+						SET dtmPOCreated = CAST(GETDATE() AS DATE)
+						WHERE strBatchId = @strBatchId
+							AND dtmPOCreated IS NULL
+
 						--For Added PO
 						UPDATE tblIPContractFeed
 						SET strFeedStatus = 'Ack Rcvd'
@@ -248,6 +253,16 @@ BEGIN TRY
 							,intStatusId = 3
 						WHERE intContractFeedId = @intContractFeedId
 							AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+
+						IF @intContractFeedId IS NULL
+						BEGIN
+							UPDATE tblIPContractFeed
+							SET strFeedStatus = 'Ack Rcvd'
+								,strMessage = @strMessage
+								,intStatusId = 3
+							WHERE intLoadId = @intLoadId
+								AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+						END
 							
 						UPDATE tblLGLoad
 						SET strComments = @StatusText
