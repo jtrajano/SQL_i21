@@ -5,7 +5,7 @@ RETURNS @TempTableDepartments TABLE
 	, strStatusMessage NVARCHAR(200)
 	, intStoreId INT NULL
 	--, intRegisterDepartmentId INT NULL -- Change to strCashRegisterDepartment ST-2050
-	, strCashRegisterDepartment nvarchar(50) NULL 
+	, strRegisterCode nvarchar(50) NULL 
 	, intCategoryId INT NULL
 	, strCategoryCode NVARCHAR(30) NULL
 	, strCategoryDescription NVARCHAR(150) NULL
@@ -22,7 +22,7 @@ BEGIN
 				, strStatusMessage
 				, intStoreId
 				--, intRegisterDepartmentId -- Change to strCashRegisterDepartment ST-2050
-				, strCashRegisterDepartment
+				, strRegisterCode
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
@@ -33,7 +33,7 @@ BEGIN
 				, strMessage						= NULL
 				, intStoreId						= Rebates.intStoreId
 				--, intRegisterDepartmentId			= CatLoc.intRegisterDepartmentId
-				, strCashRegisterDepartment			= CatLoc.strCashRegisterDepartment -- Change to strCashRegisterDepartment ST-2050
+				, strRegisterCode					= StoreDepartments.strRegisterCode -- Change to strCashRegisterDepartment ST-2050
 				, intCategoryId						= Category.intCategoryId
 				, strCategoryCode					= Category.strCategoryCode
 				, strCategoryDescription			= Category.strDescription
@@ -43,9 +43,9 @@ BEGIN
 				ON Rebates.intStoreId = Store.intStoreId
 			INNER JOIN tblICCategory Category
 				ON Rebates.intCategoryId = Category.intCategoryId
-			INNER JOIN tblICCategoryLocation CatLoc
-				ON Category.intCategoryId = CatLoc.intCategoryId
-				AND Store.intCompanyLocationId = CatLoc.intLocationId
+			INNER JOIN vyuSTStoreDepartments StoreDepartments
+				ON Category.intCategoryId = StoreDepartments.intCategoryId
+				AND Store.intCompanyLocationId = StoreDepartments.intCompanyLocationId
 			WHERE Rebates.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 
 			RETURN
@@ -59,7 +59,7 @@ BEGIN
 				, strStatusMessage
 				, intStoreId
 				--, intRegisterDepartmentId -- Change to strCashRegisterDepartment ST-2050
-				, strCashRegisterDepartment
+				, strRegisterCode
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription

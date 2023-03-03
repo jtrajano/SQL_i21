@@ -1557,6 +1557,7 @@
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
     <None Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
