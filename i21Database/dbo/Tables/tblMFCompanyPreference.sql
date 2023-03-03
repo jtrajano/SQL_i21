@@ -110,5 +110,7 @@
 	ysnOverrideRecipeInBlendManagement BIT,
 	ysnAllowMultiLotInBlendManagement BIT,
 	ysnRecomputeExpectedValueInBlendManagement BIT,
+	ysnCopyLowerToleranceFromUpperToleranceInBlendManagement BIT,
+	ysnToleranceCheckOnBlendOutputItem BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
