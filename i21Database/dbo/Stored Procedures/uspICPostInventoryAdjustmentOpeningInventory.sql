@@ -52,7 +52,8 @@ BEGIN
 			,dtmDate			
 			,dblQty				
 			,dblUOMQty			
-			,dblCost  
+			,dblCost 
+			,dblForexCost
 			,dblSalesPrice  
 			,intCurrencyId  
 			,intForexRateTypeId
@@ -72,7 +73,31 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= COALESCE(Detail.dblNewWeight, Detail.dblNewQuantity, 0)
 			,dblUOMQty				= COALESCE(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty, 0)
-			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
+			,dblCost				= 
+					CASE 
+						WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblNewCost IS NOT NULL THEN 
+							dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblNewCost) 
+						ELSE 
+							COALESCE(
+								Detail.dblNewCost
+								, dbo.fnCalculateCostBetweenUOM(stockUnit.intItemUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), ItemPricing.dblLastCost) 
+								, 0
+							)
+					END 
+					
+			,dblForexCost			= 
+					CASE 
+						WHEN Detail.intCurrencyId <> @intFunctionalCurrencyId THEN 
+							CASE 
+								WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblUnitCostInForeignCurrency IS NOT NULL  THEN 
+									dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblUnitCostInForeignCurrency) 
+								ELSE 
+									Detail.dblUnitCostInForeignCurrency
+							END 
+						ELSE 
+							NULL 
+					END 
+
 			,dblSalesPrice			= 0
 			,intCurrencyId			= Detail.intCurrencyId 
 			,intForexRateTypeId		= Detail.intForexRateTypeId
@@ -92,6 +117,15 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
+			OUTER APPLY (
+				SELECT TOP 1 *
+				FROM 
+					tblICItemUOM stockUnit
+				WHERE
+					stockUnit.intItemId = Detail.intItemId
+					AND stockUnit.ysnStockUnit = 1
+			) stockUnit
+
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
@@ -110,11 +144,30 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblNewQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= ISNULL(dbo.fnCalculateCostBetweenUOM( 
-										dbo.fnGetItemStockUOM(Detail.intItemId)
-										,Detail.intNewItemUOMId
-										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
-									), 0)
+			,dblCost				= 
+					CASE 
+						WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblNewCost IS NOT NULL THEN 
+							dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblNewCost) 
+						ELSE 
+							COALESCE(
+								Detail.dblNewCost
+								, dbo.fnCalculateCostBetweenUOM(stockUnit.intItemUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), ItemPricing.dblLastCost) 
+								, 0
+							)
+					END 
+					
+			,dblForexCost			= 
+					CASE 
+						WHEN Detail.intCurrencyId <> @intFunctionalCurrencyId THEN 
+							CASE 
+								WHEN Detail.intCostUOMId IS NOT NULL AND Detail.dblUnitCostInForeignCurrency IS NOT NULL  THEN 
+									dbo.fnCalculateCostBetweenUOM(Detail.intCostUOMId, ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId), Detail.dblUnitCostInForeignCurrency) 
+								ELSE 
+									Detail.dblUnitCostInForeignCurrency
+							END 
+						ELSE 
+							NULL 
+					END 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= Detail.intCurrencyId 
 			,intForexRateTypeId		= Detail.intForexRateTypeId
@@ -134,6 +187,14 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
+			OUTER APPLY (
+				SELECT TOP 1 *
+				FROM 
+					tblICItemUOM stockUnit
+				WHERE
+					stockUnit.intItemId = Detail.intItemId
+					AND stockUnit.ysnStockUnit = 1
+			) stockUnit
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICItemPricing ItemPricing

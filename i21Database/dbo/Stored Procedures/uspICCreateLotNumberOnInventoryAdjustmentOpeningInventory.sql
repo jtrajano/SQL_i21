@@ -58,11 +58,13 @@ BEGIN
 			,[dblQty]
 			,[dblGrossWeight]
 			,[dblWeight]
+			,[dblTare]
 			,[intWeightUOMId]
 			,[strReceiptNumber]
 			,[intOwnershipType]
 			,[intDetailId]
 			,[dblWeightPerQty]
+			,[dblTarePerQty]
 			,[strTransactionId]
 			,[strSourceTransactionId]
 			,[intSourceTransactionTypeId]
@@ -87,6 +89,7 @@ BEGIN
 			,[intProducerId] 
 			,[strTrackingNumber]	
 			,[strCargoNo] 
+			,[strWarrantNo]
 	)
 	SELECT	[intItemId]					= Detail.intItemId
 			,[intItemLocationId]		= ItemLocation.intItemLocationId
@@ -95,13 +98,15 @@ BEGIN
 			,[intSubLocationId]			= Detail.intNewSubLocationId
 			,[intStorageLocationId]		= Detail.intNewStorageLocationId
 			,[dblQty]					= Detail.dblNewQuantity
-			,[dblGrossWeight]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblNewWeight ELSE 0 END
-			,[dblWeight]				= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblNewWeight ELSE 0 END
+			,[dblGrossWeight]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblGrossWeight ELSE 0 END
+			,[dblWeight]				= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblNewWeight ELSE 0 END			
+			,[dblTare]					= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblTareWeight ELSE 0 END			
 			,[intWeightUOMId]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId) ELSE NULL END
 			,[strReceiptNumber]			= Header.strAdjustmentNo
 			,[intOwnershipType]			= Detail.intOwnershipType
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
 			,[dblWeightPerQty]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN dbo.fnCalculateWeightUnitQty(Detail.dblNewQuantity, Detail.dblNewWeight) ELSE NULL END
+			,[dblTarePerQty]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN dbo.fnCalculateWeightUnitQty(Detail.dblNewQuantity, Detail.dblTareWeight) ELSE NULL END
 			,[strTransactionId]			= Header.strAdjustmentNo
 			,[strSourceTransactionId]	= Header.strAdjustmentNo
 			,[intSourceTransactionTypeId]= @INVENTORY_ADJUSTMENT_OpeningInventory
@@ -126,6 +131,7 @@ BEGIN
 			,[intProducerId]			= Detail.intProducerId
 			,[strTrackingNumber]		= Detail.strTrackingNumber
 			,[strCargoNo]				= Detail.strCargoNo
+			,[strWarrantNumber]			= Detail.strWarrantNumber
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId

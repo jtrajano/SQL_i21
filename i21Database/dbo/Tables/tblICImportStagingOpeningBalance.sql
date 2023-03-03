@@ -20,6 +20,11 @@ CREATE TABLE [dbo].[tblICImportStagingOpeningBalance] (
 	[strCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strForexRateType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblForexRate] NUMERIC(38, 20) NULL,
+	[strCostUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblUnitCostInForeignCurrency] NUMERIC(38, 20) NULL,
+	[dblGrossWeight] NUMERIC(38, 20) NULL,
+	[dblTareWeight] NUMERIC(38, 20) NULL,
+	[strWarrantNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmExpiryDate] DATETIME NULL, 
 	[strLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strWarehouseRefNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -42,6 +47,7 @@ CREATE TABLE [dbo].[tblICImportStagingOpeningBalance] (
 	[strProducer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrackingNumber]	NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strCargoNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	
 	-- End: Wama Required fields.
 	[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
 	[dtmDateCreated] DATETIME NULL,

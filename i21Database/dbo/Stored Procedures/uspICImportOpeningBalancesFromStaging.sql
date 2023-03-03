@@ -43,8 +43,12 @@ CREATE TABLE #tmp (
 	, intCurrencyId INT NULL
 	, intForexRateTypeId INT NULL
 	, dblForexRate NUMERIC(38,20) NULL
+	, intCostUOMId INT NULL
+	, dblUnitCostInForeignCurrency NUMERIC(38, 20) NULL
+	, dblGrossWeight NUMERIC(38, 20) NULL
+	, dblTareWeight NUMERIC(38, 20) NULL
+	, strWarrantNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, strLotNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-
 	, strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, strWarehouseRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, intLotStatus INT NULL
@@ -388,6 +392,11 @@ INSERT INTO #tmp (
 	, intCurrencyId 
 	, intForexRateTypeId 
 	, dblForexRate 
+	, intCostUOMId 
+	, dblUnitCostInForeignCurrency 
+	, dblGrossWeight 
+	, dblTareWeight 
+	, strWarrantNumber 
 	, strLotNumber
 	, strLotAlias 
 	, strWarehouseRefNo 
@@ -430,12 +439,17 @@ SELECT
 	, intCurrencyId = currency.intCurrencyID
 	, intForexRateTypeId = ISNULL(rateType.intCurrencyExchangeRateTypeId, @intDefaultForexRatype) 
 	, dblForexRate = x.dblForexRate
+	, intCostUOMId = cu.intItemUOMId 
+	, dblUnitCostInForeignCurrency = x.dblUnitCostInForeignCurrency
+	, dblGrossWeight = x.dblGrossWeight
+	, dblTareWeight = x.dblTareWeight
+	, strWarrantNumber = x.strWarrantNumber
 	, strLotNumber = x.strLotNumber
 	, strLotAlias = x.strLotAlias
 	, strWarehouseRefNo = x.strWarehouseRefNo
 	, intLotStatus = ISNULL(lotStatus.intLotStatusId, 1) 
 	, intOriginId = origin.intCommodityAttributeId
-	, strBOLNo = x.strBook
+	, strBOLNo = x.strBOLNo
 	, strVessel = x.strVessel
 	, strMarkings = x.strMarkings
 	, strNotes = x.strNotes
@@ -497,6 +511,12 @@ FROM
 		ON subBook.strSubBook = x.strSubBook
 	LEFT JOIN tblEMEntity producer
 		ON producer.strName = x.strProducer
+	LEFT JOIN tblICUnitMeasure cw 
+		ON RTRIM(LTRIM(cw.strUnitMeasure)) COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strCostUOM)) COLLATE Latin1_General_CI_AS
+	LEFT JOIN tblICItemUOM cu
+		ON cu.intItemId = i.intItemId 		
+		AND cu.intUnitMeasureId = cw.intUnitMeasureId
+
 WHERE 
 	x.strImportIdentifier = @strIdentifier
 
@@ -605,6 +625,11 @@ BEGIN
 		, intCurrencyId
 		, intForexRateTypeId
 		, dblForexRate
+		, intCostUOMId
+		, dblUnitCostInForeignCurrency
+		, dblGrossWeight
+		, dblTareWeight 
+		, strWarrantNumber
 		, strNewLotNumber
 		, strLotAlias 
 		, strWarehouseRefNo 
@@ -645,6 +670,11 @@ BEGIN
 		, intCurrencyId
 		, intForexRateTypeId
 		, dblForexRate
+		, intCostUOMId
+		, dblUnitCostInForeignCurrency
+		, dblGrossWeight
+		, dblTareWeight 
+		, strWarrantNumber
 		, strLotNumber
 		, strLotAlias 
 		, strWarehouseRefNo 
