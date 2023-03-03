@@ -300,6 +300,7 @@ BEGIN TRY
 			ysnPrice
 		FROM vyuLGContractCostView
 		WHERE intContractDetailId = @intSContractDetailId
+			AND ISNULL(ysnBasis, 0) = 0 AND ISNULL(ysnBilled, 0) = 0
 
 	END
 
