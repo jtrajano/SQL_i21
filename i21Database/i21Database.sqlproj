@@ -1269,6 +1269,7 @@
     <Build Include="dbo\Stored Procedures\uspSTMechandiseSaleSummaryTaxable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMechandiseSaleSummaryNonTaxable.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
