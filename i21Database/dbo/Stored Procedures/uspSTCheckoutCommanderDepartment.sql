@@ -10,15 +10,10 @@ BEGIN
 	BEGIN TRY
 		
 		DECLARE @intStoreId INT
-		DECLARE @strCategoriesOrSubcategories CHAR(1)
 
 		SELECT	@intStoreId = intStoreId 
 		FROM	dbo.tblSTCheckoutHeader 
 		WHERE	intCheckoutId = @intCheckoutId
-
-		SELECT	@strCategoriesOrSubcategories = strCategoriesOrSubcategories
-		FROM	tblSTStore
-		WHERE	intStoreId = @intStoreId
 
 		BEGIN TRANSACTION 
 
@@ -90,13 +85,11 @@ BEGIN
 				SELECT DISTINCT
 					Chk.strSysId AS strXmlRegisterMerchandiseCode
 				FROM @UDT_TransDept Chk
-				JOIN dbo.tblSTStoreDepartments StoreDepartments 
+				JOIN dbo.vyuSTStoreDepartments StoreDepartments 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				JOIN dbo.tblSTStore S 
-					ON S.intStoreId = StoreDepartments.intStoreId
 				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = S.intCompanyLocationId
-				WHERE S.intStoreId = @intStoreId
+					ON CL.intCompanyLocationId = StoreDepartments.intCompanyLocationId
+				WHERE StoreDepartments.intStoreId = @intStoreId
 					AND ISNULL(Chk.strSysId, '') != ''
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
 					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
@@ -117,13 +110,7 @@ BEGIN
 			BEGIN
 				INSERT INTO dbo.tblSTCheckoutDepartmetTotals
 				SELECT @intCheckoutId [intCheckoutId]
-					, CASE 
-						WHEN @strCategoriesOrSubcategories = 'C'
-						THEN Cat.intCategoryId
-						WHEN @strCategoriesOrSubcategories = 'S'
-						THEN (SELECT TOP 1 intCategoryId FROM tblSTStoreDepartments x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId)
-						ELSE NULL
-						END AS [intCategoryId]
+					, StoreDepartments.intCategoryId
 					, ISNULL(Chk.dblNetSaleAmount, 0) [dblTotalSalesAmountRaw]
 					, ISNULL(Chk.dblNetSaleAmount, 0) [dblRegisterSalesAmountRaw]
 					--, (
@@ -165,28 +152,23 @@ BEGIN
 					, 0 [dblTaxAmount3]
 					, 0 [dblTaxAmount4]
 					, CASE 
-						WHEN @strCategoriesOrSubcategories = 'C'
-						THEN Cat.intGeneralItemId
-						WHEN @strCategoriesOrSubcategories = 'S'
-						THEN I.intItemId
+						WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+						THEN StoreDepartments.intGeneralItemId
+						WHEN StoreDepartments.strCategoriesOrSubcategories = 'S'
+						THEN StoreDepartments.intSubcategoryItemId
 						ELSE NULL
 						END AS [intItemId]
 					, 1 [intConcurrencyId]
 					, 0 [dblTotalLotterySalesAmountComputed]
 					, NULL [intLotteryItemsSold]
 					, 0 [ysnLotteryItemAdded]
+					, StoreDepartments.intCategoryId
 				FROM @UDT_TransDept Chk
-				JOIN dbo.tblSTStoreDepartments StoreDepartments 
+				JOIN dbo.vyuSTStoreDepartments StoreDepartments 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 				JOIN dbo.tblSTStore S 
 					ON S.intStoreId = StoreDepartments.intStoreId
-				LEFT JOIN dbo.tblICCategoryLocation Cat 
-					ON Cat.intCategoryId = StoreDepartments.intCategoryId AND Cat.intLocationId = S.intCompanyLocationId
-				LEFT JOIN dbo.tblICItem I 
-					ON I.intItemId = (SELECT TOP 1 x.intItemId FROM tblICItem x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId)
-				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = S.intCompanyLocationId
-				WHERE S.intStoreId = @intStoreId
+				WHERE StoreDepartments.intStoreId = @intStoreId
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
 					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 
@@ -223,39 +205,21 @@ BEGIN
 					, [intItemsSold]				= ISNULL(CAST(CAST(Chk.dblNetSaleItemCount AS DECIMAL) AS INT), 0) 
 					, [intTotalSalesCount]			= ISNULL(CAST(Chk.intNetSaleCount AS INT), 0) 
 					, [intItemId]					= CASE 
-														WHEN @strCategoriesOrSubcategories = 'C'
-														THEN CatLoc.intGeneralItemId
-														WHEN @strCategoriesOrSubcategories = 'S'
-														THEN I.intItemId
+														WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+														THEN StoreDepartments.intGeneralItemId
+														WHEN StoreDepartments.strCategoriesOrSubcategories = 'S'
+														THEN StoreDepartments.intSubcategoryItemId
 														ELSE NULL
 														END
 				FROM tblSTCheckoutDepartmetTotals DT
-				JOIN tblICCategory Cat 
-					ON DT.intCategoryId = Cat.intCategoryId
-				JOIN (	SELECT		x.intStoreDepartmentId, 
-									x.intStoreId, 
-									CASE 
-										WHEN x.intCategoryId IS NULL
-										THEN (SELECT intCategoryId FROM tblSTSubCategories y WHERE y.intSubcategoriesId = x.intSubcategoriesId)
-										ELSE intCategoryId
-										END AS intCategoryId,
-									x.intSubcategoriesId,
-									x.strRegisterCode
-						FROM		tblSTStoreDepartments x
-						WHERE		x.intStoreId = @intStoreId) StoreDepartments 
-					ON Cat.intCategoryId = StoreDepartments.intCategoryId
+				JOIN vyuSTStoreDepartments StoreDepartments
+					ON DT.intCategoryId = StoreDepartments.intCategoryId AND (DT.intSubcategoriesId = StoreDepartments.intSubcategoriesId OR DT.intSubcategoriesId IS NULL)
 				JOIN @UDT_TransDept Chk 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 				JOIN dbo.tblSTStore S 
 					ON S.intStoreId = StoreDepartments.intStoreId
-				LEFT JOIN dbo.tblICCategoryLocation CatLoc
-					ON CatLoc.intCategoryId = StoreDepartments.intCategoryId AND CatLoc.intLocationId = S.intCompanyLocationId AND @strCategoriesOrSubcategories = 'C'
-				LEFT JOIN dbo.tblICItem I 
-					ON I.intItemId = (SELECT TOP 1 x.intItemId FROM tblICItem x WHERE x.intSubcategoriesId = StoreDepartments.intSubcategoriesId) AND @strCategoriesOrSubcategories = 'S'
-				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = S.intCompanyLocationId
 				WHERE DT.intCheckoutId = @intCheckoutId 
-					AND S.intStoreId = @intStoreId
+					AND StoreDepartments.intStoreId = @intStoreId
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
 					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000	
 			END

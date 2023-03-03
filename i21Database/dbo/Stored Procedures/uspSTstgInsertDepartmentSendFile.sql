@@ -177,7 +177,7 @@ BEGIN
 						, 'update' [TableActionType]
 						, 'addchange' [RecordActionType] 
 						, 'addchange' AS [MCTDetailRecordActionType] 
-						, CatLoc.strCashRegisterDepartment AS [MerchandiseCode] 
+						, StoreDepartments.strRegisterCode AS [MerchandiseCode] 
 						, 'yes' AS [ActiveFlagValue] 
 						, Cat.strDescription AS [strDescription] 
 						, ISNULL(SR.strRegProdCode, 0) AS [SalesRestrictCode]
@@ -198,10 +198,10 @@ BEGIN
 						SELECT DISTINCT intCategoryId FROM @tempTableCategory 
 					) AS tmpItem 
 						ON tmpItem.intCategoryId = Cat.intCategoryId 
-					JOIN tblICCategoryLocation CatLoc 
-						ON Cat.intCategoryId = CatLoc.intCategoryId
+					JOIN vyuSTStoreDepartments StoreDepartments 
+						ON Cat.intCategoryId = StoreDepartments.intCategoryId
 					JOIN tblICItem I
-						ON CatLoc.intGeneralItemId = I.intItemId
+						ON StoreDepartments.intGeneralItemId = I.intItemId
 					JOIN tblICItemLocation IL 
 						ON IL.intItemId = I.intItemId
 					LEFT JOIN tblSTSubcategoryRegProd SR 
