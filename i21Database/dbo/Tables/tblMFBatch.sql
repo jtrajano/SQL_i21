@@ -120,6 +120,7 @@ CREATE TABLE tblMFBatch
 	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
 	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
 	,dtmShippingDate DATETIME 
+	,dtmPOCreated DATETIME
 	,CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC
