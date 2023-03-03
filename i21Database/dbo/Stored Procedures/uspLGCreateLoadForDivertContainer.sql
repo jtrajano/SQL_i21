@@ -26,22 +26,25 @@ SELECT
 FROM tblLGLoad 
 WHERE intLoadId = @intLoadId
 
-/* Append Serial Number to LS */
+/* Generate New Load Number */
 DECLARE @strNewLoadNumber NVARCHAR(100)
-DECLARE @intSerial INT = 1
-SELECT @strNewLoadNumber = strLoadNumber + '.' + CAST(@intSerial AS NVARCHAR(10)) FROM tblLGLoad WHERE intLoadId = @intLoadId
+EXEC uspSMGetStartingNumber 39, @strNewLoadNumber OUTPUT
 
-WHILE EXISTS (SELECT 1 FROM tblLGLoad WHERE strLoadNumber = @strNewLoadNumber)
-BEGIN
-	IF (@intSerial < 20) --Loop Control, diversion shouldn't exceed 20
-	BEGIN
-		SELECT @strNewLoadNumber = @strLoadNumber + '.' + CAST(@intSerial AS NVARCHAR(10)), @intSerial = @intSerial + 1
-	END
-	ELSE
-	BEGIN
-		RAISERROR('Maximum number of diversions reached.', 16, 1);
-	END
-END
+/* Append Serial Number to LS */
+--DECLARE @intSerial INT = 1
+--SELECT @strNewLoadNumber = strLoadNumber + '.' + CAST(@intSerial AS NVARCHAR(10)) FROM tblLGLoad WHERE intLoadId = @intLoadId
+
+--WHILE EXISTS (SELECT 1 FROM tblLGLoad WHERE strLoadNumber = @strNewLoadNumber)
+--BEGIN
+--	IF (@intSerial < 20) --Loop Control, diversion shouldn't exceed 20
+--	BEGIN
+--		SELECT @strNewLoadNumber = @strLoadNumber + '.' + CAST(@intSerial AS NVARCHAR(10)), @intSerial = @intSerial + 1
+--	END
+--	ELSE
+--	BEGIN
+--		RAISERROR('Maximum number of diversions reached.', 16, 1);
+--	END
+--END
 
 /* Unpost the Inbound (if posted) */
 IF (@ysnIsPosted = 1)
