@@ -1,7 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspMFSaveBlendSheet] (
-	@strXml NVARCHAR(MAX)
-	,@intWorkOrderId INT OUT
-	)
+﻿CREATE PROCEDURE [dbo].[uspMFSaveBlendSheet] 
+(
+	@strXml			NVARCHAR(MAX)
+  , @intWorkOrderId INT OUT
+)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -132,29 +133,34 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
-	DECLARE @tblBlendSheet TABLE (
-		intWorkOrderId INT
-		,strWorkOrderNo NVARCHAR(50)
-		,intBlendRequirementId INT
-		,intItemId INT
-		,intCellId INT
-		,intMachineId INT
-		,dtmDueDate DATETIME
-		,dblQtyToProduce NUMERIC(38, 20)
-		,dblPlannedQuantity NUMERIC(38, 20)
-		,intItemUOMId INT
-		,dblBinSize NUMERIC(38, 20)
-		,strComment NVARCHAR(MAX)
-		,ysnUseTemplate BIT
-		,ysnKittingEnabled BIT
-		,ysnDietarySupplements BIT
-		,intLocationId INT
-		,intPlannedShiftId INT
-		,intUserId INT
-		,intConcurrencyId INT
-		,intIssuedUOMTypeId INT
-		,ysnOverrideRecipe BIT
-		)
+	DECLARE @tblBlendSheet TABLE 
+	(
+		intWorkOrderId				 INT
+	  , strWorkOrderNo				 NVARCHAR(50)
+	  , intBlendRequirementId		 INT
+	  , intItemId					 INT
+	  , intCellId					 INT
+	  , intMachineId				 INT
+	  , dtmDueDate					 DATETIME
+	  , dblQtyToProduce				 NUMERIC(38, 20)
+	  , dblPlannedQuantity			 NUMERIC(38, 20)
+	  , intItemUOMId				 INT
+	  , dblBinSize					 NUMERIC(38, 20)
+	  , strComment					 NVARCHAR(MAX)
+	  , ysnUseTemplate				 BIT
+	  , ysnKittingEnabled			 BIT
+	  , ysnDietarySupplements		 BIT
+	  , intLocationId				 INT
+	  , intPlannedShiftId			 INT
+	  , intUserId					 INT
+	  , intConcurrencyId			 INT
+	  , intIssuedUOMTypeId			 INT
+	  , ysnOverrideRecipe			 BIT
+	  , dblUpperTolerance			 NUMERIC(38, 20)
+	  , dblLowerTolerance			 NUMERIC(38, 20)
+	  , dblCalculatedUpperTolerance	 NUMERIC(38, 20)
+	  , dblCalculatedLowerTolerance	 NUMERIC(38, 20)
+	)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
 		,intWorkOrderInputLotId INT
@@ -176,73 +182,87 @@ BEGIN TRY
 		)
 	DECLARE @tblPackagingCategoryId TABLE (intCategoryId INT)
 
-	INSERT INTO @tblBlendSheet (
+	INSERT INTO @tblBlendSheet 
+	(
 		intWorkOrderId
-		,strWorkOrderNo
-		,intBlendRequirementId
-		,intItemId
-		,intCellId
-		,intMachineId
-		,dtmDueDate
-		,dblQtyToProduce
-		,dblPlannedQuantity
-		,intItemUOMId
-		,dblBinSize
-		,strComment
-		,ysnUseTemplate
-		,ysnKittingEnabled
-		,ysnDietarySupplements
-		,intLocationId
-		,intPlannedShiftId
-		,intUserId
-		,intConcurrencyId
-		,intIssuedUOMTypeId
-		,ysnOverrideRecipe
-		)
+	  , strWorkOrderNo
+	  , intBlendRequirementId
+	  , intItemId
+	  , intCellId
+	  , intMachineId
+	  , dtmDueDate
+	  , dblQtyToProduce
+	  , dblPlannedQuantity
+	  , intItemUOMId
+	  , dblBinSize
+	  , strComment
+	  , ysnUseTemplate
+	  , ysnKittingEnabled
+	  , ysnDietarySupplements
+	  , intLocationId
+	  , intPlannedShiftId
+	  , intUserId
+	  , intConcurrencyId
+	  , intIssuedUOMTypeId
+	  , ysnOverrideRecipe
+	  , dblUpperTolerance			 
+	  , dblLowerTolerance			 
+	  , dblCalculatedUpperTolerance	 
+	  , dblCalculatedLowerTolerance	 
+	)
 	SELECT intWorkOrderId
-		,strWorkOrderNo
-		,intBlendRequirementId
-		,intItemId
-		,intCellId
-		,intMachineId
-		,dtmDueDate
-		,dblQtyToProduce
-		,dblPlannedQuantity
-		,intItemUOMId
-		,dblBinSize
-		,strComment
-		,ysnUseTemplate
-		,ysnKittingEnabled
-		,ysnDietarySupplements
-		,intLocationId
-		,intPlannedShiftId
-		,intUserId
-		,intConcurrencyId
-		,intIssuedUOMTypeId
-		,ysnOverrideRecipe
-	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intWorkOrderId INT
-			,strWorkOrderNo NVARCHAR(50)
-			,intBlendRequirementId INT
-			,intItemId INT
-			,intCellId INT
-			,intMachineId INT
-			,dtmDueDate DATETIME
-			,dblQtyToProduce NUMERIC(38, 20)
-			,dblPlannedQuantity NUMERIC(38, 20)
-			,intItemUOMId INT
-			,dblBinSize NUMERIC(38, 20)
-			,strComment NVARCHAR(MAX)
-			,ysnUseTemplate BIT
-			,ysnKittingEnabled BIT
-			,ysnDietarySupplements BIT
-			,intLocationId INT
-			,intPlannedShiftId INT
-			,intUserId INT
-			,intConcurrencyId INT
-			,intIssuedUOMTypeId INT
-			,ysnOverrideRecipe BIT
-			)
+		 , strWorkOrderNo
+		 , intBlendRequirementId
+		 , intItemId
+		 , intCellId
+		 , intMachineId
+		 , dtmDueDate
+		 , dblQtyToProduce
+		 , dblPlannedQuantity
+		 , intItemUOMId
+		 , dblBinSize
+		 , strComment
+		 , ysnUseTemplate
+		 , ysnKittingEnabled
+		 , ysnDietarySupplements
+		 , intLocationId
+		 , intPlannedShiftId
+		 , intUserId
+		 , intConcurrencyId
+		 , intIssuedUOMTypeId
+		 , ysnOverrideRecipe
+		 , dblUpperTolerance			 
+		 , dblLowerTolerance			 
+		 , dblCalculatedUpperTolerance	 
+		 , dblCalculatedLowerTolerance	 
+	FROM OPENXML(@idoc, 'root', 2) WITH 
+	(
+		intWorkOrderId INT
+	  , strWorkOrderNo NVARCHAR(50)
+	  , intBlendRequirementId INT
+	  , intItemId INT
+	  , intCellId INT
+	  , intMachineId INT
+	  , dtmDueDate DATETIME
+	  , dblQtyToProduce NUMERIC(38, 20)
+	  , dblPlannedQuantity NUMERIC(38, 20)
+	  , intItemUOMId INT
+	  , dblBinSize NUMERIC(38, 20)
+	  , strComment NVARCHAR(MAX)
+	  , ysnUseTemplate BIT
+	  , ysnKittingEnabled BIT
+	  , ysnDietarySupplements BIT
+	  , intLocationId INT
+	  , intPlannedShiftId INT
+	  , intUserId INT
+	  , intConcurrencyId			 INT
+	  , intIssuedUOMTypeId			 INT
+	  , ysnOverrideRecipe			 BIT
+	  , dblUpperTolerance			 NUMERIC(38, 20)
+	  , dblLowerTolerance			 NUMERIC(38, 20)
+	  , dblCalculatedUpperTolerance	 NUMERIC(38, 20)
+	  , dblCalculatedLowerTolerance	 NUMERIC(38, 20)
+	)
 
 	INSERT INTO @tblLot (
 		intWorkOrderInputLotId
@@ -423,68 +443,77 @@ BEGIN TRY
 						)
 				);
 
-		INSERT INTO tblMFWorkOrder (
+		INSERT INTO tblMFWorkOrder 
+		(
 			strWorkOrderNo
-			,intItemId
-			,dblQuantity
-			,intItemUOMId
-			,intStatusId
-			,intManufacturingCellId
-			,intMachineId
-			,intLocationId
-			,dblBinSize
-			,dtmExpectedDate
-			,intExecutionOrder
-			,intProductionTypeId
-			,dblPlannedQuantity
-			,intBlendRequirementId
-			,ysnKittingEnabled
-			,ysnDietarySupplements
-			,ysnUseTemplate
-			,strComment
-			,dtmCreated
-			,intCreatedUserId
-			,dtmLastModified
-			,intLastModifiedUserId
-			,intConcurrencyId
-			,intManufacturingProcessId
-			,intTransactionFrom
-			,intPlannedShiftId
-			,dtmPlannedDate
-			,strERPOrderNo
-			,intIssuedUOMTypeId
-			,ysnOverrideRecipe
-			)
+		  , intItemId
+		  , dblQuantity
+		  , intItemUOMId
+		  , intStatusId
+		  , intManufacturingCellId
+		  , intMachineId
+		  , intLocationId
+		  , dblBinSize
+		  , dtmExpectedDate
+		  , intExecutionOrder
+		  , intProductionTypeId
+		  , dblPlannedQuantity
+		  , intBlendRequirementId
+		  , ysnKittingEnabled
+		  , ysnDietarySupplements
+		  , ysnUseTemplate
+		  , strComment
+		  , dtmCreated
+		  , intCreatedUserId
+		  , dtmLastModified
+		  , intLastModifiedUserId
+		  , intConcurrencyId
+		  , intManufacturingProcessId
+		  , intTransactionFrom
+		  , intPlannedShiftId
+		  , dtmPlannedDate
+		  , strERPOrderNo
+		  , intIssuedUOMTypeId
+		  , ysnOverrideRecipe
+		  , dblUpperTolerance			 
+		  , dblLowerTolerance			 
+		  , dblCalculatedUpperTolerance	 
+		  , dblCalculatedLowerTolerance	 
+		)
 		SELECT @strNextWONo
-			,intItemId
-			,dblQtyToProduce
-			,intItemUOMId
-			,2
-			,intCellId
-			,intMachineId
-			,intLocationId
-			,dblBinSize
-			,dtmDueDate
-			,0
-			,1
-			,dblPlannedQuantity
-			,intBlendRequirementId
-			,ysnKittingEnabled
-			,ysnDietarySupplements
-			,ysnUseTemplate
-			,strComment
-			,GetDate()
-			,intUserId
-			,GetDate()
-			,intUserId
-			,intConcurrencyId + 1
-			,@intManufacturingProcessId
-			,1
-			,intPlannedShiftId
-			,dtmDueDate
-			,@strReferenceNo
-			,intIssuedUOMTypeId
-			,ysnOverrideRecipe
+			 , intItemId
+			 , dblQtyToProduce
+			 , intItemUOMId
+			 , 2
+			 , intCellId
+			 , intMachineId
+			 , intLocationId
+			 , dblBinSize
+			 , dtmDueDate
+			 , 0
+			 , 1
+			 , dblPlannedQuantity
+			 , intBlendRequirementId
+			 , ysnKittingEnabled
+			 , ysnDietarySupplements
+			 , ysnUseTemplate
+			 , strComment
+			 , GetDate()
+			 , intUserId
+			 , GetDate()
+			 , intUserId
+			 , intConcurrencyId + 1
+			 , @intManufacturingProcessId
+			 , 1
+			 , intPlannedShiftId
+			 , dtmDueDate
+			 , @strReferenceNo
+			 , intIssuedUOMTypeId
+			 , ysnOverrideRecipe
+			 , dblUpperTolerance			 
+			 , dblLowerTolerance			 
+			 , dblCalculatedUpperTolerance	 
+			 , dblCalculatedLowerTolerance	 
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -492,21 +521,25 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		UPDATE WorkOrder
-		SET WorkOrder.intManufacturingCellId = VarBlendSheet.intCellId
-			,WorkOrder.intMachineId = VarBlendSheet.intMachineId
-			,WorkOrder.dblBinSize = VarBlendSheet.dblBinSize
-			,WorkOrder.dtmExpectedDate = VarBlendSheet.dtmDueDate
-			,WorkOrder.dblPlannedQuantity = VarBlendSheet.dblPlannedQuantity
-			,WorkOrder.ysnKittingEnabled = VarBlendSheet.ysnKittingEnabled
-			,WorkOrder.ysnDietarySupplements = VarBlendSheet.ysnDietarySupplements
-			,WorkOrder.ysnUseTemplate = VarBlendSheet.ysnUseTemplate
-			,WorkOrder.strComment = VarBlendSheet.strComment
-			,WorkOrder.intLastModifiedUserId = VarBlendSheet.intUserId
-			,WorkOrder.dtmLastModified = GETDATE()
-			,WorkOrder.intConcurrencyId = WorkOrder.intConcurrencyId + 1
-			,WorkOrder.intPlannedShiftId = VarBlendSheet.intPlannedShiftId
-			,WorkOrder.dtmPlannedDate = VarBlendSheet.dtmDueDate
-			,WorkOrder.ysnOverrideRecipe =VarBlendSheet.ysnOverrideRecipe
+		SET WorkOrder.intManufacturingCellId		= VarBlendSheet.intCellId
+		  , WorkOrder.intMachineId					= VarBlendSheet.intMachineId
+		  , WorkOrder.dblBinSize					= VarBlendSheet.dblBinSize
+		  , WorkOrder.dtmExpectedDate				= VarBlendSheet.dtmDueDate
+		  , WorkOrder.dblPlannedQuantity			= VarBlendSheet.dblPlannedQuantity
+		  , WorkOrder.ysnKittingEnabled				= VarBlendSheet.ysnKittingEnabled
+		  , WorkOrder.ysnDietarySupplements			= VarBlendSheet.ysnDietarySupplements
+		  , WorkOrder.ysnUseTemplate				= VarBlendSheet.ysnUseTemplate
+		  , WorkOrder.strComment					= VarBlendSheet.strComment
+		  , WorkOrder.intLastModifiedUserId			= VarBlendSheet.intUserId
+		  , WorkOrder.dtmLastModified				= GETDATE()
+		  , WorkOrder.intConcurrencyId				= WorkOrder.intConcurrencyId + 1
+		  , WorkOrder.intPlannedShiftId				= VarBlendSheet.intPlannedShiftId
+		  , WorkOrder.dtmPlannedDate				= VarBlendSheet.dtmDueDate
+		  , WorkOrder.ysnOverrideRecipe				= VarBlendSheet.ysnOverrideRecipe
+		  , WorkOrder.dblUpperTolerance				= VarBlendSheet.dblUpperTolerance
+	      , WorkOrder.dblLowerTolerance				= VarBlendSheet.dblLowerTolerance
+	      , WorkOrder.dblCalculatedUpperTolerance	= VarBlendSheet.dblCalculatedUpperTolerance
+	      , WorkOrder.dblCalculatedLowerTolerance	= VarBlendSheet.dblCalculatedLowerTolerance 
 		FROM tblMFWorkOrder AS WorkOrder
 		JOIN @tblBlendSheet AS VarBlendSheet ON WorkOrder.intWorkOrderId = VarBlendSheet.intWorkOrderId
 	END
