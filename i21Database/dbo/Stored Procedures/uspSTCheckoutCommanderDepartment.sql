@@ -85,17 +85,11 @@ BEGIN
 				SELECT DISTINCT
 					Chk.strSysId AS strXmlRegisterMerchandiseCode
 				FROM @UDT_TransDept Chk
-				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				LEFT JOIN dbo.tblICItem I 
-					ON Cat.intGeneralItemId = I.intItemId
-				JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId
+				JOIN dbo.vyuSTStoreDepartments StoreDepartments 
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
-				JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
-				WHERE S.intStoreId = @intStoreId
+					ON CL.intCompanyLocationId = StoreDepartments.intCompanyLocationId
+				WHERE StoreDepartments.intStoreId = @intStoreId
 					AND ISNULL(Chk.strSysId, '') != ''
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
 					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
@@ -116,7 +110,7 @@ BEGIN
 			BEGIN
 				INSERT INTO dbo.tblSTCheckoutDepartmetTotals
 				SELECT @intCheckoutId [intCheckoutId]
-					, Cat.intCategoryId [intCategoryId]
+					, StoreDepartments.intCategoryId
 					, ISNULL(Chk.dblNetSaleAmount, 0) [dblTotalSalesAmountRaw]
 					, ISNULL(Chk.dblNetSaleAmount, 0) [dblRegisterSalesAmountRaw]
 					--, (
@@ -157,24 +151,24 @@ BEGIN
 					, 0 [dblTaxAmount2]
 					, 0 [dblTaxAmount3]
 					, 0 [dblTaxAmount4]
-					, I.intItemId [intItemId]
+					, CASE 
+						WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+						THEN StoreDepartments.intGeneralItemId
+						WHEN StoreDepartments.strCategoriesOrSubcategories = 'S'
+						THEN StoreDepartments.intSubcategoryItemId
+						ELSE NULL
+						END AS [intItemId]
 					, 1 [intConcurrencyId]
 					, 0 [dblTotalLotterySalesAmountComputed]
 					, NULL [intLotteryItemsSold]
 					, 0 [ysnLotteryItemAdded]
+					, StoreDepartments.intCategoryId
 				FROM @UDT_TransDept Chk
-				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
-				LEFT JOIN dbo.tblICItem I 
-					ON Cat.intGeneralItemId = I.intItemId
-				JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId
-				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
+				JOIN dbo.vyuSTStoreDepartments StoreDepartments 
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 				JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
-				WHERE S.intStoreId = @intStoreId
+					ON S.intStoreId = StoreDepartments.intStoreId
+				WHERE StoreDepartments.intStoreId = @intStoreId
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
 					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 
@@ -210,24 +204,22 @@ BEGIN
 					, [dblRefundAmount]				= ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)), 0) 
 					, [intItemsSold]				= ISNULL(CAST(CAST(Chk.dblNetSaleItemCount AS DECIMAL) AS INT), 0) 
 					, [intTotalSalesCount]			= ISNULL(CAST(Chk.intNetSaleCount AS INT), 0) 
-					, [intItemId]					= I.intItemId
+					, [intItemId]					= CASE 
+														WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+														THEN StoreDepartments.intGeneralItemId
+														WHEN StoreDepartments.strCategoriesOrSubcategories = 'S'
+														THEN StoreDepartments.intSubcategoryItemId
+														ELSE NULL
+														END
 				FROM tblSTCheckoutDepartmetTotals DT
-				JOIN tblICCategory Cat 
-					ON DT.intCategoryId = Cat.intCategoryId
-				JOIN tblICCategoryLocation CatLoc 
-					ON Cat.intCategoryId = CatLoc.intCategoryId
+				JOIN vyuSTStoreDepartments StoreDepartments
+					ON DT.intCategoryId = StoreDepartments.intCategoryId AND (DT.intSubcategoriesId = StoreDepartments.intSubcategoriesId OR DT.intSubcategoriesId IS NULL)
 				JOIN @UDT_TransDept Chk 
-					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-				LEFT JOIN dbo.tblICItem I 
-					ON CatLoc.intGeneralItemId = I.intItemId
-				JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId
-				JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 				JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
+					ON S.intStoreId = StoreDepartments.intStoreId
 				WHERE DT.intCheckoutId = @intCheckoutId 
-					AND S.intStoreId = @intStoreId
+					AND StoreDepartments.intStoreId = @intStoreId
 					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
 					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 
