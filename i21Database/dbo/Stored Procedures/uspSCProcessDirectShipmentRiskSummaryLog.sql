@@ -188,7 +188,7 @@ BEGIN
 			JOIN tblGRStorageType STORAGE_TYPE
 				ON TICKET.intStorageScheduleTypeId = STORAGE_TYPE.intStorageScheduleTypeId
 			JOIN tblCTContractDetail CONTRACT_DETAIL
-				ON TICKET.intContractId = CONTRACT_DETAIL.intContractDetailId
+				ON TICKET_CONTRACT_USED.CONTRACT_ID = CONTRACT_DETAIL.intContractDetailId
 			JOIN tblICItem ITEM
 				ON TICKET.intItemId = ITEM.intItemId 
 			JOIN tblICItemUOM ITEM_UOM
