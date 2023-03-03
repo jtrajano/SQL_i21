@@ -12,7 +12,16 @@ AS BEGIN
     INNER JOIN  tblICItem b
     ON          a.intItemId = b.intItemId
     WHERE       a.intCheckoutId = @intCheckoutId AND
-                b.ysnFuelItem = 1
+				(
+				a.intCategoryId IN (    SELECT      intCategoryId 
+                                        FROM        tblSTPumpItem
+									    WHERE       intStoreId IN (SELECT intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))
+				OR
+				a.intSubcategoriesId IN (
+										SELECT		intSubcategoriesId
+										FROM		tblSTStoreDepartments
+										WHERE		intStoreId IN (SELECT intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))
+				)
 
     RETURN      @dblDepartmentTotalsForFuel
 END

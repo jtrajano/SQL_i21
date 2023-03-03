@@ -1266,6 +1266,7 @@
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
     <Build Include="dbo\Views\vyuTMGetInventoryDelivery.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
