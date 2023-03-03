@@ -9,12 +9,12 @@ BEGIN
 	SET NOCOUNT ON;
 
     DECLARE @strError NVARCHAR(MAX)
+    DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 0;
 
     BEGIN TRANSACTION;
 
     BEGIN TRY
-	    DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;
-    
+
         IF OBJECT_ID('tempdb..#AuditorTransactions') IS NOT NULL
             DROP TABLE #AuditorTransactions
 
@@ -35,6 +35,7 @@ BEGIN
                 , dblCreditForeign = ISNULL(A.dblCreditForeign, 0)
                 , A.strPeriod 
                 , A.strDescription
+                , A.strAccountDescription
                 , A.strCode
                 , A.strReference
                 , A.strComments
@@ -54,17 +55,21 @@ BEGIN
                 , A.dblCreditUnit
                 , A.strCommodityCode 
                 , A.strSourceDocumentId
-                , A.strLocationName strLocation
+                , strLocation = LOC.strCode
                 , A.strCompanyLocation 
                 , A.strSourceUOMId 
                 , A.intSourceEntityId
                 , A.strSourceEntity 
                 , A.strSourceEntityNo 
-                , A.strLOBSegmentDescription
+                , strLOBSegmentDescription = LOB.strCode
                 , A.strCurrency
                 , A.strAccountId
+                
             FROM  
 			vyuGLDetail A 
+			outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 3)LOC
+			outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 5)LOB
+
             WHERE 
                 A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
        
@@ -83,10 +88,14 @@ BEGIN
                 , strAccountId
                 , strCurrency
                 , intCurrencyId
+                , strLOBSegmentDescription
+                , strLocation
+                , strAccountDescription
                
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
             GROUP BY intAccountId, strAccountId, intCurrencyId, strCurrency
+            ,strLOBSegmentDescription,strLocation, strAccountDescription
             
             DECLARE @intAccountIdLoop INT = 0
             DECLARE @intCurrencyIdLoop INT = 0
@@ -105,9 +114,6 @@ BEGIN
                     @beginBalance NUMERIC(18,6) = 0,
                     @beginBalanceForeign NUMERIC(18,6) = 0
                     
-
-                
-
                 SELECT TOP 1 @intAccountId= intAccountId , @intCurrencyId = intCurrencyId, @strAccountId = strAccountId
                 FROM #TransactionGroup 
                 ORDER BY strAccountId, intCurrencyId
@@ -137,6 +143,7 @@ BEGIN
                     , dblCreditForeign
                     , strPeriod 
                     , strDescription
+                    , strAccountDescription
                     , strCode
                     , strReference
                     , strComments
@@ -200,6 +207,7 @@ BEGIN
                     , dblCreditForeign
                     , strPeriod 
                     , strDescription
+                    , strAccountDescription
                     , strCode
                     , strReference
                     , strComments
@@ -252,6 +260,7 @@ BEGIN
                     , dblCreditForeign
                     , strPeriod 
                     , strDescription
+                    , strAccountDescription
                     , strCode
                     , strReference
                     , strComments
@@ -309,6 +318,9 @@ BEGIN
                     , dblCreditForeign
                     , strCurrency
                     , strAccountId
+                    , strLocation
+                    , strLOBSegmentDescription
+                    , strAccountDescription
                     , intConcurrencyId
                 )
                 SELECT TOP 1
@@ -325,6 +337,9 @@ BEGIN
                     , @dblTotalCreditForeign                   
                     , strCurrency
                     , strAccountId
+                    , strLocation
+                    , strLOBSegmentDescription
+                    , strAccountDescription
                     , 1
                     FROM #TransactionGroup 
                     WHERE intAccountId = @intAccountId
@@ -336,7 +351,7 @@ BEGIN
         END
     END TRY
     BEGIN CATCH
-        SET @strError = @@ERROR
+        SET @strError = ERROR_MESSAGE()
         GOTO ROLLBACK_TRANSACTION;
     END CATCH
 

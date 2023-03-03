@@ -9,12 +9,11 @@ BEGIN
 	SET NOCOUNT ON;
 
     DECLARE @strError NVARCHAR(MAX)
-
+    DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;
     BEGIN TRANSACTION;
 
     BEGIN TRY
-	    DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;
-    
+	    
         IF OBJECT_ID('tempdb..#AuditorTransactions') IS NOT NULL
             DROP TABLE #AuditorTransactions
 
@@ -34,6 +33,7 @@ BEGIN
                 , dblCreditForeign = ISNULL(A.dblCreditForeign, 0)
                 , A.strPeriod 
                 , A.strDescription
+                , A.strAccountDescription
                 , A.strCode
                 , A.strReference
                 , A.strComments
@@ -53,17 +53,19 @@ BEGIN
                 , A.dblCreditUnit
                 , A.strCommodityCode 
                 , A.strSourceDocumentId
-                , A.strLocationName strLocation
+                , strLocation = LOC.strCode
                 , A.strCompanyLocation 
                 , A.strSourceUOMId 
                 , A.intSourceEntityId
                 , A.strSourceEntity 
                 , A.strSourceEntityNo 
-                , A.strLOBSegmentDescription
+                , strLOBSegmentDescription = LOB.strCode
                 , A.strCurrency
                 , A.strAccountId
             FROM  
 			vyuGLDetail A 
+            outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 3)LOC
+			outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 5)LOB
             WHERE 
                 A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
         )
@@ -104,7 +106,8 @@ BEGIN
                 ORDER BY strTransactionId, intCurrencyId
 
                 INSERT INTO tblGLAuditorTransaction (
-                    intType
+                    ysnGroupHeader
+                    ,intType
                     , intGeneratedBy
                     , dtmDateGenerated
                     , intEntityId
@@ -128,6 +131,7 @@ BEGIN
                     , strComments
                     , strPeriod
                     , strDescription
+                    , strAccountDescription
                     , dblSourceUnitDebit
                     , dblSourceUnitCredit
                     , dblDebitReport
@@ -147,7 +151,8 @@ BEGIN
                     , strAccountId
                 )
                 SELECT 
-                    1 -- By TransactionId, 0 - by AccountId
+                    0
+                    ,1 -- By TransactionId, 0 - by AccountId
                     , @intEntityId
                     , @dtmNow
                     , intEntityId
@@ -171,6 +176,7 @@ BEGIN
                     , strComments
                     , strPeriod
                     , strDescription
+                    , strAccountDescription
                     , dblSourceUnitDebit
                     , dblSourceUnitCredit
                     , dblDebitReport
@@ -195,7 +201,8 @@ BEGIN
 
                 -- Total record
                 INSERT INTO tblGLAuditorTransaction (
-                    intType
+                    ysnGroupHeader
+                    , intType
                     , intGeneratedBy      
                     , dtmDateGenerated
                     , strTransactionId
@@ -212,6 +219,7 @@ BEGIN
                 )
                 SELECT TOP 1
                     1
+                    ,1
                     , @intEntityId
                     , @dtmNow
                     , @strTransactionId
@@ -235,7 +243,7 @@ BEGIN
         END
     END TRY
     BEGIN CATCH
-        SET @strError = @@ERROR
+        SET @strError = ERROR_MESSAGE()
         GOTO ROLLBACK_TRANSACTION;
     END CATCH
 
