@@ -8,6 +8,7 @@ SMCL.strAddress + ', ' + SMCL.strCity + ', ' + SMCL.strZipPostalCode + ', ' + SM
 EE.strEntityNo AS intDealerNo,
 EE.strName AS strDealer,
 CH.dtmCheckoutDate AS dtmReportDate,
+FORMAT(CH.dtmCheckoutDate, 'd','us') AS strReportDate,
 FSBGPP.intProductNumber AS intFuelGrade,
 I.strItemNo + ' - ' + I.strDescription AS strDescription,
 FSBGPP.dblPrice,
