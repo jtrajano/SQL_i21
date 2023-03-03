@@ -1,12 +1,14 @@
-CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceForeignCurrency]   
+CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAuditorReportForeign]   
 (   
- @strAccountId NVARCHAR(100),  
- @dtmDate DATETIME,  
-    @intCurrencyId INT  
+  @strAccountId NVARCHAR(100),  
+  @dtmDate DATETIME,  
+  @intCurrencyId INT  
 )  
 RETURNS @tbl TABLE (  
 strAccountId NVARCHAR(100),  
-beginBalanceForeign NUMERIC (18,6)  
+beginBalanceForeign NUMERIC (18,6),
+beginBalanceDebitForeign NUMERIC (18,6),
+beginBalanceCreditForeign NUMERIC (18,6)
 )  
   
 AS  
@@ -17,13 +19,14 @@ BEGIN
  IF @accountType IS NOT NULL  
    INSERT  @tbl  
    SELECT    
-     strAccountId,  
-       
-     SUM ( CASE   
+    strAccountId,
+    SUM ( CASE   
         WHEN D.dtmDateFrom IS NULL THEN 0   
         WHEN @accountType = 'Revenue' THEN (dblCreditForeign - dblDebitForeign)*-1  
         ELSE dblDebitForeign - dblCreditForeign  
-     END)  beginBalanceForeign  
+    END)  beginBalanceForeign,
+    SUM(dblDebitForeign) beginBalanceDebitForeign,
+    SUM(dblCreditForeign) beginBalanceCreditForeign
    FROM tblGLAccount A  
     LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId  
     LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId  
@@ -38,8 +41,9 @@ BEGIN
     SUM(   
     CASE WHEN B.strAccountType = 'Asset' THEN dblDebitForeign - dblCreditForeign  
       ELSE (dblCreditForeign - dblDebitForeign)*-1  
-    END)  beginBalanceForeign  
-    
+    END)  beginBalanceForeign,
+    SUM(dblDebitForeign) beginBalanceDebitForeign,
+    SUM(dblCreditForeign) beginBalanceCreditForeign
   FROM tblGLAccount A  
    LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId  
    LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId  

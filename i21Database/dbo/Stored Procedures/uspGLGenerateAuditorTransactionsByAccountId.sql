@@ -110,24 +110,105 @@ BEGIN
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
                 DECLARE 
-                   
                     @beginBalance NUMERIC(18,6) = 0,
-                    @beginBalanceForeign NUMERIC(18,6) = 0
-                    
+                    @beginBalanceForeign NUMERIC(18,6) = 0,
+                    @beginBalanceDebit NUMERIC(18,6) = 0,
+                    @beginBalanceCredit NUMERIC(18,6) = 0,
+                    @beginBalanceDebitForeign NUMERIC(18,6) = 0,
+                    @beginBalanceCreditForeign NUMERIC(18,6) = 0
+
                 SELECT TOP 1 @intAccountId= intAccountId , @intCurrencyId = intCurrencyId, @strAccountId = strAccountId
                 FROM #TransactionGroup 
                 ORDER BY strAccountId, intCurrencyId
 
                 IF @intAccountIdLoop <> @intAccountId
-                    SELECT @beginBalance= beginBalance FROM dbo.fnGLGetBeginningBalanceAndUnit(@strAccountId,@dtmDateFrom)
+                BEGIN
+                    SET @intAccountIdLoop  = @intAccountId
 
-                IF @intCurrencyIdLoop <> @intCurrencyId
-                    SELECT @beginBalanceForeign= beginBalanceForeign FROM dbo.fnGLGetBeginningBalanceForeignCurrency(@strAccountId,@dtmDateFrom,@intCurrencyId)
+                    SELECT
+                    @beginBalance=          ISNULL(beginBalance,0),
+                    @beginBalanceDebit=     ISNULL(beginBalanceDebit,0),
+                    @beginBalanceCredit=    ISNULL(beginBalanceCredit,0)
+                    FROM dbo.fnGLGetBeginningBalanceAuditorReport(@strAccountId,@dtmDateFrom)
+
+                    SELECT
+                    @beginBalanceForeign=       ISNULL(beginBalanceForeign,0),
+                    @beginBalanceDebitForeign=  ISNULL(beginBalanceDebitForeign,0),
+                    @beginBalanceCreditForeign= ISNULL(beginBalanceCreditForeign,0)
+                    FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@intCurrencyId)
+
+                        -- Total record
+                    INSERT INTO tblGLAuditorTransaction (
+                        ysnGroupFooter
+                        ,ysnGroupHeader
+                        , intType
+                        , intGeneratedBy      
+                        , dtmDateGenerated
+                        , strTotalTitle
+                        , strGroupTitle
+                        , intEntityId
+                        , dblDebit
+                        , dblCredit
+                        , dblEndingBalance
+                        , dblDebitForeign
+                        , dblCreditForeign
+                        , dblEndingBalanceForeign
+                        , strCurrency
+                        , strAccountId
+                        , strLocation
+                        , strLOBSegmentDescription
+                        , strAccountDescription
+                        , intConcurrencyId
+                    )
+                    SELECT TOP 1
+                        CAST(0 AS BIT)
+                        ,CAST(1 AS BIT)
+                        , 0
+                        , @intEntityId
+                        , @dtmNow
+                        , 'Beginning Balance'
+                        , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
+                        , @intEntityId
+                        , @beginBalanceDebit
+                        , @beginBalanceCredit
+                        , @beginBalance
+                        , @beginBalanceDebitForeign
+                        , @beginBalanceCreditForeign     
+                        , @beginBalanceForeign            
+                        , strCurrency
+                        , strAccountId
+                        , strLocation
+                        , strLOBSegmentDescription
+                        , strAccountDescription
+                        , 1
+                        FROM #TransactionGroup 
+                        WHERE intAccountId = @intAccountId
+                        AND @intCurrencyId = intCurrencyId
+            
+
+                END
+
+                ELSE
+                BEGIN
+                    SELECT
+                    @beginBalanceForeign=       ISNULL(beginBalanceForeign,0),
+                    @beginBalanceDebitForeign=  ISNULL(beginBalanceDebitForeign,0),
+                    @beginBalanceCreditForeign= ISNULL(beginBalanceCreditForeign,0)
+                    FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@intCurrencyId)
+                END
+
+                -- IF @intCurrencyIdLoop <> @intCurrencyId
+                --     SELECT
+                --     @beginBalanceForeign=       ISNULL(beginBalanceForeign,0),
+                --     @beginBalanceDebitForeign=  ISNULL(beginBalanceDebitForeign,0),
+                --     @beginBalanceCreditForeign= ISNULL(beginBalanceCreditForeign,0)
+                --     FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@intCurrencyId)
                 
-                SELECT @beginBalance = ISNULL(@beginBalance ,0)
-                SELECT @beginBalanceForeign = ISNULL(@beginBalanceForeign ,0);
+            
 
-                WITH CTE AS(
+              
+
+                ;WITH CTE AS(
                     SELECT 
                      intEntityId
                     , strBatchId
@@ -296,26 +377,32 @@ BEGIN
                 FROM CTEBB
             
 
-                SELECT @dblTotalDebit = sum(dblDebit), @dblTotalCredit= sum(dblCredit), @dblTotalDebitForeign = sum(dblDebitForeign), 
+                SELECT
+                @dblTotalDebit = sum(dblDebit), @dblTotalCredit= sum(dblCredit), 
+                @dblTotalDebitForeign = sum(dblDebitForeign), 
                 @dblTotalCreditForeign = sum(dblCreditForeign)
                 FROM #AuditorTransactions 
                 WHERE @intAccountId =intAccountId 
                 AND @intCurrencyId = intCurrencyId
+             
 
 
                 -- Total record
                 INSERT INTO tblGLAuditorTransaction (
-                    ysnGroupHeader
+                    ysnGroupFooter
+                    , ysnGroupHeader
                     , intType
                     , intGeneratedBy      
                     , dtmDateGenerated
                     , strTotalTitle
                     , strGroupTitle
                     , intEntityId
+                    , dblBeginningBalance
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
+                    , dblBeginningBalanceForeign
                     , strCurrency
                     , strAccountId
                     , strLocation
@@ -324,17 +411,20 @@ BEGIN
                     , intConcurrencyId
                 )
                 SELECT TOP 1
-                    CAST(1 AS BIT)
+                     CAST(1 AS BIT)
+                    ,CAST(0 AS BIT)
                     , 0
                     , @intEntityId
                     , @dtmNow
                     , 'Total'
                     , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                     , @intEntityId
+                    , @dblTotalDebit- @dblTotalCredit
                     , @dblTotalDebit
                     , @dblTotalCredit
                     , @dblTotalDebitForeign
-                    , @dblTotalCreditForeign                   
+                    , @dblTotalCreditForeign     
+                    , @dblTotalDebitForeign- @dblTotalCreditForeign           
                     , strCurrency
                     , strAccountId
                     , strLocation

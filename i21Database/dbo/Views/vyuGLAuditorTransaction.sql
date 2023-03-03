@@ -61,6 +61,7 @@ SELECT
 	,A.strAccountDescription
 	,AG.strAccountGroup
 	,A.ysnGroupHeader
+	,A.ysnGroupFooter
 	,CASE WHEN (A.strTotalTitle = 'Total') THEN '' ELSE A.strUserName END COLLATE Latin1_General_CI_AS strUserName
 FROM tblGLAuditorTransaction A
 LEFT JOIN tblGLAccount ACC ON ACC.intAccountId = A.intAccountId
