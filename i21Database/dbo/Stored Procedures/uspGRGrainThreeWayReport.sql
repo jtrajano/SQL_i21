@@ -1,7 +1,50 @@
 CREATE PROCEDURE [dbo].[uspGRGrainThreeWayReport]
 --	@emailProfileName AS NVARCHAR(MAX) = NULL
 --	,@emailRecipient AS NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX)
 AS
+SET FMTONLY OFF
+
+IF LTRIM(RTRIM(@xmlParam)) = ''
+	SET @xmlParam = NULL
+
+DECLARE @temp_xml_table TABLE 
+(
+	[fieldname] NVARCHAR(50)
+	,[condition] NVARCHAR(20)
+	,[from] NVARCHAR(MAX)
+	,[to] NVARCHAR(MAX)
+	,[join] NVARCHAR(10)
+	,[begingroup] NVARCHAR(50)
+	,[endgroup] NVARCHAR(50)
+	,[datatype] NVARCHAR(50)
+)
+DECLARE @xmlDocumentId AS INT
+
+EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam
+
+INSERT INTO @temp_xml_table
+SELECT *
+FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH 
+(
+	[fieldname] NVARCHAR(50)
+	,[condition] NVARCHAR(20)
+	,[from] NVARCHAR(50)
+	,[to] NVARCHAR(50)
+	,[join] NVARCHAR(10)
+	,[begingroup] NVARCHAR(50)
+	,[endgroup] NVARCHAR(50)
+	,[datatype] NVARCHAR(50)
+)
+
+DECLARE @intCommodityId INT
+DECLARE @strCommodityCode NVARCHAR(100)
+DECLARE @intCompanyLocationId INT
+DECLARE @strLocationName NVARCHAR(200)
+
+SELECT @intCommodityId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'intCommodityId'
 
 DECLARE @Locations AS TABLE (
 	intCompanyLocationId INT
@@ -11,10 +54,7 @@ DECLARE @Commodities AS TABLE (
 	intCommodityId INT
 	,strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
-DECLARE @intCommodityId INT
-DECLARE @strCommodityCode NVARCHAR(100)
-DECLARE @intCompanyLocationId INT
-DECLARE @strLocationName NVARCHAR(200)
+
 
 DECLARE @table1 TABLE
 (
@@ -72,7 +112,7 @@ INSERT INTO @Locations
 SELECT DISTINCT intCompanyLocationId, strLocationName FROM vyuGRStorageSearchView--) A
 
 INSERT INTO @Commodities
-SELECT DISTINCT intCommodityId, strCommodityCode FROM vyuGRStorageSearchView
+SELECT DISTINCT intCommodityId, strCommodityCode FROM vyuGRStorageSearchView WHERE intCommodityId = ISNULL(@intCommodityId,intCommodityId)
 
 INSERT INTO @FinalReport ( strCommodityCode, strLocationName )
 SELECT C.strCommodityCode,strLocationName FROM @Locations L OUTER APPLY (SELECT * FROM @Commodities) C
