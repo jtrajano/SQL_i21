@@ -140,7 +140,9 @@ AS
 				intEntityVendorId,
 				ysnPrice,
 				strChargesLink,
-				intContractDetailId
+				intContractDetailId,
+				intForexRateTypeId,
+				dblForexRate
 		) 
 		
 		SELECT	intOrderType			=	1,
@@ -162,13 +164,15 @@ AS
 				intEntityVendorId		=	CC.intVendorId,
 				ysnPrice				=	CC.ysnPrice,
 				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq),
-				intContractDetailId		=	CC.intContractDetailId
+				intContractDetailId		=	CC.intContractDetailId,
+				intForexRateTypeId		=	CC.intRateTypeId,
+				dblForexRate			=	CC.dblFX
 								
 		FROM	vyuCTContractCostView	CC
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CC.intContractHeaderId
 		JOIN	tblEMEntityLocation		EL	ON	EL.intEntityId			=	CH.intEntityId
-											AND	EL.ysnDefaultLocation	=	1						
+											AND	EL.ysnDefaultLocation	=	1
 		WHERE	CC.intContractDetailId	=	@intContractDetailId
 
 		IF NOT EXISTS(SELECT * FROM  @ShipmentStagingTable)
