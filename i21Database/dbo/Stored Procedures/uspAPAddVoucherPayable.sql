@@ -694,13 +694,13 @@ BEGIN
 		,intItemId					= A.intItemId
 		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
 		,dtmTransactionDate			= A.dtmDate
-		,dblItemCost				= CASE WHEN A.intComputeTotalOption = 0 AND  ISNULL(A.intWeightUOMId,0) > 0 AND ISNULL(A.intWeightClaimDetailId,0) > 0 THEN A.dblCost / A.dblCostUnitQty ELSE A.dblCost END
-		,dblQuantity				= CASE WHEN A.intComputeTotalOption = 0 AND  ISNULL(A.intWeightUOMId,0) > 0 AND ISNULL(A.intWeightClaimDetailId,0) > 0
-										THEN A.dblQuantityToBill
-										ELSE A.dblNetWeight END
+		,dblItemCost				= A.dblCost
+		,dblQuantity				= CASE WHEN A.intWeightUOMId > 0 AND A.dblNetWeight > 0
+										THEN A.dblNetWeight
+										ELSE A.dblQuantityToBill END
 		,intTaxGroupId				= CASE 
-									WHEN ISNULL(A.intPurchaseTaxGroupId,0) > 0 THEN A.intPurchaseTaxGroupId
-									ELSE ISNULL(EL.intTaxGroupId, CL.intTaxGroupId) END 
+									WHEN A.intPurchaseTaxGroupId > 0 THEN A.intPurchaseTaxGroupId
+									ELSE NULL END 
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1
