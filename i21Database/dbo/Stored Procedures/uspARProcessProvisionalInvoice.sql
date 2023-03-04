@@ -247,7 +247,7 @@ BEGIN TRY
 		,[dblQtyShipped]						= ARID.[dblQtyShipped]
 		,[dblDiscount]							= ARID.[dblDiscount]
 		,[dblPrice]								= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblPrice, 0))
-		,[dblUnitPrice]							= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblUnitPrice, 0))
+		,[dblUnitPrice]							= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblUnitPrice, 0)) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(LGCDV.intSeqPriceUOMId, ARID.intPriceUOMId), 1)
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ARID.[strMaintenanceType]
 		,[strFrequency]							= ARID.[strFrequency]
@@ -292,7 +292,7 @@ BEGIN TRY
 		,[dblSubCurrencyRate]					= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]					= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-		,[dblComputedGrossPrice]				= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblComputedGrossPrice, 0))
+		,[dblComputedGrossPrice]				= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblComputedGrossPrice, 0)) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(LGCDV.intSeqPriceUOMId, ARID.intPriceUOMId), 1)
 		,[intBankId]							= ARI.[intBankId]
 		,[intBankAccountId]						= ARI.[intBankAccountId]
 		,[intBorrowingFacilityId]				= ARI.[intBorrowingFacilityId]
@@ -310,6 +310,7 @@ BEGIN TRY
 		,[strSourcedFrom]						= ARI.[strSourcedFrom]
 	FROM tblARInvoiceDetail ARID
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+	LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGCDV ON ARID.intContractDetailId = LGCDV.intContractDetailId
 	WHERE ARID.[intInvoiceId] = @InvoiceId
 								
 UNION ALL
