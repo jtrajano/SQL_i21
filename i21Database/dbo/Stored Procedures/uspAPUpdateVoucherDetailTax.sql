@@ -70,7 +70,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 										ELSE B.dblCost
 									END / ISNULL(B.dblCostUnitQty, 1)
 		,dblQuantity				= CASE 
-										WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND A.intWeightClaimDetailId IS NULL
+										WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND B.intWeightClaimDetailId IS NULL
 											THEN B.dblNetWeight * B.dblWeightUnitQty
 										ELSE B.dblQtyReceived * B.dblUnitQty 
 									END
