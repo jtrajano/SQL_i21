@@ -48,6 +48,7 @@ SELECT
 	,A.intInventoryReceiptChargeId
 	,A.intInventoryShipmentItemId
 	,A.intInventoryShipmentChargeId
+	,A.intCustomerStorageId
 	,A.intLoadShipmentId
 	,A.intLoadShipmentDetailId
 	,A.intItemId
