@@ -41,7 +41,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 											AS FLOAT) / ISNULL(A.dblCostUnitQty, 1),
 		@detailTotal					=	CAST(@qty *  @cost  AS DECIMAL(18,2)),
 		[dblTotal]						=	@detailTotal,
-		[dblClaimAmount]				=	CASE WHEN A.intWeightClaimDetailId IS NOT NULL THEN WC.dblClaimAmount ELSE @detailTotal END,
+		[dblClaimAmount]				=	@detailTotal,
 		[dbl1099]						=	CASE WHEN C.intTransactionType = 9 
 											THEN @detailTotal
 											ELSE 0 END
