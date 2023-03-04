@@ -12,7 +12,9 @@ SELECT
 				THEN CAST((A.dblQuantityToBill) *  (A.dblCost / ISNULL(NULLIF(A.intSubCurrencyCents,0),1))  * (A.dblQtyToBillUnitQty/ ISNULL(NULLIF(A.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 			ELSE CAST((A.dblQuantityToBill) * (A.dblCost / ISNULL(NULLIF(A.intSubCurrencyCents,0),1))  AS DECIMAL(18,2))  --Orig Calculation
 		END)
-	ELSE (CASE 
+	ELSE (CASE
+			WHEN A.intWeightClaimDetailId > 0 AND A.intWeightClaimId > 0
+    		THEN CAST((A.dblCost / ISNULL(A.dblCostUnitQty,1)) * A.dblQuantityToBill AS DECIMAL(18,2)) 
 			WHEN A.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
 				THEN CAST(A.dblCost  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(NULLIF(A.dblCostUnitQty,0),1) AS DECIMAL(18,2)) --Formula With Weight UOM
 			WHEN (A.intQtyToBillUOMId > 0 AND A.intCostUOMId > 0)
