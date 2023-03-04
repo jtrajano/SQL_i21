@@ -246,8 +246,8 @@ BEGIN TRY
 		,[intPriceUOMId]						= ARID.[intPriceUOMId]
 		,[dblQtyShipped]						= ARID.[dblQtyShipped]
 		,[dblDiscount]							= ARID.[dblDiscount]
-		,[dblPrice]								= ISNULL(ARID.[dblPrice], 0) 
-		,[dblUnitPrice]							= ISNULL(ARID.[dblUnitPrice], 0) 
+		,[dblPrice]								= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblPrice, 0))
+		,[dblUnitPrice]							= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblUnitPrice, 0)) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(LGCDV.intSeqPriceUOMId, ARID.intPriceUOMId), 1)
 		,[ysnRefreshPrice]						= 0
 		,[strMaintenanceType]					= ARID.[strMaintenanceType]
 		,[strFrequency]							= ARID.[strFrequency]
@@ -292,24 +292,25 @@ BEGIN TRY
 		,[dblSubCurrencyRate]					= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]					= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
-		,[dblComputedGrossPrice]				= ARID.[dblComputedGrossPrice]
-		,[intBankId]						= ARI.[intBankId]
-		,[intBankAccountId]					= ARI.[intBankAccountId]
-		,[intBorrowingFacilityId]			= ARI.[intBorrowingFacilityId]
-		,[intBorrowingFacilityLimitId]		= ARI.[intBorrowingFacilityLimitId]
-		,[strTransactionNo]					= ARI.[strTransactionNo]
-		,[strBankReferenceNo]				= ARI.[strBankReferenceNo]
-		,[strBankTradeReference]			= ARI.[strBankTradeReference]
-		,[dblLoanAmount]					= ARI.[dblLoanAmount]
-		,[intBankValuationRuleId]			= ARI.[intBankValuationRuleId]
-		,[strTradeFinanceComments]			= ARI.[strTradeFinanceComments]
-		,[strGoodsStatus]					= ARI.[strGoodsStatus]
-		,[intDefaultPayToBankAccountId]		= ARI.[intDefaultPayToBankAccountId]
-		,[intPayToCashBankAccountId]		= ARI.[intPayToCashBankAccountId]
-		,[strPaymentInstructions]			= ARI.[strPaymentInstructions]
-		,[strSourcedFrom]					= ARI.[strSourcedFrom]
+		,[dblComputedGrossPrice]				= ISNULL(dbo.fnCTGetSequencePrice(ARID.intContractDetailId, NULL), ISNULL(ARID.dblComputedGrossPrice, 0)) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(LGCDV.intSeqPriceUOMId, ARID.intPriceUOMId), 1)
+		,[intBankId]							= ARI.[intBankId]
+		,[intBankAccountId]						= ARI.[intBankAccountId]
+		,[intBorrowingFacilityId]				= ARI.[intBorrowingFacilityId]
+		,[intBorrowingFacilityLimitId]			= ARI.[intBorrowingFacilityLimitId]
+		,[strTransactionNo]						= ARI.[strTransactionNo]
+		,[strBankReferenceNo]					= ARI.[strBankReferenceNo]
+		,[strBankTradeReference]				= ARI.[strBankTradeReference]
+		,[dblLoanAmount]						= ARI.[dblLoanAmount]
+		,[intBankValuationRuleId]				= ARI.[intBankValuationRuleId]
+		,[strTradeFinanceComments]				= ARI.[strTradeFinanceComments]
+		,[strGoodsStatus]						= ARI.[strGoodsStatus]
+		,[intDefaultPayToBankAccountId]			= ARI.[intDefaultPayToBankAccountId]
+		,[intPayToCashBankAccountId]			= ARI.[intPayToCashBankAccountId]
+		,[strPaymentInstructions]				= ARI.[strPaymentInstructions]
+		,[strSourcedFrom]						= ARI.[strSourcedFrom]
 	FROM tblARInvoiceDetail ARID
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
+	LEFT JOIN vyuLGAdditionalColumnForContractDetailView LGCDV ON ARID.intContractDetailId = LGCDV.intContractDetailId
 	WHERE ARID.[intInvoiceId] = @InvoiceId
 								
 UNION ALL
