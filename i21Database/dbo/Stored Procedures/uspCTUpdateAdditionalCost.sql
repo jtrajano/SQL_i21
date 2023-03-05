@@ -60,7 +60,11 @@ BEGIN TRY
 		SET	    CC.dblAccruedAmount	=	(CASE	WHEN CC.strCostMethod = 'Per Unit'
 													THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, CM.intUnitMeasureId, CD.dblQuantity) * CC.dblRate * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 												WHEN CC.strCostMethod = 'Amount'
-													THEN CC.dblRate *  CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END 
+													THEN CC.dblRate *  CASE WHEN @intFinanceCostId =  CC.intItemId  THEN 1 
+																		ELSE 
+																			CASE WHEN CD.intCurrencyId != CC.intCurrencyId 
+																			THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
+																		END
 												WHEN CC.strCostMethod = 'Per Container'
 													THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * ISNULL(CC.dblFX, 1)
 												WHEN CC.strCostMethod = 'Percentage'
