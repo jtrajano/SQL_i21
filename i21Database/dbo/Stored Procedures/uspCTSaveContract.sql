@@ -384,7 +384,8 @@ BEGIN TRY
 					, strCostMethod NVARCHAR(50)
 					, dblRate NUMERIC(18, 6)
 					, dblAmount NUMERIC(18, 6)
-					, dblFX NUMERIC(18, 6))
+					, dblFX NUMERIC(18, 6)
+					, ysnAccrue BIT)
 				
 				SELECT @intCommodityId = ch.intCommodityId
 					, @intItemId = cd.intItemId
