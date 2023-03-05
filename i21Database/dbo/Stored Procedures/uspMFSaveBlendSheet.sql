@@ -1,8 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspMFSaveBlendSheet] 
-(
-	@strXml			NVARCHAR(MAX)
-  , @intWorkOrderId INT OUT
-)
+﻿CREATE PROCEDURE [dbo].[uspMFSaveBlendSheet] (
+	@strXml NVARCHAR(MAX)
+	,@intWorkOrderId INT OUT
+	)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -43,12 +42,32 @@ BEGIN TRY
 		,@strFW NVARCHAR(3)
 		,@intRecordId INT
 		,@strValue NVARCHAR(50)
+		,@dblQtyToProduce NUMERIC(18, 6)
+		,@dblCalculatedUpperTolerance NUMERIC(18, 6)
+		,@ysnToleranceCheckOnBlendOutputItem INT
+		,@intUserId INT
+		,@intRecipeId INT
+		,@intRecipeItemUOMId INT
+		,@dtmValidFrom DATETIME
+		,@dtmValidTo DATETIME
+		,@intRecipeItemId int
+		,@intInputItemUOMId int
+		,@intUnitMeasureId int
+		,@ysnOverrideRecipe BIT
 	DECLARE @tblFW TABLE (
 		strChar CHAR(1)
 		,intItemId INT
 		,intSeq INT
 		,intRecordId INT identity(1, 1)
 		);
+
+	SELECT @ysnToleranceCheckOnBlendOutputItem = ysnToleranceCheckOnBlendOutputItem
+	FROM tblMFCompanyPreference
+
+	IF @ysnToleranceCheckOnBlendOutputItem IS NULL
+	BEGIN
+		SELECT @ysnToleranceCheckOnBlendOutputItem = 0
+	END
 
 	INSERT INTO @tblFW (strChar)
 	SELECT 'A'
@@ -183,8 +202,7 @@ BEGIN TRY
 		)
 	DECLARE @tblPackagingCategoryId TABLE (intCategoryId INT)
 
-	INSERT INTO @tblBlendSheet 
-	(
+	INSERT INTO @tblBlendSheet (
 		intWorkOrderId
 	  , strWorkOrderNo
 	  , intBlendRequirementId
@@ -264,7 +282,6 @@ BEGIN TRY
 	  , dblCalculatedUpperTolerance	 NVARCHAR(MAX) 
 	  , dblCalculatedLowerTolerance	 NVARCHAR(MAX) 
 	)
-
 
 	INSERT INTO @tblLot (
 		intWorkOrderInputLotId
@@ -349,7 +366,43 @@ BEGIN TRY
 		,@intBlendRequirementId = intBlendRequirementId
 		,@intCellId = intCellId
 		,@intIssuedUOMTypeId = intIssuedUOMTypeId
+		,@dblCalculatedUpperTolerance = dblCalculatedUpperTolerance
+		,@intUserId = intUserId
+		,@ysnOverrideRecipe=ysnOverrideRecipe
 	FROM @tblBlendSheet;
+
+	IF @intIssuedUOMTypeId IS NULL OR @intIssuedUOMTypeId=0
+	BEGIN
+		SELECT @intIssuedUOMTypeId=CASE 
+			WHEN a.strValue = 'Pallet'
+				THEN 4
+			ELSE 0
+			END
+		FROM tblMFBlendRequirementRule a
+		JOIN tblMFBlendSheetRule b ON a.intBlendSheetRuleId = b.intBlendSheetRuleId
+		WHERE intBlendRequirementId = @intBlendRequirementId
+			AND b.strName = 'Pick By'
+	END
+
+	SELECT @dblQtyToProduce = SUM(ISNULL(dblQty, 0))
+	FROM @tblLot AS VarLot
+	JOIN tblICItem AS Item ON VarLot.intItemId = Item.intItemId
+	WHERE Item.intCategoryId NOT IN (
+			SELECT *
+			FROM dbo.fnCommaSeparatedValueToTable(@strPackagingCategoryId)
+			)
+
+	IF IsNULL(@dblQtyToProduce, 0) > @dblCalculatedUpperTolerance
+		AND @ysnToleranceCheckOnBlendOutputItem = 1
+	BEGIN
+		SELECT @ErrMsg = 'Picked weight cannot be more than allowable tolerance weight.'
+
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
 
 	SELECT @strDemandNo = strDemandNo
 		,@strReferenceNo = strReferenceNo
@@ -445,77 +498,76 @@ BEGIN TRY
 						)
 				);
 
-		INSERT INTO tblMFWorkOrder 
-		(
+		INSERT INTO tblMFWorkOrder (
 			strWorkOrderNo
-		  , intItemId
-		  , dblQuantity
-		  , intItemUOMId
-		  , intStatusId
-		  , intManufacturingCellId
-		  , intMachineId
-		  , intLocationId
-		  , dblBinSize
-		  , dtmExpectedDate
-		  , intExecutionOrder
-		  , intProductionTypeId
-		  , dblPlannedQuantity
-		  , intBlendRequirementId
-		  , ysnKittingEnabled
-		  , ysnDietarySupplements
-		  , ysnUseTemplate
-		  , strComment
-		  , dtmCreated
-		  , intCreatedUserId
-		  , dtmLastModified
-		  , intLastModifiedUserId
-		  , intConcurrencyId
-		  , intManufacturingProcessId
-		  , intTransactionFrom
-		  , intPlannedShiftId
-		  , dtmPlannedDate
-		  , strERPOrderNo
-		  , intIssuedUOMTypeId
-		  , ysnOverrideRecipe
-		  , dblUpperTolerance			 
-		  , dblLowerTolerance			 
-		  , dblCalculatedUpperTolerance	 
-		  , dblCalculatedLowerTolerance	 
-		)
+			,intItemId
+			,dblQuantity
+			,intItemUOMId
+			,intStatusId
+			,intManufacturingCellId
+			,intMachineId
+			,intLocationId
+			,dblBinSize
+			,dtmExpectedDate
+			,intExecutionOrder
+			,intProductionTypeId
+			,dblPlannedQuantity
+			,intBlendRequirementId
+			,ysnKittingEnabled
+			,ysnDietarySupplements
+			,ysnUseTemplate
+			,strComment
+			,dtmCreated
+			,intCreatedUserId
+			,dtmLastModified
+			,intLastModifiedUserId
+			,intConcurrencyId
+			,intManufacturingProcessId
+			,intTransactionFrom
+			,intPlannedShiftId
+			,dtmPlannedDate
+			,strERPOrderNo
+			,intIssuedUOMTypeId
+			,ysnOverrideRecipe
+			,dblUpperTolerance
+			,dblLowerTolerance
+			,dblCalculatedUpperTolerance
+			,dblCalculatedLowerTolerance
+			)
 		SELECT @strNextWONo
-			 , intItemId
-			 , dblQtyToProduce
-			 , intItemUOMId
-			 , 2
-			 , intCellId
-			 , intMachineId
-			 , intLocationId
-			 , dblBinSize
-			 , dtmDueDate
-			 , 0
-			 , 1
-			 , dblPlannedQuantity
-			 , intBlendRequirementId
-			 , ysnKittingEnabled
-			 , ysnDietarySupplements
-			 , ysnUseTemplate
-			 , strComment
-			 , GetDate()
-			 , intUserId
-			 , GetDate()
-			 , intUserId
-			 , intConcurrencyId + 1
-			 , @intManufacturingProcessId
-			 , 1
-			 , intPlannedShiftId
-			 , dtmDueDate
-			 , @strReferenceNo
-			 , intIssuedUOMTypeId
-			 , ysnOverrideRecipe
-			 , dblUpperTolerance			 
-			 , dblLowerTolerance			 
-			 , dblCalculatedUpperTolerance	 
-			 , dblCalculatedLowerTolerance	 
+			,intItemId
+			,dblQtyToProduce
+			,intItemUOMId
+			,2
+			,intCellId
+			,intMachineId
+			,intLocationId
+			,dblBinSize
+			,dtmDueDate
+			,0
+			,1
+			,dblPlannedQuantity
+			,intBlendRequirementId
+			,ysnKittingEnabled
+			,ysnDietarySupplements
+			,ysnUseTemplate
+			,strComment
+			,GetDate()
+			,intUserId
+			,GetDate()
+			,intUserId
+			,intConcurrencyId + 1
+			,@intManufacturingProcessId
+			,1
+			,intPlannedShiftId
+			,dtmDueDate
+			,@strReferenceNo
+			,intIssuedUOMTypeId
+			,ysnOverrideRecipe
+			,dblUpperTolerance
+			,dblLowerTolerance
+			,dblCalculatedUpperTolerance
+			,dblCalculatedLowerTolerance
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -523,25 +575,25 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		UPDATE WorkOrder
-		SET WorkOrder.intManufacturingCellId		= VarBlendSheet.intCellId
-		  , WorkOrder.intMachineId					= VarBlendSheet.intMachineId
-		  , WorkOrder.dblBinSize					= VarBlendSheet.dblBinSize
-		  , WorkOrder.dtmExpectedDate				= VarBlendSheet.dtmDueDate
-		  , WorkOrder.dblPlannedQuantity			= VarBlendSheet.dblPlannedQuantity
-		  , WorkOrder.ysnKittingEnabled				= VarBlendSheet.ysnKittingEnabled
-		  , WorkOrder.ysnDietarySupplements			= VarBlendSheet.ysnDietarySupplements
-		  , WorkOrder.ysnUseTemplate				= VarBlendSheet.ysnUseTemplate
-		  , WorkOrder.strComment					= VarBlendSheet.strComment
-		  , WorkOrder.intLastModifiedUserId			= VarBlendSheet.intUserId
-		  , WorkOrder.dtmLastModified				= GETDATE()
-		  , WorkOrder.intConcurrencyId				= WorkOrder.intConcurrencyId + 1
-		  , WorkOrder.intPlannedShiftId				= VarBlendSheet.intPlannedShiftId
-		  , WorkOrder.dtmPlannedDate				= VarBlendSheet.dtmDueDate
-		  , WorkOrder.ysnOverrideRecipe				= VarBlendSheet.ysnOverrideRecipe
-		  , WorkOrder.dblUpperTolerance				= VarBlendSheet.dblUpperTolerance
-	      , WorkOrder.dblLowerTolerance				= VarBlendSheet.dblLowerTolerance
-	      , WorkOrder.dblCalculatedUpperTolerance	= VarBlendSheet.dblCalculatedUpperTolerance
-	      , WorkOrder.dblCalculatedLowerTolerance	= VarBlendSheet.dblCalculatedLowerTolerance 
+		SET WorkOrder.intManufacturingCellId = VarBlendSheet.intCellId
+			,WorkOrder.intMachineId = VarBlendSheet.intMachineId
+			,WorkOrder.dblBinSize = VarBlendSheet.dblBinSize
+			,WorkOrder.dtmExpectedDate = VarBlendSheet.dtmDueDate
+			,WorkOrder.dblPlannedQuantity = VarBlendSheet.dblPlannedQuantity
+			,WorkOrder.ysnKittingEnabled = VarBlendSheet.ysnKittingEnabled
+			,WorkOrder.ysnDietarySupplements = VarBlendSheet.ysnDietarySupplements
+			,WorkOrder.ysnUseTemplate = VarBlendSheet.ysnUseTemplate
+			,WorkOrder.strComment = VarBlendSheet.strComment
+			,WorkOrder.intLastModifiedUserId = VarBlendSheet.intUserId
+			,WorkOrder.dtmLastModified = GETDATE()
+			,WorkOrder.intConcurrencyId = WorkOrder.intConcurrencyId + 1
+			,WorkOrder.intPlannedShiftId = VarBlendSheet.intPlannedShiftId
+			,WorkOrder.dtmPlannedDate = VarBlendSheet.dtmDueDate
+			,WorkOrder.ysnOverrideRecipe = VarBlendSheet.ysnOverrideRecipe
+			,WorkOrder.dblUpperTolerance = VarBlendSheet.dblUpperTolerance
+			,WorkOrder.dblLowerTolerance = VarBlendSheet.dblLowerTolerance
+			,WorkOrder.dblCalculatedUpperTolerance = VarBlendSheet.dblCalculatedUpperTolerance
+			,WorkOrder.dblCalculatedLowerTolerance = VarBlendSheet.dblCalculatedLowerTolerance
 		FROM tblMFWorkOrder AS WorkOrder
 		JOIN @tblBlendSheet AS VarBlendSheet ON WorkOrder.intWorkOrderId = VarBlendSheet.intWorkOrderId
 	END
@@ -850,123 +902,126 @@ BEGIN TRY
 		,@intTypeId = 1
 		,@strXml = @strXml
 
-	--IF @ysnOverrideRecipe=1
-	--BEGIN
-	--				IF NOT EXISTS (
-	--				SELECT *
-	--				FROM tblMFWorkOrderRecipeItem RI
-	--				Where RI.intWorkOrderId = @intWorkOrderId
-	--				and not exists(Select *from tblMFWorkOrderInputItem WI
-	--				Where WI.intWorkOrderId = @intWorkOrderId and ysnOverrideRecipe=1)
-	--				)
-	--		BEGIN
-	--			SELECT @intRecipeId = intRecipeId
-	--				,@intRecipeItemUOMId = intItemUOMId
-	--			FROM tblMFWorkOrderRecipe
-	--			WHERE intWorkOrderId = @intWorkOrderId
+	IF IsNULL(@ysnOverrideRecipe, 0) = 1
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipeItem RI
+				WHERE RI.intWorkOrderId = @intWorkOrderId
+					AND NOT EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderInputLot WL
+						WHERE WL.intWorkOrderId = @intWorkOrderId
+							AND ysnOverrideRecipe = 1
+						)
+				)
+		BEGIN
+			SELECT @intRecipeId = NULL
+				,@intRecipeItemUOMId = NULL
+				,@dtmValidFrom = NULL
+				,@dtmValidTo = NULL
 
-	--			SELECT @intUnitMeasureId = intUnitMeasureId
-	--			FROM tblICItemUOM
-	--			WHERE intItemUOMId = @intRecipeItemUOMId
+			SELECT @intRecipeId = intRecipeId
+				,@intRecipeItemUOMId = intItemUOMId
+				,@dtmValidFrom = dtmValidFrom
+				,@dtmValidTo = dtmValidTo
+			FROM tblMFWorkOrderRecipe
+			WHERE intWorkOrderId = @intWorkOrderId
 
-	--			SELECT @intInputItemUOMId = intItemUOMId
-	--			FROM tblICItemUOM
-	--			WHERE intItemId = @intItemId
-	--				AND intUnitMeasureId = @intUnitMeasureId
+			SELECT @intUnitMeasureId = intUnitMeasureId
+			FROM tblICItemUOM
+			WHERE intItemUOMId = @intRecipeItemUOMId
 
-	--			IF NOT EXISTS (
-	--					SELECT *
-	--					FROM tblMFWorkOrderRecipeItem RI
-	--					WHERE RI.intWorkOrderId = @intWorkOrderId
-	--						AND RI.dblCalculatedQuantity <> 0
-	--						AND RI.intRecipeItemTypeId = 1
-	--					)
-	--			BEGIN
-	--				SELECT @intRecipeItemId = Max(intRecipeItemId) + 1
-	--				FROM tblMFWorkOrderRecipeItem
+			SELECT @intInputItemUOMId = intItemUOMId
+			FROM tblICItemUOM
+			WHERE intItemId = @intItemId
+				AND intUnitMeasureId = @intUnitMeasureId
 
-	--				INSERT INTO tblMFWorkOrderRecipeItem (
-	--					intRecipeItemId
-	--					,intRecipeId
-	--					,intItemId
-	--					,dblQuantity
-	--					,dblCalculatedQuantity
-	--					,[intItemUOMId]
-	--					,intRecipeItemTypeId
-	--					,strItemGroupName
-	--					,dblUpperTolerance
-	--					,dblLowerTolerance
-	--					,dblCalculatedUpperTolerance
-	--					,dblCalculatedLowerTolerance
-	--					,dblShrinkage
-	--					,ysnScaled
-	--					,intConsumptionMethodId
-	--					,intStorageLocationId
-	--					,dtmValidFrom
-	--					,dtmValidTo
-	--					,ysnYearValidationRequired
-	--					,ysnMinorIngredient
-	--					,intReferenceRecipeId
-	--					,ysnOutputItemMandatory
-	--					,dblScrap
-	--					,ysnConsumptionRequired
-	--					,dblPercentage
-	--					,intMarginById
-	--					,dblMargin
-	--					,ysnCostAppliedAtInvoice
-	--					,ysnPartialFillConsumption
-	--					,intManufacturingCellId
-	--					,intWorkOrderId
-	--					,intCreatedUserId
-	--					,dtmCreated
-	--					,intLastModifiedUserId
-	--					,dtmLastModified
-	--					,intConcurrencyId
-	--					,intCostDriverId
-	--					,dblCostRate
-	--					,ysnLock
-	--					)
-	--				SELECT intRecipeItemId = @intRecipeItemId
-	--					,intRecipeId = @intRecipeId
-	--					,intItemId = @intItemId
-	--					,dblQuantity = 1
-	--					,dblCalculatedQuantity = 1
-	--					,[intItemUOMId] = @intInputItemUOMId
-	--					,intRecipeItemTypeId = 1
-	--					,strItemGroupName = ''
-	--					,dblUpperTolerance = 100
-	--					,dblLowerTolerance = 100
-	--					,dblCalculatedUpperTolerance = 2
-	--					,dblCalculatedLowerTolerance = 1
-	--					,dblShrinkage = 0
-	--					,ysnScaled = 1
-	--					,intConsumptionMethodId = 1
-	--					,intStorageLocationId = NULL
-	--					,dtmValidFrom = '2018-01-01'
-	--					,dtmValidTo = '2018-12-31'
-	--					,ysnYearValidationRequired = 0
-	--					,ysnMinorIngredient = 0
-	--					,intReferenceRecipeId = NULL
-	--					,ysnOutputItemMandatory = 0
-	--					,dblScrap = 0
-	--					,ysnConsumptionRequired = 0
-	--					,[dblCostAllocationPercentage] = NULL
-	--					,intMarginById = NULL
-	--					,dblMargin = NULL
-	--					,ysnCostAppliedAtInvoice = NULL
-	--					,ysnPartialFillConsumption = 1
-	--					,intManufacturingCellId = @intManufacturingCellId
-	--					,intWorkOrderId = @intWorkOrderId
-	--					,intCreatedUserId = @intUserId
-	--					,dtmCreated = @dtmDate
-	--					,intLastModifiedUserId = @intUserId
-	--					,dtmLastModified = @dtmDate
-	--					,intConcurrencyId = 1
-	--					,intCostDriverId = NULL
-	--					,dblCostRate = NULL
-	--					,ysnLock = 1
+			SELECT @intRecipeItemId = Max(intRecipeItemId) + 1
+			FROM tblMFWorkOrderRecipeItem
 
-	--END
+			INSERT INTO tblMFWorkOrderRecipeItem (
+				intRecipeItemId
+				,intRecipeId
+				,intItemId
+				,dblQuantity
+				,dblCalculatedQuantity
+				,[intItemUOMId]
+				,intRecipeItemTypeId
+				,strItemGroupName
+				,dblUpperTolerance
+				,dblLowerTolerance
+				,dblCalculatedUpperTolerance
+				,dblCalculatedLowerTolerance
+				,dblShrinkage
+				,ysnScaled
+				,intConsumptionMethodId
+				,intStorageLocationId
+				,dtmValidFrom
+				,dtmValidTo
+				,ysnYearValidationRequired
+				,ysnMinorIngredient
+				,intReferenceRecipeId
+				,ysnOutputItemMandatory
+				,dblScrap
+				,ysnConsumptionRequired
+				,dblPercentage
+				,intMarginById
+				,dblMargin
+				,ysnCostAppliedAtInvoice
+				,ysnPartialFillConsumption
+				,intManufacturingCellId
+				,intWorkOrderId
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				,intConcurrencyId
+				,intCostDriverId
+				,dblCostRate
+				,ysnLock
+				)
+			SELECT intRecipeItemId = @intRecipeItemId
+				,intRecipeId = @intRecipeId
+				,intItemId = @intItemId
+				,dblQuantity = 1
+				,dblCalculatedQuantity = 1
+				,[intItemUOMId] = @intInputItemUOMId
+				,intRecipeItemTypeId = 1
+				,strItemGroupName = ''
+				,dblUpperTolerance = 10
+				,dblLowerTolerance = 10
+				,dblCalculatedUpperTolerance = 1.1
+				,dblCalculatedLowerTolerance = 0.9
+				,dblShrinkage = 0
+				,ysnScaled = 1
+				,intConsumptionMethodId = 1
+				,intStorageLocationId = NULL
+				,dtmValidFrom = @dtmValidFrom
+				,dtmValidTo = @dtmValidTo
+				,ysnYearValidationRequired = 1
+				,ysnMinorIngredient = 0
+				,intReferenceRecipeId = NULL
+				,ysnOutputItemMandatory = 0
+				,dblScrap = 0
+				,ysnConsumptionRequired = 0
+				,[dblCostAllocationPercentage] = NULL
+				,intMarginById = NULL
+				,dblMargin = NULL
+				,ysnCostAppliedAtInvoice = NULL
+				,ysnPartialFillConsumption = 1
+				,intManufacturingCellId = NULL
+				,intWorkOrderId = @intWorkOrderId
+				,intCreatedUserId = @intUserId
+				,dtmCreated = GETDATE()
+				,intLastModifiedUserId = @intUserId
+				,dtmLastModified = GETDATE()
+				,intConcurrencyId = 1
+				,intCostDriverId = NULL
+				,dblCostRate = NULL
+				,ysnLock = 1
+		END
+	END
 
 	COMMIT TRANSACTION
 

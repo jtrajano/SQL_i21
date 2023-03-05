@@ -24,6 +24,8 @@
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_intConcurrencyId] DEFAULT 0, 
 	intSubLocationId int,
 	strERPRecipeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[dtmValidFrom] DATETIME NULL,
+	[dtmValidTo] DATETIME NULL,
     CONSTRAINT [PK_tblMFWorkOrderRecipe_intRecipeId] PRIMARY KEY ([intRecipeId],[intWorkOrderId]), 
     CONSTRAINT [FK_tblMFWorkOrderRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

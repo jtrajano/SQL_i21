@@ -41,6 +41,7 @@ BEGIN TRY
 		,@strDemandNo NVARCHAR(50)
 		,@intBlendRequirementId INT
 		,@strIsInitialAckReq NVARCHAR(50)
+		,@intLeadTime INT
 
 	SELECT @strProductionOrder = dbo.[fnIPGetSAPIDOCTagValue]('Blend Demand', 'Type')
 
@@ -461,6 +462,13 @@ BEGIN TRY
 						,@ysnProposed = 0
 						,@strPatternString = @strDemandNo OUTPUT
 
+					SELECT @intLeadTime = 0
+
+					SELECT @intLeadTime = dblLeadTime
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = @intItemId
+						AND IL.intLocationId = @intLocationId
+
 					INSERT INTO tblMFBlendRequirement (
 						strDemandNo
 						,intItemId
@@ -497,8 +505,15 @@ BEGIN TRY
 						,@intMachineId
 						,@strOrderNo
 						,@intManufacturingCellId
-						,@dblQuantity
-						,1
+						,IsNULL(@intLeadTime, @dblQuantity)
+						,(
+							CASE 
+								WHEN @intLeadTime IS NULL
+									OR @intLeadTime = 0
+									THEN 1
+								ELSE Ceiling(@dblQuantity / @intLeadTime)
+								END
+							)
 						,1
 						)
 
