@@ -256,8 +256,8 @@ BEGIN TRY
 		,intSampleId = S.intSampleId
 		,intValuationGroupId = STYLE.intValuationGroupId
 		,strValuationGroup = STYLE.strName
-		,strOrigin = ORIGIN.strISOCode
-		,strSustainability = SUSTAINABILITY.strDescription
+		,strOrigin = IMP.strGardenGeoOrigin 
+		,strSustainability = IMP.strSustainability
 		,strMusterLot = IMP.strMusterLot
 		,strMissingLot = IMP.strMissingLot
 		,strComments2 = IMP.strTastersRemarks
@@ -366,8 +366,9 @@ BEGIN TRY
 	BEGIN
 		SET @ysnCreate = 0
 		SET @intBatchSampleId = NULL
+		Select @intSampleId	= NULL
 
-		SELECT @intBatchId
+		--SELECT @intBatchId
 
 		-- Check if Batch ID is supplied in the template
 		IF @intBatchId IS NOT NULL
@@ -383,7 +384,7 @@ BEGIN TRY
 				GOTO CONT
 			END
 
-			SELECT TOP 1 @intBatchSampleId = intSampleId
+			SELECT TOP 1 @intBatchSampleId = intSampleId,@intSampleId = intSampleId
 			FROM tblQMSample
 			WHERE strBatchNo = @strBatchNo
 				AND intSampleTypeId = @intTemplateSampleTypeId
@@ -564,13 +565,13 @@ BEGIN TRY
 					,intOriginalItemId = @intOriginalItemId
 				WHERE intBatchId = @intProductValueId
 
-				IF @intItemId <> @intOriginalItemId
-				BEGIN
+				--IF @intItemId <> @intOriginalItemId
+				--BEGIN
 					EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
 						,@intUserId = @intEntityUserId
 						,@intOriginalItemId = @intOriginalItemId
 						,@intItemId = @intItemId
-				END
+				--END
 
 				-- Sample Detail
 				INSERT INTO tblQMSampleDetail (
@@ -608,31 +609,29 @@ BEGIN TRY
 					,@ysnCreate = 0
 					,@ysnBeforeUpdate = 1
 
-				SELECT @intOriginalItemId = NULL
-
-				SELECT @intOriginalItemId = intItemId
-				FROM tblQMSample
-				WHERE intSampleId = @intBatchSampleId
-
-				UPDATE S
-				SET intConcurrencyId = S.intConcurrencyId + 1
-					,intLastModifiedUserId = @intEntityUserId
-					,dtmLastModified = @dtmDateCreated
-					-- Auction Fields
-					-- ,intTINClearanceId = @intTINClearanceId
-					,intItemId = @intItemId
-				FROM tblQMSample S
-				WHERE S.intSampleId = @intBatchSampleId
-
-				SET @intSampleId = @intBatchSampleId
-
-				UPDATE tblMFBatch
-				SET intTealingoItemId = @intItemId
-					,intOriginalItemId = @intOriginalItemId
-				WHERE intBatchId = @intProductValueId
-
-				IF @intItemId <> @intOriginalItemId
+				IF @intItemId IS NOT NULL
 				BEGIN
+					SELECT @intOriginalItemId = NULL
+
+					SELECT @intOriginalItemId = intItemId
+					FROM tblQMSample
+					WHERE intSampleId = @intBatchSampleId
+
+					UPDATE S
+					SET intConcurrencyId = S.intConcurrencyId + 1
+						,intLastModifiedUserId = @intEntityUserId
+						,dtmLastModified = @dtmDateCreated
+						,intItemId = @intItemId
+					FROM tblQMSample S
+					WHERE S.intSampleId = @intBatchSampleId
+
+					SET @intSampleId = @intBatchSampleId
+
+					UPDATE tblMFBatch
+					SET intTealingoItemId = @intItemId
+						,intOriginalItemId = @intOriginalItemId
+					WHERE intBatchId = @intProductValueId
+
 					EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
 						,@intUserId = @intEntityUserId
 						,@intOriginalItemId = @intOriginalItemId
@@ -708,16 +707,12 @@ BEGIN TRY
 		IF @intItemId IS NULL
 			SELECT TOP 1 @intItemId=ITEM.intItemId
 			FROM tblQMSample S
-			INNER JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-			INNER JOIN (
-				tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID
-				) ON CA.intCommodityAttributeId = S.intCountryID
 			INNER JOIN tblICItem ITEM ON ITEM.strItemNo LIKE @strBrand -- Leaf Size
 				-- TODO: To update filter once Sub Cluster is provided
 				+ '%' -- To be updated by sub cluster
 				+ @strValuationGroup -- Leaf Style
-				+ ORIGIN.strISOCode -- Origin
-				+ '-' + SUSTAINABILITY.strDescription -- Rain Forest / Sustainability
+				+ @strOrigin -- Origin
+				+(Case When @strSustainability<>'' Then '-' + @strSustainability Else '' End) -- Rain Forest / Sustainability
 			 JOIN tblQMProduct P ON P.intProductValueId = ITEM.intItemId AND P.intProductTypeId =  2 -- Item
              JOIN tblQMProductProperty PP ON PP.intProductId = P.intProductId
              JOIN tblQMProperty PROP ON PROP.intPropertyId = PP.intPropertyId
@@ -802,6 +797,16 @@ BEGIN TRY
 			,intSampleStatusId = 3 -- Approved
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
+
+		EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
+				,@intUserId = @intEntityUserId
+				,@intOriginalItemId = @intOriginalItemId
+				,@intItemId = @intItemId
+
+		UPDATE tblMFBatch
+		SET intTealingoItemId = @intItemId
+			,intOriginalItemId = @intOriginalItemId
+		WHERE intBatchId = @intProductValueId
 
 		DECLARE @intProductId INT
 

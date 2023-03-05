@@ -1002,11 +1002,14 @@ BEGIN TRY
 					FROM tblMFBatch
 					WHERE intBatchId = @intProductValueId
 
-					UPDATE dbo.tblMFBatch
-					SET intSampleId = @intSampleId
-						,intTealingoItemId = @intItemId
-						,intOriginalItemId = @intOriginalItemId
-					WHERE intBatchId = @intProductValueId
+					if @intImportType=1
+					Begin
+						UPDATE dbo.tblMFBatch
+						SET intSampleId = @intSampleId
+							,intTealingoItemId = @intItemId
+							,intOriginalItemId = @intOriginalItemId
+						WHERE intBatchId = @intProductValueId
+					End
 
 					-- Sample Detail
 					INSERT INTO tblQMSampleDetail (
@@ -1070,10 +1073,14 @@ BEGIN TRY
 
 					SET @intSampleId = @intBatchSampleId
 
-					UPDATE tblMFBatch
-					SET intTealingoItemId = @intItemId
-						,intOriginalItemId = @intOriginalItemId
-					WHERE intBatchId = @intProductValueId
+
+					IF @intImportType=1
+					BEGIN
+						UPDATE tblMFBatch
+						SET intTealingoItemId = @intItemId
+							,intOriginalItemId = @intOriginalItemId
+						WHERE intBatchId = @intProductValueId
+					END
 				END
 
 				/* Item UOM Validation. */

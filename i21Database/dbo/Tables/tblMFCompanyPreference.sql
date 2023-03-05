@@ -112,5 +112,6 @@
 	ysnRecomputeExpectedValueInBlendManagement BIT,
 	ysnCopyLowerToleranceFromUpperToleranceInBlendManagement BIT,
 	ysnToleranceCheckOnBlendOutputItem BIT,
+	ysnAllowPastDateInBlending BIT
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
