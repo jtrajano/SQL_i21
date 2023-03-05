@@ -117,7 +117,8 @@ BEGIN TRY
     
  END  
    
-  
+ UPDATE #tmpTable
+ SET dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId, intNetWeightUOMId, dblQuantity)
   
  DELETE FROM tblCTContractDetailImport WHERE intContractDetailImportHeaderId = @intContractDetailImportHeaderId  
   
