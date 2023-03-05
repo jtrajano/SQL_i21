@@ -88,6 +88,8 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	,custLocation.ysnRequireSignature
 	,custLocation.ysnRequirePump
 	,custLocation.ysnPrintPriceOnTicket
+	, ysnTaxExempt			= CUSTOMER.ysnTaxExempt
+	, intServiceChargeId	= CUSTOMER.intServiceChargeId
 	
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
