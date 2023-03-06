@@ -115,6 +115,7 @@ SELECT CP.intCompanyPreferenceId
 	 , CP.ysnRecomputeExpectedValueInBlendManagement
 	 , CP.ysnCopyLowerToleranceFromUpperToleranceInBlendManagement
 	 , CP.ysnToleranceCheckOnBlendOutputItem
+	 , CP.ysnShowHideExpectedParameterDefaultValue
 FROM tblMFCompanyPreference CP
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CP.intDefaultShipmentStagingLocation
 LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = CP.intDefaultShipmentDockDoorLocation
