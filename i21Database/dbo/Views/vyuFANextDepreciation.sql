@@ -23,12 +23,11 @@ Ordered AS(
 SELECT 
     intAssetId,  
     dtmNextDepreciation dtmDate,  
-    F.intGLFiscalYearPeriodId,
-    F.intFiscalYearId
+    F.intGLFiscalYearPeriodId 
 FROM Ordered A   
 OUTER APPLY(  
-    SELECT TOP 1 intGLFiscalYearPeriodId ,intFiscalYearId
-    FROM tblGLFiscalYearPeriod 
+    SELECT TOP 1 intGLFiscalYearPeriodId 
+    FROM tblGLFiscalYearPeriod   
     WHERE dtmNextDepreciation BETWEEN dtmStartDate AND dtmEndDate  
 ) F  
 WHERE rowId = 1
