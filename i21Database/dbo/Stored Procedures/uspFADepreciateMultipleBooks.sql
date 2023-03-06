@@ -17,6 +17,7 @@ SET XACT_ABORT ON
 
 DECLARE @ErrorMsg NVARCHAR(MAX)
 DECLARE @IdGood FABookDepreciationTypeTable
+DECLARE @intIsOverride INT
 
 DECLARE @tblError TABLE (  
   intAssetId INT NOT NULL,
@@ -270,6 +271,8 @@ BEGIN
     END
 
     -- Get Accounts Overridden by Location Segment
+
+
 	DECLARE @tblOverrideAccount TABLE (
 		intAssetId INT,
 		intAccountId INT,
@@ -278,80 +281,169 @@ BEGIN
 		strNewAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 		strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
 	)
-	INSERT INTO @tblOverrideAccount (
-		intAssetId
-		,intAccountId
-		,intTransactionType
-		,intNewAccountId
-		,strNewAccountId
-		,strError
-	)
-	SELECT DISTINCT
-		AssetAccountOverride.intAssetId
-		,AssetAccountOverride.intAccountId
-		,AssetAccountOverride.intTransactionType
-		,AssetAccountOverride.intNewAccountId
-		,AssetAccountOverride.strNewAccountId
-		,AssetAccountOverride.strError
-	FROM tblFAFixedAsset A
-    JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId
-    OUTER APPLY (
-		SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
-	) Adjustment
-    OUTER APPLY (
-		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.intAssetAccountId, 1)
-	) AssetAccountOverride
-    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
-	AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
-    UNION ALL
-    SELECT DISTINCT
-		OffsetAccount.intAssetId
-		,OffsetAccount.intAccountId
-		,OffsetAccount.intTransactionType
-		,OffsetAccount.intNewAccountId
-		,OffsetAccount.strNewAccountId
-		,OffsetAccount.strError
-	FROM tblFAFixedAsset A
-    JOIN @tblDepComputation B 
-    ON A.intAssetId = B.intAssetId
-    OUTER APPLY (
-		SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
-	) Adjustment
-    OUTER APPLY (
-		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.intExpenseAccountId, 2)
-	) OffsetAccount
-    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL 
-	AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
-    UNION ALL
-    SELECT DISTINCT
-		DepreciationAccount.intAssetId
-		,DepreciationAccount.intAccountId
-		,DepreciationAccount.intTransactionType
-		,DepreciationAccount.intNewAccountId
-		,DepreciationAccount.strNewAccountId
-		,DepreciationAccount.strError
-	FROM tblFAFixedAsset A
-    JOIN @tblDepComputation B 
-    ON A.intAssetId = B.intAssetId
-    OUTER APPLY (
-		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END, CASE WHEN B.strTransaction = 'Imported' THEN 2 ELSE 3 END)
-	) DepreciationAccount
-    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
-    UNION ALL
-    SELECT DISTINCT
-		AccumulatedDepreciationAccount.intAssetId
-		,AccumulatedDepreciationAccount.intAccountId
-		,AccumulatedDepreciationAccount.intTransactionType
-		,AccumulatedDepreciationAccount.intNewAccountId
-		,AccumulatedDepreciationAccount.strNewAccountId
-		,AccumulatedDepreciationAccount.strError
-	FROM tblFAFixedAsset A
-    JOIN @tblDepComputation B 
-    ON A.intAssetId = B.intAssetId
-    OUTER APPLY (
-		SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.[intAccumulatedAccountId], 4)
-	) AccumulatedDepreciationAccount
-    WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+
+    SET @intIsOverride = ( SELECT top 1 ysnOverrideLocation FROM tblFAFixedAsset WHERE intAssetId in (select top 1 intAssetId from @tblDepComputation))
+
+    IF @intIsOverride = 1 
+    BEGIN
+	        INSERT INTO @tblOverrideAccount (
+		        intAssetId
+		        ,intAccountId
+		        ,intTransactionType
+		        ,intNewAccountId
+		        ,strNewAccountId
+		        ,strError
+	        )
+	        SELECT DISTINCT
+		        AssetAccountOverride.intAssetId
+		        ,AssetAccountOverride.intAccountId
+		        ,AssetAccountOverride.intTransactionType
+		        ,AssetAccountOverride.intNewAccountId
+		        ,AssetAccountOverride.strNewAccountId
+		        ,AssetAccountOverride.strError
+	        FROM tblFAFixedAsset A
+            JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId
+            OUTER APPLY (
+		        SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+	        ) Adjustment
+            OUTER APPLY (
+		        SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.intAssetAccountId, 1)
+	        ) AssetAccountOverride
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+	        AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
+            UNION ALL
+            SELECT DISTINCT
+		        OffsetAccount.intAssetId
+		        ,OffsetAccount.intAccountId
+		        ,OffsetAccount.intTransactionType
+		        ,OffsetAccount.intNewAccountId
+		        ,OffsetAccount.strNewAccountId
+		        ,OffsetAccount.strError
+	        FROM tblFAFixedAsset A
+            JOIN @tblDepComputation B 
+            ON A.intAssetId = B.intAssetId
+            OUTER APPLY (
+		        SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+	        ) Adjustment
+            OUTER APPLY (
+		        SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.intExpenseAccountId, 2)
+	        ) OffsetAccount
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL 
+	        AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
+            UNION ALL
+            SELECT DISTINCT
+		        DepreciationAccount.intAssetId
+		        ,DepreciationAccount.intAccountId
+		        ,DepreciationAccount.intTransactionType
+		        ,DepreciationAccount.intNewAccountId
+		        ,DepreciationAccount.strNewAccountId
+		        ,DepreciationAccount.strError
+	        FROM tblFAFixedAsset A
+            JOIN @tblDepComputation B 
+            ON A.intAssetId = B.intAssetId
+            OUTER APPLY (
+		        SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, CASE WHEN B.strTransaction = 'Imported' THEN A.[intExpenseAccountId] ELSE A.[intDepreciationAccountId] END, CASE WHEN B.strTransaction = 'Imported' THEN 2 ELSE 3 END)
+	        ) DepreciationAccount
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+            UNION ALL
+            SELECT DISTINCT
+		        AccumulatedDepreciationAccount.intAssetId
+		        ,AccumulatedDepreciationAccount.intAccountId
+		        ,AccumulatedDepreciationAccount.intTransactionType
+		        ,AccumulatedDepreciationAccount.intNewAccountId
+		        ,AccumulatedDepreciationAccount.strNewAccountId
+		        ,AccumulatedDepreciationAccount.strError
+	        FROM tblFAFixedAsset A
+            JOIN @tblDepComputation B 
+            ON A.intAssetId = B.intAssetId
+            OUTER APPLY (
+		        SELECT * FROM dbo.fnFAGetOverrideAccount(A.intAssetId, A.[intAccumulatedAccountId], 4)
+	        ) AccumulatedDepreciationAccount
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL
+    END
+    ELSE
+    BEGIN 
+            INSERT INTO @tblOverrideAccount (  
+            intAssetId  
+            ,intAccountId  
+            ,intTransactionType  
+            ,intNewAccountId  
+            ,strNewAccountId  
+            ,strError  
+            )  
+            SELECT DISTINCT  
+            AssetAccountOverride.intAssetId  
+            ,AssetAccountOverride.intAccountId  
+            ,AssetAccountOverride.intTransactionType  
+            ,AssetAccountOverride.intNewAccountId  
+            ,AssetAccountOverride.strNewAccountId  
+            ,AssetAccountOverride.strError  
+            FROM tblFAFixedAsset A  
+            JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
+            OUTER APPLY (  
+            SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1  
+            ) Adjustment  
+            OUTER APPLY (  
+            SELECT intAssetId,intAssetAccountId AS intAccountId , 1 AS intTransactionType , intAssetAccountId AS intNewAccountId, (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = intAssetAccountId) AS strNewAccountId , NULL AS strError  FROM tblFAFixedAsset WHERE intAssetId = A.intAssetId
+            ) AssetAccountOverride  
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL  
+            AND ISNULL(Adjustment.dblAdjustment, 0) <> 0  
+            UNION ALL  
+            SELECT DISTINCT  
+            OffsetAccount.intAssetId  
+            ,OffsetAccount.intAccountId  
+            ,OffsetAccount.intTransactionType  
+            ,OffsetAccount.intNewAccountId  
+            ,OffsetAccount.strNewAccountId  
+            ,OffsetAccount.strError  
+            FROM tblFAFixedAsset A  
+            JOIN @tblDepComputation B   
+            ON A.intAssetId = B.intAssetId  
+            OUTER APPLY (  
+            SELECT TOP 1 dblAdjustment FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1  
+            ) Adjustment  
+            OUTER APPLY (  
+            SELECT intAssetId,intExpenseAccountId AS intAccountId , 2 AS intTransactionType , intExpenseAccountId AS intNewAccountId, (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = intExpenseAccountId) AS strNewAccountId , NULL AS strError  FROM tblFAFixedAsset WHERE intAssetId = A.intAssetId
+            ) OffsetAccount  
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL   
+            AND ISNULL(Adjustment.dblAdjustment, 0) <> 0  
+            UNION ALL  
+            SELECT DISTINCT  
+            DepreciationAccount.intAssetId  
+            ,DepreciationAccount.intAccountId  
+            ,DepreciationAccount.intTransactionType  
+            ,DepreciationAccount.intNewAccountId  
+            ,DepreciationAccount.strNewAccountId  
+            ,DepreciationAccount.strError  
+            FROM tblFAFixedAsset A  
+            JOIN @tblDepComputation B   
+            ON A.intAssetId = B.intAssetId  
+            OUTER APPLY (  	  
+		            SELECT intAssetId,
+		            CASE WHEN B.strTransaction = 'Imported' THEN intExpenseAccountId ELSE intDepreciationAccountId END AS intAccountId ,
+		            CASE WHEN B.strTransaction = 'Imported' THEN 2 ELSE 3 END AS intTransactionType,
+		            CASE WHEN B.strTransaction = 'Imported' THEN intExpenseAccountId ELSE intDepreciationAccountId END AS intNewAccountId, 
+		            (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = (CASE WHEN B.strTransaction = 'Imported' THEN intExpenseAccountId ELSE intDepreciationAccountId END)) AS strNewAccountId , 
+		            NULL AS strError  
+		            FROM tblFAFixedAsset WHERE intAssetId = A.intAssetId
+            ) DepreciationAccount  
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL  
+            UNION ALL  
+            SELECT DISTINCT  
+            AccumulatedDepreciationAccount.intAssetId  
+            ,AccumulatedDepreciationAccount.intAccountId  
+            ,AccumulatedDepreciationAccount.intTransactionType  
+            ,AccumulatedDepreciationAccount.intNewAccountId  
+            ,AccumulatedDepreciationAccount.strNewAccountId  
+            ,AccumulatedDepreciationAccount.strError  
+            FROM tblFAFixedAsset A  
+            JOIN @tblDepComputation B   
+            ON A.intAssetId = B.intAssetId  
+            OUTER APPLY (  
+            SELECT intAssetId,intAccumulatedAccountId AS intAccountId , 4 AS intTransactionType , intAccumulatedAccountId AS intNewAccountId, (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = intAccumulatedAccountId) AS strNewAccountId , NULL AS strError  FROM tblFAFixedAsset WHERE intAssetId = A.intAssetId
+            ) AccumulatedDepreciationAccount  
+            WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL  
+    END 
 
     -- Validate override accounts
 	IF EXISTS(SELECT TOP 1 1 FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL)

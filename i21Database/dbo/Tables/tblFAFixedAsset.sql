@@ -61,6 +61,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[ysnHasNewAccountPosted]		BIT DEFAULT (0) NOT NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
 	[intAssetTaxJurisdictionId]		INT NULL,
+	[ysnOverrideLocation]		BIT DEFAULT (0) NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
