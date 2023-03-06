@@ -127,6 +127,7 @@ BEGIN
 		ON A.intItemId = C.intItemId
 	WHERE (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
 	AND A.dblQtyReceived > A.dblQtyOrdered
+	AND A.dblQtyReceived != 0
 
 	IF @po IS NOT NULL
 	BEGIN
