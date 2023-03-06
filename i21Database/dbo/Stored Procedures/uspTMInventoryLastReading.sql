@@ -29,7 +29,7 @@ BEGIN
 					intDeviceTankMonitorId = B.intDeviceTankMonitorId
 			,dtmdate = CONVERT(VARCHAR(10), B.dtmDateTime, 111)
 			,dtmHour = DATEPART(HOUR, B.dtmDateTime)
-			,RowNumber = ROW_NUMBER() OVER (PARTITION BY DATEPART(HOUR, B.dtmDateTime) ORDER BY dtmDateTime DESC) 
+			,RowNumber = ROW_NUMBER() OVER (PARTITION BY DATEPART(HOUR, B.dtmDateTime) ORDER BY intTankReadingId DESC) 
 		FROM tblTMSite A
 			INNER JOIN tblTMTankReading B
 			ON B.intSiteId = A.intSiteID
@@ -59,5 +59,5 @@ BEGIN
 			,intDeviceTankMonitorId
 	FROM CTE 
 	WHERE RowNumber = 1
-	order by dtmDateTime desc
+	--order by dtmDateTime desc
 END
