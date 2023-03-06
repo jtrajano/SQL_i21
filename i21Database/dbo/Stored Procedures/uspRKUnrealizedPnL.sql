@@ -86,6 +86,7 @@ BEGIN
 		, dtmTradeDate
 		, strInternalTradeNo
 		, strBroker
+		, intEntityId
 		, strBrokerAccount
 		, strBook
 		, strSubBook
@@ -139,6 +140,7 @@ BEGIN
 					, dtmTradeDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ot.dtmFilledDate, 110), 110)
 					, ot.strInternalTradeNo
 					, ot.strBroker
+					, ot.intEntityId
 					, ot.strBrokerAccount
 					, ot.strBook
 					, ot.strSubBook
@@ -282,6 +284,7 @@ BEGIN
 		, dtmTradeDate
 		, strInternalTradeNo
 		, strBroker
+		, intEntityId
 		, strBrokerAccount
 		, strBook
 		, strSubBook
