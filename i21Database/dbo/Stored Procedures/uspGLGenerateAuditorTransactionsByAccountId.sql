@@ -10,7 +10,8 @@ BEGIN
 
     DECLARE @strError NVARCHAR(MAX)
     DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 0;
-
+    DECLARE @intDefaultCurrencyId INT
+    --SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
     BEGIN TRANSACTION;
 
     BEGIN TRY
@@ -31,6 +32,8 @@ BEGIN
                 , A.dtmDateEntered
                 , dblDebit = ISNULL(A.dblDebit, 0)
                 , dblCredit = ISNULL(A.dblCredit, 0)
+                --, dblDebitForeign = CASE WHEN intCurrencyId <> @intDefaultCurrencyId THEN ISNULL(A.dblDebitForeign, 0) ELSE 0 END
+                --, dblCreditForeign = CASE WHEN intCurrencyId <> @intDefaultCurrencyId THEN ISNULL(A.dblCreditForeign, 0) ELSE 0 END
                 , dblDebitForeign = ISNULL(A.dblDebitForeign, 0)
                 , dblCreditForeign = ISNULL(A.dblCreditForeign, 0)
                 , A.strPeriod 
@@ -107,16 +110,16 @@ BEGIN
             DECLARE @dblTotalDebitForeign NUMERIC(18,6)
             DECLARE @dblTotalCreditForeign NUMERIC(18,6)
 
+            DECLARE 
+            @beginBalance NUMERIC(18,6)              = 0,
+            @beginBalanceForeign NUMERIC(18,6)       = 0,
+            @beginBalanceDebit NUMERIC(18,6)         = 0,
+            @beginBalanceCredit NUMERIC(18,6)        = 0,
+            @beginBalanceDebitForeign NUMERIC(18,6)  = 0,
+            @beginBalanceCreditForeign NUMERIC(18,6) = 0
+
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
-                DECLARE 
-                    @beginBalance NUMERIC(18,6) = 0,
-                    @beginBalanceForeign NUMERIC(18,6) = 0,
-                    @beginBalanceDebit NUMERIC(18,6) = 0,
-                    @beginBalanceCredit NUMERIC(18,6) = 0,
-                    @beginBalanceDebitForeign NUMERIC(18,6) = 0,
-                    @beginBalanceCreditForeign NUMERIC(18,6) = 0
-
                 SELECT TOP 1 @intAccountId= intAccountId , @intCurrencyId = intCurrencyId, @strAccountId = strAccountId
                 FROM #TransactionGroup 
                 ORDER BY strAccountId, intCurrencyId
@@ -126,11 +129,21 @@ BEGIN
                     SET @intAccountIdLoop  = @intAccountId
 
                     SELECT
+                    @beginBalance               = 0,
+                    @beginBalanceDebit          = 0,
+                    @beginBalanceCredit         = 0,
+                    @beginBalanceForeign        = 0,
+                    @beginBalanceDebitForeign   = 0,
+                    @beginBalanceCreditForeign  = 0
+
+
+                    SELECT
                     @beginBalance=          ISNULL(beginBalance,0),
                     @beginBalanceDebit=     ISNULL(beginBalanceDebit,0),
                     @beginBalanceCredit=    ISNULL(beginBalanceCredit,0)
                     FROM dbo.fnGLGetBeginningBalanceAuditorReport(@strAccountId,@dtmDateFrom)
 
+                    --IF @intCurrencyId <> @intDefaultCurrencyId
                     SELECT
                     @beginBalanceForeign=       ISNULL(beginBalanceForeign,0),
                     @beginBalanceDebitForeign=  ISNULL(beginBalanceDebitForeign,0),
@@ -161,7 +174,7 @@ BEGIN
                         , intConcurrencyId
                     )
                     SELECT TOP 1
-                        CAST(0 AS BIT)
+                         CAST(0 AS BIT)
                         ,CAST(1 AS BIT)
                         , 0
                         , @intEntityId
@@ -184,8 +197,6 @@ BEGIN
                         FROM #TransactionGroup 
                         WHERE intAccountId = @intAccountId
                         AND @intCurrencyId = intCurrencyId
-            
-
                 END
 
                 ELSE
@@ -196,16 +207,6 @@ BEGIN
                     @beginBalanceCreditForeign= ISNULL(beginBalanceCreditForeign,0)
                     FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@intCurrencyId)
                 END
-
-                -- IF @intCurrencyIdLoop <> @intCurrencyId
-                --     SELECT
-                --     @beginBalanceForeign=       ISNULL(beginBalanceForeign,0),
-                --     @beginBalanceDebitForeign=  ISNULL(beginBalanceDebitForeign,0),
-                --     @beginBalanceCreditForeign= ISNULL(beginBalanceCreditForeign,0)
-                --     FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@intCurrencyId)
-                
-            
-
               
 
                 ;WITH CTE AS(
@@ -253,8 +254,13 @@ BEGIN
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
+                    
                     , sum(dblDebit - dblCredit) OVER ( ORDER BY dtmDate, intGLDetailId)  + @beginBalance  dblEndingBalance
                     , sum(dblDebitForeign - dblCreditForeign) OVER ( ORDER BY dtmDate, intGLDetailId) + @beginBalanceForeign  dblEndingBalanceForeign
+
+
+                    -- , sum(dblDebit - dblCredit) OVER ( ORDER BY dtmDate, intGLDetailId)  - @beginBalance  dblBeginningBalance
+                    -- , sum(dblDebitForeign - dblCreditForeign) OVER ( ORDER BY dtmDate, intGLDetailId)  - @beginBalanceForeign  dblBeginningBalanceForeign
                     FROM #AuditorTransactions 
                     WHERE @intAccountId =intAccountId 
                     AND @intCurrencyId = intCurrencyId   
@@ -263,8 +269,10 @@ BEGIN
                 CTEBB AS(
 
                     SELECT *,
-                    dblEndingBalance - (dblDebit - dblCredit)  dblBeginningBalance ,
-                    dblEndingBalanceForeign - (dblDebitForeign - dblCreditForeign) dblBeginningBalanceForeign
+                    dblBeginningBalance =  dblEndingBalance- (dblDebit- dblCredit),
+                    dblBeginningBalanceForeign =  dblEndingBalanceForeign- (dblDebitForeign- dblCreditForeign)
+                    -- dblEndingBalance - (dblDebit - dblCredit)  dblBeginningBalance ,
+                    -- dblEndingBalanceForeign - (dblDebitForeign - dblCreditForeign) dblBeginningBalanceForeign
                     FROM 
                     CTE 
 
@@ -377,9 +385,10 @@ BEGIN
                 FROM CTEBB
             
 
-                SELECT
-                @dblTotalDebit = sum(dblDebit), @dblTotalCredit= sum(dblCredit), 
-                @dblTotalDebitForeign = sum(dblDebitForeign), 
+               SELECT
+                @dblTotalDebit = sum(dblDebit) , 
+				@dblTotalCredit= sum(dblCredit) ,
+                @dblTotalDebitForeign = sum(dblDebitForeign),
                 @dblTotalCreditForeign = sum(dblCreditForeign)
                 FROM #AuditorTransactions 
                 WHERE @intAccountId =intAccountId 
@@ -397,12 +406,12 @@ BEGIN
                     , strTotalTitle
                     , strGroupTitle
                     , intEntityId
-                    , dblBeginningBalance
+                    , dblEndingBalance
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblBeginningBalanceForeign
+                    , dblEndingBalanceForeign
                     , strCurrency
                     , strAccountId
                     , strLocation
@@ -419,12 +428,12 @@ BEGIN
                     , 'Total'
                     , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                     , @intEntityId
-                    ,  @dblTotalDebit- @dblTotalCredit + @beginBalance
-                    , @dblTotalDebit
-                    , @dblTotalCredit
+                    , @dblTotalDebit- @dblTotalCredit + @beginBalance
+                    , @dblTotalDebit + CASE WHEN @beginBalance > 0 THEN @beginBalance ELSE 0 END
+                    , @dblTotalCredit - CASE WHEN @beginBalance < 0 THEN  @beginBalance ELSE 0 END
                     , @dblTotalDebitForeign
                     , @dblTotalCreditForeign     
-                    , @dblTotalDebitForeign- @dblTotalCreditForeign + @beginBalanceForeign    
+                    , @dblTotalDebitForeign- @dblTotalCreditForeign  + @beginBalanceForeign
                     , strCurrency
                     , strAccountId
                     , strLocation
@@ -434,7 +443,8 @@ BEGIN
                     FROM #TransactionGroup 
                     WHERE intAccountId = @intAccountId
                     AND @intCurrencyId = intCurrencyId
-            
+            	
+                SET @beginBalance = @beginBalance +  (@dblTotalDebit - @dblTotalCredit)
 
                 DELETE #TransactionGroup WHERE @intAccountId = intAccountId AND @intCurrencyId = intCurrencyId
             END
