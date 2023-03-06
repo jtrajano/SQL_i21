@@ -8,7 +8,7 @@
 	[intRowNumber] INT NULL,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 	CONSTRAINT [PK_tblVRUOMXref] PRIMARY KEY CLUSTERED ([intUOMXrefId] ASC),
-	CONSTRAINT [UQ_tblVRUOMXref_strVendorUOM_intEntityId] UNIQUE NONCLUSTERED ([strVendorUOM] ASC, [intUnitMeasureId], [intVendorSetupId] ASC),
+	CONSTRAINT [UQ_tblVRUOMXref_intUnitMeasureId_intEntityId] UNIQUE NONCLUSTERED ([intUnitMeasureId], [intVendorSetupId] ASC),
 	CONSTRAINT [FK_tblVRUOMXref_tblVRVendorSetup] FOREIGN KEY([intVendorSetupId])REFERENCES [dbo].[tblVRVendorSetup] ([intVendorSetupId]) ON DELETE CASCADE
 );
 GO
