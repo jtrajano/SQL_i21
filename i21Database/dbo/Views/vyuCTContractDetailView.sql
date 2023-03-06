@@ -1,503 +1,342 @@
-﻿CREATE VIEW dbo.vyuCTGridContractDetail
+﻿CREATE VIEW [dbo].[vyuCTContractDetailView]
+
 AS
-	SELECT	DISTINCT
-			--CD.*,
-			CD.intContractDetailId,
-			CD.intSplitFromId,
-			CD.intParentDetailId,
-			CD.ysnSlice,
-			CD.intConcurrencyId,
-			CD.intContractHeaderId,
-			CD.intContractStatusId,
-			CD.intContractSeq,
-			CD.intCompanyLocationId,
-			CD.intShipToId,
-			CD.dtmStartDate,
-			CD.dtmEndDate,
-			CD.ysnCashFlowOverride,
-			CD.dtmCashFlowDate,
-			CD.intFreightTermId,
-			CD.intShipViaId,
-			CD.intItemContractId,
-			CD.intItemBundleId,
-			CD.intItemId,
+
+	SELECT	CD.intContractDetailId,				CD.intContractSeq,				CD.intConcurrencyId				AS	intDetailConcurrencyId,
+			CD.intCompanyLocationId,			CD.dtmStartDate,				CD.intItemId,									
+			CD.dtmEndDate,						CD.intFreightTermId,			CD.intShipViaId,								
+			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
+			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
+			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
+			CASE WHEN CD.dblRate <> 0 THEN CD.dblRate ELSE dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) END as dblRate,										
+			CD.intContractStatusId,				CD.intMarketZoneId,								
+			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
+			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
+			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
+			CD.dblOriginalQty,					dblBalance = case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end,					CD.dblIntransitQty,
+			dblScheduleQty = case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end,					CD.strPackingDescription,		intPriceItemUOMId = isnull(CD.intPriceItemUOMId,CD.intItemUOMId),
+			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
+			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
+			CD.intShipperId,					CD.intNetWeightUOMId,			CD.strVendorLotID,
+			CD.strInvoiceNo,					CD.dblNoOfLots,					CD.intUnitsPerLayer,
+			CD.intLayersPerPallet,				CD.dtmEventStartDate,			CD.dtmPlannedAvailabilityDate,
+			CD.dtmUpdatedAvailabilityDate,		CD.intBookId,					CD.intSubBookId,
+			CD.intContainerTypeId,				CD.intNumberOfContainers,		CD.intInvoiceCurrencyId,
+			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
+			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
+			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
+			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,			CD.strLoadingPointType,
+			CD.strDestinationPointType,			CD.intItemContractId,			CD.intNoOfLoad,
+			CD.dblQuantityPerLoad,				CD.strReference,				CD.intStorageScheduleRuleId,
+			CD.dblNetWeight,					CD.ysnUseFXPrice,				CD.intSplitId,
+			CD.intFarmFieldId,					CD.intRateTypeId,				CD.intCurrencyExchangeRateId,
 			CD.strItemSpecification,
-			CD.intCategoryId,
-			CD.dblQuantity,
-			CD.intItemUOMId,
-			CD.dblOriginalQty,
-			CD.dblBalance,
-			CD.dblIntransitQty,
-			CD.dblScheduleQty,
-			CD.dblBalanceLoad,
-			CD.dblScheduleLoad,
-			CD.dblShippingInstructionQty,
-			CD.dblNetWeight,
-			CD.intNetWeightUOMId,
-			CD.intUnitMeasureId,
-			CD.intCategoryUOMId,
-			CD.intNoOfLoad,
-			CD.dblQuantityPerLoad,
-			CD.intIndexId,
-			CD.dblAdjustment,
-			CD.intAdjItemUOMId,
-			CD.intPricingTypeId,
-			CD.intFutureMarketId,
-			CD.intFutureMonthId,
-			CD.dblFutures,
-			CD.dblBasis,
-			CD.dblOriginalBasis,
-			CD.dblConvertedBasis,
-			CD.intBasisCurrencyId,
-			CD.intBasisUOMId,
-			CD.dblFreightBasisBase,
-			CD.intFreightBasisBaseUOMId,
-			CD.dblFreightBasis,
-			CD.intFreightBasisUOMId,
-			CD.dblRatio,
-			CD.dblCashPrice,
-			CD.dblTotalCost,
-			CD.intCurrencyId,
-			CD.intPriceItemUOMId,
-			CD.dblNoOfLots,
-			CD.dtmLCDate,
-			CD.dtmLastPricingDate,
-			CD.dblConvertedPrice,
-			CD.intConvPriceCurrencyId,
-			CD.intConvPriceUOMId,
-			CD.intMarketZoneId,
-			CD.intDiscountTypeId,
-			CD.intDiscountId,
-			CD.intDiscountScheduleId,
-			CD.intDiscountScheduleCodeId,
-			CD.intStorageScheduleRuleId,
-			CD.intContractOptHeaderId,
-			CD.strBuyerSeller,
-			CD.intBillTo,
-			CD.intFreightRateId,
-			CD.strFobBasis,
-			CD.intRailGradeId,
-			CD.strRailRemark,
-			CD.strLoadingPointType,
-			CD.intLoadingPortId,
-			CD.strDestinationPointType,
-			CD.intDestinationPortId,
-			CD.strShippingTerm,
-			CD.intShippingLineId,
-			CD.strVessel,
-			CD.intDestinationCityId,
-			CD.intShipperId,
-			CD.strRemark,
-			CD.intSubLocationId,
-			CD.intStorageLocationId,
-			CD.intPurchasingGroupId,
-			CD.intFarmFieldId,
-			CD.intSplitId,
-			CD.strGrade,
-			CD.strGarden,
-			CD.strVendorLotID,
-			CD.strInvoiceNo,
-			CD.strReference,
-			CD.strContractReference,
-			CD.strERPPONumber,
-			CD.strERPItemNumber,
-			CD.strERPBatchNumber,
-			CD.intUnitsPerLayer,
-			CD.intLayersPerPallet,
-			CD.dtmEventStartDate,
-			CD.dtmPlannedAvailabilityDate,
-			CD.dtmUpdatedAvailabilityDate,
-			CD.dtmM2MDate,
-			CD.intBookId,
-			CD.intSubBookId,
-			CD.intContainerTypeId,
-			CD.intNumberOfContainers,
-			CD.intInvoiceCurrencyId,
-			CD.dtmFXValidFrom,
-			CD.dtmFXValidTo,
-			CD.dblRate,
-			CD.dblFXPrice,
-			CD.ysnUseFXPrice,
-			CD.intFXPriceUOMId,
-			CD.strFXRemarks,
-			CD.dblAssumedFX,
-			CD.strFixationBy,
-			CD.strPackingDescription,
-			CD.dblYield,
-			CD.intCurrencyExchangeRateId,
-			CD.intRateTypeId,
-			CD.intCreatedById,
-			CD.dtmCreated,
-			CD.intLastModifiedById,
-			CD.dtmLastModified,
-			CD.ysnInvoice,
-			CD.ysnProvisionalInvoice,
-			CD.ysnQuantityFinal,
-			CD.intProducerId,
-			CD.ysnClaimsToProducer,
-			CD.ysnRiskToProducer,
-			CD.ysnBackToBack,
-			CD.dblAllocatedQty,
-			CD.dblReservedQty,
-			CD.dblAllocationAdjQty,
-			CD.dblInvoicedQty,
-			CD.ysnPriceChanged,
-			CD.intContractDetailRefId,
-			CD.ysnStockSale,
-			CD.strCertifications,
-			CD.ysnSplit,
-			CD.ysnProvisionalPNL,
-			CD.ysnFinalPNL,
-			CD.dtmProvisionalPNL,
-			CD.dtmFinalPNL,
-
-			CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
-			CD.intContractStatusId intCurrentContractStatusId,
-			MZ.strMarketZoneCode,
-			IM.strItemNo,
-			XM.strUnitMeasure strAdjustmentUOM,
-			CL.strLocationName,
-			FT.strFreightTerm,
-			SV.strName AS strShipVia,
-			CU.strCurrency,
-			CY.strCurrency	strMainCurrency,
-			CU.ysnSubCurrency,
-			FR.strOrigin + FR.strDest strOriginDest,
-			RG.strRailGrade,
-			PT.strPricingType,
-			OH.strContractOptDesc,
-			DT.strDiscountType,
-			DC.strDiscountId,
-			PD.dblQuantityPriceFixed,
-			PD.dblPFQuantityUOMId,
-			PF.[dblTotalLots],
-			PF.[dblLotsFixed],
-			IC.strContractItemName,
-			IB.strItemNo AS strBundleItemNo,
-			WM.strUnitMeasure strNetWeightUOM,
-			PM.strUnitMeasure strPriceUOM,
-			ISNULL(RY.strCountry,OG.strCountry) AS strOrigin,
-			IX.strIndex,
-			CS.strContractStatus,
-			PF.intPriceFixationId, 
-			PF.intPriceContractId, 
-			QA.strContainerNumber,
-			QA.strSampleTypeName,
-			QA.strSampleStatus,
-			QA.dtmTestingEndDate,
-			QA.dblApprovedQty,
-			dblUnApprovedQty = ISNULL(CD.dblQuantity,0) - ISNULL(QA.dblApprovedQty,0),
-			MA.strFutMarketName AS strFutureMarket,
-			REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') strFutureMonth,
-			CASE WHEN (SELECT COUNT(SA.intSpreadArbitrageId) FROM tblCTSpreadArbitrage SA  WHERE SA.intPriceFixationId = PF.intPriceFixationId) > 0
-			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnSpreadAvailable, 
-			CASE WHEN intPFDCount > 0
-			THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)END AS ysnFixationDetailAvailable,
-			CASE	WHEN	CH.ysnCategory = 1
-					THEN	dbo.fnCTConvertQtyToTargetCategoryUOM(CD.intCategoryUOMId,GU.intCategoryUOMId,1)
-					ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CM.intItemUOMId,1) 
-			END		AS		dblConversionFactor,
-			ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM,
-			CASE	WHEN	CH.ysnLoad = 1
-						THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
-						ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
-			END		AS	dblAppliedQty,
-			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,
-			IM.intProductTypeId,
-			CQ.dblBulkQuantity ,
-			CQ.dblBagQuantity,
-			CAST(1 AS BIT) ysnItemUOMIdExist,
-			RM.strUnitMeasure strContainerUOM,
-			SB.strSubLocationName,
-			SL.strName						AS	strStorageLocationName,		
-			LP.strCity						AS	strLoadingPoint,
-			DP.strCity						AS	strDestinationPoint,
-			AP.strApprovalStatus,
-			MA.dblContractSize				AS dblMarketContractSize,
-			MA.intUnitMeasureId				AS intMarketUnitMeasureId,
-			MA.intCurrencyId				AS intMarketCurrencyId,
-			MU.strUnitMeasure				AS strMarketUnitMeasure,
-			XM.strUnitType					AS strQtyUnitType,
-			CAST(ISNULL(LG.intLoadDetailId,0) AS BIT) AS ysnLoadAvailable,
-
-			
-			BK.strBook,
-			SK.strSubBook,
-			BT.strName						AS	strBillTo,
-			SH.strName						AS	strShipper,
-			SN.strName						AS	strShippingLine,
-			EF.strFarmNumber,
-			ES.strSplitNumber,
-			DS.strDiscountDescription,
-			SI.strDescription				AS	strScheduleCode,
-			SR.strScheduleDescription,
-			CG.strCategoryCode,
-			CQ.strContainerType,
-			DY.strCity						AS	strDestinationCity,
-			IY.strCurrency AS strInvoiceCurrency,
-			FY.strCurrency + '/' + TY.strCurrency AS strExchangeRate,
-			PG.strName						AS	strPurchasingGroup,
-			FM.strUnitMeasure				AS	strFXPriceUOM,
-			RT.strCurrencyExchangeRateType,
-			PR.strName						AS	strProducer,
-			CU.intCent						AS	intPriceCurrencyCent,
-			MY.strCurrency					AS	strMarketCurrency,
-			BC.strCurrency					AS	strBasisCurrency,
-			BC.ysnSubCurrency				AS	ysnBasisSubCurrency,
-			CC.strCurrency					AS	strConvertedCurrency,
-			CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
-			BM.strUnitMeasure				AS	strBasisUOM,
-			VM.strUnitMeasure				AS	strConvertedUOM,
-			CH.ysnLoad						AS	ysnLoad,
-			CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS ysnContractAllocated,
-			ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') AS strShipmentStatus,
-			CASE 
-				WHEN CH.intContractTypeId = 1 THEN
-					CASE 
-						WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
-						WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
-						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
-					END
-				ELSE CD.strFinancialStatus --FS.strFinancialStatus
-			END AS strFinancialStatus,
-			strFreightBasisUOM = FBUM.strUnitMeasure,
-			strFreightBasisBaseUOM = FBBUM.strUnitMeasure,
-			CD.intRefFuturesMarketId,
-			CD.intRefFuturesMonthId,
-			CD.intRefFuturesItemUOMId,
-			CD.intRefFuturesCurrencyId,
-			CD.dblRefFuturesQty,
-			RefFuturesMarket.strFutMarketName  strRefFuturesMarket,
-			REPLACE(RefFuturesMonth.strFutureMonth, ' ', '(' + RefFuturesMonth.strSymbol + ') ') strRefFuturesMonth,
-			RefFuturesCurrency.strCurrency strRefFuturesCurrency,
-			RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure,
-			ysnWithPriceFix = convert(bit, isnull(PF.intPriceFixationId,0)),
 			CD.dblQualityPremium,
-			CD.dblOptionalityPremium,
-			ICC.strProductType,
-			ICC.strGrade AS strGradeCommodity,
-			ICC.strRegion,
-			ICC.strSeason,
-			ICC.strClass,
-			ICC.strProductLine,
-			CD.dtmPrepaymentDate,
-			CD.dblPrepaymentAmount,
-			CD.intLocalCurrencyId,
-			CD.intLocalUOMId,	 
-			CD.dblLocalCashPrice,
-			ILU.strUnitMeasure AS strLocalUOM,
-			LUC.strCurrency AS strLocalCurrency,
-			CD.intAverageUOMId,
-			CD.dblAverageQuantity,
-			IAU.strUnitMeasure AS strAverageUOM,
-			CD.strLCNumber,
-			CD.intLCApplicantId,
-			CD.strLCType,
-			CD.strLCStatus,
-			CD.strLCConfirmation,
-			CD.dtmLCDate2,
-			CD.dtmLCValidityDate,
-			CD.dtmLCLatestDateOfReceipt,
-			CD.intLCPlaceOfIssuingId,
-			CD.intLCPaymentTermId,
-			CD.strLCReference,
-			CD.strLCFeesBreakdown,
-			CD.dtmLCStartPeriod,
-			CD.dtmLCEndPeriod,
-			CD.strLCPresentation,
-			CD.intLCTreasuryBankId,
-			CD.intLCBankId,
-			CD.strLCBankRole,
-			CD.ysnTransportPartialShipment,
-			CD.ysnTransportTransShipment,
-			CD.ysnTransportMultiplePorts,
-			CD.dblQuantityMinRate,
-			CD.dblAmountMinRate,
-			CD.dblQuantityMaxRate,
-			CD.dblAmountMaxRate,
-			CD.dblQuantityMinValue,
-			CD.dblAmountMinValue,
-			CD.dblQuantityMaxValue,
-			CD.dblAmountMaxValue
-			, strLCApplicant = credE.strName
-			, strLCPlaceOfIssuing = credC.strCountry
-			, strLCPaymentTerm = credT.strTerm
-			, strLCTreasuryBank = credB.strBankName
-			, strLCBank = credB2.strBankName
-			, CD.intVendorLocationId
-			, CD.ysnTaxOverride
-			, CD.strTaxPoint
-			, CD.intTaxGroupId
-			, TG.strTaxGroup
-			, CD.strTaxLocation
-			, CD.intTaxLocationId
-			, CD.dtmHistoricalDate
-			, CD.dblHistoricalRate
-			, CD.intHistoricalRateTypeId
-			, strHistoricalRateType = HRT.strCurrencyExchangeRateType
-			, strVendorLocation = null
-			, CD.dtmEtaPol
-			, CD.dtmEtaPod
-			, GM.strGardenMark
-			, CD.intReasonCodeId
-			, RC.strReasonCode
-			, CD.dblPurchasePrice
-			, CD.dblLandedPrice
-			, CD.dblSalesPrice
-	FROM			tblCTContractDetail				CD
-			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
-	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
-	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
-	LEFT JOIN tblSMTerm credT on credT.intTermID = CD.intLCPaymentTermId
-	LEFT JOIN tblCMBank credB on credB.intBankId = CD.intLCTreasuryBankId
-	LEFT JOIN tblCMBank credB2 on credB2.intBankId = CD.intLCBankId
-	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
-	LEFT	JOIN	tblCTBook						BK	ON	BK.intBookId						=		CD.intBookId				--strBook
-	LEFT    JOIN	tblCTContractOptHeader			OH	ON	OH.intContractOptHeaderId			=		CD.intContractOptHeaderId	--strContractOptDesc
-	LEFT    JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId				=		CD.intContractStatusId		--strContractStatus
-	LEFT    JOIN	tblCTDiscountType				DT	ON	DT.intDiscountTypeId				=		CD.intDiscountTypeId		--strDiscountType
-	LEFT    JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId					=		CD.intFreightRateId			--strOriginDest
-	LEFT    JOIN	tblCTIndex						IX	ON	IX.intIndexId						=		CD.intIndexId				--strIndex
-	LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
-	LEFT    JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId					=		CD.intRailGradeId
-	LEFT	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId						=		CD.intSubBookId				--strSubBook
-	LEFT	JOIN	tblSMTaxGroup					TG	ON	TG.intTaxGroupId					=		CD.intTaxGroupId
+			CD.dblOptionalityPremium,			CD.strContractReference,
 
-	-- Reference Pricing
-	LEFT JOIN tblRKFutureMarket RefFuturesMarket ON RefFuturesMarket.intFutureMarketId = CD.intRefFuturesMarketId
-	LEFT JOIN tblRKFuturesMonth RefFuturesMonth ON RefFuturesMonth.intFutureMonthId = CD.intRefFuturesMonthId
-	LEFT JOIN tblSMCurrency RefFuturesCurrency ON RefFuturesCurrency.intCurrencyID = CD.intRefFuturesCurrencyId
-	LEFT JOIN tblICItemUOM RefFuturesItemUOMId ON RefFuturesItemUOMId.intItemUOMId = CD.intRefFuturesItemUOMId
-	LEFT JOIN tblICUnitMeasure RefFturesUnitMeasure ON RefFturesUnitMeasure.intUnitMeasureId = RefFuturesItemUOMId.intUnitMeasureId
-	
-	LEFT	JOIN	tblEMEntity						BT	ON	BT.intEntityId						=		CD.intBillTo				--strBillTo
-	LEFT	JOIN	tblEMEntity						SH	ON	SH.intEntityId						=		CD.intShipperId				--strShipper
-	LEFT	JOIN	tblEMEntity						SN	ON	SN.intEntityId						=		CD.intShippingLineId		--strShippingLine
-	LEFT    JOIN	tblEMEntity						SV	ON	SV.intEntityId						=		CD.intShipViaId				--strShipVia
-	LEFT    JOIN	tblEMEntity						PR	ON	PR.intEntityId						=		CD.intProducerId			--strProducer
-	LEFT	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId					=		CD.intFarmFieldId			--strFarmNumber
-	LEFT	JOIN	tblEMEntitySplit				ES	ON	ES.intSplitId						=		CD.intSplitId				--strSplitNumber
-	
-	LEFT    JOIN	tblGRDiscountId					DC	ON	DC.intDiscountId					=		CD.intDiscountId			--strDiscountId
-	LEFT    JOIN	tblGRDiscountSchedule			DS	ON	DS.intDiscountScheduleId			=		CD.intDiscountScheduleId	--strDiscountDescription
-	LEFT    JOIN	tblGRDiscountScheduleCode		SC	ON	SC.intDiscountScheduleCodeId		=		CD.intDiscountScheduleCodeId	
-	LEFT	JOIN	tblICItem						SI	ON	SI.intItemId						=		SC.intItemId				--strScheduleCode
-	LEFT    JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId			=		CD.intStorageScheduleRuleId	--strScheduleDescription
-	
-	LEFT    JOIN	tblICCategory					CG	ON	CG.intCategoryId					=		CD.intCategoryId			--strCategoryCode
-	LEFT    JOIN	tblICCategoryUOM				YU	ON	YU.intCategoryUOMId					=		CD.intCategoryUOMId	
-	LEFT    JOIN	tblICUnitMeasure				YM	ON	YM.intUnitMeasureId					=		YU.intUnitMeasureId			--strUOM
-	LEFT    JOIN	tblICItem						IM	ON	IM.intItemId						=		CD.intItemId				--strItemNo
-	LEFT    JOIN	tblICItemContract				IC	ON	IC.intItemContractId				=		CD.intItemContractId		--strContractItemName
-	LEFT    JOIN	tblICItem						IB	ON	IB.intItemId						=		CD.intItemBundleId			--strBundleItemNo
-	LEFT    JOIN	tblICItemUOM					QU	ON	QU.intItemUOMId						=		CD.intItemUOMId				
-	LEFT    JOIN	tblICUnitMeasure				QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			--strUOM
-	LEFT    JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId						=		CD.intNetWeightUOMId		
-	LEFT    JOIN	tblICUnitMeasure				WM	ON	WM.intUnitMeasureId					=		WU.intUnitMeasureId			--strNetWeightUOM
-	LEFT    JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId						=		CD.intPriceItemUOMId
-	LEFT    JOIN	tblICUnitMeasure				PM	ON	PM.intUnitMeasureId					=		PU.intUnitMeasureId			--strPriceUOM
-	LEFT    JOIN	tblICItemUOM					XU	ON	XU.intItemUOMId						=		CD.intAdjItemUOMId
-	LEFT    JOIN	tblICUnitMeasure				XM	ON	XM.intUnitMeasureId					=		XU.intUnitMeasureId			--strAdjustmentUOM
-	LEFT    JOIN	tblICItemUOM					FU	ON	FU.intItemUOMId						=		CD.intFXPriceUOMId
-	LEFT    JOIN	tblICUnitMeasure				FM	ON	FM.intUnitMeasureId					=		FU.intUnitMeasureId			--strFXPriceUOM
-	LEFT    JOIN	tblICItemUOM					BU	ON	BU.intItemUOMId						=		CD.intBasisUOMId
-	LEFT    JOIN	tblICUnitMeasure				BM	ON	BM.intUnitMeasureId					=		BU.intUnitMeasureId			--strBasisUOM
-	LEFT    JOIN	tblICItemUOM					VU	ON	VU.intItemUOMId						=		CD.intConvPriceUOMId
-	LEFT    JOIN	tblICUnitMeasure				VM	ON	VM.intUnitMeasureId					=		VU.intUnitMeasureId			--strConvertedUOM
-	LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
-	LEFT    JOIN	tblICItemUOM					LU	ON	LU.intItemUOMId						=		CD.intLocalUOMId
-	LEFT    JOIN	tblICUnitMeasure				ILU	ON	ILU.intUnitMeasureId				=		LU.intUnitMeasureId			--strLocalUOM
-	LEFT	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId						=		CD.intAverageUOMId
-	LEFT	JOIN	tblICUnitMeasure				IAU ON	IAU.intUnitMeasureId				=		AU.intUnitMeasureId			--strAverageUOM
+			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
+			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
+			FM.strFutMarketName,				MO.strFutureMonth,				U2.strUnitMeasure				AS	strPriceUOM,
+			MZ.strMarketZoneCode,				OH.strContractOptDesc,			U3.strUnitMeasure				AS	strAdjUOM,
+			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
+			IX.strIndexType,					EF.strFieldNumber,				LP.strCity						AS	strLoadingPoint,	
+			SR.strScheduleDescription,			IM.strShortName,				DP.strCity						AS	strDestinationPoint,
+			SK.intStockUOMId,					SK.strStockUnitMeasure,			DC.strCity						AS	strDestinationCity,
+			SK.intStockUnitMeasureId,			IC.strContractItemName,			PU.intUnitMeasureId				AS	intPriceUnitMeasureId,
+			ST.strSplitNumber,													U4.strUnitMeasure				AS	strStockItemUOM,
+			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
+			ISNULL(IM.ysnUseWeighScales,0)		ysnUseWeighScales,				U7.strUnitMeasure				AS	strNetWeightUOM,
+			BK.strBook,							SO.strSubBook,					ST.strDescription				AS	strSplitDescription,
+			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
+			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
+			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
+			ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0)		-	ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end),0)											AS	dblAvailableQty,
+			dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,
+												ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0) - ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end),0))			AS	dblAvailableQtyInItemStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0))			AS	dblBalanceInItemStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblQuantity,0))		AS	dblQuantityInItemStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblQuantityPerLoad,0))	AS	dblQtyPerLoadInItemStockUOM,
+			CASE	WHEN	CH.ysnLoad = 1
+					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
+					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0)												
+			END																									AS	dblAppliedQty,
+			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)												AS	strSequenceNumber,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInQtyUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity)				AS	dblQtyInPriceUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SM.intItemUOMId,CD.dblQuantity)					AS	dblQtyInStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(SM.intItemUOMId,CD.intPriceItemUOMId,CD.dblCashPrice)				AS	dblCashPriceInStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(AD.intSeqPriceUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)),CD.intItemUOMId,1)AS	dblPriceToQtyConvFactor,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CD.intItemUOMId,1)							AS	dblWeightToQtyConvFactor,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderBalance else CD.dblBalance end),0)		
+																		      -	ISNULL((case when isnull(CH.ysnQuantityAtHeaderLevel,0) = 1 then cds.dblHeaderScheduleQty else CD.dblScheduleQty end),0))	AS	dblAvailableNetWeight,
+			CD.dblBalanceLoad - ISNULL(CD.dblScheduleLoad, 0) AS dblAvailableLoad,
+			CD.dblFutures	/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainFutures,
+			CD.dblBasis		/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainBasis,
+			CD.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainCashPrice,
+			
+			--Required by other modules
 
-	LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket
-	LEFT    JOIN	tblICUnitMeasure				MU	ON	MU.intUnitMeasureId					=		MA.intUnitMeasureId
-	LEFT    JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId					=		CD.intFutureMonthId			--strFutureMonth
-	
-	LEFT    JOIN	tblSMCity						DY	ON	DY.intCityId						=		CD.intDestinationCityId		--strDestinationCity
-	LEFT    JOIN	tblSMCity						DP	ON	DP.intCityId						=		CD.intDestinationPortId		--strDestinationPort
-	LEFT    JOIN	tblSMCity						LP	ON	LP.intCityId						=		CD.intLoadingPortId			--strLoadingPort
-	LEFT    JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId				=		CD.intCompanyLocationId		--strLocationName
-	LEFT    JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID					=		CD.intCurrencyId			--strCurrency
-	LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
-	LEFT    JOIN	tblSMCurrency					BC	ON	BC.intCurrencyID					=		CD.intBasisCurrencyId		--strBasisCurrency
-	LEFT    JOIN	tblSMCurrency					CC	ON	CC.intCurrencyID					=		CD.intConvPriceCurrencyId	--strConvertedCurrency
-	LEFT    JOIN	tblSMCurrency					LUC	ON	LUC.intCurrencyID					=		CD.intLocalCurrencyId		--strLocalCurrency
+			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,
+			SU.strStockUOM,						SU.strStockUOMType,				ISNULL(IU.dblUnitQty,0)			AS	dblItemUOMCF,  
+			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(SU.intStockUOM,0)		AS	intStockUOM,		
+												CS.strContractStatus,			ISNULL(SU.dblStockUOMCF,0)		AS	dblStockUOMCF,	
+			IX.strIndex,						VR.strVendorId,					
+			SP.intSupplyPointId,												SP.intEntityVendorId			AS	intTerminalId,
+			SP.intRackPriceSupplyPointId,		IM.intOriginId,					CA.strDescription				AS	strItemOrigin,
+			RV.dblReservedQuantity,				IM.intLifeTime,					IC.intCountryId					AS	intItemContractOriginId,
+			IM.strLifeTimeType,													CG.strCountry					AS	strItemContractOrigin,
+			CA1.intCountryID AS intOriginCountryId, CA1.strDescription AS strItemOriginCountry,
+			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0)											AS	dblUnReservedQuantity,
+			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)											AS	dblAllocatedQty,
+			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)				AS	dblUnAllocatedQty,
+			ISNULL(PA.intAllocationUOMId,SA.intAllocationUOMId)													AS	intAllocationUOMId,
+			ISNULL(U5.strUnitMeasure,U6.strUnitMeasure)                                                         AS  strAllocationUOM,
+			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)							AS	ysnAllowedToShow,
+			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)											AS	dblExchangeRate,
+			CASE	WHEN	CD.intPricingTypeId = 2
+					THEN	CASE	WHEN	ISNULL(PF.[dblTotalLots],0) = 0 
+									THEN	'Unpriced'
+							ELSE
+									CASE	WHEN ISNULL(PF.[dblTotalLots],0)-ISNULL([dblLotsFixed],0) = 0
+												THEN 'Fully Priced' 
+											WHEN ISNULL([dblLotsFixed],0) = 0 
+												THEN 'Unpriced'
+											ELSE 'Partially Priced' 
+									END
+							END
+					
+					WHEN	CD.intPricingTypeId = 1
+							THEN	'Priced'
+					ELSE	''
+			END		COLLATE Latin1_General_CI_AS AS strPricingStatus,
+			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed],0),CD.dblNoOfLots)	AS NUMERIC(18, 6))			AS	dblUnpricedLots,
+			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18, 6))			AS	dblUnhedgedLots,
+			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalanceLoad,0) AS INT)										AS	intLoadReceived,
+			CAST(CASE WHEN DATEADD(d, 0, DATEDIFF(d, 0, GETUTCDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),ISNULL(CD.dtmStartDateUTC,CD.dtmStartDate)) AND CH.intContractTypeId = 1 THEN 1
+					WHEN DATEADD(d, 0, DATEDIFF(d, 0, GETUTCDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),ISNULL(CD.dtmStartDateUTC,CD.dtmStartDate)) AND CH.intContractTypeId = 2 THEN 1
+					ELSE 0 END AS BIT) AS ysnEarlyDayPassed,
+			CAST(CASE WHEN IM.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) AS ysnBundleItem,
+			IM.strBundleType,
+			dbo.fnCTGetContractPrice(CD.intContractDetailId) dblContractPrice,
 
-	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
-	LEFT    JOIN	tblSMCurrency					MY	ON	MY.intCurrencyID					=		MA.intCurrencyId			--strMarketCurrency
-	LEFT    JOIN	tblSMCurrencyExchangeRate		ER	ON	ER.intCurrencyExchangeRateId		=		CD.intCurrencyExchangeRateId--strExchangeRate
-	LEFT    JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
-	LEFT    JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
-	LEFT    JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CD.intRateTypeId
-	LEFT    JOIN	tblSMCurrencyExchangeRateType	HRT	ON	HRT.intCurrencyExchangeRateTypeId	=		CD.intHistoricalRateTypeId
-	LEFT    JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId					=		CD.intFreightTermId			--strFreightTerm
-	LEFT	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId				=		CD.intPurchasingGroupId		--strPurchasingGroup
-	LEFT    JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=		CD.intSubLocationId 		--strLocationName
-	
-	LEFT    JOIN	tblSMCountry					RY	ON	RY.intCountryID						=		IC.intCountryId
-	LEFT    JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId			=		IM.intOriginId												
-														AND	CA.strType							=		'Origin'			
-	LEFT    JOIN	tblSMCountry					OG	ON	OG.intCountryID						=		CA.intCountryID	
-	LEFT	JOIN	tblICCommodityUnitMeasure		CO	ON	CO.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				
-	LEFT    JOIN	tblICItemUOM					CM	ON	CM.intItemId						=		CD.intItemId		
-														AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId		
-	LEFT    JOIN	tblICCategoryUOM				GU	ON	GU.intCategoryId					=		CD.intCategoryId																	
-														AND	GU.intUnitMeasureId					=		CH.intCategoryUnitMeasureId		
-	LEFT    JOIN	tblCTPriceFixation				PF	ON	CD.intContractDetailId				=		PF.intContractDetailId		
-	
-	LEFT	JOIN	tblICItemUOM					FB	ON	FB.intItemUOMId				=	CD.intFreightBasisUOMId		
-	LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
-	LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
-	LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId		
-	LEFT	JOIN	tblQMGardenMark					GM	ON	GM.intGardenMarkId = CD.intGardenMarkId
-	LEFT	JOIN	tblCTReasonCode					RC	ON	RC.intReasonCodeId = CD.intReasonCodeId
+			AD.intSeqCurrencyId,				AD.ysnSeqSubCurrency,			AD.intSeqPriceUOMId,
+			AD.dblSeqPrice,						AD.strSeqCurrency,				AD.strSeqPriceUOM,
+			AD.dblQtyToPriceUOMConvFactor,		AD.dblCostUnitQty,				AD.dblNetWtToPriceUOMConvFactor,
+			AD.dblSeqBasis,						AD.intSeqBasisCurrencyId,		AD.intSeqBasisUOMId,	
+			AD.ysnValidFX,						AD.dblSeqPrice * AD.dblQtyToPriceUOMConvFactor AS dblPricePerUnit,
+			ISNULL(WU.dblUnitQty,1)	AS dblWeightUnitQty,
+			ISNULL(IU.dblUnitQty,1)	AS dblUnitQty,
+			RT.strCurrencyExchangeRateType,		RT.strDescription	AS strCurrencyExchangeRateTypeDesc,
+			CP.ysnRequireProducerQty,
 
-	LEFT    JOIN	(
-						SELECT	 intPriceFixationId,
-								 COUNT(intPriceFixationDetailId) intPFDCount,
-								 SUM(dblQuantity) dblQuantityPriceFixed,
-								 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
-						FROM	 tblCTPriceFixationDetail
-						GROUP BY intPriceFixationId
-					)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
-	LEFT    JOIN	(
-						SELECT	CQ.intContainerTypeId,
-								CQ.intCommodityAttributeId,
-								CQ.intUnitMeasureId,
-								CQ.dblBulkQuantity ,
-								CQ.dblQuantity AS dblBagQuantity,
-								CQ.intCommodityId,
-								CA.intCountryID AS intCountryId,
-								CT.strContainerType
-						FROM	tblLGContainerTypeCommodityQty	CQ	
-						JOIN	tblLGContainerType				CT	ON	CT.intContainerTypeId		=	CQ.intContainerTypeId
-						JOIN	tblICCommodityAttribute			CA	ON	CQ.intCommodityAttributeId	=	CA.intCommodityAttributeId
-					)								CQ	ON	CQ.intCommodityId					=		CH.intCommodityId 
-														AND CQ.intContainerTypeId				=		CD.intContainerTypeId 
-														AND CQ.intCountryId						=		ISNULL(IC.intCountryId,CA.intCountryID)
-	LEFT    JOIN	tblICUnitMeasure				RM	ON	RM.intUnitMeasureId					=		CQ.intUnitMeasureId
-	LEFT    JOIN	(
-						SELECT * FROM 
-						(
-							SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
-									TR.intRecordId, AP.strStatus AS strApprovalStatus 
-							FROM	tblSMApproval		AP
-							JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
-							JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
-							WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
-														'ContractManagement.view.Amendments')
-						) t
-						WHERE intRowNum = 1
-					)								AP	ON	AP.intRecordId						=		CD.intContractHeaderId		
-	LEFT    JOIN	(
-					SELECT ROW_NUMBER() OVER (PARTITION BY ISNULL(intPContractDetailId,intSContractDetailId) ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
-					FROM tblLGLoadDetail
-				)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
-	OUTER	APPLY	dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
-	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
-	LEFT	JOIN	tblAPBillDetail						BD ON	BD.intContractDetailId = CD.intContractDetailId
-	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId
-	-- Commodity Attributes
-	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
+			CASE	WHEN	CD.intPricingTypeId = 2
+					THEN	dblSeqBasis
+					WHEN	CD.intPricingTypeId = 3
+					THEN	dblSeqFutures
+					ELSE	dblSeqPrice
+			END		dblSeqCost,
+
+			--Header Detail
+
+			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
+			CH.strContractType,					CH.intEntityId,					CH.strEntityName,
+			CH.strEntityType,					CH.strEntityNumber,				CH.strEntityAddress,
+			CH.strEntityCity,					CH.strEntityState,				CH.strEntityZipCode,
+			CH.strEntityCountry,				CH.strEntityPhone,				CH.intDefaultLocationId,
+			CH.intCommodityId,					CH.strCommodityCode,			CH.strCommodityDescription,
+			CH.dblHeaderQuantity,				CH.intCommodityUnitMeasureId,	CH.strHeaderUnitMeasure,
+			CH.strContractNumber,				CH.dtmContractDate,				CH.strCustomerContract,
+			CH.dtmDeferPayDate,					CH.dblDeferPayRate,				CH.intContractTextId,
+			CH.strTextCode,						CH.strInternalComment,			CH.ysnSigned,
+			CH.ysnPrinted,						CH.intSalespersonId,			CH.strSalespersonId,
+			CH.intGradeId,						CH.strGrade,					CH.intWeightId,
+			CH.strWeight,						CH.intCropYearId,				CH.strPrintableRemarks,
+			CH.intAssociationId,				CH.strAssociationName,			CH.intTermId,
+			CH.strTerm,							CH.intApprovalBasisId,			CH.strApprovalBasis,
+			CH.strApprovalBasisDescription,		CH.intContractBasisId,			CH.strContractBasis,
+			CH.strContractBasisDescription,		CH.intPositionId,				CH.strPosition,
+			CH.intInsuranceById,				CH.strInsuranceBy,				CH.strInsuranceByDescription,
+			CH.intInvoiceTypeId,				CH.strInvoiceType,				CH.strInvoiceTypeDescription,
+			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
+			CH.ysnSubstituteItem
+			,ysnUnlimitedQuantity = CAST(ISNULL(CH.ysnUnlimitedQuantity,0) AS BIT)
+			,CH.ysnMaxPrice,			
+			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
+			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad,
+			CH.strCropYear,						CH.ysnExported,					CH.dtmExported,
+			CH.ysnBrokerage,					CH.strCounterPartyName,			CH.strCPContract,
+			CD.dblFreightBasisBase,
+			CD.dblFreightBasis,
+			CD.intFreightBasisBaseUOMId,
+			CD.intFreightBasisUOMId,
+			strFreightBasisUOM = FBUM.strUnitMeasure,
+			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		
+		, CD.strFinanceTradeNo  COLLATE Latin1_General_CI_AS AS strFinanceTradeNo
+		, CD.intBankAccountId
+		, BA.intBankId
+		, strBankName = BN.strBankName
+		, strBankAccountNo = BA.strBankAccountNo
+		, CD.intBorrowingFacilityId
+		, FA.strBorrowingFacilityId
+		, CD.intBorrowingFacilityLimitId
+		, CD.intBorrowingFacilityLimitDetailId
+		, CD.dblLoanAmount
+		, FAL.dblLimit
+		, FALD.dblLimit AS dblSublimit
+		, CD.intBankValuationRuleId
+		, BVR.strBankValuationRule
+		, FA.strBankReferenceNo
+		, FAL.strBorrowingFacilityLimit
+		, FALD.strLimitDescription
+		, CD.strReferenceNo
+		, CD.strComments
+		, CD.ysnSubmittedToBank
+		, CD.dtmDateSubmitted
+		, CD.intApprovalStatusId
+		, ASTF.strApprovalStatus
+		, CD.dtmDateApproved
+		, CD.dblInterestRate
+		, CD.dtmPrepaymentDate
+		, CD.dblPrepaymentAmount
+		, strCostTerm = CostTerm.strFreightTerm
+        , CD.intCostTermId
+        , CD.dblBudgetPrice
+		, CD.dblTotalBudget
+		, CH.intSampleTypeId
+		, sam.strSampleTypeName
+		, CD.intLocalCurrencyId
+		, CD.intLocalUOMId
+		, CD.dblLocalCashPrice
+		, ILU.strUnitMeasure AS strLocalUOM
+		, LUC.strCurrency AS strLocalCurrency
+		, CD.intAverageUOMId
+		, CD.dblAverageQuantity
+		, IAU.strUnitMeasure AS strAverageUOM
+		, CD.intVendorLocationId
+		, CD.ysnApplyDefaultTradeFinance
+		, CD.ysnTaxOverride
+		, CD.strTaxPoint
+		, CD.strTaxLocation
+		, CD.intTaxGroupId
+		, CD.intTaxLocationId
+		, EFT.strAccountNumber
+		, CD.dtmEtaPol
+		, CD.dtmEtaPod
+		, CD.intGardenMarkId
+		, CD.intReasonCodeId
+		, CD.dblConvertedNetWeight
+		, CD.dblConvertedQuantity
+	FROM	tblCTContractDetail				CD	CROSS
+	JOIN	tblCTCompanyPreference			CP	CROSS
+	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
+	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
+	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
+	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
+	JOIN	tblCTIndex						IX	ON	IX.intIndexId				=	CD.intIndexId				LEFT
+	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT
+	
+	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT
+	JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
+	JOIN	tblICUnitMeasure				U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT	
+	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId				=	CD.intAdjItemUOMId			LEFT
+	JOIN	tblICUnitMeasure				U3	ON	U3.intUnitMeasureId			=	AU.intUnitMeasureId			LEFT	
+	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId					
+												AND	SM.ysnStockUnit				=	1							LEFT
+	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	SM.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
+	JOIN	tblICUnitMeasure				U7	ON	U7.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT	
+	
+	JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId				LEFT
+	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
+	JOIN	tblSMCountry					CG	ON	CG.intCountryID				=	IC.intCountryId				LEFT
+	JOIN	tblICCommodityAttribute			CA1	ON	CA1.intCommodityAttributeId	=	IM.intOriginId				LEFT
+	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
+	JOIN	tblSMShipVia					SV	ON	SV.[intEntityId]			=	CD.intShipViaId				LEFT
+	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
+	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
+	JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
+	JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
+	JOIN	tblAPVendor						VR	ON	VR.[intEntityId]			=	CD.intBillTo				LEFT
+	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
+	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
+	JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		LEFT
+	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
+	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				
+												AND	IL.intLocationId			=	CD.intCompanyLocationId		LEFT
+	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
+	JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
+	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
+	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
+	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
+	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
+	JOIN	tblEMEntitySplit				ST	ON	ST.intSplitId				=	CD.intSplitId				LEFT
+	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
+	JOIN	tblCTBook						BK	ON	BK.intBookId				=	CD.intBookId				LEFT 
+	JOIN	tblCTSubBook					SO	ON	SO.intSubBookId				=	CD.intSubBookId				LEFT
+	
+	JOIN	tblICItemUOM					FB	ON	FB.intItemUOMId				=	CD.intFreightBasisUOMId		LEFT
+	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	LEFT
+	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId		LEFT
+
+	JOIN	(
+				SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
+				FROM	tblICItemUOM		IU	LEFT 
+				JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
+				WHERE	ysnStockUnit = 1
+			)								SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
+	JOIN	(
+				SELECT  intItemUOMId AS intStockUOMId,strUnitMeasure AS strStockUnitMeasure,IU.intItemId,IU.intUnitMeasureId AS intStockUnitMeasureId
+				FROM	tblICItemUOM		IU	 
+				JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
+				WHERE	IU.ysnStockUnit = 1
+			)								SK	ON	SK.intItemId				=	CD.intItemId				LEFT
+	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId 	LEFT
+	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND 
+													SP.intEntityLocationId = IX.intVendorLocationId				LEFT
+	JOIN	(
+				SELECT		intContractDetailId,ISNULL(SUM(dblReservedQuantity),0) AS dblReservedQuantity 
+				FROM		tblLGReservation 
+				Group By	intContractDetailId
+			)								RV	ON	RV.intContractDetailId		=	CD.intContractDetailId		LEFT	
+	JOIN	(
+				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
+				FROM		tblLGAllocationDetail 
+				Group By	intPContractDetailId
+			)								PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId		LEFT	
+	JOIN	(
+				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty,MIN(intSUnitMeasureId) intAllocationUOMId
+				FROM		tblLGAllocationDetail 
+				Group By	intSContractDetailId
+			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
+	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
+	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
+	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
+	LEFT JOIN tblCMBorrowingFacilityLimit FAL ON FAL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
+	LEFT JOIN tblCMBorrowingFacilityLimitDetail FALD ON FALD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
+	LEFT JOIN tblCTApprovalStatusTF ASTF on ASTF.intApprovalStatusId = CD.intApprovalStatusId
+	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intBankValuationRuleId
+	LEFT JOIN tblSMFreightTerms CostTerm ON CostTerm.intFreightTermId = CD.intCostTermId
+	LEFT JOIN tblQMSampleType sam on sam.intSampleTypeId = CH.intSampleTypeId
+	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
+	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
+	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
+	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
+	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
+	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 
+	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
+    cross apply (
+     select
+     dblHeaderBalance = CH.dblHeaderQuantity - sum(cd.dblQuantity - cd.dblBalance)
+     ,dblHeaderAvailable = CH.dblHeaderQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
+	 ,dblHeaderScheduleQty = sum(isnull(cd.dblScheduleQty,0))
+     from tblCTContractDetail cd
+     where cd.intContractHeaderId = CH.intContractHeaderId
+    ) cds

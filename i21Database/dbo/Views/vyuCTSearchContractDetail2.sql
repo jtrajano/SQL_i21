@@ -177,7 +177,6 @@ SELECT a.intContractDetailId
  --, strApprovalBasis = au.strWeightGradeDesc  
  , ysnApproved = ISNULL(TR.ysnOnceApproved, 0)  
  , dblApprovedQty = aa.dblRepresentingQty  
- , dblUnApprovedQty = ISNULL(a.dblQuantity,0) - ISNULL(aa.dblRepresentingQty,0)
  , strAssociationName = zb.strName  
  , a.dblAssumedFX  
  , dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)  
