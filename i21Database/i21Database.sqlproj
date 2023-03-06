@@ -9241,6 +9241,9 @@
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateDummyLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDeleteLoadDetail.sql" />
     <Build Include="dbo\Functions\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
     <Build Include="dbo\Functions\fnGRDPRvsGrain.sql" />
     <Build Include="dbo\Functions\fnGRInventoryStocksVSDPRStorage.sql" />
