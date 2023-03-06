@@ -155,11 +155,11 @@ BEGIN TRY
 	  , intUserId					 INT
 	  , intConcurrencyId			 INT
 	  , intIssuedUOMTypeId			 INT
-	  , ysnOverrideRecipe			 BIT
-	  , dblUpperTolerance			 NUMERIC(38, 20)
-	  , dblLowerTolerance			 NUMERIC(38, 20)
-	  , dblCalculatedUpperTolerance	 NUMERIC(38, 20)
-	  , dblCalculatedLowerTolerance	 NUMERIC(38, 20)
+	  , ysnOverrideRecipe			 BIT NULL
+	  , dblUpperTolerance			 NUMERIC(38, 20) NULL
+	  , dblLowerTolerance			 NUMERIC(38, 20) NULL
+	  , dblCalculatedUpperTolerance	 NUMERIC(38, 20) NULL
+	  , dblCalculatedLowerTolerance	 NUMERIC(38, 20) NULL
 	)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
@@ -210,7 +210,7 @@ BEGIN TRY
 	  , dblCalculatedUpperTolerance	 
 	  , dblCalculatedLowerTolerance	 
 	)
-	SELECT intWorkOrderId
+		SELECT intWorkOrderId
 		 , strWorkOrderNo
 		 , intBlendRequirementId
 		 , intItemId
@@ -230,11 +230,11 @@ BEGIN TRY
 		 , intUserId
 		 , intConcurrencyId
 		 , intIssuedUOMTypeId
-		 , ysnOverrideRecipe
-		 , dblUpperTolerance			 
-		 , dblLowerTolerance			 
-		 , dblCalculatedUpperTolerance	 
-		 , dblCalculatedLowerTolerance	 
+		 , NULLIF(ysnOverrideRecipe, '')
+		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END
+		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END	 
+		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END
+		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
 		intWorkOrderId INT
@@ -257,11 +257,11 @@ BEGIN TRY
 	  , intUserId INT
 	  , intConcurrencyId			 INT
 	  , intIssuedUOMTypeId			 INT
-	  , ysnOverrideRecipe			 BIT
-	  , dblUpperTolerance			 NUMERIC(38, 20)
-	  , dblLowerTolerance			 NUMERIC(38, 20)
-	  , dblCalculatedUpperTolerance	 NUMERIC(38, 20)
-	  , dblCalculatedLowerTolerance	 NUMERIC(38, 20)
+	  , ysnOverrideRecipe			 BIT 
+	  , dblUpperTolerance			 NVARCHAR(MAX) 
+	  , dblLowerTolerance			 NVARCHAR(MAX) 
+	  , dblCalculatedUpperTolerance	 NVARCHAR(MAX) 
+	  , dblCalculatedLowerTolerance	 NVARCHAR(MAX) 
 	)
 
 	INSERT INTO @tblLot (
