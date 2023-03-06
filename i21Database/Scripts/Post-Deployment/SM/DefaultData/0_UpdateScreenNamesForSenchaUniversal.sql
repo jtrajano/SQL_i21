@@ -253,3 +253,16 @@ WHERE TSS.strNamespace LIKE '%i21%'
 
 PRINT '*** End Updating strCommand on tblSMScreen for GCE and SM ***'
 GO
+
+PRINT '*** Start Updating strNamespace on tblSMApproverConfigurationApprovalFor ***'
+GO
+
+UPDATE 
+     A 
+SET 
+     A.strNamespace = REPLACE(A.strNamespace, 'i21', 'SystemManager.controls')
+FROM tblSMApproverConfigurationApprovalFor AS A
+WHERE A.strNamespace LIKE '%i21.component%'
+
+PRINT '*** End Updating strNamespace on tblSMApproverConfigurationApprovalFor ***'
+GO
