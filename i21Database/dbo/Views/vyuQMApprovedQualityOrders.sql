@@ -36,7 +36,7 @@ SELECT
     ,[strWeightUnitMeasure] = WUM.strSymbol
     ,[dblWeightPerUnit] = ISNULL(dbo.fnLGGetItemUnitConversion(I.intItemId, QIUOM.intItemUOMId, WUM.intUnitMeasureId), 0)
     ,[strManufacturingLeafType] = LEAF_TYPE.strDescription
-
+    ,UM.strLocationName strMixingUnitLocation
     ,CH.intContractHeaderId
     ,CD.intContractDetailId
     ,CH.strContractNumber
@@ -74,6 +74,7 @@ LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = B.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = B.intBrokerId
 LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intLocationId
+LEFT JOIN tblSMCompanyLocation UM ON UM.intCompanyLocationId = B.intMixingUnitLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intDestinationStorageLocationId
 LEFT JOIN tblICItem I ON I.intItemId = B.intTealingoItemId
 LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.intCommodityAttributeId = S.intManufacturingLeafTypeId
