@@ -225,7 +225,7 @@ BEGIN
 			IF @intFiscalYearPeriodId > 0 
 			BEGIN	
 			
-		 		IF EXISTS(SELECT TOP 1 1 FROM vyuFAUndepreciatedAssetAllPeriods WHERE intFiscalPeriodId = @intFiscalYearPeriodId)
+		 		IF EXISTS(SELECT TOP 1 1 FROM vyuFANextDepreciation WHERE intGLFiscalYearPeriodId = @intFiscalYearPeriodId)
 				BEGIN
 					SELECT TransactionType = 'FixedAsset'  , message = @strPeriod ,batchGUID = '' 
 					SET @ysnUnpostedTrans = 1
@@ -234,7 +234,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				IF EXISTS(SELECT TOP 1 1 FROM vyuFAUndepreciatedAssetAllPeriods WHERE intFiscalYearId = @intFiscalYearId)
+				IF EXISTS(SELECT TOP 1 1 FROM vyuFANextDepreciation WHERE intFiscalYearId = @intFiscalYearId)
 				BEGIN
 					SELECT TransactionType = 'FixedAsset'  , message = @strFiscalYear ,batchGUID = '' 
 					SET @ysnUnpostedTrans = 1

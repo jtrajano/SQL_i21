@@ -20,16 +20,14 @@ DM.strDepreciationMethodId,
 AssetGroup.strGroupCode,
 AssetGroup.strGroupDescription
 FROM   
-tblFAFiscalAsset A  
-JOIN tblFABookDepreciation B  
+tblFAFixedAsset C  left join 
+tblFAFiscalAsset A  ON C.intAssetId = A.intAssetId 
+LEFT JOIN tblFABookDepreciation B  
 ON B.intAssetId = A.intAssetId  
 AND B.intBookId = A.intBookId  
-JOIN tblFAFixedAsset C   
-ON C.intAssetId = A.intAssetId  
-JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId  
-= A.intFiscalPeriodId  
-JOIN tblGLFiscalYear FY ON FY.intFiscalYearId=FP.intFiscalYearId  
-JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = B.intDepreciationMethodId  
+LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId  
+LEFT JOIN tblGLFiscalYear FY ON FY.intFiscalYearId=FP.intFiscalYearId  
+LEFT JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = B.intDepreciationMethodId  
 LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = C.intAssetGroupId
 OUTER APPLY(  
     SELECT COUNT(*) cnt  
@@ -41,5 +39,4 @@ OUTER APPLY(
 )FAD  
 WHERE ISNULL(B.ysnFullyDepreciated,0) = 0  
 AND ISNULL(C.ysnAcquired,0) = 1  
-AND ISNULL(C.ysnDisposed,0) = 0  
-AND FAD.cnt = 0
+AND ISNULL(C.ysnDisposed,0) = 0  AND FAD.cnt = 0
