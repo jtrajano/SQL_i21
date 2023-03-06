@@ -1,4 +1,4 @@
-﻿Create VIEW [dbo].[vyuCTSearchContractDetail2]  
+﻿CREATE VIEW [dbo].[vyuCTSearchContractDetail2]  
   
 AS  
   
@@ -177,6 +177,7 @@ SELECT a.intContractDetailId
  --, strApprovalBasis = au.strWeightGradeDesc  
  , ysnApproved = ISNULL(TR.ysnOnceApproved, 0)  
  , dblApprovedQty = aa.dblRepresentingQty  
+ , dblUnApprovedQty = ISNULL(a.dblQuantity,0) - ISNULL(aa.dblRepresentingQty,0)
  , strAssociationName = zb.strName  
  , a.dblAssumedFX  
  , dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)  
@@ -519,4 +520,4 @@ OUTER APPLY (
  GROUP BY TR.ysnOnceApproved  
   , CASE WHEN TR.strApprovalStatus IN ( 'Approved', 'Approved with Modifications') THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END  , TR.strApprovalStatus
    
-) SMTR --ON TR.intRecordId = CH.intContractHeaderId 
+) SMTR --ON TR.intRecordId = CH.intContractHeaderId e
