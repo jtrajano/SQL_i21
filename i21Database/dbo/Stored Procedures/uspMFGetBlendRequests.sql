@@ -52,6 +52,7 @@ IF @intWorkOrderId = 0
 	LEFT JOIN tblICItemPricing g ON g.intItemId = b.intItemId AND g.intItemLocationId=f.intItemLocationId
 	LEFT JOIN tblMFManufacturingCell mc ON a.intManufacturingCellId = mc.intManufacturingCellId
 	LEFT JOIN tblMFRecipe r ON a.intItemId = r.intItemId AND a.intLocationId=r.intLocationId AND r.ysnActive=1
+	LEFT JOIN tblMFRecipeItem ri ON r.intRecipeId =ri.intRecipeId and a.intItemId = ri.intItemId and intRecipeItemTypeId =2 
 	LEFT JOIN tblMFBudget bg ON a.intItemId = bg.intItemId AND a.intLocationId = bg.intLocationId AND bg.intYear = YEAR(GETDATE()) AND bg.intBudgetTypeId = 2
 	LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
 	WHERE a.intStatusId = 1
@@ -85,6 +86,7 @@ IF @intWorkOrderId > 0
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId = c.intUnitMeasureId 
 	JOIN tblICUnitMeasure d ON c.intUnitMeasureId = d.intUnitMeasureId 
 	LEFT JOIN tblMFRecipe e ON a.intItemId = e.intItemId AND a.intLocationId = e.intLocationId AND e.ysnActive=1 
+	LEFT JOIN tblMFRecipeItem ri ON e.intRecipeId =ri.intRecipeId and e.intItemId = ri.intItemId and ri.intRecipeItemTypeId =2 
 	JOIN tblMFWorkOrder f ON a.intBlendRequirementId = f.intBlendRequirementId
 	LEFT JOIN tblICItemLocation g ON b.intItemId = g.intItemId AND g.intLocationId = a.intLocationId
 	LEFT JOIN tblICItemPricing h ON h.intItemId = b.intItemId AND g.intItemLocationId = h.intItemLocationId
@@ -144,6 +146,7 @@ IF @intWorkOrderId < 0
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 
 	JOIN tblICUnitMeasure d ON c.intUnitMeasureId = d.intUnitMeasureId 
 	LEFT JOIN tblMFRecipe e ON a.intItemId = e.intItemId AND a.intLocationId = e.intLocationId AND e.ysnActive=1 
+	LEFT JOIN tblMFRecipeItem ri ON e.intRecipeId =ri.intRecipeId and e.intItemId = ri.intItemId and ri.intRecipeItemTypeId =2 
 	LEFT JOIN tblICItemLocation g ON b.intItemId = g.intItemId AND g.intLocationId = a.intLocationId
 	LEFT JOIN tblICItemPricing h ON h.intItemId = b.intItemId AND g.intItemLocationId = h.intItemLocationId
 	LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
