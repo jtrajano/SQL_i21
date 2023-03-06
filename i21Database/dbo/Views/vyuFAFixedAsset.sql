@@ -100,7 +100,9 @@ NewGLAccumulation.strAccountId strNewAccumulatedAccountId,
 NewGLGainLoss.strAccountId strNewGainLossAccountId,
 NewGLARAccount.strAccountId strNewSalesOffsetAccountId,
 FA.intConcurrencyId,
-TaxJurisdiction.strTaxJurisdiction
+TaxJurisdiction.strTaxJurisdiction,
+FA.ysnOverrideLocation,
+CASE WHEN FA.ysnOverrideLocation = 1 THEN 'Yes' ELSE 'No' END AS  strOverrideLocation 
 FROM tblFAFixedAsset FA       
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId        
 LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccountId        
