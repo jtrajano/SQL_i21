@@ -36,6 +36,7 @@ strFutureMonth  nvarchar(250),
 dtmTradeDate datetime,
 strInternalTradeNo  nvarchar(250),
 strName  nvarchar(250),
+intEntityId int,
 strAccountNumber  nvarchar(250)
 ,strBook  nvarchar(250),
 strSubBook  nvarchar(250),
