@@ -419,12 +419,12 @@ BEGIN
                     , 'Total'
                     , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                     , @intEntityId
-                    , @dblTotalDebit- @dblTotalCredit
+                    ,  @dblTotalDebit- @dblTotalCredit + @beginningBalance
                     , @dblTotalDebit
                     , @dblTotalCredit
                     , @dblTotalDebitForeign
                     , @dblTotalCreditForeign     
-                    , @dblTotalDebitForeign- @dblTotalCreditForeign           
+                    , @dblTotalDebitForeign- @dblTotalCreditForeign + @beginningBalanceForeign    
                     , strCurrency
                     , strAccountId
                     , strLocation
