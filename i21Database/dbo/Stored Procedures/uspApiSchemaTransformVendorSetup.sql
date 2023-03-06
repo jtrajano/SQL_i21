@@ -208,13 +208,13 @@ JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN tblICUnitMeasure u ON u.strUnitMeasure = vts.strUnitMeasure
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
-	AND NULLIF(vts.strCategory, '') IS NOT NULL
+	AND NULLIF(vts.strVendorUnitMeasure, '') IS NOT NULL
 	AND EXISTS (
 		SELECT TOP 1 1
 		FROM tblVRUOMXref xref
 		WHERE xref.intVendorSetupId = vs.intVendorSetupId
 			AND xref.intUnitMeasureId = u.intUnitMeasureId
-			AND xref.strVendorUOM = vts.strVendorUnitMeasure
+			-- AND xref.strVendorUOM = vts.strVendorUnitMeasure
 	)
 	AND @OverwriteExisting = 0
 
@@ -263,7 +263,7 @@ SELECT
 	, strLogLevel = 'Error'
 	, strStatus = 'Failed'
 	, intRowNo = vts.intRowNumber
-	, strMessage = 'The Item mapping "' + vts.strVendorItemNo + '" for "' + vts.strItemNo + '" already exists.'
+	, strMessage = 'The Item mapping "' + ISNULL(vts.strVendorItemNo, vts.strItemNo) + '" for "' + ISNULL(vts.strItemNo, '') + '" already exists.'
 	, strAction = 'Skipped'
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
@@ -706,7 +706,7 @@ JOIN tblVRVendorSetup e ON e.intEntityId = v.intEntityId
 JOIN tblICUnitMeasure u ON u.strUnitMeasure = vs.strUnitMeasure
 JOIN tblVRUOMXref uv ON uv.intUnitMeasureId = u.intUnitMeasureId
 	AND uv.intVendorSetupId = e.intVendorSetupId
-	AND uv.strVendorUOM = vs.strVendorUnitMeasure
+	-- AND uv.strVendorUOM = vs.strVendorUnitMeasure
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
 	AND @OverwriteExisting = 1
 
@@ -769,7 +769,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		FROM tblVRUOMXref xref
 		WHERE xref.intVendorSetupId = vs.intVendorSetupId
 			AND xref.intUnitMeasureId = u.intUnitMeasureId
-			AND xref.strVendorUOM = vts.strVendorUnitMeasure
+			-- AND xref.strVendorUOM = vts.strVendorUnitMeasure
 	)
 
 ;WITH cte AS
@@ -818,6 +818,7 @@ SET
 	  xc.guiApiUniqueId = @guiApiUniqueId
 	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
 	, xc.strVendorProduct = COALESCE(vs.strVendorItemNo, xc.strVendorProduct)
+	, xc.strVendorProductUOM = COALESCE(vs.strVendorItemUOM, xc.strVendorProductUOM)
 	, xc.intRowNumber = vs.intRowNumber
 FROM tblICItemVendorXref xc
 JOIN tblICItem i ON i.intItemId = xc.intItemId
@@ -841,6 +842,7 @@ SET
 	  xc.guiApiUniqueId = @guiApiUniqueId
 	, xc.intConcurrencyId = ISNULL(xc.intConcurrencyId, 1) + 1
 	, xc.strVendorProduct = COALESCE(vs.strVendorItemNo, xc.strVendorProduct)
+	, xc.strVendorProductUOM = COALESCE(vs.strVendorItemUOM, xc.strVendorProductUOM)
 	, xc.intRowNumber = vs.intRowNumber
 FROM tblICItemVendorXref xc
 JOIN tblICItem i ON i.intItemId = xc.intItemId
@@ -866,6 +868,7 @@ DECLARE @UniqueItems TABLE (
 	, intVendorId INT
 	, intVendorSetupId INT
 	, strVendorProduct NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	, strVendorProductUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	, guiApiUniqueId UNIQUEIDENTIFIER
 	, intRowNumber INT
 )
@@ -875,6 +878,7 @@ INSERT INTO @UniqueItems (
 	, intVendorId
 	, intVendorSetupId
 	, strVendorProduct
+	, strVendorProductUOM
 	, guiApiUniqueId
 	, intRowNumber
 )
@@ -883,6 +887,7 @@ SELECT
 	, v.intEntityId
 	, vs.intVendorSetupId
 	, COALESCE(vts.strVendorItemNo, i.strItemNo)
+	, vts.strVendorItemUOM
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
@@ -903,6 +908,7 @@ INSERT INTO @UniqueItems (
 	, intVendorId
 	, intVendorSetupId
 	, strVendorProduct
+	, strVendorProductUOM
 	, guiApiUniqueId
 	, intRowNumber
 )
@@ -911,6 +917,7 @@ SELECT
 	, v.intEntityId
 	, vs.intVendorSetupId
 	, COALESCE(vts.strVendorItemNo, i.strItemNo)
+	, vts.strVendorItemUOM
 	, @guiApiUniqueId
 	, vts.intRowNumber
 FROM tblApiSchemaTransformVendorSetup vts
@@ -943,6 +950,7 @@ INSERT INTO tblICItemVendorXref (
 	, intVendorId
 	, intVendorSetupId
 	, strVendorProduct
+	, strVendorProductUOM
 	, guiApiUniqueId
 	, intRowNumber
 	, dtmDateCreated
@@ -953,6 +961,7 @@ SELECT
 	, intVendorId
 	, intVendorSetupId
 	, strVendorProduct
+	, strVendorProductUOM
 	, @guiApiUniqueId
 	, intRowNumber
 	, GETUTCDATE()
