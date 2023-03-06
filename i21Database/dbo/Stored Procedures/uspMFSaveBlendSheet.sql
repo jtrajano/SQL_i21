@@ -920,7 +920,7 @@ BEGIN TRY
 
 			SELECT @intRecipeId = intRecipeId
 				,@intRecipeItemUOMId = intItemUOMId
-				,@dtmValidFrom = dtmVali
+				,@dtmValidFrom = dtmValidFrom
 				,@dtmValidTo = dtmValidTo
 			FROM tblMFWorkOrderRecipe
 			WHERE intWorkOrderId = @intWorkOrderId
