@@ -1549,6 +1549,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketContractUsedValidation.sql" />
     <Build Include="dbo\Tables\tblSCScaleDirectInDistributionAllocationForGL.sql" />
     <Build Include="dbo\Views\vyuSCTicketDirectInDistributionAllocationAndVoucher.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11411,6 +11412,7 @@
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureSalesContracts.sql" />
     <Build Include="dbo\Functions\fnGREndOfMonthProcedurePurchaseContracts.sql" />
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureInventory.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

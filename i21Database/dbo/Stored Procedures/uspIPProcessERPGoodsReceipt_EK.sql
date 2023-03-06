@@ -1018,6 +1018,15 @@ BEGIN TRY
 					DELETE
 					FROM #tmpAddItemReceiptResult
 					WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+					UPDATE B
+					SET B.dtmWarehouseArrival = CAST(GETDATE() AS DATE)
+					FROM tblMFBatch B
+					WHERE B.dtmWarehouseArrival IS NULL
+						AND B.strBatchId IN (
+							SELECT strLotNumber
+							FROM @LotEntries
+							)
 				END
 			END
 

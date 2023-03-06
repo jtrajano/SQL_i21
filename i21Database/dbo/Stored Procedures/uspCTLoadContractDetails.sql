@@ -513,6 +513,7 @@ BEGIN TRY
 		, CT.strSampleStatus
 		, CT.dtmTestingEndDate
 		, CT.dblApprovedQty
+		, dblUnApprovedQty = ISNULL(CD.dblQuantity,0) - ISNULL(CT.dblApprovedQty,0)
 		, CT.intWashoutId
 		, CT.strSourceNumber
 		, CT.strWashoutNumber
