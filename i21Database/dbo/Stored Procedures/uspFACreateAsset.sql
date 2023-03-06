@@ -31,7 +31,7 @@ INSERT INTO #AssetID SELECT DISTINCT intAssetId = intId, ysnProcessed = 0 FROM @
 --ELSE
 --	INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset
 
-DECLARE @intCurrentAssetId INT, @strCurrentTransactionId NVARCHAR(100)
+DECLARE @intCurrentAssetId INT, @strCurrentTransactionId NVARCHAR(100), @intIsOverride INT
 
 --=====================================================================================================================================
 -- 	UNPOSTING FIXEDASSETS TRANSACTIONS ysnPost = 0
@@ -107,39 +107,59 @@ IF ISNULL(@ysnRecap, 0) = 0
 				strNewAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 				strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
 			)
-			INSERT INTO @tblOverrideAccount (
-				intAssetId
-				,intAccountId
-				,intTransactionType
-				,intNewAccountId
-				,strNewAccountId
-				,strError
-			)
-			SELECT 
-				AssetAccountOverride.intAssetId
-				,AssetAccountOverride.intAccountId
-				,AssetAccountOverride.intTransactionType
-				,AssetAccountOverride.intNewAccountId
-				,AssetAccountOverride.strNewAccountId
-				,AssetAccountOverride.strError
-			FROM tblFAFixedAsset F
-			OUTER APPLY (
-				SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAssetAccountId, 1)
-			) AssetAccountOverride
-			WHERE F.intAssetId = @intCurrentAssetId
-			UNION ALL
-			SELECT 
-				OffsetAccountOverride.intAssetId
-				,OffsetAccountOverride.intAccountId
-				,OffsetAccountOverride.intTransactionType
-				,OffsetAccountOverride.intNewAccountId
-				,OffsetAccountOverride.strNewAccountId
-				,OffsetAccountOverride.strError
-			FROM tblFAFixedAsset F
-			OUTER APPLY (
-				SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intExpenseAccountId, 2)
-			) OffsetAccountOverride
-			WHERE F.intAssetId = @intCurrentAssetId
+
+			SET @intIsOverride  = (SELECT TOP 1 ysnOverrideLocation FROM tblFAFixedAsset WHERE intAssetId = @intCurrentAssetId )
+
+			IF @intIsOverride = 1
+				BEGIN  
+					INSERT INTO @tblOverrideAccount (
+						intAssetId
+						,intAccountId
+						,intTransactionType
+						,intNewAccountId
+						,strNewAccountId
+						,strError
+					)
+					SELECT 
+						AssetAccountOverride.intAssetId
+						,AssetAccountOverride.intAccountId
+						,AssetAccountOverride.intTransactionType
+						,AssetAccountOverride.intNewAccountId
+						,AssetAccountOverride.strNewAccountId
+						,AssetAccountOverride.strError
+					FROM tblFAFixedAsset F
+					OUTER APPLY (
+						SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intAssetAccountId, 1)
+					) AssetAccountOverride
+					WHERE F.intAssetId = @intCurrentAssetId
+					UNION ALL
+					SELECT 
+						OffsetAccountOverride.intAssetId
+						,OffsetAccountOverride.intAccountId
+						,OffsetAccountOverride.intTransactionType
+						,OffsetAccountOverride.intNewAccountId
+						,OffsetAccountOverride.strNewAccountId
+						,OffsetAccountOverride.strError
+					FROM tblFAFixedAsset F
+					OUTER APPLY (
+						SELECT * FROM dbo.fnFAGetOverrideAccount(F.intAssetId, F.intExpenseAccountId, 2)
+					) OffsetAccountOverride
+					WHERE F.intAssetId = @intCurrentAssetId
+				END
+			ELSE
+				BEGIN 
+					INSERT INTO @tblOverrideAccount (  
+						intAssetId  
+						,intAccountId  
+						,intTransactionType  
+						,intNewAccountId  
+						,strNewAccountId  
+						,strError  
+					)  
+					SELECT intAssetId,intAssetAccountId AS intAccountId , 1 AS intTransactionType , intAssetAccountId AS intNewAccountId, (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = intAssetAccountId) AS strNewAccountId , NULL AS strError  FROM tblFAFixedAsset WHERE intAssetId = @intCurrentAssetId
+					UNION ALL
+					SELECT intAssetId,intExpenseAccountId AS intAccountId , 2 AS intTransactionType , intExpenseAccountId AS intNewAccountId, (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = intExpenseAccountId) AS strNewAccountId , NULL AS strError  FROM tblFAFixedAsset WHERE intAssetId = @intCurrentAssetId
+				END
 
 			-- Validate override accounts
 			IF EXISTS (SELECT TOP 1 1 FROM @tblOverrideAccount WHERE intNewAccountId IS NULL AND strError IS NOT NULL)
