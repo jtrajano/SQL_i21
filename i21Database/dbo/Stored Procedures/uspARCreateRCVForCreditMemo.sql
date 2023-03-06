@@ -65,7 +65,7 @@ INSERT INTO #CRCPREPAIDS (
 SELECT intPrepaymentId		= PC.intPrepaymentId
 	, intInvoiceId			= PC.intInvoiceId
 	, intEntityCustomerId	= PCI.intEntityCustomerId
-	, intCompanyLocationId	= PCI.intCompanyLocationId
+	, intCompanyLocationId	= I.intCompanyLocationId
 	, intCurrencyId			= PCI.intCurrencyId
 	, intTermId				= PCI.intTermId
 	, intAccountId			= PCI.intAccountId
