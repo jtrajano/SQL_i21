@@ -67,6 +67,13 @@ AS
 				dblNet,
 				SEQ.strPricingType,
 				SEQ.intContractHeaderId
+				,dblRecEstimated=null
+				,dblPayEstimated=null
+				,dblRecActual=null
+				,dblPayActual=null
+				,intSort=null
+				,dblNetEstimated=null
+				,dblNetActual=null
 
 		FROM	vyuCTContractCostView	CST
 		JOIN	vyuCTContractSequence	SEQ	ON	SEQ.intContractDetailId =   CST.intContractDetailId
@@ -108,6 +115,33 @@ AS
 					*,
 					dblRecEstimated - dblPayEstimated AS dblNetEstimated,
 					dblRecActual - dblPayActual AS dblNetActual
+					,intContractCostId=null
+					,dblReqstdAmount=null
+					,dblRcvdPaidAmount=null
+					,dtmDueDate=null
+					,ysnReceivable=null
+					,dblRate=null
+					,intCostUOMId=null
+					,intItemId=null
+					,intCostEntityId=null
+					,strRateUnit=null
+					,strSequenceNumber=null
+					,dtmContractDate=null
+					,strItemNo=null
+					,strSeller=null
+					,dtmStartDate=null
+					,dtmEndDate=null
+					,dblQuantity=null
+					,strItemUOM=null
+					,intQtyUOMId=null
+					,strSellerRef=null
+					,strBuyerRef=null
+					,strBuyer=null
+					,dblEstimatedAmount=null
+					,dblAccruedAmount=null
+					,dblNet=null
+					,strPricingType=null
+					,intContractHeaderId=null
 			FROM
 			(
 				SELECT	S.strCurrency,
@@ -140,6 +174,33 @@ AS
 					*,
 					dblRecEstimated - dblPayEstimated AS dblNetEstimated,
 					dblRecActual - dblPayActual AS dblNetActual
+					,intContractCostId=null
+					,dblReqstdAmount=null
+					,dblRcvdPaidAmount=null
+					,dtmDueDate=null
+					,ysnReceivable=null
+					,dblRate=null
+					,intCostUOMId=null
+					,intItemId=null
+					,intCostEntityId=null
+					,strRateUnit=null
+					,strSequenceNumber=null
+					,dtmContractDate=null
+					,strItemNo=null
+					,strSeller=null
+					,dtmStartDate=null
+					,dtmEndDate=null
+					,dblQuantity=null
+					,strItemUOM=null
+					,intQtyUOMId=null
+					,strSellerRef=null
+					,strBuyerRef=null
+					,strBuyer=null
+					,dblEstimatedAmount=null
+					,dblAccruedAmount=null
+					,dblNet=null
+					,strPricingType=null
+					,intContractHeaderId=null
 			FROM
 			(
 				SELECT	S.strCurrency,
