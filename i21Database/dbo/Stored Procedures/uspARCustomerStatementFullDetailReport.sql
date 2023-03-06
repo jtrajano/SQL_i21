@@ -499,6 +499,7 @@ WHERE I.ysnPosted = 1
 	AND I.ysnProcessedToNSF = 0
 	AND (I.strType <> 'Service Charge' OR (I.strType = 'Service Charge' AND (I.strInvoiceNumber IN (SELECT strInvoiceOriginId from tblARInvoice)  OR   I.ysnForgiven = 0  )))	
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND I.strType <> 'Tax Adjustment'
 
 --STATEMENT TRANSACTIONS
 INSERT INTO #STATEMENTREPORT WITH (TABLOCK) (
