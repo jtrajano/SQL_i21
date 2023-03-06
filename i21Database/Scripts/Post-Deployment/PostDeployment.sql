@@ -137,6 +137,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\14_DegreeDayClock.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
 :r .\TM\Tables\tblTMBudgetCalculationProjection.sql
+:r .\TM\DefaultData\15_ReadingSourceType.sql
 
 
 ----TM Reports
@@ -177,6 +178,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\5_ObsoletingSeasonReset.sql
 :r .\TM\6_SyncStartingNumberAndDispatchId.sql
 :r .\TM\7_GenerateManufacturerFromDevice.sql
+:r .\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
@@ -627,6 +629,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\48_FileFieldMapping_Commander_TierProduct.sql
 :r .\ST\49_FileFieldMapping_Radiant_Department.sql
 :r .\ST\51_FileFieldMapping_Commander_Validate.sql
+:r .\ST\52_FileFieldMapping_Commander_Category.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql

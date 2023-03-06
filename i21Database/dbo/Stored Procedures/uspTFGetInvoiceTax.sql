@@ -23,6 +23,10 @@ BEGIN TRY
 	DECLARE @tmpTransaction TFCommonTransaction
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 	DECLARE @tmpDetailTax TFCommonDetailTax
+	DECLARE @tmpDetailTaxGrouped TABLE (intTransactionDetailId INT
+		, strCriteria NVARCHAR(20)
+		, dblTax DECIMAL(18, 6)
+	)
 
 	IF @Refresh = 1
 	BEGIN
@@ -137,7 +141,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), tblARInvoice.strInvoiceNumber )  ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
@@ -370,7 +374,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), tblARInvoice.strInvoiceNumber )  ELSE tblARInvoice.strInvoiceNumber END AS strBillOfLading
+					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
@@ -702,6 +706,17 @@ BEGIN TRY
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
 			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
 
+			INSERT INTO @tmpDetailTaxGrouped (intTransactionDetailId, strCriteria, dblTax)      
+				SELECT InvTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria, SUM(tblARInvoiceDetailTax.dblAdjustedTax)      
+				FROM @tmpTransaction InvTran      
+				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId      
+				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId      
+				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId      
+				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId       
+			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId   
+			GROUP BY InvTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria
+ 
+
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDetailTax)
 			BEGIN		
 				DECLARE @InvoiceDetailId INT = NULL, @intTaxCodeId INT = NULL, @strCriteria NVARCHAR(100) = NULL,  @dblTax NUMERIC(18,8) = NULL
@@ -710,11 +725,17 @@ BEGIN TRY
 
 				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
 				BEGIN
-					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
+					IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InvoiceDetailId ) = 0)
+					BEGIN
+						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId	
+					END   								 
 				END
 				ELSE IF (@strCriteria = '= 0' AND @dblTax > 0)
 				BEGIN
-					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId										 
+					IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InvoiceDetailId ) > 0)
+					BEGIN
+						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId   
+					END										 
 				END
 
 				DELETE @tmpDetailTax WHERE intTransactionDetailId = @InvoiceDetailId AND intTaxCodeId = @intTaxCodeId

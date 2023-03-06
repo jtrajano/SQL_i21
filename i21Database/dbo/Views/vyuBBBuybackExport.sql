@@ -7,8 +7,9 @@ AS
 		,A.dtmDate
 		,A.dtmShipDate
 		,A.strBOLNumber
+		,G.strItemNo strActualItemNo
 		,strItemNumber = ISNULL(H.strVendorProduct,G.strItemNo)
-		,strUnitMeasure = ISNULL(K.strVendorUOM,J.strUnitMeasure) COLLATE Latin1_General_CI_AS 
+		,strUnitMeasure = COALESCE(NULLIF(H.strVendorProductUOM, ''), CASE WHEN M.strDataFileTemplate = 'Chevron' THEN RIGHT(G.strItemNo, 3) ELSE K.strVendorUOM END, J.strUnitMeasure) COLLATE Latin1_General_CI_AS 
 		,A.intInvoiceId
 		,B.dblQtyOrdered
 		,B.dblQtyShipped

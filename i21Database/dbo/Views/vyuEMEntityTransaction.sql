@@ -14,10 +14,12 @@
 		strPaymentInfo = null,
 		intPaymentId = null	,
 		intTransactionId = null,
-		dtmDatePaid = a.dtmPostDate
+		dtmDatePaid = a.dtmPostDate,
+		strPaymentMethod = d.strPaymentMethod
 	from vyuARCustomerHistory a	
 		left join tblARInvoice b on a.strTransactionNumber = b.strInvoiceNumber
 		left join tblARPayment c on a.strTransactionNumber = c.strRecordNumber
+		left join tblSMPaymentMethod d on c.intPaymentMethodId = d.intPaymentMethodID
 			where (b.intInvoiceId is null or  b.strType <> 'CF Tran')			
 				and (isnull(c.intPaymentMethodId, 0) <> 9)
 	union all
@@ -35,7 +37,8 @@
 		strPaymentInfo = strPaymentInfo,
 		intPaymentId = intPaymentId,
 		intTransactionId = intTransactionId,
-		dtmDatePaid = dtmDatePaid
+		dtmDatePaid = dtmDatePaid,
+		strPaymentMethod = null
 		--,* 
 	from vyuAPVendorHistory
 	union all
@@ -53,6 +56,7 @@
 		strPaymentInfo = '',
 		intPaymentId = 0,
 		intTransactionId = intQuoteHeaderId,
-		dtmDatePaid = null
+		dtmDatePaid = null,
+		strPaymentMethod = null
 		--,* 
 	from vyuTRGetQuoteHeader

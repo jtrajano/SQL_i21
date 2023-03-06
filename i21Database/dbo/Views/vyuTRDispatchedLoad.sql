@@ -86,7 +86,7 @@ SELECT LG.intLoadId
 	, LG.intSalespersonId
 	, intTMDispatchId = TMO.intDispatchID
 	, strTMOrder = TMO.strTMOrder
-	, intSiteId = ISNULL(TMO.intSiteID, LG.strSiteID)
+	, intSiteId = ISNULL(TMO.intSiteID, LG.intTMSiteId)
 	, strSiteNumber = ISNULL(TMO.strSiteNumber, RIGHT('000' + CAST(TMS.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS)
 	, dblTMOverageQty = TMO.dblOverageQty
 	, dblTMOveragePrice = TMO.dblOveragePrice

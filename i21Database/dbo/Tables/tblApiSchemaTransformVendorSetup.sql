@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[tblApiSchemaTransformVendorSetup] (
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor item cross reference.
 	strItemName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor item name cross reference.
 	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor item custom name.
+	strVendorItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The vendor item unit measure
 	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor unit measure cross reference.
 	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor unit measure custom name.
 	strEquipmentType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor unit measure cross reference equipment type.

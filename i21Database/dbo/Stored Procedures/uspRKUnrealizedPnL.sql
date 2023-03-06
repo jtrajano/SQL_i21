@@ -86,6 +86,7 @@ BEGIN
 		, dtmTradeDate
 		, strInternalTradeNo
 		, strBroker
+		, intEntityId
 		, strBrokerAccount
 		, strBook
 		, strSubBook
@@ -139,6 +140,7 @@ BEGIN
 					, dtmTradeDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ot.dtmFilledDate, 110), 110)
 					, ot.strInternalTradeNo
 					, ot.strBroker
+					, ot.intEntityId
 					, ot.strBrokerAccount
 					, ot.strBook
 					, ot.strSubBook
@@ -195,7 +197,7 @@ BEGIN
 				LEFT JOIN #UnrealizedSettlePrice t ON t.intFutureMarketId = ot.intFutureMarketId AND t.intFutureMonthId = ot.intFutureMonthId
 				LEFT JOIN tblCTBook cb ON cb.intBookId = ot.intBookId
 				LEFT JOIN tblCTSubBook csb ON csb.intSubBookId = ot.intSubBookId
-				WHERE ot.intSelectedInstrumentTypeId = @intSelectedInstrumentTypeId
+				WHERE ISNULL(ot.intSelectedInstrumentTypeId,0) = ISNULL(@intSelectedInstrumentTypeId,ISNULL(ot.intSelectedInstrumentTypeId,0))
 					AND ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
 					AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
 					AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))
@@ -284,6 +286,7 @@ BEGIN
 		, dtmTradeDate
 		, strInternalTradeNo
 		, strBroker
+		, intEntityId
 		, strBrokerAccount
 		, strBook
 		, strSubBook

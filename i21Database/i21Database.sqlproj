@@ -570,6 +570,7 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySchedule.sql" />
     <Build Include="dbo\Views\vyuFRDHierarcySchedule.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessTradeFinanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSetLotStatus.sql" />
     <Build Include="dbo\Views\vyuARAccountDetail.sql" />
@@ -1308,6 +1309,10 @@
     <Build Include="dbo\Tables\tblTMSiteDeviceTankMonitor.sql" />
     <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
+    <Build Include="dbo\Tables\tblTMTankReading.sql" />
+    <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11160,6 +11165,10 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateDummyLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDeleteLoadDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

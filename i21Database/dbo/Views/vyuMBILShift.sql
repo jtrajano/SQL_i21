@@ -13,7 +13,7 @@ SELECT Shift.intShiftId
 	, Shift.dtmStartTime
 	, Shift.dtmEndTime
 	, Shift.intTruckId
-	, strTruckName = isnull(Truck.strTruckNumber,longtruck.strData)
+	, strTruckName = isnull(Truck.strTruckNumber,longtruck.strTruckNumber)
 	, Shift.intStartOdometer
 	, Shift.intEndOdometer
 	, Items.dblFuelGallonsDelievered
@@ -25,19 +25,19 @@ FROM tblMBILShift Shift
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Shift.intDriverId
 LEFT JOIN tblSMTruck Truck ON Truck.intTruckId = Shift.intTruckId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shift.intLocationId
-LEFT JOIN  tblSCTruckDriverReference longtruck ON Shift.intLongTruckId = longtruck.intTruckDriverReferenceId
+LEFT JOIN  tblSMShipViaTruck longtruck ON Shift.intLongTruckId = longtruck.intEntityShipViaTruckId
 LEFT JOIN (
 			SELECT 
 				intShiftId, SUM(dblFuelGallonsDelievered) as dblFuelGallonsDelievered, SUM(dblFuelSales) as dblFuelSales
 			FROM (
 					SELECT 
-						InvoiceItem.intShiftId, SUM(dblQuantity) as dblFuelGallonsDelievered,  (ISNULL(dblItemTotal,0) + ISNULL(dblTaxTotal,0)) as dblFuelSales
+						InvoiceItem.intShiftId, SUM(dblQuantity) as dblFuelGallonsDelievered, Sum( (ISNULL(dblItemTotal,0) + ISNULL(dblTaxTotal,0))) as dblFuelSales
 					FROM 
 						vyuMBILInvoiceItem InvoiceItem
 						INNER JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId
 						INNER JOIN vyuMBILInvoice Invoice ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
 						WHERE Item.strType = 'Inventory' and Item.ysnAvailableTM = 1 and Invoice.ysnVoided IS NULL
-						GROUP BY InvoiceItem.intShiftId, dblQuantity, dblItemTotal, dblTaxTotal
+						GROUP BY InvoiceItem.intShiftId
 				) tblTotalItem
 				GROUP BY intShiftId
 		) Items ON Items.intShiftId = Shift.intShiftId

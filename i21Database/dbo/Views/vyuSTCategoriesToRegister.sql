@@ -39,7 +39,10 @@ JOIN
 	 WHERE dtmDateModified IS NOT NULL 
 	 OR dtmDateCreated IS NOT NULL
 ) AS x 
-	ON x.intCategoryId = Cat.intCategoryId 
-WHERE CL.strCashRegisterDepartment IS NOT NULL
+ON x.intCategoryId = Cat.intCategoryId 
+JOIN vyuSTStoreDepartments StoreDepartments
+ON	ST.intStoreId = StoreDepartments.intStoreId AND
+	CL.intLocationId = StoreDepartments.intCompanyLocationId
+WHERE StoreDepartments.strRegisterCode IS NOT NULL
 AND Cat.strDescription IS NOT NULL 
 AND Cat.strDescription != ''
