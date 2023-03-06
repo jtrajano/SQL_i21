@@ -28,6 +28,7 @@ BEGIN
 		, dtmTradeDate DATETIME
 		, strInternalTradeNo NVARCHAR(100)
 		, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intEntityId INT
 		, strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strBook NVARCHAR(100)
 		, strSubBook NVARCHAR(100)
@@ -112,6 +113,7 @@ BEGIN
 		, dtmTradeDate
 		, strInternalTradeNo
 		, strName
+		, intEntityId
 		, strAccountNumber
 		, strBook
 		, strSubBook
