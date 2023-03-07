@@ -1145,36 +1145,39 @@ BEGIN
 			AND lot.intItemLocationId = @intItemLocationId
 			AND ISNULL(currentValuation.floatingValue, 0) <> 0
 
-		EXEC [dbo].[uspICPostInventoryTransaction]
-			@intItemId = @intItemId
-			,@intItemLocationId = @intItemLocationId
-			,@intItemUOMId = NULL 
-			,@intSubLocationId = NULL
-			,@intStorageLocationId = NULL 
-			,@dtmDate = @dtmDate
-			,@dblQty  = @dblQty
-			,@dblUOMQty = 0
-			,@dblCost = 0
-			,@dblValue = @dblAutoVariance
-			,@dblSalesPrice = 0
-			,@intCurrencyId = NULL 
-			,@intTransactionId = @intTransactionId
-			,@intTransactionDetailId = @intTransactionDetailId
-			,@strTransactionId = @strTransactionId
-			,@strBatchId = @strBatchId
-			,@intTransactionTypeId = @AUTO_VARIANCE
-			,@intLotId = NULL 
-			,@intRelatedInventoryTransactionId = NULL 
-			,@intRelatedTransactionId = NULL 
-			,@strRelatedTransactionId = NULL 
-			,@strTransactionForm = @strTransactionForm
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@intCostingMethod = @AVERAGECOST
-			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			,@intForexRateTypeId = NULL
-			,@dblForexRate = 1
-			,@strDescription = @strAutoVarianceDescription 
-			,@intSourceEntityId = @intSourceEntityId
+		IF @dblAutoVariance <> 0
+		BEGIN 
+			EXEC [dbo].[uspICPostInventoryTransaction]
+				@intItemId = @intItemId
+				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = NULL 
+				,@intSubLocationId = NULL
+				,@intStorageLocationId = NULL 
+				,@dtmDate = @dtmDate
+				,@dblQty  = @dblQty
+				,@dblUOMQty = 0
+				,@dblCost = 0
+				,@dblValue = @dblAutoVariance
+				,@dblSalesPrice = 0
+				,@intCurrencyId = NULL 
+				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
+				,@strTransactionId = @strTransactionId
+				,@strBatchId = @strBatchId
+				,@intTransactionTypeId = @AUTO_VARIANCE
+				,@intLotId = NULL 
+				,@intRelatedInventoryTransactionId = NULL 
+				,@intRelatedTransactionId = NULL 
+				,@strRelatedTransactionId = NULL 
+				,@strTransactionForm = @strTransactionForm
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@intCostingMethod = @AVERAGECOST
+				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+				,@intForexRateTypeId = NULL
+				,@dblForexRate = 1
+				,@strDescription = @strAutoVarianceDescription 
+				,@intSourceEntityId = @intSourceEntityId
+		END
 
 		--INSERT INTO dbo.tblICInventoryTransaction (
 		--			[intItemId]
