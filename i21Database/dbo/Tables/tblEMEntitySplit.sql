@@ -8,6 +8,9 @@
     [dblAcres]			NUMERIC(18, 6),
 	[intCategoryId]		INT	NULL,
     [strSplitType]		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	
+	[guiApiUniqueId]    UNIQUEIDENTIFIER    NULL,
+	[intRowNumber]      INT    NULL,
     [intConcurrencyId]	INT NOT NULL,
     CONSTRAINT [PK_tblEMEntitySplit] PRIMARY KEY CLUSTERED ([intSplitId] ASC),
 	CONSTRAINT [FK_tblEMEntitySplit_tblARCustomer] FOREIGN KEY([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
