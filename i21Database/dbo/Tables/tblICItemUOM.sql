@@ -98,6 +98,14 @@ Type the overview for the table here.
         ON tblICItemUOM([strUpcCode], [intModifier])
         WHERE strUpcCode IS NOT NULL AND intModifier IS NOT NULL;
     GO
+        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strUPCA] 
+        ON [tblICItemUOM]([strUPCA] ASC)
+        WHERE [strUPCA] IS NOT NULL AND intModifier IS NULL;
+    GO
+        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strSCC14] 
+        ON [tblICItemUOM]([strSCC14] ASC)
+        WHERE [strSCC14] IS NOT NULL AND intModifier IS NULL;
+    GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
