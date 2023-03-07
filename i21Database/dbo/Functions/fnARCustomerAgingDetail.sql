@@ -437,6 +437,7 @@ BEGIN
 			OR 
 			SC.intInvoiceId IS NOT NULL
 		)	
+	  AND I.strType <> 'Tax Adjustment'
 
 	IF @ysnPaidInvoice = 0
 		DELETE FROM @POSTEDINVOICES WHERE ysnPaid = 1
@@ -698,7 +699,6 @@ BEGIN
 		LEFT JOIN @CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 	WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 	  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	  AND I.strType <> 'Tax Adjustment'
 
 	UNION ALL
 
