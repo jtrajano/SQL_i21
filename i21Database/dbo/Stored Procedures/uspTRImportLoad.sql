@@ -35,7 +35,15 @@ BEGIN
             , @dtmPullDate DATETIME = NULL
             , @strSource NVARCHAR(20) = NULL
 			, @ysnDefault BIT = NULL
-	
+			, @ysnAllowBlankDriver BIT = NULL
+			, @ysnAllowBlankTruck BIT = NULL
+			, @ysnAllowBlankTrailer BIT = NULL
+
+		SELECT TOP 1 @ysnAllowBlankDriver = ISNULL(ysnAllowBlankDriver, 0)
+			, @ysnAllowBlankTruck = ISNULL(ysnAllowBlankTruck, 0)
+			, @ysnAllowBlankTrailer = ISNULL(ysnAllowBlankTrailer, 0)
+		FROM tblTRCompanyPreference
+
 		BEGIN TRANSACTION
 		
 		DECLARE @CursorTran AS CURSOR
@@ -141,7 +149,11 @@ BEGIN
 				WHERE CRB.strType = 'Driver' AND CRB.strImportValue = @strDriver
 			END
 			
-			IF (@intDriverId IS NOT NULL)
+			IF (ISNULL(@intDriverId, 0) = 0 AND @ysnAllowBlankDriver = 0)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Driver')
+			END
+			ELSE
 			BEGIN
 				UPDATE tblTRImportLoadDetail SET intDriverId = @intDriverId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
@@ -164,7 +176,7 @@ BEGIN
 					WHERE CRB.strType = 'Truck' AND CRB.strImportValue = @strTruck
 				END
 				
-				IF (@intTruckId IS NULL)
+				IF (ISNULL(@intTruckId, 0) = 0 AND @ysnAllowBlankTruck = 0)
 				BEGIN
 					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')
 				END
@@ -191,7 +203,7 @@ BEGIN
 					WHERE CRB.strType = 'Trailer' AND CRB.strImportValue = @strTrailer
 				END
 				
-				IF (@intTrailerId IS NULL)
+				IF (ISNULL(@intTrailerId, 0) = 0 AND @ysnAllowBlankTrailer = 0)
 				BEGIN
 					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Trailer')
 				END
