@@ -11169,6 +11169,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGenerateLoadDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGenerateDummyLoadDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDeleteLoadDetail.sql" />
+    <Build Include="dbo\Views\vyuMFUserLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
