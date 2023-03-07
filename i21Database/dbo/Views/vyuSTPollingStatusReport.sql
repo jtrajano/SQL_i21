@@ -25,16 +25,6 @@ INNER JOIN dbo.tblSTStore AS sts
 	ON stcp.intStoreId = sts.intStoreId
 INNER JOIN dbo.tblSTCheckoutHeader CH
 	ON stcpew.intCheckoutId = CH.intCheckoutId
-WHERE
-stcpew.intCheckoutProcessErrorWarningId IN
-(
-	SELECT MAX(intCheckoutProcessErrorWarningId) 
-	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
-	JOIN tblSTCheckoutProcess cpInMsg
-		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId
-	WHERE cpInMsg.intStoreId IN (SELECT intStoreId FROM tblSTStore)
-	GROUP BY cpInMsg.intStoreId
-)
 GROUP BY stcp.intStoreId, stcpew.intCheckoutProcessId, stcpew.intCheckoutProcessErrorWarningId, stcpew.intCheckoutId, 
 stcp.strGuid, stcp.dtmCheckoutProcessDate, CH.dtmCheckoutDate, CH.dtmCountDate, sts.intStoreNo, sts.strDescription, stcpew.strMessageType, stcpew.strMessage, CH.strCheckoutCloseDate
 HAVING CH.dtmCheckoutDate IS NOT NULL
