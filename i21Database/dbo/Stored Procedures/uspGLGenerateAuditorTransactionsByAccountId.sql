@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByAccountId]
+CREATE PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByAccountId]
 	@intEntityId INT,
 	@dtmDateFrom DATETIME,
 	@dtmDateTo DATETIME
