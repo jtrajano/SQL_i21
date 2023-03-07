@@ -57,6 +57,7 @@ SELECT
 	intCent = CASE WHEN (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId) IS NOT NULL THEN 0 ELSE E.intCent END,
 	ysnSubCurrency = ISNULL(E.ysnSubCurrency, 0),
 	intSubCurrencyCent = (SELECT TOP 1 intCent from tblSMCurrency where intMainCurrencyId = B.intCurrencyId),
+
 	B.strStoreFTPPath,
 	B.strStoreFTPUsername,
 	B.strStoreFTPPassword,
@@ -70,8 +71,7 @@ SELECT
 	ysnTransportTerminal,
 	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END as intTermsId,
 	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm,
-	B.strVATNo,
-	L.strChildVendorIds
+	B.strVATNo
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -101,10 +101,3 @@ FROM
 		ON B.intTermsId = J.intTermID
 	LEFT JOIN tblSMTerm K
 		ON C.intTermsId = K.intTermID
-	OUTER APPLY(
-		SELECT STUFF( (SELECT DISTINCT ' {"name":"' + EM.strName + '", "vendorid":' + strVendorId + '}, '  from tblAPVendor AV join tblEMEntity EM
-		on AV.intEntityId = EM.intEntityId
-		where strVendorPayToId = B.strVendorId  
-		FOR XML PATH('')),1,1, '') strChildVendorIds
-	
-	)L
