@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLAccountGroup] (
     [intAccountGroupId]        INT             IDENTITY (1, 1) NOT NULL,
+    [intAccountGroupClusterId] INT             NULL,
     [strAccountGroup]          NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strAccountType]           NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
     [intParentGroupId]         INT             NULL,
@@ -14,7 +15,8 @@
 	[intAccountRangeId] [int] NULL,
     CONSTRAINT [PK_GLAccountGroup_AccountGroupId] PRIMARY KEY CLUSTERED ([intAccountGroupId] ASC), 
     CONSTRAINT [FK_tblGLAccountGroup_tblGLAccountCategory] FOREIGN KEY([intAccountCategoryId])	REFERENCES [dbo].[tblGLAccountCategory] ([intAccountCategoryId]),
-	CONSTRAINT [FK_tblGLAccountGroup_tblGLAccountRange] FOREIGN KEY([intAccountRangeId]) REFERENCES [dbo].[tblGLAccountRange] ([intAccountRangeId])
+	CONSTRAINT [FK_tblGLAccountGroup_tblGLAccountRange] FOREIGN KEY([intAccountRangeId]) REFERENCES [dbo].[tblGLAccountRange] ([intAccountRangeId]),
+    CONSTRAINT [FK_tblGLAccountGroup_tblGLAccountGroupCluster] FOREIGN KEY([intAccountGroupClusterId])	REFERENCES [dbo].[tblGLAccountGroupCluster] ([intAccountGroupClusterId])
 );
 GO
 
