@@ -13,7 +13,7 @@ SELECT Shift.intShiftId
 	, Shift.dtmStartTime
 	, Shift.dtmEndTime
 	, Shift.intTruckId
-	, strTruckName = isnull(Truck.strTruckNumber,longtruck.strData)
+	, strTruckName = isnull(Truck.strTruckNumber,longtruck.strTruckNumber)
 	, Shift.intStartOdometer
 	, Shift.intEndOdometer
 	, Items.dblFuelGallonsDelievered
@@ -25,7 +25,7 @@ FROM tblMBILShift Shift
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Shift.intDriverId
 LEFT JOIN tblSMTruck Truck ON Truck.intTruckId = Shift.intTruckId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shift.intLocationId
-LEFT JOIN  tblSCTruckDriverReference longtruck ON Shift.intLongTruckId = longtruck.intTruckDriverReferenceId
+LEFT JOIN  tblSMShipViaTruck longtruck ON Shift.intLongTruckId = longtruck.intEntityShipViaTruckId
 LEFT JOIN (
 			SELECT 
 				intShiftId, SUM(dblFuelGallonsDelievered) as dblFuelGallonsDelievered, SUM(dblFuelSales) as dblFuelSales
