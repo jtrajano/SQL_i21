@@ -6,7 +6,7 @@
     [intShiftNo] INT NOT NULL,
     [strCheckoutType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strManagersName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-    [strManagersPassword] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+    [strManagersPassword] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [dtmShiftDateForImport] DATETIME NULL,
     [dtmShiftClosedDate] DATETIME NULL,
     [strCheckoutCloseDate] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
