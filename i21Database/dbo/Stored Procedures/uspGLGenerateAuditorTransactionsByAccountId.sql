@@ -111,6 +111,8 @@ BEGIN
             DECLARE @dblTotalCreditForeign NUMERIC(18,6)
             DECLARE @dblTotalDebitUnit NUMERIC(18,6)
             DECLARE @dblTotalCreditUnit  NUMERIC(18,6)
+            DECLARE @dblTotalSourceUnitDebit NUMERIC(18,6)
+            DECLARE @dblTotalSourceUnitCredit NUMERIC(18,6)
 
             DECLARE 
             @beginBalance NUMERIC(18,6)              = 0,
@@ -392,6 +394,8 @@ BEGIN
 				@dblTotalCredit= sum(dblCredit) ,
                 @dblTotalDebitUnit = sum(ISNULL(dblDebitUnit,0)) , 
 				@dblTotalCreditUnit= sum(ISNULL(dblCreditUnit,0)) ,
+                @dblTotalSourceUnitDebit = SUM(ISNULL(dblSourceUnitDebit,0)),
+                @dblTotalSourceUnitCredit = SUM(ISNULL(dblSourceUnitCredit,0)),
                 @dblTotalDebitForeign = sum(dblDebitForeign),
                 @dblTotalCreditForeign = sum(dblCreditForeign)
                 FROM #AuditorTransactions 
@@ -415,6 +419,8 @@ BEGIN
                     , dblCredit
                     , dblDebitUnit
                     , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblEndingBalanceForeign
@@ -439,6 +445,8 @@ BEGIN
                     , @dblTotalCredit - CASE WHEN @beginBalance < 0 THEN  @beginBalance ELSE 0 END
                     , @dblTotalDebitUnit
                     , @dblTotalCreditUnit
+                    , @dblTotalSourceUnitDebit
+                    , @dblTotalSourceUnitCredit
                     , @dblTotalDebitForeign
                     , @dblTotalCreditForeign     
                     , @dblTotalDebitForeign- @dblTotalCreditForeign  + @beginBalanceForeign
