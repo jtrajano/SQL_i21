@@ -9241,6 +9241,7 @@
     <Build Include="dbo\Functions\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
     <Build Include="dbo\Functions\fnGRDPRvsGrain.sql" />
     <Build Include="dbo\Functions\fnGRInventoryStocksVSDPRStorage.sql" />
+    <Build Include="dbo\Views\vyuMFUserLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
