@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intBatchPreStageId INT
 		,@strXML NVARCHAR(MAX) = ''
+		,@strRootXML NVARCHAR(MAX) = ''
 		,@strHeaderXML NVARCHAR(MAX) = ''
 		,@strERPOrderNo NVARCHAR(50)
 		,@intWorkOrderId INT
@@ -86,7 +87,7 @@ BEGIN TRY
 			FROM @tblMFBatchPreStage PS
 			)
 
-	SELECT @strXML = '<root><CtrlPoint><DocNo>' + IsNULL(ltrim(@intBatchPreStageId), '') + '</DocNo>' + '<MsgType>Stock_Recategorization</MsgType>' + '<Sender>iRely</Sender>' + '<Receiver>SAP</Receiver></CtrlPoint>'
+	SELECT @strRootXML = '<root><CtrlPoint><DocNo>' + IsNULL(ltrim(@intBatchPreStageId), '') + '</DocNo>' + '<MsgType>Stock_Recategorization</MsgType>' + '<Sender>iRely</Sender>' + '<Receiver>SAP</Receiver></CtrlPoint>'
 
 	WHILE @intBatchPreStageId IS NOT NULL
 	BEGIN
@@ -278,9 +279,9 @@ BEGIN TRY
 		WHERE intBatchPreStageId > @intBatchPreStageId
 	END
 
-	IF @strXML <> ''
+	IF LEN(@strXML)>0
 	BEGIN
-		   SELECT @strXML = @strXML +  '</root>'
+		   SELECT @strXML = @strRootXML + @strXML +  '</root>'
 
 		INSERT INTO @tblOutput (
 			intBatchId
