@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByAccountId]
+ALTER PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByAccountId]
 	@intEntityId INT,
 	@dtmDateFrom DATETIME,
 	@dtmDateTo DATETIME
@@ -109,6 +109,8 @@ BEGIN
             DECLARE @dblTotalCredit NUMERIC(18,6)
             DECLARE @dblTotalDebitForeign NUMERIC(18,6)
             DECLARE @dblTotalCreditForeign NUMERIC(18,6)
+            DECLARE @dblTotalDebitUnit NUMERIC(18,6)
+            DECLARE @dblTotalCreditUnit  NUMERIC(18,6)
 
             DECLARE 
             @beginBalance NUMERIC(18,6)              = 0,
@@ -388,6 +390,8 @@ BEGIN
                SELECT
                 @dblTotalDebit = sum(dblDebit) , 
 				@dblTotalCredit= sum(dblCredit) ,
+                @dblTotalDebitUnit = sum(ISNULL(dblDebitUnit,0)) , 
+				@dblTotalCreditUnit= sum(ISNULL(dblCreditUnit,0)) ,
                 @dblTotalDebitForeign = sum(dblDebitForeign),
                 @dblTotalCreditForeign = sum(dblCreditForeign)
                 FROM #AuditorTransactions 
@@ -409,6 +413,8 @@ BEGIN
                     , dblEndingBalance
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblEndingBalanceForeign
@@ -431,6 +437,8 @@ BEGIN
                     , @dblTotalDebit- @dblTotalCredit + @beginBalance
                     , @dblTotalDebit + CASE WHEN @beginBalance > 0 THEN @beginBalance ELSE 0 END
                     , @dblTotalCredit - CASE WHEN @beginBalance < 0 THEN  @beginBalance ELSE 0 END
+                    , @dblTotalDebitUnit
+                    , @dblTotalCreditUnit
                     , @dblTotalDebitForeign
                     , @dblTotalCreditForeign     
                     , @dblTotalDebitForeign- @dblTotalCreditForeign  + @beginBalanceForeign
