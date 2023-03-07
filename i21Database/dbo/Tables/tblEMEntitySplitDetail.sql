@@ -6,9 +6,6 @@
     [dblSplitPercent]					NUMERIC (18, 6) NULL,
     [strOption]							NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[intStorageScheduleTypeId]			INT		NULL ,
-	
-	[guiApiUniqueId]					UNIQUEIDENTIFIER    NULL,
-	[intRowNumber]						INT    NULL,
     [intConcurrencyId]					INT             NOT NULL,
     CONSTRAINT [PK_tblEMEntitySplitDetail] PRIMARY KEY CLUSTERED ([intSplitDetailId] ASC),	
 	CONSTRAINT [FK_tblEMEntitySplitDetail_tblEMEntity] FOREIGN KEY([intEntityId]) REFERENCES [dbo].tblEMEntity([intEntityId]), 
