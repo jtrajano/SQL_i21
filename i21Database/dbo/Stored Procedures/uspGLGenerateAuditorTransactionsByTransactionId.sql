@@ -84,6 +84,8 @@ BEGIN
                 , strCurrency
                 , dblDebit = SUM(ISNULL(dblDebit, 0))
                 , dblCredit = SUM(ISNULL(dblCredit, 0))
+                , dblDebitUnit = SUM(ISNULL(dblDebitUnit, 0))
+                , dblCreditUnit = SUM(ISNULL(dblCreditUnit, 0))
                 , dblDebitForeign = SUM(ISNULL(dblDebitForeign, 0))
                 , dblCreditForeign = SUM(ISNULL(dblCreditForeign, 0))
                 , dblAmount = (SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)))
@@ -211,6 +213,8 @@ BEGIN
                     , intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblTotal
@@ -228,6 +232,8 @@ BEGIN
                     , @intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblAmount
