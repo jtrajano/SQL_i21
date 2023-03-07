@@ -564,7 +564,6 @@ BEGIN
 			,intForexRateTypeId
 			,dblForexRate
 			,intSourceEntityId
-			,dblForexCost
 			)
 		SELECT [intItemId]
 			,[intItemLocationId]
@@ -590,7 +589,6 @@ BEGIN
 			,[intForexRateTypeId] = t.intForexRateTypeId
 			,[dblForexRate] = t.dblForexRate
 			,t.intSourceEntityId
-			,t.dblForexCost
 		FROM tblICInventoryTransaction t
 		WHERE t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
