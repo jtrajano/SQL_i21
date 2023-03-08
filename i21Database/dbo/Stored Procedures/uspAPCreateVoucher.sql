@@ -473,6 +473,12 @@ BEGIN TRY
 	FROM tblSMStartingNumber A
 	WHERE A.intStartingNumberId = 132
 
+	--PREPAYMENT
+	UPDATE A
+		SET A.intNumber = @prepaidStartNum
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 20
+
 	--1099 ADJUSTMENT Type
 	UPDATE A
 		SET A.intNumber = @adjStartNum
