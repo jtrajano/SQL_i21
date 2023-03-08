@@ -4149,10 +4149,10 @@ BEGIN TRY
 																	THEN 
 																		CASE WHEN intCurrencyId = @intCurrencyId	
 																			THEN ISNULL(dblFutures, 0)
-																			ELSE ISNULL(dblFutures, 0) * dblFinalRate END 
-																	ELSE  ISNULL(dblFutures, 0) * dblFinalRate END
+																			ELSE ISNULL(dblFutures, 0) * dblRateCT END 
+																	ELSE  ISNULL(dblFutures, 0) * dblRateCT END
 															END), 0)
-					, dblCalculatedContractRatio = CASE WHEN dblContractRatio IS NOT NULL THEN dblContractRatio * dblFinalRate ELSE 1 END
+					, dblCalculatedContractRatio = CASE WHEN dblContractRatio IS NOT NULL THEN dblContractRatio * dblRateCT ELSE 1 END
 				FROM (
 					SELECT #Temp.*
 						-- IF RATE TYPE IS CONTRACT = CHECK CONTRACT FOREX. IF NO VALUE, USE SYSTEM WIDE FOREX INSTEAD
