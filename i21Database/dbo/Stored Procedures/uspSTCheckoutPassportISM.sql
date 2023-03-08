@@ -196,10 +196,10 @@ BEGIN
 		WHERE CAST(Chk.intRegisterUpcCode AS BIGINT) NOT IN
 		(
 			SELECT DISTINCT
-				CAST(UOM.intUpcCode AS BIGINT) AS intUpcCode
+				CAST(dbo.fnICValidateUPCCode(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUpcCode
 			FROM @tblTemp Chk
 			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(dbo.fnICValidateUPCCode(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -334,7 +334,7 @@ BEGIN
 			WHERE TempChk.intPOSCode NOT IN
 			(
 				SELECT DISTINCT
-					UOM.intUpcCode AS intPOSCode
+					CAST(dbo.fnICValidateUPCCode(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intPOSCode
 				FROM tblICItemUOM UOM
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
@@ -400,7 +400,7 @@ BEGIN
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN tblICItemUOM UOM
-				ON TempChk.intPOSCode = UOM.intUpcCode
+				ON TempChk.intPOSCode = CAST(dbo.fnICValidateUPCCode(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -458,7 +458,7 @@ BEGIN
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN tblICItemUOM UOM
-				ON TempChk.intPOSCode = UOM.intUpcCode
+				ON TempChk.intPOSCode = CAST(dbo.fnICValidateUPCCode(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -643,7 +643,7 @@ BEGIN
 					ON TempChk.intCalculationId = im.intCalculationId
 					AND TempChk.intCheckoutId = im.intCheckoutId
 				INNER JOIN tblICItemUOM UOM
-					ON TempChk.intPOSCode = UOM.intUpcCode
+					ON TempChk.intPOSCode = CAST(dbo.fnICValidateUPCCode(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
