@@ -237,14 +237,16 @@ END
 
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MarkToMarket' AND strScreenName = 'Mark To Market')
-BEGIN
-	UPDATE tblSMScreen
-	SET strScreenName = 'OldMarkToMarket'
-	WHERE strNamespace = 'RiskManagement.view.MarkToMarket' 
-	AND strScreenName = 'Mark To Market'
-END
-GO
+-- RM-4950 - NET 6 UPGRADE CORRECT M2M SCREEN NAMESPACE.
+-- REMOVE RENAME OF OLD
+--IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MarkToMarket' AND strScreenName = 'Mark To Market')
+--BEGIN
+--	UPDATE tblSMScreen
+--	SET strScreenName = 'OldMarkToMarket'
+--	WHERE strNamespace = 'RiskManagement.view.MarkToMarket' 
+--	AND strScreenName = 'Mark To Market'
+--END
+--GO
 
 IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket' AND strScreenName IN ('NewMarkToMarket','New Mark To Market'))
 BEGIN
@@ -255,11 +257,34 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket')
+-- RM-4950 - NET 6 UPGRADE CORRECT M2M SCREEN NAMESPACE.
+-- UPDATE NAMESPACE OF OLD M2M
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MarkToMarket' AND strScreenName = 'OldMarkToMarket')
+BEGIN
+	UPDATE tblSMScreen
+	SET strNamespace = 'RiskManagement.view.OldMarkToMarket' 
+	WHERE strNamespace = 'RiskManagement.view.MarkToMarket' 
+	AND strScreenName = 'OldMarkToMarket'
+END
+GO
+
+-- FROM NEW MARK TO MARKET, CORRECTED TO MARK TO MARKET
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket' AND strScreenName = 'Mark To Market')
+BEGIN
+	UPDATE tblSMScreen
+	SET   strNamespace = 'RiskManagement.view.MarkToMarket' 
+		, strScreenId = 'MarkToMarket'
+	WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket' 
+	AND strScreenName = 'Mark To Market'
+END
+GO
+
+-- RENAMED NAMESPACE FOR VENDOR/CUSTOMER EXPOSURE USING THE CORRECTED NAMESPACE
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MarkToMarket')
 	AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMControl c 
 				INNER JOIN tblSMScreen screen
 					ON screen.intScreenId = c.intScreenId
-					AND screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+					AND screen.strNamespace = 'RiskManagement.view.MarkToMarket'
 				WHERE strControlName = 'Customer Exposure' AND strControlType = 'Grid')
 BEGIN 
 	INSERT INTO tblSMControl (  
@@ -277,15 +302,15 @@ BEGIN
 	, intScreenId = screen.intScreenId
 	, intConcurrencyId = 1
 	FROM tblSMScreen screen
-	WHERE screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+	WHERE screen.strNamespace = 'RiskManagement.view.MarkToMarket'
 END
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.NewMarkToMarket')
+IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MarkToMarket')
 	AND NOT EXISTS (SELECT TOP 1 1 FROM tblSMControl c 
 				INNER JOIN tblSMScreen screen
 					ON screen.intScreenId = c.intScreenId
-					AND screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+					AND screen.strNamespace = 'RiskManagement.view.MarkToMarket'
 				WHERE strControlName = 'Customer Exposure' AND strControlType = 'Tab Page')
 BEGIN 
 	INSERT INTO tblSMControl (  
@@ -303,6 +328,6 @@ BEGIN
 	, intScreenId = screen.intScreenId
 	, intConcurrencyId = 1
 	FROM tblSMScreen screen
-	WHERE screen.strNamespace = 'RiskManagement.view.NewMarkToMarket'
+	WHERE screen.strNamespace = 'RiskManagement.view.MarkToMarket'
 END
 GO
