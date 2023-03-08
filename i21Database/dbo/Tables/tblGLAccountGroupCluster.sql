@@ -3,5 +3,11 @@ CREATE TABLE tblGLAccountGroupCluster (
 	strAccountGroupClusterName NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL ,
 	ysnActive BIT NULL,
     intConcurrencyId INT NULL, 
-    CONSTRAINT [PK_tblGLAccountGroupCluster] PRIMARY KEY (intAccountGroupClusterId)
+    CONSTRAINT [PK_tblGLAccountGroupCluster] PRIMARY KEY (intAccountGroupClusterId),
+	
 )
+GO
+CREATE UNIQUE INDEX [UX_tblGLAccountGroupCluster_strAccountGroupClusterName] ON [dbo].[tblGLAccountGroupCluster](
+	[strAccountGroupClusterName] ASC
+)
+GO
