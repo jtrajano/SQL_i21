@@ -53,7 +53,7 @@ AS RETURN(
                     SELECT   
                         [strTransactionId]    
                         ,[intTransactionId]    
-                        ,[strDescription]= 'Revalue GL '  + @strPeriod 
+                        ,[strDescription]= 'Revalue ' + @strTransactionType + ' '  + @strPeriod 
                         ,[dtmTransactionDate]   
                         ,[dblDebit]   
                         ,[dblCredit]
@@ -69,7 +69,7 @@ AS RETURN(
                         ,[dtmDateEntered]    
                         ,strBatchId  
                         ,[strCode]      
-                        ,[strJournalLineDescription] = 'Revalue GL '  + @strPeriod   
+                        ,[strJournalLineDescription] = 'Revalue ' + @strTransactionType + ' '  + @strPeriod 
                         ,[intJournalLineNo]    
                         ,[strTransactionType]
                         ,[strTransactionForm]
@@ -86,7 +86,7 @@ AS RETURN(
                     SELECT   
                         [strTransactionId]    
                         ,[intTransactionId]    
-                        ,[strDescription] = 'Offset Revalue GL '  + @strPeriod      
+                        ,[strDescription] = 'Offset Revalue '  + @strTransactionType + ' ' + @strPeriod      
                         ,[dtmTransactionDate]   
                         ,[dblDebit]    = dblCredit      
                         ,[dblCredit]   = dblDebit  
@@ -102,7 +102,7 @@ AS RETURN(
                         ,[dtmDateEntered]   
                         ,strBatchId   
                         ,[strCode]      
-                        ,[strJournalLineDescription] = 'Offset Revalue GL '  + @strPeriod   
+                        ,[strJournalLineDescription] = 'Offset Revalue '  + @strTransactionType + ' ' + @strPeriod   
                         ,[intJournalLineNo]
                         ,[strTransactionType]
                         ,[strTransactionForm]
