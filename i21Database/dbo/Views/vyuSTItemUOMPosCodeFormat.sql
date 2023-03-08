@@ -6,6 +6,7 @@ SELECT Item.intItemId
        , Item.strItemNo
 	   , Item.strDescription
 	   , UOM.strLongUPCCode
+	   , UOM.strUPCA
 	   , LEN(UOM.strLongUPCCode) AS intOrigUpcLength
 	   , UOM.strLongUPCWOLeadingZero
 	   , LEN(UOM.strLongUPCWOLeadingZero) AS intUpcWOLeadingZeroLength
