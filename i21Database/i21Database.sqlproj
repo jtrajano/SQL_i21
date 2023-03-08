@@ -1548,6 +1548,8 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketContractUsedValidation.sql" />
     <Build Include="dbo\Tables\tblSCScaleDirectInDistributionAllocationForGL.sql" />
     <Build Include="dbo\Views\vyuSCTicketDirectInDistributionAllocationAndVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
