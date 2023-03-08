@@ -758,7 +758,7 @@ SELECT
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= @intFunctionalCurrencyId
-		,dblExchangeRate			= 0
+		,dblExchangeRate			= 1
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
         ,strJournalLineDescription  = '' 
@@ -777,7 +777,7 @@ SELECT
 		,dblCreditForeign			= NULL 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= 0
+		,dblForeignRate				= 1
 		,strRateType				= NULL 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
