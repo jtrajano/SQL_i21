@@ -483,12 +483,9 @@ BEGIN TRY
 		END
 	
 		--CT-8256
-		IF @intConcurrencyId = 1
+		IF @intConcurrencyId <= 1 OR NOT EXISTS(SELECT TOP 1 1 FROM tblIPPriceFeed where intContractDetailId = @intContractDetailId)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblIPPriceFeed where intContractDetailId = @intContractDetailId)
-			BEGIN
-				EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Added'
-			END
+			EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Added'
 		END
 		ELSE 
 		BEGIN
