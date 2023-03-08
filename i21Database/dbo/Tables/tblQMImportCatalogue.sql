@@ -105,7 +105,9 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [strBroker] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strTINNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strStrategy] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-
+    [dblBulkDensity] NUMERIC(18, 6) NULL,
+    [dblTeaMoisture] NUMERIC(18, 6) NULL,
+    [dblTeaVolume] NUMERIC(18, 6) NULL,
 	CONSTRAINT [PK_tblQMImportCatalogue_intImportCatalogueId] PRIMARY KEY CLUSTERED ([intImportCatalogueId] ASC),
     CONSTRAINT [FK_tblQMImportCatalogue_tblQMImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblQMImportLog] ([intImportLogId]),
     --CONSTRAINT [FK_tblQMImportCatalogue_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId])
