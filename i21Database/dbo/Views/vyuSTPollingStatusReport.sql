@@ -24,8 +24,8 @@ INNER JOIN dbo.tblSTCheckoutProcess AS stcp
 	ON stcpew.intCheckoutProcessId = stcp.intCheckoutProcessId 
 INNER JOIN dbo.tblSTStore AS sts 
 	ON stcp.intStoreId = sts.intStoreId
-LEFT OUTER JOIN dbo.tblSTCheckoutHeader CH
+LEFT JOIN dbo.tblSTCheckoutHeader CH
 	ON stcpew.intCheckoutId = CH.intCheckoutId
 GROUP BY stcp.intStoreId, stcpew.intCheckoutProcessId, stcpew.intCheckoutProcessErrorWarningId, stcpew.intCheckoutId, 
 stcp.strGuid, stcp.dtmCheckoutProcessDate, CH.dtmCheckoutDate, CH.dtmCountDate, sts.intStoreNo, sts.strDescription, stcpew.strMessageType, stcpew.strMessage, CH.strCheckoutCloseDate
-HAVING CH.dtmCheckoutDate IS NOT NULL
+--HAVING CH.dtmCheckoutDate IS NOT NULL
