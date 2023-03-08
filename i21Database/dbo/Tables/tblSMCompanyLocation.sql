@@ -210,6 +210,8 @@
 	[strVendorRefNoPrefix] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strVatNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
     [intSiteCount] INT NULL,
+	[strFLOID] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strBioINSPECTANo] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	---------------------------------------------------------------------
 	/* Credit Card Processing */
 	[ysnEnableCreditCardProcessing] BIT NOT NULL DEFAULT 0, 
