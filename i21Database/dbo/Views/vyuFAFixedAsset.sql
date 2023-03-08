@@ -47,7 +47,7 @@ dblFunctionalGAAPDepToDate = ISNULL(GAAPDepreciation.dblFunctionalDepreciationTo
 dblTaxDepToDate = ISNULL(TaxDepreciation.dblDepreciationToDate,0),
 dblFunctionalTaxDepToDate = ISNULL(TaxDepreciation.dblFunctionalDepreciationToDate,0),
 dblNetBookValue =ISNULL(FA.dblCost - ISNULL(GAAPDepreciation.dblDepreciationToDate, 0), 0),
-dblFunctionalNetBookValue =ISNULL((FA.dblCost * FA.dblForexRate) - ISNULL(GAAPDepreciation.dblFunctionalDepreciationToDate, 0), 0),    
+dblFunctionalNetBookValue =ISNULL(FA.dblCost - ISNULL(GAAPDepreciation.dblFunctionalDepreciationToDate, 0), 0),
 ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),  
 ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),  
 FA.ysnDisposed,       
