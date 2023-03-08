@@ -1550,6 +1550,7 @@
     <Build Include="dbo\Views\vyuSCTicketDirectInDistributionAllocationAndVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
+    <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
