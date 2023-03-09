@@ -122,7 +122,7 @@ BEGIN TRY
                                             ELSE IRI.dblNet
                                             END)
                                         ELSE 0 END)
-            ,[dblGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL THEN
+            ,[dblGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN
                                             -- Amount
                                             (CASE TD.strDiscountChargeType
                                             WHEN 'Percent'

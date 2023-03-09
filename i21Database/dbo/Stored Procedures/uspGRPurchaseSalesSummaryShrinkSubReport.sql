@@ -94,7 +94,7 @@ BEGIN TRY
             ,[strDiscountType]      =   DT.strDiscountType
             ,[dblGrainDP]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN ISNULL(IRI.dblGross * (TD.dblShrinkPercent/100), 0) ELSE 0 END)
             ,[dblGrainOS]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 0 THEN IRI.dblGross * (TD.dblShrinkPercent/100) ELSE 0 END)
-            ,[dblGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL THEN IRI.dblGross * (TD.dblShrinkPercent/100) ELSE 0 END)
+            ,[dblGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN IRI.dblGross * (TD.dblShrinkPercent/100) ELSE 0 END)
             ,[dblGrainSpot]			=	SUM(CASE WHEN CD.intContractDetailId IS NULL AND IRI.intOwnershipType = 1 THEN IRI.dblGross * (TD.dblShrinkPercent/100) ELSE 0 END)
         FROM tblSCTicket T
         INNER JOIN tblICItem I
