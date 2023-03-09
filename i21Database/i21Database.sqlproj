@@ -879,6 +879,7 @@
     <Build Include="dbo\Views\vyuGLAuditorTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspGLClearAuditorTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByTransactionId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByAccountId.sql" />
     <Build Include="dbo\Tables\tblLGFreightPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentConditionsReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReportForInStore1.sql" />
@@ -1266,6 +1267,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcRetainedEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRefreshREEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRefreshAuditorReportByAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
@@ -3629,6 +3631,8 @@
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAuditorReport.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAuditorReportForeign.sql" />
     <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
     <Build Include="dbo\Functions\fnGLValidateRevaluePeriod.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
@@ -5279,6 +5283,8 @@
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReport.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReportExpRev.sql" />
     <Build Include="dbo\Views\vyuPATCalculateFiscalPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerPatronageHistory.sql" />
@@ -10786,6 +10792,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
+    <Build Include="dbo\Functions\fnGLGetSegmentAccount.sql" />
     <Build Include="dbo\Functions\fnGLCheckScale.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
