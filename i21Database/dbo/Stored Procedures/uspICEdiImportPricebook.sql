@@ -110,16 +110,6 @@ AS (SELECT intEdiPricebookId
 DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
 
---Update 4 UOMs to validate if last digit is check digit
-
-UPDATE tblICEdiPricebook
-SET 
-	strSellingUpcNumber = dbo.fnICValidateUPCCode(strSellingUpcNumber),
-	strOrderCaseUpcNumber = dbo.fnICValidateUPCCode(strOrderCaseUpcNumber),
-	strAltUPCNumber1 = dbo.fnICValidateUPCCode(strAltUPCNumber1),
-	strAltUPCNumber2 = dbo.fnICValidateUPCCode(strAltUPCNumber2)
-WHERE strUniqueId = @UniqueId
-
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
 DELETE p
 FROM tblICEdiPricebook p
@@ -1277,6 +1267,14 @@ THEN
 		     , intCheckDigit		= dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)
 		     , intModifier			= CAST(Source_Query.strUpcModifierNumber AS INT)
 			 , strLongUPCCode		= Source_Query.strSellingUpcNumber
+			 , strUPCA				= CASE WHEN LEN(Source_Query.strSellingUpcNumber) IN (10, 11, 12) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 12)
+											ELSE NULL
+											END
+			 , strSCC14				=  CASE WHEN LEN(Source_Query.strSellingUpcNumber) IN (10, 11, 12, 13, 14, 15) 
+											THEN RIGHT('000000' + dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 14)
+											ELSE NULL
+											END
 /* If not found and it is allowed, insert a new item uom record. */
 WHEN 
 	NOT MATCHED 
@@ -1290,6 +1288,8 @@ THEN
 		, dblUnitQty
 		, strUpcCode
 		, strLongUPCCode
+		, strUPCA
+		, strSCC14
 		--, intCheckDigit
 		, intModifier
 		, ysnStockUnit
@@ -1305,8 +1305,16 @@ THEN
 		, Source_Query.intUnitMeasureId										-- intUnitMeasureId
 		, 1																	-- dblUnitQty
 		, dbo.fnSTConvertUPCaToUPCe(RIGHT(Source_Query.strSellingUpcNumber, 11))
-		, RIGHT('00000' + Source_Query.strSellingUpcNumber + CAST(dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber) AS VARCHAR(2)), 12) 		-- strLongUPCCode
-		--, dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)		-- intCheckDigit
+		, Source_Query.strSellingUpcNumber 									-- strLongUPCCode
+		, CASE WHEN LEN(Source_Query.strSellingUpcNumber) IN (10, 11, 12) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 12)
+											ELSE NULL
+											END 							-- strUPCA
+		, CASE WHEN LEN(Source_Query.strSellingUpcNumber) IN (10, 11, 12) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 14)
+											ELSE NULL
+											END 							-- strSCC14
+		--, dbo.fnICValidateCheckDigit(Source_Query.strSellingUpcNumber)	-- intCheckDigit
 		, CAST(Source_Query.strUpcModifierNumber AS INT)					-- intModifier
 		, Source_Query.ysnStockUnit											-- ysnStockUnit
 		, 1																	-- ysnAllowPurchase
@@ -1387,6 +1395,8 @@ INSERT INTO tblICItemUOM (
 	,dblUnitQty
 	,strUpcCode
 	,strLongUPCCode
+	,strUPCA
+	,strSCC14
 	--,intCheckDigit
 	,ysnStockUnit
 	,ysnAllowPurchase
@@ -1402,7 +1412,15 @@ SELECT
 	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 	,strUpcCode = v.strUpcCode
-	,strLongUPCCode =  RIGHT('00000' + p.strOrderCaseUpcNumber + CAST(dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber) AS VARCHAR(2)), 12) 
+	,p.strOrderCaseUpcNumber
+	,strUPCA = CASE WHEN LEN(p.strOrderCaseUpcNumber) IN (10, 11, 12) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(p.strOrderCaseUpcNumber), 12)
+											ELSE NULL
+											END 
+	,strSCC14 = CASE WHEN LEN(p.strOrderCaseUpcNumber) IN (10, 11, 12, 13, 14, 15) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(p.strOrderCaseUpcNumber), 14)
+											ELSE NULL
+											END
 	--,intCheckDigit = dbo.fnICValidateCheckDigit(p.strOrderCaseUpcNumber)
 	,ysnStockUnit = 0
 	,ysnAllowPurchase = 1
@@ -1557,6 +1575,8 @@ INSERT INTO tblICItemUOM (intItemId
 						, dblUnitQty
 						, strUpcCode
 						, strLongUPCCode
+						, strUPCA
+						, strSCC14
 						--, intCheckDigit
 						, ysnStockUnit
 						, ysnAllowPurchase
@@ -1571,7 +1591,15 @@ SELECT intItemId = i.intItemId
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity1 AS NUMERIC(38, 20)) 
 	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber1, 11))
-	 , strLongUPCCode = RIGHT('00000' + p.strAltUPCNumber1 + CAST(dbo.fnICValidateCheckDigit(p.strAltUPCNumber1) AS VARCHAR(2)), 12)
+	 , p.strAltUPCNumber1
+	 , strUPCA = CASE WHEN LEN(p.strAltUPCNumber1) IN (10, 11, 12) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(p.strAltUPCNumber1), 12)
+											ELSE NULL
+											END  
+	 , strSCC14 = CASE WHEN LEN(p.strAltUPCNumber1) IN (10, 11, 12, 13, 14, 15) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(p.strAltUPCNumber1), 14)
+											ELSE NULL
+											END  
 	 --, intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber1)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale1, '') IS NULL THEN NULL 
@@ -1686,6 +1714,8 @@ INSERT INTO tblICItemUOM (intItemId
 						, dblUnitQty
 						, strUpcCode
 						, strLongUPCCode
+						, strUPCA
+						, strSCC14
 						--, intCheckDigit
 						, ysnStockUnit
 						, ysnAllowPurchase
@@ -1700,7 +1730,15 @@ SELECT intItemId = i.intItemId
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity2 AS NUMERIC(38, 20)) 
 	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber2, 11))
-	 , strLongUPCCode = RIGHT('00000' + p.strAltUPCNumber2 + CAST(dbo.fnICValidateCheckDigit(p.strAltUPCNumber2) AS VARCHAR(2)), 12)
+	 , strLongUPCCode = p.strAltUPCNumber2
+	 , strUPCA = CASE WHEN LEN(p.strAltUPCNumber2) IN (10, 11, 12) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(p.strAltUPCNumber2), 12)
+											ELSE NULL
+											END  
+	 , strSCC14 = CASE WHEN LEN(p.strAltUPCNumber2) IN (10, 11, 12, 13, 14, 15) 
+											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(p.strAltUPCNumber2), 14)
+											ELSE NULL
+											END 
 	 --, intCheckDigit = dbo.fnICValidateCheckDigit(p.strAltUPCNumber2)
 	 , ysnStockUnit = 0
 	 , ysnAllowPurchase = CASE WHEN NULLIF(p.strPurchaseSale2, '') IS NULL THEN NULL 
