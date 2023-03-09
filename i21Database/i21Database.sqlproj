@@ -1312,6 +1312,7 @@
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
+    <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11164,6 +11165,15 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateDummyLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDeleteLoadDetail.sql" />
+    <Build Include="dbo\Views\vyuMFUserLocation.sql" />
+    <Build Include="dbo\Tables\tblSCTicketAutoScaleLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -2,23 +2,31 @@
 AS
 SELECT DISTINCT 
  Cat.intCategoryId
-, ST.intStoreId
+, StoreDepartments.intStoreId
+, StoreDepartments.intSubcategoriesId
 , Cat.strCategoryCode
 , Cat.strDescription
-, CatLoc.intGeneralItemId AS intItemId
-, Item.strItemNo
-, Item.strDescription AS strItemDescription
-, CatLoc.strCashRegisterDepartment
-, Item.strLotTracking
+, CASE 
+	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+	THEN StoreDepartments.intGeneralItemId 
+	ELSE StoreDepartments.intSubcategoryItemId
+	END AS intItemId
+, CASE
+	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+	THEN StoreDepartments.strGeneralItemNo
+	ELSE StoreDepartments.strSubcategoryItemNo
+	END AS strItemNo
+, CASE
+	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+	THEN StoreDepartments.strGeneralItemDescription
+	ELSE StoreDepartments.strSubcategoryItemDescription
+	END strItemDescription
+, StoreDepartments.strRegisterCode as strCashRegisterDepartment
+, CASE
+	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+	THEN ISNULL(StoreDepartments.strGeneralItemLotTracking, 'No')
+	ELSE ISNULL(StoreDepartments.strSubcategoryLotTracking, 'No')
+	END AS strLotTracking
 FROM dbo.tblICCategory AS Cat 
-INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
-	ON CatLoc.intCategoryId = Cat.intCategoryId 
-INNER JOIN dbo.tblSMCompanyLocation AS L 
-	ON L.intCompanyLocationId = CatLoc.intLocationId 
-INNER JOIN dbo.tblICItem AS Item 
-	ON CatLoc.intGeneralItemId = Item.intItemId
-INNER JOIN dbo.tblICItemLocation AS ItemLoc
-	ON ItemLoc.intItemId = Item.intItemId
-INNER JOIN dbo.tblSTStore AS ST 
-	ON ST.intCompanyLocationId = L.intCompanyLocationId
-	AND ItemLoc.intLocationId = ST.intCompanyLocationId
+INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
+	ON StoreDepartments.intCategoryId = Cat.intCategoryId

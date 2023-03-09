@@ -369,7 +369,7 @@ BEGIN
 																END,
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= dbo.fnICValidateUPCCode(PCF.strLongUPCCode), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCode]						= dbo.fnICValidateUPCCode(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= '0',
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -378,12 +378,12 @@ BEGIN
 																	ELSE 'no' 
 																END,
 							[dblITTDataInventoryValuePrice]		= itemPricing.dblSalePrice, 
-							[strITTDataMerchandiseCode]			= CatLoc.strCashRegisterDepartment,
+							[strITTDataMerchandiseCode]			= StoreDepartments.strRegisterCode,
 							[dblITTDataRegularSellPrice]		= itemPricing.dblSalePrice,
 							[strITTDataDescription]				= item.strDescription,
 							[strITTDataLinkCode]				= CASE
 																	WHEN uomDepositPlu.intItemUOMId IS NOT NULL
-																		THEN uomDepositPlu.strLongUPCCode
+																		THEN ISNULL(uomDepositPlu.strUPCA, uomDepositPlu.strLongUPCCode)
 																	ELSE NULL
 																END,
 							[strITTDataPaymentSystemsProductCode] = CASE 
@@ -415,8 +415,8 @@ BEGIN
 						FROM tblICItem item
 						INNER JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = item.intCategoryId
-						INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
-							ON CatLoc.intCategoryId = Cat.intCategoryId 
+						INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
+							ON StoreDepartments.intCategoryId = Cat.intCategoryId 
 						INNER JOIN 
 						(
 							SELECT DISTINCT intItemId FROM @tempTableItems 
@@ -428,7 +428,7 @@ BEGIN
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						INNER JOIN tblSTStore ST 
 							ON IL.intLocationId = ST.intCompanyLocationId
-							AND CatLoc.intLocationId = ST.intCompanyLocationId
+							AND StoreDepartments.intCompanyLocationId = ST.intCompanyLocationId
 						INNER JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = ST.intCompanyLocationId
 						INNER JOIN tblICItemUOM AS IUOM 
@@ -644,7 +644,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 												(
 													SELECT DISTINCT
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-														, dbo.fnICValidateUPCCode(IUOM.strLongUPCCode) AS strUpcCode
+														, dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
 														, I.strDescription AS strDescription
 														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
@@ -759,11 +759,11 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [strITTDetailRecordActionType] 
 							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [strICPOSCodeFormatFormat]
 							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(IUOM.strLongUPCCode),''),11) 
+									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)),''),11) 
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
-							, CategoryLoc.strCashRegisterDepartment [strITTDataMerchandiseCode]
+							, StoreDepartments.strRegisterCode [strITTDataMerchandiseCode]
 							, itemPricing.dblSalePrice AS [dblITTDataRegularSellPrice]
 							, I.strDescription [strITTDataDescription]
 							, CASE WHEN IL.intItemTypeCode = 0 THEN 1 WHEN (@XMLGatewayVersion = '3.3' AND IL.ysnCarWash = 1) 
@@ -791,6 +791,8 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							ON Cat.intCategoryId = I.intCategoryId
 						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
 							ON Cat.intCategoryId = CategoryLoc.intCategoryId
+						INNER JOIN dbo.vyuSTStoreDepartments StoreDepartments 
+							ON Cat.intCategoryId = StoreDepartments.intCategoryId
 						JOIN 
 						(
 							SELECT DISTINCT intItemId FROM @tempTableItems 
@@ -802,7 +804,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
 							ON IL.intLocationId = ST.intCompanyLocationId
-							AND CategoryLoc.intLocationId = ST.intCompanyLocationId
+							AND StoreDepartments.intCompanyLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -849,11 +851,11 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [strITTDetailRecordActionType] 
 							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [strICPOSCodeFormatFormat]
 							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(IUOM.strLongUPCCode),''),11) 
+									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)),''),11) 
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
-							, CategoryLoc.strCashRegisterDepartment [strITTDataMerchandiseCode]
+							, StoreDepartments.strRegisterCode [strITTDataMerchandiseCode]
 							, itemPricing.dblSalePrice AS [dblITTDataRegularSellPrice]
 							, I.strDescription [strITTDataDescription]
 							, CASE WHEN IL.intItemTypeCode = 0 THEN 1 WHEN (@XMLGatewayVersion = '3.3' AND IL.ysnCarWash = 1) 
@@ -888,12 +890,14 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							ON IL.intItemId = I.intItemId
 						INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
 							ON Cat.intCategoryId = CategoryLoc.intCategoryId
+						INNER JOIN dbo.vyuSTStoreDepartments StoreDepartments 
+							ON Cat.intCategoryId = StoreDepartments.intCategoryId
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
 							--ON ST.intStoreId = SubCat.intStoreId
 							ON IL.intLocationId = ST.intCompanyLocationId
-							AND CategoryLoc.intLocationId = ST.intCompanyLocationId
+							AND StoreDepartments.intCompanyLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -991,7 +995,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							(
 								SELECT DISTINCT
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-									, dbo.fnICValidateUPCCode(IUOM.strLongUPCCode) AS strUpcCode
+									, dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
 									, I.strDescription AS strDescription
 									, IUM.strUnitMeasure AS strUnitMeasure
 									, itemPricing.dblSalePrice AS dblSalePrice
@@ -1234,10 +1238,10 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 					[intCommanderOutboundPLUsId]	=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
 					, [intItemLocationId]			=	ItemLoc.intItemLocationId
 					, [strSource]					=	'keyboard'
-					, [strUpc]						=	PCF.strLongUPCCode -- IF COMMANDER/SAPPHIRE include check digit
+					, [strUpc]						=	ISNULL(PCF.strUPCA, PCF.strLongUPCCode) -- IF COMMANDER/SAPPHIRE include check digit
 					, [strUpcModifier]				=	CAST(ISNULL(UOM.intModifier, '000') AS VARCHAR(100))
 					, [strDescription]				=	LEFT(REPLACE(REPLACE(REPLACE(REPLACE(ISNULL(NULLIF(UOM.strUPCDescription, ''), Item.strDescription), '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
-					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
+					, [strDepartment]				=	CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50))
 					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
 					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
 					, [dblPrice]					=	itemPricing.dblSalePrice
@@ -1290,10 +1294,10 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 					ON Item.intItemId = UOM.intItemId
 				INNER JOIN tblICCategory Category
 					ON Item.intCategoryId = Category.intCategoryId
-				INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
-					ON Category.intCategoryId = CategoryLoc.intCategoryId
+				INNER JOIN dbo.vyuSTStoreDepartments StoreDepartments 
+					ON Category.intCategoryId = StoreDepartments.intCategoryId
 				INNER JOIN tblSTStore Store
-					ON CategoryLoc.intLocationId = Store.intCompanyLocationId
+					ON StoreDepartments.intCompanyLocationId = Store.intCompanyLocationId
 				INNER JOIN tblICItemLocation ItemLoc
 					ON Item.intItemId = ItemLoc.intItemId
 					AND Store.intCompanyLocationId = ItemLoc.intLocationId
@@ -1377,7 +1381,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 					AND UOM.strLongUPCCode IS NOT NULL
 					AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
 					AND ISNULL(SUBSTRING(PCF.strUPCwthOrwthOutCheckDigit, PATINDEX('%[^0]%', PCF.strUPCwthOrwthOutCheckDigit), LEN(PCF.strUPCwthOrwthOutCheckDigit)), 0) NOT IN ('')
-				ORDER BY PCF.strLongUPCCode ASC
+				ORDER BY ISNULL(PCF.strUPCA, PCF.strLongUPCCode) ASC
 
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderUPLUs)
@@ -1425,7 +1429,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							(
 								SELECT DISTINCT
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-									, IUOM.strLongUPCCode AS strUpcCode
+									, ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode) AS strUpcCode
 									, ISNULL(NULLIF(IUOM.strUPCDescription, ''), I.strDescription) AS strDescription
 									, IUM.strUnitMeasure AS strUnitMeasure
 									, itemPricing.dblSalePrice AS dblSalePrice
