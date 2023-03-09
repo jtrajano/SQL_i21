@@ -4356,6 +4356,7 @@
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetItemUOM.sql" />
     <Build Include="dbo\Functions\fnRKGetLastSettlementPrice.sql" />
     <Build Include="dbo\Views\vyuPATVolumeDetails.sql" />
+    <Build Include="dbo\Views\vyuPATDividendsSummary.sql" />
     <Build Include="dbo\Tables\tblMFReportCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryCount.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateOutboundOrder.sql" />
