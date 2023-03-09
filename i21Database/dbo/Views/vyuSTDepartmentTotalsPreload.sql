@@ -24,8 +24,8 @@ SELECT DISTINCT
 , StoreDepartments.strRegisterCode as strCashRegisterDepartment
 , CASE
 	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
-	THEN StoreDepartments.strGeneralItemLotTracking
-	ELSE StoreDepartments.strSubcategoryLotTracking
+	THEN ISNULL(StoreDepartments.strGeneralItemLotTracking, 'No')
+	ELSE ISNULL(StoreDepartments.strSubcategoryLotTracking, 'No')
 	END AS strLotTracking
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
