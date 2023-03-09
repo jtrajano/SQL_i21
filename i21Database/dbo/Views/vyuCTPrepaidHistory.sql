@@ -24,13 +24,13 @@ SELECT intInvoiceDetailId    =   ID.intInvoiceDetailId
              ELSE  I.dblInvoiceSubtotal END  
   , dblTax       =   I.dblTax  
   , dblTotalAmount     =   ID.dblTotal  
-  , dblAmountReceived    =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN ID.dblTotal   
+  , dblAmountReceived    =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN dblAmountDue   
                WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 1 THEN 0  
                WHEN strTransactionType = 'Customer Prepayment' AND  ysnPosted = 0 THEN 0  
-             ELSE ID.dblTotal  END  
-  , dblAmountDue      =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN ID.dblTotal * -1.0  
+             ELSE dblPayment END  
+  , dblAmountDue      =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN dblAmountDue * -1.0  
                WHEN strTransactionType = 'Customer Prepayment' AND (ysnRefundProcessed = 1 or ysnPaid = 0)  THEN 0  
-             ELSE ID.dblTotal END  
+             ELSE dblAmountDue END  
 FROM tblCTItemContractHeader ICH  
 INNER JOIN (
 
