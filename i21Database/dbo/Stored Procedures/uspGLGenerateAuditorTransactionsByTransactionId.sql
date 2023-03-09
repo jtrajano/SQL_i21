@@ -18,11 +18,11 @@ BEGIN
             DROP TABLE #AuditorTransactions
 
         ;WITH T AS (
-            SELECT
+           SELECT
                 A.intEntityId
-                , strBatchId = ISNULL(A.strBatchId, '')
+                , A.strBatchId
                 , A.intAccountId
-                , strTransactionId = ISNULL(A.strTransactionId, '')
+                , A.strTransactionId
                 , A.intTransactionId
                 , A.intCurrencyId
                 , A.dtmDate
@@ -44,7 +44,7 @@ BEGIN
                 , A.strTransactionForm 
                 , A.strDocument
                 , A.dblExchangeRate
-                , strStatus = CASE WHEN A.ysnIsUnposted = 0 THEN 'Posted' ELSE 'Audit Record ' END
+                , A.strStatus 
                 , A.dblDebitReport
                 , A.dblCreditReport
                 , A.dblSourceUnitDebit
@@ -80,26 +80,34 @@ BEGIN
         BEGIN
             SELECT 
                 strTransactionId
+                , intCurrencyId
+                , strCurrency
                 , dblDebit = SUM(ISNULL(dblDebit, 0))
                 , dblCredit = SUM(ISNULL(dblCredit, 0))
+                , dblDebitUnit = SUM(ISNULL(dblDebitUnit, 0))
+                , dblCreditUnit = SUM(ISNULL(dblCreditUnit, 0))
+                , dblSourceUnitDebit = SUM(ISNULL(dblSourceUnitDebit,0))
+                , dblSourceUnitCredit = SUM(ISNULL(dblSourceUnitCredit,0))
                 , dblDebitForeign = SUM(ISNULL(dblDebitForeign, 0))
                 , dblCreditForeign = SUM(ISNULL(dblCreditForeign, 0))
                 , dblAmount = (SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)))
                 , dblAmountForeign = (SUM(ISNULL(dblDebitForeign, 0)) - SUM(ISNULL(dblCreditForeign, 0)))
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
-            GROUP BY strTransactionId
+            GROUP BY strTransactionId, intCurrencyId, strCurrency
+            
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
                 DECLARE 
                     @strTransactionId NVARCHAR(40) = '',
+                    @intCurrencyId INT = NULL,
                     @dblAmount NUMERIC(18, 6) = 0,
                     @dblAmountForeign NUMERIC(18, 6) = 0
 
-                SELECT TOP 1 @strTransactionId = strTransactionId
+                SELECT TOP 1 @strTransactionId = strTransactionId , @intCurrencyId = intCurrencyId
                 FROM #TransactionGroup 
-                ORDER BY strTransactionId
+                ORDER BY strTransactionId, intCurrencyId
 
                 INSERT INTO tblGLAuditorTransaction (
                     ysnGroupHeader
@@ -121,7 +129,7 @@ BEGIN
                     , strBatchId
                     , strCode
                     , strTransactionType
-                    , strModuleName
+                    , strModuleName 
                     , strTransactionForm
                     , strReference
                     , strDocument
@@ -143,6 +151,9 @@ BEGIN
                     , intSourceEntityId
                     , strSourceEntity
                     , strSourceEntityNo
+                    , strLOBSegmentDescription
+                    , strCurrency
+                    , strAccountId
                 )
                 SELECT 
                     0
@@ -164,7 +175,7 @@ BEGIN
                     , strBatchId
                     , strCode
                     , strTransactionType
-                    , strModuleName
+                    , strModuleName 
                     , strTransactionForm
                     , strReference
                     , strDocument
@@ -186,8 +197,12 @@ BEGIN
                     , intSourceEntityId
                     , strSourceEntity
                     , strSourceEntityNo
+                    , strLOBSegmentDescription
+                    , strCurrency
+                    , strAccountId
                 FROM #AuditorTransactions 
-                WHERE strTransactionId = @strTransactionId
+                WHERE @strTransactionId =strTransactionId 
+                AND @intCurrencyId = intCurrencyId
                 ORDER BY dtmDate
 
                 -- Total record
@@ -202,10 +217,15 @@ BEGIN
                     , intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit 
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblTotal
                     , dblTotalForeign
+                    , strCurrency
                 )
                 SELECT TOP 1
                     1
@@ -214,18 +234,25 @@ BEGIN
                     , @dtmNow
                     , @strTransactionId
                     , 'Total'
-                    , 'Transaction ID: ' + @strTransactionId
+                    , 'Transaction ID: ' + @strTransactionId + ', Currency: ' + strCurrency
                     , @intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit 
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblAmount
                     , dblAmountForeign
+                    , strCurrency
                     FROM #TransactionGroup 
                     WHERE strTransactionId = @strTransactionId
+                    AND @intCurrencyId = intCurrencyId
+            
 
-                DELETE #TransactionGroup WHERE strTransactionId = @strTransactionId
+                DELETE #TransactionGroup WHERE @strTransactionId = strTransactionId AND @intCurrencyId = intCurrencyId
             END
         END
     END TRY
