@@ -295,7 +295,7 @@ AS
              1
       FROM   Segments
 
-    EXEC dbo.uspGLUpdateAccountLocationId
+    EXEC dbo.uspGLUpdateAccountSegmentId
 
     INSERT INTO tblGLCOACrossReference
                 ([inti21Id],
