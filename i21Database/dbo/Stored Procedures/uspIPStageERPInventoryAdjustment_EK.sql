@@ -147,7 +147,7 @@ BEGIN TRY
 							)
 					END
 				,NetWeightUOM
-				,STATUS
+				,Status
 				,ReasonCode
 				,Notes
 				,NewLocation
@@ -177,7 +177,7 @@ BEGIN TRY
 					,QuantityUOM NVARCHAR(50)
 					,NetWeight NVARCHAR(50)
 					,NetWeightUOM NVARCHAR(50)
-					,STATUS NVARCHAR(50)
+					,Status NVARCHAR(50)
 					,ReasonCode NVARCHAR(50)
 					,Notes NVARCHAR(2048)
 					,SourceLocation NVARCHAR(50)

@@ -70,13 +70,6 @@ BEGIN TRY
 				ELSE ''
 				END + CASE 
 				WHEN (
-						BATCH.intBatchId IS NULL
-						AND ISNULL(IMP.strBatchNo, '') <> ''
-						)
-					THEN 'BATCH NO, '
-				ELSE ''
-				END + CASE 
-				WHEN (
 						TEMPLATE_SAMPLE_TYPE.intSampleTypeId IS NULL
 						AND ISNULL(IMP.strSampleTypeName, '') <> ''
 						)
@@ -216,8 +209,8 @@ BEGIN TRY
 		tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
 		) ON V.intEntityId = S.intEntityId
 	INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
 	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
 	INNER JOIN (
 		tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 		-- Colour
@@ -366,10 +359,8 @@ BEGIN TRY
 	BEGIN
 		SET @ysnCreate = 0
 		SET @intBatchSampleId = NULL
-		Select @intSampleId	= NULL
 
-		--SELECT @intBatchId
-
+		
 		-- Check if Batch ID is supplied in the template
 		IF @intBatchId IS NOT NULL
 		BEGIN
@@ -720,13 +711,13 @@ BEGIN TRY
                 ON PP.intProductPropertyId = PPVP.intProductPropertyId
                 AND DATEPART(dayofyear , GETDATE()) BETWEEN DATEPART(dayofyear , PPVP.dtmValidFrom) AND DATEPART(dayofyear , PPVP.dtmValidTo)
            
-    		    AND PPVP.dblPinpointValue = Case 
+    		    AND (Case 
 				When PROP.strPropertyName = 'Appearance' then Case When @strAppearance is not null and IsNUmeric(@strAppearance)=1 Then CAST(@strAppearance AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End
 				When PROP.strPropertyName = 'Hue' then  Case When @strHue is not null and IsNUmeric(@strHue)=1 Then CAST(@strHue AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
 				When PROP.strPropertyName = 'Intensity' then  Case When @strIntensity is not null and IsNUmeric(@strIntensity)=1 Then CAST(@strIntensity AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
 				When PROP.strPropertyName = 'Taste' then  Case When @strTaste is not null and IsNUmeric(@strTaste)=1 Then CAST(@strTaste AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
 				When PROP.strPropertyName = 'Mouth Feel' then Case When @strMouthFeel is not null and IsNUmeric(@strMouthFeel)=1 Then CAST(@strMouthFeel AS NUMERIC(18, 6)) Else PPVP.dblPinpointValue End 
-				END
+				END) BETWEEN PPVP.dblMinValue  AND PPVP.dblMaxValue
 			WHERE S.intSampleId = @intSampleId
 			Group by ITEM.intItemId
 			ORDER BY COUNT(1) Desc
@@ -840,6 +831,9 @@ BEGIN TRY
 							AND P.ysnActive = 1
 						)
 		END
+
+		
+		Begin
 
 		-- Clear test properties of the previous item
 		DELETE
@@ -985,7 +979,7 @@ BEGIN TRY
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo
-
+		
 		---- Begin Update Actual Test Result
 		---- Appearance
 		--UPDATE tblQMTestResult
@@ -1270,6 +1264,7 @@ BEGIN TRY
 			,@strRemarks = 'Updated from Tasting Score Import'
 			,@ysnCreate = 0
 			,@ysnBeforeUpdate = 0
+		End
 
 		IF @intImportType = 2
 			AND NOT EXISTS (
@@ -1434,7 +1429,7 @@ BEGIN TRY
 				,strLeafSize = BRAND.strBrandCode
 				,strLeafStyle = STYLE.strName
 				,intBookId = S.intBookId
-				,dblPackagesBought = S.dblB1QtyBought
+				,dblPackagesBought = IsNULL(S.dblB1QtyBought, S.dblRepresentingQty)
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
@@ -1646,7 +1641,7 @@ BEGIN TRY
 				AND WIUOM.intUnitMeasureId = S.intSampleUOMId
 			-- Qty Item UOM
 			LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId
-				AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
+				AND QIUOM.intUnitMeasureId = IsNULL(S.intB1QtyUOMId,S.intRepresentingUOMId)
 			WHERE S.intSampleId = @intSampleId
 				AND IMP.intImportLogId = @intImportLogId
 				AND IsNULL(S.dblB1QtyBought, 0) > 0

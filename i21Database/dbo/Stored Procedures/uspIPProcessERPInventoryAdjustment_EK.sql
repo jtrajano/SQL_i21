@@ -101,6 +101,8 @@ BEGIN TRY
 		,@strTranferOrderStatus NVARCHAR(50)
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotQuantity NUMERIC(38, 20)
+		,@intNetWeightUnitMeasureId int
+		,@intNetWeightItemUOMId int
 
 	SELECT @dtmDate = GETDATE()
 
@@ -637,7 +639,7 @@ BEGIN TRY
 							SELECT 1
 							FROM tblIPInventoryAdjustmentStage
 							WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
-								AND strNotes = @strNotes
+								AND strNotes = @strNotes AND dblQuantity <0
 							)
 					BEGIN
 						-- Call uspICAddInventoryTransfer stored procedure.
@@ -692,6 +694,30 @@ BEGIN TRY
 						SELECT @dblLotQuantity	= @dblQuantity
 							,@intLotItemUOMId	= @intItemUOMId
 					End
+
+				SELECT @intNetWeightUnitMeasureId = NULL
+
+				SELECT @intNetWeightUnitMeasureId = intUnitMeasureId
+				FROM dbo.tblICUnitMeasure
+				WHERE strUnitMeasure = @strNetWeightUOM
+
+				IF @intNetWeightUnitMeasureId IS NULL
+				BEGIN
+					SELECT @strError = 'Unit Measure ' + @strNetWeightUOM + ' is not available.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				SELECT @intNetWeightItemUOMId = NULL
+
+				SELECT @intNetWeightItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intItemId
+					AND intUnitMeasureId = @intNetWeightUnitMeasureId
 
 					INSERT INTO @ReceiptStagingTable (
 						strReceiptType
@@ -883,7 +909,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblIPInventoryAdjustmentStage
 						WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
-							AND strNotes = @strNotes
+							AND strNotes = @strNotes AND dblQuantity >0
 						)
 				BEGIN
 					IF NOT EXISTS (
@@ -919,6 +945,10 @@ BEGIN TRY
 							,0
 							,@strReceiptNo
 							,@intUserId
+
+						UPDATE tblICInventoryTransfer
+						SET intStatusId=3
+						WHERE intInventoryTransferId = @intInventoryTransferId
 
 						DELETE
 						FROM #tmpAddItemReceiptResult
