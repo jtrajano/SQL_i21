@@ -35,6 +35,7 @@ SELECT
 	,ysnInProgress = CAST((CASE WHEN ISNULL(B.intLoadDetailId,0) = 0  THEN 0 ELSE 1 END) AS BIT)
 	,intTicketId = B.intTicketId
 	,A.intItemUOMId
+	,A.intSourceType 
 FROM vyuLGLoadDetailViewSearch A WITH(NOLOCK)
 OUTER APPLY (
 	SELECT TOP 1
