@@ -53,7 +53,6 @@ BEGIN TRY
 		, dblTotalLot = ISNULL(dblTotalLot, 0)
 		, dblOpenLots = CAST(ISNULL(dblOpenLots, 0) AS NUMERIC(18, 6))
 		, strOptionType
-		, dblStrike
 		, dblPremium = - dblPremiumInBucks
 		, dblPremiumValue = - dblPremiumValue
 		, dblCommission

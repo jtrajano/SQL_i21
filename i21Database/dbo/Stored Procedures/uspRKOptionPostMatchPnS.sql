@@ -53,7 +53,8 @@ WHERE  t1.intMatchOptionsPnSId in(
 
 COMMIT TRAN    
       
-    
+SELECT Result = 'Success'
+
 END TRY      
       
 BEGIN CATCH  

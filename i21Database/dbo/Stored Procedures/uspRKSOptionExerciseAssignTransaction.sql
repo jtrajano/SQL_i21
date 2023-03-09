@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKSOptionExerciseAssignTransaction
+﻿CREATE PROCEDURE uspRKSOptionExerciseAssignTransaction
 	@intTypeId int
 	, @intEntityId int
 	, @intFutureMarketId int
@@ -37,6 +37,7 @@ SELECT * FROM (
 		, t.intFutureMarketId
 		, t.intCommodityId
 		, t.intOptionMonthId
+		, t.intFutOptTransactionId
 	FROM tblRKOptionsPnSExercisedAssigned m
 	Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
 	Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
