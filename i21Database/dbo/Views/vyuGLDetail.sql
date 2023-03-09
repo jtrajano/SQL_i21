@@ -86,18 +86,6 @@ AS
 	 OUTER APPLY (
 		SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
 	 )SE
-     OUTER APPLY (
-        SELECT TOP 1 AccSeg.strChartDesc FROM tblGLAccountSegment AccSeg 
-        JOIN tblGLAccountSegmentMapping AccSegMap ON AccSegMap.intAccountSegmentId = AccSeg.intAccountSegmentId
-        JOIN tblGLAccountStructure AccStruct ON AccStruct.intAccountStructureId = AccSeg.intAccountStructureId
-        WHERE AccSegMap.intAccountId = A.intAccountId
-            AND AccStruct.intStructureType = 3
-     ) LocationSegment
-     OUTER APPLY (
-        SELECT TOP 1 AccSeg.strChartDesc FROM tblGLAccountSegment AccSeg 
-        JOIN tblGLAccountSegmentMapping AccSegMap ON AccSegMap.intAccountSegmentId = AccSeg.intAccountSegmentId
-        JOIN tblGLAccountStructure AccStruct ON AccStruct.intAccountStructureId = AccSeg.intAccountStructureId
-        WHERE AccSegMap.intAccountId = A.intAccountId
-            AND AccStruct.intStructureType = 5
-     ) LOBSegment
+     OUTER APPLY dbo.fnGLGetSegmentAccount(B.intAccountId, 3) LocationSegment
+     OUTER APPLY dbo.fnGLGetSegmentAccount(B.intAccountId, 5) LOBSegment
 GO
