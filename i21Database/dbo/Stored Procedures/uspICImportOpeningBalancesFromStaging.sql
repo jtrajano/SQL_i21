@@ -361,7 +361,7 @@ IF ISNULL(@row_errors, 0) <> 0 GOTO _exit_with_error;
 (
 	SELECT 
 		*
-		, ROW_NUMBER() OVER(PARTITION BY strLocationNo, dtmDate, strItemNo ORDER BY strLocationNo, dtmDate, strItemNo) AS RowNumber
+		, ROW_NUMBER() OVER(PARTITION BY strLocationNo, dtmDate, strItemNo, strLotNumber ORDER BY strLocationNo, dtmDate, strItemNo, strLotNumber) AS RowNumber
 	FROM 
 		tblICImportStagingOpeningBalance
 	WHERE 
