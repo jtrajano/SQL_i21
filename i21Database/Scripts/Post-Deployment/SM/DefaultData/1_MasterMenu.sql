@@ -1274,12 +1274,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account 
 	VALUES (N'Account Structure', N'General Ledger', @GeneralLedgerSetupParentMenuId, N'Account Structure', N'Setup', N'Screen', N'GeneralLedger.view.AccountStructure', N'small-menu-setup', 0, 0, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GeneralLedger.view.AccountStructure' WHERE strMenuName = N'Account Structure' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Group Cluster' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Account Group Cluster', N'General Ledger', @GeneralLedgerSetupParentMenuId, N'Account Group Cluster', N'Setup', N'Screen', N'GeneralLedger.view.AccountGroupCluster?showSearch=true', N'small-menu-setup', 0, 0, 0, 1, 6, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'GeneralLedger.view.AccountGroupCluster?showSearch=true' WHERE strMenuName = N'Account Group Cluster' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Account Groups', N'General Ledger', @GeneralLedgerSetupParentMenuId, N'Account Groups', N'Setup', N'Screen', N'GeneralLedger.view.AccountGroups', N'small-menu-setup', 0, 0, 0, 1, 2, 1)

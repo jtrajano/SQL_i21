@@ -166,6 +166,33 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 					FROM tblARInvoice INV
 					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
 					INNER JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = INV.intInvoiceId
+					GROUP BY  strTransactionType
+						, strType
+						, INV.strInvoiceNumber
+						, INV.intEntityCustomerId
+						, INV.intCompanyLocationId
+						, INV.intCurrencyId
+						, INV.intTermId
+						, ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
+						, ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
+						, dtmShipDate
+						, INV.intEntitySalespersonId
+						, INV.intFreightTermId
+						, INV.intShipViaId
+						, INV.strInvoiceNumber				 
+						, INV.strPONumber
+						, INV.strBOLNumber
+						, INV.strInvoiceNumber + ' Forgiven'
+						, strFooterComments
+						, INV.intShipToLocationId
+						, INV.intBillToLocationId
+						, INV.intEntityId
+						, ysnServiceChargeCredit
+						, INV.strInvoiceNumber
+						, INV.strInvoiceNumber + ' Forgiven'
+						, dblQtyShipped
+						, INV.dblInvoiceTotal
+						, ARID.intSalesAccountId
 
 					IF EXISTS (SELECT TOP 1 NULL FROM @tblCreditMemoEntries)
 						EXEC dbo.uspARProcessInvoices @InvoiceEntries 	= @tblCreditMemoEntries

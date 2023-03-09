@@ -49,7 +49,7 @@ BEGIN
 	JOIN dbo.tblSTPumpItem SPI 
 		ON ISNULL(CAST(b.intProductNumber as NVARCHAR(10)), '') COLLATE Latin1_General_CI_AS IN (ISNULL(SPI.strRegisterFuelId1, ''), ISNULL(SPI.strRegisterFuelId2, '')) AND SPI.intStoreId =  @intStoreId
 	JOIN dbo.tblICItemUOM UOM 
-		ON UOM.intItemId = SPI.intItemUOMId
+		ON UOM.intItemUOMId = SPI.intItemUOMId
 	 JOIN dbo.tblICItem I 
 		ON I.intItemId = UOM.intItemId
 	 JOIN dbo.tblSTStore S 

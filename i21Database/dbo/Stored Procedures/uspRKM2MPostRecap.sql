@@ -194,6 +194,7 @@ BEGIN
 		, dtmTradeDate DATETIME
 		, strInternalTradeNo NVARCHAR(100)
 		, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intEntityId INT
 		, strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strBook NVARCHAR(100)
 		, strSubBook NVARCHAR(100)
@@ -237,6 +238,7 @@ BEGIN
 		, dtmTradeDate
 		, strInternalTradeNo
 		, strName
+		, intEntityId
 		, strAccountNumber
 		, strBook
 		, strSubBook
@@ -862,7 +864,6 @@ BEGIN
 		, @intUnitMeasureId intUnitMeasureId
 		, t.dblPrice
 	FROM @Result t
-	JOIN tblEMEntity e ON t.strName = e.strName
 	WHERE ISNULL(dblGrossPnL, 0) <> 0
 	
 	UNION ALL SELECT @intM2MInquiryId intM2MInquiryId
@@ -892,6 +893,5 @@ BEGIN
 		, @intUnitMeasureId intUnitMeasureId
 		, t.dblPrice
 	FROM @Result t
-	JOIN tblEMEntity e on t.strName = e.strName
 	WHERE ISNULL(dblGrossPnL, 0) <> 0
 END

@@ -20,6 +20,8 @@ Type the overview for the table here.
 		[intWeightUOMId] INT NULL,
 		[strUpcCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strLongUPCCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+        [strUPCA] NVARCHAR(50) NULL, 
+        [strSCC14] NVARCHAR(50) NULL,
         [intCheckDigit] INT NULL,
         [strUPCDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
         [intModifier] INT NULL,
@@ -57,9 +59,7 @@ Type the overview for the table here.
 			) PERSISTED,
         [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
         [intRowNumber] INT NULL,
-
-		[strUPCA] NVARCHAR(50) NULL, 
-        [strSCC14] NVARCHAR(50) NULL, 
+ 
     CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
         CONSTRAINT [CHK_tblICItemUOM_intModifier] CHECK (intModifier >= 0 AND intModifier <= 999),
         CONSTRAINT [CHK_tblICItemUOM_intCheckDigit] CHECK (intCheckDigit >= 0 AND intCheckDigit <= 9),

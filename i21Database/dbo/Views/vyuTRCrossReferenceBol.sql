@@ -25,7 +25,8 @@ SELECT CRB.intCrossReferenceBolId,
     ST.strTrailerNumber,
     CRB.intCarrierId,
     SV.strShipVia strCarrierName,
-    CRB.intConcurrencyId
+    CRB.intConcurrencyId,
+    ysnDefault = ISNULL(CRB.ysnDefault, CAST(0 AS BIT))
 FROM tblTRCrossReferenceBol CRB
 LEFT JOIN tblEMEntity EMV ON EMV.intEntityId = CRB.intSupplierId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = CRB.intSupplyPointId

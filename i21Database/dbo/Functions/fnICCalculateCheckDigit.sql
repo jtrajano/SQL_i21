@@ -14,7 +14,7 @@ BEGIN
 		SET @UPC = '0' + @UPC
 	END 
 
-    IF (LEN(@UPC) = 11 AND ISNUMERIC(@UPC) = 1)
+    IF (LEN(@UPC) >= 11 AND ISNUMERIC(@UPC) = 1)
     BEGIN
 
         ;WITH CTE (Number) AS
