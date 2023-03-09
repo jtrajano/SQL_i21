@@ -65,7 +65,7 @@ BEGIN TRY
 					tblCTContractDetail CD
 					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
 					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
+					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)) AND @intType = 1
 	BEGIN
 		DECLARE @strContractNumber NVARCHAR(100)
 		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
