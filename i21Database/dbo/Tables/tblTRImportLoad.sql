@@ -4,7 +4,7 @@
     [guidImportIdentifier] UNIQUEIDENTIFIER NOT NULL,
     [intImportFileHeaderId] INT NULL,
 	[intUserId] INT NOT NULL,
-	[dtmImportDate] DATETIME NOT NULL,
+	[dtmImportDate] DATETIME2 NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
     [strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strFileName] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
