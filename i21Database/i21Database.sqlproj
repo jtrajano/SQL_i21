@@ -11278,6 +11278,18 @@
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureSalesContracts.sql" />
     <Build Include="dbo\Functions\fnGREndOfMonthProcedurePurchaseContracts.sql" />
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureInventory.sql" />
+    <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGenerateDummyLoadDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGDeleteLoadDetail.sql" />
+    <Build Include="dbo\Tables\tblSCTicketAutoScaleLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
+    <Build Include="dbo\Functions\fnGRDelayedPricingTransaction.sql" />
+    <Build Include="dbo\Functions\fnGRInTransitTransaction.sql" />
+    <Build Include="dbo\Functions\fnGRTConvertQuantityToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Views\vyuGRPhysicalInventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
