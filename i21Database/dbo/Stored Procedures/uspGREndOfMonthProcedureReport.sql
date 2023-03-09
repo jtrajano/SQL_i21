@@ -71,17 +71,22 @@ BEGIN TRY
         END
     END
 
-	DECLARE @strPeriodName NVARCHAR(50)
+	DECLARE
+		@strPeriodName NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
 
 	SELECT TOP 1 @strPeriodName = [from]
 	FROM @temp_xml_table WHERE [fieldname] = 'strPeriod'
+
+	SELECT TOP 1 @strItemNo = [from]
+	FROM @temp_xml_table WHERE [fieldname] = 'strItemNo'
 	-- End extraction of parameters from XML
 
     IF @strPeriodName IS NULL
         SELECT TOP 1 @strPeriodName = strPeriod FROM tblGLFiscalYearPeriod WHERE dtmEndDate <= GETDATE() ORDER BY dtmEndDate DESC
 
     -- Main Report
-	SELECT * FROM dbo.fnGREndOfMonthProcedureInventory(@strPeriodName) R
+	SELECT *, [strItemNo] = @strItemNo FROM dbo.fnGREndOfMonthProcedureInventory(@strPeriodName, @strItemNo) R
 
 END TRY
 
