@@ -8,7 +8,7 @@ SELECT
 	, IAD.intConcurrencyId
 	, IAD.ysnValid
 	, IAD.strMessage
-	, IA.dtmImportDate
+	, CAST(IA.dtmImportDate AS DATETIME2) dtmImportDate
 	, IAD.intLoadHeaderId
 	, IAD.strFileName
 	, IA.strSource
