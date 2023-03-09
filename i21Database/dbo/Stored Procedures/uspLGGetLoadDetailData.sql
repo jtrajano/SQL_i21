@@ -22,10 +22,8 @@ BEGIN
 		,strPDestinationPort = PDP.strCity
 		,strSContractNumber = SHeader.strContractNumber
 		,intSContractSeq = SDetail.intContractSeq
-		,intPPricingTypeId = PDetail.intPricingTypeId
-		,strPPricingType = PTP.strPricingType
-		,intSPricingTypeId = SDetail.intPricingTypeId
 		,strSPricingType = PTS.strPricingType
+		,intSPricingTypeId = SDetail.intPricingTypeId
 		,ysnSLoad = SHeader.ysnLoad
 		,dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
 		,strSCropYear = SCY.strCropYear
@@ -68,7 +66,6 @@ BEGIN
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
 		,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 		,strSerialNumber = TMD.strSerialNumber
-		,intBatchId = QB.intBatchId
 		,strBatchId = QB.strBatchId
 		,strTeaGardenChopInvoiceNumber = QB.strTeaGardenChopInvoiceNumber
 		,strVendorLotNumber = QB.strVendorLotNumber
