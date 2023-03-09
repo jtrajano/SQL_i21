@@ -1210,6 +1210,11 @@ BEGIN
 	RETURN @intReturnValue;
 END 
 
+DECLARE 
+	@dblAutoVariance AS NUMERIC(18, 6) 
+	,@strAutoVarianceDescription NVARCHAR(255) 
+	,@InventoryTransactionIdentityId AS INT 
+
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
 ---------------------------------------------------------------------------------------
