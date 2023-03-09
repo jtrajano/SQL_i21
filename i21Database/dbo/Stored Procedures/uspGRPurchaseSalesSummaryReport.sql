@@ -86,7 +86,7 @@ BEGIN TRY
 	SELECT @dtmDeliveryDateFromParam = ISNULL([from], DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())))
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDeliveryDate'
 
-	SELECT @dtmDeliveryDateToParam = ISNULL(DATEADD(MILLISECOND, -1, [to] + 1), GETDATE())
+	SELECT @dtmDeliveryDateToParam = ISNULL(DATEADD(MILLISECOND, -3, CAST([to] AS DATETIME) + 1), GETDATE())
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDeliveryDate'
 
 	SELECT TOP 1 @ysnIncludeInterLocationTransfers = CONVERT(BIT, [from])
