@@ -1244,6 +1244,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutTankReadings.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutTankMonitorReportAndVarianceCalculation.sql" />
     <Build Include="dbo\Functions\fnSTGetCalculatedVariance.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
