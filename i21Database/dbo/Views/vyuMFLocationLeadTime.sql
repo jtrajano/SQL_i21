@@ -21,7 +21,14 @@ SELECT intLocationLeadTimeId
 	 , dblMUToAvailableForBlending
 	 , intEntityId = LeadTime.intEntityId
 	 , strShippingLine
+	 , strOriginCode = C.strISOCode
+	 , strReceivingPlantCode = CompanyLocation.strLocationNumber
+	 , strPortOfDispatchCity = D.strCity
+	 , strPortOfArrivalCity	= A.strCity
 FROM tblMFLocationLeadTime AS LeadTime
 INNER JOIN tblSMCompanyLocation AS CompanyLocation ON LeadTime.intBuyingCenterId = CompanyLocation.intCompanyLocationId
 INNER JOIN tblSMCompanyLocationSubLocation AS SubLocation ON SubLocation.intCompanyLocationSubLocationId=LeadTime.intReceivingStorageLocation
 INNER JOIN tblARMarketZone AS MarketZone ON MarketZone.intMarketZoneId=LeadTime.intChannelId
+LEFT JOIN tblSMCountry C ON LeadTime.intOriginId = C.intCountryID
+LEFT JOIN tblSMCity D ON LeadTime.intPortOfDispatchId = D.intCityId
+LEFT JOIN tblSMCity A ON LeadTime.intPortOfArrivalId = A.intCityId
