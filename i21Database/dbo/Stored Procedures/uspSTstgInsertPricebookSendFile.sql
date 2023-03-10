@@ -369,7 +369,7 @@ BEGIN
 																END,
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= dbo.fnICValidateUPCCode(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCode]						= dbo.fnSTRemoveCheckDigit(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)), --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= '0',
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -654,7 +654,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 												(
 													SELECT DISTINCT
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-														, dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
+														, dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
 														, I.strDescription AS strDescription
 														, itemPricing.dblSalePrice AS dblSalePrice
 														, IL.intItemLocationId AS intItemLocationId
@@ -768,7 +768,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [strITTDetailRecordActionType] 
 							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [strICPOSCodeFormatFormat]
 							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)),''),11) 
+									ELSE RIGHT('00000000000'+ISNULL(dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)),''),11) 
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
@@ -860,7 +860,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							, CASE I.strStatus WHEN 'Active' THEN 'addchange' WHEN 'Phased Out' THEN 'delete' ELSE 'addchange' END as [strITTDetailRecordActionType] 
 							, CASE WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN 'plu' ELSE 'upcA' END [strICPOSCodeFormatFormat]
 							, CASE	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as int),0) AND IUOM.strUpcCode IS NOT NULL THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-									ELSE RIGHT('00000000000'+ISNULL(dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)),''),11) 
+									ELSE RIGHT('00000000000'+ISNULL(dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)),''),11) 
 								END [strICPOSCode]
 							, IUM.strUnitMeasure [strICPOSCodeModifier] 
 							, CASE I.strStatus WHEN 'Active' THEN 'yes' ELSE 'no' END as [strITTDataActiveFlagValue]
@@ -1000,7 +1000,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 							(
 								SELECT DISTINCT
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-									, dbo.fnICValidateUPCCode(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
+									, dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
 									, I.strDescription AS strDescription
 									, CASE  WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate THEN SplPrc.dblUnitAfterDiscount 
 											WHEN (GETDATE() > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
