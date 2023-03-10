@@ -7333,12 +7333,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Books' AN
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'FixedAssets.view.Books' WHERE strMenuName = 'Books' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Jurisdiction' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Tax Jurisdiction', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Tax Jurisdiction', N'Maintenance', N'Screen', N'FixedAssets.view.FixedAssetTaxJurisdiction', N'small-menu-activity', 1, 0, 0, 1, 5, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'FixedAssets.view.FixedAssetTaxJurisdiction' WHERE strMenuName = 'Tax Jurisdiction' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
-
 --REPORTS
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
