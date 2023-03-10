@@ -1419,7 +1419,7 @@ OUTER APPLY (
 		AND TS.intFromCompanyLocationId = A.intCompanyLocationId
 		--AND TS.intToCompanyLocationId <> A.intCompanyLocationId
 		AND TS.dtmTransferStorageDate = @dtmReportDate
-		AND ST_FROM.intStorageScheduleTypeId <> ST_TO.intStorageScheduleTypeId
+		AND ST_FROM.intStorageScheduleTypeId <> ST_TO.intStorageScheduleTypeId --do not include the transfer on the same storage type (different entity)
 	GROUP BY TS.strCommodityCode
 		,TS.intCommodityId
 		,intFromCompanyLocationId
