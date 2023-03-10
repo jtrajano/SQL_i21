@@ -10,7 +10,7 @@
 	[intDueToAccountId]				INT NULL,
 	[intDueFromAccountId]			INT NULL,
     [intConcurrencyId]				INT DEFAULT 1 NOT NULL,
-
+	[ysnLocationOverride]			BIT DEFAULT (1) NOT NULL,
 	CONSTRAINT [PK_tblFACompanyPreferenceOption] PRIMARY KEY CLUSTERED ([intCompanyPreferenceOptionId] ASC),
 	CONSTRAINT [FK_tblFACompanyPreferenceOption_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFACompanyPreferenceOption_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

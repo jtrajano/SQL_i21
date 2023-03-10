@@ -18,7 +18,8 @@ SELECT
 	IntraCompanyDueTo.strAccountId strDueToAccountId,
 	C.intDueFromAccountId,
 	IntraCompanyDueFrom.strAccountId strDueFromAccountId,
-	C.intConcurrencyId
+	C.intConcurrencyId,
+	C.ysnLocationOverride
 FROM tblFACompanyPreferenceOption C
 LEFT JOIN tblGLAccount AssetAccount
 	ON AssetAccount.intAccountId = C.intAssetAccountId
