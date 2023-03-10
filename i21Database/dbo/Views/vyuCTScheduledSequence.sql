@@ -17,22 +17,6 @@ AS
 			l.intTicketId = ivd.intTicketId
 			and ivd.intContractDetailId is not null
 	),
-	Bill as
-	(
-		select
-			ivd.intContractHeaderId
-			,ivd.intContractDetailId
-			,ivd.intBillId
-			,ivd.intBillDetailId
-			,ivd.intTicketId
-			,l.intLoadId
-		from
-			tblAPBillDetail ivd
-			,tblLGLoad l
-		where
-			l.intTicketId = ivd.intTicketId
-			and ivd.intContractDetailId is not null
-	),
 	schedule_raw as
 	(
 		select intId = row_number() over(partition by c.intContractDetailId order by a.intLoadDetailId asc)
@@ -59,7 +43,7 @@ AS
 		(
 			select a.intContractDetailId
 			,a.intLoadDetailId
-			,dblScheduledQty = a.dblScheduledQty--(a.dblScheduledQty - (a.dblOverageQty - sum(b.dblOverageQty)) *-1)
+			,dblScheduledQty = (a.dblScheduledQty - (a.dblOverageQty - sum(b.dblOverageQty)) *-1)
 			from schedule_raw a
 			inner join schedule_raw b on a.intId >= b.intId and a.intContractDetailId = b.intContractDetailId
 			group by a.intId,a.intContractDetailId,a.intLoadDetailId,a.dblScheduledQty,a.dblOverageQty
@@ -86,10 +70,10 @@ AS
 
 		UNION ALL
 
-		SELECT	'Load Schedule' strScreenName,LD.intPContractDetailId AS intContractDetailId,LO.strLoadNumber AS strNumber,LO.intLoadId AS intExternalHeaderId,'intLoadId' AS strHeaderIdColumn, intInvoiceId = ISNULL(Bill.intBillId,0), dblScheduledQty = isnull(schedule.dblScheduledQty,0)
+		SELECT	'Load Schedule' strScreenName,LD.intPContractDetailId AS intContractDetailId,LO.strLoadNumber AS strNumber,LO.intLoadId AS intExternalHeaderId,'intLoadId' AS strHeaderIdColumn, intInvoiceId = ISNULL(Invoice.intInvoiceId,0), dblScheduledQty = isnull(schedule.dblScheduledQty,0)
 		FROM	tblLGLoadDetail		   LD
 		JOIN	tblLGLoad			   LO  ON  LO.intLoadId			    =   LD.intLoadId
-		left join Bill on Bill.intContractDetailId = LD.intPContractDetailId and Bill.intLoadId = LO.intLoadId
+		left join Invoice on Invoice.intContractDetailId = LD.intPContractDetailId and Invoice.intLoadId = LO.intLoadId
 		left join schedule on schedule.intContractDetailId = LD.intPContractDetailId and LD.intLoadDetailId = schedule.intLoadDetailId
 		WHERE   NOT (LO.intPurchaseSale	    =   1 AND LO.intShipmentStatus    IN(4,11,7))
 		AND	LD.intPContractDetailId IS NOT NULL
