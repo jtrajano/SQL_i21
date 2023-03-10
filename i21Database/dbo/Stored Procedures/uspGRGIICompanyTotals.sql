@@ -196,6 +196,21 @@ BEGIN
 		WHERE C.intOrderNo = 2
 			AND C.dtmReportDate = @dtmReportDate
 
+		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
+		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
+		BEGIN
+			INSERT INTO @CompanyOwnedData
+			SELECT 2
+				,@dtmReportDate
+				,@intCommodityId
+				,'   COMPANY OWNERSHIP (UNPAID)'
+				,0
+				,0
+				,0
+				,0
+				,@strUOM
+		END
+
 		DROP TABLE #Vouchers
 	END
 	/*******END******COMPANY OWNERSHIP (UNPAID)*************/
