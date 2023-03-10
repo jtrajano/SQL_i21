@@ -1,4 +1,4 @@
-alter PROCEDURE [dbo].[uspGRGIIPhysicalInventory]
+CREATE PROCEDURE [dbo].[uspGRGIIPhysicalInventory]
 	@xmlParam NVARCHAR(MAX)
 AS
 BEGIN
