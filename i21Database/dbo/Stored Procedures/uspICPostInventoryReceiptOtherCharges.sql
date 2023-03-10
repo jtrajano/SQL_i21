@@ -2062,8 +2062,485 @@ BEGIN
 				InventoryCostCharges.strTransactionForm,
 				InventoryCostCharges.strRateType,
 				InventoryCostCharges.intItemCommodityId
+
+	-- GL Reversal: Generate the Reversal G/L Entries for Cost Charges with no impact towards Inventory
+	;WITH NonInventoryCostCharges (
+		dtmDate
+		,intChargeId
+		,intChargeItemLocation
+		,intTransactionId
+		,strTransactionId
+		,dblCost 				
+		,intTransactionTypeId  
+		,intCurrencyId
+		,dblExchangeRate 
+		,intInventoryReceiptChargeId
+		,strInventoryTransactionTypeName 
+		,strTransactionForm 
+		,ysnAccrue
+		,ysnPrice
+		,ysnInventoryCost
+		,dblForexRate 
+		,strRateType 
+		,strCharge 
+		,intEntityVendorId
+		,intReceiptEntityVendorId
+		,intChargeCommodityId
+	)
+	AS 
+	(
+		SELECT	dtmDate = Receipt.dtmReceiptDate
+				,intChargeId = Charge.intItemId
+				,intChargeItemLocation = ChargeItemLocation.intItemLocationId
+				,intTransactionId = Receipt.intInventoryReceiptId
+				,strTransactionId = Receipt.strReceiptNumber
+				,dblCost = 
+					CASE 
+						WHEN Receipt.strReceiptType = 'Inventory Return' 
+							THEN -ReceiptCharges.dblOriginalAmount /*Negate the other charge if it is an Inventory Return*/
+						ELSE 
+							ReceiptCharges.dblOriginalAmount 
+					END					
+				,intTransactionTypeId  = @intTransactionTypeId
+				,intCurrencyId = ReceiptCharges.intOriginalCurrencyId
+				,dblExchangeRate = COALESCE(ReceiptCharges.dblOriginalForexRate, 1)
+				,ReceiptCharges.intInventoryReceiptChargeId
+				,strInventoryTransactionTypeName = TransType.strName
+				,strTransactionForm = @strTransactionForm
+				,ReceiptCharges.ysnAccrue
+				,ReceiptCharges.ysnPrice
+				,ReceiptCharges.ysnInventoryCost
+				,dblForexRate = COALESCE(ReceiptCharges.dblOriginalForexRate, 1) 
+				,strRateType = currencyRateType.strCurrencyExchangeRateType
+				,strCharge = Charge.strItemNo
+				,intEntityVendorId = ReceiptCharges.intEntityVendorId
+				,intReceiptEntityVendorId = Receipt.intEntityVendorId
+				,intChargeCommodityId = Charge.intCommodityId
+		FROM	dbo.tblICInventoryReceipt Receipt 
+				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
+					ON ReceiptCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
+				LEFT JOIN tblICItem Charge
+					ON Charge.intItemId = ReceiptCharges.intChargeId
+				LEFT JOIN dbo.tblICItemLocation ChargeItemLocation
+					ON ChargeItemLocation.intItemId = ReceiptCharges.intChargeId
+					AND ChargeItemLocation.intLocationId = Receipt.intLocationId
+				LEFT JOIN dbo.tblICInventoryTransactionType TransType
+					ON TransType.intTransactionTypeId = @intTransactionTypeId
+				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intOriginalForexRateTypeId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND @intRebuildItemId IS NULL 
+				AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 1 
+	)
+	INSERT INTO @ChargesGLEntries (
+		[dtmDate] 
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblDebitForeign]	
+		,[dblDebitReport]	
+		,[dblCreditForeign]	
+		,[dblCreditReport]	
+		,[dblReportingRate]	
+		,[dblForeignRate]
+		,[strRateType]
+		,[intSourceEntityId]
+		,[intCommodityId]
+	)	
+
+	-------------------------------------------------------------------------------------------
+	-- Cost billed by: None
+	-- Add cost to inventory: No
+	-- 
+	-- Dr...... Freight Income 
+	-- Cr..................... Freight Expense
+	-------------------------------------------------------------------------------------------
+	SELECT	
+			dtmDate						= NonInventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + NonInventoryCostCharges.strCharge 
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
+			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= NonInventoryCostCharges.strTransactionId
+			,intTransactionId			= NonInventoryCostCharges.intTransactionId
+			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
+			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
+	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
+
+	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+
+	UNION ALL 
+	SELECT	
+			dtmDate						= NonInventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + NonInventoryCostCharges.strCharge
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
+			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= NonInventoryCostCharges.strTransactionId
+			,intTransactionId			= NonInventoryCostCharges.intTransactionId
+			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
+			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
+	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
+
+	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+
+	-------------------------------------------------------------------------------------------
+	-- Accrue Other Charge to Vendor 
+	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
+	-- 
+	-- Dr...... AP Clearing	
+	-- Cr.................... Freight Expense 
+	-------------------------------------------------------------------------------------------
+	UNION ALL 
+	SELECT	
+			dtmDate						= NonInventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + NonInventoryCostCharges.strCharge
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
+			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= NonInventoryCostCharges.strTransactionId
+			,intTransactionId			= NonInventoryCostCharges.intTransactionId
+			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
+			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
+	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
+	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 1
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
+
+	UNION ALL 
+	SELECT	
+			dtmDate						= NonInventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + NonInventoryCostCharges.strCharge
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
+			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= NonInventoryCostCharges.strTransactionId
+			,intTransactionId			= NonInventoryCostCharges.intTransactionId
+			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
+			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
+	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intAPClearing 
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
+
+	WHERE	ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 1
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
+
+	-------------------------------------------------------------------------------------------
+	-- Price Down 
+	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
+	-- 
+	-- Dr...... Freight Expense 
+	-- Cr.................... AP Clearing
+	-------------------------------------------------------------------------------------------
+	UNION ALL 
+	SELECT	
+			dtmDate						= NonInventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + NonInventoryCostCharges.strCharge
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
+			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= NonInventoryCostCharges.strTransactionId
+			,intTransactionId			= NonInventoryCostCharges.intTransactionId
+			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
+			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intReceiptEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
+	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intAPClearing 
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
+	WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1
+
+	UNION ALL 
+	SELECT	
+			dtmDate						= NonInventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Reversal on ' + NonInventoryCostCharges.strCharge 
+			,strCode					= @strCode
+			,strReference				= '' 
+			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
+			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
+			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intEntityUserSecurityId 
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= NonInventoryCostCharges.strTransactionId
+			,intTransactionId			= NonInventoryCostCharges.intTransactionId
+			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= NonInventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblDebitReport				= NULL 
+			,dblCreditForeign			= CASE WHEN NonInventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblCreditReport			= NULL 
+			,dblReportingRate			= NULL 
+			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
+			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intReceiptEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
+	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
+			CROSS APPLY dbo.fnGetDebitFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Debit
+			CROSS APPLY dbo.fnGetCreditFunctional(
+				NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.intCurrencyId
+				,@intFunctionalCurrencyId
+				,NonInventoryCostCharges.dblForexRate
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
+	WHERE	ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1	
 	
-	-- Generate the G/L Entries for Cost Charges with no impact to Inventory and without GL Reversal. 
+	-- Generate the G/L Entries for Cost Charges with no impact to Inventory. 
 	;WITH NonInventoryCostCharges (
 		dtmDate
 		,intChargeId
@@ -2129,8 +2606,7 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				AND @intRebuildItemId IS NULL 
-				AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 0 
+				AND @intRebuildItemId IS NULL 				
 	)
 	INSERT INTO @ChargesGLEntries (
 		[dtmDate] 

@@ -245,6 +245,7 @@ BEGIN TRY
 			,[strBillOfLadding]
 			,[ysnInventoryCost]
 			,[intLoadShipmentId]
+			,[intLoadShipmentDetailId]
 			,[intLoadShipmentCostId]
 			,[ysnLock]
 			,[ysnWithGLReversal]
@@ -275,9 +276,10 @@ BEGIN TRY
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = CV.intLoadDetailId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
 			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
-			,[ysnWithGLReversal] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
+			,[ysnWithGLReversal] = 1 -- CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -314,9 +316,10 @@ BEGIN TRY
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = NULL 
 			,[intLoadShipmentCostId] = NULL
 			,[ysnLock] = 0
-			,[ysnWithGLReversal] = 0
+			,[ysnWithGLReversal] = 1 -- CASE WHEN ISNULL(L.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
@@ -944,6 +947,7 @@ BEGIN TRY
 			,[strBillOfLadding]
 			,[ysnInventoryCost]
 			,[intLoadShipmentId]
+			,[intLoadShipmentDetailId]
 			,[intLoadShipmentCostId]
 			-- ,[intForexRateTypeId]
 			,[dblForexRate]
@@ -976,10 +980,11 @@ BEGIN TRY
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = CV.intLoadDetailId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
 			,[dblForexRate] = CV.dblFX
 			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
-			,[ysnWithGLReversal] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
+			,[ysnWithGLReversal] = 1 --CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -1019,10 +1024,11 @@ BEGIN TRY
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = NULL 
 			,[intLoadShipmentCostId] = NULL
 			,[dblForexRate] = NULL
 			,[ysnLock] = 0
-			,[ysnWithGLReversal] = 0
+			,[ysnWithGLReversal] = 1 --0
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
