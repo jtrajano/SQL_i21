@@ -1558,6 +1558,12 @@
     <None Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
     <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICompanyTotals.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICustomerStorageTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIIPhysicalInventory.sql" />
+    <Build Include="dbo\Tables\tblGRGIICustomerStorage.sql" />
+    <Build Include="dbo\Tables\tblGRGIIPhysicalInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
