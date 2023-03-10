@@ -3715,7 +3715,6 @@
     <Build Include="dbo\Stored Procedures\uspGLGenerateMissingOriginLocation.sql" />
     <Build Include="dbo\Tables\tblPATCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentReport.sql" />
-    <Build Include="dbo\Tables\tblTMCompanyConsumptionSite.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationSite.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationProjection.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationItemPricing.sql" />
