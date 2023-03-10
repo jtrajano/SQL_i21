@@ -85,6 +85,25 @@ DECLARE @InventoryData TABLE
 	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
 )
 
+DECLARE @InventoryDataCompanyOwned TABLE
+(
+	dblUnits DECIMAL(18,6)
+	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,intCommodityId INT
+	,intCompanyLocationId INT
+	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
+DECLARE @InventoryAdjustments TABLE
+(
+	dblUnits DECIMAL(18,6)
+	,intCommodityId INT
+	,intCompanyLocationId INT
+	,strOwnership NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
 DECLARE @intCommodityId2 INT
 DECLARE @strCommodityCode NVARCHAR(20)
 DECLARE @strUOM NVARCHAR(20)
@@ -501,7 +520,19 @@ BEGIN
 				AND dtmDate IS NOT NULL
 				AND intCompanyLocationId = @intCompanyLocationId
 		) ADJ
-		
+
+		--separate the IAs for Company Owned and Customer Owned
+		INSERT INTO @InventoryAdjustments
+		SELECT dblAdjustments
+			,@intCommodityId2
+			,@intCompanyLocationId
+			,strOwnership
+			,@strUOM
+		FROM #tblInOut
+		WHERE dtmDate IS NOT NULL
+			AND strTransactionType = 'Inventory Adjustment'
+			AND intCompanyLocationId = @intCompanyLocationId
+
 		/* IN TRANSIT */	
 		--INSERT INTO @InventoryData
 		--SELECT 
@@ -1335,9 +1366,7 @@ FROM (
 		,strLocationName
 		,strUOM
 	FROM @InventoryData
-	WHERE (
-		strLabel IN ('INTERNAL TRANSFERS RECEIVED','NET ADJUSTMENTS')
-	)
+	WHERE strLabel = 'INTERNAL TRANSFERS RECEIVED'
 	GROUP BY strCommodityCode
 		,intCommodityId
 		,intCompanyLocationId
@@ -1352,8 +1381,7 @@ OUTER APPLY (
 		,intCompanyLocationId
 		,strLocationName
 		,strUOM
-	FROM @StorageObligationData 
-	--WHERE strLabel LIKE '%BALANCE'--= 'TOTAL STORAGE OBLIGATION'
+	FROM @StorageObligationData SOD
 	WHERE strLabel = 'TOTAL STORAGE OBLIGATION DECREASE'
 		AND intCommodityId = A.intCommodityId
 		AND intCompanyLocationId = A.intCompanyLocationId
@@ -1391,6 +1419,7 @@ OUTER APPLY (
 		AND TS.intFromCompanyLocationId = A.intCompanyLocationId
 		--AND TS.intToCompanyLocationId <> A.intCompanyLocationId
 		AND TS.dtmTransferStorageDate = @dtmReportDate
+		AND ST_FROM.intStorageScheduleTypeId <> ST_TO.intStorageScheduleTypeId
 	GROUP BY TS.strCommodityCode
 		,TS.intCommodityId
 		,intFromCompanyLocationId
@@ -1431,13 +1460,62 @@ OUTER APPLY (
 		,CL.strLocationName
 		,UM.strUnitMeasure
 ) D
+OUTER APPLY (
+	/*
+		RECEIVED Company Owned stocks for the day 
+	*/
+	SELECT SUM(dblUnits) dblUnits
+		,strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+	FROM @InventoryDataCompanyOwned
+	WHERE intCommodityId = A.intCommodityId
+		AND intCompanyLocationId = A.intCompanyLocationId
+	GROUP BY strCommodityCode
+		,intCommodityId
+		,intCompanyLocationId
+		,strLocationName
+		,strUOM
+) E
+OUTER APPLY (
+	SELECT ABS(SUM(dblUnits)) dblUnits
+		,intCommodityId
+		,intCompanyLocationId
+		,strUOM
+	FROM @InventoryAdjustments IA
+	WHERE IA.intCommodityId = A.intCommodityId
+		AND IA.intCompanyLocationId = A.intCompanyLocationId
+		AND strOwnership = 'Customer Owned'
+		AND IA.strUOM = A.strUOM
+	GROUP BY intCommodityId
+		,intCompanyLocationId
+		,strUOM
+) F
+OUTER APPLY (
+	SELECT SUM(dblUnits) dblUnits
+		,intCommodityId
+		,intCompanyLocationId
+		,strUOM
+	FROM @InventoryAdjustments IA
+	WHERE IA.intCommodityId = A.intCommodityId
+		AND IA.intCompanyLocationId = A.intCompanyLocationId
+		AND strOwnership = 'Company Owned'
+		AND IA.strUOM = A.strUOM
+		AND dblUnits > 0
+	GROUP BY intCommodityId
+		,intCompanyLocationId
+		,strUOM
+) G
+
 
 INSERT INTO @InventoryData
 SELECT 
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED DECREASE (INC DP)'
 	,'-'
-	,ABS(ISNULL(A.dblUnits,0) + ISNULL(C.dblUnits,0) + ISNULL(D.dblUnits,0))
+	,ABS(ISNULL(A.dblUnits,0) + ISNULL(C.dblUnits,0) + ISNULL(D.dblUnits,0) + ISNULL(E.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1451,9 +1529,7 @@ FROM (
 		,strLocationName
 		,strUOM
 	FROM @InventoryData
-	WHERE (
-		strLabel IN ('SHIPPED','INTERNAL TRANSFERS SHIPPED')
-	)
+	WHERE strLabel IN ('SHIPPED','INTERNAL TRANSFERS SHIPPED')
 	GROUP BY strCommodityCode
 		,intCommodityId
 		,intCompanyLocationId
@@ -1525,6 +1601,21 @@ OUTER APPLY (
 		,CL.strLocationName
 		,UM.strUnitMeasure
 ) D
+OUTER APPLY (
+	SELECT SUM(dblUnits) dblUnits
+		,intCommodityId
+		,intCompanyLocationId
+		,strUOM
+	FROM @InventoryAdjustments IA
+	WHERE IA.intCommodityId = A.intCommodityId
+		AND IA.intCompanyLocationId = A.intCompanyLocationId
+		AND strOwnership = 'Company Owned'
+		AND IA.strUOM = A.strUOM
+		AND dblUnits < 0
+	GROUP BY intCommodityId
+		,intCompanyLocationId
+		,strUOM
+) E
 
 INSERT INTO @InventoryData
 SELECT
@@ -1544,52 +1635,6 @@ GROUP BY strCommodityCode
 	,intCompanyLocationId
 	,strLocationName
 	,strUOM
---SELECT 
---	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
---	,'TOTAL COMPANY OWNED ENDING (INC DP)'
---	,''
---	,ISNULL(A.dblUnits,0) - ISNULL(B.dblUnits,0)
---	,A.strCommodityCode
---	,A.intCommodityId
---	,A.intCompanyLocationId
---	,A.strLocationName
---	,A.strUOM
---FROM (
---	SELECT SUM(ISNULL(CASE WHEN strSign = '-' THEN -dblUnits ELSE dblUnits END,0)) dblUnits
---		,strCommodityCode
---		,intCommodityId
---		,intCompanyLocationId
---		,strLocationName
---		,strUOM
---	FROM @InventoryData
---	WHERE (
---		strLabel IN ('PHYSICAL INVENTORY ENDING')
---	)
---	GROUP BY strCommodityCode
---		,intCommodityId
---		,intCompanyLocationId
---		,strLocationName
---		,strUOM
---) A
---OUTER APPLY (
---	SELECT
---		SUM(ISNULL(dblUnits,0)) dblUnits
---		,strCommodityCode
---		,intCommodityId
---		,intCompanyLocationId
---		,strLocationName
---		,strUOM
---	FROM @StorageObligationData 
---	--WHERE strLabel LIKE '%BALANCE'--= 'TOTAL STORAGE OBLIGATION'
---	WHERE strLabel = 'TOTAL STORAGE OBLIGATION ENDING'
---		AND intCommodityId = A.intCommodityId
---		AND intCompanyLocationId = A.intCompanyLocationId
---	GROUP BY strCommodityCode
---		,intCommodityId
---		,intCompanyLocationId
---		,strLocationName
---		,strUOM
---) B
 
 --INSERT IN @ReportData
 INSERT INTO @ReportData
