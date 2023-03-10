@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspGRGIICompanyOwnedTotals]
+CREATE PROCEDURE [dbo].[uspGRGIICompanyOwnedTotals]
 	@xmlParam NVARCHAR(MAX)
 AS
 BEGIN
