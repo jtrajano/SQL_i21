@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspGRGIICustomerStorage]
+CREATE PROCEDURE [dbo].[uspGRGIICustomerStorage]
 	@xmlParam NVARCHAR(MAX)
 AS
 BEGIN
