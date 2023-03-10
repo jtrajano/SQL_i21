@@ -131,7 +131,6 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND s.intSubcategoryId IS NULL
 	AND NULLIF(vts.strDefaultOrderClass, '') IS NOT NULL
 
-
 Update cv
 SET
 	cv.intCategoryLocationId = cl.intCategoryLocationId,
@@ -161,6 +160,9 @@ LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId  = vts.strDefaultSellClass
 LEFT JOIN tblSTSubcategory oc ON oc.strSubcategoryId  = vts.strDefaultOrderClass
 	AND oc.strSubcategoryType = 'C'
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
+AND c.intCategoryId = cv.intCategoryId
+AND cl.intCategoryLocationId = cv.intCategoryLocationId
+AND v.intEntityId = cv.intVendorId
 AND @OverwriteExisting = 1
 
 
@@ -201,7 +203,7 @@ SELECT
 	, @guiApiUniqueId
 FROM tblApiSchemaTransformCategoryVendor vts
 JOIN tblICCategory c ON c.strCategoryCode  = vts.strCategory 
-	OR c.strDescription  = vts.strCategory 
+--	OR c.strDescription  = vts.strCategory 
 JOIN vyuAPVendor v ON v.strVendorId  = vts.strVendor  
 	OR v.strName  = vts.strVendor 
 LEFT JOIN tblSMCompanyLocation l ON l.strLocationNumber  = vts.strLocation 
