@@ -386,7 +386,7 @@ BEGIN TRY
 			,strLeafSize = BRAND.strBrandCode
 			,strLeafStyle = STYLE.strName
 			,intBookId = S.intBookId
-			,dblPackagesBought = S.dblB1QtyBought
+			,dblPackagesBought = S.dblRepresentingQty
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
@@ -440,7 +440,7 @@ BEGIN TRY
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
 			,strPackageSize = NULL
-			,intPackageUOMId = NULL
+			,intPackageUOMId = S.intRepresentingUOMId
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = IMP.strTaster
 			,strFeedStock = NULL
