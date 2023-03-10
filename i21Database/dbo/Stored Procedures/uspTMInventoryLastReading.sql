@@ -55,6 +55,7 @@ BEGIN
 			,dblInventoryReading
 			,dtmInventoryReadingDateTime
 			,ysnManual
+			,intDeviceTankMonitorId
 	FROM CTE 
 	WHERE RowNumber = 1
 	order by dtmDateTime desc
