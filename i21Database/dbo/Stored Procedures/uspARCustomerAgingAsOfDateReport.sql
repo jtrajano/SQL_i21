@@ -341,22 +341,25 @@ INSERT INTO #CREDITMEMOPAIDREFUNDED (
 	 , strInvoiceNumber
 	 , strDocumentNumber
 )
-SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
-FROM dbo.tblARInvoice I WITH (NOLOCK)
+SELECT 
+	 I.intInvoiceId
+	,I.strInvoiceNumber
+	,REFUND.strDocumentNumber
+FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 INNER JOIN(
 	SELECT ID.strDocumentNumber from tblARInvoice INV
 	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
-	where   strTransactionType='Cash Refund' and ysnPosted = 1
-)REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
+	WHERE   strTransactionType='Cash Refund' and ysnPosted = 1
+) REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
 WHERE I.ysnPosted = 1 
-	AND I.ysnPaid = 1
-	AND I.ysnProcessedToNSF = 0
-	AND I.strTransactionType <> 'Cash Refund'
-	AND I.strTransactionType = 'Credit Memo'
-	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+AND I.ysnPaid = 1
+AND I.ysnProcessedToNSF = 0
+AND I.strTransactionType <> 'Cash Refund'
+AND I.strTransactionType = 'Credit Memo'
+AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --#AGINGPOSTEDINVOICES
 INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
@@ -418,7 +421,8 @@ INSERT INTO @CANCELLEDINVOICE (
 )
 SELECT  INVCANCELLED.intInvoiceId,INVCANCELLED.strInvoiceNumber,INVCANCELLED.ysnPaid 
 FROM tblARInvoice INVCANCELLED
-WHERE ysnCancelled =1 and ysnPosted =1
+WHERE ysnCancelled =1 
+AND ysnPosted =1
 AND INVCANCELLED.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
 INSERT INTO @CANCELLEDCMINVOICE (
@@ -427,7 +431,11 @@ INSERT INTO @CANCELLEDCMINVOICE (
 )
 SELECT CM.intInvoiceId,CM.strInvoiceNumber 
 FROM tblARInvoice CM
-WHERE CM.intOriginalInvoiceId IN (SELECT intInvoiceId FROM @CANCELLEDINVOICE WHERE ISNULL(ysnPaid, 0) = 0)
+WHERE CM.intOriginalInvoiceId IN (
+	SELECT intInvoiceId 
+	FROM @CANCELLEDINVOICE 
+	WHERE ISNULL(ysnPaid, 0) = 0
+)
 AND CM.ysnPosted =1
 AND CM.strTransactionType = 'Credit Memo'
 AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -644,7 +652,7 @@ FROM (
 			 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 			 , dtmDate				= ISNULL(P.dtmDatePaid, I.dtmDate)
 			 , I.intEntityCustomerId
-			 , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) END
+			 , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) + ISNULL(APD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) END
 			 , dblPrepayments		= 0
 			 , I.strType
 		FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
@@ -655,6 +663,12 @@ FROM (
 			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 			GROUP BY PD.intInvoiceId
 		) PD ON I.intInvoiceId = PD.intInvoiceId
+		LEFT JOIN (
+			SELECT dblPayment = SUM(dblPayment) * -1
+				 , APD.intInvoiceId
+			FROM dbo.tblAPPaymentDetail APD WITH (NOLOCK)
+			GROUP BY APD.intInvoiceId
+		) APD ON I.intInvoiceId = APD.intInvoiceId
 		LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 		WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
 
