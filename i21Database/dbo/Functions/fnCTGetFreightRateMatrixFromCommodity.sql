@@ -3,7 +3,6 @@
 	@intLoadingPortId AS NVARCHAR(100)
 	,@intDestinationPortId AS  NVARCHAR(100)
 	,@intCommodityId AS INT
-	,@strOrigin AS NVARCHAR(100)
 )
 RETURNS NUMERIC(18 , 6)
 AS 
@@ -30,10 +29,8 @@ BEGIN
                 FROM tblLGFreightRateMatrix frm
                 JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
                 JOIN tblLGContainerTypeCommodityQty ctq ON ctq.intContainerTypeId = cnt.intContainerTypeId
-				INNER JOIN vyuLGContainerTypeNotMapped LGC ON LGC.intContainerTypeId = cnt.intContainerTypeId and ctq.intCommodityAttributeId = LGC.intCommodityAttributeId
                 WHERE ctq.intCommodityId = @intCommodityId             
                      AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
-					 AND LGC.strOrigin = @strOrigin
 
-	RETURN CASE WHEN ISNULL(@dblRate, 0) > 0 THEN @dblRate ELSE 0.00 END
+	RETURN CASE WHEN ISNULL(@dblRate, 0) > 0 THEN @dblRate ELSE 1 END
 END
