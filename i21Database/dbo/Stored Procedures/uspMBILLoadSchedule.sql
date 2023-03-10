@@ -339,7 +339,7 @@ INSERT INTO tblMBILLoadHeader(intDispatchOrderId
 ,dtmScheduledDate
 ,ysnPosted)
 SELECT DISTINCT LG.intDispatchOrderId
-,case when LG.intVendorId is null then 'Outbound' ELSE 'Drop Ship' end strOrderType
+,case when LG.intVendorLocationId is null then 'Outbound' ELSE 'Drop Ship' end strOrderType
 ,LG.strDispatchOrderNumber
 ,LG.intDriverEntityId
 ,LG.intEntityShipViaTruckId
@@ -392,16 +392,21 @@ where p.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and p.intLoadHea
 --DELIVERY HEADER
 
 INSERT INTO tblMBILDeliveryHeader(intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId)
-SELECT DISTINCT MB.intLoadHeaderId,DOD.intEntityId, DOD.intEntityLocationId,DO.intCompanyLocationId
+SELECT DISTINCT MB.intLoadHeaderId
+			   ,CASE WHEN TMS.ysnCompanySite  = 1 then NULL ELSE DOD.intEntityId END intEntityId
+			   ,DOD.intEntityLocationId
+			   ,CASE WHEN TMS.ysnCompanySite  = 1 then TMS.intLocationId ELSE DO.intCompanyLocationId END intCompanyLocationId
 FROM tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD ON DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblMBILLoadHeader MB ON MB.strLoadNumber = DO.strDispatchOrderNumber
+INNER JOIN tblTMDispatch TMD on TMD.intDispatchID = DOD.intTMDispatchId
+INNER JOIN tblTMSite TMS on TMS.intSiteID = TMD.intSiteID
 WHERE intStopType = 2 and intDispatchStatus = 3 AND 
  NOT EXISTS(SELECT intDeliveryHeaderId
  FROM tblMBILDeliveryHeader p
  WHERE p.intLoadHeaderId = MB.intLoadHeaderId AND 
 isnull(p.intEntityLocationId,0) = isnull(DOD.intEntityLocationId,0) AND 
-isnull(p.intCompanyLocationId,0) = isnull(DO.intCompanyLocationId,isnull(p.intCompanyLocationId,0)))
+isnull(p.intCompanyLocationId,0) = isnull(CASE WHEN TMS.ysnCompanySite  = 1 then TMS.intLocationId ELSE DO.intCompanyLocationId END,isnull(p.intCompanyLocationId,0)))
 
 UPDATE MBDH
 SET MBDH.intLoadHeaderId = MB.intLoadHeaderId
@@ -440,7 +445,9 @@ SELECT DOD.intDispatchOrderDetailId
 FROM tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD ON DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblMBILLoadHeader MBH ON MBH.strLoadNumber = DO.strDispatchOrderNumber
-INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,DO.intCompanyLocationId) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
+INNER JOIN tblTMDispatch TMD on TMD.intDispatchID = DOD.intTMDispatchId
+INNER JOIN tblTMSite TMS on TMS.intSiteID = TMD.intSiteID
+INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,CASE WHEN TMS.ysnCompanySite  = 1 THEN TMS.intLocationId else DO.intCompanyLocationId end) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
 LEFT JOIN tblMBILDeliveryDetail MBDL ON MBDL.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and MBDL.intDeliveryHeaderId = MBDH.intDeliveryHeaderId 
 LEFT JOIN tblTMOrder t on DOD.intTMDispatchId = t.intDispatchId
 WHERE intStopType = 2 AND intDispatchStatus = 3 and MBDL.intDispatchOrderDetailId is null
@@ -456,7 +463,9 @@ SET MBDL.intItemId = DOD.intItemId
 FROM tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD ON DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblMBILLoadHeader MBH ON MBH.strLoadNumber = DO.strDispatchOrderNumber
-INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,DO.intCompanyLocationId) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
+INNER JOIN tblTMDispatch TMD on TMD.intDispatchID = DOD.intTMDispatchId
+INNER JOIN tblTMSite TMS on TMS.intSiteID = TMD.intSiteID
+INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,CASE WHEN TMS.ysnCompanySite  = 1 THEN TMS.intLocationId else DO.intCompanyLocationId end) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
 INNER JOIN tblMBILDeliveryDetail MBDL ON MBDL.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and MBDL.intDeliveryHeaderId = MBDH.intDeliveryHeaderId
 LEFT JOIN tblMBILPickupDetail MBP on MBP.intDispatchOrderDetailId = MBDL.intDispatchOrderDetailId
 LEFT JOIN tblTMOrder t on MBDL.intTMDispatchId = t.intDispatchId
