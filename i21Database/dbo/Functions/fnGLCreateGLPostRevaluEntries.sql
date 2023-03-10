@@ -5,7 +5,8 @@ CREATE FUNCTION fnGLCreateGLPostRevaluEntries
     @dateNow DATETIME,
     @strPostBatchId NVARCHAR(40),
     @defaultType NVARCHAR(20),
-    @intEntityId INT
+    @intEntityId INT,
+    @strTransactionType NVARCHAR(10)
 )
 RETURNS TABLE   
 AS RETURN(
@@ -52,7 +53,7 @@ AS RETURN(
                     SELECT   
                         [strTransactionId]    
                         ,[intTransactionId]    
-                        ,[strDescription]= 'Revalue GL '  + @strPeriod 
+                        ,[strDescription]= 'Revalue ' + @strTransactionType + ' '  + @strPeriod 
                         ,[dtmTransactionDate]   
                         ,[dblDebit]   
                         ,[dblCredit]
@@ -68,7 +69,7 @@ AS RETURN(
                         ,[dtmDateEntered]    
                         ,strBatchId  
                         ,[strCode]      
-                        ,[strJournalLineDescription] = 'Revalue GL '  + @strPeriod   
+                        ,[strJournalLineDescription] = 'Revalue ' + @strTransactionType + ' '  + @strPeriod 
                         ,[intJournalLineNo]    
                         ,[strTransactionType]
                         ,[strTransactionForm]
@@ -85,7 +86,7 @@ AS RETURN(
                     SELECT   
                         [strTransactionId]    
                         ,[intTransactionId]    
-                        ,[strDescription] = 'Offset Revalue GL '  + @strPeriod      
+                        ,[strDescription] = 'Offset Revalue '  + @strTransactionType + ' ' + @strPeriod      
                         ,[dtmTransactionDate]   
                         ,[dblDebit]    = dblCredit      
                         ,[dblCredit]   = dblDebit  
@@ -101,7 +102,7 @@ AS RETURN(
                         ,[dtmDateEntered]   
                         ,strBatchId   
                         ,[strCode]      
-                        ,[strJournalLineDescription] = 'Offset Revalue GL '  + @strPeriod   
+                        ,[strJournalLineDescription] = 'Offset Revalue '  + @strTransactionType + ' ' + @strPeriod   
                         ,[intJournalLineNo]
                         ,[strTransactionType]
                         ,[strTransactionForm]
@@ -117,7 +118,10 @@ AS RETURN(
           SELECT   
           [strTransactionId]    
           ,[intTransactionId]    
-          ,intAccountId =  dbo.fnGLGetRevalueAccountTableForGL(v.intAccountCategoryId, intAccountIdOverride, A.OffSet )
+          ,intAccountId = CASE 
+                WHEN @strTransactionType= 'GL' THEN dbo.fnGLGetRevalueAccountTableForGL(v.intAccountCategoryId, intAccountIdOverride, A.OffSet ) 
+                WHEN @strTransactionType= 'CM' THEN G.AccountId ELSE ''
+                END
           ,strDescription = A.[strDescription]     
           ,[dtmTransactionDate]   
           ,[dblDebit]      
@@ -145,4 +149,10 @@ AS RETURN(
           ,intCompanySegmentOverrideId
           FROM cte1 A  LEFT JOIN
           vyuGLAccountDetail v on v.intAccountId = A.intAccountIdOverride  
+            OUTER APPLY (  
+                  SELECT TOP 1 AccountId from dbo.fnGLGetRevalueAccountTable(intAccountIdOverride) f   
+                  WHERE A.strType COLLATE Latin1_General_CI_AS = f.strType COLLATE Latin1_General_CI_AS   
+                  AND f.strModule COLLATE Latin1_General_CI_AS = A.strModule COLLATE Latin1_General_CI_AS  
+                  AND f.OffSet  = A.OffSet  
+                  )G  
 )

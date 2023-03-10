@@ -21,7 +21,8 @@ DECLARE @tblPostError TABLE(
 DECLARE
 @ysnOverrideLocation BIT = 0,
 @ysnOverrideLOB BIT = 0,
-@ysnOverrideCompany BIT = 0 
+@ysnOverrideCompany BIT = 0,
+@intDefaultCurrencyId INT
   
   DECLARE @ysnHasDetails BIT = 0
   SELECT @ysnHasDetails = 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
@@ -152,7 +153,7 @@ DECLARE
     BEGIN
           IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyPostGLEntries') DROP TABLE iRelyPostGLEntries;
 
-          IF @strTransactionType = 'GL'
+          IF @strTransactionType IN ('GL', 'CM')
           BEGIN
                 INSERT INTO @RevalTable (  
                   [strTransactionId]  
@@ -213,7 +214,7 @@ DECLARE
                   ,intLocationSegmentOverrideId  
                   ,intLOBSegmentOverrideId  
                   ,intCompanySegmentOverrideId  
-                  FROM dbo.fnGLCreateGLPostRevaluEntries(@intConsolidationId,@strPeriod,@dateNow,@strPostBatchId,@defaultType,@intEntityId)
+                  FROM dbo.fnGLCreateGLPostRevaluEntries(@intConsolidationId,@strPeriod,@dateNow,@strPostBatchId,@defaultType,@intEntityId,@strTransactionType)
           END
           ELSE
           BEGIN
@@ -230,8 +231,7 @@ DECLARE
                           WHEN dblUnrealizedGain < 0 THEN 0  
                           ELSE dblUnrealizedGain END,0)
                   ,[dblExchangeRate] = dblNewForexRate
-                  ,[dblDebitForeign] = 0
-                  ,[dblCreditForeign] = 0
+              
                   ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
                   ,[ysnIsUnposted]  = 0   
                   ,[intConcurrencyId]  = 1  
@@ -256,7 +256,14 @@ DECLARE
                   FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B   
                   ON A.intConsolidationId = B.intConsolidationId  
                   WHERE B.intConsolidationId = @intConsolidationId  
-                  ),cte1 AS  
+                  ),
+                  cteWithForeignFunctional AS(
+                      SELECT * 
+                      ,[dblDebitForeign] = dblDebit
+                      ,[dblCreditForeign] = dblCredit
+                      FROM cte
+                  ),
+                  cte1 AS  
                   (  
                   SELECT   
                     [strTransactionId]    
@@ -290,7 +297,7 @@ DECLARE
                     ,intLOBSegmentOverrideId  
                     ,intCompanySegmentOverrideId
                   FROM  
-                  cte   
+                  cteWithForeignFunctional   
                   UNION ALL  
                   SELECT   
                     [strTransactionId]    
@@ -300,8 +307,8 @@ DECLARE
                     ,[dblDebit]    = dblCredit      
                     ,[dblCredit]   = dblDebit  
                     ,[dblExchangeRate] 
-                    ,[dblDebitForeign]    = dblCreditForeign    
-                    ,[dblCreditForeign]   = dblDebitForeign
+                    ,[dblDebitForeign]  = [dblCreditForeign] 
+                    ,[dblCreditForeign] = [dblDebitForeign]
                     ,[dtmDate]  
                     ,[ysnIsUnposted]    
                     ,[intConcurrencyId]   
@@ -323,7 +330,7 @@ DECLARE
                     ,intLocationSegmentOverrideId  
                     ,intLOBSegmentOverrideId  
                     ,intCompanySegmentOverrideId
-                  FROM cte   
+                  FROM cteWithForeignFunctional   
                   )  
               
                   SELECT   
@@ -475,8 +482,8 @@ DECLARE
                   ,[dblCredit]  
                   ,[dblDebit]
                   ,[dblExchangeRate] 
-                  ,[dblDebitForeign]
-                  ,[dblCreditForeign] 
+                  ,[dblCreditForeign]
+                  ,[dblDebitForeign] 
                   ,[dtmDate] = U.dtmReverseDate  
                   ,[ysnIsUnposted]  
                   ,[intConcurrencyId]   
@@ -508,6 +515,18 @@ DECLARE
           BEGIN
             GOTO _error
           END  
+
+
+          -- SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
+
+          -- UPDATE  @RevalTable 
+          --   SET  dblDebitForeign = dblDebit, dblCreditForeign = dblCredit, intCurrencyId = @intDefaultCurrencyId
+          --   WHERE @strTransactionType='CM' AND CHARINDEX('Revalue', strJournalLineDescription) = 1
+          
+          -- UPDATE  @RevalTable 
+          --   SET  dblDebitForeign = 0, dblCreditForeign = 0
+          --   WHERE @strTransactionType='CM' AND CHARINDEX('Revalue', strJournalLineDescription) = 1
+
 
     END --IF @ysnHasDetails = 1
   
@@ -591,6 +610,9 @@ GROUP BY intAccountId,intAccountIdOverride,
     intLocationSegmentOverrideId,
     intLOBSegmentOverrideId,
     intCompanySegmentOverrideId
+
+
+  
 
   IF @ysnRecap = 0   
   BEGIN  
