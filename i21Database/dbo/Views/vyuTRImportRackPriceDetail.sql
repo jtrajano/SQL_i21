@@ -3,7 +3,7 @@
 SELECT        
 	IRD.intImportRackPriceDetailId
 	, IR.intImportRackPriceId
-	, IR.dtmImportDate
+	, CAST(IR.dtmImportDate AS DATETIME2) dtmImportDate
 	, IR.strFilename
 	, IRD.strComments
 	, CASE WHEN IRDI.intImportRackPriceDetailItemId IS NOT NULL THEN IRDI.ysnValid ELSE IRD.ysnValid  END ysnValid

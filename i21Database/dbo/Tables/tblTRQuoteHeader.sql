@@ -10,7 +10,7 @@
 	[strCustomerComments] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intUserId] INT NULL,
-	[dtmGenerateDateTime] DATETIME NULL,
+	[dtmGenerateDateTime] DATETIME2 NULL,
 	[strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMessage] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDelete] BIT NULL,
