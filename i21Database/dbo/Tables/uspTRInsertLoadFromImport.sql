@@ -257,6 +257,13 @@ BEGIN
 				AND intImportDtnDetailId <> @intImportDtnDetailId
 				AND ISNULL(ysnSuccess, 0) = 0)
 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRImportDtnDetail WHERE strBillOfLading = @strBillOfLading AND ISNULL(ysnReImport, 0) = 0)
+		BEGIN
+			UPDATE tblTRImportDtnDetail
+			SET ysnReImport = 1
+			WHERE intImportDtnDetailId = @intImportDtnDetailId
+		END
+
 		--IF @@TRANCOUNT > 0 COMMIT TRANSACTION
 
 	END TRY
