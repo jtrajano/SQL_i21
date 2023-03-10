@@ -33,12 +33,18 @@ BEGIN TRY
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
 	SELECT dtmDatePaid,
-		   intEntityVendorId,
+		--    intEntityVendorId,
+			md.intEntityVendorId, -- use the vendor set on CSV
 		   strCheckNumber,
-		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
+		--    intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
+		intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
+						AND md.strMapVendorName = I2.strEntityVendorName AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
+IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
 	INTO #tmpMultiVouchersImport
 	FROM tblAPImportPaidVouchersForPayment I
-	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
+	INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
+ 	GROUP BY dtmDatePaid, md.intEntityVendorId, strCheckNumber, intCustomPartition , md.strMapVendorName 
+	--GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchersImport)
 	BEGIN
