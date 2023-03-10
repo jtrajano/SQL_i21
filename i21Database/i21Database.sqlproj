@@ -546,6 +546,7 @@
     <Build Include="dbo\Functions\fnICValidateCheckDigitIfExists.sql" />
     <Build Include="dbo\Functions\fnICValidateUPCCode.sql" />
     <Build Include="dbo\Functions\fnICCalculateCheckDigit.sql" />
+    <Build Include="dbo\Functions\fnSTRemoveCheckDigit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateMiscVoucherFromPO.sql" />
     <Build Include="dbo\Views\vyuApiCompanyLocation.sql" />
     <Build Include="dbo\Views\vyuApiRecordAudit.sql" />
