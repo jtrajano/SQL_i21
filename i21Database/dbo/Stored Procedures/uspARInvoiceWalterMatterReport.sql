@@ -143,14 +143,18 @@ SELECT
 	,strBICCode					= CMBA.strBICCode
 	,blbFooterLogo				= SMLPF.imgLogo
 	,dblInvoiceSubtotal			= ARI.dblInvoiceSubtotal
+	,strInvoiceSubtotal			= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARI.dblInvoiceSubtotal AS MONEY),1), '.00','')
 	,dblTax						= ARI.dblTax
+	,strTax						= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARI.dblTax AS MONEY),1), '.00','')
 	,dblInvoiceTotal			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' AND ARI.ysnPosted = 0 THEN 0 ELSE ARI.dblInvoiceTotal END
+	,strInvoiceTotal			= CASE WHEN ARI.strTransactionType = 'Customer Prepayment' AND ARI.ysnPosted = 0 THEN ARGID.strCurrency + ' ' + '0.00' ELSE ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARI.dblInvoiceTotal AS MONEY),1), '.00','') END
 	,strVATNo					= ISNULL(EMELS.strVATNo, '')
 	,strOurFiscalRepName		= EMELS.strOurFiscalRepName
 	,strOurFiscalRepAddress		= EMELS.strOurFiscalRepAddress
 	,strEntityLocationRemarks	= EMELS.strRemarks
 	,strFooterComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strFooterComments, ''), 0)
 	,dblTotal					= ARGID.dblTotal
+	,strTotal					= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARGID.dblTotal AS MONEY),1), '.00','')
 	,strReportIdentifier		= CASE 
 									WHEN ARI.strType = 'Provisional' THEN 'Provisional ' 
 									WHEN ARIR.strType = 'Provisional' THEN 'Commercial ' 
@@ -175,6 +179,7 @@ SELECT
 	,strProvisionalUnitMeasure	= ARGIDP.strUnitMeasure
 	,dblProvisionalUnitPrice	= ARGIDP.dblUnitPrice
 	,strRelatedType				= ARIR.strType
+	,strType					= ARI.strType
 	,strTransactionType			= ARI.strTransactionType
 	,strBuyer					= ISNULL(RTRIM(EMELB.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(ARI.strBillToAddress) + CHAR(13) + CHAR(10), '')	+ ISNULL(NULLIF(ARI.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToState, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(ARI.strBillToCountry, ''), '')
 	,dblPercentage				= CASE 
