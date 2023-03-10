@@ -9,7 +9,7 @@ AS
 		,A.strBOLNumber
 		,G.strItemNo strActualItemNo
 		,strItemNumber = ISNULL(H.strVendorProduct,G.strItemNo)
-		,strUnitMeasure = ISNULL(K.strVendorUOM,J.strUnitMeasure) COLLATE Latin1_General_CI_AS 
+		,strUnitMeasure = COALESCE(NULLIF(H.strVendorProductUOM, ''), CASE WHEN M.strDataFileTemplate = 'Chevron' THEN RIGHT(G.strItemNo, 3) ELSE K.strVendorUOM END, J.strUnitMeasure) COLLATE Latin1_General_CI_AS 
 		,A.intInvoiceId
 		,B.dblQtyOrdered
 		,B.dblQtyShipped
@@ -25,7 +25,7 @@ AS
 		,M.strCompany1Id
 		,SO.dtmDate dtmSalesOrderDate
 		,SO.strBOLNumber strSalesOrderBOLNumber
-		,M.strMarketerAccountNo
+		,COALESCE(M.strMarketerAccountNo, M.strCompany2Id) strMarketerAccountNo
 		,M.strMarketerEmail
 		,M.strDataFileTemplate
 		,M.strExportFilePath
@@ -41,6 +41,8 @@ AS
 			  ELSE ''
 		 END AS strTransactionType
 		, D.ysnChevronUploaded
+		, D.strReimbursementNo
+		, strCharge = CASE WHEN O.strCharge = 'Inventory' THEN NULL ELSE O.strCharge END
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -72,9 +74,12 @@ AS
 		ON B.intItemUOMId = I.intItemUOMId
 	INNER JOIN tblICUnitMeasure J
 		ON I.intUnitMeasureId =  J.intUnitMeasureId
-	LEFT JOIN tblVRUOMXref K
-		ON J.intUnitMeasureId = K.intUnitMeasureId
-			AND M.intVendorSetupId = K.intVendorSetupId
+	OUTER APPLY (
+        SELECT TOP 1 xK.*
+        FROM tblVRUOMXref xK
+		WHERE J.intUnitMeasureId = xK.intUnitMeasureId
+			AND M.intVendorSetupId = xK.intVendorSetupId
+    ) K
 	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = A.intSalesOrderId
 	LEFT JOIN tblICItemUOM vendorItemUOM ON vendorItemUOM.intItemUOMId = H.intItemUnitMeasureId
 	LEFT JOIN tblICUnitMeasure vendorUOM ON vendorUOM.intUnitMeasureId = vendorItemUOM.intUnitMeasureId
