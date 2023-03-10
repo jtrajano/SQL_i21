@@ -1538,7 +1538,6 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareDropshipInTransit.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDropshipInTransit.sql" />
     <Build Include="dbo\Views\vyuCTGetQualityCodes.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_DA.sql" />
