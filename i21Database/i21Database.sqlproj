@@ -1253,6 +1253,7 @@
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
     <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
