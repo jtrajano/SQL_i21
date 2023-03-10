@@ -1563,6 +1563,7 @@
     <Build Include="dbo\Stored Procedures\uspGRGIIPhysicalInventory.sql" />
     <Build Include="dbo\Tables\tblGRGIICustomerStorage.sql" />
     <Build Include="dbo\Tables\tblGRGIIPhysicalInventory.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutFuelDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
