@@ -298,9 +298,14 @@ FROM
 		ON lot.strLotNumber COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strLotNumber)) COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblSMCompanyLocationSubLocation sl 
 		ON sl.strSubLocationName COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strStorageLocation)) COLLATE Latin1_General_CI_AS
+		AND sl.intCompanyLocationId = c.intCompanyLocationId
 	LEFT JOIN tblICStorageLocation su 
-		ON su.strName COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strStorageUnit)) COLLATE Latin1_General_CI_AS
-		OR su.strDescription COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strStorageUnit)) COLLATE Latin1_General_CI_AS
+		ON 
+		su.intSubLocationId = sl.intCompanyLocationSubLocationId
+		AND (
+			su.strName COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strStorageUnit)) COLLATE Latin1_General_CI_AS
+			OR su.strDescription COLLATE Latin1_General_CI_AS = RTRIM(LTRIM(x.strStorageUnit)) COLLATE Latin1_General_CI_AS
+		)
 WHERE 
 	x.strImportIdentifier = @strIdentifier
 
