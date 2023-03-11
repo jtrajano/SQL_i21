@@ -538,6 +538,7 @@ BEGIN TRY
 				FROM tblICInventoryTransfer IT
 				JOIN tblICInventoryTransferDetail ITD ON IT.intInventoryTransferId = ITD.intInventoryTransferId
 				WHERE IT.strERPTransferNo =@strNotes 
+					AND ITD.intLotId=@intLotId
 					
 				IF @intInventoryTransferId IS NULL AND @dblQuantity <0
 				BEGIN
