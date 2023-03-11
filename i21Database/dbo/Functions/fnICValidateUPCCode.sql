@@ -6,7 +6,9 @@ AS
 BEGIN 
 	DECLARE @strUPCCode AS VARCHAR(50)   
 
-	SET @strUPCCode = CASE WHEN LEN(@UPC) = 10 OR (LEN(@UPC) IN (11, 13) AND dbo.fnICValidateCheckDigitIfExists('0' + @UPC) = 0) 
+	SET @strUPCCode = CASE WHEN @UPC LIKE '%.%'
+						THEN @UPC
+					  WHEN LEN(@UPC) = 10 OR (LEN(@UPC) IN (11, 13) AND dbo.fnICValidateCheckDigitIfExists('0' + @UPC) = 0) 
 						THEN @UPC + CAST(dbo.fnICCalculateCheckDigit(@UPC) AS VARCHAR(1))
 					  WHEN LEN(@UPC) = 12 AND dbo.fnICValidateCheckDigitIfExists(@UPC) = 0
 						THEN LEFT(@UPC, 11) + CAST(dbo.fnICCalculateCheckDigit(LEFT(@UPC, 11)) AS VARCHAR(1))
