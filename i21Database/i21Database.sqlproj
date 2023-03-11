@@ -1315,6 +1315,8 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
     <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelDeliveries.sql" />
+    <Build Include="dbo\Views\vyuSTEodFuelTanks.sql" />
+    <Build Include="dbo\Views\vyuSTGetFuelDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
