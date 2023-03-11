@@ -62,7 +62,18 @@
 			join tblCTContractDetail cd on cd.intContractDetailId = cc.intContractDetailId
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			join tblEMEntity en on en.intEntityId = cc.intVendorId
-			left join tblAPBillDetail bd on bd.intContractHeaderId = ch.intContractHeaderId and bd.intContractDetailId = cd.intContractDetailId and bd.intItemId = cc.intItemId
+			--left join tblAPBillDetail bd on bd.intContractHeaderId = ch.intContractHeaderId and bd.intContractDetailId = cd.intContractDetailId and bd.intItemId = cc.intItemId
+			left join (
+				select
+					b.intEntityVendorId
+					,bd.intContractHeaderId
+					,bd.intContractDetailId
+					,bd.intBillDetailId
+					,bd.intItemId
+				from
+					tblAPBill b
+					join tblAPBillDetail bd on bd.intBillId = b.intBillId
+			) bd on bd.intContractHeaderId = ch.intContractHeaderId and bd.intContractDetailId = cd.intContractDetailId and bd.intItemId = cc.intItemId and bd.intEntityVendorId = cc.intVendorId
 			left join tblSMCurrency cu on cu.intCurrencyID = cc.intCurrencyId
 			left join tblICItemUOM uom on uom.intItemUOMId = cc.intItemUOMId
 			left join tblICItemUOM qu on qu.intItemUOMId = cd.intItemUOMId
