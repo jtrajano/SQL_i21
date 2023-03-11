@@ -217,7 +217,7 @@ ISNULL((
 			AND stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
-),FORMAT(GETDATE(), 'd','us')) AS dtmCheckoutProcessDate, 
+),GETDATE()) AS dtmCheckoutProcessDate,
 ISNULL((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
