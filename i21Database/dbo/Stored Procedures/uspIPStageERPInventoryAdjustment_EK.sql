@@ -188,6 +188,20 @@ BEGIN TRY
 					,OrderCompleted INTEGER
 					,ExpiryDate DATETIME
 					)
+			ORDER BY Notes,CONVERT(NUMERIC(18,6),Quantity)
+
+			UPDATE b
+			SET strCompanyLocation = a.strCompanyLocation
+				,strStorageLocation = a.strStorageLocation
+			FROM tblIPInventoryAdjustmentStage a
+			JOIN tblIPInventoryAdjustmentStage b ON a.strNotes = b.strNotes
+				AND a.strLotNo = b.strLotNo
+			WHERE a.intTransactionTypeId = 12
+				AND b.intTransactionTypeId = 12
+				AND a.dblQuantity < 0
+				AND b.dblQuantity > 0
+				AND b.strCompanyLocation = ''
+				AND b.strStorageLocation = ''
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ','
 			FROM @tblIPLot
