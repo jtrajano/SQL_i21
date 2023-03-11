@@ -23,8 +23,8 @@ SELECT intLocationLeadTimeId
 	 , strShippingLine
 	 , strOriginCode = C.strISOCode
 	 , strReceivingPlantCode = CompanyLocation.strLocationNumber
-	 , strPortOfDispatchCity = D.strCity
-	 , strPortOfArrivalCity	= A.strCity
+	 , strPortOfDispatchCity = D.strVAT
+	 , strPortOfArrivalCity	= A.strVAT
 FROM tblMFLocationLeadTime AS LeadTime
 INNER JOIN tblSMCompanyLocation AS CompanyLocation ON LeadTime.intBuyingCenterId = CompanyLocation.intCompanyLocationId
 INNER JOIN tblSMCompanyLocationSubLocation AS SubLocation ON SubLocation.intCompanyLocationSubLocationId=LeadTime.intReceivingStorageLocation
