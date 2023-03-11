@@ -262,7 +262,7 @@ SET strUPCA = CASE WHEN LEN(dbo.fnICValidateUPCCode(strLongUPCCode)) IN (10, 11,
 					THEN RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 12)
 					ELSE NULL
 					END
-WHERE strUPCA IS NULL AND strLongUPCCode IS NOT NULL AND ISNUMERIC(strLongUPCCode) = 1
+WHERE strUPCA IS NULL AND strLongUPCCode IS NOT NULL AND ISNUMERIC(strLongUPCCode) = 1 AND strLongUPCCode NOT LIKE '%.%'
 AND dbo.fnICValidateUPCCode(strLongUPCCode) NOT IN (
 	SELECT strLongUPCCode FROM (
 		SELECT
@@ -282,7 +282,7 @@ SET strSCC14 = CASE WHEN LEN(dbo.fnICValidateUPCCode(strLongUPCCode)) IN (10, 11
 					THEN RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 14)
 					ELSE NULL
 					END
-WHERE strSCC14 IS NULL AND strLongUPCCode IS NOT NULL AND ISNUMERIC(strLongUPCCode) = 1
+WHERE strSCC14 IS NULL AND strLongUPCCode IS NOT NULL AND ISNUMERIC(strLongUPCCode) = 1 AND strLongUPCCode NOT LIKE '%.%'
 AND dbo.fnICValidateUPCCode(strLongUPCCode) NOT IN (
 	SELECT strLongUPCCode FROM (
 		SELECT
