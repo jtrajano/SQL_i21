@@ -1564,6 +1564,8 @@
     <Build Include="dbo\Tables\tblGRGIICustomerStorage.sql" />
     <Build Include="dbo\Tables\tblGRGIIPhysicalInventory.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelDeliveries.sql" />
+    <Build Include="dbo\Views\vyuSTEodFuelTanks.sql" />
+    <Build Include="dbo\Views\vyuSTGetFuelDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
