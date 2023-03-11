@@ -263,14 +263,14 @@ SET strUPCA = CASE WHEN LEN(dbo.fnICValidateUPCCode(strLongUPCCode)) IN (10, 11,
 					ELSE NULL
 					END
 WHERE strUPCA IS NULL AND strLongUPCCode IS NOT NULL AND ISNUMERIC(strLongUPCCode) = 1 AND strLongUPCCode NOT LIKE '%.%'
-AND dbo.fnICValidateUPCCode(strLongUPCCode) NOT IN (
+AND RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 12) NOT IN (
 	SELECT strLongUPCCode FROM (
 		SELECT
-			dbo.fnICValidateUPCCode(strLongUPCCode) AS strLongUPCCode
+			RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 12) AS strLongUPCCode
 		FROM
 			tblICItemUOM
 		GROUP BY
-			dbo.fnICValidateUPCCode(strLongUPCCode)
+			RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 12)
 		HAVING 
 			COUNT(*) > 1
 	) sc WHERE strLongUPCCode IS NOT NULL
@@ -283,14 +283,14 @@ SET strSCC14 = CASE WHEN LEN(dbo.fnICValidateUPCCode(strLongUPCCode)) IN (10, 11
 					ELSE NULL
 					END
 WHERE strSCC14 IS NULL AND strLongUPCCode IS NOT NULL AND ISNUMERIC(strLongUPCCode) = 1 AND strLongUPCCode NOT LIKE '%.%'
-AND dbo.fnICValidateUPCCode(strLongUPCCode) NOT IN (
+AND RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 14) NOT IN (
 	SELECT strLongUPCCode FROM (
 		SELECT
-			dbo.fnICValidateUPCCode(strLongUPCCode) AS strLongUPCCode
+			RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 14) AS strLongUPCCode
 		FROM
 			tblICItemUOM
 		GROUP BY
-			dbo.fnICValidateUPCCode(strLongUPCCode)
+			RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 14)
 		HAVING 
 			COUNT(*) > 1
 	) sc WHERE strLongUPCCode IS NOT NULL
