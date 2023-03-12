@@ -9,6 +9,10 @@
 )
 AS
 BEGIN
+IF @dblTBSQuantity=0
+BEGIN
+	SELECT @dblTBSQuantity=dblQuantity  FROM tblMFWorkOrderInputLot WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+END
 /* Confirm Transaction. */
 IF @type = 'Confirm'
 	BEGIN

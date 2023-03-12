@@ -389,12 +389,14 @@ BEGIN TRY
 	DECLARE @intInputLotId INT
 	DECLARE @intInputItemId INT
 	DECLARE @strInputLotNumber NVARCHAR(50)
+			,@ysnToleranceCheckOnBlendOutputItem BIT
 
 	SELECT @intLocationId = intLocationId
 	FROM @tblBlendSheet
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 		,@ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
+		,@ysnToleranceCheckOnBlendOutputItem=IsNULL(ysnToleranceCheckOnBlendOutputItem,0) 
 	FROM tblMFCompanyPreference
 
 	INSERT INTO @tblLotSummary (
@@ -827,7 +829,7 @@ BEGIN TRY
 		SELECT @intMinMissingItem = Min(intRowNo)
 		FROM @tblPreItem
 
-		WHILE (@intMinMissingItem IS NOT NULL)
+		WHILE (@intMinMissingItem IS NOT NULL) AND @ysnToleranceCheckOnBlendOutputItem=0
 		BEGIN
 			SELECT @dblLowerToleranceQty = NULL
 				,@dblUpperToleranceQty = NULL

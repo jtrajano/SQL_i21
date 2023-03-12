@@ -912,23 +912,23 @@ BEGIN TRY
 				WHEN PRT.strPropertyName = 'Appearance' AND isNumeric(@strAppearance)=1 
 					THEN @strAppearance
 				WHEN PRT.strPropertyName = 'Appearance' AND isNumeric(@strAppearance)=0
-					THEN PPV.dblPinpointValue
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
 				WHEN PRT.strPropertyName = 'Hue' AND isNumeric(@strHue)=1 
 					THEN @strHue
 					WHEN PRT.strPropertyName = 'Hue' AND isNumeric(@strHue)=0
-					THEN PPV.dblPinpointValue
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
 				WHEN PRT.strPropertyName = 'Intensity' AND isNumeric(@strIntensity)=1 
 					THEN @strIntensity
 					WHEN PRT.strPropertyName = 'Intensity' AND isNumeric(@strIntensity)=0 
-					THEN PPV.dblPinpointValue
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
 				WHEN PRT.strPropertyName = 'Taste' AND isNumeric(@strTaste)=1 
 					THEN @strTaste
 					WHEN PRT.strPropertyName = 'Taste' AND isNumeric(@strTaste)=0
-					THEN PPV.dblPinpointValue
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
 				WHEN PRT.strPropertyName = 'Mouth Feel' AND isNumeric(@strMouthFeel)=1 
 					THEN @strMouthFeel
 					WHEN PRT.strPropertyName = 'Mouth Feel' AND isNumeric(@strMouthFeel)=0 
-					THEN PPV.dblPinpointValue
+					THEN Convert(nvarchar(50),PPV.dblPinpointValue)
 				END
 			,@dtmDateCreated
 			,''
