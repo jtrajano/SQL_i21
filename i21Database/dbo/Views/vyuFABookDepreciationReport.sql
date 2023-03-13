@@ -32,3 +32,4 @@ LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId
 LEFT JOIN tblGLAccount GLDepreciation ON GLDepreciation.intAccountId = FA.intDepreciationAccountId        
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId        
 LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId
+LEFT JOIN tblFAFixedAssetTaxJurisdiction TaxJurisdiction ON TaxJurisdiction.intAssetTaxJurisdictionId = FA.intAssetTaxJurisdictionId
