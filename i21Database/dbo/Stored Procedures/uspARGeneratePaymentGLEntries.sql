@@ -449,8 +449,8 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intWriteOffAccountDetailId]
-		,[dblDebit]                     = CASE WHEN P.[dblBaseWriteOffAmount] > 0 THEN P.[dblBaseWriteOffAmount] ELSE 0 END
-		,[dblCredit]                    = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblBaseWriteOffAmount]) ELSE 0 END
+		,[dblDebit]                     = CASE WHEN P.[dblAdjustedBaseWriteOffAmount] > 0 THEN P.[dblAdjustedBaseWriteOffAmount] ELSE 0 END
+		,[dblCredit]                    = CASE WHEN P.[dblAdjustedBaseWriteOffAmount] < 0 THEN ABS(P.[dblAdjustedBaseWriteOffAmount]) ELSE 0 END
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Write Off for ' + P.strTransactionNumber
@@ -471,9 +471,9 @@ BEGIN
 		,[strTransactionForm]           = @SCREEN_NAME
 		,[strModuleName]                = @MODULE_NAME
 		,[intConcurrencyId]             = 1
-		,[dblDebitForeign]              = CASE WHEN P.[dblWriteOffAmount] > 0 THEN P.[dblBaseWriteOffAmount] ELSE 0 END
+		,[dblDebitForeign]              = CASE WHEN P.[dblBaseWriteOffAmount] > 0 THEN P.[dblWriteOffAmount] ELSE 0 END
 		,[dblDebitReport]               = CASE WHEN P.[dblBaseWriteOffAmount] > 0 THEN P.[dblBaseWriteOffAmount] ELSE 0 END
-		,[dblCreditForeign]             = CASE WHEN P.[dblWriteOffAmount] < 0 THEN ABS(P.[dblWriteOffAmount]) ELSE 0 END
+		,[dblCreditForeign]             = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblWriteOffAmount]) ELSE 0 END
 		,[dblCreditReport]              = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblBaseWriteOffAmount]) ELSE 0 END
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
 		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
@@ -748,8 +748,12 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intGainLossAccount]
-		,[dblDebit]                     = CASE WHEN (ISNULL((( P.[dblBasePayment] - ((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN @ZeroDecimal ELSE ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal))) END
-		,[dblCredit]                    = CASE WHEN (ISNULL(( P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal))) ELSE @ZeroDecimal END
+		,[dblDebit]                     = CASE WHEN (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] > P.[dblOriginalBaseAmountDue]) THEN ABS(P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] - P.[dblOriginalBaseAmountDue])
+											WHEN (P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) < (P.[dblBasePayment] + P.[dblBaseWriteOffAmount]) THEN ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount])) 
+											ELSE @ZeroDecimal END
+		,[dblCredit]                    = CASE WHEN (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] < P.[dblOriginalBaseAmountDue]) THEN ABS(P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] - P.[dblOriginalBaseAmountDue])
+											WHEN (P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) < (P.[dblBasePayment] + P.[dblBaseWriteOffAmount]) THEN @ZeroDecimal 
+											ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount])) END
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Payment for ' + P.strTransactionNumber
@@ -771,9 +775,13 @@ BEGIN
 		,[strModuleName]                = @MODULE_NAME
 		,[intConcurrencyId]             = 1
 		,[dblDebitForeign]              = @ZeroDecimal
-		,[dblDebitReport]               = CASE WHEN (ISNULL((( P.[dblBasePayment] - ((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN @ZeroDecimal ELSE ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal))) END
+		,[dblDebitReport]               = CASE WHEN (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] > P.[dblOriginalBaseAmountDue]) THEN ABS(P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] - P.[dblOriginalBaseAmountDue])
+											WHEN (P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) < (P.[dblBasePayment] + P.[dblBaseWriteOffAmount]) THEN ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount])) 
+											ELSE @ZeroDecimal END
 		,[dblCreditForeign]             = @ZeroDecimal
-		,[dblCreditReport]              = CASE WHEN (ISNULL(( P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal))) ELSE @ZeroDecimal END
+		,[dblCreditReport]              = CASE WHEN (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] < P.[dblOriginalBaseAmountDue]) THEN ABS(P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] - P.[dblOriginalBaseAmountDue])
+											WHEN (P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) < (P.[dblBasePayment] + P.[dblBaseWriteOffAmount]) THEN @ZeroDecimal 
+											ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount])) END
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
 		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
 		,[strRateType]                  = P.[strRateType]
@@ -792,8 +800,9 @@ BEGIN
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
-		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
-				AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
+		AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
+		AND ((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] <> P.[dblBasePayment] + P.[dblBaseWriteOffAmount])  
+				OR (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] <> P.[dblOriginalBaseAmountDue]))
 
     --CREDIT DISCOUNT
     INSERT #ARPaymentGLEntries
