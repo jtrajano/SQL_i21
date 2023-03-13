@@ -1555,6 +1555,7 @@
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Views\vyuCFSearchSiteGroupAdjustment.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
