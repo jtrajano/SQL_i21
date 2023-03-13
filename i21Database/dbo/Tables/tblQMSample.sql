@@ -241,3 +241,10 @@ ON [dbo].[tblQMSample] ([intEntityId],[intLocationId],[strRepresentLotNumber],[s
 GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_intSampleStatusId_intContractDetailId_intTypeId] ON [dbo].[tblQMSample] ([intSampleStatusId],[intContractDetailId],[intTypeId])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_Catalogue] ON [dbo].[tblQMSample] (
+	[strSaleNumber]
+	,[strRepresentLotNumber]
+	,[intLocationId]
+	,[intEntityId]
+)
+GO
