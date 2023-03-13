@@ -27,3 +27,8 @@
 	CONSTRAINT [FK_tblQMProduct_tblICLotStatus_intBondedRejectionLotStatusId] FOREIGN KEY ([intBondedRejectionLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMProduct_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblQMProduct_intProductTypeId_intProductValueId_ysnActive]
+ON [dbo].[tblQMProduct] ([intProductTypeId],[intProductValueId],[ysnActive])
+GO

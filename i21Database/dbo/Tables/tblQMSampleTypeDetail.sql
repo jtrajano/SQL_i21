@@ -16,3 +16,7 @@
 	CONSTRAINT [FK_tblQMSampleTypeDetail_tblQMSampleType] FOREIGN KEY ([intSampleTypeId]) REFERENCES [tblQMSampleType]([intSampleTypeId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblQMSampleTypeDetail_tblQMAttribute] FOREIGN KEY ([intAttributeId]) REFERENCES [tblQMAttribute]([intAttributeId]) 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblQMSampleTypeDetail_intSampleTypeId] ON [dbo].[tblQMSampleTypeDetail](intSampleTypeId)
+GO

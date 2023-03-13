@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnQMGetPropertyTestResult2] (@intTestResultId INT)
+CREATE FUNCTION [dbo].[fnQMGetPropertyTestResult2] (@intTestResultId INT)
 RETURNS TABLE
 AS RETURN
 
