@@ -1244,6 +1244,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCSProcessPaymentsForPosting.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
