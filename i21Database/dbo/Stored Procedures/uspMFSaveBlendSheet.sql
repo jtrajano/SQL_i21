@@ -251,9 +251,9 @@ BEGIN TRY
 		 , intIssuedUOMTypeId
 		 , NULLIF(ysnOverrideRecipe, '')
 		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END
-		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END	 
-		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END
-		 , CASE WHEN NULLIF(dblUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblUpperTolerance AS NUMERIC(38, 20)) END
+		 , CASE WHEN NULLIF(dblLowerTolerance, '') IS NULL THEN 0 ELSE CAST(dblLowerTolerance AS NUMERIC(38, 20)) END	 
+		 , CASE WHEN NULLIF(dblCalculatedUpperTolerance, '') IS NULL THEN 0 ELSE CAST(dblCalculatedUpperTolerance AS NUMERIC(38, 20)) END
+		 , CASE WHEN NULLIF(dblCalculatedLowerTolerance, '') IS NULL THEN 0 ELSE CAST(dblCalculatedLowerTolerance AS NUMERIC(38, 20)) END
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
 		intWorkOrderId INT
