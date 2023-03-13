@@ -89,6 +89,10 @@
     [strDriver] NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
     [intRequireTrailerId] INT NOT NULL DEFAULT(2),
 
+    
+	[ysnShowCPE] BIT NOT NULL DEFAULT(1),
+	[ysnShowGrainReceipt] BIT NOT NULL DEFAULT(1),
+
 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
