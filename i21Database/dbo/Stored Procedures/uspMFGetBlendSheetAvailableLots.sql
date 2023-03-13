@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetAvailableLots]
-	@intItemId			INT
-  , @intLocationId		INT
-  , @intRecipeItemId	INT
+	@intItemId			INT = NULL
+  , @intLocationId		INT 	 
+  , @intRecipeItemId	INT = NULL
+  , @intWorkOrderId		INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -156,6 +157,8 @@ SELECT Lot.intLotId
 	 , Batch.strLeafGrade
 	 , Batch.strTeaOrigin
 	 , Batch.strVendorLotNumber
+	 , Item.intUnitPerLayer
+	 , Item.intLayerPerPallet
 INTO #tempLot
 FROM tblICLot AS Lot
 JOIN tblICItem AS Item ON Lot.intItemId = Item.intItemId
@@ -248,6 +251,9 @@ IF @ysnEnableParentLot = 0
 			 , TemporaryLot.strTeaOrigin
 			 , TemporaryLot.strVendorLotNumber
 			 , TemporaryLot.intSales
+			 , ROUND((ISNULL((ISNULL(TemporaryLot.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(TemporaryLot.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(TemporaryLot.dblWeightPerUnit, 0) = 0 THEN 1 ELSE TemporaryLot.dblWeightPerUnit END), 0) AS dblSelectedQty
+			 , TemporaryLot.intUnitPerLayer
+			 , TemporaryLot.intLayerPerPallet
 		FROM #tempLot AS TemporaryLot 
 		LEFT JOIN @tblReservedQty AS ReservedQty ON TemporaryLot.intLotId = ReservedQty.intLotId
 	END
@@ -307,6 +313,8 @@ ELSE
 					 , TemporaryLot.strLeafGrade
 					 , TemporaryLot.strTeaOrigin
 					 , TemporaryLot.strVendorLotNumber
+					 , TemporaryLot.intUnitPerLayer
+					 , TemporaryLot.intLayerPerPallet
 				INTO #tempParentLotByStorageLocation
 				FROM #tempLot AS TemporaryLot 
 				JOIN tblICParentLot AS ParentLot on TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -342,6 +350,7 @@ ELSE
 					 , ISNULL(ReservedQty.dblReservedQty, 0) AS dblReservedQty
 					 , ISNULL((ISNULL(ParentLotStorageLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - IsNULL(ParentLotStorageLocation.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
 					 , ROUND((ISNULL((ISNULL(ParentLotStorageLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - IsNULL(ParentLotStorageLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotStorageLocation.dblWeightPerUnit,0) = 0 THEN 1 ELSE ParentLotStorageLocation.dblWeightPerUnit END), 0) AS dblAvailableUnit
+					 , ROUND((ISNULL((ISNULL(ParentLotStorageLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - IsNULL(ParentLotStorageLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotStorageLocation.dblWeightPerUnit,0) = 0 THEN 1 ELSE ParentLotStorageLocation.dblWeightPerUnit END), 0) AS dblSelectedQty
 				FROM #tempParentLotByStorageLocation AS ParentLotStorageLocation 
 				LEFT JOIN @tblReservedQty AS ReservedQty on ParentLotStorageLocation.intLotId = ReservedQty.intLotId	
 			END
@@ -399,6 +408,8 @@ ELSE
 					 , TemporaryLot.strLeafGrade
 					 , TemporaryLot.strTeaOrigin
 					 , TemporaryLot.strVendorLotNumber
+					 , TemporaryLot.intUnitPerLayer
+					 , TemporaryLot.intLayerPerPallet
 				INTO #tempParentLotByLocation
 				FROM #tempLot AS TemporaryLot
 				JOIN tblICParentLot AS ParentLot ON TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -432,6 +443,7 @@ ELSE
 					 , ISNULL(ReservedQty.dblReservedQty,0) AS dblReservedQty
 					 , ISNULL((ISNULL(ParentLotLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ParentLotLocation.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
 					 , ROUND((ISNULL((ISNULL(ParentLotLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ParentLotLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotLocation.dblWeightPerUnit, 0) = 0 THEN 1 ELSE ParentLotLocation.dblWeightPerUnit END), 0) AS dblAvailableUnit
+					 , ROUND((ISNULL((ISNULL(ParentLotLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ParentLotLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotLocation.dblWeightPerUnit, 0) = 0 THEN 1 ELSE ParentLotLocation.dblWeightPerUnit END), 0) AS dblSelectedQty
 				FROM #tempParentLotByLocation AS ParentLotLocation 
 				LEFT JOIN @tblReservedQty AS ReservedQty ON ParentLotLocation.intLotId = ReservedQty.intLotId
 			END
