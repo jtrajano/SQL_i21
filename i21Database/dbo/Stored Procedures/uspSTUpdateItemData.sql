@@ -1886,22 +1886,12 @@ BEGIN TRY
 		--ORDER BY strItemDescription, strChangeDescription ASC
 
 		SELECT DISTINCT 
-			@strGuid
-			, strLocation
+			strLocation
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
 			, strPreviewOldData AS strOldData
 			, strPreviewNewData	AS strNewData
-
-			, intItemId
-			, intItemUOMId
-			, intItemLocationId
-			, intPrimaryKeyId
-			, strTableName
-			, strTableColumnName
-			, strTableColumnDataType
-			, 1
 		FROM @tblPreview
 		WHERE ysnPreview = 1
 		ORDER BY strItemDescription, strChangeDescription ASC
