@@ -1310,7 +1310,7 @@ THEN
 											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 12)
 											ELSE NULL
 											END 							-- strUPCA
-		, CASE WHEN LEN(Source_Query.strSellingUpcNumber) IN (10, 11, 12) 
+		, CASE WHEN LEN(Source_Query.strSellingUpcNumber) IN (10, 11, 12, 13, 14, 15) 
 											THEN RIGHT('0000' + dbo.fnICValidateUPCCode(Source_Query.strSellingUpcNumber), 14)
 											ELSE NULL
 											END 							-- strSCC14
