@@ -10,7 +10,8 @@ BEGIN TRY
 	DECLARE @ErrMsg	NVARCHAR(MAX)
 
 	SELECT	BI.intItemId AS intBasisItemId,
-			BI.strItemNo AS strBasisItemNo			
+			BI.strItemNo AS strBasisItemNo,
+			intUniqueId = BI.intItemId
 
 	FROM	tblICItem			BI 	
 	WHERE	ysnBasisContract = 1
