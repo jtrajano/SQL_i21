@@ -48,7 +48,12 @@ BEGIN TRY
 			ysnValueEnable,
 			ysnOtherCurrencyEnable,
 			strItemNo,
-			strOtherCurrency
+			strOtherCurrency,
+			dblFX = null,
+			intBillExpenseId = null,
+			intCleanCostId = null,
+			intExpenseId = null,
+			ysnQuantityEnable= null
 	FROM	(
 
 				SELECT	BD.intItemId,

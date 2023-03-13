@@ -147,7 +147,7 @@ BEGIN TRY
 			 SELECT @intNewId = CAST(@CreatedIvoices AS INT)
     END
 
-    SELECT @intNewId
+    SELECT isnull(@intNewId,0)
     
     COMMIT TRAN
 END TRY
