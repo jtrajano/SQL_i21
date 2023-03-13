@@ -3,6 +3,7 @@ AS
 SELECT detail.intDeliveryDetailId        
       ,detail.intDeliveryHeaderId        
       ,detail.intLoadDetailId    
+      ,detail.intPickupDetailId
       ,detail.intItemId        
       ,item.strDescription        
       ,item.strItemNo      
