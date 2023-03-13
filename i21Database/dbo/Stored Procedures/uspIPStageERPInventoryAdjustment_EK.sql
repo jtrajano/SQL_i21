@@ -117,6 +117,10 @@ BEGIN TRY
 				,LotNo
 				,CASE 
 					WHEN TransactionType IN (
+							8
+							)
+						THEN ''
+					WHEN TransactionType IN (
 							12
 							,20
 							)
@@ -129,8 +133,8 @@ BEGIN TRY
 					ELSE (
 							CASE 
 								WHEN TransactionType = 8
-									THEN - Convert(numeric(18,6),Quantity)
-								ELSE Convert(numeric(18,6),Quantity)
+									THEN - Convert(NUMERIC(18, 6), Quantity)
+								ELSE Convert(NUMERIC(18, 6), Quantity)
 								END
 							)
 					END
@@ -141,12 +145,22 @@ BEGIN TRY
 					ELSE (
 							CASE 
 								WHEN TransactionType = 8
-									THEN - Convert(numeric(18,6),NetWeight)
-								ELSE Convert(numeric(18,6),NetWeight)
+									THEN - Convert(NUMERIC(18, 6), NetWeight)
+								ELSE Convert(NUMERIC(18, 6), NetWeight)
 								END
 							)
 					END
-				,NetWeightUOM
+				,CASE 
+					WHEN TransactionType = 12
+						AND NewLocation = 1711
+						AND NetWeightUOM = 'KG'
+						THEN 'LB'
+					WHEN TransactionType = 12
+						AND NewLocation <> 1711
+						AND NetWeightUOM = 'LB'
+						THEN 'KG'
+					ELSE NetWeightUOM
+					END
 				,Status
 				,ReasonCode
 				,Notes
@@ -190,12 +204,28 @@ BEGIN TRY
 					,OrderCompleted INTEGER
 					,ExpiryDate DATETIME
 					)
-			ORDER BY Notes,CONVERT(NUMERIC(18,6),Quantity)
+			ORDER BY TransactionType DESC
+				,OrderNo
+				,Notes
+				,CONVERT(NUMERIC(18, 6), Quantity)
 
 			UPDATE b
 			SET strCompanyLocation = a.strCompanyLocation
 				,strStorageLocation = a.strStorageLocation
 			FROM tblIPInventoryAdjustmentStage a
+			JOIN tblIPInventoryAdjustmentStage b ON a.strNotes = b.strNotes
+				AND a.strLotNo = b.strLotNo
+			WHERE a.intTransactionTypeId = 12
+				AND b.intTransactionTypeId = 12
+				AND a.dblQuantity < 0
+				AND b.dblQuantity > 0
+				AND b.strCompanyLocation = ''
+				AND b.strStorageLocation = ''
+
+			UPDATE b
+			SET strCompanyLocation = a.strCompanyLocation
+				,strStorageLocation = a.strStorageLocation
+			FROM tblIPInventoryAdjustmentArchive  a
 			JOIN tblIPInventoryAdjustmentStage b ON a.strNotes = b.strNotes
 				AND a.strLotNo = b.strLotNo
 			WHERE a.intTransactionTypeId = 12
@@ -234,39 +264,6 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
-
-			INSERT INTO dbo.tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedBy
-				,(
-					CASE 
-						WHEN TransactionTypeId = 8 --(Consume)
-							THEN 11
-						WHEN TransactionTypeId = 10 --Inventory Adjustment - Quantity
-							THEN 15
-						WHEN TransactionTypeId = 20 --Inventory Adjustment - Lot Move
-							THEN 14
-						END
-					) AS intMessageTypeId
-				,0 AS intStatusId
-				,@ErrMsg AS strStatusText
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo BIGINT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
-					,TransactionTypeId INT
-					)
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (
