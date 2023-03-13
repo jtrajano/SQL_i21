@@ -262,7 +262,10 @@
 	,SCT.ysnFixRounding
 	,SCT.ysnTicketInTransit
 	,SCT.ysnTicketApplied
-FROM tblSCTicket SCT WITH(NOLOCK)
+	
+	,SCSetup.ysnShowCPE
+	,SCSetup.ysnShowGrainReceipt
+  FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag

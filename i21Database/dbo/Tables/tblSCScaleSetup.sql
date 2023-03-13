@@ -91,6 +91,9 @@
 
     [intISiteDefaultGradeReadingView] INT NOT NULL DEFAULT(0), 
     [intISiteDefaultTrucksInYardView] INT NOT NULL DEFAULT(0), 
+    
+	[ysnShowCPE] BIT NOT NULL DEFAULT(1),
+	[ysnShowGrainReceipt] BIT NOT NULL DEFAULT(1),
 
 
     [intConcurrencyId] INT NULL, 
