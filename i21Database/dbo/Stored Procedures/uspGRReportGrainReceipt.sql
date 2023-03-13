@@ -103,6 +103,7 @@ DECLARE  @strCompanyName NVARCHAR(500)
 
  ,@intCommodityId = SC.intCommodityId
  ,@strDeliveryLocation = COMPANY_LOCATION.strLocationName
+ ,@strReceiptNumber = CASE WHEN SS.ysnUseTicketNoInGrainReceipt = 1 THEN SC.strTicketNumber ELSE @strReceiptNumber END
  FROM   tblICUnitMeasure UnitMeasure  
  JOIN   tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=UnitMeasure.intUnitMeasureId  
  JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId  
