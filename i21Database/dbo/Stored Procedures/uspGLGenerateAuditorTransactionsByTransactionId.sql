@@ -84,6 +84,10 @@ BEGIN
                 , strCurrency
                 , dblDebit = SUM(ISNULL(dblDebit, 0))
                 , dblCredit = SUM(ISNULL(dblCredit, 0))
+                , dblDebitUnit = SUM(ISNULL(dblDebitUnit, 0))
+                , dblCreditUnit = SUM(ISNULL(dblCreditUnit, 0))
+                , dblSourceUnitDebit = SUM(ISNULL(dblSourceUnitDebit,0))
+                , dblSourceUnitCredit = SUM(ISNULL(dblSourceUnitCredit,0))
                 , dblDebitForeign = SUM(ISNULL(dblDebitForeign, 0))
                 , dblCreditForeign = SUM(ISNULL(dblCreditForeign, 0))
                 , dblAmount = (SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)))
@@ -125,6 +129,7 @@ BEGIN
                     , strBatchId
                     , strCode
                     , strTransactionType
+                    , strModuleName 
                     , strTransactionForm
                     , strReference
                     , strDocument
@@ -170,6 +175,7 @@ BEGIN
                     , strBatchId
                     , strCode
                     , strTransactionType
+                    , strModuleName 
                     , strTransactionForm
                     , strReference
                     , strDocument
@@ -211,6 +217,10 @@ BEGIN
                     , intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit 
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblTotal
@@ -228,6 +238,10 @@ BEGIN
                     , @intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit 
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblAmount

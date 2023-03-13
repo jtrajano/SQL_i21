@@ -29,7 +29,9 @@ AS
 				account.intUnnaturalAccountId,
 				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId,
 				account.intLocationSegmentId,
-				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId
+				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId,
+				lobSegment.strCode COLLATE Latin1_General_CI_AS strLOBSegmentId,
+				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId
 FROM            dbo.tblGLAccount account 
 				CROSS APPLY (
 					SELECT 
@@ -53,6 +55,8 @@ FROM            dbo.tblGLAccount account
 				LEFT JOIN dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
 				LEFT JOIN dbo.tblGLAccount unnaturalAccount on unnaturalAccount.intAccountId = account.intUnnaturalAccountId
 				LEFT JOIN dbo.tblGLAccountSegment locationSegment ON locationSegment.intAccountSegmentId = account.intLocationSegmentId
+				LEFT JOIN dbo.tblGLAccountSegment lobSegment ON lobSegment.intAccountSegmentId = account.intLOBSegmentId
+				LEFT JOIN dbo.tblGLAccountSegment companySegment ON locationSegment.intAccountSegmentId = account.intCompanySegmentId
 GO
 
 

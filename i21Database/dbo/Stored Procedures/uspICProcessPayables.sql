@@ -358,7 +358,14 @@ SET ANSI_WARNINGS ON
 
 	IF @ysnPost = 1
 	BEGIN
-		EXEC dbo.uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
+		IF @intReceiptId IS NOT NULL
+		BEGIN
+			EXEC uspAPReverseVoucherPayable @voucherPayable, @voucherPayableTax, 1, @intEntityUserSecurityId
+		END
+		ELSE
+		BEGIN
+			EXEC dbo.uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
+		END		
 	END
 	
 	ELSE IF @ysnPost = 0 
@@ -367,8 +374,14 @@ SET ANSI_WARNINGS ON
 		_Retry: 
 		
 		BEGIN TRY 		
-			--EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
-			EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intShipmentId, NULL, NULL, NULL, @intEntityUserSecurityId
+			IF @intReceiptId IS NOT NULL
+			BEGIN
+				EXEC uspAPReverseVoucherPayable @voucherPayable, @voucherPayableTax, 0, @intEntityUserSecurityId
+			END
+			ELSE
+			BEGIN 
+				EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intShipmentId, NULL, NULL, NULL, @intEntityUserSecurityId
+			END
 		END TRY 
 		BEGIN CATCH					
 			DECLARE @error INT, @message VARCHAR(4000), @xstate INT 

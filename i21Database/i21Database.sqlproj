@@ -8347,7 +8347,7 @@
     <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountSegmentId.sql" />
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
     <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
     <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
@@ -10822,6 +10822,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
+    <Build Include="dbo\Functions\fnGLGetSegmentAccount.sql" />
     <Build Include="dbo\Functions\fnGLCheckScale.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />

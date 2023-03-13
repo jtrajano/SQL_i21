@@ -65,7 +65,7 @@ BEGIN TRY
 					tblCTContractDetail CD
 					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
 					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
+					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)) AND @intType = 1
 	BEGIN
 		DECLARE @strContractNumber NVARCHAR(100)
 		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
@@ -374,7 +374,7 @@ BEGIN TRY
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadContainerId = LWC.intLoadContainerId
-		INNER JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		WHERE L.intLoadId = @intLoadId
 			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
 

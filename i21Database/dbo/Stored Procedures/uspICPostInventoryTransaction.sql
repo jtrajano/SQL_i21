@@ -233,11 +233,12 @@ BEGIN
 				ON accountIdInTransit.intAccountId = glAccountIdInTransit.intAccountId
 
 	WHERE	i.intItemId = @intItemId
-			AND @intItemId IS NOT NULL
+			--AND @intItemId IS NOT NULL
 			AND @intItemLocationId IS NOT NULL
 			AND (
-				(ISNULL(@dblQty, 0) <> 0 AND @intItemUOMId IS NOT NULL)
-				OR (ISNULL(@dblQty, 0) = 0 AND ISNULL(@dblValue, 0) <> 0)
+				ISNULL(@dblQty, 0) <> 0 
+				OR ISNULL(@dblValue, 0) <> 0
+				OR @intTransactionTypeId IN (26) -- Allow zero qty and zero cost for cost adjustments
 			)
 
 	SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();

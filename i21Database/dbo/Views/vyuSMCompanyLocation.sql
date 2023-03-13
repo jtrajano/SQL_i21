@@ -34,6 +34,8 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.strOregonFacilityNumber 
 ,compLoc.strVendorRefNoPrefix
 ,compLoc.strVatNo
+,compLoc.strFLOID
+,compLoc.strBioINSPECTANo
 ,compLoc.strOutOfStockWarning
 ,compLoc.strLotOverdrawnWarning
 ,compLoc.strDefaultCarrier

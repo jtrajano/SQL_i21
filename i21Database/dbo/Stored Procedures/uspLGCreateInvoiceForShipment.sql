@@ -435,7 +435,7 @@ DECLARE
 		WHERE L.intLoadId = @intLoadId
 
 	ELSE
-		IF(@intPricingTypeId = 2)
+		IF(@intPricingTypeId = 2 AND @intType = 1)
 		BEGIN
 			INSERT INTO #tmpLGContractPrice
 			EXEC uspCTGetContractPrice @intContractHeaderId,@intContractDetailId, @dblQty, 'Invoice'

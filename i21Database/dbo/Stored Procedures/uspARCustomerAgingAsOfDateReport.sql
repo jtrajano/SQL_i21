@@ -412,6 +412,7 @@ WHERE ysnPosted = 1
 	)
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+	AND I.strType <> 'Tax Adjustment'
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN

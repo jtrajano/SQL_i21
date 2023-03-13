@@ -197,6 +197,9 @@ BEGIN TRY
 
 	IF @RowState  = 'Added'
 	BEGIN
+
+		declare @strContractNumber nvarchar(50);
+		select @strContractNumber = strContractNumber from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
 		--IF NOT EXISTS(SELECT * FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId)
 		--BEGIN
 		--	SET @ErrMsg = 'Concurrency Id is missing while creating contract.'
@@ -209,67 +212,67 @@ BEGIN TRY
 		END
 		IF	@intNewStatusId IS NULL
 		BEGIN
-			SET @ErrMsg = 'Contract status is missing while creating contract.'
+			SET @ErrMsg = 'Contract status is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intContractSeq IS NULL
 		BEGIN
-			SET @ErrMsg = 'Sequence number is missing while creating contract.'
+			SET @ErrMsg = 'Sequence number is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intNewCompanyLocationId IS NULL
 		BEGIN
-			SET @ErrMsg = 'Location is missing while creating contract.'
+			SET @ErrMsg = 'Location is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@dtmNewStartDate IS NULL
 		BEGIN
-			SET @ErrMsg = 'Start date is missing while creating contract.'
+			SET @ErrMsg = 'Start date is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@dtmNewEndDate IS NULL
 		BEGIN
-			SET @ErrMsg = 'End date is missing while creating contract.'
+			SET @ErrMsg = 'End date is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intNewItemId IS NULL
 		BEGIN
-			SET @ErrMsg = 'Item is missing while creating contract.'
+			SET @ErrMsg = 'Item is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intNewItemUOMId IS NULL
 		BEGIN
-			SET @ErrMsg = 'UOM is missing while creating contract.'
+			SET @ErrMsg = 'UOM is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = @intNewItemId AND intItemUOMId = @intNewItemUOMId)
 		BEGIN
-			SET @ErrMsg = 'Combination of item id and UOM id is not matching.'
+			SET @ErrMsg = 'Combination of item id and UOM id is not matching for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@dblNewQuantity IS NULL
 		BEGIN
-			SET @ErrMsg = 'Quantity is missing while creating contract.'
+			SET @ErrMsg = 'Quantity is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intNewPricingTypeId IS NULL
 		BEGIN
-			SET @ErrMsg = 'Pricing type is missing while creating contract.'
+			SET @ErrMsg = 'Pricing type is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intNewPricingTypeId = 5 AND @intNewScheduleRuleId IS NULL
 		BEGIN
-			SET @ErrMsg = 'Storage Schedule is missing while creating contract.'
+			SET @ErrMsg = 'Storage Schedule is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intCreatedById IS NULL
 		BEGIN
-			SET @ErrMsg = 'Created by is missing while creating contract.'
+			SET @ErrMsg = 'Created by is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@dtmCreated IS NULL
 		BEGIN
-			SET @ErrMsg = 'Created date is missing while creating contract.'
+			SET @ErrMsg = 'Created date is missing while creating contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END		
 		-- IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
@@ -279,12 +282,12 @@ BEGIN TRY
 		-- END
 		IF	@dblNewQuantity > 9999999999.999999
 		BEGIN
-			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999.'
+			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999 for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		IF	@intNewNoOfLoad > 99999
 		BEGIN
-			SET @ErrMsg = 'No Of Load cannot be greater than 99999.'
+			SET @ErrMsg = 'No Of Load cannot be greater than 99999 for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 		
@@ -298,7 +301,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @ErrMsg = strContractItemName FROM tblICItemContract WHERE intItemContractId = @intNewItemContractId
 					SET @ErrMsg = REPLACE(@ErrMsg,'%','%%')
-					SET @ErrMsg = 'Contract Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					SET @ErrMsg = 'Contract Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive in contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 					RAISERROR(@ErrMsg,16,1)
 				END
 			END
@@ -308,7 +311,7 @@ BEGIN TRY
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId AND ISNULL(ysnExpired,0) = 0)
 				BEGIN
 					SELECT @ErrMsg = strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId = @intNewFutureMonthId
-					SET @ErrMsg = 'Future Month ' + ISNULL(@ErrMsg,'selected') + ' is expired.'
+					SET @ErrMsg = 'Future Month ' + ISNULL(@ErrMsg,'selected') + ' is expired for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 					RAISERROR(@ErrMsg,16,1)
 				END
 			END
@@ -320,7 +323,7 @@ BEGIN TRY
 				IF ISNULL(@strEntityName, '') = ''
 				BEGIN
 					SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewProducerId
-					SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 					RAISERROR(@ErrMsg,16,1)
 				END
 			END
@@ -332,7 +335,7 @@ BEGIN TRY
 				IF ISNULL(@strEntityName, '') = ''
 				BEGIN
 					SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShipperId
-					SET @ErrMsg = 'Shipper ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					SET @ErrMsg = 'Shipper ' + ISNULL(@ErrMsg,'selected') + ' is inactive for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 					RAISERROR(@ErrMsg,16,1)
 				END
 			END
@@ -344,7 +347,7 @@ BEGIN TRY
 				IF ISNULL(@strEntityName, '') = ''
 				BEGIN
 					SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intNewShippingLineId
-					SET @ErrMsg = 'Shipping Line ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+					SET @ErrMsg = 'Shipping Line ' + ISNULL(@ErrMsg,'selected') + ' is inactive for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 					RAISERROR(@ErrMsg,16,1)
 				END
 			END
@@ -497,7 +500,7 @@ BEGIN TRY
 			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId AND SL.intSubLocationId = @intNewSubLocationId
 		)
 		BEGIN
-			SET @ErrMsg = @strSubLocationName + ' is not configured for Item '+@strItemNo+'.'
+			SET @ErrMsg = @strSubLocationName + ' is not configured for Item '+@strItemNo+' in contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
 	END
@@ -520,7 +523,7 @@ BEGIN TRY
 					BEGIN
 						SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
 						SELECT @ErrMsg = 'Phased Out item ' + @ErrMsg + ' has a stock of ' + dbo.fnRemoveTrailingZeroes(@dblUnitOnHand) + ' ' + @strUnitMeasure + '. ' +
-						'Which is insufficient to save sequence of ' + dbo.fnRemoveTrailingZeroes(@dblNewQuantity) + ' ' + @strUnitMeasure + '. '
+						'Which is insufficient to save sequence of ' + dbo.fnRemoveTrailingZeroes(@dblNewQuantity) + ' ' + @strUnitMeasure + ' for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 						RAISERROR(@ErrMsg,16,1)
 					END
 				END
@@ -528,7 +531,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				SELECT @ErrMsg = strItemNo FROM tblICItem WHERE intItemId = @intNewItemId
-				SET @ErrMsg = 'Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+				SET @ErrMsg = 'Item ' + ISNULL(@ErrMsg,'selected') + ' is inactive for contract ' + @strContractNumber + '-' + convert(nvarchar(20),@intContractSeq) + '.'
 				RAISERROR(@ErrMsg,16,1)
 			END
 		END

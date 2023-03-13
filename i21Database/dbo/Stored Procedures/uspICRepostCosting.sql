@@ -1336,7 +1336,7 @@ BEGIN
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
 				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
 
-		IF @dblAutoVariance IS NOT NULL 
+		IF @dblAutoVariance <> 0 
 		BEGIN 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId

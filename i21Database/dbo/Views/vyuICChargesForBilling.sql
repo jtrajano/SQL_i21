@@ -85,6 +85,7 @@ SELECT
 	,LG.strLoadNumber
 	,LG.intLoadDetailId
 	,intLoadShipmentId							= ReceiptCharge.intLoadShipmentId
+	,intLoadShipmentDetailId					= ReceiptCharge.intLoadShipmentDetailId
 	,intLoadShipmentCostId						= ReceiptCharge.intLoadShipmentCostId
 	,ReceiptCharge.ysnAllowVoucher
 	,ReceiptCharge.strCostMethod
@@ -288,6 +289,7 @@ SELECT
 	,LG.strLoadNumber
 	,LG.intLoadDetailId
 	,[intLoadShipmentId]						= ReceiptCharge.intLoadShipmentId
+	,[intLoadShipmentDetailId]					= ReceiptCharge.intLoadShipmentDetailId
 	,[intLoadShipmentCostId]					= ReceiptCharge.intLoadShipmentCostId
 	,ReceiptCharge.ysnAllowVoucher
 	,ReceiptCharge.strCostMethod

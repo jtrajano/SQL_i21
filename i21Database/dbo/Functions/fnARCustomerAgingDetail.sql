@@ -437,6 +437,7 @@ BEGIN
 			OR 
 			SC.intInvoiceId IS NOT NULL
 		)	
+	  AND I.strType <> 'Tax Adjustment'
 
 	IF @ysnPaidInvoice = 0
 		DELETE FROM @POSTEDINVOICES WHERE ysnPaid = 1
