@@ -30,6 +30,7 @@ BEGIN
 		,dtmPaycheckStartDate = dtmDateFrom
 		,dtmPaycheckEndDate = dtmDateTo
 		,ysnForReset = CAST(0 AS BIT)
+		,Carryover = T.dblHoursCarryover 
 	INTO #tmpEmployees
 	FROM tblPREmployee E 
 		LEFT JOIN tblPREmployeeTimeOff T
