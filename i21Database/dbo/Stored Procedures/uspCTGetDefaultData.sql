@@ -15,7 +15,7 @@
 	@intRateTypeId			INT = NULL,
 	@intInvoiceCurrencyId	INT = NULL,
 	@intLoggedInUserId		INT	= NULL,
-	@dtmEndDate				DATETIME = NULL,
+	@dtmEndDate				DATETIME2 = NULL,
 	@intBorrowingFacilityId INT = NULL,
 	@intBorrowingFacilityLimitId INT = NULL,
 	@intLoadingPointId		INT = NULL,
