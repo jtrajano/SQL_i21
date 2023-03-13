@@ -20,7 +20,13 @@ SELECT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM
 	, ItemLocation.strVendorName
 	, UOM.strUnitMeasure
 	, ItemUOM.strUpcCode
-	, dbo.fnSTRemoveCheckDigit(ISNULL(ItemUOM.strUPCA, ItemUOM.strLongUPCCode)) AS strLongUPCCode
+	, CASE WHEN LEN(ItemUOM.strLongUPCCode) IN (10, 11, 12) 
+				THEN RIGHT('0000' + dbo.fnSTRemoveCheckDigit(ISNULL(ItemUOM.strUPCA, ItemUOM.strLongUPCCode)), 11)
+			WHEN LEN(ItemUOM.strLongUPCCode) IN (10, 11, 12, 13, 14, 15) 
+				THEN RIGHT('0000' + dbo.fnSTRemoveCheckDigit(ISNULL(ItemUOM.strSCC14, ItemUOM.strLongUPCCode)), 13) 
+			ELSE ItemUOM.strLongUPCCode
+			END 
+		AS strLongUPCCode
 	, dblLastCost = CAST(ItemPricing.dblLastCost AS NUMERIC(18, 6))
 	, dblSalePrice = CAST(itemHierarchyPricing.dblSalePrice AS NUMERIC(18, 6))
 	, dblUnitQty = CAST(ItemUOM.dblUnitQty AS NUMERIC(18, 6))
@@ -61,6 +67,7 @@ WHERE ItemPricing.intItemPricingId IS NOT NULL
 AND ItemUOM.intItemUOMId IS NOT NULL
 AND ST.intStoreId IS NOT NULL
 AND Item.intCategoryId IS NOT NULL
+AND ISNULL(ItemUOM.strLongUPCCode, '') != ''
 --AND CategoryLocation.strCashRegisterDepartment IS NOT NULL
 
 --http://jira.irelyserver.com/browse/ST-1036
