@@ -92,7 +92,8 @@
     
 	[ysnShowCPE] BIT NOT NULL DEFAULT(1),
 	[ysnShowGrainReceipt] BIT NOT NULL DEFAULT(1),
-
+    [ysnUseTicketNoInCPE] BIT NOT NULL DEFAULT(0),
+	[ysnUseTicketNoInGrainReceipt] BIT NOT NULL DEFAULT(0),
 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
