@@ -75,6 +75,12 @@ DECLARE @intReturnValue AS INT
 DECLARE @dtmCreated DATETIME 
 
 IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
+	-- Exempt the Inbound Shipment and IR from Inbound Shipment 
+	AND NOT @intTransactionTypeId IN (22) 
+	AND NOT (
+		@intTransactionTypeId IN (4)
+		AND @strSourceType IN ('Inbound Shipment')
+	)
 BEGIN 	
 	-- Replace the UOM to 'Stock Unit'. 
 	-- Convert the Qty, Cost, and Sales Price to stock UOM. 
