@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspCTReportContractPrintGrain
+﻿CREATE PROCEDURE [dbo].[uspCTReportContractPrintGrainRoth]
 
 	@xmlParam NVARCHAR(MAX) = NULL  
 	
@@ -72,16 +72,16 @@ BEGIN TRY
 	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') +ISNULL(', '+@strState,'') + ISNULL('  '+@strZip,'') + CHAR(13)+CHAR(10) +  
-			ISNULL(@strCountry,'') +  CHAR(13)+CHAR(10) 
-			--ISNULL(@strCompanyPhone,'')
+			ISNULL(@strCountry,'') +  CHAR(13)+CHAR(10) + 
+			ISNULL(@strCompanyPhone,'')
 			AS	strA,
 			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
 			ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
-			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'') +  CHAR(13)+CHAR(10) 
-			--ISNULL(CASE WHEN LTRIM(RTRIM(EM.strPhone)) = '' THEN NULL ELSE LTRIM(RTRIM(EM.strPhone)) END,'') 
+			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'') +  CHAR(13)+CHAR(10) + 
+			ISNULL(CASE WHEN LTRIM(RTRIM(EM.strPhone)) = '' THEN NULL ELSE LTRIM(RTRIM(EM.strPhone)) END,'') 
 			AS	strB,
 			CH.dtmContractDate,
 			CH.strContractNumber,
@@ -141,4 +141,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-GO
