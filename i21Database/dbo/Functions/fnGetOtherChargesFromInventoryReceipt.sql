@@ -1,4 +1,4 @@
-﻿-- This function returns the total allocated other charge per 
+﻿-- This function returns the item cost based on the other charge-item allocation. 
 CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] ( 
 	@intInventoryReceiptItemId AS INT
 	,@intStockUOMId AS INT = NULL 
@@ -39,18 +39,18 @@ BEGIN
 							-- No conversion required. Other charges shares the same currency with the item.
 							CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
 
-						-- Other charge is using a foreign currency. It is also a different currency used in the receipt item. 
+						-- Other charge is a different currency compared to the currency at the receipt item. 
 						-- 1. Convert the other charge to functional currency. 
 						-- 2. Then convert the amount in functional currency to the item currency. 
 						WHEN 
-							ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId 
-							AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intReceiptCurrencyId
-							AND ISNULL(Charge.dblForexRate, 0) <> 0 							
-						THEN 
+							--ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId 
+							ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) <> @intReceiptCurrencyId
+							--AND ISNULL(Charge.dblForexRate, 0) <> 0 							
+						THEN
 							dbo.fnDivide (							
 								dbo.fnMultiply(
 									CASE WHEN ItemOtherCharges.ysnPrice = 1 THEN -ItemOtherCharges.dblAmount ELSE ItemOtherCharges.dblAmount END 
-									, ISNULL(Charge.dblForexRate, 0)
+									, ISNULL(NULLIF(Charge.dblForexRate, 0), 1)
 								) 
 								, @dblForexRate
 							) 
@@ -67,6 +67,7 @@ BEGIN
 				ON Charge.intInventoryReceiptChargeId = ItemOtherCharges.intInventoryReceiptChargeId
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 			AND ItemOtherCharges.ysnInventoryCost = 1
+
 
 	SELECT	@units = 
 					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, ri.dblNet)
