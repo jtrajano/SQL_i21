@@ -275,7 +275,7 @@ JOIN tblFABookDepreciation BD ON T.intAssetId = BD.intAssetId AND BD.intBookDepr
 OUTER APPLY (  
 	SELECT intDays FROM [dbo].[fnFAGetMonthPeriodFromDate](T.dtmPlacedInService, CASE WHEN T.intBookId = 1 THEN 1 ELSE 0 END)  
 ) MonthPeriod  
-WHERE strError IS NULL  AND T.intBookId <> 1
+WHERE strError IS NULL  AND T.intBookId <> 1 AND intMonth <> 1
 
 
 UPDATE T
@@ -340,8 +340,8 @@ WHERE strError IS NULL
 -- Add Bonus Depreciation and Section 179 to monthly depreciation on the first month only
 UPDATE A
 SET 
-	A.dblDepre = (ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0),  
-	A.dblMonth = (ISNULL(A.dblMonth, 0) + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0)
+	A.dblDepre =  ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0),
+	A.dblMonth = ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0)
 FROM  @tblAssetInfo A
 JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId AND BD.intBookDepreciationId = A.intBookDepreciationId
 JOIN @Id I ON I.intId = A.intAssetId
