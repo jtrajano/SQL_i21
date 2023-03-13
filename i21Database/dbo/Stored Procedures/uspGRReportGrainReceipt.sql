@@ -102,10 +102,12 @@ DECLARE  @strCompanyName NVARCHAR(500)
  @strScaleTicketNo = SC.strTicketNumber  
 
  ,@intCommodityId = SC.intCommodityId
+ ,@strDeliveryLocation = COMPANY_LOCATION.strLocationName
  FROM   tblICUnitMeasure UnitMeasure  
  JOIN   tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=UnitMeasure.intUnitMeasureId  
  JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId  
  JOIN   tblSCScaleSetup SS ON SS.intScaleSetupId = SC.intScaleSetupId  
+ JOIN   tblSMCompanyLocation COMPANY_LOCATION ON SS.intLocationId = COMPANY_LOCATION.intCompanyLocationId
  JOIN   tblICItemUOM ItemUOM1 ON ItemUOM1.intUnitMeasureId=SS.intUnitMeasureId AND  ItemUOM1.intItemId=SC.intItemId  
  WHERE  SC.intTicketId= @intScaleTicketId  
 
@@ -235,31 +237,7 @@ where Preference.intCommodityId = @intCommodityId
   + ' '+@strItemStockUOM AS strNetWeightInWords
   
   ,@strScaleTicketNo AS  strScaleTicketNo
-  ,strShipToLocationAddress = LTRIM(RTRIM(CASE   
-       WHEN ISNULL(ShipToLocation.strLocationName, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strLocationName + ' '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strAddress, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strAddress + CHAR(13)  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strCity, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strCity + ', '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strState, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strState + ', '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strZipCode, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strZipCode + ', '  
-       END + CASE   
-       WHEN ISNULL(ShipToLocation.strCountry, '') = ''  
-        THEN ''  
-       ELSE ShipToLocation.strCountry  
-       END)) 
+  ,strShipToLocationAddress = @strDeliveryLocation
 	   ,strContractNumber =  ISNULL(CT.strContractNumber,'')
 
      ,dblPricePerNetTonne = CAST(SC.dblUnitPrice AS DECIMAL(18,2))
