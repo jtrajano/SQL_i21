@@ -11887,6 +11887,7 @@
     <Build Include="dbo\Views\vyuARZugInvoiceDetailView.sql" />
     <Build Include="dbo\Tables\tblARPaymentBankAccount.sql" />
     <Build Include="dbo\Views\vyuQMPreEvaluationSheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
