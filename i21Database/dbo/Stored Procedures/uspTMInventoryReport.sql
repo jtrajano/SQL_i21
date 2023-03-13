@@ -60,16 +60,16 @@ BEGIN
 		where TM.intSiteId = @intSiteId
 
 		SELECT top 1 @dtmLastInventoryTime = TM.dtmDateTime FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
-		SELECT @dblGrossVolume = sum(TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		SELECT @dblNetVolume = sum(TM.dblTempCompensatedVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		SELECT @dblUllage = sum(TM.dblUllage) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
-		SELECT top 1 @dblTotalCapacity = A.dblTotalCapacity FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT top 1 @dblGrossVolume = TM.dblFuelVolume FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
+		SELECT top 1 @dblNetVolume = TM.dblTempCompensatedVolume FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
+		SELECT top 1 @dblUllage = TM.dblUllage FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
+		SELECT top 1 @dblTotalCapacity = A.dblTotalCapacity FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
 
 		--SELECT (TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId
 
 		SET @dblFullPercent = CASE WHEN @dblTotalCapacity = 0 THEN @dblGrossVolume ELSE @dblGrossVolume/@dblTotalCapacity END
 	
-		SELECT @dblWaterHeight = sum(TM.dblWaterHeight) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId 
+		SELECT @dblWaterHeight = TM.dblWaterHeight FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
 		print @strSiteNumber
 		INSERT INTO #tempInventoryReport
 					(dblFullPercent,strLocation,strSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblWaterHeight)VALUES
