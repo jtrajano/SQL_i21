@@ -1554,6 +1554,7 @@
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Views\vyuCFSearchSiteGroupAdjustment.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
