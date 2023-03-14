@@ -1602,7 +1602,7 @@ OUTER APPLY (
 		,UM.strUnitMeasure
 ) D
 OUTER APPLY (
-	SELECT SUM(dblUnits) dblUnits
+	SELECT ABS(SUM(dblUnits)) dblUnits
 		,intCommodityId
 		,intCompanyLocationId
 		,strUOM
