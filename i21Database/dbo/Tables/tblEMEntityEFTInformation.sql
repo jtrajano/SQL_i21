@@ -40,6 +40,6 @@
 
     CONSTRAINT [PK_tblEMEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC),
 	CONSTRAINT [FK_tblEMEntityEFTInformation_tblCMBank] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank]([intBankId]),
-	CONSTRAINT [FK_tblEMEntityEFTInformation_tblEMEntityEFTHeader] FOREIGN KEY ([intEntityEFTHeaderId]) REFERENCES tblEMEntityEFTHeader([intEntityEFTHeaderId])
+	CONSTRAINT [FK_tblEMEntityEFTInformation_tblEMEntityEFTHeader] FOREIGN KEY ([intEntityEFTHeaderId]) REFERENCES tblEMEntityEFTHeader([intEntityEFTHeaderId]) ON DELETE CASCADE
 );
 
