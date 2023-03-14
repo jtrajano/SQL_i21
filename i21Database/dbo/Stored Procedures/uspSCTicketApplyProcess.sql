@@ -140,7 +140,7 @@ BEGIN
 				1 as intMarker
 				, TRANSPARENCY.intType
 				,intItemId = TICKET.intItemId
-				, intItemLocationId = TICKET.intProcessingLocationId
+				, intItemLocationId = ITEM_LOCATION.intItemLocationId
 				, intItemUOMId = ITEM_UOM.intItemUOMId
 				, dtmDate = TICKET.dtmTicketDateTime
 				, dblQty = TRANSPARENCY.dblUnit
@@ -175,6 +175,9 @@ BEGIN
 				JOIN tblICItemUOM ITEM_UOM
 					ON TICKET.intItemId = ITEM_UOM.intItemId
 						AND ITEM_UOM.ysnStockUnit = 1
+				JOIN dbo.tblICItemLocation ITEM_LOCATION 
+					ON TICKET.intItemId = ITEM_LOCATION.intItemId 
+						AND TICKET.intProcessingLocationId = ITEM_LOCATION.intLocationId
 			WHERE TRANSPARENCY.intTicketId = @CURRENT_TICKET_ID 
 				AND TRANSPARENCY.intTicketApplyId = @TICKET_APPLY_ID
 				AND TRANSPARENCY.intType = 1
@@ -186,7 +189,7 @@ BEGIN
 				2 as intMarker
 				, TRANSPARENCY.intType
 				, intItemId = TICKET.intItemId
-				, intItemLocationId = TICKET.intProcessingLocationId
+				, intItemLocationId = ITEM_LOCATION.intItemLocationId
 				, intItemUOMId = ITEM_UOM.intItemUOMId
 				, dtmDate = TICKET.dtmTicketDateTime
 				, dblQty = TRANSPARENCY.dblUnit
@@ -219,6 +222,9 @@ BEGIN
 				JOIN tblICItemUOM ITEM_UOM
 					ON TICKET.intItemId = ITEM_UOM.intItemId
 						AND ITEM_UOM.ysnStockUnit = 1
+				JOIN dbo.tblICItemLocation ITEM_LOCATION 
+					ON TICKET.intItemId = ITEM_LOCATION.intItemId 
+						AND TICKET.intProcessingLocationId = ITEM_LOCATION.intLocationId
 			WHERE TRANSPARENCY.intTicketId = @CURRENT_TICKET_ID 
 				AND TRANSPARENCY.intTicketApplyId = @TICKET_APPLY_ID		
 				AND TRANSPARENCY.intType = 2
@@ -229,7 +235,7 @@ BEGIN
 				1 as intMarker
 				, TRANSPARENCY.intType
 				, intItemId = TICKET.intItemId
-				, intItemLocationId = TICKET.intProcessingLocationId
+				, intItemLocationId = ITEM_LOCATION.intItemLocationId
 				, intItemUOMId = ITEM_UOM.intItemUOMId
 				, dtmDate = TICKET.dtmTicketDateTime
 				, dblQty = TRANSPARENCY.dblUnit
@@ -262,6 +268,9 @@ BEGIN
 				JOIN tblICItemUOM ITEM_UOM
 					ON TICKET.intItemId = ITEM_UOM.intItemId
 						AND ITEM_UOM.ysnStockUnit = 1
+				JOIN dbo.tblICItemLocation ITEM_LOCATION 
+					ON TICKET.intItemId = ITEM_LOCATION.intItemId 
+						AND TICKET.intProcessingLocationId = ITEM_LOCATION.intLocationId
 			WHERE TRANSPARENCY.intTicketId = @CURRENT_TICKET_ID 
 				AND TRANSPARENCY.intTicketApplyId = @TICKET_APPLY_ID		
 				AND TRANSPARENCY.intType = 10
