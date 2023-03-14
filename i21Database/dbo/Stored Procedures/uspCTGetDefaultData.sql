@@ -260,6 +260,10 @@ BEGIN
 			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
 			WHERE	intToCurrencyId = @intCurrencyId  AND intFromCurrencyId = @intInvoiceCurrencyId
 		END
+		ELSE
+		BEGIN
+			SELECT null, null, 1
+		END
 	END
 
 	
