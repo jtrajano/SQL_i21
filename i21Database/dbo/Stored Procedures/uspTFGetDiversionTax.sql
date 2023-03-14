@@ -212,6 +212,11 @@ BEGIN TRY
 					OR Transporter.intEntityId IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 				AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 					OR Transporter.intEntityId NOT IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
+
+				AND (COALESCE(tblTRState.strStateAbbreviation, '') != COALESCE(CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN DestinationLoc.strStateProvince ELSE CustomerLoc.strState END, '') 
+				 AND ((CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN DestinationLoc.strStateProvince ELSE CustomerLoc.strState END) IS NOT NULL
+				 AND tblTRState.strStateAbbreviation IS NOT NULL
+				))
 		) tblTFTransaction
 
 		-- Distinct the Account Status Code

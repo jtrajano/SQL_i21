@@ -58,10 +58,14 @@ SELECT
 							THEN CONVERT (VARCHAR,C.dtmNextDeliveryDate, 101) 
 							ELSE CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20)) 
 						END) COLLATE Latin1_General_CI_AS
-    ,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
-						THEN ISNULL(C.dblSummerDailyUse,0.0) 
-						ELSE ISNULL(C.dblWinterDailyUse,0.0)
-					END)
+    ,dblDailyUse = CASE WHEN C.ysnRequireClock = 0 
+						THEN 0 
+						ELSE
+							(CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
+								THEN ISNULL(C.dblSummerDailyUse,0.0) 
+								ELSE ISNULL(C.dblWinterDailyUse,0.0)
+							END)
+					END
     ,F.dblPercentLeft
 	,F.dblMinimumQuantity
 	,F.dtmRequestedDate
@@ -123,8 +127,7 @@ LEFT JOIN tblSMCompanyLocationPricingLevel Q
 LEFT JOIN tblTMGlobalJulianCalendar R
 	ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 LEFT JOIN (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z ON 1=1
-WHERE H.strCurrentSeason IS NOT NULL 
-	AND vwcus_active_yn = 'Y' 
+WHERE vwcus_active_yn = 'Y' 
 	AND C.ysnActive = 1
 	   
 
