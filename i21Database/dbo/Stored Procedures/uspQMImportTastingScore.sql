@@ -114,6 +114,27 @@ BEGIN TRY
 				)
 			)
 
+	UPDATE IMP
+	SET strLogResult 	= 'Catalogue information is not available for the combination of Sale Year, Buying Center, Sale No, Catalogue Type, Supplier, Channel.'
+		,ysnSuccess 	= 0
+		,ysnProcessed 	= 1
+	FROM tblQMImportCatalogue IMP 
+	INNER JOIN tblQMSaleYear SY ON IMP.strSaleYear = SY.strSaleYear
+	INNER JOIN tblQMCatalogueType CT ON IMP.strCatalogueType = CT.strCatalogueType
+	INNER JOIN tblSMCompanyLocation CL ON IMP.strBuyingCenter = CL.strLocationName
+	INNER JOIN tblEMEntity E ON IMP.strSupplier = E.strName
+	INNER JOIN tblAPVendor V ON E.intEntityId = V.intEntityId
+	INNER JOIN tblARMarketZone MZ ON IMP.strChannel = MZ.strMarketZoneCode
+	LEFT JOIN tblQMSample S ON IMP.strSaleNumber = S.strSaleNumber 
+						AND SY.intSaleYearId = S.intSaleYearId
+						AND CT.intCatalogueTypeId = S.intCatalogueTypeId
+						AND CL.intCompanyLocationId = S.intLocationId
+						AND E.intEntityId = S.intEntityId
+						AND MZ.intMarketZoneId = S.intMarketZoneId
+	WHERE IMP.intImportLogId = @intImportLogId
+	  AND S.intSampleId IS NULL
+	  AND IMP.ysnSuccess = 1
+
 	-- End Validation
 	DECLARE @intImportType INT
 		,@intImportCatalogueId INT
