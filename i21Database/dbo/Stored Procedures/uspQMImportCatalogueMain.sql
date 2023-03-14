@@ -30,8 +30,7 @@ BEGIN TRY
 	-- Garden Mark
 	LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
 	-- Garden Geo Origin
-	LEFT JOIN (
-		tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
+	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin
 	-- Sustainability
 	LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.strDescription = IMP.strSustainability
 	-- Evaluator's Code at TBO
