@@ -74,7 +74,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 											THEN B.dblNetWeight * B.dblWeightUnitQty
 										ELSE B.dblQtyReceived * B.dblUnitQty 
 									END
-		,intTaxGroupId				= ISNULL(B.intTaxGroupId, ISNULL(EL.intTaxGroupId, CL.intTaxGroupId))
+		,intTaxGroupId				= B.intTaxGroupId
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1
