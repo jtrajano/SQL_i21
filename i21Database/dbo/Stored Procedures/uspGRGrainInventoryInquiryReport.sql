@@ -1351,7 +1351,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED INCREASE (INC DP)'
 	,'+'
-	,ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0))
+	,ISNULL(E.dblUnits,0) + ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + ISNULL(G.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0) - ISNULL(F.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
