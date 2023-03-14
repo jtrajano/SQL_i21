@@ -509,10 +509,10 @@ BEGIN TRY
 	LEFT JOIN vyuEMSearchEntityBroker BROKERS ON IMP.strBroker IS NOT NULL
 		AND BROKERS.strName = IMP.strBroker
 	-- Receiving Storage Location
+	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
 	LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND RSL.intCompanyLocationId = TBO.intCompanyLocationId
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
 	LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 		AND BATCH_MU.intLocationId = MU.intCompanyLocationId
 	-- Buyer1 Quantity UOM
