@@ -194,6 +194,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnTankRequired						= ITMNO.ysnTankRequired
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
+	 , intDispatchId                        = INV.intDispatchId
+	 , strOrderNumber                       = ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -236,6 +238,12 @@ LEFT JOIN (
 		 , strSiteNumber	= REPLACE(STR([intSiteNumber], 4), SPACE(1), '0') 
 	FROM tblTMSite  WITH(NOLOCK)
 ) CSITE ON INV.intSiteId = CSITE.intSiteID
+LEFT JOIN (
+	SELECT 
+		 intDispatchId
+		,strOrderNumber
+	FROM tblTMOrder  WITH(NOLOCK)
+) CORDER ON INV.intDispatchId = CORDER.intDispatchId
 LEFT JOIN ( 
 	SELECT intContractDetailId
 		 , strContractNumber
