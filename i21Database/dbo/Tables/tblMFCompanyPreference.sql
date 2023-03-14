@@ -114,5 +114,6 @@
 	ysnToleranceCheckOnBlendOutputItem BIT,
 	ysnShowHideExpectedParameterDefaultValue BIT,
 	ysnAllowPastDateInBlending BIT,
+	ysnShowHideHeaderDefaultValue BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
