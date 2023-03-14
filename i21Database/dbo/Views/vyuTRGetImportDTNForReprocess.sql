@@ -52,4 +52,4 @@ FROM (
 		) HasVoucher ON HasVoucher.intInventoryReceiptId = d.intInventoryReceiptId
 	WHERE ISNULL(ysnReImport, 0) = 0
 ) tbl
-WHERE  (ysnVarianceIssue = 1 AND ysnVouchered = 0)
+WHERE ysnVarianceIssue = 0 OR (ysnVarianceIssue = 1 AND ysnVouchered = 0)
