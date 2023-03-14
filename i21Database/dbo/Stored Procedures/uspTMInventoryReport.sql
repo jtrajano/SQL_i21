@@ -9,7 +9,8 @@ BEGIN
 
 	CREATE TABLE #tempInventoryReport(
 		[Id] INT IDENTITY(1, 1) primary key 
-		,[dblFullPercent] DECIMAL(18,1)
+		,[dblFullPercent] varchar(50)
+		--,[dblFullPercent] DECIMAL(18,1)
         ,[strLocation] varchar(200)
         ,[strSiteNumber] varchar(50)
         ,[strProduct] varchar(200)
@@ -73,7 +74,7 @@ BEGIN
 		print @strSiteNumber
 		INSERT INTO #tempInventoryReport
 					(dblFullPercent,strLocation,strSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblWaterHeight)VALUES
-					(@dblFullPercent,@strLocationName,@strSiteNumber,@strProduct,@dtmLastInventoryTime,@dblGrossVolume,@dblNetVolume,@dblUllage,@dblTotalCapacity,@dblWaterHeight)
+					(CAST(@dblFullPercent AS varchar),@strLocationName,@strSiteNumber,@strProduct,@dtmLastInventoryTime,@dblGrossVolume,@dblNetVolume,@dblUllage,@dblTotalCapacity,@dblWaterHeight)
 
 	 FETCH NEXT FROM DataCursor INTO @intSiteId
     END
