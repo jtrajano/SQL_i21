@@ -108,18 +108,33 @@ BEGIN
 				END
 			END
 
-			EXEC uspTRInsertLoadFromImport 
-				@intImportLoadId = @intImportLoadId
-				, @intImportDtnDetailId = @intImportDtnDetailId
-				, @intInventoryReceiptId = @intInventoryReceiptId
-				, @intTermId = @intTermId
-				, @strInvoiceNo = @strInvoiceNo
-				, @dtmDueDate = @dtmDueDate
-				, @dblInvoiceAmount = @dblInvoiceAmount
-				, @intEntityVendorId = @intEntityVendorId
-				, @intUserId = @intUserId
-				, @strBillOfLading = @strBillOfLading
-				, @ysnOverrideTolerance = @ysnOverrideTolerance
+			-- Handle previous successful duplicates
+			IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess
+						WHERE strBillOfLading = @strBillOfLading
+							AND intImportDtnDetailId <> @intImportDtnDetailId
+							AND ysnSuccess = 1)
+			BEGIN
+				UPDATE tblTRImportDtnDetail
+				SET ysnReImport = 1
+					, ysnValid = 0
+					, strMessage = 'Bill of Lading has been previously processed.'
+				WHERE intImportDtnDetailId = @intImportDtnDetailId
+			END
+			ELSE
+			BEGIN
+				EXEC uspTRInsertLoadFromImport 
+					@intImportLoadId = @intImportLoadId
+					, @intImportDtnDetailId = @intImportDtnDetailId
+					, @intInventoryReceiptId = @intInventoryReceiptId
+					, @intTermId = @intTermId
+					, @strInvoiceNo = @strInvoiceNo
+					, @dtmDueDate = @dtmDueDate
+					, @dblInvoiceAmount = @dblInvoiceAmount
+					, @intEntityVendorId = @intEntityVendorId
+					, @intUserId = @intUserId
+					, @strBillOfLading = @strBillOfLading
+					, @ysnOverrideTolerance = @ysnOverrideTolerance
+			END			
 
 			FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance, @strBillOfLading
 		END

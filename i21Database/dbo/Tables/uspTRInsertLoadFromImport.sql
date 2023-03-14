@@ -241,22 +241,43 @@ BEGIN
 			WHERE intImportDtnDetailId = @intImportDtnDetailId
 		END
 
-		IF(ISNULL(@strMessage, '') != '')
-		BEGIN
-			UPDATE tblTRImportDtnDetail
-			SET strMessage = @strMessage + CASE WHEN @ysnOverrideTolerance = 1 THEN ' (Reprocess)' ELSE '' END
-				, ysnValid = CASE WHEN @strMessage LIKE '%Voucher successfully posted%' OR @strMessage LIKE '%Voucher create but not posted%' THEN 1 ELSE 0 END
-			WHERE intImportDtnDetailId = @intImportDtnDetailId
-		END
+		DECLARE @ysnValid BIT = 0
+		SELECT @ysnValid = CASE WHEN @strMessage LIKE '%Voucher successfully posted%' OR @strMessage LIKE '%Voucher create but not posted%' THEN 1
+								WHEN ISNULL(@strMessage, '') = '' THEN 1
+								ELSE 0 END
 
 		UPDATE tblTRImportDtnDetail
-		SET ysnReImport = 1
-		WHERE intImportDtnDetailId IN (
-			SELECT intImportDtnDetailId FROM vyuTRGetImportDTNForReprocess
-			WHERE strBillOfLading = @strBillOfLading
-				AND intImportDtnDetailId <> @intImportDtnDetailId
-				AND ISNULL(ysnSuccess, 0) = 0)
+		SET strMessage = @strMessage + CASE WHEN @ysnOverrideTolerance = 1 THEN ' (Reprocess)' ELSE '' END
+			, ysnValid = @ysnValid
+		WHERE intImportDtnDetailId = @intImportDtnDetailId
 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess WHERE strBillOfLading = @strBillOfLading AND ISNULL(ysnSuccess, 0) = 1)
+		BEGIN
+			DECLARE @maxValue NUMERIC(18, 6)
+				, @intPreviousId INT
+
+			SELECT TOP 1 @maxValue = dblInvoiceAmount, @intPreviousId = intImportDtnDetailId FROM tblTRImportDtnDetail WHERE ISNULL(ysnReImport, 0) = 0 AND strBillOfLading = @strBillOfLading
+
+			IF (ISNULL(@intPreviousId, 0) = 0)
+			BEGIN
+				UPDATE tblTRImportDtnDetail
+				SET ysnReImport = 0
+				WHERE intImportDtnDetailId = @intImportDtnDetailId
+			END
+			ELSE IF (ISNULL(@dblInvoiceAmount, 0) > ISNULL(@maxValue, 0))
+			BEGIN
+				UPDATE tblTRImportDtnDetail
+				SET ysnReImport = CASE WHEN intImportDtnDetailId = @intImportDtnDetailId THEN 0 ELSE 1 END
+				WHERE intImportDtnDetailId IN (@intImportDtnDetailId, @intPreviousId)
+			END
+			ELSE
+			BEGIN
+				UPDATE tblTRImportDtnDetail
+				SET ysnReImport = 1
+				WHERE intImportDtnDetailId = @intImportDtnDetailId
+			END
+		END
+		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRImportDtnDetail WHERE strBillOfLading = @strBillOfLading AND ISNULL(ysnReImport, 0) = 0)
 		BEGIN
 			UPDATE tblTRImportDtnDetail
@@ -264,8 +285,15 @@ BEGIN
 			WHERE intImportDtnDetailId = @intImportDtnDetailId
 		END
 
-		--IF @@TRANCOUNT > 0 COMMIT TRANSACTION
+		--UPDATE tblTRImportDtnDetail
+		--SET ysnReImport = 1
+		--WHERE intImportDtnDetailId IN (
+		--	SELECT intImportDtnDetailId FROM vyuTRGetImportDTNForReprocess
+		--	WHERE strBillOfLading = @strBillOfLading
+		--		AND intImportDtnDetailId <> @intImportDtnDetailId
+		--		AND ISNULL(ysnSuccess, 0) = 0)		
 
+		--IF @@TRANCOUNT > 0 COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		--IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
