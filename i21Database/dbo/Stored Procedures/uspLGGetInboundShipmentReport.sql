@@ -198,7 +198,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.strOriginPort,
 			L.strDestinationPort,
 			L.strDestinationCity,
-			dtmBLDate = LW.dtmDeliveryDate,
+			L.dtmBLDate,
 			L.strBLNumber,
 			L.dtmScheduledDate,
 			L.dtmETAPOL,
