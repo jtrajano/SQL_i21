@@ -5,5 +5,5 @@
 	[intConcurrencyId]          INT            NOT NULL,
 
 	CONSTRAINT [PK_tblEMEntityEFTHeader] PRIMARY KEY CLUSTERED ([intEntityEFTHeaderId] ASC),
-	CONSTRAINT [FK_tblEMEntityEFTHeader_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId])
+	CONSTRAINT [FK_tblEMEntityEFTHeader_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE
 )
