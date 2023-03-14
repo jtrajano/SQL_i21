@@ -105,9 +105,10 @@ BEGIN
 
 		-- ASSEMBLE VENDOR STATEMENTS
 		INSERT INTO @tblAPVendorStatement
-		SELECT 
+		SELECT
 			   CASE WHEN LP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END,
-			   ISNULL(LP.imgLogo, @imgLogo),
+			   --ISNULL(LP.imgLogo, @imgLogo),
+				 ISNULL(LP.imgLogo, DLP.imgLogo),
 			   LPF.imgLogo,
 			   CS.strCompanyName,
 			   dbo.fnAPFormatAddress(NULL, NULL, NULL, CS.strAddress, CS.strCity, CS.strState, CS.strZip, CS.strCountry, NULL),
@@ -165,7 +166,9 @@ BEGIN
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
-		LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND (LP.ysnVendorStatement = 1 OR LP.ysnDefault = 1)
+		-- LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND (LP.ysnVendorStatement = 1 OR LP.ysnDefault = 1)
+		LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND LP.ysnVendorStatement = 1 --Logo for vendor statement report
+	  LEFT JOIN tblSMLogoPreference DLP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND DLP.ysnDefault = 1 -- default logo
 		LEFT JOIN tblSMLogoPreferenceFooter LPF ON LPF.intCompanyLocationId = CL.intCompanyLocationId AND (LPF.ysnVendorStatement = 1 OR LPF.ysnDefault = 1)
 		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) 
 		      AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)
