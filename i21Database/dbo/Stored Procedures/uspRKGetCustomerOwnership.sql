@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKGetCustomerOwnership]
+﻿CREATE PROCEDURE [dbo].[uspRKGetCustomerOwnership]
        @dtmFromTransactionDate date = null,
 	   @dtmToTransactionDate date = null,
 	   @intCommodityId int =  null,
@@ -15,6 +15,8 @@ IF OBJECT_ID('tempdb..#final') IS NOT NULL
     DROP TABLE #final
 IF OBJECT_ID('tempdb..#LicensedLocation') IS NOT NULL
 	DROP TABLE #LicensedLocation
+IF OBJECT_ID('tempdb..#tempCustomerByDistribution') IS NOT NULL
+    DROP TABLE #tempCustomerByDistribution
 
 DECLARE @ysnDisplayAllStorage bit
 select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
@@ -84,7 +86,16 @@ GROUP BY
 	,intStorageScheduleTypeId
 
 
-
+SELECT intRowNum = ROW_NUMBER() OVER (ORDER BY strDistribution)
+	, dtmDate
+	, strDistribution
+	, dblIn = SUM(dblIn)
+	, dblOut = SUM(dblOut)
+	, dblNet = SUM(dblIn) - SUM(dblOut) 
+INTO #tempCustomerByDistribution
+FROM #tempCustomer
+GROUP BY dtmDate
+	, strDistribution
 
 IF (@ysnDisplayAllStorage=1)
 BEGIN			 
@@ -135,14 +146,14 @@ BEGIN
 	
 		SET @SQL1 =''
 		DECLARE @intCount int =0
-		SELECT @intCount=min(intRowNum) FROM #tempCustomer WHERE dtmDate = @dtmDate1 -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110)) = convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
+		SELECT @intCount=min(intRowNum) FROM #tempCustomerByDistribution WHERE dtmDate = @dtmDate1 -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110)) = convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
 		WHILE @intCount > 0
 		BEGIN
 
-		select @Type=strDistribution from #tempCustomer where dtmDate = @dtmDate1 AND intRowNum=@intCount -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110)) and intRowNum=@intCount
-		SET @SQL1 = @SQL1+'(SELECT strDistribution as '''+convert(nvarchar(100),@Type)+'_strDistribution'+''', dblIn as '''+convert(nvarchar(100),@Type)+'_In'+''',dblOut as '''+convert(nvarchar(100),@Type)+'_Out'+''',dblNet as '''+convert(nvarchar(100),@Type)+'_Net'+''' FROM #tempCustomer WHERE intRowNum= ' + convert(nvarchar,@intCount) +') t' + convert(nvarchar(100),@intCount) + ' CROSS JOIN'
+		select @Type=strDistribution from #tempCustomerByDistribution where dtmDate = @dtmDate1 AND intRowNum=@intCount -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110)) and intRowNum=@intCount
+		SET @SQL1 = @SQL1+'(SELECT strDistribution as '''+convert(nvarchar(100),@Type)+'_strDistribution'+''', dblIn as '''+convert(nvarchar(100),@Type)+'_In'+''',dblOut as '''+convert(nvarchar(100),@Type)+'_Out'+''',dblNet as '''+convert(nvarchar(100),@Type)+'_Net'+''' FROM #tempCustomerByDistribution WHERE intRowNum= ' + convert(nvarchar,@intCount) +') t' + convert(nvarchar(100),@intCount) + ' CROSS JOIN'
 		
-		SELECT @intCount = MIN(intRowNum) FROM #tempCustomer WHERE intRowNum > @intCount and dtmDate = @dtmDate1 -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
+		SELECT @intCount = MIN(intRowNum) FROM #tempCustomerByDistribution WHERE intRowNum > @intCount and dtmDate = @dtmDate1 -- CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110))= convert(datetime,CONVERT(VARCHAR(10),@dtmDate1,110))
 		END
 
 		IF LEN(@SQL1)>0
