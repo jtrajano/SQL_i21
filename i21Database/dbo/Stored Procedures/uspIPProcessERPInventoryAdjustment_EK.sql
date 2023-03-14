@@ -404,17 +404,17 @@ BEGIN TRY
 				END
 			END
 
-			IF @strItemNo IS NULL
-				OR @strItemNo = ''
-			BEGIN
-				SELECT @strError = 'Item cannot be blank.'
+			--IF @strItemNo IS NULL
+			--	OR @strItemNo = ''
+			--BEGIN
+			--	SELECT @strError = 'Item cannot be blank.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intItemId = NULL
 
@@ -422,18 +422,41 @@ BEGIN TRY
 			FROM dbo.tblICItem
 			WHERE strItemNo = @strItemNo
 
-			IF @intItemId IS NULL
-			BEGIN
-				SELECT @strError = 'Item ' + @strItemNo + ' is not available.'
+			--IF @intItemId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'Item ' + @strItemNo + ' is not available.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			IF @intTransactionTypeId NOT IN (
+			SELECT @intLotId = NULL
+				,@dblQty = NULL
+				,@dblWeight = NULL
+			--SELECT @intItemId = NULL
+
+			SELECT @intLotId = intLotId
+				,@dblLastCost = dblLastCost
+				,@intLotItemUOMId = intItemUOMId
+				,@dblWeightPerQty = dblWeightPerQty
+				,@dblQty = dblQty
+				,@dblWeight = (
+					CASE 
+						WHEN dblWeight IS NULL
+							OR dblWeight = 0
+							THEN dblQty
+						ELSE dblWeight
+						END
+					)
+				,@intItemId =(CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END)
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNo
+				AND intStorageLocationId = @intStorageLocationId
+
+		IF @intTransactionTypeId NOT IN (
 					16
 					,18
 					)
@@ -475,28 +498,6 @@ BEGIN TRY
 					AND intUnitMeasureId = @intUnitMeasureId
 			END
 
-			SELECT @intLotId = NULL
-				,@dblQty = NULL
-				,@dblWeight = NULL
-
-			SELECT @intLotId = intLotId
-				,@dblLastCost = dblLastCost
-				,@intLotItemUOMId = intItemUOMId
-				,@dblWeightPerQty = dblWeightPerQty
-				,@dblQty = dblQty
-				,@dblWeight = (
-					CASE 
-						WHEN dblWeight IS NULL
-							OR dblWeight = 0
-							THEN dblQty
-						ELSE dblWeight
-						END
-					)
-			FROM tblICLot
-			WHERE strLotNumber = @strLotNo
-				AND intStorageLocationId = @intStorageLocationId
-				AND intItemId = @intItemId
-
 			IF @intLotId IS NULL
 				AND @strLotNo <> ''
 				AND @intTransactionTypeId <> 12
@@ -514,9 +515,9 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLotItemUOMId = intItemUOMId
 					,@dblWeightPerQty = dblWeightPerQty
+					,@intItemId =(CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END)
 				FROM tblICLot
 				WHERE strLotNumber = @strLotNo
-					AND intItemId = @intItemId
 					AND dblWeightPerQty > 1
 			END
 

@@ -69,6 +69,7 @@ BEGIN TRY
 		,@strERPComment NVARCHAR(max)
 		,@strERPOrderNo nvarchar(50)
 		,@ysnOverrideRecipe BIT
+		,@ysnCopyRecipeOnSave BIT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -390,6 +391,7 @@ BEGIN TRY
 	DECLARE @intInputItemId INT
 	DECLARE @strInputLotNumber NVARCHAR(50)
 			,@ysnToleranceCheckOnBlendOutputItem BIT
+			,@ysnOverrideRecipeInBlendManagement BIT
 
 	SELECT @intLocationId = intLocationId
 	FROM @tblBlendSheet
@@ -397,6 +399,8 @@ BEGIN TRY
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 		,@ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
 		,@ysnToleranceCheckOnBlendOutputItem=IsNULL(ysnToleranceCheckOnBlendOutputItem,0) 
+		,@ysnOverrideRecipeInBlendManagement=IsNULL(ysnOverrideRecipeInBlendManagement,0)
+		,@ysnCopyRecipeOnSave=IsNULL(ysnCopyRecipeOnSave,0)
 	FROM tblMFCompanyPreference
 
 	INSERT INTO @tblLotSummary (
@@ -1966,10 +1970,13 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
-			,@intLocationId = @intLocationId
-			,@intUserId = @intUserId
-			,@intWorkOrderId = @intWorkOrderId
+		IF @ysnCopyRecipeOnSave=0
+		BEGIN
+			EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
+				,@intLocationId = @intLocationId
+				,@intUserId = @intUserId
+				,@intWorkOrderId = @intWorkOrderId
+		END
 
 		--Check for Input Items validity
 		SELECT @strInActiveItems = COALESCE(@strInActiveItems + ', ', '') + i.strItemNo
@@ -1988,7 +1995,7 @@ BEGIN TRY
 				WHERE intWorkOrderId = @intWorkOrderId
 				)
 
-		IF ISNULL(@strInActiveItems, '') <> ''
+		IF ISNULL(@strInActiveItems, '') <> '' AND @ysnOverrideRecipeInBlendManagement=0
 		BEGIN
 			SET @ErrMsg = 'Recipe ingredient items ' + @strInActiveItems + ' are inactive. Please remove the lots belong to the inactive items from blend sheet.'
 
