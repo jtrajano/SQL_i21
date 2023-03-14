@@ -6845,11 +6845,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Auction A
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Quality.view.AuctionAvailabilityView' WHERE strMenuName = 'Auction Availability View' AND intParentMenuID = @QualityViewParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pricing Mechanism View' AND intParentMenuID = @QualityViewParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Pricing Mechanism View', N'Quality', @QualityViewParentMenuId, N'Pricing Mechanism View', N'View', N'Screen', N'Quality.view.PricingMechanismView?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Quality.view.PricingMechanismView?showSearch=true' WHERE strMenuName = 'Pricing Mechanism View' AND intParentMenuID = @QualityViewParentMenuId
+-- Commented out temporarily due to unavailability of the backend service. To module owner, fix the backend and uncomment this if necessary.
+-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pricing Mechanism View' AND intParentMenuID = @QualityViewParentMenuId)
+-- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+-- 	VALUES (N'Pricing Mechanism View', N'Quality', @QualityViewParentMenuId, N'Pricing Mechanism View', N'View', N'Screen', N'Quality.view.PricingMechanismView?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+-- ELSE
+-- 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Quality.view.PricingMechanismView?showSearch=true' WHERE strMenuName = 'Pricing Mechanism View' AND intParentMenuID = @QualityViewParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buying Efficiency View' AND intParentMenuID = @QualityViewParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -6857,11 +6858,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Buying Ef
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Quality.view.BuyingEfficiencyView?showSearch=true' WHERE strMenuName = 'Buying Efficiency View' AND intParentMenuID = @QualityViewParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Purchase in Auction View' AND intParentMenuID = @QualityViewParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Competitor Purchase in Auction View', N'Quality', @QualityViewParentMenuId, N'Competitor Purchase in Auction View', N'View', N'Screen', N'Quality.view.CompetitorPurchaseInAuctionView?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Quality.view.CompetitorPurchaseInAuctionView?showSearch=true' WHERE strMenuName = 'Competitor Purchase in Auction View' AND intParentMenuID = @QualityViewParentMenuId
+-- Commented out temporarily due to unavailability of the backend service. To module owner, fix the backend and uncomment this if necessary.
+-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Competitor Purchase in Auction View' AND intParentMenuID = @QualityViewParentMenuId)
+-- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+-- 	VALUES (N'Competitor Purchase in Auction View', N'Quality', @QualityViewParentMenuId, N'Competitor Purchase in Auction View', N'View', N'Screen', N'Quality.view.CompetitorPurchaseInAuctionView?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+-- ELSE
+-- 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Quality.view.CompetitorPurchaseInAuctionView?showSearch=true' WHERE strMenuName = 'Competitor Purchase in Auction View' AND intParentMenuID = @QualityViewParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Market Overview' AND intParentMenuID = @QualityViewParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -6869,11 +6871,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Market Ov
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Quality.view.MarketOverview?showSearch=true' WHERE strMenuName = 'Market Overview' AND intParentMenuID = @QualityViewParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Forecast Feedback Loop View' AND intParentMenuID = @QualityViewParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Forecast Feedback Loop View', N'Quality', @QualityViewParentMenuId, N'Forecast Feedback Loop View', N'View', N'Screen', N'Quality.view.ForecastFeedbackLoopView?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Quality.view.ForecastFeedbackLoopView?showSearch=true' WHERE strMenuName = 'Forecast Feedback Loop View' AND intParentMenuID = @QualityViewParentMenuId
+-- Commented out temporarily due to unavailability of the backend service. To module owner, fix the backend and uncomment this if necessary.
+-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Forecast Feedback Loop View' AND intParentMenuID = @QualityViewParentMenuId)
+-- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+-- 	VALUES (N'Forecast Feedback Loop View', N'Quality', @QualityViewParentMenuId, N'Forecast Feedback Loop View', N'View', N'Screen', N'Quality.view.ForecastFeedbackLoopView?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+-- ELSE
+-- 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Quality.view.ForecastFeedbackLoopView?showSearch=true' WHERE strMenuName = 'Forecast Feedback Loop View' AND intParentMenuID = @QualityViewParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch View' AND intParentMenuID = @QualityViewParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
