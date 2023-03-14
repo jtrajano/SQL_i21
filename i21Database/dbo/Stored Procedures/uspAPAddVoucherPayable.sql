@@ -669,7 +669,25 @@ BEGIN
 		ON A.intVoucherPayableId = B.intNewPayableId
 	INNER JOIN tblAPVoucherPayableTaxStaging C
 		ON B.intNewPayableId = C.intVoucherPayableId
-		
+
+	--Update tax group of claims from voucher payable that are created from Weight Claims Screen
+	--Using DR/CR Memo button
+	BEGIN
+		UPDATE A
+			SET A.intPurchaseTaxGroupId = Tax.intTaxGroupId,
+					A.strTaxGroup = Tax.strTaxGroup
+		FROM tblAPVoucherPayable A
+		INNER JOIN @insertedData B
+			ON A.intVoucherPayableId = B.intNewPayableId
+		OUTER APPLY (
+			SELECT	TG.intTaxGroupId, TG.strTaxGroup
+			FROM	tblSMTaxGroup TG
+			WHERE	TG.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(A.intEntityVendorId, A.intLocationId, A.intItemId, A.intShipFromId, A.intFreightTermId, DEFAULT)
+			AND A.intPurchaseTaxGroupId IS NULL
+		) Tax
+		WHERE A.intPurchaseTaxGroupId IS NULL AND A.intWeightClaimId IS NOT NULL AND A.intWeightClaimDetailId IS NOT NULL
+	END
+
 	--IF NO TAX PROVIDED, WE WILL GENERATE TAX AND WILL USE TAX ACCOUNT
 	DECLARE @ParamTable AS TABLE
 		(intVoucherPayableId		INT
@@ -712,7 +730,7 @@ BEGIN
 										ELSE A.dblNetWeight END
 		,intTaxGroupId				= CASE 
 									WHEN ISNULL(A.intPurchaseTaxGroupId,0) > 0 THEN A.intPurchaseTaxGroupId
-									ELSE ISNULL(EL.intTaxGroupId, CL.intTaxGroupId) END 
+									ELSE dbo.fnGetTaxGroupIdForVendor(A.intEntityVendorId, A.intLocationId, A.intItemId, A.intShipFromId, A.intFreightTermId, DEFAULT) END
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1
