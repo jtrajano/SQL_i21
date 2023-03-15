@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuAPGetInventoryReceiptOtherCharge]  
 AS   
-SELECT DISTINCT ReceiptCharge.intInventoryReceiptChargeId  
+SELECT ReceiptCharge.intInventoryReceiptChargeId  
 	,ReceiptCharge.intInventoryReceiptId  
 	,ReceiptCharge.intContractId  
 	,ReceiptCharge.intContractDetailId  
@@ -46,10 +46,6 @@ SELECT DISTINCT ReceiptCharge.intInventoryReceiptChargeId
 	,ItemGLAccount.intAccountId  
 	,strAccountDescription = ItemGLAccount.strDescription  
 	,ItemGLAccount.strAccountId  
-	,Receipt.intFreightTermId  
-  ,FreightTerm.strFreightTerm  
-  ,Receipt.intShipFromEntityId  
-  ,Receipt.intShipFromId   
 FROM tblICInventoryReceiptCharge ReceiptCharge  
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId  
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId  
@@ -75,4 +71,3 @@ OUTER APPLY (
   SELECT intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = ItemAccount.intAccountId  
 ) ItemGLAccount  
 WHERE ReceiptCharge.ysnInventoryCost = 1 AND BillDetail.intBillDetailId IS NULL AND Payable.intVoucherPayableId IS NULL 
-AND Receipt.ysnPosted = 1
