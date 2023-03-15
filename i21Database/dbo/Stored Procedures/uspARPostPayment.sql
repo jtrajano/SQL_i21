@@ -228,7 +228,6 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBaseInvoiceTotal]              NUMERIC(18,6)   NULL
     ,[dblAmountDue]                     NUMERIC(18,6)   NULL
     ,[dblBaseAmountDue]                 NUMERIC(18,6)   NULL
-    ,[dblOriginalBaseAmountDue]         NUMERIC(18,6)   NULL
 
     ,[intInvoiceId]                     INT             NULL
     ,[ysnExcludedFromPayment]           BIT             NULL
