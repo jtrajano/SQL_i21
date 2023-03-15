@@ -498,6 +498,7 @@ SELECT Item.intItemId
 	,B.strBrandCode
 	,Item.intUnitPerLayer
 	,Item.intLayerPerPallet
+	,Item.strShortName
 FROM @tblRequiredQty AS RequiredQty
 JOIN tblICItem AS Item ON RequiredQty.intItemId = Item.intItemId
 LEFT JOIN @tblPhysicalQty AS PhysicalQty ON RequiredQty.intItemId = PhysicalQty.intItemId
