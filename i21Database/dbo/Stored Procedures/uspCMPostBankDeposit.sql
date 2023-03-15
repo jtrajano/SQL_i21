@@ -136,8 +136,7 @@ FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
-DECLARE @dblComputedExchangeRate NUMERIC (18,6)
-
+DECLARE @dblComputedExchangeRate NUMERIC (30,20)
 
 SELECT @dblComputedExchangeRate = @dblAmountDetailTotal / CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END
 
