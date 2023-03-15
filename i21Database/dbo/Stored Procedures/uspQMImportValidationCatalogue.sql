@@ -21,7 +21,7 @@ BEGIN TRY
 
 	/* Catalogue Validation. */
 	UPDATE Catalogue 
-	SET Catalogue.strLogResult	= 'Catalogue does not exists.'
+	SET Catalogue.strLogResult	= 'Catalogue information is not available for the combination of Sale Year, Buying Center, Sale No, Catalogue Type, Supplier, Channel'
 	  , Catalogue.ysnSuccess	= 0
 	  , Catalogue.ysnProcessed	= 1
 	FROM tblQMImportCatalogue AS Catalogue

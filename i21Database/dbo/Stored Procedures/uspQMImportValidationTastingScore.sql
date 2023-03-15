@@ -22,7 +22,7 @@ BEGIN TRY
 
 	/* Catalogue Validation. */
 	UPDATE Catalogue 
-	SET Catalogue.strLogResult	= 'Tasting Score does not exists.'
+	SET Catalogue.strLogResult	= 'Catalogue information is not available for the combination of Sale Year, Buying Center, Sale No, Catalogue Type, Supplier, Channel and Tealingo Item'
 	  , Catalogue.ysnSuccess	= 0
 	  , Catalogue.ysnProcessed	= 1
 	FROM tblQMImportCatalogue AS Catalogue
