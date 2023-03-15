@@ -755,7 +755,12 @@ BEGIN TRY
 				, intQtyCurrencyId
 			FROM (
 				SELECT 
-					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END DESC)
+					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId 
+													ORDER BY CASE WHEN CBL.strAction = 'Created Price' 
+																THEN CBL.dtmTransactionDate 
+																ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) 
+																END DESC
+															, CBL.intContractBalanceLogId DESC )
 					,*
 				FROM tblCTContractBalanceLog CBL
 				WHERE dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) <= @dtmEndDate
