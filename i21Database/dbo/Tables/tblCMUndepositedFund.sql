@@ -18,7 +18,7 @@
 	[strNotificationStatus]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnCommitted]				BIT NULL,
 	[intBankFileAuditId]		INT NULL,
-	[strReferenceNo]			NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
+	[strReferenceNo]			NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
 	[ysnHold]					BIT NOT NULL DEFAULT ((0)),
 	[strHoldReason]				NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
     [intLastModifiedUserId]		INT NULL,
