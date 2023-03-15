@@ -127,6 +127,8 @@
     [strDeliveryDocument]                   NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL DEFAULT 'Invoice',
     [ysnUpdatedAppliedSalesTax]             BIT NULL DEFAULT 0,
     [ysnUpdatedAppliedPrepaidTax]           BIT NULL DEFAULT 0,
+    [intProjectId]                          INT NULL,
+    [strProjectName]                        NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),

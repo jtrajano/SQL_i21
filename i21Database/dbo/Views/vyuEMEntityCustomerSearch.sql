@@ -79,6 +79,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, intDefaultPayToBankAccountId		= CUSTOMER.intDefaultPayToBankAccountId
 	, strDefaultPayToBankAccountNo		= CUSTOMER.strDefaultPayToBankAccountNo
 	, strPaymentInstructions			= CMBA.strPaymentInstructions
+	, ysnUAP							= CUSTOMER.ysnUAP
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1

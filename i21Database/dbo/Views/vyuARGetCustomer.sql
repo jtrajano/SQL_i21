@@ -179,7 +179,9 @@ SELECT intEntityId							= C.intEntityId
 	, ysnExemptCreditCardFee				= C.ysnExemptCreditCardFee
 	, intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
 	, strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
-  , strDeliveryDocument					= C.strDeliveryDocument
+    , strDeliveryDocument					= C.strDeliveryDocument
+  	, intProjectId							= C.intProjectId
+	, strProjectName						= HDP.strProjectName
 FROM tblARCustomer C
 INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
 LEFT JOIN tblSMLanguage LANG ON E.intLanguageId = LANG.intLanguageId
@@ -207,6 +209,7 @@ LEFT JOIN tblSMApprovalList SMPC ON C.intPriceChangeApprovalId = SMPC.intApprova
 LEFT JOIN tblEMEntity RCUST ON C.intReferredByCustomer = RCUST.intEntityId
 LEFT JOIN tblSMInterCompany SIC ON C.intInterCompanyId = SIC.intInterCompanyId
 LEFT JOIN tblEMEntity ECSM ON C.intCustomerSuccessManager = ECSM.intEntityId
+LEFT JOIN tblHDProject HDP ON C.intProjectId = HDP.intProjectId
 OUTER APPLY (
 	SELECT TOP 1 strPassword
 		 , strEntityContactName
