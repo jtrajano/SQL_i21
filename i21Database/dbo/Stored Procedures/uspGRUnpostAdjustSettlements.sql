@@ -31,6 +31,7 @@ SELECT COALESCE(A.intBillId,B.intBillId)
 FROM tblGRAdjustSettlements A
 LEFT JOIN tblGRAdjustSettlementsSplit B
 	ON B.intAdjustSettlementId = A.intAdjustSettlementId
+WHERE A.intAdjustSettlementId = @intAdjustSettlementId
 
 IF @intTypeId = 1
 BEGIN
