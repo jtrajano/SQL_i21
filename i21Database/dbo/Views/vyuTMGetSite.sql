@@ -178,12 +178,12 @@ OUTER APPLY (
 	SELECT TOP 1
 		dtmDate
 		,dblQuantity
-	FROM vyuICGetInventoryValuation
-	WHERE strTransactionType = 'Inventory Receipt' 
+	FROM vyuTMGetInventoryDelivery
+	WHERE (strTransactionType = 'Inventory Receipt' 
 			OR strTransactionType = 'Inventory Transfer'
 			OR strTransactionType = 'Inventory Transfer with Shipment'
 			OR strTransactionType = 'Inventory Adjustment - Quantity'
-			OR strTransactionType = 'Inventory Adjustment - Item'
+			OR strTransactionType = 'Inventory Adjustment - Item')
 		AND site.ysnCompanySite = 1
 		AND intLocationId = site.intLocationId AND site.intLocationId IS NOT NULL
 		AND intSubLocationId = site.intCompanyLocationSubLocationId AND site.intCompanyLocationSubLocationId IS NOT NULL
@@ -192,7 +192,7 @@ OUTER APPLY (
 )invDeliveries
 OUTER APPLY (
 	SELECT dblRunningQuantity = SUM(dblQuantity)
-	FROM vyuICGetInventoryValuation
+	FROM vyuTMGetInventoryDelivery
 	WHERE site.ysnCompanySite = 1
 		AND intLocationId = site.intLocationId
 		AND intLocationId = site.intLocationId AND site.intLocationId IS NOT NULL
