@@ -262,3 +262,6 @@
 
 --SCH
 :r .\27_SCH\1_FixOrphanDistribution.sql
+
+-- VR
+:r .\28_VR\1_RemoveDuplicateUOMMapping.sql
