@@ -111,5 +111,27 @@ RETURN (
 		WHERE	Item.intItemId = @intItemId
 				AND Item.strType = 'Bundle'
 
+		-- 'In-Transit value cannot be adjusted for {Other Charge}. Item type must be an "Inventory" type.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80275)
+							, Item.strItemNo
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80275				
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND Item.strType NOT IN ('Inventory')
+
 	) AS Query		
 )

@@ -1867,10 +1867,11 @@ BEGIN
 			DELETE FROM @MissingLotsForPost
 			DELETE FROM @ValueToPost
 
-			-- Repost 'In-Transit Adjustment'. Call this always because a transaction like Voucher cna have both "Cost Adjustment" and "In-Transit Adjustment" in the same batch id. 
+			-- Repost 'In-Transit Adjustment'. Call this always because a transaction like Voucher can have both "Cost Adjustment" and "In-Transit Adjustment" in the same batch id. 
 			BEGIN 
 					INSERT INTO @ValueToPost (
 						[intItemId] 
+						,[intOtherChargeItemId]
 						,[intItemLocationId] 
 						,[dtmDate] 
 						,[dblValue] 
@@ -1895,6 +1896,7 @@ BEGIN
 					)
 					SELECT 	
 						[intItemId] = t.intItemId
+						,[intOtherChargeItemId] = adjLog.intOtherChargeItemId
 						,[intItemLocationId] = t.intItemLocationId
 						,[dtmDate] = t.dtmDate
 						,[dblValue] = t.dblForexValue 
@@ -1924,6 +1926,8 @@ BEGIN
 							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 						INNER JOIN tblICInventoryTransactionType typ
 							ON typ.intTransactionTypeId = t.intTransactionTypeId
+						INNER JOIN tblICInventoryValueAdjustmentLog adjLog
+							ON adjLog.intInventoryTransactionId = t.id2
 					WHERE	
 						t.strTransactionId = @strTransactionId
 						AND t.strBatchId = @strBatchId

@@ -288,6 +288,7 @@ BEGIN
 		WHEN @msgId = 80272 THEN 'Item Category %s does not exists on Storage %s.'
 		WHEN @msgId = 80273 THEN 'Quantity in lot number %s is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
 		WHEN @msgId = 80274 THEN 'Forex Rate for the Cost Adjustment is missing.'
+		WHEN @msgId = 80275 THEN 'In-Transit value cannot be adjusted for %s. Item type must be an "Inventory" type'
 	END 
 
 	RETURN @msg COLLATE Latin1_General_CI_AS

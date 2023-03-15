@@ -374,6 +374,7 @@ SET ANSI_WARNINGS ON
 		-- Inventoried Other Charges
 		INSERT INTO @ValueToPost (
 			[intItemId] 
+			,[intOtherChargeItemId]
 			,[intItemLocationId] 
 			,[dtmDate] 
 			,[dblValue] 
@@ -397,7 +398,8 @@ SET ANSI_WARNINGS ON
 			,[intTicketId]
 		)
 		SELECT 
-			[intItemId] = ShipmentCharges.intItemId
+			[intItemId] = LD.intItemId
+			,[intOtherChargeItemId] = ShipmentCharges.intItemId
 			,[intItemLocationId] = IL.intItemLocationId
 			,[dtmDate] = L.dtmScheduledDate
 			,[dblValue] = ShipmentCharges.dblAmount 
@@ -422,7 +424,7 @@ SET ANSI_WARNINGS ON
 		FROM dbo.tblLGLoad L
 		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItemLocation IL ON IL.intItemId = ShipmentCharges.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+		INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
@@ -585,6 +587,7 @@ SET ANSI_WARNINGS ON
 		-- Inventoried Other Charges
 		INSERT INTO @ValueToPost (
 			[intItemId] 
+			,[intOtherChargeItemId]
 			,[intItemLocationId] 
 			,[dtmDate] 
 			,[dblValue] 
@@ -608,7 +611,8 @@ SET ANSI_WARNINGS ON
 			,[intTicketId]
 		)
 		SELECT 
-			[intItemId] = ShipmentCharges.intItemId
+			[intItemId] = LD.intItemId
+			,[intOtherChargeItemId] = ShipmentCharges.intItemId
 			,[intItemLocationId] = IL.intItemLocationId
 			,[dtmDate] = L.dtmScheduledDate
 			,[dblValue] = ShipmentCharges.dblAmount * -1
@@ -633,7 +637,7 @@ SET ANSI_WARNINGS ON
 		FROM dbo.tblLGLoad L
 		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItemLocation IL ON IL.intItemId = ShipmentCharges.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+		INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId

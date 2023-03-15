@@ -174,3 +174,19 @@ BEGIN
 	EXEC uspICRaiseError 80202, @strItemNo
 	RETURN -1
 END 
+
+-- Check if the caller is trying to adjust the in-transit value for an invalid item type. 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 80275
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'In-Transit value cannot be adjusted for {Other Charge}. Item type must be an "Inventory" type.'
+	EXEC uspICRaiseError 80275, @strItemNo
+	RETURN -1
+END 

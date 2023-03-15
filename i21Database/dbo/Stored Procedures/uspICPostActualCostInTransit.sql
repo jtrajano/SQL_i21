@@ -32,6 +32,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@strBOLNumber NVARCHAR(100) = NULL 
 	,@intTicketId INT = NULL 
 	,@dblValue AS NUMERIC(38,20) = NULL 
+	,@intOtherChargeItemId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -471,6 +472,7 @@ BEGIN
 				,[intRelatedTransactionDetailId]
 				,[intCreatedUserId]
 				,[intConcurrencyId]
+				,[intOtherChargeItemId]
 			)
 			SELECT 
 				[intInventoryTransactionId] = @InventoryTransactionIdentityId
@@ -489,6 +491,7 @@ BEGIN
 				,[intRelatedTransactionDetailId] = @intTransactionDetailId 
 				,[intCreatedUserId] = @intEntityUserSecurityId
 				,[intConcurrencyId] = 1
+				,[intOtherChargeItemId] = @intOtherChargeItemId
 		END 
 	END 
 END 

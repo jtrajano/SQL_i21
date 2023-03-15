@@ -156,6 +156,44 @@ BEGIN
 	;
 END 
 
+-- Get the GL Account ids to use for the other charges. 
+BEGIN 
+	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount; 
+	INSERT INTO @OtherChargeGLAccounts (
+			intItemId 
+			,intItemLocationId 
+			,intInventoryId 
+			,intContraInventoryId 
+			,intTransactionTypeId
+	)
+	SELECT	Query.intOtherChargeItemId
+			,Query.intItemLocationId
+			,intInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_InTransit) 
+			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment) 
+			,intTransactionTypeId
+	FROM	(
+				SELECT	DISTINCT 
+						adjLog.intOtherChargeItemId
+						, intItemLocationId = il.intItemLocationId
+						, t.intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t 
+						INNER JOIN tblICItem i
+							ON t.intItemId = i.intItemId 
+						INNER JOIN #tmpRebuildList list	
+							ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)							
+						INNER JOIN tblICInventoryValueAdjustmentLog adjLog
+							ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
+						INNER JOIN tblICItemLocation il 
+							ON il.intItemId = adjLog.intOtherChargeItemId
+							AND il.intLocationId = t.intCompanyLocationId
+				WHERE	t.strBatchId = @strBatchId
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+						AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+			) Query
+	;
+END 
+
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemId AS INT 
@@ -197,24 +235,23 @@ BEGIN
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE	ItemGLAccount.intContraInventoryId IS NULL 
-			AND ISNULL(Item.strType, '') = 'Inventory'
+	FROM	tblICItem Item INNER JOIN @OtherChargeGLAccounts OtherChargeGLAccount
+				ON Item.intItemId = OtherChargeGLAccount.intItemId
+	WHERE	OtherChargeGLAccount.intContraInventoryId IS NULL 
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
 	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
 				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @GLAccounts ItemGLAccount
-				ON ItemGLAccount.intItemId = il.intItemId
-				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+			INNER JOIN @OtherChargeGLAccounts OtherChargeGLAccount
+				ON OtherChargeGLAccount.intItemId = il.intItemId
+				AND OtherChargeGLAccount.intItemLocationId = il.intItemLocationId
 	WHERE	il.intItemId = @intItemId
-			AND ItemGLAccount.intContraInventoryId IS NULL 
+			AND OtherChargeGLAccount.intContraInventoryId IS NULL 
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- {Item} in {Location} is missing a GL account setup for {Cost Adjustment} account category.
+		-- {Item} in {Location} is missing a GL account setup for {AP Clearing} account category.
 		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Cost_Adjustment;
 		RETURN -1;
 	END 
@@ -271,6 +308,8 @@ WITH ForGLEntries_CTE (
 	,intCommodityId
 	,strRateType
 	,dblForexValue
+	,intOtherChargeItemId
+	,intOtherChargeLocationId
 )
 AS
 (	
@@ -298,6 +337,8 @@ AS
 			,i.intCommodityId
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,dblForexValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0), 2)
+			,adjLog.intOtherChargeItemId
+			,[intOtherChargeLocationId] = otherChargeLocation.intItemLocationId
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -306,6 +347,11 @@ AS
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			INNER JOIN tblICInventoryValueAdjustmentLog adjLog
+				ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN tblICItemLocation otherChargeLocation
+				ON otherChargeLocation.intItemId = adjLog.intOtherChargeItemId
+				AND otherChargeLocation.intLocationId = t.intCompanyLocationId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
@@ -372,7 +418,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ITA' -- In-Transit Adjustment
-		,strReference				= '1' 
+		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -426,7 +472,7 @@ SELECT
 										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ITA' -- In-Transit Adjustment
-		,strReference				= '2' 
+		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
@@ -452,12 +498,12 @@ SELECT
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
-			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+			ON ForGLEntries_CTE.intOtherChargeItemId = OtherChargeGLAccounts.intItemId
+			AND ForGLEntries_CTE.intOtherChargeLocationId = OtherChargeGLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = OtherChargeGLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+			ON tblGLAccount.intAccountId = OtherChargeGLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign

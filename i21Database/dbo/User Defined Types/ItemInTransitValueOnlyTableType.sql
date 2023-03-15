@@ -26,4 +26,5 @@ CREATE TYPE [dbo].[ItemInTransitValueOnlyTableType] AS TABLE
 	,[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[intTicketId] INT NULL 
+	,[intOtherChargeItemId] INT NULL						-- This is the Other Charge. 
 )

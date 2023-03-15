@@ -29,6 +29,7 @@
 		[intRelatedTransactionDetailId] INT,
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
+		[intOtherChargeItemId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryLotValueAdjustmentLog] PRIMARY KEY CLUSTERED ([intId])		
 	)
 	GO
@@ -39,5 +40,11 @@
 			, [intItemLocationId] ASC
 			, [intLotId] ASC
 			, [strActualCostId] ASC
+		)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryValueAdjustmentLog_Posting]
+		ON [dbo].[tblICInventoryValueAdjustmentLog](
+			[intInventoryTransactionId] ASC
 		)
 	GO

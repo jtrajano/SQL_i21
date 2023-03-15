@@ -70,6 +70,7 @@ DECLARE @intId AS INT
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
 		,@dblValue NUMERIC(38, 20)
+		,@intOtherChargeItemId AS INT
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -189,6 +190,7 @@ INSERT INTO @ValueToPostValidated (
 	,[strSourceNumber] 
 	,[strBOLNumber] 
 	,[intTicketId] 
+	,[intOtherChargeItemId]
 )
 SELECT 
 	[intItemId] = p.intItemId
@@ -212,6 +214,7 @@ SELECT
 	,[strSourceNumber] = p.strSourceNumber
 	,[strBOLNumber] = p.strBOLNumber
 	,[intTicketId] = p.intTicketId 
+	,[intOtherChargeItemId] = p.intOtherChargeItemId
 FROM 
 	@ValueToPost p
 	INNER JOIN tblICItem i 
@@ -482,6 +485,7 @@ SELECT
 	,@strBOLNumber = NULL 
 	,@intTicketId = NULL 
 	,@dblValue = NULL 
+	,@intOtherChargeItemId = NULL 
 
 DECLARE loopAdjustValue CURSOR LOCAL FAST_FORWARD
 FOR 
@@ -508,6 +512,7 @@ SELECT  intId
 		,[strSourceNumber] 
 		,[strBOLNumber] 
 		,[intTicketId] 
+		,[intOtherChargeItemId]
 FROM	@ValueToPostValidated
 
 OPEN loopAdjustValue;
@@ -537,6 +542,7 @@ FETCH NEXT FROM loopAdjustValue INTO
 	,@strSourceNumber
 	,@strBOLNumber
 	,@intTicketId 
+	,@intOtherChargeItemId
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -591,6 +597,7 @@ BEGIN
 			,@strBOLNumber 
 			,@intTicketId
 			,@dblValue
+			,@intOtherChargeItemId
 			;
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop2;
@@ -629,6 +636,7 @@ BEGIN
 			,@strBOLNumber 
 			,@intTicketId
 			,@dblValue
+			,@intOtherChargeItemId
 			;
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop2;
@@ -659,6 +667,7 @@ BEGIN
 		,@strSourceNumber
 		,@strBOLNumber
 		,@intTicketId 
+		,@intOtherChargeItemId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
