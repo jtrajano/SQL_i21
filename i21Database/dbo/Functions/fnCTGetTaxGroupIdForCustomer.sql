@@ -29,5 +29,19 @@ BEGIN
 		C.[intEntityId] = @CustomerId
 		AND EL.[intEntityLocationId] = @CustomerLocationId
 
-	RETURN @TaxGroupId;
+	IF ISNULL(@TaxGroupId,0) <> 0 
+		RETURN @TaxGroupId;	
+
+	--Company Location
+	SELECT TOP 1
+		@TaxGroupId = [intTaxGroupId]
+	FROM
+		tblSMCompanyLocation
+	WHERE
+		intCompanyLocationId = @CompanyLocationId
+	
+	IF ISNULL(@TaxGroupId,0) <> 0 
+		RETURN @TaxGroupId;
+					
+	RETURN NULL
 END
