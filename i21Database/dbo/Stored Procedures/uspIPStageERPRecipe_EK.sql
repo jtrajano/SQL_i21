@@ -154,6 +154,7 @@ BEGIN TRY
 					,WeekCommencing DATETIME
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+				AND strLocationType = 'Plant'
 			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = 1
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strBlendCode, '') + ','
@@ -221,6 +222,7 @@ BEGIN TRY
 					,LocationCode NVARCHAR(6) Collate Latin1_General_CI_AS '../LocationCode'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+				AND strLocationType = 'Plant'
 
 			INSERT INTO tblMFProductionOrderStage (
 				strOrderNo
@@ -281,6 +283,7 @@ BEGIN TRY
 					,VAverage NUMERIC(38,20)'../../VAverage'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+				AND strLocationType = 'Plant'
 			WHERE x.BatchId<>'NoN' AND isNumeric(Weight)=1
 
 			--Move to Archive

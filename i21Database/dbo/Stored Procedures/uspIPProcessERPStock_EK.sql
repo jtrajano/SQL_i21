@@ -183,6 +183,7 @@ BEGIN TRY
 				,@strLocation = strLocationName
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 			WHERE strVendorRefNoPrefix = @strLocationName
+				AND strLocationType = 'Plant'
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN

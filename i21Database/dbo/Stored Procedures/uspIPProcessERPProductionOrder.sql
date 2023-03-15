@@ -168,6 +168,7 @@ BEGIN TRY
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strLocationNumber
+				AND strLocationType = 'Plant'
 
 			IF @intLocationId IS NULL
 			BEGIN
