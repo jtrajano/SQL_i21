@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuAPGetInventoryReceiptOtherCharge]  
 AS   
-SELECT ReceiptCharge.intInventoryReceiptChargeId  
+SELECT DISTINCT ReceiptCharge.intInventoryReceiptChargeId  
 	,ReceiptCharge.intInventoryReceiptId  
 	,ReceiptCharge.intContractId  
 	,ReceiptCharge.intContractDetailId  
@@ -46,6 +46,10 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	,ItemGLAccount.intAccountId  
 	,strAccountDescription = ItemGLAccount.strDescription  
 	,ItemGLAccount.strAccountId  
+	,Receipt.intFreightTermId  
+  ,FreightTerm.strFreightTerm  
+  ,Receipt.intShipFromEntityId  
+  ,Receipt.intShipFromId   
 FROM tblICInventoryReceiptCharge ReceiptCharge  
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId  
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId  
@@ -64,6 +68,7 @@ LEFT JOIN tblLGLoadCost LoadShipmentCost ON LoadShipmentCost.intLoadId = Receipt
 LEFT JOIN tblAPBillDetail BillDetail ON ReceiptCharge.intInventoryReceiptChargeId = BillDetail.intInventoryReceiptChargeId  
 LEFT JOIN tblAPVoucherPayable Payable ON Payable.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 LEFT JOIN tblICItemLocation ItemLocation ON Receipt.intLocationId = ItemLocation.intLocationId AND ItemLocation.intItemId = Charge.intItemId  
+LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Receipt.intFreightTermId  
 OUTER APPLY (  
   SELECT dbo.fnGetItemGLAccount(Charge.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') [intAccountId]  
 ) ItemAccount  
@@ -71,3 +76,4 @@ OUTER APPLY (
   SELECT intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = ItemAccount.intAccountId  
 ) ItemGLAccount  
 WHERE ReceiptCharge.ysnInventoryCost = 1 AND BillDetail.intBillDetailId IS NULL AND Payable.intVoucherPayableId IS NULL 
+AND Receipt.ysnPosted = 1

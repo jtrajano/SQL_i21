@@ -247,6 +247,25 @@ FROM dbo.fnAPCreateVoucherPayableTaxFromDetail(@voucherDetailIds) A
 INNER JOIN @primaryKeys B ON A.intBillDetailId = B.intBillDetailId
 WHERE ysnStage = 1
 
+--GENERATE TAXES for IR Other Charges using Prepaid Other Charges Screen
+--IR Other charges that are not added to Add Payables
+DECLARE @idetailIds AS Id
+INSERT INTO @idetailIds
+
+SELECT DISTINCT
+	A.intBillDetailId
+FROM tblAPBillDetail A
+LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
+INNER JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId AND D.ysnInventoryCost = 1
+INNER JOIN vyuICGetOtherCharges E ON E.intItemId = D.intChargeId AND E.ysnInventoryCost = 1
+INNER JOIN @voucherDetailIds F ON A.intBillDetailId = F.intId
+WHERE C.intBillDetailTaxId IS NULL
+
+IF EXISTS (SELECT TOP 1 1 FROM @idetailIds)
+BEGIN
+	EXEC uspAPUpdateVoucherDetailTax @idetailIds
+END
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables) RETURN;
 
 IF @transCount = 0 BEGIN TRANSACTION
