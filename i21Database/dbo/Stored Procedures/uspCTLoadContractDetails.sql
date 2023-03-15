@@ -9,7 +9,8 @@ BEGIN TRY
 	DECLARE
 		@ErrMsg NVARCHAR(MAX)
 		,@intContractTypeId int
-		,@intScreenId int;
+		,@intScreenId int
+		,@strContractBase NVARCHAR(50);
 
 
 	DECLARE @tblShipment TABLE (
@@ -35,7 +36,7 @@ BEGIN TRY
 	);
 	Select @intScreenId=intScreenId from tblSMScreen Where strNamespace = 'ContractManagement.view.PriceContracts'
 
-	select top 1 @intContractTypeId = intContractTypeId from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
+	select top 1 @intContractTypeId = intContractTypeId, @strContractBase = strContractBase from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
 
 	if (@intContractTypeId = 1)
 	begin
@@ -243,7 +244,7 @@ BEGIN TRY
 		, CD.dblQuantity
 		, CD.intItemUOMId
 		, CD.dblOriginalQty 
-		, dblBalance =  CASE WHEN Pref.ysnEnableValueBasedContract = 1 THEN  CD.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE CD.dblBalance END 
+		, dblBalance =  CASE WHEN (Pref.ysnEnableValueBasedContract = 1 AND @strContractBase = 'Value')  THEN  CD.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE CD.dblBalance END 
 		, CD.dblIntransitQty
 		, CD.dblScheduleQty
 		, CD.dblBalanceLoad
