@@ -22,7 +22,7 @@ BEGIN TRY
 
 	/* Catalogue Validation. */
 	UPDATE Catalogue 
-	SET Catalogue.strLogResult	= 'Catalogue information is not available for the combination of Sale Year, Buying Center, Sale No, Catalogue Type, Supplier, Channel and Tealingo Item'
+	SET Catalogue.strLogResult	= 'Tasting Score information is not available for the Tealingo Item and Imported Catalogue.'
 	  , Catalogue.ysnSuccess	= 0
 	  , Catalogue.ysnProcessed	= 1
 	FROM tblQMImportCatalogue AS Catalogue
