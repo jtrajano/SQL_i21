@@ -24,5 +24,6 @@
 	,strOrderNo nvarchar(50)
 	,intOrderCompleted integer
 	,dtmExpiryDate DATETIME
+	,strTranferOrderStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,CONSTRAINT PK_tblIPInventoryAdjustmentStage PRIMARY KEY (intInventoryAdjustmentStageId)
 	)
