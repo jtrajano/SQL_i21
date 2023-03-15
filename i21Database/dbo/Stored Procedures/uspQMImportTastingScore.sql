@@ -1,146 +1,73 @@
-CREATE PROCEDURE uspQMImportTastingScore @intImportLogId INT
+CREATE PROCEDURE [dbo].[uspQMImportTastingScore] @intImportLogId INT
 AS
 BEGIN TRY
-	DECLARE @intProductValueId INT
-		,@intOriginalItemId INT
-		,@MFBatchTableType MFBatchTableType
-		,@dtmCurrentDate DATETIME
-		,@strBatchId NVARCHAR(50)
-		,@strBulkDensity NVARCHAR(50)
-		,@strTeaMoisture NVARCHAR(50)
-		,@strFines NVARCHAR(50)
-		,@strTeaVolume NVARCHAR(50)
-		,@strDustContent NVARCHAR(50)
+	DECLARE @intProductValueId	INT
+		  , @intOriginalItemId	INT
+		  , @MFBatchTableType	MFBatchTableType
+		  , @dtmCurrentDate		DATETIME
+		  , @strBatchId			NVARCHAR(50)
+		  , @strBulkDensity		NVARCHAR(50)
+		  , @strTeaMoisture		NVARCHAR(50)
+		  , @strFines			NVARCHAR(50)
+		  , @strTeaVolume		NVARCHAR(50)
+		  , @strDustContent		NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
 	BEGIN TRANSACTION
 
-	-- Validate Foreign Key Fields
+	/* Validate Foreign Key Fields. */
+
 	UPDATE IMP
-	SET strLogResult = 'Incorrect Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage), charindex(',', reverse(MSG.strLogMessage)) + 1, len(MSG.strLogMessage)))
-		,ysnSuccess = 0
-		,ysnProcessed = 1
+	SET strLogResult	= 'Incorrect Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage), charindex(',', reverse(MSG.strLogMessage)) + 1, len(MSG.strLogMessage)))
+	  , ysnSuccess		= 0
+	  , ysnProcessed	= 1
 	FROM tblQMImportCatalogue IMP
-	-- Colour
-	LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
-		AND COLOUR.strDescription = IMP.strColour
-	-- Size
-	LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
-	-- Style
-	LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
-	-- Tealingo Item
-	LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
-	-- Batch ID
-	LEFT JOIN tblMFBatch BATCH ON BATCH.strBatchId = IMP.strBatchNo
-	-- Template Sample Type
-	LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
-	-- Buyer1 Group Number
-	LEFT JOIN tblSMCompanyLocation B1GN ON B1GN.strLocationName = IMP.strB1GroupNumber
-	-- Format log message
-	OUTER APPLY (
-		SELECT strLogMessage = CASE 
-				WHEN (
-						COLOUR.intCommodityAttributeId IS NULL
-						AND ISNULL(IMP.strColour, '') <> ''
-						)
-					THEN 'COLOUR, '
-				ELSE ''
-				END + CASE 
-				WHEN (
-						SIZE.intBrandId IS NULL
-						AND ISNULL(IMP.strSize, '') <> ''
-						)
-					THEN 'SIZE, '
-				ELSE ''
-				END + CASE 
-				WHEN (
-						STYLE.intValuationGroupId IS NULL
-						AND ISNULL(IMP.strStyle, '') <> ''
-						)
-					THEN 'STYLE, '
-				ELSE ''
-				END + CASE 
-				WHEN (
-						ITEM.intItemId IS NULL
-						AND ISNULL(IMP.strTealingoItem, '') <> ''
-						)
-					THEN 'TEALINGO ITEM, '
-				ELSE ''
-				END + CASE 
-				WHEN (
-						BATCH.intBatchId IS NULL
-						AND ISNULL(IMP.strBatchNo, '') <> ''
-						)
-					THEN 'BATCH NO, '
-				ELSE ''
-				END + CASE 
-				WHEN (
-						TEMPLATE_SAMPLE_TYPE.intSampleTypeId IS NULL
-						AND ISNULL(IMP.strSampleTypeName, '') <> ''
-						)
-					THEN 'SAMPLE TYPE, '
-				ELSE ''
-				END + CASE 
-				WHEN (
-						B1GN.intCompanyLocationId IS NULL
-						AND ISNULL(IMP.strB1GroupNumber, '') <> ''
-						)
-					THEN 'BUYER1 GROUP NUMBER, '
-				ELSE ''
-				END
-		) MSG
+	LEFT JOIN tblICCommodityAttribute AS Colour ON Colour.strType = 'Season' AND Colour.strDescription = IMP.strColour
+	LEFT JOIN tblICBrand AS Size ON Size.strBrandCode = IMP.strSize 
+	LEFT JOIN tblCTValuationGroup AS Style ON Style.strName = IMP.strStyle
+	LEFT JOIN tblICItem AS Item ON Item.strItemNo = IMP.strTealingoItem
+	LEFT JOIN tblMFBatch AS Batch ON Batch.strBatchId = IMP.strBatchNo
+	LEFT JOIN tblQMSampleType AS SampleType ON SampleType.strSampleTypeName = IMP.strSampleTypeName
+	LEFT JOIN tblCTBook AS Book ON (Book.strBook = IMP.strB1GroupNumber OR Book.strBookDescription = IMP.strB1GroupNumber)
+	LEFT JOIN tblSMCompanyLocation Buyer1GroupNumber ON Buyer1GroupNumber.strLocationName = Book.strBook
+	OUTER APPLY 
+	(
+		SELECT strLogMessage = CASE WHEN (Colour.intCommodityAttributeId IS NULL AND ISNULL(IMP.strColour, '') <> '') THEN 'COLOUR, '
+									ELSE ''
+							   END 
+							 + CASE WHEN (Size.intBrandId IS NULL AND ISNULL(IMP.strSize, '') <> '') THEN 'SIZE, ' 
+									ELSE ''
+							   END 
+							 + CASE WHEN (Style.intValuationGroupId IS NULL AND ISNULL(IMP.strStyle, '') <> '') THEN 'STYLE, '
+									ELSE ''
+							   END 
+							 + CASE WHEN (Item.intItemId IS NULL AND ISNULL(IMP.strTealingoItem, '') <> '') THEN 'TEALINGO ITEM, '
+									ELSE ''
+							   END 
+							 + CASE WHEN (SampleType.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '') THEN 'SAMPLE TYPE, '
+									ELSE ''
+							   END 
+							 + CASE WHEN (Buyer1GroupNumber.intCompanyLocationId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '') THEN 'BUYER1 GROUP NUMBER, '
+									ELSE ''
+							   END
+	) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
-		AND (
-			(
-				COLOUR.intCommodityAttributeId IS NULL
-				AND ISNULL(IMP.strColour, '') <> ''
-				)
-			OR (
-				SIZE.intBrandId IS NULL
-				AND ISNULL(IMP.strSize, '') <> ''
-				)
-			OR (
-				STYLE.intValuationGroupId IS NULL
-				AND ISNULL(IMP.strStyle, '') <> ''
-				)
-			OR (
-				ITEM.intItemId IS NULL
-				AND ISNULL(IMP.strTealingoItem, '') <> ''
-				)
-			OR (
-				TEMPLATE_SAMPLE_TYPE.intSampleTypeId IS NULL
-				AND ISNULL(IMP.strSampleTypeName, '') <> ''
-				)
-			OR (
-				B1GN.intCompanyLocationId IS NULL
-				AND ISNULL(IMP.strB1GroupNumber, '') <> ''
-				)
-			)
+		AND 
+		(
+			(Colour.intCommodityAttributeId IS NULL AND ISNULL(IMP.strColour, '') <> '')
+		 OR (Size.intBrandId IS NULL AND ISNULL(IMP.strSize, '') <> '' )
+		 OR (Style.intValuationGroupId IS NULL AND ISNULL(IMP.strStyle, '') <> '')
+		 OR (Item.intItemId IS NULL AND ISNULL(IMP.strTealingoItem, '') <> '')
+		 OR (SampleType.intSampleTypeId IS NULL AND ISNULL(IMP.strSampleTypeName, '') <> '')
+		 OR (Buyer1GroupNumber.intCompanyLocationId IS NULL AND ISNULL(IMP.strB1GroupNumber, '') <> '')
+		)
 
-	UPDATE IMP
-	SET strLogResult 	= 'Catalogue information is not available for the combination of Sale Year, Buying Center, Sale No, Catalogue Type, Supplier, Channel.'
-		,ysnSuccess 	= 0
-		,ysnProcessed 	= 1
-	FROM tblQMImportCatalogue IMP 
-	INNER JOIN tblQMSaleYear SY ON IMP.strSaleYear = SY.strSaleYear
-	INNER JOIN tblQMCatalogueType CT ON IMP.strCatalogueType = CT.strCatalogueType
-	INNER JOIN tblSMCompanyLocation CL ON IMP.strBuyingCenter = CL.strLocationName
-	INNER JOIN tblEMEntity E ON IMP.strSupplier = E.strName
-	INNER JOIN tblAPVendor V ON E.intEntityId = V.intEntityId
-	INNER JOIN tblARMarketZone MZ ON IMP.strChannel = MZ.strMarketZoneCode
-	LEFT JOIN tblQMSample S ON IMP.strSaleNumber = S.strSaleNumber 
-						AND SY.intSaleYearId = S.intSaleYearId
-						AND CT.intCatalogueTypeId = S.intCatalogueTypeId
-						AND CL.intCompanyLocationId = S.intLocationId
-						AND E.intEntityId = S.intEntityId
-						AND MZ.intMarketZoneId = S.intMarketZoneId
-	WHERE IMP.intImportLogId = @intImportLogId
-	  AND S.intSampleId IS NULL
-	  AND IMP.ysnSuccess = 1
+	/* End of Validate Foreign Key Fields. */
 
-	-- End Validation
+	EXECUTE uspQMImportValidationCatalogue @intImportLogId;
+
 	DECLARE @intImportType INT
 		,@intImportCatalogueId INT
 		,@intSampleTypeId INT
