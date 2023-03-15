@@ -240,7 +240,7 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblCurrencyExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -492,7 +492,7 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -813,7 +813,7 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
@@ -1181,7 +1181,7 @@ SELECT
     ,[dblAverageExchangeRate]           = ARI.[dblAverageExchangeRate]
     ,[intTermId]                        = ARI.[intTermId]
     ,[dblInvoiceTotal]                  = ARI.[dblInvoiceTotal]
-    ,[dblBaseInvoiceTotal]              = ROUND(ARI.[dblInvoiceTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,[dblBaseInvoiceTotal]              = ARI.[dblBaseInvoiceTotal]
     ,[dblShipping]                      = ARI.[dblShipping]
     ,[dblBaseShipping]                  = ARI.[dblBaseShipping]
     ,[dblTax]                           = ARI.[dblTax]
