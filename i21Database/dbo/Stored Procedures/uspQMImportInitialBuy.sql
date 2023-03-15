@@ -330,6 +330,8 @@ BEGIN TRY
 				)
 			)
 
+	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
+
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
 		,@intSampleId INT
