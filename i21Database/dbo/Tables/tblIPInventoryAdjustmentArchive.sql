@@ -17,6 +17,7 @@
 	,strReasonCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNotes NVARCHAR(2048) COLLATE Latin1_General_CI_AS
 	,strAdjustmentNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strNewLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNewStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNewStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strTranferOrderStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
