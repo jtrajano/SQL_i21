@@ -107,7 +107,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 						FROM (
 							SELECT DISTINCT CAST(C.intEntityCustomerId AS VARCHAR(200))  + ', '
 							FROM vyuARCustomerSearch C
-							INNER JOIN @temp_xml_table TT ON C.strName = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							INNER JOIN @temp_xml_table TT ON LTRIM(RTRIM(C.strName)) = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
 							WHERE TT.fieldname = 'strCustomerName'
 							  AND TT.condition = 'Equal To'
 							FOR XML PATH ('')
