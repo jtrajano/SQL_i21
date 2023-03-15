@@ -746,7 +746,6 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseAmountDue]
 	,[dblCreditCardFee]
 	,[dblBaseCreditCardFee]
-    ,[dblOriginalBaseAmountDue]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -836,7 +835,6 @@ SELECT
     ,[dblBaseAmountDue]                 = ROUND(ARPD.[dblAmountDue] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
 	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
-    ,[dblOriginalBaseAmountDue]         = ARI.[dblBaseAmountDue]
 
     ,[intInvoiceId]                     = ARI.[intInvoiceId]
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
@@ -938,7 +936,6 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseAmountDue]
 	,[dblCreditCardFee]
 	,[dblBaseCreditCardFee]
-    ,[dblOriginalBaseAmountDue]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -1028,7 +1025,6 @@ SELECT
     ,[dblBaseAmountDue]                 = ROUND(ARPD.[dblAmountDue] * ARPD.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
 	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
-    ,[dblOriginalBaseAmountDue]         = ARP.[dblBaseAmountDue]
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit
