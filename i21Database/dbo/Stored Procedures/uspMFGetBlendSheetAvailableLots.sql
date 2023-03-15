@@ -167,6 +167,7 @@ SELECT Lot.intLotId
 	 , Item.intUnitPerLayer
 	 , Item.intLayerPerPallet
 	 , ISNULL(InputLot.dblPickedQty, 0) AS dblPickedQty
+	 , Item.strShortName
 INTO #tempLot
 FROM tblICLot AS Lot
 JOIN tblICItem AS Item ON Lot.intItemId = Item.intItemId
@@ -266,6 +267,7 @@ IF @ysnEnableParentLot = 0
 			 , TemporaryLot.intUnitPerLayer
 			 , TemporaryLot.intLayerPerPallet
 			 , TemporaryLot.dblPickedQty 
+			 , TemporaryLot.strShortName 
 		FROM #tempLot AS TemporaryLot 
 		LEFT JOIN @tblReservedQty AS ReservedQty ON TemporaryLot.intLotId = ReservedQty.intLotId
 	END
@@ -328,6 +330,7 @@ ELSE
 					 , TemporaryLot.intUnitPerLayer
 					 , TemporaryLot.intLayerPerPallet
 					 , TemporaryLot.dblPickedQty
+					 , TemporaryLot.strShortName
 				INTO #tempParentLotByStorageLocation
 				FROM #tempLot AS TemporaryLot 
 				JOIN tblICParentLot AS ParentLot on TemporaryLot.intParentLotId = ParentLot.intParentLotId 
@@ -425,6 +428,7 @@ ELSE
 					 , TemporaryLot.intUnitPerLayer
 					 , TemporaryLot.intLayerPerPallet
 					 , TemporaryLot.dblPickedQty
+					 , TemporaryLot.strShortName
 				INTO #tempParentLotByLocation
 				FROM #tempLot AS TemporaryLot
 				JOIN tblICParentLot AS ParentLot ON TemporaryLot.intParentLotId = ParentLot.intParentLotId 

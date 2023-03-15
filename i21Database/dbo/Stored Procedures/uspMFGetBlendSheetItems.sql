@@ -325,7 +325,11 @@ SELECT Item.intItemId
 	 , ISNULL(ReservedQty.dblReservedQty, 0) AS dblReservedQty
 	 , ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
 	 , 0.0 AS dblSelectedQty
-	 , ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0 THEN 1 ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1) END, 0), 0.0) AS dblAvailableUnit
+	 , ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE 
+	  			WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0
+	  				THEN 1
+	  			ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
+	  			END, 0), 0.0) AS dblAvailableUnit
 	 , RequiredQty.ysnIsSubstitute
 	 , RequiredQty.intParentItemId
 	 , RequiredQty.ysnHasSubstitute
@@ -335,29 +339,35 @@ SELECT Item.intItemId
 	 , RequiredQty.dblLowerToleranceQty
 	 , RequiredQty.dblUpperToleranceQty
 	 , RequiredQty.ysnMinorIngredient
-	 , RequiredQty.ysnScaled,RequiredQty.dblRecipeQty
+	 , RequiredQty.ysnScaled
+	 , RequiredQty.dblRecipeQty
 	 , RequiredQty.dblRecipeItemQty
 	 , RequiredQty.strRecipeItemUOM
 	 , RequiredQty.strConsumptionStorageLocation
 	 , RequiredQty.intConsumptionMethodId
-	 , ISNULL(Item.ysnHandAddIngredient,0)				AS ysnHandAddIngredient
+	 , ISNULL(Item.ysnHandAddIngredient, 0)				AS ysnHandAddIngredient
 	 , @intRecipeId										AS intRecipeId
-	 , RequiredQty.intConsumptionStorageLocationId 
+	 , RequiredQty.intConsumptionStorageLocationId
 	 , @intManufacturingProcessId						AS intManufacturingProcessId
 	 , @strBlendItemLotTracking							AS strBlendItemLotTracking
 	 , ISNULL(ConfirmedQty.dblConfirmedQty, 0)			AS dblConfirmedQty
 	 , RequiredQty.dblRequiredQty						AS dblOrgRequiredQty
-	 , ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS,0)	AS dblReservedQtyInTBS
-	 , CAST(ISNULL(ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0 THEN 1 ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1) END, 0), 0.0), 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
+	 , ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)	AS dblReservedQtyInTBS
+	 , CAST(ISNULL(ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE 
+	  					WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0
+	  						THEN 1
+	  					ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
+	  					END, 0), 0.0), 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
 	 , MT.strDescription AS strProductType
 	 , B.strBrandCode
 	 , Item.intUnitPerLayer
 	 , Item.intLayerPerPallet
-FROM @tblRequiredQty AS RequiredQty 
+	 , Item.strShortName
+FROM @tblRequiredQty AS RequiredQty
 JOIN tblICItem AS Item ON RequiredQty.intItemId = Item.intItemId
 LEFT JOIN @tblPhysicalQty AS PhysicalQty ON RequiredQty.intItemId = PhysicalQty.intItemId
 LEFT JOIN @tblReservedQty AS ReservedQty  ON RequiredQty.intItemId = ReservedQty.intItemId
 LEFT JOIN @tblConfirmedQty AS ConfirmedQty ON ConfirmedQty.intItemId = Item.intItemId
-LEFT JOIN @tblReservedQtyInTBS AS ReservedQtyInTBS on RequiredQty.intItemId=ReservedQtyInTBS.intItemId
-LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=Item.intProductTypeId
-LEFT JOIN tblICBrand B on B.intBrandId=Item.intBrandId;
+LEFT JOIN @tblReservedQtyInTBS AS ReservedQtyInTBS ON RequiredQty.intItemId = ReservedQtyInTBS.intItemId
+LEFT JOIN tblICCommodityAttribute MT ON MT.intCommodityAttributeId = Item.intProductTypeId
+LEFT JOIN tblICBrand B ON B.intBrandId = Item.intBrandId;
