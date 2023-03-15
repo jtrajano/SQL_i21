@@ -1,9 +1,12 @@
-CREATE PROCEDURE uspQMImportContractAllocation @intImportLogId INT
+CREATE PROCEDURE uspQMImportContractAllocation 
+(
+	@intImportLogId INT
+) 
 AS
 BEGIN TRY
-	DECLARE @strBatchId NVARCHAR(50)
-	DECLARE @intEntityUserId INT
-	,@strPlantCode nvarchar(50)
+	DECLARE @strBatchId			NVARCHAR(50)
+		  , @intEntityUserId	INT
+		  , @strPlantCode		NVARCHAR(50)
 
 	SELECT @intEntityUserId = intEntityId
 	FROM tblQMImportLog
@@ -100,6 +103,8 @@ BEGIN TRY
 				)
 			OR CD.intBookId<>BOOK.intBookId
 			)
+
+	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT

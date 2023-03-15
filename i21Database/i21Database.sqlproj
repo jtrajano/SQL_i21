@@ -1570,6 +1570,10 @@
     <Build Include="dbo\Views\vyuSTGetFuelInventory.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportTastingScoreValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportSupplierEvaluationValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
