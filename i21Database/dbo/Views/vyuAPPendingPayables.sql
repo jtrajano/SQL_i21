@@ -52,6 +52,8 @@ SELECT
 	,A.intInventoryShipmentChargeId
 	,A.intLoadShipmentId
 	,A.intLoadShipmentDetailId
+	,A.intWeightClaimId
+	,A.intWeightClaimDetailId
 	,A.intItemId
 	,A.strItemNo
 	,A.intPurchaseTaxGroupId
