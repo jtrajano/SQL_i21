@@ -877,7 +877,8 @@ BEGIN TRY
 	-- 1. Destination qty 
 	-- 2. Other charges. 
 	-- 3. Inventory Adjustment. 
-	EXEC [uspICPostDestinationInventoryShipment] @ysnPost ,0 ,@dtmScaleDate ,@DestinationItems ,@ShipmentCharges ,@intUserId ,@strBatchId 
+	DECLARE @CURERENT_DATE DATETIME = GETDATE()
+	EXEC [uspICPostDestinationInventoryShipment] @ysnPost ,0 ,@CURERENT_DATE ,@DestinationItems ,@ShipmentCharges ,@intUserId ,@strBatchId 
 END TRY
 BEGIN CATCH
 	SELECT 
