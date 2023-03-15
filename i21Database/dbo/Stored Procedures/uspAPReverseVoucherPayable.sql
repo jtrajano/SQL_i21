@@ -762,7 +762,7 @@ BEGIN
 			INNER JOIN @id ID ON ID.intReversedVoucherPayableId = P.intVoucherPayableId
 
 			--DELETE TAXES
-			DELETE T
+			DELETE PT
 			FROM tblAPVoucherPayableTaxReversed PT
 			INNER JOIN @id ID ON ID.intReversedVoucherPayableId = PT.intVoucherPayableId
 		END
