@@ -67,7 +67,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						CUR.intCurrencyID IS NULL
-						AND ISNULL(IMP.strCurrency, '') <> ''
+						--AND ISNULL(IMP.strCurrency, '') <> ''
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
@@ -99,7 +99,7 @@ BEGIN TRY
 				)
 			OR (
 				CUR.intCurrencyID IS NULL
-				AND ISNULL(IMP.strCurrency, '') <> ''
+				--AND ISNULL(IMP.strCurrency, '') <> ''
 				)
 			OR CD.intBookId<>BOOK.intBookId
 			)

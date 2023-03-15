@@ -1430,26 +1430,7 @@ BEGIN TRY
 					INNER JOIN tblCTPriceFixationDetail CT
 						ON CT.intPriceFixationDetailId = GR.intPriceFixationDetailId
 					WHERE GR.intSettleStorageId = @intSettleStorageId AND GR.intContractDetailId = SVC.intContractDetailId
-				) A
-
-				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
-				--UPDATE THE NET SETTLEMENT AND DISCOUNT DUE BASED ON THE PRICING LAYERS
-				UPDATE SS
-				SET dblNetSettlement = ISNULL(A.dblNetSettlement,0)
-					,dblDiscountsDue = ISNULL(B.dblDiscountDue,0)
-				FROM tblGRSettleStorage SS
-				OUTER APPLY (
-					SELECT 
-						dblNetSettlement = SUM(ISNULL(dblUnits,0) * ISNULL(dblCashPrice,0))
-					FROM @SettleVoucherCreate2
-				) A
-				OUTER APPLY (
-					SELECT 
-						dblDiscountDue = ABS(SUM(ISNULL(dblUnits,0) * ISNULL(dblCashPrice,0)))
-					FROM @SettleVoucherCreate2
-					WHERE intItemType = 3
-				) B
-				WHERE SS.intSettleStorageId = @intSettleStorageId
+				) A				
 			END			
 			ELSE
 			BEGIN
@@ -1498,8 +1479,26 @@ BEGIN TRY
 					,dblCashPriceUsed		
 					,ysnInventoryCost
 				FROM @SettleVoucherCreate
-			END		
+			END
 
+				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
+				--UPDATE THE NET SETTLEMENT AND DISCOUNT DUE BASED ON THE PRICING LAYERS
+				UPDATE SS
+				SET dblNetSettlement = ISNULL(A.dblNetSettlement,0)
+					,dblDiscountsDue = ISNULL(B.dblDiscountDue,0)
+				FROM tblGRSettleStorage SS
+				OUTER APPLY (
+					SELECT 
+						dblNetSettlement = SUM(ISNULL(dblUnits,0) * ISNULL(dblCashPrice,0))
+					FROM @SettleVoucherCreate2
+				) A
+				OUTER APPLY (
+					SELECT 
+						dblDiscountDue = ABS(SUM(ISNULL(dblUnits,0) * ISNULL(dblCashPrice,0)))
+					FROM @SettleVoucherCreate2
+					WHERE intItemType = 3
+				) B
+				WHERE SS.intSettleStorageId = @intSettleStorageId
 				-- Note: A single Batch ID will be used across multiple settle storage tickets.
 				-- -- Get the Batch Id 
 				-- EXEC dbo.uspSMGetStartingNumber 
