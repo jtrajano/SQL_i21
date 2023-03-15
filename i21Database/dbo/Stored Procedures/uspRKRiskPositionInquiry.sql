@@ -229,7 +229,7 @@ BEGIN
 	JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = cv.intFutureMonthId
 	JOIN tblICItemUOM u ON cv.intItemUOMId = u.intItemUOMId
 	JOIN tblICItem ic ON ic.intItemId = cv.intItemId
-	LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+	LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 	LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 	LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 	LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = cv.intCommodityId AND um.intUnitMeasureId = cv.intUnitMeasureId
@@ -1098,7 +1098,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+			LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 			LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 			LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1187,7 +1187,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+			LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 			LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 			LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1277,7 +1277,7 @@ BEGIN
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 		LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-		LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+		LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 		LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 		LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1395,7 +1395,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+			LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 			LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 			LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1486,7 +1486,7 @@ BEGIN
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 		LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-		LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+		LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 		LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 		LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1606,7 +1606,7 @@ BEGIN
 				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-				LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+				LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 				LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 				LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 				LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1701,7 +1701,7 @@ BEGIN
 				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-				LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+				LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 				LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 				LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 				LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
