@@ -916,6 +916,7 @@ BEGIN TRY
 						,intBrokerId
 						,intPackageTypeId
 						,dblTareWeight
+						,strCourierRef
 						)
 					-- ,intTINClearanceId
 					SELECT intConcurrencyId = 1
@@ -982,6 +983,7 @@ BEGIN TRY
 						,intBrokerId = S.intBrokerId
 						,intPackageTypeId=@intPackageTypeId
 						,dblTareWeight=@dblTareWeight
+						,strCourierRef = @strCourierRef
 					FROM tblQMSample S
 					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 					WHERE B.intBatchId = @intBatchId
@@ -1672,6 +1674,7 @@ BEGIN TRY
 				,intB1PriceUOMId = null
 				,intBookId = null
 				,intPackageTypeId=@intPackageTypeId
+				,strCourierRef = @strCourierRef
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 

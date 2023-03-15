@@ -222,6 +222,10 @@ SELECT S.intSampleId
 	,S.dblB5Price
 	,S.intB5PriceUOMId
 	,PUOM5.strUnitMeasure AS strB5PriceUOM
+	, PackageType.strUnitMeasure AS strPackageType
+	, ISNULL(S.strCourierRef, strAirwayBillCode) AS strAirwayBillCode 
+	, Batch.strTaster 
+	, S.ysnBought
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -306,6 +310,14 @@ LEFT JOIN tblICStorageLocation DSL ON DSL.intStorageLocationId = S.intDestinatio
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON S.intDestinationStorageLocationId = CLSL.intCompanyLocationSubLocationId
 LEFT JOIN tblCTValuationGroup VG ON VG.intValuationGroupId = S.intValuationGroupId
 LEFT JOIN tblQMTINClearance TC ON TC.intTINClearanceId = S.intTINClearanceId
+OUTER APPLY (SELECT TOP 1 ICUOM.strUnitMeasure
+				  , ICUOM.strSymbol
+			 FROM tblICUnitMeasure AS ICUOM 
+			 WHERE ICUOM.intUnitMeasureId = S.intPackageTypeId) AS PackageType
+OUTER APPLY (SELECT TOP 1 MFBatch.strTaster
+						, MFBatch.strAirwayBillCode
+			 FROM tblMFBatch AS MFBatch
+			 WHERE MFBatch.strBatchId = S.strBatchNo) AS Batch
 WHERE S.intTypeId = 1
 GO
 

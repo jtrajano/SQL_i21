@@ -99,6 +99,7 @@ BEGIN TRY
 		,@strIntensity NVARCHAR(MAX)
 		,@strTaste NVARCHAR(MAX)
 		,@strMouthFeel NVARCHAR(MAX)
+		,@strAirwayBillNumberCode NVARCHAR(MAX)
 	DECLARE @intValidDate INT
 		,@intDefaultItemId INT
 		,@intDefaultCategoryId INT
@@ -154,6 +155,7 @@ BEGIN TRY
 			,[strFines] = IMP.strFines
 			,[strTeaVolume] = IMP.strTeaVolume
 			,[strDustContent] = IMP.strDustContent
+			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
 		FROM tblQMSample S
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -224,6 +226,7 @@ BEGIN TRY
 			,[strFines] = IMP.strFines
 			,[strTeaVolume] = IMP.strTeaVolume
 			,[strDustContent] = IMP.strDustContent
+			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
 		FROM tblQMSample S
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -325,6 +328,7 @@ BEGIN TRY
 		,@strFines
 		,@strTeaVolume
 		,@strDustContent
+		,@strAirwayBillNumberCode
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -1239,7 +1243,7 @@ BEGIN TRY
 				,intContractDetailId = S.intContractDetailId
 				,str3PLStatus = S.str3PLStatus
 				,strSupplierReference = S.strAdditionalSupplierReference
-				,strAirwayBillCode = S.strCourierRef
+				,strAirwayBillCode = ISNULL(S.strCourierRef, @strAirwayBillNumberCode)
 				,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 				,strAWBSampleReference = S.strAWBSampleReference
 				,dblBasePrice = S.dblB1Price
@@ -1566,6 +1570,7 @@ BEGIN TRY
 			,@strFines
 			,@strTeaVolume
 			,@strDustContent
+			,@strAirwayBillNumberCode
 	END
 
 	CLOSE @C
