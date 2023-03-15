@@ -6,7 +6,8 @@ SELECT		a.intStoreId,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity,
 			ISNULL(c.dblUploadSpeed,0) as dblUploadSpeed,
-			FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us')  as dtmCurrentBusinessDay,
+			(CASE WHEN FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') = FORMAT(GETDATE() - 1, 'd','us') THEN 'Current'
+			ELSE FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') END) as dtmCurrentBusinessDay,
 			a.ysnConsignmentStore,
 			reg.strStoreAppFileVersion as strStoreAppVersion
 FROM		tblSTStore a
