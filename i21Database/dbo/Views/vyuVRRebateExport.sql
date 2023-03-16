@@ -30,7 +30,7 @@ SELECT
 	, customer.strCustomerNumber
 	, customerEntity.strName strCustomerName
 	, rebate.dblRebateRate
-	, COALESCE(vendorSetup.strMarketerAccountNo, vendorSetup.strCompany2Id) strMarketerAccountNo
+	, COALESCE(NULLIF(vendorSetup.strMarketerAccountNo, ''), vendorSetup.strCompany2Id) strMarketerAccountNo
 	, vendorSetup.strMarketerEmail
 	, vendorSetup.strDataFileTemplate
 	, vendorSetup.strExportFilePath
