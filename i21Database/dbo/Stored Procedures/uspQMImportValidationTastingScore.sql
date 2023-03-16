@@ -20,7 +20,7 @@ BEGIN TRY
 	  * JIRA: QC-1006
 	**/
 
-	/* Catalogue Validation. */
+	/* Tasting Score Validation. */
 	UPDATE Catalogue 
 	SET Catalogue.strLogResult	= 'Tasting Score record not found or Tealingo Item was not provided.'
 	  , Catalogue.ysnSuccess	= 0
