@@ -51,6 +51,8 @@ BEGIN TRY
 		,@dtmValidTo DATETIME
 		,@ysnTBSReserveOnSave BIT
 		,@dblTBSQuantity NUMERIC(18, 6)
+		,@intLotId int
+		,@dblWeight numeric(18,6)
 	DECLARE @dblInputAvlQty NUMERIC(38, 20)
 	DECLARE @dblInputReqQty NUMERIC(38, 20)
 	DECLARE @intInputLotId INT
@@ -1224,11 +1226,45 @@ BEGIN TRY
 		SELECT @intItemId = NULL
 			,@dblIssuedQuantity = NULL
 			,@strFW=NULL
+			,@intLotId =NULL
+			,@dblWeight=NULL
 
 		SELECT @intItemId = intItemId
 			,@dblIssuedQuantity = dblIssuedQuantity
+			,@intLotId=intLotId
 		FROM tblMFWorkOrderInputLot
 		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
+		FROM tblMFWorkOrderInputLot
+		WHERE intLotId = @intLotId
+
+		Select @dblInputAvlQty=dblWeight  
+		from tblICLot 
+		Where intLotId=@intLotId
+		
+		if @dblTBSQuantity>@dblInputAvlQty
+		Begin
+			SELECT @strInputLotNumber = NULL
+
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = NULL
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		End
 
 		IF (@dblIssuedQuantity % @intNoOfSheets) > 0
 			AND @intIssuedUOMTypeId = 4
@@ -1275,7 +1311,7 @@ BEGIN TRY
 		END
 
 		UPDATE tblMFWorkOrderInputLot
-		SET strFW = @strFW
+		SET strFW = @strFW, ysnKeep =Case When @dblInputAvlQty>@dblTBSQuantity then 1 Else 0 End
 		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 		SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
