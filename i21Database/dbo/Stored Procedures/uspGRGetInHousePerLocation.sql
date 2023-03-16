@@ -508,6 +508,43 @@ BEGIN
 			,strLocationName
 		FROM @tblResult
 		WHERE strTransactionType LIKE 'Inventory Adjustment%'
+			AND dblTotal > 0
+		GROUP BY dtmDate
+			,strDistribution 
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+			,intCompanyLocationId
+	) t
+
+	INSERT INTO @tblResultInventory
+	(
+		dtmDate
+		,dblAdjustments
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT dtmDate
+		,dblTotal 
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	FROM (
+		SELECT dtmDate 
+			,dblTotal = SUM(ISNULL(dblTotal,0))
+			,strDistribution  = CASE WHEN ISNULL(strDistribution,'') <> '' THEN strDistribution ELSE 'ADJ' END
+			,strTransactionType = 'Inventory Adjustment'
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResult
+		WHERE strTransactionType LIKE 'Inventory Adjustment%'
+			AND dblTotal < 0
 		GROUP BY dtmDate
 			,strDistribution 
 			,strOwnership
@@ -579,7 +616,49 @@ BEGIN
 			,strLocationName
 		FROM @tblResultInventory
 		WHERE dtmDate = @dtmDate
+			AND strTransactionType <> 'Inventory Adjustment'
 		GROUP BY dtmDate,strTransactionType,strOwnership,strOwnership,intCompanyLocationId,strLocationName
+		UNION ALL
+		SELECT dtmDate
+			,dblInvIn = 0
+			,dblInvOut = 0
+			,dblAdjustments = SUM(dblAdjustments)
+			--,strDistribution
+			--,r.dblBalanceInv
+			--,r.dblBalanceCompanyOwned
+			--,r.dblBalanceCustomerOwned 
+			--,r.dblSalesInTransit
+			,strTransactionType
+			,intCommodityId = @intCommodityId
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResultInventory
+		WHERE dtmDate = @dtmDate
+			AND strTransactionType = 'Inventory Adjustment'
+			AND dblAdjustments < 0
+		GROUP BY dtmDate,strTransactionType,strOwnership,strOwnership,intCompanyLocationId,strLocationName
+		UNION ALL
+		SELECT dtmDate
+			,dblInvIn = 0
+			,dblInvOut = 0
+			,dblAdjustments = SUM(dblAdjustments)
+			--,strDistribution
+			--,r.dblBalanceInv
+			--,r.dblBalanceCompanyOwned
+			--,r.dblBalanceCustomerOwned 
+			--,r.dblSalesInTransit
+			,strTransactionType
+			,intCommodityId = @intCommodityId
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResultInventory
+		WHERE dtmDate = @dtmDate
+			AND strTransactionType = 'Inventory Adjustment'
+			AND dblAdjustments > 0
+		GROUP BY dtmDate,strTransactionType,strOwnership,strOwnership,intCompanyLocationId,strLocationName
+		
 
 	DROP TABLE #LicensedLocation
 END
