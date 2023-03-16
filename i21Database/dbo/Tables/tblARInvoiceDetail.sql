@@ -146,6 +146,7 @@
 	[dblServiceChargeAmountDue]				NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblServiceChargeAmountDue] DEFAULT ((0)) NULL,
 	[dblServiceChargeAPR]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblServiceChargeAPR] DEFAULT ((0)) NULL,
 	[ysnOverrideTaxGroup]					BIT												NULL,
+	intDispatchId							INT												NULL,
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

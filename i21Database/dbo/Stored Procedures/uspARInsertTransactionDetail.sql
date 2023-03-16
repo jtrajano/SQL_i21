@@ -47,7 +47,9 @@ BEGIN
 		,[intSubCurrencyId]
 		,[dblAmountDue]
 		,[intCompanyLocationId]
-		,[intEntityUserId])
+		,[intEntityUserId]
+		,intDispatchId
+	)
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
@@ -79,6 +81,7 @@ BEGIN
 		,[dblAmountDue]							= @dblAmountDue
 		,[intCompanyLocationId]					= @intCompanyLocationId
 		,[intEntityUserId]						= @UserId
+		,intDispatchId							= intDispatchId
 	FROM [tblARInvoiceDetail]
 	WHERE [intInvoiceId] = @InvoiceId	
 END
