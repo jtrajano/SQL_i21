@@ -1558,6 +1558,7 @@
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
   <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
   <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
+  <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
