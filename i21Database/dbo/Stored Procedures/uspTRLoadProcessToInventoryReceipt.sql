@@ -120,8 +120,8 @@ END
 		,intCurrencyId				= @defaultCurrency
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from transport
-		,intSubLocationId			= NULL -- No Sub Location from transport
-		,intStorageLocationId		= MIN(TMSite.intCompanyLocationSubLocationId) -- No Storage Location from transport unless COmpany Consumption Site
+		,intSubLocationId			= MIN(TMSite.intCompanyLocationSubLocationId) -- No Storage Location from transport unless COmpany Consumption Site
+		,intStorageLocationId		= NULL -- No Sub Location from transport
 		,ysnIsStorage				= 0 -- No Storage from transports
 		,dblFreightRate				= min(TR.dblFreightRate)
 		,intSourceId				= min(TR.intLoadReceiptId)
