@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trucks' AND strModuleName = 'Mobile Billing')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Tax Report' AND strModuleName = 'Store')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5883,6 +5883,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Polling S
 	VALUES (N'Polling Status', N'Store', @StoreReportParentMenuId, N'Polling Status', N'Report', N'Screen', N'Store.view.PollingStatus', N'small-menu-report', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Store.view.PollingStatus' WHERE strMenuName = 'Polling Status' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Tax Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId) 
+ 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+ 	VALUES (N'Sales Tax Report', N'Store', @StoreReportParentMenuId, N'Sales Tax Report', N'Report', N'Screen', N'Store.view.SalesTaxReport', N'small-menu-report', 0, 0, 0, 1, 7, 1) 
+ELSE 
+ 	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Store.view.SalesTaxReport' WHERE strMenuName = 'Sales Tax Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
+ 
 
 --Lottery
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)
