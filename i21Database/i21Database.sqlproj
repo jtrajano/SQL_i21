@@ -413,7 +413,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
-    <Build Include="dbo\Tables\tblCMBankAccountType.sql" /> 
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Functions\fnSTGetSalesRestriction.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
@@ -1494,7 +1494,6 @@
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
     <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
-
     <Build Include="dbo\Stored Procedures\uspGRProcessTransferSettlements.sql" />
     <Build Include="dbo\User Defined Types\TransferFromSettlementStagingTable.sql" />
     <Build Include="dbo\User Defined Types\TransferSettlementReferenceStagingTable.sql" />
@@ -1502,8 +1501,9 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetailImport.sql" />
     <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
     <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
-  <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
-  <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
+    <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6725,7 +6725,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
-    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql"/>
+    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
@@ -7371,7 +7371,7 @@
     <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
-    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql"/>
+    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
