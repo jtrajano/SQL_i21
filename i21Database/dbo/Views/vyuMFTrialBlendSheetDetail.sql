@@ -17,15 +17,15 @@ SELECT wo.strWorkOrderNo
 						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 						WHERE SR.intLotId = lot.intLotId
 							AND ISNULL(ysnPosted, 0) = 0
-						), 0) > 0
+						), 0)-IsNULL(woil.dblTBSQuantity,0)  > 0
 				THEN 1
 			ELSE ISNULL(woil.ysnKeep, 0)
 			END AS BIT) [ysnKeep]
 	,lot.strLotNumber [strLotNumber]
-	,ISNULL(woil.dblTBSQuantity, (woil.dblQuantity / dblTotalWeight.dblTotalWeight) * IsNULL((
+	,(woil.dblQuantity / dblTotalWeight.dblTotalWeight) * IsNULL((
 				SELECT dblTrialBlendSheetSize
 				FROM tblMFCompanyPreference
-				), 0)) [dblWeight]
+				), 0) [dblWeight]
 	,br.strReferenceNo [strPurchaseOrder]
 	,b.strTeaGardenChopInvoiceNumber [strChop]
 	,mark.strGardenMark [strMark]
