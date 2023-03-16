@@ -25,9 +25,10 @@ BEGIN
 	INNER JOIN
 		[tblEMEntityLocation] EL
 			ON C.[intEntityId] = EL.[intEntityId] 
+	INNER JOIN tblEMEntity EN on EN.intEntityId = C.intEntityId
 	WHERE
 		C.[intEntityId] = @CustomerId
-		AND EL.[intEntityLocationId] = @CustomerLocationId
+		AND EL.[intEntityLocationId] = EN.intDefaultLocationId
 
 	IF ISNULL(@TaxGroupId,0) <> 0 
 		RETURN @TaxGroupId;	
