@@ -63,12 +63,6 @@ BEGIN TRY
         SET intSampleId = @intSampleId
         WHERE intImportCatalogueId = @intImportCatalogueId
 
-        EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId  = @intSampleId
-													  , @intUserEntityId = @intEntityUserId
-													  , @strRemarks = 'Updated from Supplier Valuation Import'
-													  , @ysnCreate = 0
-													  , @ysnBeforeUpdate = 0
-
         FETCH NEXT FROM @C INTO @intImportCatalogueId
 							  , @dblSupplierValuationPrice
 							  , @intSampleId
@@ -76,6 +70,12 @@ BEGIN TRY
     END
     CLOSE @C
 	DEALLOCATE @C
+
+    EXEC uspQMGenerateSampleCatalogueImportAuditLog
+        @intUserEntityId = @intEntityUserId
+        , @strRemarks = 'Updated from Supplier Valuation Import'
+        , @ysnCreate = 0
+        , @ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

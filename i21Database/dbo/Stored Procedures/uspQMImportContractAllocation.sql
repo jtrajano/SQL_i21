@@ -576,13 +576,6 @@ BEGIN TRY
 			WHERE intSampleId = @intSampleId
 		END
 
-		EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Contract Line Allocation Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 0
-
 		CONT:
 
 		FETCH NEXT
@@ -604,6 +597,12 @@ BEGIN TRY
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	EXEC uspQMGenerateSampleCatalogueImportAuditLog
+		@intUserEntityId = @intEntityUserId
+		,@strRemarks = 'Updated from Contract Line Allocation Import'
+		,@ysnCreate = 0
+		,@ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

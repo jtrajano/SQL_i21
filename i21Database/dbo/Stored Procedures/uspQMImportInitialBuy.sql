@@ -1030,13 +1030,6 @@ BEGIN TRY
 				,@strRowState
 		END
 
-		EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Initial Buy Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 0
-
 		FETCH NEXT
 		FROM @C
 		INTO @intImportCatalogueId
@@ -1090,6 +1083,12 @@ BEGIN TRY
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	EXEC uspQMGenerateSampleCatalogueImportAuditLog
+		@intUserEntityId = @intEntityUserId
+		,@strRemarks = 'Updated from Initial Buy Import'
+		,@ysnCreate = 0
+		,@ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY
