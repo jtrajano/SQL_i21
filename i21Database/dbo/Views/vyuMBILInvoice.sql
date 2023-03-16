@@ -34,6 +34,7 @@ SELECT Invoice.intInvoiceId
  --, Invoice.inti21InvoiceId    
  , inti21InvoiceId = i21Invoice.intInvoiceId    
  , stri21InvoiceNo = i21Invoice.strInvoiceNumber    
+ , Invoice.intLoadHeaderId
  , Invoice.intConcurrencyId    
  , strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS    
  , isnull(tax.dblTaxTotal,0) dblTotalTaxAmount      
@@ -84,3 +85,4 @@ LEFT JOIN (
   INNER JOIN tblTRLoadDistributionHeader TRDH on TRDH.intLoadHeaderId = TRL.intLoadHeaderId and TRDH.intShipToLocationId = MBILDH.intEntityLocationId and MBILDH.intCompanyLocationId = TRDH.intCompanyLocationId
   INNER JOIN tblTRLoadDistributionDetail TRDT on TRDH.intLoadDistributionHeaderId = TRDT.intLoadDistributionHeaderId and MBILDT.intTMSiteId = TRDT.intSiteId and MBILDT.intItemId = TRDT.intItemId
 ) transportDelivery on Invoice.intOrderId = transportDelivery.intOrderId
+WHERE Invoice.intLoadHeaderId IS NULL

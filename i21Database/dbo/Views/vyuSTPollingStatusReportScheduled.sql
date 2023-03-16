@@ -23,7 +23,7 @@ FORMAT((
 		ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
 	WHERE cpIn.intCheckoutProcessId =
 		(
-			SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
+			SELECT TOP 1 MAX(intCheckoutProcessErrorWarningId) 
 			FROM tblSTCheckoutProcess stcpIn
 			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
 				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
@@ -81,7 +81,7 @@ FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
 CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
 FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,
 FORMAT((
-	SELECT MAX(dtmCheckoutDate)
+	SELECT MAX(cpIn.dtmCheckoutProcessDate)
 	FROM tblSTCheckoutHeader chIn
 	JOIN tblSTCheckoutProcessErrorWarning ewIn
 		ON chIn.intCheckoutId = ewIn.intCheckoutId
@@ -93,13 +93,13 @@ FORMAT((
 			FROM tblSTCheckoutProcess stcpIn
 			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
 				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
-			WHERE stcpewIn.strMessageType = 'S'
-			AND stcpIn.intStoreId = a.intStoreId
+			WHERE
+			stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
 ), 'd','us') as strReportDate, 
 (
-	SELECT MAX(dtmCheckoutDate)
+	SELECT MAX(cpIn.dtmCheckoutProcessDate)
 	FROM tblSTCheckoutHeader chIn
 	JOIN tblSTCheckoutProcessErrorWarning ewIn
 		ON chIn.intCheckoutId = ewIn.intCheckoutId
@@ -111,49 +111,42 @@ FORMAT((
 			FROM tblSTCheckoutProcess stcpIn
 			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
 				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
-			WHERE stcpewIn.strMessageType = 'S'
-			AND stcpIn.intStoreId = a.intStoreId
+			JOIN tblSTCheckoutHeader chIIn
+				ON stcpewIn.intCheckoutId = chIIn.intCheckoutId
+			WHERE
+			stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
 ) AS dtmCheckoutProcessDate, 
+(SELECT chOut.dtmCheckoutDate
+FROM tblSTCheckoutProcessErrorWarning cpewOutMsg
+	JOIN tblSTCheckoutHeader chOut
+		ON cpewOutMsg.intCheckoutId = chOut.intCheckoutId
+WHERE cpewOutMsg.intCheckoutProcessErrorWarningId =
 (
-	SELECT MAX(dtmCheckoutDate)
-	FROM tblSTCheckoutHeader chIn
-	JOIN tblSTCheckoutProcessErrorWarning ewIn
-		ON chIn.intCheckoutId = ewIn.intCheckoutId
-	JOIN tblSTCheckoutProcess cpIn
-		ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
-	WHERE cpIn.intCheckoutProcessId =
-		(
-			SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
-			FROM tblSTCheckoutProcess stcpIn
-			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
-				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
-			WHERE stcpewIn.strMessageType = 'S'
-			AND stcpIn.intStoreId = a.intStoreId
-			GROUP BY stcpIn.intStoreId
-		)
-) AS dtmCheckoutDate, a.intStoreNo, 
+	SELECT MAX(intCheckoutProcessErrorWarningId) 
+	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
+	JOIN tblSTCheckoutProcess cpInMsg
+		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId	
+	WHERE cpInMsg.intStoreId = a.intStoreId
+	GROUP BY cpInMsg.intStoreId
+)) AS dtmCheckoutDate,
+a.intStoreNo, 
 CAST(a.intStoreNo AS VARCHAR(20)) + ' - ' + a.strDescription AS strDescription, 
 'Store did not automatically run for today. It is stuck on ' +
-FORMAT((
-	SELECT MAX(dtmCheckoutDate)
-	FROM tblSTCheckoutHeader chIn
-	JOIN tblSTCheckoutProcessErrorWarning ewIn
-		ON chIn.intCheckoutId = ewIn.intCheckoutId
-	JOIN tblSTCheckoutProcess cpIn
-		ON ewIn.intCheckoutProcessId = cpIn.intCheckoutProcessId
-	WHERE cpIn.intCheckoutProcessId =
-		(
-			SELECT DISTINCT MAX(stcpIn.intCheckoutProcessId)
-			FROM tblSTCheckoutProcess stcpIn
-			JOIN tblSTCheckoutProcessErrorWarning stcpewIn
-				ON stcpIn.intCheckoutProcessId = stcpewIn.intCheckoutProcessId
-			WHERE stcpewIn.strMessageType = 'S'
-			AND stcpIn.intStoreId = a.intStoreId
-			GROUP BY stcpIn.intStoreId
-		)
-), 'd','us') + '. ' +
+FORMAT((SELECT chOut.dtmCheckoutDate
+FROM tblSTCheckoutProcessErrorWarning cpewOutMsg
+	JOIN tblSTCheckoutHeader chOut
+		ON cpewOutMsg.intCheckoutId = chOut.intCheckoutId
+WHERE cpewOutMsg.intCheckoutProcessErrorWarningId =
+(
+	SELECT MAX(intCheckoutProcessErrorWarningId) 
+	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
+	JOIN tblSTCheckoutProcess cpInMsg
+		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId	
+	WHERE cpInMsg.intStoreId = a.intStoreId
+	GROUP BY cpInMsg.intStoreId
+)), 'd','us') + '. ' +
 (SELECT cpewOutMsg.strMessage
 FROM tblSTCheckoutProcessErrorWarning cpewOutMsg
 WHERE cpewOutMsg.intCheckoutProcessErrorWarningId =
@@ -224,7 +217,7 @@ ISNULL((
 			AND stcpIn.intStoreId = a.intStoreId
 			GROUP BY stcpIn.intStoreId
 		)
-),FORMAT(GETDATE(), 'd','us')) AS dtmCheckoutProcessDate, 
+),GETDATE()) AS dtmCheckoutProcessDate,
 ISNULL((
 	SELECT MAX(dtmCheckoutDate)
 	FROM tblSTCheckoutHeader chIn
