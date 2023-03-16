@@ -18,4 +18,8 @@ SELECT detail.intDeliveryDetailId
       ,detail.dblWaterInches
       ,detail.intContractDetailId
 FROM tblMBILDeliveryDetail detail            
-INNER JOIN tblICItem item ON detail.intItemId = item.intItemId 
+INNER JOIN tblICItem item ON detail.intItemId = item.intItemId
+WHERE NOT EXISTS(SELECT o.intDispatchId
+				FROM tblMBILOrder o 
+				INNER JOIN vyuMBILInvoice i on o.intOrderId = i.intOrderId
+				WHERE o.intDispatchId = detail.intTMDispatchId)
