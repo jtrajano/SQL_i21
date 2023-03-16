@@ -11,13 +11,13 @@ AS BEGIN
 	DECLARE @dblEditableAggregateMeterReadingsForDollars DECIMAL(18,6) = 0 
 	DECLARE @dblDepartmentTotalForFuel DECIMAL(18,6) = 0 
 	DECLARE @dblEditableOutsideFuelDiscount DECIMAL(18,6) = 0
-	DECLARE @dblEditableInsideFuelDiscount DECIMAL(18,6) = 0
+	--DECLARE @dblEditableInsideFuelDiscount DECIMAL(18,6) = 0
 	DECLARE @dblGrossFuelSales DECIMAL(18,6) = 0
 
 	SELECT	@intStoreId = intStoreId,
 			@dblEditableAggregateMeterReadingsForDollars = ISNULL(dblEditableAggregateMeterReadingsForDollars, 0),
-			@dblEditableOutsideFuelDiscount = ISNULL(dblEditableOutsideFuelDiscount, 0),
-			@dblEditableInsideFuelDiscount = ISNULL(dblEditableInsideFuelDiscount, 0)
+			@dblEditableOutsideFuelDiscount = ISNULL(dblEditableOutsideFuelDiscount, 0)--,
+			--@dblEditableInsideFuelDiscount = ISNULL(dblEditableInsideFuelDiscount, 0)
 	FROM	tblSTCheckoutHeader 
 	WHERE	intCheckoutId = @intCheckoutId
 
@@ -43,7 +43,7 @@ AS BEGIN
 
 			IF @ysnConsAddOutsideFuelDiscounts = 1
 				BEGIN
-					SET @dblGrossFuelSales = @dblDepartmentTotalForFuel + @dblEditableOutsideFuelDiscount + @dblEditableInsideFuelDiscount
+					SET @dblGrossFuelSales = @dblDepartmentTotalForFuel + @dblEditableOutsideFuelDiscount --+ @dblEditableInsideFuelDiscount
 				END
 			ELSE
 				BEGIN
