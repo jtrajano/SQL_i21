@@ -41,8 +41,30 @@ BEGIN TRY
 		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 		, dblPrice NUMERIC(24, 10)
 		, dtmFilledDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL)
+
+	DECLARE @ImportedRec2 TABLE (ImportId INT IDENTITY
+		, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		, strAccountNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		, strFutMarketName NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
+		, strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		, strBuySell NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		, dblNoOfContract NUMERIC(24, 10)
+		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+		, dblPrice NUMERIC(24, 10)
+		, dtmFilledDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL)
 	
 	DECLARE @tblTransRec TABLE (Id INT IDENTITY
+		, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		, strAccountNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		, strFutMarketName NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
+		, strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		, strBuySell NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		, dblNoOfContract NUMERIC(24, 20)
+		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+		, dblPrice NUMERIC(24, 20)
+		, dtmFilledDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL)
+
+	DECLARE @tblTransRec2 TABLE (Id INT IDENTITY
 		, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, strAccountNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		, strFutMarketName NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
@@ -151,6 +173,43 @@ BEGIN TRY
 		, strFutureMonth
 		, dblPrice
 		, dtmFilledDate
+
+	INSERT INTO @ImportedRec2 (strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, dblNoOfContract
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate)
+	SELECT strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, dblNoOfContract = SUM(dblNoOfContract)
+		, strFutureMonth = REPLACE(strFutureMonth, '-', ' ')
+		, dblPrice
+		, dtmFilledDate = REPLACE(strFilledDate, '-', '/')
+	FROM tblRKReconciliationBrokerStatementImport
+	WHERE CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(strFilledDate, '-' , '/'), @ConvertYear)), @ConvertYear) = CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(@dtmFilledDate, '-', '/'), @ConvertYear)), @ConvertYear)
+	GROUP BY strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, strFutureMonth
+		, dblPrice
+		, strFilledDate
+	ORDER BY strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate
 	
 	INSERT INTO @tblTransRec (strName
 		, strAccountNumber
@@ -221,6 +280,72 @@ BEGIN TRY
 		, dblPrice
 		, dtmFilledDate
 
+	INSERT INTO @tblTransRec2 (strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, dblNoOfContract
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate)
+	SELECT strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, dblNoOfContract = SUM(dblNoOfContract)
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate = CONVERT(NVARCHAR, @dtmFilledDate, @ConvertYear)
+	FROM (
+		SELECT e.strName
+			, strAccountNumber
+			, fm.strFutMarketName
+			, strInstrumentType = CASE WHEN f.intInstrumentTypeId = 1 THEN 'Futures'
+										WHEN f.intInstrumentTypeId = 2 THEN 'Options' END
+			, strCommodityCode
+			, l.strLocationName
+			, en.strName strSalesPersionId
+			, strCurrency
+			, strBrokerTradeNo
+			, strBuySell
+			, dblNoOfContract
+			, fmon.strFutureMonth
+			, dblPrice
+			, strReference
+			, strStatus
+			, dtmFilledDate
+		FROM tblRKFutOptTransaction f
+		JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+		JOIN tblRKBrokerageAccount ba ON ba.intBrokerageAccountId = f.intBrokerageAccountId
+		JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = f.intFutureMarketId
+		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
+		JOIN tblSMCompanyLocation l ON l.intCompanyLocationId = f.intLocationId
+		JOIN tblSMCurrency cur ON cur.intCurrencyID = f.intCurrencyId
+		JOIN tblEMEntity en ON en.intEntityId = intTraderId
+		JOIN tblRKFuturesMonth fmon ON fmon.intFutureMonthId = f.intFutureMonthId
+		WHERE CONVERT(NVARCHAR, f.dtmFilledDate, @ConvertYear) = CONVERT(NVARCHAR, @dtmFilledDate, @ConvertYear)
+			AND ISNULL(f.ysnFreezed, 0) = 0
+	) t
+	GROUP BY strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate
+	ORDER BY strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate
+
+	-- Invalid Future Market, Commodity, Broker or Broker Account	
 	INSERT INTO @tblFinalRec (strName
 		, strAccountNumber
 		, strFutMarketName
@@ -232,27 +357,87 @@ BEGIN TRY
 		, dtmFilledDate
 		, ImportId
 		, strStatus)
-	SELECT t.strName
-		, t.strAccountNumber
-		, t.strFutMarketName
-		, t.strCommodityCode
+	SELECT t1.strName
+		, t1.strAccountNumber
+		, t1.strFutMarketName
+		, t1.strCommodityCode
 		, t.strBuySell
 		, t.dblNoOfContract
 		, t.strFutureMonth
 		, t.dblPrice
 		, t.dtmFilledDate
 		, t.ImportId
-		, 'Success'
-	FROM @ImportedRec t
-	JOIN @tblTransRec t1 ON t.strName = t1.strName
-		AND t.strAccountNumber = t1.strAccountNumber 
-		AND t.strFutMarketName = t1.strFutMarketName 
-		AND t.strCommodityCode = t1.strCommodityCode 
-		AND t.strBuySell = t1.strBuySell 
+		, 'Invalid Future Market, Commodity, Broker or Broker Account'
+	FROM @ImportedRec2 t
+	JOIN @tblTransRec2 t1 ON t.strBuySell = t1.strBuySell 
 		AND t.dblNoOfContract = t1.dblNoOfContract
 		AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
 		AND t.dblPrice = t1.dblPrice 
 		AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
+	WHERE (t1.strName != @strName
+		OR t1.strAccountNumber != @strAccountNumber
+		OR t1.strFutMarketName != @strFutMarketName
+		OR t1.strCommodityCode != @strCommodityCode)
+
+	DELETE FROM @ImportedRec2
+	WHERE ImportId IN (SELECT t1.ImportId FROM @ImportedRec t1
+						JOIN @tblFinalRec t ON (t.strName != @strName
+							OR t.strAccountNumber != @strAccountNumber
+							OR t.strFutMarketName != @strFutMarketName
+							OR t.strCommodityCode != @strCommodityCode) 
+							AND t.strBuySell = t1.strBuySell 
+							AND t.dblNoOfContract = t1.dblNoOfContract
+							AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
+							AND t.dblPrice = t1.dblPrice 
+							AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
+	
+	DELETE FROM @tblTransRec2
+	WHERE Id IN (SELECT t1.Id FROM @tblTransRec t1
+				JOIN @tblFinalRec t ON (t.strName != @strName
+					OR t.strAccountNumber != @strAccountNumber
+					OR t.strFutMarketName != @strFutMarketName
+					OR t.strCommodityCode != @strCommodityCode) 
+					AND t.strBuySell = t1.strBuySell 
+					AND t.dblNoOfContract = t1.dblNoOfContract
+					AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth)
+					AND t.dblPrice = t1.dblPrice
+					AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
+
+	IF NOT EXISTS(SELECT 1 FROM @tblFinalRec WHERE strStatus <> 'Success')
+	BEGIN
+		INSERT INTO @tblFinalRec (strName
+			, strAccountNumber
+			, strFutMarketName
+			, strCommodityCode
+			, strBuySell
+			, dblNoOfContract
+			, strFutureMonth
+			, dblPrice
+			, dtmFilledDate
+			, ImportId
+			, strStatus)
+		SELECT t.strName
+			, t.strAccountNumber
+			, t.strFutMarketName
+			, t.strCommodityCode
+			, t.strBuySell
+			, t.dblNoOfContract
+			, t.strFutureMonth
+			, t.dblPrice
+			, t.dtmFilledDate
+			, t.ImportId
+			, 'Success'
+		FROM @ImportedRec t
+		JOIN @tblTransRec t1 ON t.strName = t1.strName
+			AND t.strAccountNumber = t1.strAccountNumber 
+			AND t.strFutMarketName = t1.strFutMarketName 
+			AND t.strCommodityCode = t1.strCommodityCode 
+			AND t.strBuySell = t1.strBuySell 
+			AND t.dblNoOfContract = t1.dblNoOfContract
+			AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
+			AND t.dblPrice = t1.dblPrice 
+			AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
+	END
 	
 	DELETE FROM @ImportedRec
 	WHERE ImportId IN (SELECT t1.ImportId FROM @ImportedRec t1
