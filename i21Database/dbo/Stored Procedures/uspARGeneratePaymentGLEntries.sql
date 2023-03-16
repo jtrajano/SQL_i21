@@ -777,8 +777,8 @@ BEGIN
 		,[strDescription]               = 'Payment for ' + P.strTransactionNumber
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
-		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+		,[intCurrencyId]                = FUNCTIONCURRENCY.[intCurrencyId]
+		,[dblExchangeRate]              = 1
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -796,8 +796,8 @@ BEGIN
 		,[dblDebitReport]               = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) ELSE @ZeroDecimal END
 		,[dblCreditForeign]             = @ZeroDecimal
 		,[dblCreditReport]              = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN @ZeroDecimal ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) END
-		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
-		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
+		,[dblReportingRate]             = 1
+		,[dblForeignRate]               = 1
 		,[strRateType]                  = P.[strRateType]
 		,[strDocument]                  = NULL
 		,[strComments]                  = NULL
@@ -815,6 +815,9 @@ BEGIN
 	    SELECT TOP 1 intAccountId = intOverrideAccount
 	    FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
     ) GAINLOSS
+	OUTER APPLY (
+		SELECT TOP 1 [intCurrencyId] = intDefaultCurrencyId FROM tblSMCompanyPreference
+	) FUNCTIONCURRENCY
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
