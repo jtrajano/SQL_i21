@@ -281,7 +281,7 @@ BEGIN TRY
 			strApproxWeight			= dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), --NETWEIGHT
 			strPriceKg				= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,4,CD.dblCashPrice),2), 
 			strTotalValue			= ROUND(CD.dblTotalCost,2) ,
-			strMixingUnit			= CB.strBookDescription,
+			strMixingUnit			= CB.strBook,
 			strPortofArrival		= CTY.strCity,
 			dtmEtaPOL				= CD.dtmEtaPol,
 			dtmEtaPOD				= CD.dtmEtaPod,
