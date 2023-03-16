@@ -38,7 +38,9 @@ INSERT INTO [tblARTransactionDetail](
 	,[intCurrencyId]
 	,[intSubCurrencyId]
 	,[dblAmountDue]
-	,[intCompanyLocationId])
+	,[intCompanyLocationId]
+	,intDispatchId
+)
 SELECT
 	 [intTransactionDetailId]				= ARID.[intInvoiceDetailId]
 	,[intTransactionId]						= ARID.[intInvoiceId] 
@@ -67,6 +69,7 @@ SELECT
 	,[intSubCurrencyId] 					= [intSubCurrencyId]
 	,[dblAmountDue]							= [dblAmountDue]
 	,[intCompanyLocationId]					= [intCompanyLocationId]
+	,intDispatchId							= ARID.intDispatchId
 FROM [tblARInvoiceDetail] ARID
 INNER JOIN @InvoiceIds II ON ARID.[intInvoiceId] = II.[intHeaderId]
 INNER JOIN tblARInvoice TMP ON TMP.intInvoiceId = ARID.[intInvoiceId]
