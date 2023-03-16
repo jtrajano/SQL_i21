@@ -358,9 +358,9 @@ UPDATE MBP
 SET MBP.[intSellerId] = DO.intSellerId
 ,MBP.[intSalespersonId]= DO.intSalespersonId
 ,MBP.[strTerminalRefNo]= NULL
-,MBP.[intEntityId]= DO.intVendorId
-,MBP.[intEntityLocationId]= DO.intVendorLocationId
-,MBP.[intCompanyLocationId]= DO.intCompanyLocationId
+,MBP.[intEntityId]= DOD.intVendorId
+,MBP.[intEntityLocationId]= DOD.intVendorLocationId
+,MBP.[intCompanyLocationId]= DOD.intCompanyLocationId
 ,MBP.[intContractDetailId]= NULL
 ,MBP.[intTaxGroupId]= NULL
 ,MBP.[dtmPickupFrom]= NULL
@@ -376,16 +376,16 @@ FROM tblMBILPickupDetail MBP
 INNER JOIN tblMBILLoadHeader MBL on MBL.intLoadHeaderId = MBP.intLoadHeaderId
 INNER JOIN tblLGDispatchOrder DO on DO.intDispatchOrderId = MBL.intDispatchOrderId
 INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispatchOrderId
-INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1
+INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1 and MBP.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId
 WHERE MBL.intDriverId = @intDriverId and MBP.ysnPickup = 0
 
 INSERT INTO tblMBILPickupDetail(intDispatchOrderDetailId,strType,intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intSellerId,intSalespersonId,strLoadRefNo,intItemId,dblQuantity,intDispatchOrderRouteId)
-Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DO.intVendorId,DO.intVendorLocationId,DO.intCompanyLocationId,DO.intSellerId,DO.intSalespersonId,DO.strLoadRef,DOD.intItemId,DOD.dblQuantity,DOR.intDispatchOrderRouteId
+Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DOD.intVendorId,DOD.intVendorLocationId,DOD.intCompanyLocationId,DO.intSellerId,DOD.intSalespersonId,DOD.strLoadRef,DOD.intItemId,DOD.dblQuantity,DOR.intDispatchOrderRouteId
 from tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1
-INNER JOIN tblMBILLoadHeader MBL on MBL.strLoadNumber = DO.strDispatchOrderNumber
-WHERE intDispatchStatus = 3 AND 
+INNER JOIN tblMBILLoadHeader MBL on MBL.strLoadNumber = DO.strDispatchOrderNumber 
+WHERE intDispatchStatus = 3 AND DO.intDriverEntityId = @intDriverId AND
 NOT EXISTS(SELECT 1 From tblMBILPickupDetail p 
 where p.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and p.intLoadHeaderId = MBL.intLoadHeaderId)
 
@@ -399,7 +399,7 @@ INNER JOIN tblMBILLoadHeader MB ON MB.strLoadNumber = DO.strDispatchOrderNumber
 WHERE intStopType = 2 and intDispatchStatus = 3 AND 
  NOT EXISTS(SELECT intDeliveryHeaderId
  FROM tblMBILDeliveryHeader p
- WHERE p.intLoadHeaderId = MB.intLoadHeaderId AND 
+ WHERE p.intLoadHeaderId = MB.intLoadHeaderId  AND DO.intDriverEntityId = @intDriverId AND 
 isnull(p.intEntityLocationId,0) = isnull(DOD.intEntityLocationId,0) AND 
 isnull(p.intCompanyLocationId,0) = isnull(DO.intCompanyLocationId,isnull(p.intCompanyLocationId,0)))
 
@@ -443,7 +443,7 @@ INNER JOIN tblMBILLoadHeader MBH ON MBH.strLoadNumber = DO.strDispatchOrderNumbe
 INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,DO.intCompanyLocationId) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
 LEFT JOIN tblMBILDeliveryDetail MBDL ON MBDL.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and MBDL.intDeliveryHeaderId = MBDH.intDeliveryHeaderId 
 LEFT JOIN tblTMOrder t on DOD.intTMDispatchId = t.intDispatchId
-WHERE intStopType = 2 AND intDispatchStatus = 3 and MBDL.intDispatchOrderDetailId is null
+WHERE intStopType = 2 AND intDispatchStatus = 3 and MBDL.intDispatchOrderDetailId is null  AND DO.intDriverEntityId = @intDriverId
 
 UPDATE MBDL
 SET MBDL.intItemId = DOD.intItemId
