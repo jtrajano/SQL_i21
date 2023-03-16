@@ -60,7 +60,7 @@ BEGIN
    , intFeedPriceCurrencyId = @intFeedPriceCurrencyId
   WHERE intContractDetailId = @intContractDetailId    
 
-  if (@intFeedPriceItemUOMId <> @prevFeedPriceItemUOMId)
+  if (ISNULL(@intFeedPriceItemUOMId,0) <> ISNULL(@prevFeedPriceItemUOMId,0))
   begin
    select top 1 @newFeedPriceItemUOM = um.strUnitMeasure
    from tblICItemUOM iu
@@ -68,7 +68,7 @@ BEGIN
    where iu.intItemUOMId = @intFeedPriceItemUOMId and iu.intItemId = @intItemId
   end
 
-  if (@intFeedPriceCurrencyId <> @prevFeedPriceCurrencyId)
+  if (ISNULL(@intFeedPriceCurrencyId,0) <> ISNULL(@prevFeedPriceCurrencyId,0))
   begin
    select top 1 @newFeedPriceCurrency = strCurrency from tblSMCurrency where intCurrencyID = @intFeedPriceCurrencyId
   end

@@ -199,6 +199,7 @@ BEGIN TRY
 				,@strActualLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strLocationName
+				AND strLocationType = 'Plant'
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN

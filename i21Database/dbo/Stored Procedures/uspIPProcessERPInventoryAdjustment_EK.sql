@@ -238,6 +238,7 @@ BEGIN TRY
 				,@strActualLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strCompanyLocation
+				AND strLocationType = 'Plant'
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -329,6 +330,7 @@ BEGIN TRY
 					,@strNewLocationName = strLocationName
 				FROM dbo.tblSMCompanyLocation
 				WHERE strVendorRefNoPrefix = @strNewLocation
+					AND strLocationType = 'Plant'
 
 				IF @intNewCompanyLocationId IS NULL
 				BEGIN
