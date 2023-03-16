@@ -123,6 +123,6 @@ CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intImportLogId]
     ON [dbo].[tblQMImportCatalogue]([intImportLogId] ASC)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intSampleId]
-    ON [dbo].[tblQMImportCatalogue]([intSampleId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_ysnSuccess]
+    ON [dbo].[tblQMImportCatalogue]([ysnSuccess], [intImportLogId])
 GO
