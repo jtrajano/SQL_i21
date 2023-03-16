@@ -868,7 +868,7 @@ DECLARE @UniqueItems TABLE (
 	, intVendorId INT
 	, intVendorSetupId INT
 	, strVendorProduct NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	, strVendorProductUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	, strVendorProductUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, guiApiUniqueId UNIQUEIDENTIFIER
 	, intRowNumber INT
 )
