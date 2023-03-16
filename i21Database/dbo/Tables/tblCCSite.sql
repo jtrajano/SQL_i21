@@ -14,6 +14,7 @@
 
 	--CompanyOwnedSite	
 	[ysnPassedThruArCustomer]  BIT  DEFAULT ((0)) NOT NULL,
+	[ysnPassedThruArCustomerFees]  BIT  DEFAULT ((0)) NOT NULL,
 	--
 	--DealerSite	
 	--intCreditCardReceivableAccountId
