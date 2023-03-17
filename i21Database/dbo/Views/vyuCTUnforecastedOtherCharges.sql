@@ -56,6 +56,8 @@
 			,strAccountCategory = isnull(lga.strAccountCategory,lgac.strAccountCategory)
 			,ld.intCount
 			,ir.intIRCount
+			,crt.intCurrencyExchangeRateTypeId
+			,crt.strCurrencyExchangeRateType
 		from
 			tblCTContractCost cc
 			join tblICItem it on it.intItemId = cc.intItemId
@@ -81,6 +83,7 @@
 			left join tblICItemUOM cm on cm.intUnitMeasureId = uom.intUnitMeasureId and cm.intItemId = cd.intItemId
 			left join tblSMCurrency cy2 on cy2.intCurrencyID = cd.intCurrencyId
 			left join tblICItemUOM pu on pu.intItemUOMId = cd.intPriceItemUOMId
+			left join tblSMCurrencyExchangeRateType crt on crt.intCurrencyExchangeRateTypeId = cc.intRateTypeId
 			left join (
 				select
 					intFutureMarketId
