@@ -1559,6 +1559,7 @@
   <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
   <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
   <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageEntryDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
