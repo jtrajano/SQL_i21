@@ -127,7 +127,7 @@ INSERT INTO @tmpRawData
 EXEC uspRKGetCoverageEntryDetail  
 	@dtmDate
 	,@intCommodityId
-	,@strUOMType
+	,@strUomType
 	,@intUOMId
 	,@intBookId
 	,@intSubBookId
