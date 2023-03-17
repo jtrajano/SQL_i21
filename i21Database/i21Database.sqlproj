@@ -1563,6 +1563,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
 	<Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
