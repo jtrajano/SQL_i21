@@ -3295,7 +3295,7 @@ BEGIN
 					1. If both items are the same commodity, then rebuild it by commodity. 
 					2. If possible, rebuild it all items per period. 
 			*/
-			ELSE IF @strTransactionType IN ('Inventory Adjustment - Item Change')			
+			ELSE IF @strTransactionType IN ('Inventory Adjustment - Item')			
 			BEGIN 
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
@@ -3467,16 +3467,24 @@ BEGIN
 							,dblUOMQty = 
 									NewItemUOM.dblUnitQty
 							,dblCost = 
-									CASE 
-										WHEN AdjDetail.dblNewCost IS NULL THEN 
-											FromStock.dblCost
-										ELSE
-											dbo.fnCalculateCostBetweenUOM( 
-												AdjDetail.intItemUOMId --dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
-												,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
-												,AdjDetail.dblNewCost
-											)
-									END
+									ISNULL(
+										AdjDetail.dblNewCost
+										,dbo.fnCalculateCostBetweenUOM(
+											dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
+											,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
+											,FromStock.dblCost
+										)
+									)
+									--CASE 
+									--	WHEN AdjDetail.dblNewCost IS NULL THEN 
+									--		FromStock.dblCost
+									--	ELSE
+									--		dbo.fnCalculateCostBetweenUOM( 
+									--			AdjDetail.intItemUOMId --dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
+									--			,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+									--			,AdjDetail.dblNewCost
+									--		)
+									--END
 							,dblSalesPrice			= 0
 							,intCurrencyId			= NULL 
 							,dblExchangeRate		= 1
@@ -3571,16 +3579,24 @@ BEGIN
 								,dblUOMQty = 
 										NewItemUOM.dblUnitQty
 								,dblCost = 
-										CASE 
-											WHEN AdjDetail.dblNewCost IS NULL THEN 
-												FromStock.dblCost
-											ELSE
-												dbo.fnCalculateCostBetweenUOM( 
-													dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
-													,NewItemUOM.intItemUOMId--dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
-													,AdjDetail.dblNewCost
-												)
-										END
+										--CASE 
+										--	WHEN AdjDetail.dblNewCost IS NULL THEN 
+										--		FromStock.dblCost
+										--	ELSE
+										--		dbo.fnCalculateCostBetweenUOM( 
+										--			dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
+										--			,NewItemUOM.intItemUOMId--dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+										--			,AdjDetail.dblNewCost
+										--		)
+										--END
+										ISNULL(
+											AdjDetail.dblNewCost
+											,dbo.fnCalculateCostBetweenUOM(
+												dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
+												,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
+												,FromStock.dblCost
+											)
+										)
 								,dblSalesPrice			= 0
 								,intCurrencyId			= NULL 
 								,dblExchangeRate		= 1
