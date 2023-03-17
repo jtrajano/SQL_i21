@@ -3224,7 +3224,7 @@ BEGIN
 					1. If both items are the same commodity, then rebuild it by commodity. 
 					2. If possible, rebuild it all items per period. 
 			*/
-			ELSE IF @strTransactionType IN ('Inventory Adjustment - Item Change')			
+			ELSE IF @strTransactionType IN ('Inventory Adjustment - Item')			
 			BEGIN 
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
