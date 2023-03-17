@@ -1293,7 +1293,7 @@ BEGIN TRY
 				,ysnEuropeanCompliantFlag
 				,intEvaluatorsCodeAtTBOId
 				,intFromLocationCodeId
-				,intDestinationStorageLocationId
+				-- ,intDestinationStorageLocationId
 				,strSampleBoxNumber
 				,strComments3
 				,intBrokerId
@@ -1391,7 +1391,7 @@ BEGIN TRY
 				,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
 				,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
 				,intFromLocationCodeId = @intFromLocationCodeId
-				,intDestinationStorageLocationId = @intDestinationStorageLocationId
+				-- ,intDestinationStorageLocationId = @intDestinationStorageLocationId
 				,strSampleBoxNumber = @strSampleBoxNumber
 				,strComments3 = @strComments3
 				,intBrokerId = @intBrokerId
@@ -1670,7 +1670,7 @@ BEGIN TRY
 				,ysnEuropeanCompliantFlag = @ysnEuropeanCompliantFlag
 				,intEvaluatorsCodeAtTBOId = @intEvaluatorsCodeAtTBOId
 				,intFromLocationCodeId = @intFromLocationCodeId
-				,intDestinationStorageLocationId = @intDestinationStorageLocationId
+				-- ,intDestinationStorageLocationId = @intDestinationStorageLocationId
 				,strSampleBoxNumber = @strSampleBoxNumber
 				,strComments3 = @strComments3
 				,intBrokerId = @intBrokerId

@@ -92,6 +92,8 @@ FOR
 
 SELECT a.intEntityId 
 FROM tblHDCoworkerGoal a
+	INNER JOIN vyuHDAgentDetail b
+ON a.intEntityId = b.intEntityId
 WHERE a.strFiscalYear = @strFromFiscalYear
 GROUP BY a.intEntityId
 
@@ -168,6 +170,7 @@ BEGIN
 	 --Insert Coworker Goal Detail
 
 	 EXEC uspHDCreateCoworkerGoalDetail @NewCoworkerGoalId
+	 EXEC uspHDSyncAgentTimeEntrySummary @NewCoworkerGoalId, 0, 1, 0
 	
 	END
 	ELSE

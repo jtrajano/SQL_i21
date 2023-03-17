@@ -9,15 +9,18 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @dtmBillingPeriodStart DATETIME,
 		@dtmBillingPeriodEnd DATETIME,
+		@intTimeEntryPeriodDetailId INT,
 		@intRange int
+
+SET @intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
 
 SELECT TOP 1 @dtmBillingPeriodStart = dtmBillingPeriodStart
 			,@dtmBillingPeriodEnd   = dtmBillingPeriodEnd
 			,@intRange			    = DATEDIFF(DAY, @dtmBillingPeriodStart, @dtmBillingPeriodEnd)
 FROM tblHDTimeEntryPeriodDetail
-WHERE intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+WHERE intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetailId
 
-IF @TimeEntryPeriodDetailId IS NULL OR @dtmBillingPeriodStart IS NULL OR @dtmBillingPeriodEnd IS NULL
+IF @intTimeEntryPeriodDetailId IS NULL OR @dtmBillingPeriodStart IS NULL OR @dtmBillingPeriodEnd IS NULL
 	RETURN
 
 --Already exist in this table

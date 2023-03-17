@@ -12,15 +12,23 @@ BEGIN
 	SET NOCOUNT ON  
 	SET ANSI_WARNINGS OFF
 
-	IF @EntityId IS NULL OR @TimeEntryPeriodDetailId IS NULL
+	DECLARE @intEntityId INT 
+		  ,@intTimeEntryPeriodDetailId INT 
+		  ,@strResetSelectedDate nvarchar(50) 
+
+    SET     @intEntityId				= @EntityId
+	SET		@intTimeEntryPeriodDetailId =  @TimeEntryPeriodDetailId
+	SET	    @strResetSelectedDate	    = @ResetSelectedDate
+
+	IF @intEntityId IS NULL OR @intTimeEntryPeriodDetailId IS NULL
 		RETURN
 
 		
 	IF NOT EXISTS (
 			SELECT TOP 1 ''
 			FROM tblHDTimeEntry
-			WHERE intEntityId = @EntityId AND
-				  intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+			WHERE intEntityId = @intEntityId AND
+				  intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetailId
 	
 	)
 	BEGIN
@@ -29,15 +37,15 @@ BEGIN
 				 [intEntityId]
 				,[intTimeEntryPeriodDetailId]
 			)
-			SELECT  [intEntityId]				= @EntityId
-					,[intTimeEntryPeriodDetailId]	= @TimeEntryPeriodDetailId
+			SELECT  [intEntityId]				= @intEntityId
+					,[intTimeEntryPeriodDetailId]	= @intTimeEntryPeriodDetailId
 	END
-	ELSE IF ISNULL(@ResetSelectedDate, '') <> ''
+	ELSE IF ISNULL(@strResetSelectedDate, '') <> ''
 	BEGIN
 		UPDATE tblHDTimeEntry
 		SET strSelectedDate = NULL
-		WHERE intEntityId = @EntityId AND
-			  intTimeEntryPeriodDetailId = @TimeEntryPeriodDetailId
+		WHERE intEntityId = @intEntityId AND
+			  intTimeEntryPeriodDetailId = @intTimeEntryPeriodDetailId
 
 	END
 

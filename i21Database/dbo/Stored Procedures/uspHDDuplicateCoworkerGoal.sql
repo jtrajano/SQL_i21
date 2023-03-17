@@ -180,6 +180,7 @@ BEGIN
 	 --Insert Coworker Goal Detail
 
 	 EXEC uspHDCreateCoworkerGoalDetail @NewCoworkerGoalId
+	 EXEC uspHDSyncAgentTimeEntrySummary @NewCoworkerGoalId, 0, 1, 0
 
 END
 
