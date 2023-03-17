@@ -222,9 +222,10 @@ WHERE t.ysnIsUnposted <> 1
 	AND ((CL.ysnLicensed = COALESCE(@ysnLicensed,CL.ysnLicensed) AND CL.intCompanyLocationId = ISNULL(@intLocationId,CL.intCompanyLocationId))
 			OR CL.intCompanyLocationId = @intLocationId
 		)
-	AND (t.intCostingMethod = 5 AND t.strTransactionForm = 'Invoice' --get the ACTUAL PRICE only for the invoice transactions
-			OR (t.intCostingMethod IS NOT NULL AND (t.intCostingMethod <> 5 AND t.strTransactionForm <> 'Invoice'))
-		)
+	--AND (t.intCostingMethod = 5 AND t.strTransactionForm = 'Invoice' --get the ACTUAL PRICE only for the invoice transactions
+	--		OR (t.intCostingMethod IS NOT NULL AND (t.intCostingMethod <> 5 AND t.strTransactionForm <> 'Invoice'))
+	--	)
+	AND intInTransitSourceLocationId IS NULL
 GROUP BY t.intItemId
 		,ItemLocation.intLocationId
 		,t.intLotId
