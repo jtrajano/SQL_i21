@@ -138,9 +138,9 @@ BEGIN
 		DECLARE @dblInvoiceAndCheckoutDifference DECIMAL(18,6) = 0
 		DECLARE @dblConsTolerance DECIMAL(18,6) = 0.01
 		DECLARE @dblOutsideFuelDiscount DECIMAL(18,6) = 0
-		DECLARE @dblInsideFuelDiscount DECIMAL(18,6) = 0
+		--DECLARE @dblInsideFuelDiscount DECIMAL(18,6) = 0
 		DECLARE @ysnConsMeterReadingsForDollars BIT = 0
-		DECLARE @ysnConsIncludeInsideDiscount BIT = 0
+		--DECLARE @ysnConsIncludeInsideDiscount BIT = 0
 		DECLARE @ysnConsAddOutsideFuelDiscounts BIT = 0
 		DECLARE @ysnConsCashOverShort BIT = 0
 		DECLARE @intConsInvoiceId AS INT
@@ -226,7 +226,7 @@ BEGIN
 				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
 				, @strCheckoutType = strCheckoutType
 				, @dblOutsideFuelDiscount = dblEditableOutsideFuelDiscount
-				, @dblInsideFuelDiscount = dblEditableInsideFuelDiscount
+				--, @dblInsideFuelDiscount = dblEditableInsideFuelDiscount
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -4279,7 +4279,7 @@ BEGIN
 												,[dblDiscount]				= 0
 												,[dblPrice]					= CASE 
 																				WHEN @ysnConsMeterReadingsForDollars = 0
-																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
+																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0)) --+ ISNULL(CH.dblEditableInsideFuelDiscount, 0))
 																				WHEN @ysnConsMeterReadingsForDollars = 1
 																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0))
 																				ELSE 
@@ -4335,7 +4335,7 @@ BEGIN
 									JOIN vyuEMEntityCustomerSearch vC 
 										ON ST.intCheckoutCustomerId = vC.intEntityId									
 									WHERE CH.intCheckoutId = @intCheckoutId
-										AND (ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0 OR ISNULL(CH.dblEditableInsideFuelDiscount,0) <> 0)
+										AND (ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0) --OR ISNULL(CH.dblEditableInsideFuelDiscount,0) <> 0)
 						END
 				END
 				----------------------------------------------------------------------
