@@ -3467,15 +3467,6 @@ BEGIN
 							,dblUOMQty = 
 									NewItemUOM.dblUnitQty
 							,dblCost = 
-									--ISNULL(
-									--	AdjDetail.dblNewCost
-									--	,dbo.fnCalculateCostBetweenUOM(
-									--		dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
-									--		,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
-									--		,FromStock.dblCost
-									--	)
-									--)
-
 									CASE 
 										WHEN AdjDetail.dblNewCost IS NULL THEN 
 											FromStock.dblCost
@@ -3590,14 +3581,6 @@ BEGIN
 													,AdjDetail.dblNewCost
 												)
 										END
-										--ISNULL(
-										--	AdjDetail.dblNewCost
-										--	,dbo.fnCalculateCostBetweenUOM(
-										--		dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
-										--		,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
-										--		,FromStock.dblCost
-										--	)
-										--)
 								,dblSalesPrice			= 0
 								,intCurrencyId			= NULL 
 								,dblExchangeRate		= 1
