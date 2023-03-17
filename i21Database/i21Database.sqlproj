@@ -1503,6 +1503,7 @@
     <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
   </ItemGroup>
