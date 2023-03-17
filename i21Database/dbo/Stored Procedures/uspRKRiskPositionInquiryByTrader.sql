@@ -203,5 +203,5 @@ SELECT intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,st
 			  when strPhysicalOrFuture='Futures' and strProductLine not in('PTBF Buy','PTBF Sell') then 'Hedges (Clearing)'
 			  else 'Physical'  end strProductLineBuySell
 FROM @FinalList l
-JOIN tblSMMultiCompany mc on l.strCompanyName=mc.strCompanyName
+LEFT JOIN tblSMMultiCompany mc on l.strCompanyName=mc.strCompanyName
 ORDER BY  intRowNumber,strFutMarketName,strCompanyName
