@@ -226,6 +226,7 @@ SELECT S.intSampleId
 	, ISNULL(S.strCourierRef, strAirwayBillCode) AS strAirwayBillCode 
 	, Batch.strTaster 
 	, S.ysnBought
+	, SeasonCropYear.strCropYear AS strSeasonCropYear
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -242,13 +243,10 @@ LEFT JOIN dbo.tblLGLoadContainer C ON C.intLoadContainerId = S.intLoadContainerI
 LEFT JOIN dbo.tblLGLoad SH ON SH.intLoadId = S.intLoadId
 LEFT JOIN dbo.tblEMEntity U ON U.intEntityId = S.intTestedById
 LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = S.intEntityId
-LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId
-	AND S.intProductTypeId = 6
-LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = S.intProductValueId
-	AND S.intProductTypeId = 11
+LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId AND S.intProductTypeId = 6
+LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = S.intProductValueId AND S.intProductTypeId = 11
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId
-LEFT JOIN tblICItemOwner ito2 ON ito2.intItemId = S.intItemId
-	AND ito2.ysnDefault = 1
+LEFT JOIN tblICItemOwner ito2 ON ito2.intItemId = S.intItemId AND ito2.ysnDefault = 1
 LEFT JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = S.intLotStatusId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intSampleUOMId
@@ -318,6 +316,9 @@ OUTER APPLY (SELECT TOP 1 MFBatch.strTaster
 						, MFBatch.strAirwayBillCode
 			 FROM tblMFBatch AS MFBatch
 			 WHERE MFBatch.strBatchId = S.strBatchNo) AS Batch
+OUTER APPLY (SELECT TOP 1 strCropYear
+			 FROM tblCTCropYear
+			 WHERE intCropYearId = S.intCropYearId) AS SeasonCropYear
 WHERE S.intTypeId = 1
 GO
 
