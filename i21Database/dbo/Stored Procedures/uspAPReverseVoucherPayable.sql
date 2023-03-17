@@ -372,10 +372,19 @@ BEGIN
 			);
 
 			--REMOVE PAYABLE
-			DECLARE @loadCostId INT
-			SELECT @loadCostId = intLoadShipmentCostId FROM @voucherPayable
+			DECLARE @loadCostIds Id
+			INSERT INTO @loadCostIds
+			SELECT intLoadShipmentCostId FROM @voucherPayable WHERE intLoadShipmentCostId IS NOT NULL
 
-			EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, NULL, NULL, @loadCostId, @intUserId
+			WHILE EXISTS(SELECT TOP 1 1 FROM @loadCostIds)
+			BEGIN
+				DECLARE @loadCostId INT
+				SELECT TOP 1 @loadCostId = intId FROM @loadCostIds
+
+				EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, NULL, NULL, @loadCostId, @intUserId
+
+				DELETE FROM @loadCostIds WHERE intId = @loadCostId
+			END
 
 			--CREATE NEW PAYABLE
 			EXEC uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
@@ -383,10 +392,19 @@ BEGIN
 		ELSE
 		BEGIN
 			--REMOVE NEW PAYABLE
-			DECLARE @inventoryReceiptChargeId INT
-			SELECT @inventoryReceiptChargeId = intInventoryReceiptChargeId FROM @voucherPayable
+			DECLARE @inventoryReceiptChargeIds Id
+			INSERT INTO @inventoryReceiptChargeIds
+			SELECT intInventoryReceiptChargeId FROM @voucherPayable WHERE intInventoryReceiptChargeId IS NOT NULL
 
-			EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, @inventoryReceiptChargeId, NULL, NULL, @intUserId
+			WHILE EXISTS(SELECT TOP 1 1 FROM @inventoryReceiptChargeIds)
+			BEGIN
+				DECLARE @inventoryReceiptChargeId INT
+				SELECT TOP 1 @inventoryReceiptChargeId = intId FROM @inventoryReceiptChargeIds
+
+				EXEC uspAPRemoveVoucherPayableTransaction NULL, NULL, @inventoryReceiptChargeId, NULL, NULL, @intUserId
+
+				DELETE FROM @inventoryReceiptChargeIds WHERE intId = @inventoryReceiptChargeId
+			END
 
 			--REVERSE PAYABLE
 			MERGE INTO tblAPVoucherPayable AS DESTINATION
