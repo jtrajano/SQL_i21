@@ -32,6 +32,12 @@ BEGIN
 		,@ysnHedearValueChange bit = 0
 		,@fromHeaderValue nvarchar(38)
 		,@toHeaderValue nvarchar(38)
+		,@intContractStatusId int
+		,@intContractScreenId int
+		,@ysnOnceApproved bit
+		,@ysnFeedOnApproval bit
+		,@intTransactionId int
+		,@intApproverId int
 		;
 
 	begin try
@@ -52,6 +58,7 @@ BEGIN
 			,@intPriceItemUOMId = cd.intPriceItemUOMId
 			,@dblCashPrice = cd.dblCashPrice
 			,@dblFutures = cd.dblFutures
+			,@intContractStatusId = intContractStatusId
 		from
 			tblCTContractDetail cd
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -59,6 +66,8 @@ BEGIN
 			cd.intContractDetailId = @intContractDetailId
 			and cd.intPricingTypeId in (6)
 			and ch.intPricingTypeId = cd.intPricingTypeId;
+
+		SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
 
 		if (isnull(@intContractHeaderId,0) = 0)
 		begin
@@ -110,9 +119,10 @@ BEGIN
 			</tblCTContractDetails>
 		';
 
-		EXEC uspCTBeforeSaveContract @intContractHeaderId = @intContractHeaderId, @intUserId=@intUserId, @strXML = @strXML;
+		--No need to call uspCTBeforeSaveContract from importing
+		--EXEC uspCTBeforeSaveContract @intContractHeaderId = @intContractHeaderId, @intUserId=@intUserId, @strXML = @strXML, @ysnFromImport = 1;
 
-		update tblCTContractDetail set dblCashPrice = @dblNewPrice, dblTotalCost = @dblTotalCost where intContractDetailId = @intContractDetailId;
+		update tblCTContractDetail set dblCashPrice = @dblNewPrice, dblTotalCost = @dblTotalCost, ysnPriceChanged = 1 where intContractDetailId = @intContractDetailId;
 
 		if (@strContractBase = 'Value')
 		begin
@@ -163,7 +173,61 @@ BEGIN
 			</rows>
 		';
 
-		EXEC uspCTSaveContract @intContractHeaderId = @intContractHeaderId, @userId = @intUserId, @strXML = '', @strTFXML = @strXML;
+		--No need to call uspCTSaveContract from importing
+		--EXEC uspCTSaveContract @intContractHeaderId = @intContractHeaderId, @userId = @intUserId, @strXML = '', @strTFXML = @strXML;
+		
+		/*Begin of extracted code from uspCTSaveContract*/
+
+		declare @ysnUpdateVesselInfo bit;
+		SELECT @ysnUpdateVesselInfo = ysnUpdateVesselInfo FROM tblLGCompanyPreference
+		IF @ysnUpdateVesselInfo = 1
+		BEGIN
+			UPDATE	LO
+			SET		LO.strOriginPort		=	LC.strCity,
+					LO.strDestinationPort	=	DC.strCity
+			FROM	tblLGLoad			LO 
+			JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId	=	LO.intLoadId 
+			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
+			JOIN	tblSMCity			LC	ON	LC.intCityId	=	CD.intLoadingPortId
+			JOIN	tblSMCity			DC	ON	DC.intCityId	=	CD.intDestinationPortId
+			WHERE	(LD.intSContractDetailId = @intContractDetailId 
+			OR		LD.intPContractDetailId = @intContractDetailId)
+			AND		LC.strCity	IS NOT NULL 
+			AND		DC.strCity	IS NOT NULL 
+
+			UPDATE	LD
+			SET		LD.intPSubLocationId = CD.intSubLocationId
+			FROM	tblLGLoadDetail LD
+			JOIN	tblCTContractDetail CD ON LD.intPContractDetailId = CD.intContractDetailId
+			WHERE	(LD.intSContractDetailId = @intContractDetailId 
+			OR		LD.intPContractDetailId = @intContractDetailId)
+		END
+
+		SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+
+		SELECT  @ysnOnceApproved  =	ysnOnceApproved,
+				@intTransactionId = intTransactionId 
+		FROM	tblSMTransaction 
+		WHERE	intRecordId = @intContractHeaderId 
+		AND		intScreenId = @intContractScreenId
+
+		SELECT	TOP 1
+				@intApproverId	  =	intApproverId 
+		FROM	tblSMApproval 
+		WHERE	intTransactionId  =	@intTransactionId 
+		AND		intScreenId = @intContractScreenId 
+		AND		strStatus = 'Approved' 
+		ORDER BY intApprovalId DESC
+
+		IF	@intContractStatusId	=	1	AND
+			@ysnOnceApproved		=	1	AND
+			@ysnFeedOnApproval		=	1	AND
+			NOT EXISTS (SELECT TOP 1 1 FROM tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
+		BEGIN
+			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1, 1
+		END
+
+		/*End of extracted code from uspCTSaveContract*/
 
 		set @logDetails = '
 		{
