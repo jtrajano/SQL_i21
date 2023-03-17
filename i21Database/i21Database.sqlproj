@@ -1240,7 +1240,6 @@
     <Build Include="dbo\Stored Procedures\uspSTMechandiseSaleSummaryTaxable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMechandiseSaleSummaryNonTaxable.sql" />
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartmentCons.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\UT_Utah.sql" />
     <None Include="Scripts\Post-Deployment\GL\04_ClearImportCOAFromCSV.sql" />
