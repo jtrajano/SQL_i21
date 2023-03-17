@@ -28,8 +28,8 @@ SELECT
 		,dblCost				=	WC2Details.dblCost
 		,dblTotal				=	WC2Details.dblTotal + WC2Details.dblTax
 		,dblNetShippedWeight	=	WC2Details.dblNetShippedWeight
-		,dblWeightLoss			=	dblWeightLoss--WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
-		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
+		,dblWeightLoss			=	WC2Details.dblWeightLoss--WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
+		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END - CASE WHEN WCD.strCondition = 'Missing' THEN WC2Details.dblWeightLoss ELSE 0 END
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
@@ -38,6 +38,7 @@ SELECT
 	FROM tblAPBill WC2
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
+	INNER JOIN tblLGWeightClaimDetail WCD ON WC2Details.intWeightClaimDetailId = WCD.intWeightClaimDetailId 
 	LEFT JOIN (tblICItemUOM QtyUOM INNER JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 
 			ON WC2Details.intUnitOfMeasureId = QtyUOM.intItemUOMId
 	LEFT JOIN (tblICItemUOM QtyUOMWeight INNER JOIN tblICUnitMeasure QtyUOMWeightDetails ON QtyUOMWeight.intUnitMeasureId = QtyUOMWeightDetails.intUnitMeasureId) 
