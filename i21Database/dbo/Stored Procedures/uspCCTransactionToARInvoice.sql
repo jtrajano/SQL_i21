@@ -86,8 +86,8 @@ BEGIN
 		--,[intInvoiceId]
     )
     SELECT [strTransactionType] =  CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo'
-		WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.strSiteType = 'Dealer Site' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSiteDetail.dblNet < 0 THEN 'Debit Memo' 
-		ELSE 'Credit Memo' END
+										WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.strSiteType = 'Dealer Site' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSiteDetail.dblNet < 0 THEN 'Debit Memo' 
+									ELSE 'Credit Memo' END
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
 		,[strType] = 'Dealer Credit Card'
         --,[intSourceId] = ccSiteHeader.intSiteHeaderId
@@ -105,12 +105,15 @@ BEGIN
         ,[strItemDescription] = ccItem.strItem
         ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN -1 ELSE 1 END --CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblGross -- Dealer Site Gross
-			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site' THEN (CASE WHEN ccSiteDetail.dblNet < 0 THEN ccSiteDetail.dblNet * -1 ELSE ccSiteDetail.dblNet END) -- Dealer Site Net
-			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblGross -- Company Owned Pass Thru
-			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (1 - (ccSite.dblSharedFeePercentage / 100))) -- Dealer Site Shared Fees (Net) 
-			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross -- (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)) -- Dealer Site Shared Fees (Gross) 
-			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
-			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblFees
+		  	 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site' THEN (CASE WHEN ccSiteDetail.dblNet < 0 THEN ccSiteDetail.dblNet * -1 ELSE ccSiteDetail.dblNet END) -- Dealer Site Net
+			 
+			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' AND ISNULL(ccSite.dblSharedFeePercentage,0) <> 0 THEN ccSiteDetail.dblGross - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
+			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' AND ISNULL(ccSite.dblSharedFeePercentage,0) = 0 THEN ccSiteDetail.dblGross -- Company Owned Pass Thru
+			 
+			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (1 - (ccSite.dblSharedFeePercentage / 100))) -- Dealer Site Shared Fees (Net) 
+			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross -- (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)) -- Dealer Site Shared Fees (Gross) 
+			 WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
+			 WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblFees
 			ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
 		,[intTaxGroupId] = null
         ,[ysnRecomputeTax] = 0
@@ -133,9 +136,96 @@ BEGIN
 	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
 	--LEFT JOIN tblARInvoiceDetail ARInvoiceDetail ON ARInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null
-	AND ccSite.strSiteType != 'Company Owned'
+	AND ccSite.strSiteType NOT IN  ('Company Owned', 'Company Owned Shared Fees')
 	--Fixes for CCR-315
 	-- and ccSite.ysnPostNetToArCustomer = 1
+
+	
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	--COMPANY OWNED - Shared Fees
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	INSERT INTO @EntriesForInvoice(
+        [strTransactionType]
+        ,[strSourceTransaction]
+		,[strType]
+        --,[intSourceId]
+        ,[strSourceId]
+        ,[intEntityCustomerId]
+        ,[intCompanyLocationId]
+        ,[intCurrencyId]
+        ,[intTermId]
+        ,[dtmDate]
+        ,[dtmShipDate]
+        ,[intEntitySalespersonId]
+        ,[intEntityId]
+        ,[ysnPost]
+        ,[intItemId]
+        ,[strItemDescription]
+        ,[dblQtyShipped]
+        ,[dblPrice]
+        ,[intTaxGroupId]
+        ,[ysnRecomputeTax]
+        ,[intSiteDetailId]
+        ,[ysnInventory]
+		,[intSalesAccountId]
+		,[strComments]
+		,[dtmDueDate]
+		--,[intInvoiceId]
+    )
+    SELECT [strTransactionType] =  'Invoice'
+        ,[strSourceTransaction] = 'Credit Card Reconciliation'
+		,[strType] = 'Dealer Credit Card'
+        --,[intSourceId] = ccSiteHeader.intSiteHeaderId
+        ,[strSourceId] = ccSiteDetail.intSiteDetailId
+        ,[intEntityCustomerId] = ccSite.intCustomerId
+        ,[intCompanyLocationId] = ccSiteHeader.intCompanyLocationId
+        ,[intCurrencyId] = ccVendor.intCurrencyId
+        ,[intTermId] = ccCustomer.intTermsId
+        ,[dtmDate] = ccSiteHeader.dtmDate
+        ,[dtmShipDate]  = ccSiteHeader.dtmDate
+        ,[intEntitySalespersonId] = ccCustomer.intSalespersonId
+        ,[intEntityId] = @UserId
+        ,[ysnPost] = @Post
+        ,[intItemId] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN @intDealerSiteFeeItem ELSE -1 END
+        ,[strItemDescription] = ccItem.strItem
+        ,[dblQtyShipped] = 1
+
+        ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' 
+								AND ccSite.ysnPostNetToArCustomer = 0 
+								AND ccSite.strSiteType = 'Company Owned Shared Fees' 
+								AND ISNULL(ccSite.ysnPassedThruArCustomerFees,0) = 1
+								AND ISNULL(ccSite.dblSharedFeePercentage,0) <> 0
+						   THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
+						  ELSE
+						   0
+						  END
+
+		,[intTaxGroupId] = null
+        ,[ysnRecomputeTax] = 0
+        ,[intSiteDetailId] = ccSiteDetail.intSiteDetailId
+        ,[ysnInventory] = 1
+		,[intSalesAccountId] = ItemAcc.intAccountId
+		,[strComments] = ccSiteHeader.strCcdReference
+		, CASE 
+			WHEN ccSiteHeader.strApType = 'Credit On Account' THEN ccSiteHeader.dtmDate 
+			WHEN ccSiteHeader.strApType = 'Cash Deposited' THEN ccSiteHeader.dtmDate 
+			ELSE NULL 
+		  END
+		--,[intInvoiceId] = ARInvoiceDetail.intInvoiceId
+    FROM tblCCSiteHeader ccSiteHeader 
+    INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
+    INNER JOIN @CCRItemToARItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
+    LEFT JOIN tblCCSiteDetail ccSiteDetail ON  ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
+    LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
+    LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
+	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
+	--LEFT JOIN tblARInvoiceDetail ARInvoiceDetail ON ARInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
+    WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null
+	AND ccSite.strSiteType = 'Company Owned Shared Fees'
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
     --REMOVE -1 items
 	--and those sites that does not have customer
