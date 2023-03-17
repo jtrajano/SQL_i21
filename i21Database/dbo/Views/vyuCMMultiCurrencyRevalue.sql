@@ -16,12 +16,12 @@ WITH QUERY AS(
 	strItemId    = '' COLLATE Latin1_General_CI_AS,  
 	dblQuantity    = NULL,  
 	dblUnitPrice   = NULL,  
-	dblAmount       =   CASE WHEN Rate.Value IS NULL THEN 0 else BankBalance.Value/Rate.Value end, -- this is in functional currency    
+	dblAmount       =  BankBalance.Value, -- this is in foreign currency    
 	intCurrencyId   = BA.intCurrencyId,  
 	intForexRateType  = NewRateTypeId.intCashManagementRateTypeId,  
 	strForexRateType  = NewRateTypeId.strCurrencyExchangeRateType,  
 	dblForexRate   = Rate.Value,  
-	dblHistoricAmount  = BankBalance.Value, -- foreign currency  
+	dblHistoricAmount  =  GLBalance.Value, -- functional currency  
 	dblNewForexRate         =   NewRate.dblRate,  --0, --Calcuate By GL  
 	dblNewAmount            =    0,-- (BankBalance.Value/Rate.Value) * NewRate.dblRate, --  0, --Calcuate By GL  
 	dblUnrealizedDebitGain  =    0, --Calcuate By GL  
@@ -50,7 +50,7 @@ WITH QUERY AS(
 	SELECT top 1 [dbo].fnGLGetCMGLDetailBalance(EOP.Value, BA.intGLAccountId) Value -- this is in us / functional currency  
 	)GLBalance  
 	OUTER APPLY(  
-	SELECT top 1 case when BankBalance.Value = 0 or  GLBalance.Value = 0 then NULL else GLBalance.Value / BankBalance.Value  END  Value  
+	SELECT top 1 case when BankBalance.Value = 0 or  GLBalance.Value = 0 then NULL else  BankBalance.Value/GLBalance.Value   END  Value  
 	)Rate  
 )
 SELECT * from QUERY WHERE dblHistoricAmount <> 0

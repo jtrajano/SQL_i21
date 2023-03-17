@@ -51,6 +51,22 @@ BEGIN TRY
 		,@dtmValidTo DATETIME
 		,@ysnTBSReserveOnSave BIT
 		,@dblTBSQuantity NUMERIC(18, 6)
+		,@intLotId int
+		,@dblWeight numeric(18,6)
+	DECLARE @dblInputAvlQty NUMERIC(38, 20)
+	DECLARE @dblInputReqQty NUMERIC(38, 20)
+	DECLARE @intInputLotId INT
+	DECLARE @intInputItemId INT
+	DECLARE @strInputLotNumber NVARCHAR(50)
+	DECLARE @strInputItemNo NVARCHAR(50)
+	--Available Qty Check
+	DECLARE @tblLotSummary AS TABLE (
+		intRowNo INT IDENTITY
+		,intLotId INT
+		,intItemId INT
+		,dblQty NUMERIC(38, 20)
+		,intRecipeItemId INT
+		)
 	DECLARE @tblFW TABLE (
 		strChar CHAR(1)
 		,intItemId INT
@@ -338,6 +354,81 @@ BEGIN TRY
 			,ysnOverrideRecipe BIT
 			)
 
+	INSERT INTO @tblLotSummary (
+		intLotId
+		,intItemId
+		,dblQty
+		)
+	SELECT intLotId
+		,intItemId
+		,SUM(dblQty)
+	FROM @tblLot
+	GROUP BY intLotId
+		,intItemId
+
+	DECLARE @intMinLot INT
+
+	SELECT @intMinLot = Min(intRowNo)
+	FROM @tblLotSummary
+
+	WHILE (@intMinLot IS NOT NULL)
+		AND @ysnEnableParentLot = 0
+	BEGIN
+		SELECT @intInputLotId = NULL
+			,@dblInputReqQty = NULL
+			,@intInputItemId = NULL
+
+		SELECT @intInputLotId = intLotId
+			,@dblInputReqQty = dblQty
+			,@intInputItemId = intItemId
+		FROM @tblLotSummary
+		WHERE intRowNo = @intMinLot
+
+		SELECT @dblInputAvlQty = NULL
+
+		SELECT @dblInputAvlQty = CASE 
+				WHEN isnull(l.dblWeight, 0) > 0
+					THEN l.dblWeight
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId, tl.intItemUOMId, l.dblQty)
+				END - (
+				SELECT ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+				FROM tblICStockReservation
+				WHERE intLotId = @intInputLotId
+					AND ISNULL(ysnPosted, 0) = 0
+				)
+		FROM tblICLot l
+		JOIN @tblLot tl ON l.intLotId = tl.intLotId
+		WHERE l.intLotId = @intInputLotId
+
+		IF @dblInputReqQty > @dblInputAvlQty
+			AND ABS(@dblInputReqQty - @dblInputAvlQty) > 1
+		BEGIN
+			SELECT @strInputLotNumber = NULL
+
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = NULL
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+
+		SELECT @intMinLot = Min(intRowNo)
+		FROM @tblLotSummary
+		WHERE intRowNo > @intMinLot
+	END
+
 	UPDATE @tblLot
 	SET intStorageLocationId = NULL
 	WHERE intStorageLocationId = 0;
@@ -580,6 +671,8 @@ BEGIN TRY
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId;
 
+	SELECT @intIssuedUOMTypeId = NULL
+
 	IF @intIssuedUOMTypeId IS NULL
 	BEGIN
 		SELECT @strValue = a.strValue
@@ -625,50 +718,43 @@ BEGIN TRY
 				FROM @tblLot
 				WHERE intRowNo = @intMinRowNo
 
-				IF (@dblIssuedQuantity % @intNoOfSheets) > 0
-					AND @intIssuedUOMTypeId = 4
-				BEGIN
-					IF EXISTS (
-							SELECT *
-							FROM @tblFW
-							WHERE intItemId = @intItemId
-							)
-					BEGIN
-						SELECT @strChar = NULL
-							,@intSeq = NULL
-
-						SELECT @strChar = strChar
-							,@intSeq = intSeq + 1
-						FROM @tblFW
-						WHERE intItemId = @intItemId
-
-						UPDATE @tblFW
-						SET intSeq = @intSeq
-						WHERE intItemId = @intItemId
-
-						SELECT @strFW = @strChar + ltrim(@intSeq)
-					END
-					ELSE
-					BEGIN
-						SELECT @intRecordId = NULL
-							,@strChar = NULL
-							,@intSeq = 1
-
-						SELECT TOP 1 @intRecordId = intRecordId
-							,@strChar = strChar
-						FROM @tblFW
-						WHERE intItemId IS NULL
-						ORDER BY intRecordId ASC
-
-						UPDATE @tblFW
-						SET intItemId = @intItemId
-							,intSeq = 1
-						WHERE intRecordId = @intRecordId
-
-						SELECT @strFW = @strChar + ltrim(@intSeq)
-					END
-				END
-
+				--IF (@dblIssuedQuantity % @intNoOfSheets) > 0
+				--	AND @intIssuedUOMTypeId = 4
+				--BEGIN
+				--	IF EXISTS (
+				--			SELECT *
+				--			FROM @tblFW
+				--			WHERE intItemId = @intItemId
+				--			)
+				--	BEGIN
+				--		SELECT @strChar = NULL
+				--			,@intSeq = NULL
+				--		SELECT @strChar = strChar
+				--			,@intSeq = intSeq + 1
+				--		FROM @tblFW
+				--		WHERE intItemId = @intItemId
+				--		UPDATE @tblFW
+				--		SET intSeq = @intSeq
+				--		WHERE intItemId = @intItemId
+				--		SELECT @strFW = @strChar + ltrim(@intSeq)
+				--	END
+				--	ELSE
+				--	BEGIN
+				--		SELECT @intRecordId = NULL
+				--			,@strChar = NULL
+				--			,@intSeq = 1
+				--		SELECT TOP 1 @intRecordId = intRecordId
+				--			,@strChar = strChar
+				--		FROM @tblFW
+				--		WHERE intItemId IS NULL
+				--		ORDER BY intRecordId ASC
+				--		UPDATE @tblFW
+				--		SET intItemId = @intItemId
+				--			,intSeq = 1
+				--		WHERE intRecordId = @intRecordId
+				--		SELECT @strFW = @strChar + ltrim(@intSeq)
+				--	END
+				--END
 				INSERT INTO tblMFWorkOrderInputLot (
 					intWorkOrderId
 					,intLotId
@@ -1127,6 +1213,112 @@ BEGIN TRY
 	EXEC uspMFCreateBlendRecipeComputation @intWorkOrderId = @intWorkOrderId
 		,@intTypeId = 1
 		,@strXml = @strXml
+
+	--FW
+	SELECT @intWorkOrderInputLotId = NULL
+
+	SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	WHILE @intWorkOrderInputLotId IS NOT NULL
+	BEGIN
+		SELECT @intItemId = NULL
+			,@dblIssuedQuantity = NULL
+			,@strFW=NULL
+			,@intLotId =NULL
+			,@dblWeight=NULL
+
+		SELECT @intItemId = intItemId
+			,@dblIssuedQuantity = dblIssuedQuantity
+			,@intLotId=intLotId
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
+		FROM tblMFWorkOrderInputLot
+		WHERE intLotId = @intLotId
+
+		Select @dblInputAvlQty=dblWeight  
+		from tblICLot 
+		Where intLotId=@intLotId
+		
+		if @dblTBSQuantity>@dblInputAvlQty
+		Begin
+			SELECT @strInputLotNumber = NULL
+
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = NULL
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		End
+
+		IF (@dblIssuedQuantity % @intNoOfSheets) > 0
+			AND @intIssuedUOMTypeId = 4
+		BEGIN
+			IF EXISTS (
+					SELECT *
+					FROM @tblFW
+					WHERE intItemId = @intItemId
+					)
+			BEGIN
+				SELECT @strChar = NULL
+					,@intSeq = NULL
+
+				SELECT @strChar = strChar
+					,@intSeq = intSeq + 1
+				FROM @tblFW
+				WHERE intItemId = @intItemId
+
+				UPDATE @tblFW
+				SET intSeq = @intSeq
+				WHERE intItemId = @intItemId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+			ELSE
+			BEGIN
+				SELECT @intRecordId = NULL
+					,@strChar = NULL
+					,@intSeq = 1
+
+				SELECT TOP 1 @intRecordId = intRecordId
+					,@strChar = strChar
+				FROM @tblFW
+				WHERE intItemId IS NULL
+				ORDER BY intRecordId ASC
+
+				UPDATE @tblFW
+				SET intItemId = @intItemId
+					,intSeq = 1
+				WHERE intRecordId = @intRecordId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+		END
+
+		UPDATE tblMFWorkOrderInputLot
+		SET strFW = @strFW, ysnKeep =Case When @dblInputAvlQty>@dblTBSQuantity then 1 Else 0 End
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intWorkOrderInputLotId > @intWorkOrderInputLotId
+	END
 
 	COMMIT TRANSACTION
 

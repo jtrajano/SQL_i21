@@ -5,7 +5,6 @@
 	[intCompanyLocationId] INT NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
 
-	CONSTRAINT [FK_dbo.tblAPVendorCompanyLocation_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityId]),
+	CONSTRAINT [FK_dbo.tblAPVendorCompanyLocation_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityId])  ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPVendorCompanyLocation_dbo.tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY (intCompanyLocationId) REFERENCES tblSMCompanyLocation(intCompanyLocationId)
-
 )

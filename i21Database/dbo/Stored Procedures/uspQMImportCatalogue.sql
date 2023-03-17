@@ -13,6 +13,17 @@ IF EXISTS (SELECT 1 FROM tblQMImportCatalogue WHERE intImportLogId = @intImportL
 BEGIN TRY
 	BEGIN TRANSACTION
 
+	-- Delete old error logs for the same user
+	DECLARE @intEntityUserId INT
+	SELECT @intEntityUserId = intEntityId FROM tblQMImportLog WHERE intImportLogId = @intImportLogId
+
+	DELETE IC
+	FROM tblQMImportCatalogue IC
+	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IC.intImportLogId
+	WHERE IC.ysnSuccess = 0
+	AND IL.intEntityId = @intEntityUserId
+	AND IL.intImportLogId < @intImportLogId	
+
 	/* Validation of Missing Fields for Auction & Non-Auction Sample. */
 	UPDATE IMP
 	SET strLogResult	= 'Missing Field(s): ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage), charindex(',', reverse(MSG.strLogMessage)) + 1, len(MSG.strLogMessage)))

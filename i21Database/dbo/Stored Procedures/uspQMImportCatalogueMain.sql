@@ -1151,12 +1151,6 @@ BEGIN TRY
 									)
 							WHERE intSampleId = @intSampleId
 
-							IF @ysnCreate = 0
-								EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
-									,@intUserEntityId = @intEntityUserId
-									,@strRemarks = 'Updated from Catalogue Import'
-									,@ysnCreate = 0
-							,@ysnBeforeUpdate = 0
 						END
 					END
 
@@ -1678,11 +1672,6 @@ BEGIN TRY
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 
-			EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intSampleId
-				,@intUserEntityId = @intEntityUserId
-				,@strRemarks = 'Updated from Catalogue Import'
-				,@ysnCreate = 0
-				,@ysnBeforeUpdate = 0
 		END
 
 		UPDATE tblQMImportCatalogue
@@ -1767,6 +1756,12 @@ BEGIN TRY
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	EXEC uspQMGenerateSampleCatalogueImportAuditLog
+		@intUserEntityId = @intEntityUserId
+		,@strRemarks = 'Updated from Catalogue Import'
+		,@ysnCreate = 0
+		,@ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

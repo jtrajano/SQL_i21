@@ -70,6 +70,12 @@ BEGIN TRY
 		,@strERPOrderNo nvarchar(50)
 		,@ysnOverrideRecipe BIT
 		,@ysnCopyRecipeOnSave BIT
+		,@intLotId int
+		,@dblWeight numeric(18,6)
+		,@intWorkOrderInputLotId INT
+		,@dblTBSQuantity NUMERIC(18, 6)
+		,@strFW NVARCHAR(3)
+		,@intRecordId INT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -93,10 +99,96 @@ BEGIN TRY
 		,@ysnPercResetRequired BIT = 0
 		,@dblQuantityTaken NUMERIC(18, 6)
 		,@dblPercentageIncrease NUMERIC(18, 6)
+		,@strChar NVARCHAR(1)
+
 	DECLARE @tblInputItemSeq TABLE (
 		intItemId INT
 		,intSeq INT
 		)
+DECLARE @tblFW TABLE (
+		strChar CHAR(1)
+		,intItemId INT
+		,intSeq INT
+		,intRecordId INT identity(1, 1)
+		);
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'A'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'B'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'C'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'D'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'E'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'F'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'G'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'H'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'I'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'J'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'K'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'L'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'M'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'N'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'O'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'P'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Q'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'R'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'S'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'T'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'U'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'V'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'W'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'X'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Y'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Z'
 
 	SELECT @dtmCurrentDateTime = GetDate()
 
@@ -1059,7 +1151,6 @@ BEGIN TRY
 		,@intLotCount INT
 		,@intItemId INT
 		,@dblReqQty NUMERIC(38, 20)
-		,@intLotId INT
 		,@dblQty NUMERIC(38, 20)
 
 	SELECT @intExecutionOrder = Count(1)
@@ -2306,6 +2397,109 @@ BEGIN TRY
 		SET @dblBalancedQtyToProduceOut = 0
 	SET @strWorkOrderNoOut = @strNextWONo;
 	SET @intWorkOrderIdOut = @intWorkOrderId
+
+	--FW
+	SELECT @intWorkOrderInputLotId = NULL
+
+	SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	WHILE @intWorkOrderInputLotId IS NOT NULL
+	BEGIN
+		SELECT @intItemId = NULL
+			,@intLotId =NULL
+			,@dblWeight=NULL
+
+		SELECT @intItemId = intItemId
+				,@intLotId=intLotId
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
+		FROM tblMFWorkOrderInputLot
+		WHERE intLotId = @intLotId
+
+		Select @dblInputAvlQty=dblWeight  
+		from tblICLot 
+		Where intLotId=@intLotId
+		
+		if @dblTBSQuantity>@dblInputAvlQty
+		Begin
+			SELECT @strInputLotNumber = NULL
+
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = NULL
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		End
+
+		IF (@dblIssuedQuantity % @intNoOfSheetOriginal) > 0
+			AND @intIssuedUOMTypeId = 4
+		BEGIN
+			IF EXISTS (
+					SELECT *
+					FROM @tblFW
+					WHERE intItemId = @intItemId
+					)
+			BEGIN
+				SELECT @strChar = NULL
+					,@intSeq = NULL
+
+				SELECT @strChar = strChar
+					,@intSeq = intSeq + 1
+				FROM @tblFW
+				WHERE intItemId = @intItemId
+
+				UPDATE @tblFW
+				SET intSeq = @intSeq
+				WHERE intItemId = @intItemId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+			ELSE
+			BEGIN
+				SELECT @intRecordId = NULL
+					,@strChar = NULL
+					,@intSeq = 1
+
+				SELECT TOP 1 @intRecordId = intRecordId
+					,@strChar = strChar
+				FROM @tblFW
+				WHERE intItemId IS NULL
+				ORDER BY intRecordId ASC
+
+				UPDATE @tblFW
+				SET intItemId = @intItemId
+					,intSeq = 1
+				WHERE intRecordId = @intRecordId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+		END
+
+		UPDATE tblMFWorkOrderInputLot
+		SET strFW = @strFW, ysnKeep =Case When @dblInputAvlQty>@dblTBSQuantity then 1 Else 0 End
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intWorkOrderInputLotId > @intWorkOrderInputLotId
+	END
 
 	COMMIT TRAN
 

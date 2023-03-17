@@ -104,7 +104,7 @@ BEGIN TRY
 			OR CD.intBookId<>BOOK.intBookId
 			)
 
-	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
+	--EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
@@ -444,7 +444,7 @@ BEGIN TRY
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
-			,strPackageSize = NULL
+			,strPackageSize = PT.strUnitMeasure
 			,intPackageUOMId = S.intRepresentingUOMId
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = IMP.strTaster
@@ -477,6 +477,7 @@ BEGIN TRY
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
 		Left JOIN tblSMCompanyLocation MU on MU.strLocationName =B.strBook 
+		LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -575,13 +576,6 @@ BEGIN TRY
 			WHERE intSampleId = @intSampleId
 		END
 
-		EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Contract Line Allocation Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 0
-
 		CONT:
 
 		FETCH NEXT
@@ -603,6 +597,12 @@ BEGIN TRY
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	EXEC uspQMGenerateSampleCatalogueImportAuditLog
+		@intUserEntityId = @intEntityUserId
+		,@strRemarks = 'Updated from Contract Line Allocation Import'
+		,@ysnCreate = 0
+		,@ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

@@ -166,7 +166,7 @@ SELECT Lot.intLotId
 	 , Batch.strVendorLotNumber
 	 , Item.intUnitPerLayer
 	 , Item.intLayerPerPallet
-	 , ISNULL(InputLot.dblPickedQty, 0) AS dblPickedQty
+	 , ISNULL(0.0, 0) AS dblPickedQty
 	 , Item.strShortName
 INTO #tempLot
 FROM tblICLot AS Lot
@@ -194,9 +194,9 @@ LEFT JOIN tblQMGardenMark AS GardenMark ON Batch.intGardenMarkId = GardenMark.in
 LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=Item.intProductTypeId
 LEFT JOIN tblICBrand B on B.intBrandId=Item.intBrandId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
-OUTER APPLY (SELECT ISNULL(WorkOrderInput.dblQuantity, 0) AS dblPickedQty
-			 FROM tblMFWorkOrderInputLot AS WorkOrderInput
-			 WHERE intRecipeItemId = @intRecipeItemId AND intItemId = @intItemId AND WorkOrderInput.intLotId = Lot.intLotId) AS InputLot
+--OUTER APPLY (SELECT ISNULL(WorkOrderInput.dblQuantity, 0) AS dblPickedQty
+--			 FROM tblMFWorkOrderInputLot AS WorkOrderInput
+--			 WHERE intRecipeItemId = @intRecipeItemId AND intItemId = @intItemId AND WorkOrderInput.intLotId = Lot.intLotId) AS InputLot
 WHERE Lot.intItemId = (CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE Lot.intItemId END) AND Lot.dblQty > 0 AND LotStatus.intLotStatusId IN (SELECT intLotStatusId FROM @tblLotStatus)
   And Lot.intLocationId = (CASE WHEN @ysnShowOtherFactoryLots = 1 THEN Lot.intLocationId ELSE @intLocationId END)
 ORDER BY Lot.dtmExpiryDate
