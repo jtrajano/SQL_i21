@@ -3467,24 +3467,25 @@ BEGIN
 							,dblUOMQty = 
 									NewItemUOM.dblUnitQty
 							,dblCost = 
-									ISNULL(
-										AdjDetail.dblNewCost
-										,dbo.fnCalculateCostBetweenUOM(
-											dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
-											,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
-											,FromStock.dblCost
-										)
-									)
-									--CASE 
-									--	WHEN AdjDetail.dblNewCost IS NULL THEN 
-									--		FromStock.dblCost
-									--	ELSE
-									--		dbo.fnCalculateCostBetweenUOM( 
-									--			AdjDetail.intItemUOMId --dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
-									--			,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
-									--			,AdjDetail.dblNewCost
-									--		)
-									--END
+									--ISNULL(
+									--	AdjDetail.dblNewCost
+									--	,dbo.fnCalculateCostBetweenUOM(
+									--		dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
+									--		,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
+									--		,FromStock.dblCost
+									--	)
+									--)
+
+									CASE 
+										WHEN AdjDetail.dblNewCost IS NULL THEN 
+											FromStock.dblCost
+										ELSE
+											dbo.fnCalculateCostBetweenUOM( 
+												AdjDetail.intItemUOMId --dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
+												,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+												,AdjDetail.dblNewCost
+											)
+									END
 							,dblSalesPrice			= 0
 							,intCurrencyId			= NULL 
 							,dblExchangeRate		= 1
@@ -3579,24 +3580,24 @@ BEGIN
 								,dblUOMQty = 
 										NewItemUOM.dblUnitQty
 								,dblCost = 
-										--CASE 
-										--	WHEN AdjDetail.dblNewCost IS NULL THEN 
-										--		FromStock.dblCost
-										--	ELSE
-										--		dbo.fnCalculateCostBetweenUOM( 
-										--			dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
-										--			,NewItemUOM.intItemUOMId--dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
-										--			,AdjDetail.dblNewCost
-										--		)
-										--END
-										ISNULL(
-											AdjDetail.dblNewCost
-											,dbo.fnCalculateCostBetweenUOM(
-												dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
-												,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
-												,FromStock.dblCost
-											)
-										)
+										CASE 
+											WHEN AdjDetail.dblNewCost IS NULL THEN 
+												FromStock.dblCost
+											ELSE
+												dbo.fnCalculateCostBetweenUOM( 
+													dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
+													,NewItemUOM.intItemUOMId--dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+													,AdjDetail.dblNewCost
+												)
+										END
+										--ISNULL(
+										--	AdjDetail.dblNewCost
+										--	,dbo.fnCalculateCostBetweenUOM(
+										--		dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, FromStock.intItemUOMId) 
+										--		,ISNULL(NewItemUOM.intItemUOMId, dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)) 
+										--		,FromStock.dblCost
+										--	)
+										--)
 								,dblSalesPrice			= 0
 								,intCurrencyId			= NULL 
 								,dblExchangeRate		= 1
