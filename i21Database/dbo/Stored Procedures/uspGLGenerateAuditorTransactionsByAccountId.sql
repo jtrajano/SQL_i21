@@ -9,7 +9,14 @@ BEGIN
 	SET ANSI_NULLS ON;
 	SET NOCOUNT ON;
 
-    DECLARE @strError NVARCHAR(MAX), @ysnAllowZeroEntry BIT , @ysnZeroEntry BIT
+    DECLARE @strError NVARCHAR(MAX), @ysnAllowZeroEntry BIT , @ysnZeroEntry BIT, 
+    @dblTotalDebitSummary NUMERIC(18,2) = 0, 
+    @dblTotalCreditSummary NUMERIC(18,2) = 0,
+    @dblTotalDebitUnitSummary NUMERIC(18,2) = 0,
+    @dblTotalCreditUnitSummary NUMERIC(18,2) = 0
+
+
+
     DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 0;
     DECLARE @intDefaultCurrencyId INT, @strDefaultCurrency NVARCHAR(10)
     SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId, @strDefaultCurrency= strCurrency FROM 
@@ -418,6 +425,12 @@ BEGIN
                                 WHERE @intAccountId =intAccountId 
                                 AND @intCurrencyId = intCurrencyId    
 
+                                SELECT 
+                                @dblTotalDebitSummary+=ISNULL(@dblTotalDebit,0),
+                                @dblTotalCreditSummary += ISNULL(@dblTotalCredit,0),
+                                @dblTotalDebitUnitSummary+=ISNULL(@dblTotalSourceUnitDebit,0),
+                                @dblTotalCreditUnitSummary +=ISNULL(@dblTotalSourceUnitCredit,0)
+
 
                                         -- Total record
                             INSERT INTO tblGLAuditorTransaction (
@@ -476,8 +489,6 @@ BEGIN
                                 AND @intCurrencyId = intCurrencyId
                             
                                 SET @beginBalance = @beginBalance +  (@dblTotalDebit - @dblTotalCredit)
-            
-                                SELECT @intAccountId, @intCurrencyId
                                 DELETE #TransactionGroup WHERE @intAccountId = intAccountId AND @intCurrencyId = intCurrencyId
                     END --  while exist in #TransactionGroup
 				END -- if exist in #TransactionGroup
@@ -566,9 +577,15 @@ BEGIN
                             WHERE intAccountId = @intAccountId
                 
                 END
-				SELECT @intAccountId
 				DELETE FROM #TransactionGroupAll WHERE @intAccountId = intAccountId
             END
+
+
+            SELECT 
+            @dblTotalDebitSummary dblTotalDebitSummary,
+            @dblTotalCreditSummary dblTotalCreditSummary,
+            @dblTotalDebitUnitSummary dblTotalDebitUnitSummary,
+            @dblTotalCreditUnitSummary dblTotalCreditUnitSummary
         
     END TRY
     BEGIN CATCH
