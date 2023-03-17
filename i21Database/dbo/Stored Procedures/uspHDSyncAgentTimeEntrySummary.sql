@@ -2,6 +2,9 @@
 (
 	 @CoworkerGoalId INT
 	,@TimeEntryPeriodDetailId INT
+	,@NewCoworkerGoal BIT = 0
+	,@SyncAllColumn BIT = 1
+	,@UpdateCoworkerWeeklyBudget BIT = 1
 )
 AS
 
@@ -12,18 +15,34 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS ON  
 
 BEGIN
-	    DECLARE  @intEntityId INT = 0
-				,@intCoworkerGoalId INT = @CoworkerGoalId
-				,@intTimeEntryPeriodDetailId INT = @TimeEntryPeriodDetailId
-				,@strFiscalYear NVARCHAR(50)
+	      DECLARE	 @intEntityId INT = 0
+					,@intCoworkerGoalId INT 
+					,@intTimeEntryPeriodDetailId INT 
+					,@strFiscalYear NVARCHAR(50)
+					,@ysnNewCoworkerGoal BIT 
+					,@ysnSyncAllColumn  BIT 
+					,@ysnUpdateCoworkerWeeklyBudget  BIT 
 				
+		SET	@intCoworkerGoalId						 = @CoworkerGoalId
+		SET @intTimeEntryPeriodDetailId				 = @TimeEntryPeriodDetailId				
+		SET @ysnNewCoworkerGoal						 = @NewCoworkerGoal				
+		SET @ysnSyncAllColumn						 = @SyncAllColumn				
+		SET @ysnUpdateCoworkerWeeklyBudget			 = @UpdateCoworkerWeeklyBudget				
 				
 		--FROM COWORKER GOAL
 		IF @intTimeEntryPeriodDetailId = 0
 		BEGIN
-			SELECT TOP 1  @intEntityId = intEntityId
-						 ,@strFiscalYear = strFiscalYear
-			FROM tblHDCoworkerGoal
+
+			IF @ysnUpdateCoworkerWeeklyBudget = CONVERT(BIT, 1)
+			BEGIN		
+				EXEC uspHDUpdateCoworkerWeeklyBudget @intCoworkerGoalId
+			END
+
+			SELECT TOP 1  @intEntityId = CoworkerGoal.intEntityId
+						 ,@strFiscalYear = CoworkerGoal.strFiscalYear
+			FROM tblHDCoworkerGoal CoworkerGoal
+					INNER JOIN vyuHDAgentDetail AgentDetail
+			ON CoworkerGoal.intEntityId = AgentDetail.intEntityId
 			WHERE intCoworkerGoalId = @intCoworkerGoalId
 
 			--Loop All Period
@@ -43,8 +62,7 @@ BEGIN
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
 
-				EXEC [dbo].[uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary] @intEntityId, @PeriodDetailId, 0
-				EXEC [dbo].[uspHDSyncAgentTimeEntrySummaryDetail] @intEntityId, @PeriodDetailId
+				EXEC [dbo].[uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary] @intEntityId, @PeriodDetailId, 0, @ysnNewCoworkerGoal, @ysnSyncAllColumn
 
 				FETCH NEXT FROM PeriodDetailLoop INTO @PeriodDetailId
 			END
@@ -73,9 +91,8 @@ BEGIN
 			FETCH NEXT FROM EmployeeLoop INTO @EntityId
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
-				EXEC [dbo].[uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary] @EntityId, @intTimeEntryPeriodDetailId, 0
-				EXEC [dbo].[uspHDSyncAgentTimeEntrySummaryDetail] @EntityId, @intTimeEntryPeriodDetailId
-	
+				EXEC [dbo].[uspHDCreateUpdateAgentTimeEntryPeriodDetailSummary] @EntityId, @intTimeEntryPeriodDetailId, 0, @ysnNewCoworkerGoal, @ysnSyncAllColumn
+
 				FETCH NEXT FROM EmployeeLoop INTO @EntityId
 			END
 			CLOSE EmployeeLoop

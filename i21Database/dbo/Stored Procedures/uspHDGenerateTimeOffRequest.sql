@@ -2,6 +2,11 @@
 	@intEntityId int
 AS
 
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET ANSI_WARNINGS OFF
+
 declare @queryResult cursor
 		,@intTimeOffRequestId int
 		,@dtmDateFrom datetime
@@ -20,9 +25,12 @@ declare @queryResult cursor
 
 		,@intScreenId int
 		,@strApprovalStatus nvarchar(100)
-		,@intHDTimeOffRequestId int;
+		,@intHDTimeOffRequestId int
+		,@EntityId int
 
-if (@intEntityId = 0)
+set @EntityId = @intEntityId
+
+if (@EntityId = 0)
 begin
 	set @queryResult = cursor for
 		select
@@ -61,7 +69,7 @@ begin
 		from
 			vyuPRTimeOffRequest
 		where
-			intEntityEmployeeId = @intEntityId
+			intEntityEmployeeId = @EntityId
 
 	OPEN @queryResult
 	FETCH NEXT

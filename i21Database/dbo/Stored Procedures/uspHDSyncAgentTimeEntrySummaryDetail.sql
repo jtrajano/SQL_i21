@@ -13,8 +13,11 @@ SET ANSI_WARNINGS ON
 
 BEGIN
 
-	DECLARE @intEntityId INT = @EntityId,
-			@intTimeEntryPeriodDetailId INT = @TimeEntryPeriodDetailId
+	DECLARE @intEntityId INT,
+			@intTimeEntryPeriodDetailId INT 
+
+	SET @intEntityId  = @EntityId
+	SET	@intTimeEntryPeriodDetailId  = @TimeEntryPeriodDetailId
 
 	--Time Off Request
 	UPDATE tblHDTimeOffRequestToUpdate
