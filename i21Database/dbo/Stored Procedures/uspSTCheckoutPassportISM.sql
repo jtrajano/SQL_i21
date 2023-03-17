@@ -169,6 +169,16 @@ BEGIN
 		-- ==================================================================================================================  
 
 
+		
+
+			SELECT CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUPCCode2, * INTO #tmp_tblICItemUOM
+			FROM tblICItemUOM UOM
+			WHERE strLongUPCCode IS NOT NULL AND strLongUPCCode NOT LIKE '%.%'
+			
+			SELECT CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUPCCode2, * INTO #tmp_vyuSTItemUOMPosCodeFormat
+			FROM vyuSTItemUOMPosCodeFormat UOM
+			WHERE strLongUPCCode IS NOT NULL AND strLongUPCCode NOT LIKE '%.%'
+
 
 
 
@@ -196,10 +206,10 @@ BEGIN
 		WHERE CAST(Chk.intRegisterUpcCode AS BIGINT) NOT IN
 		(
 			SELECT DISTINCT
-				CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUpcCode
+				intUPCCode2 AS intUpcCode
 			FROM @tblTemp Chk
-			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
+			INNER JOIN #tmp_vyuSTItemUOMPosCodeFormat UOM
+				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = intUPCCode2
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -334,8 +344,8 @@ BEGIN
 			WHERE TempChk.intPOSCode NOT IN
 			(
 				SELECT DISTINCT
-					CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intPOSCode
-				FROM tblICItemUOM UOM
+					intUPCCode2 AS intPOSCode
+				FROM #tmp_tblICItemUOM UOM
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
@@ -399,8 +409,8 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN tblICItemUOM UOM
-				ON TempChk.intPOSCode = CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
+			INNER JOIN #tmp_tblICItemUOM UOM
+				ON TempChk.intPOSCode = intUPCCode2
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -457,8 +467,8 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN tblICItemUOM UOM
-				ON TempChk.intPOSCode = CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT)
+			INNER JOIN #tmp_tblICItemUOM UOM
+				ON TempChk.intPOSCode = intUPCCode2
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -712,7 +722,8 @@ BEGIN
 		-- End: Item Price Differences / Department Discounts
 		-- =============================================================================================================================================================================
 
-
+		DROP TABLE #tmp_tblICItemUOM
+		DROP TABLE #tmp_vyuSTItemUOMPosCodeFormat
 
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
