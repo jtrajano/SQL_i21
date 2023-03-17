@@ -432,6 +432,7 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@intBatchId INT
 		,@strTINNumber NVARCHAR(100)
+		,@intCropYearId INT
 	DECLARE @intSampleId INT
 	DECLARE @intItemId INT
 	DECLARE @intCategoryId INT
@@ -520,6 +521,7 @@ BEGIN TRY
 		,strTINNumber = NULL
 		,intSubBookId = STRATEGY.intSubBookId
 		,strPackageType=strPackageType
+		,SeasonCropYear.intCropYearId
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sale Year
@@ -589,6 +591,9 @@ BEGIN TRY
 	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
 		AND STRATEGY.strSubBook = IMP.strStrategy
 		AND STRATEGY.intBookId = BOOK.intBookId
+	OUTER APPLY (SELECT TOP 1 intCropYearId
+				 FROM tblCTCropYear
+				 WHERE strCropYear = IMP.strSeason) AS SeasonCropYear
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND ISNULL(BATCH_MU.strBatchId, '') = ''
 		AND IMP.ysnSuccess = 1
@@ -663,6 +668,7 @@ BEGIN TRY
 		,strTINNumber = IMP.strTINNumber
 		,intSubBookId = NULL
 		,strPackageType=NULL
+		,SeasonCropYear.intCropYearId
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sample Type
@@ -678,6 +684,9 @@ BEGIN TRY
 	-- Batch TBO
 	LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId
 		AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
+	OUTER APPLY (SELECT TOP 1 intCropYearId
+				 FROM tblCTCropYear
+				 WHERE strCropYear = IMP.strSeason) AS SeasonCropYear
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND ISNULL(BATCH_MU.strBatchId, '') <> ''
 		AND IMP.ysnSuccess = 1
@@ -754,6 +763,7 @@ BEGIN TRY
 		,@strTINNumber
 		,@intSubBookId
 		,@strPackageType
+		,@intCropYearId
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -917,6 +927,7 @@ BEGIN TRY
 						,intPackageTypeId
 						,dblTareWeight
 						,strCourierRef
+						,intCropYearId
 						)
 					-- ,intTINClearanceId
 					SELECT intConcurrencyId = 1
@@ -984,6 +995,7 @@ BEGIN TRY
 						,intPackageTypeId=@intPackageTypeId
 						,dblTareWeight=@dblTareWeight
 						,strCourierRef = @strCourierRef
+						,@intCropYearId
 					FROM tblQMSample S
 					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 					WHERE B.intBatchId = @intBatchId
@@ -1287,6 +1299,7 @@ BEGIN TRY
 				,intBrokerId
 				,intPackageTypeId 
 				,dblTareWeight
+				,intCropYearId
 				)
 			-- ,strBuyingOrderNo
 			SELECT intConcurrencyId = 1
@@ -1384,6 +1397,7 @@ BEGIN TRY
 				,intBrokerId = @intBrokerId
 				,intPackageTypeId =@intPackageTypeId
 				,dblTareWeight=@dblTareWeight
+				,intCropYearId = @intCropYearId
 
 			SET @intSampleId = SCOPE_IDENTITY()
 
@@ -1669,6 +1683,7 @@ BEGIN TRY
 				,intBookId = null
 				,intPackageTypeId=@intPackageTypeId
 				,strCourierRef = @strCourierRef
+				,intCropYearId = @intCropYearId
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 
@@ -1750,6 +1765,7 @@ BEGIN TRY
 			,@strTINNumber
 			,@intSubBookId
 			,@strPackageType
+			,@intCropYearId
 
 	END
 
