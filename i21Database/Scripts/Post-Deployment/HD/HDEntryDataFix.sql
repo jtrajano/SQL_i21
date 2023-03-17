@@ -938,44 +938,44 @@ BEGIN
 END
 GO
 	PRINT N'End Update Existing status of tblHDTimeEntryPeriodDetail to closed';
-	--PRINT N'Start Update Existing Zero Weekly Budget in Coworker Goal';
+	PRINT N'Start Update Existing Zero Weekly Budget in Coworker Goal';
 GO
 
---IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDCoworkerGoal' AND COLUMN_NAME = 'dblUnderAllocated') AND
---   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDCoworkerGoal dblBudget')
---BEGIN
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblHDCoworkerGoal' AND COLUMN_NAME = 'dblUnderAllocated') AND
+   NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'Update Existing tblHDCoworkerGoal dblBudget')
+BEGIN
 
---	DECLARE @EntityId int
+	DECLARE @CoworkerGoalId int
 
---	DECLARE EmployeeLoop CURSOR 
---	  LOCAL STATIC READ_ONLY FORWARD_ONLY
---	FOR 
+	DECLARE CoworkerGoalLoop CURSOR 
+	  LOCAL STATIC READ_ONLY FORWARD_ONLY
+	FOR 
 
---	SELECT Agent.intCoworkerGoalId
---	FROM tblHDCoworkerGoal Agent
---	WHERE Agent.dblUnderAllocated > 0
---	AND Agent.intEntityId IS NOT NULL
---	GROUP BY Agent.intCoworkerGoalId
+	SELECT Agent.intCoworkerGoalId
+	FROM tblHDCoworkerGoal Agent
+	WHERE Agent.dblUnderAllocated > 0
+	AND Agent.intEntityId IS NOT NULL
+	GROUP BY Agent.intCoworkerGoalId
 
---	OPEN EmployeeLoop
---	FETCH NEXT FROM EmployeeLoop INTO @EntityId
---	WHILE @@FETCH_STATUS = 0
---	BEGIN 
+	OPEN CoworkerGoalLoop
+	FETCH NEXT FROM CoworkerGoalLoop INTO @CoworkerGoalId
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 
 
---		EXEC [dbo].[uspHDUpdateCoworkerWeeklyBudget] @EntityId
+		EXEC [dbo].[uspHDUpdateCoworkerWeeklyBudget] @CoworkerGoalId
 
---		FETCH NEXT FROM EmployeeLoop INTO @EntityId
---	END
---	CLOSE EmployeeLoop
---	DEALLOCATE EmployeeLoop
+		FETCH NEXT FROM CoworkerGoalLoop INTO @CoworkerGoalId
+	END
+	CLOSE CoworkerGoalLoop
+	DEALLOCATE CoworkerGoalLoop
 
---	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
---    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDCoworkerGoal dblBudget','1')
+	 --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('Update Existing tblHDCoworkerGoal dblBudget','1')
 
---END
+END
 
---GO
-	--PRINT N'End Update Existing Zero Weekly Budget in Coworker Goal';
+GO
+	PRINT N'End Update Existing Zero Weekly Budget in Coworker Goal';
 	PRINT N'Start Update Existing ysnActive in Coworker Goal Detail';
 GO
 
