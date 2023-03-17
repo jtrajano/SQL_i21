@@ -15,7 +15,52 @@ SELECT intWorkOrderId = WO.intWorkOrderId
 	,dblQuantity = FLOOR(WO.dblQuantity) -- Total Blend Wt
 	,strComment = WO.strComment -- Comment
 	,dblWorkOrderQty = ISNULL(WO.dblQuantity, 0) -- Work Order Quantity
-	,WOIL.*
+	,WOIL.intReferenceWOId
+	,WOIL.ysnKeep
+	,WOIL.intLotId
+	,WOIL.strLotNumber
+	,WOIL.dblTBSQuantity
+	,WOIL.strERPPONumber
+	,WOIL.strTeaGardenChopInvoiceNumber
+	,WOIL.strGardenMark
+	,WOIL.strLeafGrade
+	,WOIL.strTeaItemNo
+	,WOIL.dblTeaTaste
+	,WOIL.dblTeaHue
+	,WOIL.dblTeaIntensity
+	,WOIL.dblTeaMouthFeel
+	,WOIL.dblTeaAppearance
+	,WOIL.dblTeaVolume
+	,WOIL.strLeafCategory
+	,WOIL.strTasterComments
+	,WOIL.dblTeaQuantity
+	,WOIL.dblSellingPrice
+	,WOIL.dblLandedPrice
+	,WOIL.dblWeightPerQty
+	,WOIL.strFW
+	,WOIL.dblSumQuantity
+	,WOIL.strTINNumber
+	,WOIL.intAge
+	,WOIL.strLeaf
+	,WOIL.dblIssuedQuantity
+	,WOIL.dblPercentage
+	,[dbo].[fnRemoveTrailingZeroes](CASE 
+			WHEN ISNULL(BR.dblEstNoOfBlendSheet, 0) > 0
+				THEN WOIL.dblSumIssuedQuantity / BR.dblEstNoOfBlendSheet
+			ELSE WOIL.dblSumIssuedQuantity
+			END) AS dblSumIssuedQuantity
+	,WOIL.[TasteMinValue]
+	,WOIL.[HueMinValue]
+	,WOIL.[IntensityMinValue]
+	,WOIL.[MouthfeelMinValue]
+	,WOIL.[AppearanceMinValue]
+	,WOIL.[VolumeMinValue]
+	,WOIL.[TasteComputedValue]
+	,WOIL.[HueComputedValue]
+	,WOIL.[IntensityComputedValue]
+	,WOIL.[MouthfeelComputedValue]
+	,WOIL.[AppearanceComputedValue]
+	,WOIL.[VolumeComputedValue]
 FROM tblMFWorkOrder AS WO
 LEFT JOIN tblSMCompanyLocation AS CL ON WO.intLocationId = CL.intCompanyLocationId
 LEFT JOIN tblICItem AS Item ON WO.intItemId = Item.intItemId
@@ -59,18 +104,18 @@ LEFT JOIN (
 			ELSE 100
 			END
 		,dblSumIssuedQuantity = dblSumIssuedQuantity
-		,[TasteMinValue]=MinValue.[Taste]
-		,[HueMinValue]=MinValue.[Hue]
-		,[IntensityMinValue]=MinValue.[Intensity]
-		,[MouthfeelMinValue]=MinValue.[Mouth feel]
-		,[AppearanceMinValue]=MinValue.[Appearance]
-		,[VolumeMinValue]=MinValue.[Volume]
-		,[TasteComputedValue]=ComputedValue.[Taste]
-		,[HueComputedValue]=ComputedValue.[Hue]
-		,[IntensityComputedValue]=ComputedValue.[Intensity]
-		,[MouthfeelComputedValue]=ComputedValue.[Mouth feel]
-		,[AppearanceComputedValue]=ComputedValue.[Appearance]
-		,[VolumeComputedValue]=ComputedValue.[Volume]
+		,[TasteMinValue] = MinValue.[Taste]
+		,[HueMinValue] = MinValue.[Hue]
+		,[IntensityMinValue] = MinValue.[Intensity]
+		,[MouthfeelMinValue] = MinValue.[Mouth feel]
+		,[AppearanceMinValue] = MinValue.[Appearance]
+		,[VolumeMinValue] = MinValue.[Volume]
+		,[TasteComputedValue] = ComputedValue.[Taste]
+		,[HueComputedValue] = ComputedValue.[Hue]
+		,[IntensityComputedValue] = ComputedValue.[Intensity]
+		,[MouthfeelComputedValue] = ComputedValue.[Mouth feel]
+		,[AppearanceComputedValue] = ComputedValue.[Appearance]
+		,[VolumeComputedValue] = ComputedValue.[Volume]
 	FROM tblMFWorkOrderInputLot IL
 	INNER JOIN tblICLot AS Lot ON IL.intLotId = Lot.intLotId
 	INNER JOIN tblICItem AS Item ON IL.intItemId = Item.intItemId
@@ -117,7 +162,7 @@ LEFT JOIN (
 					,[Volume]
 					)) AS pvt
 		) AS MinValue
-		OUTER APPLY (
+	OUTER APPLY (
 		SELECT [Taste]
 			,[Hue]
 			,[Intensity]
