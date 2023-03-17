@@ -459,51 +459,49 @@ BEGIN TRY
 
 			-- TRANSACTION WITH TAX CODE
 			INSERT INTO @tmpDetailTax (intTransactionDetailId, intTaxCodeId, strCriteria, dblTax)
-			SELECT InvTran.intTransactionDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblARInvoiceDetailTax.dblAdjustedTax
-			FROM @tmpTransaction InvTran
-				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId
-				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
+			SELECT InventoryTran.intTransactionDetailId, tblICInventoryReceiptItemTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblICInventoryReceiptItemTax.dblTax
+			FROM @tmpTransaction InventoryTran
+				INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intTransactionDetailId
+				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
 				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
 			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
 
-			INSERT INTO @tmpDetailTaxGrouped (intTransactionDetailId, strCriteria, dblTax)      
-				SELECT InvTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria, SUM(tblARInvoiceDetailTax.dblAdjustedTax)      
-				FROM @tmpTransaction InvTran      
-				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId      
-				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId      
-				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId      
-				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId       
-			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId   
-			GROUP BY InvTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria
- 
+			INSERT INTO @tmpDetailTaxGrouped (intTransactionDetailId, strCriteria, dblTax)
+			SELECT InventoryTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria, SUM(tblICInventoryReceiptItemTax.dblTax)
+			FROM @tmpTransaction InventoryTran
+				INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intTransactionDetailId
+				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
+				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
+				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
+			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
+			GROUP BY InventoryTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria 
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDetailTax)
 			BEGIN		
-				DECLARE @InvoiceDetailId INT = NULL, @intTaxCodeId INT = NULL, @strCriteria NVARCHAR(100) = NULL,  @dblTax NUMERIC(18,8) = NULL
+				DECLARE @InventoryDetailId INT = NULL, @intTaxCodeId INT = NULL, @strCriteria NVARCHAR(100) = NULL,  @dblTax NUMERIC(18,8) = NULL
 
-				SELECT TOP 1 @InvoiceDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
+				SELECT TOP 1 @InventoryDetailId = intTransactionDetailId, @intTaxCodeId = intTaxCodeId, @strCriteria = strCriteria, @dblTax = dblTax FROM @tmpDetailTax
 
 				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
 				BEGIN
-					IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InvoiceDetailId ) = 0)
-					BEGIN
-						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId	
-					END   								 
+					IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InventoryDetailId ) = 0)  
+					BEGIN  
+						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId 
+					END       										 
 				END
 				ELSE IF (@strCriteria = '= 0' AND @dblTax > 0)
 				BEGIN
-					IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InvoiceDetailId ) > 0)
-					BEGIN
-						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InvoiceDetailId   
-					END										 
+				IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InventoryDetailId ) > 0)  
+					BEGIN  
+						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId	
+					END    								 
 				END
 
-				DELETE @tmpDetailTax WHERE intTransactionDetailId = @InvoiceDetailId AND intTaxCodeId = @intTaxCodeId
-
+				DELETE @tmpDetailTax WHERE intTransactionDetailId = @InventoryDetailId AND intTaxCodeId = @intTaxCodeId
 			END
 
-			DELETE @tmpDetailTax
+		   DELETE @tmpDetailTax  
 
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
