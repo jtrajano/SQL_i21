@@ -17,6 +17,7 @@ DECLARE @ysnIncludeInventoryHedge BIT
 DECLARE @strFutureMonth NVARCHAR(max)
 DECLARE @strParamFutureMonth NVARCHAR(max)
 DECLARE @strMarketSymbol NVARCHAR(max)
+DECLARE @intCommodityUOMId INT
 
 SELECT @dblContractSize = convert(INT, dblContractSize) FROM tblRKFutureMarket WHERE intFutureMarketId = @intFutureMarketId
 
@@ -27,7 +28,7 @@ SELECT TOP 1 @strUnitMeasure = strUnitMeasure
 FROM tblICUnitMeasure
 WHERE intUnitMeasureId = @intUOMId
 
-SELECT @intUOMId = intCommodityUnitMeasureId
+SELECT @intCommodityUOMId = intCommodityUnitMeasureId
 FROM tblICCommodityUnitMeasure
 WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUOMId
 
@@ -112,7 +113,7 @@ SELECT strFutureMonth
 	,dtmContractDate TransactionDate
 	,strContractType + ' - ' + case when @strPositionBy= 'Product Type' 
 				then isnull(ca.strDescription, '') else isnull(cv.strEntityName, '') end AS strAccountNumber
-	,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, isnull(dblBalance, 0))  AS dblNoOfContract
+	,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intCommodityUOMId, isnull(dblBalance, 0))  AS dblNoOfContract
 	,LEFT(strContractType, 1) + ' - ' + strContractNumber  AS strTradeNo
 	,strContractType AS strTranType
 	,strEntityName AS CustVendor
@@ -251,7 +252,11 @@ SELECT strFutMarketName
 			 FROM tblICLot Lot
 			join tblICItemUOM u on u.intItemUOMId=Lot.intItemUOMId
 			JOIN tblICItem Item ON Item.intItemId = Lot.intItemId			
-			JOIN tblRKCommodityMarketMapping MM ON MM.strCommodityAttributeId = Item.intProductTypeId
+			JOIN tblRKCommodityMarketMapping MM 
+				ON --MM.strCommodityAttributeId = Item.intProductTypeId
+					Item.intProductTypeId IN (
+						SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
+						FROM [dbo].[fnSplitString](MM.strCommodityAttributeId, ','))
 			JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = MM.intFutureMarketId
 			JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = MM.intCommodityId AND um.intUnitMeasureId = Market.intUnitMeasureId			
 			JOIN tblSMMultiCompany comp on comp.intMultiCompanyId=Lot.intCompanyId
@@ -259,9 +264,9 @@ SELECT strFutMarketName
 			LEFt JOIN tblCTBook b on b.intBookId=case when isnull(be.intBookId,0)=0 then (SELECT DISTINCT top 1 b.intBookId from tblCTBookVsEntity e
 																	join tblCTContractHeader ch on ch.intEntityId=e.intEntityId
 																	join tblCTBook b on b.intBookId=ch.intBookId) else be.intBookId end	
-				JOIN tblICCommodityAttribute CA	ON	CA.intCommodityAttributeId	=	MM.strCommodityAttributeId			
-				JOIN tblICCommodityAttribute pty on Item.intProductTypeId=pty.intCommodityAttributeId and pty.strType='ProductType'
-				JOIN tblICCommodityProductLine ptl on Item.intProductLineId=ptl.intCommodityProductLineId 
+			JOIN tblICCommodityAttribute CA	ON	CA.intCommodityAttributeId = Item.intOriginId	
+			JOIN tblICCommodityAttribute pty on Item.intProductTypeId=pty.intCommodityAttributeId and pty.strType='ProductType'
+			JOIN tblICCommodityProductLine ptl on Item.intProductLineId=ptl.intCommodityProductLineId 
 			WHERE ysnProduced = 1 and MM.intCommodityId = @intCommodityId 			
 			AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END 
 			AND Market.intFutureMarketId = @intFutureMarketId  			
@@ -285,10 +290,16 @@ INTO #tempFutureRec
 			SELECT DISTINCT 
 				 strFutMarketName
 				,strBook
-				,ca.strDescription strProductType 
+				--, ca.strDescription strProductType 
+				, strProductType = (SELECT  STUFF((SELECT ',' + ca.strDescription
+												FROM tblICCommodityAttribute ca 
+												WHERE ca.intCommodityAttributeId IN (
+													SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
+													FROM [dbo].[fnSplitString](mm.strCommodityAttributeId, ','))
+								  FOR XML PATH('')), 1, 1, ''))
 				,bac.strAccountNumber strProductLine 
-				,'' strPricingType 
-				,ca.strType strTranType
+				,strPricingType = ''  
+				,strTranType = '' --ca.strType strTranType
 				,strFutureMonth
 				,oc.dblOpenContract AS dblNoOfContract
 				,oc.dblOpenContract   dblNoOfLot
@@ -306,7 +317,8 @@ INTO #tempFutureRec
 			JOIN tblRKCommodityMarketMapping mm on mm.intFutureMarketId=ft.intFutureMarketId and mm.intCommodityId=ft.intCommodityId
 			join tblSMCompanyLocation l on l.intCompanyLocationId=ft.intLocationId
 			LEFT JOIN tblSMMultiCompany comp on comp.intMultiCompanyId=fh.intCompanyId
-			LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=mm.strCommodityAttributeId 
+			-- Removed due to strCommodityAttributeId can have multiple ids.
+			-- LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId= mm.strCommodityAttributeId 
 			LEFT JOIN tblCTBook b on b.intBookId=case when isnull(ft.intBookId,0)=0 then (SELECT DISTINCT top 1 b.intBookId from tblCTBookVsEntity e
 																	JOIN tblCTBookVsEntity be on comp.intMultiCompanyId=be.intMultiCompanyId
 																	join tblCTBook b on b.intBookId=be.intBookId) else ft.intBookId end	
