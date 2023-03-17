@@ -1520,6 +1520,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageEntryDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
