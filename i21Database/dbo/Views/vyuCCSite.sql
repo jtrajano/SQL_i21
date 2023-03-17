@@ -27,6 +27,7 @@ SELECT A.intSiteId
 			) Contact
 		FOR XML PATH('')),1,1,''
 	)
+	,A.ysnPassedThruArCustomerFees
 FROM (
 	SELECT 
 		C.intSiteId, 
@@ -37,16 +38,21 @@ FROM (
 		D.strPaymentMethod,
 		H.intEntityId,
 		H.strName as strCustomerName,
-		case when C.ysnPassedThruArCustomer is null then 'Company Owned' 
-			 when C.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
-			 end COLLATE Latin1_General_CI_AS strSiteType,
+		CASE WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 1 THEN 'Company Owned Pass Thru' --Credit Memo (Gross less fee(shared))
+			 WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 0 AND C.ysnSharedFee = 1 AND ISNULL(C.ysnPassedThruArCustomerFees,0) = 1 then 'Company Owned Shared Fees' --Normal Invoie
+			else 'Company Owned' 		 
+		end COLLATE Latin1_General_CI_AS strSiteType,
 		 ysnPostNetToArCustomer = C.ysnPassedThruArCustomer,
-		 0  as dblSharedFeePercentage,
+		 
+		CASE WHEN ISNULL(C.ysnSharedFee,0) = 1  THEN dblSharedFeePercentage
+			else 0
+		end as dblSharedFeePercentage,
 		 C.intCompanyOwnedSiteId,
 		 C.intDealerSiteId,
 		 null as intAccountId,
  		 intCreditCardReceivableAccountId = C.intAccountId,
-		 C.intFeeExpenseAccountId
+		 C.intFeeExpenseAccountId,
+		 C.ysnPassedThruArCustomerFees
 	FROM
 		 dbo.tblCCVendorDefault A
 		JOIN dbo.tblCCSite C
@@ -76,7 +82,8 @@ FROM (
 		C.intDealerSiteId,
 		C.intAccountId,
 		null as intCreditCardReceivableAccountId,
-		C.intFeeExpenseAccountId
+		C.intFeeExpenseAccountId,
+		C.ysnPassedThruArCustomerFees
 	FROM  
 		 dbo.tblCCVendorDefault A
 		JOIN dbo.tblCCSite C
