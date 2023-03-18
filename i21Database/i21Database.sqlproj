@@ -1249,6 +1249,7 @@
     <Build Include="dbo\Views\vyuSTGetFuelDeliveries.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutFuelInventory.sql" />
     <Build Include="dbo\Views\vyuSTGetFuelInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

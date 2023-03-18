@@ -140,7 +140,13 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			-- GL Revalue Accounts
 			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
 			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' UNION ALL --GL-8450
-			SELECT id = 164, name = 'In-Transit Direct'
+			SELECT id = 164, name = 'In-Transit Direct' UNION ALL--GL-8450
+			SELECT id = 165, name = 'Inter Company' UNION ALL --GL-9005
+			SELECT id = 166, name = 'Intra Company' UNION ALL --GL-9940
+
+			SELECT id = 167, name = 'Intra-Company Due From' UNION ALL --IC-11349
+			SELECT id = 168, name = 'Intra-Company Due To' --IC-11349
+
 
 
 	) AS CategoryHardCodedValues
@@ -431,7 +437,18 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
 	END	
-
+	SET @strAccountCategory  = 'Intra-Company Due From'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Intra-Company Due To'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
 
 END
 GO
