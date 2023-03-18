@@ -1025,8 +1025,8 @@ BEGIN TRY
 					EXEC uspMFDeleteBatch
 						@strBatchId = @strBatchId
 						,@intLocationId = @intToDeleteBatchLocationId
-						,@ysnSuccess = @ysnSuccess
-						,@strErrorMessage = @strErrorMessage
+						,@ysnSuccess = @ysnSuccess OUTPUT
+						,@strErrorMessage = @strErrorMessage OUTPUT
 
 					IF @ysnSuccess = 0
 						UPDATE tblQMImportCatalogue
