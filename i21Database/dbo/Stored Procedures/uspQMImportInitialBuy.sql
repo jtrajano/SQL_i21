@@ -7,6 +7,11 @@ BEGIN TRY
 	 ,@strBatchNo NVARCHAR(50)
 	,@intFromLocationCodeId INT
 	,@intDestinationStorageLocationId INT
+
+	DECLARE
+		@ysnSuccess BIT
+		,@strErrorMessage NVARCHAR(MAX)
+
 	BEGIN TRANSACTION
 
 	-- Validate Foreign Key Fields
@@ -575,6 +580,32 @@ BEGIN TRY
 	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		Select @strBatchNo=NULL
+		SELECT TOP 1 @intPlantId = CL.intCompanyLocationId ,@strBatchNo=strBatchNo 
+		FROM dbo.tblQMSample S WITH (NOLOCK)  
+		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = @intBookId 
+		AND S.intSampleId = @intSampleId  
+		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook
+		
+		IF @strBatchNo IS NOT NULL
+		BEGIN
+			-- Delete batch in MU only
+			EXEC uspMFDeleteBatch
+				@strBatchId = @strBatchNo
+				,@intLocationId = @intPlantId
+				,@ysnSuccess = @ysnSuccess OUTPUT
+				,@strErrorMessage = @strErrorMessage OUTPUT
+
+			IF @ysnSuccess = 0
+			BEGIN
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = @strErrorMessage
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+			END
+		END
+
 		EXEC uspQMGenerateSampleCatalogueImportAuditLog
 			@intSampleId  = @intSampleId
 			,@intUserEntityId = @intEntityUserId
@@ -632,18 +663,6 @@ BEGIN TRY
 		-- Call uspMFUpdateInsertBatch
 		DELETE
 		FROM @MFBatchTableType
-
-		Select @strBatchNo=NULL
-		SELECT TOP 1 @intPlantId = CL.intCompanyLocationId ,@strBatchNo=strBatchNo 
-		FROM dbo.tblQMSample S WITH (NOLOCK)  
-		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = S.intBookId  
-		AND S.intSampleId = @intSampleId  
-		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook 
-		
-		IF @strBatchNo IS NOT NULL
-		BEGIN
-			DELETE FROM tblMFBatch WHERE strBatchId=@strBatchNo
-		END 
     
 		SELECT TOP 1 @intETAPOL=IsNULL(LLT.dblPurchaseToShipment,0)
 				,@intStockDate= IsNULL(LLT.dblPurchaseToShipment,0)+IsNULL(LLT.dblPortToPort,0)+ IsNULL(LLT.dblPortToMixingUnit,0) +IsNULL(LLT.dblMUToAvailableForBlending,0) 
@@ -977,7 +996,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
-			AND IsNULL(S.dblB1QtyBought, 0) > 0
+			-- AND IsNULL(S.dblB1QtyBought, 0) > 0
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
@@ -987,37 +1006,69 @@ BEGIN TRY
 				FROM @MFBatchTableType
 				)
 		BEGIN
-			EXEC uspMFUpdateInsertBatch @MFBatchTableType
-				,@intInput
-				,@intInputSuccess
-				,@strBatchId OUTPUT
-				,0
+			-- If the buyer 1 qty and price fields are blank, delete the existing batch
+			IF ISNULL(@dblB1QtyBought, 0) = 0 AND ISNULL(@dblB1Price, 0) = 0
+			BEGIN
+				DECLARE @intToDeleteBatchLocationId INT
 
-			UPDATE B
-			SET B.intLocationId = L.intCompanyLocationId
-				,strBatchId = @strBatchId
-				--,intSampleId = NULL
-				,dblOriginalTeaTaste = dblTeaTaste
-				,dblOriginalTeaHue = dblTeaHue
-				,dblOriginalTeaIntensity = dblTeaIntensity
-				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
-				,dblOriginalTeaAppearance = dblTeaAppearance
-				,strPlant=L.strVendorRefNoPrefix
-			FROM @MFBatchTableType B
-			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
-			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+				SELECT
+					@strBatchId = B.strBatchId
+					,@intToDeleteBatchLocationId = S.intLocationId
+				FROM tblQMSample S
+				INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+				WHERE S.intSampleId = @intSampleId
 
 
-			EXEC uspMFUpdateInsertBatch @MFBatchTableType
-				,@intInput
-				,@intInputSuccess
-				,NULL
-				,1
+				IF @strBatchId IS NOT NULL
+				BEGIN
+					-- Delete batch for both TBO and MU
+					EXEC uspMFDeleteBatch
+						@strBatchId = @strBatchId
+						,@intLocationId = @intToDeleteBatchLocationId
+						,@ysnSuccess = @ysnSuccess
+						,@strErrorMessage = @strErrorMessage
 
-			UPDATE tblQMSample
-			SET strBatchNo = @strBatchId
-			WHERE intSampleId = @intSampleId
+					IF @ysnSuccess = 0
+						UPDATE tblQMImportCatalogue
+						SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = @strErrorMessage
+						WHERE intImportCatalogueId = @intImportCatalogueId
+				END
+			END
+			-- Else create/update the batch and process feed as 
+			ELSE
+			BEGIN
+				EXEC uspMFUpdateInsertBatch @MFBatchTableType
+					,@intInput
+					,@intInputSuccess
+					,@strBatchId OUTPUT
+					,0
 
+				UPDATE B
+				SET B.intLocationId = L.intCompanyLocationId
+					,strBatchId = @strBatchId
+					--,intSampleId = NULL
+					,dblOriginalTeaTaste = dblTeaTaste
+					,dblOriginalTeaHue = dblTeaHue
+					,dblOriginalTeaIntensity = dblTeaIntensity
+					,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+					,dblOriginalTeaAppearance = dblTeaAppearance
+					,strPlant=L.strVendorRefNoPrefix
+				FROM @MFBatchTableType B
+				JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
+				JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+
+
+				EXEC uspMFUpdateInsertBatch @MFBatchTableType
+					,@intInput
+					,@intInputSuccess
+					,NULL
+					,1
+
+				UPDATE tblQMSample
+				SET strBatchNo = @strBatchId
+				WHERE intSampleId = @intSampleId				
+			END
+			
 			DECLARE @strRowState NVARCHAR(50)
 			SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
 			FROM tblQMSample
@@ -1030,6 +1081,7 @@ BEGIN TRY
 				,@strRowState
 		END
 
+		CONT:
 		FETCH NEXT
 		FROM @C
 		INTO @intImportCatalogueId
