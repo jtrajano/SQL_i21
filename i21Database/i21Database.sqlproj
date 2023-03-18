@@ -1321,6 +1321,7 @@
     <Build Include="dbo\Views\vyuSTGetFuelInventory.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
     <Build Include="dbo\Views\vyuTMGetInventoryDelivery.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
