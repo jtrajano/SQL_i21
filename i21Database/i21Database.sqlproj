@@ -1574,6 +1574,7 @@
     <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageEntryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
