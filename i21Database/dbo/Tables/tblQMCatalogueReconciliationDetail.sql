@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblQMCatalogueReconciliationDetail]
     [ysnMismatched]                         BIT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblQMCatalogueReconciliationDetail_intCatalogueReconciliationDetailId] PRIMARY KEY CLUSTERED ([intCatalogueReconciliationDetailId] ASC),	
 	CONSTRAINT [FK_tblQMCatalogueReconciliationDetail_tblQMCatalogueReconciliationDetail_intCatalogueReconciliationId] FOREIGN KEY ([intCatalogueReconciliationId]) REFERENCES [dbo].[tblQMCatalogueReconciliation] ([intCatalogueReconciliationId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblQMCatalogueReconciliationDetail_tblAPBillDetail_intBillDetailId] FOREIGN KEY ([intBillDetailId]) REFERENCES [dbo].[tblAPBillDetail] ([intBillDetailId]),
+    CONSTRAINT [FK_tblQMCatalogueReconciliationDetail_tblAPBillDetail_intBillDetailId] FOREIGN KEY ([intBillDetailId]) REFERENCES [dbo].[tblAPBillDetail] ([intBillDetailId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblQMCatalogueReconciliationDetail_tblQMSample_intSampleId] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId]),
     CONSTRAINT [FK_tblQMCatalogueReconciliationDetail_tblQMGardenMark_intGardenMarkId] FOREIGN KEY ([intGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark] ([intGardenMarkId]),
     CONSTRAINT [FK_tblQMCatalogueReconciliationDetail_tblQMGardenMark_intPreInvoiceGardenMarkId] FOREIGN KEY ([intPreInvoiceGardenMarkId]) REFERENCES [dbo].[tblQMGardenMark] ([intGardenMarkId]),

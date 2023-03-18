@@ -8,6 +8,7 @@ SELECT
 	,ysnImposeReversalTransaction = CAST(0 AS BIT) --rk.ysnImposeReversalTransaction
 	,i.strItemNo
 	,(SELECT ysnEnable FROM tblSMStartingNumber WHERE intStartingNumberId = '185') AS ysnEnable
+	,strEnableIntraCompanyTransfer = CASE WHEN ic.ysnEnableIntraCompanyTransfer = 1 THEN 'Yes' ELSE 'No' END 
 FROM 
 	tblICCompanyPreference ic
 	OUTER APPLY (
@@ -18,3 +19,4 @@ FROM
 	) rk 
 	LEFT JOIN tblICItem i 
 		ON i.intItemId = ic.intItemIdHolderForReceiptImport
+	 
