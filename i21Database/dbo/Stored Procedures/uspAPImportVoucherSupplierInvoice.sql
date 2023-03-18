@@ -336,7 +336,7 @@ BEGIN
 	AND A.intLocationId = B.intStoreLocationId
 	AND A.intSubLocationId = C.intSubLocationId
 	AND A.intMarketZoneId = C.intMarketZoneId
-	AND A.strVendorLotNumber = C.strVendorLotNumber
+	AND ISNULL(A.strVendorLotNumber,'') = ISNULL(C.strVendorLotNumber,'')
 	AND A.dtmDate = DATEADD(dd, DATEDIFF(dd, 0,B.dtmDate), 0)
 	WHERE
 		B.ysnPosted = 0
@@ -355,23 +355,25 @@ BEGIN
 	AND A.intLocationId = B.intStoreLocationId
 	AND A.intSubLocationId = C.intSubLocationId
 	AND A.intMarketZoneId = C.intMarketZoneId
-	AND A.strVendorLotNumber = C.strVendorLotNumber
+	AND ISNULL(A.strVendorLotNumber,'') = ISNULL(C.strVendorLotNumber,'')
 	AND A.dtmDate = DATEADD(dd, DATEDIFF(dd, 0,B.dtmDate), 0)
 	WHERE
 		B.ysnPosted = 0
 
 	--WE DO NOT UPDATE HERE THE EXISTING DETAIL RECORDS, INSTEAD, WE REMOVE AND RE-ADDED FOR SIMPLICITY OF CODES
 	--VALIDATE MULTIPLE MATCHES
-	DECLARE @multipleMatchesInvoiceDetails AS TABLE(strVendorOrderNumber NVARCHAR(50), strName NVARCHAR(50), dtmDate DATETIME, intVoucherPayableId INT)
+	DECLARE @multipleMatchesInvoiceDetails AS TABLE(strVendorOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS, intEntityVendorId INT, dtmDate DATETIME,
+												intSaleYear INT, strSaleNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+												intCatalogueTypeId INT, intLocationId INT, intMarketZoneId INT,
+												strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
 
 	INSERT INTO @multipleMatchesInvoiceDetails
-	SELECT strVendorOrderNumber, strName, dtmDate, intVoucherPayableId
+	SELECT strVendorOrderNumber, intEntityVendorId, dtmDate, intSaleYear, strSaleNumber, intCatalogueTypeId, intLocationId, intMarketZoneId, strVendorLotNumber
 	FROM (
 		SELECT
 			A.strVendorOrderNumber,
-			B.strName,
+			A.intEntityVendorId,
 			A.dtmDate,
-			A.intVoucherPayableId,
 			A.intSaleYear,
 			A.strSaleNumber,
 			A.intCatalogueTypeId,
@@ -379,11 +381,11 @@ BEGIN
 			A.intMarketZoneId,
 			A.strVendorLotNumber
 		FROM #tmpupdateDetailsPayable A
-		INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId
+		--INNER JOIN tblEMEntity B ON A.intEntityVendorId = B.intEntityId
 		GROUP BY 
 			A.intEntityVendorId
 			,A.strVendorOrderNumber
-			,B.strName
+			,A.intEntityVendorId
 			,A.intSaleYear
 			,A.strSaleNumber
 			,A.intCatalogueTypeId
@@ -391,18 +393,38 @@ BEGIN
 			,A.intMarketZoneId
 			,A.strVendorLotNumber
 			,A.dtmDate
-			,A.intVoucherPayableId
 		HAVING COUNT(*) > 1
 	) tmp
 
 	--REMOVE FROM MATCH THE DUPLICATES
 	DELETE A
 	FROM #tmpupdateDetailsPayableMatch A
-	INNER JOIN @multipleMatchesInvoiceDetails B ON A.intVoucherPayableId = B.intVoucherPayableId
+	INNER JOIN @multipleMatchesInvoiceDetails B
+	ON 
+		A.intEntityVendorId = B.intEntityVendorId
+	AND A.strVendorOrderNumber = B.strVendorOrderNumber
+	AND A.intSaleYear = B.intSaleYear
+	AND A.strSaleNumber = B.strSaleNumber
+	AND A.intCatalogueTypeId = B.intCatalogueTypeId
+	AND A.intLocationId = B.intLocationId
+	AND A.intMarketZoneId = B.intMarketZoneId
+	AND ISNULL(A.strVendorLotNumber,'') = ISNULL(B.strVendorLotNumber,'')
+	AND A.dtmDate = DATEADD(dd, DATEDIFF(dd, 0,B.dtmDate), 0)
 
+	--REMOVE FROM FOR UPDATE/DELETE THE DUPLICATES
 	DELETE A
 	FROM #tmpupdateDetailsPayable A
-	INNER JOIN @multipleMatchesInvoiceDetails B ON A.intVoucherPayableId = B.intVoucherPayableId
+	INNER JOIN @multipleMatchesInvoiceDetails B 
+	ON 
+		A.intEntityVendorId = B.intEntityVendorId
+	AND A.strVendorOrderNumber = B.strVendorOrderNumber
+	AND A.intSaleYear = B.intSaleYear
+	AND A.strSaleNumber = B.strSaleNumber
+	AND A.intCatalogueTypeId = B.intCatalogueTypeId
+	AND A.intLocationId = B.intLocationId
+	AND A.intMarketZoneId = B.intMarketZoneId
+	AND ISNULL(A.strVendorLotNumber,'') = ISNULL(B.strVendorLotNumber,'')
+	AND A.dtmDate = DATEADD(dd, DATEDIFF(dd, 0,B.dtmDate), 0)
 
 	--IF DETAIL MATCHES
 	IF EXISTS(SELECT 1 FROM #tmpupdateDetailsPayableMatch)
@@ -417,11 +439,8 @@ BEGIN
 
 		SET @detailsUpdated = (SELECT COUNT(*) FROM #tmpupdateDetailsPayableMatch)
 	END
-	ELSE
-	BEGIN
 	
-		SET @detailsAdded = (SELECT COUNT(*) FROM #tmpupdateDetailsPayable A WHERE A.intVoucherPayableId NOT IN (SELECT intVoucherPayableId FROM #tmpupdateDetailsPayableMatch))
-	END
+	SET @detailsAdded = (SELECT COUNT(*) FROM #tmpupdateDetailsPayable A WHERE A.intVoucherPayableId NOT IN (SELECT intVoucherPayableId FROM #tmpupdateDetailsPayableMatch))
 
 	ALTER TABLE #tmpupdateDetailsPayable DROP COLUMN intVoucherPayableId
 	DECLARE @insertUpdateVoucherDetail AS VoucherPayable
@@ -494,8 +513,8 @@ FROM (
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': No default vendor expense account setup ' FROM #tmpConvertedSupplierInvoiceData WHERE intAccountId IS NULL --AND strDateOrAccount IS NOT NULL
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid vendor format ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL AND strVendorId IS NULL
-	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid transaction type ' + strPurchaseType FROM #tmpConvertedSupplierInvoiceData WHERE intTransactionType IS NULL --AND CAST(intVoucherType AS NVARCHAR) IS NULL
+	-- UNION ALL
+	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid transaction type ' + ISNULL(strPurchaseType,'') FROM #tmpConvertedSupplierInvoiceData WHERE intTransactionType IS NULL --AND CAST(intVoucherType AS NVARCHAR) IS NULL
 	-- UNION ALL
 	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid distribution type  ' + strDetailInfo FROM #tmpConvertedSupplierInvoiceData WHERE dblQuantityToBill IS NULL AND strDetailInfo IS NULL
 	-- UNION ALL
@@ -503,13 +522,13 @@ FROM (
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Sale Year ' + CAST(intSaleYear AS NVARCHAR) FROM #tmpConvertedSupplierInvoiceData WHERE intSaleYearId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Catalogue Type ' + strCatalogueType FROM #tmpConvertedSupplierInvoiceData WHERE intCatalogueTypeId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Catalogue Type ' + ISNULL(strCatalogueType,'') FROM #tmpConvertedSupplierInvoiceData WHERE intCatalogueTypeId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Purchase Group ' + strPurchasingGroup FROM #tmpConvertedSupplierInvoiceData WHERE intPurchasingGroupId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Purchase Group ' + ISNULL(strPurchasingGroup,'') FROM #tmpConvertedSupplierInvoiceData WHERE intPurchasingGroupId IS NULL
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Market Zone ' + ISNULL(strChannel,'') FROM #tmpConvertedSupplierInvoiceData WHERE intMarketZoneId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Storage Location ' + strSubLocationName FROM #tmpConvertedSupplierInvoiceData WHERE intSubLocationId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Storage Location ' + ISNULL(strSubLocationName,'') FROM #tmpConvertedSupplierInvoiceData WHERE intSubLocationId IS NULL
 	-- UNION ALL
 	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Lot Number ' + ISNULL(strVendorLotNumber,'') FROM #tmpConvertedSupplierInvoiceData WHERE strVendorLotNumber IS NULL
 	-- UNION ALL
