@@ -84,6 +84,7 @@ BEGIN
 			,@intLocationId AS INT
 			,@intSourceType AS INT 
 			,@strTransferNo AS NVARCHAR(50)
+			,@ysnEnableIntraCompanyTransfer AS BIT = 0
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryTransferId
@@ -97,6 +98,12 @@ BEGIN
 			,@strTransferNo = strTransferNo 
 	FROM	dbo.tblICInventoryTransfer
 	WHERE	strTransferNo = @strTransactionId
+
+
+	SELECT TOP 1 
+		@ysnEnableIntraCompanyTransfer = ISNULL(ysnEnableIntraCompanyTransfer, 0) 
+	FROM 
+		tblICCompanyPreference
 END  
 
 --------------------------------------------------------------------------------------------  
@@ -874,7 +881,7 @@ BEGIN
 		-----------------------------------------
 		-- Generate a new set of g/l entries
 		-----------------------------------------
-		IF @ysnShipmentRequired = 0 
+		IF @ysnShipmentRequired = 0 AND @ysnEnableIntraCompanyTransfer = 0 
 		BEGIN 
 			INSERT INTO @GLEntries (
 					[dtmDate] 
@@ -915,6 +922,49 @@ BEGIN
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
+				,@strGLDescription
+		END 
+		ELSE IF @ysnShipmentRequired = 0 AND @ysnEnableIntraCompanyTransfer = 1 
+		BEGIN 
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+					,[intSourceEntityId]
+					,[intCommodityId]
+			)
+			EXEC @intReturnValue = dbo.uspICCreateGLEntriesForIntraCompanyTransfer 
+				@strBatchId
 				,@intEntityUserSecurityId
 				,@strGLDescription
 		END 

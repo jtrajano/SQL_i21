@@ -32,6 +32,8 @@ Type the overview for the table here.
 		[intRevalueInTransit] INT NULL,
 		intNonInventoryId INT,
 		intContraNonInventoryId INT,
+		[intIntraCompanyTransferDueFrom] INT NULL,
+		[intIntraCompanyTransferDueTo] INT NULL,
 		[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmDateCreated] DATETIME NULL DEFAULT (GETDATE()), 
 		CONSTRAINT [PK_tblICInventoryGLAccountUsedOnPostLog] PRIMARY KEY ([intId])

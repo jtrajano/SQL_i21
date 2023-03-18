@@ -32,5 +32,6 @@
 	[strSingleOrMultipleLots] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnInitialFamilyClassAdjustment] BIT NULL DEFAULT(0),
 	[ysnUpdateJournalLineDescription] BIT NULL DEFAULT(0),
+	[ysnEnableIntraCompanyTransfer] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

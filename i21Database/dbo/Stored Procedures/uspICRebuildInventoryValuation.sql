@@ -2204,14 +2204,18 @@ BEGIN
 			BEGIN 
 				DECLARE @ysnTransferOnSameLocation AS BIT
 				DECLARE @ysnShipmentRequired AS BIT 
+				DECLARE @ysnEnableIntraCompanyTransfer AS BIT 
 				SET @ysnTransferOnSameLocation = 0 
 				SET @ysnShipmentRequired = 0 
+				SET @ysnEnableIntraCompanyTransfer = 0 
 				
 				SELECT	@ysnTransferOnSameLocation = CASE WHEN intFromLocationId <> intToLocationId THEN 0 ELSE 1 END 
 						,@ysnShipmentRequired = ysnShipmentRequired
 				FROM	tblICInventoryTransfer 
 				WHERE	intInventoryTransferId = @intTransactionId 
 						AND strTransferNo = @strTransactionId 
+
+				SELECT TOP 1 @ysnEnableIntraCompanyTransfer = ISNULL(ysnEnableIntraCompanyTransfer, 0) FROM tblICCompanyPreference
 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -2492,13 +2496,13 @@ BEGIN
 						,@strTransactionId
 						,@ysnTransferOnSameLocation
 
-					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR					
 				END 
 
 				/* 
 					Create the GL entries if transfer is between two different company locations. 
 				*/
-				IF @ysnTransferOnSameLocation = 0 AND @ysnShipmentRequired = 0
+				IF @ysnTransferOnSameLocation = 0 AND @ysnShipmentRequired = 0 AND @ysnEnableIntraCompanyTransfer = 0 
 				BEGIN 
 					SET @intReturnValue = NULL 
 					INSERT INTO @GLEntries (
@@ -2550,6 +2554,63 @@ BEGIN
 					IF @intReturnValue <> 0 
 					BEGIN 
 						--PRINT 'Error found in uspICCreateGLEntries'
+						GOTO _EXIT_WITH_ERROR
+					END 
+				END
+				/* 
+					Create the GL entries if Intra-Company Transfer is enabled. 
+				*/
+				ELSE IF @ysnTransferOnSameLocation = 0 AND @ysnShipmentRequired = 0 AND @ysnEnableIntraCompanyTransfer = 1
+				BEGIN 
+					SET @intReturnValue = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+							,[intSourceEntityId]
+							,[intCommodityId]
+					)			
+					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForIntraCompanyTransfer
+						@strBatchId 
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,NULL 
+						,@intItemId -- This is only used when rebuilding the stocks.
+						,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@intCategoryId -- This is only used when rebuilding the stocks.
+
+					IF @intReturnValue <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateGLEntriesForIntraCompanyTransfer'
 						GOTO _EXIT_WITH_ERROR
 					END 
 				END
