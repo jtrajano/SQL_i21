@@ -1171,8 +1171,8 @@ BEGIN TRY
 						SELECT @dblLastCost = 0
 					END
 
-					IF @dblWeight - @dblQuantity < 0
-						AND ABS(@dblWeight - @dblQuantity) < 1
+					IF @dblWeight - abs(@dblQuantity) < 0
+						AND ABS(@dblWeight - abs(@dblQuantity)) < 1
 					BEGIN
 						SELECT @dblQuantity = @dblWeight
 					END
