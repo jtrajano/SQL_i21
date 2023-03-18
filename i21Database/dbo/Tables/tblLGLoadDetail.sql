@@ -102,6 +102,9 @@
 	CONSTRAINT [FK_tblLGLoadDetail_tblMFBatch_intBatchId] FOREIGN KEY ([intBatchId]) REFERENCES [tblMFBatch]([intBatchId])
 )
 GO
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadDetail_intBatchId]
+ON [dbo].[tblLGLoadDetail]([intBatchId])
+GO
 --CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoadDetail_11_2002822197__K9_K1_17_18] ON [dbo].[tblLGLoadDetail]
 --(
 --	[intPContractDetailId] ASC,
