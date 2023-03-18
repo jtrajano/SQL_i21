@@ -57,9 +57,9 @@ BEGIN TRY
   ,@intOrgCompanyLocationSubLocationId INT  
   ,@intRelatedSampleId INT  
   ,@intCurrentRelatedSampleId INT  
-
- DECLARE @intCountryID INT
   
+DECLARE @ysnSuccess BIT
+
  SELECT @strErrorSampleNumber = NULL  
   
  SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)  
@@ -1140,15 +1140,15 @@ BEGIN TRY
 
  EXEC dbo.uspQMSampleAmendment @intSampleId = @intSampleId, @intUserId = @intLastModifiedUserId
 
-IF EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnCreateBatchOnSampleSave = 1)
-AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND (ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0)
+-- Update corresponding batch if it is available
+IF EXISTS (SELECT 1 FROM tblMFBatch WHERE intSampleId = @intSampleId)
 BEGIN
   IF EXISTS(
     SELECT 1
     FROM tblQMSample
     WHERE intSampleId = @intSampleId
     AND ISNULL(dblB1QtyBought, 0) = 0 AND ISNULL(dblB1Price, 0) = 0
-    AND ISNULL(intContractDetailId, 0) = 0
+    AND ISNULL(strSaleNumber, '') <> ''
   )
   BEGIN
     DECLARE @intToDeleteBatchLocationId INT
@@ -1190,7 +1190,7 @@ BEGIN
     -- FROM tblMFBatch B
     -- INNER JOIN tblQMSample S ON S.intSampleId = B.intSampleId
     -- WHERE S.intSampleId = @intSampleId
-		
+    
     DELETE FROM @MFBatchTableType
 
     INSERT INTO @MFBatchTableType (
@@ -1292,7 +1292,6 @@ BEGIN
       ,intLocationId
       ,intMixingUnitLocationId
       ,intMarketZoneId
-      ,dtmShippingDate
       ,dblTeaTastePinpoint
       ,dblTeaHuePinpoint
       ,dblTeaIntensityPinpoint
@@ -1312,8 +1311,8 @@ BEGIN
       ,strTeaType = CT.strCatalogueType
       ,intBrokerId = S.intBrokerId
       ,strVendorLotNumber = S.strRepresentLotNumber
-      ,intBuyingCenterLocationId = ISNULL(TBO.intCompanyLocationId, BT.intBuyingCenterLocationId)
-      ,intStorageLocationId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intDestinationStorageLocationId ELSE CD.intSubLocationId END
+      ,intBuyingCenterLocationId = BT.intBuyingCenterLocationId
+      ,intStorageLocationId = S.intDestinationStorageLocationId
       ,intStorageUnitId = NULL
       ,intBrokerWarehouseId = NULL
       ,intParentBatchId = NULL
@@ -1325,11 +1324,11 @@ BEGIN
       ,strAirwayBillCode = S.strCourierRef
       ,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
       ,strAWBSampleReference = S.strAWBSampleReference
-      ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblBasePrice ELSE CD.dblCashPrice END
+      ,dblBasePrice = S.dblBasePrice
       ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-      ,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE CD.dblCashPrice END
+      ,dblBoughtPrice = NULL
       ,dblBulkDensity = NULL
-      ,strBuyingOrderNumber = CASE WHEN CD.intContractDetailId IS NULL THEN S.strBuyingOrderNo ELSE CH.strExternalContractNumber END
+      ,strBuyingOrderNumber = S.strBuyingOrderNo
       ,intSubBookId = S.intSubBookId
       ,strContainerNumber = S.strContainerNumber
       ,intCurrencyId = S.intCurrencyId
@@ -1340,8 +1339,8 @@ BEGIN
       ,strTBOEvaluatorCode = ECTBO.strName
       ,strEvaluatorRemarks = S.strComments3
       ,dtmExpiration = NULL
-      ,intFromPortId = CD.intLoadingPortId
-      ,dblGrossWeight = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblGrossWeight ELSE S.dblSampleQty +IsNULL(S.dblTareWeight,0) END
+      ,intFromPortId = NULL
+      ,dblGrossWeight = S.dblGrossWeight
       ,dtmInitialBuy = NULL
       ,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
       ,dblLandedPrice = NULL
@@ -1350,19 +1349,19 @@ BEGIN
       ,strLeafSize = BRAND.strBrandCode
       ,strLeafStyle = STYLE.strName
       ,intBookId = S.intBookId
-      ,dblPackagesBought = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE S.dblRepresentingQty END
-      ,intItemUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intRepresentingUOMId ELSE S.intSampleUOMId END
+      ,dblPackagesBought = NULL
+      ,intItemUOMId = S.intRepresentingUOMId
       ,intWeightUOMId = S.intSampleUOMId
       ,strTeaOrigin = S.strCountry
-      ,intOriginalItemId = S.intItemId
-      ,dblPackagesPerPallet = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20) END
-      ,strPlant = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE TBO.strOregonFacilityNumber END
-      ,dblTotalQuantity = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1QtyBought ELSE S.dblSampleQty END
+      ,intOriginalItemId = NULL
+      ,dblPackagesPerPallet = NULL
+      ,strPlant = NULL
+      ,dblTotalQuantity = S.dblB1QtyBought
       ,strSampleBoxNumber = S.strSampleBoxNumber
       ,dblSellingPrice = NULL
-      ,dtmStock = CD.dtmUpdatedAvailabilityDate
+      ,dtmStock = NULL
       ,ysnStrategic = NULL
-      ,strTeaLingoSubCluster = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE REGION.strDescription END
+      ,strTeaLingoSubCluster = NULL
       ,dtmSupplierPreInvoiceDate = NULL
       ,strSustainability = SUSTAINABILITY.strDescription
       ,strTasterComments = S.strComments2
@@ -1371,7 +1370,7 @@ BEGIN
           THEN NULL
         ELSE CAST(APPEARANCE.strPropertyValue AS NUMERIC(18, 6))
         END
-      ,strTeaBuyingOffice = ISNULL(BT.strTeaBuyingOffice, TBO.strLocationName)
+      ,strTeaBuyingOffice = BT.strTeaBuyingOffice
       ,strTeaColour = COLOUR.strDescription
       ,strTeaGardenChopInvoiceNumber = S.strChopNumber
       ,intGardenMarkId = S.intGardenMarkId
@@ -1402,9 +1401,9 @@ BEGIN
       ,dblTeaVolume = NULL
       ,intTealingoItemId = S.intItemId
       ,dtmWarehouseArrival = NULL
-      ,intYearManufacture = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE Datepart(YYYY,S.dtmManufacturingDate) END
-      ,strPackageSize = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE PT.strUnitMeasure END
-      ,intPackageUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intNetWtPerPackagesUOMId ELSE S.intRepresentingUOMId END
+      ,intYearManufacture = NULL
+      ,strPackageSize = NULL
+      ,intPackageUOMId = S.intNetWtPerPackagesUOMId
       ,dblTareWeight = S.dblTareWeight
       ,strTaster = BT.strTaster
       ,strFeedStock = NULL
@@ -1420,35 +1419,30 @@ BEGIN
       ,strContainerType = NULL
       ,strVoyage = NULL
       ,strVessel = NULL
-      ,intLocationId = S.intLocationId
-      ,intMixingUnitLocationId = MU.intCompanyLocationId
+      ,intLocationId = BT.intLocationId
+      ,intMixingUnitLocationId = BT.intMixingUnitLocationId
       ,intMarketZoneId = S.intMarketZoneId
-      ,dtmShippingDate=CD.dtmEtaPol
       ,dblTeaTastePinpoint = TASTE.dblPinpointValue
       ,dblTeaHuePinpoint = HUE.dblPinpointValue
       ,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
       ,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
       ,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 
-      ,dblOriginalTeaTaste = ISNULL(BT.dblTeaTaste, TASTE.dblPinpointValue)
-      ,dblOriginalTeaHue = ISNULL(BT.dblTeaHue, HUE.dblPinpointValue)
-      ,dblOriginalTeaIntensity = ISNULL(BT.dblTeaIntensity, INTENSITY.dblPinpointValue)
-      ,dblOriginalTeaMouthfeel = ISNULL(BT.dblTeaMouthFeel, MOUTH_FEEL.dblPinpointValue)
-      ,dblOriginalTeaAppearance = ISNULL(BT.dblTeaAppearance, APPEARANCE.dblPinpointValue)
+      ,dblOriginalTeaTaste = BT.dblTeaTaste
+      ,dblOriginalTeaHue = BT.dblTeaHue
+      ,dblOriginalTeaIntensity = BT.dblTeaIntensity
+      ,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
+      ,dblOriginalTeaAppearance = BT.dblTeaAppearance
     FROM tblQMSample S
+    INNER JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo
     INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
     INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
     INNER JOIN tblICItem I ON I.intItemId = S.intItemId
-    LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
-		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
-    LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo
     LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
     LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
     LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
-    LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = S.intLocationId AND (TBO.intCompanyLocationId <> ISNULL(MU.intCompanyLocationId, 0))
     LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
     LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
-    LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
     -- Appearance
     OUTER APPLY (
       SELECT TR.strPropertyValue
@@ -1524,46 +1518,24 @@ BEGIN
       )
     )
 
-		DECLARE @intInput INT
-			,@intInputSuccess INT
+    DECLARE @intInput INT
+      ,@intInputSuccess INT
       ,@strBatchId NVARCHAR(50)
 
     IF EXISTS (
-				SELECT *
-				FROM @MFBatchTableType
-				)
-		BEGIN
+        SELECT *
+        FROM @MFBatchTableType
+        )
+    BEGIN
       EXEC uspMFUpdateInsertBatch @MFBatchTableType
-        ,@intInput OUTPUT
-        ,@intInputSuccess OUTPUT
+        ,@intInput
+        ,@intInputSuccess
         ,@strBatchId OUTPUT
         ,0
-
-      UPDATE B
-      SET B.intLocationId = L.intCompanyLocationId
-        ,strBatchId = @strBatchId
-        --,intSampleId = NULL
-        ,dblOriginalTeaTaste = dblTeaTaste
-        ,dblOriginalTeaHue = dblTeaHue
-        ,dblOriginalTeaIntensity = dblTeaIntensity
-        ,dblOriginalTeaMouthfeel = dblTeaMouthFeel
-        ,dblOriginalTeaAppearance = dblTeaAppearance
-        ,strPlant=L.strVendorRefNoPrefix
-      FROM @MFBatchTableType B
-      JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
-      JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
-
-      EXEC uspMFUpdateInsertBatch @MFBatchTableType
-        ,@intInput OUTPUT
-        ,@intInputSuccess OUTPUT
-        ,NULL
-        ,1
-
-      UPDATE tblQMSample
-      SET strBatchNo = @strBatchId
-      WHERE intSampleId = @intSampleId				
     END
   END
+END
+-- End update of batch
 
   DECLARE @strRowState NVARCHAR(50)
   SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
