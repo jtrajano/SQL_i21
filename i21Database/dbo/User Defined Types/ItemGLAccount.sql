@@ -22,5 +22,7 @@ CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 	,intOtherChargeExpense INT
 	,intNonInventoryId INT
 	,intContraNonInventoryId INT
+	,intIntraCompanyTransferDueFrom INT
+	,intIntraCompanyTransferDueTo INT
 	,PRIMARY KEY CLUSTERED (intItemId, intItemLocationId, intTransactionTypeId) 
 )
