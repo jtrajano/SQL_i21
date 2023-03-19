@@ -57,6 +57,8 @@ BEGIN TRY
   ,@intOrgCompanyLocationSubLocationId INT  
   ,@intRelatedSampleId INT  
   ,@intCurrentRelatedSampleId INT  
+
+ DECLARE @intCountryID INT
   
  SELECT @strErrorSampleNumber = NULL  
   
@@ -569,6 +571,34 @@ BEGIN TRY
    ) x  
  WHERE dbo.tblQMSample.intSampleId = @intSampleId  
   AND x.strRowState = 'MODIFIED'  
+
+  --  Origin Check
+  SELECT @intCountryID = CA.intCommodityAttributeId
+  FROM tblICCommodityAttribute CA
+  INNER JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
+  INNER JOIN tblQMSample S ON S.intSampleId = @intSampleId
+  WHERE CA.strType = 'Origin'
+  AND C.strCountry = S.strCountry
+
+  IF @intCountryID IS NULL AND EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnAllowEditingTheOrigin =1)
+  BEGIN
+    RAISERROR (  
+     'Origin does not exist.'  
+     ,16  
+     ,1  
+     )  
+  END
+  ELSE
+  BEGIN
+    UPDATE S
+    SET
+      intCountryID = CA.intCommodityAttributeId
+      ,strCountry = C.strCountry
+    FROM tblQMSample S
+    INNER JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = @intCountryID
+    INNER JOIN tblSMCountry C ON C.intCountryID = CA.intCountryID
+    WHERE S.intSampleId = @intSampleId
+  END
   
  IF ISNULL(@intRelatedSampleId ,0) <> 0  
  BEGIN

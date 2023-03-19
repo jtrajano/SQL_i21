@@ -37,6 +37,7 @@ SELECT CP.intCompanyPreferenceId
 	   END AS strSamplePrintEmailTemplate
 	 , CP.ysnAllowEditingAfterSampleApproveReject
 	 , CP.ysnAllowEditingTheItemNo
+	 , CP.ysnAllowEditingTheOrigin
 	 , CP.ysnValidateLotNo
 	 , CP.ysnFilterSupplierByLocation
 FROM tblQMCompanyPreference CP
