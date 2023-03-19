@@ -315,7 +315,7 @@ BEGIN
 		END 
 
 		--THIS ASSUMES THAT THE VOUCHER CREATED IS ONLY ONE
-		SET @intBillId = CAST(@strBillIds AS INT)
+		SELECT TOP 1 @intBillId = [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@strBillIds)
 
 		-- Handle errors thrown by AP
 		IF NULLIF(@throwedError, '') IS NOT NULL
@@ -483,8 +483,7 @@ BEGIN
 		LTRIM(
 			STUFF(
 					' ' + (
-						SELECT  CONVERT(NVARCHAR(50), @intBillId) + '|^|'
-						FOR xml path('')
+						SELECT CAST([intID] AS NVARCHAR(20)) + '|^|' FROM [dbo].fnGetRowsFromDelimitedValues(@strBillIds) FOR XML PATH('')
 					)
 				, 1
 				, 1
@@ -495,3 +494,4 @@ END
 
 Post_Exit:
 RETURN @intReturnValue;
+
