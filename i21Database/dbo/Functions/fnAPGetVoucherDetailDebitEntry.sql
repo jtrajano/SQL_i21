@@ -84,6 +84,8 @@ RETURNS TABLE AS RETURN
 		ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 	LEFT JOIN tblICItem F
 		ON B.intItemId = F.intItemId
+	LEFT JOIN tblLGLoadCost H
+		ON H.intLoadCostId = B.intLoadShipmentCostId
 	-- LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
 	OUTER APPLY (
 		SELECT TOP 1 stockUnit.*
@@ -140,5 +142,6 @@ RETURNS TABLE AS RETURN
 	) storageOldCost
 	WHERE A.intBillId = @billId
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	AND ISNULL(H.ysnInventoryCost, 0) = 0 --EXCLUDE LS INVENTORIED CHAGES
 	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 )

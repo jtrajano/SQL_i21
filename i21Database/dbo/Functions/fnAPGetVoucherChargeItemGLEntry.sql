@@ -47,6 +47,10 @@ RETURNS TABLE AS RETURN
   ON B.intItemId = F.intItemId  
  LEFT JOIN dbo.tblSMCurrencyExchangeRateType G  
   ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId  
+ LEFT JOIN tblLGLoadCost H
+  ON H.intLoadCostId = B.intLoadShipmentCostId
  WHERE A.intBillId = @billId  
- AND B.intInventoryReceiptChargeId IS NOT NULL  
+ AND (
+     B.intInventoryReceiptChargeId IS NOT NULL OR (B.intLoadShipmentCostId IS NOT NULL AND ISNULL(H.ysnInventoryCost, 0) = 0)
+ )
 )
