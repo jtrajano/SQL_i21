@@ -350,6 +350,7 @@ AS
 					,intInvoiceDetailId
 					FROM tblBBBuybackDetail
 					WHERE intBuybackId = @intBuyBackId
+						AND strCharge = 'Inventory'
 					GROUP BY intInvoiceDetailId
 					) A
 			WHERE tblARInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
