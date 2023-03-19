@@ -66,6 +66,7 @@ CREATE TABLE #tmpInvalidBillData (
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @GLEntries AS RecapTableType 
+DECLARE @GLEntriesTemp AS RecapTableType 
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
@@ -553,6 +554,103 @@ DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0
 -- 		-- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 -- 		AND (rc.dblAmount <> B.dblCost OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate)
 
+DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
+DECLARE @ValueToPost AS ItemInTransitValueOnlyTableType
+INSERT INTO @ValueToPost (
+	[intItemId] 
+	,[intOtherChargeItemId]
+	,[intItemLocationId] 
+	,[dtmDate] 
+	,[dblValue] 
+	,[intTransactionId] 
+	,[intTransactionDetailId] 
+	,[strTransactionId] 
+	,[intTransactionTypeId] 
+	,[intLotId] 
+	,[intSourceTransactionId] 
+	,[strSourceTransactionId] 
+	,[intSourceTransactionDetailId] 
+	,[intFobPointId] 
+	,[intInTransitSourceLocationId] 
+	,[intCurrencyId] 
+	,[intForexRateTypeId] 
+	,[dblForexRate] 
+	,[intSourceEntityId] 
+	,[strSourceType] 
+	,[strSourceNumber] 
+	,[strBOLNumber] 
+	,[intTicketId]
+)
+SELECT 
+	[intItemId] = LD.intItemId
+	,[intOtherChargeItemId] = BD.intItemId
+	,[intItemLocationId] = IL.intItemLocationId
+	,[dtmDate] = B.dtmDate
+	,[dblValue] = BD.dblTotal
+	,[intTransactionId] = B.intBillId
+	,[intTransactionDetailId] = BD.intBillDetailId
+	,[strTransactionId] = B.strBillId
+	,[intTransactionTypeId] = 27 --Voucher
+	,[intLotId] = NULL
+	,[intSourceTransactionId] = L.intLoadId
+	,[strSourceTransactionId] = L.strLoadNumber
+	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intFobPointId] = FP.intFobPointId
+	,[intInTransitSourceLocationId] = IL.intItemLocationId
+	,[intCurrencyId] = B.intCurrencyId
+	,[intForexRateTypeId] = BD.intCurrencyExchangeRateTypeId
+	,[dblForexRate] = BD.dblRate
+	,[intSourceEntityId] = NULL
+	,[strSourceType] = NULL
+	,[strSourceNumber] = NULL 
+	,[strBOLNumber] = NULL 
+	,[intTicketId] = NULL 
+FROM @voucherIds IDS
+INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = BD.intLoadShipmentCostId
+INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
+LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL
+UNION ALL
+SELECT 
+	[intItemId] = LD.intItemId
+	,[intOtherChargeItemId] = BD.intItemId
+	,[intItemLocationId] = IL.intItemLocationId
+	,[dtmDate] = B.dtmDate
+	,[dblValue] = LC.dblAmount * -1
+	,[intTransactionId] = B.intBillId
+	,[intTransactionDetailId] = BD.intBillDetailId
+	,[strTransactionId] = B.strBillId
+	,[intTransactionTypeId] = 27 --Voucher
+	,[intLotId] = NULL
+	,[intSourceTransactionId] = L.intLoadId
+	,[strSourceTransactionId] = L.strLoadNumber
+	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intFobPointId] = FP.intFobPointId
+	,[intInTransitSourceLocationId] = IL.intItemLocationId
+	,[intCurrencyId] = B.intCurrencyId
+	,[intForexRateTypeId] = BD.intCurrencyExchangeRateTypeId
+	,[dblForexRate] = BD.dblRate
+	,[intSourceEntityId] = NULL
+	,[strSourceType] = NULL
+	,[strSourceNumber] = NULL 
+	,[strBOLNumber] = NULL 
+	,[intTicketId] = NULL 
+FROM @voucherIds IDS
+INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = BD.intLoadShipmentCostId
+INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
+LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL
+
 IF ISNULL(@post,0) = 1
 BEGIN	
 
@@ -647,9 +745,223 @@ BEGIN
 	OUTER APPLY dbo.fnAPGetVoucherCommodity(A.intTransactionId) commodity
 	ORDER BY intTransactionId
 
-	-- Call the Item's Cost Adjustment
 	DECLARE @intReturnValue AS INT 
 	DECLARE @errorAdjustment NVARCHAR(200) 
+
+	-- Call the Item's Transit Reversal
+	IF EXISTS(SELECT 1 FROM @ValueToPost)
+	BEGIN	
+		BEGIN TRY
+			EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
+					@ItemsForInTransitCosting  
+					,@batchId  
+					,NULL 
+					,@userId
+					,NULL
+					,@ValueToPost
+
+			INSERT INTO @GLEntriesTemp (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]					
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm] 
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					,[strRateType]
+			)			
+			EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+				@strBatchId = @batchId
+				,@strTransactionId = NULL
+				,@intEntityUserSecurityId = @userId
+				,@strGLDescription = NULL
+				,@AccountCategory_Cost_Adjustment = DEFAULT 
+
+			--DELETE APC ACCOUNT IN CREDIT SIDE THIS IS SUPPOSED TO BE AP ACCOUNT BUT IC MODULE ASK US TO REMOVE IT AS AP ACCOUNT IS NOT HANDLED BY THEIR SP
+			DELETE GL 
+			FROM @GLEntriesTemp GL
+			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
+			WHERE AD.intAccountCategoryId = 45 AND GL.dblCredit <> 0
+
+			INSERT INTO @GLEntries
+			SELECT * FROM @GLEntriesTemp
+
+			--CONVERT OTHER CHARGE CURRENCY TO ITEM CURRENCY
+			DELETE GL 
+			FROM @GLEntriesTemp GL
+			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
+			WHERE AD.intAccountCategoryId = 45
+			
+			--WASH OUT ENTRY
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]					
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm] 
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					,[strRateType]
+			)
+			SELECT 	[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblCredit]
+					,[dblDebit]
+					,[dblCreditUnit]
+					,[dblDebitUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]					
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm] 
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					,[strRateType]
+			FROM @GLEntriesTemp
+			UNION ALL
+			SELECT 	[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,LS.intPriceCurrencyId
+					,ISNULL(FX.dblForexRate, 1)
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]					
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm] 
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign] * ISNULL(ShipmentToChargeCurrency.dblForexRate, 1)
+					,[dblDebitReport]
+					,[dblCreditForeign] * ISNULL(ShipmentToChargeCurrency.dblForexRate, 1)
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,ISNULL(FX.dblForexRate, 1)
+					,[intSourceEntityId]
+					,[intCommodityId]
+					,FX.strCurrencyExchangeRateType
+			FROM @GLEntriesTemp GLEntries
+			OUTER APPLY (
+				SELECT TOP 1 intPriceCurrencyId
+				FROM tblICInventoryTransaction IT
+				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
+				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+			) LS
+			OUTER APPLY (
+			SELECT TOP 1 
+				dblForexRate = ISNULL(dblRate, 0),
+				strCurrencyExchangeRateType
+			FROM vyuGLExchangeRate
+			WHERE intFromCurrencyId = LS.intPriceCurrencyId
+				AND intToCurrencyId = @intFunctionalCurrencyId
+				AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+			ORDER BY dtmValidFromDate DESC
+			) FX
+			OUTER APPLY (
+			SELECT TOP 1 
+				dblForexRate = ISNULL(dblRate, 0),
+				intCurrencyExchangeRateTypeId
+			FROM vyuGLExchangeRate
+			WHERE intFromCurrencyId = intCurrencyId
+				AND intToCurrencyId = LS.intPriceCurrencyId
+			ORDER BY dtmValidFromDate DESC
+			) ShipmentToChargeCurrency
+
+			UPDATE @GLEntries SET strModuleName = 'Accounts Payable'
+		END TRY
+		BEGIN CATCH
+			SET @errorAdjustment = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+
+	-- Call the Item's Cost Adjustment
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN	
 		BEGIN TRY
@@ -1017,6 +1329,70 @@ BEGIN
 		,intSourceLocationId	
 	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 
+	-- Call the Item's Transit Reversal
+	IF EXISTS(SELECT 1 FROM @ValueToPost)
+	BEGIN	
+		BEGIN TRY
+			UPDATE @ValueToPost SET dblValue = dblValue * -1
+
+			EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
+					@ItemsForInTransitCosting  
+					,@batchId  
+					,NULL 
+					,@userId
+					,NULL
+					,@ValueToPost
+
+			INSERT INTO @GLEntriesTemp (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]					
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm] 
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					,[strRateType]
+			)			
+			EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+				@strBatchId = @batchId
+				,@strTransactionId = NULL
+				,@intEntityUserSecurityId = @userId
+				,@strGLDescription = NULL
+				,@AccountCategory_Cost_Adjustment = DEFAULT 
+		END TRY
+		BEGIN CATCH
+			SET @errorAdjustment = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+
 	--NEGATE THE COST
 	-- UPDATE @adjustedEntries
 	-- SET dblNewValue = -dblNewValue
@@ -1379,6 +1755,8 @@ BEGIN
 	DECLARE @billIdGL AS Id
 	INSERT INTO @billIdGL
 	SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+	SELECT * FROM @GLEntries
 
 	--VALIDATE GL ENTRIES
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
