@@ -19,3 +19,34 @@ BEGIN
 END;
 
 GO
+
+EXEC(N'IF (OBJECT_ID(''UQ_tblVRCustomerXref_intCustomerEntityId_intVendorEntityId'', ''UQ'') IS NOT NULL)
+BEGIN
+    ALTER TABLE tblVRCustomerXref
+    DROP CONSTRAINT UQ_tblVRCustomerXref_intCustomerEntityId_intVendorEntityId
+END')
+
+GO
+
+EXEC(N'IF (OBJECT_ID(''UQ_tblVRCustomerXref_strVendorCustomer_intCustomerEntityId_intVendorEntity'', ''UQ'') IS NOT NULL)
+BEGIN
+    ALTER TABLE tblVRCustomerXref
+    DROP CONSTRAINT UQ_tblVRCustomerXref_strVendorCustomer_intCustomerEntityId_intVendorEntity
+END')
+
+GO
+
+-- Remove duplicate UOM mapping
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblVRCustomerXref]') AND type in (N'U'))
+BEGIN
+     ;WITH cte AS
+    (
+    SELECT *, ROW_NUMBER() OVER(PARTITION BY intVendorSetupId, intEntityId ORDER BY intVendorSetupId, intEntityId) AS Count
+    FROM tblVRCustomerXref
+    )
+    DELETE FROM cte
+    WHERE Count > 1;
+END;
+
+GO
+
