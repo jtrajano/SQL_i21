@@ -57,6 +57,8 @@ BEGIN TRY
   ,@intOrgCompanyLocationSubLocationId INT  
   ,@intRelatedSampleId INT  
   ,@intCurrentRelatedSampleId INT  
+
+ DECLARE @intCountryID INT
   
 DECLARE @ysnSuccess BIT
 
