@@ -16,7 +16,10 @@ SELECT
 	, strVendorCategory = categoryVendor.strVendorDepartment
 	, item.strItemNo
 	, strVendorItemNo = vendorXRef.strVendorProduct
-	, strVendorUOM = uomXref.strVendorUOM
+	-- , strVendorUOM = uomXref.strVendorUOM
+	, strVendorUOM = COALESCE(NULLIF(vendorXRef.strVendorProductUOM, ''), 
+		CASE WHEN vendorSetup.strDataFileTemplate = 'Chevron' 
+		THEN RIGHT(item.strItemNo, 3) ELSE uomXref.strVendorUOM END, uom.strUnitMeasure) COLLATE Latin1_General_CI_AS 
 	, intProgramId = program.intProgramId
 	, vendorSetup.intVendorSetupId
 	, invoice.intInvoiceId
@@ -54,8 +57,12 @@ LEFT OUTER JOIN tblICItemVendorXref vendorXRef ON vendorXRef.intItemId = item.in
     AND vendorXRef.intVendorSetupId = vendorSetup.intVendorSetupId
 LEFT OUTER JOIN tblICCategoryVendor categoryVendor ON categoryVendor.intCategoryId = category.intCategoryId
     AND categoryVendor.intVendorSetupId = vendorSetup.intVendorSetupId
-LEFT OUTER JOIN tblVRUOMXref uomXref ON uomXref.intUnitMeasureId = uom.intUnitMeasureId
-    AND vendorSetup.intVendorSetupId = uomXref.intVendorSetupId
+OUTER APPLY (
+	SELECT TOP 1 xK.*
+	FROM tblVRUOMXref xK
+	WHERE uom.intUnitMeasureId = xK.intUnitMeasureId
+		AND vendorSetup.intVendorSetupId = xK.intVendorSetupId
+) uomXref
 LEFT OUTER JOIN tblVRCustomerXref customerXref ON customerXref.intVendorSetupId = vendorSetup.intVendorSetupId
     AND customerXref.intEntityId = invoice.intEntityCustomerId
 WHERE program.ysnActive = 1
