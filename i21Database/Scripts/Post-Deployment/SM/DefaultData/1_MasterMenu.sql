@@ -4461,6 +4461,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Load Out 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.LoadOutBin?showSearch=true' WHERE strMenuName = 'Load Out Bin' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grain Flow Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Grain Flow Report', N'Ticket Management', @TicketManagementReportParentMenuId, N'Grain Flow Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=GrainFlowReport&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 7, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Reporting.view.ReportManager?group=Grain&report=GrainFlowReport&direct=true&showCriteria=true' WHERE strMenuName = 'Grain Flow Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName IN('Discount Tables','Discount Schedules')
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'OffSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId

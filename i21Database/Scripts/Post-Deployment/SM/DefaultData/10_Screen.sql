@@ -633,6 +633,41 @@ ELSE
 		WHERE strNamespace = 'Manufacturing.view.Recipe'
 	END
 GO
+	PRINT 'Update tblSMScreen missing in screen permissions'
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.AmendmentSearch')
+	BEGIN
+		UPDATE tblSMScreen SET strScreenName = 'Amendment' WHERE strNamespace = 'ContractManagement.view.AmendmentSearch'
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.GardenMark')
+	BEGIN
+		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Quality.view.GardenMark'
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ManufacturingCell')
+	BEGIN
+		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Manufacturing.view.ManufacturingCell'
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ManufacturingProcess')
+	BEGIN
+		UPDATE tblSMScreen SET ysnAvailable = 1 WHERE strNamespace = 'Manufacturing.view.ManufacturingProcess'
+	END
+
+	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory')
+	-- BEGIN
+	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [ysnDocumentSource], [intConcurrencyId], [strGroupName]) 
+	-- 	VALUES (N'Email Log', N'Email Log', N'GlobalComponentEngine.view.EmailHistory', N'Global Component Engine', NULL, NULL, NULL, NULL, NULL, 1, N'System Manager')
+	-- END
+	-- ELSE
+	-- BEGIN
+	-- 	UPDATE	tblSMScreen
+	-- 	SET		strScreenId = 'Email Log',
+	-- 			strScreenName = 'Email Log'
+	-- 	WHERE	strNamespace = 'GlobalComponentEngine.view.EmailHistory'
+	-- END
+GO
 	------------------------ START REPLICATION SCREEN ------------------------
 
 	-- Parent

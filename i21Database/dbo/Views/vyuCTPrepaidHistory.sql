@@ -24,13 +24,13 @@ SELECT intInvoiceDetailId    =   ID.intInvoiceDetailId
              ELSE  I.dblInvoiceSubtotal END  
   , dblTax       =   I.dblTax  
   , dblTotalAmount     =   ID.dblTotal  
-  , dblAmountReceived    =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN dblAmountDue   
+  , dblAmountReceived    =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN ID.dblTotal   
                WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 1 THEN 0  
                WHEN strTransactionType = 'Customer Prepayment' AND  ysnPosted = 0 THEN 0  
-             ELSE dblPayment END  
-  , dblAmountDue      =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN dblAmountDue * -1.0  
+             ELSE ID.dblTotal  END  
+  , dblAmountDue      =   CASE WHEN strTransactionType = 'Customer Prepayment' AND ysnPosted = 1 and ysnPaid = 0 THEN ID.dblTotal * -1.0  
                WHEN strTransactionType = 'Customer Prepayment' AND (ysnRefundProcessed = 1 or ysnPaid = 0)  THEN 0  
-             ELSE dblAmountDue END  
+             ELSE ID.dblTotal END  
 FROM tblCTItemContractHeader ICH  
 INNER JOIN (
 
@@ -40,7 +40,7 @@ INNER JOIN (
 
 ) ICD  on ICH.intItemContractHeaderId = ICD.intItemContractHeaderId  and ICH.strContractCategoryId = ICD.strContractCategoryId
 INNER JOIN tblARInvoiceDetail ID on ID.intItemContractHeaderId = ICD.intItemContractHeaderId AND CASE WHEN ICD.strContractCategoryId = 'Item' THEN ID.intItemContractDetailId ELSE ID.intItemCategoryId END = ICD.intItemContractDetailId  
-INNER JOIN tblARInvoice I on I.intInvoiceId = ID.intInvoiceId  
+INNER JOIN tblARInvoice I on I.intInvoiceId = ID.intInvoiceId  and I.strTransactionType = 'Customer Prepayment'
 LEFT JOIN tblCTContractHeader CH on CH.intContractHeaderId = ID.intContractHeaderId  
 LEFT JOIN vyuARItemUOM IOUM ON IOUM.intItemUOMId = ID.intItemUOMId  
 LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = ID.intSubCurrencyId 

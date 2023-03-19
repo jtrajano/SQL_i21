@@ -128,6 +128,8 @@
 		,strLineOfBusiness = SMLineOfBusiness.strLineOfBusiness
 		,intDefaultCurrencyExchangeRateTypeId = DefaultHelpDeskRateType.intHelpdeskRateTypeId
 		,strDefaultCurrencyExchangeRateType = DefaultHelpDeskRateType.strCurrencyExchangeRateType
+		,strUpgradeStartTime = CONVERT(nvarchar(30),a.dtmUpgradeStartTime,22) COLLATE Latin1_General_CI_AS
+		,strUpgradeEndTime = CONVERT(nvarchar(30),a.dtmUpgradeEndTime,22) COLLATE Latin1_General_CI_AS
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId

@@ -269,6 +269,8 @@ BEGIN TRY
 		DROP TABLE #tempFutures
 	IF OBJECT_ID('tempdb..#tempPurchaseInTransit') IS NOT NULL
 		DROP TABLE #tempPurchaseInTransit
+	IF OBJECT_ID('tempdb..#tempDropshipInTransit') IS NOT NULL
+		DROP TABLE #tempDropshipInTransit
 	IF OBJECT_ID('tempdb..#LicensedLocation') IS NOT NULL
 		DROP TABLE #LicensedLocation
 	
@@ -866,6 +868,36 @@ BEGIN TRY
 			AND ISNULL(strTicketStatus,'') = 'H'
 	) t WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	AND t.intSeqId = 1
+
+	--===============================
+	-- Dropship In-Transit
+	--===============================
+
+	SELECT
+		dtmCreateDate
+		,dtmTransactionDate
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId, @intCommodityUnitMeasureId, ISNULL(dblTotal, 0))
+		,intEntityId
+		,strEntityName
+		,intLocationId
+		,strLocationName
+		,intItemId
+		,strItemNo
+		,intCommodityId
+		,strCommodityCode
+		,strTransactionNumber
+		,strTransactionType
+		,intTransactionRecordId
+		,strDistributionType
+		,intOrigUOMId
+		,intTicketId
+		,strTicketNumber
+		,strUserName
+	INTO #tempDropshipInTransit
+	FROM dbo.fnRKGetBucketDropshipInTransit(@dtmToDate, @intCommodityId, @intVendorId) t
+	WHERE t.intLocationId = ISNULL(@intLocationId, t.intLocationId)
+		AND t.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+
 	
 	DECLARE @ListInventory AS TABLE (intRow INT IDENTITY PRIMARY KEY
 		, intSeqId INT
@@ -2339,6 +2371,48 @@ BEGIN TRY
 		, strTicketNumber
 	FROM @ListInventory WHERE strSeqHeader = 'In-House' AND strType = 'On-Hold'
 
+
+
+	INSERT INTO @ListInventory(intSeqId
+		, strSeqHeader
+		, strCommodityCode
+		, strCustomerName
+		--, strType
+		, dblTotal
+		, strLocationName
+		, intItemId
+		, strItemNo
+		, intCommodityId
+		, intFromCommodityUnitMeasureId
+		, intCompanyLocationId
+		, dtmTicketDateTime
+		, intTicketId
+		--, strTicketType
+		, strTicketNumber
+		,strDistributionOption
+		,strTransactionType)
+	SELECT intSeqId = 16
+		, strSeqHeader = 'Dropship In-Transit' COLLATE Latin1_General_CI_AS
+		, strCommodityCode
+		, strEntityName
+		--, strType
+		, dblTotal
+		, strLocationName
+		, intItemId
+		, strItemNo
+		, intCommodityId
+		, intOrigUOMId
+		, intLocationId
+		, dtmTransactionDate
+		, intTicketId
+		--, strTicketType
+		, strTicketNumber
+		,strDistributionType
+		,strTransactionType
+	FROM #tempDropshipInTransit
+
+
+
 	--=========================================
 	-- Includes intransit based ON Company Preference
 	--========================================
@@ -3556,6 +3630,36 @@ BEGIN TRY
 			, intCommodityId
 			, strCurrency
 
+
+		INSERT INTO @ListContractHedge(strCommodityCode
+			, strType
+			, strContractType
+			, dblTotal
+			, intItemId
+			, strItemNo
+			, intFromCommodityUnitMeasureId
+			, intCommodityId
+			, strLocationName)
+		SELECT DISTINCT @strCommodityCode
+			, strType = 'Price Risk' COLLATE Latin1_General_CI_AS
+			, strContractType = 'Dropship In-Transit' COLLATE Latin1_General_CI_AS
+			, dblTotal = SUM(dblTotal)
+			, intItemId
+			, strItemNo
+			, intOrigUOMId
+			, intCommodityId
+			, strLocationName
+			--, strCurrency
+		FROM #tempDropshipInTransit
+		WHERE intCommodityId = @intCommodityId AND @ysnExchangeTraded = 1
+			AND intLocationId = ISNULL(@intLocationId, intLocationId)
+		GROUP BY intItemId
+			, strItemNo
+			, intOrigUOMId
+			, strLocationName
+			, intCommodityId
+			--, strCurrency
+
 		--=========================================
 		-- Includes DP based ON Company Preference
 		--========================================
@@ -4100,7 +4204,7 @@ BEGIN TRY
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
-		FROM @ListContractHedge WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'OffSite' , 'Purchase In-Transit','Sales In-Transit') AND @ysnExchangeTraded = 1
+		FROM @ListContractHedge WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'OffSite' , 'Purchase In-Transit','Sales In-Transit','Dropship In-Transit') AND @ysnExchangeTraded = 1
 		GROUP BY strCommodityCode
 			, strContractType
 			, intContractHeaderId
@@ -6777,6 +6881,44 @@ BEGIN TRY
 		FROM #tempBasisDelivery
 		WHERE strContractType = 'Purchase'
 
+		INSERT INTO @ListCrushAll(
+			strType
+			,intOrderId
+			,dblTotal
+			,strEntityName
+			,strLocationName
+			,intItemId
+			,strItemNo
+			,intCommodityId
+			,strCommodityCode
+			,strTransactionNumber
+			,strTranType
+			,intTransactionRecordId
+			,intFromCommodityUnitMeasureId
+			,strContractEndMonthNearBy
+			,strContractEndMonth
+			,strDeliveryDate
+		)
+		SELECT
+			strType = 'Dropship In-Transit'
+			,intOrderId = 7
+			,dblTotal
+			,strEntityName
+			,strLocationName
+			,intItemId
+			,strItemNo
+			,intCommodityId
+			,strCommodityCode
+			,strTransactionNumber
+			,strTransactionType
+			,intTransactionRecordId
+			,intOrigUOMId
+			,strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
+			,strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
+			,strDeliveryDate = dbo.fnRKFormatDate(dtmTransactionDate, 'MMM yyyy')
+		FROM #tempDropshipInTransit
+
+
 		IF (@ysnIncludeInTransitInCompanyTitled = 1)
 		BEGIN
 			INSERT INTO @InventoryStock(intCommodityId
@@ -7086,6 +7228,45 @@ BEGIN TRY
 			, strContractNumber
 		FROM @InventoryStock
 		WHERE strInventoryType IN ('Delayed Pricing')
+
+		INSERT INTO @ListCrushDetail (strCommodityCode
+			, strItemNo
+			, strCategory
+			, dblTotal
+			, strContractEndMonth
+			, strLocationName
+			, intCommodityId
+			, intFromCommodityUnitMeasureId
+			, intOrderId
+			, strType
+			, strInventoryType
+			, strTranType
+			, strTransactionNumber
+			, intTransactionRecordHeaderId
+			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber
+			, strEntityName)
+		SELECT strCommodityCode
+			, strItemNo
+			, strCategory
+			, dblTotal
+			, 'Near By' COLLATE Latin1_General_CI_AS
+			, strLocationName
+			, intCommodityId
+			, intFromCommodityUnitMeasureId
+			, intOrderId 
+			, strType
+			, strInventoryType
+			, strTranType
+			, strTransactionNumber
+			, intTransactionRecordHeaderId
+			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber
+			, strEntityName
+		FROM @ListCrushAll
+		WHERE strType = 'Dropship In-Transit'
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
 			, strItemNo
@@ -7530,7 +7711,7 @@ BEGIN TRY
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure from @ListCrushDetail where intOrderId in(19, 20, 21, 22)
 
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
-		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(1, 2, 8, 19, 20) AND @ysnExchangeTraded = 1
+		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(1, 2, 8, 19, 20) OR strType = 'Dropship In-Transit' AND @ysnExchangeTraded = 1
 
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 16) AND @ysnExchangeTraded = 1

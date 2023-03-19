@@ -19,11 +19,11 @@ BEGIN
 	DECLARE @BillId INT
 
 	INSERT INTO @billList
-	SELECT intBillToId --DM
+	SELECT DISTINCT intBillToId --DM
 	FROM tblGRTransferSettlementReference
 	WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId
 	UNION ALL
-	SELECT intTransferToBillId --BL
+	SELECT DISTINCT intTransferToBillId --BL
 	FROM tblGRTransferSettlementReference
 	WHERE intTransferSettlementHeaderId = @intTransferSettlementHeaderId	
 
