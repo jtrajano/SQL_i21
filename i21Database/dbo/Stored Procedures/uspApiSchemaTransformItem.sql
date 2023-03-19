@@ -1,4 +1,4 @@
-ALTER PROCEDURE uspApiSchemaTransformItem 
+CREATE PROCEDURE uspApiSchemaTransformItem 
 	@guiApiUniqueId UNIQUEIDENTIFIER,
 	@guiLogId UNIQUEIDENTIFIER
 AS
