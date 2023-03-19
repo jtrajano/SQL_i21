@@ -85,7 +85,7 @@ BEGIN TRY
 		SET @intFarmId					= NULL;
 		SET @dblTotalPercent			= 0;
 
-		SELECT	@dblTotalPercent = sum(cast(case when strPercent is null or strPercent = '' then 0 else strPercent end AS DECIMAL(18,6)))
+		SELECT	@dblTotalPercent = sum(case when strPercent is null or strPercent = '' then 0 else cast(strPercent AS DECIMAL(18,6)) end)
 		FROM	tblApiSchemaEntitySplit
 		WHERE	strEntityNo = @strEntityNo AND
 				strSplitNumber = @strSplitNumber
@@ -261,7 +261,7 @@ BEGIN TRY
 		-- End Split Detail Entity Validation
 	
 		-- Split Percentage Validation
-		IF @dblTotalPercent != 100
+		IF @dblTotalPercent != CAST(100 AS DECIMAL(18, 6))
 		BEGIN
 			select 'Split Percentage not equal to 100'
 			INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField , strValue, strLogLevel, strStatus, intRowNo, strMessage)
