@@ -944,6 +944,11 @@ BEGIN TRY
 
 				SELECT @intItemUOMId = @intLotItemUOMId
 
+				Update tblICItemLocation
+				Set intAllowNegativeInventory=1
+				WHERE intItemId =@intItemId
+				AND intLocationId =@intCompanyLocationId 
+
 				EXEC dbo.uspMFLotMove @intLotId = @intLotId
 					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
 					,@intNewStorageLocationId = @intNewStorageLocationId
@@ -951,7 +956,7 @@ BEGIN TRY
 					,@intMoveItemUOMId = @intItemUOMId
 					,@intUserId = @intUserId
 					,@blnValidateLotReservation = 1
-					,@blnInventoryMove = 0
+					,@blnInventoryMove = 1
 					,@dtmDate = NULL
 					,@strReasonCode = @strReasonCode
 					,@strNotes = @strNotes
@@ -962,6 +967,11 @@ BEGIN TRY
 					,@intWorkOrderId = NULL
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
 					,@ysnExternalSystemMove = 1
+
+				Update tblICItemLocation
+				Set intAllowNegativeInventory=3
+				WHERE intItemId =@intItemId
+				AND intLocationId =@intCompanyLocationId 
 
 				SELECT @strAdjustmentNo = NULL
 
