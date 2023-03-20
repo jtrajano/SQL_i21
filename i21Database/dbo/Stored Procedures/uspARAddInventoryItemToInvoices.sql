@@ -172,6 +172,7 @@ INSERT INTO @TankDeliveries (
 	, intUserId
 	, intSiteId
 	, ysnLeaseBilling
+	,intDispatchId
 )
 SELECT DISTINCT 
 	  intInvoiceId			= IT.intInvoiceId
@@ -184,6 +185,7 @@ SELECT DISTINCT
 	, intUserId				= @UserId
 	, intSiteId				= IT.intSiteId
 	, ysnLeaseBilling		= IT.ysnLeaseBilling
+	,intDispatchId			= IT.intDispatchId
 FROM @ItemEntries IT
 WHERE IT.intSiteId IS NOT NULL
 
@@ -207,6 +209,7 @@ IF EXISTS (SELECT TOP 1 1 FROM @TankDeliveries)
 			,[intSourceId]			= IT.[intSourceId]
 			,[strSourceId]			= IT.[strSourceId]
 			,[intInvoiceId]			= IT.[intInvoiceId]
+			,intDispatchId			= IT.intDispatchId
 		FROM @ItemEntries IT
 		INNER JOIN [dbo].[fnTMGetInvalidInvoicesForSync](@TankDeliveries, 1) TM ON IT.intInvoiceId = TM.intInvoiceId
 	END
@@ -598,7 +601,9 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intTempDetailIdForTaxes]			INT												NULL
 	,[strBinNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strGroupNumber]	    			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strFeedDiet]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL)
+	,[strFeedDiet]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,intDispatchId						INT												NULL
+)
 
 INSERT INTO #InvoiceInventoryItem
 	([intInvoiceId]
@@ -880,6 +885,7 @@ SELECT
 	,[strBinNumber]							= IE.[strBinNumber]
 	,[strGroupNumber]						= IE.[strGroupNumber]
 	,[strFeedDiet]							= IE.[strFeedDiet]
+	,intDispatchId							= IE.intDispatchId
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -1086,6 +1092,7 @@ USING
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,intDispatchId
 	FROM
 		#InvoiceInventoryItem
 	)
@@ -1213,7 +1220,8 @@ INSERT(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
-	)
+	,intDispatchId
+)
 VALUES(
 	 [intInvoiceId]
 	,[strDocumentNumber]
@@ -1335,6 +1343,7 @@ VALUES(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
+	,intDispatchId
 )
 	OUTPUT  
 		ISNULL(@IntegrationLogId, -9999)						--[intIntegrationLogId]

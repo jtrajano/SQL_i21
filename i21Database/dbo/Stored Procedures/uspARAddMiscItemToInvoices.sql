@@ -343,6 +343,7 @@ USING
 		,[strBinNumber]							= IE.[strBinNumber]
 		,[strGroupNumber]						= IE.[strGroupNumber]
 		,[strFeedDiet]							= IE.[strFeedDiet]
+		,intDispatchId							= IE.intDispatchId
 	FROM
 		@ItemEntries IE
 		
@@ -579,6 +580,7 @@ VALUES(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
+	,intDispatchId
 )
 OUTPUT  
 			@IntegrationLogId						--[intIntegrationLogId]
