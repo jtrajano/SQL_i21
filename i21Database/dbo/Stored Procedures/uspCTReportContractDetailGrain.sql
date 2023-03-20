@@ -108,7 +108,7 @@ BEGIN TRY
 			,strTerm					 = strTerm
 			,strFutureMonth				 = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')
 			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END
-			,strQuantity				 = convert(nvarchar(30),dblDetailQuantity) + ' ' + strItemUOM
+			,strQuantity				 = CAST(CAST(dblDetailQuantity AS DECIMAL(18,6)) AS NVARCHAR(30)) + ' ' + strItemUOM
 			,strPrice					 = convert(nvarchar(30),(CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
 													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
