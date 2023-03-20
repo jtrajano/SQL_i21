@@ -209,7 +209,6 @@ IF EXISTS (SELECT TOP 1 1 FROM @TankDeliveries)
 			,[intSourceId]			= IT.[intSourceId]
 			,[strSourceId]			= IT.[strSourceId]
 			,[intInvoiceId]			= IT.[intInvoiceId]
-			,intDispatchId			= IT.intDispatchId
 		FROM @ItemEntries IT
 		INNER JOIN [dbo].[fnTMGetInvalidInvoicesForSync](@TankDeliveries, 1) TM ON IT.intInvoiceId = TM.intInvoiceId
 	END
@@ -739,7 +738,9 @@ INSERT INTO #InvoiceInventoryItem
 	,[intTempDetailIdForTaxes]
 	,[strBinNumber]
 	,[strGroupNumber]
-	,[strFeedDiet])
+	,[strFeedDiet]
+	,intDispatchId
+)
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
