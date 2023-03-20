@@ -6,6 +6,7 @@ SELECT intDocumentMaintenanceId
 	 , strHeader	= ISNULL(strMessage,'') COLLATE Latin1_General_CI_AS
 	 , strFooter	= ISNULL(strMessageFooter,'') COLLATE Latin1_General_CI_AS
 	 , strMessageHtml
+	 , strMessageHtmlFooter
 FROM (
 	SELECT intDocumentMaintenanceId
 		 , strCode
