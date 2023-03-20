@@ -100,6 +100,7 @@
 	,@ItemOptionalityPremium				NUMERIC(18, 6)	= 0.000000
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0.000000
 	,@ItemOverrideTaxGroup					BIT				= 0
+	,@ItemDispatchId						INT				= NULL
 AS
 BEGIN
 
@@ -259,6 +260,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+			,@ItemDispatchId				= @ItemDispatchId
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -470,7 +472,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblAddOnQuantity]
 				,[intInventoryShipmentChargeId]
 				,[dblStandardWeight]
-				,[intLoadDistributionDetailId])
+				,[intLoadDistributionDetailId]
+				,intDispatchId
+			)
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -564,7 +568,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemInventoryShipmentChargeId
 				,@ItemStandardWeight
 				,@ItemLoadDistributionDetailId
-			FROM tblICItem WHERE intItemId = @ItemId
+				,@ItemDispatchId
+			FROM tblICItem 
+			WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
 

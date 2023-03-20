@@ -517,7 +517,9 @@ CREATE TABLE #InvoiceNonInventoryItem
 	,[intTempDetailIdForTaxes]			INT												NULL
 	,[strBinNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strGroupNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strFeedDiet]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL)
+	,[strFeedDiet]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,intDispatchId						INT												NULL
+)
 
 INSERT INTO #InvoiceNonInventoryItem
 	([intInvoiceId]
@@ -647,7 +649,9 @@ INSERT INTO #InvoiceNonInventoryItem
 	,[intTempDetailIdForTaxes]
 	,[strBinNumber]
 	,[strGroupNumber]
-	,[strFeedDiet])
+	,[strFeedDiet]
+	,intDispatchId
+)
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
@@ -793,6 +797,7 @@ SELECT
 	,[strBinNumber]							= IE.[strBinNumber]
 	,[strGroupNumber]						= IE.[strGroupNumber]
 	,[strFeedDiet]							= IE.[strFeedDiet]
+	,intDispatchId							= IE.intDispatchId
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -979,6 +984,7 @@ USING
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,intDispatchId
 	FROM
 		#InvoiceNonInventoryItem
 	)
@@ -1103,7 +1109,8 @@ INSERT(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
-	)
+	,intDispatchId
+)
 VALUES(
 	 [intInvoiceId]
 	,[strDocumentNumber]
@@ -1222,6 +1229,7 @@ VALUES(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
+	,intDispatchId
 )
 OUTPUT  
 			ISNULL(@IntegrationLogId, -9999)		--[intIntegrationLogId]
