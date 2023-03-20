@@ -20,6 +20,7 @@
     [dblTaxAmount3]                      DECIMAL (18, 6) NULL,
     [dblTaxAmount4]                      DECIMAL (18, 6) NULL,
     [intItemId]                          INT             NULL,
+    [strRegisterCode]                    NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]                   INT             NULL,
     [dblTotalLotterySalesAmountComputed] DECIMAL (18, 6) CONSTRAINT [DF_tblSTCheckoutDepartmetTotals_dblTotalLotterySalesAmountComputed] DEFAULT ((0)) NULL,
     [intLotteryItemsSold]                INT             CONSTRAINT [DF_tblSTCheckoutDepartmetTotals_intLotteryItemsSold] DEFAULT ((0)) NULL,
