@@ -637,7 +637,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
 :r .\ST\50_TransferMappingFromIcToSt.sql
-
+:r .\ST\52_Populate_JobTypes.sql
 
 
 -- Motor Fuel Tax
