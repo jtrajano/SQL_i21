@@ -100,7 +100,7 @@ AS
 		join tblHDModule mo on mo.intModuleId = tic.intModuleId
 		join tblSMModule smmo on smmo.intModuleId = mo.intSMModuleId
 		join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
-		join tblEMEntity contact on contact.intEntityId = tic.intCustomerContactId
+		left join tblEMEntity contact on contact.intEntityId = tic.intCustomerContactId
 		join tblEMEntity cus on cus.intEntityId = tic.intCustomerId
 		join tblEMEntity created on created.intEntityId = tic.intCreatedUserEntityId
 		left join tblHDProjectTask projt on projt.intTicketId = tic.intTicketId
