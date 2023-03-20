@@ -158,6 +158,9 @@ SELECT l.intLotId
 	,PT.strPricingType
 	,IsNULL(LI.dblReservedQtyInTBS,0) AS dblReservedQtyInTBS
 	,i.strShortName
+	,ISNULL(LI.dblReservedQtyInTBS,0) / CASE WHEN l.dblWeightPerQty IS NULL OR l.dblWeightPerQty =  0 THEN 1
+											 ELSE l.dblWeightPerQty
+										END AS dblReservedQtyInTBSUnit
 FROM dbo.tblICLot l
 JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 JOIN dbo.tblICCategory ic ON ic.intCategoryId = i.intCategoryId
