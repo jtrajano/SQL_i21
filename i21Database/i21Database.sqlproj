@@ -1511,6 +1511,7 @@
     <Build Include="dbo\Tables\tblQMImportType.sql" />
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
+    <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
