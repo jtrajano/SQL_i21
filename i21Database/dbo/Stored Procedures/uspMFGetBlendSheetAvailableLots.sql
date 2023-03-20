@@ -3,6 +3,7 @@
   , @intLocationId		INT
   , @intRecipeItemId	INT = NULL
   , @intWorkOrderId		INT = NULL
+  ,@intBlendRequirementId int = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -20,6 +21,12 @@ DECLARE @intRecipeId						   INT
 	  , @strLotStatusIds					   NVARCHAR(50)
 	  , @index								   INT
 	  , @id									   INT
+	  ,@intManufacturingCellId INT
+
+DECLARE @tblSourceSubLocation AS TABLE (
+		intRecordId INT identity(1, 1)
+		,intSubLocationId INT
+		);
 
 DECLARE @tblLotStatus AS TABLE
 (
@@ -58,6 +65,31 @@ SELECT @strLotStatusIds = ProcessAttribute.strAttributeValue
 FROM tblMFManufacturingProcessAttribute AS ProcessAttribute 
 JOIN tblMFAttribute AS Attribute ON ProcessAttribute.intAttributeId = Attribute.intAttributeId
 WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId = @intLocationId AND Attribute.strAttributeName = 'Blend Sheet Available Lots Status';
+	
+	SELECT @intManufacturingCellId = intManufacturingCellId
+	FROM tblMFBlendRequirement AS BlendRequirement
+	WHERE BlendRequirement.intBlendRequirementId = @intBlendRequirementId;
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFManufacturingCellSubLocation
+			WHERE intManufacturingCellId = @intManufacturingCellId
+			)
+	BEGIN
+		INSERT INTO @tblSourceSubLocation (intSubLocationId)
+		SELECT intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationId = @intLocationId
+
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSourceSubLocation (intSubLocationId)
+		SELECT SL.intCompanyLocationSubLocationId
+		FROM dbo.tblMFManufacturingCellSubLocation SL
+		WHERE intManufacturingCellId = @intManufacturingCellId
+		ORDER BY SL.intManufacturingCellSubLocationId
+	END
 
 /* Create Lot Status. */
 IF ISNULL(@strLotStatusIds, '') <> ''
@@ -175,6 +207,7 @@ JOIN tblICLotStatus AS LotStatus ON Lot.intLotStatusId = LotStatus.intLotStatusI
 JOIN tblSMCompanyLocation AS CompanyLocation ON CompanyLocation.intCompanyLocationId = Lot.intLocationId
 JOIN tblICItemUOM AS LotItemUOM on Lot.intItemUOMId = LotItemUOM.intItemUOMId
 JOIN tblICUnitMeasure AS LotUnitMeasure on LotItemUOM.intUnitMeasureId = LotUnitMeasure.intUnitMeasureId
+JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 LEFT JOIN tblICItemUOM AS LotItemWeightUOM ON Lot.intWeightUOMId = LotItemWeightUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure AS UnitOfMeasure ON LotItemWeightUOM.intUnitMeasureId = UnitOfMeasure.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation AS CompanySubLocation ON CompanySubLocation.intCompanyLocationSubLocationId = Lot.intSubLocationId
