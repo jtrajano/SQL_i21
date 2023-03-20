@@ -115,5 +115,8 @@
 	ysnShowHideExpectedParameterDefaultValue BIT,
 	ysnAllowPastDateInBlending BIT,
 	ysnShowHideHeaderDefaultValue BIT,
+	ysnCopyRecipeOnSave BIT,
+	ysnTBSReserveOnSave BIT,
+	ysnAllowToCreateMultipleBlendSheetOnDemand BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
