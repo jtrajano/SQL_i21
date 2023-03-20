@@ -74,7 +74,7 @@ WHERE intManufacturingProcessId = @intManufacturingProcessId AND intLocationId =
 			SELECT *
 			FROM tblMFManufacturingCellSubLocation
 			WHERE intManufacturingCellId = @intManufacturingCellId
-			)
+			) OR @intBlendRequirementId is NULL
 	BEGIN
 		INSERT INTO @tblSourceSubLocation (intSubLocationId)
 		SELECT intCompanyLocationSubLocationId

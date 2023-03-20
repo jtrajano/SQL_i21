@@ -1257,19 +1257,19 @@ BEGIN TRY
 		from tblICLot 
 		Where intLotId=@intLotId
 		
-		if @dblTBSQuantity>@dblInputAvlQty
+		if @dblTBSQuantity>@dblInputAvlQty AND ABS(@dblTBSQuantity-@dblInputAvlQty)>1
 		Begin
 			SELECT @strInputLotNumber = NULL
 
 			SELECT @strInputLotNumber = strLotNumber
 			FROM tblICLot
-			WHERE intLotId = @intInputLotId
+			WHERE intLotId = @intLotId
 
 			SELECT @strInputItemNo = NULL
 
 			SELECT @strInputItemNo = strItemNo
 			FROM tblICItem
-			WHERE intItemId = @intInputItemId
+			WHERE intItemId = @intItemId
 
 			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
 
