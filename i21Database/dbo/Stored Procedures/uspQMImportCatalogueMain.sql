@@ -526,6 +526,8 @@ BEGIN TRY
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sale Year
 	LEFT JOIN tblQMSaleYear SY ON SY.strSaleYear = IMP.strSaleYear
+	-- Sale Number
+	LEFT JOIN tblQMSample AS S ON IMP.strSaleNumber = S.strSampleNumber
 	-- Company Location
 	LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
 	-- Catalogue Type
@@ -606,7 +608,7 @@ BEGIN TRY
 		,strSaleYear = NULL
 		,intMixingUnitLocationId = MU.intCompanyLocationId
 		,intTBOLocationId = TBO.intCompanyLocationId
-		,strSaleNumber = NULL
+		,strSaleNumber = IMP.strSaleNumber
 		,intCatalogueTypeId = NULL
 		,strCatalogueType = NULL
 		,intSupplierEntityId = NULL
@@ -674,6 +676,8 @@ BEGIN TRY
 	-- Sample Type
 	LEFT JOIN tblQMSampleType SAMPLE_TYPE ON IMP.strSampleTypeName IS NOT NULL
 		AND SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
+	-- Sale Number
+	LEFT JOIN tblQMSample AS S ON IMP.strSaleNumber = S.strSampleNumber
 	-- Mixing Location
 	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
 	-- Batch MU
@@ -958,7 +962,7 @@ BEGIN TRY
 						,intSubBookId = S.intSubBookId
 						-- Auction Fields
 						,intSaleYearId = S.intSaleYearId
-						,strSaleNumber = S.strSaleNumber
+						,strSaleNumber = @strSaleNumber
 						,dtmSaleDate = S.dtmSaleDate
 						,intCatalogueTypeId = S.intCatalogueTypeId
 						,dtmPromptDate = S.dtmPromptDate
