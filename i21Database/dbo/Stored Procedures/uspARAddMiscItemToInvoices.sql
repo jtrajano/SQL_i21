@@ -465,7 +465,8 @@ INSERT(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
-	)
+	,intDispatchId
+)
 VALUES(
 	 [intInvoiceId]
 	,[strDocumentNumber]
