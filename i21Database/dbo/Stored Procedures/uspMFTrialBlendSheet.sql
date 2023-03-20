@@ -9,6 +9,9 @@
 )
 AS
 BEGIN
+	Declare @ysnTBSReserveOnSave BIT
+	SELECT TOP 1 @ysnTBSReserveOnSave = IsNULL(ysnTBSReserveOnSave, 0)
+	FROM tblMFCompanyPreference
 IF @dblTBSQuantity=0
 BEGIN
 	SELECT @dblTBSQuantity=dblQuantity  FROM tblMFWorkOrderInputLot WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
@@ -50,10 +53,16 @@ IF @type = 'Confirm'
 /* Delete Transaction. */
 IF @type = 'Delete'
 	BEGIN
-		UPDATE tblMFWorkOrderInputLot
-		SET ysnKeep			= 0
-		  , ysnTBSReserved	= 0
-		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+		IF @ysnTBSReserveOnSave = 0
+		BEGIN
+			UPDATE tblMFWorkOrderInputLot
+			SET ysnKeep			= 0
+			  , ysnTBSReserved	= 0
+			WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+			EXEC [dbo].[uspMFDeleteTrialBlendSheetReservation] @intWorkOrderId
+														 , @intWorkOrderInputLotId
+		END
 
 		/* JIRA: MFG-4739 */
 		UPDATE tblMFWorkOrder
@@ -64,8 +73,7 @@ IF @type = 'Delete'
 		  , intTrialBlendSheetStatusId	= NULL
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		EXEC [dbo].[uspMFDeleteTrialBlendSheetReservation] @intWorkOrderId
-														 , @intWorkOrderInputLotId
+
 	END
 /* End of Delete Transaction. */
 

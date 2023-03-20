@@ -2243,9 +2243,14 @@ BEGIN TRY
 				END
 
 				IF @intIssuedUOMTypeId = 4
-					AND @ysnMinorIngredient = 0
+					--AND @ysnMinorIngredient = 0
 				BEGIN
 					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % (@dblWeightPerQty * @intUnitPerLayer * @intLayerPerPallet));
+
+					IF @dblAvailableQty = 0
+					BEGIN
+						GOTO NextLot
+					END
 				END
 
 				SELECT @dblNoOfPallets = @intUnitPerLayer * @intLayerPerPallet
@@ -3401,6 +3406,8 @@ BEGIN TRY
 
 				SET @intStorageLocationId = NULL
 
+				NextLot:
+
 				FETCH NEXT
 				FROM Cursor_FetchItem
 				INTO @intParentLotId
@@ -3706,7 +3713,6 @@ BEGIN TRY
 			--Hand Add 
 			--IF (@intIssuedUOMTypeId <> @intOriginalIssuedUOMTypeId)
 			--	SET @intIssuedUOMTypeId = @intOriginalIssuedUOMTypeId
-
 			NEXT_ITEM:
 
 			SELECT @intMinRowNo = MIN(intRowNo)

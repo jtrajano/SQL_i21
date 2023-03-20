@@ -194,6 +194,7 @@ AND A.intCatalogueTypeId > 0
 AND A.intSaleYearId > 0
 AND A.intLocationId > 0
 AND A.intSubLocationId > 0
+AND A.intPurchasingGroupId > 0
 AND A.strSaleNumber IS NOT NULL
 -- AND A.strVendorLotNumber IS NOT NULL
 AND A.strVendorOrderNumber IS NOT NULL

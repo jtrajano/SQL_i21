@@ -1149,6 +1149,8 @@ BEGIN TRY
 		BEGIN
 			IF @ysnEnableParentLot = 0
 			BEGIN
+				EXEC [dbo].[uspMFDeleteTrialBlendSheetReservation] @intWorkOrderId
+														 , @intWorkOrderInputLotId
 				DELETE
 				FROM tblMFWorkOrderInputLot
 				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId;

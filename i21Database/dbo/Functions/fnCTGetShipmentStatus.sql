@@ -7,7 +7,7 @@ RETURNS table as return
 	FROM
 	(
 		SELECT
-			ROW_NUMBER() OVER(PARTITION BY intPContractDetailId ORDER BY dtmScheduledDate desc) AS intNumberId
+			ROW_NUMBER() OVER(PARTITION BY intPContractDetailId ORDER BY intShipmentType, dtmScheduledDate desc) AS intNumberId
 			,intContractDetailId = intPContractDetailId
 			,strShipmentStatus
 			,intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
@@ -20,7 +20,7 @@ RETURNS table as return
 		union all
 
 		SELECT
-			ROW_NUMBER() OVER(PARTITION BY intSContractDetailId ORDER BY dtmScheduledDate desc) AS intNumberId
+			ROW_NUMBER() OVER(PARTITION BY intSContractDetailId ORDER BY intShipmentType, dtmScheduledDate desc) AS intNumberId
 			,intContractDetailId = intPContractDetailId
 			,strShipmentStatus
 			,intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
