@@ -925,6 +925,7 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND voucherDetails.intBillDetailId IS NOT NULL
 		  AND A.intTransactionType <> 15
+		  AND B.intLoadShipmentCostId IS NOT NULL
 
 	--CHARGES
 	UNION ALL
