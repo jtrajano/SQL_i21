@@ -8,6 +8,13 @@ BEGIN TRY
 		  , @intEntityUserId	INT
 		  , @strPlantCode		NVARCHAR(50)
 
+	DECLARE @strTxnIdentifier NVARCHAR(36)
+			,@intRowCount INT
+			,@intRow INT = 0
+			,@ysnLastRow BIT
+
+	SET @strTxnIdentifier = convert(nvarchar(36),NEWID())
+
 	SELECT @intEntityUserId = intEntityId
 	FROM tblQMImportLog
 	WHERE intImportLogId = @intImportLogId
@@ -119,11 +126,9 @@ BEGIN TRY
 		,@strSampleNumber NVARCHAR(30)
 		,@intCurrencyID INT
 	DECLARE @MFBatchTableType MFBatchTableType
-	-- Loop through each valid import detail
-	DECLARE @C AS CURSOR;
 
-	SET @C = CURSOR FAST_FORWARD
-	FOR
+	IF OBJECT_ID('tempdb..#tmpQMContractLineAllocation') IS NOT NULL
+        DROP TABLE #tmpQMContractLineAllocation
 
 	SELECT intImportCatalogueId = IMP.intImportCatalogueId
 		,intSampleId = S.intSampleId
@@ -141,6 +146,7 @@ BEGIN TRY
 		,strSampleNumber = S.strSampleNumber
 		,intCurrencyID = CUR.intCurrencyID
 		,strPlantCode=CL.strOregonFacilityNumber
+	INTO #tmpQMContractLineAllocation
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -172,6 +178,16 @@ BEGIN TRY
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
 
+	SELECT @intRowCount = COUNT(1)
+	FROM #tmpQMContractLineAllocation
+
+	-- Loop through each valid import detail
+	DECLARE @C AS CURSOR;
+
+	SET @C = CURSOR FAST_FORWARD
+	FOR
+	SELECT * FROM #tmpQMContractLineAllocation
+
 	OPEN @C
 
 	FETCH NEXT
@@ -191,6 +207,7 @@ BEGIN TRY
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		SET @intRow = @intRow + 1
 		-- If the contract and sample item does not match, throw an error
 		IF @ysnSampleContractItemMatch = 0
 		BEGIN
@@ -255,6 +272,8 @@ BEGIN TRY
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
+		SELECT @ysnLastRow = CASE WHEN @intRow = @intRowCount THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+
 		-- Update Contract Cash Price
 		IF ISNULL(@dblCashPrice, 0) <> 0
 			EXEC uspCTUpdateSequencePrice
@@ -262,6 +281,8 @@ BEGIN TRY
 				,@dblNewPrice = @dblCashPrice
 				,@intUserId = @intEntityUserId
 				,@strScreen = 'Contract Line Allocation Import'
+				,@ysnLastRecord = @ysnLastRow
+				,@strTxnIdentifier = @strTxnIdentifier
 
 		UPDATE tblQMTestResult
 		SET intProductTypeId = 8 --Contract Line Item
