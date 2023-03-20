@@ -3984,11 +3984,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Li
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'RiskManagement.view.CreditLine?showSearch=true' WHERE strMenuName = 'Credit Line Configuration' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Currency Pair', N'Risk Management', @RiskManagementMaintenanceParentMenuId, N'Currency Pair', N'Maintenance', N'Screen', N'RiskManagement.view.CurrencyPairSetup', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'RiskManagement.view.CurrencyPairSetup' WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId)
+-- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+-- 	VALUES (N'Currency Pair', N'Risk Management', @RiskManagementMaintenanceParentMenuId, N'Currency Pair', N'Maintenance', N'Screen', N'RiskManagement.view.CurrencyPairSetup', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+-- ELSE
+-- 	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'RiskManagement.view.CurrencyPairSetup' WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Assign Derivatives' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -4138,6 +4138,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModul
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Reconciliation Report' AND strModuleName = 'Risk Management' AND strCategory = 'Report' AND ysnVisible = 1
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Pair' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 
 --DELETE DUPLICATE DATA
 DECLARE @BrokerageAccountsCount INT
