@@ -944,10 +944,10 @@ BEGIN TRY
 
 				SELECT @intItemUOMId = @intLotItemUOMId
 
-				Update tblICItemLocation
-				Set intAllowNegativeInventory=1
-				WHERE intItemId =@intItemId
-				AND intLocationId =@intCompanyLocationId 
+				--Update tblICItemLocation
+				--Set intAllowNegativeInventory=1
+				--WHERE intItemId =@intItemId
+				--AND intLocationId =@intCompanyLocationId 
 
 				EXEC dbo.uspMFLotMove @intLotId = @intLotId
 					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
@@ -968,10 +968,10 @@ BEGIN TRY
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
 					,@ysnExternalSystemMove = 1
 
-				Update tblICItemLocation
-				Set intAllowNegativeInventory=3
-				WHERE intItemId =@intItemId
-				AND intLocationId =@intCompanyLocationId 
+				--Update tblICItemLocation
+				--Set intAllowNegativeInventory=3
+				--WHERE intItemId =@intItemId
+				--AND intLocationId =@intCompanyLocationId 
 
 				SELECT @strAdjustmentNo = NULL
 
