@@ -113,11 +113,17 @@ OUTER APPLY (
 	  AND ID.strInvoiceOriginId = I.strInvoiceNumber
 	  AND ID.intOriginalInvoiceId = I.intInvoiceId
 ) RI
-WHERE ISNULL(ID.[strItemType], '') <> 'Other Charge'
-AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
-AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
-AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
-AND (ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.intTicketTypeId, 0 ) <> 9)
+WHERE ID.[intInventoryShipmentChargeId] IS NULL
+	AND	(
+		(ID.strTransactionType NOT IN ('Credit Memo', 'Debit Memo') AND ((ID.[intInventoryShipmentItemId] IS NULL AND (ID.[intLoadDetailId] IS NULL OR (ID.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3)))))
+		OR
+		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
+		)
+    AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
+	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
+	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
+	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
+	AND (ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.intTicketTypeId, 0 ) <> 9)
 
 --DESTINATION WEIGHTS/GRADES
 IF NOT EXISTS(SELECT * FROM @tblToProcess)
@@ -414,7 +420,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 						, dtmDate						= @dtmDate
 						, dblQuantity					= @dblSchQuantityToUpdate
 						, dblBalanceQty					= 0
-						, dblSheduledQty				= CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 ELSE @dblSchQuantityToUpdate END
+						, dblSheduledQty				= @dblSchQuantityToUpdate
 						, dblRemainingQty				= 0
 						, strType						= 'Contract Scheduled'
 						, strTransactionType			= @strTransactionType
