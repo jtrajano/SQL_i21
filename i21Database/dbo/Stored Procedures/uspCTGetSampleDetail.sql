@@ -65,7 +65,14 @@ BEGIN TRY
 	 
 
 
-	SELECT	TOP 1 1
+	
+	SELECT	TOP 1 CT.intContractDetailId, 
+			SA.strSampleNumber,
+			SA.strContainerNumber,
+			ST.strSampleTypeName,
+			CT.strSampleStatus,
+			SA.dtmTestingEndDate,
+			CT.dblRepresentingQty	
 	FROM	tblQMSample			SA
 	JOIN	tblQMSampleType		ST  ON ST.intSampleTypeId	= SA.intSampleTypeId 
 	JOIN	tblQMSampleStatus	SS  ON SS.intSampleStatusId = SA.intSampleStatusId
