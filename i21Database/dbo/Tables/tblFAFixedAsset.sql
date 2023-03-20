@@ -23,7 +23,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[strDispositionComment]		NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
 	[dblDispositionAmount]		NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[strPoolId]					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[intLegacyId]				INT NULL,
+	[strLegacyId]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intAssetGroupId]			INT NULL,
 	[intAssetAccountId]			INT NULL,
 	[intExpenseAccountId]		INT NULL,
