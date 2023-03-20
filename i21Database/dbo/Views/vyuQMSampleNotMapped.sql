@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuQMSampleNotMapped
+﻿CREATE VIEW [dbo].[vyuQMSampleNotMapped]
 AS
 SELECT S.intSampleId
 	,ST.intControlPointId
@@ -87,6 +87,7 @@ SELECT S.intSampleId
 	,PUOM5.strUnitMeasure AS strB5PriceUOM
 	,TC.strTINNumber
 	,ISNULL(S.intProductValueId, 0) AS intBatchId
+	,CY.strCropYear
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -158,6 +159,6 @@ LEFT JOIN tblICUnitMeasure PUOM3 ON PUOM3.intUnitMeasureId = S.intB3PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM4 ON PUOM4.intUnitMeasureId = S.intB4PriceUOMId
 LEFT JOIN tblICUnitMeasure PUOM5 ON PUOM5.intUnitMeasureId = S.intB5PriceUOMId
 LEFT JOIN tblQMTINClearance TC ON TC.intTINClearanceId = S.intTINClearanceId
+LEFT JOIN tblCTCropYear CY ON S.intCropYearId = S.intCropYearId
 GO
-
 
