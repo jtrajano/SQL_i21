@@ -118,6 +118,7 @@ SELECT CP.intCompanyPreferenceId
 	 , CP.ysnShowHideExpectedParameterDefaultValue
 	 , CP.ysnAllowPastDateInBlending
 	 , CP.ysnShowHideHeaderDefaultValue
+	 , CP.ysnAllowToCreateMultipleBlendSheetOnDemand
 FROM tblMFCompanyPreference CP
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CP.intDefaultShipmentStagingLocation
 LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = CP.intDefaultShipmentDockDoorLocation

@@ -536,6 +536,18 @@ BEGIN TRY
 	BEGIN
 		DECLARE @strNextWONo NVARCHAR(50)
 
+		IF (SELECT ysnAllowToCreateMultipleBlendSheetOnDemand FROM tblMFCompanyPreference) = 0 AND EXISTS (SELECT TOP 1 * FROM tblMFWorkOrder WHERE intBlendRequirementId = @intBlendRequirementId)
+			BEGIN
+				SET @ErrMsg = 'You cannot create multiple Blend for Demand:' + @strDemandNo + '';
+
+				RAISERROR 
+				(
+					@ErrMsg
+				  , 16
+				  , 1
+				)
+			END
+
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 			,@intItemId = @intBlendItemId
 			,@intManufacturingId = @intCellId

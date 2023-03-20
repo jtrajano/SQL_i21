@@ -4506,3 +4506,10 @@ BEGIN
 		,NULL
 		,NULL
 END
+
+GO
+IF (SELECT ysnAllowToCreateMultipleBlendSheetOnDemand FROM tblMFCompanyPreference) IS NULL
+	BEGIN
+		UPDATE tblMFCompanyPreference
+		SET ysnAllowToCreateMultipleBlendSheetOnDemand = 1
+	END
