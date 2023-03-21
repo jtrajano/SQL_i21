@@ -14,17 +14,24 @@ SELECT intBillDetailId					    = BD.intBillDetailId
 	 , dtmSaleDate							= BD.dtmSaleDate
 	 , strLotNo								= BD.strVendorLotNumber
      , dblSupplierPreInvoicePrice			= BD.dblCost
+	 , dblSupplierPrice						= S.dblB1Price
      , dblPreInvoiceLotQty					= BD.dblQtyReceived
+	 , dblLotQty							= S.dblSampleQty
      , dblTotalNoPackageBreakups			= ISNULL(BD.dblPackageBreakups, 0)
 	 , intPreInvoiceGardenMarkId			= GM.intGardenMarkId
      , strPreInvoiceGarden					= GM.strGardenMark
+	 , intGardenMarkId						= S.intGardenMarkId
+	 , strGarden							= GMS.strGardenMark
 	 , intPreInvoiceGradeId					= CA.intCommodityAttributeId
      , strPreInvoiceGrade					= CA.strDescription
+	 , intGradeId							= S.intGradeId
+	 , strGrade								= CAS.strDescription
      , strPreInvoiceGardenInvoiceNo			= BD.strPreInvoiceGardenNumber
+	 , strGardenInvoiceNo					= S.strChopNumber
      , strPreInvoicePurchaseType			= CASE WHEN B.intTransactionType = 2 THEN CAST('Vendor Prepayment' AS NVARCHAR(100))
 												   WHEN B.intTransactionType = 3 THEN CAST('Debit Memo' AS NVARCHAR(100))
 												   ELSE CAST('Voucher' AS NVARCHAR(100))
-											   END
+											   END	 
      , strPreInvoiceDocumentNo				= BD.strBillOfLading
      , dblNetWtPackages						= CAST(BD.intNumOfPackagesUOM AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage
      , dblNoPackages						= BD.dblNumberOfPackages
@@ -60,7 +67,9 @@ LEFT JOIN tblARMarketZone MZ ON BD.intMarketZoneId = MZ.intMarketZoneId
 LEFT JOIN tblSMPurchasingGroup PG ON BD.intPurchasingGroupId = PG.intPurchasingGroupId
 LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblQMGardenMark GM ON BD.intGardenMarkId = GM.intGardenMarkId
+LEFT JOIN tblQMGardenMark GMS ON S.intGardenMarkId = GMS.intGardenMarkId
 LEFT JOIN tblICCommodityAttribute CA ON BD.strComment = CA.strDescription AND CA.strType = 'Grade'
+LEFT JOIN tblICCommodityAttribute CAS ON S.intGradeId = CAS.intCommodityAttributeId AND CAS.strType = 'Grade'
 LEFT JOIN tblSMTransaction SMT ON CR.strReconciliationNumber = SMT.strTransactionNo AND CR.intCatalogueReconciliationId = SMT.intRecordId
 LEFT JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId AND MFB.intLocationId = MFB.intBuyingCenterLocationId
 WHERE (CRD.intCatalogueReconciliationDetailId IS NULL
