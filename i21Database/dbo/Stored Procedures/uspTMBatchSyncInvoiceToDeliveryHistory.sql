@@ -311,6 +311,7 @@ BEGIN
 						,A.dblClockAccumulatedDegreeDay
 						,A.dblCalculatedBurnRate
 						,A.ysnMaxExceed
+						,A.intDispatchId
 					INTO #tmpInvoiceDateEqualLastDeliveryDateDetail
 					FROM #tmpFinalNonServiceInvoiceDetail A
 					INNER JOIN tblTMSite B
@@ -462,6 +463,8 @@ BEGIN
 						---GEt the list of sites to be updated
 						SELECT DISTINCT 
 							A.intSiteId
+							,A.intDispatchId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, A.dtmInvoiceDate), 0)
 						INTO #tmpSiteUpdateList1
 						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
 						
@@ -564,9 +567,10 @@ BEGIN
 						FROM tblTMDispatch A
 						INNER JOIN #tmpSiteUpdateList1 B
 							ON A.intSiteID = B.intSiteId
+								AND A.intDispatchID = B.intDispatchId
 						INNER JOIN tblTMDeliveryHistory C
 							ON A.intSiteID = C.intSiteID
-								AND C.dtmInvoiceDate = @dtmDateToProcess
+								AND C.dtmInvoiceDate = B.dtmInvoiceDate
 						
 
 
@@ -577,7 +581,8 @@ BEGIN
 												FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
 												INNER JOIN tblARInvoice B
 													ON A.intInvoiceId = B.intInvoiceId
-												WHERE B.ysnPosted = 1)
+												WHERE B.ysnPosted = 1
+													AND A.intDispatchId IS NOT NULL)
 
 
 						---- Update forecasted and estimated % left
@@ -765,6 +770,7 @@ BEGIN
 							ON B.intItemId = E.intItemId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
+								AND G.intDispatchID = B.intDispatchId
 						INNER JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -853,6 +859,8 @@ BEGIN
 							,A.dblInvoiceTotalQuantity
 							,A.dblNewBurnRate
 							,A.intInvoiceId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, A.dtmInvoiceDate), 0)
+							,A.intDispatchId
 						INTO #tmpSiteUpdateList
 						FROM #tmpInvoiceDateGreaterThanLastDelivery A
 						WHERE A.ysnLessThanLastDeliveryDate = 0
@@ -1002,9 +1010,10 @@ BEGIN
 						FROM tblTMDispatch A
 						INNER JOIN #tmpSiteUpdateList B
 							ON A.intSiteID = B.intSiteId
+								AND A.intDispatchID = B.intDispatchId
 						INNER JOIN tblTMDeliveryHistory C
 							ON A.intSiteID = C.intSiteID
-								AND B.intInvoiceId = C.intInvoiceId
+								AND B.dtmInvoiceDate = C.dtmInvoiceDate
 						
 
 
@@ -1014,7 +1023,8 @@ BEGIN
 												FROM #tmpInvoiceDateGreaterThanLastDelivery A
 												INNER JOIN tblARInvoice B
 													ON A.intInvoiceId = B.intInvoiceId
-												WHERE B.ysnPosted = 1)
+												WHERE B.ysnPosted = 1
+													AND A.intDispatchId IS NOT NULL)
 
 
 						---- Update forecasted and estimated % left

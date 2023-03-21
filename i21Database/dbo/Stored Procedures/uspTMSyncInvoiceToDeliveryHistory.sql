@@ -455,7 +455,7 @@ BEGIN
 
 
 
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId)
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID = @intDispatchId)
 					BEGIN
 						--- Insert Dispatch to tblTMDispatchHistory table
 						INSERT INTO tblTMDispatchHistory (
@@ -547,9 +547,11 @@ BEGIN
 							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
+							AND intDispatchID = @intDispatchId
 
 						DELETE FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
+							AND intDispatchID = @intDispatchId
 					END
 					
 					---- Update forecasted nad estimated % left
@@ -776,6 +778,7 @@ BEGIN
 							ON B.intInvoiceDetailId = F.intInvoiceDetailId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
+								AND G.intDispatchID = @intDispatchId
 						LEFT JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -1004,6 +1007,7 @@ BEGIN
 						ON B.intInvoiceDetailId = F.intInvoiceDetailId
 					LEFT JOIN tblTMDispatch G
 						ON A.intSiteID = G.intSiteID
+							AND G.intDispatchID = @intDispatchId
 					LEFT JOIN tblTMClock H
 						ON A.intClockID = H.intClockID
 					LEFT JOIN tblEMEntity I
@@ -1248,6 +1252,7 @@ BEGIN
 							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
+							AND intDispatchID = @intDispatchId
 					END
 
 
@@ -1438,6 +1443,7 @@ BEGIN
 			ON B.intItemId = E.intItemId
 		LEFT JOIN tblTMDispatch G
 			ON A.intSiteID = G.intSiteID
+				AND G.intDispatchID = @intDispatchId
 		LEFT JOIN tblTMClock H
 			ON A.intClockID = H.intClockID
 		LEFT JOIN tblEMEntity I
