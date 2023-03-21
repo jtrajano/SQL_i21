@@ -474,7 +474,7 @@ BEGIN
 		)
 			ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 	WHERE 
-		A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		A.intBillId = @intBillId 
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
 		AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 		AND (
