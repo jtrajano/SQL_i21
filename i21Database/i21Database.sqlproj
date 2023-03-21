@@ -1328,6 +1328,7 @@
     <Build Include="dbo\Views\vyuSTJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
+    <Build Include="dbo\Tables\tblLGDispatchOrderCompartmentQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
