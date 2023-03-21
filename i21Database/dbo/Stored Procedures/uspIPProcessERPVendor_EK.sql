@@ -1190,6 +1190,10 @@ BEGIN TRY
 				IF ISNULL(@intDefaultContactId, 0) > 0
 				BEGIN
 					UPDATE tblEMEntityToContact
+					SET ysnDefaultContact = 0
+					WHERE intEntityId = @intEntityId
+
+					UPDATE tblEMEntityToContact
 					SET ysnDefaultContact = 1
 					WHERE intEntityId = @intEntityId
 						AND intEntityContactId = @intDefaultContactId
