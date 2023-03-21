@@ -514,7 +514,7 @@ BEGIN
 							,dblOverageQty
 							,strOriginalPricingMethod
 						)	
-						SELECT TOP 1
+						SELECT 
 							[intDispatchId]				= A.[intDispatchID]
 							,[intSiteId]				= A.intSiteID
 							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
@@ -565,7 +565,7 @@ BEGIN
 							ON A.intSiteID = B.intSiteId
 						INNER JOIN tblTMDeliveryHistory C
 							ON A.intSiteID = C.intSiteID
-								AND B.intInvoiceId = C.intInvoiceId
+								AND C.dtmInvoiceDate = @dtmDateToProcess
 						
 
 
@@ -947,7 +947,7 @@ BEGIN
 							,dblOverageQty
 							,strOriginalPricingMethod
 						)	
-						SELECT TOP 1 
+						SELECT 
 							[intDispatchId]				= A.[intDispatchID]
 							,[intSiteId]				= A.intSiteID
 							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
@@ -998,7 +998,7 @@ BEGIN
 							ON A.intSiteID = B.intSiteId
 						INNER JOIN tblTMDeliveryHistory C
 							ON A.intSiteID = C.intSiteID
-								AND B.intInvoiceId = C.intInvoiceId
+								AND C.dtmInvoiceDate = @dtmDateToProcess
 
 
 						--Delete Order
