@@ -120,7 +120,8 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intImportLogId]
-    ON [dbo].[tblQMImportCatalogue]([intImportLogId] ASC)
+    ON [dbo].[tblQMImportCatalogue]([intImportLogId],[ysnSuccess])
+    INCLUDE ([strB1GroupNumber],[strBatchNo],[strSampleTypeName])
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_ysnSuccess]
