@@ -8,7 +8,7 @@
   , @dblTBSQuantity			NUMERIC(18, 6) = 0
 )
 AS
-
+BEGIN
 	Declare @ysnTBSReserveOnSave BIT
 	SELECT TOP 1 @ysnTBSReserveOnSave = IsNULL(ysnTBSReserveOnSave, 0)
 	FROM tblMFCompanyPreference
@@ -16,7 +16,6 @@ IF @dblTBSQuantity=0
 BEGIN
 	SELECT @dblTBSQuantity=dblQuantity  FROM tblMFWorkOrderInputLot WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 END
-
 /* Confirm Transaction. */
 IF @type = 'Confirm'
 	BEGIN
@@ -87,4 +86,5 @@ IF @type = 'Approve'
 		  , dtmApprovedDate				= GETDATE()
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
+END
 /* End of Approve Transaction. */
