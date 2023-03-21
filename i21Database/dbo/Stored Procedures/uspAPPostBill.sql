@@ -455,8 +455,7 @@ SELECT
 				- 
 				CAST(
 					(
-						--(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
-						rc.dblAmount
+						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
 						/ ISNULL(r.intSubCurrencyCents, 1) 
 						* ISNULL(rc.dblForexRate, 1) 
 					)
@@ -476,8 +475,7 @@ SELECT
 				- 
 				CAST(
 					(
-						--(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-						rc.dblAmount
+						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
 						/ ISNULL(r.intSubCurrencyCents, 1)
 					)
 					AS DECIMAL(18,2)
@@ -491,8 +489,7 @@ SELECT
 				)
 				- 
 				CAST(
-					--rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)
-					rc.dblAmount
+					(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
 					AS DECIMAL(18,2)
 				)
 			END 
@@ -511,8 +508,7 @@ SELECT
 					- 
 					CAST(
 					(
-						--(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-						rc.dblAmount
+						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
 						/ ISNULL(r.intSubCurrencyCents, 1))
 						AS DECIMAL(18,2)
 					)
@@ -525,8 +521,7 @@ SELECT
 					)
 					- 
 					CAST(
-						--rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)
-						rc.dblAmount
+						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
 						AS DECIMAL(18,2)
 					)
 			END  			
@@ -537,22 +532,23 @@ SELECT
 	,[intCurrencyId] = rc.intCurrencyId
 	,[intForexRateTypeId] = rc.intForexRateTypeId
 	,[dblForexRate] = B.dblRate
-FROM tblAPBill A INNER JOIN tblAPBillDetail B
-ON A.intBillId = B.intBillId
-INNER JOIN (
-	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
-ON r.intInventoryReceiptId = rc.intInventoryReceiptId
-)
-ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+FROM 
+	tblAPBill A INNER JOIN tblAPBillDetail B
+		ON A.intBillId = B.intBillId
+	INNER JOIN (
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+			ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+	)
+		ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE 
-A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-AND B.intInventoryReceiptChargeId IS NOT NULL 
-AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
-AND (
-	(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
-	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
-)
-AND A.intTransactionReversed IS NULL
+	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+	AND B.intInventoryReceiptChargeId IS NOT NULL 
+	AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+	AND (
+		(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
+		OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
+	)
+	AND A.intTransactionReversed IS NULL
 
 -- Remove zero cost adjustments. 
 DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
