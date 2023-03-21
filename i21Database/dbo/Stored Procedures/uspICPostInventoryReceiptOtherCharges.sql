@@ -581,6 +581,7 @@ BEGIN
 		,intChargeCommodityId
 		,intItemCurrencyId
 		,dblOriginalItemForexRate
+		,ysnAllowVoucher
 	)
 	AS 
 	(
@@ -619,6 +620,7 @@ BEGIN
 				,intChargeCommodityId = Charge.intCommodityId
 				,intItemCurrencyId = Receipt.intCurrencyId
 				,dblOriginalItemForexRate = ISNULL(ReceiptItem.dblOriginalForexRate, 1)
+				,ysnAllowVoucher = ISNULL(ReceiptCharges.ysnAllowVoucher, 1) 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -648,6 +650,7 @@ BEGIN
 						END
 				AND ISNULL(ReceiptCharges.ysnWithGLReversal, 0) = 1
 				AND Receipt.intSourceType IN (@SOURCE_TYPE_InboundShipment)
+				AND ReceiptCharges.intLoadShipmentCostId IS NOT NULL 
 				AND ReceiptCharges.ysnInventoryCost = 1
 	)
 	INSERT INTO @ChargesGLEntries (
@@ -949,7 +952,7 @@ BEGIN
 	-- Accrue Other Charge to Vendor and Add Cost to Inventory 
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
 	-- 
-	-- Dr...... AP Clearing	
+	-- Dr...... AP Clearing	(or none if ysnAllowVoucher is false) 
 	-- Cr.................... In-Transit 
 	--
 	-- Additional Reversal: 
@@ -1020,6 +1023,7 @@ BEGIN
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1	
 			AND InventoryCostCharges.strBundleType != 'Kit'
+			AND InventoryCostCharges.ysnAllowVoucher = 1
 	UNION ALL 
 	SELECT	
 			dtmDate						= InventoryCostCharges.dtmDate
@@ -1650,7 +1654,7 @@ BEGIN
 	-- It applies to both the Receipt/Return vendor and 3rd party vendor. 
 	-- 
 	-- (X) Dr...... Item's Inventory Acccount 
-	-- Cr.................... AP Clearing (or In-Transit if ysnAllowVoucher = 0)
+	-- Cr.................... AP Clearing (or none if ysnAllowVoucher is false)
 	--
 	-- Additional Reversal: 
 	-- If item and other charge are both using foreign currency. 
@@ -1719,7 +1723,7 @@ BEGIN
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1	
 			AND InventoryCostCharges.strBundleType != 'Kit'
-	-- ysnAllowVoucher = 1; Use AP Clearing
+	-- AP Clearing
 	UNION ALL 
 	SELECT	
 			dtmDate						= InventoryCostCharges.dtmDate
@@ -1780,82 +1784,6 @@ BEGIN
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
 			AND InventoryCostCharges.strBundleType != 'Kit'	
 			AND InventoryCostCharges.ysnAllowVoucher = 1 
-
-	GROUP BY	InventoryCostCharges.dtmDate,
-				GLAccount.intAccountId,
-				InventoryCostCharges.strCharge,
-				GLAccount.strDescription,
-				InventoryCostCharges.intCurrencyId,
-				InventoryCostCharges.dblForexRate,
-				InventoryCostCharges.intEntityVendorId,
-				InventoryCostCharges.intInventoryReceiptChargeId,
-				InventoryCostCharges.strTransactionId,
-				InventoryCostCharges.intTransactionId,
-				InventoryCostCharges.strInventoryTransactionTypeName,
-				InventoryCostCharges.strTransactionForm,
-				InventoryCostCharges.strRateType,
-				InventoryCostCharges.intChargeCommodityId
-	-- ysnAllowVoucher = 0; Use In-Transit 
-	UNION ALL 
-	SELECT	
-			dtmDate						= InventoryCostCharges.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= SUM(Credit.Value)
-			,dblCredit					= SUM(Debit.Value)
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge 
-			,strCode					= @strCode
-			,strReference				= '' 
-			,intCurrencyId				= InventoryCostCharges.intCurrencyId
-			,dblExchangeRate			= InventoryCostCharges.dblForexRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription  = 'InventoryReceiptChargeId' 
-			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
-			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= @intEntityUserSecurityId
-			,strTransactionId			= InventoryCostCharges.strTransactionId
-			,intTransactionId			= InventoryCostCharges.intTransactionId
-			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
-			,strTransactionForm			= InventoryCostCharges.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
-			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
-			,dblCreditReport			= NULL 
-			,dblReportingRate			= NULL 
-			,dblForeignRate				= InventoryCostCharges.dblForexRate 
-			,strRateType				= InventoryCostCharges.strRateType
-			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
-			,intCommodityId				= InventoryCostCharges.intChargeCommodityId
-	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
-				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
-				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
-			INNER JOIN dbo.tblGLAccount GLAccount
-				ON GLAccount.intAccountId = ItemGLAccounts.intInTransit 					 
-			CROSS APPLY dbo.fnGetDebitFunctional(
-				InventoryCostCharges.dblCost
-				,InventoryCostCharges.intCurrencyId
-				,@intFunctionalCurrencyId
-				,InventoryCostCharges.dblForexRate
-			) Debit
-			CROSS APPLY dbo.fnGetCreditFunctional(
-				InventoryCostCharges.dblCost
-				,InventoryCostCharges.intCurrencyId
-				,@intFunctionalCurrencyId
-				,InventoryCostCharges.dblForexRate
-			) Credit
-			CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
-			CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign
-
-	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
-			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
-			AND InventoryCostCharges.strBundleType != 'Kit'	
-			AND InventoryCostCharges.ysnAllowVoucher = 0 
 
 	GROUP BY	InventoryCostCharges.dtmDate,
 				GLAccount.intAccountId,
