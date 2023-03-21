@@ -12050,4 +12050,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\QM\6_CustomControls.sql" />
+  </ItemGroup>
 </Project>
