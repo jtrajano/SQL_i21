@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetAvailableLots]
-	@intItemId			INT = NULL
-  , @intLocationId		INT
-  , @intRecipeItemId	INT = NULL
-  , @intWorkOrderId		INT = NULL
-  ,@intBlendRequirementId int = NULL
+	@intItemId				INT = NULL
+  , @intLocationId			INT
+  , @intRecipeItemId		INT = NULL
+  , @intWorkOrderId			INT = NULL
+  , @intBlendRequirementId	INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -302,6 +302,7 @@ IF @ysnEnableParentLot = 0
 			 , TemporaryLot.intLayerPerPallet
 			 , TemporaryLot.dblPickedQty 
 			 , TemporaryLot.strShortName 
+			 , (TemporaryLot.dblReservedQtyInTBS / ISNULL(NULLIF(TemporaryLot.dblWeightPerUnit, 0), 1)) AS dblReservedQtyInTBSUnit
 		FROM #tempLot AS TemporaryLot 
 		LEFT JOIN @tblReservedQty AS ReservedQty ON TemporaryLot.intLotId = ReservedQty.intLotId
 	END
@@ -401,7 +402,7 @@ ELSE
 					 , ISNULL((ISNULL(ParentLotStorageLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - IsNULL(ParentLotStorageLocation.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
 					 , ROUND((ISNULL((ISNULL(ParentLotStorageLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - IsNULL(ParentLotStorageLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotStorageLocation.dblWeightPerUnit,0) = 0 THEN 1 ELSE ParentLotStorageLocation.dblWeightPerUnit END), 0) AS dblAvailableUnit
 					 , ROUND((ISNULL((ISNULL(ParentLotStorageLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - IsNULL(ParentLotStorageLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotStorageLocation.dblWeightPerUnit,0) = 0 THEN 1 ELSE ParentLotStorageLocation.dblWeightPerUnit END), 0) AS dblSelectedQty
-				
+					 , (ParentLotStorageLocation.dblReservedQtyInTBS / ISNULL(NULLIF(ParentLotStorageLocation.dblWeightPerUnit, 0), 1)) AS dblReservedQtyInTBSUnit
 				FROM #tempParentLotByStorageLocation AS ParentLotStorageLocation 
 				LEFT JOIN @tblReservedQty AS ReservedQty on ParentLotStorageLocation.intLotId = ReservedQty.intLotId	
 			END
@@ -497,7 +498,7 @@ ELSE
 					 , ISNULL((ISNULL(ParentLotLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ParentLotLocation.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
 					 , ROUND((ISNULL((ISNULL(ParentLotLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ParentLotLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotLocation.dblWeightPerUnit, 0) = 0 THEN 1 ELSE ParentLotLocation.dblWeightPerUnit END), 0) AS dblAvailableUnit
 					 , ROUND((ISNULL((ISNULL(ParentLotLocation.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ParentLotLocation.dblReservedQtyInTBS, 0)), 0) / CASE WHEN ISNULL(ParentLotLocation.dblWeightPerUnit, 0) = 0 THEN 1 ELSE ParentLotLocation.dblWeightPerUnit END), 0) AS dblSelectedQty
-					 
+					 , (ParentLotLocation.dblReservedQtyInTBS / ISNULL(NULLIF(ParentLotLocation.dblWeightPerUnit, 0), 1)) AS dblReservedQtyInTBSUnit
 				FROM #tempParentLotByLocation AS ParentLotLocation 
 				LEFT JOIN @tblReservedQty AS ReservedQty ON ParentLotLocation.intLotId = ReservedQty.intLotId
 			END
