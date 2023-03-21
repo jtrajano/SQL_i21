@@ -6,11 +6,7 @@ SELECT intWorkOrderId = WO.intWorkOrderId
 	,strItemNo = Item.strItemNo -- Blend Code
 	,dtmCreated = FORMAT(WO.dtmCreated, 'dd,MM,yyyy') -- Date Created
 	,dblEstNoOfBlendSheet = FLOOR(BR.dblEstNoOfBlendSheet) -- Mixes
-	,dblEstimatedIssueQty = [dbo].[fnRemoveTrailingZeroes](CASE 
-			WHEN ISNULL(BR.dblEstNoOfBlendSheet, 0) > 0
-				THEN WOIL.dblIssuedQuantity / BR.dblEstNoOfBlendSheet
-			ELSE WOIL.dblIssuedQuantity
-			END)
+	,dblEstimatedIssueQty = CASE WHEN ISNULL(BR.dblEstNoOfBlendSheet, 0) > 0 THEN WOIL.dblIssuedQuantity / BR.dblEstNoOfBlendSheet ELSE WOIL.dblIssuedQuantity END
 	,dblBlenderSize = BR.dblBlenderSize -- Net Wt per mix
 	,dblQuantity = FLOOR(WO.dblQuantity) -- Total Blend Wt
 	,strComment = WO.strComment -- Comment
@@ -44,11 +40,7 @@ SELECT intWorkOrderId = WO.intWorkOrderId
 	,WOIL.strLeaf
 	,WOIL.dblIssuedQuantity
 	,WOIL.dblPercentage
-	,[dbo].[fnRemoveTrailingZeroes](CASE 
-			WHEN ISNULL(BR.dblEstNoOfBlendSheet, 0) > 0
-				THEN WOIL.dblSumIssuedQuantity / BR.dblEstNoOfBlendSheet
-			ELSE WOIL.dblSumIssuedQuantity
-			END) AS dblSumIssuedQuantity
+	,dblSumIssuedQuantity = CASE WHEN ISNULL(BR.dblEstNoOfBlendSheet, 0) > 0 THEN WOIL.dblSumIssuedQuantity / BR.dblEstNoOfBlendSheet ELSE WOIL.dblSumIssuedQuantity END
 	,WOIL.[TasteMinValue]
 	,WOIL.[HueMinValue]
 	,WOIL.[IntensityMinValue]
