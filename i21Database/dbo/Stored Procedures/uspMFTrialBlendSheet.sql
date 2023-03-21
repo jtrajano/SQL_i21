@@ -87,5 +87,4 @@ IF @type = 'Approve'
 		  , dtmApprovedDate				= GETDATE()
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
-END
 /* End of Approve Transaction. */
