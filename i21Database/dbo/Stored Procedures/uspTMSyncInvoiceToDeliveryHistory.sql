@@ -452,6 +452,107 @@ BEGIN
 						END
 						
 					END
+
+
+
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID = @intDispatchId)
+					BEGIN
+						--- Insert Dispatch to tblTMDispatchHistory table
+						INSERT INTO tblTMDispatchHistory (
+							[intDispatchId]            
+							,[intSiteId]
+							,[intDeliveryHistoryId]                
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]             
+							,[intSubstituteProductId]   
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              
+							,[intDispatchDriverId]      
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]                
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]        
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
+							,[dtmReceivedDate]
+							,intPaymentId
+						)	
+						SELECT TOP 1 
+							[intDispatchId]				= [intDispatchID]
+							,[intSiteId]				= intSiteID
+							,[intDeliveryHistoryId]		= @intNewDeliveryHistoryId             
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]				= [intProductID] 
+							,[intSubstituteProductId]   = [intSubstituteProductID]
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              = [intDriverID]              
+							,[intDispatchDriverId]		= [intDispatchDriverID]   
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]				= [intUserID]
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]		= [intDeliveryTermID] 
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]
+							,[dtmReceivedDate]
+							,intPaymentId
+						FROM tblTMDispatch
+						WHERE intSiteID = @intSiteId
+							AND intDispatchID = @intDispatchId
+
+						DELETE FROM tblTMDispatch
+						WHERE intSiteID = @intSiteId
+							AND intDispatchID = @intDispatchId
+					END
 					
 					---- Update forecasted nad estimated % left
 					IF(@ysnRequireClock = 1)
@@ -677,6 +778,7 @@ BEGIN
 							ON B.intInvoiceDetailId = F.intInvoiceDetailId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
+								AND G.intDispatchID = @intDispatchId
 						LEFT JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -905,6 +1007,7 @@ BEGIN
 						ON B.intInvoiceDetailId = F.intInvoiceDetailId
 					LEFT JOIN tblTMDispatch G
 						ON A.intSiteID = G.intSiteID
+							AND G.intDispatchID = @intDispatchId
 					LEFT JOIN tblTMClock H
 						ON A.intClockID = H.intClockID
 					LEFT JOIN tblEMEntity I
@@ -1149,6 +1252,7 @@ BEGIN
 							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
+							AND intDispatchID = @intDispatchId
 					END
 
 
@@ -1339,6 +1443,7 @@ BEGIN
 			ON B.intItemId = E.intItemId
 		LEFT JOIN tblTMDispatch G
 			ON A.intSiteID = G.intSiteID
+				AND G.intDispatchID = @intDispatchId
 		LEFT JOIN tblTMClock H
 			ON A.intClockID = H.intClockID
 		LEFT JOIN tblEMEntity I
