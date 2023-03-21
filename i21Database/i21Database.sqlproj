@@ -4439,6 +4439,8 @@
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrder.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrderDetail.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
