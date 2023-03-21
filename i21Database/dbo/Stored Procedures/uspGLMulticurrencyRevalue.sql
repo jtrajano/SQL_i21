@@ -288,9 +288,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMInTransitMultiCurrencyRevalue  A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
 END
-
 IF @strModule = 'CM Swaps'
 BEGIN
 WITH cte AS(
