@@ -715,6 +715,9 @@ END
 			FROM tblICInventoryReceiptItem 
 			WHERE intInventoryReceiptId = @InventoryReceiptId
 
+			
+			EXEC [uspSCTicketClearLoadDetail] @TICKET_ID = @intTicketId, @USER_ID = @intUserId
+			
 			WHILE @CURRENT_RECEIPT_ITEM_ID IS NOT NULL
 			BEGIN
 				
