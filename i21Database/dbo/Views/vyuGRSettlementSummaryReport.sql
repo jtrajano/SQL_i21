@@ -313,7 +313,10 @@ FROM
 												END
 											)
 											+ ISNULL(tblOtherCharge.dblTax,0)
-		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) - ISNULL(BillAdjustments.dblTotal, 0)
+		,InboundDiscount				= (CASE 
+											WHEN BillDtl.intCustomerStorageId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
+											ELSE ISNULL(BillAdjustments.dblTotal, 0) 
+										END) - ISNULL(BillAdjustments.dblTotal,0)
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0
@@ -372,6 +375,7 @@ FROM
 			,strId
 			,intBillDetailId
 		FROM vyuGRSettlementSubReport
+		--WHERE intItemId IS NOT NULL
 		GROUP BY strId
 			,intBillDetailId
 	) tblOtherCharge
@@ -386,22 +390,28 @@ FROM
 	) tblTax ON tblTax.intBillId = Bill.intBillId
 	-- -- MANUALLY ADDED LINE ITEMS IN THE MAIN VOUCHER FROM SETTLEMENT
 	LEFT JOIN (
-		SELECT 
+		SELECT
 			Bill.intBillId
+			,MC.intBillDetailItemId
 			,APD.intPaymentId
 			,SUM(BD.dblTotal) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId 				
-				and APD.dblPayment <> 0
+			ON Bill.intBillId = APD.intBillId
+				AND APD.dblPayment <> 0
 				AND Bill.intTransactionType NOT IN (2,3)
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
-				AND BD.intCustomerStorageId IS NULL
-				AND BD.intSettleStorageId IS NULL
-		GROUP BY Bill.intBillId, APD.intPaymentId
-	) BillAdjustments ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
-		AND BillAdjustments.intBillId = Bill.intBillId
+			AND BD.intCustomerStorageId IS NULL
+
+		OUTER APPLY dbo.fnGRSettlementManualChargeItem(BD.intBillId) MC
+		WHERE ysnShow = 1
+			AND BD.intBillDetailId = MC.intBillDetailOtherChargeItemId
+		GROUP BY Bill.intBillId,APD.intPaymentId,MC.intBillDetailItemId
+	) BillAdjustments 
+		ON BillAdjustments.intPaymentId = PYMT.intPaymentId	
+			AND BillAdjustments.intBillId = Bill.intBillId
+			AND BillAdjustments.intBillDetailItemId = BillDtl.intBillDetailId
 	LEFT JOIN (
 		SELECT
 			PYMT.intPaymentId
@@ -491,9 +501,10 @@ FROM
 		,DebitMemoPayment.dblPayment
 		,PYMT.dblAmountPaid	
 		--,BasisPayment.dblVendorPrepayment
+		,BillDtl.intCustomerStorageId
 	UNION ALL
 	--DIRECT SHIPMENTS
-	SELECT 
+	SELECT
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
 		,strBillId						= Bill.strBillId
@@ -826,8 +837,7 @@ OUTER APPLY (
 	AND APD.intPaymentId = t.intPaymentId
 ) BillAdjustments
 
-GROUP BY 			
-	intPaymentId	
+GROUP BY intPaymentId	
 	,strPaymentNo
 	,OutboundNetWeight		
 	,OutboundGrossDollars	
