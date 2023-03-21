@@ -751,6 +751,7 @@ BEGIN TRY
 		, ysnPriceChanged = CD.ysnPriceChanged
 		, dblOriginalBasis = CD.dblOriginalBasis
 		, dblConvertedBasis = CD.dblConvertedBasis
+		, dtmOriginalETD = CASE WHEN tblCTContractDetail.dtmOriginalETD IS NULL THEN tblCTContractDetail.dtmEtaPol ELSE tblCTContractDetail.dtmOriginalETD END
 	FROM @CDTableUpdate CD
 	WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
