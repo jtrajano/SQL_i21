@@ -9249,6 +9249,8 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
+    <Build Include="dbo\Tables\tblSCTicketLoadDetailCreated.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketClearLoadDetail.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
