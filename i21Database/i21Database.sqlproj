@@ -1578,6 +1578,7 @@
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
 	<Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -31,3 +31,19 @@ BEGIN
 	EXEC('UPDATE tblSTStore SET strDepartmentOrCategory = ''D'', strCategoriesOrSubcategories = ''C''')
 	EXEC('INSERT INTO tblEMEntityPreferences ( strPreference, strValue) VALUES (''Transfer mapping from IC to ST 2'',''1'') ')
 END 
+
+IF NOT EXISTS(SELECT TOP 1 1 from [tblEMEntityPreferences] where strPreference = 'Transfer mapping from IC to ST 3' and strValue = '1')
+BEGIN
+	EXEC('INSERT INTO	tblSTStoreDepartments (intStoreId, intCategoryId, strRegisterCode, intConcurrencyId)
+			SELECT			b.intStoreId,
+							a.intCategoryId,
+							a.strCashRegisterDepartment,
+							1 as intConcurrencyId
+			FROM			tblICCategoryLocation a
+			INNER JOIN		tblSTStore b
+			ON				a.intLocationId = b.intCompanyLocationId
+			WHERE		    b.ysnConsignmentStore = 0')
+
+	EXEC('UPDATE tblSTStore SET strDepartmentOrCategory = ''D'', strCategoriesOrSubcategories = ''C''')
+	EXEC('INSERT INTO tblEMEntityPreferences ( strPreference, strValue) VALUES (''Transfer mapping from IC to ST 3'',''1'') ')
+END
