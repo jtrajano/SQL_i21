@@ -811,6 +811,9 @@ BEGIN TRY
 				SET @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
 				IF @ysnOverrideRecipe = 1
+				AND EXISTS(SELECT 1
+					FROM tblMFWorkOrderRecipe
+					WHERE intWorkOrderId = @intWorkOrderId)
 				BEGIN
 					SELECT @intRecipeId = NULL
 						,@dtmValidFrom = NULL
@@ -827,94 +830,97 @@ BEGIN TRY
 					SELECT @intRecipeItemId = Max(intRecipeItemId) + 1
 					FROM tblMFWorkOrderRecipeItem
 
-					INSERT INTO tblMFWorkOrderRecipeItem (
-						intRecipeItemId
-						,intRecipeId
-						,intItemId
-						,dblQuantity
-						,dblCalculatedQuantity
-						,[intItemUOMId]
-						,intRecipeItemTypeId
-						,strItemGroupName
-						,dblUpperTolerance
-						,dblLowerTolerance
-						,dblCalculatedUpperTolerance
-						,dblCalculatedLowerTolerance
-						,dblShrinkage
-						,ysnScaled
-						,intConsumptionMethodId
-						,intStorageLocationId
-						,dtmValidFrom
-						,dtmValidTo
-						,ysnYearValidationRequired
-						,ysnMinorIngredient
-						,intReferenceRecipeId
-						,ysnOutputItemMandatory
-						,dblScrap
-						,ysnConsumptionRequired
-						,dblPercentage
-						,intMarginById
-						,dblMargin
-						,ysnCostAppliedAtInvoice
-						,ysnPartialFillConsumption
-						,intManufacturingCellId
-						,intWorkOrderId
-						,intCreatedUserId
-						,dtmCreated
-						,intLastModifiedUserId
-						,dtmLastModified
-						,intConcurrencyId
-						,intCostDriverId
-						,dblCostRate
-						,ysnLock
-						)
-					SELECT intRecipeItemId = @intRecipeItemId
-						,intRecipeId = @intRecipeId
-						,intItemId = L.intItemId
-						,dblQuantity = 1
-						,dblCalculatedQuantity = 1
-						,[intItemUOMId] = L.intItemUOMId
-						,intRecipeItemTypeId = 1
-						,strItemGroupName = ''
-						,dblUpperTolerance = 100
-						,dblLowerTolerance = 100
-						,dblCalculatedUpperTolerance = 2
-						,dblCalculatedLowerTolerance = 1
-						,dblShrinkage = 0
-						,ysnScaled = 1
-						,intConsumptionMethodId = 1
-						,intStorageLocationId = NULL
-						,dtmValidFrom = @dtmValidFrom
-						,dtmValidTo = @dtmValidTo
-						,ysnYearValidationRequired = 1
-						,ysnMinorIngredient = 0
-						,intReferenceRecipeId = NULL
-						,ysnOutputItemMandatory = 0
-						,dblScrap = 0
-						,ysnConsumptionRequired = 0
-						,[dblCostAllocationPercentage] = NULL
-						,intMarginById = NULL
-						,dblMargin = NULL
-						,ysnCostAppliedAtInvoice = NULL
-						,ysnPartialFillConsumption = 1
-						,intManufacturingCellId = NULL
-						,intWorkOrderId = @intWorkOrderId
-						,intCreatedUserId = @intCreatedUserId
-						,dtmCreated = @dtmCurrentDateTime
-						,intLastModifiedUserId = @intCreatedUserId
-						,dtmLastModified = @dtmCurrentDateTime
-						,intConcurrencyId = 1
-						,intCostDriverId = NULL
-						,dblCostRate = NULL
-						,ysnLock = 1
-					FROM @tblLot L
-					WHERE intRowNo = @intMinRowNo
-						AND NOT EXISTS (
-							SELECT *
-							FROM tblMFWorkOrderRecipeItem RI
-							WHERE RI.intWorkOrderId = @intWorkOrderId
-								AND RI.intItemId = L.intItemId
+					IF @intRecipeId IS NOT NULL
+					BEGIN
+						INSERT INTO tblMFWorkOrderRecipeItem (
+							intRecipeItemId
+							,intRecipeId
+							,intItemId
+							,dblQuantity
+							,dblCalculatedQuantity
+							,[intItemUOMId]
+							,intRecipeItemTypeId
+							,strItemGroupName
+							,dblUpperTolerance
+							,dblLowerTolerance
+							,dblCalculatedUpperTolerance
+							,dblCalculatedLowerTolerance
+							,dblShrinkage
+							,ysnScaled
+							,intConsumptionMethodId
+							,intStorageLocationId
+							,dtmValidFrom
+							,dtmValidTo
+							,ysnYearValidationRequired
+							,ysnMinorIngredient
+							,intReferenceRecipeId
+							,ysnOutputItemMandatory
+							,dblScrap
+							,ysnConsumptionRequired
+							,dblPercentage
+							,intMarginById
+							,dblMargin
+							,ysnCostAppliedAtInvoice
+							,ysnPartialFillConsumption
+							,intManufacturingCellId
+							,intWorkOrderId
+							,intCreatedUserId
+							,dtmCreated
+							,intLastModifiedUserId
+							,dtmLastModified
+							,intConcurrencyId
+							,intCostDriverId
+							,dblCostRate
+							,ysnLock
 							)
+						SELECT intRecipeItemId = @intRecipeItemId
+							,intRecipeId = @intRecipeId
+							,intItemId = L.intItemId
+							,dblQuantity = 1
+							,dblCalculatedQuantity = 1
+							,[intItemUOMId] = L.intItemUOMId
+							,intRecipeItemTypeId = 1
+							,strItemGroupName = ''
+							,dblUpperTolerance = 100
+							,dblLowerTolerance = 100
+							,dblCalculatedUpperTolerance = 2
+							,dblCalculatedLowerTolerance = 1
+							,dblShrinkage = 0
+							,ysnScaled = 1
+							,intConsumptionMethodId = 1
+							,intStorageLocationId = NULL
+							,dtmValidFrom = @dtmValidFrom
+							,dtmValidTo = @dtmValidTo
+							,ysnYearValidationRequired = 1
+							,ysnMinorIngredient = 0
+							,intReferenceRecipeId = NULL
+							,ysnOutputItemMandatory = 0
+							,dblScrap = 0
+							,ysnConsumptionRequired = 0
+							,[dblCostAllocationPercentage] = NULL
+							,intMarginById = NULL
+							,dblMargin = NULL
+							,ysnCostAppliedAtInvoice = NULL
+							,ysnPartialFillConsumption = 1
+							,intManufacturingCellId = NULL
+							,intWorkOrderId = @intWorkOrderId
+							,intCreatedUserId = @intCreatedUserId
+							,dtmCreated = @dtmCurrentDateTime
+							,intLastModifiedUserId = @intCreatedUserId
+							,dtmLastModified = @dtmCurrentDateTime
+							,intConcurrencyId = 1
+							,intCostDriverId = NULL
+							,dblCostRate = NULL
+							,ysnLock = 1
+						FROM @tblLot L
+						WHERE intRowNo = @intMinRowNo
+							AND NOT EXISTS (
+								SELECT *
+								FROM tblMFWorkOrderRecipeItem RI
+								WHERE RI.intWorkOrderId = @intWorkOrderId
+									AND RI.intItemId = L.intItemId
+								)
+					END
 				END
 
 				IF @ysnTBSReserveOnSave = 1
@@ -1003,7 +1009,10 @@ BEGIN TRY
 						)
 				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
-				IF @ysnOverrideRecipe = 1
+				IF @ysnOverrideRecipe = 1 
+					AND EXISTS(SELECT 1
+					FROM tblMFWorkOrderRecipe
+					WHERE intWorkOrderId = @intWorkOrderId)
 				BEGIN
 					SELECT @intRecipeId = NULL
 						,@dtmValidFrom = NULL
@@ -1020,94 +1029,97 @@ BEGIN TRY
 					SELECT @intRecipeItemId = Max(intRecipeItemId) + 1
 					FROM tblMFWorkOrderRecipeItem
 
-					INSERT INTO tblMFWorkOrderRecipeItem (
-						intRecipeItemId
-						,intRecipeId
-						,intItemId
-						,dblQuantity
-						,dblCalculatedQuantity
-						,[intItemUOMId]
-						,intRecipeItemTypeId
-						,strItemGroupName
-						,dblUpperTolerance
-						,dblLowerTolerance
-						,dblCalculatedUpperTolerance
-						,dblCalculatedLowerTolerance
-						,dblShrinkage
-						,ysnScaled
-						,intConsumptionMethodId
-						,intStorageLocationId
-						,dtmValidFrom
-						,dtmValidTo
-						,ysnYearValidationRequired
-						,ysnMinorIngredient
-						,intReferenceRecipeId
-						,ysnOutputItemMandatory
-						,dblScrap
-						,ysnConsumptionRequired
-						,dblPercentage
-						,intMarginById
-						,dblMargin
-						,ysnCostAppliedAtInvoice
-						,ysnPartialFillConsumption
-						,intManufacturingCellId
-						,intWorkOrderId
-						,intCreatedUserId
-						,dtmCreated
-						,intLastModifiedUserId
-						,dtmLastModified
-						,intConcurrencyId
-						,intCostDriverId
-						,dblCostRate
-						,ysnLock
-						)
-					SELECT intRecipeItemId = @intRecipeItemId
-						,intRecipeId = @intRecipeId
-						,intItemId = L.intItemId
-						,dblQuantity = 1
-						,dblCalculatedQuantity = 1
-						,[intItemUOMId] = L.intItemUOMId
-						,intRecipeItemTypeId = 1
-						,strItemGroupName = ''
-						,dblUpperTolerance = 100
-						,dblLowerTolerance = 100
-						,dblCalculatedUpperTolerance = 2
-						,dblCalculatedLowerTolerance = 1
-						,dblShrinkage = 0
-						,ysnScaled = 1
-						,intConsumptionMethodId = 1
-						,intStorageLocationId = NULL
-						,dtmValidFrom = @dtmValidFrom
-						,dtmValidTo = @dtmValidTo
-						,ysnYearValidationRequired = 1
-						,ysnMinorIngredient = 0
-						,intReferenceRecipeId = NULL
-						,ysnOutputItemMandatory = 0
-						,dblScrap = 0
-						,ysnConsumptionRequired = 0
-						,[dblCostAllocationPercentage] = NULL
-						,intMarginById = NULL
-						,dblMargin = NULL
-						,ysnCostAppliedAtInvoice = NULL
-						,ysnPartialFillConsumption = 1
-						,intManufacturingCellId = NULL
-						,intWorkOrderId = @intWorkOrderId
-						,intCreatedUserId = @intCreatedUserId
-						,dtmCreated = @dtmCurrentDateTime
-						,intLastModifiedUserId = @intCreatedUserId
-						,dtmLastModified = @dtmCurrentDateTime
-						,intConcurrencyId = 1
-						,intCostDriverId = NULL
-						,dblCostRate = NULL
-						,ysnLock = 1
-					FROM @tblLot L
-					WHERE intRowNo = @intMinRowNo
-						AND NOT EXISTS (
-							SELECT *
-							FROM tblMFWorkOrderRecipeItem RI
-							WHERE RI.intWorkOrderId = @intWorkOrderId
-								AND RI.intItemId = L.intItemId
+					IF @intRecipeId IS NOT NULL
+					BEGIN
+						INSERT INTO tblMFWorkOrderRecipeItem (
+							intRecipeItemId
+							,intRecipeId
+							,intItemId
+							,dblQuantity
+							,dblCalculatedQuantity
+							,[intItemUOMId]
+							,intRecipeItemTypeId
+							,strItemGroupName
+							,dblUpperTolerance
+							,dblLowerTolerance
+							,dblCalculatedUpperTolerance
+							,dblCalculatedLowerTolerance
+							,dblShrinkage
+							,ysnScaled
+							,intConsumptionMethodId
+							,intStorageLocationId
+							,dtmValidFrom
+							,dtmValidTo
+							,ysnYearValidationRequired
+							,ysnMinorIngredient
+							,intReferenceRecipeId
+							,ysnOutputItemMandatory
+							,dblScrap
+							,ysnConsumptionRequired
+							,dblPercentage
+							,intMarginById
+							,dblMargin
+							,ysnCostAppliedAtInvoice
+							,ysnPartialFillConsumption
+							,intManufacturingCellId
+							,intWorkOrderId
+							,intCreatedUserId
+							,dtmCreated
+							,intLastModifiedUserId
+							,dtmLastModified
+							,intConcurrencyId
+							,intCostDriverId
+							,dblCostRate
+							,ysnLock
 							)
+						SELECT intRecipeItemId = @intRecipeItemId
+							,intRecipeId = @intRecipeId
+							,intItemId = L.intItemId
+							,dblQuantity = 1
+							,dblCalculatedQuantity = 1
+							,[intItemUOMId] = L.intItemUOMId
+							,intRecipeItemTypeId = 1
+							,strItemGroupName = ''
+							,dblUpperTolerance = 100
+							,dblLowerTolerance = 100
+							,dblCalculatedUpperTolerance = 2
+							,dblCalculatedLowerTolerance = 1
+							,dblShrinkage = 0
+							,ysnScaled = 1
+							,intConsumptionMethodId = 1
+							,intStorageLocationId = NULL
+							,dtmValidFrom = @dtmValidFrom
+							,dtmValidTo = @dtmValidTo
+							,ysnYearValidationRequired = 1
+							,ysnMinorIngredient = 0
+							,intReferenceRecipeId = NULL
+							,ysnOutputItemMandatory = 0
+							,dblScrap = 0
+							,ysnConsumptionRequired = 0
+							,[dblCostAllocationPercentage] = NULL
+							,intMarginById = NULL
+							,dblMargin = NULL
+							,ysnCostAppliedAtInvoice = NULL
+							,ysnPartialFillConsumption = 1
+							,intManufacturingCellId = NULL
+							,intWorkOrderId = @intWorkOrderId
+							,intCreatedUserId = @intCreatedUserId
+							,dtmCreated = @dtmCurrentDateTime
+							,intLastModifiedUserId = @intCreatedUserId
+							,dtmLastModified = @dtmCurrentDateTime
+							,intConcurrencyId = 1
+							,intCostDriverId = NULL
+							,dblCostRate = NULL
+							,ysnLock = 1
+						FROM @tblLot L
+						WHERE intRowNo = @intMinRowNo
+							AND NOT EXISTS (
+								SELECT *
+								FROM tblMFWorkOrderRecipeItem RI
+								WHERE RI.intWorkOrderId = @intWorkOrderId
+									AND RI.intItemId = L.intItemId
+								)
+						END
 				END
 
 				IF @ysnTBSReserveOnSave = 1
