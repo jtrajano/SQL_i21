@@ -99,7 +99,7 @@ BEGIN
 	) Adjustment
 	WHERE 
 		FA.ysnDepreciated = 1
-		AND FA.ysnDisposed = 0
+		AND ISNULL(FA.ysnDisposed,0) = 0
 		AND BD.intBookId = 1
 
 	RETURN;
