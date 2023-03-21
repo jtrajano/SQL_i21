@@ -300,15 +300,15 @@ BEGIN
     FROM @tblSummaryLog SL
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
     INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
-      CROSS APPLY (
+    CROSS APPLY (
         SELECT TOP 1 intInvoiceId 
         FROM tblARInvoice I
         WHERE I.strTransactionType = 'Invoice'
-          AND I.ysnReturned = 1
-          AND INV.strInvoiceOriginId = I.strInvoiceNumber
-          AND INV.intOriginalInvoiceId = I.intInvoiceId
-      ) RI
-    WHERE SL.strTransactionType = 'Credit Memo' AND @Post=0
+        AND I.ysnReturned = 1
+        AND INV.strInvoiceOriginId = I.strInvoiceNumber
+        AND INV.intOriginalInvoiceId = I.intInvoiceId
+    ) RI
+    WHERE SL.strTransactionType = 'Credit Memo'
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
     BEGIN
@@ -321,6 +321,16 @@ BEGIN
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
     INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
     WHERE INV.strTransactionType = 'Invoice' AND @Post = 1
+
+    --DONT LOG ON CONTRACT BALANCE IF CREDIT MEMO NOT RETURN
+    DELETE SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
+	LEFT JOIN tblARInvoice INVO ON INV.intOriginalInvoiceId = INVO.intInvoiceId
+	AND INV.strInvoiceOriginId = INVO.strInvoiceNumber
+	WHERE INV.strTransactionType = 'Credit Memo'
+	AND ISNULL(INVO.intInvoiceId, 0) = 0
 
     --CONTRACT BALANCE LOG  
     WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)  
