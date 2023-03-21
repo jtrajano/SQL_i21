@@ -466,9 +466,101 @@ BEGIN
 						
 
 
+						--- Insert Dispatch to tblTMDispatchHistory table
+						INSERT INTO tblTMDispatchHistory (
+							[intDispatchId]            
+							,[intSiteId]
+							,[intDeliveryHistoryId]                
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]             
+							,[intSubstituteProductId]   
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              
+							,[intDispatchDriverId]      
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]                
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]        
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
+							,[dtmReceivedDate]
+							,intPaymentId
+						)	
+						SELECT 
+							[intDispatchId]				= [intDispatchID]
+							,[intSiteId]				= intSiteID
+							,[intDeliveryHistoryId]		= @intNewDeliveryHistoryId             
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]				= [intProductID] 
+							,[intSubstituteProductId]   = [intSubstituteProductID]
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              = [intDriverID]              
+							,[intDispatchDriverId]		= [intDispatchDriverID]   
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]				= [intUserID]
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]		= [intDeliveryTermID] 
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]
+							,[dtmReceivedDate]
+							,intPaymentId
+						FROM tblTMDispatch
+						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1 WHERE intSiteId IS NOT NULL)
+
+
 						--Delete Order
 						DELETE FROM tblTMDispatch
-						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1)
+						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1 WHERE intSiteId IS NOT NULL)
 
 
 						---- Update forecasted and estimated % left
