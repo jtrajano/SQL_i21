@@ -1509,6 +1509,9 @@
     <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
+    <Build Include="dbo\Tables\tblQMImportType.sql" />
+    <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
+    <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
