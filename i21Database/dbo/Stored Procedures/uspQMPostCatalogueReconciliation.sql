@@ -3,7 +3,7 @@ CREATE PROCEDURE uspQMPostCatalogueReconciliation
     , @intEntityId                      INT = NULL
     , @ysnPost                          BIT = 0
 	, @strCatalogueIds					NVARCHAR(MAX) = NULL
-	, @ysnSuccess						BIT = 1 OUTPUT
+	, @ysnSuccess						BIT = 0 OUTPUT
 	, @strErrorMsg						NVARCHAR(MAX) = NULL OUTPUT	
 AS
 BEGIN TRY
@@ -56,6 +56,10 @@ BEGIN TRY
 		BEGIN
 			EXEC uspAPPostBill @param = @strBillIds, @post = @ysnPost, @userId = @intEntityId, @success = @ysnSuccess OUT, @batchIdUsed = @strBatchIdUsed OUT
 		END
+	ELSE
+		SET @ysnSuccess = ISNULL(@ysnSuccess, 1)	
+
+	SET @ysnSuccess = ISNULL(@ysnSuccess, 0)
 
 	IF ISNULL(@ysnSuccess, 0) = 1
 		BEGIN
