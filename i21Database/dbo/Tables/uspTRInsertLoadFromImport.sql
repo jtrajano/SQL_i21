@@ -256,7 +256,7 @@ BEGIN
 			DECLARE @maxValue NUMERIC(18, 6)
 				, @intPreviousId INT
 
-			SELECT TOP 1 @maxValue = dblInvoiceAmount, @intPreviousId = intImportDtnDetailId FROM tblTRImportDtnDetail WHERE ISNULL(ysnReImport, 0) = 0 AND strBillOfLading = @strBillOfLading
+			SELECT TOP 1 @maxValue = dblInvoiceAmount, @intPreviousId = intImportDtnDetailId FROM tblTRImportDtnDetail WHERE ISNULL(ysnReImport, 0) = 0 AND strBillOfLading = @strBillOfLading AND intImportDtnDetailId <> @intImportDtnDetailId
 
 			IF (ISNULL(@intPreviousId, 0) = 0)
 			BEGIN
