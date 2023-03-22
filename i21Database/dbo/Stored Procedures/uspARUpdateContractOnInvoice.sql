@@ -390,11 +390,11 @@ BEGIN TRY
 		SELECT TOP 1 TMO.*
 		FROM tblTMOrder TMO 
 		INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
-		WHERE TMO.intSiteId = P.intSiteId
+		WHERE TMO.intSiteId = P.intDispatchId
 		  AND TMO.intContractDetailId = P.intContractDetailId
 		ORDER BY TMO.dtmTransactionDate DESC
 	) TMO 
-	WHERE P.intSiteId IS NOT NULL
+	WHERE P.intDispatchId IS NOT NULL
 	  AND P.ysnMobileBilling = 1
 	  AND P.dblQty = TMO.dblQuantity
 
