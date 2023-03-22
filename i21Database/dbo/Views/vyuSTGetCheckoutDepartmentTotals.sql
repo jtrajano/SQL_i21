@@ -23,3 +23,5 @@ INNER JOIN tblICCategory Cat
 	ON CDT.intCategoryId = Cat.intCategoryId
 INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
 	ON StoreDepartments.intCategoryId = Cat.intCategoryId
+	AND StoreDepartments.strRegisterCode = CDT.strRegisterCode
+	AND StoreDepartments.intStoreId = ST.intStoreId
