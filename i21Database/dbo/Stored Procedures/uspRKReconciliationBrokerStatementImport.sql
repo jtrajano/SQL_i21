@@ -345,7 +345,6 @@ BEGIN TRY
 		, dblPrice
 		, dtmFilledDate
 
-	-- Invalid Future Market, Commodity, Broker or Broker Account	
 	INSERT INTO @tblFinalRec (strName
 		, strAccountNumber
 		, strFutMarketName
@@ -357,87 +356,27 @@ BEGIN TRY
 		, dtmFilledDate
 		, ImportId
 		, strStatus)
-	SELECT t1.strName
-		, t1.strAccountNumber
-		, t1.strFutMarketName
-		, t1.strCommodityCode
+	SELECT t.strName
+		, t.strAccountNumber
+		, t.strFutMarketName
+		, t.strCommodityCode
 		, t.strBuySell
 		, t.dblNoOfContract
 		, t.strFutureMonth
 		, t.dblPrice
 		, t.dtmFilledDate
 		, t.ImportId
-		, 'Invalid Future Market, Commodity, Broker or Broker Account'
-	FROM @ImportedRec2 t
-	JOIN @tblTransRec2 t1 ON t.strBuySell = t1.strBuySell 
+		, 'Success'
+	FROM @ImportedRec t
+	JOIN @tblTransRec t1 ON t.strName = t1.strName
+		AND t.strAccountNumber = t1.strAccountNumber 
+		AND t.strFutMarketName = t1.strFutMarketName 
+		AND t.strCommodityCode = t1.strCommodityCode 
+		AND t.strBuySell = t1.strBuySell 
 		AND t.dblNoOfContract = t1.dblNoOfContract
 		AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
 		AND t.dblPrice = t1.dblPrice 
 		AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-	WHERE (t1.strName != @strName
-		OR t1.strAccountNumber != @strAccountNumber
-		OR t1.strFutMarketName != @strFutMarketName
-		OR t1.strCommodityCode != @strCommodityCode)
-
-	DELETE FROM @ImportedRec2
-	WHERE ImportId IN (SELECT t1.ImportId FROM @ImportedRec t1
-						JOIN @tblFinalRec t ON (t.strName != @strName
-							OR t.strAccountNumber != @strAccountNumber
-							OR t.strFutMarketName != @strFutMarketName
-							OR t.strCommodityCode != @strCommodityCode) 
-							AND t.strBuySell = t1.strBuySell 
-							AND t.dblNoOfContract = t1.dblNoOfContract
-							AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
-							AND t.dblPrice = t1.dblPrice 
-							AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
-	
-	DELETE FROM @tblTransRec2
-	WHERE Id IN (SELECT t1.Id FROM @tblTransRec t1
-				JOIN @tblFinalRec t ON (t.strName != @strName
-					OR t.strAccountNumber != @strAccountNumber
-					OR t.strFutMarketName != @strFutMarketName
-					OR t.strCommodityCode != @strCommodityCode) 
-					AND t.strBuySell = t1.strBuySell 
-					AND t.dblNoOfContract = t1.dblNoOfContract
-					AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth)
-					AND t.dblPrice = t1.dblPrice
-					AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
-
-	IF NOT EXISTS(SELECT 1 FROM @tblFinalRec WHERE strStatus <> 'Success')
-	BEGIN
-		INSERT INTO @tblFinalRec (strName
-			, strAccountNumber
-			, strFutMarketName
-			, strCommodityCode
-			, strBuySell
-			, dblNoOfContract
-			, strFutureMonth
-			, dblPrice
-			, dtmFilledDate
-			, ImportId
-			, strStatus)
-		SELECT t.strName
-			, t.strAccountNumber
-			, t.strFutMarketName
-			, t.strCommodityCode
-			, t.strBuySell
-			, t.dblNoOfContract
-			, t.strFutureMonth
-			, t.dblPrice
-			, t.dtmFilledDate
-			, t.ImportId
-			, 'Success'
-		FROM @ImportedRec t
-		JOIN @tblTransRec t1 ON t.strName = t1.strName
-			AND t.strAccountNumber = t1.strAccountNumber 
-			AND t.strFutMarketName = t1.strFutMarketName 
-			AND t.strCommodityCode = t1.strCommodityCode 
-			AND t.strBuySell = t1.strBuySell 
-			AND t.dblNoOfContract = t1.dblNoOfContract
-			AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
-			AND t.dblPrice = t1.dblPrice 
-			AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
-	END
 	
 	DELETE FROM @ImportedRec
 	WHERE ImportId IN (SELECT t1.ImportId FROM @ImportedRec t1
@@ -1597,6 +1536,103 @@ BEGIN TRY
 
 	DELETE FROM @ImportedRec
 	DELETE FROM @tblTransRec
+	
+	-- Invalid Future Market, Commodity, Broker or Broker Account	
+	IF NOT EXISTS(SELECT 1 FROM @tblFinalRec WHERE strStatus = 'Success')
+	BEGIN
+		INSERT INTO @tblFinalRec (strName
+			, strAccountNumber
+			, strFutMarketName
+			, strCommodityCode
+			, strBuySell
+			, dblNoOfContract
+			, strFutureMonth
+			, dblPrice
+			, dtmFilledDate
+			, ImportId
+			, strStatus)
+		SELECT t1.strName
+			, t1.strAccountNumber
+			, t1.strFutMarketName
+			, t1.strCommodityCode
+			, t.strBuySell
+			, t.dblNoOfContract
+			, t.strFutureMonth
+			, t.dblPrice
+			, t.dtmFilledDate
+			, t.ImportId
+			, 'Invalid Future Market, Commodity, Broker or Broker Account'
+		FROM @ImportedRec2 t
+		JOIN @tblTransRec2 t1 ON t.strBuySell = t1.strBuySell 
+			AND t.dblNoOfContract = t1.dblNoOfContract
+			AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
+			AND t.dblPrice = t1.dblPrice 
+			AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
+		WHERE (t1.strName != @strName
+			OR t1.strAccountNumber != @strAccountNumber
+			OR t1.strFutMarketName != @strFutMarketName
+			OR t1.strCommodityCode != @strCommodityCode)
+	END
+
+	DELETE FROM @ImportedRec2
+	WHERE ImportId IN (SELECT t1.ImportId FROM @ImportedRec t1
+						JOIN @tblFinalRec t ON (t.strName != @strName
+							OR t.strAccountNumber != @strAccountNumber
+							OR t.strFutMarketName != @strFutMarketName
+							OR t.strCommodityCode != @strCommodityCode) 
+							AND t.strBuySell = t1.strBuySell 
+							AND t.dblNoOfContract = t1.dblNoOfContract
+							AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth) 
+							AND t.dblPrice = t1.dblPrice 
+							AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
+	
+	DELETE FROM @tblTransRec2
+	WHERE Id IN (SELECT t1.Id FROM @tblTransRec t1
+				JOIN @tblFinalRec t ON (t.strName != @strName
+					OR t.strAccountNumber != @strAccountNumber
+					OR t.strFutMarketName != @strFutMarketName
+					OR t.strCommodityCode != @strCommodityCode) 
+					AND t.strBuySell = t1.strBuySell 
+					AND t.dblNoOfContract = t1.dblNoOfContract
+					AND CONVERT(DATETIME, '1 ' + t.strFutureMonth) = CONVERT(DATETIME, '1 ' + t1.strFutureMonth)
+					AND t.dblPrice = t1.dblPrice
+					AND CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
+
+	--If there's no import detail and import filled date is equal to Filled Date header
+	IF NOT EXISTS(SELECT 1 FROM @tblFinalRec)
+	BEGIN
+		INSERT INTO @tblFinalRec (strName
+			, strAccountNumber
+			, strFutMarketName
+			, strCommodityCode
+			, strBuySell
+			, dblNoOfContract
+			, strFutureMonth
+			, dblPrice
+			, dtmFilledDate
+			, ImportId
+			, strStatus)
+		SELECT t.strName
+			, t.strAccountNumber
+			, t.strFutMarketName
+			, t.strCommodityCode
+			, t.strBuySell
+			, t.dblNoOfContract
+			, t.strFutureMonth
+			, t.dblPrice
+			, t.dtmFilledDate
+			, t.ImportId
+			, 'Import failed.'
+		FROM @ImportedRec2 t
+		JOIN @tblTransRec2 t1 ON CONVERT(DATETIME, t.dtmFilledDate, @ConvertYear) = CONVERT(DATETIME, CONVERT(NVARCHAR, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
+		WHERE (t1.strName != @strName
+			OR t1.strAccountNumber != @strAccountNumber
+			OR t1.strFutMarketName != @strFutMarketName
+			OR t1.strCommodityCode != @strCommodityCode)
+	END
+	
+	DELETE FROM @ImportedRec2
+	DELETE FROM @tblTransRec2
 
 	BEGIN TRANSACTION
 	
@@ -1625,6 +1661,32 @@ BEGIN TRY
 			, strComments = ''
 			, ysnFreezed = 0
 		
+		SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
+		SET @strStatus = 'Failed'
+	END 
+	ELSE IF NOT EXISTS(SELECT 1 FROM @tblFinalRec)
+	BEGIN
+		INSERT INTO tblRKReconciliationBrokerStatementHeader (intConcurrencyId
+			, dtmReconciliationDate
+			, dtmFilledDate
+			, intEntityId
+			, intBrokerageAccountId
+			, intFutureMarketId
+			, intCommodityId
+			, strImportStatus
+			, strComments
+			, ysnFreezed)
+		SELECT intConcurrencyId = 1
+			, dtmReconciliationDate = GETDATE()
+			, dtmFilledDate = @dtmFilledDate
+			, intEntityId = @intBrokerId
+			, intBorkerageAccountId = @intBorkerageAccountId
+			, intFutureMarketId = @intFutureMarketId
+			, intCommodityId = @intCommodityId
+			, ysnImportStatus = 'Failed'
+			, strComments = ''
+			, ysnFreezed = 0
+
 		SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
 		SET @strStatus = 'Failed'
 	END 
