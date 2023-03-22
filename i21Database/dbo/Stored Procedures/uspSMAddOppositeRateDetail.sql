@@ -31,7 +31,12 @@ BEGIN
 		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = @oppsiteId AND intRateTypeId = @rateTypeId AND dtmValidFromDate = @validFromDate)
 		BEGIN
 			INSERT INTO tblSMCurrencyExchangeRateDetail(intCurrencyExchangeRateId, dblRate, intRateTypeId, dtmValidFromDate, strSource, dtmCreatedDate)
-			SELECT @oppsiteId, (1 / dblRate), intRateTypeId, dtmValidFromDate, strSource, dtmCreatedDate
+			SELECT @oppsiteId
+			, CASE WHEN ISNULL(dblRate, 0) <> 0
+				THEN (1 / dblRate)
+				ELSE 0
+				END
+			, intRateTypeId, dtmValidFromDate, strSource, dtmCreatedDate
 			FROM tblSMCurrencyExchangeRateDetail
 			WHERE intCurrencyExchangeRateDetailId = @rateDetailId
 		END
