@@ -35,6 +35,8 @@ DECLARE @intCommodityId INT
   
 SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = @Commodity  
 SELECT @intUOMId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @UOM  
+SELECT @intBookId = intBookId FROM tblCTBook WHERE strBook = @Book
+SELECT @intSubBookId = intSubBookId FROM tblCTSubBook WHERE strSubBook = @SubBook
 SET @intDecimal = @Decimals  
 SET @strUomType = @UOMType  
   
@@ -68,8 +70,6 @@ END
   
 
   
-
-  
 IF ISNULL(@dtmDate,'') = ''  
 BEGIN  
  SET @strCustomErrorMsg = @strCustomErrorMsg + 'Date is invalid.' + CHAR(10);  
@@ -86,8 +86,17 @@ IF @intUOMId IS NULL
 BEGIN  
  SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM is invalid.' + CHAR(10);  
 END  
-  
-  
+ 
+IF @Book <> '' AND @intBookId IS NULL 
+BEGIN
+	 SET @strCustomErrorMsg = @strCustomErrorMsg + 'Book is invalid.' + CHAR(10);  
+END
+ 
+ IF @SubBook <> '' AND @intSubBookId IS NULL 
+BEGIN
+	 SET @strCustomErrorMsg = @strCustomErrorMsg + 'Sub-Book is invalid.' + CHAR(10);  
+END
+
 IF @intDecimal NOT IN (0,1,2,3,4)  OR @intDecimal IS NULL  
 BEGIN  
  SET @strCustomErrorMsg = @strCustomErrorMsg + 'Decimals is invalid. It is either 0, 1, 2, 3 or 4 only.' + CHAR(10);  
