@@ -79,9 +79,18 @@
 					,cd.intCompanyLocationId 
                 from
                     tblCTContractDetail cd
-                    left join tblAPBillDetail bd1 on bd1.intContractDetailId = cd.intContractDetailId and isnull(bd1.intSettleStorageId,0) = 0 and bd1.intInventoryReceiptChargeId is null and bd1.intItemId = cd.intItemId
-					left join tblAPBill b on b.intBillId = bd1.intBillId and b.intTransactionType = 1
-                    left join tblAPBillDetail bd on bd.intContractDetailId = cd.intContractDetailId and isnull(bd.intSettleStorageId,0) = 0 and bd.intBillId = b.intBillId and bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
+					left join (
+						select
+							a.intBillId
+							,a.intContractDetailId
+							,a.intUnitOfMeasureId
+							,a.dblQtyReceived
+						from
+							tblAPBillDetail a
+							join tblAPBill b on b.intBillId = a.intBillId
+						where
+							b.intTransactionType = 1
+					) bd on bd.intContractDetailId = cd.intContractDetailId
                     cross apply (
                     	select
                     		intPricingCount = count(*)
