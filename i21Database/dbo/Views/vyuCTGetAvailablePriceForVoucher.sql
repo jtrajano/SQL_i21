@@ -149,10 +149,23 @@ FROM (
 		, strPriceContractNo = NULL
 		, ysnMultiplePriceFixation = ch.ysnMultiplePriceFixation
 	FROM tblCTContractDetail cd
-	join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	LEFT JOIN tblAPBillDetail bd1 ON bd1.intContractDetailId = cd.intContractDetailId AND ISNULL(bd1.intSettleStorageId, 0) = 0 AND bd1.intInventoryReceiptChargeId IS NULL and bd1.intItemId = cd.intItemId
-	LEFT JOIN tblAPBill b ON b.intBillId = bd1.intBillId AND b.intTransactionType = 1
-	LEFT JOIN tblAPBillDetail bd ON bd.intContractDetailId = cd.intContractDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intBillId = b.intBillId AND bd.intInventoryReceiptChargeId IS NULL and bd.intItemId = cd.intItemId
+    join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	left join (
+		select
+			a.intBillId
+			,a.intContractDetailId
+			,a.intUnitOfMeasureId
+			,a.dblQtyReceived
+            ,a.intItemId
+		from
+			tblAPBillDetail a
+			join tblAPBill b on b.intBillId = a.intBillId
+		where
+			b.intTransactionType = 1
+			and isnull(a.intSettleStorageId,0) = 0
+			and a.intInventoryReceiptChargeId is null
+
+		) bd on bd.intContractDetailId = cd.intContractDetailId and bd.intItemId = cd.intItemId
 	CROSS APPLY (
 		SELECT intPricingCount = COUNT(*)
 		FROM tblCTPriceFixation pf
