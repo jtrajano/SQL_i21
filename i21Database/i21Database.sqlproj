@@ -1523,6 +1523,12 @@
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
     <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomBasisEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomDerivativeTransactionHistory.sql" />
+    <Build Include="dbo\Views\vyuRKCustomDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuRKCustomDailyAveragePriceDetail.sql" />
+    <Build Include="dbo\Views\vyuRKCustomDerivativeEntry.sql" />
+    <Build Include="dbo\Views\vyuRKCustomSettlementPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
