@@ -85,12 +85,16 @@
 							,a.intContractDetailId
 							,a.intUnitOfMeasureId
 							,a.dblQtyReceived
+							,a.intItemId
 						from
 							tblAPBillDetail a
 							join tblAPBill b on b.intBillId = a.intBillId
 						where
 							b.intTransactionType = 1
-					) bd on bd.intContractDetailId = cd.intContractDetailId
+							and isnull(a.intSettleStorageId,0) = 0
+							and a.intInventoryReceiptChargeId is null
+
+					) bd on bd.intContractDetailId = cd.intContractDetailId and bd.intItemId = cd.intItemId
 				    cross apply (
 						select intPricingCount = count(*)
 						from
