@@ -76,7 +76,7 @@ BEGIN
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
-			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
+			 AND ABS(COSTING.dblQty) > dbo.fnRoundBanker(ICT.dblAvailableQty,6)
 			 AND ICT.intItemId = COSTING.intItemId
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
 	OUTER APPLY (
