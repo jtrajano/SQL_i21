@@ -1576,8 +1576,11 @@
     <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
-	<Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
+    <Build Include="dbo\Tables\tblQMImportType.sql" />
+    <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
+    <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11913,6 +11916,7 @@
     <Build Include="dbo\Views\vyuQMPreEvaluationSheetReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
+    <None Include="Scripts\Post-Deployment\MF\14_ImportTypeDefaultValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
