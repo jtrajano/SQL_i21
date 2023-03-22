@@ -413,7 +413,7 @@ AS
 					dtmEndDate			=	CI.dtmEndDate,			intCompanyLocationId		=	CL.intCompanyLocationId, 
 					dblQuantity			=	CI.dblQuantity,			intContractStatusId			=	1,
 					dblBalance			=	CI.dblQuantity,			dtmStartDate				=	CI.dtmStartDate,
-					intPriceItemUOMId	=	QU.intItemUOMId,		dtmCreated					=	GETDATE(),
+					intPriceItemUOMId	=	puom.intItemUOMId,		dtmCreated					=	GETDATE(),
 					intConcurrencyId	=	1,						intCreatedById				=	@intUserId,
 					intFutureMarketId	=	MA.intFutureMarketId,	intFutureMonthId			=	MO.intFutureMonthId,
 					dblFutures			=	CI.dblFutures,			dblBasis					=	CI.dblBasis,
@@ -455,7 +455,7 @@ AS
 					,intRevaluationCurrencyExchangeRateId = cero.intCurrencyExchangeRateId
 					,dblHistoricalRate = CI.dblHistoricRate
 					,intHistoricalRateTypeId = ert.intCurrencyExchangeRateTypeId
-					,intBasisUOMId = QU.intItemUOMId
+					,intBasisUOMId = puom.intItemUOMId
 					,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,MA.intUnitMeasureId, MA.dblContractSize)
 					,cp.intCurrencyExchangeRateId
 					,intMarketUOMId = MA.intUnitMeasureId
@@ -516,6 +516,8 @@ AS
 			left join tblSMCurrencyExchangeRateType ert on ert.strCurrencyExchangeRateType = CI.strHistoricType
 			left join tblCTPricingType pt on pt.strPricingType = CI.strPricingType
 			left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
+			left join tblICUnitMeasure pum on pum.strUnitMeasure = CI.strPriceUOM
+			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
 			WHERE CI.guiUniqueId = @guiUniqueId;
 
 			select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId;
@@ -548,6 +550,7 @@ AS
 					when isnull(c.strHistoricType,'') <> '' and t.intHistoricalRateTypeId is null then 'Historic Type: "' + c.strHistoricType + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when isnull(c.strLocationName,'') <> '' and t.intCompanyLocationId is null then ' Location: "' + c.strLocationName + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intItemItemUOMId is null then ' Lot Calculation: Future Market UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.intPriceItemUOMId is null then 'Price Item UOM: Price Item UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPricingTypeId = 1 and t.dblFutures is null then 'Missing Futures Price for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					else @validationErrorMsg
 					end
@@ -1039,9 +1042,9 @@ AS
 						,strLoadingPointType = case when isnull(intLoadingPortId,0) <> 0 then 'Port' else null end
 						,strDestinationPointType = case when isnull(intDestinationPortId,0) <> 0 then 'Port' else null end
 						,intBasisCurrencyId = intCurrencyId
-						,intBasisUOMId = intItemUOMId
-						,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dblQuantity * dblBudgetPrice else null end
-						,dblTotalCost = case when intPricingTypeId = 1 then dblQuantity * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dblQuantity * isnull(dblCashPrice,1) else null end
+						,intBasisUOMId = intBasisUOMId
+						,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intItemItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBudgetPrice,0) + isnull(dblBasis,0)) else null end
+						,dblTotalCost = case when intPricingTypeId = 1 then dbo.fnCTConvertQtyToTargetItemUOM(intItemItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dbo.fnCTConvertQtyToTargetItemUOM(intItemItemUOMId,intPriceItemUOMId, dblQuantity) * isnull(dblCashPrice,1) else null end
 						,dblNoOfLots = case when round(1*dblNoOfLots,0) = 0 then 1 else round(1*dblNoOfLots,0) end
 						,intCurrencyExchangeRateId
 					FROM #tmpExtracted
