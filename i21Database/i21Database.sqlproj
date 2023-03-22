@@ -1506,7 +1506,6 @@
     <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
     <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
-    <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
     <Build Include="dbo\Tables\tblQMImportType.sql" />
