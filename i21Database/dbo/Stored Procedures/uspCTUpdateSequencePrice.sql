@@ -3,13 +3,13 @@
 	,@dblNewPrice numeric(38,20)		--> New Price
 	,@intUserId int						--> User ID
 	,@strScreen nvarchar(150)			--> Screen name / Remarks
-	,@ysnLastRecord bit					--> If use in a loop, pass 1 for the last record in the loop.
-	,@strTxnIdentifier nvarchar(36)		--> convert(nvarchar(36),NEWID()) - If use in loop, should pass the same identifier all over the loop
 AS
 BEGIN
 
 	declare
 		@ErrMsg nvarchar(max)
+		,@strXML nvarchar(max) = ''
+		,@logDetails nvarchar(max)
 		,@intContractHeaderId int
 		,@intPricingTypeId int
 		,@strContractBase nvarchar(10)
@@ -27,9 +27,9 @@ BEGIN
 		,@dblFutures numeric(38,20)
 
 		,@dblSequenceConvertedQty numeric(38,20)
-		,@dblOldTotalCost numeric(38,20)
 		,@dblTotalCost numeric(38,20)
 		,@dblTotalSequenceValue numeric(38,20)
+		,@ysnHedearValueChange bit = 0
 		,@fromHeaderValue nvarchar(38)
 		,@toHeaderValue nvarchar(38)
 		,@intContractStatusId int
@@ -38,22 +38,7 @@ BEGIN
 		,@ysnFeedOnApproval bit
 		,@intTransactionId int
 		,@intApproverId int
-		,@intContractSeq int
-		,@intValueCurrencyId int
-		,@intActiveContractHeaderId int
-		,@ysnActiveValue bit
-		,@intActiveValueCurrencyId int
-
-		,@intActiveContractSeq int
-		,@dblActiveCashPrice numeric(38,20)
-		,@dblActiveNewPrice numeric(38,20)
-		,@dblActiveOldTotalCost numeric(38,20)
-		,@dblActiveTotalCost numeric(38,20)
-		,@intActiveContractDetailId int
 		;
-
-	declare @UpdatedContract as table (intContractHeaderId int, ysnValue bit, intValueCurrencyId int null);
-	DECLARE @auditLog AS BatchAuditLogParam;
 
 	begin try
 
@@ -67,16 +52,13 @@ BEGIN
 			,@intHeaderValueCurrencyId = ch.intValueCurrencyId
 			,@dblSequenceQuantity = cd.dblQuantity
 			,@intItemUOMId = cd.intItemUOMId
-			,@dblNetWeight = isnull(cd.dblNetWeight,cd.dblQuantity)
+			,@dblNetWeight = cd.dblNetWeight
 			,@intNetWeightUOMId = cd.intNetWeightUOMId
 			,@intSequenceCurrencyId = cd.intCurrencyId
 			,@intPriceItemUOMId = cd.intPriceItemUOMId
 			,@dblCashPrice = cd.dblCashPrice
 			,@dblFutures = cd.dblFutures
-			,@dblOldTotalCost = cd.dblTotalCost
-			,@intContractStatusId = cd.intContractStatusId
-			,@intContractSeq = cd.intContractSeq
-			,@intValueCurrencyId = ch.intValueCurrencyId
+			,@intContractStatusId = intContractStatusId
 		from
 			tblCTContractDetail cd
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -124,32 +106,75 @@ BEGIN
 			goto goSkip;
 		end
 
+		select @strXML = '
+			<tblCTContractDetails>
+				<tblCTContractDetail>
+					<intContractDetailId>'+ convert(nvarchar(20),@intContractDetailId) +'</intContractDetailId>
+					<intPricingTypeId>'+ convert(nvarchar(20),@intPricingTypeId) +'</intPricingTypeId>
+					<strRowState>Modified</strRowState>
+					<dblCashPrice>'+ convert(nvarchar(38),@dblNewPrice) +'</dblCashPrice>
+					<tblCTContractCosts></tblCTContractCosts>
+					<tblCTContractFutures></tblCTContractFutures>
+				</tblCTContractDetail>
+			</tblCTContractDetails>
+		';
+
+		--No need to call uspCTBeforeSaveContract from importing
+		--EXEC uspCTBeforeSaveContract @intContractHeaderId = @intContractHeaderId, @intUserId=@intUserId, @strXML = @strXML, @ysnFromImport = 1;
+
 		update tblCTContractDetail set dblCashPrice = @dblNewPrice, dblTotalCost = @dblTotalCost, ysnPriceChanged = 1 where intContractDetailId = @intContractDetailId;
 
-		insert into tblCTUpdatedSequencePrice (
-			strTxnIdentifier
-			,intContractHeaderId
-			,intContractDetailId
-			,intContractSeq
-			,dblOldCashPrice
-			,dblNewCashPrice
-			,dblOldTotalCost
-			,dblNewTotalCost
-			,intValueCurrencyId
-			,ysnValue
+		if (@strContractBase = 'Value')
+		begin
 
-		)
-		select
-			strTxnIdentifier = @strTxnIdentifier
-			,intContractHeaderId = @intContractHeaderId
-			,intContractDetailId = @intContractDetailId
-			,intContractSeq = @intContractSeq
-			,dblOldCashPrice = @dblCashPrice
-			,dblNewCashPrice = @dblNewPrice
-			,dblOldTotalCost = @dblOldTotalCost
-			,dblNewTotalCost = @dblTotalCost
-			,intValueCurrencyId = @intValueCurrencyId
-			,ysnValue = case when @strContractBase = 'Value' then 1 else 0 end
+			select @dblTotalSequenceValue = sum(cd.dblTotalCost * isnull(x.dblRate,1))
+			from
+				tblCTContractHeader ch
+				join tblCTContractDetail cd on ch.intContractHeaderId = cd.intContractHeaderId
+				left join (
+					select
+						dblRate
+						,intFromCurrencyId
+						,intToCurrencyId
+					from 
+					(
+					select
+						intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
+						, cerd.dblRate
+						, cer.intFromCurrencyId
+						, cer.intToCurrencyId
+						, cerd.dtmValidFromDate
+						from
+							tblSMCurrencyExchangeRate  cer
+							join tblSMCurrencyExchangeRateDetail cerd on cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId
+						where
+							cerd.dtmValidFromDate <= getdate()
+					) exr
+					where exr.intRowId = 1
+				) x on x.intFromCurrencyId = cd.intCurrencyId and x.intToCurrencyId = ch.intValueCurrencyId
+			where
+				ch.intContractHeaderId = @intContractHeaderId
+
+			if (@dblHeaderValue < @dblTotalSequenceValue)
+			begin
+				update tblCTContractHeader set dblValue = @dblTotalSequenceValue, intConcurrencyId = (intConcurrencyId + 1) where intContractHeaderId = @intContractHeaderId;
+				select @ysnHedearValueChange = 1;
+			end
+
+		end
+
+		select @strXML = '
+			<rows>
+				<row>
+					<intContractDetailId>'+ convert(nvarchar(20),@intContractDetailId) +'</intContractDetailId>
+					<ysnStatusChange>0</ysnStatusChange>
+					<strRowState>Modified</strRowState>
+				</row>
+			</rows>
+		';
+
+		--No need to call uspCTSaveContract from importing
+		--EXEC uspCTSaveContract @intContractHeaderId = @intContractHeaderId, @userId = @intUserId, @strXML = '', @strTFXML = @strXML;
 		
 		/*Begin of extracted code from uspCTSaveContract*/
 
@@ -178,117 +203,6 @@ BEGIN
 			OR		LD.intPContractDetailId = @intContractDetailId)
 		END
 
-		if (@ysnLastRecord = 1)
-		begin
-
-			insert into @UpdatedContract(intContractHeaderId, ysnValue, intValueCurrencyId) select distinct intContractHeaderId, ysnValue, intValueCurrencyId from tblCTUpdatedSequencePrice where strTxnIdentifier = @strTxnIdentifier;
-			
-			select @strScreen = 'Value from ' + @strScreen;
-
-			while exists (select top 1 1 from @UpdatedContract)
-			begin
-
-				select top 1 @intActiveContractHeaderId = intContractHeaderId, @ysnActiveValue = ysnValue, @intActiveValueCurrencyId = intValueCurrencyId from @UpdatedContract;
-				
-				if (@ysnActiveValue = 1)
-				begin
-					select @dblTotalSequenceValue = sum(cd.dblTotalCost * isnull(x.dblRate,1))
-					from
-						tblCTContractDetail cd
-						left join (
-							select
-								dblRate
-								,intFromCurrencyId
-								,intToCurrencyId
-							from 
-							(
-							select
-								intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
-								, cerd.dblRate
-								, cer.intFromCurrencyId
-								, cer.intToCurrencyId
-								, cerd.dtmValidFromDate
-								from
-									tblSMCurrencyExchangeRate  cer
-									join tblSMCurrencyExchangeRateDetail cerd on cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId
-								where
-									cerd.dtmValidFromDate <= getdate()
-							) exr
-							where exr.intRowId = 1
-						) x on x.intFromCurrencyId = cd.intCurrencyId and x.intToCurrencyId = @intActiveValueCurrencyId
-					where
-						cd.intContractHeaderId = @intActiveContractHeaderId
-
-					if (@dblHeaderValue < @dblTotalSequenceValue)
-					begin
-						update tblCTContractHeader set dblValue = @dblTotalSequenceValue, intConcurrencyId = (intConcurrencyId + 1) where intContractHeaderId = @intContractHeaderId;
-
-						INSERT INTO @auditLog (
-							[Id]
-							, [Namespace]
-							, [Action]
-							, [Description]
-							, [From]
-							, [To]
-							, [EntityId]
-						)
-						SELECT
-							[Id]				= L.intContractHeaderId
-							, [Namespace]		= 'ContractManagement.view.Contract'
-							, [Action]			= 'Updated'
-							, [Change]		    = 'Value'
-							, [From]			= @dblHeaderValue
-							, [To]				= @dblTotalSequenceValue
-							, [EntityId]		= @intUserId
-						FROM tblCTUpdatedSequencePrice L
-
-					end
-				end
-
-				delete @auditLog;
-
-                INSERT INTO @auditLog (
-                    [Id]
-                    , [Namespace]
-                    , [Action]
-                    , [Description]
-                    , [From]
-                    , [To]
-                    , [EntityId]
-                )
-                SELECT
-                    [Id]				= L.intContractHeaderId
-                    , [Namespace]		= 'ContractManagement.view.Contract'
-                    , [Action]			= 'Updated'
-                    , [Change]		    = 'Cash Price'
-                    , [From]			= L.dblOldCashPrice
-                    , [To]				= L.dblNewCashPrice
-                    , [EntityId]		= @intUserId
-                FROM tblCTUpdatedSequencePrice L
-				union all
-                SELECT
-                    [Id]				= L.intContractHeaderId
-                    , [Namespace]		= 'ContractManagement.view.Contract'
-                    , [Action]			= 'Updated'
-                    , [Change]		    = 'Total Cost'
-                    , [From]			= L.dblOldTotalCost
-                    , [To]				= L.dblNewTotalCost
-                    , [EntityId]		= @intUserId
-                FROM tblCTUpdatedSequencePrice L
-
-                IF EXISTS (SELECT TOP 1 NULL FROM @auditLog)
-                    EXEC dbo.uspSMBatchAuditLog
-                        @AuditLogParam 	= @auditLog
-                        ,@EntityId		= @intUserId
-
-				select @ysnActiveValue = null, @intActiveValueCurrencyId = null;
-				delete @UpdatedContract where intContractHeaderId = @intActiveContractHeaderId;
-			end
-
-			delete tblCTUpdatedSequencePrice where strTxnIdentifier = @strTxnIdentifier;
-
-		end
-
 		SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
 		SELECT  @ysnOnceApproved  =	ysnOnceApproved,
@@ -315,11 +229,58 @@ BEGIN
 
 		/*End of extracted code from uspCTSaveContract*/
 
+		set @logDetails = '
+		{
+					"change": "tblCTContractHeader"
+					,"iconCls":"small-tree-grid"
+					,"changeDescription": "Pricing"
+					,"children": [
+						{
+							"action": "Updated"
+							,"change": "Updated - Record: Sequence 1"
+							,"iconCls": "small-tree-modified"
+							,"children": [
+								{
+									"change": "Cash Price"
+									,"from": "' + convert(nvarchar(38),@dblCashPrice) + '"
+									,"to": "' + convert(nvarchar(38),@dblNewPrice) + '"
+									,"leaf": true
+									,"iconCls": "small-gear"
+								},
+								{
+									"change": "Total Cost"
+									,"from": "15232.24"
+									,"to": "163254.34"
+									,"leaf": true
+									,"iconCls": "small-gear"
+								}
+							]
+						}
+					]
+		}
+		';
+
+		select @fromHeaderValue = '', @toHeaderValue = '';
+		if (@ysnHedearValueChange = 1)
+		begin
+			select @fromHeaderValue = convert(nvarchar(38),@dblHeaderValue), @toHeaderValue = convert(nvarchar(38),@dblTotalSequenceValue);
+		end
+
+		EXEC uspSMAuditLog
+			@screenName = 'ContractManagement.view.Contract',
+			@entityId = @intUserId,
+			@actionType = 'Updated',
+			@actionIcon = 'small-tree-modified',
+			@changeDescription =  @strScreen,
+			@keyValue = @intContractHeaderId,
+			@details = @logDetails,
+			@fromValue = @fromHeaderValue,
+			@toValue = @toHeaderValue
+
 	goSkip:
 
 	end try
 	begin catch
-		delete tblCTUpdatedSequencePrice where strTxnIdentifier = @strTxnIdentifier;
 		SET @ErrMsg = ERROR_MESSAGE()  
 		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT') 
 	end catch
