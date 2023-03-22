@@ -1567,6 +1567,8 @@
     <Build Include="dbo\Tables\tblQMImportType.sql" />
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
