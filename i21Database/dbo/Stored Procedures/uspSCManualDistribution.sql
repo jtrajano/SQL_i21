@@ -716,7 +716,7 @@ END
 			WHERE intInventoryReceiptId = @InventoryReceiptId
 
 			
-			EXEC [uspSCTicketClearLoadDetail] @TICKET_ID = @intTicketId, @USER_ID = @intUserId
+			EXEC [uspSCTicketClearLoadDetail] @TICKET_ID = @intTicketId, @USER_ID = @intUserId, @DELETE_ALL = 0
 			
 			WHILE @CURRENT_RECEIPT_ITEM_ID IS NOT NULL
 			BEGIN
@@ -734,6 +734,7 @@ END
 					 , @dblQty = @CURRENT_RECEIPT_QUANTITY
 					 , @intItemUOMId = @CURRENT_RECEIPT_ITEM_UOM_ID
 					 , @intEntityUserId = @intUserId
+					 , @intInventoryReceiptItemId = @CURRENT_RECEIPT_ITEM_ID
 					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT 
 				
 				SELECT 
@@ -741,8 +742,14 @@ END
 				FROM tblICInventoryReceiptItem 
 				WHERE intInventoryReceiptId = @InventoryReceiptId
 					AND intInventoryReceiptItemId > @CURRENT_RECEIPT_ITEM_ID
+
+
 			END
 
+
+			UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+
+			
 		END 
 
 
