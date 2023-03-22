@@ -28,10 +28,7 @@ SELECT intBillDetailId					    = BD.intBillDetailId
 	 , strGrade								= CAS.strDescription
      , strPreInvoiceGardenInvoiceNo			= BD.strPreInvoiceGardenNumber
 	 , strGardenInvoiceNo					= S.strChopNumber
-     , strPreInvoicePurchaseType			= CASE WHEN B.intTransactionType = 2 THEN CAST('Vendor Prepayment' AS NVARCHAR(100))
-												   WHEN B.intTransactionType = 3 THEN CAST('Debit Memo' AS NVARCHAR(100))
-												   ELSE CAST('Voucher' AS NVARCHAR(100))
-											   END	 
+     , strPreInvoicePurchaseType			= BD.strPreInvoicePurchaseType
      , strPreInvoiceDocumentNo				= BD.strBillOfLading
      , dblNetWtPackages						= CAST(BD.intNumOfPackagesUOM AS NUMERIC(18,6)) --BD.dblNetWeightPerPackage
      , dblNoPackages						= BD.dblNumberOfPackages
