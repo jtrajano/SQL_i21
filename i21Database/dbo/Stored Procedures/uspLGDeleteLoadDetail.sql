@@ -25,7 +25,9 @@ BEGIN TRY
             ,@intLoadId = intLoadId
         FROM tblLGLoadDetail
         WHERE intLoadDetailId = @intLoadDetailId
-
+        /*
+        --MonGonzales- the scheduling has been removed in the add load detail 
+        -- please check my comment there thank you 
         -- Return contract scheduled quantity
         EXEC uspCTUpdateScheduleQuantityUsingUOM
 			@intContractDetailId
@@ -33,8 +35,8 @@ BEGIN TRY
 			,@intEntityUserId
 			,@intLoadDetailId
 			,'Load Schedule'
-			,@intItemUOMId
-
+		,@intItemUOMId
+        */
         -- Audit log
         -- TODO: Upgrade implementation of audit log with the new method in higher versions
         DECLARE @details NVARCHAR(MAX)

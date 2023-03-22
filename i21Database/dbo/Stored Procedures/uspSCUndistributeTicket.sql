@@ -1847,13 +1847,15 @@ BEGIN TRY
 			
 			DECLARE @CURRENT_LOAD_DETAIL_ID INT
 
-			EXEC [uspSCTicketClearLoadDetail] @TICKET_ID = @intTicketId, @USER_ID = @intUserId
+			EXEC [uspSCTicketClearLoadDetail] @TICKET_ID = @intTicketId, @USER_ID = @intUserId, @DELETE_ALL = 1
 
 			SELECT 
 				@dblTicketNetUnits = dblNetUnits
 				, @intLoadId = intLoadId 
 				, @intTicketItemUOMId = intItemUOMIdTo
 			FROM tblSCTicket WHERE intTicketId = @intTicketId	
+			
+			UPDATE tblLGLoad SET intShipmentStatus = 1 WHERE intLoadId = @intLoadId
 
 			EXEC uspLGGenerateDummyLoadDetail  
 					 @intLoadId = @intLoadId
