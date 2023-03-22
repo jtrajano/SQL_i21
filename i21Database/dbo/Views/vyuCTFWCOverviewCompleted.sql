@@ -49,7 +49,7 @@ AS
 				strPortOfArrival = DP.strCity,
 				dtmETA = CTD.dtmEtaPod,
 				dtmMTA = CTD.dtmEtaPod + ISNULL(MFL.dblMUToAvailableForBlending,0),
-				dtmDaysLate = CTD.dtmPlannedAvailabilityDate +  CTD.dtmEtaPod + ISNULL(MFL.dblMUToAvailableForBlending,0),
+				intDaysLate = CASE WHEN LGL.dtmPlannedAvailabilityDate IS NULL THEN 0 ELSE DATEDIFF(Day, CTD.dtmEtaPod + ISNULL(MFL.dblMUToAvailableForBlending,0), LGL.dtmPlannedAvailabilityDate) END,
 				dtmReportRunOn = getdate(),
 				strFCPackageType = ICQM.strUnitMeasure,
 				strLineItemStatus = CTS.strContractStatus,

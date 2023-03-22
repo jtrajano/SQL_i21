@@ -1578,6 +1578,15 @@
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomBasisEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCustomDerivativeTransactionHistory.sql" />
+    <Build Include="dbo\Views\vyuRKCustomDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuRKCustomDailyAveragePriceDetail.sql" />
+    <Build Include="dbo\Views\vyuRKCustomDerivativeEntry.sql" />
+    <Build Include="dbo\Views\vyuRKCustomSettlementPrice.sql" />
     <Build Include="dbo\Tables\tblQMImportType.sql" />
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
@@ -4696,6 +4705,8 @@
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrder.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrderDetail.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
@@ -12153,5 +12164,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\QM\6_CustomControls.sql" />
   </ItemGroup>
 </Project>

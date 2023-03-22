@@ -7,7 +7,9 @@ SELECT
 	strAccountType = CASE vendor.intVendorType WHEN 0 THEN 'Company' ELSE 'Person' END,
 	contactEntity.strName strContactName,
 	vendor.intShipFromId intShipFromLocationId,
+	vendor.intBillToId intBillToLocationId,
 	entityLocation.strLocationName shipFromLocationName,
+	billToLocation.strLocationName billToLocationName,
 	vendor.dtmCreated,
 	vendor.dtmLastModified dtmDateModified,
 	vendor.ysnPymtCtrlActive ysnActive,
@@ -36,6 +38,11 @@ SELECT
 	vendor.ysnTransportTerminal ysnSupplier,
 	entityLocation.intShipViaId,
 	shipVia.strShipVia,
+	vendor.intCurrencyId,
+	vendor.intTermsId,
+	entityLocation.intFreightTermId intDefaultFreightTermId,
+	vendor.intDefaultLocationId,
+	entityContact.intEntityContactId intDefaultContactId,
 	COALESCE(updated.dtmDate, vendor.dtmLastModified, created.dtmDate, vendor.dtmCreated) dtmDateLastUpdated
 FROM tblAPVendor vendor
 JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
@@ -48,6 +55,8 @@ LEFT JOIN tblEMEntityLocation entityLocation ON entityLocation.intEntityId = ent
 	AND entityLocation.intEntityLocationId = entityContact.intEntityLocationId
 LEFT JOIN tblEMEntityLocation shipFromLocation ON shipFromLocation.intEntityLocationId = vendor.intShipFromId
 	AND shipFromLocation.intEntityId = vendor.intEntityId
+LEFT JOIN tblEMEntityLocation billToLocation ON billToLocation.intEntityLocationId = vendor.intBillToId
+	AND billToLocation.intEntityId = vendor.intEntityId
 LEFT JOIN tblEMEntityPhoneNumber phoneNumber ON phoneNumber.intEntityId = contactEntity.intEntityId
 LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = entityLocation.intShipViaId
 OUTER APPLY (
