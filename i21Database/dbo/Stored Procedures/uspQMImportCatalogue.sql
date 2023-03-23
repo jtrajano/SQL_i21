@@ -4,6 +4,12 @@ CREATE PROCEDURE [dbo].[uspQMImportCatalogue]
 )
 AS
 
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS ON
+
 -- Check if API errors already exists in the log table
 IF EXISTS (SELECT 1 FROM tblQMImportCatalogue WHERE intImportLogId = @intImportLogId AND ysnSuccess = 0)
 	BEGIN
