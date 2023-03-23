@@ -413,7 +413,7 @@ BEGIN
 	,ysnCustomerStorage
 	)
 	SELECT 
-	-9 AS intStorageScheduleTypeId
+	-10 AS intStorageScheduleTypeId
 	,'AG Work Order' AS strStorageTypeDescription
 	,'AWO'strStorageTypeCode
 	, 0 AS ysnReceiptedStorage
