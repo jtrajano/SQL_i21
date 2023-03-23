@@ -6,7 +6,7 @@
 	,@CustomerLocationId	INT
 	,@SiteId				INT
 	,@FreightTermId			INT
-	,@FOB					NVARCHAR(100)
+	,@FOB					NVARCHAR(100) = NULL
 )
 RETURNS INT
 AS

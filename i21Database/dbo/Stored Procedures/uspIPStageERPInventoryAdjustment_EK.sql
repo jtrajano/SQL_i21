@@ -15,18 +15,18 @@ BEGIN TRY
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
-
 	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
 	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
 	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
 	WHERE strType IN (
-			'Quantity Adj'
-			,'Consumption'
-			,'Lot Move'
+			'Stock Adjustment'
+			,'Stock Consumption'
+			,'Stock Movement'
+			,'Stock Transfer'
 			)
-	AND intStatusId IS NULL
+		AND intStatusId IS NULL
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM @tblIPIDOCXMLStage
@@ -76,8 +76,8 @@ BEGIN TRY
 				,strStorageUnit
 				,dblQuantity
 				,strQuantityUOM
-				,dblNetWeight 
-				,strNetWeightUOM 
+				,dblNetWeight
+				,strNetWeightUOM
 				,strStatus
 				,strReasonCode
 				,strNotes
@@ -85,22 +85,29 @@ BEGIN TRY
 				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
-				,dtmExpiryDate 
+				,dtmExpiryDate
+				,strTranferOrderStatus
 				)
 			OUTPUT INSERTED.strLotNo
 			INTO @tblIPLot
 			SELECT DocNo
 				,CASE 
-					WHEN TransactionType IN (12,20)
+					WHEN TransactionType IN (
+							12
+							,20
+							)
 						THEN SourceLocation
 					ELSE Location
 					END
 				,ActionId
-				,IsNULL(CreatedDate,GETDATE())
+				,IsNULL(CreatedDate, GETDATE())
 				,CreatedBy
 				,TransactionType
 				,CASE 
-					WHEN TransactionType IN (12,20)
+					WHEN TransactionType IN (
+							12
+							,20
+							)
 						THEN SourceStorageLocation
 					ELSE StorageLocation
 					END
@@ -108,22 +115,51 @@ BEGIN TRY
 				,MotherLotNo
 				,LotNo
 				,CASE 
-					WHEN TransactionType IN (12,20)
+					WHEN TransactionType IN (
+							12
+							,20
+							)
 						THEN SourceStorageUnit
 					ELSE StorageUnit
 					END
-				,Quantity
+
+				,CASE 
+					WHEN Quantity = ''
+						THEN NULL
+					ELSE (
+							CASE 
+								WHEN TransactionType = 8
+									THEN - Convert(numeric(18,6),Quantity)
+								ELSE Convert(numeric(18,6),Quantity)
+								END
+							)
+					END
 				,QuantityUOM
-				,NetWeight 
-				,NetWeightUOM 
-				,Status
+				,CASE 
+					WHEN NetWeight = ''
+						THEN NULL
+					ELSE (
+							CASE 
+								WHEN TransactionType = 8
+									THEN - Convert(numeric(18,6),NetWeight)
+								ELSE Convert(numeric(18,6),NetWeight)
+								END
+							)
+					END
+				,NetWeightUOM
+				,STATUS
 				,ReasonCode
 				,Notes
 				,NewStorageLocation
 				,NewStorageUnit
 				,OrderNo
 				,OrderCompleted
-				,ExpiryDate 
+				,ExpiryDate
+				,CASE 
+					WHEN TransactionType = 12
+						THEN 'Open'
+					ELSE NULL
+					END
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../CtrlPoint/DocNo'
 					,Location NVARCHAR(6)
@@ -136,11 +172,11 @@ BEGIN TRY
 					,MotherLotNo NVARCHAR(50)
 					,LotNo NVARCHAR(50)
 					,StorageUnit NVARCHAR(50)
-					,Quantity NUMERIC(18, 6)
+					,Quantity NVARCHAR(50)
 					,QuantityUOM NVARCHAR(50)
-					,NetWeight NUMERIC(18, 6)
+					,NetWeight NVARCHAR(50)
 					,NetWeightUOM NVARCHAR(50)
-					,Status NVARCHAR(50)
+					,STATUS NVARCHAR(50)
 					,ReasonCode NVARCHAR(50)
 					,Notes NVARCHAR(2048)
 					,SourceLocation NVARCHAR(50)
@@ -148,9 +184,9 @@ BEGIN TRY
 					,SourceStorageUnit NVARCHAR(50)
 					,NewStorageLocation NVARCHAR(50)
 					,NewStorageUnit NVARCHAR(50)
-					,OrderNo nvarchar(50)
-					,OrderCompleted integer
-					,ExpiryDate Datetime
+					,OrderNo NVARCHAR(50)
+					,OrderCompleted INTEGER
+					,ExpiryDate DATETIME
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ','
@@ -196,14 +232,16 @@ BEGIN TRY
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
-				,(CASE 
-					WHEN TransactionTypeId = 8--(Consume)
+				,(
+					CASE 
+						WHEN TransactionTypeId = 8 --(Consume)
 							THEN 11
-					WHEN TransactionTypeId = 10 --Inventory Adjustment - Quantity
-						THEN 15
-					WHEN TransactionTypeId = 20--Inventory Adjustment - Lot Move
-						THEN 14
-					END) AS intMessageTypeId
+						WHEN TransactionTypeId = 10 --Inventory Adjustment - Quantity
+							THEN 15
+						WHEN TransactionTypeId = 20 --Inventory Adjustment - Lot Move
+							THEN 14
+						END
+					) AS intMessageTypeId
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
@@ -211,7 +249,7 @@ BEGIN TRY
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
-					,TransactionTypeId int
+					,TransactionTypeId INT
 					)
 
 			--Move to Error

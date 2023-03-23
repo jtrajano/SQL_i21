@@ -193,12 +193,12 @@ BEGIN TRY
 					END AS RecipeItemType
 				,CASE 
 					WHEN BlendCode = ItemCode
-						THEN @strOutputItemLowerTolerance
+						THEN IsNULL(dblSanitizationOrderOutputQtyTolerancePercentage,@strOutputItemLowerTolerance)
 					ELSE @strInputItemLowerTolerance
 					END AS LowerTolerance
 				,CASE 
 					WHEN BlendCode = ItemCode
-						THEN @strOutputItemUpperTolerance
+						THEN IsNULL(dblSanitizationOrderOutputQtyTolerancePercentage,@strOutputItemUpperTolerance)
 					ELSE @strInputItemUpperTolerance
 					END AS UpperTolerance
 				,WeekCommencing AS ValidFrom

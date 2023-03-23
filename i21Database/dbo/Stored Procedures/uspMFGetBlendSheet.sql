@@ -39,6 +39,11 @@ SELECT WorkOrder.intWorkOrderId
 	 , WorkOrder.intIssuedUOMTypeId
 	 , IssuedUOMType.strName			AS strIssuedUOMType
 	 , ISNULL(WorkOrderStatus.strName, 'Not Released')	AS strWorkOrderStatus
+	 , CompanyLocation.strLocationName  AS strLocationName
+	 , ISNULL(WorkOrder.dblUpperTolerance, RecipeOutput.dblUpperTolerance) AS dblUpperTolerance
+	 , ISNULL(WorkOrder.dblLowerTolerance, RecipeOutput.dblUpperTolerance) AS dblLowerTolerance
+	 , ISNULL(WorkOrder.dblCalculatedUpperTolerance, RecipeOutput.dblCalculatedUpperTolerance) AS dblCalculatedUpperTolerance
+	 , ISNULL(WorkOrder.dblCalculatedLowerTolerance, RecipeOutput.dblCalculatedLowerTolerance) AS dblCalculatedLowerTolerance
 FROM tblMFWorkOrder AS WorkOrder 
 JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId
 JOIN tblICItemUOM AS ItemUOM ON WorkOrder.intItemUOMId = ItemUOM.intItemUOMId
@@ -51,4 +56,7 @@ OUTER APPLY (SELECT strName
 			 FROM tblMFMachineIssuedUOMType 
 			 WHERE intIssuedUOMTypeId = WorkOrder.intIssuedUOMTypeId) AS IssuedUOMType
 LEFT JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrderStatus.intStatusId = WorkOrder.intStatusId
+LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON WorkOrder.intLocationId = CompanyLocation.intCompanyLocationId
+LEFT JOIN tblMFWorkOrderRecipe AS WorkOrderRecipe ON WorkOrder.intWorkOrderId = WorkOrderRecipe.intWorkOrderId
+LEFT JOIN tblMFRecipeItem AS RecipeOutput ON WorkOrderRecipe.intRecipeId = RecipeOutput.intRecipeId AND WorkOrder.intItemId = RecipeOutput.intItemId AND RecipeOutput.intRecipeItemTypeId = 2
 WHERE WorkOrder.intWorkOrderId = @intWorkOrderId

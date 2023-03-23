@@ -137,6 +137,16 @@ SELECT
     ,C.intBatchId intChildBatchId
 	,C.strBatchId strChildBatchId
     ,A.strBOLNo
+	,strContractNumber=CH.strContractNumber
+	,intContractSeq=CD.intContractSeq
+	,strSampleTypeName=ST.strSampleTypeName
+	,strOriginalFeedStock = OriginalItem.strShortName
+	,dtmShippingDate=B.dtmShippingDate
+	,strERPPONumber2= A.strERPPONumber2
+	,strVendor=E1.strName
+	,strFines=A.strFines
+	,dtmPOCreated=A.dtmPOCreated
+	,strIBDNo=A.strIBDNo
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
@@ -154,6 +164,11 @@ LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId= A.intPackageUOMId
 LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = A.intBrokerId
 LEFT JOIN tblMFReasonCode Reason ON Reason.intReasonCodeId = A.intReasonCodeId
 LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID= A.intCurrencyId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblQMSample S ON S.intSampleId = A.intSampleId
+LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intEntityId
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  

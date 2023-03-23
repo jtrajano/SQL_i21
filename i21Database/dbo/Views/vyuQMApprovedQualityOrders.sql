@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuQMApprovedQualityOrders]
 AS
-SELECT
+SELECT 
     -- Batch fields
     B.intBatchId
     ,B.strBatchId
@@ -25,7 +25,7 @@ SELECT
     ,I.intCommodityId
     ,I.strItemNo
     ,I.strDescription
-    ,[dblQty] = B.dblTotalQuantity
+    ,[dblQty] = B.dblPackagesBought
     ,[intQtyItemUOMId] = QIUOM.intItemUOMId
     ,[intQtyUnitMeasureId] = QUM.intUnitMeasureId
     ,[strQtyUnitMeasure] = QUM.strSymbol
@@ -36,7 +36,7 @@ SELECT
     ,[strWeightUnitMeasure] = WUM.strSymbol
     ,[dblWeightPerUnit] = ISNULL(dbo.fnLGGetItemUnitConversion(I.intItemId, QIUOM.intItemUOMId, WUM.intUnitMeasureId), 0)
     ,[strManufacturingLeafType] = LEAF_TYPE.strDescription
-
+    ,UM.strLocationName strMixingUnitLocation
     ,CH.intContractHeaderId
     ,CD.intContractDetailId
     ,CH.strContractNumber
@@ -74,22 +74,23 @@ LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = B.intMarketZoneId
 LEFT JOIN vyuEMSearchEntityBroker EB ON EB.intEntityId = B.intBrokerId
 LEFT JOIN tblQMGardenMark GM ON GM.intGardenMarkId = B.intGardenMarkId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intLocationId
+LEFT JOIN tblSMCompanyLocation UM ON UM.intCompanyLocationId = B.intMixingUnitLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intDestinationStorageLocationId
 LEFT JOIN tblICItem I ON I.intItemId = B.intTealingoItemId
 LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.intCommodityAttributeId = S.intManufacturingLeafTypeId
 -- Qty UOM Auction
-LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intItemUOMId AND QIUOM.intItemId = I.intItemId
+LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intPackageUOMId AND QIUOM.intItemId = I.intItemId
 LEFT JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = QIUOM.intUnitMeasureId
 -- Weight UOM
 LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = I.intItemId
-LEFT JOIN vyuQMGetSupplier SV ON SV.intEntityId = S.intEntityId
+--LEFT JOIN vyuQMGetSupplier SV ON SV.intEntityId = S.intEntityId
 LEFT JOIN tblICItemUOM SPIUOM ON SPIUOM.intItemId = I.intItemId AND SPIUOM.intUnitMeasureId = S.intB1PriceUOMId
 LEFT JOIN tblICUnitMeasure SPUOM ON SPUOM.intUnitMeasureId = SPIUOM.intUnitMeasureId
 -- Contract side tables
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN vyuQMGetSupplier V ON V.intEntityId = CH.intEntityId
+--LEFT JOIN vyuQMGetSupplier V ON V.intEntityId = CH.intEntityId
 LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM PIUOM ON PIUOM.intItemUOMId = CD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureId
@@ -103,8 +104,20 @@ OUTER APPLY (
     INNER JOIN tblSMCurrency C ON C.intCurrencyID = CP.intDefaultCurrencyId
 ) DFC
 OUTER APPLY (
-    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblTotalQuantity)
+    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblPackagesBought)
 ) WQTY
+OUTER Apply (Select Top 1 V1.intEntityId,V1.strEntityName,V1.intDefaultLocationId,V1.strDefaultLocation  from vyuQMGetSupplier V1 Where V1.intEntityId = CH.intEntityId) V
+OUTER Apply (Select Top 1 SV1.intEntityId,SV1.strEntityName,SV1.intDefaultLocationId,SV1.strDefaultLocation  from vyuQMGetSupplier SV1 Where SV1.intEntityId = S.intEntityId) SV
+LEFT JOIN (tblLGLoadDetail LD INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ISNULL(L.ysnCancelled, 0) = 0)
+    ON LD.intBatchId = B.intBatchId
+OUTER Apply
+( select  intSampleId,strApprovalStatus from  tblQMCatalogueReconciliationDetail CRD INNER JOIN
+tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId inner join
+tblSMTransaction SMT ON SMT.intRecordId = CR.intCatalogueReconciliationId AND SMT.strTransactionNo = CR.strReconciliationNumber
+where SMT.strApprovalStatus IN ('Approved','No Need for Apprval') AND CRD.intSampleId = S.intSampleId )Qlty
+WHERE LD.intLoadDetailId IS NULL 
+AND ((S.intContractDetailId IS NOT NULL AND strApprovalStatus IS NULL)
+OR (S.intContractDetailId IS NULL AND strApprovalStatus IS NOT NULL))
 
 GO
 

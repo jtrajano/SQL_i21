@@ -1,24 +1,24 @@
 CREATE PROCEDURE uspQMGenerateSampleCatalogueImportAuditLog
-    @intSampleId INT
-    ,@intUserEntityId INT
+    @intUserEntityId INT
     ,@strRemarks NVARCHAR(100) = NULL
     ,@ysnCreate BIT = 0
     ,@ysnBeforeUpdate BIT = 1
+    ,@intSampleId INT = NULL
 AS
 
 BEGIN TRY
 	-- BEGIN TRANSACTION
         DECLARE
             @tblLog SingleAuditLogParam
-            ,@tblHeaderLog SingleAuditLogParam
-            ,@tblLogTestResult SingleAuditLogParam
+            -- ,@tblHeaderLog SingleAuditLogParam
+            -- ,@tblLogTestResult SingleAuditLogParam
             ,@intKey INT = 0
             ,@intTestResultKey INT = 0
 
         -- If the sample is just being created, add created audit log
         IF @ysnCreate = 1
         BEGIN
-            SET @intKey = 2
+            SET @intKey = 1
 
             INSERT INTO @tblLog (
                 [Id]
@@ -29,18 +29,24 @@ BEGIN TRY
                 ,[ParentId]
             )
             SELECT
-                [Id]            = 1
+                [Id]            = @intKey   
                 ,[Action]       = 'Created'
                 ,[Change]       = NULL--'Created - Record' + CASE WHEN ISNULL(@strRemarks, '') <> '' THEN ' (' + @strRemarks + ')' ELSE '' END + ': ' + @strSampleNumber
                 ,[From]         = NULL
                 ,[To]           = NULL
                 ,[ParentId]     = NULL
             
-            GOTO POST
+            EXEC uspSMSingleAuditLog
+                @screenName     = 'Quality.view.QualitySample',
+                @recordId       = @intSampleId,
+                @entityId       = @intUserEntityId,
+                @AuditLogParam  = @tblLog
+            
+            RETURN
         END
 
         -- Store the original values in a temp table before the sample is updated
-        IF @ysnBeforeUpdate = 1 AND @ysnCreate = 0
+        IF @ysnBeforeUpdate = 1
         BEGIN
             IF OBJECT_ID('tempdb..##tmpQMSample') IS NULL
             BEGIN
@@ -214,9 +220,173 @@ BEGIN TRY
                 [dblB5Price],
                 [intB5PriceUOMId],
                 [strB5PriceUOM],
-                [ysnBought]
+                [ysnBought],
+				intPackageTypeId
             )
-            SELECT * FROM tblQMSample WHERE intSampleId = @intSampleId
+            SELECT
+                [intSampleId],
+                [intConcurrencyId],
+                [intCompanyId],
+                [intSampleTypeId],
+                [strSampleNumber],
+                [intCompanyLocationId],
+                [intParentSampleId],
+                [strSampleRefNo],
+                [intProductTypeId],
+                [intProductValueId],
+                [intSampleStatusId],
+                [intPreviousSampleStatusId],
+                [intItemId],
+                [intItemContractId],
+                [intContractHeaderId],
+                [intContractDetailId],
+                [intShipmentBLContainerId],
+                [intShipmentBLContainerContractId],
+                [intShipmentId],
+                [intShipmentContractQtyId],
+                [intCountryID],
+                [ysnIsContractCompleted],
+                [intLotStatusId],
+                [intEntityId],
+                [intShipperEntityId],
+                [strShipmentNumber],
+                [strLotNumber],
+                [strSampleNote],
+                [dtmSampleReceivedDate],
+                [dtmTestedOn],
+                [intTestedById],
+                [dblSampleQty],
+                [intSampleUOMId],
+                [dblRepresentingQty],
+                [intRepresentingUOMId],
+                [strRefNo],
+                [dtmTestingStartDate],
+                [dtmTestingEndDate],
+                [dtmSamplingEndDate],
+                [strSamplingMethod],
+                [strContainerNumber],
+                [strMarks],
+                [intCompanyLocationSubLocationId],
+                [strCountry],
+                [intItemBundleId],
+                [intLoadContainerId],
+                [intLoadDetailContainerLinkId],
+                [intLoadId],
+                [intLoadDetailId],
+                [dtmBusinessDate],
+                [intShiftId],
+                [intLocationId],
+                [intInventoryReceiptId],
+                [intInventoryShipmentId],
+                [intWorkOrderId],
+                [strComment],
+                [ysnAdjustInventoryQtyBySampleQty],
+                [intStorageLocationId],
+                [intBookId],
+                [intSubBookId],
+                [strChildLotNumber],
+                [strCourier],
+                [strCourierRef],
+                [intForwardingAgentId],
+                [strForwardingAgentRef],
+                [strSentBy],
+                [intSentById],
+                [intSampleRefId],
+                [ysnParent],
+                [ysnIgnoreContract],
+                [ysnImpactPricing],
+                [dtmRequestedDate],
+                [dtmSampleSentDate],
+                [intSamplingCriteriaId],
+                [strSendSampleTo],
+                [strRepresentLotNumber],
+                [intRelatedSampleId],
+                [intTypeId],
+                [intCuppingSessionDetailId],
+                [intCreatedUserId],
+                [dtmCreated],
+                [intLastModifiedUserId],
+                [dtmLastModified],
+                [intSaleYearId],
+                [strSaleNumber],
+                [dtmSaleDate],
+                [intCatalogueTypeId],
+                [dtmPromptDate],
+                [strChopNumber],
+                [intBrokerId],
+                [intGradeId],
+                [intLeafCategoryId],
+                [intManufacturingLeafTypeId],
+                [intSeasonId],
+                [intGardenMarkId],
+                [dtmManufacturingDate],
+                [intTotalNumberOfPackageBreakups],
+                [intNetWtPerPackagesUOMId],
+                [intNoOfPackages],
+                [intNetWtSecondPackageBreakUOMId],
+                [intNoOfPackagesSecondPackageBreak],
+                [intNetWtThirdPackageBreakUOMId],
+                [intNoOfPackagesThirdPackageBreak],
+                [intProductLineId],
+                [ysnOrganic],
+                [dblSupplierValuationPrice],
+                [intProducerId],
+                [intPurchaseGroupId],
+                [strERPRefNo],
+                [dblGrossWeight],
+                [dblTareWeight],
+                [dblNetWeight],
+                [strBatchNo],
+                [str3PLStatus],
+                [strAdditionalSupplierReference],
+                [intAWBSampleReceived],
+                [strAWBSampleReference],
+                [dblBasePrice],
+                [ysnBoughtAsReserve],
+                [intCurrencyId],
+                [ysnEuropeanCompliantFlag],
+                [intEvaluatorsCodeAtTBOId],
+                [intFromLocationCodeId],
+                [strSampleBoxNumber],
+                [intBrandId],
+                [intValuationGroupId],
+                [strMusterLot],
+                [strMissingLot],
+                [intMarketZoneId],
+                [intDestinationStorageLocationId],
+                [strComments2],
+                [strComments3],
+                [strBuyingOrderNo],
+                [intTINClearanceId],
+                [intBuyer1Id],
+                [dblB1QtyBought],
+                [intB1QtyUOMId],
+                [dblB1Price],
+                [intB1PriceUOMId],
+                [intBuyer2Id],
+                [dblB2QtyBought],
+                [intB2QtyUOMId],
+                [dblB2Price],
+                [intB2PriceUOMId],
+                [intBuyer3Id],
+                [dblB3QtyBought],
+                [intB3QtyUOMId],
+                [dblB3Price],
+                [intB3PriceUOMId],
+                [intBuyer4Id],
+                [dblB4QtyBought],
+                [intB4QtyUOMId],
+                [dblB4Price],
+                [intB4PriceUOMId],
+                [intBuyer5Id],
+                [dblB5QtyBought],
+                [intB5QtyUOMId],
+                [dblB5Price],
+                [intB5PriceUOMId],
+                [strB5PriceUOM],
+                [ysnBought],
+				intPackageTypeId
+            FROM tblQMSample WHERE intSampleId = @intSampleId
             SET IDENTITY_INSERT ##tmpQMSample OFF
 
             SET IDENTITY_INSERT ##tmpQMTestResult ON
@@ -264,7 +434,50 @@ BEGIN TRY
                 [intLastModifiedUserId],
                 [dtmLastModified]
             )
-            SELECT * FROM tblQMTestResult WHERE intSampleId = @intSampleId
+            SELECT
+                [intTestResultId],
+                [intConcurrencyId],
+                [intSampleId],
+                [intProductId],
+                [intProductTypeId],
+                [intProductValueId],
+                [intTestId],
+                [intPropertyId],
+                [strPanelList],
+                [strPropertyValue],
+                [dtmCreateDate],
+                [strResult],
+                [ysnFinal],
+                [strComment],
+                [intSequenceNo],
+                [dtmValidFrom],
+                [dtmValidTo],
+                [strPropertyRangeText],
+                [dblMinValue],
+                [dblPinpointValue],
+                [dblMaxValue],
+                [dblLowValue],
+                [dblHighValue],
+                [intUnitMeasureId],
+                [strFormulaParser],
+                [dblCrdrPrice],
+                [dblCrdrQty],
+                [intProductPropertyValidityPeriodId],
+                [intPropertyValidityPeriodId],
+                [intControlPointId],
+                [intParentPropertyId],
+                [intRepNo],
+                [strFormula],
+                [intListItemId],
+                [strIsMandatory],
+                [intPropertyItemId],
+                [dtmPropertyValueCreated],
+                [intTestResultRefId],
+                [intCreatedUserId],
+                [dtmCreated],
+                [intLastModifiedUserId],
+                [dtmLastModified]
+            FROM tblQMTestResult WHERE intSampleId = @intSampleId
             SET IDENTITY_INSERT ##tmpQMTestResult OFF
 
         END
@@ -273,25 +486,37 @@ BEGIN TRY
         BEGIN
             -- Generate audit logs for sample header
             SET @intKey = 1
-            
-            DELETE FROM @tblHeaderLog
-            INSERT INTO @tblHeaderLog (
-                [Id]
-                ,[Action]
-                ,[Change]
-                ,[From]
-                ,[To]
-                ,[ParentId]
+
+            IF OBJECT_ID('tempdb..##tmpHeaderLogs') IS NOT NULL
+                DROP TABLE ##tmpHeaderLogs
+
+            IF OBJECT_ID('tempdb..##tmpLogs') IS NOT NULL
+                DROP TABLE ##tmpLogs
+
+            CREATE TABLE ##tmpLogs (
+                [Id]		    INT, 
+                [KeyValue]	    INT,
+                [Action]	    NVARCHAR(MAX),
+                [Change]	    NVARCHAR(MAX),
+                [From]		    NVARCHAR(MAX),
+                [To]		    NVARCHAR(MAX),
+                [Alias]		    NVARCHAR(MAX),
+                [intSampleId]	INT,
             )
+
+            CREATE INDEX [IX_tmpLogs_intSampleId] ON ##tmpLogs(intSampleId)
+
+            -- SET STATISTICS XML ON
             SELECT
-                [Id]        = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-                ,[Action]   = NULL
-                ,[Change]   = C.strFieldName
+                -- [Id]        = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+                -- ,[Action]   = NULL
+                [Change]   = C.strFieldName
                 ,[From]     = C.strOldValue
                 ,[To]       = C.strNewValue
-                ,[ParentId] = @intKey
-            FROM tblQMSample SN
-            INNER JOIN ##tmpQMSample SO ON SO.intSampleId = SN.intSampleId
+                ,[intSampleId] = SN.intSampleId
+            INTO ##tmpHeaderLogs
+            FROM ##tmpQMSample SO
+            INNER JOIN tblQMSample SN ON SO.intSampleId = SN.intSampleId
             -- Contract Detail
             LEFT JOIN tblCTContractDetail CDN ON CDN.intContractDetailId = SN.intContractDetailId
             LEFT JOIN tblCTContractDetail CDO ON CDO.intContractDetailId = SO.intContractDetailId
@@ -430,7 +655,7 @@ BEGIN TRY
                 UNION ALL
                 SELECT 'Mixing Unit', CTBO.strBook, CTBN.strBook
                 UNION ALL
-                SELECT 'Supplier Valuation', dbo.fnICFormatNumber(SO.dblSupplierValuationPrice), dbo.fnICFormatNumber(SN.dblSupplierValuationPrice)
+                SELECT 'Supplier Valuation', CAST(SO.dblSupplierValuationPrice AS NVARCHAR), CAST(SN.dblSupplierValuationPrice AS NVARCHAR)
                 UNION ALL
                 SELECT 'Chop No.', SO.strChopNumber, SN.strChopNumber
                 UNION ALL
@@ -440,7 +665,7 @@ BEGIN TRY
                 UNION ALL
                 SELECT 'Season', SEASO.strDescription, SEASN.strDescription
                 UNION ALL
-                SELECT 'Gross Weight', dbo.fnICFormatNumber(SO.dblGrossWeight), dbo.fnICFormatNumber(SN.dblGrossWeight)
+                SELECT 'Gross Weight', CAST(SO.dblGrossWeight AS NVARCHAR), CAST(SN.dblGrossWeight AS NVARCHAR)
                 UNION ALL
                 SELECT 'Garden Mark', GMO.strGardenMark, GMN.strGardenMark
                 UNION ALL
@@ -450,22 +675,22 @@ BEGIN TRY
                 UNION ALL
                 SELECT 'Manufacturing Date', dbo.fnRKFormatDate(SO.dtmManufacturingDate, 'MM/dd/yyy'), dbo.fnRKFormatDate(SN.dtmManufacturingDate, 'MM/dd/yyy')
                 UNION ALL
-                SELECT 'Quantity', dbo.fnICFormatNumber(SO.dblRepresentingQty), dbo.fnICFormatNumber(SN.dblRepresentingQty)
+                SELECT 'Quantity', CAST(SO.dblRepresentingQty AS NVARCHAR), CAST(SN.dblRepresentingQty AS NVARCHAR)
                 UNION ALL
-                SELECT 'Total No. of Package Breakups', dbo.fnICFormatNumber(SO.intTotalNumberOfPackageBreakups), dbo.fnICFormatNumber(SN.intTotalNumberOfPackageBreakups)
+                SELECT 'Total No. of Package Breakups', CAST(SO.intTotalNumberOfPackageBreakups AS NVARCHAR), CAST(SN.intTotalNumberOfPackageBreakups AS NVARCHAR)
                 
                 UNION ALL
-                SELECT 'No. of Packages', dbo.fnICFormatNumber(SO.intNoOfPackages), dbo.fnICFormatNumber(SN.intNoOfPackages)
+                SELECT 'No. of Packages', CAST(SO.intNoOfPackages AS NVARCHAR), CAST(SN.intNoOfPackages AS NVARCHAR)
                 UNION ALL
                 SELECT 'No. of Packages UOM', PBUOM1O.strSymbol, PBUOM1N.strSymbol
                 
                 UNION ALL
-                SELECT 'No. of Packages (2nd Package-Break)', dbo.fnICFormatNumber(SO.intNoOfPackagesSecondPackageBreak), dbo.fnICFormatNumber(SN.intNoOfPackagesSecondPackageBreak)
+                SELECT 'No. of Packages (2nd Package-Break)', CAST(SO.intNoOfPackagesSecondPackageBreak AS NVARCHAR), CAST(SN.intNoOfPackagesSecondPackageBreak AS NVARCHAR)
                 UNION ALL
                 SELECT 'No. of Packages UOM (2nd Package-Break)', PBUOM2O.strSymbol, PBUOM2N.strSymbol
                 
                 UNION ALL
-                SELECT 'No. of Packages (3rd Package-Break)', dbo.fnICFormatNumber(SO.intNoOfPackagesThirdPackageBreak), dbo.fnICFormatNumber(SN.intNoOfPackagesThirdPackageBreak)
+                SELECT 'No. of Packages (3rd Package-Break)', CAST(SO.intNoOfPackagesThirdPackageBreak AS NVARCHAR), CAST(SN.intNoOfPackagesThirdPackageBreak AS NVARCHAR)
                 UNION ALL
                 SELECT 'No. of Packages UOM (3rd Package-Break)', PBUOM3O.strSymbol, PBUOM3N.strSymbol
                 
@@ -499,55 +724,55 @@ BEGIN TRY
                 UNION ALL
                 SELECT 'Buyer1 Code', B1O.strName, B1N.strName
                 UNION ALL
-                SELECT 'Buyer1 Quantity Bought', dbo.fnICFormatNumber(SO.dblB1QtyBought), dbo.fnICFormatNumber(SN.dblB1QtyBought)
+                SELECT 'Buyer1 Quantity Bought', CAST(SO.dblB1QtyBought AS NVARCHAR), CAST(SN.dblB1QtyBought AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer1 Quantity Bought UOM', B1QUOMO.strSymbol, B1QUOMN.strSymbol
                 UNION ALL
-                SELECT 'Buyer1 Price', dbo.fnICFormatNumber(SO.dblB1Price), dbo.fnICFormatNumber(SN.dblB1Price)
+                SELECT 'Buyer1 Price', CAST(SO.dblB1Price AS NVARCHAR), CAST(SN.dblB1Price AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer1 Price UOM', B1PUOMO.strSymbol, B1PUOMN.strSymbol
                 
                 UNION ALL
                 SELECT 'Buyer2 Code', B2O.strName, B2N.strName
                 UNION ALL
-                SELECT 'Buyer2 Quantity Bought', dbo.fnICFormatNumber(SO.dblB2QtyBought), dbo.fnICFormatNumber(SN.dblB2QtyBought)
+                SELECT 'Buyer2 Quantity Bought', CAST(SO.dblB2QtyBought AS NVARCHAR), CAST(SN.dblB2QtyBought AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer2 Quantity Bought UOM', B2QUOMO.strSymbol, B2QUOMN.strSymbol
                 UNION ALL
-                SELECT 'Buyer2 Price', dbo.fnICFormatNumber(SO.dblB2Price), dbo.fnICFormatNumber(SN.dblB2Price)
+                SELECT 'Buyer2 Price', CAST(SO.dblB2Price AS NVARCHAR), CAST(SN.dblB2Price AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer2 Price UOM', B2PUOMO.strSymbol, B2PUOMN.strSymbol
 
                 UNION ALL
                 SELECT 'Buyer3 Code', B3O.strName, B3N.strName
                 UNION ALL
-                SELECT 'Buyer3 Quantity Bought', dbo.fnICFormatNumber(SO.dblB3QtyBought), dbo.fnICFormatNumber(SN.dblB3QtyBought)
+                SELECT 'Buyer3 Quantity Bought', CAST(SO.dblB3QtyBought AS NVARCHAR), CAST(SN.dblB3QtyBought AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer3 Quantity Bought UOM', B3QUOMO.strSymbol, B3QUOMN.strSymbol
                 UNION ALL
-                SELECT 'Buyer3 Price', dbo.fnICFormatNumber(SO.dblB3Price), dbo.fnICFormatNumber(SN.dblB3Price)
+                SELECT 'Buyer3 Price', CAST(SO.dblB3Price AS NVARCHAR), CAST(SN.dblB3Price AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer3 Price UOM', B3PUOMO.strSymbol, B3PUOMN.strSymbol
 
                 UNION ALL
                 SELECT 'Buyer4 Code', B4O.strName, B4N.strName
                 UNION ALL
-                SELECT 'Buyer4 Quantity Bought', dbo.fnICFormatNumber(SO.dblB4QtyBought), dbo.fnICFormatNumber(SN.dblB4QtyBought)
+                SELECT 'Buyer4 Quantity Bought', CAST(SO.dblB4QtyBought AS NVARCHAR), CAST(SN.dblB4QtyBought AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer4 Quantity Bought UOM', B4QUOMO.strSymbol, B4QUOMN.strSymbol
                 UNION ALL
-                SELECT 'Buyer4 Price', dbo.fnICFormatNumber(SO.dblB4Price), dbo.fnICFormatNumber(SN.dblB4Price)
+                SELECT 'Buyer4 Price', CAST(SO.dblB4Price AS NVARCHAR), CAST(SN.dblB4Price AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer4 Price UOM', B4PUOMO.strSymbol, B4PUOMN.strSymbol
 
                 UNION ALL
                 SELECT 'Buyer5 Code', B5O.strName, B5N.strName
                 UNION ALL
-                SELECT 'Buyer5 Quantity Bought', dbo.fnICFormatNumber(SO.dblB5QtyBought), dbo.fnICFormatNumber(SN.dblB5QtyBought)
+                SELECT 'Buyer5 Quantity Bought', CAST(SO.dblB5QtyBought AS NVARCHAR), CAST(SN.dblB5QtyBought AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer5 Quantity Bought UOM', B5QUOMO.strSymbol, B5QUOMN.strSymbol
                 UNION ALL
-                SELECT 'Buyer5 Price', dbo.fnICFormatNumber(SO.dblB5Price), dbo.fnICFormatNumber(SN.dblB5Price)
+                SELECT 'Buyer5 Price', CAST(SO.dblB5Price AS NVARCHAR), CAST(SN.dblB5Price AS NVARCHAR)
                 UNION ALL
                 SELECT 'Buyer5 Price UOM', B5PUOMO.strSymbol, B5PUOMN.strSymbol
 
@@ -560,9 +785,9 @@ BEGIN TRY
                 UNION ALL
                 SELECT 'AWB Sample Reference', SO.strAWBSampleReference, SN.strAWBSampleReference
                 UNION ALL
-                SELECT 'AWB Sample Received', dbo.fnICFormatNumber(SO.intAWBSampleReceived), dbo.fnICFormatNumber(SN.intAWBSampleReceived)
+                SELECT 'AWB Sample Received', CAST(SO.intAWBSampleReceived AS NVARCHAR), CAST(SN.intAWBSampleReceived AS NVARCHAR)
                 UNION ALL
-                SELECT 'Base Price', dbo.fnICFormatNumber(SO.dblBasePrice), dbo.fnICFormatNumber(SN.dblBasePrice)
+                SELECT 'Base Price', CAST(SO.dblBasePrice AS NVARCHAR), CAST(SN.dblBasePrice AS NVARCHAR)
                 UNION ALL
                 SELECT 'Bought as Reserve', CASE WHEN SO.ysnBoughtAsReserve = 1 THEN 'True' ELSE 'False' END, CASE WHEN SN.ysnBoughtAsReserve = 1 THEN 'True' ELSE 'False' END
                 UNION ALL
@@ -591,161 +816,88 @@ BEGIN TRY
                 SELECT 'Receiving Storage Location', RSLO.strSubLocationName, RSLN.strSubLocationName
             ) C (strFieldName, strOldValue, strNewValue)
             -- Filter
-            WHERE SN.intSampleId = @intSampleId
+            WHERE SN.intSampleId = SO.intSampleId
             AND ISNULL(C.strOldValue, '') <> ISNULL(C.strNewValue, '')
 
-            INSERT INTO @tblLog (
+            INSERT INTO ##tmpLogs (
                 [Id]
                 ,[Action]
                 ,[Change]
                 ,[From]
                 ,[To]
-                ,[ParentId]
+                ,[intSampleId]
             )
             SELECT
-                [Id]            = @intKey
+                [Id]            = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+                ,[Action]       = 'UPdated'
+                ,[Change]       = T.[Change]
+                ,[From]         = T.[From]
+                ,[To]           = T.[To]
+                ,[intSampleId]  = T.intSampleId
+            FROM ##tmpHeaderLogs T
+
+            SELECT @intKey = MAX(Id) FROM ##tmpLogs
+
+            INSERT INTO ##tmpLogs (
+                [Id]
+                ,[Action]
+                ,[Change]
+                ,[From]
+                ,[To]
+                ,[intSampleId]
+            )
+            SELECT
+                [Id]            = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
                 ,[Action]       = 'Updated'
-                ,[Change]       = NULL--'Updated - Record' + CASE WHEN ISNULL(@strRemarks, '') <> '' THEN ' (' + @strRemarks + ')' ELSE '' END + ': ' + @strSampleNumber
-                ,[From]         = NULL
-                ,[To]           = NULL
-                ,[ParentId]     = NULL
-
-            IF EXISTS (SELECT 1 FROM @tblHeaderLog)
-            BEGIN
-                INSERT INTO @tblLog (
-                    [Id]
-                    ,[Action]
-                    ,[Change]
-                    ,[From]
-                    ,[To]
-                    ,[ParentId]
-                )
-                SELECT
-                    [Id]
-                    ,[Action]
-                    ,[Change]
-                    ,[From]
-                    ,[To]
-                    ,[ParentId]
-                FROM @tblHeaderLog
-
-                SELECT @intKey = MAX(Id) FROM @tblHeaderLog
-            END
-
-            SET @intTestResultKey = @intKey + 1
-
-            -- Log for test result
-            DELETE FROM @tblLogTestResult
-
-            ;WITH CTE AS (
-                SELECT
-                    [Id] = @intTestResultKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-                    ,[KeyValue] = TRN.intTestResultId
-                    ,[Action] = 'Updated'
-                    ,[Change] = 'Updated - Record: ' + T.strTestName + ' - ' + P.strPropertyName
-                    ,[From] = NULL
-                    ,[To] = NULL
-                    ,[ParentId] = @intTestResultKey
-                FROM tblQMTestResult TRN
-                INNER JOIN tblQMTest T ON T.intTestId = TRN.intTestId
-                INNER JOIN tblQMProperty P ON P.intPropertyId = TRN.intPropertyId
-                WHERE TRN.intSampleId = @intSampleId
-            )
-            ,CTE2 AS (
-                SELECT
-                    [Id] = (SELECT MAX(Id) FROM CTE) + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-                    ,[Action] = NULL
-                    ,[Change] = C.strFieldName
-                    ,[From] = C.strOldValue
-                    ,[To] = C.strNewValue
-                    ,[ParentId] = CTE.Id
-                FROM tblQMTestResult TRN
-                INNER JOIN ##tmpQMTestResult TRO ON TRO.intPropertyId = TRN.intPropertyId AND TRO.intSampleId = TRN.intSampleId
-                -- Unpivot columns to rows
-                CROSS APPLY (
-                    SELECT 'Actual Value', TRO.strPropertyValue, TRN.strPropertyValue
-                    UNION ALL
-                    SELECT 'Result', TRO.strResult, TRN.strResult
-                    UNION ALL
-                    SELECT 'Comment', TRO.strComment, TRN.strComment
-                ) C (strFieldName, strOldValue, strNewValue)
-                INNER JOIN CTE ON CTE.KeyValue = TRN.intTestResultId
-
-                WHERE TRN.intSampleId = @intSampleId
-                AND ISNULL(C.strOldValue, '') <> ISNULL(C.strNewValue, '')
-            )
-
-            INSERT INTO @tblLogTestResult (
-                [Id]
-                ,[Action]
-                ,[Change]
-                ,[From]
-                ,[To]
-                ,[ParentId]
-            )
-            SELECT
-                [Id]
-                ,[Action]
-                ,[Change]
-                ,[From]
-                ,[To]
-                ,[ParentId]
-            FROM CTE
-            WHERE EXISTS (SELECT 1 FROM CTE2 WHERE ParentId = CTE.Id)
-
-            UNION ALL
-
-            SELECT
-                [Id]
-                ,[Action]
-                ,[Change]
-                ,[From]
-                ,[To]
-                ,[ParentId]
-            FROM CTE2
-
-            IF EXISTS (SELECT 1 FROM @tblLogTestResult)
-            BEGIN
-                INSERT INTO @tblLog (
-                    [Id]
-                    ,[Action]
-                    ,[Change]
-                    ,[Alias]
-                    ,[From]
-                    ,[To]
-                    ,[ParentId]
-                )
-                SELECT
-                    [Id]            = @intTestResultKey
-                    ,[Action]       = NULL
-                    ,[Change]       = 'tblQMTestResults'
-                    ,[Alias]        = 'Taste Score'
-                    ,[From]         = NULL
-                    ,[To]           = NULL
-                    ,[ParentId]     = @intKey
+                ,[Change]       = C.strFieldName
+                ,[From]         = C.strOldValue
+                ,[To]           = C.strNewValue
+                ,[intSampleId]  = TRN.intSampleId
+            FROM tblQMTestResult TRN
+            INNER JOIN ##tmpQMTestResult TRO ON TRO.intPropertyId = TRN.intPropertyId AND TRO.intSampleId = TRN.intSampleId
+            -- Unpivot columns to rows
+            CROSS APPLY (
+                SELECT 'Actual Value', TRO.strPropertyValue, TRN.strPropertyValue
                 UNION ALL
-                SELECT
-                    [Id]
-                    ,[Action]
-                    ,[Change]
-                    ,[Alias]
-                    ,[From]
-                    ,[To]
-                    ,[ParentId]
-                FROM @tblLogTestResult
+                SELECT 'Result', TRO.strResult, TRN.strResult
+                UNION ALL
+                SELECT 'Comment', TRO.strComment, TRN.strComment
+            ) C (strFieldName, strOldValue, strNewValue)
+            WHERE TRN.intSampleId = @intSampleId
+            AND ISNULL(C.strOldValue, '') <> ISNULL(C.strNewValue, '')
 
-                SELECT @intKey = MAX(Id) FROM @tblLogTestResult
+            -- POST:
+            IF @intKey > 1
+            BEGIN
+                DECLARE @auditLog AS BatchAuditLogParam
+
+                INSERT INTO @auditLog (
+                    [Id]
+                    , [Namespace]
+                    , [Action]
+                    , [Description]
+                    , [From]
+                    , [To]
+                    , [EntityId]
+                )
+                SELECT
+                    [Id]				= L.intSampleId
+                    , [Namespace]		= 'Quality.view.QualitySample'
+                    , [Action]			= 'Updated'
+                    , [Change]		    = L.Change
+                    , [From]			= L.[From]
+                    , [To]				= L.[To]
+                    , [EntityId]		= @intUserEntityId
+                FROM ##tmpLogs L
+
+                IF EXISTS (SELECT TOP 1 NULL FROM @auditLog)
+                    EXEC dbo.uspSMBatchAuditLog
+                        @AuditLogParam 	= @auditLog
+                        ,@EntityId		= @intUserEntityId
             END
 
         END
-
-        POST:
-        IF @intKey > 1 AND (@ysnCreate = 1 OR (@ysnCreate = 0 AND @ysnBeforeUpdate = 0))
-            EXEC uspSMSingleAuditLog
-                @screenName     = 'Quality.view.QualitySample',
-                @recordId       = @intSampleId,
-                @entityId       = @intUserEntityId,
-                @AuditLogParam  = @tblLog
+        
 END TRY
 BEGIN CATCH
 	DECLARE @strErrorMsg NVARCHAR(MAX) = NULL

@@ -186,6 +186,7 @@ AS
 			QA.strSampleStatus,
 			QA.dtmTestingEndDate,
 			QA.dblApprovedQty,
+			dblUnApprovedQty = ISNULL(CD.dblQuantity,0) - ISNULL(QA.dblApprovedQty,0),
 			MA.strFutMarketName AS strFutureMarket,
 			REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') strFutureMonth,
 			CASE WHEN (SELECT COUNT(SA.intSpreadArbitrageId) FROM tblCTSpreadArbitrage SA  WHERE SA.intPriceFixationId = PF.intPriceFixationId) > 0

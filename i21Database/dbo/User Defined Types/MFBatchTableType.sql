@@ -114,4 +114,5 @@ CREATE TYPE MFBatchTableType AS TABLE
 	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
 	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
 	,dtmShippingDate DATETIME 
+	,strFines NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )

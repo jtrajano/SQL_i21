@@ -17,3 +17,8 @@
 	CONSTRAINT [FK_tblQMProductControlPoint_tblQMControlPoint] FOREIGN KEY ([intControlPointId]) REFERENCES [tblQMControlPoint]([intControlPointId]),
 	CONSTRAINT [FK_tblQMProductControlPoint_tblQMSampleType] FOREIGN KEY ([intSampleTypeId]) REFERENCES [tblQMSampleType]([intSampleTypeId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblQMProductControlPoint_intProductId_intSampleTypeId]
+ON [dbo].[tblQMProductControlPoint] ([intProductId],[intSampleTypeId])
+GO

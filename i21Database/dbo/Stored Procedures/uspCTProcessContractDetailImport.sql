@@ -7,6 +7,7 @@ AS
 
 BEGIN
 
+	DECLARE @strContractNumber varchar(50)
 
 	INSERT INTO tblCTContractDetailImportHeader(intUserId, dtmImportDate, guiUniqueId, strFileName)
 	SELECT @intUserId, GETDATE(), @guiUniqueId, @strFileName
@@ -15,11 +16,20 @@ BEGIN
 
 	SET @intContractDetailImportHeaderId = SCOPE_IDENTITY()
 
+	UPDATE tblCTContractDetailImport
+	SET intContractDetailImportHeaderId = @intContractDetailImportHeaderId
+	WHERE guiUniqueId = @guiUniqueId
+
+	SELECT top 1 @strContractNumber = strContractNumber from tblCTContractDetailImport
+	WHERE guiUniqueId = @guiUniqueId
+
+	UPDATE tblCTContractDetailImportHeader
+	SET strContractNumber = @strContractNumber
+	WHERE guiUniqueId = @guiUniqueId
+
 	IF ISNULL(@intContractDetailImportHeaderId, 0) <> 0
 	BEGIN
-		UPDATE tblCTContractDetailImport
-		SET intContractDetailImportHeaderId = @intContractDetailImportHeaderId
-		WHERE guiUniqueId = @guiUniqueId
+		
 
 		SELECT intContractDetailImportId
 			, ci.intContractDetailImportHeaderId

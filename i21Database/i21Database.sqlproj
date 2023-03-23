@@ -413,7 +413,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMMirrorRelatedSample.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
-    <Build Include="dbo\Tables\tblCMBankAccountType.sql" /> 
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Functions\fnSTGetSalesRestriction.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
@@ -1494,6 +1494,21 @@
     <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGenerateSampleCatalogueImportAuditLog.sql" />
     <Build Include="dbo\Views\vyuQMGetBatchControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessTransferSettlements.sql" />
+    <Build Include="dbo\User Defined Types\TransferFromSettlementStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TransferSettlementReferenceStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\TransferToSettlementStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractDetailImport.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuQMImportCatalogue.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
+    <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
+    <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEntitySplit.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6715,7 +6730,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSourcingReportDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetRevalueAccountTable.sql" />
-    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql"/>
+    <Build Include="dbo\Functions\fnGLGetRevalueTransactionType.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostRevalue.sql" />
@@ -7361,7 +7376,7 @@
     <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
-    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql"/>
+    <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
@@ -11798,6 +11813,8 @@
     <Build Include="dbo\Views\vyuPRReportEmployeeDetail.sql" />
     <Build Include="dbo\Views\vyuARZugInvoiceView.sql" />
     <Build Include="dbo\Views\vyuARZugInvoiceDetailView.sql" />
+    <Build Include="dbo\Views\vyuCTGetQualityCodes.sql" />
+    <Build Include="dbo\Views\vyuQMPreEvaluationSheetReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -12034,5 +12051,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\QM\6_CustomControls.sql" />
   </ItemGroup>
 </Project>

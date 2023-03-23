@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuMFInventoryView
+﻿CREATE VIEW [dbo].[vyuMFInventoryView]
 WITH SCHEMABINDING
 AS
 SELECT l.intLotId
@@ -157,6 +157,10 @@ SELECT l.intLotId
 	,i.strExternalGroup
 	,PT.strPricingType
 	,IsNULL(LI.dblReservedQtyInTBS,0) AS dblReservedQtyInTBS
+	,i.strShortName
+	,ISNULL(LI.dblReservedQtyInTBS,0) / CASE WHEN l.dblWeightPerQty IS NULL OR l.dblWeightPerQty =  0 THEN 1
+											 ELSE l.dblWeightPerQty
+										END AS dblReservedQtyInTBSUnit
 FROM dbo.tblICLot l
 JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
 JOIN dbo.tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -192,3 +196,6 @@ LEFT JOIN dbo.tblLGLoad LO ON LO.intLoadId = LI.intLoadId
 LEFT JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = l.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = l.intContractHeaderId
 LEFT JOIN dbo.tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+GO
+
+

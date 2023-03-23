@@ -51,6 +51,11 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [strHue] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
     [strIntensity] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
     [strTaste] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	[strBulkDensity] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	[strTeaMoisture] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	[strFines] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	[strTeaVolume] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	[strDustContent] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
     [strMouthfeel] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
     [strStyle] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strMusterLot] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -105,7 +110,9 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
     [strBroker] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strTINNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strStrategy] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-
+    [dblBulkDensity] NUMERIC(18, 6) NULL,
+    [dblTeaMoisture] NUMERIC(18, 6) NULL,
+    [dblTeaVolume] NUMERIC(18, 6) NULL,
 	CONSTRAINT [PK_tblQMImportCatalogue_intImportCatalogueId] PRIMARY KEY CLUSTERED ([intImportCatalogueId] ASC),
     CONSTRAINT [FK_tblQMImportCatalogue_tblQMImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblQMImportLog] ([intImportLogId]),
     --CONSTRAINT [FK_tblQMImportCatalogue_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [dbo].[tblQMSample] ([intSampleId])
@@ -113,9 +120,10 @@ CREATE TABLE [dbo].[tblQMImportCatalogue]
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intImportLogId]
-    ON [dbo].[tblQMImportCatalogue]([intImportLogId] ASC)
+    ON [dbo].[tblQMImportCatalogue]([intImportLogId],[ysnSuccess])
+    INCLUDE ([strB1GroupNumber],[strBatchNo],[strSampleTypeName])
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intSampleId]
-    ON [dbo].[tblQMImportCatalogue]([intSampleId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_ysnSuccess]
+    ON [dbo].[tblQMImportCatalogue]([ysnSuccess], [intImportLogId])
 GO

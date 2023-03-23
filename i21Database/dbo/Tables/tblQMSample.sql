@@ -165,7 +165,8 @@
     [intB5PriceUOMId] INT NULL,
 	[strB5PriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[ysnBought] BIT NULL,
-		
+	intPackageTypeId INT NULL,
+	intCropYearId INT NULL,
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
 	CONSTRAINT [FK_tblQMSample_tblQMSample] FOREIGN KEY ([intParentSampleId]) REFERENCES [tblQMSample]([intSampleId]), 
@@ -238,4 +239,13 @@ CREATE NONCLUSTERED INDEX [IX_tblQMSample_intMarketZoneId] ON [dbo].[tblQMSample
 GO
 CREATE NONCLUSTERED INDEX [IX_tblQMSample_CatalogueImport]
 ON [dbo].[tblQMSample] ([intEntityId],[intLocationId],[strRepresentLotNumber],[strSaleNumber],[intCatalogueTypeId])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_intSampleStatusId_intContractDetailId_intTypeId] ON [dbo].[tblQMSample] ([intSampleStatusId],[intContractDetailId],[intTypeId])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_Catalogue] ON [dbo].[tblQMSample] (
+	[strSaleNumber]
+	,[strRepresentLotNumber]
+	,[intLocationId]
+	,[intEntityId]
+)
 GO
