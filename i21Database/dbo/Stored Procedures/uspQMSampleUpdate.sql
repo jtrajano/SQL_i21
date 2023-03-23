@@ -1140,10 +1140,48 @@ BEGIN TRY
 
  EXEC dbo.uspQMSampleAmendment @intSampleId = @intSampleId, @intUserId = @intLastModifiedUserId
 
--- Update corresponding batch if it is available
-IF EXISTS (SELECT 1 FROM tblMFBatch WHERE intSampleId = @intSampleId)
+IF EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnCreateBatchOnSampleSave = 1)
+AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND (ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0)
 BEGIN
--- Call uspMFUpdateInsertBatch
+  IF EXISTS(
+    SELECT 1
+    FROM tblQMSample
+    WHERE intSampleId = @intSampleId
+    AND ISNULL(dblB1QtyBought, 0) = 0 AND ISNULL(dblB1Price, 0) = 0
+    AND ISNULL(intContractDetailId, 0) = 0
+  )
+  BEGIN
+    DECLARE @intToDeleteBatchLocationId INT
+            ,@strToDeleteBatchId NVARCHAR(50)
+
+    SELECT
+      @strToDeleteBatchId = B.strBatchId
+      ,@intToDeleteBatchLocationId = S.intLocationId
+    FROM tblQMSample S
+    INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+    WHERE S.intSampleId = @intSampleId
+
+
+    IF @strToDeleteBatchId IS NOT NULL
+    BEGIN
+      -- Delete batch for both TBO and MU
+      EXEC uspMFDeleteBatch
+        @strBatchId = @strToDeleteBatchId
+        ,@intLocationId = @intToDeleteBatchLocationId
+        ,@ysnSuccess = @ysnSuccess OUTPUT
+        ,@strErrorMessage = @strErrorMessage OUTPUT
+
+      IF @ysnSuccess = 0
+        RAISERROR (
+          @strErrorMessage
+          ,11
+          ,1
+          )
+    END
+  END
+  ELSE
+  BEGIN
+    -- Call uspMFUpdateInsertBatch
     DECLARE @MFBatchTableType MFBatchTableType
     -- DECLARE @ysnPreShipmentSample BIT
 
@@ -1155,346 +1193,379 @@ BEGIN
 		
     DELETE FROM @MFBatchTableType
 
-		INSERT INTO @MFBatchTableType (
-			strBatchId
-			,intSales
-			,intSalesYear
-			,dtmSalesDate
-			,strTeaType
-			,intBrokerId
-			,strVendorLotNumber
-			,intBuyingCenterLocationId
-			,intStorageLocationId
-			,intStorageUnitId
-			,intBrokerWarehouseId
-			,intParentBatchId
-			,intInventoryReceiptId
-			,intSampleId
-			,intContractDetailId
-			,str3PLStatus
-			,strSupplierReference
-			,strAirwayBillCode
-			,strAWBSampleReceived
-			,strAWBSampleReference
-			,dblBasePrice
-			,ysnBoughtAsReserved
-			,dblBoughtPrice
-			,dblBulkDensity
-			,strBuyingOrderNumber
-			,intSubBookId
-			,strContainerNumber
-			,intCurrencyId
-			,dtmProductionBatch
-			,dtmTeaAvailableFrom
-			,strDustContent
-			,ysnEUCompliant
-			,strTBOEvaluatorCode
-			,strEvaluatorRemarks
-			,dtmExpiration
-			,intFromPortId
-			,dblGrossWeight
-			,dtmInitialBuy
-			,dblWeightPerUnit
-			,dblLandedPrice
-			,strLeafCategory
-			,strLeafManufacturingType
-			,strLeafSize
-			,strLeafStyle
-			,intBookId
-			,dblPackagesBought
-			,intItemUOMId
-			,intWeightUOMId
-			,strTeaOrigin
-			,intOriginalItemId
-			,dblPackagesPerPallet
-			,strPlant
-			,dblTotalQuantity
-			,strSampleBoxNumber
-			,dblSellingPrice
-			,dtmStock
-			,ysnStrategic
-			,strTeaLingoSubCluster
-			,dtmSupplierPreInvoiceDate
-			,strSustainability
-			,strTasterComments
-			,dblTeaAppearance
-			,strTeaBuyingOffice
-			,strTeaColour
-			,strTeaGardenChopInvoiceNumber
-			,intGardenMarkId
-			,strTeaGroup
-			,dblTeaHue
-			,dblTeaIntensity
-			,strLeafGrade
-			,dblTeaMoisture
-			,dblTeaMouthFeel
-			,ysnTeaOrganic
-			,dblTeaTaste
-			,dblTeaVolume
-			,intTealingoItemId
-			,dtmWarehouseArrival
-			,intYearManufacture
-			,strPackageSize
-			,intPackageUOMId
-			,dblTareWeight
-			,strTaster
-			,strFeedStock
-			,strFlourideLimit
-			,strLocalAuctionNumber
-			,strPOStatus
-			,strProductionSite
-			,strReserveMU
-			,strQualityComments
-			,strRareEarth
-			,strFreightAgent
-			,strSealNumber
-			,strContainerType
-			,strVoyage
-			,strVessel
-			,intLocationId
-			,intMixingUnitLocationId
-			,intMarketZoneId
-			,dblTeaTastePinpoint
-			,dblTeaHuePinpoint
-			,dblTeaIntensityPinpoint
-			,dblTeaMouthFeelPinpoint
-			,dblTeaAppearancePinpoint
+    INSERT INTO @MFBatchTableType (
+      strBatchId
+      ,intSales
+      ,intSalesYear
+      ,dtmSalesDate
+      ,strTeaType
+      ,intBrokerId
+      ,strVendorLotNumber
+      ,intBuyingCenterLocationId
+      ,intStorageLocationId
+      ,intStorageUnitId
+      ,intBrokerWarehouseId
+      ,intParentBatchId
+      ,intInventoryReceiptId
+      ,intSampleId
+      ,intContractDetailId
+      ,str3PLStatus
+      ,strSupplierReference
+      ,strAirwayBillCode
+      ,strAWBSampleReceived
+      ,strAWBSampleReference
+      ,dblBasePrice
+      ,ysnBoughtAsReserved
+      ,dblBoughtPrice
+      ,dblBulkDensity
+      ,strBuyingOrderNumber
+      ,intSubBookId
+      ,strContainerNumber
+      ,intCurrencyId
+      ,dtmProductionBatch
+      ,dtmTeaAvailableFrom
+      ,strDustContent
+      ,ysnEUCompliant
+      ,strTBOEvaluatorCode
+      ,strEvaluatorRemarks
+      ,dtmExpiration
+      ,intFromPortId
+      ,dblGrossWeight
+      ,dtmInitialBuy
+      ,dblWeightPerUnit
+      ,dblLandedPrice
+      ,strLeafCategory
+      ,strLeafManufacturingType
+      ,strLeafSize
+      ,strLeafStyle
+      ,intBookId
+      ,dblPackagesBought
+      ,intItemUOMId
+      ,intWeightUOMId
+      ,strTeaOrigin
+      ,intOriginalItemId
+      ,dblPackagesPerPallet
+      ,strPlant
+      ,dblTotalQuantity
+      ,strSampleBoxNumber
+      ,dblSellingPrice
+      ,dtmStock
+      ,ysnStrategic
+      ,strTeaLingoSubCluster
+      ,dtmSupplierPreInvoiceDate
+      ,strSustainability
+      ,strTasterComments
+      ,dblTeaAppearance
+      ,strTeaBuyingOffice
+      ,strTeaColour
+      ,strTeaGardenChopInvoiceNumber
+      ,intGardenMarkId
+      ,strTeaGroup
+      ,dblTeaHue
+      ,dblTeaIntensity
+      ,strLeafGrade
+      ,dblTeaMoisture
+      ,dblTeaMouthFeel
+      ,ysnTeaOrganic
+      ,dblTeaTaste
+      ,dblTeaVolume
+      ,intTealingoItemId
+      ,dtmWarehouseArrival
+      ,intYearManufacture
+      ,strPackageSize
+      ,intPackageUOMId
+      ,dblTareWeight
+      ,strTaster
+      ,strFeedStock
+      ,strFlourideLimit
+      ,strLocalAuctionNumber
+      ,strPOStatus
+      ,strProductionSite
+      ,strReserveMU
+      ,strQualityComments
+      ,strRareEarth
+      ,strFreightAgent
+      ,strSealNumber
+      ,strContainerType
+      ,strVoyage
+      ,strVessel
+      ,intLocationId
+      ,intMixingUnitLocationId
+      ,intMarketZoneId
+      ,dtmShippingDate
+      ,dblTeaTastePinpoint
+      ,dblTeaHuePinpoint
+      ,dblTeaIntensityPinpoint
+      ,dblTeaMouthFeelPinpoint
+      ,dblTeaAppearancePinpoint
 
       ,dblOriginalTeaTaste
       ,dblOriginalTeaHue
       ,dblOriginalTeaIntensity
       ,dblOriginalTeaMouthfeel
       ,dblOriginalTeaAppearance
-			)
-		SELECT strBatchId = S.strBatchNo
-			,intSales = CAST(S.strSaleNumber AS INT)
-			,intSalesYear = CAST(SY.strSaleYear AS INT)
-			,dtmSalesDate = S.dtmSaleDate
-			,strTeaType = CT.strCatalogueType
-			,intBrokerId = S.intBrokerId
-			,strVendorLotNumber = S.strRepresentLotNumber
-			,intBuyingCenterLocationId = BT.intBuyingCenterLocationId
-			,intStorageLocationId = S.intDestinationStorageLocationId
-			,intStorageUnitId = NULL
-			,intBrokerWarehouseId = NULL
-			,intParentBatchId = NULL
-			,intInventoryReceiptId = S.intInventoryReceiptId
-			,intSampleId = S.intSampleId
-			,intContractDetailId = S.intContractDetailId
-			,str3PLStatus = S.str3PLStatus
-			,strSupplierReference = S.strAdditionalSupplierReference
-			,strAirwayBillCode = S.strCourierRef
-			,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
-			,strAWBSampleReference = S.strAWBSampleReference
-			,dblBasePrice = S.dblBasePrice
-			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-			,dblBoughtPrice = NULL
-			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = S.strBuyingOrderNo
-			,intSubBookId = S.intSubBookId
-			,strContainerNumber = S.strContainerNumber
-			,intCurrencyId = S.intCurrencyId
-			,dtmProductionBatch = S.dtmManufacturingDate
-			,dtmTeaAvailableFrom = NULL
-			,strDustContent = NULL
-			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
-			,strTBOEvaluatorCode = ECTBO.strName
-			,strEvaluatorRemarks = S.strComments3
-			,dtmExpiration = NULL
-			,intFromPortId = NULL
-			,dblGrossWeight = S.dblGrossWeight
-			,dtmInitialBuy = NULL
-			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-			,dblLandedPrice = NULL
-			,strLeafCategory = LEAF_CATEGORY.strAttribute2
-			,strLeafManufacturingType = LEAF_TYPE.strDescription
-			,strLeafSize = BRAND.strBrandCode
-			,strLeafStyle = STYLE.strName
-			,intBookId = S.intBookId
-			,dblPackagesBought = NULL
-			,intItemUOMId = S.intRepresentingUOMId
-			,intWeightUOMId = S.intSampleUOMId
-			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = NULL
-			,dblPackagesPerPallet = NULL
-			,strPlant = NULL
-			,dblTotalQuantity = S.dblB1QtyBought
-			,strSampleBoxNumber = S.strSampleBoxNumber
-			,dblSellingPrice = NULL
-			,dtmStock = NULL
-			,ysnStrategic = NULL
-			,strTeaLingoSubCluster = NULL
-			,dtmSupplierPreInvoiceDate = NULL
-			,strSustainability = SUSTAINABILITY.strDescription
-			,strTasterComments = S.strComments2
-			,dblTeaAppearance = CASE 
-				WHEN ISNULL(APPEARANCE.strPropertyValue, '') = ''
-					THEN NULL
-				ELSE CAST(APPEARANCE.strPropertyValue AS NUMERIC(18, 6))
-				END
-			,strTeaBuyingOffice = BT.strTeaBuyingOffice
-			,strTeaColour = COLOUR.strDescription
-			,strTeaGardenChopInvoiceNumber = S.strChopNumber
-			,intGardenMarkId = S.intGardenMarkId
-			,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
-			,dblTeaHue = CASE 
-				WHEN ISNULL(HUE.strPropertyValue, '') = ''
-					THEN NULL
-				ELSE CAST(HUE.strPropertyValue AS NUMERIC(18, 6))
-				END
-			,dblTeaIntensity = CASE 
-				WHEN ISNULL(INTENSITY.strPropertyValue, '') = ''
-					THEN NULL
-				ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18, 6))
-				END
-			,strLeafGrade = GRADE.strDescription
-			,dblTeaMoisture = NULL
-			,dblTeaMouthFeel = CASE 
-				WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = ''
-					THEN NULL
-				ELSE CAST(MOUTH_FEEL.strPropertyValue AS NUMERIC(18, 6))
-				END
-			,ysnTeaOrganic = S.ysnOrganic
-			,dblTeaTaste = CASE 
-				WHEN ISNULL(TASTE.strPropertyValue, '') = ''
-					THEN NULL
-				ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
-				END
-			,dblTeaVolume = NULL
-			,intTealingoItemId = S.intItemId
-			,dtmWarehouseArrival = NULL
-			,intYearManufacture = NULL
-			,strPackageSize = NULL
-			,intPackageUOMId = S.intNetWtPerPackagesUOMId
-			,dblTareWeight = S.dblTareWeight
-			,strTaster = BT.strTaster
-			,strFeedStock = NULL
-			,strFlourideLimit = NULL
-			,strLocalAuctionNumber = NULL
-			,strPOStatus = NULL
-			,strProductionSite = NULL
-			,strReserveMU = NULL
-			,strQualityComments = NULL
-			,strRareEarth = NULL
-			,strFreightAgent = NULL
-			,strSealNumber = NULL
-			,strContainerType = NULL
-			,strVoyage = NULL
-			,strVessel = NULL
-			,intLocationId = BT.intLocationId
-			,intMixingUnitLocationId = BT.intMixingUnitLocationId
-			,intMarketZoneId = S.intMarketZoneId
-			,dblTeaTastePinpoint = TASTE.dblPinpointValue
-			,dblTeaHuePinpoint = HUE.dblPinpointValue
-			,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
-			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
-			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
+      )
+    SELECT strBatchId = S.strBatchNo
+      ,intSales = CAST(S.strSaleNumber AS INT)
+      ,intSalesYear = CAST(SY.strSaleYear AS INT)
+      ,dtmSalesDate = S.dtmSaleDate
+      ,strTeaType = CT.strCatalogueType
+      ,intBrokerId = S.intBrokerId
+      ,strVendorLotNumber = S.strRepresentLotNumber
+      ,intBuyingCenterLocationId = ISNULL(TBO.intCompanyLocationId, BT.intBuyingCenterLocationId)
+      ,intStorageLocationId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intDestinationStorageLocationId ELSE CD.intSubLocationId END
+      ,intStorageUnitId = NULL
+      ,intBrokerWarehouseId = NULL
+      ,intParentBatchId = NULL
+      ,intInventoryReceiptId = S.intInventoryReceiptId
+      ,intSampleId = S.intSampleId
+      ,intContractDetailId = S.intContractDetailId
+      ,str3PLStatus = S.str3PLStatus
+      ,strSupplierReference = S.strAdditionalSupplierReference
+      ,strAirwayBillCode = S.strCourierRef
+      ,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
+      ,strAWBSampleReference = S.strAWBSampleReference
+      ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblBasePrice ELSE CD.dblCashPrice END
+      ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
+      ,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE CD.dblCashPrice END
+      ,dblBulkDensity = NULL
+      ,strBuyingOrderNumber = CASE WHEN CD.intContractDetailId IS NULL THEN S.strBuyingOrderNo ELSE CH.strExternalContractNumber END
+      ,intSubBookId = S.intSubBookId
+      ,strContainerNumber = S.strContainerNumber
+      ,intCurrencyId = S.intCurrencyId
+      ,dtmProductionBatch = S.dtmManufacturingDate
+      ,dtmTeaAvailableFrom = NULL
+      ,strDustContent = NULL
+      ,ysnEUCompliant = S.ysnEuropeanCompliantFlag
+      ,strTBOEvaluatorCode = ECTBO.strName
+      ,strEvaluatorRemarks = S.strComments3
+      ,dtmExpiration = NULL
+      ,intFromPortId = CD.intLoadingPortId
+      ,dblGrossWeight = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblGrossWeight ELSE S.dblSampleQty +IsNULL(S.dblTareWeight,0) END
+      ,dtmInitialBuy = NULL
+      ,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
+      ,dblLandedPrice = NULL
+      ,strLeafCategory = LEAF_CATEGORY.strAttribute2
+      ,strLeafManufacturingType = LEAF_TYPE.strDescription
+      ,strLeafSize = BRAND.strBrandCode
+      ,strLeafStyle = STYLE.strName
+      ,intBookId = S.intBookId
+      ,dblPackagesBought = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE S.dblRepresentingQty END
+      ,intItemUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intRepresentingUOMId ELSE S.intSampleUOMId END
+      ,intWeightUOMId = S.intSampleUOMId
+      ,strTeaOrigin = S.strCountry
+      ,intOriginalItemId = S.intItemId
+      ,dblPackagesPerPallet = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20) END
+      ,strPlant = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE TBO.strOregonFacilityNumber END
+      ,dblTotalQuantity = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1QtyBought ELSE S.dblSampleQty END
+      ,strSampleBoxNumber = S.strSampleBoxNumber
+      ,dblSellingPrice = NULL
+      ,dtmStock = CD.dtmUpdatedAvailabilityDate
+      ,ysnStrategic = NULL
+      ,strTeaLingoSubCluster = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE REGION.strDescription END
+      ,dtmSupplierPreInvoiceDate = NULL
+      ,strSustainability = SUSTAINABILITY.strDescription
+      ,strTasterComments = S.strComments2
+      ,dblTeaAppearance = CASE 
+        WHEN ISNULL(APPEARANCE.strPropertyValue, '') = ''
+          THEN NULL
+        ELSE CAST(APPEARANCE.strPropertyValue AS NUMERIC(18, 6))
+        END
+      ,strTeaBuyingOffice = ISNULL(BT.strTeaBuyingOffice, TBO.strLocationName)
+      ,strTeaColour = COLOUR.strDescription
+      ,strTeaGardenChopInvoiceNumber = S.strChopNumber
+      ,intGardenMarkId = S.intGardenMarkId
+      ,strTeaGroup = ISNULL(BRAND.strBrandCode, '') + ISNULL(REGION.strDescription, '') + ISNULL(STYLE.strName, '')
+      ,dblTeaHue = CASE 
+        WHEN ISNULL(HUE.strPropertyValue, '') = ''
+          THEN NULL
+        ELSE CAST(HUE.strPropertyValue AS NUMERIC(18, 6))
+        END
+      ,dblTeaIntensity = CASE 
+        WHEN ISNULL(INTENSITY.strPropertyValue, '') = ''
+          THEN NULL
+        ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18, 6))
+        END
+      ,strLeafGrade = GRADE.strDescription
+      ,dblTeaMoisture = NULL
+      ,dblTeaMouthFeel = CASE 
+        WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = ''
+          THEN NULL
+        ELSE CAST(MOUTH_FEEL.strPropertyValue AS NUMERIC(18, 6))
+        END
+      ,ysnTeaOrganic = S.ysnOrganic
+      ,dblTeaTaste = CASE 
+        WHEN ISNULL(TASTE.strPropertyValue, '') = ''
+          THEN NULL
+        ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
+        END
+      ,dblTeaVolume = NULL
+      ,intTealingoItemId = S.intItemId
+      ,dtmWarehouseArrival = NULL
+      ,intYearManufacture = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE Datepart(YYYY,S.dtmManufacturingDate) END
+      ,strPackageSize = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE PT.strUnitMeasure END
+      ,intPackageUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intNetWtPerPackagesUOMId ELSE S.intRepresentingUOMId END
+      ,dblTareWeight = S.dblTareWeight
+      ,strTaster = BT.strTaster
+      ,strFeedStock = NULL
+      ,strFlourideLimit = NULL
+      ,strLocalAuctionNumber = NULL
+      ,strPOStatus = NULL
+      ,strProductionSite = NULL
+      ,strReserveMU = NULL
+      ,strQualityComments = NULL
+      ,strRareEarth = NULL
+      ,strFreightAgent = NULL
+      ,strSealNumber = NULL
+      ,strContainerType = NULL
+      ,strVoyage = NULL
+      ,strVessel = NULL
+      ,intLocationId = S.intLocationId
+      ,intMixingUnitLocationId = MU.intCompanyLocationId
+      ,intMarketZoneId = S.intMarketZoneId
+      ,dtmShippingDate=CD.dtmEtaPol
+      ,dblTeaTastePinpoint = TASTE.dblPinpointValue
+      ,dblTeaHuePinpoint = HUE.dblPinpointValue
+      ,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
+      ,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
+      ,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 
-      ,dblOriginalTeaTaste = BT.dblTeaTaste
-      ,dblOriginalTeaHue = BT.dblTeaHue
-      ,dblOriginalTeaIntensity = BT.dblTeaIntensity
-      ,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
-      ,dblOriginalTeaAppearance = BT.dblTeaAppearance
-		FROM tblQMSample S
-    INNER JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo
-		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
-		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
-		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
-		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
-		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
-		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
-		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
-		-- Appearance
-		OUTER APPLY (
-			SELECT TR.strPropertyValue
-				,TR.dblPinpointValue
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Appearance'
-			WHERE TR.intSampleId = S.intSampleId
-			) APPEARANCE
-		-- Hue
-		OUTER APPLY (
-			SELECT TR.strPropertyValue
-				,TR.dblPinpointValue
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Hue'
-			WHERE TR.intSampleId = S.intSampleId
-			) HUE
-		-- Intensity
-		OUTER APPLY (
-			SELECT TR.strPropertyValue
-				,TR.dblPinpointValue
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Intensity'
-			WHERE TR.intSampleId = S.intSampleId
-			) INTENSITY
-		-- Taste
-		OUTER APPLY (
-			SELECT TR.strPropertyValue
-				,TR.dblPinpointValue
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Taste'
-			WHERE TR.intSampleId = S.intSampleId
-			) TASTE
-		-- Mouth Feel
-		OUTER APPLY (
-			SELECT TR.strPropertyValue
-				,TR.dblPinpointValue
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Mouth Feel'
-			WHERE TR.intSampleId = S.intSampleId
-			) MOUTH_FEEL
-		-- Colour
-		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
-		-- Manufacturing Leaf Type
-		LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.intCommodityAttributeId = S.intManufacturingLeafTypeId
-		-- Evaluator's Code at TBO
-		LEFT JOIN tblEMEntity ECTBO ON ECTBO.intEntityId = S.intEvaluatorsCodeAtTBOId
-		-- Leaf Category
-		LEFT JOIN tblICCommodityAttribute2 LEAF_CATEGORY ON LEAF_CATEGORY.intCommodityAttributeId2 = S.intLeafCategoryId
-		-- Sustainability / Rainforest
-		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-		-- Grade
-		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
-		-- Weight Item UOM
-		LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
-		-- Qty Item UOM
-		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
-		WHERE S.intSampleId = @intSampleId
+      ,dblOriginalTeaTaste = ISNULL(BT.dblTeaTaste, TASTE.dblPinpointValue)
+      ,dblOriginalTeaHue = ISNULL(BT.dblTeaHue, HUE.dblPinpointValue)
+      ,dblOriginalTeaIntensity = ISNULL(BT.dblTeaIntensity, INTENSITY.dblPinpointValue)
+      ,dblOriginalTeaMouthfeel = ISNULL(BT.dblTeaMouthFeel, MOUTH_FEEL.dblPinpointValue)
+      ,dblOriginalTeaAppearance = ISNULL(BT.dblTeaAppearance, APPEARANCE.dblPinpointValue)
+    FROM tblQMSample S
+    INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+    INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+    INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+    LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
+    LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo
+    LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+    LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+    LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
+    LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = S.intLocationId AND (TBO.intCompanyLocationId <> ISNULL(MU.intCompanyLocationId, 0))
+    LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
+    LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
+    LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
+    -- Appearance
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Appearance'
+      WHERE TR.intSampleId = S.intSampleId
+      ) APPEARANCE
+    -- Hue
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Hue'
+      WHERE TR.intSampleId = S.intSampleId
+      ) HUE
+    -- Intensity
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Intensity'
+      WHERE TR.intSampleId = S.intSampleId
+      ) INTENSITY
+    -- Taste
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Taste'
+      WHERE TR.intSampleId = S.intSampleId
+      ) TASTE
+    -- Mouth Feel
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Mouth Feel'
+      WHERE TR.intSampleId = S.intSampleId
+      ) MOUTH_FEEL
+    -- Colour
+    LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
+    -- Manufacturing Leaf Type
+    LEFT JOIN tblICCommodityAttribute LEAF_TYPE ON LEAF_TYPE.intCommodityAttributeId = S.intManufacturingLeafTypeId
+    -- Evaluator's Code at TBO
+    LEFT JOIN tblEMEntity ECTBO ON ECTBO.intEntityId = S.intEvaluatorsCodeAtTBOId
+    -- Leaf Category
+    LEFT JOIN tblICCommodityAttribute2 LEAF_CATEGORY ON LEAF_CATEGORY.intCommodityAttributeId2 = S.intLeafCategoryId
+    -- Sustainability / Rainforest
+    LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+    -- Grade
+    LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
+    -- Weight Item UOM
+    LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
+    -- Qty Item UOM
+    LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
+    WHERE S.intSampleId = @intSampleId
     -- AND (
     --   (@ysnPreShipmentSample = 1 AND BT.intLocationId = S.intCompanyLocationId)
     --   OR @ysnPreShipmentSample = 0
     -- )
     AND (
-      (BT.intMixingUnitLocationId = S.intCompanyLocationId AND BT.intLocationId = S.intCompanyLocationId)
-      OR BT.intBuyingCenterLocationId = S.intCompanyLocationId
+      ((BT.intMixingUnitLocationId = S.intCompanyLocationId AND BT.intLocationId = S.intCompanyLocationId)
+      OR BT.intBuyingCenterLocationId = S.intCompanyLocationId)
+      
+      OR (
+        BT.intBatchId IS NULL
+      )
     )
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
       ,@strBatchId NVARCHAR(50)
 
-		IF EXISTS (
+    IF EXISTS (
 				SELECT *
 				FROM @MFBatchTableType
 				)
 		BEGIN
-			EXEC uspMFUpdateInsertBatch @MFBatchTableType
-				,@intInput
-				,@intInputSuccess
-				,@strBatchId OUTPUT
-				,0
-    END
-END
--- End update of batch
+      EXEC uspMFUpdateInsertBatch @MFBatchTableType
+        ,@intInput OUTPUT
+        ,@intInputSuccess OUTPUT
+        ,@strBatchId OUTPUT
+        ,0
 
- DECLARE @strRowState NVARCHAR(50)
+      UPDATE B
+      SET B.intLocationId = L.intCompanyLocationId
+        ,strBatchId = @strBatchId
+        --,intSampleId = NULL
+        ,dblOriginalTeaTaste = dblTeaTaste
+        ,dblOriginalTeaHue = dblTeaHue
+        ,dblOriginalTeaIntensity = dblTeaIntensity
+        ,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+        ,dblOriginalTeaAppearance = dblTeaAppearance
+        ,strPlant=L.strVendorRefNoPrefix
+      FROM @MFBatchTableType B
+      JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
+      JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+
+      EXEC uspMFUpdateInsertBatch @MFBatchTableType
+        ,@intInput OUTPUT
+        ,@intInputSuccess OUTPUT
+        ,NULL
+        ,1
+
+      UPDATE tblQMSample
+      SET strBatchNo = @strBatchId
+      WHERE intSampleId = @intSampleId				
+    END
+  END
+
+  DECLARE @strRowState NVARCHAR(50)
   SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
   FROM tblQMSample
   WHERE intSampleId = @intSampleId
@@ -1504,6 +1575,8 @@ END
     ,@intSampleId
     ,'Sample'
     ,@strRowState
+END
+-- End update of batch
   
  COMMIT TRAN  
 END TRY  
