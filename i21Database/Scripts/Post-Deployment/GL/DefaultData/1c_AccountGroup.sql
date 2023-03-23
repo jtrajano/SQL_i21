@@ -678,4 +678,5 @@ BEGIN
 END
 
 UPDATE tblGLAccountGroup SET intAccountGroupClusterId = 1 WHERE intAccountGroupClusterId IS NULL
+DELETE FROM tblGLAccountGroupCluster WHERE intAccountGroupClusterId NOT IN (SELECT intAccountGroupClusterId FROM tblGLAccountGroup)
 GO
