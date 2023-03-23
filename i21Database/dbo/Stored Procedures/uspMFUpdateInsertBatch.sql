@@ -17,7 +17,8 @@ DECLARE @tbl TABLE (intId INT);
 
 DECLARE @id				INT
 	  , @intBatchId		INT
-	  , @errorMessage	NVARCHAR(300) = '';
+	  , @errorMessage	NVARCHAR(300) = ''
+	  , @intCountryId INT
 
 INSERT INTO @tbl (intId)
 SELECT intId
@@ -69,8 +70,11 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				RETURN - 1;
 			END
 
+		SELECT @intCountryId = NULL
+
 		SELECT @strBatchId = A.strBatchId
 			 , @intBatchId = intBatchId
+			 ,@intCountryId = B.intCountryId 
 		FROM @MFBatchTableType B
 		LEFT JOIN tblMFBatch A ON A.intSalesYear = B.intSalesYear
 			  AND A.intSales = B.intSales
@@ -204,7 +208,23 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				/* Set new value of @strBatchId. */
 				IF @ysnCopyBatch = 0
 					BEGIN
-						EXEC uspSMGetStartingNumber 181, @strBatchId OUT;
+						EXEC dbo.uspMFGeneratePatternId @intCategoryId = 0
+							,@intItemId = 0
+							,@intManufacturingId = 0
+							,@intSubLocationId = 0
+							,@intLocationId = 0
+							,@intOrderTypeId = NULL
+							,@intBlendRequirementId = 0
+							,@intPatternCode = 181
+							,@ysnProposed = 0
+							,@intCountryId=@intCountryId
+							,@strPatternString = @strBatchId OUTPUT
+
+						IF @strBatchId IS NULL
+						BEGIN
+							EXEC uspSMGetStartingNumber 181, @strBatchId OUT;
+						END
+
 					END
 				/* End of Set new value of @strBatchId. */
 				
