@@ -932,26 +932,28 @@ BEGIN
 				FROM tblICInventoryTransaction IT
 				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
 				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 			) LS
 			OUTER APPLY (
 			SELECT TOP 1 
-				dblForexRate = ISNULL(dblRate, 0),
-				strCurrencyExchangeRateType
-			FROM vyuGLExchangeRate
-			WHERE intFromCurrencyId = LS.intPriceCurrencyId
-				AND intToCurrencyId = @intFunctionalCurrencyId
-				AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
-			ORDER BY dtmValidFromDate DESC
+					dblForexRate = ISNULL(dblRate, 0),
+					strCurrencyExchangeRateType
+				FROM vyuGLExchangeRate
+				WHERE intFromCurrencyId = LS.intPriceCurrencyId
+					AND intToCurrencyId = @intFunctionalCurrencyId
+					AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+				ORDER BY dtmValidFromDate DESC
 			) FX
 			OUTER APPLY (
-			SELECT TOP 1 
-				dblForexRate = ISNULL(dblRate, 0),
-				intCurrencyExchangeRateTypeId
-			FROM vyuGLExchangeRate
-			WHERE intFromCurrencyId = intCurrencyId
-				AND intToCurrencyId = LS.intPriceCurrencyId
-			ORDER BY dtmValidFromDate DESC
+				SELECT TOP 1
+					dblForexRate = ISNULL(dblRate, 0),
+					intCurrencyExchangeRateTypeId
+				FROM vyuGLExchangeRate
+				WHERE intFromCurrencyId = GLEntries.intCurrencyId
+					AND intToCurrencyId = LS.intPriceCurrencyId
+				ORDER BY dtmValidFromDate DESC
 			) ShipmentToChargeCurrency
+			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
 
 			UPDATE @GLEntries SET strModuleName = 'Accounts Payable'
 		END TRY
