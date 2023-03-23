@@ -111,7 +111,7 @@ ELSE SAVE TRAN @SavePoint
 		SELECT TOP 1 1
 			FROM tblAPVoucherPayable A
 			INNER JOIN @voucherPayable C
-				ON	A.intTransactionType = C.intTransactionType
+				ON	A.intTransactionType = CASE WHEN C.intTransactionType = 16 THEN 1 ELSE C.intTransactionType END
 				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 				AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)
@@ -136,7 +136,7 @@ ELSE SAVE TRAN @SavePoint
 			SELECT TOP 1 1
 			FROM tblAPVoucherPayableCompleted A
 			INNER JOIN @voucherPayable C
-				ON 	A.intTransactionType = C.intTransactionType
+				ON 	A.intTransactionType = CASE WHEN C.intTransactionType = 16 THEN 1 ELSE C.intTransactionType END
 				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 				AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)

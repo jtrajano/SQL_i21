@@ -33,6 +33,7 @@ IF NOT EXISTS(
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherDetails C
 			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND A.intTransactionType = CASE WHEN C.intTransactionType = 16 THEN 1 ELSE C.intTransactionType END
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 			AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
@@ -58,6 +59,7 @@ IF NOT EXISTS(
 		FROM tblAPVoucherPayableCompleted A
 		INNER JOIN @voucherDetails C
 			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND A.intTransactionType = CASE WHEN C.intTransactionType = 16 THEN 1 ELSE C.intTransactionType END
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 			AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)

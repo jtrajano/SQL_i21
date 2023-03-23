@@ -30,7 +30,7 @@ BEGIN
 		SELECT TOP 1 1
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable C
-			ON C.intTransactionType = A.intTransactionType
+			ON A.intTransactionType = CASE WHEN C.intTransactionType = 16 THEN 1 ELSE C.intTransactionType END
 			AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 			AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)
@@ -63,7 +63,7 @@ BEGIN
 	USING (
 		SELECT
 			[intVoucherPayableId]				=	A.intVoucherPayableId
-			,[intTransactionType]				=	A.intTransactionType
+			,[intTransactionType]				=	CASE WHEN A.intTransactionType = 16 THEN 1 ELSE A.intTransactionType END
 			,[intEntityVendorId]				=	A.intEntityVendorId
 			,[strVendorId]						=	vendor.strVendorId
 			,[strName]							=	entity.strName

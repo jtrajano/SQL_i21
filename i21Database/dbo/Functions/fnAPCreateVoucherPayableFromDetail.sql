@@ -8,7 +8,7 @@ RETURNS TABLE AS RETURN
 	SELECT
 		[intBillId]							=	A.intBillId
 		,[intEntityVendorId]				=	A.intEntityVendorId
-		,[intTransactionType]				=	A.intTransactionType
+		,[intTransactionType]				=	CASE WHEN A.intTransactionType = 16 THEN 1 ELSE A.intTransactionType END
 		,[intLocationId]					=	A.intStoreLocationId
 		,[intShipToId]						=	A.intShipToId
 		,[intShipFromId]					=	A.intShipFromId
@@ -100,7 +100,7 @@ RETURNS TABLE AS RETURN
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
 	LEFT JOIN tblICInventoryReceiptItem D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	WHERE
-	A.intTransactionType IN (1, 3, 11) AND
+	A.intTransactionType IN (1, 3, 11,16) AND
 	1 = (CASE WHEN @integrationUpdate = 1 THEN 1 ELSE --ALWAYS INCLUDE VOUCHER DETAIL FOR INTEGRATION UPDATE
 			(CASE WHEN ISNULL(D.ysnAddPayable, 1) <> 0 THEN 1 ELSE 0 END) 
 		END) AND
