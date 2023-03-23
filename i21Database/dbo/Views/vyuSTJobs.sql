@@ -5,6 +5,7 @@ SELECT		Job.intJobId,
 			JobType.strJobType,
 			Job.strParameter1,
 			Job.strParameter2,
+			Job.strParameter3,
 			register.strRegisterClass,
 			register.strSAPPHIREUserName,
 			dbo.fnAESDecryptASym(register.strSAPPHIREPassword) as strSAPPHIREPassword
