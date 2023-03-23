@@ -175,7 +175,9 @@ BEGIN TRY
 													END)
 											ELSE
 												case
-													when (@ysnIsDWG = 1 and @ysnCompleted = 0) or intPricingTypeId = 5
+													when (@ysnIsDWG = 1 and @ysnCompleted = 0)
+													then 1
+													when intPricingTypeId = 5
 													then intContractStatusId
 													else 5
 												end
