@@ -97,7 +97,7 @@ BEGIN TRY
 		END
 
 		---- AG WORK ORDER
-		ELSE IF (@intTicketStorageScheduleTypeId = -9)
+		ELSE IF (@intTicketStorageScheduleTypeId = -10)
 		BEGIN
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId

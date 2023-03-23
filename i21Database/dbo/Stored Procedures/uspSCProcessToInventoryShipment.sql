@@ -546,7 +546,7 @@ BEGIN TRY
 					IF(@dblRemainingUnits IS NULL)
 						SET @dblRemainingUnits = (@dblNetUnits * -1)
 
-					IF(@intTicketStorageScheduleTypeId  <> -9)
+					IF(@intTicketStorageScheduleTypeId  <> -10)
 					BEGIN
 						INSERT INTO @ItemsForItemShipment (
 							intItemId
@@ -759,7 +759,7 @@ BEGIN TRY
 	
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	IF(@intTicketStorageScheduleTypeId <> -9)
+	IF(@intTicketStorageScheduleTypeId <> -10)
 	BEGIN
 		EXEC uspSCProcessShipmentToInvoice 
 			@intTicketId = @intTicketId
