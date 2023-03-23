@@ -96,7 +96,7 @@
 	[ysnShowGrainReceipt] BIT NOT NULL DEFAULT(1),
     [ysnUseTicketNoInCPE] BIT NOT NULL DEFAULT(0),
 	[ysnUseTicketNoInGrainReceipt] BIT NOT NULL DEFAULT(0),
-
+    [strDefaultGrainReceiptReport] [nvarchar](250) NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
     CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketPool] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
