@@ -2774,35 +2774,29 @@ BEGIN TRY
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
-				--left join tblICInventoryReceipt IR ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
-				--	AND IR.intEntityVendorId = CS.intEntityId
-				--left join tblICInventoryReceiptItem IRI on IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IRI.intContractHeaderId IS NOT NULL
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
 						AND DSC.intItemId = a.intItemId
-				--LEFT JOIN tblGRStorageHistory STH
-				--	ON STH.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN (
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
 										AND 
-											CASE WHEN (SH.strType = 'From Transfer') THEN 
+											(CASE WHEN (SH.strType = 'From Transfer') THEN 
 												CASE WHEN SH.intContractHeaderId is not null then  
 													case when SH.intContractHeaderId = RI.intContractHeaderId then 
 														1 
 													else
 														0
 													end
-												else 
-													1 
+												else 1
 												end
 											ELSE 
 												(CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) 
 													THEN 1 
 												ELSE 0 												
 												END) 
-											END = 1
+											END) = 1
 				)  
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
@@ -2812,6 +2806,7 @@ BEGIN TRY
 								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
 								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 								AND CS.intTicketId IS NOT NULL
+								AND (RI.intOwnershipType = 2 OR (RI.intOwnershipType = 1 AND @ysnDPOwnedType = 1))
 				LEFT JOIN (
 						tblICInventoryReceiptCharge RC
 						INNER JOIN tblGRStorageHistory SHC
@@ -2861,7 +2856,8 @@ BEGIN TRY
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
-				 
+
+				-- select 'test',* from @voucherPayable
 				-- Charge and Premium
 				INSERT INTO @voucherPayable
 				(
