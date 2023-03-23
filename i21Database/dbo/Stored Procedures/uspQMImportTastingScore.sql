@@ -233,16 +233,7 @@ BEGIN TRY
 			,[strTeaVolume] = IMP.strTeaVolume
 			,[strDustContent] = IMP.strDustContent
 			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
-		FROM tblQMSample S
-		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
-		INNER JOIN (
-			tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
-			) ON V.intEntityId = S.intEntityId
-		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-		LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
-		INNER JOIN (
+		FROM  (
 			tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 			-- Colour
 			LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
@@ -265,7 +256,18 @@ BEGIN TRY
 			-- Batch TBO
 			LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId
 				AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
-			) ON SY.strSaleYear = IMP.strSaleYear
+			)
+			LEFT JOIN ( tblQMSample S
+			INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+			INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+			INNER JOIN (
+				tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+				) ON V.intEntityId = S.intEntityId
+			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+			LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+			LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+			)
+			ON SY.strSaleYear = IMP.strSaleYear
 			AND CL.strLocationName = IMP.strBuyingCenter
 			AND S.strSaleNumber = IMP.strSaleNumber
 			AND CT.strCatalogueType = IMP.strCatalogueType
@@ -577,9 +579,6 @@ BEGIN TRY
 					-- Update if existing sample exists
 			ELSE
 			BEGIN
-				DELETE TR
-				FROM tblQMTestResult TR
-				WHERE TR.intSampleId = @intBatchSampleId
 
 				EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId = @intBatchSampleId
 					,@intUserEntityId = @intEntityUserId
@@ -788,6 +787,8 @@ BEGIN TRY
 
 		DECLARE @intProductId INT
 
+		SET @intSampleTypeId = ISNULL(@intSampleTypeId, @intTemplateSampleTypeId)
+
 		-- Template
 		IF (
 				ISNULL(@intItemId, 0) > 0
@@ -822,6 +823,7 @@ BEGIN TRY
 		UPDATE ##tmpQMCatalogueImport
 		SET intItemId = @intItemId
 			,intSampleId = @intSampleId
+			,intSampleTypeId = @intSampleTypeId
 			,intProductId = @intProductId
 			,intBatchId = @intBatchId
 			,strBatchNo = @strBatchNo
@@ -835,6 +837,12 @@ BEGIN TRY
 		CONT:
 		SET @intCounter = @intCounter + 1
 	END
+
+	-- Clear test properties of the previous item
+	DELETE TR
+	FROM tblQMTestResult TR
+	INNER JOIN ##tmpQMCatalogueImport R ON TR.intSampleId = R.intSampleId
+	WHERE R.intSampleId IS NOT NULL
 
 	-- Insert Test Result outside of the loop
 	INSERT INTO tblQMTestResult (
