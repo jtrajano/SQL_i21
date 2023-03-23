@@ -484,6 +484,8 @@ BEGIN TRY
         -- Compare the updated sample with the original values to determine which field needs audit logs
         ELSE
         BEGIN
+            IF OBJECT_ID('tempdb..##tmpQMSample') IS NULL
+                RETURN
             -- Generate audit logs for sample header
             SET @intKey = 1
 
@@ -836,7 +838,7 @@ BEGIN TRY
                 ,[intSampleId]  = T.intSampleId
             FROM ##tmpHeaderLogs T
 
-            SELECT @intKey = MAX(Id) FROM ##tmpLogs
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM ##tmpLogs
 
             INSERT INTO ##tmpLogs (
                 [Id]
@@ -863,8 +865,10 @@ BEGIN TRY
                 UNION ALL
                 SELECT 'Comment', TRO.strComment, TRN.strComment
             ) C (strFieldName, strOldValue, strNewValue)
-            WHERE TRN.intSampleId = @intSampleId
+            WHERE TRN.intSampleId = TRO.intSampleId
             AND ISNULL(C.strOldValue, '') <> ISNULL(C.strNewValue, '')
+
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM ##tmpLogs
 
             -- POST:
             IF @intKey > 1
