@@ -1182,6 +1182,7 @@ BEGIN TRY
 				,dblTeaAppearancePinpoint
 				,dtmShippingDate
 				,strFines
+				,intCountryId
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1320,6 +1321,7 @@ BEGIN TRY
 				,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 				,dtmShippingDate = @dtmCurrentDate
 				,strFines = Fines.strPropertyValue 
+				,intCountryId=S.intCountryID 
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
