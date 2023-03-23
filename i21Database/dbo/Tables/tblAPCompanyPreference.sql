@@ -35,6 +35,5 @@
 	[ysnOverrideLocationSegment]	        BIT NOT NULL DEFAULT(0),
 	[ysnOverrideLineOfBusinessSegment]	    BIT NOT NULL DEFAULT(0),
     [ysnOverrideAPLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
-    [ysnAllowFinalizeVoucherWithoutReceipt]	BIT NOT NULL DEFAULT(0),
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
