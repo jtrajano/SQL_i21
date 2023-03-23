@@ -395,6 +395,11 @@ BEGIN
 END
 GO
 
+IF EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode = 'AWO' AND intStorageScheduleTypeId = -9)
+BEGIN
+	DELETE FROM tblGRStorageType WHERE strStorageTypeCode = 'AWO' AND intStorageScheduleTypeId = -9
+END
+GO
 IF NOT EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode = 'AWO')
 BEGIN
 	SET IDENTITY_INSERT [dbo].[tblGRStorageType] ON
