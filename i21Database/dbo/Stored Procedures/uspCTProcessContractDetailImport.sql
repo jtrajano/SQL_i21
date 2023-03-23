@@ -43,6 +43,7 @@ BEGIN
 			, ci.dtmPlannedAvailability
 			, ci.dtmEventStartDate
 			, ci.dtmUpdatedAvailability
+			, intCHLocationId = ch.intCompanyLocationId
 			, intLocationId = cl.intCompanyLocationId
 			, ci.strLocation
 			, bk.intBookId
@@ -214,6 +215,49 @@ BEGIN
 		LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActive = 1 and ci.strShippineLine = Ent.strEntityName collate database_default
 		
 		where ci.guiUniqueId = @guiUniqueId
+
+		Declare @ysnCompanyLocationInContractHeader as BIT
+		select @ysnCompanyLocationInContractHeader = ysnCompanyLocationInContractHeader from tblCTCompanyPreference
+
+
+		IF @ysnCompanyLocationInContractHeader = CAST(1  as BIT)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ISNULL(intCHLocationId,0) <> ISNULL(intLocationId,0)) 
+			BEGIN
+		
+				INSERT INTO tblCTErrorImportLogs
+				SELECT guiUniqueId
+					   ,'TBO in the sequence doesn''t match with the TBO in the header'
+					   ,strContractNumber
+					   ,intSequence
+					   ,'Fail'
+					   ,1
+				FROM #tmpList 
+				WHERE guiUniqueId = @guiUniqueId AND  strLocation <> '' and  ISNULL(intCHLocationId,0) <> ISNULL(intLocationId,0)
+
+			
+			END
+		END
+		ELSE
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ISNULL(intLocationId, 0) = 0) 
+			BEGIN
+		
+				INSERT INTO tblCTErrorImportLogs
+				SELECT guiUniqueId
+					   ,'Invalid TBO'
+					   ,strContractNumber
+					   ,intSequence
+					   ,'Fail'
+					   ,1
+				FROM #tmpList 
+				WHERE guiUniqueId = @guiUniqueId AND  strLocation <> ''
+
+			
+			END
+		END
+		
+
 
 
 		IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ISNULL(intItemId, 0) = 0) 
