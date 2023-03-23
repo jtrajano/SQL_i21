@@ -1660,7 +1660,7 @@ BEGIN TRY
 						END
 
 						---WORK ORDER
-						IF(@intTicketStorageScheduleTypeId = -9)
+						IF(@intTicketStorageScheduleTypeId = -10)
 						BEGIN
 							--Update Work order Shipped Quantity for the Ticket Item
 							SELECT TOP 1
