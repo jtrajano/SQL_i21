@@ -3087,31 +3087,32 @@ WHERE I.strSessionId = @strSessionId
 GROUP BY I.intInvoiceId, I.strInvoiceNumber, I.strTransactionType, I.strBatchId
 HAVING SUM(GL.dblDebit) - SUM(GL.dblCredit) <> 0
 
-INSERT INTO tblARPostInvalidInvoiceData (
-	  [intInvoiceId]
-	, [strInvoiceNumber]
-	, [strTransactionType]
-	, [intInvoiceDetailId]
-	, [intItemId]
-	, [strBatchId]
-	, [strPostingError]
-	, [strSessionId]
-)
-SELECT DISTINCT
-	  [intInvoiceId]		= I.[intInvoiceId]
-	, [strInvoiceNumber]	= I.[strInvoiceNumber]
-	, [strTransactionType]	= I.[strTransactionType] 
-	, [intInvoiceDetailId]	= NULL
-	, [intItemId]			= NULL
-	, [strBatchId]			= I.[strBatchId]
-	, [strPostingError]		= 'Foreign Debit and credit amounts are not balanced.'
-	, [strSessionId]		= @strSessionId
-FROM tblARPostInvoiceGLEntries GL
-INNER JOIN tblARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber AND GL.intTransactionId = I.intInvoiceId
-WHERE I.strSessionId = @strSessionId
-  AND GL.strSessionId = @strSessionId
-GROUP BY I.intInvoiceId, I.strInvoiceNumber, I.strTransactionType, I.strBatchId
-HAVING SUM(GL.dblDebitForeign) - SUM(GL.dblCreditForeign) <> 0
+-- Removed Foreign Debit/Credit validation - See AR-16581
+--INSERT INTO tblARPostInvalidInvoiceData (
+--	  [intInvoiceId]
+--	, [strInvoiceNumber]
+--	, [strTransactionType]
+--	, [intInvoiceDetailId]
+--	, [intItemId]
+--	, [strBatchId]
+--	, [strPostingError]
+--	, [strSessionId]
+--)
+--SELECT DISTINCT
+--	  [intInvoiceId]		= I.[intInvoiceId]
+--	, [strInvoiceNumber]	= I.[strInvoiceNumber]
+--	, [strTransactionType]	= I.[strTransactionType] 
+--	, [intInvoiceDetailId]	= NULL
+--	, [intItemId]			= NULL
+--	, [strBatchId]			= I.[strBatchId]
+--	, [strPostingError]		= 'Foreign Debit and credit amounts are not balanced.'
+--	, [strSessionId]		= @strSessionId
+--FROM tblARPostInvoiceGLEntries GL
+--INNER JOIN tblARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber AND GL.intTransactionId = I.intInvoiceId
+--WHERE I.strSessionId = @strSessionId
+--  AND GL.strSessionId = @strSessionId
+--GROUP BY I.intInvoiceId, I.strInvoiceNumber, I.strTransactionType, I.strBatchId
+--HAVING SUM(GL.dblDebitForeign) - SUM(GL.dblCreditForeign) <> 0
 
 INSERT INTO tblARPostInvalidInvoiceData (
 	  [intInvoiceId]
