@@ -725,6 +725,12 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrencyExchangeRateType HRT ON HRT.intCurrencyExchangeRateTypeId = CD.intHistoricalRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+    LEFT JOIN (
+		  SELECT APBD.* 
+		  FROM tblAPBillDetail APBD
+		  JOIN tblICItem ICI on ICI.intItemId = APBD.intItemId
+		  where ICI.strType <> 'Other Charge'
+	)            BD ON BD.intContractDetailId    =  CD.intContractDetailId
 	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CT.intCommodityUOMId
 	LEFT JOIN tblICItemUOM CM ON CM.intItemId = CD.intItemId AND CM.intUnitMeasureId = CO.intUnitMeasureId
 	LEFT JOIN @tblShipment Shipment ON Shipment.intContractDetailId = CD.intContractDetailId
