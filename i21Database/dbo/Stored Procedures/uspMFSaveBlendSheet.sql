@@ -988,6 +988,16 @@ BEGIN TRY
 			/* For Enable Parent Lot Configuration. */
 			IF @ysnEnableParentLot = 0
 			BEGIN
+				IF @ysnTBSReserveOnSave = 1
+				BEGIN
+					UPDATE LI
+					SET dblReservedQtyInTBS = IsNULL(LI.dblReservedQtyInTBS, 0) - WI.dblQuantity
+					FROM dbo.tblMFLotInventory LI
+					JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intLotId = LI.intLotId
+					WHERE WI.intWorkOrderId = @intWorkOrderId
+						AND intWorkOrderInputLotId = IsNULL(@intWorkOrderInputLotId, intWorkOrderInputLotId)
+				END
+
 				UPDATE tblMFWorkOrderInputLot
 				SET dblQuantity = (
 						SELECT dblQty
@@ -1007,6 +1017,20 @@ BEGIN TRY
 						FROM @tblLot
 						WHERE intRowNo = @intMinRowNo
 						)
+					,dblTBSQuantity = CASE 
+						WHEN @ysnTBSReserveOnSave = 1
+							THEN (
+									SELECT dblQty
+									FROM @tblLot
+									WHERE intRowNo = @intMinRowNo
+									)
+						ELSE dblTBSQuantity
+						END
+					,ysnTBSReserved = CASE 
+						WHEN @ysnTBSReserveOnSave = 1
+							THEN 1
+						ELSE ysnTBSReserved
+						END
 				WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 				IF @ysnOverrideRecipe = 1 
@@ -1124,18 +1148,8 @@ BEGIN TRY
 
 				IF @ysnTBSReserveOnSave = 1
 				BEGIN
-					SELECT @dblTBSQuantity = 0
-
-					SELECT @dblTBSQuantity = dblQty
-					FROM @tblLot
-					WHERE intRowNo = @intMinRowNo
-
-					EXEC [dbo].[uspMFTrialBlendSheet] @intWorkOrderId = @intWorkOrderId
-						,@intWorkOrderInputLotId = @intWorkOrderInputLotId
-						,@ysnKeep = 1
-						,@type = 'Confirm'
-						,@UserId = @intCreatedUserId
-						,@dblTBSQuantity = @dblTBSQuantity
+					EXEC [dbo].[uspMFUpdateTrialBlendSheetReservation] @intWorkOrderId
+																 , @intWorkOrderInputLotId
 				END
 			END
 			ELSE
