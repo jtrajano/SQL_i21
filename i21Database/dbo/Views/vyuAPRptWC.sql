@@ -29,7 +29,7 @@ SELECT
 		,dblTotal				=	WC2Details.dblTotal + WC2Details.dblTax
 		,dblNetShippedWeight	=	WC2Details.dblNetShippedWeight
 		,dblWeightLoss			=	dblWeightLoss--WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
-		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
+		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetShippedWeight - dblWeightLoss ELSE WC2Details.dblQtyReceived END
 		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
 		,dblClaimAmount			=	WC2Details.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
