@@ -44,6 +44,9 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intPricingTypeId INT
 		,@dblNetUnits NUMERIC(18,6) = 0
 		,@intDirectLoadId INT
+		,@intTicketTypeId INT
+		
+
 DECLARE @ysnTicketMatchContractLoadBased BIT
 DECLARE @ysnTicketContractLoadBased BIT
 DECLARE @intTicketLoadDetailId INT
@@ -84,13 +87,21 @@ BEGIN TRY
 		,@intTicketStorageScheduleTypeId = SC.intStorageScheduleTypeId 
 		,@intTicketContractDetailId = SC.intContractId
 		,@intTicketLoadDetailId = SC.intLoadDetailId		
-		
+		,@intTicketTypeId = SC.intTicketTypeId
 	FROM tblSCTicket SC 
 	LEFT JOIN tblCTWeightGrade CTGrade 
 		ON CTGrade.intWeightGradeId = SC.intGradeId
 	LEFT JOIN tblCTWeightGrade CTWeight 
 		ON CTWeight.intWeightGradeId = SC.intWeightId
 	WHERE intTicketId = @intTicketId
+	
+
+	IF ISNULL(@intMatchTicketId, 0) = 0 AND @strInOutFlag = 'O' AND @intTicketTypeId = 9
+	BEGIN
+		SELECT @intMatchTicketId = intMatchTicketId 
+		FROM tblSCTicket SC  WHERE intTicketId = @intTicketId
+
+	END
 
 	SELECT @strWhereFinalizedMatchWeight = CTWeight.strWhereFinalized
 		, @strWhereFinalizedMatchGrade = CTGrade.strWhereFinalized
@@ -796,6 +807,16 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+
+
+			--CHECK FOR UNIT DISCREPANCY
+			SELECT @dblTicketNetUnits , @dblMatchContractUnits
+			IF @dblTicketNetUnits != @dblMatchContractUnits
+			BEGIN
+				DECLARE @EMESSAGE NVARCHAR(MAX) = 'Direct in units (' + LTRIM(ROUND(ISNULL(CAST( @dblMatchContractUnits AS NUMERIC(18, 4)),0), 2)) + ') does not match Direct out units (' + LTRIM(ROUND(ISNULL(CAST(@dblTicketNetUnits AS NUMERIC(18, 4)),0), 2)) + '). Units should match to proceed with the distribution.'
+				RAISERROR(@EMESSAGE, 11, 1);
+
+			END
 
 			---RECORD ALLOCATION				
 			BEGIN
