@@ -8,8 +8,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @SummaryLogs AS RKSummaryLog
 
-	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9) OR (intTransactionTypeId = 6 AND strType = 'Reduced By Invoice')) ) = 1
-	--IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9)) ) = 1
+	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,3,4,5,8,9)) = 1
 	BEGIN
 		INSERT INTO @SummaryLogs
 		(
@@ -50,7 +49,7 @@ BEGIN TRY
 		SELECT
 			strBucketType 					= 'Customer Owned'
 			,strTransactionType 			= CASE 
-												WHEN intTransactionTypeId IN (1,5,8)
+												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN CASE 
 															WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
 															WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
@@ -58,7 +57,6 @@ BEGIN TRY
 														END
 												WHEN intTransactionTypeId = 4 THEN 'Storage Settlement'
 												WHEN intTransactionTypeId = 9 THEN 'Inventory Adjustment' 
-												WHEN intTransactionTypeId = 6 THEN 'Invoice'
 											END
 			,intTransactionRecordId 		= CASE 
 												WHEN intTransactionTypeId IN (1, 5, 8)
@@ -66,7 +64,6 @@ BEGIN TRY
 														nullif(coalesce(sh.intInventoryReceiptId, sh.intInventoryShipmentId, sh.intTicketId, -99), -99)
 												WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
 												WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId 
-												WHEN intTransactionTypeId = 6 THEN sh.intInvoiceId 
 											END
 			,intTransactionRecordHeaderId	= sh.intCustomerStorageId
 			,strDistributionType 			= st.strStorageTypeDescription
@@ -80,7 +77,6 @@ BEGIN TRY
 														END
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 												WHEN intTransactionTypeId = 9 THEN ISNULL(sh.strAdjustmentNo,sh.strTransactionId)
-												WHEN intTransactionTypeId = 6 THEN sh.strInvoice
 											END
 			,dtmTransactionDate 			= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
@@ -91,13 +87,25 @@ BEGIN TRY
 			,intItemId						= cs.intItemId			
 			,intLocationId					= cs.intCompanyLocationId
 			,dblQty 						= CASE 
-												WHEN ISNULL(@strAction,'') = '' THEN (CASE WHEN sh.strType = 'Reduced By Invoice' OR sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+												WHEN ISNULL(@strAction,'') = '' THEN (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
 												ELSE sh.dblUnits * -1
 											END									
 			,intEntityId					= cs.intEntityId			
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
 			,strMiscFields					= NULL
+			-- ,strMiscFields					= CASE WHEN ISNULL(strStorageTypeCode, '') = '' THEN '' ELSE '{ strStorageTypeCode = "' + strStorageTypeCode + '" }' END
+			-- 								+ CASE WHEN ISNULL(ysnReceiptedStorage, '') = '' THEN '' ELSE '{ ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) + '" }' END
+			-- 								+ CASE WHEN ISNULL(sh.intTransactionTypeId, '') = '' THEN '' ELSE '{ intTypeId = "' + CAST(sh.intTransactionTypeId AS NVARCHAR) + '" }' END
+			-- 								+ CASE WHEN ISNULL(strStorageType, '') = '' THEN '' ELSE '{ strStorageType = "' + strStorageType + '" }' END
+			-- 								+ CASE WHEN ISNULL(cs.intDeliverySheetId, '') = '' THEN '' ELSE '{ intDeliverySheetId = "' + CAST(cs.intDeliverySheetId AS NVARCHAR) + '" }' END
+			-- 								+ CASE WHEN ISNULL(strTicketStatus, '') = '' THEN '' ELSE '{ strTicketStatus = "' + strTicketStatus + '" }' END
+			-- 								+ CASE WHEN ISNULL(strOwnedPhysicalStock, '') = '' THEN '' ELSE '{ strOwnedPhysicalStock = "' + strOwnedPhysicalStock + '" }' END
+			-- 								+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
+			-- 								+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
+			-- 								+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
+			-- 								+ CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END			
+			 --,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
 												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN CASE 
@@ -108,7 +116,6 @@ BEGIN TRY
 												WHEN sh.strType = 'Settlement' THEN 9
 												WHEN sh.strType = 'Reverse Settlement' THEN 33
 												WHEN intTransactionTypeId = 9 THEN 20
-												WHEN intTransactionTypeId = 6 THEN CASE WHEN (SELECT COUNT(*) FROM tblGRStorageHistory WHERE strInvoice = sh.strInvoice AND intCustomerStorageId = sh.intCustomerStorageId) > 1 THEN 73 ELSE 16 END
 											END
 			,strStorageTypeCode 			= strStorageTypeCode
 			,ysnReceiptedStorage 			= ysnReceiptedStorage
@@ -493,7 +500,6 @@ BEGIN TRY
 			AND (sh.intTransactionTypeId = 3 AND st.ysnDPOwnedType = 1)
 
 		UPDATE @SummaryLogs set strTransactionNumber = '' where strTransactionNumber is null
-
 		EXEC uspRKLogRiskPosition @SummaryLogs
 	END
 

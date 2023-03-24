@@ -210,7 +210,6 @@ BEGIN
 		UNION ALL SELECT 70, 'Distribute Direct Out', 'Distribute Direct Out.'
 		UNION ALL SELECT 71, 'Undistribute Direct In', 'Undistribute Direct In.'
 		UNION ALL SELECT 72, 'Undistribute Direct Out', 'Undistribute Direct Out.'
-		UNION ALL SELECT 73, 'Updated Invoice', 'Updated Invoice.'
 
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)

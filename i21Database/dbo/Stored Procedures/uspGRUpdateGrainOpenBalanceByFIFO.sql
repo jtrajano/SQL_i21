@@ -13,7 +13,6 @@ AS
 SET ANSI_WARNINGS ON
 
 BEGIN TRY
-
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)
 	DECLARE @strProcessType NVARCHAR(30)
@@ -380,15 +379,6 @@ BEGIN TRY
 			,[intUserId] 				= @intUserId
 		FROM @StorageTicketInfoByFIFO
 		WHERE strItemType = 'Inventory'
-
-		IF @strSourceType = 'Invoice'
-		BEGIN
-			UPDATE SH
-			SET strInvoice = AR.strInvoiceNumber
-			FROM @StorageHistoryStagingTable SH
-			INNER JOIN tblARInvoice AR
-				ON AR.intInvoiceId = SH.intInvoiceId
-		END
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
