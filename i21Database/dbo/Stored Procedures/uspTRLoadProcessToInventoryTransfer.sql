@@ -143,7 +143,7 @@ BEGIN TRY
 		,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
-		,[intFromSubLocationId]     = NULL
+		,[intFromSubLocationId]     = MIN(TMSite.intCompanyLocationSubLocationId)
 		,[intToSubLocationId]       = NULL
 		,[intFromStorageLocationId] = NULL
 		,[intToStorageLocationId]   = NULL
@@ -163,6 +163,7 @@ BEGIN TRY
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = TR.intItemId AND ItemUOM.ysnStockUnit = 1
+			LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 	        AND IC.strType != 'Non-Inventory'
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
@@ -210,7 +211,7 @@ BEGIN TRY
 		,[dblQuantityToTransfer]    = SUM(Blend.dblQuantity)
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
-		,[intFromSubLocationId]     = NULL
+		,[intFromSubLocationId]     = MIN(TMSite.intCompanyLocationSubLocationId)
 		,[intToSubLocationId]       = NULL
 		,[intFromStorageLocationId] = NULL
 		,[intToStorageLocationId]   = NULL
@@ -228,6 +229,7 @@ BEGIN TRY
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = TR.intItemId AND ItemUOM.ysnStockUnit = 1
+			LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 		AND ISNULL(DD.strReceiptLink, '') = ''
 	    AND IC.strType != 'Non-Inventory'
