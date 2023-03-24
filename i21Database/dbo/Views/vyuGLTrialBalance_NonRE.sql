@@ -9,7 +9,6 @@ WITH DETAIL AS(
 		tblGLAccount A
 		inner join tblGLFiscalYear F on 1=1
 		JOIN tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
-	--WHERE A.intAccountId <> F.intRetainAccount
 )
 ,ACCOUNTTYPE AS
 (

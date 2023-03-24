@@ -1,9 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuGLTrialBalanceRE_NonRE]
 AS
-WITH BeginningBalance AS(
-	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId FROM vyuGLTrialBalance_NonRE 
-	-- UNION ALL
-	-- SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId FROM vyuGLTrialBalance_RE 
+WITH
+OverrrideSetting AS(
+	SELECT TOP 1 ISNULL(ysnREOverride,0) ysnREOverride FROM tblGLCompanyPreferenceOption
+),
+BeginningBalance AS(
+	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId 
+	FROM vyuGLTrialBalance_NonRE
+	UNION ALL
+	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId 
+	FROM vyuGLTrialBalance_RE , OverrrideSetting O WHERE O.ysnREOverride = 0
 )
 SELECT 
 ISNULL(B.MTD,0)MTDBalance,
