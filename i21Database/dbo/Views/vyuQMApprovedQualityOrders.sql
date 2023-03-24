@@ -114,7 +114,7 @@ OUTER Apply
 ( select  intSampleId,strApprovalStatus from  tblQMCatalogueReconciliationDetail CRD INNER JOIN
 tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId inner join
 tblSMTransaction SMT ON SMT.intRecordId = CR.intCatalogueReconciliationId AND SMT.strTransactionNo = CR.strReconciliationNumber
-where SMT.strApprovalStatus IN ('Approved','No Need for Apprval') AND CRD.intSampleId = S.intSampleId )Qlty
+where SMT.strApprovalStatus IN ('Approved','No Need for Approval') AND CRD.intSampleId = S.intSampleId ) Qlty
 WHERE LD.intLoadDetailId IS NULL 
 AND ((S.intContractDetailId IS NOT NULL AND strApprovalStatus IS NULL)
 OR (S.intContractDetailId IS NULL AND strApprovalStatus IS NOT NULL))
