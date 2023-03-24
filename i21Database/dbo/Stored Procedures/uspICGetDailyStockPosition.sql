@@ -644,7 +644,8 @@ CREATE TABLE #tmpDailyStockPosition
 				dblConsumed				= ISNULL(tmpDSP.dblConsumedQty, 0),
 				dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
 				dblClosingQty			= 
-											tmpDSP.dblOpeningQty 
+											tmpDSP.dblOpeningQty
+											+ tmpDSP.dblOpeningInTransitQty
 											+ tmpDSP.dblReceivedQty
 											+ tmpDSP.dblInventoryCountQty
 											- tmpDSP.dblInvoicedQty 
@@ -729,6 +730,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
 				dblClosingQty			= 
 											tmpDSP.dblOpeningQty 
+											+ tmpDSP.dblOpeningInTransitQty
 											+ tmpDSP.dblReceivedQty 
 											+ tmpDSP.dblInventoryCountQty
 											- tmpDSP.dblInvoicedQty 
