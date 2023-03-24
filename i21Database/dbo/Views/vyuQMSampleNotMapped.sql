@@ -69,7 +69,7 @@ SELECT S.intSampleId
 	, CLSL.strSubLocationName AS strDestinationStorageLocationName
 	,strNetWtPerPackagesUOM = PWUOM1.strUnitMeasure
 	,strNetWtSecondPackageBreakUOM = PWUOM2.strUnitMeasure
-	,strNetWtThirdPackageBreakUOM = PWUOM2.strUnitMeasure	
+	,strNetWtThirdPackageBreakUOM = PWUOM3.strUnitMeasure	
 	,B1.strName AS strBuyer1
 	,B2.strName AS strBuyer2
 	,B3.strName AS strBuyer3

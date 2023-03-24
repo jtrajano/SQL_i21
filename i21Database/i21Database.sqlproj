@@ -1512,6 +1512,7 @@
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
     <Build Include="dbo\Tables\tblCTUpdatedSequencePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageEntryDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
