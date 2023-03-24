@@ -227,6 +227,10 @@ BEGIN
 			,[dblWeight]						=	A.dblWeight
 			,[dblNetWeight]						=	A.dblNetWeight
 			,[dblWeightUnitQty]					=	A.dblWeightUnitQty
+			,[dblWeightLoss]						=	A.dblWeightLoss
+			,[dblNetShippedWeight]			=	A.dblNetShippedWeight
+			,[dblFranchiseWeight]				=	A.dblFranchiseWeight
+			,[dblFranchiseAmount]				=	A.dblFranchiseAmount
 			,[intWeightUOMId]					=	NULLIF(A.intWeightUOMId,0)
 			,[strWeightUOM]						=	weightUOM.strUnitMeasure
 			,[intCostCurrencyId]				=	CASE WHEN A.intCostCurrencyId > 0 THEN A.intCostCurrencyId ELSE A.intCurrencyId END
@@ -424,6 +428,10 @@ BEGIN
 		,[dblWeight]				
 		,[dblNetWeight]					
 		,[dblWeightUnitQty]				
+		,[dblWeightLoss]
+		,[dblNetShippedWeight]
+		,[dblFranchiseWeight]
+		,[dblFranchiseAmount]				
 		,[intWeightUOMId]				
 		,[strWeightUOM]					
 		,[intCostCurrencyId]				
@@ -545,6 +553,10 @@ BEGIN
 		,[dblWeight]			
 		,[dblNetWeight]					
 		,[dblWeightUnitQty]				
+		,[dblWeightLoss]
+		,[dblNetShippedWeight]
+		,[dblFranchiseWeight]
+		,[dblFranchiseAmount]					
 		,[intWeightUOMId]				
 		,[strWeightUOM]					
 		,[intCostCurrencyId]				
