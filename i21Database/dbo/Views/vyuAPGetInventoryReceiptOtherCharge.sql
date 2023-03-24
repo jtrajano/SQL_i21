@@ -8,7 +8,7 @@ SELECT DISTINCT ReceiptCharge.intInventoryReceiptChargeId
 	,ReceiptCharge.intChargeId  
 	,ReceiptCharge.intTaxGroupId  
 	,ReceiptCharge.intForexRateTypeId  
-	,ReceiptCharge.dblForexRate  
+	,ISNULL(ReceiptCharge.dblForexRate, 1) dblForexRate 
 	,ReceiptCharge.strCostMethod  
 	,CASE WHEN ReceiptCharge.dblRate <= 0 AND ReceiptCharge.strCostMethod = 'Amount' THEN ReceiptCharge.dblAmount ELSE ReceiptCharge.dblRate END dblRate  
 	,CAST(ReceiptCharge.dblQuantity AS DECIMAL(18,2)) dblQuantity  
