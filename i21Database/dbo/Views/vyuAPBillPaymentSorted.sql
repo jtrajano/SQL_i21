@@ -3,6 +3,7 @@
 AS
 
 SELECT 
+	CAST(ROW_NUMBER() OVER(ORDER BY (VP.intPaymentId) DESC) AS INT) AS intId,
 	B.intBillId,
 	VP.intPaymentId, 
 	VP.intARPaymentId, 
