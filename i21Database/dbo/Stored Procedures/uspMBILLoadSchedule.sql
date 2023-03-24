@@ -473,13 +473,13 @@ LEFT JOIN tblMBILPickupDetail MBP on MBP.intDispatchOrderDetailId = MBDL.intDisp
 LEFT JOIN tblTMOrder t on MBDL.intTMDispatchId = t.intDispatchId
 WHERE DO.intDriverEntityId = @intDriverId AND intStopType = 2 and intDispatchStatus = 3 and MBDL.ysnDelivered = 0
 
-Update d
-set d.intPickupDetailId = p.intPickupDetailId
-from tblMBILDeliveryDetail d
-inner join tblMBILPickupDetail p on p.intDispatchOrderDetailId = d.intDispatchOrderDetailId
-INNER JOIN tblMBILLoadHeader h on p.intLoadHeaderId = h.intLoadHeaderId
-WHERE h.intDriverId  = @intDriverId and ysnDelivered = 0 
-and h.strLoadNumber like '%DS%'
+Update dd
+set dd.intPickupDetailId = p.intPickupDetailId
+From tblMBILLoadHeader h
+inner join tblMBILPickupDetail p on h.intLoadHeaderId = p.intLoadHeaderId
+inner join tblMBILDeliveryHeader dh on dh.intLoadHeaderId = h.intLoadHeaderId and p.intLoadHeaderId = dh.intLoadHeaderId
+inner join tblMBILDeliveryDetail dd on dh.intDeliveryHeaderId = dd.intDeliveryHeaderId and (p.intDispatchOrderDetailId = dd.intDispatchOrderDetailId or p.intLoadDetailId = dd.intLoadDetailId)
+Where p.intPickupDetailId <> dd.intPickupDetailId and h.intDriverId = @intDriverId
 
 DELETE FROM tblMBILPickupDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and intLoadHeaderId IN(Select intLoadHeaderId from tblMBILLoadHeader where intDriverId = @intDriverId)
 DELETE FROM tblMBILDeliveryDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and 
