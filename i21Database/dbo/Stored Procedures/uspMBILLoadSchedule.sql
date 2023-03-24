@@ -395,7 +395,7 @@ INSERT INTO tblMBILDeliveryHeader(intLoadHeaderId,intEntityId,intEntityLocationI
 SELECT DISTINCT MB.intLoadHeaderId
 			   ,CASE WHEN TMS.ysnCompanySite  = 1 then NULL ELSE DOD.intEntityId END intEntityId
 			   ,DOD.intEntityLocationId
-			   ,CASE WHEN TMS.ysnCompanySite  = 1 then TMS.intLocationId ELSE DO.intCompanyLocationId END intCompanyLocationId
+			   ,TMS.intLocationId intCompanyLocationId
 FROM tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD ON DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblMBILLoadHeader MB ON MB.strLoadNumber = DO.strDispatchOrderNumber
@@ -410,9 +410,9 @@ isnull(p.intCompanyLocationId,0) = isnull(CASE WHEN TMS.ysnCompanySite  = 1 then
 
 UPDATE MBDH
 SET MBDH.intLoadHeaderId = MB.intLoadHeaderId
-,MBDH.intEntityId = DOD.intEntityId 
+,MBDH.intEntityId = CASE WHEN TMS.ysnCompanySite  = 1 then NULL ELSE DOD.intEntityId END
 ,MBDH.intEntityLocationId = DOD.intEntityLocationId 
-,MBDH.intCompanyLocationId = DO.intCompanyLocationId
+,MBDH.intCompanyLocationId = TMS.intLocationId
 ,MBDH.dtmDeliveryFrom = NULL
 ,MBDH.dtmDeliveryTo = NULL
 ,MBDH.intSalesPersonId = NULL
@@ -420,6 +420,8 @@ FROM tblMBILDeliveryHeader MBDH
 INNER JOIN tblMBILLoadHeader MB ON MB.intLoadHeaderId = MBDH.intLoadHeaderId
 INNER JOIN tblLGDispatchOrder DO ON DO.intDispatchOrderId = MB.intDispatchOrderId
 INNER JOIN tblLGDispatchOrderDetail DOD ON DOD.intDispatchOrderId = DOD.intDispatchOrderId AND ISNULL(DOD.intEntityLocationId,DO.intCompanyLocationId) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId)
+INNER JOIN tblTMDispatch TMD on TMD.intDispatchID = DOD.intTMDispatchId
+INNER JOIN tblTMSite TMS on TMS.intSiteID = TMD.intSiteID
 WHERE MB.intDriverId = @intDriverId AND intStopType = 2 and intDispatchStatus = 3and exists(Select * from tblMBILDeliveryDetail d Where MBDH.intDeliveryHeaderId = d.intDeliveryHeaderId and ysnDelivered = 0)
 
  
