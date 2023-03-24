@@ -17,6 +17,7 @@
 	,@intInventoryReceiptItemLotId INT = NULL
 	,@intTransactionTypeId INT = NULL
 	,@intCommodityId INT = NULL
+	,@intCountryId INT = NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -284,6 +285,13 @@ BEGIN
 						SET @strPatternString = @strPatternString + @strFormatedDate
 					END
 
+					IF @strSubFormat = 'y'
+					BEGIN
+						SET @strFormatedDate = Right(convert(VARCHAR, datepart(yy, @dtmCurrentDate)),1)
+						SET @strSubFormat = ''
+						SET @strPatternString = @strPatternString + @strFormatedDate
+					END
+
 					SET @intCnt = @intCnt + 1
 					SET @intLen = @intLen - 1
 				END
@@ -356,10 +364,12 @@ BEGIN
 						THEN @intShiftId
 					WHEN @strTableName = 'tblICCommodity'
 						THEN @intCommodityId
-						WHEN @strTableName = 'tblCTContractHeader'
+					WHEN @strTableName = 'tblCTContractHeader'
 						THEN @intContractHeaderId
-						WHEN @strTableName = 'tblICInventoryReceiptItemLot'
+					WHEN @strTableName = 'tblICInventoryReceiptItemLot'
 						THEN @intInventoryReceiptItemLotId
+					WHEN @strTableName = 'tblSMCountry'
+						THEN @intCountryId
 					END
 
 			IF @intPrimaryColumnId IS NULL

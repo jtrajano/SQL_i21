@@ -3288,6 +3288,26 @@ BEGIN TRY
 
 				DECLARE @dblVoucherTotalPrecision DECIMAL(18,6) = round(@dblVoucherTotal,2)
 
+				--check the total voucher line item in the staging table before creating a voucher
+				IF (SELECT SUM(P.dblQuantityToBill)
+				FROM @voucherPayable P
+				INNER JOIN tblICItem IC
+					ON IC.intItemId = P.intItemId
+						AND IC.strType = 'Inventory'
+				) > (
+					SELECT SUM(A.dblUnits) 
+					FROM @SettleVoucherCreate A
+					INNER JOIN tblICItem IC
+					ON IC.intItemId = A.intItemId
+						AND IC.strType = 'Inventory'
+					WHERE A.intItemId = IC.intItemId
+				)
+				BEGIN
+					BEGIN
+						RAISERROR('Unable to post settlement.<br/> Voucher Quantity for Inventory Item is greater than the Storage Settlement Quantity.',16,1)
+					END
+				END
+
 				--IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
 				IF EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
 				BEGIN

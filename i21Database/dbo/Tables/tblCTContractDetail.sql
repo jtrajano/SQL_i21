@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	intIndexId INT NULL, 
 	dblAdjustment NUMERIC(18, 6) NULL, 
 	intAdjItemUOMId int NULL,    
-	intPricingTypeId int NULL,
+	intPricingTypeId int NOT NULL,
 	intFutureMarketId int NULL,
 	intFutureMonthId INT NULL,
 	dblFutures numeric(18, 6) NULL,

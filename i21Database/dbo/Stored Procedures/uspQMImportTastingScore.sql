@@ -11,7 +11,10 @@ BEGIN TRY
 		  , @intOriginalItemId	INT
 		  , @MFBatchTableType	MFBatchTableType
 		  , @dtmCurrentDate		DATETIME
-		  , @strBatchId			NVARCHAR(50);
+		  , @strBatchId			NVARCHAR(50)
+		  , @dblB1QtyBought		NUMERIC(18,6)
+		  , @intBookId			INT
+		  , @strB1GroupNumber   NVARCHAR(50)
 		  
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
@@ -108,6 +111,7 @@ BEGIN TRY
 		  , @intDefaultCategoryId		INT
 	      , @intBatchSampleId			INT
 		  , @ysnCreate					BIT
+		  , @dblB1Price					NUMERIC(18,6)
 		  , @strBulkDensity				NVARCHAR(50)
 		  , @dblMoisture				NVARCHAR(50)
 		  , @strFines					NVARCHAR(50)
@@ -158,12 +162,15 @@ BEGIN TRY
 			 , strIntensity				= IMP.strIntensity
 			 , strTaste					= IMP.strTaste
 			 , strMouthFeel				= IMP.strMouthfeel
-			 , [strBulkDensity]			= IMP.strBulkDensity
+			 , [strBulkDensity]			= IMP.dblBulkDensity
 			 , dblTeaMoisture			= IMP.dblTeaMoisture
 			 , [strFines]				= IMP.strFines
-			 , [strTeaVolume]			= IMP.strTeaVolume
+			 , [strTeaVolume]			= IMP.dblTeaVolume
 			 , [strDustContent]			= IMP.strDustContent
 			 , strAirwayBillNumberCode	= IMP.strAirwayBillNumberCode
+			 , dblB1Price				= 0
+			 , dblB1QtyBought			= 0
+			 , strB1GroupNumber			= ''
 		FROM tblQMSample S
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -231,53 +238,58 @@ BEGIN TRY
 			, strIntensity				= IMP.strIntensity
 			, strTaste					= IMP.strTaste
 			, strMouthFeel				= IMP.strMouthfeel
-			, [strBulkDensity]			= IMP.strBulkDensity
+			, [strBulkDensity]			= IMP.dblBulkDensity
 			, dblTeaMoisture			= IMP.dblTeaMoisture
 			, [strFines]				= IMP.strFines
-			, [strTeaVolume]			= IMP.strTeaVolume
+			, [strTeaVolume]			= IMP.dblTeaVolume
 			, [strDustContent]			= IMP.strDustContent
 			, strAirwayBillNumberCode	= IMP.strAirwayBillNumberCode
-		FROM tblQMSample S
-		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
-		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
-		INNER JOIN 
-		(
-			tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
-		) ON V.intEntityId = S.intEntityId
-		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
-		LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
-		LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
-		INNER JOIN 
-		(
+			, dblB1Price				= IMP.dblB1Price
+			, dblB1QtyBought			= IMP.dblB1QtyBought
+			, strB1GroupNumber			= IMP.strB1GroupNumber
+		FROM  (
 			tblQMImportCatalogue IMP INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
-			/* Colour */
-			LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season' AND COLOUR.strDescription = IMP.strColour
-			/* Size */
+			-- Colour
+			LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.strType = 'Season'
+				AND COLOUR.strDescription = IMP.strColour
+			-- Size
 			LEFT JOIN tblICBrand SIZE ON SIZE.strBrandCode = IMP.strSize
-			/* Style */
+			-- Style
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.strName = IMP.strStyle
-			/* Tealingo Item */
+			-- Tealingo Item
 			LEFT JOIN tblICItem ITEM ON ITEM.strItemNo = IMP.strTealingoItem
-			/* Template Sample Type */
+			-- Template Sample Type
 			LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
-			/* Mixing Location */
+			-- Mixing Location
 			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
-			/* Batch MU */
-			LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo AND BATCH_MU.intLocationId = MU.intCompanyLocationId
-			/* Company Location */
+			-- Batch MU
+			LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
+				AND BATCH_MU.intLocationId = MU.intCompanyLocationId
+			-- Company Location
 			LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = BATCH_MU.intBuyingCenterLocationId
-			/* Batch TBO */
+			-- Batch TBO
 			LEFT JOIN tblMFBatch BATCH_TBO ON BATCH_TBO.strBatchId = BATCH_MU.strBatchId
 				AND BATCH_TBO.intLocationId = TBO.intCompanyLocationId
-	   ) ON SY.strSaleYear				= IMP.strSaleYear
-			AND CL.strLocationName		= IMP.strBuyingCenter
-			AND S.strSaleNumber			= IMP.strSaleNumber
-			AND CT.strCatalogueType		= IMP.strCatalogueType
-			AND E.strName				= IMP.strSupplier
+			)
+			LEFT JOIN ( tblQMSample S
+			INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+			INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
+			INNER JOIN (
+				tblEMEntity E INNER JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+				) ON V.intEntityId = S.intEntityId
+			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
+			LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
+			LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = S.intCountryID
+			)
+			ON SY.strSaleYear = IMP.strSaleYear
+			AND CL.strLocationName = IMP.strBuyingCenter
+			AND S.strSaleNumber = IMP.strSaleNumber
+			AND CT.strCatalogueType = IMP.strCatalogueType
+			AND E.strName = IMP.strSupplier
 			AND S.strRepresentLotNumber = IMP.strLotNumber
 		WHERE IMP.intImportLogId = @intImportLogId
-		  AND ISNULL(IMP.strBatchNo, '') <> ''
-		  AND IMP.ysnSuccess = 1
+			AND ISNULL(IMP.strBatchNo, '') <> ''
+			AND IMP.ysnSuccess = 1
 	)
 	SELECT *
 		 , intRow = ROW_NUMBER() OVER(ORDER BY (SELECT 1))
@@ -730,6 +742,14 @@ BEGIN TRY
 			END
 		END
 
+		IF @intImportType = 2 
+			BEGIN
+				SELECT @intBookId = intBookId
+				FROM tblCTBook 
+				WHERE strBook = @strB1GroupNumber
+			END
+		
+
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
 			,intSeasonId = @intColourId
@@ -742,6 +762,7 @@ BEGIN TRY
 			,intLastModifiedUserId = @intEntityUserId
 			,dtmLastModified = @dtmDateCreated
 			,intSampleStatusId = 3 -- Approved
+			,intBookId= Case When @intImportType=2 then @intBookId Else intBookId End 
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -756,6 +777,8 @@ BEGIN TRY
 		WHERE intBatchId = @intProductValueId
 
 		DECLARE @intProductId INT
+
+		SET @intSampleTypeId = ISNULL(@intSampleTypeId, @intTemplateSampleTypeId)
 
 		-- Template
 		IF (
@@ -791,6 +814,7 @@ BEGIN TRY
 		UPDATE ##tmpQMCatalogueImport
 		SET intItemId = @intItemId
 			,intSampleId = @intSampleId
+			,intSampleTypeId = @intSampleTypeId
 			,intProductId = @intProductId
 			,intBatchId = @intBatchId
 			,strBatchNo = @strBatchNo
@@ -806,6 +830,12 @@ BEGIN TRY
 	END
 	/* End of Looping to validate import detail. */ 
 
+
+	-- Clear test properties of the previous item
+	DELETE TR
+	FROM tblQMTestResult TR
+	INNER JOIN ##tmpQMCatalogueImport R ON TR.intSampleId = R.intSampleId
+	WHERE R.intSampleId IS NOT NULL
 
 	-- Insert Test Result outside of the loop
 	INSERT INTO tblQMTestResult (
@@ -991,6 +1021,7 @@ BEGIN TRY
 	SET @intCounter = 1
 	WHILE @intCounter <= @intMax
 	BEGIN
+		SELECT @dblB1Price=0,@dblB1QtyBought=0
 		SELECT
 			@intImportType = intImportType
 			,@intImportCatalogueId = intImportCatalogueId
@@ -1029,6 +1060,8 @@ BEGIN TRY
 			,@strTeaVolume = strTeaVolume
 			,@strDustContent = strDustContent
 			,@strAirwayBillNumberCode = strAirwayBillNumberCode
+			,@dblB1Price=dblB1Price
+			,@dblB1QtyBought=dblB1QtyBought
 		FROM ##tmpQMCatalogueImport
 		WHERE intRow = @intCounter
 
@@ -1145,6 +1178,7 @@ BEGIN TRY
 				,dblTeaAppearancePinpoint
 				,dtmShippingDate
 				,strFines
+				,intCountryId
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1166,9 +1200,9 @@ BEGIN TRY
 				,strAirwayBillCode = ISNULL(S.strCourierRef, @strAirwayBillNumberCode)
 				,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 				,strAWBSampleReference = S.strAWBSampleReference
-				,dblBasePrice = S.dblB1Price
+				,dblBasePrice = @dblB1Price
 				,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-				,dblBoughtPrice = S.dblB1Price
+				,dblBoughtPrice = @dblB1Price
 				,dblBulkDensity = CASE 
 					WHEN ISNULL(Density.strPropertyValue, '') = ''
 						THEN NULL
@@ -1186,7 +1220,7 @@ BEGIN TRY
 				,strEvaluatorRemarks = S.strComments3
 				,dtmExpiration = NULL
 				,intFromPortId = S.intFromLocationCodeId
-				,dblGrossWeight = S.dblGrossWeight
+				,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 				,dtmInitialBuy = @dtmCurrentDate
 				,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 				,dblLandedPrice = NULL
@@ -1195,7 +1229,7 @@ BEGIN TRY
 				,strLeafSize = BRAND.strBrandCode
 				,strLeafStyle = STYLE.strName
 				,intBookId = S.intBookId
-				,dblPackagesBought = IsNULL(S.dblB1QtyBought, S.dblRepresentingQty)
+				,dblPackagesBought = @dblB1QtyBought
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
@@ -1273,8 +1307,8 @@ BEGIN TRY
 				,strContainerType = NULL
 				,strVoyage = NULL
 				,strVessel = NULL
-				,intLocationId = MU.intCompanyLocationId
-				,intMixingUnitLocationId = MU.intCompanyLocationId
+				,intLocationId = @intMixingUnitLocationId
+				,intMixingUnitLocationId = @intMixingUnitLocationId
 				,intMarketZoneId = S.intMarketZoneId
 				,dblTeaTastePinpoint = TASTE.dblPinpointValue
 				,dblTeaHuePinpoint = HUE.dblPinpointValue
@@ -1283,6 +1317,7 @@ BEGIN TRY
 				,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 				,dtmShippingDate = @dtmCurrentDate
 				,strFines = Fines.strPropertyValue 
+				,intCountryId=S.intCountryID 
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -1403,14 +1438,12 @@ BEGIN TRY
 			-- Grade
 			LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 			-- Weight Item UOM
-			LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId
-				AND WIUOM.intUnitMeasureId = S.intSampleUOMId
+			LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = S.intItemId AND WIUOM.intUnitMeasureId = S.intSampleUOMId
 			-- Qty Item UOM
-			LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId
-				AND QIUOM.intUnitMeasureId = IsNULL(S.intB1QtyUOMId,S.intRepresentingUOMId)
+			LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
 			WHERE S.intSampleId = @intSampleId
 				AND IMP.intImportLogId = @intImportLogId
-				AND IsNULL(S.dblB1QtyBought, 0) > 0
+			
 
 			DECLARE @intInput INT
 				,@intInputSuccess INT
@@ -1452,7 +1485,6 @@ BEGIN TRY
 
 		SET @intCounter = @intCounter + 1
 	END
-
 
 	EXEC uspQMGenerateSampleCatalogueImportAuditLog
 		@intUserEntityId = @intEntityUserId

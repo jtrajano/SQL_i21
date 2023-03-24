@@ -32,6 +32,7 @@
 	ysnSendPriceFeed BIT NULL CONSTRAINT [DF_tblQMCompanyPreference_ysnSendPriceFeed] DEFAULT 0,
 	ysnValidateLotNo BIT NULL DEFAULT 0,
 	ysnFilterSupplierByLocation BIT NULL DEFAULT 0,
+	ysnCreateBatchOnSampleSave BIT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intRejectLotStatus] FOREIGN KEY ([intRejectLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
