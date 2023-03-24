@@ -1660,7 +1660,7 @@ BEGIN TRY
 						END
 
 						---WORK ORDER
-						IF(@intTicketStorageScheduleTypeId = -9)
+						IF(@intTicketStorageScheduleTypeId = -10)
 						BEGIN
 							--Update Work order Shipped Quantity for the Ticket Item
 							SELECT TOP 1
@@ -1926,6 +1926,32 @@ BEGIN TRY
 			,@fromValue			= 'Completed'						-- Previous Value
 			,@toValue			= 'Reopened'						-- New Value
 			,@details			= '';
+
+
+
+		IF @strDistributionOption = 'LRF'
+		BEGIN
+			
+			
+			DECLARE @CURRENT_LOAD_DETAIL_ID INT
+
+			EXEC [uspSCTicketClearLoadDetail] @TICKET_ID = @intTicketId, @USER_ID = @intUserId, @DELETE_ALL = 1
+
+			SELECT 
+				@dblTicketNetUnits = dblNetUnits
+				, @intLoadId = intLoadId 
+				, @intTicketItemUOMId = intItemUOMIdTo
+			FROM tblSCTicket WHERE intTicketId = @intTicketId	
+			
+			UPDATE tblLGLoad SET intShipmentStatus = 1 WHERE intLoadId = @intLoadId
+
+			EXEC uspLGGenerateDummyLoadDetail  
+					 @intLoadId = @intLoadId
+					 , @dblQty = @dblTicketNetUnits
+					 , @intItemUOMId = @intTicketItemUOMId
+					 , @intEntityUserId = @intUserId
+					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT 
+		END
 
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN

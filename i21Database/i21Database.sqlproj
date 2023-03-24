@@ -1567,6 +1567,8 @@
     <Build Include="dbo\Tables\tblQMImportType.sql" />
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11441,6 +11443,8 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
+    <Build Include="dbo\Tables\tblSCTicketLoadDetailCreated.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketClearLoadDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -12134,8 +12138,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\QM\6_CustomControls.sql" />
   </ItemGroup>
 </Project>

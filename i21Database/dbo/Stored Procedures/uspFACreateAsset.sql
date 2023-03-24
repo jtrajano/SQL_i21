@@ -241,7 +241,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 								
 				,[strJournalLineDescription] = ''
 				,[intJournalLineNo]		= A.[intAssetId]			
-				,[strTransactionType]	= 'Purchase'
+				,[strTransactionType]	= CASE WHEN A.ysnImported = 1 THEN 'Imported' ELSE  'Purchase' END
 				,[strTransactionForm]	= 'Fixed Assets'
 				,[strModuleName]		= 'Fixed Assets'
 				,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
@@ -287,7 +287,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 								
 				,[strJournalLineDescription] = ''
 				,[intJournalLineNo]		= A.[intAssetId]			
-				,[strTransactionType]	= 'Purchase'
+				,[strTransactionType]	= CASE WHEN A.ysnImported = 1 THEN 'Imported' ELSE  'Purchase' END
 				,[strTransactionForm]	= 'Fixed Assets'
 				,[strModuleName]		= 'Fixed Assets'
 				,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId

@@ -1,6 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuTMSiteOrder]  
-AS  
-
+﻿CREATE VIEW [dbo].[vyuTMSiteOrder]
+AS
 
 SELECT
 	A.intSiteID 
@@ -52,6 +51,8 @@ SELECT
 	,A.intFillGroupId
 	,N.strFillGroupCode
 	,A.dtmOnHoldEndDate
+	,A.ysnCompanySite
+	,A.ysnRequireClock
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
@@ -71,8 +72,14 @@ LEFT JOIN tblICItem D
 	ON A.intProduct = D.intItemId
 LEFT JOIN tblTMRoute F
 	ON A.intRouteId = F.intRouteId	
-LEFT JOIN tblTMDispatch G
-	ON A.intSiteID = G.intSiteID
+OUTER APPLY(
+	SELECT TOP 1 
+		intDispatchID
+		,ysnDispatched
+		,strWillCallStatus
+	FROM tblTMDispatch
+	WHERE intSiteID = A.intSiteID
+)G	
 LEFT JOIN tblICCategory H
 	ON D.intCategoryId = H.intCategoryId	
 LEFT JOIN tblTMFillGroup N
@@ -89,7 +96,7 @@ INNER JOIN (
 		,Cus.intTermsId
 	FROM tblEMEntity Ent
 	INNER JOIN tblARCustomer Cus 
-		ON Ent.intEntityId = Cus.[intEntityId]
+		ON Ent.intEntityId = Cus.intEntityId
 	LEFT JOIN [vyuARCustomerInquiryReport] CI
 		ON Ent.intEntityId = CI.intEntityCustomerId) I
 	ON B.intCustomerNumber = I.intEntityId
@@ -98,11 +105,11 @@ LEFT JOIN (
 			,intOpenCount = COUNT(intSiteID)
 		FROM tblTMWorkOrder 
 		WHERE intWorkStatusTypeID = (SELECT TOP 1 intWorkStatusID 
-									 FROM tblTMWorkStatusType 
-									 WHERE strWorkStatus = 'Open' 
+										FROM tblTMWorkStatusType 
+										WHERE strWorkStatus = 'Open' 
 										AND ysnDefault = 1)
 		GROUP BY intSiteID
 	) M
 		ON A.intSiteID = M.intSiteId
-LEFT JOIN (SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z ON 1=1
+,(SELECT TOP 1 [ysnUseDeliveryTermOnCS] = ISNULL([ysnUseDeliveryTermOnCS],0) FROM tblTMPreferenceCompany) Z
 WHERE A.ysnActive = 1 AND A.dblTotalCapacity > 0

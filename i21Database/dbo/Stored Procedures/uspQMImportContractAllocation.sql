@@ -345,6 +345,7 @@ BEGIN TRY
 			,intMixingUnitLocationId
 			,intMarketZoneId
 			,dtmShippingDate 
+			,intCountryId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -428,7 +429,11 @@ BEGIN TRY
 				ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18, 6))
 				END
 			,strLeafGrade = GRADE.strDescription
-			,dblTeaMoisture = NULL
+			,dblTeaMoisture = CASE 
+				WHEN ISNULL(MOISTURE.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE CAST(MOISTURE.strPropertyValue AS NUMERIC(18, 6))
+				END
 			,dblTeaMouthFeel = CASE 
 				WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = ''
 					THEN NULL
@@ -465,6 +470,7 @@ BEGIN TRY
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
 			,dtmShippingDate=CD.dtmEtaPol
+			,intCountryId=S.intCountryID
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -517,6 +523,14 @@ BEGIN TRY
 				AND P.strPropertyName = 'Mouth Feel'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOUTH_FEEL
+		-- Moisture
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Moisture'
+			WHERE TR.intSampleId = S.intSampleId
+			) MOISTURE
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type

@@ -583,7 +583,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\QM\3_CreateOfferSampleOutbound.sql
 :r .\QM\4_UpdateSampleCompanyLocation.sql
 :r .\QM\5_DefaultConfigurationData.sql
-:r .\QM\6_CustomControls.sql
 
 -- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql

@@ -25,7 +25,7 @@ SELECT
 	, intAssetDepreciationId = 1
 	, intDepreciationMethodId = DM.intDepreciationMethodId
 	, strDepreciationMethodId = DM.strDepreciationMethodId
-	, strTransaction = GL.strTransactionType
+	, strTransaction = CASE WHEN FA.ysnImported = 1 THEN 'Imported' ELSE   GL.strTransactionType   END
 	, strTransactionId = GL.strTransactionId
 	, dblBasis = (FA.dblCost - FA.dblSalvageValue)
 	, dblDepreciationBasis = (FA.dblCost - FA.dblSalvageValue)
@@ -52,7 +52,7 @@ LEFT JOIN tblGLDetail GL ON GL.intTransactionId = FA.intAssetId AND GL.strRefere
 LEFT JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = FA.intDepreciationMethodId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = GL.intCurrencyId
 LEFT JOIN tblSMCurrency CurrencyFN ON CurrencyFN.intCurrencyID = FA.intFunctionalCurrencyId
-WHERE GL.strTransactionType = 'Purchase' AND GL.ysnIsUnposted = 0
+WHERE GL.strTransactionType IN ( 'Purchase' , 'Imported') AND GL.ysnIsUnposted = 0
 GROUP BY 
 	FA.intAssetId, 
 	FA.dtmCreateAssetPostDate,
