@@ -428,8 +428,53 @@ BEGIN
 				WHERE APD.intBillId = A.intBillId AND APD.ysnApplied = 1
 			) appliedPrepays
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
+			AND A.intTransactionType <> 16 AND A.ysnFinalVoucher = 0 --Exclude Provisional and Finalize Voucher
 		) vouchers
 	--GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
+
+	UNION ALL
+	--Provisional and Finalize Voucher
+	SELECT 
+		[intPaymentId],
+		[intBillId],
+		[intAccountId],
+		[dblDiscount],
+		[dblWithheld],
+		dblAmountDue,
+		(dblPayment) - dblDiscount + dblInterest,
+		[dblInterest],
+		dblTotal,
+		[ysnOffset],
+		[intPayScheduleId]
+		FROM (
+			SELECT 
+				[intPaymentId]	= @paymentId,
+				[intBillId]		= A.intBillId,
+				[intAccountId]	= A.intAccountId,
+				[dblDiscount]	= ISNULL(C.dblDiscount, A.dblDiscount),
+				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
+				[dblAmountDue]	= ISNULL(C.dblPayment, CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalAmountDue ELSE A.dblAmountDue - A.dblProvisionalTotal END),
+				[dblPayment]	= ISNULL(C.dblPayment,
+									((CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalTotal ELSE A.dblTotal - A.dblProvisionalTotal END - ISNULL(appliedPrepays.dblPayment, 0)) - A.dblPaymentTemp)),
+				[dblInterest]	= A.dblInterest,
+				[dblTotal]		= ISNULL(C.dblPayment, CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalTotal ELSE A.dblTotal - A.dblProvisionalTotal END),
+				[ysnOffset]		= CAST(0 AS BIT),
+				[intPayScheduleId]= C.intId
+			FROM tblAPBill A
+			-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			CROSS APPLY
+			(
+				SELECT TOP 1 intAccountId, intBillId FROM tblAPBillDetail dtls WHERE dtls.intBillId = A.intBillId
+			) details
+			LEFT JOIN tblAPVoucherPaymentSchedule C
+				ON C.intBillId = A.intBillId AND C.ysnPaid = 0 AND C.ysnInPayment = 0
+			OUTER APPLY (
+				SELECT SUM(APD.dblAmountApplied) AS dblPayment
+				FROM tblAPAppliedPrepaidAndDebit APD
+				WHERE APD.intBillId = A.intBillId AND APD.ysnApplied = 1
+			) appliedPrepays
+			INNER JOIN #tmpBillsId B ON A.intBillId = B.intID AND (A.intTransactionType = 16 OR A.ysnFinalVoucher = 1) -- Finalize Voucher or Provisional Voucher only
+		) vouchers
 	'
 
 	EXEC sp_executesql @queryPayment,
