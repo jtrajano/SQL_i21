@@ -184,7 +184,12 @@ OUTER APPLY	(
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
 			--IF PAYMENT SCHEDULE COMPARE DISCOUNT ON PAYMENT TEMP
 			--ELSE DISCOUNT WILL BE 0, DISCOUNT HAS BEEN HANDLED ABOVE (A.dblPayment + A.dblDiscount)
-			AND ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
+			--forImport.ysnInPaymentSched > THIS IS EXPECTING THAT THE DISCOUNT WHAS PART OF PAYMENT SCHEDULE tblAPVoucherPaymentSchedule.dblDiscount
+			--HOWEVER, DISCOUNT MAY STILL EXISTS ON IMPORT BUT NOT ON tblAPVoucherPaymentSchedule.dblDiscount
+			--IT IS BETTER TO NO CHECK FOR DISCOUNT, JUST COMPARE THE PAYMENT
+			--ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
+			--PAYMENT FIELD SHOULD BE THE GROSS PAYMENT ON CSV
+			--AND ISNULL(forImport.dblTempDiscount, 0) = (CASE WHEN forImport.ysnInPaymentSched = 1 THEN A.dblDiscount ELSE 0 END)
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
@@ -281,6 +286,88 @@ OUTER APPLY (
 WHERE 
 	A.strNotes IS NULL
 AND A.dblPayment < 0
+
+--CHILD VENDOR MATCHING DEBIT MEMO
+UPDATE A
+	SET A.strNotes = CASE
+					WHEN 
+						A.intCurrencyId != B.intCurrencyId
+					THEN 'Currency is different on current selected currency.'
+					WHEN 
+						B.ysnPaid = 1
+					THEN 'Voucher already paid.'
+					WHEN 
+						B.ysnPosted = 0
+					THEN 'Voucher is not yet posted.'
+					WHEN 
+						A.dblPayment > 0 AND B.intTransactionType != 1
+					THEN 'Amount is positive. Voucher type is expected.'
+					WHEN 
+						A.dblPayment < 0 AND B.intTransactionType != 3
+					THEN 'Amount is negative. Debit Memo type is expected.'
+					WHEN 
+						A.dblPayment > B.dblAmountDue AND B.intTransactionType = 3
+					THEN 'Overpayment.'
+					WHEN 
+						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Overpayment.'
+					WHEN 
+						A.dblPayment < B.dblAmountDue AND B.intTransactionType = 3
+					THEN 'Underpayment.'
+					WHEN 
+						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Underpayment.'
+					WHEN 
+						B.intPayScheduleId IS NOT NULL AND P.strPaymentRecordNum IS NOT NULL
+					THEN 'Already included in payment' + P.strPaymentRecordNum + '.'
+					WHEN
+						B.intPayScheduleId IS NULL AND ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) >= ABS((B.dblTotal - B.dblPaymentTemp))
+					THEN 'Already included in payment' + P.strPaymentRecordNum + '.'
+					WHEN 
+						cte.intRow	> 1 AND B.intBillId IS NULL
+					THEN 'Duplicate row entry.'
+					WHEN 
+						B.intBillId IS NULL
+					THEN CASE
+						 WHEN @ignoreInvoiceMatch = 1
+						 THEN 'Will create empty payment.'
+						 ELSE 'Voucher not found.'
+						 END
+					ELSE NULL
+					END,
+		A.strBillId = B.strBillId,
+		A.intEntityVendorId = B.intEntityVendorId
+FROM tblAPImportPaidVouchersForPayment A
+INNER JOIN @cteTbl cte ON cte.intId = A.intId
+OUTER APPLY	(
+	SELECT *
+	FROM (
+		SELECT forImport.*, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
+		FROM vyuAPBillForImport forImport
+		INNER JOIN tblAPVendor childVend ON forImport.intEntityVendorId = childVend.intEntityId
+		INNER JOIN tblAPVendor parentVendor ON childVend.strVendorPayToId = parentVendor.strVendorId
+		WHERE parentVendor.intEntityId = A.intEntityVendorId 
+			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
+			AND forImport.intTransactionType = 3
+	) voucher
+	WHERE voucher.intRow = cte.intRow
+) B
+OUTER APPLY (
+	SELECT STUFF(
+		(
+			SELECT ', ' + P.strPaymentRecordNum 
+			FROM tblAPPaymentDetail PD 
+			INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId 
+			WHERE PD.intBillId = B.intBillId AND ISNULL(PD.intPayScheduleId, 0) = ISNULL(B.intPayScheduleId, 0) AND PD.dblPayment <> 0
+			ORDER BY P.intPaymentId FOR XML PATH('')
+		), 1, 1, ''
+	) AS strPaymentRecordNum
+) P
+WHERE
+	A.strNotes = 'Voucher not found.'
+AND A.dblPayment < 0
+AND A.strBillId IS NULL
+AND B.intBillId IS NOT NULL
 
 ;WITH cte AS (
 	SELECT DENSE_RANK() OVER(ORDER BY A.dtmDatePaid, A.intEntityVendorId, A.strCheckNumber, A.intCustomPartition) intRow,

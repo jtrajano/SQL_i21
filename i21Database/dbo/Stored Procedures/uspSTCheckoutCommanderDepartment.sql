@@ -168,6 +168,7 @@ BEGIN
 					, NULL [intLotteryItemsSold]
 					, 0 [ysnLotteryItemAdded]
 					, StoreDepartments.intCategoryId
+					, strRegisterCode
 				FROM @UDT_TransDept Chk
 				JOIN dbo.vyuSTStoreDepartments StoreDepartments 
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
@@ -192,8 +193,7 @@ BEGIN
 																THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0)
 																--THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0) + ( ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)),0) -- dblTotalAmount = Discount Amount
 																--												         + ISNULL(CAST(Chk.dblPromotionAmount AS DECIMAL(18,6)),0) 
-																--													     + ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)),0) )
-																										  
+																--													     + ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)),0) )																										  
 														END
 													  )
 					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.intPromotionCount AS INT),0) 
@@ -217,10 +217,17 @@ BEGIN
 														ELSE NULL
 														END
 				FROM tblSTCheckoutDepartmetTotals DT
-				JOIN vyuSTStoreDepartments StoreDepartments
-					ON DT.intCategoryId = StoreDepartments.intCategoryId AND (DT.intSubcategoriesId = StoreDepartments.intSubcategoriesId OR DT.intSubcategoriesId IS NULL)
-				JOIN @UDT_TransDept Chk 
+				JOIN dbo.vyuSTStoreDepartments StoreDepartments 					
+					ON (CASE
+						WHEN (StoreDepartments.strDepartmentOrCategory = 'D' OR StoreDepartments.strDepartmentOrCategory = 'C') AND StoreDepartments.strCategoriesOrSubcategories = 'C' THEN DT.intCategoryId
+						WHEN (StoreDepartments.strDepartmentOrCategory = 'D' OR StoreDepartments.strDepartmentOrCategory = 'C') AND StoreDepartments.strCategoriesOrSubcategories = 'S' THEN DT.intSubcategoriesId
+					END) = (CASE
+						WHEN (StoreDepartments.strDepartmentOrCategory = 'D' OR StoreDepartments.strDepartmentOrCategory = 'C') AND StoreDepartments.strCategoriesOrSubcategories = 'C' THEN StoreDepartments.intCategoryId
+						WHEN (StoreDepartments.strDepartmentOrCategory = 'D' OR StoreDepartments.strDepartmentOrCategory = 'C') AND StoreDepartments.strCategoriesOrSubcategories = 'S' THEN StoreDepartments.intSubcategoriesId 
+					END)				
+				JOIN @UDT_TransDept Chk
 					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(StoreDepartments.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+					AND CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(DT.strRegisterCode AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 				JOIN dbo.tblSTStore S 
 					ON S.intStoreId = StoreDepartments.intStoreId
 				WHERE DT.intCheckoutId = @intCheckoutId 

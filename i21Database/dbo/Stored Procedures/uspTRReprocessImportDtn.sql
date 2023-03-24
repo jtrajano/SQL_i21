@@ -64,6 +64,14 @@ BEGIN
 		FETCH NEXT FROM @CursorTran INTO @intImportDtnDetailId, @intInventoryReceiptId, @intTermId, @strInvoiceNo, @dtmDueDate, @dblInvoiceAmount, @intEntityVendorId, @intImportLoadId, @ysnOverrideTolerance, @strBillOfLading
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
+
+			IF (ISNULL(@intInventoryReceiptId, 0) <> 0)
+			BEGIN
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId)
+				BEGIN
+					UPDATE tblTRImportDtnDetail SET intInventoryReceiptId = NULL WHERE intImportDtnDetailId = @intImportDtnDetailId
+				END
+			END
 			
 			IF (ISNULL(@intInventoryReceiptId, 0) = 0) OR (ISNULL(@intEntityVendorId, 0) = 0)
 			BEGIN

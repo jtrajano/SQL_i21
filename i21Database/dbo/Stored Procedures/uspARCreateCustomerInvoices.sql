@@ -179,7 +179,9 @@ INSERT INTO @InvoicesToGenerate (
 	,[strAcresApplied]					
 	,[strNutrientAnalysis]				
 	,[strBillingMethod]					
-	,[strApplicatorLicense])
+	,[strApplicatorLicense]
+	,intDispatchId
+)
 SELECT
 	 [intId]							= [intId]
 	,[strTransactionType]				= [strTransactionType]
@@ -333,6 +335,7 @@ SELECT
 	,[strNutrientAnalysis]				= [strNutrientAnalysis]	
 	,[strBillingMethod]					= [strBillingMethod]
 	,[strApplicatorLicense]				= [strApplicatorLicense]
+	,intDispatchId						= intDispatchId
 FROM
 	@InvoiceEntries 
 
@@ -2191,7 +2194,9 @@ BEGIN TRY
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
-        ,[dblAddOnQuantity])
+        ,[dblAddOnQuantity]
+		,intDispatchId
+	)
 	SELECT
 		 [intId]								= IL.[intId]
 		,[strTransactionType]					= ITG.[strTransactionType]
@@ -2341,6 +2346,7 @@ BEGIN TRY
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
+		,intDispatchId							= ITG.intDispatchId
 	FROM
 		@InvoicesToGenerate ITG
 	INNER JOIN

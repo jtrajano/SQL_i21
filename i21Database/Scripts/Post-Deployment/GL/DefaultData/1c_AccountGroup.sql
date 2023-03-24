@@ -670,11 +670,13 @@ BEGIN
 		PRINT N'END EXISTING GROUPS CHECKING'
 END
 --SETUP ACCOUNT GROUP CLUSTER
-IF NOT EXISTS (SELECT 1 FROM tblGLAccountGroupCluster)
+IF NOT EXISTS (SELECT 1 FROM tblGLAccountGroupCluster WHERE intAccountGroupClusterId = 1)
 BEGIN
 	SET IDENTITY_INSERT  tblGLAccountGroupCluster ON
 	INSERT INTO tblGLAccountGroupCluster (intAccountGroupClusterId,strAccountGroupClusterName,ysnActive, intConcurrencyId) SELECT  1, 'Standard',1, 1
-	UPDATE tblGLAccountGroup SET intAccountGroupClusterId = 1
 	SET IDENTITY_INSERT  tblGLAccountGroupCluster OFF
 END
+
+UPDATE tblGLAccountGroup SET intAccountGroupClusterId = 1 WHERE intAccountGroupClusterId IS NULL
+DELETE FROM tblGLAccountGroupCluster WHERE intAccountGroupClusterId NOT IN (SELECT intAccountGroupClusterId FROM tblGLAccountGroup)
 GO

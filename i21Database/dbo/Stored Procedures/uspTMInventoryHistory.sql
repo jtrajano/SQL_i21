@@ -50,7 +50,7 @@ BEGIN
 		,DATEPART(HOUR, B.dtmDateTime)
 		,B.dblFuelVolume
 	FROM tblTMSite A
-		INNER JOIN tblTMTankMonitor B
+		INNER JOIN tblTMTankReading B
 		ON B.intSiteId = A.intSiteID
 	where A.intSiteNumber = @intSiteNumber and ((DATEDIFF (day, B.dtmDateTime, getdate())) <= 28)
 	order by B.dtmDateTime desc

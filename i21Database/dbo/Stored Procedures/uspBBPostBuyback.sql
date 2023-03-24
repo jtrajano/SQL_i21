@@ -80,7 +80,7 @@ AS
 			,intItemId = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN BuybackDetail.intItemId ELSE NULL END
 			,[dblQtyShipped] = BuybackDetail.dblBuybackQuantity
 			,[dblPrice] = BuybackDetail.dblBuybackRate
-			,[intSalesAccountId] = dbo.fnGetLocationAwareGLAccount(@intDetailAccount, salesAccount.intLocationId)--[dbo].[fnGetItemGLAccount](BuybackDetail.intItemId, salesAccount.intItemLocationId, 'Sales Account')
+			,[intSalesAccountId] = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN dbo.fnGetItemGLAccount (BuybackDetail.intItemId, salesAccount.intItemLocationId, 'Cost of Goods') ELSE dbo.fnGetLocationAwareGLAccount(@intDetailAccount, salesAccount.intLocationId) END--[dbo].[fnGetItemGLAccount](BuybackDetail.intItemId, salesAccount.intItemLocationId, 'Sales Account')
 			,[strItemDescription] = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN NULL ELSE BuybackDetail.strCharge END
 		FROM tblBBBuybackDetail BuybackDetail
 		INNER JOIN tblBBBuyback Buyback ON BuybackDetail.intBuybackId = Buyback.intBuybackId
@@ -159,7 +159,7 @@ AS
 
 		---Staging 
 		SELECT 
-			[intAccountId]	= dbo.fnGetLocationAwareGLAccount(@intDetailAccount, C.intLocationId) --[dbo].[fnGetItemGLAccount](B.intItemId, C.intItemLocationId, 'Sales Account')
+			[intAccountId]	= CASE WHEN A.strCharge = 'Inventory' THEN dbo.fnGetItemGLAccount (B.intItemId, C.intItemLocationId, 'Cost of Goods') ELSE dbo.fnGetLocationAwareGLAccount(@intDetailAccount, C.intLocationId) END--[dbo].[fnGetItemGLAccount](B.intItemId, C.intItemLocationId, 'Sales Account')
 			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
 			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
 			,[dblQtyReceived] = dbo.fnCalculateQtyBetweenUOM(iu.intItemUOMId, su.intItemUOMId, A.dblBuybackQuantity)--A.dblBuybackQuantity	
@@ -270,6 +270,7 @@ AS
 					,intInvoiceDetailId
 					FROM tblBBBuybackDetail
 					WHERE intBuybackId = @intBuyBackId
+						AND strCharge = 'Inventory'
 					GROUP BY intInvoiceDetailId
 					) A
 			WHERE tblARInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId

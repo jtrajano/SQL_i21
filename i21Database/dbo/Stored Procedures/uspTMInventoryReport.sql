@@ -25,7 +25,7 @@ BEGIN
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
     FOR
 
-   		SELECT distinct B.intSiteId FROM  tblTMTankMonitor B
+   		SELECT distinct B.intSiteId FROM  tblTMTankReading B
 		
 
     OPEN DataCursor
@@ -55,7 +55,7 @@ BEGIN
 			ON B.intCustomerNumber = C.intEntityId
 		LEFT JOIN tblICItem T
 			ON A.intProduct = T.intItemId 
-		INNER JOIN tblTMTankMonitor TM
+		INNER JOIN tblTMTankReading TM
 			ON TM.intSiteId = A.intSiteID
 		JOIN tblSMCompanyLocation location ON location.intCompanyLocationId = A.intLocationId
 		where TM.intSiteId = @intSiteId
@@ -66,7 +66,7 @@ BEGIN
 		SELECT top 1 @dblUllage = TM.dblUllage FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
 		SELECT top 1 @dblTotalCapacity = A.dblTotalCapacity FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
 
-		--SELECT (TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankMonitor TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId
+		--SELECT (TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId
 
 		SET @dblFullPercent = CASE WHEN @dblTotalCapacity = 0 THEN @dblGrossVolume ELSE @dblGrossVolume/@dblTotalCapacity END
 	

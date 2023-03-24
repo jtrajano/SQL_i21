@@ -1267,6 +1267,12 @@
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
     <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
     <None Include="Scripts\Post-Deployment\ST\52_FileFieldMapping_Commander_Category.sql" />
+    <Build Include="dbo\Tables\tblSTJobs.sql" />
+    <Build Include="dbo\Tables\tblSTTypes.sql" />
+    <None Include="Scripts\Post-Deployment\ST\52_Populate_JobTypes.sql" />
+    <Build Include="dbo\Views\vyuSTJobs.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3245,6 +3251,7 @@
     <Build Include="dbo\Tables\tblNRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARCustomerConsumptionSite.sql" />
+    <Build Include="dbo\Views\vyuARCustomerConsumptionDispatch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateInboundIntransitQty.sql" />
     <None Include="Scripts\Post-Deployment\EM\012_DeleteOldTables.sql" />
     <Build Include="dbo\Tables\tblSTMassUpdateReportMaster.sql" />
@@ -4378,6 +4385,8 @@
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrder.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrderDetail.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />

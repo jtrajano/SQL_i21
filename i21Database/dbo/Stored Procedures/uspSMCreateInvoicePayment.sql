@@ -272,6 +272,7 @@ BEGIN
 				, dblAmountPaid
 				, ysnPost
 				, intEntityId
+				, intEntityCardInfoId
 			)
 			SELECT intId						= 1
 				, strSourceTransaction			= 'Direct'
@@ -291,6 +292,7 @@ BEGIN
 				, dblAmountPaid					= @dblPayment
 				, ysnPost						= CASE WHEN ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
+				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 			FROM vyuARCustomerSearch C			
 			WHERE intEntityId = @intEntityCustomerId
 		END

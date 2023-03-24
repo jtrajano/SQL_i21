@@ -9,7 +9,7 @@ AS BEGIN
 
     SELECT      @dblDepartmentTotalsForFuel = ISNULL(SUM(dblTotalSalesAmountComputed),0)
     FROM        tblSTCheckoutDepartmetTotals a
-    INNER JOIN  tblICItem b
+    LEFT JOIN  tblICItem b
     ON          a.intItemId = b.intItemId
     WHERE       a.intCheckoutId = @intCheckoutId AND
 				(
