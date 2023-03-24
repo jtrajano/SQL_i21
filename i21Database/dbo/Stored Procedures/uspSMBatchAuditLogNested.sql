@@ -83,11 +83,12 @@ BEGIN TRY
 		---- INSERT tblSMAudit data
 		-----------------------------------------------------------------------------------------------------------------------------------------
 
-		INSERT INTO tblSMAudit (intLogId, intKeyValue, strAction, strFrom, strTo, intParentAuditId, intConcurrencyId)
+		INSERT INTO tblSMAudit (intLogId, intKeyValue, strAction, strChange, strFrom, strTo, intParentAuditId, intConcurrencyId)
 		OUTPUT		INSERTED.intAuditId, INSERTED.intLogId, INSERTED.intKeyValue INTO @insertedPKTable
 		SELECT		c.intLogId,
 					a.[Id],
 					a.[Action],
+					a.[Description],
 					a.[From],
 					a.[To],
 					a.[ParentId],
