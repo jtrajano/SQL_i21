@@ -160,10 +160,10 @@ BEGIN TRY
 			,strIntensity = IMP.strIntensity
 			,strTaste = IMP.strTaste
 			,strMouthFeel = IMP.strMouthfeel
-			,[strBulkDensity] = IMP.strBulkDensity
-			,[strTeaMoisture] = IMP.strTeaMoisture
+			,[strBulkDensity] = IMP.dblBulkDensity
+			,[strTeaMoisture] = IMP.dblTeaMoisture
 			,[strFines] = IMP.strFines
-			,[strTeaVolume] = IMP.strTeaVolume
+			,[strTeaVolume] = IMP.dblTeaVolume
 			,[strDustContent] = IMP.strDustContent
 			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
 			,dblB1Price	= 0
@@ -234,10 +234,10 @@ BEGIN TRY
 			,strIntensity = IMP.strIntensity
 			,strTaste = IMP.strTaste
 			,strMouthFeel = IMP.strMouthfeel
-			,[strBulkDensity] = IMP.strBulkDensity
-			,[strTeaMoisture] = IMP.strTeaMoisture
+			,[strBulkDensity] = IMP.dblBulkDensity
+			,[strTeaMoisture] = IMP.dblTeaMoisture
 			,[strFines] = IMP.strFines
-			,[strTeaVolume] = IMP.strTeaVolume
+			,[strTeaVolume] = IMP.dblTeaVolume
 			,[strDustContent] = IMP.strDustContent
 			,strAirwayBillNumberCode = IMP.strAirwayBillNumberCode
 			,dblB1Price = IMP.dblB1Price
