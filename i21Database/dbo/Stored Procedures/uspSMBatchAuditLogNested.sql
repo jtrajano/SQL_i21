@@ -42,7 +42,7 @@ BEGIN TRY
 			LEFT JOIN tblSMScreen		AS c ON
 			b.intScreenId = c.intScreenId
 	WHERE	ISNULL(b.intTransactionId, 0) = 0 AND
-			c.strScreenName = @strScreenName
+			c.strNamespace = @strScreenName
   
 	---------------------------------------------------------------------------------------------------------------------------------------
 	-- Validations
