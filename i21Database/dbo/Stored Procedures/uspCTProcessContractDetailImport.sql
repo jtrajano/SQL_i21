@@ -265,7 +265,7 @@ BEGIN
 		
 			INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Item'
+				   ,'Invalid TeaLingo'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -348,7 +348,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Book'
+				   ,'Invalid Mixing Unit'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -361,7 +361,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Sub-Book'
+				   ,'Invalid Strategy'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -374,7 +374,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Purchasing Group'
+				   ,'Invalid Company Code'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -414,7 +414,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Loading Point'
+				   ,'Invalid Port of Shipping'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -427,7 +427,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Destination Point'
+				   ,'Invalid Port of Arrival'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -454,7 +454,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Market Zone'
+				   ,'Invalid ETD'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
