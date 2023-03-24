@@ -914,6 +914,7 @@
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertFinalVoucherToDebitMemo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

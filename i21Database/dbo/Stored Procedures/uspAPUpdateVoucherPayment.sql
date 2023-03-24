@@ -106,10 +106,14 @@ BEGIN TRY
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
 									ISNULL(payDetails.dblInterest, 0)
 								),
-			@ysnInPayment = CASE WHEN (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) = @dblPaymentTemp
+			@ysnInPayment = CASE WHEN ((CASE WHEN B.intTransactionType = 16 THEN B.dblProvisionalTotal
+																			 WHEN B.ysnFinalVoucher = 1 THEN B.dblTotal - B.dblProvisionalTotal
+																			 ELSE B.dblTotal END) - ISNULL(appliedPrepays.dblPayment, 0)) = @dblPaymentTemp
 							THEN 1
 							ELSE
-								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0))
+								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > ((CASE WHEN B.intTransactionType = 16 THEN B.dblProvisionalTotal 
+																																					WHEN B.ysnFinalVoucher = 1 THEN B.dblTotal - B.dblProvisionalTotal
+																																					ELSE B.dblTotal END) - ISNULL(appliedPrepays.dblPayment, 0))
 								THEN NULL
 								ELSE 0
 								END
@@ -185,10 +189,14 @@ BEGIN TRY
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
 									ISNULL(payDetails.dblInterest, 0)
 								),
-			@ysnInPayment = CASE WHEN (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) = @dblPaymentTemp
+			@ysnInPayment = CASE WHEN ((CASE WHEN B.intTransactionType = 16 THEN B.dblProvisionalTotal
+																			 WHEN B.ysnFinalVoucher = 1 THEN B.dblTotal - B.dblProvisionalTotal
+				 															 ELSE B.dblTotal END) - ISNULL(appliedPrepays.dblPayment, 0)) = @dblPaymentTemp
 							THEN 1
 							ELSE
-								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0))
+								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > ((CASE WHEN B.intTransactionType = 16 THEN B.dblProvisionalTotal 
+																																					WHEN B.ysnFinalVoucher = 1 THEN B.dblTotal - B.dblProvisionalTotal 
+																																					ELSE B.dblTotal END) - ISNULL(appliedPrepays.dblPayment, 0))
 								THEN NULL
 								ELSE 0
 								END
