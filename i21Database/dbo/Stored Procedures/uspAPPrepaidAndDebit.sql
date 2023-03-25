@@ -868,10 +868,8 @@ AND EXISTS
 -- AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
 -- AND 1 = CASE WHEN A.intTransactionType = 13 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED 
 -- 		ELSE 1 END
---UNION ALL
+UNION ALL
 --PROVISIONAL
-
-/* AP-10365 
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
@@ -921,7 +919,6 @@ CROSS APPLY
 ) CurrentBill
 LEFT JOIN tblICItem itm ON itm.intItemId = B.intItemId
 WHERE A.intTransactionType = 16
-*/
 
 SELECT * FROM tblAPAppliedPrepaidAndDebit WHERE intBillId = @billId
 

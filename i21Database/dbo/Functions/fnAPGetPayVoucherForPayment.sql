@@ -27,7 +27,7 @@ RETURNS TABLE AS RETURN
 		,forPay.strAccountId
 		,forPay.strVendorOrderNumber
 		,forPay.strBillId
-		,CASE WHEN forPay.intTransactionType = 16 THEN forPay.dblProvisionalTotal ELSE voucher.dblTotal END dblTotal
+		,forPay.dblTotal
 		,forPay.dblDiscount
 		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
 									THEN 
@@ -50,7 +50,7 @@ RETURNS TABLE AS RETURN
 								THEN
 									dbo.fnGetInterestBasedOnTerm(forPay.dblAmountDue, voucher.dtmBillDate, @datePaid, voucher.dtmInterestDate, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
-		,CASE WHEN forPay.intTransactionType = 16 THEN forPay.dblProvisionalAmountDue ELSE voucher.dblAmountDue END dblAmountDue
+		,forPay.dblAmountDue
 		,forPay.dblPayment
 		,forPay.dblTempPayment
 		,forPay.dblWithheld
