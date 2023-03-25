@@ -13,7 +13,7 @@ BEGIN TRY
   IF @transCount = 0 BEGIN TRANSACTION   
   
   --MAKE SURE Finalize Voucher Only and amount is negative  
-  IF NOT EXISTS (SELECT 1 FROM tblAPBill WHERE intBillId = @billId AND intTransactionType = 1 AND ISNULL(ysnFinalVoucher,0) = 1 AND dblAmountDue - A.dblProvisionalTotal < 0)   
+  IF NOT EXISTS (SELECT 1 FROM tblAPBill WHERE intBillId = @billId AND intTransactionType = 1 AND ISNULL(ysnFinalVoucher,0) = 1 AND dblAmountDue - dblProvisionalTotal < 0)   
   BEGIN  
     RAISERROR('Unable to convert to Debit Memo. Only finalize voucher with negative amount due can be converted', 16, 1)  
     RETURN  
