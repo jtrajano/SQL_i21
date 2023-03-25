@@ -198,7 +198,7 @@ SELECT Lot.intLotId
 	 , Batch.strVendorLotNumber
 	 , Item.intUnitPerLayer
 	 , Item.intLayerPerPallet
-	 , ISNULL(InputLot.dblPickedQty, 0) AS dblPickedQty
+	 , ISNULL(0.0, 0) AS dblPickedQty
 	 , Item.strShortName
 INTO #tempLot
 FROM tblICLot AS Lot
@@ -213,8 +213,9 @@ LEFT JOIN tblICUnitMeasure AS UnitOfMeasure ON LotItemWeightUOM.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation AS CompanySubLocation ON CompanySubLocation.intCompanyLocationSubLocationId = Lot.intSubLocationId
 LEFT JOIN tblICStorageLocation AS StorageLocation ON StorageLocation.intStorageLocationId = Lot.intStorageLocationId
 LEFT JOIN tblICStorageUnitType AS StorageUnitType ON StorageLocation.intStorageUnitTypeId = StorageUnitType.intStorageUnitTypeId AND StorageUnitType.strInternalCode <> 'PROD_STAGING'
+LEFT JOIN tblMFWorkOrderRecipeItem AS WorkOrderRecipeItem ON WorkOrderRecipeItem.intItemId = Item.intItemId AND WorkOrderRecipeItem.intWorkOrderId = @intWorkOrderId AND  WorkOrderRecipeItem.intRecipeItemTypeId = 1 AND WorkOrderRecipeItem.intRecipeItemId = @intRecipeItemId
 LEFT JOIN tblMFRecipeItem AS RecipeItem ON RecipeItem.intItemId = Item.intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId
-LEFT JOIN tblICItemUOM AS RecipeItemUOM ON RecipeItem.intItemUOMId = RecipeItemUOM.intItemUOMId
+LEFT JOIN tblICItemUOM AS RecipeItemUOM ON IsNULL(WorkOrderRecipeItem.intItemUOMId,RecipeItem.intItemUOMId) = RecipeItemUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure AS RecipeItemUnitOfMeasure ON RecipeItemUOM.intUnitMeasureId = RecipeItemUnitOfMeasure.intUnitMeasureId 
 LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
 LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = Lot.intLotId
@@ -226,9 +227,9 @@ LEFT JOIN tblQMGardenMark AS GardenMark ON Batch.intGardenMarkId = GardenMark.in
 LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=Item.intProductTypeId
 LEFT JOIN tblICBrand B on B.intBrandId=Item.intBrandId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
-OUTER APPLY (SELECT ISNULL(WorkOrderInput.dblQuantity, 0) AS dblPickedQty
-			 FROM tblMFWorkOrderInputLot AS WorkOrderInput
-			 WHERE intRecipeItemId = @intRecipeItemId AND intItemId = @intItemId AND WorkOrderInput.intLotId = Lot.intLotId) AS InputLot
+--OUTER APPLY (SELECT ISNULL(WorkOrderInput.dblQuantity, 0) AS dblPickedQty
+--			 FROM tblMFWorkOrderInputLot AS WorkOrderInput
+--			 WHERE intRecipeItemId = @intRecipeItemId AND intItemId = @intItemId AND WorkOrderInput.intLotId = Lot.intLotId) AS InputLot
 WHERE Lot.intItemId = (CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE Lot.intItemId END) AND Lot.dblQty > 0 AND LotStatus.intLotStatusId IN (SELECT intLotStatusId FROM @tblLotStatus)
   And Lot.intLocationId = (CASE WHEN @ysnShowOtherFactoryLots = 1 THEN Lot.intLocationId ELSE @intLocationId END)
 ORDER BY Lot.dtmExpiryDate

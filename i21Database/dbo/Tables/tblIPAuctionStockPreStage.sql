@@ -4,4 +4,5 @@
 	,intStatusId INT
 	,dtmProcessedDate DATETIME
 	,intLocationId int
+	,intCurrencyId int
 	)

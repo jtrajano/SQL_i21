@@ -38,7 +38,7 @@ BEGIN TRY
 				strPriceCurrency,		dtmStartDate,				dtmEndDate,					dtmPlannedAvailabilityDate,
 				dtmUpdatedAvailabilityDate, strPurchasingGroup,		strPackingDescription,		strVirtualPlant,
 				strLoadingPoint,		strDestinationPoint,		dblLeadTime,				strBatchId,
-				intEntityId,			strRowState
+				intEntityId,			strRowState,				strMarketZoneCode,			intDetailNumber
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			NULL,						NULL,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
@@ -49,7 +49,7 @@ BEGIN TRY
 				CU.strCurrency,			NULL,						NULL,						NULL,
 				NULL,					CL.strOregonFacilityNumber,	NULL,						CL1.strOregonFacilityNumber,
 				NULL,					NULL,						NULL,						B.strBatchId,
-				@intEntityId,			@strRowState
+				@intEntityId,			@strRowState,				@strMarketZoneCode,			LD.intDetailNumber
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 		JOIN dbo.tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
 			AND LD.intLoadDetailId = @intLoadDetailId
@@ -94,7 +94,7 @@ BEGIN TRY
 				strPriceCurrency,		dtmStartDate,				dtmEndDate,					dtmPlannedAvailabilityDate,
 				dtmUpdatedAvailabilityDate, strPurchasingGroup,		strPackingDescription,		strVirtualPlant,
 				strLoadingPoint,		strDestinationPoint,		dblLeadTime,				strBatchId,
-				intEntityId,			strRowState
+				intEntityId,			strRowState,				strMarketZoneCode,			intDetailNumber
 		)
 		SELECT	@intLoadId,				@intLoadDetailId,			CD.intContractHeaderId,		CD.intContractDetailId,
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
@@ -105,7 +105,7 @@ BEGIN TRY
 				CU.strCurrency,			CD.dtmStartDate,			CD.dtmEndDate,				CD.dtmPlannedAvailabilityDate,
 				CD.dtmUpdatedAvailabilityDate,CL.strOregonFacilityNumber,CD.strPackingDescription,	CL1.strOregonFacilityNumber,
 				LP.strCity,				DP.strCity,					@dblLeadTime,				B.strBatchId,
-				@intEntityId,			@strRowState
+				@intEntityId,			@strRowState,				@strMarketZoneCode,			LD.intDetailNumber
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 		JOIN dbo.tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
 			AND LD.intLoadDetailId = @intLoadDetailId

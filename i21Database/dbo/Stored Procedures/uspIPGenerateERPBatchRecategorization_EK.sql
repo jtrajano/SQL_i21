@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intBatchPreStageId INT
 		,@strXML NVARCHAR(MAX) = ''
+		,@strRootXML NVARCHAR(MAX) = ''
 		,@strHeaderXML NVARCHAR(MAX) = ''
 		,@strERPOrderNo NVARCHAR(50)
 		,@intWorkOrderId INT
@@ -86,7 +87,7 @@ BEGIN TRY
 			FROM @tblMFBatchPreStage PS
 			)
 
-	SELECT @strXML = '<root><CtrlPoint><DocNo>' + IsNULL(ltrim(@intBatchPreStageId), '') + '</DocNo>' + '<MsgType>Stock_Recategorization</MsgType>' + '<Sender>iRely</Sender>' + '<Receiver>SAP</Receiver></CtrlPoint>'
+	SELECT @strRootXML = '<root><CtrlPoint><DocNo>' + IsNULL(ltrim(@intBatchPreStageId), '') + '</DocNo>' + '<MsgType>Stock_Recategorization</MsgType>' + '<Sender>iRely</Sender>' + '<Receiver>SAP</Receiver></CtrlPoint>'
 
 	WHILE @intBatchPreStageId IS NOT NULL
 	BEGIN
@@ -225,7 +226,7 @@ BEGIN TRY
 				+ '<PackageType>' + ISNULL(B.strPackageUOM, '') + '</PackageType>'
 				+ '<TareWt>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTareWeight, 0))) + '</TareWt>'
 				+ '<Taster>' + ISNULL(B.strTaster, '') + '</Taster>'
-				+ '<FeedStock>' + ISNULL(B.strFeedStock, '') + '</FeedStock>'
+				+ '<FeedStock>' + ISNULL(I.strShortName, '') + '</FeedStock>'
 				+ '<FluorideLimit>' + ISNULL(B.strFlourideLimit, '') + '</FluorideLimit>'
 				+ '<LocalAuctionNumber>' + ISNULL(B.strLocalAuctionNumber, '') + '</LocalAuctionNumber>'
 				+ '<POStatus>' + ISNULL(B.strPOStatus, '') + '</POStatus>'
@@ -278,9 +279,9 @@ BEGIN TRY
 		WHERE intBatchPreStageId > @intBatchPreStageId
 	END
 
-	IF @strXML <> ''
+	IF LEN(@strXML)>0
 	BEGIN
-		   SELECT @strXML = @strXML +  '</root>'
+		   SELECT @strXML = @strRootXML + @strXML +  '</root>'
 
 		INSERT INTO @tblOutput (
 			intBatchId
