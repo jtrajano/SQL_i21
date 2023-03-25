@@ -30,6 +30,8 @@ FROM (
 		,voucher.dblTempInterest
 		,CASE WHEN voucher.intTransactionType IN (3,8) AND voucher.dblAmountDue > 0 THEN voucher.dblAmountDue * -1
 			WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1 THEN voucher.dblAmountDue * -1
+			WHEN voucher.intTransactionType = 1 AND voucher.ysnFinalVoucher = 1 THEN voucher.dblAmountDue - voucher.dblProvisionalTotal
+			WHEN voucher.intTransactionType = 16 THEN voucher.dblProvisionalAmountDue
 			ELSE voucher.dblAmountDue END AS dblAmountDue
 		,voucher.dblPayment
 		,voucher.dblTempPayment

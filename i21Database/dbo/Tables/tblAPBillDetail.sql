@@ -100,6 +100,8 @@
 	[ysnOverrideForexRate] BIT NOT NULL DEFAULT 0,
 	[strReasonablenessComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[dblProvisionalPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 100, 
+	[dblProvisionalCost] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[dblProvisionalWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblProvisionalTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],

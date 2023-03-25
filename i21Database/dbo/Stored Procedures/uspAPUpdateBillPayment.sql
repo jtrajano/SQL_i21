@@ -13,6 +13,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @amountDue DECIMAL(18,2);
+DECLARE @provAmountDue DECIMAL(18,2);
+DECLARE @finalVoucherAmountDue DECIMAL(18,2);
 DECLARE @discountAmt DECIMAL(18,6);
 
 IF @post = 0
@@ -31,8 +33,15 @@ BEGIN
 									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
+			@provAmountDue 	= C.dblProvisionalAmountDue + 
+									(
+										ISNULL(paySchedDetails.dblPayment, ABS(payDetails.dblPayment))
+									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+									- 	ABS(ISNULL(payDetails.dblInterest, 0))
+									),	
 			@discountAmt = C.dblDiscount - ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
 			tblAPBill.dblAmountDue = @amountDue, 
+			tblAPBill.dblProvisionalAmountDue = CASE WHEN C.intTransactionType = 16 THEN @provAmountDue ELSE 0 END,
 			tblAPBill.ysnPaid = 0,
 			tblAPBill.dblPayment = C.dblPayment - 
 									(
@@ -124,9 +133,24 @@ BEGIN
 						+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 						- 	ABS(ISNULL(payDetails.dblInterest, 0))
 						),
+			@provAmountDue = C.dblProvisionalAmountDue
+						- (
+							ISNULL(paySchedDetails.dblPayment, ABS(payDetails.dblPayment))
+						+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+						- 	ABS(ISNULL(payDetails.dblInterest, 0))
+						),
+			@finalVoucherAmountDue = (C.dblAmountDue - C.dblProvisionalTotal)
+						- (
+							ISNULL(paySchedDetails.dblPayment, ABS(payDetails.dblPayment))
+						+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+						- 	ABS(ISNULL(payDetails.dblInterest, 0))
+						),
 			tblAPBill.dblAmountDue = @amountDue,
-			tblAPBill.ysnPaid = (CASE WHEN @amountDue = 0 THEN 1 ELSE 0 END),
-			tblAPBill.dtmDatePaid = (CASE WHEN @amountDue = 0 THEN A.dtmDatePaid ELSE NULL END),
+			-- tblAPBill.ysnPaid = (CASE WHEN @amountDue = 0 THEN 1 ELSE 0 END),
+			-- tblAPBill.dtmDatePaid = (CASE WHEN @amountDue = 0 THEN A.dtmDatePaid ELSE NULL END),
+			tblAPBill.dblProvisionalAmountDue = CASE WHEN C.intTransactionType = 16 THEN @provAmountDue ELSE 0 END,
+			tblAPBill.ysnPaid = (CASE WHEN @amountDue = 0 OR @provAmountDue = 0 OR @finalVoucherAmountDue = 0 THEN 1 ELSE 0 END),
+			tblAPBill.dtmDatePaid = (CASE WHEN @amountDue = 0 OR @provAmountDue = 0 OR @finalVoucherAmountDue = 0 THEN A.dtmDatePaid ELSE NULL END),
 			tblAPBill.dblWithheld = ABS(ISNULL(payDetails.dblWithheld,0)),
 			tblAPBill.dblDiscount = (CASE WHEN A2.dblAmountDue = 0 THEN ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 										ELSE 

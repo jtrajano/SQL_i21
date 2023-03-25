@@ -256,7 +256,7 @@ BEGIN
 				-- WHERE R.dblDiscount <> 0 AND R.intBillId = A.intBillId
             ) Details
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND A.intTransactionType <> 15
+		  AND A.intTransactionType NOT IN (15,16) AND A.ysnFinalVoucher = 0
 	
 	UNION ALL
 	--DEBIT DUE FROM
@@ -1426,6 +1426,435 @@ BEGIN
 	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+
+	/*
+	===============================
+		PROVISIONAL VOUCHER
+	===============================
+	*/
+	UNION ALL
+	--CREDIT
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	A.intAccountId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	 CAST(Details.dblTotal * (A.dblProvisionalPercentage / 100)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	ISNULL(Details.dblUnits  * (A.dblProvisionalPercentage / 100),0),
+		[strDescription]				=	'',
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	Details.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Posted Provisional Voucher',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Provisional Voucher',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	CAST(Details.dblTotal * (A.dblProvisionalPercentage / 100) AS DECIMAL(18,2)),
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),
+		[strRateType]                   =    Details.strCurrencyExchangeRateType,
+		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
+		[strComments]					=	D.strName + ' - ' + Details.strComment,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	Details.dblUnits * (A.dblProvisionalPercentage / 100),
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			OUTER APPLY
+            (
+                SELECT R.intBillDetailId,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
+					(R.dblTotal) AS dblTotal, 
+					R.dblRate  AS dblRate,
+					R.dblProvisionalTotal, 
+					exRates.intCurrencyExchangeRateTypeId, 
+					exRates.strCurrencyExchangeRateType,
+					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
+											ELSE
+												dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
+												THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
+												itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+											END),
+					R.strComment										
+        FROM dbo.tblAPBillDetail R
+				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
+        LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				OUTER APPLY (
+					SELECT TOP 1 stockUnit.*
+					FROM tblICItemUOM stockUnit 
+					WHERE 
+						item.intItemId = stockUnit.intItemId 
+					AND stockUnit.ysnStockUnit = 1
+				) itemUOM
+        WHERE R.intBillId = A.intBillId
+				UNION ALL --taxes
+				SELECT R.intBillDetailId,
+					2 intFormat,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 
+								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId) AND charges.ysnPrice = 1
+												THEN R2.dblAdjustedTax * -1 
+											ELSE R2.dblAdjustedTax 
+											END) 
+								ELSE R2.dblAdjustedTax END AS dblTotal,
+				 	R.dblRate  AS dblRate,
+				 	R.dblProvisionalTotal, 
+				 	exRates.intCurrencyExchangeRateTypeId,
+				  exRates.strCurrencyExchangeRateType,
+				  0,
+				  ''
+        FROM dbo.tblAPBillDetail R
+				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
+				LEFT JOIN tblICInventoryReceiptCharge charges
+					ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+				LEFT JOIN tblICInventoryReceipt receipts
+					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+                WHERE R.intBillId = A.intBillId
+            ) Details
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND A.intTransactionType = 16
+	
+	UNION ALL
+	--DEBIT SIDE
+	SELECT	
+		[dtmDate]								=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]						=	@batchId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[dblDebit]							=	CAST(Details.dblTotal * (A.dblProvisionalPercentage / 100) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblCredit]							=	0,
+		[dblDebitUnit]					=	ISNULL(Details.dblUnits * (A.dblProvisionalPercentage / 100), 0),
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(Details.intBillDetailId, Details.intFormat),
+		[strCode]								=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]						=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	Details.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]					=	ISNULL(NULLIF(Details.dblRate,0),1),
+		[dtmDateEntered]					=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Posted Provisional Voucher',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]						=	0,
+		[intUserId]								=	@intUserId,
+		[intEntityId]							=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Provisional Voucher',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]						=	@MODULE_NAME,
+		[dblDebitForeign]					=	CAST(Details.dblTotal * (A.dblProvisionalPercentage / 100) AS DECIMAL(18,2)),      
+		[dblDebitReport]					=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]					=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]          = ISNULL(NULLIF(Details.dblRate, 0), 1),
+		[strRateType]             = Details.strCurrencyExchangeRateType,
+		[strDocument]							=	D.strName + ' - ' + A.strVendorOrderNumber,
+		[strComments]							=	D.strName + ' - ' + Details.strComment,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	Details.dblUnits * (A.dblProvisionalPercentage / 100),
+		[intCommodityId]					=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+	ON A.intEntityVendorId = C.[intEntityId]
+	OUTER APPLY
+  (
+   SELECT R.intBillDetailId,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
+					(R.dblTotal) AS dblTotal, 
+					R.dblRate AS dblRate,
+					exRates.intCurrencyExchangeRateTypeId, 
+					exRates.strCurrencyExchangeRateType,
+					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
+											ELSE
+												dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
+														THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
+														itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+											END),
+					R.strComment,
+					R.intAccountId
+        FROM dbo.tblAPBillDetail R
+				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
+        LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				OUTER APPLY (
+					SELECT TOP 1 stockUnit.*
+					FROM tblICItemUOM stockUnit 
+					WHERE item.intItemId = stockUnit.intItemId 
+						AND stockUnit.ysnStockUnit = 1
+				) itemUOM	
+        WHERE R.intBillId = A.intBillId
+				UNION ALL --taxes
+				SELECT R.intBillDetailId,
+					2 intFormat,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 
+								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId) AND charges.ysnPrice = 1 THEN R2.dblAdjustedTax * -1 
+												ELSE R2.dblAdjustedTax 
+											END) 
+								ELSE R2.dblAdjustedTax
+					END AS dblTotal,
+				 	R.dblRate AS dblRate,
+				 	exRates.intCurrencyExchangeRateTypeId,
+					exRates.strCurrencyExchangeRateType,
+				  0,
+				  '',
+					R.intAccountId
+        FROM dbo.tblAPBillDetail R
+				INNER JOIN tblAPBillDetailTax R2 
+					ON R.intBillDetailId = R2.intBillDetailId
+				LEFT JOIN tblICInventoryReceiptCharge charges
+					ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+				LEFT JOIN tblICInventoryReceipt receipts
+					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+        LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates 
+					ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+        WHERE R.intBillId = A.intBillId
+        ) Details
+				OUTER APPLY (
+					SELECT intOverrideAccount
+					FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+				) OVERRIDESEGMENT
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND @AllowIntraEntries = 1
+  AND @DueFromAccountId <> 0
+  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
+	AND A.intTransactionType = 16
+
+	/*
+	===============================
+		FINALIZE VOUCHER
+	===============================
+	*/
+	UNION ALL
+	--CREDIT
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	A.intAccountId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	 CAST(Details.dblTotal * ((100 - A.dblProvisionalPercentage) / 100) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	ISNULL(Details.dblUnits * ((100 - A.dblProvisionalPercentage) / 100),0),
+		[strDescription]				=	'',
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	Details.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Posted Finalize Voucher',
+		[intJournalLineNo]				=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Finalize Voucher',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	CAST(Details.dblTotal * ((100 - A.dblProvisionalPercentage) / 100) AS DECIMAL(18,2)),
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),
+		[strRateType]                   =    Details.strCurrencyExchangeRateType,
+		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
+		[strComments]					=	D.strName + ' - ' + Details.strComment,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	Details.dblUnits * ((100 - A.dblProvisionalPercentage) / 100),
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			OUTER APPLY
+            (
+                SELECT R.intBillDetailId,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
+					(R.dblTotal - R.dblProvisionalTotal) AS dblTotal, 
+					R.dblRate  AS dblRate, 
+					exRates.intCurrencyExchangeRateTypeId, 
+					exRates.strCurrencyExchangeRateType,
+					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 
+											OR R.intLoadId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
+									ELSE
+									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
+											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
+											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+								END),
+					R.strComment										
+                FROM dbo.tblAPBillDetail R
+				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
+                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				OUTER APPLY (
+					SELECT TOP 1 stockUnit.*
+					FROM tblICItemUOM stockUnit 
+					WHERE 
+						item.intItemId = stockUnit.intItemId 
+					AND stockUnit.ysnStockUnit = 1
+				) itemUOM
+                WHERE R.intBillId = A.intBillId
+				UNION ALL --taxes
+				SELECT R.intBillDetailId,
+					2 intFormat,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 
+								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
+												AND charges.ysnPrice = 1
+											THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
+						ELSE R2.dblAdjustedTax
+					END
+				AS dblTotal,
+				 R.dblRate  AS dblRate,
+				 exRates.intCurrencyExchangeRateTypeId,
+				 exRates.strCurrencyExchangeRateType,
+				 0,
+				''
+        FROM dbo.tblAPBillDetail R
+				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
+				LEFT JOIN tblLGLoadDetail LD
+					ON R.intLoadDetailId = LD.intLoadDetailId
+				LEFT JOIN tblLGLoad L
+					ON L.intLoadId = LD.intLoadId
+				LEFT JOIN tblICInventoryReceiptCharge charges
+					ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+				LEFT JOIN tblICInventoryReceipt receipts
+					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+        LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+        WHERE R.intBillId = A.intBillId
+        ) Details
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND A.intTransactionType = 1 AND ISNULL(A.ysnFinalVoucher, 0) = 1
+
+	UNION ALL
+	--DEBIT SIDE
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[dblDebit]						=	CAST(Details.dblTotal * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	ISNULL(Details.dblUnits * ((100 - A.dblProvisionalPercentage) / 100),0),
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(Details.intBillDetailId, Details.intFormat),
+		[strCode]								=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	Details.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Posted Finalize Voucher',
+		[intJournalLineNo]			=	1,
+		[ysnIsUnposted]					=	0,
+		[intUserId]							=	@intUserId,
+		[intEntityId]						=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Finalize Voucher',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	CAST(Details.dblTotal AS DECIMAL(18,2)),      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]			=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]			=	0,
+		[dblForeignRate]        = ISNULL(NULLIF(Details.dblRate, 0), 1),
+		[strRateType]           = Details.strCurrencyExchangeRateType,
+		[strDocument]						=	D.strName + ' - ' + A.strVendorOrderNumber,
+		[strComments]						=	D.strName + ' - ' + Details.strComment,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	Details.dblUnits * ((100 - A.dblProvisionalPercentage) / 100),
+		[intCommodityId]					=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+		ON A.intEntityVendorId = C.[intEntityId]
+	OUTER APPLY
+		(	SELECT R.intBillDetailId,
+			CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
+			(	R.dblTotal - R.dblProvisionalTotal) AS dblTotal, 
+				R.dblRate  AS dblRate,
+				exRates.intCurrencyExchangeRateTypeId, 
+				exRates.strCurrencyExchangeRateType,
+				dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') 
+												THEN R.dblQtyReceived
+											ELSE 
+												dbo.fnCalculateQtyBetweenUOM
+														(CASE WHEN R.intWeightUOMId > 0 THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
+														itemUOM.intItemUOMId, 
+														CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+										END),
+					R.strComment,
+					R.intAccountId
+                FROM dbo.tblAPBillDetail R
+				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
+                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				OUTER APPLY (
+					SELECT TOP 1 stockUnit.*
+					FROM tblICItemUOM stockUnit 
+					WHERE 
+						item.intItemId = stockUnit.intItemId 
+					AND stockUnit.ysnStockUnit = 1
+				) itemUOM
+                WHERE R.intBillId = A.intBillId
+				UNION ALL --taxes
+				SELECT R.intBillDetailId,
+					2 intFormat,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 
+							THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId) AND charges.ysnPrice = 1 THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
+							ELSE R2.dblAdjustedTax END AS dblTotal,
+				 R.dblRate  AS dblRate,
+				 exRates.intCurrencyExchangeRateTypeId,
+				  exRates.strCurrencyExchangeRateType,
+				  0,
+				  '',
+				R.intAccountId
+        FROM dbo.tblAPBillDetail R
+				INNER JOIN tblAPBillDetailTax R2 
+					ON R.intBillDetailId = R2.intBillDetailId
+				LEFT JOIN tblICInventoryReceiptCharge charges
+					ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+				LEFT JOIN tblICInventoryReceipt receipts
+					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+      	LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+        WHERE R.intBillId = A.intBillId
+      ) Details
+			OUTER APPLY (
+				SELECT intOverrideAccount
+				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND @AllowIntraEntries = 1
+  AND @DueFromAccountId <> 0
+  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
+	AND A.intTransactionType = 1 
+	AND ISNULL(A.ysnFinalVoucher,0) = 1
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

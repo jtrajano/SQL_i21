@@ -431,12 +431,14 @@ BEGIN
 															ELSE
 															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-															- B.dblInterest, voucher.dblTotal)
+															- B.dblInterest, CASE WHEN voucher.intTransactionType = 16 THEN voucher.dblProvisionalTotal
+																										WHEN ISNULL(voucher.ysnFinalVoucher, 0) = 1 THEN voucher.dblTotal - voucher.dblProvisionalTotal
+																										ELSE voucher.dblTotal END)
 															END
 													)
 														*  ISNULL(NULLIF(voucher.dblAverageExchangeRate,0),1))
 											AS DECIMAL(18,2))) * (
-																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14) AND A.ysnPrepay = 0)
+																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14,16) AND A.ysnPrepay = 0)
 																			OR
 																		  (voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1)
 																		  OR 
@@ -472,13 +474,15 @@ BEGIN
 															ELSE
 															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-															- B.dblInterest, voucher.dblTotal)
+															- B.dblInterest, CASE WHEN voucher.intTransactionType = 16 THEN voucher.dblProvisionalTotal
+																										WHEN ISNULL(voucher.ysnFinalVoucher, 0) = 1 THEN voucher.dblTotal - voucher.dblProvisionalTotal
+																										ELSE voucher.dblTotal END)
 															END
 													)
 												)
 											AS DECIMAL(18,2))
 											* (
-												CASE WHEN (voucher.intTransactionType NOT IN (1,2,13, 14) AND A.ysnPrepay = 0)
+												CASE WHEN (voucher.intTransactionType NOT IN (1,2,13, 14,16) AND A.ysnPrepay = 0)
 															OR
 															(voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1)
 															OR 
