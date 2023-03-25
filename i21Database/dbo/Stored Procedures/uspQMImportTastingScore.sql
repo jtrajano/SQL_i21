@@ -1072,6 +1072,8 @@ BEGIN TRY
 				WHERE strBatchId = @strBatchNo
 				)
 		BEGIN
+			DELETE FROM @MFBatchTableType
+			
 			INSERT INTO @MFBatchTableType (
 				strBatchId
 				,intSales
