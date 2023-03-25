@@ -19,5 +19,7 @@ CREATE TABLE tblICStagingCountDetail (
 	, dblQtyPerPallet NUMERIC(38, 20) NULL
 	, ysnRecount BIT NULL
 	, dblWeightQty NUMERIC(38, 20) NULL
+	, intCountUOMId INT NULL
+	, intWeightUOMId INT NULL
 	, CONSTRAINT PK_tblICStagingCountDetail_intStagingCountDetailId PRIMARY KEY(intStagingCountDetailId)
 )
