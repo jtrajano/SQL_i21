@@ -122,10 +122,10 @@ BEGIN TRY
    SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum AS NVARCHAR)  
        ,@debitMemoNo = @debitMemoPref + CAST(@debitMemoStartNum AS NVARCHAR)    
        ,@debitMemoStartNum = @debitMemoStartNum + 1  
-       ,dblTotal = ABS(A.dblAmountDue)  
-       ,dblAmountDue = ABS(A.dblAmountDue)  
-       ,dblSubtotal = ABS(A.dblAmountDue)  
-       ,dblTotalController = ABS(A.dblAmountDue)  
+       ,dblTotal = ABS(A.dblAmountDue - A.dblProvisionalTotal)  
+       ,dblAmountDue = ABS(A.dblAmountDue - A.dblProvisionalTotal) 
+       ,dblSubtotal = ABS(A.dblAmountDue - A.dblProvisionalTotal)  
+       ,dblTotalController = ABS(A.dblAmountDue - A.dblProvisionalTotal)  
        ,intTransactionType = 3 --Debit Memo
        ,ysnFinalVoucher = 0
        ,strReference = REPLACE(strReference, 'Final Voucher of', 'Debit Memo of')

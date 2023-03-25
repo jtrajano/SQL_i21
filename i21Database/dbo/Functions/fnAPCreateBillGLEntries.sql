@@ -1695,7 +1695,7 @@ BEGIN
             (
                 SELECT R.intBillDetailId,
 					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
-					(R.dblTotal - R.dblProvisionalTotal) AS dblTotal, 
+					(R.dblTotal) AS dblTotal, 
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,

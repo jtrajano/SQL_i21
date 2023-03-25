@@ -32,6 +32,9 @@ RETURNS TABLE AS RETURN
 									END																		
 						END
 					END
+		* (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalPercentage / 100
+						WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
+						ELSE 1 END) 
 			* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) AS dblTotal
 		,CAST(
 			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal 
@@ -57,6 +60,9 @@ RETURNS TABLE AS RETURN
 												- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 									END																		
 						END
+			* (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalPercentage / 100
+						WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
+						ELSE 1 END)
 			END AS DECIMAL(18,2)) AS dblForeignTotal
 		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN B.dblQtyReceived
 			   ELSE
