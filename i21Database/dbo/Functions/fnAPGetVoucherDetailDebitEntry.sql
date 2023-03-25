@@ -9,42 +9,52 @@ RETURNS TABLE AS RETURN
 		,B.strMiscDescription
 		,CAST(
 			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal 
+						WHEN A.intTransactionType = 16 THEN (B.dblTotal * (B.dblProvisionalPercentage / 100))
 					ELSE
 						CASE	WHEN B.intCustomerStorageId > 0 THEN  --COST ADJUSTMENT FOR SETTLE STORAGE ITEM
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
 										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((ISNULL(storageOldCost.dblOldCost, B.dblOldCost) * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal
+									- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+								- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 								ELSE 
 									CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
 												CASE	WHEN B.dblOldCost = 0 THEN 0 
 														ELSE usingOldCost.dblTotal --COST ADJUSTMENT FOR RECEIPT ITEM
+													- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 												END 
 											ELSE 
 												B.dblTotal 
+												- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 									END																		
 						END
 					END
 			* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) AS dblTotal
 		,CAST(
 			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal 
+					WHEN A.intTransactionType = 16 THEN (B.dblTotal * (B.dblProvisionalPercentage / 100)) 
 					ELSE
 						CASE	WHEN B.intCustomerStorageId > 0 THEN 
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
 										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((ISNULL(storageOldCost.dblOldCost, B.dblOldCost) * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal
+									 - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END)
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+								- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 								ELSE 
 									CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
 												CASE	WHEN B.dblOldCost = 0 THEN 0 
 														ELSE usingOldCost.dblTotal --COST ADJUSTMENT
+														- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END)
 												END 
 											ELSE 
 												B.dblTotal 
+												- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 									END																		
 						END
 			END AS DECIMAL(18,2)) AS dblForeignTotal
@@ -55,7 +65,11 @@ RETURNS TABLE AS RETURN
 												  THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END), 
 													itemUOM.intItemUOMId, CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
 					 
-		END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END) as dblTotalUnits
+		END) * (CASE WHEN A.intTransactionType NOT IN (1,14,16) THEN -1 ELSE 1 END)
+		* (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalPercentage / 100
+						WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
+						ELSE 1 END
+			) as dblTotalUnits
 		,CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL 
 				THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') --AP-3492 use AP Clearing if tansaction is From IS
 				ELSE B.intAccountId

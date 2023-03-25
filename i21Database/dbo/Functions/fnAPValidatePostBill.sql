@@ -895,6 +895,21 @@ BEGIN
 		AND B.ysnPosted = 1
 		AND IRC.ysnWithGLReversal = 1
 
+		--PROVISIONAL VOUCHER IS ALREADY FINALIZED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'You cannot unpost this voucher. ' + A.strBillId + ' is already associated to ' + B.strBillId + '.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			23
+		FROM tblAPBill A
+		INNER JOIN tblAPBill B ON A.intBillId = B.intFinalizeVoucherId AND B.intFinalizeVoucherId IS NOT NULL
+		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND A.ysnPosted = 1
+		AND A.ysnFinalize = 1
+		AND A.intTransactionType = 16
+
 		-- --BILL WAS POSTED FROM SETTLE STORAGE
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		-- SELECT 

@@ -19,6 +19,16 @@ BEGIN
 		RETURN;
 	END
 
+	--Validate if provisional is already finalize
+	IF EXISTS (
+			SELECT TOP 1 1 FROM tblAPBill A
+				INNER JOIN tblAPBill B ON A.intFinalizeVoucherId IS NOT NULL AND A.intFinalizeVoucherId = B.intBillId
+				WHERE A.intBillId = @billId AND A.ysnFinalize = 1) 
+	BEGIN
+		RAISERROR('Provisional is already finalized', 16, 1);
+		RETURN;
+	END
+
 	--CREATE VOUCHER FROM RECEIPT
 	DECLARE @receiptId INT = 0;
 	SELECT TOP 1 @receiptId = IRI.intInventoryReceiptId
@@ -159,4 +169,9 @@ BEGIN
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD2.intBillId = @billId
 		WHERE BD.intBillId = @createdVoucher
 	END
+	
+	UPDATE tblAPBill 
+		SET intFinalizeVoucherId = @createdVoucher
+				,ysnFinalize = 1
+	WHERE intBillId = @billId
 END
