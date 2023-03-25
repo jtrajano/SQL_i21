@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPPOIDOC_CA] (
+﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_DA (
 	@ysnCancel BIT = 0
 	,@ysnDebug BIT = 0
 	)
@@ -6,6 +6,7 @@ AS
 BEGIN
 	DECLARE @strVendorAccountNum NVARCHAR(100)
 		,@strERPPONumber NVARCHAR(100)
+		,@strERPItemNumber NVARCHAR(100)
 		,@strItemNo NVARCHAR(100)
 		,@strContractItemNo NVARCHAR(100)
 		,@strLoadingPoint NVARCHAR(100)
@@ -36,7 +37,9 @@ BEGIN
 		,@dtmStartDate DATETIME
 		,@dtmEndDate DATETIME
 		,@intNumberOfContainers INT
-		,@strThirdPartyFeedStatus nvarchar(50)
+		,@strThirdPartyFeedStatus NVARCHAR(50)
+		,@intItemId INT
+		,@strDescription NVARCHAR(200)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -47,64 +50,77 @@ BEGIN
 		,strPONo NVARCHAR(100)
 		)
 
+	EXEC uspIPValidateContractFeed_CA
+
 	SELECT @dtmCurrentDate = GetDATE()
 
 	SELECT @intThirdPartyContractWaitingPeriod = IsNULL(intThirdPartyContractWaitingPeriod, 60)
 	FROM dbo.tblIPCompanyPreference
+
+	DELETE
+	FROM @tblCTContractFeed
 
 	IF @ysnCancel = 1
 	BEGIN
 		INSERT INTO dbo.tblIPThirdPartyContractFeed (
 			intContractFeedId
 			,strERPPONumber
+			,strERPItemNumber
 			,strRowState
 			)
 		SELECT CF.intContractFeedId
-			,CF.strERPPONumber
+			--,CF.strERPPONumber
+			--,CF.strERPItemNumber
+			,CF.strContractNumber
+			,LTRIM(CF.intContractSeq)
 			,CF.strRowState
 		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
-		WHERE CF.strERPPONumber <> ''
-			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
+		WHERE CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
 			AND CF.strCommodityCode = 'Coffee'
 			AND CF.strRowState = 'Delete'
 			AND CF.strContractBasis = 'FOB'
+			--AND CF.strERPPONumber <> ''
 			AND NOT EXISTS (
-				SELECT *
+				SELECT 1
 				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
 				WHERE TPCF.intContractFeedId = CF.intContractFeedId
 				)
 			AND NOT EXISTS (
-					SELECT 1
-					FROM tblCTContractDetail CD
-					WHERE CD.intContractDetailId = CF.intContractDetailId
-					)
+				SELECT 1
+				FROM tblCTContractDetail CD
+				WHERE CD.intContractDetailId = CF.intContractDetailId
+				)
 		ORDER BY CF.intContractFeedId ASC
 
 		INSERT INTO dbo.tblIPThirdPartyContractFeed (
 			intContractFeedId
 			,strERPPONumber
+			,strERPItemNumber
 			,strRowState
 			)
 		SELECT CF.intContractFeedId
-			,CF.strERPPONumber
+			--,CF.strERPPONumber
+			--,CF.strERPItemNumber
+			,CF.strContractNumber
+			,LTRIM(CF.intContractSeq)
 			,CF.strRowState
 		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
-		WHERE CF.strERPPONumber <> ''
-			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
+		WHERE CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
 			AND CF.strCommodityCode = 'Coffee'
 			AND CF.strRowState = 'Delete'
 			AND CF.strContractBasis = 'FOB'
+			--AND CF.strERPPONumber <> ''
 			AND NOT EXISTS (
-				SELECT *
+				SELECT 1
 				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
 				WHERE TPCF.intContractFeedId = CF.intContractFeedId
 				)
 			AND EXISTS (
-					SELECT 1
-					FROM tblCTContractDetail CD
-					WHERE CD.intContractDetailId = CF.intContractDetailId
-					AND CD.intContractStatusId=3
-					)
+				SELECT 1
+				FROM tblCTContractDetail CD
+				WHERE CD.intContractDetailId = CF.intContractDetailId
+					AND CD.intContractStatusId = 3
+				)
 		ORDER BY CF.intContractFeedId ASC
 
 		INSERT INTO @tblCTContractFeed (intContractFeedId)
@@ -118,19 +134,23 @@ BEGIN
 		INSERT INTO tblIPThirdPartyContractFeed (
 			intContractFeedId
 			,strERPPONumber
+			,strERPItemNumber
 			,strRowState
 			)
 		SELECT CF.intContractFeedId
-			,CF.strERPPONumber
+			--,CF.strERPPONumber
+			--,CF.strERPItemNumber
+			,CF.strContractNumber
+			,LTRIM(CF.intContractSeq)
 			,CF.strRowState
 		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
-		WHERE CF.strERPPONumber <> ''
-			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
+		WHERE CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
 			AND CF.strCommodityCode = 'Coffee'
 			AND CF.strRowState <> 'Delete'
 			AND CF.strContractBasis = 'FOB'
+			--AND CF.strERPPONumber <> ''
 			AND NOT EXISTS (
-				SELECT *
+				SELECT 1
 				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
 				WHERE TPCF.intContractFeedId = CF.intContractFeedId
 				)
@@ -146,33 +166,51 @@ BEGIN
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
 
+	UPDATE tblIPThirdPartyContractFeed
+	SET intStatusId = - 1
+	WHERE intContractFeedId IN (
+			SELECT intContractFeedId
+			FROM @tblCTContractFeed
+			)
+
 	WHILE @intContractFeedId IS NOT NULL
 	BEGIN
-		SELECT @intContractHeaderId = NULL
-			,@intContractDetailId = NULL
-
 		SELECT @strVendorAccountNum = NULL
 			,@strERPPONumber = NULL
+			,@strERPItemNumber = NULL
 			,@strItemNo = NULL
 			,@strContractItemNo = NULL
 			,@strLoadingPoint = NULL
 			,@dblQuantity = NULL
 			,@dblNetWeight = NULL
 			,@dtmPlannedAvailabilityDate = NULL
+			,@intContractHeaderId = NULL
 			,@strRowState = NULL
-			,@intEntityId = NULL
-			,@strContractNo = NULL
 			,@dtmFeedCreated = NULL
-			,@strShipperVendorAccountNum = NULL
+			,@intContractDetailId = NULL
 			,@strSeq = NULL
 			,@dtmStartDate = NULL
 			,@dtmEndDate = NULL
+			,@intItemId = NULL
+			,@strDescription = NULL
+
+		SELECT @intEntityId = NULL
+			,@strVendorRefNo = NULL
+			,@strContractNo = NULL
+			,@intShipperId = NULL
+			,@intDestinationCityId = NULL
+			,@intDestinationPortId = NULL
 			,@intNumberOfContainers = NULL
+			,@strVendorName = NULL
+			,@strShipperName = NULL
+			,@strShipperVendorAccountNum = NULL
+			,@strDestinationPoint = NULL
 
 		SELECT @strError = ''
 
 		SELECT @strVendorAccountNum = strVendorAccountNum
 			,@strERPPONumber = strERPPONumber
+			,@strERPItemNumber = strERPItemNumber
 			,@strItemNo = strItemNo
 			,@strContractItemNo = strContractItemName
 			,@strLoadingPoint = strLoadingPoint
@@ -186,10 +224,11 @@ BEGIN
 			,@strSeq = intContractSeq
 			,@dtmStartDate = dtmStartDate
 			,@dtmEndDate = dtmEndDate
+			,@intItemId = intItemId
 		FROM dbo.tblCTContractFeed WITH (NOLOCK)
 		WHERE intContractFeedId = @intContractFeedId
 
-		SELECT @dtmEndDate = Convert(DATETIME, Convert(NVARCHAR, @dtmEndDate, 101))
+		SELECT @dtmEndDate = CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmEndDate, 101))
 
 		SELECT @intEntityId = intEntityId
 			,@strVendorRefNo = strCustomerContract
@@ -203,6 +242,13 @@ BEGIN
 			,@intNumberOfContainers = intNumberOfContainers
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
+
+		SELECT @strDescription = strDescription
+		FROM dbo.tblICItem WITH (NOLOCK)
+		WHERE intItemId = @intItemId
+
+		SELECT @strERPPONumber = @strContractNo
+			,@strERPItemNumber = @strSeq
 
 		SELECT @strVendorName = strName
 		FROM dbo.tblEMEntity WITH (NOLOCK)
@@ -224,7 +270,7 @@ BEGIN
 
 		SELECT @strDestinationPoint = strCity
 		FROM dbo.tblSMCity WITH (NOLOCK)
-		WHERE intCityId = IsNULl(@intDestinationCityId, @intDestinationPortId)
+		WHERE intCityId = ISNULL(@intDestinationCityId, @intDestinationPortId)
 
 		IF @strRowState <> 'Delete'
 		BEGIN
@@ -251,13 +297,15 @@ BEGIN
 				SELECT @strError = @strError + 'Planned Availability date cannot be blank. '
 			END
 
-			IF @strContractItemNo IS NULL
-				OR @strContractItemNo = ''
+			IF @strDescription IS NULL
+				OR @strDescription = ''
 			BEGIN
-				SELECT @strError = @strError + 'Contract Item cannot be blank. '
+				SELECT @strError = @strError + 'Item Description cannot be blank. '
 			END
 		END
+
 		SELECT @strThirdPartyFeedStatus = NULL
+
 		SELECT TOP 1 @strThirdPartyFeedStatus = strThirdPartyFeedStatus
 		FROM dbo.tblIPThirdPartyContractFeed
 		WHERE intContractFeedId = @intContractFeedId
@@ -268,7 +316,11 @@ BEGIN
 			SELECT @strError = @strError + 'Duplicate Entry. '
 		END
 
-		IF NOT EXISTS(SELECT *FROM tblCTContractFeed WHERE intContractFeedId = @intContractFeedId)
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tblCTContractFeed WITH (NOLOCK)
+				WHERE intContractFeedId = @intContractFeedId
+				)
 		BEGIN
 			SELECT @strError = @strError + 'Data is missing in the Contract Feed table. '
 		END
@@ -287,11 +339,12 @@ BEGIN
 		IF @strRowState = 'Delete'
 		BEGIN
 			IF NOT EXISTS (
-					SELECT *
+					SELECT 1
 					FROM tblIPThirdPartyContractFeed
 					WHERE strERPPONumber = @strERPPONumber
+						AND strERPItemNumber = @strERPItemNumber
 						AND strThirdPartyFeedStatus <> 'Failed'
-						 AND intContractFeedId <> @intContractFeedId
+						AND intContractFeedId <> @intContractFeedId
 					)
 			BEGIN
 				UPDATE dbo.tblIPThirdPartyContractFeed
@@ -304,7 +357,17 @@ BEGIN
 
 			SELECT @strXML = '<Shipment>'
 
-			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+			--SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+
+			--SELECT @strXML = @strXML + '<ReferenceItemNumber>' + @strERPItemNumber + '</ReferenceItemNumber>'
+
+			SELECT @strXML = @strXML + '<ContractNumber>' + @strContractNo + '</ContractNumber>'
+
+			SELECT @strXML = @strXML + '<ContractSequenceNumber>' + @strSeq + '</ContractSequenceNumber>'
+
+			SELECT @strXML = @strXML + '<ERPPONumber>' + @strERPPONumber + '</ERPPONumber>'
+
+			SELECT @strXML = @strXML + '<ERPPOItemNumber>' + @strERPItemNumber + '</ERPPOItemNumber>'
 
 			SELECT @strXML = @strXML + '<Status>800</Status>'
 
@@ -316,41 +379,53 @@ BEGIN
 		BEGIN
 			SELECT @strXML = '<Shipment>'
 
+			--SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+
+			--SELECT @strXML = @strXML + '<ReferenceItemNumber>' + @strERPItemNumber + '</ReferenceItemNumber>'
+
+			SELECT @strXML = @strXML + '<ContractNumber>' + @strContractNo + '</ContractNumber>'
+
+			SELECT @strXML = @strXML + '<ContractSequenceNumber>' + @strSeq + '</ContractSequenceNumber>'
+
+			SELECT @strXML = @strXML + '<ERPPONumber>' + @strERPPONumber + '</ERPPONumber>'
+
+			SELECT @strXML = @strXML + '<ERPPOItemNumber>' + @strERPItemNumber + '</ERPPOItemNumber>'
+
 			SELECT @strXML = @strXML + '<Incoterm>FOB</Incoterm>'
 
 			SELECT @strXML = @strXML + '<Parties>'
 
 			SELECT @strXML = @strXML + '<Party>'
 
-			SELECT @strXML = @strXML + '<Alias>JDE</Alias>'
+			SELECT @strXML = @strXML + '<Alias>DALLMAYR</Alias>'
 
-			SELECT @strXML = @strXML + '<Name>JDE</Name>'
+			SELECT @strXML = @strXML + '<Name>DALLMAYR</Name>'
 
 			SELECT @strXML = @strXML + '<Type>BUY</Type>'
 
-			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+			--SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
 
 			SELECT @strXML = @strXML + '</Party>'
 
 			SELECT @strXML = @strXML + '<Party>'
 
-			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
+			SELECT @strXML = @strXML + '<Alias>' + ISNULL(@strVendorAccountNum, '') + '</Alias>'
 
 			SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(@strVendorName) + '</Name>'
 
 			SELECT @strXML = @strXML + '<Type>SUP</Type>'
 
-			SELECT @strXML = @strXML + '<Reference>' + dbo.fnEscapeXML(IsNULL(@strVendorRefNo, '')) + '</Reference>'
+			SELECT @strXML = @strXML + '<Reference>' + dbo.fnEscapeXML(ISNULL(@strVendorRefNo, '')) + '</Reference>'
 
 			SELECT @strXML = @strXML + '</Party>'
 
-			IF IsNULL(@strShipperName, '') <> ''
+			IF ISNULL(@strShipperName, '') <> ''
 			BEGIN
 				SELECT @strXML = @strXML + '<Party>'
 
-				SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strShipperVendorAccountNum, '') + '</Alias>'
+				SELECT @strXML = @strXML + '<Alias>' + ISNULL(@strShipperVendorAccountNum, '') + '</Alias>'
 
-				SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(IsNULL(@strShipperName, '')) + '</Name>'
+				SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(ISNULL(@strShipperName, '')) + '</Name>'
 
 				SELECT @strXML = @strXML + '<Type>CZ</Type>'
 
@@ -359,9 +434,9 @@ BEGIN
 
 			SELECT @strXML = @strXML + '</Parties>'
 
-			SELECT @strXML = @strXML + '<Pol>' + dbo.fnEscapeXML(IsNULL(@strLoadingPoint, '')) + '</Pol>'
+			SELECT @strXML = @strXML + '<Pol>' + dbo.fnEscapeXML(ISNULL(@strLoadingPoint, '')) + '</Pol>'
 
-			SELECT @strXML = @strXML + '<Pod>' + dbo.fnEscapeXML(IsNULL(@strDestinationPoint, '')) + '</Pod>'
+			SELECT @strXML = @strXML + '<Pod>' + dbo.fnEscapeXML(ISNULL(@strDestinationPoint, '')) + '</Pod>'
 
 			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(30), @dtmPlannedAvailabilityDate, 126) + '</Eta>'
 
@@ -369,21 +444,21 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<EndDate>' + CONVERT(VARCHAR(30), @dtmEndDate, 126) + '</EndDate>'
 
-			SELECT @strXML = @strXML + '<ContainerCount>' + IsNULL(Ltrim(@intNumberOfContainers),'') + '</ContainerCount>'
+			SELECT @strXML = @strXML + '<ContainerCount>' + ISNULL(LTRIM(@intNumberOfContainers), '') + '</ContainerCount>'
 
 			SELECT @strXML = @strXML + '<CommodityItems>'
 
 			SELECT @strXML = @strXML + '<CommodityItem>'
 
-			SELECT @strXML = @strXML + '<ArticleCode>' + @strItemNo + '</ArticleCode>'
+			SELECT @strXML = @strXML + '<ArticleCode>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</ArticleCode>'
 
-			SELECT @strXML = @strXML + '<ArticleDescription>' + dbo.fnEscapeXML(IsNULL(@strContractItemNo, '')) + '</ArticleDescription>'
+			SELECT @strXML = @strXML + '<ArticleDescription>' + dbo.fnEscapeXML(ISNULL(@strDescription, '')) + '</ArticleDescription>'
 
 			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
-			SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(Convert(NUMERIC(18, 0), @dblNetWeight)) + '</GrossWeight>'
+			SELECT @strXML = @strXML + '<GrossWeight>' + LTRIM(CONVERT(NUMERIC(18, 0), @dblNetWeight)) + '</GrossWeight>'
 
-			SELECT @strXML = @strXML + '<Packages>' + ltrim(Convert(NUMERIC(18, 0), @dblQuantity)) + '</Packages>'
+			SELECT @strXML = @strXML + '<Packages>' + LTRIM(CONVERT(NUMERIC(18, 0), @dblQuantity)) + '</Packages>'
 
 			SELECT @strXML = @strXML + '</CommodityItem>'
 
@@ -406,7 +481,7 @@ BEGIN
 				,@strRowState
 				,@strXML
 				,ISNULL(@strContractNo, '') + ' / ' + ISNULL(@strSeq, '')
-				,ISNULL(@strERPPONumber, '')
+				,ISNULL(@strERPPONumber, '') + ' / ' + ISNULL(@strERPItemNumber, '')
 				)
 
 			IF @ysnDebug = 0
@@ -456,7 +531,7 @@ BEGIN
 		END
 
 		IF EXISTS (
-				SELECT *
+				SELECT 1
 				FROM @tblOutput
 				)
 		BEGIN
@@ -469,6 +544,14 @@ BEGIN
 		FROM @tblCTContractFeed
 		WHERE intContractFeedId > @intContractFeedId
 	END
+
+	UPDATE tblIPThirdPartyContractFeed
+	SET intStatusId = NULL
+	WHERE intContractFeedId IN (
+			SELECT intContractFeedId
+			FROM @tblCTContractFeed
+			)
+		AND intStatusId = - 1
 
 	SELECT IsNULL(strContractFeedIds, '0') AS id
 		,IsNULL(strXml, '') AS strXml

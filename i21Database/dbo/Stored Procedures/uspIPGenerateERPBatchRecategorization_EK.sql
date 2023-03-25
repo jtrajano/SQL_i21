@@ -226,7 +226,7 @@ BEGIN TRY
 				+ '<PackageType>' + ISNULL(B.strPackageUOM, '') + '</PackageType>'
 				+ '<TareWt>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTareWeight, 0))) + '</TareWt>'
 				+ '<Taster>' + ISNULL(B.strTaster, '') + '</Taster>'
-				+ '<FeedStock>' + ISNULL(B.strFeedStock, '') + '</FeedStock>'
+				+ '<FeedStock>' + ISNULL(I.strShortName, '') + '</FeedStock>'
 				+ '<FluorideLimit>' + ISNULL(B.strFlourideLimit, '') + '</FluorideLimit>'
 				+ '<LocalAuctionNumber>' + ISNULL(B.strLocalAuctionNumber, '') + '</LocalAuctionNumber>'
 				+ '<POStatus>' + ISNULL(B.strPOStatus, '') + '</POStatus>'

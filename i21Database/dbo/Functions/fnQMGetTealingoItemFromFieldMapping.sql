@@ -5,7 +5,7 @@ RETURNS INT
 AS BEGIN
     DECLARE @intItemId INT
 
-    SELECT TOP 1 @intItemId = ITEM1.intItemId
+    SELECT TOP 1 @intItemId=ITEM.intItemId
     FROM tblQMSample S
     -- Sustainability / Rain Forest
     LEFT JOIN tblICCommodityProductLine SUSTAINABILITY ON SUSTAINABILITY.intCommodityProductLineId = S.intProductLineId
@@ -15,17 +15,15 @@ AS BEGIN
     LEFT JOIN tblICBrand SIZE ON SIZE.intBrandId = S.intBrandId
     -- Style
     LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
-    -- Tealingo Item From Field Mapping
-    LEFT JOIN tblICItem ITEM1 ON ITEM1.strItemNo LIKE 
-        SIZE.strBrandCode -- Leaf Size
+    LEFT JOIN tblICItem ITEM ON ITEM.strItemNo LIKE SIZE.strBrandCode -- Leaf Size
         -- TODO: To update filter once Sub Cluster is provided
         + '%' -- To be updated by sub cluster
         + STYLE.strName -- Leaf Style
         + ORIGIN.strISOCode -- Origin
-        + '-'
-        + SUSTAINABILITY.strDescription -- Rain Forest / Sustainability
+        + (Case When SUSTAINABILITY.strDescription <> '' Then '-' + SUSTAINABILITY.strDescription Else '' End) -- Rain Forest / Sustainability
     WHERE S.intSampleId = @intSampleId
-    ORDER BY ITEM1.strItemNo ASC
+    Group by ITEM.intItemId
+    ORDER BY COUNT(1) Desc
     
     RETURN @intItemId    
 END

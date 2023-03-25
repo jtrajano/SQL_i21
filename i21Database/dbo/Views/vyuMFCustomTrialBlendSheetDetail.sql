@@ -12,7 +12,7 @@ SELECT (CASE WHEN ysnKeep = 1 THEN 'KEEP'
 		END) AS ysnKeep																		-- KEEP 
 	 , WorkOrderInputLot.intLotId
 	 , Lot.strLotNumber																		-- Batch
-	 , dblTBSQuantity		= CAST(ISNULL(WorkOrderInputLot.dblTBSQuantity, (WorkOrderInputLot.dblQuantity / WorkOrderInputLotQty.dblSumQuantity) * (SELECT dblTrialBlendSheetSize FROM tblMFCompanyPreference)) AS NUMERIC(38,2))		-- Weigh Up (Grams)
+	 , dblTBSQuantity		= CAST(((WorkOrderInputLot.dblQuantity / WorkOrderInputLotQty.dblSumQuantity) * (SELECT dblTrialBlendSheetSize FROM tblMFCompanyPreference)) AS NUMERIC(38,2))		-- Weigh Up (Grams)
      , Batch.strERPPONumber																	-- Purchase Order
 	 , Batch.strTeaGardenChopInvoiceNumber													-- Chop
 	 , GardenMark.strGardenMark																-- Mark

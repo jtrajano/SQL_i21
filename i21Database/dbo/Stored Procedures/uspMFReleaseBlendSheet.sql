@@ -69,7 +69,13 @@ BEGIN TRY
 		,@strERPComment NVARCHAR(max)
 		,@strERPOrderNo nvarchar(50)
 		,@ysnOverrideRecipe BIT
-
+		,@ysnCopyRecipeOnSave BIT
+		,@intLotId int
+		,@dblWeight numeric(18,6)
+		,@intWorkOrderInputLotId INT
+		,@dblTBSQuantity NUMERIC(18, 6)
+		,@strFW NVARCHAR(3)
+		,@intRecordId INT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -93,10 +99,96 @@ BEGIN TRY
 		,@ysnPercResetRequired BIT = 0
 		,@dblQuantityTaken NUMERIC(18, 6)
 		,@dblPercentageIncrease NUMERIC(18, 6)
+		,@strChar NVARCHAR(1)
+
 	DECLARE @tblInputItemSeq TABLE (
 		intItemId INT
 		,intSeq INT
 		)
+DECLARE @tblFW TABLE (
+		strChar CHAR(1)
+		,intItemId INT
+		,intSeq INT
+		,intRecordId INT identity(1, 1)
+		);
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'A'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'B'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'C'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'D'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'E'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'F'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'G'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'H'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'I'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'J'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'K'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'L'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'M'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'N'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'O'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'P'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Q'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'R'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'S'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'T'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'U'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'V'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'W'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'X'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Y'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Z'
 
 	SELECT @dtmCurrentDateTime = GetDate()
 
@@ -391,6 +483,7 @@ BEGIN TRY
 	DECLARE @intInputItemId INT
 	DECLARE @strInputLotNumber NVARCHAR(50)
 			,@ysnToleranceCheckOnBlendOutputItem BIT
+			,@ysnOverrideRecipeInBlendManagement BIT
 
 	SELECT @intLocationId = intLocationId
 	FROM @tblBlendSheet
@@ -398,6 +491,8 @@ BEGIN TRY
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 		,@ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
 		,@ysnToleranceCheckOnBlendOutputItem=IsNULL(ysnToleranceCheckOnBlendOutputItem,0) 
+		,@ysnOverrideRecipeInBlendManagement=IsNULL(ysnOverrideRecipeInBlendManagement,0)
+		,@ysnCopyRecipeOnSave=IsNULL(ysnCopyRecipeOnSave,0)
 	FROM tblMFCompanyPreference
 
 	INSERT INTO @tblLotSummary (
@@ -660,79 +755,165 @@ BEGIN TRY
 	--Missing Item Check / Required Qty Check
 	IF @ysnAllInputItemsMandatory = 1
 	BEGIN
-		INSERT INTO @tblPreItem (
-			intItemId
-			,dblReqQty
-			,ysnIsSubstitute
-			,intConsumptionMethodId
-			,intConsumptionStoragelocationId
-			,intParentItemId
-			,dblUpperToleranceQty
-			,dblLowerToleranceQty
-			,ysnMinorIngredient
-			)
-		SELECT ri.intItemId
-			,(ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
-			,0 AS ysnIsSubstitute
-			,ri.intConsumptionMethodId
-			,ri.intStorageLocationId
-			,0
-			,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
-			,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
-			,(
-				CASE 
-					WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
-						THEN 1
-					ELSE 0
-					END
-				) AS ysnMinorIngredient
-		FROM tblMFRecipeItem ri
-		JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-		WHERE ri.intRecipeId = @intRecipeId
-			AND ri.intRecipeItemTypeId = 1
-			AND (
-				(
-					ri.ysnYearValidationRequired = 1
-					AND @dtmDate BETWEEN ri.dtmValidFrom
-						AND ri.dtmValidTo
-					)
-				OR (
-					ri.ysnYearValidationRequired = 0
-					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-						AND DATEPART(dy, ri.dtmValidTo)
-					)
+		IF EXISTS (
+				SELECT 1
+				FROM tblMFWorkOrderRecipe
+				WHERE intWorkOrderId = @intWorkOrderId
 				)
-			AND ri.intConsumptionMethodId IN (
-				1
-				,2
-				,3
+		BEGIN
+			INSERT INTO @tblPreItem (
+				intItemId
+				,dblReqQty
+				,ysnIsSubstitute
+				,intConsumptionMethodId
+				,intConsumptionStoragelocationId
+				,intParentItemId
+				,dblUpperToleranceQty
+				,dblLowerToleranceQty
+				,ysnMinorIngredient
 				)
-		
-		UNION
-		
-		SELECT rs.intSubstituteItemId
-			,(rs.dblQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
-			,1 AS ysnIsSubstitute
-			,0
-			,0
-			,rs.intItemId
-			,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
-			,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
-			,(
-				CASE 
-					WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
-						THEN 1
-					ELSE 0
-					END
-				) AS ysnMinorIngredient
-		FROM tblMFRecipeSubstituteItem rs
-		JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
-		JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
-		WHERE rs.intRecipeId = @intRecipeId
-			AND rs.intRecipeItemTypeId = 1
-		ORDER BY 2 DESC
-			,ysnIsSubstitute
-			,ysnMinorIngredient
+			SELECT ri.intItemId
+				,(ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
+				,0 AS ysnIsSubstitute
+				,ri.intConsumptionMethodId
+				,ri.intStorageLocationId
+				,0
+				,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+				,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
+			FROM tblMFWorkOrderRecipeItem ri
+			JOIN tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+				AND r.intWorkOrderId = ri.intWorkOrderId
+			WHERE ri.intWorkOrderId = @intWorkOrderId
+				AND ri.intRecipeItemTypeId = 1
+				AND (
+					(
+						ri.ysnYearValidationRequired = 1
+						AND @dtmDate BETWEEN ri.dtmValidFrom
+							AND ri.dtmValidTo
+						)
+					OR (
+						ri.ysnYearValidationRequired = 0
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+							AND DATEPART(dy, ri.dtmValidTo)
+						)
+					)
+				AND ri.intConsumptionMethodId IN (
+					1
+					,2
+					,3
+					)
+			
+			UNION
+			
+			SELECT rs.intSubstituteItemId
+				,(rs.dblQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
+				,1 AS ysnIsSubstitute
+				,0
+				,0
+				,rs.intItemId
+				,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+				,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
+			FROM tblMFWorkOrderRecipeSubstituteItem rs
+			JOIN tblMFWorkOrderRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+				AND ri.intWorkOrderId = rs.intWorkOrderId
+			JOIN tblMFWorkOrderRecipe r ON r.intRecipeId = rs.intRecipeId
+				AND r.intWorkOrderId = rs.intWorkOrderId
+			WHERE rs.intWorkOrderId = @intWorkOrderId
+				AND rs.intRecipeItemTypeId = 1
+			ORDER BY 2 DESC
+				,ysnIsSubstitute
+				,ysnMinorIngredient
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblPreItem (
+				intItemId
+				,dblReqQty
+				,ysnIsSubstitute
+				,intConsumptionMethodId
+				,intConsumptionStoragelocationId
+				,intParentItemId
+				,dblUpperToleranceQty
+				,dblLowerToleranceQty
+				,ysnMinorIngredient
+				)
+			SELECT ri.intItemId
+				,(ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
+				,0 AS ysnIsSubstitute
+				,ri.intConsumptionMethodId
+				,ri.intStorageLocationId
+				,0
+				,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+				,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
+			FROM tblMFRecipeItem ri
+			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			WHERE ri.intRecipeId = @intRecipeId
+				AND ri.intRecipeItemTypeId = 1
+				AND (
+					(
+						ri.ysnYearValidationRequired = 1
+						AND @dtmDate BETWEEN ri.dtmValidFrom
+							AND ri.dtmValidTo
+						)
+					OR (
+						ri.ysnYearValidationRequired = 0
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+							AND DATEPART(dy, ri.dtmValidTo)
+						)
+					)
+				AND ri.intConsumptionMethodId IN (
+					1
+					,2
+					,3
+					)
+			
+			UNION
+			
+			SELECT rs.intSubstituteItemId
+				,(rs.dblQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
+				,1 AS ysnIsSubstitute
+				,0
+				,0
+				,rs.intItemId
+				,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+				,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
+			FROM tblMFRecipeSubstituteItem rs
+			JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+			WHERE rs.intRecipeId = @intRecipeId
+				AND rs.intRecipeItemTypeId = 1
+			ORDER BY 2 DESC
+				,ysnIsSubstitute
+				,ysnMinorIngredient
+		END
 
 		DECLARE @intMinMissingItem INT
 		DECLARE @intConsumptionMethodId INT
@@ -970,7 +1151,6 @@ BEGIN TRY
 		,@intLotCount INT
 		,@intItemId INT
 		,@dblReqQty NUMERIC(38, 20)
-		,@intLotId INT
 		,@dblQty NUMERIC(38, 20)
 
 	SELECT @intExecutionOrder = Count(1)
@@ -1044,56 +1224,119 @@ BEGIN TRY
 			DELETE
 			FROM @tblItem
 
-			INSERT INTO @tblItem (
-				intItemId
-				,dblReqQty
-				,dblUpperToleranceQty
-				,dblLowerToleranceQty
-				,ysnComplianceItem
-				,dblCompliancePercent
-				,ysnMinorIngredient
-				)
-			SELECT ri.intItemId
-				,(ri.dblCalculatedQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
-				,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
-				,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
-				,ri.ysnComplianceItem
-				,ri.dblCompliancePercent
-				,(
-					CASE 
-						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
-							THEN 1
-						ELSE 0
-						END
-					) AS ysnMinorIngredient
-			FROM tblMFRecipeItem ri
-			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			WHERE ri.intRecipeId = @intRecipeId
-				AND ri.intRecipeItemTypeId = 1
-			
-			UNION
-			
-			SELECT rs.intSubstituteItemId
-				,(rs.dblQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
-				,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
-				,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
-				,ri.ysnComplianceItem
-				,ri.dblCompliancePercent
-				,(
-					CASE 
-						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
-							THEN 1
-						ELSE 0
-						END
-					) AS ysnMinorIngredient
-			FROM tblMFRecipeSubstituteItem rs
-			JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
-				AND ri.intRecipeId = rs.intRecipeId
-			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
-			WHERE rs.intRecipeId = @intRecipeId
-				AND rs.intRecipeItemTypeId = 1
-			ORDER BY 2 DESC
-				,ysnMinorIngredient
+			IF EXISTS (
+					SELECT 1
+					FROM tblMFWorkOrderRecipe
+					WHERE intWorkOrderId = @intWorkOrderId
+					)
+			BEGIN
+				INSERT INTO @tblItem (
+					intItemId
+					,dblReqQty
+					,dblUpperToleranceQty
+					,dblLowerToleranceQty
+					,ysnComplianceItem
+					,dblCompliancePercent
+					,ysnMinorIngredient
+					)
+				SELECT ri.intItemId
+					,(ri.dblCalculatedQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
+					,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
+					,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
+					,ri.ysnComplianceItem
+					,ri.dblCompliancePercent
+					,(
+						CASE 
+							WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+								THEN 1
+							ELSE 0
+							END
+						) AS ysnMinorIngredient
+				FROM tblMFWorkOrderRecipeItem ri
+				JOIN tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+					AND r.intWorkOrderId = ri.intWorkOrderId
+				WHERE ri.intWorkOrderId = @intWorkOrderId
+					AND ri.intRecipeItemTypeId = 1
+				
+				UNION
+				
+				SELECT rs.intSubstituteItemId
+					,(rs.dblQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
+					,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
+					,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
+					,ri.ysnComplianceItem
+					,ri.dblCompliancePercent
+					,(
+						CASE 
+							WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+								THEN 1
+							ELSE 0
+							END
+						) AS ysnMinorIngredient
+				FROM tblMFWorkOrderRecipeSubstituteItem rs
+				JOIN tblMFWorkOrderRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+					AND ri.intRecipeId = rs.intRecipeId
+					AND ri.intWorkOrderId = rs.intWorkOrderId
+				JOIN tblMFWorkOrderRecipe r ON r.intRecipeId = rs.intRecipeId
+					AND r.intWorkOrderId = rs.intWorkOrderId
+				WHERE rs.intWorkOrderId = @intWorkOrderId
+					AND rs.intRecipeItemTypeId = 1
+				ORDER BY 2 DESC
+					,ysnMinorIngredient
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @tblItem (
+					intItemId
+					,dblReqQty
+					,dblUpperToleranceQty
+					,dblLowerToleranceQty
+					,ysnComplianceItem
+					,dblCompliancePercent
+					,ysnMinorIngredient
+					)
+				SELECT ri.intItemId
+					,(ri.dblCalculatedQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
+					,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
+					,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
+					,ri.ysnComplianceItem
+					,ri.dblCompliancePercent
+					,(
+						CASE 
+							WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+								THEN 1
+							ELSE 0
+							END
+						) AS ysnMinorIngredient
+				FROM tblMFRecipeItem ri
+				JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+				WHERE ri.intRecipeId = @intRecipeId
+					AND ri.intRecipeItemTypeId = 1
+				
+				UNION
+				
+				SELECT rs.intSubstituteItemId
+					,(rs.dblQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
+					,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
+					,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
+					,ri.ysnComplianceItem
+					,ri.dblCompliancePercent
+					,(
+						CASE 
+							WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+								THEN 1
+							ELSE 0
+							END
+						) AS ysnMinorIngredient
+				FROM tblMFRecipeSubstituteItem rs
+				JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+					AND ri.intRecipeId = rs.intRecipeId
+				JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+				WHERE rs.intRecipeId = @intRecipeId
+					AND rs.intRecipeItemTypeId = 1
+				ORDER BY 2 DESC
+					,ysnMinorIngredient
+			END
 
 			UPDATE @tblItem
 			SET dblPickedQty = dblReqQty
@@ -1818,10 +2061,13 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
-			,@intLocationId = @intLocationId
-			,@intUserId = @intUserId
-			,@intWorkOrderId = @intWorkOrderId
+		IF @ysnCopyRecipeOnSave=0
+		BEGIN
+			EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
+				,@intLocationId = @intLocationId
+				,@intUserId = @intUserId
+				,@intWorkOrderId = @intWorkOrderId
+		END
 
 		--Check for Input Items validity
 		SELECT @strInActiveItems = COALESCE(@strInActiveItems + ', ', '') + i.strItemNo
@@ -1840,7 +2086,7 @@ BEGIN TRY
 				WHERE intWorkOrderId = @intWorkOrderId
 				)
 
-		IF ISNULL(@strInActiveItems, '') <> ''
+		IF ISNULL(@strInActiveItems, '') <> '' AND @ysnOverrideRecipeInBlendManagement=0
 		BEGIN
 			SET @ErrMsg = 'Recipe ingredient items ' + @strInActiveItems + ' are inactive. Please remove the lots belong to the inactive items from blend sheet.'
 
@@ -2089,7 +2335,30 @@ BEGIN TRY
 
 	--Update Bulk Item(By Location or FIFO) Standard Required Qty Calculated Using Planned Qty
 	--IF @ysnCalculateNoSheetUsingBinSize = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblMFWorkOrderRecipe
+		WHERE intWorkOrderId = @intWorkOrderId
+		)
 	BEGIN
+		SELECT @dblBulkReqQuantity = ISNULL(SUM((ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity))), 0)
+		FROM tblMFWorkOrderRecipeItem ri
+		JOIN tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId and  r.intWorkOrderId = ri.intWorkOrderId
+		WHERE r.intItemId = @intBlendItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND ri.intRecipeItemTypeId = 1
+			AND ri.intConsumptionMethodId IN (
+				2
+				,3
+				) AND r.intWorkOrderId=@intWorkOrderId
+
+		UPDATE tblMFWorkOrder
+		SET dblQuantity = dblQuantity + @dblBulkReqQuantity
+		WHERE intWorkOrderId = @intWorkOrderId
+	END
+	Else
+	Begin
 		SELECT @dblBulkReqQuantity = ISNULL(SUM((ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity))), 0)
 		FROM tblMFRecipeItem ri
 		JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
@@ -2105,7 +2374,7 @@ BEGIN TRY
 		UPDATE tblMFWorkOrder
 		SET dblQuantity = dblQuantity + @dblBulkReqQuantity
 		WHERE intWorkOrderId = @intWorkOrderId
-	END
+	end
 
 	UPDATE tblMFBlendRequirement
 	SET dblIssuedQty = (
@@ -2128,6 +2397,109 @@ BEGIN TRY
 		SET @dblBalancedQtyToProduceOut = 0
 	SET @strWorkOrderNoOut = @strNextWONo;
 	SET @intWorkOrderIdOut = @intWorkOrderId
+
+	--FW
+	SELECT @intWorkOrderInputLotId = NULL
+
+	SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	WHILE @intWorkOrderInputLotId IS NOT NULL
+	BEGIN
+		SELECT @intItemId = NULL
+			,@intLotId =NULL
+			,@dblWeight=NULL
+
+		SELECT @intItemId = intItemId
+				,@intLotId=intLotId
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
+		FROM tblMFWorkOrderInputLot
+		WHERE intLotId = @intLotId
+
+		Select @dblInputAvlQty=dblWeight  
+		from tblICLot 
+		Where intLotId=@intLotId
+		
+		if @dblTBSQuantity>@dblInputAvlQty
+		Begin
+			SELECT @strInputLotNumber = NULL
+
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = NULL
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		End
+
+		IF (@dblIssuedQuantity % @intNoOfSheetOriginal) > 0
+			AND @intIssuedUOMTypeId = 4
+		BEGIN
+			IF EXISTS (
+					SELECT *
+					FROM @tblFW
+					WHERE intItemId = @intItemId
+					)
+			BEGIN
+				SELECT @strChar = NULL
+					,@intSeq = NULL
+
+				SELECT @strChar = strChar
+					,@intSeq = intSeq + 1
+				FROM @tblFW
+				WHERE intItemId = @intItemId
+
+				UPDATE @tblFW
+				SET intSeq = @intSeq
+				WHERE intItemId = @intItemId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+			ELSE
+			BEGIN
+				SELECT @intRecordId = NULL
+					,@strChar = NULL
+					,@intSeq = 1
+
+				SELECT TOP 1 @intRecordId = intRecordId
+					,@strChar = strChar
+				FROM @tblFW
+				WHERE intItemId IS NULL
+				ORDER BY intRecordId ASC
+
+				UPDATE @tblFW
+				SET intItemId = @intItemId
+					,intSeq = 1
+				WHERE intRecordId = @intRecordId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+		END
+
+		UPDATE tblMFWorkOrderInputLot
+		SET strFW = @strFW, ysnKeep =Case When @dblInputAvlQty>@dblTBSQuantity then 1 Else 0 End
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intWorkOrderInputLotId > @intWorkOrderInputLotId
+	END
 
 	COMMIT TRAN
 

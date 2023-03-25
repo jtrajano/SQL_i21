@@ -20,4 +20,5 @@
 	,dblTeaMouthFeel NUMERIC(18, 6)
 	,dblTeaAppearance NUMERIC(18, 6)
 	,dblTeaVolume NUMERIC(18, 6)
+	,strSessionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ''
 )
