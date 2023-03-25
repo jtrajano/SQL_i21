@@ -83,6 +83,7 @@ DECLARE @Transactions TABLE (
 	, intItemLocationId INT
 	, intInTransitSourceLocationId INT
 	, ysnOwned BIT
+	, strSourceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, PRIMARY KEY(intId)
 )
 
@@ -96,6 +97,7 @@ INSERT INTO @Transactions(
 	, intItemLocationId
 	, intInTransitSourceLocationId
 	, ysnOwned
+	, strSourceType
 )
 SELECT 
 	t.intTransactionId
@@ -107,6 +109,7 @@ SELECT
 	, t.intItemLocationId
 	, t.intInTransitSourceLocationId
 	, 1
+	, t.strSourceType
 FROM 
 	tblICInventoryTransaction t
 WHERE 
@@ -123,6 +126,7 @@ INSERT INTO @Transactions(
 	, intItemLocationId
 	, intInTransitSourceLocationId
 	, ysnOwned
+	, strSourceType
 )
 SELECT 
 	t.intTransactionId
@@ -134,6 +138,7 @@ SELECT
 	, t.intItemLocationId
 	, NULL
 	, 0
+	, t.strSourceType
 FROM 
 	tblICInventoryTransactionStorage t
 WHERE 
@@ -413,7 +418,7 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM 
-		@TransactionsAsOfDate t
+		@Transactions t
 		INNER JOIN tblICItemLocation ItemLocation 
 			ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
 	WHERE 		
@@ -436,7 +441,7 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM 
-		@TransactionsAsOfDate t
+		@Transactions t
 		INNER JOIN tblICInventoryTransfer InvTransfer 
 			ON InvTransfer.intInventoryTransferId = t.intTransactionId 
 			AND InvTransfer.ysnShipmentRequired = 1
@@ -462,7 +467,7 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intInTransitSourceLocationId,
 			dblQty = -1 * SUM(dbo.fnICConvertUOMtoStockUnit(b.intItemId, b.intUnitMeasureId, b.dblOpenReceive))			
 	FROM 
-		@TransactionsAsOfDate t
+		@Transactions t
 		INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId 
 			AND InvTransfer.ysnShipmentRequired = 1
 		INNER JOIN tblICInventoryReceiptItem b
@@ -490,7 +495,7 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM 
-		@TransactionsAsOfDate t
+		@Transactions t
 		INNER JOIN tblICItemLocation ItemLocation 
 			ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
 	WHERE 
