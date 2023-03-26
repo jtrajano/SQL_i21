@@ -8,7 +8,8 @@ SELECT		Job.intJobId,
 			Job.strParameter3,
 			register.strRegisterClass,
 			register.strSAPPHIREUserName,
-			dbo.fnAESDecryptASym(register.strSAPPHIREPassword) as strSAPPHIREPassword
+			dbo.fnAESDecryptASym(register.strSAPPHIREPassword) as strSAPPHIREPassword,
+			Job.intEntityId
 FROM		tblSTJobs Job
 INNER JOIN	tblSTJobTypes JobType
 ON			Job.intJobTypeId = JobType.intJobTypeId
