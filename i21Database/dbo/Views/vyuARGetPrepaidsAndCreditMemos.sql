@@ -61,6 +61,7 @@ SELECT intPrepaidAndCreditId				= PC.intPrepaidAndCreditId
 FROM tblARPrepaidAndCredit PC
 LEFT JOIN tblARInvoice PREPAY ON PC.intPrepaymentId = PREPAY.intInvoiceId
 LEFT JOIN tblARInvoiceDetail PREPAYDETAIL ON PC.intPrepaymentId = PREPAYDETAIL.intInvoiceId
+									   AND ((PC.intPrepaymentDetailId IS NOT NULL AND PC.intPrepaymentDetailId = PREPAYDETAIL.intInvoiceDetailId) OR PC.intPrepaymentDetailId IS NULL)
 LEFT JOIN tblCTContractHeader CH ON PREPAYDETAIL.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN tblCTContractDetail CD ON PREPAYDETAIL.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblCTItemContractHeader ICH ON PREPAYDETAIL.intItemContractHeaderId = ICH.intItemContractHeaderId
