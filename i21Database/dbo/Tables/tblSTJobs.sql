@@ -8,6 +8,7 @@
     [strParameter2] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
     [strParameter3] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
     [ysnJobReceived] BIT NOT NULL,
+    [intEntityId] INT NULL,
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTJobs] PRIMARY KEY CLUSTERED ([intJobId] ASC),
     CONSTRAINT [FK_tblSTJobs_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),
