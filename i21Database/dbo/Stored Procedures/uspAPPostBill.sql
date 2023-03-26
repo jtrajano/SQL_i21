@@ -439,59 +439,78 @@ SELECT
 	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
 	,[dblNewValue] = --B.dblCost - B.dblOldCost
 			CASE 
-			WHEN ISNULL(rc.dblForexRate, 1) <> 1 THEN 
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-			-- 2. convert to sub currency cents. 
-			-- 3. and then convert into functional currency. 
-				CAST(
-					(
-						(B.dblQtyReceived * B.dblCost)
-						/ ISNULL(r.intSubCurrencyCents, 1) 
-						* ISNULL(rc.dblForexRate, 1)
-					) 
-					AS DECIMAL(18,2)
-				)
-				- 
-				CAST(
-					(
-						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
-						/ ISNULL(r.intSubCurrencyCents, 1) 
-						* ISNULL(rc.dblForexRate, 1) 
+				WHEN ISNULL(rc.dblForexRate, 1) <> 1 AND ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. convert to sub currency cents. 
+					-- 3. and then convert into functional currency. 
+					CAST(
+						(
+							(B.dblQtyReceived * B.dblCost)
+							/ ISNULL(r.intSubCurrencyCents, 1) 
+							* ISNULL(rc.dblForexRate, 1)
+						) 
+						AS DECIMAL(18,2)
 					)
-					AS DECIMAL(18,2)
-				)
-			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-			-- 2. and then convert into functional currency. 
-				CAST(
-					(
-						(B.dblQtyReceived * B.dblCost)
-						/ ISNULL(r.intSubCurrencyCents, 1) 
-					)  
-					AS DECIMAL(18,2)
-				)
-				- 
-				CAST(
-					(
-						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
-						/ ISNULL(r.intSubCurrencyCents, 1)
+					- 
+					CAST(
+						(
+							(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+							/ ISNULL(r.intSubCurrencyCents, 1) 
+							* ISNULL(rc.dblForexRate, 1) 
+						)
+						AS DECIMAL(18,2)
 					)
-					AS DECIMAL(18,2)
-				)
-			ELSE
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-				CAST(
-					(B.dblQtyReceived * B.dblCost)  
-					AS DECIMAL(18,2)
-				)
-				- 
-				CAST(
-					(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
-					AS DECIMAL(18,2)
-				)
+				WHEN ISNULL(rc.dblForexRate, 1) <> 1 AND ISNULL(rc.ysnSubCurrency, 0) = 0 THEN 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. and then convert into functional currency. 
+					CAST(
+						(
+							(B.dblQtyReceived * B.dblCost)
+							* ISNULL(rc.dblForexRate, 1)
+						) 
+						AS DECIMAL(18,2)
+					)
+					- 
+					CAST(
+						(
+							(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+							* ISNULL(rc.dblForexRate, 1) 
+						)
+						AS DECIMAL(18,2)
+					)
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. and then convert into functional currency. 
+						CAST(
+							(
+								(B.dblQtyReceived * B.dblCost)
+								/ ISNULL(r.intSubCurrencyCents, 1) 
+							)  
+							AS DECIMAL(18,2)
+						)
+						- 
+						CAST(
+							(
+								(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+								/ ISNULL(r.intSubCurrencyCents, 1)
+							)
+							AS DECIMAL(18,2)
+						)
+				ELSE
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+						CAST(
+							(B.dblQtyReceived * B.dblCost)  
+							AS DECIMAL(18,2)
+						)
+						- 
+						CAST(
+							(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+							AS DECIMAL(18,2)
+						)
 			END 
 	,[dblNewForexValue] = --B.dblCost - B.dblOldCost
 			CASE 
