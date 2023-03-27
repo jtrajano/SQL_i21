@@ -10,6 +10,11 @@ GO
 	BEGIN
 		INSERT [dbo].[tblSTJobTypes] ([strJobType], [intConcurrencyId]) VALUES ( 'Poll Files', 1)
 	END
+
+	IF NOT EXISTS(SELECT '' FROM tblSTJobTypes where strJobType = 'Change Register Password')
+	BEGIN
+		INSERT [dbo].[tblSTJobTypes] ([strJobType], [intConcurrencyId]) VALUES ( 'Change Register Password', 1)
+	END
 GO
 	PRINT N'END INSERT STORE JOB TYPES'
 GO
