@@ -82,6 +82,8 @@ BEGIN TRY
 		----=====================================================================================================================================
 		---- INSERT tblSMAudit data
 		-----------------------------------------------------------------------------------------------------------------------------------------
+		ALTER TABLE tblSMAudit 
+		NOCHECK CONSTRAINT [FK_dbo.tblSMAudit_tblSMAudit];  
 
 		INSERT INTO tblSMAudit (intLogId, intKeyValue, strAction, strChange, strFrom, strTo, intParentAuditId, intConcurrencyId)
 		OUTPUT		INSERTED.intAuditId, INSERTED.intLogId, INSERTED.intKeyValue INTO @insertedPKTable
@@ -113,6 +115,8 @@ BEGIN TRY
 		WHERE		a.intAuditId IN(select intId FROM @insertedPKTable)  AND
 					a.intParentAuditId = b.tempKey
 
+		ALTER TABLE tblSMAudit 
+		CHECK CONSTRAINT [FK_dbo.tblSMAudit_tblSMAudit];
 	END
 	ELSE
 	BEGIN
@@ -141,6 +145,9 @@ BEGIN CATCH
 	SET @ErrorLine     = ERROR_LINE()
 
 	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+
+	ALTER TABLE tblSMAudit 
+	CHECK CONSTRAINT [FK_dbo.tblSMAudit_tblSMAudit];
 
 	SET @error = @ErrorMessage;
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
