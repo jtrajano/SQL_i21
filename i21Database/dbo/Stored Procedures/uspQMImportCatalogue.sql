@@ -199,21 +199,20 @@ BEGIN TRY
 		)
 
 	-- End Validate Key Fields for Pre-Shipment Sample
+
+	/* Delete temp tables for audit logs. */
+    IF OBJECT_ID('tempdb..##tmpQMSample') IS NOT NULL
+		DROP TABLE ##tmpQMSample;
+
+    IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NOT NULL
+		DROP TABLE ##tmpQMTestResult;
 	
 	/* Prepare temporary table that will be used for audit logs to fix performance issue. */
-    IF OBJECT_ID('tempdb..##tmpQMSample') IS NULL
-		BEGIN
-			SELECT * INTO ##tmpQMSample FROM tblQMSample WHERE 1 = 0;
+	SELECT * INTO ##tmpQMSample FROM tblQMSample WHERE 1 = 0;
+	CREATE INDEX [IX_tmpQMSample_intSampleId] ON ##tmpQMSample(intSampleId);
 
-			CREATE INDEX [IX_tmpQMSample_intSampleId] ON ##tmpQMSample(intSampleId);
-		END
-
-    IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NULL
-		BEGIN
-			SELECT * INTO ##tmpQMTestResult FROM tblQMTestResult WHERE 1 = 0;
-
-			CREATE INDEX [IX_tmpQMTestResult_intSampleId] ON ##tmpQMTestResult(intSampleId);
-		END
+	SELECT * INTO ##tmpQMTestResult FROM tblQMTestResult WHERE 1 = 0;
+	CREATE INDEX [IX_tmpQMTestResult_intSampleId] ON ##tmpQMTestResult(intSampleId);
 
 	/* Importing starts here. */
 	DECLARE @strImportType AS NVARCHAR(MAX);
@@ -250,17 +249,6 @@ BEGIN TRY
 	IF (@strImportType = 'Contract Line Allocation')
 		BEGIN
 			EXEC uspQMImportContractAllocation @intImportLogId;
-		END
-
-	/* Delete temp tables for audit logs. */
-    IF OBJECT_ID('tempdb..##tmpQMSample') IS NOT NULL
-		BEGIN
-			DROP TABLE ##tmpQMSample;
-		END
-
-    IF OBJECT_ID('tempdb..##tmpQMTestResult') IS NOT NULL
-		BEGIN
-			DROP TABLE ##tmpQMTestResult;
 		END
 
 	COMMIT TRANSACTION

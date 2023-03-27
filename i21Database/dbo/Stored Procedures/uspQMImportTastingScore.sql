@@ -300,11 +300,6 @@ BEGIN TRY
 	CREATE INDEX [IX_tmpQMCatalogueImport_intRow] ON ##tmpQMCatalogueImport(intRow)
 
 	/* Clear test properties of the previous item. */
-	DELETE TR
-	FROM tblQMTestResult TR
-	INNER JOIN ##tmpQMCatalogueImport R ON TR.intSampleId = R.intSampleId
-	WHERE R.intSampleId IS NOT NULL
-	AND R.intImportType = 1
 
 	DECLARE @intCounter INT = 1
 		  , @intMax		INT
@@ -588,8 +583,6 @@ BEGIN TRY
 				ELSE
 					/* Update Existing record if there's record found. */
 					BEGIN
-						DELETE tblQMTestResult WHERE intSampleId = @intBatchSampleId;
-
 						/* Create Audit Log. */
 						EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId		= @intBatchSampleId
 																	  , @intUserEntityId	= @intEntityUserId
