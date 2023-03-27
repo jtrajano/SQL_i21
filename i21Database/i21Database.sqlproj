@@ -1521,6 +1521,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSAPCreatePoHeader.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
