@@ -1573,6 +1573,8 @@
     <Build Include="dbo\User Defined Types\TMOrderHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspTMArchiveRestoreOrders.sql" />
     <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
+    <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
