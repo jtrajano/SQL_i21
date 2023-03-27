@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessERPProductionOrder] @strInfo1 NVARCHAR(MAX) = '' OUT
 	,@strInfo2 NVARCHAR(MAX) = '' OUT
 	,@intNoOfRowsAffected INT = 0 OUT
+	,@strSessionId NVARCHAR(50) = ''
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -77,7 +78,7 @@ BEGIN TRY
 	INSERT INTO @tblMFProductionOrderStage (intProductionOrderStageId)
 	SELECT intProductionOrderStageId
 	FROM tblMFProductionOrderStage
-	WHERE intStatusId IS NULL
+	WHERE intStatusId IS NULL AND strSessionId=@strSessionId
 
 	SELECT @intProductionOrderStageId = MIN(intProductionOrderStageId)
 	FROM @tblMFProductionOrderStage
@@ -168,6 +169,7 @@ BEGIN TRY
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strLocationNumber
+				AND strLocationType = 'Plant'
 
 			IF @intLocationId IS NULL
 			BEGIN
@@ -432,6 +434,11 @@ BEGIN TRY
 
 				SELECT @intWorkOrderId = SCOPE_IDENTITY()
 
+				EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
+					,@intLocationId = @intLocationId
+					,@intUserId = @intUserId
+					,@intWorkOrderId = @intWorkOrderId
+
 				SELECT @intTestId = strAttributeValue
 				FROM tblMFManufacturingProcessAttribute pa
 				JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
@@ -504,24 +511,32 @@ BEGIN TRY
 				WHERE intTestId = @intTestId
 			END
 
-			INSERT INTO tblMFWorkOrderInputLot (
-				intWorkOrderId
-				,intItemId
-				,intLotId
-				,dblQuantity
-				,intItemUOMId
-				,dblIssuedQuantity
-				,intItemIssuedUOMId
-				,intConcurrencyId
-				)
-			SELECT @intWorkOrderId
-				,@intItemId
-				,@intLotId
-				,@dblWeight
-				,@intWeightUOMId
-				,@dblNoOfPack
-				,@intItemUOMId
-				,1
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderInputLot
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intLotId = @intLotId
+					)
+			BEGIN
+				INSERT INTO tblMFWorkOrderInputLot (
+					intWorkOrderId
+					,intItemId
+					,intLotId
+					,dblQuantity
+					,intItemUOMId
+					,dblIssuedQuantity
+					,intItemIssuedUOMId
+					,intConcurrencyId
+					)
+				SELECT @intWorkOrderId
+					,@intItemId
+					,@intLotId
+					,@dblWeight
+					,@intWeightUOMId
+					,@dblNoOfPack
+					,@intItemUOMId
+					,1
+			END
 
 			MOVE_TO_ARCHIVE:
 
@@ -687,7 +702,7 @@ BEGIN TRY
 				FROM @tblProductProperty PP
 				OUTER APPLY (
 					SELECT B.strBrandCode
-						,sum(L.dblQuantity ) dblQty
+						,sum(L.dblQuantity) dblQty
 					FROM tblMFWorkOrderInputLot L
 					JOIN tblICLot Lot ON Lot.intLotId = L.intLotId
 						AND L.intWorkOrderId = @intWorkOrderId

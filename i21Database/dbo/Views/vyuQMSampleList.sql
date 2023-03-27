@@ -321,3 +321,5 @@ OUTER APPLY (SELECT TOP 1 strCropYear
 			 WHERE intCropYearId = S.intCropYearId) AS SeasonCropYear
 WHERE S.intTypeId = 1
 GO
+
+

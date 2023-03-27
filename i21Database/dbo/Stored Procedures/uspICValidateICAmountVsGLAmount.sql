@@ -44,7 +44,7 @@ DECLARE @difference AS NUMERIC(18, 6)
 
 DECLARE @strAccountCategory AS NVARCHAR(50)
 DECLARE @strItemNo AS NVARCHAR(50)
-
+DECLARE @strCategory AS NVARCHAR(50)
 
 DECLARE @glTransactions TABLE (
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
@@ -793,8 +793,10 @@ BEGIN
 	-- Check if there is an item that changed to a different category and the GL Account setup is different. 
 	BEGIN 
 		SET @strItemNo = NULL 
+		SET @strCategory = NULL
 		SELECT TOP 1 			
 			@strItemNo = i.strItemNo
+			,@strCategory = new_category.strCategoryCode 
 		FROM 
 			tblICInventoryTransaction t 	
 			INNER JOIN tblICItem i 
@@ -824,8 +826,8 @@ BEGIN
 
 		IF @strItemNo IS NOT NULL 
 		BEGIN 
-			-- Category changed for item {Item No}.
-			EXEC uspICRaiseError 80263, @strItemNo; 
+			-- Category changed for item {Item No}. Rebuild the category {Category Code} instead of the item.'
+			EXEC uspICRaiseError 80263, @strItemNo, @strCategory; 
 			RETURN 80263
 		END 
 	END 

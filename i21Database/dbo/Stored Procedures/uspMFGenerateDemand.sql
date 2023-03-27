@@ -136,7 +136,7 @@ BEGIN TRY
 			)
 		,@ysnForecastedConsumptionByRemainingDays = ysnForecastedConsumptionByRemainingDays
 		,@ysnConsiderBookInDemandView = IsNULL(ysnConsiderBookInDemandView, 1)
-		,@intPositionByETA = IsNULL(@intPositionByETA, 2)
+		,@intPositionByETA = IsNULL(intPositionByETADemandReport, 2)
 	FROM tblMFCompanyPreference
 
 	SELECT @strContainerType = strContainerType
@@ -1489,14 +1489,20 @@ BEGIN TRY
 						ELSE LD.dblDeliveredQuantity
 						END
 					)) * I.dblRatio) AS dblIntrasitQty
-		,13 AS intAttributeId --Open
+		,(
+			CASE 
+				WHEN @intPositionByETA = 2
+					THEN 14
+				ELSE 13
+				END
+			) AS intAttributeId --Open
 		,0 AS intMonthId
 		,SS.intCompanyLocationId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
-		AND L.ysnPosted = 0
+		AND IsNULL(L.ysnPosted, 0) = 0
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
 	--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
@@ -1520,22 +1526,22 @@ BEGIN TRY
 				WHEN Day((
 							CASE 
 								WHEN @intPositionByETA = 1
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END
 							)) > @intDemandAnalysisMonthlyCutOffDay
 					THEN DateAdd(m, 1, (
 								CASE 
 									WHEN @intPositionByETA = 1
-										THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-									ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+										THEN SS.dtmUpdatedAvailabilityDate
+									ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 									END
 								))
 				ELSE (
 						CASE 
 							WHEN @intPositionByETA = 1
-								THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-							ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+								THEN SS.dtmUpdatedAvailabilityDate
+							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 							END
 						)
 				END
@@ -1580,28 +1586,34 @@ BEGIN TRY
 						ELSE LD.dblDeliveredQuantity
 						END
 					)) * I.dblRatio) AS dblIntrasitQty
-		,13 AS intAttributeId --Open
+		,(
+			CASE 
+				WHEN @intPositionByETA = 2
+					THEN 14
+				ELSE 13
+				END
+			) AS intAttributeId --Open
 		,DATEDIFF(mm, 0, (
 				CASE 
 					WHEN Day((
 								CASE 
 									WHEN @intPositionByETA = 1
-										THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-									ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+										THEN SS.dtmUpdatedAvailabilityDate
+									ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 									END
 								)) > @intDemandAnalysisMonthlyCutOffDay
 						THEN DateAdd(m, 1, (
 									CASE 
 										WHEN @intPositionByETA = 1
-											THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-										ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+											THEN SS.dtmUpdatedAvailabilityDate
+										ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 										END
 									))
 					ELSE (
 							CASE 
 								WHEN @intPositionByETA = 1
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END
 							)
 					END
@@ -1611,7 +1623,7 @@ BEGIN TRY
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
 		AND L.intShipmentType = 1
-		AND L.ysnPosted = 0
+		AND IsNULL(L.ysnPosted, 0) = 0
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
@@ -1635,22 +1647,22 @@ BEGIN TRY
 				WHEN Day((
 							CASE 
 								WHEN @intPositionByETA = 1
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2 & 3 
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END
 							)) > @intDemandAnalysisMonthlyCutOffDay
 					THEN DateAdd(m, 1, (
 								CASE 
 									WHEN @intPositionByETA = 1
-										THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-									ELSE SS.dtmUpdatedAvailabilityDate --2 & 3 
+										THEN SS.dtmUpdatedAvailabilityDate
+									ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 									END
 								))
 				ELSE (
 						CASE 
 							WHEN @intPositionByETA = 1
-								THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-							ELSE SS.dtmUpdatedAvailabilityDate --2 & 3 
+								THEN SS.dtmUpdatedAvailabilityDate
+							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 							END
 						)
 				END
@@ -1679,22 +1691,22 @@ BEGIN TRY
 					WHEN Day((
 								CASE 
 									WHEN @intPositionByETA = 1
-										THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-									ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+										THEN SS.dtmUpdatedAvailabilityDate
+									ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 									END
 								)) > @intDemandAnalysisMonthlyCutOffDay
 						THEN DateAdd(m, 1, (
 									CASE 
 										WHEN @intPositionByETA = 1
-											THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-										ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+											THEN SS.dtmUpdatedAvailabilityDate
+										ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 										END
 									))
 					ELSE (
 							CASE 
 								WHEN @intPositionByETA = 1
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2 & 3
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END
 							)
 					END
@@ -1749,31 +1761,22 @@ BEGIN TRY
 		AND (
 			CASE 
 				WHEN Day(CASE 
-							WHEN @intPositionByETA IN (
-									1
-									,3
-									)
-								THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-							ELSE SS.dtmUpdatedAvailabilityDate --2
+							WHEN @intPositionByETA = 1
+								THEN SS.dtmUpdatedAvailabilityDate
+							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 							END) > @intDemandAnalysisMonthlyCutOffDay
 					THEN DateAdd(m, 1, (
 								CASE 
-									WHEN @intPositionByETA IN (
-											1
-											,3
-											)
-										THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-									ELSE SS.dtmUpdatedAvailabilityDate --2
+									WHEN @intPositionByETA = 1
+										THEN SS.dtmUpdatedAvailabilityDate
+									ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 									END
 								))
 				ELSE (
 						CASE 
-							WHEN @intPositionByETA IN (
-									1
-									,3
-									)
-								THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-							ELSE SS.dtmUpdatedAvailabilityDate --2
+							WHEN @intPositionByETA = 1
+								THEN SS.dtmUpdatedAvailabilityDate
+							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 							END
 						)
 				END
@@ -1822,31 +1825,22 @@ BEGIN TRY
 		,DATEDIFF(mm, 0, (
 				CASE 
 					WHEN Day(CASE 
-								WHEN @intPositionByETA IN (
-										1
-										,3
-										)
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2
+								WHEN @intPositionByETA = 1
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END) > @intDemandAnalysisMonthlyCutOffDay
 						THEN DateAdd(m, 1, (
 									CASE 
-										WHEN @intPositionByETA IN (
-												1
-												,3
-												)
-											THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-										ELSE SS.dtmUpdatedAvailabilityDate --2
+										WHEN @intPositionByETA = 1
+											THEN SS.dtmUpdatedAvailabilityDate
+										ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 										END
 									))
 					ELSE (
 							CASE 
-								WHEN @intPositionByETA IN (
-										1
-										,3
-										)
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2
+								WHEN @intPositionByETA = 1
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END
 							)
 					END
@@ -1878,31 +1872,22 @@ BEGIN TRY
 		AND (
 			CASE 
 				WHEN Day(CASE 
-							WHEN @intPositionByETA IN (
-									1
-									,3
-									)
-								THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-							ELSE SS.dtmUpdatedAvailabilityDate --2
+							WHEN @intPositionByETA = 1
+								THEN SS.dtmUpdatedAvailabilityDate
+							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 							END) > @intDemandAnalysisMonthlyCutOffDay
 					THEN DateAdd(m, 1, (
 								CASE 
-									WHEN @intPositionByETA IN (
-											1
-											,3
-											)
-										THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-									ELSE SS.dtmUpdatedAvailabilityDate --2
+									WHEN @intPositionByETA = 1
+										THEN SS.dtmUpdatedAvailabilityDate
+									ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 									END
 								))
 				ELSE (
 						CASE 
-							WHEN @intPositionByETA IN (
-									1
-									,3
-									)
-								THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-							ELSE SS.dtmUpdatedAvailabilityDate --2
+							WHEN @intPositionByETA = 1
+								THEN SS.dtmUpdatedAvailabilityDate
+							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 							END
 						)
 				END
@@ -1929,31 +1914,22 @@ BEGIN TRY
 		,DATEDIFF(mm, 0, (
 				CASE 
 					WHEN Day(CASE 
-								WHEN @intPositionByETA IN (
-										1
-										,3
-										)
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2
+								WHEN @intPositionByETA = 1
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END) > @intDemandAnalysisMonthlyCutOffDay
 						THEN DateAdd(m, 1, (
 									CASE 
-										WHEN @intPositionByETA IN (
-												1
-												,3
-												)
-											THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-										ELSE SS.dtmUpdatedAvailabilityDate --2
+										WHEN @intPositionByETA = 1
+											THEN SS.dtmUpdatedAvailabilityDate
+										ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 										END
 									))
 					ELSE (
 							CASE 
-								WHEN @intPositionByETA IN (
-										1
-										,3
-										)
-									THEN DateAdd(day, C.intLeadTime, L.dtmETAPOD)
-								ELSE SS.dtmUpdatedAvailabilityDate --2
+								WHEN @intPositionByETA = 1
+									THEN SS.dtmUpdatedAvailabilityDate
+								ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
 								END
 							)
 					END

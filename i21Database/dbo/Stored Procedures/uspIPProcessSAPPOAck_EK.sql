@@ -161,6 +161,13 @@ BEGIN TRY
 					FROM dbo.tblLGLoad L
 					WHERE L.strLoadNumber = @RefNo
 
+					IF @intLoadId IS NULL
+					BEGIN
+						SELECT TOP 1 @intLoadId = CF.intLoadId
+						FROM dbo.tblIPContractFeed CF
+						WHERE CF.strLoadNumber = @RefNo
+					END
+
 					SELECT @intLoadDetailId = CF.intLoadDetailId
 						,@intContractFeedId = CF.intContractFeedId
 						,@strBatchId = CF.strBatchId
@@ -199,6 +206,11 @@ BEGIN TRY
 						SET strERPPONumber = @PONumber
 							,strERPPOLineNo = @POLineItemNo
 						WHERE strBatchId = @strBatchId
+
+						UPDATE tblMFBatch
+						SET dtmPOCreated = CAST(GETDATE() AS DATE)
+						WHERE strBatchId = @strBatchId
+							AND dtmPOCreated IS NULL
 
 						--For Added PO
 						UPDATE tblIPContractFeed
@@ -241,6 +253,22 @@ BEGIN TRY
 							,intStatusId = 3
 						WHERE intContractFeedId = @intContractFeedId
 							AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+
+						IF @intContractFeedId IS NULL
+						BEGIN
+							UPDATE tblIPContractFeed
+							SET strFeedStatus = 'Ack Rcvd'
+								,strMessage = @strMessage
+								,intStatusId = 3
+							WHERE intLoadId = @intLoadId
+								AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+						END
+							
+						UPDATE tblLGLoad
+						SET strComments = @StatusText
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intLoadId = @intLoadId
+							AND ISNULL(strComments, '') <> ISNULL(@StatusText, '')
 
 						INSERT INTO @tblMessage (
 							strMessageType

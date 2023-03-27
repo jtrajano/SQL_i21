@@ -15,6 +15,7 @@ BEGIN TRY
 		,@strXml NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@dtmCurrentDate DATETIME
+
 	DECLARE @tblIPInvReceipt TABLE (strReceiptNumber NVARCHAR(50))
 	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
@@ -69,6 +70,7 @@ BEGIN TRY
 				,strBLNumber
 				,strLocationName
 				,strWarehouseRefNo
+				,strOrderType
 				)
 			OUTPUT INSERTED.strERPReceiptNo
 			INTO @tblIPInvReceipt
@@ -80,6 +82,7 @@ BEGIN TRY
 				,BOLNo
 				,[Location]
 				,WarehouseRefNo
+				,OrderType
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../DocNo'
 					,ReceiptNo NVARCHAR(50)
@@ -88,6 +91,7 @@ BEGIN TRY
 					,BOLNo NVARCHAR(50)
 					,[Location] NVARCHAR(50)
 					,WarehouseRefNo NVARCHAR(50)
+					,OrderType NVARCHAR(50)
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strReceiptNumber, '') + ','

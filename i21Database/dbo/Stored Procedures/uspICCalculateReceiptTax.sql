@@ -222,6 +222,7 @@ BEGIN
 		,[ysnCheckoffTax]
 		,[strTaxCode]
 		,[ysnTaxExempt]
+		,[ysnAddToCost]
 		,[dblQty]
 		,[dblCost]
 		,[intUnitMeasureId]
@@ -282,6 +283,7 @@ BEGIN
 			,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
 			,[strTaxCode]					= vendorTax.[strTaxCode]
 			,[ysnTaxExempt]					= vendorTax.[ysnTaxExempt]
+			,[ysnAddToCost]					= vendorTax.[ysnAddToCost]
 			,[dblQty]						= @Qty
 			,[dblCost]						= @Amount
 			,[intUnitMeasureId]				= @TaxUOMId

@@ -37,6 +37,8 @@
 	,strDestinationPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,dblLeadTime NUMERIC(18, 6)
 	,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strMarketZoneCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,intDetailNumber INT
 	
 	,intEntityId INT
 	,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS

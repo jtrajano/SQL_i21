@@ -2,6 +2,7 @@
 (
 	intStageReceiptId			INT IDENTITY(1,1),
 	strCompCode					NVARCHAR(20) COLLATE Latin1_General_CI_AS,
+	strOrderType				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strReceiptNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmReceiptDate				DATETIME,
 	strBLNumber					NVARCHAR(100) COLLATE Latin1_General_CI_AS,

@@ -139,7 +139,11 @@ BEGIN TRY
 				,MP.strProcessName
 				,@dtmCurrentDate AS CreatedDate
 				,NULL CreatedBy
-				,DocNo AS TrxSequenceNo
+				,Dense_Rank() OVER (
+					 ORDER BY x.LocationCode
+						,x.BlendCode
+						,x.WeekCommencing
+					) AS strSessionId
 				,'By Quantity'
 				,1 AS ActionId
 				,DocNo AS TrxSequenceNo
@@ -154,6 +158,7 @@ BEGIN TRY
 					,WeekCommencing DATETIME
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+				AND strLocationType = 'Plant'
 			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = 1
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strBlendCode, '') + ','
@@ -206,7 +211,11 @@ BEGIN TRY
 				,1 AS YearValidation
 				,NULL AS ConsumptionMethod
 				,NULL AS StorageLocation
-				,DocNo AS SessionId
+				,Dense_Rank() OVER (
+					 ORDER BY x.LocationCode
+						,x.BlendCode
+						,x.WeekCommencing
+					) AS strSessionId
 				,'C' AS RowState
 				,NULL AS ItemGroupName
 				,DocNo
@@ -221,6 +230,7 @@ BEGIN TRY
 					,LocationCode NVARCHAR(6) Collate Latin1_General_CI_AS '../LocationCode'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+				AND strLocationType = 'Plant'
 
 			INSERT INTO tblMFProductionOrderStage (
 				strOrderNo
@@ -241,6 +251,7 @@ BEGIN TRY
 				,dblTeaMouthFeel
 				,dblTeaAppearance
 				,dblTeaVolume
+				,strSessionId
 				)
 			SELECT OrderNo
 				,LocationCode
@@ -260,10 +271,17 @@ BEGIN TRY
 				,MAverage
 				,AAverage
 				,VAverage
+				,Dense_Rank() OVER (
+					 ORDER BY x.LocationCode
+						,x.BlendCode
+						,x.WeekCommencing
+					) AS strSessionId
 			FROM OPENXML(@idoc, 'root/Header/Line/Batch', 2) WITH (
 					DocNo BIGINT '../../../DocNo'
 					,OrderNo NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderNo'
 					,LocationCode NVARCHAR(50) collate Latin1_General_CI_AS '../../LocationCode'
+					,BlendCode NVARCHAR(50) Collate Latin1_General_CI_AS '../../BlendCode'
+					,WeekCommencing DATETIME '../../WeekCommencing'
 					,OrderQuantity numeric(38,20)'../../OrderQuantity'
 					,OrderQuantityUOM NVARCHAR(50) collate Latin1_General_CI_AS '../../OrderQuantityUOM'
 					,NoOfMixes numeric(38,20)'../../NoOfMixes'
@@ -281,6 +299,7 @@ BEGIN TRY
 					,VAverage NUMERIC(38,20)'../../VAverage'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
+				AND strLocationType = 'Plant'
 			WHERE x.BatchId<>'NoN' AND isNumeric(Weight)=1
 
 			--Move to Archive

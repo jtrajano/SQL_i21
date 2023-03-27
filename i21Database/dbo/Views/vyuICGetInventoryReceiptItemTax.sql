@@ -29,6 +29,7 @@ SELECT
 	,ReceiptItemTax.dblCost
 	,ReceiptItemTax.intUnitMeasureId
 	,UnitMeasure.strUnitMeasure
+	,ReceiptItemTax.ysnAddToCost 
 FROM 
 	tblICInventoryReceiptItemTax ReceiptItemTax LEFT JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemTax.intInventoryReceiptItemId

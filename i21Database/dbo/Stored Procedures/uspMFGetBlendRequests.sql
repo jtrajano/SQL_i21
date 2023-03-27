@@ -64,9 +64,10 @@ IF @intWorkOrderId > 0
 		 , a.intItemId
 		 , b.strItemNo
 		 , b.strDescription
-		 , CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
-				ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
-		   END AS dblQuantity
+		 --, CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
+			--	ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
+		 --  END AS dblQuantity
+		 ,a.dblQuantity
 		 , c.intItemUOMId
 		 , d.strUnitMeasure AS strUOM
 		 , a.dtmDueDate
@@ -101,9 +102,7 @@ IF @intWorkOrderId > 0
 		 , a.intItemId
 		 , b.strItemNo
 		 , b.strDescription
-		 , CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
-				ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
-		   END 
+		 , a.dblQuantity 
 		 , c.intItemUOMId
 		 , d.strUnitMeasure 
 		 , a.dtmDueDate
