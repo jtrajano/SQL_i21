@@ -454,7 +454,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid ETD'
+				   ,'Invalid Channel'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
