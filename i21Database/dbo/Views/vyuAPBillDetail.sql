@@ -43,16 +43,25 @@ SELECT
 	H.strAccountId,
 	B.dbl1099,
 	B.int1099Form,
-	CASE B.int1099Form WHEN 0 THEN 'NONE'
-		WHEN 1 THEN '1099 MISC'
-		WHEN 2 THEN '1099 INT'
-		WHEN 3 THEN '1099 B'
-		WHEN 4 THEN '1099 PATR'
-		WHEN 5 THEN '1099 DIV'
-		WHEN 7 THEN '1099 NEC'
-		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form,
-	B.int1099Category,
-	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
+	CASE B.int1099Form WHEN 0 THEN 'NONE'  
+		WHEN 1 THEN '1099 MISC'  
+		WHEN 2 THEN '1099 INT'  
+		WHEN 3 THEN '1099 B'  
+		WHEN 4 THEN '1099 PATR'  
+		WHEN 5 THEN '1099 DIV'  
+		WHEN 6 THEN '1099 K'  
+		WHEN 7 THEN '1099 NEC'  
+	ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form,  
+ 	B.int1099Category,  
+ 	CASE WHEN B.int1099Category IS NULL THEN 'NONE' ELSE 
+		CASE B.int1099Form
+			WHEN 1 THEN D.strCategory
+			WHEN 7 THEN D.strCategory
+			WHEN 6 THEN D2.strCategory
+			WHEN 5 THEN D3.strCategory
+			WHEN 4 THEN D4.strCategory
+		END
+ 	END AS str1099Category, 
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
 	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN  ISS.strShipmentNumber WHEN B.intStorageChargeId > 0 THEN SG.strStorageChargeNumber 
 	WHEN B.intInsuranceChargeDetailId > 0 THEN ichrge.strChargeNo ELSE  IR.strReceiptNumber END as strReceiptNumber,
@@ -119,6 +128,12 @@ LEFT JOIN dbo.tblICItem C
 	ON B.intItemId = C.intItemId
 LEFT JOIN dbo.tblAP1099Category D 
 	ON D.int1099CategoryId = B.int1099Category
+LEFT JOIN dbo.tblAP1099KCategory D2  
+ 	ON D2.int1099CategoryId = B.int1099Category  
+LEFT JOIN dbo.tblAP1099DIVCategory D3
+ 	ON D3.int1099CategoryId = B.int1099Category  
+LEFT JOIN dbo.tblAP1099PATRCategory D4
+	 ON D4.int1099CategoryId = B.int1099Category  
 LEFT JOIN dbo.tblSMTaxGroup E 
 	ON B.intTaxGroupId = E.intTaxGroupId
 LEFT JOIN dbo.tblSMTaxGroup F 
