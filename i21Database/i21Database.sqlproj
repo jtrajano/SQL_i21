@@ -1373,7 +1373,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessOrdersToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
-    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
     <Build Include="dbo\Views\vyuARTaxGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPRecipe_EK.sql" />
@@ -1597,10 +1596,10 @@
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
     <Build Include="dbo\Tables\tblTMDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceTankMonitor.sql" />
-    <Build Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
-    <Build Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
     <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
