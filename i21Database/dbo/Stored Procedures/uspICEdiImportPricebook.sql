@@ -111,34 +111,34 @@ DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
 
 -- Remove the UPC code that will trigger the Unique Constraint in tblICItemUOM. 
-DELETE p
-FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS BIGINT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1))
-OUTER APPLY (SELECT TOP 1 i.intItemId 
-			 FROM tblICItem i 
-			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
-OUTER APPLY (SELECT TOP 1 m.*
-			 FROM tblICUnitMeasure m 
-			 WHERE m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-		     ORDER BY m.intUnitMeasureId) m
-OUTER APPLY (SELECT TOP 1 s.*
-			 FROM tblICUnitMeasure s 
-			 WHERE s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
-			 ORDER BY m.intUnitMeasureId) s
-OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
-			 FROM tblICItemUOM iu
-			 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
-OUTER APPLY (SELECT TOP 1 *
-			 FROM tblICItemUOM dup
-			 WHERE dup.intItemId = i.intItemId
-			   AND dup.intItemUOMId <> u.intItemUOMId
-			   AND dup.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)) dup
-WHERE p.strUniqueId = @UniqueId AND dup.intItemUOMId IS NOT NULL ;
+--DELETE p
+--FROM tblICEdiPricebook p
+--LEFT JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) IN (p.strSellingUpcNumber, p.strOrderCaseUpcNumber ,p.strAltUPCNumber1, p.strAltUPCNumber2) AND u.intModifier IN (CAST(p.strOrderCaseUpcNumber AS BIGINT), ISNULL(NULLIF(p.strAltUPCModifier1, ''),1), ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1))
+--OUTER APPLY (SELECT TOP 1 i.intItemId 
+--			 FROM tblICItem i 
+--			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i		
+--OUTER APPLY (SELECT TOP 1 m.*
+--			 FROM tblICUnitMeasure m 
+--			 WHERE m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+--		     ORDER BY m.intUnitMeasureId) m
+--OUTER APPLY (SELECT TOP 1 s.*
+--			 FROM tblICUnitMeasure s 
+--			 WHERE s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+--			 ORDER BY m.intUnitMeasureId) s
+--OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
+--			 FROM tblICItemUOM iu
+--			 WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1) stockUnit
+--OUTER APPLY (SELECT TOP 1 *
+--			 FROM tblICItemUOM dup
+--			 WHERE dup.intItemId = i.intItemId
+--			   AND dup.intItemUOMId <> u.intItemUOMId
+--			   AND dup.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)) dup
+--WHERE p.strUniqueId = @UniqueId AND dup.intItemUOMId IS NOT NULL ;
 
 -- Get the duplicate count. 
-SELECT @duplicatePricebookCount = @originalPricebookCount - COUNT(1) 
-FROM tblICEdiPricebook 
-WHERE strUniqueId = @UniqueId;
+--SELECT @duplicatePricebookCount = @originalPricebookCount - COUNT(1) 
+--FROM tblICEdiPricebook 
+--WHERE strUniqueId = @UniqueId;
 
 -- Retrieve the Category -> Vendor Category XRef setup. 
 UPDATE p
@@ -360,41 +360,41 @@ WHERE NULLIF(dbo.fnSTConvertUPCaToUPCe(strSellingUpcNumber),'') IS NULL AND NULL
 
 
 -- Log the records with duplicate records
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Warning'
-	, NULL
-	, NULL 
-	, NULL 
-	, dbo.fnFormatMessage(
-		'There are %i records(s) already exists.'
-		,@duplicatePricebookCount
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-	)
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-WHERE 
-	@duplicatePricebookCount > 0 
+--INSERT INTO tblICImportLogDetail(
+--	intImportLogId
+--	, strType
+--	, intRecordNo
+--	, strField
+--	, strValue
+--	, strMessage
+--	, strStatus
+--	, strAction
+--	, intConcurrencyId
+--)
+--SELECT 
+--	@LogId
+--	, 'Warning'
+--	, NULL
+--	, NULL 
+--	, NULL 
+--	, dbo.fnFormatMessage(
+--		'There are %i records(s) already exists.'
+--		,@duplicatePricebookCount
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--		,DEFAULT
+--	)
+--	, 'Skipped'
+--	, 'Record not imported.'
+--	, 1
+--WHERE 
+--	@duplicatePricebookCount > 0 
 
 -- Log the records with missing Vendor-Category setup
 INSERT INTO tblICImportLogDetail(
@@ -426,237 +426,237 @@ WHERE
 	AND p.intVendorId IS NULL 	
 
 -- Log the duplicate UOM from strItemUnitOfMeasure
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, intRecordNumber
-	, 'strItemUnitOfMeasure'
-	, strSymbol
-	, 'Duplicate UOM Symbol is used for ' + strUnitMeasure
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM (
-		SELECT 
-			strUnitMeasure = u.strUnitMeasure
-			,strSymbol = u.strSymbol
-			,intRecordNumber = p.intRecordNumber
-			,row_no = u.row_no
-		FROM 
-			tblICEdiPricebook p 
-			LEFT JOIN (
-				SELECT * 
-				FROM (
-					SELECT 
-						strUnitMeasure
-						,strSymbol
-						,row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
-					FROM 
-						tblICUnitMeasure u 
-				) x
-				WHERE
-					x.row_no > 1 			
-			) u
-			ON 
-				(p.ysnUpdateExistingRecords = 1 OR p.ysnAddNewRecords = 1) 
-				AND u.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')				
-		WHERE
-			p.strUniqueId = @UniqueId
-	) x
-WHERE
-	x.row_no > 1 
+--INSERT INTO tblICImportLogDetail(
+--	intImportLogId
+--	, strType
+--	, intRecordNo
+--	, strField
+--	, strValue
+--	, strMessage
+--	, strStatus
+--	, strAction
+--	, intConcurrencyId
+--)
+--SELECT 
+--	@LogId
+--	, 'Error'
+--	, intRecordNumber
+--	, 'strItemUnitOfMeasure'
+--	, strSymbol
+--	, 'Duplicate UOM Symbol is used for ' + strUnitMeasure
+--	, 'Skipped'
+--	, 'Record not imported.'
+--	, 1
+--FROM (
+--		SELECT 
+--			strUnitMeasure = u.strUnitMeasure
+--			,strSymbol = u.strSymbol
+--			,intRecordNumber = p.intRecordNumber
+--			,row_no = u.row_no
+--		FROM 
+--			tblICEdiPricebook p 
+--			LEFT JOIN (
+--				SELECT * 
+--				FROM (
+--					SELECT 
+--						strUnitMeasure
+--						,strSymbol
+--						,row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
+--					FROM 
+--						tblICUnitMeasure u 
+--				) x
+--				WHERE
+--					x.row_no > 1 			
+--			) u
+--			ON 
+--				(p.ysnUpdateExistingRecords = 1 OR p.ysnAddNewRecords = 1) 
+--				AND u.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')				
+--		WHERE
+--			p.strUniqueId = @UniqueId
+--	) x
+--WHERE
+--	x.row_no > 1 
 
--- Log the duplicate 2nd UOM from strOrderPackageDescription
-INSERT INTO tblICImportLogDetail(intImportLogId
-							   , strType
-							   , intRecordNo
-							   , strField
-							   , strValue
-							   , strMessage
-							   , strStatus
-							   , strAction
-							   , intConcurrencyId
-)
-SELECT @LogId
-	 , 'Error'
-	 , intRecordNumber
-	 , 'strOrderPackageDescription'
-	 , strSymbol
-	 , 'Duplicate UOM Symbol is used for ' + strUnitMeasure
-	 , 'Skipped'
-	 , 'Record not imported.'
-	 , 1
-FROM (SELECT strUnitMeasure = u.strUnitMeasure
-		   , strSymbol = u.strSymbol
-		   , intRecordNumber = p.intRecordNumber
-		   , row_no = u.row_no
-		FROM tblICEdiPricebook p 
-		LEFT JOIN (SELECT * 
-				   FROM (SELECT strUnitMeasure
-							  , strSymbol
-							  , row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
-						FROM tblICUnitMeasure u) x
-		WHERE x.row_no > 1) u ON p.ysnAddOrderingUPC = 1 AND u.strSymbol = NULLIF(p.strOrderPackageDescription, '')				
-		WHERE p.strUniqueId = @UniqueId) x
-WHERE x.row_no > 1 
+---- Log the duplicate 2nd UOM from strOrderPackageDescription
+--INSERT INTO tblICImportLogDetail(intImportLogId
+--							   , strType
+--							   , intRecordNo
+--							   , strField
+--							   , strValue
+--							   , strMessage
+--							   , strStatus
+--							   , strAction
+--							   , intConcurrencyId
+--)
+--SELECT @LogId
+--	 , 'Error'
+--	 , intRecordNumber
+--	 , 'strOrderPackageDescription'
+--	 , strSymbol
+--	 , 'Duplicate UOM Symbol is used for ' + strUnitMeasure
+--	 , 'Skipped'
+--	 , 'Record not imported.'
+--	 , 1
+--FROM (SELECT strUnitMeasure = u.strUnitMeasure
+--		   , strSymbol = u.strSymbol
+--		   , intRecordNumber = p.intRecordNumber
+--		   , row_no = u.row_no
+--		FROM tblICEdiPricebook p 
+--		LEFT JOIN (SELECT * 
+--				   FROM (SELECT strUnitMeasure
+--							  , strSymbol
+--							  , row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
+--						FROM tblICUnitMeasure u) x
+--		WHERE x.row_no > 1) u ON p.ysnAddOrderingUPC = 1 AND u.strSymbol = NULLIF(p.strOrderPackageDescription, '')				
+--		WHERE p.strUniqueId = @UniqueId) x
+--WHERE x.row_no > 1 
 	
--- Log the duplicate UPC code for the 2nd UOM. 
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, intRecordNumber
-	, 'strOrderCaseUpcNumber'
-	, strOrderCaseUpcNumber
-	, 'Duplicate UPC code is used for ' + strOrderPackageDescription
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM 
-	tblICEdiPricebook p
-	LEFT JOIN tblICItemUOM u 
-		--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-		ON (
-			ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
-			OR u.intUpcCode = 
-				CASE 
-					WHEN p.strSellingUpcNumber IS NOT NULL 
-						AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
-						AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
-					THEN 
-						CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
-					ELSE 
-						CAST(NULL AS BIGINT) 	
-				END		
-		)
-	OUTER APPLY (
-		SELECT TOP 1 
-			i.intItemId 
-		FROM
-			tblICItem i 
-		WHERE
-			i.intItemId = u.intItemId
-			OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)
-	) i
-	OUTER APPLY (
-		SELECT TOP 1 
-			iu.intItemUOMId 
-		FROM 
-			tblICItemUOM iu
-		WHERE
-			iu.intItemId = i.intItemId
-			AND iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
-	) existUOM
-WHERE
-	p.strUniqueId = @UniqueId
-	AND i.intItemId IS NOT NULL 
-	AND NULLIF(p.strOrderCaseUpcNumber, '') IS NOT NULL 
-	AND p.ysnAddOrderingUPC = 1
-	AND existUOM.intItemUOMId IS NOT NULL  
+---- Log the duplicate UPC code for the 2nd UOM. 
+--INSERT INTO tblICImportLogDetail(
+--	intImportLogId
+--	, strType
+--	, intRecordNo
+--	, strField
+--	, strValue
+--	, strMessage
+--	, strStatus
+--	, strAction
+--	, intConcurrencyId
+--)
+--SELECT 
+--	@LogId
+--	, 'Error'
+--	, intRecordNumber
+--	, 'strOrderCaseUpcNumber'
+--	, strOrderCaseUpcNumber
+--	, 'Duplicate UPC code is used for ' + strOrderPackageDescription
+--	, 'Skipped'
+--	, 'Record not imported.'
+--	, 1
+--FROM 
+--	tblICEdiPricebook p
+--	LEFT JOIN tblICItemUOM u 
+--		--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+--		ON (
+--			ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+--			OR u.intUpcCode = 
+--				CASE 
+--					WHEN p.strSellingUpcNumber IS NOT NULL 
+--						AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+--						AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+--					THEN 
+--						CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+--					ELSE 
+--						CAST(NULL AS BIGINT) 	
+--				END		
+--		)
+--	OUTER APPLY (
+--		SELECT TOP 1 
+--			i.intItemId 
+--		FROM
+--			tblICItem i 
+--		WHERE
+--			i.intItemId = u.intItemId
+--			OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)
+--	) i
+--	OUTER APPLY (
+--		SELECT TOP 1 
+--			iu.intItemUOMId 
+--		FROM 
+--			tblICItemUOM iu
+--		WHERE
+--			iu.intItemId = i.intItemId
+--			AND iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
+--	) existUOM
+--WHERE
+--	p.strUniqueId = @UniqueId
+--	AND i.intItemId IS NOT NULL 
+--	AND NULLIF(p.strOrderCaseUpcNumber, '') IS NOT NULL 
+--	AND p.ysnAddOrderingUPC = 1
+--	AND existUOM.intItemUOMId IS NOT NULL  
 
-IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
-	GOTO _Exit_With_Errors
+--IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
+--	GOTO _Exit_With_Errors
 
--- Log the duplicate UPC code for the 3rd UOM / Alt UPC 1. 
-INSERT INTO tblICImportLogDetail(intImportLogId
-							   , strType
-							   , intRecordNo
-							   , strField
-							   , strValue
-							   , strMessage
-							   , strStatus
-							   , strAction
-							   , intConcurrencyId
-)
-SELECT @LogId
-	 , 'Error'
-	 , intRecordNumber
-	 , 'strAltUPCNumber1 / Alt UPC Number 1'
-	 , strAltUPCNumber1
-	 , 'Duplicate UPC code is used for ' + strAltUPCUOM1
-	 , 'Skipped'
-	 , 'Record not imported.'
-	 , 1
-FROM tblICEdiPricebook p
-OUTER APPLY (SELECT TOP 1 i.intItemId 
-			 FROM tblICItem i 
-			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i
-OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
-			 FROM tblICItemUOM iu
-			 WHERE iu.intItemId = i.intItemId AND iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '')) existUOM
-WHERE p.strUniqueId = @UniqueId 
-  AND i.intItemId IS NOT NULL 
-  AND NULLIF(p.strAltUPCNumber1, '') IS NOT NULL 
-  AND p.ysnAddOrderingUPC = 1 
-  AND existUOM.intItemUOMId IS NOT NULL  
-  AND (p.strAltUPCModifier1 <> p.strAltUPCModifier2 AND p.strAltUPCModifier1 <> strUpcModifierNumber)
+---- Log the duplicate UPC code for the 3rd UOM / Alt UPC 1. 
+--INSERT INTO tblICImportLogDetail(intImportLogId
+--							   , strType
+--							   , intRecordNo
+--							   , strField
+--							   , strValue
+--							   , strMessage
+--							   , strStatus
+--							   , strAction
+--							   , intConcurrencyId
+--)
+--SELECT @LogId
+--	 , 'Error'
+--	 , intRecordNumber
+--	 , 'strAltUPCNumber1 / Alt UPC Number 1'
+--	 , strAltUPCNumber1
+--	 , 'Duplicate UPC code is used for ' + strAltUPCUOM1
+--	 , 'Skipped'
+--	 , 'Record not imported.'
+--	 , 1
+--FROM tblICEdiPricebook p
+--OUTER APPLY (SELECT TOP 1 i.intItemId 
+--			 FROM tblICItem i 
+--			 WHERE i.strItemNo = NULLIF(p.strItemNo ,'')) i
+--OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
+--			 FROM tblICItemUOM iu
+--			 WHERE iu.intItemId = i.intItemId AND iu.strLongUPCCode = NULLIF(p.strAltUPCNumber1, '')) existUOM
+--WHERE p.strUniqueId = @UniqueId 
+--  AND i.intItemId IS NOT NULL 
+--  AND NULLIF(p.strAltUPCNumber1, '') IS NOT NULL 
+--  AND p.ysnAddOrderingUPC = 1 
+--  AND existUOM.intItemUOMId IS NOT NULL  
+--  AND (p.strAltUPCModifier1 <> p.strAltUPCModifier2 AND p.strAltUPCModifier1 <> strUpcModifierNumber)
 
-IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
-	GOTO _Exit_With_Errors
+--IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
+--	GOTO _Exit_With_Errors
 
 
--- Log the duplicate UPC code for the 4th UOM / Alt UPC 2. 
-INSERT INTO tblICImportLogDetail(intImportLogId
-							   , strType
-							   , intRecordNo
-							   , strField
-							   , strValue
-							   , strMessage
-							   , strStatus
-							   , strAction
-							   , intConcurrencyId
-)
-SELECT @LogId
-	 , 'Error'
-	 , intRecordNumber
-	 , 'strAltUPCNumber2 / Alt UPC Number 2'
-	 , strAltUPCNumber2
-	 , 'Duplicate UPC code is used for ' + strAltUPCUOM2
-	 , 'Skipped'
-	 , 'Record not imported.'
-	 , 1
-FROM tblICEdiPricebook p
-LEFT JOIN tblICItemUOM u ON (ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber OR u.intUpcCode = CASE WHEN p.strSellingUpcNumber IS NOT NULL AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') THEN 
-																																							CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
-																																					  ELSE 
-																																							CAST(NULL AS BIGINT) 	
-																																					  END)
-OUTER APPLY (SELECT TOP 1 i.intItemId 
-			 FROM tblICItem i 
-			 WHERE i.intItemId = u.intItemId OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)) i
-OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
-			 FROM tblICItemUOM iu
-			 WHERE iu.intItemId = i.intItemId AND iu.strLongUPCCode = NULLIF(p.strAltUPCNumber2, '0')) existUOM
-WHERE p.strUniqueId = @UniqueId 
-  AND i.intItemId IS NOT NULL 
-  AND NULLIF(p.strAltUPCNumber2, '') IS NOT NULL 
-  AND p.ysnAddOrderingUPC = 1 
-  AND existUOM.intItemUOMId IS NOT NULL  
-  AND (p.strAltUPCModifier1 <> p.strAltUPCModifier2 AND p.strAltUPCModifier2 <> strUpcModifierNumber)
+---- Log the duplicate UPC code for the 4th UOM / Alt UPC 2. 
+--INSERT INTO tblICImportLogDetail(intImportLogId
+--							   , strType
+--							   , intRecordNo
+--							   , strField
+--							   , strValue
+--							   , strMessage
+--							   , strStatus
+--							   , strAction
+--							   , intConcurrencyId
+--)
+--SELECT @LogId
+--	 , 'Error'
+--	 , intRecordNumber
+--	 , 'strAltUPCNumber2 / Alt UPC Number 2'
+--	 , strAltUPCNumber2
+--	 , 'Duplicate UPC code is used for ' + strAltUPCUOM2
+--	 , 'Skipped'
+--	 , 'Record not imported.'
+--	 , 1
+--FROM tblICEdiPricebook p
+--LEFT JOIN tblICItemUOM u ON (ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber OR u.intUpcCode = CASE WHEN p.strSellingUpcNumber IS NOT NULL AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') THEN 
+--																																							CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+--																																					  ELSE 
+--																																							CAST(NULL AS BIGINT) 	
+--																																					  END)
+--OUTER APPLY (SELECT TOP 1 i.intItemId 
+--			 FROM tblICItem i 
+--			 WHERE i.intItemId = u.intItemId OR i.strItemNo = ISNULL(NULLIF(p.strItemNo ,''), p.strSellingUpcNumber)) i
+--OUTER APPLY (SELECT TOP 1 iu.intItemUOMId 
+--			 FROM tblICItemUOM iu
+--			 WHERE iu.intItemId = i.intItemId AND iu.strLongUPCCode = NULLIF(p.strAltUPCNumber2, '0')) existUOM
+--WHERE p.strUniqueId = @UniqueId 
+--  AND i.intItemId IS NOT NULL 
+--  AND NULLIF(p.strAltUPCNumber2, '') IS NOT NULL 
+--  AND p.ysnAddOrderingUPC = 1 
+--  AND existUOM.intItemUOMId IS NOT NULL  
+--  AND (p.strAltUPCModifier1 <> p.strAltUPCModifier2 AND p.strAltUPCModifier2 <> strUpcModifierNumber)
 
-IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
-	GOTO _Exit_With_Errors
+--IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
+--	GOTO _Exit_With_Errors
 
 -- Log the records with invalid intBottleDepositNo
 INSERT INTO tblICImportLogDetail(
@@ -1248,8 +1248,31 @@ WITH (HOLDLOCK) AS ItemUOM
 				WHERE iu.intItemId = Item.intItemId AND iu.ysnStockUnit = 1
 			) AS StockUnit
 			LEFT JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)	= ItemUOM.intUnitMeasureId
+			
+			OUTER APPLY (
+				SELECT TOP 1 
+					iu.intItemUOMId 
+				FROM 
+					tblICItemUOM iu
+				WHERE
+					iu.intItemId = Item.intItemId
+					AND (
+						iu.intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)
+						OR iu.strLongUPCCode = NULLIF(Pricebook.strSellingUpcNumber, '0') 
+					)
+			) existUOM
+			OUTER APPLY (
+				SELECT TOP 1 
+					iu.intItemUOMId
+				FROM 
+					tblICItemUOM iu
+				WHERE
+					iu.strLongUPCCode = Pricebook.strSellingUpcNumber
+			) existUPCCode
 		WHERE 
 			Pricebook.strUniqueId = @UniqueId
+			AND existUOM.intItemUOMId IS NULL  
+			AND existUPCCode.intItemUOMId IS NULL 
 	) AS Source_Query 
 		ON ItemUOM.intItemUOMId = Source_Query.intItemUOMId 
 		AND ItemUOM.intItemId = Source_Query.intItemId 
