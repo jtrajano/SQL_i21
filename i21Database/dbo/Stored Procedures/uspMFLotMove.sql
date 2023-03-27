@@ -894,6 +894,12 @@ BEGIN TRY
 			,@strNotes = NULL
 	END
 
+	IF NOT EXISTS(SELECT *FROM tblMFLotInventory WHERE intLotId=@intNewLotId)
+	BEGIN
+		INSERT INTO dbo.tblMFLotInventory(intLotId)
+		SELECT @intNewLotId
+	END
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 END TRY
