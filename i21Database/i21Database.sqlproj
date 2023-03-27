@@ -1529,6 +1529,8 @@
     <Build Include="dbo\Views\vyuRKCustomDailyAveragePriceDetail.sql" />
     <Build Include="dbo\Views\vyuRKCustomDerivativeEntry.sql" />
     <Build Include="dbo\Views\vyuRKCustomSettlementPrice.sql" />
+    <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
