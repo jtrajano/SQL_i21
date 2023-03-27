@@ -1273,6 +1273,7 @@
     <Build Include="dbo\Views\vyuSTJobs.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSCreateNewJob.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
