@@ -44,70 +44,17 @@ SELECT intSalesOrderDetailId	= D.intSalesOrderDetailId
      , ysnProcessed				= H.ysnProcessed
 	 , intCurrencyExchangeRateTypeId	= D.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate	= D.dblCurrencyExchangeRate 
-	 , D.intPriceUOMId 
+	 , intPriceUOMId			= D.intPriceUOMId 
 	 , strPriceUOM				= PriceUOM.strUnitMeasure
+	 , strTransactionType		= H.strTransactionType
 FROM dbo.tblSOSalesOrderDetail D WITH (NOLOCK)
-LEFT JOIN (
-	SELECT intSalesOrderId
-		 , intCompanyLocationId
-		 , intEntityCustomerId
-		 , strSalesOrderNumber
-		 , strCustomerNumber
-		 , strCustomerName
-		 , ysnProcessed
-	FROM dbo.vyuSOSalesOrderSearch WITH (NOLOCK)
-	WHERE strTransactionType = 'Order'
-) H ON H.intSalesOrderId = D.intSalesOrderId
-LEFT JOIN (
-	SELECT intCompanyLocationId
-		 , strLocationName
-	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) L ON H.intCompanyLocationId = L.intCompanyLocationId
-LEFT JOIN (
-	SELECT intItemUOMId
-		 , intUnitMeasureId
-		 , dblUnitQty
-	FROM dbo.tblICItemUOM WITH (NOLOCK)
-) IU ON D.intItemUOMId = IU.intItemUOMId
-LEFT JOIN (
-	SELECT intUnitMeasureId
-		 , strUnitMeasure
-	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-) U ON IU.intUnitMeasureId = U.intUnitMeasureId
-LEFT JOIN (
-	SELECT intItemId
-		 , intCommodityId
-		 , strItemNo
-		 , strLotTracking
-	FROM dbo.tblICItem WITH (NOLOCK)
-) IC ON D.intItemId = IC.intItemId
-LEFT JOIN (
-	SELECT intStorageLocationId
-		 , intSubLocationId
-		 , strName
-		 , strSubLocationName
-	FROM dbo.vyuICGetStorageLocation WITH (NOLOCK)
-) ST ON D.intStorageLocationId = ST.intStorageLocationId
-LEFT JOIN (
-	SELECT intContractHeaderId
-		 , strContractNumber
-	FROM dbo.tblCTContractHeader WITH (NOLOCK) 
-) CH ON D.intContractHeaderId = CH.intContractHeaderId
-LEFT JOIN (
-    SELECT intContractHeaderId
-		 , intContractDetailId
-		 , intContractSeq
-	FROM dbo.tblCTContractDetail WITH (NOLOCK)
-) CD ON D.intContractDetailId = CD.intContractDetailId 
-   AND CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN (
-	SELECT intItemUOMId
-		 , intUnitMeasureId
-		 , dblUnitQty
-	FROM dbo.tblICItemUOM WITH (NOLOCK)
-) ItemPriceUOM ON D.intPriceUOMId = ItemPriceUOM.intItemUOMId
-LEFT JOIN (
-	SELECT intUnitMeasureId
-		 , strUnitMeasure
-	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-) PriceUOM ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
+INNER JOIN vyuSOSalesOrderSearch H WITH (NOLOCK) ON H.intSalesOrderId = D.intSalesOrderId
+LEFT JOIN tblSMCompanyLocation L WITH (NOLOCK) ON H.intCompanyLocationId = L.intCompanyLocationId
+LEFT JOIN tblICItemUOM IU WITH (NOLOCK) ON D.intItemUOMId = IU.intItemUOMId
+LEFT JOIN tblICUnitMeasure U WITH (NOLOCK) ON IU.intUnitMeasureId = U.intUnitMeasureId
+LEFT JOIN tblICItem IC WITH (NOLOCK) ON D.intItemId = IC.intItemId
+LEFT JOIN vyuICGetStorageLocation ST WITH (NOLOCK) ON D.intStorageLocationId = ST.intStorageLocationId
+LEFT JOIN tblCTContractHeader CH WITH (NOLOCK) ON D.intContractHeaderId = CH.intContractHeaderId
+LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON D.intContractDetailId = CD.intContractDetailId AND CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblICItemUOM ItemPriceUOM WITH (NOLOCK) ON D.intPriceUOMId = ItemPriceUOM.intItemUOMId
+LEFT JOIN tblICUnitMeasure PriceUOM WITH (NOLOCK) ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
