@@ -1329,6 +1329,9 @@
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrderCompartmentQty.sql" />
+    <Build Include="dbo\User Defined Types\TMOrderHistoryStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMArchiveRestoreOrders.sql" />
+    <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
