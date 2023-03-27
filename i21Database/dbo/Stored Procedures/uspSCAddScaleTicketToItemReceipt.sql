@@ -240,12 +240,12 @@ SELECT
 		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN LI.intSourceTransactionId ELSE NULL END
 		,intTaxGroupId				= CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
 										ELSE 
-											CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
+											CASE WHEN ISNULL(CNT.intPricingTypeId,0) = 2 OR ISNULL(CNT.intPricingTypeId,0) = 3 
 											THEN -1
 											ELSE NULL
 											END 
 										END
-		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 OR ISNULL(ConHeader.intPricingTypeId,0) = 5 
+		,ysnAddPayable				= CASE WHEN ISNULL(CNT.intPricingTypeId,0) = 2 OR ISNULL(CNT.intPricingTypeId,0) = 3 OR ISNULL(CNT.intPricingTypeId,0) = 5 
 										THEN 0
 										ELSE NULL
 										END
