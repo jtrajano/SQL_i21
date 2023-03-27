@@ -155,6 +155,12 @@ BEGIN
 		SET @strItemNo = NULL
 		SET @intItemId = NULL
 
+		SELECT TOP 1 @intItemId = Item.intItemId
+			,@strItemNo = Item.strItemNo
+		FROM dbo.tblICItem Item
+		INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts ON Item.intItemId = ChargesGLAccounts.intChargeId
+		WHERE ChargesGLAccounts.intAPClearing IS NULL
+
 		SELECT TOP 1 @strLocationName = c.strLocationName
 		FROM tblICItemLocation il
 		INNER JOIN tblSMCompanyLocation c ON il.intLocationId = c.intCompanyLocationId
