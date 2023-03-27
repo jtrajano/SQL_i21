@@ -9,11 +9,11 @@ AS
 BEGIN TRY
 	-- BEGIN TRANSACTION
         DECLARE
-            @tblLog SingleAuditLogParam
-            -- ,@tblHeaderLog SingleAuditLogParam
-            -- ,@tblLogTestResult SingleAuditLogParam
-            ,@intKey INT = 0
+            @intKey INT = 0
             ,@intTestResultKey INT = 0
+
+        DECLARE @auditLog AS BatchAuditLogParamNested
+                ,@tblLog AS SingleAuditLogParam
 
         -- If the sample is just being created, add created audit log
         IF @ysnCreate = 1
@@ -484,34 +484,36 @@ BEGIN TRY
         -- Compare the updated sample with the original values to determine which field needs audit logs
         ELSE
         BEGIN
+            -- Return if there is nothing to compare to
             IF OBJECT_ID('tempdb..##tmpQMSample') IS NULL
                 RETURN
+
             -- Generate audit logs for sample header
-            SET @intKey = 1
+            SET @intKey = 0
 
             IF OBJECT_ID('tempdb..##tmpHeaderLogs') IS NOT NULL
                 DROP TABLE ##tmpHeaderLogs
 
-            IF OBJECT_ID('tempdb..##tmpLogs') IS NOT NULL
-                DROP TABLE ##tmpLogs
+            IF OBJECT_ID('tempdb..##tmpDetailLogs') IS NOT NULL
+                DROP TABLE ##tmpDetailLogs
 
-            CREATE TABLE ##tmpLogs (
-                [Id]		    INT, 
-                [KeyValue]	    INT,
-                [Action]	    NVARCHAR(MAX),
-                [Change]	    NVARCHAR(MAX),
-                [From]		    NVARCHAR(MAX),
-                [To]		    NVARCHAR(MAX),
-                [Alias]		    NVARCHAR(MAX),
-                [intSampleId]	INT,
+            IF OBJECT_ID('tempdb..##tmpDetailAuditLog') IS NOT NULL
+                DROP TABLE ##tmpDetailAuditLog
+
+            DELETE FROM @auditLog
+
+            CREATE TABLE ##tmpDetailAuditLog (
+                [Id]		        INT,
+                [Action]	        NVARCHAR(MAX),
+                [Change]	        NVARCHAR(MAX),
+                [From]		        NVARCHAR(MAX),
+                [To]		        NVARCHAR(MAX),
+                [ParentId]  	    INT,
+                [intSampleId]	    INT,
+                [intPropertyId]	    INT
             )
 
-            CREATE INDEX [IX_tmpLogs_intSampleId] ON ##tmpLogs(intSampleId)
-
-            -- SET STATISTICS XML ON
             SELECT
-                -- [Id]        = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-                -- ,[Action]   = NULL
                 [Change]   = C.strFieldName
                 ,[From]     = C.strOldValue
                 ,[To]       = C.strNewValue
@@ -648,8 +650,8 @@ BEGIN TRY
             -- Unpivot columns to rows
             CROSS APPLY (
                 SELECT 'Contract', CAST(CHO.strContractNumber AS NVARCHAR(MAX)) + ' - ' + ISNULL(CAST(CDO.intContractSeq AS NVARCHAR(5)), ''), CAST(CHN.strContractNumber AS NVARCHAR(MAX)) + ' - ' + ISNULL(CAST(CDN.intContractSeq AS NVARCHAR(5)), '')
-                UNION ALL
-                SELECT 'Sample Status', CAST(SO.intSampleStatusId AS NVARCHAR), CAST(SN.intSampleStatusId AS NVARCHAR)
+                -- UNION ALL
+                -- SELECT 'Sample Status', CAST(SO.intSampleStatusId AS NVARCHAR), CAST(SN.intSampleStatusId AS NVARCHAR)
                 UNION ALL
                 SELECT 'Channel', MZO.strMarketZoneCode, MZN.strMarketZoneCode
                 UNION ALL
@@ -821,42 +823,62 @@ BEGIN TRY
             WHERE SN.intSampleId = SO.intSampleId
             AND ISNULL(C.strOldValue, '') <> ISNULL(C.strNewValue, '')
 
-            INSERT INTO ##tmpLogs (
+            -- Get the unqique sample IDs from the header change logs
+            INSERT INTO @auditLog (
                 [Id]
                 ,[Action]
-                ,[Change]
+                ,[Description]
                 ,[From]
                 ,[To]
-                ,[intSampleId]
-            )
-            SELECT
-                [Id]            = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-                ,[Action]       = 'UPdated'
-                ,[Change]       = T.[Change]
-                ,[From]         = T.[From]
-                ,[To]           = T.[To]
-                ,[intSampleId]  = T.intSampleId
-            FROM ##tmpHeaderLogs T
-
-            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM ##tmpLogs
-
-            INSERT INTO ##tmpLogs (
-                [Id]
-                ,[Action]
-                ,[Change]
-                ,[From]
-                ,[To]
-                ,[intSampleId]
+                ,[RecordId]
             )
             SELECT
                 [Id]            = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
                 ,[Action]       = 'Updated'
-                ,[Change]       = C.strFieldName
-                ,[From]         = C.strOldValue
-                ,[To]           = C.strNewValue
-                ,[intSampleId]  = TRN.intSampleId
+                ,[Description]  = NULL
+                ,[From]         = NULL
+                ,[To]           = NULL
+                ,[RecordId]     = T.intSampleId
+            FROM ##tmpHeaderLogs T
+            GROUP BY T.intSampleId
+
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM @auditLog
+
+            INSERT INTO @auditLog (
+                [Id]
+                ,[RecordId]
+                ,[Action]
+                ,[Description]
+                ,[From]
+                ,[To]
+                ,[ParentId]
+            )
+            SELECT
+                [Id]            = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+                ,[RecordId]     = T.intSampleId
+                ,[Action]       = NULL--'Updated'
+                ,[Description]  = T.[Change]
+                ,[From]         = T.[From]
+                ,[To]           = T.[To]
+                ,[ParentId]     = A.Id
+            FROM ##tmpHeaderLogs T
+            INNER JOIN @auditLog A ON A.RecordId = T.intSampleId
+
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM @auditLog
+
+            -- Audit logs for test results
+            SELECT
+                [Change]            = C.strFieldName
+                ,[From]             = C.strOldValue
+                ,[To]               = C.strNewValue
+                ,[RecordName]       = T.strTestName + ' - ' + P.strPropertyName
+                ,[intSampleId]      = TRN.intSampleId
+                ,[intPropertyId]    = TRN.intPropertyId
+            INTO ##tmpDetailLogs
             FROM tblQMTestResult TRN
             INNER JOIN ##tmpQMTestResult TRO ON TRO.intPropertyId = TRN.intPropertyId AND TRO.intSampleId = TRN.intSampleId
+            INNER JOIN tblQMTest T ON T.intTestId = TRN.intTestId
+            INNER JOIN tblQMProperty P ON P.intPropertyId = TRN.intPropertyId
             -- Unpivot columns to rows
             CROSS APPLY (
                 SELECT 'Actual Value', TRO.strPropertyValue, TRN.strPropertyValue
@@ -868,36 +890,104 @@ BEGIN TRY
             WHERE TRN.intSampleId = TRO.intSampleId
             AND ISNULL(C.strOldValue, '') <> ISNULL(C.strNewValue, '')
 
-            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM ##tmpLogs
+            -- Insert the parent log for samples which are not yet in the UDT
+            INSERT INTO @auditLog (
+                [Id]
+                ,[Action]
+                ,[Description]
+                ,[From]
+                ,[To]
+                ,[RecordId]
+            )
+            SELECT
+                [Id]            = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+                ,[Action]       = 'Updated'
+                ,[Description]  = NULL
+                ,[From]         = NULL
+                ,[To]           = NULL
+                ,[RecordId]     = T.intSampleId
+            FROM ##tmpDetailLogs T
+            LEFT JOIN @auditLog A ON A.RecordId = T.intSampleId
+            WHERE A.RecordId IS NULL
+            GROUP BY T.intSampleId
 
-            -- POST:
-            IF @intKey > 1
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM @auditLog
+
+            INSERT INTO ##tmpDetailAuditLog (
+                [Id]
+                ,[Action]
+                ,[Change]
+                ,[From]
+                ,[To]
+                ,[ParentId]
+                ,[intSampleId]
+                ,[intPropertyId]
+            )
+            SELECT
+                [Id]                = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+                ,[Action]           = NULL--'Updated'
+                ,[Description]      = 'Updated - Record: ' + T.RecordName
+                ,[From]             = NULL
+                ,[To]               = NULL
+                ,[ParentId]         = A.Id
+                ,[intSampleId]      = T.intSampleId
+                ,[intPropertyId]    = T.intPropertyId
+            FROM ##tmpDetailLogs T
+            INNER JOIN @auditLog A ON A.RecordId = T.intSampleId AND A.ParentId IS NULL
+            GROUP BY A.Id, T.RecordName, T.intSampleId, T.intPropertyId
+
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM ##tmpDetailAuditLog
+
+            INSERT INTO ##tmpDetailAuditLog (
+                [Id]
+                ,[Action]
+                ,[Change]
+                ,[From]
+                ,[To]
+                ,[ParentId]
+                ,[intSampleId]
+                ,[intPropertyId]
+            )
+            SELECT
+                [Id]                = @intKey + ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+                ,[Action]           = NULL
+                ,[Description]      = T.[Change]
+                ,[From]             = T.[From]
+                ,[To]               = T.[To]
+                ,[ParentId]         = A.Id
+                ,[intSampleId]      = T.intSampleId
+                ,[intPropertyId]    = T.intPropertyId
+            FROM ##tmpDetailLogs T
+            INNER JOIN ##tmpDetailAuditLog A ON A.intSampleId = T.intSampleId AND A.intPropertyId = T.intPropertyId
+
+            SELECT @intKey = ISNULL(MAX(Id), @intKey) FROM ##tmpDetailAuditLog
+
+            INSERT INTO @auditLog (
+                [Id]
+                ,[Action]
+                ,[Description]
+                ,[From]
+                ,[To]
+                ,[ParentId]
+                ,[RecordId]
+            )
+            SELECT
+                [Id]                = T.[Id]
+                ,[Action]           = T.[Action]
+                ,[Description]      = T.[Change]
+                ,[From]             = T.[From]
+                ,[To]               = T.[To]
+                ,[ParentId]         = T.ParentId
+                ,[RecordId]         = T.intSampleId
+            FROM ##tmpDetailAuditLog T
+
+            POST:
+            IF EXISTS (SELECT 1 FROM @auditLog)
             BEGIN
-                DECLARE @auditLog AS BatchAuditLogParam
-
-                INSERT INTO @auditLog (
-                    [Id]
-                    , [Namespace]
-                    , [Action]
-                    , [Description]
-                    , [From]
-                    , [To]
-                    , [EntityId]
-                )
-                SELECT
-                    [Id]				= L.intSampleId
-                    , [Namespace]		= 'Quality.view.QualitySample'
-                    , [Action]			= 'Updated'
-                    , [Change]		    = L.Change
-                    , [From]			= L.[From]
-                    , [To]				= L.[To]
-                    , [EntityId]		= @intUserEntityId
-                FROM ##tmpLogs L
-
-                IF EXISTS (SELECT TOP 1 NULL FROM @auditLog)
-                    EXEC dbo.uspSMBatchAuditLog
-                        @AuditLogParam 	= @auditLog
-                        ,@EntityId		= @intUserEntityId
+                EXEC dbo.uspSMBatchAuditLogNested
+                    @strScreenName      = 'Quality.view.QualitySample'
+                    ,@intEntityId		= @intUserEntityId
+                    ,@tblAuditLogParam 	= @auditLog
             END
 
         END
