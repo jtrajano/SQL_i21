@@ -1590,6 +1590,10 @@
     <Build Include="dbo\Tables\tblQMImportType.sql" />
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
+    
+    <Build Include="dbo\User Defined Types\TMOrderHistoryStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMArchiveRestoreOrders.sql" />
+    <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
