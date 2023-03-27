@@ -12,10 +12,10 @@ INSERT INTO #ARPaymentAccount
     ,[strAccountCategory]
     ,[ysnActive])
 SELECT  DISTINCT
-     [intAccountId]         = GLAD.[intAccountId]
-    ,[strAccountId]         = GLAD.[strAccountId]
-    ,[strAccountCategory]   = GLS.[strAccountCategory]
-    ,[ysnActive]            = GLAD.[ysnActive]
+     [intAccountId]				= GLAD.[intAccountId]
+    ,[strAccountId]				= GLAD.[strAccountId]
+    ,[strAccountCategory]		= GLS.[strAccountCategory]
+    ,[ysnActive]				= GLAD.[ysnActive]
 FROM #ARPostPaymentHeader ARPH
 INNER JOIN tblGLAccount GLAD ON ARPH.[intUndepositedFundsId] = GLAD.[intAccountId]
 CROSS APPLY (
@@ -28,19 +28,16 @@ CROSS APPLY (
 ) GLS
 
 
-
-
-
 INSERT INTO #ARPaymentAccount
 	([intAccountId]
     ,[strAccountId]
     ,[strAccountCategory]
     ,[ysnActive])
 SELECT DISTINCT
-     [intAccountId]         = GLAD.[intAccountId]
-    ,[strAccountId]         = GLAD.[strAccountId]
-    ,[strAccountCategory]   = GLS.[strAccountCategory]
-    ,[ysnActive]            = GLAD.[ysnActive]
+     [intAccountId]				= GLAD.[intAccountId]
+    ,[strAccountId]				= GLAD.[strAccountId]
+    ,[strAccountCategory]		= GLS.[strAccountCategory]
+    ,[ysnActive]				= GLAD.[ysnActive]
 FROM #ARPostPaymentHeader ARPH
 INNER JOIN tblCMBankAccount CMBA ON ARPH.[intBankAccountId] = CMBA.[intBankAccountId]
 INNER JOIN tblGLAccount GLAD ON CMBA.[intGLAccountId] = GLAD.[intAccountId]
