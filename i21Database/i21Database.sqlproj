@@ -1281,6 +1281,7 @@
     <Build Include="dbo\Tables\tblSTTypes.sql" />
     <None Include="Scripts\Post-Deployment\ST\52_Populate_JobTypes.sql" />
     <Build Include="dbo\Views\vyuSTJobs.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSCreateNewJob.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
