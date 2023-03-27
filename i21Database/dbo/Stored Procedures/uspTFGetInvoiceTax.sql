@@ -141,7 +141,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
+					, COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber)) AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
@@ -374,7 +374,7 @@ BEGIN TRY
 					, NULL AS dblTaxExempt
 					, tblARInvoice.strInvoiceNumber
 					, tblARInvoice.strPONumber
-					, CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
+					, COALESCE(NULLIF(tblTRLoadDistributionDetail.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber)) AS strBillOfLading
 					, tblARInvoice.dtmDate
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN tblSMCompanyLocation.strCity WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN tblTMSite.strCity ELSE tblARInvoice.strShipToCity END AS strDestinationCity
 					, CASE WHEN tblARInvoice.intFreightTermId = 3 THEN NULL WHEN tblARInvoice.strType = 'Tank Delivery' AND tblARInvoiceDetail.intSiteId IS NOT NULL THEN NULL ELSE DestinationCounty.strCounty END AS strDestinationCounty
