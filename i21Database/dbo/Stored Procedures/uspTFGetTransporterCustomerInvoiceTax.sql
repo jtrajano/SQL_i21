@@ -133,7 +133,7 @@ BEGIN TRY
       , (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty      
       , tblARInvoice.strInvoiceNumber      
       , tblARInvoice.strPONumber      
-      , CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
+      ,COALESCE(NULLIF(LDD.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) AS strBillOfLading  
       , tblARInvoice.dtmDate      
       , tblARInvoice.strShipToCity AS strDestinationCity      
       , DestinationCounty.strCounty AS strDestinationCounty      
@@ -368,7 +368,7 @@ BEGIN TRY
       , (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblBillQty      
   , tblARInvoice.strInvoiceNumber      
       , tblARInvoice.strPONumber      
-      , CASE WHEN tblARInvoice.strType = 'Transport Delivery' THEN COALESCE(NULLIF(LDD.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) ELSE  ISNULL(NULLIF(tblARInvoice.strBOLNumber,''), tblARInvoice.strInvoiceNumber) END AS strBillOfLading
+      ,COALESCE(NULLIF(LDD.strBillOfLading,''), ISNULL(NULLIF(tblARInvoice.strBOLNumber,'') ,tblARInvoice.strInvoiceNumber) ) AS strBillOfLading  
       , tblARInvoice.dtmDate      
       , tblARInvoice.strShipToCity AS strDestinationCity      
       , DestinationCounty.strCounty AS strDestinationCounty      
