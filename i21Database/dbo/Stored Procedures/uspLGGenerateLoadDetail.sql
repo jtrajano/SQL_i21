@@ -70,9 +70,9 @@ BEGIN TRY
 				,[dblGross]							= @dblQty * W.dblWeightUnitQty
 				,[dblTare]							= 0
 				,[dblNet]							= @dblQty * W.dblWeightUnitQty
-				,[dblDeliveredQuantity]				= 0
+				,[dblDeliveredQuantity]				= @dblQty * W.dblWeightUnitQty
 				,[dblDeliveredGross]				= 0
-				,[dblDeliveredNet]					= 0
+				,[dblDeliveredNet]					= @dblQty * W.dblWeightUnitQty
 				,[dblDeliveredTare]					= 0
 				,[intWeightItemUOMId]				= WIUOM.intItemUOMId
 				,[strScheduleInfoMsg]				= LSM.strMessage
@@ -187,9 +187,9 @@ BEGIN TRY
 			,[dblGross]							= RECEIPT_ITEM.dblGross
 			,[dblTare]							= 0
 			,[dblNet]							= RECEIPT_ITEM.dblNet
-			,[dblDeliveredQuantity]				= 0
-			,[dblDeliveredGross]				= 0
-			,[dblDeliveredNet]					= 0
+			,[dblDeliveredQuantity]				= RECEIPT_ITEM.dblReceived
+			,[dblDeliveredGross]				= RECEIPT_ITEM.dblGross
+			,[dblDeliveredNet]					= RECEIPT_ITEM.dblNet
 			,[dblDeliveredTare]					= 0
 			,[intWeightItemUOMId]				= RECEIPT_ITEM.intWeightUOMId
 			,[strScheduleInfoMsg]				= ''
