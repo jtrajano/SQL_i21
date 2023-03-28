@@ -121,13 +121,8 @@ SELECT	CHK.dtmDate
 		,CHK.intBankAccountId
 		
 		-- Bank and company info related fields
-		,strCompanyName = COMPANY.strCompanyName
-		,strCompanyAddress = CASE	
-									WHEN ISNULL(dbo.fnConvertToFullAddress( COMPANY.strAddress,  COMPANY.strCity, COMPANY.strState,  COMPANY.strZip), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
-										dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
-									ELSE 
-										NULL
-							END
+		,strCompanyName = Companies.strCompanyName
+		,strCompanyAddress =Companies.strAddress
 		,strBank = ''
 		,strBankAddress = ''
 		
@@ -144,6 +139,7 @@ SELECT	CHK.dtmDate
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId		
 FROM	dbo.tblCMBankTransaction CHK
+INNER JOIN tblCMBankAccount BNKACCNT ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
@@ -151,8 +147,19 @@ FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN tblEMEntity ENTITY
 			ON VENDOR.[intEntityId] = ENTITY.intEntityId
 		LEFT JOIN [tblEMEntityLocation] LOCATION
-			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
-		OUTER APPLY( SElECT TOP 1 strCompanyName, strAddress,strCity,strState, strCountry, strCounty, strZip FROM tblSMCompanySetup) COMPANY
+			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1
+		OUTER APPLY (  
+			SELECT TOP 1 strCompanyName, strAddress FROM (  
+				SELECT  TOP 1 1 id, strCompanyName, strAddress  FROM vyuGLCompanyAccountId A   
+				LEFT JOIN tblGLAccountSegment G ON G.intAccountSegmentId = A.intAccountSegmentId  
+				LEFT JOIN tblGLCompanyDetails C ON C.intAccountSegmentId = G.intAccountSegmentId  
+				WHERE intAccountId = BNKACCNT.intGLAccountId   
+				UNION ALL  
+				SElECT TOP 1 2 id, strCompanyName,ISNULL(dbo.fnConvertToFullAddress(strAddress,strCity,strState,strZip),'') strAddress  
+				FROM tblSMCompanySetup  
+   				) AllCompanies  
+   				WHERE ISNULL(strCompanyName, '')<> ''  ORDER BY id 
+		) Companies
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND (CHK.ysnHasDetailOverflow = 1 OR CHK.ysnHasBasisPrepayOverflow = 1)
