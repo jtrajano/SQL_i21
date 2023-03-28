@@ -20,7 +20,9 @@ SELECT detail.intDeliveryDetailId
       ,detail.intContractDetailId
 FROM tblMBILDeliveryDetail detail            
 INNER JOIN tblICItem item ON detail.intItemId = item.intItemId
-WHERE NOT EXISTS(SELECT o.intDispatchId
+INNER JOIN tblMBILDeliveryHeader deliveryHeader on detail.intDeliveryHeaderId = deliveryHeader.intDeliveryHeaderId
+INNER JOIN tblMBILLoadHeader load on load.intLoadHeaderId = deliveryHeader.intLoadHeaderId
+WHERE load.ysnDispatched = 1 AND NOT EXISTS(SELECT o.intDispatchId
 				FROM tblMBILOrder o 
 				INNER JOIN vyuMBILInvoice i on o.intOrderId = i.intOrderId
 				WHERE o.intDispatchId = detail.intTMDispatchId)

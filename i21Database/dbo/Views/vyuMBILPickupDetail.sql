@@ -37,3 +37,4 @@ LEFT JOIN tblEMEntity Salesperson ON Salesperson.intEntityId = detail.intSalespe
 left join tblEMEntityLocation location on detail.intEntityLocationId = location.intEntityLocationId and detail.intEntityId = location.intEntityId                
 left join tblSMCompanyLocation companylocation on detail.intCompanyLocationId = companylocation.intCompanyLocationId                
 left join tblSMCompanySetup company on 1=1 
+WHERE load.ysnDispatched = 1
