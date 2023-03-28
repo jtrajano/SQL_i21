@@ -279,7 +279,7 @@ BEGIN TRY
 			strPkgType				= UM.strUnitMeasure, --Qty UOM
 			strAvgWeight			= U7.strUnitMeasure, --Net UOM
 			strApproxWeight			= dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), --NETWEIGHT
-			strPriceKg				= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,4,CD.dblCashPrice),2), 
+			strPriceKg				= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,KG.intItemUOMId,CD.dblCashPrice),2), 
 			strTotalValue			= ROUND(CD.dblTotalCost,2) ,
 			strMixingUnit			= CB.strBook,
 			strPortofArrival		= CTY.strCity,
@@ -322,6 +322,7 @@ BEGIN TRY
 	JOIN	tblSMCity			CT	WITH (NOLOCK) ON	CT.intCityId			=	CH.intINCOLocationTypeId LEFT
 	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId LEFT
 	JOIN	tblCTBook			CB	WITH (NOLOCK) ON	CB.intBookId			=   CD.intBookId
+	LEFT JOIN tblICItemUOM      KG  WITH (NOLOCK) ON	CD.intPriceItemUOMId			=   KG.intItemUOMId AND KG.intUnitMeasureId = 4
 	CROSS JOIN tblCTCompanyPreference   CP
 	CROSS JOIN (
 		SELECT strReportDateFormat
