@@ -37,7 +37,7 @@ LEFT JOIN tblEMEntityToContact entityToContact ON entity.intEntityId = entityToC
 LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId    
 LEFT JOIN tblSMCompanyLocation companylocation ON delivery.intCompanyLocationId = companylocation.intCompanyLocationId                
 LEFT JOIN tblSMCompanySetup company ON 1 = 1     
-WHERE intDeliveryHeaderId in(Select intDeliveryHeaderId from tblMBILDeliveryDetail where ysnDelivered = 0 AND 
+WHERE load.ysnDispatched = 1 and intDeliveryHeaderId in(Select intDeliveryHeaderId from tblMBILDeliveryDetail where ysnDelivered = 0 AND 
 NOT EXISTS(SELECT o.intDispatchId
 			FROM tblMBILOrder o 
 			INNER JOIN vyuMBILInvoice i on o.intOrderId = i.intOrderId
