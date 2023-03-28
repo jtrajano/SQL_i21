@@ -470,14 +470,14 @@ BEGIN
 	UPDATE A
 	SET A.intSelectedByUserId = NULL
 	FROM tblAPBill A
-	INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
+	INNER JOIN #tmpMultiVouchers tmp ON A.intBillId = tmp.intBillId
 	INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId 
 	WHERE A.intSelectedByUserId = @userId
 
 	UPDATE A
 	SET A.intSelectedByUserId = NULL
 	FROM tblAPVoucherPaymentSchedule A
-	INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
+	INNER JOIN #tmpMultiVouchers tmp ON A.intBillId = tmp.intBillId
 	INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId 
 	WHERE A.intSelectedByUserId = @userId
 
