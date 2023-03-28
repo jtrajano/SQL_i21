@@ -1556,32 +1556,31 @@
     <Build Include="dbo\Views\vyuCFSearchSiteGroupAdjustment.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_UserRoleAdvancePermission.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetTaxJurisdiction.sql" />
-  <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
-  <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
-  <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationCatalogue.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportValidationTastingScore.sql" />
+    <Build Include="dbo\Functions\fnQMGetPropertyTestResult2.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageEntryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForIntraCompanyTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBatch.sql" />
-	<Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSampleDetail.sql" />
     <Build Include="dbo\Tables\tblQMImportType.sql" />
     <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
     <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
     <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
-    
     <Build Include="dbo\User Defined Types\TMOrderHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspTMArchiveRestoreOrders.sql" />
     <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
-    <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
     <Build Include="dbo\Tables\tblTMDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceTankMonitor.sql" />
-    <Build Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
-      <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
     <Build Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
+    <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11575,7 +11574,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherDetail1099.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetOverrideGLAccount.sql" />
-     <Build Include="dbo\Functions\fnGLGetIntraCompanyGLEntries.sql" />
+    <Build Include="dbo\Functions\fnGLGetIntraCompanyGLEntries.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
