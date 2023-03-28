@@ -1424,12 +1424,6 @@
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateBasisAndFutures.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKCustomBasisEntry.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKCustomDerivativeTransactionHistory.sql" />
-    <Build Include="dbo\Views\vyuRKCustomDailyAveragePrice.sql" />
-    <Build Include="dbo\Views\vyuRKCustomDailyAveragePriceDetail.sql" />
-    <Build Include="dbo\Views\vyuRKCustomDerivativeEntry.sql" />
-    <Build Include="dbo\Views\vyuRKCustomSettlementPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
