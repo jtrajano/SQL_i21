@@ -174,6 +174,7 @@ OUTER APPLY (
 	AND exchangeRateDetail.dtmValidFromDate <= @paymentDate
 	ORDER BY exchangeRateDetail.dtmValidFromDate DESC
 ) rateInfo
+WHERE A.intSelectedByUserId = @userId
 
 IF @transCount = 0 BEGIN TRANSACTION
 

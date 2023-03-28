@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPClearVoucherTempData]
 	@voucherIds NVARCHAR(MAX)
+ ,@userId INT = NULL
 AS
 BEGIN
 
@@ -32,16 +33,19 @@ BEGIN
 	BEGIN
 		UPDATE voucher
 			SET voucher.ysnReadyForPayment = 0, voucher.dblTempPayment = 0, voucher.dblTempWithheld = 0, voucher.strTempPaymentInfo = null
+				  ,voucher.intSelectedByUserId = NULL
 		FROM tblAPBill voucher
 		INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 		WHERE voucher.ysnPosted = 1
 		AND voucher.ysnPaid = 0
 		AND voucher.ysnIsPaymentScheduled = 0
+		AND 1 = (CASE WHEN forPay.intSelectedByUserId IS NULL OR forPay.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
 
 		SET @vouchersUpdated = @@ROWCOUNT;
 
 		UPDATE paySched
 			SET paySched.ysnReadyForPayment = 0
+				 ,paySched.intSelectedByUserId = NULL
 		OUTPUT inserted.intBillId INTO #tmpPaySchedVoucherId
 		FROM tblAPVoucherPaymentSchedule paySched
 		INNER JOIN @ids ids ON paySched.intBillId = ids.intId
@@ -52,6 +56,7 @@ BEGIN
 		AND voucher.dblAmountDue != 0
 		AND paySched.ysnPaid = 0
 		AND voucher.ysnIsPaymentScheduled = 1
+		AND 1 = (CASE WHEN forPay.intSelectedByUserId IS NULL OR forPay.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
 
 		SET @paySchedUpdated = (SELECT COUNT(DISTINCT intBillId) FROM #tmpPaySchedVoucherId)
 

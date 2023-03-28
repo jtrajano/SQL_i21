@@ -209,6 +209,7 @@ BEGIN
 			FOR XML PATH('')), 
 			1, 1, '') AS strPayee
 	) lienInfo
+	WHERE voucher.intSelectedByUserId = @userId
 
 	--ALL TRANSACTIONS THAT VENDOR IS NOT ONE BILL PER PAYMENT
 	SET @script = 
@@ -459,9 +460,26 @@ BEGIN
 		) details
 		LEFT JOIN tblAPVoucherPaymentSchedule paySched
 			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
+			AND paySched.intSelectedByUserId = @userId
+		WHERE vouchers.intSelectedByUserId = @userId	
 	END
 
 	SET @batchPaymentId = @batchId;
+
+	--RESET USER SELECTED
+	UPDATE A
+	SET A.intSelectedByUserId = NULL
+	FROM tblAPBill A
+	INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
+	INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId 
+	WHERE A.intSelectedByUserId = @userId
+
+	UPDATE A
+	SET A.intSelectedByUserId = NULL
+	FROM tblAPVoucherPaymentSchedule A
+	INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
+	INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId 
+	WHERE A.intSelectedByUserId = @userId
 
 	SELECT @createdPaymentIds = COALESCE(@createdPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intCreatePaymentId)
 	FROM #tmpMultiVouchersCreatedPayment
