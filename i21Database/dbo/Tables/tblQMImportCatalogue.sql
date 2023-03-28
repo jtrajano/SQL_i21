@@ -127,7 +127,3 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_ysnSuccess]
     ON [dbo].[tblQMImportCatalogue]([ysnSuccess], [intImportLogId])
 GO
-
-CREATE NONCLUSTERED INDEX [IX_tblQMImportCatalogue_intImportLogId_intSampleId]
-ON [dbo].[tblQMImportCatalogue] ([intImportLogId],[intSampleId])
-GO
