@@ -242,29 +242,6 @@ BEGIN
 				WHERE CRB.strType = 'Supplier' AND CRB.strImportValue = @strSupplier
 			END
 			
-			IF (@intVendorId IS NULL)
-			BEGIN
-				IF (@intVendorCompanyLocationId IS NULL)
-				BEGIN
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supplier')
-				END
-				ELSE
-				BEGIN
-					UPDATE tblTRImportLoadDetail SET intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
-				END
-			END
-			ELSE
-			BEGIN
-				IF(@intSupplyPointId IS NULL)
-				BEGIN
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supply Point')
-				END
-				ELSE
-				BEGIN
-					UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId, intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
-				END
-			END
-			
 			-- CHECK IF HAS VALID DESTINATION
 			DECLARE @intCustomerId INT = NULL
 			DECLARE @intShipToId INT = NULL
@@ -302,14 +279,7 @@ BEGIN
 			
 			IF (@intCustomerId IS NULL)
 			BEGIN
-				IF (@intCustomerCompanyLocationId IS NULL)
-				BEGIN
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Destination')
-				END
-				ELSE
-				BEGIN
-					UPDATE tblTRImportLoadDetail SET intCustomerCompanyLocationId = @intCustomerCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
-				END
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Destination')
 			END
 			ELSE
 			BEGIN
@@ -397,6 +367,22 @@ BEGIN
 				END
 			END
 			
+			IF (@intVendorId IS NULL)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supplier')
+			END
+			ELSE
+			BEGIN
+				IF(@intSupplyPointId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supply Point')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId, intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				END
+			END			
+
 			IF(@ysnValid = 1)
 			BEGIN
 				IF(ISNULL(@strMessage, '') != '')
