@@ -39,9 +39,7 @@ INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = IT.intCompanyLocationId
 OUTER APPLY dbo.fnGRTConvertQuantityToTargetCommodityUOM(CUOM_FROM.intCommodityUnitMeasureId, CUOM_TO.intCommodityUnitMeasureId, IT.dblQty) CUOMQTY
 WHERE IT.ysnIsUnposted <> 1
-	AND (IT.intCostingMethod = 5 AND IT.strTransactionForm = 'Invoice' --get the ACTUAL PRICE only for the invoice transactions
-			OR (IT.intCostingMethod IS NOT NULL AND (IT.intCostingMethod <> 5 AND IT.strTransactionForm <> 'Invoice'))
-		)
+    AND IT.intInTransitSourceLocationId IS NULL
 
 UNION ALL
 
