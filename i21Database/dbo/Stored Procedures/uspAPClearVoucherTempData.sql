@@ -39,7 +39,7 @@ BEGIN
 		WHERE voucher.ysnPosted = 1
 		AND voucher.ysnPaid = 0
 		AND voucher.ysnIsPaymentScheduled = 0
-		AND 1 = (CASE WHEN forPay.intSelectedByUserId IS NULL OR forPay.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
+		AND 1 = (CASE WHEN voucher.intSelectedByUserId IS NULL OR voucher.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
 
 		SET @vouchersUpdated = @@ROWCOUNT;
 
@@ -56,7 +56,7 @@ BEGIN
 		AND voucher.dblAmountDue != 0
 		AND paySched.ysnPaid = 0
 		AND voucher.ysnIsPaymentScheduled = 1
-		AND 1 = (CASE WHEN forPay.intSelectedByUserId IS NULL OR forPay.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
+		AND 1 = (CASE WHEN paySched.intSelectedByUserId IS NULL OR paySched.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
 
 		SET @paySchedUpdated = (SELECT COUNT(DISTINCT intBillId) FROM #tmpPaySchedVoucherId)
 
