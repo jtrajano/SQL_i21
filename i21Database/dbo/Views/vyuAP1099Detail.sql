@@ -26,6 +26,7 @@ SELECT
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
 		WHEN 5 THEN '1099 DIV'
+		WHEN 6 THEN '1099 K'  
 		WHEN 7 THEN '1099 NEC'
 		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form
 	,CASE voucherDetail.int1099Form 
@@ -35,6 +36,8 @@ SELECT
 			THEN categoryPATR.strCategory
 			WHEN 5
 			THEN categoryDIV.strCategory
+			WHEN 6
+			THEN categoryK.strCategory
 			WHEN 7
 			THEN category.strCategory
 			ELSE 'NONE'
@@ -52,6 +55,7 @@ LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCom
 LEFT JOIN tblAP1099Category category ON category.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.int1099CategoryId = voucherDetail.int1099Category
+LEFT JOIN tblAP1099KCategory categoryK ON categoryK.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 			ON voucher.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR voucher.dtmDate = FP.dtmStartDate OR voucher.dtmDate = FP.dtmEndDate
 OUTER APPLY (
