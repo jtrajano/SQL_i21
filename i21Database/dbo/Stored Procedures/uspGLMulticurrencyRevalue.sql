@@ -57,7 +57,7 @@ SELECT
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuAPMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CT'
@@ -78,7 +78,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
  END
 IF @strModule = 'AR' 
 BEGIN
@@ -98,7 +98,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'INV'
@@ -180,7 +180,7 @@ INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND ISNULL(dblHistoricForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM'
@@ -225,7 +225,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuFAMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM Forwards'
@@ -266,7 +266,7 @@ SELECT A.*, strCurrency
 FROM cte 
 A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate AND dtmDueDate > @dtmDate
-AND ISNULL(dblHistoricForexRate, 1) <> 1
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM In-Transit'
@@ -288,7 +288,11 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMInTransitMultiCurrencyRevalue  A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
+<<<<<<< HEAD
 AND ISNULL(dblForexRate, 1) <> 1
+=======
+AND A.intCurrencyId <> @intDefaultCurrencyId
+>>>>>>> 9b1176b146 (GL-10139)
 END
 
 IF @strModule = 'CM Swaps'
@@ -358,7 +362,7 @@ INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND ISNULL(dblHistoricForexRate, 1) <> 1
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'GL'
@@ -377,10 +381,17 @@ SELECT
 	,intLOBSegmentCodeId = NULL
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
+<<<<<<< HEAD
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
 --AND ISNULL(dblForexRate, 1) <> 1
+=======
+	,A.strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuGLMulticurrencyRevalueGJ A
+WHERE dtmDate <= @dtmDate
+AND A.intCurrencyId <> @intDefaultCurrencyId
+>>>>>>> 9b1176b146 (GL-10139)
 END
 
 
