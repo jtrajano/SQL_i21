@@ -19,6 +19,7 @@ BEGIN TRY
 				@dblNoOfLots				NUMERIC(18,6),
 				@dblChildSeqLots			NUMERIC(18,6),
 				@dblChildSeqQty				NUMERIC(18,6),
+				@dblChildSeqLoad			INT,
 				@XML						NVARCHAR(MAX),
 				@ErrMsg						NVARCHAR(MAX),
 				@strTradeNo					NVARCHAR(100),
@@ -99,6 +100,7 @@ BEGIN TRY
 		UPDATE	FD
 		SET		FD.dblNoOfLots			=	CD.dblNoOfLots,
 				FD.dblQuantity			=	CD.dblQuantity,
+				FD.dblLoadPriced		=	case when isnull(CD.intNoOfLoad,0) = 0 then null else CD.intNoOfLoad end,
 				FD.dblHedgeNoOfLots		=	CASE WHEN FD.ysnHedge = 1 THEN CD.dblNoOfLots ELSE NULL END
 		FROM	tblCTPriceFixation			PF 
 		JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
@@ -130,7 +132,8 @@ BEGIN TRY
 		WHILE	ISNULL(@intChildContractDetailId,0) > 0
 		BEGIN
 				SELECT	@dblChildSeqLots	=	dblNoOfLots,
-						@dblChildSeqQty		=	dblQuantity
+						@dblChildSeqQty		=	dblQuantity,
+						@dblChildSeqLoad	=	intNoOfLoad
 				FROM	tblCTContractDetail
 				WHERE	intContractDetailId	=	@intChildContractDetailId
 
@@ -186,6 +189,7 @@ BEGIN TRY
 				EXEC	uspCTGetStartingNumber 'Price Fixation Trade No', @strTradeNo OUTPUT
 				SET		@XML =	'<root><toUpdate><strTradeNo>'+LTRIM(RTRIM(@strTradeNo))+'</strTradeNo><dblNoOfLots>'+STR(@dblChildSeqLots,18,6)+'</dblNoOfLots>'+
 								'<dblQuantity>'+STR(@dblChildSeqQty,18,6)+'</dblQuantity>'+
+								case when isnull(@dblChildSeqLoad,0) > 0 then '<dblLoadPriced>'+STR(@dblChildSeqLoad)+'</dblLoadPriced>' else '' end +
 								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
 								CASE WHEN @ysnHedge = 1 THEN '<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>' ELSE '' END +
 								CASE WHEN @ysnHedge = 1 THEN '<dblHedgeNoOfLots>'+STR(@dblChildSeqLots,18,6)+'</dblHedgeNoOfLots>' ELSE '' END +
