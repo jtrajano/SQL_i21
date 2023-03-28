@@ -27,7 +27,7 @@ AS
                                                           dtmEndDate)
                                   fiscal
                WHERE  ( B.strAccountType IN ( 'Expense', 'Revenue' )
-                       
+               AND dtmDate >= fiscal.dtmStartDate
                         AND ISNULL(strCode, '') <> '' )
                GROUP  BY fiscal.strPeriod,
                          B.strAccountType,
