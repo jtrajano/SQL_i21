@@ -118,46 +118,49 @@ BEGIN
 
                 INSERT INTO tblGLAuditorTransaction (
                     ysnGroupHeader
-                    ,intType
+                    , intType
                     , intGeneratedBy
                     , dtmDateGenerated
                     , intEntityId
+                    , strBatchId
                     , intAccountId
-                    , intTransactionId
                     , strTransactionId
+                    , intTransactionId
+                    , intCurrencyId
                     , dtmDate
                     , dtmDateEntered
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblExchangeRate
-                    , intCurrencyId
-                    , strBatchId
-                    , strCode
-                    , strTransactionType
-                    , strModuleName 
-                    , strTransactionForm
-                    , strReference
-                    , strDocument
-                    , strComments
-                    , strPeriod
+                    , strPeriod 
                     , strDescription
                     , strAccountDescription
-                    , dblSourceUnitDebit
-                    , dblSourceUnitCredit
+                    , strCode
+                    , strReference
+                    , strComments
+                    , strJournalLineDescription
+                    , strUOMCode 
+                    , strTransactionType 
+                    , strModuleName 
+                    , strTransactionForm 
+                    , strDocument
+                    , dblExchangeRate
+                    , strStatus 
                     , dblDebitReport
                     , dblCreditReport
-                    , strCommodityCode
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , strCommodityCode 
                     , strSourceDocumentId
                     , strLocation
-                    , strCompanyLocation
-                    , strJournalLineDescription
-                    , strUOMCode
-                    , strStatus
+                    , strCompanyLocation 
+                    , strSourceUOMId 
                     , intSourceEntityId
-                    , strSourceEntity
-                    , strSourceEntityNo
+                    , strSourceEntity 
+                    , strSourceEntityNo 
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
@@ -168,42 +171,45 @@ BEGIN
                     , @intEntityId
                     , @dtmNow
                     , intEntityId
+                    , strBatchId
                     , intAccountId
-                    , intTransactionId
                     , strTransactionId
+                    , intTransactionId
+                    , intCurrencyId
                     , dtmDate
                     , dtmDateEntered
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblExchangeRate
-                    , intCurrencyId
-                    , strBatchId
-                    , strCode
-                    , strTransactionType
-                    , strModuleName 
-                    , strTransactionForm
-                    , strReference
-                    , strDocument
-                    , strComments
-                    , strPeriod
+                    , strPeriod 
                     , strDescription
                     , strAccountDescription
-                    , dblSourceUnitDebit
-                    , dblSourceUnitCredit
+                    , strCode
+                    , strReference
+                    , strComments
+                    , strJournalLineDescription
+                    , strUOMCode 
+                    , strTransactionType 
+                    , strModuleName 
+                    , strTransactionForm 
+                    , strDocument
+                    , dblExchangeRate
+                    , strStatus 
                     , dblDebitReport
                     , dblCreditReport
-                    , strCommodityCode
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , strCommodityCode 
                     , strSourceDocumentId
                     , strLocation
-                    , strCompanyLocation
-                    , strJournalLineDescription
-                    , strUOMCode
-                    , strStatus
+                    , strCompanyLocation 
+                    , strSourceUOMId 
                     , intSourceEntityId
-                    , strSourceEntity
-                    , strSourceEntityNo
+                    , strSourceEntity 
+                    , strSourceEntityNo 
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
