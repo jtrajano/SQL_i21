@@ -125,6 +125,7 @@
 	[intTaxLocationId] INT NULL,
 	[intFinalizeVoucherId] INT NULL,
 	[ysnFinalize] BIT NULL DEFAULT 0, -- use to check if the provisional voucher is already finalize
+	[intSelectedByUserId] INT NULL,
 	[intProfitCenter] INT NULL
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     -- CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
