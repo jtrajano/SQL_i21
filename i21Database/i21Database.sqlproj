@@ -1372,7 +1372,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessOrdersToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSDeleteCheckoutProcessEntry.sql" />
-    <Build Include="dbo\Tables\tblTMTankMonitor.sql" />
     <Build Include="dbo\Tables\tblMBILApplicationLog.sql" />
     <Build Include="dbo\Views\vyuARTaxGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPRecipe_EK.sql" />
