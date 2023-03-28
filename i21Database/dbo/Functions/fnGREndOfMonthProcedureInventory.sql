@@ -30,7 +30,7 @@ FROM (
         ,dblUnits = SUM(ISNULL(IT.dblCommodityUOMQty, 0))
         ,FYP.dtmEndDate
     FROM vyuGRPhysicalInventoryTransaction IT
-    INNER JOIN tblGLFiscalYearPeriod FYP ON IT.dtmDate BETWEEN FYP.dtmStartDate AND FYP.dtmEndDate
+    INNER JOIN tblGLFiscalYearPeriod FYP ON IT.dtmDate <= FYP.dtmEndDate  
     WHERE FYP.strPeriod = @strPeriod
     AND (@strItemNo IS NULL OR (@strItemNo IS NOT NULL AND IT.strItemNo = @strItemNo))
     GROUP BY
