@@ -14,7 +14,7 @@ BEGIN
 			@dblUnitQtyTo			NUMERIC(26,12)
 
 	SELECT	@intItemId = intItemId,@IntFromUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @IntFromItemUOMId
-	SELECT	@intToUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intToItemUOMId
+	SELECT	@intToUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intToItemUOMId  AND intItemId = @intItemId
 	
 	SELECT @result = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@IntFromUnitMeasureId,ISNULL(@intToUnitMeasureId,@IntFromUnitMeasureId),@dblQty)
 	
