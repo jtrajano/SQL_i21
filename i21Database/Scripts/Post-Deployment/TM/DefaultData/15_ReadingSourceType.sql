@@ -16,7 +16,7 @@ BEGIN
 		,'User'
 	)
 END
-
+ 
 GO
 	print N'END INSERT DEFAULT TM Reading Source Type'
 GO
