@@ -99,7 +99,7 @@ DECLARE @_dblCurrentContractAvailable NUMERIC(38,20)
 DECLARE @_dblCurrentContractSchedule NUMERIC(38,20)
 
 DECLARE @REFERENCE_ONLY BIT
-
+DECLARE @TICKET_DATE_TIME DATETIME
 DECLARE @_tmpContractSchedule TABLE(
 	intContractDetailId INT
 	,dblScheduleQty NUMERIC (38,20)
@@ -123,6 +123,7 @@ SELECT
 	, @intTicketLoadDetailId = SC.intLoadDetailId
 	
 	, @REFERENCE_ONLY = CASE WHEN SC.intStorageScheduleTypeId = -9 THEN 1 ELSE 0 END
+	, @TICKET_DATE_TIME = dtmTicketDateTime
 FROM dbo.tblSCTicket SC 
 WHERE SC.intTicketId = @intTicketId 
 
@@ -747,7 +748,9 @@ END
 			END
 
 
-			UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET intShipmentStatus = 4, 
+				dtmDeliveredDate = @TICKET_DATE_TIME
+			WHERE intLoadId = @intLoadId
 
 			
 		END 
