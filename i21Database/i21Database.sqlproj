@@ -1527,8 +1527,6 @@
     <Build Include="dbo\Views\vyuRKCustomDailyAveragePriceDetail.sql" />
     <Build Include="dbo\Views\vyuRKCustomDerivativeEntry.sql" />
     <Build Include="dbo\Views\vyuRKCustomSettlementPrice.sql" />
-    <Build Include="dbo\User Defined Types\BatchAuditLogParamNested.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
