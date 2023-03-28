@@ -71,7 +71,28 @@ BEGIN TRY
  BEGIN  
     EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost, @intUserId
  END  
-  
+
+    IF @ysnPostOrUnPost = 1
+    BEGIN
+        DECLARE @OrderHistoryStaging TMOrderHistoryStagingTable
+
+        INSERT INTO @OrderHistoryStaging (intDispatchId, ysnDelete, intSourceType, intDeliveryHistoryId)
+	    SELECT DISTINCT DD.intTMOId, ysnDelete = CAST(1 AS BIT),  intSourceType = 2, intDeliveryHistoryId = NULL
+	    FROM tblTRLoadHeader TL
+	    LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId
+	    LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TR.intLoadHeaderId
+	    LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND DD.strReceiptLink = TR.strReceiptLine
+	    LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
+	    WHERE TL.intLoadHeaderId = @intLoadHeaderId	    
+
+        IF EXISTS (SELECT TOP 1 1 FROM @OrderHistoryStaging)
+        BEGIN
+	        EXEC uspTMArchiveRestoreOrders
+		        @OrderHistoryStaging
+		        , @intUserId
+        END
+    END
+    
  IF(@@TRANCOUNT > 0)  
  BEGIN  
   COMMIT TRANSACTION  
