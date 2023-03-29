@@ -453,15 +453,15 @@ BEGIN
 	SELECT dtmDate = ForGLEntries_CTE.dtmDate
 		,strBatchId = @strBatchId
 		,intAccountId = GLAccount.intAccountId
-		,dblDebit = ROUND(DebitForeign.Value * FX.dblForexRate, 2)
-		,dblCredit = ROUND(CreditForeign.Value * FX.dblForexRate, 2)
+		,dblDebit = ROUND(DebitForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
+		,dblCredit = ROUND(CreditForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
 		,dblDebitUnit = 0
 		,dblCreditUnit = 0
 		,strDescription = ISNULL(GLAccount.strDescription, '') + ' (' + ForGLEntries_CTE.strItemNo + ')'
 		,strCode = @strCode
 		,strReference = ''
 		,intCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
-		,dblExchangeRate = ISNULL(FX.dblForexRate,1)
+		,dblExchangeRate = ISNULL(ItemCurrencyToFunctional.dblForexRate,1)
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
@@ -488,8 +488,8 @@ BEGIN
 			END
 		,dblCreditReport = NULL
 		,dblReportingRate = NULL
-		,dblForeignRate = ISNULL(FX.dblForexRate,1)
-		,strRateType = FX.strCurrencyExchangeRateType
+		,dblForeignRate = ISNULL(ItemCurrencyToFunctional.dblForexRate,1)
+		,strRateType = ItemCurrencyToFunctional.strCurrencyExchangeRateType
 	FROM ForGLEntries_CTE
 	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
 	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -499,20 +499,21 @@ BEGIN
 					dblForexRate = ISNULL(dblRate,0),
 					strCurrencyExchangeRateType
 				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
+				WHERE intFromCurrencyId = ForGLEntries_CTE.intCurrencyId
 					AND intToCurrencyId = @intFunctionalCurrencyId
 					AND intCurrencyExchangeRateTypeId = ISNULL(ForGLEntries_CTE.intShipmentExchangeRateTypeId, intCurrencyExchangeRateTypeId)
-				ORDER BY dtmValidFromDate DESC) FX
+				ORDER BY dtmValidFromDate DESC) ChargeCurrencyToFunctional
 	OUTER APPLY (SELECT TOP 1 
 					dblForexRate = ISNULL(dblRate,0),
-					intCurrencyExchangeRateTypeId
+					strCurrencyExchangeRateType
 				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = ForGLEntries_CTE.intCurrencyId AND intToCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
-				ORDER BY dtmValidFromDate DESC) ShipmentToChargeCurrency
-	-- CROSS APPLY dbo.fnGetDebitFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Debit
-	-- CROSS APPLY dbo.fnGetCreditFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Credit
-	CROSS APPLY dbo.fnGetDebit(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1))) DebitForeign
-	CROSS APPLY dbo.fnGetCredit(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ShipmentToChargeCurrency.dblForexRate,1))) CreditForeign
+				WHERE intFromCurrencyId = ForGLEntries_CTE.intShipmentCurrencyId
+				AND intToCurrencyId = @intFunctionalCurrencyId
+				ORDER BY dtmValidFromDate DESC) ItemCurrencyToFunctional
+	-- CROSS APPLY dbo.fnGetDebitFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ItemCurrencyToFunctional.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Debit
+	-- CROSS APPLY dbo.fnGetCreditFunctional(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ItemCurrencyToFunctional.dblForexRate,1)), ForGLEntries_CTE.intShipmentCurrencyId, @intFunctionalCurrencyId, FX.dblForexRate) Credit
+	CROSS APPLY dbo.fnGetDebit(dbo.fnDivide(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)) DebitForeign
+	CROSS APPLY dbo.fnGetCredit(dbo.fnDivide(dbo.fnMultiply(ForGLEntries_CTE.dblCost, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)) CreditForeign
 	WHERE ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 1 AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1 AND ForGLEntries_CTE.intCurrencyId <> @intInvoiceCurrency
 
 	UNION ALL
