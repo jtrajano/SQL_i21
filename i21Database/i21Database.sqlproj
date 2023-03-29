@@ -1583,6 +1583,7 @@
     <Build Include="dbo\Tables\tblTMReadingSourceType.sql" />
     <Build Include="dbo\Tables\tblSTStoreDepartments.sql" />
     <Build Include="dbo\Views\vyuSTStoreDepartments.sql" />
+    <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
