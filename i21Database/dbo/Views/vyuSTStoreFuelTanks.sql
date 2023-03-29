@@ -19,7 +19,8 @@ SELECT
 		ELSE CAST(site.intSiteNumber as NVARCHAR(1))
 		END as strSiteNumber,
 	device.intDeviceId,
-	site.intSiteID as intCompanyConsumptionSiteId
+	site.intSiteID as intCompanyConsumptionSiteId,
+	site.intCustomerID
 FROM tblSTStoreFuelTanks FT
 JOIN tblSTStore ST
 	ON FT.intStoreId = ST.intStoreId
