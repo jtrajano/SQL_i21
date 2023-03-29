@@ -105,7 +105,7 @@ BEGIN
 					SELECT TOP 1 @intInventoryReceiptId = IR.intInventoryReceiptId
 					FROM tblICInventoryReceipt IR
 					WHERE IR.intEntityVendorId = @intEntityVendorId
-						AND IR.strBillOfLading = @strBOL
+						AND dbo.fnRemoveLeadingZero(IR.strBillOfLading) = dbo.fnRemoveLeadingZero(@strBOL)
 						AND IR.intSourceType = 3
 						AND IR.strReceiptType = 'Direct'
 
@@ -118,7 +118,7 @@ BEGIN
 
 			-- Handle previous successful duplicates
 			IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess
-						WHERE strBillOfLading = @strBillOfLading
+						WHERE dbo.fnRemoveLeadingZero(strBillOfLading) = dbo.fnRemoveLeadingZero(@strBillOfLading)
 							AND intImportDtnDetailId <> @intImportDtnDetailId
 							AND ysnSuccess = 1)
 			BEGIN

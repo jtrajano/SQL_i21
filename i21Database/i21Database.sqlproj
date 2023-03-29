@@ -1260,6 +1260,7 @@
     <Build Include="dbo\Tables\tblTMTankReading.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInventoryLastReading.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
+    <Build Include="dbo\Functions\fnRemoveLeadingZero.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
