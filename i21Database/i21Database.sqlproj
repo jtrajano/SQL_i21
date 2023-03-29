@@ -1333,6 +1333,7 @@
     <Build Include="dbo\Stored Procedures\uspTMArchiveRestoreOrders.sql" />
     <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateNewJob.sql" />
+    <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
