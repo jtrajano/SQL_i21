@@ -59,8 +59,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'intPaymentMethodId' 
   AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'intPaymentMethodID' AND [object_id] = OBJECT_ID(N'tblSMPaymentMethod'))
   AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'strPaymentMethod' AND [object_id] = OBJECT_ID(N'tblCMUndepositedFund'))
 BEGIN
- IF OBJECT_ID('tempdb..#PAYMENTS') IS NOT NULL DROP TABLE #PAYMENTS 
- ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentUpdate
+ IF OBJECT_ID('tempdb..#PAYMENTS') IS NOT NULL DROP TABLE #PAYMENTS
  
  DECLARE @intPaymentMethodId INT    = NULL
     , @strPaymentMethod NVARCHAR(100) = NULL
@@ -93,7 +92,6 @@ BEGIN
    INNER JOIN tblARPayment P ON P.intPaymentId = PP.intPaymentId
   END
  
- ALTER TABLE tblARPayment ENABLE TRIGGER trg_tblARPaymentUpdate
  IF OBJECT_ID('tempdb..#PAYMENTS') IS NOT NULL DROP TABLE #PAYMENTS
 END
  
