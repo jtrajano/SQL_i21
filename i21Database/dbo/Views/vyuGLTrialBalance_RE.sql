@@ -19,23 +19,23 @@ SELECT
 	Fiscal.intGLFiscalYearPeriodId,
 	Fiscal.PeriodStart,
 	Fiscal.FiscalStart,
-	ISNULL(ExpRev_Prior.beginningBalance,0) + ISNULL(ExpRev_Current.beginningBalance,0) YTD,
+	ISNULL(ExpRev_Prior.beginningBalance,0) YTD,
 	PERIODACTIVITY.beginningBalance MTD,
 	SM.intCurrencyId
 	--,Fiscal.strPeriod
 FROM DETAIL Fiscal
+-- OUTER APPLY ( 
+-- 	SELECT  SUM(ISNULL(dblDebit,0) - ISNULL(dblCredit,0)) beginningBalance
+-- 	FROM tblGLAccount A LEFT JOIN  tblGLDetail D on D.intAccountId = A.intAccountId
+-- 	LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
+-- 	WHERE D.dtmDate BETWEEN Fiscal.FiscalStart and PeriodEnd and D.ysnIsUnposted = 0
+-- 	AND G.strAccountType in ('Expense','Revenue')  
+-- )ExpRev_Current
 OUTER APPLY ( 
 	SELECT  SUM(ISNULL(dblDebit,0) - ISNULL(dblCredit,0)) beginningBalance
 	FROM tblGLAccount A LEFT JOIN  tblGLDetail D on D.intAccountId = A.intAccountId
 	LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
-	WHERE D.dtmDate BETWEEN Fiscal.FiscalStart and PeriodEnd and D.ysnIsUnposted = 0
-	AND G.strAccountType in ('Expense','Revenue')  
-)ExpRev_Current
-OUTER APPLY ( 
-	SELECT  SUM(ISNULL(dblDebit,0) - ISNULL(dblCredit,0)) beginningBalance
-	FROM tblGLAccount A LEFT JOIN  tblGLDetail D on D.intAccountId = A.intAccountId
-	LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
-	WHERE D.dtmDate BETWEEN  DATEADD( DAY, FiscalDays,Fiscal.FiscalStart) AND  DATEADD(SECOND, -1, Fiscal.FiscalStart) and D.ysnIsUnposted = 0
+	WHERE D.dtmDate < Fiscal.FiscalStart and D.ysnIsUnposted = 0
 	AND G.strAccountType in ('Expense','Revenue')  
 )ExpRev_Prior
 OUTER APPLY(
