@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspMFPickWorkOrder] 
+﻿CREATE PROCEDURE [dbo].[uspMFPickWorkOrder] 
 (
 	@intWorkOrderId					INT
   , @dblProduceQty					NUMERIC(38, 20)
