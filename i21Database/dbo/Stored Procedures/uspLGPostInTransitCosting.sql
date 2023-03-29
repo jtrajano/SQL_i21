@@ -436,6 +436,7 @@ SET ANSI_WARNINGS ON
 					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
 					ORDER BY dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
+		AND ISNULL(ShipmentCharges.ysnAccrue, 0) = 1
 
 		EXEC @intReturnValue = dbo.uspICPostInTransitCosting  
 			@ItemsForInTransitCosting  
