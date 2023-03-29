@@ -25,6 +25,7 @@ AS
 		,strAccountStatus = C.strAcctStatus	
 		,strRouteId = R.strRouteId
 		,C.intRouteId
+		,SM.strShipVia
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
@@ -42,4 +43,6 @@ AS
 		ON C.intFillMethodId = K.intFillMethodId
 	LEFT JOIN tblTMRoute R
 		ON R.intRouteId = C.intRouteId
+	LEFT JOIN tblSMShipVia SM
+		ON G.intShipViaId = SM.intEntityId
 GO
