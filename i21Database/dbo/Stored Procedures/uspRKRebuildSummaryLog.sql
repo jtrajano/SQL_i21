@@ -967,6 +967,15 @@ BEGIN TRY
 											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced)
 													AND dblCumulativeBalance <= dblCumulativeQtyPriced AND (dblLagOldBalance * 2) = dblLagQtyPriced)) 
 									THEN 0
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Fully Priced'
+									AND SH.strPricingStatus = 'Partially Priced'
+									AND SH.ysnBalanceChange = 1 
+									AND SH.ysnCashPriceChange = 1
+									AND SH.ysnFuturesChange = 1
+									AND SH.dblBalance = SH.dblQuantity
+									AND SH.dblOldBalance = SH.dblQtyPriced
+								)	THEN SH.dblQtyUnpriced * -1
 								WHEN ( strPricingStatus <> 'Unpriced'
 											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced)
 													OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
@@ -986,15 +995,14 @@ BEGIN TRY
 									AND SH.dblOldBalance = dblLagQuantity
 									) THEN dblOldBalance * -1
 								-- PRICED TO UNPRICED
-								WHEN 
-									(ISNULL(P.intPriceFixationId, 0) = 0
+								WHEN (ISNULL(P.intPriceFixationId, 0) = 0
 									AND SH.intLagPricingTypeId <> SH.intPricingTypeId
 									AND SH.strLagPricingStatus = 'Fully Priced'
 									AND SH.strPricingStatus = 'Unpriced'
 									AND SH.ysnBalanceChange = 1
 									AND SH.ysnBasisChange IS NULL
 									AND SH.ysnFuturesChange IS NULL
-									) THEN dblOldBalance * -1
+									) THEN dblOldBalance * -1							
 								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
 									AND SH.strLagPricingStatus = 'Partially Priced'
 									AND SH.strPricingStatus = 'Fully Priced'
@@ -1104,6 +1112,15 @@ BEGIN TRY
 					AND SH.ysnBasisChange IS NULL
 					AND SH.ysnFuturesChange IS NULL
 					)
+					OR (SH.intLagPricingTypeId <> SH.intPricingTypeId
+					AND SH.strLagPricingStatus = 'Fully Priced'
+					AND SH.strPricingStatus = 'Partially Priced'
+					AND SH.ysnBalanceChange = 1
+					AND SH.ysnCashPriceChange = 1
+					AND SH.ysnFuturesChange = 1
+					AND SH.dblBalance = SH.dblQuantity
+					AND SH.dblOldBalance = SH.dblQtyPriced
+					)
 				 )
 			AND (SH.intPricingTypeId <> 1
 				 OR
@@ -1125,10 +1142,19 @@ BEGIN TRY
 											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced)
 													AND dblCumulativeBalance <= dblCumulativeQtyPriced AND (dblLagOldBalance * 2) = dblLagQtyPriced)) 
 									THEN 0
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Fully Priced'
+									AND SH.strPricingStatus = 'Partially Priced'
+									AND SH.ysnBalanceChange = 1
+									AND SH.ysnCashPriceChange = 1
+									AND SH.ysnFuturesChange = 1
+									AND SH.dblBalance = SH.dblQuantity
+									AND SH.dblOldBalance = SH.dblQtyPriced
+								)	THEN SH.dblQtyUnpriced * -1
 								WHEN	strPricingStatus <> 'Unpriced'
 										AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced) 
 													OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
-									THEN dblActualPriceFixation
+									THEN dblActualPriceFixation					
 								WHEN strPricingStatus = 'Partially Priced' AND dblCumulativeBalance = dblQtyPriced AND dblLagQtyPriced = 0
 									THEN 0
 								WHEN strPricingStatus = 'Partially Priced' 
@@ -1249,6 +1275,15 @@ BEGIN TRY
 					 AND SH.ysnBalanceChange = 1
 					 AND SH.ysnBasisChange IS NULL
 					 AND SH.ysnFuturesChange IS NULL
+					 )
+					 OR (SH.intLagPricingTypeId <> SH.intPricingTypeId
+					 AND SH.strLagPricingStatus = 'Fully Priced'
+					 AND SH.strPricingStatus = 'Partially Priced'
+					 AND SH.ysnBalanceChange = 1
+					 AND SH.ysnCashPriceChange = 1
+					 AND SH.ysnFuturesChange = 1
+					 AND SH.dblBalance = SH.dblQuantity
+					 AND SH.dblOldBalance = SH.dblQtyPriced
 					 )
 				 )
 			AND (SH.intPricingTypeId <> 1
