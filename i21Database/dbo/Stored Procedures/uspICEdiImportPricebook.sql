@@ -1111,7 +1111,7 @@ USING (
 	LEFT JOIN tblICBrand b ON b.strBrandName = Pricebook.strManufacturersBrandName	
 	LEFT JOIN tblSTSubcategory sc ON sc.strSubcategoryId = CAST(NULLIF(Pricebook.strProductClass, '') AS NVARCHAR(8)) AND sc.strSubcategoryType = 'C'
 	LEFT JOIN tblSTSubcategory sf ON sf.strSubcategoryId = CAST(NULLIF(Pricebook.strProductFamily, '') AS NVARCHAR(8)) AND sf.strSubcategoryType = 'F'
-	LEFT JOIN tblSTSubCategories ItemSubCategories ON CAST(NULLIF(LOWER(Pricebook.strSubcategory), '') AS NVARCHAR(6)) = LOWER(ItemSubCategories.strSubCategory)
+	LEFT JOIN tblSTSubCategories ItemSubCategories ON CAST(NULLIF(LOWER(Pricebook.strSubcategory), '') AS NVARCHAR(8)) = LOWER(ItemSubCategories.strSubCategoryCode)
 	OUTER APPLY (SELECT TOP 1 dup.*
 				 FROM tblICItem dup
 				 WHERE dup.strItemNo = NULLIF(Pricebook.strItemNo, '')) dup
