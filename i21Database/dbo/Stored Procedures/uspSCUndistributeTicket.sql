@@ -1943,7 +1943,10 @@ BEGIN TRY
 				, @intTicketItemUOMId = intItemUOMIdTo
 			FROM tblSCTicket WHERE intTicketId = @intTicketId	
 			
-			UPDATE tblLGLoad SET intShipmentStatus = 1 WHERE intLoadId = @intLoadId
+			UPDATE tblLGLoad SET 
+				intShipmentStatus = 1
+				, dtmDeliveredDate = NULL
+			WHERE intLoadId = @intLoadId
 
 			EXEC uspLGGenerateDummyLoadDetail  
 					 @intLoadId = @intLoadId
