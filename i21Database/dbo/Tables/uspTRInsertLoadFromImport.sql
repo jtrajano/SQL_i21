@@ -222,7 +222,7 @@ BEGIN
 					SELECT TOP 1 1 FROM tblTRLoadReceipt lr
 					JOIN tblTRLoadHeader lh ON lh.intLoadHeaderId = lr.intLoadHeaderId
 					WHERE lr.intTerminalId = @intEntityVendorId
-						AND lr.strBillOfLading = @BOL
+						AND dbo.fnRemoveLeadingZero(lr.strBillOfLading) = dbo.fnRemoveLeadingZero(@BOL)
 						AND ISNULL(lh.ysnPosted, 0) = 0)
 				BEGIN
 					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Transport Load is not posted')
@@ -251,12 +251,12 @@ BEGIN
 			, ysnValid = @ysnValid
 		WHERE intImportDtnDetailId = @intImportDtnDetailId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess WHERE strBillOfLading = @strBillOfLading AND ISNULL(ysnSuccess, 0) = 1)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess WHERE dbo.fnRemoveLeadingZero(strBillOfLading) = dbo.fnRemoveLeadingZero(@strBillOfLading) AND ISNULL(ysnSuccess, 0) = 1)
 		BEGIN
 			DECLARE @maxValue NUMERIC(18, 6)
 				, @intPreviousId INT
 
-			SELECT TOP 1 @maxValue = dblInvoiceAmount, @intPreviousId = intImportDtnDetailId FROM tblTRImportDtnDetail WHERE ISNULL(ysnReImport, 0) = 0 AND strBillOfLading = @strBillOfLading AND intImportDtnDetailId <> @intImportDtnDetailId
+			SELECT TOP 1 @maxValue = dblInvoiceAmount, @intPreviousId = intImportDtnDetailId FROM tblTRImportDtnDetail WHERE ISNULL(ysnReImport, 0) = 0 AND dbo.fnRemoveLeadingZero(strBillOfLading) = dbo.fnRemoveLeadingZero(@strBillOfLading) AND intImportDtnDetailId <> @intImportDtnDetailId
 
 			IF (ISNULL(@intPreviousId, 0) = 0)
 			BEGIN
@@ -278,7 +278,7 @@ BEGIN
 			END
 		END
 		
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRImportDtnDetail WHERE strBillOfLading = @strBillOfLading AND ISNULL(ysnReImport, 0) = 0)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTRImportDtnDetail WHERE dbo.fnRemoveLeadingZero(strBillOfLading) = dbo.fnRemoveLeadingZero(@strBillOfLading) AND ISNULL(ysnReImport, 0) = 0)
 		BEGIN
 			UPDATE tblTRImportDtnDetail
 			SET ysnReImport = 0

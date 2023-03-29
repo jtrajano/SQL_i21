@@ -1279,6 +1279,7 @@
     <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateNewJob.sql" />
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
+    <Build Include="dbo\Functions\fnRemoveLeadingZero.sql" />
     <Build Include="dbo\Tables\tblGRAPClearingStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGenerateAPClearingForStorageInventoryReceipt.sql" />
   </ItemGroup>
