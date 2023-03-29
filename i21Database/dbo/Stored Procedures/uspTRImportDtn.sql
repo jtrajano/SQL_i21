@@ -66,7 +66,7 @@ BEGIN
 				SELECT @intInventoryReceiptId = IR.intInventoryReceiptId, @ysnInventoryPosted = IR.ysnPosted
 				FROM tblTRImportDtnDetail DD
 				INNER JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId = DD.intEntityVendorId
-					AND IR.strBillOfLading = DD.strBillOfLading
+					AND dbo.fnRemoveLeadingZero(IR.strBillOfLading) = dbo.fnRemoveLeadingZero(DD.strBillOfLading)
 				WHERE DD.intImportDtnDetailId = @intImportDtnDetailId
 					AND IR.intSourceType = 3
 					AND IR.strReceiptType = 'Direct'

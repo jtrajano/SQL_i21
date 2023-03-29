@@ -43,7 +43,7 @@ BEGIN
 		BEGIN
 			-- Handle previous successful duplicates
 			IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess
-						WHERE strBillOfLading = @strBillOfLading
+						WHERE dbo.fnRemoveLeadingZero(strBillOfLading) = dbo.fnRemoveLeadingZero(@strBillOfLading)
 							AND intImportDtnDetailId <> @intImportDtnDetailId
 							AND ysnSuccess = 1)
 			BEGIN
