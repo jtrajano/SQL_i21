@@ -53,12 +53,11 @@ PRINT '********************** END - FIX INVALID PAYMENT LOCATION ***************
 GO
 
 
-PRINT '********************** BEGIN - FIX INVALID PAYMENT LOCATION **********************'
+PRINT '********************** BEGIN - FIX INVALID PAYMENT METHOD **********************'
 GO
 IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'intPaymentMethodId' AND [object_id] = OBJECT_ID(N'tblARPayment'))
   AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'intPaymentMethodID' AND [object_id] = OBJECT_ID(N'tblSMPaymentMethod'))
   AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE [name] = N'strPaymentMethod' AND [object_id] = OBJECT_ID(N'tblCMUndepositedFund'))
-  AND EXISTS (SELECT TOP 1 1 FROM sys.triggers WHERE [name] = 'trg_tblARPaymentUpdate')
 BEGIN
  IF OBJECT_ID('tempdb..#PAYMENTS') IS NOT NULL DROP TABLE #PAYMENTS 
  ALTER TABLE tblARPayment DISABLE TRIGGER trg_tblARPaymentUpdate
