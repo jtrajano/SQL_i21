@@ -1844,7 +1844,7 @@ BEGIN
 					,[intSourceTransactionId]	= t.intTransactionId
 					,[strSourceTransactionId]	= t.strTransactionId
 					,[intSourceTransactionDetailId] = t.intTransactionDetailId
-					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
+					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intLocationId)
 					,[intForexRateTypeId]			= t.intForexRateTypeId --ri.intForexRateTypeId
 					,[dblForexRate]					= t.dblForexRate --ri.dblForexRate
 					,[intSourceEntityId]		= NULL 
