@@ -907,6 +907,7 @@
     <Build Include="dbo\Stored Procedures\uspGLClearAuditorTransactions.sql" />
     <Build Include="dbo\Views\vyuCTUnforecastedOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByTransactionId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByAccountId.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableReversed.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPayableTaxReversed.sql" />
     <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPayable.sql" />
