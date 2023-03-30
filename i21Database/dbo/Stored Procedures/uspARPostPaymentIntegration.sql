@@ -684,6 +684,24 @@ ELSE
 			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
 		END
 
+    --UPDATE Unapplied Amount to deduct Prepay.
+	UPDATE P
+	SET
+		 P.[dblUnappliedAmount]	= P.[dblUnappliedAmount] - (PD.dblPayment)
+		,P.[dblBaseUnappliedAmount]	= P.[dblBaseUnappliedAmount] - (PD.dblBasePayment)
+	FROM tblARPayment P
+	INNER JOIN #ARPostPaymentHeader PH ON P.intPaymentId = PH.intTransactionId
+	INNER JOIN (
+			SELECT
+				 ARPD.intPaymentId
+				,SUM(ARPD.dblPayment) AS dblPayment
+				,SUM(ARPD.dblBasePayment) AS dblBasePayment
+			FROM tblARPaymentDetail ARPD
+			INNER JOIN tblARInvoice ARI ON ARPD.intInvoiceId = ARI.intInvoiceId
+			WHERE strTransactionType = 'Customer Prepayment'
+			GROUP BY ARPD.intPaymentId
+		) PD ON P.[intPaymentId] = PD.[intPaymentId] 
+    
     --UPDATE ACCOUNTING PERIOD FOR CPP FROM INVOICE SCREEN
   UPDATE ARI
   SET intPeriodId = GL.intGLFiscalYearPeriodId
