@@ -54,8 +54,8 @@ SELECT
                                 WHEN CD.intPricingStatus = 2 THEN 'Fully Priced'
                             END COLLATE Latin1_General_CI_AS
     ,[dblCashPrice] = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
-    ,[intCurrencyId] = CASE WHEN CD.intContractDetailId IS NULL THEN DFC.intDefaultCurrencyId ELSE CD.intCurrencyId END
-    ,[strCurrency] = CASE WHEN CD.intContractDetailId IS NULL THEN DFC.strDefaultCurrency ELSE CUR.strCurrency END
+    ,[intCurrencyId] = CASE WHEN CD.intContractDetailId IS NULL THEN DFC.intCurrencyID ELSE CD.intCurrencyId END
+    ,[strCurrency] = CASE WHEN CD.intContractDetailId IS NULL THEN DFC.strCurrency ELSE CUR.strCurrency END
     ,[intPriceItemUOMId] = CASE WHEN CD.intContractDetailId IS NULL THEN SPIUOM.intItemUOMId ELSE CD.intPriceItemUOMId END
     ,[strPriceUnitMeasure] = CASE WHEN CD.intContractDetailId IS NULL THEN SPUOM.strUnitMeasure ELSE PUOM.strUnitMeasure END
     ,CD.dblTotalCost
@@ -97,13 +97,7 @@ LEFT JOIN tblICItemUOM PIUOM ON PIUOM.intItemUOMId = CD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureId
 LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 LEFT JOIN tblSMCurrency FC ON FC.intCurrencyID = CD.intInvoiceCurrencyId AND CD.ysnUseFXPrice = 1
-OUTER APPLY (
-    SELECT TOP 1
-        CP.intDefaultCurrencyId
-        ,[strDefaultCurrency] = C.strCurrency
-    FROM tblSMCompanyPreference CP
-    INNER JOIN tblSMCurrency C ON C.intCurrencyID = CP.intDefaultCurrencyId
-) DFC
+LEFT JOIN tblSMCurrency DFC ON DFC.intCurrencyID = B.intCurrencyId
 OUTER APPLY (
     SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblPackagesBought)
 ) WQTY
