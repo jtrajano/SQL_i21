@@ -2236,7 +2236,7 @@ BEGIN TRY
 				
 					END
 
-				NEXTITEM:
+				NextItem:
 
 				SELECT @intItemRecordId = Min(intItemRecordId)
 				FROM @tblItem
