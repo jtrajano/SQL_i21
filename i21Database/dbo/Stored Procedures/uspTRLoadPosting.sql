@@ -84,6 +84,7 @@ BEGIN TRY
 	    LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND DD.strReceiptLink = TR.strReceiptLine
 	    LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
 	    WHERE TL.intLoadHeaderId = @intLoadHeaderId	    
+            AND ISNULL(DD.intTMOId, 0) <> 0
 
         IF EXISTS (SELECT TOP 1 1 FROM @OrderHistoryStaging)
         BEGIN
