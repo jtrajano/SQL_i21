@@ -29,8 +29,8 @@ SELECT lh.intLoadHeaderId
 	, pd.intCompanyLocationId as intReceiptCompanyLocationId
 	, el.strZipCode as strZipPostalCode
 	, pd.dblPickupQuantity
-	, pd.dblGross
-	, pd.dblNet
+	, dblGross = case when tms.ysnCompanySite = 1 then isnull(dd.dblDeliveredQty,0) else pd.dblGross end
+	, dblNet = case when tms.ysnCompanySite = 1 then isnull(dd.dblDeliveredQty,0) else pd.dblNet end
 	, pd.dtmPickupFrom
 	, pd.dtmPickupTo
 	, pd.dtmActualPickupFrom
@@ -75,3 +75,5 @@ OUTER APPLY tblTRCompanyPreference trc
 JOIN tblMBILLoadHeader lh ON lh.intLoadHeaderId = dh.intLoadHeaderId
 LEFT JOIN tblARCustomer arc ON arc.intEntityId = dh.intEntityId
 LEFT JOIN tblEMEntityLocation cel ON cel.intEntityLocationId = dh.intEntityLocationId
+LEFT JOIN tblTMDispatch tm on tm.intDispatchID = dd.intTMDispatchId
+LEFT JOIN tblTMSite tms on tm.intSiteID = tms.intSiteID
