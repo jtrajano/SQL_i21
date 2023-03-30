@@ -73,14 +73,14 @@ BEGIN TRY
 																 CASE WHEN CD.intPricingTypeId <> 2 THEN  
 																  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity)   
 																  * (CD.dblCashPrice / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))  
-																  * CC.dblRate/100   
+																  * CC.dblRate/100 * ISNULL(CC.dblFX, 1)  
 																 ELSE  
 																  CASE WHEN @ysnEnableBudgetForBasisPricing = CONVERT(BIT, 1) THEN    
-																   CD.dblTotalBudget  * (CC.dblRate/100)  
+																   CD.dblTotalBudget  * (CC.dblRate/100) * ISNULL(CC.dblFX, 1)  
 																  ELSE  
 																   dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity)   
 																   * ((FSPM.dblLastSettle + CD.dblBasis) / (CASE WHEN ISNULL(CY2.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY2.intCent, 1) ELSE 1 END))  
-																   * CC.dblRate/100  
+																   * CC.dblRate/100 * ISNULL(CC.dblFX, 1)  
 																  END  
 																 END  
 															ELSE
