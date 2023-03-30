@@ -190,12 +190,12 @@ BEGIN
                             , strTotalTitle
                             , strGroupTitle
                             , intEntityId
-                            , dblDebit
-                            , dblCredit
-                            , dblEndingBalance
-                            , dblDebitForeign
-                            , dblCreditForeign
-                            , dblEndingBalanceForeign
+                            --, dblDebit
+                            --, dblCredit
+                            , dblBeginningBalance
+                            --, dblDebitForeign
+                            --, dblCreditForeign
+                            , dblBeginningBalanceForeign
                             , strCurrency
                             , strAccountId
                             , strLocation
@@ -212,11 +212,11 @@ BEGIN
                                 , 'Beginning Balance'
                                 , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                                 , @intEntityId
-                                , @beginBalanceDebit
-                                , @beginBalanceCredit
+                                --, @beginBalanceDebit
+                                --, @beginBalanceCredit
                                 , @beginBalance
-                                , @beginBalanceDebitForeign
-                                , @beginBalanceCreditForeign     
+                                --, @beginBalanceDebitForeign
+                                --, @beginBalanceCreditForeign     
                                 , @beginBalanceForeign            
                                 , strCurrency
                                 , strAccountId
