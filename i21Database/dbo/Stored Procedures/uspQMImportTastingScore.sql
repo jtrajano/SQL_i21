@@ -71,6 +71,59 @@ BEGIN TRY
 
 	/* End of Validate Foreign Key Fields. */
 
+	/* Validate Numeric Fields */
+	UPDATE IMP
+	SET strLogResult	= 'The following field(s) must be numeric: ' + REVERSE(SUBSTRING(REVERSE(MSG.strLogMessage), charindex(',', reverse(MSG.strLogMessage)) + 1, len(MSG.strLogMessage)))
+	  , ysnSuccess		= 0
+	  , ysnProcessed	= 1
+	FROM tblQMImportCatalogue IMP
+	OUTER APPLY 
+	(
+		SELECT strLogMessage =
+			CASE WHEN (ISNULL(IMP.strBulkDensity, '') <> '' AND ISNUMERIC(IMP.strBulkDensity) = 0) THEN 'DENSITY, '
+				ELSE ''
+			END 
+			+ CASE WHEN (ISNULL(IMP.strFines, '') <> '' AND ISNUMERIC(IMP.strFines) = 0) THEN 'FINES, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strTeaVolume, '') <> '' AND ISNUMERIC(IMP.strTeaVolume) = 0) THEN 'VOLUME, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strDustContent, '') <> '' AND ISNUMERIC(IMP.strDustContent) = 0) THEN 'DUST LEVEL, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strAppearance, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0) THEN 'APPEARANCE, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strHue, '') <> '' AND ISNUMERIC(IMP.strHue) = 0) THEN 'HUE, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strIntensity, '') <> '' AND ISNUMERIC(IMP.strIntensity) = 0) THEN 'INTENSITY, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0) THEN 'TASTE, '
+				ELSE ''
+			END
+			+ CASE WHEN (ISNULL(IMP.strMouthfeel, '') <> '' AND ISNUMERIC(IMP.strMouthfeel) = 0) THEN 'MOUTH FEEL, '
+				ELSE ''
+			END
+	) MSG
+	WHERE IMP.intImportLogId = @intImportLogId
+		AND IMP.ysnSuccess = 1
+		AND 
+		(
+			(ISNULL(IMP.strBulkDensity, '') <> '' AND ISNUMERIC(IMP.strBulkDensity) = 0)
+		OR	(ISNULL(IMP.strFines, '') <> '' AND ISNUMERIC(IMP.strFines) = 0)
+		OR	(ISNULL(IMP.strTeaVolume, '') <> '' AND ISNUMERIC(IMP.strTeaVolume) = 0)
+		OR	(ISNULL(IMP.strDustContent, '') <> '' AND ISNUMERIC(IMP.strDustContent) = 0)
+		OR	(ISNULL(IMP.strAppearance, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
+		OR	(ISNULL(IMP.strHue, '') <> '' AND ISNUMERIC(IMP.strHue) = 0)
+		OR	(ISNULL(IMP.strIntensity, '') <> '' AND ISNUMERIC(IMP.strIntensity) = 0)
+		OR	(ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
+		OR	(ISNULL(IMP.strMouthfeel, '') <> '' AND ISNUMERIC(IMP.strMouthfeel) = 0)
+		)
+	/* End Validate Numeric Fields */
+
 	EXECUTE uspQMImportValidationCatalogue @intImportLogId;
 
 	DECLARE @intImportType				INT
@@ -896,15 +949,15 @@ BEGIN TRY
 		,P.intPropertyId
 		,''
 		,CASE 
-			WHEN P.strPropertyName = 'Density'
+			WHEN P.strPropertyName = 'Density' AND isNumeric(CI.strBulkDensity)=1 
 				THEN CI.strBulkDensity
 			WHEN P.strPropertyName = 'Moisture'
 				THEN CI.dblTeaMoisture
-			WHEN P.strPropertyName = 'Fines'
+			WHEN P.strPropertyName = 'Fines' AND isNumeric(CI.strFines)=1 
 				THEN CI.strFines
-			WHEN P.strPropertyName = 'Volume'
+			WHEN P.strPropertyName = 'Volume' AND isNumeric(CI.strTeaVolume)=1 
 				THEN CI.strTeaVolume
-			WHEN P.strPropertyName = 'Dust Level'
+			WHEN P.strPropertyName = 'Dust Level' AND isNumeric(CI.strDustContent)=1 
 				THEN CI.strDustContent
 			WHEN P.strPropertyName = 'Appearance' AND isNumeric(CI.strAppearance)=1 
 				THEN CI.strAppearance
