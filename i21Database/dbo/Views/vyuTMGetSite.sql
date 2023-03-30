@@ -116,7 +116,7 @@ SELECT dblBurnRate = site.dblBurnRate
 	,ysnRequirePump = site.ysnRequirePump
 	,ysnCompanySite = site.ysnCompanySite
 					
-	, strSiteCustomerLocation = EL.strCheckPayeeName
+	, strSiteCustomerLocation = EL.strLocationName
 	, intSiteCustomerLocationId = LCS.intEntityLocationId
 	, ysnSiteTakenOffHoldByCallEntry = CONVERT(BIT, 0)
 	, strDriverName = driver.strName
