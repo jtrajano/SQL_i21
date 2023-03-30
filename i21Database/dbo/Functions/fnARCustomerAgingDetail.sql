@@ -771,21 +771,30 @@ BEGIN
 		 , dtmDate					= ISNULL(P.dtmDatePaid, I.dtmDate)
 		 , dtmDatePaid				= NULL
 		 , I.intEntityCustomerId
-		 , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
-		 , dblBaseAvailableCredit	= ISNULL(I.dblBaseInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+		 , dblAvailableCredit		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) + ISNULL(APD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
+		 , dblBaseAvailableCredit	= ISNULL(I.dblBaseInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) + ISNULL(APD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
 		 , dblPrepayments			= 0
 		 , dblBasePrepayments		= 0
 		 , I.strType
 		 , strRecordNumber		= P.strRecordNumber
 	FROM @POSTEDINVOICES I
-		LEFT JOIN @ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
-		LEFT JOIN (
-			SELECT dblPayment = SUM(dblPayment) + SUM(dblWriteOffAmount)
-				 , PD.intInvoiceId
-			FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN @ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
-			GROUP BY PD.intInvoiceId
-		) PD ON I.intInvoiceId = PD.intInvoiceId
-		LEFT JOIN @CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+	LEFT JOIN @ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
+	LEFT JOIN (
+		SELECT dblPayment = SUM(dblPayment) + SUM(dblWriteOffAmount)
+			 , PD.intInvoiceId
+		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
+		INNER JOIN @ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
+		GROUP BY PD.intInvoiceId
+	) PD ON I.intInvoiceId = PD.intInvoiceId
+	LEFT JOIN (
+		SELECT dblPayment = SUM(dblPayment) * -1
+			 , APD.intInvoiceId
+		FROM dbo.tblAPPaymentDetail APD WITH (NOLOCK)
+		INNER JOIN tblAPPayment P ON APD.intPaymentId = P.intPaymentId
+		WHERE P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+		GROUP BY APD.intInvoiceId
+	) APD ON I.intInvoiceId = APD.intInvoiceId
+	LEFT JOIN @CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 	WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 	  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
