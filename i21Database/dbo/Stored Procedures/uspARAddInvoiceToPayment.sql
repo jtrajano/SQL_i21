@@ -266,7 +266,6 @@ BEGIN TRY
 			ON P.[intPaymentId] = PD.[intPaymentId]
 	WHERE
 		P.[intPaymentId] = @PaymentId
-		AND P.[strPaymentMethod] <> 'Prepay'
 
 	
 END TRY
