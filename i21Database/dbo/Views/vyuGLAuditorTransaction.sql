@@ -5,8 +5,12 @@ SELECT
 	,ACC.strAccountId
 	,ACC.strDescription strAccountDescription
 	,AG.strAccountGroup
-	,Currency.strCurrency
-	,CASE WHEN (A.strTotalTitle = 'Total') THEN '' ELSE EM.strName END COLLATE Latin1_General_CI_AS strUserName
+	,A.ysnGroupHeader
+	,A.ysnGroupFooter
+	,A.ysnSummary
+	,A.ysnSummaryFooter
+	,A.ysnSpace
+	,CASE WHEN (A.strTotalTitle = 'Total') THEN '' ELSE A.strUserName END COLLATE Latin1_General_CI_AS strUserName
 FROM tblGLAuditorTransaction A
 LEFT JOIN tblGLAccount ACC ON ACC.intAccountId = A.intAccountId
 LEFT JOIN tblGLAccountGroup AG ON AG.intAccountGroupId = ACC.intAccountGroupId

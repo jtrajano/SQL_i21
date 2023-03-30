@@ -9,13 +9,7 @@ BEGIN
 	SET ANSI_NULLS ON;
 	SET NOCOUNT ON;
 
-    DECLARE @strError NVARCHAR(MAX), @ysnAllowZeroEntry BIT , @ysnZeroEntry BIT, 
-    @dblTotalDebitSummary NUMERIC(18,2) = 0, 
-    @dblTotalCreditSummary NUMERIC(18,2) = 0,
-    @dblTotalDebitUnitSummary NUMERIC(18,2) = 0,
-    @dblTotalCreditUnitSummary NUMERIC(18,2) = 0
-
-
+    DECLARE @strError NVARCHAR(MAX), @ysnAllowZeroEntry BIT , @ysnZeroEntry BIT
 
     DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 0;
     DECLARE @intDefaultCurrencyId INT, @strDefaultCurrency NVARCHAR(10)
@@ -41,8 +35,6 @@ BEGIN
                 , A.dtmDateEntered
                 , dblDebit = ISNULL(A.dblDebit, 0)
                 , dblCredit = ISNULL(A.dblCredit, 0)
-                --, dblDebitForeign = CASE WHEN intCurrencyId <> @intDefaultCurrencyId THEN ISNULL(A.dblDebitForeign, 0) ELSE 0 END
-                --, dblCreditForeign = CASE WHEN intCurrencyId <> @intDefaultCurrencyId THEN ISNULL(A.dblCreditForeign, 0) ELSE 0 END
                 , dblDebitForeign = ISNULL(A.dblDebitForeign, 0)
                 , dblCreditForeign = ISNULL(A.dblCreditForeign, 0)
                 , A.strPeriod 
@@ -197,11 +189,7 @@ BEGIN
                             , strTotalTitle
                             , strGroupTitle
                             , intEntityId
-                            --, dblDebit
-                            --, dblCredit
                             , dblBeginningBalance
-                            --, dblDebitForeign
-                            --, dblCreditForeign
                             , dblBeginningBalanceForeign
                             , strCurrency
                             , strAccountId
@@ -219,11 +207,7 @@ BEGIN
                                 , 'Beginning Balance'
                                 , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                                 , @intEntityId
-                                --, @beginBalanceDebit
-                                --, @beginBalanceCredit
                                 , @beginBalance
-                                --, @beginBalanceDebitForeign
-                                --, @beginBalanceCreditForeign     
                                 , @beginBalanceForeign            
                                 , strCurrency
                                 , strAccountId
@@ -285,26 +269,17 @@ BEGIN
                         
                             , sum(dblDebit - dblCredit) OVER ( ORDER BY dtmDate, intGLDetailId)  + @beginBalance  dblEndingBalance
                             , sum(dblDebitForeign - dblCreditForeign) OVER ( ORDER BY dtmDate, intGLDetailId) + @beginBalanceForeign  dblEndingBalanceForeign
-
-
-                        -- , sum(dblDebit - dblCredit) OVER ( ORDER BY dtmDate, intGLDetailId)  - @beginBalance  dblBeginningBalance
-                        -- , sum(dblDebitForeign - dblCreditForeign) OVER ( ORDER BY dtmDate, intGLDetailId)  - @beginBalanceForeign  dblBeginningBalanceForeign
                             FROM #AuditorTransactions 
                             WHERE @intAccountId =intAccountId 
                             AND @intCurrencyId = intCurrencyId   
 
                         ),
                         CTEBB AS(
-
                             SELECT *,
                             dblBeginningBalance =  dblEndingBalance- (dblDebit- dblCredit),
                             dblBeginningBalanceForeign =  dblEndingBalanceForeign- (dblDebitForeign- dblCreditForeign)
-                            -- dblEndingBalance - (dblDebit - dblCredit)  dblBeginningBalance ,
-                            -- dblEndingBalanceForeign - (dblDebitForeign - dblCreditForeign) dblBeginningBalanceForeign
                             FROM 
-                            CTE 
-
-                            )
+                            CTE )
                             INSERT INTO tblGLAuditorTransaction (
                                 ysnGroupHeader
                                 ,intType
@@ -424,13 +399,6 @@ BEGIN
                                 FROM #AuditorTransactions 
                                 WHERE @intAccountId =intAccountId 
                                 AND @intCurrencyId = intCurrencyId    
-
-                                SELECT 
-                                @dblTotalDebitSummary+=ISNULL(@dblTotalDebit,0),
-                                @dblTotalCreditSummary += ISNULL(@dblTotalCredit,0),
-                                @dblTotalDebitUnitSummary+=ISNULL(@dblTotalSourceUnitDebit,0),
-                                @dblTotalCreditUnitSummary +=ISNULL(@dblTotalSourceUnitCredit,0)
-
 
                                         -- Total record
                             INSERT INTO tblGLAuditorTransaction (
@@ -580,13 +548,41 @@ BEGIN
 				DELETE FROM #TransactionGroupAll WHERE @intAccountId = intAccountId
             END
 
+        INSERT INTO tblGLAuditorTransaction (ysnSpace,intType,intGeneratedBy,intEntityId) SELECT 1, 0, @intEntityId, @intEntityId --space
 
-            SELECT 
-            @dblTotalDebitSummary dblTotalDebitSummary,
-            @dblTotalCreditSummary dblTotalCreditSummary,
-            @dblTotalDebitUnitSummary dblTotalDebitUnitSummary,
-            @dblTotalCreditUnitSummary dblTotalCreditUnitSummary
-        
+        IF @ysnSuppressZero = 1
+            INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+                SELECT 1,0, @intEntityId, @intEntityId,
+                strCurrency,
+                SUM(ISNULL(dblDebit,0)) dblDebit, 
+                SUM(ISNULL(dblCredit,0)) dblCredit,
+                SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
+                FROM
+                #AuditorTransactions  A 
+                GROUP BY strCurrency
+        ELSE
+                INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+                SELECT 1,0, @intEntityId, @intEntityId,
+                SM.strCurrency,
+                SUM(ISNULL(dblDebit,0)) dblDebit, 
+                SUM(ISNULL(dblCredit,0)) dblCredit,
+                SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
+                FROM
+                #AuditorTransactions  A  RIGHT JOIN tblSMCurrency SM ON SM.intCurrencyID = A.intCurrencyId
+                GROUP BY SM.strCurrency
+
+
+          INSERT INTO tblGLAuditorTransaction (ysnSummaryFooter, intType,intGeneratedBy,intEntityId,strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+            SELECT 1, 0, @intEntityId, @intEntityId,
+            'Final Total',
+            SUM(ISNULL(dblDebit,0)) dblDebit, 
+            SUM(ISNULL(dblCredit,0)) dblCredit,
+            SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
+            FROM
+            #AuditorTransactions  A 
+            
+
+            
     END TRY
     BEGIN CATCH
         SET @strError = ERROR_MESSAGE()
