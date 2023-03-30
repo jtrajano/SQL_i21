@@ -1455,6 +1455,7 @@
     <Build Include="dbo\Tables\tblGLAccountDefaultDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountGroup.sql" />
     <Build Include="dbo\Tables\tblGLAccountGroupCluster.sql" />
+    <Build Include="dbo\Tables\tblGLAccountGroupClusterDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountReallocation.sql" />
     <Build Include="dbo\Tables\tblGLAccountReallocationDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountSegment.sql" />
