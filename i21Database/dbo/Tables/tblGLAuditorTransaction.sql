@@ -10,6 +10,7 @@
 	[intAccountId] INT NULL,
 	[intTransactionId] INT NULL,
 	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS  NULL,
+	[strAccountId] NVARCHAR(40) COLLATE Latin1_General_CI_AS  NULL,
 	[dtmDate] DATETIME NULL,
 	[dblDebit] NUMERIC(18, 6) NULL,
 	[dblCredit] NUMERIC(18, 6) NULL,

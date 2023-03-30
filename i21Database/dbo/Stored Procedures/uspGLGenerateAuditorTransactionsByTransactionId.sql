@@ -10,20 +10,21 @@ BEGIN
 
     DECLARE @strError NVARCHAR(MAX)
 
+    DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;
+
     BEGIN TRANSACTION;
 
     BEGIN TRY
-	    DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;
-    
+	    
         IF OBJECT_ID('tempdb..#AuditorTransactions') IS NOT NULL
             DROP TABLE #AuditorTransactions
 
         ;WITH T AS (
-            SELECT
+           SELECT
                 A.intEntityId
-                , strBatchId = ISNULL(A.strBatchId, '')
+                , A.strBatchId
                 , A.intAccountId
-                , strTransactionId = ISNULL(A.strTransactionId, '')
+                , A.strTransactionId
                 , A.intTransactionId
                 , A.intCurrencyId
                 , A.dtmDate
@@ -32,52 +33,47 @@ BEGIN
                 , dblCredit = ISNULL(A.dblCredit, 0)
                 , dblDebitForeign = ISNULL(A.dblDebitForeign, 0)
                 , dblCreditForeign = ISNULL(A.dblCreditForeign, 0)
-                , strPeriod = ISNULL(FP.strPeriod, '')
-                , strDescription = ISNULL(A.strDescription, '')
-                , strCode = ISNULL(A.strCode, '')
-                , strReference = ISNULL(A.strReference, '')
-                , strComments = ISNULL(A.strComments, '')
-                , strJournalLineDescription = ISNULL(A.strJournalLineDescription, '')
-                , strUOMCode = ISNULL(U.strUOMCode, '')
-                , strTransactionType = ISNULL(A.strTransactionType, '')
-                , strModuleName = ISNULL(A.strModuleName, '')
-                , strTransactionForm = ISNULL(A.strTransactionForm, '')
-                , strDocument = ISNULL(A.strDocument, '')
+                , A.strPeriod 
+                , A.strDescription
+                , A.strAccountDescription
+                , A.strCode
+                , A.strReference
+                , A.strComments
+                , A.strJournalLineDescription
+                , A.strUOMCode 
+                , A.strTransactionType 
+                , A.strModuleName 
+                , A.strTransactionForm 
+                , A.strDocument
                 , A.dblExchangeRate
-                , strStatus = CASE WHEN A.ysnIsUnposted = 0 THEN 'Posted' ELSE 'Audit Record ' END
+                , A.strStatus 
                 , A.dblDebitReport
                 , A.dblCreditReport
                 , A.dblSourceUnitDebit
                 , A.dblSourceUnitCredit
                 , A.dblDebitUnit
                 , A.dblCreditUnit
-                , strCommodityCode = ISNULL(ICCom.strCommodityCode, '')
-                , strSourceDocumentId = ISNULL(A.strSourceDocumentId, '')
-                , strLocation = ISNULL(Loc.strLocationName, '')
-                , strCompanyLocation = ISNULL(CL.strLocationName, '')
-                , strSourceUOMId = ISNULL(ICUOM.strUnitMeasure, '')
+                , A.strCommodityCode 
+                , A.strSourceDocumentId
+                , strLocation = LOC.strCode
+                , A.strCompanyLocation 
+                , A.strSourceUOMId 
                 , A.intSourceEntityId
-                , strSourceEntity = ISNULL(SE.strName, '')
-                , strSourceEntityNo = ISNULL(SE.strEntityNo, '')
-            FROM tblGLDetail A
-	        LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
-            LEFT JOIN tblSMCompanyLocation Loc ON A.intSourceLocationId = Loc.intCompanyLocationId
-            LEFT JOIN tblICUnitMeasure ICUOM ON ICUOM.intUnitMeasureId = A.intSourceUOMId
-            LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
-            LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
-            LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
-            LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
-            OUTER APPLY (
-		        SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
-	         )U
-            OUTER APPLY (
-		        SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
-	         )SE
+                , A.strSourceEntity 
+                , A.strSourceEntityNo 
+                , strLOBSegmentDescription = LOB.strCode
+                , A.strCurrency
+                , A.strAccountId
+            FROM  
+			vyuGLDetail A 
+            outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 3)LOC
+			outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 5)LOB
             WHERE 
                 A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
         )
         SELECT * INTO #AuditorTransactions FROM T ORDER BY T.strTransactionId, T.dtmDate
 
+      
         DECLARE @dtmNow DATETIME = GETDATE()
 
         IF OBJECT_ID('tempdb..#TransactionGroup') IS NOT NULL
@@ -87,116 +83,146 @@ BEGIN
         BEGIN
             SELECT 
                 strTransactionId
+                , intCurrencyId
+                , strCurrency
                 , dblDebit = SUM(ISNULL(dblDebit, 0))
                 , dblCredit = SUM(ISNULL(dblCredit, 0))
+                , dblDebitUnit = SUM(ISNULL(dblDebitUnit, 0))
+                , dblCreditUnit = SUM(ISNULL(dblCreditUnit, 0))
+                , dblSourceUnitDebit = SUM(ISNULL(dblSourceUnitDebit,0))
+                , dblSourceUnitCredit = SUM(ISNULL(dblSourceUnitCredit,0))
                 , dblDebitForeign = SUM(ISNULL(dblDebitForeign, 0))
                 , dblCreditForeign = SUM(ISNULL(dblCreditForeign, 0))
                 , dblAmount = (SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)))
                 , dblAmountForeign = (SUM(ISNULL(dblDebitForeign, 0)) - SUM(ISNULL(dblCreditForeign, 0)))
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
-            GROUP BY strTransactionId
+            GROUP BY strTransactionId, intCurrencyId, strCurrency
+
+
+           
+
+            
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
                 DECLARE 
                     @strTransactionId NVARCHAR(40) = '',
+                    @intCurrencyId INT = NULL,
                     @dblAmount NUMERIC(18, 6) = 0,
                     @dblAmountForeign NUMERIC(18, 6) = 0
 
-                SELECT TOP 1 @strTransactionId = strTransactionId
+                SELECT TOP 1 @strTransactionId = strTransactionId , @intCurrencyId = intCurrencyId
                 FROM #TransactionGroup 
-                ORDER BY strTransactionId
+                ORDER BY strTransactionId, intCurrencyId
 
                 INSERT INTO tblGLAuditorTransaction (
-                    intType
+                    ysnGroupHeader
+                    , intType
                     , intGeneratedBy
                     , dtmDateGenerated
                     , intEntityId
+                    , strBatchId
                     , intAccountId
-                    , intTransactionId
                     , strTransactionId
+                    , intTransactionId
+                    , intCurrencyId
                     , dtmDate
                     , dtmDateEntered
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblExchangeRate
-                    , intCurrencyId
-                    , strBatchId
-                    , strCode
-                    , strTransactionType
-                    , strModuleName
-                    , strTransactionForm
-                    , strReference
-                    , strDocument
-                    , strComments
-                    , strPeriod
+                    , strPeriod 
                     , strDescription
-                    , dblSourceUnitDebit
-                    , dblSourceUnitCredit
+                    , strAccountDescription
+                    , strCode
+                    , strReference
+                    , strComments
+                    , strJournalLineDescription
+                    , strUOMCode 
+                    , strTransactionType 
+                    , strModuleName 
+                    , strTransactionForm 
+                    , strDocument
+                    , dblExchangeRate
+                    , strStatus 
                     , dblDebitReport
                     , dblCreditReport
-                    , strCommodityCode
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , strCommodityCode 
                     , strSourceDocumentId
                     , strLocation
-                    , strCompanyLocation
-                    , strJournalLineDescription
-                    , strUOMCode
-                    , strStatus
+                    , strCompanyLocation 
+                    , strSourceUOMId 
                     , intSourceEntityId
-                    , strSourceEntity
-                    , strSourceEntityNo
+                    , strSourceEntity 
+                    , strSourceEntityNo 
+                    , strLOBSegmentDescription
+                    , strCurrency
+                    , strAccountId
                 )
                 SELECT 
-                    1 -- By TransactionId, 0 - by AccountId
+                    0
+                    ,1 -- By TransactionId, 0 - by AccountId
                     , @intEntityId
                     , @dtmNow
                     , intEntityId
+                    , strBatchId
                     , intAccountId
-                    , intTransactionId
                     , strTransactionId
+                    , intTransactionId
+                    , intCurrencyId
                     , dtmDate
                     , dtmDateEntered
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblExchangeRate
-                    , intCurrencyId
-                    , strBatchId
-                    , strCode
-                    , strTransactionType
-                    , strModuleName
-                    , strTransactionForm
-                    , strReference
-                    , strDocument
-                    , strComments
-                    , strPeriod
+                    , strPeriod 
                     , strDescription
-                    , dblSourceUnitDebit
-                    , dblSourceUnitCredit
+                    , strAccountDescription
+                    , strCode
+                    , strReference
+                    , strComments
+                    , strJournalLineDescription
+                    , strUOMCode 
+                    , strTransactionType 
+                    , strModuleName 
+                    , strTransactionForm 
+                    , strDocument
+                    , dblExchangeRate
+                    , strStatus 
                     , dblDebitReport
                     , dblCreditReport
-                    , strCommodityCode
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , strCommodityCode 
                     , strSourceDocumentId
                     , strLocation
-                    , strCompanyLocation
-                    , strJournalLineDescription
-                    , strUOMCode
-                    , strStatus
+                    , strCompanyLocation 
+                    , strSourceUOMId 
                     , intSourceEntityId
-                    , strSourceEntity
-                    , strSourceEntityNo
+                    , strSourceEntity 
+                    , strSourceEntityNo 
+                    , strLOBSegmentDescription
+                    , strCurrency
+                    , strAccountId
                 FROM #AuditorTransactions 
-                WHERE strTransactionId = @strTransactionId
+                WHERE @strTransactionId =strTransactionId 
+                AND @intCurrencyId = intCurrencyId
                 ORDER BY dtmDate
 
                 -- Total record
                 INSERT INTO tblGLAuditorTransaction (
-                    intType
-                    , intGeneratedBy
+                    ysnGroupHeader
+                    , intType
+                    , intGeneratedBy      
                     , dtmDateGenerated
                     , strTransactionId
                     , strTotalTitle
@@ -204,34 +230,57 @@ BEGIN
                     , intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit 
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblTotal
                     , dblTotalForeign
+                    , strCurrency
                 )
                 SELECT TOP 1
                     1
+                    ,1
                     , @intEntityId
                     , @dtmNow
                     , @strTransactionId
                     , 'Total'
-                    , 'Transaction ID: ' + @strTransactionId
+                    , 'Transaction ID: ' + @strTransactionId + ', Currency: ' + strCurrency
                     , @intEntityId
                     , dblDebit
                     , dblCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit 
                     , dblDebitForeign
                     , dblCreditForeign
                     , dblAmount
                     , dblAmountForeign
+                    , strCurrency
                     FROM #TransactionGroup 
                     WHERE strTransactionId = @strTransactionId
+                    AND @intCurrencyId = intCurrencyId
+            
 
-                DELETE #TransactionGroup WHERE strTransactionId = @strTransactionId
+                DELETE #TransactionGroup WHERE @strTransactionId = strTransactionId AND @intCurrencyId = intCurrencyId
             END
+
+
         END
+
+        SELECT 
+        SUM(dblDebit) dblTotalDebitSummary,
+        SUM(dblCredit) dblTotalCreditSummary,
+        SUM(dblDebitUnit) dblTotalDebitUnitSummary,
+        SUM(dblCreditUnit) dblTotalCreditUnitSummary
+        FROM #AuditorTransactions
+
     END TRY
     BEGIN CATCH
-        SET @strError = @@ERROR
+        SET @strError = ERROR_MESSAGE()
         GOTO ROLLBACK_TRANSACTION;
     END CATCH
 
