@@ -80,13 +80,7 @@ BEGIN TRY
 	OUTER APPLY 
 	(
 		SELECT strLogMessage =
-			CASE WHEN (ISNULL(IMP.strBulkDensity, '') <> '' AND ISNUMERIC(IMP.strBulkDensity) = 0) THEN 'DENSITY, '
-				ELSE ''
-			END 
-			+ CASE WHEN (ISNULL(IMP.strFines, '') <> '' AND ISNUMERIC(IMP.strFines) = 0) THEN 'FINES, '
-				ELSE ''
-			END
-			+ CASE WHEN (ISNULL(IMP.strTeaVolume, '') <> '' AND ISNUMERIC(IMP.strTeaVolume) = 0) THEN 'VOLUME, '
+			CASE WHEN (ISNULL(IMP.strFines, '') <> '' AND ISNUMERIC(IMP.strFines) = 0) THEN 'FINES, '
 				ELSE ''
 			END
 			+ CASE WHEN (ISNULL(IMP.strDustContent, '') <> '' AND ISNUMERIC(IMP.strDustContent) = 0) THEN 'DUST LEVEL, '
@@ -112,9 +106,7 @@ BEGIN TRY
 		AND IMP.ysnSuccess = 1
 		AND 
 		(
-			(ISNULL(IMP.strBulkDensity, '') <> '' AND ISNUMERIC(IMP.strBulkDensity) = 0)
-		OR	(ISNULL(IMP.strFines, '') <> '' AND ISNUMERIC(IMP.strFines) = 0)
-		OR	(ISNULL(IMP.strTeaVolume, '') <> '' AND ISNUMERIC(IMP.strTeaVolume) = 0)
+			(ISNULL(IMP.strFines, '') <> '' AND ISNUMERIC(IMP.strFines) = 0)
 		OR	(ISNULL(IMP.strDustContent, '') <> '' AND ISNUMERIC(IMP.strDustContent) = 0)
 		OR	(ISNULL(IMP.strAppearance, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
 		OR	(ISNULL(IMP.strHue, '') <> '' AND ISNUMERIC(IMP.strHue) = 0)
@@ -215,10 +207,10 @@ BEGIN TRY
 			 , strIntensity				= IMP.strIntensity
 			 , strTaste					= IMP.strTaste
 			 , strMouthFeel				= IMP.strMouthfeel
-			 , [strBulkDensity]			= IMP.dblBulkDensity
+			 , [strBulkDensity]			= CAST(IMP.dblBulkDensity AS NVARCHAR(50))
 			 , dblTeaMoisture			= IMP.dblTeaMoisture
 			 , [strFines]				= IMP.strFines
-			 , [strTeaVolume]			= IMP.dblTeaVolume
+			 , [strTeaVolume]			= CAST(IMP.dblTeaVolume AS NVARCHAR(50))
 			 , [strDustContent]			= IMP.strDustContent
 			 , strAirwayBillNumberCode	= IMP.strAirwayBillNumberCode
 			 , dblB1Price				= 0
@@ -291,10 +283,10 @@ BEGIN TRY
 			, strIntensity				= IMP.strIntensity
 			, strTaste					= IMP.strTaste
 			, strMouthFeel				= IMP.strMouthfeel
-			, [strBulkDensity]			= IMP.dblBulkDensity
+			, [strBulkDensity]			= CAST(IMP.dblBulkDensity AS NVARCHAR(50))
 			, dblTeaMoisture			= IMP.dblTeaMoisture
 			, [strFines]				= IMP.strFines
-			, [strTeaVolume]			= IMP.dblTeaVolume
+			, [strTeaVolume]			= CAST(IMP.dblTeaVolume AS NVARCHAR(50))
 			, [strDustContent]			= IMP.strDustContent
 			, strAirwayBillNumberCode	= IMP.strAirwayBillNumberCode
 			, dblB1Price				= IMP.dblB1Price
@@ -949,15 +941,15 @@ BEGIN TRY
 		,P.intPropertyId
 		,''
 		,CASE 
-			WHEN P.strPropertyName = 'Density' AND isNumeric(CI.strBulkDensity)=1 
+			WHEN P.strPropertyName = 'Density'
 				THEN CI.strBulkDensity
 			WHEN P.strPropertyName = 'Moisture'
-				THEN CI.dblTeaMoisture
-			WHEN P.strPropertyName = 'Fines' AND isNumeric(CI.strFines)=1 
+				THEN CAST(CI.dblTeaMoisture AS NVARCHAR(50))
+			WHEN P.strPropertyName = 'Fines'
 				THEN CI.strFines
-			WHEN P.strPropertyName = 'Volume' AND isNumeric(CI.strTeaVolume)=1 
+			WHEN P.strPropertyName = 'Volume'
 				THEN CI.strTeaVolume
-			WHEN P.strPropertyName = 'Dust Level' AND isNumeric(CI.strDustContent)=1 
+			WHEN P.strPropertyName = 'Dust Level' 
 				THEN CI.strDustContent
 			WHEN P.strPropertyName = 'Appearance' AND isNumeric(CI.strAppearance)=1 
 				THEN CI.strAppearance
