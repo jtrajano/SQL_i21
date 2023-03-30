@@ -61,5 +61,8 @@
 	[strAccountDescription]  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnGroupHeader] BIT NULL,
 	[ysnGroupFooter] BIT NULL,
+	[ysnSummary] BIT NULL,
+	[ysnSummaryFooter] BIT NULL,
+	[ysnSpace] BIT NULL,
 	CONSTRAINT [PK_tblGLAuditorTransaction] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
 )
