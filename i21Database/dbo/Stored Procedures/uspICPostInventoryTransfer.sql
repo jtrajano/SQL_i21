@@ -785,8 +785,8 @@ BEGIN
 				,[strSourceNumber]
 		)
 		SELECT
-				[intItemId] 
-				,[intItemLocationId] 
+				FromStock.[intItemId] 
+				,FromStock.[intItemLocationId] 
 				,[intItemUOMId] 
 				,[dtmDate] 
 				,-[dblQty] 
@@ -805,7 +805,7 @@ BEGIN
 				,[strTransactionId] 
 				,[intTransactionDetailId] 
 				,[intFobPointId] = @FOB_DESTINATION
-				,[intInTransitSourceLocationId] = FromStock.intItemLocationId
+				,[intInTransitSourceLocationId] = targetLocation.intItemLocationId --FromStock.intItemLocationId
 				,[intForexRateTypeId] = FromStock.intForexRateTypeId
 				,[dblForexRate] = FromStock.dblForexRate
 				,[intSourceEntityId]
@@ -813,6 +813,11 @@ BEGIN
 				,[strSourceType]
 				,[strSourceNumber]
 		FROM	tblICInventoryTransaction FromStock 
+				INNER JOIN tblICInventoryTransfer tf
+					ON FromStock.strTransactionId = tf.strTransferNo
+				INNER JOIN tblICItemLocation targetLocation
+					ON targetLocation.intItemId = FromStock.intItemId
+					AND targetLocation.intLocationId = tf.intToLocationId
 		WHERE	FromStock.strTransactionId = @strTransactionId
 				AND ISNULL(FromStock.ysnIsUnposted, 0) = 0 
 				AND FromStock.strBatchId = @strBatchId
