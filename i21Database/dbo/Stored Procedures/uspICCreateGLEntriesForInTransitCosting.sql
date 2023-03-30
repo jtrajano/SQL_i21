@@ -52,6 +52,7 @@ DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
 -- Get the GL Account ids to use
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
+
 INSERT INTO @GLAccounts (
 	intItemId 
 	,intItemLocationId 
@@ -65,11 +66,42 @@ SELECT	Query.intItemId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
 		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
 		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
-		,intTransactionTypeId
+		,Query.intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
 					t.intItemId
-					, intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+					, intItemLocationId = t.intItemLocationId
+					, t.intTransactionTypeId
+			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+						ON t.intItemId = i.intItemId 
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			WHERE	t.strBatchId = @strBatchId
+					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+					AND t.intInTransitSourceLocationId IS NULL 
+		) Query
+
+
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intInventoryId 
+	,intContraInventoryId 
+	,intAutoNegativeId 
+	,intTransactionTypeId
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,Query.intTransactionTypeId
+FROM	(
+			SELECT	DISTINCT 
+					t.intItemId
+					, intItemLocationId = t.intInTransitSourceLocationId
 					, t.intTransactionTypeId
 			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
 						ON t.intItemId = i.intItemId 
@@ -81,6 +113,13 @@ FROM	(
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 					AND t.intInTransitSourceLocationId IS NOT NULL 
 		) Query
+		LEFT JOIN @GLAccounts gla
+			ON gla.intItemId = Query.intItemId
+			AND gla.intItemLocationId = Query.intItemLocationId
+			AND gla.intTransactionTypeId = Query.intTransactionTypeId
+WHERE
+	gla.intItemId IS NULL 
+
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -246,7 +285,7 @@ BEGIN
 	DECLARE @intFunctionalCurrencyId AS INT
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 END 
-;
+;	
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
@@ -269,6 +308,7 @@ WITH ForGLEntries_CTE (
 	,dblForexRate
 	,intSourceEntityId
 	,intCommodityId
+	,intInTransitSourceLocationId
 )
 AS 
 (
@@ -291,6 +331,7 @@ AS
 			,t.dblForexRate
 			,t.intSourceEntityId
 			,i.intCommodityId
+			,t.intInTransitSourceLocationId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
@@ -300,13 +341,23 @@ AS
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 	WHERE	t.strBatchId = @strBatchId
 			--AND t.intFobPointId IS NOT NULL 	
-			AND t.intInTransitSourceLocationId IS NOT NULL 
+			--AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 			AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
+/*
+	Debit ........ In-Transit
+	Credit ................................... Inventory
+
+	OR 
+
+	Debit ........ COGS
+	Credit ................................... In-Transit 
+
+*/
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
@@ -379,6 +430,82 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				, @InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
+		AND ForGLEntries_CTE.intInTransitSourceLocationId IS NOT NULL 
+
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= DebitUnit.Value 
+		,dblCreditUnit				= CreditUnit.Value 
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
+		,strCode					= 'IC' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= DebitForeign.Value 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= CreditForeign.Value
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)	
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
+WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
+				@InventoryTransactionTypeId_WriteOffSold
+				, @InventoryTransactionTypeId_RevalueSold
+				, @InventoryTransactionTypeId_AutoNegative
+				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+			)
+		AND ForGLEntries_CTE.intInTransitSourceLocationId IS NULL
 
 UNION ALL 
 SELECT	
@@ -453,6 +580,8 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				, @InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
+		AND @AccountCategory_ContraInventory = 'Cost of Goods'
+
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto Variance 
