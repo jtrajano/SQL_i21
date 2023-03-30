@@ -82,8 +82,12 @@ END
 	WHERE ISNULL(CF.ysnFreightOnly, 0) = 1
 		AND (ISNULL(LR.dblUnitCost, 0) != 0 OR ISNULL(LR.dblFreightRate, 0) != 0 OR ISNULL(LR.dblPurSurcharge, 0) != 0)
 		AND DH.intLoadHeaderId = @intLoadHeaderId
+	
+	DECLARE @ysnCompanyOwnedCarrier BIT = 0
+	SELECT @ysnCompanyOwnedCarrier = ISNULL(ysnCompanyOwnedCarrier, 0) FROM tblSMShipVia
+	WHERE intEntityId = (SELECT intShipViaId = ISNULL(intShipViaId, 0) FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId)
 
-	IF EXISTS (SELECT TOP 1 1 FROM #tmpList)
+	IF EXISTS (SELECT TOP 1 1 FROM #tmpList) AND (ISNULL(@ysnCompanyOwnedCarrier, 0) <> 1)
 	BEGIN
 		DECLARE	@ids AS NVARCHAR(MAX)
 
