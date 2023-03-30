@@ -10718,7 +10718,8 @@
     <Build Include="dbo\Stored Procedures\uspMFBatchSheetReportDetail.sql" />
     <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
-  </ItemGroup>
+    <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
+ </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
