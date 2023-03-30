@@ -3795,7 +3795,6 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Options Trading Months', strDescriptio
 UPDATE tblSMMasterMenu SET strMenuName = 'Live DPR', strDescription = 'Live DPR' WHERE strMenuName = 'Daily Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Position Report', strDescription = 'Position Report' WHERE strMenuName = 'Live DPR' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Coverage/Risk Inquiry', strDescription = N'Coverage/Risk Inquiry' WHERE strMenuName = 'Coverage Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = N'Mark To Market', strDescription = N'Mark To Market' WHERE strMenuName = 'M2M Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Profit and Loss Analysis', strDescription = N'Profit and Loss Analysis'  WHERE strMenuName = 'PnL Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Position Reconciliation Report', strDescription = N'Position Reconciliation Report' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 /* END OF RENAMING  */
@@ -4073,6 +4072,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Option Lifecycle' AND strModule
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Futures360' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'M2M Entry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName IN ('Mark To Market', 'M2M Inquiry') AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'M2M Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Assign Futures To Contracts' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Contract' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Customer Position Inquiry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
