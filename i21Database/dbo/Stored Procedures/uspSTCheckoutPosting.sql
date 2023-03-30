@@ -6227,7 +6227,7 @@ BEGIN
 									END as ysnManual,
 								siteDevice.intSiteID,
 								fuelInventory.intDeviceId,
-								tankMonitorDevice.intDeviceId as intTankMonitorDeviceId,
+								siteDeviceTankMonitor.intDeviceTankMonitorId,
 								tankMonitorDevice.strSerialNumber                
 				FROM			tblSTCheckoutFuelInventory fuelInventory
 				INNER JOIN		tblTMDevice device
@@ -6238,8 +6238,10 @@ BEGIN
 				ON				fuelInventory.intDeviceId = siteDevice.intDeviceId
 				LEFT JOIN		tblTMSiteDeviceTankMonitor siteDeviceTankMonitor
 				ON				siteDevice.intSiteID = siteDeviceTankMonitor.intSiteId
+				LEFT JOIN		tblTMDeviceTankMonitor deviceTankMonitor
+				ON				siteDeviceTankMonitor.intDeviceTankMonitorId = deviceTankMonitor.intDeviceTankMonitorId
 				LEFT JOIN		tblTMDevice tankMonitorDevice
-				ON				tankMonitorDevice.intDeviceId = siteDeviceTankMonitor.intDeviceTankMonitorId
+				ON				tankMonitorDevice.intDeviceId = deviceTankMonitor.intDeviceId
                 WHERE			fuelInventory.intCheckoutId = @intCheckoutId
 				------------------------------------------------------
 				---------- TRANSFER TANK READINGS TO TM  -------------
