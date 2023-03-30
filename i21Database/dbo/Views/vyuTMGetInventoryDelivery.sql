@@ -15,6 +15,7 @@ SELECT
 	,dblQuantity = A.dblQty
 	,A.intStorageLocationId
 	,A.strTransactionForm
+	,E.intTransactionTypeId
 FROM tblICInventoryTransaction A
 INNER JOIN tblICItem B 
 	ON A.intItemId = B.intItemId
