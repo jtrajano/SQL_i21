@@ -69,7 +69,7 @@ BEGIN TRY
 			END
 			ELSE 
 			BEGIN
-				SET @Message = 'Transport Load Posted Successfully'
+				SET @Message = 'Transaction successfully posted.'
 			END
 
 		END TRY
