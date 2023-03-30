@@ -24,8 +24,8 @@ SELECT
    ,detail.dtmActualPickupFrom                          
    ,detail.dtmActualPickupTo                          
    ,load.intDriverId                      
-   ,dblLongitude = case when detail.strType = 'Outbound' then companylocation.dblLongitude else location.dblLongitude end                  
-   ,dblLatitude =  case when detail.strType = 'Outbound' then companylocation.dblLatitude else location.dblLatitude end                   
+   ,dblLongitude = case when detail.strType = 'Outbound' and entity.intEntityId is null then companylocation.dblLongitude else location.dblLongitude end                  
+   ,dblLatitude =  case when detail.strType = 'Outbound' and entity.intEntityId is null then companylocation.dblLatitude else location.dblLatitude end                   
    ,ysnPickup               
    ,detail.intSellerId          
    ,dblQuantity = sum(detail.dblQuantity)          
@@ -65,7 +65,7 @@ Group by detail.intLoadHeaderId
    ,detail.dtmActualPickupFrom                          
    ,detail.dtmActualPickupTo                          
    ,load.intDriverId                      
-   ,case when detail.strType = 'Outbound' then companylocation.dblLongitude else location.dblLongitude end                  
-   ,case when detail.strType = 'Outbound' then companylocation.dblLatitude else location.dblLatitude end                   
+   ,case when detail.strType = 'Outbound' and entity.intEntityId is null then companylocation.dblLongitude else location.dblLongitude end                  
+   ,case when detail.strType = 'Outbound' and entity.intEntityId is null then companylocation.dblLatitude else location.dblLatitude end                   
    ,ysnPickup               
    ,detail.intSellerId
