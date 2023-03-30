@@ -370,11 +370,12 @@ CREATE TABLE #tmpDailyStockPosition
 	FROM 
 		@Transactions t
 		INNER JOIN tblICInventoryTransfer InvTransfer 
-			ON InvTransfer.intInventoryTransferId = t.intTransactionId AND InvTransfer.strTransferType = 'Location to Location'
-	INNER JOIN tblICItemLocation ItemLocation
-		ON ItemLocation.intItemLocationId = t.intItemLocationId 
-		AND InvTransfer.intToLocationId = ItemLocation.intLocationId
-	WHERE t.intTransactionTypeId = @InventoryTransfer
+			ON InvTransfer.intInventoryTransferId = t.intTransactionId 			
+		INNER JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemLocationId = t.intItemLocationId 
+			AND InvTransfer.intToLocationId = ItemLocation.intLocationId
+	WHERE 
+		t.intTransactionTypeId IN (@InventoryTransfer, @InventoryTransferwithShipment)
 		AND t.intInTransitSourceLocationId IS NULL
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,
@@ -395,12 +396,11 @@ CREATE TABLE #tmpDailyStockPosition
 		@Transactions t
 		INNER JOIN tblICInventoryTransfer InvTransfer 
 			ON InvTransfer.intInventoryTransferId = t.intTransactionId 
-			AND InvTransfer.strTransferType = 'Location to Location'
 		INNER JOIN tblICItemLocation ItemLocation 
-			ON ItemLocation.intItemLocationId = t.intItemLocationId 
+			ON ItemLocation.intItemLocationId = t.intItemLocationId
 			AND InvTransfer.intFromLocationId = ItemLocation.intLocationId
 	WHERE 
-		t.intTransactionTypeId = @InventoryTransfer
+		t.intTransactionTypeId IN (@InventoryTransfer, @InventoryTransferwithShipment)
 		AND t.intInTransitSourceLocationId IS NULL
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,
