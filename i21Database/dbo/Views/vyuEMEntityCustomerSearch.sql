@@ -82,6 +82,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, ysnUAP							= CUSTOMER.ysnUAP
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
+AND CUSTOMER.intDefaultContactId = entityToContact.intEntityToContactId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntity entityContact ON entityContact.intEntityId = entityToContact.intEntityContactId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntityLocation custLocation ON CUSTOMER.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
