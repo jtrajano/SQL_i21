@@ -9246,6 +9246,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLogHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
+    <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
