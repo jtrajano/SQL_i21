@@ -67,6 +67,7 @@ BEGIN
 			,[intFreightTermId]
 			,[dblTax]
 			,[dblDiscount]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[ysnSubCurrency]
 			,[intSubCurrencyCents]
@@ -118,6 +119,7 @@ BEGIN
 			,[intFreightTermId] = L.intFreightTermId
 			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
+			,[intCurrencyExchangeRateTypeId] = ISNULL(LD.intForexRateTypeId,FX.intForexRateTypeId)
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
 									 WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
@@ -223,9 +225,10 @@ BEGIN
 			,[intFreightTermId] = NULL
 			,[dblTax] = 0
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = CASE WHEN (A.intCurrencyId <> @DefaultCurrencyId) THEN 0 ELSE 1 END
-			,[ysnSubCurrency] =	CC.ysnSubCurrency
-			,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
+			,[intCurrencyExchangeRateTypeId] = FX.intForexRateTypeId
+			,[dblExchangeRate] = COALESCE(LC.dblFX, FX.dblFXRate, 1)
+			,[ysnSubCurrency] =	CUR.ysnSubCurrency
+			,[intSubCurrencyCents] = ISNULL(CUR.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
@@ -240,13 +243,14 @@ BEGIN
 			,[strFinancingTransactionNumber] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
+			JOIN tblLGLoadCost LC ON LC.intLoadCostId = A.intLoadCostId 
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL) 
 																	THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 			JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
-			LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = A.intCurrencyId
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = A.intCurrencyId
 			LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -269,6 +273,15 @@ BEGIN
 							AND A.intItemId = CTC.intItemId
 							AND A.intEntityVendorId = CTC.intVendorId
 						) CTC
+			OUTER APPLY (SELECT	TOP 1  
+					intForexRateTypeId = RD.intRateTypeId
+					,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
+					FROM tblSMCurrencyExchangeRate ER
+					JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+					WHERE @DefaultCurrencyId <> ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
+						AND ((ER.intFromCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)))
+					ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE A.intLoadId = @intLoadId
 				AND A.intLoadCostId = ISNULL(NULL, A.intLoadCostId)
 				AND A.intLoadDetailId NOT IN 
