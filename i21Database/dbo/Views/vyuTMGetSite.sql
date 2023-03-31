@@ -184,6 +184,7 @@ OUTER APPLY (
 		AND intLocationId = site.intLocationId AND site.intLocationId IS NOT NULL
 		AND intSubLocationId = site.intCompanyLocationSubLocationId AND site.intCompanyLocationSubLocationId IS NOT NULL
 		AND intItemId = site.intProduct AND site.intProduct IS NOT NULL
+		AND dblQuantity > 0
 	ORDER BY dtmDate DESC
 )invDeliveries
 OUTER APPLY (
