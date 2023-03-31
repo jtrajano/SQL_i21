@@ -259,11 +259,11 @@ BEGIN TRY
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
+							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblShipmentUnitPrice], LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
 			,[dblAmount] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN VP.dblTotal
-				ELSE (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
-				END
+							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblTotal], LOD.dblQuantityTotal), LD.dblQuantity) 
+							END
 			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -972,11 +972,11 @@ BEGIN TRY
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
+							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblShipmentUnitPrice], LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
 			,[dblAmount] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN VP.dblTotal
-				ELSE (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
-				END
+							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblTotal], LOD.dblQuantityTotal), LD.dblQuantity) 
+							END
 			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
