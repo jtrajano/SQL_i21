@@ -279,24 +279,27 @@ BEGIN TRY
 			END			
 		END
 
-	/*(CT-4647) - this block will re-order the pricing number upon deleting pricing layer.*/
-	Update
-		fd
-	set
-		fd.intNumber = t.intOrder	 
-	from
-		(
-			select
-				intPriceFixationDetailId
-				,intOrder = convert(int,ROW_NUMBER() over (order by intPriceFixationDetailId))
-			from
-				tblCTPriceFixationDetail
-			where
-				intPriceFixationId = @intPriceFixationId
-		)t
-		,tblCTPriceFixationDetail fd
-	where
-		fd.intPriceFixationDetailId = t.intPriceFixationDetailId
+		/*(CT-4647) - this block will re-order the pricing number upon deleting pricing layer.*/
+		Update
+			fd
+		set
+			fd.intNumber = t.intOrder
+			,fd.dtmPrevFixationDate = fd.dtmFixationDate
+			,fd.dblPrevQuantity = fd.dblQuantity
+			,fd.dblPrevCashPrice = fd.dblCashPrice
+		from
+			(
+				select
+					intPriceFixationDetailId
+					,intOrder = convert(int,ROW_NUMBER() over (order by intPriceFixationDetailId))
+				from
+					tblCTPriceFixationDetail
+				where
+					intPriceFixationId = @intPriceFixationId
+			)t
+			,tblCTPriceFixationDetail fd
+		where
+			fd.intPriceFixationDetailId = t.intPriceFixationDetailId
 
 		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
 	END

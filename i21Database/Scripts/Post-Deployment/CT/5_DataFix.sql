@@ -296,4 +296,15 @@ BEGIN
 	EXEC uspCTFixCBLogAfterRebuild
 END
 
+update
+	tblCTPriceFixationDetail
+set
+	dtmPrevFixationDate = dtmFixationDate
+	,dblPrevQuantity = dblQuantity
+	,dblPrevCashPrice = dblCashPrice
+where 
+	dtmPrevFixationDate is null
+	or dblPrevQuantity is null
+	or dblPrevCashPrice is null
+	
 GO

@@ -3041,7 +3041,7 @@ BEGIN TRY
 					, cd.intContractTypeId
 					, dblQty = (
 						case
-						when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity
+						when ISNULL(pfd.dblPrevQuantity,0) = pfd.dblQuantity
 						then 0
 						else
 							CASE
@@ -3052,7 +3052,7 @@ BEGIN TRY
 						end
 					)
 					, dblOrigQty = pfd.dblQuantity
-					, dblDynamic =  CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
+					, dblDynamic =  CASE WHEN ISNULL(pfd.dblPrevQuantity,0) = pfd.dblQuantity AND ISNULL(pfd.dblPrevCashPrice,0) <> pfd.dblCashPrice THEN 0 -- When change of price only.
 										ELSE (CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * cd.dblQuantityPerLoad
 											ELSE ISNULL(dblQuantityAppliedAndPriced, 0) END) END
 					, intQtyUOMId = cd.intCommodityUOMId
@@ -3079,24 +3079,16 @@ BEGIN TRY
 					, cd.intSubBookId
 					, intOrderBy = 1
 					, intUserId = @intUserId
-					, intActionId = CASE WHEN (ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures) or (ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures) THEN 67 ELSE 17 END
-					, strNotes = (CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity
-										THEN (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity. Change Futures Price.' ELSE 'Change Quantity.' END)
-										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Futures Price' ELSE NULL END) END)
+					, intActionId = CASE WHEN (isnull(pfd.dblPrevQuantity,0) = pfd.dblQuantity AND isnull(pfd.dblPrevCashPrice,0) <> pfd.dblCashPrice) or (isnull(pfd.dblPrevQuantity,0) <> pfd.dblQuantity AND isnull(pfd.dblPrevCashPrice,0) <> pfd.dblCashPrice) THEN 67 ELSE 17 END
+					, strNotes = (CASE WHEN isnull(pfd.dblPrevQuantity,0) <> pfd.dblQuantity
+										THEN (CASE WHEN isnull(pfd.dblPrevCashPrice,0) <> pfd.dblCashPrice THEN 'Change Quantity. Change Futures Price.' ELSE 'Change Quantity.' END)
+										ELSE (CASE WHEN isnull(pfd.dblPrevCashPrice,0) <> pfd.dblCashPrice THEN 'Change Futures Price' ELSE NULL END) END)
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
-				OUTER APPLY (
-					SELECT TOP 1 dblOrigQty = CASE WHEN intActionId = 1 THEN ABS(pl.dblOrigQty) ELSE pl.dblOrigQty END, pl.dblFutures
-					FROM @cbLogPrev pl
-					WHERE strTransactionReference = 'Price Fixation'
-						AND intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
-						AND intContractDetailId = @intContractDetailId
-					ORDER BY dtmTransactionDate DESC
-				) prevLog
-				WHERE ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity OR ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures
+				WHERE pfd.dblPrevQuantity <> pfd.dblQuantity or pfd.dblPrevCashPrice <> pfd.dblCashPrice or pfd.dtmPrevFixationDate <> pfd.dtmFixationDate
 			) tbl
 			/*End of CT-4833*/
 

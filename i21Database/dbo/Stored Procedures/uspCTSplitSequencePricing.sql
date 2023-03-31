@@ -101,7 +101,10 @@ BEGIN TRY
 		SET		FD.dblNoOfLots			=	CD.dblNoOfLots,
 				FD.dblQuantity			=	CD.dblQuantity,
 				FD.dblLoadPriced		=	case when isnull(CD.intNoOfLoad,0) = 0 then null else CD.intNoOfLoad end,
-				FD.dblHedgeNoOfLots		=	CASE WHEN FD.ysnHedge = 1 THEN CD.dblNoOfLots ELSE NULL END
+				FD.dblHedgeNoOfLots		=	CASE WHEN FD.ysnHedge = 1 THEN CD.dblNoOfLots ELSE NULL END,
+				FD.dblPrevQuantity		=	CD.dblQuantity,
+				FD.dtmPrevFixationDate	=	FD.dtmFixationDate,
+				FD.dblPrevCashPrice		=	FD.dblCashPrice
 		FROM	tblCTPriceFixation			PF 
 		JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -189,6 +192,7 @@ BEGIN TRY
 				EXEC	uspCTGetStartingNumber 'Price Fixation Trade No', @strTradeNo OUTPUT
 				SET		@XML =	'<root><toUpdate><strTradeNo>'+LTRIM(RTRIM(@strTradeNo))+'</strTradeNo><dblNoOfLots>'+STR(@dblChildSeqLots,18,6)+'</dblNoOfLots>'+
 								'<dblQuantity>'+STR(@dblChildSeqQty,18,6)+'</dblQuantity>'+
+								'<dblPrevQuantity>'+STR(@dblChildSeqQty,18,6)+'</dblPrevQuantity>'+
 								case when isnull(@dblChildSeqLoad,0) > 0 then '<dblLoadPriced>'+STR(@dblChildSeqLoad)+'</dblLoadPriced>' else '' end +
 								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
 								CASE WHEN @ysnHedge = 1 THEN '<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>' ELSE '' END +
