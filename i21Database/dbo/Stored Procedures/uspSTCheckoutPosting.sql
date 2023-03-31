@@ -838,6 +838,7 @@ BEGIN
 										,[intSubCurrencyId]
 										,[dblSubCurrencyRate]
 										,[intSubLocationId]
+										,[intCompanyLocationSubLocationId]
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
@@ -956,7 +957,8 @@ BEGIN
 										,[dblCurrencyExchangeRate]	= 1.000000
 										,[intSubCurrencyId]			= @intCurrencyId
 										,[dblSubCurrencyRate]		= 1.000000
-										,[intSubLocationId]			= IL.intSubLocationId
+										,[intSubLocationId]			= NULL
+										,[intCompanyLocationSubLocationId] = tmSite.intCompanyLocationSubLocationId
 										--,0
 										--,1
 							FROM tblSTCheckoutPumpTotals CPT
@@ -996,6 +998,9 @@ BEGIN
 							) Tax
 								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
 								AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
+							LEFT JOIN tblTMSite tmSite
+								ON ST.intCompanyLocationId = tmSite.intLocationId AND
+									I.intItemId = tmSite.intProduct
 							WHERE CPT.intCheckoutId = @intCheckoutId
 								AND CPT.dblAmount > 0
 								AND TPI.intTaxGroupId IS NOT NULL
