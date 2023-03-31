@@ -1282,6 +1282,7 @@
     <Build Include="dbo\Functions\fnRemoveLeadingZero.sql" />
     <Build Include="dbo\Tables\tblGRAPClearingStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGenerateAPClearingForStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuSTStoreMaintenanceDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
