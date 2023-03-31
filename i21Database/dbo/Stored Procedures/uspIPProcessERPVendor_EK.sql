@@ -316,6 +316,21 @@ BEGIN TRY
 							,1
 							)
 				END
+
+				IF EXISTS (
+						SELECT 1
+						FROM tblEMEntity E
+						WHERE E.strName = @strName
+						)
+				BEGIN
+					SELECT @strError = 'Vendor Name ''' + @strName + ''' already exists.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
 			END
 			ELSE
 			BEGIN
