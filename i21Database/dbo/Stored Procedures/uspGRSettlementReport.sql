@@ -969,7 +969,7 @@ BEGIN
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
-				,dblTax							= BillDtl.dblTax
+				,dblTax							= BillDtl.dblTax + ISNULL(BillByReceipt.dblTax,0)
 				,dblNetTotal					= BillDtl.dblTotal+ BillDtl.dblTax
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0) = 0 THEN 'Dist Type'
@@ -2177,7 +2177,7 @@ BEGIN
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
-				,dblTax							= BillDtl.dblTax
+				,dblTax							= BillDtl.dblTax + ISNULL(BillByReceipt.dblTax,0)
 				,dblNetTotal					= BillDtl.dblTotal+ BillDtl.dblTax
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0) = 0 THEN 'Dist Type'
