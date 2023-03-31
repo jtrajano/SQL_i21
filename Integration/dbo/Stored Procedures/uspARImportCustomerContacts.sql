@@ -233,11 +233,11 @@ BEGIN
 			--UPDATE DEFAULT CUSTOMER CONTACT
 			IF OBJECT_ID('tempdb..##CONTACTNODEFAULT') IS NOT NULL DROP TABLE #CONTACTNODEFAULT	
 
-			SELECT C.intEntityId
+			SELECT C.intEntityId, CETC.intEntityContactId
 			INTO #CONTACTNODEFAULT
 			FROM tblARCustomer C
 			CROSS APPLY (
-				SELECT TOP 1 ETC.intEntityToContactId
+				SELECT TOP 1 ETC.intEntityToContactId, ETC.intEntityContactId
 				FROM tblEMEntityToContact ETC
 				WHERE ETC.intEntityId = C.intEntityId
 			) CETC
@@ -256,6 +256,7 @@ BEGIN
 			SET ysnDefaultContact = CAST(1 AS BIT)
 			FROM tblEMEntityToContact ETC
 			INNER JOIN #CONTACTNODEFAULT CD ON ETC.intEntityId = CD.intEntityId
+			AND ETC.intEntityContactId = CD.intEntityContactId
 			CROSS APPLY (
 				SELECT EC.intEntityToContactId
 				FROM tblEMEntityToContact EC
