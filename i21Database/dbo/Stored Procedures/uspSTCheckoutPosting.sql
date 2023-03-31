@@ -6397,7 +6397,9 @@ BEGIN
 											,[dblSubCurrencyRate]
 											,[dblCurrencyExchangeRate]
 											,[ysnRecap]
-											,[intSubLocationId])
+											,[intSubLocationId]
+											,[intCompanyLocationSubLocationId]
+											)
 										SELECT 
 											ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 											,[strTransactionType]
@@ -6490,6 +6492,7 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[ysnRecap]
 											,[intSubLocationId]
+											,[intCompanyLocationSubLocationId]
 										FROM @EntriesForInvoice
 
 
