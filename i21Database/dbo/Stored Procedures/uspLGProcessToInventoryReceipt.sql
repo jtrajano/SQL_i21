@@ -131,6 +131,7 @@ BEGIN TRY
 			,[intTaxGroupId]
 			,[strTaxPoint]
 			,[intTaxLocationId]
+			,[ysnAddPayable]
 			)
 		SELECT 
 			[strReceiptType] = 'Direct'
@@ -188,6 +189,7 @@ BEGIN TRY
 			,[intTaxGroupId] = LD.intTaxGroupId
 			,[strTaxPoint] = L.strTaxPoint
 			,[intTaxLocationId] = L.intTaxLocationId
+			,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
 		FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -197,6 +199,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 		WHERE L.intLoadId = @intLoadId
 			AND 1 = (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NULL AND LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) > 0)
 							OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL 
@@ -249,6 +252,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId]
 			,[ysnLock]
 			,[ysnWithGLReversal]
+			,[ysnAllowVoucher]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
@@ -278,8 +282,9 @@ BEGIN TRY
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentDetailId] = CV.intLoadDetailId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
-			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
+			,[ysnLock] = CASE WHEN (VCHR.intBillId IS NOT NULL AND VCHR.ysnPosted = 1) THEN 1 ELSE 0 END
 			,[ysnWithGLReversal] = 1 -- CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
+			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -289,7 +294,7 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
-		OUTER APPLY (SELECT TOP 1 ysnLock = 1 FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId AND B.ysnPosted = 1) LCK
+		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
 		WHERE CV.intLoadId = @intLoadId
 
 		UNION ALL
@@ -320,6 +325,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = NULL
 			,[ysnLock] = 0
 			,[ysnWithGLReversal] = 1 -- CASE WHEN ISNULL(L.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
+			,[ysnAllowVoucher] = CASE WHEN LWS.intBillId IS NOT NULL THEN 0 ELSE 1 END
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
@@ -648,6 +654,7 @@ BEGIN TRY
 				,[intTaxGroupId]
 				,[strTaxPoint]
 				,[intTaxLocationId]
+				,[ysnAddPayable]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -738,6 +745,7 @@ BEGIN TRY
 				,[intTaxGroupId] = LD.intTaxGroupId
 				,[strTaxPoint] = L.strTaxPoint
 				,[intTaxLocationId] = L.intTaxLocationId
+				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -763,6 +771,7 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
+			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 			WHERE L.intLoadId = @intLoadId
 				AND ISNULL(LC.ysnRejected, 0) <> 1
 				AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
@@ -816,6 +825,7 @@ BEGIN TRY
 				,[intTaxGroupId]
 				,[strTaxPoint]
 				,[intTaxLocationId]
+				,[ysnAddPayable]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -886,6 +896,7 @@ BEGIN TRY
 				,[intTaxGroupId] = LD.intTaxGroupId
 				,[strTaxPoint] = L.strTaxPoint
 				,[intTaxLocationId] = L.intTaxLocationId
+				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -906,6 +917,7 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
+			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
 		END
@@ -953,6 +965,7 @@ BEGIN TRY
 			,[dblForexRate]
 			,[ysnLock]
 			,[ysnWithGLReversal]
+			,[ysnAllowVoucher]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
@@ -983,8 +996,9 @@ BEGIN TRY
 			,[intLoadShipmentDetailId] = CV.intLoadDetailId
 			,[intLoadShipmentCostId] = CV.intLoadCostId
 			,[dblForexRate] = CV.dblFX
-			,[ysnLock] = ISNULL(LCK.ysnLock, 0)
+			,[ysnLock] = CASE WHEN (VCHR.intBillId IS NOT NULL AND VCHR.ysnPosted = 1) THEN 1 ELSE 0 END
 			,[ysnWithGLReversal] = 1 --CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
+			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -997,7 +1011,7 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
-		OUTER APPLY (SELECT TOP 1 ysnLock = 1 FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId AND B.ysnPosted = 1) LCK
+		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
 		WHERE CV.intLoadId = @intLoadId
 
 		UNION ALL
@@ -1029,6 +1043,7 @@ BEGIN TRY
 			,[dblForexRate] = NULL
 			,[ysnLock] = 0
 			,[ysnWithGLReversal] = 1 --0
+			,[ysnAllowVoucher] = CASE WHEN LWS.intBillId IS NOT NULL THEN 0 ELSE 1 END
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
