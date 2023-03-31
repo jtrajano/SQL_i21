@@ -87,12 +87,12 @@ BEGIN TRY
 				,BatchId
 				,ItemNo
 				,Quantity
-				,QuantityUOM
+				,Case When Location='1711' and IsNULL(QuantityUOM,'')='' Then 'LB' When Location<>'1711' and IsNULL(QuantityUOM,'')='' Then 'KG'Else QuantityUOM End
 				,NetWeight
-				,NetWeightUOM
+				,Case When Location='1711' and IsNULL(NetWeightUOM,'')='' Then 'LB' When Location<>'1711' and IsNULL(NetWeightUOM,'')='' Then 'KG'Else NetWeightUOM End
 				,Cost
-				,CostUOM
-				,CostCurrency
+				,Case When Location='1711' and IsNULL(CostUOM,'')='' Then 'LB' When Location<>'1711' and IsNULL(CostUOM,'')='' Then 'KG'Else CostUOM End
+				,Case When IsNULL(CostCurrency,'')='' Then 'USD' Else CostCurrency End
 				,AllocatedQty
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../DocNo'

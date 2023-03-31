@@ -425,7 +425,7 @@ BEGIN TRY
 					,@intQtyItemUOMId = IUOM.intItemUOMId
 				FROM tblMFBatch B WITH (NOLOCK)
 				JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
-					AND IUOM.intUnitMeasureId = B.intItemUOMId
+					AND IUOM.intUnitMeasureId = B.intPackageUOMId
 					AND B.strBatchId = @strLotNumber
 					AND B.intTealingoItemId = @intItemId
 					AND B.intLocationId = @intCompanyLocationId
