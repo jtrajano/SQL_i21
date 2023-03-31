@@ -339,7 +339,7 @@ BEGIN
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
 		JOIN tblICItem IM ON IM.intItemId = ID.intItemId	
-		JOIN tblICItemUOM QU ON QU.intItemUOMId = ID.intUnitOfMeasureId	
+		JOIN tblICItemUOM QU ON QU.intItemUOMId = ISNULL(ID.intUnitOfMeasureId, AD.intPUnitMeasureId)
 		LEFT JOIN tblICItemUOM QUCost ON QUCost.intItemUOMId = ID.intCostUOMId
 		JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId	
 		JOIN tblSMCurrency CY ON CY.intCurrencyID = IV.intCurrencyId
@@ -355,8 +355,8 @@ BEGIN
 					OR
 				 (IV.intTransactionType = 3)
 				)
-					
 			
+
 		UNION ALL SELECT *
 			, intSort = ROW_NUMBER() OVER (ORDER BY dblAllocatedQty ASC)
 		FROM (
