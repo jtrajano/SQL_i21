@@ -1424,6 +1424,9 @@
     <Build Include="dbo\Tables\tblApiSchemaEntitySplit.sql" />
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateBasisAndFutures.sql" />
+    <Build Include="dbo\Tables\tblQMImportType.sql" />
+    <Build Include="dbo\Tables\tblQMImportTemplateColumn.sql" />
+    <Build Include="dbo\Views\vyuQMImportTemplateColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
