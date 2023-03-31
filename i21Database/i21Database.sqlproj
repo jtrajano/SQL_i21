@@ -1335,6 +1335,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCSCreateNewJob.sql" />
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
     <Build Include="dbo\Functions\fnRemoveLeadingZero.sql" />
+    <Build Include="dbo\Views\vyuSTStoreMaintenanceDepartments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
