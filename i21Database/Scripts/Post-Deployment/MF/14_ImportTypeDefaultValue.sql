@@ -30,3 +30,27 @@ GO
 
 PRINT 'End of Adding of Import Type Default Value'
 GO
+
+
+PRINT 'Begin Setting Demand Import Default Value'
+GO
+
+IF (SELECT strDemandImportDateTimeFormat FROM tblMFCompanyPreference) IS NULL
+	BEGIN
+		UPDATE tblMFCompanyPreference SET strDemandImportDateTimeFormat = 'MM DD YYYY HH:MI'
+	END
+GO
+IF (SELECT intMinimumDemandMonth FROM tblMFCompanyPreference) IS NULL
+	BEGIN
+		UPDATE tblMFCompanyPreference SET intMinimumDemandMonth = 1
+	END
+GO
+
+IF (SELECT intMaximumDemandMonth FROM tblMFCompanyPreference) IS NULL
+	BEGIN
+		UPDATE tblMFCompanyPreference SET intMaximumDemandMonth = 12
+	END
+GO
+
+PRINT 'End of Setting Demand Import Default Value'
+GO
