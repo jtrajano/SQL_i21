@@ -226,7 +226,7 @@ BEGIN
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[intCurrencyExchangeRateTypeId] = FX.intForexRateTypeId
-			,[dblExchangeRate] = COALESCE(LC.dblFX, FX.dblFXRate, 1)
+			,[dblExchangeRate] = COALESCE(A.dblFX, FX.dblFXRate, 1)
 			,[ysnSubCurrency] =	CUR.ysnSubCurrency
 			,[intSubCurrencyCents] = ISNULL(CUR.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
@@ -243,7 +243,6 @@ BEGIN
 			,[strFinancingTransactionNumber] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
-			JOIN tblLGLoadCost LC ON LC.intLoadCostId = A.intLoadCostId 
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL) 
