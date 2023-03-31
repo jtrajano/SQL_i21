@@ -52,6 +52,7 @@ DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
 -- Get the GL Account ids to use
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
+
 INSERT INTO @GLAccounts (
 	intItemId 
 	,intItemLocationId 
@@ -65,29 +66,7 @@ SELECT	Query.intItemId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
 		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
 		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
-		,intTransactionTypeId
-FROM	(
-			SELECT	DISTINCT 
-					t.intItemId
-					, intItemLocationId = t.intInTransitSourceLocationId
-					, t.intTransactionTypeId
-			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
-						ON t.intItemId = i.intItemId 
-					INNER JOIN #tmpRebuildList list	
-						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
-						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-			WHERE	t.strBatchId = @strBatchId
-					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
-					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
-					AND t.intInTransitSourceLocationId IS NOT NULL 
-		) Query
-UNION ALL 
-SELECT	Query.intItemId
-		,Query.intItemLocationId
-		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
-		,intTransactionTypeId
+		,Query.intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
 					t.intItemId
@@ -103,6 +82,44 @@ FROM	(
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 					AND t.intInTransitSourceLocationId IS NULL 
 		) Query
+
+
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intInventoryId 
+	,intContraInventoryId 
+	,intAutoNegativeId 
+	,intTransactionTypeId
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory_In_Transit) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,Query.intTransactionTypeId
+FROM	(
+			SELECT	DISTINCT 
+					t.intItemId
+					, intItemLocationId = t.intInTransitSourceLocationId
+					, t.intTransactionTypeId
+			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+						ON t.intItemId = i.intItemId 
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+			WHERE	t.strBatchId = @strBatchId
+					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+					AND t.intInTransitSourceLocationId IS NOT NULL 
+		) Query
+		LEFT JOIN @GLAccounts gla
+			ON gla.intItemId = Query.intItemId
+			AND gla.intItemLocationId = Query.intItemLocationId
+			AND gla.intTransactionTypeId = Query.intTransactionTypeId
+WHERE
+	gla.intItemId IS NULL 
+
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -331,6 +348,16 @@ AS
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
+/*
+	Debit ........ In-Transit
+	Credit ................................... Inventory
+
+	OR 
+
+	Debit ........ COGS
+	Credit ................................... In-Transit 
+
+*/
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
@@ -478,7 +505,10 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				, @InventoryTransactionTypeId_AutoNegative
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
-		AND ForGLEntries_CTE.intInTransitSourceLocationId IS NULL 
+		AND (
+			ForGLEntries_CTE.intInTransitSourceLocationId IS NULL 
+			OR @AccountCategory_ContraInventory = 'Cost of Goods'
+		)
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto Variance 
