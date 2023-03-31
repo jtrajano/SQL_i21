@@ -442,7 +442,7 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM 
-		@TransactionsAsOfDate t
+		@Transactions t
 		INNER JOIN tblICItemLocation ItemLocation 
 			ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
 	WHERE 
@@ -598,7 +598,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dblOpeningOnSiteQty		= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblOpeningInTransitInbound = ISNULL(tmpDSP.dblOpeningInTransitInbound, 0),
 				dblOpeningInTransitOutbound = ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),
-				dblTotalOpeningQty		 = ISNULL(tmpDSP.dblOpeningQty, 0) + ISNULL(tmpDSP.dblOpeningInTransitInbound, 0) - ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),
+				dblTotalOpeningQty		 = ISNULL(tmpDSP.dblOpeningQty, 0) + ISNULL(tmpDSP.dblOpeningInTransitInbound, 0) + ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),
 				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
 				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0),
 				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
@@ -624,7 +624,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dblClosingQty			= 
 											tmpDSP.dblOpeningQty
 											+ tmpDSP.dblOpeningInTransitInbound
-											- tmpDSP.dblOpeningInTransitOutbound
+											+ tmpDSP.dblOpeningInTransitOutbound
 											+ tmpDSP.dblReceivedQty
 											+ tmpDSP.dblInventoryCountQty
 											- tmpDSP.dblInvoicedQty 
@@ -698,7 +698,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dblOpeningOnSiteQty		= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblOpeningInTransitInbound = ISNULL(tmpDSP.dblOpeningInTransitInbound, 0),
 				dblOpeningInTransitOutbound = ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),
-				dblTotalOpeningQty		 = ISNULL(tmpDSP.dblOpeningQty, 0) + ISNULL(tmpDSP.dblOpeningInTransitInbound, 0) - ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),
+				dblTotalOpeningQty		 = ISNULL(tmpDSP.dblOpeningQty, 0) + ISNULL(tmpDSP.dblOpeningInTransitInbound, 0) + ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),
 				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
 				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0),
 				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
@@ -724,7 +724,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dblClosingQty			= 
 											tmpDSP.dblOpeningQty
 											+ tmpDSP.dblOpeningInTransitInbound
-											- tmpDSP.dblOpeningInTransitOutbound
+											+ tmpDSP.dblOpeningInTransitOutbound
 											+ tmpDSP.dblReceivedQty
 											+ tmpDSP.dblInventoryCountQty
 											- tmpDSP.dblInvoicedQty 
