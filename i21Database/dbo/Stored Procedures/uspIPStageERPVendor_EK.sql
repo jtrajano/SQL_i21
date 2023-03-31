@@ -89,7 +89,7 @@ BEGIN TRY
 					,VendorAccountNo NVARCHAR(50)
 					,[Status] NVARCHAR(50)
 					,VendorName NVARCHAR(100)
-					,ContactName NVARCHAR(50)
+					,ContactName NVARCHAR(100)
 					,DefaultTermsCode NVARCHAR(50)
 					,EntityType NVARCHAR(50)
 					,Currency NVARCHAR(40)
@@ -119,7 +119,7 @@ BEGIN TRY
 			SELECT (
 					SELECT TOP 1 intStageEntityId
 					FROM tblIPEntityStage
-					WHERE strName = x.VendorName
+					WHERE strAccountNo = x.VendorAccountNo
 					)
 				,VendorName
 				,DocNo
@@ -136,7 +136,7 @@ BEGIN TRY
 				,Email
 				,TermsCode
 			FROM OPENXML(@idoc, 'root/Header/Line', 2) WITH (
-					VendorName NVARCHAR(50) COLLATE Latin1_General_CI_AS '../VendorName'
+					VendorName NVARCHAR(100) COLLATE Latin1_General_CI_AS '../VendorName'
 					,DocNo BIGINT '../../DocNo'
 					,LineType NVARCHAR(50)
 					,LocationName NVARCHAR(100)
@@ -150,6 +150,7 @@ BEGIN TRY
 					,Mobile NVARCHAR(100)
 					,Email NVARCHAR(100)
 					,TermsCode NVARCHAR(100)
+					,VendorAccountNo NVARCHAR(50) COLLATE Latin1_General_CI_AS '../VendorAccountNo'
 					) x
 
 			UPDATE ET
