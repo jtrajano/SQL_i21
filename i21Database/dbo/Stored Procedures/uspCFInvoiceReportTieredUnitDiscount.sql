@@ -282,7 +282,7 @@ BEGIN
 	WHERE strUserId = @UserId
 
 	
-	SELECT * FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId
+	-- SELECT * FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId
 
 
 
