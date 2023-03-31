@@ -248,7 +248,7 @@ FROM tblARCompanyPreference WITH (NOLOCK)
 
 --COMPANY INFO
 SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = ISNULL(strAddress + CHAR(13) + char(10), '') + ISNULL(strCity, '') + ISNULL(', ' + strState, '') + ISNULL(', ' + strZip, '') + ISNULL(', ' + strCountry, '')
+		   , @strCompanyAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '') + CHAR(10) + ISNULL('' + NULLIF(strPhone, ''), '')
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
