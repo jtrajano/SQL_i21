@@ -1173,7 +1173,7 @@ BEGIN TRY
 
 		SELECT
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY strAction, CBL.intContractDetailId, CBL.intTransactionReferenceDetailId  ORDER BY CBL.intContractBalanceLogId DESC)
-			,intSort = 4
+			,intSort = 14
 			,CL.strLocationName
 			,E.strName
 			,C.strCommodityCode
