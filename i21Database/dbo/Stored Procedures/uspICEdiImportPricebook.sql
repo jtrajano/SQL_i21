@@ -1222,7 +1222,7 @@ WITH (HOLDLOCK) AS ItemUOM
 			 , ISNULL(ItemUOM.intItemUOMId, 0) AS intItemUOMId
 			 , intUnitMeasureId = COALESCE(UnitMeasure.intUnitMeasureId, Symbol.intUnitMeasureId)			
 			 , ysnStockUnit = CASE WHEN StockUnit.intItemUOMId IS NOT NULL THEN 0 ELSE 1 END 
-			 , strUpcModifierNumber = CASE WHEN NULLIF(Pricebook.strUpcModifierNumber, '') IS NULL THEN  ItemUOM.intModifier ELSE Pricebook.strUpcModifierNumber END
+			 , strUpcModifierNumber = CASE WHEN NULLIF(Pricebook.strUpcModifierNumber, '') IS NULL THEN  ISNULL(ItemUOM.intModifier, 0) ELSE ISNULL(Pricebook.strUpcModifierNumber, 0) END
 			 , strSellingUpcNumber =  CASE WHEN NULLIF(Pricebook.strSellingUpcNumber, '') IS NULL THEN ItemUOM.strLongUPCCode ELSE Pricebook.strSellingUpcNumber END
 			 , Pricebook.ysnUpdateExistingRecords
 			 , Pricebook.ysnAddNewRecords
@@ -1783,7 +1783,7 @@ SELECT intItemId = i.intItemId
 			WHEN (p.strOrderCaseUpcNumber <> p.strAltUPCNumber2 AND p.strAltUPCNumber2 <> p.strAltUPCNumber1) AND (p.strSellingUpcNumber = p.strAltUPCNumber2) THEN ISNULL(p.strAltUPCModifier1, CAST(p.strUpcModifierNumber AS INT) + 1) 
 			WHEN (p.strSellingUpcNumber <> p.strAltUPCNumber2 AND p.strAltUPCNumber2 <> p.strAltUPCNumber1) AND (p.strOrderCaseUpcNumber = p.strAltUPCNumber2) THEN 2
 			WHEN (p.strSellingUpcNumber <> p.strAltUPCNumber2 AND p.strAltUPCNumber2 <> p.strOrderCaseUpcNumber) AND (p.strAltUPCNumber1 = p.strAltUPCNumber2) THEN 2
-			ELSE ISNULL(p.strAltUPCModifier1, 1)
+			ELSE ISNULL(p.strAltUPCModifier2, 1)
 	   END
 FROM tblICEdiPricebook p
 --INNER JOIN @validAlternate2UOM v ON p.intEdiPricebookId = v.intEdiPricebookId
@@ -2850,7 +2850,7 @@ USING (
 		 , Pricebook.ysnUpdatePrice
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS UnitOfMeasure ON UnitOfMeasure.intItemId = Item.intItemId AND UnitOfMeasure.intModifier = NULLIF(Pricebook.strUpcModifierNumber,'') AND UnitOfMeasure.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
+	INNER JOIN tblICItemUOM AS UnitOfMeasure ON UnitOfMeasure.intItemId = Item.intItemId AND UnitOfMeasure.intModifier = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0) AND UnitOfMeasure.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
 	OUTER APPLY (SELECT loc.intCompanyLocationId 
 					  , l.*
 				 FROM @ValidLocations loc 
@@ -2956,7 +2956,7 @@ USING (
 		 , ItemUOM.dblUnitQty
 	FROM @vendorItemXRef AS VendorXRef 
 	INNER JOIN tblICItem AS Item ON  LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(VendorXRef.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.intModifier = NULLIF(VendorXRef.strUpcModifierNumber,'') AND ItemUOM.strLongUPCCode =  NULLIF(VendorXRef.strSellingUpcNumber,'')	
+	INNER JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.intModifier = ISNULL(NULLIF(VendorXRef.strUpcModifierNumber,''), 0) AND ItemUOM.strLongUPCCode =  NULLIF(VendorXRef.strSellingUpcNumber,'')	
 	CROSS APPLY (SELECT TOP 1 v.* 
 				 FROM vyuAPVendor v
 				 WHERE (v.strVendorId = VendorXRef.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)) AS Vendor				
