@@ -703,6 +703,7 @@ ELSE
 			WHERE strTransactionType = 'Customer Prepayment'
 			GROUP BY ARPD.intPaymentId
 		) PD ON P.[intPaymentId] = PD.[intPaymentId] 
+    WHERE P.[dblUnappliedAmount] <> 0
     
     --UPDATE ACCOUNTING PERIOD FOR CPP FROM INVOICE SCREEN
   UPDATE ARI
