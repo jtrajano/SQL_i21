@@ -810,7 +810,7 @@ BEGIN
 		AND P.[strTransactionType] <> 'Claim'
 		AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
 		AND ((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] <> P.[dblBasePayment] + P.[dblBaseWriteOffAmount])  
-				OR (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] <> P.[dblBaseTransactionAmountDue] + P.[dblBaseWriteOffAmount]))
+				OR (P.dblAmountDue = 0 AND P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] <> P.[dblBaseTransactionAmountDue]))
 
     --CREDIT DISCOUNT
     INSERT #ARPaymentGLEntries
