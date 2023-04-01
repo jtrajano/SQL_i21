@@ -10,6 +10,7 @@
     [ysnPosted] BIT NOT NULL DEFAULT 0, 
 	[ysnFTP] BIT NOT NULL DEFAULT 0, 
     [ysnChevronUploaded] BIT NULL DEFAULT 0, 
+    [guiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblBBBuyback] PRIMARY KEY ([intBuybackId]) ,
 	CONSTRAINT [FK_tblBBBuyback_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblBBBuyback_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
