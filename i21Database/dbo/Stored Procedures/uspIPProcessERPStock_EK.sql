@@ -432,6 +432,15 @@ BEGIN TRY
 
 				IF ISNULL(@dblQty, 0) = 0
 				BEGIN
+					RAISERROR (
+							'Batch characteristics does not exists. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@dblQty, 0) = 0
+				BEGIN
 					SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
 						,@intQtyItemUOMId = L.intItemUOMId
 					FROM tblICLot L WITH (NOLOCK)
