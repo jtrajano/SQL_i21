@@ -368,14 +368,14 @@ AS
 				ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)), 2)
 			,dblComputedBaseValue1 = 
 				CASE 
-					WHEN @intFunctionalCurrencyId <> t.intCurrencyId THEN 
+					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND ISNULL(t.dblForexRate,0) <> ISNULL(latestForexRate.dblRate, 0) THEN 
 						ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0)), 2) * t.dblForexRate
 					ELSE 
 						NULL
 				END 
 			,dblComputedBaseValue2 = 
 				CASE 
-					WHEN @intFunctionalCurrencyId <> t.intCurrencyId THEN 
+					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND ISNULL(t.dblForexRate,0) <> ISNULL(latestForexRate.dblRate, 0) THEN 
 						ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0)), 2) * latestForexRate.dblRate
 					ELSE 
 						NULL
@@ -1122,5 +1122,4 @@ FROM	ForGLEntries_CTE
 WHERE	ForGLEntries_CTE.intTransactionTypeId IN (
 				@InventoryTransactionTypeId_InTransitAdjustment
 		)
-		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
-
+		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0
