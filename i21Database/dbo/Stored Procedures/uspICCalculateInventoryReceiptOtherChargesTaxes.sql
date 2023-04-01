@@ -584,7 +584,7 @@ BEGIN
 			tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
 				ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
 			LEFT JOIN vyuAPVendor v
-				ON v.[intEntityId] = rc.intEntityVendorId
+				ON v.[intEntityId] = rc.intNewEntityVendorId
 		WHERE
 			rc.intInventoryReceiptId = @intInventoryReceiptId
 			AND rc.intNewEntityVendorId IS NOT NULL 
