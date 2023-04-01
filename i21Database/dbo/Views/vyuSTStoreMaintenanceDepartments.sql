@@ -8,7 +8,7 @@ intStoreDepartmentId
 ,sd.intSubcategoriesId
 ,sc.strSubCategory
 ,strSubCategoryCode
-,strRegisterCode
+,sd.strRegisterCode
 ,sd.intConcurrencyId
 FROM tblSTStoreDepartments sd
 LEFT JOIN vyuSTDepartmentTotalsPreloadCS plcs
