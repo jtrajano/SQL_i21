@@ -148,10 +148,8 @@ BEGIN TRY
       , tblSMTransportationMode.strCode      
       , Transporter.strName AS strTransporterName      
       , Transporter.strFederalTaxId AS strTransporterFederalTaxId      
-      
-      , CASE WHEN (ISNULL(CF.ysnFreightOnly,0) = 0 ) THEN Seller.str1099Name ELSE tblEMEntity.strName END AS strConsignorName      
-      , CASE WHEN (ISNULL(CF.ysnFreightOnly,0) = 0 ) THEN Seller.strFederalTaxId ELSE tblEMEntity.strFederalTaxId END AS strConsignorFederalTaxId      
-
+      , Seller.str1099Name AS strConsignorName      
+      , Seller.strFederalTaxId AS strConsignorFederalTaxId      
       , tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber      
       , CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName      
       , CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strEin END AS strVendorFederalTaxId      
@@ -211,14 +209,8 @@ BEGIN TRY
       LEFT JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = tblARInvoiceDetail.intLoadDistributionDetailId
 	  LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = LDD.intItemId AND LDD.strReceiptLink = tblTRLoadReceipt.strReceiptLine  
 	  LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId
+
       LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId      
-
-      LEFT JOIN tblICItem I ON tblTRLoadReceipt.intItemId = I.intItemId
-      LEFT JOIN vyuTRCustomerFreightList CF ON CF.intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
-      									    AND CF.inCustomerLocationId = tblTRLoadDistributionHeader.intShipToLocationId
-										    AND CF.intCategoryId = I.intCategoryId
-										    AND CF.strZipCode = SupplyPointLoc.strZipCode
-
       LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId      
       LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId      
       LEFT JOIN tblAPVendor ON tblAPVendor.intEntityId = tblTRLoadReceipt.intTerminalId      
@@ -391,8 +383,8 @@ BEGIN TRY
       , tblSMTransportationMode.strCode      
       , Transporter.strName AS strTransporterName      
       , Transporter.strFederalTaxId AS strTransporterFederalTaxId      
-      , CASE WHEN (ISNULL(CF.ysnFreightOnly,0) = 0 ) THEN  Seller.str1099Name ELSE tblEMEntity.strName END AS strConsignorName      
-      , CASE WHEN (ISNULL(CF.ysnFreightOnly,0) = 0 ) THEN Seller.strFederalTaxId ELSE tblEMEntity.strFederalTaxId END AS strConsignorFederalTaxId      
+      , Seller.str1099Name AS strConsignorName      
+      , Seller.strFederalTaxId AS strConsignorFederalTaxId      
       , tblTFTerminalControlNumber.strTerminalControlNumber AS strTerminalControlNumber      
       , CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strName ELSE tblTFCompanyPreference.strCompanyName END AS strVendorName      
       , CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN Vendor.strFederalTaxId ELSE tblSMCompanySetup.strEin END AS strVendorFederalTaxId      
@@ -452,15 +444,11 @@ BEGIN TRY
 	--LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = tblARInvoiceDetail.intItemId      
 	LEFT JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId AND tblTRLoadReceipt.intItemId = LDD.intItemId AND LDD.strReceiptLink = tblTRLoadReceipt.strReceiptLine  
 	--LEFT JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = tblARInvoiceDetail.intLoadDistributionDetailId  --AND tblTRLoadReceipt.strReceiptLine = LDD.strReceiptLink        
-		LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId --AND tblTRLoadReceipt.strReceiptLine = LDD.strReceiptLink        
+	LEFT JOIN tblTRSupplyPoint ON tblTRLoadReceipt.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId --AND tblTRLoadReceipt.strReceiptLine = LDD.strReceiptLink        
+
+	  
+
       LEFT JOIN tblEMEntityLocation SupplyPointLoc ON tblTRSupplyPoint.intEntityLocationId = SupplyPointLoc.intEntityLocationId      
-
-	  LEFT JOIN tblICItem I ON tblTRLoadReceipt.intItemId = I.intItemId
-      LEFT JOIN vyuTRCustomerFreightList CF ON CF.intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
-      									    AND CF.inCustomerLocationId = tblTRLoadDistributionHeader.intShipToLocationId
-										    AND CF.intCategoryId = I.intCategoryId
-										    AND CF.strZipCode = SupplyPointLoc.strZipCode
-
       LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId      
       LEFT JOIN tblSMCompanyLocation OriginBulkLoc ON OriginBulkLoc.intCompanyLocationId = tblTRLoadReceipt.intCompanyLocationId      
       LEFT JOIN tblAPVendor ON tblAPVendor.intEntityId = tblTRLoadReceipt.intTerminalId      
