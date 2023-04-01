@@ -7698,6 +7698,7 @@
     <Build Include="dbo\Views\vyuCTContractAddOrdersLookup.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailViewLookup.sql" />
     <Build Include="dbo\Tables\tblBBCustomerLocationXref.sql" />
+    <Build Include="dbo\Tables\tblBBReimbursementPostingSession.sql" />
     <Build Include="dbo\Tables\tblBBChevronExportBuybackLogDetail.sql" />
     <Build Include="dbo\Tables\tblVRChevronExportRebateLogDetail.sql" />
     <Build Include="dbo\Tables\tblICAdjustInventoryTerms.sql" />
@@ -7910,6 +7911,7 @@
     <Build Include="dbo\Views\vyuBBBuybackDetail.sql" />
     <Build Include="dbo\Views\vyuBBOpenBuybackWithRate.sql" />
     <Build Include="dbo\Stored Procedures\uspBBPostBuyback.sql" />
+    <Build Include="dbo\Stored Procedures\uspBBSubmitReimbursements.sql" />
     <Build Include="dbo\Views\vyuBBBuybackExport.sql" />
     <Build Include="dbo\Stored Procedures\uspBBUnpostBuyback.sql" />
     <Build Include="dbo\Views\vyuHDTicketWatcher.sql" />
