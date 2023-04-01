@@ -73,6 +73,33 @@ END
 
 IF @ysnNewOtherChargeVendor = 1
 BEGIN 
+	-- Validate if the other charge does not have an existing voucher. 
+	DECLARE @strVoucherNo AS NVARCHAR(50)
+		,@strOtherCharge AS NVARCHAR(50) 
+	SELECT TOP 1 
+		@strVoucherNo = b.strBillId
+		,@strOtherCharge = charge.strItemNo
+	FROM 
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+			ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+		INNER JOIN tblICItem charge
+			ON charge.intItemId = rc.intChargeId
+		INNER JOIN tblAPBillDetail bd
+			ON bd.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
+		INNER JOIN tblAPBill b
+			ON b.intBillId = bd.intBillId
+	WHERE
+		r.intInventoryReceiptId = @ReceiptId
+		AND rc.intNewEntityVendorId IS NOT NULL 
+
+	IF @strVoucherNo IS NOT NULL
+	BEGIN 
+		-- 'Vendor Change is not allowed if {Other Charge} have a voucher already. {Other Charge} is already used in {Voucher No}.'
+		EXEC uspICRaiseError 80276, @strOtherCharge, @strOtherCharge, @strVoucherNo;
+		RETURN -80276
+	END 
+	
+
 	EXEC uspICInventoryReceiptChangeOtherChargeVendor
 		@ReceiptId = @ReceiptId
 		,@UserId = @UserId	
