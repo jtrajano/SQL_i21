@@ -9,8 +9,8 @@ BEGIN
 
     UPDATE bbd
     SET 
-        bbd.dblBuybackRate = CASE WHEN bc.intBuybackChargeId IS NOT NULL THEN bbd.dblBuybackRate ELSE dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, ivd.intItemUOMId, iv.dtmDate) END,
-        bbd.dblReimbursementAmount = dbo.fnCalculateQtyBetweenUOM(iu.intItemUOMId, su.intItemUOMId, CASE WHEN bc.intBuybackChargeId IS NOT NULL THEN bbd.dblBuybackRate ELSE dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, ivd.intItemUOMId, iv.dtmDate) END * bbd.dblBuybackQuantity)
+        bbd.dblBuybackRate = CASE WHEN bc.intBuybackChargeId IS NOT NULL THEN bbd.dblBuybackRate ELSE COALESCE(NULLIF(dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, ivd.intItemUOMId, iv.dtmDate), 0), NULLIF(ip.dblLastCost, 0), ip.dblStandardCost) END,
+        bbd.dblReimbursementAmount = dbo.fnCalculateQtyBetweenUOM(iu.intItemUOMId, su.intItemUOMId, CASE WHEN bc.intBuybackChargeId IS NOT NULL THEN bbd.dblBuybackRate ELSE COALESCE(NULLIF(dbo.fnBBGetItemCostByCostType(vs.strCostType, i.intItemId, il.intItemLocationId, ivd.intItemUOMId, iv.dtmDate), 0), NULLIF(ip.dblLastCost, 0), ip.dblStandardCost) END * bbd.dblBuybackQuantity)
     FROM tblBBBuybackDetail bbd
     JOIN tblBBBuyback bb ON bb.intBuybackId = bbd.intBuybackId
     JOIN @Ids id ON id.intBuybackId = bb.intBuybackId
@@ -27,6 +27,8 @@ BEGIN
 		AND su.ysnStockUnit = 1
     JOIN tblICItemLocation il ON il.intLocationId = iv.intCompanyLocationId
         AND il.intItemId = i.intItemId
+    LEFT JOIN tblICItemPricing ip ON ip.intItemId = i.intItemId
+        AND ip.intItemLocationId = il.intItemLocationId
     LEFT JOIN tblBBBuybackCharge bc ON bc.intBuybackId = bb.intBuybackId
         AND bc.strCharge = bbd.strCharge
 
