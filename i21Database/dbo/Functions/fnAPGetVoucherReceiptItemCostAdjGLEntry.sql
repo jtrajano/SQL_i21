@@ -34,7 +34,7 @@ RETURNS TABLE AS RETURN
 		,CASE 
 			WHEN B.intPurchaseDetailId > 0 AND poDetail.intAccountId > 0
 				THEN poDetail.intAccountId
-			WHEN B.intInventoryReceiptChargeId > 0 OR F.strType = 'Non-Inventory'
+			WHEN (B.intInventoryReceiptChargeId > 0 AND charges.ysnInventoryCost = 0) OR F.strType = 'Non-Inventory'
 				THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')
 			ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
 			END AS intAccountId
