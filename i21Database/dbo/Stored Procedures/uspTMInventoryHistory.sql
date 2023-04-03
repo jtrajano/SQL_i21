@@ -190,7 +190,7 @@ BEGIN
 				BEGIN
 					update #tempInventoryHistory set dblTwentyThree = @dblFuelVolume where Id = @IdTemp
 				END
-				ELSE IF @intHour = 24 and @dblZero is null
+				ELSE IF @intHour = 0 and @dblZero is null
 				BEGIN
 					update #tempInventoryHistory set dblZero = @dblFuelVolume where Id = @IdTemp
 				END
@@ -289,7 +289,7 @@ BEGIN
 				BEGIN
 					INSERT INTO #tempInventoryHistory(dtmTempDateTime,dblTwentyThree)values(@dtmDateTime,@dblFuelVolume)
 				END
-				ELSE IF @intHour = 24
+				ELSE IF @intHour = 0
 				BEGIN
 					INSERT INTO #tempInventoryHistory(dtmTempDateTime,dblZero)values(@dtmDateTime,@dblFuelVolume)
 				END
