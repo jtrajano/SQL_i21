@@ -2956,7 +2956,7 @@ USING (
 		 , ItemUOM.dblUnitQty
 	FROM @vendorItemXRef AS VendorXRef 
 	INNER JOIN tblICItem AS Item ON  LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(VendorXRef.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.intModifier = ISNULL(NULLIF(VendorXRef.strUpcModifierNumber,''), 0) AND ItemUOM.strLongUPCCode =  NULLIF(VendorXRef.strSellingUpcNumber,'')	
+	INNER JOIN tblICItemUOM AS ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ISNULL(ItemUOM.intModifier, 0) = ISNULL(NULLIF(VendorXRef.strUpcModifierNumber,''), 0) AND ItemUOM.strLongUPCCode =  NULLIF(VendorXRef.strSellingUpcNumber,'')	
 	CROSS APPLY (SELECT TOP 1 v.* 
 				 FROM vyuAPVendor v
 				 WHERE (v.strVendorId = VendorXRef.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)) AS Vendor				
