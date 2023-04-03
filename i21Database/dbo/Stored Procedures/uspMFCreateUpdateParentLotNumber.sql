@@ -1,17 +1,20 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber] @strParentLotNumber NVARCHAR(50) = NULL
-	,@strParentLotAlias NVARCHAR(50)
-	,@intItemId INT
-	,@dtmExpiryDate DATETIME
-	,@intLotStatusId INT
-	,@intEntityUserSecurityId INT
-	,@intLotId INT
-	,@intParentLotId INT = NULL OUTPUT
-	,@intSubLocationId INT = NULL
-	,@intLocationId INT = NULL
-	,@dtmDate DATETIME = NULL
-	,@intShiftId INT = NULL
-	,@ysnUpdateOnlyParentLot BIT=0
-AS
+﻿CREATE PROCEDURE [dbo].[uspMFCreateUpdateParentLotNumber]
+(
+	@strParentLotNumber			NVARCHAR(50) = NULL
+  , @strParentLotAlias			NVARCHAR(50)
+  , @intItemId					INT
+  , @dtmExpiryDate				DATETIME
+  , @intLotStatusId				INT
+  , @intEntityUserSecurityId	INT
+  , @intLotId					INT
+  , @intParentLotId				INT = NULL OUTPUT
+  , @intSubLocationId			INT = NULL
+  , @intLocationId				INT = NULL
+  , @dtmDate					DATETIME = NULL
+  , @intShiftId					INT = NULL
+  , @ysnUpdateOnlyParentLot		BIT = 0
+
+)AS
 BEGIN
 	DECLARE @ErrMsg NVARCHAR(Max)
 		,@intCategoryId INT
