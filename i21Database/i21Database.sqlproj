@@ -7463,6 +7463,7 @@
     <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql" />
     <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMatchingLotAvailableQtyValidation.sql" />
     <Build Include="dbo\Functions\fnCommaSeparatedValueToTable.sql" />
