@@ -1230,18 +1230,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GeneralLedger.view.AccountGroup?showSearch=true' WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Account ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Auditor Transactions by Account ID', N'General Ledger', @GeneralLedgerReportParentMenuId, N'Auditor Transactions by Account ID', N'Report', N'Screen', N'GeneralLedger.view.AuditorTransactionsByAccountId', N'small-menu-report', 0, 0, 0, 1, 2, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GeneralLedger.view.AuditorTransactionsByAccountId' WHERE strMenuName = N'Auditor Transactions by Account ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Account ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Account ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Transaction ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Auditor Transactions by Transaction ID', N'General Ledger', @GeneralLedgerReportParentMenuId, N'Auditor Transactions by Transaction Id', N'Report', N'Screen', N'GeneralLedger.view.AuditorTransactionsByAccountId', N'small-menu-report', 0, 0, 0, 1, 2, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GeneralLedger.view.AuditorTransactionsByTransactionId' WHERE strMenuName = N'Auditor Transactions by Transaction ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
-
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Transaction ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Transaction ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
+	
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'New General Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
