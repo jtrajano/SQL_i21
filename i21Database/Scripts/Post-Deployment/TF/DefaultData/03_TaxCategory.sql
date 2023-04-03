@@ -600,10 +600,32 @@ DELETE @TaxCategoryMO
 
 GO
 
+PRINT ('Deploying WV Tax Category')
+
+DECLARE @TaxCategoryWV AS TFTaxCategory
 
 
 
+INSERT INTO @TaxCategoryWV(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Gasoline (GA)', intMasterId = 480001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Gasohol (GH)', intMasterId = 480002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Undyed Diesel/Kerosene (DI)', intMasterId = 480003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Compressed Natural Gas (CNG)', intMasterId = 480004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Dyed Diesel/Kerosene', intMasterId = 480005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Propane/LPG (LP)', intMasterId = 480006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Aviation Gas', intMasterId = 480007
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Aviation Jet Fuel', intMasterId = 480008
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Liquefied Natural Gas (LNG)', intMasterId = 480009
 
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WV', @TaxCategories = @TaxCategoryWV
+
+DELETE @TaxCategoryWV
+GO
 
 
 PRINT ('Deploying VA Tax Category')
