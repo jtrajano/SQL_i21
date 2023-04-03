@@ -116,7 +116,6 @@ BEGIN TRY
         --UPDATE BILL DETAILS
 		UPDATE BD
 		SET dblCost							= ISNULL(S.dblB1Price, 0)
-		  , dblCashPrice					= ISNULL(S.dblB1Price, 0)
 		  , dblQtyReceived					= ISNULL(A.dblSampleQty, 0)
 		  , dblQtyOrdered					= ISNULL(A.dblSampleQty, 0)
 		  , strPreInvoiceGardenNumber		= S.strChopNumber
@@ -129,20 +128,6 @@ BEGIN TRY
 		LEFT JOIN tblQMGardenMark GM ON S.intGardenMarkId = GM.intGardenMarkId
 		LEFT JOIN tblICCommodityAttribute CA ON S.intGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
 		WHERE S.intSampleId = @intSampleId
-
-		--UPDATE BILL TOTALS
-		DECLARE @billIds AS Id
-
-		INSERT INTO @billIds
-		SELECT DISTINCT BD.intBillId
-		FROM tblAPBillDetail BD 
-		INNER JOIN tblQMCatalogueReconciliationDetail CRD ON BD.intBillDetailId = CRD.intBillDetailId
-        INNER JOIN #AMENDMENTS A ON CRD.intCatalogueReconciliationId = A.intCatalogueReconciliationId
-		INNER JOIN tblQMSample S ON S.intSampleId = CRD.intSampleId
-		WHERE S.intSampleId = @intSampleId
-
-		IF EXISTS (SELECT TOP 1 1 FROM @billIds)
-			EXEC uspAPUpdateVoucherTotal @billIds
 		
 		--UPDATE BATCH
         UPDATE B
@@ -466,18 +451,6 @@ BEGIN TRY
 
 						SELECT [Id]			= 3
 							, [Action]		= NULL
-							, [Change]		= 'Update Cash Price'
-							, [From]		= CAST(dblPreInvoicePrice AS NVARCHAR(100))
-							, [To]			= CAST(dblSamplePrice AS NVARCHAR(100))
-							, [ParentId]	= 1
-						FROM #AMENDMENTS 
-						WHERE intCatalogueReconciliationDetailId = @intCatalogueReconciliationDetailId
-						  AND dblPreInvoicePrice <> dblSamplePrice
-
-						UNION ALL
-
-						SELECT [Id]			= 4
-							, [Action]		= NULL
 							, [Change]		= 'Update Received'
 							, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
 							, [To]			= CAST(dblSampleQty AS NVARCHAR(100))
@@ -488,7 +461,7 @@ BEGIN TRY
 
 						UNION ALL
 
-						SELECT [Id]			= 5
+						SELECT [Id]			= 4
 							, [Action]		= NULL
 							, [Change]		= 'Update Ordered'
 							, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
@@ -500,7 +473,7 @@ BEGIN TRY
 
 						UNION ALL
 
-						SELECT [Id]			= 6
+						SELECT [Id]			= 5
 							, [Action]		= NULL
 							, [Change]		= 'Update Pre-Invoice Garden Number'
 							, [From]		= strPreInvoiceChopNo
@@ -512,7 +485,7 @@ BEGIN TRY
 
 						UNION ALL
 
-						SELECT [Id]			= 7
+						SELECT [Id]			= 6
 							, [Action]		= NULL
 							, [Change]		= 'Update Garden Mark'
 							, [From]		= CAST(GM.strGardenMark AS NVARCHAR(100))
@@ -526,7 +499,7 @@ BEGIN TRY
 
 						UNION ALL
 
-						SELECT [Id]			= 8
+						SELECT [Id]			= 7
 							, [Action]		= NULL
 							, [Change]		= 'Update Comment'
 							, [From]		= CAST(CA.strDescription AS NVARCHAR(100))

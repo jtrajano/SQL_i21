@@ -94,7 +94,6 @@ BEGIN TRY
 		BEGIN
 			UPDATE BD
 			SET dblCost						= ISNULL(V.dblCatReconPrice, 0)
-			  , dblCashPrice				= ISNULL(V.dblCatReconPrice, 0)
 			  , dblQtyReceived				= ISNULL(V.dblCatReconQty, 0)
 			  , dblQtyOrdered				= ISNULL(V.dblCatReconQty, 0)
 			  , strPreInvoiceGardenNumber	= CAST(V.strCatReconChopNo AS NVARCHAR(100))
@@ -102,17 +101,6 @@ BEGIN TRY
 			  , strComment					= CAST(V.strCatReconGrade AS NVARCHAR(100))
 			FROM tblAPBillDetail BD
 			INNER JOIN #VOUCHERS V ON V.intBillDetailId = BD.intBillDetailId
-
-			--UPDATE BILL TOTALS
-			DECLARE @billIds AS Id
-
-			INSERT INTO @billIds
-			SELECT DISTINCT BD.intBillId
-			FROM tblAPBillDetail BD
-			INNER JOIN #VOUCHERS V ON V.intBillDetailId = BD.intBillDetailId
-
-			IF EXISTS (SELECT TOP 1 1 FROM @billIds)
-				EXEC uspAPUpdateVoucherTotal @billIds
 
 			--AUDIT LOG FOR VOUCHERS
 			WHILE EXISTS (SELECT TOP 1 1 FROM #VOUCHERS)
@@ -158,18 +146,6 @@ BEGIN TRY
 
 					SELECT [Id]			= 3
 						, [Action]		= NULL
-						, [Change]		= 'Update Cash Price'
-						, [From]		= CAST(dblPreInvoicePrice AS NVARCHAR(100))
-						, [To]			= CAST(dblCatReconPrice AS NVARCHAR(100))
-						, [ParentId]	= 1
-					FROM #VOUCHERS 
-					WHERE intBillId = @intBillId
-					  AND dblPreInvoicePrice <> dblCatReconPrice
-
-					UNION ALL
-
-					SELECT [Id]			= 4
-						, [Action]		= NULL
 						, [Change]		= 'Update Received'
 						, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
 						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
@@ -180,7 +156,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 5
+					SELECT [Id]			= 4
 						, [Action]		= NULL
 						, [Change]		= 'Update Ordered'
 						, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
@@ -192,7 +168,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 6
+					SELECT [Id]			= 5
 						, [Action]		= NULL
 						, [Change]		= 'Update Pre-Invoice Garden Number'
 						, [From]		= CAST(strPreInvoiceChopNo AS NVARCHAR(100))
@@ -204,7 +180,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 7
+					SELECT [Id]			= 6
 						, [Action]		= NULL
 						, [Change]		= 'Update Garden Mark'
 						, [From]		= CAST(VGM.strGardenMark AS NVARCHAR(100))
@@ -218,7 +194,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 8
+					SELECT [Id]			= 7
 						, [Action]		= NULL
 						, [Change]		= 'Update Comment'
 						, [From]		= CAST(strPreInvoiceGrade AS NVARCHAR(100))
