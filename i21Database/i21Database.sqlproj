@@ -1444,6 +1444,8 @@
     <Build Include="dbo\Tables\tblGLAccountDefault.sql" />
     <Build Include="dbo\Tables\tblGLAccountDefaultDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountGroup.sql" />
+    <Build Include="dbo\Tables\tblGLAccountGroupCluster.sql" />
+    <Build Include="dbo\Tables\tblGLAccountGroupClusterDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountReallocation.sql" />
     <Build Include="dbo\Tables\tblGLAccountReallocationDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountSegment.sql" />
@@ -2200,6 +2202,7 @@
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeSegmentAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLMergeClusterDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMulticurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspGLValidateSubsidiarySetting.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeGLAccount.sql" />
@@ -7448,6 +7451,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetSplit.sql" />
     <None Include="Scripts\Post-Deployment\MF\9_Lot Pattern.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAccountGroupForCluster.sql" />
     <Build Include="dbo\Views\vyuBBOpenBuyback.sql" />
     <Build Include="dbo\Tables\tblBBBuybackDetail.sql" />
     <Build Include="dbo\Views\vyuBBBuybacksProgramInvoices.sql" />

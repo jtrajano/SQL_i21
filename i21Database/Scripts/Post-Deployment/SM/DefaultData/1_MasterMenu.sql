@@ -1211,6 +1211,7 @@ ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'GeneralLedger.view.Ledger?showSearch=true' WHERE strMenuName = N'Ledgers' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceParentMenuId
 
 
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Import GL from Subledger' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerImportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Import GL from Subledger', N'General Ledger', @GeneralLedgerImportParentMenuId, N'Import GL from Subledger', N'Import', N'Screen', N'GeneralLedger.view.ImportFromSubledger', N'small-menu-import', 0, 0, 0, 1, 0, 1)
@@ -1255,12 +1256,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account 
 	VALUES (N'Account Structure', N'General Ledger', @GeneralLedgerSetupParentMenuId, N'Account Structure', N'Setup', N'Screen', N'GeneralLedger.view.AccountStructure', N'small-menu-setup', 0, 0, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GeneralLedger.view.AccountStructure' WHERE strMenuName = N'Account Structure' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Account Groups', N'General Ledger', @GeneralLedgerSetupParentMenuId, N'Account Groups', N'Setup', N'Screen', N'GeneralLedger.view.AccountGroups', N'small-menu-setup', 0, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GeneralLedger.view.AccountGroups' WHERE strMenuName = N'Account Groups' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId
+
+DELETE FROM tblSMMasterMenu WHERE strMenuName='Account Group Cluster' AND strModuleName= 'General Ledger'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Segment Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerSetupParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
