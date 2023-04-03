@@ -10,7 +10,7 @@ SELECT CD.intContractDetailImportId
     ,CD.dtmEndDate    
     ,CD.dtmUpdatedAvailability    
     ,strLocationName = CD.strLocation    
-    ,CL.intCompanyLocationId    
+    ,CH.intCompanyLocationId    
     ,CD.strBook    
     ,B.intBookId    
     ,CD.strSubBook    
