@@ -34,7 +34,7 @@ F.strPeriod
 FROM tblGLAccount A
 LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
 LEFT JOIN tblGLFiscalYearPeriod F on F.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
-LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
+LEFT JOIN tblSMCurrency C on C.intCurrencyID = B.intCurrencyId
 LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
 LEFT JOIN tblGLAccountUnit U on U.intAccountUnitId = A.intAccountUnitId
 CROSS APPLY(
