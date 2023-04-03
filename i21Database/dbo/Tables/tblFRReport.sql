@@ -36,6 +36,7 @@
     [intSort]                   INT             DEFAULT 0 NULL,
     [intReportCurrency]         INT             DEFAULT 0 NULL,
     [intConcurrencyId]          INT             DEFAULT 1 NOT NULL,
+    [intAccountGroupClusterId]  INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRReport] PRIMARY KEY CLUSTERED ([intReportId] ASC),
 	CONSTRAINT [FK_tblFRReport_tblFRSegmentFilterGroup] FOREIGN KEY([intSegmentCode]) REFERENCES [dbo].[tblFRSegmentFilterGroup] ([intSegmentFilterGroupId])
 );
