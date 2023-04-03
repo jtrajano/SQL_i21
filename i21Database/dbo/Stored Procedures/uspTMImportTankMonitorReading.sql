@@ -699,6 +699,15 @@
 			
 		
 		END
+		ELSE
+		BEGIN
+			--update Estimated % left and Gals left
+			UPDATE tblTMSite
+			SET dblEstimatedPercentLeft = @tk_level
+				,dblEstimatedGallonsLeft = (case when @is_wesroc = 1 then ((@tk_level * dblTotalCapacity) / 100) else @qty_in_tank end)
+				,dtmLastReadingUpdate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
+			WHERE intSiteID = @siteId
+		END
 	
 		--print @resultLog
 		SET @resultLog = @resultLog + 'Import successful'
