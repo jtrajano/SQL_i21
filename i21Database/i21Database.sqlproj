@@ -1283,6 +1283,7 @@
     <Build Include="dbo\Tables\tblGRAPClearingStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGenerateAPClearingForStorageInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuSTStoreMaintenanceDepartments.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployee401K.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
