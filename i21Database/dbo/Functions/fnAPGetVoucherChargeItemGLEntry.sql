@@ -47,6 +47,6 @@ RETURNS TABLE AS RETURN
   ON H.intLoadCostId = B.intLoadShipmentCostId
  WHERE A.intBillId = @billId  
  AND (
-     B.intInventoryReceiptChargeId IS NOT NULL OR (B.intLoadShipmentCostId IS NOT NULL AND ISNULL(H.ysnInventoryCost, 0) = 0)
+     B.intInventoryReceiptChargeId IS NOT NULL OR (B.intLoadShipmentCostId IS NOT NULL AND ISNULL(H.ysnInventoryCost, 0) = 0 AND B.dblCost <> H.dblRate)
  )
 )
