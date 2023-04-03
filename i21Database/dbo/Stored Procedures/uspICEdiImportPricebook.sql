@@ -2658,7 +2658,7 @@ USING (
 			pl.intCompanyLocationId = ValidLocation.intCompanyLocationId 	
 	) AS CompanyPricingLevel
 	INNER JOIN tblICItemLocation AS ItemLocation ON ItemLocation.intLocationId = ValidLocation.intCompanyLocationId AND ItemLocation.intItemId = Item.intItemId
-	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2))) AND ItemUOM.intModifier = NULLIF(Pricebook.strAltUPCModifier2,'')
+	INNER JOIN vyuICGetItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId AND LOWER(ItemUOM.strUnitMeasure) = LTRIM(RTRIM(LOWER(Pricebook.strAltUPCUOM2))) AND ISNULL(ItemUOM.intModifier, 0) = NULLIF(Pricebook.strAltUPCModifier2,'')
 	WHERE 
 		Pricebook.strUniqueId = @UniqueId 
 		AND CAST(NULLIF(Pricebook.strAltUPCPrice2, '') AS NUMERIC(38, 20)) <> 0 
@@ -2850,7 +2850,7 @@ USING (
 		 , Pricebook.ysnUpdatePrice
 	FROM tblICEdiPricebook AS Pricebook
 	INNER JOIN tblICItem AS Item ON LOWER(Item.strItemNo) =  NULLIF(LTRIM(RTRIM(LOWER(Pricebook.strItemNo))), '')
-	INNER JOIN tblICItemUOM AS UnitOfMeasure ON UnitOfMeasure.intItemId = Item.intItemId AND UnitOfMeasure.intModifier = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0) AND UnitOfMeasure.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
+	INNER JOIN tblICItemUOM AS UnitOfMeasure ON UnitOfMeasure.intItemId = Item.intItemId AND ISNULL(UnitOfMeasure.intModifier, 0) = ISNULL(NULLIF(Pricebook.strUpcModifierNumber,''), 0) AND UnitOfMeasure.strLongUPCCode =  NULLIF(Pricebook.strSellingUpcNumber,'')	
 	OUTER APPLY (SELECT loc.intCompanyLocationId 
 					  , l.*
 				 FROM @ValidLocations loc 
