@@ -1336,6 +1336,7 @@
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
     <Build Include="dbo\Functions\fnRemoveLeadingZero.sql" />
     <Build Include="dbo\Views\vyuSTStoreMaintenanceDepartments.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployee401K.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
