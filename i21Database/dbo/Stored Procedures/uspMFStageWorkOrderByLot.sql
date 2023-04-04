@@ -1,290 +1,303 @@
-﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrderByLot] (
-	@strXML NVARCHAR(MAX)
-	,@intWorkOrderInputLotId INT = NULL OUTPUT
-	)
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrderByLot] 
+(
+	@strXML					NVARCHAR(MAX)
+  , @intWorkOrderInputLotId INT = NULL OUTPUT
+)
 AS
 BEGIN TRY
-	DECLARE @idoc INT
-		,@ErrMsg NVARCHAR(MAX)
-		,@intLocationId INT
-		,@intSubLocationId INT
-		,@intManufacturingProcessId INT
-		,@intMachineId INT
-		,@intWorkOrderId INT
-		,@dtmPlannedDate DATETIME
-		,@intPlannedShiftId INT
-		,@intItemId INT
-		,@intStorageLocationId INT
-		,@intInputLotId INT
-		,@intInputItemId INT
-		,@dblWeight NUMERIC(38, 20)
-		,@dblInputWeight NUMERIC(38, 20)
-		,@dblReadingQuantity NUMERIC(38, 20)
-		,@intInputWeightUOMId INT
-		,@intUserId INT
-		,@ysnEmptyOut BIT
-		,@intContainerId INT
-		,@strReferenceNo NVARCHAR(50)
-		,@dtmActualInputDateTime DATETIME
-		,@intShiftId INT
-		,@ysnNegativeQuantityAllowed BIT
-		,@ysnExcessConsumptionAllowed BIT
-		,@strItemNo NVARCHAR(50)
-		,@strInputItemNo NVARCHAR(50)
-		,@intConsumptionMethodId INT
-		,@intConsumptionStorageLocationId INT
-		,@dblDefaultResidueQty NUMERIC(38, 20)
-		,@dblNewWeight NUMERIC(38, 20)
-		,@intDestinationLotId INT
-		,@strLotNumber NVARCHAR(50)
-		,@strLotTracking NVARCHAR(50)
-		,@intItemLocationId INT
-		,@dtmCurrentDateTime DATETIME
-		,@dblAdjustByQuantity NUMERIC(18, 6)
-		,@intInventoryAdjustmentId INT
-		,@intNewItemUOMId INT
-		,@dblWeightPerQty NUMERIC(18, 6)
-		,@strDestinationLotNumber NVARCHAR(50)
-		,@intConsumptionSubLocationId INT
-		,@intWeightUOMId INT
-		,@intTransactionCount INT
-		,@strWorkOrderNo NVARCHAR(50)
-		,@strProcessName NVARCHAR(50)
-		,@dtmBusinessDate DATETIME
-		,@intBusinessShiftId INT
-		,@intManufacturingCellId INT
-		,@strInventoryTracking NVARCHAR(50)
-		,@intProductionStagingId INT
-		,@intProductionStageLocationId INT
-		,@intCategoryId INT
-		,@intItemTypeId INT
-		,@ItemsToReserve AS dbo.ItemReservationTableType
-		,@intInventoryTransactionType AS INT = 8
-		,@intAdjustItemUOMId INT
-		,@intRecipeItemUOMId INT
-		,@dblEnteredQty NUMERIC(38, 20)
-		,@intEnteredItemUOMId INT
-		,@intItemStockUOMId INT
-		,@strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
-		,@intOrderHeaderId INT
-		,@dblQty NUMERIC(38, 20)
-		,@strErr NVARCHAR(MAX)
-		,@intSwapToWorkOrderId INT
-		,@intSwapToLotId INT
-		,@intSwapToOrderHeaderId INT
-		,@strSwapToWorkOrderNo NVARCHAR(50)
-		,@intRecordId INT
-		,@dblSwapToQty NUMERIC(18, 6)
-		,@dblLotQty NUMERIC(38, 20)
-		,@dblReservedQty NUMERIC(18, 6)
-		,@dblInputWeight2 NUMERIC(18, 6)
-		,@dblRequiredQty NUMERIC(18, 6)
-		,@dblSwapToQty2 NUMERIC(18, 6)
-		,@intMainItemId INT
-		,@strConsumeSourceLocation NVARCHAR(50)
-	DECLARE @tblMFSwapto TABLE (
-		intSwapTo INT identity(1, 1)
-		,intWorkOrderId INT
-		,strWorkOrderNo NVARCHAR(50)
-		,dblQty NUMERIC(18, 6)
-		)
-	DECLARE @tblMFReservation TABLE (
-		intRecordId INT identity(1, 1)
-		,intWorkOrderId INT
-		,strWorkOrderNo NVARCHAR(50)
-		,dblQty NUMERIC(18, 6)
-		)
-	DECLARE @tblMFLot TABLE (
-		intSwapToLotId INT
-		,dblQty NUMERIC(38, 20)
-		)
-	DECLARE @tblMFPickedLot TABLE (
-		intLotId INT
-		,dblQty NUMERIC(38, 20)
-		)
+	DECLARE @idoc							INT
+		  , @ErrMsg							NVARCHAR(MAX)
+		  , @intLocationId					INT
+		  , @intSubLocationId				INT
+		  , @intManufacturingProcessId		INT
+		  , @intMachineId					INT
+		  , @intWorkOrderId					INT
+		  , @dtmPlannedDate					DATETIME
+		  , @intPlannedShiftId				INT
+		  , @intItemId						INT
+		  , @intStorageLocationId			INT
+		  , @intInputLotId					INT
+		  , @intInputItemId					INT
+		  , @dblWeight						NUMERIC(38, 20)
+		  , @dblInputWeight					NUMERIC(38, 20)
+		  , @dblReadingQuantity				NUMERIC(38, 20)
+		  , @intInputWeightUOMId			INT
+		  , @intUserId						INT
+		  , @ysnEmptyOut					BIT
+		  , @intContainerId					INT
+		  , @strReferenceNo					NVARCHAR(50)
+		  , @dtmActualInputDateTime			DATETIME
+		  , @intShiftId						INT
+		  , @intNegativeQuantityAllowed		INT
+		  , @ysnExcessConsumptionAllowed	BIT
+		  , @strItemNo						NVARCHAR(50)
+		  , @strInputItemNo					NVARCHAR(50)
+		  , @intConsumptionMethodId			INT
+		  , @intConsumptionStorageLocationId INT
+		  , @dblDefaultResidueQty			NUMERIC(38, 20)
+		  , @dblNewWeight					NUMERIC(38, 20)
+		  , @intDestinationLotId			INT
+		  , @strLotNumber					NVARCHAR(50)
+		  , @strLotTracking					NVARCHAR(50)
+		  , @intItemLocationId				INT
+		  , @dtmCurrentDateTime				DATETIME
+		  , @dblAdjustByQuantity			NUMERIC(18, 6)
+		  , @intInventoryAdjustmentId		INT
+		  , @intNewItemUOMId				INT
+		  , @dblWeightPerQty				NUMERIC(18, 6)
+		  , @strDestinationLotNumber		NVARCHAR(50)
+		  , @intConsumptionSubLocationId	INT
+		  , @intWeightUOMId					INT
+		  , @intTransactionCount			INT
+		  , @strWorkOrderNo					NVARCHAR(50)
+		  , @strProcessName					NVARCHAR(50)
+		  , @dtmBusinessDate				DATETIME
+		  , @intBusinessShiftId				INT
+		  , @intManufacturingCellId			INT
+		  , @strInventoryTracking			NVARCHAR(50)
+		  , @intProductionStagingId			INT
+		  , @intProductionStageLocationId	INT
+		  , @intCategoryId					INT
+		  , @intItemTypeId					INT
+		  , @ItemsToReserve					dbo.ItemReservationTableType
+		  , @intInventoryTransactionType	INT = 8
+		  , @intAdjustItemUOMId				INT
+		  , @intRecipeItemUOMId				INT
+		  , @dblEnteredQty					NUMERIC(38, 20)
+		  , @intEnteredItemUOMId			INT
+		  , @intItemStockUOMId				INT
+		  , @strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
+		  , @intOrderHeaderId				INT
+		  , @dblQty							NUMERIC(38, 20)
+		  , @strErr							NVARCHAR(MAX)
+		  , @intSwapToWorkOrderId			INT
+		  , @intSwapToLotId					INT
+		  , @intSwapToOrderHeaderId			INT
+		  , @strSwapToWorkOrderNo			NVARCHAR(50)
+		  , @intRecordId					INT
+		  , @dblSwapToQty					NUMERIC(18, 6)
+		  , @dblLotQty						NUMERIC(38, 20)
+		  , @dblReservedQty					NUMERIC(18, 6)
+		  , @dblInputWeight2				NUMERIC(18, 6)
+		  , @dblRequiredQty					NUMERIC(18, 6)
+		  , @dblSwapToQty2					NUMERIC(18, 6)
+		  , @intMainItemId					INT
+		  , @strConsumeSourceLocation		NVARCHAR(50)
+
+	DECLARE @tblMFSwapto TABLE 
+	(
+		intSwapTo		INT IDENTITY(1, 1)
+	  , intWorkOrderId	INT
+	  , strWorkOrderNo	NVARCHAR(50)
+	  , dblQty			NUMERIC(18, 6)
+	);
+
+	DECLARE @tblMFReservation TABLE 
+	(
+		intRecordId		INT IDENTITY(1, 1)
+	  , intWorkOrderId	INT
+	  , strWorkOrderNo	NVARCHAR(50)
+	  , dblQty			NUMERIC(18, 6)
+	);
+
+	DECLARE @tblMFLot TABLE 
+	(
+		intSwapToLotId	INT
+	  , dblQty			NUMERIC(38, 20)
+	);
+
+	DECLARE @tblMFPickedLot TABLE 
+	(
+		intLotId	INT
+	  , dblQty		NUMERIC(38, 20)
+	);
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @dtmCurrentDateTime = GetDate()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
-		,@strXML
+							  , @strXML
 
-	SELECT @intLocationId = intLocationId
-		,@intSubLocationId = intSubLocationId
-		,@intManufacturingProcessId = intManufacturingProcessId
-		,@intMachineId = intMachineId
-		,@intWorkOrderId = intWorkOrderId
-		,@dtmPlannedDate = dtmPlannedDate
-		,@intPlannedShiftId = intPlannedShiftId
-		,@intItemId = intItemId
-		,@intStorageLocationId = intStorageLocationId
-		,@intInputLotId = intInputLotId
-		,@intInputItemId = intInputItemId
-		,@dblInputWeight = dblInputWeight
-		,@dblReadingQuantity = dblReadingQuantity
-		,@intInputWeightUOMId = intInputWeightUOMId
-		,@intUserId = intUserId
-		,@ysnEmptyOut = ysnEmptyOut
-		,@intContainerId = intContainerId
-		,@strReferenceNo = strReferenceNo
-		,@dtmActualInputDateTime = dtmActualInputDateTime
-		,@intShiftId = intShiftId
-		,@ysnNegativeQuantityAllowed = ysnNegativeQuantityAllowed
-		,@ysnExcessConsumptionAllowed = ysnExcessConsumptionAllowed
-		,@dblDefaultResidueQty = dblDefaultResidueQty
-		,@intMainItemId = intMainItemId
-	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intLocationId INT
-			,intSubLocationId INT
-			,intManufacturingProcessId INT
-			,intMachineId INT
-			,intWorkOrderId INT
-			,dtmPlannedDate DATETIME
-			,intPlannedShiftId INT
-			,intItemId INT
-			,intStorageLocationId INT
-			,intInputLotId INT
-			,intInputItemId INT
-			,dblInputWeight NUMERIC(38, 20)
-			,dblReadingQuantity NUMERIC(38, 20)
-			,intInputWeightUOMId INT
-			,intUserId INT
-			,ysnEmptyOut BIT
-			,intContainerId INT
-			,strReferenceNo NVARCHAR(50)
-			,dtmActualInputDateTime DATETIME
-			,intShiftId INT
-			,ysnNegativeQuantityAllowed BIT
-			,ysnExcessConsumptionAllowed BIT
-			,dblDefaultResidueQty NUMERIC(38, 20)
-			,intMainItemId INT
-			)
+	SELECT @intLocationId				= intLocationId
+		 , @intSubLocationId			= intSubLocationId
+		 , @intManufacturingProcessId	= intManufacturingProcessId
+		 , @intMachineId				= intMachineId
+		 , @intWorkOrderId				= intWorkOrderId
+		 , @dtmPlannedDate				= dtmPlannedDate
+		 , @intPlannedShiftId			= intPlannedShiftId
+		 , @intItemId					= intItemId
+		 , @intStorageLocationId		= intStorageLocationId
+		 , @intInputLotId				= intInputLotId
+		 , @intInputItemId				= intInputItemId
+		 , @dblInputWeight				= dblInputWeight
+		 , @dblReadingQuantity			= dblReadingQuantity
+		 , @intInputWeightUOMId			= intInputWeightUOMId
+		 , @intUserId					= intUserId
+		 , @ysnEmptyOut					= ysnEmptyOut
+		 , @intContainerId				= intContainerId
+		 , @strReferenceNo				= strReferenceNo
+		 , @dtmActualInputDateTime		= dtmActualInputDateTime
+		 , @intShiftId					= intShiftId
+		 , @ysnExcessConsumptionAllowed = ysnExcessConsumptionAllowed
+		 , @dblDefaultResidueQty		= dblDefaultResidueQty
+		 , @intMainItemId				= intMainItemId
+	FROM OPENXML(@idoc, 'root', 2) WITH 
+	(
+		intLocationId				INT
+	  , intSubLocationId			INT
+	  , intManufacturingProcessId	INT
+	  , intMachineId				INT
+	  , intWorkOrderId				INT
+	  , dtmPlannedDate				DATETIME
+	  , intPlannedShiftId			INT
+	  , intItemId					INT
+	  , intStorageLocationId		INT
+	  , intInputLotId				INT
+	  , intInputItemId				INT
+	  , dblInputWeight				NUMERIC(38, 20)
+	  , dblReadingQuantity			NUMERIC(38, 20)
+	  , intInputWeightUOMId			INT
+	  , intUserId					INT
+	  , ysnEmptyOut					BIT
+	  , intContainerId				INT
+	  , strReferenceNo				NVARCHAR(50)
+	  , dtmActualInputDateTime		DATETIME
+	  , intShiftId					INT
+	  , ysnExcessConsumptionAllowed BIT
+	  , dblDefaultResidueQty		NUMERIC(38, 20)
+	  , intMainItemId				INT
+	);
 
+	/* Feed Time validation. */
 	IF @dtmActualInputDateTime > GETDATE()
-	BEGIN
-		RAISERROR (
+		BEGIN
+			RAISERROR 
+			(
 				'Feed time cannot be greater than current date and time.'
-				,14
-				,1
-				)
-	END
+			  , 14
+			  , 1
+			);
+		END
+	/* End of Feed Time validation. */
 
-	SELECT @dblEnteredQty = @dblInputWeight
-		,@intEnteredItemUOMId = @intInputWeightUOMId
 
-	SELECT @strInventoryTracking = strInventoryTracking
-		,@intCategoryId = intCategoryId
-	FROM dbo.tblICItem
-	WHERE intItemId = @intInputItemId
+	SELECT @dblEnteredQty		= @dblInputWeight
+		 , @intEnteredItemUOMId = @intInputWeightUOMId
 
+	SELECT @strInventoryTracking		= Item.strInventoryTracking
+		 , @intCategoryId				= Item.intCategoryId
+		 , @intNegativeQuantityAllowed	= ItemLocation.intAllowNegativeInventory
+	FROM dbo.tblICItem AS Item
+	OUTER APPLY (SELECT intAllowNegativeInventory
+				 FROM tblICItemLocation AS ICItemLocation
+				 WHERE ICItemLocation.intItemId = Item.intItemId AND ICItemLocation.intLocationId = @intLocationId) AS ItemLocation
+	WHERE Item.intItemId = @intInputItemId;
+
+	/* Lot Tracked Validation. */
 	IF @strInventoryTracking = 'Lot Level'
-	BEGIN
-		IF @intInputLotId IS NULL
-			OR @intInputLotId = 0
 		BEGIN
-			RAISERROR (
-					'Lot cannot be blank.'
-					,14
-					,1
+
+			/* Lot validation. */
+			IF @intInputLotId IS NULL OR @intInputLotId = 0
+				BEGIN
+					RAISERROR 
+					(
+						'Lot cannot be blank.'
+					  , 14
+					  , 1
 					)
-		END
+				END
+			/* End of Lot validation. */
 
-		SELECT @strLotNumber = strLotNumber
-			,@intInputLotId = intLotId
-			,@dblWeight = (
-				CASE 
-					WHEN intWeightUOMId IS NOT NULL
-						THEN dblWeight
-					ELSE dblQty
-					END
-				)
-			,@intNewItemUOMId = intItemUOMId
-			,@dblWeightPerQty = (
-				CASE 
-					WHEN dblWeightPerQty IS NULL
-						OR dblWeightPerQty = 0
-						THEN 1
-					ELSE dblWeightPerQty
-					END
-				)
-			,@intWeightUOMId = intWeightUOMId
-			,@dblQty = dblQty
-		FROM tblICLot
-		WHERE intLotId = @intInputLotId
+			SELECT @strLotNumber	= strLotNumber
+				 , @intInputLotId	= intLotId
+				 , @dblWeight		= (CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight
+											ELSE dblQty
+									   END)
+				 , @intNewItemUOMId = intItemUOMId
+				 , @dblWeightPerQty = ISNULL(NULLIF(dblWeightPerQty, 0) ,1) 
+				 , @intWeightUOMId	= intWeightUOMId
+				 , @dblQty			= dblQty
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
 
-		IF @intNewItemUOMId <> @intInputWeightUOMId
-			AND IsNULL(@intWeightUOMId, @intNewItemUOMId) <> @intInputWeightUOMId
-		BEGIN
-			SELECT @dblInputWeight = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
+			IF @intNewItemUOMId <> @intInputWeightUOMId AND ISNULL(@intWeightUOMId, @intNewItemUOMId) <> @intInputWeightUOMId
+				BEGIN
+					SELECT @dblInputWeight = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
 
-			SELECT @intInputWeightUOMId = @intNewItemUOMId
-		END
+					SELECT @intInputWeightUOMId = @intNewItemUOMId
+				END
 
-		IF @dblInputWeight > @dblWeight
-		BEGIN
-			IF @ysnExcessConsumptionAllowed = 0
-			BEGIN
-				RAISERROR (
+			/* Validation of Input quantity/weight greater than lot quantity/weight. */
+			IF @dblInputWeight > @dblWeight AND @intNegativeQuantityAllowed <> 1
+				BEGIN
+					RAISERROR 
+					(
 						'The quantity to be consumed must not exceed the selected lot quantity.'
-						,14
-						,1
-						)
-			END
-		END
+						, 14
+						, 1
+					);
+				END
+			/* End of Validation of Input quantity/weight greater than lot quantity/weight. */
 
-		IF @intInputLotId IS NULL
-			OR @intInputLotId = 0
-		BEGIN
-			RAISERROR (
-					'Please select a valid lot'
-					,14
-					,1
+			/* Validation of lot if empty/null . */
+			IF @intInputLotId IS NULL OR @intInputLotId = 0
+				BEGIN
+					RAISERROR 
+					(
+						'Please select a valid lot'
+					  , 14
+					  , 1
+					);
+				END
+			/* End of Validation of lot if empty/null . */
+
+			/* Validation if lot have stock . */
+			IF @dblWeight <= 0 AND @intNegativeQuantityAllowed <> 1
+				BEGIN
+					RAISERROR 
+					(
+						'Lot quantity should be greater than zero.'
+					  , 14
+					  , 1
 					)
-		END
+				END
+			/* End of Validation if lot have stock . */
 
-		IF @dblWeight <= 0
-			AND @ysnNegativeQuantityAllowed = 0
-		BEGIN
-			RAISERROR (
-					'Lot quantity should be greater than zero.'
-					,14
-					,1
-					)
 		END
-	END
+	/* End of Lot Tracked Validation. */
 
-	SELECT TOP 1 --@dtmPlannedDate = dtmPlannedDate
-		@strWorkOrderNo = strWorkOrderNo
+	SELECT TOP 1 @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	IF @intWorkOrderId IS NULL
-		OR @intWorkOrderId = 0
-	BEGIN
-		SELECT TOP 1 @intWorkOrderId = intWorkOrderId
-		FROM dbo.tblMFWorkOrder
-		WHERE intItemId = @intItemId
-			AND dtmPlannedDate = @dtmPlannedDate
-			AND intPlannedShiftId = @intPlannedShiftId
-			AND intStatusId = 10
-			AND intLocationId = @intLocationId
-		ORDER BY dtmCreated
-
-		IF @intWorkOrderId IS NULL
+	IF @intWorkOrderId IS NULL OR @intWorkOrderId = 0
 		BEGIN
-			SELECT @strItemNo = strItemNo
-			FROM dbo.tblICItem
-			WHERE intItemId = @intItemId
+			SELECT TOP 1 @intWorkOrderId = intWorkOrderId
+			FROM dbo.tblMFWorkOrder
+			WHERE intItemId			= @intItemId
+			  AND dtmPlannedDate	= @dtmPlannedDate
+			  AND intPlannedShiftId = @intPlannedShiftId
+			  AND intStatusId		= 10 /* Started */
+			  AND intLocationId		= @intLocationId
+			ORDER BY dtmCreated
 
-			RAISERROR (
-					'No open runs for the target item ''%s''. Cannot consume.'
-					,14
-					,1
-					,@strItemNo
+			IF @intWorkOrderId IS NULL
+				BEGIN
+					SELECT @strItemNo = strItemNo
+					FROM dbo.tblICItem
+					WHERE intItemId = @intItemId
+
+					RAISERROR 
+					(
+						'No open runs / Work Order does not exists for the target item ''%s''. Cannot consume.'
+					  , 14
+					  , 1
+					  , @strItemNo
 					)
+				END
 		END
-	END
 
 	SELECT @intProductionStageLocationId = intProductionStagingLocationId
 	FROM tblMFManufacturingProcessMachine
@@ -886,6 +899,7 @@ BEGIN TRY
 		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
+	/* Insertion of Work Order Input Lot/Stage. */
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
 		,intItemId
@@ -962,35 +976,35 @@ BEGIN TRY
 
 		IF @dblNewWeight > @dblWeight
 		BEGIN
-			IF @ysnExcessConsumptionAllowed = 0
-			BEGIN
-				RAISERROR (
+			/* Validation of Input quantity/weight greater than lot quantity/weight. */
+			IF @dblInputWeight > @dblWeight AND @intNegativeQuantityAllowed <> 1
+				BEGIN
+					RAISERROR 
+					(
 						'The quantity to be consumed must not exceed the selected lot quantity.'
-						,14
-						,1
-						)
-			END
+						, 14
+						, 1
+					);
+				END
 
 			SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight
 
-			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
-				-- Parameters for filtering:
-				@intItemId = @intInputItemId
-				,@dtmDate = NULL
-				,@intLocationId = @intLocationId
-				,@intSubLocationId = @intSubLocationId
-				,@intStorageLocationId = @intStorageLocationId
-				,@strLotNumber = @strLotNumber
-				-- Parameters for the new values: 
-				,@dblAdjustByQuantity = @dblAdjustByQuantity
-				,@dblNewUnitCost = NULL
-				,@intItemUOMId = @intInputWeightUOMId
-				-- Parameters used for linking or FK (foreign key) relationships
-				,@intSourceId = 1
-				,@intSourceTransactionTypeId = 8
-				,@intEntityUserSecurityId = @intUserId
-				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-				,@strDescription = @strWorkOrderNo
+			EXEC [uspICInventoryAdjustment_CreatePostQtyChange] @intItemId					= @intInputItemId
+															  , @dtmDate					= NULL
+															  , @intLocationId				= @intLocationId
+															  , @intSubLocationId			= @intSubLocationId
+															  , @intStorageLocationId		= @intStorageLocationId
+															  , @strLotNumber				= @strLotNumber
+															  -- Parameters for the new values: 
+															  , @dblAdjustByQuantity		= @dblAdjustByQuantity
+															  , @dblNewUnitCost				= NULL
+															  , @intItemUOMId				= @intInputWeightUOMId
+															  -- Parameters used for linking or FK (foreign key) relationships
+															  , @intSourceId				= @intWorkOrderId
+															  , @intSourceTransactionTypeId = 8
+															  , @intEntityUserSecurityId	= @intUserId
+															  , @intInventoryAdjustmentId	= @intInventoryAdjustmentId OUTPUT
+															  , @strDescription				= @strWorkOrderNo
 
 			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
 				intWorkOrderId
@@ -1031,36 +1045,35 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SELECT @dblAdjustByQuantity = - @dblNewWeight / @dblWeightPerQty
-				,@intAdjustItemUOMId = @intNewItemUOMId
+			SELECT @dblAdjustByQuantity = -@dblNewWeight / @dblWeightPerQty
+				 , @intAdjustItemUOMId	= @intNewItemUOMId
 		END
 
-		EXEC uspICInventoryAdjustment_CreatePostLotMerge
-			-- Parameters for filtering:
-			@intItemId = @intInputItemId
-			,@dtmDate = NULL
-			,@intLocationId = @intLocationId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId
-			,@strLotNumber = @strLotNumber
-			-- Parameters for the new values: 
-			,@intNewLocationId = @intLocationId
-			,@intNewSubLocationId = @intConsumptionSubLocationId
-			,@intNewStorageLocationId = @intConsumptionStorageLocationId
-			,@strNewLotNumber = @strLotNumber
-			,@dblAdjustByQuantity = @dblAdjustByQuantity
-			,@dblNewSplitLotQuantity = NULL
-			,@dblNewWeight = NULL
-			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
-			,@intNewWeightUOMId = NULL
-			,@dblNewUnitCost = NULL
-			,@intItemUOMId = @intAdjustItemUOMId
-			-- Parameters used for linking or FK (foreign key) relationships
-			,@intSourceId = 1
-			,@intSourceTransactionTypeId = 8
-			,@intEntityUserSecurityId = @intUserId
-			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-			,@strDescription = @strWorkOrderNo
+
+		EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId						= @intInputItemId
+													   , @dtmDate						= NULL
+													   , @intLocationId					= @intLocationId
+													   , @intSubLocationId				= @intSubLocationId
+													   , @intStorageLocationId			= @intStorageLocationId
+													   , @strLotNumber					= @strLotNumber
+													   -- Parameters for the new values: 
+													   , @intNewLocationId				= @intLocationId
+													   , @intNewSubLocationId			= @intConsumptionSubLocationId
+													   , @intNewStorageLocationId		= @intConsumptionStorageLocationId
+													   , @strNewLotNumber				= @strLotNumber
+													   , @dblAdjustByQuantity			= @dblAdjustByQuantity
+													   , @dblNewSplitLotQuantity		= NULL
+													   , @dblNewWeight					= NULL
+													   , @intNewItemUOMId				= NULL --New Item UOM Id should be NULL as per Feb
+													   , @intNewWeightUOMId				= NULL
+													   , @dblNewUnitCost				= NULL
+													   , @intItemUOMId					= @intAdjustItemUOMId
+													   -- Parameters used for linking or FK (foreign key) relationships
+													   , @intSourceId					= @intWorkOrderId
+													   , @intSourceTransactionTypeId	= 8
+													   , @intEntityUserSecurityId		= @intUserId
+													   , @intInventoryAdjustmentId		= @intInventoryAdjustmentId OUTPUT
+													   , @strDescription				= @strWorkOrderNo
 	END
 
 	IF @strInventoryTracking = 'Item Level'
