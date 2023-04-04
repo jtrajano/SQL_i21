@@ -142,8 +142,8 @@ BEGIN TRY
 
 		UPDATE tblLGLoad
 		SET strComments = ''
-			,intConcurrencyId = intConcurrencyId + 1
 		WHERE intLoadId = @intMainLoadId
+			AND ISNULL(strComments, '') <> ''
 
 		WHILE @intContractFeedId IS NOT NULL
 		BEGIN
@@ -956,7 +956,6 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblLGLoad
 			SET strComments = 'Internal: ' + CHAR(13) + CHAR(10) + @strErrorMessage
-				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intMainLoadId
 		END
 
