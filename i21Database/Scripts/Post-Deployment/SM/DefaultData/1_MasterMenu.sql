@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory vs DPR vs Grain' AND strModuleName = 'Ticket Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '401K' AND strModuleName = 'Payroll')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3211,6 +3211,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee 
 	VALUES (N'Employee Details', N'Payroll', @PayrollReportParentMenuId, N'Employee Details', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=EmployeeDetails&direct=true', N'small-menu-report', 1, 0, 0, 1, 12, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=EmployeeDetails&direct=true' WHERE strMenuName = 'Employee Details' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'401K', N'Payroll', @PayrollReportParentMenuId, N'401K', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=401K&direct=true', N'small-menu-report', 1, 0, 0, 1, 13, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=401K&direct=true' WHERE strMenuName = '401K' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paycheck Calculator' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollUtilitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
