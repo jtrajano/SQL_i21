@@ -6939,7 +6939,7 @@ IF(@ysnDebug = 1)
 								(
 									SELECT
 											CASE
-											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+												WHEN (@strInvoiceTransactionTypeMain = @strCASH)
 													THEN CASE
 														WHEN Inv.dblInvoiceTotal = (
 															(CASE
@@ -7053,7 +7053,15 @@ IF(@ysnDebug = 1)
 																	THEN CH.dblTotalDeposits
 															END) 
 														- CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+															THEN 
+																CASE 
+																	WHEN @ysnConsignmentStore = 1
+																	THEN
+																		'The Sum of the Methods of Payments - Gross Fuel Sales + Dealer''s Commissions is not equal to the calculated Bank Deposit/Draft. Posting will not continue: Total Variance: ' +
+																		CAST(ISNULL(dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId), 0) 
+																		- (ISNULL(dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId), 0) + ISNULL(dbo.fnSTGetDealerCommission(@intCheckoutId), 0)) AS NVARCHAR(50))
+																	ELSE
+																		'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CASE
 																														WHEN @ysnConsignmentStore = 1
@@ -7066,6 +7074,7 @@ IF(@ysnDebug = 1)
 																															THEN CH.dblTotalDeposits
 																													END), 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																	END
 														WHEN Inv.dblInvoiceTotal < (
 														(CASE
 																WHEN @ysnConsignmentStore = 1
@@ -7121,19 +7130,28 @@ IF(@ysnDebug = 1)
 																	THEN CH.dblTotalDeposits
 															END)
 														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
-																														WHEN @ysnConsignmentStore = 1
-																															THEN (CASE
-																																	WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
-																																		THEN @dblConsTotalDeposits
-																																	ELSE CH.dblTotalDeposits
-																																END)
-																														WHEN @ysnConsignmentStore = 0
-																															THEN CH.dblTotalDeposits
-																													END) * -1), 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+															THEN 
+																CASE 
+																	WHEN @ysnConsignmentStore = 1
+																	THEN
+																		'The Sum of the Methods of Payments - Gross Fuel Sales + Dealer''s Commissions is not equal to the calculated Bank Deposit/Draft. Posting will not continue: Total Variance: ' +
+																		CAST(ISNULL(dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId), 0) 
+																		- (ISNULL(dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId), 0) + ISNULL(dbo.fnSTGetDealerCommission(@intCheckoutId), 0)) AS NVARCHAR(50))
+																	ELSE
+																		'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																						+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																						+ 'Total Deposits: ' + CAST(ISNULL(((CASE
+																																WHEN @ysnConsignmentStore = 1
+																																	THEN (CASE
+																																			WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
+																																				THEN @dblConsTotalDeposits
+																																			ELSE CH.dblTotalDeposits
+																																		END)
+																																WHEN @ysnConsignmentStore = 0
+																																	THEN CH.dblTotalDeposits
+																															END) * -1), 0) AS NVARCHAR(50)) + '<br>'
+																						+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																	END
 														WHEN Inv.dblInvoiceTotal < ((
 														(CASE
 																WHEN @ysnConsignmentStore = 1
@@ -8009,21 +8027,30 @@ IF(@ysnDebug = 1)
 																	THEN CH.dblTotalDeposits
 															END)
 														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
-																														WHEN @ysnConsignmentStore = 1
-																															THEN (CASE
-																																	WHEN @strConsInvoiceType = 'Invoice' AND CH.dblTotalDeposits > 0
+															THEN 
+																CASE 
+																	WHEN @ysnConsignmentStore = 1
+																	THEN
+																		'The Sum of the Methods of Payments - Gross Fuel Sales + Dealer''s Commissions is not equal to the calculated Bank Deposit/Draft. Posting will not continue: Total Variance: ' +
+																		CAST(ISNULL(dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId), 0) 
+																		- (ISNULL(dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId), 0) + ISNULL(dbo.fnSTGetDealerCommission(@intCheckoutId), 0)) AS NVARCHAR(50))
+																	ELSE
+																		'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																							+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																							+ 'Total Deposits: ' + CAST(ISNULL(((CASE
+																																	WHEN @ysnConsignmentStore = 1
+																																		THEN (CASE
+																																				WHEN @strConsInvoiceType = 'Invoice' AND CH.dblTotalDeposits > 0
+																																					THEN CH.dblTotalDeposits
+																																				WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
+																																					THEN @dblConsTotalDeposits
+																																				ELSE 0 --CH.dblTotalDeposits
+																																			END)
+																																	WHEN @ysnConsignmentStore = 0
 																																		THEN CH.dblTotalDeposits
-																																	WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
-																																		THEN @dblConsTotalDeposits
-																																	ELSE 0 --CH.dblTotalDeposits
-																																END)
-																														WHEN @ysnConsignmentStore = 0
-																															THEN CH.dblTotalDeposits
-																													END) * -1), 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																																END) * -1), 0) AS NVARCHAR(50)) + '<br>'
+																							+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																	END
 														WHEN Inv.dblInvoiceTotal < ((
 														(CASE
 																WHEN @ysnConsignmentStore = 1
