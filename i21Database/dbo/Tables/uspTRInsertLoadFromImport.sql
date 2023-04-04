@@ -264,11 +264,16 @@ BEGIN
 				SET ysnReImport = 0
 				WHERE intImportDtnDetailId = @intImportDtnDetailId
 			END
-			ELSE IF (ISNULL(@dblInvoiceAmount, 0) > ISNULL(@maxValue, 0))
+			ELSE IF (ISNULL(@dblInvoiceAmount, 0) >= ISNULL(@maxValue, 0))
 			BEGIN
 				UPDATE tblTRImportDtnDetail
 				SET ysnReImport = CASE WHEN intImportDtnDetailId = @intImportDtnDetailId THEN 0 ELSE 1 END
 				WHERE intImportDtnDetailId IN (@intImportDtnDetailId, @intPreviousId)
+
+				UPDATE tblTRImportDtnDetail
+				SET ysnReImport = 1
+				WHERE intImportDtnDetailId NOT IN (@intImportDtnDetailId, @intPreviousId)
+					AND strBillOfLading = @strBillOfLading
 			END
 			ELSE
 			BEGIN
