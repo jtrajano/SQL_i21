@@ -612,6 +612,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 											strActionType,
 											strUpcCode,
 											strDescription,
+											strUnitMeasure,
 											dblSalePrice,
 											ysnSalesTaxed,
 											ysnIdRequiredLiquor,
@@ -626,6 +627,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 											strActionType = t1.strActionType,
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
+											strUnitMeasure = t1.strUnitMeasure,
 											dblSalePrice = CASE
 																	WHEN (GETDATE() BETWEEN t1.dtmBeginDate AND t1.dtmEndDate)
 																		THEN t1.dblUnitAfterDiscount 
@@ -649,13 +651,14 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 										FROM  
 										(
 										SELECT *,
-												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId, t.strUnitMeasure ORDER BY (SELECT NULL))
 											FROM 
 												(
 													SELECT DISTINCT
 														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 														, dbo.fnSTRemoveCheckDigit(ISNULL(IUOM.strUPCA, IUOM.strLongUPCCode)) AS strUpcCode
 														, I.strDescription AS strDescription
+														, IUM.strUnitMeasure AS strUnitMeasure
 														, itemPricing.dblSalePrice AS dblSalePrice
 														, IL.intItemLocationId AS intItemLocationId
 														, IL.ysnTaxFlag1 AS ysnSalesTaxed
