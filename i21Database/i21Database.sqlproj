@@ -360,6 +360,7 @@
     <Build Include="dbo\Functions\fnCMGetVendorAcctNoByLocation.sql" />
     <Build Include="dbo\Functions\fnCMGetBSBankFileFormatStatus.sql" />
     <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
+    <Build Include="dbo\Functions\fnGLFiscalPeriodExists.sql" />
     <Build Include="dbo\Functions\fnGLGetOverrideAccountByAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
@@ -7980,6 +7981,7 @@
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
     <Build Include="dbo\Views\vyuCRMLostRevenueSalesperson.sql" />
     <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
+    fnGFiscalPeriodExists
     <Build Include="dbo\Functions\fnGLGetCommonSettings.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetail.sql" />
