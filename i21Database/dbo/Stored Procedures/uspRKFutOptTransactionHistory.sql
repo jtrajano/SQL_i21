@@ -19,6 +19,27 @@ BEGIN TRY
 
 	IF @action = 'HEADER DELETE' --This scenario is when you delete the entire derivative entry. It will look for the history table to insert delete entry to those transaction that doesn't have. 
 	BEGIN
+
+		--Finding all deleted derivatives that do not have an entry on Derivative History Log table for the @intFutOptTransactionHeaderId provided.
+		SELECT DISTINCT intFutOptTransactionId, strInternalTradeNo
+		INTO #tmpDerivativeWithNoDeleteEntry
+		FROM tblRKFutOptTransactionHistory H
+		WHERE intFutOptTransactionId not in (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction WHERE intFutOptTransactionHeaderId  = @intFutOptTransactionHeaderId)
+		AND intFutOptTransactionId not in (SELECT intFutOptTransactionId FROM tblRKFutOptTransactionHistory WHERE intFutOptTransactionId = H.intFutOptTransactionId AND intFutOptTransactionHeaderId  = @intFutOptTransactionHeaderId AND strAction = 'DELETE')
+		AND intFutOptTransactionHeaderId  = @intFutOptTransactionHeaderId
+
+		--Getting the last log of each derivatives to be deleted
+		SELECT intFutOptTransactionHistoryId 
+		INTO #tmpHistory
+		FROM (			
+			SELECT 
+				intRowNum = ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY intFutOptTransactionHistoryId DESC)
+				,intFutOptTransactionHistoryId
+			FROM tblRKFutOptTransactionHistory
+			WHERE intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM #tmpDerivativeWithNoDeleteEntry)
+		) t
+		WHERE intRowNum = 1
+
 		INSERT INTO tblRKFutOptTransactionHistory (intFutOptTransactionHeaderId
 			, strSelectedInstrumentType
 			, intFutOptTransactionId
@@ -53,25 +74,22 @@ BEGIN TRY
 			, strUserName
 			, strAction
 			, strNotes)
-		SELECT H.intFutOptTransactionHeaderId
-			, H.strSelectedInstrumentType
-			, T.intFutOptTransactionId
+		SELECT intFutOptTransactionHeaderId
+			, strSelectedInstrumentType
+			, intFutOptTransactionId
 			, strInternalTradeNo
-		    , strLocationName = Loc.strLocationName
-			, dblContractSize = FMarket.dblContractSize
-			, strInstrumentType = (CASE WHEN T.intInstrumentTypeId = 1 THEN 'Futures'
-										WHEN T.intInstrumentTypeId = 2 THEN 'Options'
-										WHEN T.intInstrumentTypeId = 3 THEN 'Currency Contract'
-										ELSE '' END)
-			, strFutureMarket = FMarket.strFutMarketName
-			, strCurrency = Curr.strCurrency
-			, strCommodity = Comm.strCommodityCode
-			, strBroker = B.strName
-			, strBrokerAccount = BA.strAccountNumber
-			, strTrader = Trader.strName
+		    , strLocationName
+			, dblContractSize
+			, strInstrumentType 
+			, strFutureMarket 
+			, strCurrency
+			, strCommodity 
+			, strBroker 
+			, strBrokerAccount 
+			, strTrader 
 			, strBrokerTradeNo
-			, strFutureMonth = FMonth.strFutureMonth
-			, strOptionMonth = OM.strOptionMonth
+			, strFutureMonth 
+			, strOptionMonth 
 			, strOptionType
 			, dblStrike
 			, dblPrice
@@ -82,32 +100,21 @@ BEGIN TRY
 			, 0
 			, @strScreenName
 			, NULL
-			, T.strBuySell
+			, strNewBuySell
 			, GETDATE()
 			, intBookId
 			, intSubBookId
-			, ysnMonthExpired = FMonth.ysnExpired
+			, ysnMonthExpired
 			, strUserName = @strUserName
 			, 'DELETE'
-			, T.strReference
-		FROM tblRKFutOptTransaction T
-		JOIN tblRKFutOptTransactionHeader H ON T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
-		JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
-		JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = T.intFutureMonthId
-		LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = T.intLocationId
-		LEFT JOIN tblSMCurrency Curr ON Curr.intCurrencyID = T.intCurrencyId
-		LEFT JOIN tblEMEntity B ON B.intEntityId = T.intEntityId
-		LEFT JOIN tblEMEntity Trader ON Trader.intEntityId = T.intTraderId
-		LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = T.intCommodityId
-		LEFT JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = T.intBrokerageAccountId
-		LEFT JOIN tblRKOptionsMonth OM ON OM.intOptionMonthId = T.intOptionMonthId
-		WHERE T.intFutOptTransactionId IN (
-			SELECT DISTINCT intFutOptTransactionId FROM (
-				SELECT DISTINCT intFutOptTransactionId, strAction FROM tblRKFutOptTransactionHistory
-				WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
-				and intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransactionHistory WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId AND strAction = 'DELETE')
-			) tbl
-		)	--This filter will look into the history table to check entries that does not have delete entry.
+			, T.strNotes
+		FROM tblRKFutOptTransactionHistory T
+		WHERE T.intFutOptTransactionHistoryId IN (SELECT intFutOptTransactionHistoryId FROM #tmpHistory)
+		--since the original transaction was already delete, we will use the last log on the history table
+
+		
+		DROP TABLE #tmpDerivativeWithNoDeleteEntry
+		DROP TABLE #tmpHistory
 
 
 		IF (ISNULL(@ysnLogRiskSummary, 1) = 1)
@@ -172,8 +179,7 @@ BEGIN TRY
 			, intSubBookId
 			, ysnMonthExpired
 			, strUserName
-			, strAction
-			, strNotes)
+			, strAction)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -210,7 +216,6 @@ BEGIN TRY
 			, ysnMonthExpired = FMonth.ysnExpired
 			, strUserName = @strUserName
 			, @action
-			, T.strReference
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
