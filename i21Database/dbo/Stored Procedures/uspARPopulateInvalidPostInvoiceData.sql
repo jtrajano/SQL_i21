@@ -825,9 +825,9 @@ BEGIN
 		,[strPostingError]		= I.[strInvoiceNumber] + ' is using invalid account. Use Undeposited Fund Account for Cash transactions.'
 		,[strSessionId]			= @strSessionId
 	FROM tblARPostInvoiceHeader I
-	INNER JOIN vyuGLAccountDetail GLA ON I.[intAccountId] = GLA.[intAccountId]		 
+	LEFT JOIN vyuGLAccountDetail GLA ON I.[intAccountId] = GLA.intAccountId AND GLA.strAccountCategory = 'Undeposited Funds'	 
 	WHERE I.strTransactionType = 'Cash'
-	  AND GLA.strAccountCategory <> 'Undeposited Funds'
+	  AND GLA.intAccountId IS NULL
 	  AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
