@@ -5,7 +5,7 @@
 	AS
 	DECLARE @OutputMessage NVARCHAR(200)
 	DECLARE @Location INT
-	DECLARE @activeStatus bit
+	DECLARE @activeStatus bit = 0
 	DECLARE @creditHoldStatus bit
 
 	SET @OutputMessage = 'Conversion is not applicable to this type of entity.'
