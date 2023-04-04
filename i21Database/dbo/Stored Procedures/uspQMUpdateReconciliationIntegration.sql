@@ -465,8 +465,10 @@ BEGIN TRY
 			SET dblUnitPrice	= LS.dblCatReconPrice
 			  , dblQuantity		= LS.dblCatReconQty
 			  , dblGross		= LS.dblCatReconGrossQty
-			  , dblNet			= LS.dblCatReconGrossQty
+			  , dblNet			= LS.dblCatReconGrossQty			  
 			  , dblTare			= 0
+			  , dblAmount 		= LS.dblCatReconPrice * LS.dblCatReconGrossQty
+			  , dblForexAmount	= LS.dblCatReconPrice * LS.dblCatReconGrossQty
 			FROM tblLGLoadDetail LG
 			INNER JOIN #LOADSHIPMENTS LS ON LG.intLoadDetailId = LS.intLoadDetailId
 
