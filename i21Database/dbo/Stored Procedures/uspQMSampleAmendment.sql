@@ -186,6 +186,12 @@ BEGIN TRY
                           AND intLoadDetailId = @intLoadDetailId
 						  AND dblQuantity <> ISNULL(@dblSampleQty, 0)
 
+						UPDATE tblLGLoadDetail
+                        SET dblAmount 		= dblUnitPrice * dblNet
+						  , dblForexAmount	= dblUnitPrice * dblNet
+                        WHERE intLoadId = @intLoadId
+                          AND intLoadDetailId = @intLoadDetailId
+
 						--AUDIT LOG FOR LOAD SHIPMENT
 						DECLARE @LoadShipmentSingleAuditLogParam		AS SingleAuditLogParam
 
