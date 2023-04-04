@@ -632,7 +632,7 @@ CREATE TABLE #tmpDailyStockPosition
 											+ tmpDSP.dblTransfersReceived 
 											- tmpDSP.dblTransfersShipped 
 											+ tmpDSP.dblInTransitInbound 
-											- tmpDSP.dblInTransitOutbound 
+											+ tmpDSP.dblInTransitOutbound 
 											- tmpDSP.dblConsumedQty 
 											+ tmpDSP.dblProduced,
 				strStatus				= Item.strStatus,
@@ -732,7 +732,7 @@ CREATE TABLE #tmpDailyStockPosition
 											+ tmpDSP.dblTransfersReceived 
 											- tmpDSP.dblTransfersShipped 
 											+ tmpDSP.dblInTransitInbound 
-											- tmpDSP.dblInTransitOutbound 
+											+ tmpDSP.dblInTransitOutbound 
 											- tmpDSP.dblConsumedQty 
 											+ tmpDSP.dblProduced,
 				strStatus				= Item.strStatus,
