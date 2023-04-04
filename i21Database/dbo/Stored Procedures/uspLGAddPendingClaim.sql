@@ -317,11 +317,11 @@ BEGIN
 																,dblNet = SUM(ISNULL(IRIL.dblGrossWeight, 0)) - SUM(ISNULL(IRIL.dblTareWeight, 0))
 														 FROM tblICInventoryReceiptItemLot IRIL
 														 WHERE intInventoryReceiptItemId = IRI.intInventoryReceiptItemId AND ISNULL(IRIL.strCondition, '') <> 'Missing') LotWt
-											WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+											WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
 												AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return') RI
 							CROSS APPLY (SELECT dblIRNet = SUM(ISNULL(IRI.dblNet,0)),dblIRGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 											JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-											WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+											WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
 												AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = 'Inventory Return') IRN
 							WHERE 
 								L.intLoadId = @intLoadId
