@@ -40,6 +40,7 @@
 	intModifiedByUserId INT NULL,
 	intCreatedByUserId INT NULL,
 	ysnBuilding BIT NULL,
+	dblShippedQty NUMERIC(28, 2) NULL,		
 	CONSTRAINT [PK_tblStagingDailyStockPosition_intId] PRIMARY KEY ([intId]),
 )
 GO
