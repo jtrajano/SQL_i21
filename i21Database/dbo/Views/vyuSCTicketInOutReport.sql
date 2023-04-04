@@ -55,11 +55,11 @@
 		else
 			Ticket.dblNetUnits
 		end as dblComputedNetUnits
-		, TicketPool.strTicketPool
+
 		from tblSCTicket Ticket
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
-			left join tblSCTicketPool TicketPool on TicketPool.intTicketPoolId = Ticket.intTicketPoolId
+				
 			join tblICCommodity Commodity
 				on Item.intCommodityId = Commodity.intCommodityId
 			join tblEMEntity Entity
@@ -135,11 +135,9 @@
 		else
 			Ticket.dblNetUnits * -1
 		end as dblComputedNetUnits
-		, TicketPool.strTicketPool
 		from tblSCTicket Ticket	
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
-			left join tblSCTicketPool TicketPool on TicketPool.intTicketPoolId = Ticket.intTicketPoolId
 			join tblICCommodity Commodity
 				on Item.intCommodityId = Commodity.intCommodityId		
 			join tblSMCompanyLocation CompanyLocation
@@ -211,11 +209,9 @@
 		else
 			Ticket.dblNetUnits
 		end as dblComputedNetUnits
-		, TicketPool.strTicketPool
 		from tblSCTicket Ticket		
 			join tblICItem Item
 				on Ticket.intItemId = Item.intItemId
-			left join tblSCTicketPool TicketPool on TicketPool.intTicketPoolId = Ticket.intTicketPoolId
 			join tblICCommodity Commodity
 				on Item.intCommodityId = Commodity.intCommodityId	
 			join tblSMCompanyLocation CompanyLocation
