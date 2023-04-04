@@ -270,10 +270,7 @@ BEGIN TRY
 							)
 				ELSE (@dblNewUnitCost * @dblProduceQty * RI.dblPercentage / 100) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
 				END, 2)
-		,[intCurrencyId] = (
-			SELECT TOP 1 intDefaultReportingCurrencyId
-			FROM tblSMCompanyPreference
-			)
+		,[intCurrencyId] = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 		--,[dblExchangeRate] = 0
 		,[intTransactionId] = @intBatchId
 		,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
