@@ -128,6 +128,7 @@ BEGIN TRY
        ,dblTotalController = ABS(A.dblAmountDue - A.dblProvisionalTotal)  
        ,intTransactionType = 3 --Debit Memo
        ,ysnFinalVoucher = 0
+       ,ysnConvertedToDebitMemo = 1
        ,strReference = REPLACE(strReference, 'Final Voucher of', 'Debit Memo of')
    FROM tblAPBill A WHERE A.intBillId = @billId  
   

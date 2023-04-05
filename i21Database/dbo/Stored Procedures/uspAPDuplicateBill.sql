@@ -224,6 +224,7 @@ ON 1 = 0
 			[dblWeightUnitQty],
 			[dblCostUnitQty],
 			[dblUnitQty],
+			[intLotId],
 			[intCurrencyExchangeRateTypeId]
 		)
 		VALUES
@@ -272,6 +273,7 @@ ON 1 = 0
 			[dblWeightUnitQty],
 			[dblCostUnitQty],
 			[dblUnitQty],
+			[intLotId],
 			[intCurrencyExchangeRateTypeId]
 		)
 		OUTPUT inserted.intBillDetailId, A.intBillDetailId INTO @billDetailTaxes(intCreatedBillDetailId, originalBillDetailId); --get the new and old bill detail id
