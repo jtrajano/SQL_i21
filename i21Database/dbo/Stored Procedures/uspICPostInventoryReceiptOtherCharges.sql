@@ -1656,7 +1656,7 @@ BEGIN
 	-- (X) Dr...... Item's Inventory Acccount 
 	-- Cr.................... AP Clearing (or none if ysnAllowVoucher is false)
 	--
-	-- Additional Reversal: 
+	-- Additional Entries: 
 	-- If item and other charge are both using foreign currency. 
 	-- For example, Item is USD. Other Charge is EUR. 
 	-- Convert the EUR to USD. 
@@ -1723,6 +1723,8 @@ BEGIN
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1	
 			AND InventoryCostCharges.strBundleType != 'Kit'
+			AND InventoryCostCharges.ysnAllowVoucher = 1 
+
 	-- AP Clearing
 	UNION ALL 
 	SELECT	
@@ -1865,6 +1867,7 @@ BEGIN
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
 			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			AND InventoryCostCharges.ysnAllowVoucher = 1 
 
 	-- Dr...... Inventory Account (USD)	
 	UNION ALL 
