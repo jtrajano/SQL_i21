@@ -34,14 +34,9 @@ SELECT  intYear 					= YEAR(SAR.dtmDate)
 	  , strLocationName				= strLocationName
 	  , strCompanyName				= COMPANY.strCompanyName
 	  , strCompanyAddress			= COMPANY.strCompanyAddress
-
-FROM vyuARSalesAnalysisReport SAR
-
- OUTER APPLY (SELECT
-       TOP 1 strCompanyName,
-       strCompanyAddress = dbo.[fnARFormatCustomerAddress]
-       (NULL, NULL, NULL, strAddress, strCity,
-       strState, strZip, strCountry, NULL, 0)
-       COLLATE Latin1_General_CI_AS FROM
-       dbo.tblSMCompanySetup WITH (NOLOCK))
-       COMPANY
+FROM tblARSalesAnalysisStagingReport SAR
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0)
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
