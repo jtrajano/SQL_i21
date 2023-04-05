@@ -268,7 +268,7 @@ OUTER APPLY (
 WHERE strError IS NULL  AND T.intBookId = 1
 
 UPDATE T  
-SET dblMonth = (dblAnnualDep - BD.dblBonusDepreciation )/ intMonthDivisor,  
+SET dblMonth = (ISNULL(dblAnnualDep,0) - ISNULL(BD.dblBonusDepreciation,0) )/ intMonthDivisor,    
 intDaysInFirstMonth = MonthPeriod.intDays  
 FROM @tblAssetInfo T  
 JOIN tblFABookDepreciation BD ON T.intAssetId = BD.intAssetId AND BD.intBookDepreciationId = T.intBookDepreciationId  
