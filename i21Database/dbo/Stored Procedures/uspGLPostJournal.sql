@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspGLPostJournal]
+alter PROCEDURE [dbo].[uspGLPostJournal]
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
@@ -65,8 +65,6 @@ IF ISNULL(@ysnPost, 0) = 0
 				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, @ysnRecap, 'GJ', NULL, @intEntityId, @intCount	OUT
 				
 				IF @@ERROR <> 0	GOTO Post_Rollback;
-				
-				SET @successfulCount = count(*) FROM tblGLDetail a
 				
 				IF(@intCount > 0)
 				BEGIN
