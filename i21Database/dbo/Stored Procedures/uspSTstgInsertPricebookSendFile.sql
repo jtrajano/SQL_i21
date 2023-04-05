@@ -1460,12 +1460,18 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 								FROM tblICItem I
 								JOIN tblICCategory Cat 
 									ON Cat.intCategoryId = I.intCategoryId
+								JOIN tblICCategoryLocation CatLoc
+									ON CatLoc.intCategoryId = Cat.intCategoryId
 								JOIN @tempTableItems tmpItem 
 									ON tmpItem.intItemId = I.intItemId
 								JOIN tblICItemLocation IL 
 									ON IL.intItemId = I.intItemId
 								LEFT JOIN tblSTSubcategoryRegProd SubCat 
-									ON SubCat.intRegProdId = IL.intProductCodeId
+									ON --SubCat.intRegProdId = IL.intProductCodeId
+									(CASE
+									WHEN IL.intProductCodeId IS NOT NULL THEN IL.intProductCodeId
+									ELSE CatLoc.intProductCodeId
+									END) = SubCat.intRegProdId
 								JOIN tblSTStore ST 
 									--ON ST.intStoreId = SubCat.intStoreId
 									ON IL.intLocationId = ST.intCompanyLocationId
