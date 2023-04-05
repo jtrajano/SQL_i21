@@ -102,6 +102,7 @@
 	[dblProvisionalPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 100, 
 	[dblProvisionalCost] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblProvisionalWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblProvisionalQtyReceived] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblProvisionalTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblFinalVoucherTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
