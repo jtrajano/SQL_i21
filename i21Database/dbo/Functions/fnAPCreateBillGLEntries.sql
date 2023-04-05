@@ -575,7 +575,6 @@ BEGIN
 	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
-		  AND A.ysnConvertedToDebitMemo = 0 --EXCLUDE CONVERTED DEBIT MEMO
 	
 	--DEBIT DUE TO FOR LOCATION
 	UNION ALL 
@@ -755,59 +754,6 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND voucherDetails.intBillDetailId IS NOT NULL
 		  AND A.intTransactionType <> 15
-			AND A.ysnFinalVoucher = 0 --EXCLUDE FINAL VOUCHER
-
-		UNION ALL
-		--FINAL VOUCHER COST ADJUSTMENT 
-	SELECT	
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
-		[strBatchID]					=	@batchId,
-		[intAccountId]					=	voucherDetails.intAccountId,
-		[dblDebit]						=	voucherDetails.dblTotal, 
-		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,
-		[strDescription]				=	NULL,
-		[strCode]						=	'AP',
-		[strReference]					=	C.strVendorId,
-		[intCurrencyId]					=	A.intCurrencyId,
-		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
-		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	A.dtmDate,
-		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
-		[intJournalLineNo]				=	voucherDetails.intBillDetailId,
-		[ysnIsUnposted]					=	0,
-		[intUserId]						=	@intUserId,
-		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strBillId, 
-		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Bill',
-		[strTransactionForm]			=	@SCREEN_NAME,
-		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,       
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	0,
-		[dblCreditReport]				=	0,
-		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
-		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
-		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	D.strName,
-		[intConcurrencyId]				=	1,
-		[dblSourceUnitCredit]			=	0,
-		[dblSourceUnitDebit]			=	0,
-		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId,
-		[strSourceDocumentId]			=	A.strVendorOrderNumber
-	FROM [dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetFinalVoucherItemCostAdjGLEntry(A.intBillId) voucherDetails
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
-	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND voucherDetails.intBillDetailId IS NOT NULL
-		  AND A.intTransactionType = 1
-			AND A.ysnFinalVoucher = 1
 
 	--NEGATIGE QTY
 	UNION ALL
@@ -1707,9 +1653,9 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	 CAST(Details.dblTotal * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
+		[dblCredit]						=	 CAST(Details.dblTotal * ((100 - A.dblProvisionalPercentage) / 100) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	ISNULL(Details.dblUnits,0),
+		[dblCreditUnit]					=	ISNULL(Details.dblUnits * ((100 - A.dblProvisionalPercentage) / 100),0),
 		[strDescription]				=	'',
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -1730,7 +1676,7 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		[dblDebitForeign]				=	0,      
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	CAST(Details.dblTotal AS DECIMAL(18,2)),
+		[dblCreditForeign]				=	CAST(Details.dblTotal * ((100 - A.dblProvisionalPercentage) / 100) AS DECIMAL(18,2)),
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),
@@ -1750,7 +1696,7 @@ BEGIN
             (
                 SELECT R.intBillDetailId,
 					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
-					(R.dblTotal - R.dblProvisionalTotal) AS dblTotal, 
+					(R.dblTotal) AS dblTotal, 
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
@@ -1760,7 +1706,7 @@ BEGIN
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
 											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-								END) - R.dblProvisionalWeight,
+								END),
 					R.strComment										
                 FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
@@ -1864,7 +1810,7 @@ BEGIN
 														(CASE WHEN R.intWeightUOMId > 0 THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
 														itemUOM.intItemUOMId, 
 														CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-										END) - R.dblProvisionalWeight,
+										END),
 					R.strComment,
 					R.intAccountId
                 FROM dbo.tblAPBillDetail R
@@ -1911,66 +1857,6 @@ BEGIN
 	AND A.intTransactionType = 1 
 	AND ISNULL(A.ysnFinalVoucher,0) = 1
 
-	/*
-	===========================
-	-- CONVERTED DEBIT MEMO
-	===========================
-	*/
-	--CREDIT SIDE
-	UNION ALL 
-	SELECT	
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
-		[strBatchID]					=	@batchId,
-		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
-		[dblDebit]						=	0,
-		[dblCredit]						=	-voucherDetails.dblTotal,
-		[dblDebitUnit]					= 0,
-		[dblCreditUnit]					=		-ISNULL(voucherDetails.dblTotalUnits,0),
-		[strDescription]				=	NULL,
-		[strCode]						=	'AP',
-		[strReference]					=	C.strVendorId,
-		[intCurrencyId]					=	A.intCurrencyId,
-		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
-		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	A.dtmDate,
-		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
-		[intJournalLineNo]				=	voucherDetails.intBillDetailId,
-		[ysnIsUnposted]					=	0,
-		[intUserId]						=	@intUserId,
-		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	A.strBillId, 
-		[intTransactionId]				=	A.intBillId, 
-		[strTransactionType]			=	'Debit Memo',
-		[strTransactionForm]			=	@SCREEN_NAME,
-		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	0,
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	-voucherDetails.dblForeignTotal,
-		[dblCreditReport]				=	0,
-		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
-		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
-		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
-		[strComments]					=	D.strName + ' - ' + voucherDetails.strComment,
-		[intConcurrencyId]				=	1,
-		[dblSourceUnitCredit]			=	-ISNULL(voucherDetails.dblTotalUnits,0),
-		[dblSourceUnitDebit]			=	0,
-		[intCommodityId]				=	A.intCommodityId,
-		[intSourceLocationId]			=	A.intStoreLocationId,
-		[strSourceDocumentId]			=	A.strVendorOrderNumber
-	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId) voucherDetails
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
-	OUTER APPLY (
-		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-	) OVERRIDESEGMENT
-	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		AND A.intTransactionType = 3
-		AND A.ysnConvertedToDebitMemo = 1
-	
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A

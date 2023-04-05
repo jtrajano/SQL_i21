@@ -19,23 +19,11 @@ BEGIN
 		RETURN;
 	END
 
-	--Validate provisional if there is remaining to bill
-	IF EXISTS (
-			SELECT TOP 1 1 FROM tblAPBill A
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			WHERE A.intBillId = @billId
-			AND	A.dblProvisionalPercentage = 100
-	) 
-	BEGIN
-		RAISERROR('There is no remaining quanity to bill', 16, 1);
-		RETURN;
-	END
-
 	--Validate if provisional is already finalize
 	IF EXISTS (
 			SELECT TOP 1 1 FROM tblAPBill A
 				INNER JOIN tblAPBill B ON A.intFinalizeVoucherId IS NOT NULL AND A.intFinalizeVoucherId = B.intBillId
-				WHERE A.intBillId = @billId) 
+				WHERE A.intBillId = @billId AND A.ysnFinalize = 1) 
 	BEGIN
 		RAISERROR('Provisional is already finalized', 16, 1);
 		RETURN;
@@ -105,7 +93,6 @@ BEGIN
 		SET B.strReference = 'Final Voucher of ' + B2.strBillId,
 			B.dblProvisionalTotal = @dblTotal,
 			B.dblProvisionalPercentage = @dblProvisionalPercentage,
-			B.dblFinalVoucherTotal = B2.dblTotal - @dblTotal, 
 			B.ysnFinalVoucher = 1
 		FROM tblAPBill B
 		INNER JOIN tblAPBill B2 ON B2.intBillId = @billId
@@ -134,7 +121,6 @@ BEGIN
 			BD.dblProvisionalWeight = BD2.dblNetWeight * (@dblProvisionalPercentage / 100),
 			BD.dblProvisionalTotal = (@dblProvisionalPercentage / 100) * BD2.dblTotal,
 			BD.dblProvisionalPercentage = @dblProvisionalPercentage,
-			BD.dblFinalVoucherTotal = BD2.dblTotal - ((@dblProvisionalPercentage / 100) * BD2.dblTotal),
 			BD.ysnStage = 0
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intLoadDetailId = BD.intLoadDetailId AND BD2.intBillId = @billId
@@ -143,14 +129,12 @@ BEGIN
 	
 	IF @receiptId > 0 AND @contractNumber IS NULL
 	BEGIN
-		-- EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
-		EXEC uspAPDuplicateBill @billId = @billId, @userId = @userId, @reset = 1, @type = 1,  @billCreatedId = @createdVoucher OUT
+		EXEC uspICProcessToBill @intReceiptId = @receiptId, @intUserId = @userId, @strType = 'voucher', @intScreenId = 1, @intBillId = @createdVoucher OUT
 
 		UPDATE B 
 		SET B.strReference = 'Final Voucher of ' + B2.strBillId,
 				B.dblProvisionalTotal = @dblTotal,
 				B.dblProvisionalPercentage = @dblProvisionalPercentage,
-				B.dblFinalVoucherTotal = B2.dblTotal - @dblTotal,
 			B.ysnFinalVoucher = 1
 		FROM tblAPBill B
 		INNER JOIN tblAPBill B2 ON B2.intBillId = @billId
@@ -180,7 +164,6 @@ BEGIN
 			BD.dblProvisionalWeight = BD2.dblNetWeight * (@dblProvisionalPercentage / 100),
 			BD.dblProvisionalTotal = (@dblProvisionalPercentage / 100) * BD2.dblTotal,
 			BD.dblProvisionalPercentage = @dblProvisionalPercentage,
-			BD.dblFinalVoucherTotal = BD2.dblTotal - ((@dblProvisionalPercentage / 100) * BD2.dblTotal),
 			BD.ysnStage = 0
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBillDetail BD2 ON BD2.intInventoryReceiptItemId = BD.intInventoryReceiptItemId AND BD2.intBillId = @billId
