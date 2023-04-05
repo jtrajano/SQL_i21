@@ -1,4 +1,4 @@
-alter PROCEDURE [dbo].[uspGLPostJournal]
+CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
