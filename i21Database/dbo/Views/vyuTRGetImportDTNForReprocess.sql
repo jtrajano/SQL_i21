@@ -28,7 +28,7 @@ FROM (
 		, lh.strTransaction
 		, ir.strReceiptNumber
 		, dblDocumentTotal = d.dblInvoiceAmount
-		, dblReceiptTotal = ir.dblGrandTotal
+		, dblReceiptTotal = dbo.fnICGetInventoryReceiptTotal(ir.intInventoryReceiptId)
 		, dblVariance = ISNULL(d.dblInvoiceAmount, 0) - ISNULL(ir.dblGrandTotal, 0)
 		, v.strBillId
 		, d.strMessage
