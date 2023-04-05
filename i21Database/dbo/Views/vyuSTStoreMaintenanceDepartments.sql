@@ -13,6 +13,6 @@ intStoreDepartmentId
 FROM tblSTStoreDepartments sd
 LEFT JOIN vyuSTDepartmentTotalsPreloadCS plcs
 ON sd.intStoreId = plcs.intStoreId
-AND sd.strRegisterCode = plcs.strCashRegisterDepartment
+AND ISNULL(sd.strRegisterCode, '') = ISNULL(plcs.strCashRegisterDepartment, '')
 LEFT JOIN tblSTSubCategories sc
-ON sc.intSubcategoriesId = plcs.intSubcategoriesId
+ON ISNULL(sc.intSubcategoriesId, 0) = ISNULL(plcs.intSubcategoriesId, 0)
