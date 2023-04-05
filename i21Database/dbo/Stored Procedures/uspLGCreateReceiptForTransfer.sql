@@ -116,7 +116,7 @@ BEGIN TRY
 		,[intTransferorId] = LD.intPCompanyLocationId
 		,[intEntityVendorId] = NULL --LD.intVendorEntityId
 		,[intShipFromId] = LD.intPCompanyLocationId
-		,[intLocationId] = ISNULL(CLSL.intCompanyLocationId, LD.intSCompanyLocationId)
+		,[intLocationId] = LD.intSCompanyLocationId
 		,[strBillOfLadding] = L.strBLNumber
 		,[intItemId] = LD.intItemId
 		,[intItemLocationId] = LD.intPCompanyLocationId
@@ -124,24 +124,19 @@ BEGIN TRY
 		,[intContractHeaderId] = NULL
 		,[intContractDetailId] = NULL
 		,[dtmDate] = GETDATE()
-		,[intShipViaId] = ISNULL(LW.intHaulerEntityId, L.intHaulerEntityId)
-		,[dblQty] = COALESCE(LDCL.dblQuantity, LD.dblQuantity, 0)
-		,[intGrossNetUOMId] = COALESCE(Lot.intWeightUOMId, LCUOM.intItemUOMId, LD.intWeightItemUOMId)
-		,[dblGross] = COALESCE(LD.dblGross, LDCL.dblLinkGrossWt, 0)
-		,[dblTare] = COALESCE(LD.dblTare, LDCL.dblLinkTareWt, 0)
-		,[dblNet] = COALESCE(LD.dblNet, LDCL.dblLinkNetWt, 0)
-		,[dblCost] = --COALESCE(Lot.dblLastCost, ItemPricing.dblLastCost)
-			dbo.fnCalculateCostBetweenUOM(
-				topValuation.intItemUOMId
-				,ISNULL(Lot.intWeightUOMId, StkUOM.intItemUOMId) 
-				,valuationCost.dblCost
-			)
-		,[intCostUOMId] = ISNULL(Lot.intWeightUOMId, StkUOM.intItemUOMId) --StkUOM.intItemUOMId
+		,[intShipViaId] = CD.intShipViaId
+		,[dblQty] = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0)
+		,[intGrossNetUOMId] = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId)
+		,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
+		,[dblTare] = LD.dblTare - ISNULL(LD.dblDeliveredTare,0)
+		,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
+		,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
+		,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
 		,[intCurrencyId] = @DefaultCurrencyId
 		,[dblExchangeRate] = 1
 		,[intLotId] = NULL
-		,[intSubLocationId] = ISNULL(LW.intSubLocationId, LD.intSSubLocationId)
-		,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, LD.intSStorageLocationId)
+		,[intSubLocationId] = LD.intSSubLocationId
+		,[intStorageLocationId] = LD.intSStorageLocationId
 		,[ysnIsStorage] = 0
 		,[intSourceId] = LD.intLoadDetailId
 		,[intSourceType] = 9 --TEMPORARY Source Type for Transfer Shipment
@@ -150,58 +145,37 @@ BEGIN TRY
 		,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
 		,[intBookId] = L.intBookId
 		,[intSubBookId] = L.intSubBookId
-		,[intSort] = COALESCE(LC.intLoadContainerId,LD.intLoadDetailId,0)
+		,[intSort] = LD.intLoadDetailId
 		,[intLoadShipmentId] = L.intLoadId
 		,[intLoadShipmentDetailId] = LD.intLoadDetailId
 	FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
-		LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-		LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
-		LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = LD.intItemId
-			AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(LD.intItemId, LD.intPCompanyLocationId)
-		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCUOM
-		OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND ysnStockUOM = 1) StkUOM
-		OUTER APPLY (
-			SELECT 				
-				dblCost = 
-					dbo.fnDivide(
-						SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
-						,SUM(t.dblQty) 
-					)
-			FROM 
-				tblICInventoryTransaction t 
-			WHERE
-				t.strTransactionId = L.strLoadNumber
-				AND t.intTransactionId = L.intLoadId
-				AND t.intTransactionDetailId = LD.intLoadDetailId
-				AND t.intItemId = ISNULL(Lot.intItemId, LD.intItemId)
-				AND ((L.intPurchaseSale = 2 AND t.dblQty < 0) OR (L.intPurchaseSale = 4 AND t.dblQty > 0))
-				AND t.ysnIsUnposted = 0 
-		) valuationCost 
-		OUTER APPLY (
-			SELECT TOP 1 			
-				t.* 
-			FROM 
-				tblICInventoryTransaction t 
-			WHERE
-				t.strTransactionId = L.strLoadNumber
-				AND t.intTransactionId = L.intLoadId
-				AND t.intTransactionDetailId = LD.intLoadDetailId
-				AND t.intItemId = ISNULL(Lot.intItemId, LD.intItemId)
-				AND ((L.intPurchaseSale = 2 AND t.dblQty < 0) OR (L.intPurchaseSale = 4 AND t.dblQty > 0))
-				AND t.ysnIsUnposted = 0 
-		) topValuation
+	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+	JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
+	JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId AND EL.ysnDefaultLocation = 1
+	LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+	LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
+	LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+	OUTER APPLY (SELECT	TOP 1  
+				intForexRateTypeId = RD.intRateTypeId
+				,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+							THEN 1/RD.[dblRate] 
+							ELSE RD.[dblRate] END 
+				FROM tblSMCurrencyExchangeRate ER
+				JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+				WHERE @DefaultCurrencyId <> CD.intInvoiceCurrencyId
+					AND ((ER.intFromCurrencyId = CD.intInvoiceCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+						OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
+				ORDER BY RD.dtmValidFromDate DESC) FX
+	OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
 	WHERE L.intLoadId = @intLoadId
+		AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
 		AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
 						INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-						WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intContainerId = LC.intLoadContainerId AND IR.intSourceType = 9) --TEMPORARY Source Type for Transfer Shipment
-	ORDER BY LDCL.intLoadDetailContainerLinkId
+						WHERE IRI.intSourceId = LD.intLoadDetailId AND IR.intSourceType = 9) --TEMPORARY Source Type for Transfer Shipment
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
 	BEGIN
@@ -344,8 +318,8 @@ BEGIN TRY
 		,[strLotAlias] = Lot.strLotAlias
 		,[intParentLotId] = Lot.intParentLotId
 		,[strParentLotNumber] = PLot.strParentLotNumber
-		,[intSubLocationId] = ISNULL(LW.intSubLocationId, LD.intSSubLocationId)
-		,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, LD.intSStorageLocationId)
+		,[intSubLocationId] = LD.intSSubLocationId
+		,[intStorageLocationId] = LD.intSStorageLocationId
 		,[intContractHeaderId] = NULL
 		,[intContractDetailId] = NULL
 		,[intItemUnitMeasureId] = LD.intItemUOMId
@@ -354,13 +328,13 @@ BEGIN TRY
 		,[dblGrossWeight] = LDL.dblGross
 		,[dblTareWeight] = LDL.dblTare
 		,[strContainerNo] = LC.strContainerNumber
-		,[intSort] = COALESCE(LC.intLoadContainerId,LD.intLoadDetailId,0)
+		,[intSort] = LD.intLoadDetailId
 		,[strMarkings] = LC.strMarks
 		,[strCondition] = Lot.strCondition
 		,[intEntityVendorId] = NULL --LD.intVendorEntityId
 		,[strReceiptType] = 'Transfer Order'
-		,[intLocationId] = ISNULL(CLSL.intCompanyLocationId, LD.intSCompanyLocationId)
-		,[intShipViaId] = ISNULL(LW.intHaulerEntityId, L.intHaulerEntityId)
+		,[intLocationId] = LD.intSCompanyLocationId
+		,[intShipViaId] = L.intHaulerEntityId
 		,[intShipFromId] = LD.intPCompanyLocationId
 		,[intCurrencyId] = @DefaultCurrencyId
 		,[intSourceType] =  9 --TEMPORARY Source Type for Transfer Shipment
@@ -373,8 +347,6 @@ BEGIN TRY
 		LEFT JOIN tblICParentLot PLot ON PLot.intParentLotId = Lot.intParentLotId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouse LW ON LD.intLoadId = LW.intLoadId
-		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	WHERE LD.intLoadId = @intLoadId
 
 	IF NOT EXISTS (
