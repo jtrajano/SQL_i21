@@ -307,9 +307,21 @@ BEGIN
 				,[ysnTaxExempt]	
 				,[ysnTaxOnly]
 			)
-			SELECT 
+			SELECT distinct
 				[intVoucherPayableId]			= payables.intVoucherPayableId
-				,[intTaxGroupId]				= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
+				,[intTaxGroupId]				= CASE when payables.intLoadShipmentCostId is not null then 
+						CASE WHEN ISNULL(CL.intTaxGroupId, '') = '' THEN 
+							dbo.fnGetTaxGroupIdForVendor (
+								Cost.intVendorId	-- @VendorId
+								,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
+								,NULL				--,@ItemId
+								,LCost.intEntityLocationId		--,@VendorLocationId
+								,L.intFreightTermId	--,@FreightTermId
+								,default --,@FOB
+							)
+					
+						ELSE CL.intTaxGroupId END				
+				WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 				,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
 				,[intTaxClassId]				= vendorTax.[intTaxClassId]
 				,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
@@ -367,6 +379,8 @@ BEGIN
 			INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
 			INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1
 			INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
+			left join tblLGLoadCost Cost on Cost.intLoadId = LD.intLoadId and payables.intEntityVendorId = Cost.intVendorId
+			left join tblEMEntityLocation LCost ON LCost.intEntityId = Cost.intVendorId AND LCost.ysnDefaultLocation = 1
 			OUTER APPLY [dbo].[fnGetItemTaxComputationForVendor](
 					payables.intItemId,
 					payables.intEntityVendorId,
@@ -400,7 +414,19 @@ BEGIN
 						ELSE 
 							payables.dblOrderQty 
 					END,
-					CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END,
+					CASE when payables.intLoadShipmentCostId is not null then 
+						CASE WHEN ISNULL(CL.intTaxGroupId, '') = '' THEN 
+							dbo.fnGetTaxGroupIdForVendor (
+								Cost.intVendorId	-- @VendorId
+								,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
+								,NULL				--,@ItemId
+								,LCost.intEntityLocationId		--,@VendorLocationId
+								,L.intFreightTermId	--,@FreightTermId
+								,default --,@FOB
+							)
+					
+						ELSE CL.intTaxGroupId END					
+					WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END,
 					CL.intCompanyLocationId,
 					EL.intEntityLocationId,
 					1,
