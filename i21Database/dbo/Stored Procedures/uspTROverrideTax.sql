@@ -33,360 +33,433 @@ BEGIN TRY
 	@intSetupShipViaId INT = NULL,
     @intSetupId INT = NULL
 
+
 	-- All Setup
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	AND @intShipViaId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
-			AND intBulkLocationId = @intDistributionBulkLocationId
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 1
 	END
 
-	-- No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
+
+	-- Ignore Bulk
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
-			AND intBulkLocationId = @intDistributionBulkLocationId
-	END
-
-	-- No Bulk Location
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	AND @intShipViaId IS NOT NULL
-	)
-	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
-		FROM tblTROverrideTaxGroupDetail 
-		WHERE
-			-- Receipt
-			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
-			-- Distribution
-			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			--AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 2
 	END
 
 
-	-- No Bulk, No Shipvia
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	)
+	-- Ignore Ship Via
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
-	END
-
-
-	-- No Customer, 
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intShipViaId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
-	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
-		FROM tblTROverrideTaxGroupDetail 
-		WHERE
-			-- Receipt
-			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
-			-- Distribution
-			AND strDistributionState = @strDistributionState
-			AND intBulkLocationId = @intDistributionBulkLocationId
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NULL
+
+			--print 3
 	END
 
-	-- No Customer, No Bulk
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intShipViaId IS NOT NULL
-	)
+	-- Ignore Bulk, Ship Via
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			--AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NULL
+
+			--print 4
 	END
 
-	-- No Customer, No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
+
+	-- Ignore Customer
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intBulkLocationId = @intDistributionBulkLocationId
-	END
-
-
-
-	-- No Customer, No Bulk, No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intSupplierId IS NOT NULL
-	AND @intSupplyPointId IS NOT NULL
-	)
-	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
-		FROM tblTROverrideTaxGroupDetail 
-		WHERE
-			-- Receipt
-			strReceiptState = @strReceiptState 
-			AND intSupplierId = @intSupplierId
-			AND intSupplyPointId = @intSupplyPointId
-			-- Distribution
-			AND strDistributionState = @strDistributionState
-	END
-
-
-	-- No Supplier
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	AND @intShipViaId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
-	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
-		FROM tblTROverrideTaxGroupDetail 
-		WHERE
-			-- Receipt
-			strReceiptState = @strReceiptState 
-			-- Distribution
-			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
-			AND intBulkLocationId = @intDistributionBulkLocationId
+			--AND ISNULL(intCustomerId, 0) = @intCustomerId
+			--AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 5
 	END
 
 
-	-- No Supplier, No Bulk
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	AND @intShipViaId IS NOT NULL
-	)
+	-- Ignore Customer, Bulk
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
+			--AND ISNULL(intCustomerId, 0) = @intCustomerId
+			--AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			--AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 6
 	END
 
-	-- No Supplier, No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
+
+	-- Ignore Customer, Ship Via
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
-			AND intBulkLocationId = @intDistributionBulkLocationId
-	END
-
-
-	-- No Supplier, No Bulk, No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intCustomerId IS NOT NULL
-	AND @intCustomerShipToId IS NOT NULL
-	)
-	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
-		FROM tblTROverrideTaxGroupDetail 
-		WHERE
-			-- Receipt
-			strReceiptState = @strReceiptState 
-			-- Distribution
-			AND strDistributionState = @strDistributionState
-			AND intCustomerId = @intCustomerId
-			AND intCustomerShipToId = @intCustomerShipToId
-	END
-
-
-	-- No Customer, No Supplier
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intShipViaId IS NOT NULL
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
-	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
-		FROM tblTROverrideTaxGroupDetail 
-		WHERE
-			-- Receipt
-			strReceiptState = @strReceiptState 
-			-- Distribution
-			AND strDistributionState = @strDistributionState
-			AND intBulkLocationId = @intDistributionBulkLocationId
+			--AND ISNULL(intCustomerId, 0) = @intCustomerId
+			--AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NULL
+
+			--print 7
 	END
 
 
-	-- No Customer, No Supplier, No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intDistributionBulkLocationId IS NOT NULL
-	)
+	-- Ignore Customer, Bulk, Ship Via
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
+			AND ISNULL(intSupplierId, 0) = @intSupplierId
+			AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
-			AND intBulkLocationId = @intDistributionBulkLocationId
+			--AND ISNULL(intCustomerId, 0) = @intCustomerId
+			--AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			--AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
+			-- Ship Via
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NOT NULL
+			AND intSupplyPointId IS NOT NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NULL
+
+			--print 8
+	END
+
+	
+	-- Ignore Supplier
+	IF (@intSetupId IS NULL)
+	BEGIN
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
+		FROM tblTROverrideTaxGroupDetail 
+		WHERE
+			-- Receipt
+			strReceiptState = @strReceiptState 
+			--AND ISNULL(intSupplierId, 0) = @intSupplierId
+			--AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
+			-- Distribution
+			AND strDistributionState = @strDistributionState
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
+			-- Ship Via
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 9
 	END
 	
 
-	-- No Customer, No Supplier, No Bulk
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	AND @intShipViaId IS NOT NULL
-	)
+	-- Ignore Supplier, Bulk
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
+			--AND ISNULL(intSupplierId, 0) = @intSupplierId
+			--AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
 			-- Distribution
 			AND strDistributionState = @strDistributionState
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			--AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
 			-- Ship Via
-			AND intShipViaId = @intShipViaId
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 10
 	END
 
 
-	-- No Customer, No Supplier, No Bulk, No Ship Via
-	IF (@intSetupId IS NULL
-	AND @strReceiptState IS NOT NULL 
-	AND @strDistributionState IS NOT NULL 
-	)
+	-- Ignore Supplier, Ship Via
+	IF (@intSetupId IS NULL)
 	BEGIN
-		SELECT @intSetupId = intOverrideTaxGroupDetailId
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
+		FROM tblTROverrideTaxGroupDetail 
+		WHERE
+			-- Receipt
+			strReceiptState = @strReceiptState 
+			--AND ISNULL(intSupplierId, 0) = @intSupplierId
+			--AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
+			-- Distribution
+			AND strDistributionState = @strDistributionState
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
+			-- Ship Via
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NULL
+
+			--print 11
+	END
+
+
+	-- Ignore Supplier, Ship Via, Bulk
+	IF (@intSetupId IS NULL)
+	BEGIN
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
+		FROM tblTROverrideTaxGroupDetail 
+		WHERE
+			-- Receipt
+			strReceiptState = @strReceiptState 
+			--AND ISNULL(intSupplierId, 0) = @intSupplierId
+			--AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
+			-- Distribution
+			AND strDistributionState = @strDistributionState
+			AND ISNULL(intCustomerId, 0) = @intCustomerId
+			AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			--AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
+			-- Ship Via
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NOT NULL
+			AND intCustomerShipToId IS NOT NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NULL
+
+			--print 12
+	END
+	
+
+	-- Ignore Customer, Supplier
+	IF (@intSetupId IS NULL)
+	BEGIN
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
+		FROM tblTROverrideTaxGroupDetail 
+		WHERE
+			-- Receipt
+			strReceiptState = @strReceiptState 
+			--AND ISNULL(intSupplierId, 0) = @intSupplierId
+			--AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
+			-- Distribution
+			AND strDistributionState = @strDistributionState
+			--AND ISNULL(intCustomerId, 0) = @intCustomerId
+			--AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
+			-- Ship Via
+			AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NOT NULL
+
+			--print 13
+	END
+
+
+	-- Ignore Customer, No Supplier, No Ship Via
+	IF (@intSetupId IS NULL)
+	BEGIN
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
+		FROM tblTROverrideTaxGroupDetail 
+		WHERE
+			-- Receipt
+			strReceiptState = @strReceiptState 
+			--AND ISNULL(intSupplierId, 0) = @intSupplierId
+			--AND ISNULL(intSupplyPointId, 0) = @intSupplyPointId
+			-- Distribution
+			AND strDistributionState = @strDistributionState
+			--AND ISNULL(intCustomerId, 0) = @intCustomerId
+			--AND ISNULL(intCustomerShipToId, 0) = @intCustomerShipToId
+			AND ISNULL(intBulkLocationId, 0) = @intDistributionBulkLocationId
+			-- Ship Via
+			--AND ISNULL(intShipViaId, 0) = @intShipViaId
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NOT NULL
+			AND intShipViaId IS NULL
+
+			--print 14
+	END
+
+
+	-- Ignore Supplier, Customer, Ship Via, Bulk
+	IF (@intSetupId IS NULL)
+	BEGIN
+		SELECT TOP 1 @intSetupId = intOverrideTaxGroupDetailId
 		FROM tblTROverrideTaxGroupDetail 
 		WHERE
 			-- Receipt
 			strReceiptState = @strReceiptState 
 			-- Distribution
 			AND strDistributionState = @strDistributionState
+
+			AND intSupplierId IS NULL
+			AND intSupplyPointId IS NULL
+			AND intCustomerId IS NULL
+			AND intCustomerShipToId IS NULL
+			AND intBulkLocationId IS NULL
+			AND intShipViaId IS NULL
+
+			--print 15
 	END
+
 
 	IF (@intSetupId IS NOT NULL)
 	BEGIN
