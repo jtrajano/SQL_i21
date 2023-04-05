@@ -915,6 +915,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertFinalVoucherToDebitMemo.sql" />
+    <Build Include="dbo\Functions\fnAPGetFinalVoucherItemCostAdjGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10719,7 +10720,7 @@
     <Build Include="dbo\Views\vyuGRSearchUOMRounding.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicIL.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
- </ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>

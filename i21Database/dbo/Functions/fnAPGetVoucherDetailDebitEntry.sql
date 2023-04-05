@@ -32,9 +32,6 @@ RETURNS TABLE AS RETURN
 									END																		
 						END
 					END
-		* (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalPercentage / 100
-						WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
-						ELSE 1 END) 
 			* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) AS dblTotal
 		,CAST(
 			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal 
@@ -60,9 +57,6 @@ RETURNS TABLE AS RETURN
 												- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 									END																		
 						END
-			* (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalPercentage / 100
-						WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
-						ELSE 1 END)
 			END AS DECIMAL(18,2)) AS dblForeignTotal
 		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN B.dblQtyReceived
 			   ELSE
@@ -160,4 +154,93 @@ RETURNS TABLE AS RETURN
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
 	AND ISNULL(H.ysnInventoryCost, 0) = 0 --EXCLUDE LS INVENTORIED CHAGES
 	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
+	AND A.ysnFinalVoucher = 0 -- EXCLUDE FINAL VOUCHER
+	
+	UNION ALL
+	--FINAL VOUCHER
+	SELECT
+		B.intBillDetailId
+		,B.strMiscDescription
+		,CAST(
+				CASE WHEN ISNULL(B.dblOldCost,0) != 0 
+					THEN B.dblFinalVoucherTotal 
+					ELSE 
+				 	(B.dblQtyReceived * B.dblCost) - B.dblProvisionalTotal
+				END	
+				* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)
+				) AS dblTotal
+		,CAST(CASE WHEN ISNULL(B.dblOldCost,0) <> 0 
+					THEN B.dblFinalVoucherTotal 
+					ELSE 
+				 	(B.dblQtyReceived * B.dblCost) - B.dblProvisionalTotal
+				END AS DECIMAL(18,2)
+				 ) AS dblForeignTotal
+		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN B.dblQtyReceived
+			   ELSE
+			   dbo.fnCalculateQtyBetweenUOM(
+				 		CASE WHEN B.intWeightUOMId > 0 THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END, 
+						itemUOM.intItemUOMId, 
+						CASE WHEN B.intWeightUOMId > 0
+							THEN B.dblNetWeight - B.dblProvisionalWeight
+							ELSE B.dblQtyBundleReceived
+						END 
+						)
+		END)
+		* (
+				CASE 
+					WHEN A.intTransactionType IN (1) 
+						THEN  1
+					ELSE -1 
+			 	END
+			)	as dblTotalUnits
+		,CASE 
+				WHEN B.intInventoryShipmentChargeId IS NOT NULL 
+					THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
+				ELSE B.intAccountId
+		END AS intAccountId
+		,G.intCurrencyExchangeRateTypeId
+		,G.strCurrencyExchangeRateType
+		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
+		,B.strComment
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	LEFT JOIN tblICInventoryReceiptItem E
+		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceiptCharge charges
+		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
+		ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
+	LEFT JOIN tblICItem B2
+		ON B.intItemId = B2.intItemId
+	LEFT JOIN tblICItemLocation loc
+		ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+	LEFT JOIN tblICItem F
+		ON B.intItemId = F.intItemId
+	LEFT JOIN tblLGLoadCost H
+		ON H.intLoadCostId = B.intLoadShipmentCostId
+	OUTER APPLY (
+		SELECT TOP 1 stockUnit.*
+		FROM tblICItemUOM stockUnit 
+		WHERE 
+			B.intItemId = stockUnit.intItemId 
+		AND stockUnit.ysnStockUnit = 1
+	) itemUOM
+	
+	OUTER APPLY (
+		SELECT TOP 1
+			storageHistory.dblPaidAmount
+			,storageHistory.dblOldCost
+		FROM tblGRSettleStorage storage 
+		INNER JOIN tblGRSettleStorageTicket storageTicket ON storage.intSettleStorageId = storageTicket.intSettleStorageId
+		INNER JOIN tblGRCustomerStorage customerStorage ON storageTicket.intCustomerStorageId = customerStorage.intCustomerStorageId 
+															AND B.intCustomerStorageId = customerStorage.intCustomerStorageId
+		INNER JOIN tblGRStorageHistory storageHistory ON storageHistory.intCustomerStorageId = customerStorage.intCustomerStorageId 
+													AND storageHistory.intSettleStorageId = storageTicket.intSettleStorageId
+		WHERE B.intBillId = storage.intBillId
+	) storageOldCost
+	WHERE A.intBillId = @billId
+	AND A.intTransactionType IN (1)
+	AND A.ysnFinalVoucher = 1
+	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	AND ISNULL(H.ysnInventoryCost, 0) = 0 --EXCLUDE LS INVENTORIED CHAGES
 )
