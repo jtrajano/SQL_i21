@@ -246,6 +246,8 @@ BEGIN
 				INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
 				INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1
 				INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
+				left join tblLGLoadCost Cost on Cost.intLoadId = LD.intLoadId and @intNewVendorEntityId = Cost.intVendorId
+				left join tblEMEntityLocation LCost ON LCost.intEntityId =@intNewVendorEntityId AND LCost.ysnDefaultLocation = 1
 				OUTER APPLY [dbo].[fnGetItemTaxComputationForVendor](
 						payables.intItemId,
 						payables.intEntityVendorId,
@@ -279,17 +281,17 @@ BEGIN
 							ELSE 
 								payables.dblOrderQty 
 						END,
-						CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN 
+						CASE WHEN ISNULL(CL.intTaxGroupId, '') = '' THEN 
 							dbo.fnGetTaxGroupIdForVendor (
-								LD.intVendorEntityId	-- @VendorId
+								@intNewVendorEntityId	-- @VendorId
 								,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
 								,NULL				--,@ItemId
-								,EL.intEntityLocationId		--,@VendorLocationId
+								,LCost.intEntityLocationId		--,@VendorLocationId
 								,L.intFreightTermId	--,@FreightTermId
 								,default --,@FOB
 							)
 					
-						ELSE LD.intTaxGroupId END,
+						ELSE CL.intTaxGroupId END,
 						CL.intCompanyLocationId,
 						EL.intEntityLocationId,
 						1,
