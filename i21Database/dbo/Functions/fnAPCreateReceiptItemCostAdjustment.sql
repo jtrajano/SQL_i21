@@ -516,8 +516,8 @@ BEGIN
 												dbo.fnMultiply(
 													--[Voucher Qty]
 													CASE WHEN B.intWeightUOMId IS NULL 
-														THEN (E2.dblOrderQty - B.dblQtyReceived) 
-													ELSE (E2.dblNet - B.dblNetWeight ) END
+														THEN (E2.dblOrderQty - B.dblProvisionalQtyReceived) 
+													ELSE (E2.dblNet - B.dblProvisionalWeight ) END
 													,--[Receipt Cost]
 													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
 															CASE 
@@ -561,8 +561,8 @@ BEGIN
 												dbo.fnMultiply(
 													--[Voucher Qty]
 													CASE WHEN B.intWeightUOMId IS NULL 
-														THEN (E2.dblOrderQty - B.dblQtyReceived) 
-													ELSE (E2.dblNet - B.dblNetWeight ) END									
+														THEN (E2.dblOrderQty - B.dblProvisionalQtyReceived) 
+													ELSE (E2.dblNet - B.dblProvisionalWeight) END									
 													,--[Receipt Cost]
 													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
 															dbo.fnCalculateCostBetweenUOM(
