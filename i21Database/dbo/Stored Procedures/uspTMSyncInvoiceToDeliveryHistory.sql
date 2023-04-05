@@ -46,6 +46,7 @@ BEGIN
 	DECLARE @intScreenId INT
 	DECLARE @ysnRequireClock BIT
 	DECLARE @intDispatchId INT
+	DECLARE @TMOrderHistoryStagingTable TMOrderHistoryStagingTable
 	
 
 
@@ -98,6 +99,15 @@ BEGIN
 		AND intSiteId IS NOT NULL
 		AND ISNULL(ysnLeaseBilling,0) <> 1
 		AND ISNULL(ysnVirtualMeterReading,0) <> 1
+
+	---Get all the DispatchId used in the invoice
+	IF OBJECT_ID('tempdb..#tmpTMInvoiceDispatchIds') IS NOT NULL DROP TABLE #tmpTMInvoiceDispatchIds
+	SELECT DISTINCT
+		intDispatchId
+		,intInvoiceDetailId
+	INTO #tmpTMInvoiceDispatchIds
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = @InvoiceId
 	
 	-- Process Delivery
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTMInvoiceDetail)
@@ -455,8 +465,9 @@ BEGIN
 
 
 
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID = @intDispatchId)
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds))
 					BEGIN
+						/*
 						--- Insert Dispatch to tblTMDispatchHistory table
 						INSERT INTO tblTMDispatchHistory (
 							[intDispatchId]            
@@ -502,7 +513,7 @@ BEGIN
 							,[dtmReceivedDate]
 							,intPaymentId
 						)	
-						SELECT TOP 1 
+						SELECT  
 							[intDispatchId]				= [intDispatchID]
 							,[intSiteId]				= intSiteID
 							,[intDeliveryHistoryId]		= @intNewDeliveryHistoryId             
@@ -547,11 +558,28 @@ BEGIN
 							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
-							AND intDispatchID = @intDispatchId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds)
 
 						DELETE FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
-							AND intDispatchID = @intDispatchId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds)
+
+						*/
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT 
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= @intNewDeliveryHistoryId 
+						FROM #tmpTMInvoiceDispatchIds
+
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 					END
 					
 					---- Update forecasted nad estimated % left
@@ -778,7 +806,7 @@ BEGIN
 							ON B.intInvoiceDetailId = F.intInvoiceDetailId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
-								AND G.intDispatchID = @intDispatchId
+								AND G.intDispatchID = (SELECT TOP 1 intDispatchId FROM #tmpTMInvoiceDispatchIds ORDER BY intDispatchId)
 						LEFT JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -1007,7 +1035,7 @@ BEGIN
 						ON B.intInvoiceDetailId = F.intInvoiceDetailId
 					LEFT JOIN tblTMDispatch G
 						ON A.intSiteID = G.intSiteID
-							AND G.intDispatchID = @intDispatchId
+							AND G.intDispatchID = (SELECT TOP 1 intDispatchId FROM #tmpTMInvoiceDispatchIds ORDER BY intDispatchId)
 					LEFT JOIN tblTMClock H
 						ON A.intClockID = H.intClockID
 					LEFT JOIN tblEMEntity I
@@ -1151,17 +1179,12 @@ BEGIN
 					--	,intConcurrencyId = intConcurrencyId + 1
 					--WHERE intSiteID = @intSiteId
 					
-					IF(@ysnRequireClock = 1)
-					BEGIN
-						---- Update forecasted nad estimated % left
-						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
-						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
-						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
-					END
+					
 					
 
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID = @intDispatchId)
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds))
 					BEGIN
+						/*
 						--- Insert Dispatch to tblTMDispatchHistory table
 						INSERT INTO tblTMDispatchHistory (
 							[intDispatchId]            
@@ -1207,7 +1230,7 @@ BEGIN
 							,[dtmReceivedDate]
 							,intPaymentId
 						)	
-						SELECT TOP 1 
+						SELECT 
 							[intDispatchId]				= [intDispatchID]
 							,[intSiteId]				= intSiteID
 							,[intDeliveryHistoryId]		= @intNewDeliveryHistoryId             
@@ -1252,13 +1275,39 @@ BEGIN
 							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
-							AND intDispatchID = @intDispatchId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds) 
+						
+						DELETE FROM tblTMDispatch
+						WHERE intSiteID = @intSiteId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds)
+							
+						*/
+
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT 
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= @intNewDeliveryHistoryId 
+						FROM #tmpTMInvoiceDispatchIds
+
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 					END
+					
 
-
-					DELETE FROM tblTMDispatch
-					WHERE intSiteID = @intSiteId
-						AND intDispatchID = @intDispatchId
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						---- Update forecasted nad estimated % left
+						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					END
 				END
 				
 			END
@@ -1443,7 +1492,7 @@ BEGIN
 			ON B.intItemId = E.intItemId
 		LEFT JOIN tblTMDispatch G
 			ON A.intSiteID = G.intSiteID
-				AND G.intDispatchID = @intDispatchId
+				AND G.intDispatchID = (SELECT TOP 1 intDispatchId FROM #tmpTMInvoiceDispatchIds ORDER BY intDispatchId)
 		LEFT JOIN tblTMClock H
 			ON A.intClockID = H.intClockID
 		LEFT JOIN tblEMEntity I

@@ -101,7 +101,11 @@ BEGIN
 			AND A.ysnActive = 1
 			AND ((A.dtmLastReadingUpdate IS NOT NULL AND A.dtmLastReadingUpdate < @LastReadingDate) OR (A.dtmLastReadingUpdate IS NULL AND CAST('1900-01-01' AS DATETIME) < @LastReadingDate)) --CAST((ISNULL(A.dtmLastReadingUpdate,'1900-01-01')) as DATETIME) < @LastReadingDate
 
-
+		---Set negative percent left to 0
+		UPDATE tblTMDispatch
+		SET dblPercentLeft = 0
+		WHERE dblPercentLeft < 0
+			AND intSiteID = @intSiteId
 
 		UPDATE tblTMSite
 		SET dtmLastReadingUpdate = @LastReadingDate,   
