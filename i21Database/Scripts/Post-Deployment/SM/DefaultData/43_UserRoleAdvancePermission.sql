@@ -1,6 +1,5 @@
-﻿GO
-	PRINT N'BEGIN---> INSERT USER ROLE ADVANCE PERMISSION FOR DEFAULT RECORDS'
-GO
+﻿PRINT N'BEGIN---> INSERT USER ROLE ADVANCE PERMISSION FOR DEFAULT RECORDS'
+
 	DECLARE @ContractModuleId INT
 	DECLARE @EditOnUnconfirmed NVARCHAR(1000) = N'Allow a Contract Sequence to be edited when the Status is Unconfirmed.'
 	DECLARE @ContractAdvanceId INT
@@ -26,7 +25,7 @@ GO
 		WHERE intAdvancePermissionId = @ContractAdvanceId
 	END
 
-GO
+
 
 	DECLARE @InventoryModuleId INT
 	DECLARE @OverrideItemNo NVARCHAR(1000) = N'Allow user to override item no. in item screen when Item No. Generation is Active'
@@ -52,8 +51,14 @@ GO
 		UPDATE tblSMAdvancePermission SET strDescription = @OverrideItemNo
 		WHERE intAdvancePermissionId = @InventoryAdvanceId
 	END
-	
-	--INSERT NEW HERE WITH THE ABOVE FORMAT--
-GO
-	PRINT N'END---> INSERT USER ROLE ADVANCE PERMISSION FOR DEFAULT RECORDS'
-GO
+
+	DECLARE @SMModuleId INT
+	SELECT @SMModuleId = intModuleId FROM tblSMModule WHERE strModule = 'System Manager' AND strApplicationName = 'i21'
+	IF ISNULL(@SMModuleId, 0) <> 0 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMAdvancePermission WHERE intModuleId = @SMModuleId AND strDescription = N'Allow Power BI reports to be edited.')
+		INSERT INTO tblSMAdvancePermission(intModuleId,strDescription, intConcurrencyId)
+		VALUES(@SMModuleId, N'Allow Power BI reports to be edited.', 1)
+
+
+	--INSERT NEW HERE USING THE ABOVE FORMAT--
+
+PRINT N'END---> INSERT USER ROLE ADVANCE PERMISSION FOR DEFAULT RECORDS'
