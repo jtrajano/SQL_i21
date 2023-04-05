@@ -904,33 +904,33 @@ WHERE NULLIF(strOrderPackageDescription, '') IS NOT NULL AND NULLIF(strOrderPack
 
 /* Log and duplicate UOM for Item Pricing Level*/
 
-INSERT INTO tblICImportLogDetail(intImportLogId
-							   , strType
-							   , intRecordNo
-							   , strField
-							   , strValue
-							   , strMessage
-							   , strStatus
-							   , strAction
-							   , intConcurrencyId
-)
-SELECT @LogId
-	 , 'Error'
-	 , PriceBook.intRecordNumber
-	 , 'Item Unit Measure / Alt UPC UOM'
-	 , PriceBook.strItemUnitOfMeasure
-	 , 'Duplicate UOM found on Item Unit Measure and Alt UPC UOM'
-	 , 'Skipped'
-	 , 'Record not imported.'
-	 , 1
-FROM tblICEdiPricebook AS PriceBook
-WHERE (PriceBook.strAltUPCUOM1 = PriceBook.strItemUnitOfMeasure) OR (PriceBook.strAltUPCUOM2 = PriceBook.strItemUnitOfMeasure)
+--INSERT INTO tblICImportLogDetail(intImportLogId
+--							   , strType
+--							   , intRecordNo
+--							   , strField
+--							   , strValue
+--							   , strMessage
+--							   , strStatus
+--							   , strAction
+--							   , intConcurrencyId
+--)
+--SELECT @LogId
+--	 , 'Error'
+--	 , PriceBook.intRecordNumber
+--	 , 'Item Unit Measure / Alt UPC UOM'
+--	 , PriceBook.strItemUnitOfMeasure
+--	 , 'Duplicate UOM found on Item Unit Measure and Alt UPC UOM'
+--	 , 'Skipped'
+--	 , 'Record not imported.'
+--	 , 1
+--FROM tblICEdiPricebook AS PriceBook
+--WHERE (PriceBook.strAltUPCUOM1 = PriceBook.strItemUnitOfMeasure) OR (PriceBook.strAltUPCUOM2 = PriceBook.strItemUnitOfMeasure)
 
 /* Remove the duplicate Alt UPC UOM & Item Unit Measure */
 
-DELETE 
-FROM tblICEdiPricebook
-WHERE (strAltUPCUOM1 = strItemUnitOfMeasure) OR (strAltUPCUOM2 = strItemUnitOfMeasure)
+--DELETE 
+--FROM tblICEdiPricebook
+--WHERE (strAltUPCUOM1 = strItemUnitOfMeasure) OR (strAltUPCUOM2 = strItemUnitOfMeasure)
 /* End of Log of Alt UPC UOM & Item Unit Measure */
 
 /* Log and duplicate UOM for Item Pricing Level*/
@@ -1389,27 +1389,27 @@ WHERE p.strUniqueId = @UniqueId
 SELECT @duplicate2ndUOMUPCCode = @@ROWCOUNT;
 
 -- Remove the duplicate records in @valid2ndUOM
-;WITH deleteDuplicate2ndUOMLongUPC_CTE (
-	intEdiPricebookId
-	,strLongUPCCode
-	,dblDuplicateCount
-)
-AS (SELECT p.intEdiPricebookId
-		 , p.strLongUPCCode
-		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
-	FROM @valid2ndUOM p
-	WHERE p.strLongUPCCode IS NOT NULL		
-)
-DELETE FROM deleteDuplicate2ndUOMLongUPC_CTE
-WHERE dblDuplicateCount > 1;
+--;WITH deleteDuplicate2ndUOMLongUPC_CTE (
+--	intEdiPricebookId
+--	,strLongUPCCode
+--	,dblDuplicateCount
+--)
+--AS (SELECT p.intEdiPricebookId
+--		 , p.strLongUPCCode
+--		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
+--	FROM @valid2ndUOM p
+--	WHERE p.strLongUPCCode IS NOT NULL		
+--)
+--DELETE FROM deleteDuplicate2ndUOMLongUPC_CTE
+--WHERE dblDuplicateCount > 1;
 
 -- Remove the duplicate records in @valid2ndUOM
-DELETE p 
-FROM tblICItemUOM iu RIGHT JOIN @valid2ndUOM p ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
-WHERE iu.intItemUOMId IS NOT NULL ;
+--DELETE p 
+--FROM tblICItemUOM iu RIGHT JOIN @valid2ndUOM p ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
+--WHERE iu.intItemUOMId IS NOT NULL ;
 
-SELECT @duplicate2ndUOMUPCCode = ISNULL(@duplicate2ndUOMUPCCode, 0) - COUNT(1) 
-FROM  @valid2ndUOM
+--SELECT @duplicate2ndUOMUPCCode = ISNULL(@duplicate2ndUOMUPCCode, 0) - COUNT(1) 
+--FROM  @valid2ndUOM
 
 -- Insert 2nd UOM
 INSERT INTO tblICItemUOM (			
@@ -1430,7 +1430,7 @@ INSERT INTO tblICItemUOM (
 	,intDataSourceId
 	,intModifier
 )
-SELECT 
+SELECT DISTINCT
 	intItemId = i.intItemId 
 	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
@@ -1520,7 +1520,9 @@ FROM
 			iu.intItemId = i.intItemId
 			AND (
 				iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
-				OR iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
+				OR (iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0')  AND  iu.intModifier = CAST(ISNULL(NULLIF(CASE WHEN p.strOrderCaseUpcNumber = p.strSellingUpcNumber THEN CAST(p.strUpcModifierNumber AS INT) + 1
+																									   ELSE 1
+																								  END, ''), 1) AS BIGINT))
 			)
 	) existUOM
 	OUTER APPLY (
@@ -1529,7 +1531,9 @@ FROM
 		FROM 
 			tblICItemUOM iu
 		WHERE
-			iu.strLongUPCCode = p.strOrderCaseUpcNumber
+			iu.strLongUPCCode = p.strOrderCaseUpcNumber AND iu.intModifier = CAST(ISNULL(NULLIF(CASE WHEN p.strOrderCaseUpcNumber = p.strSellingUpcNumber THEN CAST(p.strUpcModifierNumber AS INT) + 1
+																									   ELSE 1
+																								  END, ''), 1) AS BIGINT)
 	) existUPCCode
 WHERE
 	p.strUniqueId = @UniqueId
@@ -1610,7 +1614,7 @@ INSERT INTO tblICItemUOM (intItemId
 						, intDataSourceId
 						, intModifier
 )
-SELECT intItemId = i.intItemId 
+SELECT DISTINCT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity1 AS NUMERIC(38, 20)) 
 	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber1, 11))
@@ -1710,26 +1714,26 @@ WHERE p.strUniqueId = @UniqueId
 SELECT @duplicateAlternate2UOMUPCCode = @@ROWCOUNT;
 
 -- Remove the duplicate records in @validAlternate2UOM
-;WITH deleteDuplicateAlternate2UOMLongUPC_CTE (intEdiPricebookId
-											 , strLongUPCCode
-											 , dblDuplicateCount
-)
-AS (SELECT p.intEdiPricebookId
-		 , p.strLongUPCCode
-		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
-	FROM @validAlternate2UOM p
-	WHERE p.strLongUPCCode IS NOT NULL		
-)
-DELETE FROM deleteDuplicateAlternate2UOMLongUPC_CTE
-WHERE dblDuplicateCount > 1;
+--;WITH deleteDuplicateAlternate2UOMLongUPC_CTE (intEdiPricebookId
+--											 , strLongUPCCode
+--											 , dblDuplicateCount
+--)
+--AS (SELECT p.intEdiPricebookId
+--		 , p.strLongUPCCode
+--		 , dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
+--	FROM @validAlternate2UOM p
+--	WHERE p.strLongUPCCode IS NOT NULL		
+--)
+--DELETE FROM deleteDuplicateAlternate2UOMLongUPC_CTE
+--WHERE dblDuplicateCount > 1;
 
 -- Remove the duplicate records in @validAlternate2UOM
-DELETE p 
-FROM tblICItemUOM iu RIGHT JOIN @validAlternate2UOM p ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
-WHERE iu.intItemUOMId IS NOT NULL ;
+--DELETE p 
+--FROM tblICItemUOM iu RIGHT JOIN @validAlternate2UOM p ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
+--WHERE iu.intItemUOMId IS NOT NULL ;
 
-SELECT @duplicateAlternate2UOMUPCCode = ISNULL(@duplicateAlternate2UOMUPCCode, 0) - COUNT(1) 
-FROM  @validAlternate2UOM
+--SELECT @duplicateAlternate2UOMUPCCode = ISNULL(@duplicateAlternate2UOMUPCCode, 0) - COUNT(1) 
+--FROM  @validAlternate2UOM
 
 -- Insert Alternate2 UOM
 INSERT INTO tblICItemUOM (intItemId
@@ -1749,7 +1753,7 @@ INSERT INTO tblICItemUOM (intItemId
 						, intDataSourceId
 						, intModifier
 )
-SELECT intItemId = i.intItemId 
+SELECT DISTINCT intItemId = i.intItemId 
 	 , intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	 , dblUnitQty = CAST(p.strAltUPCQuantity2 AS NUMERIC(38, 20)) 
 	 , strUpcCode = dbo.fnSTConvertUPCaToUPCe(RIGHT(strAltUPCNumber2, 11))
@@ -1812,7 +1816,7 @@ OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 WHERE iu.intItemId = i.intItemId AND (iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId) OR (iu.strLongUPCCode = NULLIF(p.strAltUPCNumber2, '0')) AND NULLIF(p.strAltUPCModifier2, '') = iu.intModifier)) existUOM
 OUTER APPLY (SELECT TOP 1 iu.intItemUOMId
 			 FROM tblICItemUOM iu
-			 WHERE iu.strLongUPCCode = p.strAltUPCNumber2) existUPCCode
+			 WHERE iu.strLongUPCCode = p.strAltUPCNumber2 AND iu.intModifier = CAST(ISNULL(NULLIF(p.strAltUPCModifier2, ''), 1) AS BIGINT)) existUPCCode
 WHERE p.strUniqueId = @UniqueId
   AND i.intItemId IS NOT NULL 
   AND NULLIF(p.strAltUPCQuantity2, '') IS NOT NULL 
@@ -3157,41 +3161,41 @@ BEGIN
 	END 
 
 	-- Log the records with duplicate records
-	INSERT INTO tblICImportLogDetail(
-		intImportLogId
-		, strType
-		, intRecordNo
-		, strField
-		, strValue
-		, strMessage
-		, strStatus
-		, strAction
-		, intConcurrencyId
-	)
-	SELECT 
-		@LogId
-		, 'Warning'
-		, NULL
-		, NULL 
-		, NULL 
-		, dbo.fnFormatMessage(
-			'There are %i duplicate 2nd UPC Code(s) found in the file.'
-			,@duplicate2ndUOMUPCCode
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-			,DEFAULT
-		)
-		, 'Skipped'
-		, 'Record not imported.'
-		, 1
-	WHERE 
-		@duplicate2ndUOMUPCCode <> 0
+	--INSERT INTO tblICImportLogDetail(
+	--	intImportLogId
+	--	, strType
+	--	, intRecordNo
+	--	, strField
+	--	, strValue
+	--	, strMessage
+	--	, strStatus
+	--	, strAction
+	--	, intConcurrencyId
+	--)
+	--SELECT 
+	--	@LogId
+	--	, 'Warning'
+	--	, NULL
+	--	, NULL 
+	--	, NULL 
+	--	, dbo.fnFormatMessage(
+	--		'There are %i duplicate 2nd UPC Code(s) found in the file.'
+	--		,@duplicate2ndUOMUPCCode
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--		,DEFAULT
+	--	)
+	--	, 'Skipped'
+	--	, 'Record not imported.'
+	--	, 1
+	--WHERE 
+	--	@duplicate2ndUOMUPCCode <> 0
 
 	-- Log the updated items. 
 	IF @updatedItem <> 0 
