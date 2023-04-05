@@ -184,6 +184,7 @@ BEGIN TRY
 		,dblComboMinimumUnits					= DD.dblComboMinimumUnits
 		,dblComboSurcharge						= DD.dblComboSurcharge
 		,intInventoryReceiptId					= TR.intInventoryReceiptId
+		,intDispatchId							= DD.intTMOId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -1030,6 +1031,7 @@ BEGIN TRY
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
 		,[ysnBlended]
+		,[intDispatchId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1114,6 +1116,7 @@ BEGIN TRY
 		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
 		,ysnBlended								= TR.ysnBlended
+		,intDispatchId							= TR.intDispatchId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
