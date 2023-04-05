@@ -461,10 +461,110 @@ BEGIN
 						---GEt the list of sites to be updated
 						SELECT DISTINCT 
 							A.intSiteId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, A.dtmInvoiceDate), 0)
 						INTO #tmpSiteUpdateList1
 						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
 						
-
+						--- Insert Dispatch to tblTMDispatchHistory table
+						INSERT INTO tblTMDispatchHistory (
+							[intDispatchId]            
+							,[intSiteId]
+							,[intDeliveryHistoryId]                
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]             
+							,[intSubstituteProductId]   
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              
+							,[intDispatchDriverId]      
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]                
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]        
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
+							,[dtmReceivedDate]
+							,intPaymentId
+							,dblOveragePrice
+							,dblOverageQty
+							,strOriginalPricingMethod
+						)	
+						SELECT TOP 1
+							[intDispatchId]				= A.[intDispatchID]
+							,[intSiteId]				= A.intSiteID
+							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
+							,A.[dblPercentLeft]           
+							,A.[dblQuantity]              
+							,A.[dblMinimumQuantity]       
+							,[intProductId]				= A.[intProductID] 
+							,[intSubstituteProductId]   = A.[intSubstituteProductID]
+							,A.[dblPrice]                 
+							,A.[dblTotal]                 
+							,A.[dtmRequestedDate]         
+							,A.[intPriority]              
+							,A.[strComments]              
+							,A.[ysnCallEntryPrinted]      
+							,[intDriverId]              = A.[intDriverID]              
+							,[intDispatchDriverId]		= A.[intDispatchDriverID]   
+							,A.[strDispatchLoadNumber]    
+							,A.[dtmCallInDate]            
+							,A.[ysnSelected]              
+							,A.[strRoute]                 
+							,A.[strSequence]              
+							,[intUserId]				= A.[intUserID]
+							,A.[dtmLastUpdated]           
+							,A.[ysnDispatched]            
+							,A.[strCancelDispatchMessage] 
+							,[intDeliveryTermId]		= A.[intDeliveryTermID] 
+							,A.[dtmDispatchingDate]       
+							,A.[strWillCallStatus]			
+							,A.[strPricingMethod]			
+							,A.[strOrderNumber]			
+							,A.[dtmDeliveryDate]			
+							,A.[dblDeliveryQuantity]		
+							,A.[dblDeliveryPrice]			
+							,A.[dblDeliveryTotal]			
+							,A.[intContractId]				
+							,A.[ysnLockPrice]				
+							,A.[intRouteId]				
+							,A.[ysnReceived]				
+							,A.[ysnLeakCheckRequired]
+							,A.[dblOriginalPercentLeft]
+							,A.[dtmReceivedDate]
+							,A.intPaymentId
+							,A.dblOveragePrice
+							,A.dblOverageQty
+							,A.strOriginalPricingMethod
+						FROM tblTMDispatch A
+						INNER JOIN #tmpSiteUpdateList1 B
+							ON A.intSiteID = B.intSiteId
+						INNER JOIN tblTMDeliveryHistory C
+							ON A.intSiteID = C.intSiteID
+								AND C.dtmInvoiceDate = B.dtmInvoiceDate
 
 						--Delete Order
 						DELETE FROM tblTMDispatch
