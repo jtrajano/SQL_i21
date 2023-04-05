@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateDPRRecon]
 	@intDPRReconHeaderId INT = NULL
 	, @dtmFromDate  DATETIME 
-	, @dtmToDate DATETIME 
+	, @dtmToDate DATETIME
+	, @dtmServerFromDate DATETIME
+	, @dtmServerToDate DATETIME
 	, @intCommodityId INT
 	, @intUserId INT
 
@@ -16,16 +18,12 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
  
-	DECLARE @ErrMsg NVARCHAR(MAX),
-			@dtmServerFromDate DATETIME,
-			@dtmServerToDate DATETIME
+	DECLARE @ErrMsg NVARCHAR(MAX)
 
-	SET @dtmServerFromDate = @dtmFromDate
-	SET @dtmServerToDate = @dtmToDate
 
 	--Convert Dates to UTC
-	SET @dtmFromDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmFromDate)
-	SET @dtmToDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), @dtmToDate)
+	--SET @dtmFromDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()) - 1, @dtmFromDate)
+	--SET @dtmToDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE())- 1, @dtmToDate)
 
 	DECLARE @tblRKDPRReconContracts TABLE (
 		[intSort] INT NOT NULL,
@@ -88,9 +86,32 @@ BEGIN TRY
 		[intFutOptTransactionHeaderId] INT NULL
 	)
 
+
+
 	--==========================================================================================
 	--				PURCHASE CONTRACT
 	--==========================================================================================
+
+	SELECT CBL.intContractDetailId, CBL.intTransactionReferenceDetailId, CBL.dblOrigQty
+	INTO #tmpPurchaseCTCreatedPriceFix
+	FROM tblCTContractBalanceLog CBL
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
+	WHERE CBL.intCommodityId = @intCommodityId
+		AND strAction IN ('Created Price')
+		AND CBL.intContractTypeId = 1 --Purchase
+		AND CBL.intPricingTypeId = 1
+		AND CH.intPricingTypeId = 2
+
+	SELECT CBL.intContractDetailId, CBL.intTransactionReferenceDetailId, CBL.dblOrigQty
+	INTO #tmpSalesCTCreatedPriceFix
+	FROM tblCTContractBalanceLog CBL
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
+	WHERE CBL.intCommodityId = @intCommodityId
+		AND strAction IN ('Created Price')
+		AND CBL.intContractTypeId = 2 --Sales
+		AND CBL.intPricingTypeId = 1
+		AND CH.intPricingTypeId = 2
+
 	INSERT INTO @tblRKDPRReconContracts (
 		intSort
 		,strLocationName
@@ -456,19 +477,19 @@ BEGIN TRY
 		UNION ALL
 
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId  ORDER BY intContractDetailId DESC)
-			,intSort = 14
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY strAction, CBL.intContractDetailId, CBL.intTransactionReferenceDetailId  ORDER BY CBL.intContractBalanceLogId DESC)
+			,intSort = 4
 			,CL.strLocationName
 			,E.strName
 			,C.strCommodityCode
-			,strContractType = 'Sales'
+			,strContractType = 'Purchase'
 			,CS.strContractStatus
 			,CBL.strContractNumber
 			,CBL.intContractSeq
 			,I.strItemNo
-			,dtmCreatedDate = MAX(dtmCreatedDate)
-			,dtmTransactionDate = MAX(dtmTransactionDate)
-			,dblQty = SUM(CBL.dblQty)
+			,dtmCreatedDate = dtmCreatedDate
+			,dtmTransactionDate = dtmTransactionDate
+			,dblQty = CBL.dblOrigQty - ISNULL(PF.dblOrigQty,0)
 			,UM.strUnitMeasure
 			,EC.strUserName
 			,strBucketName = '+ Purchase Basis Pricing'
@@ -496,37 +517,24 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 		INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
+		INNER JOIN #tmpPurchaseCTCreatedPriceFix PF ON PF.intContractDetailId = CBL.intContractDetailId AND PF.intTransactionReferenceDetailId = CBL.intTransactionReferenceDetailId
 		WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 		AND CBL.intCommodityId = @intCommodityId
-		AND CBL.intContractSeq = 1
 		AND strAction IN ('Price Updated')
 		AND CBL.intContractTypeId = 1 --Purchase
 		AND CBL.intPricingTypeId = 1
 		AND CH.intPricingTypeId = 2
-		GROUP BY 
-			intContractDetailId
-			,strLocationName
-			,strName
-			,strCommodityCode
-			,strContractStatus
-			,CBL.strContractNumber
-			,CBL.intContractSeq
-			,strItemNo
-			,strUnitMeasure
-			,strUserName
-			,strAction
-			,CBL.intContractHeaderId
-		HAVING SUM(CBL.dblQty) <> 0
+
 
 		UNION ALL
 
 		SELECT
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId  ORDER BY intContractDetailId DESC)
-			,intSort = 14
+			,intSort = 4
 			,CL.strLocationName
 			,E.strName
 			,C.strCommodityCode
-			,strContractType = 'Sales'
+			,strContractType = 'Purchase'
 			,CS.strContractStatus
 			,CBL.strContractNumber
 			,CBL.intContractSeq
@@ -664,6 +672,7 @@ BEGIN TRY
 		AND CBL.intContractTypeId = 1 --Purchase
 		AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 		--AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+		AND (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3)
 		AND CBL.strTransactionType = 'Contract Balance'
 		GROUP BY 
 			intContractDetailId
@@ -680,55 +689,6 @@ BEGIN TRY
 			,CBL.intContractHeaderId
 		HAVING SUM(CBL.dblQty) <> 0
 	) t WHERE intRowNum = 1
-	UNION ALL
-
-	SELECT
-		intSort = 5
-		,CL.strLocationName
-		,E.strName
-		,C.strCommodityCode
-		,strContractType = 'Purchase'
-		,CS.strContractStatus
-		,CBL.strContractNumber
-		,CBL.intContractSeq
-		,I.strItemNo
-		,CBL.dtmCreatedDate
-		,CBL.dtmTransactionDate
-		,CBL.dblQty
-		,UM.strUnitMeasure
-		,EC.strUserName
-		,strBucketName = '+ Purchase Qty Adjustment'
-		,strAction
-		,PT.strPricingType
-		,strTicketNumber = NULL
-		,strLoadNumber = NULL
-		,dblLoadQty = NULL
-		,dblReceivedQty  = NULL
-		,dblCash = NULL
-		,CBL.intContractHeaderId
-		,intTicketId = NULL
-		,intLoadId = NULL
-		,strDistribution  = ''
-		,strStorageSchedule  = ''
-		,strSettlementTicket = ''
-		,strStatus  = ''
-	FROM tblCTContractBalanceLog CBL
-	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
-	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
-	INNER JOIN tblICCommodity C ON C.intCommodityId = CBL.intCommodityId
-	INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId 
-	INNER JOIN tblICItem I ON I.intItemId = CBL.intItemId
-	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
-	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
-	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
-	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
-	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
-	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN('Updated Contract')
-	AND CBL.intContractTypeId = 1 --Purchase
-	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
-
-
 	UNION ALL
 
 	SELECT
@@ -839,7 +799,7 @@ BEGIN TRY
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
-		,dtmCreatedDate =  DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()),B.dtmDateCreated)
+		,dtmCreatedDate =  DATEADD(hh, DATEDIFF(hh, @dtmServerFromDate, @dtmFromDate),B.dtmDateCreated)
 		,SL.dtmTransactionDate
 		,dblVariance  =  CASE WHEN SL.dblOrigQty < 0 THEN CH.dblQuantityPerLoad - ABS(SL.dblOrigQty)  ELSE  SL.dblOrigQty - CH.dblQuantityPerLoad END
 		,UM.strUnitMeasure
@@ -1212,7 +1172,7 @@ BEGIN TRY
 		UNION ALL
 
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId  ORDER BY intContractDetailId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY strAction, CBL.intContractDetailId, CBL.intTransactionReferenceDetailId  ORDER BY CBL.intContractBalanceLogId DESC)
 			,intSort = 14
 			,CL.strLocationName
 			,E.strName
@@ -1222,9 +1182,9 @@ BEGIN TRY
 			,CBL.strContractNumber
 			,CBL.intContractSeq
 			,I.strItemNo
-			,dtmCreatedDate = MAX(dtmCreatedDate)
-			,dtmTransactionDate = MAX(dtmTransactionDate)
-			,dblQty = SUM(CBL.dblQty)
+			,dtmCreatedDate = dtmCreatedDate
+			,dtmTransactionDate = dtmTransactionDate
+			,dblQty = CBL.dblOrigQty - ISNULL(PF.dblOrigQty,0)
 			,UM.strUnitMeasure
 			,EC.strUserName
 			,strBucketName = '+ Sales Basis Pricing'
@@ -1252,27 +1212,13 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
 		INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CBL.intContractHeaderId
+		INNER JOIN #tmpSalesCTCreatedPriceFix PF ON PF.intContractDetailId = CBL.intContractDetailId AND PF.intTransactionReferenceDetailId = CBL.intTransactionReferenceDetailId
 		WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
 		AND CBL.intCommodityId = @intCommodityId
-		AND CBL.intContractSeq = 1
 		AND strAction IN ('Price Updated')
 		AND CBL.intContractTypeId = 2 --Sales
 		AND CBL.intPricingTypeId = 1
 		AND CH.intPricingTypeId = 2
-		GROUP BY 
-			intContractDetailId
-			,strLocationName
-			,strName
-			,strCommodityCode
-			,strContractStatus
-			,CBL.strContractNumber
-			,CBL.intContractSeq
-			,strItemNo
-			,strUnitMeasure
-			,strUserName
-			,strAction
-			,CBL.intContractHeaderId
-		HAVING SUM(CBL.dblQty) <> 0
 
 		UNION ALL
 
@@ -1419,6 +1365,7 @@ BEGIN TRY
 		AND CBL.intContractTypeId = 2 --Sales
 		AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 		--AND( (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3) OR (CBL.intPricingTypeId = 3 AND ABS(CBL.dblQty) != ABS(CBL.dblOrigQty) ))
+		AND (CBL.dblQty != CBL.dblOrigQty  AND CBL.intPricingTypeId <> 3)
 		AND CBL.strTransactionType = 'Contract Balance'
 		GROUP BY 
 			intContractDetailId
@@ -1435,54 +1382,6 @@ BEGIN TRY
 			,CBL.intContractHeaderId
 		HAVING SUM(CBL.dblQty) <> 0
 	) t WHERE intRowNum = 1
-
-	UNION ALL
-
-	SELECT
-		intSort = 15
-		,CL.strLocationName
-		,E.strName
-		,C.strCommodityCode
-		,strContractType = 'Sales'
-		,CS.strContractStatus
-		,CBL.strContractNumber
-		,CBL.intContractSeq
-		,I.strItemNo
-		,CBL.dtmCreatedDate
-		,CBL.dtmTransactionDate
-		,CBL.dblQty
-		,UM.strUnitMeasure
-		,EC.strUserName
-		,strBucketName = '+ Sales Qty Adjustment'
-		,strAction
-		,PT.strPricingType
-		,strTicketNumber = NULL
-		,strLoadNumber = NULL
-		,dblLoadQty = NULL
-		,dblReceivedQty  = NULL
-		,dblCash = NULL
-		,CBL.intContractHeaderId
-		,intTicketId = NULL
-		,intLoadId = NULL
-		,strDistribution  = ''
-		,strStorageSchedule  = ''
-		,strSettlementTicket = ''
-		,strStatus  = ''
-	FROM tblCTContractBalanceLog CBL
-	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CBL.intLocationId
-	INNER JOIN tblEMEntity E ON E.intEntityId = CBL.intEntityId
-	INNER JOIN tblICCommodity C ON C.intCommodityId = CBL.intCommodityId
-	INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId 
-	INNER JOIN tblICItem I ON I.intItemId = CBL.intItemId
-	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = CBL.intQtyUOMId
-	INNER JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CUM.intUnitMeasureId
-	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = CBL.intUserId
-	INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
-	WHERE dtmCreatedDate BETWEEN @dtmFromDate AND @dtmToDate
-	AND CBL.intCommodityId = @intCommodityId
-	AND strAction IN('Updated Contract')
-	AND CBL.intContractTypeId = 2 --Sales
-	AND CBL.intPricingTypeId IN (1,3) --Priced, HTA
 
 	UNION ALL
 
@@ -1593,7 +1492,7 @@ BEGIN TRY
 		,CH.strContractNumber
 		,CD.intContractSeq
 		,I.strItemNo
-		,dtmCreatedDate = DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()),IV.dtmDateCreated)
+		,dtmCreatedDate = DATEADD(hh, DATEDIFF(hh, @dtmServerFromDate, @dtmFromDate),IV.dtmDateCreated)
 		,SL.dtmTransactionDate
 		,dblVariance  = CASE WHEN SL.dblOrigQty < 0 THEN ABS(SL.dblOrigQty) - CH.dblQuantityPerLoad ELSE CH.dblQuantityPerLoad - SL.dblOrigQty END
 		,UM.strUnitMeasure
