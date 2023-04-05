@@ -138,6 +138,7 @@ IF @ysnDetailedFormatLocal = 0
 			WHERE ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormat
 		) C ON SSC.intEntityCustomerId = C.intEntityId
 		WHERE intEntityUserId = @intEntityUserId
+		AND Cast(SSC.dblARBalance as varchar) != CASE WHEN @ysnPrintZeroBalance = 0 THEN '0.000000' ELSE '' END
 		ORDER BY SSC.strCustomerName
 	END
 ELSE
@@ -145,5 +146,6 @@ ELSE
 		SELECT SSC.*
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
 		WHERE intEntityUserId = @intEntityUserId
+		AND Cast(SSC.dblARBalance as varchar) != CASE WHEN @ysnPrintZeroBalance = 0 THEN '0.000000' ELSE '' END
 		ORDER BY SSC.strCustomerName
 	END
