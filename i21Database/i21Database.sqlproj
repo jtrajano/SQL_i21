@@ -11946,6 +11946,12 @@
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
     <None Include="Scripts\Post-Deployment\MF\14_ImportTypeDefaultValue.sql" />
+    <Build Include="dbo\Views\vyuCTContractHeaderViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractDetailViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractAmendmentViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailViewBU.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
