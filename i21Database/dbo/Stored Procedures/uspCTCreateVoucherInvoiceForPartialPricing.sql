@@ -1650,18 +1650,6 @@ BEGIN TRY
 
 							END
 
-							if (isnull(@ysnDestinationWeightsGrades,0) = 1)
-							begin
-								exec uspARUpdateOverageContracts
-									  @intInvoiceId = @intNewInvoiceId
-									, @intScaleUOMId = default
-									, @intUserId = @intUserId
-									, @dblNetWeight =  default
-									, @ysnFromSalesOrder =  default
-									, @ysnFromImport =  default
-									, @dblSpotPrice =  default
-							end
-
 							--Update the load applied and priced
 							IF @ysnLoad = 1
 							BEGIN
