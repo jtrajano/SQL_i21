@@ -11837,6 +11837,12 @@
     <Build Include="dbo\Views\vyuARZugInvoiceDetailView.sql" />
     <Build Include="dbo\Views\vyuCTGetQualityCodes.sql" />
     <Build Include="dbo\Views\vyuQMPreEvaluationSheetReport.sql" />
+    <Build Include="dbo\Views\vyuCTContractHeaderViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractDetailViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractAmendmentViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailViewBU.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
