@@ -7980,7 +7980,6 @@
     <Build Include="dbo\Tables\tblPRTypeTaxStatePSDCode.sql" />
     <Build Include="dbo\Views\vyuCRMLostRevenueSalesperson.sql" />
     <Build Include="dbo\Functions\fnGLGetCMGLDetailBalance.sql" />
-    fnGFiscalPeriodExists
     <Build Include="dbo\Functions\fnGLGetCommonSettings.sql" />
     <Build Include="dbo\Views\vyuSMBEExportCashDiscount.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetail.sql" />
