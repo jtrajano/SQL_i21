@@ -89,7 +89,7 @@ BEGIN
 				--Cannot continue if Module status in fiscal year period is closed (CM,AR,INV,AP)
 				UNION ALL
 				SELECT strTransactionId
-						,GLEntries.strModuleName strText
+						,strModuleName strText
 						,60018 intErrorCode
 						,strModuleName
 				FROM @GLEntriesToValidate 
