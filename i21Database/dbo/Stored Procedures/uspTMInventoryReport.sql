@@ -10,7 +10,7 @@ BEGIN
 	CREATE TABLE #tempInventoryReport(
 		[Id] INT IDENTITY(1, 1) primary key 
 		,[dblFullPercent] varchar(50)
-		--,[dblFullPercent] DECIMAL(18,1)
+		,[dblFullPercentForOrder] DECIMAL(18,1)
         ,[strLocation] varchar(200)
         ,[strSiteNumber] varchar(50)
         ,[strProduct] varchar(200)
@@ -68,18 +68,18 @@ BEGIN
 
 		--SELECT (TM.dblFuelVolume) FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId
 
-		SET @dblFullPercent = CASE WHEN @dblTotalCapacity = 0 THEN @dblGrossVolume ELSE @dblGrossVolume/@dblTotalCapacity END
+		SET @dblFullPercent = CASE WHEN @dblTotalCapacity = 0 THEN @dblGrossVolume ELSE (@dblGrossVolume/@dblTotalCapacity) * 100 END
 	
 		SELECT @dblWaterHeight = TM.dblWaterHeight FROM tblTMSite A INNER JOIN tblTMTankReading TM ON TM.intSiteId = A.intSiteID where TM.intSiteId = @intSiteId order by TM.intTankReadingId desc
 		print @strSiteNumber
 		INSERT INTO #tempInventoryReport
-					(dblFullPercent,strLocation,strSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblWaterHeight)VALUES
-					(CAST(@dblFullPercent AS varchar),@strLocationName,@strSiteNumber,@strProduct,@dtmLastInventoryTime,@dblGrossVolume,@dblNetVolume,@dblUllage,@dblTotalCapacity,@dblWaterHeight)
+					(dblFullPercent,dblFullPercentForOrder,strLocation,strSiteNumber,strProduct,dtmLastInventoryTime,dblGrossVolume,dblNetVolume,dblUllage,dblTotalCapacity,dblWaterHeight)VALUES
+					(CAST(@dblFullPercent AS varchar),@dblFullPercent,@strLocationName,@strSiteNumber,@strProduct,@dtmLastInventoryTime,@dblGrossVolume,@dblNetVolume,@dblUllage,@dblTotalCapacity,@dblWaterHeight)
 
 	 FETCH NEXT FROM DataCursor INTO @intSiteId
     END
     CLOSE DataCursor
 	DEALLOCATE DataCursor
 
-	select * from #tempInventoryReport
+	select * from #tempInventoryReport order by dblFullPercentForOrder
 END
