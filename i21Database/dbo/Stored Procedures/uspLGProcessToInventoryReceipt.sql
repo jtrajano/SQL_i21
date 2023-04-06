@@ -284,7 +284,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = CV.intLoadCostId
 			,[ysnLock] = CASE WHEN (VCHR.intBillId IS NOT NULL AND VCHR.ysnPosted = 1) THEN 1 ELSE 0 END
 			,[ysnWithGLReversal] = 1 -- CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
-			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END
+			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NULL) THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -998,7 +998,7 @@ BEGIN TRY
 			,[dblForexRate] = CV.dblFX
 			,[ysnLock] = CASE WHEN (VCHR.intBillId IS NOT NULL AND VCHR.ysnPosted = 1) THEN 1 ELSE 0 END
 			,[ysnWithGLReversal] = 1 --CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
-			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END
+			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NULL) THEN 1 ELSE 0 END
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
