@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFUndoStageWorkOrder 
+﻿CREATE PROCEDURE [dbo].[uspMFUndoStageWorkOrder] 
 (
 	@strXML NVARCHAR(MAX)
 )
@@ -71,6 +71,7 @@ BEGIN TRY
 		  , @intDestinationLotId		INT
 		  , @intMainItemId				INT
 		  , @dblLotQuantity				NUMERIC(38, 20)
+		  , @intEnteredUOMId			INT
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
@@ -86,6 +87,7 @@ BEGIN TRY
 		 , @intDestinationLotId		= intDestinationLotId
 		 , @intMainItemId			= intMainItemId
 		 , @dblLotQuantity			= dblLotQuantity
+		 , @intEnteredUOMId			= intEnteredItemUOMId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
@@ -210,7 +212,6 @@ BEGIN TRY
 					SELECT @dblAdjustByQuantity = -@dblAdjustWeight / @dblWeightPerQty
 						 , @intNewItemUOMId		= @intItemUOMId
 				END
-			/* End of if the Stage Quantity is divisible by Weight Per Qty. */
 
 			IF NOT EXISTS (SELECT *
 						   FROM tblICLot
@@ -247,10 +248,38 @@ BEGIN TRY
 														   , @dblNewUnitCost			= NULL
 														   , @intItemUOMId				= @intNewItemUOMId
 														   /* Parameters used for linking or FK (foreign key) relationships. */
-														   , @intSourceId				= 1
+														   , @intSourceId				= @intWorkOrderId
 														   , @intSourceTransactionTypeId = 8
 														   , @intEntityUserSecurityId	= @intUserId
 														   , @intInventoryAdjustmentId	= @intInventoryAdjustmentId OUTPUT
+
+			IF @dblNewWeight > @dblLotQuantity AND ISNULL(@dblLotQuantity, 0) > 0
+				BEGIN
+
+					/* Retrieve and negate excess stage qty. */
+					DECLARE @dblExcessStageQty NUMERIC(38, 20) = -(@dblNewWeight - @dblLotQuantity)
+
+					/* Remove excess stage lot.
+					 * Reverting Quantity to original stock before item was staged.
+					*/
+					EXEC [uspICInventoryAdjustment_CreatePostQtyChange] @intItemId					= @intInputItemId
+																	  , @dtmDate					= NULL
+																	  , @intLocationId				= @intLocationId
+																	  , @intSubLocationId			= @intSubLocationId
+																	  , @intStorageLocationId		= @intStorageLocationId
+																	  , @strLotNumber				= @strLotNumber
+																	  -- Parameters for the new values: 
+																	  , @dblAdjustByQuantity		= @dblExcessStageQty
+																	  , @dblNewUnitCost				= NULL
+																	  , @intItemUOMId				= @intEnteredUOMId
+																	  -- Parameters used for linking or FK (foreign key) relationships
+																	  , @intSourceId				= @intWorkOrderId
+																	  , @intSourceTransactionTypeId = 8
+																	  , @intEntityUserSecurityId	= @intUserId
+																	  , @intInventoryAdjustmentId	= @intInventoryAdjustmentId OUTPUT
+																	  , @strDescription				= @strWorkOrderNo
+				END
+			
 		END
 		/* End of Lot Track post Inventory Adjustment Lot Merge. */
 	ELSE
@@ -279,9 +308,9 @@ BEGIN TRY
 
 	/* Set Work Order Stage Line to Reversed.  */
 	UPDATE tblMFWorkOrderInputLot
-	SET ysnConsumptionReversed = 1
-	  , dtmLastModified = @dtmCurrentDateTime
-	  , intLastModifiedUserId = @intUserId
+	SET ysnConsumptionReversed	= 1
+	  , dtmLastModified			= @dtmCurrentDateTime
+	  , intLastModifiedUserId	= @intUserId
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 	SELECT @intRecipeItemUOMId = ISNULL(RI.intItemUOMId, 
