@@ -27,6 +27,31 @@ AS
 		,intContractSeq int
 	);
 
+	declare @BasisCost table (
+		intConcurrencyId int
+		,intPrevConcurrencyId int
+		,intContractDetailId int
+		,intItemId int
+		,strCostMethod nvarchar(100)
+		,intCurrencyId int
+		,dblRate numeric(18,6)
+		,intItemUOMId int
+		,ysnAccrue bit
+		,ysnMTM bit
+		,ysnPrice bit
+		,ysnAdditionalCost bit
+		,ysnBasis bit
+		,ysnReceivable bit
+		,ysn15DaysFromShipment bit
+		,dblAccruedAmount numeric(18,6)
+		,ysnFromBasisComponent bit
+		,ysnUnforcasted bit
+		,strContractNumber nvarchar(100)
+		,intContractSeq int
+		,strBasisUnitOfMeasure nvarchar(100)
+		,strBasisCost nvarchar(100)
+	);
+
 	DECLARE @XML NVARCHAR(MAX)
 	DECLARE @intContractHeaderId INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -48,6 +73,11 @@ AS
 		,@strCertificationIdName nvarchar(max)
 		,@strActiveCertificationIdName nvarchar(100)
 		,@intCertificationId int
+		,@ysnBasisComponent bit = 0
+		,@strBasisCostContractNumber nvarchar(100)
+		,@intBasisCostContractSeq int
+		,@strBasisCostUnitOfMeasure nvarchar(100)
+		,@strBasisCost nvarchar(100)
 		;
 		
 		DECLARE @intContractImportId INT
@@ -456,7 +486,7 @@ AS
 					,dblHistoricalRate = CI.dblHistoricRate
 					,intHistoricalRateTypeId = ert.intCurrencyExchangeRateTypeId
 					,intBasisUOMId = puom.intItemUOMId
-					,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,MA.intUnitMeasureId, MA.dblContractSize)
+					,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,MA.intUnitMeasureId,IU.intUnitMeasureId, MA.dblContractSize)
 					,cp.intCurrencyExchangeRateId
 					,intMarketUOMId = MA.intUnitMeasureId
 					,intItemItemUOMId = MAUOM.intUnitMeasureId
@@ -1073,6 +1103,139 @@ AS
 							cd.intContractHeaderId = @intContractHeaderId
 					end
 
+					set @ysnBasisComponent = 0;
+					select @ysnBasisComponent = case when @intContractTypeId = 1 then isnull(ysnBasisComponentPurchase,0) else isnull(ysnBasisComponentSales,0) end from tblCTCompanyPreference;
+					if (@ysnBasisComponent = 1)
+					begin
+						if not exists (select top 1 1 from tblCTBasisCost)
+						begin
+							set @ErrMsg = 'No available Basis Cost for ' + case when @intContractTypeId = 1 then 'purchase contract.' else 'sale contract.' end;
+							RAISERROR(@ErrMsg, 16, 1)
+						end
+
+						delete @BasisCost;
+
+						insert @BasisCost(
+							intConcurrencyId
+							,intPrevConcurrencyId
+							,intContractDetailId
+							,intItemId
+							,strCostMethod
+							,intCurrencyId
+							,dblRate
+							,intItemUOMId
+							,ysnAccrue
+							,ysnMTM
+							,ysnPrice
+							,ysnAdditionalCost
+							,ysnBasis
+							,ysnReceivable
+							,ysn15DaysFromShipment
+							,dblAccruedAmount
+							,ysnFromBasisComponent
+							,ysnUnforcasted
+
+							,strContractNumber
+							,intContractSeq
+							,strBasisUnitOfMeasure
+							,strBasisCost
+						)
+						select
+							intConcurrencyId = 1
+							,intPrevConcurrencyId = 0
+							,intContractDetailId = cd.intContractDetailId
+							,intItemId = bc.intItemId
+							,strCostMethod = bc.strCostMethod
+							,intCurrencyId = cd.intCurrencyId
+							,dblRate = cd.dblBasis
+							,intItemUOMId = uom.intItemUOMId
+							,ysnAccrue = 0
+							,ysnMTM = 0
+							,ysnPrice = 0
+							,ysnAdditionalCost = 0
+							,ysnBasis = 1
+							,ysnReceivable = 0
+							,ysn15DaysFromShipment = 0
+							,dblAccruedAmount = 0
+							,ysnFromBasisComponent = 1
+							,ysnUnforcasted = 0
+
+							,strContractNumber = @strContractNumber
+							,cd.intContractSeq
+							,strBasisUnitOfMeasure = um.strUnitMeasure
+							,strBasisCost = bc.strItemNo
+						from tblCTContractDetail cd
+						outer apply (select top 1 * from tblCTBasisCost order by intSort) bc
+						left join tblICItemUOM buom on buom.intItemUOMId = cd.intBasisUOMId
+						left join tblICUnitMeasure um on um.intUnitMeasureId = buom.intUnitMeasureId
+						left join tblICItemUOM uom on uom.intItemId = bc.intItemId and uom.intUnitMeasureId = buom.intUnitMeasureId
+						where cd.intContractHeaderId = @intContractHeaderId and isnull(cd.dblBasis,0) <> 0;
+
+						select
+							@strBasisCostContractNumber = null
+							,@intBasisCostContractSeq = null
+							,@strBasisCostUnitOfMeasure = null
+							,@strBasisCost = null
+
+						select top 1
+							@strBasisCostContractNumber = strContractNumber
+							,@intBasisCostContractSeq = intContractSeq
+							,@strBasisCostUnitOfMeasure = strBasisUnitOfMeasure
+							,@strBasisCost = strBasisCost
+						from
+							@BasisCost
+						where
+							isnull(intItemUOMId,0) = 0;
+
+						if (isnull(@strBasisCostContractNumber,'') <> '')
+						begin
+							set @ErrMsg = 'Basis Cost: ' + @strBasisCostUnitOfMeasure + ' UOM does not exists in ' + @strBasisCost + ' Basis Cost for contract ' + @strBasisCostContractNumber + '-' + convert(nvarchar(20),@intBasisCostContractSeq) + '.';
+							RAISERROR(@ErrMsg, 16, 1)
+						end
+
+						insert into tblCTContractCost (
+							intConcurrencyId
+							,intPrevConcurrencyId
+							,intContractDetailId
+							,intItemId
+							,strCostMethod
+							,intCurrencyId
+							,dblRate
+							,intItemUOMId
+							,ysnAccrue
+							,ysnMTM
+							,ysnPrice
+							,ysnAdditionalCost
+							,ysnBasis
+							,ysnReceivable
+							,ysn15DaysFromShipment
+							,dblAccruedAmount
+							,ysnFromBasisComponent
+							,ysnUnforcasted
+						)
+						select
+							intConcurrencyId
+							,intPrevConcurrencyId
+							,intContractDetailId
+							,intItemId
+							,strCostMethod
+							,intCurrencyId
+							,dblRate
+							,intItemUOMId
+							,ysnAccrue
+							,ysnMTM
+							,ysnPrice
+							,ysnAdditionalCost
+							,ysnBasis
+							,ysnReceivable
+							,ysn15DaysFromShipment
+							,dblAccruedAmount
+							,ysnFromBasisComponent
+							,ysnUnforcasted
+						from
+							@BasisCost
+
+					end
 
 					UPDATE tblCTContractHeader
 					SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
