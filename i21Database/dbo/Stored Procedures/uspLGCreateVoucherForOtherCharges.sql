@@ -343,9 +343,10 @@ BEGIN TRY
 				,[intCurrencyExchangeRateTypeId] = VDD.intCurrencyExchangeRateTypeId
 				,[ysnSubCurrency] = CUR.ysnSubCurrency
 				,[intSubCurrencyCents] = CUR.intCent
-				,[intAccountId] = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND VDD.ysnAccrue = 1 AND VDD.intVendorEntityId IS NOT NULL) 
-					THEN dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'AP Clearing') 
-					ELSE dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'Other Charge Expense') END
+				,[intAccountId] = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND VDD.ysnAccrue = 1 AND VDD.intVendorEntityId IS NOT NULL)
+										OR (ISNULL(LC.ysnInventoryCost, 0) = 1 AND VDD.ysnAccrue = 1)
+									THEN dbo.fnGetItemGLAccount(VDD.intItemId, IL.intItemLocationId, 'AP Clearing') 
+									ELSE dbo.fnGetItemGLAccount(VDD.intItemId, IL.intItemLocationId, 'Other Charge Expense') END
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
 				,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
@@ -355,7 +356,9 @@ BEGIN TRY
 				INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
 				INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
+				INNER JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId AND IL.intLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+				LEFT JOIN tblLGLoadCost LC ON LC.intLoadCostId = VDD.intLoadCostId
 				OUTER APPLY tblLGCompanyPreference CP
 				OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 				OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC

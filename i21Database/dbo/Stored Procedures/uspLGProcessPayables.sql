@@ -262,6 +262,7 @@ BEGIN
 							A.intItemId,
 							ItemLoc.intItemLocationId,
 							CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL)
+									OR ISNULL(A.ysnInventoryCost, 0) = 1
 							THEN 'AP Clearing'
 							ELSE 'Other Charge Expense' 
 							END) itemAccnt
