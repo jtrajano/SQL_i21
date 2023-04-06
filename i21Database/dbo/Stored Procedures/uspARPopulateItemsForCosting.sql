@@ -135,13 +135,15 @@ LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARID.[intLoadId]
 LEFT OUTER JOIN 
-	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
+	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [ysnDestinationWeightGradePost], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN(
-	SELECT intUnitMeasureId, intItemUOMId, ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+	SELECT intUnitMeasureId, intItemUOMId FROM tblICItemUOM ICUOM  WITH (NOLOCK)
 	INNER JOIN tblICItem ITEM ON ICUOM.intItemId = ITEM.intItemId
 ) ICIUOM
 ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+LEFT JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
+LEFT JOIN tblICCommodity COM ON ITEM.intCommodityId = COM.intCommodityId
 CROSS APPLY (
 	SELECT intItemUOMId 
 	FROM tblICItemUOM WITH (NOLOCK)
@@ -170,6 +172,7 @@ WHERE
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))))
 	--AND ISNULL(T.[intTicketTypeId], 0) <> 9
+	AND (ARID.intTicketId IS NULL OR (ARID.intTicketId IS NOT NULL AND ((T.ysnDestinationWeightGradePost = 1 AND ISNULL(COM.intAdjustInventorySales, 0) <> 2) OR ISNULL(T.ysnDestinationWeightGradePost, 0) = 0)))
 
 --Bundle Items
 INSERT INTO ##ARItemsForCosting
