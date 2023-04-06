@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARSearchStatementsCustomer]
+﻿ALTER PROCEDURE [dbo].[uspARSearchStatementsCustomer]
 (
 	 @strStatementFormat			NVARCHAR(50)  
 	,@strAsOfDate					NVARCHAR(50) 
@@ -116,8 +116,7 @@ OUTER APPLY (
 		AND ISNULL(CC.strEmail, '') <> '' 
 		AND CC.strEmailDistributionOption LIKE '%Statements%'
 ) EMAILSETUP
-WHERE (@ysnPrintZeroBalance = 1 OR (@ysnPrintZeroBalance = 0 AND ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0) <> 0 ))
-  AND (@ysnPrintCreditBalanceLocal = 1 OR (@ysnPrintCreditBalanceLocal = 0 AND ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0) > 0))
+WHERE (@ysnPrintCreditBalanceLocal = 1 OR (@ysnPrintCreditBalanceLocal = 0 AND ISNULL(AGING.dblTotalAR, 0) + ISNULL(BUDGET.dblAmountDue, 0) > 0))
   AND (@ysnDetailedFormatLocal = 0 AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')) OR @ysnDetailedFormatLocal = 1
   
 IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
@@ -126,6 +125,13 @@ IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
 		WHERE intEntityUserId = @intEntityUserId
 		  AND intEntityCustomerId NOT IN (SELECT intEntityId FROM dbo.tblARCustomer WITH (NOLOCK) 
 										  WHERE dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId) LIKE '%' + @strAccountStatusCodeLocal + '%')
+	END
+
+IF ISNULL(@ysnPrintZeroBalance, 0) = 0
+	BEGIN
+		DELETE FROM tblARSearchStatementCustomer
+		WHERE intEntityUserId = @intEntityUserId
+		  AND dblARBalance = 0
 	END
 
 IF @ysnDetailedFormatLocal = 0
@@ -138,7 +144,6 @@ IF @ysnDetailedFormatLocal = 0
 			WHERE ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormat
 		) C ON SSC.intEntityCustomerId = C.intEntityId
 		WHERE intEntityUserId = @intEntityUserId
-		AND Cast(SSC.dblARBalance as varchar) != CASE WHEN @ysnPrintZeroBalance = 0 THEN '0.000000' ELSE '' END
 		ORDER BY SSC.strCustomerName
 	END
 ELSE
@@ -146,6 +151,5 @@ ELSE
 		SELECT SSC.*
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
 		WHERE intEntityUserId = @intEntityUserId
-		AND Cast(SSC.dblARBalance as varchar) != CASE WHEN @ysnPrintZeroBalance = 0 THEN '0.000000' ELSE '' END
 		ORDER BY SSC.strCustomerName
 	END
