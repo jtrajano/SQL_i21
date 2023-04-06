@@ -4,83 +4,103 @@
 	)
 AS
 BEGIN TRY
-	DECLARE @idoc							INT
-		  , @ErrMsg							NVARCHAR(MAX)
-		  , @intLocationId					INT
-		  , @intSubLocationId				INT
-		  , @intManufacturingProcessId		INT
-		  , @intMachineId					INT
-		  , @intWorkOrderId					INT
-		  , @dtmPlannedDate					DATETIME
-		  , @intPlannedShiftId				INT
-		  , @intItemId						INT
-		  , @intStorageLocationId			INT
-		  , @intInputLotId					INT
-		  , @intInputItemId					INT
-		  , @dblWeight						NUMERIC(38, 20)
-		  , @dblInputWeight					NUMERIC(38, 20)
-		  , @dblReadingQuantity				NUMERIC(38, 20)
-		  , @intInputWeightUOMId			INT
-		  , @intUserId						INT
-		  , @ysnEmptyOut					BIT
-		  , @intContainerId					INT
-		  , @strReferenceNo					NVARCHAR(50)
-		  , @dtmActualInputDateTime			DATETIME
-		  , @intShiftId						INT
-		  , @intNegativeQuantityAllowed		INT
-		  , @ysnExcessConsumptionAllowed	BIT
-		  , @strItemNo						NVARCHAR(50)
-		  , @strInputItemNo					NVARCHAR(50)
-		  , @intConsumptionMethodId			INT
-		  , @intConsumptionStorageLocationId INT
-		  , @dblDefaultResidueQty			NUMERIC(38, 20)
-		  , @dblNewWeight					NUMERIC(38, 20)
-		  , @intDestinationLotId			INT
-		  , @strLotNumber					NVARCHAR(50)
-		  , @strLotTracking					NVARCHAR(50)
-		  , @intItemLocationId				INT
-		  , @dtmCurrentDateTime				DATETIME
-		  , @dblAdjustByQuantity			NUMERIC(18, 6)
-		  , @intInventoryAdjustmentId		INT
-		  , @intNewItemUOMId				INT
-		  , @dblWeightPerQty				NUMERIC(18, 6)
-		  , @strDestinationLotNumber		NVARCHAR(50)
-		  , @intConsumptionSubLocationId	INT
-		  , @intWeightUOMId					INT
-		  , @intTransactionCount			INT
-		  , @strWorkOrderNo					NVARCHAR(50)
-		  , @strProcessName					NVARCHAR(50)
-		  , @dtmBusinessDate				DATETIME
-		  , @intBusinessShiftId				INT
-		  , @strInventoryTracking			NVARCHAR(50)
-		  , @intProductionStagingId			INT
-		  , @intProductionStageLocationId	INT
-		  , @intCategoryId					INT
-		  , @intItemTypeId					INT
-		  , @ItemsToReserve					dbo.ItemReservationTableType
-		  , @intInventoryTransactionType	INT = 8
-		  , @intAdjustItemUOMId				INT
-		  , @intRecipeItemUOMId				INT
-		  , @dblEnteredQty					NUMERIC(38, 20)
-		  , @intEnteredItemUOMId			INT
-		  , @intItemStockUOMId				INT
-		  , @strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
-		  , @intOrderHeaderId				INT
-		  , @dblQty							NUMERIC(38, 20)
-		  , @strErr							NVARCHAR(MAX)
-		  , @intSwapToWorkOrderId			INT
-		  , @intSwapToLotId					INT
-		  , @intSwapToOrderHeaderId			INT
-		  , @strSwapToWorkOrderNo			NVARCHAR(50)
-		  , @intRecordId					INT
-		  , @dblSwapToQty					NUMERIC(18, 6)
-		  , @dblLotQty						NUMERIC(38, 20)
-		  , @dblReservedQty					NUMERIC(18, 6)
-		  , @dblInputWeight2				NUMERIC(18, 6)
-		  , @dblRequiredQty					NUMERIC(18, 6)
-		  , @dblSwapToQty2					NUMERIC(18, 6)
-		  , @intMainItemId					INT
-		  , @intWorkOrderStatusId			INT
+	DECLARE @idoc INT
+		,@ErrMsg NVARCHAR(MAX)
+		,@intLocationId INT
+		,@intSubLocationId INT
+		,@intManufacturingProcessId INT
+		,@intMachineId INT
+		,@intWorkOrderId INT
+		,@dtmPlannedDate DATETIME
+		,@intPlannedShiftId INT
+		,@intItemId INT
+		,@intStorageLocationId INT
+		,@intInputLotId INT
+		,@intInputItemId INT
+		,@dblWeight NUMERIC(38, 20)
+		,@dblInputWeight NUMERIC(38, 20)
+		,@dblReadingQuantity NUMERIC(38, 20)
+		,@intInputWeightUOMId INT
+		,@intUserId INT
+		,@ysnEmptyOut BIT
+		,@intContainerId INT
+		,@strReferenceNo NVARCHAR(50)
+		,@dtmActualInputDateTime DATETIME
+		,@intShiftId INT
+		,@ysnNegativeQuantityAllowed BIT
+		,@ysnExcessConsumptionAllowed BIT
+		,@strItemNo NVARCHAR(50)
+		,@strInputItemNo NVARCHAR(50)
+		,@intConsumptionMethodId INT
+		,@intConsumptionStorageLocationId INT
+		,@dblDefaultResidueQty NUMERIC(38, 20)
+		,@dblNewWeight NUMERIC(38, 20)
+		,@intDestinationLotId INT
+		,@strLotNumber NVARCHAR(50)
+		,@strLotTracking NVARCHAR(50)
+		,@intItemLocationId INT
+		,@dtmCurrentDateTime DATETIME
+		,@dblAdjustByQuantity NUMERIC(18, 6)
+		,@intInventoryAdjustmentId INT
+		,@intNewItemUOMId INT
+		,@dblWeightPerQty NUMERIC(18, 6)
+		,@strDestinationLotNumber NVARCHAR(50)
+		,@intConsumptionSubLocationId INT
+		,@intWeightUOMId INT
+		,@intTransactionCount INT
+		,@strWorkOrderNo NVARCHAR(50)
+		,@strProcessName NVARCHAR(50)
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
+		,@intManufacturingCellId INT
+		,@strInventoryTracking NVARCHAR(50)
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
+		,@intCategoryId INT
+		,@intItemTypeId INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 8
+		,@intAdjustItemUOMId INT
+		,@intRecipeItemUOMId INT
+		,@dblEnteredQty NUMERIC(38, 20)
+		,@intEnteredItemUOMId INT
+		,@intItemStockUOMId INT
+		,@strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
+		,@intOrderHeaderId INT
+		,@dblQty NUMERIC(38, 20)
+		,@strErr NVARCHAR(MAX)
+		,@intSwapToWorkOrderId INT
+		,@intSwapToLotId INT
+		,@intSwapToOrderHeaderId INT
+		,@strSwapToWorkOrderNo NVARCHAR(50)
+		,@intRecordId INT
+		,@dblSwapToQty NUMERIC(18, 6)
+		,@dblLotQty NUMERIC(38, 20)
+		,@dblReservedQty NUMERIC(18, 6)
+		,@dblInputWeight2 NUMERIC(18, 6)
+		,@dblRequiredQty NUMERIC(18, 6)
+		,@dblSwapToQty2 NUMERIC(18, 6)
+		,@intMainItemId INT
+	DECLARE @tblMFSwapto TABLE (
+		intSwapTo INT identity(1, 1)
+		,intWorkOrderId INT
+		,strWorkOrderNo NVARCHAR(50)
+		,dblQty NUMERIC(18, 6)
+		)
+	DECLARE @tblMFReservation TABLE (
+		intRecordId INT identity(1, 1)
+		,intWorkOrderId INT
+		,strWorkOrderNo NVARCHAR(50)
+		,dblQty NUMERIC(18, 6)
+		)
+	DECLARE @tblMFLot TABLE (
+		intSwapToLotId INT
+		,dblQty NUMERIC(38, 20)
+		)
+	DECLARE @tblMFPickedLot TABLE (
+		intLotId INT
+		,dblQty NUMERIC(38, 20)
+		)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -233,8 +253,8 @@ BEGIN TRY
 		END
 	END
 
-	SELECT TOP 1 @strWorkOrderNo		= strWorkOrderNo
-			   , @intWorkOrderStatusId  = intStatusId
+	SELECT TOP 1 --@dtmPlannedDate = dtmPlannedDate
+		@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -265,1044 +285,1134 @@ BEGIN TRY
 		END
 	END
 
-	/* Retrieve Producation Staging Location/Unit. */
-	SELECT @intProductionStageLocationId = ISNULL(intProductionStagingLocationId, 
-												 (
-													SELECT strAttributeValue		
-													FROM vyuMFProcessAttributeDetail
-													WHERE intManufacturingProcessId = @intManufacturingProcessId
-													  AND intLocationId			    = @intLocationId
-													  AND strAttributeName		    = 'Production Staging Location'
-												  ))
+	SELECT @intProductionStageLocationId = intProductionStagingLocationId
 	FROM tblMFManufacturingProcessMachine
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
-	  AND intMachineId				= @intMachineId
+		AND intMachineId = @intMachineId
 
+	IF @intProductionStageLocationId IS NULL
+	BEGIN
+		SELECT @intProductionStagingId = intAttributeId
+		FROM tblMFAttribute
+		WHERE strAttributeName = 'Production Staging Location'
 
-	SELECT @intConsumptionMethodId			= RI.intConsumptionMethodId
-		 , @intConsumptionStorageLocationId = CASE WHEN RI.intConsumptionMethodId = 1 THEN @intProductionStageLocationId
-												   ELSE RI.intStorageLocationId
-											  END
-		 , @intItemTypeId					= CASE WHEN RS.intSubstituteItemId IS NOT NULL AND RS.intSubstituteItemId = @intInputItemId THEN 3
-												   ELSE 1
-											  END
+		SELECT @intProductionStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = @intProductionStagingId
+	END
+
+	SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
+		,@intConsumptionStorageLocationId = CASE 
+			WHEN RI.intConsumptionMethodId = 1
+				THEN @intProductionStageLocationId
+			ELSE RI.intStorageLocationId
+			END
+		,@intItemTypeId = (
+			CASE 
+				WHEN RS.intSubstituteItemId IS NOT NULL
+					AND RS.intSubstituteItemId = @intInputItemId
+					THEN 3
+				ELSE 1
+				END
+			)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
-	WHERE RI.intWorkOrderId			= @intWorkOrderId
-	  AND RI.intRecipeItemTypeId	= 1 /* Input Item Recipe. */
-	  AND (RI.intItemId = @intInputItemId OR RS.intSubstituteItemId = @intInputItemId)
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND RI.intRecipeItemTypeId = 1
+		AND (
+			RI.intItemId = @intInputItemId
+			OR RS.intSubstituteItemId = @intInputItemId
+			)
 
 	SELECT @intConsumptionSubLocationId = intSubLocationId
 	FROM dbo.tblICStorageLocation
 	WHERE intStorageLocationId = @intConsumptionStorageLocationId
 
-	/* Validate if Input Item is part of Recipe. */
-	IF @intInputItemId IS NULL OR @intInputItemId = 0
-		BEGIN
-			/* Recipe Item. */
-			SELECT @strItemNo = strItemNo
-			FROM dbo.tblICItem
-			WHERE intItemId = @intItemId
+	IF @intInputItemId IS NULL
+		OR @intInputItemId = 0
+	BEGIN
+		SELECT @strItemNo = strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
 
-			/* Recipe Item. */
-			SELECT @strInputItemNo = strItemNo
-			FROM dbo.tblICItem
-			WHERE intItemId = @intInputItemId
+		SELECT @strInputItemNo = strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId = @intInputItemId
 
-			RAISERROR 
-			(
-				'''%s'' is not part of Recipes Input Item for ''%s'' , Cannot proceed.'
-			  , 14
-			  , 1
-			  , @strInputItemNo
-			  , @strItemNo
+		RAISERROR (
+				'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
+				,14
+				,1
+				,@strInputItemNo
+				,@strItemNo
+				)
+	END
+
+	IF @intConsumptionMethodId = 1
+		AND (
+			@intConsumptionStorageLocationId IS NULL
+			OR @intConsumptionStorageLocationId = 0
 			)
-		END
-	/* End of Validate if Input Item is part of Recipe. */
+	BEGIN
+		RAISERROR (
+				'No mapped staging location found, cannot stage.'
+				,14
+				,1
+				)
+	END
 
-	/* Validation if there is Staging Location Setup. */
-	IF @intConsumptionMethodId = 1 AND (@intConsumptionStorageLocationId IS NULL OR @intConsumptionStorageLocationId = 0)
-		BEGIN
-			RAISERROR 
-			(
-				'No Staging Location setup found. Check Manufacturing Process, Machine and Storage Location.'
-			  , 14
-			  , 1
-			)
-		END
-	/* End of Validation if there is Staging Location Setup. */
-	
-	/* Validate if Manufacturing Process is associate/part of Work Order. */
-	IF NOT EXISTS (SELECT * FROM dbo.tblMFWorkOrder WHERE intWorkOrderId = @intWorkOrderId AND intManufacturingProcessId = @intManufacturingProcessId)
-		BEGIN
-			SELECT @strWorkOrderNo			= strWorkOrderNo
-			FROM dbo.tblMFWorkOrder
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrder W
 			WHERE intWorkOrderId = @intWorkOrderId
-
-			SELECT @strProcessName = strProcessName
-			FROM dbo.tblMFManufacturingProcess
-			WHERE intManufacturingProcessId = @intManufacturingProcessId
-
-			RAISERROR 
-			(
-				'Work Order ''%s'' is not associated on the Manufacturing Process ''%s'' .'
-			  , 11
-			  , 1
-			  , @strWorkOrderNo
-			  , @strProcessName
+				AND intManufacturingProcessId = @intManufacturingProcessId
 			)
-		END
-	/* End of Validate if Manufacturing Process is associate/part of Work Order. */
+	BEGIN
+		SELECT @strWorkOrderNo = strWorkOrderNo
+			,@intManufacturingCellId = intManufacturingCellId
+		FROM dbo.tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
 
+		SELECT @strProcessName = strProcessName
+		FROM dbo.tblMFManufacturingProcess
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
 
-	/* Validate if Work Order can be still process based on Status. */
-	IF (@intWorkOrderStatusId = 13)
-		BEGIN
-			RAISERROR 
-			(
-				'Work Order already Completed.'
-			  , 11
-			  , 1
-			)
-		END
-	ELSE IF (@intWorkOrderStatusId = 11)
-		BEGIN
-			RAISERROR 
-			(
-				'Work Order currently Paused. Please re-start the Work Order.'
-			  , 11
-			  , 1
-			)
-		END
-	ELSE IF (@intWorkOrderStatusId <> 10)
-		BEGIN
-			RAISERROR 
-			(
-				'Work Order is not Started yet.'
-			  , 11
-			  , 1
-			)
-		END
+		RAISERROR (
+				'Lot %s you are trying to consume for Work order %s is not associated with the selected process %s.'
+				,11
+				,1
+				,@strLotNumber
+				,@strWorkOrderNo
+				,@strProcessName
+				)
+	END
 
-	SELECT @strMultipleMachinesShareCommonStagingLocation = ISNULL(strAttributeValue, 'False')
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrder W
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND W.intStatusId = 13
+			)
+	BEGIN
+		RAISERROR (
+				'The work order that you clicked on is already completed.'
+				,11
+				,1
+				)
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrder W
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND W.intStatusId = 11
+			)
+	BEGIN
+		RAISERROR (
+				'The work order has been paused. Please re-start the WO to resume.'
+				,11
+				,1
+				)
+	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrder W
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND W.intStatusId = 10
+			)
+	BEGIN
+		RAISERROR (
+				'Work order is not in started state. Please start the work order.'
+				,11
+				,1
+				)
+	END
+
+	SELECT @strMultipleMachinesShareCommonStagingLocation = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
-	  AND intLocationId = @intLocationId
-	  AND intAttributeId = 102 /* Multiple machines share common staging location. */	
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 102 --Multiple machines share common staging location
 
+	IF @strMultipleMachinesShareCommonStagingLocation IS NULL
+	BEGIN
+		SELECT @strMultipleMachinesShareCommonStagingLocation = 'False'
+	END
 
-	SELECT @dblReservedQty = ISNULL(dblWeight, 0)
+	--*************************************
+	-- Reservation validation
+	--*************************************
+	SELECT @dblReservedQty = dblQty
 	FROM vyuMFStockReservationByWorkOrder
 	WHERE intWorkOrderId <> @intWorkOrderId
-	  AND intLotId		  = @intInputLotId
+		AND intLotId = @intInputLotId
 
-	/* Validate Lot by checking Stock Reservation. */
-	IF @dblInputWeight > @dblWeight - @dblReservedQty AND @dblInputWeight - (@dblWeight - @dblReservedQty) > 0.1 AND @dblReservedQty > 0
+	IF @dblReservedQty IS NULL
+		SELECT @dblReservedQty = 0
+
+	SELECT @dblInputWeight2 = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intNewItemUOMId, @dblInputWeight)
+
+	IF @dblInputWeight2 > @dblQty - @dblReservedQty AND @dblInputWeight2 -( @dblQty - @dblReservedQty)>0.1 and @dblReservedQty>0
+	BEGIN
+		SELECT @dblRequiredQty = ABS((@dblQty - @dblReservedQty) - @dblInputWeight2)
+
+		SELECT @dblReservedQty = NULL
+
+		SELECT @dblReservedQty = SUM(dblQty)
+		FROM vyuMFStockReservationByWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND intInventoryTransactionType = 9
+
+		IF @dblReservedQty IS NULL
+			SELECT @dblReservedQty = 0
+
+		IF @dblReservedQty - @dblInputWeight2 < 0
 		BEGIN
-			SELECT @dblRequiredQty = ABS((@dblWeight - @dblReservedQty) - @dblInputWeight)
+			SELECT @strErr = 'There is reservation against this lot. Cannot proceed.'
 
-			SELECT @dblReservedQty = ISNULL(SUM(dblWeight), 0)
-			FROM vyuMFStockReservationByWorkOrder
-			WHERE intWorkOrderId	= @intWorkOrderId
-			  AND intItemId			= @intInputItemId
-			  AND intInventoryTransactionType = 9 /* Produce. */
-
-			IF @dblReservedQty - @dblInputWeight < 0
-				BEGIN
-					RAISERROR 
-					(
-						'There is a Reservation from this Lot.'
-					  , 16
-					  , 1
+			RAISERROR (
+					@strErr
+					,16
+					,1
 					)
 
-					RETURN
-				END
-			ELSE
-				BEGIN
-					WHILE @dblRequiredQty > 0
-						BEGIN
-							INSERT INTO @tblMFSwapto 
-							(
-								intWorkOrderId
-							  , strWorkOrderNo
-							  , dblQty
-							)
-							SELECT intWorkOrderId
-								 , strWorkOrderNo
-								 , dblQty
-							FROM vyuMFStockReservationByWorkOrder
-							WHERE intWorkOrderId <> @intWorkOrderId AND intLotId = @intInputLotId
-
-							SELECT @intRecordId = MIN(intSwapTo)
-							FROM @tblMFSwapto
-
-							WHILE @intRecordId IS NOT NULL
-								BEGIN
-									SELECT @intSwapToWorkOrderId = NULL
-										 , @strSwapToWorkOrderNo = NULL
-										 , @dblSwapToQty		 = NULL
-
-									SELECT @intSwapToWorkOrderId	= intWorkOrderId
-										 , @strSwapToWorkOrderNo	= strWorkOrderNo
-										 , @dblSwapToQty			= dblQty
-									FROM @tblMFSwapto
-									WHERE intSwapTo = @intRecordId
-
-									IF @dblRequiredQty > @dblSwapToQty
-										BEGIN
-											INSERT INTO @tblMFReservation
-											SELECT @intSwapToWorkOrderId
-												 , @strSwapToWorkOrderNo
-												 , @dblSwapToQty
-
-											SET @dblRequiredQty = @dblRequiredQty - @dblSwapToQty
-										END
-									ELSE
-										BEGIN
-											INSERT INTO @tblMFReservation
-											SELECT @intSwapToWorkOrderId
-												 , @strSwapToWorkOrderNo
-												 , @dblRequiredQty
-
-											SET @dblRequiredQty = 0
-										END
-
-									IF @dblRequiredQty = 0
-										BEGIN
-											BREAK
-										END
-
-									SELECT @intRecordId = MIN(intSwapTo)
-									FROM @tblMFSwapto
-									WHERE intSwapTo > @intRecordId
-								END
-						END
-				END
+			RETURN
 		END
-		/* End of Validate Lot by checking Stock Reservation. */
+		ELSE
+		BEGIN
+			WHILE @dblRequiredQty > 0
+			BEGIN
+				INSERT INTO @tblMFSwapto (
+					intWorkOrderId
+					,strWorkOrderNo
+					,dblQty
+					)
+				SELECT intWorkOrderId
+					,strWorkOrderNo
+					,dblQty
+				FROM vyuMFStockReservationByWorkOrder
+				WHERE intWorkOrderId <> @intWorkOrderId
+					AND intLotId = @intInputLotId
 
+				SELECT @intRecordId = MIN(intSwapTo)
+				FROM @tblMFSwapto
+
+				WHILE @intRecordId IS NOT NULL
+				BEGIN
+					SELECT @intSwapToWorkOrderId = NULL
+						,@strSwapToWorkOrderNo = NULL
+						,@dblSwapToQty = NULL
+
+					SELECT @intSwapToWorkOrderId = intWorkOrderId
+						,@strSwapToWorkOrderNo = strWorkOrderNo
+						,@dblSwapToQty = dblQty
+					FROM @tblMFSwapto
+					WHERE intSwapTo = @intRecordId
+
+					IF @dblRequiredQty > @dblSwapToQty
+					BEGIN
+						INSERT INTO @tblMFReservation
+						SELECT @intSwapToWorkOrderId
+							,@strSwapToWorkOrderNo
+							,@dblSwapToQty
+
+						SELECT @dblRequiredQty = @dblRequiredQty - @dblSwapToQty
+					END
+					ELSE
+					BEGIN
+						INSERT INTO @tblMFReservation
+						SELECT @intSwapToWorkOrderId
+							,@strSwapToWorkOrderNo
+							,@dblRequiredQty
+
+						SELECT @dblRequiredQty = 0
+					END
+
+					IF @dblRequiredQty = 0
+					BEGIN
+						BREAK
+					END
+
+					SELECT @intRecordId = MIN(intSwapTo)
+					FROM @tblMFSwapto
+					WHERE intSwapTo > @intRecordId
+				END
+			END
+		END
+	END
+
+	--*************************************
+	-- End Reservation validation
+	--*************************************
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-		SELECT @intOrderHeaderId = intOrderHeaderId
-		FROM tblMFStageWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+	SELECT @intOrderHeaderId = intOrderHeaderId
+	FROM tblMFStageWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @intRecordId = NULL
+	SELECT @intRecordId = NULL
+
+	SELECT @intRecordId = MIN(intRecordId)
+	FROM @tblMFReservation
+
+	WHILE @intRecordId IS NOT NULL
+	BEGIN
+		SELECT @intSwapToWorkOrderId = NULL
+			,@strSwapToWorkOrderNo = NULL
+			,@dblSwapToQty = NULL
+			,@dblSwapToQty2 = NULL
+
+		SELECT @intSwapToWorkOrderId = intWorkOrderId
+			,@strSwapToWorkOrderNo = strWorkOrderNo
+			,@dblSwapToQty = dblQty
+			,@dblSwapToQty2 = dblQty
+		FROM @tblMFReservation
+		WHERE intRecordId = @intRecordId
+
+		SELECT @intSwapToOrderHeaderId = intOrderHeaderId
+		FROM tblMFStageWorkOrder
+		WHERE intWorkOrderId = @intSwapToWorkOrderId
+
+		SELECT @intSwapToLotId = NULL
+
+		SELECT @intSwapToLotId = intLotId
+		FROM vyuMFStockReservationByWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND intInventoryTransactionType = 9
+			AND dblQty = @dblSwapToQty2
+
+		IF @intSwapToLotId IS NOT NULL
+			AND EXISTS (
+				SELECT *
+				FROM tblMFTask
+				WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+					AND intLotId = @intInputLotId
+					AND dblQty = @dblSwapToQty2
+				)
+		BEGIN
+			UPDATE tblMFTask
+			SET intLotId = @intSwapToLotId
+			WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+				AND intLotId = @intInputLotId
+
+			DELETE
+			FROM tblMFTask
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intLotId = @intSwapToLotId
+
+			INSERT INTO @tblMFPickedLot
+			SELECT @intSwapToLotId
+				,@dblSwapToQty2
+		END
+		ELSE
+		BEGIN
+			DELETE
+			FROM @tblMFLot
+
+			INSERT INTO @tblMFLot (
+				intSwapToLotId
+				,dblQty
+				)
+			SELECT SR.intLotId
+				,SR.dblQty - IsNULL(L.dblQty, 0)
+			FROM vyuMFStockReservationByWorkOrder SR
+			LEFT JOIN @tblMFPickedLot L ON L.intLotId = SR.intLotId
+			WHERE SR.intWorkOrderId = @intWorkOrderId
+				AND SR.intItemId = @intInputItemId
+				AND SR.intInventoryTransactionType = 9
+				AND SR.dblQty - IsNULL(L.dblQty, 0) > 0
+
+			SELECT @intSwapToLotId = NULL
+
+			SELECT @intSwapToLotId = MIN(intSwapToLotId)
+			FROM @tblMFLot
+
+			WHILE @intSwapToLotId IS NOT NULL
+			BEGIN
+				SELECT @dblLotQty = NULL
+
+				SELECT @dblLotQty = dblQty
+				FROM @tblMFLot
+				WHERE intSwapToLotId = @intSwapToLotId
+
+				IF @dblSwapToQty > @dblLotQty
+				BEGIN
+					INSERT INTO tblMFTask (
+						intConcurrencyId
+						,strTaskNo
+						,intTaskTypeId
+						,intTaskStateId
+						,intAssigneeId
+						,intOrderHeaderId
+						,intOrderDetailId
+						,intTaskPriorityId
+						,dtmReleaseDate
+						,intFromStorageLocationId
+						,intToStorageLocationId
+						,intItemId
+						,intLotId
+						,dblQty
+						,intItemUOMId
+						,dblWeight
+						,intWeightUOMId
+						,dblWeightPerQty
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						,dblPickQty
+						)
+					SELECT intConcurrencyId
+						,strTaskNo
+						,intTaskTypeId
+						,intTaskStateId
+						,intAssigneeId
+						,intOrderHeaderId
+						,intOrderDetailId
+						,intTaskPriorityId
+						,dtmReleaseDate
+						,intFromStorageLocationId
+						,intToStorageLocationId
+						,intItemId
+						,@intSwapToLotId
+						,@dblLotQty
+						,intItemUOMId
+						,@dblLotQty
+						,intItemUOMId
+						,1
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						,@dblLotQty
+					FROM tblMFTask
+					WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+						AND intLotId = @intInputLotId
+
+					SELECT @dblSwapToQty = @dblSwapToQty - @dblLotQty
+
+					UPDATE dbo.tblMFTask
+					SET dblQty = dblQty - @dblLotQty
+						,dblWeight = (dblQty - @dblLotQty) / dblWeightPerQty
+						,dblPickQty = dblQty - @dblLotQty
+					WHERE intOrderHeaderId = @intOrderHeaderId
+						AND intLotId = @intSwapToLotId
+
+					INSERT INTO @tblMFPickedLot
+					SELECT @intSwapToLotId
+						,@dblLotQty
+
+					DELETE
+					FROM tblMFTask
+					WHERE intOrderHeaderId = @intOrderHeaderId
+						AND intLotId = @intSwapToLotId
+						AND dblQty = 0
+				END
+				ELSE
+				BEGIN
+					INSERT INTO tblMFTask (
+						intConcurrencyId
+						,strTaskNo
+						,intTaskTypeId
+						,intTaskStateId
+						,intAssigneeId
+						,intOrderHeaderId
+						,intOrderDetailId
+						,intTaskPriorityId
+						,dtmReleaseDate
+						,intFromStorageLocationId
+						,intToStorageLocationId
+						,intItemId
+						,intLotId
+						,dblQty
+						,intItemUOMId
+						,dblWeight
+						,intWeightUOMId
+						,dblWeightPerQty
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						,dblPickQty
+						)
+					SELECT intConcurrencyId
+						,strTaskNo
+						,intTaskTypeId
+						,intTaskStateId
+						,intAssigneeId
+						,intOrderHeaderId
+						,intOrderDetailId
+						,intTaskPriorityId
+						,dtmReleaseDate
+						,intFromStorageLocationId
+						,intToStorageLocationId
+						,intItemId
+						,@intSwapToLotId
+						,@dblSwapToQty
+						,intItemUOMId
+						,@dblSwapToQty
+						,intItemUOMId
+						,1
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						,@dblSwapToQty
+					FROM dbo.tblMFTask
+					WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+						AND intLotId = @intInputLotId
+
+					UPDATE dbo.tblMFTask
+					SET dblQty = dblQty - @dblSwapToQty
+						,dblWeight = (dblQty - @dblSwapToQty) / dblWeightPerQty
+						,dblPickQty = dblQty - @dblSwapToQty
+					WHERE intOrderHeaderId = @intOrderHeaderId
+						AND intLotId = @intSwapToLotId
+
+					DELETE
+					FROM tblMFTask
+					WHERE intOrderHeaderId = @intOrderHeaderId
+						AND intLotId = @intSwapToLotId
+						AND dblQty = 0
+
+					INSERT INTO @tblMFPickedLot
+					SELECT @intSwapToLotId
+						,@dblSwapToQty
+
+					SELECT @dblSwapToQty = 0
+				END
+
+				IF @dblSwapToQty <= 0
+				BEGIN
+					IF EXISTS (
+							SELECT *
+							FROM dbo.tblMFTask
+							WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+								AND intLotId = @intInputLotId
+								AND dblQty = @dblSwapToQty2
+							)
+					BEGIN
+						DELETE
+						FROM dbo.tblMFTask
+						WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+							AND intLotId = @intInputLotId
+					END
+					ELSE
+					BEGIN
+						UPDATE dbo.tblMFTask
+						SET dblQty = dblQty - @dblSwapToQty2
+							,dblWeight = (dblQty - @dblSwapToQty2) / dblWeightPerQty
+							,dblPickQty = dblQty - @dblSwapToQty2
+						WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+							AND intLotId = @intInputLotId
+					END
+
+					BREAK
+				END
+
+				SELECT @intSwapToLotId = MIN(intSwapToLotId)
+				FROM @tblMFLot
+				WHERE intSwapToLotId > @intSwapToLotId
+			END
+		END
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intSwapToWorkOrderId
+			,9
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intSwapToWorkOrderId
+			,strTransactionId = @strSwapToWorkOrderNo
+			,intTransactionTypeId = 9
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intSwapToOrderHeaderId
+			AND T.intTaskStateId = 4
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intSwapToWorkOrderId
+			,9
+
+		DELETE
+		FROM @ItemsToReserve
 
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFReservation
-
-		/* Create Pick List and Stock Reservation. */
-		WHILE @intRecordId IS NOT NULL
-			BEGIN
-				SELECT @intSwapToWorkOrderId	= NULL
-					 , @strSwapToWorkOrderNo	= NULL
-					 , @dblSwapToQty			= NULL
-					 , @dblSwapToQty2			= NULL
-					 , @intSwapToLotId			= NULL
-
-				SELECT @intSwapToWorkOrderId	= intWorkOrderId
-					 , @strSwapToWorkOrderNo	= strWorkOrderNo
-					 , @dblSwapToQty			= dblQty
-					 , @dblSwapToQty2			= dblQty
-				FROM @tblMFReservation
-				WHERE intRecordId = @intRecordId
-
-				SELECT @intSwapToOrderHeaderId = intOrderHeaderId
-				FROM tblMFStageWorkOrder
-				WHERE intWorkOrderId = @intSwapToWorkOrderId
-
-				SELECT @intSwapToLotId = intLotId
-				FROM vyuMFStockReservationByWorkOrder
-				WHERE intWorkOrderId = @intWorkOrderId
-				  AND intItemId = @intInputItemId
-				  AND intInventoryTransactionType = 9 /* Produce. */
-				  AND dblQty = @dblSwapToQty2
-
-				IF @intSwapToLotId IS NOT NULL AND EXISTS (SELECT *
-														   FROM tblMFTask
-														   WHERE intOrderHeaderId	= @intSwapToOrderHeaderId
-															 AND intLotId			= @intInputLotId
-															 AND dblQty				= @dblSwapToQty2
-														  )
-					BEGIN
-						UPDATE tblMFTask
-						SET intLotId = @intSwapToLotId
-						WHERE intOrderHeaderId = @intSwapToOrderHeaderId AND intLotId = @intInputLotId;
-
-						DELETE FROM tblMFTask WHERE intOrderHeaderId = @intOrderHeaderId AND intLotId = @intSwapToLotId;
-
-						INSERT INTO @tblMFPickedLot
-						SELECT @intSwapToLotId
-							 , @dblSwapToQty2
-					END
-				ELSE
-					BEGIN
-						DELETE FROM @tblMFLot
-
-						INSERT INTO @tblMFLot 
-						(
-							intSwapToLotId
-						  , dblQty
-						)
-						SELECT SR.intLotId
-							 , SR.dblQty - ISNULL(L.dblQty, 0)
-						FROM vyuMFStockReservationByWorkOrder SR
-						LEFT JOIN @tblMFPickedLot L ON L.intLotId = SR.intLotId
-						WHERE SR.intWorkOrderId = @intWorkOrderId
-						  AND SR.intItemId = @intInputItemId
-						  AND SR.intInventoryTransactionType = 9 /* Produce. */
-						  AND SR.dblQty - IsNULL(L.dblQty, 0) > 0
-
-						SELECT @intSwapToLotId = NULL
-
-						SELECT @intSwapToLotId = MIN(intSwapToLotId)
-						FROM @tblMFLot
-
-						/* Pick List Creation. */
-						WHILE @intSwapToLotId IS NOT NULL
-							BEGIN
-								SELECT @dblLotQty = NULL
-
-								SELECT @dblLotQty = dblQty
-								FROM @tblMFLot
-								WHERE intSwapToLotId = @intSwapToLotId
-
-								IF @dblSwapToQty > @dblLotQty
-									BEGIN
-										INSERT INTO tblMFTask 
-										(
-											intConcurrencyId
-										  , strTaskNo
-										  , intTaskTypeId
-										  , intTaskStateId
-										  , intAssigneeId
-										  , intOrderHeaderId
-										  , intOrderDetailId
-										  , intTaskPriorityId
-										  , dtmReleaseDate
-										  , intFromStorageLocationId
-										  , intToStorageLocationId
-										  , intItemId
-										  , intLotId
-										  , dblQty
-										  , intItemUOMId
-										  , dblWeight
-										  , intWeightUOMId
-										  , dblWeightPerQty
-										  , intCreatedUserId
-										  , dtmCreated
-										  , intLastModifiedUserId
-										  , dtmLastModified
-										  , dblPickQty
-										)
-										SELECT intConcurrencyId
-											 , strTaskNo
-											 , intTaskTypeId
-											 , intTaskStateId
-											 , intAssigneeId
-											 , intOrderHeaderId
-											 , intOrderDetailId
-											 , intTaskPriorityId
-											 , dtmReleaseDate
-											 , intFromStorageLocationId
-											 , intToStorageLocationId
-											 , intItemId
-											 , @intSwapToLotId
-											 , @dblLotQty
-											 , intItemUOMId
-											 , @dblLotQty
-											 , intItemUOMId
-											 , 1
-											 , intCreatedUserId
-											 , dtmCreated
-											 , intLastModifiedUserId
-											 , dtmLastModified
-											 , @dblLotQty
-										FROM tblMFTask
-										WHERE intOrderHeaderId	= @intSwapToOrderHeaderId
-										  AND intLotId			= @intInputLotId
-
-										SELECT @dblSwapToQty = @dblSwapToQty - @dblLotQty
-
-										UPDATE dbo.tblMFTask
-										SET dblQty		= dblQty - @dblLotQty
-										  , dblWeight	= (dblQty - @dblLotQty) / dblWeightPerQty
-										  , dblPickQty	= dblQty - @dblLotQty
-										WHERE intOrderHeaderId	= @intOrderHeaderId
-										  AND intLotId			= @intSwapToLotId
-
-										INSERT INTO @tblMFPickedLot
-										SELECT @intSwapToLotId
-											 , @dblLotQty
-									END
-								ELSE
-									BEGIN
-										INSERT INTO tblMFTask 
-										(
-											intConcurrencyId
-										  , strTaskNo
-										  , intTaskTypeId
-										  , intTaskStateId
-										  , intAssigneeId
-										  , intOrderHeaderId
-										  , intOrderDetailId
-										  , intTaskPriorityId
-										  , dtmReleaseDate
-										  , intFromStorageLocationId
-										  , intToStorageLocationId
-										  , intItemId
-										  , intLotId
-										  , dblQty
-										  , intItemUOMId
-										  , dblWeight
-										  , intWeightUOMId
-										  , dblWeightPerQty
-										  , intCreatedUserId
-										  , dtmCreated
-										  , intLastModifiedUserId
-										  , dtmLastModified
-										  , dblPickQty
-										)
-										SELECT intConcurrencyId
-											 , strTaskNo
-											 , intTaskTypeId
-											 , intTaskStateId
-											 , intAssigneeId
-											 , intOrderHeaderId
-											 , intOrderDetailId
-											 , intTaskPriorityId
-											 , dtmReleaseDate
-											 , intFromStorageLocationId
-											 , intToStorageLocationId
-											 , intItemId
-											 , @intSwapToLotId
-											 , @dblSwapToQty
-											 , intItemUOMId
-											 , @dblSwapToQty
-											 , intItemUOMId
-											 , 1
-											 , intCreatedUserId
-											 , dtmCreated
-											 , intLastModifiedUserId
-											 , dtmLastModified
-											 , @dblSwapToQty
-										FROM dbo.tblMFTask
-										WHERE intOrderHeaderId = @intSwapToOrderHeaderId
-										  AND intLotId = @intInputLotId;
-
-										UPDATE dbo.tblMFTask
-										SET dblQty		= dblQty - @dblSwapToQty
-										  , dblWeight	= (dblQty - @dblSwapToQty) / dblWeightPerQty
-										  , dblPickQty	= dblQty - @dblSwapToQty
-										WHERE intOrderHeaderId	= @intOrderHeaderId
-										  AND intLotId			= @intSwapToLotId
-
-										INSERT INTO @tblMFPickedLot
-										SELECT @intSwapToLotId
-											 , @dblSwapToQty
-
-										SELECT @dblSwapToQty = 0
-									END
-
-									DELETE FROM tblMFTask WHERE intOrderHeaderId = @intOrderHeaderId AND intLotId = @intSwapToLotId AND dblQty = 0;
-
-
-								IF @dblSwapToQty <= 0
-									BEGIN
-										IF EXISTS (SELECT *
-												   FROM dbo.tblMFTask
-												   WHERE intOrderHeaderId = @intSwapToOrderHeaderId
-												   	 AND intLotId		  = @intInputLotId
-												   	 AND dblQty			  = @dblSwapToQty2
-												  )
-											BEGIN
-												DELETE FROM dbo.tblMFTask WHERE intOrderHeaderId = @intSwapToOrderHeaderId AND intLotId = @intInputLotId;
-											END
-										ELSE
-											BEGIN
-												UPDATE dbo.tblMFTask
-												SET dblQty		= dblQty - @dblSwapToQty2
-												  , dblWeight	= (dblQty - @dblSwapToQty2) / dblWeightPerQty
-												  , dblPickQty	= dblQty - @dblSwapToQty2
-												WHERE intOrderHeaderId = @intSwapToOrderHeaderId
-												  AND intLotId = @intInputLotId
-											END
-										BREAK
-									END
-
-									SELECT @intSwapToLotId = MIN(intSwapToLotId)
-									FROM @tblMFLot
-									WHERE intSwapToLotId > @intSwapToLotId
-							END
-					END
-
-				EXEC dbo.uspICCreateStockReservation @ItemsToReserve			= @ItemsToReserve
-												   , @intTransactionId			= @intSwapToWorkOrderId
-												   , @intTransactionTypeId		= 9
-
-
-				INSERT INTO @ItemsToReserve 
-				(
-					intItemId
-				  , intItemLocationId
-				  , intItemUOMId
-				  , intLotId
-				  , intSubLocationId
-				  , intStorageLocationId
-				  , dblQty
-				  , intTransactionId
-				  , strTransactionId
-				  , intTransactionTypeId
-				)
-				SELECT intItemId			= T.intItemId
-					 , intItemLocationId	= IL.intItemLocationId
-					 , intItemUOMId			= T.intItemUOMId
-					 , intLotId				= T.intLotId
-					 , intSubLocationId		= SL.intSubLocationId
-					 , intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
-					 , dblQty				= T.dblPickQty
-					 , intTransactionId		= @intSwapToWorkOrderId
-					 , strTransactionId		= @strSwapToWorkOrderNo
-					 , intTransactionTypeId = 9
-				FROM tblMFTask T
-				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
-				JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId AND IL.intLocationId = SL.intLocationId
-				WHERE T.intOrderHeaderId = @intSwapToOrderHeaderId
-					AND T.intTaskStateId = 4
-
-				EXEC dbo.uspICCreateStockReservation @ItemsToReserve			= @ItemsToReserve
-												   , @intTransactionId			= @intSwapToWorkOrderId
-												   , @intTransactionTypeId		= 9
-
-				DELETE FROM @ItemsToReserve;
-
-				SELECT @intRecordId = MIN(intRecordId)
-				FROM @tblMFReservation
-				WHERE intRecordId > @intRecordId
-			END
-		/* End of Create Pick List and Stock Reservation. */
+		WHERE intRecordId > @intRecordId
+	END
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intLocationId
-	  AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset;
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	/* Insertion of Work Order Input Lot/Staging. */
-	INSERT INTO dbo.tblMFWorkOrderInputLot 
-	(
+	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
-	  , intItemId
-	  , intLotId
-	  , dblQuantity
-	  , intItemUOMId
-	  , dblIssuedQuantity
-	  , intItemIssuedUOMId
-	  , intSequenceNo
-	  , dtmProductionDate
-	  , intShiftId
-	  , intStorageLocationId
-	  , intMachineId
-	  , ysnConsumptionReversed
-	  , intContainerId
-	  , strReferenceNo
-	  , dtmActualInputDateTime
-	  , dtmBusinessDate
-	  , intBusinessShiftId
-	  , dtmCreated
-	  , intCreatedUserId
-	  , dtmLastModified
-	  , intLastModifiedUserId
-	  , dblEnteredQty
-	  , intEnteredItemUOMId
-	  , intMainItemId
-	  , dblLotQuantity
-	)
+		,intItemId
+		,intLotId
+		,dblQuantity
+		,intItemUOMId
+		,dblIssuedQuantity
+		,intItemIssuedUOMId
+		,intSequenceNo
+		,dtmProductionDate
+		,intShiftId
+		,intStorageLocationId
+		,intMachineId
+		,ysnConsumptionReversed
+		,intContainerId
+		,strReferenceNo
+		,dtmActualInputDateTime
+		,dtmBusinessDate
+		,intBusinessShiftId
+		,dtmCreated
+		,intCreatedUserId
+		,dtmLastModified
+		,intLastModifiedUserId
+		,dblEnteredQty
+		,intEnteredItemUOMId
+		,intMainItemId
+		)
 	SELECT @intWorkOrderId
-		 , @intInputItemId
-		 , @intInputLotId
-		 , CASE WHEN @intInputWeightUOMId = ISNULL(@intNewItemUOMId, 0) THEN @dblInputWeight * @dblWeightPerQty
+		,@intInputItemId
+		,@intInputLotId
+		,(
+			CASE 
+				WHEN @intInputWeightUOMId = IsNULL(@intNewItemUOMId, 0)
+					THEN @dblInputWeight * @dblWeightPerQty
 				ELSE @dblInputWeight
-		   END
-		 , ISNULL(ISNULL(@intWeightUOMId, @intNewItemUOMId), @intInputWeightUOMId)
-		 , @dblInputWeight
-		 , @intInputWeightUOMId
-		 , 1
-		 , @dtmPlannedDate
-		 , @intPlannedShiftId
-		 , @intStorageLocationId
-		 , @intMachineId
-		 , 0
-		 , @intContainerId
-		 , @strReferenceNo
-		 , @dtmActualInputDateTime
-		 , @dtmBusinessDate
-		 , @intBusinessShiftId
-		 , @dtmCurrentDateTime
-		 , @intUserId
-		 , @dtmCurrentDateTime
-		 , @intUserId
-		 , @dblEnteredQty
-		 , @intEnteredItemUOMId
-		 , @intMainItemId
-		 , CASE WHEN @dblInputWeight > @dblWeight AND @dblWeight > 0 THEN @dblWeight
-				ELSE @dblInputWeight
-		   END
+				END
+			)
+		,IsNULL(Isnull(@intWeightUOMId, @intNewItemUOMId), @intInputWeightUOMId)
+		,@dblInputWeight
+		,@intInputWeightUOMId
+		,1
+		,@dtmPlannedDate
+		,@intPlannedShiftId
+		,@intStorageLocationId
+		,@intMachineId
+		,0
+		,@intContainerId
+		,@strReferenceNo
+		,@dtmActualInputDateTime
+		,@dtmBusinessDate
+		,@intBusinessShiftId
+		,@dtmCurrentDateTime
+		,@intUserId
+		,@dtmCurrentDateTime
+		,@intUserId
+		,@dblEnteredQty
+		,@intEnteredItemUOMId
+		,@intMainItemId
 
 	SELECT @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
-	/* Lot Tracked Inventory Adjusment. */
 	IF @strInventoryTracking = 'Lot Level'
+	BEGIN
+		SET @dblNewWeight = CASE 
+				WHEN @ysnEmptyOut = 0
+					THEN CASE 
+							WHEN @dblInputWeight >= @dblWeight
+								THEN @dblWeight + @dblDefaultResidueQty
+							ELSE @dblInputWeight
+							END
+				ELSE @dblInputWeight
+				END
+
+		IF @dblNewWeight > @dblWeight
 		BEGIN
-			SET @dblNewWeight = CASE WHEN @ysnEmptyOut = 0 THEN CASE WHEN @dblInputWeight >= @dblWeight THEN @dblWeight + @dblDefaultResidueQty
-																	 ELSE @dblInputWeight
-																END
-									 ELSE @dblInputWeight
-								END;
+			IF @ysnExcessConsumptionAllowed = 0
+			BEGIN
+				RAISERROR (
+						'The quantity to be consumed must not exceed the selected lot quantity.'
+						,14
+						,1
+						)
+			END
 
-			IF @dblNewWeight > @dblWeight
-				BEGIN
-					/* Validation of Input quantity/weight greater than lot quantity/weight. */
-					IF @dblInputWeight > @dblWeight AND @intNegativeQuantityAllowed <> 1
-						BEGIN
-							RAISERROR 
-							(
-								'The quantity to be consumed must not exceed the selected lot quantity.'
-								, 14
-								, 1
-							);
-						END
+			SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight
 
-					SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight
+			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+				-- Parameters for filtering:
+				@intItemId = @intInputItemId
+				,@dtmDate = @dtmPlannedDate
+				,@intLocationId = @intLocationId
+				,@intSubLocationId = @intSubLocationId
+				,@intStorageLocationId = @intStorageLocationId
+				,@strLotNumber = @strLotNumber
+				-- Parameters for the new values: 
+				,@dblAdjustByQuantity = @dblAdjustByQuantity
+				,@dblNewUnitCost = NULL
+				,@intItemUOMId = @intInputWeightUOMId
+				-- Parameters used for linking or FK (foreign key) relationships
+				,@intSourceId = 1
+				,@intSourceTransactionTypeId = 8
+				,@intEntityUserSecurityId = @intUserId
+				,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+				,@strDescription = @strWorkOrderNo
 
-					/* Use Inventory Adjustment for Allowed Negative Inventory = Yes and if the Input Lot Quantity is greater than On Hand Stock. */
-					EXEC [uspICInventoryAdjustment_CreatePostQtyChange] @intItemId					= @intInputItemId
-																	  , @dtmDate					= NULL
-																	  , @intLocationId				= @intLocationId
-																	  , @intSubLocationId			= @intSubLocationId
-																	  , @intStorageLocationId		= @intStorageLocationId
-																	  , @strLotNumber				= @strLotNumber
-																	  -- Parameters for the new values: 
-																	  , @dblAdjustByQuantity		= @dblAdjustByQuantity
-																	  , @dblNewUnitCost				= NULL
-																	  , @intItemUOMId				= @intInputWeightUOMId
-																	  -- Parameters used for linking or FK (foreign key) relationships
-																	  , @intSourceId				= @intWorkOrderId
-																	  , @intSourceTransactionTypeId = 8
-																	  , @intEntityUserSecurityId	= @intUserId
-																	  , @intInventoryAdjustmentId	= @intInventoryAdjustmentId OUTPUT
-																	  , @strDescription				= @strWorkOrderNo
+			INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction (
+				intWorkOrderId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,intItemId
+				,intTransactionId
+				,intTransactionTypeId
+				,strTransactionType
+				,dtmTransactionDate
+				,intProcessId
+				,intShiftId
+				)
+			SELECT TOP 1 WI.intWorkOrderId
+				,WI.intLotId
+				,@dblNewWeight - @dblWeight
+				,WI.intItemUOMId
+				,WI.intItemId
+				,@intInventoryAdjustmentId
+				,24
+				,'Empty Out Adj'
+				,@dtmBusinessDate
+				,intManufacturingProcessId
+				,@intBusinessShiftId
+			FROM dbo.tblMFWorkOrderInputLot WI
+			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+			WHERE intLotId = @intInputLotId
 
-					INSERT INTO dbo.tblMFWorkOrderProducedLotTransaction 
-					(
-						intWorkOrderId
-					  , intLotId
-					  , dblQuantity
-					  , intItemUOMId
-					  , intItemId
-					  , intTransactionId
-					  , intTransactionTypeId
-					  , strTransactionType
-					  , dtmTransactionDate
-					  , intProcessId
-					  , intShiftId
-					)
-					SELECT TOP 1 WI.intWorkOrderId
-							   , WI.intLotId
-							   , @dblNewWeight - @dblWeight
-							   , WI.intItemUOMId
-							   , WI.intItemId
-							   , @intInventoryAdjustmentId
-							   , 24
-							   , 'Empty Out Adj'
-							   , @dtmBusinessDate
-							   , intManufacturingProcessId
-							   , @intBusinessShiftId
-					FROM dbo.tblMFWorkOrderInputLot WI
-					JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
-					WHERE intLotId = @intInputLotId
-				END
-
-			IF @dblWeightPerQty = 0 OR @dblNewWeight % @dblWeightPerQty > 0
-				BEGIN
-					SELECT @dblAdjustByQuantity = - @dblNewWeight
-						 , @intAdjustItemUOMId	= @intInputWeightUOMId
-				END
-			ELSE
-				BEGIN
-					SELECT @dblAdjustByQuantity = -@dblNewWeight / @dblWeightPerQty
-						 , @intAdjustItemUOMId	= @intNewItemUOMId
-				END
-
-			/* Used IA - Lot Merge for Lot Tracked. */
-			EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId						= @intInputItemId
-														   , @dtmDate						= NULL
-														   , @intLocationId					= @intLocationId
-														   , @intSubLocationId				= @intSubLocationId
-														   , @intStorageLocationId			= @intStorageLocationId
-														   , @strLotNumber					= @strLotNumber
-														   -- Parameters for the new values: 
-														   , @intNewLocationId				= @intLocationId
-														   , @intNewSubLocationId			= @intConsumptionSubLocationId
-														   , @intNewStorageLocationId		= @intConsumptionStorageLocationId
-														   , @strNewLotNumber				= @strLotNumber
-														   , @dblAdjustByQuantity			= @dblAdjustByQuantity
-														   , @dblNewSplitLotQuantity		= NULL
-														   , @dblNewWeight					= NULL
-														   , @intNewItemUOMId				= NULL --New Item UOM Id should be NULL as per Feb
-														   , @intNewWeightUOMId				= NULL
-														   , @dblNewUnitCost				= NULL
-														   , @intItemUOMId					= @intAdjustItemUOMId
-														   -- Parameters used for linking or FK (foreign key) relationships
-														   , @intSourceId					= @intWorkOrderId
-														   , @intSourceTransactionTypeId	= 8
-														   , @intEntityUserSecurityId		= @intUserId
-														   , @intInventoryAdjustmentId		= @intInventoryAdjustmentId OUTPUT
-														   , @strDescription				= @strWorkOrderNo
+			PRINT 'Call Lot Adjust routine.'
 		END
-		/* End of Lot Tracked Inventory Adjusment. */
 
-	/* Item Level Inventory Transfer. */
+		IF @dblWeightPerQty = 0
+			OR @dblNewWeight % @dblWeightPerQty > 0
+		BEGIN
+			SELECT @dblAdjustByQuantity = - @dblNewWeight
+				,@intAdjustItemUOMId = @intInputWeightUOMId
+		END
+		ELSE
+		BEGIN
+			SELECT @dblAdjustByQuantity = - @dblNewWeight / @dblWeightPerQty
+				,@intAdjustItemUOMId = @intNewItemUOMId
+		END
+
+		EXEC uspICInventoryAdjustment_CreatePostLotMerge
+			-- Parameters for filtering:
+			@intItemId = @intInputItemId
+			,@dtmDate = NULL
+			,@intLocationId = @intLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strLotNumber
+			-- Parameters for the new values: 
+			,@intNewLocationId = @intLocationId
+			,@intNewSubLocationId = @intConsumptionSubLocationId
+			,@intNewStorageLocationId = @intConsumptionStorageLocationId
+			,@strNewLotNumber = @strLotNumber
+			,@dblAdjustByQuantity = @dblAdjustByQuantity
+			,@dblNewSplitLotQuantity = NULL
+			,@dblNewWeight = NULL
+			,@intNewItemUOMId = NULL --New Item UOM Id should be NULL as per Feb
+			,@intNewWeightUOMId = NULL
+			,@dblNewUnitCost = NULL
+			,@intItemUOMId = @intAdjustItemUOMId
+			-- Parameters used for linking or FK (foreign key) relationships
+			,@intSourceId = 1
+			,@intSourceTransactionTypeId = 8
+			,@intEntityUserSecurityId = @intUserId
+			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+			,@strDescription = @strWorkOrderNo
+	END
+
 	IF @strInventoryTracking = 'Item Level'
+	BEGIN
+		SELECT @intItemStockUOMId = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intInputItemId
+			AND ysnStockUnit = 1
+
+		IF @intItemStockUOMId <> @intInputWeightUOMId
 		BEGIN
-			SELECT @intItemStockUOMId = intItemUOMId
-			FROM tblICItemUOM
-			WHERE intItemId = @intInputItemId AND ysnStockUnit = 1
+			SELECT @dblInputWeight = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intItemStockUOMId, @dblInputWeight)
 
-			IF @intItemStockUOMId <> @intInputWeightUOMId
-				BEGIN
-					SELECT @dblInputWeight = dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intItemStockUOMId, @dblInputWeight)
-
-					SELECT @intInputWeightUOMId = @intItemStockUOMId
-				END
-
-			/* Create Temp Table. */
-			IF NOT EXISTS ( SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
-				BEGIN
-					CREATE TABLE #tmpAddInventoryTransferResult 
-					(
-						intSourceId				INT
-					  , intInventoryTransferId	INT
-					)
-				END
-			/* End of Create Temp Table. */
-
-			DECLARE @TransferEntries AS InventoryTransferStagingTable
-
-
-			/* Staging Data fro Inventory Transfer. */
-			INSERT INTO @TransferEntries 
-			(
-				/* Header Data. */
-				[dtmTransferDate]
-			  , [strTransferType]
-			  , [intSourceType]
-			  , [strDescription]
-			  , [intFromLocationId]
-			  , [intToLocationId]
-			  , [ysnShipmentRequired]
-			  , [intStatusId]
-			  , [intShipViaId]
-			  , [intFreightUOMId]
-				/* Detail Data. */
-			  , [intItemId]
-			  , [intLotId]
-			  , [intItemUOMId]
-			  , [dblQuantityToTransfer]
-			  , [strNewLotId]
-			  , [intFromSubLocationId]
-			  , [intToSubLocationId]
-			  , [intFromStorageLocationId]
-			  , [intToStorageLocationId]
-				/* Integration Data. */
-			  , [intInventoryTransferId]
-			  , [intSourceId]
-			  , [strSourceId]
-			  , [strSourceScreenName]
-			)
-			SELECT [dtmTransferDate]			= @dtmPlannedDate
-				 , [strTransferType]			= 'Storage to Storage'
-				 , [intSourceType]				= 0
-				 , [strDescription]				= NULL
-				 , [intFromLocationId]			= @intLocationId
-				 , [intToLocationId]			= @intLocationId
-				 , [ysnShipmentRequired]		= 0
-				 , [intStatusId]				= 3 /* Closed. */
-				 , [intShipViaId]				= NULL
-				 , [intFreightUOMId]			= NULL
-				   /* Detail Data. */
-				 , [intItemId]					= @intInputItemId
-				 , [intLotId]					= NULL
-				 , [intItemUOMId]				= @intInputWeightUOMId
-				 , [dblQuantityToTransfer]		= @dblInputWeight
-				 , [strNewLotId]				= NULL
-				 , [intFromSubLocationId]		= @intSubLocationId
-				 , [intToSubLocationId]			= @intConsumptionSubLocationId
-				 , [intFromStorageLocationId]	= @intStorageLocationId
-				 , [intToStorageLocationId]		= @intConsumptionStorageLocationId
-					/* Integration Data. */
-				 , [intInventoryTransferId]		= NULL
-				 , [intSourceId]				= @intWorkOrderInputLotId
-				 , [strSourceId]				= @strWorkOrderNo
-				 , [strSourceScreenName]		= 'Process Production Consume'
-
-			-- Call uspICAddInventoryTransfer stored procedure.
-			EXEC dbo.uspICAddInventoryTransfer @TransferEntries			= @TransferEntries
-											 , @intEntityUserSecurityId = @intUserId
-
-			-- Post the Inventory Transfers                                            
-			DECLARE @intTransferId		INT
-				  , @strTransactionId	NVARCHAR(50);
-
-			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddInventoryTransferResult)
-				BEGIN
-					SELECT @intTransferId		= NULL
-						 , @strTransactionId	= NULL
-
-					SELECT TOP 1 @intTransferId = intInventoryTransferId
-					FROM #tmpAddInventoryTransferResult
-
-					-- Post the Inventory Transfer that was created
-					SELECT @strTransactionId = strTransferNo
-					FROM tblICInventoryTransfer
-					WHERE intInventoryTransferId = @intTransferId
-
-					EXEC dbo.uspICPostInventoryTransfer @ysnPost				 = 1
-													  , @ysnRecap				 = 0
-													  , @strTransactionId		 = @strTransactionId
-													  , @intEntityUserSecurityId = @intUserId;
-
-					DELETE FROM #tmpAddInventoryTransferResult WHERE intInventoryTransferId = @intTransferId;
-				END;
+			SELECT @intInputWeightUOMId = @intItemStockUOMId
 		END
-		/* End of Item Level Inventory Transfer. */
 
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tempdb..sysobjects
+				WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult')
+				)
+		BEGIN
+			CREATE TABLE #tmpAddInventoryTransferResult (
+				intSourceId INT
+				,intInventoryTransferId INT
+				)
+		END
 
-	SELECT @intRecipeItemUOMId = CASE WHEN RI.intItemUOMId IS NOT NULL THEN RI.intItemUOMId
-									  /* Retrieve Substitute Item UOM. */
-									  ELSE (SELECT RS.intItemUOMId
-											FROM tblMFWorkOrderRecipeSubstituteItem RS
-											WHERE RS.intWorkOrderId = @intWorkOrderId
-											  AND RS.intSubstituteItemId = @intInputItemId)
-								END
+		DECLARE @TransferEntries AS InventoryTransferStagingTable
+
+		-- Insert the data needed to create the inventory transfer.
+		INSERT INTO @TransferEntries (
+			-- Header
+			[dtmTransferDate]
+			,[strTransferType]
+			,[intSourceType]
+			,[strDescription]
+			,[intFromLocationId]
+			,[intToLocationId]
+			,[ysnShipmentRequired]
+			,[intStatusId]
+			,[intShipViaId]
+			,[intFreightUOMId]
+			-- Detail
+			,[intItemId]
+			,[intLotId]
+			,[intItemUOMId]
+			,[dblQuantityToTransfer]
+			,[strNewLotId]
+			,[intFromSubLocationId]
+			,[intToSubLocationId]
+			,[intFromStorageLocationId]
+			,[intToStorageLocationId]
+			-- Integration Field
+			,[intInventoryTransferId]
+			,[intSourceId]
+			,[strSourceId]
+			,[strSourceScreenName]
+			)
+		SELECT -- Header
+			[dtmTransferDate] = @dtmPlannedDate
+			,[strTransferType] = 'Storage to Storage'
+			,[intSourceType] = 0
+			,[strDescription] = NULL
+			,[intFromLocationId] = @intLocationId
+			,[intToLocationId] = @intLocationId
+			,[ysnShipmentRequired] = 0
+			,[intStatusId] = 3
+			,[intShipViaId] = NULL
+			,[intFreightUOMId] = NULL
+			-- Detail
+			,[intItemId] = @intInputItemId
+			,[intLotId] = NULL
+			,[intItemUOMId] = @intInputWeightUOMId
+			,[dblQuantityToTransfer] = @dblInputWeight
+			,[strNewLotId] = NULL
+			,[intFromSubLocationId] = @intSubLocationId
+			,[intToSubLocationId] = @intConsumptionSubLocationId
+			,[intFromStorageLocationId] = @intStorageLocationId
+			,[intToStorageLocationId] = @intConsumptionStorageLocationId
+			-- Integration Field
+			,[intInventoryTransferId] = NULL
+			,[intSourceId] = @intWorkOrderInputLotId
+			,[strSourceId] = @strWorkOrderNo
+			,[strSourceScreenName] = 'Process Production Consume'
+
+		-- Call uspICAddInventoryTransfer stored procedure.
+		EXEC dbo.uspICAddInventoryTransfer @TransferEntries
+			,@intUserId
+
+		-- Post the Inventory Transfers                                            
+		DECLARE @intTransferId INT
+			,@strTransactionId NVARCHAR(50);
+
+		WHILE EXISTS (
+				SELECT TOP 1 1
+				FROM #tmpAddInventoryTransferResult
+				)
+		BEGIN
+			SELECT @intTransferId = NULL
+				,@strTransactionId = NULL
+
+			SELECT TOP 1 @intTransferId = intInventoryTransferId
+			FROM #tmpAddInventoryTransferResult
+
+			-- Post the Inventory Transfer that was created
+			SELECT @strTransactionId = strTransferNo
+			FROM tblICInventoryTransfer
+			WHERE intInventoryTransferId = @intTransferId
+
+			EXEC dbo.uspICPostInventoryTransfer 1
+				,0
+				,@strTransactionId
+				,@intUserId;
+
+			DELETE
+			FROM #tmpAddInventoryTransferResult
+			WHERE intInventoryTransferId = @intTransferId
+		END;
+	END
+
+	SELECT @intRecipeItemUOMId = RI.intItemUOMId
 	FROM tblMFWorkOrderRecipeItem RI
-	WHERE RI.intWorkOrderId			= @intWorkOrderId
-	  AND RI.intItemId				= @intInputItemId
-	  AND RI.intRecipeItemTypeId	= 1
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND RI.intItemId = @intInputItemId
+		AND RI.intRecipeItemTypeId = 1
 
+	IF @intRecipeItemUOMId IS NULL
+	BEGIN
+		SELECT @intRecipeItemUOMId = RS.intItemUOMId
+		FROM tblMFWorkOrderRecipeSubstituteItem RS
+		WHERE RS.intWorkOrderId = @intWorkOrderId
+			AND RS.intSubstituteItemId = @intInputItemId
+	END
 
 	IF @strMultipleMachinesShareCommonStagingLocation = 'True'
-		BEGIN
-			SELECT @intMachineId = NULL
-		END
+	BEGIN
+		SELECT @intMachineId = NULL
+	END
 
-	/* Set Production Summary Item. */
 	IF @intMainItemId IS NOT NULL
-		BEGIN
-			UPDATE tblMFProductionSummary
-			SET intMainItemId = @intMainItemId
-			WHERE intWorkOrderId	= @intWorkOrderId
-				AND intItemId		= @intInputItemId
-				AND ISNULL(intMachineId, 0) = (CASE WHEN intMachineId IS NOT NULL THEN ISNULL(@intMachineId, 0)
-													ELSE ISNULL(intMachineId, 0)
-											   END)
-				AND intItemTypeId IN (1, 3)
-				AND intMainItemId IS NULL
-		END
+	BEGIN
+		UPDATE tblMFProductionSummary
+		SET intMainItemId = @intMainItemId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND IsNULL(intMachineId, 0) = (
+				CASE 
+					WHEN intMachineId IS NOT NULL
+						THEN IsNULL(@intMachineId, 0)
+					ELSE IsNULL(intMachineId, 0)
+					END
+				)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
+			AND intMainItemId IS NULL
+	END
 
-	/* Create Production Summary if not extists, Update if exists. */
-	IF NOT EXISTS (SELECT * 
-				   FROM tblMFProductionSummary 
-				   WHERE intWorkOrderId		= @intWorkOrderId
-					 AND intItemId			= @intInputItemId
-					 AND ISNULL(intMachineId, 0) = (CASE WHEN intMachineId IS NOT NULL THEN ISNULL(@intMachineId, 0)
-														 ELSE ISNULL(intMachineId, 0)
-													END)
-					 AND intItemTypeId IN (1, 3)
-					 AND ISNULL(intMainItemId, ISNULL(@intMainItemId, 0)) = ISNULL(@intMainItemId, 0)
-				  )
-		BEGIN
-			INSERT INTO tblMFProductionSummary 
-			(
-				intWorkOrderId
-			  , intItemId
-			  , dblOpeningQuantity
-			  , dblOpeningOutputQuantity
-			  , dblOpeningConversionQuantity
-			  , dblInputQuantity
-			  , dblConsumedQuantity
-			  , dblOutputQuantity
-			  , dblOutputConversionQuantity
-			  , dblCountQuantity
-			  , dblCountOutputQuantity
-			  , dblCountConversionQuantity
-			  , dblCalculatedQuantity
-			  , intCategoryId
-			  , intItemTypeId
-			  , intMachineId
-			  , intMainItemId
-			)
-			SELECT @intWorkOrderId
-				 , @intInputItemId
-				 , 0
-				 , 0
-				 , 0
-				 , dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight)
-				 , 0
-				 , 0
-				 , 0
-				 , 0
-				 , 0
-				 , 0
-				 , 0
-				 , @intCategoryId
-				 , @intItemTypeId
-				 , @intMachineId
-				 , @intMainItemId
-		END
-	ELSE
-		BEGIN
-			UPDATE tblMFProductionSummary
-			SET dblInputQuantity = dblInputQuantity + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight), 0)
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intInputItemId
-				AND ISNULL(intMachineId, 0) = (CASE WHEN intMachineId IS NOT NULL THEN ISNULL(@intMachineId, 0)
-													ELSE ISNULL(intMachineId, 0)
-											   END)
-				AND intItemTypeId IN (1, 3)
-				AND ISNULL(intMainItemId, ISNULL(@intMainItemId, 0)) = ISNULL(@intMainItemId, 0)
-		END
-	/* End of Create Production Summary if not extists, Update if exists. */
-	
+				AND IsNULL(intMachineId, 0) = (
+					CASE 
+						WHEN intMachineId IS NOT NULL
+							THEN IsNULL(@intMachineId, 0)
+						ELSE IsNULL(intMachineId, 0)
+						END
+					)
+				AND intItemTypeId IN (
+					1
+					,3
+					)
+				AND IsNULL(intMainItemId, IsNULL(@intMainItemId, 0)) = IsNULL(@intMainItemId, 0)
+			)
+	BEGIN
+		INSERT INTO tblMFProductionSummary (
+			intWorkOrderId
+			,intItemId
+			,dblOpeningQuantity
+			,dblOpeningOutputQuantity
+			,dblOpeningConversionQuantity
+			,dblInputQuantity
+			,dblConsumedQuantity
+			,dblOutputQuantity
+			,dblOutputConversionQuantity
+			,dblCountQuantity
+			,dblCountOutputQuantity
+			,dblCountConversionQuantity
+			,dblCalculatedQuantity
+			,intCategoryId
+			,intItemTypeId
+			,intMachineId
+			,intMainItemId
+			)
+		SELECT @intWorkOrderId
+			,@intInputItemId
+			,0
+			,0
+			,0
+			,dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight)
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,@intCategoryId
+			,@intItemTypeId
+			,@intMachineId
+			,@intMainItemId
+	END
+	ELSE
+	BEGIN
+		UPDATE tblMFProductionSummary
+		SET dblInputQuantity = dblInputQuantity + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight), 0)
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND IsNULL(intMachineId, 0) = (
+				CASE 
+					WHEN intMachineId IS NOT NULL
+						THEN IsNULL(@intMachineId, 0)
+					ELSE IsNULL(intMachineId, 0)
+					END
+				)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
+			AND IsNULL(intMainItemId, IsNULL(@intMainItemId, 0)) = IsNULL(@intMainItemId, 0)
+	END
+
 	---************************************
 	IF @intSwapToLotId IS NOT NULL
-		BEGIN
-			DELETE FROM @ItemsToReserve
+	BEGIN
+		DELETE
+		FROM @ItemsToReserve
 
-			EXEC dbo.uspICCreateStockReservation @ItemsToReserve			= @ItemsToReserve
-											   , @intTransactionId			= @intWorkOrderId
-											   , @intTransactionTypeId		= 9
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intWorkOrderId
+			,9
 
-			INSERT INTO @ItemsToReserve 
-			(
-				intItemId
-			  , intItemLocationId
-			  , intItemUOMId
-			  , intLotId
-			  , intSubLocationId
-			  , intStorageLocationId
-			  , dblQty
-			  , intTransactionId
-			  , strTransactionId
-			  , intTransactionTypeId
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
 			)
-			SELECT intItemId			= T.intItemId
-				 , intItemLocationId	= IL.intItemLocationId
-				 , intItemUOMId			= T.intItemUOMId
-				 , intLotId				= T.intLotId
-				 , intSubLocationId		= SL.intSubLocationId
-				 , intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
-				 , dblQty				= T.dblPickQty
-				 , intTransactionId		= @intWorkOrderId
-				 , strTransactionId		= @strWorkOrderNo
-				 , intTransactionTypeId = 9 /* Produce. */
-			FROM tblMFTask T
-			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
-			JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId AND IL.intLocationId = SL.intLocationId
-			WHERE T.intOrderHeaderId = @intOrderHeaderId
-			  AND T.intTaskStateId = 4 /* COMPLETED */
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intWorkOrderId
+			,strTransactionId = @strWorkOrderNo
+			,intTransactionTypeId = 9
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId = 4
 
-			EXEC dbo.uspICCreateStockReservation @ItemsToReserve			= @ItemsToReserve
-											   , @intTransactionId			= @intWorkOrderId
-											   , @intTransactionTypeId		= 9
-		END
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intWorkOrderId
+			,9
+	END
 
 	---************************************
-	DELETE FROM @ItemsToReserve
+	DELETE
+	FROM @ItemsToReserve
 
-	EXEC dbo.uspICCreateStockReservation @ItemsToReserve			= @ItemsToReserve
-									   , @intTransactionId			= @intWorkOrderId
-									   , @intTransactionTypeId		= @intInventoryTransactionType
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
 
-	INSERT INTO @ItemsToReserve 
-	(
+	INSERT INTO @ItemsToReserve (
 		intItemId
-	  , intItemLocationId
-	  , intItemUOMId
-	  , intLotId
-	  , intSubLocationId
-	  , intStorageLocationId
-	  , dblQty
-	  , intTransactionId
-	  , strTransactionId
-	  , intTransactionTypeId
-	)
-	SELECT intItemId			= WI.intItemId
-		 , intItemLocationId	= IL.intItemLocationId
-		 , intItemUOMId			= WI.intItemIssuedUOMId
-		 , intLotId				= (SELECT TOP 1 intLotId
-								   FROM tblICLot L1
-								   WHERE L1.strLotNumber = L.strLotNumber AND L1.intStorageLocationId = @intConsumptionStorageLocationId
-								  )
-		 , intSubLocationId		= @intConsumptionSubLocationId
-		 , intStorageLocationId = @intConsumptionStorageLocationId
-		 , dblQty				= SUM(WI.dblIssuedQuantity)
-		 , intTransactionId		= @intWorkOrderId
-		 , strTransactionId		= @strWorkOrderNo
-		 , intTransactionTypeId = @intInventoryTransactionType
+		,intItemLocationId
+		,intItemUOMId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblQty
+		,intTransactionId
+		,strTransactionId
+		,intTransactionTypeId
+		)
+	SELECT intItemId = WI.intItemId
+		,intItemLocationId = IL.intItemLocationId
+		,intItemUOMId = WI.intItemIssuedUOMId
+		,intLotId = (
+			SELECT TOP 1 intLotId
+			FROM tblICLot L1
+			WHERE L1.strLotNumber = L.strLotNumber
+				AND L1.intStorageLocationId = @intConsumptionStorageLocationId
+			)
+		,intSubLocationId = @intConsumptionSubLocationId
+		,intStorageLocationId = @intConsumptionStorageLocationId
+		,dblQty = SUM(WI.dblIssuedQuantity)
+		,intTransactionId = @intWorkOrderId
+		,strTransactionId = @strWorkOrderNo
+		,intTransactionTypeId = @intInventoryTransactionType
 	FROM tblMFWorkOrderInputLot WI
-	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId AND IL.intLocationId = @intLocationId AND WI.ysnConsumptionReversed = 0
+	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
+		AND IL.intLocationId = @intLocationId
+		AND WI.ysnConsumptionReversed = 0
 	LEFT JOIN tblICLot L ON L.intLotId = WI.intLotId
 	WHERE intWorkOrderId = @intWorkOrderId
 	GROUP BY WI.intItemId
-		   , IL.intItemLocationId
-		   , WI.intItemIssuedUOMId
-		   , L.strLotNumber
+		,IL.intItemLocationId
+		,WI.intItemIssuedUOMId
+		,L.strLotNumber
 
-	
-	EXEC dbo.uspICCreateStockReservation @ItemsToReserve			= @ItemsToReserve
-									   , @intTransactionId			= @intWorkOrderId
-									   , @intTransactionTypeId		= @intInventoryTransactionType	
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		,@intWorkOrderId
+		,@intInventoryTransactionType
 
 	SELECT @intDestinationLotId = intLotId
 	FROM tblICLot L
-	WHERE L.strLotNumber = @strLotNumber AND L.intStorageLocationId = @intConsumptionStorageLocationId;
+	WHERE L.strLotNumber = @strLotNumber
+		AND L.intStorageLocationId = @intConsumptionStorageLocationId
 
 	UPDATE tblMFWorkOrderInputLot
 	SET intDestinationLotId = @intDestinationLotId
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
-	EXEC dbo.uspMFAdjustInventory @dtmDate						= @dtmPlannedDate
-								, @intTransactionTypeId			= 104 --Stage
-								, @intItemId					= @intInputItemId
-								, @intSourceLotId				= @intInputLotId
-								, @intDestinationLotId			= @intDestinationLotId
-								, @dblQty						= @dblInputWeight
-								, @intItemUOMId					= @intInputWeightUOMId
-								, @intOldItemId					= NULL
-								, @dtmOldExpiryDate				= NULL
-								, @dtmNewExpiryDate				= NULL
-								, @intOldLotStatusId			= NULL
-								, @intNewLotStatusId			= NULL
-								, @intUserId					= @intUserId
-								, @strNote						= NULL
-								, @strReason					= NULL
-								, @intLocationId				= @intLocationId
-								, @intInventoryAdjustmentId		= NULL
-								, @intStorageLocationId			= @intStorageLocationId
-								, @intDestinationStorageLocationId = @intConsumptionStorageLocationId
-								, @intWorkOrderInputLotId		= @intWorkOrderInputLotId
-								, @intWorkOrderProducedLotId	= NULL
-								, @intWorkOrderId				= @intWorkOrderId
+	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmPlannedDate
+		,@intTransactionTypeId = 104 --Stage
+		,@intItemId = @intInputItemId
+		,@intSourceLotId = @intInputLotId
+		,@intDestinationLotId = @intDestinationLotId
+		,@dblQty = @dblInputWeight
+		,@intItemUOMId = @intInputWeightUOMId
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = NULL
+		,@intNewLotStatusId = NULL
+		,@intUserId = @intUserId
+		,@strNote = NULL
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = NULL
+		,@intStorageLocationId = @intStorageLocationId
+		,@intDestinationStorageLocationId = @intConsumptionStorageLocationId
+		,@intWorkOrderInputLotId = @intWorkOrderInputLotId
+		,@intWorkOrderProducedLotId = NULL
+		,@intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
-		BEGIN
-			COMMIT TRANSACTION
-		END
+		COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
@@ -1310,22 +1420,17 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0 AND @intTransactionCount = 0
-		BEGIN
-			ROLLBACK TRANSACTION
-		END
+	IF XACT_STATE() != 0
+		AND @intTransactionCount = 0
+		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
-		BEGIN
-			EXEC sp_xml_removedocument @idoc
-		END
+		EXEC sp_xml_removedocument @idoc
 
-	RAISERROR 
-	(
-		@ErrMsg
-	  , 16
-	  , 1
-	  , 'WITH NOWAIT'
-	);
-
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH
