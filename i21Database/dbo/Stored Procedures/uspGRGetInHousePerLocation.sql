@@ -112,6 +112,7 @@ BEGIN
 	WHERE SC.intItemId = ISNULL(@intItemId,SC.intItemId)
 		AND (AR.intCompanyLocationId= ISNULL(@intLocationId,AR.intCompanyLocationId)
 			OR AR.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
+		AND SC.intCommodityId = ISNULL(@intCommodityId, SC.intCommodityId)
 
 	--=============================
 	-- Customer Owned
