@@ -118,21 +118,39 @@ SELECT
 	,[intTicketId]				= ARID.intTicketId
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
 	,[strSessionId]				= @strSessionId
-FROM tblARPostInvoiceDetail ARID
-INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
-LEFT OUTER JOIN tblARInvoiceDetailLot ARIDL WITH (NOLOCK) ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-LEFT OUTER JOIN tblARInvoiceDetail ARIDP WITH (NOLOCK) ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
-LEFT OUTER JOIN tblICLot LOT WITH (NOLOCK) ON LOT.[intLotId] = ARIDL.[intLotId]
-LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]
-LEFT OUTER JOIN tblSCTicket T WITH (NOLOCK) ON ARID.intTicketId = T.intTicketId
-LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARID.intItemUOMId = ICIUOM.intItemUOMId
- CROSS APPLY (
-     SELECT intItemUOMId 
-     FROM tblICItemUOM WITH (NOLOCK)
-     WHERE intItemId = ARID.intItemId
-     AND ysnStockUnit = 1
- ) ICIUOM_STOCK
-WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
+FROM
+    ##ARPostInvoiceDetail ARID
+LEFT OUTER JOIN
+	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
+		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+LEFT OUTER JOIN
+	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
+		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
+LEFT OUTER JOIN
+	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId], [intItemUOMId] FROM tblICLot WITH (NOLOCK)) LOT
+		ON LOT.[intLotId] = ARIDL.[intLotId]
+LEFT OUTER JOIN
+    (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
+		ON LGL.[intLoadId] = ARID.[intLoadId]
+LEFT OUTER JOIN 
+	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [ysnDestinationWeightGradePost], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
+		ON ARID.intTicketId = T.intTicketId
+LEFT OUTER JOIN(
+	SELECT intUnitMeasureId, intItemUOMId FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+	INNER JOIN tblICItem ITEM ON ICUOM.intItemId = ITEM.intItemId
+) ICIUOM
+ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+LEFT JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
+LEFT JOIN tblICCommodity COM ON ITEM.intCommodityId = COM.intCommodityId
+CROSS APPLY (
+	SELECT intItemUOMId 
+	FROM tblICItemUOM WITH (NOLOCK)
+	WHERE intItemId = ARID.intItemId
+	AND ysnStockUnit = 1
+) ICIUOM_STOCK
+
+WHERE
+    ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
 	AND (((ARID.[strImportFormat] IS NULL OR ARID.[strImportFormat] <> 'CarQuest') AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ARID.[strImportFormat] = 'CarQuest') 		
@@ -152,6 +170,7 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))))
 	--AND ISNULL(T.[intTicketTypeId], 0) <> 9
+	AND (ARID.intTicketId IS NULL OR (ARID.intTicketId IS NOT NULL AND ((T.ysnDestinationWeightGradePost = 1 AND ISNULL(COM.intAdjustInventorySales, 0) <> 2) OR ISNULL(T.ysnDestinationWeightGradePost, 0) = 0)))
 	AND ARID.strSessionId = @strSessionId 
 
 --Bundle Items
