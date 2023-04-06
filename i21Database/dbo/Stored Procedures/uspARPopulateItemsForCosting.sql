@@ -116,18 +116,19 @@ SELECT
 	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
+LEFT OUTER JOIN tblICCommodity COM ON ITEM.intCommodityId = COM.intCommodityId
 LEFT OUTER JOIN tblARInvoiceDetailLot ARIDL WITH (NOLOCK) ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN tblARInvoiceDetail ARIDP WITH (NOLOCK) ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN tblICLot LOT WITH (NOLOCK) ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId]
 LEFT OUTER JOIN tblSCTicket T WITH (NOLOCK) ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARID.intItemUOMId = ICIUOM.intItemUOMId
- CROSS APPLY (
-     SELECT intItemUOMId 
-     FROM tblICItemUOM WITH (NOLOCK)
-     WHERE intItemId = ARID.intItemId
-     AND ysnStockUnit = 1
- ) ICIUOM_STOCK
+CROSS APPLY (
+	SELECT intItemUOMId 
+	FROM tblICItemUOM WITH (NOLOCK)
+	WHERE intItemId = ARID.intItemId
+	AND ysnStockUnit = 1
+) ICIUOM_STOCK
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
@@ -148,6 +149,7 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))))
 	--AND ISNULL(T.[intTicketTypeId], 0) <> 9
+	AND (ARID.intTicketId IS NULL OR (ARID.intTicketId IS NOT NULL AND ((T.ysnDestinationWeightGradePost = 1 AND ISNULL(COM.intAdjustInventorySales, 0) <> 2) OR ISNULL(T.ysnDestinationWeightGradePost, 0) = 0)))
 
 --Bundle Items
 INSERT INTO ##ARItemsForCosting
