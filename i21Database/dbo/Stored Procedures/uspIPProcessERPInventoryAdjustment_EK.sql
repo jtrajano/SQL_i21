@@ -1414,9 +1414,13 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
-				,strAdjustmentNo
+				,strNewLocation
+				,strNewStorageLocation
+				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
+				,strTranferOrderStatus
+				,strAdjustmentNo
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -1433,9 +1437,13 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
-				,@strAdjustmentNo
+				,strNewLocation
+				,strNewStorageLocation
+				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
+				,strTranferOrderStatus
+				,@strAdjustmentNo
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 
@@ -1472,12 +1480,13 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
-				,strErrorMessage
 				,strNewLocation
 				,strNewStorageLocation
 				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
+				,strTranferOrderStatus
+				,strErrorMessage
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -1494,12 +1503,13 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
-				,@ErrMsg AS strStatusText
 				,strNewLocation
 				,strNewStorageLocation
 				,strNewStorageUnit
 				,strOrderNo
 				,intOrderCompleted
+				,strTranferOrderStatus
+				,@ErrMsg AS strStatusText
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 
