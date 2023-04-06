@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspARSearchStatementsCustomer]
+﻿CREATE PROCEDURE [dbo].[uspARSearchStatementsCustomer]
 (
 	 @strStatementFormat			NVARCHAR(50)  
 	,@strAsOfDate					NVARCHAR(50) 
