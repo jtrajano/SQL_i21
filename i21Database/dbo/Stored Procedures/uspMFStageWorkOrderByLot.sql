@@ -905,9 +905,8 @@ BEGIN TRY
 	/* Lot Tracked Inventory Adjusment. */
 	IF @strInventoryTracking = 'Lot Level' AND @strConsumeSourceLocation = 'False'
 		BEGIN
-			SET @dblNewWeight = CASE WHEN @ysnEmptyOut = 0 THEN CASE WHEN @dblInputWeight >= @dblWeight THEN @dblWeight + @dblDefaultResidueQty
-																	 ELSE @dblInputWeight
-																END
+			SET @dblNewWeight = CASE WHEN @intNegativeQuantityAllowed = 1 THEN @dblInputWeight
+									 WHEN @ysnEmptyOut = 0 AND @dblInputWeight >= @dblWeight THEN @dblWeight + @dblDefaultResidueQty
 									 ELSE @dblInputWeight
 								END;
 
@@ -926,7 +925,9 @@ BEGIN TRY
 
 					SELECT @dblAdjustByQuantity = @dblNewWeight - @dblWeight
 
-					/* Use Inventory Adjustment for Allowed Negative Inventory = Yes and if the Input Lot Quantity is greater than On Hand Stock. */
+					/* Use Inventory Adjustment for Allowed Negative Inventory = Yes and if the Input Lot Quantity is greater than On Hand Stock. 
+					 * Adjust Quantity excess Stage.
+					 */
 					EXEC [uspICInventoryAdjustment_CreatePostQtyChange] @intItemId					= @intInputItemId
 																	  , @dtmDate					= NULL
 																	  , @intLocationId				= @intLocationId
