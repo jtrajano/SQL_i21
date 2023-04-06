@@ -168,7 +168,7 @@ BEGIN TRY
 															  ELSE L.intStorageLocationId
 														 END) --By location, then apply location filter
 											  END)
-				AND L.intLotId = @strStagedLotNumber
+				AND L.strLotNumber = @strStagedLotNumber
 			ORDER BY L.dblQty			DESC
 				   , L.dtmDateCreated	ASC
 
