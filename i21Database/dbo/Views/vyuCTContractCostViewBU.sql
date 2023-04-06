@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuCTContractDetailViewBU]  
+CREATE VIEW [dbo].[vyuCTContractCostViewBU]  
   
 AS  
 
