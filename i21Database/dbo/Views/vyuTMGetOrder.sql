@@ -25,6 +25,7 @@ SELECT D.intDispatchID
 	, ysnCompanySite = ISNULL(S.ysnCompanySite, 0)
 	, S.intLocationId
 	, intStorageLocationId = S.intCompanyLocationSubLocationId
+	, ysnLockPrice = ISNULL(D.ysnLockPrice, CAST(0 AS BIT))
 FROM tblTMDispatch D
 JOIN tblTMSite S ON S.intSiteID = D.intSiteID
 JOIN tblTMCustomer C ON C.intCustomerID = S.intCustomerID
