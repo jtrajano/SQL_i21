@@ -162,26 +162,26 @@ BEGIN TRY
 					WHERE intManufacturingProcessId = @intManufacturingProcessId
 					  AND intMachineId				= @intMachineId
 
-					SELECT TOP 1 @strLotNumber			= L.strLotNumber
-							   , @intLocationId			= L.intLocationId
-							   , @intSubLocationId		= L.intSubLocationId
-							   , @intStorageLocationId	= L.intStorageLocationId
-							   , @intWeightUOMId		= L.intWeightUOMId
-					FROM dbo.tblICLot L
-					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					WHERE L.intItemId = @intInputItemId
-						AND L.intLocationId = @intLocationId
-						AND L.intLotStatusId = 1
-						AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-						AND L.intStorageLocationId = (CASE WHEN @intStorageLocationId IS NULL AND @intProductionStageLocationId IS NULL THEN L.intStorageLocationId
-														   ELSE (CASE WHEN @intConsumptionMethodId = 1 THEN @intProductionStageLocationId
-																	  WHEN @intConsumptionMethodId = 2 THEN @intStorageLocationId
-																	  ELSE L.intStorageLocationId
-																 END) --By location, then apply location filter
-													  END)
-						AND L.intLotId = @strStagedLotNumber
-					ORDER BY L.dblQty			DESC
-						   , L.dtmDateCreated	ASC
+			SELECT TOP 1 @strLotNumber			= L.strLotNumber
+					   , @intLocationId			= L.intLocationId
+					   , @intSubLocationId		= L.intSubLocationId
+					   , @intStorageLocationId	= L.intStorageLocationId
+					   , @intWeightUOMId		= L.intWeightUOMId
+			FROM dbo.tblICLot L
+			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			WHERE L.intItemId = @intInputItemId
+				AND L.intLocationId = @intLocationId
+				AND L.intLotStatusId = 1
+				AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND L.intStorageLocationId = (CASE WHEN @intStorageLocationId IS NULL AND @intProductionStageLocationId IS NULL THEN L.intStorageLocationId
+												   ELSE (CASE WHEN @intConsumptionMethodId = 1 THEN @intProductionStageLocationId
+															  WHEN @intConsumptionMethodId = 2 THEN @intStorageLocationId
+															  ELSE L.intStorageLocationId
+														 END) --By location, then apply location filter
+											  END)
+				AND L.strLotNumber = @strStagedLotNumber
+			ORDER BY L.dblQty			DESC
+				   , L.dtmDateCreated	ASC
 
 
 					IF @strLotNumber IS NULL
