@@ -103,13 +103,14 @@ BEGIN
 	INNER JOIN tblARInvoice AR
 		ON AR.intInvoiceId = CompOwn.intTransactionRecordHeaderId
 			AND AR.intSalesOrderId IS NULL
+			AND AR.strInvoiceNumber = CompOwn.strTransactionNumber
 	INNER JOIN tblARInvoiceDetail AD
 		ON AD.intInvoiceDetailId = CompOwn.intTransactionRecordId
 			AND AD.intTicketId IS NULL
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
-		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+		AND CompOwn.strTransactionType = 'Invoice'
 
 	--=================================
 	-- Company Owned *** Sales Order
