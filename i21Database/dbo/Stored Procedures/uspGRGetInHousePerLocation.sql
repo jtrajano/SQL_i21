@@ -92,7 +92,7 @@ BEGIN
 	)
 	SELECT
 		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
-		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal)
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal * -1)
 		,CompOwn.strTransactionNumber
 		,CompOwn.strTransactionType
 		,'SO' --set strDistribution the same as Sales Order just to easily get the Invoice
@@ -103,13 +103,14 @@ BEGIN
 	INNER JOIN tblARInvoice AR
 		ON AR.intInvoiceId = CompOwn.intTransactionRecordHeaderId
 			AND AR.intSalesOrderId IS NULL
+			AND AR.strInvoiceNumber = CompOwn.strTransactionNumber
 	INNER JOIN tblARInvoiceDetail AD
 		ON AD.intInvoiceDetailId = CompOwn.intTransactionRecordId
 			AND AD.intTicketId IS NULL
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
-		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+		AND CompOwn.strTransactionType = 'Invoice'
 
 	--=================================
 	-- Company Owned *** Sales Order
