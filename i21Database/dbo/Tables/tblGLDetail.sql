@@ -35,7 +35,7 @@
     [dblCreditForeign] [numeric](18, 9) NULL CONSTRAINT [DF_tblGLDetail_dblCreditForeign]  DEFAULT ((0)),
     [dblCreditReport] [numeric](18, 9) NULL CONSTRAINT [DF_tblGLDetail_dblCreditReport]  DEFAULT ((0)),
     [dblReportingRate] [numeric](18, 9) NULL CONSTRAINT [DF_tblGLDetail_dblReportingRate]  DEFAULT ((0)),
-    [dblForeignRate] NUMERIC(18, 9) NULL, 
+    [dblForeignRate] NUMERIC(38,20) NULL, 
     [intReconciledId] INT NULL, 
     [dtmReconciled] DATETIME NULL, 
     [ysnReconciled] BIT NULL, 
