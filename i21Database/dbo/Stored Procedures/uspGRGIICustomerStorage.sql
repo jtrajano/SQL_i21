@@ -266,6 +266,23 @@ UPDATE @CustomerStorageData SET dblEndingBalance = ISNULL(dblBeginningBalance,0)
 INSERT INTO tblGRGIICustomerStorage
 SELECT * FROM @CustomerStorageData
 
+INSERT INTO @CustomerStorageData
+SELECT
+	dtmReportDate
+	,intCommodityId
+	,strCommodityCode
+	,'TOTAL STORAGE OBLIGATION'
+	,SUM(dblBeginningBalance)
+	,SUM(dblIncrease)
+	,SUM(dblDecrease)
+	,SUM(dblEndingBalance)
+	,strUOM
+FROM @CustomerStorageData
+GROUP BY dtmReportDate
+	,intCommodityId
+	,strCommodityCode
+	,strUOM
+
 SELECT * FROM @CustomerStorageData ORDER BY intCommodityId
 
 END
