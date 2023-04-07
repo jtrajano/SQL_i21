@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspGRGIICustomerStorageTotal]
+CREATE PROCEDURE [dbo].[uspGRGIICustomerStorageTotal]
 	@intCommodityId INT
 	,@dtmReportDate DATETIME
 AS
