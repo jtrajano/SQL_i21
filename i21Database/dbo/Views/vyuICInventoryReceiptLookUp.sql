@@ -25,6 +25,7 @@ SELECT
 	, ysnOverrideTaxPoint = overrideTaxPoint.ysnOverrideTaxPoint
 	, ysnOverrideTaxLocation = overrideTaxLocation.ysnOverrideTaxLocation
 	, strTaxLocation = ISNULL(CompanyLocationTaxLocation.strTaxLocation, EntityLocationTaxLocation.strTaxLocation) 
+	, bankAccount.strNickname
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation [Location] 
