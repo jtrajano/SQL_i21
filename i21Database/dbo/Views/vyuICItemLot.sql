@@ -23,7 +23,7 @@ SELECT
 	, strItemUOM = uom.strUnitMeasure
 	, dblItemUnitQty = CONVERT(NUMERIC(30, 15), iuom.dblUnitQty)
 	, dblWeightPerQty = CONVERT(NUMERIC(30, 15), lot.dblWeightPerQty)
-	, dblLastCost = CONVERT(NUMERIC(30, 15), lot.dblLastCost)
+	, dblLastCost = CONVERT(NUMERIC(30, 15), lot.dblLastCost)	
 	, intLotId = lot.intLotId
 	, strWeightUOM = weightUOM.strUnitMeasure
 	, strCostUOM = costUOM.strUnitMeasure
@@ -55,6 +55,8 @@ SELECT
 	, lot.strLotAlias
 	, lot.strCertificate
 	, cropYear.strCropYear
+	, dblLastForexCost = CONVERT(NUMERIC(30, 15), lot.dblLastForexCost)
+	, c.strCurrency
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -84,3 +86,4 @@ FROM tblICLot lot
 	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus
 	LEFT JOIN tblTRFTradeFinance tf ON tf.intTradeFinanceId = lot.intTradeFinanceId
 	LEFT JOIN tblCTCropYear cropYear ON cropYear.intCropYearId = lot.intSeasonCropYear
+	LEFT JOIN tblSMCurrency c ON c.intCurrencyID = lot.intLastCostCurrencyId

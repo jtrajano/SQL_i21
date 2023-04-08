@@ -555,6 +555,9 @@ BEGIN
 						)
 					,Lot.dblLastCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)  --dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
 					,Lot.dblLastForexCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblForexCost)  --dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
+					,Lot.intLastCostCurrencyId = @intCurrencyId
+					,Lot.dblLastCostForexRate = @dblForexRate
+					,Lot.intLastCostForexRateTypeId = @intForexRateTypeId
 			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
 						ON StockUOM.intItemId = Lot.intItemId
 						AND StockUOM.ysnStockUnit = 1

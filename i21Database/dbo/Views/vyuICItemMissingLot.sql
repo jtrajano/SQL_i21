@@ -51,6 +51,9 @@ SELECT
 	, lot.strRejectedBy
 	, lot.strCertificate
 	, cropYear.strCropYear
+	, dblLastForexCost = CONVERT(NUMERIC(30, 15), lot.dblLastForexCost)
+	, c.strCurrency
+
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -79,5 +82,6 @@ FROM tblICLot lot
 	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = item.intProductLineId
 	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus
 	LEFT JOIN tblCTCropYear cropYear ON cropYear.intCropYearId = lot.intSeasonCropYear
+	LEFT JOIN tblSMCurrency c ON c.intCurrencyID = lot.intLastCostCurrencyId
 WHERE
 	lot.strCondition IN ('Missing', 'Swept', 'Skimmed')
