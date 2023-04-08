@@ -107,6 +107,9 @@ END
 BEGIN 
 	DECLARE @itemsForCostAdjustment as ItemCostAdjustmentTableType
 
+	-- Get the default currency ID
+	DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+
 	-- Allocate new cost by contract. 
 	BEGIN 			
 		-- Allocate by 'Unit'
@@ -150,12 +153,17 @@ BEGIN
 				,[dblNewForexValue]					= 
 												CASE
 													-- Other charge currency and item currency is not the same. 
-													WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN 
+													-- Both are foreign currencies
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId <> Receipt.intCurrencyId 
+													THEN 
 														dbo.fnMultiply(
 															-- Convert the other charge to the item's currency 
 															dbo.fnDivide( 
 																approvedCharges.dblNewValue
-																,ReceiptItem.dblForexRate
+																,ISNULL(NULLIF(ReceiptItem.dblForexRate, 0), 1) 
 															)
 															,dbo.fnDivide( 
 																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
@@ -164,6 +172,23 @@ BEGIN
 																,TotalUnitsPerContract.dblTotalUnits
 															)
 														)												
+
+													-- Other charge currency and item currency is not the same. 
+													-- Item currency is functional. 
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId = Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(															
+															approvedCharges.dblNewValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
+																		ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
+																END 
+																,TotalUnitsPerContract.dblTotalUnits
+															)
+														)
 
 													-- Other charge currency and item currency is the same. 
 													ELSE 
