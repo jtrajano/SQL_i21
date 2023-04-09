@@ -568,6 +568,93 @@ WHERE
 		OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 	)
 	AND A.intTransactionReversed IS NULL
+	AND A.intTransactionType IN (1)
+UNION ALL
+SELECT 
+	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
+	,[dblNewValue] =
+		CASE 
+			WHEN ISNULL(rc.dblForexRate, 1) <> 1 AND ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. convert to sub currency cents. 
+				-- 3. and then convert into functional currency. 
+				CAST(
+					(
+						(B.dblQtyReceived * B.dblCost)
+						/ ISNULL(r.intSubCurrencyCents, 1) 
+						* ISNULL(rc.dblForexRate, 1)
+					) 
+					AS DECIMAL(18,2)
+				)
+			WHEN ISNULL(rc.dblForexRate, 1) <> 1 AND ISNULL(rc.ysnSubCurrency, 0) = 0 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. and then convert into functional currency. 
+				CAST(
+					(
+						(B.dblQtyReceived * B.dblCost)
+						* ISNULL(rc.dblForexRate, 1)
+					) 
+					AS DECIMAL(18,2)
+				)
+			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. and then convert into functional currency. 
+					CAST(
+						(
+							(B.dblQtyReceived * B.dblCost)
+							/ ISNULL(r.intSubCurrencyCents, 1) 
+						)  
+						AS DECIMAL(18,2)
+					)
+			ELSE
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					CAST(
+						(B.dblQtyReceived * B.dblCost)  
+						AS DECIMAL(18,2)
+					)
+		END 
+	,[dblNewForexValue] =
+		CASE 
+			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. and then convert into functional currency. 
+				CAST(
+					(
+						(B.dblQtyReceived * B.dblCost) / ISNULL(r.intSubCurrencyCents, 1) 
+					)  
+					AS DECIMAL(18,2)
+				)
+			ELSE
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				CAST(
+					(B.dblQtyReceived * B.dblCost )  
+					AS DECIMAL(18,2)
+				)
+		END  
+	,[dtmDate] = A.dtmDate
+	,[intTransactionId] = A.intBillId
+	,[intTransactionDetailId] = B.intBillDetailId
+	,[strTransactionId] = A.strBillId
+	,[intCurrencyId] = rc.intCurrencyId
+	,[intForexRateTypeId] = rc.intForexRateTypeId
+	,[dblForexRate] = B.dblRate
+FROM tblAPBill A 
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+INNER JOIN (
+	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+		ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+) ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+AND B.intInventoryReceiptChargeId IS NOT NULL 
+AND rc.ysnInventoryCost = 1
+AND A.intTransactionReversed IS NULL
+AND A.intTransactionType IN (3)
 
 -- Remove zero cost adjustments. 
 DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
@@ -650,7 +737,7 @@ INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND B.intTransactionType IN (1)
 UNION ALL
 SELECT 
 	[intItemId] = LD.intItemId
@@ -685,7 +772,7 @@ INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND B.intTransactionType IN (1)
 
 IF ISNULL(@post,0) = 1
 BEGIN	
