@@ -835,6 +835,16 @@ BEGIN TRY
 		,intMonthId INT
 		,intLocationId INT
 		)
+	IF OBJECT_ID('tempdb..#tblMFTempDemand') IS NOT NULL
+		DROP TABLE #tblMFTempDemand
+
+	CREATE TABLE #tblMFTempDemand (
+		intItemId INT
+		,dblQty NUMERIC(18, 6)
+		,intAttributeId INT
+		,intMonthId INT
+		,intLocationId INT
+		)
 
 	IF OBJECT_ID('tempdb..#tblMFInventory') IS NOT NULL
 		DROP TABLE #tblMFInventory
@@ -1935,6 +1945,52 @@ BEGIN TRY
 					END
 				))
 		,SS.intCompanyLocationId
+	INSERT INTO #tblMFTempDemand (
+		intItemId
+		,dblQty
+		,intAttributeId
+		,intMonthId
+		,intLocationId
+		)
+	SELECT
+		intItemId
+		,dblQty
+		,intAttributeId
+		,intMonthId
+		,intLocationId
+	FROM #tblMFDemand
+	WHERE intAttributeId IN (
+			13 --Open Purchases
+			,14 --In-transit Purchases
+			)
+	DELETE FROM #tblMFDemand
+	WHERE intAttributeId IN (
+			13 --Open Purchases
+			,14 --In-transit Purchases
+			)
+
+	INSERT INTO #tblMFDemand (
+		intItemId
+		,dblQty
+		,intAttributeId
+		,intMonthId
+		,intLocationId
+		)
+	SELECT intItemId
+		,SUM(dblQty)
+		,intAttributeId AS intAttributeId 
+		,intMonthId
+		,intLocationId
+	FROM #tblMFTempDemand
+	WHERE intAttributeId IN (
+			13 --Open Purchases
+			,14 --In-transit Purchases
+			)
+	GROUP BY intItemId
+		,intAttributeId
+		,intMonthId
+		,intLocationId;
+
 
 	INSERT INTO #tblMFDemand (
 		intItemId
