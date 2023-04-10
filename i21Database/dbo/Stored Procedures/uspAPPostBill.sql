@@ -79,6 +79,7 @@ DECLARE @totalRecords INT
 DECLARE @costAdjustmentResult INT;
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @billIdsInventoryLog AS Id;
+DECLARE @linkBillIds AS Id;
 
 -- Get the functional currency
 BEGIN 
@@ -294,6 +295,15 @@ BEGIN
 	ORDER BY intBillId
 
 	EXEC uspAPUpdateAccountOnPost @validBillIds
+	
+	--LINK LS ITEM IN IR TO HANDLE COST ADJUSTMENTS
+	UPDATE BD
+	SET BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+	OUTPUT inserted.intBillDetailId INTO @linkBillIds
+	FROM tblAPBillDetail BD
+	INNER JOIN #tmpPostBillData B ON B.intBillId = BD.intBillId
+	INNER JOIN tblICInventoryReceiptItem RI ON RI.intLoadShipmentId = BD.intLoadId AND RI.intLoadShipmentDetailId = BD.intLoadDetailId
+	WHERE BD.intInventoryReceiptItemId IS NULL AND BD.intInventoryReceiptChargeId IS NULL
 END
 
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
@@ -2470,6 +2480,12 @@ ELSE
 		--CLEAN UP TRACKER FOR POSTING
 		DELETE A
 		FROM tblAPBillForPosting A
+
+		--CLEAN THE LINK OF LS ITEM FROM IR
+		UPDATE BD
+		SET BD.intInventoryReceiptItemId = NULL
+		FROM tblAPBillDetail BD
+		INNER JOIN @linkBillIds BL ON BL.intId = BD.intBillDetailId
 		
 		RETURN;
 
@@ -2552,3 +2568,8 @@ Post_Exit:
 	DELETE A
 	FROM tblAPBillForPosting A
 
+	--CLEAN THE LINK OF LS ITEM FROM IR
+	UPDATE BD
+	SET BD.intInventoryReceiptItemId = NULL
+	FROM tblAPBillDetail BD
+	INNER JOIN @linkBillIds BL ON BL.intId = BD.intBillDetailId
