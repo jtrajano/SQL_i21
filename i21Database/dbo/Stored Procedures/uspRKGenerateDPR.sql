@@ -892,6 +892,9 @@ BEGIN TRY
 		,intOrigUOMId
 		,intTicketId
 		,strTicketNumber
+		,intContractHeaderId
+		,intContractDetailId
+		,strContractNumber
 		,strUserName
 	INTO #tempDropshipInTransit
 	FROM dbo.fnRKGetBucketDropshipInTransit(@dtmToDate, @intCommodityId, @intVendorId) t
@@ -2390,7 +2393,9 @@ BEGIN TRY
 		--, strTicketType
 		, strTicketNumber
 		,strDistributionOption
-		,strTransactionType)
+		,strTransactionType
+		,intContractHeaderId
+		,strContractNumber)
 	SELECT intSeqId = 16
 		, strSeqHeader = 'Dropship In-Transit' COLLATE Latin1_General_CI_AS
 		, strCommodityCode
@@ -2409,6 +2414,8 @@ BEGIN TRY
 		, strTicketNumber
 		,strDistributionType
 		,strTransactionType
+		,intContractHeaderId
+		,strContractNumber
 	FROM #tempDropshipInTransit
 
 
@@ -6898,6 +6905,8 @@ BEGIN TRY
 			,strContractEndMonthNearBy
 			,strContractEndMonth
 			,strDeliveryDate
+			,strContractNumber
+			,intContractHeaderId
 		)
 		SELECT
 			strType = 'Dropship In-Transit'
@@ -6916,6 +6925,8 @@ BEGIN TRY
 			,strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
 			,strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
 			,strDeliveryDate = dbo.fnRKFormatDate(dtmTransactionDate, 'MMM yyyy')
+			,strContractNumber
+			,intContractHeaderId
 		FROM #tempDropshipInTransit
 
 
