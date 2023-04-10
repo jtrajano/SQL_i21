@@ -1338,6 +1338,7 @@
     <Build Include="dbo\Views\vyuSTStoreMaintenanceDepartments.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployee401K.sql" />
     <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
+    <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
