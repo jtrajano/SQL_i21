@@ -4,6 +4,7 @@
 	[intUserRoleId]					INT		NOT NULL,
 	[intPowerBIReportId]			INT		NOT NULL,
 	[strPermission]					NVARCHAR(100),
+	[intCreatedById]				INT		NULL,
 	[intConcurrencyId]				INT		NOT NULL	DEFAULT 1,
 
 	CONSTRAINT [PK_tblSMPowerBIUserRoleReport] PRIMARY KEY CLUSTERED ([intPowerBIUserRoleReportId] ASC),
