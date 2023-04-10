@@ -600,7 +600,7 @@ BEGIN
 							AllocatedOtherCharges.dblOriginalAmount 
 					END					
 				,intTransactionTypeId  = @intTransactionTypeId
-				,intCurrencyId = ISNULL(ReceiptCharges.intCurrencyId, Receipt.intCurrencyId) 
+				,intCurrencyId = ReceiptCharges.intOriginalCurrencyId 
 				,dblExchangeRate = ISNULL(ReceiptCharges.dblOriginalForexRate, 1)
 				,ReceiptItem.intInventoryReceiptItemId
 				,AllocatedOtherCharges.intInventoryReceiptChargeId
@@ -1590,7 +1590,7 @@ BEGIN
 			AND InventoryCostCharges.strBundleType != 'Kit'
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
-			AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
 			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
 
 	-- Dr...... Inventory Account (USD)	
@@ -1646,7 +1646,7 @@ BEGIN
 			AND InventoryCostCharges.strBundleType != 'Kit'
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
-			AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
 			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
 
 	-------------------------------------------------------------------------------------------
@@ -1865,7 +1865,7 @@ BEGIN
 			AND InventoryCostCharges.strBundleType != 'Kit'
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
-			AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
 			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
 			AND InventoryCostCharges.ysnAllowVoucher = 1 
 
@@ -1922,7 +1922,7 @@ BEGIN
 			AND InventoryCostCharges.strBundleType != 'Kit'
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
-			AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
 			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
 
 	-------------------------------------------------------------------------------------------
