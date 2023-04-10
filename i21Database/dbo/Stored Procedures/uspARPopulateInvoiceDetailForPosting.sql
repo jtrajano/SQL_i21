@@ -1394,47 +1394,17 @@ WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
 
 UPDATE ARPIH
-SET dblBaseInvoiceTotal = ARPID.dblBaseLineItemGLAmount + ISNULL(ARPIH.dblBaseTax, 0)
+SET dblBaseInvoiceTotal = ARPID.dblBaseLineItemGLAmount + ISNULL(ARPIH.dblBaseTax, 0) - ISNULL(ARPID.dblBaseDiscountAmount, 0)
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
-    SELECT
-         intInvoiceId = intInvoiceId
-        ,dblBaseLineItemGLAmount = SUM(dblBaseLineItemGLAmount)
+    SELECT intInvoiceId             = intInvoiceId
+         , dblBaseLineItemGLAmount  = SUM(dblBaseLineItemGLAmount)
+         , dblBaseDiscountAmount    = SUM(dblBaseDiscountAmount)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
 WHERE strSessionId = @strSessionId
-
-UPDATE ID
-SET dblQtyUnitOrGross = CASE WHEN SP.strGrossOrNet = 'Net' THEN DI.dblDistributionNetSalesUnits ELSE DI.dblDistributionGrossSalesUnits END
-FROM tblARPostInvoiceDetail ID
-INNER JOIN tblTRLoadDistributionDetail DI WITH (NOLOCK) ON ID.intLoadDistributionDetailId = DI.intLoadDistributionDetailId
-INNER JOIN tblTRLoadDistributionHeader DH WITH (NOLOCK) ON DH.intLoadDistributionHeaderId = DI.intLoadDistributionHeaderId
-INNER JOIN tblTRLoadReceipt LR WITH (NOLOCK) ON DH.intLoadHeaderId = LR.intLoadHeaderId
-INNER JOIN tblTRSupplyPoint SP WITH (NOLOCK) ON LR.intSupplyPointId = SP.intSupplyPointId
-WHERE ID.strSessionId = @strSessionId
-  AND DH.strDestination = 'Customer'
-
-UPDATE ARPID
-SET dblBaseInvoiceTotal = ARPIH.dblBaseInvoiceTotal
-FROM tblARPostInvoiceDetail ARPID
-INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPID.intInvoiceId = ARPIH.intInvoiceId AND ARPID.strSessionId = ARPIH.strSessionId
-WHERE ARPID.strSessionId = @strSessionId
-
--- UPDATE ARPIH
--- SET dblBaseInvoiceTotal = ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax
--- FROM tblARPostInvoiceHeader ARPIH
--- INNER JOIN (
---     SELECT
---          intInvoiceId               = intInvoiceId
---         ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
---         ,dblBaseTax                 = SUM(dblBaseTax)
---     FROM tblARPostInvoiceDetail
---     WHERE strSessionId = @strSessionId
---     GROUP BY intInvoiceId
--- ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
--- WHERE strSessionId = @strSessionId
 
 UPDATE ARPID
 SET dblBaseInvoiceTotal = ARPIH.dblBaseInvoiceTotal
