@@ -24,6 +24,9 @@ RETURNS @returntable TABLE
 	, intOrigUOMId INT
 	, intTicketId INT
 	, strTicketNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intContractHeaderId INT
+	, intContractDetailId INT
+	, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strUserName NVARCHAR(250) COLLATE Latin1_General_CI_AS
 	, strAction NVARCHAR(250) COLLATE Latin1_General_CI_AS
 )
@@ -51,12 +54,15 @@ BEGIN
 		,intOrigUOMId
 		,intTicketId
 		,strTicketNumber
+		,intContractHeaderId
+		,intContractDetailId
+		,strContractNumber
 		,strUserName
 		,strAction 
 	FROM (
 		
 		SELECT
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY intTransactionRecordId ORDER BY intSummaryLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY intTransactionRecordId, intContractHeaderId, intContractDetailId ORDER BY intSummaryLogId DESC)
 			,dtmCreatedDate
 			,dtmTransactionDate
 			,dblTotal = c.dblOrigQty
@@ -75,6 +81,9 @@ BEGIN
 			,intOrigUOMId
 			,intTicketId
 			,strTicketNumber
+			,intContractHeaderId
+			,intContractDetailId
+			,strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR(10),intContractSeq)
 			,strUserName
 			,strAction
 		FROM vyuRKGetSummaryLog c
