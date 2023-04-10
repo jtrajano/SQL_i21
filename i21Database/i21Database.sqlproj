@@ -1608,6 +1608,7 @@
     <None Include="Scripts\Post-Deployment\ST\52_Populate_JobTypes.sql" />
     <Build Include="dbo\Views\vyuSTJobs.sql" />
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
+    <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
