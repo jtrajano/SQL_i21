@@ -414,8 +414,8 @@ SET ANSI_WARNINGS ON
 			,[intFobPointId] = FP.intFobPointId
 			,[intInTransitSourceLocationId] = IL.intItemLocationId
 			,[intCurrencyId] = ShipmentCharges.intCurrencyId
-			,[intForexRateTypeId] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
-			,[dblForexRate] = CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
+			,[intForexRateTypeId] = NULL --CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
+			,[dblForexRate] = ShipmentCharges.dblFX --CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
 			,[intSourceEntityId] = NULL
 			,[strSourceType] = NULL
 			,[strSourceNumber] = NULL 
@@ -428,13 +428,6 @@ SET ANSI_WARNINGS ON
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
-		OUTER APPLY (SELECT TOP 1 
-						dblForexRate = ISNULL(dblRate,0),
-						intCurrencyExchangeRateTypeId
-					FROM vyuGLExchangeRate
-					OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
-					WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
-					ORDER BY dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId AND ISNULL(ShipmentCharges.ysnInventoryCost,0) = 1
 		AND ISNULL(ShipmentCharges.ysnAccrue, 0) = 1
 
