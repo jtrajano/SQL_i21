@@ -44,8 +44,8 @@ BEGIN TRY
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
 				VE.strVendorAccountNum,	CL.strLocationName,			CO.strCommodityCode,		S.strSampleNumber,
 				NULL,					NULL,						L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
-				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
-				WUOM.strUnitMeasure,	'Cash',						LD.dblUnitPrice,			PUOM.strUnitMeasure,
+				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			B.dblTotalQuantity,
+				WUOM1.strUnitMeasure,	'Cash',						LD.dblUnitPrice,			ISNULL(PUOM1.strUnitMeasure, PUOM.strUnitMeasure),
 				CU.strCurrency,			NULL,						NULL,						NULL,
 				NULL,					CL.strOregonFacilityNumber,	NULL,						CL1.strOregonFacilityNumber,
 				NULL,					NULL,						NULL,						B.strBatchId,
@@ -66,6 +66,8 @@ BEGIN TRY
 		LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intBuyingCenterLocationId
 		LEFT JOIN dbo.tblSMCompanyLocation CL1 WITH (NOLOCK) ON CL1.intCompanyLocationId = B.intMixingUnitLocationId
 		JOIN dbo.tblQMSample S WITH (NOLOCK) ON S.intSampleId = B.intSampleId
+		LEFT JOIN dbo.tblICUnitMeasure PUOM1 WITH (NOLOCK) ON PUOM1.intUnitMeasureId = S.intB1PriceUOMId
+		JOIN dbo.tblICUnitMeasure WUOM1 WITH (NOLOCK) ON WUOM1.intUnitMeasureId = B.intItemUOMId
 		LEFT JOIN dbo.tblAPVendor VE WITH (NOLOCK) ON VE.intEntityId = S.intEntityId
 		--LEFT JOIN dbo.tblSMPurchasingGroup PG WITH (NOLOCK) ON PG.intPurchasingGroupId = S.intPurchaseGroupId
 		WHERE LD.intLoadDetailId = @intLoadDetailId
@@ -100,8 +102,8 @@ BEGIN TRY
 				B.intSampleId,			LD.intBatchId,				B.intBuyingCenterLocationId,L.strLoadNumber,
 				VE.strVendorAccountNum,	CL.strLocationName,			CO.strCommodityCode,		CH.strContractNumber,
 				CD.intContractSeq,		CH.strCustomerContract,		L.strExternalShipmentNumber,LD.strExternalShipmentItemNumber,
-				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			LD.dblNet,
-				WUOM.strUnitMeasure,	ISNULL(PT.strPricingType, 'Cash'),LD.dblUnitPrice,		PUOM.strUnitMeasure,
+				I.strItemNo,			LD.dblQuantity,				UOM.strUnitMeasure,			B.dblTotalQuantity,
+				WUOM1.strUnitMeasure,	ISNULL(PT.strPricingType, 'Cash'),LD.dblUnitPrice,		PUOM.strUnitMeasure,
 				CU.strCurrency,			CD.dtmStartDate,			CD.dtmEndDate,				CD.dtmPlannedAvailabilityDate,
 				CD.dtmUpdatedAvailabilityDate,CL.strOregonFacilityNumber,CD.strPackingDescription,	CL1.strOregonFacilityNumber,
 				LP.strCity,				DP.strCity,					@dblLeadTime,				B.strBatchId,
@@ -123,6 +125,7 @@ BEGIN TRY
 		LEFT JOIN dbo.tblSMCompanyLocation CL1 WITH (NOLOCK) ON CL1.intCompanyLocationId = B.intMixingUnitLocationId
 		JOIN dbo.tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN dbo.tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN dbo.tblICUnitMeasure WUOM1 WITH (NOLOCK) ON WUOM1.intUnitMeasureId = B.intItemUOMId
 		JOIN dbo.tblAPVendor VE WITH (NOLOCK) ON VE.intEntityId = CH.intEntityId
 		LEFT JOIN dbo.tblCTPricingType PT WITH (NOLOCK) ON PT.intPricingTypeId = CD.intPricingTypeId
 		--LEFT JOIN dbo.tblSMPurchasingGroup PG WITH (NOLOCK) ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
