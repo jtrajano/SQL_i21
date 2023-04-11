@@ -220,8 +220,19 @@ BEGIN
                                 AND @intCurrencyId = intCurrencyId
 
                         END
-
-                        ;WITH CTE AS(
+                        ;WITH cteOrder AS(
+                            select *, ROW_NUMBER() over(order by dtmDate, strTransactionId) rowId 
+                            FROM #AuditorTransactions 
+                            WHERE @intAccountId =intAccountId 
+                            AND @intCurrencyId = intCurrencyId   
+                        )
+                        ,cteTotal AS (
+                            select * , sum(dblDebit - dblCredit) over(order by rowId) total,
+                            sum(dblDebitForeign - dblCreditForeign) over(order by rowId) totalf
+                            from cteOrder
+                        ),
+                        
+                        cteResult AS(
                             SELECT 
                             intEntityId
                             , strBatchId
@@ -266,20 +277,13 @@ BEGIN
                             , strLOBSegmentDescription
                             , strCurrency
                             , strAccountId
-                        
-                            , sum(dblDebit - dblCredit) OVER ( ORDER BY dtmDate, intGLDetailId)  + @beginBalance  dblEndingBalance
-                            , sum(dblDebitForeign - dblCreditForeign) OVER ( ORDER BY dtmDate, intGLDetailId) + @beginBalanceForeign  dblEndingBalanceForeign
-                            FROM #AuditorTransactions 
-                            WHERE @intAccountId =intAccountId 
-                            AND @intCurrencyId = intCurrencyId   
-
-                        ),
-                        CTEBB AS(
-                            SELECT *,
-                            dblBeginningBalance =  dblEndingBalance- (dblDebit- dblCredit),
-                            dblBeginningBalanceForeign =  dblEndingBalanceForeign- (dblDebitForeign- dblCreditForeign)
-                            FROM 
-                            CTE )
+                            , total - (dblDebit - dblCredit) + @beginBalance dblBeginningBalance 
+                            , totalf - (dblDebitForeign - dblCreditForeign) + @beginBalanceForeign dblBeginningBalanceForeign
+                            , total + @beginBalance  dblEndingBalance
+                            , totalf + @beginBalanceForeign  dblEndingBalanceForeign
+                            FROM cteTotal
+                            )
+                      
                             INSERT INTO tblGLAuditorTransaction (
                                 ysnGroupHeader
                                 ,intType
@@ -385,7 +389,7 @@ BEGIN
                                 , dblEndingBalance
                                 , dblBeginningBalanceForeign
                                 , dblEndingBalanceForeign
-                                FROM CTEBB
+                                FROM cteResult
 
                                 SELECT
                                 @dblTotalDebit = sum(dblDebit) , 
@@ -473,7 +477,7 @@ BEGIN
 
                     IF @ysnSuppressZero = 0 OR @ysnZeroEntry = 0 OR
                     (@ysnZeroEntry = 1 AND @ysnSuppressZero = 0)
-
+                    BEGIN
                         INSERT INTO tblGLAuditorTransaction (
                             ysnGroupFooter
                             ,ysnGroupHeader
@@ -483,12 +487,12 @@ BEGIN
                             , strTotalTitle
                             , strGroupTitle
                             , intEntityId
-                            , dblDebit
-                            , dblCredit
-                            , dblEndingBalance
-                            , dblDebitForeign
-                            , dblCreditForeign
-                            , dblEndingBalanceForeign
+                            --, dblDebit
+                            --, dblCredit
+                            , dblBeginningBalance
+                           -- , dblDebitForeign
+                           -- , dblCreditForeign
+                            , dblBeginningBalanceForeign
                             , strCurrency
                             , strAccountId
                             , strLocation
@@ -505,11 +509,11 @@ BEGIN
                             , 'Beginning Balance'
                             , 'Account ID: ' + strAccountId + ', Currency: ' + @strDefaultCurrency
                             , @intEntityId
-                            , @beginBalanceDebit
-                            , @beginBalanceCredit
+                            --, @beginBalanceDebit
+                            --, @beginBalanceCredit
                             , @beginBalance
-                            , @beginBalanceDebitForeign
-                            , @beginBalanceCreditForeign     
+                           -- , @beginBalanceDebitForeign
+                           -- , @beginBalanceCreditForeign     
                             , @beginBalanceForeign            
                             , @strDefaultCurrency
                             , strAccountId
@@ -519,8 +523,29 @@ BEGIN
                             , 1
                             FROM #TransactionGroupAll
                             WHERE intAccountId = @intAccountId
-                            
-                        UNION ALL SELECT TOP 1
+                        INSERT INTO tblGLAuditorTransaction (
+                            ysnGroupFooter
+                            ,ysnGroupHeader
+                            , intType
+                            , intGeneratedBy      
+                            , dtmDateGenerated
+                            , strTotalTitle
+                            , strGroupTitle
+                            , intEntityId
+                            --, dblDebit
+                            --, dblCredit
+                            , dblEndingBalance
+                           -- , dblDebitForeign
+                           -- , dblCreditForeign
+                            , dblEndingBalanceForeign
+                            , strCurrency
+                            , strAccountId
+                            , strLocation
+                            , strLOBSegmentDescription
+                            , strAccountDescription
+                            , intConcurrencyId
+                        )   
+                        SELECT TOP 1
                             CAST(1 AS BIT)
                             ,CAST(0 AS BIT)
                             , 0
@@ -529,11 +554,11 @@ BEGIN
                             , 'Total'
                             , 'Account ID: ' + strAccountId + ', Currency: ' + @strDefaultCurrency
                             , @intEntityId
-                            , 0
-                            , 0
+                           -- , 0
+                           -- , 0
                             , @beginBalance
-                            , 0
-                            , 0    
+                            --, 0
+                            --, 0    
                             , @beginBalanceForeign            
                             , @strDefaultCurrency
                             , strAccountId
@@ -543,6 +568,7 @@ BEGIN
                             , 1
                             FROM #TransactionGroupAll
                             WHERE intAccountId = @intAccountId
+                    END
                 
                 END
 				DELETE FROM #TransactionGroupAll WHERE @intAccountId = intAccountId
