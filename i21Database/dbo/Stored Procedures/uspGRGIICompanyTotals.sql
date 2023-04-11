@@ -113,6 +113,13 @@ BEGIN
 			ON SBD.intBillId = BD.intBillId
 		INNER JOIN tblGRSettleStorage SS
 			ON SS.intSettleStorageId = SBD.intSettleStorageId
+		--INNER JOIN tblGRSettleStorageTicket SST
+		--	ON SST.intSettleStorageId = SS.intSettleStorageId
+		--INNER JOIN tblGRCustomerStorage CS
+		--	ON CS.intCustomerStorageId = SST.intCustomerStorageId
+		--INNER JOIN tblGRStorageType ST
+		--	ON ST.intStorageScheduleTypeId = CS.intStorageScheduleId
+		--		AND ST.ysnDPOwnedType = 0
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = AP.intShipToId
 				AND CL.ysnLicensed = 1
@@ -372,7 +379,7 @@ BEGIN
 
 		--CUSTOMER STORAGE TOTAL
 		DECLARE @dblCustomerStorage DECIMAL(18,6)
-		SET @dblPhysicalInventory = NULL
+		SET @dblCustomerStorage = NULL
 		SELECT @dblCustomerStorage = SUM(dblBeginningBalance) 
 		FROM tblGRGIICustomerStorage 
 		WHERE intCommodityId = @intCommodityId 
@@ -384,7 +391,7 @@ BEGIN
 		--GET SHIPPED FOR THE DAY
 		DECLARE @dblShipped DECIMAL(18,6)
 		SET @dblShipped = NULL
-		SELECT @dblPhysicalInventory = SUM(dblShipped)
+		SELECT @dblShipped = SUM(dblShipped)
 		FROM tblGRGIIPhysicalInventory 
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
@@ -487,14 +494,13 @@ BEGIN
 			,CO.dblTotalBeginning + CS.dblCustomerBeginning
 			,CO.dblTotalIncrease + CS.dblCustomerIncrease
 			,CO.dblTotalDecrease + CS.dblCustomerDecrease
-			,CO.dblTotalEnding + CS.dblCustomerEnding
+			,0
 			,@strUOM
 		FROM @CompanyOwnedData CO
 		INNER JOIN (
 			SELECT dblCustomerBeginning = SUM(dblBeginningBalance)
 				,dblCustomerIncrease = SUM(dblIncrease)
 				,dblCustomerDecrease = SUM(dblDecrease)
-				,dblCustomerEnding = SUM(dblEndingBalance)
 				,intCommodityId
 			FROM tblGRGIICustomerStorage
 			WHERE intCommodityId = @intCommodityId
