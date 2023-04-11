@@ -311,17 +311,7 @@ BEGIN
 			SELECT distinct
 				[intVoucherPayableId]			= payables.intVoucherPayableId
 				,[intTaxGroupId]				= CASE when payables.intLoadShipmentCostId is not null then 
-						CASE WHEN ISNULL(CL.intTaxGroupId, '') = '' THEN 
-							dbo.fnGetTaxGroupIdForVendor (
-								Cost.intVendorId	-- @VendorId
-								,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
-								,NULL				--,@ItemId
-								,LCost.intEntityLocationId		--,@VendorLocationId
-								,L.intFreightTermId	--,@FreightTermId
-								,default --,@FOB
-							)
-					
-						ELSE CL.intTaxGroupId END				
+						CL.intTaxGroupId		
 				WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 				,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
 				,[intTaxClassId]				= vendorTax.[intTaxClassId]
@@ -416,17 +406,7 @@ BEGIN
 							payables.dblOrderQty 
 					END,
 					CASE when payables.intLoadShipmentCostId is not null then 
-						CASE WHEN ISNULL(CL.intTaxGroupId, '') = '' THEN 
-							dbo.fnGetTaxGroupIdForVendor (
-								Cost.intVendorId	-- @VendorId
-								,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
-								,NULL				--,@ItemId
-								,LCost.intEntityLocationId		--,@VendorLocationId
-								,L.intFreightTermId	--,@FreightTermId
-								,default --,@FOB
-							)
-					
-						ELSE CL.intTaxGroupId END					
+						CL.intTaxGroupId			
 					WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END,
 					CL.intCompanyLocationId,
 					EL.intEntityLocationId,
