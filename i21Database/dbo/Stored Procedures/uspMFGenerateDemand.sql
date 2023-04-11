@@ -1,31 +1,33 @@
-﻿CREATE PROCEDURE uspMFGenerateDemand (
-	@intInvPlngReportMasterID INT = NULL
-	,@ExistingDataXML NVARCHAR(MAX) = NULL
-	,@MaterialKeyXML NVARCHAR(MAX) = NULL
-	,@intMonthsToView INT = 12
-	,@ysnIncludeInventory BIT = 1
-	,@intCompanyLocationId INT = NULL
-	,@intUnitMeasureId INT
-	,@intDemandHeaderId INT
-	,@ysnTest BIT = 0
-	,@ysnAllItem BIT = 0
-	,@intCategoryId INT
-	,@PlannedPurchasesXML VARCHAR(MAX) = NULL
-	,@WeeksOfSupplyTargetXML VARCHAR(MAX) = NULL
-	,@ForecastedConsumptionXML VARCHAR(MAX) = NULL
-	,@OpenPurchaseXML VARCHAR(MAX) = NULL
-	,@ysnCalculatePlannedPurchases BIT = 0
-	,@ysnCalculateEndInventory BIT = 0
-	,@ysnRefreshContract BIT = 0
-	,@ysnRefreshStock BIT = 0
-	,@strRefreshItemStock NVARCHAR(MAX) = ''
-	,@ShortExcessXML VARCHAR(MAX) = NULL
-	,@AdditionalForecastedConsumptionXML VARCHAR(MAX) = NULL
-	,@strExternalGroup NVARCHAR(50) = NULL
-	,@InventoryTransferXML VARCHAR(MAX) = NULL
-	)
+﻿CREATE PROCEDURE uspMFGenerateDemand 
+(
+	@intInvPlngReportMasterID		INT = NULL
+  , @ExistingDataXML				NVARCHAR(MAX) = NULL
+  , @MaterialKeyXML					NVARCHAR(MAX) = NULL
+  , @intMonthsToView				INT = 12
+  , @ysnIncludeInventory			BIT = 1
+  , @intCompanyLocationId			INT = NULL
+  , @intUnitMeasureId				INT
+  , @intDemandHeaderId				INT
+  , @ysnTest						BIT = 0
+  , @ysnAllItem						BIT = 0
+  , @intCategoryId					INT
+  , @PlannedPurchasesXML			VARCHAR(MAX) = NULL
+  , @WeeksOfSupplyTargetXML			VARCHAR(MAX) = NULL
+  , @ForecastedConsumptionXML		VARCHAR(MAX) = NULL
+  , @OpenPurchaseXML				VARCHAR(MAX) = NULL
+  , @ysnCalculatePlannedPurchases	BIT = 0
+  , @ysnCalculateEndInventory		BIT = 0
+  , @ysnRefreshContract				BIT = 0
+  , @ysnRefreshStock				BIT = 0
+  , @strRefreshItemStock			NVARCHAR(MAX) = ''
+  , @ShortExcessXML					VARCHAR(MAX) = NULL
+  , @AdditionalForecastedConsumptionXML VARCHAR(MAX) = NULL
+  , @strExternalGroup				NVARCHAR(50) = NULL
+  , @InventoryTransferXML			VARCHAR(MAX) = NULL
+)
 AS
 BEGIN TRY
+
 	DECLARE @dtmStartOfMonth DATETIME
 		,@ysnFGDemand BIT
 		,@intCurrentMonth INT
@@ -68,53 +70,65 @@ BEGIN TRY
 		,@ysnForecastedConsumptionByRemainingDays BIT
 		,@ysnConsiderBookInDemandView INT
 		,@intPositionByETA INT
-	DECLARE @tblMFContainerWeight TABLE (
-		intItemId INT
-		,dblWeight NUMERIC(18, 6)
-		,intWeightUnitMeasureId INT
-		)
-	DECLARE @tblMFItemBook TABLE (
-		intId INT identity(1, 1)
-		,intItemId INT
-		,strBook NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-		)
-	DECLARE @intItemBookId INT
-		,@intId INT
-		,@strBook NVARCHAR(MAX)
-		,@intRemainingDay INT
-		,@intNoOfDays INT
-	DECLARE @tblMFItem TABLE (
-		intItemId INT
-		,intMainItemId INT
-		)
-	DECLARE @tblMFEndInventory TABLE (
-		intRecordId INT identity(1, 1)
-		,intItemId INT
-		,dblQty NUMERIC(18, 6)
-		,intLocationId INT
-		)
-	DECLARE @tblMFItemDetail TABLE (
-		intItemId INT
-		,intMainItemId INT
-		,ysnSpecificItemDescription BIT
-		,dblRatio NUMERIC(18, 6)
-		)
-	DECLARE @tblSMCompanyLocation TABLE (intCompanyLocationId INT)
+
+	DECLARE @tblMFContainerWeight TABLE 
+	(
+		intItemId				INT
+	  , dblWeight				NUMERIC(18, 6)
+	  , intWeightUnitMeasureId	INT
+	);
+
+	DECLARE @tblMFItemBook TABLE 
+	(
+		intId		INT IDENTITY(1, 1)
+	  , intItemId	INT
+	  , strBook		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	);
+
+	DECLARE @intItemBookId		INT
+		  , @intId				INT
+		  , @strBook			NVARCHAR(MAX)
+		  , @intRemainingDay	INT
+		  , @intNoOfDays		INT
+
+	DECLARE @tblMFItem TABLE 
+	(
+		intItemId		INT
+	  , intMainItemId	INT
+	);
+
+	DECLARE @tblMFEndInventory TABLE 
+	(
+		intRecordId		INT IDENTITY(1, 1)
+	  , intItemId		INT
+	  , dblQty			NUMERIC(18, 6)
+	  , intLocationId	INT
+	);
+
+	DECLARE @tblMFItemDetail TABLE 
+	(
+		intItemId					INT
+	  , intMainItemId				INT
+	  , ysnSpecificItemDescription	BIT
+	  , dblRatio					NUMERIC(18, 6)
+	);
+
+	DECLARE @tblSMCompanyLocation TABLE 
+	(
+		intCompanyLocationId INT
+	);
 
 	INSERT INTO @tblSMCompanyLocation (intCompanyLocationId)
 	SELECT intCompanyLocationId
 	FROM tblSMCompanyLocation
 
-	IF (
-			SELECT Count(*)
-			FROM @tblSMCompanyLocation
-			) > 1
-	BEGIN
-		INSERT INTO @tblSMCompanyLocation (intCompanyLocationId)
-		SELECT 9999 AS intCompanyLocationId
-	END
+	IF (SELECT COUNT(*) FROM @tblSMCompanyLocation) > 1
+		BEGIN
+			INSERT INTO @tblSMCompanyLocation (intCompanyLocationId)
+			SELECT 9999 AS intCompanyLocationId
+		END
 
-	SELECT @intRemainingDay = DATEDIFF(day, getdate(), DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, GETDATE()) + 1, 0))) + 1
+	SELECT @intRemainingDay = DATEDIFF(DAY, GETDATE(), DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, GETDATE()) + 1, 0))) + 1
 
 	SELECT @intNoOfDays = datediff(dd, getdate(), dateadd(mm, 1, getdate()))
 
@@ -1454,50 +1468,46 @@ BEGIN TRY
 		END
 	END
 	ELSE
-	BEGIN
-		INSERT INTO #tblMFDemand (
-			intItemId
-			,dblQty
-			,intAttributeId
-			,intMonthId
-			,intLocationId
+		BEGIN
+			INSERT INTO #tblMFDemand 
+			(
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
+				,intLocationId
 			)
-		SELECT intItemId
-			,strValue
-			,13 --Open Purchases 
-			,[strName] AS intMonthId
-			,intLocationId
-		FROM #TempOpenPurchase
-	END
+			SELECT intItemId
+					, CASE WHEN @ysnCalculateEndInventory = 1 THEN 0 
+						   ELSE strValue 
+					  END
+					, 13 /* Open Purchase */
+					, [strName] AS intMonthId
+					, intLocationId
+			FROM #TempOpenPurchase
+		END
 
-	INSERT INTO #tblMFDemand (
+	INSERT INTO #tblMFDemand 
+	(
 		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		,intLocationId
-		)
-	SELECT CASE 
-			WHEN I.ysnSpecificItemDescription = 1
-				THEN I.intItemId
-			ELSE I.intMainItemId
-			END AS intItemId
-		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (
-					CASE 
-						WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL)
-							THEN ISNULL(LDCL.dblReceivedQty, 0)
-						ELSE LD.dblDeliveredQuantity
-						END
-					)) * I.dblRatio) AS dblIntrasitQty
-		,(
-			CASE 
-				WHEN @intPositionByETA = 2
-					THEN 14
-				ELSE 13
-				END
-			) AS intAttributeId --Open
-		,0 AS intMonthId
-		,SS.intCompanyLocationId
+	  , dblQty
+	  , intAttributeId
+	  , intMonthId
+	  , intLocationId
+	)
+	SELECT CASE WHEN I.ysnSpecificItemDescription = 1 THEN I.intItemId
+				ELSE I.intMainItemId
+		   END AS intItemId
+		 , SUM(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, ISNULL(LDCL.dblQuantity, LD.dblQuantity) - 
+					(CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0)
+						  ELSE LD.dblDeliveredQuantity
+					 END)
+			   ) * I.dblRatio) AS dblIntrasitQty
+		 , (CASE WHEN @intPositionByETA = 2 THEN 14
+				 ELSE 13
+			END) AS intAttributeId --Open
+		 , 0 AS intMonthId
+		 , SS.intCompanyLocationId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
