@@ -11842,7 +11842,13 @@
     <Build Include="dbo\Views\vyuCTPriceContractViewBU.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractDetailViewBU.sql" />
     <Build Include="dbo\Views\vyuCTContractAmendmentViewBU.sql" />
-    <Build Include="dbo\Views\vyuCTContractDetailViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostViewBU.sql" />
+    <Build Include="dbo\Views\vyuCTContractHeaderViewZug.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailViewZug.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractViewZug.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContractDetailViewZug.sql" />
+    <Build Include="dbo\Views\vyuCTContractAmendmentViewZug.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostViewZug.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
