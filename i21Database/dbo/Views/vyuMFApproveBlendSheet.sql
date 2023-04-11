@@ -55,6 +55,7 @@ SELECT WorkOrder.intWorkOrderId
 			ELSE 'No'
 	   END AS strChannel
 	 , ISNULL(WorkOrder.intCompanyId, WorkOrder.intLocationId) AS intCompanyLocationId
+	 , Batch.intBuyingCenterLocationId
 FROM tblMFWorkOrder AS WorkOrder
 INNER JOIN tblMFWorkOrderInputLot AS InputLot ON WorkOrder.intWorkOrderId = InputLot.intWorkOrderId
 INNER JOIN tblICLot AS Lot ON Lot.intLotId = InputLot.intLotId
