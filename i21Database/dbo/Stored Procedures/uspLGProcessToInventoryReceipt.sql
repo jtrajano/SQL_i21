@@ -189,7 +189,7 @@ BEGIN TRY
 			,[intTaxGroupId] = LD.intTaxGroupId
 			,[strTaxPoint] = L.strTaxPoint
 			,[intTaxLocationId] = L.intTaxLocationId
-			,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
+			,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
 		FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -745,7 +745,7 @@ BEGIN TRY
 				,[intTaxGroupId] = LD.intTaxGroupId
 				,[strTaxPoint] = L.strTaxPoint
 				,[intTaxLocationId] = L.intTaxLocationId
-				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
+				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -896,7 +896,7 @@ BEGIN TRY
 				,[intTaxGroupId] = LD.intTaxGroupId
 				,[strTaxPoint] = L.strTaxPoint
 				,[intTaxLocationId] = L.intTaxLocationId
-				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 1 ELSE 0 END AS BIT)
+				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
