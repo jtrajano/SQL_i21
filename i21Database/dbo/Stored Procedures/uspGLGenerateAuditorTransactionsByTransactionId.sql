@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByTransactionId]
 	@intEntityId INT,
 	@dtmDateFrom DATETIME,
-	@dtmDateTo DATETIME
+	@dtmDateTo DATETIME,
+    @strFilterDate NVARCHAR(20) = 'DatePosted'
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF;
@@ -69,11 +70,11 @@ BEGIN
             outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 3)LOC
 			outer apply dbo.fnGLGetSegmentAccount(A.intAccountId, 5)LOB
             WHERE 
-                A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+                A.ysnIsUnposted = 0 AND CASE WHEN @strFilterDate = 'DatePosted' THEN A.dtmDate ELSE A.dtmDateEntered END
+                BETWEEN @dtmDateFrom AND @dtmDateTo
         )
-        SELECT * INTO #AuditorTransactions FROM T ORDER BY T.strTransactionId, T.dtmDate
+        SELECT * INTO #AuditorTransactions FROM T ORDER BY T.strTransactionId, CASE WHEN @strFilterDate = 'DatePosted' THEN T.dtmDate ELSE T.dtmDateEntered END
 
-      
         DECLARE @dtmNow DATETIME = GETDATE()
 
         IF OBJECT_ID('tempdb..#TransactionGroup') IS NOT NULL
@@ -98,11 +99,6 @@ BEGIN
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
             GROUP BY strTransactionId, intCurrencyId, strCurrency
-
-
-           
-
-            
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
@@ -216,7 +212,7 @@ BEGIN
                 FROM #AuditorTransactions 
                 WHERE @strTransactionId =strTransactionId 
                 AND @intCurrencyId = intCurrencyId
-                ORDER BY dtmDate
+                ORDER BY CASE WHEN @strFilterDate = 'DatePosted' THEN   dtmDate ELSE dtmDateEntered  END
 
                 -- Total record
                 INSERT INTO tblGLAuditorTransaction (
