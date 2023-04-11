@@ -39,6 +39,7 @@ BEGIN
 		INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Gross')
 		INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Fees')
 		INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Dealer Site Shared Fees')
+		INSERT INTO @CCRItemToAPItem VALUES (@intSiteHeaderId,'Company Owned Shared Fees')
 
 		SELECT @strCcdReference = ccSiteHeader.strCcdReference
 			, @dtmDate = ccSiteHeader.dtmDate
@@ -85,6 +86,7 @@ BEGIN
 					WHEN ccItem.strItem = 'Dealer Site Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intFeeExpenseAccountId
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSite.intCreditCardReceivableAccountId  
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSite.intFeeExpenseAccountId
+					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSite.intFeeExpenseAccountId
 					ELSE null END) AS intAccountId
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Site Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet 
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblGross 
@@ -94,6 +96,7 @@ BEGIN
 					WHEN ccItem.strItem = 'Dealer Site Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees - ROUND(ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100), 2)
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblGross 
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblFees
+					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSiteDetail.dblFees - ROUND(ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100), 2)
 					ELSE null END) AS dblCost
 			FROM tblCCSiteHeader ccSiteHeader
 			LEFT JOIN tblCCSiteDetail ccSiteDetail ON ccSiteDetail.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
