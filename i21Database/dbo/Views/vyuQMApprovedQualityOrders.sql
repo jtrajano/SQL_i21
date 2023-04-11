@@ -29,9 +29,9 @@ SELECT
     ,[intQtyItemUOMId] = QIUOM.intItemUOMId
     ,[intQtyUnitMeasureId] = QUM.intUnitMeasureId
     ,[strQtyUnitMeasure] = QUM.strSymbol
-    ,[dblGrossWeight] = WQTY.dblWeight
+    ,[dblGrossWeight] = B.dblTotalQuantity
     ,[dblTareWeight] = CAST(0 AS DECIMAL(18, 6))
-    ,[dblNetWeight] = WQTY.dblWeight
+    ,[dblNetWeight] = B.dblTotalQuantity
     ,[intWeightItemUOMId] = WIUOM.intItemUOMId
     ,[strWeightUnitMeasure] = WUM.strSymbol
     ,[dblWeightPerUnit] = ISNULL(dbo.fnLGGetItemUnitConversion(I.intItemId, QIUOM.intItemUOMId, WUM.intUnitMeasureId), 0)
@@ -98,9 +98,6 @@ LEFT JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureI
 LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 LEFT JOIN tblSMCurrency FC ON FC.intCurrencyID = CD.intInvoiceCurrencyId AND CD.ysnUseFXPrice = 1
 LEFT JOIN tblSMCurrency DFC ON DFC.intCurrencyID = B.intCurrencyId
-OUTER APPLY (
-    SELECT [dblWeight] = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, B.dblPackagesBought)
-) WQTY
 OUTER Apply (Select Top 1 V1.intEntityId,V1.strEntityName,V1.intDefaultLocationId,V1.strDefaultLocation  from vyuQMGetSupplier V1 Where V1.intEntityId = CH.intEntityId) VV
 OUTER Apply (Select Top 1 SV1.intEntityId,SV1.strEntityName,SV1.intDefaultLocationId,SV1.strDefaultLocation  from vyuQMGetSupplier SV1 Where SV1.intEntityId = S.intEntityId) SVV
 LEFT JOIN (tblLGLoadDetail LDD INNER JOIN tblLGLoad L ON L.intLoadId = LDD.intLoadId AND ISNULL(L.ysnCancelled, 0) = 0)
