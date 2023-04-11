@@ -593,6 +593,7 @@ BEGIN
 			,t.dblForexCost
 		FROM tblICInventoryTransaction t
 		WHERE t.strTransactionId = @strTransactionId
+			AND t.intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
 			AND t.ysnIsUnposted = 0
 			AND t.strBatchId = @strBatchId
 			AND @intFOBPointId = 2
