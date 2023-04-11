@@ -11,6 +11,7 @@
 	[intPowerBICredentialId]	INT		NULL,
 	[intModuleId]				INT		NULL,
 	[strModule]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[intCreatedById]			INT		NULL,
 	[intConcurrencyId]			INT		NOT NULL	DEFAULT 1,
 
 
