@@ -140,12 +140,15 @@ BEGIN
 		ON AR.intSalesOrderId = SC.intSalesOrderId
 	INNER JOIN tblSMCompanyLocation CL
 		ON CL.intCompanyLocationId = AR.intCompanyLocationId
+	INNER JOIN tblICItem IC
+		ON IC.intItemId = UOM.intItemId
 	INNER JOIN tblICCommodityUnitMeasure CO
-		ON CO.intCommodityId = SC.intCommodityId
+		ON CO.intCommodityId = IC.intCommodityId
 			AND CO.intUnitMeasureId = UOM.intUnitMeasureId
-	WHERE SC.intItemId = ISNULL(@intItemId,SC.intItemId)
+	WHERE IC.intItemId = ISNULL(@intItemId,IC.intItemId)
 		AND (AR.intCompanyLocationId= ISNULL(@intLocationId,AR.intCompanyLocationId)
 			OR AR.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
+		AND IC.intCommodityId = ISNULL(@intCommodityId, IC.intCommodityId)
 
 	--=============================
 	-- Company Owned *** Invoices that are not linked to scale tickets
