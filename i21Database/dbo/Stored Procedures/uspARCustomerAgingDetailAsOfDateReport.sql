@@ -45,7 +45,7 @@ SET @intEntityUserIdLocal			= NULLIF(@intEntityUserId, 0)
 SET @ysnPaidInvoiceLocal			= ISNULL(@ysnPaidInvoice, 1)
 SET @ysnInclude120DaysLocal			= ISNULL(@ysnInclude120Days, 0)
 SET @ysnExcludeAccountStatusLocal	= ISNULL(@ysnExcludeAccountStatus, 0)
-SET @intGracePeriodLocal			= NULLIF(@intGracePeriodLocal, 0)
+SET @intGracePeriodLocal			= NULLIF(@intGracePeriod, 0)
 SET @ysnOverrideCashFlowLocal  		= ISNULL(@ysnOverrideCashFlow, 0)
 
 IF(OBJECT_ID('tempdb..#TEMPAGINGDETAILS') IS NOT NULL) DROP TABLE #TEMPAGINGDETAILS
