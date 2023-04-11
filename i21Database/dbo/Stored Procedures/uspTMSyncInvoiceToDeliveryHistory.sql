@@ -367,20 +367,25 @@ BEGIN
 						--WHERE intSiteID = @intSiteId
 						print 'Virtual Meter'
 					END
+
+
+					---- update site last gals delivered base on delivery history Detail totals and last Reading update
 					UPDATE tblTMSite
 					SET dtmLastReadingUpdate = @dtmInvoiceDate
-						,dblLastDeliveredGal = dblQuantityTotal
+						,dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
 					FROM(
-						SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-							,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
-						FROM #tmpSiteInvoiceLineItems
+						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+							,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+						FROM tblTMDeliveryHistoryDetail 
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					)A
 					WHERE intSiteID = @intSiteId
 					
-					---Update Site Estimated Gals and last gals in tank
+					---Update Site Estimated Gals and Estimated % in tank
 					UPDATE tblTMSite
 					SET dblEstimatedPercentLeft = A.dblPercentAfterDelivery
 						,dblEstimatedGallonsLeft = ISNULL(A.dblPercentAfterDelivery,0.0) * tblTMSite.dblTotalCapacity /100
+						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(A.dblPercentAfterDelivery,0)/100
 					FROM(
 						SELECT   
 							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
@@ -389,17 +394,8 @@ BEGIN
 					)A
 					WHERE tblTMSite.intSiteID = @intSiteId
 
-					UPDATE tblTMSite
-					SET dblLastDeliveredGal = A.dblShippedQuantity
-						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(A.dblPercentAfterDelivery,0)/100
-					FROM(
-						SELECT   
-							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
-							,dblShippedQuantity = SUM(ISNULL(dblQuantityDelivered,0.0))
-						FROM tblTMDeliveryHistoryDetail	
-						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId	 
-					)A
-					WHERE tblTMSite.intSiteID = @intSiteId
+
+					
 					
 					---- get the invoicedetail Id of the highest percent full
 					SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId 
@@ -582,6 +578,8 @@ BEGIN
 						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 					END
 					
+					
+
 					---- Update forecasted nad estimated % left
 					IF(@ysnRequireClock = 1)
 					BEGIN
@@ -657,6 +655,17 @@ BEGIN
 							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 						)A
 						WHERE tblTMDeliveryHistory.intDeliveryHistoryID = @intNewDeliveryHistoryId
+
+						---- update last gals delivered base on delivery history Detail totals
+						UPDATE tblTMSite
+						SET dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM tblTMDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
 						
 						-----Update Site
 						IF(@strBillingBy <> 'Virtual Meter')
@@ -853,6 +862,17 @@ BEGIN
 						--	)A
 						--	WHERE intSiteID = @intSiteId
 						--END
+
+						---- update last gals delivered base on delivery history Detail totals
+						UPDATE tblTMSite
+						SET dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM tblTMDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
 				
 					END
 
@@ -1100,19 +1120,24 @@ BEGIN
 					--	WHERE intSiteID = @intSiteId
 					--END
 
-					
+					---- update last gals delivered base on delivery history Detail totals
+					UPDATE tblTMSite
+					SET dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
+					FROM(
+						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+							,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+						FROM tblTMDeliveryHistoryDetail 
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+					)A
+					WHERE intSiteID = @intSiteId
 					
 
 					UPDATE tblTMSite
 					SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
 						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-						
-						,dblLastDeliveredGal = @dblQuantityShipped
 						,dtmLastDeliveryDate = @dtmInvoiceDate
 						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 						,ysnDeliveryTicketPrinted = 0
-						
-						
 						,dtmLastReadingUpdate = @dtmInvoiceDate
 					WHERE intSiteID = @intSiteId
 
@@ -1171,6 +1196,7 @@ BEGIN
 					END
 
 				
+					
 			
 					----Update Next Julian Calendar Date of the site
 					--TM-3174 - Remove this part that cause a blank for next julian calendar
