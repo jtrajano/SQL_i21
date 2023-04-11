@@ -343,8 +343,8 @@ BEGIN TRY
 				,[intCurrencyExchangeRateTypeId] = VDD.intCurrencyExchangeRateTypeId
 				,[ysnSubCurrency] = CUR.ysnSubCurrency
 				,[intSubCurrencyCents] = CUR.intCent
-				,[intAccountId] = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND VDD.ysnAccrue = 1 AND VDD.intVendorEntityId IS NOT NULL)
-										OR (ISNULL(LC.ysnInventoryCost, 0) = 1 AND VDD.ysnAccrue = 1)
+				,[intAccountId] = CASE WHEN (VDD.ysnAccrue = 1 AND VDD.intVendorEntityId IS NOT NULL
+												AND ((CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2) OR (L.intPurchaseSale = 1)))
 									THEN dbo.fnGetItemGLAccount(VDD.intItemId, IL.intItemLocationId, 'AP Clearing') 
 									ELSE dbo.fnGetItemGLAccount(VDD.intItemId, IL.intItemLocationId, 'Other Charge Expense') END
 				,[strBillOfLading] = L.strBLNumber
