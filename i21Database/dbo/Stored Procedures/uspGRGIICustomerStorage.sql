@@ -50,7 +50,8 @@ WHERE [fieldname] = 'intCommodityId'
 SET @dtmReportDate = CASE WHEN @dtmReportDate IS NULL THEN dbo.fnRemoveTimeOnDate(GETDATE()) ELSE @dtmReportDate END
 
 DECLARE @CustomerStorageData AS TABLE (
-	dtmReportDate DATETIME
+	intId INT IDENTITY(1,1)
+	,dtmReportDate DATETIME
 	,intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,strStorageTypeDescription NVARCHAR(40) COLLATE Latin1_General_CI_AS
@@ -264,7 +265,16 @@ DELETE FROM #StorageTypes
 UPDATE @CustomerStorageData SET dblEndingBalance = ISNULL(dblBeginningBalance,0) + ISNULL(dblIncrease,0) - ISNULL(dblDecrease,0)
 
 INSERT INTO tblGRGIICustomerStorage
-SELECT * FROM @CustomerStorageData
+SELECT dtmReportDate
+	,intCommodityId
+	,strCommodityCode
+	,strStorageTypeDescription
+	,dblBeginningBalance
+	,dblIncrease
+	,dblDecrease
+	,dblEndingBalance
+	,strUOM
+FROM @CustomerStorageData
 
 INSERT INTO @CustomerStorageData
 SELECT
@@ -283,6 +293,6 @@ GROUP BY dtmReportDate
 	,strCommodityCode
 	,strUOM
 
-SELECT * FROM @CustomerStorageData ORDER BY intCommodityId
+SELECT * FROM @CustomerStorageData ORDER BY intId,intCommodityId
 
 END
