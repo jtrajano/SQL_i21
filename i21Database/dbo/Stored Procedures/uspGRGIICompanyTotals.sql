@@ -119,7 +119,16 @@ BEGIN
 				AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
 		) UM_REF
 		INNER JOIN tblGRSettleStorageBillDetail SBD
-			ON SBD.intBillId = BD.intBillId		
+			ON SBD.intBillId = BD.intBillId
+		INNER JOIN tblGRSettleStorage SS
+			ON SS.intSettleStorageId = SBD.intSettleStorageId
+		--INNER JOIN tblGRSettleStorageTicket SST
+		--	ON SST.intSettleStorageId = SS.intSettleStorageId
+		--INNER JOIN tblGRCustomerStorage CS
+		--	ON CS.intCustomerStorageId = SST.intCustomerStorageId
+		--INNER JOIN tblGRStorageType ST
+		--	ON ST.intStorageScheduleTypeId = CS.intStorageScheduleId
+		--		AND ST.ysnDPOwnedType = 0
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = AP.intShipToId
 				AND CL.ysnLicensed = 1
@@ -409,9 +418,8 @@ BEGIN
 
 		--CUSTOMER STORAGE TOTAL
 		DECLARE @dblCustomerStorage DECIMAL(18,6)
-		DECLARE @dblSODecrease DECIMAL(18,6)
-		SET @dblCustomerStorage = NULL		
-		SELECT @dblCustomerStorage = SUM(dblBeginningBalance)
+		SET @dblCustomerStorage = NULL
+		SELECT @dblCustomerStorage = SUM(dblBeginningBalance) 
 		FROM tblGRGIICustomerStorage 
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
@@ -419,16 +427,11 @@ BEGIN
 		GROUP BY intCommodityId
 			,strUOM
 
-		SET @dblSODecrease = NULL
-		SELECT @dblSODecrease = SUM(dblDecrease)
-		FROM tblGRGIICustomerStorage CS
-		INNER JOIN tblGRStorageType ST
-			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				AND ST.ysnReceiptedStorage = 0
-				AND ST.ysnCustomerStorage = 0
-				AND ST.ysnDPOwnedType = 0
-				AND ST.ysnGrainBankType = 0
-				AND ST.strOwnedPhysicalStock = 'Customer'
+		--GET SHIPPED FOR THE DAY
+		DECLARE @dblShipped DECIMAL(18,6)
+		SET @dblShipped = NULL
+		SELECT @dblShipped = SUM(dblShipped)
+		FROM tblGRGIIPhysicalInventory 
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
 			AND dtmReportDate = @dtmReportDate
