@@ -26,23 +26,24 @@ SELECT
 FROM tblLGWeightClaim WC
 WHERE intWeightClaimId = @intWeightClaimsId
 
+-- Check if there is a Voucher that is already posted
+IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionPostedFlag = 1 AND 
+EXISTS (
+	SELECT AP.intBillId 
+	FROM tblLGWeightClaimDetail WCD
+	INNER JOIN tblAPBill AP ON AP.intBillId = WCD.intBillId
+	WHERE WCD.intWeightClaimId = @intWeightClaimsId
+)
+BEGIN
+	RAISERROR ('Voucher has been created for the weight claim. Cannot unpost.',11,1)
+	RETURN;	
+END
+
 /********************
  Weight Claims No GL
  ********************/
 IF EXISTS(SELECT TOP 1 1 FROM tblLGCompanyPreference WHERE ISNULL(ysnWeightClaimsImpactGL, 0) = 0)
 BEGIN
-	IF(@ysnPost = 0 AND @ysnRecap = 0) 
-	BEGIN
-		IF EXISTS (SELECT 1 FROM tblLGWeightClaimDetail WHERE intWeightClaimId = @intWeightClaimsId AND intBillId IS NOT NULL)
-		BEGIN 
-			SELECT @intBillId = intBillId FROM tblLGWeightClaimDetail WHERE intWeightClaimId = @intWeightClaimsId
-			IF EXISTS(SELECT 1 FROM tblAPBill WHERE intBillId = @intBillId)
-			BEGIN 
-				RAISERROR('Voucher has been created for the weight claim. Cannot unpost.',16,1)
-			END
-		END
-	END
-
 	IF (@ysnRecap = 0)
 	BEGIN
 		UPDATE tblLGWeightClaim
@@ -102,6 +103,7 @@ BEGIN
 	RAISERROR ('The transaction is already unposted.',11,1)
 	RETURN;
 END
+
 
 /*********************
  Generate GL Entries 
