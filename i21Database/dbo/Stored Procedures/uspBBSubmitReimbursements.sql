@@ -36,7 +36,17 @@ END
 CLOSE cur
 DEALLOCATE cur
 
-INSERT INTO tblBBBuybackDetail (
+DECLARE @Details TABLE (
+	intBuybackId INT, 
+	intInvoiceDetailId INT, 
+	intProgramRateId INT NULL, intItemId INT, 
+    dblBuybackRate NUMERIC(18, 6), dblBuybackQuantity NUMERIC(32, 20), 
+	dblReimbursementAmount NUMERIC(18, 6), 
+	dblItemCost NUMERIC(18, 6),
+    strCharge NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+	intConcurrencyId INT)
+
+INSERT INTO @Details (
     intBuybackId, intInvoiceDetailId, intProgramRateId, intItemId, 
     dblBuybackRate, dblBuybackQuantity, dblReimbursementAmount, dblItemCost,
     strCharge, intConcurrencyId)
@@ -51,17 +61,24 @@ WHERE ISNULL(br.dblRatePerUnit, 0) != 0
     AND bb.guiUniqueId = @UniqueId
 
 -- Create Inventory
-;WITH cte AS (
-  SELECT TOP 1 bd.strCharge, bd.dblReimbursementAmount, bd.dblBuybackQuantity, bd.dblBuybackRate, bd.intProgramRateId, bd.dblItemCost
-  FROM tblBBBuybackDetail bd
-  JOIN tblBBBuyback bb ON bb.intBuybackId = bd.intBuybackId
-  WHERE bb.guiUniqueId = @UniqueId
-)
-update cte 
-set strCharge = 'Inventory',
-    intProgramRateId = NULL,
-    dblReimbursementAmount = dblBuybackQuantity * dblItemCost,
-    dblBuybackRate = dblItemCost
+INSERT INTO tblBBBuybackDetail(
+    intBuybackId, intInvoiceDetailId, intProgramRateId, intItemId, 
+    dblBuybackRate, dblBuybackQuantity, dblReimbursementAmount, dblItemCost,
+    strCharge, intConcurrencyId)
+SELECT DISTINCT intBuybackId, intInvoiceDetailId, NULL, intItemId, 
+    dblItemCost, dblBuybackQuantity, dblBuybackQuantity * dblItemCost, dblItemCost,
+    'Inventory', intConcurrencyId
+FROM @Details
+
+-- Create Charge
+INSERT INTO tblBBBuybackDetail(
+    intBuybackId, intInvoiceDetailId, intProgramRateId, intItemId, 
+    dblBuybackRate, dblBuybackQuantity, dblReimbursementAmount, dblItemCost,
+    strCharge, intConcurrencyId)
+SELECT intBuybackId, intInvoiceDetailId, intProgramRateId, intItemId, 
+    dblBuybackRate, dblBuybackQuantity, dblReimbursementAmount, dblItemCost,
+    strCharge, intConcurrencyId
+FROM @Details
 
 UPDATE b
 SET b.dblReimbursementAmount = (
@@ -82,7 +99,6 @@ WHERE bb.guiUniqueId = @UniqueId
     AND bd.strCharge != 'Inventory'
 
 DELETE FROM tblBBReimbursementPostingSession WHERE guiSessionId = @UniqueId
-
 
 DECLARE @strBuybackIds NVARCHAR(MAX)
 
