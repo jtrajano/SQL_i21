@@ -3,7 +3,7 @@
 	@dtmDateFrom DATETIME,
 	@dtmDateTo DATETIME,
     @strFilterDate NVARCHAR(20) = 'DatePosted',
-    @intLocationSegmentId INT = NULL
+    @intLocationSegmentId INT = 0
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF;
@@ -73,7 +73,7 @@ BEGIN
             WHERE 
                 A.ysnIsUnposted = 0 AND CASE WHEN @strFilterDate = 'DatePosted' THEN A.dtmDate ELSE A.dtmDateEntered END
                 BETWEEN @dtmDateFrom AND @dtmDateTo
-            AND  CASE WHEN @intLocationSegmentId IS NULL THEN  intLocationSegmentId  ELSE @intLocationSegmentId END = intLocationSegmentId
+            AND  CASE WHEN @intLocationSegmentId = 0 THEN  intLocationSegmentId  ELSE @intLocationSegmentId END = intLocationSegmentId
         )
         SELECT * INTO #AuditorTransactions FROM T ORDER BY T.strTransactionId, CASE WHEN @strFilterDate = 'DatePosted' THEN T.dtmDate ELSE T.dtmDateEntered END
 
