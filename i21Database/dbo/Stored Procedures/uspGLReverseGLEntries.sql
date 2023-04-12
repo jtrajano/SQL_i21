@@ -114,7 +114,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
---SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strTransactionId = @strTransactionId)
+SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strTransactionId = @strTransactionId)
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -124,7 +124,6 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 Post_Commit:
 IF @@TRANCOUNT > 0
 	COMMIT TRANSACTION
-	SET @successfulCount = 1
 	GOTO Post_Exit
 
 Post_Rollback:

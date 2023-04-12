@@ -63,8 +63,7 @@ IF ISNULL(@ysnPost, 0) = 0
 			BEGIN
 				SET @Param = (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM @tmpPostJournals))
 				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, @ysnRecap, 'GJ', NULL, @intEntityId, @intCount	OUT
-				
-				IF @@ERROR <> 0	GOTO Post_Rollback;
+				SET @successfulCount = @intCount
 				
 				IF(@intCount > 0)
 				BEGIN
@@ -286,9 +285,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
-
+		
 		IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback;
-		SET @successfulCount = 1
 	END
 ELSE
 	BEGIN
@@ -376,13 +374,10 @@ ELSE
 		IF @@ERROR <>  0 
 		GOTO Post_Rollback;
 		
-		IF EXISTS(SELECT 1 FROM @GLEntries)
-		BEGIN
-			EXEC uspGLValidateGLEntries @GLEntries, @ysnPost
-			IF @@ERROR <> 0	GOTO Post_Rollback;
-			EXEC uspGLPostRecap @GLEntries , @intEntityId , 0
-			SET @successfulCount = 1
-		END
+
+		EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityId
 
 	
 		IF @@ERROR <> 0	GOTO Post_Rollback;
