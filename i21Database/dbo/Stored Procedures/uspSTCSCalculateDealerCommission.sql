@@ -73,6 +73,23 @@ BEGIN
 	--BEGIN TRAN  
 	EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId  
 	--ROLLBACK
+
+	IF @Cost = NULL
+	BEGIN
+		DECLARE @ysnAutoBlend BIT
+		SELECT @ysnAutoBlend = i.ysnAutoBlend FROM tblICItem i WHERE i.intItemId = @intItemId
+
+		IF @ysnAutoBlend = 1
+		BEGIN
+			SELECT @Cost = SUM(r.dblCost * r.dblQuantity)
+			FROM vyuMFGetRecipeItem r 
+			WHERE 
+			r.intLocationId = @intCompanyLocationId 
+			AND strRecipeItemNo = @strItemNo
+			AND r.strRecipeItemType = 'INPUT'
+		END
+	END	
+
 	SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
 	SET @dblCommission = @dblMargin * @dblDealerPercentage  
 	SET @dblTotalCommission += @dblCommission  
@@ -83,6 +100,8 @@ BEGIN
 		INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
 		VALUES (@intCheckoutProcessId, @intCheckoutId, 'F', @strMessage, 1) 
 	END
+
+	SET @Cost = NULL;
   
 	--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
 	FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId  
