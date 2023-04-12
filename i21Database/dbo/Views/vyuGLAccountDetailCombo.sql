@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuGLAccountDetail]
+CREATE VIEW [dbo].[vyuGLAccountDetailCombo]
 AS
 
 	SELECT      TOP 1000000 
