@@ -1043,6 +1043,7 @@ BEGIN
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 					,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
+					,@ItemDispatchId				= [intDispatchId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1148,6 +1149,7 @@ BEGIN
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 						,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+						,@ItemDispatchId				= @ItemDispatchId
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1839,6 +1841,7 @@ BEGIN TRY
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 						,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
+						,@ItemDispatchId				= [intDispatchId]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1936,6 +1939,7 @@ BEGIN TRY
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 							,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+							,@ItemDispatchId				= @ItemDispatchId
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN
