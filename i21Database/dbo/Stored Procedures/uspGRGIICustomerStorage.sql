@@ -244,7 +244,7 @@ BEGIN
 
 	--DECREASE FOR THE DAY
 	UPDATE CSD
-	SET dblIncrease = STORAGE.TOTAL
+	SET dblDecrease = STORAGE.TOTAL
 	FROM @CustomerStorageData CSD
 	INNER JOIN (
 		SELECT TOTAL = SUM(dblOut)
