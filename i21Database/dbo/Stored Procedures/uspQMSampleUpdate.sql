@@ -1352,14 +1352,14 @@ BEGIN
       ,strLeafSize = BRAND.strBrandCode
       ,strLeafStyle = STYLE.strName
       ,intBookId = S.intBookId
-      ,dblPackagesBought = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE S.dblRepresentingQty END
+      ,dblPackagesBought = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1QtyBought ELSE S.dblRepresentingQty END
       ,intItemUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intRepresentingUOMId ELSE S.intSampleUOMId END
       ,intWeightUOMId = S.intSampleUOMId
       ,strTeaOrigin = S.strCountry
       ,intOriginalItemId = S.intItemId
       ,dblPackagesPerPallet = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20) END
       ,strPlant = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE TBO.strOregonFacilityNumber END
-      ,dblTotalQuantity = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1QtyBought ELSE S.dblSampleQty END
+      ,dblTotalQuantity = S.dblSampleQty
       ,strSampleBoxNumber = S.strSampleBoxNumber
       ,dblSellingPrice = NULL
       ,dtmStock = CD.dtmUpdatedAvailabilityDate
