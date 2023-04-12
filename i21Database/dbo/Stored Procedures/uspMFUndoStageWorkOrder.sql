@@ -74,6 +74,7 @@ BEGIN TRY
 		  , @intMainItemId				INT
 		  , @dblLotQuantity				NUMERIC(38, 20)
 		  , @intEnteredUOMId			INT
+		  , @dblSummaryQty				NUMERIC(38, 20)
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
@@ -211,19 +212,21 @@ BEGIN TRY
 																	ELSE @dblNewWeight
 															   END
 
-					SET @dblAdjustByQuantity = -@dblAdjustWeight;
+			SELECT @dblAdjustByQuantity = -@dblAdjustWeight
+				 , @dblSummaryQty		= -@dblNewWeight;
 
-					/* If the Stage Quantity is divisible by Weight Per Qty. */
-					IF @dblWeightPerQty = 0 OR @dblNewWeight % @dblWeightPerQty > 0
-						BEGIN
-							SET @intNewItemUOMId = @intNewItemUOMId;
-						END
-					ELSE
-						BEGIN
-							SELECT @dblAdjustByQuantity = -@dblAdjustWeight / @dblWeightPerQty
-								 , @intNewItemUOMId		= @intItemUOMId
-						END
-					/* End of if the Stage Quantity is divisible by Weight Per Qty. */
+			/* If the Stage Quantity is divisible by Weight Per Qty. */
+			IF @dblWeightPerQty = 0 OR @dblNewWeight % @dblWeightPerQty > 0
+				BEGIN
+					SET @intNewItemUOMId = @intNewItemUOMId;
+				END
+			ELSE
+				BEGIN
+					SELECT @dblAdjustByQuantity = -@dblAdjustWeight / @dblWeightPerQty
+						 , @intNewItemUOMId		= @intItemUOMId
+						 , @dblSummaryQty		= -@dblSummaryQty / @dblWeightPerQty
+				END
+			/* End of if the Stage Quantity is divisible by Weight Per Qty. */
 
 					IF NOT EXISTS (SELECT *
 								   FROM tblICLot
@@ -354,11 +357,12 @@ BEGIN TRY
 
 	SET @dblAdjustByQuantity = ABS(@dblAdjustByQuantity)
 
+	/* Update Production Summary - Negate Input/Stage Qty. */
 	UPDATE tblMFProductionSummary
-	SET dblInputQuantity = dblInputQuantity - ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblAdjustByQuantity), 0)
+	SET dblInputQuantity = dblInputQuantity - ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNewItemUOMId, @intRecipeItemUOMId, @dblSummaryQty), 0)
 	WHERE intWorkOrderId = @intWorkOrderId
 	  AND intItemId = @intInputItemId
-	  AND ISNULL(intMachineId, 0) = CASE WHEN intMachineId IS NOT NULL THEN IsNULL(@intMachineId, 0)
+	  AND ISNULL(intMachineId, 0) = CASE WHEN intMachineId IS NOT NULL THEN ISNULL(@intMachineId, 0)
 										 ELSE ISNULL(intMachineId, 0)
 									END
 	  AND ISNULL(intMainItemId, ISNULL(@intMainItemId, 0)) = ISNULL(@intMainItemId, 0)
@@ -416,14 +420,14 @@ BEGIN TRY
 									   , @intTransactionId		= @intWorkOrderId
 									   , @intTransactionTypeId	= @intInventoryTransactionType
 
-	SET @dblAdjustByQuantity = -@dblAdjustByQuantity;
+	SET @dblSummaryQty = -@dblSummaryQty;
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate						= @dtmProductionDate
 								, @intTransactionTypeId			= 104--Stage
 								, @intItemId					= @intInputItemId
 								, @intSourceLotId				= @intDestinationLotId
 								, @intDestinationLotId			= @intLotId
-								, @dblQty						= @dblAdjustByQuantity
+								, @dblQty						= @dblSummaryQty
 								, @intItemUOMId					= @intNewItemUOMId
 								, @intOldItemId					= NULL
 								, @dtmOldExpiryDate				= NULL
