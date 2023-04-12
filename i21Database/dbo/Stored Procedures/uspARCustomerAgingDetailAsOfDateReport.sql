@@ -585,7 +585,7 @@ FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)) AS A
 
 LEFT JOIN
     
-(SELECT DISTINCT 
+(SELECT  
 	intEntityCustomerId
   , intInvoiceId
   , intPaymentId
@@ -676,7 +676,7 @@ WHERE I.strTransactionType = 'Customer Prepayment'
 
 UNION ALL      
       
-SELECT DISTINCT
+SELECT 
 	I.intInvoiceId
   , intPaymentId		= PAYMENT.intPaymentId
   , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END

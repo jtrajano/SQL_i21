@@ -9912,6 +9912,9 @@
     <Build Include="dbo\Functions\fnRKGetBucketOpenBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOpenCollateral.sql" />
     <Build Include="dbo\Views\vyuMFGetItemPricing.sql" />
+    <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Views\vyuEMVendorTabAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBatchValidateInvoiceForSync.sql" />
     <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
@@ -9919,6 +9922,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCSnapShotTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Functions\fnGRSettlementMiscCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGenerateLoadDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGenerateDummyLoadDetail.sql" />
@@ -9931,10 +9935,12 @@
     <Build Include="dbo\Functions\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
     <Build Include="dbo\Functions\fnGRDPRvsGrain.sql" />
     <Build Include="dbo\Functions\fnGRInventoryStocksVSDPRStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
     <Build Include="dbo\Tables\tblSCTicketLoadDetailCreated.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketClearLoadDetail.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateTicketLoadCostPayable.sql" />
+    <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10269,6 +10275,7 @@
     <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
     <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
