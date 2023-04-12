@@ -27,6 +27,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
+SELECT 'DEBUG @ChargesToAdjust', * FROM @ChargesToAdjust
+
 /*--------------------------------------------------
  Declarations 
 --------------------------------------------------*/
@@ -273,22 +275,95 @@ BEGIN
 														END 
 														,TotalCostPerContract.dblTotalCost)
 												)
-				,[dblNewForexValue]				= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblNet, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-																ELSE 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblOpenReceive, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-														END 
-														,TotalCostPerContract.dblTotalCost)
-												)												
+				,[dblNewForexValue]				= 
+												--dbo.fnMultiply(
+												--	approvedCharges.dblNewForexValue
+												--	,dbo.fnDivide( 
+												--		CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+												--					dbo.fnMultiply(
+												--						ISNULL(ReceiptItem.dblNet, 0) 
+												--						,ISNULL(ReceiptItem.dblUnitCost, 0)
+												--					)	
+												--				ELSE 
+												--					dbo.fnMultiply(
+												--						ISNULL(ReceiptItem.dblOpenReceive, 0) 
+												--						,ISNULL(ReceiptItem.dblUnitCost, 0)
+												--					)	
+												--		END 
+												--		,TotalCostPerContract.dblTotalCost)
+												--)										
+												CASE
+													-- Other charge currency and item currency is not the same. 
+													-- Both are foreign currencies
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId <> Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(
+															-- Convert the other charge to the item's currency 
+															dbo.fnDivide( 
+																approvedCharges.dblNewValue
+																,ISNULL(NULLIF(ReceiptItem.dblForexRate, 0), 1) 
+															)
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblNet, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																		ELSE 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblOpenReceive, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																END 
+																,TotalCostPerContract.dblTotalCost)
+														)												
+
+													-- Other charge currency and item currency is not the same. 
+													-- Item currency is functional. 
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId = Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(															
+															approvedCharges.dblNewValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblNet, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																		ELSE 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblOpenReceive, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																END 
+																,TotalCostPerContract.dblTotalCost)
+														)
+
+													-- Other charge currency and item currency is the same. 
+													ELSE 
+														dbo.fnMultiply(
+															approvedCharges.dblNewForexValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblNet, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																		ELSE 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblOpenReceive, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																END 
+																,TotalCostPerContract.dblTotalCost)
+														) 
+												END 												
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -301,9 +376,9 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
+				,[intCurrencyId]				= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN Receipt.intCurrencyId ELSE approvedCharges.intCurrencyId END
+				,[intForexRateTypeId]			= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.intForexRateTypeId ELSE approvedCharges.intForexRateTypeId END
+				,[dblForexRate]					= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.dblForexRate ELSE approvedCharges.dblForexRate END
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -359,16 +434,71 @@ BEGIN
 														END
 														,TotalUnitsPerContract.dblTotalUnits)
 												) 		
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
-																ELSE 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
-														END
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 
+				,[dblNewForexValue]				= 
+												--dbo.fnMultiply(
+												--	approvedCharges.dblNewForexValue
+												--	,dbo.fnDivide( 
+												--		CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+												--					dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+												--				ELSE 
+												--					dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+												--		END
+												--		,TotalUnitsPerContract.dblTotalUnits)
+												--) 
+												CASE
+													-- Other charge currency and item currency is not the same. 
+													-- Both are foreign currencies
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId <> Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(
+															-- Convert the other charge to the item's currency 
+															dbo.fnDivide( 
+																approvedCharges.dblNewValue
+																,ISNULL(NULLIF(ReceiptItem.dblForexRate, 0), 1) 
+															)
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+																		ELSE 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+																END
+																,TotalUnitsPerContract.dblTotalUnits)
+														)												
+
+													-- Other charge currency and item currency is not the same. 
+													-- Item currency is functional. 
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId = Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(															
+															approvedCharges.dblNewValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+																		ELSE 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+																END
+																,TotalUnitsPerContract.dblTotalUnits)
+														)
+
+													-- Other charge currency and item currency is the same. 
+													ELSE 
+														dbo.fnMultiply(
+															approvedCharges.dblNewForexValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+																		ELSE 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+																END
+																,TotalUnitsPerContract.dblTotalUnits)
+														) 
+												END 
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -381,9 +511,9 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
+				,[intCurrencyId]				= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN Receipt.intCurrencyId ELSE approvedCharges.intCurrencyId END
+				,[intForexRateTypeId]			= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.intForexRateTypeId ELSE approvedCharges.intForexRateTypeId END
+				,[dblForexRate]					= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.dblForexRate ELSE approvedCharges.dblForexRate END
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -461,14 +591,63 @@ BEGIN
 														END 
 														,TotalUnitsPerContract.dblTotalUnits)
 												) 	
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
-																ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
-														END 
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 													
+				,[dblNewForexValue]				= 
+												--dbo.fnMultiply(
+												--	approvedCharges.dblNewForexValue
+												--	,dbo.fnDivide( 
+												--		CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
+												--				ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
+												--		END 
+												--		,TotalUnitsPerContract.dblTotalUnits)
+												--) 											
+												CASE
+													-- Other charge currency and item currency is not the same. 
+													-- Both are foreign currencies
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId <> Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(
+															-- Convert the other charge to the item's currency 
+															dbo.fnDivide( 
+																approvedCharges.dblNewValue
+																,ISNULL(NULLIF(ReceiptItem.dblForexRate, 0), 1) 
+															)
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
+																		ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
+																END 
+																,TotalUnitsPerContract.dblTotalUnits)
+														)												
+
+													-- Other charge currency and item currency is not the same. 
+													-- Item currency is functional. 
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId = Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(															
+															approvedCharges.dblNewValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
+																		ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
+																END 
+																,TotalUnitsPerContract.dblTotalUnits)
+														)
+
+													-- Other charge currency and item currency is the same. 
+													ELSE 
+														dbo.fnMultiply(
+															approvedCharges.dblNewForexValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0)
+																		ELSE ISNULL(ReceiptItem.dblOpenReceive, 0)
+																END 
+																,TotalUnitsPerContract.dblTotalUnits)
+														) 
+												END 												
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -481,9 +660,9 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
+				,[intCurrencyId]				= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN Receipt.intCurrencyId ELSE approvedCharges.intCurrencyId END
+				,[intForexRateTypeId]			= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.intForexRateTypeId ELSE approvedCharges.intForexRateTypeId END
+				,[dblForexRate]					= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.dblForexRate ELSE approvedCharges.dblForexRate END
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -542,22 +721,96 @@ BEGIN
 														END 
 														,TotalCostPerContract.dblTotalCost)
 												) 
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblNet, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-																ELSE 
-																	dbo.fnMultiply(
-																		ISNULL(ReceiptItem.dblOpenReceive, 0) 
-																		,ISNULL(ReceiptItem.dblUnitCost, 0)
-																	)	
-														END 
-														,TotalCostPerContract.dblTotalCost)
-												) 												
+				,[dblNewForexValue]				= 
+												--dbo.fnMultiply(
+												--	approvedCharges.dblNewForexValue
+												--	,dbo.fnDivide( 
+												--		CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+												--					dbo.fnMultiply(
+												--						ISNULL(ReceiptItem.dblNet, 0) 
+												--						,ISNULL(ReceiptItem.dblUnitCost, 0)
+												--					)	
+												--				ELSE 
+												--					dbo.fnMultiply(
+												--						ISNULL(ReceiptItem.dblOpenReceive, 0) 
+												--						,ISNULL(ReceiptItem.dblUnitCost, 0)
+												--					)	
+												--		END 
+												--		,TotalCostPerContract.dblTotalCost)
+												--) 										
+												CASE
+													-- Other charge currency and item currency is not the same. 
+													-- Both are foreign currencies
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId <> Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(
+															-- Convert the other charge to the item's currency 
+															dbo.fnDivide( 
+																approvedCharges.dblNewValue
+																,ISNULL(NULLIF(ReceiptItem.dblForexRate, 0), 1) 
+															)
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblNet, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																		ELSE 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblOpenReceive, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																END 
+																,TotalCostPerContract.dblTotalCost)
+														)												
+
+													-- Other charge currency and item currency is not the same. 
+													-- Item currency is functional. 
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId = Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(															
+															approvedCharges.dblNewValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblNet, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																		ELSE 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblOpenReceive, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																END 
+																,TotalCostPerContract.dblTotalCost)
+														)
+
+													-- Other charge currency and item currency is the same. 
+													ELSE 
+														dbo.fnMultiply(
+															approvedCharges.dblNewForexValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblNet, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																		ELSE 
+																			dbo.fnMultiply(
+																				ISNULL(ReceiptItem.dblOpenReceive, 0) 
+																				,ISNULL(ReceiptItem.dblUnitCost, 0)
+																			)	
+																END 
+																,TotalCostPerContract.dblTotalCost)
+														) 
+												END 												
+
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -570,9 +823,9 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
+				,[intCurrencyId]				= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN Receipt.intCurrencyId ELSE approvedCharges.intCurrencyId END
+				,[intForexRateTypeId]			= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.intForexRateTypeId ELSE approvedCharges.intForexRateTypeId END
+				,[dblForexRate]					= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.dblForexRate ELSE approvedCharges.dblForexRate END
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -631,16 +884,71 @@ BEGIN
 														END
 														,TotalUnitsPerContract.dblTotalUnits)
 												) 	
-				,[dblNewForexValue]					= dbo.fnMultiply(
-													approvedCharges.dblNewForexValue
-													,dbo.fnDivide( 
-														CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
-																ELSE 
-																	dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
-														END
-														,TotalUnitsPerContract.dblTotalUnits)
-												) 													
+				,[dblNewForexValue]				= 
+												--dbo.fnMultiply(
+												--	approvedCharges.dblNewForexValue
+												--	,dbo.fnDivide( 
+												--		CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+												--					dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+												--				ELSE 
+												--					dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+												--		END
+												--		,TotalUnitsPerContract.dblTotalUnits)
+												--)
+												CASE
+													-- Other charge currency and item currency is not the same. 
+													-- Both are foreign currencies
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId <> Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(
+															-- Convert the other charge to the item's currency 
+															dbo.fnDivide( 
+																approvedCharges.dblNewValue
+																,ISNULL(NULLIF(ReceiptItem.dblForexRate, 0), 1) 
+															)
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+																		ELSE 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+																END
+																,TotalUnitsPerContract.dblTotalUnits)
+														)												
+
+													-- Other charge currency and item currency is not the same. 
+													-- Item currency is functional. 
+													WHEN 
+														approvedCharges.intCurrencyId <> Receipt.intCurrencyId 
+														AND @intFunctionalCurrencyId <> approvedCharges.intCurrencyId 
+														AND @intFunctionalCurrencyId = Receipt.intCurrencyId 
+													THEN 
+														dbo.fnMultiply(															
+															approvedCharges.dblNewValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+																		ELSE 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+																END
+																,TotalUnitsPerContract.dblTotalUnits)
+														)
+
+													-- Other charge currency and item currency is the same. 
+													ELSE 
+														dbo.fnMultiply(
+															approvedCharges.dblNewForexValue
+															,dbo.fnDivide( 
+																CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblNet, GrossNetUOM.dblUnitQty) 
+																		ELSE 
+																			dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, GrossNetUOM.dblUnitQty) 
+																END
+																,TotalUnitsPerContract.dblTotalUnits)
+														) 
+												END 												
 				,[intTransactionId]				= approvedCharges.intTransactionId
 				,[intTransactionDetailId]		= approvedCharges.intTransactionDetailId
 				,[strTransactionId]				= approvedCharges.strTransactionId
@@ -653,9 +961,9 @@ BEGIN
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
 				,[strActualCostId]				= ReceiptItem.strActualCostId
-				,[intCurrencyId]				= approvedCharges.intCurrencyId
-				,[intForexRateTypeId]			= approvedCharges.intForexRateTypeId
-				,[dblForexRate]					= approvedCharges.dblForexRate
+				,[intCurrencyId]				= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN Receipt.intCurrencyId ELSE approvedCharges.intCurrencyId END
+				,[intForexRateTypeId]			= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.intForexRateTypeId ELSE approvedCharges.intForexRateTypeId END
+				,[dblForexRate]					= CASE WHEN approvedCharges.intCurrencyId <> Receipt.intCurrencyId THEN ReceiptItem.dblForexRate ELSE approvedCharges.dblForexRate END
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -709,4 +1017,4 @@ END
 -- Exit point
 _Exit:
 
-RETURN ISNULL(@ReturnValue, 0) 
+RETURN ISNULL(@ReturnValue, 0)
