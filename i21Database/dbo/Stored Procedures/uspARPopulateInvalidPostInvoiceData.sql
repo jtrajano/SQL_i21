@@ -20,7 +20,7 @@ SET @ZeroBit = CAST(0 AS BIT)
 
 DECLARE @ItemsForContracts InvoicePostingTable
 
-EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
+EXEC [dbo].[uspARPopulateContractDetails] @strSessionId = @strSessionId, @Post = @Post
 
 DECLARE @strDatabaseName NVARCHAR(50)
 DECLARE @strCompanyName NVARCHAR(50)
