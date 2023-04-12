@@ -304,19 +304,14 @@ BEGIN
 		ON IT_SHIPPED.intCommodityId = PID.intCommodityId
 			AND IT_SHIPPED.strLocationName = PID.strLocationName
 	LEFT JOIN (
-		SELECT TOTAL = CASE WHEN ISNULL(dblAdjustments,0) = 0 THEN 0 ELSE ABS(dblAdjustments) END
-			,intCommodityId
-			,strLocationName
-		FROM (
-			SELECT dblAdjustments = SUM(ISNULL(dblAdjustments,0))
+		SELECT dblAdjustments = SUM(ISNULL(dblAdjustments,0))
 				,intCommodityId
 				,strLocationName
 			FROM #tblInOut
 			WHERE strTransactionType IN ('Storage Adjustment', 'Inventory Adjustment')
 				AND dtmDate IS NOT NULL
 			GROUP BY intCommodityId
-				,strLocationName				
-		) A
+				,strLocationName
 	) NET_ADJUSTMENTS
 		ON NET_ADJUSTMENTS.intCommodityId = PID.intCommodityId
 			AND NET_ADJUSTMENTS.strLocationName = PID.strLocationName
