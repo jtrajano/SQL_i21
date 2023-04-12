@@ -513,7 +513,7 @@ BEGIN
 							,dblOverageQty
 							,strOriginalPricingMethod
 						)	
-						SELECT TOP 1
+						SELECT 
 							[intDispatchId]				= A.[intDispatchID]
 							,[intSiteId]				= A.intSiteID
 							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
