@@ -87,9 +87,18 @@ BEGIN
 				WHERE	NOT EXISTS (SELECT TOP 1 1 FROM @GLEntriesToValidate)
 
 				--Cannot continue if Module status in fiscal year period is closed (CM,AR,INV,AP)
-				UNION ALL 
+				UNION ALL
+				SELECT strTransactionId
+						,strModuleName strText
+						,60018 intErrorCode
+						,strModuleName
+				FROM @GLEntriesToValidate 
+				WHERE
+				dbo.fnGLFiscalPeriodExists(dtmDate) = 0
+				GROUP BY strTransactionId, strModuleName
+				UNION ALL
 				SELECT	 strTransactionId
-						,GLEntries.strModuleName strText
+						,strModuleName strText
 						,60009 intErrorCode
 						,strModuleName
 				FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName 
