@@ -38,8 +38,12 @@ FROM (
 		D.strPaymentMethod,
 		H.intEntityId,
 		H.strName as strCustomerName,
-		CASE WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 1 THEN 'Company Owned Pass Thru' --Credit Memo (Gross less fee(shared))
-			 WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 0 AND C.ysnSharedFee = 1 AND ISNULL(C.ysnPassedThruArCustomerFees,0) = 1 then 'Company Owned Shared Fees' --Normal Invoie
+		CASE WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 0 AND C.ysnSharedFee = 1 AND ISNULL(C.ysnPassedThruArCustomerFees,0) = 1 then 'Company Owned Shared Fees/Pass Thru Fees' --Normal Invoie
+			 WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 1 AND C.ysnSharedFee = 1 AND ISNULL(C.ysnPassedThruArCustomerFees,0) = 0 then 'Company Owned Shared Fees/Pass Thru' --cREDIT Memo
+			 --WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 0 AND C.ysnSharedFee = 1 AND ISNULL(C.ysnPassedThruArCustomerFees,0) = 0 then 'Company Owned Shared Fees' --no ar
+			 WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 1 THEN 'Company Owned Pass Thru' --Credit Memo (Gross less fee(shared))
+			 --WHEN ISNULL(C.ysnPassedThruArCustomer,0) = 0 AND C.ysnSharedFee = 1 AND ISNULL(C.ysnPassedThruArCustomerFees,0) = 0 then 'Company Owned Shared Fees' --Normal Invoie
+
 			else 'Company Owned' 		 
 		end COLLATE Latin1_General_CI_AS strSiteType,
 		 ysnPostNetToArCustomer = C.ysnPassedThruArCustomer,

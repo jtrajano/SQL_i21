@@ -74,28 +74,58 @@ BEGIN
 			,intSiteDetailId
 			,strItem
 			,SUM(dblCost)
-			,[dblQtyReceived] = CASE WHEN strItem IN ('Company Owned Fees', 'Dealer Site Shared Fees', 'Dealer Site Fees') THEN -1 ELSE 1 END
+			,[dblQtyReceived] = CASE WHEN strItem IN ('Company Owned Fees', 'Dealer Site Shared Fees', 'Dealer Site Fees','Company Owned Shared Fees') THEN -1 ELSE 1 END
 			,0
 		FROM (SELECT ccSiteDetail.intSiteDetailId
 				 ,ccItem.strItem
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Site Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSite.intAccountId 
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intCreditCardReceivableAccountId  
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSite.intFeeExpenseAccountId
+					
 					WHEN ccItem.strItem = 'Dealer Site Gross' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intAccountId 
 					WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intAccountId 
 					WHEN ccItem.strItem = 'Dealer Site Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSite.intFeeExpenseAccountId
+
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSite.intCreditCardReceivableAccountId  
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSite.intFeeExpenseAccountId
+					--WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSite.intFeeExpenseAccountId
+
+					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees' THEN ccSite.intCreditCardReceivableAccountId  
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees' THEN ccSite.intFeeExpenseAccountId
+					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees' THEN ccSite.intFeeExpenseAccountId
+
+					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru' THEN ccSite.intCreditCardReceivableAccountId  
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru' THEN ccSite.intFeeExpenseAccountId
+					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru' THEN ccSite.intFeeExpenseAccountId
+					
+					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSite.intAccountId  
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSite.intAccountId 
 					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSite.intFeeExpenseAccountId
+
+			
 					ELSE null END) AS intAccountId
+
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Site Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet 
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblGross 
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned' THEN ccSiteDetail.dblFees
+					
 					WHEN ccItem.strItem = 'Dealer Site Gross' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross
 					WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
 					WHEN ccItem.strItem = 'Dealer Site Shared Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees - ROUND(ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100), 2)
+
 					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblGross 
 					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblFees
+					
+					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees' THEN ccSiteDetail.dblGross 
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
+					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees' THEN ccSiteDetail.dblFees - ROUND(ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100), 2)
+
+					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru' THEN ccSiteDetail.dblGross
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
+					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru' THEN ccSiteDetail.dblFees - ROUND(ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100), 2)
+						--note: company owned shared fees "Site Type" is not being used, added just in case it is needed
+					WHEN ccItem.strItem = 'Company Owned Gross' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSiteDetail.dblGross
+					WHEN ccItem.strItem = 'Company Owned Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
 					WHEN ccItem.strItem = 'Company Owned Shared Fees' AND ccSite.strSiteType = 'Company Owned Shared Fees' THEN ccSiteDetail.dblFees - ROUND(ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100), 2)
 					ELSE null END) AS dblCost
 			FROM tblCCSiteHeader ccSiteHeader

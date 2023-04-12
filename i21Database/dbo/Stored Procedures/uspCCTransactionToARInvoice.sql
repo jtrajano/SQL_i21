@@ -107,8 +107,8 @@ BEGIN
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblGross -- Dealer Site Gross
 		  	 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site' THEN (CASE WHEN ccSiteDetail.dblNet < 0 THEN ccSiteDetail.dblNet * -1 ELSE ccSiteDetail.dblNet END) -- Dealer Site Net
 			 
-			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' AND ISNULL(ccSite.dblSharedFeePercentage,0) <> 0 THEN ccSiteDetail.dblGross - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
-			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' AND ISNULL(ccSite.dblSharedFeePercentage,0) = 0 THEN ccSiteDetail.dblGross -- Company Owned Pass Thru
+			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND (ccSite.strSiteType = 'Company Owned Pass Thru' OR ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru') AND ISNULL(ccSite.dblSharedFeePercentage,0) <> 0 THEN ccSiteDetail.dblGross - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
+			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND (ccSite.strSiteType = 'Company Owned Pass Thru' OR ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru') AND ISNULL(ccSite.dblSharedFeePercentage,0) = 0 THEN ccSiteDetail.dblGross -- Company Owned Pass Thru
 			 
 			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (1 - (ccSite.dblSharedFeePercentage / 100))) -- Dealer Site Shared Fees (Net) 
 			 WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross -- (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)) -- Dealer Site Shared Fees (Gross) 
@@ -136,13 +136,13 @@ BEGIN
 	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
 	--LEFT JOIN tblARInvoiceDetail ARInvoiceDetail ON ARInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null
-	AND ccSite.strSiteType NOT IN  ('Company Owned', 'Company Owned Shared Fees')
+	AND ccSite.strSiteType NOT IN  ('Company Owned','Company Owned Shared Fees/Pass Thru Fees')
 	--Fixes for CCR-315
 	-- and ccSite.ysnPostNetToArCustomer = 1
 
 	
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	--COMPANY OWNED - Shared Fees
+	--COMPANY OWNED - Shared Fees/Pass Thru Fees
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	INSERT INTO @EntriesForInvoice(
@@ -192,9 +192,6 @@ BEGIN
         ,[dblQtyShipped] = 1
 
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' 
-								AND ccSite.ysnPostNetToArCustomer = 0 
-								AND ccSite.strSiteType = 'Company Owned Shared Fees' 
-								AND ISNULL(ccSite.ysnPassedThruArCustomerFees,0) = 1
 								AND ISNULL(ccSite.dblSharedFeePercentage,0) <> 0
 						   THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
 						  ELSE
@@ -222,7 +219,7 @@ BEGIN
 	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
 	--LEFT JOIN tblARInvoiceDetail ARInvoiceDetail ON ARInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null
-	AND ccSite.strSiteType = 'Company Owned Shared Fees'
+	AND (ccSite.strSiteType = 'Company Owned Shared Fees/Pass Thru Fees')
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
