@@ -618,7 +618,7 @@ FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)
 
 LEFT JOIN
           
-(SELECT DISTINCT 
+(SELECT  
       intEntityCustomerId
     , intInvoiceId  
 	, dblAmountPaid
@@ -744,5 +744,4 @@ A.intEntityCustomerId	 = B.intEntityCustomerId
 AND A.intInvoiceId		 = B.intInvoiceId
 
 GROUP BY A.intEntityCustomerId) AS AGING
-INNER JOIN #ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
-ORDER BY strCustomerName
+INNER JOIN #ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId

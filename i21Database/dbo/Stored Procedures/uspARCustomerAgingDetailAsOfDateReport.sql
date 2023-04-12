@@ -363,8 +363,8 @@ AND CM.strTransactionType = 'Credit Memo'
 AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 
---##POSTEDINVOICES
-INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
+--#AGINGPOSTEDINVOICES
+INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
 	 , intEntityCustomerId
 	 , intPaymentId
@@ -448,15 +448,15 @@ GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 DELETE FROM  #AGINGPOSTEDINVOICES
 WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM #CASHREFUNDS CF INNER  JOIN #CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber) 
 
-DELETE FROM  ##POSTEDINVOICES
+DELETE FROM  #AGINGPOSTEDINVOICES
 WHERE intInvoiceId IN (SELECT intInvoiceId FROM ##CANCELLEDINVOICE)
 
-DELETE FROM  ##POSTEDINVOICES
+DELETE FROM  #AGINGPOSTEDINVOICES
 WHERE intInvoiceId IN (SELECT intInvoiceId FROM ##CANCELLEDCMINVOICE)
 
 
---##CASHRETURNS
-INSERT INTO ##CASHRETURNS (
+--#CASHRETURNS
+INSERT INTO #CASHRETURNS (
 	   intInvoiceId
 	 , intOriginalInvoiceId
 	 , dblInvoiceTotal
@@ -585,7 +585,7 @@ FROM #AGINGPOSTEDINVOICES I WITH (NOLOCK)) AS A
 
 LEFT JOIN
     
-(SELECT DISTINCT 
+(SELECT  
 	intEntityCustomerId
   , intInvoiceId
   , intPaymentId
@@ -676,7 +676,7 @@ WHERE I.strTransactionType = 'Customer Prepayment'
 
 UNION ALL      
       
-SELECT DISTINCT
+SELECT 
 	I.intInvoiceId
   , intPaymentId		= PAYMENT.intPaymentId
   , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
