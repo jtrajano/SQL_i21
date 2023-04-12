@@ -809,7 +809,90 @@ IF ISNULL(@intFreightItemId,0) = 0
 						FROM dbo.[fnSCGetLoadNoneFreightItemCharges](@ReceiptStagingTable,@ysnPrice,@ysnAccrue,@intFreightItemId,@intLoadCostId, @REFERENCE_ONLY)
 
 						/* -- LOAD RELATED CHARGES -- */
+					
 
+						-- SELECT * FROM @LOAD_OTHER_CHARGES
+						-- DECLARE @NEW_GUID UNIQUEIDENTIFIER = NEWID()
+						-- INSERT INTO tblSCTicketOtherCharge(							
+						-- 	intId
+						-- 	,intEntityVendorId
+						-- 	,strBillOfLadding
+						-- 	,strReceiptType
+						-- 	,intLocationId
+						-- 	,intShipViaId
+						-- 	,intShipFromId
+						-- 	,intCurrencyId
+						-- 	,strVendorRefNo
+						-- 	,intShipFromEntityId
+						-- 	,intChargeId
+						-- 	,ysnInventoryCost
+						-- 	,strCostMethod
+						-- 	,intCostCurrencyId
+						-- 	,dblRate
+						-- 	,intCostUOMId
+						-- 	,intOtherChargeEntityVendorId
+						-- 	,dblAmount
+						-- 	,strAllocateCostBy
+						-- 	,ysnAccrue
+						-- 	,ysnPrice
+						-- 	,intContractHeaderId
+						-- 	,intContractDetailId
+						-- 	,ysnSubCurrency
+						-- 	,intTaxGroupId
+						-- 	,intForexRateTypeId
+						-- 	,dblForexRate
+						-- 	,strChargesLink
+						-- 	,ysnAllowVoucher
+						-- 	,intLoadShipmentId
+						-- 	,intLoadShipmentCostId
+						-- 	,intTicketId
+						-- 	,intTypeReferenceId
+						-- 	,strBatchId
+
+						-- )
+						-- SELECT 
+						-- 	intId
+						-- 	,intEntityVendorId
+						-- 	,strBillOfLadding
+						-- 	,strReceiptType
+						-- 	,intLocationId
+						-- 	,intShipViaId
+						-- 	,intShipFromId
+						-- 	,intCurrencyId
+						-- 	,strVendorRefNo
+						-- 	,intShipFromEntityId
+						-- 	,intChargeId
+						-- 	,ysnInventoryCost
+						-- 	,strCostMethod
+						-- 	,intCostCurrencyId
+						-- 	,dblRate
+						-- 	,intCostUOMId
+						-- 	,intOtherChargeEntityVendorId
+						-- 	,dblAmount
+						-- 	,strAllocateCostBy
+						-- 	,ysnAccrue
+						-- 	,ysnPrice
+						-- 	,intContractHeaderId
+						-- 	,intContractDetailId
+						-- 	,ysnSubCurrency
+						-- 	,intTaxGroupId
+						-- 	,intForexRateTypeId
+						-- 	,dblForexRate
+						-- 	,strChargesLink
+						-- 	,ysnAllowVoucher
+						-- 	,intLoadShipmentId
+						-- 	,intLoadShipmentCostId
+						-- 	,@intTicketId
+						-- 	,1
+						-- 	,@NEW_GUID
+						-- FROM
+						
+
+						DELETE FROM @LOAD_OTHER_CHARGES
+						WHERE intId IN (SELECT intId FROM @LOAD_OTHER_CHARGES
+						WHERE intOtherChargeEntityVendorId <> @intEntityId
+							AND ysnAllowVoucher = 1) 
+						
 						/* -- CONTRACT RELATED CHARGES -- */
 
 						/* -- CONTRACT RELATED CHARGES */

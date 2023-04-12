@@ -202,6 +202,13 @@ BEGIN TRY
 						INNER JOIN tblGRCustomerStorage GRC ON GRC.intCustomerStorageId = GRT.intCustomerStorageId
 					WHERE GRC.intTicketId = @intTicketId
 							AND GRS.intParentSettleStorageId IS NOT NULL
+					
+
+					IF @strDistributionOption = 'LRF'
+					BEGIN						
+						EXEC uspSCCreateTicketLoadCostPayable @TICKET_ID = @intTicketId, @POST = 0						
+					END
+
 
 					DECLARE settleStorageCursor CURSOR LOCAL FAST_FORWARD
 					FOR
@@ -1866,6 +1873,9 @@ BEGIN TRY
 					 , @intItemUOMId = @intTicketItemUOMId
 					 , @intEntityUserId = @intUserId
 					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT 
+
+			
+			
 		END
 
 		IF ISNULL(@intLoadDetailId,0) > 0
