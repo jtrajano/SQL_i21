@@ -100,7 +100,8 @@ FROM (
 								ORDER BY PrevRec.dtmTransactionDate DESC)
 		, dblNewNoOfLots = CASE WHEN ISNULL(HistoryDelete.intFutOptTransactionHistoryId, 0) <> 0 
 							THEN 0
-							ELSE CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
+							ELSE CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract 
+								ELSE - Trans.dblNoOfContract END -- - History.dblNewNoOfContract END
 							END
 		, History.strScreenName
 		, History.strOldBuySell

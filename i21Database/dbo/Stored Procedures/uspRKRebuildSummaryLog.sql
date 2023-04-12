@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKRebuildSummaryLog]
 	@intCurrentUserId INT	
+	, @ysnCBOnly BIT = 0 -- 1 WILL REBUILD CONTRACT BALANCES ONLY (FOR TESTING) - WILL ENHANCE REBUILD RUNTIME.
 AS
 
 BEGIN TRY
@@ -320,22 +321,32 @@ BEGIN TRY
 				, @intBookId 
 				, @intSubBookId
 				, @intUserId 
-			from tblCTSequenceHistory SH
+			FROM #tmpCTSequenceHistory SH
 			LEFT JOIN vyuCTSequenceUsageHistory SUH
 				ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
 				AND SUH.strFieldName = 'Balance'
 				AND SUH.intContractDetailId = @intContractDetailId
+			OUTER APPLY 
+				(
+					SELECT TOP 1 * FROM #tmpCTSequenceHistory CTSH
+					WHERE CTSH.rowNum = SH.rowNum - 1
+					ORDER BY intSequenceHistoryId ASC
+				) LAGSH
 			WHERE SH.intContractDetailId = @intContractDetailId
-			--and SH.ysnQtyChange = 1
 			and SH.ysnBalanceChange = 1
 			and SH.intPricingTypeId <> 5
 			AND SUH.intSequenceUsageHistoryId IS NULL
-			AND ((SH.intPricingTypeId = @intHeaderPricingType)
+			AND ((SH.intPricingTypeId = @intHeaderPricingType
+					AND NOT (ISNULL(SH.ysnFuturesChange, 0) = 1 AND SH.dblOldFutures IS NOT NULL AND SH.dblFutures IS NULL)
+					AND NOT (ISNULL(SH.ysnBasisChange, 0) = 1 AND SH.dblOldBasis IS NOT NULL AND SH.dblBasis IS NULL)
+				 )
 					OR 
 				 (SH.intPricingTypeId <> @intHeaderPricingType
-					AND ISNULL(SH.ysnFuturesChange, 0) <> 1
-					AND ISNULL(SH.ysnBasisChange, 0) <> 1)
+					AND ((ISNULL(SH.ysnFuturesChange, 0) <> 1) OR (ISNULL(SH.ysnFuturesChange, 0) = 1 AND SH.dblOldFutures IS NOT NULL AND SH.dblFutures IS NOT NULL))
+					AND ((ISNULL(SH.ysnBasisChange, 0) <> 1) OR (ISNULL(SH.ysnBasisChange, 0) = 1 AND SH.dblOldBasis IS NOT NULL AND SH.dblBasis IS NOT NULL))
+				 )
 				)
+			AND LAGSH.intPricingTypeId = SH.intPricingTypeId
 
 			-- SCENARIO: BALANCE CHANGE WITH PRICING TYPE CHANGE (WHEN OLD IS UNPRICED AND UPDATED TO PRICED)
 			union  all
@@ -384,6 +395,56 @@ BEGIN TRY
 			AND ( (SH.ysnFuturesChange = 1 AND SH.dblOldFutures IS NULL) 
 				 OR 
 				  (SH.ysnBasisChange = 1 AND SH.dblOldBasis IS NULL)
+				)
+			
+			-- SCENARIO: BALANCE CHANGE WITH PRICING TYPE CHANGE (WHEN OLD IS PRICED AND UPDATED TO UNPRICED)
+			-- SHOULD ADD PRICED QTY
+			union  all
+			select
+				SH.dtmHistoryCreated
+				, @strContractNumber
+				, @intContractSeq
+				, @intContractTypeId
+				, dblBalance  = SH.dblBalance - SH.dblOldBalance
+				, strTransactionReference = 'Contract Sequence Balance Change'
+				, @intContractHeaderId
+				, @intContractDetailId
+				, intPricingTypeId  = 1 -- PRICED
+				, intTransactionReferenceId = SH.intContractHeaderId
+				, strTransactionReferenceNo = SH.strContractNumber + '-' + cast(SH.intContractSeq as nvarchar(10))
+				, @intCommodityId
+				, @strCommodityCode
+				, @intItemId
+				, SH.intEntityId
+				, @intLocationId
+				, @intFutureMarketId 
+				, @intFutureMonthId 
+				, @dtmStartDate 
+				, @dtmEndDate 
+				, @intQtyUOMId
+				, @dblFutures
+				, @dblBasis
+				, @intBasisUOMId 
+				, @intBasisCurrencyId 
+				, @intPriceUOMId 
+				, @intContractStatusId 
+				, @intBookId 
+				, @intSubBookId
+				, @intUserId 
+			from tblCTSequenceHistory SH
+			LEFT JOIN vyuCTSequenceUsageHistory SUH
+				ON SUH.intSequenceUsageHistoryId = SH.intSequenceUsageHistoryId
+				AND SUH.strFieldName = 'Balance'
+				AND SUH.intContractDetailId = @intContractDetailId
+			WHERE SH.intContractDetailId = @intContractDetailId
+			--and SH.ysnQtyChange = 1
+			and SH.ysnBalanceChange = 1
+			and SH.intPricingTypeId <> 5
+			AND SUH.intSequenceUsageHistoryId IS NULL
+			AND SH.intPricingTypeId = @intHeaderPricingType
+			AND ( (SH.ysnFuturesChange = 1 AND SH.dblOldFutures IS NOT NULL AND SH.dblFutures IS NULL) 
+				 OR 
+				  (SH.ysnBasisChange = 1 AND SH.dblOldBasis IS NOT NULL AND SH.dblBasis IS NULL)
 				)
 			
 			-- SCENARIO: BALANCE CHANGE WITHOUT PRICING TYPE CHANGE (WITH SEQUENCE USAGE HISTORY = 'Price Contract')
@@ -442,7 +503,7 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
+				, dblTransactionQuantity = CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
 												ELSE CASE WHEN SH.strPricingStatus = 'Partially Priced' AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0
 															AND (SH.dblOldBalance - SH.dblBalance) * -1 < (CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END) 
 													THEN 
@@ -490,13 +551,13 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
-								ELSE ((SH.dblOldBalance - SH.dblBalance) - ABS(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END)) * -1 END
+				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad
+									ELSE ((SH.dblOldBalance - SH.dblBalance) - ABS(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END)) * -1 END 
 				, SUH.strScreenName  
 				, @intContractHeaderId
 				, @intContractDetailId
 				, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
-												AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0 
+												AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END >= 0 
 										THEN 1 ELSE SH.intPricingTypeId END
 				, intTransactionReferenceId = SUH.intExternalHeaderId
 				, strTransactionReferenceNo = SUH.strNumber
@@ -526,7 +587,7 @@ BEGIN TRY
 			and SUH.strFieldName = 'Balance'
 			and SUH.intContractDetailId = @intContractDetailId
 			AND CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0
-			AND (SH.dblOldBalance - SH.dblBalance) * -1 < (CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END) 
+			AND (SH.dblOldBalance - SH.dblBalance) * -1 < (CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END)
 			AND SH.dblOldBalance IS NOT NULL
 			
 			-- DELETED ORIG QTY 
@@ -537,15 +598,23 @@ BEGIN TRY
 				, @intContractSeq
 				, @intContractTypeId
 				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 
-												THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
-												ELSE SUH.dblTransactionQuantity END * CASE WHEN SH.intContractTypeId = 1 THEN 1 ELSE -1 END
+												THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad * CASE WHEN SH.intContractTypeId = 1 THEN -1 ELSE 1 END
+												ELSE SUH.dblTransactionQuantity * CASE WHEN SH.intContractTypeId = 1 THEN 1 ELSE -1 END END
 				, SUH.strScreenName  
 				, @intContractHeaderId
 				, @intContractDetailId
 				, intPricingTypeId = CASE WHEN SH.strPricingStatus = 'Partially Priced' 
-											AND (	(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0)
-													OR
-													((SH.dblBalance - SH.dblOldBalance) = dblQtyPriced)
+											AND (SH.dblOldBalance <= SH.dblBalance
+												  OR
+												 (SH.dblOldBalance > SH.dblBalance AND SH.dblOldBalance > SH.dblQtyUnpriced AND (SH.dblOldBalance - SH.dblBalance) <> SH.dblQtyUnpriced)
+												)
+											AND (SH.dblQuantity - SH.dblOldBalance) <= SH.dblQtyPriced
+											AND ((SH.dblOldBalance > SH.dblBalance AND (SH.dblQuantity - SH.dblOldBalance) + (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+													OR (SH.dblOldBalance < SH.dblBalance 
+													AND (  (SH.dblQuantity - SH.dblOldBalance) - (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+															OR 
+														   (SH.dblBalance = SH.dblQuantity AND SH.dblQtyPriced > 0)
+														)
 												)
 										THEN 1 ELSE SH.intPricingTypeId END
 				, intTransactionReferenceId = SUH.intExternalHeaderId
@@ -590,7 +659,11 @@ BEGIN TRY
 				)
 			AND SUH.strScreenName NOT IN ('Settle Storage', 'Transfer Storage')
 			AND SH.dblOldBalance IS NOT NULL
-			AND (SH.dblBalance - SH.dblOldBalance) <> dblQtyPriced
+			--AND (SH.dblBalance - SH.dblOldBalance) <> SH.dblQtyPriced
+			AND (	SH.dblOldBalance < SH.dblBalance
+					OR
+					(SH.dblOldBalance > SH.dblBalance) AND (SH.dblBalance - SH.dblOldBalance) <> dblQtyPriced
+			)
 
 			UNION ALL
 			-- DELETED NEGATE QTY
@@ -600,19 +673,27 @@ BEGIN TRY
 				, @intContractSeq
 				, @intContractTypeId
 				, dblTransactionQuantity = CASE WHEN @ysnLoad = 1 
-													THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad 
-													ELSE SUH.dblTransactionQuantity END * CASE WHEN SH.intContractTypeId = 1 THEN -1 ELSE 1 END
+													THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad * CASE WHEN SH.intContractTypeId = 1 THEN 1 ELSE -1 END
+													ELSE SUH.dblTransactionQuantity * CASE WHEN SH.intContractTypeId = 1 THEN -1 ELSE 1 END END
 				, SUH.strScreenName  
 				, @intContractHeaderId
 				, @intContractDetailId
 				, intPricingTypeId = CASE WHEN  (currentPricingType.strPricingStatus = 'Fully Priced' AND currentPricingType.dblQtyPriced <> 0)
-												OR
-												(	SH.strPricingStatus = 'Partially Priced' 
-													AND (	(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0)
-															OR
-															((SH.dblBalance - SH.dblOldBalance) = SH.dblQtyPriced)
+											OR
+											(	SH.strPricingStatus = 'Partially Priced' 
+												AND (	(CASE WHEN SH.dblQtyPriced = 0 THEN 0 ELSE SH.dblQtyPriced - (SH.dblQuantity - SH.dblBalance) END < 0)
+														OR
+														((SH.dblBalance - SH.dblOldBalance) = SH.dblQtyPriced)
+													)
+												AND (SH.dblQuantity - SH.dblOldBalance) <= SH.dblQtyPriced
+												AND ((SH.dblOldBalance > SH.dblBalance AND (SH.dblQuantity - SH.dblOldBalance) + (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+														OR (SH.dblOldBalance < SH.dblBalance 
+														AND (  (SH.dblQuantity - SH.dblOldBalance) - (SH.dblOldBalance - SH.dblBalance) <= SH.dblQtyPriced)
+																OR 
+															   (SH.dblBalance = SH.dblQuantity AND SH.dblQtyPriced > 0)
 														)
-												)
+													)
+											)
 										THEN 1 
 										ELSE currentPricingType.intPricingTypeId END
 				, intTransactionReferenceId = SUH.intExternalHeaderId
@@ -648,6 +729,13 @@ BEGIN TRY
 				AND ctUH.strFieldName = 'Balance'
 				AND SUH.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
 			) negateHistory
+			CROSS APPLY (
+				SELECT TOP 1 ysnExists = 1
+				FROM tblCTSequenceHistory suh
+				WHERE suh.intContractDetailId = @intContractDetailId
+				AND intSequenceUsageHistoryId = negateHistory.intSequenceUsageHistoryId
+				AND dblOldBalance IS NOT NULL
+			) createHistorySequenceHistory
 			OUTER APPLY (
 				SELECT TOP 1 intPricingTypeId
 					, strPricingStatus
@@ -673,7 +761,8 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad ELSE SUH.dblTransactionQuantity END
+				, dblTransactionQuantity =  CASE WHEN @ysnLoad = 1 THEN SUH.dblTransactionQuantity * @dblQuantityPerLoad * CASE WHEN SH.intContractTypeId = 1 THEN -1 ELSE 1 END
+												 ELSE SUH.dblTransactionQuantity END
 				, SUH.strScreenName  
 				, @intContractHeaderId
 				, @intContractDetailId
@@ -785,18 +874,143 @@ BEGIN TRY
 			and ysnBasisChange = 1
 			and ysnCashPriceChange = 1
 			and strPricingType IN ('Priced','HTA')
-			
-			union all  -- Header is Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
-			select 
+
+			-- Header is Unit
+			UNION ALL
+			SELECT
 				dtmHistoryCreated
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblQuantity = CASE WHEN ( strPricingStatus <> 'Unpriced'
-											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation) 
+				, dblBalance  = CASE WHEN strPricingType = 'Priced' THEN dblQtyPriced * -1 ELSE dblQtyUnpriced  END 
+				, strTransactionReference = 'Unit - Price Fixation'
+				, @intContractHeaderId
+				, @intContractDetailId
+				, @intHeaderPricingType
+				, intTransactionReferenceId = intContractHeaderId
+				, strTransactionReferenceNo = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
+				, @intCommodityId
+				, @strCommodityCode
+				, @intItemId
+				, intEntityId
+				, @intLocationId
+				, @intFutureMarketId 
+				, @intFutureMonthId 
+				, @dtmStartDate 
+				, @dtmEndDate 
+				, @intQtyUOMId
+				, @dblFutures
+				, @dblBasis
+				, @intBasisUOMId 
+				, @intBasisCurrencyId 
+				, @intPriceUOMId 
+				, @intContractStatusId 
+				, @intBookId 
+				, @intSubBookId
+				, @intUserId 
+			FROM tblCTSequenceHistory 
+			WHERE intContractDetailId = @intContractDetailId
+			AND @intHeaderPricingType = 4
+			AND ysnFuturesChange = 1
+			AND strPricingType IN ('Priced','Unit')
+
+			UNION ALL --Counter entry when price fixing an Unit
+			SELECT
+				dtmHistoryCreated
+				, @strContractNumber
+				, @intContractSeq
+				, @intContractTypeId
+				, dblBalance  =  CASE WHEN strPricingType = 'Priced' THEN dblQtyPriced ELSE dblQtyUnpriced * -1 END 
+				, strTransactionReference = 'Unit - Price Fixation'
+				, @intContractHeaderId
+				, @intContractDetailId
+				, 1 --Priced
+				, intTransactionReferenceId = intContractHeaderId
+				, strTransactionReferenceNo = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
+				, @intCommodityId
+				, @strCommodityCode
+				, @intItemId
+				, intEntityId
+				, @intLocationId
+				, @intFutureMarketId 
+				, @intFutureMonthId 
+				, @dtmStartDate 
+				, @dtmEndDate 
+				, @intQtyUOMId
+				, @dblFutures
+				, @dblBasis
+				, @intBasisUOMId 
+				, @intBasisCurrencyId 
+				, @intPriceUOMId 
+				, @intContractStatusId 
+				, @intBookId 
+				, @intSubBookId
+				, @intUserId 
+			FROM tblCTSequenceHistory 
+			WHERE intContractDetailId = @intContractDetailId
+			AND @intHeaderPricingType = 4
+			AND ysnFuturesChange = 1
+			AND strPricingType IN ('Priced','Unit')
+			
+			union all  -- Header is Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
+			select	
+				dtmHistoryCreated
+				, @strContractNumber
+				, @intContractSeq
+				, @intContractTypeId
+				, dblQuantity = CASE WHEN SH.intContractStatusId = 6 THEN 0 -- CANCELLED
+								WHEN ( strPricingStatus = 'Partially Priced' AND SH.dblQtyPriced <> 0
+											AND dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance = dblQtyPriced --325 - 25
+													AND dblCumulativeBalance <= dblCumulativeQtyPriced AND SH.dblBalance = SH.dblQtyUnpriced) 
+									THEN 0
+								WHEN ( strPricingStatus <> 'Unpriced'
+											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced)
+													AND dblCumulativeBalance <= dblCumulativeQtyPriced AND (dblLagOldBalance * 2) = dblLagQtyPriced)) 
+									THEN 0
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Fully Priced'
+									AND SH.strPricingStatus = 'Partially Priced'
+									AND SH.ysnBalanceChange = 1 
+									AND SH.ysnCashPriceChange = 1
+									AND SH.ysnFuturesChange = 1
+									AND SH.dblBalance = SH.dblQuantity
+									AND SH.dblOldBalance = SH.dblQtyPriced
+								)	THEN SH.dblQtyUnpriced * -1
+								WHEN ( strPricingStatus <> 'Unpriced'
+											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced)
 													OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
 										   )
-									THEN dblActualPriceFixation 
+									THEN dblActualPriceFixation
+								WHEN strPricingStatus = 'Partially Priced' AND dblCumulativeBalance = dblQtyPriced AND dblLagQtyPriced = 0
+									THEN 0
+								WHEN strPricingStatus = 'Partially Priced' 
+									AND ROUND(SH.dblBalance, 1) = ROUND(SH.dblQtyUnpriced, 1) THEN SH.dblBalance - SH.dblQtyUnpriced
+								-- PRICED TO UNPRICED (Previous Transaction is Contract Sequence Begin Balance)
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Fully Priced'
+									AND SH.strPricingStatus = 'Unpriced'
+									AND SH.ysnBalanceChange = 1
+									AND SH.ysnBasisChange IS NULL
+									AND SH.ysnFuturesChange IS NULL
+									AND SH.dblOldBalance = dblLagQuantity
+									) THEN dblOldBalance * -1
+								-- PRICED TO UNPRICED
+								WHEN (ISNULL(P.intPriceFixationId, 0) = 0
+									AND SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Fully Priced'
+									AND SH.strPricingStatus = 'Unpriced'
+									AND SH.ysnBalanceChange = 1
+									AND SH.ysnBasisChange IS NULL
+									AND SH.ysnFuturesChange IS NULL
+									) THEN dblOldBalance * -1							
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Partially Priced'
+									AND SH.strPricingStatus = 'Fully Priced'
+									AND SH.ysnBalanceChange IS NULL
+									AND SH.ysnCashPriceChange = 1
+									AND SH.ysnFuturesChange = 1
+									AND ((dblLagQtyPriced - dblLagQtyUnpriced) > (SH.dblQtyPriced / 2))
+									) THEN 0
 								WHEN SH.dblBalance < dblActualPriceFixation THEN SH.dblBalance
 								WHEN  strPricingStatus = 'Unpriced' THEN SH.dblBalance * -1
 								ELSE dblActualPriceFixation - dblCumulativeBalance END
@@ -837,6 +1051,9 @@ BEGIN TRY
 													OR
 												(lagctsh.strPricingStatus = 'Unpriced'
 												 AND origctsh.strPricingStatus <> 'Unpriced')
+													OR
+												(lagctsh.strPricingStatus <> 'Unpriced'
+													AND origctsh.strPricingStatus = 'Unpriced')
 										THEN 1 ELSE 0 END
 						, dblActualPriceFixation = 
 									(CASE WHEN origctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE origctsh.dblQtyPriced END) 
@@ -845,6 +1062,10 @@ BEGIN TRY
 						, dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
 						, intLagPricingTypeId = lagctsh.intPricingTypeId
 						, strLagPricingStatus = lagctsh.strPricingStatus
+						, dblLagQtyPriced = lagctsh.dblQtyPriced
+						, dblLagQtyUnpriced = lagctsh.dblQtyUnpriced
+						, dblLagQuantity = lagctsh.dblQuantity
+						, dblLagOldBalance = lagctsh.dblOldBalance
 						, origctsh.* 
 				FROM #tmpCTSequenceHistory origctsh
 				OUTER APPLY 
@@ -869,7 +1090,7 @@ BEGIN TRY
 			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 
 						AND ( SH.dblQuantity = SH.dblQtyPriced
 								OR
-							 (SH.dblQuantity <> SH.dblQtyPriced AND SH.dblBalance > (SH.dblQuantity - SH.dblQtyPriced) AND SH.strPricingStatus = 'Partially Priced')
+							 (SH.dblQuantity <> SH.dblQtyPriced AND SH.dblBalance >= (SH.dblQuantity - SH.dblQtyPriced) AND SH.strPricingStatus = 'Partially Priced')
 							    OR
 							 (SH.dblQtyPriced = 0 AND SH.strPricingStatus = 'Unpriced')
 							)
@@ -881,7 +1102,30 @@ BEGIN TRY
 					  AND SH.ysnCashPriceChange = 1
 					  AND SH.strPricingType IN ('Priced','Basis')
 					 )
+					OR
+					-- PRICED TO UNPRICED
+					(ISNULL(P.intPriceFixationId, 0) = 0
+					AND SH.intLagPricingTypeId <> SH.intPricingTypeId
+					AND SH.strLagPricingStatus = 'Fully Priced'
+					AND SH.strPricingStatus = 'Unpriced'
+					AND SH.ysnBalanceChange = 1
+					AND SH.ysnBasisChange IS NULL
+					AND SH.ysnFuturesChange IS NULL
+					)
+					OR (SH.intLagPricingTypeId <> SH.intPricingTypeId
+					AND SH.strLagPricingStatus = 'Fully Priced'
+					AND SH.strPricingStatus = 'Partially Priced'
+					AND SH.ysnBalanceChange = 1
+					AND SH.ysnCashPriceChange = 1
+					AND SH.ysnFuturesChange = 1
+					AND SH.dblBalance = SH.dblQuantity
+					AND SH.dblOldBalance = SH.dblQtyPriced
+					)
 				 )
+			AND (SH.intPricingTypeId <> 1
+				 OR
+				 (SH.intPricingTypeId = 1 AND SH.intPricingTypeId <> intLagPricingTypeId)
+				)
 
 			union all -- Counter entry when price fixing a Basis (Price Fixation of Basis thru Contract Pricing Screen or Updating Sequence Pricing Type to 'Priced')
 			select 
@@ -889,10 +1133,49 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblQuantity = CASE WHEN	strPricingStatus <> 'Unpriced'
-										AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation) 
-												OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
-									THEN dblActualPriceFixation 
+				, dblQuantity = CASE WHEN SH.intContractStatusId = 6 THEN 0 -- CANCELLED
+								WHEN strPricingStatus = 'Partially Priced' AND SH.dblQtyPriced <> 0
+											AND dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance = dblQtyPriced
+													AND dblCumulativeBalance <= dblCumulativeQtyPriced AND SH.dblBalance = SH.dblQtyUnpriced 
+									THEN 0
+								WHEN ( strPricingStatus <> 'Unpriced'
+											AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced)
+													AND dblCumulativeBalance <= dblCumulativeQtyPriced AND (dblLagOldBalance * 2) = dblLagQtyPriced)) 
+									THEN 0
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Fully Priced'
+									AND SH.strPricingStatus = 'Partially Priced'
+									AND SH.ysnBalanceChange = 1
+									AND SH.ysnCashPriceChange = 1
+									AND SH.ysnFuturesChange = 1
+									AND SH.dblBalance = SH.dblQuantity
+									AND SH.dblOldBalance = SH.dblQtyPriced
+								)	THEN SH.dblQtyUnpriced * -1
+								WHEN	strPricingStatus <> 'Unpriced'
+										AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation AND dblCumulativeBalance <> dblQtyPriced) 
+													OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
+									THEN dblActualPriceFixation					
+								WHEN strPricingStatus = 'Partially Priced' AND dblCumulativeBalance = dblQtyPriced AND dblLagQtyPriced = 0
+									THEN 0
+								WHEN strPricingStatus = 'Partially Priced' 
+									AND ROUND(SH.dblBalance, 1) = ROUND(SH.dblQtyUnpriced, 1) THEN SH.dblBalance - SH.dblQtyUnpriced
+								-- PRICED TO UNPRICED
+								WHEN (ISNULL(P.intPriceFixationId, 0) = 0
+								 	AND SH.intLagPricingTypeId <> SH.intPricingTypeId
+								 	AND SH.strLagPricingStatus = 'Fully Priced'
+								 	AND SH.strPricingStatus = 'Unpriced'
+								 	AND SH.ysnBalanceChange = 1
+								 	AND SH.ysnBasisChange IS NULL
+								 	AND SH.ysnFuturesChange IS NULL
+								 	) THEN SH.dblBalance * -1
+								WHEN (SH.intLagPricingTypeId <> SH.intPricingTypeId
+									AND SH.strLagPricingStatus = 'Partially Priced'
+									AND SH.strPricingStatus = 'Fully Priced'
+									AND SH.ysnBalanceChange IS NULL
+									AND SH.ysnCashPriceChange = 1
+									AND SH.ysnFuturesChange = 1
+									AND ((dblLagQtyPriced - dblLagQtyUnpriced) > (SH.dblQtyPriced / 2))
+									) THEN 0
 								WHEN SH.dblBalance < dblActualPriceFixation THEN SH.dblBalance
 								WHEN  strPricingStatus = 'Unpriced' THEN SH.dblBalance * -1
 								ELSE dblActualPriceFixation - dblCumulativeBalance END * -1
@@ -933,6 +1216,9 @@ BEGIN TRY
 													OR
 												(lagctsh.strPricingStatus = 'Unpriced'
 												 AND origctsh.strPricingStatus <> 'Unpriced')
+												  	OR
+												 (lagctsh.strPricingStatus <> 'Unpriced'
+												 	AND origctsh.strPricingStatus = 'Unpriced')
 										THEN 1 ELSE 0 END
 						, dblActualPriceFixation = 
 									(CASE WHEN origctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE origctsh.dblQtyPriced END) 
@@ -941,6 +1227,9 @@ BEGIN TRY
 						, dblCumulativeQtyPriced = (CASE WHEN lagctsh.strPricingStatus = 'Unpriced' THEN 0 ELSE lagctsh.dblQtyPriced END)
 						, intLagPricingTypeId = lagctsh.intPricingTypeId
 						, strLagPricingStatus = lagctsh.strPricingStatus
+						, dblLagQtyPriced = lagctsh.dblQtyPriced
+						, dblLagQtyUnpriced = lagctsh.dblQtyUnpriced
+						, dblLagOldBalance = lagctsh.dblOldBalance
 						, origctsh.* 
 				FROM #tmpCTSequenceHistory origctsh
 				OUTER APPLY 
@@ -965,7 +1254,7 @@ BEGIN TRY
 			AND (	(ISNULL(P.intPriceFixationId, 0) <> 0 AND SH.ysnIsPricing = 1 
 						AND ( SH.dblQuantity = SH.dblQtyPriced
 								OR
-								(SH.dblQuantity <> SH.dblQtyPriced AND SH.dblBalance > (SH.dblQuantity- SH.dblQtyPriced) AND SH.strPricingStatus = 'Partially Priced')
+								(SH.dblQuantity <> SH.dblQtyPriced AND SH.dblBalance >= (SH.dblQuantity - SH.dblQtyPriced) AND SH.strPricingStatus = 'Partially Priced')
 								OR
 								(SH.dblQtyPriced = 0 AND SH.strPricingStatus = 'Unpriced')
 							)
@@ -977,7 +1266,30 @@ BEGIN TRY
 					  AND SH.ysnCashPriceChange = 1
 					  AND SH.strPricingType IN ('Priced','Basis')
 					 )
+					 OR
+					 -- PRICED TO UNPRICED
+					 (ISNULL(P.intPriceFixationId, 0) = 0
+					 AND SH.intLagPricingTypeId <> SH.intPricingTypeId
+					 AND SH.strLagPricingStatus = 'Fully Priced'
+					 AND SH.strPricingStatus = 'Unpriced'
+					 AND SH.ysnBalanceChange = 1
+					 AND SH.ysnBasisChange IS NULL
+					 AND SH.ysnFuturesChange IS NULL
+					 )
+					 OR (SH.intLagPricingTypeId <> SH.intPricingTypeId
+					 AND SH.strLagPricingStatus = 'Fully Priced'
+					 AND SH.strPricingStatus = 'Partially Priced'
+					 AND SH.ysnBalanceChange = 1
+					 AND SH.ysnCashPriceChange = 1
+					 AND SH.ysnFuturesChange = 1
+					 AND SH.dblBalance = SH.dblQuantity
+					 AND SH.dblOldBalance = SH.dblQtyPriced
+					 )
 				 )
+			AND (SH.intPricingTypeId <> 1
+				 OR
+				 (SH.intPricingTypeId = 1 AND SH.intPricingTypeId <> intLagPricingTypeId)
+				)
 
 			union all -- Header is Priced
 			select 
@@ -985,7 +1297,8 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblQuantity = CASE WHEN	strPricingStatus <> 'Unpriced'
+				, dblQuantity = CASE WHEN SH.intContractStatusId = 6 THEN 0 -- CANCELLED
+								WHEN	strPricingStatus <> 'Unpriced'
 										AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation) 
 												OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
 									THEN dblActualPriceFixation 
@@ -1051,7 +1364,8 @@ BEGIN TRY
 				, @strContractNumber
 				, @intContractSeq
 				, @intContractTypeId
-				, dblQuantity = CASE WHEN	strPricingStatus <> 'Unpriced'
+				, dblQuantity = CASE WHEN SH.intContractStatusId = 6 THEN 0 -- CANCELLED
+								WHEN	strPricingStatus <> 'Unpriced'
 										AND ((dblCumulativeBalance > dblActualPriceFixation AND SH.dblBalance > dblActualPriceFixation) 
 												OR dblCumulativeBalance <= dblCumulativeQtyPriced)  
 									THEN dblActualPriceFixation 
@@ -1593,14 +1907,14 @@ BEGIN TRY
 				)
 			AND ctWG.strWhereFinalized = 'Destination'
 		CROSS APPLY (
-				SELECT TOP 1 ctUH.intSequenceUsageHistoryId
-						, ctUH.dtmTransactionDate
-				FROM tblCTSequenceUsageHistory ctUH
-				WHERE ctUH.intExternalHeaderId = suh.intExternalHeaderId
-				AND ctUH.intContractDetailId = @intContractDetailId
-				AND ctUH.strFieldName = 'Balance'
-				AND suh.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
-			) negateHistory
+			SELECT TOP 1 ctUH.intSequenceUsageHistoryId
+					, ctUH.dtmTransactionDate
+			FROM tblCTSequenceUsageHistory ctUH
+			WHERE ctUH.intExternalHeaderId = suh.intExternalHeaderId
+			AND ctUH.intContractDetailId = @intContractDetailId
+			AND ctUH.strFieldName = 'Balance'
+			AND suh.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
+		) negateHistory
 		where strFieldName = 'Balance'
 		AND suh.ysnDeleted = 1
 		AND sh.strPricingStatus  IN ('Unpriced','Partially Priced')
@@ -1652,14 +1966,14 @@ BEGIN TRY
 				)
 			AND ctWG.strWhereFinalized = 'Destination'
 		CROSS APPLY (
-				SELECT TOP 1 ctUH.intSequenceUsageHistoryId
-						, ctUH.dtmTransactionDate
-				FROM tblCTSequenceUsageHistory ctUH
-				WHERE ctUH.intExternalHeaderId = suh.intExternalHeaderId
-				AND ctUH.intContractDetailId = @intContractDetailId
-				AND ctUH.strFieldName = 'Balance'
-				AND suh.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
-			) negateHistory
+			SELECT TOP 1 ctUH.intSequenceUsageHistoryId
+					, ctUH.dtmTransactionDate
+			FROM tblCTSequenceUsageHistory ctUH
+			WHERE ctUH.intExternalHeaderId = suh.intExternalHeaderId
+			AND ctUH.intContractDetailId = @intContractDetailId
+			AND ctUH.strFieldName = 'Balance'
+			AND suh.dblTransactionQuantity * -1 = ctUH.dblTransactionQuantity
+		) negateHistory
 		where strFieldName = 'Balance'
 		AND suh.ysnDeleted = 1
 		AND sh.strPricingStatus  IN ('Unpriced','Partially Priced')
@@ -2106,6 +2420,8 @@ BEGIN TRY
 
 		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Basis Deliveries')
 
+		IF @ysnCBOnly = 0
+		BEGIN
 		--=======================================
 		--				DERIVATIVES
 		--=======================================
@@ -3345,6 +3661,8 @@ BEGIN TRY
         EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
         INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - On Hold')
         DELETE FROM @ExistingHistory
+
+		END
 		
 		---------------------------------------------------------------------------------------------------
 		-- CB LOG Rebuild for Cancelled, Short Closed, and Completed contracts within 3 month threshold  --
