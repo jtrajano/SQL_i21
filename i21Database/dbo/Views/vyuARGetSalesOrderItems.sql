@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARGetSalesOrderItems]
 AS 
-SELECT intSalesOrderId					= SO.intSalesOrderId
+SELECT intRowId							= CAST(ROW_NUMBER() OVER(ORDER BY SODETAIL.intSalesOrderDetailId) AS INT)
+	 , intSalesOrderId					= SO.intSalesOrderId
 	 , intEntityCustomerId				= SO.intEntityCustomerId
 	 , intCompanyLocationId				= SO.intCompanyLocationId
      , intSalesOrderDetailId			= SODETAIL.intSalesOrderDetailId
@@ -147,7 +148,7 @@ INNER JOIN (
 		 , SOD.dblDiscount
 		 , SOD.dblCurrencyExchangeRate
 		 , SOD.dblSubCurrencyRate
-		 , strItemDescription = COMP.strDescription
+		 , strItemDescription = ITEMCOMP.strDescription
 		 , SOD.strPricing
 		 , SOD.strVFDDocumentNumber
 		 , SOD.ysnBlended
@@ -166,6 +167,7 @@ INNER JOIN (
 	INNER JOIN tblSOSalesOrderDetail SOD WITH (NOLOCK) ON COMP.intItemId = SOD.intItemId
 	INNER JOIN tblICItem ITEMCOMP WITH (NOLOCK) ON COMP.intComponentItemId = ITEMCOMP.intItemId
 	INNER JOIN tblICItem ITEM WITH (NOLOCK) ON SOD.intItemId = ITEM.intItemId
+	INNER JOIN tblSOSalesOrder SO WITH (NOLOCK) ON SOD.intSalesOrderId = SO.intSalesOrderId AND COMP.intCompanyLocationId = SO.intCompanyLocationId
 	WHERE ((SOD.dblQtyOrdered > 0 AND SOD.dblQtyShipped < SOD.dblQtyOrdered) OR (SOD.dblQtyOrdered < 0 AND SOD.dblQtyShipped > SOD.dblQtyOrdered))
 	  AND SOD.intItemId IS NOT NULL
 	  AND ISNULL(ITEM.strBundleType, '') = 'Option'

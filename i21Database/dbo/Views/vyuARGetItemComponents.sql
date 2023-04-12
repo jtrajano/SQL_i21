@@ -131,7 +131,7 @@ SELECT intRecipeId				= NULL
 	 , intCompanyLocationId		= I.intLocationId
      , intComponentItemId		= BUNDLE.intBundleItemId
 	 , strItemNo				= I.strItemNo
-	 , strDescription			= BUNDLE.strDescription	 
+	 , strDescription			= I.strDescription	 
 	 , intItemUnitMeasureId		= BUNDLE.intItemUnitMeasureId
 	 , intUnitMeasureId			= I.intStockUOMId
 	 , strUnitMeasure			= UOM.strUnitMeasure
@@ -165,6 +165,7 @@ INNER JOIN (
 		 , intItemLocationId
 		 , intStorageLocationId
 		 , intSubLocationId
+		 , strDescription
 	FROM dbo.vyuICGetItemStock WITH (NOLOCK)
 ) I ON BUNDLE.intBundleItemId = I.intItemId
 INNER JOIN (
