@@ -212,6 +212,11 @@ BEGIN TRY
 					OR Transporter.intEntityId IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 				AND ((SELECT COUNT(*) FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 					OR Transporter.intEntityId NOT IN (SELECT intEntityId FROM tblTFReportingComponentCarrier WHERE intReportingComponentId = @RCId AND ysnInclude = 0))	
+
+				AND (COALESCE(tblTRState.strStateAbbreviation, '') != COALESCE(CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN DestinationLoc.strStateProvince ELSE CustomerLoc.strState END, '') 
+				 AND ((CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN DestinationLoc.strStateProvince ELSE CustomerLoc.strState END) IS NOT NULL
+				 AND tblTRState.strStateAbbreviation IS NOT NULL
+				))
 		) tblTFTransaction
 
 		-- Distinct the Account Status Code
@@ -323,20 +328,20 @@ BEGIN TRY
 				, strOriginCity
 				, strOriginCounty
 				, strOriginState
-				, strCustomerName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName
 				, REPLACE(strCustomerFederalTaxId, '-', '')
-				, strShipVia
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia 
 				, strTransporterLicense
 				, strTransportationMode
-				, strTransporterName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName
 				, REPLACE(strTransporterFederalTaxId, '-', '')
-				, strConsignorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName 
 				, REPLACE(strConsignorFederalTaxId, '-', '')
 				, strTaxCode
 				, strTerminalControlNumber
-				, strVendorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName  
 				, REPLACE(strVendorFederalTaxId, '-', '')
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
@@ -359,7 +364,7 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strContactName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strContactName)), 35) ELSE strContactName END AS strContactName 
 				, strEmail
 				, strImportVerificationNumber
 			FROM @tmpTransaction Trans

@@ -83,15 +83,15 @@ SELECT
 	, strFillGroupDescription = I.strDescription
 	, ysnFillGroupActive = I.ysnActive
 	, intFillGroupId = CAST(ISNULL(C.intFillGroupId,0) AS INT)
-	, strDriverName = J.strName  
-	, strDriverId = J.strEntityNo
+	, strDriverName = ISNULL(J.strName ,'')
+	, strDriverId = ISNULL(J.strEntityNo,'')
 	, F.dtmRequestedDate
 	--, dblQuantity = (CASE WHEN COALESCE(F.dblMinimumQuantity,0.0) <> 0 THEN F.dblMinimumQuantity
 	--					ELSE COALESCE(F.dblQuantity,0.0) END) 
 	, dblQuantity = ISNULL(NULLIF(ISNULL(F.dblMinimumQuantity, 0), 0), ISNULL(F.dblQuantity,0))
 	, strProductId = G.strItemNo
 	, strProductDescription = G.strDescription
-	, O.strRouteId
+	, strRouteId = ISNULL(O.strRouteId,'')
 	, P.strFillMethod
 	, strBetweenDlvry = (CASE WHEN C.intFillMethodId = U.intFillMethodId THEN R.strDescription
 							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
@@ -112,6 +112,7 @@ SELECT
 																							FROM vyuTMDeliveryFillGroupSubReport 
 																							WHERE intFillGroupId = C.intFillGroupId
 																								AND intSiteId <> C.intSiteID) END
+	,intDispatchId = F.intDispatchID
 FROM tblTMCustomer A 
 INNER JOIN vyuTMCustomerEntityView B
 	ON A.intCustomerNumber = B.A4GLIdentity

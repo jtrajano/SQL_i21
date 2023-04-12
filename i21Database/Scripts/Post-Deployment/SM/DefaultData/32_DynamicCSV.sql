@@ -1780,6 +1780,7 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @TariffTypeId	INT
 	DECLARE @SurchargeOutS	NVARCHAR(100)
 	DECLARE @SurchargeOut	NUMERIC (18, 6)
+	DECLARE @ExistingId		INT
 
 	SELECT
 			@EntityNo 		= ''@entityCustomerId@'',
@@ -1812,7 +1813,8 @@ UPDATE tblSMCSVDynamicImport SET
 			@UnitIn			= 0,
 			@EntityId		= NULL,
 			@TariffTypeId	= NULL,
-			@SurchargeOut   = 0
+			@SurchargeOut   = 0,
+			@ExistingId		= NULL
 
 	
 
@@ -2013,44 +2015,78 @@ UPDATE tblSMCSVDynamicImport SET
 						@Unit = 0,
 						@UnitIn = 0
 			END
-			BEGIN TRY
-				INSERT INTO tblARCustomerFreightXRef(
-					intEntityCustomerId,		intCategoryId,
-					ysnFreightOnly,				strFreightType,
-					dblFreightAmount,			dblFreightRate,
-					dblMinimumUnits,			ysnFreightInPrice,
-					dblFreightMiles,			intShipViaId,
-					intEntityLocationId,		strZipCode,
-					intEntityTariffTypeId,		intConcurrencyId,
-					dblFreightRateIn,			dblMinimumUnitsIn,
-					dblSurchargeOut
-				)
-				SELECT
-					@EntityId,					@ItemCatId,
-					@FreightOnlyB,				@FreightType,
-					@Amount,					@FreightOut,
-					@Unit,						@FreightPriceB,
-					@Miles,						@ShipViaId,
-					@CusLocId,					@ZipCode,
-					@TariffTypeId,				0,
-					@FreightIn,					@UnitIn,
-					@SurchargeOut
-			END TRY
-			BEGIN CATCH
-				DECLARE @Err NVARCHAR(MAX)
-				SET @Err = Error_Message()
-				SELECT @Err
-				IF CHARINDEX(''uk_tblarcustomerfreightxref_reference_columns'', LOWER(@Err)) > 0
-				BEGIN
-					SET @ValidationMessage = ''Duplicate combination of (Location, Zip Code & Category) entry for Customer (@entityCustomerId@).''
-				END
-				ELSE
-				BEGIN
-					SET @ValidationMessage = ''Customer (@entityCustomerId@) does not exists.''
-				END
+			SELECT @ExistingId = CF.intFreightXRefId FROM tblARCustomerFreightXRef CF
+				LEFT JOIN tblARCustomer C
+					ON CF.intEntityCustomerId = C.intEntityId
+				LEFT JOIN tblICCategory IC
+					ON CF.intCategoryId = IC.intCategoryId
+				LEFT JOIN tblEMEntityLocation EL
+					ON CF.intEntityLocationId = EL.intEntityLocationId
+				LEFT JOIN tblEMEntityTariffType ET
+					ON CF.intEntityTariffTypeId = ET.intEntityTariffTypeId
+			WHERE C.strCustomerNumber = @EntityNo
+				AND IC.strCategoryCode = @ItemCat
+				AND CF.strZipCode = @ZipCode
+				AND EL.intEntityLocationId = @CusLocId
+				AND ET.intEntityTariffTypeId = @TariffTypeId
+
+			IF (@ExistingId IS NOT NULL)
+			BEGIN
+				UPDATE tblARCustomerFreightXRef 
+				SET ysnFreightOnly = @FreightOnlyB
+					,strFreightType = @FreightType
+					,intShipViaId = @ShipViaId
+					,dblFreightRate = @FreightOut
+					,dblSurchargeOut = @SurchargeOut
+					,dblFreightRateIn = @FreightIn
+					,dblFreightAmount = @Amount
+					,dblFreightMiles = @Miles
+					,ysnFreightInPrice = @FreightPriceB
+					,dblMinimumUnitsIn = @UnitIn
+					,dblMinimumUnits = @Unit
+				WHERE intFreightXRefId = @ExistingId
+			END
+			ELSE
+			BEGIN
+				BEGIN TRY
+					INSERT INTO tblARCustomerFreightXRef(
+						intEntityCustomerId,		intCategoryId,
+						ysnFreightOnly,				strFreightType,
+						dblFreightAmount,			dblFreightRate,
+						dblMinimumUnits,			ysnFreightInPrice,
+						dblFreightMiles,			intShipViaId,
+						intEntityLocationId,		strZipCode,
+						intEntityTariffTypeId,		intConcurrencyId,
+						dblFreightRateIn,			dblMinimumUnitsIn,
+						dblSurchargeOut
+					)
+					SELECT
+						@EntityId,					@ItemCatId,
+						@FreightOnlyB,				@FreightType,
+						@Amount,					@FreightOut,
+						@Unit,						@FreightPriceB,
+						@Miles,						@ShipViaId,
+						@CusLocId,					@ZipCode,
+						@TariffTypeId,				0,
+						@FreightIn,					@UnitIn,
+						@SurchargeOut
+				END TRY
+				BEGIN CATCH
+					DECLARE @Err NVARCHAR(MAX)
+					SET @Err = Error_Message()
+					SELECT @Err
+					IF CHARINDEX(''uk_tblarcustomerfreightxref_reference_columns'', LOWER(@Err)) > 0
+					BEGIN
+						SET @ValidationMessage = ''Duplicate combination of (Location, Zip Code & Category) entry for Customer (@entityCustomerId@).''
+					END
+					ELSE
+					BEGIN
+						SET @ValidationMessage = ''Customer (@entityCustomerId@) does not exists.''
+					END
 
 				
-			END CATCH
+				END CATCH
+			END
 				
 		END
 
@@ -2081,7 +2117,7 @@ UPDATE tblSMCSVDynamicImport SET
 	Union All
 	SELECT @NewHeaderId, 'freightshipvia', 'Fixed Ship Via', 0
 	Union All
-	SELECT @NewHeaderId, 'freightamount', 'Freight Amount', 0
+	SELECT @NewHeaderId, 'freightamount', 'Toll', 0
 	Union All
 	SELECT @NewHeaderId, 'freightrateout', 'Freight-Out', 0
 	Union All
@@ -2754,6 +2790,8 @@ UPDATE tblSMCSVDynamicImport SET
 		DECLARE @intRackLocationId			INT
 		DECLARE @strInvoiceType				NVARCHAR(MAX)
 
+
+		SET @strCostToUse = @cost_to_use
 
 		DECLARE @IsValid INT = 1
 

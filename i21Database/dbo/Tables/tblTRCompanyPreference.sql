@@ -27,6 +27,7 @@
 	[ysnFreightInRequired] BIT NULL,	
 	[ysnComboFreight] BIT NULL,
 	[ysnAllowDifferentUnits] BIT NULL,
+	[ysnIncludeSurchargeInQuote] BIT NULL,
 	[strDtnImportProcessFolder] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strDtnImportArchiveFolder] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAllowBlankDriver] BIT NULL DEFAULT ((1)),

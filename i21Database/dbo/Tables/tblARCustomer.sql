@@ -129,6 +129,8 @@
     [strRecurringPONumber]                   NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
     [ysnUpdatedAppliedSalesTax]             BIT NULL DEFAULT 0,
     [ysnUpdatedAppliedPrepaidTax]           BIT NULL DEFAULT 0,
+    [intProjectId]                          INT NULL,
+    [strProjectName]                        NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
@@ -156,6 +158,7 @@
 	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intPriceChangeApprovalId] FOREIGN KEY ([intPriceChangeApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),	
 	CONSTRAINT [FK_tblARCustomer_tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_tblARCustomer_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID]),
+    CONSTRAINT [FK_tblARCustomer_tblSMInterCompany_intInterCompanyId] FOREIGN KEY ([intInterCompanyId]) REFERENCES [dbo].[tblSMInterCompany] ([intInterCompanyId]),
 
 	
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)

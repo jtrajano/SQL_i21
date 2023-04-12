@@ -34,6 +34,7 @@ SELECT intInventoryTransferId
 	, Broker.strName AS strBroker
 	, InvTransfer.strTrailerId
 	, InvTransfer.strERPTransferNo
+	, strDiversionNo
 FROM tblICInventoryTransfer InvTransfer
 	LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = InvTransfer.intTransferredById
 	LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = InvTransfer.intBrokerId

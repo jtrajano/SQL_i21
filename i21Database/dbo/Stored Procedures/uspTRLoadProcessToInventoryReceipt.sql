@@ -82,8 +82,12 @@ END
 	WHERE ISNULL(CF.ysnFreightOnly, 0) = 1
 		AND (ISNULL(LR.dblUnitCost, 0) != 0 OR ISNULL(LR.dblFreightRate, 0) != 0 OR ISNULL(LR.dblPurSurcharge, 0) != 0)
 		AND DH.intLoadHeaderId = @intLoadHeaderId
+	
+	DECLARE @ysnCompanyOwnedCarrier BIT = 0
+	SELECT @ysnCompanyOwnedCarrier = ISNULL(ysnCompanyOwnedCarrier, 0) FROM tblSMShipVia
+	WHERE intEntityId = (SELECT intShipViaId = ISNULL(intShipViaId, 0) FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId)
 
-	IF EXISTS (SELECT TOP 1 1 FROM #tmpList)
+	IF EXISTS (SELECT TOP 1 1 FROM #tmpList) AND (ISNULL(@ysnCompanyOwnedCarrier, 0) <> 1)
 	BEGIN
 		DECLARE	@ids AS NVARCHAR(MAX)
 
@@ -120,8 +124,8 @@ END
 		,intCurrencyId				= @defaultCurrency
 		,dblExchangeRate			= 1 -- Need to check this
 		,intLotId					= NULL --No LOTS from transport
-		,intSubLocationId			= NULL -- No Sub Location from transport
-		,intStorageLocationId		= NULL -- No Storage Location from transport
+		,intSubLocationId			= MIN(TMSite.intCompanyLocationSubLocationId) -- No Storage Location from transport unless COmpany Consumption Site
+		,intStorageLocationId		= NULL -- No Sub Location from transport
 		,ysnIsStorage				= 0 -- No Storage from transports
 		,dblFreightRate				= min(TR.dblFreightRate)
 		,intSourceId				= min(TR.intLoadReceiptId)
@@ -131,14 +135,14 @@ END
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
-		,strActualCostId			= ISNULL(min(TLD.strTransaction), min(BID.strTransaction))
+		,strActualCostId			= ISNULL(min(TL.strTransaction), min(BID.strTransaction))
 		,intTaxGroupId				= min(TR.intTaxGroupId)
 		,strVendorRefNo				= min(TR.strBillOfLading)
 		,strSourceId				= min(TL.strTransaction)
 		,strSourceScreenName		= 'Transport Loads'
 		,intPaymentOn				= 1 -- Compute on Qty to Receive
 		,strChargesLink				= MIN(TR.strReceiptLine)
-		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
+		,strDestinationType			= ISNULL(MIN(DH.strDestination), MIN(BID.strDestination))
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
 		,dblMinimumUnits			= MIN(TR.dblMinimumUnits)
 		,dblComboFreightRate		= MIN(TR.dblComboFreightRate)
@@ -152,8 +156,10 @@ END
 	LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = TR.intSupplyPointId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = TL.intShipViaId
-	LEFT JOIN vyuTRGetLoadReceiptToDistribution TLD on TLD.intLoadHeaderId = TR.intLoadHeaderId AND TLD.intLoadReceiptId = TR.intLoadReceiptId AND TLD.intItemId = TR.intItemId
+	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TR.intLoadHeaderId
+	LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND DD.strReceiptLink = TR.strReceiptLine
 	LEFT JOIN vyuTRGetLoadReceiptToBlendIngredient BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
+	LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId --333333
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'

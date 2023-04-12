@@ -166,10 +166,10 @@ BEGIN TRY
 			--------------- START CONTRACT COST -------------------
 			IF OBJECT_ID('tempdb..#ContractCosts') IS NOT NULL
 				DROP TABLE #ContractCosts
-
+			
 			SELECT  * 
 			INTO	#ContractCosts
-			FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail/tblCTContractCosts',2)
+			FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail/tblCTContractCosts/tblCTContractCost',3)
 			WITH	(intContractCostId INT,intContractDetailId INT,strRowState NVARCHAR(50))     
 
 			IF OBJECT_ID('tempdb..#ProcessCost') IS NOT NULL
@@ -181,7 +181,7 @@ BEGIN TRY
 			WHERE	intContractDetailId = @intContractDetailId
 
 			SELECT @intCostUniqueId = MIN(intCostUniqueId) FROM #ProcessCost
-
+			
 			WHILE ISNULL(@intCostUniqueId,0) > 0
 			BEGIN
 				SELECT	@intContractCostId = intContractCostId

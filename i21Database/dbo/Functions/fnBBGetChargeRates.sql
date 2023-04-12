@@ -15,33 +15,51 @@ BEGIN
 	
 	--location ,item, uom
 	IF EXISTS(SELECT TOP 1 1 
-			  FROM tblBBRate
-			  WHERE intCustomerLocationId = @intEntityLocationId
-				AND intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
-				AND dtmBeginDate <= @dtmDate
-				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
-				AND intProgramChargeId = @intProgramChargeId
+			  FROM tblBBRate r
+				OUTER APPLY (
+					SELECT TOP 1 i.intUnitMeasureId
+					FROM tblICItemUOM i 
+					WHERE i.intItemId = r.intItemId
+						AND i.intUnitMeasureId = @intUnitMeasureId
+				) u
+			  WHERE r.intCustomerLocationId = @intEntityLocationId
+				AND r.intItemId = @intItemId
+				AND (r.intUnitMeasureId = @intUnitMeasureId OR u.intUnitMeasureId IS NOT NULL)
+				AND r.dtmBeginDate <= @dtmDate
+				AND ISNULL(r.dtmEndDate,'1/1/9999') >= @dtmDate
+				AND r.intProgramChargeId = @intProgramChargeId
 	)
 	BEGIN
 		INSERT INTO @tblReturnValue (dblRate,intProgramRateId)
 		SELECT TOP 1 dblRatePerUnit, intRateId 
-			  FROM tblBBRate
-			  WHERE intCustomerLocationId = @intEntityLocationId
-				AND intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
-				AND dtmBeginDate <= @dtmDate
+			  FROM tblBBRate r
+			  	OUTER APPLY (
+					SELECT TOP 1 i.intUnitMeasureId
+					FROM tblICItemUOM i 
+					WHERE i.intItemId = r.intItemId
+						AND i.intUnitMeasureId = @intUnitMeasureId
+				) u
+			  WHERE r.intCustomerLocationId = @intEntityLocationId
+				AND r.intItemId = @intItemId
+				AND (r.intUnitMeasureId = @intUnitMeasureId OR u.intUnitMeasureId IS NOT NULL)
+				AND r.dtmBeginDate <= @dtmDate
 				AND ISNULL(dtmEndDate ,'1/1/9999') >= @dtmDate
-				AND intProgramChargeId = @intProgramChargeId
+				AND r.intProgramChargeId = @intProgramChargeId
 		RETURN
 	END
 
 	--itemid, uom
 	IF EXISTS(SELECT TOP 1 1 
-			  FROM tblBBRate
+			  FROM tblBBRate r
+			  OUTER APPLY (
+					SELECT TOP 1 i.intUnitMeasureId
+					FROM tblICItemUOM i 
+					WHERE i.intItemId = r.intItemId
+						AND i.intUnitMeasureId = @intUnitMeasureId
+				) u
 			  WHERE intCustomerLocationId IS NULL
 				AND intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
+				AND (r.intUnitMeasureId = @intUnitMeasureId OR u.intUnitMeasureId IS NOT NULL)
 				AND dtmBeginDate <= @dtmDate
 				AND ISNULL(dtmEndDate, '1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
@@ -49,10 +67,16 @@ BEGIN
 	BEGIN
 		INSERT INTO @tblReturnValue (dblRate,intProgramRateId)
 		SELECT TOP 1 dblRatePerUnit, intRateId 
-			  FROM tblBBRate
+			  FROM tblBBRate r
+			  OUTER APPLY (
+					SELECT TOP 1 i.intUnitMeasureId
+					FROM tblICItemUOM i 
+					WHERE i.intItemId = r.intItemId
+						AND i.intUnitMeasureId = @intUnitMeasureId
+				) u
 			  WHERE intCustomerLocationId IS NULL
 				AND intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
+				AND (r.intUnitMeasureId = @intUnitMeasureId OR u.intUnitMeasureId IS NOT NULL)
 				AND dtmBeginDate <= @dtmDate
 				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
@@ -61,10 +85,16 @@ BEGIN
 
 	---UOM
 	IF EXISTS(SELECT TOP 1 1 
-			  FROM tblBBRate
+			  FROM tblBBRate r
+			  OUTER APPLY (
+					SELECT TOP 1 i.intUnitMeasureId
+					FROM tblICItemUOM i 
+					WHERE i.intItemId = r.intItemId
+						AND i.intUnitMeasureId = @intUnitMeasureId
+				) u
 			  WHERE intCustomerLocationId IS NULL
 				AND intItemId IS NULL
-				AND intUnitMeasureId = @intUnitMeasureId
+				AND (r.intUnitMeasureId = @intUnitMeasureId OR u.intUnitMeasureId IS NOT NULL)
 				AND dtmBeginDate <= @dtmDate
 				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
@@ -72,10 +102,16 @@ BEGIN
 	BEGIN
 		INSERT INTO @tblReturnValue (dblRate,intProgramRateId)
 		SELECT TOP 1 dblRatePerUnit, intRateId 
-			  FROM tblBBRate
+			  FROM tblBBRate r
+			  OUTER APPLY (
+					SELECT TOP 1 i.intUnitMeasureId
+					FROM tblICItemUOM i 
+					WHERE i.intItemId = r.intItemId
+						AND i.intUnitMeasureId = @intUnitMeasureId
+				) u
 			  WHERE intCustomerLocationId IS NULL
 				AND intItemId IS NULL
-				AND intUnitMeasureId = @intUnitMeasureId
+				AND (r.intUnitMeasureId = @intUnitMeasureId OR u.intUnitMeasureId IS NOT NULL)
 				AND dtmBeginDate <= @dtmDate
 				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId

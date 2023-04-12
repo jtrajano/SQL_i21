@@ -680,6 +680,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\AL_Alabama.sql
 :r .\TF\DefaultData\WV_WestVirginia.sql
 :r .\TF\DefaultData\WY_Wyoming.sql
+:r .\TF\DefaultData\UT_Utah.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

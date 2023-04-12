@@ -89,6 +89,7 @@
     <Folder Include="Scripts\Pre-Deployment\25_ST" />
     <Folder Include="Scripts\Pre-Deployment\26_LG" />
     <Folder Include="Scripts\Pre-Deployment\27_SCH" />
+    <Folder Include="Scripts\Pre-Deployment\28_VR\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />

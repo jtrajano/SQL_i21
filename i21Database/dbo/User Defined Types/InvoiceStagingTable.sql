@@ -223,4 +223,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[dtmCalculated]						DATETIME										NULL
 	,[ysnImportedFromOrigin]				BIT												NULL
 	,[ysnImportedAsPosted] 				    BIT												NULL
+	,intDispatchId							INT												NULL
 )

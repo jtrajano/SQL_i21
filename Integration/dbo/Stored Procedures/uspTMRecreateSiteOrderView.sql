@@ -83,6 +83,8 @@ BEGIN
 				,A.intFillGroupId
 				,O.strFillGroupCode
 				,A.dtmOnHoldEndDate
+				,ysnCompanySite = 0
+				,ysnRequireClock = 1
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -182,6 +184,8 @@ BEGIN
 				,A.intFillGroupId
 				,N.strFillGroupCode
 				,A.dtmOnHoldEndDate
+				,A.ysnCompanySite
+				,A.ysnRequireClock
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -201,8 +205,14 @@ BEGIN
 				ON A.intProduct = D.intItemId
 			LEFT JOIN tblTMRoute F
 				ON A.intRouteId = F.intRouteId	
-			LEFT JOIN tblTMDispatch G
-				ON A.intSiteID = G.intSiteID
+			OUTER APPLY(
+				SELECT TOP 1 
+					intDispatchID
+					,ysnDispatched
+					,strWillCallStatus
+				FROM tblTMDispatch
+				WHERE intSiteID = A.intSiteID
+			)G	
 			LEFT JOIN tblICCategory H
 				ON D.intCategoryId = H.intCategoryId	
 			LEFT JOIN tblTMFillGroup N

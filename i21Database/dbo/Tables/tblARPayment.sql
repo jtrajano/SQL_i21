@@ -57,7 +57,8 @@
 	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblARPayment_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID]),
 	CONSTRAINT [FK_tblARPayment_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
-	CONSTRAINT [FK_tblARPayment_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblARPayment_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID])
 );
 --INDEXES
 GO

@@ -93,7 +93,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@strFilingStatus					= CASE WHEN strFilingStatus <> '' AND strFilingStatus IN('Single','Married') THEN strFilingStatus ELSE '' END
 			,@intSupplementalCalc				= (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 WHEN strSupplimentalCalc = 'Normal Rate' THEN 1 ELSE 2 END)
 			,@dblAmount							= dblAmount
-			,@dblExtraWithholding				= dblExtraWithholding
+			,@dblExtraWithholding				= ISNULL(dblExtraWithholding,0)
 			,@dblLimit							= dblLimit
 			,@intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strLiabilityAccount)
 			,@intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
@@ -195,7 +195,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 																	,(SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId)
 																	,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 WHEN EMT.strSupplimentalCalc = 'Normal Rate' THEN 1 ELSE 2 END)
 																	,EMT.dblAmount
-																	,EMT.dblExtraWithholding
+																	,ISNULL(EMT.dblExtraWithholding,0)
 																	,EMT.dblLimit
 																	,@intAccountId
 																	,@intExpenseAccountId

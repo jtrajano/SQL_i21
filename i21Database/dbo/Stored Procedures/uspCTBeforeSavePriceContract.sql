@@ -2,7 +2,8 @@
 		
 	@intPriceContractId INT,
 	@strXML				NVARCHAR(MAX),
-	@ysnDeleteFromInvoice bit = 0
+	@ysnDeleteFromInvoice bit = 0,
+	@intUserId int
 	
 AS
 
@@ -13,8 +14,7 @@ BEGIN TRY
 			@intUniqueId				INT,
 			@intPriceFixationId			INT,
 			@intContractHeaderId		INT,
-			@intContractDetailId		INT,			
-			@intUserId					INT,
+			@intContractDetailId		INT,
 			@strRowState				NVARCHAR(50),
 			@Condition					NVARCHAR(MAX),
 			@intPriceFixationDetailId	INT,
@@ -159,9 +159,7 @@ BEGIN TRY
 		intPriceFixationTicketId	INT,
 		strRowState					NVARCHAR(50)
 	)     
-
-	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
-
+	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixation
 
 	WHILE ISNULL(@intUniqueId,0) > 0
