@@ -1575,7 +1575,7 @@ BEGIN TRY
 			END
 		,SS.intCompanyLocationId
 
-	IF @ysnCalculateEndInventory <> 1 
+	IF @ysnCalculateEndInventory <> 1  AND @ShortExcessXML = '' AND @ysnRefreshStock <> 1
 		BEGIN
 			INSERT INTO #tblMFDemand (
 				intItemId
