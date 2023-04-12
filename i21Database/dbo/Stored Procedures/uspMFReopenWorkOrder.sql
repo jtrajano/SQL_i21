@@ -142,6 +142,7 @@ BEGIN TRY
 														   AND ProducedLot.ysnProductionReversed = 0
 														   AND ProducedLot.intProducedLotId = t.intLotId
 														   AND ProducedLot.intWorkOrderId = WorkOrder.intWorkOrderId
+		WHERE t.strBatchId = @strCostAdjustmentBatchId
 
 		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust			= @unpostCostAdjustment
 													 , @strBatchId				= @strBatchIdForUnpost
