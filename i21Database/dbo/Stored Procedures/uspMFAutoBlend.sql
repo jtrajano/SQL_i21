@@ -589,7 +589,7 @@ BEGIN TRY
 			  AND 
 			  (
 			  	/* Negative Inventory = No (need to have stocks.)*/
-			  	((S.dblOnHand - S.dblUnitReserved) > 0 AND IL.intAllowNegativeInventory = 0) 
+			  	((S.dblOnHand - S.dblUnitReserved) > 0 AND IL.intAllowNegativeInventory <> 1) 
 			  	OR 
 			  	/* Negative Inventory = Yes (ignore stocks.)*/
 				(IL.intAllowNegativeInventory = 1)
