@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuGLAccountDetailCombo]
+CREATE VIEW [dbo].[vyuGLAccountDetail]
 AS
 
 	SELECT      TOP 1000000 
@@ -25,7 +25,13 @@ AS
 				sg.strCode COLLATE Latin1_General_CI_AS strCode, 
 				cast(0.00 as numeric(18,2)) as dblBalance,
 				sg.ysnGLRestricted, 
-				sg.ysnAPRestricted
+				sg.ysnAPRestricted,
+				account.intUnnaturalAccountId,
+				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId,
+				account.intLocationSegmentId,
+				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId,
+				account.intCompanySegmentId,
+				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId
 FROM            dbo.tblGLAccount account 
 				CROSS APPLY (
 					SELECT 
@@ -47,6 +53,7 @@ FROM            dbo.tblGLAccount account
 				LEFT JOIN dbo.tblGLAccountUnit u ON account.intAccountUnitId = u.intAccountUnitId
 				LEFT JOIN dbo.tblGLCOACrossReference coa  on account.intAccountId =inti21Id
 				LEFT JOIN dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
+				LEFT JOIN dbo.tblGLAccount unnaturalAccount on unnaturalAccount.intAccountId = account.intUnnaturalAccountId
+				LEFT JOIN dbo.tblGLAccountSegment locationSegment ON locationSegment.intAccountSegmentId = account.intLocationSegmentId
+				LEFT JOIN dbo.tblGLAccountSegment companySegment ON companySegment.intAccountSegmentId = account.intCompanySegmentId
 GO
-
-
