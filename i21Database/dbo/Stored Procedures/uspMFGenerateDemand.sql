@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGenerateDemand 
+﻿CREATE PROCEDURE [dbo].[uspMFGenerateDemand] 
 (
 	@intInvPlngReportMasterID		INT = NULL
   , @ExistingDataXML				NVARCHAR(MAX) = NULL
@@ -1575,7 +1575,7 @@ BEGIN TRY
 			END
 		,SS.intCompanyLocationId
 
-	IF @ysnCalculateEndInventory <> 1  AND @ShortExcessXML = '' AND @ysnRefreshStock <> 1
+	IF ISNULL(@intInvPlngReportMasterID, 0) = 0 OR @ysnRefreshContract = 1
 		BEGIN
 			INSERT INTO #tblMFDemand (
 				intItemId
