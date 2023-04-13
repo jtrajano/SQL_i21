@@ -649,6 +649,7 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intEntityId'
 							and isnull(@ContractHeaderIntEntityId,0) <> isnull(@HeaderLastModificationIntEntityId, 0)
+							AND ISNULL(PreviousType.strName,'') <> ''
 					
 					--Position
 					union SELECT TOP 1 intSequenceHistoryId = NULL
@@ -667,6 +668,7 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intPositionId'
 							and isnull(@ContractHeaderIntPositionId, 0) <> isnull(@HeaderLastModificationIntPositionId,0)
+							AND ISNULL(PreviousType.strPosition,'') <> ''
 
 					--INCO/Ship Term
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -685,6 +687,7 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intFreightTermId'
 							and isnull(@ContractHeaderIntFreightTermId, 0) <> isnull(@HeaderLastModificationIntFreightTermId, 0)
+							AND ISNULL(PreviousType.strFreightTerm,'') <> ''
 
 					--Terms
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -703,6 +706,7 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intTermId'
 							and isnull(@ContractHeaderIntTermId, 0) <> isnull(@HeaderLastModificationIntTermId, 0)
+							AND ISNULL(PreviousType.strTerm,'') <> ''
 
 					--Grades
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -1083,7 +1087,8 @@ BEGIN TRY
 				where CTA.strType = '1.Header' 
 					and CTA.ysnAmendment = 1 
 					and CTA.strDataIndex = 'intINCOLocationTypeId'
-					and isnull(@ContractHeaderIntINCOLocationTypeId, 0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)		
+					and isnull(@ContractHeaderIntINCOLocationTypeId, 0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)	
+					AND ISNULL(PreviousType.strCity,'') <> ''
 		END     
 	END
 END TRY
