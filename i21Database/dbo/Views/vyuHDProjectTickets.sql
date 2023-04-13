@@ -15,7 +15,7 @@
 			,strAssignedTo = assEnt.strName
 			,intAssignedToEntityId = t.intAssignedToEntity
 			,t.dtmDueDate
-			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101) COLLATE Latin1_General_CI_AS
+			,strDueDate = CONVERT(nvarchar(30),t.dtmDueDate,22) COLLATE Latin1_General_CI_AS
 			,ysnCompleted = Convert(bit,(case when t.intTicketStatusId = 2 then 1 else 0 end))
 			--,dblQuotedHours = isnull(t.dblQuotedHours,0)
 			,dblQuotedHours = isnull((select sum(nb.dblEstimatedHours) from tblHDTicketHoursWorked nb where nb.intTicketId = t.intTicketId),0)
