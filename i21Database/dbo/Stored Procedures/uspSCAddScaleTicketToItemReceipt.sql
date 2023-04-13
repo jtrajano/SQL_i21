@@ -889,8 +889,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						
 
 						DELETE FROM @LOAD_OTHER_CHARGES
-						WHERE intId IN (SELECT intId FROM @LOAD_OTHER_CHARGES
-						WHERE intOtherChargeEntityVendorId <> @intEntityId
+						WHERE intId IN (SELECT intId FROM @LOAD_OTHER_CHARGES CHARGES 
+							INNER JOIN tblICItem ITEM
+									ON CHARGES.intChargeId = ITEM.intItemId 
+										AND ITEM.ysnInventoryCost = 0
+								WHERE intOtherChargeEntityVendorId <> @intEntityId
 							AND ysnAllowVoucher = 1) 
 						
 						/* -- CONTRACT RELATED CHARGES -- */
