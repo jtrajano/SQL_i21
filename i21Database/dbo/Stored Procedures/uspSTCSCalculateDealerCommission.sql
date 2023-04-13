@@ -21,74 +21,119 @@ DECLARE @strItemNo NVARCHAR(250)
 DECLARE @strItemDescription NVARCHAR(500) 
 DECLARE @strMessage NVARCHAR(MAX)  
 
-DECLARE @intPumpTotalsId int  
+DECLARE @intPumpTotalsId INT
+DECLARE @ysnAutoBlend BIT
   
-DECLARE MY_CURSOR CURSOR   
-    LOCAL STATIC READ_ONLY FORWARD_ONLY  
+DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 FOR  
+SELECT		a.intPumpTotalsId, 
+			c.ysnAutoBlend 
+FROM		tblSTCheckoutPumpTotals a
+INNER JOIN	tblICItemUOM b
+ON			a.intPumpCardCouponId = b.intItemUOMId
+INNER JOIN	tblICItem c
+ON			b.intItemId = c.intItemId
+WHERE		a.intCheckoutId = @intCheckoutId
   
-SELECT intPumpTotalsId  
-FROM  
-dbo.tblSTCheckoutPumpTotals CPT  
-WHERE CPT.intCheckoutId = @intCheckoutId  
+SELECT		@intStoreId = CH.intStoreId  
+FROM		dbo.tblSTCheckoutHeader CH  
+WHERE		CH.intCheckoutId = @intCheckoutId  
   
-SELECT @intStoreId = CH.intStoreId  
-FROM  
-dbo.tblSTCheckoutHeader CH  
-WHERE CH.intCheckoutId = @intCheckoutId  
-  
-SELECT   
-@dblMarkUp = ST.dblConsCommissionRawMarkup  
-, @dblDealerPercentage = ST.dblConsCommissionDealerPercentage  
-FROM tblSTStore ST  
-WHERE ST.intStoreId = @intStoreId  
+SELECT		@dblMarkUp = ST.dblConsCommissionRawMarkup  
+			, @dblDealerPercentage = ST.dblConsCommissionDealerPercentage  
+FROM		tblSTStore ST  
+WHERE		ST.intStoreId = @intStoreId  
   
 OPEN MY_CURSOR  
-FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId  
+FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId, @ysnAutoBlend
 WHILE @@FETCH_STATUS = 0  
 BEGIN   
-	SELECT 
-	@intItemId = Item.intItemId  
-	, @strItemNo = Item.strItemNo
-	, @strItemDescription = Item.strDescription
-	, @intCompanyLocationId = ST.intCompanyLocationId  
-	, @dblQty = CPT.dblQuantity  
-	, @dblPrice = CPT.dblPrice  
-	, @intItemUOMId = UOM.intItemUOMId 
-	FROM
-	dbo.tblSTCheckoutPumpTotals CPT
-	INNER JOIN tblSTCheckoutHeader CH
-		ON CPT.intCheckoutId = CH.intCheckoutId
-	INNER JOIN tblSTStore ST
-		ON CH.intStoreId = ST.intStoreId
-	INNER JOIN tblICItemUOM UOM
-		ON CPT.intPumpCardCouponId = UOM.intItemUOMId
-	INNER JOIN tblICItem Item
-		ON UOM.intItemId = Item.intItemId
-	WHERE CPT.intPumpTotalsId = @intPumpTotalsId  
+	SELECT		@intItemId = Item.intItemId  
+				, @strItemNo = Item.strItemNo
+				, @strItemDescription = Item.strDescription
+				, @intCompanyLocationId = ST.intCompanyLocationId  
+				, @dblQty = CPT.dblQuantity  
+				, @dblPrice = CPT.dblPrice  
+				, @intItemUOMId = UOM.intItemUOMId 
+	FROM		dbo.tblSTCheckoutPumpTotals CPT
+	INNER JOIN	tblSTCheckoutHeader CH
+	ON			CPT.intCheckoutId = CH.intCheckoutId
+	INNER JOIN	tblSTStore ST
+	ON			CH.intStoreId = ST.intStoreId
+	INNER JOIN	tblICItemUOM UOM
+	ON			CPT.intPumpCardCouponId = UOM.intItemUOMId
+	INNER JOIN	tblICItem Item
+	ON			UOM.intItemId = Item.intItemId
+	WHERE		CPT.intPumpTotalsId = @intPumpTotalsId  
 
 	--- START INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
 	-- MARGIN = ((Qty Sold) * (Unit Price)) - (Cost in Inventory)  - ((Qty Sold) * (Consignor Markup/dblConsCommissionRawMarkup))  
 	-- COMMISSION = (MARGIN) * (Commission Rate/dblConsCommissionDealerPercentage)      
-	--BEGIN TRAN  
-	EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId  
+	--BEGIN TRAN
+	SET @Cost = NULL
+
+	IF @ysnAutoBlend = 0
+	BEGIN
+	EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId 
+	END
 	--ROLLBACK
 
-	IF @Cost = NULL
+	IF @Cost IS NULL
 	BEGIN
-		DECLARE @ysnAutoBlend BIT
-		SELECT @ysnAutoBlend = i.ysnAutoBlend FROM tblICItem i WHERE i.intItemId = @intItemId
-
 		IF @ysnAutoBlend = 1
 		BEGIN
-			SELECT @Cost = SUM(r.dblCost * r.dblQuantity)
-			FROM vyuMFGetRecipeItem r 
-			WHERE 
-			r.intLocationId = @intCompanyLocationId 
-			AND strRecipeItemNo = @strItemNo
-			AND r.strRecipeItemType = 'INPUT'
+			--Based on discussion fuel blending will only involve a maximum of two fuel items.
+
+			DECLARE @intMFGItemId INT 
+			DECLARE @intMFGItemUOMId INT  
+			DECLARE @dblMFGQty DECIMAL(18,6) 
+			DECLARE @MFGCost DECIMAL(18,6)
+			DECLARE @CostFirstInputItem DECIMAL(18,6)
+			DECLARE @CostSecondInputItem DECIMAL(18,6)
+			DECLARE @dblQtyFirstInputItem DECIMAL(18,6)
+			DECLARE @dblQtySecondInputItem DECIMAL(18,6)  
+			DECLARE @ysnInitialIteration BIT = 1
+
+			DECLARE		RECIPE_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+			FOR  
+			SELECT		b.intItemId,
+						b.intItemUOMId,
+						b.dblQuantity
+			FROM		tblMFRecipe a
+			INNER JOIN	tblMFRecipeItem b
+			ON			a.intRecipeId = b.intRecipeId
+			WHERE		a.intLocationId = @intCompanyLocationId AND
+						a.intItemUOMId = @intItemUOMId AND
+						b.intRecipeItemTypeId = 1 AND --means input
+						a.ysnActive = 1
+
+			OPEN RECIPE_CURSOR  
+			FETCH NEXT FROM RECIPE_CURSOR INTO @intMFGItemId, @intMFGItemUOMId, @dblMFGQty
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				SET @MFGCost = NULL
+				EXEC [dbo].[uspICCalculateCost] @intMFGItemId, @intCompanyLocationId, @dblQty, NULL, @MFGCost OUT, @intMFGItemUOMId 
+
+				IF (@ysnInitialIteration = 1)
+				BEGIN
+					SET @CostFirstInputItem = @MFGCost
+					SET @dblQtyFirstInputItem = @dblMFGQty
+				END
+				ELSE
+				BEGIN
+					SET @CostSecondInputItem = @MFGCost
+					SET @dblQtySecondInputItem = @dblMFGQty
+				END
+
+				SET @ysnInitialIteration = 0
+				FETCH NEXT FROM RECIPE_CURSOR INTO @intMFGItemId, @intMFGItemUOMId, @dblMFGQty
+			END
+			CLOSE RECIPE_CURSOR  
+			DEALLOCATE RECIPE_CURSOR
+
+			SET @Cost = (@CostFirstInputItem * @dblQtyFirstInputItem) + (@CostSecondInputItem * @dblQtySecondInputItem)
 		END
-	END	
+	END
 
 	SET @dblMargin = (@dblQty * @dblPrice) - (ISNULL(@Cost,0) * @dblQty) - (@dblQty * @dblMarkUp)  
 	SET @dblCommission = @dblMargin * @dblDealerPercentage  
@@ -100,11 +145,9 @@ BEGIN
 		INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
 		VALUES (@intCheckoutProcessId, @intCheckoutId, 'F', @strMessage, 1) 
 	END
-
-	SET @Cost = NULL;
   
 	--- END INSERT FORMULA FOR CALCULATING DEALER COMMISSION HERE....  
-	FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId  
+	FETCH NEXT FROM MY_CURSOR INTO @intPumpTotalsId, @ysnAutoBlend
 END  
 CLOSE MY_CURSOR  
 DEALLOCATE MY_CURSOR  
