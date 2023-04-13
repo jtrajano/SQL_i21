@@ -1591,7 +1591,13 @@ BEGIN
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
 			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
-			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			AND (
+				InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+				OR (
+					InventoryCostCharges.intLoadShipmentCostId IS NULL
+					AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+				)
+			)
 
 	-- Dr...... Inventory Account (USD)	
 	UNION ALL 
@@ -1647,7 +1653,13 @@ BEGIN
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
 			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
-			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			AND (
+				InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+				OR (
+					InventoryCostCharges.intLoadShipmentCostId IS NULL
+					AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+				)
+			)
 
 	-------------------------------------------------------------------------------------------
 	-- Accrue Other Charge to Vendor and Add Cost to Inventory 
@@ -1866,7 +1878,14 @@ BEGIN
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
 			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
-			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			--AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			AND (
+				InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+				OR (
+					InventoryCostCharges.intLoadShipmentCostId IS NULL
+					AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+				)
+			)
 			AND InventoryCostCharges.ysnAllowVoucher = 1 
 
 	-- Dr...... Inventory Account (USD)	
@@ -1923,7 +1942,14 @@ BEGIN
 			AND InventoryCostCharges.intCurrencyId <> @intFunctionalCurrencyId
 			AND InventoryCostCharges.intItemCurrencyId <> @intFunctionalCurrencyId
 			--AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
-			AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			--AND InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+			AND (
+				InventoryCostCharges.intLoadShipmentCostId IS NOT NULL 
+				OR (
+					InventoryCostCharges.intLoadShipmentCostId IS NULL
+					AND InventoryCostCharges.intCurrencyId <> InventoryCostCharges.intItemCurrencyId
+				)
+			)
 
 	-------------------------------------------------------------------------------------------
 	-- If linked item is a 'Kit' and Inventory Cost = true
