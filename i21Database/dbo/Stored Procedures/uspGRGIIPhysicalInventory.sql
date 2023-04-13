@@ -250,7 +250,7 @@ BEGIN
 		,dblShipped = SHIPPED.TOTAL
 		,dblInternalTransfersReceived = IT_RECEIVED.TOTAL
 		,dblInternalTransfersShipped = IT_SHIPPED.TOTAL
-		,dblNetAdjustments = NET_ADJUSTMENTS.TOTAL
+		,dblNetAdjustments = NET_ADJUSTMENTS.dblAdjustments
 	FROM @PhysicalInventoryData PID
 	LEFT JOIN (
 		SELECT TOTAL = ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
