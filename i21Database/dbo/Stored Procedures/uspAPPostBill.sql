@@ -913,7 +913,7 @@ BEGIN
 					,[strCode]
 					,[strReference]
 					,LS.intPriceCurrencyId
-					,ISNULL(FX.dblForexRate, 1)
+					,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
 					,[dtmDateEntered]
 					,[dtmTransactionDate]
 					,[strJournalLineDescription]
@@ -927,15 +927,15 @@ BEGIN
 					,[strTransactionForm] 
 					,[strModuleName]
 					,[intConcurrencyId]
-					,[dblDebitForeign] * ISNULL(ShipmentToChargeCurrency.dblForexRate, 1)
+					,dbo.fnDivide(dbo.fnMultiply(dblDebitForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
 					,[dblDebitReport]
-					,[dblCreditForeign] * ISNULL(ShipmentToChargeCurrency.dblForexRate, 1)
+					,dbo.fnDivide(dbo.fnMultiply(dblCreditForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
 					,[dblCreditReport]
 					,[dblReportingRate]
-					,ISNULL(FX.dblForexRate, 1)
+					,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
 					,[intSourceEntityId]
 					,[intCommodityId]
-					,FX.strCurrencyExchangeRateType
+					,ItemCurrencyToFunctional.strCurrencyExchangeRateType
 			FROM @GLEntriesTemp GLEntries
 			OUTER APPLY (
 				SELECT TOP 1 intPriceCurrencyId
@@ -949,20 +949,20 @@ BEGIN
 					dblForexRate = ISNULL(dblRate, 0),
 					strCurrencyExchangeRateType
 				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = LS.intPriceCurrencyId
+				WHERE intFromCurrencyId = GLEntries.intCurrencyId
 					AND intToCurrencyId = @intFunctionalCurrencyId
 					AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
 				ORDER BY dtmValidFromDate DESC
-			) FX
+			) ChargeCurrencyToFunctional
 			OUTER APPLY (
 				SELECT TOP 1
-					dblForexRate = ISNULL(dblRate, 0),
-					intCurrencyExchangeRateTypeId
+					dblForexRate = ISNULL(dblRate,0),
+					strCurrencyExchangeRateType
 				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = GLEntries.intCurrencyId
-					AND intToCurrencyId = LS.intPriceCurrencyId
+				WHERE intFromCurrencyId = LS.intPriceCurrencyId
+				AND intToCurrencyId = @intFunctionalCurrencyId
 				ORDER BY dtmValidFromDate DESC
-			) ShipmentToChargeCurrency
+			) ItemCurrencyToFunctional
 			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
 
 			UPDATE @GLEntries SET strModuleName = 'Accounts Payable'
@@ -1768,8 +1768,6 @@ BEGIN
 	DECLARE @billIdGL AS Id
 	INSERT INTO @billIdGL
 	SELECT DISTINCT intBillId FROM #tmpPostBillData	
-
-	SELECT * FROM @GLEntries
 
 	--VALIDATE GL ENTRIES
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
