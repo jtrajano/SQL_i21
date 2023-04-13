@@ -7,6 +7,7 @@ SELECT
 	[intContractSeq] ,
 	[strEntityName], 
 	[strContractType],
+	[strItemChanged],
 	[strOldValue],
 	[strNewValue],
 	[strCommodityCode],
