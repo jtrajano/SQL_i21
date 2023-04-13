@@ -92,7 +92,7 @@ BEGIN
 	)
 	SELECT
 		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
-		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal)
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal * -1)
 		,CompOwn.strTransactionNumber
 		,CompOwn.strTransactionType
 		,'SO' --set strDistribution the same as Sales Order just to easily get the Invoice
