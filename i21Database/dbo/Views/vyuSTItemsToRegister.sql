@@ -22,22 +22,12 @@ SELECT DISTINCT
 FROM tblICItem AS I
 JOIN tblICCategory Cat 
 	ON Cat.intCategoryId = I.intCategoryId
-JOIN tblICCategoryLocation CatLoc 
-	ON CatLoc.intCategoryId = Cat.intCategoryId
 JOIN tblICItemLocation IL 
 	ON IL.intItemId = I.intItemId
 JOIN tblSTSubcategoryRegProd sr
-	ON --IL.intProductCodeId = sr.intRegProdId
-	(CASE
-	WHEN IL.intProductCodeId IS NOT NULL THEN IL.intProductCodeId
-	ELSE CatLoc.intProductCodeId
-	END) = sr.intRegProdId
+	ON IL.intProductCodeId = sr.intRegProdId
 LEFT JOIN tblSTSubcategoryRegProd SubCat 
-	ON --SubCat.intRegProdId = IL.intProductCodeId
-	(CASE
-	WHEN IL.intProductCodeId IS NOT NULL THEN IL.intProductCodeId
-	ELSE CatLoc.intProductCodeId
-	END) = sr.intRegProdId
+	ON SubCat.intRegProdId = IL.intProductCodeId
 JOIN tblSTStore ST 
 	--ON ST.intStoreId = SubCat.intStoreId
 	ON IL.intLocationId = ST.intCompanyLocationId
