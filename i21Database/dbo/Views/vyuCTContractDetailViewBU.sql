@@ -143,6 +143,7 @@ SELECT
  , strItemUOM = h.strUnitMeasure  
  , i.strFutMarketName  
  , strFutureMonth = LEFT(CONVERT(DATE, '01 ' + j.strFutureMonth), 7) + ' (' + j.strFutureMonth + ')'  
+ , strPriceUOM = l.strUnitMeasure  
  , n.strLocationName  
  , o.strCurrency  
  , p.strContractStatus  

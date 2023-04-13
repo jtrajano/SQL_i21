@@ -16,6 +16,7 @@ SELECT
 	, CH.ysnSigned
 	, CH.ysnPrinted
 	, VNM.strApprovalStatus
+	, ysnApproved = ISNULL(TR.ysnApproved, 0)
 	, strAssociationName = AN.strName
 	, BK.strBook
 	, CH.ysnBrokerage
@@ -107,4 +108,15 @@ LEFT JOIN tblSMFreightTerms				FT	WITH (NOLOCK) ON	FT.intFreightTermId					=	CH.
 LEFT JOIN tblEMEntityLocation			ESL WITH (NOLOCK) ON	ESL.intEntityLocationId				=	CH.intEntitySelectedLocationId
 LEFT JOIN tblSMCompanyLocation 			SMC WITH (NOLOCK) ON 	SMC.intCompanyLocationId			= 	CH.intCompanyLocationId
 INNER JOIN vyuCTContractHeaderNotMapped	VNM	ON	VNM.intContractHeaderId	=	CH.intContractHeaderId
-
+OUTER APPLY (
+	select top 1
+		ysnApproved = convert(bit,1)
+	from
+		tblSMScreen sc
+		join tblSMTransaction tr on tr.intScreenId = sc.intScreenId
+	where
+		sc.strModule = 'Contract Management'
+		and sc.strNamespace in ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
+		and tr.strApprovalStatus in ('Approved', 'Approved with Modifications')
+		and tr.intRecordId = CH.intContractHeaderId
+) TR

@@ -21,6 +21,7 @@ SELECT		CC.intContractCostId,
 			CC.dblFX,
 			CC.dblAccruedAmount,
 			CC.strStatus,
+			dtmAccrualDate,
 			CC.dblRemainingPercent
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
