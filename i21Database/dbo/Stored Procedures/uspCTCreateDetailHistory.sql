@@ -617,10 +617,6 @@ BEGIN TRY
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intLastModifiedById AND intApprovalListId = @intApprovalListId) OR (@ysnAmdWoAppvl = 1)
 		BEGIN
 
-
-			Declare @ysnPricing as BIT
-			SET @ysnPricing = CASE WHEN @strSource = 'Pricing-Old' AND @strProcess = 'Price Fixation' THEN 1 ELSE 0 END
-
 			--CT-7027 x 
 			--CT-7064
 			IF isnull(@ysnAmmendmentLogged, 0) = 0
@@ -653,7 +649,6 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intEntityId'
 							and isnull(@ContractHeaderIntEntityId,0) <> isnull(@HeaderLastModificationIntEntityId, 0)
-							AND @ysnPricing = 0
 					
 					--Position
 					union SELECT TOP 1 intSequenceHistoryId = NULL
@@ -672,7 +667,6 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intPositionId'
 							and isnull(@ContractHeaderIntPositionId, 0) <> isnull(@HeaderLastModificationIntPositionId,0)
-							AND @ysnPricing = 0
 
 					--INCO/Ship Term
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -691,7 +685,6 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intFreightTermId'
 							and isnull(@ContractHeaderIntFreightTermId, 0) <> isnull(@HeaderLastModificationIntFreightTermId, 0)
-							AND @ysnPricing = 0
 
 					--Terms
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -710,7 +703,6 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intTermId'
 							and isnull(@ContractHeaderIntTermId, 0) <> isnull(@HeaderLastModificationIntTermId, 0)
-							AND @ysnPricing = 0
 
 					--Grades
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -729,7 +721,6 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intGradeId'
 							and isnull(@ContractHeaderIntGradeId, 0) <> isnull(@HeaderLastModificationIntGradeId, 0)
-							AND @ysnPricing = 0
 
 					--Weights
 					UNION SELECT TOP 1 intSequenceHistoryId = NULL
@@ -748,7 +739,6 @@ BEGIN TRY
 							and ysnAmendment = 1 
 							and strDataIndex = 'intWeightId'
 							and isnull(@ContractHeaderIntWeightId, 0) <> isnull(@HeaderLastModificationIntWeightId, 0)
-							AND @ysnPricing = 0
 
 														
 
@@ -783,7 +773,6 @@ BEGIN TRY
 			JOIN tblCTContractStatus	PreviousType		ON	PreviousType.intContractStatusId	  =	 PreviousRow.intContractStatusId
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intContractStatusId')	tblAmendment
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
-			AND @ysnPricing = 0
 			
 			--dtmStartDate
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -801,7 +790,6 @@ BEGIN TRY
 			JOIN @tblDetail				PreviousRow			ON Convert(Nvarchar,PreviousRow.dtmStartDate,101) <> Convert(Nvarchar,CurrentRow.dtmStartDate,101)
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'dtmStartDate')	CurrentType
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and CurrentType.ysnAmendment = 1
-			AND @ysnPricing = 0
 
 			
 			
@@ -821,7 +809,6 @@ BEGIN TRY
 			JOIN @tblDetail				PreviousRow			ON  Convert(Nvarchar,PreviousRow.dtmEndDate,101) <> Convert(Nvarchar,CurrentRow.dtmEndDate,101)
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'dtmEndDate')	tblAmendment
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
-			AND @ysnPricing = 0
 			
 			--Item
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -841,7 +828,6 @@ BEGIN TRY
 			JOIN tblICItem				PreviousType		ON	PreviousType.intItemId		  =	 PreviousRow.intItemId
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intItemId')	tblAmendment
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
-			AND @ysnPricing = 0
 
 			--dblQuantity
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -859,7 +845,6 @@ BEGIN TRY
 			JOIN @tblDetail				PreviousRow			ON   PreviousRow.dblQuantity		    <> CurrentRow.dblQuantity
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'dblQuantity')	tblAmendment
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
-			AND @ysnPricing = 0
 			
 			
 			--Quantity UOM
@@ -883,7 +868,6 @@ BEGIN TRY
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intItemUOMId')	tblAmendment
 			WHERE  U2.intUnitMeasureId <> U21.intUnitMeasureId 
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
-				AND @ysnPricing = 0
 			
 			--Futures Market
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -1038,7 +1022,6 @@ BEGIN TRY
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intBookId')	tblAmendment
 			WHERE ISNULL(oldBook.intBookId,0) <> ISNULL(newBook.intBookId,0)
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId and tblAmendment.ysnAmendment = 1
-				AND @ysnPricing = 0
 			
 			--Sub Book
 			UNION SELECT intSequenceHistoryId    = NewRecords.intSequenceHistoryId
@@ -1059,7 +1042,6 @@ BEGIN TRY
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intSubBookId')	tblAmendment
 			WHERE ISNULL(oldSubBook.intSubBookId,0) <> ISNULL(newSubBook.intSubBookId,0)
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	 and tblAmendment.ysnAmendment = 1
-				AND @ysnPricing = 0
 
 
 			--Garden
@@ -1081,7 +1063,6 @@ BEGIN TRY
 			outer apply(select strDataIndex, ysnAmendment from tblCTAmendmentApproval where strType = '2.Sequence' and strDataIndex = 'intGardenMarkId')	tblAmendment
 			WHERE ISNULL(oldGarden.intGardenMarkId,0) <> ISNULL(newGarden.intGardenMarkId,0)
 				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId	  and tblAmendment.ysnAmendment = 1
-				AND @ysnPricing = 0
 				
 			--intINCOLocationTypeId 
 			UNION SELECT TOP 1 intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -1103,7 +1084,6 @@ BEGIN TRY
 					and CTA.ysnAmendment = 1 
 					and CTA.strDataIndex = 'intINCOLocationTypeId'
 					and isnull(@ContractHeaderIntINCOLocationTypeId, 0) <> isnull(@HeaderLastModificationIntINCOLocationTypeId, 0)		
-					AND @ysnPricing = 0
 		END     
 	END
 END TRY
