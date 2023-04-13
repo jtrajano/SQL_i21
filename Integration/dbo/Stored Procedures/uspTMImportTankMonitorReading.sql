@@ -87,12 +87,14 @@ EXEC('
 				ON A.intCustomerID = B.intCustomerID
 			INNER JOIN vwcusmst C
 				ON B.intCustomerNumber = C.A4GLIdentity
-			INNER JOIN tblTMSiteDevice D
-				ON A.intSiteID = D.intSiteID
+			INNER JOIN tblTMSiteDeviceTankMonitor D
+				ON A.intSiteID = D.intSiteId
+			INNER JOIN tblTMDeviceTankMonitor TD
+				ON D.intDeviceTankMonitorId = TD.intDeviceTankMonitorId
 			INNER JOIN tblTMDevice E
-				ON D.intDeviceId = E.intDeviceId
+				ON TD.intDeviceId = E.intDeviceId
 			INNER JOIN tblTMDeviceType F
-				ON E.intDeviceTypeId = F.intDeviceTypeId		
+				ON E.intDeviceTypeId = F.intDeviceTypeId			
 			WHERE B.intCustomerNumber = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE vwcus_key = @ts_cat_1)
 				AND F.strDeviceType = ''Tank Monitor''
 				AND E.strSerialNumber = @tx_serialnum
