@@ -20,6 +20,7 @@ CREATE TABLE [dbo].[tblMBILInvoice](
 	[dtmPostedDate] DATETIME NULL,
 	[dtmVoidedDate] DATETIME NULL,
 	[inti21InvoiceId] INT NULL,
+	[intLoadHeaderId] INT NULL,
 	[strDiversionNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intStateId] INT NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NULL,
