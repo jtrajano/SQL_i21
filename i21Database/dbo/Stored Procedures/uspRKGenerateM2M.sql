@@ -1422,7 +1422,14 @@ BEGIN TRY
 			FROM @GetContractDetailView cd
 			INNER JOIN vyuRKM2MContractCost dc ON dc.intContractDetailId = cd.intContractDetailId
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-			INNER JOIN tblRKM2MConfiguration M2M ON dc.intItemId = M2M.intItemId AND ch.intFreightTermId = M2M.intFreightTermId
+			INNER JOIN tblCTContractDetail cd2 ON cd2.intContractHeaderId = ch.intContractHeaderId
+			INNER JOIN tblRKM2MConfiguration M2M 
+				ON dc.intItemId = M2M.intItemId 
+				AND ch.intFreightTermId = M2M.intFreightTermId
+				AND (	 @ysnEnableMTMPoint = 0 
+						 OR
+						(@ysnEnableMTMPoint = 1 AND ISNULL(M2M.intMTMPointId , 0) = ISNULL(cd2.intMTMPointId, 0))
+					)
 			INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = @intCommodityId AND cu.intUnitMeasureId = @intPriceUOMId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = dc.intCurrencyId
 			LEFT JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = @intCommodityId AND cu1.intUnitMeasureId = dc.intUnitMeasureId
