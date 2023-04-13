@@ -1440,7 +1440,7 @@ BEGIN TRY
 		SELECT DISTINCT intContractDetailId
 			, dblFuturePrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId, dblLastSettle / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 			, dblFutures = dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, PUOM.intCommodityUnitMeasureId, cd.dblFutures / CASE WHEN c1.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-			, intFuturePriceCurrencyId = fm.intCurrencyId
+			, intFuturePriceCurrencyId = CASE WHEN CFM.ysnSubCurrency = 1 THEN CFM.intMainCurrencyId ELSE fm.intCurrencyId END
 			, intFMMainCurrencyId = CFM.intMainCurrencyId
 			, ysnFMSubCurrency = CFM.ysnSubCurrency
 		INTO #tblSettlementPrice
@@ -1583,7 +1583,7 @@ BEGIN TRY
 		SELECT dblRatio
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 			, intMarketBasisUOM = intCommodityUnitMeasureId
-			, intMarketBasisCurrencyId = temp.intCurrencyId
+			, intMarketBasisCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE temp.intCurrencyId END
 			, intFutureMarketId = temp.intFutureMarketId
 			, intItemId = temp.intItemId
 			, intContractTypeId = temp.intContractTypeId
@@ -3309,7 +3309,7 @@ BEGIN TRY
 				, dblNoOfLots
 				, dblLotsFixed
 				, dblPriceWORollArb
-				, intCurrencyId
+				, intCurrencyId = CASE WHEN ysnSubCurrency = 1 THEN intMainCurrencyId ELSE intCurrencyId END
 				, intSpreadMonthId
 				, strSpreadMonth
 				, dblSpreadMonthPrice
@@ -3928,7 +3928,7 @@ BEGIN TRY
 										ELSE (ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0)) * dblFinalRate END
 									ELSE 0 END)
 				, dblMarketRatio
-				, dblFuturePrice = (ISNULL(dblFuturePrice, 0) * dblFinalRate)--Market Futures
+				, dblFuturePrice = (ISNULL(dblFuturePrice, 0) * dblRateFP)--Market Futures
 				, intContractTypeId
 				, dblAdjustedContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 
 													THEN (CASE WHEN intCurrencyId = @intCurrencyId
@@ -7590,7 +7590,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
 		LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
 		LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intItemId AND M2M.intFreightTermId = RealizedPNL.intFreightTermId
-		WHERE Item.strCostType <> 'Commission'
+		WHERE Item.strCostType <> 'Commission' 
 		
 		IF ISNULL(@intFutureSettlementPriceId, 0) > 0
 		BEGIN

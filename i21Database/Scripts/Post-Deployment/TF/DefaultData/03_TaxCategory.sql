@@ -572,7 +572,8 @@ SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Ga
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Clear', intMasterId = 422
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Dyed', intMasterId = 423
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Kerosene', intMasterId = 424
-
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Undyed', intMasterId = 425
+                                                                          
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
 
 DELETE @TaxCategoryTN
@@ -599,10 +600,32 @@ DELETE @TaxCategoryMO
 
 GO
 
+PRINT ('Deploying WV Tax Category')
+
+DECLARE @TaxCategoryWV AS TFTaxCategory
 
 
 
+INSERT INTO @TaxCategoryWV(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Gasoline (GA)', intMasterId = 480001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Gasohol (GH)', intMasterId = 480002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Undyed Diesel/Kerosene (DI)', intMasterId = 480003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Compressed Natural Gas (CNG)', intMasterId = 480004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Dyed Diesel/Kerosene', intMasterId = 480005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Propane/LPG (LP)', intMasterId = 480006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Aviation Gas', intMasterId = 480007
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Aviation Jet Fuel', intMasterId = 480008
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'WV', strTaxCategory = 'WV Excise Liquefied Natural Gas (LNG)', intMasterId = 480009
 
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WV', @TaxCategories = @TaxCategoryWV
+
+DELETE @TaxCategoryWV
+GO
 
 
 PRINT ('Deploying VA Tax Category')
@@ -652,4 +675,27 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 	'WY'	, strTaxCategory = 	' WY
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WY', @TaxCategories = @TaxCategoryWY
 
 DELETE @TaxCategoryWY
+GO
+
+
+PRINT ('Deploying UT Tax Category')
+GO
+
+DECLARE @TaxCategoryUT AS TFTaxCategory
+
+INSERT INTO @TaxCategoryUT(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+	      SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Motor Fuel'			, intMasterId = 440001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Undyed Diesel Fuel'	, intMasterId =	440002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Dyed Diesel Fuel'	, intMasterId =	440003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Aviation Fuel'		, intMasterId = 440004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 	'UT'	, strTaxCategory = 	'UT Alternative Fuels'	, intMasterId =	440005
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'UT', @TaxCategories = @TaxCategoryUT
+
+DELETE @TaxCategoryUT
 GO

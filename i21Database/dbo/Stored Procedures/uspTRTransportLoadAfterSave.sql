@@ -144,7 +144,10 @@ BEGIN
 			FROM tblTRLoadHeader LH
 			WHERE LH.intLoadHeaderId = @LoadHeaderId
 
-			EXEC dbo.uspICAddTransactionLinkOrigin @intCreateLinkTransactionId, @strCreateLinkTransactionNo, @strCreateLinkTransactionType, @strCreateLinkModuleName
+			IF (ISNULL(@strCreateLinkModuleName, '') <> '')
+			BEGIN
+				EXEC dbo.uspICAddTransactionLinkOrigin @intCreateLinkTransactionId, @strCreateLinkTransactionNo, @strCreateLinkTransactionType, @strCreateLinkModuleName
+			END
 		END
 	END
 	-- END TR-1611
@@ -180,6 +183,37 @@ BEGIN
 		[intItemUOMId] INT NULL,
 		[intContractDetailId] INT NULL
 	)
+
+	IF (@ForDelete != 1)
+	BEGIN
+		-- Check first instance of Load Schedule processed load
+		IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '' AND intConcurrencyId <= 1)
+		BEGIN
+			EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Added', @UserId
+		END
+		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intDispatchOrderId, '') <> '' AND intConcurrencyId <= 1)
+		BEGIN
+			SELECT DISTINCT LGD.intDispatchOrderId
+			INTO #tmpDispatchOrders
+			FROM tblTRLoadDistributionDetail TRD
+			JOIN tblLGDispatchOrderDetail LGD ON LGD.intDispatchOrderDetailId = TRD.intDispatchOrderDetailId
+			JOIN tblTRLoadDistributionHeader TRH ON TRH.intLoadDistributionHeaderId = TRD.intLoadDistributionHeaderId
+			WHERE TRH.intLoadHeaderId = @LoadHeaderId
+
+			DECLARE @intDispatchOrderId INT
+
+			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDispatchOrders)
+			BEGIN
+				SELECT TOP 1 @intDispatchOrderId = intDispatchOrderId FROM #tmpDispatchOrders
+
+				EXEC uspLGDispatchUpdateOrders @intDispatchOrderId, @UserId
+		
+				DELETE FROM #tmpDispatchOrders WHERE intDispatchOrderId = @intDispatchOrderId
+			END
+
+			DROP TABLE #tmpDispatchOrders
+		END
+	END
 
 	DECLARE @hdoc int
 		, @XML XML
@@ -532,13 +566,6 @@ BEGIN
 		AND previousSnapshot.strSourceType = @SourceType_InventoryReceipt
 		AND previousSnapshot.intContractDetailId IS NOT NULL
 
-
-		-- Check first instance of Load Schedule processed load
-		IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '' AND intConcurrencyId <= 1)
-		BEGIN
-			EXEC uspTRLoadProcessLogisticsLoad @LoadHeaderId, 'Added', @UserId
-		END
-
 		---- Add Blend Ingredients if needed
 		--EXEC uspTRUpdateLoadBlendIngredient @LoadHeaderId
 
@@ -553,6 +580,7 @@ BEGIN
 		, @dblQuantity			NUMERIC(18, 6)
 		, @intContractDetailId	INT
 		, @strScreenName		NVARCHAR(50)
+		, @TMOId INT
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tblToProcess)
 	BEGIN
@@ -576,6 +604,12 @@ BEGIN
 			AND LG.intSourceType NOT IN (2, 4, 5)
 			AND ISNULL(LD.intTMDispatchId, 0) <> 0
 
+		SELECT TOP 1 @TMOId = DD.intTMOId
+		FROM tblTRLoadDistributionDetail DD
+		JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
+		WHERE intLoadDistributionDetailId = @intTransactionId
+
+
 		IF (@intActivity = 1 OR @intActivity = 2)
 		BEGIN
 			IF (@strTransactionType = @SourceType_InventoryReceipt OR @strTransactionType = @SourceType_InventoryTransfer)
@@ -583,7 +617,7 @@ BEGIN
 			ELSE IF (@strTransactionType = @SourceType_Invoice)
 				SET @strScreenName = 'Transport Sale'
 
-			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer) AND (ISNULL(@intLoadId, 0) = 0))
+			IF ((ISNULL(@intContractDetailId, '') <> '') AND (@strTransactionType <> @SourceType_InventoryTransfer) AND (ISNULL(@intLoadId, 0) = 0) AND ISNULL(@TMOId, 0) = 0)
 			BEGIN
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId 
 					, @dblQuantityToUpdate = @dblQuantity 

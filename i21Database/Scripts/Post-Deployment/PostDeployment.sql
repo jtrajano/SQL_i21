@@ -491,6 +491,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
 :R .\GR\Fix_SettleStorage_Basis.sql
+:r "..\..\..\Integration\dbo\Stored Procedures\uspGRImportStorageTicket.sql"
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -635,11 +636,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\48_FileFieldMapping_Commander_TierProduct.sql
 :r .\ST\49_FileFieldMapping_Radiant_Department.sql
 :r .\ST\51_FileFieldMapping_Commander_Validate.sql
+:r .\ST\52_FileFieldMapping_Commander_Category.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql
 :r .\ST\50_TransferMappingFromIcToSt.sql
-
+:r .\ST\52_Populate_JobTypes.sql
 
 
 -- Motor Fuel Tax
@@ -681,6 +683,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\AL_Alabama.sql
 :r .\TF\DefaultData\WV_WestVirginia.sql
 :r .\TF\DefaultData\WY_Wyoming.sql
+:r .\TF\DefaultData\UT_Utah.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

@@ -343,7 +343,10 @@ BEGIN
 		ORDER BY [intInvoiceId]
 
 		
-		EXEC dbo.uspTMUnSyncInvoiceFromDeliveryHistory @intInvoiceForSyncId, @ResultLogForSync OUT
+		EXEC dbo.uspTMUnSyncInvoiceFromDeliveryHistory 
+					@InvoiceId = @intInvoiceForSyncId
+					,@intUserId = @UserId  
+					,@ResultLog = @ResultLogForSync OUT
 												
 		DELETE FROM @TankDeliveryForSync WHERE [intInvoiceId] = @intInvoiceForSyncId
 	END

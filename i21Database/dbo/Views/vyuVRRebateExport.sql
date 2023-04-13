@@ -33,7 +33,7 @@ SELECT
 	, customer.strCustomerNumber
 	, customerEntity.strName strCustomerName
 	, rebate.dblRebateRate
-	, vendorSetup.strMarketerAccountNo
+	, COALESCE(NULLIF(vendorSetup.strMarketerAccountNo, ''), vendorSetup.strCompany2Id) strMarketerAccountNo
 	, vendorSetup.strMarketerEmail
 	, vendorSetup.strDataFileTemplate
 	, vendorSetup.strExportFilePath

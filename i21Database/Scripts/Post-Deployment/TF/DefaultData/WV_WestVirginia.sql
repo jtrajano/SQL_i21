@@ -225,6 +225,9 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = '3_Bulk', strScheduleName = 'Loaded in WV and Delivered in WV',				strType = 'Aviation Jet Fuel', strNote = '', strTransactionType = 'Inventory',			intSort = 2540	,strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax',	intMasterId = 4800134	, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = '3_Bulk', strScheduleName = 'Loaded in WV and Delivered in WV',				strType = 'LNG', strNote = '', strTransactionType = 'Inventory',						intSort = 2550	,strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax',	intMasterId = 4800135	, intComponentTypeId = 1
 
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = 'MFT-507_Excelfile', strScheduleName = 'WV Transporter Electronic file (Excel format)', strType = '', strNote = '', strTransactionType = '', intSort = 2560,strStoredProcedure = '', intMasterId = 4800136, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-508', strFormName = 'WV Importer Report', strScheduleCode = 'MFT-508_Excelfile', strScheduleName = 'WV Importer Electronic file (Excel format)', strType = '', strNote = '', strTransactionType = '', intSort = 2570,strStoredProcedure = '', intMasterId = 4800137, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-511', strFormName = 'WV Exporter Report', strScheduleCode = 'MFT-511_Excelfile', strScheduleName = 'WV Exporter Electronic file (Excel format)', strType = '', strNote = '', strTransactionType = '', intSort = 2580,strStoredProcedure = '', intMasterId = 4800138, intComponentTypeId = 4
 
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
@@ -3188,6 +3191,10 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '3_Bulk', strType = 'Aviation Gas', ysnStatus = 1, intFrequency = 1,				intMasterId = 4800133
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '3_Bulk', strType = 'Aviation Jet Fuel', ysnStatus = 1, intFrequency = 1,			intMasterId = 4800134
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '3_Bulk', strType = 'LNG', ysnStatus = 1, intFrequency = 1,							intMasterId = 4800135
+
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = 'MFT-507_Excelfile', strType = '', ysnStatus = 1, intFrequency = 1,					intMasterId = 4800136
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-508' , strScheduleCode = 'MFT-508_Excelfile', strType = '', ysnStatus = 1, intFrequency = 1,					intMasterId = 4800137
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = 'MFT-511_Excelfile', strType = '', ysnStatus = 1, intFrequency = 1,					intMasterId = 4800138
 
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets

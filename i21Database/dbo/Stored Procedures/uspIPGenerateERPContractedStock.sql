@@ -97,6 +97,12 @@ BEGIN TRY
 					AND @limit + @offset
 			)
 	BEGIN
+		SELECT IsNULL(1, '0') AS id
+			,IsNULL(@strXML, '') AS strXml
+			,'' AS strInfo1
+			,'' AS strInfo2
+			,'' AS strOnFailureCallbackSql
+			Where 0=1
 		RETURN
 	END
 
@@ -320,6 +326,15 @@ SELECT @strDetailXML2 = IsNULL(@strDetailXML2,'')
 			,'' AS strInfo1
 			,'' AS strInfo2
 			,'' AS strOnFailureCallbackSql
+	END
+	ELSE
+	BEGIN
+		SELECT IsNULL(1, '0') AS id
+			,IsNULL(@strXML, '') AS strXml
+			,'' AS strInfo1
+			,'' AS strInfo2
+			,'' AS strOnFailureCallbackSql
+		Where 0=1
 	END
 END TRY
 

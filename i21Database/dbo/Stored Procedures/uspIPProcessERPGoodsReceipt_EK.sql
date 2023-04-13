@@ -199,6 +199,7 @@ BEGIN TRY
 				,@strActualLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strLocationName
+				AND strLocationType = 'Plant'
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -357,6 +358,16 @@ BEGIN TRY
 					SELECT TOP 1 @intStorageLocationId = t.intStorageLocationId
 					FROM tblICStorageLocation t WITH (NOLOCK)
 					WHERE t.intSubLocationId = @intSubLocationId
+						AND t.strName = 'SU'
+				
+					IF ISNULL(@intStorageLocationId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Default Storage Unit is not configured. '
+								,16
+								,1
+								)
+					END
 				END
 
 				IF @dblQuantity <= 0
@@ -1008,6 +1019,15 @@ BEGIN TRY
 					DELETE
 					FROM #tmpAddItemReceiptResult
 					WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+					UPDATE B
+					SET B.dtmWarehouseArrival = CAST(GETDATE() AS DATE)
+					FROM tblMFBatch B
+					WHERE B.dtmWarehouseArrival IS NULL
+						AND B.strBatchId IN (
+							SELECT strLotNumber
+							FROM @LotEntries
+							)
 				END
 			END
 

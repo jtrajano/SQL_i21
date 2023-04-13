@@ -6,7 +6,7 @@
 	[dtmLoadDateTime]  DATETIME        NOT NULL,
 	[intShipViaId] INT NOT NULL,	
 	[intSellerId] INT NOT NULL,	
-	[intDriverId] INT NOT NULL,	
+	[intDriverId] INT NULL,	
     [strTractor] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intTruckDriverReferenceId] INT NULL,
 	[intTrailerId] INT NULL,

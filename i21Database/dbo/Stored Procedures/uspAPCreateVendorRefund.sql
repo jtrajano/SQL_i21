@@ -51,6 +51,18 @@ SELECT intID FROM #tmpBillsId
 INSERT INTO @invoices
 SELECT intID FROM #tmpInvoicesId
 
+SELECT A.* 
+ INTO #tmpPaymentIntegration 
+ FROM tblAPPaymentIntegrationTransaction A
+ INNER JOIN @invoices B ON A.intInvoiceId = B.intId    
+ WHERE A.ysnRefundFromPayment = 1
+
+ --Remove those records that created from Create Deposit - Pay Voucher Details Screen
+ DELETE A
+ FROM tblAPPaymentIntegrationTransaction A
+ INNER JOIN @invoices B ON A.intInvoiceId = B.intId
+ WHERE A.ysnRefundFromPayment = 1
+
 INSERT INTO #tmpVouchersForPay
 SELECT
 	payVouchers.intBillId
@@ -206,7 +218,7 @@ FROM (
 		,[intBankAccountId]					=	@bankAccountId
 		,[intWriteOffAccountId]				=	NULL
 		,[dblAmountPaid]					=	payVouchers.dblAmountPaid
-		,[dblAmountDue]						=	A.dblAmountDue --(A.dblTotal - A.dblTempDiscount + A.dblTempInterest) - (A.dblTempPayment)
+		,[dblAmountDue]						=	(A.dblInvoiceTotal - C.dblTempDiscount + C.dblTempInterest) - (C.dblTempPayment) --(A.dblTotal - A.dblTempDiscount + A.dblTempInterest) - (A.dblTempPayment)
 		,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
 		,[ysnUseOriginalIdAsPaymentNumber]	=	0
 		,[ysnApplytoBudget]					=	0
@@ -224,10 +236,10 @@ FROM (
 		,[strTransactionNumber]				=	A.strInvoiceNumber
 		,[intTermId]						=	A.intTermId
 		,[ysnApplyTermDiscount]				=	0
-		,[dblDiscount]						=	0 --A.dblTempDiscount
+		,[dblDiscount]						=	 C.dblTempDiscount
 		,[dblDiscountAvailable]				=	0
-		,[dblInterest]						=	0 --A.dblTempInterest
-		,[dblPayment]						=	A.dblAmountDue --A.dblTempPayment
+		,[dblInterest]					=	C.dblTempInterest
+		,[dblPayment]						=	C.dblTempPayment
 		,[strInvoiceReportNumber]			=	NULL
 		,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
 		,[intCurrencyExchangeRateId]		=	NULL
@@ -237,6 +249,7 @@ FROM (
 	FROM tblARInvoice A
 	INNER JOIN #tmpVouchersForPay payVouchers ON A.intInvoiceId = payVouchers.intInvoiceId
 	INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+	INNER JOIN #tmpPaymentIntegration C ON A.intInvoiceId = C.intInvoiceId AND C.intInvoiceId IS NOT NULL
 	OUTER APPLY (
 		SELECT TOP 1
 			exchangeRateDetail.dblRate

@@ -143,8 +143,8 @@ BEGIN TRY
 		,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
-		,[intFromSubLocationId]     = NULL
-		,[intToSubLocationId]       = NULL
+		,[intFromSubLocationId]     = MIN(TMSite.intCompanyLocationSubLocationId)
+		,[intToSubLocationId]       = MIN(TMSite.intCompanyLocationSubLocationId)
 		,[intFromStorageLocationId] = NULL
 		,[intToStorageLocationId]   = NULL
 		,[intInventoryTransferId]   = MIN(TR.intInventoryTransferId)
@@ -163,10 +163,11 @@ BEGIN TRY
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = TR.intItemId AND ItemUOM.ysnStockUnit = 1
+			LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 	        AND IC.strType != 'Non-Inventory'
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
-			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' )--AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
 			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId))
 			AND TR.intItemId = DD.intItemId /* If distribution item is different from the received item, then this is an auto-blend scenario where received items are blended together to be distributed as a new item (ex. E10 is 10% ethanol and 90% gasoline). */
@@ -210,7 +211,7 @@ BEGIN TRY
 		,[dblQuantityToTransfer]    = SUM(Blend.dblQuantity)
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
-		,[intFromSubLocationId]     = NULL
+		,[intFromSubLocationId]     = MIN(TMSite.intCompanyLocationSubLocationId)
 		,[intToSubLocationId]       = NULL
 		,[intFromStorageLocationId] = NULL
 		,[intToStorageLocationId]   = NULL
@@ -228,6 +229,7 @@ BEGIN TRY
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = TR.intItemId AND ItemUOM.ysnStockUnit = 1
+			LEFT JOIN vyuTMGetSite TMSite ON TMSite.intSiteID = DD.intSiteId AND ISNULL(TMSite.ysnCompanySite, 0) = 1
     WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 		AND ISNULL(DD.strReceiptLink, '') = ''
 	    AND IC.strType != 'Non-Inventory'

@@ -57,7 +57,7 @@ BEGIN TRY
 	SELECT @dtmDeliveryDateFromParam = ISNULL([from], DATEADD(dd, 0, DATEDIFF(dd, 0, GETDATE())))
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDeliveryDate'
 
-	SELECT @dtmDeliveryDateToParam = ISNULL([to], GETDATE())
+	SELECT @dtmDeliveryDateToParam = ISNULL(DATEADD(MILLISECOND, -3, ISNULL(CAST([to] AS DATETIME), CAST([from] AS DATETIME)) + 1), GETDATE())
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDeliveryDate'
 
 	SELECT TOP 1 @ysnIncludeInterLocationTransfers = CONVERT(BIT, [from])
@@ -122,7 +122,7 @@ BEGIN TRY
                                             ELSE IRI.dblNet
                                             END)
                                         ELSE 0 END)
-            ,[dblGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL THEN
+            ,[dblGrainContract]		=	SUM(CASE WHEN CD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN
                                             -- Amount
                                             (CASE TD.strDiscountChargeType
                                             WHEN 'Percent'

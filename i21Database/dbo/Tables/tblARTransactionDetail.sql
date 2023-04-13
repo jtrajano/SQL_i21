@@ -34,7 +34,8 @@
 	[intCompanyLocationId]					INT 			NULL,	
 	[intEntityUserId]						INT 			NULL,
 	[intConcurrencyId]						INT				CONSTRAINT [DF_tblARTransactionDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARTransactionDetail] PRIMARY KEY CLUSTERED ([intId] ASC)
+    intDispatchId							INT 			NULL,
+	CONSTRAINT [PK_tblARTransactionDetail] PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 GO
 CREATE INDEX [idx_tblARTransactionDetail] ON [dbo].[tblARTransactionDetail] (intTransactionId, intTransactionDetailId)

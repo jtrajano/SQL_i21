@@ -122,6 +122,7 @@ BEGIN
 	,@InvoiceOriginId			NVARCHAR(8)
 	,@PONumber					NVARCHAR(25)
 	,@BOLNumber					NVARCHAR(50)
+	,@DocumentMaintenanceId		INT
 	,@Comments					NVARCHAR(max)
 	,@FooterComments			NVARCHAR(max)
 	,@ShipToLocationId			INT
@@ -197,7 +198,8 @@ BEGIN
 		,@InvoiceOriginId			= NULL
 		,@PONumber					= NULL --SO.[strPONumber]
 		,@BOLNumber					= L.strBLNumber
-		,@Comments					= L.strLoadNumber + ' : ' + L.strCustomerReference
+		,@Comments					= CASE WHEN (DCT.intDocumentMaintenanceId IS NOT NULL) THEN NULL ELSE (L.strLoadNumber + ' : ' + L.strCustomerReference) END
+		,@DocumentMaintenanceId		= DCT.intDocumentMaintenanceId
 		,@FooterComments			= NULL
 		,@ShipToLocationId			= NULL
 		,@ShipToLocationName		= NULL
@@ -235,6 +237,9 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
+	OUTER APPLY dbo.fnARGetDefaultCommentTable(LD.intSCompanyLocationId, LD.intCustomerEntityId, 
+		(CASE WHEN (@intType = 3) THEN 'Proforma Invoice' ELSE 'Invoice' END), 
+		(CASE WHEN (@intType = 2) THEN 'Provisional' ELSE 'Standard' END), 'Header', NULL, 0) DCT
 	WHERE L.intLoadId = @intLoadId
 
 	SELECT TOP 1 @intARAccountId = ISNULL(intARAccountId,0) FROM tblARCompanyPreference
@@ -269,6 +274,7 @@ BEGIN
 			,[strPONumber]
 			,[strBOLNumber]
 			,[strComments]
+			,[intDocumentMaintenanceId]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
 			,[ysnTemplate]
@@ -382,6 +388,7 @@ BEGIN
 			,[strPONumber]							= @PONumber 
 			,[strBOLNumber]							= @BOLNumber 
 			,[strComments]							= @Comments 
+			,[intDocumentMaintenanceId]				= @DocumentMaintenanceId
 			,[intShipToLocationId]					= @ShipToLocationId 
 			,[intBillToLocationId]					= @BillToLocationId
 			,[ysnTemplate]							= @Template
@@ -499,6 +506,7 @@ BEGIN
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
+		,[intDocumentMaintenanceId]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
 		,[ysnTemplate]
@@ -603,6 +611,7 @@ BEGIN
 		,[strPONumber]							= @PONumber 
 		,[strBOLNumber]							= @BOLNumber 
 		,[strComments]							= @Comments 
+		,[intDocumentMaintenanceId]				= @DocumentMaintenanceId
 		,[intShipToLocationId]					= @ShipToLocationId 
 		,[intBillToLocationId]					= @BillToLocationId
 		,[ysnTemplate]							= @Template

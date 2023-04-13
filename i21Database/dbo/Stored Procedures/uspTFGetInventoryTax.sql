@@ -22,7 +22,10 @@ BEGIN TRY
 
 	DECLARE @tmpTransaction TFCommonTransaction
 	DECLARE @tmpDetailTax TFCommonDetailTax
-
+	DECLARE @tmpDetailTaxGrouped TABLE (intTransactionDetailId INT
+		, strCriteria NVARCHAR(20)
+		, dblTax DECIMAL(18, 6)
+	)
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
 	IF @Refresh = 1
@@ -464,6 +467,16 @@ BEGIN TRY
 				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
 			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
 
+			INSERT INTO @tmpDetailTaxGrouped (intTransactionDetailId, strCriteria, dblTax)
+			SELECT InventoryTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria, SUM(tblICInventoryReceiptItemTax.dblTax)
+			FROM @tmpTransaction InventoryTran
+				INNER JOIN tblICInventoryReceiptItemTax ON tblICInventoryReceiptItemTax.intInventoryReceiptItemId = InventoryTran.intTransactionDetailId
+				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblICInventoryReceiptItemTax.intTaxCodeId
+				INNER JOIN tblTFTaxCategory ON tblTFTaxCategory.intTaxCategoryId = tblSMTaxCode.intTaxCategoryId
+				INNER JOIN tblTFReportingComponentCriteria ON tblTFReportingComponentCriteria.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId 
+			WHERE tblTFReportingComponentCriteria.intReportingComponentId = @RCId
+			GROUP BY InventoryTran.intTransactionDetailId, tblTFReportingComponentCriteria.strCriteria 
+
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDetailTax)
 			BEGIN		
 				DECLARE @InventoryDetailId INT = NULL, @intTaxCodeId INT = NULL, @strCriteria NVARCHAR(100) = NULL,  @dblTax NUMERIC(18,8) = NULL
@@ -472,18 +485,23 @@ BEGIN TRY
 
 				IF(@strCriteria = '<> 0' AND @dblTax = 0)	
 				BEGIN
-					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId										 
+					IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InventoryDetailId ) = 0)  
+					BEGIN  
+						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId 
+					END       										 
 				END
 				ELSE IF (@strCriteria = '= 0' AND @dblTax > 0)
 				BEGIN
-					DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId										 
+				IF((SELECT dblTax FROM @tmpDetailTaxGrouped WHERE intTransactionDetailId = @InventoryDetailId ) > 0)  
+					BEGIN  
+						DELETE FROM @tmpTransaction WHERE intTransactionDetailId = @InventoryDetailId	
+					END    								 
 				END
 
 				DELETE @tmpDetailTax WHERE intTransactionDetailId = @InventoryDetailId AND intTaxCodeId = @intTaxCodeId
-
 			END
 
-			DELETE @tmpDetailTax
+		   DELETE @tmpDetailTax  
 
 			-- TRANSACTION NOT MAPPED ON MFT TAX CATEGORY
 			IF (EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentCriteria WHERE intReportingComponentId = @RCId AND strCriteria = '<> 0'))
@@ -581,18 +599,18 @@ BEGIN TRY
 				, CONVERT(DECIMAL(18), dblReceived)
 				, dblTax
 				, dtmDate
-				, strShipVia
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strShipVia)), 35) ELSE strShipVia END AS strShipVia 
 				, strTransporterLicense
 				, strTransportationMode
-				, strVendorName
-				, strTransporterName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strVendorName)), 35) ELSE strVendorName END AS strVendorName  
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strTransporterName)), 35) ELSE strTransporterName END AS strTransporterName  
 				, REPLACE(strVendorFederalTaxId, '-', '')
 				, REPLACE(strTransporterFederalTaxId, '-', '')
 				, strTerminalControlNumber
 				, @DateFrom
 				, @DateTo
 				--HEADER
-				, strHeaderCompanyName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strHeaderCompanyName)), 35) ELSE strHeaderCompanyName END AS strHeaderCompanyName 
 				, strHeaderAddress
 				, strHeaderCity
 				, strHeaderState
@@ -606,7 +624,7 @@ BEGIN TRY
 				, strDestinationState
 				, strDestinationCity
 				, strDestinationCounty
-				, strCustomerName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strCustomerName)), 35) ELSE strCustomerName END AS strCustomerName  
 				, REPLACE(strCustomerFederalTaxId, '-', '')
 				, strTransporterIdType
 				, strVendorIdType
@@ -623,10 +641,10 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, CONVERT(DECIMAL(18), dblGross)
-				, strContactName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strContactName)), 35) ELSE strContactName END AS strContactName 
 				, strEmail
 				, strImportVerificationNumber
-				, strConsignorName
+				, CASE WHEN @IsEdi = 1 THEN LEFT(LTRIM(RTRIM(strConsignorName)), 35) ELSE strConsignorName END AS strConsignorName  
 				, REPLACE(strConsignorFederalTaxId, '-', '')
 			FROM @tmpTransaction Trans
 		END

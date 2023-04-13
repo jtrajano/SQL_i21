@@ -2050,7 +2050,8 @@ UNION ALL SELECT intLocalityId = 0, strLocalityCode =	'51199'	, strLocalityZipCo
 UNION ALL SELECT intLocalityId = 0, strLocalityCode =	'51199'	, strLocalityZipCode =	'23693'	, strLocalityName =	'York County'	, intMasterId =	4601979
 UNION ALL SELECT intLocalityId = 0, strLocalityCode =	'51199'	, strLocalityZipCode =	'23696'	, strLocalityName =	'York County'	, intMasterId =	4601980
 
-
+UNION ALL SELECT intLocalityId = 0, strLocalityCode =	'51173'	, strLocalityZipCode =	'24354'	, strLocalityName =	'Smyth County'	, intMasterId =	4601981
+UNION ALL SELECT intLocalityId = 0, strLocalityCode =	'51810'	, strLocalityZipCode =	'23451'	, strLocalityName =	'Virginia Beach, City of'	, intMasterId =	4601982
 
 EXEC uspTFUpgradeLocality @TaxAuthorityCode = 'VA', @Locality = @TFLocalityVA
 

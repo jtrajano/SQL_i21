@@ -17,7 +17,7 @@ SELECT wo.strWorkOrderNo
 						JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 						WHERE SR.intLotId = lot.intLotId
 							AND ISNULL(ysnPosted, 0) = 0
-						), 0) > 0
+						), 0)-IsNULL(woil.dblTBSQuantity,0)  > 0
 				THEN 1
 			ELSE ISNULL(woil.ysnKeep, 0)
 			END AS BIT) [ysnKeep]

@@ -142,7 +142,7 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED] OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA State' 
-				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') 
+				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND ISNULL(strVal1, 'None') = 'None' AND ISNULL(strVal2, 'None') = 'None') 
 					OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Local' ) TXBLLOCAL OUTER APPLY
@@ -171,9 +171,9 @@ BEGIN
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 				AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
-				--AND (tax.intTypeTaxStateId NOT IN (41, 45)
-				--	OR ((tax.intTypeTaxStateId = 41 AND tax.strVal1 = 'None' AND tax.strVal2 = 'None')
-				--	OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 = 'None (None)'))) 
+				AND (tax.intTypeTaxStateId NOT IN (41, 45)
+					OR ((tax.intTypeTaxStateId = 41 AND tax.strVal1 = 'None' AND tax.strVal2 = 'None')
+					OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 = 'None (None)'))) 
 			GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY lc.strLocalName), strState = st.strCode, strLocal = lc.strLocalName, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId
@@ -290,7 +290,7 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED] OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA State' 
-				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') 
+				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND ISNULL(strVal1, 'None') = 'None' AND ISNULL(strVal2, 'None') = 'None') 
 					OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
 		
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Local' ) TXBLLOCAL OUTER APPLY
@@ -319,9 +319,9 @@ BEGIN
 				INNER JOIN tblPRTypeTax tt ON tax.intTypeTaxId = tt.intTypeTaxId
 			WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId 
 				AND tax.strPaidBy = 'Employee' AND tax.strCalculationType = 'USA State' AND ysnVoid = 0 
-				--AND (tax.intTypeTaxStateId NOT IN (41, 45)
-				--	OR ((tax.intTypeTaxStateId = 41 AND tax.strVal1 = 'None' AND tax.strVal2 = 'None')
-				--	OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 = 'None (None)'))) 
+				AND (tax.intTypeTaxStateId NOT IN (41, 45)
+					OR ((tax.intTypeTaxStateId = 41 AND tax.strVal1 = 'None' AND tax.strVal2 = 'None')
+					OR (tax.intTypeTaxStateId = 45 AND tax.strVal2 = 'None (None)' AND tax.strVal3 = 'None (None)'))) 
 			GROUP BY st.strCode, strEmployerStateTaxID) STATETAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY lc.strLocalName), strState = st.strCode, strLocal = lc.strLocalName, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
 			FROM vyuPRPaycheckTax tax INNER JOIN tblPRTypeTaxState st ON tax.intTypeTaxStateId = st.intTypeTaxStateId

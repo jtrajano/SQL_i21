@@ -37,6 +37,7 @@ FROM (
 				 WHEN isnull(a.strType,b.strType) = 'Purchase Basis Deliveries' THEN 5
 				 WHEN isnull(a.strType,b.strType) = 'Sales Basis Deliveries' THEN 6
 				 WHEN isnull(a.strType,b.strType) = 'Delayed Pricing' THEN 7
+				 WHEN isnull(a.strType,b.strType) = 'Dropship In-Transit' THEN 7
 				 WHEN isnull(a.strType,b.strType) = 'Company Titled' THEN 8
 				 WHEN isnull(a.strType,b.strType) = 'Net Physical Position' THEN 9
 				 WHEN isnull(a.strType,b.strType) = '' THEN 10
@@ -63,7 +64,7 @@ FROM (
 		,dblDPRRun2 = isnull(b.dblTotal,0)
 		,dblDifference =  isnull(b.dblTotal,0) - isnull(a.dblTotal,0)
 	from #temp1 a
-	right join #temp2 b on b.strType = a.strType
+	left join #temp2 b on b.strType = a.strType
 ) t
 
 

@@ -1,67 +1,71 @@
-﻿CREATE PROCEDURE uspMFGetRecipeInputAndOutputItem (@strXML NVARCHAR(MAX) = '')
+﻿CREATE PROCEDURE [dbo].[uspMFGetRecipeInputAndOutputItem] 
+(
+	@strXML NVARCHAR(MAX) = ''
+)
 AS
 BEGIN TRY
-	DECLARE @strPackagingCategory NVARCHAR(50)
-		,@intPackagingCategoryId INT
-		,@intPMCategoryId INT
-		,@intManufacturingProcessId INT
-		,@ysnProducedQtyByWeight BIT = 1
-		,@dtmCurrentDate DATETIME
-		,@dtmCurrentDateTime DATETIME
-		,@intDayOfYear INT
-		,@dblCalculatedOutputQuantity NUMERIC(24, 10)
-		,@dblCalculatedInputQuantity NUMERIC(24, 10)
-		,@idoc INT
-		,@ErrMsg NVARCHAR(MAX)
-		,@intItemId INT
-		,@dblQuantity NUMERIC(24, 10)
-		,@intQuantityItemUOMId INT
-		,@intLocationId INT
-		,@intWorkOrderId INT
-		,@dblPartialQuantity NUMERIC(24, 10)
-		,@strType NVARCHAR(1)
-		,@intTransferStorageLocationId INT
-		,@intProductId INT
-		,@dblCalculatedQuantity DECIMAL(24, 10)
-		,@ysnSubstituteItem BIT
-		,@intMainItemId INT
-		,@strWorkOrderNo NVARCHAR(50) 
-		,@dblTareWeight DECIMAL(24, 10)
-		,@dblGrossWeight DECIMAL(24, 10)
-		,@dblNetWeight DECIMAL(24, 10)
-		,@intWeightItemUOMId int
-		,@dblWeightPerUnit DECIMAL(24, 10)
-		,@intActualItemUnitMeasureId int
-		,@strActualItemUnitMeasure nvarchar(50)
-		,@intQuantityUnitMeasureId int
-		,@strQuantityUnitMeasure nvarchar(50)
+	DECLARE @strPackagingCategory			NVARCHAR(50)
+		  , @intPackagingCategoryId			INT
+		  , @intPMCategoryId				INT
+		  , @intManufacturingProcessId		INT
+		  , @ysnProducedQtyByWeight			BIT = 1
+		  , @dtmCurrentDate					DATETIME
+		  , @dtmCurrentDateTime				DATETIME
+		  , @intDayOfYear					INT
+		  , @dblCalculatedOutputQuantity	NUMERIC(24, 10)
+		  , @dblCalculatedInputQuantity		NUMERIC(24, 10)
+		  , @idoc							INT
+		  , @ErrMsg							NVARCHAR(MAX)
+		  , @intItemId						INT
+		  , @dblQuantity					NUMERIC(24, 10)
+		  , @intQuantityItemUOMId			INT
+		  , @intLocationId					INT
+		  , @intWorkOrderId					INT
+		  , @dblPartialQuantity				NUMERIC(24, 10)
+		  , @strType						NVARCHAR(1)
+		  , @intTransferStorageLocationId	INT
+		  , @intProductId					INT
+		  , @dblCalculatedQuantity			DECIMAL(24, 10)
+		  , @ysnSubstituteItem				BIT
+		  , @intMainItemId					INT
+		  , @strWorkOrderNo					NVARCHAR(50) 
+		  , @dblTareWeight					DECIMAL(24, 10)
+		  , @dblGrossWeight					DECIMAL(24, 10)
+		  , @dblNetWeight					DECIMAL(24, 10)
+		  , @intWeightItemUOMId				INT
+		  , @dblWeightPerUnit				DECIMAL(24, 10)
+		  , @intActualItemUnitMeasureId		INT
+		  , @strActualItemUnitMeasure		NVARCHAR(50)
+		  , @intQuantityUnitMeasureId		INT
+		  , @strQuantityUnitMeasure			NVARCHAR(50)
 
-	CREATE TABLE #tblMFConsumptionDetail (
-		intContainerId INT
-		,strContainerId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intStorageLocationId INT
-		,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intStorageSubLocationId INT
-		,intInputItemId INT
-		,strInputItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,strInputItemDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dblInputQuantity NUMERIC(38, 20) NULL
-		,intInputItemUOMId INT
-		,intUnitMeasureId INT
-		,strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intInputLotId INT
-		,strInputLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dblInputLotQuantity NUMERIC(38, 20) NULL
-		,strInputLotUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,ysnEmptyOutSource BIT
-		,dtmFeedTime DATETIME
-		,strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dtmActualInputDateTime DATETIME
-		,intRowNo INT IDENTITY(1, 1)
-		,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,ysnInputItem BIT
-		,intMainItemId INT
-		)
+	CREATE TABLE #tblMFConsumptionDetail 
+	(
+		intContainerId			INT
+	  , strContainerId			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , intStorageLocationId	INT
+	  , strStorageLocationName  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , intStorageSubLocationId INT
+	  , intInputItemId			INT
+	  , strInputItemNo			NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
+	  , strInputItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+	  , dblInputQuantity		NUMERIC(38, 20) NULL
+	  , intInputItemUOMId		INT
+	  , intUnitMeasureId		INT
+	  , strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , intInputLotId			INT
+	  , strInputLotNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , dblInputLotQuantity		NUMERIC(38, 20) NULL
+	  , strInputLotUnitMeasure	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , ysnEmptyOutSource		BIT
+	  , dtmFeedTime				DATETIME
+	  , strReferenceNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , dtmActualInputDateTime	DATETIME
+	  , intRowNo				INT IDENTITY(1, 1)
+	  , strInventoryTracking	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , ysnInputItem			BIT
+	  , intMainItemId			INT
+	)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML

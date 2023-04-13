@@ -2692,7 +2692,7 @@ BEGIN TRY
 						FROM @tblIPETAPOD
 						WHERE dtmETAPOD IS NOT NULL
 						)
-					AND @strTransactionType = 'Inbound Shipment'
+					--AND @strTransactionType = 'Inbound Shipment'
 				BEGIN
 					SELECT @intContractDetailId = NULL
 						,@dtmETAPOD = NULL

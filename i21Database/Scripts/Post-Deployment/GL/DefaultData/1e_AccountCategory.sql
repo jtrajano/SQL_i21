@@ -112,7 +112,7 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' UNION ALL
 			SELECT id = 139, name = 'Deferred Expense' UNION ALL 
 
-			SELECT id = 140, name = 'Unrealized Gain on Inventory (Inventory Offset)' UNION ALL
+			SELECT id = 140, name = 'Unrealized Gain on Inventory Inventory Offset)' UNION ALL
 			SELECT id = 141, name = 'Unrealized Loss on Inventory (Inventory Offset)' UNION ALL
 			SELECT id = 142, name = 'Unrealized Gain on Purchasing (AP Clearing)' UNION ALL
 			SELECT id = 143, name = 'Unrealized Loss on Purchasing (AP Clearing)' UNION ALL

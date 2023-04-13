@@ -12,7 +12,7 @@ AS
 						dbo.fnRemoveTrailingZeroes(ISNULL(RV.dblReservedQuantity,0)) collate Latin1_General_CI_AS [Reserved],				
 						--ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
 						dbo.fnRemoveTrailingZeroes(ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)) collate Latin1_General_CI_AS  AS [Allocated],
-						dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,LP.intWeightUOMId,ISNULL(CD.dblQuantity,0)) AS NUMERIC(18, 6)) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)) collate Latin1_General_CI_AS AS [Unallocated],
+						dbo.fnRemoveTrailingZeroes(CAST(ISNULL(CD.dblNetWeight,0) AS NUMERIC(18, 6)) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)) collate Latin1_General_CI_AS AS [Unallocated],
 						dbo.fnRemoveTrailingZeroes(ISNULL(PL.dblPickedQty,0)) collate Latin1_General_CI_AS [Picked Qty],
 						dbo.fnRemoveTrailingZeroes(ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) - PL.dblPickedQty) collate Latin1_General_CI_AS AS [To be Picked]
 
@@ -57,3 +57,6 @@ AS
 								[Reserved]
 							)
 						) UP
+GO
+
+

@@ -16,6 +16,7 @@ SELECT
     , l.strWebsite
     , l.dblLatitude
     , l.dblLongitude
+    , l.ysnActive
 	, created.dtmDate dtmDateCreated
 	, COALESCE(updated.dtmDate, created.dtmDate) dtmDateLastUpdated
 FROM tblSMCompanyLocation l

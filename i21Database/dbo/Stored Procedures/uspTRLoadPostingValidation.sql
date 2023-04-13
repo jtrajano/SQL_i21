@@ -98,10 +98,10 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('Invalid Seller', 16, 1)
 	END
-	IF (@intDriver IS NULL)
-	BEGIN
-		RAISERROR('Invalid Driver', 16, 1)
-	END
+	-- IF (@intDriver IS NULL)
+	-- BEGIN
+	-- 	RAISERROR('Invalid Driver', 16, 1)
+	-- END
 
 
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
@@ -364,7 +364,7 @@ BEGIN TRY
 					@intLoadDetailId = intLoadDetailId
 				FROM #UndistributedTMOrderList
 
-				SET @strErrorResult += 'Customer ' + RTRIM(LTRIM(@strCustomer)) + ' with TM Order ' + RTRIM(LTRIM(@strTmoNumber)) + ' in Load Schedule ' + + RTRIM(LTRIM(@strLoadNumber)) + ' is missing. </br>'
+				SET @strErrorResult += 'Customer ' + RTRIM(LTRIM(@strCustomer)) + ' with TM Order ' + RTRIM(LTRIM(@strTmoNumber)) + ' in Load Schedule ' + + RTRIM(LTRIM(@strLoadNumber)) + ' is missing. </br>' + 'Once posted this would be deleted from Load Schedule as well. </br>' 
 				DELETE FROM #UndistributedTMOrderList WHERE intLoadDetailId = @intLoadDetailId
 			END
 			DROP TABLE #UndistributedTMOrderList

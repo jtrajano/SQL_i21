@@ -183,6 +183,7 @@ BEGIN TRY
 				,@strLocation = strLocationName
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 			WHERE strVendorRefNoPrefix = @strLocationName
+				AND strLocationType = 'Plant'
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN
@@ -235,6 +236,14 @@ BEGIN TRY
 
 			IF ISNULL(@intSubLocationId, 0) = 0
 			BEGIN
+				SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
+				FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
+				WHERE t.strSubLocationName = @strSubLocationName
+					AND t.intCompanyLocationId = @intCompanyLocationId
+			End
+
+			IF ISNULL(@intSubLocationId, 0) = 0
+			BEGIN
 				RAISERROR (
 						'Invalid Storage Location. '
 						,16
@@ -263,6 +272,16 @@ BEGIN TRY
 				SELECT TOP 1 @intStorageLocationId = t.intStorageLocationId
 				FROM tblICStorageLocation t WITH (NOLOCK)
 				WHERE t.intSubLocationId = @intSubLocationId
+					AND t.strName = 'SU'
+
+				IF ISNULL(@intStorageLocationId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Default Storage Unit is not configured. '
+							,16
+							,1
+							)
+				END
 			END
 
 			SELECT @intQtyUnitMeasureId = t.intUnitMeasureId
@@ -402,14 +421,23 @@ BEGIN TRY
 				END
 
 				-- Take Qty from Batch
-				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0)
+				SELECT TOP 1 @dblQty = CEILING(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0))
 					,@intQtyItemUOMId = IUOM.intItemUOMId
 				FROM tblMFBatch B WITH (NOLOCK)
 				JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
-					AND IUOM.intUnitMeasureId = B.intItemUOMId
+					AND IUOM.intUnitMeasureId = B.intPackageUOMId
 					AND B.strBatchId = @strLotNumber
 					AND B.intTealingoItemId = @intItemId
 					AND B.intLocationId = @intCompanyLocationId
+
+				IF ISNULL(@dblQty, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Batch characteristics does not exists. '
+							,16
+							,1
+							)
+				END
 
 				IF ISNULL(@dblQty, 0) = 0
 				BEGIN
@@ -514,7 +542,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF @dblOrgQty <> @dblQty
+				IF ISNULL(@dblQty, 0) <> 0
 				BEGIN
 					--SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
 					SELECT @dblAdjustByQuantity = @dblQty

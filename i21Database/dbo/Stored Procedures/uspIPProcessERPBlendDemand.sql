@@ -158,15 +158,30 @@ BEGIN TRY
 
 			SELECT @intLocationId = NULL
 
-			SELECT @intLocationId = intCompanyLocationId
-			FROM dbo.tblSMCompanyLocation
-			WHERE (
-					CASE 
-						WHEN @strProductionOrder = 'True'
-							THEN strVendorRefNoPrefix
-						ELSE strLotOrigin
-						END
-					) = @strCompanyLocation
+			IF @strProductionOrder = 'True'
+			BEGIN
+				SELECT @intLocationId = intCompanyLocationId
+				FROM dbo.tblSMCompanyLocation
+				WHERE strLocationType = 'Plant' AND (
+						CASE 
+							WHEN @strProductionOrder = 'True'
+								THEN strVendorRefNoPrefix
+							ELSE strLotOrigin
+							END
+						) = @strCompanyLocation
+			END
+			ELSE
+			BEGIN
+				SELECT @intLocationId = intCompanyLocationId
+				FROM dbo.tblSMCompanyLocation
+				WHERE (
+						CASE 
+							WHEN @strProductionOrder = 'True'
+								THEN strVendorRefNoPrefix
+							ELSE strLotOrigin
+							END
+						) = @strCompanyLocation
+			END
 
 			SELECT @intCompanyLocationSubLocationId = NULL
 

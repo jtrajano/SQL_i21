@@ -1,9 +1,9 @@
 ﻿
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '22.1')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '22.1.1')
 BEGIN
 INSERT INTO tblSMEULA(strVersionNumber, strText)
-VALUES ('22.1', N'<!DOCTYPE html>
+VALUES ('22.1.1', N'<!DOCTYPE html>
 <html>
 
 <head>
