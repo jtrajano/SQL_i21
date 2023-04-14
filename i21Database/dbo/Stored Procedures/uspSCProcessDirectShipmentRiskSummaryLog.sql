@@ -210,7 +210,7 @@ BEGIN
 	
 	IF @DEBUG_MODE = 0
 	BEGIN
-		EXEC uspRKLogRiskPosition @SummaryLogs
+		EXEC uspRKLogRiskPosition @SummaryLogs, 0 , 0
 	END
 	ELSE
 	BEGIN
