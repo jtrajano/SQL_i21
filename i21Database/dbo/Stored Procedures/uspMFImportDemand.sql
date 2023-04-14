@@ -1,5 +1,9 @@
-﻿CREATE PROCEDURE uspMFImportDemand @intLocationId INT = NULL
-	,@intUserId INT = NULL
+﻿CREATE PROCEDURE uspMFImportDemand 
+(
+	@intLocationId	INT = NULL
+  , @intUserId		INT = NULL
+)
+
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -8,129 +12,122 @@ BEGIN TRY
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE @ErrMsg NVARCHAR(MAX)
-		,@intDemandImportId INT
-		,@intConcurrencyId INT
-		,@strDemandNo NVARCHAR(50)
-		,@strDemandName NVARCHAR(100)
-		,@dtmDate DATETIME
-		,@strBook NVARCHAR(100)
-		,@strSubBook NVARCHAR(100)
-		,@strItemNo NVARCHAR(50)
-		,@strSubstituteItemNo NVARCHAR(50)
-		,@dtmDemandDate NVARCHAR(50)
-		,@dblQuantity NUMERIC(18, 6)
-		,@strUnitMeasure NVARCHAR(50)
-		,@strLocationName NVARCHAR(50)
-		,@intCreatedUserId INT
-		,@dtmCreated DATETIME
-		,@intBookId INT
-		,@intSubBookId INT
-		,@intDemandHeaderImportId INT
-		,@intDemandHeaderId INT
-		,@intDemandDetailImportId INT
-		,@intItemId INT
-		,@intUnitMeasureId INT
-		,@intItemUOMId INT
-		,@intDemandDetailId INT
-		,@intSubstituteItemId INT
-		,@strDemandImportDateTimeFormat NVARCHAR(50)
-		,@intConvertYear INT
-		,@dtmMinDemandDate DATETIME
-		,@dtmMaxDemandDate DATETIME
-		,@intMinMonth INT
-		,@intMaxMonth INT
-		,@intMinYear INT
-		,@intMaxYear INT
-		,@intMinimumDemandMonth INT
-		,@intMaximumDemandMonth INT
-		,@intMonthDiff INT
-		,@dblDemandGrowthPerc NUMERIC(18, 6)
-		,@strDetails NVARCHAR(MAX)
-		,@strJson NVARCHAR(MAX)
-		,@strOldDemandNo NVARCHAR(50)
-		,@dtmOldDate DATETIME
-		,@intOldBookId INT
-		,@intOldSubBookId INT
-		,@strHeaderData NVARCHAR(MAX)
-		,@strOldBook NVARCHAR(50)
-		,@strOldSubBook NVARCHAR(50)
-		,@strDetailData NVARCHAR(MAX)
-		,@strJSONData NVARCHAR(MAX)
-	DECLARE @tblMFDemandHeaderImport TABLE (
+	DECLARE @ErrMsg						NVARCHAR(MAX)
+		  , @intDemandImportId			INT
+		  , @intConcurrencyId			INT
+		  , @strDemandNo				NVARCHAR(50)
+		  , @strDemandName				NVARCHAR(100)
+		  , @dtmDate					DATETIME
+		  , @strBook					NVARCHAR(100)
+		  , @strSubBook					NVARCHAR(100)
+		  , @strItemNo					NVARCHAR(50)
+		  , @strSubstituteItemNo		NVARCHAR(50)
+		  , @dtmDemandDate				NVARCHAR(50)
+		  , @dblQuantity				NUMERIC(18, 6)
+		  , @strUnitMeasure				NVARCHAR(50)
+		  , @strLocationName			NVARCHAR(50)
+		  , @intCreatedUserId			INT
+		  , @dtmCreated					DATETIME
+		  , @intBookId					INT
+		  , @intSubBookId				INT
+		  , @intDemandHeaderImportId	INT
+		  , @intDemandHeaderId			INT
+		  , @intDemandDetailImportId	INT
+		  , @intItemId					INT
+		  , @intUnitMeasureId			INT
+		  , @intItemUOMId				INT
+		  , @intDemandDetailId			INT
+		  , @intSubstituteItemId		INT
+		  , @dtmMinDemandDate			DATETIME
+		  , @dtmMaxDemandDate			DATETIME
+		  , @intMinMonth				INT
+		  , @intMaxMonth				INT
+		  , @intMinYear					INT
+		  , @intMaxYear					INT
+		  , @intMinimumDemandMonth		INT
+		  , @intMaximumDemandMonth		INT
+		  , @intMonthDiff				INT
+		  , @dblDemandGrowthPerc		NUMERIC(18, 6)
+		  , @strDetails					NVARCHAR(MAX)
+		  , @strJson					NVARCHAR(MAX)
+		  , @strOldDemandNo				NVARCHAR(50)
+		  , @dtmOldDate					DATETIME
+		  , @intOldBookId				INT
+		  , @intOldSubBookId			INT
+		  , @strHeaderData				NVARCHAR(MAX)
+		  , @strOldBook					NVARCHAR(50)
+		  , @strOldSubBook				NVARCHAR(50)
+		  , @strDetailData				NVARCHAR(MAX)
+		  , @strJSONData				NVARCHAR(MAX)
+		  , @strAutoFillValue			NVARCHAR(50)
+	
+	DECLARE @tblMFDemandHeaderImport TABLE 
+	(
 		intDemandHeaderImportId INT NOT NULL IDENTITY
-		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		,dtmDate DATETIME
-		,strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,intCreatedUserId INT
-		)
-	DECLARE @tblMFDemandDetailImport TABLE (
-		intDemandDetailImportId INT NOT NULL IDENTITY
-		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,strSubstituteItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,dtmDemandDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,dblQuantity NUMERIC(18, 6) NOT NULL
-		,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		)
-	DECLARE @tblMFDemandDetailChanges TABLE (
-		dblOldQuantity NUMERIC(18, 6)
-		,intOldItemUOMId INT
-		,dblNewQuantity NUMERIC(18, 6)
-		,intNewItemUOMId INT
-		,intDemandDetailId INT
-		)
-	DECLARE @tblMFItem TABLE (
-		intItemId INT
-		,intSubstituteItemId INT
-		,intLocationId INT
-		)
+	  , strDemandName			NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+	  , dtmDate					DATETIME
+	  , strBook					NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	  , strSubBook				NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	  , intCreatedUserId		INT
+	);
 
-	DECLARE @strAutoFillValue nvarchar(50)
+	DECLARE @tblMFDemandDetailImport TABLE 
+	(
+		intDemandDetailImportId INT NOT NULL IDENTITY
+	  , strDemandName			NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+	  , strItemNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	  , strSubstituteItemNo		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	  , dtmDemandDate			NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	  , dblQuantity				NUMERIC(18, 6) NOT NULL
+	  , strUnitMeasure			NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	  , strLocationName			NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	);
+
+	DECLARE @tblMFDemandDetailChanges TABLE 
+	(
+		dblOldQuantity		NUMERIC(18, 6)
+	  , intOldItemUOMId		INT
+	  , dblNewQuantity		NUMERIC(18, 6)
+	  , intNewItemUOMId		INT
+	  , intDemandDetailId	INT
+	);
+
+	DECLARE @tblMFItem TABLE 
+	(
+		intItemId			INT
+	  , intSubstituteItemId INT
+	  , intLocationId		INT
+	);
 
 	SELECT @strAutoFillValue = strValue
 	FROM tblIPSAPIDOCTag
-	WHERE strMessageType = 'Demand'
-		AND strTag = 'AutoFill'
+	WHERE strMessageType = 'Demand' AND strTag = 'AutoFill'
 
-	if @strAutoFillValue is null or @strAutoFillValue=''
-	Select @strAutoFillValue='Yes'
+	IF @strAutoFillValue IS NULL OR @strAutoFillValue=''
+		BEGIN
+			SET @strAutoFillValue='Yes'
+		END
 
-	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat, 'MM DD YYYY HH:MI')
-		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth, 12)
-		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth, 12)
-		,@dblDemandGrowthPerc = IsNULL(dblDemandGrowthPerc, 0)
+	SELECT @intMinimumDemandMonth	= ISNULL(intMinimumDemandMonth, 12)
+		 , @intMaximumDemandMonth	= ISNULL(intMaximumDemandMonth, 12)
+		 , @dblDemandGrowthPerc		= ISNULL(dblDemandGrowthPerc, 0)
 	FROM tblMFCompanyPreference
-
-	SELECT @intConvertYear = 101
-
-	IF (
-			@strDemandImportDateTimeFormat = 'MM DD YYYY HH:MI'
-			OR @strDemandImportDateTimeFormat = 'YYYY MM DD HH:MI'
-			)
-		SELECT @intConvertYear = 101
-	ELSE IF (
-			@strDemandImportDateTimeFormat = 'DD MM YYYY HH:MI'
-			OR @strDemandImportDateTimeFormat = 'YYYY DD MM HH:MI'
-			)
-		SELECT @intConvertYear = 103
 
 	BEGIN TRANSACTION
 
-	INSERT INTO @tblMFDemandHeaderImport (
+	INSERT INTO @tblMFDemandHeaderImport 
+	(
 		strDemandName
-		,dtmDate
-		,strBook
-		,strSubBook
-		,intCreatedUserId
-		)
+	  , dtmDate
+	  , strBook
+	  , strSubBook
+	  , intCreatedUserId
+	)
 	SELECT DISTINCT strDemandName
-		,CONVERT(NVARCHAR, GETDATE(), 101)
-		,strBook
-		,strSubBook
-		,intCreatedUserId
+				   , CONVERT(NVARCHAR, GETDATE(), 101)
+				   , strBook
+				   , strSubBook
+				   , intCreatedUserId
 	FROM tblMFDemandImport
 
 	SELECT @intDemandHeaderImportId = MIN(intDemandHeaderImportId)
@@ -272,7 +269,7 @@ BEGIN TRY
 		SELECT strDemandName
 			,strItemNo
 			,strSubstituteItemNo
-			,CONVERT(datetime, CONVERT(datetime, dtmDemandDate, @intConvertYear))
+			,dtmDemandDate
 			,dblQuantity
 			,strUnitMeasure
 			,strLocationName
@@ -547,16 +544,18 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
+	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION
+		END
 
-	SET @ErrMsg = ERROR_MESSAGE()
+	SET @ErrMsg = ERROR_MESSAGE();
 
-	RAISERROR (
-			@ErrMsg
-			,16
-			,1
-			,'WITH NOWAIT'
-			)
+	RAISERROR 
+	(
+		@ErrMsg
+	  , 16
+	  , 1
+	  , 'WITH NOWAIT'
+	)
 END CATCH
