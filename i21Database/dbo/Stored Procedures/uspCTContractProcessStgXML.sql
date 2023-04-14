@@ -1474,7 +1474,7 @@ BEGIN TRY
 						,CH.intLastModifiedById = CH1.intLastModifiedById
 						,CH.intProductTypeId = CH1.intProductTypeId
 						,CH.ysnPrimeCustomer = CH1.ysnPrimeCustomer
-					FROM CH.tblCTContractHeader CH
+					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
 
