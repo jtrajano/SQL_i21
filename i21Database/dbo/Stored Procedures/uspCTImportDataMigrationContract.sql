@@ -25,6 +25,7 @@ AS
 	declare @CertificateIds table(
 		intCertificationId int
 		,intContractSeq int
+		,intContractHeaderId int
 	);
 
 	declare @BasisCost table (
@@ -113,6 +114,8 @@ AS
 			,@intProducerId int
 			,@intFreightTermId int
 			,@intCompanyLocationId int
+			,@intWarehouseId int
+			,@intCountryId int
 			;
 
 	BEGIN TRY
@@ -207,6 +210,7 @@ AS
 				,strRevolutionCurrencyPair
 				,dblHistoricRate
 				,strHistoricType
+				,strWarehouse
 				,guiUniqueId
 				,intImportFrom
 			)
@@ -272,8 +276,10 @@ AS
 				,strRevolutionCurrencyPair = substring(ltrim(rtrim(src.strRevolutionCurrencyPair)),1,100)
 				,dblHistoricRate = src.dblHistoricRate
 				,strHistoricType = substring(ltrim(rtrim(src.strHistoricType)),1,100)
+				,strWarehouse = substring(ltrim(rtrim(src.strWarehouse)),1,100)
 				,guiUniqueId = @guiUniqueId
 				,intImportFrom = 2
+
 			from tblCTContractImportTemp src;
 
 			truncate table tblCTContractImportTemp;
@@ -370,7 +376,9 @@ AS
 				dblNoOfLots numeric(18,6),
 				intCurrencyExchangeRateId int,
 				intMarketUOMId int,
-				intItemItemUOMId int
+				intItemItemUOMId int,
+				intWarehouseId INT, 
+				intCountryId INT,
 			); 
 
 			IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -429,6 +437,8 @@ AS
 				,intCurrencyExchangeRateId
 				,intMarketUOMId
 				,intItemItemUOMId
+				,intWarehouseId
+				,intCountryId
 			)
 			SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 					intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -490,6 +500,8 @@ AS
 					,cp.intCurrencyExchangeRateId
 					,intMarketUOMId = MA.intUnitMeasureId
 					,intItemItemUOMId = MAUOM.intUnitMeasureId
+					,intWarehouseId = wc.intCityId
+					,intCountryId = wc.intCountryId
 
 			FROM	tblCTContractImport			CI	LEFT
 			JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -548,6 +560,7 @@ AS
 			left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
 			left join tblICUnitMeasure pum on pum.strUnitMeasure = CI.strPriceUOM
 			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
+			left join tblSMCity wc on wc.strCity = CI.strWarehouse
 			WHERE CI.guiUniqueId = @guiUniqueId;
 
 			select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId;
@@ -582,6 +595,7 @@ AS
 					when t.intItemItemUOMId is null then ' Lot Calculation: Future Market UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPriceItemUOMId is null then 'Price Item UOM: Price Item UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPricingTypeId = 1 and t.dblFutures is null then 'Missing Futures Price for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when isnull(c.strWarehouse,'') <> '' and t.intWarehouseId is null then ' Warehouse Location: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					else @validationErrorMsg
 					end
 				from
@@ -617,6 +631,8 @@ AS
 					,intProducerId
 					,intFreightTermId
 					,intCompanyLocationId
+					,intWarehouseId
+					,intCountryId
 				FROM	#tmpExtracted
 				GROUP BY intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,
 					intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId
@@ -631,6 +647,8 @@ AS
 					,intProducerId
 					,intFreightTermId
 					,intCompanyLocationId
+					,intWarehouseId
+					,intCountryId
 
 				OPEN cur
 
@@ -666,6 +684,8 @@ AS
 					, @intProducerId
 					, @intFreightTermId
 					, @intCompanyLocationId
+					, @intWarehouseId
+					, @intCountryId
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
@@ -684,6 +704,8 @@ AS
 						,intProducerId
 						,intFreightTermId
 						,intCompanyLocationId
+						,intWarehouseId
+						,intCountryId
 					)
 					SELECT @intContractTypeId
 						, @intContractEntityId
@@ -715,6 +737,8 @@ AS
 						, @intProducerId
 						, @intFreightTermId
 						, @intCompanyLocationId
+						, @intWarehouseId
+						, @intCountryId
 
 					EXEC uspCTGetTableDataInXML '#tmpContractHeader', null, @strTblXML OUTPUT,'tblCTContractHeader'
 					EXEC uspCTValidateContractHeader @strTblXML,'Added'
@@ -779,6 +803,8 @@ AS
 						,intProducerId
 						,intFreightTermId
 						,intCompanyLocationId
+						,intINCOLocationTypeId
+						,intCountryId
 					)
 					VALUES (
 						  @intContractTypeId
@@ -811,6 +837,8 @@ AS
 						, @intProducerId
 						, @intFreightTermId
 						, @intCompanyLocationId
+						, @intWarehouseId
+						, @intCountryId
 					)
 
 					SET @intContractHeaderId = SCOPE_IDENTITY()
@@ -945,7 +973,7 @@ AS
 											select @validationErrorMsg = 'Certification "' + @strActiveCertificationIdName + '" does not exists.';
 											RAISERROR(@validationErrorMsg,16,1);
 										end
-										insert into @CertificateIds select intCertificationId = @intCertificationId, intContractSeq = @intActiveContractSeq;
+										insert into @CertificateIds select intCertificationId = @intCertificationId, intContractSeq = @intActiveContractSeq, intContractHeaderId = @intContractHeaderId;
 										select @intCertificationId = null;
 
 										delete from @Certificates where strCertificationIdName = @strActiveCertificationIdName;
@@ -1098,7 +1126,7 @@ AS
 						select intCertificationId=c.intCertificationId,intContractDetailId=cd.intContractDetailId,intConcurrencyId=1
 						from
 							tblCTContractDetail cd
-							join @CertificateIds c on c.intContractSeq = cd.intContractSeq
+							join @CertificateIds c on c.intContractSeq = cd.intContractSeq and c.intContractHeaderId = cd.intContractHeaderId
 						where
 							cd.intContractHeaderId = @intContractHeaderId
 					end
@@ -1287,6 +1315,8 @@ AS
 						, @intProducerId
 						, @intFreightTermId
 						, @intCompanyLocationId
+						, @intWarehouseId
+						, @intCountryId
 
 					END
 
