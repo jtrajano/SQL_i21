@@ -6,7 +6,7 @@
 	DECLARE @OutputMessage NVARCHAR(200)
 	DECLARE @Location INT
 	DECLARE @activeStatus bit = 0
-	DECLARE @creditHoldStatus bit
+	DECLARE @creditHoldStatus bit = 0
 
 	SET @OutputMessage = 'Conversion is not applicable to this type of entity.'
 	SET @Location = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
@@ -18,9 +18,10 @@
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE intEntityId = @EntityId AND strType = 'Lead')
 		BEGIN
-			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'lead'
-			SELECT @activeStatus = ysnActive FROM tblARLead WHERE intEntityId = @EntityId
 
+			SELECT @activeStatus = ysnActive FROM tblARLead WHERE intEntityId = @EntityId
+			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'lead'
+			
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomer WHERE intEntityId = @EntityId)
 			BEGIN
 
@@ -47,8 +48,9 @@
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE intEntityId = @EntityId AND strType = 'Prospect' )
 		BEGIN
-			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'	
+		
 			SELECT @activeStatus = ysnActive, @creditHoldStatus = ysnCreditHold FROM tblARCustomer WHERE intEntityId = @EntityId
+			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'	
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomer WHERE intEntityId = @EntityId)
 			BEGIN
@@ -71,9 +73,11 @@
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WHERE intEntityId = @EntityId AND strType = 'Prospect' )
 		BEGIN
+
+			SELECT @activeStatus = ysnActive FROM tblARCustomer WHERE intEntityId = @EntityId
+
 			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'
 			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'customer'
-			SELECT @activeStatus = ysnActive FROM tblARCustomer WHERE intEntityId = @EntityId
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARLead WHERE intEntityId = @EntityId)
 			BEGIN
@@ -93,3 +97,4 @@
 		END
 	END
 		SELECT @OutputMessage
+GO
