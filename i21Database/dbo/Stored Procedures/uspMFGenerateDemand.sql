@@ -1585,7 +1585,7 @@ BEGIN TRY
 			END
 		,SS.intCompanyLocationId
 
-	IF ISNULL(@intInvPlngReportMasterID, 0) = 0 OR @ysnRefreshContract = 1
+	IF (ISNULL(@intInvPlngReportMasterID, 0) = 0 AND @ysnCalculateEndInventory <> 1) OR (@ysnRefreshContract = 1 AND @ysnCalculateEndInventory <> 1)
 		BEGIN
 			INSERT INTO #tblMFDemand (
 				intItemId
