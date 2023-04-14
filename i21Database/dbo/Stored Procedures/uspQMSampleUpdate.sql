@@ -1300,6 +1300,7 @@ BEGIN
       ,intMixingUnitLocationId
       ,intMarketZoneId
       ,dtmShippingDate
+      ,strERPPONumber
       ,dblTeaTastePinpoint
       ,dblTeaHuePinpoint
       ,dblTeaIntensityPinpoint
@@ -1432,6 +1433,7 @@ BEGIN
       ,intMixingUnitLocationId = MU.intCompanyLocationId
       ,intMarketZoneId = S.intMarketZoneId
       ,dtmShippingDate=CD.dtmEtaPol
+      ,strERPPONumber = BT.strERPPONumber
       ,dblTeaTastePinpoint = TASTE.dblPinpointValue
       ,dblTeaHuePinpoint = HUE.dblPinpointValue
       ,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
@@ -1565,17 +1567,9 @@ BEGIN
     -- Qty Item UOM
     LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
     WHERE S.intSampleId = @intSampleId
-    -- AND (
-    --   (@ysnPreShipmentSample = 1 AND BT.intLocationId = S.intCompanyLocationId)
-    --   OR @ysnPreShipmentSample = 0
-    -- )
     AND (
-      ((BT.intMixingUnitLocationId = S.intCompanyLocationId AND BT.intLocationId = S.intCompanyLocationId)
-      OR BT.intBuyingCenterLocationId = S.intCompanyLocationId)
-      
-      OR (
-        BT.intBatchId IS NULL
-      )
+      (BT.intBatchId IS NOT NULL AND BT.intLocationId = S.intCompanyLocationId)
+      OR (BT.intBatchId IS NULL)
     )
 
     DECLARE @intInput INT
