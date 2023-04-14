@@ -187,7 +187,7 @@ USING (
 								, t.dblQty
 							)
 						)
-					,dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
+					,dblValue = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
 					,t.intItemId
 					,t.intItemLocationId
 					,t.intInTransitSourceLocationId
