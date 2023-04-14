@@ -145,19 +145,29 @@ UNION ALL
 
 SELECT
      [intId]                = IT.[intId]
-    ,[strMessage]           = 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
+    ,[strMessage]           = 'Available quantity for the contract ' + CONT.strContractNumber + ' and sequence ' + CAST(CONT.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CONT.dblBalance, 0) - ISNULL(CONT.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(IT.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.'
     ,[strTransactionType]   = IT.[strTransactionType]
     ,[strType]              = IT.[strType]
     ,[strSourceTransaction] = IT.[strSourceTransaction]
     ,[intSourceId]          = IT.[intSourceId]
     ,[strSourceId]          = IT.[strSourceId]
     ,[intInvoiceId]         = IT.[intInvoiceId]
-FROM @ItemEntries IT
-INNER JOIN tblCTContractDetail CTD ON IT.intContractDetailId = CTD.intContractDetailId
-INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+FROM @ItemEntries IT 
+INNER JOIN (
+	SELECT intContractHeaderId		= IE.intContractHeaderId
+		 , intContractDetailId		= IE.intContractDetailId
+		 , strContractNumber		= CTH.strContractNumber
+		 , intContractSeq			= CTD.intContractSeq
+		 , dblBalance				= AVG(CTD.dblBalance)
+		 , dblScheduleQty			= AVG(ISNULL(CTD.dblScheduleQty, 0))
+	FROM @ItemEntries IE
+	INNER JOIN tblCTContractDetail CTD ON IE.intContractDetailId = CTD.intContractDetailId
+	INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+	GROUP BY IE.intContractHeaderId, IE.intContractDetailId, CTH.strContractNumber, CTD.intContractSeq
+	HAVING SUM(ISNULL(IE.dblQtyShipped, 0)) > AVG(ISNULL(CTD.dblBalance, 0)) - AVG(ISNULL(CTD.dblScheduleQty, 0))
+) CONT ON IT.intContractDetailId = CONT.intContractDetailId
 WHERE IT.strTransactionType = 'Invoice'
   AND IT.strType = 'Tank Delivery'
-  AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
