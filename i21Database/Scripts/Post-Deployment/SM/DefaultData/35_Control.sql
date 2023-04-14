@@ -27,7 +27,7 @@ GO
 			INSERT [dbo].[tblSMControl] ([intScreenId],[strControlId],[strControlName],[strContainer],[strControlType])
 			VALUES (@entityVendorId, N'txtVendorAccountNo', N'Vendor Account No', N'', 'Text')
 		END
-	END
+	END	
 GO
 	PRINT N'END INSERT DEFAULT CONTROL'
 GO

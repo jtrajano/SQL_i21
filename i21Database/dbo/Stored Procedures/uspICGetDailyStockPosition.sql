@@ -72,20 +72,141 @@ DECLARE	@InventoryAutoVariance AS INT = 1
 		,@RetailWriteOffs AS INT = 50
 		,@SalesReturn AS INT = 51
 
-DECLARE @Transactions TABLE (intId INT IDENTITY(1,1), intTransactionId INT, intItemId INT, intItemUOMId INT,
-	intTransactionTypeId INT, intLotId INT, dblQty NUMERIC(18, 6), intItemLocationId INT, intInTransitSourceLocationId INT, ysnOwned BIT, PRIMARY KEY(intId))
+DECLARE @Transactions TABLE (
+	intId INT IDENTITY(1,1)
+	, intTransactionId INT
+	, intItemId INT
+	, intItemUOMId INT
+	, intTransactionTypeId INT
+	, intLotId INT
+	, dblQty NUMERIC(38, 20)
+	, intItemLocationId INT
+	, intInTransitSourceLocationId INT
+	, ysnOwned BIT
+	, PRIMARY KEY(intId)
+)
 
-INSERT INTO @Transactions(intTransactionId, intItemId, intItemUOMId, intTransactionTypeId, intLotId, dblQty, intItemLocationId, intInTransitSourceLocationId, ysnOwned)
-SELECT t.intTransactionId, t.intItemId, t.intItemUOMId, t.intTransactionTypeId, t.intLotId, t.dblQty, t.intItemLocationId, t.intInTransitSourceLocationId, 1
-FROM tblICInventoryTransaction t
-WHERE t.ysnIsUnposted <> 1
-	AND dbo.fnRemoveTimeOnDate(t.dtmDate) = @dtmDate
+INSERT INTO @Transactions(
+	intTransactionId
+	, intItemId
+	, intItemUOMId
+	, intTransactionTypeId
+	, intLotId
+	, dblQty
+	, intItemLocationId
+	, intInTransitSourceLocationId
+	, ysnOwned
+)
+SELECT 
+	t.intTransactionId
+	, t.intItemId
+	, t.intItemUOMId
+	, t.intTransactionTypeId
+	, t.intLotId
+	, t.dblQty
+	, t.intItemLocationId
+	, t.intInTransitSourceLocationId
+	, 1
+FROM 
+	tblICInventoryTransaction t
+WHERE 
+	t.ysnIsUnposted <> 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) = FLOOR(CAST(@dtmDate AS FLOAT))
 
-INSERT INTO @Transactions(intTransactionId, intItemId, intItemUOMId, intTransactionTypeId, intLotId, dblQty, intItemLocationId, intInTransitSourceLocationId, ysnOwned)
-SELECT t.intTransactionId, t.intItemId, t.intItemUOMId, t.intTransactionTypeId, t.intLotId, t.dblQty, t.intItemLocationId, NULL, 0
-FROM tblICInventoryTransactionStorage t
-WHERE t.ysnIsUnposted <> 1
-	AND dbo.fnRemoveTimeOnDate(t.dtmDate) = @dtmDate
+INSERT INTO @Transactions(
+	intTransactionId
+	, intItemId
+	, intItemUOMId
+	, intTransactionTypeId
+	, intLotId
+	, dblQty
+	, intItemLocationId
+	, intInTransitSourceLocationId
+	, ysnOwned
+)
+SELECT 
+	t.intTransactionId
+	, t.intItemId
+	, t.intItemUOMId
+	, t.intTransactionTypeId
+	, t.intLotId
+	, t.dblQty
+	, t.intItemLocationId
+	, NULL
+	, 0
+FROM 
+	tblICInventoryTransactionStorage t
+WHERE 
+	t.ysnIsUnposted <> 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) = FLOOR(CAST(@dtmDate AS FLOAT))
+
+DECLARE @TransactionsAsOfDate TABLE (
+	intId INT IDENTITY(1,1)
+	, intTransactionId INT
+	, intItemId INT
+	, intItemUOMId INT
+	, intTransactionTypeId INT
+	, intLotId INT
+	, dblQty NUMERIC(38, 20)
+	, intItemLocationId INT
+	, intInTransitSourceLocationId INT
+	, ysnOwned BIT
+	, PRIMARY KEY(intId)
+)
+
+INSERT INTO @TransactionsAsOfDate(
+	intTransactionId
+	, intItemId
+	, intItemUOMId
+	, intTransactionTypeId
+	, intLotId
+	, dblQty
+	, intItemLocationId
+	, intInTransitSourceLocationId
+	, ysnOwned
+)
+SELECT 
+	t.intTransactionId
+	, t.intItemId
+	, t.intItemUOMId
+	, t.intTransactionTypeId
+	, t.intLotId
+	, t.dblQty
+	, t.intItemLocationId
+	, t.intInTransitSourceLocationId
+	, 1
+FROM 
+	tblICInventoryTransaction t
+WHERE 
+	t.ysnIsUnposted <> 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+
+INSERT INTO @TransactionsAsOfDate(
+	intTransactionId
+	, intItemId
+	, intItemUOMId
+	, intTransactionTypeId
+	, intLotId
+	, dblQty
+	, intItemLocationId
+	, intInTransitSourceLocationId
+	, ysnOwned
+)
+SELECT 
+	t.intTransactionId
+	, t.intItemId
+	, t.intItemUOMId
+	, t.intTransactionTypeId
+	, t.intLotId
+	, t.dblQty
+	, t.intItemLocationId
+	, NULL
+	, 0
+FROM 
+	tblICInventoryTransactionStorage t
+WHERE 
+	t.ysnIsUnposted <> 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 
 CREATE TABLE #tmpDailyStockPosition
 (
@@ -96,7 +217,7 @@ CREATE TABLE #tmpDailyStockPosition
 	intTransactionTypeId			INT,
 	intLotId						INT,
 	intInTransitSourceLocationId	INT,
-	dblQty							NUMERIC(18, 6)
+	dblQty							NUMERIC(38,20)
 )	
 	-----===== SOURCE 1 - Opening Qty
 	INSERT INTO #tmpDailyStockPosition
@@ -107,10 +228,12 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
-	FROM tblICInventoryTransaction t
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	FROM 
+		tblICInventoryTransaction t
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = t.intItemLocationId
 	WHERE 
-		t.ysnIsUnposted <> 1
+		ISNULL(t.ysnIsUnposted, 0) <> 1
 		AND (
 			t.dtmDate < @dtmDate
 			OR (
@@ -139,7 +262,7 @@ CREATE TABLE #tmpDailyStockPosition
 	FROM tblICInventoryTransactionStorage t
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
 	WHERE 
-		t.ysnIsUnposted <> 1
+		ISNULL(t.ysnIsUnposted, 0) <> 1
 		AND (
 			t.dtmDate < @dtmDate
 			OR (
@@ -182,8 +305,10 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, -t.dblQty))
-	FROM @Transactions t 
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId) 
+	FROM 
+		@Transactions t 
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId) 
 	WHERE t.intTransactionTypeId = @Invoice
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,
@@ -201,7 +326,8 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 	FROM @Transactions t 
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = t.intItemLocationId
 	WHERE t.intTransactionTypeId IN (
 			@InventoryAdjustmentQuantityChange
 			,@InventoryAdjustmentUOMChange
@@ -231,8 +357,10 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
-	FROM @Transactions t
-		INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId AND InvTransfer.strTransferType = 'Location to Location'
+	FROM 
+		@Transactions t
+		INNER JOIN tblICInventoryTransfer InvTransfer 
+			ON InvTransfer.intInventoryTransferId = t.intTransactionId AND InvTransfer.strTransferType = 'Location to Location'
 	INNER JOIN tblICItemLocation ItemLocation
 		ON ItemLocation.intItemLocationId = t.intItemLocationId 
 		AND InvTransfer.intToLocationId = ItemLocation.intLocationId
@@ -253,11 +381,16 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, -t.dblQty))
-	FROM @Transactions t
-		INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId AND InvTransfer.strTransferType = 'Location to Location'
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId 
+	FROM 
+		@Transactions t
+		INNER JOIN tblICInventoryTransfer InvTransfer 
+			ON InvTransfer.intInventoryTransferId = t.intTransactionId 
+			AND InvTransfer.strTransferType = 'Location to Location'
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = t.intItemLocationId 
 			AND InvTransfer.intFromLocationId = ItemLocation.intLocationId
-	WHERE t.intTransactionTypeId = @InventoryTransfer
+	WHERE 
+		t.intTransactionTypeId = @InventoryTransfer
 		AND t.intInTransitSourceLocationId IS NULL
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,
@@ -274,9 +407,12 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
-	FROM @Transactions t
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
-	WHERE t.intTransactionTypeId IN(
+	FROM 
+		@TransactionsAsOfDate t
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
+	WHERE 		
+		t.intTransactionTypeId IN(
 			@InboundShipments
 		)
 		AND t.intInTransitSourceLocationId IS NOT NULL
@@ -293,15 +429,19 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
-	FROM @Transactions t
-	INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId 
-		AND InvTransfer.ysnShipmentRequired = 1
-	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = t.intItemId 
-		AND ItemLocation.intLocationId = InvTransfer.intToLocationId
-	WHERE t.intTransactionTypeId IN(
-		@InventoryTransferwithShipment
-	)
-	AND t.intInTransitSourceLocationId IS NOT NULL
+	FROM 
+		@TransactionsAsOfDate t
+		INNER JOIN tblICInventoryTransfer InvTransfer 
+			ON InvTransfer.intInventoryTransferId = t.intTransactionId 
+			AND InvTransfer.ysnShipmentRequired = 1
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemId = t.intItemId 
+			AND ItemLocation.intLocationId = InvTransfer.intToLocationId
+	WHERE 
+		t.intTransactionTypeId IN(
+			@InventoryTransferwithShipment
+		)
+		AND t.intInTransitSourceLocationId IS NOT NULL
 	GROUP BY t.intItemId,
 		ItemLocation.intLocationId,
 		t.intTransactionTypeId,
@@ -314,19 +454,20 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intTransactionTypeId,
 			t.intLotId,
 			t.intInTransitSourceLocationId,
-			dblQty = -1 * SUM(dbo.fnICConvertUOMtoStockUnit(b.intItemId, b.intUnitMeasureId, b.dblOpenReceive))
-			
-	FROM @Transactions t
-	INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId 
-		AND InvTransfer.ysnShipmentRequired = 1
-	INNER JOIN tblICInventoryReceiptItem b
-		on t.intTransactionId = ISNULL(b.intInventoryTransferId, b.intOrderId )
-	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = t.intItemId 
-		AND ItemLocation.intLocationId = InvTransfer.intToLocationId
-	WHERE t.intTransactionTypeId IN(
-		@InventoryTransferwithShipment
-	)
-	AND t.intInTransitSourceLocationId IS NOT NULL
+			dblQty = -1 * SUM(dbo.fnICConvertUOMtoStockUnit(b.intItemId, b.intUnitMeasureId, b.dblOpenReceive))			
+	FROM 
+		@TransactionsAsOfDate t
+		INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId 
+			AND InvTransfer.ysnShipmentRequired = 1
+		INNER JOIN tblICInventoryReceiptItem b
+			on t.intTransactionId = ISNULL(b.intInventoryTransferId, b.intOrderId )
+		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = t.intItemId 
+			AND ItemLocation.intLocationId = InvTransfer.intToLocationId
+	WHERE 
+		t.intTransactionTypeId IN(
+			@InventoryTransferwithShipment
+		)
+		AND t.intInTransitSourceLocationId IS NOT NULL
 	GROUP BY t.intItemId,
 		ItemLocation.intLocationId,
 		t.intTransactionTypeId,
@@ -342,8 +483,10 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
-	FROM @Transactions t
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
+	FROM 
+		@TransactionsAsOfDate t
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId 
 	WHERE t.intTransactionTypeId IN (
 			@InventoryShipment
 			,@OutboundShipment
@@ -366,9 +509,12 @@ CREATE TABLE #tmpDailyStockPosition
 			t.intLotId,
 			t.intInTransitSourceLocationId,
 			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, -t.dblQty))
-	FROM @Transactions t 
-	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
-	WHERE t.intTransactionTypeId IN (@Consume)
+	FROM 
+		@Transactions t 
+		INNER JOIN tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemLocationId = t.intItemLocationId
+	WHERE 
+		t.intTransactionTypeId IN (@Consume)
 		AND t.intInTransitSourceLocationId IS NULL
 	GROUP BY t.intItemId,
 			ItemLocation.intLocationId,

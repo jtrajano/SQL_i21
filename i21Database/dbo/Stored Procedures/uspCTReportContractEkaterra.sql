@@ -165,8 +165,20 @@ BEGIN TRY
 												AND intContractHeaderId <> @intContractHeaderId
 										  		FOR XML PATH('')
 										  		), 1, 1, '')
-	END
-
+	END 
+	--CT-8386 CONDITION FOOTER IMPLEMENTATION
+	DECLARE @strGeneralConditionName NVARCHAR(MAX)
+	DECLARE @strGeneralCondition NVARCHAR(520)
+	SELECT TOP 1 @strGeneralConditionName = DM.strConditionName							
+					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
+					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
+					WHERE	CD.intContractHeaderId	=	@intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'General Terms & Condition' OR UPPER(DM.strConditionName) =	'General Terms & Conditions')
+					
+	SELECT	TOP 1 @strGeneralCondition = CASE WHEN dbo.fnTrim(CD.strConditionDescription) = '' THEN  DM.strConditionDesc ELSE CD.strConditionDescription END							
+					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
+					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
+					WHERE	CD.intContractHeaderId	=	@intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'General Terms & Condition' OR UPPER(DM.strConditionName)  =	'General Terms & Conditions') 
+									
 	--LOGO SETUP TAB IMPLEMENTATION
 	DECLARE @imgLocationLogo vARBINARY (MAX),
 			@strLogoType  NVARCHAR(50),
@@ -207,6 +219,8 @@ BEGIN TRY
 		,strLocation			= CT.strCity
 		,strPurchasingGroup     = SQ.strPurchasingGroup
 		,strAmendedColumns		= ' '
+		,strGeneralConditionName =@strGeneralConditionName
+		,strGeneralCondition =@strGeneralCondition
 	FROM  
 		tblCTContractHeader				CH
 		JOIN	tblCTContractType				TP	WITH (NOLOCK) ON	TP.intContractTypeId			=	CH.intContractTypeId
@@ -265,4 +279,3 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
 END CATCH
-GO

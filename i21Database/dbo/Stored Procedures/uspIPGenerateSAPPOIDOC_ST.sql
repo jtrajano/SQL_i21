@@ -15,6 +15,7 @@ BEGIN
 		,@intSubBookId INT
 		,@strContractNumber NVARCHAR(50)
 		,@strINCOLocation NVARCHAR(50)
+		,@ysnPriceApproved BIT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -154,7 +155,7 @@ BEGIN
 			,@strSubBook = NULL
 			,@strContractNumber = NULL
 			,@strINCOLocation = NULL
-
+		SELECT @ysnPriceApproved=1
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
 			,@strERPPONumber = strERPPONumber
@@ -234,12 +235,8 @@ BEGIN
 						AND intScreenId = 123
 					)
 			BEGIN
-				--UPDATE tblCTContractFeed
-				--SET strMessage = 'Price Contract Waiting for Approval'
-				--WHERE intContractHeaderId = @intContractHeaderId
-				--	AND IsNULL(strFeedStatus, '') = ''
-				--	AND strRowState = @strRowState
-				GOTO NextPO
+
+				Select @ysnPriceApproved=0
 			END
 		END
 
@@ -343,8 +340,18 @@ BEGIN
 				WHEN UPPER(RS.strOrgRowState) = 'MODIFIED'
 					THEN IsNULL(CF.strERPItemNumber, '')
 				ELSE ''
-				END + '</PO_LINE_ITEM_NO>' + '<ITEM_NO>' + IsNull(I.strItemNo, '') + '</ITEM_NO>' + '<SUB_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strSubLocation, '')) + '</SUB_LOCATION>' + '<STORAGE_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strStorageLocation, '')) + '</STORAGE_LOCATION>' + '<QUANTITY>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>' + '<QUANTITY_UOM>' + IsNULL(CF.strQuantityUOM, '') + '</QUANTITY_UOM>' + '<NET_WEIGHT>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblNetWeight)), '') + '</NET_WEIGHT>' + '<NET_WEIGHT_UOM>' + IsNULL(strNetWeightUOM, '') + '</NET_WEIGHT_UOM>' + '<PRICE_TYPE>' + IsNULL(PT.strPricingType, 0) + '</PRICE_TYPE>' + '<PRICE_MARKET>' + IsNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>' + '<PRICE_MONTH>' + IsNULL(Left(Convert(NVARCHAR, Convert(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>' + '<PRICE>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</PRICE>' + '<PRICE_UOM>' + IsNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>' + '<PRICE_CURRENCY>' + IsNULL(C2.strDescription, 
-				'') + '</PRICE_CURRENCY>' + '<BASIS>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>' + '<BASIS_UOM>' + IsNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>' + '<BASIS_CURRENCY>' + IsNULL(C.strDescription, '') + '</BASIS_CURRENCY>' + '<FIXATION_DATE>' + rtrim(ltrim(IsNULL(Convert(CHAR, (
+				END + '</PO_LINE_ITEM_NO>' + '<ITEM_NO>' + IsNull(I.strItemNo, '') + '</ITEM_NO>' + '<SUB_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strSubLocation, '')) + '</SUB_LOCATION>' + '<STORAGE_LOCATION>' + dbo.fnEscapeXML(IsNULL(CF.strStorageLocation, '')) + '</STORAGE_LOCATION>' + '<QUANTITY>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>' + '<QUANTITY_UOM>' + IsNULL(CF.strQuantityUOM, '') + '</QUANTITY_UOM>' + '<NET_WEIGHT>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CF.dblNetWeight)), '') + '</NET_WEIGHT>' + '<NET_WEIGHT_UOM>' + IsNULL(strNetWeightUOM, '') + '</NET_WEIGHT_UOM>' 
+				+ Case When @ysnPriceApproved=1 then  
+				'<PRICE_TYPE>' + IsNULL(PT.strPricingType, 0) + '</PRICE_TYPE>' 
+				+ '<PRICE_MARKET>' + IsNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>' 
+				+ '<PRICE_MONTH>' + IsNULL(Left(Convert(NVARCHAR, Convert(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>' 
+				+ '<PRICE>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblCashPrice)), '') + '</PRICE>' 
+				+ '<PRICE_UOM>' + IsNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>' 
+				+ '<PRICE_CURRENCY>' + IsNULL(C2.strDescription,'') + '</PRICE_CURRENCY>' 
+				+ '<BASIS>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>' 
+				+ '<BASIS_UOM>' + IsNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>' 
+				+ '<BASIS_CURRENCY>' + IsNULL(C.strDescription, '') + '</BASIS_CURRENCY>' 
+				+ '<FIXATION_DATE>' + rtrim(ltrim(IsNULL(Convert(CHAR, (
 								CASE 
 									WHEN CH.intPricingTypeId = 1
 										THEN CH.dtmContractDate
@@ -354,7 +361,15 @@ BEGIN
 											WHERE PFD.intPriceFixationId = PF.intPriceFixationId
 											)
 									END
-								), 112), ''))) + '</FIXATION_DATE>' + '<START_DATE>' + IsNULL(Convert(NVARCHAR, CF.dtmStartDate, 112), '') + '</START_DATE>' + '<END_DATE>' + IsNULL(Convert(NVARCHAR, CF.dtmEndDate, 112), '') + '</END_DATE>' + '<PLANNED_AVL_DATE>' + IsNULL(Convert(NVARCHAR, CD.dtmUpdatedAvailabilityDate, 112), '') + '</PLANNED_AVL_DATE>' + '<CONTRACT_ITEM_NO>' + IsNULL(BIN.strItemNo, '') + '</CONTRACT_ITEM_NO>' + '<ORIGIN>' + IsNULL(CF.strOrigin, '') + '</ORIGIN>' + '<PURCH_GROUP>' + IsNULL(CF.strPurchasingGroup, '') + '</PURCH_GROUP>' + '<VENDOR_LOT_NO>' + IsNULL('', '') + '</VENDOR_LOT_NO>' + '<PACK_DESC>' + IsNULL(CF.strPackingDescription, '') + '</PACK_DESC>' + '<LOADING_PORT>' + IsNULL(CF.strLoadingPoint, '') + '</LOADING_PORT>' + '<DEST_PORT>' + IsNULL(City.strCity, '') + '</DEST_PORT>' + '<SHIPPING_LINE>' + IsNULL(E.strName, '') + '</SHIPPING_LINE>' + IsNULL(CC.strCertification, '') + '<ROW_STATE>' + CASE 
+								), 112), ''))) + '</FIXATION_DATE>' Else  '<PRICE_TYPE>Basis</PRICE_TYPE>'+'<PRICE_MARKET>' + IsNULL(FM.strFutMarketName, 0) + '</PRICE_MARKET>' 
+				+ '<PRICE_MONTH>' + IsNULL(Left(Convert(NVARCHAR, Convert(DATETIME, '01 ' + FMon.strFutureMonth), 112), 6), '') + '</PRICE_MONTH>' 
+				+ '<PRICE></PRICE>' 
+				+ '<PRICE_UOM>' + IsNULL(PUM.strUnitMeasure, '') + '</PRICE_UOM>' 
+				+ '<PRICE_CURRENCY>' + IsNULL(C2.strDescription,'') + '</PRICE_CURRENCY>' 
+				+ '<BASIS>' + IsNULL(Convert(NVARCHAR(50), Convert(NUMERIC(18, 2), CD.dblBasis)), '') + '</BASIS>' 
+				+ '<BASIS_UOM>' + IsNULL(UM.strUnitMeasure, '') + '</BASIS_UOM>' 
+				+ '<BASIS_CURRENCY>' + IsNULL(C.strDescription, '') + '</BASIS_CURRENCY><FIXATION_DATE></FIXATION_DATE>' End
+				+ '<START_DATE>' + IsNULL(Convert(NVARCHAR, CF.dtmStartDate, 112), '') + '</START_DATE>' + '<END_DATE>' + IsNULL(Convert(NVARCHAR, CF.dtmEndDate, 112), '') + '</END_DATE>' + '<PLANNED_AVL_DATE>' + IsNULL(Convert(NVARCHAR, CD.dtmUpdatedAvailabilityDate, 112), '') + '</PLANNED_AVL_DATE>' + '<CONTRACT_ITEM_NO>' + IsNULL(BIN.strItemNo, '') + '</CONTRACT_ITEM_NO>' + '<ORIGIN>' + IsNULL(CF.strOrigin, '') + '</ORIGIN>' + '<PURCH_GROUP>' + IsNULL(CF.strPurchasingGroup, '') + '</PURCH_GROUP>' + '<VENDOR_LOT_NO>' + IsNULL('', '') + '</VENDOR_LOT_NO>' + '<PACK_DESC>' + IsNULL(CF.strPackingDescription, '') + '</PACK_DESC>' + '<LOADING_PORT>' + IsNULL(CF.strLoadingPoint, '') + '</LOADING_PORT>' + '<DEST_PORT>' + IsNULL(City.strCity, '') + '</DEST_PORT>' + '<SHIPPING_LINE>' + IsNULL(E.strName, '') + '</SHIPPING_LINE>' + IsNULL(CC.strCertification, '') + '<ROW_STATE>' + CASE 
 				WHEN UPPER(RS.strOrgRowState) = 'ADDED'
 					THEN 'C'
 				WHEN UPPER(RS.strOrgRowState) = 'MODIFIED'

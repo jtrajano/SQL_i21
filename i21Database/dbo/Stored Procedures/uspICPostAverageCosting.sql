@@ -352,7 +352,8 @@ BEGIN
 			IF @QtyOffset IS NOT NULL
 			BEGIN 				
 				-- If there is a cost difference, do an auto-variance. 
-				IF (ISNULL(@CostUsed, 0) <> @dblCost)
+				IF	(ISNULL(@CostUsed, 0) <> @dblCost)
+					AND @intTransactionTypeId NOT IN (@TransactionType_InventoryAdjustment_OpeningInventory)
 				BEGIN
 					-- Calculate the variance amount. 
 					SET @dblAutoVarianceOnUsedOrSoldStock = 						

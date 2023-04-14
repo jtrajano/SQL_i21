@@ -17,6 +17,11 @@ BEGIN TRY
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
+	DECLARE @TransferEntries AS InventoryTransferStagingTable
+	DECLARE @intTransferId INT
+		,@strTransactionId NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
+		,@intWorkOrderStatusId INT
 	DECLARE @LotEntries ReceiptItemLotStagingTable
 		,@ItemsForPost AS ItemCostingTableType
 		,@intTrxSequenceNo BIGINT
@@ -83,12 +88,22 @@ BEGIN TRY
 		,@intPrevOrderCompleted INT
 		,@intWorkOrderId INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@ItemsToReserve2 AS dbo.ItemReservationTableType
 		,@intLotStatusId INT
 		,@strNetWeightUOM NVARCHAR(50)
 		,@strStatus NVARCHAR(50)
 		,@dtmExpiryDate DATETIME
 		,@intFreightTermId INT
 		,@strReceiptNo NVARCHAR(50)
+		,@strActualLocationName NVARCHAR(50)
+		,@strNewLocation NVARCHAR(50)
+		,@intNewCompanyLocationId INT
+		,@strNewLocationName NVARCHAR(50)
+		,@strTranferOrderStatus NVARCHAR(50)
+		,@dblWeight NUMERIC(38, 20)
+		,@dblLotQuantity NUMERIC(38, 20)
+		,@intNetWeightUnitMeasureId INT
+		,@intNetWeightItemUOMId INT
 
 	SELECT @dtmDate = GETDATE()
 
@@ -152,6 +167,8 @@ BEGIN TRY
 				,@strNetWeightUOM = NULL
 				,@strStatus = NULL
 				,@dtmExpiryDate = NULL
+				,@strNewLocation = NULL
+				,@strTranferOrderStatus = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -173,13 +190,20 @@ BEGIN TRY
 				,@strStatus = strStatus
 				,@strReasonCode = strReasonCode
 				,@strNotes = strNotes
+				,@strNewLocation = strNewLocation
 				,@strNewStorageLocation = strNewStorageLocation
 				,@strNewStorageUnit = strNewStorageUnit
 				,@strOrderNo = strOrderNo
 				,@intOrderCompleted = intOrderCompleted
 				,@dtmExpiryDate = dtmExpiryDate
+				,@strTranferOrderStatus = strTranferOrderStatus
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
+
+			IF @strLotNo = ''
+			BEGIN
+				GOTO skipValidation
+			END
 
 			--IF EXISTS (
 			--		SELECT 1
@@ -208,10 +232,13 @@ BEGIN TRY
 			--			)
 			--END
 			SELECT @intCompanyLocationId = NULL
+				,@strActualLocationName = NULL
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
+				,@strActualLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strCompanyLocation
+				AND strLocationType = 'Plant'
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -224,8 +251,11 @@ BEGIN TRY
 						)
 			END
 
-			IF @strStorageLocation IS NULL
-				OR @strStorageLocation = ''
+			IF (
+					@strStorageLocation IS NULL
+					OR @strStorageLocation = ''
+					)
+				AND @intTransactionTypeId <> 12
 			BEGIN
 				SELECT @strError = 'Storage Location cannot be blank.'
 
@@ -240,10 +270,19 @@ BEGIN TRY
 
 			SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 			FROM dbo.tblSMCompanyLocationSubLocation
-			WHERE strSubLocationName = @strStorageLocation
+			WHERE strSubLocationName = @strActualLocationName + ' / ' + @strStorageLocation
 				AND intCompanyLocationId = @intCompanyLocationId
 
 			IF @intCompanyLocationSubLocationId IS NULL
+			BEGIN
+				SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+				FROM dbo.tblSMCompanyLocationSubLocation
+				WHERE strSubLocationName = @strStorageLocation
+					AND intCompanyLocationId = @intCompanyLocationId
+			END
+
+			IF @intCompanyLocationSubLocationId IS NULL
+				AND @intTransactionTypeId <> 12
 			BEGIN
 				SELECT @strError = 'Storage Location ' + @strStorageLocation + ' is not available.'
 
@@ -268,6 +307,7 @@ BEGIN TRY
 				AND intSubLocationId = @intCompanyLocationSubLocationId
 
 			IF @intStorageLocationId IS NULL
+				AND @intTransactionTypeId <> 12
 			BEGIN
 				SELECT @strError = 'Storage Unit ' + @strStorageUnit + ' is not available.'
 
@@ -283,6 +323,26 @@ BEGIN TRY
 					,20
 					)
 			BEGIN
+				SELECT @intNewCompanyLocationId = NULL
+					,@strNewLocationName = NULL
+
+				SELECT @intNewCompanyLocationId = intCompanyLocationId
+					,@strNewLocationName = strLocationName
+				FROM dbo.tblSMCompanyLocation
+				WHERE strVendorRefNoPrefix = @strNewLocation
+					AND strLocationType = 'Plant'
+
+				IF @intNewCompanyLocationId IS NULL
+				BEGIN
+					SELECT @strError = 'New Company Location ' + @strNewLocationName + 'is not available.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
 				IF @strNewStorageLocation IS NULL
 					OR @strNewStorageLocation = ''
 				BEGIN
@@ -299,8 +359,16 @@ BEGIN TRY
 
 				SELECT @intCompanyLocationNewSubLocationId = intCompanyLocationSubLocationId
 				FROM dbo.tblSMCompanyLocationSubLocation
-				WHERE strSubLocationName = @strNewStorageLocation
-					AND intCompanyLocationId = @intCompanyLocationId
+				WHERE strSubLocationName = @strNewLocationName + ' / ' + @strNewStorageLocation
+					AND intCompanyLocationId = @intNewCompanyLocationId
+
+				IF @intCompanyLocationNewSubLocationId IS NULL
+				BEGIN
+					SELECT @intCompanyLocationNewSubLocationId = intCompanyLocationSubLocationId
+					FROM dbo.tblSMCompanyLocationSubLocation
+					WHERE strSubLocationName = @strNewStorageLocation
+						AND intCompanyLocationId = @intNewCompanyLocationId
+				END
 
 				IF @intCompanyLocationNewSubLocationId IS NULL
 				BEGIN
@@ -316,7 +384,7 @@ BEGIN TRY
 				IF @strNewStorageUnit IS NULL
 					OR @strNewStorageUnit = ''
 				BEGIN
-					SELECT @strNewStorageUnit='SU'
+					SELECT @strNewStorageUnit = 'SU'
 				END
 
 				SELECT @intNewStorageLocationId = NULL
@@ -338,17 +406,17 @@ BEGIN TRY
 				END
 			END
 
-			IF @strItemNo IS NULL
-				OR @strItemNo = ''
-			BEGIN
-				SELECT @strError = 'Item cannot be blank.'
+			--IF @strItemNo IS NULL
+			--	OR @strItemNo = ''
+			--BEGIN
+			--	SELECT @strError = 'Item cannot be blank.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intItemId = NULL
 
@@ -356,71 +424,85 @@ BEGIN TRY
 			FROM dbo.tblICItem
 			WHERE strItemNo = @strItemNo
 
-			IF @intItemId IS NULL
-			BEGIN
-				SELECT @strError = 'Item ' + @strItemNo + ' is not available.'
+			--IF @intItemId IS NULL
+			--BEGIN
+			--	SELECT @strError = 'Item ' + @strItemNo + ' is not available.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			IF @strQuantityUOM IS NULL
-				OR @strQuantityUOM = ''
-			BEGIN
-				SELECT @strError = 'UOM cannot be blank.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			SELECT @intUnitMeasureId = NULL
-
-			SELECT @intUnitMeasureId = intUnitMeasureId
-			FROM dbo.tblICUnitMeasure
-			WHERE strUnitMeasure = @strQuantityUOM
-
-			IF @intUnitMeasureId IS NULL
-			BEGIN
-				SELECT @strError = 'Unit Measure ' + @strQuantityUOM + ' is not available.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
-			END
-
-			SELECT @intItemUOMId = NULL
-
-			SELECT @intItemUOMId = intItemUOMId
-			FROM tblICItemUOM
-			WHERE intItemId = @intItemId
-				AND intUnitMeasureId = @intUnitMeasureId
+			--	RAISERROR (
+			--			@strError
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intLotId = NULL
 				,@dblQty = NULL
+				,@dblWeight = NULL
+			--SELECT @intItemId = NULL
 
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
 				,@intLotItemUOMId = intItemUOMId
 				,@dblWeightPerQty = dblWeightPerQty
 				,@dblQty = dblQty
+				,@dblWeight = (
+					CASE 
+						WHEN dblWeight IS NULL
+							OR dblWeight = 0
+							THEN dblQty
+						ELSE dblWeight
+						END
+					)
+				,@intItemId =(CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END)
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
-				AND intItemId = @intItemId
+
+		IF @intTransactionTypeId NOT IN (
+					16
+					,18
+					)
+			BEGIN
+				IF @strQuantityUOM IS NULL
+					OR @strQuantityUOM = ''
+				BEGIN
+					SELECT @strError = 'UOM cannot be blank.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				SELECT @intUnitMeasureId = NULL
+
+				SELECT @intUnitMeasureId = intUnitMeasureId
+				FROM dbo.tblICUnitMeasure
+				WHERE strUnitMeasure = @strQuantityUOM
+
+				IF @intUnitMeasureId IS NULL
+				BEGIN
+					SELECT @strError = 'Unit Measure ' + @strQuantityUOM + ' is not available.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				SELECT @intItemUOMId = NULL
+
+				SELECT @intItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intItemId
+					AND intUnitMeasureId = @intUnitMeasureId
+			END
 
 			IF @intLotId IS NULL
-				AND @intTransactionTypeId NOT IN (
-					8
-					,10
-					)
+				AND @strLotNo <> ''
+				AND @intTransactionTypeId <> 12
 			BEGIN
 				SELECT @strError = 'Lot ' + @strLotNo + ' is not available in the storage unit ' + @strStorageUnit + '.'
 
@@ -430,6 +512,52 @@ BEGIN TRY
 						,1
 						)
 			END
+
+			IF @intTransactionTypeId = 12
+			BEGIN
+				SELECT @intLotItemUOMId = intItemUOMId
+					,@dblWeightPerQty = dblWeightPerQty
+					,@intItemId =(CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END)
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNo
+					AND dblWeightPerQty > 1
+			END
+
+			IF EXISTS (
+					SELECT *
+					FROM tblICInventoryTransfer IT
+					WHERE IT.strERPTransferNo = @strNotes
+						AND intStatusId = 2
+					)
+				AND @dblQuantity < 0
+			BEGIN
+				SELECT @strError = 'ERP Transfer Order Number ' + @strNotes + ' is already processed in i21.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF EXISTS (
+					SELECT *
+					FROM tblICInventoryTransfer IT
+					WHERE IT.strERPTransferNo = @strNotes
+						AND intStatusId = 3
+					)
+				AND @dblQuantity > 0
+			BEGIN
+				SELECT @strError = 'ERP Transfer Order Number ' + @strNotes + ' is already processed in i21.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			skipValidation:
 
 			BEGIN TRAN
 
@@ -448,11 +576,11 @@ BEGIN TRY
 					,@strTransferOrderNo = strTransferNo
 				FROM tblICInventoryTransfer IT
 				JOIN tblICInventoryTransferDetail ITD ON IT.intInventoryTransferId = ITD.intInventoryTransferId
-				WHERE ITD.intLotId = @intLotId
-					AND dblQuantity = @dblQuantity
-					AND IT.intStatusId = 2
+				WHERE IT.strERPTransferNo = @strNotes
+					AND ITD.intLotId = @intLotId
 
 				IF @intInventoryTransferId IS NULL
+					AND @dblQuantity < 0
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
@@ -466,7 +594,49 @@ BEGIN TRY
 							)
 					END
 
-					DECLARE @TransferEntries AS InventoryTransferStagingTable
+					IF NOT EXISTS (
+							SELECT *
+							FROM @TransferEntries
+							WHERE strERPTransferNo = @strNotes
+							)
+					BEGIN
+						DELETE
+						FROM @TransferEntries
+					END
+
+					IF @dblWeightPerQty > 0
+					BEGIN
+						SELECT @dblLotQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+					END
+					ELSE
+					BEGIN
+						SELECT @dblLotQuantity = @dblQuantity
+							,@intLotItemUOMId = @intItemUOMId
+					END
+
+					SELECT @intNetWeightUnitMeasureId = NULL
+
+					SELECT @intNetWeightUnitMeasureId = intUnitMeasureId
+					FROM dbo.tblICUnitMeasure
+					WHERE strUnitMeasure = @strNetWeightUOM
+
+					IF @intNetWeightUnitMeasureId IS NULL
+					BEGIN
+						SELECT @strError = 'Unit Measure ' + @strNetWeightUOM + ' is not available.'
+
+						RAISERROR (
+								@strError
+								,16
+								,1
+								)
+					END
+
+					SELECT @intNetWeightItemUOMId = NULL
+
+					SELECT @intNetWeightItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND intUnitMeasureId = @intNetWeightUnitMeasureId
 
 					-- Insert the data needed to create the inventory transfer.
 					INSERT INTO @TransferEntries (
@@ -486,6 +656,9 @@ BEGIN TRY
 						,[intLotId]
 						,[intItemUOMId]
 						,[dblQuantityToTransfer]
+						,intItemWeightUOMId
+						,[dblGrossWeight]
+						,[dblTareWeight]
 						,[strNewLotId]
 						,[intFromSubLocationId]
 						,[intToSubLocationId]
@@ -496,6 +669,7 @@ BEGIN TRY
 						,[intSourceId]
 						,[strSourceId]
 						,[strSourceScreenName]
+						,strERPTransferNo
 						)
 					SELECT -- Header
 						[dtmTransferDate] = GETDATE()
@@ -503,7 +677,7 @@ BEGIN TRY
 						,[intSourceType] = 0
 						,[strDescription] = NULL
 						,[intFromLocationId] = @intCompanyLocationId
-						,[intToLocationId] = @intCompanyLocationId
+						,[intToLocationId] = @intNewCompanyLocationId
 						,[ysnShipmentRequired] = 1
 						,[intStatusId] = 1
 						,[intShipViaId] = NULL
@@ -511,8 +685,11 @@ BEGIN TRY
 						-- Detail
 						,[intItemId] = @intItemId
 						,[intLotId] = @intLotId
-						,[intItemUOMId] = @intItemUOMId
-						,[dblQuantityToTransfer] = @dblQuantity
+						,[intItemUOMId] = @intLotItemUOMId
+						,[dblQuantityToTransfer] = ABS(@dblLotQuantity)
+						,intItemWeightUOMId = @intNetWeightItemUOMId
+						,[dblGrossWeight] = ABS(dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity))
+						,[dblTareWeight] = 0
 						,[strNewLotId] = NULL
 						,[intFromSubLocationId] = @intCompanyLocationSubLocationId
 						,[intToSubLocationId] = @intCompanyLocationNewSubLocationId
@@ -521,42 +698,52 @@ BEGIN TRY
 						-- Integration Field
 						,[intInventoryTransferId] = NULL
 						,[intSourceId] = @intInventoryAdjustmentStageId
-						,[strSourceId] = @intInventoryAdjustmentStageId
+						,[strSourceId] = @strNotes
 						,[strSourceScreenName] = 'Stock Transfer'
+						,strERPTransferNo = @strNotes
 
-					-- Call uspICAddInventoryTransfer stored procedure.
-					EXEC dbo.uspICAddInventoryTransfer @TransferEntries
-						,@intUserId
-
-					-- Post the Inventory Transfers                                            
-					DECLARE @intTransferId INT
-						,@strTransactionId NVARCHAR(50);
-
-					WHILE EXISTS (
-							SELECT TOP 1 1
-							FROM #tmpAddInventoryTransferResult
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblIPInventoryAdjustmentStage
+							WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
+								AND strNotes = @strNotes
+								AND dblQuantity < 0
 							)
 					BEGIN
-						SELECT @intTransferId = NULL
-							,@strTransactionId = NULL
-
-						SELECT TOP 1 @intTransferId = intInventoryTransferId
-						FROM #tmpAddInventoryTransferResult
-
-						-- Post the Inventory Transfer that was created
-						SELECT @strTransactionId = strTransferNo
-						FROM tblICInventoryTransfer
-						WHERE intInventoryTransferId = @intTransferId
-
-						EXEC dbo.uspICPostInventoryTransfer 1
-							,0
-							,@strTransactionId
-							,@intUserId;
+						-- Call uspICAddInventoryTransfer stored procedure.
+						EXEC dbo.uspICAddInventoryTransfer @TransferEntries
+							,@intUserId
 
 						DELETE
-						FROM #tmpAddInventoryTransferResult
-						WHERE intInventoryTransferId = @intTransferId
-					END;
+						FROM @TransferEntries
+
+						-- Post the Inventory Transfers                                            
+						WHILE EXISTS (
+								SELECT TOP 1 1
+								FROM #tmpAddInventoryTransferResult
+								)
+						BEGIN
+							SELECT @intTransferId = NULL
+								,@strTransactionId = NULL
+
+							SELECT TOP 1 @intTransferId = intInventoryTransferId
+							FROM #tmpAddInventoryTransferResult
+
+							-- Post the Inventory Transfer that was created
+							SELECT @strTransactionId = strTransferNo
+							FROM tblICInventoryTransfer
+							WHERE intInventoryTransferId = @intTransferId
+
+							EXEC dbo.uspICPostInventoryTransfer 1
+								,0
+								,@strTransactionId
+								,@intUserId;
+
+							DELETE
+							FROM #tmpAddInventoryTransferResult
+							WHERE intInventoryTransferId = @intTransferId
+						END;
+					END
 				END
 				ELSE
 				BEGIN
@@ -565,6 +752,40 @@ BEGIN TRY
 					FROM tblSMFreightTerms WITH (NOLOCK)
 					WHERE strFreightTerm = 'Deliver'
 						AND strFobPoint = 'Destination'
+
+					IF @dblWeightPerQty > 0
+					BEGIN
+						SELECT @dblLotQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+					END
+					ELSE
+					BEGIN
+						SELECT @dblLotQuantity = @dblQuantity
+							,@intLotItemUOMId = @intItemUOMId
+					END
+
+					SELECT @intNetWeightUnitMeasureId = NULL
+
+					SELECT @intNetWeightUnitMeasureId = intUnitMeasureId
+					FROM dbo.tblICUnitMeasure
+					WHERE strUnitMeasure = @strNetWeightUOM
+
+					IF @intNetWeightUnitMeasureId IS NULL
+					BEGIN
+						SELECT @strError = 'Unit Measure ' + @strNetWeightUOM + ' is not available.'
+
+						RAISERROR (
+								@strError
+								,16
+								,1
+								)
+					END
+
+					SELECT @intNetWeightItemUOMId = NULL
+
+					SELECT @intNetWeightItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND intUnitMeasureId = @intNetWeightUnitMeasureId
 
 					INSERT INTO @ReceiptStagingTable (
 						strReceiptType
@@ -627,10 +848,10 @@ BEGIN TRY
 						,intContractDetailId = @intInventoryTransferDetailId
 						,dtmDate = GETDATE()
 						,intShipViaId = IT.intShipViaId
-						,dblQty = @dblQuantity
-						,intGrossNetUOMId = @intItemUOMId
-						,dblGross = @dblQuantity
-						,dblNet = @dblQuantity
+						,dblQty = @dblLotQuantity
+						,intGrossNetUOMId = @intNetWeightItemUOMId
+						,dblGross = dbo.fnMFConvertQuantityToTargetItemUOM(ITD.intItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity)
+						,dblNet = dbo.fnMFConvertQuantityToTargetItemUOM(ITD.intItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity)
 						,dblCost = ITD.dblCost
 						,intCostUOMId = @intItemUOMId
 						,intCurrencyId = ITD.intCurrencyId
@@ -648,7 +869,7 @@ BEGIN TRY
 						,intForexRateTypeId = NULL
 						,dblForexRate = NULL
 						,intContainerId = NULL
-						,intFreightTermId = @intFreightTermId
+						,intFreightTermId = NULL
 						,intBookId = NULL
 						,intSubBookId = NULL
 						,intSort = @intInventoryTransferDetailId
@@ -720,13 +941,13 @@ BEGIN TRY
 						,intItemUnitMeasureId = RI.intItemUOMId
 						,intItemId = RI.intItemId
 						,dblQuantity = RI.dblQty
-						,dblGrossWeight = @dblQuantity
+						,dblGrossWeight = dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, @intNetWeightItemUOMId, RI.dblQty)
 						,dblTareWeight = 0
 						,dblCost = 0
 						,strContainerNo = NULL
 						,intSort = RI.intSort
 						,strMarkings = NULL
-						,strCondition = 'Sound/Full'
+						,strCondition = 'Clean Wgt'
 						,intEntityVendorId = RI.intEntityVendorId
 						,strReceiptType = RI.strReceiptType
 						,intLocationId = RI.intLocationId
@@ -744,14 +965,18 @@ BEGIN TRY
 					FROM @ReceiptStagingTable RI
 					WHERE RI.intInventoryTransferId = @intInventoryTransferId
 						AND RI.intInventoryTransferDetailId = @intInventoryTransferDetailId
-
-					--INSERT INTO @InventoryTransferDetail (intInventoryTransferDetailId)
-					--SELECT @intInventoryTransferDetailId
 				END
 
 				IF EXISTS (
 						SELECT 1
 						FROM @ReceiptStagingTable
+						)
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblIPInventoryAdjustmentStage
+						WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
+							AND strNotes = @strNotes
+							AND dblQuantity > 0
 						)
 				BEGIN
 					IF NOT EXISTS (
@@ -788,6 +1013,10 @@ BEGIN TRY
 							,@strReceiptNo
 							,@intUserId
 
+						UPDATE tblICInventoryTransfer
+						SET intStatusId = 3
+						WHERE intInventoryTransferId = @intInventoryTransferId
+
 						DELETE
 						FROM #tmpAddItemReceiptResult
 						WHERE intInventoryReceiptId = @intInventoryReceiptId
@@ -795,14 +1024,25 @@ BEGIN TRY
 				END
 						----************************************************
 			END
-			ELSE IF @intTransactionTypeId = 20
+			ELSE IF @intTransactionTypeId = 20 --Lot Move
 			BEGIN
+				IF @dblWeight - @dblQuantity < 0
+					AND ABS(@dblWeight - @dblQuantity) < 1
+				BEGIN
+					SELECT @dblQuantity = @dblWeight
+				END
+
 				IF @dblWeightPerQty > 0
 				BEGIN
 					SELECT @dblQuantity = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
 				END
 
 				SELECT @intItemUOMId = @intLotItemUOMId
+
+				--Update tblICItemLocation
+				--Set intAllowNegativeInventory=1
+				--WHERE intItemId =@intItemId
+				--AND intLocationId =@intCompanyLocationId 
 
 				EXEC dbo.uspMFLotMove @intLotId = @intLotId
 					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
@@ -811,7 +1051,7 @@ BEGIN TRY
 					,@intMoveItemUOMId = @intItemUOMId
 					,@intUserId = @intUserId
 					,@blnValidateLotReservation = 1
-					,@blnInventoryMove = 0
+					,@blnInventoryMove = 1
 					,@dtmDate = NULL
 					,@strReasonCode = @strReasonCode
 					,@strNotes = @strNotes
@@ -822,6 +1062,11 @@ BEGIN TRY
 					,@intWorkOrderId = NULL
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
 					,@ysnExternalSystemMove = 1
+
+				--Update tblICItemLocation
+				--Set intAllowNegativeInventory=3
+				--WHERE intItemId =@intItemId
+				--AND intLocationId =@intCompanyLocationId 
 
 				SELECT @strAdjustmentNo = NULL
 
@@ -870,123 +1115,33 @@ BEGIN TRY
 					,@dtmDate = @dtmDate
 					,@ysnBulkChange = 0
 			END
-			ELSE IF @intTransactionTypeId = 8
+			ELSE IF @intTransactionTypeId IN (
+					8
+					,0
+					,- 8
+					)
 			BEGIN
-				IF @intLotId IS NULL
+				IF @strLotNo = ''
 				BEGIN
-					EXEC uspMFGeneratePatternId @intCategoryId = NULL
-						,@intItemId = NULL
-						,@intManufacturingId = NULL
-						,@intSubLocationId = NULL
-						,@intLocationId = @intCompanyLocationId
-						,@intOrderTypeId = NULL
-						,@intBlendRequirementId = NULL
-						,@intPatternCode = 33 -- Transaction Batch Id
-						,@ysnProposed = 0
-						,@strPatternString = @intBatchId OUTPUT
+					SELECT @intWorkOrderId = NULL
+						,@strWorkOrderNo = NULL
 
-					SELECT @intItemLocationId = NULL
+					SELECT @intWorkOrderId = intWorkOrderId
+						,@strWorkOrderNo = strWorkOrderNo
+					FROM tblMFWorkOrder
+					WHERE strERPOrderNo = @strOrderNo
 
-					SELECT @intItemLocationId = intItemLocationId
-					FROM tblICItemLocation
-					WHERE intItemId = @intItemId
-						AND intLocationId = @intCompanyLocationId
+					DELETE
+					FROM @ItemsToReserve
 
-					SELECT @dblStandardCost = NULL
+					EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+						,@intWorkOrderId
+						,8
 
-					SELECT @dblStandardCost = t.dblStandardCost
-					FROM tblICItemPricing t WITH (NOLOCK)
-					WHERE t.intItemId = @intItemId
-						AND t.intItemLocationId = @intItemLocationId
-
-					IF @dblStandardCost IS NULL
-					BEGIN
-						SELECT @dblStandardCost = 0
-					END
-
-					SELECT @intParentLotId = NULL
-						,@dblWeightPerQty = NULL
-						,@intLotItemUOMId = NULL
-						,@strParentLotNumber = NULL
-						,@strContainerNo = NULL
-						,@strMarkings = NULL
-						,@intEntityVendorId = NULL
-						,@strCondition = NULL
-						,@intInventoryReceiptId = NULL
-
-					SELECT TOP 1 @intParentLotId = intParentLotId
-						,@dblWeightPerQty = dblWeightPerQty
-						,@intLotItemUOMId = intItemUOMId
-						,@strContainerNo = strContainerNo
-						,@strMarkings = strMarkings
-						,@intEntityVendorId = intEntityVendorId
-						,@strCondition = strCondition
-					FROM tblICLot
-					WHERE intItemId = @intItemId
-						AND strLotNumber = @strLotNo
-					ORDER BY intLotId
-
-					IF @intParentLotId IS NULL
-					BEGIN
-						SELECT @dblWeightPerQty = 1
-
-						SELECT @dblNoOfPack = @dblQuantity
-
-						SELECT @intLotItemUOMId = @intItemUOMId
-					END
-					ELSE
-					BEGIN
-						SELECT @dblNoOfPack = NULL
-
-						SELECT @dblNoOfPack = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
-					END
-
-					SELECT @strParentLotNumber = strParentLotNumber
-					FROM tblICParentLot
-					WHERE intParentLotId = @intParentLotId
-
-					EXEC uspMFPostProduction 1
-						,0
-						,NULL
-						,@intItemId
-						,@intUserId
-						,NULL
-						,@intStorageLocationId
-						,@dblQuantity
-						,@intItemUOMId
-						,@dblWeightPerQty
-						,@dblNoOfPack
-						,@intLotItemUOMId
-						,@strLotNo
-						,@strLotNo
-						,@intBatchId
-						,@intLotId OUTPUT
-						,NULL
-						,NULL
-						,@strParentLotNumber --Parent Lot Number
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,NULL
-						,@dblStandardCost
-						,'Created from external system'
-						,1
-						,NULL
-						,NULL
-						,NULL
-						,@strContainerNo
-						,@strMarkings
-						,@intEntityVendorId
-						,@strCondition
-
-					SELECT @dblLastCost = dblLastCost
-						,@intLotItemUOMId = intItemUOMId
-						,@dblWeightPerQty = dblWeightPerQty
-						,@dblQty = dblQty
-					FROM tblICLot
-					WHERE intLotId = @intLotId
+					UPDATE tblMFWorkOrder
+					SET intStatusId = 13
+						,dtmCompletedDate = GETDATE()
+					WHERE intWorkOrderId = @intWorkOrderId
 				END
 				ELSE
 				BEGIN
@@ -1026,117 +1181,23 @@ BEGIN TRY
 						SELECT @dblLastCost = 0
 					END
 
-					IF @strPrevOrderNo <> @strOrderNo
-						AND @strPrevOrderNo IS NOT NULL
+					IF @dblWeight - abs(@dblQuantity) < 0
+						AND ABS(@dblWeight - abs(@dblQuantity)) < 1
 					BEGIN
-						SELECT @intWorkOrderId = NULL
+						SELECT @dblQuantity = @dblWeight
+					END
 
-						SELECT @intWorkOrderId = intWorkOrderId
-						FROM tblMFWorkOrder
-						WHERE strWorkOrderNo = @strPrevOrderNo
-
-						EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-							,@intWorkOrderId
-							,8
-
-						DELETE
-						FROM @GLEntries
-
-						-- Call the post routine 
-						INSERT INTO @GLEntries (
-							[dtmDate]
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]
-							,[dblDebitReport]
-							,[dblCreditForeign]
-							,[dblCreditReport]
-							,[dblReportingRate]
-							,[dblForeignRate]
-							,[strRateType]
-							,[intSourceEntityId]
-							,[intCommodityId]
+					--Lot Tracking
+					IF NOT EXISTS (
+							SELECT *
+							FROM @ItemsForPost
+							WHERE strTransactionId = @strOrderNo
 							)
-						EXEC dbo.uspICPostCosting @ItemsForPost
-							,@strBatchId
-							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-							,@intUserId
-
-						EXEC dbo.uspGLBookEntries @GLEntries
-							,1
-
-						DELETE
-						FROM @ItemsToReserve
-
-						IF @intPrevOrderCompleted = 0
-						BEGIN
-							INSERT INTO @ItemsToReserve (
-								intItemId
-								,intItemLocationId
-								,intItemUOMId
-								,intLotId
-								,intSubLocationId
-								,intStorageLocationId
-								,dblQty
-								,intTransactionId
-								,strTransactionId
-								,intTransactionTypeId
-								)
-							SELECT intItemId = wcl.intItemId
-								,intItemLocationId = l.intItemLocationId
-								,intItemUOMId = wcl.intItemUOMId
-								,intLotId = wcl.intLotId
-								,intSubLocationId = l.intSubLocationId
-								,intStorageLocationId = l.intStorageLocationId
-								,dblQty = wcl.dblQuantity + IsNULL(RR.dblQty, 0)
-								,intTransactionId = wcl.intWorkOrderId
-								,strTransactionId = w.strWorkOrderNo
-								,intTransactionTypeId = 8
-							FROM tblMFWorkOrderInputLot wcl
-							JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
-							JOIN tblICLot l ON l.intLotId = wcl.intLotId
-							LEFT JOIN @ItemsForPost RR ON RR.intLotId = wcl.intLotId
-							WHERE wcl.intWorkOrderId = @intWorkOrderId
-
-							EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-								,@intWorkOrderId
-								,8
-						END
-						ELSE
-						BEGIN
-							UPDATE tblMFWorkOrder
-							SET intStatusId = 13
-								,dtmCompletedDate = GETDATE()
-							WHERE intWorkOrderId = @intWorkOrderId
-						END
-
+					BEGIN
 						DELETE
 						FROM @ItemsForPost
 					END
 
-					--Lot Tracking
 					INSERT INTO @ItemsForPost (
 						intItemId
 						,intItemLocationId
@@ -1162,7 +1223,7 @@ BEGIN TRY
 						,intItemLocationId = @intItemLocationId
 						,intItemUOMId = @intItemUOMId
 						,dtmDate = @dtmDate
-						,dblQty = - @dblQuantity
+						,dblQty = @dblQuantity
 						,dblUOMQty = 1
 						,dblCost = @dblLastCost
 						,dblSalesPrice = 0
@@ -1170,7 +1231,7 @@ BEGIN TRY
 						,dblExchangeRate = 1
 						,intTransactionId = @intTransactionId
 						,intTransactionDetailId = @intTransactionId
-						,strTransactionId = @intTrxSequenceNo
+						,strTransactionId = @strOrderNo
 						,intTransactionTypeId = 8
 						,intLotId = @intLotId
 						,intSubLocationId = @intCompanyLocationSubLocationId
@@ -1180,15 +1241,51 @@ BEGIN TRY
 
 					IF NOT EXISTS (
 							SELECT *
-							FROM @tblIPInventoryAdjustmentStage
-							WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
+							FROM tblIPInventoryAdjustmentStage
+							WHERE strOrderNo = @strOrderNo
+								AND intStatusId = - 1
+								AND intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
 							)
 					BEGIN
 						SELECT @intWorkOrderId = NULL
+							,@strWorkOrderNo = NULL
+							,@intWorkOrderStatusId = NULL
 
 						SELECT @intWorkOrderId = intWorkOrderId
+							,@strWorkOrderNo = strWorkOrderNo
+							,@intWorkOrderStatusId = intStatusId
 						FROM tblMFWorkOrder
-						WHERE strWorkOrderNo = @strOrderNo
+						WHERE strERPOrderNo = @strOrderNo
+
+						DELETE
+						FROM @ItemsToReserve2
+
+						INSERT INTO @ItemsToReserve2 (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId
+							,dblQty
+							,intTransactionId
+							,strTransactionId
+							,intTransactionTypeId
+							)
+						SELECT intItemId = SR.intItemId
+							,intItemLocationId = SR.intItemLocationId
+							,intItemUOMId = SR.intItemUOMId
+							,intLotId = SR.intLotId
+							,intSubLocationId = SR.intSubLocationId
+							,intStorageLocationId = SR.intStorageLocationId
+							,dblQty = SR.dblQty
+							,intTransactionId = SR.intTransactionId
+							,strTransactionId = SR.strTransactionId
+							,intTransactionTypeId = 8
+						FROM tblICStockReservation SR
+						WHERE SR.intTransactionId = @intWorkOrderId
+							AND SR.strTransactionId = @strWorkOrderNo
+							AND SR.intInventoryTransactionType = 8
 
 						EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 							,@intWorkOrderId
@@ -1246,6 +1343,7 @@ BEGIN TRY
 						FROM @ItemsToReserve
 
 						IF @intOrderCompleted = 0
+							AND @intWorkOrderStatusId <> 13
 						BEGIN
 							INSERT INTO @ItemsToReserve (
 								intItemId
@@ -1259,27 +1357,31 @@ BEGIN TRY
 								,strTransactionId
 								,intTransactionTypeId
 								)
-							SELECT intItemId = wcl.intItemId
-								,intItemLocationId = l.intItemLocationId
-								,intItemUOMId = wcl.intItemUOMId
-								,intLotId = wcl.intLotId
-								,intSubLocationId = l.intSubLocationId
-								,intStorageLocationId = l.intStorageLocationId
-								,dblQty = wcl.dblQuantity + IsNULL(RR.dblQty, 0)
-								,intTransactionId = wcl.intWorkOrderId
-								,strTransactionId = w.strWorkOrderNo
+							SELECT intItemId = SR.intItemId
+								,intItemLocationId = SR.intItemLocationId
+								,intItemUOMId = SR.intItemUOMId
+								,intLotId = SR.intLotId
+								,intSubLocationId = SR.intSubLocationId
+								,intStorageLocationId = SR.intStorageLocationId
+								,dblQty = SR.dblQty + IsNULL(RR1.dblQty, 0)
+								,intTransactionId = SR.intTransactionId
+								,strTransactionId = SR.strTransactionId
 								,intTransactionTypeId = 8
-							FROM tblMFWorkOrderInputLot wcl
-							JOIN tblMFWorkOrder w ON w.intWorkOrderId = wcl.intWorkOrderId
-							JOIN tblICLot l ON l.intLotId = wcl.intLotId
-							LEFT JOIN @ItemsForPost RR ON RR.intLotId = wcl.intLotId
-							WHERE wcl.intWorkOrderId = @intWorkOrderId
+							FROM @ItemsToReserve2 SR
+							JOIN tblICLot L ON L.intLotId = SR.intLotId
+							OUTER APPLY (
+								SELECT TOP 1 RR.dblQty
+								FROM @ItemsForPost RR
+								JOIN tblICLot L2 ON L2.intLotId = RR.intLotId
+								WHERE L2.strLotNumber=L.strLotNumber
+								) RR1
 
 							EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 								,@intWorkOrderId
 								,8
 						END
-						ELSE
+
+						IF @intOrderCompleted = 1
 						BEGIN
 							UPDATE tblMFWorkOrder
 							SET intStatusId = 13
@@ -1291,10 +1393,6 @@ BEGIN TRY
 						FROM @ItemsForPost
 					END
 				END
-
-				SELECT @strPrevOrderNo = @strOrderNo
-
-				SELECT @intPrevOrderCompleted = @intOrderCompleted
 			END
 
 			MOVE_TO_ARCHIVE:
@@ -1316,6 +1414,12 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
+				,strNewLocation
+				,strNewStorageLocation
+				,strNewStorageUnit
+				,strOrderNo
+				,intOrderCompleted
+				,strTranferOrderStatus
 				,strAdjustmentNo
 				)
 			SELECT intTrxSequenceNo
@@ -1333,6 +1437,12 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
+				,strNewLocation
+				,strNewStorageLocation
+				,strNewStorageUnit
+				,strOrderNo
+				,intOrderCompleted
+				,strTranferOrderStatus
 				,@strAdjustmentNo
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
@@ -1370,6 +1480,12 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
+				,strNewLocation
+				,strNewStorageLocation
+				,strNewStorageUnit
+				,strOrderNo
+				,intOrderCompleted
+				,strTranferOrderStatus
 				,strErrorMessage
 				)
 			SELECT intTrxSequenceNo
@@ -1387,6 +1503,12 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
+				,strNewLocation
+				,strNewStorageLocation
+				,strNewStorageUnit
+				,strOrderNo
+				,intOrderCompleted
+				,strTranferOrderStatus
 				,@ErrMsg AS strStatusText
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId

@@ -9,7 +9,6 @@ AS
 *****************************************************************/
 SELECT Entity.*
 	 , CompanyLocation.strLocationName 
-	 , CompanyLocation.intCompanyLocationId
 FROM vyuCTEntity AS Entity
 LEFT JOIN tblAPVendorCompanyLocation AS VendorLocation ON Entity.intEntityId = VendorLocation.intEntityVendorId
 LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON VendorLocation.intCompanyLocationId = CompanyLocation.intCompanyLocationId

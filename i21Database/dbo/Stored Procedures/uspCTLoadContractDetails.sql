@@ -9,7 +9,9 @@ BEGIN TRY
 	DECLARE
 		@ErrMsg NVARCHAR(MAX)
 		,@intContractTypeId int
-		,@intScreenId int;
+		,@intScreenId int
+		,@strContractBase NVARCHAR(50)
+		,@ysnEnableValueBasedContract BIT;
 
 
 	DECLARE @tblShipment TABLE (
@@ -35,7 +37,21 @@ BEGIN TRY
 	);
 	Select @intScreenId=intScreenId from tblSMScreen Where strNamespace = 'ContractManagement.view.PriceContracts'
 
-	select top 1 @intContractTypeId = intContractTypeId from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
+	select top 1 @intContractTypeId = intContractTypeId, @strContractBase = strContractBase from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
+	SELECT @ysnEnableValueBasedContract = ysnEnableValueBasedContract FROM tblCTCompanyPreference
+
+		
+	Declare @sampleDetail	TABLE
+	(
+		intContractDetailId INT,
+		strSampleNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+		strContainerNumber	NVARCHAR(100)  COLLATE Latin1_General_CI_AS,
+		strSampleTypeName	NVARCHAR(100)  COLLATE Latin1_General_CI_AS,
+		strSampleStatus		NVARCHAR(100)  COLLATE Latin1_General_CI_AS,
+		dtmTestingEndDate	DATETIME,
+		dblApprovedQty		NUMERIC(18,6) 
+	)
+
 
 	if (@intContractTypeId = 1)
 	begin
@@ -185,11 +201,11 @@ BEGIN TRY
 			, FI.ysnSpreadAvailable
 			, FI.ysnFixationDetailAvailable
 			, FI.ysnMultiPricingDetail
-			, QA.strContainerNumber
-			, QA.strSampleTypeName
-			, QA.strSampleStatus
-			, QA.dtmTestingEndDate
-			, QA.dblApprovedQty
+			--, QA.strContainerNumber
+			--, QA.strSampleTypeName
+			--, QA.strSampleStatus
+			--, QA.dtmTestingEndDate
+			--, QA.dblApprovedQty
 			, WO.intWashoutId
 			, WO.strSourceNumber
 			, WO.strWashoutNumber
@@ -210,7 +226,7 @@ BEGIN TRY
 			tblCTContractDetail CD
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			left join OpenLoad LG on LG.intContractDetailId = CD.intContractDetailId
-			OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
+			--OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
 			OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
 			OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
 			OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
@@ -242,8 +258,8 @@ BEGIN TRY
 		, CD.intCategoryId
 		, CD.dblQuantity
 		, CD.intItemUOMId
-		, CD.dblOriginalQty
-		, CD.dblBalance
+		, CD.dblOriginalQty 
+		, dblBalance = CD.dblBalance -- CASE WHEN (Pref.ysnEnableValueBasedContract = 1 AND @strContractBase = 'Value')  THEN  CD.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE CD.dblBalance END 
 		, CD.dblIntransitQty
 		, CD.dblScheduleQty
 		, CD.dblBalanceLoad
@@ -362,7 +378,6 @@ BEGIN TRY
 		, CD.ysnClaimsToProducer
 		, CD.ysnRiskToProducer
 		, CD.ysnBackToBack
-		, CD.dblAllocatedQty
 		, CD.dblReservedQty
 		, CD.dblAllocationAdjQty
 		, CD.dblInvoicedQty
@@ -508,11 +523,12 @@ BEGIN TRY
 		, CT.ysnSpreadAvailable
 		, CT.ysnFixationDetailAvailable
 		, CT.ysnMultiPricingDetail
-		, CT.strContainerNumber
-		, CT.strSampleTypeName
-		, CT.strSampleStatus
-		, CT.dtmTestingEndDate
-		, CT.dblApprovedQty
+		, strContainerNumber = CAST('' AS nvarchar(100))
+		, strSampleTypeName = CAST('' AS nvarchar(100))
+		, strSampleStatus = CAST('' AS nvarchar(100))
+		, dtmTestingEndDate = CAST(NULL as DATETIME)
+		, dblApprovedQty = CAST(NULL as NUMERIC(18,6))
+		, dblUnApprovedQty = ISNULL(CD.dblQuantity,0) --ISNULL(CD.dblQuantity,0) - ISNULL(CT.dblApprovedQty,0)
 		, CT.intWashoutId
 		, CT.strSourceNumber
 		, CT.strWashoutNumber
@@ -634,7 +650,6 @@ BEGIN TRY
 		, CD.ysnApplyDefaultTradeFinance
 		, CD.ysnTaxOverride
 		, CD.strTaxPoint
-		, CD.intTaxGroupId
 		, CD.strTaxLocation
 		, CD.intTaxGroupId
 		, TG.strTaxGroup
@@ -643,8 +658,8 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
-		, strQualityCode = IB.strItemNo
-		, strQualityDescription = IB.strDescription
+		, strQualityCode = QC.strQualityCode
+		, strQualityDescription = QC.strQualityDesc
 		, CD.dtmEtaPol
 		, CD.dtmEtaPod
 		, CD.intGardenMarkId
@@ -660,6 +675,7 @@ BEGIN TRY
 		, CD.intFeedPriceCurrencyId
 		, strFeedPriceItemUOM = FUM.strUnitMeasure
 		, strFeedPriceCurrency = FCU.strCurrency
+	INTO #TMP
 	FROM tblCTContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -709,6 +725,12 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrencyExchangeRateType HRT ON HRT.intCurrencyExchangeRateTypeId = CD.intHistoricalRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+    LEFT JOIN (
+		  SELECT APBD.* 
+		  FROM tblAPBillDetail APBD
+		  JOIN tblICItem ICI on ICI.intItemId = APBD.intItemId
+		  where ICI.strType <> 'Other Charge'
+	)            BD ON BD.intContractDetailId    =  CD.intContractDetailId
 	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CT.intCommodityUOMId
 	LEFT JOIN tblICItemUOM CM ON CM.intItemId = CD.intItemId AND CM.intUnitMeasureId = CO.intUnitMeasureId
 	LEFT JOIN @tblShipment Shipment ON Shipment.intContractDetailId = CD.intContractDetailId
@@ -767,8 +789,41 @@ BEGIN TRY
 	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
 	LEFT JOIN tblCTReasonCode RC on RC.intReasonCodeId = CD.intReasonCodeId
-	
+	LEFT JOIN vyuCTGetQualityCodes QC ON QC.intItemId = CD.intItemId
+
 	WHERE CD.intContractHeaderId = @intContractHeaderId
+
+	IF NOT EXISTS(
+		
+			SELECT	TOP 1 1
+			FROM	tblQMSample			SA
+			JOIN	tblCTContractDetail		CT	ON CT.intContractDetailId = SA.intContractDetailId
+			WHERE	SA.intTypeId = 1  AND  CT.intContractHeaderId = @intContractHeaderId 
+			ORDER BY SA.intSampleId DESC
+	)
+	BEGIN
+		SELECT * FROM #TMP  ORDER BY intContractSeq
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @sampleDetail
+		EXEC [uspCTGetSampleDetail] @intContractHeaderId
+
+
+		UPDATE T
+		SET dblBalance = CASE WHEN (@ysnEnableValueBasedContract = 1 AND @strContractBase = 'Value')  THEN  T.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE T.dblBalance END 
+			, strContainerNumber = CT.strContainerNumber
+			, strSampleTypeName = CT.strSampleTypeName
+			, strSampleStatus = CT.strSampleStatus
+			, dtmTestingEndDate = CT.dtmTestingEndDate
+			, dblApprovedQty = CT.dblApprovedQty
+			, dblUnApprovedQty = ISNULL(T.dblQuantity,0) - ISNULL(CT.dblApprovedQty,0)
+		FROM #TMP T
+		JOIN @sampleDetail CT on CT.intContractDetailId = T.intContractDetailId
+
+		SELECT * FROM #TMP ORDER BY intContractSeq
+
+	END 
 
 END TRY
 BEGIN CATCH

@@ -88,10 +88,6 @@ IF (@transType IS NULL OR RTRIM(LTRIM(@transType)) = '')
 DECLARE @dtmStartWait	DATETIME
 SET @dtmStartWait = GETDATE()
 
--- DELETE PQ
--- FROM tblARPostingQueue PQ
--- WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) >= 60
-
 --LOG PERFORMANCE START
 IF @transType <> 'all'
 	EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Batch Invoice Posting Screen'
@@ -101,112 +97,6 @@ IF @transType <> 'all'
 									  , @intUserId	            = @userId
 									  , @intPerformanceLogId    = NULL
 									  , @intNewPerformanceLogId = @intNewPerformanceLogId OUT
-
--- --CHECK IF THERE'S ON GOING POSTING IN QUEUE
--- IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60)
--- 	--IF HAS QUEUE TRY TO WAIT FOR 1 MINUTE
--- 	BEGIN
--- 		DECLARE @intQueueCount INT = 0
-
--- 		--CHECK EVERY 5 SECS.
--- 		WHILE @intQueueCount <= 12
--- 			BEGIN
--- 				--IF WAITING TIME IS > 1 MINUTE, THROW TIME OUT ERROR
--- 				IF @intQueueCount >= 12
--- 					BEGIN
--- 						SET @intQueueCount = 13
-
--- 						IF @raiseError = 0
--- 							BEGIN
--- 								IF @InitTranCount = 0
--- 									BEGIN
--- 										IF (XACT_STATE()) = -1
--- 											ROLLBACK TRANSACTION
--- 										IF (XACT_STATE()) = 1
--- 											COMMIT TRANSACTION
--- 									END		
--- 								ELSE
--- 									BEGIN
--- 										IF (XACT_STATE()) = -1
--- 											ROLLBACK TRANSACTION  @Savepoint
--- 									END	
-
--- 								INSERT INTO tblARPostResult (
--- 										strMessage
--- 									  , strTransactionType
--- 									  , strTransactionId
--- 									  , strBatchNumber
--- 									  , intTransactionId
--- 								)
--- 								SELECT strMessage	= 'There''s an on-going posting for other transactions. Please try again later.'
--- 									, [strTransactionType]
--- 									, [strInvoiceNumber]
--- 									, [strBatchId]
--- 									, [intInvoiceId]
--- 								FROM tblARInvoice ARI
--- 								INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
--- 							END
-
--- 							IF @raiseError = 1
--- 								BEGIN
--- 									RAISERROR('There''s an on-going posting for other transactions. Please try again later.', 11, 1)							
--- 								END
--- 							GOTO Post_Exit
--- 					END
-				
--- 				IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60) AND @intQueueCount < 12
--- 					BEGIN
--- 						SET @intQueueCount += 1
--- 						WAITFOR DELAY '00:00:05'
--- 					END
--- 				ELSE IF @intQueueCount < 12
--- 					BEGIN
--- 						SET @intQueueCount = 13
-
--- 						INSERT INTO tblARPostingQueue (
--- 							intTransactionId
--- 							, strTransactionNumber
--- 							, strBatchId
--- 							, dtmPostingdate
--- 							, intEntityId
--- 							, strTransactionType
--- 						)
--- 						SELECT DISTINCT 
--- 							intTransactionId		= ARI.intInvoiceId
--- 							, strTransactionNumber	= ARI.strInvoiceNumber
--- 							, strBatchId			= @batchIdUsed
--- 							, dtmPostingdate		= @dtmStartWait
--- 							, intEntityId			= ARI.intEntityId
--- 							, strTransactionType	= 'Invoice'
--- 						FROM tblARInvoice ARI
--- 						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
--- 						WHERE ISNULL(ARI.intLoadId, 0) = 0
--- 					END
--- 			END		
--- 	END
--- ELSE 
--- 	--IF NONE
--- 	BEGIN	
--- 		--INSERT INVOICES TO POSTING QUEUE
--- 		INSERT INTO tblARPostingQueue (
--- 			intTransactionId
--- 			, strTransactionNumber
--- 			, strBatchId
--- 			, dtmPostingdate
--- 			, intEntityId
--- 			, strTransactionType
--- 		)
--- 		SELECT DISTINCT 
--- 			intTransactionId		= ARI.intInvoiceId
--- 			, strTransactionNumber	= ARI.strInvoiceNumber
--- 			, strBatchId			= @batchIdUsed
--- 			, dtmPostingdate		= @dtmStartWait
--- 			, intEntityId			= ARI.intEntityId
--- 			, strTransactionType	= 'Invoice'
--- 		FROM tblARInvoice ARI
--- 		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
--- 		WHERE ISNULL(ARI.intLoadId, 0) = 0
--- 	END
 
 DECLARE @InvoiceIds AS [InvoiceId]
 
@@ -237,24 +127,27 @@ IF @post = 1 AND @recap = 0
 		, @strSessionId	= @strRequestId
 
 --Removed excluded Invoices to post/unpost
-IF(@exclude IS NOT NULL)
+IF ISNULL(@exclude, '') <> ''
 	BEGIN
 		DECLARE @InvoicesExclude TABLE  (
-			intInvoiceId INT
+			intInvoiceId INT PRIMARY KEY
 		);
 
 		INSERT INTO @InvoicesExclude
-		SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@exclude)
+		SELECT DISTINCT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@exclude)
 
-		DELETE FROM A
-		FROM tblARPostInvoiceHeader A
-		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
-		  AND A.strSessionId = @strRequestId
+		IF EXISTS (SELECT TOP 1 1 FROM @InvoicesExclude)
+			BEGIN
+				DELETE FROM A
+				FROM tblARPostInvoiceHeader A
+				INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
+				WHERE A.strSessionId = @strRequestId
 
-		DELETE FROM A
-		FROM tblARPostInvoiceDetail A
-		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
-		  AND A.strSessionId = @strRequestId
+				DELETE FROM A
+				FROM tblARPostInvoiceDetail A
+				INNER JOIN @InvoicesExclude B ON A.[intInvoiceId] = B.[intInvoiceId]
+				WHERE A.strSessionId = @strRequestId
+			END
 	END
 
 --------------------------------------------------------------------------------------------  
@@ -369,10 +262,6 @@ IF((@totalInvalid >= 1 AND @totalRecords <= 0) OR (@totalInvalid >= 1 AND @rollb
 			WHERE strSessionId = @strRequestId
 		END
 
-		-- DELETE 
-		-- FROM tblARPostingQueue
-		-- WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
-
 		IF @raiseError = 1
 			BEGIN
 				IF ISNULL(@ErrorMerssage, '') = ''
@@ -398,10 +287,6 @@ BEGIN TRY
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
 			   ,@strSessionId	 = @strRequestId
-
-		-- DELETE 
-		-- FROM tblARPostingQueue
-		-- WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
 
         GOTO Do_Commit
     END

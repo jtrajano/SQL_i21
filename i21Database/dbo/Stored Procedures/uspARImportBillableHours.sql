@@ -65,70 +65,49 @@ FROM vyuARBillableHoursForImport
 WHERE 1 = 0
 		
 IF ISNULL(@HoursWorkedIDs, 'all') = 'all'
-	BEGIN
-		INSERT INTO #BILLABLE 
-		SELECT intEntityCustomerId				= BILLABLE.intEntityId
-			 , intTicketId						= BILLABLE.intTicketId
-			 , intTicketHoursWorkedId			= BILLABLE.intTicketHoursWorkedId
-			 , intCompanyLocationId				= ISNULL(BILLABLE.intEntityWarehouseId, ISNULL(@intCompanyLocationId, BILLABLE.intCompanyLocationId))
-			 , intCurrencyId					= BILLABLE.intCurrencyId
-			 , intSubCurrencyId					= BILLABLE.intSubCurrencyId
-			 , intItemId						= BILLABLE.intItemId
-			 , intItemUOMId						= BILLABLE.intItemUOMId
-			 , intCurrencyExchangeRateTypeId	= BILLABLE.intCurrencyExchangeRateTypeId	 
-			 , strItemNo						= BILLABLE.strItemNo
-			 , dblHours							= CAST(BILLABLE.intHours AS NUMERIC(18, 6))
-			 , dblPrice							= BILLABLE.dblPrice
-			 , dblCurrencyExchangeRate			= BILLABLE.dblCurrencyExchangeRate
-			 , dblSubCurrencyRate				= BILLABLE.dblSubCurrencyRate
-			 , strTicketNumber					= BILLABLE.strTicketNumber
-			 , strSubject						= BILLABLE.strSubject
-		FROM vyuARBillableHoursForImport BILLABLE
-	END
-ELSE
-	BEGIN
-		INSERT INTO #BILLABLE 
-		SELECT intEntityCustomerId				= BILLABLE.intEntityId
-			 , intTicketId						= BILLABLE.intTicketId
-			 , intTicketHoursWorkedId			= BILLABLE.intTicketHoursWorkedId
-			 , intCompanyLocationId				= ISNULL(BILLABLE.intEntityWarehouseId, ISNULL(@intCompanyLocationId, BILLABLE.intCompanyLocationId))
-			 , intCurrencyId					= BILLABLE.intCurrencyId
-			 , intSubCurrencyId					= BILLABLE.intSubCurrencyId
-			 , intItemId						= BILLABLE.intItemId
-			 , intItemUOMId						= BILLABLE.intItemUOMId
-			 , intCurrencyExchangeRateTypeId	= BILLABLE.intCurrencyExchangeRateTypeId	 
-			 , strItemNo						= BILLABLE.strItemNo
-			 , dblHours							= CAST(BILLABLE.intHours AS NUMERIC(18, 6))
-			 , dblPrice							= BILLABLE.dblPrice
-			 , dblCurrencyExchangeRate			= BILLABLE.dblCurrencyExchangeRate
-			 , dblSubCurrencyRate				= BILLABLE.dblSubCurrencyRate
-			 , strTicketNumber					= BILLABLE.strTicketNumber
-			 , strSubject						= BILLABLE.strSubject
-		FROM vyuARBillableHoursForImport BILLABLE
-		INNER JOIN fnGetRowsFromDelimitedValues(@HoursWorkedIDs) SELECTED
-		ON SELECTED.intID = BILLABLE.intTicketHoursWorkedId
-	END
-
-IF(OBJECT_ID('tempdb..#INACTIVECUSTOMERS') IS NOT NULL)
 BEGIN
-    DROP TABLE #INACTIVECUSTOMERS
+	INSERT INTO #BILLABLE 
+	SELECT intEntityCustomerId				= BILLABLE.intEntityId
+			, intTicketId						= BILLABLE.intTicketId
+			, intTicketHoursWorkedId			= BILLABLE.intTicketHoursWorkedId
+			, intCompanyLocationId				= ISNULL(BILLABLE.intEntityWarehouseId, ISNULL(@intCompanyLocationId, BILLABLE.intCompanyLocationId))
+			, intCurrencyId					= BILLABLE.intCurrencyId
+			, intSubCurrencyId					= BILLABLE.intSubCurrencyId
+			, intItemId						= BILLABLE.intItemId
+			, intItemUOMId						= BILLABLE.intItemUOMId
+			, intCurrencyExchangeRateTypeId	= BILLABLE.intCurrencyExchangeRateTypeId	 
+			, strItemNo						= BILLABLE.strItemNo
+			, dblHours							= CAST(BILLABLE.intHours AS NUMERIC(18, 6))
+			, dblPrice							= BILLABLE.dblPrice
+			, dblCurrencyExchangeRate			= BILLABLE.dblCurrencyExchangeRate
+			, dblSubCurrencyRate				= BILLABLE.dblSubCurrencyRate
+			, strTicketNumber					= BILLABLE.strTicketNumber
+			, strSubject						= BILLABLE.strSubject
+	FROM vyuARBillableHoursForImport BILLABLE
 END
-
-SELECT C.strName
-INTO #INACTIVECUSTOMERS
-FROM #BILLABLE B
-INNER JOIN vyuARCustomerSearch C ON B.intEntityCustomerId = C.intEntityCustomerId
-WHERE C.ysnActive = 0
-
-IF EXISTS (SELECT TOP 1 NULL FROM #INACTIVECUSTOMERS)
-	BEGIN
-		DECLARE @strErrorMsg  NVARCHAR(500) = 'Customer: ' + ISNULL((SELECT TOP 1 strName FROM #INACTIVECUSTOMERS), '') + ' is Inactive.'
-		SET @IsSuccess = 0
-
-		RAISERROR(@strErrorMsg, 16, 1)
-		RETURN 0
-	END
-	
+ELSE
+BEGIN
+	INSERT INTO #BILLABLE 
+	SELECT intEntityCustomerId				= BILLABLE.intEntityId
+			, intTicketId						= BILLABLE.intTicketId
+			, intTicketHoursWorkedId			= BILLABLE.intTicketHoursWorkedId
+			, intCompanyLocationId				= ISNULL(BILLABLE.intEntityWarehouseId, ISNULL(@intCompanyLocationId, BILLABLE.intCompanyLocationId))
+			, intCurrencyId					= BILLABLE.intCurrencyId
+			, intSubCurrencyId					= BILLABLE.intSubCurrencyId
+			, intItemId						= BILLABLE.intItemId
+			, intItemUOMId						= BILLABLE.intItemUOMId
+			, intCurrencyExchangeRateTypeId	= BILLABLE.intCurrencyExchangeRateTypeId	 
+			, strItemNo						= BILLABLE.strItemNo
+			, dblHours							= CAST(BILLABLE.intHours AS NUMERIC(18, 6))
+			, dblPrice							= BILLABLE.dblPrice
+			, dblCurrencyExchangeRate			= BILLABLE.dblCurrencyExchangeRate
+			, dblSubCurrencyRate				= BILLABLE.dblSubCurrencyRate
+			, strTicketNumber					= BILLABLE.strTicketNumber
+			, strSubject						= BILLABLE.strSubject
+	FROM vyuARBillableHoursForImport BILLABLE
+	INNER JOIN fnGetRowsFromDelimitedValues(@HoursWorkedIDs) SELECTED
+	ON SELECTED.intID = BILLABLE.intTicketHoursWorkedId
+END
 
 INSERT INTO @tblInvoiceEntries (
 	 [strSourceTransaction]
@@ -191,7 +170,7 @@ SELECT
 	,[strComments]						=  'HD-Invoice'
 FROM #BILLABLE BILLABLE  where BILLABLE.dblHours >= @ZeroDecimal
 
-union all
+UNION ALL
 
 SELECT 
 	 [strSourceTransaction]				= 'Direct'
@@ -235,6 +214,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 			,@RaiseError					= 0
 			,@ErrorMessage					= @strErrorMessage OUT
 			,@CreatedIvoices				= @strCreatedInvoices OUT
+
+		IF @strErrorMessage != ''
+		BEGIN
+			SET @IsSuccess = 0
+			RAISERROR(@strErrorMessage, 16, 1)
+			RETURN 0
+		END
 
 		IF ISNULL(@strCreatedInvoices, '') <> ''
 			BEGIN

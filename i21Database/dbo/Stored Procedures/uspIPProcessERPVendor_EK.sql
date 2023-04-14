@@ -45,6 +45,7 @@ BEGIN TRY
 		,@strDetailContactName NVARCHAR(100)
 	DECLARE @intDetailCountryId INT
 		,@intDetailTermId INT
+		,@intEntityLocationId INT
 	DECLARE @tblEMEntity TABLE (
 		strOldName NVARCHAR(100)
 		,ysnOldActive BIT
@@ -315,6 +316,21 @@ BEGIN TRY
 							,1
 							)
 				END
+
+				IF EXISTS (
+						SELECT 1
+						FROM tblEMEntity E
+						WHERE E.strName = @strName
+						)
+				BEGIN
+					SELECT @strError = 'Vendor Name ''' + @strName + ''' already exists.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
 			END
 			ELSE
 			BEGIN
@@ -448,6 +464,7 @@ BEGIN TRY
 
 				SELECT @intDetailCountryId = NULL
 					,@intDetailTermId = NULL
+					,@intEntityLocationId = NULL
 
 				SELECT @strDetailLineType = strLineType
 					,@strDetailLocation = strLocation
@@ -913,101 +930,117 @@ BEGIN TRY
 				FROM @tblEMEntityNewLocation
 
 				--Entity Location
-				INSERT INTO tblEMEntityLocation (
-					intEntityId
-					,strLocationName
-					,strAddress
-					,strCity
-					,strCountry
-					,strZipCode
-					,strState
-					,strCheckPayeeName
-					,strPhone
-					,intTermsId
-					,ysnDefaultLocation
-					,ysnActive
-					,intConcurrencyId
-					)
-				OUTPUT inserted.intEntityLocationId
-					,inserted.strLocationName
-					,'Added'
-				INTO @tblEMEntityNewLocation
-				SELECT @intEntityId
-					,strLocation
-					,strAddress
-					,strCity
-					,strCountry
-					,strZip
-					,strState
-					,LEFT(strCity, 50)
-					,strPhone
-					,T.intTermID
-					,(
-						CASE 
-							WHEN @strDefaultLocation = ETS.strLocation
-								THEN 1
-							ELSE 0
-							END
-						)
-					,1
-					,1
-				FROM tblIPEntityTermStage ETS
-				LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
-				WHERE ETS.intStageEntityId = @intStageEntityId
-					AND ETS.strLineType = 'L'
-					AND strLocation NOT IN (
-						SELECT strLocationName
+				IF NOT EXISTS (SELECT 1
 						FROM tblEMEntityLocation
-						WHERE intEntityId = @intEntityId
+						WHERE intEntityId = @intEntityId)
+				BEGIN
+					INSERT INTO tblEMEntityLocation (
+						intEntityId
+						,strLocationName
+						,strAddress
+						,strCity
+						,strCountry
+						,strZipCode
+						,strState
+						,strCheckPayeeName
+						,strPhone
+						,intTermsId
+						,ysnDefaultLocation
+						,ysnActive
+						,intConcurrencyId
 						)
+					OUTPUT inserted.intEntityLocationId
+						,inserted.strLocationName
+						,'Added'
+					INTO @tblEMEntityNewLocation
+					SELECT @intEntityId
+						,strLocation
+						,strAddress
+						,strCity
+						,strCountry
+						,strZip
+						,strState
+						,LEFT(strCity, 50)
+						,strPhone
+						,T.intTermID
+						,(
+							CASE 
+								WHEN @strDefaultLocation = ETS.strLocation
+									THEN 1
+								ELSE 0
+								END
+							)
+						,1
+						,1
+					FROM tblIPEntityTermStage ETS
+					LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
+					WHERE ETS.intStageEntityId = @intStageEntityId
+						AND ETS.strLineType = 'L'
+						AND strLocation NOT IN (
+							SELECT strLocationName
+							FROM tblEMEntityLocation
+							WHERE intEntityId = @intEntityId
+							)
+				END
+				ELSE
+				BEGIN
+					DELETE
+					FROM @tblEMEntityLocation
 
-				DELETE
-				FROM @tblEMEntityLocation
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM dbo.tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
 
-				UPDATE EL
-				SET strAddress = ETS.strAddress
-					,strCity = ETS.strCity
-					,strCountry = ETS.strCountry
-					,strZipCode = ETS.strZip
-					,strState = ETS.strState
-					,strCheckPayeeName = LEFT(ETS.strCity, 50)
-					,strPhone = ETS.strPhone
-					,intTermsId = T.intTermID
-					,ysnDefaultLocation = (
-						CASE 
-							WHEN @strDefaultLocation = ETS.strLocation
-								THEN 1
-							ELSE 0
-							END
-						)
-					,intConcurrencyId = EL.intConcurrencyId + 1
-				OUTPUT inserted.intEntityLocationId
-					,'Modified'
-					,deleted.strAddress
-					,deleted.strCity
-					,deleted.strCountry
-					,deleted.strZipCode
-					,deleted.strState
-					,deleted.strCheckPayeeName
-					,deleted.strPhone
-					,deleted.intTermsId
-					,deleted.ysnDefaultLocation
-					,inserted.strAddress
-					,inserted.strCity
-					,inserted.strCountry
-					,inserted.strZipCode
-					,inserted.strState
-					,inserted.strCheckPayeeName
-					,inserted.strPhone
-					,inserted.intTermsId
-					,inserted.ysnDefaultLocation
-				INTO @tblEMEntityLocation
-				FROM tblEMEntityLocation EL
-				JOIN tblIPEntityTermStage ETS ON ETS.strLocation = EL.strLocationName
-					AND EL.intEntityId = @intEntityId
-					AND ETS.intStageEntityId = @intStageEntityId
-					AND ETS.strLineType = 'L'
-				LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
+					UPDATE tblEMEntityLocation
+					SET strLocationName = @strDefaultLocation
+					WHERE intEntityId = @intEntityId
+						AND intEntityLocationId = @intEntityLocationId
+
+					UPDATE EL
+					SET strAddress = ETS.strAddress
+						,strCity = ETS.strCity
+						,strCountry = ETS.strCountry
+						,strZipCode = ETS.strZip
+						,strState = ETS.strState
+						,strCheckPayeeName = LEFT(ETS.strCity, 50)
+						,strPhone = ETS.strPhone
+						,intTermsId = T.intTermID
+						,ysnDefaultLocation = (
+							CASE 
+								WHEN @strDefaultLocation = ETS.strLocation
+									THEN 1
+								ELSE 0
+								END
+							)
+						,intConcurrencyId = EL.intConcurrencyId + 1
+					OUTPUT inserted.intEntityLocationId
+						,'Modified'
+						,deleted.strAddress
+						,deleted.strCity
+						,deleted.strCountry
+						,deleted.strZipCode
+						,deleted.strState
+						,deleted.strCheckPayeeName
+						,deleted.strPhone
+						,deleted.intTermsId
+						,deleted.ysnDefaultLocation
+						,inserted.strAddress
+						,inserted.strCity
+						,inserted.strCountry
+						,inserted.strZipCode
+						,inserted.strState
+						,inserted.strCheckPayeeName
+						,inserted.strPhone
+						,inserted.intTermsId
+						,inserted.ysnDefaultLocation
+					INTO @tblEMEntityLocation
+					FROM tblEMEntityLocation EL
+					JOIN tblIPEntityTermStage ETS ON ETS.strLocation = EL.strLocationName
+						AND EL.intEntityId = @intEntityId
+						AND ETS.intStageEntityId = @intStageEntityId
+						AND ETS.strLineType = 'L'
+					LEFT JOIN tblSMTerm T ON T.strTermCode = ETS.strTerm
+				END
 
 				SELECT @intDefaultLocationId = intEntityLocationId
 				FROM dbo.tblEMEntityLocation
@@ -1107,19 +1140,19 @@ BEGIN TRY
 							AND ETS.strLineType = 'T'
 						)
 
-				DELETE EL
-				OUTPUT deleted.intEntityLocationId
-					,deleted.strLocationName
-					,'Deleted'
-				INTO @tblEMEntityNewLocation
-				FROM tblEMEntityLocation EL
-				WHERE EL.intEntityId = @intEntityId
-					AND EL.strLocationName NOT IN (
-						SELECT ETS.strLocation
-						FROM tblIPEntityTermStage ETS
-						WHERE ETS.intStageEntityId = @intStageEntityId
-							AND ETS.strLineType = 'L'
-						)
+				--DELETE EL
+				--OUTPUT deleted.intEntityLocationId
+				--	,deleted.strLocationName
+				--	,'Deleted'
+				--INTO @tblEMEntityNewLocation
+				--FROM tblEMEntityLocation EL
+				--WHERE EL.intEntityId = @intEntityId
+				--	AND EL.strLocationName NOT IN (
+				--		SELECT ETS.strLocation
+				--		FROM tblIPEntityTermStage ETS
+				--		WHERE ETS.intStageEntityId = @intStageEntityId
+				--			AND ETS.strLineType = 'L'
+				--		)
 
 				DELETE
 				FROM @tblEntityContactIdOutput
@@ -1172,6 +1205,10 @@ BEGIN TRY
 				IF ISNULL(@intDefaultContactId, 0) > 0
 				BEGIN
 					UPDATE tblEMEntityToContact
+					SET ysnDefaultContact = 0
+					WHERE intEntityId = @intEntityId
+
+					UPDATE tblEMEntityToContact
 					SET ysnDefaultContact = 1
 					WHERE intEntityId = @intEntityId
 						AND intEntityContactId = @intDefaultContactId
@@ -1217,19 +1254,19 @@ BEGIN TRY
 					AND ISNULL(ETS.strMobile, '') <> ''
 
 				-- Deletes tblEMEntity, tblEMEntityToContact, tblEMEntityPhoneNumber, tblEMEntityMobileNumber
-				IF EXISTS (
-						SELECT 1
-						FROM @tblEntityContactIdOutput
-						)
-				BEGIN
-					DELETE EC
-					FROM tblEMEntityToContact EC
-					WHERE EC.intEntityId = @intEntityId
-						AND EC.intEntityContactId NOT IN (
-							SELECT intEntityId
-							FROM @tblEntityContactIdOutput
-							)
-				END
+				--IF EXISTS (
+				--		SELECT 1
+				--		FROM @tblEntityContactIdOutput
+				--		)
+				--BEGIN
+				--	DELETE EC
+				--	FROM tblEMEntityToContact EC
+				--	WHERE EC.intEntityId = @intEntityId
+				--		AND EC.intEntityContactId NOT IN (
+				--			SELECT intEntityId
+				--			FROM @tblEntityContactIdOutput
+				--			)
+				--END
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 

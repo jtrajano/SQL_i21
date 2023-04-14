@@ -7,6 +7,7 @@ AS
 
 BEGIN
 
+	DECLARE @strContractNumber varchar(50)
 
 	INSERT INTO tblCTContractDetailImportHeader(intUserId, dtmImportDate, guiUniqueId, strFileName)
 	SELECT @intUserId, GETDATE(), @guiUniqueId, @strFileName
@@ -15,11 +16,20 @@ BEGIN
 
 	SET @intContractDetailImportHeaderId = SCOPE_IDENTITY()
 
+	UPDATE tblCTContractDetailImport
+	SET intContractDetailImportHeaderId = @intContractDetailImportHeaderId
+	WHERE guiUniqueId = @guiUniqueId
+
+	SELECT top 1 @strContractNumber = strContractNumber from tblCTContractDetailImport
+	WHERE guiUniqueId = @guiUniqueId
+
+	UPDATE tblCTContractDetailImportHeader
+	SET strContractNumber = @strContractNumber
+	WHERE guiUniqueId = @guiUniqueId
+
 	IF ISNULL(@intContractDetailImportHeaderId, 0) <> 0
 	BEGIN
-		UPDATE tblCTContractDetailImport
-		SET intContractDetailImportHeaderId = @intContractDetailImportHeaderId
-		WHERE guiUniqueId = @guiUniqueId
+		
 
 		SELECT intContractDetailImportId
 			, ci.intContractDetailImportHeaderId
@@ -33,6 +43,7 @@ BEGIN
 			, ci.dtmPlannedAvailability
 			, ci.dtmEventStartDate
 			, ci.dtmUpdatedAvailability
+			, intCHLocationId = ch.intCompanyLocationId
 			, intLocationId = cl.intCompanyLocationId
 			, ci.strLocation
 			, bk.intBookId
@@ -205,13 +216,56 @@ BEGIN
 		
 		where ci.guiUniqueId = @guiUniqueId
 
+		Declare @ysnCompanyLocationInContractHeader as BIT
+		select @ysnCompanyLocationInContractHeader = ysnCompanyLocationInContractHeader from tblCTCompanyPreference
+
+
+		IF @ysnCompanyLocationInContractHeader = CAST(1  as BIT)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ISNULL(intCHLocationId,0) <> ISNULL(intLocationId,0)) 
+			BEGIN
+		
+				INSERT INTO tblCTErrorImportLogs
+				SELECT guiUniqueId
+					   ,'TBO in the sequence doesn''t match with the TBO in the header'
+					   ,strContractNumber
+					   ,intSequence
+					   ,'Fail'
+					   ,1
+				FROM #tmpList 
+				WHERE guiUniqueId = @guiUniqueId AND  strLocation <> '' and  ISNULL(intCHLocationId,0) <> ISNULL(intLocationId,0)
+
+			
+			END
+		END
+		ELSE
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ISNULL(intLocationId, 0) = 0) 
+			BEGIN
+		
+				INSERT INTO tblCTErrorImportLogs
+				SELECT guiUniqueId
+					   ,'Invalid TBO'
+					   ,strContractNumber
+					   ,intSequence
+					   ,'Fail'
+					   ,1
+				FROM #tmpList 
+				WHERE guiUniqueId = @guiUniqueId AND  strLocation <> ''
+
+			
+			END
+		END
+		
+
+
 
 		IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ISNULL(intItemId, 0) = 0) 
 		BEGIN
 		
 			INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Item'
+				   ,'Invalid TeaLingo'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -294,7 +348,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Book'
+				   ,'Invalid Mixing Unit'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -307,7 +361,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Sub-Book'
+				   ,'Invalid Strategy'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -320,7 +374,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Purchasing Group'
+				   ,'Invalid Company Code'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -360,7 +414,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Loading Point'
+				   ,'Invalid Port of Shipping'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -373,7 +427,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Destination Point'
+				   ,'Invalid Port of Arrival'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
@@ -400,7 +454,7 @@ BEGIN
 		BEGIN
 		INSERT INTO tblCTErrorImportLogs
 			SELECT guiUniqueId
-				   ,'Invalid Market Zone'
+				   ,'Invalid Channel'
 				   ,strContractNumber
 				   ,intSequence
 				   ,'Fail'
