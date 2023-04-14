@@ -227,8 +227,13 @@ BEGIN
 							SELECT SUM(dblAmountDue)
 							FROM 
 							(
-							SELECT 
-								((SUM(dblTotal) - SUM(ISNULL(appliedPrepays.dblPayment, 0))) - SUM(dblPaymentTemp)) dblAmountDue
+							SELECT
+								CASE 
+									WHEN A.intTransactionType = 16 THEN
+										((SUM(dblProvisionalTotal) - SUM(ISNULL(appliedPrepays.dblPayment, 0))) - SUM(dblPaymentTemp))
+									ELSE
+										((SUM(dblTotal) - SUM(ISNULL(appliedPrepays.dblPayment, 0))) - SUM(dblPaymentTemp)) 
+								END dblAmountDue
 							FROM tblAPBill A
 							OUTER APPLY (
 								SELECT SUM(APD.dblAmountApplied) AS dblPayment
@@ -238,6 +243,7 @@ BEGIN
 							WHERE 
 								A.intBillId IN (SELECT intID FROM #tmpBillsId)
 							AND A.ysnIsPaymentScheduled = 0
+							GROUP BY A.intTransactionType
 							UNION ALL
 							SELECT SUM(dblPayment - dblDiscount) dblAmountDue
 							FROM tblAPVoucherPaymentSchedule B
