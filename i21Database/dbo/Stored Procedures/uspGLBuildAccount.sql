@@ -1,19 +1,14 @@
 ﻿
 	CREATE PROCEDURE  [dbo].[uspGLBuildAccount]
 			@intUserId INT,
-			@intCurrencyId INT = 0
+			@intCurrencyId INT = NULL
 	AS
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
-	IF @intCurrencyId = 0
-		SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
-	IF ISNULL(@intCurrencyId, 0)= 0
-	BEGIN
-		RAISERROR('Functional Currency is not setup properly. Please set it up in Company Configuration Screen.', 16, 1);
-	END
+	IF @intCurrencyId = 0 SET @intCurrencyId = NULL
 	DECLARE  @tblAccount  TABLE ( strAccountId NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL )
 	
 	INSERT INTO @tblAccount (strAccountId)
@@ -120,8 +115,6 @@
 	--DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
 	IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
 		EXEC uspGLAccountOriginSync @intUserId
-		
-	EXEC dbo.uspGLUpdateAccountLocationId
-	EXEC uspGLBuildTempCOASegment
 
-	
+	EXEC dbo.uspGLUpdateAccountSegmentId
+	EXEC uspGLBuildTempCOASegment
