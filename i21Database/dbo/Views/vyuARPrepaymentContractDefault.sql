@@ -75,7 +75,7 @@ SELECT
 	,strCompanyLocationName	= LOC.strLocationName
 	,strSalespersonName		= SP.strName
 	,strFreightTerm			= FT.strFreightTerm
-	,strTaxGroup			= TRIM(CONTRACTS.strTaxGroup)
+	,strTaxGroup			= CONTRACTS.strTaxGroup
 	,intTaxGroupId			= CONTRACTS.intTaxGroupId
 FROM (
 	SELECT intContractHeaderId		= CC.intContractHeaderId
