@@ -28,7 +28,6 @@ DECLARE @tblCompanyLocation TABLE (
 )
 DECLARE	 @ZeroDecimal					NUMERIC(18, 6) = 0
 		,@ysnChargeonCharge				BIT	= 1
-		,@strServiceChargeCalculation	NVARCHAR(50)
 
 SET @batchId = CONVERT(NVARCHAR(100), NEWID())
 SET @totalAmount = @ZeroDecimal
@@ -80,16 +79,8 @@ BEGIN
 	AND ARI.intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@companyLocationIds))
 END
 
-SELECT TOP 1 
-	 @ysnChargeonCharge				= ISNULL(ysnChargeonCharge, 1)
-	,@strServiceChargeCalculation	= ISNULL(strServiceChargeCalculation, '')
+SELECT TOP 1 @ysnChargeonCharge	= ISNULL(ysnChargeonCharge, 1)
 FROM tblARCompanyPreference
-
-IF @strServiceChargeCalculation = ''
-BEGIN
-	RAISERROR('There is no setup for Service Charge Calculation in the Company Configuration.', 16, 1) 
-	RETURN 0
-END
 
 WHILE EXISTS(SELECT TOP 1 1 FROM @tblCompanyLocation)
 BEGIN
