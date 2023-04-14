@@ -256,9 +256,9 @@ BEGIN
 		[strDescription]				=	'Gain/Loss',
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
-		[intCurrencyId]					=	A.intCurrencyId,
-		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	A.dblExchangeRate,
+		[intCurrencyId]					=	@functionalCurrency,
+		[intCurrencyExchangeRateTypeId]=	NULL,
+		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Posted Gain/Loss',
@@ -272,12 +272,30 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[intConcurrencyId]				=	1,
-		[dblDebitForeign]				=	0,      
+		[dblDebitForeign]				=	--CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
+											-- (CAST(
+											-- 	dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+											-- 	AS DECIMAL(18,2))
+											-- -
+											-- CAST(
+											-- 	dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
+											-- 	AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+											(CAST(
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1)
+												AS DECIMAL(18,2))
+											-
+											CAST(
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) * voucher.dblAverageExchangeRate
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 1 THEN -1 ELSE 1 END),
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	A.dblExchangeRate,
+		[dblForeignRate]				=	1,
 		[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -770,6 +788,7 @@ BEGIN
 			AND PD.dblPayment <> 0
   		GROUP BY PD.intAccountId, PD.intPaymentId
 		) PAY ON PAY.intPaymentId = P.intPaymentId
+		WHERE PAY.dblDifference <> 0 OR dblDifferenceForeign <> 0
 
 		--THIS IS FOR DETAILED ENTRIES ROUNDING ISSUE NOT CURRENTLY APPLICABLE IN 20.1
 		-- UNION ALL	
