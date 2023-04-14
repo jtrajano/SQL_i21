@@ -579,6 +579,68 @@ WHERE
 	)
 	AND A.intTransactionReversed IS NULL
 	AND A.intTransactionType IN (1)
+	AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
+UNION ALL
+SELECT 
+	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId 
+	,[dblNewValue] =
+			CASE 
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+					CAST(
+						(
+							(B.dblCost * dblQtyReceived) / ISNULL(r.intSubCurrencyCents, 1) 
+						)  
+						AS DECIMAL(18,2)
+					)
+				ELSE
+					-CAST(
+						(B.dblCost * B.dblQtyReceived)  * rc.dblForexRate
+						AS DECIMAL(18,2)
+					)
+			END
+	 ,[dblNewForexValue] =
+			CASE 
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+						CAST(
+							(
+								(B.dblCost * rc.dblForexRate)
+								/ ISNULL(r.intSubCurrencyCents, 1) 
+							)  
+							AS DECIMAL(18,2)
+						)
+				ELSE 
+						CAST(
+							(B.dblCost * rc.dblForexRate)
+							AS DECIMAL(18,2)
+						)
+			END  			
+	,[dtmDate] = A.dtmDate
+	,[intTransactionId] = A.intBillId
+	,[intTransactionDetailId] = B.intBillDetailId
+	,[strTransactionId] = A.strBillId
+	,[intCurrencyId] = rc.intCurrencyId
+	,[intForexRateTypeId] = rc.intForexRateTypeId
+	,[dblForexRate] = rc.dblRate
+FROM 
+	tblAPBill A INNER JOIN tblAPBillDetail B
+		ON A.intBillId = B.intBillId
+	INNER JOIN (
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+			ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+		)
+	ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId 
+WHERE 
+	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+	AND B.intInventoryReceiptChargeId IS NOT NULL 
+	AND rc.ysnInventoryCost = 1
+	AND (
+		(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
+		OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
+	)
+	AND A.intTransactionReversed IS NULL
+	AND A.intTransactionType IN (1)
+	AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1
+	
 UNION ALL
 SELECT 
 	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId

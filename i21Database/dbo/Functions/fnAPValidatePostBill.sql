@@ -384,6 +384,25 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND (GLD.intAccountCategoryId IN (1, 2, 5, 27) OR GLD.intAccountId IS NULL)
 		AND A.intTransactionType <> 15
+		AND ISNULL(ysnPrepaidOtherCharge,0) != 1 --EXCLUDE PREPAID OTHER CHARGES
+
+		--VALIDATE PREPAID OTHER CHARGE ACCOUNT USED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Account used for item ''' + ISNULL(ISNULL(C.strItemNo, B.strMiscDescription),'') + ''' is invalid.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			16
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
+			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND (GLD.intAccountCategoryId NOT IN (27) OR GLD.intAccountId IS NULL)
+		AND A.intTransactionType IN (1)
+		AND B.intInventoryReceiptChargeId > 0
+		AND ISNULL(ysnPrepaidOtherCharge,0) = 1
 
 		--VALIDATE EXPENSE ACCOUNT USED IF ACTIVE DETAIL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

@@ -32,7 +32,10 @@ RETURNS TABLE AS RETURN
 				 AND A.intTransactionType <> 15
 				 AND (receiptItem.intTaxGroupId > 0 OR charges.intTaxGroupId > 0)
 				 AND (B.intTaxGroupId = receiptItem.intTaxGroupId OR B.intTaxGroupId = charges.intTaxGroupId)
+				 AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
+			 WHEN B.intInventoryReceiptChargeId IS NOT NULL AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1 THEN
+				 dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Inventory')
 			ELSE D.intAccountId
 		END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
@@ -73,6 +76,7 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15,11)
 	AND A.ysnFinalVoucher != 1 --Exclude Finalize Voucher
+	AND 1 = (CASE WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 0 AND B.dblOldCost IS NULL THEN 1 ELSE 0 END)
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
