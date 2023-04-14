@@ -494,7 +494,7 @@ BEGIN TRY
 
 		UPDATE @SummaryLogs set strTransactionNumber = '' where strTransactionNumber is null
 
-		EXEC uspRKLogRiskPosition @SummaryLogs
+		EXEC uspRKLogRiskPosition @SummaryLogs, 0, 0
 	END
 
 END TRY
