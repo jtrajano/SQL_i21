@@ -486,7 +486,7 @@ AS
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
 		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 
@@ -2257,7 +2257,7 @@ AS
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
 		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 	
