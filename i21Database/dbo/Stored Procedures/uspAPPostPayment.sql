@@ -700,6 +700,7 @@ GROUP BY
 	A.[strTransactionForm],
 	A.[strModuleName],
 	A.[intConcurrencyId]
+HAVING SUM(dblCredit - dblDebit) BETWEEN -1 AND 1
 END
 
 --=====================================================================================================================================
