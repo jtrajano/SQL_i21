@@ -87,6 +87,7 @@ BEGIN
 			ON A.[intEntityVendorId] = C.[intEntityId]
 		LEFT JOIN tblEMEntityLocation loc
 			ON loc.intEntityLocationId = A.intPayToAddressId
+		ORDER BY C.strVendorPayToId ASC--must be parent vendor first
 
 	SELECT TOP 1 
 		@functionalCurrency = intDefaultCurrencyId 
