@@ -3988,7 +3988,7 @@ BEGIN TRY
 				begin
 					declare @intLastLogStatus int;
 					select top 1 @intLastLogStatus = intContractStatusId from @cbLogPrev where strTransactionType = 'Contract Balance' order by intId desc
-					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4 and (isnull(@ysnQuantityChange,0) = 0 or @ysnUnlimitedQuantity = 0))
+					if (@strProcess <> 'Do Roll' and @intLastLogStatus = 4 and isnull(@ysnQuantityChange,0) = 0)
 					begin
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					end
