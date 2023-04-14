@@ -1,24 +1,27 @@
 CREATE PROCEDURE uspQMImportSupplierEvaluation
-    @intImportLogId INT
+(
+	@intImportLogId INT
+)    
 AS
 
 BEGIN TRY
 	BEGIN TRANSACTION
 
-    DECLARE
-        @intImportCatalogueId INT
-        ,@dblSupplierValuationPrice NUMERIC(18, 6)
-        ,@intSampleId INT
-        ,@intEntityUserId INT
+    DECLARE @intImportCatalogueId		INT
+		  , @dblSupplierValuationPrice	NUMERIC(18, 6)
+		  , @intSampleId				INT
+		  , @intEntityUserId			INT
 
-    -- Loop through each valid import detail
+	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
+
+    /* Loop through each valid import detail. */
     DECLARE @C AS CURSOR;
+
 	SET @C = CURSOR FAST_FORWARD FOR
-        SELECT
-            intImportCatalogueId = IMP.intImportCatalogueId
-            ,dblSupplierValuationPrice = IMP.dblSupplierValuation
-            ,intSampleId = S.intSampleId
-            ,intEntityUserId = IL.intEntityId
+        SELECT intImportCatalogueId			= IMP.intImportCatalogueId
+             , dblSupplierValuationPrice	= IMP.dblSupplierValuation
+             , intSampleId					= S.intSampleId
+             , intEntityUserId				= IL.intEntityId
         FROM tblQMSample S
         INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
         INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -37,47 +40,42 @@ BEGIN TRY
             AND IMP.ysnSuccess = 1
 
     OPEN @C 
-	FETCH NEXT FROM @C INTO
-		@intImportCatalogueId
-        ,@dblSupplierValuationPrice
-        ,@intSampleId
-        ,@intEntityUserId
+	FETCH NEXT FROM @C INTO @intImportCatalogueId
+						  , @dblSupplierValuationPrice
+						  , @intSampleId
+						  , @intEntityUserId
+
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-
-        EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Supplier Valuation Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 1
+        EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId  = @intSampleId
+													  , @intUserEntityId = @intEntityUserId
+													  , @strRemarks = 'Updated from Supplier Valuation Import'
+													  , @ysnCreate = 0
+													  , @ysnBeforeUpdate = 1
 
         UPDATE S
-        SET
-            intConcurrencyId = S.intConcurrencyId + 1
-            ,dblSupplierValuationPrice = @dblSupplierValuationPrice
+        SET intConcurrencyId			= S.intConcurrencyId + 1
+          , dblSupplierValuationPrice	= @dblSupplierValuationPrice
         FROM tblQMSample S
-        WHERE S.intSampleId = @intSampleId
+        WHERE S.intSampleId = @intSampleId;
 
         UPDATE tblQMImportCatalogue
         SET intSampleId = @intSampleId
         WHERE intImportCatalogueId = @intImportCatalogueId
 
-        EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Supplier Valuation Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 0
-
-        FETCH NEXT FROM @C INTO
-            @intImportCatalogueId
-            ,@dblSupplierValuationPrice
-            ,@intSampleId
-            ,@intEntityUserId
+        FETCH NEXT FROM @C INTO @intImportCatalogueId
+							  , @dblSupplierValuationPrice
+							  , @intSampleId
+							  , @intEntityUserId
     END
     CLOSE @C
 	DEALLOCATE @C
+
+    EXEC uspQMGenerateSampleCatalogueImportAuditLog
+        @intUserEntityId = @intEntityUserId
+        , @strRemarks = 'Updated from Supplier Valuation Import'
+        , @ysnCreate = 0
+        , @ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

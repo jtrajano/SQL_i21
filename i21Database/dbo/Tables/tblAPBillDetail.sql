@@ -108,6 +108,7 @@
 	[strVendorLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intGardenMarkId] INT NULL,
 	[strPreInvoiceGardenNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strPreInvoicePurchaseType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intBookId]	INT NULL,
 	[intSubBookId] INT NULL,
 	[intCatalogueTypeId] INT NULL,

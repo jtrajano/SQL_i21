@@ -44,6 +44,7 @@ SELECT S.intSampleId
 	, strTasterRemark = S.strComment
 	, S.dblSupplierValuationPrice
 	, strLastPrice = '0.0'
+	, S.intCompanyLocationId
 FROM tblQMSample S
 LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 LEFT JOIN tblAPVendor VAN ON VAN.intEntityId = S.intEntityId

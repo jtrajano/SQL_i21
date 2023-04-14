@@ -244,6 +244,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	ysnRoll BIT NULL DEFAULT 0, 
 	dtmEtaPol datetime null,
 	dtmEtaPod datetime null,
+	[dtmOriginalETD] datetime null,
 	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intGardenMarkId] [int] NULL,
 	[intReasonCodeId] [int] NULL,
@@ -767,12 +768,9 @@ CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
     AFTER DELETE
 AS
 BEGIN	
-	ALTER TABLE tblCTContractCost DISABLE TRIGGER trgCTContractCostInstedOfDelete
-
+	
 	DELETE FROM tblCTContractCost 
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM DELETED)
-
-	ALTER TABLE tblCTContractCost ENABLE TRIGGER trgCTContractCostInstedOfDelete
 
     DECLARE @contractDetails AS [dbo].[ContractDetailTable]
     INSERT INTO @contractDetails ([intContractDetailId],[intContractHeaderId],[dtmCreated],[intContractSeq],[intBasisCurrencyId],[intBasisUOMId])

@@ -120,6 +120,10 @@ CREATE TABLE tblMFBatch
 	,dblTeaMouthFeelPinpoint  NUMERIC(18,6)  NULL
 	,dblTeaAppearancePinpoint  NUMERIC(18,6)  NULL
 	,dtmShippingDate DATETIME 
+	,strERPPONumber2 NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL
+	,strFines NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL
+	,dtmPOCreated DATETIME
+	,strIBDNo NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL
 	,CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC
@@ -128,4 +132,12 @@ CREATE TABLE tblMFBatch
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblMFBatch_intSampleId] ON [dbo].[tblMFBatch](intSampleId)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblMFBatch_strBatchId_intLocationId] ON [dbo].[tblMFBatch](strBatchId, intLocationId)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblMFBatch_batch_check]
+ON [dbo].[tblMFBatch] ([intSales],[intSalesYear],[dtmSalesDate],[strTeaType],[strVendorLotNumber],[intBuyingCenterLocationId],[intSubBookId],[intLocationId])
+INCLUDE ([strBatchId])
 GO

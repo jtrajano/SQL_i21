@@ -294,6 +294,8 @@ INSERT INTO tblICItem (
 , strFuelInspectFee
 , ysnSeparateStockForUOMs
 , intSubcategoriesId
+, strInvoiceComments
+, strPickListComments
 , dtmDateCreated
 , intDataSourceId
 , intRowNumber
@@ -351,6 +353,8 @@ SELECT
   , sr.strFuelInspectFee
   , sr.ysnSeparateStockForUOMs
   , subcat.intSubcategoriesId
+  , sr.strInvoiceComments
+  , sr.strPickListComments
   , GETUTCDATE()
   , 3
   , sr.intRowNumber
@@ -471,6 +475,8 @@ SET
   , i.strFuelInspectFee = sr.strFuelInspectFee
   , i.ysnSeparateStockForUOMs = sr.ysnSeparateStockForUOMs
   , i.intSubcategoriesId = subcat.intSubcategoriesId
+  , i.strInvoiceComments = sr.strInvoiceComments
+  , i.strPickListComments = sr.strPickListComments
   , i.dtmDateCreated = GETUTCDATE()
   , i.intDataSourceId = 3
   , i.intRowNumber = sr.intRowNumber

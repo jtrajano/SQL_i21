@@ -343,6 +343,8 @@ BEGIN TRY
 		,dtmLastModified
 		,intConcurrencyId
 		,strERPRecipeNo
+		,dtmValidFrom
+		,dtmValidTo
 		)
 	SELECT intRecipeId
 		,intItemId
@@ -365,6 +367,8 @@ BEGIN TRY
 		,dtmLastModified
 		,intConcurrencyId
 		,strERPRecipeNo
+		,dtmValidFrom
+		,dtmValidTo
 	FROM dbo.tblMFRecipe
 	WHERE intRecipeId = @intRecipeId
 

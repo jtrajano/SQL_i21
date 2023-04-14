@@ -6,17 +6,17 @@ AS
 SET @dtmAsOfDate = dbo.fnRemoveTimeOnDate(ISNULL(@dtmAsOfDate, GETDATE())) 
  
 DECLARE @icAmounts AS TABLE (
-	strType NVARCHAR(500)
+	strType NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	,dblAmount NUMERIC(18, 6) 
  )
 
 DECLARE @glAmounts AS TABLE (
-	strType NVARCHAR(500)
+	strType NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	,dblAmount NUMERIC(18, 6) 
  )
 
  DECLARE @icVsGLResult AS TABLE (
-	strType NVARCHAR(500)
+	strType NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	,dblICAmount NUMERIC(18, 6) NULL
 	,dblGLAmount NUMERIC(18, 6) NULL 
 	,dblDiff NUMERIC(18, 6) NULL 
@@ -118,10 +118,10 @@ BEGIN
 			ON ic.strType = gl.strType
 	WHERE
 		ISNULL(ic.dblAmount, 0) <> ISNULL(gl.dblAmount, 0) 
-		AND ic.strType NOT IN ('Consume', 'Produce', 'Inventory Adjustment - Opening Inventory')
+		AND ic.strType NOT IN ('Consume', 'Produce', 'Inventory Adjustment - Opening Inventory', 'Inventory Receipt', 'Inventory Return')
 
 	SET @result = @@ROWCOUNT
-	IF ISNULL(@result, 0) > 0 SET @return = -1
+	IF ISNULL(@result, 0) > 0 SET @return = -1 -- Return -1 to signify an error. 
 	
 	-- IC vs GL for Consume and Produce
 	INSERT INTO @icVsGLResult (
@@ -143,9 +143,43 @@ BEGIN
 		ISNULL(icMfg.dblAmount, 0) <> ISNULL(glMfg.dblAmount, 0) 
 
 	SET @result = @@ROWCOUNT
-	IF ISNULL(@result, 0) > 0 SET @return = -1
+	IF ISNULL(@result, 0) > 0 SET @return = -1 -- Return -1 to signify an error. 
 	
-	-- Return -1 to signify an error. 
+	-- IC vs GL for Inventory Receipt and Inventory Return
+	INSERT INTO @icVsGLResult (
+		strType
+		,dblICAmount
+		,dblGLAmount 
+		,dblDiff
+	)
+	SELECT 
+		ic.strType
+		,ic.dblAmount
+		,gl.dblAmount
+		,ISNULL(ic.dblAmount, 0) - ISNULL(gl.dblAmount, 0) 
+	FROM 
+		@icAmounts ic LEFT JOIN @glAmounts gl
+			ON ic.strType = gl.strType
+	WHERE
+		ISNULL(ic.dblAmount, 0) <> ISNULL(gl.dblAmount, 0) 
+		AND ic.strType IN ('Inventory Receipt', 'Inventory Return')
+		AND (
+			ISNULL(ic.dblAmount, 0) - ISNULL(gl.dblAmount, 0) > 0.01 
+			OR ISNULL(ic.dblAmount, 0) - ISNULL(gl.dblAmount, 0) < -0.01 
+		)
+		-- Allow a 0.01 discrepancy between IC and GL because there are other charges assigned to item cost that can cause 0.01 discrepancy 
+		-- For example: 
+		-- 1. 250 units of lotted item. Unit cost is 0.54. Line total is $135.* 
+		-- 2. Other charge is $2.88. 
+		-- 3. New item cost is $135 + $2.88 = $137.88 or $0.55152 per unit. 
+		-- 4. Item is received in multiple lots: (1) 150 units, (2) 50 units, and (3) 50 units. 
+		-- 5. 150 x $0.55152 = $82.728. GL is booked at $82.73. 
+		-- 6. 50 x  $0.55152 = $27.576. GL is booked at $27.58. 
+		-- 7. 50 x  $0.55152 = $27.576. GL is booked at $27.58. 
+		-- 8. Total of GL amount is $82.73 + $27.58 + $27.58 = $137.89. IC and GL now has a 0.01 discrepancy.* 
+
+	SET @result = @@ROWCOUNT
+	IF ISNULL(@result, 0) > 0 SET @return = -1 -- Return -1 to signify an error. 	
 	
 	IF @return < 0
 	BEGIN 

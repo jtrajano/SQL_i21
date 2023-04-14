@@ -123,9 +123,7 @@ BEGIN TRY
 			BEGIN TRAN
 
 			UPDATE tblMFBatch
-			SET strERPPONumber = @strPONumber
-				,strERPPOLineNo = @strPOLineItemNo
-				,strPOStatus = (
+			SET strPOStatus = (
 					CASE 
 						WHEN @strPOStatus = 'A'
 							THEN 'PO Open'

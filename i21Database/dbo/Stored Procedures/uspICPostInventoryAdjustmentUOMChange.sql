@@ -88,6 +88,7 @@ BEGIN
 						ON LotTrans.intLotId = Detail.intLotId
 						AND LotTrans.intSubLocationId = Lot.intSubLocationId
 						AND LotTrans.intStorageLocationId = Lot.intStorageLocationId
+						AND LotTrans.ysnIsUnposted = 0 
 					INNER JOIN (
 						tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
 							ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
@@ -129,9 +130,9 @@ BEGIN
 	)
 	SELECT 	intItemId				= Lot.intItemId
 			,intItemLocationId		= Lot.intItemLocationId
-			,intItemUOMId			= Lot.intWeightUOMId
+			,intItemUOMId			= ISNULL(Lot.intWeightUOMId, Lot.intItemUOMId) 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -Lot.dblWeight --dbo.fnCalculateQtyBetweenUOM(Detail.intWeightUOMId, Lot.intWeightUOMId, Detail.dblQuantity) * -1
+			,dblQty					= -ISNULL(NULLIF(Lot.dblWeight, 0), Lot.dblQty) --dbo.fnCalculateQtyBetweenUOM(Detail.intWeightUOMId, Lot.intWeightUOMId, Detail.dblQuantity) * -1
 			,dblUOMQty				= Detail.dblWeightPerQty
 			,dblCost				= Lot.dblLastCost
 			,dblSalesPrice			= 0
@@ -212,7 +213,6 @@ BEGIN
 		AND Detail.dblAdjustByQuantity <> 0 
 		AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own -- process only company-owned stocks 
 	
-
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
@@ -384,11 +384,18 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intWeightUOMId
+			,intItemUOMId			= ISNULL(Detail.intWeightUOMId, Detail.intNewItemUOMId) 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -SourceTransaction.dblQty
-			,dblUOMQty				= WeightUOM.dblUnitQty
-			,dblCost				= Detail.dblNewCost
+			,dblQty					= 
+									 CASE 
+										WHEN Detail.intWeightUOMId IS NOT NULL THEN 
+											-SourceTransaction.dblQty
+										ELSE
+											-dbo.fnCalculateQtyBetweenUOM(SourceTransaction.intItemUOMId, Detail.intNewItemUOMId, SourceTransaction.dblQty) 											
+									END
+			,dblUOMQty				= ISNULL(WeightUOM.dblUnitQty, newItemUOM.dblUnitQty) 
+			,dblCost				= --Detail.dblNewCost
+										dbo.fnCalculateCostBetweenUOM(SourceTransaction.intItemUOMId, ISNULL(Detail.intWeightUOMId, Detail.intNewItemUOMId), SourceTransaction.dblCost) 
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -420,6 +427,9 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
 				ON WeightUOM.intItemId = Detail.intItemId
 				AND WeightUOM.intItemUOMId = Detail.intWeightUOMId
+
+			LEFT JOIN tblICItemUOM newItemUOM
+				ON newItemUOM.intItemUOMId = Detail.intNewItemUOMId
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblQuantity > 0 

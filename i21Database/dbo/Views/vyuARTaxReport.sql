@@ -129,6 +129,7 @@ SELECT
 	,dblPayment					= INVOICE.dblPayment
 	,dblPaymentFunctional		= INVOICE.dblBasePayment
 	,strCheckNumbers			= PAYMENT.strCheckNumbers
+	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,dtmDateCreated				= CAST(INVOICE.dtmDateCreated AS DATE)
 	,dtmUpdatedDate				= CAST(AUDITLOG.dtmUpdatedDate AS DATE)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)

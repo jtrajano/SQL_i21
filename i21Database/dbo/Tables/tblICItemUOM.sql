@@ -20,6 +20,8 @@ Type the overview for the table here.
 		[intWeightUOMId] INT NULL,
 		[strUpcCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strLongUPCCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+        [strUPCA] NVARCHAR(50) NULL, 
+        [strSCC14] NVARCHAR(50) NULL,
         [intCheckDigit] INT NULL,
         [strUPCDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
         [intModifier] INT NULL,
@@ -57,7 +59,8 @@ Type the overview for the table here.
 			) PERSISTED,
         [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
         [intRowNumber] INT NULL,
-		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
+ 
+    CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
         CONSTRAINT [CHK_tblICItemUOM_intModifier] CHECK (intModifier >= 0 AND intModifier <= 999),
         CONSTRAINT [CHK_tblICItemUOM_intCheckDigit] CHECK (intCheckDigit >= 0 AND intCheckDigit <= 9),
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
@@ -94,6 +97,14 @@ Type the overview for the table here.
         CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strUpcCode_intModifier]
         ON tblICItemUOM([strUpcCode], [intModifier])
         WHERE strUpcCode IS NOT NULL AND intModifier IS NOT NULL;
+    GO
+        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strUPCA] 
+        ON [tblICItemUOM]([strUPCA] ASC)
+        WHERE [strUPCA] IS NOT NULL AND intModifier IS NULL;
+    GO
+        CREATE UNIQUE NONCLUSTERED INDEX [UQ_tblICItemUOM_strSCC14] 
+        ON [tblICItemUOM]([strSCC14] ASC)
+        WHERE [strSCC14] IS NOT NULL AND intModifier IS NULL;
     GO
 
 GO

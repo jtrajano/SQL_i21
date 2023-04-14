@@ -495,6 +495,45 @@ BEGIN TRY
 		FROM tblICStockReservation
 		WHERE intLotId = @intLotId
 			AND ysnPosted = 0
+	END
+	IF not exists(Select *From @tblICStockReservation) and @blnInventoryMove = 1
+		AND  (
+			SELECT Count(1)
+			FROM tblICStockReservation
+			WHERE intLotId = @intLotId
+				AND ysnPosted = 0
+			)=1 AND @blnIsPartialMove = 1
+	BEGIN
+		INSERT INTO @tblICStockReservation (
+			intTransactionId
+			,intInventoryTransactionType
+			)
+		SELECT DISTINCT intTransactionId
+			,intInventoryTransactionType
+		FROM tblICStockReservation
+		WHERE intLotId = @intLotId
+			AND ysnPosted = 0
+	END
+	IF NOT EXISTS(SELECT *FROM @tblICStockReservation) AND @blnInventoryMove = 1
+		AND  (
+			SELECT Count(1)
+			FROM tblICStockReservation
+			WHERE intLotId = @intLotId
+				AND ysnPosted = 0
+				AND dblQty-@dblMoveWeight<1
+			)=1 AND @blnIsPartialMove = 1
+	BEGIN
+		INSERT INTO @tblICStockReservation (
+			intTransactionId
+			,intInventoryTransactionType
+			)
+		SELECT DISTINCT intTransactionId
+			,intInventoryTransactionType
+		FROM tblICStockReservation
+		WHERE intLotId = @intLotId
+			AND ysnPosted = 0
+			AND dblQty-@dblMoveWeight<1
+	END
 
 		--AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intMoveItemUOMId, dblQty) = @dblMoveQty
 		INSERT INTO @ItemsToReserve (
@@ -540,8 +579,7 @@ BEGIN TRY
 			FROM @tblICStockReservation
 			WHERE intTransactionId > @intTransactionId
 		END
-	END
-
+	
 	IF @ysnDestinationLotEmptyOut = 1
 		AND (
 			SELECT dblQty
@@ -608,18 +646,19 @@ BEGIN TRY
 			AND SR.intLotId = T.intLotId
 		Where T.intLotId=@intLotId
 
-		UPDATE @ItemsToReserve
-		SET intLotId = @intNewLotId
-			,intStorageLocationId = @intNewStorageLocationId
-			,intSubLocationId = @intNewSubLocationId
-		WHERE intLotId = @intLotId
-
 		DELETE SR
 		FROM tblMFTask T
 		JOIN @ItemsToReserve SR ON SR.intTransactionId = T.intOrderHeaderId
 			AND SR.intLotId = T.intLotId
 			AND T.intLotId=@intNewLotId
 			AND T.intTaskStateId = 4
+		END
+
+		UPDATE @ItemsToReserve
+		SET intLotId = @intNewLotId
+			,intStorageLocationId = @intNewStorageLocationId
+			,intSubLocationId = @intNewSubLocationId
+		WHERE intLotId = @intLotId
 
 		SELECT @intTransactionId = NULL
 
@@ -671,7 +710,7 @@ BEGIN TRY
 			FROM @tblICStockReservation
 			WHERE intTransactionId > @intTransactionId
 		END
-	END
+
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 20
@@ -853,6 +892,12 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Source Empty out'
 			,@strNotes = NULL
+	END
+
+	IF NOT EXISTS(SELECT *FROM tblMFLotInventory WHERE intLotId=@intNewLotId)
+	BEGIN
+		INSERT INTO dbo.tblMFLotInventory(intLotId)
+		SELECT @intNewLotId
 	END
 
 	IF @intTransactionCount = 0

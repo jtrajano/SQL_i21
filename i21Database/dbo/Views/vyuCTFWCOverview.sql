@@ -5,8 +5,8 @@ AS
 		SELECT	DISTINCT
 				CH.intContractHeaderId,
 				CTD.intContractDetailId,
-				strPONumber = LGL.strCustomerReference,	
-				dtmOriginalETD = LGL.dtmETAPOD,
+				strPONumber = LGL.strExternalShipmentNumber,	
+				dtmOriginalETD = CTD.dtmOriginalETD,
 				dtmCurrentETD = CTD.dtmEtaPod,
 				dtmOriginalStockDate = LGL.dtmPlannedAvailabilityDate,
 				dtmRevisedStockDate = CTD.dtmPlannedAvailabilityDate, 
@@ -49,11 +49,11 @@ AS
 				strPortOfArrival = DP.strCity,
 				dtmETA = CTD.dtmEtaPod,
 				dtmMTA = CTD.dtmEtaPod + ISNULL(MFL.dblMUToAvailableForBlending,0),
-				dtmDaysLate = CTD.dtmPlannedAvailabilityDate +  CTD.dtmEtaPod + ISNULL(MFL.dblMUToAvailableForBlending,0),
+				intDaysLate = CASE WHEN LGL.dtmPlannedAvailabilityDate IS NULL THEN 0 ELSE DATEDIFF(Day, CTD.dtmEtaPod + ISNULL(MFL.dblMUToAvailableForBlending,0), LGL.dtmPlannedAvailabilityDate) END,
 				dtmReportRunOn = getdate(),
 				strFCPackageType = ICQM.strUnitMeasure,
 				strLineItemStatus = CTS.strContractStatus,
-				strSalesYear = SY.strSaleYear,
+				strSalesYear =  CONVERT(VARCHAR(20),MFB.intSalesYear, 100),
 				strFCBuyingCenter = CLD.strLocationName,
 				intSalesNo = MFB.intSales,
 				strCatalogueType = MFB.strTeaType,
@@ -66,7 +66,7 @@ AS
 			FROM	tblCTContractHeader	CH	
 			INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CTD.intContractHeaderId = CH.intContractHeaderId
 			LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = LGD.intPContractDetailId
-			LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intContractDetailId = CTD.intContractDetailId
+			LEFT JOIN tblLGLoad					LGL  WITH (NOLOCK) ON LGL.intLoadId = LGD.intLoadId
 			LEFT JOIN tblCTContractStatus		CTS  WITH (NOLOCK) ON CTS.intContractStatusId = CTD.intContractStatusId
 			LEFT JOIN tblSMCompanyLocation		CL   WITH (NOLOCK) ON CL.intCompanyLocationId = CH.intCompanyLocationId
 			LEFT JOIN tblSMCompanyLocation		CLD  WITH (NOLOCK) ON CLD.intCompanyLocationId = CTD.intCompanyLocationId
@@ -89,8 +89,7 @@ AS
 			LEFT JOIN tblCTBook					CTB	 WITH (NOLOCK) ON CTB.intBookId			  = CH.intBookId
 			LEFT JOIN tblSMCity					LP	 WITH (NOLOCK) ON LP.intCityId			  =	CTD.intLoadingPortId
 			LEFT JOIN tblSMCity					DP	 WITH (NOLOCK) ON DP.intCityId			  =	CTD.intDestinationPortId
-			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId
-			LEFT JOIN tblQMSaleYear				SY	 WITH (NOLOCK) ON SY.intSaleYearId		  = MFB.intSalesYear
+			LEFT JOIN tblMFLocationLeadTime		MFL	 WITH (NOLOCK) ON CTD.intLoadingPortId    = MFL.intPortOfDispatchId AND  CTD.intDestinationPortId = MFL.intPortOfArrivalId		
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
 			WHERE CTD.intContractStatusId IN ( 1,2,4) --Open, Unconfirmed,Re-Open

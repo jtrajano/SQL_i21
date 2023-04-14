@@ -252,6 +252,20 @@ BEGIN TRY
 						)
 			END
 
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblAPVendorCompanyLocation V
+					WHERE V.intEntityVendorId = @intEntityId
+						AND V.intCompanyLocationId = @intCompanyLocationId
+					)
+			BEGIN
+				RAISERROR (
+						'Location is not maintained in Vendor. '
+						,16
+						,1
+						)
+			END
+
 			SELECT @intCommodityId = intCommodityId
 			FROM dbo.tblICCommodity WITH (NOLOCK)
 			WHERE strCommodityCode = @strCommodity

@@ -202,7 +202,7 @@ BEGIN TRY
 			+ '<Revision>' + ISNULL(I.strGTIN, '') + '</Revision>'
 			+ '<Origin>' + ISNULL(C.strISOCode, '') + '</Origin>'
 			+ '<SubCluster>' + ISNULL(Region.strDescription, '') + '</SubCluster>'
-			+ '<TeaClusterCode>' + ISNULL(Certification.strCertificationName, '') + '</TeaClusterCode>'
+			+ '<TeaClusterCode>' + ISNULL(attribute2.strAttribute2, '') + '</TeaClusterCode>'
 			+ '<ManufactureType>' + ISNULL(ProductType.strDescription, '') + '</ManufactureType>'
 			+ '<TeaColourCode>' + ISNULL(LEFT(Season.strDescription, 1), '') + '</TeaColourCode>'
 			+ '<LeafSizeCode>' + ISNULL(Brand.strBrandCode, '') + '</LeafSizeCode>'
@@ -236,11 +236,11 @@ BEGIN TRY
 			+ '<AppearanceLower>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(@dblAMinValue, 0))) + '</AppearanceLower>'
 			+ '<AppearanceUpper>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(@dblAMaxValue, 0))) + '</AppearanceUpper>'
 			+ '<ManufactureTypeName>' + ISNULL(Certification.strCertificationCode, '') + '</ManufactureTypeName>'
-			+ '<ClusterName>' + ISNULL(Certification.strIssuingOrganization, '') + '</ClusterName>'
-			+ '<ClusterType>' + ISNULL(Certification.strCertificationIdName, '') + '</ClusterType>'
+			+ '<ClusterName>' + ISNULL(attribute4.strAttribute4, '') + '</ClusterName>'
+			+ '<ClusterType>' + ISNULL(attribute4.strAttribute4, '') + '</ClusterType>'
 			+ '<QualityGroup>' + ISNULL(attribute3.strAttribute3, '') + '</QualityGroup>'
-			+ '<MaterialCode>' + ISNULL(I.strModelNo, '') + '</MaterialCode>'
-			+ '<LeafSizeDescription>' + ISNULL(Brand.strBrandName, '') + '</LeafSizeDescription>'
+			+ '<MaterialCode></MaterialCode>'
+			+ '<LeafSizeDescription>' + ISNULL(I.strModelNo, '') + '</LeafSizeDescription>'
 			+ '<AllocationCode>' + ISNULL(attribute1.strAttribute1, '') + '</AllocationCode>'
 			+ '<LeafStyleDescription>' + ISNULL(VG.strDescription, '') + '</LeafStyleDescription>'
 		FROM dbo.tblICItem I WITH (NOLOCK)
@@ -259,6 +259,8 @@ BEGIN TRY
 		LEFT JOIN dbo.tblICManufacturer Manufacturer WITH (NOLOCK) ON Manufacturer.intManufacturerId = I.intManufacturerId
 		LEFT JOIN dbo.tblICCommodityAttribute3 attribute3 WITH (NOLOCK) ON attribute3.intCommodityAttributeId3 = I.intCommodityAttributeId3
 		LEFT JOIN dbo.tblICCommodityAttribute1 attribute1 WITH (NOLOCK) ON attribute1.intCommodityAttributeId1 = I.intCommodityAttributeId1
+		LEFT JOIN dbo.tblICCommodityAttribute2 attribute2 WITH (NOLOCK) ON attribute2.intCommodityAttributeId2 = I.intCommodityAttributeId2
+		LEFT JOIN dbo.tblICCommodityAttribute4 attribute4 WITH (NOLOCK) ON attribute4.intCommodityAttributeId4 = I.intCommodityAttributeId4
 
 		SELECT @strLineXML = @strLineXML
 			+ '<Line>'

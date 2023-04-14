@@ -963,6 +963,10 @@ BEGIN TRY
 					AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 						AND DATEPART(dy, PPV.dtmValidTo)
 				ORDER BY PP.intSequenceNo
+			
+				UPDATE tblQMSample
+				SET intCompanyLocationId = intLocationId
+				WHERE intCompanyLocationId IS NULL
 			END
 
 			IF ISNULL(@strTransactionType, '') = 'SAMPLE_UPDATE'

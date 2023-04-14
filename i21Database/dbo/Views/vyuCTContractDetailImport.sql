@@ -10,7 +10,7 @@ SELECT CD.intContractDetailImportId
     ,CD.dtmEndDate    
     ,CD.dtmUpdatedAvailability    
     ,strLocationName = CD.strLocation    
-    ,CL.intCompanyLocationId    
+    ,CH.intCompanyLocationId    
     ,CD.strBook    
     ,B.intBookId    
     ,CD.strSubBook    
@@ -69,10 +69,11 @@ SELECT CD.intContractDetailImportId
  ,dblConversionFactor = CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))    
  ,dblTotalCost = CD.dblCashPrice * CD.dblQuantity    * CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))    
  ,dblRealQuantity = CD.dblQuantity  * (CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10)) )
+ ,dtmCashFlowDate = CD.dtmEndDate + ISNULL(SMT.intBalanceDue, 0)
 FROM tblCTContractDetailImport    CD    
 LEFT JOIN tblCTContractHeader    CH  ON CH.strContractNumber   = CD.strContractNumber collate database_default    
 LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId and CH.intCommodityUOMId = CUM.intCommodityUnitMeasureId  
-LEFT JOIN tblSMCompanyLocation    CL  ON CL.strLocationName   = CD.strLocation   collate database_default    
+LEFT JOIN tblSMCompanyLocation    CL  ON CL.strLocationName =  CD.strLocation  collate database_default  
 LEFT JOIN tblCTBook       B  ON B.strBook     = CD.strBook    collate database_default    
 LEFT JOIN tblCTSubBook      SB  ON SB.strSubBook    = CD.strSubBook   collate database_default AND SB.intBookId =B.intBookId     
 LEFT JOIN tblICItem       IT  ON IT.strItemNo     = CD.strItem    collate database_default    
@@ -96,6 +97,7 @@ LEFT JOIN vyuCTInventoryItem    II  ON II.intItemId     = IT.intItemId AND II.in
 LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActive = 1 and CD.strShippineLine = Ent.strEntityName collate database_default
  LEFT JOIN tblICItemUOM ICF on qIuom.intUnitMeasureId   = ICF.intUnitMeasureId and IT.intItemId   = ICF.intItemId    
  LEFT JOIN tblICItemUOM ICT on CUM.intUnitMeasureId = ICT.intUnitMeasureId and IT.intItemId = ICT.intItemId
+ LEFT JOIN tblSMTerm SMT on SMT.intTermID = CH.intTermId
 GO
 
 

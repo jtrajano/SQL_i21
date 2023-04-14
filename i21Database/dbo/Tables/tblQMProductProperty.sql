@@ -27,3 +27,8 @@
 	CONSTRAINT [FK_tblQMProductProperty_tblQMProperty] FOREIGN KEY ([intPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]), 
 	CONSTRAINT [FK_tblQMProductProperty_tblQMComputationType] FOREIGN KEY ([intComputationTypeId]) REFERENCES [tblQMComputationType]([intComputationTypeId]) 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblQMProductProperty_intProductId]
+ON [dbo].[tblQMProductProperty] ([intProductId])
+GO

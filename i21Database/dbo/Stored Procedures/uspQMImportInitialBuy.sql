@@ -3,6 +3,14 @@ AS
 BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(50)
 	 ,@intPlantId INT 
+	 ,@strPlantCode NVARCHAR(50)
+	 ,@strBatchNo NVARCHAR(50)
+	,@intFromLocationCodeId INT
+	,@intDestinationStorageLocationId INT
+
+	DECLARE
+		@ysnSuccess BIT
+		,@strErrorMessage NVARCHAR(MAX)
 
 	BEGIN TRANSACTION
 
@@ -43,13 +51,22 @@ BEGIN TRY
 	-- Buyer1 Company Code
 	LEFT JOIN tblSMPurchasingGroup COMPANY_CODE ON COMPANY_CODE.strName = IMP.strB1CompanyCode
 	-- Buyer1 Group Number
-	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
+	LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strB1GroupNumber OR BOOK.strBookDescription = IMP.strB1GroupNumber)
 	-- Currency
 	LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
 	-- Strategy
 	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
 		AND STRATEGY.strSubBook = IMP.strStrategy
 		AND STRATEGY.intBookId = BOOK.intBookId
+	-- From Location Code
+	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
+	-- Receiving Storage Location
+	LEFT JOIN (
+		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
+		) ON IMP.strReceivingStorageLocation IS NOT NULL
+		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
+		AND TBO2.strLocationName = IMP.strBuyingCenter
+	
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -193,7 +210,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						BOOK.intBookId IS NULL
-						AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+						--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
 						)
 					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
@@ -207,16 +224,21 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						CURRENCY.intConcurrencyId IS NULL
-						AND ISNULL(IMP.strCurrency, '') <> ''
+						--AND ISNULL(IMP.strCurrency, '') <> ''
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
-				END + CASE 
+				END+ CASE 
 				WHEN (
-						STRATEGY.intSubBookId IS NULL
-						AND ISNULL(IMP.strStrategy, '') <> ''
+						FROM_LOC_CODE.intCityId IS NULL
 						)
-					THEN 'STRATEGY, '
+					THEN 'FROM LOCATION CODE, '
+				ELSE ''
+				END +CASE 
+				WHEN (
+						RSL.intCompanyLocationSubLocationId IS NULL
+						)
+					THEN 'RECEIVING STORAGE LOCATION, '
 				ELSE ''
 				END
 		) MSG
@@ -325,17 +347,22 @@ BEGIN TRY
 				)
 			OR (
 				BOOK.intBookId IS NULL
-				AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+				--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
 				)
 			OR (
 				CURRENCY.intCurrencyID IS NULL
-				AND ISNULL(IMP.strCurrency, '') <> ''
+				--AND ISNULL(IMP.strCurrency, '') <> ''
 				)
 			OR (
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
 				)
+				OR FROM_LOC_CODE.intCityId IS NULL
+				OR RSL.intCompanyLocationSubLocationId IS NULL
+				
 			)
+
+	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
@@ -434,6 +461,9 @@ BEGIN TRY
 		,intB5QtyUOMId = B5QUOM.intUnitMeasureId
 		,dblB5Price = IMP.dblB5Price
 		,intB5PriceUOMId = B5PUOM.intUnitMeasureId
+		,strPlantCode=CL.strOregonFacilityNumber
+		,intFromLocationCodeId = FROM_LOC_CODE.intCityId
+		,intStorageLocationId = RSL.intCompanyLocationSubLocationId
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -475,13 +505,21 @@ BEGIN TRY
 		-- Buyer1 Company Code
 		LEFT JOIN tblSMPurchasingGroup COMPANY_CODE ON COMPANY_CODE.strName = IMP.strB1CompanyCode
 		-- Buyer1 Group Number
-		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strB1GroupNumber
+		LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strB1GroupNumber OR BOOK.strBookDescription = IMP.strB1GroupNumber)
 		-- Currency
 		LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.strCurrency = IMP.strCurrency
 		-- Strategy
 		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL
 			AND STRATEGY.strSubBook = IMP.strStrategy
 			AND STRATEGY.intBookId = BOOK.intBookId
+		-- From Location Code
+		LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
+		-- Receiving Storage Location
+		LEFT JOIN (
+		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
+		) ON IMP.strReceivingStorageLocation IS NOT NULL
+		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
+		AND TBO2.strLocationName = IMP.strBuyingCenter
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -536,9 +574,38 @@ BEGIN TRY
 		,@intB5QtyUOMId
 		,@dblB5Price
 		,@intB5PriceUOMId
-
+		,@strPlantCode
+		,@intFromLocationCodeId 
+		,@intDestinationStorageLocationId 
+	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		Select @strBatchNo=NULL
+		SELECT TOP 1 @intPlantId = CL.intCompanyLocationId ,@strBatchNo=strBatchNo 
+		FROM dbo.tblQMSample S WITH (NOLOCK)  
+		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = @intBookId 
+		AND S.intSampleId = @intSampleId  
+		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook
+		
+		IF @strBatchNo IS NOT NULL
+		BEGIN
+			-- Delete batch in MU only
+			EXEC uspMFDeleteBatch
+				@strBatchId = @strBatchNo
+				,@intLocationId = @intPlantId
+				,@ysnSuccess = @ysnSuccess OUTPUT
+				,@strErrorMessage = @strErrorMessage OUTPUT
+
+			IF @ysnSuccess = 0
+			BEGIN
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = @strErrorMessage
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+			END
+		END
+
 		EXEC uspQMGenerateSampleCatalogueImportAuditLog
 			@intSampleId  = @intSampleId
 			,@intUserEntityId = @intEntityUserId
@@ -584,6 +651,8 @@ BEGIN TRY
 			,intB5QtyUOMId = @intB5QtyUOMId
 			,dblB5Price = @dblB5Price
 			,intB5PriceUOMId = @intB5PriceUOMId
+			,intFromLocationCodeId = @intFromLocationCodeId
+			,intDestinationStorageLocationId = @intDestinationStorageLocationId
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -594,12 +663,6 @@ BEGIN TRY
 		-- Call uspMFUpdateInsertBatch
 		DELETE
 		FROM @MFBatchTableType
-
-		SELECT TOP 1 @intPlantId = CL.intCompanyLocationId  
-		FROM dbo.tblQMSample S WITH (NOLOCK)  
-		JOIN dbo.tblCTBook B WITH (NOLOCK) ON B.intBookId = S.intBookId  
-		AND S.intSampleId = @intSampleId  
-		JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.strLocationName = B.strBook  
     
 		SELECT TOP 1 @intETAPOL=IsNULL(LLT.dblPurchaseToShipment,0)
 				,@intStockDate= IsNULL(LLT.dblPurchaseToShipment,0)+IsNULL(LLT.dblPortToPort,0)+ IsNULL(LLT.dblPortToMixingUnit,0) +IsNULL(LLT.dblMUToAvailableForBlending,0) 
@@ -734,6 +797,7 @@ BEGIN TRY
 			,dblTeaMouthFeelPinpoint
 			,dblTeaAppearancePinpoint
 			,dtmShippingDate
+			,intCountryId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -771,7 +835,7 @@ BEGIN TRY
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
 			,intFromPortId = S.intFromLocationCodeId
-			,dblGrossWeight = S.dblGrossWeight
+			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = @dtmCurrentDate 
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
@@ -780,19 +844,19 @@ BEGIN TRY
 			,strLeafSize = BRAND.strBrandCode
 			,strLeafStyle = STYLE.strName
 			,intBookId = S.intBookId
-			,dblPackagesBought = NULL
-			,intItemUOMId = S.intRepresentingUOMId
+			,dblPackagesBought = S.dblB1QtyBought
+			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
 			,intOriginalItemId = S.intItemId
-			,dblPackagesPerPallet = NULL
-			,strPlant = NULL
-			,dblTotalQuantity = S.dblB1QtyBought
+			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
+			,strPlant = @strPlantCode
+			,dblTotalQuantity = S.dblSampleQty
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
 			,dtmStock = @dtmStock
 			,ysnStrategic = NULL
-			,strTeaLingoSubCluster = NULL
+			,strTeaLingoSubCluster = REGION.strDescription
 			,dtmSupplierPreInvoiceDate = NULL
 			,strSustainability = SUSTAINABILITY.strDescription
 			,strTasterComments = S.strComments2
@@ -817,7 +881,11 @@ BEGIN TRY
 				ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18, 6))
 				END
 			,strLeafGrade = GRADE.strDescription
-			,dblTeaMoisture = NULL
+			,dblTeaMoisture = CASE 
+				WHEN ISNULL(MOISTURE.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE CAST(MOISTURE.strPropertyValue AS NUMERIC(18, 6))
+				END
 			,dblTeaMouthFeel = CASE 
 				WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = ''
 					THEN NULL
@@ -832,8 +900,8 @@ BEGIN TRY
 			,dblTeaVolume = NULL
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
-			,intYearManufacture = NULL
-			,strPackageSize = NULL
+			,intYearManufacture = Datepart(YYYY,S.dtmManufacturingDate)
+			,strPackageSize = PT.strUnitMeasure
 			,intPackageUOMId = S.intNetWtPerPackagesUOMId
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = IMP.strTaster
@@ -859,6 +927,7 @@ BEGIN TRY
 			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 			,dtmShippingDate=@dtmShippingDate
+			,intCountryId=S.intCountryID 
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -869,6 +938,7 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
+		LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -914,6 +984,15 @@ BEGIN TRY
 				AND P.strPropertyName = 'Mouth Feel'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOUTH_FEEL
+		--Moisture
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Moisture'
+			WHERE TR.intSampleId = S.intSampleId
+			) MOISTURE
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
@@ -942,35 +1021,69 @@ BEGIN TRY
 				FROM @MFBatchTableType
 				)
 		BEGIN
-			EXEC uspMFUpdateInsertBatch @MFBatchTableType
-				,@intInput
-				,@intInputSuccess
-				,@strBatchId OUTPUT
-				,0
+			-- If the buyer 1 qty and price fields are blank, delete the existing batch
+			IF ISNULL(@dblB1QtyBought, 0) = 0 AND ISNULL(@dblB1Price, 0) = 0
+			BEGIN
+				DECLARE @intToDeleteBatchLocationId INT
 
-			UPDATE B
-			SET B.intLocationId = L.intCompanyLocationId
-				,strBatchId = @strBatchId
-				--,intSampleId = NULL
-				,dblOriginalTeaTaste = dblTeaTaste
-				,dblOriginalTeaHue = dblTeaHue
-				,dblOriginalTeaIntensity = dblTeaIntensity
-				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
-				,dblOriginalTeaAppearance = dblTeaAppearance
-			FROM @MFBatchTableType B
-			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
-			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+				SELECT
+					@strBatchId = B.strBatchId
+					,@intToDeleteBatchLocationId = S.intLocationId
+				FROM tblQMSample S
+				INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+				WHERE S.intSampleId = @intSampleId
 
-			EXEC uspMFUpdateInsertBatch @MFBatchTableType
-				,@intInput
-				,@intInputSuccess
-				,NULL
-				,1
 
-			UPDATE tblQMSample
-			SET strBatchNo = @strBatchId
-			WHERE intSampleId = @intSampleId
+				IF @strBatchId IS NOT NULL
+				BEGIN
+					-- Delete batch for both TBO and MU
+					EXEC uspMFDeleteBatch
+						@strBatchId = @strBatchId
+						,@intLocationId = @intToDeleteBatchLocationId
+						,@ysnSuccess = @ysnSuccess OUTPUT
+						,@strErrorMessage = @strErrorMessage OUTPUT
 
+					IF @ysnSuccess = 0
+						UPDATE tblQMImportCatalogue
+						SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = @strErrorMessage
+						WHERE intImportCatalogueId = @intImportCatalogueId
+				END
+			END
+			-- Else create/update the batch and process feed as 
+			ELSE
+			BEGIN
+				EXEC uspMFUpdateInsertBatch @MFBatchTableType
+					,@intInput
+					,@intInputSuccess
+					,@strBatchId OUTPUT
+					,0
+
+				UPDATE B
+				SET B.intLocationId = L.intCompanyLocationId
+					,strBatchId = @strBatchId
+					--,intSampleId = NULL
+					,dblOriginalTeaTaste = dblTeaTaste
+					,dblOriginalTeaHue = dblTeaHue
+					,dblOriginalTeaIntensity = dblTeaIntensity
+					,dblOriginalTeaMouthfeel = dblTeaMouthFeel
+					,dblOriginalTeaAppearance = dblTeaAppearance
+					,strPlant=L.strVendorRefNoPrefix
+				FROM @MFBatchTableType B
+				JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
+				JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+
+
+				EXEC uspMFUpdateInsertBatch @MFBatchTableType
+					,@intInput
+					,@intInputSuccess
+					,NULL
+					,1
+
+				UPDATE tblQMSample
+				SET strBatchNo = @strBatchId
+				WHERE intSampleId = @intSampleId				
+			END
+			
 			DECLARE @strRowState NVARCHAR(50)
 			SELECT @strRowState = CASE WHEN intConcurrencyId > 1 THEN 'Modified' ELSE 'Added' END
 			FROM tblQMSample
@@ -983,13 +1096,7 @@ BEGIN TRY
 				,@strRowState
 		END
 
-		EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Initial Buy Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 0
-
+		CONT:
 		FETCH NEXT
 		FROM @C
 		INTO @intImportCatalogueId
@@ -1033,11 +1140,22 @@ BEGIN TRY
 			,@intB5QtyUOMId
 			,@dblB5Price
 			,@intB5PriceUOMId
+
+			,@strPlantCode
+			,@intFromLocationCodeId 
+			,@intDestinationStorageLocationId 
+	
 	END
 
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	EXEC uspQMGenerateSampleCatalogueImportAuditLog
+		@intUserEntityId = @intEntityUserId
+		,@strRemarks = 'Updated from Initial Buy Import'
+		,@ysnCreate = 0
+		,@ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

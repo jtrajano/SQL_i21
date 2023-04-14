@@ -7,7 +7,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF
+--SET ANSI_WARNINGS OFF
 
 DECLARE @intTranCount	 			INT
 SET @intTranCount = @@trancount;
@@ -37,7 +37,8 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = B.intWeightUOMId
 	LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intUnitMeasureId = B.intItemUOMId AND QIUOM.intItemId = B.intTealingoItemId
 	LEFT JOIN tblICItemUOM WIUOM ON WIUOM.intUnitMeasureId = WUM.intUnitMeasureId AND WIUOM.intItemId = B.intTealingoItemId
-	WHERE B.intSampleId IS NOT NULL
+	WHERE CRD.intCatalogueReconciliationId = @intCatalogueReconciliationId
+	    AND B.intSampleId IS NOT NULL
 		AND ((B.strTeaGardenChopInvoiceNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
 		OR (B.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
 		OR (B.strLeafGrade <> CA.strDescription AND CRD.intPreInvoiceGradeId = CRD.intGradeId)
@@ -93,6 +94,7 @@ BEGIN TRY
 		BEGIN
 			UPDATE BD
 			SET dblCost						= ISNULL(V.dblCatReconPrice, 0)
+			  , dblCashPrice				= ISNULL(V.dblCatReconPrice, 0)
 			  , dblQtyReceived				= ISNULL(V.dblCatReconQty, 0)
 			  , dblQtyOrdered				= ISNULL(V.dblCatReconQty, 0)
 			  , strPreInvoiceGardenNumber	= CAST(V.strCatReconChopNo AS NVARCHAR(100))
@@ -100,6 +102,17 @@ BEGIN TRY
 			  , strComment					= CAST(V.strCatReconGrade AS NVARCHAR(100))
 			FROM tblAPBillDetail BD
 			INNER JOIN #VOUCHERS V ON V.intBillDetailId = BD.intBillDetailId
+
+			--UPDATE BILL TOTALS
+			DECLARE @billIds AS Id
+
+			INSERT INTO @billIds
+			SELECT DISTINCT BD.intBillId
+			FROM tblAPBillDetail BD
+			INNER JOIN #VOUCHERS V ON V.intBillDetailId = BD.intBillDetailId
+
+			IF EXISTS (SELECT TOP 1 1 FROM @billIds)
+				EXEC uspAPUpdateVoucherTotal @billIds
 
 			--AUDIT LOG FOR VOUCHERS
 			WHILE EXISTS (SELECT TOP 1 1 FROM #VOUCHERS)
@@ -145,19 +158,19 @@ BEGIN TRY
 
 					SELECT [Id]			= 3
 						, [Action]		= NULL
-						, [Change]		= 'Update Received'
-						, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
-						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
+						, [Change]		= 'Update Cash Price'
+						, [From]		= CAST(dblPreInvoicePrice AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconPrice AS NVARCHAR(100))
 						, [ParentId]	= 1
 					FROM #VOUCHERS 
 					WHERE intBillId = @intBillId
-					  AND dblPreInvoiceQuantity <> dblCatReconQty
+					  AND dblPreInvoicePrice <> dblCatReconPrice
 
 					UNION ALL
 
 					SELECT [Id]			= 4
 						, [Action]		= NULL
-						, [Change]		= 'Update Ordered'
+						, [Change]		= 'Update Received'
 						, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
 						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
 						, [ParentId]	= 1
@@ -169,6 +182,18 @@ BEGIN TRY
 
 					SELECT [Id]			= 5
 						, [Action]		= NULL
+						, [Change]		= 'Update Ordered'
+						, [From]		= CAST(dblPreInvoiceQuantity AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconQty AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #VOUCHERS 
+					WHERE intBillId = @intBillId
+					  AND dblPreInvoiceQuantity <> dblCatReconQty
+
+					UNION ALL
+
+					SELECT [Id]			= 6
+						, [Action]		= NULL
 						, [Change]		= 'Update Pre-Invoice Garden Number'
 						, [From]		= CAST(strPreInvoiceChopNo AS NVARCHAR(100))
 						, [To]			= CAST(strCatReconChopNo AS NVARCHAR(100))
@@ -179,7 +204,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 6
+					SELECT [Id]			= 7
 						, [Action]		= NULL
 						, [Change]		= 'Update Garden Mark'
 						, [From]		= CAST(VGM.strGardenMark AS NVARCHAR(100))
@@ -193,7 +218,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 7
+					SELECT [Id]			= 8
 						, [Action]		= NULL
 						, [Change]		= 'Update Comment'
 						, [From]		= CAST(strPreInvoiceGrade AS NVARCHAR(100))
@@ -232,6 +257,8 @@ BEGIN TRY
 		 , intSampleGardenMarkId				= S.intGardenMarkId
 		 , intCatReconGradeId					= CRD.intPreInvoiceGradeId
 		 , intSampleGradeId						= S.intGradeId
+		 , dblSupplierValuationPrice			= S.dblSupplierValuationPrice
+		 , dblB1QtyBought						= S.dblB1QtyBought
     INTO #SAMPLES 
     FROM tblQMCatalogueReconciliation CR
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON CRD.intCatalogueReconciliationId = CR.intCatalogueReconciliationId
@@ -251,12 +278,14 @@ BEGIN TRY
 	IF EXISTS (SELECT TOP 1 1 FROM #SAMPLES)
 		BEGIN
 			UPDATE S
-			SET dblB1Price			= ISNULL(SS.dblCatReconPrice, 0)
-			  , dblSampleQty		= ISNULL(SS.dblCatReconSampleQty, 0)
-			  , dblRepresentingQty	= ISNULL(SS.dblCatReconRepQty, 0)
-			  , strChopNumber		= SS.strCatReconChopNo
-			  , intGardenMarkId		= NULLIF(SS.intCatReconGardenMarkId, 0)
-			  , intGradeId			= NULLIF(SS.intCatReconGradeId, 0)
+			SET dblB1Price					= ISNULL(SS.dblCatReconPrice, 0)
+			  , dblSupplierValuationPrice	= ISNULL(SS.dblCatReconPrice, 0)
+			  , dblSampleQty				= ISNULL(SS.dblCatReconSampleQty, 0)
+			  , dblRepresentingQty			= ISNULL(SS.dblCatReconRepQty, 0)
+			  , dblB1QtyBought				= ISNULL(SS.dblCatReconRepQty, 0)
+			  , strChopNumber				= SS.strCatReconChopNo
+			  , intGardenMarkId				= NULLIF(SS.intCatReconGardenMarkId, 0)
+			  , intGradeId					= NULLIF(SS.intCatReconGradeId, 0)
 			FROM tblQMSample S
 			INNER JOIN #SAMPLES SS ON S.intSampleId = SS.intSampleId
 
@@ -304,6 +333,18 @@ BEGIN TRY
 
 					SELECT [Id]			= 3
 						, [Action]		= NULL
+						, [Change]		= 'Update Supplier Valuation Price'
+						, [From]		= CAST(dblSupplierValuationPrice AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconPrice AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #SAMPLES 
+					WHERE intSampleId = @intSampleId
+					  AND dblSupplierValuationPrice <> dblCatReconPrice
+
+					UNION ALL
+
+					SELECT [Id]			= 4
+						, [Action]		= NULL
 						, [Change]		= 'Update Net Quantity'
 						, [From]		= CAST(dblSampleQty AS NVARCHAR(100))
 						, [To]			= CAST(dblCatReconSampleQty AS NVARCHAR(100))
@@ -314,7 +355,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 4
+					SELECT [Id]			= 5
 						, [Action]		= NULL
 						, [Change]		= 'Update Quantity'
 						, [From]		= CAST(dblRepresentingQty AS NVARCHAR(100))
@@ -325,8 +366,20 @@ BEGIN TRY
 					  AND dblRepresentingQty <> dblCatReconRepQty
 
 					UNION ALL
+
+					SELECT [Id]			= 6
+						, [Action]		= NULL
+						, [Change]		= 'Update Buyer 1 Quantity Bought'
+						, [From]		= CAST(dblB1QtyBought AS NVARCHAR(100))
+						, [To]			= CAST(dblCatReconRepQty AS NVARCHAR(100))
+						, [ParentId]	= 1
+					FROM #SAMPLES 
+					WHERE intSampleId = @intSampleId
+					  AND dblRepresentingQty <> dblCatReconRepQty
+
+					UNION ALL
 					
-					SELECT [Id]			= 5
+					SELECT [Id]			= 7
 						, [Action]		= NULL
 						, [Change]		= 'Update Chop Number'
 						, [From]		= CAST(strSampleChopNo AS NVARCHAR(100))
@@ -338,7 +391,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 6
+					SELECT [Id]			= 8
 						, [Action]		= NULL
 						, [Change]		= 'Update Garden Mark'
 						, [From]		= CAST(SGM.strGardenMark AS NVARCHAR(100))
@@ -352,7 +405,7 @@ BEGIN TRY
 
 					UNION ALL
 
-					SELECT [Id]			= 7
+					SELECT [Id]			= 9
 						, [Action]		= NULL
 						, [Change]		= 'Update Grade'
 						, [From]		= CAST(SCA.strDescription AS NVARCHAR(100))
@@ -412,8 +465,10 @@ BEGIN TRY
 			SET dblUnitPrice	= LS.dblCatReconPrice
 			  , dblQuantity		= LS.dblCatReconQty
 			  , dblGross		= LS.dblCatReconGrossQty
-			  , dblNet			= LS.dblCatReconGrossQty
+			  , dblNet			= LS.dblCatReconGrossQty			  
 			  , dblTare			= 0
+			  , dblAmount 		= LS.dblCatReconPrice * LS.dblCatReconGrossQty
+			  , dblForexAmount	= LS.dblCatReconPrice * LS.dblCatReconGrossQty
 			FROM tblLGLoadDetail LG
 			INNER JOIN #LOADSHIPMENTS LS ON LG.intLoadDetailId = LS.intLoadDetailId
 

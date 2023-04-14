@@ -620,10 +620,45 @@ BEGIN
 			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId			
-			INNER JOIN dbo.tblICInventoryTransaction FromStock
-				ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
-				AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
-				AND FromStock.intItemId = Detail.intItemId
+			--INNER JOIN dbo.tblICInventoryTransaction FromStock
+			--	ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
+			--	AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
+			--	AND FromStock.intItemId = Detail.intItemId
+			CROSS APPLY (
+				SELECT 
+					dblQty = SUM(FromStock.dblQty)
+					,dblCost = SUM(FromStock.dblQty * FromStock.dblCost + FromStock.dblValue) / SUM(FromStock.dblQty)
+					,strActualCostId
+					,intCostingMethod
+					,intSourceEntityId
+					,strBOLNumber
+					,intTicketId
+					,strSourceType
+					,strSourceNumber
+					,intLotId
+					,strBatchId
+					,intItemUOMId
+				FROM 
+					dbo.tblICInventoryTransaction FromStock
+				WHERE 
+					FromStock.intLotId = Detail.intLotId 
+					AND FromStock.intTransactionId = Header.intInventoryAdjustmentId 
+					AND FromStock.strTransactionId = Header.strAdjustmentNo
+					AND FromStock.intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
+					AND FromStock.dblQty < 0
+					AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
+				GROUP BY
+					strActualCostId
+					,intCostingMethod
+					,intSourceEntityId
+					,strBOLNumber
+					,intTicketId
+					,strSourceType
+					,strSourceNumber
+					,intLotId
+					,strBatchId
+					,intItemUOMId
+			) FromStock
 			INNER JOIN dbo.tblICLot SourceLot
 				ON SourceLot.intLotId = FromStock.intLotId
 			INNER JOIN dbo.tblICItemLocation SourceLotItemLocation 
@@ -653,8 +688,7 @@ BEGIN
 				ON StockUnit.intItemId = Detail.intItemId
 				AND StockUnit.ysnStockUnit = 1
 
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
+	WHERE	Header.intInventoryAdjustmentId = @intTransactionId			
 			AND FromStock.strBatchId = @strBatchId
 			AND NewLot.intLotId IS NOT NULL 
 			AND NewLot.intOwnershipType = @OWNERSHIP_TYPE_Own
@@ -966,10 +1000,45 @@ BEGIN
 			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId			
-			INNER JOIN dbo.tblICInventoryTransactionStorage FromStock
-				ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
-				AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
-				AND FromStock.intItemId = Detail.intItemId
+			--INNER JOIN dbo.tblICInventoryTransactionStorage FromStock
+			--	ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
+			--	AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
+			--	AND FromStock.intItemId = Detail.intItemId
+			INNER JOIN tblICItem i
+				ON i.intItemId = Detail.intItemId 
+			CROSS APPLY (
+				SELECT 
+					dblQty = SUM(FromStock.dblQty)
+					,dblCost = SUM(FromStock.dblQty * FromStock.dblCost + FromStock.dblValue) / SUM(FromStock.dblQty)
+					,intCostingMethod
+					,intSourceEntityId
+					,strBOLNumber
+					,intTicketId
+					,strSourceType
+					,strSourceNumber
+					,intLotId
+					,strBatchId
+					,intItemUOMId
+				FROM 
+					dbo.tblICInventoryTransactionStorage FromStock
+				WHERE 
+					FromStock.intLotId = Detail.intLotId 
+					AND FromStock.intTransactionId = Header.intInventoryAdjustmentId 
+					AND FromStock.strTransactionId = Header.strAdjustmentNo
+					AND FromStock.intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
+					AND FromStock.dblQty < 0
+					AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
+				GROUP BY
+					intCostingMethod
+					,intSourceEntityId
+					,strBOLNumber
+					,intTicketId
+					,strSourceType
+					,strSourceNumber
+					,intLotId
+					,strBatchId
+					,intItemUOMId
+			) FromStock
 			INNER JOIN dbo.tblICLot SourceLot
 				ON SourceLot.intLotId = FromStock.intLotId
 			INNER JOIN dbo.tblICItemLocation SourceLotItemLocation 
@@ -1000,7 +1069,6 @@ BEGIN
 				AND StockUnit.ysnStockUnit = 1
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
 			AND FromStock.strBatchId = @strBatchId
 			AND NewLot.intLotId IS NOT NULL 
 			AND NewLot.intOwnershipType = @OWNERSHIP_TYPE_Storage

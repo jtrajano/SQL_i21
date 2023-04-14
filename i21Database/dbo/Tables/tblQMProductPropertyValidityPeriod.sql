@@ -25,3 +25,8 @@
 	CONSTRAINT [FK_tblQMProductPropertyValidityPeriod_tblQMProductProperty] FOREIGN KEY ([intProductPropertyId]) REFERENCES [tblQMProductProperty]([intProductPropertyId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblQMProductPropertyValidityPeriod_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblQMProductPropertyValidityPeriod_intProductPropertyId]
+ON [dbo].[tblQMProductPropertyValidityPeriod] ([intProductPropertyId])
+GO

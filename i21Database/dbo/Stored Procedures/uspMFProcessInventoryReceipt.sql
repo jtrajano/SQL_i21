@@ -15,11 +15,7 @@ BEGIN TRY
 	/* Check if there's a detail/item that is not processed yet. */
 	IF NOT EXISTS (SELECT * FROM dbo.tblMFPODetail WHERE intPurchaseId = @intPurchaseId AND ysnProcessed = 0)
 	BEGIN
-		RAISERROR (
-				'There is no record to process for the selected PO.'
-				,16
-				,1
-				)
+		RAISERROR ('There is no record to process for the selected PO.', 16, 1);
 
 		RETURN
 	END

@@ -1,6 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCreateShipmentFromSalesOrderPickList] @intSalesOrderId INT
-	,@intUserId INT
-	,@intInventoryShipmentId INT = 0 OUT
+﻿CREATE PROCEDURE [dbo].[uspMFCreateShipmentFromSalesOrderPickList] 
+	@intSalesOrderId		INT
+  , @intUserId				INT
+  , @intInventoryShipmentId INT = 0 OUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -138,16 +139,16 @@ BEGIN
 	JOIN tblICItemUOM iu ON um.intUnitMeasureId = iu.intUnitMeasureId
 	WHERE iu.intItemUOMId = @intItemUOMId
 
-	IF @dblSelQty < @dblReqQty
-	BEGIN
-		SET @ErrMsg = 'Item ' + @strItemNo + ' is required ' + dbo.fnRemoveTrailingZeroes(@dblReqQty) + ' ' + @strUOM + ' but selected ' + dbo.fnRemoveTrailingZeroes(@dblSelQty) + ' ' + @strUOM + '.'
+	--IF @dblSelQty < @dblReqQty
+	--BEGIN
+	--	SET @ErrMsg = 'Item ' + @strItemNo + ' is required ' + dbo.fnRemoveTrailingZeroes(@dblReqQty) + ' ' + @strUOM + ' but selected ' + dbo.fnRemoveTrailingZeroes(@dblSelQty) + ' ' + @strUOM + '.'
 
-		RAISERROR (
-				@ErrMsg
-				,16
-				,1
-				)
-	END
+	--	RAISERROR (
+	--			@ErrMsg
+	--			,16
+	--			,1
+	--			)
+	--END
 
 	SELECT @intMinSalesOrderItem = MIN(intRowNo)
 	FROM @tblInputItem

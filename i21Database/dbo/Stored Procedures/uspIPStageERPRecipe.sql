@@ -20,15 +20,14 @@ BEGIN TRY
 		,@strOutputItemLowerTolerance NVARCHAR(50)
 		,@strOutputItemUpperTolerance NVARCHAR(50)
 		,@strIgnoreShrinkageCommodity NVARCHAR(50)
-		,@intCommodityId int
-
+		,@intCommodityId INT
 	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
 	INSERT INTO @tblIPIDOCXMLStage (intIDOCXMLStageId)
 	SELECT intIDOCXMLStageId
 	FROM tblIPIDOCXMLStage
 	WHERE strType = 'Recipe'
-	AND intStatusId IS NULL
+		AND intStatusId IS NULL
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM @tblIPIDOCXMLStage
@@ -39,7 +38,7 @@ BEGIN TRY
 	END
 
 	UPDATE S
-	SET S.intStatusId = -1
+	SET S.intStatusId = - 1
 	FROM tblIPIDOCXMLStage S
 	JOIN @tblIPIDOCXMLStage TS ON TS.intIDOCXMLStageId = S.intIDOCXMLStageId
 
@@ -53,9 +52,9 @@ BEGIN TRY
 
 	SELECT @strIgnoreShrinkageCommodity = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Ignore Shrinkage Commodity')
 
-	Select @intCommodityId =intCommodityId 
-	from tblICCommodity 
-	Where strCommodityCode =@strIgnoreShrinkageCommodity
+	SELECT @intCommodityId = intCommodityId
+	FROM tblICCommodity
+	WHERE strCommodityCode = @strIgnoreShrinkageCommodity
 
 	IF @strInputItemLowerTolerance IS NULL
 		OR @strInputItemLowerTolerance = ''
@@ -85,8 +84,15 @@ BEGIN TRY
 		SELECT @strOutputItemUpperTolerance = 0
 	END
 
-	DELETE FROM tblMFRecipeStage WHERE intStatusId=1 AND ysnInitialAckSent =1
-	DELETE FROM tblMFRecipeItemStage WHERE intStatusId=1 AND ysnInitialAckSent =1
+	DELETE
+	FROM tblMFRecipeStage
+	WHERE intStatusId = 1
+		AND ysnInitialAckSent = 1
+
+	DELETE
+	FROM tblMFRecipeItemStage
+	WHERE intStatusId = 1
+		AND ysnInitialAckSent = 1
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -169,7 +175,7 @@ BEGIN TRY
 					,ValidFrom DATETIME
 					,ValidTo DATETIME
 					,StorageLocation NVARCHAR(50)
-					,ERPRecipeNo NVARCHAR(50)
+					,ERPRecipeNo NVARCHAR(50) Collate Latin1_General_CI_AS
 					,ProcessName NVARCHAR(50)
 					,Active INT
 					) x
@@ -177,6 +183,21 @@ BEGIN TRY
 			LEFT JOIN tblICItem I ON I.strItemNo = x.ItemNo Collate Latin1_General_CI_AS
 			LEFT JOIN tblIPCommodityManufacturingProcess CP ON CP.intCommodityId = I.intCommodityId
 			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = CP.intManufacturingProcessId
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblMFRecipeExclude E
+					WHERE E.strERPRecipeNo = x.ERPRecipeNo
+					)
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblMFItemSubstitutionRecipe R
+					JOIN tblMFItemSubstitution S ON R.intItemSubstitutionId = S.intItemSubstitutionId
+					JOIN tblMFRecipe R1 ON R1.intRecipeId = R.intRecipeId
+					WHERE R.ysnApplied = 1
+						AND S.ysnProcessed = 1
+						AND ysnCancelled = 0
+						and R1.strERPRecipeNo = x.ERPRecipeNo
+					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strERPRecipeNo, '') + ','
 			FROM @tblIPRecipeName
@@ -258,9 +279,24 @@ BEGIN TRY
 					,YearValidation INT
 					,parentId BIGINT '@parentId'
 					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation'
+					,ERPRecipeNo NVARCHAR(50) Collate Latin1_General_CI_AS '../ERPRecipeNo'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
-
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblMFRecipeExclude E
+					WHERE E.strERPRecipeNo = x.ERPRecipeNo
+					)
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblMFItemSubstitutionRecipe R
+					JOIN tblMFItemSubstitution S ON R.intItemSubstitutionId = S.intItemSubstitutionId
+					JOIN tblMFRecipe R1 ON R1.intRecipeId = R.intRecipeId
+					WHERE R.ysnApplied = 1
+						AND S.ysnProcessed = 1
+						AND ysnCancelled = 0
+						and R1.strERPRecipeNo = x.ERPRecipeNo
+					)
 			UPDATE RI
 			SET strRecipeHeaderItemNo = R.strItemNo
 				,strRecipeName = R.strItemNo
@@ -327,8 +363,8 @@ BEGIN TRY
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
-					) 
-			Where TrxSequenceNo IS NOT NULL
+					)
+			WHERE TrxSequenceNo IS NOT NULL
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (

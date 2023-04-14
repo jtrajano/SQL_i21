@@ -288,6 +288,9 @@ SELECT   L.intLoadId
 		,QCT.strCatalogueType
 		,[strManufacturingLeafType] = QB.strLeafManufacturingType
 		,LD.intDetailNumber
+
+		,[strCreatedBy] = EM.strName
+		,L.dtmCreatedOn
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -374,3 +377,4 @@ OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved'
 					AND S.intTypeId = 1
 				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
+LEFT JOIN tblEMEntity EM ON EM.intEntityId = L.intCreatedById

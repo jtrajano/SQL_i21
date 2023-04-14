@@ -1,8 +1,19 @@
-CREATE PROCEDURE uspQMImportContractAllocation @intImportLogId INT
+CREATE PROCEDURE uspQMImportContractAllocation 
+(
+	@intImportLogId INT
+) 
 AS
 BEGIN TRY
-	DECLARE @strBatchId NVARCHAR(50)
-	DECLARE @intEntityUserId INT
+	DECLARE @strBatchId			NVARCHAR(50)
+		  , @intEntityUserId	INT
+		  , @strPlantCode		NVARCHAR(50)
+
+	DECLARE @strTxnIdentifier NVARCHAR(36)
+			,@intRowCount INT
+			,@intRow INT = 0
+			,@ysnLastRow BIT
+
+	SET @strTxnIdentifier = convert(nvarchar(36),NEWID())
 
 	SELECT @intEntityUserId = intEntityId
 	FROM tblQMImportLog
@@ -24,9 +35,11 @@ BEGIN TRY
 	-- Sample Status
 	LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 	-- Group Number
-	LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+	LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strGroupNumber OR BOOK.strBookDescription = IMP.strGroupNumber)
 	-- Strategy
 	LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+	-- Currency
+	LEFT JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -47,7 +60,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						BOOK.intBookId IS NULL
-						AND ISNULL(IMP.strGroupNumber, '') <> ''
+				--		AND ISNULL(IMP.strGroupNumber, '') <> ''
 						)
 					THEN 'GROUP NUMBER, '
 				ELSE ''
@@ -58,7 +71,21 @@ BEGIN TRY
 						)
 					THEN 'STRATEGY, '
 				ELSE ''
-				END
+				END + CASE 
+				WHEN (
+						CUR.intCurrencyID IS NULL
+						--AND ISNULL(IMP.strCurrency, '') <> ''
+						)
+					THEN 'CURRENCY, '
+				ELSE ''
+				END+ CASE 
+				WHEN (
+						CD.intBookId<>BOOK.intBookId
+				--		AND ISNULL(IMP.strGroupNumber, '') <> ''
+						)
+					THEN 'MIXING UNIT, '
+				ELSE ''
+				END 
 		) MSG
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
@@ -71,13 +98,20 @@ BEGIN TRY
 				)
 			OR (
 				BOOK.intBookId IS NULL
-				AND ISNULL(IMP.strGroupNumber, '') <> ''
+			--	AND ISNULL(IMP.strGroupNumber, '') <> ''
 				)
 			OR (
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
 				)
+			OR (
+				CUR.intCurrencyID IS NULL
+				--AND ISNULL(IMP.strCurrency, '') <> ''
+				)
+			OR CD.intBookId<>BOOK.intBookId
 			)
+
+	--EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
 	-- End Validation   
 	DECLARE @intImportCatalogueId INT
@@ -90,12 +124,11 @@ BEGIN TRY
 		,@dblCashPrice NUMERIC(18, 6)
 		,@ysnSampleContractItemMatch BIT
 		,@strSampleNumber NVARCHAR(30)
+		,@intCurrencyID INT
 	DECLARE @MFBatchTableType MFBatchTableType
-	-- Loop through each valid import detail
-	DECLARE @C AS CURSOR;
 
-	SET @C = CURSOR FAST_FORWARD
-	FOR
+	IF OBJECT_ID('tempdb..#tmpQMContractLineAllocation') IS NOT NULL
+        DROP TABLE #tmpQMContractLineAllocation
 
 	SELECT intImportCatalogueId = IMP.intImportCatalogueId
 		,intSampleId = S.intSampleId
@@ -111,6 +144,9 @@ BEGIN TRY
 			ELSE 0
 			END
 		,strSampleNumber = S.strSampleNumber
+		,intCurrencyID = CUR.intCurrencyID
+		,strPlantCode=CL.strOregonFacilityNumber
+	INTO #tmpQMContractLineAllocation
 	FROM tblQMSample S
 	INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
 	INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
@@ -128,9 +164,11 @@ BEGIN TRY
 		-- Sample Status
 		LEFT JOIN tblQMSampleStatus SAMPLE_STATUS ON SAMPLE_STATUS.strStatus = IMP.strSampleStatus
 		-- Group Number
-		LEFT JOIN tblCTBook BOOK ON BOOK.strBook = IMP.strGroupNumber
+		LEFT JOIN tblCTBook BOOK ON (BOOK.strBook = IMP.strGroupNumber OR BOOK.strBookDescription = IMP.strGroupNumber)
 		-- Strategy
 		LEFT JOIN tblCTSubBook STRATEGY ON IMP.strStrategy IS NOT NULL AND STRATEGY.strSubBook = IMP.strStrategy AND STRATEGY.intBookId = BOOK.intBookId
+		-- Currency
+		LEFT JOIN tblSMCurrency CUR ON IMP.strCurrency IS NOT NULL AND CUR.strCurrency = IMP.strCurrency
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -139,6 +177,16 @@ BEGIN TRY
 		AND S.strRepresentLotNumber = IMP.strLotNumber
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
+
+	SELECT @intRowCount = COUNT(1)
+	FROM #tmpQMContractLineAllocation
+
+	-- Loop through each valid import detail
+	DECLARE @C AS CURSOR;
+
+	SET @C = CURSOR FAST_FORWARD
+	FOR
+	SELECT * FROM #tmpQMContractLineAllocation
 
 	OPEN @C
 
@@ -154,9 +202,12 @@ BEGIN TRY
 		,@dblCashPrice
 		,@ysnSampleContractItemMatch
 		,@strSampleNumber
+		,@intCurrencyID
+		,@strPlantCode
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		SET @intRow = @intRow + 1
 		-- If the contract and sample item does not match, throw an error
 		IF @ysnSampleContractItemMatch = 0
 		BEGIN
@@ -186,8 +237,11 @@ BEGIN TRY
 			,intSampleStatusId = @intSampleStatusId
 			,intBookId = @intBookId
 			,intSubBookId = @intSubBookId
+			,intCurrencyId = @intCurrencyID
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
+
+		SELECT @ysnLastRow = CASE WHEN @intRow = @intRowCount THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
 		-- Update Contract Cash Price
 		IF ISNULL(@dblCashPrice, 0) <> 0
@@ -196,6 +250,8 @@ BEGIN TRY
 				,@dblNewPrice = @dblCashPrice
 				,@intUserId = @intEntityUserId
 				,@strScreen = 'Contract Line Allocation Import'
+				,@ysnLastRecord = @ysnLastRow
+				,@strTxnIdentifier = @strTxnIdentifier
 
 		UPDATE tblQMTestResult
 		SET intProductTypeId = 8 --Contract Line Item
@@ -310,6 +366,7 @@ BEGIN TRY
 			,intMixingUnitLocationId
 			,intMarketZoneId
 			,dtmShippingDate 
+			,intCountryId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -347,7 +404,7 @@ BEGIN TRY
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
 			,intFromPortId = CD.intLoadingPortId
-			,dblGrossWeight = S.dblGrossWeight
+			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = NULL
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
 			,dblLandedPrice = NULL
@@ -356,19 +413,19 @@ BEGIN TRY
 			,strLeafSize = BRAND.strBrandCode
 			,strLeafStyle = STYLE.strName
 			,intBookId = S.intBookId
-			,dblPackagesBought = NULL
-			,intItemUOMId = S.intRepresentingUOMId
+			,dblPackagesBought = S.dblRepresentingQty
+			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
 			,intOriginalItemId = S.intItemId
-			,dblPackagesPerPallet = NULL
-			,strPlant = NULL
-			,dblTotalQuantity = S.dblRepresentingQty
+			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
+			,strPlant = @strPlantCode
+			,dblTotalQuantity = S.dblSampleQty 
 			,strSampleBoxNumber = S.strSampleBoxNumber
 			,dblSellingPrice = NULL
 			,dtmStock = CD.dtmUpdatedAvailabilityDate 
 			,ysnStrategic = NULL
-			,strTeaLingoSubCluster = NULL
+			,strTeaLingoSubCluster = REGION.strDescription
 			,dtmSupplierPreInvoiceDate = NULL
 			,strSustainability = SUSTAINABILITY.strDescription
 			,strTasterComments = S.strComments2
@@ -393,7 +450,11 @@ BEGIN TRY
 				ELSE CAST(INTENSITY.strPropertyValue AS NUMERIC(18, 6))
 				END
 			,strLeafGrade = GRADE.strDescription
-			,dblTeaMoisture = NULL
+			,dblTeaMoisture = CASE 
+				WHEN ISNULL(MOISTURE.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE CAST(MOISTURE.strPropertyValue AS NUMERIC(18, 6))
+				END
 			,dblTeaMouthFeel = CASE 
 				WHEN ISNULL(MOUTH_FEEL.strPropertyValue, '') = ''
 					THEN NULL
@@ -408,9 +469,9 @@ BEGIN TRY
 			,dblTeaVolume = NULL
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
-			,intYearManufacture = NULL
-			,strPackageSize = NULL
-			,intPackageUOMId = NULL
+			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
+			,strPackageSize = PT.strUnitMeasure
+			,intPackageUOMId = S.intRepresentingUOMId
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = IMP.strTaster
 			,strFeedStock = NULL
@@ -430,6 +491,7 @@ BEGIN TRY
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
 			,dtmShippingDate=CD.dtmEtaPol
+			,intCountryId=S.intCountryID
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -442,6 +504,7 @@ BEGIN TRY
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
 		Left JOIN tblSMCompanyLocation MU on MU.strLocationName =B.strBook 
+		LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -482,6 +545,14 @@ BEGIN TRY
 				AND P.strPropertyName = 'Mouth Feel'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOUTH_FEEL
+		-- Moisture
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Moisture'
+			WHERE TR.intSampleId = S.intSampleId
+			) MOISTURE
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
@@ -524,6 +595,7 @@ BEGIN TRY
 				,dblOriginalTeaIntensity = dblTeaIntensity
 				,dblOriginalTeaMouthfeel = dblTeaMouthFeel
 				,dblOriginalTeaAppearance = dblTeaAppearance
+				,strPlant=L.strVendorRefNoPrefix
 			FROM @MFBatchTableType B
 			JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
 			JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
@@ -539,13 +611,6 @@ BEGIN TRY
 			WHERE intSampleId = @intSampleId
 		END
 
-		EXEC uspQMGenerateSampleCatalogueImportAuditLog
-			@intSampleId  = @intSampleId
-			,@intUserEntityId = @intEntityUserId
-			,@strRemarks = 'Updated from Contract Line Allocation Import'
-			,@ysnCreate = 0
-			,@ysnBeforeUpdate = 0
-
 		CONT:
 
 		FETCH NEXT
@@ -560,11 +625,19 @@ BEGIN TRY
 			,@dblCashPrice
 			,@ysnSampleContractItemMatch
 			,@strSampleNumber
+			,@intCurrencyID
+			,@strPlantCode
 	END
 
 	CLOSE @C
 
 	DEALLOCATE @C
+
+	EXEC uspQMGenerateSampleCatalogueImportAuditLog
+		@intUserEntityId = @intEntityUserId
+		,@strRemarks = 'Updated from Contract Line Allocation Import'
+		,@ysnCreate = 0
+		,@ysnBeforeUpdate = 0
 
 	COMMIT TRANSACTION
 END TRY

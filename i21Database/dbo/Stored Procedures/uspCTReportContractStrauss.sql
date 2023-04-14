@@ -203,11 +203,11 @@ BEGIN TRY
 
 		IF CHARINDEX('intGradeId',@strAmendedColumns, 0) > 0 
 		BEGIN
-			SET @fontBold = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+			SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;font-weight:bold;">'
 		END
 		ELSE
 		BEGIN 
-			SET @fontBold = '<span style="font-family:Arial;font-size:13px;">'
+			SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;">'
 		END
 		IF CHARINDEX('intFreightTermId',@strAmendedColumns, 0) > 0 
 		BEGIN
@@ -454,7 +454,7 @@ BEGIN TRY
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
-		,strStrussOtherCondition				= @fontBold + ISNULL(W2.strWeightGradeDesc, '') + '</span>'+  ISNULL(@strGeneralCondition, '')  
+		,strStrussOtherCondition				= '<p>' + @fontBold + ISNULL(W2.strWeightGradeDesc, '') + '</span>'+  +'<span style="font-family:Arial;font-size:12.5px;">' + ISNULL(@strGeneralCondition, '')  + '</span>' + '</p>'
 		,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 		,ysnExternal							= @ysnExternal
 		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)

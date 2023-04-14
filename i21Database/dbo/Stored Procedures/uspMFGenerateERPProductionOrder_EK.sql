@@ -25,6 +25,9 @@ BEGIN TRY
 		,@dblIntensity NUMERIC(18, 6)
 		,@dblMouthfeel NUMERIC(18, 6)
 		,@dblAppearance NUMERIC(18, 6)
+		,@dblMoisture NUMERIC(18, 6)
+		,@dblVolume NUMERIC(18, 6)
+		,@dblDustLevel NUMERIC(18, 6)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intWorkOrderId INT
@@ -118,7 +121,7 @@ BEGIN TRY
 
 		SELECT @dblMouthfeel = 0
 
-		SELECT @dblAppearance = 0
+		SELECT @dblAppearance = 0, @dblMoisture=0,@dblVolume=0,@dblDustLevel =0
 
 		SELECT @dblTaste = dblComputedValue
 		FROM tblMFWorkOrderRecipeComputation C
@@ -150,6 +153,24 @@ BEGIN TRY
 		WHERE P.strPropertyName = 'Appearance'
 		AND intWorkOrderId = @intWorkOrderId
 
+		SELECT @dblMoisture = dblComputedValue
+		FROM tblMFWorkOrderRecipeComputation C
+		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
+		WHERE P.strPropertyName = 'Moisture'
+		AND intWorkOrderId = @intWorkOrderId
+
+		SELECT @dblVolume = dblComputedValue
+		FROM tblMFWorkOrderRecipeComputation C
+		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
+		WHERE P.strPropertyName = 'Volume'
+		AND intWorkOrderId = @intWorkOrderId
+
+		SELECT @dblDustLevel = dblComputedValue
+		FROM tblMFWorkOrderRecipeComputation C
+		JOIN tblQMProperty P ON P.intPropertyId = C.intPropertyId
+		WHERE P.strPropertyName = 'Dust Level'
+		AND intWorkOrderId = @intWorkOrderId
+
 		SELECT @strXML = @strXML + '<Header>'
 		+ '<Status>'+Case When @strRowState = 'Modified' then 'U' Else 'C' End	  + '</Status>'
 		+ '<Plant>' + IsNULL(CL.strVendorRefNoPrefix,'')   + '</Plant>'
@@ -158,12 +179,12 @@ BEGIN TRY
 				+ '<BlendDescription>' + I.strDescription  + '</BlendDescription>' 
 				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), W.dtmApprovedDate , 126),'') + '</DateApproved>' 
 				+ '<Mixes>' + [dbo].[fnRemoveTrailingZeroes]( BR.dblEstNoOfBlendSheet) + '</Mixes>'
-				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](P.dblTotalPart) + '</Parts>'
-				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</NetWtPerMix>'
-				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblQuantity,0) ) + '</TotalBlendWt>'
-				+ '<Volume>0</Volume>'
-				+ '<DustLevel>0</DustLevel>'
-				+ '<Moisture>0</Moisture>'
+				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](ROUND(P.dblTotalPart,0)) + '</Parts>'
+				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblPlannedQuantity/BR.dblEstNoOfBlendSheet,0)) + '</NetWtPerMix>'
+				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblPlannedQuantity,0) ) + '</TotalBlendWt>'
+				+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblVolume),0) + '</Volume>'
+				+ '<DustLevel>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblDustLevel),0) + '</DustLevel>'
+				+ '<Moisture>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblMoisture),0) + '</Moisture>'
 				+ '<T>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblTaste ),0) + '</T>'
 				+ '<H>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblHue ),0) + '</H>'
 				+ '<I>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblIntensity ),0) + '</I>'
@@ -198,7 +219,8 @@ BEGIN TRY
 		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](Round(L.dblWeightPerQty,0) ) + '</WeightPerPack>' 
 		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</WeightPerMix>' 
 		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity,0) ) + '</WeightPerBatch>' 
-		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](WI.dblIssuedQuantity ) + '</Bags>' 
+		+ '<WeightUOM>' + IsNULL(UM.strUnitMeasure,'')  + '</WeightUOM>' 
+		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblIssuedQuantity ,3)) + '</Bags>' 
 		+ '<FW>' + IsNULL(WI.strFW,'')  + '</FW>' 
 		+ '<UserID>' + US.strUserName  + '</UserID>' 
 		+ '<UserName>' + US.strFullName  + '</UserName>' 

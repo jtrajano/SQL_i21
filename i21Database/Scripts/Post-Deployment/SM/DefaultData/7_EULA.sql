@@ -1,9 +1,9 @@
 ﻿
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '22.1')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMEULA WHERE strVersionNumber = '22.1.1')
 BEGIN
 INSERT INTO tblSMEULA(strVersionNumber, strText)
-VALUES ('22.1', N'<!DOCTYPE html>
+VALUES ('22.1.1', N'<!DOCTYPE html>
 <html>
 
 <head>
@@ -755,7 +755,7 @@ this Master Agreement and applicable Schedules.<span style=''mso-spacerun:yes''>
 style=''text-underline:black''>Ordering Document</u>” hereunder. </p>
 
 <p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
-margin-left:62.75pt''>1.2.<span style=''mso-spacerun:yes''>   </span><b
+margin-left:62.75pt''>1.2.<span style=''mso-spacerun:yes''> </span><b
 style=''mso-bidi-font-weight:normal''>Schedule 2.1 – Software License Agreement</b>,
 governs the licensing of Software, if Customer has elected to use the Software
 installed on its own servers or as hosted by Provider. </p>
@@ -836,7 +836,7 @@ indirectly from the disclosing Party, whether disclosed orally or in writing or
 electronically or some other form. </p>
 
 <p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
-margin-left:62.75pt''>2.4.<span style=''mso-spacerun:yes''>   </span>“<u
+margin-left:62.75pt''>2.4.<span style=''mso-spacerun:yes''> </span>“<u
 style=''text-underline:black''>Customer Data</u>&quot; means any data,
 information, content or material which Customer or its Affiliates enter, load
 onto, or use in connection with the Application, and all results from
@@ -1286,9 +1286,8 @@ of Termination</u>.<span style=''mso-spacerun:yes''>  </span>When this Master
 Agreement terminates or expires for any reason: </p>
 
 <p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
-margin-left:89.25pt;text-indent:-.75in''><span
-style=''mso-spacerun:yes''> </span>8.4.1.<span style=''mso-spacerun:yes''>  
-</span>Customer will pay Provider for all Products provided, Services <span
+margin-left:1.20in;text-indent:-31.45pt''><span
+style=''mso-spacerun:yes''> </span>8.4.1.<span style=''mso-spacerun:yes''> </span>Customer will pay Provider for all Products provided, Services <span
 class=GramE>performed</span> and expenses incurred by Provider on or before the
 date of termination.<span style=''mso-spacerun:yes''>  </span>If this Master
 Agreement was terminated before the end of the then current Term for reasons
@@ -1298,7 +1297,7 @@ early-terminated Term. </p>
 
 <p class=MsoNormal style=''margin-top:0in;margin-right:0in;margin-bottom:6.95pt;
 margin-left:1.25in;text-indent:-31.45pt''>8.4.2.<span
-style=''mso-spacerun:yes''>   </span>Provider will discontinue (and cause its
+style=''mso-spacerun:yes''> </span>Provider will discontinue (and cause its
 contractors and personnel to discontinue) all use of Customer IP.<span
 style=''mso-spacerun:yes''>   </span></p>
 

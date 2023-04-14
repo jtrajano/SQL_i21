@@ -183,6 +183,7 @@ BEGIN TRY
 				,@strLocation = strLocationName
 			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 			WHERE strVendorRefNoPrefix = @strLocationName
+				AND strLocationType = 'Plant'
 
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 			BEGIN
@@ -235,6 +236,14 @@ BEGIN TRY
 
 			IF ISNULL(@intSubLocationId, 0) = 0
 			BEGIN
+				SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
+				FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
+				WHERE t.strSubLocationName = @strSubLocationName
+					AND t.intCompanyLocationId = @intCompanyLocationId
+			End
+
+			IF ISNULL(@intSubLocationId, 0) = 0
+			BEGIN
 				RAISERROR (
 						'Invalid Storage Location. '
 						,16
@@ -263,6 +272,16 @@ BEGIN TRY
 				SELECT TOP 1 @intStorageLocationId = t.intStorageLocationId
 				FROM tblICStorageLocation t WITH (NOLOCK)
 				WHERE t.intSubLocationId = @intSubLocationId
+					AND t.strName = 'SU'
+
+				IF ISNULL(@intStorageLocationId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Default Storage Unit is not configured. '
+							,16
+							,1
+							)
+				END
 			END
 
 			SELECT @intQtyUnitMeasureId = t.intUnitMeasureId
@@ -372,8 +391,10 @@ BEGIN TRY
 			SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 
 			SELECT @intLotId = L.intLotId
+				,@intQtyItemUOMId = L.intItemUOMId
 				,@dblOrgQty = L.dblQty
-				,@dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+				--,@dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+				,@dblQty = dbo.[fnDivide]((@dblNetWeight - L.dblWeight), L.dblWeightPerQty)
 			FROM tblICLot L WITH (NOLOCK)
 			WHERE L.strLotNumber = @strLotNumber
 				AND L.intItemId = @intItemId
@@ -389,15 +410,6 @@ BEGIN TRY
 						)
 			END
 
-			IF ISNULL(@intLotId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Invalid Batch. '
-						,16
-						,1
-						)
-			END
-
 			BEGIN TRAN
 
 			-- Lot Create / Update
@@ -408,14 +420,36 @@ BEGIN TRY
 					GOTO NextRec
 				END
 
-				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
-					,@intQtyItemUOMId = L.intItemUOMId
-				FROM tblICLot L WITH (NOLOCK)
-				WHERE L.strLotNumber = @strLotNumber
-					AND L.intItemId = @intItemId
-					AND L.intSubLocationId = @intSubLocationId
+				-- Take Qty from Batch
+				SELECT TOP 1 @dblQty = CEILING(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0))
+					,@intQtyItemUOMId = IUOM.intItemUOMId
+				FROM tblMFBatch B WITH (NOLOCK)
+				JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
+					AND IUOM.intUnitMeasureId = B.intPackageUOMId
+					AND B.strBatchId = @strLotNumber
+					AND B.intTealingoItemId = @intItemId
+					AND B.intLocationId = @intCompanyLocationId
 
-				IF @dblQty IS NULL
+				IF ISNULL(@dblQty, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Batch characteristics does not exists. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@dblQty, 0) = 0
+				BEGIN
+					SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+						,@intQtyItemUOMId = L.intItemUOMId
+					FROM tblICLot L WITH (NOLOCK)
+					WHERE L.strLotNumber = @strLotNumber
+						AND L.intItemId = @intItemId
+						AND L.intSubLocationId = @intSubLocationId
+				END
+
+				IF ISNULL(@dblQty, 0) = 0
 				BEGIN
 					SELECT @dblQty = @dblNetWeight
 						,@intQtyItemUOMId = @intNetWeightItemUOMId
@@ -508,9 +542,10 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF @dblOrgQty <> @dblQty
+				IF ISNULL(@dblQty, 0) <> 0
 				BEGIN
-					SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
+					--SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
+					SELECT @dblAdjustByQuantity = @dblQty
 
 					EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
 						,@dtmDate = NULL
@@ -519,7 +554,7 @@ BEGIN TRY
 						,@intStorageLocationId = @intStorageLocationId
 						,@strLotNumber = @strLotNumber
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
-						,@dblNewUnitCost = @dblNewCost
+						,@dblNewUnitCost = NULL
 						,@intItemUOMId = @intQtyItemUOMId
 						,@intSourceId = 1
 						,@intSourceTransactionTypeId = 8
