@@ -249,7 +249,7 @@ BEGIN
 												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 														- B.dblInterest, voucher.dblTotal) * voucher.dblAverageExchangeRate
-												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
