@@ -82,6 +82,7 @@ IF @intWorkOrderId > 0
 		 , ISNULL(f.dblLowerTolerance, ri.dblLowerTolerance)		AS dblLowerTolerance
 		 , ISNULL(f.dblCalculatedUpperTolerance, (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity))) AS dblCalculatedUpperTolerance
 		 , ISNULL(f.dblCalculatedLowerTolerance, (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))) AS dblCalculatedLowerTolerance 
+		 , f.ysnOverrideRecipe
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId = c.intUnitMeasureId 
@@ -117,6 +118,8 @@ IF @intWorkOrderId > 0
 		 , ISNULL(f.dblLowerTolerance, ri.dblLowerTolerance)		
 		 , ISNULL(f.dblCalculatedUpperTolerance, (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)))
 		 , ISNULL(f.dblCalculatedLowerTolerance, (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))) 
+		 , f.ysnOverrideRecipe
+
 
 --Negative means BlendRequirementId
 IF @intWorkOrderId < 0
@@ -169,4 +172,4 @@ IF @intWorkOrderId < 0
 		 , ri.dblUpperTolerance				
 		 , ri.dblLowerTolerance				
 		 , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) 
-		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) 
+		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))
