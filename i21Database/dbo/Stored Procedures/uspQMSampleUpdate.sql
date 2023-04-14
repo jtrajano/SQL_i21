@@ -1295,6 +1295,7 @@ BEGIN
       ,intMixingUnitLocationId
       ,intMarketZoneId
       ,dtmShippingDate
+      ,strERPPONumber
       ,dblTeaTastePinpoint
       ,dblTeaHuePinpoint
       ,dblTeaIntensityPinpoint
@@ -1426,6 +1427,7 @@ BEGIN
       ,intMixingUnitLocationId = MU.intCompanyLocationId
       ,intMarketZoneId = S.intMarketZoneId
       ,dtmShippingDate=CD.dtmEtaPol
+      ,strERPPONumber = BT.strERPPONumber
       ,dblTeaTastePinpoint = TASTE.dblPinpointValue
       ,dblTeaHuePinpoint = HUE.dblPinpointValue
       ,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
@@ -1441,9 +1443,9 @@ BEGIN
     INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
     INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
     INNER JOIN tblICItem I ON I.intItemId = S.intItemId
-    LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
-    LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo
+    LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+    LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intSampleId = S.intSampleId
     LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
     LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
     LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
@@ -1558,17 +1560,9 @@ BEGIN
     -- Qty Item UOM
     LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
     WHERE S.intSampleId = @intSampleId
-    -- AND (
-    --   (@ysnPreShipmentSample = 1 AND BT.intLocationId = S.intCompanyLocationId)
-    --   OR @ysnPreShipmentSample = 0
-    -- )
     AND (
-      ((BT.intMixingUnitLocationId = S.intCompanyLocationId AND BT.intLocationId = S.intCompanyLocationId)
-      OR BT.intBuyingCenterLocationId = S.intCompanyLocationId)
-      
-      OR (
-        BT.intBatchId IS NULL
-      )
+      (BT.intBatchId IS NOT NULL AND BT.intLocationId = S.intCompanyLocationId)
+      OR (BT.intBatchId IS NULL)
     )
 
     DECLARE @intInput INT
