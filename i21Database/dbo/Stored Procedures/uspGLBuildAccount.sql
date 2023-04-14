@@ -8,13 +8,15 @@
 	SET NOCOUNT ON
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
-	-- IF @intCurrencyId = 0
-	-- 	SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
-	-- IF ISNULL(@intCurrencyId, 0)= 0
-	-- BEGIN
-	-- 	RAISERROR('Functional Currency is not setup properly. Please set it up in Company Configuration Screen.', 16, 1);
-	-- END
 	IF @intCurrencyId = 0 SET @intCurrencyId = NULL
+	DECLARE  @tblAccount  TABLE ( strAccountId NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL )
+	
+	INSERT INTO @tblAccount (strAccountId)
+	SELECT strAccountId
+	FROM tblGLTempAccount
+		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
+		ORDER BY strAccountId
+
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
 	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
@@ -104,8 +106,7 @@
 				INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@accountId, @segmentId)
 				UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureId = (SELECT intAccountStructureId FROM tblGLAccountSegment WHERE intAccountSegmentId = @segmentId)
 					
-			END
-		
+			END		
 			DELETE FROM tblGLTempAccount WHERE cntId = @Id
 		END
 	END
@@ -114,8 +115,6 @@
 	--DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
 	IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
 		EXEC uspGLAccountOriginSync @intUserId
-		
+
 	EXEC dbo.uspGLUpdateAccountSegmentId
 	EXEC uspGLBuildTempCOASegment
-
-	
