@@ -84,6 +84,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 			  AND A.intBuyingCenterLocationId = B.intBuyingCenterLocationId
 			  AND A.intSubBookId = B.intSubBookId
 			  AND A.intLocationId = B.intLocationId
+			  AND A.intSampleId = B.intSampleId
 		WHERE B.intId = @id;
 
 		/* Update Existing Batch if @strBatchId is not empty. */
