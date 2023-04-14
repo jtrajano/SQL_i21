@@ -37,7 +37,7 @@ BEGIN
 				,[intCompanyId] 
 				,[dtmDate] 
 				,[dblQty] = SUM(dblQty) 
-				,[dblValue] = SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+				,[dblValue] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
 				,[dblValueRounded] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
 			FROM 
 				tblICInventoryTransaction t
