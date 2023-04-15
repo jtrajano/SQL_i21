@@ -105,7 +105,9 @@ SELECT 	 SQ.intContractDetailId
 		,LV.dtmStuffingDate
 		,LV.dtmETSPOL
 		,LV.dtmETAPOL
+		,intWeekActETD = datepart(wk, LV.dtmETAPOL)
 		,LV.dtmETAPOD
+		,intWeekActETA = datepart(wk, LV.dtmETAPOD)
 		,LV.strBookingReference
 		,LV.intLoadId
 		,LV.dtmDeadlineCargo
