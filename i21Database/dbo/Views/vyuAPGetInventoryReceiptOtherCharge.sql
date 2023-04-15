@@ -70,7 +70,7 @@ LEFT JOIN tblAPVoucherPayable Payable ON Payable.intInventoryReceiptChargeId = R
 LEFT JOIN tblICItemLocation ItemLocation ON Receipt.intLocationId = ItemLocation.intLocationId AND ItemLocation.intItemId = Charge.intItemId  
 LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Receipt.intFreightTermId  
 OUTER APPLY (  
-  SELECT dbo.fnGetItemGLAccount(Charge.intItemId, ItemLocation.intItemLocationId, 'Inventory') [intAccountId]  
+  SELECT dbo.fnGetItemGLAccount(Charge.intItemId, ItemLocation.intItemLocationId, 'Other Charge Expense') [intAccountId]  
 ) ItemAccount  
 OUTER APPLY (  
   SELECT intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = ItemAccount.intAccountId  
