@@ -15,18 +15,27 @@
 	-- 	RAISERROR('Functional Currency is not setup properly. Please set it up in Company Configuration Screen.', 16, 1);
 	-- END
 	IF @intCurrencyId = 0 SET @intCurrencyId = NULL
+	
+	DECLARE  @tblAccount  TABLE ( strAccountId NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL )
+	
+	INSERT INTO @tblAccount (strAccountId)
+	SELECT strAccountId
+	FROM tblGLTempAccount
+		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
+		ORDER BY strAccountId
+
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
 	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
-		SELECT A.strAccountId,
-			   strDescription,
-			   intAccountGroupId,
-			   intAccountUnitId,
-			   ysnSystem,
-			   ysnActive,
-			   @intCurrencyId
-		FROM tblGLTempAccount A JOIN @tblAccount B ON A.strAccountId = B.strAccountId
-		ORDER BY A.strAccountId
+	SELECT A.strAccountId,
+			strDescription,
+			intAccountGroupId,
+			intAccountUnitId,
+			ysnSystem,
+			ysnActive,
+			@intCurrencyId
+	FROM tblGLTempAccount A JOIN @tblAccount B ON A.strAccountId = B.strAccountId
+	ORDER BY A.strAccountId
 
 
 	DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50)
@@ -42,7 +51,6 @@
         @actionType = 'Created'                                 
 		DELETE FROM @tblAccount WHERE strAccountId = @_strAccountId
 	END
-
 	
 	-- +++++ INSERT CROSS REFERENCE +++++ --
 	DECLARE @strType NVARCHAR(20), @updateCrossReference BIT = 1
