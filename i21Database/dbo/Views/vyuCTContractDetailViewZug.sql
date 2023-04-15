@@ -195,7 +195,7 @@ SELECT
  , b.dtmCreated  
  , an.strCropYear  
  , strCustomer = ao.strName
- , strCustomerContract = b.strCPContract  
+ , strCustomerContractCP = b.strCPContract  
  , b.dtmSigned  
  , b.dtmDeferPayDate  
  , b.dblDeferPayRate
