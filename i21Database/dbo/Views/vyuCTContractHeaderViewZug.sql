@@ -13,13 +13,15 @@ SELECT
 	, dblAppliedQty = CAST(BL.dblTotalAppliedQty AS NUMERIC(18, 6))
 	, strHeaderUnitMeasure = U2.strUnitMeasure
 	, strEntityContract = CH.strCustomerContract
-	, CH.ysnSigned
+	, CH.ysnSigned	
+	, CH.dtmSigned
 	, CH.ysnPrinted
 	, VNM.strApprovalStatus
 	, ysnApproved = ISNULL(TR.ysnApproved, 0)
 	, strAssociationName = AN.strName
 	, BK.strBook
 	, CH.ysnBrokerage
+	, CP.strContractPlan
 	, CY.strCommodityCode
 	, strCommodityDescription = CY.strDescription
 	, CO.strCountry
@@ -34,13 +36,22 @@ SELECT
 	, CH.strInternalComment
 	, IT.strInvoiceType
 	, strLastModifiedBy = UE.strName
+	, CH.ysnLoad
+	, strLoadUnitMeasure = U3.strUnitMeasure
+	, 0 AS intIgnoreMismatch
+	, CH.ysnMultiplePriceFixation
+	, CH.intNoOfLoad
 	, CH.ysnMaxPrice
 	, PO.strPosition
 	, ysnPrepaid = CAST(CASE WHEN ISNULL((SELECT COUNT(*) FROM tblAPBillDetail BD
 										JOIN tblAPBill BL ON BL.intBillId	= BD.intBillId
 										WHERE BL.intTransactionType = 2 AND BD.intContractHeaderId = CH.intContractHeaderId), 0) = 0 THEN 0 ELSE 1 END AS BIT)
 	, PT.strPricingType
+	, CH.strPrintableRemarks
+	, strProducer = PR.strName
 	, CH.ysnProvisional
+	, CH.dblProvisionalInvoicePct
+	, CH.dblQuantityPerLoad
 	, CH.ysnReceivedSignedFixationLetter
 	, strSalesperson = ES.strName
 	, SB.strSubBook
