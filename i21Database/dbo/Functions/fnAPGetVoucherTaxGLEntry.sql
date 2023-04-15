@@ -1,4 +1,4 @@
-﻿ALTER FUNCTION [dbo].[fnAPGetVoucherTaxGLEntry]
+﻿CREATE FUNCTION [dbo].[fnAPGetVoucherTaxGLEntry]
 (
 	@billId INT
 )
@@ -76,12 +76,7 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15,11)
 	AND A.ysnFinalVoucher != 1 --Exclude Finalize Voucher
-	AND 1 = (
-						CASE WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 0 THEN 1
-							WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 1 AND B.dblOldCost IS NULL THEN 1
-							WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 1 AND B.dblOldCost IS NOT NULL THEN 0
-						END 
-					)
+	AND 1 = (CASE WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 0 AND B.dblOldCost IS NULL THEN 1 ELSE 0 END)
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax

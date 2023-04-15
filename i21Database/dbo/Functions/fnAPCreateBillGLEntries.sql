@@ -1443,8 +1443,6 @@ BEGIN
 		  AND A.intTransactionType IN (1)
 		  AND D.ysnTaxAdjusted = 1
 			AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1
-			AND ISNULL(B.dblOldCost,0) <> 0
-			AND D.ysnTaxAdjusted = 1
 			AND B.intInventoryReceiptChargeId > 0
 	GROUP BY A.dtmDate
 	,D.ysnTaxAdjusted
