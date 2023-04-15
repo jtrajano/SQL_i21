@@ -399,7 +399,7 @@ BEGIN
 			INNER JOIN vyuGLAccountDetail GLD ON B.intAccountId = GLD.intAccountId
 			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND (GLD.intAccountCategoryId NOT IN (27) OR GLD.intAccountId IS NULL)
+		AND (GLD.intAccountCategoryId NOT IN (47) OR GLD.intAccountId IS NULL)
 		AND A.intTransactionType IN (1)
 		AND B.intInventoryReceiptChargeId > 0
 		AND ISNULL(ysnPrepaidOtherCharge,0) = 1
