@@ -2,15 +2,9 @@
 AS
 
 TRUNCATE TABLE tblARCustomerAgingStagingTable
-EXEC uspARCustomerAgingAsOfDateReport
+EXEC uspARCustomerAgingAsOfDateReport @intEntityUserId = 1
 
 UPDATE CUSTOMER
-SET dblARBalance = AGING.dblTotalAR
-FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-INNER JOIN (
-	SELECT intEntityCustomerId
-		 , dblTotalAR = ISNULL(dblTotalAR, 0)
-	FROM tblARCustomerAgingStagingTable
-) AGING ON CUSTOMER.intEntityId = AGING.intEntityCustomerId
-
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+SET dblARBalance = ISNULL(AGING.dblTotalAR, 0)
+FROM dbo.tblARCustomer CUSTOMER 
+LEFT JOIN tblARCustomerAgingStagingTable AGING ON CUSTOMER.intEntityId = AGING.intEntityCustomerId AND AGING.intEntityUserId = 1 AND AGING.strAgingType = 'Summary'
