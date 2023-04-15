@@ -122,13 +122,6 @@ BEGIN
 			ON SBD.intBillId = BD.intBillId
 		INNER JOIN tblGRSettleStorage SS
 			ON SS.intSettleStorageId = SBD.intSettleStorageId
-		--INNER JOIN tblGRSettleStorageTicket SST
-		--	ON SST.intSettleStorageId = SS.intSettleStorageId
-		--INNER JOIN tblGRCustomerStorage CS
-		--	ON CS.intCustomerStorageId = SST.intCustomerStorageId
-		--INNER JOIN tblGRStorageType ST
-		--	ON ST.intStorageScheduleTypeId = CS.intStorageScheduleId
-		--		AND ST.ysnDPOwnedType = 0
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = AP.intShipToId
 				AND CL.ysnLicensed = 1
@@ -202,21 +195,6 @@ BEGIN
 		--	ON C.intCommodityId = V.intCommodityId
 		--WHERE C.dtmReportDate = @dtmReportDate
 		--	AND C.intOrderNo = 2
-
-		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
-		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
-		BEGIN
-			INSERT INTO @CompanyOwnedData
-			SELECT 2
-				,@dtmReportDate
-				,@intCommodityId
-				,'   COMPANY OWNERSHIP (UNPAID)'
-				,0
-				,0
-				,0
-				,0
-				,@strUOM
-		END
 
 		/******DECREASE*******/
 		UPDATE C
@@ -358,8 +336,23 @@ BEGIN
 			,@strUOM
 		FROM #DelayedPricingBal D
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
-		GROUP BY strDistributionType
-		
+		GROUP BY strDistributionType		
+
+		--INCREASE AND DECREASE
+		UPDATE C
+		SET dblTotalIncrease = ISNULL(A.dblTotalIncrease,0)
+			,dblTotalDecrease = ISNULL(A.dblTotalDecrease,0)
+		FROM @CompanyOwnedData C
+		OUTER APPLY (			
+			SELECT dblTotalIncrease = SUM(dblIn)
+				,dblTotalDecrease = SUM(dblOut)
+			FROM #DelayedPricingIncDec C
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
+			GROUP BY strCommodityCode
+		) A
+		WHERE C.intCommodityId = @intCommodityId
+			AND C.intOrderNo = 3
+
 		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
 		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 3)
 		BEGIN
@@ -378,21 +371,6 @@ BEGIN
 				AND ysnCustomerStorage = 0
 				AND strOwnedPhysicalStock = 'Company'
 		END
-
-		--INCREASE AND DECREASE
-		UPDATE C
-		SET dblTotalIncrease = ISNULL(A.dblTotalIncrease,0)
-			,dblTotalDecrease = ISNULL(A.dblTotalDecrease,0)
-		FROM @CompanyOwnedData C
-		OUTER APPLY (			
-			SELECT dblTotalIncrease = SUM(dblIn)
-				,dblTotalDecrease = SUM(dblOut)
-			FROM #DelayedPricingIncDec C
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
-			GROUP BY strCommodityCode
-		) A
-		WHERE C.intCommodityId = @intCommodityId
-			AND C.intOrderNo = 3		
 
 		DROP TABLE #DelayedPricingALL
 		DROP TABLE #DelayedPricingBal
@@ -418,8 +396,11 @@ BEGIN
 
 		--CUSTOMER STORAGE TOTAL
 		DECLARE @dblCustomerStorage DECIMAL(18,6)
+		DECLARE @dblSODecrease DECIMAL(18,6)
 		SET @dblCustomerStorage = NULL
-		SELECT @dblCustomerStorage = SUM(dblBeginningBalance) 
+		SET @dblSODecrease = NULL
+		SELECT @dblCustomerStorage = SUM(dblBeginningBalance)
+			,@dblSODecrease = SUM(dblDecrease)
 		FROM tblGRGIICustomerStorage 
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
@@ -427,16 +408,37 @@ BEGIN
 		GROUP BY intCommodityId
 			,strUOM
 
-		--GET SHIPPED FOR THE DAY
+
+		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
 		DECLARE @dblShipped DECIMAL(18,6)
+		DECLARE @dblInternalTransfersReceived DECIMAL(18,6)
+		DECLARE @dblInternalTransfersShipped DECIMAL(18,6)
+		DECLARE @dblInternalTransfersDiff DECIMAL(18,6)
 		SET @dblShipped = NULL
-		SELECT @dblShipped = SUM(dblShipped)
+		SET @dblInternalTransfersReceived = NULL
+		SET @dblInternalTransfersShipped = NULL
+		SET @dblInternalTransfersDiff = NULL
+
+		SELECT @dblShipped = SUM(ISNULL(dblShipped,0))
+			,@dblInternalTransfersReceived = SUM(ISNULL(dblInternalTransfersReceived,0))
+			,@dblInternalTransfersShipped = SUM(ISNULL(dblInternalTransfersShipped,0))
 		FROM tblGRGIIPhysicalInventory 
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
 			AND dtmReportDate = @dtmReportDate
-		GROUP BY intCommodityId
-			,strUOM
+
+		SET @dblInternalTransfersDiff = @dblInternalTransfersReceived - @dblInternalTransfersShipped
+
+		--GET RECEIVED THAT ARE COMPANY OWNED
+		DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
+		SET @dblReceivedCompanyOwned = NULL
+		SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
+		FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
+		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
+		WHERE intCommodityId = @intCommodityId
+			AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
+			AND CompOwn.strTransactionType = 'Inventory Receipt'
 
 
 		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
@@ -500,7 +502,7 @@ BEGIN
 			,'   COMPANY OWNERSHIP (PAID)'
 			,dblTotalBeginning = ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) - ISNULL(CO.total,0)
 			,dblTotalIncrease = CU.total + ISNULL(@dblIACompanyOwned,0) + ISNULL(@dblInternalTransfersDiff,0) + ISNULL(@dblReceivedCompanyOwned,0)
-			,dblTotalDecrease = ABS((ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) - ISNULL(DP.total,0))
+			,dblTotalDecrease = (ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) - ISNULL(DP.total,0)
 			,0
 			,@strUOM
 		FROM (
