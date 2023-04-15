@@ -18,32 +18,28 @@
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
 	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
-		SELECT A.strAccountId,
+		SELECT strAccountId,
 			   strDescription,
 			   intAccountGroupId,
 			   intAccountUnitId,
 			   ysnSystem,
 			   ysnActive,
 			   @intCurrencyId
-		FROM tblGLTempAccount A JOIN @tblAccount B ON A.strAccountId = B.strAccountId
-		ORDER BY A.strAccountId
+		FROM tblGLTempAccount
+		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
+		ORDER BY strAccountId
 
+	-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
+	--IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference)
+	--      BEGIN
+	--          IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst_bak]') AND type IN (N'U'))
+	--              DROP TABLE glactmst_bak
+	--          SELECT * INTO glactmst_bak FROM glactmst
+	--          DELETE FROM glactmst
+	--      END
+	--      IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst_bak]') AND type IN (N'U'))
+	--      	SELECT * INTO glactmst_bak FROM glactmst
 
-	DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50)
-	WHILE EXISTS (SELECT 1 FROM  @tblAccount )
-	BEGIN
-		SELECT TOP 1 @_intAccountId=intAccountId, @_strAccountId = A.strAccountId FROM tblGLAccount A 
-		JOIN @tblAccount B ON A.strAccountId = B.strAccountId WHERE A.strAccountId = B.strAccountId
-
-		EXEC uspSMAuditLog
-        @keyValue = @_intAccountId,                                          -- Primary Key Value
-        @screenName = 'GeneralLedger.view.EditAccount',            -- Screen Namespace
-        @entityId = @intUserId,                                              -- Entity Id.
-        @actionType = 'Created'                                 
-		DELETE FROM @tblAccount WHERE strAccountId = @_strAccountId
-	END
-
-	
 	-- +++++ INSERT CROSS REFERENCE +++++ --
 	DECLARE @strType NVARCHAR(20), @updateCrossReference BIT = 1
 	SELECT TOP 1 @strType = strType FROM tblGLAccountStructure ORDER BY intSort -- check if primary is the first segment
@@ -94,3 +90,5 @@
 		
 	EXEC dbo.uspGLUpdateAccountLocationId
 	EXEC uspGLBuildTempCOASegment
+
+	
