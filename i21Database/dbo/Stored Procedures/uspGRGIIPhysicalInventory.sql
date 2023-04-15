@@ -54,6 +54,8 @@ DECLARE @PhysicalInventoryData AS TABLE (
 	,dblNetAdjustments DECIMAL(18,6) DEFAULT 0
 	,dblEndInventory DECIMAL(18,6) DEFAULT 0
 	,strUOM NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,dblIACompanyOwned DECIMAL(18,6) DEFAULT 0
+	,dblIACustomerOwned DECIMAL(18,6) DEFAULT 0
 )
 
 CREATE TABLE #tblInOut
@@ -74,6 +76,15 @@ DECLARE @tblCommodities AS TABLE
 	intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,strCommodityDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS
+)
+
+DECLARE @InventoryAdjustments TABLE
+(
+	dblUnits DECIMAL(18,6)
+	,intCommodityId INT
+	,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,strOwnership NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
 )
 
 DECLARE @strCommodityCode NVARCHAR(20)
@@ -251,6 +262,8 @@ BEGIN
 		,dblInternalTransfersReceived = IT_RECEIVED.TOTAL
 		,dblInternalTransfersShipped = IT_SHIPPED.TOTAL
 		,dblNetAdjustments = NET_ADJUSTMENTS.dblAdjustments
+		,dblIACompanyOwned = NET_ADJUSTMENTS_COMPANY_OWNED.dblAdjustments
+		,dblIACustomerOwned = NET_ADJUSTMENTS_CUSTOMER_OWNED.dblAdjustments
 	FROM @PhysicalInventoryData PID
 	LEFT JOIN (
 		SELECT TOTAL = ABS(SUM(ISNULL(dblInvIn,0)) - SUM(ISNULL(dblInvOut,0)))
@@ -312,7 +325,33 @@ BEGIN
 	) NET_ADJUSTMENTS
 		ON NET_ADJUSTMENTS.intCommodityId = PID.intCommodityId
 			AND NET_ADJUSTMENTS.strLocationName = PID.strLocationName
-	
+	LEFT JOIN (
+		SELECT dblAdjustments = SUM(ISNULL(dblAdjustments,0))
+				,intCommodityId
+				,strLocationName
+			FROM #tblInOut
+			WHERE strTransactionType = 'Inventory Adjustment'
+				AND dtmDate IS NOT NULL
+				AND strOwnership = 'Company Owned'
+			GROUP BY intCommodityId
+				,strLocationName
+	) NET_ADJUSTMENTS_COMPANY_OWNED
+		ON NET_ADJUSTMENTS_COMPANY_OWNED.intCommodityId = PID.intCommodityId
+			AND NET_ADJUSTMENTS_COMPANY_OWNED.strLocationName = PID.strLocationName
+	LEFT JOIN (
+		SELECT dblAdjustments = SUM(ISNULL(dblAdjustments,0))
+				,intCommodityId
+				,strLocationName
+			FROM #tblInOut
+			WHERE strTransactionType = 'Inventory Adjustment'
+				AND dtmDate IS NOT NULL
+				AND strOwnership = 'Customer Owned'
+			GROUP BY intCommodityId
+				,strLocationName
+	) NET_ADJUSTMENTS_CUSTOMER_OWNED
+		ON NET_ADJUSTMENTS_CUSTOMER_OWNED.intCommodityId = PID.intCommodityId
+			AND NET_ADJUSTMENTS_CUSTOMER_OWNED.strLocationName = PID.strLocationName
+
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
@@ -340,6 +379,8 @@ SELECT @dtmReportDate
 	,NULL
 	,0
 	,C.strUOM	
+	,0
+	,0
 FROM tblSMCompanyLocation CL
 OUTER APPLY (
 	SELECT * FROM #Coms
@@ -360,7 +401,8 @@ UPDATE @PhysicalInventoryData
 SET dblBegInventory = ISNULL(dblBegInventory,0), dblEndInventory = ISNULL(dblBegInventory,0) + ISNULL(dblReceived,0) - ISNULL(dblShipped,0) + ISNULL(dblInternalTransfersReceived,0) - ISNULL(dblInternalTransfersShipped,0) + ISNULL(dblNetAdjustments,0)
 
 INSERT INTO tblGRGIIPhysicalInventory
-SELECT * FROM @PhysicalInventoryData
+SELECT * 
+FROM @PhysicalInventoryData
 
 INSERT INTO @PhysicalInventoryData
 SELECT @dtmReportDate
@@ -377,12 +419,29 @@ SELECT @dtmReportDate
 	,SUM(ISNULL(dblNetAdjustments,0))
 	,SUM(ISNULL(dblEndInventory,0))
 	,strUOM
+	,0
+	,0
 FROM @PhysicalInventoryData
 GROUP BY intCommodityId
 	,strCommodityCode
 	,strCommodityDescription
 	,strUOM
 
-SELECT * FROM @PhysicalInventoryData
+SELECT 
+	dtmReportDate
+	,strLicensed
+	,intCommodityId
+	,strCommodityCode
+	,strCommodityDescription
+	,strLocationName
+	,dblBegInventory
+	,dblReceived
+	,dblShipped
+	,dblInternalTransfersReceived
+	,dblInternalTransfersShipped
+	,dblNetAdjustments
+	,dblEndInventory
+	,strUOM
+FROM @PhysicalInventoryData
 
 END
