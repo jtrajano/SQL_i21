@@ -49,7 +49,6 @@ SELECT
 	intContractHeaderId,
 	intCurrencyId,
 	intPriceContractId,
-	intPriceContractId,
 	intPriceFixationId,
 	intUniqueId,
 	ysnSubCurrency
