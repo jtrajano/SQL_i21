@@ -15,5 +15,6 @@ SELECT
 	[ysnSigned],
 	[dtmSigned] AS [dtmSignedDate],
 	[strLocationName],
-	[strAmendmentNumber]
+	[strAmendmentNumber],
+	[strTrader] =  strSalesPerson
 FROM [dbo].[vyuCTAmendmentHistory] 

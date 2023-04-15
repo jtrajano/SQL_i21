@@ -30,6 +30,7 @@ SELECT
 	dblBalanceNoOfLots,
 	intLotsHedged,
 	dblFinalPrice,
+	ysnMultiplePriceFixation,
 	strEntityContract,
 	dtmStartDate,
 	dtmEndDate,
@@ -41,7 +42,17 @@ SELECT
 	strItemNo,
 	strItemShortName,
 	strMainCurrency,
-	strPriceUOM
+	strPriceUOM,
+	intBasisCommodityUOMId,
+	intCommodityId,
+	intContractDetailId,
+	intContractHeaderId,
+	intCurrencyId,
+	intPriceContractId,
+	intPriceContractId,
+	intPriceFixationId,
+	intUniqueId,
+	ysnSubCurrency
 FROM vyuCTSearchPriceContract
 GO
 

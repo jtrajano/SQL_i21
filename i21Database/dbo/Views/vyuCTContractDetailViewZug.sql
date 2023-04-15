@@ -134,12 +134,14 @@ SELECT
  , a.dblBasis  
  , a.dblCashPrice  
  , dblBalance = case when b.ysnQuantityAtHeaderLevel = 1 then hq.dblHeaderBalance else a.dblBalance end 
+ , a.dtmEventStartDate
  , a.dtmPlannedAvailabilityDate  
  , a.dtmUpdatedAvailabilityDate  
  , a.intItemId  
  , c.strItemNo  
  , a.intItemBundleId  
  , strBundleItemNo = d.strItemNo  
+ , e.strShipVia
  , a.intPricingTypeId  
  , f.strPricingType  
  , a.intItemUOMId  
@@ -148,6 +150,7 @@ SELECT
  , i.strFutMarketName  
  , strFutureMonth = LEFT(CONVERT(DATE, '01 ' + j.strFutureMonth), 7) + ' (' + j.strFutureMonth + ')'  
  , strPriceUOM = l.strUnitMeasure
+ , m.strContractOptDesc  
  , n.strLocationName  
  , o.strCurrency  
  , p.strContractStatus  
@@ -164,6 +167,8 @@ SELECT
  , dblActualLots = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(w.dblUnitQty, 0) = 0 THEN NULL  
        WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(w.dblUnitQty, 0) THEN a.dblQuantity  
        ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(w.dblUnitQty, 0)) END) / i.dblContractSize
+ , a.dblAdjustment  
+ , z.dblAllocatedQty
  , strApprovalStatus = SMTR.strApprovalStatus
  , ysnApproved = ISNULL(TR.ysnOnceApproved, 0)  
  , dblApprovedQty = aa.dblRepresentingQty  
@@ -175,16 +180,25 @@ SELECT
        ELSE(i.dblContractSize * (a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0))) * (ISNULL(ad.dblUnitQty, 0) / ISNULL(ae.dblUnitQty, 0)) END)  
  , zc.strBook  
  , b.ysnBrokerage  
+ , a.strBuyerSeller  
+ , b.ysnCategory  
  , dblTotalAppliedQty = (CASE WHEN ISNULL(ah.dblUnitQty, 0) = 0 OR ISNULL(ai.dblUnitQty, 0) = 0 THEN NULL  
         WHEN ISNULL(ah.dblUnitQty, 0) = ISNULL(ai.dblUnitQty, 0) THEN(a.dblQuantity - a.dblBalance)  
         ELSE((a.dblQuantity - a.dblBalance) * ISNULL(ah.dblUnitQty, 0)) / ISNULL(ai.dblUnitQty, 0) END)  
  , strHeaderPricingType = u.strPricingType  
  , dblHeaderQuantity = b.dblQuantity 
- , b.dtmContractDate  
+ , b.dtmContractDate 
+ , aj.strContractPlan   
  , ak.strContractType  
  , al.strCountry  
  , strCreatedBy = am.strName  
  , b.dtmCreated  
+ , an.strCropYear  
+ , strCustomer = ao.strName
+ , strCustomerContract = b.strCPContract  
+ , b.dtmSigned  
+ , b.dtmDeferPayDate  
+ , b.dblDeferPayRate
  , strDestinationPoint = ap.strCity  
  , a.intContractDetailId  
  , a.strERPItemNumber  
@@ -194,6 +208,9 @@ SELECT
  , b.strCustomerContract  
  , b.ysnExported  
  , b.dtmExported  
+ , a.strFXRemarks  
+ , a.dtmFXValidFrom  
+ , a.dtmFXValidTo  
  , a.strFixationBy  
  , a.strFobBasis  
  , intDetailFreightTermId = a.intFreightTermId  
@@ -203,25 +220,46 @@ SELECT
  , dblHedgeQty = (CASE WHEN ISNULL(ad.dblUnitQty, 0) = 0 OR ISNULL(ae.dblUnitQty, 0) = 0 THEN NULL  
       WHEN ISNULL(ad.dblUnitQty, 0) = ISNULL(ae.dblUnitQty, 0) THEN i.dblContractSize * ISNULL(ab.dblHedgedLots, 0)  
       ELSE(i.dblContractSize * ISNULL(ab.dblHedgedLots, 0)) * (ISNULL(ad.dblUnitQty, 0) / ISNULL(ae.dblUnitQty, 0)) END)  
+ , ab.dblHedgedLots  
+ , strINCOLocation = CASE WHEN ISNULL(av.strINCOLocationType,ar.strINCOLocationType) = 'City' THEN aw.strCity  
+       ELSE ax.strSubLocationName END   
+ , ay.strIndex  
+ , az.strInsuranceBy   
+ , b.strInternalComment  
+ , a.dblIntransitQty 
+ , a.strInvoiceNo  
+ , ba.strInvoiceNumber  
+ , bb.strInvoiceType  
  , strItemDescription = c.strDescription  
  , strItemShortName = c.strShortName  
  , b.intLastModifiedById  
  , strLastModifiedBy = bc.strName  
- , a.dtmLastPricingDate  
+ , a.dtmLastPricingDate
+ , b.ysnLoad  
+ , strLoadUnitMeasure = be.strUnitMeasure 
  , strLoadingPoint = bf.strCity  
  , c.strLotTracking
  , bg.strMarketZoneCode  
- , b.ysnMaxPrice   
+ , b.ysnMaxPrice
+ , b.ysnMultiplePriceFixation   
+ , 0 AS intIgnoreMismatch
+ , a.intNoOfLoad  
  , a.dblNoOfLots 
  , a.intNumberOfContainers 
  , strOrigin = ISNULL(bi.strCountry, bk.strCountry) 
+ , strOriginDest = bl.strOrigin + ' - ' + bl.strDest 
  , a.dblOriginalQty 
  , bm.strPosition
  , ysnPrepaid = CASE WHEN ISNULL(bn.intRecordCount, 0) > 0 THEN CONVERT(BIT, 1)  
-      ELSE CONVERT(BIT, 0) END  
+      ELSE CONVERT(BIT, 0) END
+ , bo.strPricingLevelName  
+ , b.strPrintableRemarks       
  , b.ysnPrinted  
+ , strProducer = bp2.strName 
  , strProductType = bq.strDescription  
  , b.ysnProvisional  
+ , b.dblProvisionalInvoicePct  
+ , strPurchasingGroup = br.strName 
  , dblQtyInCommodityDefaultUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bt.dblUnitQty, 0) = 0 THEN NULL  
           WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bt.dblUnitQty, 0) THEN a.dblQuantity  
           ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bt.dblUnitQty, 0)) END)  
@@ -230,10 +268,19 @@ SELECT
  , dblQtyInCommodityStockUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bu.dblUnitQty, 0) = 0 THEN NULL  
           WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bu.dblUnitQty, 0) THEN a.dblQuantity  
           ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bu.dblUnitQty, 0)) END)  
+ , b.dblQuantityPerLoad 
+ , dblQuantityKg = dbo.fnCTConvertQtyToTargetItemUOM (g.intItemUOMId,  (select TOP 1  intItemUOMId from tblICItemUOM 
+                                                       where intUnitMeasureId IN (select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'KG') 
+                                                       AND intItemId = a.intItemId), b.dblQuantityPerLoad )                                                       
+ , a.dblRate  
  , b.ysnReceivedSignedFixationLetter 
+ , a.strReference
+ , a.strRemark
+ , strPaymentInfo = a.strReference 
  , strSalesperson = bw.strName  
  , a.dblScheduleQty  
- , strSeqBook = bx.strBook   
+ , strSeqBook = bx.strBook 
+ , strTrader = bw.strName    
  , a.strShippingTerm  
  , b.ysnSigned  
  , strStatuses = ca.strStatuses  
