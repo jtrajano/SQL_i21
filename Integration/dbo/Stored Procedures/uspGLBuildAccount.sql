@@ -20,9 +20,10 @@ BEGIN
 		-- +++++ INSERT ACCOUNT Id +++++ --
 		IF @intCurrencyId = 0 SET @intCurrencyId = NULL
 
-		DECLARE  @tblAccount  TABLE ( strAccountId NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL )
+
+		DECLARE @tblAuditLogAccount  TABLE ( strAccountId NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL )
 		
-		INSERT INTO @tblAccount (strAccountId)
+		INSERT INTO @tblAuditLogAccount (strAccountId)
 		SELECT strAccountId
 		FROM tblGLTempAccount
 			WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
@@ -38,22 +39,22 @@ BEGIN
 				ysnSystem,
 				ysnActive,
 				@intCurrencyId
-		FROM tblGLTempAccount A JOIN @tblAccount B ON A.strAccountId = B.strAccountId
+		FROM tblGLTempAccount A JOIN @tblAuditLogAccount B ON A.strAccountId = B.strAccountId
 		ORDER BY A.strAccountId
 
 
 		DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50)
-		WHILE EXISTS (SELECT 1 FROM  @tblAccount )
+		WHILE EXISTS (SELECT 1 FROM  @tblAuditLogAccount )
 		BEGIN
 			SELECT TOP 1 @_intAccountId=intAccountId, @_strAccountId = A.strAccountId FROM tblGLAccount A 
-			JOIN @tblAccount B ON A.strAccountId = B.strAccountId WHERE A.strAccountId = B.strAccountId
+			JOIN @tblAuditLogAccount B ON A.strAccountId = B.strAccountId WHERE A.strAccountId = B.strAccountId
 
 			EXEC uspSMAuditLog
 			@keyValue = @_intAccountId,                                          -- Primary Key Value
 			@screenName = ''GeneralLedger.view.EditAccount'',            -- Screen Namespace
 			@entityId = @intUserId,                                              -- Entity Id.
 			@actionType = ''Created''                                 
-			DELETE FROM @tblAccount WHERE strAccountId = @_strAccountId
+			DELETE FROM @tblAuditLogAccount WHERE strAccountId = @_strAccountId
 		END
 	
 		-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
