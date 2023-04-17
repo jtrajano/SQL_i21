@@ -436,8 +436,14 @@ group by dtmDate,
         
 IF EXISTS(SELECT 1 FROM @RevalTableType WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 BEGIN
-    EXEC uspGLPostRecap @RecapTableType, @intEntityId          
-    EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
+    EXEC uspGLPostRecap @RecapTableType, @intEntityId   
+    DECLARE  @MissingAccounts GLMissingAccounts 
+    INSERT INTO @MissingAccounts (strAccountId)
+    SELECT strNewAccountIdOverride
+        FROM   tblGLPostRecap
+        WHERE  strOverrideAccountError IS NOT NULL
+        GROUP  BY strNewAccountIdOverride     
+    EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId,@MissingAccounts              
     SET @result = 'Error overriding accounts.'  
     GOTO _end      
 END        

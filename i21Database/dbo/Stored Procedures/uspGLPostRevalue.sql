@@ -836,4 +836,10 @@ END
 
  _overrideError:
   SET @strMessage = 'Error Overriding Accounts'  
-  EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId
+  DECLARE  @MissingAccounts GLMissingAccounts
+  INSERT INTO @MissingAccounts (strAccountId)
+  SELECT strNewAccountIdOverride
+    FROM   tblGLPostRecap
+    WHERE  strOverrideAccountError IS NOT NULL
+    GROUP  BY strNewAccountIdOverride     
+  EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId,@MissingAccounts   
