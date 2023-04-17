@@ -663,8 +663,14 @@ _insertIntra:
 
 		IF EXISTS(SELECT 1 FROM @intTraGLEntries WHERE ISNULL(strOverrideAccountError,'') <> '' )          
 		BEGIN
-			EXEC uspGLPostRecap @intTraGLEntries, @intEntityId          
-			EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId      
+			EXEC uspGLPostRecap @intTraGLEntries, @intEntityId     
+			DECLARE  @MissingAccounts GLMissingAccounts 
+			INSERT INTO @MissingAccounts (strAccountId)
+			SELECT strNewAccountIdOverride
+             FROM   tblGLPostRecap
+             WHERE  strOverrideAccountError IS NOT NULL
+             GROUP  BY strNewAccountIdOverride     
+			EXEC uspGLBuildMissingAccountsRevalueOverride @intEntityId,@MissingAccounts    
 			RAISERROR( 'Error overriding accounts.' , 16,1)
 			GOTO Post_Commit      
 		END  

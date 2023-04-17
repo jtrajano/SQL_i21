@@ -2147,7 +2147,7 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
-    <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
+    <Build Include="dbo\User Defined Types\GLMissingAccounts.sql" />
     <Build Include="dbo\User Defined Types\RevalTableType.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -4754,6 +4754,7 @@
     <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBatchPostEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLOverrideSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromVoucherBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspWHGetCompanyPreferenceValueList.sql" />
     <Build Include="dbo\Stored Procedures\uspWMGetUserLocationListWMS.sql" />
@@ -7713,7 +7714,6 @@
     <Build Include="dbo\Tables\tblVRProgram.sql" />
     <Build Include="dbo\Tables\tblVRCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSyncGLAccountDescription.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLOverrideSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
     <Build Include="dbo\Views\vyuAP1099DIV.sql" />
     <Build Include="dbo\Views\vyuPATDividends.sql" />
@@ -12151,7 +12151,6 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
     <Build Include="dbo\Functions\fnGLOverrideTableOfAccounts.sql" />
     <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
-    <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
     <Build Include="dbo\Views\vyuCTOverviewHistoricalConsolidated.sql" />
     <Build Include="dbo\Functions\fnCTGetDefaultCurrencyExchangeRate.sql" />
     <Build Include="dbo\Functions\fnCTPriceHedge.sql" />
