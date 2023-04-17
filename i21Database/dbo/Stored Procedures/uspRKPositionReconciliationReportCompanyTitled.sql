@@ -171,7 +171,7 @@ BEGIN
 			,@dblCTBalanceForward  NUMERIC(18,6)
 			,@dblCompTitledBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblTotal,0)) --+ ISNULL(@dblInTransitBegBalance,0)
+	SELECT @dblCTBalanceForward =  ISNULL(SUM(ISNULL(dblTotal,0)),0) --+ ISNULL(@dblInTransitBegBalance,0)
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110) < CONVERT(DATETIME, @dtmFromTransactionDate)
 
@@ -273,6 +273,7 @@ BEGIN
 			,strCommodityCode = @strCommodities
 			,dblCompTitledBegBalForSummary = @dblCTBalanceForward
 			,dblCompTitledEndBalForSummary = @dblCTBalanceForward
+			,ysnInTransit = NULL
 	END
 
 	ExitRoutine:

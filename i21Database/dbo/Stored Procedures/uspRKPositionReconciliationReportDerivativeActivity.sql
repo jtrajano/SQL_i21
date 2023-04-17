@@ -179,8 +179,8 @@ BEGIN
 			,@dblCruBegBalForSummary NUMERIC(18,6)
 
 	SELECT 
-		@dblFutBalanceForward =  SUM(ISNULL(CASE WHEN ysnPreCrush = 0 THEN dblBuy + dblSell END,0))
-		,@dblCruBalanceForward =  SUM(ISNULL(CASE WHEN ysnPreCrush = 1 THEN dblBuy + dblSell END,0))
+		@dblFutBalanceForward =  ISNULL(SUM(ISNULL(CASE WHEN ysnPreCrush = 0 THEN dblBuy + dblSell END,0)),0)
+		,@dblCruBalanceForward =  ISNULL(SUM(ISNULL(CASE WHEN ysnPreCrush = 1 THEN dblBuy + dblSell END,0)),0)
 	FROM @tblDerivativeHistory
 	WHERE dtmTransactionDate < @dtmFromTransactionDate
 

@@ -142,19 +142,19 @@ BEGIN
 			,@dblCustomerOwnedEndBalance NUMERIC(18,6)
 
 	SELECT 
-		@dblInvBalanceForward =  SUM(ISNULL(dblTotal,0))
+		@dblInvBalanceForward =  ISNULL(SUM(ISNULL(dblTotal,0)),0)
 	FROM @InHouse
 	WHERE dtmDate < @dtmFromTransactionDate
 	AND strOwnership IN('Company Owned', 'Customer Owned')
 
 	SELECT 
-		@dblCompanyOwnedBalanceForward = SUM(ISNULL(dblTotal,0))
+		@dblCompanyOwnedBalanceForward = ISNULL(SUM(ISNULL(dblTotal,0)),0)
 	FROM @InHouse
 	WHERE dtmDate < @dtmFromTransactionDate
 	AND strOwnership IN('Company Owned')
 
 	SELECT 
-		@dblCustomerOwnedBalanceForward = SUM(ISNULL(dblTotal,0))
+		@dblCustomerOwnedBalanceForward = ISNULL(SUM(ISNULL(dblTotal,0)),0)
 	FROM @InHouse
 	WHERE dtmDate < @dtmFromTransactionDate
 	AND strOwnership IN('Customer Owned')

@@ -392,8 +392,8 @@ GOTO ExitRoutine
 
 BeginBalanceOnly:
 
-IF @dblBasisBalanceForward <> 0 OR @dblPricedBalanceForward <> 0
-	OR @dblDPBalanceForward <> 0 OR @dblHTABalanceForward <> 0 OR @dblCashBalanceForward <> 0
+IF @dblBasisBalanceForward IS NOT NULL OR @dblPricedBalanceForward IS NOT NULL
+	OR @dblDPBalanceForward IS NOT NULL OR @dblHTABalanceForward IS NOT NULL OR @dblCashBalanceForward  IS NOT NULL
 BEGIN
 	select 
 		 intRowNum  = 1
