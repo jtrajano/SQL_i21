@@ -6632,6 +6632,7 @@
     <Build Include="dbo\Views\vyuRKFutSettlementPriceMarketMap.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleDelete.sql" />
     <Build Include="dbo\Views\vyuQMLotStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportCoffeeJDE.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureMonth.sql" />
     <Build Include="dbo\Views\vyuICGetAddOnComponentStock.sql" />
