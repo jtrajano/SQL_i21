@@ -57,6 +57,7 @@ BEGIN
 		, Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, PriceStatus NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
+		, intFutureMonthOrder INT
 		, strAccountNumber NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, dblNoOfContract DECIMAL(24, 10)
 		, strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -152,6 +153,7 @@ BEGIN
 		, Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, PriceStatus NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
+		, intFutureMonthOrder INT
 		, strAccountNumber NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, dblNoOfContract DECIMAL(24, 10)
 		, strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -186,6 +188,7 @@ BEGIN
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo

@@ -195,11 +195,38 @@ SELECT 	 intRowNumber,strFutMarketName,strBook ,strProductType ,strProductLine ,
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
 FROM @List where strFutureMonth='Delta Total'  order by strFutureMonth,intRowNumber
 
-SELECT intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
-		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
-		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,
-		case when isnull(mc.intMultiCompanyParentId,0) =0 then 'Parent' else 'Subsidiary' end strCompanyName,l.strCompanyName strName,strShipmentPeriod 
-		,case when strPhysicalOrFuture='Futures' and strProductLine in('PTBF Buy','PTBF Sell') then strProductLine
+SELECT intSumRowNum
+	, strFutMarketName
+	, strBook 
+	, strProductType 
+	, strProductLine 
+	, strContractType  
+	, strTranType
+	, strPhysicalOrFuture
+	, strFutureMonth
+	, intFutureMonthOrder = ROW_NUMBER() OVER (ORDER BY CASE WHEN strFutureMonth = 'Previous' THEN CAST('01/01/1900' AS DATE)
+															WHEN strFutureMonth = 'KAMP' THEN CAST('01/01/9996' AS DATE)
+															WHEN strFutureMonth = 'Total' THEN CAST('01/01/9997' AS DATE)
+															WHEN strFutureMonth = 'Delta Ratio' THEN CAST('01/01/9998' AS DATE)
+															WHEN strFutureMonth = 'Delta Total' THEN CAST('01/01/9999' AS DATE)
+															ELSE CONVERT(DATETIME, REPLACE(REPLACE(strFutureMonth, ' (UP)', ''), ' ', ' 1, '))
+															END )
+	, dblNoOfContract
+	, dblNoOfLot
+	, dblQuantity
+	, strTradeNo
+	, intContractHeaderId
+	, intFutOptTransactionHeaderId
+	, TransactionDate
+	, TranType
+	, CustVendor
+	, strItemOrigin
+	, strLocationName
+	, strItemDescription
+	, case when isnull(mc.intMultiCompanyParentId,0) =0 then 'Parent' else 'Subsidiary' end strCompanyName
+	, l.strCompanyName strName
+	, strShipmentPeriod 
+	, case when strPhysicalOrFuture='Futures' and strProductLine in('PTBF Buy','PTBF Sell') then strProductLine
 			  when strPhysicalOrFuture='Futures' and strProductLine not in('PTBF Buy','PTBF Sell') then 'Hedges (Clearing)'
 			  else 'Physical'  end strProductLineBuySell
 FROM @FinalList l

@@ -2550,6 +2550,10 @@ AS
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder = ROW_NUMBER() OVER (ORDER BY CASE WHEN strFutureMonth = 'Previous' THEN CAST('01/01/1900' AS DATE)
+																	WHEN strFutureMonth = 'Total' THEN CAST('01/01/9999' AS DATE)
+																	ELSE CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, '))
+																	END )
 		, strAccountNumber
 		, dblNoOfContract = CASE WHEN @strUomType = 'By Lot' AND PriceStatus = '4.Market Coverage(Weeks)' THEN (CONVERT(DOUBLE PRECISION, ROUND(dblNoOfLot, @intDecimal))) / @intForecastWeeklyConsumption WHEN @strUomType = 'By Lot' AND strAccountNumber <> 'Avg Long Price' THEN (CONVERT(DOUBLE PRECISION, ROUND(dblNoOfLot, @intDecimal))) ELSE CONVERT(DOUBLE PRECISION, ROUND(dblNoOfContract, @intDecimal)) END
 		, strTradeNo
