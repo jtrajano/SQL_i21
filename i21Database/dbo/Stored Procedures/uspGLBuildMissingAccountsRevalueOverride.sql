@@ -1,5 +1,5 @@
 -- USED IN REVALUE CURRENCY OVERRIDING
-CREATE PROCEDURE uspGLBuildMissingAccountsRevalueOverride @intEntityId INT
+CREATE PROCEDURE uspGLBuildMissingAccountsRevalueOverride @intEntityId INT, @MissingAccounts GLMissingAccounts READONLY
 AS
     DECLARE @tblS TABLE
       (
@@ -23,10 +23,9 @@ AS
       );
 
     WITH d
-         AS (SELECT strNewAccountIdOverride
-             FROM   tblGLPostRecap
-             WHERE  strOverrideAccountError IS NOT NULL
-             GROUP  BY strNewAccountIdOverride),
+         AS (
+            SELECT strAccountId strNewAccountIdOverride FROM @MissingAccounts
+          ),
          Segments
          AS (SELECT u.Item,
                     strNewAccountIdOverride
