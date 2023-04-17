@@ -177,10 +177,18 @@ BEGIN
 		,voucher.strVendorOrderNumber
 		,commodity.strCommodityCode
 		,term.strTerm
-		,voucher.dblTotal
+		-- ,voucher.dblTotal
+		,dblTotal = CASE WHEN voucher.intTransactionType = 16 THEN voucher.dblProvisionalTotal
+									WHEN voucher.intTransactionType = 1 AND voucher.ysnFinalVoucher = 1 THEN voucher.dblTotal - voucher.dblProvisionalTotal
+									ELSE voucher.dblTotal
+								END
 		,voucher.dblTempDiscount
 		,voucher.dblTempInterest
-		,voucher.dblAmountDue
+		-- ,voucher.dblAmountDue
+		,dblAmountDue = CASE WHEN voucher.intTransactionType = 16 THEN voucher.dblProvisionalAmountDue
+									WHEN voucher.intTransactionType = 1 AND voucher.ysnFinalVoucher = 1 THEN voucher.dblAmountDue - voucher.dblProvisionalTotal
+									ELSE voucher.dblAmountDue
+								END
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
 		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
@@ -463,6 +471,37 @@ BEGIN
 			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
 			AND paySched.intSelectedByUserId = @userId
 		WHERE vouchers.intSelectedByUserId = @userId	
+			AND vouchers.ysnFinalVoucher != 1
+			AND vouchers.intTransactionType NOT IN (16)
+			
+		UNION ALL
+		SELECT 
+			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
+			[intBillId]			=	tmp.intBillId,
+			[intAccountId]		=	vouchers.intAccountId,
+			[dblDiscount]		=	ISNULL(paySched.dblDiscount, vouchers.dblTempDiscount),
+			[dblWithheld]		=	vouchers.dblTempWithheld,
+			[dblAmountDue]		=	ISNULL(paySched.dblPayment, 
+																(CASE WHEN vouchers.intTransactionType = 16 THEN vouchers.dblProvisionalTotal
+																	ELSE vouchers.dblTotal - vouchers.dblProvisionalTotal
+															END)),
+			[dblPayment]		=	ISNULL(paySched.dblPayment - paySched.dblDiscount, vouchers.dblTempPayment),
+			[dblInterest]		=	vouchers.dblTempInterest,
+			[dblTotal]			=	ISNULL(paySched.dblPayment, 
+															(CASE WHEN vouchers.intTransactionType = 16 THEN vouchers.dblProvisionalTotal
+																	ELSE vouchers.dblTotal - vouchers.dblProvisionalTotal
+															END)),
+			[ysnOffset]			=	0,
+			[intPayScheduleId]	=	paySched.intId
+		FROM tblAPBill vouchers
+		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
+		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId
+		LEFT JOIN tblAPVoucherPaymentSchedule paySched
+			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
+			AND paySched.intSelectedByUserId = @userId
+		WHERE vouchers.intSelectedByUserId = @userId
+		AND vouchers.intTransactionType IN (1, 16)
+		AND 1 = (CASE WHEN vouchers.ysnFinalVoucher = 1 OR vouchers.intTransactionType = 16 THEN 1 ELSE 0 END)	
 	END
 
 	SET @batchPaymentId = @batchId;

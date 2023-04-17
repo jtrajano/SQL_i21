@@ -22,6 +22,8 @@ FROM (
 		,voucher.strBillId
 		,CASE WHEN voucher.intTransactionType IN (3,8) AND voucher.dblTotal > 0 THEN voucher.dblTotal * -1
 			WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1 THEN voucher.dblTotal * -1
+			WHEN voucher.intTransactionType = 16 AND voucher.dblProvisionalTotal > 0 THEN voucher.dblProvisionalTotal
+			WHEN voucher.intTransactionType = 1 AND voucher.ysnFinalVoucher = 1 AND voucher.dblTotal > 0 THEN voucher.dblTotal - voucher.dblProvisionalTotal
 			ELSE voucher.dblTotal END AS dblTotal
 		,voucher.dblDiscount
 		--use the tempdiscount(filled by multi payment screen) if not override, else use dblDiscount
