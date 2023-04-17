@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspMFGetRecipeInputAndOutputItem] 
+﻿CREATE PROCEDURE [dbo].[uspMFGetRecipeInputAndOutputItem] 
 (
 	@strXML NVARCHAR(MAX) = ''
 )
