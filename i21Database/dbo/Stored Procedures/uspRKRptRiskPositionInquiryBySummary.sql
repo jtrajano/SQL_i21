@@ -178,6 +178,7 @@ DECLARE @temp AS TABLE (
 	Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	PriceStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS,
+	intFutureMonthOrder INT,
 	strAccountNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	dblNoOfContract DECIMAL(24, 10),
 	strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
@@ -221,6 +222,7 @@ BEGIN
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo
@@ -329,6 +331,7 @@ BEGIN
 		Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		PriceStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS,
+		intFutureMonthOrder INT,
 		strAccountNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		dblNoOfContract DECIMAL(24, 10),
 		strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
@@ -363,6 +366,7 @@ BEGIN
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo
