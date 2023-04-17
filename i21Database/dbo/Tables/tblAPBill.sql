@@ -7,6 +7,7 @@
 	[intCommodityId]				INT             NULL ,
 	[intInvoiceRefId]				INT             NULL ,
 	[intCompanyId]				INT             NULL ,
+	[intCompanySegmentId]		INT             NULL ,
 	[intBankInfoId]				INT             NULL ,
 	[intBookId]	INT NULL,
 	[intSubBookId] INT NULL,
