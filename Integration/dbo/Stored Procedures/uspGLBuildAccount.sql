@@ -17,27 +17,45 @@ BEGIN
 		SET ANSI_NULLS ON
 		SET NOCOUNT ON
 
-		-- +++++ INSERT ACCOUNT Id +++++ --
-		IF @intCurrencyId = 0
-			SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
-		IF ISNULL(@intCurrencyId, 0)= 0
-		BEGIN
-			RAISERROR(''Functional Currency is not setup properly. Please set it up in Company Configuration Screen.'', 16, 1);
-		END
+		IF @intCurrencyId = 0 SET @intCurrencyId = NULL
 
-		-- +++++ INSERT ACCOUNT Id +++++ --
-		INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
-		SELECT strAccountId,
-			   strDescription,
-			   intAccountGroupId,
-			   intAccountUnitId,
-			   ysnSystem,
-			   ysnActive,
-			   @intCurrencyId
+
+		DECLARE @tblAuditLogAccount  TABLE ( strAccountId NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL )
+		
+		INSERT INTO @tblAuditLogAccount (strAccountId)
+		SELECT strAccountId
 		FROM tblGLTempAccount
-		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
-		ORDER BY strAccountId
+			WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
+			ORDER BY strAccountId
 
+
+		-- +++++ INSERT ACCOUNT Id +++++ --
+		INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
+			SELECT A.strAccountId,
+				strDescription,
+				intAccountGroupId,
+				intAccountUnitId,
+				ysnSystem,
+				ysnActive,
+				@intCurrencyId
+		FROM tblGLTempAccount A JOIN @tblAuditLogAccount B ON A.strAccountId = B.strAccountId
+		ORDER BY A.strAccountId
+
+
+		DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50)
+		WHILE EXISTS (SELECT 1 FROM  @tblAuditLogAccount )
+		BEGIN
+			SELECT TOP 1 @_intAccountId=intAccountId, @_strAccountId = A.strAccountId FROM tblGLAccount A 
+			JOIN @tblAuditLogAccount B ON A.strAccountId = B.strAccountId WHERE A.strAccountId = B.strAccountId
+
+			EXEC uspSMAuditLog
+			@keyValue = @_intAccountId,                                          -- Primary Key Value
+			@screenName = ''GeneralLedger.view.EditAccount'',            -- Screen Namespace
+			@entityId = @intUserId,                                              -- Entity Id.
+			@actionType = ''Created''                                 
+			DELETE FROM @tblAuditLogAccount WHERE strAccountId = @_strAccountId
+		END
+	
 		-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
 		IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference WHERE strCompanyId = ''Legacy'')
         BEGIN
