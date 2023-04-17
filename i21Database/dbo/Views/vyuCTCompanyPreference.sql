@@ -101,6 +101,7 @@ AS
 			,CP.ysnForexRatePriceOptionalOnContract
 			,CP.ysnAllowSignedWhenContractHasAmendment
 			,CP.intQuantityDecimals
+			,CP.intContractQtyDecimals
 			,CP.ysnAutoCompleteDPDeliveryDate
 			,CP.intPricingDecimals
 			,CP.strContractApprovalIncrements
