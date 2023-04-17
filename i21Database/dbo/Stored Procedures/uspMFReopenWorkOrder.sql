@@ -1,40 +1,41 @@
-﻿CREATE PROCEDURE uspMFReopenWorkOrder (
+﻿CREATE PROCEDURE uspMFReopenWorkOrder 
+(
 	@intWorkOrderId INT
-	,@intUserId INT
-	)
+  , @intUserId		INT
+)
 AS
 BEGIN TRY
-	DECLARE @strCostAdjustmentBatchId NVARCHAR(50)
-		,@intLocationId INT
-		,@intTransactionId INT
-		,@strTransactionId NVARCHAR(50)
-		,@GLEntries AS RecapTableType
-		,@intManufacturingProcessId INT
-		,@strCostDistribution NVARCHAR(50)
-		,@ErrMsg NVARCHAR(MAX)
-		,@intTransactionCount INT
-		,@strAttributeValue NVARCHAR(50)
-		,@strBatchId NVARCHAR(50)
-		,@intBatchId INT
-		,@strWorkOrderNo NVARCHAR(50)
-		,@strAutoCycleCountOnWorkOrderClose NVARCHAR(50)
-		,@unpostCostAdjustment AS ItemCostAdjustmentTableType
-		,@strBatchIdForUnpost AS NVARCHAR(50)
-		,@intReturnValue AS INT
-		,@strErrorMessage AS NVARCHAR(4000)
-		,@intInputItemId INT
-		,@intProductionStageLocationId INT
-		,@intProductionStagingId INT
-		,@intConsumptionStorageLocationId INT
-		,@intConsumptionSubLocationId INT
-		,@ItemsToReserve AS dbo.ItemReservationTableType
-		,@intInventoryTransactionType AS INT = 8
-		,@strCycleCount nvarchar(50)
+	DECLARE @strCostAdjustmentBatchId		NVARCHAR(50)
+		  , @intLocationId					INT
+		  , @intTransactionId				INT
+		  , @strTransactionId				NVARCHAR(50)
+		  , @GLEntries						RecapTableType
+		  , @intManufacturingProcessId		INT
+		  , @strCostDistribution			NVARCHAR(50)
+		  , @ErrMsg							NVARCHAR(MAX)
+		  , @intTransactionCount			INT
+		  , @strAttributeValue				NVARCHAR(50)
+		  , @strBatchId						NVARCHAR(50)
+		  , @intBatchId						INT
+		  , @strWorkOrderNo					NVARCHAR(50)
+		  , @strAutoCycleCountOnWorkOrderClose NVARCHAR(50)
+		  , @unpostCostAdjustment			ItemCostAdjustmentTableType
+		  , @strBatchIdForUnpost			NVARCHAR(50)
+		  , @intReturnValue					INT
+		  , @strErrorMessage				NVARCHAR(4000)
+		  , @intInputItemId					INT
+		  , @intProductionStageLocationId	INT
+		  , @intProductionStagingId			INT
+		  , @intConsumptionStorageLocationId INT
+		  , @intConsumptionSubLocationId	INT
+		  , @ItemsToReserve					dbo.ItemReservationTableType
+		  , @intInventoryTransactionType	INT = 8
+		  , @strCycleCount					NVARCHAR(50)
 
-	SELECT @intManufacturingProcessId = intManufacturingProcessId
-		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
-		,@intLocationId = intLocationId
-		,@strWorkOrderNo = strWorkOrderNo
+	SELECT @intManufacturingProcessId	= intManufacturingProcessId
+		 , @strCostAdjustmentBatchId	= strCostAdjustmentBatchId
+		 , @intLocationId				= intLocationId
+		 , @strWorkOrderNo				= strWorkOrderNo
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -50,11 +51,10 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 107 --Cost Distribution during close work order
 
-	IF @strCostDistribution IS NULL
-		OR @strCostDistribution = ''
-	BEGIN
-		SELECT @strCostDistribution = 'False'
-	END
+	IF @strCostDistribution IS NULL OR @strCostDistribution = ''
+		BEGIN
+			SET @strCostDistribution = 'False';
+		END
 
 	SELECT @strCycleCount = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -62,11 +62,10 @@ BEGIN TRY
 		AND intAttributeId = 7 --Is Cycle Count Required
 		AND intLocationId = @intLocationId
 
-	IF @strCycleCount IS NULL
-		OR @strCycleCount = ''
-	BEGIN
-		SELECT @strCycleCount = 'False'
-	END
+	IF @strCycleCount IS NULL OR @strCycleCount = ''
+		BEGIN
+			SELECT @strCycleCount = 'False'
+		END
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -85,82 +84,83 @@ BEGIN TRY
 		EXEC uspSMGetStartingNumber 3
 			,@strBatchIdForUnpost OUT
 
-		INSERT INTO @unpostCostAdjustment (
+		INSERT INTO @unpostCostAdjustment 
+		(
 			[intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[intCostUOMId]
-			,[dblNewValue]
-			,[intCurrencyId]
-			,[intTransactionId]
-			,[intTransactionDetailId]
-			,[strTransactionId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[intSubLocationId]
-			,[intStorageLocationId]
-			,[ysnIsStorage]
-			,[strActualCostId]
-			,[intSourceTransactionId]
-			,[intSourceTransactionDetailId]
-			,[strSourceTransactionId]
-			,intFobPointId
-			,dblVoucherCost
-			)
+		  , [intItemLocationId]
+		  , [intItemUOMId]
+		  , [dtmDate]
+		  , [dblQty]
+		  , [dblUOMQty]
+		  , [intCostUOMId]
+		  , [dblNewValue]
+		  , [intCurrencyId]
+		  , [intTransactionId]
+		  , [intTransactionDetailId]
+		  , [strTransactionId]
+		  , [intTransactionTypeId]
+		  , [intLotId]
+		  , [intSubLocationId]
+		  , [intStorageLocationId]
+		  , [ysnIsStorage]
+		  , [strActualCostId]
+		  , [intSourceTransactionId]
+		  , [intSourceTransactionDetailId]
+		  , [strSourceTransactionId]
+		  , intFobPointId
+		  , dblVoucherCost
+		)
 		SELECT t.[intItemId]
-			,[intItemLocationId]
-			,t.[intItemUOMId]
-			,t.[dtmDate]
-			,[dblQty]
-			,[dblUOMQty]
-			,[intCostUOMId] = t.[intItemUOMId]
-			,[dblNewValue] = t.dblValue
-			,[intCurrencyId]
-			,[intTransactionId] = pl.intBatchId
-			,[intTransactionDetailId] = pl.intWorkOrderProducedLotId
-			,[strTransactionId]
-			,[intTransactionTypeId] = 9
-			,t.[intLotId]
-			,t.[intSubLocationId]
-			,t.[intStorageLocationId]
-			,[ysnIsStorage] = 0
-			,[strActualCostId]
-			,[intSourceTransactionId] = pl.intBatchId --t.intTransactionId
-			,[intSourceTransactionDetailId] = pl.intWorkOrderProducedLotId --t.intTransactionDetailId
-			,[strSourceTransactionId] = t.strTransactionId
-			,intFobPointId
-			,dblVoucherCost = NULL
+			 , [intItemLocationId]
+			 , t.[intItemUOMId]
+			 , t.[dtmDate]
+			 , [dblQty]
+			 , [dblUOMQty]
+			 , [intCostUOMId] = t.[intItemUOMId]
+			 , [dblNewValue] = t.dblValue
+			 , [intCurrencyId]
+			 , [intTransactionId] = ProducedLot.intBatchId
+			 , [intTransactionDetailId] = ProducedLot.intWorkOrderProducedLotId
+			 , [strTransactionId]
+			 , [intTransactionTypeId] = 9
+			 , t.[intLotId]
+			 , t.[intSubLocationId]
+			 , t.[intStorageLocationId]
+			 , [ysnIsStorage] = 0
+			 , [strActualCostId]
+			 , [intSourceTransactionId] = ProducedLot.intBatchId --t.intTransactionId
+			 , [intSourceTransactionDetailId] = ProducedLot.intWorkOrderProducedLotId --t.intTransactionDetailId
+			 , [strSourceTransactionId] = t.strTransactionId
+			 , intFobPointId
+			 , dblVoucherCost = NULL
 		FROM tblICInventoryTransaction t
-		INNER JOIN (
-			tblMFWorkOrderProducedLot pl LEFT JOIN tblMFWorkOrder wo ON pl.intWorkOrderId = wo.intWorkOrderId
-				AND pl.ysnProductionReversed = 0
-			) ON t.strTransactionId = wo.strWorkOrderNo
-			AND t.intLotId = ISNULL(pl.intProducedLotId, pl.intLotId)
+		OUTER APPLY (SELECT TOP 1 intWorkOrderId
+					 FROM tblMFWorkOrder AS MFWorkOrder
+					 WHERE MFWorkOrder.strWorkOrderNo = t.strTransactionId) AS WorkOrder
+		INNER JOIN tblMFWorkOrderProducedLot AS ProducedLot ON t.intTransactionDetailId = ProducedLot.intWorkOrderProducedLotId 
+														   AND ProducedLot.ysnProductionReversed = 0
+														   AND ProducedLot.intProducedLotId = t.intLotId
+														   AND ProducedLot.intWorkOrderId = WorkOrder.intWorkOrderId
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
-			AND t.strTransactionId = t.strRelatedTransactionId
-			AND t.ysnIsUnposted = 0
-			AND t.intTransactionTypeId = 26
 
-		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
-			,@strBatchId = @strBatchIdForUnpost
-			,@intEntityUserSecurityId = @intUserId
-			,@ysnPost = 0
+		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust			= @unpostCostAdjustment
+													 , @strBatchId				= @strBatchIdForUnpost
+													 , @intEntityUserSecurityId = @intUserId
+													 , @ysnPost					= 0
 
 		IF @intReturnValue <> 0
-		BEGIN
-			SELECT TOP 1 @strErrorMessage = strMessage
-			FROM tblICPostResult
-			WHERE strBatchNumber = @strBatchIdForUnpost
+			BEGIN
+				SELECT TOP 1 @strErrorMessage = strMessage
+				FROM tblICPostResult
+				WHERE strBatchNumber = @strBatchIdForUnpost
 
-			RAISERROR (
+				RAISERROR 
+				(
 					@strErrorMessage
-					,11
-					,1
-					);
-		END
+				  , 11
+				  , 1
+				);
+			END
 
 		INSERT INTO @GLEntries (
 			dtmDate
