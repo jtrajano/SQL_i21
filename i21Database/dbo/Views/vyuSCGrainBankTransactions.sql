@@ -46,7 +46,7 @@
 
 	WHERE 
 		HISTORY.intTransactionTypeId = 1
-		AND HISTORY.ysnPost = 1
+		-- AND HISTORY.ysnPost = 1
 		/*
 		AND STORAGE.intCustomerStorageId = @CUSTOMER_STORAGE
 		AND STORAGE.intEntityId = @ENTITY_ID
@@ -97,7 +97,7 @@
 			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
 		) GR_COMPANY_PREFERENCE
 	WHERE HISTORY.intTransactionTypeId = 3
-		AND HISTORY.ysnPost = 1
+		-- AND HISTORY.ysnPost = 1
 		/*STORAGE.intEntityId = @ENTITY_ID
 		AND STORAGE.intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID
 		AND 
@@ -147,7 +147,7 @@
 			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
 		) GR_COMPANY_PREFERENCE
 	WHERE HISTORY.intTransactionTypeId = 4
-		AND HISTORY.ysnPost = 1
+		-- AND HISTORY.ysnPost = 1
 		 /*
 		 STORAGE.intEntityId = @ENTITY_ID
 		AND STORAGE.intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID
@@ -203,7 +203,7 @@
 			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
 		) GR_COMPANY_PREFERENCE
 	WHERE HISTORY.intTransactionTypeId = 6
-		AND HISTORY.ysnPost = 1
+		-- AND HISTORY.ysnPost = 1
 		/*
 		STORAGE.intEntityId = @ENTITY_ID
 		AND STORAGE.intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID		
