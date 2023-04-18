@@ -18,6 +18,7 @@
 	,@intTransactionTypeId INT = NULL
 	,@intCommodityId INT = NULL
 	,@intCountryId INT = NULL
+	,@intMarketZoneId INT=NULL
 AS
 BEGIN
 	DECLARE @intSubPatternTypeId INT
@@ -370,6 +371,8 @@ BEGIN
 						THEN @intInventoryReceiptItemLotId
 					WHEN @strTableName = 'tblSMCountry'
 						THEN @intCountryId
+					WHEN @strTableName = 'tblARMarketZone'
+						THEN @intMarketZoneId
 					END
 
 			IF @intPrimaryColumnId IS NULL

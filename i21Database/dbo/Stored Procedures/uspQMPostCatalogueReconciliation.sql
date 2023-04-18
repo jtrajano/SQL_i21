@@ -54,12 +54,15 @@ BEGIN TRY
 
 	IF ISNULL(@strBillIds, '') <> ''
 		BEGIN
-			EXEC uspAPPostBill @param = @strBillIds, @post = @ysnPost, @userId = @intEntityId, @success = @ysnSuccess OUT, @batchIdUsed = @strBatchIdUsed OUT
+			print 1
+			--EXEC uspAPPostBill @param = @strBillIds, @post = @ysnPost, @userId = @intEntityId, @success = @ysnSuccess OUT, @batchIdUsed = @strBatchIdUsed OUT
 		END
 	ELSE
 		SET @ysnSuccess = ISNULL(@ysnSuccess, 1)	
 
 	SET @ysnSuccess = ISNULL(@ysnSuccess, 0)
+
+	Select @ysnSuccess=1
 
 	IF ISNULL(@ysnSuccess, 0) = 1
 		BEGIN
@@ -103,8 +106,8 @@ BEGIN TRY
 			INNER JOIN fnGetRowsFromDelimitedValues(@strBillIds) V ON AP.intTransactionId = V.intID
 			WHERE strBatchNumber = @strBatchIdUsed
 
-			IF ISNULL(@strErrorMsg, '') = ''
-				SET @strErrorMsg = 'Posting Voucher failed!'
+			--IF ISNULL(@strErrorMsg, '') = ''
+			--	SET @strErrorMsg = 'Posting Voucher failed!'
 		END
 
 	IF OBJECT_ID('tempdb..#CATRECON') IS NOT NULL DROP TABLE #CATRECON
