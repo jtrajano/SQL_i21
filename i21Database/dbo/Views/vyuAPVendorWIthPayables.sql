@@ -22,6 +22,6 @@ FROM (
 			AA.ysnPosted = 1
 		AND A2.intBillId IS NULL
 		AND AA.dblAmountDue != 0
-		AND AA.strTransactionType IN ('Cash Refund','Invoice','Debit Memo', 'Cash')
+		AND AA.strTransactionType IN ('Cash Refund','Invoice','Debit Memo', 'Cash','Credit Memo')
 		AND AA.strType != 'CT Tran'
 ) tmpVendos
