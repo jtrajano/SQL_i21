@@ -346,6 +346,7 @@ BEGIN TRY
 			,intMarketZoneId
 			,dtmShippingDate 
 			,intCountryId
+			,intSupplierId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -470,7 +471,8 @@ BEGIN TRY
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
 			,dtmShippingDate=CD.dtmEtaPol
-			,intCountryId=S.intCountryID
+			,intCountryId=ORIGIN.intCountryID
+			,intSupplierId=S.intEntityId
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -479,6 +481,7 @@ BEGIN TRY
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+		LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = S.intCountryID
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		Left JOIN tblCTBook B on B.intBookId =S.intBookId 

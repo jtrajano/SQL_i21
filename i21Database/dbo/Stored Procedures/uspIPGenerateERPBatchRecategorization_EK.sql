@@ -208,7 +208,7 @@ BEGIN TRY
 				+ '<TeaBuyingOffice>' + ISNULL(B.strTeaBuyingOffice, '') + '</TeaBuyingOffice>'
 				+ '<TeaColour>' + ISNULL(B.strTeaColour, '') + '</TeaColour>'
 				+ '<TeaGardenChopInvoiceNo>' + ISNULL(LEFT(B.strTeaGardenChopInvoiceNumber, 15), '') + '</TeaGardenChopInvoiceNo>'
-				+ '<TeaGardenMark>' + ISNULL(LEFT(GM.strGardenMark, 15), '') + '</TeaGardenMark>'
+				+ '<TeaGardenMark>' + dbo.fnEscapeXML(ISNULL(LEFT(GM.strGardenMark, 15), '')) + '</TeaGardenMark>'
 				+ '<TeaGroup>' + ISNULL(B.strTeaGroup, '') + '</TeaGroup>'
 				+ '<TeaHue>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTeaHue, 0))) + '</TeaHue>'
 				+ '<TeaIntensity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTeaIntensity, 0))) + '</TeaIntensity>'
