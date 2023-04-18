@@ -164,91 +164,47 @@ CREATE TABLE #TempMBILInvoiceItem (
 				, [strPaymentInfo]
 				, [ysnRecap]
 
-				, [intInvoiceDetailId]
-				, [intItemId]
-				, [ysnInventory] 
-				, [intItemUOMId]
-				, [dblQtyShipped]
-				, [dblPrice]
-				, [dblUnitPrice]
-				, [dblPercentFull]
-				, [ysnRefreshPrice]
-				, [ysnRecomputeTax]
-				, [intContractDetailId]
-				, [intSiteId] 
-				, [strInvoiceOriginId]
-				, [ysnUseOriginIdAsInvoiceNumber]
-				, [intPerformerId]
-			)
-		-- SELECT 
-		-- 	 [intInvoiceId]
-		-- 	,[strTransactionType] = InvoiceItem.strType
-		-- 	,[strType] = 'Tank Delivery'
-		-- 	,[strSourceTransaction] = 'Mobile Billing'
-		-- 	,[intSourceId] = InvoiceItem.intInvoiceId
-		-- 	,[strSourceId] = InvoiceItem.strInvoiceNo
-		-- 	,[intEntityCustomerId] = InvoiceItem.intEntityCustomerId
-		-- 	,[intCompanyLocationId] = InvoiceItem.intLocationId
-		-- 	,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
-		-- 	,[intEntityId] = @UserId
-		-- 	,[dtmDate] = InvoiceItem.dtmInvoiceDate
-		-- 	,[dtmDueDate] = NULL
-		-- 	,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
-		-- 	,[dtmPostDate] = InvoiceItem.dtmPostedDate
-		-- 	,[strComments] = InvoiceItem.strComments
-		-- 	,[ysnPost] = @ysnPost
-		-- 	,[intPaymentMethodId] = InvoiceItem.intPaymentMethodId
-		-- 	,[strItemDescription] = InvoiceItem.strItemDescription
-		-- 	,[intTaxGroupId] = NULL
-		-- 	,[intTermId] = InvoiceItem.intTermId
-		-- 	,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-		-- 	,[strPaymentInfo]
-		-- 	,[ysnRecap] = @ysnRecap
-		
-		-- 	--Detail																																															
-		-- 	,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
-		-- 	,[intItemId] = InvoiceItem.intItemId
-		-- 	,[ysnInventory] = 1
-		-- 	,[intItemUOMId] = InvoiceItem.intItemUOMId
-		-- 	,[dblQtyShipped] = InvoiceItem.dblQuantity
-		-- 	,[dblPrice] = InvoiceItem.dblPrice
-		-- 	,[dblUnitPrice] = (InvoiceItem.dblPrice / InvoiceItem.dblQuantity)
-		-- 	,[dblPercentFull] = InvoiceItem.dblPercentageFull
-		-- 	,[ysnRefreshPrice] = 0
-		-- 	,[ysnRecomputeTax] = 1
-		-- 	,[intContractDetailId] = InvoiceItem.intContractDetailId
-		-- 	,[intSiteId] = InvoiceItem.intSiteId
-		-- 	,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
-		-- 	,[ysnUseOriginIdAsInvoiceNumber] = 1
-		-- 	,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-
-		-- FROM vyuMBILInvoiceItem InvoiceItem
-		-- WHERE (inti21InvoiceId IS NULL OR inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice)) AND intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
-
-		SELECT 
-			 InvoiceItem.[intInvoiceId]
-			,[strTransactionType] = InvoiceItem.strType
-			,[strType] = 'Tank Delivery'
-			,[strSourceTransaction] = 'Mobile Billing'
-			,[intSourceId] = InvoiceItem.intInvoiceId
-			,[strSourceId] = InvoiceItem.strInvoiceNo
-			,[intEntityCustomerId] = InvoiceItem.intEntityCustomerId
-			,[intCompanyLocationId] = InvoiceItem.intLocationId
-			,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
-			,[intEntityId] = @UserId
-			,[dtmDate] = InvoiceItem.dtmInvoiceDate
-			,[dtmDueDate] = NULL
-			,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
-			,[dtmPostDate] = InvoiceItem.dtmPostedDate
-			,[strComments] = InvoiceItem.strComments
-			,[ysnPost] = @ysnPost
-			,[intPaymentMethodId] = InvoiceItem.intPaymentMethodId
-			,[strItemDescription] = InvoiceItem.strItemDescription
-			,[intTaxGroupId] = NULL
-			,[intTermId] = InvoiceItem.intTermId
-			,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-			,InvoiceItem.[strPaymentInfo]
-			,[ysnRecap] = @ysnRecap
+			, [intInvoiceDetailId]
+			, [intItemId]
+			, [ysnInventory] 
+			, [intItemUOMId]
+			, [dblQtyShipped]
+			, [dblPrice]
+			, [dblUnitPrice]
+			, [dblPercentFull]
+			, [ysnRefreshPrice]
+			, [ysnRecomputeTax]
+			, [intContractDetailId]
+			, [intSiteId] 
+			, [strInvoiceOriginId]
+			, [ysnUseOriginIdAsInvoiceNumber]
+			, [intPerformerId]
+			, [intDispatchId]
+		)
+	SELECT 
+		 InvoiceItem.[intInvoiceId]
+		,[strTransactionType] = InvoiceItem.strType
+		,[strType] = 'Tank Delivery'
+		,[strSourceTransaction] = 'Mobile Billing'
+		,[intSourceId] = InvoiceItem.intInvoiceId
+		,[strSourceId] = InvoiceItem.strInvoiceNo
+		,[intEntityCustomerId] = InvoiceItem.intEntityCustomerId
+		,[intCompanyLocationId] = InvoiceItem.intLocationId
+		,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+		,[intEntityId] = InvoiceItem.intEntityCustomerId
+		,[dtmDate] = InvoiceItem.dtmInvoiceDate
+		,[dtmDueDate] = NULL
+		,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
+		,[dtmPostDate] = InvoiceItem.dtmPostedDate
+		,[strComments] = InvoiceItem.strComments
+		,[ysnPost] = @ysnPost
+		,[intPaymentMethodId] = InvoiceItem.intPaymentMethodId
+		,[strItemDescription] = InvoiceItem.strItemDescription
+		,[intTaxGroupId] = NULL
+		,[intTermId] = InvoiceItem.intTermId
+		,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+		,[strPaymentInfo] = InvoiceItem.strPaymentInfo
+		,[ysnRecap] = @ysnRecap
 		
 		--Detail																																															
 		,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
