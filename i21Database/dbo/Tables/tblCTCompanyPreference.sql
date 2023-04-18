@@ -90,7 +90,7 @@
 	ysnForexRatePriceOptionalOnContract BIT NOT NULL DEFAULT 0,
 	ysnAllowSignedWhenContractHasAmendment bit not null default 0,
 	intQuantityDecimals INT NOT NULL DEFAULT 2,
-	intContractQtyDecimals int not null default 4;
+	intContractQtyDecimals int not null default 4,
 	ysnAutoCompleteDPDeliveryDate bit not null default 0,
 	intPricingDecimals INT NOT NULL DEFAULT 2,
 	strContractApprovalIncrements NVARCHAR(150) COLLATE Latin1_General_CI_AS,
