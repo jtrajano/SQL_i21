@@ -51,6 +51,7 @@ SELECT
 	, ysnPrepaid = CAST(CASE WHEN ISNULL((SELECT COUNT(*) FROM tblAPBillDetail BD
 										JOIN tblAPBill BL ON BL.intBillId	= BD.intBillId
 										WHERE BL.intTransactionType = 2 AND BD.intContractHeaderId = CH.intContractHeaderId), 0) = 0 THEN 0 ELSE 1 END AS BIT)
+	, PL.strPricingLevelName
 	, PT.strPricingType
 	, CH.strPrintableRemarks
 	, strProducer = PR.strName
