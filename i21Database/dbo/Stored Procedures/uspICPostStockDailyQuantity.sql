@@ -3,6 +3,7 @@
 	,@strBatchId AS NVARCHAR(50) = NULL 
 	,@strTransactionId AS NVARCHAR(50) = NULL 
 	,@ysnRebuild AS BIT = 0 
+	,@dblQty AS NUMERIC(38, 20) = NULL 
 AS
 
 DECLARE @stock AS TABLE(
@@ -180,11 +181,15 @@ BEGIN
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				t.intInventoryTransactionId = @intInventoryTransactionId			
-				OR (
-					t.strBatchId = @strBatchId
-					AND t.strTransactionId = @strTransactionId 
+				(
+					t.intInventoryTransactionId = @intInventoryTransactionId			
+					OR (
+						t.strBatchId = @strBatchId
+						AND t.strTransactionId = @strTransactionId 
+					)
 				)
+				-- Do not read the inventory transaction if it will not reduce the stock. 
+				AND ISNULL(t.dblQty, 0) >= 0 
 			GROUP BY
 				[intItemId] 
 				,[intItemLocationId] 
@@ -195,6 +200,32 @@ BEGIN
 				,[intItemUOMId] 
 				,[intCompanyId] 
 				,[dtmDate] 
+			UNION ALL 
+			-- Read the reduce stock separately in case the reduce stock is merged as one record in the valuation.
+			SELECT	
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intInTransitSourceLocationId] 
+				,[intCompanyLocationId]
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[intItemUOMId] 
+				,[intCompanyId] 
+				,[dtmDate] 
+				,[dblQty] = ISNULL(@dblQty, t.dblQty)
+				,[dblValue] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), t.dblCost) + t.dblValue, 2)
+				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2)
+			FROM 
+				tblICInventoryTransaction t 
+			WHERE
+				(
+					t.intInventoryTransactionId = @intInventoryTransactionId			
+					OR (
+						t.strBatchId = @strBatchId
+						AND t.strTransactionId = @strTransactionId 
+					)
+				)
+				AND ISNULL(t.dblQty, 0) < 0  
 	) AS StockToUpdate
 		ON 
 			DailyTransaction.[intItemId] = StockToUpdate.intItemId 
@@ -260,8 +291,8 @@ BEGIN
 		(
 			t.intInventoryTransactionId = @intInventoryTransactionId			
 			OR (
-				t.strBatchId = @strBatchId
-				AND t.strTransactionId = @strTransactionId 
+				(t.strBatchId = @strBatchId AND @strBatchId IS NOT NULL)
+				AND (t.strTransactionId = @strTransactionId AND @strTransactionId IS NOT NULL) 
 			)
 		)
 		AND t.intItemUOMId IS NOT NULL 
@@ -309,21 +340,21 @@ BEGIN
 		asOfDate.intId IS NULL 
 		 
 	DECLARE 
-		@intItemId INT
-		,@intItemLocation INT
-		,@intItemUOMId INT
-		,@dtmDate DATETIME 
-		,@dblQty NUMERIC(38, 20)
+		@stock_intItemId INT
+		,@stock_intItemLocation INT
+		,@stock_intItemUOMId INT
+		,@stock_dtmDate DATETIME 
+		,@stock_dblQty NUMERIC(38, 20)
 	
 	WHILE EXISTS (SELECT TOP 1 1 FROM @stock)
 	BEGIN 
 		SELECT TOP 1 
-			@intItemId = s.intItemId
-			,@intItemLocation = s.intItemLocationId
-			,@intItemUOMId = s.intItemUOMId
-			,@dtmDate = s.dtmDate
-			,@dblQty = s.dblQty
-		FROM @stock s
+			@stock_intItemId = s.intItemId
+			,@stock_intItemLocation = s.intItemLocationId
+			,@stock_intItemUOMId = s.intItemUOMId
+			,@stock_dtmDate = s.dtmDate
+			,@stock_dblQty = s.dblQty
+		FROM @stock s	
 
 		UPDATE asOfDate
 		SET
@@ -331,25 +362,25 @@ BEGIN
 		FROM 
 			tblICInventoryStockAsOfDate asOfDate 			
 		WHERE
-			asOfDate.intItemId = @intItemId
-			AND asOfDate.intItemLocationId = @intItemLocation
-			AND asOfDate.intItemUOMId = @intItemUOMId
-			AND asOfDate.dtmDate >= @dtmDate
+			asOfDate.intItemId = @stock_intItemId
+			AND asOfDate.intItemLocationId = @stock_intItemLocation
+			AND asOfDate.intItemUOMId = @stock_intItemUOMId
+			AND asOfDate.dtmDate >= @stock_dtmDate
 
 		DELETE @stock
 		WHERE
-			@intItemId = intItemId
-			AND @intItemLocation = intItemLocationId
-			AND @intItemUOMId = intItemUOMId
-			AND @dtmDate = dtmDate
-			AND @dblQty = dblQty
+			@stock_intItemId = intItemId
+			AND @stock_intItemLocation = intItemLocationId
+			AND @stock_intItemUOMId = intItemUOMId
+			AND @stock_dtmDate = dtmDate
+			AND @stock_dblQty = dblQty
 
 		SELECT 
-			@intItemId = NULL
-			,@intItemLocation = NULL
-			,@intItemUOMId = NULL
-			,@dtmDate = NULL
-			,@dblQty = NULL
+			@stock_intItemId = NULL
+			,@stock_intItemLocation = NULL
+			,@stock_intItemUOMId = NULL
+			,@stock_dtmDate = NULL
+			,@stock_dblQty = NULL
 	END 
 END 
 

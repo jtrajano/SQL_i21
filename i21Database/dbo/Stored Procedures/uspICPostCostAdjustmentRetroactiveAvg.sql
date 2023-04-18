@@ -1072,6 +1072,7 @@ BEGIN
 				,[dblForexRate]
 				,[dtmDateCreated]
 				,[dblComputedValue]
+				,[intCompanyLocationId]
 		)			
 	SELECT	
 			[intItemId]								= @intItemId
@@ -1123,6 +1124,7 @@ BEGIN
 			,[dblComputedValue]						= 
 					dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
 					- dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
+			,[intCompanyLocationId]				= [location].intCompanyLocationId
 	FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 				ON ItemPricing.intItemId = Stock.intItemId
 				AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -1150,6 +1152,7 @@ BEGIN
 								0
 						END 
 			) allowAutoVariance 
+			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 	WHERE	ItemPricing.intItemId = @intItemId
 			AND ItemPricing.intItemLocationId = @intItemLocationId			
 			AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId), 2) <> 0
