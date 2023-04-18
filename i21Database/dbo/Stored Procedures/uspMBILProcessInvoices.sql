@@ -250,26 +250,27 @@ CREATE TABLE #TempMBILInvoiceItem (
 			,InvoiceItem.[strPaymentInfo]
 			,[ysnRecap] = @ysnRecap
 		
-			--Detail
-			,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
-			,[intItemId] = InvoiceItem.intItemId
-			,[ysnInventory] = 1
-			,[intItemUOMId] = InvoiceItem.intItemUOMId
-			,[dblQtyShipped] = InvoiceItem.dblQuantity
-			,[dblPrice] = InvoiceItem.dblPrice
-			,[dblUnitPrice] = (InvoiceItem.dblPrice / InvoiceItem.dblQuantity)
-			,[dblPercentFull] = InvoiceItem.dblPercentageFull
-			,[ysnRefreshPrice] = 0
-			,[ysnRecomputeTax] = 1
-			,[intContractDetailId] = InvoiceItem.intContractDetailId
-			,[intSiteId] = InvoiceItem.intSiteId
-			,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
-			,[ysnUseOriginIdAsInvoiceNumber] = 1
-			,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-		FROM vyuMBILInvoiceItem InvoiceItem
-		INNER JOIN #TempMBILInvoice MBILI ON InvoiceItem.intInvoiceId = MBILI.intInvoiceId
-		LEFT JOIN tblARInvoice II ON InvoiceItem.inti21InvoiceId = II.intInvoiceId
-		WHERE InvoiceItem.inti21InvoiceId IS NULL OR II.intInvoiceId IS NULL
+		--Detail																																															
+		,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
+		,[intItemId] = InvoiceItem.intItemId
+		,[ysnInventory] = 1
+		,[intItemUOMId] = InvoiceItem.intItemUOMId
+		,[dblQtyShipped] = InvoiceItem.dblQuantity
+		,[dblPrice] = InvoiceItem.dblPrice
+		,[dblUnitPrice] = (InvoiceItem.dblPrice / InvoiceItem.dblQuantity)
+		,[dblPercentFull] = InvoiceItem.dblPercentageFull
+		,[ysnRefreshPrice] = 0
+		,[ysnRecomputeTax] = 1
+		,[intContractDetailId] = InvoiceItem.intContractDetailId
+		,[intSiteId] = InvoiceItem.intSiteId
+		,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
+		,[ysnUseOriginIdAsInvoiceNumber] = 1
+		,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+		,[intDispatchId] = InvoiceItem.intDispatchId
+	FROM vyuMBILInvoiceItem InvoiceItem
+	INNER JOIN #TempMBILInvoice MBILI ON InvoiceItem.intInvoiceId = MBILI.intInvoiceId
+	LEFT JOIN tblARInvoice II ON InvoiceItem.inti21InvoiceId = II.intInvoiceId
+	WHERE InvoiceItem.inti21InvoiceId IS NULL OR II.intInvoiceId IS NULL
 
 	INSERT INTO @TaxDetails
 					(
