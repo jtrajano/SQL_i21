@@ -8,13 +8,13 @@ AS
     Date: 04/17/2023
 *****************************************************************/
 SELECT StorageLocation.intStorageLocationId
-     , StorageLocation.strName
-     , CompanyLocation.intCompanyLocationSubLocationId
-     , CompanyLocation.strSubLocationName
+    , StorageLocation.strName
+    , CompanyLocation.intCompanyLocationSubLocationId
+    , CompanyLocation.strSubLocationName
 FROM tblICStorageLocation AS StorageLocation
 JOIN tblICLot AS Lot ON Lot.intStorageLocationId = StorageLocation.intStorageLocationId
 JOIN tblSMCompanyLocationSubLocation AS CompanyLocation ON CompanyLocation.intCompanyLocationSubLocationId = Lot.intSubLocationId
 GROUP BY StorageLocation.intStorageLocationId
-       , StorageLocation.strName
-       , CompanyLocation.intCompanyLocationSubLocationId
-       , CompanyLocation.strSubLocationName
+    , StorageLocation.strName
+    , CompanyLocation.intCompanyLocationSubLocationId
+    , CompanyLocation.strSubLocationName
