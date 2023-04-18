@@ -34,8 +34,8 @@ RETURNS TABLE AS RETURN
 				 AND (B.intTaxGroupId = receiptItem.intTaxGroupId OR B.intTaxGroupId = charges.intTaxGroupId)
 				 AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
-			 WHEN B.intInventoryReceiptChargeId IS NOT NULL AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1 THEN
-				 dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Inventory')
+			--  WHEN B.intInventoryReceiptChargeId IS NOT NULL AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1 THEN
+			-- 	 dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Other Charge Expense')
 			ELSE D.intAccountId
 		END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
