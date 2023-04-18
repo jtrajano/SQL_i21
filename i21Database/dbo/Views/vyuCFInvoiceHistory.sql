@@ -1,8 +1,18 @@
 ﻿CREATE VIEW [dbo].[vyuCFInvoiceHistory]
 AS
 
+WITH INVCYCLE (
+	strInvoiceReportNumber , intCustomerId , strInvoiceCycle
+)
+AS
+(
+	SELECT  strInvoiceReportNumber , intCustomerId , strInvoiceCycle 
+	FROM tblCFInvoiceHistoryStagingTable 
+	GROUP BY strInvoiceReportNumber , intCustomerId , strInvoiceCycle
+)
+
 SELECT 
-strInvoiceCycle = (SELECT TOP 1 strInvoiceCycle FROM tblCFInvoiceHistoryStagingTable where strInvoiceReportNumber = cfProcessHistory.strInvoiceNumberHistory and intCustomerId = cfProcessHistory.intCustomerId),
+strInvoiceCycle = (SELECT TOP 1 strInvoiceCycle FROM INVCYCLE where strInvoiceReportNumber = cfProcessHistory.strInvoiceNumberHistory and intCustomerId = cfProcessHistory.intCustomerId),
 cfProcessHistory.* ,
  ISNULL(dblTotalAR,0) as dblTotalAR,
  ysnRemittancePage = (
@@ -17,7 +27,4 @@ LEFT JOIN (
 		) AS cfCustHistory
 ON cfCustHistory.strInvoiceNumberHistory = cfProcessHistory.strInvoiceNumberHistory
 
-
 GO
-
-
