@@ -3,14 +3,17 @@
 -- If MU location ID is ppased in @intLocation id, this SP will delete only the batch for MU location
 CREATE PROCEDURE [dbo].[uspMFDeleteBatch]
 (
-	@strBatchId NVARCHAR(50)
-    ,@intLocationId INT
-    ,@ysnSuccess BIT OUTPUT
-    ,@strErrorMessage NVARCHAR(MAX) OUTPUT
+	@strBatchId			NVARCHAR(50)
+  , @intLocationId		INT
+  , @ysnSuccess			BIT OUTPUT
+  , @strErrorMessage	NVARCHAR(MAX) OUTPUT
 )
 AS
-BEGIN
-    -- Start validations
+
+BEGIN TRY
+	BEGIN TRANSACTION 
+
+	-- Start validations
     -- Check if there is an existing load that uses the batch
     DECLARE @strLoadNumber NVARCHAR(50)
 
@@ -44,4 +47,16 @@ BEGIN
     AND (intLocationId = @intLocationId OR intBuyingCenterLocationId = @intLocationId)
 
     SET @ysnSuccess = 1;
-END
+
+
+	COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+	
+	DECLARE @msg AS VARCHAR(MAX) = ERROR_MESSAGE()
+
+	ROLLBACK TRANSACTION 
+
+	RAISERROR(@msg, 11, 1) 
+
+END CATCH 
