@@ -4,6 +4,7 @@ SELECT DISTINCT
  ST.intStorageScheduleTypeId
 ,ST.strStorageTypeCode
 ,ST.strStorageTypeDescription 
+,ST.ysnGrainBankType
 FROM tblGRCustomerStorage CS
 JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId=CS.intStorageTypeId
 WHERE  ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0 
