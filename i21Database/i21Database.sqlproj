@@ -1686,6 +1686,8 @@
     <Build Include="dbo\Tables\tblSTCheckoutTankVarianceCalculation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCalculateTankVariance.sql" />
     <Build Include="dbo\Views\vyuSTGetTankVarianceCalculation.sql" />
+    <None Include="Scripts\Post-Deployment\ST\53_FileFieldMapping_Passport_FGMA.sql" />
+    <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
