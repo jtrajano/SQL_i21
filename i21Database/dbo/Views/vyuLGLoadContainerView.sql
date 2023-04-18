@@ -81,12 +81,7 @@ SELECT   L.intLoadId
 		,PDetail.intContractSeq AS intPContractSeq
 		,SHeader.strContractNumber AS strSContractNumber
 		,SDetail.intContractSeq AS	intSContractSeq
-		,strSampleStatus = CASE WHEN EXISTS(SELECT 1 FROM tblQMSample WHERE strContainerNumber = LC.strContainerNumber) 
-								THEN (SELECT TOP 1 SS.strStatus
-										FROM tblQMSample S
-										JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-										AND S.intLoadContainerId  = LC.intLoadContainerId  ORDER BY dtmTestedOn DESC)
-								ELSE NULL END
+		,strSampleStatus = ISNULL(LSS.strStatus, CSS.strStatus)
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
 		,strShipmentStatus = CASE L.intShipmentStatus
@@ -186,3 +181,13 @@ LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intStaticValueCurrencyId
 LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END  
+    FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId  
+    WHERE (S.intContractDetailId = SDetail.intContractDetailId OR S.intContractDetailId = PDetail.intContractDetailId)  
+     AND S.intLoadDetailId IS NULL  
+    ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) CSS  
+OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END  
+    FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId  
+    WHERE S.intLoadDetailId = LD.intLoadDetailId  
+     AND SS.strStatus <> 'Rejected'  
+    ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS
