@@ -1286,6 +1286,8 @@
     <Build Include="dbo\Views\vyuPRReportEmployee401K.sql" />
     <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
     <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
+    <None Include="Scripts\Post-Deployment\ST\53_FileFieldMapping_Passport_FGMA.sql" />
+    <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
