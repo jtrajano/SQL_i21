@@ -53,6 +53,8 @@ BEGIN TRY
 		,@dblTBSQuantity NUMERIC(18, 6)
 		,@intLotId int
 		,@dblWeight numeric(18,6)
+		,@ysnTBSReserve int
+		,@dblQuantity numeric(18,6)
 	DECLARE @dblInputAvlQty NUMERIC(38, 20)
 	DECLARE @dblInputReqQty NUMERIC(38, 20)
 	DECLARE @intInputLotId INT
@@ -367,9 +369,11 @@ BEGIN TRY
 		,intItemId
 
 	DECLARE @intMinLot INT
+	Select @ErrMsg=''
 
 	SELECT @intMinLot = Min(intRowNo)
-	FROM @tblLotSummary
+	FROM @tblLot
+	WHERE strRowState <> 'DELETE'
 
 	WHILE (@intMinLot IS NOT NULL)
 		AND @ysnEnableParentLot = 0
@@ -381,7 +385,7 @@ BEGIN TRY
 		SELECT @intInputLotId = intLotId
 			,@dblInputReqQty = dblQty
 			,@intInputItemId = intItemId
-		FROM @tblLotSummary
+		FROM @tblLot
 		WHERE intRowNo = @intMinLot
 
 		SELECT @dblInputAvlQty = NULL
@@ -415,18 +419,22 @@ BEGIN TRY
 			FROM tblICItem
 			WHERE intItemId = @intInputItemId
 
-			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+			SET @ErrMsg =@ErrMsg+ 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
 
-			RAISERROR (
+		END
+
+		SELECT @intMinLot = Min(intRowNo)
+		FROM @tblLot
+		WHERE intRowNo > @intMinLot
+		AND strRowState <> 'DELETE'
+	END
+	IF @ErrMsg<>''
+	BEGIN
+		RAISERROR (
 					@ErrMsg
 					,16
 					,1
 					)
-		END
-
-		SELECT @intMinLot = Min(intRowNo)
-		FROM @tblLotSummary
-		WHERE intRowNo > @intMinLot
 	END
 
 	UPDATE @tblLot
@@ -1255,7 +1263,7 @@ BEGIN TRY
 		,@strXml = @strXml
 
 	--FW
-	SELECT @intWorkOrderInputLotId = NULL
+	SELECT @intWorkOrderInputLotId = NULL,@ErrMsg=''
 
 	SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
 	FROM tblMFWorkOrderInputLot
@@ -1268,16 +1276,22 @@ BEGIN TRY
 			,@strFW=NULL
 			,@intLotId =NULL
 			,@dblWeight=NULL
+			,@ysnTBSReserve =NULL
+			,@dblQuantity=NULL
 
 		SELECT @intItemId = intItemId
 			,@dblIssuedQuantity = dblIssuedQuantity
 			,@intLotId=intLotId
+			,@ysnTBSReserve=ysnTBSReserved 
+			,@dblQuantity=dblQuantity
 		FROM tblMFWorkOrderInputLot
 		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
-		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
-		FROM tblMFWorkOrderInputLot
-		WHERE intLotId = @intLotId
+		SELECT @dblTBSQuantity=SUM(WI.dblTBSQuantity) 
+		FROM tblMFWorkOrderInputLot WI
+		JOIN tblMFWorkOrder W on W.intWorkOrderId=WI.intWorkOrderId
+		WHERE WI.intLotId = @intLotId
+		AND W.intStatusId<>13
 
 		Select @dblInputAvlQty=dblWeight  
 		from tblICLot 
@@ -1297,13 +1311,7 @@ BEGIN TRY
 			FROM tblICItem
 			WHERE intItemId = @intItemId
 
-			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
-
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
+			SET @ErrMsg =@ErrMsg+ 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
 		End
 
 		IF (@dblIssuedQuantity % @intNoOfSheets) > 0
@@ -1354,10 +1362,28 @@ BEGIN TRY
 		SET strFW = @strFW, ysnKeep =Case When @dblInputAvlQty>@dblTBSQuantity then 1 Else 0 End
 		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
+		IF ISNULL(@ysnTBSReserve,0)=0 AND @ysnTBSReserveOnSave =1
+		BEGIN
+			EXEC [dbo].[uspMFTrialBlendSheet] @intWorkOrderId = @intWorkOrderId
+						,@intWorkOrderInputLotId = @intWorkOrderInputLotId
+						,@ysnKeep = 1
+						,@type = 'Confirm'
+						,@UserId = @intCreatedUserId
+						,@dblTBSQuantity = @dblQuantity
+		END 
+
 		SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
 		FROM tblMFWorkOrderInputLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intWorkOrderInputLotId > @intWorkOrderInputLotId
+	END
+	IF @ErrMsg<>''
+	BEGIN
+	RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
 	END
 
 	COMMIT TRANSACTION

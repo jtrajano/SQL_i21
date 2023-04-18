@@ -69,6 +69,13 @@ BEGIN TRY
 		,@strERPComment NVARCHAR(max)
 		,@strERPOrderNo nvarchar(50)
 		,@ysnOverrideRecipe BIT
+		,@ysnCopyRecipeOnSave BIT
+		,@intLotId int
+		,@dblWeight numeric(18,6)
+		,@intWorkOrderInputLotId INT
+		,@dblTBSQuantity NUMERIC(18, 6)
+		,@strFW NVARCHAR(3)
+		,@intRecordId INT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -92,10 +99,96 @@ BEGIN TRY
 		,@ysnPercResetRequired BIT = 0
 		,@dblQuantityTaken NUMERIC(18, 6)
 		,@dblPercentageIncrease NUMERIC(18, 6)
+		,@strChar NVARCHAR(1)
+
 	DECLARE @tblInputItemSeq TABLE (
 		intItemId INT
 		,intSeq INT
 		)
+DECLARE @tblFW TABLE (
+		strChar CHAR(1)
+		,intItemId INT
+		,intSeq INT
+		,intRecordId INT identity(1, 1)
+		);
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'A'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'B'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'C'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'D'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'E'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'F'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'G'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'H'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'I'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'J'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'K'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'L'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'M'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'N'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'O'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'P'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Q'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'R'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'S'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'T'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'U'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'V'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'W'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'X'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Y'
+
+	INSERT INTO @tblFW (strChar)
+	SELECT 'Z'
 
 	SELECT @dtmCurrentDateTime = GetDate()
 
@@ -389,12 +482,17 @@ BEGIN TRY
 	DECLARE @intInputLotId INT
 	DECLARE @intInputItemId INT
 	DECLARE @strInputLotNumber NVARCHAR(50)
+			,@ysnToleranceCheckOnBlendOutputItem BIT
+			,@ysnOverrideRecipeInBlendManagement BIT
 
 	SELECT @intLocationId = intLocationId
 	FROM @tblBlendSheet
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 		,@ysnRecipeHeaderValidation = ysnRecipeHeaderValidation
+		,@ysnToleranceCheckOnBlendOutputItem=IsNULL(ysnToleranceCheckOnBlendOutputItem,0) 
+		,@ysnOverrideRecipeInBlendManagement=IsNULL(ysnOverrideRecipeInBlendManagement,0)
+		,@ysnCopyRecipeOnSave=IsNULL(ysnCopyRecipeOnSave,0)
 	FROM tblMFCompanyPreference
 
 	INSERT INTO @tblLotSummary (
@@ -410,6 +508,8 @@ BEGIN TRY
 		,intItemId
 
 	DECLARE @intMinLot INT
+
+	SELECT @ErrMsg=''
 
 	SELECT @intMinLot = Min(intRowNo)
 	FROM @tblLotSummary
@@ -447,18 +547,21 @@ BEGIN TRY
 			FROM tblICItem
 			WHERE intItemId = @intInputItemId
 
-			SET @ErrMsg = 'Quantity of ' + CONVERT(VARCHAR, @dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(VARCHAR, @dblInputAvlQty) + '.'
+			SET @ErrMsg = @ErrMsg+'Quantity of ' + CONVERT(VARCHAR, @dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(VARCHAR, @dblInputAvlQty) + '.'
 
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
 		END
 
 		SELECT @intMinLot = Min(intRowNo)
 		FROM @tblLotSummary
 		WHERE intRowNo > @intMinLot
+	END
+	IF @ErrMsg<>''
+	BEGIN
+		RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			)
 	END
 
 	--End Available Qty Check
@@ -827,7 +930,7 @@ BEGIN TRY
 		SELECT @intMinMissingItem = Min(intRowNo)
 		FROM @tblPreItem
 
-		WHILE (@intMinMissingItem IS NOT NULL)
+		WHILE (@intMinMissingItem IS NOT NULL) AND @ysnToleranceCheckOnBlendOutputItem=0
 		BEGIN
 			SELECT @dblLowerToleranceQty = NULL
 				,@dblUpperToleranceQty = NULL
@@ -1053,7 +1156,6 @@ BEGIN TRY
 		,@intLotCount INT
 		,@intItemId INT
 		,@dblReqQty NUMERIC(38, 20)
-		,@intLotId INT
 		,@dblQty NUMERIC(38, 20)
 
 	SELECT @intExecutionOrder = Count(1)
@@ -1964,10 +2066,13 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
-			,@intLocationId = @intLocationId
-			,@intUserId = @intUserId
-			,@intWorkOrderId = @intWorkOrderId
+		IF @ysnCopyRecipeOnSave=0
+		BEGIN
+			EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
+				,@intLocationId = @intLocationId
+				,@intUserId = @intUserId
+				,@intWorkOrderId = @intWorkOrderId
+		END
 
 		--Check for Input Items validity
 		SELECT @strInActiveItems = COALESCE(@strInActiveItems + ', ', '') + i.strItemNo
@@ -1986,7 +2091,7 @@ BEGIN TRY
 				WHERE intWorkOrderId = @intWorkOrderId
 				)
 
-		IF ISNULL(@strInActiveItems, '') <> ''
+		IF ISNULL(@strInActiveItems, '') <> '' AND @ysnOverrideRecipeInBlendManagement=0
 		BEGIN
 			SET @ErrMsg = 'Recipe ingredient items ' + @strInActiveItems + ' are inactive. Please remove the lots belong to the inactive items from blend sheet.'
 
@@ -2298,6 +2403,113 @@ BEGIN TRY
 	SET @strWorkOrderNoOut = @strNextWONo;
 	SET @intWorkOrderIdOut = @intWorkOrderId
 
+	--FW
+	SELECT @intWorkOrderInputLotId = NULL,
+			@ErrMsg=''
+
+	SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	WHILE @intWorkOrderInputLotId IS NOT NULL
+	BEGIN
+		SELECT @intItemId = NULL
+			,@intLotId =NULL
+			,@dblWeight=NULL
+
+		SELECT @intItemId = intItemId
+				,@intLotId=intLotId
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
+		FROM tblMFWorkOrderInputLot WI
+		JOIN tblMFWorkOrder W on W.intWorkOrderId=WI.intWorkOrderId
+		WHERE intLotId = @intLotId
+		AND W.intStatusId<>13
+
+		Select @dblInputAvlQty=dblWeight  
+		from tblICLot 
+		Where intLotId=@intLotId
+		
+		if @dblTBSQuantity>@dblInputAvlQty
+		Begin
+			SELECT @strInputLotNumber = NULL
+
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = NULL
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg =@ErrMsg+ 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
+		End
+
+		IF (@dblIssuedQuantity % @intNoOfSheetOriginal) > 0
+			AND @intIssuedUOMTypeId = 4
+		BEGIN
+			IF EXISTS (
+					SELECT *
+					FROM @tblFW
+					WHERE intItemId = @intItemId
+					)
+			BEGIN
+				SELECT @strChar = NULL
+					,@intSeq = NULL
+
+				SELECT @strChar = strChar
+					,@intSeq = intSeq + 1
+				FROM @tblFW
+				WHERE intItemId = @intItemId
+
+				UPDATE @tblFW
+				SET intSeq = @intSeq
+				WHERE intItemId = @intItemId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+			ELSE
+			BEGIN
+				SELECT @intRecordId = NULL
+					,@strChar = NULL
+					,@intSeq = 1
+
+				SELECT TOP 1 @intRecordId = intRecordId
+					,@strChar = strChar
+				FROM @tblFW
+				WHERE intItemId IS NULL
+				ORDER BY intRecordId ASC
+
+				UPDATE @tblFW
+				SET intItemId = @intItemId
+					,intSeq = 1
+				WHERE intRecordId = @intRecordId
+
+				SELECT @strFW = @strChar + ltrim(@intSeq)
+			END
+		END
+
+		UPDATE tblMFWorkOrderInputLot
+		SET strFW = @strFW, ysnKeep =Case When @dblInputAvlQty>@dblTBSQuantity then 1 Else 0 End
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
+
+		SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intWorkOrderInputLotId > @intWorkOrderInputLotId
+	END
+	IF @ErrMsg<>''
+	BEGIN
+	RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+	END
 	COMMIT TRAN
 
 	EXEC sp_xml_removedocument @idoc

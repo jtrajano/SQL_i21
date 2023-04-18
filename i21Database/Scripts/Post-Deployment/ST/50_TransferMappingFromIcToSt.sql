@@ -26,7 +26,7 @@ BEGIN
 			FROM			tblICCategoryLocation a
 			INNER JOIN		tblSTStore b
 			ON				a.intLocationId = b.intCompanyLocationId
-			WHERE			a.strCashRegisterDepartment IS NOT NULL AND a.strCashRegisterDepartment != ''''')
+			WHERE			b.ysnConsignmentStore = 1 AND a.strCashRegisterDepartment IS NOT NULL AND a.strCashRegisterDepartment != ''''')
 
 	EXEC('UPDATE tblSTStore SET strDepartmentOrCategory = ''D'', strCategoriesOrSubcategories = ''C''')
 	EXEC('INSERT INTO tblEMEntityPreferences ( strPreference, strValue) VALUES (''Transfer mapping from IC to ST 2'',''1'') ')
