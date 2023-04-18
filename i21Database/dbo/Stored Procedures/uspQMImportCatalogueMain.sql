@@ -7,6 +7,7 @@ BEGIN TRY
 		  ,@strPackageType nvarchar(50) 
 		  ,@intPackageTypeId int
 		  ,@dblTareWeight Numeric(18,6)
+		  ,@intWgtUnitMeasureId Numeric(18,6)
 
 	BEGIN TRANSACTION
 
@@ -78,14 +79,16 @@ BEGIN TRY
 						)
 					THEN 'MANUFACTURING LEAF TYPE, '
 				ELSE ''
-				END + CASE 
-				WHEN (
-						SEASON.intCommodityAttributeId IS NULL
-						AND ISNULL(IMP.strColour, '') <> ''
-						)
-					THEN 'SEASON, '
-				ELSE ''
-				END + CASE 
+				END 
+				--+ CASE 
+				--WHEN (
+				--		SEASON.intCommodityAttributeId IS NULL
+				--		AND ISNULL(IMP.strColour, '') <> ''
+				--		)
+				--	THEN 'SEASON, '
+				--ELSE ''
+				--END 
+				+ CASE 
 				WHEN (
 						GARDEN.intGardenMarkId IS NULL
 						--AND ISNULL(IMP.strGardenMark, '') <> ''
@@ -255,10 +258,10 @@ BEGIN TRY
 				LEAF_TYPE.intCommodityAttributeId IS NULL
 				--AND ISNULL(IMP.strManufacturingLeafType, '') <> ''
 				)
-			OR (
-				SEASON.intCommodityAttributeId IS NULL
-				AND ISNULL(IMP.strColour, '') <> ''
-				)
+			--OR (
+			--	SEASON.intCommodityAttributeId IS NULL
+			--	AND ISNULL(IMP.strColour, '') <> ''
+			--	)
 			OR (
 				GARDEN.intGardenMarkId IS NULL
 				--AND ISNULL(IMP.strGardenMark, '') <> ''
@@ -522,6 +525,7 @@ BEGIN TRY
 		,intSubBookId = STRATEGY.intSubBookId
 		,strPackageType=strPackageType
 		,SeasonCropYear.intCropYearId
+		,intWgtUnitMeasureId=B1PUOM.intUnitMeasureId
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sale Year
@@ -671,6 +675,7 @@ BEGIN TRY
 		,intSubBookId = NULL
 		,strPackageType=NULL
 		,SeasonCropYear.intCropYearId
+		,intWgtUnitMeasureId=NULL
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
 	-- Sample Type
@@ -768,6 +773,7 @@ BEGIN TRY
 		,@intSubBookId
 		,@strPackageType
 		,@intCropYearId
+		,@intWgtUnitMeasureId
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -1345,10 +1351,10 @@ BEGIN TRY
 					WHERE IUOM1.intItemId = @intItemId
 						AND IUOM1.intUnitMeasureId = @intRepresentingUOMId
 					)
-				,intSampleUOMId = (
+				,intSampleUOMId = IsNULL(@intWgtUnitMeasureId,(
 					SELECT TOP 1 [intDefaultSampleUOMId]
 					FROM tblQMCatalogueImportDefaults
-					)
+					))
 				,intRepresentingUOMId = @intRepresentingUOMId
 				,strRepresentLotNumber = @strRefNo
 				,dtmTestingStartDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmDateCreated)
@@ -1770,7 +1776,7 @@ BEGIN TRY
 			,@intSubBookId
 			,@strPackageType
 			,@intCropYearId
-
+			,@intWgtUnitMeasureId
 	END
 
 	CLOSE @C

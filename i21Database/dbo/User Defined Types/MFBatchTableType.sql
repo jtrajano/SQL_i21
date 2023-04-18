@@ -116,4 +116,5 @@ CREATE TYPE MFBatchTableType AS TABLE
 	,dtmShippingDate DATETIME 
 	,strFines NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,intCountryId int 
+	,intSupplierId int
 )
