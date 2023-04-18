@@ -298,6 +298,7 @@ BEGIN
 	BEGIN 
 		EXEC uspICPostStockDailyQuantity 
 			@intInventoryTransactionId = @InventoryTransactionIdentityId
+			,@dblQty = @dblQty
 	END 
 END 
 
