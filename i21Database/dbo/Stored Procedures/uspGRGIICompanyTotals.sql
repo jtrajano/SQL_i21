@@ -133,7 +133,7 @@ BEGIN
 				--OR ISNULL(PYMT.ysnPosted,0) = 0
 				--OR ISNULL(PYMT.strPaymentInfo,'') = ''
 			)
-			AND IC.intCommodityId = 1
+			AND IC.intCommodityId = @intCommodityId
 			AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate
 		GROUP BY IC.intCommodityId
 			,UM_REF.intCommodityUnitMeasureId
@@ -370,11 +370,25 @@ BEGIN
 		--CUSTOMER STORAGE TOTAL
 		DECLARE @dblCustomerStorage DECIMAL(18,6)
 		DECLARE @dblSODecrease DECIMAL(18,6)
-		SET @dblCustomerStorage = NULL
-		SET @dblSODecrease = NULL
+		SET @dblCustomerStorage = NULL		
 		SELECT @dblCustomerStorage = SUM(dblBeginningBalance)
-			,@dblSODecrease = SUM(dblDecrease)
 		FROM tblGRGIICustomerStorage 
+		WHERE intCommodityId = @intCommodityId 
+			AND strUOM = @strUOM 
+			AND dtmReportDate = @dtmReportDate
+		GROUP BY intCommodityId
+			,strUOM
+
+		SET @dblSODecrease = NULL
+		SELECT @dblSODecrease = SUM(dblDecrease)
+		FROM tblGRGIICustomerStorage CS
+		INNER JOIN tblGRStorageType ST
+			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				AND ST.ysnReceiptedStorage = 0
+				AND ST.ysnCustomerStorage = 0
+				AND ST.ysnDPOwnedType = 0
+				AND ST.ysnGrainBankType = 0
+				AND ST.strOwnedPhysicalStock = 'Customer'
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
 			AND dtmReportDate = @dtmReportDate
