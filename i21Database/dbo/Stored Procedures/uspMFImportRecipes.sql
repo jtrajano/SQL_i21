@@ -38,8 +38,7 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@dtmValidFrom DATETIME
 	,@dtmValidTo DATETIME
 	,@ysnRecipeHeaderValidation BIT
-
-
+	
 SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
 SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
@@ -780,10 +779,10 @@ BEGIN
 					,iu.intItemUOMId
 					,2
 					,''
-					,0
-					,0
-					,s.[strQuantity]
-					,s.[strQuantity]
+					,IsNULL(L.dblSanitizationOrderOutputQtyTolerancePercentage,0)
+					,IsNULL(L.dblSanitizationOrderOutputQtyTolerancePercentage,0)
+					,dbo.fnMFCalculateRecipeItemUpperTolerance(1, s.[strQuantity], 0, ISNULL(L.dblSanitizationOrderOutputQtyTolerancePercentage, 0))
+					,dbo.fnMFCalculateRecipeItemUpperTolerance(1, s.[strQuantity], 0, ISNULL(L.dblSanitizationOrderOutputQtyTolerancePercentage, 0))
 					,0
 					,0
 					,NULL
@@ -813,6 +812,7 @@ BEGIN
 				LEFT JOIN tblICUnitMeasure um ON s.strUOM = um.strUnitMeasure
 				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
 				AND um.intUnitMeasureId =iu.intUnitMeasureId 
+				LEFT JOIN tblSMCompanyLocation L on L.strLocationName=s.strLocationName 
 				WHERE s.intRecipeStageId = @intMinId
 		END
 		ELSE

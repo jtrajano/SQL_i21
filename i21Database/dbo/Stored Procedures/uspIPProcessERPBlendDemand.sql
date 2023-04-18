@@ -526,7 +526,7 @@ BEGIN TRY
 								WHEN @intLeadTime IS NULL
 									OR @intLeadTime = 0
 									THEN 1
-								ELSE Ceiling(@dblQuantity / @intLeadTime)
+								ELSE (Case When Round(@dblQuantity / @intLeadTime,0)=0 then 1 Else Round(@dblQuantity / @intLeadTime,0) End)
 								END
 							)
 						,1
@@ -561,6 +561,13 @@ BEGIN TRY
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE strOrderNo = @strOrderNo
 
+					SELECT @intLeadTime = 0
+
+					SELECT @intLeadTime = dblLeadTime
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = @intItemId
+						AND IL.intLocationId = @intLocationId
+
 					UPDATE tblMFBlendRequirement
 					SET intItemId = @intItemId
 						,dblQuantity = @dblQuantity
@@ -570,7 +577,16 @@ BEGIN TRY
 						,dtmDueDate = @dtmDueDate
 						,dtmLastModified = @dtmCreatedDate
 						,intConcurrencyId = intConcurrencyId + 1
-						,dblBlenderSize = @dblQuantity
+						--,dblBlenderSize = @intLeadTime
+						,dblEstNoOfBlendSheet=(
+							CASE 
+								WHEN @intLeadTime IS NULL
+									OR @intLeadTime = 0
+									THEN 1
+								ELSE (Case When Round(@dblQuantity / @intLeadTime,0)=0 then 1 Else Round(@dblQuantity / @intLeadTime,0) End)
+								END
+							)
+						
 					WHERE strReferenceNo = @strOrderNo
 				END
 			END

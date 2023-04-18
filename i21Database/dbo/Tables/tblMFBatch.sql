@@ -124,6 +124,7 @@ CREATE TABLE tblMFBatch
 	,strFines NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL
 	,dtmPOCreated DATETIME
 	,strIBDNo NVARCHAR(50) COLLATE  Latin1_General_CI_AS  NULL
+	,intSupplierId INT
 	,CONSTRAINT [PK_tblMFBatch] PRIMARY KEY CLUSTERED 
     (
         [intBatchId] ASC
