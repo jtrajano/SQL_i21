@@ -86,8 +86,6 @@ BEGIN
         BEGIN
             SELECT 
                 strTransactionId
-                , intCurrencyId
-                , strCurrency
                 , dblDebit = SUM(ISNULL(dblDebit, 0))
                 , dblCredit = SUM(ISNULL(dblCredit, 0))
                 , dblDebitUnit = SUM(ISNULL(dblDebitUnit, 0))
@@ -100,19 +98,18 @@ BEGIN
                 , dblAmountForeign = (SUM(ISNULL(dblDebitForeign, 0)) - SUM(ISNULL(dblCreditForeign, 0)))
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
-            GROUP BY strTransactionId, intCurrencyId, strCurrency
+            GROUP BY strTransactionId
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
             BEGIN
                 DECLARE 
                     @strTransactionId NVARCHAR(40) = '',
-                    @intCurrencyId INT = NULL,
                     @dblAmount NUMERIC(18, 6) = 0,
                     @dblAmountForeign NUMERIC(18, 6) = 0
 
-                SELECT TOP 1 @strTransactionId = strTransactionId , @intCurrencyId = intCurrencyId
+                SELECT TOP 1 @strTransactionId = strTransactionId
                 FROM #TransactionGroup 
-                ORDER BY strTransactionId, intCurrencyId
+                ORDER BY strTransactionId
 
                 INSERT INTO tblGLAuditorTransaction (
                     ysnGroupHeader
@@ -213,7 +210,6 @@ BEGIN
                     , strAccountId
                 FROM #AuditorTransactions 
                 WHERE @strTransactionId =strTransactionId 
-                AND @intCurrencyId = intCurrencyId
                 ORDER BY CASE WHEN @strFilterDate = 'DatePosted' THEN   dtmDate ELSE dtmDateEntered  END
 
                 -- Total record
@@ -236,7 +232,6 @@ BEGIN
                     , dblCreditForeign
                     , dblTotal
                     , dblTotalForeign
-                    , strCurrency
                 )
                 SELECT TOP 1
                     1
@@ -245,7 +240,7 @@ BEGIN
                     , @dtmNow
                     , @strTransactionId
                     , 'Total'
-                    , 'Transaction ID: ' + @strTransactionId + ', Currency: ' + strCurrency
+                    , 'Transaction ID: ' + @strTransactionId 
                     , @intEntityId
                     , dblDebit
                     , dblCredit
@@ -257,13 +252,9 @@ BEGIN
                     , dblCreditForeign
                     , dblAmount
                     , dblAmountForeign
-                    , strCurrency
                     FROM #TransactionGroup 
                     WHERE strTransactionId = @strTransactionId
-                    AND @intCurrencyId = intCurrencyId
-            
-
-                DELETE #TransactionGroup WHERE @strTransactionId = strTransactionId AND @intCurrencyId = intCurrencyId
+                DELETE #TransactionGroup WHERE @strTransactionId = strTransactionId
             END
 
 
