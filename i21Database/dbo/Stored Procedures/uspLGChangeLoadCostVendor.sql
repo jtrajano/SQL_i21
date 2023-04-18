@@ -139,10 +139,8 @@ BEGIN
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
 							A.intItemId,
 							ItemLoc.intItemLocationId,
-							CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL)
-							THEN 'AP Clearing'
-							ELSE 'Other Charge Expense'
-							END) itemAccnt
+							'AP Clearing'
+						) itemAccnt
 			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 			OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
