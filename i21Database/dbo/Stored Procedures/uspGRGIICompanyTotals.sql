@@ -99,9 +99,8 @@ BEGIN
 	
 	/*******START******COMPANY OWNERSHIP (UNPAID)*************/
 	BEGIN
-		SELECT dtmPostDate = dbo.fnRemoveTimeOnDate(AP.dtmDate)
-			,IC.intCommodityId
-			,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(SS.intCommodityStockUomId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
+		SELECT IC.intCommodityId
+			,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
 		INTO #Vouchers
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBill AP
@@ -109,26 +108,32 @@ BEGIN
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = BD.intItemId
 				AND IC.strType = 'Inventory'
+		INNER JOIN tblICItemUOM UOM	
+			ON UOM.intItemUOMId = BD.intUnitOfMeasureId
+		OUTER APPLY (
+			SELECT TOP 1 intCommodityUnitMeasureId
+			FROM tblICCommodityUnitMeasure
+			WHERE intCommodityId = IC.intCommodityId
+				AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+		) UM_REF
 		INNER JOIN tblGRSettleStorageBillDetail SBD
-			ON SBD.intBillId = BD.intBillId
-		INNER JOIN tblGRSettleStorage SS
-			ON SS.intSettleStorageId = SBD.intSettleStorageId
+			ON SBD.intBillId = BD.intBillId		
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = AP.intShipToId
 				AND CL.ysnLicensed = 1
-		LEFT JOIN (
-			tblAPPaymentDetail PD
-			INNER JOIN tblAPPayment PYMT
-				ON PYMT.intPaymentId = PD.intPaymentId
-		) ON PD.intBillId = AP.intBillId
-		WHERE (AP.ysnPosted = 0
-				OR ISNULL(PYMT.ysnPosted,0) = 0
-				OR ISNULL(PYMT.strPaymentInfo,'') = ''
+		--LEFT JOIN (
+		--	tblAPPaymentDetail PD
+		--	INNER JOIN tblAPPayment PYMT
+		--		ON PYMT.intPaymentId = PD.intPaymentId
+		--) ON PD.intBillId = AP.intBillId
+		WHERE (AP.ysnPosted = 0 OR AP.ysnPaid = 0
+				--OR ISNULL(PYMT.ysnPosted,0) = 0
+				--OR ISNULL(PYMT.strPaymentInfo,'') = ''
 			)
-			AND IC.intCommodityId = @intCommodityId
-		GROUP BY AP.dtmDate
-			,IC.intCommodityId
-			,SS.intCommodityStockUomId
+			AND IC.intCommodityId = 1
+			AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate
+		GROUP BY IC.intCommodityId
+			,UM_REF.intCommodityUnitMeasureId
 
 		/****BEGINNING****/
 		INSERT INTO @CompanyOwnedData
@@ -144,7 +149,6 @@ BEGIN
 		FROM #Vouchers V
 		INNER JOIN tblICCommodity CO
 			ON CO.intCommodityId = V.intCommodityId
-		WHERE V.dtmPostDate < @dtmReportDate
 		GROUP BY V.intCommodityId
 
 		--/******INCREASE*******/
