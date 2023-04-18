@@ -178,7 +178,6 @@ CREATE TABLE #TempMBILInvoiceItem (
 			, [strInvoiceOriginId]
 			, [ysnUseOriginIdAsInvoiceNumber]
 			, [intPerformerId]
-			, [intDispatchId]
 		)
 	SELECT 
 		 InvoiceItem.[intInvoiceId]
@@ -221,7 +220,6 @@ CREATE TABLE #TempMBILInvoiceItem (
 		,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
 		,[ysnUseOriginIdAsInvoiceNumber] = 1
 		,[intPerformerId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-		,[intDispatchId] = InvoiceItem.intDispatchId
 	FROM vyuMBILInvoiceItem InvoiceItem
 	INNER JOIN #TempMBILInvoice MBILI ON InvoiceItem.intInvoiceId = MBILI.intInvoiceId
 	LEFT JOIN tblARInvoice II ON InvoiceItem.inti21InvoiceId = II.intInvoiceId

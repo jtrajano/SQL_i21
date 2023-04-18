@@ -12,7 +12,6 @@ CREATE TABLE [dbo].[tblMBILInvoiceItem](
 	[intConcurrencyId] INT DEFAULT ((1)) NULL,
 	[dblItemTotal] NUMERIC (18,6) null,
 	[dblTaxTotal] NUMERIC (18,6) null,
-	[intDispatchId] INT null,
 	CONSTRAINT [PK_tblMBILInvoiceItem] PRIMARY KEY CLUSTERED ([intInvoiceItemId] ASC),
     CONSTRAINT [FK_tblMBILInvoiceItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblMBILInvoiceItem_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
