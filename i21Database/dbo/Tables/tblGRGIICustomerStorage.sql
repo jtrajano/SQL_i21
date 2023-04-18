@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblGRGIICustomerStorage]
 	,dtmReportDate DATETIME
 	,intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,intStorageTypeId INT
 	,strStorageTypeDescription NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,dblBeginningBalance DECIMAL(18,6) DEFAULT 0
 	,dblIncrease DECIMAL(18,6) DEFAULT 0
