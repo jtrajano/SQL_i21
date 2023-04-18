@@ -118,5 +118,6 @@
 	ysnCopyRecipeOnSave BIT,
 	ysnTBSReserveOnSave BIT,
 	ysnAllowToCreateMultipleBlendSheetOnDemand BIT,
+	ysnDisplayLandedPriceInBlendManagement BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

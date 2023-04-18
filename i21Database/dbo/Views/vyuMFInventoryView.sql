@@ -4,6 +4,8 @@ AS
 SELECT l.intLotId
 	,l.strLotNumber
 	,CASE 
+		When CP.ysnDisplayLandedPriceInBlendManagement=1 
+		Then IsNULL(B.dblLandedPrice,0)
 		WHEN CP.ysnCostEnabled = 1
 			THEN dbo.fnMFGetLotUnitCost(l.intLotId)
 		ELSE l.dblLastCost
@@ -196,6 +198,7 @@ LEFT JOIN dbo.tblLGLoad LO ON LO.intLoadId = LI.intLoadId
 LEFT JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = l.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = l.intContractHeaderId
 LEFT JOIN dbo.tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+LEFT JOIN dbo.tblMFBatch B on B.intBatchId =LI.intBatchId 
 GO
 
 

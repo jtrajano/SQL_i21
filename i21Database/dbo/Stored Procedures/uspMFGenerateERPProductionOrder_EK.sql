@@ -42,6 +42,7 @@ BEGIN TRY
 			Select *
 			FROM dbo.tblMFWorkOrderPreStage
 			WHERE intStatusId IS NULL
+			AND strRowState <>'Deleted'
 			)
 	BEGIN
 		RETURN
@@ -67,6 +68,7 @@ BEGIN TRY
 	SELECT TOP (@limit) PS.intWorkOrderPreStageId
 	FROM dbo.tblMFWorkOrderPreStage PS
 	WHERE PS.intStatusId IS NULL
+	AND strRowState <>'Deleted'
 	ORDER BY intWorkOrderPreStageId
 
 	SELECT @intWorkOrderPreStageId = MIN(intWorkOrderPreStageId)
@@ -177,11 +179,11 @@ BEGIN TRY
 		+ '<OrderNo>' + IsNULL(BR.strReferenceNo,'')   + '</OrderNo>' 
 			+ '<BlendCode>' + I.strItemNo + '</BlendCode>' 
 				+ '<BlendDescription>' + I.strDescription  + '</BlendDescription>' 
-				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), W.dtmApprovedDate , 126),'') + '</DateApproved>' 
+				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), IsNULL(W.dtmApprovedDate,GETDATE()) , 126),'') + '</DateApproved>' 
 				+ '<Mixes>' + [dbo].[fnRemoveTrailingZeroes]( BR.dblEstNoOfBlendSheet) + '</Mixes>'
 				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](ROUND(P.dblTotalPart,0)) + '</Parts>'
-				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblPlannedQuantity/BR.dblEstNoOfBlendSheet,0)) + '</NetWtPerMix>'
-				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblPlannedQuantity,0) ) + '</TotalBlendWt>'
+				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</NetWtPerMix>'
+				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblQuantity,0) ) + '</TotalBlendWt>'
 				+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblVolume),0) + '</Volume>'
 				+ '<DustLevel>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblDustLevel),0) + '</DustLevel>'
 				+ '<Moisture>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblMoisture),0) + '</Moisture>'

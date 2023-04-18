@@ -15,6 +15,8 @@ BEGIN TRY
 		  , @dblB1QtyBought		NUMERIC(18,6)
 		  , @intBookId			INT
 		  , @strB1GroupNumber   NVARCHAR(50)
+		  , @intLotId			INT
+		  , @strNewLotNumber	nvarchar(50)
 		  
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
@@ -580,13 +582,14 @@ BEGIN TRY
 																	  , @ysnCreate		 = 1
 
 						SELECT @intOriginalItemId = intTealingoItemId
+								,@strBatchId	=	strBatchId
 						FROM tblMFBatch
 						WHERE intBatchId = @intProductValueId;
 
 						UPDATE dbo.tblMFBatch
 						SET intSampleId = @intSampleId
 							,intTealingoItemId = @intItemId
-							,intOriginalItemId = @intOriginalItemId
+							,intOriginalItemId = CASE WHEN intOriginalItemId IS NULL OR intOriginalItemId=@intDefaultItemId THEN @intOriginalItemId ELSE intOriginalItemId END
 						WHERE intBatchId = @intProductValueId;
 
 						/* Batch Pre Stage Process. */
@@ -652,7 +655,7 @@ BEGIN TRY
 
 								UPDATE tblMFBatch
 								SET intTealingoItemId = @intItemId
-								  , intOriginalItemId = @intOriginalItemId
+								  , intOriginalItemId = CASE WHEN intOriginalItemId IS NULL OR intOriginalItemId=@intDefaultItemId THEN @intOriginalItemId ELSE intOriginalItemId END
 								WHERE intBatchId = @intProductValueId
 
 								/* Batch Pre Stage Process. */
@@ -660,6 +663,27 @@ BEGIN TRY
 														  , @intUserId			= @intEntityUserId
 														  , @intOriginalItemId	= @intOriginalItemId
 														  , @intItemId			= @intItemId
+
+								IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
+								BEGIN
+									SELECT @strBatchId=NULL
+									SELECT @strBatchId=strBatchId FROM tblMFBatch WHERE intBatchId=@intBatchId
+									IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchId AND intItemId<>@intItemId)
+									BEGIN
+										SELECT @intLotId=NULL
+										SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+										EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+														,@intNewItemId =@intItemId
+														,@intUserId =@intEntityUserId
+														,@strNewLotNumber  = @strNewLotNumber OUTPUT
+														,@dtmDate =@dtmCurrentDate
+														,@strReasonCode  = NULL
+														,@strNotes  = NULL
+														,@ysnBulkChange  = 0
+														,@ysnProducedItemChange  = 0
+														,@dblPhysicalCount  = NULL
+									END
+								END
 
 							/* End of Update Item Id if it was not supplied. */
 							END
@@ -811,8 +835,29 @@ BEGIN TRY
 
 		UPDATE tblMFBatch
 		SET intTealingoItemId = @intItemId
-			,intOriginalItemId = @intOriginalItemId
+			,intOriginalItemId = CASE WHEN intOriginalItemId IS NULL OR intOriginalItemId=@intDefaultItemId THEN @intOriginalItemId ELSE intOriginalItemId END
 		WHERE intBatchId = @intProductValueId
+
+		IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
+		BEGIN
+			SELECT @strBatchId=NULL
+			SELECT @strBatchId=strBatchId FROM tblMFBatch WHERE intBatchId=@intBatchId
+			IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchId and intItemId<>@intItemId)
+			BEGIN
+				SELECT @intLotId=NULL
+				SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+				EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+								,@intNewItemId =@intItemId
+								,@intUserId =@intEntityUserId
+								,@strNewLotNumber  = @strNewLotNumber OUTPUT
+								,@dtmDate =@dtmCurrentDate
+								,@strReasonCode  = NULL
+								,@strNotes  = NULL
+								,@ysnBulkChange  = 0
+								,@ysnProducedItemChange  = 0
+								,@dblPhysicalCount  = NULL
+			END
+		END
 
 		DECLARE @intProductId INT
 

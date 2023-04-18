@@ -448,7 +448,8 @@ BEGIN TRY
 				SELECT DISTINCT B.intMixingUnitLocationId
 				FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 				JOIN dbo.tblMFBatch B WITH (NOLOCK) ON B.intBatchId = LD.intBatchId
-					AND LD.intLoadId = @intLoadId
+				JOIN dbo.tblSMCompanyLocation L on L.intCompanyLocationId=B.intBuyingCenterLocationId
+					AND LD.intLoadId = @intLoadId AND IsNULL(L.ysnTrackMFTActivity,0)=0
 				) t
 
 			IF (ISNULL(@intMixingUnitCount, 0) > 1)
@@ -761,7 +762,7 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Batch - Item cannot be blank. '
 			END
 
-			IF ISNULL(@strPlant, '') = ''
+			IF ISNULL(@strPlant, '') = '' AND IsNULL(@ysnTrackMFTActivity,0)=0
 			BEGIN
 				SELECT @strError = @strError + 'Batch - MU Location cannot be blank. '
 			END
@@ -855,7 +856,7 @@ BEGIN TRY
 				+ '<TeaBuyingOffice>' + ISNULL(B.strTeaBuyingOffice, '') + '</TeaBuyingOffice>'
 				+ '<TeaColour>' + ISNULL(B.strTeaColour, '') + '</TeaColour>'
 				+ '<TeaGardenChopInvoiceNo>' + ISNULL(LEFT(B.strTeaGardenChopInvoiceNumber, 15), '') + '</TeaGardenChopInvoiceNo>'
-				+ '<TeaGardenMark>' + ISNULL(LEFT(GM.strGardenMark, 15), '') + '</TeaGardenMark>'
+				+ '<TeaGardenMark>' + dbo.fnEscapeXML(ISNULL(LEFT(GM.strGardenMark, 15), '')) + '</TeaGardenMark>'
 				+ '<TeaGroup>' + ISNULL(B.strTeaGroup, '') + '</TeaGroup>'
 				+ '<TeaHue>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTeaHue, 0))) + '</TeaHue>'
 				+ '<TeaIntensity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTeaIntensity, 0))) + '</TeaIntensity>'

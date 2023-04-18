@@ -21,7 +21,8 @@ DECLARE @intRecipeId						   INT
 	  , @strLotStatusIds					   NVARCHAR(50)
 	  , @index								   INT
 	  , @id									   INT
-	  ,@intManufacturingCellId INT
+	  ,@intManufacturingCellId					INT
+	  ,@ysnDisplayLandedPriceInBlendManagement	INT
 
 DECLARE @tblSourceSubLocation AS TABLE (
 		intRecordId INT identity(1, 1)
@@ -40,7 +41,7 @@ DECLARE @tblReservedQty TABLE
 );
 
 /* Get Value of Enable Parent Lot from Manufacturing Configuration. */
-SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) 
+SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) ,@ysnDisplayLandedPriceInBlendManagement=IsNULL(ysnDisplayLandedPriceInBlendManagement,0)
 FROM tblMFCompanyPreference;
 
 /* Get Manufacturing Process ID where Attribute is Blending (2). */
@@ -150,7 +151,7 @@ SELECT Lot.intLotId
 	 , CASE WHEN ISNULL(Lot.dblWeight,0) > 0 THEN Lot.dblWeight ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty) END AS dblPhysicalQty
 	 , ISNULL(Lot.intWeightUOMId, RecipeItemUOM.intItemUOMId)						AS intItemUOMId 
 	 , ISNULL(UnitOfMeasure.strUnitMeasure, RecipeItemUnitOfMeasure.strUnitMeasure) AS strUOM
-	 , Lot.dblLastCost									AS dblUnitCost
+	 , Case When @ysnDisplayLandedPriceInBlendManagement=1 Then IsNULL(Batch.dblLandedPrice,0) Else Lot.dblLastCost End									AS dblUnitCost
 	 , CASE WHEN ISNULL(Lot.dblWeight,0) > 0 THEN Lot.dblWeightPerQty ELSE LotItemUOM.dblUnitQty / RecipeItemUOM.dblUnitQty END AS dblWeightPerUnit
 	 , UnitOfMeasure.strUnitMeasure						AS strWeightPerUnitUOM
 	 , Lot.intItemUOMId									AS intPhysicalItemUOMId

@@ -72,6 +72,7 @@ BEGIN TRY
 		,@ItemsToReserve1 AS dbo.ItemReservationTableType
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
 		,@ysnCPMergeOnMove BIT
+		,@intBatchId INT
 
 	SELECT TOP 1 @ysnCPMergeOnMove = ysnMergeOnMove
 	FROM tblMFCompanyPreference
@@ -483,57 +484,58 @@ BEGIN TRY
 			FROM tblICStockReservation
 			WHERE intLotId = @intLotId
 				AND ysnPosted = 0
-			--HAVING SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intMoveItemUOMId, dblQty)) = @dblMoveQty
 			) and @blnIsPartialMove = 0
 	BEGIN
 		INSERT INTO @tblICStockReservation (
 			intTransactionId
 			,intInventoryTransactionType
 			)
-		SELECT DISTINCT intTransactionId
+		SELECT DISTINCT Top 1 intTransactionId
 			,intInventoryTransactionType
 		FROM tblICStockReservation
 		WHERE intLotId = @intLotId
 			AND ysnPosted = 0
 	END
 	IF not exists(Select *From @tblICStockReservation) and @blnInventoryMove = 1
-		AND  (
-			SELECT Count(1)
+		AND Exists(
+			SELECT 1
 			FROM tblICStockReservation
 			WHERE intLotId = @intLotId
 				AND ysnPosted = 0
-			)=1 AND @blnIsPartialMove = 1
+				AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intMoveItemUOMId, dblQty)=@dblMoveWeight
+			) AND @blnIsPartialMove = 1
 	BEGIN
 		INSERT INTO @tblICStockReservation (
 			intTransactionId
 			,intInventoryTransactionType
 			)
-		SELECT DISTINCT intTransactionId
+		SELECT DISTINCT Top 1 intTransactionId
 			,intInventoryTransactionType
 		FROM tblICStockReservation
 		WHERE intLotId = @intLotId
+			AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intMoveItemUOMId, dblQty)=@dblMoveWeight
 			AND ysnPosted = 0
 	END
-	IF NOT EXISTS(SELECT *FROM @tblICStockReservation) AND @blnInventoryMove = 1
-		AND  (
-			SELECT Count(1)
-			FROM tblICStockReservation
-			WHERE intLotId = @intLotId
-				AND ysnPosted = 0
-				AND dblQty-@dblMoveWeight<1
-			)=1 AND @blnIsPartialMove = 1
-	BEGIN
-		INSERT INTO @tblICStockReservation (
-			intTransactionId
-			,intInventoryTransactionType
-			)
-		SELECT DISTINCT intTransactionId
-			,intInventoryTransactionType
-		FROM tblICStockReservation
-		WHERE intLotId = @intLotId
-			AND ysnPosted = 0
-			AND dblQty-@dblMoveWeight<1
-	END
+	--IF NOT EXISTS(SELECT *FROM @tblICStockReservation) AND @blnInventoryMove = 1
+	--	AND  Exists(
+	--		SELECT 1
+	--		FROM tblICStockReservation
+	--		WHERE intLotId = @intLotId
+	--			AND ysnPosted = 0
+	--			AND dblQty-@dblMoveWeight<1
+	--		) AND @blnIsPartialMove = 1
+	--BEGIN
+	--	INSERT INTO @tblICStockReservation (
+	--		intTransactionId
+	--		,intInventoryTransactionType
+	--		)
+	--	SELECT DISTINCT Top 1 intTransactionId
+	--		,intInventoryTransactionType
+	--	FROM tblICStockReservation
+	--	WHERE intLotId = @intLotId
+	--		AND ysnPosted = 0
+	--		AND dblQty-@dblMoveWeight<1
+	--END
 
 		--AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intMoveItemUOMId, dblQty) = @dblMoveQty
 		INSERT INTO @ItemsToReserve (
@@ -711,6 +713,23 @@ BEGIN TRY
 			WHERE intTransactionId > @intTransactionId
 		END
 
+	IF NOT EXISTS(SELECT *FROM tblMFLotInventory WHERE intLotId=@intNewLotId)
+	BEGIN
+		SELECT @intBatchId =NULL
+		SELECT @intBatchId =intBatchId 
+		FROM tblMFBatch 
+		WHERE strBatchId =@strNewLotNumber AND intLocationId  =@intNewLocationId
+
+		IF @intBatchId IS NULL
+		BEGIN
+			SELECT @intBatchId =intBatchId 
+			FROM tblMFBatch 
+			WHERE strBatchId =@strNewLotNumber 
+		END
+
+		INSERT INTO dbo.tblMFLotInventory(intLotId,intBatchId)
+		SELECT @intNewLotId,@intBatchId
+	END
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 20
@@ -892,12 +911,6 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@strReasonCode = 'Source Empty out'
 			,@strNotes = NULL
-	END
-
-	IF NOT EXISTS(SELECT *FROM tblMFLotInventory WHERE intLotId=@intNewLotId)
-	BEGIN
-		INSERT INTO dbo.tblMFLotInventory(intLotId)
-		SELECT @intNewLotId
 	END
 
 	IF @intTransactionCount = 0
