@@ -166,6 +166,21 @@ BEGIN
 		--WHERE C.dtmReportDate = @dtmReportDate
 		--	AND C.intOrderNo = 2
 
+		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
+		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
+		BEGIN
+			INSERT INTO @CompanyOwnedData
+			SELECT 2
+				,@dtmReportDate
+				,@intCommodityId
+				,'   COMPANY OWNERSHIP (UNPAID)'
+				,0
+				,0
+				,0
+				,0
+				,@strUOM
+		END
+
 		/******DECREASE*******/
 		UPDATE C
 		SET dblTotalDecrease = A.dblQty
@@ -200,20 +215,7 @@ BEGIN
 		WHERE C.intOrderNo = 2
 			AND C.dtmReportDate = @dtmReportDate
 
-		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
-		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
-		BEGIN
-			INSERT INTO @CompanyOwnedData
-			SELECT 2
-				,@dtmReportDate
-				,@intCommodityId
-				,'   COMPANY OWNERSHIP (UNPAID)'
-				,0
-				,0
-				,0
-				,0
-				,@strUOM
-		END
+		
 
 		DROP TABLE #Vouchers
 	END
@@ -319,23 +321,8 @@ BEGIN
 			,@strUOM
 		FROM #DelayedPricingBal D
 		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)
-		GROUP BY strDistributionType		
-
-		--INCREASE AND DECREASE
-		UPDATE C
-		SET dblTotalIncrease = ISNULL(A.dblTotalIncrease,0)
-			,dblTotalDecrease = ISNULL(A.dblTotalDecrease,0)
-		FROM @CompanyOwnedData C
-		OUTER APPLY (			
-			SELECT dblTotalIncrease = SUM(dblIn)
-				,dblTotalDecrease = SUM(dblOut)
-			FROM #DelayedPricingIncDec C
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
-			GROUP BY strCommodityCode
-		) A
-		WHERE C.intCommodityId = @intCommodityId
-			AND C.intOrderNo = 3
-
+		GROUP BY strDistributionType
+		
 		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
 		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 3)
 		BEGIN
@@ -354,6 +341,21 @@ BEGIN
 				AND ysnCustomerStorage = 0
 				AND strOwnedPhysicalStock = 'Company'
 		END
+
+		--INCREASE AND DECREASE
+		UPDATE C
+		SET dblTotalIncrease = ISNULL(A.dblTotalIncrease,0)
+			,dblTotalDecrease = ISNULL(A.dblTotalDecrease,0)
+		FROM @CompanyOwnedData C
+		OUTER APPLY (			
+			SELECT dblTotalIncrease = SUM(dblIn)
+				,dblTotalDecrease = SUM(dblOut)
+			FROM #DelayedPricingIncDec C
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) = CONVERT(DATETIME, @dtmReportDate)
+			GROUP BY strCommodityCode
+		) A
+		WHERE C.intCommodityId = @intCommodityId
+			AND C.intOrderNo = 3		
 
 		DROP TABLE #DelayedPricingALL
 		DROP TABLE #DelayedPricingBal
