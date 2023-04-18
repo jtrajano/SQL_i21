@@ -4,8 +4,9 @@ AS
 
 DECLARE @dblRecipeQty NUMERIC(18,6)
 	  , @ysnEnableParentLot BIT=0
+	  ,@ysnDisplayLandedPriceInBlendManagement	INT
 
-SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) 
+SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0), @ysnDisplayLandedPriceInBlendManagement=IsNULL(ysnDisplayLandedPriceInBlendManagement,0)
 FROM tblMFCompanyPreference
 
 SELECT TOP 1 @dblRecipeQty = r.dblQuantity 
@@ -39,7 +40,7 @@ BEGIN
 			 , um.strUnitMeasure AS strUOM
 			 , um1.strUnitMeasure AS strIssuedUOM
 			 , wi.intRecipeItemId
-			 , l.dblLastCost AS dblUnitCost
+			 , Case When @ysnDisplayLandedPriceInBlendManagement=1 Then IsNULL(Batch.dblLandedPrice,0) Else l.dblLastCost End AS dblUnitCost
 			 , ISNULL(l.strLotAlias,'') AS strLotAlias
 			 , l.strGarden AS strGarden
 			 , l.intLocationId
@@ -74,6 +75,8 @@ BEGIN
 		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
 		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
 		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
+		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
+		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 	END
 	ELSE /* When blend sheet created from Sales Order, directly produced in blend production screen, then only consumed lot table will have the values, to show in blend management screen from traceability */

@@ -104,6 +104,12 @@ BEGIN TRY
 		,@dblLotQuantity NUMERIC(38, 20)
 		,@intNetWeightUnitMeasureId INT
 		,@intNetWeightItemUOMId INT
+		,@intStockReservationId INT
+		,@intStockReservationId2 INT
+		,@intLotId2 INT
+		,@intSubLocationId2 INT
+		,@intStorageLocationId2 INT
+		,@intTransactionId2 INT
 
 	SELECT @dtmDate = GETDATE()
 
@@ -1239,6 +1245,68 @@ BEGIN TRY
 						,intSourceTransactionId = 8
 						,strSourceTransactionId = @intTransactionId
 
+					IF @intTransactionTypeId=8
+					BEGIN
+						SELECT @intWorkOrderId = NULL
+							,@strWorkOrderNo = NULL
+
+						SELECT @intWorkOrderId = intWorkOrderId
+							,@strWorkOrderNo = strWorkOrderNo
+						FROM tblMFWorkOrder
+						WHERE strERPOrderNo = @strOrderNo
+
+						SELECT @intStockReservationId =NULL
+							,@intStockReservationId2  =NULL
+							,@intLotId2  =NULL
+							,@intSubLocationId2  =NULL
+							,@intStorageLocationId2  =NULL
+							,@intTransactionId2 =NULL
+
+						SELECT @intStockReservationId = NULL
+
+						SELECT @intStockReservationId = intStockReservationId
+						FROM tblICStockReservation
+						WHERE intLotId = @intLotId
+							AND dblQty = @dblQuantity
+							AND intTransactionId = @intWorkOrderId
+							AND ysnPosted = 0
+
+						IF @intStockReservationId IS NULL
+						BEGIN
+							SELECT @intStockReservationId2 = intStockReservationId
+								,@intLotId2 = intLotId
+								,@intSubLocationId2 = intSubLocationId
+								,@intStorageLocationId2 = intStorageLocationId
+								,@intTransactionId2=intTransactionId
+							FROM tblICStockReservation SR
+							WHERE dblQty = abs(@dblQuantity)
+								AND intTransactionId = @intWorkOrderId
+								AND ysnPosted = 0
+								AND SR.intLotId IN (
+									SELECT L.intLotId
+									FROM tblICLot L
+									WHERE L.strLotNumber = @strLotNo
+									)
+						SELECT @intStockReservationId = intStockReservationId
+						FROM tblICStockReservation
+						WHERE intLotId = @intLotId
+							AND dblQty = abs(@dblQuantity)
+							AND ysnPosted = 0
+
+							UPDATE tblICStockReservation
+							SET intLotId = @intLotId2
+								,intSubLocationId = @intSubLocationId2
+								,intStorageLocationId = @intStorageLocationId2
+							WHERE intStockReservationId = @intStockReservationId
+
+							UPDATE tblICStockReservation
+							SET intLotId = @intLotId
+								,intSubLocationId = @intCompanyLocationSubLocationId
+								,intStorageLocationId = @intStorageLocationId
+							WHERE intStockReservationId = @intStockReservationId2
+						END
+					END
+
 					IF NOT EXISTS (
 							SELECT *
 							FROM tblIPInventoryAdjustmentStage
@@ -1363,7 +1431,7 @@ BEGIN TRY
 								,intLotId = SR.intLotId
 								,intSubLocationId = SR.intSubLocationId
 								,intStorageLocationId = SR.intStorageLocationId
-								,dblQty = SR.dblQty + IsNULL(RR1.dblQty, 0)
+								,dblQty = Case When SR.dblQty + IsNULL(RR1.dblQty, 0)<0 Then 0 Else SR.dblQty + IsNULL(RR1.dblQty, 0) End
 								,intTransactionId = SR.intTransactionId
 								,strTransactionId = SR.strTransactionId
 								,intTransactionTypeId = 8

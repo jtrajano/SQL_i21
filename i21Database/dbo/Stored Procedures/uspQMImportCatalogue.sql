@@ -144,19 +144,19 @@ BEGIN TRY
 	 *  Description: Skip sale date earlier than todays date.
 	 *  JIRA: QC-990 
 	**/
-	UPDATE IMP
-	SET strLogResult	= 'Sale Date cannot be earlier than date Today.'   
-	  , ysnSuccess		= 0
-	  , ysnProcessed	= 1
-	FROM tblQMImportCatalogue AS IMP
-	LEFT JOIN tblQMSampleType AS ST ON ST.strSampleTypeName = IMP.strSampleTypeName
-	LEFT JOIN tblQMControlPoint AS ControlPoint ON ST.intControlPointId = ControlPoint.intControlPointId
-	WHERE IMP.intImportLogId = @intImportLogId
-		/* Having no batch number indicates that the import is an Auction or Non-Action sample. */
-	    AND ISNULL(IMP.strBatchNo, '') = '' 
-		AND ysnSuccess = 1
-		AND CONVERT(DATE, IMP.dtmSaleDate) < CONVERT(DATE, GETDATE());
-	/* End of Past Sale Date Validation */
+	--UPDATE IMP
+	--SET strLogResult	= 'Sale Date cannot be earlier than date Today.'   
+	--  , ysnSuccess		= 0
+	--  , ysnProcessed	= 1
+	--FROM tblQMImportCatalogue AS IMP
+	--LEFT JOIN tblQMSampleType AS ST ON ST.strSampleTypeName = IMP.strSampleTypeName
+	--LEFT JOIN tblQMControlPoint AS ControlPoint ON ST.intControlPointId = ControlPoint.intControlPointId
+	--WHERE IMP.intImportLogId = @intImportLogId
+	--	/* Having no batch number indicates that the import is an Auction or Non-Action sample. */
+	--    AND ISNULL(IMP.strBatchNo, '') = '' 
+	--	AND ysnSuccess = 1
+	--	AND CONVERT(DATE, IMP.dtmSaleDate) < CONVERT(DATE, GETDATE());
+	--/* End of Past Sale Date Validation */
 
 
 	UPDATE IMP

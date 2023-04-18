@@ -509,6 +509,8 @@ DECLARE @tblFW TABLE (
 
 	DECLARE @intMinLot INT
 
+	SELECT @ErrMsg=''
+
 	SELECT @intMinLot = Min(intRowNo)
 	FROM @tblLotSummary
 
@@ -545,18 +547,21 @@ DECLARE @tblFW TABLE (
 			FROM tblICItem
 			WHERE intItemId = @intInputItemId
 
-			SET @ErrMsg = 'Quantity of ' + CONVERT(VARCHAR, @dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(VARCHAR, @dblInputAvlQty) + '.'
+			SET @ErrMsg = @ErrMsg+'Quantity of ' + CONVERT(VARCHAR, @dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(VARCHAR, @dblInputAvlQty) + '.'
 
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
 		END
 
 		SELECT @intMinLot = Min(intRowNo)
 		FROM @tblLotSummary
 		WHERE intRowNo > @intMinLot
+	END
+	IF @ErrMsg<>''
+	BEGIN
+		RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			)
 	END
 
 	--End Available Qty Check
@@ -2399,7 +2404,8 @@ DECLARE @tblFW TABLE (
 	SET @intWorkOrderIdOut = @intWorkOrderId
 
 	--FW
-	SELECT @intWorkOrderInputLotId = NULL
+	SELECT @intWorkOrderInputLotId = NULL,
+			@ErrMsg=''
 
 	SELECT @intWorkOrderInputLotId = min(intWorkOrderInputLotId)
 	FROM tblMFWorkOrderInputLot
@@ -2417,8 +2423,10 @@ DECLARE @tblFW TABLE (
 		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 		SELECT @dblTBSQuantity=SUM(dblTBSQuantity) 
-		FROM tblMFWorkOrderInputLot
+		FROM tblMFWorkOrderInputLot WI
+		JOIN tblMFWorkOrder W on W.intWorkOrderId=WI.intWorkOrderId
 		WHERE intLotId = @intLotId
+		AND W.intStatusId<>13
 
 		Select @dblInputAvlQty=dblWeight  
 		from tblICLot 
@@ -2438,13 +2446,7 @@ DECLARE @tblFW TABLE (
 			FROM tblICItem
 			WHERE intItemId = @intInputItemId
 
-			SET @ErrMsg = 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
-
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
+			SET @ErrMsg =@ErrMsg+ 'Quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblTBSQuantity) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputAvlQty) + '.'
 		End
 
 		IF (@dblIssuedQuantity % @intNoOfSheetOriginal) > 0
@@ -2500,7 +2502,14 @@ DECLARE @tblFW TABLE (
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intWorkOrderInputLotId > @intWorkOrderInputLotId
 	END
-
+	IF @ErrMsg<>''
+	BEGIN
+	RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+	END
 	COMMIT TRAN
 
 	EXEC sp_xml_removedocument @idoc

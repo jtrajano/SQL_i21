@@ -798,6 +798,7 @@ BEGIN TRY
 			,dblTeaAppearancePinpoint
 			,dtmShippingDate
 			,intCountryId
+			,intSupplierId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -837,7 +838,8 @@ BEGIN TRY
 			,intFromPortId = S.intFromLocationCodeId
 			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = @dtmCurrentDate 
-			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
+			--,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
+			,dblWeightPerUnit = Case When IsNULL(S.dblB1QtyBought,0)>0 Then S.dblSampleQty/S.dblB1QtyBought Else 1 End
 			,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
@@ -927,13 +929,15 @@ BEGIN TRY
 			,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 			,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 			,dtmShippingDate=@dtmShippingDate
-			,intCountryId=S.intCountryID 
+			,intCountryId=ORIGIN.intCountryID 
+			,intSupplierId=S.intEntityId
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
 		INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
 		INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+		LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = S.intCountryID
 		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
