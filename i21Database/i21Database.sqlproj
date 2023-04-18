@@ -9248,6 +9248,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketAutoScaleLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAutoScaleLogResetSchdule.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
+    <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
