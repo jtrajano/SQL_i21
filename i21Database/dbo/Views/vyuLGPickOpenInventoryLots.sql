@@ -159,7 +159,7 @@ FROM (
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
-		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CTDetail.intContractDetailId) AD
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
@@ -222,6 +222,7 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) PL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
-		AND Receipt.ysnPosted = 1
+		AND (Receipt.intInventoryReceiptId IS NULL
+			OR (Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.ysnPosted = 1))
 	) InvLots
 GO
