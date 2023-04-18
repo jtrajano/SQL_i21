@@ -26,6 +26,11 @@ SELECT
 	, strCommodityDescription = CY.strDescription
 	, CO.strCountry
 	, strCreatedBy = CE.strName
+	, YR.strCropYear
+	, strCustomerCounterParty = PY.strName
+	, CH.strCustomerContract
+	, CH.dtmDeferPayDate
+	, CH.dblDeferPayRate
 	, CH.ysnExported
 	, CH.dtmExported
 	, FT.intFreightTermId
