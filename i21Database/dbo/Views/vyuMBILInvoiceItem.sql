@@ -64,7 +64,6 @@ SELECT Invoice.intInvoiceId
 	, isnull(InvoiceItem.dblItemTotal,0)dblItemTotal
 	--, isnull(tax.dblRate,0)dblRate
 	--, tax.strCalculationMethod
-	, InvoiceItem.intDispatchId
 FROM tblMBILInvoiceItem InvoiceItem
 LEFT JOIN vyuMBILInvoice Invoice ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
 LEFT JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId
