@@ -2150,6 +2150,7 @@ BEGIN TRY
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage' AND intPricingTypeId <> 5 AND @strProcess <> 'Update Sequence Balance - DWG')
 				OR EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0 AND intPricingTypeId = 5 AND strTransactionReference <> 'Settle Storage' AND @strProcess <> 'Update Sequence Balance - DWG')
 			BEGIN
+
 				SET @ysnUnposted = 1
 				
 				SELECT @intHeaderId = intTransactionReferenceId, 
@@ -2250,6 +2251,87 @@ BEGIN TRY
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
 				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+
+				--If the storage distributed to DP contract transfer to another DP contract, negate log from old DP contract
+				if (exists(SELECT TOP 1 1 FROM @cbLogTemp WHERE intPricingTypeId = 5 AND strTransactionReference = 'Transfer Storage' AND @strProcess = 'Update Sequence Balance') and not exists(select top 1 1 from @cbLogCurrent))
+				begin
+					INSERT INTO @cbLogCurrent (dtmTransactionDate
+						, strTransactionType
+						, strTransactionReference
+						, intTransactionReferenceId
+						, intTransactionReferenceDetailId
+						, strTransactionReferenceNo
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, dblOrigQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes
+						, intUserId
+						, intActionId
+						, strProcess
+					)
+					select top 1 1
+						dtmTransactionDate
+						, strTransactionType
+						, strTransactionReference
+						, intTransactionReferenceId
+						, intTransactionReferenceDetailId
+						, strTransactionReferenceNo
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, dblOrigQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes
+						, intUserId
+						, intActionId
+						, strProcess
+					from @cbLogTemp
+				end
+
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Split')
 			BEGIN
@@ -3371,7 +3453,7 @@ BEGIN TRY
 			@ysnAddToLogSpecific BIT = 1,
 			@intNegatedCount int = 0,
 			@intId INT
-
+			
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
 	BEGIN
