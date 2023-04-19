@@ -455,14 +455,14 @@ BEGIN TRY
 					END
 				END
 
-				IF @dblCost <= 0
-				BEGIN
-					RAISERROR (
-							'Invalid Cost. '
-							,16
-							,1
-							)
-				END
+				--IF @dblCost <= 0
+				--BEGIN
+				--	RAISERROR (
+				--			'Invalid Cost. '
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				SELECT @intCostUnitMeasureId = t.intUnitMeasureId
 				FROM tblICUnitMeasure t WITH (NOLOCK)
