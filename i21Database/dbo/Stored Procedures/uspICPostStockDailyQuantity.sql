@@ -227,6 +227,7 @@ BEGIN
 					AND t.strTransactionId = @strTransactionId 
 				)
 				AND ISNULL(t.dblQty, 0) < 0  
+				AND @dblQty IS NOT NULL 
 	) AS StockToUpdate
 		ON 
 			DailyTransaction.[intItemId] = StockToUpdate.intItemId 
