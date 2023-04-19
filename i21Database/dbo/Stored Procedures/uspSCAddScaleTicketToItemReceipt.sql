@@ -1144,7 +1144,15 @@ IF ISNULL(@intFreightItemId,0) = 0
 						DELETE FROM @LOAD_OTHER_CHARGES
 					END
 
-				END	
+				END 
+
+				UPDATE L
+				SET
+					intShipmentStatus = 4,
+					dtmDeliveredDate = T.dtmTicketDateTime
+				FROM tblLGLoad L
+				INNER JOIN tblSCTicket T ON T.intLoadId = L.intLoadId
+				WHERE L.intLoadId = @intLoadId
 			END
 		ELSE
 			BEGIN
