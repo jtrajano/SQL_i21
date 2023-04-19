@@ -186,10 +186,12 @@ BEGIN
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				t.intInventoryTransactionId = @intInventoryTransactionId			
-				OR (
-					t.strBatchId = @strBatchId
-					AND t.strTransactionId = @strTransactionId 
+				(
+					t.intInventoryTransactionId = @intInventoryTransactionId			
+					OR (
+						t.strBatchId = @strBatchId
+						AND t.strTransactionId = @strTransactionId 
+					)
 				)
 				-- Do not read the inventory transaction if it will not reduce the stock. 
 				AND ISNULL(t.dblQty, 0) >= 0 
@@ -215,19 +217,20 @@ BEGIN
 				,[intItemUOMId] 
 				,[intCompanyId] 
 				,[dtmDate] 
-				,[dblQty] = @dblQty
+				,[dblQty] = ISNULL(@dblQty, t.dblQty) 
 				,[dblValue] = ROUND(dbo.fnMultiply(@dblQty, t.dblCost) + t.dblValue, 2)
 				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2)
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				t.intInventoryTransactionId = @intInventoryTransactionId			
-				OR (
-					t.strBatchId = @strBatchId
-					AND t.strTransactionId = @strTransactionId 
-				)
+				(
+					t.intInventoryTransactionId = @intInventoryTransactionId			
+					OR (
+						t.strBatchId = @strBatchId
+						AND t.strTransactionId = @strTransactionId 
+					)
+				) 
 				AND ISNULL(t.dblQty, 0) < 0  
-				AND @dblQty IS NOT NULL 
 	) AS StockToUpdate
 		ON 
 			DailyTransaction.[intItemId] = StockToUpdate.intItemId 
