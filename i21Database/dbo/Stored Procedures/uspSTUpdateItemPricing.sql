@@ -24,11 +24,12 @@ BEGIN TRY
 			@Family             NVARCHAR(MAX),
 			@Class              NVARCHAR(MAX),
 			@Description        NVARCHAR(250),
+			@CountedDaily       NVARCHAR(250),
 			@Region             NVARCHAR(6),
 			@District           NVARCHAR(6),
 			@State              NVARCHAR(2),
-			@intItemUOMId       INT, --NVARCHAR(MAX),
-			@intUOM       INT, --NVARCHAR(MAX),
+			@UOMId				NVARCHAR(MAX), --NVARCHAR(MAX),
+			@intUOM				INT, --NVARCHAR(MAX),
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
@@ -52,10 +53,11 @@ BEGIN TRY
 			@Family          =   Family,
             @Class           =   Class,
             @Description     =   ItmDescription,
+            @CountedDaily    =   CountedDaily,
 			@Region          =   Region,
 			@District        =   District,
 			@State           =   States,
-			@intItemUOMId    =   UPCCode,
+			@UOMId			 =   UPCCode,
 			@intUOM			 =	 UOM,
 			@StandardCost 	 = 	 Cost,
 			@RetailPrice   	 =	 Retail,
@@ -78,10 +80,11 @@ BEGIN TRY
 			Family	     	        NVARCHAR(MAX),
 			Class	     	        NVARCHAR(MAX),
 			ItmDescription		    NVARCHAR(250),
+			CountedDaily		    NVARCHAR(250),
 			Region                  NVARCHAR(6),
 			District                NVARCHAR(6),
 			States                  NVARCHAR(2),
-			UPCCode		            INT,
+			UPCCode		            NVARCHAR(MAX),
 			Cost		            DECIMAL (18,6),
 			Retail		            DECIMAL (18,6),
 			SalesPrice       		DECIMAL (18,6),
@@ -142,19 +145,38 @@ BEGIN TRY
 				)
 			END
 
-			IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Description') IS NULL 
-			BEGIN
-				CREATE TABLE #tmpUpdateItemPricingForCStore_Description (
-					intItemId INT 
-				)
-			END
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Description') IS NULL 
+		BEGIN
+			CREATE TABLE #tmpUpdateItemPricingForCStore_Description (
+				intItemId INT 
+			)
+		END
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_UOMId') IS NULL 
+		BEGIN
+			CREATE TABLE #tmpUpdateItemPricingForCStore_UOMId (
+				intItemUOMId INT 
+			)
+		END
 			
+		-- Create the temp table for the audit log. 
+		IF OBJECT_ID('tempdb..#tmpItemLocationForCStore_AuditLog') IS NULL  
+			CREATE TABLE #tmpItemLocationForCStore_AuditLog (
+				strAction NVARCHAR(50)
+				,intItemId INT
+				,intItemLocationId INT 
+				,ysnOldCountedDaily BIT
+				,ysnNewCountedDaily BIT
+			)
+		;
+
 		-- Create the temp table for the audit log. 
 		IF OBJECT_ID('tempdb..#tmpEffectiveCostForCStore_AuditLog') IS NULL  
 			CREATE TABLE #tmpEffectiveCostForCStore_AuditLog (
 				intEffectiveItemCostId INT
 				,intItemId INT
 				,intItemLocationId INT 
+				,intItemUOMId INT 
 				,dblOldCost NUMERIC(38, 20) NULL
 				,dblNewCost NUMERIC(38, 20) NULL
 				,dtmOldEffectiveDate DATETIME NULL
@@ -266,7 +288,7 @@ BEGIN TRY
 				SELECT [intID] AS intClassId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
-
+			
 		IF(@Description IS NOT NULL AND @Description != '')
 			BEGIN
 				INSERT INTO #tmpUpdateItemPricingForCStore_Description (
@@ -274,6 +296,15 @@ BEGIN TRY
 				)
 				SELECT intItemId as intItemId FROM
 				tblICItem WHERE strDescription LIKE '%' + @Description + '%'
+			END
+
+		IF(@UOMId IS NOT NULL AND @UOMId != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemPricingForCStore_UOMId (
+					intItemUOMId
+				)
+				SELECT [intID] AS intItemUOMId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@UOMId)
 			END
 	END
 
@@ -334,28 +365,39 @@ BEGIN TRY
 
 
 
-	-- Get strUpcCode
-	DECLARE @strUpcCode AS NVARCHAR(20) = (
-											SELECT CASE
-													WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
-											END AS strUpcCode
-											FROM tblICItemUOM 
-											WHERE intItemUOMId = @intItemUOMId
-											)
-
 	DECLARE @dblStandardCostConv AS NUMERIC(38, 20) = CAST(@StandardCost AS NUMERIC(38, 20))
 	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
 	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
 	DECLARE @intItemUOM AS INT = CAST(@intUOM AS INT)
+	
+	IF @CountedDaily IS NOT NULL
+	BEGIN
+		BEGIN TRY
+			DECLARE @ysnCountedDaily AS BIT = CASE WHEN @CountedDaily = 'Yes' THEN 1
+													WHEN @CountedDaily = 'No' THEN 0
+													END
+			-- ITEM PRICING
+			EXEC [uspICUpdateItemLocationPricingForCStore]
+				@strScreen				= 'UpdateItemPricing'
+				, @strDescription			= @Description
+				, @ysnCountedDaily			= @ysnCountedDaily
+				, @intEntityUserSecurityId	= @intCurrentUserIdConv
+		END TRY
+		BEGIN CATCH
+			SELECT 'uspICUpdateItemLocationPricingForCStore', ERROR_MESSAGE()
+			SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+
+			GOTO ExitWithRollback 
+		END CATCH
+	END
 
 	IF @dtmEffectiveDateConv IS NOT NULL
 	BEGIN
 		BEGIN TRY
 			-- ITEM PRICING
 			EXEC [uspICUpdateEffectivePricingForCStore]
-				  @strUpcCode				= @strUpcCode
-				, @strScreen				= 'UpdateItemPricing'
+				@strScreen				= 'UpdateItemPricing'
 				, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
 				, @intItemId				= NULL
 				, @dblStandardCost			= @dblStandardCostConv
@@ -391,7 +433,6 @@ BEGIN TRY
 				,@intUnitMeasureId				= @intUOM
 				,@dtmBeginDate					= @dtmSalesStartingDateConv
 				,@dtmEndDate					= @dtmSalesEndingDateConv 
-				,@strUpcCode					= @strUpcCode
 				,@intEntityUserSecurityId		= @intCurrentUserIdConv
 		END TRY
 		BEGIN CATCH
@@ -406,12 +447,12 @@ BEGIN TRY
 
 
 
-	IF(@ysnRecap = 1) 
-		BEGIN
-			SELECT '#tmpEffectiveCostForCStore_AuditLog', * FROM #tmpEffectiveCostForCStore_AuditLog
-			SELECT '#tmpEffectivePriceForCStore_AuditLog', * FROM #tmpEffectivePriceForCStore_AuditLog
-			SELECT '#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog', * FROm #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
-		END
+	--IF(@ysnRecap = 1) 
+	--	BEGIN
+	--		--SELECT '#tmpEffectiveCostForCStore_AuditLog', * FROM #tmpEffectiveCostForCStore_AuditLog
+	--		--SELECT '#tmpEffectivePriceForCStore_AuditLog', * FROM #tmpEffectivePriceForCStore_AuditLog
+	--		SELECT '#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog', * FROm #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
+	--	END
 
 
 	-- MARK END UPDATE
@@ -836,6 +877,111 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 			)
+
+		-- COUNTED DAILY
+		INSERT INTO @tblPreview (
+			strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, intPrimaryKeyId
+			, intParentId
+			, intChildId
+			, intCurrentEntityUserId
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intItemSpecialPricingId
+
+			, dtmDateModified
+			, intCompanyLocationId
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strUnitMeasure
+			, strPreviewOldData
+			, strPreviewNewData
+			, strOldDataPreview
+			, strAction
+			, ysnPreview
+			, ysnForRevert
+		)
+		SELECT  
+			strTableName				= N'tblICItemLocation'
+			, strTableColumnName		= CASE
+											WHEN [Changes].oldColumnName = 'ysnCountedDaily_Original' THEN 'ysnCountedDaily'
+										END
+			, strTableColumnDataType	= CASE
+											WHEN [Changes].oldColumnName = 'ysnCountedDaily_Original' THEN 'BIT'
+										END
+			, intPrimaryKeyId			= IL.intItemLocationId
+			, intParentId				= I.intItemId
+			, intChildId				= NULL
+			, intCurrentEntityUserId	= @currentUserId
+			, intItemId					= I.intItemId
+			, intItemUOMId				= NULL
+			, intItemLocationId			= IL.intItemLocationId
+			, intItemSpecialPricingId	= NULL
+			
+			, dtmDateModified			= ISNULL(IL.dtmDateModified, GETDATE())
+			, intCompanyLocationId		= CL.intCompanyLocationId
+			, strLocation				= CL.strLocationName
+			, strUpc					= NULL
+			, strItemDescription		= I.strDescription
+			, strChangeDescription		= CASE
+											WHEN [Changes].oldColumnName = 'ysnCountedDaily_Original' THEN 'Counted Daily'
+										END
+			, strUnitMeasure			= NULL
+			, strPreviewOldData			= CASE WHEN [Changes].strOldData = ''
+												THEN NULL
+											ELSE
+												[Changes].strOldData
+											END
+			, strPreviewNewData			= [Changes].strNewData
+			, strOldDataPreview			= CASE WHEN [Changes].strOldData = ''
+												THEN NULL
+											ELSE
+												[Changes].strOldData
+											END
+			, strAction					= [Changes].strAction
+			, ysnPreview				= 1
+			, ysnForRevert				= 1
+		FROM 
+		(
+			SELECT DISTINCT intItemId, intItemLocationId, oldColumnName, strOldData, strNewData, strAction
+			FROM 
+			(
+				SELECT intItemId 
+					,intItemLocationId 
+					,CAST(CAST(ysnOldCountedDaily AS BIT) AS NVARCHAR(50)) AS ysnCountedDaily_Original
+					,CAST(CAST(ysnNewCountedDaily AS BIT) AS NVARCHAR(50)) AS ysnCountedDaily_New
+					,strAction
+				FROM #tmpItemLocationForCStore_AuditLog
+			) t
+			unpivot
+			(
+				strOldData for oldColumnName in (ysnCountedDaily_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (ysnCountedDaily_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+		
+		) [Changes]
+		INNER JOIN tblICItem I 
+			ON [Changes].intItemId = I.intItemId
+		INNER JOIN tblICItemLocation IL 
+			ON [Changes].intItemLocationId = IL.intItemLocationId 
+			AND I.intItemId = IL.intItemId
+		INNER JOIN tblSMCompanyLocation CL 
+			ON IL.intLocationId = CL.intCompanyLocationId
+		WHERE 
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM #tmpItemLocationForCStore_AuditLog)
+				OR EXISTS (SELECT TOP 1 1 FROM #tmpItemLocationForCStore_AuditLog WHERE intItemLocationId = IL.intItemLocationId) 			
+			)
+
 	END
 
 
@@ -881,8 +1027,16 @@ BEGIN TRY
 				, strItemDescription
 				, strChangeDescription
 				, strUnitMeasure
-				, strPreviewOldData
-				, strPreviewNewData
+				, CASE WHEN strChangeDescription = 'Counted Daily' 
+						THEN CASE WHEN strPreviewOldData = 0 THEN 'Unchecked' ELSE 'Checked' 
+					END 
+				ELSE strPreviewOldData 
+				END AS strOldData
+			  , CASE WHEN strChangeDescription = 'Counted Daily' 
+						THEN CASE WHEN strPreviewNewData = 0 THEN 'Unchecked' ELSE 'Checked' 
+					END 
+				ELSE strPreviewNewData 
+				END strNewData
 				, strAction
 
 				--, intItemId
@@ -978,7 +1132,7 @@ BEGIN TRY
 							WHERE SubFamily.strSubcategoryType = 'F'
 
 							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-						END
+						END 
 
 					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
 						BEGIN
@@ -992,11 +1146,15 @@ BEGIN TRY
 
 							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 						END
-					IF ISNULL(@strUpcCode, '') != ''
+					
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_UOMId)
 						BEGIN
-							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UPC Code</b></p>'
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UOM</b></p>'
 								
-							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @strUpcCode + '</p>'
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + UOM.strLongUPCCode + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_UOMId tempUOM
+							INNER JOIN tblICItemUOM UOM
+								ON tempUOM.intItemUOMId = UOM.intItemUOMId
 
 							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 						END
@@ -1165,19 +1323,25 @@ BEGIN TRY
 			DROP TABLE #tmpUpdateItemPricingForCStore_Subcategory 
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NOT NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_Family 
+			DROP TABLE #tmpUpdateItemPricingForCStore_Family  
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemPricingForCStore_Class 
+			
+		IF OBJECT_ID('tempdb..##tmpUpdateItemPricingForCStore_UOMId') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_UOMId 
 
 		IF OBJECT_ID('tempdb..#tmpEffectiveCostForCStore_AuditLog') IS NOT NULL   
 			DROP TABLE #tmpEffectiveCostForCStore_AuditLog 
 
-		IF OBJECT_ID('tempdb..##tmpEffectivePriceForCStore_AuditLog') IS NOT NULL   
+		IF OBJECT_ID('tempdb..#tmpEffectivePriceForCStore_AuditLog') IS NOT NULL   
 			DROP TABLE #tmpEffectivePriceForCStore_AuditLog 
-
+			
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL   
 			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+
+		IF OBJECT_ID('tempdb..#tmpItemLocationForCStore_AuditLog') IS NOT NULL   
+			DROP TABLE #tmpItemLocationForCStore_AuditLog 
 	END
 
 
@@ -1193,8 +1357,16 @@ BEGIN TRY
 			  , strUnitMeasure
 			  , strItemDescription
 			  , strChangeDescription
-			  , strPreviewOldData AS strOldData
-			  , strPreviewNewData AS strNewData
+			  , CASE WHEN strChangeDescription = 'Counted Daily' 
+						THEN CASE WHEN strPreviewOldData = 0 THEN 'Unchecked' ELSE 'Checked' 
+					END 
+				ELSE strPreviewOldData 
+				END AS strOldData
+			  , CASE WHEN strChangeDescription = 'Counted Daily' 
+						THEN CASE WHEN strPreviewNewData = 0 THEN 'Unchecked' ELSE 'Checked' 
+					END 
+				ELSE strPreviewNewData 
+				END strNewData
 			  , CASE WHEN strAction = 'INSERT' THEN 'ADDED' 
 					WHEN strAction = 'UPDATE' THEN 'UPDATED'
 					END AS strActionType
