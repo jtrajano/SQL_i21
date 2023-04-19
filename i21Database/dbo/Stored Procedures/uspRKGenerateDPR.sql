@@ -398,7 +398,7 @@ BEGIN TRY
 	INTO #tblCustomerOwnedAll
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToDate, @intCommodityId, @intVendorId) t
 	LEFT JOIN tblSCTicket SC ON t.intTicketId = SC.intTicketId
-	WHERE ISNULL(strStorageType, '') <> 'ITR' AND intTypeId IN (1, 3, 4, 5, 8, 9)
+	WHERE ISNULL(strStorageType, '') <> 'ITR' AND intTypeId IN (1, 3, 4, 5, 6, 8, 9)
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND t.intCommodityId = ISNULL(@intCommodityId, t.intCommodityId)
 		AND ISNULL(t.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(t.intEntityId, 0))
