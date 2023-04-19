@@ -32,6 +32,7 @@ AS
 				,strETAPOLReasonCodeDescription = EA.strReasonCodeDescription
 				,strETSPOLReasonCodeDescription = ES.strReasonCodeDescription
 				,strETAPODReasonCodeDescription = PD.strReasonCodeDescription
+				,strForwardingAgentEntity = FA.strName
 
 		FROM	tblLGLoad			LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId			=	LO.intLoadId 
@@ -39,6 +40,7 @@ LEFT	JOIN	tblEMEntity			SL ON SL.intEntityId		=	LO.intShippingLineEntityId
 LEFT	JOIN	tblLGReasonCode		EA ON EA.intReasonCodeId	=	LO.intETAPOLReasonCodeId
 LEFT	JOIN	tblLGReasonCode		ES ON ES.intReasonCodeId	=	LO.intETSPOLReasonCodeId
 LEFT	JOIN	tblLGReasonCode		PD ON PD.intReasonCodeId	=	LO.intETAPODReasonCodeId
+LEFT	JOIN	tblEMEntity FA on FA.intEntityId = LO.intForwardingAgentEntityId
 		WHERE	LO.intShipmentType = 1
 		AND		LO.intShipmentStatus <> 10
 	
@@ -72,6 +74,7 @@ LEFT	JOIN	tblLGReasonCode		PD ON PD.intReasonCodeId	=	LO.intETAPODReasonCodeId
 			,strETAPOLReasonCodeDescription
 			,strETSPOLReasonCodeDescription
 			,strETAPODReasonCodeDescription
+			,strForwardingAgentEntity
 
 	FROM
 	(
@@ -107,6 +110,7 @@ LEFT	JOIN	tblLGReasonCode		PD ON PD.intReasonCodeId	=	LO.intETAPODReasonCodeId
 				,strETAPOLReasonCodeDescription = EA.strReasonCodeDescription
 				,strETSPOLReasonCodeDescription = ES.strReasonCodeDescription
 				,strETAPODReasonCodeDescription = PD.strReasonCodeDescription
+				,strForwardingAgentEntity = FA.strName
 
 		FROM	tblLGLoad			LO
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId			=	LO.intLoadId	
@@ -114,6 +118,7 @@ LEFT	JOIN	tblEMEntity			SL ON SL.intEntityId		=	LO.intShippingLineEntityId
 LEFT	JOIN	tblLGReasonCode		EA ON EA.intReasonCodeId	=	LO.intETAPOLReasonCodeId
 LEFT	JOIN	tblLGReasonCode		ES ON ES.intReasonCodeId	=	LO.intETSPOLReasonCodeId
 LEFT	JOIN	tblLGReasonCode		PD ON PD.intReasonCodeId	=	LO.intETAPODReasonCodeId
+LEFT	JOIN	tblEMEntity FA on FA.intEntityId = LO.intForwardingAgentEntityId
 		WHERE	LD.intPContractDetailId NOT IN (SELECT intContractDetailId FROM Shipment)
 		AND		LO.intShipmentType = 2
 		AND		LO.intShipmentStatus <> 10
@@ -145,3 +150,4 @@ LEFT	JOIN	tblLGReasonCode		PD ON PD.intReasonCodeId	=	LO.intETAPODReasonCodeId
 			,strETAPOLReasonCodeDescription
 			,strETSPOLReasonCodeDescription
 			,strETAPODReasonCodeDescription
+			,strForwardingAgentEntity

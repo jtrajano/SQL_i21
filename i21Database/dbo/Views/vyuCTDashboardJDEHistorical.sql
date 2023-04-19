@@ -139,7 +139,8 @@ SELECT 	 SQ.intContractDetailId
 		,CH.intBookId as intHeaderBookId
 		,CH.intSubBookId as intHeaderSubBookId
 		,CD.intBookId as intDetailBookId
-		,CD.intSubBookId as intDetailSubBookId 
+		,CD.intSubBookId as intDetailSubBookId
+		,LV.strForwardingAgentEntity
 
 	FROM 		vyuCTContractSequence			 	SQ	WITH (NOLOCK)		
 	JOIN 		tblCTContractDetail				 	CD	WITH (NOLOCK) ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId NOT IN (1,2,4)

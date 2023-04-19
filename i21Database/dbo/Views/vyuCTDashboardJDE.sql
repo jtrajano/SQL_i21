@@ -34,9 +34,11 @@ lgLoad AS (
 		, strETAPODReasonCodeDescription = PD.strReasonCodeDescription
 		, ysnDocsReceived = LO.ysnDocumentsReceived
 		, dblQuantity = SUM(LD.dblQuantity)
+		, strForwardingAgentEntity = FA.strName
 	FROM tblLGLoad LO WITH(NOLOCK)
 	JOIN tblLGLoadDetail LD WITH(NOLOCK) ON LO.intLoadId = LD.intLoadId
 	LEFT JOIN tblEMEntity SL ON SL.intEntityId = LO.intShippingLineEntityId
+	LEFT JOIN tblEMEntity FA on FA.intEntityId = LO.intForwardingAgentEntityId
 	LEFT JOIN tblLGReasonCode EA ON EA.intReasonCodeId = LO.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode ES ON ES.intReasonCodeId = LO.intETSPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode PD ON PD.intReasonCodeId = LO.intETAPODReasonCodeId
@@ -78,7 +80,8 @@ lgLoad AS (
 		, ES.strReasonCodeDescription
 		, PD.strReasonCodeDescription
 		, LO.ysnDocumentsReceived
-		, con.strContainerNumber)
+		, con.strContainerNumber
+		, FA.strName)
 , cer AS (
 	SELECT cr.intContractDetailId
 		, cr.intContractCertificationId
@@ -210,6 +213,7 @@ SELECT CD.intContractDetailId
 	, CH.intSubBookId AS intHeaderSubBookId
 	, CD.intBookId AS intDetailBookId
 	, CD.intSubBookId AS intDetailSubBookId
+	, strForwardingAgentEntity = isnull(LG1.strForwardingAgentEntity, LG.strForwardingAgentEntity)
 FROM tblCTContractDetail CD WITH(NOLOCK)
 JOIN tblCTContractHeader CH WITH(NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
