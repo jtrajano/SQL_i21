@@ -57,6 +57,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Description') IS NULL
 		intItemId INT 
 	)
 
+IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_UOMId') IS NULL  
+	CREATE TABLE #tmpUpdateItemPricingForCStore_UOMId (
+		intItemUOMId INT 
+	)
+
 -- Create the temp table for the audit log. 
 IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NULL  
 	CREATE TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog (
@@ -153,6 +158,10 @@ BEGIN
 									--ST-2074
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Description)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Description WHERE intItemId = i.intItemId)			
+								)
+								AND (
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_UOMId)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_UOMId WHERE intItemUOMId = uom.intItemUOMId )			
 								)
 								AND (
 									@strUpcCode IS NULL 
