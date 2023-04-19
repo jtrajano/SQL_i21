@@ -186,10 +186,12 @@ BEGIN
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				t.intInventoryTransactionId = @intInventoryTransactionId			
-				OR (
-					t.strBatchId = @strBatchId
-					AND t.strTransactionId = @strTransactionId 
+				(
+					t.intInventoryTransactionId = @intInventoryTransactionId			
+					OR (
+						t.strBatchId = @strBatchId
+						AND t.strTransactionId = @strTransactionId 
+					)
 				)
 				-- Do not read the inventory transaction if it will not reduce the stock. 
 				AND ISNULL(t.dblQty, 0) >= 0 
@@ -221,10 +223,12 @@ BEGIN
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				t.intInventoryTransactionId = @intInventoryTransactionId			
-				OR (
-					t.strBatchId = @strBatchId
-					AND t.strTransactionId = @strTransactionId 
+				(
+					t.intInventoryTransactionId = @intInventoryTransactionId			
+					OR (
+						t.strBatchId = @strBatchId
+						AND t.strTransactionId = @strTransactionId 
+					)
 				)
 				AND ISNULL(t.dblQty, 0) < 0  
 	) AS StockToUpdate
