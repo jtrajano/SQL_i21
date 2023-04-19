@@ -1079,6 +1079,15 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intLoadShipmentCostId]	
 						,intTaxGroupId			
 					FROM dbo.[fnSCGetLoadNoneFreightItemCharges](@ReceiptStagingTable,@ysnPrice,@ysnAccrue,@intFreightItemId,@intLoadCostId)
+					
+					-- Update the shipment status of the LS
+					UPDATE L
+					SET
+						intShipmentStatus = 4,
+						dtmDeliveredDate = T.dtmTicketDateTime
+					FROM tblLGLoad L
+					INNER JOIN tblSCTicket T ON T.intLoadId = L.intLoadId
+					WHERE L.intLoadId = @intLoadId
 				END	
 			END
 		ELSE
