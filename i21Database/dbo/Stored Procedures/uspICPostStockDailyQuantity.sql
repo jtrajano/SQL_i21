@@ -38,7 +38,7 @@ BEGIN
 				,[intCompanyId] 
 				,[dtmDate] 
 				,[dblQty] = SUM(dblQty) 
-				,[dblValue] = SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
+				,[dblValue] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
 				,[dblValueRounded] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
 			FROM 
 				tblICInventoryTransaction t
@@ -193,7 +193,7 @@ BEGIN
 						AND t.strTransactionId = @strTransactionId 
 					)
 				)
-				-- Do not read the inventory transaction if it will not reduce the stock. 
+				-- Do not read the inventory transaction if @intItemId IS NOT NULL 
 				AND ISNULL(t.dblQty, 0) >= 0 
 			GROUP BY
 				[intItemId] 
@@ -206,7 +206,7 @@ BEGIN
 				,[intCompanyId] 
 				,[dtmDate] 
 			UNION ALL 
-			-- Read the reduce stock separately in case the reduce stock is merged as one record in the valuation.
+			-- Read the reduce stock separately in case the reduce stock is merged as one valuation.
 			SELECT	
 				[intItemId] 
 				,[intItemLocationId] 
@@ -218,8 +218,8 @@ BEGIN
 				,[intCompanyId] 
 				,[dtmDate] 
 				,[dblQty] = ISNULL(@dblQty, t.dblQty) 
-				,[dblValue] = ROUND(dbo.fnMultiply(@dblQty, t.dblCost) + t.dblValue, 2)
-				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2)
+				,[dblValue] = ROUND(dbo.fnMultiply(ISNULL(@dblQty, t.dblQty), t.dblCost) + t.dblValue, 2)
+				,[dblValueRounded] = ROUND(dbo.fnMultiply(ISNULL(ISNULL(@dblQty, t.dblQty), 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2)
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
