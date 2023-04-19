@@ -29,6 +29,7 @@ AS
 				account.intUnnaturalAccountId,
 				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId,
 				account.intLocationSegmentId,
+				account.intLOBSegmentId,
 				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId,
 				lobSegment.strCode COLLATE Latin1_General_CI_AS strLOBSegmentId,
 				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId
