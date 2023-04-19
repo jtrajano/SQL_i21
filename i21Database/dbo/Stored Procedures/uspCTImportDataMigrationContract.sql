@@ -506,7 +506,7 @@ AS
 					,intItemItemUOMId = MAUOM.intUnitMeasureId
 					,intWarehouseId = wc.intCityId
 					,intCountryId = wc.intCountryId
-					,dblNetWeight = dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,nwum.intUnitMeasureId, CI.dblQuantity)
+					,dblNetWeight = dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,nwuom.intUnitMeasureId, CI.dblQuantity)
 					,intNetWeightUOMId = nwuom.intItemUOMId
 
 			FROM	tblCTContractImport			CI	LEFT
@@ -567,8 +567,7 @@ AS
 			left join tblICUnitMeasure pum on pum.strUnitMeasure = CI.strPriceUOM
 			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
 			left join tblSMCity wc on wc.strCity = CI.strWarehouse
-			outer apply (select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'Metric Ton') nwum
-			left join tblICItemUOM nwuom on nwuom.intItemId = IM.intItemId and nwuom.intUnitMeasureId = nwum.intUnitMeasureId
+			left join tblICItemUOM nwuom on nwuom.intItemId = IM.intItemId and nwuom.ysnStockUnit = 1
 			WHERE CI.guiUniqueId = @guiUniqueId;
 
 			select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId;
@@ -604,7 +603,7 @@ AS
 					when t.intPriceItemUOMId is null then 'Price Item UOM: Price Item UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPricingTypeId = 1 and t.dblFutures is null then 'Missing Futures Price for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when isnull(c.strWarehouse,'') <> '' and t.intWarehouseId is null then ' Warehouse Location: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
-					when t.intNetWeightUOMId is null then 'Net Weight UOM: "Metric Ton" UOM does not exists in item "' + c.strItem + '" for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.intNetWeightUOMId is null then 'Net Weight UOM: Item "' + c.strItem + '" has no UOM Stock Unit for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					else @validationErrorMsg
 					end
 				from
