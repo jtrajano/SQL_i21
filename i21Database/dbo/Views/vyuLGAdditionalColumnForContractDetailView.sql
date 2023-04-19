@@ -108,5 +108,4 @@ OUTER APPLY (
 OUTER APPLY (
     SELECT TOP 1 intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId AND intFromCurrencyId = ISNULL(CY.intMainCurrencyId,CD.intCurrencyId)
 ) TC
-
 GO

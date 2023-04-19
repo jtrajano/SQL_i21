@@ -3,8 +3,6 @@ CREATE VIEW vyuQMContractSamplesMonitoring AS
 WITH QUERY AS
 (
    SELECT
-      strAllocationNumber,
-      intAllocationDetailId,
       dtmStartDateP,
       dtmEndDateP,
       intSequenceP,
@@ -65,8 +63,6 @@ WITH QUERY AS
       vyuQMPurchaseSampleLinked
    UNION
    SELECT
-      strAllocationNumber,
-      intAllocationDetailId,
       dtmStartDateP,
       dtmEndDateP,
       intSequenceP,

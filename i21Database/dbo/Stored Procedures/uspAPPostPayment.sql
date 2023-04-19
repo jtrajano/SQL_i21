@@ -60,7 +60,7 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Payable'
 DECLARE @TRAN_TYPE NVARCHAR(25) = 'Payable'
-DECLARE @paymentIds NVARCHAR(MAX) = @param
+DECLARE @paymentIds NVARCHAR(MAX)
 DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
 DECLARE @count INT = 0;
@@ -593,7 +593,26 @@ SELECT TOP 1
 	@GainLossAccount = intAccountsPayableRealizedId 
 FROM tblSMMultiCurrency
 
-IF EXISTS(SELECT 1 FROM @GLEntries WHERE intAccountId = @GainLossAccount)
+DECLARE	@OverrideCompanySegment BIT,
+			  @OverrideLocationSegment BIT,
+			  @OverrideLineOfBusinessSegment BIT
+
+SELECT TOP 1 
+	@OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+	@OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+	@OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+FROM tblAPCompanyPreference
+
+
+IF EXISTS(SELECT 1 FROM tblAPPayment A
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT 
+	INNER JOIN @GLEntries GL ON GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
+	WHERE GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
+	AND	A.intPaymentId IN (SELECT intId FROM @payments)
+)
 BEGIN
 --HANDLE DECIMAL LOSS FOR MULTI CURRENCY
 INSERT INTO @GLEntries(
@@ -762,7 +781,7 @@ BEGIN
 	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
 	--INSERT THE RESULT FOR SHOWING ON THE USER
-	DECLARE @invalidGLEntries AS Id
+	DECLARE @invalidGLEntries AS TABLE(intId INT)
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
 	OUTPUT inserted.intTransactionId INTO @invalidGLEntries
 	SELECT 
@@ -788,9 +807,12 @@ BEGIN
 		DECLARE @postVarGL BIT = ~@post
 		--ROLLBACK THE UPDATING OF AMOUNT DUE IF IF THERE IS NO VALID
 		--UPDATE tblAPPaymentDetail
-		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidGLEntries, @post = @postVarGL
+		DECLARE @invalidPayIds AS Id
+		INSERT INTO @invalidPayIds
+		SELECT DISTINCT intId FROM @invalidGLEntries
+		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidPayIds, @post = @postVarGL
 		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @invalidGLEntries, @post = @postVarGL
+		EXEC uspAPUpdateBillPayment @paymentIds = @invalidPayIds, @post = @postVarGL
 	END
 	
 	--DELETE THE FAILED POST ENTRIES
@@ -829,7 +851,8 @@ BEGIN
 	--CREATE BANK TRANSACTION
 	DECLARE @paymentForBankTransaction AS Id
 	INSERT INTO @paymentForBankTransaction
-	SELECT intPaymentId FROM #tmpPayablePostData
+	-- SELECT intPaymentId FROM #tmpPayablePostData
+	SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds
 	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @paymentForBankTransaction, @post = @post, @userId = @userId, @batchId = @batchIdUsed
 
 	--Insert Successfully posted transactions.

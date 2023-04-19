@@ -45,6 +45,18 @@ SELECT
 		, intStorageLocationId = storageLocation.intCompanyLocationSubLocationId
 		, strStorageUnit = storageUnit.strName
 		, intStorageUnitId = storageUnit.intStorageLocationId
+		, strProductType = ProductType.strDescription
+		, i.intProductTypeId
+		, strProductLine = ProductLine.strDescription
+		, i.intProductLineId
+		, strGrade  = Grade.strDescription
+		, i.intGradeId
+		, strCertification = bd.strCertification
+		, i.intCertificationId
+		, MTMPoint.strMTMPoint
+		, bd.intMTMPointId
+		, strClass = CLASS.strDescription
+		, strRegion = REGION.strDescription
 FROM tblRKM2MBasisDetail bd
 JOIN tblRKM2MBasis mb on mb.intM2MBasisId=bd.intM2MBasisId
 JOIN tblICCommodity c on c.intCommodityId=bd.intCommodityId
@@ -69,3 +81,12 @@ LEFT JOIN tblSMCompanyLocationSubLocation storageLocation
 	ON storageLocation.intCompanyLocationSubLocationId = bd.intStorageLocationId
 LEFT JOIN tblICStorageLocation storageUnit
 	ON storageUnit.intStorageLocationId = bd.intStorageUnitId
+LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityId = c.intCommodityId AND ProductType.strType = 'ProductType' AND ProductType.intCommodityAttributeId = bd.intProductTypeId
+LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityId = c.intCommodityId AND ProductLine.intCommodityProductLineId = bd.intProductLineId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityId = c.intCommodityId AND Grade.strType = 'Grade' AND Grade.intCommodityAttributeId = bd.intGradeId
+--LEFT JOIN tblICCertification Certification ON Certification.intCertificationId = bd.intCertificationId
+LEFT JOIN tblCTMTMPoint MTMPoint ON MTMPoint.intMTMPointId = bd.intMTMPointId
+LEFT JOIN tblICCommodityAttribute CLASS
+	ON CLASS.intCommodityAttributeId = i.intClassVarietyId
+LEFT JOIN tblICCommodityAttribute REGION
+	ON REGION.intCommodityAttributeId = i.intRegionId

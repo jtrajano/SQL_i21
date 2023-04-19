@@ -483,6 +483,8 @@ begin try
 					, [intFreightTermId]
 					, strTaxPoint
 					, intTaxLocationId
+					, dblOptionalityPremium
+					, dblQualityPremium
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -557,19 +559,21 @@ begin try
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
 					,dblExchangeRate = vp.dblExchangeRate
 					,intPurchaseTaxGroupId = 
-						CASE 
-							WHEN isnull(vp.intPurchaseTaxGroupId,0) = 0 THEN 
-								dbo.fnGetTaxGroupIdForVendor(
-									vp.intEntityVendorId
-									,@intCompanyLocationId
-									,vp.intItemId
-									,em.intEntityLocationId
-									,@intFreightTermId
-									,default
-								) 
-							ELSE 
-								vp.intPurchaseTaxGroupId 
-						END
+						CASE WHEN CD.ysnTaxOverride = CAST(0 as BIT) THEN
+						  CASE     
+						   WHEN isnull(vp.intPurchaseTaxGroupId,0) = 0 THEN     
+							dbo.fnGetTaxGroupIdForVendor(    
+							 vp.intEntityVendorId    
+							 ,@intCompanyLocationId    
+							 ,vp.intItemId    
+							 ,em.intEntityLocationId    
+							 ,@intFreightTermId    
+							 ,default    
+							)     
+						   ELSE     
+							vp.intPurchaseTaxGroupId     
+						  END 
+						ELSE CD.intTaxGroupId END
 					,dblTax = vp.dblTax
 					,dblDiscount = vp.dblDiscount
 					,dblDetailDiscountPercent = vp.dblDetailDiscountPercent
@@ -614,11 +618,14 @@ begin try
 					, vp.intFreightTermId
 					, vp.strTaxPoint
 					, vp.intTaxLocationId
+					, dblOptionalityPremium = vp.dblOptionalityPremium
+					, dblQualityPremium = vp.dblQualityPremium
 				from
 					@voucherPayables vp
 					LEFT JOIN tblEMEntityLocation em 
 						ON em.intEntityId = vp.intEntityVendorId 
 						AND isnull(em.ysnDefaultLocation,0) = 1
+					LEFT JOIN tblCTContractDetail CD on vp.intContractDetailId  = CD.intContractDetailId
 					OUTER APPLY (
 						SELECT TOP 1 
 							ap.intVoucherPayableId
@@ -782,6 +789,8 @@ begin try
 					, [strReferenceNo]
 					, [intBankValuationRuleId]
 					, [strComments]
+					, dblOptionalityPremium
+					, dblQualityPremium
 				)
 				SELECT 
 					[intEntityVendorId]			
@@ -853,6 +862,8 @@ begin try
 					, [strReferenceNo]
 					, [intBankValuationRuleId]
 					, [strComments]
+					, dblOptionalityPremium
+					, dblQualityPremium
 				FROM 
 					@voucherPayableProRatedCharges
 
@@ -977,6 +988,8 @@ begin try
 					, [intFreightTermId]
 					, strTaxPoint
 					, intTaxLocationId
+					, dblOptionalityPremium
+					, dblQualityPremium
 		)
 		SELECT
 			intPartitionId = vp.intPartitionId
@@ -1088,6 +1101,8 @@ begin try
 			, [intFreightTermId]
 			, strTaxPoint
 			, intTaxLocationId
+			, dblOptionalityPremium = vp.dblOptionalityPremium
+			, dblQualityPremium = vp.dblQualityPremium
 		from
 			@voucherPayables vp
 		where

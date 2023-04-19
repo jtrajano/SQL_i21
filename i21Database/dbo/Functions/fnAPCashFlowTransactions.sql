@@ -18,6 +18,7 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 	INSERT @returntable
+	
 	--AP PAYABLES
 	SELECT
 	B.intBillId,
@@ -55,9 +56,12 @@ BEGIN
 				,dblAmountPaid
 				,dblDiscount
 				,dblInterest
-				,dtmDate
-				FROM dbo.vyuAPPayables
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
+				,P.dtmDate
+				FROM dbo.vyuAPPayables P
+				OUTER APPLY (
+					SELECT CASE WHEN ysnOverrideCashFlow = 1 THEN dtmCashFlowDate ELSE dtmDueDate END dtmDate FROM tblAPBill WHERE intBillId = P.intBillId
+				) B
+				WHERE DATEADD(dd, DATEDIFF(dd, 0, B.dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
 		GROUP BY intBillId
 		UNION ALL
 		SELECT 
@@ -73,16 +77,20 @@ BEGIN
 				,dblAmountPaid
 				,dblDiscount
 				,dblInterest
-				,dtmDate
+				,P.dtmDate
 				,intPrepaidRowType
-				FROM dbo.vyuAPPrepaidPayables
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPrepaidPayables 
+				FROM dbo.vyuAPPrepaidPayables P
+				OUTER APPLY (
+					SELECT CASE WHEN ysnOverrideCashFlow = 1 THEN dtmCashFlowDate ELSE dtmDueDate END dtmDate FROM tblAPBill WHERE intBillId = P.intBillId
+				) B
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,B.dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPrepaidPayables 
 		GROUP BY intBillId, intPrepaidRowType
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill B ON B.intBillId = tmpAgingSummaryTotal.intBillId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
-	UNION ALL
+	
 	--AP PAYABLES ARCHIVED
+	UNION ALL
 	SELECT
 	B.intBillId,
 	B.strBillId,
@@ -122,14 +130,15 @@ BEGIN
 				,dtmDate
 				,intCount
 				FROM dbo.vyuAPPayablesAgingDeleted
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
 		GROUP BY intBillId
 		HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBillArchive B ON B.intBillId = tmpAgingSummaryTotal.intBillId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
-	UNION ALL
+	
 	--AR PAYABLES
+	UNION ALL
 	SELECT
 		I.intInvoiceId,
 		I.strInvoiceNumber,
@@ -155,9 +164,12 @@ BEGIN
 				,dblAmountPaid
 				,dblDiscount
 				,dblInterest
-				,dtmDate
-				FROM dbo.vyuAPSalesForPayables
-				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
+				,P.dtmDate
+				FROM dbo.vyuAPSalesForPayables P
+				OUTER APPLY (
+					SELECT CASE WHEN ysnOverrideCashFlow = 1 THEN dtmCashFlowDate ELSE dtmDueDate END dtmDate FROM tblARInvoice WHERE intInvoiceId = P.intInvoiceId
+				) B
+				WHERE DATEADD(dd, DATEDIFF(dd, 0, B.dtmDate), 0) BETWEEN ISNULL(@dtmFrom, '01-01-1900') AND ISNULL(@dtmTo, GETDATE())) tmpAPPayables 
 		GROUP BY intInvoiceId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblARInvoice I ON I.intInvoiceId = tmpAgingSummaryTotal.intInvoiceId

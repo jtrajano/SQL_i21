@@ -2,6 +2,7 @@
 	@intLoadId    INT,
 	@intUserId    INT,
 	@intType	INT = 1, /* 1 - Direct, 2 - Provisional, 3 - Proforma */
+	@intBankAccountId INT = NULL,
 	@NewInvoiceId INT = NULL OUTPUT	
 AS 
 BEGIN
@@ -91,6 +92,7 @@ DECLARE
 	,@intContractDetailId		INT
 	,@intPricingTypeId			INT
 	,@dblQty					NUMERIC(18, 6)
+	,@DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	SELECT TOP 1 @intARAccountId = ISNULL(intARAccountId,0) FROM tblARCompanyPreference
 	IF @intARAccountId = 0
@@ -301,7 +303,8 @@ DECLARE
 			,[dblOptionalityPremium]
 			,[strTaxPoint]
 			,[intTaxLocationId]
-			,[intTaxGroupId])
+			,[intTaxGroupId]
+			,[ysnOverrideTaxGroup])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -416,9 +419,9 @@ DECLARE
 			,[ysnVirtualMeterReading]				= 0
 			,[ysnClearDetailTaxes]					= 0
 			,[intTempDetailIdForTaxes]				= NULL
-			,[intCurrencyExchangeRateTypeId]		= CD.intRateTypeId
+			,[intCurrencyExchangeRateTypeId]		= ISNULL(CD.intHistoricalRateTypeId, CD.intRateTypeId)
 			,[intCurrencyExchangeRateId]			= CD.intCurrencyExchangeRateId
-			,[dblCurrencyExchangeRate]				= CD.dblRate
+			,[dblCurrencyExchangeRate]				= ISNULL(CD.dblHistoricalRate, CD.dblRate)
 			,[intSubCurrencyId]						= AD.intSeqCurrencyId 
 			,[dblSubCurrencyRate]					= CASE WHEN AD.ysnSeqSubCurrency = 1
 															THEN CU.intCent
@@ -429,6 +432,7 @@ DECLARE
 			,[strTaxPoint]							= L.strTaxPoint
 			,[intTaxLocationId]						= L.intTaxLocationId
 			,[intTaxGroupId]						= LD.intTaxGroupId
+			,[ysnOverrideTaxGroup]					= LD.ysnTaxGroupOverride
 		FROM tblLGLoad L
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -591,14 +595,15 @@ DECLARE
 			,[intFacilityId]
 			,[intLoanLimitId]
 			,[strBankReferenceNo]
-			,[strBankTransactionId]
+			,[strBankTradeReference]
 			,[dblLoanAmount]
 			,[intBankValuationRuleId]
 			,[strTradeFinanceComments]
 			,[strGoodsStatus]
 			,[strTaxPoint]
 			,[intTaxLocationId]
-			,[intTaxGroupId])
+			,[intTaxGroupId]
+			,[ysnOverrideTaxGroup])
 		SELECT
 			[strTransactionType]					= @TransactionType
 			,[strType]								= @Type
@@ -703,9 +708,18 @@ DECLARE
 			,[ysnVirtualMeterReading]				= 0
 			,[ysnClearDetailTaxes]					= 0
 			,[intTempDetailIdForTaxes]				= NULL
-			,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId] 
-			,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId] 
-			,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
+			,[intCurrencyExchangeRateTypeId]		= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ISNULL(CD.intHistoricalRateTypeId, ARSI.[intCurrencyExchangeRateTypeId])
+															ELSE NULL
+														END
+			,[intCurrencyExchangeRateId]			= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ARSI.[intCurrencyExchangeRateId] 
+															ELSE NULL
+														END
+			,[dblCurrencyExchangeRate]				= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ISNULL(CD.dblHistoricalRate, ARSI.[dblCurrencyExchangeRate])
+															ELSE 1
+														END
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 			,[dblQualityPremium]					= LD.dblQualityPremium
@@ -718,7 +732,7 @@ DECLARE
 			,[intFacilityId]						= TF.intFacilityId
 			,[intLoanLimitId]						= TF.intLoanLimitId
 			,[strBankReferenceNo]					= TF.strBankReferenceNo
-			,[strBankTransactionId]					= NULL
+			,[strBankTradeReference]				= TF.strBankTradeReference
 			,[dblLoanAmount]						= TF.dblLoanAmount
 			,[intBankValuationRuleId]				= TF.intBankValuationRuleId
 			,[strTradeFinanceComments]				= TF.strTradeFinanceComments
@@ -726,9 +740,11 @@ DECLARE
 			,[strTaxPoint]							= L.strTaxPoint
 			,[intTaxLocationId]						= L.intTaxLocationId
 			,[intTaxGroupId]						= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN ARSI.[intTaxGroupId] ELSE LD.intTaxGroupId END
+			,[ysnOverrideTaxGroup]					= LD.ysnTaxGroupOverride
 		FROM vyuARShippedItems ARSI
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARSI.intLoadDetailId
 			LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 			OUTER APPLY (
 				SELECT cp.* 
 					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp
@@ -750,16 +766,18 @@ DECLARE
 					,[intLoanLimitId]						= PL.intLoanLimitId
 					,[strBankReferenceNo]					= IR.strBankReferenceNo
 					,[dblLoanAmount]						= PL.dblLoanAmount
-					,[intBankValuationRuleId]				= PL.intBankValuationRuleId		
+					,[intBankValuationRuleId]				= IR.intOverrideFacilityValuation	
 					,[strTradeFinanceComments]				= IR.strComments
 					,[strGoodsStatus]						= CASE (PL.intWarrantStatus) WHEN 1 THEN 'Pledged' WHEN 2 THEN 'Released' ELSE NULL END COLLATE Latin1_General_CI_AS 
+					,[strBankTradeReference]				= IR.strReferenceNo
 				FROM tblLGLoadDetailLot LDL
 				LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
 				LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 				LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 				LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = IRI.intSourceId 
 				LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
-				WHERE LDL.intLoadDetailId = ARSI.intLoadDetailId) TF
+				WHERE LDL.intLoadDetailId = ARSI.intLoadDetailId
+					AND (@intBankAccountId IS NULL OR (@intBankAccountId IS NOT NULL AND IR.intBankAccountId = @intBankAccountId))) TF
 		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 		  AND ARSI.[intLoadId] = @intLoadId
 	

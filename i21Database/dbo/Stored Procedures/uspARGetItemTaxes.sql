@@ -29,15 +29,20 @@ SELECT @OriginalTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@Customer
 
 IF(ISNULL(@TaxGroupId,0) = 0)
 BEGIN
-	IF(@FOB IS NOT NULL)
+	IF(@FOB IS NOT NULL AND @TaxLocationId IS NOT NULL)
 		SELECT @NewTaxGroupId = ISNULL([dbo].[fnGetTaxGroupIdForCustomer](@CustomerId, @TaxLocationId, @ItemId, @TaxLocationId, @SiteId, @FreightTermId, @FOB), 0)
 
-	IF @NewTaxGroupId <> 0
-		SET @TaxGroupId = @NewTaxGroupId
-	ELSE 
-		SET @TaxGroupId = @OriginalTaxGroupId
+	IF(ISNULL(@TaxLocationId, 0) <> 0)
+	BEGIN
+		IF @NewTaxGroupId <> 0
+			SET @TaxGroupId = @NewTaxGroupId
+	END
+	ELSE
+	BEGIN
+		SET @TaxGroupId = CASE WHEN @NewTaxGroupId = 0 THEN @OriginalTaxGroupId ELSE @NewTaxGroupId END
+	END
 
-	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @TaxGroupId THEN 1 ELSE 0 END
+	SET @IsOverrideTaxGroup = CASE WHEN @OriginalTaxGroupId <> @NewTaxGroupId AND ISNULL(@TaxLocationId, 0) <> 0 THEN 1 ELSE 0 END
 END
 ELSE
 BEGIN

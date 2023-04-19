@@ -289,9 +289,9 @@ END
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTSwapToFXGLAccountId
         ,[dblDebit]              = 0
-        ,[dblCredit]             = dblAmountFrom
+        ,[dblCredit]             = dblPayableFn -- dblAmountFrom
         ,[dblDebitForeign]       = 0
-        ,[dblCreditForeign]      = dblAmountFrom/dblRateAmountTo  
+        ,[dblCreditForeign]      = dblPayableFx -- dblAmountFrom/dblRateAmountTo  
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
         ,[strDescription]        = A.strDescription      
@@ -299,7 +299,7 @@ END
         ,[strReference]          = A.strReferenceTo  
         ,[intCurrencyId]         = intCurrencyIdAmountTo
         ,[intCurrencyExchangeRateTypeId] =  intRateTypeIdAmountTo
-        ,[dblExchangeRate]       = dblRateAmountTo
+        ,[dblExchangeRate]       = dblPayableFn/dblPayableFx
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'Currency Payable'
@@ -318,9 +318,9 @@ END
         ,[dtmDate]               = @dtmDate
         ,[strBatchId]            = @strBatchId      
         ,[intAccountId]          = @intBTSwapFromFXGLAccountId
-        ,[dblDebit]              = dblAmountFrom
+        ,[dblDebit]              = dblReceivableFn-- dblAmountFrom
         ,[dblCredit]             = 0
-        ,[dblDebitForeign]       = dblAmountFrom
+        ,[dblDebitForeign]       = dblReceivableFx-- dblAmountForeignFrom
         ,[dblCreditForeign]      = 0
         ,[dblDebitUnit]          = 0      
         ,[dblCreditUnit]         = 0      
@@ -329,7 +329,7 @@ END
         ,[strReference]          = A.strReferenceTo  
         ,[intCurrencyId]         = intCurrencyIdAmountFrom
         ,[intCurrencyExchangeRateTypeId] =  intRateTypeIdAmountFrom
-        ,[dblExchangeRate]       = dblRateAmountFrom
+        ,[dblExchangeRate]       = dblReceivableFn/dblReceivableFx
         ,[dtmDateEntered]        = GETDATE()      
         ,[dtmTransactionDate]    = A.dtmDate      
         ,[strJournalLineDescription]  = 'Currency Receivable'

@@ -597,7 +597,7 @@ BEGIN CATCH
 				BEGIN
 					--UPDATE tblARInvoiceDetail SET intTaxGroupId = NULL WHERE intInvoiceId = @CreatedInvoiceId
 					EXEC [dbo].[uspARReComputeInvoiceTaxes]
-						@InvoiceId	= @CreatedInvoiceId
+						 @InvoiceId	= @CreatedInvoiceId
 						,@DetailId	= NULL
 				END
 			ELSE	
@@ -669,10 +669,10 @@ BEGIN CATCH
 				
 				
 			EXEC [dbo].[uspARReComputeInvoiceAmounts]
-				@InvoiceId = @CreatedInvoiceId
+				 @InvoiceId = @CreatedInvoiceId
 				
 			EXEC [dbo].uspARUpdateInvoiceIntegrations 
-				@InvoiceId	= @CreatedInvoiceId
+				 @InvoiceId	= @CreatedInvoiceId
 				,@ForDelete	= 0
 				,@UserId	= @UserId
 						
@@ -696,15 +696,21 @@ BEGIN CATCH
 
 		BEGIN TRY
 			UPDATE ARI 
-			SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
-			, intOriginalInvoiceId = @InvoiceId 
-			, ysnImpactInventory = @IsImpactInventory
-			, dblTotalWeight = @TotalWeight
-			, dblTotalStandardWeight = T.dblTotalStandardWeight 
+			SET 
+				 ysnRecurring			=  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
+				,intOriginalInvoiceId	= @InvoiceId 
+				,ysnImpactInventory		= @IsImpactInventory
+				,dblTotalWeight			= @TotalWeight
+				,dblTotalStandardWeight = T.dblTotalStandardWeight 
+				,strInvoiceOriginId		= T.strInvoiceNumber
 			FROM tblARInvoice ARI
 			OUTER APPLY(
-				SELECT dblTotalStandardWeight FROM tblARInvoice WHERE intInvoiceId=@InvoiceId
-			)T
+				SELECT 
+					 strInvoiceNumber
+					,dblTotalStandardWeight 
+				FROM tblARInvoice 
+				WHERE intInvoiceId = @InvoiceId
+			) T
 			WHERE intInvoiceId = @NewInvoiceId
 		END TRY
 		BEGIN CATCH

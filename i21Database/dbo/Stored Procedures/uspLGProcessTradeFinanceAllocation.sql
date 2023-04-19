@@ -51,8 +51,9 @@ BEGIN TRY
         , dblFinancedAmount
         , strBorrowingFacilityBankRefNo
         , ysnDeleted
+        , intOverrideBankValuationId
     )
-    SELECT
+    SELECT TOP 1
         strAction = 'Allocated Contract'
         , strTransactionType = 'Logistics'
         , intTradeFinanceTransactionId = tf.intTradeFinanceId
@@ -76,30 +77,35 @@ BEGIN TRY
         , intConcurrencyId = 1
         , intContractHeaderId = cd.intContractHeaderId
         , intContractDetailId = cd.intContractDetailId
-        , intBankId = cd.intBankId
-        , intBankAccountId = cd.intBankAccountId
-        , intBorrowingFacilityId = cd.intBorrowingFacilityId
-        , intLimitId = cd.intBorrowingFacilityLimitId
-        , intSublimitId = cd.intBorrowingFacilityLimitDetailId
-        , strBankTradeReference = cd.strReferenceNo
-        , strBankApprovalStatus = STF.strApprovalStatus
+        , intBankId = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.intBankId ELSE cd.intBankId END
+        , intBankAccountId = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.intBankAccountId ELSE cd.intBankAccountId END
+        , intBorrowingFacilityId = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.intBorrowingFacilityId ELSE cd.intBorrowingFacilityId END
+        , intLimitId = CFL.intBorrowingFacilityLimitId
+        , intSublimitId = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.intSublimitTypeId ELSE cd.intBorrowingFacilityLimitDetailId END
+        , strBankTradeReference = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.strReferenceNo ELSE cd.strReferenceNo END
+        , strBankApprovalStatus = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.strApprovalStatus ELSE STF.strApprovalStatus END
         , dblLimit = limit.dblLimit
         , dblSublimit = sublimit.dblLimit
         , dblFinanceQty = SUM(ad.dblPAllocatedQty)
         , dblFinancedAmount = SUM((cd.dblTotalCost / cd.dblQuantity) * (ad.dblPAllocatedQty)
                             * (case when cd.intCurrencyId <> cd.intInvoiceCurrencyId and isnull(cd.dblRate,0) <> 0 then cd.dblRate else 1 end))
-        , strBorrowingFacilityBankRefNo = cd.strBankReferenceNo
+        , strBorrowingFacilityBankRefNo = CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.strBankReferenceNo ELSE cd.strBankReferenceNo END 
         , ysnDeleted = @ysnDeleted
+        , intOverrideBankValuationId = cd.intBankValuationRuleId
     FROM
         tblLGAllocationHeader ah
         JOIN tblLGAllocationDetail ad ON ad.intAllocationHeaderId = ah.intAllocationHeaderId
         JOIN tblCTContractDetail cd ON cd.intContractDetailId = ad.intPContractDetailId
         JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-        JOIN tblTRFTradeFinance tf ON tf.strTradeFinanceNumber = (cd.strFinanceTradeNo COLLATE Latin1_General_CI_AS) and tf.strTransactionType = 'Contract'
+        JOIN tblTRFTradeFinance tf ON tf.strTradeFinanceNumber = (cd.strFinanceTradeNo COLLATE Latin1_General_CI_AS) and (tf.strTransactionType = 'Contract' or tf.strTransactionType = 'Inventory')
         LEFT JOIN tblCMBankLoan bl ON bl.intBankLoanId = cd.intLoanLimitId
         LEFT JOIN tblCTApprovalStatusTF STF ON STF.intApprovalStatusId = cd.intApprovalStatusId
         LEFT JOIN tblCMBorrowingFacilityLimit limit ON limit.intBorrowingFacilityLimitId = cd.intBorrowingFacilityLimitId
         LEFT JOIN tblCMBorrowingFacilityLimitDetail sublimit ON sublimit.intBorrowingFacilityLimitDetailId = cd.intBorrowingFacilityLimitDetailId
+        LEFT JOIN tblICInventoryReceipt IC ON IC.intInventoryReceiptId = tf.intTransactionHeaderId
+        LEFT JOIN tblCMBorrowingFacilityLimit CFL ON CFL.intBorrowingFacilityId =
+                    CASE WHEN ISNULL(IC.strReceiptNumber, '') <> '' THEN IC.intBorrowingFacilityId ELSE cd.intBorrowingFacilityId END 
+                    AND CFL.strBorrowingFacilityLimit = 'Logistics'
     WHERE
         ah.intAllocationHeaderId = @intAllocationHeaderId
     GROUP BY
@@ -129,6 +135,17 @@ BEGIN TRY
         ,cd.intInvoiceCurrencyId
         ,cd.dblRate
         ,cd.strBankReferenceNo
+        ,cd.intBankValuationRuleId
+        ,IC.strApprovalStatus
+        ,IC.strReferenceNo
+        ,IC.strReceiptNumber
+        ,IC.intBankId
+        ,IC.intBankAccountId
+        ,IC.intBorrowingFacilityId
+        ,IC.intSublimitTypeId
+        ,IC.strBankReferenceNo
+        ,CFL.intBorrowingFacilityLimitId
+    ORDER BY tf.intTradeFinanceId DESC
 
     -- Log Trade Finance
     IF EXISTS(SELECT 1 FROM @TRFLog)

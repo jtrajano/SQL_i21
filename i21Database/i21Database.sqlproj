@@ -1111,6 +1111,10 @@
     <Build Include="dbo\Views\vyuHDExemptedAgent.sql" />
     <Build Include="dbo\Tables\tblICFreightOverride.sql" />
     <Build Include="dbo\Views\vyuICGetFreightOverride.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessTradeFinancePickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPostOtherCharges.sql" />
+    <Build Include="dbo\Tables\tblCTMTMPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTHedgeContractPrice.sql" />
     <Build Include="dbo\Tables\tblGLChangeAccountCategory.sql" />
     <Build Include="dbo\Tables\tblGLChangeAccountCategoryDetail.sql" />
     <Build Include="dbo\Views\vyuGLChangeAccountCategory.sql" />
@@ -1700,6 +1704,40 @@
     <Build Include="dbo\Views\vyuSTJobs.sql" />
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
     <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
+    <Build Include="dbo\Functions\fnAPGetDetailSourceTransactionTaxes.sql" />
+    <Build Include="dbo\Functions\fnFAMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetOriginByCommodity.sql" />
+    <Build Include="dbo\Views\vyuCTCurrencyExchangeRates.sql" />
+    <Build Include="dbo\Functions\fnAPGetOverrideLineOfBusinessAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGFetchExistingConditions.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetailWithCurrencies.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKValidateCurrencyPairSetupRecord.sql" />
+    <Build Include="dbo\Tables\tblRKCurrencyPair.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyPairSetup.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentMethodBlank.sql" />
+    <Build Include="dbo\Views\vyuAPBankAccountAllBank.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAllocatedContractRiskReport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\18_BankDepositForeignDebitCredit.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountCurrency.sql" />
+    <Build Include="dbo\Tables\tblGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Views\vyuGLUpdateCurrencyLog.sql" />
+    <Build Include="dbo\Views\vyuLGLoadOpenContractsWithAllocation.sql" />
+    <Build Include="dbo\Views\vyuCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="dbo\Tables\tblGLAuditorTransaction.sql" />
+    <Build Include="dbo\Views\vyuGLAuditorTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLClearAuditorTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByTransactionId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAuditorTransactionsByAccountId.sql" />
+    <Build Include="dbo\Tables\tblLGFreightPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentConditionsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReportForInStore1.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerSalesReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessClaimPayables.sql" />
+    <Build Include="dbo\Functions\fnLGGetDelimitedContractCertificates.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCancelAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCancelPickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1796,6 +1834,7 @@
     <Folder Include="Scripts\Utility\GR\" />
     <Folder Include="Scripts\Post-Deployment\MBIL" />
     <Folder Include="dbo\" />
+    <Folder Include="Scripts\Post-Deployment\GL\Views\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
@@ -2088,6 +2127,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcRetainedEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRefreshREEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRefreshAuditorReportByAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspVRVoucherIntegration.sql" />
@@ -2120,6 +2160,8 @@
     <Build Include="dbo\Views\vyuGLAccountGroup.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Views\vyuGLAccountSegmentPartition.sql" />
+    <Build Include="dbo\Views\vyuGLOverrideAccount.sql" />
+    <Build Include="dbo\Views\vyuGLOverrideISAccount.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
     <Build Include="dbo\Views\vyuAPBillBatch.sql" />
     <Build Include="dbo\Views\vyuAPPayments.sql" />
@@ -2150,6 +2192,7 @@
     <Build Include="dbo\Stored Procedures\uspCMBankReconUnclearedPaymentsSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconUnclearedDepositsSubReport.sql" />
     <Build Include="dbo\Functions\fnGLIsOpenAccountingDate.sql" />
+    <Build Include="dbo\Functions\fnGLCreateGLPostRevaluEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankAccountsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
@@ -3711,6 +3754,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetContainerTypeCount.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Views\vyuQMUserLocation.sql" />
+    <Build Include="dbo\Views\uspQMGetLot.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
@@ -4465,6 +4510,8 @@
     <Build Include="dbo\Tables\tblPATTransfer.sql" />
     <Build Include="dbo\Tables\tblPATTransferDetail.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAuditorReport.sql" />
+    <Build Include="dbo\Functions\fnGLGetBeginningBalanceAuditorReportForeign.sql" />
     <Build Include="dbo\Functions\fnGLGetMTDActivity.sql" />
     <Build Include="dbo\Functions\fnGLValidateRevaluePeriod.sql" />
     <Build Include="dbo\Functions\fnIsAllowUserSelfPost.sql" />
@@ -5803,6 +5850,7 @@
     <Build Include="dbo\Functions\fnEMGetEntityLineOfBusiness.sql" />
     <Build Include="dbo\Tables\tblSCTicketEmailOption.sql" />
     <Build Include="dbo\Functions\fnGLGetJournalExport.sql" />
+    <Build Include="dbo\Functions\fnGLGetJournalCurrencyExport.sql" />
     <Build Include="dbo\Functions\fnMFConvertCostToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemCostInTargetUOM.sql" />
     <Build Include="dbo\Views\vyuLGLoadPurchaseContracts.sql" />
@@ -6122,6 +6170,8 @@
     <Build Include="dbo\Views\vyuPATCalculateFiscalSummaryHistory.sql" />
     <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountUnit.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReport.sql" />
+    <Build Include="dbo\Functions\fnGLGetAccountCurrencyReportExpRev.sql" />
     <Build Include="dbo\Views\vyuPATCalculateFiscalPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundPatronage.sql" />
     <Build Include="dbo\Views\vyuPATCalculateCustomerPatronageHistory.sql" />
@@ -9167,7 +9217,7 @@
     <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountSegmentId.sql" />
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
     <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
     <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
@@ -11182,7 +11232,6 @@
     <Build Include="dbo\Stored Procedures\uspQMPreStageSample.sql" />
     <Build Include="dbo\Views\vyuQMGetSampleType.sql" />
     <Build Include="dbo\Views\vyuQMContractSamplesMonitoring.sql" />
-    <Build Include="dbo\Views\vyuQMSampleNotAllocated.sql" />
     <Build Include="dbo\Tables\tblIPSampleType.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTransferOrderWithoutBOL.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
@@ -11599,6 +11648,7 @@
     <Build Include="dbo\Stored Procedures\uspSCCreateTicketLoadCostPayable.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11705,6 +11755,7 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateOldData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingW2.sql" />
     <Build Include="dbo\Functions\fnGLGetAccountDetailSQL.sql" />
+    <Build Include="dbo\Functions\fnGLGetSegmentAccount.sql" />
     <Build Include="dbo\Functions\fnGLCheckScale.sql" />
     <Build Include="dbo\Functions\fnGLCreateGLPostRevaluEntries.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
@@ -11926,6 +11977,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBTOverrideGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMForwardBTOverrideGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_AddConstrainWithNoCheck_tblSMEmailRecipient.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateTransactionIdinSettleStorageVoucherReference.sql" />
     <None Include="Scripts\Post-Deployment\EM\2210_AddDefaultEFTBank.sql" />
@@ -12076,6 +12128,12 @@
     <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
     <Build Include="dbo\User Defined Types\OverrideTableType.sql" />
     <Build Include="dbo\Views\vyuCTOverviewHistoricalConsolidated.sql" />
+    <Build Include="dbo\Functions\fnCTGetDefaultCurrencyExchangeRate.sql" />
+    <Build Include="dbo\Functions\fnCTPriceHedge.sql" />
+    <None Include="Scripts\Post-Deployment\GL\Views\vyuGLLineOfBusinessAccountId.sql" />
+    <Build Include="dbo\Views\vyuGLLineOfBusinessAccountId.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
+    <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

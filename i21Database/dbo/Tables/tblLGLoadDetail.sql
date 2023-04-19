@@ -74,6 +74,8 @@
 	[intTaxGroupId] INT NULL,
 	[intBatchId] INT NULL,
 	[intDetailNumber] INT NULL,
+	[intDefaultTaxGroupId] INT NULL, 
+	[ysnPrintShipper] BIT,
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 

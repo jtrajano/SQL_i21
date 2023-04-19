@@ -61,6 +61,9 @@ RETURNS @returntable TABLE (
 	,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 	,[intAccountId]			    INT NULL
 	,[intAge]                   INT NULL DEFAULT 0
+	,[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
+	,[blbLogo]					VARBINARY (MAX) NULL
+	,[blbFooterLogo]			VARBINARY (MAX) NULL
 )
 AS
 BEGIN
@@ -125,7 +128,8 @@ BEGIN
 			@intEntityUserIdLocal		INT = NULL,
 			@intGracePeriodLocal		INT = 0,
 			@ysnOverrideCashFlowLocal  	BIT = 0,
-			@strCustomerAgingBy		    NVARCHAR(250) = NULL
+			@strCustomerAgingBy		    NVARCHAR(250) = NULL, 
+			@blbLogo     VARBINARY (MAX) = NULL
 
 	DECLARE  @DELCUSTOMERS		Id
 			,@ADLOCATION		Id
@@ -241,6 +245,8 @@ BEGIN
 	SET @ysnOverrideCashFlowLocal  	= ISNULL(@ysnOverrideCashFlow, 0)
 	SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 	SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
+
+	 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 
 	SELECT TOP 1 @strCompanyName	= strCompanyName
 			   , @strCompanyAddress = strAddress + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
@@ -496,11 +502,15 @@ BEGIN
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 	INNER JOIN @GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 	LEFT JOIN (
-		SELECT strTransactionId		= strTransactionId
-			 , dblNewForexRate		= AVG(dblNewForexRate)
-		FROM vyuGLRevalueDetails
-		WHERE strTransactionType = 'Invoice'
-		GROUP BY strTransactionId
+		SELECT TOP 1
+			 strTransactionId
+			,dblNewForexRate
+		FROM vyuGLRevalueDetails vGLR
+		INNER JOIN tblGLRevalue tGLR ON vGLR.intConsolidationId = tGLR.intConsolidationId
+		WHERE vGLR.strTransactionType = 'Invoice' and tGLR.ysnPosted = 1
+		GROUP BY
+			 strTransactionId
+			,dblNewForexRate
 	) GLRD ON I.strInvoiceNumber = GLRD.strTransactionId 
 	LEFT JOIN (
 		SELECT intCurrencyID
@@ -521,6 +531,7 @@ BEGIN
 			OR 
 			SC.intInvoiceId IS NOT NULL
 		)	
+	  AND I.strType <> 'Tax Adjustment'
 
 	IF @ysnPaidInvoice = 0
 		DELETE FROM @POSTEDINVOICES WHERE ysnPaid = 1
@@ -648,6 +659,9 @@ BEGIN
 		 , dblEndOfMonthAmount	= ROUND(ISNULL(AGING.dblTotalAR, 0) * AGING.dblCurrencyRevalueRate, dbo.fnARGetDefaultDecimal())
 		 , intAccountId			= AGING.intAccountId
 		 , intAge				= ISNULL(AGING.intAge, 0)
+		 , strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+		 , blbLogo				= ISNULL(SMLP.imgLogo, @blbLogo)
+		 , blbFooterLogo		= SMLPF.imgLogo
 	FROM
 	(SELECT A.strInvoiceNumber
 		 , B.strRecordNumber
@@ -892,6 +906,8 @@ BEGIN
 
 	WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 	INNER JOIN @ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+	LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
+	LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = AGING.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
 
 	INSERT INTO @UNPAIDINVOICES
 	SELECT DISTINCT intInvoiceId 

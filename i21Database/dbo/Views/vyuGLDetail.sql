@@ -65,7 +65,11 @@ AS
         CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
         L.strLedgerName,
         LD.strLedgerName COLLATE Latin1_General_CI_AS strSubledgerName,
-        A.intSubsidiaryCompanyId
+        A.intSubsidiaryCompanyId,
+        RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS strCurrencyExchangeRateType,
+        ISNULL(LocationSegment.strChartDesc, '') COLLATE Latin1_General_CI_AS strLocationSegmentDescription,
+        ISNULL(LOBSegment.strChartDesc, '')  COLLATE Latin1_General_CI_AS strLOBSegmentDescription,
+        A.intCurrencyId
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -77,6 +81,7 @@ AS
      LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
      LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
      LEFT JOIN tblGLLedgerDetail LD ON LD.intLedgerDetailId = A.intSubledgerId
+     LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
@@ -86,4 +91,6 @@ AS
 	 OUTER APPLY (
 		SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
 	 )SE
+     OUTER APPLY dbo.fnGLGetSegmentAccount(B.intAccountId, 3) LocationSegment
+     OUTER APPLY dbo.fnGLGetSegmentAccount(B.intAccountId, 5) LOBSegment
 GO

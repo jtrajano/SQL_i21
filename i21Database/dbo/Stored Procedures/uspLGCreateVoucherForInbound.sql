@@ -161,7 +161,7 @@ BEGIN TRY
 				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
-				,3--L.intFreightTermId	--,@FreightTermId
+				,L.intFreightTermId	--,@FreightTermId
 				,default --,@FOB
 			)
 		FROM tblLGLoad L
@@ -257,18 +257,30 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = NULL
 			,[intItemId] = LD.intItemId
 			,[strMiscDescription] = item.strDescription
-			,[dblOrderQty] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
+			,[dblOrderQty] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
+							THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
+							ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0) - ISNULL(B.dblQtyBilled, 0)
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intOrderUOMId] = LD.intItemUOMId
-			,[dblQuantityToBill] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
+			,[dblQuantityToBill] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
+						THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
+						ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
+			,[dblCost] = (CASE WHEN intPurchaseSale = 3 
+							THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+							ELSE 
+								CASE WHEN AD.ysnValidFX = 1 THEN CT.dblFXPrice
+								ELSE ISNULL(LD.dblUnitPrice, 0)
+								END
+							END)
 			,[dblOptionalityPremium] = LD.dblOptionalityPremium
 			,[dblQualityPremium] = LD.dblQualityPremium
 			,[dblCostUnitQty] = CAST(ISNULL(AD.dblCostUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
-			,[dblNetWeight] = LD.dblNet - ISNULL(B.dblNetWeight, 0)
+			,[dblNetWeight] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
+							THEN ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
+							ELSE LD.dblNet -ISNULL(LD.dblDeliveredNet,0) END - ISNULL(B.dblNetWeight, 0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = SC.intCurrencyID
@@ -276,8 +288,9 @@ BEGIN TRY
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
+									WHEN CT.dblHistoricalRate IS NOT NULL THEN CT.dblHistoricalRate
 									WHEN AD.ysnValidFX = 1 THEN 
-									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 											THEN CT.dblRate --functional price to foreign FX, use contract FX rate
 										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId = @DefaultCurrencyId)
 											THEN 1 --foreign price to functional FX, use 1
@@ -289,7 +302,7 @@ BEGIN TRY
 										THEN ISNULL(FX.dblFXRate, 1)
 										ELSE ISNULL(LD.dblForexRate,1) END
 									END
-			,[ysnSubCurrency] =	CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN 1 ELSE 0 END
+			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 			,[intSubCurrencyCents] = SC.intCent
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
@@ -337,10 +350,19 @@ BEGIN TRY
 						AND BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge'
 						AND BD.intLoadId = L.intLoadId AND BD.intLoadDetailId = LD.intLoadDetailId) B
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
-		OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
-					LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
-					LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
-					WHERE intLoadId = L.intLoadId) LW
+		LEFT JOIN (
+			SELECT 
+				W.intLoadId,
+				W.intLoadWarehouseId,
+				W.intSubLocationId,
+				W.intStorageLocationId,
+				strSubLocation = CLSL.strSubLocationName,
+				strStorageLocation = SL.strName
+			FROM tblLGLoadWarehouse W
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
+			) LW ON LW.intLoadId = L.intLoadId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadWarehouseId = LW.intLoadWarehouseId
 		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
 			OUTER APPLY (SELECT	TOP 1  
 							intForexRateTypeId = RD.intRateTypeId
@@ -355,6 +377,8 @@ BEGIN TRY
 							ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadContainerId = LWC.intLoadContainerId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		WHERE L.intLoadId = @intLoadId
 			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
 
@@ -660,7 +684,7 @@ BEGIN TRY
 							ELSE 
 								payables.dblOrderQty 
 						END,
-						@intTaxGroupId,
+						CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END,
 						CL.intCompanyLocationId,
 						EL.intEntityLocationId,
 						1,

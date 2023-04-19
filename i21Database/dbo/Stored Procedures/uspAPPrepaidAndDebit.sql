@@ -26,6 +26,7 @@ INSERT INTO tblAPAppliedPrepaidAndDebit(
 	[strTransactionNumber],
 	[intItemId],
 	[strItemDescription],
+	[strComment],
 	[strItemNo],
 	[intContractHeaderId],
 	[strContractNumber],
@@ -48,6 +49,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
 	[strItemDescription]	=	NULL,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
@@ -147,6 +149,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
 	[strItemDescription]	=	E.strDescription,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	E.strItemNo,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
@@ -254,6 +257,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
 	[strItemDescription]	=	NULL,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
@@ -354,6 +358,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
 	[strItemDescription]	=	E.strDescription,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	E.strItemNo,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,
@@ -457,6 +462,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	NULL,
 	[strItemDescription]	=	NULL,
+	[strComment]			=	NULL,
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	NULL,	
 	[strContractNumber]		=	NULL,
@@ -469,11 +475,10 @@ SELECT
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
 --LEFT JOIN tblAPAppliedPrepaidAndDebit B ON B.intTransactionId = A.intBillId
-WHERE A.intTransactionType IN (3,8)
+WHERE A.intTransactionType IN (3,8,11)
 AND A.intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
-AND 1 = CASE WHEN A.intTransactionType = 3 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED DEBIT MEMO
-		ELSE 1 END
+AND A.ysnPosted = 1
 UNION ALL
 --=========================================================
 --PREPAYMENT WITHOUT CONTRACT
@@ -486,6 +491,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	NULL,
 	[strItemDescription]	=	NULL,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	NULL,	
 	[strContractNumber]		=	NULL,
@@ -590,6 +596,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	(SELECT intItemId FROM tblICItem WHERE intItemId IN (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = A.intBillId)),
 	[strItemDescription]	=	(SELECT strDescription FROM tblICItem WHERE intItemId IN (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = A.intBillId)),
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	(SELECT strItemNo FROM tblICItem WHERE intItemId IN (SELECT TOP 1 ISNULL(intItemId,0) FROM tblAPBillDetail WHERE intBillId = A.intBillId)),
 	[intContractHeaderId]	=	NULL,	
 	[strContractNumber]		=	NULL,
@@ -688,6 +695,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
 	[strItemDescription]	=	C.strDescription,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	C.strItemNo,
 	[intContractHeaderId]	=	NULL,	
 	[strContractNumber]		=	NULL,
@@ -786,6 +794,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	CurrentBillDetails.intItemId,
 	[strItemDescription]	=	CurrentBillDetails.strDescription,
+	[strComment]			=	NULL,
 	[strItemNo]				=	CurrentBillDetails.strItemNo,
 	[intContractHeaderId]	=	CurrentBillDetails.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBillDetails.strContractNumber,
@@ -870,6 +879,7 @@ SELECT
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	CurrentBill.intItemId,
 	[strItemDescription]	=	CurrentBill.strLotNumber,
+	[strComment]			=	B.strComment,
 	[strItemNo]				=	itm.strItemNo,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
 	[strContractNumber]		=	CurrentBill.strContractNumber,

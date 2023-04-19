@@ -480,7 +480,8 @@ BEGIN TRY
 		[intBankValuationRuleId]			,
 		[strComments]			,
 		[strTaxPoint]			,
-		[intTaxLocationId]
+		[intTaxLocationId]		,
+		[intProfitCenter]
 	)
 	VALUES (
 		[intTermsId]			,
@@ -538,7 +539,8 @@ BEGIN TRY
 		[intBankValuationRuleId]			,
 		[strComments]			,
 		[strTaxPoint]			,
-		[intTaxLocationId]
+		[intTaxLocationId]		,
+		[intProfitCenter]
 	)
 	OUTPUT 
 		inserted.intBillId 
@@ -620,6 +622,27 @@ BEGIN TRY
 
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
+
+	--UPDATE AP ACCOUNT IF AP LOB OVERRIDE IS ENABLED
+	UPDATE B
+	SET B.intAccountId = O.intOverrideAccount
+	FROM tblAPBill B
+	INNER JOIN @voucherIds I ON I.intId = B.intBillId
+	OUTER APPLY (
+		SELECT TOP 1 intItemId
+		FROM tblAPBillDetail
+		WHERE intBillId = B.intBillId
+		ORDER BY intLineNo
+	) BD
+	OUTER APPLY (
+		SELECT TOP 1 intOverrideAccount
+		FROM dbo.fnAPGetOverrideLineOfBusinessAccount(B.intAccountId, BD.intItemId) O
+	) O
+	CROSS APPLY (
+		SELECT TOP 1 ysnOverrideAPLineOfBusinessSegment
+		FROM tblAPCompanyPreference
+		WHERE ysnOverrideAPLineOfBusinessSegment = 1
+	) CP
 
 	-- DECLARE @billDetailIds AS Id
 	-- INSERT INTO @billDetailIds

@@ -53,6 +53,8 @@ SELECT
 	, tf.intTradeFinanceId
 	, lot.dblReleasedQty
 	, lot.strLotAlias
+	, lot.strCertificate
+	, cropYear.strCropYear
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -81,3 +83,4 @@ FROM tblICLot lot
 	LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = item.intProductLineId
 	LEFT JOIN tblICWarrantStatus WarrantStatus ON WarrantStatus.intWarrantStatus = lot.intWarrantStatus
 	LEFT JOIN tblTRFTradeFinance tf ON tf.intTradeFinanceId = lot.intTradeFinanceId
+	LEFT JOIN tblCTCropYear cropYear ON cropYear.intCropYearId = lot.intSeasonCropYear

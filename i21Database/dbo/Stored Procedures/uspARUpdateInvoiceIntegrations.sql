@@ -29,6 +29,8 @@ DECLARE @intInvoiceId				INT
 	  , @InvoicesForContractDelete	InvoiceId
 	  , @strItemNo					NVARCHAR(100)
 	  , @strLocationName			NVARCHAR(100)
+	  , @strSourcedFrom				NVARCHAR(25)
+	  , @strTradeFinanceTransactionNo	NVARCHAR(25)
 
 --For Prepaid Contract Update
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
@@ -54,6 +56,8 @@ BEGIN TRY
 			, @strTransactionType = strTransactionType
 			, @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
 			, @strBatchId			= strBatchId
+			, @strSourcedFrom		= strSourcedFrom
+			, @strTradeFinanceTransactionNo = strTransactionNo
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
 
@@ -181,7 +185,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId, @strSessionId	
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds = @InvoiceIds, @strSessionId = @strSessionId
 	EXEC dbo.[uspARUpdateInvoiceReportFields] @InvoiceIds, 0
-	IF @FromPosting = 1 EXEC dbo.[uspARUpdateLotReleased] @intInvoiceId, @intUserId, @Post
+	IF @FromPosting = 1 AND @strSourcedFrom <> 'Logistics' AND @strTradeFinanceTransactionNo IS NOT NULL EXEC dbo.[uspARUpdateLotReleased] @intInvoiceId, @intUserId, @Post
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
 		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post

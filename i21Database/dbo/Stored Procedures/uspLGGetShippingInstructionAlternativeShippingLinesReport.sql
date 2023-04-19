@@ -4,7 +4,7 @@ AS
 BEGIN
 SELECT 
 	SLR.strShippingLine,
-	SLR.strServiceContractNumber,
+	strServiceConNumFreightClause = SLR.strServiceContractNumber + ' ' + SLR.strFreightClause,
 	SLR.strRank
 FROM vyuLGLoadShippingLineRank SLR
 JOIN tblLGLoad L ON L.intLoadId = SLR.intLoadId

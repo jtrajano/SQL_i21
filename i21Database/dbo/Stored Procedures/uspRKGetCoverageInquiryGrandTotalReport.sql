@@ -150,6 +150,7 @@ DECLARE @tmpRawData AS TABLE (intRowNumber1 INT
 		, Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, PriceStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, intFutureMonthOrder INT
 		, strAccountNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dblNoOfContract NUMERIC(24, 10)
 		, strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS

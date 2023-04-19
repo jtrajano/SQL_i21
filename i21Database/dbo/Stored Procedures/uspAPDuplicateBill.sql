@@ -215,7 +215,9 @@ ON 1 = 0
 			[int1099Form], 
 			[int1099Category], 
 			[intLocationId],
-			[intLineNo]
+			[intLineNo],
+			[dblRate],
+			[intCurrencyExchangeRateTypeId]
 		)
 		VALUES
 		(
@@ -254,7 +256,9 @@ ON 1 = 0
 			[int1099Form], 
 			[int1099Category], 
 			[intLocationId],
-			[intLineNo]
+			[intLineNo],
+			[dblRate],
+			[intCurrencyExchangeRateTypeId]
 		)
 		OUTPUT inserted.intBillDetailId, A.intBillDetailId INTO @billDetailTaxes(intCreatedBillDetailId, originalBillDetailId); --get the new and old bill detail id
 

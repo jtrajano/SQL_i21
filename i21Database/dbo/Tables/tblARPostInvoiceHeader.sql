@@ -171,6 +171,9 @@ CREATE TABLE tblARPostInvoiceHeader (
     ,[dblSurcharge]                         NUMERIC(18,6)   NULL DEFAULT 0
     ,[intCompanySegment]                    INT             NULL
     ,CONSTRAINT [PK_tblARPostInvoiceHeader_intId] PRIMARY KEY CLUSTERED ([intId] ASC)
+    ,[dblPercentage]                        NUMERIC(18,6)   NOT NULL DEFAULT 0
+    ,[dblProvisionalTotal]                  NUMERIC(18,6)   NOT NULL DEFAULT 0
+    ,[dblBaseProvisionalTotal]              NUMERIC(18,6)   NOT NULL DEFAULT 0
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceHeader_intInvoiceId] ON [dbo].[tblARPostInvoiceHeader] (intInvoiceId)

@@ -484,6 +484,8 @@ BEGIN
 			, intConcurrencyId 
 			, intContractHeaderId 
 			, intContractDetailId 
+			, intOverrideBankValuationId
+			, strOverrideBankValuation
 		)
 		SELECT 
 			strAction = @strAction + ' ' + CASE WHEN r.strReceiptType = 'Inventory Return' THEN 'Inventory Return' ELSE 'Inventory Receipt' END 
@@ -531,6 +533,8 @@ BEGIN
 			, intConcurrencyId = 1
 			, intContractHeaderId = receiptContract.intContractHeaderId
 			, intContractDetailId = receiptContract.intContractDetailId
+			, intOverrideFacilityValuation = bvr.intBankValuationRuleId
+			, strOverrideFacilityValuation = bvr.strBankValuationRule
 		FROM 
 			tblICInventoryReceipt r LEFT JOIN tblTRFTradeFinance tf
 				ON r.strTradeFinanceNumber = tf.strTradeFinanceNumber

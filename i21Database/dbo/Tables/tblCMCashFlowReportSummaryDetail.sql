@@ -21,6 +21,7 @@
 	[intCurrencyExchangeRateTypeId]		INT NULL,
 	[dblRate]							NUMERIC(18, 6) NOT NULL DEFAULT(1),
 	[intAccountId]						INT NULL,
+	[intBankId]							INT NULL,
 	[intBankAccountId]					INT NULL,
 	[intCompanyLocationId]				INT NULL,
 	[intConcurrencyId]					INT DEFAULT 1 NOT NULL,

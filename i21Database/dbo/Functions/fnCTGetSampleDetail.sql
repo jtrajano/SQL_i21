@@ -64,7 +64,7 @@ BEGIN
 	SELECT	TOP 1 SA.strSampleNumber,
 			SA.strContainerNumber,
 			ST.strSampleTypeName,
-			@strSampleStatus,
+			ISNULL(@strSampleStatus, SS.strStatus),  
 			SA.dtmTestingEndDate,
 			@dblRepresentingQty	
 	FROM	tblQMSample			SA

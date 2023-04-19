@@ -42,7 +42,20 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
-
+	DECLARE	 @AllowIntraEntries BIT
+			,@DueToAccountId	INT
+			,@DueFromAccountId  INT
+			,@OverrideCompanySegment  BIT
+			,@OverrideLocationSegment  BIT
+			,@OverrideLineOfBusinessSegment BIT
+	SELECT TOP 1
+		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END, 
+		  @DueToAccountId	= ISNULL([intDueToAccountId], 0), 
+		  @DueFromAccountId = ISNULL([intDueFromAccountId], 0),
+		  @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+		  @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+	FROM tblAPCompanyPreference
 	
 	INSERT INTO @returntable (
 		[dtmDate]                   ,
@@ -85,7 +98,7 @@ BEGIN
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]           =	1,
+		[dblExchangeRate]           =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	1,
 		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 2 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
@@ -99,7 +112,7 @@ BEGIN
 		[dblCreditForeign]          =	0,
 		[dblCreditReport]           =	0,
 		[dblReportingRate]          =	0,
-		[dblForeignRate]            =	Details.dblRate,
+		[dblForeignRate]            =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[strRateType]				=	Details.strCurrencyExchangeRateType
 	FROM tblAPBill voucher
 	INNER JOIN @prepayReversalIds prepaid ON voucher.intBillId = prepaid.intId
@@ -119,7 +132,7 @@ BEGIN
 	SELECT
 		[dtmDate]                   =	DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0),
 		[strBatchId]				=	@batchId,
-		[intAccountId]              =	Details.intAccountId,
+		[intAccountId]              =	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]                  =	0,
 		[dblCredit]                 =	CAST(Details.dblTotal * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]              =	0,
@@ -128,7 +141,7 @@ BEGIN
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]           =	1,
+		[dblExchangeRate]           =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	Details.intBillDetailId,
 		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 2 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
@@ -142,7 +155,7 @@ BEGIN
 		[dblCreditForeign]          =	(CASE WHEN ISNULL(NULLIF(Details.dblRate,0),1) != 1 THEN Details.dblTotal ELSE 0 END),
 		[dblCreditReport]           =	0,
 		[dblReportingRate]          =	0,
-		[dblForeignRate]            =	Details.dblRate,
+		[dblForeignRate]            =	ISNULL(NULLIF(Details.dblRate,0),1),
 		[strRateType]				=	Details.strCurrencyExchangeRateType
 	FROM tblAPBill voucher
 	INNER JOIN @prepayReversalIds prepaid ON voucher.intBillId = prepaid.intId
@@ -160,6 +173,10 @@ BEGIN
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
+	OUTER APPLY (
+				SELECT intOverrideAccount
+				FROM dbo.[fnARGetOverrideAccount](voucher.intAccountId, Details.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
 	WHERE voucher.intTransactionType IN (2,12,13)
 
 	UPDATE A

@@ -80,6 +80,8 @@ BEGIN
 		,intSalesYear = QB.intSalesYear
 		,strCatalogueType = QCT.strCatalogueType
 		,strManufacturingLeafType = QB.strLeafManufacturingType
+		,strCertificate = PCC.strCertificates
+		,strSCertificate = SCC.strCertificates
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -131,4 +133,6 @@ BEGIN
 	LEFT JOIN tblARMarketZone					MZ				ON		MZ.intMarketZoneId = QS.intMarketZoneId
 	LEFT JOIN vyuEMSearchEntityBroker			EB				ON		EB.intEntityId = QB.intBrokerId
 	LEFT JOIN tblQMGardenMark					GM				ON		GM.intGardenMarkId = QB.intGardenMarkId
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(PDetail.intContractDetailId) PCC
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(SDetail.intContractDetailId) SCC
 END

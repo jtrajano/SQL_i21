@@ -4,6 +4,7 @@
 	,@invoiceIds NVARCHAR(MAX) = NULL  
 	,@selectDue BIT = NULL
 	,@datePaid DATETIME = GETDATE
+	,@userId INT = NULL
 	,@tempDiscount DECIMAL(18,6) = 0
 	,@tempInterest DECIMAL(18,6) = 0
 	,@tempPayment DECIMAL(18,6) = 0
@@ -43,6 +44,28 @@ BEGIN
 	DECLARE @cntPaySched INT = 0;
 	DECLARE @vouchersForPaymentTran NVARCHAR(MAX);
 
+	--CHECK IF THE VOUCHER IS ALREADY SELECTED BY OTHER USER
+	IF EXISTS (
+		SELECT 1 FROM tblAPBill A
+		INNER JOIN fnGetRowsFromDelimitedValues(@vouchers) B
+			ON A.intBillId = B.intID AND B.intID > 0
+		WHERE
+			 A.intSelectedByUserId IS NOT NULL
+		AND A.intSelectedByUserId != @userId 
+	) 
+	OR EXISTS (
+		SELECT 1 FROM tblAPVoucherPaymentSchedule A
+		INNER JOIN fnGetRowsFromDelimitedValues(@vouchers) B
+			ON A.intBillId = B.intID AND B.intID > 0
+		WHERE
+			A.intSelectedByUserId IS NOT NULL
+			AND A.intSelectedByUserId != @userId
+	)
+	BEGIN
+		RAISERROR('Voucher(s) already selected by other user', 16, 1);
+		RETURN;
+	END
+
 	INSERT INTO @ids
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@vouchers) WHERE intID > 0
 
@@ -59,6 +82,7 @@ BEGIN
 	OR	B.ysnPaid = 1
 	OR	B.dblTotal = 0
 	OR	B.dblAmountDue > B.dblTotal
+	OR (B.intSelectedByUserId IS NOT NULL AND B.intSelectedByUserId != @userId)
 	)  
 
 	 --REMOVE INVALID INVOICES  
@@ -93,6 +117,7 @@ BEGIN
 	OR	B.dblTotal = 0
 	OR	B.dblAmountDue > B.dblTotal
 	OR	A2.ysnPaid = 1
+	OR (B.intSelectedByUserId IS NOT NULL AND B.intSelectedByUserId != @userId)
 	) 
 
 	SELECT @cntPaySched = COUNT(*) FROM @schedIds
@@ -120,6 +145,7 @@ BEGIN
 						,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
 						,voucher.dblTempWithheld = @updatedWithheld
 						,voucher.ysnReadyForPayment = 1
+						,voucher.intSelectedByUserId = CASE WHEN @readyForPayment = 1 THEN @userId ELSE NULL END
 				FROM tblAPBill voucher
 				INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 				INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
@@ -145,6 +171,7 @@ BEGIN
 													ELSE 0 END
 						,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
 						,voucher.dblTempWithheld = @updatedWithheld
+						,voucher.intSelectedByUserId = CASE WHEN @readyForPayment = 1 THEN @userId ELSE NULL END
 						,voucher.ysnReadyForPayment = CASE WHEN @selectDue = 1
 															THEN 
 																CASE WHEN @datePaid >= dbo.fnGetDueDateBasedOnTerm(voucher.dtmDate, voucher.intTermsId)
@@ -216,6 +243,7 @@ BEGIN
 					,voucher.dblTempWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END
 					,voucher.strTempPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END
 					,voucher.ysnReadyForPayment = @readyForPayment
+					,voucher.intSelectedByUserId = CASE WHEN @readyForPayment = 1 THEN @userId ELSE NULL END
 					,voucher.ysnDiscountOverride = CASE WHEN @discountOverride = 1 THEN 1 ELSE voucher.ysnDiscountOverride END
 					,voucher.dblDiscount = CASE WHEN @discountOverride = 1 THEN @tempDiscount ELSE voucher.dblDiscount END
 			FROM tblAPBill voucher
@@ -261,6 +289,7 @@ BEGIN
 			BEGIN
 				UPDATE A
 					SET A.ysnReadyForPayment = @readyForPayment
+					,A.intSelectedByUserId = CASE WHEN @readyForPayment = 1 THEN @userId ELSE NULL END
 				FROM tblAPVoucherPaymentSchedule A
 				INNER JOIN @schedIds A2 ON A.intId = A2.intId
 				INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
@@ -280,6 +309,7 @@ BEGIN
 																END
 															ELSE 0
 														END
+					,A.intSelectedByUserId = CASE WHEN @readyForPayment = 1 THEN @userId ELSE NULL END
 				FROM tblAPVoucherPaymentSchedule A
 				INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 				WHERE 
@@ -294,6 +324,7 @@ BEGIN
 		BEGIN
 			UPDATE A
 				SET A.ysnReadyForPayment = @readyForPayment
+				,A.intSelectedByUserId = CASE WHEN @readyForPayment = 1 THEN @userId ELSE NULL END
 				,@updatedPaymentAmt = A.dblPayment - A.dblDiscount
 				,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))

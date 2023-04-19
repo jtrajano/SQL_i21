@@ -24,6 +24,9 @@ BEGIN TRY
 		, @strCommodityCode NVARCHAR(100)
 		, @ysnPosted BIT
 		, @strRecordName NVARCHAR(100)
+		, @intCurrencyId INT
+		, @intFunctionalCurrencyId INT
+		, @ysnM2MAllowGLPostToNonFunctionalCurrency BIT
 
 	SELECT @intCommodityId = intCommodityId
 		, @dtmCurrenctGLPostDate = dtmPostDate
@@ -31,6 +34,7 @@ BEGIN TRY
 		, @intLocationId = intLocationId
 		, @ysnPosted = ysnPosted
 		, @strRecordName = strRecordName
+		, @intCurrencyId = intCurrencyId
 	FROM tblRKM2MHeader
 	WHERE intM2MHeaderId = @intM2MHeaderId
 
@@ -42,6 +46,9 @@ BEGIN TRY
 	FROM tblRKM2MHeader 
 	WHERE ysnPosted = 1 AND intCommodityId = @intCommodityId
 	ORDER BY dtmPostDate DESC
+	
+	SELECT @ysnM2MAllowGLPostToNonFunctionalCurrency = ysnM2MAllowGLPostToNonFunctionalCurrency FROM tblRKCompanyPreference
+	SELECT @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
 	IF (ISNULL(@ysnPosted, 0) = 1)
 	BEGIN
@@ -57,6 +64,11 @@ BEGIN TRY
 	IF (CONVERT(DATETIME, @dtmCurrenctGLPostDate) <= CONVERT(DATETIME, @dtmPreviousGLReverseDate))
 	BEGIN
 		RAISERROR('GL Post Date cannot be less than or equal to the previous post date.', 16, 1)
+	END
+
+	IF (ISNULL(@ysnM2MAllowGLPostToNonFunctionalCurrency, 0) = 0 AND @intCurrencyId <> @intFunctionalCurrencyId)
+	BEGIN
+		RAISERROR('GL are posted to Non-Functional Currency', 16, 1)
 	END
 
 	DECLARE @GLAccounts TABLE(strCategory NVARCHAR(100)
@@ -76,6 +88,11 @@ BEGIN TRY
 	FROM tblRKM2MPostPreview 
 	WHERE intM2MHeaderId = @intM2MHeaderId
 	
+	IF (@dtmCurrenctGLPostDate IS NULL)
+	BEGIN
+		SELECT TOP 1 @dtmCurrenctGLPostDate = dtmDate FROM #tmpPostRecap
+	END
+
 	IF (@dtmCurrenctGLPostDate IS NULL)
 	BEGIN
 		SELECT TOP 1 @dtmCurrenctGLPostDate = dtmDate FROM #tmpPostRecap
@@ -309,57 +326,61 @@ BEGIN TRY
 		SET @strBatchId = @batchId
 
 		INSERT INTO @GLEntries (
-			 [dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[intCurrencyId]
-			,[dtmTransactionDate]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[ysnIsUnposted]
-			,[strCode]
-			,[strReference]  
-			,[intEntityId]
-			,[intUserId]      
-			,[intSourceLocationId]
-			,[intSourceUOMId]
-			)
+			  [dtmDate]
+			, [strBatchId]
+			, [intAccountId]
+			, [dblDebit]
+			, [dblCredit]
+			, [dblDebitForeign]
+			, [dblCreditForeign]
+			, [dblDebitUnit]
+			, [dblCreditUnit]
+			, [strDescription]
+			, [intCurrencyId]
+			, [dtmTransactionDate]
+			, [strTransactionId]
+			, [intTransactionId]
+			, [strTransactionType]
+			, [strTransactionForm]
+			, [strModuleName]
+			, [intConcurrencyId]
+			, [dblExchangeRate]
+			, [dtmDateEntered]
+			, [ysnIsUnposted]
+			, [strCode]
+			, [strReference]  
+			, [intEntityId]
+			, [intUserId]      
+			, [intSourceLocationId]
+			, [intSourceUOMId]
+		)
 		SELECT [dtmDate]
-			,@batchId
-			,[intAccountId]
-			,ROUND([dblDebit],2)
-			,ROUND([dblCredit],2)
-			,ROUND([dblDebitUnit],2)
-			,ROUND([dblCreditUnit],2)
-			,[strDescription]
-			,[intCurrencyId]
-			,[dtmTransactionDate]
-			,[strTransactionId]
-			,[intTransactionId]
-			,'Mark To Market'--[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblExchangeRate]
-			,GETDATE() --[dtmDateEntered]
-			,[ysnIsUnposted]
-			,'RK'
-			,[strReference]  
-			,[intEntityId]
-			,[intUserId]  
-			,[intSourceLocationId]
-			,[intSourceUOMId]
+			, @batchId
+			, [intAccountId]
+			, ROUND([dblDebit],2)
+			, ROUND([dblCredit],2)
+			, [dblDebitForeign] = ROUND([dblDebitForeign], 2)
+			, [dblCreditForeign] = ROUND([dblCreditForeign], 2)
+			, ROUND([dblDebitUnit],2)
+			, ROUND([dblCreditUnit],2)
+			, [strDescription]
+			, [intCurrencyId]
+			, [dtmTransactionDate]
+			, [strTransactionId]
+			, [intTransactionId]
+			, 'Mark To Market'--[strTransactionType]
+			, [strTransactionForm]
+			, [strModuleName]
+			, [intConcurrencyId]
+			, [dblExchangeRate]
+			, GETDATE() --[dtmDateEntered]
+			, [ysnIsUnposted]
+			, 'RK'
+			, [strReference]  
+			, [intEntityId]
+			, [intUserId]  
+			, [intSourceLocationId]
+			, [intSourceUOMId]
 		FROM tblRKM2MPostPreview
 		WHERE intM2MHeaderId = @intM2MHeaderId
 
@@ -386,6 +407,8 @@ BEGIN TRY
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -412,6 +435,8 @@ BEGIN TRY
 			,[intAccountId]
 			,ROUND([dblCredit],2) --Reversal - credit value will become debit value
 			,ROUND([dblDebit],2)
+			, [dblDebitForeign] = ROUND([dblCreditForeign], 2)  --Reversal - credit value will become debit value
+			, [dblCreditForeign] = ROUND([dblDebitForeign], 2)
 			,ROUND([dblCreditUnit],2)
 			,ROUND([dblDebitUnit],2)
 			,[strDescription]
@@ -438,7 +463,6 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @ReverseGLEntries,1 
 	
 		UPDATE tblRKM2MPostPreview SET strReversalBatchId = @strReversalBatchId WHERE intM2MHeaderId = @intM2MHeaderId
-	
 
 	COMMIT TRAN	
 END TRY

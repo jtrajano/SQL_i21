@@ -33,7 +33,9 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
 		@ysnPrintFromCFLocal			BIT				= 0,
 		@ysnOverrideCashFlowLocal  		BIT    			= 0,
-		@strCustomerAgingBy			    NVARCHAR(250)	= NULL
+		@strCustomerAgingBy			    NVARCHAR(250)	= NULL,
+	    @blbLogo						VARBINARY(MAX),
+	    @strLogoType					NVARCHAR(10)
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#ARPOSTEDPAYMENT') IS NOT NULL) DROP TABLE #ARPOSTEDPAYMENT
@@ -229,6 +231,16 @@ ELSE
 		SELECT CL.intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation CL WITH (NOLOCK) 
 	END
+
+-- SET LOGO
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header'), @strLogoType = 'Attachment'
+ 
+SELECT TOP 1 
+	  @blbLogo = ISNULL(imgLogo, @blbLogo)
+	, @strLogoType = CASE WHEN imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+FROM tblSMLogoPreference 
+WHERE intCompanyLocationId IN (SELECT TOP 1 intCompanyLocationId FROM #ADLOCATION)
+	AND (ysnARInvoice = 1 OR ysnDefault = 1)
 
 --ACCOUNT STATUS FILTER
 IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
@@ -446,6 +458,7 @@ WHERE CM.intOriginalInvoiceId IN (
 AND CM.ysnPosted =1
 AND CM.strTransactionType = 'Credit Memo'
 AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+AND I.strType <> 'Tax Adjustment'
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 BEGIN
@@ -604,6 +617,8 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyAddress
 	 , strAgingType
 	 , strReportLogId
+	 , strLogoType
+	 , blbLogo
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
@@ -632,6 +647,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= @strAgingType
 	 , strReportLogId		= @strReportLogId
+	 , strLogoType			= @strLogoType
+	 , blbLogo				= @blbLogo
 FROM (
 SELECT intEntityCustomerId	= B.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)

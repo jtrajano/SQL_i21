@@ -124,6 +124,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	strPackingDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dblYield NUMERIC(18, 6) NULL, 
 	intCurrencyExchangeRateId INT NULL,
+	intRevaluationCurrencyExchangeRateId INT NULL,
 	intRateTypeId INT NULL,
     intCreatedById INT,
 	dtmCreated DATETIME,
@@ -151,6 +152,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dtmFinalPNL DATETIME NULL,
 	intPricingStatus INT,
 	dtmStartDateUTC datetime NULL,
+	intLogisticsLeadId INT NULL,
 	-- Reference Pricing
 	dblRefFuturesQty NUMERIC(18, 6) NULL,
 	intRefFuturesItemUOMId INT NULL,
@@ -254,6 +256,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblSalesPrice NUMERIC(18, 6) NULL DEFAULT(0),
 	[intFeedPriceItemUOMId] [int] NULL,
 	[intFeedPriceCurrencyId] [int] NULL,
+	[intMTMPointId] [int] NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
@@ -321,6 +324,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRateType_intRateTypeId_intCurrencyExchangeRateId] FOREIGN KEY (intRateTypeId) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+
+
 	--CONSTRAINT [FK_tblCTContractDetail_tblEMEntityFarm_intFarmFieldId] FOREIGN KEY ([intFarmFieldId]) REFERENCES [tblEMEntityFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMPurchasingGroup_intPurchasingGroupId] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup]([intPurchasingGroupId]),
@@ -768,7 +773,6 @@ CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
     AFTER DELETE
 AS
 BEGIN
-	
 	DELETE FROM tblCTContractCost 
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM DELETED)
 

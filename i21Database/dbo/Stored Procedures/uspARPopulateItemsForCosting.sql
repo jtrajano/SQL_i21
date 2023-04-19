@@ -147,9 +147,8 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 		(ARID.[intLoadDetailId] IS NOT NULL AND ARID.intTicketId IS NOT NULL)
 		)
 	AND ARID.[intItemId] IS NOT NULL
-	--AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
-	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
-	AND ARID.[strTransactionType] <> 'Debit Memo'							
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
+	AND ARID.[strTransactionType] NOT IN ('Debit Memo', 'Tax Adjustment')
 	AND ARID.[intStorageScheduleTypeId] IS NULL
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))))
@@ -252,7 +251,7 @@ WHERE (ARID.[strImportFormat] IS NULL OR ((ARID.[strImportFormat] <> 'CarQuest')
     AND ARID.[ysnImpactInventory] = 1
 	AND ARID.[intItemId] IS NOT NULL
 	AND ARIC.[intBundleItemId] IS NOT NULL
-	AND ARID.[strTransactionType] <> 'Debit Memo'	
+	AND ARID.[strTransactionType] NOT IN ('Debit Memo', 'Tax Adjustment')
 	AND ARID.[strItemType] = 'Bundle'
 	AND ICI.[strType] <> 'Non-Inventory'
 	AND ARID.[intStorageScheduleTypeId] IS NULL

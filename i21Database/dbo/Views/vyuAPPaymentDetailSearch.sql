@@ -47,3 +47,4 @@ LEFT JOIN tblGLAccount M ON M.intAccountId = B.intAccountId
 LEFT JOIN tblSMCurrency N ON N.intCurrencyID = A.intCurrencyId
 LEFT JOIN vyuAPFiscalPeriod P ON MONTH(A.dtmDatePaid) = P.intMonth AND YEAR(A.dtmDatePaid) = P.intYear
 LEFT JOIN tblAPVoucherPaymentSchedule O ON O.intId = B.intPayScheduleId
+WHERE I.intBillId IS NOT NULL OR J.intInvoiceId IS NOT NULL

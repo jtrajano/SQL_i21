@@ -24,6 +24,9 @@ BEGIN
 		@dblBucket8 DECIMAL(18, 6) = 0,
 		@dblBucket9 DECIMAL(18, 6) = 0
 
+	DECLARE @intDefaultCurrencyId INT
+	SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM [dbo].[tblSMCompanyPreference]
+
 	INSERT INTO tblCMCashFlowReportSummaryDetail (
 			[intCashFlowReportId]
 			,[intTransactionId]
@@ -55,7 +58,7 @@ BEGIN
 		strTransactionId,
 		strTransactionType,
 		dtmDate,
-		dblAmount * RateFilter.dblRateBucket1,
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket1) END,
 		0,
 		0,
 		0,
@@ -102,7 +105,7 @@ BEGIN
 		strTransactionType,
 		dtmDate,
 		0,
-		(dblAmount * RateFilter.dblRateBucket2),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket2) END,
 		0,
 		0,
 		0,
@@ -149,7 +152,7 @@ BEGIN
 		dtmDate,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket3),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket3) END,
 		0,
 		0,
 		0,
@@ -196,7 +199,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket4),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket4) END,
 		0,
 		0,
 		0,
@@ -243,7 +246,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket5),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket5) END,
 		0,
 		0,
 		0,
@@ -290,7 +293,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket6),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket6) END,
 		0,
 		0,
 		0,
@@ -337,7 +340,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket7),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket7) END,
 		0,
 		0,
 		intCurrencyId,
@@ -384,7 +387,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket8),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket8) END,
 		0,
 		intCurrencyId,
 		@intReportingCurrencyId,
@@ -431,7 +434,7 @@ BEGIN
 		0,
 		0,
 		0,
-		(dblAmount * RateFilter.dblRateBucket9),
+		CASE WHEN @intDefaultCurrencyId = @intReportingCurrencyId THEN dblAmount ELSE (dblAmount * RateFilter.dblRateBucket9) END,
 		intCurrencyId,
 		@intReportingCurrencyId,
 		RateTypeFilter.intRateTypeBucket9,

@@ -30,18 +30,18 @@ SELECT A.*
 	, GL23.strAccountId strCommissionExpenseId
 	, GL24.strAccountId strAllocatedContractGainOrLossId
 	, GL25.strAccountId strAllocatedContractGainOrLossOffsetId
-	, strDefaultInstrument = CASE WHEN intDefaultInstrumentId = 1 THEN 'Exchange Traded'
-								WHEN intDefaultInstrumentId = 2 THEN 'OTC'
-								WHEN intDefaultInstrumentId = 3 THEN 'OTC - Others' END COLLATE Latin1_General_CI_AS
+	, strDefaultInstrument = CASE WHEN A.intDefaultInstrumentId = 1 THEN 'Exchange Traded'
+								WHEN A.intDefaultInstrumentId = 2 THEN 'OTC'
+								WHEN A.intDefaultInstrumentId = 3 THEN 'OTC - Others' END COLLATE Latin1_General_CI_AS
 	, strDefaultInstrumentType = CASE WHEN intDefaultInstrumentTypeId = 1 THEN 'Futures'
 									WHEN intDefaultInstrumentTypeId = 2 THEN 'Options'
 									WHEN intDefaultInstrumentTypeId = 3 THEN 'Currency Contract' END COLLATE Latin1_General_CI_AS
-	, strPostToGL = CASE WHEN intPostToGLId = 1 THEN 'Company Configurations'
-						WHEN intPostToGLId = 2 THEN 'Commodity GL' END COLLATE Latin1_General_CI_AS
-	, strMarkExpiredMonthPosition = CASE WHEN intMarkExpiredMonthPositionId = 1 THEN 'Validate Expired'
-								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
-								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END COLLATE Latin1_General_CI_AS
-	, rv.strRiskView
+	, strPostToGL = CASE WHEN A.intPostToGLId = 1 THEN 'Company Configurations'
+						WHEN A.intPostToGLId = 2 THEN 'Commodity GL' END COLLATE Latin1_General_CI_AS
+	, strMarkExpiredMonthPosition = CASE WHEN A.intMarkExpiredMonthPositionId = 1 THEN 'Validate Expired'
+								WHEN A.intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
+								WHEN A.intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END COLLATE Latin1_General_CI_AS
+	, strRiskView = rv.strRiskView
 	, strTonnageUOM = UOM.strUnitMeasure
 FROM tblRKCompanyPreference A
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId

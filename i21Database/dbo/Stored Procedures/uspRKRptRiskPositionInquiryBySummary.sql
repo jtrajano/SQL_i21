@@ -14,7 +14,8 @@ DECLARE @idoc INT,
 	@strPositionBy NVARCHAR(100) = NULL,
 	@dtmPositionAsOf DATETIME = NULL,
 	@strReportName NVARCHAR(100) = NULL,
-	@strUomType NVARCHAR(100) = NULL
+	@strUomType NVARCHAR(100) = NULL,
+	@strOriginIds NVARCHAR(500) = NULL
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL
@@ -103,6 +104,9 @@ FROM @temp_xml_table
 WHERE [fieldname] = 'strUomType'
 
 SET @intDecimal = 4
+SELECT @strOriginIds = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strOriginIds'
 
 DECLARE @strCommodityCodeH NVARCHAR(100)
 DECLARE @strFutureMarketH NVARCHAR(100)
@@ -175,6 +179,7 @@ DECLARE @temp AS TABLE (
 	Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	PriceStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS,
+	intFutureMonthOrder INT,
 	strAccountNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	dblNoOfContract DECIMAL(24, 10),
 	strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
@@ -199,8 +204,10 @@ DECLARE @temp AS TABLE (
 	, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblHedgedLots DECIMAL(24, 10)
+	, dblToBeHedgedLots DECIMAL(24, 10)
 	)
 
 DECLARE @intRiskViewId INT
@@ -209,7 +216,6 @@ SELECT TOP 1 @intRiskViewId = intRiskViewId
 	, @ysnSubTotalByBook = ysnSubTotalByBook
 FROM tblRKCompanyPreference
 
-
 IF (@intRiskViewId = 1)
 BEGIN
 	INSERT INTO @temp (
@@ -217,6 +223,7 @@ BEGIN
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo
@@ -243,6 +250,8 @@ BEGIN
 		, strClass
 		, strCertificationName 
 		, strCropYear 
+		, dblHedgedLots
+		, dblToBeHedgedLots
 		)
 	EXEC uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,
 		@intCompanyLocationId = @intCompanyLocationId,
@@ -254,7 +263,8 @@ BEGIN
 		@intForecastWeeklyConsumptionUOMId = @intForecastWeeklyConsumptionUOMId,
 		@intBookId = @intBookId,
 		@intSubBookId = @intSubBookId,
-		@strPositionBy = @strPositionBy
+		@strPositionBy = @strPositionBy,
+		@strOriginIds = @strOriginIds
 
 	UPDATE @temp
 	SET strGroup = CASE WHEN Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') THEN Selection WHEN Selection = 'Specialities & Low grades' THEN Selection WHEN Selection = 'Total speciality delta fixed' THEN Selection WHEN Selection = 'Terminal position (a. in lots )' THEN Selection WHEN Selection = 'Terminal position (Avg Long Price)' THEN Selection WHEN Selection LIKE ('%Terminal position (b.%') THEN Selection WHEN Selection = 'Delta options' THEN Selection WHEN Selection = 'F&O' THEN '8.' + Selection WHEN Selection LIKE ('%Total F&O(b. in%') THEN Selection WHEN Selection IN ('Outright coverage', 'Net market risk') THEN Selection WHEN Selection IN ('Switch position', 'Futures required') THEN Selection END
@@ -322,6 +332,7 @@ BEGIN
 		Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		PriceStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS,
+		intFutureMonthOrder INT,
 		strAccountNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 		dblNoOfContract DECIMAL(24, 10),
 		strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
@@ -345,7 +356,7 @@ BEGIN
 		strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 		intSubBookId INT,
 		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-		strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+		strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 		strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
 
@@ -356,6 +367,7 @@ BEGIN
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo

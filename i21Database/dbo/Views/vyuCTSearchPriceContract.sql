@@ -1,7 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuCTSearchPriceContract]
 
 AS 
-	with cpHTA as (
+	with weightedPrice as (
+		select
+			pf.intContractHeaderId
+			,intContractDetailId = isnull(pf.intContractDetailId,0)
+			,dblweightedAvg = sum((fd.dblNoOfLots * fd.dblFinalPrice)) / sum(fd.dblNoOfLots)
+		from
+			tblCTPriceFixation pf
+			join tblCTPriceFixationDetail fd on fd.intPriceFixationId = pf.intPriceFixationId
+		group by pf.intContractHeaderId,pf.intContractDetailId
+	),
+	cpHTA as (
 		select top 1 intPricingTypeId = (case when isnull(ysnEnableHTAMultiplePricing,0) = 1 then 3 else 0 end) from tblCTCompanyPreference
 	),
 	CTEGridContractDetail AS
@@ -91,7 +101,68 @@ AS
 	)
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY t.intContractHeaderId) AS INT) AS intUniqueId
-			,t.*
+			--,t.*
+			,t.intPriceContractId
+			,t.intPriceFixationId
+			,t.intContractDetailId
+			,t.intContractHeaderId
+			,t.strContractNumber
+			,t.intContractSeq
+			,t.intContractTypeId
+			,t.strContractType
+			,t.intEntityId
+			,t.strEntityName
+			,t.intCommodityId
+			,t.strCommodityDescription
+			,t.ysnMultiplePriceFixation
+			,t.dblQuantity
+			,t.strUOM
+			,t.dblNoOfLots
+			,t.strLocationName
+			,t.intItemId
+			,t.intItemUOMId
+			,t.intFutureMarketId
+			,t.strFutMarketName
+			,t.intFutureMonthId
+			,t.strFutureMonth
+			,t.dblBasis
+			,t.dblFutures
+			,t.dblCashPrice
+			,t.intPriceItemUOMId
+			,t.intBookId
+			,t.intSubBookId
+			,t.intSalespersonId
+			,t.intCurrencyId
+			,t.intCompanyLocationId
+			,t.strStatus
+			,t.dblLotsFixed
+			,t.dblBalanceNoOfLots
+			,t.intLotsHedged
+			,dblFinalPrice = case when t.strStatus = 'Fully Priced' then t.dblFinalPrice else null end
+			,t.intDefaultCommodityUOMId
+			,t.intDiscountScheduleCodeId
+			,t.intBasisCommodityUOMId
+			,t.strEntityContract
+			,t.dtmStartDate
+			,t.dtmEndDate
+			,t.strBook
+			,t.strSubBook
+			,t.strPriceUOM
+			,t.strPriceContractNo
+			,t.strCurrency
+			,t.ysnSubCurrency
+			,t.strMainCurrency
+			,t.strPricingType
+			,t.strItemNo
+			,t.strItemDescription
+			,t.strItemShortName
+			,t.intHeaderBookId
+			,t.intHeaderSubBookId
+			,t.intDetailBookId
+			,t.intDetailSubBookId
+			,t.intInvoiceCurrencyId
+			,t.strInvoiceCurrency
+			,t.intMainCurrencyId
 			,x.dblQuantityPriced
 			,x.dblQuantityUnpriced
 			,x.dblAppliedQty
@@ -332,7 +403,7 @@ cross apply (select * from cpHTA) hta
 					SUM(CASE WHEN (T.intPriceFixationId) IS NOT NULL THEN 0 ELSE PFD.dblNoOfLots END) [dblLotsFixed],
 					PF.[dblTotalLots]-SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END) AS dblBalanceNoOfLots,
 					CASE WHEN ISNULL(SUM(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN 0 ELSE PFD.dblNoOfLots END),0) = 0 THEN 0 ELSE PF.intLotsHedged END intLotsHedged,
-					MAX(CASE WHEN (T.intPriceFixationId) IS NOT  NULL THEN null ELSE PFD.dblFinalPrice END) dblFinalPrice,
+					dblFinalPrice = max(CASE WHEN (T.intPriceFixationId) IS NOT NULL THEN null ELSE wap.dblweightedAvg END),
 				
 					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
 					CD.intDiscountScheduleCodeId,
@@ -382,6 +453,7 @@ cross apply (select * from cpHTA) hta
 									join  tblSMTransaction t on t.intRecordId = pf.intPriceContractId and t.intScreenId = 119 and t.strApprovalStatus in 	('Waiting for Approval', 'Waiting for Submit')
 									group By PFD.intPriceFixationId
 		) T on T.intPriceFixationId = PF.intPriceFixationId  and T.intPriceFixationDetailId = PFD.intPriceFixationDetailId
+		left join weightedPrice wap on wap.intContractHeaderId = PF.intContractHeaderId and wap.intContractDetailId = isnull(PF.intContractDetailId,0)
 		
 		GROUP BY
 		PF.intPriceContractId,

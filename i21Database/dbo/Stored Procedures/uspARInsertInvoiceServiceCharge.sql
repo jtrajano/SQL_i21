@@ -128,7 +128,7 @@ AS
 			,@intCompanyLocationId
 			,[intSalespersonId]
 			,[intEntityContactId]
-			,ISNULL(@dtmServiceChargeDate, @dateNow)
+			,ISNULL(@dtmAsOfDate, ISNULL(@dtmServiceChargeDate, @dateNow))
 			,[intShipViaId]
 			,NULL --[strPONumber]
 			,ISNULL(@intCompTermsId, intTermsId)

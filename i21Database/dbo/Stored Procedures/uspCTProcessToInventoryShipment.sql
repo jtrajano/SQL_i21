@@ -170,6 +170,7 @@ AS
 		JOIN	tblEMEntityLocation		EL	ON	EL.intEntityId			=	CH.intEntityId
 											AND	EL.ysnDefaultLocation	=	1						
 		WHERE	CC.intContractDetailId	=	@intContractDetailId
+		and ISNULL(CC.ysnBasis,0) <> 1
 
 		IF NOT EXISTS(SELECT * FROM  @ShipmentStagingTable)
 		BEGIN

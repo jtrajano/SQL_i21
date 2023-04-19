@@ -1,8 +1,8 @@
 CREATE VIEW [dbo].[vyuGLSummaryCompare]      
    AS      
-    SELECT * FROM (      
-        SELECT  A.strReport,A.dtmDateEntered,A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*,
-        E.strUOMCode, E.dblLbsPerUnit , A.intCurrencyId , F.strCurrency,B.intUnnaturalAccountId            
+   SELECT strReport,dtmDateEntered,dtmDate,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,dblDebitForeign,dblCreditForeign,strCode,strDescription,strAccountGroup,strAccountType,intAccountId,strAccountId,[Primary Account],Location,Company,strUOMCode,dblLbsPerUnit,intCurrencyId,strCurrency,intUnnaturalAccountId,intUnAccountId,strUnAccountId,strUnDescription,strUnAccountGroup,strUnAccountType,UnLocation,[UnPrimary Account] FROM (          
+        SELECT  A.strReport,A.dtmDateEntered,A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit,A.dblDebitForeign,A.dblCreditForeign, ISNULL(A.strCode,'') strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.intAccountId,D.strAccountId,D.[Primary Account],D.Location,D.Company,    
+        E.strUOMCode, E.dblLbsPerUnit , A.intCurrencyId , F.strCurrency,B.intUnnaturalAccountId    
         FROM  dbo.tblGLPostedCompare AS A         
         INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId         
         INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId        

@@ -10,6 +10,7 @@
 	, @intBookId INT = NULL
 	, @intSubBookId INT = NULL
 	, @strPositionBy NVARCHAR(100) = NULL
+	, @strOriginIds NVARCHAR(500) = NULL
 
 AS
 
@@ -35,6 +36,29 @@ BEGIN
 	IF ISNULL(@intForecastWeeklyConsumptionUOMId, 0) = 0
 	BEGIN
 		SET @intForecastWeeklyConsumptionUOMId = @intUOMId
+	END
+
+	DECLARE @ysnSelectAllOrigin BIT = 0
+
+	SELECT intCountryID = CAST(a.Item AS INT)
+	INTO #tmpOriginIds
+	FROM [dbo].[fnSplitString](@strOriginIds, ',') a
+	WHERE @strPositionBy = 'Origin'
+
+	DELETE FROM #tmpOriginIds
+	WHERE intCountryID = 0
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpOriginIds)
+	BEGIN
+		INSERT INTO #tmpOriginIds 
+		SELECT -1
+		
+		INSERT INTO #tmpOriginIds
+		SELECT DISTINCT intCountryID
+		FROM tblICCommodityAttribute
+		WHERE strType = 'Origin'
+
+		SELECT @ysnSelectAllOrigin = 1
 	END
 
 	DECLARE @strUnitMeasure NVARCHAR(MAX)
@@ -102,7 +126,7 @@ BEGIN
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblHedgedLots DECIMAL(24, 10)
 		, dblToBeHedgedLots DECIMAL(24, 10)
@@ -144,7 +168,7 @@ BEGIN
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblHedgedLots DECIMAL(24, 10)
 		, dblToBeHedgedLots DECIMAL(24, 10)
@@ -152,7 +176,12 @@ BEGIN
 
 	INSERT INTO @PricedContractList
 	SELECT fm.strFutureMonth
-		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(ca.strDescription, '') ELSE ISNULL(cv.strEntityName, '') END
+		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' 
+															THEN ISNULL(ca.strDescription, '') 
+															WHEN @strPositionBy = 'Origin'
+															THEN ISNULL(origin.strDescription, '(Blank)')
+															ELSE ISNULL(cv.strEntityName, '') 
+															END
 		, dblNoOfContract = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN ISNULL(dblBalance, 0)
 				ELSE (CASE WHEN intContractStatusId = 6 THEN (ISNULL(dblDetailQuantity, 0) - ISNULL(dblBalance, 0)) ELSE dblDetailQuantity END) END)
 		, strTradeNo = LEFT(strContractType, 1) + ' - ' + strContractNumber + ' - ' + CONVERT(NVARCHAR, intContractSeq)
@@ -189,7 +218,8 @@ BEGIN
 		, strRegion = region.strDescription
 		, strSeason = season.strDescription
 		, strClass = class.strDescription
-		, strCertificationName = certification.strCertificationName
+		--, strCertificationName = certification.strCertificationName
+		, strCertificationName = CC.strContractCertifications
 		, strCropYear = cropYear.strCropYear
 		, cv.dblHedgedLots
 		, cv.dblToBeHedgedLots
@@ -199,7 +229,7 @@ BEGIN
 	JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = cv.intFutureMonthId
 	JOIN tblICItemUOM u ON cv.intItemUOMId = u.intItemUOMId
 	JOIN tblICItem ic ON ic.intItemId = cv.intItemId
-	LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+	LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 	LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 	LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 	LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = cv.intCommodityId AND um.intUnitMeasureId = cv.intUnitMeasureId
@@ -207,15 +237,33 @@ BEGIN
 	LEFT JOIN tblICCommodityAttribute region ON region.intCommodityAttributeId = ic.intRegionId
 	LEFT JOIN tblICCommodityAttribute season ON season.intCommodityAttributeId = ic.intSeasonId
 	LEFT JOIN tblICCommodityAttribute class ON class.intCommodityAttributeId = ic.intClassVarietyId
-	LEFT JOIN tblICCertification certification
-		ON certification.intCertificationId = ic.intCertificationId
+	--LEFT JOIN tblICCertification certification
+	--	ON certification.intCertificationId = ic.intCertificationId
 	LEFT JOIN tblCTCropYear cropYear
 		ON cropYear.intCropYearId = cv.intCropYearId
+	OUTER APPLY (
+		SELECT strContractCertifications = (LTRIM(STUFF((
+			SELECT ', ' + ICC.strCertificationName
+			FROM tblCTContractCertification CTC
+			JOIN tblICCertification ICC
+				ON ICC.intCertificationId = CTC.intCertificationId
+			WHERE CTC.intContractDetailId = cv.intContractDetailId
+			ORDER BY ICC.strCertificationName
+			FOR XML PATH('')), 1, 1, ''))
+		) COLLATE Latin1_General_CI_AS
+	) CC
 	WHERE cv.intCommodityId = @intCommodityId
 		AND cv.intFutureMarketId = @intFutureMarketId
 		AND cv.intContractStatusId NOT IN (2, 3)
 		AND ISNULL(intBookId, 0) = ISNULL(@intBookId, ISNULL(intBookId, 0))
 		AND ISNULL(intSubBookId, 0) = ISNULL(@intSubBookId, ISNULL(intSubBookId, 0))
+		AND (@strPositionBy <> 'Origin'
+			OR
+			 (@strPositionBy = 'Origin' 
+			  AND (ISNULL(origin.intCountryID, 0) = 0 AND -1 IN (SELECT intCountryID FROM #tmpOriginIds)
+				  OR origin.intCountryID IN (SELECT intCountryID FROM #tmpOriginIds)
+				  )
+			 ))
 
 	SELECT *
 	INTO #ContractTransaction
@@ -429,7 +477,7 @@ BEGIN
 	INTO #DeltaPrecent
 	FROM (
 		SELECT strFutureMonth
-			, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
+			, strAccountNumber = strAccountNumber + ' (Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
 			, dblNoOfContract = ((CASE WHEN intPricingTypeId = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId,dblQuantity * dblRatioContractSize) ELSE dblNoOfContract END) * dblDeltaPercent) / 100
 			, strTradeNo
 			, TransactionDate
@@ -502,7 +550,7 @@ BEGIN
 			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
-				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
+				, strAccountNumber = strAccountNumber + ' (Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
 				, dblNoOfContract = 0
 				, strTradeNo
 				, TransactionDate
@@ -586,7 +634,7 @@ BEGIN
 			, dblToBeHedgedLots
 		FROM (
 			SELECT strFutureMonth
-				, strAccountNumber = strAccountNumber + '(Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
+				, strAccountNumber = strAccountNumber + ' (Delta=' + CONVERT(NVARCHAR, LEFT(dblDeltaPercent, 4)) + '%)'
 				, dblNoOfContract = 0
 				, strTradeNo
 				, TransactionDate
@@ -1050,7 +1098,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+			LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 			LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 			LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1139,7 +1187,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+			LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 			LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 			LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1229,7 +1277,7 @@ BEGIN
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 		LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-		LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+		LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 		LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 		LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1347,7 +1395,7 @@ BEGIN
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 			LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+			LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 			LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 			LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1438,7 +1486,7 @@ BEGIN
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 		LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-		LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+		LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 		LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 		LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1558,7 +1606,7 @@ BEGIN
 				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-				LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+				LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 				LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 				LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 				LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -1653,7 +1701,7 @@ BEGIN
 				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = CD.intCompanyLocationId
 				LEFT JOIN tblICItem ic ON ic.intItemId = CD.intItemId
-				LEFT JOIN tblICCommodityProductLine pl ON ic.intCommodityId = pl.intCommodityId AND ic.intProductLineId = pl.intCommodityProductLineId
+				LEFT JOIN tblICCommodityProductLine pl ON ic.intProductLineId = pl.intCommodityProductLineId
 				LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = ic.intProductTypeId
 				LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
 				LEFT JOIN tblICCommodityAttribute grade ON grade.intCommodityAttributeId = ic.intGradeId
@@ -2228,6 +2276,10 @@ BEGIN
 			, Selection
 			, PriceStatus
 			, strFutureMonth
+			, intFutureMonthOrder = ROW_NUMBER() OVER (ORDER BY CASE WHEN strFutureMonth = 'Previous' THEN CAST('01/01/1900' AS DATE)
+																	WHEN strFutureMonth = 'Total' THEN CAST('01/01/9999' AS DATE)
+																	ELSE CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, '))
+																	END )
 			, strAccountNumber
 			, dblNoOfContract = CONVERT(DOUBLE PRECISION, ROUND(ISNULL(dblNoOfContract, 0), ISNULL(@intDecimal,0)))
 			, strTradeNo
@@ -2263,4 +2315,6 @@ BEGIN
 					WHEN strFutureMonth ='Total' THEN '01/01/9999'
 					WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) 
 	END
+
+	DROP TABLE #tmpOriginIds
 END

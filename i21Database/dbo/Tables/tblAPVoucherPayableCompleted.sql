@@ -46,6 +46,7 @@
 	[strFreightTerm]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
 	[strTaxGroup]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[ysnOverrideTaxGroup] 			BIT NULL,
 	[intItemLocationId]				INT NULL,
 	[strItemLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intStorageLocationId]			INT NULL,
@@ -68,6 +69,11 @@
 	[strCostUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblNetWeight]					DECIMAL(18,6),
 	[dblWeightUnitQty]				DECIMAL(38,20),
+	[dblWeight]				DECIMAL(18,6),
+	[dblNetShippedWeight]			DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblWeightLoss]					DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblFranchiseWeight]			DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[dblFranchiseAmount]			DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[intWeightUOMId]				INT NULL,
 	[strWeightUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intCostCurrencyId]				INT NULL,
@@ -97,8 +103,36 @@
 	[intBookId]						INT NULL,
 	[intSubBookId]					INT NULL,
 	[intComputeTotalOption] 		TINYINT NOT NULL DEFAULT(0),
-	[intPayFromBankAccountId] 		INT NULL,
-	[strPayFromBankAccount]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+
+	[intPayFromBankAccountId] 			INT NULL,
+	[strPayFromBankAccount]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strFinancingSourcedFrom] 			NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strFinancingTransactionNumber] 	NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+
+	[strFinanceTradeNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBankId] 						INT NULL,
+	[strBankName]           			NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+	[intBankAccountId] 					INT NULL,
+	[strBankAccountNo]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intBorrowingFacilityId] 			INT NULL,
+	[strBorrowingFacilityId]        	NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	[strBankReferenceNo] 				NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBorrowingFacilityLimitId] 		INT NULL,
+	[strBorrowingFacilityLimit]       	NVARCHAR(40) NULL,
+	[intBorrowingFacilityLimitDetailId] INT NULL,
+	[strLimitDescription]				NVARCHAR(100) NULL,
+	[strReferenceNo] 					NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intBankValuationRuleId] 			INT NULL,
+	[strBankValuationRule]            	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strComments] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+
+	[dblQualityPremium] 				DECIMAL(18, 6) DEFAULT 0,
+ 	[dblOptionalityPremium] 			DECIMAL(18, 6) DEFAULT 0,
+
+	[strTaxPoint] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxLocationId] 					INT NULL,
+	[strTaxLocation]					NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
+
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO

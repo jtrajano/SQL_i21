@@ -34,7 +34,7 @@ BEGIN TRY
 			FROM tblRKAssignFuturesToContractSummary
 			WHERE intFutOptAssignedId = @intFutOptTransactionId
 			
-			IF (ISNULL(@ExistingContractDetailId,0) <> ISNULL(@intContractDetailId,0))
+			IF (ISNULL(@ExistingContractDetailId,0) <> ISNULL(@intContractDetailId,0) AND ISNULL(@intContractDetailId, 0) <> 0)
 			BEGIN
 				UPDATE tblRKAssignFuturesToContractSummary
 				SET intContractDetailId = @intContractDetailId
@@ -53,7 +53,7 @@ BEGIN TRY
 		FROM tblRKAssignFuturesToContractSummary
 		WHERE intFutOptAssignedId = @intFutOptTransactionId
 		
-		IF (ISNULL(@intExistingContractHeaderId,0) <> ISNULL(@intContractHeaderId,0))
+		IF (ISNULL(@intExistingContractHeaderId,0) <> ISNULL(@intContractHeaderId,0) AND ISNULL(@intContractHeaderId,0) <> 0)
 		BEGIN
 			UPDATE tblRKAssignFuturesToContractSummary
 			SET intContractHeaderId = @intContractHeaderId

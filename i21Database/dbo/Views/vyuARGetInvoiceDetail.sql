@@ -196,6 +196,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 	 , intDispatchId                        = INV.intDispatchId
 	 , strOrderNumber                       = ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
+	 , dblPercentage						= INV.dblPercentage
+	 , dblProvisionalTotal					= CASE WHEN INV.dblPercentage <> 100 THEN INV.dblProvisionalTotal ELSE INV.dblTotal END
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (

@@ -47,7 +47,6 @@ BEGIN
 				,strDispatcher = SE.strUserName
 				,strShippingInstructionNo = SI.strLoadNumber
 				,FT.strFreightTerm
-				,FT.strFobPoint
 				,CU.strCurrency
 				,CONT.strContainerType
 				,intLeadTime = ISNULL(DPort.intLeadTime, 0)
@@ -154,7 +153,6 @@ BEGIN
 			,strDispatcher = SE.strUserName
 			,strShippingInstructionNo = SI.strLoadNumber
 			,FT.strFreightTerm
-			,FT.strFobPoint
 			,CU.strCurrency
 			,CONT.strContainerType
 			,intLeadTime = ISNULL(DPort.intLeadTime, 0)

@@ -765,6 +765,30 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError]
 		,[strSessionId])
+	--NOT BALANCE
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The debit and credit amounts are not balanced.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceHeader I			 
+	WHERE ((I.strType <> 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ((SELECT SUM([dblTotal]) FROM tblARPostInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId) + ISNULL(I.[dblShipping],0.0) + ISNULL(I.[dblTax],0.0)))
+	   OR (I.strType = 'Tax Adjustment' AND I.[dblInvoiceTotal] <> ISNULL(I.[dblTax], 0.0)))
+	   AND I.strSessionId = @strSessionId
+
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
 	--Header Account ID
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -1607,6 +1631,7 @@ BEGIN
 	  AND ARID.[intInventoryShipmentItemId] IS NULL
 	  AND ARID.[intLoadDetailId] IS NULL
 	  AND ARID.[ysnBlended] <> 1
+	  AND I.strType <> 'Tax Adjustment'
 	  AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData

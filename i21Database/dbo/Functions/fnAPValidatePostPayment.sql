@@ -22,11 +22,13 @@ BEGIN
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	SET @gainLossAccount = (SELECT TOP 1 intAccountsPayableRealizedId FROM tblSMMultiCurrency)
 
-	DECLARE	@OverrideCompanySegment BIT,
+	DECLARE	@AllowSingleEntries BIT,
+			@OverrideCompanySegment BIT,
 			@OverrideLocationSegment BIT,
 			@OverrideLineOfBusinessSegment BIT
 
-	SELECT TOP 1 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+	SELECT TOP 1 @AllowSingleEntries = ysnAllowSingleLocationEntries,
+				 @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
 				 @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
 				 @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
 	FROM tblAPCompanyPreference
@@ -266,14 +268,13 @@ BEGIN
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'Posting negative amount is not allowed for non-eCheck payment method. You may want to create a deposit instead.',
+			'Posting negative amount is not allowed. You may want to create a deposit instead.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			A.dblAmountPaid < 0
-			AND A.intPaymentMethodId != 6
 
 		--BILL(S) ALREADY PAID IN FULL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -367,18 +368,18 @@ BEGIN
 		-- GROUP BY A.strPaymentRecordNum, A.intPaymentId
 		-- HAVING COUNT(DISTINCT C.intPayToAddressId) > 1
 
-		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		-- SELECT 
-		-- 	'You cannot post with negative amount if payment method is not a Refund.',
-		-- 	'Payable',
-		-- 	A.strPaymentRecordNum,
-		-- 	A.intPaymentId
-		-- FROM tblAPPayment A
-		-- WHERE A.dblAmountPaid < 0 
-		-- AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
-		-- AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE (C.intTransactionType = 2 OR C.intTransactionType = 13) AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
-		-- 		AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)) = 1)
-		-- AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'You cannot post with negative amount if payment method is not a Refund.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A
+		WHERE A.dblAmountPaid < 0 
+		AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
+		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE (C.intTransactionType = 2 OR C.intTransactionType = 13) AND B.intPaymentId IN (SELECT intId FROM @paymentIds))
+				AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intId FROM @paymentIds)) = 1)
+		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		
 			
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -392,17 +393,8 @@ BEGIN
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
-		INNER JOIN tblAPVendor childVend
-			ON childVend.intEntityId = C.intEntityVendorId
-		INNER JOIN tblAPVendor parentVend
-			ON parentVend.intEntityId = A.intEntityVendorId
-		WHERE 
-		(
-			(C.intEntityVendorId != A.intEntityVendorId AND childVend.strVendorPayToId IS NULL) --parent vouchers
-			OR (C.intEntityVendorId != A.intEntityVendorId AND childVend.strVendorPayToId != parentVend.strVendorId AND childVend.strVendorPayToId IS NOT NULL) --child vouchers
-		)
+		WHERE C.intEntityVendorId <> A.intEntityVendorId
 		AND A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND B.dblPayment != 0
 
 		--DO NOT ALLOW TO POST DEBIT MEMOS AND PAYMENTS IF AMOUNT PAID IS NOT EQUAL TO ZERO
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -694,6 +686,21 @@ BEGIN
 		FROM tblAPPayment P
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND P.intPayToBankAccountId IS NULL AND P.intPaymentMethodId = 2
+
+		--DIFFERENT LOCATION AND PAY FROM BANK ACCOUNT ON SINGLE LOCATION ENTRIES
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Location and Pay From Bank Account should have the same location segment.',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intCompanyLocationId
+		INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = P.intAccountId
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND @AllowSingleEntries = 1
+		AND AD.intLocationSegmentId <> CL.intProfitCenter
+		
 	END
 	ELSE
 	BEGIN

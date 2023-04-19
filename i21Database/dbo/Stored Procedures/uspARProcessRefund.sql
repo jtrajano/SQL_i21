@@ -11,39 +11,44 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @tblInvoiceEntries		InvoiceIntegrationStagingTable
-DECLARE	@tblTaxEntries			LineItemTaxDetailStagingTable
-DECLARE @tblInvoicesCreated		Id
-DECLARE @dblZeroDecimal			NUMERIC(18,6)	= 0
-	  , @dblInvoiceTotal		NUMERIC(18,6)	= 0
-	  , @dblAmountDue			NUMERIC(18,6)	= 0
-	  , @dtmDateOnly			DATETIME		= CAST(GETDATE() AS DATE)
-	  , @strTransactionType		NVARCHAR(100)	= NULL
-	  , @strInvoiceNumber		NVARCHAR(100)	= NULL
-	  , @strCreatedInvoices		NVARCHAR(100)	= NULL
-	  , @ysnPosted				BIT				= 0
-	  , @ysnRefundProcessed		BIT				= 0
-	  , @ysnPaid				BIT				= 0
-	  , @ysnSuccess				BIT				= 0
-	  , @intAccountId			INT				= NULL
-	  , @intCompanyLocationId	INT				= NULL
-	  , @intInvoiceDetailId		INT				= NULL
-	  , @intEntityCustomerId	INT				= NULL
-	  , @intNewInvoiceId		INT				= NULL
+DECLARE @tblInvoiceEntries			InvoiceIntegrationStagingTable
+DECLARE	@tblTaxEntries				LineItemTaxDetailStagingTable
+DECLARE @tblInvoicesCreated			Id
+DECLARE @dblZeroDecimal				NUMERIC(18,6)	= 0
+	  , @dblInvoiceTotal			NUMERIC(18,6)	= 0
+	  , @dblAmountDue				NUMERIC(18,6)	= 0
+	  , @dtmDateOnly				DATETIME		= CAST(GETDATE() AS DATE)
+	  , @strTransactionType			NVARCHAR(100)	= NULL
+	  , @strInvoiceNumber			NVARCHAR(100)	= NULL
+	  , @strCreatedInvoices			NVARCHAR(100)	= NULL
+	  , @ysnPosted					BIT				= 0
+	  , @ysnRefundProcessed			BIT				= 0
+	  , @ysnPaid					BIT				= 0
+	  , @ysnSuccess					BIT				= 0
+	  , @intAccountId				INT				= NULL
+	  , @intCompanyLocationId		INT				= NULL
+	  , @intInvoiceDetailId			INT				= NULL
+	  , @intEntityCustomerId		INT				= NULL
+	  , @intNewInvoiceId			INT				= NULL
+	  , @dblCurrencyExchangeRate	NUMERIC(18,6)	= 1
 
-SELECT @strTransactionType		= strTransactionType
-	 , @strInvoiceNumber		= strInvoiceNumber
-	 , @dblInvoiceTotal			= dblInvoiceTotal
-	 , @dblAmountDue			= dblAmountDue
-	 , @ysnPosted				= ysnPosted
-	 , @ysnRefundProcessed		= ysnRefundProcessed
-	 , @ysnPaid					= ysnPaid
-	 , @intCompanyLocationId	= intCompanyLocationId
-	 , @intInvoiceDetailId		= DETAIL.intInvoiceDetailId
-	 , @intEntityCustomerId		= intEntityCustomerId
+SELECT 
+	 @strTransactionType		= strTransactionType
+	,@strInvoiceNumber			= strInvoiceNumber
+	,@dblInvoiceTotal			= dblInvoiceTotal
+	,@dblAmountDue				= dblAmountDue
+	,@ysnPosted					= ysnPosted
+	,@ysnRefundProcessed		= ysnRefundProcessed
+	,@ysnPaid					= ysnPaid
+	,@intCompanyLocationId		= intCompanyLocationId
+	,@intInvoiceDetailId		= DETAIL.intInvoiceDetailId
+	,@intEntityCustomerId		= intEntityCustomerId
+	,@dblCurrencyExchangeRate	= DETAIL.dblCurrencyExchangeRate
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 OUTER APPLY (
-	SELECT TOP 1 intInvoiceDetailId
+	SELECT TOP 1 
+		 intInvoiceDetailId
+		,dblCurrencyExchangeRate
 	FROM tblARInvoiceDetail ID
 	WHERE ID.intInvoiceId = I.intInvoiceId
 ) DETAIL
@@ -135,41 +140,44 @@ INSERT INTO @tblInvoiceEntries (
 	,[ysnRefreshPrice]
 	,[ysnRecomputeTax]
 	,[intOriginalInvoiceId]
+	,dblCurrencyExchangeRate
 )
 SELECT
-	 [strSourceTransaction]				= 'Direct'
-	,[strTransactionType]				= 'Cash Refund'
-	,[intSourceId]						= I.intInvoiceId
-	,[strSourceId]						= I.strInvoiceNumber
-	,[intEntityCustomerId]				= I.intEntityCustomerId
-	,[intCompanyLocationId]				= I.intCompanyLocationId
-	,[intCurrencyId]					= I.intCurrencyId
-	,[intAccountId]						= @intAccountId	
-	,[dtmDate]							= @dtmDateOnly
-	,[dtmPostDate]						= @dtmDateOnly
-	,[intEntityId]						= @intUserId
-	,[ysnPost]							= 0
-	,[intItemId]						= NULL
-	,[ysnInventory]						= 0
-	,[strItemDescription]				= 'Cash Refund from: ' + I.strInvoiceNumber
-	,[intOrderUOMId]					= NULL
-	,[dblQtyOrdered]					= NULL
-	,[intItemUOMId]						= NULL
-	,[dblQtyShipped]					= 1
-	,[dblPrice]							= I.dblAmountDue
-	,[ysnRefreshPrice]					= 0
-	,[ysnRecomputeTax]					= 0
-	,[intOriginalInvoiceId]             = I.intInvoiceId
+	 [strSourceTransaction]	= 'Direct'
+	,[strTransactionType]	= 'Cash Refund'
+	,[intSourceId]			= I.intInvoiceId
+	,[strSourceId]			= I.strInvoiceNumber
+	,[intEntityCustomerId]	= I.intEntityCustomerId
+	,[intCompanyLocationId]	= I.intCompanyLocationId
+	,[intCurrencyId]		= I.intCurrencyId
+	,[intAccountId]			= @intAccountId	
+	,[dtmDate]				= @dtmDateOnly
+	,[dtmPostDate]			= @dtmDateOnly
+	,[intEntityId]			= @intUserId
+	,[ysnPost]				= 0
+	,[intItemId]			= NULL
+	,[ysnInventory]			= 0
+	,[strItemDescription]	= 'Cash Refund from: ' + I.strInvoiceNumber
+	,[intOrderUOMId]		= NULL
+	,[dblQtyOrdered]		= NULL
+	,[intItemUOMId]			= NULL
+	,[dblQtyShipped]		= 1
+	,[dblPrice]				= I.dblAmountDue
+	,[ysnRefreshPrice]		= 0
+	,[ysnRecomputeTax]		= 0
+	,[intOriginalInvoiceId]	= I.intInvoiceId
+	,dblCurrencyExchangeRate= @dblCurrencyExchangeRate
 FROM dbo.tblARInvoice I
 WHERE I.intInvoiceId = @intInvoiceId
 
-EXEC dbo.[uspARProcessInvoices] @InvoiceEntries		= @tblInvoiceEntries
-							  , @LineItemTaxEntries	= @tblTaxEntries
-							  , @UserId				= @intUserId
-							  , @GroupingOption		= 1	
-							  , @RaiseError			= 0
-							  , @ErrorMessage		= @strErrorMessage OUT
-							  , @CreatedIvoices		= @strCreatedInvoices OUT
+EXEC uspARProcessInvoices	
+		 @InvoiceEntries	= @tblInvoiceEntries
+		,@LineItemTaxEntries= @tblTaxEntries
+		,@UserId			= @intUserId
+		,@GroupingOption	= 1	
+		,@RaiseError		= 0
+		,@ErrorMessage		= @strErrorMessage OUT
+		,@CreatedIvoices	= @strCreatedInvoices OUT
 
 --INSERT CREDITMEMO/PREPAIDS TAB AND POST
 IF ISNULL(@strCreatedInvoices, '') <> ''
@@ -180,21 +188,20 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 		SELECT TOP 1 @intNewInvoiceId = intId FROM @tblInvoicesCreated
 
 		INSERT INTO tblARPrepaidAndCredit (
-			 intInvoiceId
-		   , intPrepaymentId
-		   , intPrepaymentDetailId
-		   , dblAppliedInvoiceDetailAmount
-		   , dblBaseAppliedInvoiceDetailAmount
-		   , ysnApplied
-		   , intRowNumber
+			intInvoiceId
+		   ,intPrepaymentId
+		   ,intPrepaymentDetailId
+		   ,dblAppliedInvoiceDetailAmount
+		   ,ysnApplied
+		   ,intRowNumber
 		)
-		SELECT intInvoiceId						= @intNewInvoiceId
-		   , intPrepaymentId					= @intInvoiceId
-		   , intPrepaymentDetailId				= @intInvoiceDetailId
-		   , dblAppliedInvoiceDetailAmount		= @dblAmountDue
-		   , dblBaseAppliedInvoiceDetailAmount	= @dblAmountDue
-		   , ysnApplied							= 1
-		   , intRowNumber						= 1
+		SELECT 
+			 intInvoiceId					= @intNewInvoiceId
+			,intPrepaymentId				= @intInvoiceId
+		    ,intPrepaymentDetailId			= @intInvoiceDetailId
+		    ,dblAppliedInvoiceDetailAmount	= @dblAmountDue
+		    ,ysnApplied						= 1
+		    ,intRowNumber					= 1
 	
 		EXEC [dbo].[uspARPostInvoice] @post				= 1
 									, @recap			= 0

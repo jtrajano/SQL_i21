@@ -44,6 +44,22 @@ BEGIN TRY
 	FROM tblLGLoadDetail
 	WHERE intLoadId = @intLoadId
 
+	-- Validate if the Allocation associated with the LS, if it exists, is cancelled
+	IF (@ysnCancel = 0)
+	BEGIN
+		IF EXISTS (
+			SELECT L.strLoadNumber 
+			FROM tblLGAllocationHeader AH
+			INNER JOIN tblLGAllocationDetail AD ON AD.intAllocationHeaderId = AH.intAllocationHeaderId
+			INNER JOIN tblLGLoadDetail LD ON LD.intAllocationDetailId = AD.intAllocationDetailId
+			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			WHERE L.intLoadId = @intLoadId AND AH.ysnCancelled = 1
+		)
+		BEGIN
+			RAISERROR('Cannot reverse the Load cancellation. The Allocation associated with it is cancelled.', 16, 1)  
+		END
+	END
+
 	IF (@intShipmentType = 1)
 	BEGIN
 		IF (@ysnCancel = 1)

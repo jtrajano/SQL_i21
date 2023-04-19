@@ -6,14 +6,14 @@ RETURNS TABLE
 AS
 RETURN 
 
-SELECT
+SELECT DISTINCT
 	intTransactionId = L.intLoadId
 	,strTransactionId = L.strLoadNumber
 	,strTransactionType = CASE WHEN (L.intPurchaseSale = 2) 
 							THEN 'Outbound Shipment' 
 							ELSE 'Inbound Shipments' 
 						END COLLATE Latin1_General_CI_AS
-	,intCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
+	,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID) END
 	,dtmDate = ISNULL(L.dtmCashFlowDate, L.dtmScheduledDate)
 	,dblAmount = LDT.dblAmount * CASE WHEN (L.intPurchaseSale = 2) THEN 1 ELSE -1 END
 	,intBankAccountId = BA.intBankAccountId
@@ -29,6 +29,7 @@ FROM tblLGLoadDetail LD
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 WHERE L.intShipmentType = 1
 	AND L.intShipmentStatus <> 11
 	AND L.intSourceType IN (2, 4, 5, 6)

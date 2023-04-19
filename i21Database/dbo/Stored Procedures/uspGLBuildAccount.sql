@@ -100,4 +100,5 @@
 		EXEC uspGLAccountOriginSync @intUserId
 		
 	EXEC dbo.uspGLUpdateAccountLocationId
+	EXEC dbo.uspGLUpdateAccountSegmentId
 	EXEC uspGLBuildTempCOASegment

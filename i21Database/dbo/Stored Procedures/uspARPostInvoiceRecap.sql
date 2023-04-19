@@ -198,8 +198,8 @@ BEGIN TRY
 		,[dblCredit]						= Credit.[Value]
 		,[dblDebitUnit]						= DebitUnit.[Value]
 		,[dblCreditUnit]					= CreditUnit.[Value]
-		,[dblDebitForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN @ZeroDecimal ELSE A.[dblDebitForeign] END
-		,[dblCreditForeign]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN @ZeroDecimal ELSE A.[dblCreditForeign]	 END 		
+		,[dblDebitForeign]					= A.dblDebitForeign
+		,[dblCreditForeign]					= A.dblCreditForeign	
 		,[intCurrencyId]					= A.[intCurrencyId]
 		,[dtmDate]							= A.[dtmDate]
 		,[ysnIsUnposted]					= A.[ysnIsUnposted]

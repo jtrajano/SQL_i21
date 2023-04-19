@@ -54,6 +54,9 @@ FROM (
 		,strContainerNumber = Shipment.strContainerNumber
 		,strMarks = Shipment.strMarks
 		,strLotNumber = '' COLLATE Latin1_General_CI_AS
+		,strLotAlias = '' COLLATE Latin1_General_CI_AS
+		,strWarrantNo = '' COLLATE Latin1_General_CI_AS
+		,strWarrantStatus = '' COLLATE Latin1_General_CI_AS
 		,strWarehouse = Shipment.strSubLocationName
 		,strLocationName = Shipment.strLocationName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
@@ -92,6 +95,8 @@ FROM (
 		,strProducer = Shipment.strProducer
 		,strCertification = Shipment.strCertification
 		,strCertificationId = Shipment.strCertificationId
+		,strCertificateName = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+		,strIRCropYear = CAST(NULL AS NVARCHAR(30)) COLLATE Latin1_General_CI_AS
 	FROM vyuLGInboundShipmentView Shipment
 		OUTER APPLY (SELECT ysnIncludeArrivedInPortStatus, ysnIncludeStrippingInstructionStatus FROM tblLGCompanyPreference) CP
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
@@ -136,6 +141,9 @@ FROM (
 		,strContainerNumber = Spot.strContainerNumber
 		,strMarks = Spot.strMarkings
 		,strLotNumber = Spot.strLotNumber
+		,strLotAlias = Spot.strLotAlias
+		,strWarrantNo = Spot.strWarrantNo
+		,strWarrantStatus = Spot.strWarrantStatus
 		,strWarehouse = Spot.strSubLocationName
 		,strLocationName = Spot.strLocationName
 		,strCondition = Spot.strCondition
@@ -169,10 +177,15 @@ FROM (
 		,strProducer = Spot.strProducer
 		,strCertification = Spot.strCertification
 		,strCertificationId = Spot.strCertificationId
+		,strCertificateName = IRIL.strCertificate
+		,strIRCropYear = CRY.strCropYear
 	FROM vyuLGPickOpenInventoryLots Spot
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
+	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
+	LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = CH.intCropYearId
+	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intInventoryReceiptItemLotId = Spot.intInventoryReceiptItemLotId
 	WHERE Spot.dblQty > 0.0
 
 	UNION ALL
@@ -215,6 +228,9 @@ FROM (
 		,strContainerNumber = LC.strContainerNumber
 		,strMarks = LC.strMarks
 		,strLotNumber = LC.strLotNumber
+		,strLotAlias = '' COLLATE Latin1_General_CI_AS
+		,strWarrantNo = '' COLLATE Latin1_General_CI_AS
+		,strWarrantStatus = '' COLLATE Latin1_General_CI_AS
 		,strWarehouse = '' COLLATE Latin1_General_CI_AS
 		,strLocationName = '' COLLATE Latin1_General_CI_AS
 		,strCondition = '' COLLATE Latin1_General_CI_AS
@@ -252,6 +268,8 @@ FROM (
 		,strProducer = PRO.strName
 		,strCertification = CER.strCertificationName
 		,strCertificationId = '' COLLATE Latin1_General_CI_AS
+		,strCertificateName = NULL
+		,strIRCropYear = NULL
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
@@ -337,6 +355,9 @@ FROM (
 		,strContainerNumber = NULL
 		,strMarks = NULL
 		,strLotNumber = NULL
+		,strLotAlias = NULL
+		,strWarrantNo = NULL
+		,strWarrantStatus = NULL
 		,strWarehouse = WH.strSubLocationName
 		,strLocationName = WHU.strName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
@@ -374,6 +395,8 @@ FROM (
 		,strProducer = PRO.strName
 		,strCertification = CER.strCertificationName
 		,strCertificationId = '' COLLATE Latin1_General_CI_AS
+		,strCertificateName = NULL
+		,strIRCropYear = NULL
 	FROM 
 		tblCTContractDetail PCD
 		INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId

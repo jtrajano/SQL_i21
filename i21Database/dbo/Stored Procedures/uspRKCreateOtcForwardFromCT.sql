@@ -29,27 +29,39 @@ BEGIN TRY
 	DECLARE @intCommodityId INT
 		, @strBuyCurrency NVARCHAR(200)
 		, @strSellCurrency NVARCHAR(200)
-		, @intCurrencyPair INT = NULL
+		, @intCurrencyPairId INT = NULL
 		, @ErrMsg NVARCHAR(MAX) = NULL
+		, @dblFXRateDecimals NUMERIC(16, 8)
 		
 	SELECT @strBuyCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intBuyCurrencyId
 	SELECT @strSellCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSellCurrencyId
+	SELECT @dblFXRateDecimals = dblFXRateDecimals FROM tblRKCompanyPreference
 	
-	SELECT @intCurrencyPair = intRateTypeId 
+	SELECT @intCurrencyPairId = intCurrencyPairId 
 	FROM 
 	(
-		SELECT TOP 1 intRateTypeId
-		FROM tblSMCurrencyExchangeRateDetail fxRateDetail
-		CROSS APPLY (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate fxr
-			WHERE fxr.intFromCurrencyId = @intBuyCurrencyId 
-			AND fxr.intToCurrencyId = @intSellCurrencyId 
-			AND fxr.intCurrencyExchangeRateId = fxRateDetail.intCurrencyExchangeRateId
-		) fxRate
-		WHERE dtmValidFromDate <= GETDATE()
-		ORDER BY dtmValidFromDate DESC
+		--SELECT TOP 1 intRateTypeId
+		--FROM tblSMCurrencyExchangeRateDetail fxRateDetail
+		--CROSS APPLY (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate fxr
+		--	WHERE fxr.intFromCurrencyId = @intBuyCurrencyId 
+		--	AND fxr.intToCurrencyId = @intSellCurrencyId 
+		--	AND fxr.intCurrencyExchangeRateId = fxRateDetail.intCurrencyExchangeRateId
+		--) fxRate
+		--WHERE dtmValidFromDate <= GETDATE()
+		--ORDER BY dtmValidFromDate DESC
+
+		SELECT TOP 1 intCurrencyPairId = intCurrencyPairId
+		FROM vyuRKCurrencyPairSetup
+		WHERE intFromCurrencyId = @intSellCurrencyId 
+		AND intToCurrencyId = @intBuyCurrencyId 
 	) t
-	JOIN tblSMCurrencyExchangeRateType fxRateType
-	ON fxRateType.intCurrencyExchangeRateTypeId = t.intRateTypeId
+
+	IF (ISNULL(@intCurrencyPairId, 0) = 0)
+	BEGIN
+		SET @ErrMsg = 'The Currency Pair Setup for Sell (' + @strSellCurrency + ') and Buy (' + @strBuyCurrency + ') Currencies is not existing.'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
+	END
 
 	SELECT TOP 1 @intCommodityId = intCommodityId FROM tblICCommodity
 	WHERE strCommodityCode = 'Currency'
@@ -57,7 +69,33 @@ BEGIN TRY
 	IF (ISNULL(@intCommodityId, '') = '')
 	BEGIN
 		SET @ErrMsg = 'The Commodity ''Currency'' is not existing.'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
+	END
 
+	DECLARE @dblDecimalCount INT
+		, @strDecimalValues NVARCHAR(100)
+
+	-- CONTRACT RATE DECIMAL PLACE VALIDATION
+	SELECT @strDecimalValues = CAST(CAST(@dblContractRate AS float) AS NVARCHAR(100))
+	SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+
+	IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+	BEGIN
+		SET @ErrMsg = 'Contract Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ').'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
+	END
+	
+	-- LIMIT RATE DECIMAL PLACE VALIDATION
+	SELECT @strDecimalValues = CAST(CAST(@dblLimitRate AS float) AS NVARCHAR(100))
+	SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+
+	IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+	BEGIN
+		SET @ErrMsg = 'Limit Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ').'
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+		RETURN
 	END
 
 	IF (ISNULL(@ErrMsg, '') <> '')
@@ -110,7 +148,8 @@ BEGIN TRY
 		, dblContractAmount
 		, dblMatchAmount
 		, intOrderTypeId
-		, intCurrencyExchangeRateTypeId
+		--, intCurrencyExchangeRateTypeId
+		, intCurrencyPairId
 		, dblLimitRate
 		, dtmMarketDate
 		, ysnGTC
@@ -140,7 +179,8 @@ BEGIN TRY
 		, dblContractAmount = @dblBuyAmount
 		, dblMatchAmount = @dblSellAmount
 		, intOrderTypeId = @intOrderTypeId
-		, intCurrencyExchangeRateTypeId = @intCurrencyPair
+		--, intCurrencyExchangeRateTypeId = @intCurrencyPair
+		, intCurrencyPairId = @intCurrencyPairId
 		, dblLimitRate = @dblLimitRate 
 		, dtmMarketDate = @dtmMarketDate 
 		, ysnGTC = @ysnGTC 

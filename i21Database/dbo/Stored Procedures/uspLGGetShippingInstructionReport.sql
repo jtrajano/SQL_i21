@@ -24,7 +24,10 @@ BEGIN
 			@strUserPhoneNo				NVARCHAR(100),
 			@strUserEmailId				NVARCHAR(100),
 			@strContainerQtyUOM			NVARCHAR(100),
-			@strPackingUOM				NVARCHAR(100)
+			@strPackingUOM				NVARCHAR(100),
+			@Condition					VARCHAR(8000) ,
+			@intVendorCustomerLocId		INT,
+			@intPSCompanyLocId			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -102,6 +105,33 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE intLoadId = @intLoadId
 	GROUP BY UOM.strUnitMeasure
+
+	SET @Condition = '<ol>'
+	SELECT @Condition = COALESCE(@Condition + '<li>', '') + CTC.strConditionName + ' - ' + REPLACE(REPLACE(LC.strConditionDescription, char(13), '<br/>'), CHAR(10), '<br/>') + '</li>'
+	FROM tblLGLoadCondition LC
+	INNER JOIN tblCTCondition CTC ON LC.intConditionId = CTC.intConditionId
+	WHERE intLoadId = @intLoadId
+	SET @Condition = @Condition +'</ol>'
+
+	IF @Condition = '<ol></ol>'
+	BEGIN
+		SET @Condition = NULL
+	END
+
+	SELECT
+		@intVendorCustomerLocId = 
+			CASE WHEN intPurchaseSale = 1 
+				THEN LD.intVendorEntityLocationId ELSE
+				intCustomerEntityLocationId
+			END,
+		@intPSCompanyLocId =
+			CASE WHEN intPurchaseSale = 1 
+				THEN LD.intPCompanyLocationId ELSE
+				intSCompanyLocationId
+			END
+	FROM tblLGLoad L
+	INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	WHERE L.intLoadId = @intLoadId
 
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
@@ -186,6 +216,7 @@ SELECT *
 	,strShipmentPeriod
 	,strDestinationCity
 	,strMarkingInstruction
+	,strConditions = @Condition
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
@@ -233,12 +264,14 @@ FROM (
 		,L.strServiceContractNumber
 		,strServiceContractOwner = SLSC.strOwner
 		,SLSC.strFreightClause
+		,strServiceConNumFreightClause = L.strServiceContractNumber + ' ' + SLSC.strFreightClause
 		,strShipper = Shipper.strName
 		,L.strPackingDescription
 		,L.intNumberOfContainers
 		,strNumberOfContainers = CONVERT(NVARCHAR, L.intNumberOfContainers) + ' (' + L.strPackingDescription + ')'
 		,ContType.strContainerType
 		,L.strShippingMode
+		,strShippingModeContType = ContType.strContainerType + ' ' + L.strShippingMode
 		,L.strMVessel
 		,L.strMVoyageNumber
 		,L.strFVessel
@@ -504,6 +537,7 @@ FROM (
 		,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
 		,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)			
 		,strShipmentPeriod = UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106))
+		,strLSShipmentPeriod = CONVERT(NVARCHAR,L.dtmStartDate,101) + ' - ' + CONVERT(NVARCHAR,L.dtmEndDate,101)
 		,strMarkingInstruction = L.strMarks
 		,strPositionInfo = DATENAME(mm, CD.dtmEndDate) + ' / ' + CAST(DATEPART(yy, CD.dtmEndDate) AS NVARCHAR(10)) + ' ' + POS.strPosition
 		,strInstructionText = CASE
@@ -611,12 +645,12 @@ FROM (
 	
 	LEFT JOIN tblLGReportRemark strItemRemarks ON 
 		strItemRemarks.intValueId = LD.intItemId 
-		AND ISNULL(strItemRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND ISNULL(strItemRemarks.intLocationId, 1) = ISNULL(@intPSCompanyLocId,1)
 		AND strItemRemarks.strType = 'Item'
 
 	LEFT JOIN tblLGReportRemark strEntityRemarks ON 
 		strEntityRemarks.intValueId = LD.intVendorEntityId
-		AND ISNULL(strEntityRemarks.intLocationId, LD.intPCompanyLocationId) = LD.intPCompanyLocationId
+		AND ISNULL(strEntityRemarks.intLocationId, 1) = ISNULL(@intVendorCustomerLocId,1)
 		AND strEntityRemarks.strType = 'Entity'
 
 	CROSS APPLY tblLGCompanyPreference CP

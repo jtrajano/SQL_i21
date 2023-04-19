@@ -28,7 +28,7 @@ SELECT
 	GLAccount.strAccountId,
 	Detail.intBankAccountId,
 	dbo.fnAESDecryptASym(BankAccount.strBankAccountNo) COLLATE Latin1_General_CI_AS strBankAccountId,
-	Bank.strBankName,
+	strBankName = ISNULL(BankFromDetail.strBankName, Bank.strBankName),
 	Detail.intCompanyLocationId,
 	CompanyLocation.strLocationName strCompanyLocation,
 	Detail.intConcurrencyId
@@ -39,6 +39,8 @@ LEFT JOIN tblCMBankAccount BankAccount
 	ON BankAccount.intBankAccountId = Detail.intBankAccountId
 LEFT JOIN tblCMBank Bank
 	ON Bank.intBankId = BankAccount.intBankId
+LEFT JOIN tblCMBank BankFromDetail
+	ON BankFromDetail.intBankId = Detail.intBankId
 LEFT JOIN tblGLAccount GLAccount
 	ON GLAccount.intAccountId = Detail.intAccountId
 LEFT JOIN tblSMCurrency Currency

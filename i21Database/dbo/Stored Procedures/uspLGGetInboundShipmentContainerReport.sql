@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetInboundShipmentContainerReport] 
-	@xmlParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL,
+	@xmlParam2 INT = NULL
 AS
 BEGIN
 	DECLARE @ysnLoadNumber BIT
@@ -192,6 +193,9 @@ BEGIN
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = LDL.intLotId
 		LEFT JOIN tblSMCountry SMC ON ITM.intCountryId = SMC.intCountryID
 		WHERE LDV.strLoadNumber = @xmlParam
+			AND (ISNULL(@xmlParam2, 0) = 0 
+				OR (ISNULL(@xmlParam2, 0) > 0 AND @xmlParam2 = LDV.intCustomerEntityId)
+				OR (ISNULL(@xmlParam2, 0) < 0 AND LDV.intCustomerEntityId IS NULL))
 			AND (@ysnHasPickContainer = 0
 				 OR (@ysnHasPickContainer = 1 AND LC.intLoadContainerId IN 
 						(SELECT intContainerId FROM tblLGPickLotDetail PLD 

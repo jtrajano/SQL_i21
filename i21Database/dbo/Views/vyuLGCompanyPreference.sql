@@ -192,6 +192,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnIncludeArrivedInPortStatus
 	,CP.ysnIncludeStrippingInstructionStatus
 	,CP.ysnWeightClaimsByContainer
+	,CP.ysnWeightClaimsImpactGL
 	,CP.intExpirationDays
 	,CP.intExpirationDateBasis
 	,strExpirationDateBasis = CASE CP.intExpirationDateBasis

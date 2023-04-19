@@ -64,6 +64,8 @@ BEGIN TRY
 		strBank NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	)
 
+	DECLARE @dblFXRateDecimals NUMERIC(18, 6)
+	
 	-- Checking for User Location Access.
 	SELECT locationPermission.intCompanyLocationId 
 	INTO #tmpRKUserSecurityLocations
@@ -72,7 +74,10 @@ BEGIN TRY
 		ON locationPermission.intEntityId = userSecurity.intEntityId
 	WHERE userSecurity.intEntityId = @intEntityUserId
 
-	SELECT @strDateTimeFormat = strDateTimeFormat, @ysnAllowDerivativeAssignToMultipleContracts = ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference
+	SELECT @strDateTimeFormat = strDateTimeFormat
+		, @ysnAllowDerivativeAssignToMultipleContracts = ysnAllowDerivativeAssignToMultipleContracts 
+		, @dblFXRateDecimals = dblFXRateDecimals
+	FROM tblRKCompanyPreference
 
 	SELECT @strDateTimeFormat2 = REPLACE(LEFT(LTRIM(RTRIM(strDateTimeFormat)),10), ' ', '-') FROM tblRKCompanyPreference;
 
@@ -308,7 +313,7 @@ BEGIN TRY
 				BEGIN
 					SET @strRequiredFieldError = @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Maturity Date' ELSE 'Maturity Date' END
 				END
-
+				
 				-- Finance Rate
 				IF(ISNULL(@dblExchangeRate, 0) <= 0)
 				BEGIN
@@ -332,6 +337,41 @@ BEGIN TRY
 				BEGIN
 					SET @strRequiredFieldError = @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' THEN ', Finance Forward Rate be greater than 0' ELSE 'Finance Forward Rate be greater than 0' END
 				END
+			END
+			
+			DECLARE @dblDecimalCount INT
+				, @strDecimalValues NVARCHAR(100)
+
+
+			-- Finance Rate Decimal Place Validation
+			SELECT @strDecimalValues = CAST(CAST(@dblExchangeRate AS float) AS NVARCHAR(100))
+			SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+
+			IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+			BEGIN
+				SET @strRequiredFieldError = @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' 
+						THEN ', Finance Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ')'  
+						ELSE 'Finance Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ')' END
+			END
+			
+			-- Finance Forward Rate Decimal Place Validation
+			SELECT @strDecimalValues = CAST(CAST(@dblFinanceForwardRate AS float) AS NVARCHAR(100))
+			SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+			IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+			BEGIN
+				SET @strRequiredFieldError = @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' 
+						THEN ', Finance Forward Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ')'  
+						ELSE 'Finance Forward Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ')' END
+			END
+			
+			-- Limit Rate Decimal Place Validation
+			SELECT @strDecimalValues = CAST(CAST(@dblLimitRate AS float) AS NVARCHAR(100))
+			SELECT @dblDecimalCount = LEN(RIGHT(@strDecimalValues, LEN(@strDecimalValues) - CHARINDEX('.', @strDecimalValues)))
+			IF ISNULL(@dblDecimalCount, 0) > @dblFXRateDecimals
+			BEGIN
+				SET @strRequiredFieldError = @strRequiredFieldError +  CASE WHEN @strRequiredFieldError <> '' 
+						THEN ', Limit Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ')'  
+						ELSE 'Limit Rate Decimals should not exceed FX Rate Decimal config (' + CAST(CAST(@dblFXRateDecimals AS INT) AS NVARCHAR(10)) + ')' END
 			END
 			
 			IF (@strOrderType = 'Limit' AND ISNULL(@dblLimitRate, 0) <= 0)
@@ -395,24 +435,32 @@ BEGIN TRY
 
 				SELECT TOP 1 @intLocationId = intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName
 
-				SELECT TOP 1 @intCurrencyPairId = intCurrencyExchangeRateTypeId
-					, @intBuyCurrencyId = intFromCurrencyId
-					, @intSellCurrencyId = intToCurrencyId
-					, @strBuyCurrency = strFromCurrency
-					, @strSellCurrency = strToCurrency
-				FROM vyuRKGetCurrencyPair
-				WHERE strCurrencyExchangeRateType = @strCurrencyExchangeRateTypeId
+				--SELECT TOP 1 @intCurrencyPairId = intCurrencyExchangeRateTypeId
+				--	, @intBuyCurrencyId = intFromCurrencyId
+				--	, @intSellCurrencyId = intToCurrencyId
+				--	, @strBuyCurrency = strFromCurrency
+				--	, @strSellCurrency = strToCurrency
+				--FROM vyuRKGetCurrencyPair
+				--WHERE strCurrencyExchangeRateType = @strCurrencyExchangeRateTypeId
+
+				SELECT TOP 1 @intCurrencyPairId = intCurrencyPairId
+					, @intBuyCurrencyId = intToCurrencyId
+					, @intSellCurrencyId = intFromCurrencyId
+					, @strBuyCurrency = strToCurrency
+					, @strSellCurrency = strFromCurrency
+				FROM vyuRKCurrencyPairSetup
+				WHERE strCurrencyPair = @strCurrencyExchangeRateTypeId
 
 				IF (ISNULL(@intCurrencyPairId, 0) = 0)
 				BEGIN
-					IF EXISTS (SELECT TOP 1 '' FROM tblSMCurrencyExchangeRateType WHERE strCurrencyExchangeRateType = @strCurrencyExchangeRateTypeId)
-					BEGIN
-						SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Currency Pair exists in Currency Exchange Rate Types but does not contain setup for Currency Exchange Rates.'
-					END
-					ELSE
-					BEGIN
-						SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Currency Pair does not exists in the system.'
-					END
+					--IF EXISTS (SELECT TOP 1 '' FROM vyuRKCurrencyPairSetup WHERE strCurrencyPair = @strCurrencyExchangeRateTypeId)
+					--BEGIN
+					--	SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Currency Pair exists in Currency Exchange Rate Types but does not contain setup for Currency Exchange Rates.'
+					--END
+					--ELSE
+					--BEGIN
+						SET @ErrMsg = @ErrMsg + CASE WHEN @ErrMsg <> '' THEN ' ' ELSE '' END + 'Currency Pair does not exist in Currency Pair Setup.'
+					--END
 				END
 				ELSE 
 				BEGIN
@@ -969,7 +1017,13 @@ BEGIN TRY
 
 							IF @dblNoOfContract > @dblToBeAssignedLots
 							BEGIN
-								SET @ErrMsg = @ErrMsg + ' Derivative lots (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
+								UPDATE #tmpAssignPhysicalTransaction SET dblToBeAssignedLots = @dblToBeAssignedLots WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence
+
+								UPDATE tblRKFutOptTransactionImport
+								SET dblToAssignOrHedgeLots = ABS(@dblToBeAssignedLots)
+								WHERE intFutOptTransactionId = @mRowNumber
+
+								--SET @ErrMsg = @ErrMsg + ' Derivative lots (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeAssignedLots) + ') to be assigned.'
 							END
 							ELSE
 							BEGIN
@@ -994,9 +1048,19 @@ BEGIN TRY
 								SET @ErrMsg = @ErrMsg +' Market, Month, Commodity and Locations should be the same for both Derivative and Contract for hedging.'
 							END
 
-							IF @dblNoOfContract > @dblToBeHedgedLots 
+							IF ISNULL(@dblToBeHedgedLots, 0) = 0
 							BEGIN
-								SET @ErrMsg = @ErrMsg + ' Derivative lot (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
+								SET @ErrMsg = @ErrMsg + ' Selected Contract has been fully Hedged, Derivative has not been created.'
+							END
+							ELSE IF @dblNoOfContract > @dblToBeHedgedLots 
+							BEGIN
+								UPDATE #tmpAssignPhysicalTransaction SET dblToBeHedgedLots = @dblToBeHedgedLots WHERE strContractNumber = @strContractNumber AND intContractSeq = @strContractSequence
+
+								UPDATE tblRKFutOptTransactionImport
+								SET dblToAssignOrHedgeLots = ABS(@dblToBeHedgedLots)
+								WHERE intFutOptTransactionId = @mRowNumber
+
+								--SET @ErrMsg = @ErrMsg + ' Derivative lot (' + dbo.fnFormatNumber(@dblNoOfContract)  + ') should not be greater than the Contract ' + @strContractNumber + '-'+ @strContractSequence + ' available lots (' + dbo.fnFormatNumber(@dblToBeHedgedLots) + ') to be hedged.'
 							END
 							ELSE
 							BEGIN

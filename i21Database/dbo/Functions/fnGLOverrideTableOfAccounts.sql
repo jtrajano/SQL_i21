@@ -43,6 +43,9 @@ SELECT
 from @OverrideTableType 
 
 
+IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 0 )
+    RETURN
+
 IF ( @ysnOverrideLocation | @ysnOverrideLOB | @ysnOverrideCompany  = 1 )
 BEGIN
     UPDATE A   

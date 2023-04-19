@@ -366,6 +366,7 @@ BEGIN TRY
 		, CD.strPackingDescription
 		, CD.dblYield
 		, CD.intCurrencyExchangeRateId
+		, CD.intRevaluationCurrencyExchangeRateId
 		, CD.intRateTypeId
 		, CD.intCreatedById
 		, CD.dtmCreated
@@ -481,6 +482,7 @@ BEGIN TRY
 		, strDestinationCity = dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId, 'tblSMCity')
 		, strInvoiceCurrency = IY.strCurrency
 		, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
+		, strRevaluationExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intRevaluationCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 		, strPurchasingGroup = PG.strName
 		, strFXPriceUOM = dbo.[fnCTGetSeqDisplayField](CD.intFXPriceUOMId, 'tblICItemUOM')
 		, RT.strCurrencyExchangeRateType
@@ -562,10 +564,9 @@ BEGIN TRY
 		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
 		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
 		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
-
 		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
-		, BA.intBankId
+		, BK.intBankId
 		, BK.strBankName
 		, strBankAccountNo = ISNULL(dbo.fnAESDecryptASym(BA.strBankAccountNo),BA.strBankAccountNo) COLLATE Latin1_General_CI_AS
 		, CD.intBorrowingFacilityId
@@ -790,6 +791,8 @@ BEGIN TRY
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
 	LEFT JOIN tblCTReasonCode RC on RC.intReasonCodeId = CD.intReasonCodeId
 	LEFT JOIN vyuCTGetQualityCodes QC ON QC.intItemId = CD.intItemId
+	LEFT JOIN tblCTMTMPoint mtmp on mtmp.intMTMPointId = CD.intMTMPointId
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 

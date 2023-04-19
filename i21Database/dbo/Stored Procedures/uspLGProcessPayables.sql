@@ -21,7 +21,7 @@ BEGIN
 				,ISNULL(L.intCompanyLocationId, CD.intCompanyLocationId)		--,@CompanyLocationId
 				,NULL				--,@ItemId
 				,EL.intEntityLocationId		--,@VendorLocationId
-				,3--L.intFreightTermId	--,@FreightTermId
+				,L.intFreightTermId	--,@FreightTermId
 				,default --,@FOB
 			)
 		FROM tblLGLoad L
@@ -78,7 +78,10 @@ BEGIN
 			,[intSubLocationId]
 			,[dblOptionalityPremium]
 			,[dblQualityPremium]
-			,[intPurchaseTaxGroupId])
+			,[intPurchaseTaxGroupId]
+			,[intPayFromBankAccountId]
+			,[strFinancingSourcedFrom]
+			,[strFinancingTransactionNumber])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -139,7 +142,10 @@ BEGIN
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 			,[dblOptionalityPremium] = ISNULL(LD.dblOptionalityPremium, 0)
 			,[dblQualityPremium] = ISNULL(LD.dblQualityPremium, 0)
-			,[intPurchaseTaxGroupId] = @intTaxGroupId
+			,[intPurchaseTaxGroupId] = CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
+			,[intPayFromBankAccountId] = BA.intBankAccountId
+			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
+			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -173,6 +179,7 @@ BEGIN
 							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
 					ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
 		WHERE L.intLoadId = @intLoadId
 			AND CT.intPricingTypeId IN (1, 6)
 			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
@@ -228,6 +235,9 @@ BEGIN
 			,[dblOptionalityPremium] = 0
 			,[dblQualityPremium] = 0
 			,[intPurchaseTaxGroupId] = NULL
+			,[intPayFromBankAccountId] = NULL
+			,[strFinancingSourcedFrom] = NULL
+			,[strFinancingTransactionNumber] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
@@ -245,7 +255,13 @@ BEGIN
 			LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intPriceItemUOMId
 			LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+							A.intItemId,
+							ItemLoc.intItemLocationId,
+							CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL)
+							THEN 'AP Clearing'
+							ELSE 'Other Charge Expense' 
+							END) itemAccnt
 			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 			OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
@@ -281,7 +297,7 @@ BEGIN
 			)
 			SELECT 
 				[intVoucherPayableId]			= payables.intVoucherPayableId
-				,[intTaxGroupId]				= @intTaxGroupId
+				,[intTaxGroupId]				= CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END
 				,[intTaxCodeId]					= vendorTax.[intTaxCodeId]
 				,[intTaxClassId]				= vendorTax.[intTaxClassId]
 				,[strTaxableByOtherTaxes]		= vendorTax.[strTaxableByOtherTaxes]
@@ -372,7 +388,7 @@ BEGIN
 						ELSE 
 							payables.dblOrderQty 
 					END,
-					@intTaxGroupId,
+					CASE WHEN ISNULL(LD.intTaxGroupId, '') = '' THEN @intTaxGroupId ELSE LD.intTaxGroupId END,
 					CL.intCompanyLocationId,
 					EL.intEntityLocationId,
 					1,

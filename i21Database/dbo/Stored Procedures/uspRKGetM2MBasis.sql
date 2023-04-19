@@ -22,6 +22,8 @@ BEGIN TRY
         , @ysnEvaluationByCropYear BIT
         , @ysnEvaluationByStorageLocation BIT
         , @ysnEvaluationByStorageUnit BIT
+		, @ysnIncludeProductInformation BIT
+		, @ysnEnableMTMPoint BIT
 	
 	SELECT TOP 1 @ysnIncludeInventoryM2M = ISNULL(ysnIncludeInventoryM2M, 0)
 		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ISNULL(ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell, 0)
@@ -36,8 +38,13 @@ BEGIN TRY
         , @ysnEvaluationByCropYear = ysnEvaluationByCropYear 
         , @ysnEvaluationByStorageLocation = ysnEvaluationByStorageLocation 
         , @ysnEvaluationByStorageUnit = ysnEvaluationByStorageUnit 
+		, @ysnIncludeProductInformation = ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
 	
+	SELECT TOP 1 
+		@ysnEnableMTMPoint = ysnEnableMTMPoint  
+	FROM tblCTCompanyPreference
+
 	DECLARE @tempBasis TABLE (strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		, strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		, strOriginDest NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -80,6 +87,18 @@ BEGIN TRY
 		, intStorageLocationId INT
 		, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intStorageUnitId INT
+		, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intProductTypeId INT
+		, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intProductLineId INT
+		, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intGradeId INT
+		, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intCertificationId INT
+		, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intMTMPointId INT
+		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 	
 	IF (@strEvaluationBy = 'Commodity')
@@ -130,6 +149,18 @@ BEGIN TRY
 				, intStorageLocationId = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN intStorageLocationId ELSE NULL END)
 				, strStorageUnit = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN strStorageUnit ELSE NULL END)
 				, intStorageUnitId = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN intStorageUnitId ELSE NULL END)
+				, strProductType = NULL
+				, intProductTypeId = NULL
+				, strProductLine = NULL
+				, intProductLineId = NULL
+				, strGrade  = NULL
+				, intGradeId = NULL
+				, strCertification = NULL
+				, intCertificationId = NULL
+				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
+				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass  = NULL
+				, strRegion  = NULL
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -178,6 +209,18 @@ BEGIN TRY
 				, intStorageLocationId = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN intStorageLocationId ELSE NULL END)
 				, strStorageUnit = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN strStorageUnit ELSE NULL END)
 				, intStorageUnitId = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN intStorageUnitId ELSE NULL END)
+				, strProductType = NULL
+				, intProductTypeId = NULL
+				, strProductLine = NULL
+				, intProductLineId = NULL
+				, strGrade  = NULL
+				, intGradeId = NULL
+				, strCertification = NULL
+				, intCertificationId = NULL
+				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
+				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass  = NULL
+				, strRegion  = NULL
 			FROM vyuRKGetM2MBasis
 		END
 		
@@ -188,7 +231,7 @@ BEGIN TRY
 				, a.dblBasisOrDiscount = b.dblBasisOrDiscount
 				, a.intUnitMeasureId = b.intUnitMeasureId
 				, a.strUnitMeasure = UOM.strUnitMeasure
-				, a.dblRatio = b.dblRatio
+				, a.dblRatio = ISNULL(b.dblRatio, 0)
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)				
@@ -202,6 +245,7 @@ BEGIN TRY
 				AND ISNULL(a.intCropYearId, 0) = (CASE WHEN @ysnEvaluationByCropYear = 1 THEN ISNULL(b.intCropYearId, 0) ELSE ISNULL(a.intCropYearId, 0) END)
 				AND ISNULL(a.intStorageLocationId, 0) = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN ISNULL(b.intStorageLocationId, 0) ELSE ISNULL(a.intStorageLocationId, 0) END)
 				AND ISNULL(a.intStorageUnitId, 0) = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN ISNULL(b.intStorageUnitId, 0) ELSE ISNULL(a.intStorageUnitId, 0) END)
+				AND ISNULL(a.intMTMPointId, 0) = (CASE WHEN @ysnEnableMTMPoint = 1 THEN ISNULL(b.intMTMPointId, 0) ELSE ISNULL(a.intMTMPointId, 0) END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
@@ -254,6 +298,18 @@ BEGIN TRY
 				, intStorageLocationId = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN intStorageLocationId ELSE NULL END)
 				, strStorageUnit = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN strStorageUnit ELSE NULL END)
 				, intStorageUnitId = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN intStorageUnitId ELSE NULL END)
+				, strProductType 
+				, intProductTypeId 
+				, strProductLine 
+				, intProductLineId
+				, strGrade 
+				, intGradeId
+				, strCertification = (CASE WHEN @ysnIncludeProductInformation = 1 THEN strCertification ELSE NULL END)
+				, intCertificationId = NULL
+				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
+				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass
+				, strRegion
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -302,6 +358,18 @@ BEGIN TRY
 				, intStorageLocationId = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN intStorageLocationId ELSE NULL END)
 				, strStorageUnit = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN strStorageUnit ELSE NULL END)
 				, intStorageUnitId = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN intStorageUnitId ELSE NULL END)
+				, strProductType 
+				, intProductTypeId 
+				, strProductLine 
+				, intProductLineId
+				, strGrade 
+				, intGradeId
+				, strCertification = (CASE WHEN @ysnIncludeProductInformation = 1 THEN strCertification ELSE NULL END)
+				, intCertificationId = NULL
+				, strMTMPoint = (CASE WHEN @ysnEnableMTMPoint = 1 THEN strMTMPoint ELSE NULL END)
+				, intMTMPointId = (CASE WHEN @ysnEnableMTMPoint = 1 THEN intMTMPointId ELSE NULL END)
+				, strClass
+				, strRegion
 			FROM vyuRKGetM2MBasis
 		END
 		
@@ -327,12 +395,16 @@ BEGIN TRY
 				AND ISNULL(a.intCropYearId, 0) = (CASE WHEN @ysnEvaluationByCropYear = 1 THEN ISNULL(b.intCropYearId, 0) ELSE ISNULL(a.intCropYearId, 0) END)
 				AND ISNULL(a.intStorageLocationId, 0) = (CASE WHEN @ysnEvaluationByStorageLocation = 1 THEN ISNULL(b.intStorageLocationId, 0) ELSE ISNULL(a.intStorageLocationId, 0) END)
 				AND ISNULL(a.intStorageUnitId, 0) = (CASE WHEN @ysnEvaluationByStorageUnit = 1 THEN ISNULL(b.intStorageUnitId, 0) ELSE ISNULL(a.intStorageUnitId, 0) END)
+				AND ISNULL(a.intMTMPointId, 0) = (CASE WHEN @ysnEnableMTMPoint = 1 THEN ISNULL(b.intMTMPointId, 0) ELSE ISNULL(a.intMTMPointId, 0) END)
+				AND ISNULL(a.strCertification, '') = (CASE WHEN @ysnIncludeProductInformation = 1 THEN ISNULL(b.strCertification, '') ELSE ISNULL(a.strCertification, '') END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
 	END
 	
-	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo)) AS intRowNumber
+	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strItemNo, intFutureMarketId, intCurrencyId, strPeriodTo, intContractTypeId
+												, intCompanyLocationId, intMarketZoneId, intOriginPortId, intDestinationPortId
+												, intCropYearId, intStorageLocationId, intStorageUnitId, intMTMPointId, strCertification)) AS intRowNumber
 		, *
 		, ysnEvaluationByLocation = @ysnEvaluationByLocation 
 		, ysnEvaluationByMarketZone = @ysnEvaluationByMarketZone 
@@ -340,7 +412,9 @@ BEGIN TRY
 		, ysnEvaluationByDestinationPort = @ysnEvaluationByDestinationPort 
 		, ysnEvaluationByCropYear = @ysnEvaluationByCropYear 
 		, ysnEvaluationByStorageLocation = @ysnEvaluationByStorageLocation 
-		, ysnEvaluationByStorageUnit = @ysnEvaluationByStorageUnit 
+		, ysnEvaluationByStorageUnit = @ysnEvaluationByStorageUnit
+		, ysnIncludeProductInformation = @ysnIncludeProductInformation
+		, ysnEnableMTMPoint = @ysnEnableMTMPoint
 	FROM @tempBasis
 	WHERE intCommodityId IS NOT NULL
 	ORDER BY strMarketValuation

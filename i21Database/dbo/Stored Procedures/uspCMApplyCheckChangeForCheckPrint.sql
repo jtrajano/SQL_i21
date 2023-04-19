@@ -70,7 +70,7 @@ BEGIN
 		END
 			,intConcurrencyId = intConcurrencyId + 1
 	FROM [dbo].[tblCMBankTransaction] B
-	CROSS apply (SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where intTransactionId = Item ) S
+	CROSS apply (SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where B.intTransactionId = Item ) S
 	WHERE	intBankAccountId = @intBankAccountId
 			AND ( intBankTransactionTypeId = @intBankTransactionTypeId OR intBankTransactionTypeId = @intBankTransactionTypeId + 100)
 			AND ysnPosted = 1

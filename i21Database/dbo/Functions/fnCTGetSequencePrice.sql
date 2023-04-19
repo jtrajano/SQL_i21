@@ -25,14 +25,19 @@ BEGIN
 		,@intMainCurrencyId INT
 		,@intPriceItemUOMId INT
 		,@ysnValidFX BIT = 0
+		,@ysnEnableBudgetForBasisPricing	BIT
+		,@dblBudgetPrice NUMERIC(18,6)
 
 	SELECT @intPricingTypeId = intPricingTypeId
 		,@dbldblNoOfLots = dblNoOfLots
 		,@intFutureMarketId = intFutureMarketId
 		,@intFutureMonthId = intFutureMonthId
 		,@dblBasis = dblBasis
+		,@dblBudgetPrice = dblBudgetPrice
 	FROM tblCTContractDetail
 	WHERE intContractDetailId = @intContractDetailId
+
+	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing FROM tblCTCompanyPreference
 
 	SELECT @intPriceFixationId = intPriceFixationId
 		,@dblLotsFixed = dblLotsFixed
@@ -109,15 +114,15 @@ BEGIN
 		ELSE
 		BEGIN
 			IF @dblSettlementPrice IS NULL
-				SELECT @dblSeqPrice = dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFutureMonthId,GETDATE()) + @dblBasis
+				SELECT @dblSeqPrice =CASE WHEN @ysnEnableBudgetForBasisPricing = 0 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFutureMonthId,GETDATE()), 0) ELSE @dblBudgetPrice END + @dblBasis
 			ELSE 
 				SELECT @dblSeqPrice = @dblSettlementPrice +@dblBasis
 
 			SELECT @dblSeqPrice = CASE 
-								  WHEN @ysnSubCurrency = 1 AND @ysnValidFX = 1
-									 THEN @dblSeqPrice / 100
-								  ELSE @dblSeqPrice
-								  END
+								  WHEN @ysnSubCurrency = 1 
+									 THEN (@dblSeqPrice / 100) 
+								  ELSE @dblSeqPrice  
+								  END * ISNULL(@dblRate, 1 )
 		END
 	END
 

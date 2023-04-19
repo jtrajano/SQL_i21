@@ -354,9 +354,7 @@ BEGIN TRY
 			,[dblExchangeRate] = 1
 			,[ysnSubCurrency] = VDD.ysnSubCurrency
 			,[intSubCurrencyCents] = VDD.intSubCurrencyCents
-			,[intAccountId] = CASE WHEN (VDD.intContractDetailId IS NULL) 
-								THEN (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing') 
-								ELSE V.intGLAccountExpenseId END
+			,[intAccountId] = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
 			,[ysnReturn] = CAST(CASE WHEN (@intVoucherType = 11) THEN 1 ELSE 0 END AS BIT)
 			,[ysnStage] = CAST(0 AS BIT)
 			,[intSubLocationId] = VDD.intSubLocationId
@@ -368,11 +366,12 @@ BEGIN TRY
 			LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = VDD.intWeightClaimDetailId
 			LEFT JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
 			LEFT JOIN tblAPVendor V ON VDD.intPartyEntityId = V.intEntityId
-			OUTER APPLY (SELECT TOP 1 ld.intLoadDetailId FROM tblLGLoadDetail ld 
+			OUTER APPLY (SELECT TOP 1 ld.intLoadDetailId, ld.intPCompanyLocationId FROM tblLGLoadDetail ld 
 						 LEFT JOIN tblLGLoadDetailContainerLink ldcl on ldcl.intLoadDetailId = ld.intLoadDetailId
 						 WHERE ld.intLoadId = L.intLoadId 
 							AND (WCD.intLoadContainerId IS NULL 
 							 OR (WCD.intLoadContainerId IS NOT NULL AND WCD.intLoadContainerId = ldcl.intLoadContainerId))) LD
+			LEFT JOIN tblICItemLocation IL ON IL.intItemId = WCD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 		WHERE VDD.intPartyEntityId = @intVendorEntityId
 
 		EXEC uspAPCreateVoucher 

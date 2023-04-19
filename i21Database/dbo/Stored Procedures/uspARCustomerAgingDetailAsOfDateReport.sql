@@ -118,6 +118,9 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 	, intAccountId
 	, intAge
 	, strReportLogId	
+	, strLogoType
+	, blbLogo
+	, blbFooterLogo
 )
 SELECT * 
 FROM #TEMPAGINGDETAILS

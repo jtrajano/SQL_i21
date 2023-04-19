@@ -86,8 +86,10 @@ BEGIN
 		,strPhone = CS.strPhone
 		,strFax = CS.strFax
 		,strWeb = CS.strWebSite 
-		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
-		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+		,blbHeaderLogo = LOGO.blbHeaderLogo
+		,blbFooterLogo = LOGO.blbFooterLogo
+		,strHeaderLogoType = LOGO.strHeaderLogoType
+		,strFooterLogoType = LOGO.strFooterLogoType
 		,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
 		,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
 		,ysnFullHeaderLogo = ISNULL(CP.ysnFullHeaderLogo, 0)
@@ -126,6 +128,29 @@ BEGIN
 			JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
 			JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
 			WHERE S.strUserName = @strUserName) U
+		OUTER APPLY (
+			SELECT TOP 1
+				[blbLogo] = imgLogo
+				,[strLogoType] = 'Logo'
+			FROM tblSMLogoPreference
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = PCD.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC) CLLH
+		OUTER APPLY (
+			SELECT TOP 1
+				[blbLogo] = imgLogo
+				,[strLogoType] = 'Logo'
+			FROM tblSMLogoPreferenceFooter
+			WHERE (ysnAllOtherReports = 1 OR ysnDefault = 1)
+				AND intCompanyLocationId = PCD.intCompanyLocationId
+			ORDER BY (CASE WHEN ysnDefault = 1 THEN 1 ELSE 0 END) DESC) CLLF
+		OUTER APPLY (
+			SELECT
+				blbHeaderLogo = ISNULL(CLLH.blbLogo, dbo.fnSMGetCompanyLogo('Header'))
+				,blbFooterLogo = ISNULL(CLLF.blbLogo, dbo.fnSMGetCompanyLogo('Footer'))
+				,strHeaderLogoType = CASE WHEN CLLH.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END) LOGO
+
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
 END

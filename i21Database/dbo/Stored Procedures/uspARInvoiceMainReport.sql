@@ -41,11 +41,11 @@ CREATE TABLE #STANDARDINVOICES
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
-	BEGIN 
-		SET @xmlParam = NULL
+BEGIN 
+	SET @xmlParam = NULL
 
-		SELECT * FROM #INVOICETABLE
-	END
+	SELECT * FROM #INVOICETABLE
+END
 
 -- Declare the variables.
 DECLARE  @dtmDateTo				AS DATETIME
@@ -140,10 +140,10 @@ FROM @temp_xml_table
 WHERE [fieldname] = 'strReportLogId'
 
 IF NOT EXISTS(SELECT TOP 1 NULL FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
-	BEGIN
-		INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
-		VALUES (@strReportLogId, GETDATE())
-	END
+BEGIN
+	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+	VALUES (@strReportLogId, GETDATE())
+END
 --ELSE
 --	RETURN	
 
@@ -259,16 +259,16 @@ SET @strMainQuery += ' ORDER BY INVOICE.intInvoiceId'
 EXEC sp_executesql @strMainQuery
 
 IF ISNULL(@strInvoiceIds, '') <> ''
-	BEGIN
-		SELECT DISTINCT intInvoiceId = intID 
-		INTO #DELIMITEDROWS
-		FROM fnGetRowsFromDelimitedValues(@strInvoiceIds)
+BEGIN
+	SELECT DISTINCT intInvoiceId = intID 
+	INTO #DELIMITEDROWS
+	FROM fnGetRowsFromDelimitedValues(@strInvoiceIds)
 
-		DELETE INVOICE 
-		FROM #INVOICETABLE INVOICE
-		LEFT JOIN #DELIMITEDROWS DR ON INVOICE.intInvoiceId = DR.intInvoiceId
-		WHERE ISNULL(DR.intInvoiceId, 0) = 0
-	END
+	DELETE INVOICE 
+	FROM #INVOICETABLE INVOICE
+	LEFT JOIN #DELIMITEDROWS DR ON INVOICE.intInvoiceId = DR.intInvoiceId
+	WHERE ISNULL(DR.intInvoiceId, 0) = 0
+END
 
 UPDATE #INVOICETABLE SET strInvoiceFormat = 'Format 3 - Swink' WHERE strInvoiceFormat = 'Format 1 - Swink'
 

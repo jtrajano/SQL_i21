@@ -24,15 +24,8 @@ BEGIN
 	BEGIN TRY
 
 	DECLARE @currentUser INT = @userId;
-	DECLARE @functionalCurrency INT;
-	DECLARE @foreignCurrency INT;
-	DECLARE @rateType INT;
 	DECLARE @withHoldAccount INT = NULL;
 	DECLARE @withholdPercent DECIMAL(18,6);
-	DECLARE @paymentCompanyLocation INT;
-	DECLARE @bankGLAccountId INT;
-	DECLARE @rate DECIMAL(18,6) = 1;
-	DECLARE @currency INT;
 	DECLARE @vendorEnableWithhold BIT = 0;
 	DECLARE @createdPaymentIds AS NVARCHAR(MAX);
 	DECLARE @batchId NVARCHAR(255) = NEWID();
@@ -49,6 +42,19 @@ BEGIN
 	DECLARE @script NVARCHAR(MAX);
 	DECLARE @clientSort NVARCHAR(500) = @sort;
 	DECLARE @instructionCode INT;
+	DECLARE @functionalCurrency INT;
+	DECLARE @rateType INT;
+
+	--GET DEFAULT COMPANY CONFIGURATIONS
+	SELECT TOP 1 @instructionCode = intInstructionCode, 
+		   @paymentMethod = CASE WHEN NULLIF(@paymentMethod, 0) IS NULL THEN intPaymentMethodID ELSE @paymentMethod END
+	FROM tblAPCompanyPreference
+
+	SELECT TOP 1 @functionalCurrency = intDefaultCurrencyId
+	FROM tblSMCompanyPreference
+
+	SELECT TOP 1 @rateType = intAccountsPayableRateTypeId
+	FROM tblSMMultiCurrency
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchers') IS NOT NULL DROP TABLE #tmpMultiVouchers
 	CREATE TABLE #tmpMultiVouchers
@@ -64,7 +70,9 @@ BEGIN
 		dblWithheld DECIMAL(18,2),
 		strPaymentInfo NVARCHAR(50),
 		strPayee NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
+		intPayFromBankAccountId INT NULL,
 		intPayToBankAccountId INT NULL,
+		intShipToId INT NULL,
 		intSortId INT IDENTITY(1,1)
 	);
 
@@ -82,66 +90,63 @@ BEGIN
 		[intTransactionId] INT
 	);
 
+	IF OBJECT_ID('tempdb..#tmpBankAccountInfo') IS NOT NULL DROP TABLE #tmpBankAccountInfo
+	CREATE TABLE #tmpBankAccountInfo
+	(
+		intPayFromBankAccountId INT,
+		intCurrencyId INT,
+		intGLAccountId INT,
+		ysnForeignCurrency BIT,
+		dblRate DECIMAL(18, 6) NOT NULL DEFAULT(1),
+	);
+
 	INSERT INTO @ids
 	--USE DISTINCT TO REMOVE DUPLICATE BILL ID FOR SCHEDULE PAYMENT
 	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
-	INSERT INTO @invoices
-	--USE DISTINCT TO REMOVE DUPLICATE BILL ID FOR SCHEDULE PAYMENT
-	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@invoiceIds)
+	--VALIDATION START
+	INSERT INTO #tmpBankAccountInfo
+	SELECT DISTINCT ISNULL(NULLIF(@bankAccount, 0), B.intPayFromBankAccountId),
+		   BA.intCurrencyId,
+		   BA.intGLAccountId,
+		   CASE WHEN BA.intCurrencyId <> @functionalCurrency THEN 1 ELSE 0 END,
+		   1
+	FROM tblAPBill B
+	INNER JOIN @ids ids ON ids.intId = B.intBillId
+	INNER JOIN tblCMBankAccount BA ON BA.intBankAccountId = ISNULL(NULLIF(@bankAccount, 0), B.intPayFromBankAccountId)
 
-	SELECT TOP 1
-		@currency = bank.intCurrencyId
-		,@bankGLAccountId = bank.intGLAccountId
-	FROM tblCMBankAccount bank
-	WHERE bank.intBankAccountId = @bankAccount
-
-	SELECT TOP 1 
-		@functionalCurrency = intDefaultCurrencyId 
-		,@foreignCurrency = CASE WHEN intDefaultCurrencyId != @currency THEN 1 ELSE 0 END
-	FROM tblSMCompanyPreference
-
-	IF @foreignCurrency = 1
+	IF EXISTS(SELECT TOP 1 1 FROM #tmpBankAccountInfo WHERE ysnForeignCurrency = 1)
 	BEGIN
-		SELECT TOP 1
-			@rateType = intAccountsPayableRateTypeId
-		FROM tblSMMultiCurrency
-		 
-		SELECT TOP 1
-			@rate = exchangeRateDetail.dblRate
-		FROM tblSMCurrencyExchangeRate exchangeRate
-		INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail 
-				ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
-		WHERE exchangeRateDetail.intRateTypeId = @rateType
-		AND exchangeRate.intFromCurrencyId = @currency AND exchangeRate.intToCurrencyId = @functionalCurrency
-		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
-		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
-
 		IF @rateType IS NULL 
 		BEGIN
 			RAISERROR('PAYVOUCHERNOEXCHANGERATETYPE', 16, 1);
 			RETURN;
 		END
+
+		UPDATE BAI
+		SET BAI.dblRate = ER.dblRate
+		FROM #tmpBankAccountInfo BAI
+		OUTER APPLY (
+			SELECT TOP 1 exchangeRateDetail.dblRate
+			FROM tblSMCurrencyExchangeRate exchangeRate
+			INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
+			WHERE exchangeRateDetail.intRateTypeId = @rateType AND exchangeRate.intFromCurrencyId = BAI.intCurrencyId AND exchangeRate.intToCurrencyId = @functionalCurrency AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+			ORDER BY exchangeRateDetail.dtmValidFromDate DESC
+		) ER
+		WHERE BAI.ysnForeignCurrency = 1
 		
-		IF @rate IS NULL OR @rate < 0
+		IF EXISTS(SELECT TOP 1 1 FROM #tmpBankAccountInfo WHERE ysnForeignCurrency = 1 AND (dblRate IS NULL OR dblRate < 0))
 		BEGIN
 			RAISERROR('PAYVOUCHERNOEXCHANGERATE', 16, 1);
 			RETURN;
 		END
 	END
 
-	--VALIDATION
-	--Make sure there is user to use
 	IF @currentUser IS NULL
 	BEGIN
 		RAISERROR('User is required.', 16, 1);
 		RETURN;
 	END
-
-	SELECT
-		@paymentCompanyLocation = intCompanyLocationId
-	FROM tblSMUserSecurity
-	WHERE intEntityId = @currentUser;
 
 	SELECT TOP 1
 		@withHoldAccount = B.intWithholdAccountId
@@ -160,6 +165,7 @@ BEGIN
 		RAISERROR(@vendorWithhold,16,1);
 		RETURN;
 	END
+	--VALIDATION END
 
 	IF OBJECT_ID('tempdb..#tmpPartitionedVouchers') IS NOT NULL DROP TABLE  #tmpPartitionedVouchers
 	SELECT 
@@ -179,14 +185,9 @@ BEGIN
 		,ISNULL(voucher.dblAmountDue, invoice.dblAmountDue) AS dblAmountDue
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
-				,strPayee = CASE WHEN result.intInvoiceId > 0
-					THEN
-					ISNULL(payToInvoice.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
-					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payToInvoice.strAddress,''), ISNULL(payToInvoice.strCity,''), ISNULL(payToInvoice.strState,''), ISNULL(payToInvoice.strZipCode,'')),'')
-					ELSE
-					ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
+		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
 					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payTo.strAddress,''), ISNULL(payTo.strCity,''), ISNULL(payTo.strState,''), ISNULL(payTo.strZipCode,'')),'')
-					END
+		,intDefaultPayFromBankAccountId = ISNULL(NULLIF(@bankAccount, 0), result.intPayFromBankAccountId)
 		,intDefaultPayToBankAccountId = ISNULL(result.intPayToBankAccountId, eft.intEntityEFTInfoId)
 	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids, @invoices) result
@@ -200,7 +201,7 @@ BEGIN
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN vyuAPVoucherCommodity commodityInvoice ON invoice.intInvoiceId = commodityInvoice.intInvoiceId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
-	LEFT JOIN tblEMEntityEFTInformation eft ON eft.intEntityId = entity.intEntityId AND eft.intCurrencyId = @currency AND eft.ysnActive = 1 AND eft.ysnDefaultAccount = 1
+	LEFT JOIN tblEMEntityEFTInformation eft ON eft.intEntityId = entity.intEntityId AND eft.ysnActive = 1 AND eft.ysnDefaultAccount = 1 AND eft.intCurrencyId = voucher.intCurrencyId
 	OUTER APPLY (
 		SELECT STUFF((
 			SELECT DISTINCT ' and ' + strName
@@ -214,6 +215,7 @@ BEGIN
 			FOR XML PATH('')), 
 			1, 1, '') AS strPayee
 	) lienInfo
+	WHERE voucher.intSelectedByUserId = @userId
 
 	--ALL TRANSACTIONS THAT VENDOR IS NOT ONE BILL PER PAYMENT
 	SET @script = 
@@ -230,11 +232,13 @@ BEGIN
 		strPaymentInfo,
 		strPayee,
 		ysnLienExists,
+		intPayFromBankAccountId,
 		intPayToBankAccountId,
+		intShipToId,
 		intPartitionId
 	)
 	SELECT
-		intBillId, intInvoiceId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayToBankAccountId, intPartitionId
+		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayFromBankAccountId, intDefaultPayToBankAccountId, intShipToId, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -271,22 +275,19 @@ BEGIN
 			ALTER TABLE tblAPPayment DROP CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum];
 		END
 
-		--GET DEFAULT COMPANY CONFIGURATIONS
-		SELECT @instructionCode = intInstructionCode FROM tblAPCompanyPreference
-
 		MERGE INTO tblAPPayment AS destination
 		USING
 		(
 			SELECT TOP 100 PERCENT
-				[intAccountId]						= 	@bankGLAccountId,
-				[intBankAccountId]					= 	@bankAccount,
+				[intAccountId]						= 	BAI.intGLAccountId,
+				[intBankAccountId]					= 	BAI.intPayFromBankAccountId,
 				[intPaymentMethodId]				= 	CASE WHEN (vouchersPay.dblAmountPaid - vouchersPay.dblWithheld) = 0 
 																AND @paymentMethod <> 2
 														THEN 3 --Debit Memos and Payments
 														ELSE @paymentMethod END,
 				[intPayToAddressId]					= 	vouchersPay.intPayToAddressId,
-				[intCompanyLocationId]  			= 	@paymentCompanyLocation,
-				[intCurrencyId]						= 	@currency,
+				[intCompanyLocationId]  			= 	vouchersPay.intShipToId,
+				[intCurrencyId]						= 	BAI.intCurrencyId,
 				[intEntityVendorId]					= 	vouchersPay.intEntityVendorId,
 				[intCurrencyExchangeRateTypeId]		=	@rateType,
 				[strPaymentInfo]					= 	vouchersPay.strPaymentInfo,
@@ -297,7 +298,7 @@ BEGIN
 				[dtmDatePaid]						= 	@datePaid,
 				[dblAmountPaid]						= 	vouchersPay.dblAmountPaid - vouchersPay.dblWithheld,
 				[dblUnapplied]						= 	0,
-				[dblExchangeRate]					= 	@rate,
+				[dblExchangeRate]					= 	BAI.dblRate,
 				[ysnPosted]							= 	0,
 				[ysnLienExists]						= 	vouchersPay.ysnLienExists,
 				[ysnOverrideCheckPayee]				= 	0,
@@ -316,7 +317,16 @@ BEGIN
 				-- 											FOR XML PATH('')),1,1,''
 				-- 										)
 			FROM #tmpMultiVouchers vouchersPay
+			CROSS APPLY (
+				SELECT TOP 1 *
+				FROM #tmpBankAccountInfo
+				WHERE intPayFromBankAccountId = vouchersPay.intPayFromBankAccountId
+			) BAI
 			GROUP BY 
+				BAI.intGLAccountId,
+				BAI.intPayFromBankAccountId,
+				BAI.intCurrencyId,
+				BAI.dblRate,
 				vouchersPay.intPaymentId,
 				vouchersPay.dblAmountPaid,
 				vouchersPay.intPayToAddressId,
@@ -325,7 +335,9 @@ BEGIN
 				vouchersPay.strPayee,
 				vouchersPay.dblWithheld,
 				vouchersPay.ysnLienExists,
+				vouchersPay.intPayFromBankAccountId,
 				vouchersPay.intPayToBankAccountId,
+				vouchersPay.intShipToId,
 				vouchersPay.intPartitionId
 			ORDER BY MIN(vouchersPay.intSortId)
 		) AS SourceData
@@ -458,6 +470,8 @@ BEGIN
 		) details
 		LEFT JOIN tblAPVoucherPaymentSchedule paySched
 			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
+			AND paySched.intSelectedByUserId = @userId
+			WHERE vouchers.intSelectedByUserId = @userId	
 		UNION ALL
 		SELECT
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
@@ -475,10 +489,24 @@ BEGIN
 		FROM tblARInvoice invoice
 		INNER JOIN #tmpMultiVouchers tmp ON invoice.intInvoiceId = tmp.intInvoiceId
 		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intInvoiceId = tmpVoucherAndPay.intInvoiceId
-
 	END
 
 	SET @batchPaymentId = @batchId;
+
+	--RESET USER SELECTED
+	UPDATE A
+	SET A.intSelectedByUserId = NULL
+	FROM tblAPBill A
+	INNER JOIN #tmpMultiVouchers tmp ON A.intBillId = tmp.intBillId
+	INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId 
+	WHERE A.intSelectedByUserId = @userId
+
+	UPDATE A
+	SET A.intSelectedByUserId = NULL
+	FROM tblAPVoucherPaymentSchedule A
+	INNER JOIN #tmpMultiVouchers tmp ON A.intBillId = tmp.intBillId
+	INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId 
+	WHERE A.intSelectedByUserId = @userId
 
 	SELECT @createdPaymentIds = COALESCE(@createdPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intCreatePaymentId)
 	FROM #tmpMultiVouchersCreatedPayment

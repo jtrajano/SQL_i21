@@ -176,13 +176,13 @@ SELECT intEntityId							= C.intEntityId
      , dtmBatchTimeFrom						= C.dtmBatchTimeFrom
      , dtmBatchTimeTo						= C.dtmBatchTimeTo
      , intConcurrencyId						= E.intConcurrencyId
-	, ysnExemptCreditCardFee				= C.ysnExemptCreditCardFee
-	, intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
-	, strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
-  , strDeliveryDocument					= C.strDeliveryDocument
+     , ysnExemptCreditCardFee				= C.ysnExemptCreditCardFee
+     , intDefaultPayToBankAccountId		    = C.intDefaultPayToBankAccountId
+     , strDefaultPayToBankAccountNo		    = C.strDefaultPayToBankAccountNo
+     , strDeliveryDocument					= C.strDeliveryDocument
 
-  , ysnAllowFleetVehiclestoChangeLocation = C.ysnAllowFleetVehiclestoChangeLocation
-  , strRecurringPONumber = C.strRecurringPONumber
+     , ysnAllowFleetVehiclestoChangeLocation = C.ysnAllowFleetVehiclestoChangeLocation
+     , strRecurringPONumber = C.strRecurringPONumber
 FROM tblARCustomer C
 INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
 LEFT JOIN tblSMLanguage LANG ON E.intLanguageId = LANG.intLanguageId

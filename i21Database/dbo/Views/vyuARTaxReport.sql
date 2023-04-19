@@ -30,14 +30,14 @@ SELECT
 	,ysnInvalidSetup			= DETAIL.ysnInvalidSetup
 	,dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblTaxAmountFunctional		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	, dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
-		 							THEN DETAIL.dblLineTotal 
-									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 
-												THEN DETAIL.dblLineTotal 
-												ELSE 0.000000 
-											END) 
-									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTaxAmountFunctional		= DETAIL.dblBaseAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblNonTaxable    			= (CASE WHEN INVOICE.dblTax = 0 
+								THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+								ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000
+											THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
+											ELSE 0.000000 
+										END) 
+								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblNonTaxableFunctional	= (CASE WHEN INVOICE.dblBaseTax = 0 
 								THEN DETAIL.dblBaseLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 								ELSE (CASE WHEN DETAIL.dblBaseAdjustedTax = 0.000000
@@ -67,7 +67,7 @@ SELECT
 								END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTotalSales 				= DETAIL.dblLineTotal * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTotalSalesFunctional	= DETAIL.dblBaseLineTotal * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblTaxCollected			= INVOICE.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTaxCollected			= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,strCustomerNumber	    	= CUSTOMER.strCustomerNumber
 	,strCustomerName			= CUSTOMER.strCustomerName
 	,strCustomerCity			= CUSTOMER.strCustomerCity
@@ -118,9 +118,9 @@ SELECT
 	,strUnitOfMeasure			= DETAIL.strUnitOfMeasure
 	,ysnPaid					= INVOICE.ysnPaid
 	,intARAccountId				= INVOICE.intAccountId
-	,strARAccountId				= ARACCOUNT.strAccountId
+	,strARAccountId				= CASE WHEN INVOICE.strType IN ('Tax Adjustment') THEN DETAIL.strDebitTaxAccount ELSE ARACCOUNT.strAccountId END
 	,intSalesAccountId			= DETAIL.intSalesAccountId
-	,strSalesAccountId			= DETAIL.strAccountId
+	,strSalesAccountId			= CASE WHEN INVOICE.strType IN ('Tax Adjustment') THEN DETAIL.strCreditTaxAccount ELSE DETAIL.strAccountId END
 	,strShipToName				= SHIPTO.strCheckPayeeName
 	,strShipToAddress			= SHIPTO.strAddress
 	,strShipToCity				= SHIPTO.strCity
@@ -132,6 +132,9 @@ SELECT
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,dtmDateCreated				= CAST(INVOICE.dtmDateCreated AS DATE)
 	,dtmUpdatedDate				= CAST(AUDITLOG.dtmUpdatedDate AS DATE)
+	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
+	,dblTotalAmount				= (DETAIL.dblLineTotal + DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal()) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -181,6 +184,9 @@ INNER JOIN (
 		,strAccountId			= SALESACCOUNT.strAccountId
 		,intSalesAccountId		= ID.intSalesAccountId
 		,ysnOverrideTaxGroup    = ISNULL(ID.ysnOverrideTaxGroup, 0)
+		,strDebitTaxAccount		= DEBITTAXACCOUNT.strAccountId 
+		,strCreditTaxAccount	= CREDITTAXACCOUNT.strAccountId 
+		,dblCurrencyExchangeRate = ID.dblCurrencyExchangeRate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT 
@@ -299,7 +305,6 @@ INNER JOIN (
 		FROM tblGLAccount
 		WHERE intAccountId = ID.intSalesAccountId
 	) SALESACCOUNT
-
 	UNION ALL
  
 	SELECT intInvoiceId				= DF.intInvoiceId
@@ -361,6 +366,16 @@ INNER JOIN (
 		FROM tblARInvoiceDetail ID
 		GROUP BY ID.intInvoiceId
 	) ID ON DF.intInvoiceId = ID.intInvoiceId
+	OUTER APPLY (	
+		SELECT TOP 1 strAccountId	
+		FROM tblGLAccount	
+		WHERE intAccountId = (select TOP 1 intAccountId from tblGLDetail where dblDebit <> 0 and intTransactionId = ID.intInvoiceId order by dtmDateEntered desc)	
+	) DEBITTAXACCOUNT
+	OUTER APPLY (	
+		SELECT TOP 1 strAccountId	
+		FROM tblGLAccount	
+		WHERE intAccountId = (select TOP 1 intAccountId from tblGLDetail where dblCredit <> 0 and intTransactionId = ID.intInvoiceId order by dtmDateEntered desc)	
+	) CREDITTAXACCOUNT
 ) DETAIL ON INVOICE.intInvoiceId = DETAIL.intInvoiceId
 INNER JOIN (
 	SELECT 

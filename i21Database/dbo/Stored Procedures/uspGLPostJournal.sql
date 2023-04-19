@@ -230,6 +230,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intCompanyLocationId]	= B.[intCompanyLocationId]
 			,[intLedgerId]			= A.[intLedgerId]
 			,[intSubledgerId]		= A.[intSubledgerId]
+
 		
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -327,6 +328,7 @@ ELSE
 			,[intCompanyLocationId]	
 			,[intLedgerId]
 			,[intSubledgerId]
+			,[intCurrencyId]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -366,6 +368,7 @@ ELSE
 			,[intCompanyLocationId]	= B.[intCompanyLocationId]
 			,[intLedgerId]			= A.[intLedgerId]
 			,[intSubledgerId]		= A.[intSubledgerId]
+			,[intCurrencyId]		= ISNULL(A.intCurrencyId, B.intCurrencyId)
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 

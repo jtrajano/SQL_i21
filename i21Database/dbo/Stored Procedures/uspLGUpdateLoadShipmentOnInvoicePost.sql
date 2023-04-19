@@ -3,6 +3,7 @@
 	,@Post BIT = 0
 	,@LoadId INT = NULL
 	,@UserId INT = NULL
+	,@ysnCancelAllocation BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -29,6 +30,7 @@ BEGIN TRY
 	DECLARE @strInvoiceType NVARCHAR(100)
 	DECLARE @intShipmentStatus INT
 	DECLARE @ysnFromReturn BIT
+	DECLARE @intAllocationHeaderId INT
 
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
@@ -105,7 +107,9 @@ BEGIN TRY
 				WHERE intSContractDetailId = @intSContractDetailId
 					AND intLoadId = @intLoadId
 
-				SELECT @intAllocationPContractDetailId = intPContractDetailId
+				SELECT 
+					@intAllocationPContractDetailId = intPContractDetailId,
+					@intAllocationHeaderId = intAllocationHeaderId
 				FROM tblLGAllocationDetail
 				WHERE intAllocationDetailId = @intAllocationDetailId
 				
@@ -128,9 +132,24 @@ BEGIN TRY
 					BEGIN
 						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
 						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+
+						-- Automatic Allocation Cancellation
+						IF (@ysnCancelAllocation = 1)
+						BEGIN
+							EXEC uspLGCancelAllocation
+								@intAllocationHeaderId = @intAllocationHeaderId,
+								@ysnCancel = @ysnCancelAllocation,
+								@UserId = @UserId
+						END
 					END
 					ELSE
 					BEGIN
+						-- Automatic Allocation Reverse Cancellation
+						EXEC uspLGCancelAllocation
+							@intAllocationHeaderId = @intAllocationHeaderId,
+							@ysnCancel = 0,
+							@UserId = @UserId
+
 						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
 						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
 					END
@@ -168,7 +187,11 @@ BEGIN TRY
 		BEGIN
 			IF(@strInvoiceType IN ('Provisional', 'Standard') AND ISNULL(@ysnFromReturn, 0) = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12)
+				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12, 10)
+			END
+			ELSE IF(ISNULL(@ysnFromReturn, 0) = 1)
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12, 10)
 			END
 			ELSE IF(ISNULL(@ysnFromReturn, 0) = 1)
 			BEGIN
@@ -183,7 +206,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 6 WHERE intLoadId = @intLoadId AND intShipmentStatus NOT IN (4, 12)
 			END
 		END
 

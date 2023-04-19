@@ -13,6 +13,23 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
+	DECLARE	 @AllowSingleEntries BIT
+			,@AllowIntraEntries BIT
+			,@DueToAccountId	INT
+			,@DueFromAccountId  INT
+			,@OverrideCompanySegment  BIT
+			,@OverrideLocationSegment  BIT
+			,@OverrideLineOfBusinessSegment  BIT
+	SELECT TOP 1
+		  @AllowSingleEntries = ysnAllowSingleLocationEntries,
+		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END, 
+		  @DueToAccountId	= ISNULL([intDueToAccountId], 0), 
+		  @DueFromAccountId = ISNULL([intDueFromAccountId], 0),
+		  @OverrideCompanySegment = ISNULL([ysnOverrideCompanySegment], 0),
+		  @OverrideLocationSegment = ISNULL([ysnOverrideLocationSegment], 0),
+		  @OverrideLineOfBusinessSegment = ISNULL([ysnOverrideLineOfBusinessSegment], 0)
+	FROM tblAPCompanyPreference
+
 	IF @post = 1
 	BEGIN
 		--MAKE SURE IT HAS CORRECT ACCOUNT TO USE
@@ -109,6 +126,111 @@ BEGIN
 		AND EXISTS (
 			SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId --AND B.strScreenName = 'Voucher'
 		)
+
+		--You cannot post intra-location transaction without due to account. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Unable to find the due to account that matches the account segment/s of the AP Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			40
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		OUTER APPLY (
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT
+		WHERE A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND @AllowIntraEntries = 1
+		AND OVERRIDESEGMENT.bitOverriden = 0
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
+
+		--You cannot post intra-location transaction without due from account. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Unable to find the due from account that matches the account segment/s of the Payables Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			41
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		OUTER APPLY (
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT
+		WHERE A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND @AllowIntraEntries = 1
+		AND OVERRIDESEGMENT.bitOverriden = 0
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
+
+		--VALIDATE DETAIL ACCOUNT OVERRIDE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Unable to find the purchasing account that matches the account segment/s of the Payables Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			42
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+		OUTER APPLY (
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT
+		WHERE A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND OVERRIDESEGMENT.bitOverriden = 0
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
+
+		--VALIDATE TAX ACCOUNT OVERRIDE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Unable to find the tax account that matches the account segment/s of the Payables Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			43
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
+		INNER JOIN tblAPBillDetailTax C ON C.intBillDetailId = B.intBillDetailId
+		OUTER APPLY (
+			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT
+		WHERE A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND OVERRIDESEGMENT.bitOverriden = 0
+		AND (
+			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLocationSegment = 0 AND @OverrideLocationSegment = 1) OR
+			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
+		)
+
+		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			'Purchase and AP Account should have the same location segment.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			44
+		FROM tblAPBill A 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		OUTER APPLY (
+			SELECT *
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, 0, @OverrideLocationSegment, 0)
+		) OVERRIDESEGMENT
+		WHERE A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND @AllowSingleEntries = 1
+		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], OVERRIDESEGMENT.intOverrideAccount, 3) = 0
 	END
 	ELSE
 	BEGIN

@@ -319,7 +319,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - dbo.fnRoundBanker(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], CASE WHEN ARID.[strType] = 'Provisional' THEN LGD.[dblQuantity] ELSE ARID.[dblShipmentNetWt] END), @ZeroDecimal), 6)
+	,[dblQty]						= - ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ICIT.intItemUOMId, CASE WHEN ARID.strType = 'Provisional' OR LG.intPurchaseSale = 3 THEN LGD.dblQuantity ELSE ARID.dblShipmentNetWt END), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -358,7 +358,7 @@ CROSS APPLY (
 ) ICIT
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
+  AND LG.intPurchaseSale IN (2, 3)
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ARID.[intTicketId] IS NULL
@@ -373,7 +373,11 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+<<<<<<< HEAD
 	,[dblQty]						= dbo.fnRoundBanker(ICIT.dblQty * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END, 6)
+=======
+	,[dblQty]						= ARIDL.dblQuantityShipped * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
+>>>>>>> 22.1ProdWaMa
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -409,7 +413,7 @@ AND ICIT.[intLotId] = ARIDL.[intLotId]
 AND ICIT.[ysnIsUnposted] = 0		
 AND ICIT.[intInTransitSourceLocationId] IS NOT NULL
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
+  AND LG.intPurchaseSale IN (2, 3)
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ARID.strSessionId = @strSessionId
@@ -422,7 +426,11 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+<<<<<<< HEAD
 	,[dblQty]						= dbo.fnRoundBanker(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal), 6)
+=======
+	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal)
+>>>>>>> 22.1ProdWaMa
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -471,7 +479,7 @@ INNER JOIN (
 	  AND ICIT.[strTransactionId] = ARRETURN.[strInvoiceNumber] 			 
 	  AND ICIT.[intItemId] = ARRETURN.[intItemId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
+	AND LG.intPurchaseSale IN (2, 3)
 	AND ARID.[intInventoryShipmentItemId] IS NULL
 	AND ARID.[strTransactionType] = 'Credit Memo'
     AND ARID.[intTicketId] IS NULL
@@ -486,7 +494,11 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+<<<<<<< HEAD
 	,[dblQty]						= dbo.fnRoundBanker(-ICIT.[dblQty], 6)
+=======
+	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal)
+>>>>>>> 22.1ProdWaMa
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -534,7 +546,7 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ARRETURN.
 										 AND ICIT.[ysnIsUnposted] = 0		
 										 AND ICIT.[intInTransitSourceLocationId] IS NOT NULL	 
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
+	AND LG.intPurchaseSale IN (2, 3)
 	AND ARID.[intInventoryShipmentItemId] IS NULL
 	AND ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note')
 	AND ARID.[strSessionId] = @strSessionId
@@ -618,7 +630,7 @@ WHERE ARID.[intSourceId] = 2
   AND ARID.[ysnFromProvisional] = 1 
   AND ARID.[ysnProvisionalWithGL] = 1
   AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
-  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
+  AND LG.intPurchaseSale IN (2, 3)
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intTicketId] IS NULL
   AND ARIDL.[intInvoiceDetailLotId] IS NULL
@@ -703,7 +715,7 @@ WHERE ARID.[intSourceId] = 2
   AND ARID.[ysnFromProvisional] = 1 
   AND ARID.[ysnProvisionalWithGL] = 1
   AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
-  AND ((LG.[intPurchaseSale] = 2 OR (LG.[intPurchaseSale] = 3) AND ARID.[strType] = 'Provisional'))
+  AND LG.intPurchaseSale IN (2, 3)
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intTicketId] IS NULL
   AND ARIDL.[intInvoiceDetailLotId] IS NULL

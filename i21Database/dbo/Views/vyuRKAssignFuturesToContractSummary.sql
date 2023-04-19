@@ -32,10 +32,15 @@ SELECT cs.intAssignFuturesToContractSummaryId,
 		cs.ysnIsHedged,
 		fot.intFutOptTransactionHeaderId,
 		fot.dtmCreateDateTime,
-		strPricingStatus = CASE WHEN cd.intPricingStatus = 0 THEN 'Unpriced' WHEN cd.intPricingStatus = 1 THEN 'Partially Priced' WHEN cd.intPricingStatus = 2 THEN 'Priced' END
+		strPricingStatus = CASE WHEN cd.intPricingTypeId = 2
+								THEN CASE WHEN ISNULL(PF.dblTotalLots, 0) = 0  THEN 'Unpriced'
+									ELSE CASE WHEN ISNULL(PF.dblTotalLots, 0) - ISNULL(AP.dblLotsFixed, 0) = 0 THEN 'Fully Priced' 
+										WHEN ISNULL(AP.dblLotsFixed, 0) = 0  THEN 'Unpriced'
+										ELSE 'Partially Priced' END END
+									WHEN cd.intPricingTypeId = 1 THEN 'Priced' ELSE '' END	
 		, dblNoOfLots = CASE WHEN isnull(ch.ysnMultiplePriceFixation,0) = 1 THEN ISNULL(ch.dblNoOfLots, 0) ELSE ISNULL(cd.dblNoOfLots, 0) END
-		, dblLotsPriced = CASE WHEN cd.intPricingTypeId = 1 THEN (cd.dblQuantity / m.dblContractSize) ELSE ISNULL(PFD.dblQuantity, 0) / m.dblContractSize END
-		, dblLotsUnpriced = CASE WHEN cd.intPricingTypeId = 1 THEN 0 ELSE ((cd.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / m.dblContractSize) END
+		, dblLotsPriced = CASE WHEN cd.intPricingTypeId IN(1, 6) THEN ISNULL(ISNULL(cd.dblNoOfLots, AP.dblLotsFixed), 0) ELSE ISNULL(PF.dblLotsFixed, 0) END
+		, dblLotsUnpriced = CASE WHEN cd.intPricingTypeId IN(1, 6) THEN 0 ELSE ISNULL(cd.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0), 0) END
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN tblCTContractDetail cd ON  cs.intContractDetailId=cd.intContractDetailId  
 join tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
@@ -56,6 +61,16 @@ LEFT JOIN tblCTBook b1 on fot.intBookId=b1.intBookId
 LEFT JOIN tblCTSubBook sb1 on fot.intSubBookId=sb1.intSubBookId  
 LEFT JOIN tblCTPriceFixation PF on PF.intContractDetailId = cd.intContractDetailId
 LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+OUTER APPLY (
+	SELECT TOP 1 A.intContractHeaderId
+		, A.intContractDetailId
+		, C.strApprovalStatus
+		, A.dblLotsFixed
+		FROM tblCTPriceFixation A
+		LEFT JOIN tblSMTransaction C ON C.intRecordId = A.intPriceContractId AND C.strApprovalStatus IS NOT NULL 
+		WHERE A.intContractHeaderId = ch.intContractHeaderId
+			AND ISNULL(A.intContractDetailId, 0) = CASE WHEN ch.ysnMultiplePriceFixation = 1 THEN ISNULL(A.intContractDetailId, 0) ELSE ISNULL(cd.intContractDetailId, 0) END
+		ORDER BY C.intTransactionId DESC) AP
 where isnull(ch.ysnMultiplePriceFixation,0) = 0
 
 UNION 
@@ -89,10 +104,17 @@ SELECT cs.intAssignFuturesToContractSummaryId,
 		fot.intFutOptTransactionId,
 		cs.ysnIsHedged
 		,fot.intFutOptTransactionHeaderId,fot.dtmCreateDateTime  	
-		, strPricingStatus = CASE WHEN cd.intPricingStatus = 0 THEN 'Unpriced' WHEN cd.intPricingStatus = 1 THEN 'Partially Priced' WHEN cd.intPricingStatus = 2 THEN 'Priced' END
+		, strPricingStatus = CASE WHEN cd.intPricingTypeId = 2
+									  THEN CASE WHEN ISNULL(PF.dblTotalLots, 0) = 0  THEN 'Unpriced'
+										ELSE CASE WHEN ISNULL(PF.dblTotalLots, 0) - ISNULL(AP.dblLotsFixed, 0) = 0 THEN 'Fully Priced' 
+												  WHEN ISNULL(AP.dblLotsFixed, 0) = 0  THEN 'Unpriced'
+												  ELSE 'Partially Priced' END END
+									  WHEN cd.intPricingTypeId = 1 THEN 'Priced' ELSE '' END	
 		, dblNoOfLots = ISNULL(ch.dblNoOfLots, 0)
-		, dblLotsPriced = CASE WHEN cd.intPricingTypeId = 1 THEN (cd.dblQuantity / fm.dblContractSize) ELSE ISNULL(PFD.dblQuantity, 0) / fm.dblContractSize END
-		, dblLotsUnpriced = CASE WHEN cd.intPricingTypeId = 1 THEN 0 ELSE ((cd.dblQuantity - ISNULL(PFD.dblQuantity, 0)) / fm.dblContractSize) END
+		, dblLotsPriced = CASE WHEN cd.intPricingTypeId IN(1, 6) THEN ISNULL(ISNULL(ch.dblNoOfLots, AP.dblLotsFixed), 0)
+								ELSE ISNULL(PF.dblLotsFixed, 0) END
+		, dblLotsUnpriced = CASE WHEN cd.intPricingTypeId IN(1, 6) THEN 0
+								ELSE ISNULL(ch.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0), 0) END
 FROM tblRKAssignFuturesToContractSummary cs
 JOIN tblCTContractHeader ch on ch.intContractHeaderId= cs.intContractHeaderId 
 join tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
@@ -115,6 +137,17 @@ LEFT JOIN tblCTBook b1 on b1.intBookId = (select top 1 intBookId from tblCTContr
 LEFT JOIN tblCTSubBook sb1 on sb1.intSubBookId = (select top 1 intSubBookId from tblCTContractDetail cd where cd.intContractHeaderId=ch.intContractHeaderId)
 LEFT JOIN tblCTPriceFixation PF on PF.intContractDetailId = cd.intContractDetailId
 LEFT JOIN tblCTPriceFixationDetail PFD on PFD.intPriceFixationId = PF.intPriceFixationId
+OUTER APPLY (
+	SELECT TOP 1 A.intContractHeaderId
+				, A.intContractDetailId
+				, C.strApprovalStatus
+				, A.dblLotsFixed
+	FROM tblCTPriceFixation A
+	LEFT JOIN tblSMTransaction C ON C.intRecordId = A.intPriceContractId AND C.strApprovalStatus IS NOT NULL 
+	WHERE A.intContractHeaderId = ch.intContractHeaderId
+		AND ISNULL(A.intContractDetailId, 0) = CASE WHEN ch.ysnMultiplePriceFixation = 1 THEN ISNULL(A.intContractDetailId, 0) ELSE ISNULL(cd.intContractDetailId, 0) END
+	ORDER BY C.intTransactionId DESC
+) AP
 where isnull(ch.ysnMultiplePriceFixation,0) = 1
 
 

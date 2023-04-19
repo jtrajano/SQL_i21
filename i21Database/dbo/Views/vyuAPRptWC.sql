@@ -27,15 +27,28 @@ SELECT
 		,dblQtyReceived			=	WC2Details.dblWeightLoss - WC2Details.dblFranchiseWeight--CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
 		,dblCost				=	WC2Details.dblCost
 		,dblTotal				=	WC2Details.dblTotal + WC2Details.dblTax
-		,dblNetShippedWeight	=	WC2Details.dblNetShippedWeight
-		,dblWeightLoss			=	dblWeightLoss--WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
-		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WC2Details.dblNetWeight ELSE WC2Details.dblQtyReceived END
-		,dblFranchiseWeight		=	WC2Details.dblFranchiseWeight
-		,dblClaimAmount			=	WC2Details.dblClaimAmount
+		,dblNetShippedWeight	=	WCSummary.dblNetShippedWeight
+		,dblClaimWeight			=	WCSummary.dblWeightLoss - WCSummary.dblFranchiseWeight
+		,dblWeightLoss			=	WCSummary.dblWeightLoss--WC2Details.dblNetShippedWeight - WC2Details.dblQtyReceived
+		,dblLandedWeight		=	CASE WHEN WC2Details.intWeightUOMId > 0 THEN WCSummary.dblNetShippedWeight - WCSummary.dblWeightLoss ELSE WCSummary.dblQtyReceived END
+		,dblFranchiseWeight		=	WCSummary.dblFranchiseWeight
+		,dblClaimAmount			=	WCSummary.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
 		,strContainerNumber		=	LCointainer.strContainerNumber
 		,intShipToId			=	WC2.intShipToId
 	FROM tblAPBill WC2
+	INNER JOIN (
+			SELECT
+				B.intBillId
+				,SUM(dblFranchiseWeight) [dblFranchiseWeight]
+				,SUM([dblClaimAmount]) [dblClaimAmount] 
+				,SUM([dblNetShippedWeight]) [dblNetShippedWeight]
+				,SUM(dblWeightLoss) dblWeightLoss
+				,SUM(dblQtyReceived) dblQtyReceived
+				FROM tblAPBillDetail A
+				INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+				GROUP BY B.intBillId
+	 ) WCSummary ON WCSummary.intBillId = WC2.intBillId
 	INNER JOIN tblAPBillDetail WC2Details ON WC2.intBillId = WC2Details.intBillId
 	INNER JOIN tblICItem Item ON Item.intItemId = WC2Details.intItemId
 	LEFT JOIN (tblICItemUOM QtyUOM INNER JOIN tblICUnitMeasure QtyUOMDetails ON QtyUOM.intUnitMeasureId = QtyUOMDetails.intUnitMeasureId) 

@@ -50,4 +50,11 @@ GO
         SELECT  @rowUpdated = CONVERT( NVARCHAR(20) , @@ROWCOUNT )
 		PRINT ('Updated fiscal period of ' +  @rowUpdated +  ' records in tblCMBankTransfer')
 	END
+
+
+	
+	-- Insert data for showing all bank accounts in process payments
+	IF NOT EXISTS(SELECT 1 FROM tblCMBankAccountAll)
+	INSERT INTO tblCMBankAccountAll(intBankAccountId, strBankAccountNo, strBankName) 
+		SELECT -1, 'All Bank Accounts', 'All Banks'
 GO

@@ -21,7 +21,8 @@ DECLARE @tblPostError TABLE(
 DECLARE
 @ysnOverrideLocation BIT = 0,
 @ysnOverrideLOB BIT = 0,
-@ysnOverrideCompany BIT = 0 
+@ysnOverrideCompany BIT = 0,
+@intDefaultCurrencyId INT
   
   DECLARE @ysnHasDetails BIT = 0
   SELECT @ysnHasDetails = 1 FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId
@@ -152,7 +153,7 @@ DECLARE
     BEGIN
           IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyPostGLEntries') DROP TABLE iRelyPostGLEntries;
 
-          IF @strTransactionType = 'GL'
+          IF @strTransactionType IN ('GL', 'CM')
           BEGIN
                 INSERT INTO @RevalTable (  
                   [strTransactionId]  
@@ -213,7 +214,7 @@ DECLARE
                   ,intLocationSegmentOverrideId  
                   ,intLOBSegmentOverrideId  
                   ,intCompanySegmentOverrideId  
-                  FROM dbo.fnGLCreateGLPostRevaluEntries(@intConsolidationId,@strPeriod,@dateNow,@strPostBatchId,@defaultType,@intEntityId)
+                  FROM dbo.fnGLCreateGLPostRevaluEntries(@intConsolidationId,@strPeriod,@dateNow,@strPostBatchId,@defaultType,@intEntityId,@strTransactionType)
           END
           ELSE
           BEGIN

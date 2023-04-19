@@ -49,6 +49,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@datatype						AS NVARCHAR(50)
 		,@intPerformanceLogId			AS INT = NULL
 		,@strReportLogId				AS NVARCHAR(MAX)
+		,@blbLogo						AS VARBINARY(MAX)
 		,@strCurrency					AS NVARCHAR(40)
 		,@strReportComment				AS NVARCHAR(MAX)
 		
@@ -206,8 +207,8 @@ BEGIN
 	IF CHARINDEX('''', @strCustomerName) > 0 
 		SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 
-	SET @strStatementSP = CASE WHEN @strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward') THEN 'uspARCustomerStatementBalanceForwardReport'
-							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer', 'Zeeland Open Item') THEN 'uspARCustomerStatementReport'
+	SET @strStatementSP = CASE WHEN @strStatementFormat = 'Balance Forward' THEN 'uspARCustomerStatementBalanceForwardReport'
+							   WHEN @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer') THEN 'uspARCustomerStatementReport'
 							   WHEN @strStatementFormat = 'Payment Activity' THEN 'uspARCustomerStatementPaymentActivityReport'
 							   WHEN @strStatementFormat IN ('Full Details - No Card Lock', 'AR Detail Statement') THEN 'uspARCustomerStatementFullDetailReport'
 							   WHEN @strStatementFormat = 'Budget Reminder' THEN 'uspARCustomerStatementBudgetReminderReport'
@@ -216,8 +217,28 @@ BEGIN
 						  END
 
 	EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, @strStatementSP, @strRequestId, 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
+
+	--SETUP LOGO
+	SELECT @blbLogo = CASE WHEN CP.ysnStretchLogo = 1 THEN S.blbFile ELSE A.blbFile END
+	FROM tblARCompanyPreference CP 	
+	OUTER APPLY (
+		SELECT TOP 1 U.blbFile
+		FROM tblSMUpload U
+		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
+		  AND A.strComment = 'Header'
+		ORDER BY A.intAttachmentId DESC
+	) A 
+	OUTER APPLY (
+		SELECT TOP 1 U.blbFile
+		FROM tblSMUpload U
+		INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+		WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference')
+		  AND A.strComment IN ('Stretch Header', 'Stretched Header')
+		ORDER BY A.intAttachmentId DESC
+	) S
 	
-	IF @strStatementFormat IN ('Balance Forward', 'Zeeland Balance Forward')
+	IF @strStatementFormat = 'Balance Forward'
 		BEGIN
 			EXEC dbo.uspARCustomerStatementBalanceForwardReport 
 				  @dtmDateTo					= @dtmDateTo
@@ -236,9 +257,8 @@ BEGIN
 				, @ysnEmailOnly					= @ysnEmailOnly
 				, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
-				, @strStatementFormat			= @strStatementFormat
 		END
-	ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer', 'Zeeland Open Item')
+	ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
 		BEGIN
 			EXEC dbo.uspARCustomerStatementReport
 				  @dtmDateTo					= @dtmDateTo
@@ -295,9 +315,9 @@ BEGIN
 				, @ysnEmailOnly					= @ysnEmailOnly
 				, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
 				, @intEntityUserId				= @intEntityUserId
-				-- , @strStatementFormat			= @strStatementFormat
-				-- , @strCurrency					= @strCurrency
-				-- , @strReportComment				= @strReportComment
+				, @strStatementFormat			= @strStatementFormat
+				, @strCurrency					= @strCurrency
+				, @strReportComment				= @strReportComment
 		END
 	ELSE IF @strStatementFormat = 'Budget Reminder'
 		BEGIN
@@ -357,6 +377,12 @@ BEGIN
 				, @intEntityUserId				= @intEntityUserId
 		END
 
+	--LOGO
+	UPDATE tblARCustomerStatementStagingTable
+	SET blbLogo = ISNULL(blbLogo, @blbLogo)
+	WHERE intEntityUserId = @intEntityUserId
+	  AND strStatementFormat = @strStatementFormat
+
 	DELETE FROM tblARCustomerStatementOfAccountStagingTable
 	WHERE intEntityUserId = @intEntityUserId
 	AND strReportLogId <> @strReportLogId
@@ -374,6 +400,7 @@ BEGIN
 		, dtmDateTo
 		, intEntityUserId
 		, strReportLogId
+		, blbLogo
 	)
 	SELECT strCustomerName			= @strCustomerName
 		 , strAccountStatusCode		= @strAccountStatusCode
@@ -387,6 +414,7 @@ BEGIN
 	 	 , dtmDateTo				= @dtmDateTo
 		 , intEntityUserId			= @intEntityUserId
 		 , strReportLogId			= @strReportLogId
+		 , blbLogo					= @blbLogo
 END
 
 SELECT * 

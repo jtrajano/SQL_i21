@@ -104,9 +104,9 @@ BEGIN TRY
 			,FD.dblPolPremium
 			,FD.dblCashPrice
 			,FD.intPricingUOMId
-			,FD.ysnHedge
+			,ysnHedge = convert(bit,(case when FD.ysnHedge = 1 then 1 else ph.ysnHedge end))
 			,FD.ysnAA
-			,FD.dblHedgePrice
+			,dblHedgePrice = case when FD.ysnHedge = 1 then FD.dblHedgePrice else ph.dblHedgePrice end
 			,FD.intHedgeFutureMonthId
 			,FD.intBrokerId
 			,FD.intBrokerageAccountId
@@ -119,7 +119,7 @@ BEGIN TRY
 			,FD.intInvoiceId
 			,FD.intInvoiceDetailId
 			,FD.intDailyAveragePriceDetailId
-			,FD.dblHedgeNoOfLots
+			,dblHedgeNoOfLots = case when FD.ysnHedge = 1 then FD.dblHedgeNoOfLots else ph.dblHedgeNoOfLots end
 			,FD.dblLoadApplied
 			,FD.ysnToBeDeleted
 			,FD.dblPreviousQty
@@ -128,11 +128,18 @@ BEGIN TRY
 			,strCurrencyPair = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 			,PF.dblRollArb
 			,PM.strUnitMeasure	AS strPricingUOM,
-			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
-			strHedgeUOM = case when FD.ysnHedge = 1 then UM.strUnitMeasure	else null end,
-			strHedgeMonth = case when FD.ysnHedge = 1 then REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') else null end,
-			strBroker = case when FD.ysnHedge = 1 then EY.strName else  null end,
-			strBrokerAccount = case when FD.ysnHedge = 1 then BA.strAccountNumber else null end,
+			--strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
+			--strHedgeUOM = case when FD.ysnHedge = 1 then UM.strUnitMeasure	else null end,
+			--strHedgeMonth = case when FD.ysnHedge = 1 then REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') else null end,
+			--strBroker = case when FD.ysnHedge = 1 then EY.strName else  null end,
+			--strBrokerAccount = case when FD.ysnHedge = 1 then BA.strAccountNumber else null end,
+			
+			strHedgeCurrency = CY.strCurrency,
+			strHedgeUOM = UM.strUnitMeasure,
+			strHedgeMonth = case when FD.ysnHedge = 1 then REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') else ph.strHedgeMonth end,
+			strBroker = case when FD.ysnHedge = 1 then EY.strName else  ph.strBroker end,
+			strBrokerAccount = case when FD.ysnHedge = 1 then BA.strAccountNumber else ph.strAccount end,
+
 			TR.ysnFreezed,
 			CD.dblRatio,
 			dblAppliedQty = CASE
@@ -140,7 +147,7 @@ BEGIN TRY
 								THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 								ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 							END,
-			TR.strInternalTradeNo,
+			strInternalTradeNo = case when FD.ysnHedge = 1 then TR.strInternalTradeNo else ph.strInternalTradeNo end,
 			TR.intFutOptTransactionHeaderId,
 			ysnInvoiced = FDI.ysnInvoiced,
 			strInvoiceIds = FDI.strInvoiceIds,
@@ -150,7 +157,8 @@ BEGIN TRY
 			strBills = FDV.strBills,
 			strEditErrorMessage = dbo.fnCTGetPricingDetailVoucherInvoice(FD.intPriceFixationDetailId),
 			ysnPaid = CAST((CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END) AS BIT),
-			REPLACE(FM.strFutureMonth, ' ', '(' + FM.strSymbol + ') ') strPricingMonth
+			REPLACE(FM.strFutureMonth, ' ', '(' + FM.strSymbol + ') ') strPricingMonth,
+			strFutOptTransactionId = case when FD.ysnHedge = 1 then null else ph.strFutOptTransactionId end
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -170,6 +178,8 @@ BEGIN TRY
 	JOIN	fixationDetailInvoice		FDI ON	FDI.intPriceFixationDetailId	=	FD.intPriceFixationDetailId	LEFT 
 	JOIN	fixationDetailVoucher		FDV ON	FDV.intPriceFixationDetailId	=	FD.intPriceFixationDetailId	LEFT 
 	JOIN	paidVouchers				PV	ON	PV.intPriceFixationDetailId		=	FD.intPriceFixationDetailId
+	left join dbo.fnCTPriceHedge(@intPriceFixationId,0) ph on ph.intPriceFixationDetailId		=	FD.intPriceFixationDetailId
+	
 
 END TRY
 

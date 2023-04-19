@@ -128,6 +128,38 @@ BEGIN TRY
 			WHERE	CH.intContractHeaderId NOT IN(SELECT B.intRecordId FROM tblSMApproval A INNER JOIN tblSMTransaction B ON A.intTransactionId = B.intTransactionId WHERE strStatus=''Submitted'')  AND 4 <> intAllStatusId & 4
 			AND		intContractDetailId IS NOT NULL'
 	END
+	ELSE IF @strNotificationType = 'Late Shipment'
+	BEGIN
+		SELECT @SQL += '	
+			SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
+					CH.dblQuantity,					CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
+					CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
+					CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
+					CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
+					CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
+					CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				''Late Shipment'' AS strNotificationType,
+					CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
+					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
+					CH.strContractItemNo,
+					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
+					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo	
+
+			FROM	vyuCTNotificationHeader CH
+			LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	1 AND RF.strNotificationType = ''Late Shipment''
+			cross join tblCTAction ac
+			cross join tblCTEvent ev
+			join tblCTEventRecipient er on er.intEventId = ev.intEventId
+			where
+				CH.intContractStatusId in (1,4)
+				and ac.strActionName = ''Late Shipment''
+				and ev.intActionId = ac.intActionId
+				and getdate() between
+					(case when ev.strReminderCondition = ''day(s) before due date'' then dateadd(day,ev.intDaysToRemind * -1,CH.dtmEndDate) else CH.dtmEndDate end)
+					and
+					(case when ev.strReminderCondition = ''day(s) before due date'' then CH.dtmEndDate else dateadd(day,ev.intDaysToRemind,CH.dtmEndDate) end)
+			'
+	END
 	ELSE IF @strNotificationType = 'Approved Not Sent'
 	BEGIN
 		SELECT @SQL += '		

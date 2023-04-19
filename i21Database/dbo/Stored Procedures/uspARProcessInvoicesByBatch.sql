@@ -109,6 +109,8 @@ BEGIN TRY
 		,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 		,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	    ,[intOpportunityId]				INT 											NULL
+		,intTaxLocationId				INT												NULL
+		,strTaxPoint					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	)
 	
 	DECLARE  @QueryString AS VARCHAR(MAX)
@@ -278,6 +280,8 @@ BEGIN
 		,[strBillingMethod]		
 		,[strApplicatorLicense]
 		,[intOpportunityId]	
+		,intTaxLocationId
+		,strTaxPoint
 
 		,[intInvoiceDetailId]
 		,[intItemId]
@@ -369,13 +373,14 @@ BEGIN
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,ysnOverrideTaxGroup
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
 		,[strTransactionType]				= IE.[strTransactionType]
 		,[strType]							= IE.[strType]
 		,[strSourceTransaction]				= IE.[strSourceTransaction]
-		,[intSourceId]						= IE.[intSourceId] -- dbo.[fnARValidateInvoiceSourceId]([strSourceTransaction], [intSourceId])
+		,[intSourceId]						= IE.[intSourceId]
 		,[intPeriodsToAccrue]				= IE.[intPeriodsToAccrue] 
 		,[strSourceId]						= IE.[strSourceId]
 		,[intInvoiceId]						= IE.[intInvoiceId]
@@ -429,6 +434,8 @@ BEGIN
 		,[strBillingMethod]					= IE.[strBillingMethod]
 		,[strApplicatorLicense]				= IE.[strApplicatorLicense]
 		,[intOpportunityId]					= IE.[intOpportunityId]
+		,intTaxLocationId					= IE.intTaxLocationId
+		,strTaxPoint						= IE.strTaxPoint
 
 		,[intInvoiceDetailId]				= IE.[intInvoiceDetailId]
 		,[intItemId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemId] ELSE NULL END) 
@@ -440,9 +447,9 @@ BEGIN
 		,[intOrderUOMId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intOrderUOMId] ELSE NULL END)
 		,[dblQtyOrdered]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblQtyOrdered] ELSE NULL END)
 		,[intItemUOMId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemUOMId] ELSE NULL END)
-		,[intPriceUOMId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intPriceUOMId] ELSE NULL END)
+		,[intPriceUOMId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intPriceUOMId] ELSE NULL END)
 		,[dblQtyShipped]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblQtyShipped] ELSE NULL END)
-		,[dblContractPriceUOMQty]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblContractPriceUOMQty] ELSE NULL END)
+		,[dblContractPriceUOMQty]			= (CASE WHEN @GroupingOption = 0 THEN IE.[dblContractPriceUOMQty] ELSE NULL END)
 		,[dblDiscount]						= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscount] ELSE NULL END)
 		,[dblItemTermDiscount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblItemTermDiscount] ELSE NULL END)
 		,[strItemTermDiscountBy]			= (CASE WHEN @GroupingOption = 0 THEN IE.[strItemTermDiscountBy] ELSE NULL END)
@@ -520,6 +527,7 @@ BEGIN
 		,[strBinNumber]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strBinNumber] ELSE NULL END)
 		,[strGroupNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strGroupNumber] ELSE NULL END)
 		,[strFeedDiet]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFeedDiet] ELSE NULL END)
+		,ysnOverrideTaxGroup				= (CASE WHEN @GroupingOption = 0 THEN IE.ysnOverrideTaxGroup ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -740,7 +748,9 @@ BEGIN
             ,[dblAddOnQuantity]
 			,[strBinNumber]
 			,[strGroupNumber]
-			,[strFeedDiet])
+			,[strFeedDiet]
+			,ysnOverrideTaxGroup
+		)
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -892,6 +902,7 @@ BEGIN
 			,[strBinNumber]							= ITG.[strBinNumber]
 			,[strGroupNumber]						= ITG.[strGroupNumber]
 			,[strFeedDiet]							= ITG.[strFeedDiet]
+			,ysnOverrideTaxGroup					= ITG.ysnOverrideTaxGroup
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
@@ -1371,6 +1382,7 @@ BEGIN
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,ysnOverrideTaxGroup
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -1516,6 +1528,7 @@ BEGIN
 		,[strBinNumber]						= IE.[strBinNumber]
 		,[strGroupNumber]					= IE.[strGroupNumber]
 		,[strFeedDiet]						= IE.[strFeedDiet]
+		,ysnOverrideTaxGroup				= IE.ysnOverrideTaxGroup
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY

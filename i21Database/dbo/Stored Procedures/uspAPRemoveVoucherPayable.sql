@@ -98,7 +98,7 @@ BEGIN
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherPayable C
-		ON 	C.intTransactionType = A.intTransactionType
+		ON 	A.intTransactionType = CASE WHEN C.intTransactionType = 16 THEN 1 ELSE C.intTransactionType END
 		AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 		AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
 		AND ISNULL(C.intContractCostId,-1) = ISNULL(B.intContractCostId,-1)
@@ -143,7 +143,7 @@ BEGIN
 			,deleted.intTransactionType
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
-		INNER JOIN @vouchers B ON A.intTransactionType = B.intTransactionType
+		INNER JOIN @vouchers B ON A.intTransactionType = CASE WHEN B.intTransactionType = 16 THEN 1 ELSE B.intTransactionType END
 			AND	ISNULL(A.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
@@ -174,7 +174,7 @@ BEGIN
 		--REMOVE FROM @vouchers the deleted
 		DELETE A
 		FROM @vouchers A
-		INNER JOIN @payablesDeleted B ON A.intTransactionType = B.intTransactionType
+		INNER JOIN @payablesDeleted B ON A.intTransactionType = CASE WHEN B.intTransactionType = 16 THEN 1 ELSE B.intTransactionType END
 			AND	ISNULL(A.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
@@ -227,7 +227,8 @@ BEGIN
 			,deleted.intTransactionType
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
-		INNER JOIN @voucherPayable B ON A.intTransactionType = B.intTransactionType
+		INNER JOIN @voucherPayable B 
+			ON A.intTransactionType = CASE WHEN B.intTransactionType = 16 THEN 1 ELSE B.intTransactionType END
 			AND ISNULL(A.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)

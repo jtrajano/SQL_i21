@@ -215,7 +215,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strDescription]		= A.[strAssetDescription]
 				,[strReference]			= A.[strAssetId]
 				,[dtmTransactionDate]	= A.[dtmDateAcquired]
-				,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE (A.[dblCost] * @dblRate) END
+				,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE ROUND((A.[dblCost] * @dblRate), 2) END
 				,[dblCredit]			= 0
 				,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE A.[dblCost] END
 				,[dblCreditForeign]		= 0
@@ -262,7 +262,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strReference]			= A.[strAssetId]
 				,[dtmTransactionDate]	= A.[dtmDateAcquired]
 				,[dblDebit]				= 0
-				,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE (A.[dblCost] * @dblRate) END
+				,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE ROUND((A.[dblCost] * @dblRate), 2) END
 				,[dblDebitForeign]		= 0
 				,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE A.[dblCost] END
 				,[dblDebitReport]		= 0
@@ -297,6 +297,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			JOIN @tblOverrideAccount OverrideAccount 
 				ON OverrideAccount.intAssetId = A.intAssetId AND OverrideAccount.intAccountId = A.intExpenseAccountId
 			WHERE A.[intAssetId] = @intCurrentAssetId
+
 					
 			BEGIN TRY
 				EXEC uspGLBookEntries @GLEntries, @ysnPost

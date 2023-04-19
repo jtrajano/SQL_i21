@@ -22,6 +22,9 @@
     [strSourceTransactionId]   NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
     [intMatchDerivativeNo]     INT	NULL,
     [strRefreshScript]      NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intCommodityId]           INT	NULL,
+    [intLocationSegmentOverrideId]  INT NULL,
+    [intLOBSegmentOverrideId]       INT NULL,
     CONSTRAINT [PK_tblCMBankTransactionDetail] PRIMARY KEY CLUSTERED ([intTransactionDetailId] ASC),
     CONSTRAINT [FK_tblCMBankTransactiontblCMBankTransactionDetail] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGLAccounttblCMBankTransactionDetail] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])

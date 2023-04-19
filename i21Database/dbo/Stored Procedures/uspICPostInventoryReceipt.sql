@@ -233,10 +233,11 @@ BEGIN
 		SELECT TOP 1 
 			@strBillNumber = bill.strBillId
 		FROM
-			tblICInventoryReceiptItem ri
+			tblICInventoryReceiptItem ri 
 			OUTER APPLY (
 				SELECT TOP 1 
 					b.strBillId
+					,b.dtmDateCreated
 				FROM 
 					tblAPBill b INNER JOIN tblAPBillDetail bd
 						ON b.intBillId = bd.intBillId
@@ -246,6 +247,13 @@ BEGIN
 		WHERE
 			ri.intInventoryReceiptId = @intTransactionId
 			AND bill.strBillId IS NOT NULL 
+			-- If source type is Inbound Shipment, do not validate if the Voucher is created before Inventory Receipt. 
+			-- Otherwise, validate all other scenarios. 
+			AND (
+				(ri.dtmDateCreated <= bill.dtmDateCreated AND @intSourceType = @SOURCE_TYPE_InboundShipment) 
+				OR (@intSourceType <> @SOURCE_TYPE_InboundShipment OR @intSourceType IS NULL) 
+			)
+
 
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 

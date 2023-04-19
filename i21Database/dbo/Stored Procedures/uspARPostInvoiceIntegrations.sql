@@ -246,6 +246,11 @@ BEGIN
 			,ARI.intPeriodId				= NULL
 		FROM tblARPostInvoiceHeader PID
 		INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId 					
+		CROSS APPLY (
+			SELECT COUNT(intPrepaidAndCreditId) PPC 
+			FROM tblARPrepaidAndCredit 
+			WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
+		) PPC
 		LEFT OUTER JOIN tblARInvoice ARIR ON ARIR.intInvoiceId = ARI.intOriginalInvoiceId AND ARIR.ysnPosted = 1
 		WHERE PID.strSessionId = @strSessionId
 	END
@@ -588,11 +593,13 @@ INNER JOIN (
      AND DUE.dblPastDue > 0
      AND DUE.dblPastDue > CUSTOMER.dblHighestDueAR
 
---UPDATE BATCH ID
+--UPDATE BATCH ID AND EXCHANGE RATE
 UPDATE INV
-SET INV.[strBatchId]	 = CASE WHEN PID.[ysnPost] = 1 THEN PID.[strBatchId] ELSE NULL END
-  , INV.[dtmBatchDate]  = CASE WHEN PID.[ysnPost] = 1 THEN CAST(GETDATE() AS DATE) ELSE NULL END
-  , INV.[intPostedById] = CASE WHEN PID.[ysnPost] = 1 THEN PID.[intUserId] ELSE NULL END
+SET 
+	 INV.strBatchId				= CASE WHEN PID.[ysnPost] = 1 THEN PID.[strBatchId] ELSE NULL END
+	,INV.dtmBatchDate			= CASE WHEN PID.[ysnPost] = 1 THEN CAST(GETDATE() AS DATE) ELSE NULL END
+	,INV.intPostedById			= CASE WHEN PID.[ysnPost] = 1 THEN PID.[intUserId] ELSE NULL END
+	,INV.dblCurrencyExchangeRate= PID.dblAverageExchangeRate
 FROM tblARInvoice INV
 INNER JOIN tblARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 WHERE PID.strSessionId = @strSessionId

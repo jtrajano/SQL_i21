@@ -30,8 +30,8 @@ SELECT DE.intFutOptTransactionId
 	, strFutureMonthYearWOSymbol = FMonth.strFutureMonth
 	, strOptionMonthYear = (SUBSTRING(OMonth.strOptionMonth, 0, 4) + '(' + OMonth.strOptMonthSymbol + ')' + CONVERT(NVARCHAR, OMonth.intYear)) COLLATE Latin1_General_CI_AS
 	, strOptionMonthYearWOSymbol = strOptionMonth
-	, strContractSeq = (ch.strContractNumber + ' - ' + CAST(cd.intContractSeq AS NVARCHAR(10))) COLLATE Latin1_General_CI_AS
-	, strContractNumber = ch.strContractNumber
+	, strContractSeq = CAST(assigncontractdetail.intContractSeq AS NVARCHAR(10)) COLLATE Latin1_General_CI_AS --(assigncontractheader.strContractNumber + ' - ' + CAST(assigncontractdetail.intContractSeq AS NVARCHAR(10))) COLLATE Latin1_General_CI_AS
+	, strContractNumber = assigncontractheader.strContractNumber
 	, strRollingMonth = RMonth.strFutureMonth
 	, DE.intRollingMonthId
 	, strSelectedInstrumentType = CASE WHEN ISNULL(DE.intSelectedInstrumentTypeId,1) =1  THEN 'Exchange Traded'
@@ -80,6 +80,7 @@ SELECT DE.intFutOptTransactionId
 							THEN CASE WHEN ISNULL(DE.strSource, '') <> '' THEN DE.strSource ELSE 'Manual' END 
 							ELSE '' END COLLATE Latin1_General_CI_AS
 	, intFutureMonthsFutureMarketId = FMonth.intFutureMarketId
+	, strCurrencyPair = CPS.strCurrencyPair
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -115,11 +116,22 @@ OUTER APPLY (
 	SELECT TOP 1 ftcs.intContractDetailId
 	FROM tblRKAssignFuturesToContractSummary ftcs
 	WHERE ftcs.intFutOptTransactionId = DE.intFutOptTransactionId
+	AND ISNULL(ftcs.ysnIsHedged, 0) = 1
 ) hedgecontract
+OUTER APPLY (
+	SELECT TOP 1 ftcs.intContractDetailId
+	FROM tblRKAssignFuturesToContractSummary ftcs
+	WHERE ftcs.intFutOptTransactionId = DE.intFutOptTransactionId
+	AND ISNULL(ftcs.ysnIsHedged, 0) = 0
+) assigncontract
 LEFT JOIN tblCTContractDetail hedgecontractdetail
 	ON hedgecontract.intContractDetailId = hedgecontractdetail.intContractDetailId
 LEFT JOIN tblCTContractHeader hedgecontractheader
 	ON hedgecontractdetail.intContractHeaderId = hedgecontractheader.intContractHeaderId
+LEFT JOIN tblCTContractDetail assigncontractdetail
+	ON assigncontract.intContractDetailId = assigncontractdetail.intContractDetailId
+LEFT JOIN tblCTContractHeader assigncontractheader
+	ON assigncontractdetail.intContractHeaderId = assigncontractheader.intContractHeaderId
 OUTER APPLY (
 	SELECT TOP 1 intScreenId FROM tblSMScreen 
 	WHERE strModule = 'Risk Management' 
@@ -134,3 +146,5 @@ LEFT JOIN tblCTContractHeader contractH
 	ON contractH.intContractHeaderId = DE.intContractHeaderId
 LEFT JOIN tblCTContractDetail contractD
 	ON contractD.intContractDetailId = DE.intContractDetailId
+LEFT JOIN vyuRKCurrencyPairSetup CPS
+	ON CPS.intCurrencyPairId = DE.intCurrencyPairId

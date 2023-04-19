@@ -193,6 +193,29 @@ BEGIN TRY
 			
 			UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = 45
 		END
+
+		--Getting the Commission
+		DECLARE  @tempCommission TABLE (
+			dblCommission NUMERIC(18,6)
+			,strCommissionRateType NVARCHAR(50)
+			,intBrokerageCommissionId INT
+		)
+
+		DECLARE @dtmCurrentDate DATETIME = GETDATE()
+				,@dblBrokerageRate NUMERIC(18,6)
+				,@strCommissionRateType NVARCHAR(50)
+				,@intBrokerageCommissionId INT
+
+		INSERT INTO @tempCommission
+		EXEC uspRKGetCommission @intBrokerageAccountId,@intFutureMarketId,@dtmCurrentDate,@intInstrumentTypeId
+
+
+		SELECT
+			@dblBrokerageRate = dblCommission
+			,@strCommissionRateType = strCommissionRateType
+			,@intBrokerageCommissionId = intBrokerageCommissionId
+		FROM @tempCommission
+
 		
 		INSERT INTO tblRKFutOptTransaction (dtmTransactionDate
 			, intFutOptTransactionHeaderId
@@ -218,7 +241,11 @@ BEGIN TRY
 			, intCurrencyId
 			, intConcurrencyId
 			, intSelectedInstrumentTypeId
-			, dtmCreateDateTime)
+			, dtmCreateDateTime
+			, strCommissionRateType
+			, dblBrokerageRate
+			, dblCommission
+			, intBrokerageCommissionId)
 		VALUES (CONVERT(DATETIME, CONVERT(CHAR(10), @dtmTransactionDate, 110))
 			, @intFutOptTransactionHeaderId
 			, @intEntityId
@@ -243,7 +270,12 @@ BEGIN TRY
 			, @intCurrencyId
 			, 1
 			, @intSelectedInstrumentTypeId
-			, GETDATE())
+			, GETDATE()
+			, @strCommissionRateType
+			, @dblBrokerageRate
+			, (@dblBrokerageRate * @dblNoOfContract) * -1
+			, @intBrokerageCommissionId
+			)
 		
 		SET @intFutOptTransactionId = SCOPE_IDENTITY()
 

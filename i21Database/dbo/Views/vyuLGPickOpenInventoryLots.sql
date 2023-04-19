@@ -43,6 +43,16 @@ FROM (
 										Lot.dblQty - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
 									ELSE 0.0 END
 							END
+	   ,dblQtyInContractUOM = ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0)
+       ,dblUnPickedQtyInContractUOM = CASE WHEN Lot.intWarrantStatus = 2 THEN
+	   								CASE WHEN Lot.dblReleasedQty > 0.0 THEN 
+										Lot.dblReleasedQty - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+								ELSE
+									CASE WHEN Lot.dblQty > 0.0 THEN 
+										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptLot.intItemUnitMeasureId, ISNULL(CTDetail.intItemUOMId, Lot.intItemUOMId), ReceiptLot.dblQuantity), 0) - IsNull(SR.dblReservedQty, 0) - ISNULL(PC.dblPickedContainerQty, 0)
+									ELSE 0.0 END
+							END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
        ,strLotAlias = Lot.strLotAlias
@@ -87,7 +97,7 @@ FROM (
        ,dtmDateCreated = Lot.dtmDateCreated
        ,intCreatedUserId = Lot.intCreatedUserId
        ,intConcurrencyId = Lot.intConcurrencyId
-       ,dtmReceiptDate = Receipt.dtmReceiptDate
+       ,dtmReceiptDate = CASE WHEN (Lot.intSourceTransactionTypeId = 47) THEN InvAdj.dtmAdjustmentDate ELSE Receipt.dtmReceiptDate END
        ,intInventoryReceiptItemLotId = ReceiptLot.intInventoryReceiptItemLotId
        ,strCondition = Lot.strCondition
        ,intSourceId = ReceiptItem.intSourceId
@@ -133,7 +143,7 @@ FROM (
 	   ,intDefaultUOMId = UM.intUnitMeasureId
 	   ,strDefaultUOM = UM.strUnitMeasure
 	   ,intDefaultItemUOMId = IU.intItemUOMId
-	   ,strCropYear = '' COLLATE Latin1_General_CI_AS 
+	   ,strCropYear = CY.strCropYear --'' COLLATE Latin1_General_CI_AS 
 	   ,strProducer = '' COLLATE Latin1_General_CI_AS
 	   ,strCertification = '' COLLATE Latin1_General_CI_AS
 	   ,strCertificationId = '' COLLATE Latin1_General_CI_AS
@@ -152,14 +162,19 @@ FROM (
 	   ,Lot.intWarrantStatus
 	   ,WS.strWarrantStatus
 	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - ISNULL(PL.dblLotPickedQty, 0)
+	   ,strMarks = Lot.strMarkings
+	   ,strCertificate = ReceiptLot.strCertificate
 	FROM tblICLot Lot
 		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
-		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
+		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId) AND Lot.intSourceTransactionTypeId = 4
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		LEFT JOIN tblICInventoryAdjustmentDetail InvAdjDet ON InvAdjDet.intNewLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId) AND Lot.intSourceTransactionTypeId = 47
+		LEFT JOIN tblICInventoryAdjustment InvAdj ON InvAdj.intInventoryAdjustmentId = InvAdjDet.intInventoryAdjustmentId
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
-		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId
+		LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = ReceiptLot.intSeasonCropYear
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId 
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
@@ -222,7 +237,12 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) PL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
+<<<<<<< HEAD
 		AND (Receipt.intInventoryReceiptId IS NULL
 			OR (Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.ysnPosted = 1))
+=======
+		AND ((Lot.intSourceTransactionTypeId = 4 AND Receipt.ysnPosted = 1)
+			OR (Lot.intSourceTransactionTypeId = 47 AND InvAdj.ysnPosted = 1))
+>>>>>>> 22.1ProdWaMa
 	) InvLots
 GO

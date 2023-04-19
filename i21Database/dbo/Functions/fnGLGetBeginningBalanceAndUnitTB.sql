@@ -7,6 +7,7 @@ CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAndUnitTB]
 RETURNS @tbl TABLE (
 strAccountId NVARCHAR(100),
 beginBalance NUMERIC (18,6),
+beginBalanceForeign NUMERIC (18,6),
 beginBalanceUnit NUMERIC(18,6)
 )
 
@@ -18,7 +19,7 @@ BEGIN
 	IF @accountType IS NOT NULL
 		IF @intGLDetailId = -1
 			INSERT  @tbl
-			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance,SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
+			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance, SUM(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) beginBalanceForeign, SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
@@ -27,7 +28,7 @@ BEGIN
 			GROUP BY strAccountId
 		ELSE
 			INSERT  @tbl
-			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance,SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
+			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance, SUM(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) beginBalanceForeign, SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
@@ -38,7 +39,7 @@ BEGIN
 	ELSE
 		IF @intGLDetailId  = -1
 			INSERT  @tbl
-			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance,SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
+			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance, SUM(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) beginBalanceForeign, SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
 
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
@@ -47,7 +48,7 @@ BEGIN
 			GROUP BY strAccountId
 		ELSE
 			INSERT  @tbl
-			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance,SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
+			SELECT  strAccountId,SUM (dblDebit - dblCredit) beginBalance, SUM(ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)) beginBalanceForeign, SUM(dblCreditUnit - dblDebitUnit)beginBalanceUnit
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId

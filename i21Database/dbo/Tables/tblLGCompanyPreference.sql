@@ -84,6 +84,7 @@
 [ysnIncludeArrivedInPortStatus] BIT NULL DEFAULT ((0)),
 [ysnIncludeStrippingInstructionStatus] BIT NULL DEFAULT ((0)),
 [ysnWeightClaimsByContainer] BIT NULL DEFAULT ((0)),
+[ysnWeightClaimsImpactGL] BIT NULL DEFAULT ((0)),
 [intExpirationDays] INT NULL,
 [intExpirationDateBasis] INT NULL,
 [strFullCalendarKey] [nvarchar](400) COLLATE Latin1_General_CI_AS NULL,
@@ -94,6 +95,7 @@
 [ysnHideCurrencyField] BIT NULL,
 [ysnAllowPendingClaimsWoClaimableWt] BIT NULL,
 [ysnAutoCopyDocumentsToSales] BIT NULL DEFAULT ((0)),
+[ysnAllowPledgedLotsForPicking] BIT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

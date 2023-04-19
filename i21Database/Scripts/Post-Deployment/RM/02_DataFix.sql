@@ -501,6 +501,33 @@ BEGIN
     --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
     INSERT INTO tblEMEntityPreferences (strPreference, strValue) VALUES ('RM data fix for DPR In-Transit Helper Log table beginning data','1')
 END   
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'dblFXRateDecimals')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE dblFXRateDecimals IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET dblFXRateDecimals = 4
+	END
+END
+
+IF	EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnIncludeProductInformation')
+	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnEvaluationByCropYear')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ISNULL(ysnIncludeProductInformation, 0) = 1 AND ISNULL(ysnEvaluationByCropYear, 0) = 0)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnEvaluationByCropYear = 1
+	END
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnM2MAllowGLPostToNonFunctionalCurrency')
+BEGIN
+	IF EXISTS (SELECT TOP 1 '' FROM tblRKCompanyPreference WHERE ysnM2MAllowGLPostToNonFunctionalCurrency IS NULL)
+	BEGIN
+		UPDATE tblRKCompanyPreference 
+		SET ysnM2MAllowGLPostToNonFunctionalCurrency = 0
+	END
+END
 
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

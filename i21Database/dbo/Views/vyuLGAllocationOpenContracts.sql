@@ -15,7 +15,7 @@ SELECT
 	,intContractBasisId = CH.intFreightTermId
 	,strINCOTerm = CB.strContractBasis
 	,dblDetailQuantity = CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END
-	,CD.intUnitMeasureId
+	,UOM.intUnitMeasureId
 	,UOM.strUnitMeasure
 	,UOM.strUnitType
 	,intPricingType = CD.intPricingTypeId
@@ -58,6 +58,17 @@ SELECT
 	,strFutureMarket = FMKT.strFutMarketName
 	,CD.intFutureMonthId
 	,FMTH.strFutureMonth
+
+	,CC.strCertificates
+	,CY.strCropYear
+	-- Item Quality Segmentation
+	,I.strOrigin
+	,I.strProductType
+	,I.strGrade
+	,I.strRegion
+	,I.strSeason
+	,I.strClass
+	,I.strProductLine
 FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= CD.intCompanyLocationId
@@ -76,4 +87,7 @@ FROM tblCTContractDetail CD
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN tblRKFutureMarket FMKT ON FMKT.intFutureMarketId = CD.intFutureMarketId
 	LEFT JOIN tblRKFuturesMonth FMTH ON FMTH.intFutureMonthId = CD.intFutureMonthId
+	LEFT JOIN vyuICGetCompactItem I ON I.intItemId = CD.intItemId
+	LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(CD.intContractDetailId) CC
 WHERE CD.dblQuantity - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) > 0.0

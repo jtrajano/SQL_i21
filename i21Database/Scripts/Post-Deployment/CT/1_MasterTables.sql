@@ -566,6 +566,14 @@ END
 GO
 
 GO
+IF NOT EXISTS(SELECT 1 FROM tblCTAction WHERE strActionName = 'Late Shipment')
+BEGIN
+	INSERT INTO tblCTAction(strActionName, strInternalCode, intConcurrencyId, strRoute)
+	VALUES('Late Shipment','Late Shipment Contracts',1,'ContractManagement.view.Contract?routeId=')
+END
+GO
+
+GO
 IF NOT EXISTS(SELECT * FROM tblCTAmendment)
 BEGIN
     INSERT INTO tblCTAmendment(intConcurrencyId)

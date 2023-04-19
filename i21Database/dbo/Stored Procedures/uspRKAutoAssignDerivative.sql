@@ -26,26 +26,24 @@ DECLARE @dblToBeAssignedLots NUMERIC(18,6)
 	,@dtmCurrentDate DATETIME  = GETDATE()
 
 select
-	@dblToBeAssignedLots = dblToBeAssignedLots
-	,@intContractDetailId = intContractDetailId
+	@intContractDetailId = intContractDetailId
 	,@intContractHeaderId = intContractHeaderId
 from vyuRKGetAssignPhysicalTransaction where strContractNumber = @strContractNumber and intContractSeq = @strContractSequence
 
 
-IF @dblAssignedLots <= @dblToBeAssignedLots
-BEGIN
-	EXEC uspRKFutOptAssignedSave 
-		@intContractDetailId 
-		,@dtmCurrentDate
-		,@intFutOptTransactionId 
-		,@dblAssignedLots
-		,@intContractHeaderId 
-		,@strContractSequence
-		,@strContractNumber 
 
-	SET @strResultOutput = 'Derivative ' + @strInternalTradeNo +' was successfully assigned to Contract ' + @strContractNumber + '-'+ @strContractSequence + '.'
+EXEC uspRKFutOptAssignedSave 
+	@intContractDetailId 
+	,@dtmCurrentDate
+	,@intFutOptTransactionId 
+	,@dblAssignedLots
+	,@intContractHeaderId 
+	,@strContractSequence
+	,@strContractNumber 
 
-END
+SET @strResultOutput = 'Derivative ' + @strInternalTradeNo +' was successfully assigned to Contract ' + @strContractNumber + '-'+ @strContractSequence + '.'
+
+
 
 
 END TRY

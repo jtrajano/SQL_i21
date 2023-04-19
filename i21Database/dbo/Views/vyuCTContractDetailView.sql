@@ -8,7 +8,7 @@ AS
 			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
 			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
 			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
-			CASE WHEN CD.dblRate <> 0 THEN CD.dblRate ELSE dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0) END as dblRate,										
+			CASE WHEN smcp.intDefaultCurrencyId = isnull(INV.intMainCurrencyId,CD.intInvoiceCurrencyId) THEN 1 ELSE dbo.fnCTGetDefaultCurrencyExchangeRate(isnull(INV.intMainCurrencyId,CD.intInvoiceCurrencyId),smcp.intDefaultCurrencyId) END as dblRate,
 			CD.intContractStatusId,				CD.intMarketZoneId,								
 			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
@@ -227,9 +227,12 @@ AS
 		, CD.intReasonCodeId
 		, CD.dblConvertedNetWeight
 		, CD.dblConvertedQuantity
+		, LL.strName AS strLogisticsLeadName
+		, CD.intLogisticsLeadId
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	Cross apply (select intDefaultCurrencyId from tblSMCompanyPreference) smcp
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT	
@@ -330,7 +333,6 @@ AS
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
-	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId 
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
     cross apply (
      select
@@ -340,3 +342,6 @@ AS
      from tblCTContractDetail cd
      where cd.intContractHeaderId = CH.intContractHeaderId
     ) cds
+	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId and isnull(EFT.ysnDefaultAccount,0) = 1 and EFT.intCurrencyId = CD.intCurrencyId
+ 	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId

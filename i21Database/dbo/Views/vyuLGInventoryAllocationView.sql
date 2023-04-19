@@ -29,11 +29,11 @@ FROM (
 		,dblAllocatedQty = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
 								THEN ISNULL(PLD.dblLotPickedQty, 0)
 								ELSE ISNULL(CD.dblAllocatedQty, 0) END
-		,dblPledgedQty = CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
 		,dblAllocatedPledgedQty = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
 									THEN ISNULL(PLD.dblLotPickedQty, 0)
 								ELSE ISNULL(CD.dblAllocatedQty, 0) END
-						+ CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+						+ ISNULL(ICL.dblQty, 0)
 
 		,strShippingLine = Shipment.strShippingLine
 		,strVessel = Shipment.strMVessel
@@ -105,6 +105,23 @@ FROM (
 		,LWC.strID1
 		,LWC.strID2
 		,LWC.strID3
+
+		,dblBalToPick = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
+							THEN ISNULL(PLD.dblLotPickedQty, 0)
+							ELSE ISNULL(CD.dblAllocatedQty, 0) END -
+						CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
+							THEN ISNULL(PLD.dblLotPickedQty, 0)
+							ELSE ISNULL(CD.dblAllocatedQty, 0) END
+							+ ISNULL(ICL.dblQty, 0)
+		
+		,strCropYear = NULL
+		,strCertificate = NULL
+		-- Item Quality Segmentation
+		,I.strProductType
+		,I.strRegion
+		,I.strSeason
+		,I.strClass
+		,I.strProductLine
 	FROM vyuLGInboundShipmentView Shipment
 		LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -115,6 +132,7 @@ FROM (
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblLGPickLotDetail PLD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId AND PLD.intContainerId = Shipment.intLoadContainerId
+		LEFT JOIN tblICLot ICL ON ICL.intLotId = PLD.intLotId AND ICL.intWarrantStatus = 1
 		OUTER APPLY 
 			(SELECT TOP 1 ysnHasPickContainers = CAST(1 AS BIT) 
 				FROM tblLGPickLotDetail PLD1 INNER JOIN tblLGPickLotHeader PLD2 ON PLD2.intPickLotHeaderId = PLD1.intPickLotHeaderId
@@ -130,6 +148,7 @@ FROM (
             WHERE S.intContractDetailId = Shipment.intContractDetailId AND S.intTypeId = 1) S
 		LEFT JOIN tblAPBillDetail BD ON BD.intLoadDetailId = Shipment.intLoadDetailId
 		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		LEFT JOIN vyuICGetCompactItem I ON I.intItemId = Shipment.intItemId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
 	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice WHERE intLoadId IS NOT NULL)
@@ -147,9 +166,8 @@ FROM (
 		,dblContainerQty = IRI.dblOpenReceive
 		,dblOpenQuantity = Spot.dblQty - ISNULL(PLD.dblLotPickedQty, 0)
 		,dblAllocatedQty = ISNULL(PLD.dblLotPickedQty, 0)
-		,dblPledgedQty = CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
-		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0)
-						+ CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
+		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
 		,strShippingLine = SL.strName
 		,strVessel = L.strMVessel
 		,strIMONumber = L.strIMONumber
@@ -220,6 +238,17 @@ FROM (
 		,LWC.strID1
 		,LWC.strID2
 		,LWC.strID3
+
+		,dblBalToPick = ISNULL(PLD.dblLotPickedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
+
+		,strCropYear = CY.strCropYear
+		,strCertificate = IRIL.strCertificate
+		-- Item Quality Segmentation
+		,I.strProductType
+		,I.strRegion
+		,I.strSeason
+		,I.strClass
+		,I.strProductLine
 	FROM vyuLGPickOpenInventoryLots Spot
 		LEFT JOIN tblICLot Lot ON Lot.intLotId = Spot.intLotId
 		LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = Spot.intLotId
@@ -236,6 +265,8 @@ FROM (
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN tblICLot ICL ON ICL.intLotId = PLD.intLotId AND ICL.intWarrantStatus = 1
 		OUTER APPLY 
 			(SELECT TOP 1
 				strSampleNumber,
@@ -250,6 +281,8 @@ FROM (
 					WHERE PLD2.intType = 1 AND PLD1.intLotId = Spot.intLotId) HP
 		LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId
+		LEFT JOIN vyuICGetCompactItem I ON I.intItemId = Spot.intItemId
+		LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
 	WHERE Spot.dblQty > 0.0
 
 	UNION ALL
@@ -338,6 +371,16 @@ FROM (
 		,LWC.strID1
 		,LWC.strID2
 		,LWC.strID3
+		,dblBalToPick = CAST(0 AS NUMERIC(18, 6))
+
+		,strCropYear = NULL
+		,strCertificate = NULL
+
+		,CI.strProductType
+		,CI.strRegion
+		,CI.strSeason
+		,CI.strClass
+		,CI.strProductLine
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -375,6 +418,7 @@ FROM (
 		LEFT JOIN tblEMEntity C ON C.intEntityId = LD.intCustomerEntityId
 		LEFT JOIN tblARInvoiceDetail ID ON SCD.intContractDetailId = ID.intContractDetailId AND LD.intLoadDetailId = ID.intLoadDetailId
 		LEFT JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId
+		LEFT JOIN vyuICGetCompactItem CI ON CI.intItemId = I.intItemId
 	WHERE L.intPurchaseSale = 3 AND L.ysnPosted = 1
 		AND IV.strInvoiceNumber IS NULL
 		AND LD.intPickLotDetailId IS NULL

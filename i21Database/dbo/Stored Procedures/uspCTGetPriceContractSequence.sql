@@ -99,6 +99,8 @@ BEGIN TRY
 				, CD.strSeason
 				, CD.strClass
 				, CD.strProductLine
+				, dblDefaultFx = null
+				, CD.strExchangeRate
 			FROM tblCTContractHeader			CH	
 			JOIN tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
 			JOIN tblEMEntity					EY	ON	EY.intEntityId			=	CH.intEntityId
@@ -138,6 +140,7 @@ BEGIN TRY
 					, ICC.strProductLine
 					, CDetail.intInvoiceCurrencyId
 					, intMainCurrencyId = CU.intMainCurrencyId
+					, strExchangeRate = dbo.[fnCTGetSeqDisplayField](CDetail.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 				FROM tblCTContractDetail CDetail
 				JOIN tblCTContractHeader header ON header.intContractHeaderId = CDetail.intContractHeaderId
 				LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
@@ -241,6 +244,8 @@ BEGIN TRY
 				, ICC.strSeason
 				, ICC.strClass
 				, ICC.strProductLine
+				, dblDefaultFx = case when isnull(CD.intCurrencyExchangeRateId,0) = 0 then 1 else (select top 1 erd.dblRate from tblSMCurrencyExchangeRateDetail erd where erd.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId order by erd.dtmValidFromDate desc) end
+				, CD.strExchangeRate
 			FROM vyuCTContractSequence		CD
 			JOIN tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 			LEFT JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId 

@@ -266,7 +266,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\StoredProcedures\uspGLUpdateAPAccountCategory.sql
 :r .\GL\vyuGLTrialBalance.sql
 :r .\GL\vyuGLCompanyAccountId.sql
-
+:r .\GL\Views\vyuGLLineOfBusinessAccountId.sql
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
 
@@ -287,6 +287,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\15_CompanyPreferenceOptions.sql
 :r .\CM\16_UpdateNextEFTNo.sql
 :r .\CM\17_InsertResponsiblePartyOption.sql
+:r .\CM\18_BankDepositForeignDebitCredit.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 :r .\CM\18_BankFileFormat.sql
 

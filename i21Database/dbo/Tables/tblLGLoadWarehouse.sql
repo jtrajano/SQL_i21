@@ -24,7 +24,10 @@
 [strOtherComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
 [intWarehouseRateMatrixHeaderId] INT NULL,
 [intLoadWarehouseRefId] INT NULL,
-
+[ysnLetterSentToWarehouse] BIT NULL,
+[dtmLetterSentToWarehouseDate] DATETIME NULL,
+[ysnLetterSentToBank] BIT NULL,
+[dtmLetterSentToBankDate] DATETIME NULL,
 CONSTRAINT [PK_tblLGLoadWarehouse] PRIMARY KEY ([intLoadWarehouseId]), 
 CONSTRAINT [FK_tblLGLoadWarehouse_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
 CONSTRAINT [FK_tblLGLoadWarehouse_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),

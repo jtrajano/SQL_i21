@@ -19,5 +19,5 @@
 	CONSTRAINT [FK_tblCTDefaultTradeFinance_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTDefaultTradeFinance_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTDefaultTradeFinance_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES tblCMBank([intBankId]),
-	CONSTRAINT [UK_tblCTDefaultTradeFinance_intLoadingPortId_intDestinationPortId_intBankId_dtmValidFrom_dtmValidTo] UNIQUE ([intLoadingPortId],[intDestinationPortId],[intBankId],[dtmValidFrom],[dtmValidTo])
+	CONSTRAINT [UK_tblCTDefaultTradeFinance_intLoadingPortId_intDestinationPortId_intBankId_dtmValidFrom_dtmValidTo] UNIQUE ([intLoadingPortId],[intDestinationPortId],[intBankId],[dtmValidFrom],[dtmValidTo], [intProductTypeId])
 )

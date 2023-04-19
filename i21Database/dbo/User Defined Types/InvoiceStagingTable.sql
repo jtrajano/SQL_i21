@@ -106,6 +106,8 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strBillingMethod]						NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 	,[strApplicatorLicense]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[intOpportunityId]						INT 											NULL 		-- Key Value from tblCRMOpportunity
+	,intTaxLocationId						INT												NULL
+	,strTaxPoint							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
@@ -224,4 +226,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnImportedFromOrigin]				BIT												NULL
 	,[ysnImportedAsPosted] 				    BIT												NULL
 	,intDispatchId							INT												NULL
+	,ysnOverrideTaxGroup					BIT												NULL
 )

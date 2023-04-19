@@ -44,5 +44,6 @@
 	[strAssignOrHedge] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnCommissionExempt] BIT,
 	[ysnCommissionOverride] BIT,
-	[dblCommission] DECIMAL(24, 10)
+	[dblCommission] DECIMAL(24, 10),
+	[dblToAssignOrHedgeLots] DECIMAL(24, 10)
 )

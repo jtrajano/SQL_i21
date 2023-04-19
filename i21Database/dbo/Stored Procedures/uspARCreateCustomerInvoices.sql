@@ -182,6 +182,8 @@ INSERT INTO @InvoicesToGenerate (
 	,[strApplicatorLicense]
 	,[intOpportunityId]
 	,intDispatchId
+	,intTaxLocationId
+	,strTaxPoint
 )
 SELECT
 	 [intId]							= [intId]
@@ -338,6 +340,8 @@ SELECT
 	,[strApplicatorLicense]				= [strApplicatorLicense]
 	,[intOpportunityId]					= [intOpportunityId]
 	,intDispatchId						= intDispatchId
+	,intTaxLocationId					= intTaxLocationId
+	,strTaxPoint						= strTaxPoint
 FROM
 	@InvoiceEntries 
 
@@ -1373,7 +1377,9 @@ CREATE TABLE #CustomerInvoice
 	,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 	,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[intOpportunityId]				INT 											NULL
-)
+	,intTaxLocationId				INT												NULL
+	,strTaxPoint					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	)
 
 INSERT INTO #CustomerInvoice
 	([intInvoiceId]
@@ -1482,6 +1488,9 @@ INSERT INTO #CustomerInvoice
 	,[strBillingMethod]			
 	,[strApplicatorLicense]	
 	,[intOpportunityId]
+	,[strApplicatorLicense]
+	,intTaxLocationId
+    ,strTaxPoint
 )
 SELECT
 	 [intInvoiceId]					= NULL
@@ -1593,14 +1602,41 @@ SELECT
 	,[strBillingMethod]				= ITG.[strBillingMethod]
 	,[strApplicatorLicense]			= ITG.[strApplicatorLicense]
 	,[intOpportunityId]				= ITG.[intOpportunityId]
-FROM @InvoicesToGenerate ITG --WITH (NOLOCK)
-INNER JOIN tblARCustomer ARC WITH (NOLOCK) ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
-LEFT OUTER JOIN [tblEMEntityLocation] EL WITH (NOLOCK) ON ARC.[intEntityId] = EL.[intEntityId] AND EL.ysnDefaultLocation = 1
-LEFT OUTER JOIN [tblEMEntityLocation] SL WITH (NOLOCK) ON ISNULL(ITG.intShipToLocationId, 0) <> 0 AND ITG.intShipToLocationId = SL.[intEntityLocationId]
-LEFT OUTER JOIN [tblEMEntityLocation] SL1 WITH (NOLOCK) ON ARC.[intShipToId] = SL1.intEntityLocationId
-LEFT OUTER JOIN [tblEMEntityLocation] BL WITH (NOLOCK) ON ISNULL(ITG.intBillToLocationId, 0) <> 0 AND ITG.intBillToLocationId = BL.intEntityLocationId		
-LEFT OUTER JOIN [tblEMEntityLocation] BL1 WITH (NOLOCK) ON ARC.[intBillToId] = BL1.intEntityLocationId
-LEFT OUTER JOIN tblEMEntityToContact ETC WITH (NOLOCK) ON ITG.intEntityCustomerId = ETC.intEntityId AND ETC.ysnDefaultContact = 1
+	,intTaxLocationId				= ITG.intTaxLocationId
+    ,strTaxPoint					= ITG.strTaxPoint
+FROM	
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+--INNER JOIN
+--	(SELECT intId FROM @InvoicesToGenerate) ITG2  --WITH (NOLOCK)) ITG2
+--		ON ITG.[intId] = ITG2.[intId]
+INNER JOIN
+	(SELECT [intEntityId], [intTermsId], [intSalespersonId], [intShipToId], [intBillToId] FROM tblARCustomer WITH (NOLOCK)) ARC
+		ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [intEntityId], [strCountry], [strState], [strCity], [strZipCode], [intTermsId], [intShipViaId]
+	FROM 
+		[tblEMEntityLocation] WITH (NOLOCK)
+	WHERE
+		ysnDefaultLocation = 1
+	) EL
+		ON ARC.[intEntityId] = EL.[intEntityId]
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL
+		ON ISNULL(ITG.intShipToLocationId, 0) <> 0
+		AND ITG.intShipToLocationId = SL.[intEntityLocationId]
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry], [intFreightTermId] FROM [tblEMEntityLocation] WITH (NOLOCK)) SL1
+		ON ARC.[intShipToId] = SL1.intEntityLocationId
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL
+		ON ISNULL(ITG.intBillToLocationId, 0) <> 0
+		AND ITG.intBillToLocationId = BL.intEntityLocationId		
+LEFT OUTER JOIN
+	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
+		ON ARC.[intBillToId] = BL1.intEntityLocationId
+LEFT OUTER JOIN
+	(SELECT intEntityId, intEntityContactId FROM tblEMEntityToContact WITH (NOLOCK) WHERE ysnDefaultContact = 1) ETC
+		ON ITG.intEntityCustomerId = ETC.intEntityId
 		
 WHILE EXISTS(SELECT TOP 1 NULL FROM #CustomerInvoice WHERE RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = '' ORDER BY [intRowId])	
 BEGIN
@@ -1750,7 +1786,9 @@ USING
 		,[strAcresApplied]				
 		,[strNutrientAnalysis]			
 		,[strBillingMethod]				
-		,[strApplicatorLicense]			
+		,[strApplicatorLicense]
+		,intTaxLocationId
+		,strTaxPoint
 	FROM
 		#CustomerInvoice
 	)
@@ -1852,8 +1890,10 @@ INSERT(
 	,[strAcresApplied]				
 	,[strNutrientAnalysis]		
 	,[strBillingMethod]			
-	,[strApplicatorLicense]		
-)
+	,[strApplicatorLicense]
+	,[intTaxLocationId]
+	,[strTaxPoint]
+	)
 VALUES(
 	 [strInvoiceNumber]
 	,[strTransactionType]
@@ -1949,7 +1989,9 @@ VALUES(
 	,[strAcresApplied]				
 	,[strNutrientAnalysis]			
 	,[strBillingMethod]				
-	,[strApplicatorLicense]			
+	,[strApplicatorLicense]
+	,[intTaxLocationId]
+	,[strTaxPoint]
 )
 	OUTPUT  
 			@IntegrationLogId						--[intIntegrationLogId]
@@ -2203,6 +2245,7 @@ BEGIN TRY
 		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
 		,intDispatchId
+		,ysnOverrideTaxGroup
 	)
 	SELECT
 		 [intId]								= IL.[intId]
@@ -2354,6 +2397,7 @@ BEGIN TRY
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
 		,intDispatchId							= ITG.intDispatchId
+		,ysnOverrideTaxGroup					= ITG.ysnOverrideTaxGroup
 	FROM
 		@InvoicesToGenerate ITG
 	INNER JOIN

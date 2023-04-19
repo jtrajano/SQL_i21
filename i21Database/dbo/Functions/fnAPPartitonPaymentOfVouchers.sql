@@ -7,7 +7,7 @@ RETURNS TABLE AS RETURN
 (
 	SELECT
 		partitionedVouchers.*
-		,DENSE_RANK() OVER(ORDER BY intEntityVendorId, intPayToAddressId, intPayFromBankAccountId, intPayToBankAccountId, intPaymentId) intPartitionId
+		,DENSE_RANK() OVER(ORDER BY intEntityVendorId, intPayToAddressId, intPayFromBankAccountId, intPayToBankAccountId, intShipToId, intPaymentId) intPartitionId
 	FROM (
 		
 		SELECT
@@ -121,6 +121,7 @@ RETURNS TABLE AS RETURN
 			,voucher.intPayToAddressId
 			,voucher.intPayFromBankAccountId
 			,voucher.intPayToBankAccountId
+			,voucher.intShipToId
 			,ROW_NUMBER() OVER(ORDER BY voucher.intEntityVendorId DESC) AS intPaymentId
 			,ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) 
 					THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0) AS dblTempPayment

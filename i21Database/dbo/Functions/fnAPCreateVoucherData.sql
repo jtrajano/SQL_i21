@@ -62,7 +62,8 @@ RETURNS @returntable TABLE
 	[strComments] 						NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	--Tax Override
 	[strTaxPoint] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-	[intTaxLocationId] 	INT NULL
+	[intTaxLocationId] 	INT NULL,
+	[intProfitCenter] 	INT NULL
 )
 AS
 BEGIN
@@ -179,7 +180,8 @@ BEGIN
 		[intBankValuationRuleId]			,
 		[strComments]						,
 		[strTaxPoint]						,
-		[intTaxLocationId]
+		[intTaxLocationId]					,
+		[intProfitCenter]
 	)
 	SELECT
 		[intPartitionId]		=	A.intPartitionId,
@@ -274,7 +276,8 @@ BEGIN
 		[intBankValuationRuleId]			= A.intBankValuationRuleId,
 		[strComments]						= A.strComments,
 		[strTaxPoint]						= A.strTaxPoint,
-		[intTaxLocationId]					= A.intTaxLocationId
+		[intTaxLocationId]					= A.intTaxLocationId,
+		[intProfitCenter]					= payableLoc.intProfitCenter
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location

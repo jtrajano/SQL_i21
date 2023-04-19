@@ -19,7 +19,8 @@
 	@intBorrowingFacilityId INT = NULL,
 	@intBorrowingFacilityLimitId INT = NULL,
 	@intLoadingPointId		INT = NULL,
-	@strFutureMonth			NVARCHAR(50) = ''
+	@strFutureMonth			NVARCHAR(50) = '',
+	@intFreightTermId INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -35,6 +36,9 @@ BEGIN
 			@strAccountNumber		NVARCHAR(100),
 			@intFreightMatrixLeadTime INT,
 			@intDestinationLeadTime int
+			@intDefaultCurrencyId INT,
+			@intRevaluationCurrencyExchangeRateId INT,
+			@strRevaluationExchangeRate varchar(100)
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -103,10 +107,9 @@ BEGIN
 			LEFT JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId =	IU.intUnitMeasureId
 			LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID	=	M.intCurrencyId
 			LEFT JOIN	tblSMCurrency				MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
-			WHERE
-				C.intCommodityId = @intCommodityId
-				AND M.intFutureMarketId = (case when isnull(co.intFutureMarketId,0) = 0 then M.intFutureMarketId else co.intFutureMarketId end)
-			ORDER BY M.intFutureMarketId ASC
+			LEFT JOIN	tblICCommodity				CC	ON CC.intCommodityId	=	C.intCommodityId AND CC.intFutureMarketId	= M.intFutureMarketId
+			WHERE C.intCommodityId = @intCommodityId 
+			ORDER BY ISNULL(CC.intFutureMarketId, 0) DESC, M.intFutureMarketId ASC
 		END
 	END
 
@@ -259,6 +262,43 @@ BEGIN
 		END
 	END
 
+	IF @strType = 'FXCost'
+	BEGIN
+		SELECT @intCurrencyId = ISNULL(intMainCurrencyId,intCurrencyID) FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
+		IF @intCurrencyId <> @intInvoiceCurrencyId
+		BEGIN
+			SELECT	intCurrencyExchangeRateId ,
+					'From ' + FC.strCurrency +' To ' + TC.strCurrency strExchangeRate,
+					(SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			FROM	tblSMCurrencyExchangeRate ER
+			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
+			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			WHERE	intToCurrencyId = @intCurrencyId  AND intFromCurrencyId = @intInvoiceCurrencyId
+		END
+		ELSE
+		BEGIN
+			SELECT null, null, 1
+		END
+	END
+
+	
+	IF @strType = 'Revaluation'
+	BEGIN
+
+		
+		SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId from tblSMCompanyPreference
+		IF @intDefaultCurrencyId <> @intInvoiceCurrencyId
+		BEGIN
+			SELECT	 intCurrencyExchangeRateId
+				, 'From ' + FC.strCurrency +' To ' + TC.strCurrency 
+				, (SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			FROM	tblSMCurrencyExchangeRate ER
+			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
+			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			WHERE	intToCurrencyId = @intDefaultCurrencyId AND intFromCurrencyId = @intInvoiceCurrencyId
+		END
+	END
+
 	IF @strType = 'Commodity UOM'
 	BEGIN
 		SELECT	intCommodityUnitMeasureId,strUnitMeasure,UM.intUnitMeasureId 
@@ -317,6 +357,36 @@ BEGIN
 			JOIN tblCMBorrowingFacility BF on BF.intBorrowingFacilityId = BFL.intBorrowingFacilityId
 			LEFT JOIN tblCMBankValuationRule VR on VR.intBankValuationRuleId = BFLD.intBankValuationRuleId
 			WHERE BF.intBorrowingFacilityId = @intBorrowingFacilityId and BFLD.ysnDefault = 1
+	END
+
+	IF @strType = 'Tax'
+	BEGIN
+		Declare @strFobPoint varchar(30)
+		Declare @intTaxLocationId INT
+		Declare @strTaxLocation Varchar(100)
+		Declare @intTaxGroupId INT
+		Declare @strTaxGroupId varchar(100)
+
+		SELECT TOP 1 @strFobPoint = strFobPoint FROM tblSMFreightTerms where intFreightTermId = @intFreightTermId
+
+		SELECT TOP 1 @intTaxLocationId = intTaxLocationId
+					,@strTaxLocation = strTaxLocation
+					,@intTaxGroupId = ISNULL(TL.intTaxGroupId,0)
+					,@strTaxGroupId = ISNULL(TG.strTaxGroup, '')
+		FROM [vyuCTTaxLocation] TL
+		LEFT JOIN tblSMTaxGroup TG on TG.intTaxGroupId = TL.intTaxGroupId
+		WHERE intEntityId = @intEntityId and  strTaxPoint = @strFobPoint
+
+		
+		
+
+		SELECT @strFobPoint strFobPoint
+				, @strTaxLocation strTaxLocation
+				, @intTaxLocationId intTaxLocationId
+				, @strTaxGroupId strTaxGroupId
+				, @intTaxGroupId intTaxGroupId
+
+			
 	END
 
 END

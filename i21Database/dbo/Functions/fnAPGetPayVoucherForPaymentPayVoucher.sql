@@ -7,7 +7,8 @@
 	@vendorId INT = NULL,
 	@payToAddress INT = 0,
 	@paymentId INT = 0,
-	@bankAccountId INT = 0
+	@bankAccountId INT = 0,
+	@userId INT = NULL
 )
 RETURNS TABLE AS RETURN
 (
@@ -117,7 +118,7 @@ RETURNS TABLE AS RETURN
 		FROM tblAPAppliedPrepaidAndDebit APD
 		WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
 	) appliedPrepays
-	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
+	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR (forPay.intPaymentMethodId IS NULL AND @paymentMethodId = 0))
 	AND forPay.ysnDeferredPay = @showDeferred
 	AND 1 = (CASE WHEN @currencyId > 0
 					THEN (CASE WHEN forPay.intCurrencyId = @currencyId THEN 1 ELSE 0 END)
@@ -267,4 +268,5 @@ RETURNS TABLE AS RETURN
 	-- AND 1 = (CASE WHEN @payToBankAccountId > 0 AND ISNULL(voucher.intPayToCashBankAccountId, ISNULL(voucher.intDefaultPayToBankAccountId, 0)) > 0  
 	--     THEN (CASE WHEN @payToBankAccountId = ISNULL(voucher.intPayToCashBankAccountId, ISNULL(voucher.intDefaultPayToBankAccountId, 0)) THEN 1 ELSE 0 END)  
 	--     ELSE 1 END)  
+	AND 1 = (CASE WHEN forPay.intSelectedByUserId IS NULL OR forPay.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
 )

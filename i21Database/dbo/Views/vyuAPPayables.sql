@@ -272,7 +272,7 @@ INNER JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
-WHERE C.ysnPosted = 1 AND A.intTransactionType = 3 AND B.ysnApplied = 1 AND A.ysnPosted = 1
+WHERE C.ysnPosted = 1 AND A.intTransactionType IN (3, 11) AND B.ysnApplied = 1 AND A.ysnPosted = 1
 UNION ALL
 SELECT --OVERPAYMENT
 	A.dtmDate

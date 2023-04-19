@@ -981,6 +981,12 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Weight/Grades', N'Weight/Grades', N'ContractManagement.view.WeightGrades', N'Contract Management', N'tblCTWeightGrade', 1, N'Contract Management')
 	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.MTMPoint') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'MTM Point', N'MTM Point', N'ContractManagement.view.MTMPoint', N'Contract Management', N'tblCTMTMPoint', 1, N'Contract Management')
+	END
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.Banks') 
 	BEGIN

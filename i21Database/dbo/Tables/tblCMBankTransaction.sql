@@ -55,6 +55,7 @@
     [intAPPaymentId]           INT              NULL, 
     [intEFTInfoId]             INT              NULL, 
     [ysnInterCompany]          BIT              NULL,
+    [ysnRemittanceForEmail]    BIT              NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL,
 	CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),

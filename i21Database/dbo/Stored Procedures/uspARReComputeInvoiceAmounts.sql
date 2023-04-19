@@ -65,8 +65,8 @@ SET
 	 [dblRate]				= ISNULL([dblRate], @ZeroDecimal)
 	,[dblBaseRate]			= ISNULL([dblBaseRate], ISNULL([dblRate], @ZeroDecimal))
 	,[dblTax]				= ISNULL([dblTax], @ZeroDecimal)
-	,[dblAdjustedTax]		= [dbo].fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ISNULL([dblBaseAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[dblAdjustedTax]		= dbo.fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), dbo.fnARGetDefaultDecimal())
+	,[dblBaseAdjustedTax]	= dbo.fnRoundBanker(ISNULL([dblBaseAdjustedTax], @ZeroDecimal), dbo.fnARGetDefaultDecimal())
 	,[ysnTaxAdjusted]		= ISNULL([ysnTaxAdjusted], 0)
 WHERE 
 	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceIdLocal)
@@ -163,6 +163,7 @@ SET
 	,[ysnFromProvisional]					= ISNULL([ysnFromProvisional], CAST(0 AS BIT))
 	,[ysnProvisionalWithGL]					= ISNULL([ysnProvisionalWithGL], CAST(0 AS BIT))
 	,[ysnImpactInventory]					= ISNULL([ysnImpactInventory], CAST(1 AS BIT))
+	,[dblLoanAmount]						= CASE WHEN ISNULL(strTransactionNo, '') <> '' THEN ISNULL([dblInvoiceSubtotal], @ZeroDecimal) ELSE NULL END
 WHERE [intInvoiceId] = @InvoiceIdLocal
 
 UPDATE I
@@ -213,49 +214,68 @@ WHERE
 	tblARInvoiceDetail.[intInvoiceDetailId] = T.[intInvoiceDetailId]
 	AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
 
-UPDATE
-	ARID
-SET
-	ARID.[dblTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
-							ELSE
-								(	
-									--[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblUnitQuantity]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblUnitQuantity]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-									CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) AND ISNULL(ARID.[intItemWeightUOMId], 0) <> 0 THEN [dbo].fnRoundBanker([dbo].fnRoundBanker(((CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)) / ARID.[dblSubCurrencyRate]) * (CASE WHEN dblComputedGrossPrice > 0 THEN  dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ARID.intPriceUOMId, ARID.[dblShipmentNetWt]) ELSE ARID.[dblShipmentNetWt] END)), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)) / ARID.[dblSubCurrencyRate]) * (CASE WHEN dblComputedGrossPrice > 0 THEN  dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ARID.intPriceUOMId, ARID.[dblShipmentNetWt]) ELSE ARID.[dblShipmentNetWt] END)) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-										 WHEN (ISNULL(intContractDetailId,0) <> 0 OR ISNULL(intContractHeaderId,0) <> 0) THEN [dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-										 WHEN ARID.intPriceUOMId IS NOT NULL AND ARID.intPriceUOMId <> ARID.intItemUOMId THEN [dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intPriceUOMId, ARID.dblQtyShipped)), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intPriceUOMId, ARID.dblQtyShipped)) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-										 ELSE
-											--[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())											
-											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-									END							
-								  )
-							END)
-	
-FROM
-	tblARInvoiceDetail ARID
-LEFT OUTER JOIN
-	tblICItem ICI
-		ON ARID.[intItemId] = ICI.[intItemId] 
-WHERE
-	ARID.[intInvoiceId] = @InvoiceIdLocal
+UPDATE ARID
+SET ARID.dblTotal	= CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' 
+						THEN @ZeroDecimal
+						ELSE
+							CASE 
+								WHEN ISNULL(ARID.intLoadDetailId,0) <> 0 THEN dbo.fnRoundBanker(dbo.fnRoundBanker(((ARID.dblPrice / ARID.dblSubCurrencyRate) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped))), dbo.fnARGetDefaultDecimal()) - dbo.fnRoundBanker((((ARID.dblPrice / ARID.[dblSubCurrencyRate]) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemWeightUOMId), ISNULL(ARID.dblShipmentNetWt, ARID.dblQtyShipped))) * (ARID.dblDiscount / 100.00)), dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())
+								ELSE
+									dbo.fnRoundBanker(dbo.fnRoundBanker(((ARID.dblPrice / ARID.dblSubCurrencyRate) * ARID.dblQtyShipped), dbo.fnARGetDefaultDecimal()) - dbo.fnRoundBanker((((ARID.dblPrice / ARID.dblSubCurrencyRate) * ARID.dblQtyShipped) * (ARID.dblDiscount / 100.00)), dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())											
+							END
+						END
+FROM tblARInvoiceDetail ARID
+LEFT OUTER JOIN tblICItem ICI ON ARID.[intItemId] = ICI.[intItemId] 
+WHERE ARID.[intInvoiceId] = @InvoiceIdLocal
 
-UPDATE
-	ARID
-SET
-	ARID.[dblBaseTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
+UPDATE ARID
+SET ARID.[dblBaseTotal]		= (CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' THEN @ZeroDecimal
 							ELSE
 								(	
-									CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) AND ISNULL(ARID.[intItemWeightUOMId], 0) <> 0 THEN [dbo].fnRoundBanker([dbo].fnRoundBanker(((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * (CASE WHEN dblComputedGrossPrice > 0 THEN  dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ARID.intPriceUOMId, ARID.[dblShipmentNetWt]) ELSE ARID.[dblShipmentNetWt] END)), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * (CASE WHEN dblComputedGrossPrice > 0 THEN  dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ARID.intPriceUOMId, ARID.[dblShipmentNetWt]) ELSE ARID.[dblShipmentNetWt] END)) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-										 --WHEN (ISNULL(intContractDetailId,0) <> 0 OR ISNULL(intContractHeaderId,0) <> 0) THEN [dbo].fnRoundBanker([dbo].fnRoundBanker((ARID.[dblBaseUnitPrice] * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker(((ARID.[dblBaseUnitPrice] * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())											
-										 WHEN (ISNULL(intContractDetailId,0) <> 0 OR ISNULL(intContractHeaderId,0) <> 0) THEN CASE WHEN ISNULL(ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000),0) = 0 THEN [dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]()) ELSE [dbo].fnRoundBanker([dbo].fnRoundBanker(((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]()) END
-										 WHEN ARID.intPriceUOMId IS NOT NULL AND ARID.intPriceUOMId <> ARID.intItemUOMId THEN [dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intPriceUOMId, ARID.dblQtyShipped)), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ARID.intPriceUOMId, ARID.dblQtyShipped)) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
-										 ELSE
-											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())											
+									CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) AND ISNULL(ARID.[intItemWeightUOMId], 0) <> 0 THEN dbo.fnRoundBanker(dbo.fnRoundBanker(((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * (CASE WHEN dblComputedGrossPrice > 0 THEN  dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ARID.intPriceUOMId, ARID.[dblShipmentNetWt]) ELSE ARID.[dblShipmentNetWt] END)), dbo.fnARGetDefaultDecimal()) - dbo.fnRoundBanker((((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * (CASE WHEN dblComputedGrossPrice > 0 THEN  dbo.fnCalculateQtyBetweenUOM(ARID.intItemWeightUOMId, ARID.intPriceUOMId, ARID.[dblShipmentNetWt]) ELSE ARID.[dblShipmentNetWt] END)) * (ARID.[dblDiscount]/100.00)), dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())
+										 WHEN (ISNULL(intContractDetailId,0) <> 0 OR ISNULL(intContractHeaderId,0) <> 0) THEN CASE WHEN ISNULL(ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000),0) = 0 THEN dbo.fnRoundBanker(dbo.fnRoundBanker(((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal()) - dbo.fnRoundBanker((((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal()) ELSE dbo.fnRoundBanker(dbo.fnRoundBanker(((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal()) - dbo.fnRoundBanker((((ISNULL(ISNULL(ISNULL(CAST(ARID.[dblPrice] * dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ISNULL(ARID.intPriceUOMId, ARID.intItemUOMId), 1) AS DECIMAL(18,7)), [dblPrice]), 0.000) * [dblCurrencyExchangeRate], 0.000) / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal()) END
+										ELSE
+											dbo.fnRoundBanker(dbo.fnRoundBanker(((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), dbo.fnARGetDefaultDecimal()) - dbo.fnRoundBanker((((ARID.[dblBasePrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), dbo.fnARGetDefaultDecimal()), dbo.fnARGetDefaultDecimal())											
 									END							
 								  )
 							END)	
 FROM tblARInvoiceDetail ARID
 LEFT OUTER JOIN tblICItem ICI ON ARID.[intItemId] = ICI.[intItemId] 
 WHERE ARID.[intInvoiceId] = @InvoiceIdLocal
+		
+	
+UPDATE
+	tblARInvoice
+SET
+	 [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
+	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
+	,[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
+	,[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
+	,[dblInvoiceTotal]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblInvoiceTotal] END
+	,[dblBaseInvoiceTotal]		= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseInvoiceTotal] END
+	,[dblAmountDue]				= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblAmountDue] END
+	,[dblBaseAmountDue]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseAmountDue] END
+	,[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
+FROM
+	(
+		SELECT 
+			 [dblTotalTax]				= SUM([dblTotalTax])
+			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
+			,[dblTotal]					= SUM([dblTotal])
+			,[dblBaseTotal]				= SUM([dblBaseTotal])
+			,[dblTotalStandardWeight]	= SUM(dbo.fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), dbo.fnARGetDefaultDecimal()))
+			,[intInvoiceId]				= [intInvoiceId]
+		FROM
+			tblARInvoiceDetail
+		WHERE
+			[intInvoiceId] = @InvoiceIdLocal
+		GROUP BY
+			[intInvoiceId]
+	)
+	 T
+WHERE
+	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
+	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
 	
 UPDATE tblARInvoice
 SET [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)

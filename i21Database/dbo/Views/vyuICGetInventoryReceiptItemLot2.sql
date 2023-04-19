@@ -70,7 +70,8 @@ SELECT
 		,receiptItemLot.strCargoNo
 		,receiptItemLot.strWarrantNo
 		,receiptItemLot.intWarrantStatus
-		, fiscal.strPeriod strAccountingPeriod		
+		,fiscal.strPeriod strAccountingPeriod
+		,cropYear.strCropYear
 FROM	tblICInventoryReceiptItemLot receiptItemLot
 		INNER JOIN tblICInventoryReceiptItem item 
 			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
@@ -114,3 +115,5 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 			FROM tblGLFiscalYearPeriod fp
 			WHERE receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
 		) fiscal
+		LEFT JOIN tblCTCropYear cropYear
+			ON cropYear.intCropYearId = receiptItemLot.intSeasonCropYear

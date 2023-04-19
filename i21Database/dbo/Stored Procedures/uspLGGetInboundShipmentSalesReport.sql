@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetInboundShipmentSalesReport]
-		@xmlParam NVARCHAR(MAX) = NULL  
+		@xmlParam NVARCHAR(MAX) = NULL,
+		@xmlParam2 INT = NULL 
 AS
 BEGIN
 	--DECLARE @intReferenceNumber			INT,
@@ -42,5 +43,9 @@ BEGIN
 
 SELECT SH.*
 FROM vyuLGDropShipmentDetailsView SH 
-WHERE SH.strLoadNumber = @xmlParam	
+WHERE SH.strLoadNumber = @xmlParam
+AND (ISNULL(@xmlParam2, 0) = 0 
+	OR (ISNULL(@xmlParam2, 0) > 0 AND @xmlParam2 = SH.intCustomerEntityId)
+	OR (ISNULL(@xmlParam2, 0) < 0 AND SH.intCustomerEntityId IS NULL))
+
 END

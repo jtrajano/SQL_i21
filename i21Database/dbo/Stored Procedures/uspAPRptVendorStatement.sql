@@ -98,7 +98,7 @@ BEGIN
 		END
 
 		SET @dtmDateFrom = ISNULL(@dtmDateFrom, '1/1/1900')
-		SET @dtmDateTo = ISNULL(@dtmDateTo, GETDATE())
+		SET @dtmDateTo = ISNULL(@dtmDateTo, '12/31/2100')
 
 		-- GET LOGO
 		 SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -128,8 +128,8 @@ BEGIN
 			   A.strTransactionType,
 			   CH.strContractNumber,
 			   A.strDescription,
-			   CASE WHEN A.dblTotal > 0 THEN ABS(A.dblTotal) ELSE 0 END,
 			   CASE WHEN A.dblTotal < 0 THEN ABS(A.dblTotal) ELSE 0 END,
+			   CASE WHEN A.dblTotal > 0 THEN ABS(A.dblTotal) ELSE 0 END,
 			   C.strCurrency,
 			   @strReportComment,
 			   A.intOrder,
@@ -139,7 +139,7 @@ BEGIN
 			SELECT NULL intBillId, 
 			       NULL strVendorOrderNumber, 
 				   'Initial Balance' strTransactionType, 
-				   @dtmDateFrom dtmBillDate, 
+				   DATEADD(DAY, -1, @dtmDateFrom) dtmBillDate, 
 				   NULL dtmDueDate, 
 				   intCurrencyId, 
 				   SUM(dblTotal) dblTotal, 
@@ -151,7 +151,7 @@ BEGIN
 			FROM (
 				SELECT *
 				FROM vyuAPVendorStatement
-				WHERE dtmBillDate BETWEEN '1/1/1900' AND @dtmDateFrom
+				WHERE dtmBillDate BETWEEN '1/1/1900' AND DATEADD(DAY, -1, @dtmDateFrom)
 			) IB
 			GROUP BY intShipToId, intEntityVendorId, intCurrencyId
 			UNION ALL
@@ -165,7 +165,9 @@ BEGIN
 		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = A.intEntityVendorId AND ysnDefaultLocation = 1
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 		INNER JOIN tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
-		LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND (LP.ysnVendorStatement = 1 OR LP.ysnDefault = 1)
+		-- LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND (LP.ysnVendorStatement = 1 OR LP.ysnDefault = 1)
+		LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND LP.ysnVendorStatement = 1 --Logo for vendor statement report
+	  	LEFT JOIN tblSMLogoPreference DLP ON LP.intCompanyLocationId = CL.intCompanyLocationId AND DLP.ysnDefault = 1 -- default logo
 		LEFT JOIN tblSMLogoPreferenceFooter LPF ON LPF.intCompanyLocationId = CL.intCompanyLocationId AND (LPF.ysnVendorStatement = 1 OR LPF.ysnDefault = 1)
 		WHERE (NULLIF(@strName, '') IS NULL OR @strName = E.strName) 
 		      AND (NULLIF(@strLocationName, '') IS NULL OR @strLocationName = CL.strLocationName)

@@ -20,13 +20,15 @@ BEGIN
 	);
 	INSERT INTO @tmpBills SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
 
-	DECLARE	 @AllowIntraEntries BIT
+	DECLARE	 @AllowSingleEntries BIT
+			,@AllowIntraEntries BIT
 			,@DueToAccountId	INT
 			,@DueFromAccountId  INT
 			,@OverrideCompanySegment  BIT
 			,@OverrideLocationSegment  BIT
 			,@OverrideLineOfBusinessSegment  BIT
 	SELECT TOP 1
+		  @AllowSingleEntries = ysnAllowSingleLocationEntries,
 		  @AllowIntraEntries= CASE WHEN ISNULL(ysnAllowIntraCompanyEntries, 0) = 1 OR ISNULL(ysnAllowIntraLocationEntries, 0) = 1 THEN 1 ELSE 0 END, 
 		  @DueToAccountId	= ISNULL([intDueToAccountId], 0), 
 		  @DueFromAccountId = ISNULL([intDueFromAccountId], 0),
@@ -432,6 +434,7 @@ BEGIN
 			WHERE B.intBillId = A.intBillId
 		) details
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND details.dblTotal < 0
+		AND A.intTransactionType <> 15
 			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
@@ -631,10 +634,10 @@ BEGIN
 		WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
 
-		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
+		--You cannot post intra-location transaction without due to account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
-			'Purchase and AP Account should have the same location segment.',
+			'Unable to find the due to account that matches the account segment/s of the AP Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
@@ -671,7 +674,7 @@ BEGIN
 			(OVERRIDESEGMENT.bitSameLineOfBusinessSegment = 0 AND @OverrideLineOfBusinessSegment = 1)
 		)
 
-		--You cannot post intra-location transaction without due from account. 
+		--You cannot post if location segment of AP Account and Payable Account when single location entry is enabled. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
 			'Unable to find the due from account that matches the account segment/s of the Payables Account. Please add ' + OVERRIDESEGMENT.strOverrideAccount + ' to the chart of accounts.',
@@ -748,6 +751,7 @@ BEGIN
 				WHEN A.intTransactionType = 2 THEN 'Prepayment'
 				WHEN A.intTransactionType = 3 THEN 'Debit Memo'
 				WHEN A.intTransactionType = 13 THEN 'Basis Advance'
+				WHEN A.intTransactionType = 11 THEN 'Claim'
 			ELSE ''
 			END
 			+ ' cannot be unpost because it is applied to voucher ' + applied.strBillId,
@@ -767,7 +771,7 @@ BEGIN
 		) applied
 		WHERE  
 			A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
-		AND A.intTransactionType IN (2, 3, 13)
+		AND A.intTransactionType IN (2, 3, 13, 11)
 		AND A.ysnPosted = 1
 		AND applied.strBillId IS NOT NULL
 

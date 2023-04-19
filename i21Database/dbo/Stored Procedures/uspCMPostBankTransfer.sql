@@ -55,10 +55,7 @@ CREATE TABLE #tmpGLDetail (
  ,[strModuleName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL      
  ,[intConcurrencyId] [int] NULL    
 )    
---CREATE FEES TABLE  
---SELECT * INTO #tmpGLDetailFees FROM #tmpGLDetail  
-  
--- Declare the variables     
+   
 DECLARE     
  -- Constant Variables.     
  @BANK_TRANSACTION_TYPE_Id AS INT   = 4 -- Bank Transfer Type Id is 4 (See tblCMBankTransactionType).     
@@ -502,28 +499,21 @@ END
 -- BANK TRANSFER FORWARD POSTING
   IF @intBankTransferTypeId = 3
   BEGIN 
-    
     EXEC uspCMCreateBankTransferForwardPostEntries
     @strTransactionId,
     @strBatchId,
     @intDefaultCurrencyId,
     @ysnPostedInTransit
-
   END
 
   IF @intBankTransferTypeId = 4
   BEGIN
-    
     DELETE FROM #tmpGLDetail
       EXEC uspCMCreateBankTransferSwapShortPostEntries
       @strTransactionId,
       @strBatchId,
       @intDefaultCurrencyId,
       @ysnPostedInTransit
-
-  
-
-    
   END
   
   IF @intBankTransferTypeId = 5
@@ -546,18 +536,48 @@ END
   --BEGIN  
     --IF @dblDifference <> 0  
   
-      IF @ysnPost =1
-        EXEC [uspCMInsertGainLossBankTransfer] 
-          @intDefaultCurrencyId,
-          @intBankTransferTypeId,
-          @intGLAccountIdTo,
-          @strTransactionId,
-          @intRealizedAccountId
+  IF @ysnPost =1
+    EXEC [uspCMInsertGainLossBankTransfer] 
+      @intDefaultCurrencyId,
+      @intBankTransferTypeId,
+      @intGLAccountIdTo,
+      @strTransactionId,
+      @intRealizedAccountId
 
-      IF @@ERROR <> 0 GOTO Post_Rollback
+  IF @@ERROR <> 0 GOTO Post_Rollback
+
+
+  DECLARE @dblDiff DECIMAL(18,6)
+ 
+  --  IF isnull(@dblFeesFrom,0) > 0
+  --  BEGIN
       
-  --END  
-  
+  --    SELECT @dblDiff = SUM(dblDebit-dblCredit) FROM #tmpGLDetail
+
+  --    IF ABS(@dblDiff) = .01 
+  --    BEGIN
+  --      UPDATE A SET dblCredit = dblCredit + @dblDiff 
+		--  ,dblExchangeRate = (dblCredit + @dblDiff)/ dblCreditForeign
+		--FROM #tmpGLDetail A JOIN  tblCMBankTransfer B
+		--ON B.intGLAccountIdFeesFrom = A.intAccountId
+		--WHERE B.strTransactionId=@strTransactionId
+  --    END
+  --  END
+
+
+    IF isnull(@dblFeesTo,0) > 0
+    BEGIN
+      SELECT @dblDiff = SUM(dblCredit-dblDebit) FROM #tmpGLDetail
+      IF ABS(@dblDiff) = .01
+      BEGIN
+        UPDATE A SET dblDebit = dblDebit + @dblDiff ,
+        dblExchangeRate = (dblDebit + @dblDiff)/ dblDebitForeign
+        FROM #tmpGLDetail A JOIN  tblCMBankTransfer B 
+        ON B.intGLAccountIdFeesTo = A.intAccountId
+        WHERE B.strTransactionId=@strTransactionId
+      END
+    END
+
     
 END  
 ELSE IF @ysnPost = 0    
@@ -575,6 +595,7 @@ END
 IF @ysnRecap = 0    
 BEGIN    
 IF @ysnPost = 1
+  
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
@@ -889,6 +910,7 @@ IF @ysnPost = 1
         END
      
       END  
+      
     END    
     IF @@ERROR <> 0 GOTO Post_Rollback    
 END    
@@ -899,6 +921,8 @@ IF @ysnRecap = 1
 BEGIN     
 
 IF @ysnPost = 1
+
+  
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 

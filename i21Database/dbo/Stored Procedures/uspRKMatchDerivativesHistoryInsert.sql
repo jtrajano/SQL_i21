@@ -101,8 +101,6 @@ BEGIN
 		tblRKMatchDerivativesHistory H
 		WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
-
-
 		INSERT INTO @SummaryLog(strBucketType
 			, strTransactionType
 			, intTransactionRecordId

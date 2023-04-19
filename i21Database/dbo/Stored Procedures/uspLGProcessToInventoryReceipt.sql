@@ -106,6 +106,9 @@ BEGIN TRY
 			,[intSort]
 			,[intLoadShipmentId]
 			,[intLoadShipmentDetailId]
+			,[intTaxGroupId]
+			,[strTaxPoint]
+			,[intTaxLocationId]
 			)
 		SELECT 
 			[strReceiptType] = 'Direct'
@@ -160,6 +163,9 @@ BEGIN TRY
 			,[intSort] = ISNULL(LC.intLoadContainerId, 0)
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentDetailId] = LD.intLoadDetailId
+			,[intTaxGroupId] = LD.intTaxGroupId
+			,[strTaxPoint] = L.strTaxPoint
+			,[intTaxLocationId] = L.intTaxLocationId
 		FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -224,10 +230,10 @@ BEGIN TRY
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE ROUND((CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
+							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
 							END
-			,[dblAmount] = ROUND((CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity, 2)
-			,[intCostUOMId] = CV.intItemUOMId
+			,[dblAmount] = (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
+			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
 			,[ysnAccrue] = 1
@@ -398,7 +404,7 @@ BEGIN TRY
 			,[strWarrantNo] = L.strWarrantNo
 			,[intWarrantStatus] = L.intWarrantStatus
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
-			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[intOverrideFacilityValuation] = L.intBankValuationRuleId
 			,[strComments] = L.strTradeFinanceComments
 
 			,[intEntityVendorId] = LD.intVendorEntityId
@@ -818,6 +824,9 @@ BEGIN TRY
 				,[intSort]
 				,[intLoadShipmentId]
 				,[intLoadShipmentDetailId]
+				,[intTaxGroupId]
+				,[strTaxPoint]
+				,[intTaxLocationId]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -905,6 +914,9 @@ BEGIN TRY
 				,[intSort] = ISNULL(LC.intLoadContainerId,0)
 				,[intLoadShipmentId] = L.intLoadId
 				,[intLoadShipmentDetailId] = LD.intLoadDetailId
+				,[intTaxGroupId] = LD.intTaxGroupId
+				,[strTaxPoint] = L.strTaxPoint
+				,[intTaxLocationId] = L.intTaxLocationId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -980,6 +992,9 @@ BEGIN TRY
 				,[intSort]
 				,[intLoadShipmentId]
 				,[intLoadShipmentDetailId]
+				,[intTaxGroupId]
+				,[strTaxPoint]
+				,[intTaxLocationId]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -1047,6 +1062,9 @@ BEGIN TRY
 				,[intSort] = NULL
 				,[intLoadShipmentId] = L.intLoadId
 				,[intLoadShipmentDetailId] = LD.intLoadDetailId
+				,[intTaxGroupId] = LD.intTaxGroupId
+				,[strTaxPoint] = L.strTaxPoint
+				,[intTaxLocationId] = L.intTaxLocationId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -1115,10 +1133,10 @@ BEGIN TRY
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE ROUND((CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
+							ELSE (CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * LD.dblQuantity
 							END
-			,[dblAmount] = ROUND((CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity, 2)
-			,[intCostUOMId] = CV.intItemUOMId
+			,[dblAmount] = (CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity
+			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
 			,[ysnAccrue] = 1
@@ -1318,7 +1336,7 @@ BEGIN TRY
 			,[strWarrantNo] = NULL
 			,[intWarrantStatus] = NULL
 			,[strReferenceNo] = L.strTradeFinanceReferenceNo
-			,[intOverrideFacilityValuation] = L.intOverrideFacilityId
+			,[intOverrideFacilityValuation] = L.intBankValuationRuleId
 			,[strComments] = L.strTradeFinanceComments
 
 			,[intEntityVendorId] = LD.intVendorEntityId

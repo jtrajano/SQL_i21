@@ -66,32 +66,34 @@ IF @transCount = 0 BEGIN TRANSACTION
 		 intItemId					= B.intItemId
 		,intVendorId				= CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN A.intShipFromEntityId ELSE A.intEntityVendorId END
 		,dtmTransactionDate			= A.dtmDate
-		,dblItemCost				= B.dblCost
-		,dblQuantity				= 
-									-- CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
-									-- 	THEN B.dblNetWeight
-									-- 	ELSE B.dblQtyReceived END
-									--THIS IS THE CORRECT QUANTITY, IT SHOULD MATCH WITH THE UOM OF COST
-										CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
-											THEN dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId, ISNULL(NULLIF(B.intCostUOMId,0), B.intUnitOfMeasureId), B.dblNetWeight) 
-											ELSE (CASE WHEN B.intCostUOMId > 0 THEN dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B.intCostUOMId, B.dblQtyReceived) ELSE B.dblQtyReceived END)
-										END
+		,dblItemCost				= CASE 
+										WHEN B.ysnSubCurrency <> 0
+											THEN B.dblCost / ISNULL(A.intSubCurrencyCents, 1)
+										ELSE B.dblCost
+									END / ISNULL(B.dblCostUnitQty, 1)
+		,dblQuantity				= CASE 
+										WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND WC.intWeightClaimDetailId IS NULL
+											THEN B.dblNetWeight * B.dblWeightUnitQty
+										ELSE B.dblQtyReceived * B.dblUnitQty 
+									END
 		,intTaxGroupId				= B.intTaxGroupId
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1
-		,intFreightTermId           = ISNULL(B.intFreightTermId,
-												CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN EL_entity.intFreightTermId ELSE EL.intFreightTermId END)
+		,intFreightTermId           = ISNULL(B.intFreightTermId, CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN EL_entity.intFreightTermId ELSE EL.intFreightTermId END)
 		,ysnExcludeCheckOff			= 0
 		,intBillDetailId			= B.intBillDetailId
-		,intItemUOMId				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
-										THEN B.intWeightUOMId
-										ELSE B.intUnitOfMeasureId END
+		,intItemUOMId				= CASE 
+										WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND WC.intWeightClaimDetailId IS NULL
+											THEN B.intWeightUOMId
+										ELSE B.intUnitOfMeasureId
+									END
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId --GET THE FREIGHT TERM FROM ENTITY LOCATION
 	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
 	LEFT JOIN tblEMEntityLocation EL_entity ON EL_entity.intEntityLocationId = A.intShipFromEntityId
+	LEFT JOIN tblLGWeightClaimDetail WC ON WC.intBillId = A.intBillId
 
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 

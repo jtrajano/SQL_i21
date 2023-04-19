@@ -8,6 +8,12 @@ AS
 BEGIN
 DECLARE @ysnOverrideLocation BIT = 0 , @ysnOverrideLOB BIT = 0, @ysnOverrideCompany BIT = 0, @msg NVARCHAR(MAX) = ''
 
+IF @intBankTransferTypeId = 3
+BEGIN
+    EXEC uspCMForwardBTOverrideGLAccount @intAccountId
+    RETURN
+END
+
 IF EXISTS(SELECT 1 FROM tblGLAccountStructure WHERE intStructureType =  3)
 SELECT TOP 1 @ysnOverrideLocation=ISNULL(
 CASE WHEN @intBankTransferTypeId = 2 THEN ysnOverrideLocationSegment_InTransit

@@ -67,7 +67,6 @@
 	[strRemarks]					NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 
     [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
-
     --MCDG
     --Customer Linked Fields
     [strOrderType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,

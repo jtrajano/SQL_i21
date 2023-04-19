@@ -168,16 +168,16 @@ BEGIN TRY
 	END
 
 	--LOGO SETUP TAB IMPLEMENTATION
-	DECLARE @imgLocationLogo vARBINARY (MAX),
+	DECLARE @imgLocationLogo VARBINARY (MAX),
 			@strLogoType  NVARCHAR(50),
 			@intCompanyLocationId INT,
 			@locCount INT
-
+	DECLARE @strPrintableRemarks  NVARCHAR(1889);
 	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 	SELECT TOP 1 @imgLocationLogo = imgLogo, @strLogoType = 'Logo' FROM tblSMLogoPreference
 	WHERE (ysnDefault = 1 OR  ysnContract = 1)  AND  intCompanyLocationId = @intCompanyLocationId
 
-
+	SELECT TOP 1 @strPrintableRemarks = strPrintableRemarks FROM tblCTContractHeader where intContractHeaderId = @intContractHeaderId
 	SELECT
 		intContractHeaderId					    = CH.intContractHeaderId
 		,blbHeaderLogo						    = dbo.[fnCTGetCompanyLogo]('Header', @intContractHeaderId)
@@ -261,7 +261,7 @@ BEGIN TRY
 		,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
 		,strContractText						= ISNULL(TX.strText,'') 
 		,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
-		,strPrintableRemarks				    = CH.strPrintableRemarks			
+		,strPrintableRemarks				    ='<span style="font-family:Arial;font-size:13px;">' + @strPrintableRemarks + '</span>'
 		,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 		,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 	FROM

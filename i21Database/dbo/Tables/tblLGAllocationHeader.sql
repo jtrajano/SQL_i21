@@ -12,6 +12,7 @@
 	[intCompanyId] INT NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
+    [ysnCancelled] BIT NULL,
 
     CONSTRAINT [PK_tblLGAllocationHeader_intAllocationHeaderId] PRIMARY KEY ([intAllocationHeaderId]), 
 	CONSTRAINT [UK_tblLGAllocationHeader_intReferenceNumber] UNIQUE ([strAllocationNumber]),

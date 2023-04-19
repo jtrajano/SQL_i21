@@ -46,7 +46,19 @@ DECLARE @tempBasis TABLE(intRowNumber INT
 	, strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intStorageLocationId INT
 	, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, intStorageUnitId INT	
+	, intStorageUnitId INT
+	, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intProductTypeId INT
+	, strProductLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intProductLineId INT
+	, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intGradeId INT
+	, strCertification NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intCertificationId INT
+	, strMTMPoint NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intMTMPointId INT
+	, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnEvaluationByLocation BIT
     , ysnEvaluationByMarketZone BIT
     , ysnEvaluationByOriginPort BIT
@@ -54,6 +66,8 @@ DECLARE @tempBasis TABLE(intRowNumber INT
     , ysnEvaluationByCropYear BIT
     , ysnEvaluationByStorageLocation BIT
     , ysnEvaluationByStorageUnit BIT
+	, ysnIncludeProductInformation BIT
+	, ysnEnableMTMPoint BIT
 )  
 
 INSERT INTO @tempBasis
@@ -81,7 +95,13 @@ INSERT INTO tblRKM2MBasisDetail (intM2MBasisId
 	, intDestinationPortId
 	, intCropYearId
 	, intStorageLocationId
-	, intStorageUnitId)
+	, intStorageUnitId
+	, intProductTypeId 
+	, intProductLineId
+	, intGradeId
+	, strCertification
+	, intCertificationId
+	, intMTMPointId)
 SELECT @intM2MBasisId
 	, 1
 	, intCommodityId
@@ -105,5 +125,11 @@ SELECT @intM2MBasisId
 	, intCropYearId
 	, intStorageLocationId
 	, intStorageUnitId
+	, intProductTypeId 
+	, intProductLineId
+	, intGradeId
+	, strCertification
+	, intCertificationId
+	, intMTMPointId
 FROM @tempBasis
 WHERE intRowNumber NOT IN (SELECT * FROM dbo.[fnCommaSeparatedValueToTable](@intRowNumbers))

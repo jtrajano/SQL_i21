@@ -25,7 +25,7 @@ SELECT CD.intContractDetailId
 			ELSE 
 				ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0)
 			END
-	,CH.intContractTypeId intPurchaseSale
+	,intPurchaseSale = CH.intContractTypeId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
@@ -112,7 +112,7 @@ SELECT CD.intContractDetailId
 	,intInvoiceCurrencyId = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intInvoiceCurrencyId ELSE NULL END
 	,strInvoiceCurrency = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN FXC.strCurrency ELSE NULL END
 	,strCurrencyExchangeRateType = CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END
-	,CD.intFreightTermId
+	,CH.intFreightTermId
 	,FT.strFreightTerm
 	,CD.intShipToId
 	,strShipTo = SH.strLocationName
@@ -123,6 +123,7 @@ SELECT CD.intContractDetailId
 	,CH.intTermId
 	,CD.intTaxGroupId
 	,TG.strTaxGroup
+	,FT.strFobPoint
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH
 INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -158,12 +159,12 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND CD.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CD.intRateTypeId
-LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CH.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
-LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId =	CD.intTaxGroupId
+LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = CD.intTaxGroupId
 OUTER APPLY (
 	SELECT TOP 1
 		S.intContractDetailId

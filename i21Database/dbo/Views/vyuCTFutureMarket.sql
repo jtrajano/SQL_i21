@@ -15,7 +15,7 @@ AS
 					,CY.strCurrency
 					,CM.strCommodityAttributeId
 					,MY.strCurrency				AS	strMainCurrency
-					,MY.intMainCurrencyId
+					,CY.intMainCurrencyId
 					,CY.ysnSubCurrency
 					,CY.intCent
 	FROM			tblICCommodity				CO 

@@ -602,6 +602,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[strGroupNumber]	    			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strFeedDiet]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,intDispatchId						INT												NULL
+	,ysnOverrideTaxGroup				BIT												NULL
 )
 
 INSERT INTO #InvoiceInventoryItem
@@ -737,6 +738,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[strGroupNumber]
 	,[strFeedDiet]
 	,intDispatchId
+	,ysnOverrideTaxGroup
 )
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
@@ -887,6 +889,7 @@ SELECT
 	,[strGroupNumber]						= IE.[strGroupNumber]
 	,[strFeedDiet]							= IE.[strFeedDiet]
 	,intDispatchId							= IE.intDispatchId
+	,ysnOverrideTaxGroup					= IE.ysnOverrideTaxGroup
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -1094,6 +1097,7 @@ USING
 		,[strGroupNumber]
 		,[strFeedDiet]
 		,intDispatchId
+		,ysnOverrideTaxGroup
 	FROM
 		#InvoiceInventoryItem
 	)
@@ -1222,7 +1226,8 @@ INSERT(
 	,[strGroupNumber]
 	,[strFeedDiet]
 	,intDispatchId
-)
+	,ysnOverrideTaxGroup
+	)
 VALUES(
 	 [intInvoiceId]
 	,[strDocumentNumber]
@@ -1345,6 +1350,7 @@ VALUES(
 	,[strGroupNumber]
 	,[strFeedDiet]
 	,intDispatchId
+	,ysnOverrideTaxGroup
 )
 	OUTPUT  
 		ISNULL(@IntegrationLogId, -9999)						--[intIntegrationLogId]

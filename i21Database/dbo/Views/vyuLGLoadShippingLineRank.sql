@@ -4,6 +4,7 @@ SELECT
 	SLR.*
 	,strShippingLine = SL.strName
 	,strServiceContractNumber = SLSCD.strServiceContractNumber
+	,strFreightClause = SLSCD.strFreightClause
 	,strRank = CASE SLR.intRank 
 		WHEN 1 THEN 'First' 
 		WHEN 2 THEN 'Second' 

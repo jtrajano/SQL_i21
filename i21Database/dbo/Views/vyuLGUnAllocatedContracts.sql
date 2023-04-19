@@ -83,6 +83,23 @@ FROM (
 		,strClass = Class.strDescription
 		,strProductLine = ProductLine.strDescription
 		,IM.strMarketValuation
+		,strLogisticsLead = LL.strName
+		,strSampleType = ST.strSampleTypeName
+		,strSampleStatus = SS.strStatus
+		,dtmUpdatedDate = S.dtmTestedOn
+		,strShipmentStatus = SSS.strShipmentStatus
+		,strFinancialStatus = CASE WHEN CH.intContractTypeId = 1
+								THEN CASE WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
+										WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
+										WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' 
+										WHEN CD.strFinancialStatus IS NOT NULL THEN CD.strFinancialStatus 
+										ELSE ''
+									END
+								ELSE SFS.strFinancialStatus
+							END
+		,[dblPricedLots] =  CASE WHEN CD.intPricingTypeId IN(1,6) THEN ISNULL(CD.dblNoOfLots, 0) ELSE PF.dblLotsFixed END
+		,[dblUnpricedLots] = CASE WHEN CD.intPricingTypeId IN(1,6) THEN NULL ELSE ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) END
+		,[strCertificates] = CC.strCertificates
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -122,6 +139,13 @@ FROM (
 	LEFT JOIN tblICUnitMeasure U6 ON U6.intUnitMeasureId = SAL.intSUnitMeasureId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
+	LEFT JOIN tblEMEntity LL ON LL.intEntityId = CD.intLogisticsLeadId
+	LEFT JOIN (tblQMSample S INNER JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId) ON S.intProductValueId = CD.intContractDetailId AND S.intProductTypeId = 8 -- Contract item
+	LEFT JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+	OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = CD.intContractDetailId) BD
 	OUTER APPLY (SELECT TOP 1 ysnDisplaySalesContractAsNegative = ISNULL(ysnDisplaySalesContractAsNegative, 0) FROM tblLGCompanyPreference) CP
+	OUTER APPLY dbo.fnCTGetFinancialStatus(CD.intContractDetailId) SFS
+	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) SSS
+	OUTER APPLY dbo.fnLGGetDelimitedContractCertificates(CD.intContractDetailId) CC
 	WHERE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0) > 0
 ) tbl

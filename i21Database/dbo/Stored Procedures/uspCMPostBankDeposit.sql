@@ -136,10 +136,10 @@ FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
-DECLARE @dblComputedExchangeRate NUMERIC (18,6)
-
+DECLARE @dblComputedExchangeRate NUMERIC (30,20)
 
 SELECT @dblComputedExchangeRate = @dblAmountDetailTotal / CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END
+
 --=====================================================================================================================================
 -- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -348,9 +348,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblAmount,2) ELSE A.dblAmount END
+			,[dblDebit]				= @dblAmountDetailTotal - ROUND(( A.dblShortAmount * @dblComputedExchangeRate ),2)				
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblAmount ELSE 0 END
+			,[dblDebitForeign]		= CASE WHEN  @ysnForeignTransaction = 1  THEN A.dblAmount ELSE 0 END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -386,9 +386,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= A.intShortGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblShortAmount,2) ELSE A.dblShortAmount END
+			,[dblDebit]				= ROUND(( A.dblShortAmount * @dblComputedExchangeRate ),2)	
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblShortAmount ELSE 0 END
+			,[dblDebitForeign]		= CASE WHEN  @ysnForeignTransaction = 1 THEN A.dblShortAmount ELSE 0 END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -397,7 +397,7 @@ BEGIN
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] =  NULL
-			,[dblExchangeRate]		= CASE WHEN @ysnForeignTransaction =1 THEN @dblComputedExchangeRate ELSE 1 END
+			,[dblExchangeRate]		= @dblComputedExchangeRate
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = A.strMemo

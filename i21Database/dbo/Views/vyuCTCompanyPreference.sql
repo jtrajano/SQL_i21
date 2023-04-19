@@ -148,6 +148,11 @@ AS
 			,CP.ysnForceReasonCodeForAmendments
 			,CP.ysnEnableNetWeightAdjustment
 			,CP.ysnSequenceImportToCreateCBLogs
+			,CP.ysnEnableMTMPoint
+			,CP.ysnEnableHedgingInAssignDerivatives
+			,CP.ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost
+			,CP.intTransactionForexId
+			,strTransactionForex = case when CP.intTransactionForexId = 2 then 'Current' else 'Contract' end
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId

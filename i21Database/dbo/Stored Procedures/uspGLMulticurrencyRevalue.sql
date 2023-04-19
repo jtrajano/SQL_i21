@@ -57,7 +57,7 @@ SELECT
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuAPMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CT'
@@ -69,7 +69,7 @@ BEGIN
 	strLocation  COLLATE Latin1_General_CI_AS ,strTicket  COLLATE Latin1_General_CI_AS strTicket,strContractNumber  COLLATE Latin1_General_CI_AS strContractId,
 	strItemId  COLLATE Latin1_General_CI_AS ,dblQuantity,dblUnitPrice, dblAmount dblTransactionAmount,A.intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
 	strForexRateType,dblForexRate dblHistoricForexRate,dblHistoricAmount, dblAmountDifference = 0, strModule = 'CT', 
-	strType = CASE WHEN strTransactionType = 'Purchase' THEN 'Payables' ELSE CASE WHEN  strTransactionType = 'Sales' THEN 'Receivables' END END  COLLATE Latin1_General_CI_AS
+	strType = CASE WHEN strTransactionType = 'Purchase' THEN 'Payables' ELSE CASE WHEN  strTransactionType = 'Sale' THEN 'Receivables' END END  COLLATE Latin1_General_CI_AS
 	,intAccountId = NULL
 	,intCompanyLocationId
 	,intLOBSegmentCodeId
@@ -78,7 +78,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
  END
 IF @strModule = 'AR' 
 BEGIN
@@ -98,7 +98,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'INV'
@@ -180,7 +180,7 @@ INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND ISNULL(dblHistoricForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM'
@@ -223,9 +223,9 @@ BEGIN
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
-FROM vyuFAMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
+FROM dbo.fnFAMultiCurrencyRevalue(@dtmDate) A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM Forwards'
@@ -266,7 +266,7 @@ SELECT A.*, strCurrency
 FROM cte 
 A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate AND dtmDueDate > @dtmDate
-AND ISNULL(dblHistoricForexRate, 1) <> 1
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM In-Transit'
@@ -288,9 +288,8 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCMInTransitMultiCurrencyRevalue  A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND ISNULL(dblForexRate, 1) <> 1
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
-
 IF @strModule = 'CM Swaps'
 BEGIN
 WITH cte AS(
@@ -358,7 +357,7 @@ INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND ISNULL(dblHistoricForexRate, 1) <> 1
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'GL'
@@ -377,70 +376,37 @@ SELECT
 	,intLOBSegmentCodeId = NULL
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
-	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
-FROM vyuGLMulticurrencyRevalueGJ A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
-WHERE strTransactionDate <= @dtmDate
---AND ISNULL(dblForexRate, 1) <> 1
+	,A.strCurrency COLLATE Latin1_General_CI_AS strCurrency
+FROM vyuGLMulticurrencyRevalueGJ A
+WHERE dtmDate <= @dtmDate
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
-
-
 IF @strModule = 'GL' -- GL will average
-	WITH finalQuery AS(
+WITH CTE AS(
 	SELECT  
-	A.strTransactionType,
-	A.dblTransactionAmount,
+	strTransactionType = '',
+	SUM(A.dblTransactionAmount)dblTransactionAmount,
 	A.intCurrencyId,
-	A.dblHistoricForexRate,
-	A.dblHistoricAmount, 
-	A.dblAmountDifference,
-	A.strType,
-	B.strCurrency,
-	intAccountIdOverride = A.intAccountId,
-	intLOBSegmentOverrideId = intLOBSegmentCodeId,
-	A.intNewCurrencyExchangeRateTypeId,
-	A.strNewForexRateType,
-	C.strAccountId,
-	CL.* 
-	FROM @tblMulti A 
-	JOIN tblGLAccount C ON C.intAccountId = A.intAccountId
-	LEFT JOIN tblSMCurrency B ON A.intCurrencyId = B.intCurrencyID
-	OUTER APPLY(
-		SELECT	
-		intLocationSegmentCodeId = intProfitCenter,
-		intCompanySegmentCodeId = intCompanySegment 
-		FROM dbo.tblSMCompanyLocation 
-		WHERE intCompanyLocationId = A.intCompanyLocationId
-	)CL
-	)
-	SELECT 
-	strTransactionType,
-	intAccountIdOverride,
+	SUM(A.dblHistoricAmount)dblHistoricAmount, 
+	SUM(A.dblAmountDifference)dblAmountDifference,
 	strForexRateType = 'Avg',
-	intCurrencyId,
-	strCurrency,
-	strAccountId,
-	AVG(dblTransactionAmount) dblTransactionAmount,
-	AVG(dblHistoricAmount) dblHistoricAmount,
-	AVG(dblHistoricForexRate) dblHistoricForexRate,
-	AVG(dblAmountDifference) dblAmountDifference,
-	intLOBSegmentOverrideId,
-	intLocationSegmentCodeId,
-	intCompanySegmentCodeId,
-	strType
-	FROM 
-	finalQuery
+	A.strType,
+	A.strCurrency,
+	intAccountIdOverride = A.intAccountId,
+	strAccountId
+	FROM @tblMulti A JOIN tblGLAccount B ON B.intAccountId = A.intAccountId
 	GROUP BY
 	intCurrencyId,
 	strCurrency,
-	intAccountIdOverride,
-	intLOBSegmentOverrideId,
-	intLocationSegmentCodeId,
-	intCompanySegmentCodeId,
-	strType,
 	strAccountId,
-	strTransactionType
-
+	A.intAccountId,
+	A.strType
+	HAVING SUM(dblTransactionAmount)<> 0
+)
+SELECT *,
+dblHistoricForexRate = dblHistoricAmount/dblTransactionAmount
+FROM CTE
 ELSE
 	SELECT 
 	A.strTransactionType,

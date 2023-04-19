@@ -14,8 +14,7 @@ BEGIN TRY
 
 DECLARE @billIds Id
 INSERT INTO @billIds
-SELECT
-	A.intBillId
+SELECT DISTINCT A.intBillId
 FROM tblAPPaymentDetail A
 INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
 INNER JOIN tblAPBill C ON A.intBillId = C.intBillId

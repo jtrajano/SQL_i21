@@ -113,6 +113,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intValueCurrencyId] INT NULL,
 	[dtmPeriodStartDate] [datetime] NULL,
 	[dtmPeriodEndDate] [datetime] NULL,
+	intTransactionForexId INT null,
 	--CT-7027
 	--[intLastEntityId] INT NULL,
     -- CT-5315

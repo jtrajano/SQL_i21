@@ -29,13 +29,20 @@ SELECT DISTINCT
     dblCredit               =   0,  -- Calcuate By GL
 	intCompanyLocationId	=	NULL,
 	intAccountId			=	BT.intGLAccountIdTo,
-	intLOBSegmentCodeId		= 	BT.intItemLOBSegmentId
+	intLOBSegmentCodeId		= 	DER.intSegmentCodeId
 FROM tblCMBankTransfer BT
 LEFT JOIN tblSMCurrencyExchangeRateType RateType
 	ON RateType.intCurrencyExchangeRateTypeId = BT.intRateTypeIdAmountTo
 OUTER APPLY (
 	SELECT TOP 1 ysnRevalue_Forward FROM tblCMCompanyPreferenceOption
 ) RevalueOptions
+OUTER APPLY(
+    SELECT TOP 1 SM.intSegmentCodeId FROM tblCTContractHeader A 
+	JOIN tblRKFutOptTransaction der ON der.intContractHeaderId = A.intContractHeaderId
+	JOIN tblICCommodity I ON I.intCommodityId = A.intCommodityId
+	JOIN tblSMLineOfBusiness SM on SM.intLineOfBusinessId = I.intLineOfBusinessId
+	where  der.strInternalTradeNo = BT.strDerivativeId
+)DER
 WHERE
 	BT.ysnPosted = 0
 	AND BT.ysnPostedInTransit = 1

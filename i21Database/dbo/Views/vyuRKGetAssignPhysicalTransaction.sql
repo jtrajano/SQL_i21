@@ -37,9 +37,16 @@ FROM (
 			, SB.strSubBook
 			, CD.intContractStatusId
 			, CD.intPricingTypeId
-			, strPricingStatus = CASE WHEN CD.intPricingStatus = 0 THEN 'Unpriced' WHEN CD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CD.intPricingStatus = 2 THEN 'Priced' END
-			, dblLotsPriced = CASE WHEN CD.intPricingTypeId = 1 THEN (CD.dblQuantity / M.dblContractSize)  ELSE ISNULL(priceFixation.dblQuantity, 0) / M.dblContractSize END
-			, dblLotsUnpriced = CASE WHEN CD.intPricingTypeId = 1 THEN 0 ELSE ((CD.dblQuantity - ISNULL(priceFixation.dblQuantity, 0)) / M.dblContractSize) END
+			, strPricingStatus = CASE WHEN CD.intPricingTypeId = 2
+									  THEN CASE WHEN ISNULL(PF.dblTotalLots, 0) = 0  THEN 'Unpriced'
+										ELSE CASE WHEN ISNULL(PF.dblTotalLots, 0) - ISNULL(AP.dblLotsFixed, 0) = 0 THEN 'Fully Priced' 
+												  WHEN ISNULL(AP.dblLotsFixed, 0) = 0  THEN 'Unpriced'
+												  ELSE 'Partially Priced' END END
+									  WHEN CD.intPricingTypeId = 1 THEN 'Priced' ELSE '' END	
+			, dblLotsPriced = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN ISNULL(ISNULL(CD.dblNoOfLots, AP.dblLotsFixed), 0)
+								ELSE ISNULL(PF.dblLotsFixed, 0) END
+			, dblLotsUnpriced = CASE WHEN CD.intPricingTypeId IN(1, 6) THEN 0
+								ELSE ISNULL(CD.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0), 0) END
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -47,6 +54,7 @@ FROM (
 			, compactItem.strSeason
 			, compactItem.strClass
 			, compactItem.strProductLine
+			, dtmEndDate = CAST(CD.dtmEndDate AS DATE)
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId <> 3
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
@@ -66,6 +74,18 @@ FROM (
 		) priceFixation
 		LEFT JOIN tblICItem item ON item.intItemId = CD.intItemId
 		LEFT JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
+		LEFT JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId
+		OUTER APPLY (
+			SELECT TOP 1 A.intContractHeaderId
+				, A.intContractDetailId
+				, C.strApprovalStatus
+				, A.dblLotsFixed
+			FROM tblCTPriceFixation A
+			LEFT JOIN tblSMTransaction C ON C.intRecordId = A.intPriceContractId AND C.strApprovalStatus IS NOT NULL 
+			WHERE A.intContractHeaderId = CH.intContractHeaderId
+				AND ISNULL(A.intContractDetailId, 0) = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN ISNULL(A.intContractDetailId, 0) ELSE ISNULL(CD.intContractDetailId, 0) END
+			ORDER BY C.intTransactionId DESC
+		) AP
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 0
 		AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
@@ -102,9 +122,16 @@ FROM (
 			, SB.strSubBook
 			, CD.intContractStatusId
 			, CH.intPricingTypeId
-			, strPricingStatus = CASE WHEN CDD.intPricingStatus = 0 THEN 'Unpriced' WHEN CDD.intPricingStatus = 1 THEN 'Partially Priced' WHEN CDD.intPricingStatus = 2 THEN 'Priced' END
-			, dblLotsPriced = CASE WHEN CDD.intPricingTypeId = 1 THEN (CDD.dblQuantity / M.dblContractSize)  ELSE ISNULL(priceFixation.dblQuantity, 0) / M.dblContractSize END
-			, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId = 1 THEN 0 ELSE ((CDD.dblQuantity - ISNULL(priceFixation.dblQuantity, 0)) / M.dblContractSize) END
+			, strPricingStatus = CASE WHEN CDD.intPricingTypeId = 2
+									  THEN CASE WHEN ISNULL(PF.dblTotalLots, 0) = 0  THEN 'Unpriced'
+										ELSE CASE WHEN ISNULL(PF.dblTotalLots, 0) - ISNULL(AP.dblLotsFixed, 0) = 0 THEN 'Fully Priced' 
+												  WHEN ISNULL(AP.dblLotsFixed, 0) = 0  THEN 'Unpriced'
+												  ELSE 'Partially Priced' END END
+									  WHEN CDD.intPricingTypeId = 1 THEN 'Priced' ELSE '' END	
+			, dblLotsPriced = CASE WHEN CDD.intPricingTypeId IN(1, 6) THEN ISNULL(ISNULL(CH.dblNoOfLots, AP.dblLotsFixed), 0)
+								ELSE ISNULL(PF.dblLotsFixed, 0) END
+			, dblLotsUnpriced = CASE WHEN CDD.intPricingTypeId IN(1, 6) THEN 0
+								ELSE ISNULL(CH.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0), 0) END
 			, compactItem.strOrigin
 			, compactItem.strProductType
 			, compactItem.strGrade
@@ -112,6 +139,7 @@ FROM (
 			, compactItem.strSeason
 			, compactItem.strClass
 			, compactItem.strProductLine
+			, dtmEndDate = CAST(CDD.dtmEndDate AS DATE)
 		FROM tblCTContractHeader CH
 		INNER JOIN (SELECT DISTINCT intContractHeaderId, intContractStatusId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
@@ -132,9 +160,30 @@ FROM (
 		) priceFixation
 		LEFT JOIN tblICItem item ON item.intItemId = CDD.intItemId
 		LEFT JOIN vyuICGetCompactItem compactItem ON item.intItemId = compactItem.intItemId
+		LEFT JOIN tblCTPriceFixation PF ON CDD.intContractDetailId = PF.intContractDetailId	
+		OUTER APPLY (
+			SELECT TOP 1 A.intContractHeaderId
+				, A.intContractDetailId
+				, C.strApprovalStatus
+				, A.dblLotsFixed
+			FROM tblCTPriceFixation A
+			LEFT JOIN tblSMTransaction C ON C.intRecordId = A.intPriceContractId AND C.strApprovalStatus IS NOT NULL 
+			WHERE A.intContractHeaderId = CH.intContractHeaderId
+				AND ISNULL(A.intContractDetailId, 0) = CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN ISNULL(A.intContractDetailId, 0) ELSE ISNULL(CDD.intContractDetailId, 0) END
+			ORDER BY C.intTransactionId DESC
+		) AP
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 1
 			AND CH.intContractHeaderId <> (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail CCD WHERE CCD.intContractStatusId <> 3)
 			AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
 )t1
-WHERE intContractStatusId NOT IN (3, 5, 6)
+OUTER APPLY (
+	SELECT TOP 1 ysnAllowCompletedContractForAssign = ISNULL(ysnAllowCompletedContractForAssign, CAST(0 AS BIT))
+	FROM tblRKCompanyPreference
+) rkc
+WHERE intContractStatusId NOT IN (3, 6)
+AND ( ysnAllowCompletedContractForAssign = 1
+	  OR
+	  ( ysnAllowCompletedContractForAssign = 0
+	    AND intContractStatusId <> 5 )
+	)

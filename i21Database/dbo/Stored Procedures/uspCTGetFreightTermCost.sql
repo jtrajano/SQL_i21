@@ -12,6 +12,7 @@
 	, @intRateTypeId INT
 	, @ysnWarningMessage BIT = 1
 	, @intSequenceCurrencyId INT
+	, @intContainerTypeId INT
 
 AS
 	
@@ -50,7 +51,8 @@ BEGIN TRY
 		, strCostMethod NVARCHAR(50)
 		, dblRate NUMERIC(18, 6)
 		, dblAmount NUMERIC(18, 6)
-		, dblFX NUMERIC(18, 6))
+		, dblFX NUMERIC(18, 6)
+		, ysnAccrue BIT)
 
 	SELECT TOP 1 @ysnFreightTermCost = ISNULL(ysnFreightTermCost, 0)
 		, @ysnAutoCalc = ISNULL(ysnAutoCalculateFreightTermCost, 0)
@@ -101,7 +103,45 @@ BEGIN TRY
 		FROM #tmpCosts
 
 		IF (@intCostItemId = @intFreightItemId) OR (@ysnFreight = 1)
-		BEGIN			
+		BEGIN	
+			DECLARE @intFreightRateMatrixCount INT
+			DECLARE @ysnDefaultContainer INT
+			
+			SELECT  @intFreightRateMatrixCount = COUNT(FRM.intFreightRateMatrixId) 
+			FROM tblLGFreightRateMatrix FRM
+			JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
+			JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
+			WHERE LP.intCityId = @intFromPortId
+				AND DP.intCityId = @intToPortId
+				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
+				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
+				AND FRM.intContainerTypeId = @intContainerTypeId
+	
+			SELECT TOP 1  @ysnDefaultContainer = ISNULL(FRM.ysnDefault, 0)
+			FROM tblLGFreightRateMatrix FRM
+			JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
+			JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
+			WHERE LP.intCityId = @intFromPortId
+				AND DP.intCityId = @intToPortId
+				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
+				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
+				AND ISNULL(FRM.ysnDefault,0) = 1
+			
+			IF (@ysnDefaultContainer <> 0 AND @intFreightRateMatrixCount > 1) 
+			BEGIN 
+				SELECT TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
+				FROM tblLGFreightRateMatrix FRM
+				JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
+				JOIN tblSMCity DP ON DP.strCity = FRM.strDestinationCity
+				WHERE LP.intCityId = @intFromPortId
+					AND DP.intCityId = @intToPortId
+					AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
+					AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
+					AND FRM.ysnDefault = 1
+					AND FRM.intContainerTypeId = @intContainerTypeId
+			END
+			ELSE
+			BEGIN 
 			SELECT TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
 			FROM tblLGFreightRateMatrix FRM
 			JOIN tblSMCity LP ON LP.strCity = FRM.strOriginPort
@@ -110,8 +150,9 @@ BEGIN TRY
 				AND DP.intCityId = @intToPortId
 				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) >= FRM.dtmValidFrom
 				AND CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) <= FRM.dtmValidTo
-				AND ISNULL(FRM.ysnDefault, 0) = 1
-
+				AND FRM.intContainerTypeId = @intContainerTypeId
+			END
+			--SELECT @ysnDefaultContainer, @intFreightRateMatrixCount
 			IF ISNULL(@intFreightRateMatrixId, 0) = 0
 			BEGIN
 				SELECT TOP 1 @intFreightRateMatrixId = FRM.intFreightRateMatrixId
@@ -147,6 +188,7 @@ BEGIN TRY
 					, dblRate = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
 					, dblAmount = CASE WHEN ISNULL(ctq.dblWeight, 0) = 0 THEN 0 ELSE (frm.dblTotalCostPerContainer / ctq.dblWeight) END
 					, dblFX = NULL
+					, ysnAccrue = (CASE WHEN @intCostItemId = CP.intDefaultFreightItemId OR @intCostItemId = CP.intDefaultInsuranceItemId THEN 1 ELSE  0 END)
 				FROM tblLGFreightRateMatrix frm
 				JOIN tblEMEntity em ON em.intEntityId = frm.intEntityId
 				JOIN tblLGContainerType cnt ON cnt.intContainerTypeId = frm.intContainerTypeId
@@ -155,25 +197,10 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = iUOM.intUnitMeasureId
 				JOIN tblICCommodityAttribute cat ON cat.intCommodityAttributeId = ctq.intCommodityAttributeId
 				JOIN tblSMCurrency cur ON cur.intCurrencyID = frm.intCurrencyId
+				OUTER APPLY tblCTCompanyPreference CP 
 				WHERE ctq.intCommodityId = @intCommodityId
 					AND cat.intCountryID = @intOriginCountryId
 					AND frm.intFreightRateMatrixId = @intFreightRateMatrixId
-			END
-			ELSE
-			BEGIN
-				INSERT INTO @CostItems
-				SELECT @intCostItemId
-					, @strCostItem
-					, NULL
-					, NULL
-					, @intSequenceCurrencyId
-					, @strSequenceCurrency
-					, NULL
-					, NULL
-					, 'Per Unit'
-					, dblRate = 0
-					, dblAmount = 0
-					, dblFX = NULL
 			END
 		END
 		ELSE IF (@intCostItemId = @intInsuranceItemId) OR (@ysnInsurance = 1)
@@ -193,15 +220,17 @@ BEGIN TRY
 				, NULL
 				, NULL
 				, 'Amount'
-				, dblRate = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
-				, dblAmount = ((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)
+				, dblRate = ISNULL(((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100)  ,0)
+				, dblAmount = ISNULL(((CASE WHEN @intContractTypeId = 1 THEN pFactor.dblInsurancePercent ELSE sFactor.dblInsurancePercent END) / 100) * (detail.dblInsurancePremiumFactor / 100) ,0) 
 				, dblFX = NULL
+				, ysnAccrue = (CASE WHEN @intCostItemId = CP.intDefaultFreightItemId OR @intCostItemId = CP.intDefaultInsuranceItemId THEN 1 ELSE  0 END)
 			FROM tblLGInsurancePremiumFactor ipf
 			JOIN tblLGInsurancePremiumFactorDetail detail ON detail.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId
 			JOIN tblEMEntity em ON em.intEntityId = ipf.intEntityId
 			LEFT JOIN tblLGInsurancePremiumFactorPurchase pFactor ON pFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 1 AND pFactor.intFreightTermId = @intFromTermId
 			LEFT JOIN tblLGInsurancePremiumFactorSale sFactor ON sFactor.intInsurancePremiumFactorId = ipf.intInsurancePremiumFactorId AND @intContractTypeId = 2 AND sFactor.intFreightTermId = @intToTermId
 			JOIN tblICItem item ON item.intItemId = @intItemId AND item.intProductTypeId = ipf.intCommodityAttributeId
+			OUTER APPLY tblCTCompanyPreference CP
 			WHERE detail.intLoadingPortId = @intFromPortId
 				AND detail.intDestinationPortId = @intToPortId
 				AND ISNULL(@intMarketZoneId, 0) = (CASE WHEN @intContractTypeId = 1 THEN ISNULL(@intMarketZoneId, 0) ELSE detail.intDestinationZoneId END)
@@ -224,17 +253,13 @@ BEGIN TRY
 				, dblRate = @dblValue
 				, dblAmount = @dblValue
 				, dblFX = NULL
+				, ysnAccrue = 0 
 		END
 
 		DELETE FROM #tmpCosts WHERE intTermCostDetailId = @intTermCostDetailId
 	END
 
 	DROP TABLE #tmpCosts
-
-	IF ISNULL(@intFreightRateMatrixId, 0) = 0 AND ISNULL(@ysnInsurance, 0) = 0
-	BEGIN
-		delete @CostItems;
-	END
 
 	IF EXISTS (SELECT TOP 1 1 FROM @CostItems WHERE ISNULL(dblRate, 0) <> 0)
 	BEGIN
@@ -256,6 +281,7 @@ BEGIN TRY
 				, ci.dblRate
 				, ci.dblAmount
 				, dblFX = ISNULL(CASE WHEN (@intSequenceCurrencyId = ci.intCurrencyId or ci.intCurrencyId = seqCurrency.intMainCurrencyId) THEN 1 ELSE tbl.dblRate END, NULL)
+				, ci.ysnAccrue
 			FROM @CostItems ci
 			LEFT JOIN (
 				SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY cerd.intCurrencyExchangeRateId ORDER BY cerd.dtmValidFromDate DESC)
@@ -264,10 +290,10 @@ BEGIN TRY
 					, cer.intToCurrencyId
 				FROM tblSMCurrencyExchangeRate cer 
 				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
-				left join tblSMCurrency cu on cu.intCurrencyID = @intSequenceCurrencyId
-				WHERE (cer.intFromCurrencyId = @intSequenceCurrencyId or cer.intFromCurrencyId = cu.intMainCurrencyId)
+				cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
+				WHERE ( cer.intToCurrencyId = ISNULL(seqCurrency.intMainCurrencyId, seqCurrency.intCurrencyID ) )
 					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
-			) tbl ON tbl.intToCurrencyId = ci.intCurrencyId AND intRowId = 1
+			) tbl ON tbl.intFromCurrencyId = ci.intCurrencyId AND intRowId = 1
 			cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
 		END
 	END

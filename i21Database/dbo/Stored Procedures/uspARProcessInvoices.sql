@@ -231,6 +231,23 @@ DECLARE  @Id									INT
 		,@TaxPoint								NVARCHAR(50)
 		,@Surcharge								NUMERIC(18, 6)
 		,@OpportunityId							INT
+		,@TransactionNo							NVARCHAR(50)
+		,@BankId								INT
+		,@BankAccountId							INT
+		,@BorrowingFacilityId					INT
+		,@BorrowingFacilityLimitId				INT
+		,@BankReferenceNo						NVARCHAR(100)
+		,@BankTradeReference					NVARCHAR(100)
+		,@LoanAmount							NUMERIC(18, 6)
+		,@BankValuationRuleId					INT
+		,@TradeFinanceComments					NVARCHAR(MAX)
+		,@GoodsStatus							NVARCHAR(100)
+		,@SourcedFrom							NVARCHAR(100)
+		,@TaxLocationId							INT
+		,@TaxPoint								NVARCHAR(50)
+		,@DefaultPayToBankAccountId				INT
+		,@PayToCashBankAccountId				INT
+		,@PaymentInstructions					NVARCHAR(MAX)
 
 		,@InvoiceDetailId						INT
 		,@ItemId								INT
@@ -444,10 +461,27 @@ BEGIN
 		,@FreightCharge					= [dblFreightCharge]
 		,@FreightCompanySegment			= [intFreightCompanySegment]
 		,@FreightLocationSegment		= [intFreightLocationSegment]
-		,@TaxLocationId					= [intTaxLocationId]
 		,@TaxPoint						= [strTaxPoint]
 		,@Surcharge						= [dblSurcharge]
 		,@OpportunityId 				= [intOpportunityId]
+		,@ImportFormat					= [strImportFormat]
+		,@TransactionNo					= [strTradeFinanceNo]
+		,@BankId						= [intBankId]
+		,@BankAccountId					= [intBankAccountId]
+		,@BorrowingFacilityId			= [intBorrowingFacilityId]
+		,@BorrowingFacilityLimitId		= [intBorrowingFacilityLimitId]
+		,@BankReferenceNo				= [strBankReferenceNo]
+		,@BankTradeReference			= [strBankTradeReference]
+		,@LoanAmount					= [dblLoanAmount]
+		,@BankValuationRuleId			= [intBankValuationRuleId]
+		,@TradeFinanceComments			= [strTradeFinanceComments]
+		,@GoodsStatus					= [strGoodsStatus]
+		,@TaxLocationId					= [intTaxLocationId]
+		,@TaxPoint						= [strTaxPoint]
+		,@DefaultPayToBankAccountId		= [intDefaultPayToBankAccountId]
+		,@PayToCashBankAccountId		= [intPayToCashBankAccountId]
+		,@PaymentInstructions			= [strPaymentInstructions]
+		,@SourcedFrom					= [strSourcedFrom]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
 		,@ItemId						= (CASE WHEN @GroupingOption = 0 THEN [intItemId] ELSE NULL END) 
@@ -672,7 +706,7 @@ BEGIN
 		FROM tblARInvoice 
 		WHERE intLoadId = @LoadId
 		AND strTransactionType <> 'Proforma Invoice'
-		
+
 		IF (@NewInvoiceNumber <> '')
 		BEGIN
 			SET @ErrorMessage = 'Invoice (' + @NewInvoiceNumber + ') was already created for ' + ISNULL(ISNULL(@SourceNumber, @ItemDocumentNumber), '')
@@ -739,10 +773,26 @@ BEGIN
 			,@FreightCharge					= @FreightCharge
 			,@FreightCompanySegment			= @FreightCompanySegment
 			,@FreightLocationSegment		= @FreightLocationSegment
-			,@TaxLocationId					= @TaxLocationId
-			,@TaxPoint						= @TaxPoint
 			,@Surcharge						= @Surcharge
 			,@OpportunityId					= @OpportunityId
+			,@TruckDriverReferenceId		= @TruckDriverReferenceId
+			,@TransactionNo					= @TransactionNo
+			,@BankId						= @BankId
+			,@BankAccountId					= @BankAccountId
+			,@BorrowingFacilityId			= @BorrowingFacilityId
+			,@BorrowingFacilityLimitId		= @BorrowingFacilityLimitId
+			,@BankReferenceNo				= @BankReferenceNo
+			,@BankTradeReference			= @BankTradeReference
+			,@LoanAmount					= @LoanAmount
+			,@BankValuationRuleId			= @BankValuationRuleId
+			,@TradeFinanceComments			= @TradeFinanceComments
+			,@GoodsStatus					= @GoodsStatus
+			,@SourcedFrom					= @SourcedFrom
+			,@TaxLocationId					= @TaxLocationId
+			,@TaxPoint						= @TaxPoint
+			,@DefaultPayToBankAccountId		= @DefaultPayToBankAccountId
+			,@PayToCashBankAccountId		= @PayToCashBankAccountId
+			,@PaymentInstructions			= @PaymentInstructions
 
 			,@ItemId						= @ItemId
 			,@ItemPrepayTypeId				= @ItemPrepayTypeId
@@ -2396,7 +2446,7 @@ BEGIN TRY
 						AND @UpdateAvailableDiscount = 0
 						
 					EXEC	[dbo].[uspARProcessTaxDetailsForLineItem]
-									@TaxDetails	= @TaxDetails
+								 @TaxDetails	= @TaxDetails
 								,@UserId		= @EntityId
 								,@ClearExisting	= @ClearDetailTaxes
 								,@RaiseError	= @RaiseError
@@ -2850,7 +2900,7 @@ SELECT
 	@UpdatedIds = COALESCE(@UpdatedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 FROM
 	@TempInvoiceIdTable
-	
+
 SET @UpdatedIvoices = @UpdatedIds
 
 IF ISNULL(@RaiseError,0) = 0

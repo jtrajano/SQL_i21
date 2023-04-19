@@ -1,16 +1,15 @@
 CREATE PROCEDURE [dbo].[uspQMReportTestingSummarySession]
-	
-	@xmlParam NVARCHAR(MAX) = NULL  
-	
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg NVARCHAR(MAX),
+	DECLARE @ErrMsg			NVARCHAR(MAX),
 			@xmlDocumentId	INT
 
-	DECLARE @intCuppingSessionId INT
-	DECLARE @strPrintType NVARCHAR(MAX)
+	DECLARE @CuppingSessionDetailId		Id,
+			@strPrintType				NVARCHAR(MAX),
+			@strCuppingSessionDetailId	NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -57,16 +56,21 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
 	
-	SELECT	@intCuppingSessionId = [from]
+	INSERT INTO @CuppingSessionDetailId
+	SELECT	[from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intCuppingSessionId'
+	WHERE	[fieldname] = 'intCuppingSessionDetailId'
 
 	SELECT	@strPrintType = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strPrintType'
 
+	select @strCuppingSessionDetailId = COALESCE(@strCuppingSessionDetailId + ',', '') + CAST(intId AS NVARCHAR(MAX))
+	from @CuppingSessionDetailId
+
 	SELECT
-		 strPrintType = @strPrintType
+		 strPrintType					= @strPrintType
+		,strCuppingSessionDetailId		= RTRIM(LTRIM(@strCuppingSessionDetailId))
 		,QMCS.intCuppingSessionId
 		,strSampleNumber				= ISNULL(QMSP.strSampleNumber, QMS.strSampleNumber)
 		,strChildSampleNumber			= QMS.strSampleNumber
@@ -83,7 +87,7 @@ BEGIN TRY
 		,strSContractNumber				= CASE WHEN LGACC.intCount > 1 THEN 'Multiple' ELSE LGAC.strSContractNumber END
 		,strProductLine					= ICCPL.strDescription
 	FROM tblQMCuppingSession QMCS
-	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCS.intCuppingSessionId = @intCuppingSessionId
+	INNER JOIN tblQMCuppingSessionDetail QMCSD ON QMCS.intCuppingSessionId = QMCSD.intCuppingSessionId AND QMCSD.intCuppingSessionDetailId IN (SELECT intId FROM @CuppingSessionDetailId)
 	INNER JOIN tblQMSample QMS ON QMCSD.intCuppingSessionDetailId = QMS.intCuppingSessionDetailId
 	INNER JOIN tblICItem ICI WITH (NOLOCK) ON QMS.intItemId = ICI.intItemId
 	LEFT JOIN tblQMSample QMSP ON QMS.intParentSampleId = QMSP.intSampleId

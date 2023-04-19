@@ -45,6 +45,10 @@ SELECT TOP 1 @intBTBankFeesAccountId=intBTBankFeesAccountId FROM tblCMCompanyPre
     ,dblAmountForeignTo = ROUND(dblAmountForeignTo, 2)
     ,dblAmountFrom = ROUND(dblAmountForeignFrom * BAF.dblRate, 2)
     ,dblAmountTo = ROUND(dblAmountForeignTo * BAT.dblRate, 2)
+    ,dblRateFeesFrom= BAF.dblRate
+    ,dblRateFeesTo=BAT.dblRate
+    ,dblRateAmountSettlementFrom=CASE WHEN BAF.intCurrencyId = @intDefaultCurrencyId THEN 1 ELSE 0 END
+    ,dblRateAmountSettlementTo=CASE WHEN BAT.intCurrencyId = @intDefaultCurrencyId THEN 1 ELSE 0 END
     ,strDerivativeId
     ,intFutOptTransactionId
     ,intFutOptTransactionHeaderId
@@ -89,6 +93,10 @@ SELECT TOP 1 @intBTBankFeesAccountId=intBTBankFeesAccountId FROM tblCMCompanyPre
     ,dblAmountForeignTo
     ,dblAmountFrom
     ,dblAmountTo
+    ,dblRateFeesFrom
+    ,dblRateFeesTo
+    ,dblRateAmountSettlementFrom
+    ,dblRateAmountSettlementTo
     ,dblDifference
     ,dtmCreated
     ,strDerivativeId
@@ -125,6 +133,10 @@ SELECT TOP 1 @intBTBankFeesAccountId=intBTBankFeesAccountId FROM tblCMCompanyPre
     ,dblAmountForeignTo
     ,dblAmountFrom 
     ,dblAmountTo
+    ,dblRateFeesFrom
+    ,dblRateFeesTo
+    ,dblRateAmountSettlementFrom
+    ,dblRateAmountSettlementTo
     ,dblDifference = dblAmountTo - dblAmountFrom
     ,dtmCreated
     ,strDerivativeId

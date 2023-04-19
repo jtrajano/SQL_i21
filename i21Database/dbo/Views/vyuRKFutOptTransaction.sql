@@ -50,6 +50,24 @@ FROM (
 									END
 							ELSE ft.strStatus
 							END COLLATE Latin1_General_CI_AS
+		, strAssignedContracts  = CASE WHEN  ft.intSelectedInstrumentTypeId IN (1) THEN (
+									SELECT  STUFF((SELECT ',' + CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+									FROM tblRKAssignFuturesToContractSummary A
+									INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+									INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+									WHERE ysnIsHedged = 0 AND A.intFutOptTransactionId = ft.intFutOptTransactionId
+									FOR XML PATH('')), 1, 1, ''))
+								ELSE '' END
+		, strHedgedContracts  = CASE WHEN  ft.intSelectedInstrumentTypeId IN (1) THEN 
+									(SELECT  STUFF((SELECT ',' + CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+									FROM tblRKAssignFuturesToContractSummary A
+									INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetailId
+									INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+									WHERE ysnIsHedged = 1 AND A.intFutOptTransactionId = ft.intFutOptTransactionId
+									FOR XML PATH('')), 1, 1, ''))
+								ELSE 
+									Contract.strContractNumber + '-' + CAST(ContractDetail.intContractSeq AS NVARCHAR(10))
+								END
 		, ft.intBookId
 		, sb.strBook
 		, ft.intSubBookId
@@ -104,6 +122,7 @@ FROM (
 		, ft.ysnCommissionExempt
 		, ft.ysnCommissionOverride
 		, ft.ysnPosted
+		, strCurrencyPair = CPS.strCurrencyPair
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId
@@ -134,5 +153,7 @@ LEFT JOIN tblSMTransaction approval
 	AND ft.intInstrumentTypeId = 4						-- OTC Forwards Only
 	AND approval.intScreenId = approvalScreen.intScreenId
 	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
+LEFT JOIN vyuRKCurrencyPairSetup CPS
+	ON CPS.intCurrencyPairId = ft.intCurrencyPairId
 )t 
 --ORDER BY intFutOptTransactionId ASC

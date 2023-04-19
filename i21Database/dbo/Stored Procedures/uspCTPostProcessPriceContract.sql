@@ -152,10 +152,25 @@ BEGIN
 					@dblHedgePrice			=	FD.dblHedgePrice,
 					@ysnHedge				=	FD.ysnHedge,
 					@dtmFixationDate		=	FD.dtmFixationDate,
+					@intContractHeaderId	=	PF.intContractHeaderId,
+					@intContractDetailId	=	cd.intContractDetailId, 
+					@intCommodityId			=	CH.intCommodityId,					
+					@intTraderId			=	CH.intSalespersonId,
+					@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,
+					@intCurrencyId			=	cd.intCurrencyId,
+					@intBookId				=	cd.intBookId,
+					@intSubBookId			=	cd.intSubBookId,
+					@intLocationId			=	cd.intCompanyLocationId,
 					@ysnAA					=	FD.ysnAA,
 					@dblHedgeNoOfLots		= 	FD.dblHedgeNoOfLots
 				FROM
 					tblCTPriceFixationDetail FD WITH (UPDLOCK)
+					JOIN tblCTPriceFixation PF WITH (UPDLOCK) ON PF.intPriceFixationId = FD.intPriceFixationId
+					JOIN tblCTContractHeader CH WITH (UPDLOCK) ON CH.intContractHeaderId = PF.intContractHeaderId
+					join tblCTContractDetail cd on
+						cd.intContractHeaderId = PF.intContractHeaderId
+						and cd.intContractDetailId = case when CH.ysnMultiplePriceFixation = 1 then cd.intContractDetailId else PF.intContractDetailId end
+						and cd.intContractSeq = case when CH.ysnMultiplePriceFixation = 1 then 1 else cd.intContractSeq end
 				WHERE
 					FD.intPriceFixationDetailId = @intPriceFixationDetailId
 
@@ -265,14 +280,25 @@ BEGIN
 						,@intBrokerId = a.intBrokerId
 						,@intBrokerageAccountId = a.intBrokerAccountId
 						,@intFutureMarketId = a.intNewFutureMarketId
+						,@intCommodityId = c.intCommodityId
+						,@intLocationId = cd.intCompanyLocationId
+						,@intTraderId = c.intSalespersonId
 						,@intCurrencyId = a.intCurrencyId
 						,@strBuySell = a.strBuySell
 						,@intHedgeFutureMonthId = a.intNewFutureMonthId
 						,@dblHedgePrice = a.dblSpreadPrice
 						,@dtmFixationDate = a.dtmSpreadArbitrageDate
 						,@ysnAA = 0
+						,@intBookId				= cd.intBookId
+						,@intSubBookId			= cd.intSubBookId
 					from
 						tblCTSpreadArbitrage a
+						join tblCTPriceFixation b on b.intPriceFixationId = a.intPriceFixationId
+						join tblCTContractHeader c on c.intContractHeaderId = b.intContractHeaderId
+						join tblCTContractDetail cd on
+							cd.intContractHeaderId = b.intContractHeaderId
+							and cd.intContractDetailId = case when c.ysnMultiplePriceFixation = 1 then cd.intContractDetailId else b.intContractDetailId end
+							and cd.intContractSeq = case when c.ysnMultiplePriceFixation = 1 then 1 else cd.intContractSeq end
 					where
 						a.intSpreadArbitrageId = @intSpreadArbitrageId;
 

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdatePaymentInfoOfForPayment]
 	@voucherIds NVARCHAR(MAX),
 	@paymentInfo NVARCHAR(50) = NULL,
+	@userId INT = NULL,
 	@newPaymentInfo NVARCHAR(50) OUT
 AS
 
@@ -74,6 +75,7 @@ BEGIN TRY
 		SET B.strTempPaymentInfo = @paymentInfo
 		FROM tblAPBill B
 		INNER JOIN #tmpPartitionedVouchers PV ON PV.intBillId = B.intBillId AND PV.intPartitionId = @partitionNumber
+		WHERE B.intSelectedByUserId = @userId
 
 		SET @paymentInfo = ''
 		SET @partitionNumber = @partitionNumber + 1

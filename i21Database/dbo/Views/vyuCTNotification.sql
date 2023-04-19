@@ -157,6 +157,34 @@ AS
 				CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
 				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
 				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
+				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Late Shipment' AS strNotificationType,
+				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+				CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
+				CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
+				CH.strContractItemNo
+
+		FROM Header CH
+		join tblCTContractDetail cd on cd.intContractHeaderId = CH.intContractHeaderId
+		cross join tblCTAction ac
+		cross join tblCTEvent ev
+		join tblCTEventRecipient er on er.intEventId = ev.intEventId
+		where
+			CH.intContractStatusId in (1,4)
+			and ac.strActionName = 'Late Shipment'
+			and ev.intActionId = ac.intActionId
+			and getdate() between
+				(case when ev.strReminderCondition = 'day(s) before due date' then dateadd(day,ev.intDaysToRemind * -1,cd.dtmEndDate) else cd.dtmEndDate end)
+				and
+				(case when ev.strReminderCondition = 'day(s) before due date' then cd.dtmEndDate else dateadd(day,ev.intDaysToRemind,cd.dtmEndDate) end)
+
+		UNION ALL
+
+		SELECT	CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
+				CH.dblQuantity,					CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
+				CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
+				CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
+				CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
+				CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
 				CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				'Unsubmitted' AS strNotificationType,
 				CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
 				CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			

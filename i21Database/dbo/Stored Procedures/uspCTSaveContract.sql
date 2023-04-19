@@ -62,7 +62,8 @@ BEGIN TRY
             @strLCNumber				NVARCHAR(50),
 			@ysnRoll				    BIT = 0,
 			@intCostTermId				INT,
-			@ysnCancelledLoad			bit = 0	;
+			@ysnCancelledLoad			bit = 0,
+			@intContainerTypeId			INT
 
 
 		
@@ -330,6 +331,7 @@ BEGIN TRY
 				@intLCApplicantId	=	intLCApplicantId,
 				@strLCType			=	strLCType,
 				@ysnRoll			=	ysnRoll,
+
 				@intCostTermId		=	intCostTermId
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
@@ -406,6 +408,7 @@ BEGIN TRY
 					, @ysnEnableBudgetForBasisPricing BIT
 					, @dblTotalBudget NUMERIC(18, 6)
 					, @dblTotalCost NUMERIC(18, 6)
+					, @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost bit
 
 				DECLARE @CostItems AS TABLE (intCostItemId INT
 					, strCostItem NVARCHAR(100)
@@ -418,7 +421,8 @@ BEGIN TRY
 					, strCostMethod NVARCHAR(50)
 					, dblRate NUMERIC(18, 6)
 					, dblAmount NUMERIC(18, 6)
-					, dblFX NUMERIC(18, 6))
+					, dblFX NUMERIC(18, 6)
+					, ysnAccrue BIT)
 				
 				SELECT @intCommodityId = ch.intCommodityId
 					, @intItemId = cd.intItemId
@@ -433,12 +437,16 @@ BEGIN TRY
 					, @intSequenceCurrencyId = cd.intCurrencyId
 					, @dblTotalBudget = dblTotalBudget
 					, @dblTotalCost = dblTotalCost
+					, @intDetailPricingTypeId = cd.intPricingTypeId
+					, @intContainerTypeId = cd.intContainerTypeId
 				FROM tblCTContractDetail cd
 				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				where cd.intContractDetailId = @intContractDetailId
 
 				SELECT @intDefaultFreightId = intDefaultFreightItemId
 					, @intDefaultInsuranceId = intDefaultInsuranceItemId
 					, @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing
+					, @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost = ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost
 				FROM tblCTCompanyPreference
 
 				INSERT INTO @CostItems
@@ -456,20 +464,21 @@ BEGIN TRY
 					, @intRateTypeId = @intRateTypeId
 					, @ysnWarningMessage = 0
 					, @intSequenceCurrencyId = @intSequenceCurrencyId
+					, @intContainerTypeId = @intContainerTypeId
 
 				IF EXISTS (SELECT TOP 1 1 FROM @CostItems)
 				BEGIN
 					UPDATE tblCTContractCost
 					SET intItemUOMId = tblUpdate.intItemUOMId
-						, dblFX = tblUpdate.dblFX
-						, dblRate = tblUpdate.dblRate						
+						, dblFX = ISNULL(tblUpdate.dblFX,0)
+						, dblRate = ISNULL(tblUpdate.dblRate,0)						
 					FROM (
 						SELECT cc.intContractCostId
 							, ci.intItemUOMId
-							, ci.dblFX
+							, dblFX = case when @ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost = 1 then cc.dblFX else ci.dblFX end
 							, dblRate = CASE WHEN cc.intItemId = @intDefaultInsuranceId THEN 
 												CASE WHEN @intDetailPricingTypeId = 2 AND @ysnEnableBudgetForBasisPricing = 1 THEN @dblTotalBudget * ci.dblAmount
-													ELSE @dblTotalCost * ci.dblAmount END
+													ELSE CASE WHEN ci.dblAmount <> 0 THEN @dblTotalCost * ci.dblAmount ELSE cc.dblRate END END
 											ELSE ci.dblRate END
 							, dblRemainingPercent = 100
 							, dtmAccrualDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
@@ -493,6 +502,7 @@ BEGIN TRY
 			BEGIN
 				EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Modified'
 			END
+
 		END
 
 		
@@ -586,9 +596,24 @@ BEGIN TRY
 			UPDATE	@CDTableUpdate SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
 		END
 
-		
 
-	
+		UPDATE tblCTContractDetail
+		SET intPricingTypeId = CD.intPricingTypeId
+			, dblFutures = CD.dblFutures
+			, dblCashPrice = CD.dblCashPrice
+			, dblTotalCost = CD.dblTotalCost
+			, intProducerId = CD.intProducerId
+			, dblNetWeight = CD.dblNetWeight
+			, dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+			, intFutureMonthId = CD.intFutureMonthId
+			, dblOriginalQty = CD.dblOriginalQty
+			, ysnPriceChanged = CD.ysnPriceChanged
+			, dblOriginalBasis = CD.dblOriginalBasis
+			, dblConvertedBasis = CD.dblConvertedBasis
+			, strLCNumber = @strLCNumber
+			, ysnApplyDefaultTradeFinance = 0
+		FROM @CDTableUpdate CD
+		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
 		
 		EXEC uspLGUpdateLoadItem @intContractDetailId
@@ -847,3 +872,4 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
+GO

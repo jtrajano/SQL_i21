@@ -89,11 +89,13 @@ AS
  		DROP TABLE #tempReceiptInfo
  	IF OBJECT_ID('tempdb..#tempVoucherInfo') IS NOT NULL
  		DROP TABLE #tempVoucherInfo
+ 	IF OBJECT_ID('tempdb..#tempVoucherInfo2') IS NOT NULL
+ 		DROP TABLE #tempVoucherInfo2
 		
- 	IF OBJECT_ID('tempdb..#tempVoucher') IS NOT NULL
- 		DROP TABLE #tempVoucher
- 	IF OBJECT_ID('tempdb..#tempVoucherPayment') IS NOT NULL
- 		DROP TABLE #tempVoucherPayment
+ 	--IF OBJECT_ID('tempdb..#tempVoucher') IS NOT NULL
+ 	--	DROP TABLE #tempVoucher
+ 	--IF OBJECT_ID('tempdb..#tempVoucherPayment') IS NOT NULL
+ 	--	DROP TABLE #tempVoucherPayment
 
  	IF OBJECT_ID('tempdb..#tempContractPair') IS NOT NULL
  		DROP TABLE #tempContractPair
@@ -140,10 +142,13 @@ AS
 
  	-- Get All Contracts and filter by facility and transaction date
  	SELECT  DISTINCT
- 		  intContractHeaderId
+ 		  intContractHeaderId = tlog.intContractHeaderId
  		, intContractDetailId
+		, intContractTypeId = CD.intContractTypeId
  	INTO #tempTradeLogContracts
  	FROM tblTRFTradeFinanceLog tlog
+	JOIN tblCTContractHeader CD
+		ON CD.intContractHeaderId = tlog.intContractHeaderId
  	JOIN #tempFacilityInfo facility
  		ON tlog.intBorrowingFacilityId = facility.intBorrowingFacilityId
 	OUTER APPLY (
@@ -164,6 +169,12 @@ AS
  	AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
 	AND ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
+ 	-- Get Purchase Contract's Allocated Sale Contract
+ 	SELECT DISTINCT intPContractDetailId
+ 		, intSContractDetailId
+ 	INTO #tempContractPair
+ 	FROM tblLGAllocationDetail allocation
+ 	WHERE intPContractDetailId IN (SELECT intContractDetailId FROM #tempTradeLogContracts WHERE intContractTypeId = 1)
 
  	SELECT  
  		  tlog.intContractHeaderId
@@ -195,12 +206,25 @@ AS
 		, tlog.strOverrideBankValuation
 		, tlog.strBankTradeReference
 		, tlog.dblFinanceQty
+		, tContract.intContractTypeId
+		, intPContractDetailId = CASE WHEN tContract.intContractTypeId = 1 
+									THEN tlog.intContractDetailId 
+									ELSE saleCTPair.intPContractDetailId END
+		, intSContractDetailId = CASE WHEN tContract.intContractTypeId = 2 
+									THEN tlog.intContractDetailId 
+									ELSE purchaseCTPair.intSContractDetailId END
  	INTO #tempTradeFinanceLog
  	FROM tblTRFTradeFinanceLog tlog
  	JOIN #tempTradeLogContracts tContract
  		ON	tContract.intContractDetailId = tlog.intContractDetailId
  		AND CAST(tlog.dtmCreatedDate AS DATE) >= @dtmStartDate
  		AND CAST(tlog.dtmCreatedDate AS DATE) <= @dtmEndDate
+	LEFT JOIN #tempContractPair purchaseCTPair
+		ON purchaseCTPair.intPContractDetailId = tlog.intContractDetailId
+		AND tContract.intContractTypeId = 1
+	LEFT JOIN #tempContractPair saleCTPair
+		ON saleCTPair.intSContractDetailId = tlog.intContractDetailId
+		AND tContract.intContractTypeId = 2
 	OUTER APPLY (
 		SELECT TOP 1 ysnDeleted = CAST(1 AS BIT)
 		FROM tblTRFTradeFinanceLog delTLog
@@ -215,9 +239,8 @@ AS
 	) deletedRecord
 	WHERE ISNULL(deletedRecord.ysnDeleted, 0) = 0
 
- 	SELECT intContractHeaderId
- 		, intContractDetailId
- 		, dtmTransactionDate
+
+ 	SELECT dtmTransactionDate
  		, intBankTransactionId
  		, dblTransactionAmountAllocated
  		, dblTransactionAmountActual
@@ -247,11 +270,13 @@ AS
 		, strBankTradeReference
 		, dblFinanceQty
 		, dtmCreatedDate
+		, intPContractDetailId
+		, intSContractDetailId
  	INTO #tempLatestLogValues
  	FROM 
  	(
  		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC)
+ 			intRowNum = ROW_NUMBER() OVER (PARTITION BY intPContractDetailId, intSContractDetailId ORDER BY dtmCreatedDate DESC)
  			, *
  		FROM #tempTradeFinanceLog
  	) t
@@ -300,7 +325,7 @@ AS
  	JOIN tblCTContractHeader cth
  		ON cth.intContractHeaderId = ctd.intContractHeaderId
  	JOIN #tempLatestLogValues latestLog
- 		ON latestLog.intContractDetailId = ctd.intContractDetailId
+ 		ON latestLog.intPContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail sublimit
 		ON sublimit.intBorrowingFacilityLimitDetailId = latestLog.intSublimitId
 	LEFT JOIN tblCMBankValuationRule valRule
@@ -632,38 +657,38 @@ AS
  	WHERE shipmentDetail.intPContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 	AND shipment.intShipmentType = 1 -- SHIPMENT
 	
- 	SELECT * 
- 	INTO #tempVoucher
- 	FROM
- 	(
- 		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
- 			, tlog.intContractHeaderId
- 			, tlog.intContractDetailId
- 			, tlog.intTransactionHeaderId
- 			, tlog.intTransactionDetailId
- 		FROM #tempTradeFinanceLog tlog 
- 		WHERE tlog.strTransactionType = 'AP'
- 		AND tlog.strAction = 'Created Voucher'
- 	) t
- 	WHERE intRowNum = 1
+ 	--SELECT * 
+ 	--INTO #tempVoucher
+ 	--FROM
+ 	--(
+ 	--	SELECT 
+ 	--		intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
+ 	--		, tlog.intContractHeaderId
+ 	--		, tlog.intContractDetailId
+ 	--		, tlog.intTransactionHeaderId
+ 	--		, tlog.intTransactionDetailId
+ 	--	FROM #tempTradeFinanceLog tlog 
+ 	--	WHERE tlog.strTransactionType = 'AP'
+ 	--	AND tlog.strAction = 'Created Voucher'
+ 	--) t
+ 	--WHERE intRowNum = 1
 	
 
- 	SELECT * 
- 	INTO #tempVoucherPayment
- 	FROM
- 	(
- 		SELECT 
- 			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
- 			, tlog.intContractHeaderId
- 			, tlog.intContractDetailId
- 			, tlog.intTransactionHeaderId
- 			, tlog.intTransactionDetailId
- 		FROM #tempTradeFinanceLog tlog 
- 		WHERE tlog.strTransactionType = 'AP'
- 		AND tlog.strAction = 'Created AP Payment'
- 	) t
- 	WHERE intRowNum = 1
+ 	--SELECT * 
+ 	--INTO #tempVoucherPayment
+ 	--FROM
+ 	--(
+ 	--	SELECT 
+ 	--		intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmCreatedDate DESC)
+ 	--		, tlog.intContractHeaderId
+ 	--		, tlog.intContractDetailId
+ 	--		, tlog.intTransactionHeaderId
+ 	--		, tlog.intTransactionDetailId
+ 	--	FROM #tempTradeFinanceLog tlog 
+ 	--	WHERE tlog.strTransactionType = 'AP'
+ 	--	AND tlog.strAction = 'Created AP Payment'
+ 	--) t
+ 	--WHERE intRowNum = 1
 
 
  	-- Get Purchase Contract Ticket
@@ -691,14 +716,14 @@ AS
  	WHERE receiptItem.intContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 
 	
- 	-- Get Purchase Contract Voucher
+ 	-- Get Purchase Contract Voucher (Via Inventory Receipt)
  	SELECT 
  		  voucher.intInventoryReceiptId
  		, voucher.intInventoryReceiptItemId
  		, voucher.intBillId
- 		, strInvoiceNumber = bill.strVendorOrderNumber
- 		, strSupplierVoucherReference = voucher.strBillId
- 		, dblPurchaseInvoiceAmount = bill.dblTotalController
+ 		, strInvoiceNumber = CASE WHEN ISNULL(bill.strVendorOrderNumber, '') = '' THEN NULL ELSE bill.strVendorOrderNumber END
+ 		, strSupplierVoucherReference = CASE WHEN ISNULL(voucher.strBillId, '') = '' THEN NULL ELSE voucher.strBillId END
+ 		, dblPurchaseInvoiceAmount = bill.dblTotal --bill.dblTotalController
  		, dtmVoucherDate = bill.dtmDate
  		, dtmVoucherDueDate = bill.dtmDueDate
  		, dblVoucherPaidAmount = bill.dblPayment
@@ -710,15 +735,26 @@ AS
  	ON bill.intBillId = voucher.intBillId
 	WHERE voucher.intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tempReceiptInfo)
 	AND voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo)
-
-
- 	-- Get Purchase Contract's Allocated Sale Contract
- 	SELECT DISTINCT intPContractDetailId
- 		, intSContractDetailId
- 	INTO #tempContractPair
- 	FROM tblLGAllocationDetail allocation
- 	WHERE intPContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
-
+	
+ 	-- Get Purchase Contract Voucher (Via Load Shipment)
+	SELECT 
+		  BD.intContractDetailId
+		, bill.intBillId
+		, strInvoiceNumber = bill.strVendorOrderNumber
+		, strSupplierVoucherReference = bill.strBillId
+		, dblPurchaseInvoiceAmount = bill.dblTotal
+		, dtmVoucherDate = bill.dtmDate
+ 		, dtmVoucherDueDate = bill.dtmDueDate
+ 		, dblVoucherPaidAmount = bill.dblPayment
+ 		, dblVoucherBalance = bill.dblAmountDue
+ 		, bill.intCurrencyId
+		, bill.strFinanceTradeNo
+	INTO #tempVoucherInfo2
+	FROM tblAPBillDetail BD
+	INNER JOIN tblAPBill bill
+		ON bill.intBillId = BD.intBillId
+		AND ISNULL(bill.strFinanceTradeNo, '') <> ''
+		AND BD.intContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
 
  	-- Allocated Sale Contract Hedge Info
  	SELECT 
@@ -789,7 +825,7 @@ AS
  	LEFT JOIN tblSMTerm term
  		ON term.intTermID = cth.intTermId
 	LEFT JOIN #tempLatestLogValues latestLog
-		ON latestLog.intContractDetailId = ctd.intContractDetailId
+		ON latestLog.intSContractDetailId = ctd.intContractDetailId
 	WHERE ctd.intContractDetailId IN (SELECT intSContractDetailId FROM #tempContractPair)
 	AND cth.intContractTypeId = 2 -- SALE CONTRACTS ONLY
 
@@ -982,41 +1018,139 @@ AS
 			
  	-- Get Latest Pricing Status
  	SELECT 
- 	  pContract.intContractHeaderId
- 	, pContract.intContractDetailId
- 	, ctSeqHist.ysnPriced
-	, pContract.intContractTypeId
+ 			  pContract.intContractHeaderId
+ 			, pContract.intContractDetailId
+ 			, ctSeqHist.ysnPriced
+			, pContract.intContractTypeId
+			, dblFutures = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 2
+								THEN priceFixationDetail.dblFutures
+								ELSE ctSeqHist.dblFutures
+								END, @dblZero)
+			, dblBasis = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 3
+								THEN priceFixationDetailForHTA.dblBasis
+								ELSE ctSeqHist.dblBasis
+								END, @dblZero)
  	INTO #tempContractSeqHistory
  	FROM #tempPurchaseContracts pContract
  	OUTER APPLY (
  		SELECT TOP 1 
- 			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+ 			    ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , ysnPartialPrice = CASE WHEN cb.strPricingStatus = 'Partially Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , cb.dblFutures
+			  , cb.dblBasis
+			  , cb.intContractDetailId
+			  , cb.intPricingTypeId
+			  , cb.dblQuantity
  		FROM tblCTSequenceHistory cb
  		WHERE cb.intContractDetailId = pContract.intContractDetailId
 		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
  		ORDER BY cb.dtmHistoryCreated DESC
  	) ctSeqHist
+	OUTER APPLY (
+		-- Weighted Average Futures Price for Basis (Priced Qty) in Multiple Price Fixations
+		SELECT dblFutures = SUM(dblFutures) 
+		FROM
+		(
+			SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 2 
+		) t
+	) priceFixationDetail
+	OUTER APPLY (
+		-- Weighted Average Futures Price for HTA (Priced Qty) in Multiple Price Fixations
+		SELECT dblBasis = SUM(dblBasis) 
+		FROM
+		(
+			SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 3 
+		) t
+	) priceFixationDetailForHTA
+
 	
  	INSERT INTO #tempContractSeqHistory (
  		  intContractHeaderId
  		, intContractDetailId
  		, ysnPriced
 		, intContractTypeId
+		, dblFutures
+		, dblBasis
  	) 
  	SELECT 
- 	  sContract.intContractHeaderId
- 	, sContract.intContractDetailId
- 	, ctSeqHist.ysnPriced
-	, sContract.intContractTypeId
+ 			  sContract.intContractHeaderId
+ 			, sContract.intContractDetailId
+ 			, ctSeqHist.ysnPriced
+			, sContract.intContractTypeId
+			, dblFutures = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 2
+								THEN priceFixationDetail.dblFutures
+								ELSE ctSeqHist.dblFutures
+								END, @dblZero)
+			, dblBasis = ISNULL(CASE WHEN ctSeqHist.ysnPartialPrice = 1 
+									AND ctSeqHist.intPricingTypeId = 3
+								THEN priceFixationDetailForHTA.dblBasis
+								ELSE ctSeqHist.dblBasis
+								END, @dblZero)
  	FROM #tempSaleContractInfo sContract
  	OUTER APPLY (
  		SELECT TOP 1 
- 			  ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+ 			    ysnPriced = CASE WHEN cb.strPricingStatus = 'Fully Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , ysnPartialPrice = CASE WHEN cb.strPricingStatus = 'Partially Priced' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			  , ch.ysnMultiplePriceFixation
+			  , cb.dblFutures
+			  , cb.dblBasis
+			  , cb.intContractDetailId
+			  , cb.intPricingTypeId
+			  , cb.dblQuantity
  		FROM tblCTSequenceHistory cb
+		LEFT JOIN tblCTContractHeader ch
+			ON ch.intContractHeaderId = cb.intContractDetailId
  		WHERE cb.intContractDetailId = sContract.intContractDetailId
 		AND CAST(cb.dtmHistoryCreated AS DATE) <= @dtmEndDate
  		ORDER BY cb.dtmHistoryCreated DESC
  	) ctSeqHist
+	OUTER APPLY (
+		-- Weighted Average Futures Price for Basis (Priced Qty) in Multiple Price Fixations
+		SELECT dblFutures = SUM(dblFutures) 
+		FROM
+		(
+			SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 2 
+		) t
+	) priceFixationDetail
+	OUTER APPLY (
+		-- Weighted Average Futures Price for HTA (Priced Qty) in Multiple Price Fixations
+		SELECT dblBasis = SUM(dblBasis) 
+		FROM
+		(
+			SELECT dblBasis = (pfd.dblBasis) * (pfd.dblQuantity / ctSeqHist.dblQuantity)
+			FROM tblCTPriceFixation pfh
+			INNER JOIN tblCTPriceFixationDetail pfd
+				ON pfh.intPriceFixationId = pfd.intPriceFixationId
+				AND pfd.dtmFixationDate <= @dtmEndDate
+			WHERE pfh.intContractDetailId = ctSeqHist.intContractDetailId
+				AND ctSeqHist.ysnPartialPrice = 1
+				AND ctSeqHist.intPricingTypeId = 3 
+		) t
+	) priceFixationDetailForHTA
 
  	-- Get Latest Market Price
  	SELECT *
@@ -1131,12 +1265,12 @@ AS
  		, pContract.strPContractNumber
  		, pContract.strSupplier
  		, pContract.strPurchaseTerm
- 		, dblPurchaseBasis = ISNULL(purchaseCB.dblBasis, @dblZero)
+ 		, dblPurchaseBasis = ISNULL(purchaseCTSeqHist.dblBasis, @dblZero)
  		, dblPurchaseDifferential = ISNULL(pContract.dblPurchaseDifferential, @dblZero)
- 		, dblPurchaseFixed = ISNULL((purchaseCB.dblBasis + purchaseCB.dblFutures), @dblZero)
+ 		, dblPurchaseFixed = ISNULL((purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures), @dblZero)
  		, pContract.strPurchaseMarket
  		, pContract.strPurchaseMonth
- 		, dblPurchaseUnitPrice = ISNULL((purchaseCB.dblBasis + purchaseCB.dblFutures), @dblZero)
+ 		, dblPurchaseUnitPrice = ISNULL((purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures), @dblZero)
  		, pContract.strPurchaseCurrency
  		, dblPurchaseLots = ISNULL(pContract.dblPurchaseLots, @dblZero)
  		, dblPHedgedLots = ISNULL(pHedge.dblHedgedLots, @dblZero)
@@ -1152,15 +1286,15 @@ AS
  		, strPDerivativeFutureMonth = pHedge.strFutureMonth
  		, strPLocation = pTicket.strLocation
  		, strPWarehouse = pTicket.strWarehouse
- 		, strPInvoiceNumber = pVoucher.strInvoiceNumber
- 		, pVoucher.strSupplierVoucherReference
- 		, dblPurchaseInvoiceAmount = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
- 		, pVoucher.dtmVoucherDate
- 		, pVoucher.dtmVoucherDueDate
- 		, dblVoucherPaidAmount = ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero)
- 		, dblVoucherBalance = CASE WHEN ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero) > 0
- 									THEN ISNULL(pVoucher.dblVoucherBalance, @dblZero)
- 									ELSE ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
+ 		, strPInvoiceNumber = ISNULL(pVoucher.strInvoiceNumber, pVoucher2.strInvoiceNumber)
+ 		, strSupplierVoucherReference = ISNULL(pVoucher.strSupplierVoucherReference, pVoucher2.strSupplierVoucherReference)
+ 		, dblPurchaseInvoiceAmount = ISNULL(pVoucher.dblPurchaseInvoiceAmount, ISNULL(pVoucher2.dblPurchaseInvoiceAmount, @dblZero))
+ 		, dtmVoucherDate = ISNULL(pVoucher.dtmVoucherDate, pVoucher2.dtmVoucherDate)
+ 		, dtmVoucherDueDate = ISNULL(pVoucher.dtmVoucherDueDate, pVoucher2.dtmVoucherDueDate)
+ 		, dblVoucherPaidAmount = ISNULL(pVoucher.dblVoucherPaidAmount, ISNULL(pVoucher2.dblVoucherPaidAmount, @dblZero))
+ 		, dblVoucherBalance = CASE WHEN ISNULL(pVoucher.dblVoucherPaidAmount, ISNULL(pVoucher2.dblVoucherPaidAmount, @dblZero)) > 0
+ 									THEN ISNULL(pVoucher.dblVoucherBalance, ISNULL(pVoucher2.dblVoucherBalance, @dblZero))
+ 									ELSE ISNULL(pVoucher.dblPurchaseInvoiceAmount, ISNULL(pVoucher2.dblPurchaseInvoiceAmount, @dblZero))
  									END
  		, dblPContractCost = ISNULL(pContractCost.dblCosts, @dblZero)
 
@@ -1171,13 +1305,13 @@ AS
  		, strSaleCountry = sContract.strCountry
  		, strSaleInvoiceNumber = sInvoice.strInvoiceNumber
  		, dtmSaleInvoiceDate = sInvoice.dtmInvoiceDate
- 		, dblSaleBasis = ISNULL(saleCB.dblBasis,@dblZero) --sContract.dblSaleBasis
+ 		, dblSaleBasis = ISNULL(saleCTSeqHist.dblBasis,@dblZero) --sContract.dblSaleBasis
  		, dblSaleDifferential = ISNULL(sContract.dblSaleDifferential, @dblZero)
- 		, dblSaleFixed = ISNULL((saleCB.dblBasis + sContract.dblSaleDifferential), @dblZero) --sContract.dblSaleFixed
+ 		, dblSaleFixed = ISNULL((saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures), @dblZero) --sContract.dblSaleFixed
  		, sContract.strSaleMarket
  		, sContract.strSaleMonth
  		, sContract.strSaleCurrency
- 		, dblSaleUnitPrice = ISNULL((saleCB.dblBasis + saleCB.dblFutures), @dblZero) --sContract.dblSaleUnitPrice
+ 		, dblSaleUnitPrice = ISNULL((saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures), @dblZero) --sContract.dblSaleUnitPrice
  		, strSaleShipmentStatus = sLoadShipment.strSaleShipmentStatus
  		, sLoadShipment.dtmSaleDeliveredDate
  		, strSaleInvoiceCurrency = sInvoice.strCurrency
@@ -1190,7 +1324,8 @@ AS
 
  		-- Financing columns
  		, dblSInvoiceAmountInFacilityCurr = ISNULL(sInvoice.dblInvoiceTotal, @dblZero) * dbo.fnRKGetCurrencyConvertion(sInvoice.intCurrencyId, pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
- 		, dblPInvoiceAmountInFacilityCurr = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero) * dbo.fnRKGetCurrencyConvertion(pVoucher.intCurrencyId, pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
+ 		, dblPInvoiceAmountInFacilityCurr = ISNULL(pVoucher.dblPurchaseInvoiceAmount, ISNULL(pVoucher2.dblPurchaseInvoiceAmount, @dblZero)) * 
+					dbo.fnRKGetCurrencyConvertion(ISNULL(pVoucher.intCurrencyId, pVoucher2.intCurrencyId) , pContract.intFacilityCurrencyId, DEFAULT) -- Convert to Facility Currency
 
  		-- Valuation columns
  		, dblMarketPrice = CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
@@ -1215,13 +1350,13 @@ AS
  		, dblBankValuation = CASE WHEN pContract.dblFinanceQty < 0 
 								AND ISNULL(sContract.dblFinanceQty, 0) <> 0 
 								AND sContract.dtmTFLogCreateDate >= pContract.dtmTFLogCreateDate
-							THEN sContract.dblFinanceQty 
-							ELSE pContract.dblFinanceQty	
+							THEN ABS(sContract.dblFinanceQty) 
+							ELSE ABS(pContract.dblFinanceQty) 	
 							END * 
 							(CASE	WHEN pContract.intBankValuationRuleId = 1 -- BANK VALUATION: Purchase Price
 										THEN 
 											CASE WHEN purchaseCTSeqHist.ysnPriced = 1 
-												THEN (purchaseCB.dblBasis + purchaseCB.dblFutures)  -- Purchase Price
+												THEN  (purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures)  -- Purchase Price
 												ELSE 
 													-- Market Price
 													CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
@@ -1233,15 +1368,15 @@ AS
  											 CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
 											 WHEN purchaseCTSeqHist.ysnPriced = 0
 													OR
-												(purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+												(purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures) > 
  												(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
  												THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 												ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
+ 												ELSE ISNULL(purchaseCTSeqHist.dblBasis, @dblZero) + ISNULL(purchaseCTSeqHist.dblFutures, @dblZero) -- Purchase Price
  												END
  									WHEN pContract.intBankValuationRuleId = 3 -- BANK VALUATION: Sale Price
  										THEN 
 											CASE WHEN saleCTSeqHist.ysnPriced = 1 
-												THEN (saleCB.dblBasis + saleCB.dblFutures) -- Sale Price
+												THEN (saleCTSeqHist.dblBasis + saleCTSeqHist.dblFutures) -- Sale Price
 												ELSE @dblZero
 												END
  									WHEN pContract.intBankValuationRuleId = 4 -- BANK VALUATION: LCM Lower of purchase or M2M unless sale is fixed
@@ -1250,13 +1385,13 @@ AS
  												THEN 
 													CASE WHEN ISNULL(marketBasis.strMarketBasisCurrency, '') = '' THEN @dblZero
  													WHEN purchaseCTSeqHist.ysnPriced = 0 
-														OR ((purchaseCB.dblBasis + purchaseCB.dblFutures) > 
+														OR ((purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures) > 
  															(ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero))
 														   )
  														THEN ISNULL(marketFutures.dblLastSettle, @dblZero) + ISNULL(marketBasis.dblMarketBasis, @dblZero) -- Market Price
- 														ELSE purchaseCB.dblBasis + purchaseCB.dblFutures -- Purchase Price
+ 														ELSE purchaseCTSeqHist.dblBasis + purchaseCTSeqHist.dblFutures -- Purchase Price
  														END
- 												ELSE saleCB.dblBasis + saleCB.dblFutures -- Sale Price
+ 												ELSE ISNULL(saleCTSeqHist.dblBasis, @dblZero) + ISNULL(saleCTSeqHist.dblFutures, @dblZero) -- Sale Price
  												END
  									WHEN pContract.intBankValuationRuleId = 5 -- BANK VALUATION: M2M
 										THEN 
@@ -1286,6 +1421,12 @@ AS
 		WHERE pVoucherInfo.intInventoryReceiptId = pReceipt.intInventoryReceiptId
  		AND pVoucherInfo.intInventoryReceiptItemId = pReceipt.intInventoryReceiptItemId
 	) pVoucher
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM #tempVoucherInfo2 pVoucherInfo2
+		WHERE pVoucherInfo2.intContractDetailId = pContract.intContractDetailId
+		ORDER BY pVoucherInfo2.intBillId DESC
+	) pVoucher2
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM #tempContractPair ctPair
@@ -1400,8 +1541,9 @@ AS
  	DROP TABLE #tempHedgeInfo
  	DROP TABLE #tempReceiptInfo
  	DROP TABLE #tempVoucherInfo
- 	DROP TABLE #tempVoucher
- 	DROP TABLE #tempVoucherPayment
+ 	DROP TABLE #tempVoucherInfo2
+ 	--DROP TABLE #tempVoucher
+ 	--DROP TABLE #tempVoucherPayment
 
  	DROP TABLE #tempContractPair
  	DROP TABLE #tempSaleHedgeInfo

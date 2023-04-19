@@ -37,7 +37,7 @@ DECLARE @TempGLEntries AS TABLE (
 	, [strCode]							NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL 
 	, [strReference]					NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
 	, [intCurrencyId]					INT              NULL
-	, [dblExchangeRate]					NUMERIC (38, 20) DEFAULT 1 NOT NULL
+	, [dblExchangeRate]					NUMERIC (38, 20) NULL DEFAULT 1
 	, [dtmDateEntered]					DATETIME         NOT NULL
 	, [dtmTransactionDate]				DATETIME         NULL
 	, [strJournalLineDescription]		NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL
@@ -73,81 +73,80 @@ DECLARE @TempGLEntries AS TABLE (
 ) 
 
 IF @Post = 1
-
-INSERT INTO @ItemsForPost(
-	 [intItemId]
-    ,[intItemLocationId]
-    ,[intItemUOMId]
-    ,[dtmDate]
-    ,[dblQty]
-    ,[dblUOMQty]
-    ,[dblCost]
-    ,[dblValue]
-    ,[dblSalesPrice]
-    ,[intCurrencyId]
-    ,[dblExchangeRate]
-    ,[intTransactionId]
-    ,[intTransactionDetailId]
-    ,[strTransactionId]
-    ,[intTransactionTypeId]
-    ,[intLotId]
-    ,[intSubLocationId]
-    ,[intStorageLocationId]
-    ,[ysnIsStorage]
-    ,[strActualCostId]
-    ,[intSourceTransactionId]
-    ,[strSourceTransactionId]
-    ,[intInTransitSourceLocationId]
-    ,[intForexRateTypeId]
-    ,[dblForexRate]
-    ,[intStorageScheduleTypeId]
-    ,[dblUnitRetail]
-    ,[intCategoryId]
-    ,[dblAdjustRetailValue]
-	,[strBOLNumber]
-	,[intTicketId]
-	,[strSourceNumber]
-	,[strSourceType]
-	,[intSourceEntityId]
-) 
-SELECT 
-     [intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSubLocationId]
-	,[intStorageLocationId]
-	,[ysnIsStorage]
-	,[strActualCostId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate]
-	,[intStorageScheduleTypeId]
-	,[dblUnitRetail]
-	,[intCategoryId]
-	,[dblAdjustRetailValue]
-	,[strBOLNumber]
-	,[intTicketId]
-	,[strSourceNumber]
-	,[strSourceType]
-	,[intSourceEntityId]
-FROM tblARPostItemsForCosting
-WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
-  AND strSessionId = @strSessionId
+	INSERT INTO @ItemsForPost(
+		 [intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+		,[intStorageScheduleTypeId]
+		,[dblUnitRetail]
+		,[intCategoryId]
+		,[dblAdjustRetailValue]
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceNumber]
+		,[strSourceType]
+		,[intSourceEntityId]
+	) 
+	SELECT 
+		 [intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+		,[intStorageScheduleTypeId]
+		,[dblUnitRetail]
+		,[intCategoryId]
+		,[dblAdjustRetailValue]
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceNumber]
+		,[strSourceType]
+		,[intSourceEntityId]
+	FROM tblARPostItemsForCosting
+	WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
+	  AND strSessionId = @strSessionId
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
@@ -200,63 +199,63 @@ DECLARE  @InTransitItems                ItemInTransitCostingTableType
 		,@FOB_DESTINATION               INT = 2	
 
 IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM tblARPostInvoiceDetail WHERE intSourceId = 2 AND strSessionId = @strSessionId))
-INSERT INTO @InTransitItems(
-	 [intItemId] 
-    ,[intItemLocationId] 
-    ,[intItemUOMId] 
-    ,[dtmDate] 
-    ,[dblQty] 
-    ,[dblUOMQty] 
-    ,[dblCost] 
-    ,[dblValue] 
-    ,[dblSalesPrice] 
-    ,[intCurrencyId] 
-    ,[dblExchangeRate] 
-    ,[intTransactionId] 
-    ,[intTransactionDetailId] 
-    ,[strTransactionId] 
-    ,[intTransactionTypeId] 
-    ,[intLotId] 
-    ,[intSourceTransactionId] 
-    ,[strSourceTransactionId] 
-    ,[intSourceTransactionDetailId] 
-    ,[intFobPointId] 
-    ,[intInTransitSourceLocationId]
-    ,[intForexRateTypeId]
-    ,[dblForexRate]
-	,[strBOLNumber]	
-	,[intTicketId]
-	,[intSourceEntityId]
-)
-SELECT
-     [intItemId] 
-    ,[intItemLocationId] 
-    ,[intItemUOMId] 
-    ,[dtmDate] 
-    ,[dblQty] 
-    ,[dblUOMQty] 
-    ,[dblCost] 
-    ,[dblValue] 
-    ,[dblSalesPrice] 
-    ,[intCurrencyId] 
-    ,[dblExchangeRate] 
-    ,[intTransactionId] 
-    ,[intTransactionDetailId] 
-    ,[strTransactionId] 
-    ,[intTransactionTypeId] 
-    ,[intLotId] 
-    ,[intSourceTransactionId] 
-    ,[strSourceTransactionId] 
-    ,[intSourceTransactionDetailId] 
-    ,[intFobPointId] 
-    ,[intInTransitSourceLocationId]
-    ,[intForexRateTypeId]
-    ,[dblForexRate]
-	,[strBOLNumber]
-	,[intTicketId]
-	,[intSourceEntityId]
-FROM tblARPostItemsForInTransitCosting
-WHERE strSessionId = @strSessionId
+	INSERT INTO @InTransitItems(
+		 [intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intSourceTransactionDetailId] 
+		,[intFobPointId] 
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+		,[strBOLNumber]	
+		,[intTicketId]
+		,[intSourceEntityId]
+	)
+	SELECT
+		 [intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intSourceTransactionDetailId] 
+		,[intFobPointId] 
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+		,[strBOLNumber]
+		,[intTicketId]
+		,[intSourceEntityId]
+	FROM tblARPostItemsForInTransitCosting
+	WHERE strSessionId = @strSessionId
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 BEGIN		 --Call the post routine 
@@ -305,9 +304,9 @@ BEGIN		 --Call the post routine
 	UPDATE B
 	SET intAccountId = dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
 	FROM tblICInventoryTransaction  A
-	JOIN tblARPostInvoiceGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
-							  AND A.intTransactionId = B.intTransactionId
-							  AND A.strTransactionId = B.strTransactionId
+	JOIN @TempGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
+	AND A.intTransactionId = B.intTransactionId
+	AND A.strTransactionId = B.strTransactionId
 	JOIN tblARPostItemsForInTransitCosting C ON A.intTransactionId = C.intTransactionId
 					             AND A.strTransactionId = C.strTransactionId
 					             AND A.intTransactionDetailId =  C.intTransactionDetailId 
@@ -323,49 +322,49 @@ END
 DECLARE @StorageItemsForPost AS ItemCostingTableType  			
 
 IF @Post = 1
-INSERT INTO @StorageItemsForPost (  
-     [intItemId] 
-    ,[intItemLocationId] 
-    ,[intItemUOMId]
-    ,[dtmDate]
-    ,[dblQty]
-    ,[dblUOMQty]
-    ,[dblCost]
-    ,[dblSalesPrice]
-    ,[intCurrencyId] 
-    ,[dblExchangeRate]
-    ,[intTransactionId] 
-    ,[intTransactionDetailId]
-    ,[strTransactionId]  
-    ,[intTransactionTypeId]  
-    ,[intLotId] 
-    ,[intSubLocationId]
-    ,[intStorageLocationId]
-    ,[strActualCostId]
-	,[strBOLNumber]
-) 
-SELECT 
-     [intItemId] 
-    ,[intItemLocationId] 
-    ,[intItemUOMId]
-    ,[dtmDate]
-    ,[dblQty]
-    ,[dblUOMQty]
-    ,[dblCost]
-    ,[dblSalesPrice]
-    ,[intCurrencyId] 
-    ,[dblExchangeRate]
-    ,[intTransactionId] 
-    ,[intTransactionDetailId]
-    ,[strTransactionId]  
-    ,[intTransactionTypeId]  
-    ,[intLotId] 
-    ,[intSubLocationId]
-    ,[intStorageLocationId]
-    ,[strActualCostId]
-	,[strBOLNumber]
-FROM tblARPostItemsForStorageCosting
-WHERE strSessionId = @strSessionId
+	INSERT INTO @StorageItemsForPost (  
+		 [intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblSalesPrice]
+		,[intCurrencyId] 
+		,[dblExchangeRate]
+		,[intTransactionId] 
+		,[intTransactionDetailId]
+		,[strTransactionId]  
+		,[intTransactionTypeId]  
+		,[intLotId] 
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[strActualCostId]
+		,[strBOLNumber]
+	) 
+	SELECT 
+		 [intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblSalesPrice]
+		,[intCurrencyId] 
+		,[dblExchangeRate]
+		,[intTransactionId] 
+		,[intTransactionDetailId]
+		,[strTransactionId]  
+		,[intTransactionTypeId]  
+		,[intLotId] 
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[strActualCostId]
+		,[strBOLNumber]
+	FROM tblARPostItemsForStorageCosting
+	WHERE strSessionId = @strSessionId
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
@@ -459,7 +458,7 @@ SELECT [dtmDate]
 	,[strCode]
 	,[strReference]
 	,[intCurrencyId]
-	,[dblExchangeRate]
+	,[dblExchangeRate]				= ISNULL(dblExchangeRate, 1)
 	,[dtmDateEntered]				= @PostDate
 	,[dtmTransactionDate]
 	,[strJournalLineDescription]
@@ -483,6 +482,15 @@ SELECT [dtmDate]
 	,[intCommodityId]
 	,[strSessionId]					= @strSessionId
 FROM @TempGLEntries
+
+UPDATE tblARPostInvoiceGLEntries
+SET [strSessionId] = @strSessionId
+WHERE strSessionId IS NULL 
+
+UPDATE tblARPostInvoiceGLEntries
+SET [dtmDateEntered] = @PostDate
+   ,[strBatchId]     = @BatchId
+WHERE strSessionId = @strSessionId
 
 UPDATE GL
 SET GL.intSourceEntityId = I.intEntityCustomerId

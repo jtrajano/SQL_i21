@@ -64,6 +64,12 @@ FROM (
 		,IRIL.strLotNumber
 		,LC.strContainerNumber
 		,CD.strFixationBy
+		,IRIL.strCertificate
+		,I.strGrade
+		,I.strRegion
+		,I.strSeason
+		,I.strClass
+		,I.strProductLine
 	FROM tblCTContractHeader CH
 	JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1
@@ -98,6 +104,7 @@ FROM (
 	LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = IM.intProductTypeId
 		AND PT.strType = 'ProductType'
 	LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
+	LEFT JOIN vyuICGetCompactItem I ON I.intItemId = IM.intItemId
 	GROUP BY CH.strContractNumber
 		,CD.intContractSeq
 		,CO.strCountry
@@ -137,5 +144,11 @@ FROM (
 		,L.intLoadId
 		,LC.strContainerNumber
 		,CD.strFixationBy
+		,IRIL.strCertificate
+		,I.strGrade
+		,I.strRegion
+		,I.strSeason
+		,I.strClass
+		,I.strProductLine
 	) tbl
 WHERE ISNULL(dblUnAllocatedQty, 0) > 0

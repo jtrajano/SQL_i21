@@ -356,7 +356,7 @@ BEGIN
 		,dblDeliveredGross = NULL
 		,dblDeliveredTare = NULL
 		,dblDeliveredNet = NULL
-		,strLotAlias
+		,LD.strLotAlias
 		,strSupplierLotNumber
 		,dtmProductionDate
 		,strScheduleInfoMsg
@@ -646,10 +646,10 @@ END
 
 /* Reduce the Lot, Order, Container Qty. */
 UPDATE LD
-SET dblQuantity = (dblQuantity - dblDivertQuantity)
-	,dblGross = (dblQuantity - dblDivertQuantity) * (dblWeightPerUnit + dblTarePerQty)
-	,dblTare = (dblQuantity - dblDivertQuantity) * dblTarePerQty
-	,dblNet = (dblQuantity - dblDivertQuantity) * dblWeightPerUnit
+SET dblQuantity = (dblQuantity - LDL.dblDivertQuantity)
+	,dblGross = (dblQuantity - LDL.dblDivertQuantity) * (dblWeightPerUnit + dblTarePerQty)
+	,dblTare = (dblQuantity - LDL.dblDivertQuantity) * dblTarePerQty
+	,dblNet = (dblQuantity - LDL.dblDivertQuantity) * dblWeightPerUnit
 FROM tblLGLoadDetail LD
 CROSS APPLY 
 	(SELECT dblDivertQuantity = SUM(dblDivertQuantity)
@@ -662,10 +662,10 @@ CROSS APPLY
 WHERE LD.intLoadId = @intLoadId AND LDL.dblDivertQuantity > 0
 
 UPDATE LDCL
-SET dblQuantity = (LDCL.dblQuantity - dblDivertQuantity)
-	,dblLinkGrossWt = (LDCL.dblQuantity - dblDivertQuantity) * (dblWeightPerUnit + dblTarePerQty)
-	,dblLinkTareWt = (LDCL.dblQuantity - dblDivertQuantity) * dblTarePerQty
-	,dblLinkNetWt = (LDCL.dblQuantity - dblDivertQuantity) * dblWeightPerUnit
+SET dblQuantity = (LDCL.dblQuantity - LDL.dblDivertQuantity)
+	,dblLinkGrossWt = (LDCL.dblQuantity - LDL.dblDivertQuantity) * (dblWeightPerUnit + dblTarePerQty)
+	,dblLinkTareWt = (LDCL.dblQuantity - LDL.dblDivertQuantity) * dblTarePerQty
+	,dblLinkNetWt = (LDCL.dblQuantity - LDL.dblDivertQuantity) * dblWeightPerUnit
 FROM tblLGLoadDetailContainerLink LDCL
 CROSS APPLY 
 	(SELECT dblDivertQuantity = SUM(dblDivertQuantity)
