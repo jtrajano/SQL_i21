@@ -102,7 +102,6 @@ BEGIN
 	UPDATE tblICInventoryTransaction 
 	SET 
 		dblQty = dblQty + @dblQty
-		,dblComputedValue = dbo.fnMultiply((dblQty + @dblQty), dblCost) + ISNULL(dblValue, 0)
 	WHERE 
 		intInventoryTransactionId = @InventoryTransactionIdentityId
 		AND @InventoryTransactionIdentityId IS NOT NULL 
@@ -160,7 +159,6 @@ BEGIN
 			,[intTicketId]
 			,[strAccountIdInventory]
 			,[strAccountIdInTransit]
-			,[dblComputedValue]
 	)
 	SELECT	[intItemId]							= @intItemId
 			,[intItemLocationId]				= @intItemLocationId
@@ -210,7 +208,6 @@ BEGIN
 			,[intTicketId]						= @intTicketId
 			,[strAccountIdInventory]			= glAccountIdInventory.strAccountId
 			,[strAccountIdInTransit]			= glAccountIdInTransit.strAccountId
-			,[dblComputedValue]                 = dbo.fnMultiply(@dblQty, @dblCost) + ISNULL(@dblValue, 0) 
 	FROM	tblICItem i 
 			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
@@ -301,6 +298,7 @@ BEGIN
 	BEGIN 
 		EXEC uspICPostStockDailyQuantity 
 			@intInventoryTransactionId = @InventoryTransactionIdentityId
+			,@dblQty = @dblQty
 	END 
 END 
 
