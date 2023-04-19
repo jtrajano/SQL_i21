@@ -130,6 +130,7 @@ DECLARE @blbLogo						VARBINARY (MAX) = NULL
 	  , @strCompanyFullAddress			NVARCHAR(500) = NULL
 	  , @intItemForFreightId			INT = NULL
 	  , @dtmCurrentDate					DATETIME = GETDATE()
+	  , @ysnIncludeHazmatMessage		BIT = 0
 
 SELECT TOP 1 @intItemForFreightId = intItemForFreightId 
 FROM tblTRCompanyPreference
@@ -156,6 +157,7 @@ SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 --AR PREFERENCE
 SELECT TOP 1 @ysnPrintInvoicePaymentDetail	= ysnPrintInvoicePaymentDetail
 		   , @strInvoiceReportName			= strInvoiceReportName
+		   , @ysnIncludeHazmatMessage		= ysnIncludeHazmatMessage
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId DESC
 
@@ -396,7 +398,7 @@ LEFT JOIN (
 		,strVFDDocumentNumber		= ID.strVFDDocumentNumber
 		,strUnitMeasure				= UM.strUnitMeasure
 		,strItemNo					= ITEM.strItemNo
-		,strInvoiceComments			= ITEM.strInvoiceComments
+		,strInvoiceComments			= CASE WHEN @ysnIncludeHazmatMessage = 0 THEN ITEM.strInvoiceComments ELSE ITEM.strInvoiceComments + ' - ' + ITEMTAG.strMessage END
 		,strItemType				= ITEM.strType
 		,strItemDescription			= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
 		,ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
@@ -412,6 +414,7 @@ LEFT JOIN (
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId	
 	LEFT JOIN tblICItemUOM IUOM ON ID.intItemUOMId = IUOM.intItemUOMId
+	LEFT JOIN tblICTag ITEMTAG WITH (NOLOCK) ON ITEM.intHazmatTag = ITEMTAG.intTagId
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUOM.intUnitMeasureId	
 	LEFT JOIN (
 		SELECT DISTINCT
