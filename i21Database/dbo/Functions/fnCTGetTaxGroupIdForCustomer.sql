@@ -23,12 +23,12 @@ BEGIN
 	FROM
 		tblARCustomer C
 	INNER JOIN
-		[tblEMEntityLocation] EL
-			ON C.[intEntityId] = EL.[intEntityId] 
+		[tblEMEntityLocation] EL 
+			ON C.[intEntityId] = EL.[intEntityId]   AND EL.ysnDefaultLocation = 1
 	INNER JOIN tblEMEntity EN on EN.intEntityId = C.intEntityId
 	WHERE
 		C.[intEntityId] = @CustomerId
-		AND EL.[intEntityLocationId] = EN.intDefaultLocationId
+		--AND EL.[intEntityLocationId] = EN.intDefaultLocationId
 
 	IF ISNULL(@TaxGroupId,0) <> 0 
 		RETURN @TaxGroupId;	
