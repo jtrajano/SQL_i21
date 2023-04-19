@@ -89,6 +89,7 @@
 	[strExpressApplicationID]					NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	[strExpressAcceptorID]						NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strExpressAccountToken]					NVARCHAR(140) COLLATE Latin1_General_CI_AS NULL,
+	[ysnIncludeHazmatMessage]					BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnIncludeHazmatMessage] DEFAULT((0)),
 	[ysnOverrideARAccountLineOfBusinessSegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLineOfBusinessSegment] DEFAULT((0)),
 	[ysnAllowContractWithoutPrepayment]			BIT NOT NULL DEFAULT 0,
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
