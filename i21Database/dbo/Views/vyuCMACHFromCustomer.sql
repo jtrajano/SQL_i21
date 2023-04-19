@@ -51,8 +51,7 @@ FROM            dbo.tblCMBankTransaction AS BT INNER JOIN
                          dbo.tblARPayment AS Pay ON Unde.intSourceTransactionId = Pay.intPaymentId
 OUTER APPLY(
 		SELECT TOP 1 intEntityEFTInfoId, strRTN,dtmEffectiveDate,
-		dbo.fnAESDecryptASym(strAccountNumber) strAccountNumber , EFTInfo.strBankName FROM [tblEMEntityEFTInformation] EFTInfo 
-		strAccountNumber , EFTInfo.strBankName FROM [tblEMEntityEFTInformation] EFTInfo 
+		dbo.fnAESDecryptASym(strAccountNumber) strAccountNumber , EFTInfo.strBankName FROM [tblEMEntityEFTInformation] EFTInfo
 		JOIN vyuCMBank B ON B.intBankId = EFTInfo.intBankId
 		WHERE intEntityId = Pay.intEntityCustomerId  AND EFTInfo.ysnActive = 1 
 		ORDER BY dtmEffectiveDate desc

@@ -243,8 +243,6 @@ DECLARE  @Id									INT
 		,@TradeFinanceComments					NVARCHAR(MAX)
 		,@GoodsStatus							NVARCHAR(100)
 		,@SourcedFrom							NVARCHAR(100)
-		,@TaxLocationId							INT
-		,@TaxPoint								NVARCHAR(50)
 		,@DefaultPayToBankAccountId				INT
 		,@PayToCashBankAccountId				INT
 		,@PaymentInstructions					NVARCHAR(MAX)

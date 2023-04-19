@@ -176,30 +176,6 @@ WHERE NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItem
 IF ISNULL(@SkipRecompute, 0) = 0
 BEGIN
 
-	DECLARE @InvoiceDetail AS TABLE(
-		 [intInvoiceDetailId]				INT PRIMARY KEY
-		,[intInvoiceId]						INT
-		,[intItemId]						INT
-		,[intEntityCustomerId]				INT
-		,[intCurrencyId]					INT
-		,[intCompanyLocationId]				INT
-		,[dtmTransactionDate]				DATETIME
-		,[intDistributionHeaderId]			INT
-		,[intCustomerLocationId]			INT
-		,[dblSubCurrencyRate]				DECIMAL(18,6)
-		,[intFreightTermId]					INT
-		,[dblPrice]							DECIMAL(18,6) 
-		,[dblQtyShipped]					DECIMAL(18,6) 
-		,[intCurrencyExchangeRateTypeId]	INT
-		,[dblCurrencyExchangeRate]			DECIMAL(18,6) 	
-		,[intTaxGroupId]					INT
-		,[strItemType]						NVARCHAR(100)
-		,[intSiteId]						INT
-		,[intItemUOMId]						INT
-		,[strTaxPoint]						NVARCHAR(50)
-		UNIQUE ([intInvoiceDetailId])
-	);
-
 	INSERT INTO @InvoiceDetail
 		([intInvoiceDetailId]
 		,[intInvoiceId]

@@ -35,7 +35,7 @@ BEGIN
 			@intBrokerageAccountId	INT,
 			@strAccountNumber		NVARCHAR(100),
 			@intFreightMatrixLeadTime INT,
-			@intDestinationLeadTime int
+			@intDestinationLeadTime int,
 			@intDefaultCurrencyId INT,
 			@intRevaluationCurrencyExchangeRateId INT,
 			@strRevaluationExchangeRate varchar(100)

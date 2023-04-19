@@ -7,7 +7,7 @@ RETURNS TABLE AS RETURN
 (
 	SELECT
 		partitionedVouchers.*
-		,DENSE_RANK() OVER(ORDER BY intEntityVendorId, intPayToAddressId, intPayFromBankAccountId, intPayToBankAccountId, intShipToId, intPaymentId) intPartitionId
+		,DENSE_RANK() OVER(ORDER BY intEntityVendorId, intPayToAddressId, intPayFromBankAccountId, intPayToBankAccountId, intPaymentId) intPartitionId
 	FROM (
 		
 		SELECT

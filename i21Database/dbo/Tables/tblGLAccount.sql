@@ -16,7 +16,6 @@
     [intCurrencyID] INT NULL, 
     [intLocationSegmentId] INT NULL, 
     [intLOBSegmentId] INT NULL, 
-    [intCompanySegmentId] INT NULL, 
     [intCurrencyExchangeRateTypeId] INT NULL, 
 	[strOldAccountId]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intUnnaturalAccountId] INT NULL,

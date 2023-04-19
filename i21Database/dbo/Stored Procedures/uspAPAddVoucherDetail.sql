@@ -553,6 +553,8 @@ INSERT
 	/**/
 	,dtmExpectedDate				
 )
+VALUES
+(
 	intBillId							
 	,strMiscDescription					
 	,intAccountId						

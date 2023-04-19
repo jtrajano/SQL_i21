@@ -207,12 +207,6 @@
 [strWarrantNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intWarrantStatus] INT NULL,
 [intBankId] INT NULL,
-
-[strTaxPoint] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
-[ysnTaxPointOverride] BIT NULL,
-[strLocationName] NVARCHAR(50) NULL,
-[intTaxLocationId] INT NULL,
-[ysnTaxLocationOverride] BIT NULL,
 [strFobPoint] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 
 [ysnProvisionalReleased] BIT NULL,

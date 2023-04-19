@@ -1292,7 +1292,6 @@
     <Build Include="dbo\Tables\tblTFReportingComponentCarrier.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCarrier.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseOnShipmentDelete.sql" />
-    <Build Include="dbo\vyuQMUserLocation.sql" />
     <Build Include="dbo\Tables\tblMFLocationLeadTime.sql" />
     <Build Include="dbo\Views\vyuMFLocationLeadTime.sql" />
     <Build Include="dbo\Tables\tblQMCatalogueType.sql" />
@@ -1606,7 +1605,7 @@
     <Build Include="dbo\Stored Procedures\uspTMInventoryHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
-    <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />   
+    <Build Include="dbo\Views\vyuTRGetQuoteDetailSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099KTwoPart.sql" />
     <Build Include="dbo\Views\vyuTMGetSite.sql" />
     <Build Include="dbo\Views\vyuTMGetOrder.sql" />
@@ -1694,7 +1693,6 @@
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentTotalsPreloadCS.sql" />
     <Build Include="dbo\Views\vyuSTStoreMaintenanceDepartments.sql" />
-     
     <Build Include="dbo\User Defined Types\TMOrderHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspTMArchiveRestoreOrders.sql" />
     <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />

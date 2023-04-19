@@ -39,6 +39,7 @@ BEGIN
 			IF EXISTS(SELECT 1 FROM tblAPBill WHERE intBillId = @intBillId)
 			BEGIN 
 				RAISERROR('Voucher has been created for the weight claim. Cannot unpost.',16,1)
+			END
 		END
 	END
 

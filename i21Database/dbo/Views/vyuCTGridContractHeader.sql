@@ -183,7 +183,7 @@ AS
 			CH.intValueCurrencyId,
 			NM.strValueCurrency,
 			CH.dtmPeriodStartDate,
-			CH.dtmPeriodEndDate
+			CH.dtmPeriodEndDate,
 
 			CH.intTransactionForexId,
 			strTransactionForex = case when CH.intTransactionForexId = 2 then 'Current' else 'Contract' end

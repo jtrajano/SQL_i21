@@ -1,5 +1,4 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractSequence]
-
 AS
 			--Detail
 	SELECT	CD.intContractDetailId,	CD.intContractSeq,		CD.intCompanyLocationId,			
@@ -62,7 +61,7 @@ AS
 			strInvoiceCurrency = ICU.strCurrency,
 			CD.intCurrencyExchangeRateId,
 			strVendorLotID = case when ltrim(rtrim(CD.strVendorLotID)) = '' then null else CD.strVendorLotID end,
-			strReference = case when ltrim(rtrim(CD.strReference)) = '' then null else CD.strReference end
+			strReference = case when ltrim(rtrim(CD.strReference)) = '' then null else CD.strReference end,
 			strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId

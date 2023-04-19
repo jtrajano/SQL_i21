@@ -237,12 +237,9 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) PL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
-<<<<<<< HEAD
 		AND (Receipt.intInventoryReceiptId IS NULL
 			OR (Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.ysnPosted = 1))
-=======
 		AND ((Lot.intSourceTransactionTypeId = 4 AND Receipt.ysnPosted = 1)
 			OR (Lot.intSourceTransactionTypeId = 47 AND InvAdj.ysnPosted = 1))
->>>>>>> 22.1ProdWaMa
 	) InvLots
 GO
