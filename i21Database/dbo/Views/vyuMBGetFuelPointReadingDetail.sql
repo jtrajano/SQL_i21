@@ -2,12 +2,13 @@
 	AS
 	
 SELECT FPReadingDetail.intFuelPointReadingDetailId
+	, FPReadingDetail.intConcurrencyId
 	, FPReadingDetail.intFuelPointReadingId
 	, FPReading.intEntityCustomerId
 	, FPReading.strCustomerName
 	, FPReading.strCustomerNumber
 	, FPReading.intEntityLocationId
-	, FPReading.strLocationName
+	, strLocationName = FPReading.strEntityLocationName
 	, FPReading.dtmDate
 	, FPReadingDetail.strFuelingPoint
 	, FPReadingDetail.strProductNo

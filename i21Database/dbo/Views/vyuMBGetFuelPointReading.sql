@@ -3,10 +3,12 @@
 	
 SELECT FPReading.intFuelPointReadingId
 	, FPReading.intEntityCustomerId
+	, FPReading.intConcurrencyId
 	, strCustomerName = Customer.strName
 	, Customer.strCustomerNumber
 	, FPReading.intEntityLocationId
-	, EntityLocation.strLocationName
+	, strEntityLocationName = EntityLocation.strLocationName 
+	--, strLocationName = EntityLocation.strLocationName 
 	, FPReading.dtmDate
 	, FPReading.intSort
 FROM tblMBFuelPointReading FPReading
