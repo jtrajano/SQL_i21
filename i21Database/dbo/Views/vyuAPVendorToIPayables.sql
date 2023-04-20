@@ -1,5 +1,5 @@
-CREATE PROCEDURE uspAPVendorToIPayables
-AS
+CREATE VIEW vyuAPVendorToIPayables
+as
 WITH cte as(
 select 
 A.intEntityId,
@@ -95,4 +95,4 @@ cteAllRecords AS (
 	UNION ALL
 	select  '99', 999999, '99|C0000549|'+ cast( count(*) as nvarchar(10)) from cteOrder
 )
-select strData from cteAllRecords order by intEntityId, strTag
+select intEntityId, strTag,strData from cteAllRecords --order by intEntityId, strTag
