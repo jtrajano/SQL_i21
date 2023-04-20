@@ -1,7 +1,8 @@
 ﻿CREATE VIEW vyuTMInventoryReport
 AS
 		SELECT distinct
-			strSiteNumber = '0000' + CAST(A.intSiteNumber AS varchar(10)) 
+			intTankReadingId = intTankReadingId.intTankReadingId
+			,strSiteNumber = '0000' + CAST(A.intSiteNumber AS varchar(10)) 
 			,strProduct = T.strItemNo
 			,strLocation= case when EL.strLocationName is null then location.strLocationName else EL.strLocationName end
 			,dblFullPercentForOrder = (dblGrossVolume.dblFuelVolume/dblTotalCapacity.dblTotalCapacity) * 100
@@ -40,3 +41,6 @@ AS
 		OUTER APPLY(
 			SELECT top 1 TM.dblWaterHeight FROM tblTMSite S INNER JOIN tblTMTankReading TM ON TM.intSiteId = S.intSiteID where TM.intSiteId = A.intSiteID order by TM.intTankReadingId desc
 		)dblWaterHeight
+		OUTER APPLY(
+			SELECT top 1 TM.intTankReadingId FROM tblTMSite S INNER JOIN tblTMTankReading TM ON TM.intSiteId = S.intSiteID where TM.intSiteId = A.intSiteID order by TM.intTankReadingId desc
+		)intTankReadingId
