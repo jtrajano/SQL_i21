@@ -195,7 +195,7 @@ BEGIN
 							[ItemListID]							= PIL.intPromoItemListNo, 
 							[ItemListDescription]					= ISNULL(PIL.strPromoItemListDescription, ''), 
 							[POSCodeFormatFormat]					= PCF.strPosCodeFormat, 
-							[POSCode]								= PCF.strUPCwthOrwthOutCheckDigit, --PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
+							[POSCode]								= dbo.fnSTRemoveCheckDigit(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)), --PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
 							[strUniqueGuid]							= @strUniqueGuid
 						FROM tblICItem I
 						INNER JOIN tblICItemLocation IL 
@@ -352,7 +352,7 @@ BEGIN
 					[strItemListDescription]			=	PIL.strPromoItemListDescription,
 
 					[strPOSCodeFormatFormat]			=	PCF.strPosCodeFormat,
-					[strPOSCode]						=	IUOM.strLongUPCCode,
+					[strPOSCode]						=	dbo.fnSTRemoveCheckDigit(ISNULL(PCF.strUPCA, PCF.strLongUPCCode)),
 					[strPOSCodeModifier]				=	CAST(ISNULL(IUOM.intModifier, '000') AS VARCHAR(100))
 				FROM tblSTPromotionItemListDetail ILT
 				INNER JOIN tblSTPromotionItemList PIL
@@ -515,7 +515,7 @@ BEGIN
 					[strItemListDescription]			=	PIL.strPromoItemListDescription,
 
 					[strPOSCodeFormatFormat]			=	PCF.strPosCodeFormat,
-					[strPOSCode]						=	PCF.strUPCwthOrwthOutCheckDigit,
+					[strPOSCode]						=	ISNULL(PCF.strUPCA, PCF.strLongUPCCode),
 					[strPOSCodeModifier]				=	CAST(ISNULL(IUOM.intModifier, '000') AS VARCHAR(100))
 				FROM tblSTPromotionItemListDetail ILT
 				INNER JOIN tblSTPromotionItemList PIL
