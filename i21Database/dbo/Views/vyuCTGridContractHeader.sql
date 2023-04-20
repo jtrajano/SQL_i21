@@ -184,7 +184,6 @@ AS
 			NM.strValueCurrency,
 			CH.dtmPeriodStartDate,
 			CH.dtmPeriodEndDate,
-
 			CH.intTransactionForexId,
 			strTransactionForex = case when CH.intTransactionForexId = 2 then 'Current' else 'Contract' end
 	FROM		tblCTContractHeader				CH

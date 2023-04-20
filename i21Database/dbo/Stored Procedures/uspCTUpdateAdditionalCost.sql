@@ -21,8 +21,7 @@ BEGIN TRY
 			
 	SELECT @intCommodityId	=	intCommodityId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
-
-	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing, @intFinanceCostId = intFinanceCostId FROM tblCTCompanyPreference  
+	SELECT TOP 1 @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing, @intFinanceCostId = intFinanceCostId FROM tblCTCompanyPreference
 	
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -68,7 +67,7 @@ BEGIN TRY
 												WHEN CC.strCostMethod = 'Per Container'
 													THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * ISNULL(CC.dblFX, 1)
 												WHEN CC.strCostMethod = 'Percentage'
-													THEN 
+													THEN
 															CASE WHEN @intFinanceCostId <> CC.intItemId THEN
 																 CASE WHEN CD.intPricingTypeId <> 2 THEN  
 																  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity)   
@@ -86,6 +85,7 @@ BEGIN TRY
 															ELSE
 															CC.dblRate
 															END
+
 												END)
 										/ (CASE WHEN ISNULL(CY.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(CY.intCent, 1) ELSE 1 END)
 		FROM	tblCTContractCost	CC

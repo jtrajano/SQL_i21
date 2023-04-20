@@ -773,6 +773,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
     AFTER DELETE
 AS
 BEGIN
+
 	DELETE FROM tblCTContractCost 
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM DELETED)
 

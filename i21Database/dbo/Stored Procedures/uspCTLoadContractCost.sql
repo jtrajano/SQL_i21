@@ -72,7 +72,6 @@ AS
 								THEN (CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers, 1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers, 1) END)) * CASE WHEN CD.intCurrencyId != CD.intInvoiceCurrencyId THEN  ISNULL(CC.dblFX, 1) ELSE 1 END
 							WHEN CC.strCostMethod = 'Percentage'
 								THEN 
-
 									CASE WHEN @intFinanceCostId <> CC.intItemId THEN
 		
 										 CASE WHEN CD.intPricingTypeId <> 2 THEN  

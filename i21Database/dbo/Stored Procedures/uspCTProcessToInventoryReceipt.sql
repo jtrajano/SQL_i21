@@ -111,7 +111,7 @@ AS
 				--CT-7100 (ECOM commented this line for ECOM) --										ELSE	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice),0)
 				--CT-7100 (ECOM commented this line for ECOM) --								END,
 				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
-				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
+				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2
 														THEN	isnull(
 																	(
 																		(

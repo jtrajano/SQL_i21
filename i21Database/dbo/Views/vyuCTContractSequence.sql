@@ -1,4 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractSequence]
+
 AS
 			--Detail
 	SELECT	CD.intContractDetailId,	CD.intContractSeq,		CD.intCompanyLocationId,			

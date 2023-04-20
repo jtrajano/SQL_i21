@@ -3946,7 +3946,7 @@ BEGIN TRY
 						begin
 							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = @_action
 						end
-
+						
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				

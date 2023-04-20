@@ -676,6 +676,9 @@ BEGIN TRY
 		, CD.intFeedPriceCurrencyId
 		, strFeedPriceItemUOM = FUM.strUnitMeasure
 		, strFeedPriceCurrency = FCU.strCurrency
+	  	, strMTMPoint = mtmp.strMTMPoint
+	  	, strLogisticsLeadName = LL.strName
+	  	, CD.intLogisticsLeadId
 	INTO #TMP
 	FROM tblCTContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId

@@ -63,9 +63,7 @@ BEGIN TRY
 			@ysnRoll				    BIT = 0,
 			@intCostTermId				INT,
 			@ysnCancelledLoad			bit = 0,
-			@intContainerTypeId			INT
-
-
+			@intContainerTypeId			INT	;
 		
 		DECLARE @xmlDocumentId INT
 		DECLARE @ModifiedSequence TABLE(
@@ -331,7 +329,6 @@ BEGIN TRY
 				@intLCApplicantId	=	intLCApplicantId,
 				@strLCType			=	strLCType,
 				@ysnRoll			=	ysnRoll,
-
 				@intCostTermId		=	intCostTermId
 
 		FROM	tblCTContractDetail WITH (UPDLOCK)
@@ -465,7 +462,6 @@ BEGIN TRY
 					, @ysnWarningMessage = 0
 					, @intSequenceCurrencyId = @intSequenceCurrencyId
 					, @intContainerTypeId = @intContainerTypeId
-
 				IF EXISTS (SELECT TOP 1 1 FROM @CostItems)
 				BEGIN
 					UPDATE tblCTContractCost
@@ -502,7 +498,6 @@ BEGIN TRY
 			BEGIN
 				EXEC uspIPProcessPriceToFeed @userId,@intContractDetailId,'Contract','Modified'
 			END
-
 		END
 
 		
@@ -595,8 +590,7 @@ BEGIN TRY
 		BEGIN
 			UPDATE	@CDTableUpdate SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
 		END
-
-
+		
 		UPDATE tblCTContractDetail
 		SET intPricingTypeId = CD.intPricingTypeId
 			, dblFutures = CD.dblFutures
@@ -869,7 +863,6 @@ END TRY
 BEGIN CATCH
 
 	SET @ErrMsg = ERROR_MESSAGE()  
-	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
-	
+	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
 END CATCH
 GO

@@ -319,7 +319,7 @@ AS
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
 	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
-	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+	LEFT JOIN tblCMBank BN ON BN.intBankId = CD.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
 	LEFT JOIN tblCMBorrowingFacilityLimit FAL ON FAL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
 	LEFT JOIN tblCMBorrowingFacilityLimitDetail FALD ON FALD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
@@ -333,6 +333,9 @@ AS
 	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU2	ON	AU2.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU2.intUnitMeasureId	--strAverageUOM
+	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId and isnull(EFT.ysnDefaultAccount,0) = 1 and EFT.intCurrencyId = CD.intCurrencyId
+ 	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
+	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
     cross apply (
      select
@@ -342,6 +345,3 @@ AS
      from tblCTContractDetail cd
      where cd.intContractHeaderId = CH.intContractHeaderId
     ) cds
-	LEFT JOIN [vyuAPEntityEFTInformation] EFT on EFT.intEntityId = CH.intEntityId and isnull(EFT.ysnDefaultAccount,0) = 1 and EFT.intCurrencyId = CD.intCurrencyId
- 	LEFT JOIN tblSMCurrency INV ON INV.intCurrencyID = CD.intInvoiceCurrencyId
-	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId

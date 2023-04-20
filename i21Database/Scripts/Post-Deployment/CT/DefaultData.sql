@@ -44,7 +44,8 @@ MERGE INTO tblCTBasisCost AS destination
 			,SourceData.[intPriority]
 			,SourceData.[intSort]
 			,SourceData.[intConcurrencyId]
-		);	
+		);
+		
 END		
 
 --INSERT NEW Item in Ammendment and Approval
@@ -96,4 +97,4 @@ BEGIN
 		UPDATE tblCTCompanyPreference
 		SET strAmendmentFields = strAmendmentFields+',intINCOLocationTypeId'
 	END
-END  
+END

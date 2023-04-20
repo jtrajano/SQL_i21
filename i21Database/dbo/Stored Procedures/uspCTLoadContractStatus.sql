@@ -96,7 +96,7 @@ BEGIN TRY
 				PF.intPriceContractId,
 				PC.strPriceContractNo,
 				PD.dblFutures, 
-				intHedgedLots = case when PD.ysnHedge = 1 then SY.dblHedgedLots else ph.dblHedgeNoOfLots end  
+				intHedgedLots = case when PD.ysnHedge = 1 then SY.dblHedgedLots else ph.dblHedgeNoOfLots end
 
 		FROM	tblCTPriceFixationDetail			PD
 		JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId	
@@ -140,7 +140,7 @@ BEGIN TRY
 		FROM [vyuCTContractFutures] CF
 		INNER JOIN tblCTContractDetail					CD	on CF.intContractDetailId = CD.intContractDetailId
 		INNER JOIN tblCTContractHeader					CH	on CH.intContractHeaderId = CD.intContractHeaderId	
-		LEFT JOIN  tblICItemUOM							IU	ON	IU.intItemUOMId					=	CD.intPriceItemUOMId				
+		LEFT JOIN  tblICItemUOM							IU	ON	IU.intItemUOMId					=	CD.intPriceItemUOMId
 		LEFT JOIN	tblICUnitMeasure					CM	ON	CM.intUnitMeasureId				=	IU.intUnitMeasureId
 		WHERE  CH.intPricingTypeId = 1 and CD.intContractDetailId = @intContractDetailId
 		
