@@ -1288,6 +1288,7 @@
     <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
     <None Include="Scripts\Post-Deployment\ST\53_FileFieldMapping_Passport_FGMA.sql" />
     <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
+    <Build Include="dbo\Views\vyuTMInventoryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -2607,8 +2608,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCommanderTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDiscontinued.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurgePromotions.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricing.sql" /> 
-    <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationPricingForCStore.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateRebateOrDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemData.sql" />
     <Build Include="dbo\Tables\tblSMScreenStage.sql" />
