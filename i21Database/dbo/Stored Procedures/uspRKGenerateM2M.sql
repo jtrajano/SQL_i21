@@ -2366,8 +2366,9 @@ BEGIN TRY
 			, intBookId
 			, strSubBook
 			, intSubBookId
-			, intM2MTransactionTypeId = 1 -- Contract
-			, strMTMPoint
+			, intFMMainCurrencyId									   	--, intM2MTransactionTypeId = 1 -- Contract
+			, ysnFMSubCurrency										   	--, strMTMPoint
+			, strMTMPoint											   	--, intMTMPointId
 			, intMTMPointId
 		FROM (
 			SELECT *	
