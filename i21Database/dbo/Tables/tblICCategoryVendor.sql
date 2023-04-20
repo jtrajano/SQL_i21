@@ -22,6 +22,7 @@ Type the overview for the table here.
 		[ysnUpdateExistingRecords] BIT NULL, 
 		[ysnAddNewRecords] BIT NULL, 
 		[ysnUpdatePrice] BIT NULL, 
+		[ysnCountedDaily] BIT NULL, 
 		[intFamilyId] INT NULL, 
 		[intSellClassId] INT NULL, 
 		[intOrderClassId] INT NULL, 
@@ -128,6 +129,15 @@ Type the overview for the table here.
 		@level1name = N'tblICCategoryVendor',
 		@level2type = N'COLUMN',
 		@level2name = N'ysnUpdatePrice'
+	GO
+	EXEC sp_addextendedproperty @name = N'MS_Description',
+		@value = N'Counted Daily',
+		@level0type = N'SCHEMA',
+		@level0name = N'dbo',
+		@level1type = N'TABLE',
+		@level1name = N'tblICCategoryVendor',
+		@level2type = N'COLUMN',
+		@level2name = N'ysnCountedDaily'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Default Family Id',
