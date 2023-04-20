@@ -257,7 +257,7 @@ BEGIN
 		[intOrderById]			=	@userId,
 		[intBookId]				=	ISNULL(A.intBookId,ctBookEntities.intBookId),
 		[intSubBookId]			=	ISNULL(A.intSubBookId,ctBookEntities.intSubBookId),
-		[intCurrencyId]			=	CASE WHEN A.intCurrencyId > 0 THEN A.intCurrencyId 
+		[intCurrencyId]			=	CASE WHEN A.intCurrencyId > 0 AND A.intTransactionType <> 16 THEN A.intCurrencyId 
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
 									ELSE ISNULL(NULLIF(subCur.intCent, 0), 1) END,
