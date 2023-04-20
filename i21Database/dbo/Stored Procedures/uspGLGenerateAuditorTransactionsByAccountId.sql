@@ -689,8 +689,9 @@ BEGIN
 
         INSERT INTO tblGLAuditorTransaction (ysnSpace,intType,intGeneratedBy,intEntityId) SELECT 1, 0, @intEntityId, @intEntityId --space
 
-        IF @ysnSuppressZero = 1
-            INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+        IF EXISTS (SELECT 1 FROM #AuditorTransactions)
+        BEGIN 
+             INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
                 SELECT 1,0, @intEntityId, @intEntityId,
                 strCurrency,
                 SUM(ISNULL(dblDebit,0)) dblDebit, 
@@ -699,19 +700,8 @@ BEGIN
                 FROM
                 #AuditorTransactions  A 
                 GROUP BY strCurrency
-        ELSE
-                INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
-                SELECT 1,0, @intEntityId, @intEntityId,
-                SM.strCurrency,
-                SUM(ISNULL(dblDebit,0)) dblDebit, 
-                SUM(ISNULL(dblCredit,0)) dblCredit,
-                SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
-                FROM
-                #AuditorTransactions  A  RIGHT JOIN tblSMCurrency SM ON SM.intCurrencyID = A.intCurrencyId
-                GROUP BY SM.strCurrency
 
-
-          INSERT INTO tblGLAuditorTransaction (ysnSummaryFooter, intType,intGeneratedBy,intEntityId,strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+            INSERT INTO tblGLAuditorTransaction (ysnSummaryFooter, intType,intGeneratedBy,intEntityId,strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
             SELECT 1, 0, @intEntityId, @intEntityId,
             'Final Total',
             SUM(ISNULL(dblDebit,0)) dblDebit, 
@@ -719,6 +709,33 @@ BEGIN
             SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
             FROM
             #AuditorTransactions  A 
+
+        END
+        ELSE
+        BEGIN
+            IF isnull(@ysnSuppressZero,0) = 0 
+            BEGIN
+                INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+                SELECT 1,0, @intEntityId, @intEntityId,
+                SM.strCurrency,
+                0 dblDebit, 
+                0 dblCredit,
+                0 dblEndingBalance
+                FROM
+                #AuditorTransactions  A  RIGHT JOIN tblSMCurrency SM ON SM.intCurrencyID = A.intCurrencyId
+                GROUP BY SM.strCurrency
+
+                INSERT INTO tblGLAuditorTransaction (ysnSummaryFooter, intType,intGeneratedBy,intEntityId,strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
+                SELECT 1, 0, @intEntityId, @intEntityId,
+                'Final Total',
+                0 dblDebit, 
+                0 dblCredit,
+                0 dblEndingBalance
+            END
+        END
+
+      
+        
             
 
             
