@@ -169,7 +169,7 @@ BEGIN TRY
 		intItemId		INT
 	  , strName			NVARCHAR(50)
 	  , strValue		DECIMAL(24, 6)
-	  , ntLocationId	INT
+	  , intLocationId	INT
 	)
 
 	IF OBJECT_ID('tempdb..#TempPlannedPurchases') IS NOT NULL
@@ -195,7 +195,7 @@ BEGIN TRY
 		intItemId		INT
 	  , strName			NVARCHAR(50)
 	  , strValue		DECIMAL(24, 6)
-	  , ntLocationId	INT
+	  , intLocationId	INT
 	)
 
 	IF OBJECT_ID('tempdb..#TempAdditionalForecastedConsumption') IS NOT NULL
@@ -841,7 +841,7 @@ BEGIN TRY
 		,dblQty NUMERIC(18, 6)
 		,intAttributeId INT
 		,intMonthId INT
-		,intLocationId INT
+		,[intLocationId] INT
 		)
 	IF OBJECT_ID('tempdb..#tblMFTempDemand') IS NOT NULL
 		DROP TABLE #tblMFTempDemand
