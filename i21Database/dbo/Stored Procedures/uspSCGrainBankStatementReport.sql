@@ -166,8 +166,13 @@ begin
 			)
 		, 0
 	FROM dbo.vyuSCGrainBankTransactions
-		
+			
 	WHERE dtmTransactionDate < @dtmStartDate
+		AND (@ENTITY_ID IS NULL OR intEntityId = @ENTITY_ID )
+		AND (@intItemId IS NULL OR intItemId = @intItemId)
+		AND (@intStorageTypeId IS NULL OR intStorageTypeId = @intStorageTypeId)
+
+
 	GROUP BY intEntityId 
 		, intItemId
 		, intStorageTypeId
@@ -276,8 +281,8 @@ begin
 		intGrainBankUnitMeasureId
 	FROM GRAINBANK_TRANSACTION_LOOP
 	WHERE  (@ENTITY_ID IS NULL OR intEntityId = @ENTITY_ID )
-		AND (@intItemId IS NULL OR intItemId = @intItemId)
-		AND intStorageTypeId = @intStorageTypeId
+		AND (@intItemId IS NULL OR intItemId = @intItemId)		
+		AND (@intStorageTypeId IS NULL OR intStorageTypeId = @intStorageTypeId)
 		
 		AND (dtmTransactionDate >= @dtmStartDate
 				AND dtmTransactionDate <= @dtmEndDate
@@ -287,102 +292,149 @@ begin
 		AND intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID*/
 	ORDER BY intStorageTypeId, intStorageScheduleId, GRAINBANK_TRANSACTION_LOOP.rn
 
-
+	--SELECT * FROM @BALANCES
 	
-	MERGE INTO @BALANCES AS [Target]
-	USING (
+
+	IF EXISTS(SELECT TOP 1 1 FROM @DATA_TABLE)
+	BEGIN
+
+
+		MERGE INTO @BALANCES AS [Target]
+		USING (
 		
+			SELECT 
+				intEntityId 
+				, intItemId
+				, intStorageTypeId
+				, intStorageScheduleId
+				, SUM(
+				CASE WHEN @COMPANY_PREFERENCE_REPORT_UOM <> intGrainBankUnitMeasureId THEN
+					round(dbo.fnGRConvertQuantityToTargetItemUOM(
+										intItemId
+										, intGrainBankUnitMeasureId
+										, @COMPANY_PREFERENCE_REPORT_UOM
+										, dblUnits) , 4) 
+				ELSE
+					ISNULL(dblUnits,0)
+				END
+			
+				) dblEndingBalance			
+			FROM @DATA_TABLE		
+			GROUP BY intEntityId 
+				, intItemId
+				, intStorageTypeId
+				, intStorageScheduleId
+			
+
+		)
+		AS [Source]
+			ON [Target].intEntityId = [Source].intEntityId
+				AND [Target].intItemId = [Source].intItemId
+				AND [Target].intStorageTypeId = [Source].intStorageTypeId
+				AND [Target].intStorageScheduleId = [Source].intStorageScheduleId
+		WHEN MATCHED THEN
+			UPDATE SET dblEndingBalance = [Target].dblBeginningBalance + ISNULL([Source].dblEndingBalance, 0)
+		WHEN NOT MATCHED BY TARGET THEN
+		INSERT (intEntityId			
+				,intItemId				
+				,intStorageTypeId		
+				,intStorageScheduleId	
+				,dblBeginningBalance	
+				,dblEndingBalance
+		)
+		VALUES ([Source].intEntityId			
+				,[Source].intItemId				
+				,[Source].intStorageTypeId		
+				,[Source].intStorageScheduleId	
+				,0
+				,[Source].dblEndingBalance);
+
+
 		SELECT 
-			intEntityId 
-			, intItemId
-			, intStorageTypeId
-			, intStorageScheduleId
-			, SUM(
-			CASE WHEN @COMPANY_PREFERENCE_REPORT_UOM <> intGrainBankUnitMeasureId THEN
-				round(dbo.fnGRConvertQuantityToTargetItemUOM(
-									intItemId
-									, intGrainBankUnitMeasureId
-									, @COMPANY_PREFERENCE_REPORT_UOM
-									, dblUnits) , 4) 
-			ELSE
-				ISNULL(dblUnits,0)
-			END
-			
-			) dblEndingBalance			
-		FROM @DATA_TABLE		
-		GROUP BY intEntityId 
-			, intItemId
-			, intStorageTypeId
-			, intStorageScheduleId
-			
 
-	)
-	AS [Source]
-		ON [Target].intEntityId = [Source].intEntityId
-			AND [Target].intItemId = [Source].intItemId
-			AND [Target].intStorageTypeId = [Source].intStorageTypeId
-			AND [Target].intStorageScheduleId = [Source].intStorageScheduleId
-	WHEN MATCHED THEN
-		UPDATE SET dblEndingBalance = [Target].dblBeginningBalance + ISNULL([Source].dblEndingBalance, 0)
-	WHEN NOT MATCHED BY TARGET THEN
-	INSERT (intEntityId			
-			,intItemId				
-			,intStorageTypeId		
-			,intStorageScheduleId	
-			,dblBeginningBalance	
-			,dblEndingBalance
-	)
-	VALUES ([Source].intEntityId			
-			,[Source].intItemId				
-			,[Source].intStorageTypeId		
-			,[Source].intStorageScheduleId	
-			,0
-			,[Source].dblEndingBalance);
+			DATA_TABLE.intStorageHistoryId		
+			,DATA_TABLE.dblUnits				
+			,DATA_TABLE.intCustomerStorageId	
+			,DATA_TABLE.intEntityId			
+			,DATA_TABLE.intStorageTypeId		
+			,DATA_TABLE.intStorageScheduleId	
+			,DATA_TABLE.dtmTransactionDate		
+			,DATA_TABLE.intItemId				
+			,DATA_TABLE.strTransactionId		
+			,DATA_TABLE.strTransactionType		
+			,DATA_TABLE.dblRunningUnits		
+			,DATA_TABLE.intRowNumber 
+			, ENTITY.strEntityNo
+			, ENTITY.strName
+			, ENTITY_LOCATION.strAddress
+			, ITEM.strItemNo
 
-	SELECT 
+			, BALANCES.dblBeginningBalance AS dblBeginningBalance
+			, BALANCES.dblEndingBalance AS dblEndingBalance
 
-		DATA_TABLE.intStorageHistoryId		
-		,DATA_TABLE.dblUnits				
-		,DATA_TABLE.intCustomerStorageId	
-		,DATA_TABLE.intEntityId			
-		,DATA_TABLE.intStorageTypeId		
-		,DATA_TABLE.intStorageScheduleId	
-		,DATA_TABLE.dtmTransactionDate		
-		,DATA_TABLE.intItemId				
-		,DATA_TABLE.strTransactionId		
-		,DATA_TABLE.strTransactionType		
-		,DATA_TABLE.dblRunningUnits		
-		,DATA_TABLE.intRowNumber 
-		, ENTITY.strEntityNo
-		, ENTITY.strName
-		, ENTITY_LOCATION.strAddress
-		, ITEM.strItemNo
-
-		, BALANCES.dblBeginningBalance AS dblBeginningBalance
-		, BALANCES.dblEndingBalance AS dblEndingBalance
-
-		, @COMPANY_PREFERENCE_REPORT_UOM_STRING AS strBalanceUOM
-		, @COMPANY_PREFERENCE_GRAIN_BANK_UOM_STRING AS strUnitUOM
-		, @dtmStartDate AS dtmStartDate
-		, @dtmEndDate AS dtmEndDate
+			, @COMPANY_PREFERENCE_REPORT_UOM_STRING AS strBalanceUOM
+			, @COMPANY_PREFERENCE_GRAIN_BANK_UOM_STRING AS strUnitUOM
+			, @dtmStartDate AS dtmStartDate
+			, @dtmEndDate AS dtmEndDate
 
 
-		, @strAddress AS strCompanyAddress
-	FROM @DATA_TABLE DATA_TABLE
-		LEFT JOIN @BALANCES BALANCES
-			ON DATA_TABLE.intEntityId = BALANCES.intEntityId
-				AND DATA_TABLE.intItemId = BALANCES.intItemId 
-				AND DATA_TABLE.intStorageTypeId = BALANCES.intStorageTypeId 
-				AND DATA_TABLE.intStorageScheduleId = BALANCES.intStorageScheduleId 		
-		JOIN tblEMEntity ENTITY
-			ON DATA_TABLE.intEntityId = ENTITY.intEntityId
-		JOIN tblEMEntityLocation ENTITY_LOCATION
-			ON ENTITY.intEntityId = ENTITY_LOCATION.intEntityId
-				AND ENTITY_LOCATION.ysnDefaultLocation = 1
-		JOIN tblICItem ITEM
-			ON DATA_TABLE.intItemId= ITEM.intItemId
+			, @strAddress AS strCompanyAddress
+		FROM @DATA_TABLE DATA_TABLE
+			LEFT JOIN @BALANCES BALANCES
+				ON DATA_TABLE.intEntityId = BALANCES.intEntityId
+					AND DATA_TABLE.intItemId = BALANCES.intItemId 
+					AND DATA_TABLE.intStorageTypeId = BALANCES.intStorageTypeId 
+					AND DATA_TABLE.intStorageScheduleId = BALANCES.intStorageScheduleId 		
+			JOIN tblEMEntity ENTITY
+				ON DATA_TABLE.intEntityId = ENTITY.intEntityId
+			JOIN tblEMEntityLocation ENTITY_LOCATION
+				ON ENTITY.intEntityId = ENTITY_LOCATION.intEntityId
+					AND ENTITY_LOCATION.ysnDefaultLocation = 1
+			JOIN tblICItem ITEM
+				ON DATA_TABLE.intItemId= ITEM.intItemId
 
-	
+	END
+	ELSE
+	BEGIN
+		SELECT 
+			 NULL AS intStorageHistoryId		
+			,0 AS dblUnits				
+			,NULL AS intCustomerStorageId	
+			,BALANCES.intEntityId			
+			,BALANCES.intStorageTypeId		
+			,BALANCES.intStorageScheduleId	
+			,NULL AS dtmTransactionDate		
+			,BALANCES.intItemId AS intItemId				
+			,NULL AS strTransactionId		
+			,NULL AS strTransactionType		
+			,0 AS dblRunningUnits		
+			,1 AS intRowNumber 
+			, ENTITY.strEntityNo
+			, ENTITY.strName
+			, ENTITY_LOCATION.strAddress
+			, '' AS strItemNo
+
+			, BALANCES.dblBeginningBalance AS dblBeginningBalance
+			, BALANCES.dblEndingBalance AS dblEndingBalance
+
+			, @COMPANY_PREFERENCE_REPORT_UOM_STRING AS strBalanceUOM
+			, @COMPANY_PREFERENCE_GRAIN_BANK_UOM_STRING AS strUnitUOM
+			, @dtmStartDate AS dtmStartDate
+			, @dtmEndDate AS dtmEndDate
+
+
+			, @strAddress AS strCompanyAddress
+		FROM @BALANCES BALANCES			
+			JOIN tblEMEntity ENTITY
+				ON BALANCES.intEntityId = ENTITY.intEntityId
+			JOIN tblEMEntityLocation ENTITY_LOCATION
+				ON ENTITY.intEntityId = ENTITY_LOCATION.intEntityId
+					AND ENTITY_LOCATION.ysnDefaultLocation = 1			
+
+	END
+
+
+
 
 
 end
