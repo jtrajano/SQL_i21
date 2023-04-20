@@ -11258,6 +11258,7 @@
     <Build Include="dbo\Stored Procedures\uspSCCreateTicketLoadCostPayable.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
