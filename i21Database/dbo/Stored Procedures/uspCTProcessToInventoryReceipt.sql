@@ -110,8 +110,11 @@ AS
 				--CT-7100 (ECOM commented this line for ECOM) --								END,
 				--CT-7100 (ECOM commented this line for ECOM) --intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
-														THEN	((ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
-																ISNULL(CD.dblBasis,0))  / CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = CAST(1 AS BIT)   THEN 100 ELSE 1 END) * ISNULL(CD.dblRate, 1 )
+														THEN	
+															CASE WHEN ISNULL(AD.dblSeqPrice,0)   = 0 THEN 0 ELSE
+															   ((ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) +   
+																ISNULL(CD.dblBasis,0))  / CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = CAST(1 AS BIT)   THEN 100 ELSE 1 END) * ISNULL(CD.dblRate, 1 ) 
+															END
 														ELSE	ISNULL(AD.dblSeqPrice,0)
 												END,
 				intCostUOMId				=	CASE WHEN CD.intPricingTypeId = 2 OR ISNULL(CD.intCurrencyExchangeRateId, 0) = 0 THEN 
