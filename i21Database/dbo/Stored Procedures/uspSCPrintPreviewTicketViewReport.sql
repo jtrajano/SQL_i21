@@ -231,11 +231,11 @@ BEGIN
 			, blbSignature
 			, intUserId
 			, intDecimalPrecision
-			, PRINT_RELATED_TABLE.ysnSuppressCashPrice
+			, ISNULL(PRINT_PREVIEW.ysnSuppressCashPrice ,PRINT_RELATED_TABLE.ysnSuppressCashPrice) AS ysnSuppressCashPrice 
 			, strSealNumbers
 			, strTimezone
 			, strTrailerId
-			, PRINT_RELATED_TABLE.intTicketPrintOptionId
+			, ISNULL(PRINT_PREVIEW.intTicketPrintOptionId, PRINT_RELATED_TABLE.intTicketPrintOptionId) AS intTicketPrintOptionId
 			, strDestinationLocationName
 			, strDestinationSubLocation
 			, strDestinationStorageLocation 
