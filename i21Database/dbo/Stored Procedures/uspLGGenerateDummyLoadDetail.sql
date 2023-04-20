@@ -3,7 +3,8 @@ CREATE PROCEDURE [dbo].[uspLGGenerateDummyLoadDetail]
 	@dblQty NUMERIC(18,6),
 	@intItemUOMId INT,
 	@intEntityUserId INT,
-	@intLoadDetailId INT OUTPUT
+	@intLoadDetailId INT OUTPUT,
+    @intVendorEntityId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,6 +35,7 @@ BEGIN TRY
         ,[dblDeliveredNet]
         ,[dblDeliveredTare]
         ,[intWeightItemUOMId]
+        ,[intVendorEntityId]
     )
     SELECT
         [intConcurrencyId]					= 1
@@ -49,6 +51,7 @@ BEGIN TRY
         ,[dblDeliveredNet]					= 0
         ,[dblDeliveredTare]					= 0
         ,[intWeightItemUOMId]				= WIUOM.intItemUOMId
+        ,[intVendorEntityId]                = @intVendorEntityId
     FROM tblLGLoad L
     INNER JOIN tblICItemUOM WIUOM ON WIUOM.intItemId = @intItemId AND WIUOM.intUnitMeasureId = L.intWeightUnitMeasureId
     OUTER APPLY (
