@@ -291,7 +291,7 @@ SELECT intPaymentId					= P.intPaymentId
 	 , strCompanyAddress			= @strCompanyAddress
 FROM tblARPayment P
 INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN #PAYMENTMETHODS PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+INNER JOIN #PAYMENTMETHODS PM ON P.intPaymentMethodId = PM.intPaymentMethodId
 LEFT JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
 LEFT JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
 WHERE P.intPaymentId BETWEEN @intRecordNumberFrom AND @intRecordNumberTo
