@@ -1736,6 +1736,9 @@
     <Build Include="dbo\Stored Procedures\uspLGCancelPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationPriceContract.sql" />
+    <Build Include="dbo\Tables\tblCTContractImportTemp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3065,8 +3068,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCommanderTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDiscontinued.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurgePromotions.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricing.sql" /> 
-    <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationPricingForCStore.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateRebateOrDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemData.sql" />
     <Build Include="dbo\Tables\tblSMScreenStage.sql" />

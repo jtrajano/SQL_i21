@@ -91,9 +91,7 @@ AS
 			CH.strEntitySelectedLocation, -- CT-5315
 			CH.strCompanyLocation,
 			CH.strHeaderProductType,
-			CH.intCompanyLocationId,
-			CH.strReportTo,
-			CH.ysnEnableFutures
+			CH.intCompanyLocationId
 	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN
 	 (
