@@ -270,6 +270,11 @@ INSERT INTO #INVOICES (
 	, ysnStretchLogo
 	, strSubFormula
 	, dtmCreated
+	, strServiceChargeItem								
+	, intDaysOld               							
+	, strServiceChareInvoiceNumber 						
+	, dtmDateSC				 							
+	, intSiteId			
 	, ysnIncludeEntityName
 	, strFooterComments
 	, intOriginalInvoiceId
