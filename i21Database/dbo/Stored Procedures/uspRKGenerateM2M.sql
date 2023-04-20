@@ -1412,7 +1412,7 @@ BEGIN TRY
 											OR (M2M.strContractType = 'Sale' AND cd.strContractType = 'Sale')
 												THEN ABS(CASE WHEN dc.strCostMethod = 'Amount' 
 														THEN (SUM(dc.dblRate) 
-															/ CASE WHEN ISNULL(ch.ysnLoad, 1) = 1 
+															/ CASE WHEN ISNULL(ch.ysnLoad, 0) = 1 
 																THEN (ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId, cu3.intCommodityUnitMeasureId, ISNULL(cd2.dblQuantityPerLoad, 1)), 1) 
 																		* CAST(ISNULL(cd2.intNoOfLoad, 1) AS NUMERIC(16, 8)))
 																ELSE ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId, cu3.intCommodityUnitMeasureId, ISNULL(cd.dblDetailQuantity, 1)), 1)
