@@ -237,6 +237,7 @@ FROM (
 		,vendor.intPayFromBankAccountId
 		,A.intPayToBankAccountId
 		,vendor.strVendorPayToId
+		,intSelectedByUserId = CAST(NULL AS INT)
 		FROM vyuARInvoicesForPayment A  
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
 		ON vendor.intEntityId = A.intEntityCustomerId  
