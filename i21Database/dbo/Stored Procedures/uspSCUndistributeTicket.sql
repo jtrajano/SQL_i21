@@ -1872,7 +1872,8 @@ BEGIN TRY
 					 , @dblQty = @dblTicketNetUnits
 					 , @intItemUOMId = @intTicketItemUOMId
 					 , @intEntityUserId = @intUserId
-					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT 
+					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT
+					 , @intVendorEntityId =  @intTicketEntityId
 
 			
 			
