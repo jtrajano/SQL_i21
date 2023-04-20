@@ -355,6 +355,26 @@ BEGIN TRY
 	WHERE P.intSiteId IS NOT NULL
 	  AND P.ysnMobileBilling = 1
 	  AND P.dblQty = TMO.dblQuantity
+
+	--FROM MBIL WHERE MBIL QTY <> TMO QTY
+    UPDATE P
+    SET dblQty = CASE WHEN P.dblQty > TMO.dblQuantity
+                      THEN P.dblQty - TMO.dblQuantity
+                      ELSE -(TMO.dblQuantity - P.dblQty)
+                 END
+    FROM @tblToProcess P
+    INNER JOIN tblCTContractDetail CD ON P.intContractDetailId = CD.intContractDetailId
+    CROSS APPLY ( 
+        SELECT TOP 1 TMO.*
+        FROM tblTMOrder TMO 
+        INNER JOIN tblTMDispatch D ON TMO.intSiteId = D.intSiteID
+        WHERE TMO.intSiteId = P.intSiteId
+          AND TMO.intContractDetailId = P.intContractDetailId
+        ORDER BY TMO.dtmTransactionDate DESC
+    ) TMO 
+    WHERE P.intSiteId IS NOT NULL
+      AND P.ysnMobileBilling = 1
+      AND P.dblQty <> TMO.dblQuantity
 	
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
