@@ -9,7 +9,7 @@ AS
        DECLARE @intAccountId INT
        DECLARE @whereParam NVARCHAR(MAX)= 'SELECT intAccountId,strAccountId vyuGLAccountDetail where ' + @strAccountWhere
        DECLARE @tblAccount TABLE ( intAccountId INT, strAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL  )
-       INSERT INTO @tblAccount EXEC(@whereParam)
+       INSERT INTO @tblAccount (intAccountId, strAccountId) EXEC(@whereParam)
        DECLARE @dtmOverrideFiscalStartDate DATETIME
              
        IF @dtmOverrideFiscalEndDate  IS NOT NULL
