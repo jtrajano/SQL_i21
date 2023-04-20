@@ -114,6 +114,9 @@ BEGIN
 		,[dblEndOfMonthAmount]		NUMERIC(18, 6) NULL
 		,[intAccountId]			    INT NULL
 		,[intAge]                   INT NULL DEFAULT 0
+		,[strLogoType]				NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL
+		,[blbLogo]					VARBINARY (MAX) NULL
+		,[blbFooterLogo]			VARBINARY (MAX) NULL
 	)
 
 	DECLARE @dtmDateFromLocal			DATETIME = NULL,
@@ -612,7 +615,57 @@ BEGIN
 			WHERE SALESPERSON.intId IS NULL 
 		END
 
-	INSERT INTO @tempReturntable
+	INSERT INTO @tempReturntable(
+		[strCustomerName]		
+		,[strCustomerNumber]	
+		,[strCustomerInfo]		
+		,[strInvoiceNumber]		
+		,[strRecordNumber]		
+		,[intInvoiceId]			
+		,[intPaymentId]			
+		,[strBOLNumber]			
+		,[intEntityCustomerId]	
+		,[intEntityUserId]		
+		,[dblCreditLimit]		
+		,[dblTotalAR]			
+		,[dblTotalCustomerAR]   
+		,[dblFuture]			
+		,[dbl0Days]				
+		,[dbl10Days]			
+		,[dbl30Days]			
+		,[dbl60Days]			
+		,[dbl90Days]			
+		,[dbl120Days]			
+		,[dbl121Days]			
+		,[dblTotalDue]			
+		,[dblAmountPaid]		
+		,[dblInvoiceTotal]		
+		,[dblCredits]			
+		,[dblPrepayments]		
+		,[dblPrepaids]			
+		,[dtmDate]				
+		,[dtmDueDate]			
+		,[dtmAsOfDate]			
+		,[strSalespersonName]	
+		,[intCompanyLocationId]	
+		,[strSourceTransaction]	
+		,[strType]				
+		,[strTransactionType]	
+		,[strCompanyName]		
+		,[strCompanyAddress]    
+		,[strAgingType]			
+		,[intCurrencyId]		
+		,[strCurrency]          
+		,[dblHistoricRate]		
+		,[dblHistoricAmount]	
+		,[dblEndOfMonthRate]	
+		,[dblEndOfMonthAmount]	
+		,[intAccountId]			
+		,[intAge]   
+		, strLogoType		
+		, blbLogo			
+		, blbFooterLogo            
+	)
 	SELECT strCustomerName		= CUSTOMER.strCustomerName
 		 , strCustomerNumber	= CUSTOMER.strCustomerNumber
 		 , strCustomerInfo		= CUSTOMER.strCustomerName + CHAR(13) + CUSTOMER.strCustomerNumber
