@@ -626,7 +626,7 @@ WHERE
 			END 
 		) 
 	)
-	AND B.dblUnitCost <> 0 --EXCLUDE ZERO RECEIPT COST 
+	--AND B.dblUnitCost <> 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType <> 2	
 	AND C.strType <> 'Bundle'
@@ -1040,4 +1040,3 @@ WHERE
 RETURN
 
 END
-GO
