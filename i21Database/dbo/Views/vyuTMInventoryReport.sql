@@ -5,7 +5,7 @@ AS
 			,strSiteNumber = '0000' + CAST(A.intSiteNumber AS varchar(10)) 
 			,strProduct = T.strItemNo
 			,strLocation= case when EL.strLocationName is null then location.strLocationName else EL.strLocationName end
-			,dblFullPercentForOrder = (dblGrossVolume.dblFuelVolume/dblTotalCapacity.dblTotalCapacity) * 100
+			,dblFullPercentForOrder = cast(((dblGrossVolume.dblFuelVolume/dblTotalCapacity.dblTotalCapacity) * 100) as decimal(16,2))
 			,dtmLastInventoryTime = dtmLastInventoryTime.dtmDateTime
 			,dblGrossVolume = dblGrossVolume.dblFuelVolume
 			,dblNetVolume = dblNetVolume.dblTempCompensatedVolume
