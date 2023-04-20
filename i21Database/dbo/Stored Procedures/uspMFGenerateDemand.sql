@@ -28,48 +28,46 @@
 AS
 BEGIN TRY
 
-	DECLARE @dtmStartOfMonth DATETIME
-		,@ysnFGDemand BIT
-		,@intCurrentMonth INT
-		,@intMonthId INT = 1
-		,@intReportMasterID INT
-		,@idoc INT
-		,@dtmDate DATETIME
-		,@intPrevInvPlngReportMasterID INT
-		,@ysnWeekOfSupply BIT = 0
-		,@ysnCalculateNoOfContainerByBagQty BIT = 0
-		,@intContainerTypeId INT
-		--,@strContainerType NVARCHAR(50) 
-		,@intItemId INT
-		,@dblEndInventory NUMERIC(18, 6)
-		,@intConsumptionMonth INT
-		,@dblConsumptionQty NUMERIC(18, 6)
-		,@dblWeeksOfSsupply NUMERIC(18, 6)
-		,@ysnSupplyTargetbyAverage BIT
-		,@strSupplyTarget NVARCHAR(50)
-		,@intNoofWeeksorMonthstoCalculateSupplyTarget INT
-		,@intNoofWeekstoCalculateSupplyTargetbyAverage INT
-		,@ysnComputeDemandUsingRecipe BIT
-		,@ysnDisplayDemandWithItemNoAndDescription BIT
-		,@ysnDemandViewForBlend BIT
-		,@strContainerType NVARCHAR(50)
-		,@ysnDisplayRestrictedBookInDemandView BIT
-		,@dblRemainingConsumptionQty NUMERIC(18, 6)
-		,@dblSupplyTarget NUMERIC(18, 6)
-		,@dblDecimalPart NUMERIC(18, 6)
-		,@intIntegerPart INT
-		,@dblTotalConsumptionQty NUMERIC(18, 6)
-		,@intConsumptionAvlMonth INT
-		,@intPrevUnitMeasureId INT
-		,@intBookId INT
-		,@intSubBookId INT
-		,@intDemandAnalysisMonthlyCutOffDay INT
-		,@intLocationId INT
-		--,@intItemId int
-		,@intRecordId INT
-		,@ysnForecastedConsumptionByRemainingDays BIT
-		,@ysnConsiderBookInDemandView INT
-		,@intPositionByETA INT
+	DECLARE @dtmStartOfMonth				DATETIME
+		  , @ysnFGDemand					BIT
+		  , @intCurrentMonth				INT
+		  , @intMonthId						INT = 1
+		  , @intReportMasterID				INT
+		  , @idoc							INT
+		  , @dtmDate						DATETIME
+		  , @intPrevInvPlngReportMasterID	INT
+		  , @ysnWeekOfSupply				BIT = 0
+		  , @ysnCalculateNoOfContainerByBagQty BIT = 0
+		  , @intContainerTypeId				INT
+		  , @intItemId						INT
+		  , @dblEndInventory				NUMERIC(18, 6)
+		  , @intConsumptionMonth			INT
+		  , @dblConsumptionQty				NUMERIC(18, 6)
+		  , @dblWeeksOfSsupply				NUMERIC(18, 6)
+		  , @ysnSupplyTargetbyAverage		BIT
+		  , @strSupplyTarget				NVARCHAR(50)
+		  , @intNoofWeeksorMonthstoCalculateSupplyTarget	INT
+		  , @intNoofWeekstoCalculateSupplyTargetbyAverage	INT
+		  , @ysnComputeDemandUsingRecipe    BIT
+		  , @ysnDisplayDemandWithItemNoAndDescription BIT
+		  , @ysnDemandViewForBlend			BIT
+		  , @strContainerType				NVARCHAR(50)
+		  , @ysnDisplayRestrictedBookInDemandView BIT
+		  , @dblRemainingConsumptionQty		NUMERIC(18, 6)
+		  , @dblSupplyTarget				NUMERIC(18, 6)
+		  , @dblDecimalPart					NUMERIC(18, 6)
+		  , @intIntegerPart					INT
+		  , @dblTotalConsumptionQty			NUMERIC(18, 6)
+		  , @intConsumptionAvlMonth			INT
+		  , @intPrevUnitMeasureId			INT
+		  , @intBookId						INT
+		  , @intSubBookId					INT
+		  , @intDemandAnalysisMonthlyCutOffDay INT
+		  , @intLocationId					INT
+		  , @intRecordId					INT
+		  , @ysnForecastedConsumptionByRemainingDays BIT
+		  , @ysnConsiderBookInDemandView	INT
+		  , @intPositionByETA				INT
 
 	DECLARE @tblMFContainerWeight TABLE 
 	(
@@ -130,27 +128,23 @@ BEGIN TRY
 
 	SELECT @intRemainingDay = DATEDIFF(DAY, GETDATE(), DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, GETDATE()) + 1, 0))) + 1
 
-	SELECT @intNoOfDays = datediff(dd, getdate(), dateadd(mm, 1, getdate()))
+	SELECT @intNoOfDays = DATEDIFF(dd, GETDATE(), DATEADD(mm, 1, GETDATE()))
 
-	SELECT @intContainerTypeId = intContainerTypeId
-		,@ysnCalculateNoOfContainerByBagQty = ysnCalculateNoOfContainerByBagQty
-		,@ysnSupplyTargetbyAverage = ysnSupplyTargetbyAverage
-		,@strSupplyTarget = strSupplyTarget
-		,@intNoofWeeksorMonthstoCalculateSupplyTarget = IsNULL(intNoofWeeksorMonthstoCalculateSupplyTarget, 3)
-		,@intNoofWeekstoCalculateSupplyTargetbyAverage = IsNULL(intNoofWeekstoCalculateSupplyTargetbyAverage, 13)
-		,@ysnComputeDemandUsingRecipe = ysnComputeDemandUsingRecipe
-		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
-		,@ysnDisplayRestrictedBookInDemandView = IsNULL(ysnDisplayRestrictedBookInDemandView, 0)
-		,@intDemandAnalysisMonthlyCutOffDay = (
-			CASE 
-				WHEN IsNULL(intDemandAnalysisMonthlyCutOffDay, 0) = 0
-					THEN 32
-				ELSE intDemandAnalysisMonthlyCutOffDay
-				END
-			)
-		,@ysnForecastedConsumptionByRemainingDays = ysnForecastedConsumptionByRemainingDays
-		,@ysnConsiderBookInDemandView = IsNULL(ysnConsiderBookInDemandView, 1)
-		,@intPositionByETA = IsNULL(intPositionByETADemandReport, 2)
+	SELECT @intContainerTypeId								= intContainerTypeId
+		 , @ysnCalculateNoOfContainerByBagQty				= ysnCalculateNoOfContainerByBagQty
+		 , @ysnSupplyTargetbyAverage						= ysnSupplyTargetbyAverage
+		 , @strSupplyTarget									= strSupplyTarget
+		 , @intNoofWeeksorMonthstoCalculateSupplyTarget		= ISNULL(intNoofWeeksorMonthstoCalculateSupplyTarget, 3)
+		 , @intNoofWeekstoCalculateSupplyTargetbyAverage	= ISNULL(intNoofWeekstoCalculateSupplyTargetbyAverage, 13)
+		 , @ysnComputeDemandUsingRecipe						= ysnComputeDemandUsingRecipe
+		 , @ysnDisplayDemandWithItemNoAndDescription		= ysnDisplayDemandWithItemNoAndDescription
+		 , @ysnDisplayRestrictedBookInDemandView			= IsNULL(ysnDisplayRestrictedBookInDemandView, 0)
+		 , @intDemandAnalysisMonthlyCutOffDay				= (CASE WHEN ISNULL(intDemandAnalysisMonthlyCutOffDay, 0) = 0 THEN 32
+																	ELSE intDemandAnalysisMonthlyCutOffDay
+															   END)
+		 , @ysnForecastedConsumptionByRemainingDays			= ysnForecastedConsumptionByRemainingDays
+		 , @ysnConsiderBookInDemandView						= ISNULL(ysnConsiderBookInDemandView, 1)
+		 , @intPositionByETA								= ISNULL(intPositionByETADemandReport, 2)
 	FROM tblMFCompanyPreference
 
 	SELECT @strContainerType = strContainerType
@@ -161,47 +155,61 @@ BEGIN TRY
 	FROM tblCTCompanyPreference
 
 	IF @intNoofWeekstoCalculateSupplyTargetbyAverage = 0
-		SELECT @intNoofWeekstoCalculateSupplyTargetbyAverage = 13
+		BEGIN
+			SET @intNoofWeekstoCalculateSupplyTargetbyAverage = 13;
+		END
 
 	IF OBJECT_ID('tempdb..#TempOpenPurchase') IS NOT NULL
-		DROP TABLE #TempOpenPurchase
+		BEGIN
+			DROP TABLE #TempOpenPurchase;
+		END
 
-	CREATE TABLE #TempOpenPurchase (
-		[intItemId] INT
-		,[strName] NVARCHAR(50)
-		,[strValue] DECIMAL(24, 6)
-		,intLocationId INT
-		)
+	CREATE TABLE #TempOpenPurchase 
+	(
+		intItemId		INT
+	  , strName			NVARCHAR(50)
+	  , strValue		DECIMAL(24, 6)
+	  , ntLocationId	INT
+	)
 
 	IF OBJECT_ID('tempdb..#TempPlannedPurchases') IS NOT NULL
-		DROP TABLE #TempPlannedPurchases
+		BEGIN
+			DROP TABLE #TempPlannedPurchases;
+		END
 
-	CREATE TABLE #TempPlannedPurchases (
-		[intItemId] INT
-		,[strName] NVARCHAR(50)
-		,[strValue] DECIMAL(24, 6)
-		,intLocationId INT
-		)
+	CREATE TABLE #TempPlannedPurchases 
+	(
+		intItemId		INT
+	  , strName			NVARCHAR(50)
+	  , strValue		DECIMAL(24, 6)
+	  , intLocationId	INT
+	)
 
 	IF OBJECT_ID('tempdb..#TempForecastedConsumption') IS NOT NULL
-		DROP TABLE #TempForecastedConsumption
+		BEGIN
+			DROP TABLE #TempForecastedConsumption;
+		END
 
-	CREATE TABLE #TempForecastedConsumption (
-		[intItemId] INT
-		,[strName] NVARCHAR(50)
-		,[strValue] DECIMAL(24, 6)
-		,intLocationId INT
-		)
+	CREATE TABLE #TempForecastedConsumption 
+	(
+		intItemId		INT
+	  , strName			NVARCHAR(50)
+	  , strValue		DECIMAL(24, 6)
+	  , ntLocationId	INT
+	)
 
 	IF OBJECT_ID('tempdb..#TempAdditionalForecastedConsumption') IS NOT NULL
-		DROP TABLE #TempAdditionalForecastedConsumption
+		BEGIN
+			DROP TABLE #TempAdditionalForecastedConsumption;
+		END
 
-	CREATE TABLE #TempAdditionalForecastedConsumption (
-		[intItemId] INT
-		,[strName] NVARCHAR(50)
-		,[strValue] DECIMAL(24, 6)
-		,intLocationId INT
-		)
+	CREATE TABLE #TempAdditionalForecastedConsumption 
+	(
+		intItemId		INT
+	  , strName			NVARCHAR(50)
+	  , strValue		DECIMAL(24, 6)
+	  , intLocationId	INT
+	)
 
 	--IF OBJECT_ID('tempdb..#TempShortExcess') IS NOT NULL
 	--	DROP TABLE #TempShortExcess
@@ -217,188 +225,174 @@ BEGIN TRY
 	--	,[strName] NVARCHAR(50)
 	--	,[strValue] DECIMAL(24, 6)
 	--	)
-	IF OBJECT_ID('tempdb..#TempWeeksOfSupplyTarget') IS NOT NULL
-		DROP TABLE #TempWeeksOfSupplyTarget
 
-	CREATE TABLE #TempWeeksOfSupplyTarget (
-		[intItemId] INT
-		,[strName] NVARCHAR(50)
-		,[strValue] DECIMAL(24, 6)
-		,intLocationId INT
-		)
+	IF OBJECT_ID('tempdb..#TempWeeksOfSupplyTarget') IS NOT NULL
+		BEGIN
+			DROP TABLE #TempWeeksOfSupplyTarget;
+		END
+
+	CREATE TABLE #TempWeeksOfSupplyTarget 
+	(
+		intItemId		INT
+	  , strName			NVARCHAR(50)
+	  , strValue		DECIMAL(24, 6)
+	  , intLocationId	INT
+	)
 
 	IF OBJECT_ID('tempdb..#TempInventoryTransfer') IS NOT NULL
-		DROP TABLE #TempInventoryTransfer
+		BEGIN
+			DROP TABLE #TempInventoryTransfer;
+		END
 
-	CREATE TABLE #TempInventoryTransfer (
-		[intItemId] INT
-		,[strName] NVARCHAR(50)
-		,[strValue] DECIMAL(24, 6)
-		,intLocationId INT
-		)
+	CREATE TABLE #TempInventoryTransfer 
+	(
+		intItemId		INT
+	  , strName			NVARCHAR(50)
+	  , strValue		DECIMAL(24, 6)
+	  , intLocationId	INT
+	)
 
 	SELECT @intReportMasterID = intReportMasterID
 	FROM tblCTReportMaster
 	WHERE strReportName = 'Inventory Planning Report'
 
 	IF @intInvPlngReportMasterID > 0
-	BEGIN
-		SELECT @dtmDate = dtmDate
-		FROM tblCTInvPlngReportMaster
-		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+		BEGIN
+			SELECT @dtmDate = dtmDate
+			FROM tblCTInvPlngReportMaster
+			WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID;
 
-		SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0)
+			SET @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0);
 
-		SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
-	END
+			SET @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate);
+		END
 	ELSE
-	BEGIN
-		SELECT @dtmDate = GETDATE()
+		BEGIN
+			SET @dtmDate = GETDATE();
 
-		SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0)
+			SET @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0);
 
-		SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
-	END
+			SET @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate);
+		END
 
-	SELECT @intBookId = intBookId
-		,@intSubBookId = intSubBookId
+	SELECT @intBookId		= intBookId
+		 , @intSubBookId	= intSubBookId
 	FROM tblMFDemandHeader
 	WHERE intDemandHeaderId = @intDemandHeaderId
 
-	--To get a previously saved demand view
-	IF @intBookId = 0
-		OR @intBookId IS NULL
-	BEGIN
-		SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
-			,@intPrevUnitMeasureId = intUnitMeasureId
-		FROM tblCTInvPlngReportMaster
-		WHERE ysnPost = 1
-			AND dtmDate <= @dtmDate
-			AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
-		ORDER BY intInvPlngReportMasterID DESC
-	END
+	/* Retrieve last demand saved. */
+	IF @intBookId = 0 OR @intBookId IS NULL
+		BEGIN
+			SELECT TOP 1 @intPrevInvPlngReportMasterID	= intInvPlngReportMasterID
+					   , @intPrevUnitMeasureId			= intUnitMeasureId
+			FROM tblCTInvPlngReportMaster
+			WHERE ysnPost = 1 
+			  AND dtmDate <= @dtmDate
+			  AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+			ORDER BY intInvPlngReportMasterID DESC
+		END
 	ELSE
-	BEGIN
-		IF @intSubBookId = 0
-			OR @intSubBookId IS NULL
 		BEGIN
-			SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
-				,@intPrevUnitMeasureId = intUnitMeasureId
-			FROM tblCTInvPlngReportMaster
-			WHERE ysnPost = 1
-				AND dtmDate <= @dtmDate
-				AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
-				AND intBookId = @intBookId
-			ORDER BY intInvPlngReportMasterID DESC
+			IF @intSubBookId = 0 OR @intSubBookId IS NULL
+				BEGIN
+					SELECT TOP 1 @intPrevInvPlngReportMasterID	= intInvPlngReportMasterID
+							   , @intPrevUnitMeasureId			= intUnitMeasureId
+					FROM tblCTInvPlngReportMaster
+					WHERE ysnPost = 1
+					  AND dtmDate <= @dtmDate
+					  AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+					  AND intBookId = @intBookId
+					ORDER BY intInvPlngReportMasterID DESC
+				END
+			ELSE
+				BEGIN
+					SELECT TOP 1 @intPrevInvPlngReportMasterID	= intInvPlngReportMasterID
+							   , @intPrevUnitMeasureId			= intUnitMeasureId
+					FROM tblCTInvPlngReportMaster
+					WHERE ysnPost = 1
+					  AND dtmDate <= @dtmDate
+					  AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+					  AND intBookId = @intBookId
+					  AND intSubBookId = @intSubBookId
+					ORDER BY intInvPlngReportMasterID DESC
+				END
 		END
-		ELSE
-		BEGIN
-			SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
-				,@intPrevUnitMeasureId = intUnitMeasureId
-			FROM tblCTInvPlngReportMaster
-			WHERE ysnPost = 1
-				AND dtmDate <= @dtmDate
-				AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
-				AND intBookId = @intBookId
-				AND intSubBookId = @intSubBookId
-			ORDER BY intInvPlngReportMasterID DESC
-		END
-	END
+	/* End of Retrieve last demand saved. */
 
 	IF @intCompanyLocationId = 0
-		SELECT @intCompanyLocationId = NULL
+		BEGIN
+			SET @intCompanyLocationId = NULL
+		END
 
 	IF @intCategoryId = 0
-		SELECT @intCategoryId = NULL
+		BEGIN
+			SELECT @intCategoryId = NULL
+		END
 
+	/* Material Key */
 	IF @MaterialKeyXML <> ''
-	BEGIN
-		IF @ysnAllItem = 0
 		BEGIN
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@MaterialKeyXML
+			IF @ysnAllItem = 0
+				BEGIN
+					EXEC sp_xml_preparedocument @idoc OUTPUT
+											  , @MaterialKeyXML
 
-			INSERT INTO @tblMFItem (intItemId)
-			SELECT intItemId
-			FROM OPENXML(@idoc, 'root/Material', 2) WITH (intItemId INT)
+					INSERT INTO @tblMFItem (intItemId)
+					SELECT intItemId
+					FROM OPENXML(@idoc, 'root/Material', 2) WITH (intItemId INT)
 
-			EXEC sp_xml_removedocument @idoc
-		END
-		ELSE
-		BEGIN
-			IF @intCategoryId IS NOT NULL
-			BEGIN
-				INSERT INTO @tblMFItem (intItemId)
-				SELECT I.intItemId
-				FROM tblICItem I
-				WHERE I.intCategoryId = @intCategoryId
-					AND I.strStatus = 'Active'
-					AND NOT EXISTS (
-						SELECT *
-						FROM tblMFItemExclude IE
-						WHERE IE.intItemId = I.intItemId
-							AND IE.ysnExcludeInDemandView = 1
-							AND NOT EXISTS (
-								SELECT *
-								FROM tblMFDemandDetail DD
-								WHERE IE.intItemId = IsNULL(DD.intSubstituteItemId, DD.intItemId)
-									AND DD.intDemandHeaderId = @intDemandHeaderId
-								)
-						)
-			END
+					EXEC sp_xml_removedocument @idoc
+				END
 			ELSE
-			BEGIN
-				INSERT INTO @tblMFItem (intItemId)
-				SELECT I.intItemId
-				FROM tblICItem I
-				WHERE I.strExternalGroup = @strExternalGroup
-			END
+				BEGIN
+					IF @intCategoryId IS NOT NULL
+						BEGIN
+							INSERT INTO @tblMFItem (intItemId)
+							SELECT I.intItemId
+							FROM tblICItem I
+							WHERE I.intCategoryId = @intCategoryId
+								AND I.strStatus = 'Active'
+								AND NOT EXISTS (SELECT *
+												FROM tblMFItemExclude IE
+												WHERE IE.intItemId = I.intItemId
+												  AND IE.ysnExcludeInDemandView = 1
+												  AND NOT EXISTS (SELECT *
+																  FROM tblMFDemandDetail DD
+																  WHERE IE.intItemId = ISNULL(DD.intSubstituteItemId, DD.intItemId)
+																	AND DD.intDemandHeaderId = @intDemandHeaderId))
+						END
+					ELSE
+						BEGIN
+							INSERT INTO @tblMFItem (intItemId)
+							SELECT I.intItemId
+							FROM tblICItem I
+							WHERE I.strExternalGroup = @strExternalGroup
+						END
+				END
 		END
-	END
+	/* End of Material Key */
 
 	IF @ysnDemandViewForBlend = 1
-	BEGIN
-		INSERT INTO @tblMFItemDetail (
-			intItemId
-			,intMainItemId
-			,ysnSpecificItemDescription
-			,dblRatio
+		BEGIN
+			INSERT INTO @tblMFItemDetail 
+			(
+				intItemId
+			  , intMainItemId
+			  , ysnSpecificItemDescription
+			  , dblRatio
 			)
-		SELECT DISTINCT R.intItemId
-			,RI.intItemId
-			,0
-			,RI.dblCalculatedQuantity / (
-				CASE 
-					WHEN R.intRecipeTypeId = 1
-						THEN R.dblQuantity
-					ELSE 1
-					END
-				)
-		FROM @tblMFItem I
-		JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
-			AND RI.intRecipeItemTypeId = 1
-		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
-			AND R.ysnActive = 1
-			AND R.intLocationId = IsNULL(@intCompanyLocationId, R.intLocationId)
-			--IF EXISTS (
-			--		SELECT *
-			--		FROM @tblMFItem I
-			--		WHERE NOT EXISTS (
-			--				SELECT *
-			--				FROM @tblMFItemDetail ID
-			--				WHERE ID.intItemId = I.intItemId
-			--				)
-			--		)
-			--BEGIN
-			--	RAISERROR (
-			--			'There is no matching recipe found.'
-			--			,16
-			--			,1
-			--			,'WITH NOWAIT'
-			--			)
-			--	RETURN
-			--END
-	END
+			SELECT DISTINCT R.intItemId
+						  , RI.intItemId
+						  , 0
+						  , RI.dblCalculatedQuantity / (CASE WHEN R.intRecipeTypeId = 1 THEN R.dblQuantity
+															 ELSE 1
+														END)
+			FROM @tblMFItem I
+			JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId AND RI.intRecipeItemTypeId = 1
+			JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId 
+							  AND R.ysnActive = 1
+							  AND R.intLocationId = IsNULL(@intCompanyLocationId, R.intLocationId)
+		END
 	ELSE
 	BEGIN
 		INSERT INTO @tblMFItemDetail (
@@ -2163,7 +2157,7 @@ BEGIN TRY
 			END --Previous Planned Purchases
 		,6
 		,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
-		,intLocationId
+		,ISNULL(intLocationId, @intCompanyLocationId)
 	FROM tblCTInvPlngReportAttributeValue
 	WHERE intReportAttributeID = 5 --Planned Purchases
 		AND intInvPlngReportMasterID = @intPrevInvPlngReportMasterID
@@ -3267,7 +3261,7 @@ BEGIN TRY
 					THEN 'Months of Supply Target'
 				WHEN A.intReportAttributeID IN (
 						5
-						,6
+						--,6
 						)
 					AND @intContainerTypeId IS NOT NULL
 					THEN A.strAttributeName + ' [' + @strContainerType + ']'
