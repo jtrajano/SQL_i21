@@ -15,8 +15,7 @@ ISNULL(P.strPhone,'') COLLATE Latin1_General_CI_AS strPhone,
 ISNULL(ContactDetails.strFax,'') COLLATE Latin1_General_CI_AS strFax,
 ISNULL(A.strEmail,'') COLLATE Latin1_General_CI_AS  strEmail,
 ISNULL(A.strTerm, '') COLLATE Latin1_General_CI_AS  strTerm,
-ISNULL(EM.ysnActive, CAST (0 AS BIT) ) ysnActive,
-EML.*
+ISNULL(EM.ysnActive, CAST (0 AS BIT) ) ysnActive
 from vyuAPVendor A
 outer apply (select top 1 strAddress, strCity,strState, strZipCode, strCountry from tblEMEntityLocation where A.intEntityId = intEntityId ) B
 outer apply (select top 1 intEntityContactId from tblEMEntityToContact where intEntityId = A.intEntityId) E
@@ -28,22 +27,22 @@ OUTER APPLY(
 left join tblEMEntity EM on A.intEntityId = EM.intEntityId
 outer apply (select Item Street1 from  dbo.fnSplitStringWithRowId(B.strAddress, char(10))  where RowId = 1 ) Address1
 outer apply (select Item Street2 from  dbo.fnSplitStringWithRowId(B.strAddress, char(10))  where RowId = 2 ) Address2
-outer apply( 
-	select TOP 1 
-	ISNULL(strLocationName,'')  COLLATE Latin1_General_CI_AS EML_AddressType,  
-	ISNULL(strAddress,'')  COLLATE Latin1_General_CI_AS EML_strAddress,
-	ISNULL(strCity,'')  COLLATE Latin1_General_CI_AS EML_strCity,
-	ISNULL(strState,'')  COLLATE Latin1_General_CI_AS EML_strState,
-	ISNULL(strZipCode,'')  COLLATE Latin1_General_CI_AS EML_strZipCode,
-	ISNULL(strCountry,'')  COLLATE Latin1_General_CI_AS EML_strCountry,
-	ISNULL(Address1.Street1 ,'') COLLATE Latin1_General_CI_AS EML_Street1,
-	ISNULL(Address2.Street2,'') COLLATE Latin1_General_CI_AS EML_Street2
-	from  tblEMEntityLocation 
-	outer apply (select Item Street1 from  dbo.fnSplitStringWithRowId(strAddress, char(10))  where RowId = 1 ) Address1
-	outer apply (select Item Street2 from  dbo.fnSplitStringWithRowId(strAddress, char(10))  where RowId = 2 ) Address2
-	where intEntityId = A.intEntityId
-)EML
-
+) ,
+EML AS ( 
+	select A.intEntityId,
+	B.strName VendorName,
+	ISNULL(B.strVendorId,'') COLLATE Latin1_General_CI_AS  VendorNbr ,
+	ISNULL(A.strLocationName,'')  COLLATE Latin1_General_CI_AS AddressType,  
+	ISNULL(A.strAddress,'')  COLLATE Latin1_General_CI_AS strAddress,
+	ISNULL(A.strCity,'')  COLLATE Latin1_General_CI_AS strCity,
+	ISNULL(A.strState,'')  COLLATE Latin1_General_CI_AS strState,
+	ISNULL(A.strZipCode,'')  COLLATE Latin1_General_CI_AS strZipCode,
+	ISNULL(A.strCountry,'')  COLLATE Latin1_General_CI_AS strCountry,
+	ISNULL(Address1.Street1 ,'') COLLATE Latin1_General_CI_AS Street1,
+	ISNULL(Address2.Street2,'') COLLATE Latin1_General_CI_AS Street2
+	from  tblEMEntityLocation A join vyuAPVendor B ON A.intEntityId = B.intEntityId
+	outer apply (select Item Street1 from  dbo.fnSplitStringWithRowId(A.strAddress, char(10))  where RowId = 1 ) Address1
+	outer apply (select Item Street2 from  dbo.fnSplitStringWithRowId(A.strAddress, char(10))  where RowId = 2 ) Address2
 ),
 tag01 as(
 select '01' strTag, intEntityId,
@@ -62,13 +61,13 @@ tag05 as(
 ),
 tag06 as(
 	select '06' strTag, intEntityId,
-	'06|C0000549|' + VendorNbr + '|' + EML_AddressType + '||' 
-	+ VendorName + '|' + EML_Street1 + '|' 
-	+ EML_Street2 + '|' + EML_strCity + '|'
-	+ EML_strState + '|' 
-	+ EML_strZipCode + '|' + EML_strCountry   
+	'06|C0000549|' + VendorNbr + '|' + AddressType + '||' 
+	+ VendorName + '|' + Street1 + '|' 
+	+ Street2 + '|' + strCity + '|'
+	+ strState + '|' 
+	+ strZipCode + '|' + strCountry   
 	strData
-	from cte
+	from EML
 ),
 tag07 as(
 	select '07' strTag, intEntityId,
@@ -95,4 +94,4 @@ cteAllRecords AS (
 	UNION ALL
 	select  '99', 999999, '99|C0000549|'+ cast( count(*) as nvarchar(10)) from cteOrder
 )
-select intEntityId, strTag,strData from cteAllRecords --order by intEntityId, strTag
+select strTag, intEntityId,strData from cteAllRecords
