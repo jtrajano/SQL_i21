@@ -1739,6 +1739,7 @@
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationPriceContract.sql" />
     <Build Include="dbo\Tables\tblCTContractImportTemp.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -2417,7 +2418,6 @@
     <Build Include="dbo\Tables\tblPRPaycheckTax.sql" />
     <Build Include="dbo\Tables\tblPRPayGroup.sql" />
     <Build Include="dbo\Tables\tblPRTaxAgency.sql" />
-    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
     <Build Include="dbo\Tables\tblICBrand.sql" />
     <Build Include="dbo\Tables\tblICCatalog.sql" />
