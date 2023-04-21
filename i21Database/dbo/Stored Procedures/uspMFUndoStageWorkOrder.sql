@@ -329,7 +329,7 @@ BEGIN TRY
 		AND RI.intRecipeItemTypeId	= 1
 
 
-	SET @dblAdjustByQuantity = ABS(@dblAdjustByQuantity)
+	SET @dblSummaryQty = ABS(@dblSummaryQty)
 
 	/* Update Production Summary - Negate Input/Stage Qty. */
 	UPDATE tblMFProductionSummary
