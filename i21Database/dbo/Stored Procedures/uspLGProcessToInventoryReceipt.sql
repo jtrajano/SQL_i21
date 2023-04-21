@@ -293,9 +293,10 @@ BEGIN TRY
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
+		LEFT JOIN tblAPBill AB ON AB.intBillId = VP.intBillId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
-		WHERE CV.intLoadId = @intLoadId
+		WHERE CV.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
 
 		UNION ALL
 
@@ -1010,9 +1011,10 @@ BEGIN TRY
 		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
 		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
+		LEFT JOIN tblAPBill AB ON AB.intBillId = VP.intBillId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
-		WHERE CV.intLoadId = @intLoadId
+		WHERE CV.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
 
 		UNION ALL
 
