@@ -114,7 +114,6 @@ BEGIN
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				,i21.intPayToDown
-				,strACHClientId = '''' --i21.strACHClientId
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
 				,i21.strCorrespondingBank
@@ -345,7 +344,6 @@ BEGIN
 					,intConcurrencyId
 					,strCbkNo
 					,intPayToDown
-					,strACHClientId
 					,intResponsibleEntityId
 					,strCorrespondingBank
 					,ysnABREnable
@@ -438,7 +436,6 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
-					,strACHClientId						= i.strACHClientId
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
@@ -649,7 +646,6 @@ BEGIN
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
-					,strACHClientId						= i.strACHClientId
 					,intResponsibleEntityId				= i.intResponsibleEntityId
 					,strCorrespondingBank				= i.strCorrespondingBank
 					,ysnABREnable						= i.ysnABREnable
