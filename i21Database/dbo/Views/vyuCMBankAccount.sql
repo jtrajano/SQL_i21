@@ -1,6 +1,4 @@
-﻿-- Create a stub view that can be used if the Origin Integration is not established. 
-
-CREATE VIEW vyuCMBankAccount
+﻿CREATE VIEW vyuCMBankAccount
 WITH SCHEMABINDING
 AS 
 

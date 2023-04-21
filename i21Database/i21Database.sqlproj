@@ -1739,7 +1739,6 @@
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportDataMigrationPriceContract.sql" />
     <Build Include="dbo\Tables\tblCTContractImportTemp.sql" />
-    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -5309,6 +5308,7 @@
     <Build Include="dbo\Stored Procedures\uspAPFixVoucher.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
