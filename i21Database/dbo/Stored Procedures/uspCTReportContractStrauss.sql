@@ -454,7 +454,7 @@ BEGIN TRY
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
-		,strStrussOtherCondition				= '<p>' + @fontBold + ISNULL(W2.strWeightGradeDesc, '') + '</span>'+  +'<span style="font-family:Arial;font-size:12.5px;">' + ISNULL(@strGeneralCondition, '')  + '</span>' + '</p>'
+		,strStrussOtherCondition				= '<span>' + @fontBold + ISNULL(W2.strWeightGradeDesc, '') + '</span>'+  +'<span style="font-family:Arial;font-size:13px;">' + ISNULL(@strGeneralCondition, '')  + '</span>' + '</span>'
 		,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 		,ysnExternal							= @ysnExternal
 		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)
