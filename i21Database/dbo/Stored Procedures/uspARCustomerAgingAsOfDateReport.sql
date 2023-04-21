@@ -458,7 +458,7 @@ WHERE CM.intOriginalInvoiceId IN (
 AND CM.ysnPosted =1
 AND CM.strTransactionType = 'Credit Memo'
 AND CM.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-AND I.strType <> 'Tax Adjustment'
+-- AND I.strType <> 'Tax Adjustment'  --Please Review
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 BEGIN
