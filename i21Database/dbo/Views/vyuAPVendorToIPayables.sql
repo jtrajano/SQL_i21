@@ -72,7 +72,7 @@ tag06 as(
 ),
 tag07 as(
 	select '07' strTag, intEntityId,
-	'06|C0000549|' + VendorNbr + '||CHCK'
+	'07|C0000549|' + VendorNbr + '||CHCK'
 	strData
 	from cte
 ),
