@@ -50,4 +50,4 @@ LEFT JOIN tblSMCurrency CU on CU.intCurrencyID = BT.intCurrencyId
 LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = BT.intCurrencyExchangeRateTypeId
 LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = BT.intBankLoanId
 LEFT JOIN tblGLFiscalYearPeriod FP on FP.intGLFiscalYearPeriodId = BT.intFiscalPeriodId
-
+GO
