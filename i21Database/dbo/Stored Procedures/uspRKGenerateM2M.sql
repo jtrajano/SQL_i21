@@ -6293,7 +6293,7 @@ BEGIN TRY
 												END
 					, dtmDateEntered = @dtmCurrentDate
 					, ysnIsUnposted = 0
-					, intEntityId
+					, e.intEntityId
 					, strReference = @strRecordName 
 					, intUserId = @intUserId 
 					, intSourceLocationId = @intLocationId 
