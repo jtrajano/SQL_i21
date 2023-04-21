@@ -70,7 +70,7 @@ BEGIN
 										FROM tblLGLoadContainer LC 
 										INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
 										WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
-										FOR XML PATH (''''), TYPE).value(''.'',''NVARCHAR(MAX)''),1,2,'' '')
+										FOR XML PATH ('''')), 1, 1, '''')
 			FROM tblLGLoadDetail LD
 			WHERE strContainerNumbers IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadContainer LC 
 													INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
