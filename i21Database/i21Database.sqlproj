@@ -105,6 +105,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
+    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
     <Build Include="dbo\Views\vyuCTApiDollarContract.sql" />
     <Build Include="dbo\Views\vyuCTApiItemContract.sql" />
     <Build Include="dbo\Views\vyuICApiCategory.sql" />
@@ -5307,8 +5308,7 @@
     <Build Include="dbo\Functions\fnAPGetImportedBillsNotEqualToDetailTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucher.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentActual.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" />
-    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadReassign.sql" /> 
     <Build Include="dbo\Views\vyuRKFutOptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutItemMovementReport.sql" />
