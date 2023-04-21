@@ -75,7 +75,7 @@ FROM (
 		, dtmFilledDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ft.dtmFilledDate, 110), 110)
 		, ft.intCommodityId
 		, b.strBankName
-		, strBankAccountNo
+		, ba.strBankAccountNo
 		, ft.intSelectedInstrumentTypeId
 		, strSelectedInstrumentType = (CASE WHEN ft.intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
 											WHEN ft.intSelectedInstrumentTypeId = 2 THEN 'OTC'
@@ -138,7 +138,7 @@ LEFT OUTER JOIN tblICUnitMeasure AS um ON [fot].[intUnitMeasureId] = um.[intUnit
 LEFT OUTER JOIN tblICCommodity AS sc ON ft.[intCommodityId] = sc.[intCommodityId]
 LEFT OUTER JOIN tblSMCompanyLocation AS cl ON ft.[intLocationId] = cl.[intCompanyLocationId]
 LEFT OUTER JOIN tblCMBank AS b ON ft.[intBankId] = b.[intBankId]
--- LEFT OUTER JOIN vyuCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
+LEFT OUTER JOIN vyuCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ft.intContractHeaderId
 LEFT OUTER JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ft.intContractDetailId
