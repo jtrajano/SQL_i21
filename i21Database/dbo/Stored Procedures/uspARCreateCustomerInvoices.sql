@@ -1488,7 +1488,6 @@ INSERT INTO #CustomerInvoice
 	,[strBillingMethod]			
 	,[strApplicatorLicense]	
 	,[intOpportunityId]
-	,[strApplicatorLicense]
 	,intTaxLocationId
     ,strTaxPoint
 )
