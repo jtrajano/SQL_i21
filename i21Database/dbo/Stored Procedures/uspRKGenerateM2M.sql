@@ -6332,7 +6332,7 @@ BEGIN TRY
 												END
 					, @dtmCurrentDate
 					, 0
-					, intEntityId
+					, e.intEntityId
 					, @strRecordName strRecordName
 					, @intUserId intUserId
 					, @intLocationId intLocationId
