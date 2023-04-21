@@ -99,8 +99,7 @@ BEGIN
 	
 	/*******START******COMPANY OWNERSHIP (UNPAID)*************/
 	BEGIN
-		SELECT IC.intCommodityId
-			,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
+		SELECT *
 		INTO #Vouchers
 		FROM (
 		SELECT IC.intCommodityId
@@ -124,19 +123,45 @@ BEGIN
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = AP.intShipToId
 				AND CL.ysnLicensed = 1
-		--LEFT JOIN (
-		--	tblAPPaymentDetail PD
-		--	INNER JOIN tblAPPayment PYMT
-		--		ON PYMT.intPaymentId = PD.intPaymentId
-		--) ON PD.intBillId = AP.intBillId
 		WHERE (AP.ysnPosted = 0 OR AP.ysnPaid = 0
-				--OR ISNULL(PYMT.ysnPosted,0) = 0
-				--OR ISNULL(PYMT.strPaymentInfo,'') = ''
 			)
 			AND IC.intCommodityId = @intCommodityId
 			AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate
 		GROUP BY IC.intCommodityId
 			,UM_REF.intCommodityUnitMeasureId
+		UNION ALL
+		SELECT IC.intCommodityId
+			,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
+		FROM tblAPBillDetail BD
+		INNER JOIN tblAPBill AP
+			ON AP.intBillId = BD.intBillId
+		INNER JOIN tblICItem IC
+			ON IC.intItemId = BD.intItemId
+				AND IC.strType = 'Inventory'
+		INNER JOIN tblICItemUOM UOM	
+			ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
+				OR (UOM.intItemId = IC.intItemId
+					AND UOM.ysnStockUnit = 1)
+				)
+		OUTER APPLY (
+			SELECT TOP 1 intCommodityUnitMeasureId
+			FROM tblICCommodityUnitMeasure
+			WHERE intCommodityId = IC.intCommodityId
+				AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+		) UM_REF
+		LEFT JOIN tblICInventoryReceiptItem IR
+			ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+		WHERE (AP.ysnPosted = 0 OR AP.ysnPaid = 0
+			)
+			AND IC.intCommodityId = @intCommodityId
+			AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate
+			AND AP.intTransactionType = 1
+			AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
+					OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
+				)
+		GROUP BY IC.intCommodityId
+			,UM_REF.intCommodityUnitMeasureId
+		) A
 
 		/****BEGINNING****/
 		INSERT INTO @CompanyOwnedData
@@ -504,7 +529,7 @@ BEGIN
 			,'   COMPANY OWNERSHIP (PAID)'
 			,dblTotalBeginning = ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) - ISNULL(CO.total,0)
 			,dblTotalIncrease = CU.total + ISNULL(@dblIACompanyOwned,0) + ISNULL(@dblInternalTransfersDiff,0) + ISNULL(@dblReceivedCompanyOwned,0)
-			,dblTotalDecrease = (ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) - ISNULL(DP.total,0)
+			,dblTotalDecrease = ABS((ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) - ISNULL(DP.total,0))
 			,0
 			,@strUOM
 		FROM (
