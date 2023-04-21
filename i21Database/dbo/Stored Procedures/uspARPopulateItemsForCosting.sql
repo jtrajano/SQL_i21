@@ -120,6 +120,7 @@ SELECT
 	,[strSessionId]				= @strSessionId
 FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
+LEFT OUTER JOIN tblICCommodity COM ON ITEM.intCommodityId = COM.intCommodityId
 LEFT OUTER JOIN tblARInvoiceDetailLot ARIDL WITH (NOLOCK) ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN tblARInvoiceDetail ARIDP WITH (NOLOCK) ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN tblICLot LOT WITH (NOLOCK) ON LOT.[intLotId] = ARIDL.[intLotId]
@@ -151,7 +152,7 @@ WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Ca
 	AND ARID.[intStorageScheduleTypeId] IS NULL
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND LGL.[intPurchaseSale] NOT IN (2, 3)))
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NULL)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ARID.[intInventoryShipmentItemId] IS NOT NULL))))
-	--AND ISNULL(T.[intTicketTypeId], 0) <> 9
+	AND (ARID.intTicketId IS NULL OR (ARID.intTicketId IS NOT NULL AND ((T.ysnDestinationWeightGradePost = 1 AND ISNULL(COM.intAdjustInventorySales, 0) <> 2) OR ISNULL(T.ysnDestinationWeightGradePost, 0) = 0)))
 	AND ARID.strSessionId = @strSessionId 
 
 --Bundle Items
