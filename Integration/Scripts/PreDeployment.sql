@@ -47,7 +47,7 @@
 :r "..\dbo\Views\apchkmst.sql"
 :r "..\dbo\Functions\fnIsDepositEntry.sql"
 :r "..\dbo\Functions\fnGetCurrencyIdFromi21ToOrigin.sql"
--- :r "..\dbo\Views\vyuCMBankAccount.sql"
+:r "..\dbo\Views\vyuCMBankAccount.sql"
 :r "..\dbo\Views\vyuCMOriginDepositEntry.sql"
 :r "..\dbo\Views\vyuCMOriginUndepositedFund.sql"
 :r "..\dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql"

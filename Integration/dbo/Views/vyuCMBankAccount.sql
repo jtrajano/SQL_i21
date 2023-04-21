@@ -114,7 +114,7 @@ BEGIN
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				,i21.intPayToDown
-				,i21.strACHClientId
+				,strACHClientId = '''' --i21.strACHClientId
 				,i21.intResponsibleEntityId
 				,strResponsibleEntity = E.strName
 				,i21.strCorrespondingBank
