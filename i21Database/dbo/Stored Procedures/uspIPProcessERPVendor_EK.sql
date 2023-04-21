@@ -596,6 +596,7 @@ BEGIN TRY
 
 					INSERT INTO tblEMEntity (
 						strName
+						,strNickName
 						,strEntityNo
 						,ysnActive
 						,strContactNumber
@@ -603,6 +604,7 @@ BEGIN TRY
 						,strExternalERPId
 						)
 					SELECT @strName
+						,@strName
 						,@strEntityNo
 						,1
 						,''
@@ -675,7 +677,8 @@ BEGIN TRY
 						,strCountry
 						,strZip
 						,strState
-						,LEFT(strCity, 50)
+						--,LEFT(strCity, 50)
+						,strContactName
 						,strPhone
 						,T.intTermID
 						,(
@@ -853,7 +856,7 @@ BEGIN TRY
 						,1
 					FROM @tblEntityContactIdOutput EC
 					JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
-					JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+					JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strNickName
 					LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
 					WHERE ETS.intStageEntityId = @intStageEntityId
 						AND ETS.strLineType = 'C'
@@ -872,7 +875,7 @@ BEGIN TRY
 						,1
 					FROM @tblEntityContactIdOutput EC
 					JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
-					JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+					JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strNickName
 					LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
 					WHERE ETS.intStageEntityId = @intStageEntityId
 						AND ETS.strLineType = 'C'
@@ -893,7 +896,8 @@ BEGIN TRY
 
 				UPDATE tblEMEntity
 				SET intConcurrencyId = intConcurrencyId + 1
-					,strName = @strName
+					--,strName = @strName
+					,strNickName = @strName
 					,ysnActive = @ysnActive
 				OUTPUT deleted.strName
 					,deleted.ysnActive
@@ -960,7 +964,8 @@ BEGIN TRY
 						,strCountry
 						,strZip
 						,strState
-						,LEFT(strCity, 50)
+						--,LEFT(strCity, 50)
+						,strContactName
 						,strPhone
 						,T.intTermID
 						,(
@@ -1002,7 +1007,8 @@ BEGIN TRY
 						,strCountry = ETS.strCountry
 						,strZipCode = ETS.strZip
 						,strState = ETS.strState
-						,strCheckPayeeName = LEFT(ETS.strCity, 50)
+						--,strCheckPayeeName = LEFT(ETS.strCity, 50)
+						,strCheckPayeeName = ETS.strContactName
 						,strPhone = ETS.strPhone
 						,intTermsId = T.intTermID
 						,ysnDefaultLocation = (
@@ -1228,7 +1234,7 @@ BEGIN TRY
 					,1
 				FROM @tblEntityContactIdOutput EC
 				JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
-				JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+				JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strNickName
 				LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
 				WHERE ETS.intStageEntityId = @intStageEntityId
 					AND ETS.strLineType = 'C'
@@ -1247,7 +1253,7 @@ BEGIN TRY
 					,1
 				FROM @tblEntityContactIdOutput EC
 				JOIN tblEMEntity E ON E.intEntityId = EC.intEntityId
-				JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strName
+				JOIN tblIPEntityTermStage ETS ON ETS.strContactName = E.strNickName
 				LEFT JOIN tblSMCountry C ON C.strCountry = ETS.strCountry
 				WHERE ETS.intStageEntityId = @intStageEntityId
 					AND ETS.strLineType = 'C'
@@ -1270,13 +1276,13 @@ BEGIN TRY
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 
-				IF EXISTS (
-						SELECT 1
-						FROM @tblEMEntity
-						WHERE IsNULL(strOldName, '') <> IsNULL(strNewName, '')
-						)
-					SELECT @strDetails += '{"change":"strName","iconCls":"small-gear","from":"' + IsNULL(strOldName, '') + '","to":"' + IsNULL(strNewName, '') + '","leaf":true,"changeDescription":"Name"},'
-					FROM @tblEMEntity
+				--IF EXISTS (
+				--		SELECT 1
+				--		FROM @tblEMEntity
+				--		WHERE IsNULL(strOldName, '') <> IsNULL(strNewName, '')
+				--		)
+				--	SELECT @strDetails += '{"change":"strName","iconCls":"small-gear","from":"' + IsNULL(strOldName, '') + '","to":"' + IsNULL(strNewName, '') + '","leaf":true,"changeDescription":"Name"},'
+				--	FROM @tblEMEntity
 
 				IF EXISTS (
 						SELECT 1
