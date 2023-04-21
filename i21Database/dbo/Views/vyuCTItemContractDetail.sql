@@ -1,7 +1,6 @@
 CREATE VIEW [dbo].[vyuCTItemContractDetail]
 	
 AS 
-
 	SELECT	*
 	FROM	(
 				SELECT	
