@@ -77,6 +77,7 @@ SELECT
 	,strDestinationPort
 	,strMVessel
 	,strMVoyageNumber
+	,strForwardingAgentEntity
 	,strFVessel
 	,strFVoyageNumber
 	,strBLNumber
@@ -196,6 +197,7 @@ SELECT
 	,strDestinationPort
 	,strMVessel
 	,strMVoyageNumber
+	,strForwardingAgentEntity
 	,strFVessel
 	,strFVoyageNumber
 	,strBLNumber
