@@ -104,6 +104,15 @@ DECLARE @InventoryAdjustments TABLE
 	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
 )
 
+DECLARE @InventoryShipmentCustomerOwned TABLE
+(
+	dblIn DECIMAL(18,6)
+	,dblOut DECIMAL(18,6)
+	,intCommodityId INT
+	,intCompanyLocationId INT
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
 DECLARE @intCommodityId2 INT
 DECLARE @strCommodityCode NVARCHAR(20)
 DECLARE @strUOM NVARCHAR(20)
@@ -482,11 +491,23 @@ BEGIN
 			,@strLocationName
 			,@strUOM
 		FROM #tblInOut
-		WHERE (strTransactionType IN ('Outbound Shipment','Invoice')
-				OR (strTransactionType = 'Inventory Shipment' AND strOwnership = 'Company Owned')
-			)
+		WHERE (strTransactionType IN ('Outbound Shipment','Invoice', 'Inventory Shipment'))
+			--	OR (strTransactionType = 'Inventory Shipment' AND strOwnership = 'Company Owned')
+			--)
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
+
+		INSERT INTO @InventoryShipmentCustomerOwned
+		SELECT ISNULL(dblInvIn,0)
+			,ISNULL(dblInvOut,0)
+			,@intCommodityId2
+			,@intCompanyLocationId
+			,@strUOM
+		FROM #tblInOut
+		WHERE dtmDate IS NOT NULL
+			AND strTransactionType = 'Inventory Shipment'
+			AND strOwnership = 'Customer Owned'
+			AND intCompanyLocationId = @intCompanyLocationId		
 
 		INSERT INTO @InventoryData
 		SELECT 4
@@ -770,6 +791,14 @@ DECLARE @intStorageScheduleTypeId INT
 DECLARE @strStorageTypeDescription NVARCHAR(60)
 DECLARE @prevStorageType NVARCHAR(40)
 
+DECLARE @CustomerOwnedShipments TABLE
+(
+	dblUnits DECIMAL(18,6)
+	,intCommodityId INT
+	,intCompanyLocationId INT
+	,strUOM NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
 INSERT INTO @tblCommodities
 SELECT DISTINCT ID.intCommodityId
 	,ID.strCommodityCode
@@ -838,6 +867,18 @@ BEGIN
 	DELETE A
 	FROM #CustomerOwnershipALL A
 	WHERE intLocationId NOT IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+
+	INSERT INTO @CustomerOwnedShipments
+	SELECT ABS(dblOut)
+		,@intCommodityId2
+		,CO.intLocationId
+		,@strUOM
+	FROM #CustomerOwnershipALL CO
+	INNER JOIN tblGRStorageType ST
+		ON ST.intStorageScheduleTypeId = CO.intStorageScheduleTypeId
+			AND ST.ysnGrainBankType = 1
+			AND ST.strOwnedPhysicalStock = 'Customer'
+	WHERE CO.strTransactionType = 'Inventory Shipment'	
 
 	INSERT INTO @StorageTypes
 	SELECT DISTINCT
@@ -1372,7 +1413,7 @@ SELECT
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED INCREASE (INC DP)'
 	,'+'
-	,ISNULL(E.dblUnits,0) + ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + ISNULL(G.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0) - ISNULL(F.dblUnits,0))
+	,ISNULL(E.dblUnits,0) + ISNULL(A.dblUnits,0) + ISNULL(D.dblUnits,0) + ISNULL(G.dblUnits,0) + (ISNULL(B.dblUnits,0) - ISNULL(C.dblUnits,0) - ISNULL(F.dblUnits,0) - ISNULL(H.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1526,14 +1567,26 @@ OUTER APPLY (
 		,intCompanyLocationId
 		,strUOM
 ) G
-
+OUTER APPLY (
+	SELECT SUM(dblUnits) dblUnits
+		,intCommodityId
+		,intCompanyLocationId
+		,strUOM
+	FROM @CustomerOwnedShipments IA
+	WHERE IA.intCommodityId = A.intCommodityId
+		AND IA.intCompanyLocationId = A.intCompanyLocationId
+		AND IA.strUOM = A.strUOM
+	GROUP BY intCommodityId
+		,intCompanyLocationId
+		,strUOM
+) H
 
 INSERT INTO @InventoryData
 SELECT 
 	ISNULL(@intTotalRowCnt,1) + (SELECT MAX(intRowNum) FROM @ReportData)
 	,'TOTAL COMPANY OWNED DECREASE (INC DP)'
 	,'-'
-	,ABS(ISNULL(A.dblUnits,0) + ISNULL(C.dblUnits,0) + ISNULL(D.dblUnits,0) + ISNULL(E.dblUnits,0))
+	,ABS((ISNULL(A.dblUnits,0) + ISNULL(C.dblUnits,0) + ISNULL(D.dblUnits,0) + ISNULL(E.dblUnits,0)) - ISNULL(F.dblUnits,0))
 	,A.strCommodityCode
 	,A.intCommodityId
 	,A.intCompanyLocationId
@@ -1620,6 +1673,7 @@ OUTER APPLY (
 		,UM.strUnitMeasure
 ) D
 OUTER APPLY (
+	--Negative Company Owned IA transactions
 	SELECT ABS(SUM(dblUnits)) dblUnits
 		,intCommodityId
 		,intCompanyLocationId
@@ -1634,6 +1688,19 @@ OUTER APPLY (
 		,intCompanyLocationId
 		,strUOM
 ) E
+OUTER APPLY (
+	SELECT ABS(SUM(ISNULL(dblIn,0)) - SUM(ISNULL(dblOut,0))) dblUnits
+		,intCommodityId
+		,intCompanyLocationId
+		,strUOM
+	FROM @InventoryShipmentCustomerOwned IA
+	WHERE IA.intCommodityId = A.intCommodityId
+		AND IA.intCompanyLocationId = A.intCompanyLocationId
+		AND IA.strUOM = A.strUOM
+	GROUP BY intCommodityId
+		,intCompanyLocationId
+		,strUOM
+) F
 
 INSERT INTO @InventoryData
 SELECT
