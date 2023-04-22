@@ -69,6 +69,7 @@ BEGIN
 		,strInvoiceNumber			NVARCHAR(50)
 		,strItemNumber				NVARCHAR(50)
 		,intInvoiceId				INT
+		,strTransactionType			NVARCHAR(50)
 	)
 
 	DECLARE @AvailableContractQuantity	NUMERIC(18, 6)
