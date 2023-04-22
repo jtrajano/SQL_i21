@@ -530,6 +530,7 @@ BEGIN
     ,ISNULL(ysnSuccess,0) AS ysnSuccessful           
     ,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId        
     ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType        
+    ,'' strRecordId
    FROM tblARInvoiceIntegrationLogDetail          
     LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId --  AND intInvoiceDetailId IS null  
     LEFT JOIN tblARInvoiceDetail ON tblARInvoiceIntegrationLogDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId  
@@ -551,6 +552,7 @@ BEGIN
     , CAST(0 AS BIT)  AS ysnSuccessful           
     ,0 AS intInvoiceId        
     ,'' strTransactionType        
+    ,'' strRecordId
    FROM @ValidationTableLog      
    WHERE ysnError = 1  
    ) ResultTableLog      
