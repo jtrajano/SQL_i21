@@ -17,7 +17,10 @@ RETURNS TABLE AS RETURN
 										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((ISNULL(storageOldCost.dblOldCost, B.dblOldCost) * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END) 
 									END
-								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END) 
+								WHEN B.intInventoryReceiptItemId IS NULL THEN (
+									CASE WHEN B.intLoadShipmentCostId > 0 THEN ISNULL(B.dblOldCost, B.dblCost) ELSE B.dblTotal END
+								)
+								- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 								ELSE 
 									CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
 												CASE	WHEN B.dblOldCost = 0 THEN 0 
@@ -39,7 +42,10 @@ RETURNS TABLE AS RETURN
 										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((ISNULL(storageOldCost.dblOldCost, B.dblOldCost) * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END)
 									END
-								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END) 
+								WHEN B.intInventoryReceiptItemId IS NULL THEN (
+									CASE WHEN B.intLoadShipmentCostId > 0 THEN ISNULL(B.dblOldCost, B.dblCost) ELSE B.dblTotal END
+								)
+								- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 								ELSE 
 									CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
 												CASE	WHEN B.dblOldCost = 0 THEN 0 

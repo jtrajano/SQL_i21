@@ -922,6 +922,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCancelPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGChangeLoadCostVendor.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptOtherCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherLoadShipmentCostAdjGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
