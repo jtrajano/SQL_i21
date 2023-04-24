@@ -8,7 +8,8 @@
 	@payToAddress INT = 0,
 	@paymentId INT = 0,
 	@payFromBankAccountId INT = 0,
-	@payToBankAccountId INT = 0
+	@payToBankAccountId INT = 0,
+	@companyLocationId INT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -96,13 +97,23 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblSMCurrency currency ON currency.intCurrencyID = voucher.intCurrencyId
 	OUTER APPLY (
 		SELECT TOP 1
+			 ISNULL(CP.ysnAllowSingleLocationEntries,0) ysnAllowSingleLocationEntries
+		FROM tblAPCompanyPreference CP
+	) CP
+	OUTER APPLY (
+		SELECT TOP 1
 			eg.strEntityGroupName,
 			eg.intEntityGroupId
 		FROM tblEMEntityGroup eg
 		INNER JOIN tblEMEntityGroupDetail egd ON eg.intEntityGroupId = egd.intEntityGroupId
 		WHERE egd.intEntityId = forPay.intEntityVendorId
 	) entityGroup
-	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
+	-- WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
+	WHERE 1 = (
+							CASE WHEN ISNULL(@paymentMethodId,0) > 0 THEN
+								CASE WHEN forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL THEN 1 ELSE 0 END
+							ELSE 1 END
+						)
 	AND forPay.intCurrencyId = @currencyId
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
 			ELSE 
@@ -125,9 +136,16 @@ RETURNS TABLE AS RETURN
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @payFromBankAccountId > 0 AND voucher.intPayFromBankAccountId > 0
-					THEN (CASE WHEN @payFromBankAccountId = voucher.intPayFromBankAccountId THEN 1 ELSE 0 END)
+					THEN (CASE WHEN @payFromBankAccountId = voucher.intPayFromBankAccountId OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @payToBankAccountId > 0 AND voucher.intPayToBankAccountId > 0
 					THEN (CASE WHEN @payToBankAccountId = voucher.intPayToBankAccountId THEN 1 ELSE 0 END)
+					ELSE 1 END)
+	AND 1 = (CASE WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 1
+						THEN (CASE WHEN voucher.intShipToId = @companyLocationId AND (forPay.intTransactionType IN (1, 2, 3)) THEN 1
+									ELSE 0 END)
+					WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 0 
+						THEN (CASE WHEN voucher.intShipToId = @companyLocationId THEN 1
+									ELSE 0 END)
 					ELSE 1 END)
 )
