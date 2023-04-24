@@ -310,6 +310,7 @@ WITH ForGLEntries_CTE (
 	,dblForexValue
 	,intOtherChargeItemId
 	,intOtherChargeLocationId
+	,[other charge]
 )
 AS
 (	
@@ -339,6 +340,7 @@ AS
 			,dblForexValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0), 2)
 			,adjLog.intOtherChargeItemId
 			,[intOtherChargeLocationId] = otherChargeLocation.intItemLocationId
+			,[other charge] = charge.strItemNo
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -349,11 +351,14 @@ AS
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			INNER JOIN tblICInventoryValueAdjustmentLog adjLog
 				ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN tblICItem charge
+				ON charge.intItemId = adjLog.intOtherChargeItemId
 			INNER JOIN tblICItemLocation otherChargeLocation
 				ON otherChargeLocation.intItemId = adjLog.intOtherChargeItemId
 				AND otherChargeLocation.intLocationId = t.intCompanyLocationId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2) <> 0 
@@ -414,8 +419,8 @@ SELECT
 		,strDescription				= dbo.fnCreateCostAdjGLDescription(
 										@strGLDescription
 										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.[other charge]
 										,ForGLEntries_CTE.strItemNo
-										,ForGLEntries_CTE.strRelatedTransactionId
 									) 
 		,strCode					= 'ITA' -- In-Transit Adjustment
 		,strReference				= '' 
@@ -468,8 +473,8 @@ SELECT
 		,strDescription				= dbo.fnCreateCostAdjGLDescription(
 										@strGLDescription
 										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.[other charge]
 										,ForGLEntries_CTE.strItemNo
-										,ForGLEntries_CTE.strRelatedTransactionId
 									)
 		,strCode					= 'ITA' -- In-Transit Adjustment
 		,strReference				= '' 
