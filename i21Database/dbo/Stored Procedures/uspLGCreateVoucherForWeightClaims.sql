@@ -406,7 +406,7 @@ BEGIN TRY
 		EXEC uspAPUpdateVoucherTotal @voucherIds
 
 		IF (ISNULL(@intWeightClaimDetailId,0) <> 0)
-			SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
+			SET @strBillId = ISNULL(@strBillId,'') + ',' + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
 
 		DELETE FROM @voucherPayableToProcess
 		DELETE FROM @voucherIds
