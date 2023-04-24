@@ -664,11 +664,14 @@ BEGIN
 	--IF THERE IS TAX DATA PROVIDED, MAKE SURE TO USE THAT AS TAX GROUP ID
 	UPDATE A
 		SET A.intPurchaseTaxGroupId = C.intTaxGroupId
+				,A.strTaxGroup = D.strTaxGroup
 	FROM tblAPVoucherPayable A
 	INNER JOIN @insertedData B
 		ON A.intVoucherPayableId = B.intNewPayableId
 	INNER JOIN tblAPVoucherPayableTaxStaging C
 		ON B.intNewPayableId = C.intVoucherPayableId
+	INNER JOIN tblSMTaxGroup D
+		ON D.intTaxGroupId = C.intTaxGroupId
 
 	--Update tax group of claims from voucher payable that are created from Weight Claims Screen
 	--Using DR/CR Memo button
