@@ -144,7 +144,7 @@ BEGIN TRY
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = MIN(TMSite.intCompanyLocationSubLocationId)
-		,[intToSubLocationId]       = MIN(TMSite.intCompanyLocationSubLocationId)
+		,[intToSubLocationId]       = NULL
 		,[intFromStorageLocationId] = NULL
 		,[intToStorageLocationId]   = NULL
 		,[intInventoryTransferId]   = MIN(TR.intInventoryTransferId)
