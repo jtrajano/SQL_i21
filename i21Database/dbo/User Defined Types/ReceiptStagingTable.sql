@@ -62,7 +62,9 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[dblUnitRetail] NUMERIC(38, 20) NULL 
 	,[ysnAllowVoucher] BIT NULL
 	,[ysnAddPayable] BIT NULL
-	,[strImportDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL	
+	,[strImportDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
+	,[intComputeItemTotalOption] TINYINT NULL				-- 0: 'On Net Qty first; Otherwise Receipt Qty'; 1: 'Always on Receipt Qty'
+
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
 	,[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0         -- Freight Rate 
