@@ -109,7 +109,7 @@ BEGIN
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
-		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+		AND CompOwn.strTransactionType = 'Invoice'-- and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
 
 	--=================================
 	-- Company Owned *** Sales Order

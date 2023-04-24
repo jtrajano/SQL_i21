@@ -64,10 +64,12 @@ FROM
 												WHEN BillDtl.intInventoryReceiptChargeId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
 												ELSE ISNULL(BillByReceipt.dblTax, 0)
 											END
-		,InboundDiscount				= (CASE 
-											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
-											ELSE ISNULL(BillByReceipt.dblTotal, 0) 
-										END) - ISNULL(BillAdjustments.dblTotal,0)
+		,InboundDiscount				= 
+									--(CASE 
+									--		WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
+									--		ELSE ISNULL(BillByReceipt.dblTotal, 0) 
+									--	END) - ISNULL(BillAdjustments.dblTotal,0)
+									ISNULL(BillByReceipt.dblTotal, 0) 
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0
@@ -76,10 +78,11 @@ FROM
 												END
 											) +											
 											( 
-												(CASE 													
-													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
-													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
-												END) - ISNULL(BillAdjustments.dblTotal,0)
+												--(CASE 													
+												--	WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
+												--	ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
+												--END) - ISNULL(BillAdjustments.dblTotal,0)
+												ISNULL(BillByReceipt.dblTotal, 0)
 											) +
 											-- Include tax for discounts/other charges
 											CASE 
@@ -92,7 +95,7 @@ FROM
 		,OutboundDiscount				= 0
 		,OutboundNetDue					= 0
 		,SalesAdjustment				= ISNULL(Invoice.dblPayment,0)
-		,VoucherAdjustment				= ISNULL(BillAdjustments.dblTotal, 0)
+		,VoucherAdjustment				= ISNULL(tblOtherCharge.dblTotal,0) - ISNULL(BillByReceipt.dblTotal ,0)
 		--,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment, 0) <> 0 THEN Invoice.dblPayment

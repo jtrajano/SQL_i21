@@ -22,11 +22,15 @@ BEGIN TRY
 		, @dtmPreviousGLReverseDate DATETIME
 		, @strPreviousBatchId NVARCHAR(100)
 		, @strCommodityCode NVARCHAR(100)
+		, @ysnPosted BIT
+		, @strRecordName NVARCHAR(100)
 
 	SELECT @intCommodityId = intCommodityId
 		, @dtmCurrenctGLPostDate = dtmPostDate
 		, @dtmGLReverseDate = dtmReverseDate 
 		, @intLocationId = intLocationId
+		, @ysnPosted = ysnPosted
+		, @strRecordName = strRecordName
 	FROM tblRKM2MHeader
 	WHERE intM2MHeaderId = @intM2MHeaderId
 
@@ -39,13 +43,20 @@ BEGIN TRY
 	WHERE ysnPosted = 1 AND intCommodityId = @intCommodityId
 	ORDER BY dtmPostDate DESC
 
+	IF (ISNULL(@ysnPosted, 0) = 1)
+	BEGIN
+		SET @ErrMsg = @strRecordName + ' is already posted.'
+		RAISERROR(@ErrMsg, 16, 1)
+		RETURN
+	END
+
 	IF (@dtmGLReverseDate IS NULL)
 	BEGIN
 		RAISERROR('Please save the record before posting.', 16, 1)
 	END
 	IF (CONVERT(DATETIME, @dtmCurrenctGLPostDate) <= CONVERT(DATETIME, @dtmPreviousGLReverseDate))
 	BEGIN
-		RAISERROR('GL Post Date cannot be less than or equal to the previous post date', 16, 1)
+		RAISERROR('GL Post Date cannot be less than or equal to the previous post date.', 16, 1)
 	END
 
 	DECLARE @GLAccounts TABLE(strCategory NVARCHAR(100)
@@ -64,6 +75,11 @@ BEGIN TRY
 	SELECT * INTO #tmpPostRecap
 	FROM tblRKM2MPostPreview 
 	WHERE intM2MHeaderId = @intM2MHeaderId
+	
+	IF (@dtmCurrenctGLPostDate IS NULL)
+	BEGIN
+		SELECT TOP 1 @dtmCurrenctGLPostDate = dtmDate FROM #tmpPostRecap
+	END
 
 	DECLARE @tblResult TABLE (Result NVARCHAR(200))
 
@@ -350,7 +366,12 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
 
 		UPDATE tblRKM2MPostPreview SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MHeaderId = @intM2MHeaderId
-		UPDATE tblRKM2MHeader SET ysnPosted=1,dtmPostDate=getdate(),strBatchId=@batchId,dtmUnpostDate=null WHERE intM2MHeaderId = @intM2MHeaderId
+		UPDATE tblRKM2MHeader 
+		SET	  ysnPosted = 1
+			, dtmPostDate = @dtmCurrenctGLPostDate
+			, strBatchId = @batchId
+			, dtmUnpostDate = NULL 
+		WHERE intM2MHeaderId = @intM2MHeaderId
 
 
 		--Post Reversal using the reversal date
@@ -424,9 +445,10 @@ END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-
+	
 	IF XACT_STATE() != 0
 		ROLLBACK TRANSACTION
+
 	IF @ErrMsg != ''
 	BEGIN
 		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
