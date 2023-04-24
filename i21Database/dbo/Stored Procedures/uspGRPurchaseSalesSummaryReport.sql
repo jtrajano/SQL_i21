@@ -187,7 +187,7 @@ BEGIN TRY
 				,[intCommodityId]				=	I.intCommodityId
 				,[dblPurchaseGrainDP]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN ISNULL(IRI.dblNet, 0) ELSE 0 END)
 				,[dblPurchaseGrainOS]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 0 THEN IRI.dblNet ELSE 0 END)
-				,[dblPurchaseGrainContract]		=	SUM(CASE WHEN IRI.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN IRI.dblNet ELSE 0 END)
+				,[dblPurchaseGrainContract]		=	SUM(CASE WHEN IRI.intContractDetailId IS NOT NULL AND ISNULL(ST.ysnDPOwnedType, 0) = 0 THEN IRI.dblNet ELSE 0 END)
 				,[dblPurchaseGrainSpot]			=	SUM(CASE WHEN IRI.intContractDetailId IS NULL AND IRI.intOwnershipType = 1 THEN IRI.dblNet ELSE 0 END)
 			FROM tblSCTicket T
 			INNER JOIN tblICItem I
@@ -335,7 +335,7 @@ BEGIN TRY
 																ELSE BD.dblNetWeight
 															END
 														ELSE 0 END)
-				,[dblPurchasePaidUnitsContract]		=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN
+				,[dblPurchasePaidUnitsContract]		=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ISNULL(ST.ysnDPOwnedType, 0) = 0 THEN
 															CASE 
 																WHEN ISNULL(BD.intUnitOfMeasureId,0) > 0 AND ISNULL(BD.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,BD.intCostUOMId,BD.dblNetWeight) 
 																ELSE BD.dblNetWeight
@@ -349,7 +349,7 @@ BEGIN TRY
 														ELSE 0 END)
 				-- Paid Amounts
 				,[dblPurchasePaidAmountDP]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN BD.dblTotal+ BD.dblTax ELSE 0 END)
-				,[dblPurchasePaidAmountContract]	=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN BD.dblTotal + BD.dblTax ELSE 0 END)
+				,[dblPurchasePaidAmountContract]	=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ISNULL(ST.ysnDPOwnedType, 0) = 0 THEN BD.dblTotal + BD.dblTax ELSE 0 END)
 				,[dblPurchasePaidAmountSpot]		=	SUM(CASE WHEN BD.intContractDetailId IS NULL THEN BD.dblTotal + BD.dblTax ELSE 0 END)
 
 				,[dblPurchaseBasisTotal]			=	SUM(
@@ -412,7 +412,7 @@ BEGIN TRY
 																ELSE BD.dblNetWeight
 															END
 														ELSE 0 END)
-				,[dblPurchasePaidUnitsContract]		=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN
+				,[dblPurchasePaidUnitsContract]		=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ISNULL(ST.ysnDPOwnedType, 0) = 0 THEN
 															CASE 
 																WHEN ISNULL(BD.intUnitOfMeasureId,0) > 0 AND ISNULL(BD.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,BD.intCostUOMId,BD.dblNetWeight) 
 																ELSE BD.dblNetWeight
@@ -426,7 +426,7 @@ BEGIN TRY
 														ELSE 0 END)
 				-- Paid Amounts
 				,[dblPurchasePaidAmountDP]			=	SUM(CASE WHEN ST.ysnDPOwnedType = 1 THEN BD.dblTotal+ BD.dblTax ELSE 0 END)
-				,[dblPurchasePaidAmountContract]	=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ST.ysnDPOwnedType = 0 THEN BD.dblTotal + BD.dblTax ELSE 0 END)
+				,[dblPurchasePaidAmountContract]	=	SUM(CASE WHEN BD.intContractDetailId IS NOT NULL AND ISNULL(ST.ysnDPOwnedType, 0) = 0 THEN BD.dblTotal + BD.dblTax ELSE 0 END)
 				,[dblPurchasePaidAmountSpot]		=	SUM(CASE WHEN BD.intContractDetailId IS NULL THEN BD.dblTotal + BD.dblTax ELSE 0 END)
 
 				,[dblPurchaseBasisTotal]			=	SUM(
