@@ -532,6 +532,7 @@ INSERT
 	,dblOptionalityPremium
 	,strComment
 	/*Supplier Invoice*/
+	,intSaleYear	 -- TW -- MON		
 	,strSaleNumber						
 	,dtmSaleDate						
 	,strVendorLotNumber					
