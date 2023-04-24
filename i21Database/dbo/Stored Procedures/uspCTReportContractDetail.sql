@@ -248,7 +248,7 @@ BEGIN TRY
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
 			strStraussPrice			= CASE WHEN CH.intPricingTypeId = 2
-											THEN @fontBold + 'PTBF basis ' +  '</span>' + @fontBoldFutureMarket + MA.strFutMarketName + '</span>' + ' ' + @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + '</span>'
+											THEN @fontBold + 'PTBF basis ' +  '</span>' + @fontBoldFutureMarket + MA.strFutMarketName + space(20)  + '</span>' + ' ' + @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + '</span>'
 			 									+ CASE WHEN CD.dblBasis < 0 THEN  @fontBold + ' minus ' + '</span>'  ELSE  @fontBold +  ' plus ' + '</span>' END
 			 									+ @fontBoldCurrency + BCU.strCurrency+  '</span>' + ' '
 			 									+ @fontBoldBasis + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)+'</span>' + '/' + @fontBold + BUM.strUnitMeasure + '</span>'
