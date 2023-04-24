@@ -104,75 +104,68 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 				BEGIN
 					--CREATE CREDIT MEMO
 					INSERT INTO @tblCreditMemoEntries (
-						 strTransactionType
-						,strType	
-						,strSourceTransaction
-						,strSourceId
-						,intEntityCustomerId
-						,intCompanyLocationId
-						,intCurrencyId
-						,intTermId
-						,dtmDate
-						,dtmPostDate
-						,dtmShipDate
-						,intEntitySalespersonId
-						,intFreightTermId
-						,intShipViaId
-						,strInvoiceOriginId
-						,strPONumber
-						,strBOLNumber
-						,strComments
-						,strFooterComments	
-						,intShipToLocationId
-						,intBillToLocationId
-						,intEntityId	
-						,ysnServiceChargeCredit
-						,ysnPost
-						,strDocumentNumber
-						,strItemDescription
-						,dblQtyShipped
-						,dblPrice
-						,intCurrencyExchangeRateTypeId
-						,intCurrencyExchangeRateId
-						,dblCurrencyExchangeRate
-						,intSalesAccountId
+						strTransactionType
+						, strType	
+						, strSourceTransaction
+						, strSourceId
+						, intEntityCustomerId
+						, intCompanyLocationId
+						, intCurrencyId
+						, intTermId
+						, dtmDate
+						, dtmPostDate
+						, dtmShipDate
+						, intEntitySalespersonId
+						, intFreightTermId
+						, intShipViaId
+						, strInvoiceOriginId
+						, strPONumber
+						, strBOLNumber
+						, strComments
+						, strFooterComments	
+						, intShipToLocationId
+						, intBillToLocationId
+						, intEntityId	
+						, ysnServiceChargeCredit
+						, ysnPost
+						, strDocumentNumber
+						, strItemDescription
+						, dblQtyShipped
+						, dblPrice
+						, intSalesAccountId
 					)
-					SELECT 
-						 strTransactionType				= 'Credit Memo'
-						,strType						= 'Standard'
-						,strSourceTransaction			= 'Direct'
-						,strSourceId					= INV.strInvoiceNumber
-						,intEntityCustomerId			= INV.intEntityCustomerId
-						,intCompanyLocationId			= INV.intCompanyLocationId
-						,intCurrencyId					= INV.intCurrencyId
-						,intTermId						= INV.intTermId
-						,dtmDate						= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
-						,dtmPostDate					= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
-						,dtmShipDate					= @dtmDateToday
-						,intEntitySalespersonId			= INV.intEntitySalespersonId
-						,intFreightTermId				= INV.intFreightTermId
-						,intShipViaId					= INV.intShipViaId
-						,strInvoiceOriginId				= INV.strInvoiceNumber				 
-						,strPONumber					= INV.strPONumber
-						,strBOLNumber					= INV.strBOLNumber
-						,strComments					= INV.strInvoiceNumber + ' Forgiven'
-						,strFooterComments				= 'System Generated for prior forgiven Service Charge'
-						,intShipToLocationId			= INV.intShipToLocationId
-						,intBillToLocationId			= INV.intBillToLocationId
-						,intEntityId					= INV.intEntityId
-						,ysnServiceChargeCredit			= CAST(1 AS BIT)
-						,ysnPost						= CAST(1 AS BIT)
-						,strDocumentNumber				= INV.strInvoiceNumber
-						,strItemDescription				= INV.strInvoiceNumber + ' Forgiven'
-						,dblQtyShipped					= 1
-						,dblPrice						= INV.dblInvoiceTotal
-						,intCurrencyExchangeRateTypeId	= ARID.intCurrencyExchangeRateTypeId
-						,intCurrencyExchangeRateId		= ARID.intCurrencyExchangeRateId
-						,dblCurrencyExchangeRate		= ARID.dblCurrencyExchangeRate
-						,intSalesAccountId				= ARID.intSalesAccountId
+					SELECT strTransactionType		= 'Credit Memo'
+						, strType					= 'Standard'
+						, strSourceTransaction		= 'Direct'
+						, strSourceId				= INV.strInvoiceNumber
+						, intEntityCustomerId		= INV.intEntityCustomerId
+						, intCompanyLocationId		= INV.intCompanyLocationId
+						, intCurrencyId				= INV.intCurrencyId
+						, intTermId					= INV.intTermId
+						, dtmDate					= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
+						, dtmPostDate				= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
+						, dtmShipDate				= @dtmDateToday
+						, intEntitySalespersonId	= INV.intEntitySalespersonId
+						, intFreightTermId			= INV.intFreightTermId
+						, intShipViaId				= INV.intShipViaId
+						, strInvoiceOriginId		= INV.strInvoiceNumber				 
+						, strPONumber				= INV.strPONumber
+						, strBOLNumber				= INV.strBOLNumber
+						, strComments				= INV.strInvoiceNumber + ' Forgiven'
+						, strFooterComments			= 'System Generated for prior forgiven Service Charge'
+						, intShipToLocationId		= INV.intShipToLocationId
+						, intBillToLocationId		= INV.intBillToLocationId
+						, intEntityId				= INV.intEntityId
+						, ysnServiceChargeCredit	= CAST(1 AS BIT)
+						, ysnPost					= CAST(1 AS BIT)
+						, strDocumentNumber			= INV.strInvoiceNumber
+						, strItemDescription		= INV.strInvoiceNumber + ' Forgiven'
+						, dblQtyShipped				= 1
+						, dblPrice					= INV.dblInvoiceTotal
+						, intSalesAccountId			= ARID.intSalesAccountId				 
 					FROM tblARInvoice INV
 					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
-					INNER JOIN tblARInvoiceDetail ARID ON INV.intInvoiceId = ARID.intInvoiceId
+					INNER JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = INV.intInvoiceId
 					GROUP BY  strTransactionType
 						, strType
 						, INV.strInvoiceNumber
@@ -537,3 +530,4 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 			/****************** AUDIT LOG ******************/
 		END
 	END
+GO
