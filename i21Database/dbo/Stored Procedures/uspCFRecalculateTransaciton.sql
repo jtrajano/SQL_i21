@@ -8065,8 +8065,8 @@ BEGIN
 		UPDATE @tblCFTransactionTax 
 		SET dblRate = CASE 
 		WHEN LOWER(strCalculationMethod) = 'percentage' 
-		THEN ISNULL(dblRate,0) / (@dblQuantity * @dblCalculatedNetPrice)
-		ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+		THEN ABS(ISNULL(dblRate,0) / (@dblQuantity * @dblCalculatedNetPrice))
+		ELSE ABS(ISNULL(dblRate,0) / ISNULL(@dblQuantity,0))
 		END
 
 
