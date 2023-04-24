@@ -10,6 +10,7 @@
 	[intAccountId] INT NULL,
 	[intTransactionId] INT NULL,
 	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS  NULL,
+	[strAccountId] NVARCHAR(40) COLLATE Latin1_General_CI_AS  NULL,
 	[dtmDate] DATETIME NULL,
 	[dblDebit] NUMERIC(18, 6) NULL,
 	[dblCredit] NUMERIC(18, 6) NULL,
@@ -54,6 +55,14 @@
 	[dblTotal] NUMERIC(18, 6) NULL,
 	[dblTotalForeign] NUMERIC(18, 6) NULL,
 	[intConcurrencyId] INT DEFAULT 1 NOT NULL,
-	
+	[strUserName] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strCurrency] NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
+	[strLOBSegmentDescription] NVARCHAR (10) COLLATE Latin1_General_CI_AS NULL,
+	[strAccountDescription]  NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnGroupHeader] BIT NULL,
+	[ysnGroupFooter] BIT NULL,
+	[ysnSummary] BIT NULL,
+	[ysnSummaryFooter] BIT NULL,
+	[ysnSpace] BIT NULL,
 	CONSTRAINT [PK_tblGLAuditorTransaction] PRIMARY KEY CLUSTERED ([intAuditorTransactionId] ASC)
 )

@@ -24,14 +24,14 @@ RETURNS TABLE AS RETURN
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
-		,CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL 
-						AND receiptItem.intTaxGroupId > 0 
-						AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
-				 OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
-				 OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL))
+		,CASE WHEN (
+					(B.intInventoryReceiptItemId IS NOT NULL AND receiptItem.intTaxGroupId > 0 AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
+					OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
+					OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL)
+				 )
 				 AND A.intTransactionType <> 15
-				 AND receiptItem.intTaxGroupId > 0
-				 AND B.intTaxGroupId = receiptItem.intTaxGroupId
+				 AND (receiptItem.intTaxGroupId > 0 OR charges.intTaxGroupId > 0)
+				 AND (B.intTaxGroupId = receiptItem.intTaxGroupId OR B.intTaxGroupId = charges.intTaxGroupId)
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId

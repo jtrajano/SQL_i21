@@ -135,15 +135,14 @@ BEGIN TRY
 			,intFobPointId
 			,dblVoucherCost = NULL
 		FROM tblICInventoryTransaction t
-		INNER JOIN (
-			tblMFWorkOrderProducedLot pl LEFT JOIN tblMFWorkOrder wo ON pl.intWorkOrderId = wo.intWorkOrderId
-				AND pl.ysnProductionReversed = 0
-			) ON t.strTransactionId = wo.strWorkOrderNo
-			AND t.intLotId = ISNULL(pl.intProducedLotId, pl.intLotId)
+		OUTER APPLY (SELECT TOP 1 intWorkOrderId
+					 FROM tblMFWorkOrder AS MFWorkOrder
+					 WHERE MFWorkOrder.strWorkOrderNo = t.strTransactionId) AS WorkOrder
+		INNER JOIN tblMFWorkOrderProducedLot AS ProducedLot ON t.intTransactionDetailId = ProducedLot.intWorkOrderProducedLotId 
+														   AND ProducedLot.ysnProductionReversed = 0
+														   AND ProducedLot.intProducedLotId = t.intLotId
+														   AND ProducedLot.intWorkOrderId = WorkOrder.intWorkOrderId
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
-			AND t.strTransactionId = t.strRelatedTransactionId
-			AND t.ysnIsUnposted = 0
-			AND t.intTransactionTypeId = 26
 
 		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
 			,@strBatchId = @strBatchIdForUnpost
@@ -198,6 +197,7 @@ BEGIN TRY
 			,dblForeignRate
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
 			)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId

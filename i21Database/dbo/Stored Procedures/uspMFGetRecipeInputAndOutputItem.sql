@@ -1,67 +1,68 @@
-﻿CREATE PROCEDURE uspMFGetRecipeInputAndOutputItem (@strXML NVARCHAR(MAX) = '')
+﻿CREATE PROCEDURE [dbo].[uspMFGetRecipeInputAndOutputItem] (@strXML NVARCHAR(MAX) = '')
 AS
 BEGIN TRY
-	DECLARE @strPackagingCategory NVARCHAR(50)
-		,@intPackagingCategoryId INT
-		,@intPMCategoryId INT
-		,@intManufacturingProcessId INT
-		,@ysnProducedQtyByWeight BIT = 1
-		,@dtmCurrentDate DATETIME
-		,@dtmCurrentDateTime DATETIME
-		,@intDayOfYear INT
-		,@dblCalculatedOutputQuantity NUMERIC(24, 10)
-		,@dblCalculatedInputQuantity NUMERIC(24, 10)
-		,@idoc INT
-		,@ErrMsg NVARCHAR(MAX)
-		,@intItemId INT
-		,@dblQuantity NUMERIC(24, 10)
-		,@intQuantityItemUOMId INT
-		,@intLocationId INT
-		,@intWorkOrderId INT
-		,@dblPartialQuantity NUMERIC(24, 10)
-		,@strType NVARCHAR(1)
-		,@intTransferStorageLocationId INT
-		,@intProductId INT
-		,@dblCalculatedQuantity DECIMAL(24, 10)
-		,@ysnSubstituteItem BIT
-		,@intMainItemId INT
-		,@strWorkOrderNo NVARCHAR(50) 
-		,@dblTareWeight DECIMAL(24, 10)
-		,@dblGrossWeight DECIMAL(24, 10)
-		,@dblNetWeight DECIMAL(24, 10)
-		,@intWeightItemUOMId int
-		,@dblWeightPerUnit DECIMAL(24, 10)
-		,@intActualItemUnitMeasureId int
-		,@strActualItemUnitMeasure nvarchar(50)
-		,@intQuantityUnitMeasureId int
-		,@strQuantityUnitMeasure nvarchar(50)
+	DECLARE @strPackagingCategory			NVARCHAR(50)
+		  , @intPackagingCategoryId			INT
+		  , @intPMCategoryId				INT
+		  , @intManufacturingProcessId		INT
+		  , @ysnProducedQtyByWeight			BIT = 1
+		  , @dtmCurrentDate					DATETIME
+		  , @dtmCurrentDateTime				DATETIME
+		  , @intDayOfYear					INT
+		  , @dblCalculatedOutputQuantity	NUMERIC(24, 10)
+		  , @dblCalculatedInputQuantity		NUMERIC(24, 10)
+		  , @idoc							INT
+		  , @ErrMsg							NVARCHAR(MAX)
+		  , @intItemId						INT
+		  , @dblQuantity					NUMERIC(24, 10)
+		  , @intQuantityItemUOMId			INT
+		  , @intLocationId					INT
+		  , @intWorkOrderId					INT
+		  , @dblPartialQuantity				NUMERIC(24, 10)
+		  , @strType						NVARCHAR(1)
+		  , @intTransferStorageLocationId	INT
+		  , @intProductId					INT
+		  , @dblCalculatedQuantity			DECIMAL(24, 10)
+		  , @ysnSubstituteItem				BIT
+		  , @intMainItemId					INT
+		  , @strWorkOrderNo					NVARCHAR(50) 
+		  , @dblTareWeight					DECIMAL(24, 10)
+		  , @dblGrossWeight					DECIMAL(24, 10)
+		  , @dblNetWeight					DECIMAL(24, 10)
+		  , @intWeightItemUOMId				INT
+		  , @dblWeightPerUnit				DECIMAL(24, 10)
+		  , @intActualItemUnitMeasureId		INT
+		  , @strActualItemUnitMeasure		NVARCHAR(50)
+		  , @intQuantityUnitMeasureId		INT
+		  , @strQuantityUnitMeasure			NVARCHAR(50)
 
-	CREATE TABLE #tblMFConsumptionDetail (
-		intContainerId INT
-		,strContainerId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intStorageLocationId INT
-		,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intStorageSubLocationId INT
-		,intInputItemId INT
-		,strInputItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,strInputItemDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dblInputQuantity NUMERIC(38, 20) NULL
-		,intInputItemUOMId INT
-		,intUnitMeasureId INT
-		,strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intInputLotId INT
-		,strInputLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dblInputLotQuantity NUMERIC(38, 20) NULL
-		,strInputLotUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,ysnEmptyOutSource BIT
-		,dtmFeedTime DATETIME
-		,strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,dtmActualInputDateTime DATETIME
-		,intRowNo INT IDENTITY(1, 1)
-		,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,ysnInputItem BIT
-		,intMainItemId INT
-		)
+	CREATE TABLE #tblMFConsumptionDetail 
+	(
+		intContainerId			INT
+	  , strContainerId			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , intStorageLocationId	INT
+	  , strStorageLocationName  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , intStorageSubLocationId INT
+	  , intInputItemId			INT
+	  , strInputItemNo			NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
+	  , strInputItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+	  , dblInputQuantity		NUMERIC(38, 20) NULL
+	  , intInputItemUOMId		INT
+	  , intUnitMeasureId		INT
+	  , strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , intInputLotId			INT
+	  , strInputLotNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , dblInputLotQuantity		NUMERIC(38, 20) NULL
+	  , strInputLotUnitMeasure	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , ysnEmptyOutSource		BIT
+	  , dtmFeedTime				DATETIME
+	  , strReferenceNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , dtmActualInputDateTime	DATETIME
+	  , intRowNo				INT IDENTITY(1, 1)
+	  , strInventoryTracking	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , ysnInputItem			BIT
+	  , intMainItemId			INT
+	)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -475,7 +476,7 @@ BEGIN TRY
 		,Prod.strLotAlias
 		,C.intCategoryId
 		,I.strLotTracking
-		,I.dblWeight
+		, ISNULL(ISNULL(ISNULL(NULLIF(I.dblWeight, 0), IU1.dblWeight), ItemGrossUOM.dblUnitPerQty), ItemStockUOM.dblUnitPerQty) AS dblWeight
 		,Prod.ysnFillPartialPallet
 		,Prod.intParentLotId
 		,Prod.strThirdPartyLotNumber AS strLotNumber
@@ -499,125 +500,93 @@ BEGIN TRY
 	LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = @intTransferStorageLocationId
 	LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = Prod.intWeightItemUOMId
 	LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IsNULL(IU1.intUnitMeasureId, I.intWeightUOMId)
-	LEFT JOIN dbo.tblICItemUOM IU2 ON IU2.intItemId = I.intItemId
-		AND IU2.intUnitMeasureId = UM1.intUnitMeasureId
+	LEFT JOIN dbo.tblICItemUOM IU2 ON IU2.intItemId = I.intItemId AND IU2.intUnitMeasureId = UM1.intUnitMeasureId
 	LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Prod.intContainerId
+	OUTER APPLY (SELECT TOP 1 ISNULL(ICIUOM.dblWeight, ICIUOM.dblUnitQty) AS dblUnitPerQty
+				 FROM tblICItemLocation AS ICILocation
+				 LEFT JOIN tblICItemUOM AS ICIUOM ON ICILocation.intGrossUOMId = ICIUOM.intItemUOMId
+				 WHERE ICILocation.intItemId = ri.intItemId AND ICILocation.intLocationId = @intLocationId) as ItemGrossUOM
+	OUTER APPLY (SELECT TOP 1 ICIUOM.dblUnitQty AS dblUnitPerQty
+				 FROM tblICItemLocation AS ICILocation
+				 LEFT JOIN tblICItemUOM AS ICIUOM ON ICILocation.intGrossUOMId = ICIUOM.intItemUOMId
+				 WHERE ICILocation.intItemId = ri.intItemId AND ICILocation.intLocationId = @intLocationId AND ICIUOM.ysnStockUnit = 1) as ItemStockUOM
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 
-	IF NOT EXISTS (
-			SELECT *
-			FROM #ProductionDetail
-			WHERE intCasesPerPallet > 0
-			)
-	BEGIN
-		SELECT intStorageLocationId
-			,strStorageLocationName
-			,intStorageSubLocationId
-			,intActualItemId
-			,strActualItemNo
-			,strActualItemDescription
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @dblQuantity
-					ELSE dblPhysicalCount
-					END
-				) AS dblPhysicalCount
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @intQuantityItemUOMId
-					ELSE intPhysicalItemUOMId
-					END
-				) AS intPhysicalItemUOMId
-			,intUnitUOMId
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @strQuantityUnitMeasure
-					ELSE strPhysicalItemUOM
-					END
-				)strPhysicalItemUOM
-			,strOutputLotNumber
-			,strParentLotNumber
-			,intContainerId
-			,strContainerId
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @dblTareWeight
-					ELSE dblTareWeight
-					END
-				) dblTareWeight
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @dblGrossWeight
-					ELSE dblPhysicalCount * dblWeight
-					END
-				) AS dblGrossWeight
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @dblNetWeight
-					ELSE dblPhysicalCount * dblWeight
-					END
-				) AS dblProduceQty
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @intWeightItemUOMId
-					ELSE intActualItemUOMId
-					END
-				) intActualItemUOMId
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @intActualItemUnitMeasureId
-					ELSE intActualItemUnitMeasureId
-					END
-				) intActualItemUnitMeasureId
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @strActualItemUnitMeasure
-					ELSE strActualItemUnitMeasure
-					END
-				) strActualItemUnitMeasure
-			,(
-				CASE 
-					WHEN intActualItemId = @intItemId
-						AND @strType = 'O'
-						THEN @dblWeightPerUnit
-					ELSE dblWeight
-					END
-				) AS dblUnitQty
-			,strReferenceNo
-			,strComment
-			,intRowNo
-			,strLotAlias
-			,intCategoryId
-			,strLotTracking
-			,dblPhysicalCount AS dblReadingQuantity
-			,ysnFillPartialPallet
-			,intParentLotId
-			,strLotNumber
-			,intLotId
-			,intProduceUnitMeasureId
-			,intCertificationId
-			,strCertificationName
-		FROM #ProductionDetail DT
-	END
+	IF NOT EXISTS (SELECT * FROM #ProductionDetail WHERE intCasesPerPallet > 0)
+		BEGIN
+			SELECT intStorageLocationId
+				,strStorageLocationName
+				,intStorageSubLocationId
+				,intActualItemId
+				,strActualItemNo
+				,strActualItemDescription
+				,(
+					CASE 
+						WHEN intActualItemId = @intItemId
+							AND @strType = 'O'
+							THEN @dblQuantity
+						ELSE dblPhysicalCount
+						END
+					) AS dblPhysicalCount
+				,(
+					CASE 
+						WHEN intActualItemId = @intItemId
+							AND @strType = 'O'
+							THEN @intQuantityItemUOMId
+						ELSE intPhysicalItemUOMId
+						END
+					) AS intPhysicalItemUOMId
+				,intUnitUOMId
+				,(
+					CASE 
+						WHEN intActualItemId = @intItemId
+							AND @strType = 'O'
+							THEN @strQuantityUnitMeasure
+						ELSE strPhysicalItemUOM
+						END
+					)strPhysicalItemUOM
+				,strOutputLotNumber
+				,strParentLotNumber
+				,intContainerId
+				,strContainerId
+				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblTareWeight IS NOT NULL THEN @dblTareWeight
+						ELSE dblTareWeight
+				  END) AS dblTareWeight
+				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblGrossWeight IS NOT NULL THEN @dblGrossWeight 
+					   ELSE dblPhysicalCount * dblWeight
+				  END) AS dblGrossWeight
+				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblNetWeight IS NOT NULL THEN @dblNetWeight
+						ELSE dblPhysicalCount * dblWeight
+				  END) AS dblProduceQty
+				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @intWeightItemUOMId IS NOT NULL THEN @intWeightItemUOMId 
+						ELSE intActualItemUOMId
+				  END) intActualItemUOMId
+				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @intActualItemUnitMeasureId IS NOT NULL THEN @intActualItemUnitMeasureId 
+					   ELSE intActualItemUnitMeasureId
+				  END) intActualItemUnitMeasureId
+				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @intActualItemUnitMeasureId IS NOT NULL THEN @strActualItemUnitMeasure
+						ELSE strActualItemUnitMeasure
+				  END) strActualItemUnitMeasure
+				,(CASE  WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblWeightPerUnit IS NOT NULL THEN @dblWeightPerUnit 
+						ELSE dblWeight
+				  END) AS dblUnitQty
+				,strReferenceNo
+				,strComment
+				,intRowNo
+				,strLotAlias
+				,intCategoryId
+				,strLotTracking
+				,dblPhysicalCount AS dblReadingQuantity
+				,ysnFillPartialPallet
+				,intParentLotId
+				,strLotNumber
+				,intLotId
+				,intProduceUnitMeasureId
+				,intCertificationId
+				,strCertificationName
+			FROM #ProductionDetail DT
+		END
 	ELSE
 	BEGIN
 		DECLARE @tblMFItem TABLE (

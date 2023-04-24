@@ -34,7 +34,7 @@ RETURNS TABLE AS RETURN
 		,CASE 
 			WHEN B.intPurchaseDetailId > 0 AND poDetail.intAccountId > 0
 				THEN poDetail.intAccountId
-			WHEN B.intInventoryReceiptChargeId > 0 OR F.strType = 'Non-Inventory'
+			WHEN (B.intInventoryReceiptChargeId > 0 AND charges.ysnInventoryCost = 0) OR F.strType = 'Non-Inventory'
 				THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')
 			ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
 			END AS intAccountId
@@ -103,6 +103,7 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost 
 	AND B.intCustomerStorageId IS NULL
+	AND (E.intInventoryReceiptItemId IS NOT NULL OR charges.intInventoryReceiptChargeId IS NOT NULL)
 	--WILL CONSIDER COST ADJUSTMENT FOR RECEIPT ALL TRANSACTION 
 	--AND 1 = (CASE WHEN B.intInventoryReceiptChargeId > 0 AND F.ysnInventoryCost = 0 THEN 1 
 	--		WHEN B.intInventoryReceiptItemId > 0 THEN 1 ELSE 0 END) --created adjustment for charges only if inventory cost yes

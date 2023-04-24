@@ -1395,10 +1395,7 @@ BEGIN TRY
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
 				,[dblNewCost] = ROUND((PS.dblProductionUnitRate * PL.dblQuantity) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))), 2, 1)
-				,[intCurrencyId] = (
-					SELECT TOP 1 intDefaultReportingCurrencyId
-					FROM tblSMCompanyPreference
-					)
+				,[intCurrencyId] = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 				--,[dblExchangeRate] = 0
 				,[intTransactionId] = @intBatchId
 				,[intTransactionDetailId] = PL.intWorkOrderProducedLotId
@@ -1527,6 +1524,7 @@ BEGIN TRY
 					,dblForeignRate
 					,intSourceEntityId
 					,intCommodityId
+					,intCurrencyExchangeRateTypeId
 					)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
 					,@intEntityUserSecurityId = @userId

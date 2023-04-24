@@ -926,6 +926,7 @@ BEGIN
 		  AND voucherDetails.intBillDetailId IS NOT NULL
 		  AND A.intTransactionType <> 15
 		  AND B.intLoadShipmentCostId IS NOT NULL
+		  AND B.intInventoryReceiptChargeId IS NULL
 
 	--CHARGES
 	UNION ALL

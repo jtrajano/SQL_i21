@@ -79,6 +79,7 @@ DECLARE @totalRecords INT
 DECLARE @costAdjustmentResult INT;
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @billIdsInventoryLog AS Id;
+DECLARE @linkBillIds AS Id;
 
 -- Get the functional currency
 BEGIN 
@@ -295,6 +296,15 @@ BEGIN
 	ORDER BY intBillId
 
 	EXEC uspAPUpdateAccountOnPost @validBillIds
+	
+	--LINK LS ITEM IN IR TO HANDLE COST ADJUSTMENTS
+	UPDATE BD
+	SET BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+	OUTPUT inserted.intBillDetailId INTO @linkBillIds
+	FROM tblAPBillDetail BD
+	INNER JOIN #tmpPostBillData B ON B.intBillId = BD.intBillId
+	INNER JOIN tblICInventoryReceiptItem RI ON RI.intLoadShipmentId = BD.intLoadId AND RI.intLoadShipmentDetailId = BD.intLoadDetailId
+	WHERE BD.intInventoryReceiptItemId IS NULL AND BD.intInventoryReceiptChargeId IS NULL
 END
 
 COMMIT TRANSACTION --COMMIT inserted invalid transaction
@@ -903,7 +913,7 @@ BEGIN
 					,[strCode]
 					,[strReference]
 					,LS.intPriceCurrencyId
-					,ISNULL(FX.dblForexRate, 1)
+					,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
 					,[dtmDateEntered]
 					,[dtmTransactionDate]
 					,[strJournalLineDescription]
@@ -917,41 +927,43 @@ BEGIN
 					,[strTransactionForm] 
 					,[strModuleName]
 					,[intConcurrencyId]
-					,[dblDebitForeign] * ISNULL(ShipmentToChargeCurrency.dblForexRate, 1)
+					,dbo.fnDivide(dbo.fnMultiply(dblDebitForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
 					,[dblDebitReport]
-					,[dblCreditForeign] * ISNULL(ShipmentToChargeCurrency.dblForexRate, 1)
+					,dbo.fnDivide(dbo.fnMultiply(dblCreditForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
 					,[dblCreditReport]
 					,[dblReportingRate]
-					,ISNULL(FX.dblForexRate, 1)
+					,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
 					,[intSourceEntityId]
 					,[intCommodityId]
-					,FX.strCurrencyExchangeRateType
+					,ItemCurrencyToFunctional.strCurrencyExchangeRateType
 			FROM @GLEntriesTemp GLEntries
 			OUTER APPLY (
 				SELECT TOP 1 intPriceCurrencyId
 				FROM tblICInventoryTransaction IT
 				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
 				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 			) LS
 			OUTER APPLY (
 			SELECT TOP 1 
-				dblForexRate = ISNULL(dblRate, 0),
-				strCurrencyExchangeRateType
-			FROM vyuGLExchangeRate
-			WHERE intFromCurrencyId = LS.intPriceCurrencyId
-				AND intToCurrencyId = @intFunctionalCurrencyId
-				AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
-			ORDER BY dtmValidFromDate DESC
-			) FX
+					dblForexRate = ISNULL(dblRate, 0),
+					strCurrencyExchangeRateType
+				FROM vyuGLExchangeRate
+				WHERE intFromCurrencyId = GLEntries.intCurrencyId
+					AND intToCurrencyId = @intFunctionalCurrencyId
+					AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+				ORDER BY dtmValidFromDate DESC
+			) ChargeCurrencyToFunctional
 			OUTER APPLY (
-			SELECT TOP 1 
-				dblForexRate = ISNULL(dblRate, 0),
-				intCurrencyExchangeRateTypeId
-			FROM vyuGLExchangeRate
-			WHERE intFromCurrencyId = intCurrencyId
-				AND intToCurrencyId = LS.intPriceCurrencyId
-			ORDER BY dtmValidFromDate DESC
-			) ShipmentToChargeCurrency
+				SELECT TOP 1
+					dblForexRate = ISNULL(dblRate,0),
+					strCurrencyExchangeRateType
+				FROM vyuGLExchangeRate
+				WHERE intFromCurrencyId = LS.intPriceCurrencyId
+				AND intToCurrencyId = @intFunctionalCurrencyId
+				ORDER BY dtmValidFromDate DESC
+			) ItemCurrencyToFunctional
+			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
 
 			UPDATE @GLEntries SET strModuleName = 'Accounts Payable'
 		END TRY
@@ -1757,8 +1769,6 @@ BEGIN
 	INSERT INTO @billIdGL
 	SELECT DISTINCT intBillId FROM #tmpPostBillData	
 
-	SELECT * FROM @GLEntries
-
 	--VALIDATE GL ENTRIES
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 	OUTPUT inserted.intTransactionId INTO @invalidGL
@@ -2346,6 +2356,12 @@ ELSE
 		--CLEAN UP TRACKER FOR POSTING
 		DELETE A
 		FROM tblAPBillForPosting A
+
+		--CLEAN THE LINK OF LS ITEM FROM IR
+		UPDATE BD
+		SET BD.intInventoryReceiptItemId = NULL
+		FROM tblAPBillDetail BD
+		INNER JOIN @linkBillIds BL ON BL.intId = BD.intBillDetailId
 		
 		RETURN;
 
@@ -2428,3 +2444,8 @@ Post_Exit:
 	DELETE A
 	FROM tblAPBillForPosting A
 
+	--CLEAN THE LINK OF LS ITEM FROM IR
+	UPDATE BD
+	SET BD.intInventoryReceiptItemId = NULL
+	FROM tblAPBillDetail BD
+	INNER JOIN @linkBillIds BL ON BL.intId = BD.intBillDetailId
