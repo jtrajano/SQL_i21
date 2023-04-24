@@ -1092,7 +1092,7 @@ BEGIN
 				,RawData.intLoadShipmentDetailId
 				,ysnAddPayable					= RawData.ysnAddPayable
 				,strImportDescription			= RawData.strImportDescription
-				,intComputeItemTotalOption		= Item.intComputeItemTotalOption
+				,intComputeItemTotalOption		= ISNULL(RawData.intComputeItemTotalOption, Item.intComputeItemTotalOption) 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
