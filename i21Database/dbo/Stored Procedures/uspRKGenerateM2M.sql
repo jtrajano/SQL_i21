@@ -1407,22 +1407,13 @@ BEGIN TRY
 		INTO #tblContractCost
 		FROM ( 
 			SELECT dblCosts = dbo.fnRKGetCurrencyConvertion(CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = 1 THEN CU.intMainCurrencyId ELSE dc.intCurrencyId END, @intCurrencyId, @intMarkToMarketRateTypeId)
-								* (CASE WHEN (M2M.strContractType = 'Both') 
-											OR (M2M.strContractType = 'Purchase' AND cd.strContractType = 'Purchase') 
-											OR (M2M.strContractType = 'Sale' AND cd.strContractType = 'Sale')
-												THEN ABS(CASE WHEN dc.strCostMethod = 'Amount' 
-														THEN (SUM(dc.dblRate) 
-															/ CASE WHEN ISNULL(ch.ysnLoad, 1) = 1 
-																THEN (ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId, cu3.intCommodityUnitMeasureId, ISNULL(cd2.dblQuantityPerLoad, 1)), 1) 
-																		* CAST(ISNULL(cd2.intNoOfLoad, 1) AS NUMERIC(16, 8)))
-																ELSE ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId, cu3.intCommodityUnitMeasureId, ISNULL(cd.dblDetailQuantity, 1)), 1)
-																END)
-														ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0)))
-														END) * CASE WHEN strAdjustmentType = 'Add' THEN 1  
-																	WHEN strAdjustmentType = 'Reduce' THEN -1
-																	ELSE 0
-																	END
-												ELSE 0 END)
+								* (CASE WHEN (M2M.strContractType = 'Both') OR (M2M.strContractType = 'Purchase' AND cd.strContractType = 'Purchase') OR (M2M.strContractType = 'Sale' AND cd.strContractType = 'Sale')
+											THEN (CASE WHEN strAdjustmentType = 'Add' THEN ABS(CASE WHEN dc.strCostMethod = 'Amount' THEN SUM(dc.dblRate)
+																									ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END)
+														WHEN strAdjustmentType = 'Reduce' THEN CASE WHEN dc.strCostMethod = 'Amount' THEN SUM(dc.dblRate)
+																									ELSE - SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END
+														ELSE 0 END)
+										ELSE 0 END)
 				, strAdjustmentType
 				, dc.intContractDetailId
 				, a = cu.intCommodityUnitMeasureId
@@ -1442,14 +1433,9 @@ BEGIN TRY
 			INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = @intCommodityId AND cu.intUnitMeasureId = @intPriceUOMId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = dc.intCurrencyId
 			LEFT JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = @intCommodityId AND cu1.intUnitMeasureId = dc.intUnitMeasureId
-			LEFT JOIN tblICItemUOM CIU ON CIU.intItemUOMId = cd2.intItemUOMId
-			LEFT JOIN tblICCommodityUnitMeasure cu2 ON cu2.intCommodityId = @intCommodityId AND cu2.intUnitMeasureId = CIU.intUnitMeasureId
-			LEFT JOIN tblICCommodityUnitMeasure cu3 ON cu3.intCommodityId = @intCommodityId AND cu3.intUnitMeasureId = @intQuantityUOMId
 			WHERE NOT (cd.intPricingTypeId = 2 AND cd.strPricingType = 'Priced')
 			GROUP BY cu.intCommodityUnitMeasureId
 				, cu1.intCommodityUnitMeasureId
-				, cu2.intCommodityUnitMeasureId
-				, cu3.intCommodityUnitMeasureId
 				, strAdjustmentType
 				, dc.intContractDetailId
 				, dc.strCostMethod
@@ -1458,10 +1444,6 @@ BEGIN TRY
 				, dc.intCurrencyId
 				, M2M.strContractType
 				, cd.strContractType
-				, cd.dblDetailQuantity
-				, ch.ysnLoad
-				, cd2.intNoOfLoad
-				, cd2.dblQuantityPerLoad
 		) t 
 		GROUP BY intContractDetailId
 
