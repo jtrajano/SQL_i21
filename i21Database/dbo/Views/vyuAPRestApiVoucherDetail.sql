@@ -80,6 +80,7 @@ SELECT
 	, tax.ysnTaxExempt
 	, tax.ysnTaxOnly
 	, tax.strTaxCode
+	, i.strType AS strInventoryItemType
 FROM tblAPBillDetail bd
 LEFT JOIN tblCTContractHeader ch ON ch.intContractHeaderId = bd.intContractHeaderId
 LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = bd.intContractDetailId
