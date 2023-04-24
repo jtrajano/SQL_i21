@@ -78,6 +78,7 @@ FROM (
 		,0 AS ysnInPaymentSched
 		,NULL AS strPaymentScheduleNumber
 		,voucher.intSelectedByUserId
+		,loc.strLocationName
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -86,6 +87,7 @@ FROM (
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID
 	LEFT JOIN tblGLAccount glAccount ON glAccount.intAccountId = voucher.intAccountId
+	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = voucher.intShipToId
 	OUTER APPLY 
 	(
 		SELECT TOP 1 prepay.intAccountId, detailAccnt.strAccountId
@@ -159,6 +161,7 @@ FROM (
 		,paySched.ysnInPayment AS ysnInPaymentSched
 		,paySched.strPaymentScheduleNumber
 		,paySched.intSelectedByUserId
+		,loc.strLocationName
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -169,6 +172,7 @@ FROM (
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID
 	LEFT JOIN tblGLAccount glAccount ON glAccount.intAccountId = voucher.intAccountId
+	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = voucher.intShipToId
 	WHERE voucher.ysnPosted = 1 
 	AND voucher.ysnPaid = 0
 	AND voucher.intTransactionType IN (1)
