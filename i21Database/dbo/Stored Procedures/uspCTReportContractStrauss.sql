@@ -21,8 +21,6 @@ BEGIN TRY
 			,@intScreenId							INT
 			,@ysnExternal							BIT
 			,@strAmendedColumns						NVARCHAR(MAX)
-			,@strAmendedDate						NVARCHAR(200)
-			,@strAmendedTerm						NVARCHAR(200)
 			,@strSequenceHistoryId					NVARCHAR(MAX)
 			,@strCompanyName						NVARCHAR(500)
 			,@strPackingDescription					NVARCHAR(100)
@@ -121,12 +119,7 @@ BEGIN TRY
 
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
 	DECLARE @thisContractStatus NVARCHAR(100)
-	DECLARE @fontBold NVARCHAR(MAX)
-	DECLARE @fontBoldFreightTerm NVARCHAR(MAX)
-	DECLARE @fontBoldCity NVARCHAR(MAX)
-	DECLARE @fontBoldWeightGradeDesc NVARCHAR(MAX)
 
-	
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
 	SELECT @intTransactionId=intTransactionId, @thisContractStatus = strApprovalStatus, @IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
@@ -155,85 +148,15 @@ BEGIN TRY
 			AND T.intRecordId = @intContractHeaderId
 		ORDER BY intApprovalId
 
-		IF EXISTS (SELECT 1 FROM tblCTSequenceAmendmentLog WHERE intSequenceHistoryId = (SELECT TOP  1 intSequenceHistoryId FROM @tblSequenceHistoryId))
-		BEGIN
-		PRINT 1
 		SELECT  @strAmendedColumns = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
-											FROM tblCTAmendmentApproval AAP
-											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
-											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId 
-											WHERE ISNULL(AAP.ysnAmendment,0) = 1
-												--AND AL.dtmHistoryCreated <= @dtmApproveDate
-											FOR XML PATH('')
-											), 1, 1, '')
-
-		SELECT  @strAmendedDate = (SELECT TOP 1 CONVERT(VARCHAR(20),AL.dtmHistoryCreated, 3)   
 											FROM tblCTAmendmentApproval AAP
 											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
 											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
 											WHERE ISNULL(AAP.ysnAmendment,0) = 1
-												--AND AL.dtmHistoryCreated <= @dtmApproveDate 
-											order by AL.dtmHistoryCreated DESC )
-		END
-		ELSE
-		BEGIN
-		PRINT 2
-		SELECT  @strAmendedColumns = STUFF((
-											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
-											FROM tblCTAmendmentApproval AAP
-											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId = @intContractHeaderId 
-											JOIN tblCTSequenceHistory SH  ON SH.intContractHeaderId = @intContractHeaderId
-											WHERE ISNULL(AAP.ysnAmendment,0) = 1
+												AND AL.dtmHistoryCreated >= @dtmApproveDate
 											FOR XML PATH('')
 											), 1, 1, '')
-
-		SELECT  @strAmendedDate = (SELECT TOP 1 CONVERT(VARCHAR(20),AL.dtmHistoryCreated, 3)   
-											FROM tblCTAmendmentApproval AAP
-											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId = @intContractHeaderId 
-											JOIN tblCTSequenceHistory SH  ON SH.intContractHeaderId = @intContractHeaderId 
-											WHERE ISNULL(AAP.ysnAmendment,0) = 1 
-											order by AL.dtmHistoryCreated DESC )
-		END
-
-		SELECT @strAmendedTerm = (SELECT TOP 1 strNewValue
-									FROM tblCTAmendmentApproval AAP
-									JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId AND AL.intContractHeaderId =  @intContractHeaderId  
-									WHERE ISNULL(AAP.ysnAmendment,0) = 1 and strItemChanged = 'Terms' )
-
-		IF CHARINDEX('intGradeId',@strAmendedColumns, 0) > 0 
-		BEGIN
-			SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;font-weight:bold;">'
-		END
-		ELSE
-		BEGIN 
-			SET @fontBold = '<span style="font-family:Arial;font-size:12.5px;">'
-		END
-		IF CHARINDEX('intFreightTermId',@strAmendedColumns, 0) > 0 
-		BEGIN
-			SET @fontBoldFreightTerm = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
-		END
-		ELSE
-		BEGIN 
-			SET @fontBoldFreightTerm  = '<span style="font-family:Arial;font-size:13px;">'
-		END
-		IF CHARINDEX('intINCOLocationTypeId',@strAmendedColumns, 0) > 0 
-		BEGIN
-			SET @fontBoldCity = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
-		END
-		ELSE
-		BEGIN 
-			SET @fontBoldCity  = '<span style="font-family:Arial;font-size:13px;">'
-		END
-		IF CHARINDEX('intWeightId',@strAmendedColumns, 0) > 0 
-		BEGIN
-			SET @fontBoldWeightGradeDesc = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
-		END
-		ELSE
-		BEGIN 
-			SET @fontBoldWeightGradeDesc  = '<span style="font-family:Arial;font-size:13px;">'
-		END
-
 	END
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
@@ -403,7 +326,6 @@ BEGIN TRY
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 	
 	SELECT intContractHeaderId					= CH.intContractHeaderId
-		,@fontBold
 		,intContractTypeId						= CH.intContractTypeId
 		,StraussContractSubmitByParentSignature	= @blbParentSubmitSignature
 		,InterCompApprovalSign					= @blbParentApproveSignature
@@ -431,8 +353,7 @@ BEGIN TRY
 														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END, '')
 													END + '</span>'
 		 ,dtmContractDate						= CH.dtmContractDate
-		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END) + (CASE WHEN @strAmendedDate  IS NULL THEN '' ELSE ' - ('+ @strAmendedDate + ')' END)
-		 ,strAmendedTerm						= ISNULL(@strAmendedTerm,NULL)
+		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END)
 		 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
@@ -445,21 +366,15 @@ BEGIN TRY
 		,strStraussShipmentLabel				= (CASE WHEN PO.strPositionType = 'Spot' THEN 'DELIVERY' ELSE 'SHIPMENT' END)
 		,strStraussShipment						= CONVERT(VARCHAR, @dtmStartDate, 101) + ' - ' + CONVERT(VARCHAR, @dtmEndDate, 101)
 		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE @strDestinationPort END)
-		,strFreightTerm							= CB.strFreightTerm + ' (' + CB.strDescription + ')'
-		,strCity								= ISNULL(CT.strCity, '')
-		,strWeightGradeDesc						= ISNULL(W1.strWeightGradeDesc, '')
-		,strStraussCondition     				= @fontBoldFreightTerm + CB.strFreightTerm + ' (' + CB.strDescription + ')' + '</span>' + ' '
-												+ @fontBoldCity +  ISNULL(CT.strCity, '') + '</span>' + ' ' 
-												+ @fontBoldWeightGradeDesc + ISNULL(W1.strWeightGradeDesc, '') + '</span>'
+		,strStraussCondition     				= CB.strFreightTerm + ' (' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
-		,strStrussOtherCondition				= '<span>' + @fontBold + ISNULL(W2.strWeightGradeDesc, '') + '</span>'+  +'<span style="font-family:Arial;font-size:13px;">' + ISNULL(@strGeneralCondition, '')  + '</span>' + '</span>'
+		,strStrussOtherCondition				= '<span style="font-family:Arial;font-size:13px;">' + ISNULL(W2.strWeightGradeDesc, '') +  ISNULL(@strGeneralCondition, '') + '</span>'
 		,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 		,ysnExternal							= @ysnExternal
 		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)
 		,strReferenceNo							= CASE WHEN LTRIM(RTRIM(ISNULL(CH.strCustomerContract, ''))) <> '' THEN 'Your Ref. ' + ltrim(rtrim(CH.strCustomerContract)) ELSE NULL END
-		,strAmendedColumns 						= @strAmendedColumns
 
 	FROM tblCTContractHeader CH
 	LEFT JOIN vyuCTEntity EC WITH (NOLOCK) ON EC.intEntityId = CH.intCounterPartyId AND EC.strEntityType = 'Customer'
