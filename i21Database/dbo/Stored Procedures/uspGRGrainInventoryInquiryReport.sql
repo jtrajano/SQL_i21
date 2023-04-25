@@ -876,6 +876,7 @@ BEGIN
 			AND ST.ysnGrainBankType = 1
 			AND ST.strOwnedPhysicalStock = 'Customer'
 	WHERE CO.strTransactionType = 'Inventory Shipment'	
+		AND CO.dtmDate = @dtmReportDate
 
 	INSERT INTO @StorageTypes
 	SELECT DISTINCT
