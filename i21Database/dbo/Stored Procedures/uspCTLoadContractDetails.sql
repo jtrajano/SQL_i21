@@ -676,6 +676,7 @@ BEGIN TRY
 		, CD.intFeedPriceCurrencyId
 		, strFeedPriceItemUOM = FUM.strUnitMeasure
 		, strFeedPriceCurrency = FCU.strCurrency
+		, CD.intMTMPointId
 	  	, strMTMPoint = mtmp.strMTMPoint
 	  	, strLogisticsLeadName = LL.strName
 	  	, CD.intLogisticsLeadId

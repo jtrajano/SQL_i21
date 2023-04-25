@@ -347,6 +347,7 @@ AS
 			, CD.dblSalesPrice
 			, strLogisticsLeadName = LL.strName
 			, CD.intLogisticsLeadId
+			, CD.intMTMPointId
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
