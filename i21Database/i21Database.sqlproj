@@ -11261,6 +11261,7 @@
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
+    <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
