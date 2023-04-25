@@ -139,6 +139,9 @@ BEGIN TRY
 	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
 	WHERE intBillId = @intBillId
 
+	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
+	WHERE intTransactionId = @intBillId
+
 	--Get intBillBatchId of the deleted Voucher
 	DECLARE @billBatchId INT
 	SET @billBatchId = (SELECT A.intBillBatchId FROM tblAPBill A WHERE A.intBillId = @intBillId)
