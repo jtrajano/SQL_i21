@@ -11326,6 +11326,7 @@
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
+    <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
