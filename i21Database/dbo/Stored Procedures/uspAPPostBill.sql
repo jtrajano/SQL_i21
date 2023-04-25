@@ -1238,7 +1238,7 @@ BEGIN
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
 			,@intEntityUserSecurityId = @userId
-			,@strGLDescription = 1
+			,@strGLDescription = DEFAULT
 			,@ysnPost = @post
 			,@AccountCategory_Cost_Adjustment = DEFAULT
 
@@ -1675,7 +1675,7 @@ BEGIN
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
 			,@intEntityUserSecurityId = @userId
-			,@strGLDescription = 1
+			,@strGLDescription = DEFAULT
 			,@ysnPost = @post
 			,@AccountCategory_Cost_Adjustment = DEFAULT
 

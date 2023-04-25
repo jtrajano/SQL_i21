@@ -34,6 +34,11 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveFIFO]
 	,@intCurrencyId AS INT = NULL 
 	,@intForexRateTypeId AS INT = NULL
 	,@dblForexRate AS NUMERIC(38, 20) 
+	,@intOtherChargeCurrencyId AS INT = NULL
+	,@intOtherChargeForexRateTypeId AS INT = NULL 
+	,@dblOtherChargeForexRate AS NUMERIC(38, 20) 
+	,@dblOtherChargeValue AS NUMERIC(38, 20) 
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -588,6 +593,10 @@ BEGIN
 				,[intCurrencyId]
 				,[intForexRateTypeId]
 				,[dblForexRate]
+				,[intOtherChargeCurrencyId]
+				,[intOtherChargeForexRateTypeId]
+				,[dblOtherChargeForexRate]
+				,[dblOtherChargeValue]
 			)
 			SELECT
 				[intInventoryFIFOId] = @CostBucketId
@@ -684,6 +693,30 @@ BEGIN
 				,[intCurrencyId] = @intCurrencyId
 				,[intForexRateTypeId] = @intForexRateTypeId
 				,[dblForexRate] = @dblForexRate
+				,[intOtherChargeCurrencyId] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@intOtherChargeCurrencyId
+							ELSE 
+								NULL
+					END
+				,[intOtherChargeForexRateTypeId] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@intOtherChargeForexRateTypeId
+							ELSE 
+								NULL
+					END
+				,[dblOtherChargeForexRate] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@dblOtherChargeForexRate
+							ELSE 
+								NULL
+					END
+				,[dblOtherChargeValue] = 
+					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
+								@dblOtherChargeValue
+							ELSE 
+								NULL
+					END
 			WHERE		
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostAdjustment

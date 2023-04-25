@@ -115,6 +115,10 @@ DECLARE @intId AS INT
 		,@intSourceEntityId INT 
 		,@intForexRateTypeId INT 
 		,@dblForexRate NUMERIC(38, 20) 
+		,@intOtherChargeCurrencyId INT 
+		,@intOtherChargeForexRateTypeId INT
+		,@dblOtherChargeForexRate NUMERIC(38, 20)
+		,@dblOtherChargeValue AS NUMERIC(38, 20) 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionFormName AS NVARCHAR(200)
@@ -168,6 +172,10 @@ BEGIN
 			,[intSourceEntityId]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[intOtherChargeCurrencyId]
+			,[intOtherChargeForexRateTypeId] 
+			,[dblOtherChargeForexRate] 
+			,[dblOtherChargeValue]
 	)
 	SELECT 
 			[intItemId] 
@@ -201,6 +209,10 @@ BEGIN
 			,[intSourceEntityId]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[intOtherChargeCurrencyId]
+			,[intOtherChargeForexRateTypeId] 
+			,[dblOtherChargeForexRate] 
+			,[dblOtherChargeValue] = CASE WHEN @ysnPost = 1 THEN [dblOtherChargeValue] ELSE -[dblOtherChargeValue] END
 	FROM	@ItemsToAdjust 
 	ORDER BY	
 		[intItemId]
@@ -297,6 +309,10 @@ SELECT  intId
 		,intSourceEntityId
 		,intForexRateTypeId
 		,dblForexRate
+		,intOtherChargeCurrencyId
+		,intOtherChargeForexRateTypeId 
+		,dblOtherChargeForexRate 
+		,dblOtherChargeValue
 
 FROM	@Internal_ItemsToAdjust
 
@@ -334,6 +350,10 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intSourceEntityId
 	,@intForexRateTypeId
 	,@dblForexRate
+	,@intOtherChargeCurrencyId
+	,@intOtherChargeForexRateTypeId 
+	,@dblOtherChargeForexRate 
+	,@dblOtherChargeValue
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -451,6 +471,10 @@ BEGIN
 				,@intCurrencyId
 				,@intForexRateTypeId
 				,@dblForexRate
+				,@intOtherChargeCurrencyId
+				,@intOtherChargeForexRateTypeId 
+				,@dblOtherChargeForexRate 
+				,@dblOtherChargeValue
 		END 
 		-- Do the retroactive average cost if cost adjustment is within a month. 
 		ELSE 
@@ -488,6 +512,10 @@ BEGIN
 				,@intCurrencyId
 				,@intForexRateTypeId
 				,@dblForexRate
+				,@intOtherChargeCurrencyId
+				,@intOtherChargeForexRateTypeId 
+				,@dblOtherChargeForexRate 
+				,@dblOtherChargeValue
 		END 
 	END TRY
 	BEGIN CATCH
@@ -537,6 +565,10 @@ BEGIN
 			,@intCurrencyId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intOtherChargeCurrencyId
+			,@intOtherChargeForexRateTypeId 
+			,@dblOtherChargeForexRate 
+			,@dblOtherChargeValue
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -585,6 +617,10 @@ BEGIN
 			,@intCurrencyId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intOtherChargeCurrencyId
+			,@intOtherChargeForexRateTypeId 
+			,@dblOtherChargeForexRate 
+			,@dblOtherChargeValue
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -634,6 +670,10 @@ BEGIN
 			,@intCurrencyId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intOtherChargeCurrencyId
+			,@intOtherChargeForexRateTypeId 
+			,@dblOtherChargeForexRate 
+			,@dblOtherChargeValue
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -684,6 +724,10 @@ BEGIN
 			,@intCurrencyId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intOtherChargeCurrencyId
+			,@intOtherChargeForexRateTypeId 
+			,@dblOtherChargeForexRate 
+			,@dblOtherChargeValue
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -750,6 +794,10 @@ BEGIN
 		,@intSourceEntityId
 		,@intForexRateTypeId
 		,@dblForexRate
+		,@intOtherChargeCurrencyId
+		,@intOtherChargeForexRateTypeId 
+		,@dblOtherChargeForexRate 
+		,@dblOtherChargeValue
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

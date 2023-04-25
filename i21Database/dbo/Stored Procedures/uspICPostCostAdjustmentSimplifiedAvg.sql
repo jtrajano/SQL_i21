@@ -34,6 +34,10 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentSimplifiedAvg]
 	,@intCurrencyId AS INT = NULL 
 	,@intForexRateTypeId AS INT = NULL
 	,@dblForexRate AS NUMERIC(38, 20) 
+	,@intOtherChargeCurrencyId AS INT = NULL 
+	,@intOtherChargeForexRateTypeId AS INT = NULL 
+	,@dblOtherChargeForexRate AS NUMERIC(38, 20) 
+	,@dblOtherChargeValue AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -390,7 +394,10 @@ BEGIN
 		,[intCurrencyId]
 		,[intForexRateTypeId]
 		,[dblForexRate]
-
+		,[intOtherChargeCurrencyId]
+		,[intOtherChargeForexRateTypeId]
+		,[dblOtherChargeForexRate]
+		,[dblOtherChargeValue]
 	)
 	SELECT
 		[intInventoryFIFOId] = @CostBucketId
@@ -412,6 +419,10 @@ BEGIN
 		,[intCurrencyId] = @intCurrencyId
 		,[intForexRateTypeId] = @intForexRateTypeId
 		,[dblForexRate] = @dblForexRate
+		,[intOtherChargeCurrencyId] = @intOtherChargeCurrencyId
+		,[intOtherChargeForexRateTypeId] = @intOtherChargeForexRateTypeId
+		,[dblOtherChargeForexRate] = @dblOtherChargeForexRate
+		,[dblOtherChargeValue] = @dblOtherChargeValue
 		
 	EXEC [uspICPostInventoryTransaction]
 		@intItemId								= @intItemId

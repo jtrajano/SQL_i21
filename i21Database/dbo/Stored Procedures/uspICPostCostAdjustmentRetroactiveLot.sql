@@ -35,6 +35,10 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@intCurrencyId AS INT = NULL 
 	,@intForexRateTypeId AS INT = NULL
 	,@dblForexRate AS NUMERIC(38, 20)
+	,@intOtherChargeCurrencyId AS INT = NULL 
+	,@intOtherChargeForexRateTypeId AS INT = NULL 
+	,@dblOtherChargeForexRate AS NUMERIC(38, 20) 
+	,@dblOtherChargeValue AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -703,6 +707,10 @@ BEGIN
 				,[intCurrencyId] 
 				,[intForexRateTypeId] 
 				,[dblForexRate] 
+				,[intOtherChargeCurrencyId]
+				,[intOtherChargeForexRateTypeId]
+				,[dblOtherChargeForexRate]
+				,[dblOtherChargeValue]
 			)
 			SELECT
 				[intInventoryLotId] = @CostBucketId
@@ -795,6 +803,30 @@ BEGIN
 				,[intCurrencyId] = @intCurrencyId
 				,[intForexRateTypeId] = @intForexRateTypeId
 				,[dblForexRate] = @dblForexRate
+				,[intOtherChargeCurrencyId] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@intOtherChargeCurrencyId
+							ELSE 
+								NULL
+					END
+				,[intOtherChargeForexRateTypeId] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@intOtherChargeForexRateTypeId
+							ELSE 
+								NULL
+					END
+				,[dblOtherChargeForexRate] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@dblOtherChargeForexRate
+							ELSE 
+								NULL
+					END
+				,[dblOtherChargeValue] = 
+					CASE	WHEN @IsSourceTransaction = 1 THEN 
+								@dblOtherChargeValue
+							ELSE 
+								NULL
+					END
 			WHERE		
 				CASE	WHEN @IsSourceTransaction = 1 THEN 
 							@t_dblQty * @CostAdjustmentPerCb

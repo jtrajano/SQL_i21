@@ -30,6 +30,9 @@
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		[intOtherChargeItemId] INT NULL,
+		[intOtherChargeCurrencyId] INT NULL,
+		[intOtherChargeForexRateTypeId] INT NULL,
+		[dblOtherChargeForexRate] NUMERIC(38, 20) NULL DEFAULT 1,
 		CONSTRAINT [PK_tblICInventoryLotValueAdjustmentLog] PRIMARY KEY CLUSTERED ([intId])		
 	)
 	GO
