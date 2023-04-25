@@ -95,6 +95,7 @@ RETURNS TABLE AS RETURN
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost 
 	AND B.intCustomerStorageId IS NULL
 	AND B.dblQtyReceived < 0
+	AND ISNULL(B.ysnPrepaidOtherCharge, 0) != 1 --EXCLUDE PREPAID OTHER CHARGES
 	UNION ALL
 	SELECT
 		B.intBillDetailId
@@ -181,4 +182,5 @@ RETURNS TABLE AS RETURN
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost 
 	AND B.intCustomerStorageId IS NULL
 	AND B.dblQtyReceived < 0
+	AND ISNULL(B.ysnPrepaidOtherCharge, 0) != 1 --EXCLUDE PREPAID OTHER CHARGES
 )

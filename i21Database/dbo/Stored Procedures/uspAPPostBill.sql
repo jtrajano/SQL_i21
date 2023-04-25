@@ -593,7 +593,7 @@ SELECT
 						AS DECIMAL(18,2)
 					)
 				ELSE
-					-CAST(
+					CAST(
 						(B.dblCost * B.dblQtyReceived)  * rc.dblForexRate
 						AS DECIMAL(18,2)
 					)
@@ -603,14 +603,14 @@ SELECT
 				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
 						CAST(
 							(
-								(B.dblCost * rc.dblForexRate)
+								((B.dblCost * B.dblQtyReceived) * rc.dblForexRate)
 								/ ISNULL(r.intSubCurrencyCents, 1) 
 							)  
 							AS DECIMAL(18,2)
 						)
 				ELSE 
 						CAST(
-							(B.dblCost * rc.dblForexRate)
+							((B.dblCost * B.dblQtyReceived) * rc.dblForexRate)
 							AS DECIMAL(18,2)
 						)
 			END  			

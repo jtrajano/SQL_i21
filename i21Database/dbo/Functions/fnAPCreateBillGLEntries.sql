@@ -1435,6 +1435,106 @@ BEGIN
 
 	--TAX ADJUSTMENT FOR PREPAID OTHER CHARGES
 	UNION ALL
+	--CREDIT
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	D.intAccountId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1)) AS DECIMAL(18,2)),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	D.intBillDetailTaxId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,   
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) AS DECIMAL(18,2)),
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			INNER JOIN tblAPBillDetailTax D
+				ON B.intBillDetailId = D.intBillDetailId
+			LEFT JOIN tblICInventoryReceiptCharge charges
+				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+			LEFT JOIN tblICInventoryReceipt receipts
+				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
+				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			LEFT JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND A.intTransactionType IN (3)
+		  AND D.ysnTaxAdjusted = 1
+			AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1
+			AND ISNULL(B.dblOldCost,0) <> 0
+			AND D.ysnTaxAdjusted = 1
+			AND B.intInventoryReceiptChargeId > 0
+	GROUP BY A.dtmDate
+	,D.ysnTaxAdjusted
+	,D.intAccountId
+	,A.strReference
+	,A.strVendorOrderNumber
+	,C.strVendorId
+	,D.intBillDetailTaxId
+	,A.intCurrencyId
+	,A.intTransactionType
+	,A.strBillId
+	,A.intBillId
+	,charges.intInventoryReceiptChargeId
+	,charges.ysnPrice
+	,receipts.intEntityVendorId
+	,charges.intEntityVendorId
+	,A.intEntityVendorId
+	,B.dblRate
+	,G.strCurrencyExchangeRateType
+	,G.intCurrencyExchangeRateTypeId
+	,B.dblOldCost
+	,F.intItemId
+	,loc.intItemLocationId
+	,B.intInventoryReceiptItemId
+	,B.intInventoryReceiptChargeId
+	,A.intCommodityId
+	,A.intStoreLocationId
+	,E.strName
+	,B.strComment
+	,B.ysnPrepaidOtherCharge
+	
+	--DEBIT
+	UNION ALL
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
