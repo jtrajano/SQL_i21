@@ -75,6 +75,8 @@ SELECT
 	,strCompanyLocationName	= LOC.strLocationName
 	,strSalespersonName		= SP.strName
 	,strFreightTerm			= FT.strFreightTerm
+	,strTaxGroup			= CONTRACTS.strTaxGroup
+	,intTaxGroupId			= CONTRACTS.intTaxGroupId
 FROM (
 	SELECT intContractHeaderId		= CC.intContractHeaderId
 		 , intContractDetailId		= CC.intContractDetailId
@@ -129,6 +131,8 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= NULL
 		 , intFreightTermId			= CC.intFreightTermId
+		 , intTaxGroupId			= NULL
+		 , strTaxGroup				= NULL
 	FROM vyuCTCustomerContract CC
 	OUTER APPLY (
 		SELECT TOP 1 intCurrencyId = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
@@ -194,8 +198,11 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= ICC.intSalespersonId
 		 , intFreightTermId			= ICC.intFreightTermId
+		 , intTaxGroupId			= SMTG.intTaxGroupId
+		 , strTaxGroup				= SMTG.strTaxGroup
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractDetail ICD ON ICC.intItemContractHeaderId = ICD.intItemContractHeaderId
+	LEFT JOIN tblSMTaxGroup SMTG ON ICD.intTaxGroupId = SMTG.intTaxGroupId
 	INNER JOIN tblICItem ITEM ON ICD.intItemId = ITEM.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON ICD.intItemUOMId = UOM.intItemUOMId
 	WHERE ICD.intContractStatusId = 1
@@ -256,6 +263,8 @@ FROM (
 		 , strCategoryDescription	= IC.strDescription
 		 , intEntitySalespersonId	= ICC.intSalespersonId
 		 , intFreightTermId			= ICC.intFreightTermId
+		 , intTaxGroupId			= NULL
+		 , strTaxGroup				= NULL
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractHeaderCategory ICHC ON ICC.intItemContractHeaderId = ICHC.intItemContractHeaderId
 	INNER JOIN tblICCategory IC ON IC.intCategoryId = ICHC.intCategoryId
