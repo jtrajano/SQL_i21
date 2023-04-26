@@ -3,6 +3,7 @@
 	[intBuybackId] [int] NOT NULL,
 	[intInvoiceDetailId] [int] NOT NULL,
     [dblBuybackQuantity] NUMERIC(18, 6) NOT NULL, 
+    [dblItemCost] NUMERIC(18, 6) NULL, -- temporary holder for submission
     [intItemId] INT NOT NULL, 
     [intProgramRateId] INT NULL, 
     [dblBuybackRate] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
