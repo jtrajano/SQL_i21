@@ -47,7 +47,7 @@ FROM (
 	LEFT JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId      
 	LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId      
 	LEFT JOIN tblCTPriceFixationDetailAPAR ap ON ap.intPriceFixationDetailId = pfd.intPriceFixationDetailId      
-	LEFT JOIN tblAPBillDetail bd ON bd.intBillDetailId = ap.intBillDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
+	LEFT JOIN tblAPBillDetail bd ON bd.intBillDetailId = ap.intBillDetailId AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
 	LEFT JOIN tblICCommodityUnitMeasure co ON co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = cd.intItemId AND iu.intUnitMeasureId = co.intUnitMeasureId
 	OUTER APPLY (
@@ -102,7 +102,7 @@ FROM (
 	join tblCTContractDetail cd on cd.intContractHeaderId = ch.intContractHeaderId and cd.intContractSeq = 1
 	LEFT JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId      
 	LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
-	LEFT JOIN tblAPBillDetail bd ON bd.intContractHeaderId = ch.intContractHeaderId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
+	LEFT JOIN tblAPBillDetail bd ON bd.intContractHeaderId = ch.intContractHeaderId AND bd.intInventoryReceiptChargeId is null and bd.intItemId = cd.intItemId
 	LEFT JOIN tblICCommodityUnitMeasure co ON co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
 	LEFT JOIN tblICItemUOM iu ON iu.intItemId = cd.intItemId AND iu.intUnitMeasureId = co.intUnitMeasureId
 	WHERE ch.ysnMultiplePriceFixation = 1
