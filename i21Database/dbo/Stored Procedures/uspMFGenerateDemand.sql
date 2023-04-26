@@ -550,41 +550,39 @@ BEGIN TRY
 			FROM @tblMFItemBook
 
 			WHILE @intId IS NOT NULL
-			BEGIN
-				SELECT @intItemBookId	= NULL
-					 , @strBook			= ''
+				BEGIN
+					SELECT @intItemBookId	= NULL
+						 , @strBook			= ''
 
-				SELECT @intItemBookId = intItemId
-				FROM @tblMFItemBook
-				WHERE intId = @intId
+					SELECT @intItemBookId = intItemId
+					FROM @tblMFItemBook
+					WHERE intId = @intId
 
-				SELECT @strBook = @strBook + strBook + ','
-				FROM tblCTBook B
-				WHERE NOT EXISTS (
-						SELECT intBookId
-						FROM tblICItemBook IB
-						WHERE IB.intItemId = @intItemBookId
-							AND IB.intBookId = B.intBookId
-						)
+					SELECT @strBook = @strBook + strBook + ','
+					FROM tblCTBook B
+					WHERE NOT EXISTS (SELECT intBookId
+									  FROM tblICItemBook IB
+									  WHERE IB.intItemId = @intItemBookId
+										AND IB.intBookId = B.intBookId)
 
-				IF @strBook IS NULL
-					BEGIN
-						SELECT @strBook = '';
-					END
+					IF @strBook IS NULL
+						BEGIN
+							SELECT @strBook = '';
+						END
 
-				IF len(@strBook) > 0
-					BEGIN
-						SELECT @strBook = LEFT(@strBook, LEN(@strBook) - 1)
+					IF len(@strBook) > 0
+						BEGIN
+							SELECT @strBook = LEFT(@strBook, LEN(@strBook) - 1)
 
-						UPDATE @tblMFItemBook
-						SET strBook = @strBook
-						WHERE intId = @intId
-					END
+							UPDATE @tblMFItemBook
+							SET strBook = @strBook
+							WHERE intId = @intId
+						END
 
-				SELECT @intId = MIN(intId)
-				FROM @tblMFItemBook
-				WHERE intId > @intId
-			END
+					SELECT @intId = MIN(intId)
+					FROM @tblMFItemBook
+					WHERE intId > @intId
+				END
 		END
 
 	IF @OpenPurchaseXML <> ''
@@ -1113,7 +1111,7 @@ BEGIN TRY
 	/* End of Retrieve Addtional Forecast */
 
 
-	/* Retrieval of Purchase / Contracts / Logistics. (Critical Part of Generating Demand). */
+	/* Retrieval of Purchase / Contracts (Critical Part of Generating Demand). */
 	IF ISNULL(@OpenPurchaseXML, '') = ''
 		BEGIN
 			IF @ysnRefreshContract = 1
@@ -1233,6 +1231,10 @@ BEGIN TRY
 					, intLocationId
 			FROM #TempOpenPurchase
 		END
+
+	/* End of Retrieval of Purchase / Contracts (Critical Part of Generating Demand). */
+
+	/* Retrieval of Logistics (Critical Part of Generating Demand). */
 
 	INSERT INTO #tblMFDemand 
 	(
@@ -1488,7 +1490,8 @@ BEGIN TRY
 										 END)
 							  END))
 		   , SS.intCompanyLocationId
-	/* Retrieval of Purchase / Contracts / Logistics. (Critical Part of Generating Demand). */
+
+	/* Retrieval of Logistics (Critical Part of Generating Demand). */
 
 	/* Stage the Contract / Logitics / Purchase. */
 	INSERT INTO #tblMFTempDemand 
@@ -1765,778 +1768,710 @@ BEGIN TRY
 																   )
 																   AND intAttributeId IN 
 																   (
-																		2 --Opening Inventory
-																	  , 13 --Open Purchases
-																	  , 14 --In-transit Purchases
+																		2	/* Opening Inventory */
+																	  , 13	/* Open Purchases */
+																	  , 14	/* In-transit Purchases */
 																 ))
 									  ELSE (SELECT SUM(OpenInv.dblQty)
 											FROM #tblMFDemand OpenInv
 											WHERE OpenInv.intItemId = D.intItemId
 											  AND OpenInv.intLocationId = D.intLocationId
 											  AND intMonthId = @intMonthId - 1
-											  AND intAttributeId = 9) --Ending Inventory
+											  AND intAttributeId = 9) /* Ending Inventory */
 									
 								 END
 					FROM #tblMFDemand D
-					WHERE intAttributeId = 2 --Opening Inventory
+					WHERE intAttributeId = 2 /* Opening Inventory */
 					  AND intMonthId	 = @intMonthId
 
 					IF @ysnCalculatePlannedPurchases = 1
 						BEGIN
 							UPDATE D
-							SET dblQty = (
-									CASE 
-										WHEN (
-												SELECT sum(OpenInv.dblQty)
-												FROM #tblMFDemand OpenInv
-												WHERE OpenInv.intItemId = D.intItemId
-													AND OpenInv.intLocationId = D.intLocationId
-													AND OpenInv.intMonthId = @intMonthId
-													AND (
-														intAttributeId IN (
-															2
-															,4
-															,8
-															,15
-															,16
-															) --Opening Inventory, Existing Purchases,Forecasted Consumption
-														)
-												) < 0
-											THEN (
-													SELECT sum(OpenInv.dblQty)
-													FROM #tblMFDemand OpenInv
-													WHERE OpenInv.intItemId = D.intItemId
-														AND OpenInv.intLocationId = D.intLocationId
-														AND OpenInv.intMonthId = @intMonthId
-														AND (
-															intAttributeId IN (
-																2
-																,4
-																,8
-																,15
-																,16
-																) --Opening Inventory, Existing Purchases,Forecasted Consumption
-															)
-													) * - 1
-										ELSE 0
-										END
-									)
+							SET dblQty = (CASE WHEN (SELECT sum(OpenInv.dblQty)
+													 FROM #tblMFDemand OpenInv
+													 WHERE OpenInv.intItemId = D.intItemId
+													   AND OpenInv.intLocationId = D.intLocationId
+													   AND OpenInv.intMonthId = @intMonthId
+													   AND intAttributeId IN 
+													   (
+															2	/* Opening Inventory */
+														  , 4	/* Existing Purchases */
+														  , 8	/* Forecasted Consumption */
+														  , 15	/* Forecasted Consumption - Additional */
+														  , 16	/* Inventory Transfer */
+													   ) 
+													) < 0 THEN (SELECT SUM(OpenInv.dblQty)
+																FROM #tblMFDemand OpenInv
+																WHERE OpenInv.intItemId = D.intItemId
+																  AND OpenInv.intLocationId = D.intLocationId
+																  AND OpenInv.intMonthId = @intMonthId
+																  AND intAttributeId IN 
+																  (
+																	  2		/* Opening Inventory */
+																	, 4		/* Existing Purchases */
+																	, 8		/* Forecasted Consumption */
+																	, 15	/* Forecasted Consumption - Additional */
+																	, 16	/* Inventory Transfer */
+																  )) * - 1 
+															
+													
+											   ELSE 0
+										  END)
 							FROM #tblMFDemand D
-							WHERE intAttributeId = 5 --Planned Purchases -
-								AND intMonthId = @intMonthId
+							WHERE intAttributeId = 5 /* Planned Purchases */
+							  AND intMonthId = @intMonthId
 						END
 
 					DELETE FROM @tblMFEndInventory;
 
 					UPDATE D
-					SET dblQty = (
-							SELECT sum(OpenInv.dblQty)
-							FROM #tblMFDemand OpenInv
-							WHERE OpenInv.intItemId = D.intItemId
-								AND OpenInv.intLocationId = D.intLocationId
-								AND OpenInv.intMonthId = @intMonthId
-								AND (
-									intAttributeId IN (
-										2
-										,4
-										,5
-										,8
-										,15
-										,16
-										) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
-									)
+					SET dblQty = (SELECT SUM(OpenInv.dblQty)
+								  FROM #tblMFDemand OpenInv
+								  WHERE OpenInv.intItemId = D.intItemId
+									AND OpenInv.intLocationId = D.intLocationId
+									AND OpenInv.intMonthId = @intMonthId
+									AND (intAttributeId IN 
+									(
+										2	/* Opening Inventory */
+									  , 4	/* Existing Purchases */
+									  , 5	/* Planned Purchases */
+									  , 8	/* Forecasted Consumption */
+									  , 15	/* Forecasted Consumption - Additional */
+									  , 16	/* Inventory Transfer */
+									) 
+								  )
 							)
 					OUTPUT inserted.intItemId
-						,inserted.dblQty
-						,inserted.intLocationId
+						 , inserted.dblQty
+						 , inserted.intLocationId
 					INTO @tblMFEndInventory
 					FROM #tblMFDemand D
 					WHERE intAttributeId = 9 --Ending Inventory
-						AND intMonthId = @intMonthId
+					  AND intMonthId = @intMonthId
 				END
 			ELSE
 				BEGIN
-					DELETE
-					FROM @tblMFEndInventory
+					DELETE FROM @tblMFEndInventory
 
 					UPDATE D
-					SET dblQty = CASE 
-							WHEN @intMonthId = 1
-								THEN (
-										SELECT sum(OpenInv.dblQty)
-										FROM #tblMFDemand OpenInv
-										WHERE OpenInv.intItemId = D.intItemId
-											AND OpenInv.intLocationId = D.intLocationId
-											AND intMonthId IN (
-												- 1 --Opening Inventory
-												,0 --Past Due
-												)
-											AND intAttributeId IN (
-												2 --Opening Inventory
-												,13 --Open Purchases
-												,14 --In-transit Purchases
-												)
-										)
-							ELSE (
-									SELECT sum(OpenInv.dblQty)
-									FROM #tblMFDemand OpenInv
-									WHERE OpenInv.intItemId = D.intItemId
-										AND OpenInv.intLocationId = D.intLocationId
-										AND intMonthId = @intMonthId - 1
-										AND intAttributeId = 9 --Ending Inventory
-									)
-							END
+					SET dblQty = CASE WHEN @intMonthId = 1 THEN (SELECT sum(OpenInv.dblQty)
+																 FROM #tblMFDemand OpenInv
+																 WHERE OpenInv.intItemId = D.intItemId
+																   AND OpenInv.intLocationId = D.intLocationId
+																   AND intMonthId IN 
+																   (
+																		-1 --Opening Inventory
+																	   , 0 --Past Due
+																   )
+																   AND intAttributeId IN 
+																   (
+																		2	/* Opening Inventory */
+																	  , 13	/* Open Purchases */
+																	  , 14	/* In-transit Purchases */
+																   ))
+									  ELSE (SELECT sum(OpenInv.dblQty)
+											FROM #tblMFDemand OpenInv
+											WHERE OpenInv.intItemId = D.intItemId
+											  AND OpenInv.intLocationId = D.intLocationId
+											  AND intMonthId = @intMonthId - 1
+											  AND intAttributeId = 9) /* Ending Inventory */
+									
+								 END
 					OUTPUT inserted.intItemId
-						,inserted.dblQty
-						,inserted.intLocationId
+						 , inserted.dblQty
+						 , inserted.intLocationId
 					INTO @tblMFEndInventory
 					FROM #tblMFDemand D
-					WHERE intAttributeId = 2 --Opening Inventory
-						AND intMonthId = @intMonthId
+					WHERE intAttributeId = 2 /* Opening Inventory */
+					  AND intMonthId = @intMonthId
 
 					SELECT @intRecordId = NULL
 
-					SELECT @intRecordId = min(intRecordId)
-					FROM @tblMFEndInventory
+					SELECT @intRecordId = MIN(intRecordId) FROM @tblMFEndInventory
 
 					WHILE @intRecordId IS NOT NULL
-					BEGIN
-						SELECT @dblEndInventory = 0
-							,@dblWeeksOfSsupply = 0
-
-						--Calculate Excess or shortage
-						SELECT @dblSupplyTarget = NULL
-							,@dblDecimalPart = NULL
-							,@intIntegerPart = NULL
-							,@dblTotalConsumptionQty = NULL
-							,@intLocationId = NULL
-							,@intItemId = NULL
-
-						SELECT @intItemId = intItemId
-							,@intLocationId = intLocationId
-						FROM @tblMFEndInventory
-						WHERE intRecordId = @intRecordId
-
-						SELECT @dblSupplyTarget = dblQty
-						FROM #tblMFDemand
-						WHERE intItemId = @intItemId
-							AND intAttributeId = 11 --Weeks of Supply Target
-							AND intMonthId = @intMonthId
-							AND intLocationId = @intLocationId
-
-						SELECT @dblDecimalPart = @dblSupplyTarget % 1
-
-						SELECT @intIntegerPart = @dblSupplyTarget - @dblDecimalPart
-
-						IF @intIntegerPart = 0
 						BEGIN
-							IF @dblDecimalPart > 0
-							BEGIN
-								SELECT @dblTotalConsumptionQty = ABS(SUM(dblQty)) * @dblDecimalPart
-								FROM #tblMFDemand
-								WHERE intItemId = @intItemId
-									AND intMonthId = @intMonthId + 1
-									AND intAttributeId IN (
-										8
-										,15
-										)
-									AND intLocationId = @intLocationId
-							END
-						END
-						ELSE
-						BEGIN
-							SELECT @dblTotalConsumptionQty = ABS(SUM(CASE 
-											WHEN intAttributeId = 16
-												AND dblQty > 0
-												THEN 0
-											ELSE dblQty
-											END))
+							SELECT @dblEndInventory			= 0
+								 , @dblWeeksOfSsupply		= 0
+								 /* Calculate Excess or shortage */
+								 , @dblSupplyTarget			= NULL
+								 , @dblDecimalPart			= NULL
+								 , @intIntegerPart			= NULL
+								 , @dblTotalConsumptionQty	= NULL
+								 , @intLocationId			= NULL
+								 , @intItemId				= NULL
+
+							SELECT @intItemId		= intItemId
+								 , @intLocationId	= intLocationId
+							FROM @tblMFEndInventory
+							WHERE intRecordId = @intRecordId
+
+							SELECT @dblSupplyTarget = dblQty
 							FROM #tblMFDemand
-							WHERE intItemId = @intItemId
-								AND intMonthId BETWEEN @intMonthId + 1
-									AND @intMonthId + @intIntegerPart
-								AND intAttributeId IN (
-									8
-									,15
-									,16
-									)
-								AND intLocationId = @intLocationId
+							WHERE intItemId			= @intItemId
+							  AND intAttributeId	= 11 --Weeks of Supply Target
+							  AND intMonthId		= @intMonthId
+							  AND intLocationId		= @intLocationId
 
-							IF @dblDecimalPart > 0
-							BEGIN
-								SELECT @dblTotalConsumptionQty = isNULL(@dblTotalConsumptionQty, 0) + (
-										ABS(SUM(CASE 
-													WHEN intAttributeId = 16
-														AND dblQty > 0
-														THEN 0
-													ELSE dblQty
-													END)) * @dblDecimalPart
-										)
-								FROM #tblMFDemand
-								WHERE intItemId = @intItemId
-									AND intMonthId = @intMonthId + @intIntegerPart + 1
-									AND intAttributeId IN (
-										8
-										,15
-										,16
-										)
-									AND intLocationId = @intLocationId
-							END
-						END
+							SELECT @dblDecimalPart = @dblSupplyTarget % 1
 
-						---************************************
-						---************************************
-						---************************************
-						IF @ysnCalculatePlannedPurchases = 1
-						BEGIN
-							UPDATE D
-							SET dblQty = IsNULL((
-										SELECT CASE 
-												WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
-													THEN Ceiling(abs((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight))) * Max(CW.dblWeight)
-												ELSE abs(sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
-												END
-										FROM #tblMFDemand OpenInv
-										LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
-										WHERE OpenInv.intItemId = D.intItemId
-											AND OpenInv.intMonthId = @intMonthId
-											AND (
-												intAttributeId IN (
-													2
-													,4
-													,8
-													,15
-													,16
-													) --Opening Inventory, Existing Purchases,Forecasted Consumption
-												)
-											AND intLocationId = @intLocationId
-										HAVING (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) < 0
-										), 0)
-							FROM #tblMFDemand D
-							WHERE intAttributeId = 5 --Planned Purchases -
-								AND intMonthId = @intMonthId
-								AND intItemId = @intItemId
-								AND intLocationId = @intLocationId
-						END
+							SELECT @intIntegerPart = @dblSupplyTarget - @dblDecimalPart
 
-						UPDATE D
-						SET dblQty = (
-								SELECT sum(OpenInv.dblQty)
-								FROM #tblMFDemand OpenInv
-								WHERE OpenInv.intItemId = D.intItemId
-									AND OpenInv.intMonthId = @intMonthId
-									AND (
-										intAttributeId IN (
-											2
-											,4
-											,5
-											,8
-											,15
-											,16
-											) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
-										)
-									AND intLocationId = @intLocationId
-								)
-						FROM #tblMFDemand D
-						WHERE intAttributeId = 9 --Ending Inventory
-							AND intMonthId = @intMonthId
-							AND intItemId = @intItemId
-							AND intLocationId = @intLocationId
-
-						---************************************
-						---************************************
-						---************************************
-						SELECT @dblEndInventory = dblQty
-						FROM #tblMFDemand D
-						WHERE intAttributeId = 9 --Ending Inventory
-							AND intMonthId = @intMonthId
-							AND intItemId = @intItemId
-							AND intLocationId = @intLocationId
-
-						IF @dblEndInventory IS NULL
-							SELECT @dblEndInventory = 0
-
-						SELECT @intConsumptionMonth = @intMonthId + 1
-
-						INSERT INTO #tblMFDemand (
-							intItemId
-							,dblQty
-							,intAttributeId
-							,intMonthId
-							,intLocationId
-							)
-						SELECT @intItemId
-							,@dblEndInventory - IsNULL(@dblTotalConsumptionQty, 0)
-							,12 --Short/Excess Inventory
-							,@intMonthId
-							,@intLocationId
-
-						SELECT @intConsumptionAvlMonth = 0
-
-						SELECT @intConsumptionAvlMonth = Count(*)
-						FROM #tblMFDemand
-						WHERE intItemId = @intItemId
-							AND (
-								intAttributeId IN (
-									8
-									,15
-									)
-								OR (
-									intAttributeId = 16
-									AND dblQty < 0
-									)
-								)
-							AND intLocationId = @intLocationId
-
-						IF @intConsumptionAvlMonth IS NULL
-							SELECT @intConsumptionAvlMonth = @intMonthsToView
-
-						WHILE @intConsumptionMonth <= 12
-							AND @dblEndInventory > 0
-						BEGIN
-							SELECT @dblRemainingConsumptionQty = NULL
-
-							SELECT @dblRemainingConsumptionQty = ABS(SUM(CASE 
-											WHEN intAttributeId = 16
-												AND dblQty > 0
-												THEN 0
-											ELSE dblQty
-											END))
-							FROM #tblMFDemand
-							WHERE intItemId = @intItemId
-								AND intMonthId >= @intConsumptionMonth
-								AND intAttributeId IN (
-									8
-									,15
-									,16
-									)
-								AND intLocationId = @intLocationId
-
-							IF @dblRemainingConsumptionQty IS NULL
-								SELECT @dblRemainingConsumptionQty = 0
-
-							IF (
-									@dblRemainingConsumptionQty = 0
-									--OR @dblEndInventory > @dblRemainingConsumptionQty
-									)
-								AND @intConsumptionMonth = @intMonthId + 1
-							BEGIN
-								IF NOT EXISTS (
-										SELECT *
-										FROM #tblMFDemand
-										WHERE intItemId = @intItemId
-											AND intAttributeId = 10
-											AND dblQty = 999
-											AND intLocationId = @intLocationId
-										)
+							IF @intIntegerPart = 0
 								BEGIN
-									INSERT INTO #tblMFDemand (
-										intItemId
-										,dblQty
-										,intAttributeId
-										,intMonthId
-										,intLocationId
-										)
-									SELECT @intItemId
-										,999
-										,10 --Weeks of Supply
-										,@intMonthId
-										,@intLocationId
+									IF @dblDecimalPart > 0
+										BEGIN
+											SELECT @dblTotalConsumptionQty = ABS(SUM(dblQty)) * @dblDecimalPart
+											FROM #tblMFDemand
+											WHERE intItemId = @intItemId
+											  AND intMonthId = @intMonthId + 1
+											  AND intAttributeId IN 
+											  (
+												  8
+											    , 15
+											  )
+											  AND intLocationId = @intLocationId
+										END
 								END
-								ELSE
-								BEGIN
-									INSERT INTO #tblMFDemand (
-										intItemId
-										,dblQty
-										,intAttributeId
-										,intMonthId
-										,intLocationId
-										)
-									SELECT @intItemId
-										,0
-										,10 --Weeks of Supply
-										,@intMonthId
-										,@intLocationId
-								END
-
-								GOTO NextItem
-							END
-
-							SELECT @dblConsumptionQty = 0
-
-							SELECT @dblConsumptionQty = ABS(SUM(CASE 
-											WHEN intAttributeId = 16
-												AND dblQty > 0
-												THEN 0
-											ELSE dblQty
-											END))
-							FROM #tblMFDemand
-							WHERE intItemId = @intItemId
-								AND intMonthId = @intConsumptionMonth
-								AND intAttributeId IN (
-									8
-									,15
-									,16
-									)
-								AND intLocationId = @intLocationId
-
-							IF @dblConsumptionQty IS NULL
-								SELECT @dblConsumptionQty = 0
-
-							IF @dblEndInventory > @dblConsumptionQty
-							BEGIN
-								SELECT @dblEndInventory = @dblEndInventory - @dblConsumptionQty
-
-								SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + 1
-
-								IF NOT EXISTS (
-										SELECT 1
-										FROM #tblMFDemand
-										WHERE intItemId = @intItemId
-											AND intMonthId > @intConsumptionMonth
-											AND intAttributeId IN (
-												8
-												,15
-												,16
-												)
-											AND intLocationId = @intLocationId
-										HAVING ABS(SUM(CASE 
-														WHEN intAttributeId = 16
-															AND dblQty > 0
-															THEN 0
-														ELSE dblQty
-														END)) > 0
-										)
-								BEGIN
-									INSERT INTO #tblMFDemand (
-										intItemId
-										,dblQty
-										,intAttributeId
-										,intMonthId
-										,intLocationId
-										)
-									SELECT @intItemId
-										,@dblWeeksOfSsupply
-										,10 --Weeks of Supply
-										,@intMonthId
-										,@intLocationId
-
-									SELECT @dblEndInventory = 0
-								END
-							END
 							ELSE
-							BEGIN
-								SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + (@dblEndInventory / @dblConsumptionQty)
+								BEGIN
+									SELECT @dblTotalConsumptionQty = ABS(SUM(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+																				  ELSE dblQty
+																			 END))
+									FROM #tblMFDemand
+									WHERE intItemId = @intItemId
+									  AND intMonthId BETWEEN @intMonthId + 1
+									  AND @intMonthId + @intIntegerPart
+									  AND intAttributeId IN 
+									  (
+										  8
+										, 15
+										, 16
+									  )
+									  AND intLocationId = @intLocationId
 
-								SELECT @dblEndInventory = 0
+									IF @dblDecimalPart > 0
+										BEGIN
+											SELECT @dblTotalConsumptionQty = isNULL(@dblTotalConsumptionQty, 0) + (ABS(SUM(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+																																ELSE dblQty
+																														   END)) * @dblDecimalPart)
+											FROM #tblMFDemand
+											WHERE intItemId = @intItemId
+											  AND intMonthId = @intMonthId + @intIntegerPart + 1
+											  AND intAttributeId IN 
+											  (
+												  8
+												, 15
+												, 16
+											  )
+											  AND intLocationId = @intLocationId
+										END
+								END
 
-								INSERT INTO #tblMFDemand (
-									intItemId
-									,dblQty
-									,intAttributeId
-									,intMonthId
-									,intLocationId
+							---************************************
+							---************************************
+							---************************************
+							IF @ysnCalculatePlannedPurchases = 1
+								BEGIN
+									UPDATE D
+									SET dblQty = ISNULL((SELECT CASE WHEN MAX(ISNULL(CW.dblWeight, 0)) > 0 THEN CEILING(ABS((SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) / MAX(CW.dblWeight))) * MAX(CW.dblWeight)
+																	 ELSE ABS(SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0))
+																END
+												FROM #tblMFDemand OpenInv
+												LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
+												WHERE OpenInv.intItemId = D.intItemId
+												  AND OpenInv.intMonthId = @intMonthId
+												  AND (intAttributeId IN 
+													  (
+														  2
+														, 4
+														, 8
+														, 15
+														, 16
+													  )) --Opening Inventory, Existing Purchases,Forecasted Consumption
+												  AND intLocationId = @intLocationId
+												HAVING (SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) < 0
+												), 0)
+									FROM #tblMFDemand D
+									WHERE intAttributeId	= 5 --Planned Purchases -
+										AND intMonthId		= @intMonthId
+										AND intItemId		= @intItemId
+										AND intLocationId	= @intLocationId
+								END
+
+							UPDATE D
+							SET dblQty = (SELECT SUM(OpenInv.dblQty)
+										  FROM #tblMFDemand OpenInv
+										  WHERE OpenInv.intItemId = D.intItemId
+											AND OpenInv.intMonthId = @intMonthId
+											AND (intAttributeId IN 
+												(
+													2
+												  , 4
+												  , 5
+												  , 8
+												  , 15
+												  , 16
+												)) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
+											AND intLocationId = @intLocationId
 									)
-								SELECT @intItemId
-									,@dblWeeksOfSsupply
-									,10 --Weeks of Supply
-									,@intMonthId
-									,@intLocationId
-							END
+							FROM #tblMFDemand D
+							WHERE intAttributeId	= 9 --Ending Inventory
+							  AND intMonthId		= @intMonthId
+							  AND intItemId			= @intItemId
+							  AND intLocationId		= @intLocationId
 
-							SELECT @intConsumptionMonth = @intConsumptionMonth + 1
+							---************************************
+							---************************************
+							---************************************
+
+							SELECT @dblEndInventory = dblQty
+							FROM #tblMFDemand D
+							WHERE intAttributeId	= 9 --Ending Inventory
+							  AND intMonthId		= @intMonthId
+							  AND intItemId			= @intItemId
+							  AND intLocationId		= @intLocationId
+
+							IF @dblEndInventory IS NULL
+								BEGIN
+									SELECT @dblEndInventory = 0;
+								END
+
+							SELECT @intConsumptionMonth = @intMonthId + 1
+
+							INSERT INTO #tblMFDemand 
+							(
+								intItemId
+							  , dblQty
+							  , intAttributeId
+							  , intMonthId
+							  , intLocationId
+							)
+							SELECT @intItemId
+								 , @dblEndInventory - ISNULL(@dblTotalConsumptionQty, 0)
+								 , 12 --Short/Excess Inventory
+								 , @intMonthId
+								 , @intLocationId
+
+							SELECT @intConsumptionAvlMonth = 0
+
+							SELECT @intConsumptionAvlMonth = Count(*)
+							FROM #tblMFDemand
+							WHERE intItemId = @intItemId
+							  AND (intAttributeId IN 
+								  (
+									  8
+									, 15
+								  )
+							  OR (intAttributeId = 16 AND dblQty < 0)
+								  )
+							  AND intLocationId = @intLocationId
+
+							IF @intConsumptionAvlMonth IS NULL
+								BEGIN
+									SELECT @intConsumptionAvlMonth = @intMonthsToView;
+								END
+
+							WHILE @intConsumptionMonth <= 12 AND @dblEndInventory > 0
+								BEGIN
+									SELECT @dblRemainingConsumptionQty = NULL
+
+									SELECT @dblRemainingConsumptionQty = ABS(SUM(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+																					  ELSE dblQty
+																				 END))
+									FROM #tblMFDemand
+									WHERE intItemId = @intItemId
+									  AND intMonthId >= @intConsumptionMonth
+									  AND intAttributeId IN 
+									  (
+										  8
+										, 15
+										, 16
+									  )
+									  AND intLocationId = @intLocationId
+
+									IF @dblRemainingConsumptionQty IS NULL
+										BEGIN
+											SELECT @dblRemainingConsumptionQty = 0;
+										END
+
+									IF @dblRemainingConsumptionQty = 0 AND @intConsumptionMonth = @intMonthId + 1
+										BEGIN
+											IF NOT EXISTS (SELECT *
+														   FROM #tblMFDemand
+														   WHERE intItemId = @intItemId
+															 AND intAttributeId = 10
+															 AND dblQty = 999
+															 AND intLocationId = @intLocationId)
+												BEGIN
+													INSERT INTO #tblMFDemand 
+													(
+														intItemId
+													  , dblQty
+													  , intAttributeId
+													  , intMonthId
+													  , intLocationId
+													)
+													SELECT @intItemId
+														 , 999
+														 , 10 --Weeks of Supply
+														 , @intMonthId
+														 , @intLocationId
+												END
+											ELSE
+												BEGIN
+													INSERT INTO #tblMFDemand 
+													(
+														intItemId
+													  , dblQty
+													  , intAttributeId
+													  , intMonthId
+													  , intLocationId
+													)
+													SELECT @intItemId
+														 , 0
+														 , 10 --Weeks of Supply
+														 , @intMonthId
+														 , @intLocationId
+												END
+
+											GOTO NextItem
+										END
+
+									SELECT @dblConsumptionQty = 0
+
+									SELECT @dblConsumptionQty = ABS(SUM(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+																			 ELSE dblQty
+																		END))
+									FROM #tblMFDemand
+									WHERE intItemId = @intItemId
+										AND intMonthId = @intConsumptionMonth
+										AND intAttributeId IN 
+										(
+											8
+										  , 15
+										  , 16
+										)
+										AND intLocationId = @intLocationId
+
+									IF @dblConsumptionQty IS NULL
+										BEGIN
+											SELECT @dblConsumptionQty = 0
+										END
+
+									IF @dblEndInventory > @dblConsumptionQty
+										BEGIN
+											SELECT @dblEndInventory = @dblEndInventory - @dblConsumptionQty
+
+											SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + 1
+
+											IF NOT EXISTS (SELECT 1
+														   FROM #tblMFDemand
+														   WHERE intItemId = @intItemId
+															 AND intMonthId > @intConsumptionMonth
+															 AND intAttributeId IN 
+															 (
+																 8
+															   , 15
+															   , 16
+															 )
+															 AND intLocationId = @intLocationId
+														   HAVING ABS(SUM(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+																			   ELSE dblQty
+																		  END)) > 0)
+												BEGIN
+													INSERT INTO #tblMFDemand 
+													(
+														intItemId
+													  , dblQty
+													  , intAttributeId
+													  , intMonthId
+													  , intLocationId
+													)
+													SELECT @intItemId
+														 , @dblWeeksOfSsupply
+														 , 10 --Weeks of Supply
+														 , @intMonthId
+														 , @intLocationId
+
+													SELECT @dblEndInventory = 0
+												END
+										END
+									ELSE
+										BEGIN
+											SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + (@dblEndInventory / @dblConsumptionQty)
+
+											SELECT @dblEndInventory = 0
+
+											INSERT INTO #tblMFDemand 
+											(
+												intItemId
+											  , dblQty
+											  , intAttributeId
+											  , intMonthId
+											  , intLocationId
+											)
+											SELECT @intItemId
+												 , @dblWeeksOfSsupply
+												 , 10 --Weeks of Supply
+												 , @intMonthId
+												 , @intLocationId
+										END
+
+									SELECT @intConsumptionMonth = @intConsumptionMonth + 1
+								END
+
+							--END
+							NextItem:
+
+							SELECT @intRecordId = min(intRecordId)
+							FROM @tblMFEndInventory
+							WHERE intRecordId > @intRecordId
 						END
-
-						--END
-						NextItem:
-
-						SELECT @intRecordId = min(intRecordId)
-						FROM @tblMFEndInventory
-						WHERE intRecordId > @intRecordId
-							--AND dblQty > 0
-					END
 				END
 
 			SELECT @intMonthId = @intMonthId + 1
 		END
 
 	IF @ysnSupplyTargetbyAverage = 1
-	BEGIN
-		INSERT INTO #tblMFDemand (
-			intItemId
-			,dblQty
-			,intAttributeId
-			,intMonthId
-			,intLocationId
+		BEGIN
+			INSERT INTO #tblMFDemand 
+			(
+				intItemId
+			  , dblQty
+			  , intAttributeId
+			  , intMonthId
+			  , intLocationId
 			)
-		SELECT Demand.intItemId
-			,CASE 
-				WHEN (
-						SELECT ABS(SUM(CASE 
-										WHEN intAttributeId = 16
-											AND dblQty > 0
-											THEN 0
-										ELSE dblQty
-										END))
-						FROM #tblMFDemand D
-						WHERE D.intItemId = Demand.intItemId
-							AND D.intAttributeId IN (
-								8
-								,15
-								,16
-								)
-							AND (
-								(
-									Demand.intMonthId <= @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
-									AND D.intMonthId BETWEEN Demand.intMonthId + 1
-										AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget
-									)
-								OR (
-									Demand.intMonthId > @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
-									AND D.intMonthId BETWEEN @intMonthsToView + 1 - @intNoofWeeksorMonthstoCalculateSupplyTarget
-										AND @intMonthsToView
-									)
-								)
-							AND intLocationId = @intLocationId
-						) > 0
-					THEN (
-							SELECT dblQty
-							FROM #tblMFDemand D
-							WHERE D.intItemId = Demand.intItemId
-								AND D.intAttributeId = 9
-								AND D.intMonthId = Demand.intMonthId
-								AND D.intLocationId = Demand.intLocationId
-							) / (
-							(
-								SELECT SUM(abs(CASE 
-												WHEN intAttributeId = 16
-													AND dblQty > 0
-													THEN 0
-												ELSE dblQty
-												END))
-								FROM #tblMFDemand D
-								WHERE D.intItemId = Demand.intItemId
-									AND D.intAttributeId IN (
+			SELECT Demand.intItemId
+				 , CASE WHEN (SELECT ABS(SUM(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+												  ELSE dblQty
+											 END))
+							  FROM #tblMFDemand D
+							  WHERE D.intItemId = Demand.intItemId
+								AND D.intAttributeId IN 
+									(
 										8
-										,15
-										,16
-										)
-									AND (
-										(
-											Demand.intMonthId <= @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
-											AND D.intMonthId BETWEEN Demand.intMonthId + 1
-												AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget
-											)
-										OR (
-											Demand.intMonthId > @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
-											AND D.intMonthId BETWEEN @intMonthsToView + 1 - @intNoofWeeksorMonthstoCalculateSupplyTarget
-												AND @intMonthsToView
-											)
-										)
-									AND D.intLocationId = Demand.intLocationId
-								) / @intNoofWeekstoCalculateSupplyTargetbyAverage
-							)
-				ELSE 0
-				END
-			,10 --Weeks of Supply
-			,intMonthId
-			,Demand.intLocationId
-		FROM #tblMFDemand Demand
-		WHERE intAttributeId = 2 --Opening Inventory
-	END
+									  , 15
+									  , 16
+									)
+								AND (
+										(Demand.intMonthId <= @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget AND D.intMonthId BETWEEN Demand.intMonthId + 1 AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget)
+									 OR (Demand.intMonthId > @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget AND D.intMonthId BETWEEN @intMonthsToView + 1 - @intNoofWeeksorMonthstoCalculateSupplyTarget AND @intMonthsToView)
+									)
+								AND intLocationId = @intLocationId
+							  ) > 0 THEN (SELECT dblQty
+										  FROM #tblMFDemand D
+										  WHERE D.intItemId = Demand.intItemId
+											AND D.intAttributeId = 9
+											AND D.intMonthId = Demand.intMonthId
+											AND D.intLocationId = Demand.intLocationId) / ((SELECT SUM(ABS(CASE WHEN intAttributeId = 16 AND dblQty > 0 THEN 0
+																												ELSE dblQty
+																										   END))
+																							FROM #tblMFDemand D
+																							WHERE D.intItemId = Demand.intItemId
+																							  AND D.intAttributeId IN 
+																							  (
+																								 8
+																							   , 15
+																							   , 16
+																							  )
+																							  AND 
+																							  (
+																									(Demand.intMonthId <= @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget AND D.intMonthId BETWEEN Demand.intMonthId + 1 AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget)
+																								 OR (Demand.intMonthId > @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget AND D.intMonthId BETWEEN @intMonthsToView + 1 - @intNoofWeeksorMonthstoCalculateSupplyTarget AND @intMonthsToView)
+																							  ) 
+																							  AND D.intLocationId = Demand.intLocationId
+																						    ) / @intNoofWeekstoCalculateSupplyTargetbyAverage)
+						ELSE 0
+				   END
+				 , 10 /* Weeks of Supply */
+				 , intMonthId
+				 , Demand.intLocationId
+			FROM #tblMFDemand Demand
+			WHERE intAttributeId = 2 /* Opening Inventory */
+		END
 
 	IF @ysnSupplyTargetbyAverage = 1
-	BEGIN
-		INSERT INTO #tblMFDemand (
-			intItemId
-			,dblQty
-			,intAttributeId
-			,intMonthId
-			,intLocationId
+		BEGIN
+			INSERT INTO #tblMFDemand 
+			(
+				intItemId
+			  , dblQty
+			  , intAttributeId
+			  , intMonthId
+			  , intLocationId
 			)
-		SELECT Demand.intItemId
-			,CASE 
-				WHEN IsNULL((
-							SELECT dblQty
-							FROM #tblMFDemand D2
-							WHERE D2.intItemId = Demand.intItemId
-								AND D2.intAttributeId = 10
-								AND D2.intMonthId = Demand.intMonthId
-								AND D2.intLocationId = Demand.intLocationId
-							), 0) = 0
-					THEN (
-							SELECT dblQty
-							FROM #tblMFDemand D1
-							WHERE D1.intItemId = Demand.intItemId
-								AND D1.intAttributeId = 9 --Ending Inventory
-								AND D1.intMonthId = Demand.intMonthId
-								AND D1.intLocationId = Demand.intLocationId
+			SELECT Demand.intItemId
+				 , CASE WHEN ISNULL((SELECT dblQty
+									 FROM #tblMFDemand D2
+									 WHERE D2.intItemId		 = Demand.intItemId
+									   AND D2.intAttributeId = 10 /* Weeks of Supply */
+									   AND D2.intMonthId	 = Demand.intMonthId
+									   AND D2.intLocationId	 = Demand.intLocationId), 0) = 0 THEN (SELECT dblQty
+																								   FROM #tblMFDemand D1
+																								   WHERE D1.intItemId = Demand.intItemId
+																								   	 AND D1.intAttributeId = 9 --Ending Inventory
+																								   	 AND D1.intMonthId = Demand.intMonthId
+																								   	 AND D1.intLocationId = Demand.intLocationId)
+						ELSE ((SELECT dblQty
+							   FROM #tblMFDemand D1
+							   WHERE D1.intItemId = Demand.intItemId
+								 AND D1.intAttributeId = 9 /* Ending Inventory */
+								 AND D1.intMonthId = Demand.intMonthId
+								 AND D1.intLocationId = Demand.intLocationId) / (SELECT dblQty
+																				 FROM #tblMFDemand D2
+																				 WHERE D2.intItemId = Demand.intItemId
+																				   AND D2.intAttributeId = 10 --Weeks of Supply
+																				   AND D2.intMonthId = Demand.intMonthId
+																				   AND D2.intLocationId = Demand.intLocationId)
+							 ) * ((ISNULL((SELECT dblQty
+										   FROM #tblMFDemand D3
+										   WHERE D3.intItemId = Demand.intItemId
+											 AND D3.intAttributeId = 10 /* Weeks of Supply */
+											 AND D3.intMonthId = Demand.intMonthId
+											 AND D3.intLocationId = Demand.intLocationId), 0)) - ISNULL((SELECT dblQty
+																										 FROM #tblMFDemand D4
+																										 WHERE D4.intItemId = Demand.intItemId
+																										   AND D4.intAttributeId = 11 /* Weeks of Supply Target*/
+																										   AND D4.intMonthId = Demand.intMonthId
+																										   AND D4.intLocationId = Demand.intLocationId), 0)
 							)
-				ELSE (
-						(
-							SELECT dblQty
-							FROM #tblMFDemand D1
-							WHERE D1.intItemId = Demand.intItemId
-								AND D1.intAttributeId = 9 --Ending Inventory
-								AND D1.intMonthId = Demand.intMonthId
-								AND D1.intLocationId = Demand.intLocationId
-							) / (
-							SELECT dblQty
-							FROM #tblMFDemand D2
-							WHERE D2.intItemId = Demand.intItemId
-								AND D2.intAttributeId = 10 --Weeks of Supply
-								AND D2.intMonthId = Demand.intMonthId
-								AND D2.intLocationId = Demand.intLocationId
-							)
-						) * (
-						(
-							IsNULL((
-									SELECT dblQty
-									FROM #tblMFDemand D3
-									WHERE D3.intItemId = Demand.intItemId
-										AND D3.intAttributeId = 10 --Weeks of Supply 
-										AND D3.intMonthId = Demand.intMonthId
-										AND D3.intLocationId = Demand.intLocationId
-									), 0)
-							) - IsNULL((
-								SELECT dblQty
-								FROM #tblMFDemand D4
-								WHERE D4.intItemId = Demand.intItemId
-									AND D4.intAttributeId = 11 --Weeks of Supply Target
-									AND D4.intMonthId = Demand.intMonthId
-									AND D4.intLocationId = Demand.intLocationId
-								), 0)
-						)
-				END
-			,12 --Short/Excess Inventory
-			,intMonthId
-			,intLocationId
-		FROM #tblMFDemand Demand
-		WHERE intAttributeId = 2;--Opening Inventory
-	END
+				   END
+				 , 12 /* Short/Excess Inventory */
+				 , intMonthId
+				 , intLocationId
+			FROM #tblMFDemand AS Demand
+			WHERE intAttributeId = 2; /* Opening Inventory */
+		END
 
-	INSERT INTO #tblMFDemandList (
+	INSERT INTO #tblMFDemandList 
+	(
 		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		,intMainItemId
-		,intLocationId
-		)
+	  , dblQty
+	  , intAttributeId
+	  , intMonthId
+	  , intMainItemId
+	  , intLocationId
+	)
 	SELECT I.intItemId
-		,NULL
-		,2 AS intAttributeId --Opening Inventory
-		,- 1 AS intMonthId
-		,I.intMainItemId
-		,L.intCompanyLocationId
+		 , NULL
+		 , 2	AS intAttributeId  /* Opening Inventory */
+		 , -1	AS intMonthId
+		 , I.intMainItemId
+		 , L.intCompanyLocationId
 	FROM @tblMFItem I
 	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
-	WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
+	WHERE L.intCompanyLocationId = ISNULL(@intCompanyLocationId, L.intCompanyLocationId)
 
-	INSERT INTO #tblMFDemandList (
+	INSERT INTO #tblMFDemandList 
+	(
 		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		,intMainItemId
-		,intLocationId
-		)
+	  , dblQty
+	  , intAttributeId
+	  , intMonthId
+	  , intMainItemId
+	  , intLocationId
+	)
 	SELECT I.intItemId
-		,NULL
-		,A.intReportAttributeID AS intAttributeId
-		,0 AS intMonthId
-		,I.intMainItemId
-		,L.intCompanyLocationId
+		 , NULL
+		 , A.intReportAttributeID AS intAttributeId
+		 , 0 AS intMonthId
+		 , I.intMainItemId
+		 , L.intCompanyLocationId
 	FROM @tblMFItem I
 	INNER JOIN tblCTReportAttribute A ON 1 = 1
 	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
-	WHERE A.intReportAttributeID IN (
-			4 --Existing Purchases
-			,13 --Open Purchases
-			,14 --In-transit Purchases
-			)
-		AND A.intReportMasterID = @intReportMasterID
-		AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
-		AND A.ysnVisible = 1;
+	WHERE A.intReportAttributeID IN 
+	  (
+		  4  /* Existing Purchases */
+	    , 13 /* Open Purchases */
+		, 14 /* In-transit Purchases */
+	  )
+	  AND A.intReportMasterID = @intReportMasterID
+	  AND L.intCompanyLocationId = ISNULL(@intCompanyLocationId, L.intCompanyLocationId)
+	  AND A.ysnVisible = 1;
 
-	WITH tblMFGenerateDemandData (intMonthId)
-	AS (
+	WITH tblMFGenerateDemandData (intMonthId) AS 
+	(
 		SELECT 1 AS intMonthId
 		
 		UNION ALL
-		
+	
 		SELECT intMonthId + 1
 		FROM tblMFGenerateDemandData
 		WHERE intMonthId + 1 <= @intMonthsToView
-		)
-	INSERT INTO #tblMFDemandList (
+	)
+	INSERT INTO #tblMFDemandList 
+	(
 		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		,intMainItemId
-		,intLocationId
-		)
+	  , dblQty
+	  , intAttributeId
+	  , intMonthId
+	  , intMainItemId
+	  , intLocationId
+	)
 	SELECT I.intItemId
-		,NULL
-		,A.intReportAttributeID
-		,intMonthId
-		,I.intMainItemId
-		,L.intCompanyLocationId
+		 , NULL
+		 , A.intReportAttributeID
+		 , intMonthId
+		 , I.intMainItemId
+		 , L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
 	INNER JOIN @tblMFItem I ON 1 = 1
 	INNER JOIN tblCTReportAttribute A ON 1 = 1
 	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
-	WHERE A.intReportAttributeID IN (
-			2 --Opening Inventory
-			,4 --Existing Purchases
-			,13 --Open Purchases
-			,14 --In-transit Purchases
-			,5 --Planned Purchases
-			,6 --Previous Planned Purchases
-			,9 --Ending Inventory
-			,10 --Weeks of Supply
-			,11 --Weeks of Supply Target
-			,12 --Short/Excess Inventory
-			,16 --Inventory Transfer
-			)
-		AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
-		AND A.ysnVisible = 1;
+	WHERE A.intReportAttributeID IN 
+	  (
+		  2 --Opening Inventory
+	    , 4 --Existing Purchases
+		, 13 --Open Purchases
+		, 14 --In-transit Purchases
+		, 5 --Planned Purchases
+		, 6 --Previous Planned Purchases
+		, 9 --Ending Inventory
+		, 10 --Weeks of Supply
+		, 11 --Weeks of Supply Target
+		, 12 --Short/Excess Inventory
+		, 16 --Inventory Transfer
+	  )
+	  AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
+	  AND A.ysnVisible = 1;
 
-	WITH tblMFGenerateDemandData (intMonthId)
-	AS (
+	WITH tblMFGenerateDemandData (intMonthId) AS 
+	(
 		SELECT 1 AS intMonthId
-		
 		UNION ALL
-		
 		SELECT intMonthId + 1
 		FROM tblMFGenerateDemandData
 		WHERE intMonthId + 1 <= 12
-		)
-	INSERT INTO #tblMFDemandList (
+	)
+	INSERT INTO #tblMFDemandList 
+	(
 		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		,intMainItemId
-		,intLocationId
-		)
+	  , dblQty
+	  , intAttributeId
+	  , intMonthId
+	  , intMainItemId
+	  , intLocationId
+	)
 	SELECT I.intItemId
-		,NULL
-		,A.intReportAttributeID
-		,intMonthId
-		,I.intMainItemId
-		,L.intCompanyLocationId
+		 , NULL
+		 , A.intReportAttributeID
+		 , intMonthId
+		 , I.intMainItemId
+		 , L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
 	INNER JOIN @tblMFItem I ON 1 = 1
 	INNER JOIN tblCTReportAttribute A ON 1 = 1
 	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
-	WHERE A.intReportAttributeID IN (
-			8
-			,15
-			) --Forecasted Consumption
-		AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
-		AND A.ysnVisible = 1
+	WHERE A.intReportAttributeID IN 
+	(
+		8  /* Forecasted Consumption */
+	  , 15 /* Forecasted Consumption - Additional */
+	) 
+	  AND L.intCompanyLocationId = ISNULL(@intCompanyLocationId, L.intCompanyLocationId)
+	  AND A.ysnVisible = 1
 
 	IF @intInvPlngReportMasterID > 0
 		BEGIN
