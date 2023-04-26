@@ -1895,6 +1895,10 @@ BEGIN TRY
 				, @intTicketItemUOMId = intItemUOMIdTo
 			FROM tblSCTicket WHERE intTicketId = @intTicketId	
 			
+			UPDATE tblSCTicket 
+				SET intContractId = NULL
+			WHERE intTicketId = @intTicketId	
+
 			UPDATE tblLGLoad SET 
 				intShipmentStatus = 1
 				, dtmDeliveredDate = NULL
