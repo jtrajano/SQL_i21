@@ -40,7 +40,7 @@
 					left join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId      
 					left join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId      
 					left join tblCTPriceFixationDetailAPAR ap on ap.intPriceFixationDetailId = pfd.intPriceFixationDetailId      
-					left join tblAPBillDetail bd on bd.intBillDetailId = ap.intBillDetailId and isnull(bd.intSettleStorageId,0) = 0 and bd.intItemId = cd.intItemId
+					left join tblAPBillDetail bd on bd.intBillDetailId = ap.intBillDetailId and bd.intItemId = cd.intItemId
 					left join tblICCommodityUnitMeasure co on co.intCommodityUnitMeasureId = pfd.intPricingUOMId      
 					left join tblICItemUOM iu on iu.intItemId = cd.intItemId and iu.intUnitMeasureId = co.intUnitMeasureId
 				group by      
