@@ -73,7 +73,7 @@ SELECT CD.intContractDetailImportId
 FROM tblCTContractDetailImport    CD    
 LEFT JOIN tblCTContractHeader    CH  ON CH.strContractNumber   = CD.strContractNumber collate database_default    
 LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId and CH.intCommodityUOMId = CUM.intCommodityUnitMeasureId  
-LEFT JOIN tblSMCompanyLocation    CL  ON CASE WHEN ISNULL(CD.strLocation,'') = '' THEN CL.intCompanyLocationId ELSE CL.strLocationName END =  CASE WHEN ISNULL(CD.strLocation,'') = '' THEN CH.intCompanyLocationId ELSE CD.strLocation collate database_default  END     
+LEFT JOIN tblSMCompanyLocation    CL  ON CL.strLocationName =  CD.strLocation  collate database_default  
 LEFT JOIN tblCTBook       B  ON B.strBook     = CD.strBook    collate database_default    
 LEFT JOIN tblCTSubBook      SB  ON SB.strSubBook    = CD.strSubBook   collate database_default AND SB.intBookId =B.intBookId     
 LEFT JOIN tblICItem       IT  ON IT.strItemNo     = CD.strItem    collate database_default    
