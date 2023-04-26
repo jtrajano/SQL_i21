@@ -75,5 +75,6 @@ OUTER APPLY (
 OUTER APPLY (  
   SELECT intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = ItemAccount.intAccountId  
 ) ItemGLAccount  
-WHERE ReceiptCharge.ysnInventoryCost = 1 AND BillDetail.intBillDetailId IS NULL AND Payable.intVoucherPayableId IS NULL 
+WHERE ReceiptCharge.ysnInventoryCost = 1 --AND BillDetail.intBillDetailId IS NULL 
+AND Payable.intVoucherPayableId IS NULL 
 AND Receipt.ysnPosted = 1
