@@ -128,6 +128,10 @@
 				AND F.strDeviceType = 'Tank'
 				AND E.strSerialNumber = @ts_tankserialnum COLLATE Latin1_General_CI_AS
 		END
+		IF(@ts_capacity = 0)
+		BEGIN
+			select @ts_capacity =dblTotalCapacity from tblTMSite where intSiteID = @siteId
+		END
 		IF(@siteId IS NULL)
 		BEGIN 
 			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + @ExceptionValue + ': Not Matching.' + char(10)
@@ -396,7 +400,7 @@
 			--update Estimated % left and Gals left
 			UPDATE tblTMSite
 			SET dblEstimatedPercentLeft = @tk_level
-				,dblEstimatedGallonsLeft = (case when @is_wesroc = 1 then ((@tk_level * dblTotalCapacity) / 100) else @qty_in_tank end)
+				,dblEstimatedGallonsLeft = ((@tk_level * dblTotalCapacity) / 100) --(case when @is_wesroc = 1 then ((@tk_level * dblTotalCapacity) / 100) else @qty_in_tank end)
 				,dtmLastReadingUpdate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
 			WHERE intSiteID = @siteId
 
@@ -706,7 +710,7 @@
 			--update Estimated % left and Gals left
 			UPDATE tblTMSite
 			SET dblEstimatedPercentLeft = @tk_level
-				,dblEstimatedGallonsLeft = (case when @is_wesroc = 1 then ((@tk_level * dblTotalCapacity) / 100) else @qty_in_tank end)
+				,dblEstimatedGallonsLeft = ((@tk_level * dblTotalCapacity) / 100)--(case when @is_wesroc = 1 then ((@tk_level * dblTotalCapacity) / 100) else @qty_in_tank end)
 				,dtmLastReadingUpdate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
 			WHERE intSiteID = @siteId
 		END
