@@ -11214,7 +11214,6 @@
     <Build Include="dbo\Stored Procedures\uspGLGetTestAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetOverrideGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetBeginningBalanceOverrideFiscal.sql" />
-    <Build Include="dbo\Functions\fnGLGetIntraCompanyGLEntries.sql" />
     <Build Include="dbo\Views\vyuAPClaimsRptDetails.sql" />
     <Build Include="dbo\Views\vyuAPVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCTUnpricedBasisDelivery.sql" />
