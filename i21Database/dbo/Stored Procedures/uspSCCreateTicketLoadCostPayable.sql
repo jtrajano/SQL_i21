@@ -230,7 +230,7 @@ BEGIN
 			WHERE LOAD_COST_FOR_VENDOR.intLoadId = @LOAD_ID
 				AND TICKET.intTicketId = @TICKET_ID
 				--AND A.intLoadCostId = ISNULL(NULL, A.intLoadCostId)
-				
+				AND (LOAD_COST_FOR_VENDOR.ysnAccrue = 1)
 				AND LOAD_COST_FOR_VENDOR.intLoadId NOT IN 
 					(SELECT IsNull(BD.intLoadId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 					WHERE BD.intItemId = LOAD_COST_FOR_VENDOR.intItemId AND Item.strType = 'Other Charge' AND ISNULL(LOAD_COST_FOR_VENDOR.ysnAccrue,0) = 1)
@@ -238,7 +238,10 @@ BEGIN
 				--AND NOT (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL)
 
 
-	SELECT * FROM @voucherPayable
+	
+	
+	
+	-- SELECT * FROM @voucherPayable
 
 	DECLARE @ERROR_MESSAGE NVARCHAR(1000)
 	IF (@POST = 1)
