@@ -114,6 +114,7 @@
 	,@ItemCustomerStorageId					INT				= NULL		
 	,@ItemSiteDetailId						INT				= NULL		
 	,@ItemLoadDetailId						INT				= NULL		
+	,@ItemLoadDistributionDetailId   		INT    			= NULL
 	,@ItemLotId								INT				= NULL		
 	,@ItemOriginalInvoiceDetailId			INT				= NULL		
 	,@ItemSiteId							INT				= NULL												
@@ -158,13 +159,19 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
+	,@FreightCharge							NUMERIC(18, 6)
+	,@FreightCompanySegment					NVARCHAR(100)
+	,@FreightLocationSegment				NVARCHAR(100)
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
+	,@Surcharge								NUMERIC(18, 6)	= 0
+	,@OpportunityId							INT 			= 0
 	,@DefaultPayToBankAccountId				INT				= NULL
 	,@PayToCashBankAccountId				INT				= NULL
 	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
+	,@ItemDispatchId						INT				= NULL
 AS
 
 BEGIN
@@ -547,10 +554,15 @@ BEGIN TRY
 		,[strTradeFinanceComments]
 		,[strGoodsStatus]
 		,[intBorrowingFacilityLimitDetailId]
+		,[dblFreightCharge]
+		,[intFreightCompanySegment]
+		,[intFreightLocationSegment]
 		,[intDefaultPayToBankAccountId]
 		,[strSourcedFrom]
 		,[intTaxLocationId]
 		,[strTaxPoint]
+		,[dblSurcharge]
+		,[intOpportunityId]
 		,[strPaymentInstructions]
 		,[intPayToCashBankAccountId]
 		,strPrintFormat
@@ -651,6 +663,9 @@ BEGIN TRY
 		,[strTradeFinanceComments]			= @TradeFinanceComments
 		,[strGoodsStatus]					= @GoodsStatus
 		,[intBorrowingFacilityLimitDetailId]= @BorrowingFacilityLimitDetailId
+		,[dblFreightCharge]					= @FreightCharge
+		,[intFreightCompanySegment]			= @FreightCompanySegment
+		,[intFreightLocationSegment]		= @FreightLocationSegment
 		,[intDefaultPayToBankAccountId]  	= @DefaultPayToBankAccountId
 		,[strSourcedFrom]					= CASE WHEN ISNULL(@TransactionNo, '') <> ''
 												THEN @SourcedFrom 
@@ -662,6 +677,8 @@ BEGIN TRY
 											  END
 		,[intTaxLocationId]					= @TaxLocationId
 		,[strTaxPoint]						= @TaxPoint
+		,[dblSurcharge]						= @Surcharge
+		,[intOpportunityId]					= @OpportunityId
 		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
 		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
 		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
@@ -789,6 +806,7 @@ BEGIN TRY
 		,@ItemCustomerStorageId			= @ItemCustomerStorageId
 		,@ItemSiteDetailId				= @ItemSiteDetailId
 		,@ItemLoadDetailId				= @ItemLoadDetailId
+		,@ItemLoadDistributionDetailId 	= @ItemLoadDistributionDetailId
 		,@ItemLotId						= @ItemLotId
 		,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 		,@ItemSiteId					= @ItemSiteId
@@ -817,6 +835,7 @@ BEGIN TRY
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 		,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+		,@ItemDispatchId				= @ItemDispatchId
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
