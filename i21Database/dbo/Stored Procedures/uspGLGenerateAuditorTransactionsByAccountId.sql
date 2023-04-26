@@ -6,8 +6,10 @@ CREATE PROCEDURE [dbo].[uspGLGenerateAuditorTransactionsByAccountId]
     @intLocationSegmentId INT,
     @intLOBSegmentId INT,
     @intCurrencyId INT,
-    @strPrimary NVARCHAR(50),
-    @intAccountId INT
+    @intPrimaryFrom INT,
+    @intPrimaryTo INT,
+    @intAccountIdFrom INT,
+    @intAccountIdTo INT
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF;
@@ -22,12 +24,18 @@ BEGIN
     tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
     BEGIN TRANSACTION;
 
+
+
+
     BEGIN TRY
 
-        IF OBJECT_ID('tempdb..#AuditorTransactions') IS NOT NULL
-            DROP TABLE #AuditorTransactions
 
-        ;WITH T AS (
+
+
+        IF OBJECT_ID('tempdb..##AuditorTransactions') IS NOT NULL
+            DROP TABLE ##AuditorTransactions
+        DECLARE @strSQL NVARCHAR(MAX) =
+        ' ;WITH T AS (
            SELECT
                 A.intGLDetailId
                 , A.intEntityId
@@ -74,6 +82,7 @@ BEGIN
                 , SM.strCurrency
                 , B.strAccountId
                 , strPrimary = B.strCode
+                , B.intOrderId
             FROM  
 			tblGLDetail A LEFT JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId
             LEFT JOIN tblSMCurrency SM on SM.intCurrencyID = A.intCurrencyId
@@ -87,14 +96,38 @@ BEGIN
 			OUTER APPLY (
 				SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 			)U
-            WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-            AND A.intAccountId = CASE WHEN ISNULL(@intAccountId, 0) <> 0 THEN @intAccountId ELSE A.intAccountId END
-            AND B.intLocationSegmentId = CASE WHEN ISNULL(@intLocationSegmentId,0) <> 0 THEN @intLocationSegmentId ELSE B.intLocationSegmentId END
-            AND B.intLOBSegmentId = CASE WHEN ISNULL(@intLOBSegmentId,0) <> 0 THEN @intLOBSegmentId ELSE B.intLOBSegmentId END
-            AND A.intCurrencyId = CASE WHEN ISNULL(@intCurrencyId,0) <> 0 THEN @intCurrencyId ELSE A.intCurrencyId END
-            AND B.strCode = CASE WHEN ISNULL(@strPrimary,'') <> '' THEN @strPrimary ELSE B.strCode END
-        )
-        SELECT * INTO #AuditorTransactions FROM T ORDER BY T.strAccountId, T.intCurrencyId, T.dtmDate, T.intGLDetailId
+            WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo'
+            
+        IF ( ISNULL(@intLocationSegmentId,0) <> 0)
+            SET @strSQL = @strSQL + '  AND B.intLocationSegmentId =  ' +  CAST( @intLocationSegmentId AS NVARCHAR(5))
+        
+        IF ( ISNULL(@intLOBSegmentId,0) <> 0)
+            SET @strSQL = @strSQL + '  AND B.intLOBSegmentId =  ' +  CAST( @intLOBSegmentId AS NVARCHAR(5))
+        
+         IF ( ISNULL(@intCurrencyId,0) <> 0)
+            SET @strSQL = @strSQL + '  AND A.intCurrencyId =  ' +  CAST( @intCurrencyId AS NVARCHAR(5))
+       
+
+        IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) <> 0)
+            SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdTo AS NVARCHAR(5))
+        
+        IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) = 0)
+            SET @strSQL = @strSQL + '  AND B.intOrderId =  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5))
+
+        
+        IF (ISNULL(@intPrimaryFrom, 0) <> 0 AND ISNULL(@intPrimaryTo, 0) <> 0)
+            SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryTo AS NVARCHAR(5))
+        
+        IF (ISNULL(@intPrimaryFrom, 0) <> 0 AND ISNULL(@intPrimaryTo, 0) = 0)
+            SET @strSQL = @strSQL + '  AND B.intOrderId =  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5))
+
+
+
+        SET @strSQL = @strSQL + ') SELECT * INTO ##AuditorTransactions FROM T ORDER BY T.intOrderId, T.intCurrencyId, T.dtmDate, T.intGLDetailId'
+        DECLARE @params NVARCHAR(100) = '@dtmDateFrom DATETIME, @dtmDateTo DATETIME'
+        
+        EXEC sp_executesql @strSQL, @params, @dtmDateFrom= @dtmDateFrom, @dtmDateTo=@dtmDateTo
+
 
         DECLARE @dtmNow DATETIME = GETDATE()
        
@@ -127,7 +160,7 @@ BEGIN
                 , strAccountDescription
                
             INTO #TransactionGroup 
-            FROM #AuditorTransactions 
+            FROM ##AuditorTransactions 
             GROUP BY intAccountId, strAccountId, intCurrencyId, strCurrency
             ,strLOBSegmentDescription,strLocation, strAccountDescription
             
@@ -236,7 +269,7 @@ BEGIN
                         END
                         ;WITH cteOrder AS(
                             select *, ROW_NUMBER() over(order by dtmDate, strTransactionId) rowId 
-                            FROM #AuditorTransactions 
+                            FROM ##AuditorTransactions 
                             WHERE @_intAccountId =intAccountId 
                             AND @_intCurrencyId = intCurrencyId   
                         )
@@ -414,7 +447,7 @@ BEGIN
                                 @dblTotalSourceUnitCredit = SUM(ISNULL(dblSourceUnitCredit,0)),
                                 @dblTotalDebitForeign = sum(dblDebitForeign),
                                 @dblTotalCreditForeign = sum(dblCreditForeign)
-                                FROM #AuditorTransactions 
+                                FROM ##AuditorTransactions 
                                 WHERE @_intAccountId =intAccountId 
                                 AND @_intCurrencyId = intCurrencyId    
 
@@ -633,7 +666,7 @@ BEGIN
                             WHERE intAccountId = @_intAccountId
                             INSERT INTO tblGLAuditorTransaction (
                                 ysnGroupFooter
-        ,ysnGroupHeader
+                                ,ysnGroupHeader
                                 , intType
                                 , intGeneratedBy      
                                 , dtmDateGenerated
@@ -689,7 +722,7 @@ BEGIN
 
         INSERT INTO tblGLAuditorTransaction (ysnSpace,intType,intGeneratedBy,intEntityId) SELECT 1, 0, @intEntityId, @intEntityId --space
 
-        IF EXISTS (SELECT 1 FROM #AuditorTransactions)
+        IF EXISTS (SELECT 1 FROM ##AuditorTransactions)
         BEGIN 
              INSERT INTO tblGLAuditorTransaction (ysnSummary, intType,intGeneratedBy,intEntityId, strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
                 SELECT 1,0, @intEntityId, @intEntityId,
@@ -698,7 +731,7 @@ BEGIN
                 SUM(ISNULL(dblCredit,0)) dblCredit,
                 SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
                 FROM
-                #AuditorTransactions  A 
+                ##AuditorTransactions  A 
                 GROUP BY strCurrency
 
             INSERT INTO tblGLAuditorTransaction (ysnSummaryFooter, intType,intGeneratedBy,intEntityId,strTotalTitle, dblDebit, dblCredit, dblDebitUnit)
@@ -708,7 +741,7 @@ BEGIN
             SUM(ISNULL(dblCredit,0)) dblCredit,
             SUM(ISNULL(dblDebit,0)- ISNULL(dblCredit,0)) dblEndingBalance
             FROM
-            #AuditorTransactions  A 
+            ##AuditorTransactions  A 
 
         END
         ELSE
@@ -722,7 +755,7 @@ BEGIN
                 0 dblCredit,
                 0 dblEndingBalance
                 FROM
-                #AuditorTransactions  A  RIGHT JOIN tblSMCurrency SM ON SM.intCurrencyID = A.intCurrencyId
+                ##AuditorTransactions  A  RIGHT JOIN tblSMCurrency SM ON SM.intCurrencyID = A.intCurrencyId
                 GROUP BY SM.strCurrency
 
                 INSERT INTO tblGLAuditorTransaction (ysnSummaryFooter, intType,intGeneratedBy,intEntityId,strTotalTitle, dblDebit, dblCredit, dblDebitUnit)

@@ -31,7 +31,8 @@ AS
 				account.intLocationSegmentId,
 				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId,
 				lobSegment.strCode COLLATE Latin1_General_CI_AS strLOBSegmentId,
-				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId
+				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId,
+				account.intOrderId
 FROM            dbo.tblGLAccount account 
 				CROSS APPLY (
 					SELECT 
