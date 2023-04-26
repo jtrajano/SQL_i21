@@ -46,6 +46,7 @@ SELECT
 	,ysnRoutingAlert = TMO.ysnRoutingAlert
 	,strRoute = TMR.strRouteId
 	,TMO.intConcurrencyId
+	,TMS.strRecurringPONumber
 FROM vyuTMGeneratedCallEntry TMO 
 	LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
 	OUTER APPLY (SELECT TOP 1 sd.intDeviceId, d.strSerialNumber FROM tblTMSiteDevice sd 
