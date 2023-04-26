@@ -194,8 +194,11 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= ICC.intSalespersonId
 		 , intFreightTermId			= ICC.intFreightTermId
+		 , intTaxGroupId			= SMTG.intTaxGroupId
+		 , strTaxGroup				= SMTG.strTaxGroup
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractDetail ICD ON ICC.intItemContractHeaderId = ICD.intItemContractHeaderId
+	INNER JOIN tblSMTaxGroup SMTG ON ICD.intTaxGroupId = SMTG.intTaxGroupId
 	INNER JOIN tblICItem ITEM ON ICD.intItemId = ITEM.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON ICD.intItemUOMId = UOM.intItemUOMId
 	WHERE ICD.intContractStatusId = 1
