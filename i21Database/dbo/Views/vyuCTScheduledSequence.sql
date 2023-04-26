@@ -32,22 +32,6 @@ AS
 			l.intTicketId = ivd.intTicketId
 			and ivd.intContractDetailId is not null
 	),
-	Bill as
-	(
-		select
-			ivd.intContractHeaderId
-			,ivd.intContractDetailId
-			,ivd.intBillId
-			,ivd.intBillDetailId
-			,ivd.intTicketId
-			,l.intLoadId
-		from
-			tblAPBillDetail ivd
-			,tblLGLoad l
-		where
-			l.intTicketId = ivd.intTicketId
-			and ivd.intContractDetailId is not null
-	),
 	schedule_raw as
 	(
 		select intId = row_number() over(partition by c.intContractDetailId order by a.intLoadDetailId asc)
