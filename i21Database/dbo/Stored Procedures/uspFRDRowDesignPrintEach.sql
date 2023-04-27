@@ -42,7 +42,6 @@ DECLARE @strCurrency NVARCHAR(50)
 DECLARE @strQuery NVARCHAR(max)        
 DECLARE @ysnUnnaturalAccount INT = 0    
 DECLARE @queryStringFilter NVARCHAR(MAX)  
-DECLARE @ysnUnnaturalAccount INT = 0  
 DECLARE @hasAccount BIT 
 
 CREATE TABLE #tempGLAccount (
