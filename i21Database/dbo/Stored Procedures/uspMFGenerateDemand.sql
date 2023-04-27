@@ -1273,12 +1273,21 @@ BEGIN TRY
 	  AND SS.intContractStatusId IN (1, 4)
 	  AND SS.intCompanyLocationId = ISNULL(@intCompanyLocationId, SS.intCompanyLocationId)
 	  AND (CASE WHEN DAY((CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-							   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+							   /* Add Lead Time for Ocean Transport Mode. */
+							   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+							   /* UAD with Posted / Saved LS. */
+							   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 						  END)) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																							  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																							  /* Add Lead Time for Ocean Transport Mode. */
+																							  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																							  /* UAD with Posted / Saved LS. */
+																							  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																						 END))
 				ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-						   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+						   /* Add Lead Time for Ocean Transport Mode. */
+						   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+						   /* UAD with Posted / Saved LS. */
+						   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 					  END)
 		   END) < @dtmStartOfMonth
 	  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN ISNULL(SS.intBookId, 0)
@@ -1316,12 +1325,21 @@ BEGIN TRY
 						 ELSE 13
 					END) AS intAttributeId --Open
 				 , DATEDIFF(mm, 0, (CASE WHEN DAY((CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-														ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+														/* Add Lead Time for Ocean Transport Mode. */
+													    WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+													    /* UAD with Posted / Saved LS. */
+													   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 												   END)) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																													   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																													   /* Add Lead Time for Ocean Transport Mode. */
+																													   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																													   /* UAD with Posted / Saved LS. */
+																													   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																												  END))
 										 ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-													ELSE ISNULL(DATEADD(DAY, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+													/* Add Lead Time for Ocean Transport Mode. */
+												   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+												   /* UAD with Posted / Saved LS. */
+												   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 											   END)
 									END)) + 1 - @intCurrentMonth AS intMonthId
 				 , SS.intCompanyLocationId
@@ -1341,12 +1359,21 @@ BEGIN TRY
 			  AND SS.intContractStatusId IN (1, 4)
 			  AND SS.intCompanyLocationId = ISNULL(@intCompanyLocationId, SS.intCompanyLocationId)
 			  AND (CASE WHEN DAY((CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-									   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+									   /* Add Lead Time for Ocean Transport Mode. */
+									   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+									   /* UAD with Posted / Saved LS. */
+									   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 								  END)) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																									  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																									  /* Add Lead Time for Ocean Transport Mode. */
+																									  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																									  /* UAD with Posted / Saved LS. */
+																									  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																								 END))
 						ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-								   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+								   /* Add Lead Time for Ocean Transport Mode. */
+								   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+								   /* UAD with Posted / Saved LS. */
+								   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 							  END)
 				   END) >= @dtmStartOfMonth
 			  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN ISNULL(SS.intBookId, 0)
@@ -1359,12 +1386,21 @@ BEGIN TRY
 						  ELSE I.intMainItemId
 					 END
 				   , DATEDIFF(mm, 0, (CASE WHEN DAY((CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-														  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+														  /* Add Lead Time for Ocean Transport Mode. */
+														  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+														  /* UAD with Posted / Saved LS. */
+														  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 													 END)) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																														 ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																														 /* Add Lead Time for Ocean Transport Mode. */
+																														 WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																														 /* UAD with Posted / Saved LS. */
+																														 ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																													END))
 										   ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-													  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+													  /* Add Lead Time for Ocean Transport Mode. */
+													  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+													  /* UAD with Posted / Saved LS. */
+													  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 												 END)
 									  END))
 				   , SS.intCompanyLocationId
@@ -1403,12 +1439,21 @@ BEGIN TRY
 	  AND SS.intContractStatusId IN (1, 4)
 	  AND SS.intCompanyLocationId = ISNULL(@intCompanyLocationId, SS.intCompanyLocationId)
 	  AND (CASE WHEN DAY(CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-							  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+							  /* Add Lead Time for Ocean Transport Mode. */
+							  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+							  /* UAD with Posted / Saved LS. */
+							  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 						 END) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																							ELSE IsNULL(DateAdd(day, IsNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																							/* Add Lead Time for Ocean Transport Mode. */
+																						    WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																						    /* UAD with Posted / Saved LS. */
+																							ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																					   END))
 				ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-						   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+						   /* Add Lead Time for Ocean Transport Mode. */
+						   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+						   /* UAD with Posted / Saved LS. */
+						   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 					  END)
 		   END) < @dtmStartOfMonth
 	  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN ISNULL(SS.intBookId, 0)
@@ -1438,12 +1483,21 @@ BEGIN TRY
 																																						END)) * I.dblRatio) AS dblIntrasitQty
 		 , 14 AS intAttributeId --In-transit Purchases
 		 , DATEDIFF(mm, 0, (CASE WHEN DAY(CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-											   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+											   /* Add Lead Time for Ocean Transport Mode. */
+											   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+											   /* UAD with Posted / Saved LS. */
+											   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 										  END) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																											 ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																											 /* Add Lead Time for Ocean Transport Mode. */
+																											 WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																											 /* UAD with Posted / Saved LS. */
+																											 ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																										END))
 								 ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-											ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+											/* Add Lead Time for Ocean Transport Mode. */
+											WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+											/* UAD with Posted / Saved LS. */
+											ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 									   END)
 							END)) + 1 - @intCurrentMonth AS intMonthId
 		 , SS.intCompanyLocationId
@@ -1463,12 +1517,21 @@ BEGIN TRY
 	  AND SS.intContractStatusId IN (1, 4)
 	  AND SS.intCompanyLocationId = ISNULL(@intCompanyLocationId, SS.intCompanyLocationId)
 	  AND (CASE WHEN DAY(CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-							  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+							  /* Add Lead Time for Ocean Transport Mode. */
+							  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+							  /* UAD with Posted / Saved LS. */
+							  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 						 END) > @intDemandAnalysisMonthlyCutOffDay THEN DateAdd(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																							ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																							/* Add Lead Time for Ocean Transport Mode. */
+																						    WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																							/* UAD with Posted / Saved LS. */
+																							ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																					   END))
 				ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-						   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+						   /* Add Lead Time for Ocean Transport Mode. */
+						   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+						   /* UAD with Posted / Saved LS. */
+						   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 					  END)
 		   END) >= @dtmStartOfMonth
 	  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN ISNULL(SS.intBookId, 0)
@@ -1481,12 +1544,21 @@ BEGIN TRY
 				  ELSE I.intMainItemId
 			 END
 		   , DATEDIFF(mm, 0, (CASE WHEN DAY(CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-												 ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+												 /* Add Lead Time for Ocean Transport Mode. */
+												 WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+												 /* UAD with Posted / Saved LS. */
+												 ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 											END) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																											   ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																											   /* Add Lead Time for Ocean Transport Mode. */
+																											   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																											   /* UAD with Posted / Saved LS. */
+																											   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 																										  END))
 								   ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-											  ELSE ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+											  /* Add Lead Time for Ocean Transport Mode. */
+											  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+											  /* UAD with Posted / Saved LS. */
+											  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
 										 END)
 							  END))
 		   , SS.intCompanyLocationId
