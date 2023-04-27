@@ -255,7 +255,7 @@ BEGIN TRY
 			 									+ @fontBold + ' at ' + CD.strFixationBy + '''s option prior to FND of ' + '</span>'
 			 									+ @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)  + '</span>'
 			 									+ @fontBold + ' or prior to presentation of documents,whichever is earlier.' + '</span>'
-			 								ELSE '' + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + @fontBold + ' per ' + '</span>' +  @fontBold + PU.strUnitMeasure + '</span>' 
+			 								ELSE '' +'</br>'+ @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + @fontBold + ' per ' + '</span>' +  @fontBold + PU.strUnitMeasure + '</span>' 
 			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		= '<p>'+ CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE '' END +CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
