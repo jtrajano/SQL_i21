@@ -110,7 +110,7 @@ RETURNS TABLE AS RETURN
 	) entityGroup
 	-- WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	WHERE 1 = (
-							CASE WHEN ISNULL(@paymentMethodId,0) > 0 THEN
+							CASE WHEN ISNULL(@paymentMethodId,0) > 0 AND ISNULL(@paymentMethodId,0) NOT IN (3) THEN
 								CASE WHEN forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL THEN 1 ELSE 0 END
 							ELSE 1 END
 						)
@@ -135,17 +135,17 @@ RETURNS TABLE AS RETURN
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
 					ELSE 1 END)
-	AND 1 = (CASE WHEN @payFromBankAccountId > 0 AND voucher.intPayFromBankAccountId > 0
+	AND 1 = (CASE WHEN @payFromBankAccountId > 0 --AND voucher.intPayFromBankAccountId > 0
 					THEN (CASE WHEN @payFromBankAccountId = voucher.intPayFromBankAccountId OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @payToBankAccountId > 0 AND voucher.intPayToBankAccountId > 0
 					THEN (CASE WHEN @payToBankAccountId = voucher.intPayToBankAccountId THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 1
-						THEN (CASE WHEN voucher.intShipToId = @companyLocationId AND (forPay.intTransactionType IN (1, 2, 3)) THEN 1
+						THEN (CASE WHEN voucher.intShipToId = @companyLocationId THEN 1
 									ELSE 0 END)
 					WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 0 
-						THEN (CASE WHEN voucher.intShipToId = @companyLocationId THEN 1
+						THEN (CASE WHEN voucher.intShipToId = @companyLocationId OR voucher.intTransactionType IN (2, 3) THEN 1
 									ELSE 0 END)
 					ELSE 1 END)
 )
