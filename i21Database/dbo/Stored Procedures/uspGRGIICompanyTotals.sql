@@ -610,7 +610,7 @@ END
 TRUNCATE TABLE tblGRGIIPhysicalInventory
 TRUNCATE TABLE tblGRGIICustomerStorage
 
-UPDATE @CompanyOwnedData SET dblTotalEnding = ISNULL(dblTotalBeginning,0) + ISNULL(dblTotalIncrease,0) - ISNULL(dblTotalIncrease,0)
+UPDATE @CompanyOwnedData SET dblTotalEnding = ISNULL(dblTotalBeginning,0) + ISNULL(dblTotalIncrease,0) - ISNULL(dblTotalDecrease,0) WHERE strLabel <> ''
 
 SELECT * FROM @CompanyOwnedData ORDER BY intOrderNo
 
