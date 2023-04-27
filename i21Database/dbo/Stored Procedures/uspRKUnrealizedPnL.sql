@@ -145,7 +145,7 @@ BEGIN
 					, ot.strSalespersonId
 					, ot.strCommodityCode
 					, ot.strLocationName
-					, dblOriginalQty = ot.dblOpenContract
+					, dblOriginalQty = ot.dblNoOfContract
 					, Long1 = ISNULL(CASE WHEN ot.strNewBuySell = 'Buy' THEN ISNULL(ot.dblOpenContract, 0) ELSE NULL END, 0)
 					, Sell1 = ISNULL(CASE WHEN ot.strNewBuySell = 'Sell' THEN ABS(ISNULL(ot.dblOpenContract, 0)) ELSE NULL END, 0)
 					, dblNet1 = ot.dblOpenContract
