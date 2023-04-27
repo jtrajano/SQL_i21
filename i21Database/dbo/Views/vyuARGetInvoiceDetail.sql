@@ -240,9 +240,14 @@ LEFT JOIN (
 ) CSITE ON INV.intSiteId = CSITE.intSiteID
 LEFT JOIN (
 	SELECT 
-		 intDispatchId
+		intDispatchId = intDispatchID
 		,strOrderNumber
-	FROM tblTMOrder  WITH(NOLOCK)
+	FROM tblTMDispatch  WITH(NOLOCK)
+	UNION 
+	SELECT DISTINCT
+		 intDispatchId = intDispatchId
+		,strOrderNumber
+	FROM tblTMDispatchHistory  WITH(NOLOCK)
 ) CORDER ON INV.intDispatchId = CORDER.intDispatchId
 LEFT JOIN ( 
 	SELECT intContractDetailId

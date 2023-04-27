@@ -259,7 +259,7 @@ BEGIN
 			,[intContractHeaderId]				= (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
 			,[intContractDetailId]				= RE.intContractDetailId 
 			,[ysnAccrue]						= 0 --LoadCost.ysnAccrue
-			,[ysnPrice]							= LoadCost.ysnPrice
+			,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 			,[strChargesLink]					= RE.strChargesLink
 			,[ysnAllowVoucher]					= LoadCost.ysnPrice
 			,[intLoadShipmentId]			= RE.intLoadShipmentId 
