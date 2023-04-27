@@ -391,7 +391,7 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId )
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
 		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.--[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))																												
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
@@ -1520,7 +1520,7 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId )
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
 		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))
 		,dblCIFInStore = 0.00 
 		,dblCUMStorage =  0.00
@@ -1776,7 +1776,7 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId 
 																	   END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 	
-		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId )
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
 		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
 		,dblCIFInStore = 0.00 
 		,dblCUMStorage =  0.00
@@ -2030,7 +2030,7 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId )
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
 		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
@@ -2324,7 +2324,7 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
-		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId )
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
 		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
