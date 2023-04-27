@@ -19,6 +19,8 @@ DECLARE @id				INT
 	  , @intBatchId		INT
 	  , @errorMessage	NVARCHAR(300) = ''
 	  , @intCountryId INT
+	  , @intMarketZoneId INT
+	  , @intBuyingCenterLocationId INT
 
 INSERT INTO @tbl (intId)
 SELECT intId
@@ -71,10 +73,14 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 			END
 
 		SELECT @intCountryId = NULL
+				,@intMarketZoneId=NULL
+				,@intBuyingCenterLocationId =NULL
 
 		SELECT @strBatchId = A.strBatchId
 			 , @intBatchId = intBatchId
 			 ,@intCountryId = B.intCountryId 
+			 ,@intMarketZoneId=B.intMarketZoneId
+			 ,@intBuyingCenterLocationId=B.intBuyingCenterLocationId
 		FROM @MFBatchTableType B
 		LEFT JOIN tblMFBatch A ON A.intSalesYear = B.intSalesYear
 			  AND A.intSales = B.intSales
@@ -84,6 +90,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 			  AND A.intBuyingCenterLocationId = B.intBuyingCenterLocationId
 			  AND A.intSubBookId = B.intSubBookId
 			  AND A.intLocationId = B.intLocationId
+			  AND A.intSupplierId = B.intSupplierId
 		WHERE B.intId = @id;
 
 		/* Update Existing Batch if @strBatchId is not empty. */
@@ -212,12 +219,13 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 							,@intItemId = 0
 							,@intManufacturingId = 0
 							,@intSubLocationId = 0
-							,@intLocationId = 0
+							,@intLocationId = @intBuyingCenterLocationId
 							,@intOrderTypeId = NULL
 							,@intBlendRequirementId = 0
 							,@intPatternCode = 181
 							,@ysnProposed = 0
 							,@intCountryId=@intCountryId
+							,@intMarketZoneId=@intMarketZoneId
 							,@strPatternString = @strBatchId OUTPUT
 
 						IF @strBatchId IS NULL
@@ -344,6 +352,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , dblTeaMouthFeelPinpoint
 				  , dblTeaAppearancePinpoint
 				  , dtmShippingDate
+				  ,intSupplierId 
 				)
 				SELECT (CASE WHEN @ysnCopyBatch = 0 THEN @strBatchId
 							 ELSE strBatchId
@@ -460,6 +469,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 					 , dblTeaMouthFeelPinpoint
 					 , dblTeaAppearancePinpoint
 					 , dtmShippingDate
+					 , intSupplierId 
 				FROM @MFBatchTableType
 				WHERE intId = @id;
 

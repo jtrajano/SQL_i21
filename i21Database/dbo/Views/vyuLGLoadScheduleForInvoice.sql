@@ -46,16 +46,8 @@ SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,dblWeight = dbo.fnCalculateQtyBetweenUOM(ISNULL(CD.intItemUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1.000000)
 	,dblQtyShipped = ISNULL(LD.dblQuantity, 0)
 	,dblQtyOrdered = ISNULL(LD.dblQuantity, 0)
-	,dblShipmentQuantity = CASE WHEN (dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity)) <> LD.dblNet)
-					THEN LD.dblNet 
-				ELSE
-					dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
-				END
-	,dblShipmentQtyShippedTotal = CASE WHEN (dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity)) <> LD.dblNet)
-					THEN LD.dblNet 
-				ELSE
-					dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
-				END
+	,dblShipmentQuantity = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
+	,dblShipmentQtyShippedTotal = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblQtyRemaining = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblDiscount = 0.0000000
 	,dblPrice = CASE 

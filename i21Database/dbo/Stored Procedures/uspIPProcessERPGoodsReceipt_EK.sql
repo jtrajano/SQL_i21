@@ -455,14 +455,14 @@ BEGIN TRY
 					END
 				END
 
-				IF @dblCost <= 0
-				BEGIN
-					RAISERROR (
-							'Invalid Cost. '
-							,16
-							,1
-							)
-				END
+				--IF @dblCost <= 0
+				--BEGIN
+				--	RAISERROR (
+				--			'Invalid Cost. '
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				SELECT @intCostUnitMeasureId = t.intUnitMeasureId
 				FROM tblICUnitMeasure t WITH (NOLOCK)
@@ -589,7 +589,7 @@ BEGIN TRY
 						,@strERPItemNumber = strERPPOLineNo
 					FROM tblMFBatch B WITH (NOLOCK)
 					WHERE B.strBatchId = @strLotNo
-						AND B.intLocationId = @intCompanyLocationId
+						--AND B.intLocationId = @intCompanyLocationId
 
 					IF ISNULL(@strERPPONumber, '') = ''
 					BEGIN
@@ -613,7 +613,7 @@ BEGIN TRY
 					SET B.strERPPONumber2 = @strERPPONumber2
 					FROM tblMFBatch B
 					WHERE B.strBatchId = @strLotNo
-						AND B.intLocationId = @intCompanyLocationId
+						--AND B.intLocationId = @intCompanyLocationId
 
 					SELECT TOP 1 @intLoadId = L.intLoadId
 						,@intLoadDetailId = LD.intLoadDetailId
@@ -693,10 +693,21 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						SELECT @intLotQtyItemUOMId = intItemUOMId
-						FROM tblICItemUOM t WITH (NOLOCK)
-						WHERE t.intItemId = @intItemId
-							AND t.intUnitMeasureId = @intLotQtyUnitMeasureId
+						--SELECT @intLotQtyItemUOMId = intItemUOMId
+						--FROM tblICItemUOM t WITH (NOLOCK)
+						--WHERE t.intItemId = @intItemId
+						--	AND t.intUnitMeasureId = @intLotQtyUnitMeasureId
+
+						-- Take Qty UOM from Batch
+						SELECT TOP 1 @intQtyItemUOMId = IUOM.intItemUOMId
+						FROM tblMFBatch B WITH (NOLOCK)
+						JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
+							AND IUOM.intUnitMeasureId = B.intPackageUOMId
+							AND B.strBatchId = @strLotNo
+							AND B.intTealingoItemId = @intItemId
+							--AND B.intLocationId = @intCompanyLocationId
+
+						SELECT @intLotQtyItemUOMId = @intQtyItemUOMId
 
 						IF ISNULL(@intLotQtyItemUOMId, 0) = 0
 						BEGIN

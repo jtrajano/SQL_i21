@@ -109,6 +109,7 @@ BEGIN TRY
 		,@intRecordId INT
 		,@intOrgNoOfSheets INT
 		,@dblAutoLotPicking NUMERIC(38, 20)
+		,@ysnDisplayLandedPriceInBlendManagement	INT
 	DECLARE @tblInputItemSeq TABLE (
 		intRecordId INT
 		,intItemId INT
@@ -275,6 +276,7 @@ BEGIN TRY
 	/* Get value of Default Residue Qty from Manufacturing Configuration. */
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnRecipeHeaderValidation = IsNULL(ysnRecipeHeaderValidation, 0)
+		,@ysnDisplayLandedPriceInBlendManagement=IsNULL(ysnDisplayLandedPriceInBlendManagement,0)
 	FROM tblMFCompanyPreference;
 
 	SELECT @strBlendItemNo = Item.strItemNo
@@ -3776,7 +3778,7 @@ BEGIN TRY
 			,UM2.strUnitMeasure AS strIssuedUOM
 			,BS.intItemId
 			,BS.intRecipeItemId
-			,L.dblLastCost AS dblUnitCost
+			,Case When @ysnDisplayLandedPriceInBlendManagement=1 Then IsNULL(Batch.dblLandedPrice,0) Else L.dblLastCost End AS dblUnitCost
 			--,(
 			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
 			--	FROM dbo.QM_TestResult AS TR
@@ -3826,6 +3828,8 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 		LEFT JOIN tblICCommodityAttribute MT ON MT.intCommodityAttributeId = I.intProductTypeId
 		LEFT JOIN tblICBrand B ON B.intBrandId = I.intBrandId
+		LEFT JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+		LEFT JOIN tblMFBatch Batch on Batch.intBatchId=LI.intBatchId
 		WHERE BS.dblQuantity > 0
 		
 		UNION

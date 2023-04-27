@@ -632,11 +632,8 @@ BEGIN
   
      SET @intNonBlendLoadDistributionDetailId = @@identity  
 
-	 IF(@ysnComboFreight = 0)  
-     BEGIN  
       UPDATE tblTRLoadDistributionDetail SET ysnComboFreight = 0
       WHERE intLoadDistributionDetailId = @intNonBlendLoadDistributionDetailId  
-     END  
        
 
      UPDATE tblTRImportLoadDetail SET intLoadDistributionDetailId = @intNonBlendLoadDistributionDetailId  

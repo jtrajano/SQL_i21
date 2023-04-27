@@ -426,6 +426,15 @@ BEGIN TRY
 							IF @dblLoadUsedQty <> 0
 							BEGIN
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
+
+								-- Update the LS status back to scheduled and remove delivered date
+								UPDATE L
+								SET
+									intShipmentStatus = 1,
+									dtmDeliveredDate = NULL
+								FROM tblLGLoad L
+								INNER JOIN tblSCTicket T ON T.intLoadId = L.intLoadId
+								WHERE T.intTicketId = @intTicketId
 							END
 						END
 
@@ -1950,6 +1959,10 @@ BEGIN TRY
 				, @intTicketItemUOMId = intItemUOMIdTo
 			FROM tblSCTicket WHERE intTicketId = @intTicketId	
 			
+			UPDATE tblSCTicket 
+				SET intContractId = NULL
+			WHERE intTicketId = @intTicketId	
+
 			UPDATE tblLGLoad SET 
 				intShipmentStatus = 1
 				, dtmDeliveredDate = NULL
@@ -1960,7 +1973,8 @@ BEGIN TRY
 					 , @dblQty = @dblTicketNetUnits
 					 , @intItemUOMId = @intTicketItemUOMId
 					 , @intEntityUserId = @intUserId
-					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT 
+					 , @intLoadDetailId = @CURRENT_LOAD_DETAIL_ID OUTPUT
+					 , @intVendorEntityId =  @intTicketEntityId
 
 			
 			

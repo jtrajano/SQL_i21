@@ -92,6 +92,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
+	AND ISNULL(CUSTOMER.intDefaultContactId,entityToContact.intEntityToContactId) = entityToContact.intEntityToContactId
 LEFT JOIN tblEMEntity entityContact ON entityContact.intEntityId = entityToContact.intEntityContactId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntityLocation custLocation ON CUSTOMER.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
 LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocation.intEntityLocationId AND shipLocation.ysnActive = 1

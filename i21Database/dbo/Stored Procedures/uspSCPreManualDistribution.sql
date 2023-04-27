@@ -1,0 +1,23 @@
+﻿CREATE PROCEDURE [dbo].[uspSCPreManualDistribution]
+	@TICKET_ID INT,
+	@USER_ID INT
+AS
+	
+	DECLARE @DISTRIBUTION_OPTION NVARCHAR(10)
+
+
+	SELECT
+		@DISTRIBUTION_OPTION = strDistributionOption									
+	FROM
+	tblSCTicket
+	WHERE intTicketId = @TICKET_ID
+
+
+	IF @DISTRIBUTION_OPTION = 'LRF'
+	BEGIN
+
+		EXEC uspSCTicketClearLoadDetail @TICKET_ID = @TICKET_ID, @USER_ID = @USER_ID, @DELETE_ALL = 1
+
+	END
+
+RETURN 0
