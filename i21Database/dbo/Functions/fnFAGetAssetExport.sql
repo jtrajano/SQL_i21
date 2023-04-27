@@ -15,7 +15,9 @@ RETURNS  @tbl TABLE(
 	dblSection179 NUMERIC(18, 6),
 	dblBonusDepreciation NUMERIC(18, 6),
 	dblMarketValue NUMERIC(18, 6),
-	dblInsuranceValue NUMERIC(18, 6)
+	dblInsuranceValue NUMERIC(18, 6),
+	dtmImportDepThruDate VARCHAR(20)  ,
+	dblImportDepreciationToDate NUMERIC(18, 6)
 	
 )
 AS
@@ -35,6 +37,8 @@ BEGIN
 		,BD.dblBonusDepreciation
 		,BD.dblMarketValue
 		,BD.dblInsuranceValue
+		,CONVERT(VARCHAR(20),BD.dtmImportDepThruDate,101)  
+		,BD.dblImportDepreciationToDate
 	FROM tblFABookDepreciation BD
 	LEFT JOIN tblFABook B ON B.intBookId = BD.intBookId
 	LEFT JOIN tblGLLedger L ON L.intLedgerId = BD.intLedgerId
