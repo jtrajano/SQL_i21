@@ -200,7 +200,7 @@ BEGIN
 			,[intTransactionType] = 1
 			,[intLocationId] = A.intCompanyLocationId
 			,[intCurrencyId] = A.intCurrencyId
-			,[dtmDate] = A.dtmProcessDate
+			,[dtmDate] = A.dtmPostedDate
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
 			,[strSourceNumber] = LTRIM(A.strLoadNumber)
