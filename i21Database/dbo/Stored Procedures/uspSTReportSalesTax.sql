@@ -12,7 +12,8 @@
 AS
 
 BEGIN
-	DECLARE @tmpDetails AS TABLE(intStoreNo NVARCHAR(100)
+	DECLARE @tmpDetails AS TABLE(dtmCheckoutDate DATETIME
+		, intStoreNo NVARCHAR(100)
 		, intStoreId INT
 		, strStoreName NVARCHAR(100)
 		, intItemId INT
@@ -76,7 +77,7 @@ BEGIN
 	IF (@strReportName IN ('Tax Fuel Sales', 'Fuel Tax Total'))
 	BEGIN	
 		INSERT INTO @MainStore
-		SELECT T0.dtmCheckoutDate
+		SELECT dtmCheckoutDate = CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME)
 			, T4.intStoreNo
 			, T0.intStoreId
 			, strStoreName = T4.strDescription
@@ -94,7 +95,7 @@ BEGIN
 		INNER JOIN tblSTStore T4 ON T0.intStoreId = T4.intStoreId
 		INNER JOIN vyuARInvoiceTaxDetail T5 ON T0.intInvoiceId = T5.intInvoiceId AND T3.intItemId = T5.intItemId
 		WHERE ISNULL(T0.intInvoiceId, 0) <> 0 AND T5.ysnTaxExempt = 0
-		GROUP BY T0.dtmCheckoutDate
+		GROUP BY CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME)
 			, T4.intStoreNo
 			, T0.intStoreId
 			, T4.strDescription
@@ -108,7 +109,7 @@ BEGIN
 
 		INSERT INTO @MainStoreGroup
 		SELECT T6.strStoreGroupName
-			, T0.dtmCheckoutDate
+			, dtmCheckoutDate = CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME)
 			, T4.intStoreNo
 			, T0.intStoreId
 			, T4.strDescription AS strStoreName
@@ -128,7 +129,7 @@ BEGIN
 		LEFT JOIN @tmpStoreGroup T6 ON T0.intStoreId = T6.intStoreId
 		WHERE ISNULL(T0.intInvoiceId,0) <> 0 AND T5.ysnTaxExempt = 0
 		GROUP BY T6.strStoreGroupName
-			, T0.dtmCheckoutDate
+			, CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME)
 			, T4.intStoreNo
 			, T0.intStoreId
 			, T4.strDescription
@@ -151,7 +152,8 @@ BEGIN
 			IF @intGroupById = 0
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT intStoreNo = 0
+				SELECT dtmCheckoutDate
+					, intStoreNo = 0
 					, intStoreId = 0
 					, strStoreName = ''
 					, intItemId
@@ -167,14 +169,16 @@ BEGIN
 				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
 					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY intItemId
+				GROUP BY dtmCheckoutDate
+					, intItemId
 					, strItemNo
 					, strDescription
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT intStoreNo
+				SELECT dtmCheckoutDate
+					, intStoreNo
 					, intStoreId
 					, strStoreName
 					, intItemId
@@ -190,7 +194,8 @@ BEGIN
 				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
 					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY intStoreNo
+				GROUP BY dtmCheckoutDate
+					, intStoreNo
 					, intStoreId
 					, strStoreName
 					, intItemId
@@ -203,7 +208,8 @@ BEGIN
 			IF @intGroupById = 0
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT intStoreNo = 0
+				SELECT dtmCheckoutDate
+					, intStoreNo = 0
 					, intStoreId = 0
 					, strStoreName = ''
 					, intItemId
@@ -219,14 +225,16 @@ BEGIN
 				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 					AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
 					AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY intItemId
+				GROUP BY dtmCheckoutDate
+					, intItemId
 					, strItemNo
 					, strDescription
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @tmpDetails
-				SELECT intStoreNo = strStoreGroupName + ' - ' + CAST(intStoreNo AS NVARCHAR(10))
+				SELECT dtmCheckoutDate
+					, intStoreNo = strStoreGroupName + ' - ' + CAST(intStoreNo AS NVARCHAR(10))
 					, intStoreId
 					, strStoreName
 					, intItemId
@@ -242,7 +250,8 @@ BEGIN
 				WHERE CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
 				AND CAST(FLOOR(CAST(MT.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
 				AND MT.intStoreId IN (SELECT Item FROM @tmpStores)
-				GROUP BY strStoreGroupName
+				GROUP BY dtmCheckoutDate
+					, strStoreGroupName
 					, intStoreNo
 					, intStoreId
 					, strStoreName
@@ -254,7 +263,8 @@ BEGIN
 
 		IF @ysnIncludeZeroValues = 1
 		BEGIN
-			SELECT intStoreNo
+			SELECT dtmCheckoutDate
+				, intStoreNo
 				, intStoreId
 				, strStoreName
 				, intItemId
@@ -268,7 +278,8 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT intStoreNo
+			SELECT dtmCheckoutDate
+				, intStoreNo
 				, intStoreId
 				, strStoreName
 				, intItemId
