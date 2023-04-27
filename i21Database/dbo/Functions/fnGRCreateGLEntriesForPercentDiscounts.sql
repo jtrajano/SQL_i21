@@ -75,6 +75,7 @@ BEGIN
 	)
 	
 	INSERT INTO @Bills
+	SELECT * FROM (
 	SELECT 
 		(R.dblTotal + IRC.dblAmount) AS dblTotal, 
 		R.dblRate AS dblRate, 
@@ -124,7 +125,8 @@ BEGIN
 		WHERE 
 			item.intItemId = stockUnit.intItemId 
 		AND stockUnit.ysnStockUnit = 1
-	) itemUOM			
+	) itemUOM
+	) A WHERE dblTotal <> 0
 
 	INSERT INTO @returntable
 	 --AP Account
