@@ -700,7 +700,7 @@ GROUP BY
 	A.[strTransactionForm],
 	A.[strModuleName],
 	A.[intConcurrencyId]
-HAVING SUM(dblCredit - dblDebit) BETWEEN -1 AND 1
+HAVING SUM(dblCredit - dblDebit) = -0.01 OR SUM(dblCredit - dblDebit) = 0.01
 END
 
 --=====================================================================================================================================
