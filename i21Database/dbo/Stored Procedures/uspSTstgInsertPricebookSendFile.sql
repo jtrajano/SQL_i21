@@ -1250,7 +1250,7 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 					, [intFlagSysid]				=	CASE
 															WHEN UNPIVOTItemLoc.strColumnName = 'ysnPromotionalItem' -- Always INCLUDE
 																THEN 1
-															WHEN UNPIVOTItemLoc.strColumnName = 'ysnReturnable' AND UNPIVOTItemLoc.ysnValue = 1
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnReturnable' AND UNPIVOTItemLoc.ysnValue = 0
 																THEN 3
 															WHEN UNPIVOTItemLoc.strColumnName = 'ysnFoodStampable'  AND UNPIVOTItemLoc.ysnValue = 1
 																THEN 4
@@ -1366,7 +1366,8 @@ SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT
 														  )
 						) n
 						WHERE n.ysnValue = 1
-							OR n.strColumnName = 'ysnPromotionalItem'
+							OR n.strColumnName = 'ysnPromotionalItem' 
+							OR n.strColumnName = 'ysnReturnable'
 				) UNPIVOTItemLoc
 					ON ItemLoc.intItemLocationId = UNPIVOTItemLoc.intPrimaryId
 				INNER JOIN vyuSTItemUOMPosCodeFormat PCF
