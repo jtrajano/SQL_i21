@@ -7,6 +7,7 @@
 RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 	, dtmTransactionDate DATETIME
 	, dblOpenContract NUMERIC(18, 6)
+	, dblNoOfContract NUMERIC(18, 6)
 	, intCommodityId INT
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -168,6 +169,7 @@ BEGIN
 	INSERT INTO @FinalResult(intFutOptTransactionId
 		, dtmTransactionDate
 		, dblOpenContract
+		, dblNoOfContract
 		, intCommodityId
 		, strCommodityCode
 		, strInternalTradeNo
@@ -213,6 +215,7 @@ BEGIN
 	SELECT DISTINCT intFutOptTransactionId
 		, dtmTransactionDate
 		, dblOpenContract
+		, dblNoOfContract
 		, intCommodityId
 		, strCommodityCode
 		, strInternalTradeNo
@@ -269,6 +272,7 @@ BEGIN
 				, FOT.intFutOptTransactionId
 				, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
 										ELSE ISNULL(History.dblOpenContract, FOT.dblOpenContract) END
+				, dblNoOfContract = ABS(FOT.dblGetNoOfContract)
 				, FOT.intCommodityId
 				, FOT.strCommodityCode
 				, FOT.strInternalTradeNo
@@ -385,6 +389,7 @@ BEGIN
 				, FOT.intFutOptTransactionId
 				, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
 										ELSE ISNULL(History.dblOpenContract, FOT.dblOpenContract) END
+				, dblNoOfContract = ABS(FOT.dblGetNoOfContract)
 				, FOT.intCommodityId
 				, FOT.strCommodityCode
 				, FOT.strInternalTradeNo
@@ -497,6 +502,7 @@ BEGIN
 											END
 				, History.intFutOptTransactionId
 				, dblOpenContract = History.dblOpenContract
+				, dblNoOfContract = dblOldNoOfLots
 				, intCommodityId
 				, History.strCommodity COLLATE Latin1_General_CI_AS
 				, History.strInternalTradeNo COLLATE Latin1_General_CI_AS
