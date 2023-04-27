@@ -1235,71 +1235,79 @@ BEGIN TRY
 	/* End of Retrieval of Purchase / Contracts (Critical Part of Generating Demand). */
 
 	/* Retrieval of Logistics (Critical Part of Generating Demand). */
-
-	INSERT INTO #tblMFDemand 
-	(
-		intItemId
-	  , dblQty
-	  , intAttributeId
-	  , intMonthId
-	  , intLocationId
-	)
-	SELECT CASE WHEN I.ysnSpecificItemDescription = 1 THEN I.intItemId
-				ELSE I.intMainItemId
-		   END AS intItemId
-		 , SUM(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, ISNULL(LDCL.dblQuantity, LD.dblQuantity) - 
-					(CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0)
-						  ELSE LD.dblDeliveredQuantity
-					 END)
-			   ) * I.dblRatio) AS dblIntrasitQty
-		 , (CASE WHEN @intPositionByETA = 2 THEN 14
-				 ELSE 13
-			END) AS intAttributeId --Open
-		 , 0 AS intMonthId
-		 , SS.intCompanyLocationId
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-						   AND L.intPurchaseSale = 1
-						   AND L.intShipmentType = 1
-						   AND ISNULL(L.ysnPosted, 0) = 0
-	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
-	JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-	LEFT JOIN tblSMCity C ON C.strCity = L.strDestinationPort
-	WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0)
-														   ELSE LD.dblDeliveredQuantity
-													  END) > 0
-	  AND SS.intContractStatusId IN (1, 4)
-	  AND SS.intCompanyLocationId = ISNULL(@intCompanyLocationId, SS.intCompanyLocationId)
-	  AND (CASE WHEN DAY((CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-							   /* Add Lead Time for Ocean Transport Mode. */
-							   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
-							   /* UAD with Posted / Saved LS. */
-							   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
-						  END)) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-																							  /* Add Lead Time for Ocean Transport Mode. */
-																							  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
-																							  /* UAD with Posted / Saved LS. */
-																							  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
-																						 END))
-				ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
-						   /* Add Lead Time for Ocean Transport Mode. */
-						   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
-						   /* UAD with Posted / Saved LS. */
-						   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
-					  END)
-		   END) < @dtmStartOfMonth
-	  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN ISNULL(SS.intBookId, 0)
-				ELSE ISNULL(@intBookId, 0)
-		   END) = ISNULL(@intBookId, 0)
-	  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN IsNULL(SS.intSubBookId, 0)
-				ELSE IsNULL(@intSubBookId, 0)
-		   END) = ISNULL(@intSubBookId, 0)
-	GROUP BY CASE WHEN I.ysnSpecificItemDescription = 1 THEN I.intItemId
-				  ELSE I.intMainItemId
-			 END
-		   , SS.intCompanyLocationId
+		/* Recommend Purchase */
+	IF (@ysnCalculatePlannedPurchases <> 1 AND @ysnCalculateEndInventory <> 0 AND @ShortExcessXML = '<root></root>' AND @intInvPlngReportMasterID = 0) OR 
+		/* Calculate End Inventory*/
+		(@ysnCalculatePlannedPurchases <> 0 AND @ysnCalculateEndInventory <> 1 AND @ShortExcessXML <> '' AND @intInvPlngReportMasterID = 0) OR
+		/* Generate Plan */
+		(@ysnCalculatePlannedPurchases = 0 AND @ysnCalculateEndInventory = 0)
+		BEGIN
+			INSERT INTO #tblMFDemand 
+			(
+				intItemId
+			  , dblQty
+			  , intAttributeId
+			  , intMonthId
+			  , intLocationId
+			)
+			SELECT CASE WHEN I.ysnSpecificItemDescription = 1 THEN I.intItemId
+						ELSE I.intMainItemId
+				   END AS intItemId
+				 , SUM(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, ISNULL(LDCL.dblQuantity, LD.dblQuantity) - 
+							(CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0)
+								  ELSE LD.dblDeliveredQuantity
+							 END)
+					   ) * I.dblRatio) AS dblIntrasitQty
+				 , (CASE WHEN @intPositionByETA = 2 THEN 14
+						 ELSE 13
+					END) AS intAttributeId --Open
+				 , 0 AS intMonthId
+				 , SS.intCompanyLocationId
+			FROM tblLGLoad L
+			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+								   AND L.intPurchaseSale = 1
+								   AND L.intShipmentType = 1
+								   AND ISNULL(L.ysnPosted, 0) = 0
+			JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+			JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
+			JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+			LEFT JOIN tblSMCity C ON C.strCity = L.strDestinationPort
+			WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0)
+																   ELSE LD.dblDeliveredQuantity
+															  END) > 0
+			  AND SS.intContractStatusId IN (1, 4)
+			  AND SS.intCompanyLocationId = ISNULL(@intCompanyLocationId, SS.intCompanyLocationId)
+			  AND (CASE WHEN DAY((CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
+									   /* Add Lead Time for Ocean Transport Mode. */
+									   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+									   /* UAD with Posted / Saved LS. */
+									   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
+								  END)) > @intDemandAnalysisMonthlyCutOffDay THEN DATEADD(m, 1, (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
+																									  /* Add Lead Time for Ocean Transport Mode. */
+																									  WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+																									  /* UAD with Posted / Saved LS. */
+																									  ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
+																								 END))
+						ELSE (CASE WHEN @intPositionByETA = 1 THEN SS.dtmUpdatedAvailabilityDate
+								   /* Add Lead Time for Ocean Transport Mode. */
+								   WHEN L.intTransportationMode = 2 THEN ISNULL(DATEADD(DAY, ISNULL(C.intLeadTime, 0), L.dtmETAPOD), SS.dtmUpdatedAvailabilityDate)
+								   /* UAD with Posted / Saved LS. */
+								   ELSE ISNULL(L.dtmETAPOD, SS.dtmUpdatedAvailabilityDate)
+							  END)
+				   END) < @dtmStartOfMonth
+			  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN ISNULL(SS.intBookId, 0)
+						ELSE ISNULL(@intBookId, 0)
+				   END) = ISNULL(@intBookId, 0)
+			  AND (CASE WHEN @ysnConsiderBookInDemandView = 1 THEN IsNULL(SS.intSubBookId, 0)
+						ELSE IsNULL(@intSubBookId, 0)
+				   END) = ISNULL(@intSubBookId, 0)
+			GROUP BY CASE WHEN I.ysnSpecificItemDescription = 1 THEN I.intItemId
+						  ELSE I.intMainItemId
+					 END
+				   , SS.intCompanyLocationId
+		END
+	
 
 	IF (ISNULL(@intInvPlngReportMasterID, 0) = 0 AND @ysnCalculateEndInventory <> 1) OR (@ysnRefreshContract = 1 AND @ysnCalculateEndInventory <> 1)
 		BEGIN
@@ -1688,7 +1696,7 @@ BEGIN TRY
 	  , intLocationId
 	)
 	SELECT D.intItemId
-		 , CASE WHEN @ysnCalculatePlannedPurchases = 0 AND @ysnCalculateEndInventory = 0 AND @intContainerTypeId IS NOT NULL THEN ISNULL(IL.dblMinOrder * ISNULL(UMCByWeight.dblConversionToStock, 1), 0)
+		 , CASE WHEN @ysnCalculateEndInventory = 0 AND @intContainerTypeId IS NOT NULL THEN ISNULL(IL.dblMinOrder * ISNULL(UMCByWeight.dblConversionToStock, 1), 0)
 				ELSE 0
 		   END
 		 , 5 AS intAttributeId /* Planned Purchases */
@@ -2043,33 +2051,35 @@ BEGIN TRY
 							---************************************
 							---************************************
 							---************************************
-							IF @ysnCalculatePlannedPurchases = 1
-								BEGIN
-									UPDATE D
-									SET dblQty = ISNULL((SELECT CASE WHEN MAX(ISNULL(CW.dblWeight, 0)) > 0 THEN CEILING(ABS((SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) / MAX(CW.dblWeight))) * MAX(CW.dblWeight)
-																	 ELSE ABS(SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0))
-																END
-												FROM #tblMFDemand OpenInv
-												LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
-												WHERE OpenInv.intItemId = D.intItemId
-												  AND OpenInv.intMonthId = @intMonthId
-												  AND (intAttributeId IN 
-													  (
-														  2
-														, 4
-														, 8
-														, 15
-														, 16
-													  )) --Opening Inventory, Existing Purchases,Forecasted Consumption
-												  AND intLocationId = @intLocationId
-												HAVING (SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) < 0
-												), 0)
-									FROM #tblMFDemand D
-									WHERE intAttributeId	= 5 --Planned Purchases -
-										AND intMonthId		= @intMonthId
-										AND intItemId		= @intItemId
-										AND intLocationId	= @intLocationId
-								END
+
+							/* Below code commented due to Planned Purchases is not accurate and it should set based on Container Weight . */
+							--IF @ysnCalculatePlannedPurchases = 1
+							--	BEGIN
+							--		UPDATE D
+							--		SET dblQty = ISNULL((SELECT CASE WHEN MAX(ISNULL(CW.dblWeight, 0)) > 0 THEN CEILING(ABS((SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) / MAX(CW.dblWeight))) * MAX(CW.dblWeight)
+							--										 ELSE ABS(SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0))
+							--									END
+							--					FROM #tblMFDemand OpenInv
+							--					LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
+							--					WHERE OpenInv.intItemId = D.intItemId
+							--					  AND OpenInv.intMonthId = @intMonthId
+							--					  AND (intAttributeId IN 
+							--						  (
+							--							  2
+							--							, 4
+							--							, 8
+							--							, 15
+							--							, 16
+							--						  )) --Opening Inventory, Existing Purchases,Forecasted Consumption
+							--					  AND intLocationId = @intLocationId
+							--					HAVING (SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) < 0
+							--					), 0)
+							--		FROM #tblMFDemand D
+							--		WHERE intAttributeId	= 5 --Planned Purchases -
+							--			AND intMonthId		= @intMonthId
+							--			AND intItemId		= @intItemId
+							--			AND intLocationId	= @intLocationId
+							--	END
 
 							UPDATE D
 							SET dblQty = (SELECT SUM(OpenInv.dblQty)
