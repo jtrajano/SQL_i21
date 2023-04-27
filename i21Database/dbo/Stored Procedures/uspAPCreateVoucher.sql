@@ -625,7 +625,7 @@ BEGIN TRY
 		WHERE A.intPurchaseTaxGroupId IS NULL 
 			AND A.intWeightClaimId IS NOT NULL 
 			AND A.intWeightClaimDetailId IS NOT NULL
-			AND A.intTransactionType = 11 --Claim Type
+			AND A.intTransactionType IN (1,11) --Claim Type, Voucher Type
 	END
 
 	INSERT INTO @voucherIds
