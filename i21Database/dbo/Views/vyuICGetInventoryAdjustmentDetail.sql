@@ -75,7 +75,31 @@ SELECT
 	, strNewSubLocation = NewSubLocation.strSubLocationName
 	, AdjDetail.intNewStorageLocationId
 	, strNewStorageLocation = NewStorageLocation.strName
-	, AdjDetail.dblLineTotal
+	, dblLineTotal = --AdjDetail.dblLineTotal
+		ROUND(
+			CASE 
+				WHEN AdjDetail.intCostUOMId IS NOT NULL AND AdjDetail.dblNewCost IS NOT NULL THEN 
+					dbo.fnCalculateCostBetweenUOM(AdjDetail.intCostUOMId, ISNULL(AdjDetail.intNewWeightUOMId, AdjDetail.intNewItemUOMId), AdjDetail.dblNewCost) 
+				ELSE 
+					COALESCE(
+						AdjDetail.dblNewCost
+						, dbo.fnCalculateCostBetweenUOM (
+							stockUnit.intItemUOMId
+							, AdjDetail.intItemUOMId 
+							, AdjDetail.dblCost
+						) 
+						, 0
+					)
+			END 
+			* 
+			CASE 
+				WHEN AdjDetail.intCostUOMId IS NOT NULL AND AdjDetail.dblNewCost IS NOT NULL AND AdjDetail.intNewWeightUOMId IS NOT NULL THEN
+					ISNULL(AdjDetail.dblNewWeight, 0) 
+				ELSE 
+					AdjDetail.dblAdjustByQuantity
+			END 
+			,2
+		)
 	, AdjDetail.intSort
 	, strOwnerName = LotOwnerEntity.strName
 	, strNewOwnerName = NewLotOwnerEntity.strName
@@ -132,3 +156,12 @@ OUTER APPLY (
 	FROM tblGLFiscalYearPeriod fp
 	WHERE Adj.dtmAdjustmentDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
 ) fiscal
+OUTER APPLY (
+	SELECT TOP 1 
+		stockUnit.*
+	FROM 
+		tblICItemUOM stockUnit 
+	WHERE
+		stockUnit.intItemId = AdjDetail.intItemId 
+		AND stockUnit.ysnStockUnit = 1
+) stockUnit 

@@ -44,7 +44,7 @@
 	[intForexRateTypeId] INT NULL,
 	[dblForexRate] NUMERIC(38,20) NULL, 
 	--[dtmExpiryDate] DATETIME NULL, 
-	[intCostUOMId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intCostUOMId] INT NULL,
 	[dblUnitCostInForeignCurrency] NUMERIC(38, 20) NULL,
 	[dblGrossWeight] NUMERIC(38, 20) NULL,
 	[dblTareWeight] NUMERIC(38, 20) NULL,
