@@ -272,6 +272,7 @@ BEGIN
 				, strDescription
 				, dblPrice
 				, dblQuantity
+				, dblNetSales
 				, dblTax
 				, dblAmount
 			FROM @tmpDetails
@@ -287,6 +288,7 @@ BEGIN
 				, strDescription
 				, dblPrice
 				, dblQuantity
+				, dblNetSales
 				, dblTax
 				, dblAmount
 			FROM @tmpDetails
