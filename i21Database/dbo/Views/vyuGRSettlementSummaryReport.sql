@@ -339,10 +339,11 @@ FROM
 											ELSE NULL 
 										END 
 		--,lblCustomerPrepayment			=  'Customer Prepay' COLLATE Latin1_General_CI_AS
-		,dblGradeFactorTax				= CASE 
-											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
-											ELSE NULL 
-										END 
+		,dblGradeFactorTax				= NULL
+										-- CASE 
+										-- 	WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
+										-- 	ELSE NULL 
+										-- END 
 		--,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		--,dblPartialPrepaymentSubTotal	= CASE 
 		--									WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblPayment
