@@ -422,15 +422,15 @@ BEGIN
 		,strModuleName = @ModuleName
 		,intConcurrencyId = 1
 		,dblDebitForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
+			WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId
 				THEN CreditForeign.Value
-			ELSE 0
+			ELSE ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			END
 		,dblDebitReport = NULL
 		,dblCreditForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
+			WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId
 				THEN DebitForeign.Value
-			ELSE 0
+			ELSE ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			END
 		,dblCreditReport = NULL
 		,dblReportingRate = NULL
@@ -476,15 +476,15 @@ BEGIN
 		,strModuleName = @ModuleName
 		,intConcurrencyId = 1
 		,dblDebitForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
+			WHEN ForGLEntries_CTE.intShipmentCurrencyId <> @intFunctionalCurrencyId
 				THEN DebitForeign.Value
-			ELSE 0
+			ELSE ROUND(DebitForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
 			END
 		,dblDebitReport = NULL
 		,dblCreditForeign = CASE 
-			WHEN intCurrencyId <> @intFunctionalCurrencyId
+			WHEN ForGLEntries_CTE.intShipmentCurrencyId <> @intFunctionalCurrencyId
 				THEN CreditForeign.Value
-			ELSE 0
+			ELSE ROUND(CreditForeign.Value * ItemCurrencyToFunctional.dblForexRate, 2)
 			END
 		,dblCreditReport = NULL
 		,dblReportingRate = NULL
