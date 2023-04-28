@@ -724,20 +724,7 @@ BEGIN TRY
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
 										END
-				,[dblForexRate] = CASE --if contract FX tab is setup
-										WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, LD.dblForexRate) --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN 1 --foreign price to functional FX, use 1
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-											ELSE ISNULL(LD.dblForexRate,1) END
-										ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
-											THEN ISNULL(FX.dblFXRate, 1)
-											ELSE ISNULL(LD.dblForexRate,1) END
-										END
+				,[dblForexRate] = ISNULL(LoadDetail.dblPFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
 				,[intContainerId] = ISNULL(LC.intLoadContainerId, -1)
 				,[intFreightTermId] = L.intFreightTermId
 				,[intBookId] = L.intBookId
@@ -875,20 +862,7 @@ BEGIN TRY
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
 										END
-				,[dblForexRate] = CASE --if contract FX tab is setup
-										WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-												THEN dbo.fnDivide(1, LD.dblForexRate) --functional price to foreign FX, use inverted contract FX rate
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN 1 --foreign price to functional FX, use 1
-											WHEN (ISNULL(LSC.intMainCurrencyId, ISNULL(LSC.intCurrencyID, '')) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-											ELSE ISNULL(LD.dblForexRate,1) END
-										ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, ISNULL(SC.intCurrencyID,''))) 
-											THEN ISNULL(FX.dblFXRate, 1)
-											ELSE ISNULL(LD.dblForexRate,1) END
-										END
+				,[dblForexRate] = ISNULL(LoadDetail.dblPFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
 				,[intContainerId] = -1
 				,[intFreightTermId] = L.intFreightTermId
 				,[intBookId] = L.intBookId

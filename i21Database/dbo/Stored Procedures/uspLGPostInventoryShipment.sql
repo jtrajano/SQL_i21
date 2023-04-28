@@ -410,20 +410,7 @@ BEGIN
 										THEN FX.intForexRateTypeId
 										ELSE LoadDetail.intForexRateTypeId END
 									END
-			,dblForexRate = CASE --if contract FX tab is setup
-									WHEN AD.ysnValidFX = 1 THEN 
-									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-											THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
-										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-											THEN 1 --foreign price to functional FX, use 1
-										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-										ELSE ISNULL(LoadDetail.dblForexRate,1) END
-									ELSE  --if contract FX tab is not setup
-									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
-										THEN ISNULL(FX.dblFXRate, 1)
-										ELSE ISNULL(LoadDetail.dblForexRate,1) END
-									END
+			,dblForexRate = ISNULL(LoadDetail.dblSFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
 		FROM tblLGLoad L
 		INNER JOIN tblLGLoadDetail LoadDetail ON L.intLoadId = LoadDetail.intLoadId
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
