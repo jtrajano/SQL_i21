@@ -48,6 +48,7 @@ IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPa
   ON  md.intVendorMappingId = vm.intVendorMappingId
  )
  ON I.strEntityVendorName = md.strMapVendorName
+ AND I.intEntityVendorId = md.intEntityVendorId
 	-- INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
  	GROUP BY dtmDatePaid, md.intEntityVendorId, strCheckNumber, intCustomPartition , md.strMapVendorName 
 	--GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
