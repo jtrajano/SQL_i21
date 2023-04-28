@@ -328,6 +328,7 @@ BEGIN TRY
 			,[intCurrencyId]
 			,[intSourceType]
 			,[strBillOfLadding]
+			,[intSeasonCropYear]
 			)
 		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
@@ -353,6 +354,7 @@ BEGIN TRY
 			,[intCurrencyId] = ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
 			,[intSourceType] = 0
 			,[strBillOfLadding] = L.strBLNumber
+			,[intSeasonCropYear] = LD.intCropYearId
 		FROM tblLGLoad L  
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -1027,6 +1029,7 @@ BEGIN TRY
 			,[intProducerId]
 			,[strCertificateId]
 			,[strTrackingNumber]
+			,[intSeasonCropYear]
 			)
 		SELECT DISTINCT [intLotId] = NULL
 			,[strLotNumber] = NULL
@@ -1072,6 +1075,7 @@ BEGIN TRY
 									THEN CC.strTrackingNumber
 									ELSE NULL
 								END
+			,[intSeasonCropYear] = LD.intCropYearId
 		FROM tblLGLoad L 
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
