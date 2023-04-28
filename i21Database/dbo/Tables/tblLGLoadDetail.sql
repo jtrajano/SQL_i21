@@ -69,8 +69,6 @@
 	[intTaxGroupId] INT NULL, 
 	[intDefaultTaxGroupId] INT NULL, 
 	[ysnPrintShipper] BIT, 
-	[dblPFunctionalFxRate] NUMERIC(18,6) NULL,
-	[dblSFunctionalFxRate] NUMERIC(18,6) NULL,
 
     CONSTRAINT [PK_tblLGLoadDetail] PRIMARY KEY ([intLoadDetailId]),
     CONSTRAINT [FK_tblLGLoadDetail_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE, 

@@ -414,7 +414,7 @@ DECLARE
 			,[intTempDetailIdForTaxes]				= NULL
 			,[intCurrencyExchangeRateTypeId]		= ISNULL(CD.intHistoricalRateTypeId, CD.intRateTypeId)
 			,[intCurrencyExchangeRateId]			= CD.intCurrencyExchangeRateId
-			,[dblCurrencyExchangeRate]				= ISNULL(LD.dblSFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
+			,[dblCurrencyExchangeRate]				= ISNULL(CD.dblHistoricalRate, CD.dblRate)
 			,[intSubCurrencyId]						= AD.intSeqCurrencyId 
 			,[dblSubCurrencyRate]					= CASE WHEN AD.ysnSeqSubCurrency = 1
 															THEN CU.intCent
@@ -707,7 +707,10 @@ DECLARE
 															THEN ARSI.[intCurrencyExchangeRateId] 
 															ELSE NULL
 														END
-			,[dblCurrencyExchangeRate]				= ISNULL(LD.dblSFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
+			,[dblCurrencyExchangeRate]				= CASE WHEN ARSI.intCurrencyId <> @DefaultCurrencyId
+															THEN ISNULL(CD.dblHistoricalRate, ARSI.[dblCurrencyExchangeRate])
+															ELSE 1
+														END
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 			,[dblQualityPremium]					= LD.dblQualityPremium

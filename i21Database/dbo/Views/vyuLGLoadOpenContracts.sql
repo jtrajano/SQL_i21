@@ -121,7 +121,6 @@ SELECT CD.intContractDetailId
 	,CD.intTaxGroupId
 	,TG.strTaxGroup
 	,FT.strFobPoint
-	,dblFunctionalFxRate = dbo.fnLGGetForexRateFromContract(CD.intContractDetailId)
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH
 INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
