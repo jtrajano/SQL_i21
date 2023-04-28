@@ -54,7 +54,9 @@ AS
 			CD.intPricingTypeId,
 			CH.ysnLoad,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0))			AS	dblBalanceInItemStockUOM,
-			intVendorLocationId = null
+			intVendorLocationId = null,
+
+			CD.intItemUOMId
 																												
 	FROM	tblCTContractDetail				CD
 	CROSS																						
