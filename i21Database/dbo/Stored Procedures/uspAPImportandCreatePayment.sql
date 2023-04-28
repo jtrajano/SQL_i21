@@ -46,6 +46,7 @@ IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPa
   tblGLVendorMappingDetail md 
   INNER JOIN tblGLVendorMapping vm
   ON  md.intVendorMappingId = vm.intVendorMappingId
+	AND I.intEntityVendorId = md.intEntityVendorId
  )
  ON I.strEntityVendorName = md.strMapVendorName
 	-- INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
