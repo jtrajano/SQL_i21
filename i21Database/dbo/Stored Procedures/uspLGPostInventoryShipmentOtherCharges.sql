@@ -552,13 +552,13 @@ BEGIN
 		,dblDebitForeign = CASE 
 			WHEN intCurrencyId <> @intFunctionalCurrencyId
 				THEN DebitForeign.Value
-			ELSE 0
+			ELSE ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			END
 		,dblDebitReport = NULL
 		,dblCreditForeign = CASE 
 			WHEN intCurrencyId <> @intFunctionalCurrencyId
 				THEN CreditForeign.Value
-			ELSE 0
+			ELSE ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			END
 		,dblCreditReport = NULL
 		,dblReportingRate = NULL
@@ -604,13 +604,13 @@ BEGIN
 		,dblDebitForeign = CASE 
 			WHEN intCurrencyId <> @intFunctionalCurrencyId
 				THEN CreditForeign.Value
-			ELSE 0
+			ELSE ROUND(CreditForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			END
 		,dblDebitReport = NULL
 		,dblCreditForeign = CASE 
 			WHEN intCurrencyId <> @intFunctionalCurrencyId
 				THEN DebitForeign.Value
-			ELSE 0
+			ELSE ROUND(DebitForeign.Value * ForGLEntries_CTE.dblForexRate, 2)
 			END
 		,dblCreditReport = NULL
 		,dblReportingRate = NULL
