@@ -828,7 +828,7 @@ SELECT
     ,[dblTransactionInterest]           = ARI.[dblInterest]
     ,[dblBaseTransactionInterest]       = ROUND(ARI.[dblInterest] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblTransactionAmountDue]          = ARI.[dblAmountDue]
-    ,[dblBaseTransactionAmountDue]      = CASE WHEN ARI.strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+    ,[dblBaseTransactionAmountDue]      = CASE WHEN ARI.strTransactionType IN ('Credit Memo', 'Overpayment')
                                                THEN ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]()) * -1
                                                ELSE ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
                                           END
