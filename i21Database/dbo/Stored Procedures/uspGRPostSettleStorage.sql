@@ -4087,27 +4087,30 @@ BEGIN TRY
 	EXEC [dbo].[uspGRRiskSummaryLog2]
 		@StorageHistoryIds = @intStorageHistoryIds
 
-	--throw an error if settlement was not logged successfully in DPR Summary Log
-	--note: this will just be a temporary fix as we couldn't replicate the issue where the settlements are not being logged in the summary log
-	IF NOT EXISTS(SELECT 1 FROM @intStorageHistoryIds)
+	IF(@ysnFromPriceBasisContract = 0)
 	BEGIN
-		RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please try again.', 16, 1);
-		GOTO SettleStorage_Exit;
-	END
+		--throw an error if settlement was not logged successfully in DPR Summary Log
+		--note: this will just be a temporary fix as we couldn't replicate the issue where the settlements are not being logged in the summary log
+		IF NOT EXISTS(SELECT 1 FROM @intStorageHistoryIds)
+		BEGIN
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please try again.', 16, 1);
+			GOTO SettleStorage_Exit;
+		END
 
-	DECLARE @IDS Id
+		DECLARE @IDS Id
 
-	INSERT INTO @IDS
-	SELECT IDS.intId
-	FROM @intStorageHistoryIds IDS
-	LEFT JOIN tblRKSummaryLog RK	
-		ON RK.intStorageHistoryId = IDS.intId
-	WHERE RK.intSummaryLogId IS NULL	
+		INSERT INTO @IDS
+		SELECT IDS.intId
+		FROM @intStorageHistoryIds IDS
+		LEFT JOIN tblRKSummaryLog RK	
+			ON RK.intStorageHistoryId = IDS.intId
+		WHERE RK.intSummaryLogId IS NULL	
 
-	IF EXISTS(SELECT TOP 1 1 FROM @IDS)
-	BEGIN
-		RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please try again.', 16, 1);
-		GOTO SettleStorage_Exit;
+		IF EXISTS(SELECT TOP 1 1 FROM @IDS)
+		BEGIN
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please try again.', 16, 1);
+			GOTO SettleStorage_Exit;
+		END
 	END
 	
 	SettleStorage_Exit:
