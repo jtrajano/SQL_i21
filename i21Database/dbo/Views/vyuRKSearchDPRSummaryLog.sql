@@ -4,8 +4,8 @@ AS
 
 SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 	select 
-		dtmTransactionDate
-		,dtmCreatedDate
+		dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+		,dtmCreatedDate = CAST(dtmCreatedDate AS DATE)
 		,strCommodityCode
 		,strBucketType
 		,strTransactionType
@@ -67,8 +67,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strNotes
 	FROM (
 		SELECT --intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC),
-				dtmTransactionDate
-				,dtmCreatedDate
+				dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+				,dtmCreatedDate = CAST(dtmCreatedDate AS DATE)
 				,strCommodityCode
 				,strBucketType
 				,strTransactionType
@@ -104,8 +104,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		UNION ALL
 
 		SELECT --intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC), 
-					dtmTransactionDate
-				,dtmCreatedDate
+				dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+				,dtmCreatedDate = CAST(dtmCreatedDate AS DATE) 
 				,strCommodityCode
 				,strBucketType
 				,strTransactionType
@@ -169,8 +169,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strNotes
 	FROM  (
 		SELECT  --intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC),
-					dtmTransactionDate
-				,dtmCreatedDate
+				dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+				,dtmCreatedDate = CAST(dtmCreatedDate AS DATE)
 				,strCommodityCode
 				,strBucketType
 				,strTransactionType
@@ -205,8 +205,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 			
 		UNION ALL
 		SELECT --intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC), 
-					dtmTransactionDate
-				,dtmCreatedDate
+				dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+				,dtmCreatedDate = CAST(dtmCreatedDate AS DATE) 
 				,strCommodityCode
 				,strBucketType
 				,strTransactionType
@@ -243,8 +243,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 
 	union all
 	select 
-		dtmTransactionDate = dtmOpenDate
-		,dtmCreatedDate
+		dtmTransactionDate = CAST(dtmOpenDate AS DATE)
+		,dtmCreatedDate = CAST(dtmCreatedDate AS DATE)
 		,strCommodityCode
 		,strBucketType = 'Collateral'
 		,strTransactionType  
@@ -277,8 +277,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 
 	union all
 	select 
-		dtmTransactionDate
-		,dtmCreateDate
+		dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+		,dtmCreateDate = CAST(dtmCreateDate AS DATE)
 		,strCommodityCode
 		,strBucketType = (strContractType + ' ' + strPricingType) COLLATE Latin1_General_CI_AS
 		,strTransactionType = strTransactionReference
@@ -311,8 +311,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 
 	union all
 	select
-		dtmTransactionDate
-		,dtmCreateDate
+		dtmTransactionDate = CAST(dtmTransactionDate AS DATE)
+		,dtmCreateDate = CAST(dtmCreateDate AS DATE)
 		,strCommodityCode
 		,strBucketType = strTransactionType
 		,strTransactionType = strTransactionReference
