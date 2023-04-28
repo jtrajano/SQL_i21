@@ -30,6 +30,7 @@ RETURNS TABLE AS RETURN
 					OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL)
 				 )
 				 AND A.intTransactionType <> 15
+				 AND B.intWeightClaimId IS NULL AND B.intWeightClaimDetailId IS NULL
 				 AND (receiptItem.intTaxGroupId > 0 OR charges.intTaxGroupId > 0)
 				 AND (B.intTaxGroupId = receiptItem.intTaxGroupId OR B.intTaxGroupId = charges.intTaxGroupId)
 				 AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
