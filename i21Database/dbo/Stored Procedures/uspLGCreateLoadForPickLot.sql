@@ -185,6 +185,7 @@ BEGIN TRY
 			,dblUnitPrice
 			,dtmDeliveryFrom
 			,dtmDeliveryTo
+			,dblAmount
 			)
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
@@ -206,6 +207,7 @@ BEGIN TRY
 			,A.dblSeqPrice
 			,CD.dtmStartDate
 			,CD.dtmEndDate
+			,dbo.fnMultiply(dbo.fnCalculateQtyBetweenUOM(WUOM.intItemUOMId, A.intSeqPriceUOMId,PLD.dblNetWt), A.dblSeqPrice)
 		FROM tblLGAllocationDetail AD
 		JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 		JOIN tblLGPickLotDetail PLD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
