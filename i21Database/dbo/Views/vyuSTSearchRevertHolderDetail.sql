@@ -108,6 +108,8 @@ SELECT --DISTINCT
 
 							 WHEN revertHolder.intRevertType = 2
 								THEN CASE
+									WHEN RHD.strTableColumnName = 'ysnCountedDaily'
+										THEN CASE WHEN ItemLoc.ysnCountedDaily = 1 THEN 'Yes' ELSE 'No' END
 									WHEN RHD.strTableColumnName = 'dblRetailPrice'
 										THEN CAST(CAST(ItemPricingPrice_New.dblRetailPrice AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblCost' AND RHD.strChangeDescription != 'Promotional Cost'
@@ -140,8 +142,8 @@ SELECT --DISTINCT
 									THEN CONVERT(VARCHAR(10), CAST(RHD.strOldData AS DATE), 101)
 								WHEN RHD.strTableColumnDataType = 'VARCHAR'
 									THEN  CAST(RHD.strOldData AS VARCHAR(20))
-								WHEN RHD.strOldData = 'true' THEN 'Yes'
-								WHEN RHD.strOldData = 'false' THEN 'No'
+								WHEN RHD.strOldData = 'true' OR (RHD.strOldData = '1' AND  RHD.strTableColumnDataType = 'BIT') THEN 'Yes'
+								WHEN RHD.strOldData = 'false' OR (RHD.strOldData = '0' AND  RHD.strTableColumnDataType = 'BIT') THEN 'No'
 								WHEN (RHD.strTableColumnDataType = 'INT' OR RHD.strTableColumnDataType LIKE '%NUMERIC%') AND RHD.strPreviewOldData NOT LIKE '%[A-Za-z]%'
 									THEN ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
 								ELSE

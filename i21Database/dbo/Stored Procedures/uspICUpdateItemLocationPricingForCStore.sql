@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemLocationPricingForCStore]
 	@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strScreen AS NVARCHAR(250) = NULL 
 	,@strDescription AS NVARCHAR(250) = NULL 
+	,@intItemLocationId AS INT = NULL 
 	-- update params
 	,@ysnCountedDaily AS BIT = NULL 
 	,@intEntityUserSecurityId AS INT 
@@ -136,6 +137,10 @@ BEGIN
 					AND (
 						@strDescription IS NULL 
 						OR i.strDescription LIKE '%' + @strDescription + '%'	--ST-2074
+					)
+					AND (
+						@intItemLocationId IS NULL 
+						OR il.intItemLocationId = @intItemLocationId
 					)
 					AND (
 						@strUpcCode IS NULL 
