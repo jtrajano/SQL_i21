@@ -27,8 +27,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY IM.intItemId, IL.intLocationId) 
  , intBundleItemId = NULL  
  , UOM.intUnitMeasureId
  , UOM.strUnitMeasure
+  , IU.intItemUOMId 
 FROM tblICItem      IM  
 JOIN tblICItemLocation    IL ON IL.intItemId    = IM.intItemId  
+INNER JOIN tblICItemUOM IU on IU.intItemId = IM.intItemId  
 LEFT JOIN tblICCategory    CR ON CR.intCategoryId   = IM.intCategoryId  
 LEFT JOIN tblICCommodity   CO ON CO.intCommodityId   = IM.intCommodityId  
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId AND CA.strType = 'Origin'  
