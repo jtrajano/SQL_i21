@@ -270,7 +270,20 @@ SET ANSI_WARNINGS ON
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
 									 END
-			,dblForexRate = ISNULL(LD.dblPFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
+			,dblForexRate = CASE --if contract FX tab is setup
+									 WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+												THEN dbo.fnDivide(1, ISNULL(LD.dblForexRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+												THEN 1 --foreign price to functional FX, use 1
+											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+											ELSE ISNULL(LD.dblForexRate,1) END
+									 ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+											THEN ISNULL(FX.dblFXRate, 1)
+											ELSE ISNULL(LD.dblForexRate,1) END
+									 END
 			,ISNULL(LD.intVendorEntityId, LD.intCustomerEntityId) 
 			,L.strLoadNumber
 		FROM tblLGLoad L
