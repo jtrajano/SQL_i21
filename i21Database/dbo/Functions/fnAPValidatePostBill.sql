@@ -680,7 +680,7 @@ BEGIN
 			A.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND A.intPayToBankAccountId IS NULL
 		AND B.intPaymentMethodId = 2 --ACH
-		AND A.intTransactionType NOT IN (2,3)
+		AND A.intTransactionType NOT IN (3)
 
 		--VALIDATE TAX ADJUSTMENT ACCOUNT
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
