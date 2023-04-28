@@ -51,5 +51,23 @@ BEGIN
         END
         
     END')
+
+    
 END 
+IF EXISTS (SELECT 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblGLAccount' )
+BEGIN
+    EXEC('
+     IF COL_LENGTH(''dbo.tblGLAccount'', ''intOrderId'') IS NULL
+     BEGIN
+        ALTER TABLE tblGLAccount ADD intOrderId INT NULL
+     END
+')
+EXEC ('
+    ;WITH cte AS (
+        SELECT ROW_NUMBER() OVER(ORDER BY strAccountId ASC) rowId, intAccountId FROM tblGLAccount
+    )
+    UPDATE A SET intOrderId = rowId FROM tblGLAccount A JOIN cte B ON A.intAccountId = B.intAccountId
+	')
+
+END
 GO
