@@ -6,6 +6,10 @@ AS
 		@guiUniqueId uniqueidentifier = newid()
 		,@intUserId int = 1;
 
+	declare @ErrorMessages table(
+		strErrorMessage nvarchar(max) COLLATE Latin1_General_CI_AS
+	);
+
 	declare @PackingDescription table(
 		strPackingDescription nvarchar(50) COLLATE Latin1_General_CI_AS
 	);
@@ -20,12 +24,14 @@ AS
 
 	declare @Certificates table(
 		strCertificationIdName nvarchar(100) COLLATE Latin1_General_CI_AS
+		,strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
+		,intCertificationId int null
 	);
 
 	declare @CertificateIds table(
 		intCertificationId int
 		,intContractSeq int
-		,intContractHeaderId int
+		,strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
 	);
 
 	declare @BasisCost table (
@@ -79,6 +85,10 @@ AS
 		,@intBasisCostContractSeq int
 		,@strBasisCostUnitOfMeasure nvarchar(100)
 		,@strBasisCost nvarchar(100)
+		,@strActiveContractNumber nvarchar(50)
+		,@strCertificationContractNumber nvarchar(50)
+		,@strActiveCertificationContractNumber nvarchar(50)
+		,@intActiveCertificationSeqNo int
 		;
 		
 		DECLARE @intContractImportId INT
@@ -503,7 +513,7 @@ AS
 					,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,MA.intUnitMeasureId,IU.intUnitMeasureId, MA.dblContractSize)
 					,cp.intCurrencyExchangeRateId
 					,intMarketUOMId = MA.intUnitMeasureId
-					,intItemItemUOMId = MAUOM.intUnitMeasureId
+					,intItemItemUOMId = MAUOM.intItemUOMId
 					,intWarehouseId = wc.intCityId
 					,intCountryId = wc.intCountryId
 					,dblNetWeight = dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,nwuom.intUnitMeasureId, CI.dblQuantity)
@@ -568,9 +578,9 @@ AS
 			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
 			left join tblSMCity wc on wc.strCity = CI.strWarehouse
 			left join tblICItemUOM nwuom on nwuom.intItemId = IM.intItemId and nwuom.ysnStockUnit = 1
-			WHERE CI.guiUniqueId = @guiUniqueId;
+			WHERE CI.guiUniqueId = @guiUniqueId and CI.intImportFrom = 2;
 
-			select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId;
+			select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId and intImportFrom = 2;
 			while @intActiveContractImportId is not null
 			begin
 				select
@@ -599,13 +609,18 @@ AS
 					when isnull(c.strRevolutionCurrencyPair,'') <> '' and t.intRevaluationCurrencyExchangeRateId is null then 'Revaluation Currency Pair does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when isnull(c.strHistoricType,'') <> '' and t.intHistoricalRateTypeId is null then 'Historic Type: "' + c.strHistoricType + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when isnull(c.strLocationName,'') <> '' and t.intCompanyLocationId is null then ' Location: "' + c.strLocationName + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.intItemId is null then 'Item No: "'+c.strItem+'" Item No does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intItemItemUOMId is null then ' Lot Calculation: Future Market UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPriceItemUOMId is null then 'Price Item UOM: Price Item UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPricingTypeId = 1 and t.dblFutures is null then 'Missing Futures Price for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when isnull(c.strWarehouse,'') <> '' and t.intWarehouseId is null then ' Warehouse Location: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intNetWeightUOMId is null then 'Net Weight UOM: Item "' + c.strItem + '" has no UOM Stock Unit for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					else @validationErrorMsg
-					end
+					end,
+					@strCertificationIdName = t.strCertification,
+					@strCertificationContractNumber = t.strContractNumber + '-' + convert(nvarchar(20), t.intContractSeq),
+					@strActiveCertificationContractNumber = t.strContractNumber,
+					@intActiveCertificationSeqNo = t.intContractSeq
 				from
 					tblCTContractImport c
 					join #tmpExtracted t on t.intContractImportId = c.intContractImportId
@@ -614,15 +629,49 @@ AS
 
 				if (isnull(@validationErrorMsg,'') <> '')
 				begin
-					RAISERROR(@validationErrorMsg,16,1);
+					insert into @ErrorMessages (strErrorMessage) select strErrorMessage = @validationErrorMsg;
 				end
+
+				insert into @CertificateIds (intCertificationId,intContractSeq,strContractNumber)
+				select intCertificationId = aa.intCertificationId, intContractSeq = @intActiveCertificationSeqNo, strContractNumber = @strActiveCertificationContractNumber from tblICCertification aa join fnSplitString(@strCertificationIdName, ';') bb on bb.Item COLLATE Latin1_General_CI_AS = aa.strCertificationName;
+
+				insert into @Certificates (strCertificationIdName, strContractNumber, intCertificationId)
+				select distinct strCertificationIdName = Item, strContractNumber = @strCertificationContractNumber, intCertificationId = null from fnSplitString(@strCertificationIdName, ';');
+
+				select @validationErrorMsg = '', @strCertificationIdName = '';
 		
-				select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId and intContractImportId > @intActiveContractImportId;
+				select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId and intImportFrom = 2 and intContractImportId > @intActiveContractImportId;
 			end
 
+			if exists (select top 1 1 from @ErrorMessages)
+			begin
+				select [Import Status] = 'Failed: Importing failed. See below errors.'
+				select [Error/s] = strErrorMessage from @ErrorMessages;
+				RAISERROR('Importing failed',16,1);
+			end
+
+			if exists (select top 1 1 from @Certificates)
+			begin
+				update aa set aa.intCertificationId = bb.intCertificationId from @Certificates aa left join tblICCertification bb on bb.strCertificationName = aa.strCertificationIdName and bb.ysnMultiple = 0;
+				if exists (select top 1 1 from @Certificates where intCertificationId is null)
+				begin
+					select [Import Status] = 'Failed: Importing failed. See below errors.'
+					select distinct [Error/s] = '"' + strCertificationIdName + '" certification does not exists for contract ' + strContractNumber + '.' from @Certificates where intCertificationId is null;
+					RAISERROR('Importing failed',16,1);
+				end
+			end
 
 			IF EXISTS(SELECT * FROM #tmpExtracted)
 			BEGIN
+				--Do not enable this line of code. This is for testing only.
+				--update aa set aa.strContractNumber = aa.strContractNumber + 'i2' from tblCTContractHeader aa join #tmpExtracted bb on bb.strContractNumber COLLATE Latin1_General_CI_AS = aa.strContractNumber;
+
+				if exists (select top 1 1 from tblCTContractHeader aa join #tmpExtracted bb on bb.strContractNumber COLLATE Latin1_General_CI_AS = aa.strContractNumber)
+				begin
+					select [Import Status] = 'Failed: Importing failed. The following contracts are already exists.'
+					select [Contract Numbers] = aa.strContractNumber from tblCTContractHeader aa join #tmpExtracted bb on bb.strContractNumber COLLATE Latin1_General_CI_AS = aa.strContractNumber;
+					RAISERROR('Importing failed',16,1);
+				end
 
 				DECLARE cur CURSOR LOCAL FAST_FORWARD
 				FOR
@@ -749,7 +798,7 @@ AS
 						, @intCountryId
 
 					EXEC uspCTGetTableDataInXML '#tmpContractHeader', null, @strTblXML OUTPUT,'tblCTContractHeader'
-					EXEC uspCTValidateContractHeader @strTblXML,'Added'
+					EXEC uspCTValidateContractHeader @strTblXML,'Added';
 
 					select @strRequiredDocuments = '';
 					delete @RequiredDocumentIds;
@@ -957,39 +1006,7 @@ AS
 							select @strCondition = ' intContractDetailId='+convert(nvarchar(20),@intActiveContractDetailId)+' ';
 
 							EXEC uspCTGetTableDataInXML '#tmpContractDetail', @strCondition, @strTblXML OUTPUT,'tblCTContractDetail'
-							EXEC uspCTValidateContractDetail @strTblXML, 'Added'
-
-							select @intActiveContractSeq=intContractSeq from #tmpContractDetail where intContractDetailId = @intActiveContractDetailId;
-					
-
-							select @strCertificationIdName = '';
-							delete @Certificates;
-							select top 1 @strCertificationIdName = strCertification from #tmpExtracted where strContractNumber = @strContractNumber and intContractSeq = @intActiveContractSeq;
-							if (isnull(@strCertificationIdName,'') <> '')
-							begin
-								insert into @Certificates (strCertificationIdName)
-								select distinct Item from fnSplitString(@strCertificationIdName, ';');
-
-								if exists(select top 1 1 from @Certificates)
-								begin
-									select top 1 @strActiveCertificationIdName = strCertificationIdName from @Certificates;
-									while isnull(@strActiveCertificationIdName,'') <> ''
-									begin
-										select top 1 @intCertificationId=intCertificationId from tblICCertification where strCertificationName = @strActiveCertificationIdName and ysnMultiple = 0;
-										if (isnull(@intCertificationId,0) = 0)
-										begin
-											select @validationErrorMsg = 'Certification "' + @strActiveCertificationIdName + '" does not exists.';
-											RAISERROR(@validationErrorMsg,16,1);
-										end
-										insert into @CertificateIds select intCertificationId = @intCertificationId, intContractSeq = @intActiveContractSeq, intContractHeaderId = @intContractHeaderId;
-										select @intCertificationId = null;
-
-										delete from @Certificates where strCertificationIdName = @strActiveCertificationIdName;
-										select @strActiveCertificationIdName = '';
-										select top 1 @strActiveCertificationIdName = strCertificationIdName from @Certificates;
-									end
-								end
-							end
+							EXEC uspCTValidateContractDetail @strTblXML, 'Added';
 
 							select @intActiveContractDetailId=min(intContractDetailId) from #tmpContractDetail where intContractDetailId > @intActiveContractDetailId;
 						end
@@ -1109,8 +1126,8 @@ AS
 						,strDestinationPointType = case when isnull(intDestinationPortId,0) <> 0 then 'Port' else null end
 						,intBasisCurrencyId = intCurrencyId
 						,intBasisUOMId = intBasisUOMId
-						,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intItemItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBudgetPrice,0) + isnull(dblBasis,0)) else null end
-						,dblTotalCost = case when intPricingTypeId = 1 then dbo.fnCTConvertQtyToTargetItemUOM(intItemItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dbo.fnCTConvertQtyToTargetItemUOM(intItemItemUOMId,intPriceItemUOMId, dblQuantity) * isnull(dblCashPrice,1) else null end
+						,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBudgetPrice,0) + isnull(dblBasis,0)) else null end
+						,dblTotalCost = case when intPricingTypeId = 1 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * isnull(dblCashPrice,1) else null end
 						,dblNoOfLots = case when round(1*dblNoOfLots,0) = 0 then 1 else round(1*dblNoOfLots,0) end
 						,intCurrencyExchangeRateId
 					FROM #tmpExtracted
@@ -1134,9 +1151,10 @@ AS
 						select intCertificationId=c.intCertificationId,intContractDetailId=cd.intContractDetailId,intConcurrencyId=1
 						from
 							tblCTContractDetail cd
-							join @CertificateIds c on c.intContractSeq = cd.intContractSeq and c.intContractHeaderId = cd.intContractHeaderId
+							join @CertificateIds c on c.intContractSeq = cd.intContractSeq and c.strContractNumber = @strContractNumber
 						where
 							cd.intContractHeaderId = @intContractHeaderId
+							and c.intCertificationId is not null
 					end
 
 					set @ysnBasisComponent = 0;
