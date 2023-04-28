@@ -859,7 +859,7 @@ BEGIN
 							,A.dblInvoiceTotalQuantity
 							,A.dblNewBurnRate
 							,A.intInvoiceId
-							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, A.dtmInvoiceDate), 0)
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmDateToProcess), 0)
 							,A.intDispatchId
 						INTO #tmpSiteUpdateList
 						FROM #tmpInvoiceDateGreaterThanLastDelivery A
