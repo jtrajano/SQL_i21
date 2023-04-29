@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuAPPayablesDeletedForeign]
+CREATE VIEW [dbo].[vyuAPPayablesAgingDeletedForeign]
 AS
 
 SELECT   
