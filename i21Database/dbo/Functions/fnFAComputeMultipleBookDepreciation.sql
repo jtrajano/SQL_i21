@@ -437,6 +437,16 @@ ON T0.intBookId = T1.intBookId AND T0.intAssetId = T1.intAssetId
 WHERE YEAR(dtmImportDepThruDate) = YEAR(dtmDepreciationToDate)
 AND MONTH(dtmDepreciationToDate) + 1 < MONTH(dtmImportDepThruDate) 
 
+--For First Depreciation
+UPDATE T0   
+SET T0.dblDepre = 0 , T0.dblMonth = 0  
+FROM @tblAssetInfo T0  
+INNER JOIN  tblFABookDepreciation T1   
+ON T0.intBookId = T1.intBookId AND T0.intAssetId = T1.intAssetId  
+WHERE YEAR(dtmImportDepThruDate) = YEAR(dtmDepreciationToDate)  
+AND MONTH(dtmDepreciationToDate) < MONTH(dtmImportDepThruDate)   
+AND intMonth = 1
+
 UPDATE T0 
 SET T0.dblDepre = T0.dblDepre + ISNULL(dblImportDepreciationToDate,0)
 FROM @tblAssetInfo T0
