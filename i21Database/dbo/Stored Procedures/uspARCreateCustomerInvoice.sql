@@ -159,15 +159,15 @@
 	,@TradeFinanceComments					NVARCHAR(MAX)	= NULL
 	,@GoodsStatus							NVARCHAR(100)	= NULL
 	,@ItemComputedGrossPrice				NUMERIC(18, 6)	= 0
-	,@FreightCharge							NUMERIC(18, 6)
-	,@FreightCompanySegment					NVARCHAR(100)
-	,@FreightLocationSegment				NVARCHAR(100)
+	,@FreightCharge							NUMERIC(18, 6) 	= 0
+	,@FreightCompanySegment					NVARCHAR(100)	= NULL
+	,@FreightLocationSegment				NVARCHAR(100)	= NULL
 	,@SourcedFrom							NVARCHAR(100)	= NULL
 	,@TaxLocationId							INT				= NULL
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
-	,@OpportunityId							INT 			= 0
+	,@OpportunityId							INT 			= NULL
 	,@DefaultPayToBankAccountId				INT				= NULL
 	,@PayToCashBankAccountId				INT				= NULL
 	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
