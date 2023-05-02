@@ -44,7 +44,7 @@ INSERT INTO @tblAsset
 SELECT
 B.strAssetId,
 A.intAssetId,
-(B.dblCost - ISNULL(B.dblSalvageValue, 0)) + ISNULL(Adjustment.dblAdjustment, 0),
+B.dblCost + ISNULL(Adjustment.dblAdjustment, 0),
 B.dtmDispositionDate,
 F.ysnOpenPeriod,
 0,
