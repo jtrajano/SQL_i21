@@ -151,7 +151,11 @@
     [ysnConsIncludeFreightChargesInCostBasis] BIT NOT NULL DEFAULT 0,
     [strDepartmentOrCategory] CHAR(1) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'D', 
     [strCategoriesOrSubcategories] CHAR(1) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'C', 
-
+    [intGasFETId] INT NULL,
+    [intGasSETId] INT NULL,
+    [intDieselFETId] INT NULL,
+    [intDieselSETId] INT NULL,
+    [intSSTId] INT NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 
