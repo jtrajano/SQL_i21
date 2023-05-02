@@ -599,7 +599,7 @@ BEGIN TRY
 		, strAWBSampleReference 
 		, dblBasePrice
 		, ysnBoughtAsReserve
-		, intCurrencyId 
+		, intCurrencyId = CASE WHEN intCurrencyId = 0 THEN NULL ELSE intCurrencyId END
 		, ysnEuropeanCompliantFlag 
 		, intEvaluatorsCodeAtTBOId 
 		, intFromLocationCodeId
