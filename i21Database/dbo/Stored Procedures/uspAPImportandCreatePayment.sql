@@ -36,7 +36,7 @@ BEGIN TRY
 		@archieveServer = strArchiveServer 
 	FROM tblAPCompanyPreference
 
-	IF ISNULL(TRIM(@archieveServer), '') = ''
+	IF ISNULL(dbo.fnTrim(@archieveServer), '') = ''
 	BEGIN
 		RAISERROR('Archieve Failed. Directory not exists or permission denied', 16, 1);
 	END
