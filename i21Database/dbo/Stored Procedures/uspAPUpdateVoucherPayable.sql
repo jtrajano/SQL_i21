@@ -261,6 +261,19 @@ INNER JOIN vyuICGetOtherCharges E ON E.intItemId = D.intChargeId AND E.ysnInvent
 INNER JOIN @voucherDetailIds F ON A.intBillDetailId = F.intId
 WHERE C.intBillDetailTaxId IS NULL
 
+UNION ALL
+--GENERATE TAXES for CT Unforecasted Other Charges
+--CT Other charges that are not added to Add Payables
+SELECT 
+	A.intBillDetailId
+FROM tblAPBillDetail A
+LEFT JOIN tblAPBillDetailTax B ON A.intBillDetailId = B.intBillDetailId
+INNER JOIN tblCTContractCost C ON C.intContractCostId = A.intContractCostId AND C.ysnUnforcasted = 1
+INNER JOIN @voucherDetailIds E ON A.intBillDetailId = E.intId
+WHERE B.intBillDetailTaxId IS NULL
+GROUP BY
+	A.intBillDetailId
+
 IF EXISTS (SELECT TOP 1 1 FROM @idetailIds)
 BEGIN
 	EXEC uspAPUpdateVoucherDetailTax @idetailIds

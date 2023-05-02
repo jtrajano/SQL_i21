@@ -910,6 +910,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCancelPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGChangeLoadCostVendor.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptOtherCharge.sql" />
+    <Build Include="dbo\Views\vyuAPUnforecastedChargesTax.sql" />
     <Build Include="dbo\Tables\tblICTally.sql" />
     <None Include="Scripts\Post-Deployment\IC\33_InventoryTally.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />

@@ -106,6 +106,7 @@
 	[dblProvisionalTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblFinalVoucherTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[ysnPrepaidOtherCharge] BIT NULL DEFAULT 0,
+	[ysnUnforecastedCharge] BIT NULL DEFAULT 0,
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
