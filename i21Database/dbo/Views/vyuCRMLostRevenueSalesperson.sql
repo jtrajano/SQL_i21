@@ -19,4 +19,7 @@
 		inner join tblEMEntity e on e.intEntityId = d.intEntityContactId
 	where
 		b.strType = 'Salesperson'
-		and c.ysnActive = convert(bit, 1)
+		and c.ysnActive = convert(bit, 1) 
+		and d.ysnDefaultContact = 1
+		and c.strType != 'Driver'
+GO
