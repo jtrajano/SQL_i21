@@ -218,6 +218,10 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet NUMERIC(38, 20)
 		,strFW NVARCHAR(3)
 		,ysnOverrideRecipe BIT
+		,dblUpperTolerance NUMERIC(38, 20)
+		,dblLowerTolerance NUMERIC(38, 20)
+		,dblCalculatedUpperTolerance NUMERIC(38, 20)
+		,dblCalculatedLowerTolerance NUMERIC(38, 20)
 		)
 	DECLARE @tblPreItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -324,6 +328,10 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet
 		,strFW
 		,ysnOverrideRecipe
+		,dblUpperTolerance 
+		,dblLowerTolerance
+		,dblCalculatedUpperTolerance 
+		,dblCalculatedLowerTolerance 
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -345,6 +353,10 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet
 		,strFW
 		,ysnOverrideRecipe
+		,dblUpperTolerance 
+		,dblLowerTolerance
+		,dblCalculatedUpperTolerance 
+		,dblCalculatedLowerTolerance 
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -366,6 +378,10 @@ DECLARE @tblFW TABLE (
 			,dblNoOfPallet NUMERIC(38, 20)
 			,strFW NVARCHAR(50)
 			,ysnOverrideRecipe BIT
+			,dblUpperTolerance NUMERIC(38, 20)
+			,dblLowerTolerance NUMERIC(38, 20)
+			,dblCalculatedUpperTolerance NUMERIC(38, 20)
+			,dblCalculatedLowerTolerance NUMERIC(38, 20)
 			)
 
 	INSERT INTO @tblPreLot (
@@ -2011,6 +2027,10 @@ DECLARE @tblFW TABLE (
 			,strERPComment
 			,strERPOrderNo
 			,ysnOverrideRecipe 
+			,dblUpperTolerance
+			,dblLowerTolerance
+			,dblCalculatedUpperTolerance
+			,dblCalculatedLowerTolerance
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -2058,6 +2078,10 @@ DECLARE @tblFW TABLE (
 			,@strERPComment
 			,@strERPOrderNo
 			,ysnOverrideRecipe
+			,dblUpperTolerance
+			,dblLowerTolerance
+			,dblCalculatedUpperTolerance
+			,dblCalculatedLowerTolerance
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
