@@ -4080,7 +4080,7 @@ BEGIN TRY
 		--note: this will just be a temporary fix as we couldn't replicate the issue where the settlements are not being logged in the summary log
 		IF NOT EXISTS(SELECT 1 FROM @intStorageHistoryIds)
 		BEGIN
-			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please try again.', 16, 1);
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please click OK to continue.', 16, 1);
 			GOTO SettleStorage_Exit;
 		END
 
@@ -4095,7 +4095,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM @IDS)
 		BEGIN
-			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please try again.', 16, 1);
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please click OK to continue.', 16, 1);
 			GOTO SettleStorage_Exit;
 		END
 	END
