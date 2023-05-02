@@ -45,7 +45,8 @@ BEGIN TRY
 	SELECT @strMainEntityName = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strMainEntityName';
-
+	
+	SELECT @strMainEntityName = REPLACE(@strMainEntityName, '''''', '''')
 	
 	select 
 	strMainEntityName	
