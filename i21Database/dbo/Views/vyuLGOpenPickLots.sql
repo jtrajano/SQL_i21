@@ -23,6 +23,7 @@ SELECT DISTINCT (SELECT COUNT(*) FROM tblLGPickLotDetail WHERE intPickLotHeaderI
   intWeightItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId),
   PL.dtmPickedDate,
   Lot.strLotNumber,
+  Lot.strLotAlias,
   Lot.strReceiptNumber,
   Lot.strMarkings,
   IM.intItemId,
