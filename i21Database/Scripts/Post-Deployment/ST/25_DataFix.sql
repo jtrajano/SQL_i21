@@ -300,4 +300,37 @@ AND RIGHT('0000' + dbo.fnICValidateUPCCode(strLongUPCCode), 14) NOT IN (
 -- [END]: Add defaulting of UPCA and SCC-14
 ----------------------------------------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Fix Promo Price in Promotion Sales Screen
+----------------------------------------------------------------------------------------------------------------------------------
+UPDATE
+    SL
+SET
+    SL.dblPromoPrice = tmp.dblPrice
+FROM
+    tblSTPromotionSalesList AS SL
+    INNER JOIN (
+		SELECT psl.intPromoSalesListId, tmps.dblPrice
+		FROM tblSTPromotionSalesList psl
+		INNER JOIN (
+			SELECT 
+				sld.intPromoSalesListId, 
+				CASE WHEN strPromoType = 'M' 
+						THEN SUM(dblPrice) 
+					 WHEN strPromoType = 'C' 
+						THEN SUM(sld.intQuantity * dblPrice) 
+					END 
+				AS dblPrice 
+			FROM tblSTPromotionSalesListDetail sld
+			JOIN tblSTPromotionSalesList sl
+			ON sld.intPromoSalesListId = sl.intPromoSalesListId
+			GROUP BY sld.intPromoSalesListId, strPromoType
+		) tmps
+	ON psl.intPromoSalesListId = tmps.intPromoSalesListId
+) AS tmp
+        ON SL.intPromoSalesListId = tmp.intPromoSalesListId
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Fix Promo Price in Promotion Sales Screen
+----------------------------------------------------------------------------------------------------------------------------------
 GO
