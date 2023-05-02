@@ -1,4 +1,4 @@
-﻿CREATE  PROCEDURE [dbo].[uspMFGetProductByProcess] 
+﻿CREATE PROCEDURE [dbo].[uspMFGetProductByProcess] 
 (
 	@intManufacturingProcessId	INT
   , @intLocationID				INT
@@ -20,14 +20,14 @@ BEGIN
 							  ELSE 0
 						 END)) AS ysnInputItemEnabled
 		 , I.intCategoryId
-		 , 0 AS dblProducedQuantity
+		 , 0.00 AS dblProducedQuantity
 		 , 0 AS intMainItemId
 		 , '' AS strMainItemNo
 		 , 0 AS intCertificationId
 		 , '' AS strCertificationName
 		 , I.intLayerPerPallet
 		 , I.intUnitPerLayer
-		 , 0 AS dblQuantity
+		 , 0.00 AS dblQuantity
 		 , '' AS strMainItemDescription
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblICItem I ON I.intItemId = R.intItemId
