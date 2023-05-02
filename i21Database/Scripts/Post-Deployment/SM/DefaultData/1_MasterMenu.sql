@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mass Update' AND strModuleName = 'Store')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pick Lots' AND strModuleName = 'Logistics')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -4565,7 +4565,6 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Terminals', strDescription = 'Terminal
 UPDATE tblSMMasterMenu SET strMenuName = 'Mass Dispatch Loads' WHERE strMenuName = 'Dispatch Loads' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Load / Shipment Schedules', strDescription = 'Load / Shipment Schedules' WHERE strMenuName = 'Load Schedules' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Unallocated Inventory and Open Contracts', strDescription = 'Unallocated Inventory and Open Contracts' WHERE strMenuName = 'Unallocated Inventory' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
-UPDATE tblSMMasterMenu SET strMenuName = 'Pick Containers / Lots', strDescription = 'Pick Containers / Lots' WHERE strMenuName = 'Pick Lots' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 /* END OF RENAMING  */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Allocations' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId)
@@ -4582,7 +4581,7 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pick Containers / Lots' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Pick Containers / Lots', N'Logistics', @LogisticsActivitiesParentMenuId, N'Pick Lots', N'Activity', N'Screen', N'Logistics.view.PickLot?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Pick Containers / Lots', N'Logistics', @LogisticsActivitiesParentMenuId, N'Pick Containers / Lots', N'Activity', N'Screen', N'Logistics.view.PickLot?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.PickLot?showSearch=true', intSort = 2 WHERE strMenuName = 'Pick Containers / Lots' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 
@@ -4769,6 +4768,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse Rate Matrix' AND strM
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Container Types' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Dispatch Orders' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Truck Dispatch Schedule' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Pick Lots' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesParentMenuId
 /* END OF DELETING */
 
 /* MANUFACTURING */
