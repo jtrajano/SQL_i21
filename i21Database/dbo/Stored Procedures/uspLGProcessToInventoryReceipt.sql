@@ -232,6 +232,7 @@ BEGIN TRY
 			,[strCostMethod]
 			,[dblRate]
 			,[dblAmount]
+			,[dblQuantity]
 			,[intCostUOMId]
 			,[intContractHeaderId]
 			,[intContractDetailId]
@@ -264,6 +265,7 @@ BEGIN TRY
 			,[dblAmount] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN VP.dblTotal
 							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblTotal], LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
+			,[dblQuantity] = NULL
 			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -303,9 +305,10 @@ BEGIN TRY
 		SELECT 
 			[intOtherChargeEntityVendorId] = CLSL.intVendorId
 			,[intChargeId] = LWS.intItemId
-			,[strCostMethod] = 'Per Unit'
+			,[strCostMethod] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN 'Custom Unit' ELSE 'Per Unit' END -- If Calculate Qty is = 'Manual Entry', pass cost method 'Custom Unit' to the IR charges
 			,[dblRate] = LWS.dblUnitRate
 			,[dblAmount] = LWS.dblActualAmount
+			,[dblQuantity] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN LWS.dblQuantity ELSE NULL END
 			,[intCostUOMId] = LWS.intItemUOMId
 			,[intContractHeaderId] = CT.intContractHeaderId
 			,[intContractDetailId] = CT.intContractDetailId
@@ -333,6 +336,7 @@ BEGIN TRY
 		JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId
 		OUTER APPLY (SELECT TOP 1 CD.intContractHeaderId, CD.intContractDetailId, 
 						LD.intVendorEntityId, LD.intPCompanyLocationId, EL.intEntityLocationId
 					FROM tblLGLoadDetail LD 
@@ -946,6 +950,7 @@ BEGIN TRY
 			,[strCostMethod]
 			,[dblRate]
 			,[dblAmount]
+			,[dblQuantity]
 			,[intCostUOMId]
 			,[intContractHeaderId]
 			,[intContractDetailId]
@@ -980,6 +985,7 @@ BEGIN TRY
 			,[dblAmount] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN VP.dblTotal
 							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblTotal], LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
+			,[dblQuantity] = NULL
 			,[intCostUOMId] = CV.intPriceItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -1023,9 +1029,10 @@ BEGIN TRY
 		SELECT 
 			[intOtherChargeEntityVendorId] = CLSL.intVendorId
 			,[intChargeId] = LWS.intItemId
-			,[strCostMethod] = 'Per Unit'
+			,[strCostMethod] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN 'Custom Unit' ELSE 'Per Unit' END -- If Calculate Qty is = 'Manual Entry', pass cost method 'Custom Unit' to the IR charges
 			,[dblRate] = LWS.dblUnitRate
 			,[dblAmount] = LWS.dblActualAmount
+			,[dblQuantity] = CASE WHEN ISNULL(WRMD.intCalculateQty, 8) = 8 THEN LWS.dblQuantity ELSE NULL END
 			,[intCostUOMId] = LWS.intItemUOMId
 			,[intContractHeaderId] = CT.intContractHeaderId
 			,[intContractDetailId] = CT.intContractDetailId
@@ -1054,6 +1061,7 @@ BEGIN TRY
 		JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId 
 		OUTER APPLY (SELECT TOP 1 CD.intContractHeaderId, CD.intContractDetailId, 
 						LD.intVendorEntityId, LD.intPCompanyLocationId, EL.intEntityLocationId
 					FROM tblLGLoadDetail LD 
