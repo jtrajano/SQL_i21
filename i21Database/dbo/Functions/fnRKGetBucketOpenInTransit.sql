@@ -116,10 +116,10 @@ FROM (
 		, c.strTransactionType
 		, c.intTransactionRecordHeaderId
 		, intOrigUOMId = null
-		, intContractDetailId = null
-		, intContractHeaderId = null
-		, strContractNumber = ''
-		, strContractSeq = ''
+		, c.intContractDetailId --intContractDetailId = null
+		, c.intContractHeaderId --intContractHeaderId = null
+		, c.strContractNumber --strContractNumber = ''
+		, c.strContractSeq --strContractSeq = ''
 		, intTicketId = null
 		, strTicketNumber = ''
 		, intFutureMarketId = null
@@ -152,10 +152,10 @@ FROM (
 		, c.strTransactionType
 		, c.intTransactionRecordHeaderId
 		--, c.intOrigUOMId
-		--, c.intContractDetailId
-		--, c.intContractHeaderId
-		--, c.strContractNumber
-		--, c.strContractSeq
+		, c.intContractDetailId
+		, c.intContractHeaderId
+		, c.strContractNumber
+		, c.strContractSeq
 		--, c.intTicketId
 		--, c.strTicketNumber
 		--, c.intFutureMarketId
