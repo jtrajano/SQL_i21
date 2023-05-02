@@ -5,6 +5,7 @@
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
 	,@dblQtyFromCt DECIMAL(24,10) = 0
 	,@dtmClientPostDate DATETIME = NULL
+	,@postCnt INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -4071,7 +4072,7 @@ BEGIN TRY
 	EXEC [dbo].[uspGRRiskSummaryLog2]
 		@StorageHistoryIds = @intStorageHistoryIds
 
-	IF(@ysnFromPriceBasisContract = 0)
+	IF(@ysnFromPriceBasisContract = 0 AND ISNULL(@postCnt,0) = 0)
 	BEGIN
 		--throw an error if settlement was not logged successfully in DPR Summary Log
 		--note: this will just be a temporary fix as we couldn't replicate the issue where the settlements are not being logged in the summary log
