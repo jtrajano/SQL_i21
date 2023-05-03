@@ -32,6 +32,11 @@ SELECT ST.*
 	   , CustomerCharge.strDescription as strCustomerChargeDescription
 	   , CashTransaction.strDescription as strCashTransactionDescription
 	   , strConsFuelDiscountItem			 =    FuelDiscountItem.strItemNo
+	   , strGasFET							= GasFET.strTaxCode
+	   , strGasSET							= GasSET.strTaxCode
+	   , strDieselFET						= DieselFET.strTaxCode
+	   , strDieselSET						= DieselSET.strTaxCode
+	   , strSST								= SST.strTaxCode
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
@@ -86,3 +91,8 @@ LEFT JOIN tblCMBank Bank
 	ON ConsBankDepositDraftId.intBankId = Bank.intBankId
 LEFT JOIN tblGLAccount ConsARAccountId
 	ON ST.intConsDelearCommissionARAccountId = ConsARAccountId.intAccountId
+LEFT JOIN tblSMTaxCode GasFET ON GasFET.intTaxCodeId = ST.intGasFETId
+LEFT JOIN tblSMTaxCode GasSET ON GasSET.intTaxCodeId = ST.intGasSETId
+LEFT JOIN tblSMTaxCode DieselFET ON DieselFET.intTaxCodeId = ST.intDieselFETId
+LEFT JOIN tblSMTaxCode DieselSET ON DieselSET.intTaxCodeId = ST.intDieselSETId
+LEFT JOIN tblSMTaxCode SST ON SST.intTaxCodeId = ST.intSSTId
