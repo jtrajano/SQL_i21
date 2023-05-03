@@ -9,14 +9,14 @@ RETURNS TABLE AS RETURN
 		,B.strMiscDescription
 		,CAST((
 				CASE WHEN A.intTransactionType IN (1) 
-					THEN (B.dblCost - (C.dblAmount * (CASE WHEN (A.intEntityVendorId = C.intVendorId) AND C.ysnPrice = 1 THEN -1 ELSE 1 END))) 
+					THEN (B.dblTotal - (C.dblAmount * (CASE WHEN (A.intEntityVendorId = C.intVendorId) AND C.ysnPrice = 1 THEN -1 ELSE 1 END))) 
 						* ISNULL(NULLIF(B.dblRate, 0), 1) 
 					ELSE 0 
 				END
 		) AS  DECIMAL(18, 2)) AS dblTotal
 		,CAST((
 				CASE WHEN A.intTransactionType IN (1) 
-					THEN (B.dblCost - (C.dblAmount * (CASE WHEN (A.intEntityVendorId = C.intVendorId) AND C.ysnPrice = 1 THEN -1 ELSE 1 END))) 
+					THEN (B.dblTotal - (C.dblAmount * (CASE WHEN (A.intEntityVendorId = C.intVendorId) AND C.ysnPrice = 1 THEN -1 ELSE 1 END))) 
 					ELSE 0 
 				END
 		) AS  DECIMAL(18, 2)) AS dblForeignTotal
