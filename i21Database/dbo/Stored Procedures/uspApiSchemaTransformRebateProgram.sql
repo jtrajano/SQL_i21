@@ -421,9 +421,10 @@ SELECT
 FROM tblApiSchemaTransformRebateProgram rp
 JOIN vyuAPVendor v ON v.strVendorId = rp.strVendor OR v.strName = rp.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
-JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
-LEFT JOIN tblICItem i ON i.strItemNo = rp.strItemNo
-	OR i.strDescription = rp.strItemName
+JOIN tblVRProgram p ON p.intVendorSetupId = vs.intVendorSetupId
+	AND p.guiApiUniqueId = rp.guiApiUniqueId
+	AND p.intRowNumber = rp.intRowNumber
+LEFT JOIN tblICItem i ON (i.strItemNo = rp.strItemNo OR i.strDescription = rp.strItemName)
 OUTER APPLY (
 	SELECT TOP 1 xxi.intItemId
 	FROM tblICItemVendorXref xxi
@@ -600,10 +601,10 @@ SELECT
 	, p.intProgramId
 	, MAX(vts.intRowNumber)
 FROM tblApiSchemaTransformRebateProgram vts
-LEFT JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
-LEFT JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 JOIN vyuARCustomer c ON c.strCustomerNumber = vts.strCustomer OR c.strName = vts.strCustomerName
-LEFT JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
+JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
 	AND p.strVendorProgram = vts.strVendorProgram
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND NOT EXISTS (
@@ -627,12 +628,12 @@ SELECT
 	, p.intProgramId
 	, MAX(vts.intRowNumber)
 FROM tblApiSchemaTransformRebateProgram vts
-LEFT JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
-LEFT JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
+JOIN vyuAPVendor v ON v.strName = vts.strVendor OR v.strVendorId = vts.strVendor
+JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
 LEFT JOIN tblVRCustomerXref x ON x.intVendorSetupId = vs.intVendorSetupId
 	AND x.strVendorCustomer = vts.strVendorCustomer
 JOIN vyuARCustomer c ON c.intEntityId = x.intEntityId
-LEFT JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
+JOIN @CreatedPrograms p ON p.intVendorSetupId = vs.intVendorSetupId
 	AND p.strVendorProgram = vts.strVendorProgram
 WHERE vts.guiApiUniqueId = @guiApiUniqueId
 	AND NULLIF(vts.strCustomer, '') IS NULL
@@ -678,11 +679,11 @@ WHERE p.guiApiUniqueId = @guiApiUniqueId
 	)
 
 UPDATE log
-SET log.intTotalRowsImported = r.intCount
+SET log.intTotalRowsImported = ISNULL(rv.intCount, 0)
 FROM tblApiImportLog log
-CROSS APPLY (
+OUTER APPLY (
 	SELECT COUNT(*) intCount
-	FROM tblICItem
+	FROM tblVRProgramItem
 	WHERE guiApiUniqueId = log.guiApiUniqueId
-) r
-WHERE log.guiApiImportLogId = @guiLogId
+) rv
+WHERE log.guiApiUniqueId = @guiApiUniqueId
