@@ -118,8 +118,6 @@ CREATE TABLE #INVOICES (
 	 , dblServiceChargeAPR			NUMERIC(18, 6)	NULL DEFAULT 0
 	 , strLogoType					NVARCHAR(10)
 	 , intItemId					INT 			NULL
-	 , dtmDueDateSC					DATETIME		NULL
-	 , ysnForgiven					BIT				NULL
 )
 
 DECLARE @blbLogo						VARBINARY (MAX) = NULL
@@ -132,6 +130,7 @@ DECLARE @blbLogo						VARBINARY (MAX) = NULL
 	  , @strCompanyFullAddress			NVARCHAR(500) = NULL
 	  , @intItemForFreightId			INT = NULL
 	  , @dtmCurrentDate					DATETIME = GETDATE()
+	  , @ysnIncludeHazmatMessage		BIT = 0
 
 SELECT TOP 1 @intItemForFreightId = intItemForFreightId 
 FROM tblTRCompanyPreference
@@ -158,6 +157,7 @@ SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 --AR PREFERENCE
 SELECT TOP 1 @ysnPrintInvoicePaymentDetail	= ysnPrintInvoicePaymentDetail
 		   , @strInvoiceReportName			= strInvoiceReportName
+		   , @ysnIncludeHazmatMessage		= ysnIncludeHazmatMessage
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ORDER BY intCompanyPreferenceId DESC
 
@@ -270,11 +270,6 @@ INSERT INTO #INVOICES (
 	, ysnStretchLogo
 	, strSubFormula
 	, dtmCreated
-	, strServiceChargeItem								
-	, intDaysOld               							
-	, strServiceChareInvoiceNumber 						
-	, dtmDateSC				 							
-	, intSiteId			
 	, ysnIncludeEntityName
 	, strFooterComments
 	, intOriginalInvoiceId
@@ -284,8 +279,6 @@ INSERT INTO #INVOICES (
 	, strTicketNumbers
 	, dblPercentFull
 	, intItemId
-	, dtmDueDateSC
-	, ysnForgiven
 )
 SELECT 
 	 intInvoiceId					= INV.intInvoiceId
@@ -377,17 +370,6 @@ SELECT
 	, ysnStretchLogo				= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	, strSubFormula					= INVOICEDETAIL.strSubFormula	
 	, dtmCreated					= @dtmCurrentDate
-	, strServiceChargeItem			= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-										THEN 'Service Charge'
-										ELSE ''
-									END
-	, intDaysOld               		= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('By Customer Balance', 'By Invoice') 
-										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST((CASE WHEN INVOICEDETAIL.ysnPaid = 1 THEN PAYMENT.dtmDatePaid ELSE INV.dtmShipDate END) AS DATE))
-										ELSE 0
-									END
-	, strServiceChareInvoiceNumber 	= INVOICEDETAIL.strSCInvoiceNumber
-	, dtmDateSC				 		= INVOICEDETAIL.dtmDateSC
-	, intSiteId						= INVOICEDETAIL.intSiteID
 	, ysnIncludeEntityName			= CAST(0 AS BIT)
 	, strFooterComments				= INV.strFooterComments
 	, intOriginalInvoiceId			= INV.intOriginalInvoiceId
@@ -397,8 +379,6 @@ SELECT
 	, strTicketNumbers				= INV.strTicketNumbers
 	, dblPercentFull				= INVOICEDETAIL.dblPercentFull
 	, intItemId						= INVOICEDETAIL.intItemId
-	, dtmDueDateSC					= INVOICEDETAIL.dtmDueDateSC
-	, ysnForgiven					= INV.ysnForgiven
 FROM dbo.tblARInvoice INV
 INNER JOIN #STANDARDINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN #LOCATIONS L ON INV.intCompanyLocationId = L.intCompanyLocationId
@@ -418,7 +398,8 @@ LEFT JOIN (
 		,strVFDDocumentNumber		= ID.strVFDDocumentNumber
 		,strUnitMeasure				= UM.strUnitMeasure
 		,strItemNo					= ITEM.strItemNo
-		,strInvoiceComments			= ITEM.strInvoiceComments
+		,strInvoiceComments			= CASE WHEN @ysnIncludeHazmatMessage = 0 OR ITEM.ysnHazardMaterial = 0 THEN ITEM.strInvoiceComments 
+										ELSE ISNULL(NULLIF(ITEM.strInvoiceComments, '') + CHAR(13)+CHAR(10), '') + ISNULL(NULLIF(ITEMTAG.strMessage, ''), '') END
 		,strItemType				= ITEM.strType
 		,strItemDescription			= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
 		,ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
@@ -431,10 +412,10 @@ LEFT JOIN (
 		,dblServiceChargeAPR		= ID.dblServiceChargeAPR		
 		,intSCInvoiceId				= ID.intSCInvoiceId
 		,intItemId					= ID.intItemId
-		,dtmDueDateSC				= INVSC.dtmDueDate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON ID.intItemId = ITEM.intItemId	
 	LEFT JOIN tblICItemUOM IUOM ON ID.intItemUOMId = IUOM.intItemUOMId
+	LEFT JOIN tblICTag ITEMTAG WITH (NOLOCK) ON ITEM.intHazmatTag = ITEMTAG.intTagId
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUOM.intUnitMeasureId	
 	LEFT JOIN (
 		SELECT DISTINCT
@@ -505,14 +486,6 @@ LEFT JOIN (
 	  AND (NULL IS NULL OR ID.intItemId <> NULL)
 	GROUP BY ID.intInvoiceId
 ) TOTALTAX ON TOTALTAX.intInvoiceId = INV.intInvoiceId
-LEFT JOIN (
-	SELECT 
-		 dtmDatePaid		= MAX(dtmDatePaid)
-		,ARPD.intInvoiceId
-	FROM tblARPaymentDetail ARPD
-	INNER JOIN tblARPayment ARP ON ARPD.intPaymentId = ARP.intPaymentId
-	GROUP BY ARPD.intInvoiceId
-) PAYMENT ON INVOICEDETAIL.intSCInvoiceId = PAYMENT.intInvoiceId
 LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = INV.intCompanyLocationId AND (SMLP.ysnARInvoice = 1 OR SMLP.ysnDefault = 1)
 
 --CUSTOMERS
@@ -897,7 +870,6 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	, dtmDateSC
 	, dblServiceChargeAPR
 	, strLogoType
-	, dtmDueDateSC
 )
 SELECT 
 	  intInvoiceId
@@ -931,10 +903,10 @@ SELECT
 	, strComments
 	, strInvoiceHeaderComment
 	, strInvoiceFooterComment
-	, dblInvoiceSubtotal = CASE WHEN A.ysnForgiven = 1 THEN 0 ELSE A.dblInvoiceSubtotal END
+	, dblInvoiceSubtotal
 	, dblShipping
 	, dblTax
-	, dblInvoiceTotal = CASE WHEN A.ysnForgiven = 1 THEN 0 ELSE A.dblInvoiceTotal END
+	, dblInvoiceTotal
 	, dblAmountDue
 	, strItemNo
 	, intInvoiceDetailId
@@ -948,7 +920,7 @@ SELECT
 	, dblQtyOrdered
 	, dblDiscount
 	, dblTotalTax
-	, dblPrice = CASE WHEN A.ysnForgiven = 1 THEN 0 ELSE A.dblPrice END
+	, dblPrice
 	, dblItemPrice
 	, strPaid
 	, strPosted
@@ -1001,8 +973,7 @@ SELECT
 	, dtmDateSC
 	, dblServiceChargeAPR
 	, strLogoType
-	, dtmDueDateSC
-FROM #INVOICES A
+FROM #INVOICES
 
 --UPDATE STAGING
 UPDATE STAGING
