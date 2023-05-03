@@ -76,6 +76,7 @@ BEGIN
 		,@GetAllAvailablePricing
 		,1.000000
 		,NULL
+		,0
 		,0)
 
 	RETURN

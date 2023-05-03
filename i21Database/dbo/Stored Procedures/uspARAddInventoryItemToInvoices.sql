@@ -400,6 +400,7 @@ BEGIN TRY
 		,ISNULL(IE.[dblCurrencyExchangeRate], 1)	--@CurrencyExchangeRate
 		,IE.[intCurrencyExchangeRateId] --@CurrencyExchangeRateTypeId
 		,0							--@ysnFromItemSelection
+		,0							--@ysnDisregardContractQty
 	) IP
 	WHERE
 		ISNULL(IE.[ysnRefreshPrice],0) = 1
