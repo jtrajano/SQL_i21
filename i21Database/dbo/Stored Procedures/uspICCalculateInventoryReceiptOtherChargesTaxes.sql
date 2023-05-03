@@ -573,36 +573,247 @@ BEGIN
 	-- Update the AP Clearing with a new Vendor. 
 	IF @ysnNewVendorId = 1
 	BEGIN 
-		-- Update tblAPVoucherPayable
-		UPDATE ap
-		SET
-			ap.intEntityVendorId = rc.intEntityVendorId			
-			,ap.strVendorId = v.strVendorId
-			,ap.strName = v.strName
-			,ap.dblTax = rc.dblTax
+		---- Update tblAPVoucherPayable
+		--UPDATE ap
+		--SET
+		--	ap.intEntityVendorId = rc.intNewEntityVendorId			
+		--	,ap.strVendorId = v.strVendorId
+		--	,ap.strName = v.strName
+		--	,ap.dblTax = rc.dblTax
+		--FROM 
+		--	tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
+		--		ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
+		--	LEFT JOIN vyuAPVendor v
+		--		ON v.[intEntityId] = rc.intNewEntityVendorId
+		--WHERE
+		--	rc.intInventoryReceiptId = @intInventoryReceiptId
+		--	AND rc.intNewEntityVendorId IS NOT NULL 
+
+		---- Delete tblAPVoucherPayableTaxStaging
+		--DELETE apTax
+		--FROM 
+		--	tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
+		--		ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
+		--	INNER JOIN tblAPVoucherPayableTaxStaging apTax
+		--		ON apTax.intVoucherPayableId = ap.intVoucherPayableId
+		--WHERE
+		--	rc.intInventoryReceiptId = @intInventoryReceiptId
+		--	AND rc.intNewEntityVendorId IS NOT NULL 
+
+		---- Re-insert the new records for tblAPVoucherPayableTaxStaging 
+		--INSERT INTO tblAPVoucherPayableTaxStaging (
+		--	[intVoucherPayableId]		
+		--	,[intTaxGroupId]				
+		--	,[intTaxCodeId]				
+		--	,[intTaxClassId]				
+		--	,[strTaxableByOtherTaxes]	
+		--	,[strCalculationMethod]		
+		--	,[dblRate]					
+		--	,[intAccountId]				
+		--	,[dblTax]					
+		--	,[dblAdjustedTax]			
+		--	,[ysnTaxAdjusted]			
+		--	,[ysnSeparateOnBill]			
+		--	,[ysnCheckOffTax]
+		--	,[ysnTaxOnly]	
+		--	,[ysnTaxExempt]
+		--)
+		--SELECT 
+		--	[intVoucherPayableId] = ap.intVoucherPayableId	
+		--	,[intTaxGroupId] = rcTax.intTaxGroupId
+		--	,[intTaxCodeId]	= rcTax.intTaxCodeId
+		--	,[intTaxClassId] = rcTax.intTaxClassId
+		--	,[strTaxableByOtherTaxes] = rcTax.strTaxableByOtherTaxes
+		--	,[strCalculationMethod] = rcTax.strCalculationMethod
+		--	,[dblRate] = rcTax.dblRate
+		--	,[intAccountId] = rcTax.intTaxAccountId
+		--	,[dblTax] = rcTax.dblTax
+		--	,[dblAdjustedTax] = rcTax.dblAdjustedTax
+		--	,[ysnTaxAdjusted] = rcTax.ysnTaxAdjusted
+		--	,[ysnSeparateOnBill] = 0
+		--	,[ysnCheckOffTax] = rcTax.ysnCheckoffTax
+		--	,[ysnTaxOnly] = rcTax.ysnTaxOnly
+		--	,[ysnTaxExempt] = rcTax.ysnTaxExempt
+		--FROM 
+		--	tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
+		--		ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
+		--	INNER JOIN tblICInventoryReceiptChargeTax rcTax
+		--		ON rcTax.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
+		--	INNER JOIN tblSMTaxCode taxCode
+		--		ON taxCode.intTaxCodeId = rcTax.intTaxCodeId
+		--WHERE
+		--	rc.intInventoryReceiptId = @intInventoryReceiptId
+		--	AND rc.intNewEntityVendorId IS NOT NULL 
+
+		DECLARE 
+			@voucherPayable AS VoucherPayable 
+			,@voucherPayableTax AS VoucherDetailTax 
+
+		INSERT INTO @voucherPayable (
+			[intEntityVendorId]
+			,[intTransactionType]		
+			,[intLocationId]	
+			,[intShipToId]	
+			,[intShipFromId]			
+			,[intShipFromEntityId]
+			,[intPayToAddressId]
+			,[intCurrencyId]					
+			,[dtmDate]				
+			,[strVendorOrderNumber]			
+			,[strReference]						
+			,[strSourceNumber]					
+			,[intPurchaseDetailId]				
+			,[intContractHeaderId]				
+			,[intContractDetailId]				
+			,[intContractSeqId]					
+			,[intScaleTicketId]					
+			,[intInventoryReceiptItemId]		
+			,[intInventoryReceiptChargeId]		
+			,[intInventoryShipmentItemId]		
+			,[intInventoryShipmentChargeId]		
+			,[strLoadShipmentNumber]
+			,[intLoadShipmentId]				
+			,[intLoadShipmentDetailId]	
+			,[intLoadShipmentCostId]		
+			,[intItemId]						
+			,[intPurchaseTaxGroupId]			
+			,[strMiscDescription]				
+			,[dblOrderQty]						
+			,[dblOrderUnitQty]					
+			,[intOrderUOMId]					
+			,[dblQuantityToBill]				
+			,[dblQtyToBillUnitQty]				
+			,[intQtyToBillUOMId]				
+			,[dblCost]							
+			,[dblCostUnitQty]					
+			,[intCostUOMId]						
+			,[dblNetWeight]						
+			,[dblWeightUnitQty]					
+			,[intWeightUOMId]					
+			,[intCostCurrencyId]
+			,[dblTax]							
+			,[dblDiscount]
+			,[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate]					
+			,[ysnSubCurrency]					
+			,[intSubCurrencyCents]				
+			,[intAccountId]						
+			,[intShipViaId]						
+			,[intTermId]		
+			,[intFreightTermId]				
+			,[strBillOfLading]					
+			,[ysnReturn]
+			,[intBookId]
+			,[intSubBookId]
+			,[intLotId]
+			/*Payment Info*/
+			,[intPayFromBankAccountId]
+			,[strFinancingSourcedFrom]
+			,[strFinancingTransactionNumber]
+			/*Trade Finance Info*/
+			,[strFinanceTradeNo]
+			,[intBankId]
+			,[intBankAccountId]
+			,[intBorrowingFacilityId]
+			,[strBankReferenceNo]
+			,[intBorrowingFacilityLimitId]
+			,[intBorrowingFacilityLimitDetailId]
+			,[strReferenceNo]
+			,[intBankValuationRuleId]
+			,[strComments]
+			,[strTaxPoint]
+			,[intTaxLocationId]
+			,[ysnOverrideTaxGroup]
+			/*Quality and Optionality Premium*/
+			,[dblQualityPremium] 
+ 			,[dblOptionalityPremium] 
+		)
+		SELECT 
+			[intEntityVendorId]	= rc.intNewEntityVendorId		
+			,ap.[intTransactionType] 
+			,ap.[intLocationId]	
+			,ap.[intShipToId]	
+			,ap.[intShipFromId]			
+			,ap.[intShipFromEntityId]
+			,ap.[intPayToAddressId]
+			,ap.[intCurrencyId]					
+			,ap.[dtmDate]				
+			,ap.[strVendorOrderNumber]			
+			,ap.[strReference]						
+			,ap.[strSourceNumber]					
+			,ap.[intPurchaseDetailId]				
+			,ap.[intContractHeaderId]				
+			,ap.[intContractDetailId]				
+			,ap.[intContractSeqId]					
+			,ap.[intScaleTicketId]					
+			,ap.[intInventoryReceiptItemId]		
+			,ap.[intInventoryReceiptChargeId]		
+			,ap.[intInventoryShipmentItemId]		
+			,ap.[intInventoryShipmentChargeId]		
+			,ap.[strLoadShipmentNumber]
+			,ap.[intLoadShipmentId]				
+			,ap.[intLoadShipmentDetailId]	
+			,ap.[intLoadShipmentCostId]		
+			,ap.[intItemId]						
+			,ap.[intPurchaseTaxGroupId]			
+			,ap.[strMiscDescription]				
+			,ap.[dblOrderQty]						
+			,ap.[dblOrderUnitQty]					
+			,ap.[intOrderUOMId]					
+			,ap.[dblQuantityToBill]				
+			,ap.[dblQtyToBillUnitQty]				
+			,ap.[intQtyToBillUOMId]				
+			,ap.[dblCost]							
+			,ap.[dblCostUnitQty]					
+			,ap.[intCostUOMId]						
+			,ap.[dblNetWeight]						
+			,ap.[dblWeightUnitQty]					
+			,ap.[intWeightUOMId]					
+			,ap.[intCostCurrencyId]
+			,[dblTax] = rc.dblTax 
+			,ap.[dblDiscount]
+			,ap.[intCurrencyExchangeRateTypeId]	
+			,ap.[dblExchangeRate]					
+			,ap.[ysnSubCurrency]					
+			,ap.[intSubCurrencyCents]				
+			,ap.[intAccountId]						
+			,ap.[intShipViaId]						
+			,ap.[intTermId]		
+			,ap.[intFreightTermId]				
+			,ap.[strBillOfLading]					
+			,ap.[ysnReturn]
+			,ap.[intBookId]
+			,ap.[intSubBookId]
+			,ap.[intLotId]
+			,ap.[intPayFromBankAccountId]
+			,ap.[strFinancingSourcedFrom]
+			,ap.[strFinancingTransactionNumber]
+			,ap.[strFinanceTradeNo]
+			,ap.[intBankId]
+			,ap.[intBankAccountId]
+			,ap.[intBorrowingFacilityId]
+			,ap.[strBankReferenceNo]
+			,ap.[intBorrowingFacilityLimitId]
+			,ap.[intBorrowingFacilityLimitDetailId]
+			,ap.[strReferenceNo]
+			,ap.[intBankValuationRuleId]
+			,ap.[strComments]
+			,ap.[strTaxPoint]
+			,ap.[intTaxLocationId]
+			,ap.[ysnOverrideTaxGroup]
+			,ap.[dblQualityPremium] 
+ 			,ap.[dblOptionalityPremium] 
 		FROM 
 			tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
 				ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
-			LEFT JOIN vyuAPVendor v
+			INNER JOIN vyuAPVendor v
 				ON v.[intEntityId] = rc.intNewEntityVendorId
 		WHERE
 			rc.intInventoryReceiptId = @intInventoryReceiptId
 			AND rc.intNewEntityVendorId IS NOT NULL 
 
-		-- Delete tblAPVoucherPayableTaxStaging
-		DELETE apTax
-		FROM 
-			tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
-				ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
-			INNER JOIN tblAPVoucherPayableTaxStaging apTax
-				ON apTax.intVoucherPayableId = ap.intVoucherPayableId
-		WHERE
-			rc.intInventoryReceiptId = @intInventoryReceiptId
-			AND rc.intNewEntityVendorId IS NOT NULL 
-
-		-- Re-insert the new records for tblAPVoucherPayableTaxStaging 
-		INSERT INTO tblAPVoucherPayableTaxStaging (
-			[intVoucherPayableId]		
+		INSERT INTO @voucherPayableTax(
+			[intVoucherPayableId]
 			,[intTaxGroupId]				
 			,[intTaxCodeId]				
 			,[intTaxClassId]				
@@ -614,9 +825,9 @@ BEGIN
 			,[dblAdjustedTax]			
 			,[ysnTaxAdjusted]			
 			,[ysnSeparateOnBill]			
-			,[ysnCheckOffTax]
-			,[ysnTaxOnly]	
-			,[ysnTaxExempt]
+			,[ysnCheckOffTax]		
+			,[ysnTaxExempt]	
+			,[ysnTaxOnly]
 		)
 		SELECT 
 			[intVoucherPayableId] = ap.intVoucherPayableId	
@@ -632,10 +843,10 @@ BEGIN
 			,[ysnTaxAdjusted] = rcTax.ysnTaxAdjusted
 			,[ysnSeparateOnBill] = 0
 			,[ysnCheckOffTax] = rcTax.ysnCheckoffTax
-			,[ysnTaxOnly] = rcTax.ysnTaxOnly
 			,[ysnTaxExempt] = rcTax.ysnTaxExempt
+			,[ysnTaxOnly] = rcTax.ysnTaxOnly					
 		FROM 
-			tblICInventoryReceiptCharge rc INNER JOIN tblAPVoucherPayable ap
+			tblICInventoryReceiptCharge rc INNER JOIN @voucherPayable ap
 				ON rc.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId
 			INNER JOIN tblICInventoryReceiptChargeTax rcTax
 				ON rcTax.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
@@ -644,6 +855,17 @@ BEGIN
 		WHERE
 			rc.intInventoryReceiptId = @intInventoryReceiptId
 			AND rc.intNewEntityVendorId IS NOT NULL 
+
+		DECLARE @intEntityUserSecurityId AS INT
+		SELECT @intEntityUserSecurityId = COALESCE(intModifiedByUserId, intCreatedByUserId, intEntityId) 
+		FROM tblICInventoryReceipt r 
+		WHERE	intInventoryReceiptId = @intInventoryReceiptId
+
+		-- Call SP from AP to update the vendor in the payables
+		EXEC uspAPUpdateVoucherPayableVendor
+			@voucherPayable
+			,@voucherPayableTax
+			,@intEntityUserSecurityId
 	END 
 
 	-- Update Other Charge Vendor 
