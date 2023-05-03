@@ -10285,6 +10285,7 @@
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
+    <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
