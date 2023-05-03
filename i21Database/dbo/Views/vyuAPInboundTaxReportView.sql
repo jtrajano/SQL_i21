@@ -175,4 +175,86 @@ OUTER APPLY (
 ) account
 LEFT JOIN vyuARTaxLocation TL ON TL.intTaxLocationId = APB.intTaxLocationId AND TL.strFobPoint = (CASE WHEN APB.strTaxPoint = 'Origin' THEN 'Destination' ELSE 'Origin' END)
 
+GROUP BY
+	--HEADER
+	 APBD.intBillDetailId
+	,APB.intBillId
+	,APB.strBillId
+	,APB.intTransactionType
+  ,APBD.dblRate
+  ,APB.dblAverageExchangeRate
+
+  --VENDOR
+	,E.strName
+	,E.strEntityNo
+	,E.strFederalTaxId 
+	,E.strStateTaxId
+  ,EL.strAddress
+  ,EL.strCity
+  ,EL.strState
+  ,EL.strZipCode
+  ,EL.strCountry
+  ,EL.strCounty
+  
+  ,vendor.strEmail
+  ,vendor.strEmail2
+  ,vendor.strPhone
+  ,vendor.strPhone2
+
+
+	--TAXES
+	,APB.strTaxPoint
+	,TL.strLocationName
+	,RT.strTaxGroup
+	,APBD.ysnOverrideTaxGroup
+	,RT.strCalculationMethod
+	,RT.strTaxCode
+	,RT.strTaxAgency
+	,RT.strDescription
+	,RT.strTaxClass
+	,RT.strTaxPoint
+	
+	--DATES
+	,payment.dtmDatePaid
+	,APB.dtmDate
+	,APB.dtmBillDate
+	,APB.dtmDueDate
+
+	--ITEMS
+	,C.strCommodityCode 
+	,IE.strItemNo
+	,IC.strCategoryCode
+
+	--SHIP FROM
+	,ELS.strCheckPayeeName
+	,ELS.strLocationName
+	,ELS.strAddress
+	,ELS.strCity
+	,ELS.strState
+	,ELS.strCountry
+
+	--SHIP TO
+	,CL.strLocationName
+	,CL.strAddress
+	,CL.strCity
+	,CL.strStateProvince
+	,CL.strCountry
+
+	--AP ACCOUNT
+	,account.strAccountId
+	,apaccount.strAccountId
+	,RT.strAccountId
+
+	,SMC.strCurrency
+	,UM.strUnitMeasure
+	,APBD.dblQtyReceived
+	,APBD.dblCost
+	,RT.dblAdjustedTax
+	,APB.dblTotal
+	,APB.dblPayment	
+	,APBD.dblTotal
+	,APBD.dblTax
+	,RT.dblRate
+	,APB.ysnPaid
+	,payment.strPaymentInfo
 GO
