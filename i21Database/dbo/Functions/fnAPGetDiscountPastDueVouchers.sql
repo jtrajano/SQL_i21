@@ -15,7 +15,7 @@ CREATE FUNCTION [dbo].[fnAPGetDiscountPastDueVouchers]
 RETURNS NVARCHAR(MAX)
 AS
 BEGIN
-	DECLARE @vouchers NVARCHAR(MAX)
+	DECLARE @vouchers NVARCHAR(MAX) = ''
 
 	IF @vendorId IS NULL
 	BEGIN
