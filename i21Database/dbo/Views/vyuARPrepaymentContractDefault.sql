@@ -194,8 +194,6 @@ FROM (
 		 , strCategoryDescription	= NULL
 		 , intEntitySalespersonId	= ICC.intSalespersonId
 		 , intFreightTermId			= ICC.intFreightTermId
-		 , intTaxGroupId			= SMTG.intTaxGroupId
-		 , strTaxGroup				= SMTG.strTaxGroup
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractDetail ICD ON ICC.intItemContractHeaderId = ICD.intItemContractHeaderId
 	LEFT JOIN tblSMTaxGroup SMTG ON ICD.intTaxGroupId = SMTG.intTaxGroupId
