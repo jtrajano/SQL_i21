@@ -31,7 +31,7 @@ AS
       ,CH.dtmContractDate
       ,CC.dblRate
       ,1
-      ,22
+      ,CD.intTaxGroupId
       ,CH.intCompanyLocationId
       ,VD.intDefaultLocationId
       ,1
