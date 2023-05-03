@@ -181,6 +181,8 @@ BEGIN TRY
 		,@dtmETAPOD DATETIME
 		,@dtmNewETAPOD DATETIME
 		,@strDestinationPort NVARCHAR(200)
+		,@intShipmentType INT
+		,@intTransportationMode INT
 		,@intLeadTime INT
 		,@intContractHeaderId INT
 		,@dtmUpdatedAvailabilityDate DATETIME
@@ -242,6 +244,7 @@ BEGIN TRY
 	DECLARE @tblIPETAPOD TABLE (
 		dtmETAPOD DATETIME
 		,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intTransportationMode INT
 		)
 	DECLARE @tblIPContractDetail TABLE (intContractDetailId INT)
 	DECLARE @tblLGDeleteLoadWarehouse TABLE (intLoadWarehouseId INT)
@@ -256,6 +259,9 @@ BEGIN TRY
 		,@ysnParent = ysnParent
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
+
+	DECLARE @ysnFeedETAToUpdatedAvailabilityDate BIT
+	SELECT TOP 1 @ysnFeedETAToUpdatedAvailabilityDate = ISNULL(ysnFeedETAToUpdatedAvailabilityDate, 0) FROM dbo.tblLGCompanyPreference 
 
 	DECLARE @tblLGIntrCompLogisticsStg TABLE (intId INT)
 
@@ -921,6 +927,7 @@ BEGIN TRY
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
 				,@ysnPosted = ysnPosted
+				,@intShipmentType = intShipmentType
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
 				AND intBookId = @intBookId
@@ -1143,6 +1150,7 @@ BEGIN TRY
 					)
 				OUTPUT inserted.dtmETAPOD
 					,inserted.strDestinationPort
+					,inserted.intTransportationMode
 				INTO @tblIPETAPOD
 				SELECT 1 AS intConcurrencyId
 					,@strNewLoadNumber
@@ -1635,6 +1643,7 @@ BEGIN TRY
 					,dtmArrivedInPort=x.dtmArrivedInPort
 				OUTPUT inserted.dtmETAPOD
 					,inserted.strDestinationPort
+					,inserted.intTransportationMode
 				INTO @tblIPETAPOD
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -2697,11 +2706,13 @@ BEGIN TRY
 					SELECT @intContractDetailId = NULL
 						,@dtmETAPOD = NULL
 						,@strDestinationPort = NULL
+						,@intTransportationMode = NULL
 						,@intSContractSeq = NULL
 						,@strAuditDescription = NULL
 
 					SELECT @dtmETAPOD = dtmETAPOD
 						,@strDestinationPort = strDestinationPort
+						,@intTransportationMode = intTransportationMode
 					FROM @tblIPETAPOD
 
 					IF @strTransactionType = 'Drop Shipment'
@@ -2724,7 +2735,7 @@ BEGIN TRY
 						SELECT @intLeadTime = 0
 					END
 
-					SELECT @dtmNewETAPOD = DATEADD(DD, @intLeadTime, @dtmETAPOD)
+					SELECT @dtmNewETAPOD =  CASE WHEN @intTransportationMode = 1 THEN @dtmETAPOD ELSE DATEADD(DD, @intLeadTime, @dtmETAPOD) END
 
 					SELECT @intContractHeaderId = intContractHeaderId
 						,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
@@ -2732,34 +2743,40 @@ BEGIN TRY
 					FROM tblCTContractDetail
 					WHERE intContractDetailId = @intContractDetailId
 
-					IF @dtmUpdatedAvailabilityDate <> @dtmNewETAPOD
+					IF (@dtmUpdatedAvailabilityDate <> @dtmNewETAPOD)
 					BEGIN
 						UPDATE tblCTContractDetail
-						SET dtmUpdatedAvailabilityDate = @dtmNewETAPOD
-							,dtmPlannedAvailabilityDate = @dtmETAPOD
+						SET dtmPlannedAvailabilityDate = @dtmETAPOD
 						WHERE intContractDetailId = @intContractDetailId
 
-						SET @strAuditDescription = 'Sequence - ' + CAST(@intSContractSeq AS VARCHAR(20)) + ', Updated Availability Date'
-
-						EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId
-							,@screenName = 'ContractManagement.view.Contract'
-							,@entityId = @intUserId
-							,@actionType = 'Updated (from Inter Company Feed)'
-							,@actionIcon = 'small-tree-modified'
-							,@changeDescription = @strAuditDescription
-							,@fromValue = @dtmUpdatedAvailabilityDate
-							,@toValue = @dtmNewETAPOD
-
-						SELECT TOP 1 @intApprovedById = intApprovedById
-						FROM tblCTApprovedContract
-						WHERE intContractDetailId = @intContractDetailId
-						ORDER BY intApprovedContractId DESC
-
-						IF @intApprovedById IS NOT NULL
+						IF (@ysnFeedETAToUpdatedAvailabilityDate = 1 AND @intShipmentType = 1)
 						BEGIN
-							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId
-								,@intApprovedById = @intApprovedById
-								,@intContractDetailId = @intContractDetailId
+							UPDATE tblCTContractDetail
+							SET dtmUpdatedAvailabilityDate = @dtmNewETAPOD
+							WHERE intContractDetailId = @intContractDetailId
+
+							SET @strAuditDescription = 'Sequence - ' + CAST(@intSContractSeq AS VARCHAR(20)) + ', Updated Availability Date'
+
+							EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId
+								,@screenName = 'ContractManagement.view.Contract'
+								,@entityId = @intUserId
+								,@actionType = 'Updated (from Inter Company Feed)'
+								,@actionIcon = 'small-tree-modified'
+								,@changeDescription = @strAuditDescription
+								,@fromValue = @dtmUpdatedAvailabilityDate
+								,@toValue = @dtmNewETAPOD
+
+							SELECT TOP 1 @intApprovedById = intApprovedById
+							FROM tblCTApprovedContract
+							WHERE intContractDetailId = @intContractDetailId
+							ORDER BY intApprovedContractId DESC
+
+							IF @intApprovedById IS NOT NULL
+							BEGIN
+								EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId
+									,@intApprovedById = @intApprovedById
+									,@intContractDetailId = @intContractDetailId
+							END
 						END
 					END
 				END
