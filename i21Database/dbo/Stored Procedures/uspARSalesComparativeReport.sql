@@ -150,8 +150,7 @@ FROM tblSMLogoPreference
 WHERE (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
 	AND (ysnARInvoice = 1 OR ysnDefault = 1)
 
-SELECT 
-	   dtmBeginDate				= MIN(CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) )
+SELECT dtmBeginDate				= MIN(CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) )
      , dtmEndingDate			= MIN(CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) )
 	 , dtmTransactionDate		= MIN(dtmTransactionDate)
 	 , dtmTransactionDateEnding	= MIN(dtmTransactionDateEnding)
@@ -215,14 +214,7 @@ WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
-  AND (intItemId IN (
-		SELECT intItemId
-		FROM tblICItem
-		WHERE strDescription IN (
-			SELECT strDescription
-			FROM tblICItem
-			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
-		)) OR ISNULL(@strItemDescriptions, '') = '')
+  AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ','))) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
   AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
@@ -261,14 +253,7 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
-  AND (intItemId IN (
-		SELECT intItemId
-		FROM tblICItem
-		WHERE strDescription IN (
-			SELECT strDescription
-			FROM tblICItem
-			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
-		)) OR ISNULL(@strItemDescriptions, '') = '')
+  AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ','))) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
   AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
