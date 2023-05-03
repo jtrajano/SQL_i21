@@ -479,7 +479,7 @@ begin try
 									vp.intEntityVendorId
 									,@intCompanyLocationId
 									,vp.intItemId
-									,em.intEntityLocationId
+									,CASE WHEN vp.intScaletTicketId IS NOT NULL THEN ISNULL(vp.intShipFromId, em.intEntityLocationId) ELSE em.intEntityLocationId END
 									,@intFreightTermId
 								) 
 							ELSE 
