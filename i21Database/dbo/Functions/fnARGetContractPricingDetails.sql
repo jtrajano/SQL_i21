@@ -11,6 +11,7 @@
 	,@ContractDetailId		INT
 	,@OriginalQuantity		NUMERIC(18,6)
 	,@AllowQtyToExceed		BIT
+	,@DisregardContractQty	BIT
 )
 RETURNS @returntable TABLE
 (
@@ -111,12 +112,13 @@ DECLARE	 @Price							NUMERIC(18,6)
 				(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(@ItemUOMId, ARCC.[intItemUOMId]), ISNULL(ARCC.[intOrderUOMId], ARCC.[intItemUOMId]), @OriginalQuantity),ISNULL(@OriginalQuantity, @ZeroDecimal)) + ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(@ItemUOMId, ARCC.[intItemUOMId]), ISNULL(ARCC.[intOrderUOMId], ARCC.[intItemUOMId]), @Quantity),ISNULL(@Quantity, @ZeroDecimal))
 				OR ARCC.[ysnUnlimitedQuantity] = 1 
 				OR ISNULL(@AllowQtyToExceed,0) = 1
+				OR ISNULL(@DisregardContractQty,0) = 1
 			)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 		AND ARCC.[intContractHeaderId] = @ContractHeaderId
 		AND ARCC.[intContractDetailId] = @ContractDetailId
-		AND ((ISNULL(@OriginalQuantity, @ZeroDecimal) + ARCC.[dblAvailableQty] > @ZeroDecimal) OR ARCC.[ysnUnlimitedQuantity] = 1)
-		AND (dblBalance > @ZeroDecimal OR ysnUnlimitedQuantity = 1)
+		AND ((ISNULL(@OriginalQuantity, @ZeroDecimal) + ARCC.[dblAvailableQty] > @ZeroDecimal) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@DisregardContractQty,0) = 1)
+		AND (dblBalance > @ZeroDecimal OR ysnUnlimitedQuantity = 1 OR ISNULL(@DisregardContractQty,0) = 1)
 		AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		AND ARCC.[strPricingType] NOT IN ('Unit','Index')
 		AND (ISNULL(@CurrencyId, 0) = 0 OR ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
@@ -227,10 +229,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 		AND (@LimitContractLocation = 0 OR ARCC.[intCompanyLocationId] = @LocationId)
 		AND (ARCC.[intItemUOMId] = @ItemUOMId OR ARCC.[intPriceItemUOMId] = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND ARCC.[intItemId] = @ItemId
-		AND (((ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), ARCC.[intItemUOMId], @Quantity),ISNULL(@Quantity, @ZeroDecimal))) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
+		AND (((ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), ARCC.[intItemUOMId], @Quantity),ISNULL(@Quantity, @ZeroDecimal))) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1 OR ISNULL(@DisregardContractQty,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND CAST(ISNULL(ARCC.[dtmEndDate], @TransactionDate) AS DATE)
-		AND (((ARCC.[dblAvailableQty]) > 0) OR ARCC.[ysnUnlimitedQuantity] = 1)
-		AND (ARCC.[dblBalance] > 0 OR ARCC.[ysnUnlimitedQuantity] = 1)
+		AND (((ARCC.[dblAvailableQty]) > 0) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@DisregardContractQty,0) = 1)
+		AND (ARCC.[dblBalance] > 0 OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@DisregardContractQty,0) = 1)
 		AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		AND ARCC.[strPricingType] NOT IN ('Unit','Index')
 		AND (ISNULL(@CurrencyId, 0) = 0 OR ARCC.[intCurrencyId] = @CurrencyId OR ARCC.[intSubCurrencyId] = @CurrencyId)
