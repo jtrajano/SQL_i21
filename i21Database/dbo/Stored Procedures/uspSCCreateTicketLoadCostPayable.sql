@@ -55,7 +55,9 @@ BEGIN
 			,[ysnReturn]
 			,[ysnStage]
 			,[intStorageLocationId]
-			,[intSubLocationId])
+			,[intSubLocationId]
+			,[intScaleTicketId]
+			)
 		
 
 
@@ -104,7 +106,7 @@ BEGIN
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = NULL
 			,[intSubLocationId] = NULL
-
+			,TICKET.intTicketId
 		FROM (
 			SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 			,[strTransactionNumber] = L.[strLoadNumber]
@@ -236,10 +238,6 @@ BEGIN
 					WHERE BD.intItemId = LOAD_COST_FOR_VENDOR.intItemId AND Item.strType = 'Other Charge' AND ISNULL(LOAD_COST_FOR_VENDOR.ysnAccrue,0) = 1)
 					/**/
 				--AND NOT (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL)
-
-
-	
-	
 	
 	-- SELECT * FROM @voucherPayable
 
