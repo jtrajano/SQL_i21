@@ -97,7 +97,7 @@ BEGIN TRY
 			+ CASE WHEN (ISNULL(IMP.strIntensity, '') <> '' AND ISNUMERIC(IMP.strIntensity) = 0) THEN 'INTENSITY, '
 				ELSE ''
 			END
-			+ CASE WHEN (ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0) THEN 'TASTE, '
+			+ CASE WHEN (ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strTaste) = 0) THEN 'TASTE, '
 				ELSE ''
 			END
 			+ CASE WHEN (ISNULL(IMP.strMouthfeel, '') <> '' AND ISNUMERIC(IMP.strMouthfeel) = 0) THEN 'MOUTH FEEL, '
@@ -113,7 +113,7 @@ BEGIN TRY
 		OR	(ISNULL(IMP.strAppearance, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
 		OR	(ISNULL(IMP.strHue, '') <> '' AND ISNUMERIC(IMP.strHue) = 0)
 		OR	(ISNULL(IMP.strIntensity, '') <> '' AND ISNUMERIC(IMP.strIntensity) = 0)
-		OR	(ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
+		OR	(ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strTaste) = 0)
 		OR	(ISNULL(IMP.strMouthfeel, '') <> '' AND ISNUMERIC(IMP.strMouthfeel) = 0)
 		)
 	/* End Validate Numeric Fields */
