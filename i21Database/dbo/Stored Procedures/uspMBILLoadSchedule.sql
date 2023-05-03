@@ -368,7 +368,7 @@ SET MBP.[intSellerId] = DO.intSellerId
 ,MBP.[strLoadRefNo]= DO.strLoadRef
 ,MBP.[intItemId]= DOD.intItemId
 ,MBP.[dblQuantity]= DOD.dblQuantity
-,MBP.[strPONumber]= NULL 
+,MBP.[strPONumber]= DOD.strPONumber
 ,MBP.[strItemUOM]= NULL
 ,MBP.[strBOL] = ''
 ,MBP.intDispatchOrderRouteId = DOR.intDispatchOrderRouteId
@@ -379,8 +379,8 @@ INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispat
 INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1 and MBP.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId
 WHERE MBL.intDriverId = @intDriverId and MBP.ysnPickup = 0
 
-INSERT INTO tblMBILPickupDetail(intDispatchOrderDetailId,strType,intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intSellerId,intSalespersonId,strLoadRefNo,intItemId,dblQuantity,intDispatchOrderRouteId)
-Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DOD.intVendorId,DOD.intVendorLocationId,DOD.intCompanyLocationId,DO.intSellerId,DOD.intSalespersonId,DOD.strLoadRef,DOD.intItemId,DOD.dblQuantity,DOR.intDispatchOrderRouteId
+INSERT INTO tblMBILPickupDetail(intDispatchOrderDetailId,strType,intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intSellerId,intSalespersonId,strLoadRefNo,intItemId,dblQuantity,intDispatchOrderRouteId,strPONumber)
+Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DOD.intVendorId,DOD.intVendorLocationId,DOD.intCompanyLocationId,DO.intSellerId,DOD.intSalespersonId,DOD.strLoadRef,DOD.intItemId,DOD.dblQuantity,DOR.intDispatchOrderRouteId,DOD.strPONumber
 from tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1
