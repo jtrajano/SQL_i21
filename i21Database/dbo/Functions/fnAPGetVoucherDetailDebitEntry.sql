@@ -18,7 +18,21 @@ RETURNS TABLE AS RETURN
 									ELSE B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END) 
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN (
-									CASE WHEN B.intLoadShipmentCostId > 0 THEN ISNULL(B.dblOldCost, B.dblCost) ELSE B.dblTotal END
+									CASE WHEN B.intLoadShipmentCostId > 0 
+										THEN 
+											CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND B.intWeightClaimDetailId IS NULL
+												THEN B.dblNetWeight * B.dblWeightUnitQty
+												ELSE B.dblQtyReceived * B.dblUnitQty 
+											END
+											*
+											CAST(
+													CASE WHEN B.ysnSubCurrency <> 0
+														THEN ISNULL(B.dblOldCost, B.dblCost)  / ISNULL(A.intSubCurrencyCents, 1)
+														ELSE ISNULL(B.dblOldCost, B.dblCost) 
+													END
+											AS FLOAT) / ISNULL(B.dblCostUnitQty, 1)
+										ELSE B.dblTotal 
+									END
 								)
 								- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 								ELSE 
@@ -43,7 +57,21 @@ RETURNS TABLE AS RETURN
 									ELSE B.dblTotal - (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 THEN B.dblProvisionalPayment ELSE 0 END)
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN (
-									CASE WHEN B.intLoadShipmentCostId > 0 THEN ISNULL(B.dblOldCost, B.dblCost) ELSE B.dblTotal END
+									CASE WHEN B.intLoadShipmentCostId > 0 
+										THEN 
+											CASE WHEN B.intComputeTotalOption = 0 AND B.intWeightUOMId IS NOT NULL AND B.intWeightClaimDetailId IS NULL
+												THEN B.dblNetWeight * B.dblWeightUnitQty
+												ELSE B.dblQtyReceived * B.dblUnitQty 
+											END
+											*
+											CAST(
+													CASE WHEN B.ysnSubCurrency <> 0
+														THEN ISNULL(B.dblOldCost, B.dblCost)  / ISNULL(A.intSubCurrencyCents, 1)
+														ELSE ISNULL(B.dblOldCost, B.dblCost) 
+													END
+											AS FLOAT) / ISNULL(B.dblCostUnitQty, 1)
+										ELSE B.dblTotal 
+									END
 								)
 								- (CASE WHEN ISNULL(A.ysnFinalVoucher,0) = 1 AND A.intTransactionType = 1 THEN B.dblProvisionalTotal ELSE 0 END) 
 								ELSE 
