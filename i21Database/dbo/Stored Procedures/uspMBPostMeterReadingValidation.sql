@@ -36,7 +36,7 @@ BEGIN TRY
     END
 
 	-- Meter Reading Qty Sold should be >= 0
-	IF EXISTS(SELECT TOP 1 1 FROM tblMBMeterReadingDetail WHERE intMeterReadingId = @intMeterReadingId AND dblCurrentReading < dblLastReading)
+	IF @Post = 1 AND EXISTS(SELECT TOP 1 1 FROM tblMBMeterReadingDetail WHERE intMeterReadingId = @intMeterReadingId AND dblCurrentReading < dblLastReading)
 	BEGIN
 		IF(@ysnRaiseError = 1)
 		BEGIN
