@@ -30,7 +30,8 @@ SELECT
         --(CHARGE 100 * -1QTY) + TAX -10 = -110
         --TO ACCOMPLISH THIS CHECKOFF TAX MUST BE CONSISTENTLY NEGATIVE
         + ISNULL(ReceiptCharge.dblTax * -1,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
-    ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) * -1 AS dblReceiptChargeQty      
+    --,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) * -1 AS dblReceiptChargeQty      
+    ,ROUND(ISNULL(CASE WHEN P.dblQty IS NULL THEN ReceiptCharge.dblQuantity ELSE P.dblQty END,0),2) * -1 AS dblReceiptChargeQty
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
     ,CAST(1 AS BIT) ysnAllowVoucher      
@@ -47,6 +48,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId    
+OUTER APPLY [dbo].[fnGRGetPercentDiscounts](ReceiptCharge.intInventoryReceiptChargeId) P
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
