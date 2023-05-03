@@ -690,6 +690,10 @@ END
 	BEGIN
 		SELECT Result FROM @tempResult ORDER BY SortId
 	END
+	ELSE
+	BEGIN
+		SELECT Result = 'There are no Derivatives available for Auto-Matching.'
+	END
 
 
 DROP TABLE #tempMarkets
