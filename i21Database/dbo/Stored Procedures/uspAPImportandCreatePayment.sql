@@ -38,7 +38,7 @@ BEGIN TRY
 
 	IF ISNULL(dbo.fnTrim(@archieveServer), '') = ''
 	BEGIN
-		RAISERROR('Archieve Failed. Directory not exists or permission denied', 16, 1);
+		RAISERROR('Archived Failed. Directory not exists or permission denied.', 16, 1);
 	END
 
 	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL AND strNotes NOT LIKE '%Will create empty payment%'
