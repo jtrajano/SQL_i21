@@ -167,8 +167,8 @@ SET ANSI_WARNINGS ON
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 			,dtmDate = L.dtmScheduledDate
-			,dblQty = LD.dblQuantity
-			,dblUOMQty = IU.dblUnitQty
+			,dblQty = CASE WHEN QtyCheck.ysnMatch = 1 THEN LD.dblQuantity ELSE LD.dblNet END
+			,dblUOMQty = CASE WHEN QtyCheck.ysnMatch = 1 THEN IU.dblUnitQty ELSE WIU.dblUnitQty END --IU.dblUnitQty
 			--,dblCost = 
 			--	dbo.fnDivide (
 			--		dbo.fnMultiply (
@@ -217,7 +217,9 @@ SET ANSI_WARNINGS ON
 			--	)
 
 			-- Cost is in foreign currency. 
-			,dblCost = 
+			,dblCost = CASE
+				WHEN QtyCheck.ysnMatch = 1 THEN
+					-- Cost per Item UOM
 				dbo.fnDivide (
 					dbo.fnMultiply (
 						LD.dblNet
@@ -242,6 +244,27 @@ SET ANSI_WARNINGS ON
 					)
 					, LD.dblQuantity
 				)
+				ELSE
+				-- Cost per Weight UOM
+				dbo.fnCalculateCostBetweenUOM (
+					AD.intSeqPriceUOMId
+					,LD.intWeightItemUOMId
+					,CASE 
+						WHEN (AD.dblSeqPrice IS NULL) THEN
+							CASE 
+								WHEN (LD.dblUnitPrice > 0) THEN 
+									LD.dblUnitPrice 
+									/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
+								ELSE 
+									dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+									/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+							END
+						ELSE 
+							AD.dblSeqPrice 
+							/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+					END
+				)
+				END
 			,dblValue = 0
 			,dblSalesPrice = 0.0
 			,intCurrencyId = @intInvoiceCurrency
@@ -277,6 +300,7 @@ SET ANSI_WARNINGS ON
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
 			JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+			JOIN tblICItemUOM WIU ON WIU.intItemUOMId = LD.intWeightItemUOMId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
@@ -285,6 +309,7 @@ SET ANSI_WARNINGS ON
 			LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+			OUTER APPLY (SELECT ysnMatch = CASE WHEN LD.dblNet = dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, LD.intWeightItemUOMId, LD.dblQuantity) THEN 1 ELSE 0 END) QtyCheck
 			OUTER APPLY (SELECT	TOP 1  
 						intForexRateTypeId = RD.intRateTypeId
 						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  

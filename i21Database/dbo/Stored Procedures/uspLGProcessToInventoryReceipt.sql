@@ -132,6 +132,7 @@ BEGIN TRY
 			,[strTaxPoint]
 			,[intTaxLocationId]
 			,[ysnAddPayable]
+			,[intComputeItemTotalOption]
 			)
 		SELECT 
 			[strReceiptType] = 'Direct'
@@ -190,6 +191,7 @@ BEGIN TRY
 			,[strTaxPoint] = L.strTaxPoint
 			,[intTaxLocationId] = L.intTaxLocationId
 			,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
+			,[intComputeItemTotalOption] = CASE WHEN QtyCheck.ysnMatch = 1 THEN NULL ELSE 0 END
 		FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -200,6 +202,7 @@ BEGIN TRY
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT ysnMatch = CASE WHEN LD.dblNet = dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, LD.intWeightItemUOMId, LD.dblQuantity) THEN 1 ELSE 0 END) QtyCheck
 		WHERE L.intLoadId = @intLoadId
 			AND 1 = (CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NULL AND LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) > 0)
 							OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL 
@@ -662,6 +665,7 @@ BEGIN TRY
 				,[strTaxPoint]
 				,[intTaxLocationId]
 				,[ysnAddPayable]
+				,[intComputeItemTotalOption]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -740,6 +744,7 @@ BEGIN TRY
 				,[strTaxPoint] = L.strTaxPoint
 				,[intTaxLocationId] = L.intTaxLocationId
 				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
+				,[intComputeItemTotalOption] = CASE WHEN QtyCheck.ysnMatch = 1 THEN NULL ELSE 0 END
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -766,6 +771,7 @@ BEGIN TRY
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT ysnMatch = CASE WHEN LD.dblNet = dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, LD.intWeightItemUOMId, LD.dblQuantity) THEN 1 ELSE 0 END) QtyCheck
 			WHERE L.intLoadId = @intLoadId
 				AND ISNULL(LC.ysnRejected, 0) <> 1
 				AND NOT EXISTS (SELECT 1 FROM tblICInventoryReceiptItem IRI 
@@ -820,6 +826,7 @@ BEGIN TRY
 				,[strTaxPoint]
 				,[intTaxLocationId]
 				,[ysnAddPayable]
+				,[intComputeItemTotalOption]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -878,6 +885,7 @@ BEGIN TRY
 				,[strTaxPoint] = L.strTaxPoint
 				,[intTaxLocationId] = L.intTaxLocationId
 				,[ysnAddPayable] = CAST(CASE WHEN (VCHR.intBillId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
+				,[intComputeItemTotalOption] = CASE WHEN QtyCheck.ysnMatch = 1 THEN NULL ELSE 0 END
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -899,6 +907,7 @@ BEGIN TRY
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = CD.intInvoiceCurrencyId))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 			OUTER APPLY (SELECT	TOP 1 intBillId FROM tblAPBillDetail WHERE intLoadDetailId = LD.intLoadDetailId) VCHR
+			OUTER APPLY (SELECT ysnMatch = CASE WHEN LD.dblNet = dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, LD.intWeightItemUOMId, LD.dblQuantity) THEN 1 ELSE 0 END) QtyCheck
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
 		END
