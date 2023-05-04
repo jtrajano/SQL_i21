@@ -27,6 +27,11 @@ SELECT DISTINCT
 	THEN ISNULL(StoreDepartments.strGeneralItemLotTracking, 'No')
 	ELSE ISNULL(StoreDepartments.strSubcategoryLotTracking, 'No')
 	END AS strLotTracking
+, StoreDepartments.strRegisterCode
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
 	ON StoreDepartments.intCategoryId = Cat.intCategoryId
+WHERE (CASE 
+	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
+	THEN StoreDepartments.intGeneralItemId 
+	ELSE StoreDepartments.intSubcategoryItemId END) IS NOT NULL
