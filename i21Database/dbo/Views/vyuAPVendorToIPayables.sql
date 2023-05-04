@@ -85,6 +85,8 @@ select strTag, intEntityId, strData from tag01
 UNION ALL
 select strTag, intEntityId, strData from tag02
 UNION ALL
+select strTag, intEntityId, strData from tag03
+UNION ALL
 select strTag, intEntityId, strData from tag05
 UNION ALL
 select strTag, intEntityId, strData from tag06
