@@ -146,7 +146,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR RI.[intInvoiceId] IS NOT NULL))
 		)
     AND (ID.[strItemType] IS NOT NULL AND ID.[strItemType] <> 'Other Charge')
-	AND (RI.[intInvoiceId] IS NULL OR (RI.[intInvoiceId] IS NOT NULL AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
+	AND (RI.[intInvoiceId] IS NULL OR (RI.[intInvoiceId] IS NOT NULL AND (ID.intLoadDetailId IS NULL OR (ID.[intLoadDetailId] IS NOT NULL AND ID.strTransactionType = 'Credit Memo') OR ID.[intTicketId] IS NOT NULL)))
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
 	AND ID.intContractDetailId IS NOT NULL
