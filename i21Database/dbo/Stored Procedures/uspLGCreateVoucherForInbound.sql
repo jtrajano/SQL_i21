@@ -82,8 +82,12 @@ BEGIN TRY
 			AND (PF.dblTotalLots IS NULL OR (ISNULL(PF.dblTotalLots,0) > 0 AND (ISNULL(PF.dblTotalLots,0) <> ISNULL(PF.dblLotsFixed,0))))
 
 		SET @ErrorMessageNotPriced = 'Contract No. ' + @strContractNumber + ' is not fully priced. Unable to create Voucher.' 
-		RAISERROR(@ErrorMessageNotPriced, 16, 1);
-		RETURN 0;
+
+		IF (@ErrorMessageNotPriced IS NOT NULL)
+		BEGIN
+			RAISERROR(@ErrorMessageNotPriced, 16, 1);
+			RETURN 0;
+		END
 	END
 
 	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId

@@ -59,7 +59,7 @@ WITH shipmentstatus AS (
           WHEN ISNULL(eee.dblUnitQty, 0) = ISNULL(fff.dblUnitQty, 0) THEN ddd.dblRepresentingQty  
           ELSE ddd.dblRepresentingQty * (ISNULL(eee.dblUnitQty, 0) / ISNULL(fff.dblUnitQty, 0)) END)  
   FROM tblCTContractDetail ccc WITH(NOLOCK)  
-   inner join tblQMSample ddd WITH(NOLOCK) on ddd.intProductValueId = ccc.intContractDetailId and ddd.intTypeId = 1  
+   inner join tblQMSample ddd WITH(NOLOCK) on ddd.intContractDetailId = ccc.intContractDetailId and ddd.intTypeId = 1  
    inner join tblICItemUOM eee WITH(NOLOCK) on eee.intUnitMeasureId = ddd.intRepresentingUOMId  
    inner join tblICItemUOM fff WITH(NOLOCK) on fff.intItemId = ccc.intItemId and fff.intUnitMeasureId = ccc.intUnitMeasureId  
      

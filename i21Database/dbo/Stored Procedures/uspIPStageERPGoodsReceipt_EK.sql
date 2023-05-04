@@ -85,14 +85,19 @@ BEGIN TRY
 				,OrderType
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../DocNo'
-					,ReceiptNo NVARCHAR(50)
+					,ReceiptNo NVARCHAR(50) Collate Latin1_General_CI_AS
 					,ReceiptDate DATETIME
 					,VendorAccountNo NVARCHAR(100)
 					,BOLNo NVARCHAR(50)
 					,[Location] NVARCHAR(50)
 					,WarehouseRefNo NVARCHAR(50)
 					,OrderType NVARCHAR(50)
-					)
+					) t
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM tblIPInvReceiptStage S
+					WHERE S.strERPReceiptNo = t.ReceiptNo
+				)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strReceiptNumber, '') + ','
 			FROM @tblIPInvReceipt
