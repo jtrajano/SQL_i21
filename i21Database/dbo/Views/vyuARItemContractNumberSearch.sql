@@ -13,9 +13,13 @@ SELECT DISTINCT
 	 , ysnPrepaid				= NULL  
 	 , intCategoryId			= intCategoryId
 	 , strCategory				= strCategory
-	 , strPrepayment			= ISNULL(strPrepayment, '')
+	 , strPrepayment			= CASE WHEN ISNULL(strPrepayment, '') = '' AND CP.ysnAllowContractWithoutPrepayment = 0 THEN 'Not Selectable without Prepayment' ELSE strPrepayment END
 	 , strItemNo				= CTICD.strItemNo
 FROM dbo.tblCTItemContractHeader CTICH
+CROSS APPLY 
+   ( 
+   SELECT ysnAllowContractWithoutPrepayment FROM tblARCompanyPreference
+   ) CP
 INNER JOIN (
 	SELECT 
 		  CTICD.intItemContractHeaderId
@@ -58,3 +62,4 @@ INNER JOIN (
 	ON ARID.intInvoiceId = ARI.intInvoiceId
 	GROUP BY CTICHC.intItemContractHeaderId, CTICHC.intCategoryId, ICC.strCategoryCode, ARI.strInvoiceNumber
 ) CTICD ON CTICH.intItemContractHeaderId = CTICD.intItemContractHeaderId
+GO
