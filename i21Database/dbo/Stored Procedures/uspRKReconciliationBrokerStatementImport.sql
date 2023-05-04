@@ -4,9 +4,10 @@
 	, @intCommodityId INT
 	, @intBrokerId INT
 	, @intBorkerageAccountId INT = NULL
-	--, @intUserId INT
+	, @intReconciliationBrokerStatementHeaderIdIn INT = 0
 	, @intReconciliationBrokerStatementHeaderIdOut INT OUT
 	, @strStatus NVARCHAR(50) OUT
+	, @intUserId INT
 
 AS
 
@@ -1638,82 +1639,121 @@ BEGIN TRY
 	
 	DECLARE @intReconciliationBrokerStatementHeaderId INT
 	
-	IF EXISTS(SELECT 1 FROM @tblFinalRec WHERE strStatus <> 'Success')
+	IF EXISTS(SELECT TOP 1 1 FROM @tblFinalRec WHERE strStatus <> 'Success')
+		OR
+	   NOT EXISTS(SELECT TOP 1 1 FROM @tblFinalRec)
 	BEGIN
-		INSERT INTO tblRKReconciliationBrokerStatementHeader (intConcurrencyId
-			, dtmReconciliationDate
-			, dtmFilledDate
-			, intEntityId
-			, intBrokerageAccountId
-			, intFutureMarketId
-			, intCommodityId
-			, strImportStatus
-			, strComments
-			, ysnFreezed)
-		SELECT intConcurrencyId = 1
-			, dtmReconciliationDate = GETDATE()
-			, dtmFilledDate = @dtmFilledDate
-			, intEntityId = @intBrokerId
-			, intBorkerageAccountId = @intBorkerageAccountId
-			, intFutureMarketId = @intFutureMarketId
-			, intCommodityId = @intCommodityId
-			, ysnImportStatus = 'Failed'
-			, strComments = ''
-			, ysnFreezed = 0
+		IF ISNULL(@intReconciliationBrokerStatementHeaderIdIn, 0) = 0
+		BEGIN
+			INSERT INTO tblRKReconciliationBrokerStatementHeader (intConcurrencyId
+				, dtmReconciliationDate
+				, dtmFilledDate
+				, intEntityId
+				, intBrokerageAccountId
+				, intFutureMarketId
+				, intCommodityId
+				, strImportStatus
+				, ysnFreezed)
+			SELECT intConcurrencyId = 1
+				, dtmReconciliationDate = GETDATE()
+				, dtmFilledDate = @dtmFilledDate
+				, intEntityId = @intBrokerId
+				, intBorkerageAccountId = @intBorkerageAccountId
+				, intFutureMarketId = @intFutureMarketId
+				, intCommodityId = @intCommodityId
+				, strImportStatus = 'Failed'
+				, ysnFreezed = 0
 		
-		SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
-		SET @strStatus = 'Failed'
-	END 
-	ELSE IF NOT EXISTS(SELECT 1 FROM @tblFinalRec)
-	BEGIN
-		INSERT INTO tblRKReconciliationBrokerStatementHeader (intConcurrencyId
-			, dtmReconciliationDate
-			, dtmFilledDate
-			, intEntityId
-			, intBrokerageAccountId
-			, intFutureMarketId
-			, intCommodityId
-			, strImportStatus
-			, strComments
-			, ysnFreezed)
-		SELECT intConcurrencyId = 1
-			, dtmReconciliationDate = GETDATE()
-			, dtmFilledDate = @dtmFilledDate
-			, intEntityId = @intBrokerId
-			, intBorkerageAccountId = @intBorkerageAccountId
-			, intFutureMarketId = @intFutureMarketId
-			, intCommodityId = @intCommodityId
-			, ysnImportStatus = 'Failed'
-			, strComments = ''
-			, ysnFreezed = 0
+			SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
+		
+			EXEC uspSMAuditLog @keyValue = @intReconciliationBrokerStatementHeaderId
+					, @screenName = 'RiskManagement.view.ReconciliationBrokerStatement'
+					, @entityId = @intUserId
+					, @actionType = 'Created'
+					, @changeDescription = ''
+					, @fromValue = '' 
+					, @toValue = ''
+			WAITFOR DELAY '00:00:01'
+		END 
+		ELSE
+		BEGIN
+			UPDATE tblRKReconciliationBrokerStatementHeader
+			SET dtmReconciliationDate = GETDATE()
+				, dtmFilledDate = @dtmFilledDate
+				, intEntityId = @intBrokerId
+				, intBrokerageAccountId = @intBorkerageAccountId
+				, intFutureMarketId = @intFutureMarketId
+				, intCommodityId = @intCommodityId
+				, strImportStatus = 'Failed'
+				, ysnFreezed = 0
+			WHERE intReconciliationBrokerStatementHeaderId = @intReconciliationBrokerStatementHeaderIdIn
 
-		SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
+			SET @intReconciliationBrokerStatementHeaderId = @intReconciliationBrokerStatementHeaderIdIn
+		END
+
 		SET @strStatus = 'Failed'
+
+		EXEC uspSMAuditLog @keyValue = @intReconciliationBrokerStatementHeaderId
+				, @screenName = 'RiskManagement.view.ReconciliationBrokerStatement'
+				, @entityId = @intUserId
+				, @actionType = 'Reconciliation Failed'
+				, @changeDescription = ''
+				, @fromValue = '' 
+				, @toValue = ''
 	END 
 	ELSE
 	BEGIN
-		INSERT INTO tblRKReconciliationBrokerStatementHeader (intConcurrencyId
-			, dtmReconciliationDate
-			, dtmFilledDate
-			, intEntityId
-			, intBrokerageAccountId
-			, intFutureMarketId
-			, intCommodityId
-			, strImportStatus
-			, strComments
-			, ysnFreezed)
-		SELECT intConcurrencyId = 1
-			, dtmReconciliationDate = GETDATE()
-			, dtmFilledDate = @dtmFilledDate
-			, intEntityId = @intBrokerId
-			, intBorkerageAccountId = @intBorkerageAccountId
-			, intFutureMarketId = @intFutureMarketId
-			, intCommodityId = @intCommodityId
-			, ysnImportStatus = 'Success'
-			, strComments = ''
-			, ysnFreezed = 1
+		IF ISNULL(@intReconciliationBrokerStatementHeaderIdIn, 0) = 0
+		BEGIN
+			INSERT INTO tblRKReconciliationBrokerStatementHeader (intConcurrencyId
+				, dtmReconciliationDate
+				, dtmFilledDate
+				, intEntityId
+				, intBrokerageAccountId
+				, intFutureMarketId
+				, intCommodityId
+				, strImportStatus
+				, strComments
+				, ysnFreezed)
+			SELECT intConcurrencyId = 1
+				, dtmReconciliationDate = GETDATE()
+				, dtmFilledDate = @dtmFilledDate
+				, intEntityId = @intBrokerId
+				, intBorkerageAccountId = @intBorkerageAccountId
+				, intFutureMarketId = @intFutureMarketId
+				, intCommodityId = @intCommodityId
+				, strImportStatus = 'Success'
+				, strComments = ''
+				, ysnFreezed = 1
 		
-		SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
+			SET @intReconciliationBrokerStatementHeaderId = SCOPE_IDENTITY()
+		
+			EXEC uspSMAuditLog @keyValue = @intReconciliationBrokerStatementHeaderId
+					, @screenName = 'RiskManagement.view.ReconciliationBrokerStatement'
+					, @entityId = @intUserId
+					, @actionType = 'Created'
+					, @changeDescription = ''
+					, @fromValue = '' 
+					, @toValue = ''
+			WAITFOR DELAY '00:00:01'
+
+		END
+		ELSE 
+		BEGIN
+			UPDATE tblRKReconciliationBrokerStatementHeader
+			SET dtmReconciliationDate = GETDATE()
+				, dtmFilledDate = @dtmFilledDate
+				, intEntityId = @intBrokerId
+				, intBrokerageAccountId = @intBorkerageAccountId
+				, intFutureMarketId = @intFutureMarketId
+				, intCommodityId = @intCommodityId
+				, strImportStatus = 'Success'
+				, ysnFreezed = 1
+			WHERE intReconciliationBrokerStatementHeaderId = @intReconciliationBrokerStatementHeaderIdIn
+
+			SET @intReconciliationBrokerStatementHeaderId = @intReconciliationBrokerStatementHeaderIdIn
+		END
+
 		SET @strStatus = 'Success'
 
 		UPDATE tblRKFutOptTransaction SET ysnFreezed = 1
@@ -1746,13 +1786,21 @@ BEGIN TRY
 		--		,@entityId = @intUserId
 		--		,@actionType = 'Reconciled'
 		--		,@changeDescription = 'Freeze'
-		--		,@fromValue = 'False'
+		--		,@fromValue = 'False' 
 		--		,@toValue = 'True'
 
 		--	DELETE FROM #tmpDerivatives WHERE intFutOptTransactionId = @intDerivativeEntryId
 		--END
 
 		--DROP TABLE #tmpDerivatives
+		
+		EXEC uspSMAuditLog @keyValue = @intReconciliationBrokerStatementHeaderId
+				, @screenName = 'RiskManagement.view.ReconciliationBrokerStatement'
+				, @entityId = @intUserId
+				, @actionType = 'Reconciliation Successful'
+				, @changeDescription = ''
+				, @fromValue = '' 
+				, @toValue = ''
 	END
 	
 	INSERT INTO tblRKReconciliationBrokerStatement (intReconciliationBrokerStatementHeaderId
