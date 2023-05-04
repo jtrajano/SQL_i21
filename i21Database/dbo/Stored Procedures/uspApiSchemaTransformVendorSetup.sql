@@ -867,10 +867,11 @@ DECLARE @UniqueItems TABLE (
 	  intItemId INT
 	, intVendorId INT
 	, intVendorSetupId INT
-	, strVendorProduct NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	, strVendorProductUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, strVendorProduct NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL
+	, strVendorProductUOM NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
 	, guiApiUniqueId UNIQUEIDENTIFIER
 	, intRowNumber INT
+	, strItemNo NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL
 )
 
 INSERT INTO @UniqueItems (
@@ -881,6 +882,7 @@ INSERT INTO @UniqueItems (
 	, strVendorProductUOM
 	, guiApiUniqueId
 	, intRowNumber
+	, strItemNo
 )
 SELECT
 	  i.intItemId
@@ -890,6 +892,7 @@ SELECT
 	, vts.strVendorItemUOM
 	, @guiApiUniqueId
 	, vts.intRowNumber
+	, i.strItemNo
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
@@ -911,6 +914,7 @@ INSERT INTO @UniqueItems (
 	, strVendorProductUOM
 	, guiApiUniqueId
 	, intRowNumber
+	, strItemNo
 )
 SELECT
 	  i.intItemId
@@ -920,6 +924,7 @@ SELECT
 	, vts.strVendorItemUOM
 	, @guiApiUniqueId
 	, vts.intRowNumber
+	, i.strItemNo
 FROM tblApiSchemaTransformVendorSetup vts
 JOIN vyuAPVendor v ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
 JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
@@ -937,13 +942,14 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorProduct ORDER BY sr.intVendorSetupId, sr.strVendorProduct) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY sr.intVendorSetupId, sr.strVendorProduct, sr.strItemNo ORDER BY sr.intVendorSetupId, sr.strVendorProduct, sr.strItemNo) AS RowNumber
    FROM @UniqueItems sr
    WHERE sr.guiApiUniqueId = @guiApiUniqueId
 )
 DELETE FROM cte
 WHERE guiApiUniqueId = @guiApiUniqueId
   AND RowNumber > 1;
+
 
 INSERT INTO tblICItemVendorXref (
 	  intItemId
@@ -1095,6 +1101,7 @@ JOIN tblEMEntity e ON e.intEntityId = vs.intEntityId
 JOIN tblAPVendor v ON v.intEntityId = vs.intEntityId
 JOIN @ForUpdates u ON u.strVendorNumber = v.strVendorId
 WHERE vs.guiApiUniqueId = @guiApiUniqueId
+
 
 UPDATE log
 SET log.intTotalRowsImported = ISNULL(rv.intCount, 0) + ISNULL(rc.intCount, 0) + ISNULL(rp.intCount, 0) + ISNULL(ru.intCount, 0)
