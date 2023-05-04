@@ -23,6 +23,7 @@ SELECT [Order].intOrderId
  , [Order].intShiftId    
  , Shift.intShiftNumber
  , [Order].ysnLockPrice
+ , [Order].strRecurringPONumber
 FROM tblMBILOrder [Order]    
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = [Order].intEntityId    
 LEFT JOIN tblSMTerm Term ON Term.intTermID = [Order].intTermId    
