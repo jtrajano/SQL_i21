@@ -15,6 +15,7 @@
 	[intShipToId] INT NULL,
 	[intLocationId] INT NULL,
 	[ysnLockPrice] BIT NULL,
+	[strRecurringPONumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS DEFAULT 0 NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NOT NULL,
 	CONSTRAINT [PK_tblMBILOrder] PRIMARY KEY CLUSTERED ([intOrderId] ASC), 
     CONSTRAINT [FK_tblMBILOrder_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]), 
