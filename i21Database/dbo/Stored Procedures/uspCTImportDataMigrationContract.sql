@@ -125,6 +125,7 @@ AS
 			,@intFreightTermId int
 			,@intCompanyLocationId int
 			,@intWarehouseId int
+			,@intINCOLocationTypeId int
 			,@intCountryId int
 			;
 
@@ -388,6 +389,8 @@ AS
 				intMarketUOMId int,
 				intItemItemUOMId int,
 				intWarehouseId INT, 
+				intINCOLocationTypeId int,
+				ysnWarehouse bit,
 				intCountryId INT,
 				dblNetWeight numeric(18,6),
 				intNetWeightUOMId int
@@ -450,6 +453,8 @@ AS
 				,intMarketUOMId
 				,intItemItemUOMId
 				,intWarehouseId
+				,intINCOLocationTypeId
+				,ysnWarehouse
 				,intCountryId
 				,dblNetWeight
 				,intNetWeightUOMId
@@ -514,7 +519,9 @@ AS
 					,cp.intCurrencyExchangeRateId
 					,intMarketUOMId = MA.intUnitMeasureId
 					,intItemItemUOMId = MAUOM.intItemUOMId
-					,intWarehouseId = wc.intCityId
+					,intWarehouseId = wc.intCompanyLocationSubLocationId
+					,intINCOLocationTypeId = ftpc.intCityId
+					,ysnWarehouse = case when lower(rtrim(ltrim(ft.strINCOLocationType))) = 'warehouse' then convert(bit,1) else convert(bit,0) end
 					,intCountryId = wc.intCountryId
 					,dblNetWeight = dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,nwuom.intUnitMeasureId, CI.dblQuantity)
 					,intNetWeightUOMId = nwuom.intItemUOMId
@@ -576,7 +583,8 @@ AS
 			left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
 			left join tblICUnitMeasure pum on pum.strUnitMeasure = CI.strPriceUOM
 			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
-			left join tblSMCity wc on wc.strCity = CI.strWarehouse
+			left join tblSMCompanyLocationSubLocation wc on wc.strSubLocationName = CI.strWarehouse and wc.intCompanyLocationId = CL.intCompanyLocationId
+			left join tblSMCity ftpc on ftpc.strCity = CI.strWarehouse
 			left join tblICItemUOM nwuom on nwuom.intItemId = IM.intItemId and nwuom.ysnStockUnit = 1
 			WHERE CI.guiUniqueId = @guiUniqueId and CI.intImportFrom = 2;
 
@@ -613,7 +621,9 @@ AS
 					when t.intItemItemUOMId is null then ' Lot Calculation: Future Market UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPriceItemUOMId is null then 'Price Item UOM: Price Item UOM is missing in Item UOM for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intPricingTypeId = 1 and t.dblFutures is null then 'Missing Futures Price for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
-					when isnull(c.strWarehouse,'') <> '' and t.intWarehouseId is null then ' Warehouse Location: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.ysnWarehouse = 1 and isnull(c.strWarehouse,'') <> '' and t.intCompanyLocationId is null then 'Location: Comapny Location is missing to validate Warehouse Location for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.ysnWarehouse = 1 and isnull(c.strWarehouse,'') <> '' and t.intWarehouseId is null then ' Warehouse Location: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.ysnWarehouse = 0 and isnull(c.strWarehouse,'') <> '' and t.intINCOLocationTypeId is null then ' Port / City: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intNetWeightUOMId is null then 'Net Weight UOM: Item "' + c.strItem + '" has no UOM Stock Unit for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					else @validationErrorMsg
 					end,
@@ -689,6 +699,7 @@ AS
 					,intFreightTermId
 					,intCompanyLocationId
 					,intWarehouseId
+					,intINCOLocationTypeId
 					,intCountryId
 				FROM	#tmpExtracted
 				GROUP BY intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,
@@ -705,6 +716,7 @@ AS
 					,intFreightTermId
 					,intCompanyLocationId
 					,intWarehouseId
+					,intINCOLocationTypeId
 					,intCountryId
 
 				OPEN cur
@@ -742,6 +754,7 @@ AS
 					, @intFreightTermId
 					, @intCompanyLocationId
 					, @intWarehouseId
+					, @intINCOLocationTypeId
 					, @intCountryId
 
 				WHILE @@FETCH_STATUS = 0
@@ -762,6 +775,7 @@ AS
 						,intFreightTermId
 						,intCompanyLocationId
 						,intWarehouseId
+						,intINCOLocationTypeId
 						,intCountryId
 					)
 					SELECT @intContractTypeId
@@ -795,6 +809,7 @@ AS
 						, @intFreightTermId
 						, @intCompanyLocationId
 						, @intWarehouseId
+						, @intINCOLocationTypeId
 						, @intCountryId
 
 					EXEC uspCTGetTableDataInXML '#tmpContractHeader', null, @strTblXML OUTPUT,'tblCTContractHeader'
@@ -860,6 +875,7 @@ AS
 						,intProducerId
 						,intFreightTermId
 						,intCompanyLocationId
+						,intWarehouseId
 						,intINCOLocationTypeId
 						,intCountryId
 					)
@@ -895,6 +911,7 @@ AS
 						, @intFreightTermId
 						, @intCompanyLocationId
 						, @intWarehouseId
+						, @intINCOLocationTypeId
 						, @intCountryId
 					)
 
@@ -1342,6 +1359,7 @@ AS
 						, @intFreightTermId
 						, @intCompanyLocationId
 						, @intWarehouseId
+						, @intINCOLocationTypeId
 						, @intCountryId
 
 					END
