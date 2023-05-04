@@ -20,7 +20,7 @@ SELECT S.intSampleId
 	, strChannel = MZ.strMarketZoneCode
 	, strLotNo = S.strRepresentLotNumber
 	, S.strChopNumber
-	, strPONo = S.strERPRefNo
+	, strPONo = Batch.strERPPONumber
 	, strParentBatch = Batch.strBatchId
 	, strBuyingOrderNo = S.strBuyingOrderNo
 	, CTT.strCatalogueType
