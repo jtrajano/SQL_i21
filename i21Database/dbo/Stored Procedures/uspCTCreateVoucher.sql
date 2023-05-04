@@ -566,7 +566,7 @@ begin try
 							 vp.intEntityVendorId    
 							 ,@intCompanyLocationId    
 							 ,vp.intItemId    
-							 ,CASE WHEN vp.intScaletTicketId IS NOT NULL THEN ISNULL(vp.intShipFromId, em.intEntityLocationId) ELSE em.intEntityLocationId END									
+							 ,CASE WHEN vp.intScaleTicketId IS NOT NULL THEN ISNULL(vp.intShipFromId, em.intEntityLocationId) ELSE em.intEntityLocationId END									
 							 ,@intFreightTermId    
 							 ,default    
 							)     
