@@ -1696,7 +1696,7 @@ BEGIN TRY
 	  , intLocationId
 	)
 	SELECT D.intItemId
-		 , CASE WHEN @ysnCalculateEndInventory = 0 AND @intContainerTypeId IS NOT NULL THEN ISNULL(IL.dblMinOrder * ISNULL(UMCByWeight.dblConversionToStock, 1), 0)
+		 , CASE WHEN @ysnCalculatePlannedPurchases = 0 AND @ysnCalculateEndInventory = 0 AND @intContainerTypeId IS NOT NULL THEN ISNULL(IL.dblMinOrder * ISNULL(UMCByWeight.dblConversionToStock, 1), 0)
 				ELSE 0
 		   END
 		 , 5 AS intAttributeId /* Planned Purchases */
@@ -2053,33 +2053,33 @@ BEGIN TRY
 							---************************************
 
 							/* Below code commented due to Planned Purchases is not accurate and it should set based on Container Weight . */
-							--IF @ysnCalculatePlannedPurchases = 1
-							--	BEGIN
-							--		UPDATE D
-							--		SET dblQty = ISNULL((SELECT CASE WHEN MAX(ISNULL(CW.dblWeight, 0)) > 0 THEN CEILING(ABS((SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) / MAX(CW.dblWeight))) * MAX(CW.dblWeight)
-							--										 ELSE ABS(SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0))
-							--									END
-							--					FROM #tblMFDemand OpenInv
-							--					LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
-							--					WHERE OpenInv.intItemId = D.intItemId
-							--					  AND OpenInv.intMonthId = @intMonthId
-							--					  AND (intAttributeId IN 
-							--						  (
-							--							  2
-							--							, 4
-							--							, 8
-							--							, 15
-							--							, 16
-							--						  )) --Opening Inventory, Existing Purchases,Forecasted Consumption
-							--					  AND intLocationId = @intLocationId
-							--					HAVING (SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) < 0
-							--					), 0)
-							--		FROM #tblMFDemand D
-							--		WHERE intAttributeId	= 5 --Planned Purchases -
-							--			AND intMonthId		= @intMonthId
-							--			AND intItemId		= @intItemId
-							--			AND intLocationId	= @intLocationId
-							--	END
+							IF @ysnCalculatePlannedPurchases = 1
+								BEGIN
+									UPDATE D
+									SET dblQty = ISNULL((SELECT CASE WHEN MAX(ISNULL(CW.dblWeight, 0)) > 0 THEN CEILING(ABS((SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) / MAX(CW.dblWeight))) * MAX(CW.dblWeight)
+																	 ELSE ABS(SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0))
+																END
+												FROM #tblMFDemand OpenInv
+												LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
+												WHERE OpenInv.intItemId = D.intItemId
+												  AND OpenInv.intMonthId = @intMonthId
+												  AND (intAttributeId IN 
+													  (
+														  2
+														, 4
+														, 8
+														, 15
+														, 16
+													  )) --Opening Inventory, Existing Purchases,Forecasted Consumption
+												  AND intLocationId = @intLocationId
+												HAVING (SUM(OpenInv.dblQty) - ISNULL(@dblTotalConsumptionQty, 0)) < 0
+												), 0)
+									FROM #tblMFDemand D
+									WHERE intAttributeId	= 5 --Planned Purchases -
+										AND intMonthId		= @intMonthId
+										AND intItemId		= @intItemId
+										AND intLocationId	= @intLocationId
+								END
 
 							UPDATE D
 							SET dblQty = (SELECT SUM(OpenInv.dblQty)
