@@ -919,6 +919,7 @@
     <Build Include="dbo\Functions\fnAPGetFinalVoucherItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherLoadShipmentCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnLGGetForexRateFromContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
