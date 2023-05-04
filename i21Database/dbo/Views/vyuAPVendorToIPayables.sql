@@ -6,7 +6,7 @@ A.intEntityId,
 A.strName VendorName,
 ISNULL(strVendorId,'') COLLATE Latin1_General_CI_AS  VendorNbr ,
 ISNULL(Address1.Street1, '') COLLATE Latin1_General_CI_AS  Street1,
-ISNULL(Address2.Street2, '') COLLATE Latin1_General_CI_AS  Street2,
+--ISNULL(Address2.Street2, '') COLLATE Latin1_General_CI_AS  Street2,
 ISNULL(B.strCity,'') COLLATE Latin1_General_CI_AS  City,
 ISNULL(B.strState,'') COLLATE Latin1_General_CI_AS  CountryCode,
 ISNULL(B.strZipCode,'') COLLATE Latin1_General_CI_AS strZipCode ,
@@ -26,7 +26,7 @@ OUTER APPLY(
 )ContactDetails
 left join tblEMEntity EM on A.intEntityId = EM.intEntityId
 outer apply (select Item Street1 from  dbo.fnSplitStringWithRowId(B.strAddress, char(10))  where RowId = 1 ) Address1
-outer apply (select Item Street2 from  dbo.fnSplitStringWithRowId(B.strAddress, char(10))  where RowId = 2 ) Address2
+--outer apply (select Item Street2 from  dbo.fnSplitStringWithRowId(B.strAddress, char(10))  where RowId = 2 ) Address2
 ) ,
 EML AS ( 
 	select A.intEntityId,
@@ -46,32 +46,35 @@ EML AS (
 ),
 tag01 as(
 select '01' strTag, intEntityId,
-'01|C0000549|' + VendorNbr + '|' + Street1 + '|' + Street2 + '|' + City+ '|' +CountryCode+ '|' +strZipCode+ '|' +strCountry+ '|' +strPhone+ '|' +strFax+ '|' +strEmail  strData
+'01|C0000549|' + VendorNbr + '|' + Street1 + '||' + City+ '|' +CountryCode+ '|' +strZipCode+ '|' +strCountry+ '|' +strPhone+ '|' +strFax+ '|' +strEmail  strData
 from cte 
 ),
 tag02 as(
 select '02' strTag, intEntityId,
-'02|C0000549|' + VendorNbr + '||' + strTerm   strData
+'02|C0000549|' + VendorNbr + '|0090|' + strTerm   strData
 from cte 
+),
+tag03 as(
+	select '03' strTag,intEntityId,'03|C0000549|1|0090|Corrigan Administration Services LLC' strData from cte
 ),
 tag05 as(
 	select '05' strTag, intEntityId,
-	'05|C0000549|' + VendorNbr + '||' + CASE WHEN ysnActive = 1 THEN 'ACTV' ELSE 'IACTV' END + '|'   strData
+	'05|C0000549|' + VendorNbr + '|0090|' + CASE WHEN ysnActive = 1 THEN 'ACTV' ELSE 'IACTV' END  strData
 	from cte 
 ),
 tag06 as(
 	select '06' strTag, intEntityId,
 	'06|C0000549|' + VendorNbr + '|' + AddressType + '||' 
-	+ VendorName + '|' + Street1 + '|' 
-	+ Street2 + '|' + strCity + '|'
-	+ strState + '|' 
-	+ strZipCode + '|' + strCountry   
+	+ VendorName + '|' + Street1 + ',' 
+	+ Street2 + ',' + strCity + ','
+	+ strState + ',' 
+	+ strZipCode + ',' + strCountry   
 	strData
 	from EML
 ),
 tag07 as(
 	select '07' strTag, intEntityId,
-	'07|C0000549|' + VendorNbr + '||CHCK'
+	'07|C0000549|' + VendorNbr + '|0090|CHCK'
 	strData
 	from cte
 ),
