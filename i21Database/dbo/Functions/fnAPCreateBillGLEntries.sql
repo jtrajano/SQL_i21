@@ -62,6 +62,12 @@ BEGIN
 	);
 	INSERT INTO @tmpTransacions SELECT [intID] AS intTransactionId FROM [dbo].fnGetRowsFromDelimitedValues(@transactionIds)
 
+	DECLARE @GainLossAccount INT
+	SELECT TOP 1 @GainLossAccount = intAccountsPayableRealizedId FROM tblSMMultiCurrency
+
+	DECLARE @functionalCurrency INT;
+	SELECT TOP 1 @functionalCurrency = intDefaultCurrencyId FROM tblSMCompanyPreference
+
 	DECLARE	 @AllowIntraEntries BIT
 			,@DueToAccountId	INT
 			,@DueFromAccountId  INT
@@ -1921,6 +1927,71 @@ BEGIN
           AND @DueFromAccountId <> 0
           AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
 		  AND A.intTransactionType = 1 AND ISNULL(A.ysnFinalVoucher,0) = 1
+
+	INSERT INTO @returntable
+	SELECT	
+		[dtmDate]						=	A.dtmDate,
+		[strBatchID]					=	A.strBatchId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[dblDebit]						=	SUM(dblCredit - dblDebit),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					= 	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	'Decimal loss due to rounding.',
+		[strCode]						=	A.strCode,
+		[strReference]					=	NULL,
+		[intCurrencyId]					=	@functionalCurrency,
+		[intCurrencyExchangeRateTypeId] =	NULL,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	A.dtmDateEntered,
+		[dtmTransactionDate]			=	A.dtmTransactionDate,
+		[strJournalLineDescription]		=	'Posted Decimal Loss',
+		[intJournalLineNo]				=	4,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	A.intUserId,
+		[intEntityId]					=	A.intEntityId,
+		[strTransactionId]				=	A.strTransactionId, 
+		[intTransactionId]				=	A.intTransactionId, 
+		[strTransactionType]			=	A.strTransactionType,
+		[strTransactionForm]			=	A.strTransactionForm,
+		[strModuleName]					=	A.strModuleName,
+		[dblDebitForeign]				=	0,
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	1,
+		[strRateType]					=	NULL,
+		[strDocument]					=	NULL,
+		[strComments]					=	NULL,
+		[intConcurrencyId]				=	A.intConcurrencyId,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	0,
+		[intSourceLocationId]			=	0,
+		[strSourceDocumentId]			=	NULL
+	FROM @returntable A
+	OUTER APPLY (
+		SELECT TOP 1 intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
+	GROUP BY 
+	A.[dtmDate],
+	A.[strBatchId],
+	A.[ysnIsUnposted],    
+	A.[intUserId],
+	A.[intEntityId],
+	A.[strCode],
+	A.[dtmDateEntered],
+	A.[dtmTransactionDate],
+	A.[strTransactionId],
+	A.[intTransactionId],
+	A.[strTransactionType],
+	A.[strTransactionForm],
+	A.[strModuleName],
+	A.[intConcurrencyId],
+	OVERRIDESEGMENT.intOverrideAccount
+	HAVING SUM(dblCredit - dblDebit) = -0.01 OR SUM(dblCredit - dblDebit) = 0.01
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
