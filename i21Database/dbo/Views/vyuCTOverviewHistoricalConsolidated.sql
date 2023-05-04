@@ -117,6 +117,7 @@ SELECT
 	,intHeaderSubBookId
 	,intDetailBookId
 	,intDetailSubBookId
+	,strLogisticsLeadName
 FROM [vyuCTDashboardJDEHistorical]
 
 UNION ALL
@@ -237,5 +238,6 @@ SELECT
 	,intHeaderSubBookId
 	,intDetailBookId
 	,intDetailSubBookId
+	,strLogisticsLeadName
 FROM vyuCTDashboardJDE
 
