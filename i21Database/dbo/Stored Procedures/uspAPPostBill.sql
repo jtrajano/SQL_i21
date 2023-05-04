@@ -1133,9 +1133,11 @@ BEGIN
 					dblForexRate = ISNULL(dblRate, 0),
 					strCurrencyExchangeRateType
 				FROM vyuGLExchangeRate
+				INNER JOIN tblICInventoryTransaction IT
+					ON IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 				WHERE intFromCurrencyId = GLEntries.intCurrencyId
 					AND intToCurrencyId = @intFunctionalCurrencyId
-					AND intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+					AND intCurrencyExchangeRateTypeId = IT.intForexRateTypeId
 				ORDER BY dtmValidFromDate DESC
 			) ChargeCurrencyToFunctional
 			OUTER APPLY (
