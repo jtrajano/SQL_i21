@@ -883,17 +883,20 @@ BEGIN TRY
 			,dblUpperToleranceReqQty
 			)
 		SELECT WI.intItemId
-			,Round(I.dblReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
+			,Round(I.dblReqQty * WI.dblRatio / 100, 2)
 			,WI.intItemUOMId
 			,I.intStorageLocationId
 			,I.intConsumptionMethodId
-			,I.strLotTracking
-			,Round(I.dblLowerToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
+			,WOLotTrack.strLotTracking
+			,Round(I.dblLowerToleranceReqQty * WI.dblRatio / 100, 2)
 			,I.intMainItemId
 			,I.intCategoryId
-			,Round(I.dblUpperToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
+			,Round(I.dblUpperToleranceReqQty * WI.dblRatio / 100, 2)
 		FROM @tblMFWorkOrderInputItem WI
 		JOIN @tblItem I ON I.intItemId = WI.intMainItemId
+		OUTER APPLY (SELECT TOP 1 strLotTracking 
+					 FROM tblICItem AS ICItem
+					 WHERE intItemId = WI.intItemId) AS WOLotTrack
 		WHERE NOT EXISTS (
 				SELECT *
 				FROM @tblItem I2
