@@ -49,16 +49,35 @@ BEGIN
 			 , sl.strName AS strStorageLocationName
 			 , l.strNotes AS strRemarks
 			 , i.dblRiskScore
-			 , ri.dblQuantity/@dblRecipeQty AS dblConfigRatio
+			 , ISNULL(ri.dblQuantity/@dblRecipeQty, 0) AS dblConfigRatio
 			 , CAST(ISNULL(q.Density,0) AS DECIMAL) AS dblDensity
 			 , CAST(ISNULL(q.Score,0) AS DECIMAL) AS dblScore
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
-			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
-			 ,wi.strFW
-			  ,MT.strDescription AS strProductType
-			,B.strBrandCode
+			 , i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+			 , wi.strFW
+			 , MT.strDescription AS strProductType
+			 , B.strBrandCode
+			 , AuctionCenter.strLocationName AS strAuctionCenter
+			 , Batch.intSalesYear AS intSaleYear
+			 , Batch.intSales AS intSaleNo
+			 , Batch.dblTeaTaste
+			 , Batch.dblTeaHue
+			 , Batch.dblTeaIntensity
+			 , Batch.dblTeaMouthFeel
+			 , SubCluster.strDescription	AS strSubCluster
+			 , Batch.dblTeaAppearance
+			 , ISNULL(Batch.dblTeaVolume, 0) AS dblTeaVolume
+			 , DATEDIFF(DAY, l.dtmDateCreated, GETDATE()) AS intAge
+			 , CASE WHEN (NULLIF(i.intUnitPerLayer,'') IS NULL OR i.intUnitPerLayer = 0) AND (NULLIF(i.intLayerPerPallet,'') IS NULL OR i.intLayerPerPallet = 0) THEN 0
+					WHEN (CASE WHEN ISNULL(wi.dblQuantity,0) > 0 THEN wi.dblQuantity 
+							   ELSE dbo.fnMFConvertQuantityToTargetItemUOM(wi.intItemUOMId, l.intItemUOMId, wi.dblQuantity) 
+						  END) = 0 THEN 0
+					ELSE CAST(wi.dblQuantity / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC(18, 2))
+			   END AS dblNoOfPallet
+			 , Batch.strLeafGrade
+			 , Garden.strGardenMark
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -77,6 +96,9 @@ BEGIN
 		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
 		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
 		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
+		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+		LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
+		LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 	END
 	ELSE /* When blend sheet created from Sales Order, directly produced in blend production screen, then only consumed lot table will have the values, to show in blend management screen from traceability */
@@ -110,16 +132,35 @@ BEGIN
 			 , sl.strName AS strStorageLocationName
 			 , l.strNotes AS strRemarks
 			 , i.dblRiskScore
-			 , ri.dblQuantity / @dblRecipeQty AS dblConfigRatio
+			 , ISNULL(ri.dblQuantity / @dblRecipeQty, 0) AS dblConfigRatio
 			 , CAST(ISNULL(q.Density,0) AS DECIMAL) AS dblDensity
 			 , CAST(ISNULL(q.Score,0) AS DECIMAL) AS dblScore
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
-			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
-			 ,'' As strFW
-			  ,MT.strDescription AS strProductType
-				,B.strBrandCode
+			 , i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+			 , '' As strFW
+			 , MT.strDescription AS strProductType
+			 , B.strBrandCode
+			 , AuctionCenter.strLocationName AS strAuctionCenter
+			 , Batch.intSalesYear AS intSaleYear
+			 , Batch.intSales
+			 , Batch.dblTeaTaste
+			 , Batch.dblTeaHue
+			 , Batch.dblTeaIntensity
+			 , Batch.dblTeaMouthFeel
+			 , SubCluster.strDescription	AS strSubCluster
+			 , Batch.dblTeaAppearance
+			 , ISNULL(Batch.dblTeaVolume, 0) AS dblTeaVolume
+			 , DATEDIFF(DAY, l.dtmDateCreated, GETDATE()) AS intAge
+			 , CASE WHEN (NULLIF(i.intUnitPerLayer,'') IS NULL OR i.intUnitPerLayer = 0) AND (NULLIF(i.intLayerPerPallet,'') IS NULL OR i.intLayerPerPallet = 0) THEN 0
+					WHEN (CASE WHEN ISNULL(wi.dblQuantity,0) > 0 THEN wi.dblQuantity 
+							   ELSE dbo.fnMFConvertQuantityToTargetItemUOM(wi.intItemUOMId, l.intItemUOMId, wi.dblQuantity) 
+						  END) = 0 THEN 0
+					ELSE CAST(wi.dblQuantity / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC(18, 2))
+			   END AS dblNoOfPallet
+			 , Batch.strLeafGrade
+			 , Garden.strGardenMark
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -134,8 +175,13 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
 		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId = i.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId = i.intBrandId
+		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
+		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
+		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+		LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
+		LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 END
 ELSE
@@ -175,10 +221,10 @@ BEGIN
 	, i.intCategoryId
 	, wi.intStorageLocationId 
     , LS.strSecondaryStatus
-	 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
-	 ,'' As strFW
-	  ,MT.strDescription AS strProductType
-	,B.strBrandCode
+	, i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+	, '' As strFW
+	, MT.strDescription AS strProductType
+	, B.strBrandCode
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
