@@ -1,4 +1,4 @@
-﻿Create VIEW [dbo].[vyuCTSearchContractDetail2]  
+﻿CREATE VIEW [dbo].[vyuCTSearchContractDetail2]  
   
 AS  
   
@@ -360,6 +360,7 @@ SELECT a.intContractDetailId
  , strFeedPriceCurrency = FCU.strCurrency  
  , ysnApprovedCT = SMTR.ysnApproved
  , strApprovalStatus = SMTR.strApprovalStatus
+ , LL.strName AS strLogisticsLeadName
 FROM tblCTContractDetail a WITH(NOLOCK)  
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId  
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId  
@@ -472,6 +473,7 @@ LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
 LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- CT-5315  
 --OUTER APPLY dbo.fnCTGetSampleDetail(a.intContractDetailId) QA  
 LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = a.intItemId  
+LEFT JOIN tblEMEntity LL on LL.intEntityId = a.intLogisticsLeadId
 LEFT JOIN (  
     SELECT *  
     FROM  
