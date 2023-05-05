@@ -243,7 +243,7 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 			strStraussQuantity		=  CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE '' END +  @fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + ' '  + '<div>' + @fontBoldQuantityUOM + UM.strUnitMeasure +'</span>' + '</div>'							
-									   +(CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END),
+									   + @fontBold + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END) + '</span>',
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
