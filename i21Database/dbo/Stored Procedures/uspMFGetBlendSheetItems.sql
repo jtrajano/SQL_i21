@@ -1,9 +1,12 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetItems] @intItemId INT
-	,@intLocationId INT
-	,@dblQtyToProduce DECIMAL(38, 20)
-	,@dtmDueDate DATETIME
-	,@strHandAddIngredientXml NVARCHAR(MAX) = ''
-	,@intWorkOrderId INT = NULL
+﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetItems] 
+(
+	@intItemId				 INT
+  , @intLocationId			 INT
+  , @dblQtyToProduce		 DECIMAL(38, 20)
+  , @dtmDueDate				 DATETIME
+  , @strHandAddIngredientXml NVARCHAR(MAX) = ''
+  , @intWorkOrderId			INT = NULL
+) 
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,39 +14,45 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intRecipeId INT
-	,@ysnRecipeItemValidityByDueDate BIT = 0
-	,@intManufacturingProcessId INT
-	,@intDayOfYear INT
-	,@dtmDate DATETIME
-	,@strPackagingCategoryId NVARCHAR(MAX)
-	,@strBlendItemLotTracking NVARCHAR(50)
-	,@ysnRecipeHeaderValidation BIT = 0
-DECLARE @tblRequiredQty TABLE (
-	intItemId INT
-	,dblRequiredQty NUMERIC(38, 20)
-	,ysnIsSubstitute BIT
-	,intParentItemId INT
-	,ysnHasSubstitute BIT
-	,intRecipeItemId INT
-	,intParentRecipeItemId INT
-	,strGroupName NVARCHAR(50)
-	,dblLowerToleranceQty NUMERIC(38, 20)
-	,dblUpperToleranceQty NUMERIC(38, 20)
-	,ysnMinorIngredient BIT
-	,ysnScaled BIT
-	,dblRecipeQty NUMERIC(38, 20)
-	,dblRecipeItemQty NUMERIC(38, 20)
-	,strRecipeItemUOM NVARCHAR(50)
-	,strConsumptionStorageLocation NVARCHAR(50)
-	,intConsumptionMethodId INT
-	,intConsumptionStorageLocationId INT
-	);
-DECLARE @tblPhysicalQty TABLE (
-	intItemId INT
-	,dblPhysicalQty NUMERIC(38, 20)
-	,dblWeightPerUnit NUMERIC(38, 20)
-	);
+DECLARE @intRecipeId					INT
+	  , @ysnRecipeItemValidityByDueDate BIT = 0
+	  , @intManufacturingProcessId		INT
+	  , @intDayOfYear					INT
+	  , @dtmDate						DATETIME
+	  , @strPackagingCategoryId			NVARCHAR(MAX)
+	  , @strBlendItemLotTracking		NVARCHAR(50)
+	  , @ysnRecipeHeaderValidation		BIT = 0
+
+
+DECLARE @tblRequiredQty TABLE 
+(
+	intItemId						INT
+  , dblRequiredQty					NUMERIC(38, 20)
+  , ysnIsSubstitute					BIT
+  , intParentItemId					INT
+  , ysnHasSubstitute				BIT
+  , intRecipeItemId					INT
+  , intParentRecipeItemId			INT
+  , strGroupName					NVARCHAR(50)
+  , dblLowerToleranceQty			NUMERIC(38, 20)
+  , dblUpperToleranceQty			NUMERIC(38, 20)
+  , ysnMinorIngredient				BIT
+  , ysnScaled						BIT
+  , dblRecipeQty					NUMERIC(38, 20)
+  , dblRecipeItemQty				NUMERIC(38, 20)
+  , strRecipeItemUOM				NVARCHAR(50)
+  , strConsumptionStorageLocation	NVARCHAR(50)
+  , intConsumptionMethodId			INT
+  , intConsumptionStorageLocationId INT
+);
+
+DECLARE @tblPhysicalQty TABLE 
+(
+	intItemId			INT
+  , dblPhysicalQty		NUMERIC(38, 20)
+  , dblWeightPerUnit	NUMERIC(38, 20)
+);
+
 DECLARE @tblReservedQty TABLE (
 	intItemId INT
 	,dblReservedQty NUMERIC(38, 20)
@@ -454,51 +463,47 @@ GROUP BY intItemId;
 
 /* RETURNED DATA. */
 SELECT Item.intItemId
-	,Item.strItemNo
-	,Item.strDescription
-	,RequiredQty.dblRequiredQty
-	,ISNULL(PhysicalQty.dblPhysicalQty, 0) AS dblPhysicalQty
-	,ISNULL(ReservedQty.dblReservedQty, 0) AS dblReservedQty
-	,ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
-	,0.0 AS dblSelectedQty
-	,ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE 
-				WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0
-					THEN 1
-				ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
-				END, 0), 0.0) AS dblAvailableUnit
-	,RequiredQty.ysnIsSubstitute
-	,RequiredQty.intParentItemId
-	,RequiredQty.ysnHasSubstitute
-	,RequiredQty.intRecipeItemId
-	,RequiredQty.intParentRecipeItemId
-	,RequiredQty.strGroupName
-	,RequiredQty.dblLowerToleranceQty
-	,RequiredQty.dblUpperToleranceQty
-	,RequiredQty.ysnMinorIngredient
-	,RequiredQty.ysnScaled
-	,RequiredQty.dblRecipeQty
-	,RequiredQty.dblRecipeItemQty
-	,RequiredQty.strRecipeItemUOM
-	,RequiredQty.strConsumptionStorageLocation
-	,RequiredQty.intConsumptionMethodId
-	,ISNULL(Item.ysnHandAddIngredient, 0) AS ysnHandAddIngredient
-	,@intRecipeId AS intRecipeId
-	,RequiredQty.intConsumptionStorageLocationId
-	,@intManufacturingProcessId AS intManufacturingProcessId
-	,@strBlendItemLotTracking AS strBlendItemLotTracking
-	,ISNULL(ConfirmedQty.dblConfirmedQty, 0) AS dblConfirmedQty
-	,RequiredQty.dblRequiredQty AS dblOrgRequiredQty
-	,ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0) AS dblReservedQtyInTBS
-	,CAST(ISNULL(ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE 
-						WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0
-							THEN 1
-						ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
-						END, 0), 0.0), 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
-	,MT.strDescription AS strProductType
-	,B.strBrandCode
-	,Item.intUnitPerLayer
-	,Item.intLayerPerPallet
-	,Item.strShortName
+	 , Item.strItemNo
+	 , Item.strDescription
+	 , RequiredQty.dblRequiredQty
+	 , ISNULL(PhysicalQty.dblPhysicalQty, 0) AS dblPhysicalQty
+	 , ISNULL(ReservedQty.dblReservedQty, 0) AS dblReservedQty
+	 , ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0) AS dblAvailableQty
+	 , 0.0 AS dblSelectedQty
+	 , ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0 THEN 1
+																																										  ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
+																																									 END, 0), 0.0) AS dblAvailableUnit
+	 , RequiredQty.ysnIsSubstitute
+	 , RequiredQty.intParentItemId
+	 , RequiredQty.ysnHasSubstitute
+	 , RequiredQty.intRecipeItemId
+	 , RequiredQty.intParentRecipeItemId
+	 , RequiredQty.strGroupName
+	 , RequiredQty.dblLowerToleranceQty
+	 , RequiredQty.dblUpperToleranceQty
+	 , RequiredQty.ysnMinorIngredient
+	 , RequiredQty.ysnScaled
+	 , RequiredQty.dblRecipeQty
+	 , RequiredQty.dblRecipeItemQty
+	 , RequiredQty.strRecipeItemUOM
+	 , RequiredQty.strConsumptionStorageLocation
+	 , RequiredQty.intConsumptionMethodId
+	 , ISNULL(Item.ysnHandAddIngredient, 0) AS ysnHandAddIngredient
+	 , @intRecipeId AS intRecipeId
+	 , RequiredQty.intConsumptionStorageLocationId
+	 , @intManufacturingProcessId AS intManufacturingProcessId
+	 , @strBlendItemLotTracking AS strBlendItemLotTracking
+	 , ISNULL(ConfirmedQty.dblConfirmedQty, 0) AS dblConfirmedQty
+	 , RequiredQty.dblRequiredQty AS dblOrgRequiredQty
+	 , ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0) AS dblReservedQtyInTBS
+	 , CAST(ISNULL(ISNULL(ROUND((ISNULL((ISNULL(PhysicalQty.dblPhysicalQty, 0) - ISNULL(ReservedQty.dblReservedQty, 0) - ISNULL(ReservedQtyInTBS.dblReservedQtyInTBS, 0)), 0)) / CASE WHEN ISNULL(PhysicalQty.dblWeightPerUnit, 1) = 0 THEN 1
+																																													  ELSE ISNULL(PhysicalQty.dblWeightPerUnit, 1)
+																																												 END, 0), 0.0), 0) / (Item.intLayerPerPallet * Item.intUnitPerLayer) AS NUMERIC(18, 2)) AS dblNoOfPallet
+	  , MT.strDescription AS strProductType
+	 , B.strBrandCode
+	 , Item.intUnitPerLayer
+	 , Item.intLayerPerPallet
+	 , Item.strShortName
 FROM @tblRequiredQty AS RequiredQty
 JOIN tblICItem AS Item ON RequiredQty.intItemId = Item.intItemId
 LEFT JOIN @tblPhysicalQty AS PhysicalQty ON RequiredQty.intItemId = PhysicalQty.intItemId
