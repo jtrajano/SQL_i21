@@ -1289,6 +1289,7 @@
     <None Include="Scripts\Post-Deployment\ST\53_FileFieldMapping_Passport_FGMA.sql" />
     <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
     <Build Include="dbo\Views\vyuTMInventoryReport.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

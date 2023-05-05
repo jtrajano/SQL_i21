@@ -137,6 +137,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\14_DegreeDayClock.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
 :r .\TM\Tables\tblTMBudgetCalculationProjection.sql
+:r .\TM\DefaultData\15_ReadingSourceType.sql
 
 
 ----TM Reports
