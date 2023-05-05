@@ -506,13 +506,9 @@ BEGIN
             ,[intCommodityId]               = NULL
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
-        FROM
-            tblARPostInvoiceDetail I
-        INNER JOIN
-            tblARInvoiceAccrual ARIA
-                ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
-        WHERE
-            I.[intInvoiceDetailId] = @InvoiceDetailId
+        FROM tblARPostInvoiceDetail I
+        INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
+        WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
             AND I.[dblTotal] <> @ZeroDecimal
             AND (
                 I.[intItemId] IS NULL
@@ -607,8 +603,6 @@ BEGIN
         INNER JOIN tblARInvoiceAccrual ARIA ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN tblARPostInvoiceItemAccount IA ON I.[intItemId] = IA.[intItemId]  AND I.[intCompanyLocationId] = IA.[intLocationId]
         WHERE I.[intInvoiceDetailId] = @InvoiceDetailId
-            --AND I.[intInvoiceId] = @InvoiceId
-            --AND I.[intInvoiceDetailId] IS NOT NULL
             AND I.[dblTotal] <> @ZeroDecimal
             AND (
                 I.[intItemId] IS NULL
@@ -617,7 +611,6 @@ BEGIN
                 )
             AND I.[strTransactionType] <> 'Debit Memo'
             AND I.strSessionId = @strSessionId
-            AND IA.strSessionId = @strSessionId
 		
 		UNION ALL 
 

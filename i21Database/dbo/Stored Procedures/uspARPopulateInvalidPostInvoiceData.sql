@@ -1057,6 +1057,8 @@ BEGIN
 	FROM tblARPostInvoiceDetail I			
 	WHERE I.[intPeriodsToAccrue] > 1
 	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+	  AND I.[strItemType] IS NOT NULL
+	  AND I.[strItemType] <> ''
 	  AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
