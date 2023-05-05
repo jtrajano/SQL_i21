@@ -3485,6 +3485,7 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateTransferKit.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPickListAvailableLots.sql" />
     <Build Include="dbo\Views\vyuGLAccountDetail.sql" />
+    <Build Include="dbo\Views\vyuGLAccountDetailCombo.sql" />
     <Build Include="dbo\Views\vyuGRStorageSearchView.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MBasis.sql" />
     <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
