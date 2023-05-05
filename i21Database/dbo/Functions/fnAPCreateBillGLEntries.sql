@@ -2041,12 +2041,19 @@ BEGIN
 				UNION ALL --taxes
 				SELECT R.intBillDetailId,
 					2 intFormat,
-					CASE WHEN R.intInventoryReceiptChargeId > 0 
+					CAST(((CASE WHEN R.intInventoryReceiptChargeId > 0 
 								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
 												AND charges.ysnPrice = 1
-											THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
-						ELSE R2.dblAdjustedTax
-					END
+											THEN R2.dblTax * -1 ELSE R2.dblTax END) 
+						ELSE R2.dblTax
+					END) * (100 - A.dblProvisionalPercentage) / 100) AS DECIMAL(18,2))
+					
+					+ (CASE WHEN R.intInventoryReceiptChargeId > 0 
+								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
+												AND charges.ysnPrice = 1
+											THEN (R2.dblAdjustedTax - R2.dblTax) * -1 ELSE (R2.dblAdjustedTax - R2.dblTax) END) 
+						ELSE (R2.dblAdjustedTax - R2.dblTax)
+					END)
 				AS dblTotal,
 				 R.dblRate  AS dblRate,
 				 exRates.intCurrencyExchangeRateTypeId,
@@ -2148,7 +2155,7 @@ BEGIN
 					2 intFormat,
 					CASE WHEN R.intInventoryReceiptChargeId > 0 
 							THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId) AND charges.ysnPrice = 1 THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
-							ELSE R2.dblAdjustedTax END AS dblTotal,
+							ELSE R2.dblAdjustedTax END * (100 - A.dblProvisionalPercentage) / 100 AS dblTotal,
 				 R.dblRate  AS dblRate,
 				 exRates.intCurrencyExchangeRateTypeId,
 				  exRates.strCurrencyExchangeRateType,

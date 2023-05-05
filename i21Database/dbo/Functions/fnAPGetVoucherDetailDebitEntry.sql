@@ -198,29 +198,55 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,B.strMiscDescription
 		,CAST(
-				CASE WHEN ISNULL(B.dblOldCost,0) != 0 
-					THEN B.dblFinalVoucherTotal 
-					ELSE 
-				 	(B.dblQtyReceived * B.dblCost) - B.dblProvisionalTotal
+				CASE WHEN ISNULL(B.dblOldCost,0) = 0 THEN
+					CASE WHEN ISNULL(B.intComputeTotalOption,0) = 0 AND ISNULL(B.intWeightUOMId,0) > 0
+						THEN 
+							(B.dblNetWeight * B.dblCost) - B.dblProvisionalTotal
+						ELSE 
+						(B.dblQtyReceived * B.dblCost) - B.dblProvisionalTotal
+					END
+				ELSE
+					CASE WHEN ISNULL(B.intComputeTotalOption,0) = 0 AND ISNULL(B.intWeightUOMId,0) > 0
+						THEN 
+							(B.dblNetWeight * B.dblOldCost) - B.dblProvisionalTotal
+						ELSE 
+						(B.dblQtyReceived * B.dblOldCost) - B.dblProvisionalTotal
+					END
 				END	
-				* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)
-				) AS dblTotal
-		,CAST(CASE WHEN ISNULL(B.dblOldCost,0) <> 0 
-					THEN B.dblFinalVoucherTotal 
-					ELSE 
-				 	(B.dblQtyReceived * B.dblCost) - B.dblProvisionalTotal
-				END AS DECIMAL(18,2)
+					* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)
+					) AS dblTotal
+			,CAST(
+					CASE WHEN ISNULL(B.dblOldCost,0) = 0 THEN
+						CASE WHEN ISNULL(B.intComputeTotalOption,0) = 0 AND ISNULL(B.intWeightUOMId,0) > 0
+							THEN 
+								(B.dblNetWeight * B.dblCost) - B.dblProvisionalTotal
+							ELSE 
+							(B.dblQtyReceived * B.dblCost) - B.dblProvisionalTotal
+						END
+					ELSE
+						CASE WHEN ISNULL(B.intComputeTotalOption,0) = 0 AND ISNULL(B.intWeightUOMId,0) > 0
+							THEN 
+								(B.dblNetWeight * B.dblOldCost) - B.dblProvisionalTotal
+							ELSE 
+							(B.dblQtyReceived * B.dblOldCost) - B.dblProvisionalTotal
+						END
+					END
+				AS DECIMAL(18,2)
 				 ) AS dblForeignTotal
 		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN B.dblQtyReceived
 			   ELSE
-			   dbo.fnCalculateQtyBetweenUOM(
-				 		CASE WHEN B.intWeightUOMId > 0 THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END, 
-						itemUOM.intItemUOMId, 
-						CASE WHEN B.intWeightUOMId > 0
-							THEN B.dblNetWeight - B.dblProvisionalWeight
-							ELSE B.dblQtyBundleReceived
-						END 
-						)
+			  --  dbo.fnCalculateQtyBetweenUOM(
+				--  		CASE WHEN B.intWeightUOMId > 0 THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END, 
+				-- 		itemUOM.intItemUOMId, 
+				-- 		CASE WHEN B.intWeightUOMId > 0
+				-- 			THEN B.dblNetWeight - B.dblProvisionalWeight
+				-- 			ELSE B.dblQtyBundleReceived
+				-- 		END 
+				-- 		)
+				dbo.fnCalculateQtyBetweenUOM(CASE WHEN B.intWeightUOMId > 0 
+											THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END, 
+											itemUOM.intItemUOMId, CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
+											- B.dblProvisionalWeight
 		END)
 		* (
 				CASE 

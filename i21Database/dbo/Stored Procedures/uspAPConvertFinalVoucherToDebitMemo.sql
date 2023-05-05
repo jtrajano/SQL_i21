@@ -32,6 +32,7 @@ BEGIN TRY
           @detailTotal DECIMAL(18,6) = 0,  
           @rowCount INT = 0,  
         @intBillDetailId INT = 0,  
+          @percentage DECIMAL(18,6) = 0,  
           @rowNum INT = 1  
   
   SELECT ROW_NUMBER() OVER (  
@@ -43,6 +44,7 @@ BEGIN TRY
     dblNetWeight,  
     dblProvisionalTotal,  
     dblProvisionalCost,  
+    dblProvisionalPercentage,  
     dblProvisionalWeight 
   INTO #tmpBillDetail FROM tblAPBillDetail  
   WHERE intBillId = @billId  
@@ -58,6 +60,7 @@ BEGIN TRY
       @diffWeight = dblNetWeight - dblProvisionalWeight,  
       @cost = CASE WHEN @diffCost <> 0 THEN @diffCost ELSE dblCost END,  
       @weight = CASE WHEN @diffWeight <> 0 THEN @diffWeight ELSE dblNetWeight END,  
+      @percentage = dblProvisionalPercentage / 100,  
       @intBillDetailId = intBillDetailId  
     FROM #tmpBillDetail WHERE RowNum = @rowNum  
   
@@ -104,8 +107,27 @@ BEGIN TRY
   SET  A.dblTotal = B.dblTotal  
        ,A.dblNetWeight = B.dblNetWeight  
        ,A.dblCost = B.dblCost  
+       ,A.dblTax = (TX.dblTax * @percentage) - TX.dblAdjustedTax
   FROM tblAPBillDetail A INNER JOIN #tmpBillDetail B  
   ON A.intBillDetailId = B.intBillDetailId AND A.intBillId = @billId  
+  CROSS APPLY (
+    SELECT 
+       SUM(dblAdjustedTax) dblAdjustedTax
+      ,SUM(dblTax) dblTax
+    FROM tblAPBillDetailTax BDT WHERE BDT.intBillDetailId = A.intBillDetailId
+    GROUP BY BDT.intBillDetailId
+  ) TX
+  
+  UPDATE A
+  SET A.dblAdjustedTax = (A.dblTax * @percentage) - A.dblAdjustedTax
+     ,A.dblTax = (A.dblTax * @percentage) - A.dblAdjustedTax
+     ,ysnTaxAdjusted = (CAST 0 AS BIT)
+  FROM tblAPBillDetailTax A
+  INNER JOIN #tmpBillDetail B
+    ON A.intBillDetailId = B.intBillDetailId
+  INNER JOIN tblAPBillDetail C
+    ON A.intBillDetailId = C.intBillDetailId
+  WHERE C.intBillId = @billId
   
   DECLARE @debitMemoStartNum INT = 0;    
   DECLARE @debitMemoPref NVARCHAR(50)  

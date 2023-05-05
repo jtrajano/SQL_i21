@@ -124,53 +124,57 @@ RETURNS TABLE AS RETURN
           --When final voucher has no receipt  
       CASE WHEN B.intLoadShipmentCostId > 0  
         THEN LD.dblAmount  
-      ELSE   
-          (CASE   
-      -- If there is a Gross/Net UOM, compute by the net weight.   
-      WHEN LD.intWeightItemUOMId IS NOT NULL THEN   
-       -- Convert the Cost UOM to Gross/Net UOM.   
-       dbo.fnCalculateCostBetweenUOM(  
-        ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
-        , LD.intWeightItemUOMId  
-        , LD.dblUnitPrice  
-       )   
-       / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END   
-       * B.dblNetWeight  
+      ELSE
+        (CASE WHEN B.intComputeTotalOption = 0 AND ISNULL(B.intWeightUOMId,0) > 0
+          THEN B.dblNetWeight * (B.dblOldCost)
+         ELSE B.dblQtyReceived * (B.dblOldCost) 
+        END)    
+    --       (CASE   
+    --   -- If there is a Gross/Net UOM, compute by the net weight.   
+    --   WHEN LD.intWeightItemUOMId IS NOT NULL THEN   
+    --    -- Convert the Cost UOM to Gross/Net UOM.   
+    --    dbo.fnCalculateCostBetweenUOM(  
+    --     ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
+    --     , LD.intWeightItemUOMId  
+    --     , LD.dblUnitPrice  
+    --    )   
+    --    / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END   
+    --    * B.dblNetWeight  
   
-      -- If Gross/Net UOM is missing: compute by the receive qty.   
-      ELSE   
-       -- Convert the Cost UOM to Gross/Net UOM.   
-       dbo.fnCalculateCostBetweenUOM(  
-        ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
-        , LD.intWeightItemUOMId  
-        , LD.dblUnitPrice  
-       )   
-       / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END    
-       * B.dblQtyReceived  
-     END)  
-     -  
-     (CASE    
-      WHEN LD.intWeightItemUOMId IS NOT NULL THEN   
-       -- Convert the Cost UOM to Gross/Net UOM.   
-       dbo.fnCalculateCostBetweenUOM(  
-        ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
-        , LD.intWeightItemUOMId  
-        , LD.dblUnitPrice  
-       )   
-       / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END   
-       * (B.dblNetWeight - LD.dblNet)  
+    --   -- If Gross/Net UOM is missing: compute by the receive qty.   
+    --   ELSE   
+    --    -- Convert the Cost UOM to Gross/Net UOM.   
+    --    dbo.fnCalculateCostBetweenUOM(  
+    --     ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
+    --     , LD.intWeightItemUOMId  
+    --     , LD.dblUnitPrice  
+    --    )   
+    --    / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END    
+    --    * B.dblQtyReceived  
+    --  END)  
+    --  -  
+    --  (CASE    
+    --   WHEN LD.intWeightItemUOMId IS NOT NULL THEN   
+    --    -- Convert the Cost UOM to Gross/Net UOM.   
+    --    dbo.fnCalculateCostBetweenUOM(  
+    --     ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
+    --     , LD.intWeightItemUOMId  
+    --     , LD.dblUnitPrice  
+    --    )   
+    --    / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END   
+    --    * (B.dblNetWeight - LD.dblNet)  
   
-      -- If Gross/Net UOM is missing: compute by the receive qty.   
-      ELSE   
-       -- Convert the Cost UOM to Gross/Net UOM.   
-       dbo.fnCalculateCostBetweenUOM(  
-        ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
-        , LD.intWeightItemUOMId  
-        , LD.dblUnitPrice  
-       )   
-       / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END    
-       * (B.dblQtyReceived - LD.dblQuantity)  
-     END)  
+    --   -- If Gross/Net UOM is missing: compute by the receive qty.   
+    --   ELSE   
+    --    -- Convert the Cost UOM to Gross/Net UOM.   
+    --    dbo.fnCalculateCostBetweenUOM(  
+    --     ISNULL(LD.intPriceUOMId, LD.intItemUOMId)  
+    --     , LD.intWeightItemUOMId  
+    --     , LD.dblUnitPrice  
+    --    )   
+    --    / CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(NULLIF(A.intSubCurrencyCents, 0),1) ELSE 1 END    
+    --    * (B.dblQtyReceived - LD.dblQuantity)  
+    --  END)  
     END  
    END AS DECIMAL(18, 2)  
   )  

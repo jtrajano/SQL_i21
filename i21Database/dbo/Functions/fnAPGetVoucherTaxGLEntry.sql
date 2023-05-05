@@ -90,6 +90,7 @@ RETURNS TABLE AS RETURN
 	-- 	ELSE (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2) != 0
 	UNION ALL
 	--Provisional Voucher and Finalize Voucher
+	--Converted DM
 	SELECT
 		B.intBillDetailId
 		,D.intBillDetailTaxId
@@ -208,5 +209,6 @@ RETURNS TABLE AS RETURN
 		WHERE shipmentChargeTax.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 	) shipmentChargeTax
 	WHERE A.intBillId = @billId
-	AND A.intTransactionType = 1 AND A.ysnFinalVoucher = 1
+	AND (A.intTransactionType = 1 AND A.ysnFinalVoucher = 1)
+	OR (ISNULL(ysnConvertedToDebitMemo,0) = 1)
 )
