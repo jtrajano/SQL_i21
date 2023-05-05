@@ -81,7 +81,7 @@ SELECT   L.intLoadId
 		,PDetail.intContractSeq AS intPContractSeq
 		,SHeader.strContractNumber AS strSContractNumber
 		,SDetail.intContractSeq AS	intSContractSeq
-		,strSampleStatus = ISNULL(LSS.strStatus, CSS.strStatus)
+		,strSampleStatus = ISNULL(LSMS.strStatus, CSS.strStatus)
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
 		,LSS.strShipmentStatus
@@ -149,4 +149,4 @@ OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved'
     FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId  
     WHERE S.intLoadDetailId = LD.intLoadDetailId  
      AND SS.strStatus <> 'Rejected'  
-    ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS
+    ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSMS
