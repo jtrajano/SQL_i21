@@ -42,6 +42,6 @@ LEFT JOIN vyuICGetBundleItem  BI ON BI.intBundleItemId   = IM.intItemId
    JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
    WHERE IUOM.ysnStockUnit = 1 AND IUOM.intItemId = IM.intItemId
    ) UOM 
-WHERE IM.strType = 'Non-Inventory'  
- OR (IM.strType = 'Inventory' AND (ISNULL(IM.intCommodityId, 0) = 0 OR ISNULL(CO.ysnExchangeTraded, 0) = 0))
-
+WHERE (IM.strType = 'Non-Inventory'    
+ OR (IM.strType = 'Inventory' AND (ISNULL(IM.intCommodityId, 0) = 0 OR ISNULL(CO.ysnExchangeTraded, 0) = 0)))
+ and IU.ysnStockUnit = 1
