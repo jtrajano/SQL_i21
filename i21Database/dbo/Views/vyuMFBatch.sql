@@ -140,6 +140,7 @@ SELECT
 	,strContractNumber=CH.strContractNumber
 	,intContractSeq=CD.intContractSeq
 	,strSampleTypeName=ST.strSampleTypeName
+    ,strSampleNumber = S.strSampleNumber
 	,strOriginalFeedStock = OriginalItem.strShortName
 	,dtmShippingDate=B.dtmShippingDate
 	,strERPPONumber2= A.strERPPONumber2
