@@ -587,11 +587,16 @@ UPDATE GL SET intSourceEntityId = PAY.intEntityVendorId
 FROM @GLEntries GL
 JOIN tblAPPayment PAY
 ON GL.strTransactionId = PAY.strPaymentRecordNum
-DECLARE @GainLossAccount INT;
 
+DECLARE @GainLossAccount INT;
 SELECT TOP 1 
 	@GainLossAccount = intAccountsPayableRealizedId 
 FROM tblSMMultiCurrency
+
+DECLARE @functionalCurrency INT;
+SELECT TOP 1 
+		@functionalCurrency = intDefaultCurrencyId 
+	FROM tblSMCompanyPreference
 
 DECLARE	@OverrideCompanySegment BIT,
 			  @OverrideLocationSegment BIT,
@@ -604,14 +609,15 @@ SELECT TOP 1
 FROM tblAPCompanyPreference
 
 
-IF EXISTS(SELECT 1 FROM tblAPPayment A
+IF EXISTS(
+	SELECT TOP 1 1 isForex
+	FROM tblAPPayment A
 	OUTER APPLY (
 		SELECT intOverrideAccount
 		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT 
+	INNER JOIN @payments ID ON ID.intId = A.intPaymentId
 	INNER JOIN @GLEntries GL ON GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
-	WHERE GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
-	AND	A.intPaymentId IN (SELECT intId FROM @payments)
 )
 BEGIN
 --HANDLE DECIMAL LOSS FOR MULTI CURRENCY
@@ -660,7 +666,7 @@ SELECT
 	'Decimal loss due to rounding.',
 	A.[strCode],    
 	NULL,
-	A.[intCurrencyId],
+	@functionalCurrency,
 	NULL,
 	1,
 	A.[dtmDateEntered] ,
@@ -691,7 +697,6 @@ GROUP BY
 	A.[intUserId],
 	A.[intEntityId],
 	A.[strCode],
-	A.[intCurrencyId],
 	A.[dtmDateEntered],
 	A.[dtmTransactionDate],
 	A.[strTransactionId],
