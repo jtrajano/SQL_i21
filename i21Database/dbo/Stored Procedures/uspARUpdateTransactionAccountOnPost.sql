@@ -25,7 +25,7 @@ SET ANSI_WARNINGS OFF
 
 	SELECT TOP 1
 		 @OverrideCompanySegment				= ysnOverrideCompanySegment
-		,@OverrideLocationSegment				= ysnOverrideLocationSegment
+		,@OverrideLocationSegment				= CASE WHEN ysnOverrideLocationSegment = 1 OR ysnAllowSingleLocationEntries = 1 THEN 1 ELSE 0 END
 		,@OverrideLineOfBusinessSegment			= ysnOverrideLineOfBusinessSegment
 		,@OverrideARAccountLineOfBusinessSegment= ysnOverrideARAccountLineOfBusinessSegment
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
