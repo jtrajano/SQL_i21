@@ -448,9 +448,9 @@ BEGIN TRY
 		,strFreightTerm							= CB.strFreightTerm + ' (' + CB.strDescription + ')'
 		,strCity								= ISNULL(CT.strCity, '')
 		,strWeightGradeDesc						= ISNULL(W1.strWeightGradeDesc, '')
-		,strStraussCondition     				= @fontBoldFreightTerm + CB.strFreightTerm + ' (' + CB.strDescription + ')' + '</span>' + ' '
-												+ @fontBoldCity +  ISNULL(CT.strCity, '') + '</span>' + ' ' 
-												+ @fontBoldWeightGradeDesc + ISNULL(W1.strWeightGradeDesc, '') + '</span>'
+		,strStraussCondition     				= @fontBoldFreightTerm + CB.strFreightTerm + ' (' + CB.strDescription + ') ' + '</span>' + 
+												+ @fontBoldCity +  ISNULL(CT.strCity, '') + '</span>' +  
+												+ @fontBoldWeightGradeDesc + ISNULL(W1.strWeightGradeDesc, '') + '</span>' 
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
