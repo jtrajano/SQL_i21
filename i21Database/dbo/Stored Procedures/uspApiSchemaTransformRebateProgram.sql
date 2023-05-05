@@ -319,36 +319,46 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		WHERE xp.intVendorSetupId = v.intVendorSetupId
 			AND xvs.intEntityId = v.intEntityId
 	)
+		
+UPDATE p
+SET   p.strVendorProgram = x.strVendorProgram
+	, p.guiApiUniqueId = @guiApiUniqueId
+	, p.strProgramDescription = x.strDescription
+	, p.intRowNumber = x.intRowNumber
+	, p.intConcurrencyId = p.intConcurrencyId + 1
+FROM tblVRProgram p
+JOIN (
+	SELECT DISTINCT xp.intProgramId, MAX(vts.strVendorProgram) strVendorProgram,
+	MAX(vts.intRowNumber) intRowNumber, MAX(vts.strDescription) strDescription
+	FROM tblVRProgram xp
+	JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
+	JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
+	JOIN tblApiSchemaTransformRebateProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
+	JOIN @UniqueVendors uv ON uv.intEntityId = v.intEntityId
+	WHERE vts.guiApiUniqueId = @guiApiUniqueId
+		AND (xp.guiApiUniqueId != @guiApiUniqueId OR xp.guiApiUniqueId IS NULL)
+		AND (xp.strVendorProgram = vts.strVendorProgram OR NULLIF(xp.strVendorProgram, '') IS NULL)
+	GROUP BY xp.intProgramId
+) x ON x.intProgramId = p.intProgramId
 
-UPDATE xp
-SET   xp.strVendorProgram = vts.strVendorProgram
-	, xp.guiApiUniqueId = @guiApiUniqueId
-	, xp.strProgramDescription = vts.strDescription
-	, xp.intRowNumber = vts.intRowNumber
-	, xp.intConcurrencyId = xp.intConcurrencyId + 1
-FROM tblVRProgram xp
-JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
-JOIN vyuAPVendor v ON v.intEntityId = xvs.intEntityId
-JOIN tblApiSchemaTransformRebateProgram vts ON v.strVendorId = vts.strVendor OR v.strName = vts.strVendor
-JOIN @UniqueVendors uv ON uv.intEntityId = v.intEntityId
-WHERE vts.guiApiUniqueId = @guiApiUniqueId
 
-DECLARE @CreatedPrograms TABLE (intProgramId INT, intVendorSetupId INT, strProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS, strVendorProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+DECLARE @CreatedPrograms TABLE (intProgramId INT, intVendorSetupId INT, strProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS, strVendorProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS, intRowNumber INT)
 
 DECLARE @intProgramId INT
 DECLARE @intVendorSetupId INT
 DECLARE @startingNo NVARCHAR(150)
 DECLARE @strVendorProgram NVARCHAR(200)
+DECLARE @intRowNumber INT
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT p.intProgramId, p.intVendorSetupId, p.strVendorProgram
+SELECT p.intProgramId, p.intVendorSetupId, p.strVendorProgram, p.intRowNumber
 FROM tblVRProgram p
 WHERE p.guiApiUniqueId = @guiApiUniqueId
 
 OPEN cur
 
-FETCH NEXT FROM cur INTO @intProgramId, @intVendorSetupId, @strVendorProgram
+FETCH NEXT FROM cur INTO @intProgramId, @intVendorSetupId, @strVendorProgram, @intRowNumber
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -357,10 +367,10 @@ BEGIN
 	SET strProgram = @startingNo
 	WHERE intProgramId = @intProgramId
 
-	INSERT INTO @CreatedPrograms(intProgramId, intVendorSetupId, strProgram, strVendorProgram)
-	VALUES (@intProgramId, @intVendorSetupId, @startingNo, @strVendorProgram)
+	INSERT INTO @CreatedPrograms(intProgramId, intVendorSetupId, strProgram, strVendorProgram, intRowNumber)
+	VALUES (@intProgramId, @intVendorSetupId, @startingNo, @strVendorProgram, @intRowNumber)
 
-	FETCH NEXT FROM cur INTO @intProgramId, @intVendorSetupId, @strVendorProgram
+	FETCH NEXT FROM cur INTO @intProgramId, @intVendorSetupId, @strVendorProgram, @intRowNumber
 END
 
 CLOSE cur
@@ -406,6 +416,25 @@ DECLARE @CreatedProgramItems TABLE (
 	, intRowNumber INT NULL
 )
 
+-- SELECT
+-- 	  v.strProgram, p.intProgramId, p.strProgram, rp.strVendorProgram
+	
+-- FROM tblApiSchemaTransformRebateProgram rp
+-- OUTER APPLY (
+-- 	SELECT uv.strProgram, uv.intVendorSetupId
+-- 	FROM @UniqueVendors uv
+-- 	JOIN vyuAPVendor v ON v.intEntityId = uv.intEntityId
+-- 	WHERE uv.strProgram = rp.strVendorProgram
+-- 		AND (rp.strVendor = v.strVendorId OR rp.strVendor = v.strName)
+-- ) v
+-- OUTER APPLY (
+-- 	SELECT TOP 1 xp.intProgramId, xp.strProgram
+-- 	FROM tblVRProgram xp
+-- 	WHERE xp.strVendorProgram = rp.strVendorProgram
+-- 		AND xp.intVendorSetupId = v.intVendorSetupId
+-- ) p
+-- WHERE rp.guiApiUniqueId = @guiApiUniqueId
+
 INSERT INTO @CreatedProgramItems
 SELECT
 	  p.intProgramId
@@ -419,30 +448,38 @@ SELECT
 	, 1
 	, rp.intRowNumber
 FROM tblApiSchemaTransformRebateProgram rp
-JOIN vyuAPVendor v ON v.strVendorId = rp.strVendor OR v.strName = rp.strVendor
-JOIN tblVRVendorSetup vs ON vs.intEntityId = v.intEntityId
-JOIN tblVRProgram p ON p.intVendorSetupId = vs.intVendorSetupId
-	AND p.guiApiUniqueId = rp.guiApiUniqueId
-	AND p.intRowNumber = rp.intRowNumber
+OUTER APPLY (
+	SELECT uv.strProgram, uv.intVendorSetupId
+	FROM @UniqueVendors uv
+	JOIN vyuAPVendor v ON v.intEntityId = uv.intEntityId
+	WHERE uv.strProgram = rp.strVendorProgram
+		AND (rp.strVendor = v.strVendorId OR rp.strVendor = v.strName)
+) v
+OUTER APPLY (
+	SELECT TOP 1 xp.intProgramId, xp.strProgram
+	FROM @CreatedPrograms xp
+	WHERE xp.strVendorProgram = rp.strVendorProgram
+		AND xp.intVendorSetupId = v.intVendorSetupId
+) p
 LEFT JOIN tblICItem i ON (i.strItemNo = rp.strItemNo OR i.strDescription = rp.strItemName)
 OUTER APPLY (
 	SELECT TOP 1 xxi.intItemId
 	FROM tblICItemVendorXref xxi
 	WHERE xxi.strVendorProduct = rp.strVendorItemNo
-	AND xxi.intVendorSetupId = p.intVendorSetupId
+	AND xxi.intVendorSetupId = v.intVendorSetupId
 ) xi
 LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = rp.strRebateUOM
 OUTER APPLY (
 	SELECT TOP 1 intUnitMeasureId 
 	FROM tblVRUOMXref 
 	WHERE strVendorUOM = rp.strVendorRebateUOM
-	AND intVendorSetupId = p.intVendorSetupId
+	AND intVendorSetupId = v.intVendorSetupId
 ) xu
 OUTER APPLY (
 	SELECT TOP 1 intCategoryId
 	FROM tblICCategoryVendor
 	WHERE strVendorDepartment = rp.strVendorCategory
-	AND intVendorSetupId = p.intVendorSetupId
+	AND intVendorSetupId = v.intVendorSetupId
 	AND NULLIF(rp.strCategory, '') IS NULL
 ) xc
 LEFT JOIN tblICCategory cat ON cat.strCategoryCode = rp.strCategory OR cat.strDescription = rp.strCategory
@@ -453,6 +490,7 @@ OUTER APPLY (
 		AND ysnStockUnit = 1
 ) du
 WHERE rp.guiApiUniqueId = @guiApiUniqueId
+ORDER BY rp.intRowNumber
 
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage, strAction)
 SELECT
