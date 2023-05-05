@@ -50,7 +50,8 @@ BEGIN TRY
 	DECLARE @fontBoldEndDate NVARCHAR(MAX)
 	DECLARE @fontBold NVARCHAR(MAX)
 	DECLARE @fontBoldItem NVARCHAR(MAX)
-	
+	DECLARE @fontBoldStatus NVARCHAR(MAX)
+
 	SELECT  @strAmendedColumnsDetails = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
 											FROM tblCTAmendmentApproval AAP
@@ -149,6 +150,15 @@ BEGIN TRY
 		BEGIN 
 			SET @fontBoldItem = '<span style="font-family:Arial;font-size:13px;">'
 		END	
+	IF CHARINDEX('intContractStatusId',@strAmendedColumnsDetails, 0) > 0 
+		BEGIN
+			SET @fontBoldStatus = '<span style="font-family:Arial;font-size:13px;font-weight:bold;">'
+		END
+		ELSE
+		BEGIN 
+			SET @fontBoldStatus = '<span style="font-family:Arial;font-size:13px;">'
+		END	
+	
 		
 	DECLARE @htmlDoc NVARCHAR(MAX)
 	SET @htmlDoc = '</br></br>'
@@ -243,7 +253,7 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 			strStraussQuantity		=  CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE '' END +  @fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + ' '  + '<div>' + @fontBoldQuantityUOM + UM.strUnitMeasure +'</span>' + '</div>'							
-									   + @fontBold + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END) + '</span>',
+									   + @fontBoldStatus + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END) + '</span>',
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
