@@ -240,7 +240,7 @@ BEGIN TRY
 		,[strInvoiceReportNumber]	= @InvoiceReportNumber
 		,[intConcurrencyId]			= 0
 		,[dtmDiscountDate]			= @dtmDiscountDate
-		,[dblCurrencyExchangeRate]	= ARI.[dblCurrencyExchangeRate]
+		,[dblCurrencyExchangeRate]	= ISNULL(NULLIF(ARI.[dblCurrencyExchangeRate],0), @ExchangeRate)
 	FROM	
 		tblARInvoice ARI	
 	WHERE
