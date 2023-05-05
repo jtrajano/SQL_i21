@@ -7,6 +7,7 @@
 	DECLARE @Location INT
 	DECLARE @BillTo INT
 	DECLARE @ShipTo INT
+	DECLARE @Terms INT = null
 	DECLARE @activeStatus bit = 0
 	DECLARE @creditHoldStatus bit = 0
 
@@ -54,15 +55,16 @@
 			SELECT @activeStatus = ysnActive, 
 				   @creditHoldStatus = ysnCreditHold,
 				   @BillTo = intBillToId,
-				   @ShipTo = intShipToId
+				   @ShipTo = intShipToId,
+				   @Terms = intTermsId
 			FROM tblARCustomer WHERE intEntityId = @EntityId
 			DELETE FROM tblEMEntityType WHERE intEntityId = @EntityId AND LOWER(strType) = 'prospect'	
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomer WHERE intEntityId = @EntityId)
 			BEGIN
 
-				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance, ysnActive, ysnCreditHold, intBillToId, intShipToId)
-				SELECT @EntityId,0,0,@activeStatus, @creditHoldStatus, @BillTo, @ShipTo
+				INSERT INTO tblARCustomer(intEntityId, dblCreditLimit, dblARBalance, ysnActive, ysnCreditHold, intBillToId, intShipToId, intTermsId)
+				SELECT @EntityId,0,0,@activeStatus, @creditHoldStatus, @BillTo, @ShipTo, @Terms
 
 			END
 
