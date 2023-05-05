@@ -296,14 +296,17 @@ BEGIN TRY
 									  @intUserId			=  @intUserId
 
 			-- Summary Log
-			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-								@intContractDetailId 	= 	@intContractDetailId,
-								@strSource			 	= 	'Pricing',
-								@strProcess		 	    = 	'Fixation Detail Delete',
-								@contractDetail 		= 	@contractDetails,
-								@intUserId				= 	@intUserId,
-								@intTransactionId		= 	@intPriceFixationDetailId,
-								@dblTransactionQty		= 	@QtyToDelete
+			if (@ysnDeleteWholePricing <> 1)
+			begin
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 	    = 	'Fixation Detail Delete',
+									@contractDetail 		= 	@contractDetails,
+									@intUserId				= 	@intUserId,
+									@intTransactionId		= 	@intPriceFixationDetailId,
+									@dblTransactionQty		= 	@QtyToDelete
+			end
 			-- Summary Log
 
 		end
