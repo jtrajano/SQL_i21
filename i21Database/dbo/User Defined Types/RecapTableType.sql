@@ -29,7 +29,7 @@
 	[dblCreditForeign]			NUMERIC (18, 6) NULL,
 	[dblCreditReport]			NUMERIC (18, 6) NULL,
 	[dblReportingRate]			NUMERIC (18, 6) NULL,
-	[dblForeignRate]			NUMERIC (18, 6) NULL,
+	[dblForeignRate]			NUMERIC (38, 20) NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
 	[strRateType]			    NVARCHAR(50)	COLLATE Latin1_General_CI_AS,
 	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
