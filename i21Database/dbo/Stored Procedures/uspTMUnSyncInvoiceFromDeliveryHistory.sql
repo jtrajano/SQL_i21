@@ -671,6 +671,7 @@ BEGIN
 		,intSourceType				= 1
 		,intDeliveryHistoryId		= NULL
 	FROM #tmpTMInvoiceDispatchIds 
+	WHERE intDispatchId IS NOT NULL
 
 	EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 	
