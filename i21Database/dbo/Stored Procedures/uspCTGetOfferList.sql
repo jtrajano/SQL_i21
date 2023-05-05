@@ -314,7 +314,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =    --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -379,7 +379,7 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff =  --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -391,7 +391,8 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightFRM = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))																												
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
+		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.--[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))																												
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 						 --Check if need to consider the sub currency
@@ -570,7 +571,7 @@ BEGIN
 					) 
 		  ,FMO.strFutureMonth
 		  ,dblBasis =   --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -625,7 +626,7 @@ BEGIN
 		,dtmReceiptDate = NULL    
 		,strStorageLocation = NULL 
 		,dblBasisDiff =  --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -769,7 +770,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =   --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -834,7 +835,7 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff = --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -986,7 +987,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =   --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1051,7 +1052,7 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff = --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1193,7 +1194,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =    --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1258,7 +1259,7 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff =  --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1443,7 +1444,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =    --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1507,7 +1508,7 @@ BEGIN
 		,strStorageLocation = CASE WHEN  ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') = 'Open' THEN CSL.strSubLocationName		
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff =   --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1519,7 +1520,8 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightFRM = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
+		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))
 		,dblCIFInStore = 0.00 
 		,dblCUMStorage =  0.00
 		,dblCUMFinancing = 0.00
@@ -1697,7 +1699,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =    --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1762,7 +1764,7 @@ BEGIN
 								 
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff =  --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -1774,7 +1776,8 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId 
 																	   END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 	
-		,dblFreightFRM = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
+		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
 		,dblCIFInStore = 0.00 
 		,dblCUMStorage =  0.00
 		,dblCUMFinancing = 0.00
@@ -1950,7 +1953,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =    --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -2015,7 +2018,7 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff = --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -2027,7 +2030,8 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate())
-		,dblFreightFRM = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
+		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 						 --Check if need to consider the sub currency
@@ -2243,7 +2247,7 @@ BEGIN
 		  ,PT.strPricingType
 		  ,FMO.strFutureMonth
 		  ,dblBasis =    --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -2308,7 +2312,7 @@ BEGIN
 								   WHEN	 IRI.intLoadShipmentId <> 0 THEN IRSL.strSubLocationName
 								   ELSE  CLSL.strSubLocationName END
 		,dblBasisDiff =  --(OfferlistFilter UOM to Sequence UOM) Basis of the Sequence
-						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,ISNULL(CTD.dblBasis,0.00))
+						dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),(SELECT TOP 1 intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = CTD.intBasisUOMId AND intItemId = CTD.intItemId),ISNULL(CTD.dblBasis,0.00))
 						--Currency exchange rate of sequence currency  to filter currency 
 						* dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 					
 						--Check if need to consider the sub currency
@@ -2320,7 +2324,8 @@ BEGIN
 																			THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) 
 																			ELSE CTD.intCurrencyId
 																	  END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
-		,dblFreightFRM = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
+		,dblFreightFRM = dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId, @IntUnitMeasureId)
+		--dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(@IntUnitMeasureId,CTD.intUnitMeasureId),CTD.intUnitMeasureId,dbo.[fnCTGetFreightRateMatrixFromCommodity](CTD.intLoadingPortId,CTD.intDestinationPortId,CH.intCommodityId ))	
 		,dblCIFInStore = dbo.fnCTConvertQtyToTargetCommodityUOM( CH.intCommodityId,ISNULL(NULLIF(@IntUnitMeasureId,0),CTD.intUnitMeasureId),CTD.intUnitMeasureId,  ISNULL(CASE WHEN IRI.intInventoryReceiptId <> 0 THEN IRC.dblAmount ELSE 0.00 END,IRC.dblAmount))  --CIF Item setup in Company Config CIF Charge from IR
 						 * dbo.fnCMGetForexRateFromCurrency( CASE WHEN EXISTS(SELECT 1 FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId and ysnSubCurrency = 1 ) THEN (SELECT intMainCurrencyId FROM tblSMCurrency where intCurrencyID =  CTD.intCurrencyId ) ELSE CTD.intCurrencyId END,@IntCurrencyId,CTD.intRateTypeId,getdate()) 
 						 --Check if need to consider the sub currency

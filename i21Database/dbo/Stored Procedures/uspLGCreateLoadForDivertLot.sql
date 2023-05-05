@@ -352,7 +352,7 @@ BEGIN
 		,dblDeliveredGross = NULL
 		,dblDeliveredTare = NULL
 		,dblDeliveredNet = NULL
-		,strLotAlias
+		,LD.strLotAlias
 		,strSupplierLotNumber
 		,dtmProductionDate
 		,strScheduleInfoMsg

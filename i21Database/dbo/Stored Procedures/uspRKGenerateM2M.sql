@@ -1407,13 +1407,22 @@ BEGIN TRY
 		INTO #tblContractCost
 		FROM ( 
 			SELECT dblCosts = dbo.fnRKGetCurrencyConvertion(CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = 1 THEN CU.intMainCurrencyId ELSE dc.intCurrencyId END, @intCurrencyId, @intMarkToMarketRateTypeId)
-								* (CASE WHEN (M2M.strContractType = 'Both') OR (M2M.strContractType = 'Purchase' AND cd.strContractType = 'Purchase') OR (M2M.strContractType = 'Sale' AND cd.strContractType = 'Sale')
-											THEN (CASE WHEN strAdjustmentType = 'Add' THEN ABS(CASE WHEN dc.strCostMethod = 'Amount' THEN SUM(dc.dblRate)
-																									ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END)
-														WHEN strAdjustmentType = 'Reduce' THEN CASE WHEN dc.strCostMethod = 'Amount' THEN SUM(dc.dblRate)
-																									ELSE - SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END
-														ELSE 0 END)
-										ELSE 0 END)
+								* (CASE WHEN (M2M.strContractType = 'Both') 
+											OR (M2M.strContractType = 'Purchase' AND cd.strContractType = 'Purchase') 
+											OR (M2M.strContractType = 'Sale' AND cd.strContractType = 'Sale')
+												THEN ABS(CASE WHEN dc.strCostMethod = 'Amount' 
+														THEN (SUM(dc.dblRate) 
+															/ CASE WHEN ISNULL(ch.ysnLoad, 0) = 1 
+																THEN (ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId, cu3.intCommodityUnitMeasureId, ISNULL(cd2.dblQuantityPerLoad, 1)), 1) 
+																		* CAST(ISNULL(cd2.intNoOfLoad, 1) AS NUMERIC(16, 8)))
+																ELSE ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId, cu3.intCommodityUnitMeasureId, ISNULL(cd.dblDetailQuantity, 1)), 1)
+																END)
+														ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0)))
+														END) * CASE WHEN strAdjustmentType = 'Add' THEN 1  
+																	WHEN strAdjustmentType = 'Reduce' THEN -1
+																	ELSE 0
+																	END
+												ELSE 0 END)
 				, strAdjustmentType
 				, dc.intContractDetailId
 				, a = cu.intCommodityUnitMeasureId
@@ -1422,13 +1431,25 @@ BEGIN TRY
 			FROM @GetContractDetailView cd
 			INNER JOIN vyuRKM2MContractCost dc ON dc.intContractDetailId = cd.intContractDetailId
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-			INNER JOIN tblRKM2MConfiguration M2M ON dc.intItemId = M2M.intItemId AND ch.intFreightTermId = M2M.intFreightTermId
+			INNER JOIN tblCTContractDetail cd2 ON cd2.intContractHeaderId = ch.intContractHeaderId
+			INNER JOIN tblRKM2MConfiguration M2M 
+				ON dc.intItemId = M2M.intItemId 
+				AND ch.intFreightTermId = M2M.intFreightTermId
+				AND (	 @ysnEnableMTMPoint = 0 
+						 OR
+						(@ysnEnableMTMPoint = 1 AND ISNULL(M2M.intMTMPointId , 0) = ISNULL(cd2.intMTMPointId, 0))
+					)
 			INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = @intCommodityId AND cu.intUnitMeasureId = @intPriceUOMId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = dc.intCurrencyId
 			LEFT JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = @intCommodityId AND cu1.intUnitMeasureId = dc.intUnitMeasureId
+			LEFT JOIN tblICItemUOM CIU ON CIU.intItemUOMId = cd2.intItemUOMId
+			LEFT JOIN tblICCommodityUnitMeasure cu2 ON cu2.intCommodityId = @intCommodityId AND cu2.intUnitMeasureId = CIU.intUnitMeasureId
+			LEFT JOIN tblICCommodityUnitMeasure cu3 ON cu3.intCommodityId = @intCommodityId AND cu3.intUnitMeasureId = @intQuantityUOMId
 			WHERE NOT (cd.intPricingTypeId = 2 AND cd.strPricingType = 'Priced')
 			GROUP BY cu.intCommodityUnitMeasureId
 				, cu1.intCommodityUnitMeasureId
+				, cu2.intCommodityUnitMeasureId
+				, cu3.intCommodityUnitMeasureId
 				, strAdjustmentType
 				, dc.intContractDetailId
 				, dc.strCostMethod
@@ -1437,6 +1458,10 @@ BEGIN TRY
 				, dc.intCurrencyId
 				, M2M.strContractType
 				, cd.strContractType
+				, cd.dblDetailQuantity
+				, ch.ysnLoad
+				, cd2.intNoOfLoad
+				, cd2.dblQuantityPerLoad
 		) t 
 		GROUP BY intContractDetailId
 
@@ -1486,7 +1511,7 @@ BEGIN TRY
 		SELECT DISTINCT intContractDetailId
 			, dblFuturePrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cuc.intCommodityUnitMeasureId, dblLastSettle / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 			, dblFutures = dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, PUOM.intCommodityUnitMeasureId, cd.dblFutures / CASE WHEN c1.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-			, intFuturePriceCurrencyId = fm.intCurrencyId
+			, intFuturePriceCurrencyId = CASE WHEN CFM.ysnSubCurrency = 1 THEN CFM.intMainCurrencyId ELSE fm.intCurrencyId END
 			, intFMMainCurrencyId = CFM.intMainCurrencyId
 			, ysnFMSubCurrency = CFM.ysnSubCurrency
 		INTO #tblSettlementPrice
@@ -1632,7 +1657,7 @@ BEGIN TRY
 		SELECT dblRatio
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 			, intMarketBasisUOM = intCommodityUnitMeasureId
-			, intMarketBasisCurrencyId = temp.intCurrencyId
+			, intMarketBasisCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE temp.intCurrencyId END
 			, intFutureMarketId = temp.intFutureMarketId
 			, intItemId = temp.intItemId
 			, intContractTypeId = temp.intContractTypeId
@@ -3389,7 +3414,7 @@ BEGIN TRY
 				, dblNoOfLots
 				, dblLotsFixed
 				, dblPriceWORollArb
-				, intCurrencyId
+				, intCurrencyId = CASE WHEN ysnSubCurrency = 1 THEN intMainCurrencyId ELSE intCurrencyId END
 				, intSpreadMonthId
 				, strSpreadMonth
 				, dblSpreadMonthPrice
@@ -4067,7 +4092,7 @@ BEGIN TRY
 										ELSE (ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0)) * dblFinalRate END
 									ELSE 0 END)
 				, dblMarketRatio
-				, dblFuturePrice = (ISNULL(dblFuturePrice, 0) * dblFinalRate)--Market Futures
+				, dblFuturePrice = (ISNULL(dblFuturePrice, 0) * dblRateFP)--Market Futures
 				, intContractTypeId
 				, dblAdjustedContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 
 													THEN (CASE WHEN intCurrencyId = @intCurrencyId
@@ -7935,7 +7960,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
 		LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
 		LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intItemId AND M2M.intFreightTermId = RealizedPNL.intFreightTermId
-		WHERE Item.strCostType <> 'Commission'
+		WHERE Item.strCostType <> 'Commission' 
 		
 		IF ISNULL(@intFutureSettlementPriceId, 0) > 0
 		BEGIN

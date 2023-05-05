@@ -281,7 +281,8 @@ BEGIN TRY
 					, cer.intToCurrencyId
 				FROM tblSMCurrencyExchangeRate cer 
 				LEFT JOIN tblSMCurrencyExchangeRateDetail cerd ON cerd.intCurrencyExchangeRateId = cer.intCurrencyExchangeRateId AND cerd.intRateTypeId = @intRateTypeId
-				WHERE ( cer.intToCurrencyId = @intSequenceCurrencyId )
+				cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
+				WHERE ( cer.intToCurrencyId = ISNULL(seqCurrency.intMainCurrencyId, seqCurrency.intCurrencyID ) )
 					AND CAST(FLOOR(CAST(cerd.dtmValidFromDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
 			) tbl ON tbl.intFromCurrencyId = ci.intCurrencyId AND intRowId = 1
 			cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency

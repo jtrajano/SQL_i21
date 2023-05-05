@@ -318,99 +318,142 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strContractType')
 	BEGIN
 		EXEC('ALTER TABLE tblRKM2MConfiguration ADD strContractType NVARCHAR(20)')
+		EXEC('UPDATE tblRKM2MConfiguration SET strContractType = ''Both''')
 	END
-
-	EXEC('UPDATE tblRKM2MConfiguration SET strContractType = ''Both''')
 END
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKM2MConfiguration]') AND type IN (N'U'))
 BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strContractType')
-	BEGIN
-		IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'intFreightTermId')
-		BEGIN
-			EXEC('DELETE FROM tblRKM2MConfiguration
-				WHERE intM2MConfigurationId IN (
-					SELECT intM2MConfigurationId FROM (
-						SELECT Config.intItemId
-							, Config.strContractType
-							, Config.intFreightTermId
-							, Config.strAdjustmentType
-							, intM2MConfigurationId = MAX(intM2MConfigurationId)
-						FROM tblRKM2MConfiguration Config
-						JOIN (
-							SELECT intItemId
-								, strContractType
-								, intFreightTermId
-								, strAdjustmentType
-							FROM tblRKM2MConfiguration
-							GROUP BY intItemId
-								, strContractType
-								, intFreightTermId
-								, strAdjustmentType
-							HAVING COUNT(*) > 1
-						) tbl ON tbl.intItemId = Config.intItemId
-							AND tbl.strContractType = Config.strContractType
-							AND tbl.intFreightTermId = Config.intFreightTermId
-							AND tbl.strAdjustmentType = Config.strAdjustmentType
-						GROUP BY Config.intItemId
-							, Config.strContractType
-							, Config.intFreightTermId
-							, Config.strAdjustmentType
-					) tbl
-				)')
-		END
-		ELSE
-		BEGIN
-			EXEC('DELETE FROM tblRKM2MConfiguration
-				WHERE intM2MConfigurationId IN (
-					SELECT intM2MConfigurationId FROM (
-						SELECT Config.intItemId
-							, Config.strContractType
-							, Config.strAdjustmentType
-							, intM2MConfigurationId = MAX(intM2MConfigurationId)
-						FROM tblRKM2MConfiguration Config
-						JOIN (
-							SELECT intItemId
-								, strContractType
-								, strAdjustmentType
-							FROM tblRKM2MConfiguration
-							GROUP BY intItemId
-								, strContractType
-								, strAdjustmentType
-							HAVING COUNT(*) > 1
-						) tbl ON tbl.intItemId = Config.intItemId
-							AND tbl.strContractType = Config.strContractType
-							AND tbl.strAdjustmentType = Config.strAdjustmentType
-						GROUP BY Config.intItemId
-							, Config.strContractType
-							, Config.strAdjustmentType
-					) tbl
-				)')
-		END
-	END
-	ELSE IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strAdjustmentType')
+		AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strAdjustmentType')
+		AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'intFreightTermId')
+		AND EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'intMTMPointId')
 	BEGIN
 		EXEC('DELETE FROM tblRKM2MConfiguration
 			WHERE intM2MConfigurationId IN (
 				SELECT intM2MConfigurationId FROM (
 					SELECT Config.intItemId
+						, Config.strContractType
+						, Config.intFreightTermId
 						, Config.strAdjustmentType
+						, Config.intMTMPointId
 						, intM2MConfigurationId = MAX(intM2MConfigurationId)
 					FROM tblRKM2MConfiguration Config
 					JOIN (
 						SELECT intItemId
+							, strContractType
+							, intFreightTermId
 							, strAdjustmentType
+							, intMTMPointId
 						FROM tblRKM2MConfiguration
 						GROUP BY intItemId
+							, strContractType
+							, intFreightTermId
 							, strAdjustmentType
+							, intMTMPointId
 						HAVING COUNT(*) > 1
 					) tbl ON tbl.intItemId = Config.intItemId
+						AND tbl.strContractType = Config.strContractType
+						AND tbl.intFreightTermId = Config.intFreightTermId
 						AND tbl.strAdjustmentType = Config.strAdjustmentType
+						AND tbl.intMTMPointId = Config.intMTMPointId
 					GROUP BY Config.intItemId
+						, Config.strContractType
+						, Config.intFreightTermId
 						, Config.strAdjustmentType
+						, Config.intMTMPointId
 				) tbl
 			)')
+	END
+	ELSE 
+	BEGIN
+		IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strContractType')
+		BEGIN
+			IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'intFreightTermId')
+			BEGIN
+				EXEC('DELETE FROM tblRKM2MConfiguration
+					WHERE intM2MConfigurationId IN (
+						SELECT intM2MConfigurationId FROM (
+							SELECT Config.intItemId
+								, Config.strContractType
+								, Config.intFreightTermId
+								, Config.strAdjustmentType
+								, intM2MConfigurationId = MAX(intM2MConfigurationId)
+							FROM tblRKM2MConfiguration Config
+							JOIN (
+								SELECT intItemId
+									, strContractType
+									, intFreightTermId
+									, strAdjustmentType
+								FROM tblRKM2MConfiguration
+								GROUP BY intItemId
+									, strContractType
+									, intFreightTermId
+									, strAdjustmentType
+								HAVING COUNT(*) > 1
+							) tbl ON tbl.intItemId = Config.intItemId
+								AND tbl.strContractType = Config.strContractType
+								AND tbl.intFreightTermId = Config.intFreightTermId
+								AND tbl.strAdjustmentType = Config.strAdjustmentType
+							GROUP BY Config.intItemId
+								, Config.strContractType
+								, Config.intFreightTermId
+								, Config.strAdjustmentType
+						) tbl
+					)')
+			END
+			ELSE
+			BEGIN
+				EXEC('DELETE FROM tblRKM2MConfiguration
+					WHERE intM2MConfigurationId IN (
+						SELECT intM2MConfigurationId FROM (
+							SELECT Config.intItemId
+								, Config.strContractType
+								, Config.strAdjustmentType
+								, intM2MConfigurationId = MAX(intM2MConfigurationId)
+							FROM tblRKM2MConfiguration Config
+							JOIN (
+								SELECT intItemId
+									, strContractType
+									, strAdjustmentType
+								FROM tblRKM2MConfiguration
+								GROUP BY intItemId
+									, strContractType
+									, strAdjustmentType
+								HAVING COUNT(*) > 1
+							) tbl ON tbl.intItemId = Config.intItemId
+								AND tbl.strContractType = Config.strContractType
+								AND tbl.strAdjustmentType = Config.strAdjustmentType
+							GROUP BY Config.intItemId
+								, Config.strContractType
+								, Config.strAdjustmentType
+						) tbl
+					)')
+			END
+		END
+		ELSE IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strAdjustmentType')
+		BEGIN
+			EXEC('DELETE FROM tblRKM2MConfiguration
+				WHERE intM2MConfigurationId IN (
+					SELECT intM2MConfigurationId FROM (
+						SELECT Config.intItemId
+							, Config.strAdjustmentType
+							, intM2MConfigurationId = MAX(intM2MConfigurationId)
+						FROM tblRKM2MConfiguration Config
+						JOIN (
+							SELECT intItemId
+								, strAdjustmentType
+							FROM tblRKM2MConfiguration
+							GROUP BY intItemId
+								, strAdjustmentType
+							HAVING COUNT(*) > 1
+						) tbl ON tbl.intItemId = Config.intItemId
+							AND tbl.strAdjustmentType = Config.strAdjustmentType
+						GROUP BY Config.intItemId
+							, Config.strAdjustmentType
+					) tbl
+				)')
+		END
 	END
 END
 

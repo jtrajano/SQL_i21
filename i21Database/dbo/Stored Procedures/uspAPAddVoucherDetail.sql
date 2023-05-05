@@ -91,7 +91,12 @@ SELECT TOP 100 PERCENT
 	,intTransactionType					=	A.intTransactionType
 	,intBillId							=	A.intBillId
 	,strMiscDescription					=	A.strMiscDescription
-	,intAccountId						=	CASE WHEN A.intAccountId > 0 THEN A.intAccountId ELSE vendor.intGLAccountExpenseId END
+	,intAccountId						=	CASE WHEN A.intTransactionType = 2
+											THEN
+												CASE WHEN A.intAccountId IS NULL THEN payableLoc.intAPAccount ELSE A.intAccountId END
+											ELSE
+												CASE WHEN A.intAccountId > 0 THEN A.intAccountId ELSE vendor.intGLAccountExpenseId END
+											END
 	,intItemId							=	A.intItemId
 	,dblDiscount						=	A.dblDiscount
 	,ysnSubCurrency						=	ISNULL(A.ysnSubCurrency,0)
@@ -307,6 +312,7 @@ OUTER APPLY (
 	INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2
 	WHERE prepayDetail.intContractDetailId = A.intContractDetailId AND A.intTransactionType = 11
 ) prepayRec
+LEFT JOIN tblSMCompanyLocation payableLoc ON B.intShipToId = payableLoc.intCompanyLocationId
 LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 LEFT JOIN tblAP1099KCategory category1099K ON LTRIM(entity.str1099Type) = category1099K.strCategory

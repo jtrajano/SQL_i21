@@ -777,8 +777,8 @@ BEGIN
 		,[strDescription]               = 'Payment for ' + P.strTransactionNumber
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
-		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+		,[intCurrencyId]                = FUNCTIONCURRENCY.[intCurrencyId]
+		,[dblExchangeRate]              = 1
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -796,8 +796,8 @@ BEGIN
 		,[dblDebitReport]               = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) ELSE @ZeroDecimal END
 		,[dblCreditForeign]             = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN @ZeroDecimal ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) END
 		,[dblCreditReport]              = CASE WHEN P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount] < P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount] THEN @ZeroDecimal ELSE ABS((P.[dblAdjustedBasePayment] + P.[dblAdjustedBaseWriteOffAmount] + P.[dblAdjustedBaseInterest] - P.[dblAdjustedBaseDiscount]) - (P.[dblBasePayment] + P.[dblBaseWriteOffAmount] + P.[dblBaseInterest] - P.[dblBaseDiscount])) END
-		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
-		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
+		,[dblReportingRate]             = 1
+		,[dblForeignRate]               = 1
 		,[strRateType]                  = P.[strRateType]
 		,[strDocument]                  = NULL
 		,[strComments]                  = NULL
@@ -815,6 +815,9 @@ BEGIN
 	    SELECT TOP 1 intAccountId = intOverrideAccount
 	    FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
     ) GAINLOSS
+	OUTER APPLY (
+		SELECT TOP 1 [intCurrencyId] = intDefaultCurrencyId FROM tblSMCompanyPreference
+	) FUNCTIONCURRENCY
 	WHERE
 			P.[ysnPost] = 1
 		AND P.[strTransactionType] <> 'Claim'
@@ -1295,6 +1298,118 @@ BEGIN
         ,NULL
     FROM
         [dbo].[fnAPCreateClaimARGLEntries](@TempPaymentIds, @UserId, @BatchId)
+
+    --GAINLOSS FROM ROUNDING DECIMALS
+	IF NOT EXISTS(SELECT NULL FROM #ARPaymentGLEntries WHERE intAccountId IN (
+		SELECT TOP 1 GAINLOSS.intAccountId FROM #ARPostPaymentDetail P
+		OUTER APPLY (SELECT TOP 1 intAccountId = intOverrideAccount FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)) GAINLOSS)
+	)
+	BEGIN
+		INSERT #ARPaymentGLEntries
+			([dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[strDocument]
+			,[strComments]
+			,[strSourceDocumentId]
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+			,[dblSourceUnitDebit]
+			,[dblSourceUnitCredit]
+			,[intCommodityId]
+			,[intSourceEntityId]
+			,[ysnRebuild])
+		SELECT TOP 1
+			 [dtmDate]                      = P.[dtmDatePaid]
+			,[strBatchId]                   = P.[strBatchId]
+			,[intAccountId]                 = GAINLOSS.[intAccountId]
+			,[dblDebit]                     = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN ABS(ConversionRoundingGainLoss.dblConversionDifference) ELSE @ZeroDecimal END
+			,[dblCredit]                    = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN @ZeroDecimal ELSE ABS(ConversionRoundingGainLoss.dblConversionDifference) END
+			,[dblDebitUnit]                 = @ZeroDecimal
+			,[dblCreditUnit]                = @ZeroDecimal
+			,[strDescription]               = 'Payment for ' + P.strTransactionNumber
+			,[strCode]                      = @CODE
+			,[strReference]                 = P.[strCustomerNumber]
+			,[intCurrencyId]                = FUNCTIONCURRENCY.[intCurrencyId]
+			,[dblExchangeRate]              = 1
+			,[dtmDateEntered]               = P.[dtmPostDate]
+			,[dtmTransactionDate]           = P.[dtmDatePaid]
+			,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
+			,[intJournalLineNo]             = P.[intTransactionDetailId]
+			,[ysnIsUnposted]                = 0
+			,[intUserId]                    = P.[intUserId]
+			,[intEntityId]                  = P.[intEntityId]
+			,[strTransactionId]             = P.[strTransactionId]
+			,[intTransactionId]             = P.[intTransactionId]
+			,[strTransactionType]           = @SCREEN_NAME
+			,[strTransactionForm]           = @SCREEN_NAME
+			,[strModuleName]                = @MODULE_NAME
+			,[intConcurrencyId]             = 1
+			,[dblDebitForeign]              = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN ABS(ConversionRoundingGainLoss.dblConversionDifference) ELSE @ZeroDecimal END
+			,[dblDebitReport]               = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN ABS(ConversionRoundingGainLoss.dblConversionDifference) ELSE @ZeroDecimal END
+			,[dblCreditForeign]             = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN @ZeroDecimal ELSE ABS(ConversionRoundingGainLoss.dblConversionDifference) END
+			,[dblCreditReport]              = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN @ZeroDecimal ELSE ABS(ConversionRoundingGainLoss.dblConversionDifference) END
+			,[dblReportingRate]             = 1
+			,[dblForeignRate]               = 1
+			,[strRateType]                  = P.[strRateType]
+			,[strDocument]                  = NULL
+			,[strComments]                  = NULL
+			,[strSourceDocumentId]          = NULL
+			,[intSourceLocationId]          = NULL
+			,[intSourceUOMId]               = NULL
+			,[dblSourceUnitDebit]           = NULL
+			,[dblSourceUnitCredit]          = NULL
+			,[intCommodityId]               = NULL
+			,[intSourceEntityId]            = P.[intEntityCustomerId]
+			,[ysnRebuild]                   = NULL
+		FROM
+			#ARPostPaymentDetail P
+		OUTER APPLY (
+			SELECT TOP 1 intAccountId = intOverrideAccount
+			FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		) GAINLOSS
+		OUTER APPLY (
+			SELECT TOP 1 [intCurrencyId] = intDefaultCurrencyId FROM tblSMCompanyPreference
+		) FUNCTIONCURRENCY
+		OUTER APPLY (
+			SELECT [dblConversionDifference] = (SUM([dblDebit]) - SUM([dblCredit])) FROM #ARPaymentGLEntries
+		) ConversionRoundingGainLoss
+		WHERE
+				P.[ysnPost] = 1
+			AND P.[strTransactionType] <> 'Claim'
+			AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
+			AND ConversionRoundingGainLoss.dblConversionDifference BETWEEN -1 AND 1 
+			AND ConversionRoundingGainLoss.dblConversionDifference <> 0
+	END
 END
 					
 IF @Post = 0

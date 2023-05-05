@@ -81,7 +81,10 @@ BEGIN
 			,[intPurchaseTaxGroupId]
 			,[intPayFromBankAccountId]
 			,[strFinancingSourcedFrom]
-			,[strFinancingTransactionNumber])
+			,[strFinancingTransactionNumber]
+			,[strTaxPoint]
+			,[intTaxLocationId]
+			,[ysnOverrideTaxGroup])
 		SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
@@ -146,6 +149,9 @@ BEGIN
 			,[intPayFromBankAccountId] = BA.intBankAccountId
 			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
 			,[strFinancingTransactionNumber] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN L.strLoadNumber ELSE '' END
+			,[strTaxPoint] = L.strTaxPoint
+			,[intTaxLocationId] = L.intTaxLocationId
+			,[ysnOverrideTaxGroup] = LD.ysnTaxGroupOverride
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -238,6 +244,9 @@ BEGIN
 			,[intPayFromBankAccountId] = NULL
 			,[strFinancingSourcedFrom] = NULL
 			,[strFinancingTransactionNumber] = NULL
+			,[strTaxPoint] = NULL
+			,[intTaxLocationId] = NULL
+			,[ysnOverrideTaxGroup] = NULL
 		FROM vyuLGLoadCostForVendor A
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId

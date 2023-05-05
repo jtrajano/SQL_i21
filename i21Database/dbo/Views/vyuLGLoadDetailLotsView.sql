@@ -21,6 +21,7 @@ SELECT
 	,strItemUnitMeasure = UM.strUnitMeasure
 	,strWeightUnitMeasure = WUM.strUnitMeasure
 	,LOT.strLotNumber 
+	,LOT.strLotAlias
 	,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,LOT.strWarehouseRefNo)
 	,CLSL.strSubLocationName
 	,strStorageLocation = SL.strName

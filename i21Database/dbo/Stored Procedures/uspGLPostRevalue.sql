@@ -231,8 +231,7 @@ DECLARE
                           WHEN dblUnrealizedGain < 0 THEN 0  
                           ELSE dblUnrealizedGain END,0)
                   ,[dblExchangeRate] = dblNewForexRate
-                  ,[dblDebitForeign] = 0
-                  ,[dblCreditForeign] = 0
+              
                   ,[dtmDate]    = ISNULL(B.[dtmDate], GETDATE())  
                   ,[ysnIsUnposted]  = 0   
                   ,[intConcurrencyId]  = 1  
@@ -257,7 +256,14 @@ DECLARE
                   FROM [dbo].tblGLRevalueDetails A RIGHT JOIN [dbo].tblGLRevalue B   
                   ON A.intConsolidationId = B.intConsolidationId  
                   WHERE B.intConsolidationId = @intConsolidationId  
-                  ),cte1 AS  
+                  ),
+                  cteWithForeignFunctional AS(
+                      SELECT * 
+                      ,[dblDebitForeign] = dblDebit
+                      ,[dblCreditForeign] = dblCredit
+                      FROM cte
+                  ),
+                  cte1 AS  
                   (  
                   SELECT   
                     [strTransactionId]    
@@ -291,7 +297,7 @@ DECLARE
                     ,intLOBSegmentOverrideId  
                     ,intCompanySegmentOverrideId
                   FROM  
-                  cte   
+                  cteWithForeignFunctional   
                   UNION ALL  
                   SELECT   
                     [strTransactionId]    
@@ -301,8 +307,8 @@ DECLARE
                     ,[dblDebit]    = dblCredit      
                     ,[dblCredit]   = dblDebit  
                     ,[dblExchangeRate] 
-                    ,[dblDebitForeign]    = dblCreditForeign    
-                    ,[dblCreditForeign]   = dblDebitForeign
+                    ,[dblDebitForeign]  = [dblCreditForeign] 
+                    ,[dblCreditForeign] = [dblDebitForeign]
                     ,[dtmDate]  
                     ,[ysnIsUnposted]    
                     ,[intConcurrencyId]   
@@ -324,7 +330,7 @@ DECLARE
                     ,intLocationSegmentOverrideId  
                     ,intLOBSegmentOverrideId  
                     ,intCompanySegmentOverrideId
-                  FROM cte   
+                  FROM cteWithForeignFunctional   
                   )  
               
                   SELECT   
@@ -476,8 +482,8 @@ DECLARE
                   ,[dblCredit]  
                   ,[dblDebit]
                   ,[dblExchangeRate] 
-                  ,[dblDebitForeign]
-                  ,[dblCreditForeign] 
+                  ,[dblCreditForeign]
+                  ,[dblDebitForeign] 
                   ,[dtmDate] = U.dtmReverseDate  
                   ,[ysnIsUnposted]  
                   ,[intConcurrencyId]   

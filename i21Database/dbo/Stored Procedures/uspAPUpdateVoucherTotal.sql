@@ -28,7 +28,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
 		@qty							=	CASE 
-												WHEN A.intComputeTotalOption = 0 AND A.intWeightUOMId IS NOT NULL AND WC.intWeightClaimDetailId IS NULL
+												WHEN A.intComputeTotalOption = 0 AND A.intWeightUOMId IS NOT NULL AND A.intWeightClaimDetailId IS NULL
 											 		THEN A.dblNetWeight * A.dblWeightUnitQty
 												ELSE A.dblQtyReceived * A.dblUnitQty 
 											END,

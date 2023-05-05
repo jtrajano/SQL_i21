@@ -126,7 +126,7 @@ BEGIN
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblHedgedLots DECIMAL(24, 10)
 		, dblToBeHedgedLots DECIMAL(24, 10)
@@ -168,7 +168,7 @@ BEGIN
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblHedgedLots DECIMAL(24, 10)
 		, dblToBeHedgedLots DECIMAL(24, 10)
@@ -2276,6 +2276,10 @@ BEGIN
 			, Selection
 			, PriceStatus
 			, strFutureMonth
+			, intFutureMonthOrder = ROW_NUMBER() OVER (ORDER BY CASE WHEN strFutureMonth = 'Previous' THEN CAST('01/01/1900' AS DATE)
+																	WHEN strFutureMonth = 'Total' THEN CAST('01/01/9999' AS DATE)
+																	ELSE CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, '))
+																	END )
 			, strAccountNumber
 			, dblNoOfContract = CONVERT(DOUBLE PRECISION, ROUND(ISNULL(dblNoOfContract, 0), ISNULL(@intDecimal,0)))
 			, strTradeNo

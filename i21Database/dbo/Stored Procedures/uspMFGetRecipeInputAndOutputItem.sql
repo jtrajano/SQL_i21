@@ -475,7 +475,7 @@ BEGIN TRY
 		,Prod.strLotAlias
 		,C.intCategoryId
 		,I.strLotTracking
-		,I.dblWeight
+		, ISNULL(ISNULL(ISNULL(NULLIF(I.dblWeight, 0), IU1.dblWeight), ItemGrossUOM.dblUnitPerQty), ItemStockUOM.dblUnitPerQty) AS dblWeight
 		,Prod.ysnFillPartialPallet
 		,Prod.intParentLotId
 		,Prod.strThirdPartyLotNumber AS strLotNumber
@@ -502,6 +502,14 @@ BEGIN TRY
 	LEFT JOIN dbo.tblICItemUOM IU2 ON IU2.intItemId = I.intItemId
 		AND IU2.intUnitMeasureId = UM1.intUnitMeasureId
 	LEFT JOIN tblICContainer Cont ON Cont.intContainerId = Prod.intContainerId
+	OUTER APPLY (SELECT TOP 1 ISNULL(ICIUOM.dblWeight, ICIUOM.dblUnitQty) AS dblUnitPerQty
+				 FROM tblICItemLocation AS ICILocation
+				 LEFT JOIN tblICItemUOM AS ICIUOM ON ICILocation.intGrossUOMId = ICIUOM.intItemUOMId
+				 WHERE ICILocation.intItemId = ri.intItemId AND ICILocation.intLocationId = @intLocationId) as ItemGrossUOM
+	OUTER APPLY (SELECT TOP 1 ICIUOM.dblUnitQty AS dblUnitPerQty
+				 FROM tblICItemLocation AS ICILocation
+				 LEFT JOIN tblICItemUOM AS ICIUOM ON ICILocation.intGrossUOMId = ICIUOM.intItemUOMId
+				 WHERE ICILocation.intItemId = ri.intItemId AND ICILocation.intLocationId = @intLocationId AND ICIUOM.ysnStockUnit = 1) as ItemStockUOM
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 

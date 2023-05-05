@@ -57,6 +57,7 @@ BEGIN
 		, Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, PriceStatus NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
+		, intFutureMonthOrder INT
 		, strAccountNumber NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, dblNoOfContract DECIMAL(24, 10)
 		, strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -81,7 +82,7 @@ BEGIN
 		, strRegion NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strSeason NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strClass NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblHedgedLots DECIMAL(24, 10)
 		, dblToBeHedgedLots DECIMAL(24, 10)
@@ -152,6 +153,7 @@ BEGIN
 		, Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, PriceStatus NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
+		, intFutureMonthOrder INT
 		, strAccountNumber NVARCHAR(max) COLLATE Latin1_General_CI_AS
 		, dblNoOfContract DECIMAL(24, 10)
 		, strTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -176,7 +178,7 @@ BEGIN
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
 		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strCertificationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertificationName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	)
 
@@ -186,6 +188,7 @@ BEGIN
 		, Selection
 		, PriceStatus
 		, strFutureMonth
+		, intFutureMonthOrder
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo

@@ -11,5 +11,5 @@
     CONSTRAINT [PK_tblRKM2MConfiguration_intM2MConfigurationId] PRIMARY KEY ([intM2MConfigurationId]), 
     CONSTRAINT [FK_tblRKM2MConfiguration_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),	
     CONSTRAINT [FK_tblRKM2MConfiguration_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
-    CONSTRAINT [AK_tblRKM2MConfiguration] UNIQUE ([intItemId], [strContractType], [strAdjustmentType], [intFreightTermId]) 
+    CONSTRAINT [AK_tblRKM2MConfiguration] UNIQUE ([intItemId], [strContractType], [strAdjustmentType], [intFreightTermId], [intMTMPointId]) 
 )

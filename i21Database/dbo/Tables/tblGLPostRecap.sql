@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [intCurrencyId]             INT              NULL,
 	[intCurrencyExchangeRateTypeId]             INT              NULL,
-    [dblExchangeRate]           NUMERIC (38, 20) NOT NULL,
+    [dblExchangeRate]           NUMERIC (18, 7) NOT NULL,
     [dtmDateEntered]            DATETIME         NOT NULL,
     [dtmTransactionDate]        DATETIME         NULL,
     [strJournalLineDescription] NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,

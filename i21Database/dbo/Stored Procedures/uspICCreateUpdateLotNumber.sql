@@ -1195,23 +1195,25 @@ BEGIN
 
 		-- Insert the parent lot 
 		IF	ISNULL(@intInsertedLotId, 0) <> 0
-			AND @intParentLotId IS NULL 
 		BEGIN 
 			SET @intReturnCode = 0
 
-			EXEC @intReturnCode = dbo.uspMFCreateUpdateParentLotNumber 
-				@strParentLotNumber
-				,@strParentLotAlias
-				,@intItemId
-				,@dtmExpiryDate
-				,@intLotStatusId_ItemLotTable
-				,@intEntityUserSecurityId
-				,@intLotId
-				,@intParentLotId OUTPUT 
-				,@intSubLocationId
-				,@intLocationId
-				,@dtmManufacturedDate
-				,@intShiftId
+			SELECT @strParentLotNumber = strParentLotNumber
+			FROM tblICParentLot
+			WHERE intParentLotId = @intParentLotId;
+
+			EXEC @intReturnCode = dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber
+																	 , @strParentLotAlias
+																	 , @intItemId
+																	 , @dtmExpiryDate
+																	 , @intLotStatusId_ItemLotTable
+																	 , @intEntityUserSecurityId
+																	 , @intLotId
+																	 , @intParentLotId OUTPUT 
+																	 , @intSubLocationId
+																	 , @intLocationId
+																	 , @dtmManufacturedDate
+																	 , @intShiftId
 
 			IF @intReturnCode <> 0
 			BEGIN 

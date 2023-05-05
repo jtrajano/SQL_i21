@@ -58,7 +58,7 @@ AS
 														AND IR.strReceiptType					=	'Purchase Contract'
 			JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId						=	ISNULL(RI.intWeightUOMId,RI.intUnitMeasureId)
 			JOIN	tblICUnitMeasure				IM	ON	IM.intUnitMeasureId					=	IU.intUnitMeasureId
-			JOIN	tblLGAllocationDetail			AD	ON	AD.intPContractDetailId				=	RI.intLineNo		
+			JOIN	tblLGAllocationDetail			AD	ON	AD.intSContractDetailId				=	RI.intLineNo		
 	LEFT	JOIN	tblSMCompanyLocationSubLocation SL	ON	SL.intCompanyLocationSubLocationId	=	RI.intSubLocationId	CROSS	
 			APPLY	tblLGCompanyPreference			LP 	
 		)t

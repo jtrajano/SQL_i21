@@ -9,7 +9,9 @@ BEGIN
 	SET NOCOUNT ON;
 
     DECLARE @strError NVARCHAR(MAX)
+
     DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;
+
     BEGIN TRANSACTION;
 
     BEGIN TRY
@@ -71,6 +73,7 @@ BEGIN
         )
         SELECT * INTO #AuditorTransactions FROM T ORDER BY T.strTransactionId, T.dtmDate
 
+      
         DECLARE @dtmNow DATETIME = GETDATE()
 
         IF OBJECT_ID('tempdb..#TransactionGroup') IS NOT NULL
@@ -95,6 +98,10 @@ BEGIN
             INTO #TransactionGroup 
             FROM #AuditorTransactions 
             GROUP BY strTransactionId, intCurrencyId, strCurrency
+
+
+           
+
             
 
             WHILE EXISTS(SELECT TOP 1 1 FROM #TransactionGroup)
@@ -111,46 +118,49 @@ BEGIN
 
                 INSERT INTO tblGLAuditorTransaction (
                     ysnGroupHeader
-                    ,intType
+                    , intType
                     , intGeneratedBy
                     , dtmDateGenerated
                     , intEntityId
+                    , strBatchId
                     , intAccountId
-                    , intTransactionId
                     , strTransactionId
+                    , intTransactionId
+                    , intCurrencyId
                     , dtmDate
                     , dtmDateEntered
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblExchangeRate
-                    , intCurrencyId
-                    , strBatchId
-                    , strCode
-                    , strTransactionType
-                    , strModuleName 
-                    , strTransactionForm
-                    , strReference
-                    , strDocument
-                    , strComments
-                    , strPeriod
+                    , strPeriod 
                     , strDescription
                     , strAccountDescription
-                    , dblSourceUnitDebit
-                    , dblSourceUnitCredit
+                    , strCode
+                    , strReference
+                    , strComments
+                    , strJournalLineDescription
+                    , strUOMCode 
+                    , strTransactionType 
+                    , strModuleName 
+                    , strTransactionForm 
+                    , strDocument
+                    , dblExchangeRate
+                    , strStatus 
                     , dblDebitReport
                     , dblCreditReport
-                    , strCommodityCode
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , strCommodityCode 
                     , strSourceDocumentId
                     , strLocation
-                    , strCompanyLocation
-                    , strJournalLineDescription
-                    , strUOMCode
-                    , strStatus
+                    , strCompanyLocation 
+                    , strSourceUOMId 
                     , intSourceEntityId
-                    , strSourceEntity
-                    , strSourceEntityNo
+                    , strSourceEntity 
+                    , strSourceEntityNo 
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
@@ -161,42 +171,45 @@ BEGIN
                     , @intEntityId
                     , @dtmNow
                     , intEntityId
+                    , strBatchId
                     , intAccountId
-                    , intTransactionId
                     , strTransactionId
+                    , intTransactionId
+                    , intCurrencyId
                     , dtmDate
                     , dtmDateEntered
                     , dblDebit
                     , dblCredit
                     , dblDebitForeign
                     , dblCreditForeign
-                    , dblExchangeRate
-                    , intCurrencyId
-                    , strBatchId
-                    , strCode
-                    , strTransactionType
-                    , strModuleName 
-                    , strTransactionForm
-                    , strReference
-                    , strDocument
-                    , strComments
-                    , strPeriod
+                    , strPeriod 
                     , strDescription
                     , strAccountDescription
-                    , dblSourceUnitDebit
-                    , dblSourceUnitCredit
+                    , strCode
+                    , strReference
+                    , strComments
+                    , strJournalLineDescription
+                    , strUOMCode 
+                    , strTransactionType 
+                    , strModuleName 
+                    , strTransactionForm 
+                    , strDocument
+                    , dblExchangeRate
+                    , strStatus 
                     , dblDebitReport
                     , dblCreditReport
-                    , strCommodityCode
+                    , dblSourceUnitDebit
+                    , dblSourceUnitCredit
+                    , dblDebitUnit
+                    , dblCreditUnit
+                    , strCommodityCode 
                     , strSourceDocumentId
                     , strLocation
-                    , strCompanyLocation
-                    , strJournalLineDescription
-                    , strUOMCode
-                    , strStatus
+                    , strCompanyLocation 
+                    , strSourceUOMId 
                     , intSourceEntityId
-                    , strSourceEntity
-                    , strSourceEntityNo
+                    , strSourceEntity 
+                    , strSourceEntityNo 
                     , strLOBSegmentDescription
                     , strCurrency
                     , strAccountId
@@ -254,7 +267,17 @@ BEGIN
 
                 DELETE #TransactionGroup WHERE @strTransactionId = strTransactionId AND @intCurrencyId = intCurrencyId
             END
+
+
         END
+
+        SELECT 
+        SUM(dblDebit) dblTotalDebitSummary,
+        SUM(dblCredit) dblTotalCreditSummary,
+        SUM(dblDebitUnit) dblTotalDebitUnitSummary,
+        SUM(dblCreditUnit) dblTotalCreditUnitSummary
+        FROM #AuditorTransactions
+
     END TRY
     BEGIN CATCH
         SET @strError = ERROR_MESSAGE()

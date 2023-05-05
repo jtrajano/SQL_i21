@@ -13,10 +13,22 @@ RETURN -- EXIT WHEN CURRENCIES ARE FUNCTIONAL
 
 
 DECLARE @intDiffAccountId INT
-SELECT TOP 1 @intDiffAccountId= intBTForexDiffAccountId FROM tblCMCompanyPreferenceOption  
+DECLARE @MissingAccountErrorMsg NVARCHAR(100)
+DECLARE @accountDesc NVARCHAR(30)
+
+IF EXISTS(SELECT 1 FROM tblCMBankTransfer WHERE strTransactionId = @strTransactionId AND intBankTransferTypeId = 1)
+BEGIN    
+	SELECT TOP 1 @intDiffAccountId= intCashManagementRealizedId FROM tblSMMultiCurrency
+	SET @accountDesc = 'Realized Gain/Loss'
+END ELSE
+BEGIN 
+	SELECT TOP 1 @intDiffAccountId= intBTForexDiffAccountId FROM tblCMCompanyPreferenceOption 
+	SET @accountDesc = 'Forex Difference'
+END
 IF ISNULL(@intDiffAccountId,0)  = 0
 BEGIN  
-    RAISERROR ('Foreign Difference Account was not set in Company Configuration screen.',11,1)  
+	SET @MissingAccountErrorMsg = 'Cash Management ' +  @accountDesc + ' was not set in Company Configuration screen.'
+    RAISERROR (@MissingAccountErrorMsg,11,1)  
     RETURN
 END  
 
@@ -68,7 +80,7 @@ INSERT INTO #tmpGLDetail (
         ,[dblExchangeRate]       = 1
         ,[dtmDateEntered]        = GETDATE()    
         ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = 'Forex Difference'    
+        ,[strJournalLineDescription]  = @accountDesc    
         ,[ysnIsUnposted]         = 0     
         ,[intConcurrencyId]      = 1    
         ,[intUserId]             = intLastModifiedUserId    
@@ -80,4 +92,3 @@ INSERT INTO #tmpGLDetail (
         SELECT strDescription FROM [dbo].tblGLAccount WHERE @intDiffAccountId = intAccountId) GLAccnt 
     WHERE A.strTransactionId = @strTransactionId    
     AND dblDifference <> 0
-

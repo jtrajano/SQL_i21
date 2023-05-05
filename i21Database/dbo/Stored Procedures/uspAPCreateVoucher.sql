@@ -429,6 +429,7 @@ BEGIN TRY
 		[dtmDueDate]			,
 		[dtmDate]				,
 		[dtmBillDate]			,
+		[dtmCashFlowDate]		,
 		[intAccountId]			,
 		[intEntityId]			,
 		[intEntityVendorId]		,
@@ -488,6 +489,7 @@ BEGIN TRY
 		[dtmDueDate]			,
 		[dtmDate]				,
 		[dtmBillDate]			,
+		[dtmDueDate]			,
 		[intAccountId]			,
 		[intEntityId]			,
 		[intEntityVendorId]		,
@@ -610,6 +612,23 @@ BEGIN TRY
 			-- AND ISNULL(A.intPayToAddressId,0) = ISNULL(B.intPayToAddressId,0)
 			-- AND ISNULL(A.intCurrencyId,0) = ISNULL(B.intCurrencyId,0)
 	WHERE A.intBillId IS NULL
+
+	--Update tax group of claims from voucher payable that are created from Weight Claims Screen using DR/CR Memo button
+	BEGIN
+		UPDATE A
+		SET A.intPurchaseTaxGroupId = Tax.intTaxGroupId
+		FROM @voucherPayablesData A
+		OUTER APPLY (
+		SELECT TG.intTaxGroupId, TG.strTaxGroup
+		FROM tblSMTaxGroup TG
+		WHERE TG.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(A.intEntityVendorId, A.intLocationId, A.intItemId, A.intShipFromId, A.intFreightTermId, DEFAULT)
+		AND A.intPurchaseTaxGroupId IS NULL
+		) Tax
+		WHERE A.intPurchaseTaxGroupId IS NULL 
+			AND A.intWeightClaimId IS NOT NULL 
+			AND A.intWeightClaimDetailId IS NOT NULL
+			AND A.intTransactionType IN (1,11) --Claim Type, Voucher Type
+	END
 
 	INSERT INTO @voucherIds
 	SELECT intBillId FROM @createdVouchers
