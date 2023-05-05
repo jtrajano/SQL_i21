@@ -41,8 +41,8 @@ BEGIN TRY
 	IF	@ysnFeedExist = 0 OR 
 		EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE') AND strRowState = 'Added')
 	BEGIN
-		SELECT @strRowState= 'Added'
-		DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
+		SELECT @strRowState= 'Added';
+		if (@ysnFeedExist = 1) SELECT @strRowState= 'Modified';
 		INSERTBLOCK:
 		INSERT INTO tblCTContractFeed
 		(
