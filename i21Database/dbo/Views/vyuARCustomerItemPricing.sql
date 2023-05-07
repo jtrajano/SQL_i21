@@ -14,6 +14,9 @@ SELECT
 	,[strPricing]				= ARPH.[strPricing]            COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation2]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation3]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation4]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= ARID.[intContractHeaderId]								--CAST(NULL AS INT)
 	,[intContractDetailId]		= ARID.[intContractDetailId]								--CAST(NULL AS INT) 
 	,[strContractNumber]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -57,6 +60,9 @@ SELECT
 	,[strPricing]				= ARPH.[strPricing]            COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation2]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation3]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation4]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= ARID.[intContractHeaderId]								--CAST(NULL AS INT)
 	,[intContractDetailId]		= ARID.[intContractDetailId]								--CAST(NULL AS INT) 
 	,[strContractNumber]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -113,6 +119,9 @@ SELECT
 	,[strPricing]				= IP.[strPricing]			--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= IP.[dblDeviation]			--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation2]			= CAST(0 AS NUMERIC(18,6))	--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation3]			= CAST(0 AS NUMERIC(18,6))	--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation4]			= CAST(0 AS NUMERIC(18,6))	--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= IP.[intContractHeaderId]	--CAST(NULL AS INT)
 	,[intContractDetailId]		= IP.[intContractDetailId]	--CAST(NULL AS INT) 
 	,[strContractNumber]		= IP.[strContractNumber]	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -197,6 +206,9 @@ SELECT
 	,[strPricing]				= ARPH.[strPricing]			   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation2]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation3]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation4]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= SOSOD.[intContractHeaderId]								--CAST(NULL AS INT)
 	,[intContractDetailId]		= SOSOD.[intContractDetailId]								--CAST(NULL AS INT) 
 	,[strContractNumber]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -239,6 +251,9 @@ SELECT
 	,[strPricing]				= ARPH.[strPricing]			   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= ARPH.[strOriginalPricing]	   COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation2]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation3]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation4]			= CAST(0 AS NUMERIC(18,6))									--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= SOSOD.[intContractHeaderId]								--CAST(NULL AS INT)
 	,[intContractDetailId]		= SOSOD.[intContractDetailId]								--CAST(NULL AS INT) 
 	,[strContractNumber]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
@@ -287,12 +302,15 @@ SELECT
 	,[intEntityCustomerId]		= SO.[intEntityCustomerId]		--CAST(NULL AS INT)
 	,[intItemId]				= SOSOD.[intItemId]				--CAST(NULL AS INT)
 	,[dblPrice]					= IP.[dblPrice]					--CAST(0 AS NUMERIC(18,6))
-	,[dblOriginalPrice]			= ISNULL(SOSOD.[dblPrice],0)		--CAST(0 AS NUMERIC(18,6))
+	,[dblOriginalPrice]			= ISNULL(SOSOD.[dblPrice],0)	--CAST(0 AS NUMERIC(18,6))
 	,[dblTermDiscount]			= IP.[dblTermDiscount]			--CAST(0 AS NUMERIC(18,6))
-	,[strTermDiscountBy]		= IP.[strTermDiscountBy] 	--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	,[strTermDiscountBy]		= IP.[strTermDiscountBy] 		--CAST(NULL AS  NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,[strPricing]				= IP.[strPricing]				--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[strOriginalPricing]		= CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS	--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblDeviation]				= IP.[dblDeviation]				--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation2]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation3]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
+	,[dblDeviation4]			= CAST(0 AS NUMERIC(18,6))		--CAST(0 AS NUMERIC(18,6))
 	,[intContractHeaderId]		= IP.[intContractHeaderId]		--CAST(NULL AS INT)
 	,[intContractDetailId]		= IP.[intContractDetailId]		--CAST(NULL AS INT) 
 	,[strContractNumber]		= IP.[strContractNumber]		--CAST(NULL AS  NVARCHAR(250)) COLLATE Latin1_General_CI_AS
