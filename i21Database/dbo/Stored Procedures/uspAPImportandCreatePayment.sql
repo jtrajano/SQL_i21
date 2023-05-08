@@ -30,13 +30,16 @@ BEGIN TRY
 	DECLARE @payToAddress INT = NULL;
 
 	--EFT Import Config
-	DECLARE @archieveServer NVARCHAR(MAX) = NULL
+	DECLARE @archiveServer NVARCHAR(MAX) = NULL
+	DECLARE @importServer NVARCHAR(MAX) = NULL
 	
 	SELECT TOP 1 
-		@archieveServer = strArchiveServer 
+		@archiveServer = strArchiveServer
+		,@importServer = strFromServer
 	FROM tblAPCompanyPreference
 
-	IF ISNULL(dbo.fnTrim(@archieveServer), '') = ''
+	IF ISNULL(dbo.fnTrim(@archiveServer), '') = ''
+		AND ISNULL(dbo.fnTrim(@importServer), '') != ''
 	BEGIN
 		RAISERROR('Archived Failed. Directory not exists or permission denied.', 16, 1);
 	END
