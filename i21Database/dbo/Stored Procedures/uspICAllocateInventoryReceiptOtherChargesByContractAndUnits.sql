@@ -60,6 +60,9 @@ BEGIN
 					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					AND ReceiptItem.intOrderId IS NOT NULL 
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId 
+					AND Item.strType IN ('Inventory')
 				INNER JOIN (					
 					SELECT	dblTotalOtherCharge = 
 								SUM(
@@ -108,6 +111,9 @@ BEGIN
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
+							INNER JOIN tblICItem Item
+								ON Item.intItemId = ReceiptItem.intItemId 
+								AND Item.strType IN ('Inventory') 
 							INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -126,7 +132,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 		AND ReceiptItemAllocatedCharge.intInventoryReceiptChargeId = Source_Query.intInventoryReceiptChargeId
-		AND ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
+		AND ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')		
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 

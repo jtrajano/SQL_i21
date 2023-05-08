@@ -62,6 +62,9 @@ BEGIN
 					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					AND ReceiptItem.intOrderId IS NOT NULL 
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId 
+					AND Item.strType IN ('Inventory') 
 				INNER JOIN (
 					SELECT	
 							dblTotalOtherCharge = 
@@ -121,6 +124,9 @@ BEGIN
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
+							INNER JOIN tblICItem Item
+								ON Item.intItemId = ReceiptItem.intItemId 
+								AND Item.strType IN ('Inventory') 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 							AND ReceiptItem.intOrderId IS NOT NULL 
 					GROUP BY ReceiptItem.intOrderId, ReceiptItem.intLineNo, ReceiptItem.strChargesLink 
