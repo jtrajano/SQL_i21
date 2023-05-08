@@ -69,6 +69,9 @@ BEGIN
 								 ELSE 0
 							END 					
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId 
+					AND Item.strType IN ('Inventory') 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = 
 								-- Convert the other charge amount to functional currency. 
@@ -132,6 +135,9 @@ BEGIN
 							,ReceiptItem.intInventoryReceiptId 						
 					FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
 								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							INNER JOIN tblICItem i
+								ON i.intItemId = ri.intItemId 
+								AND i.strType IN ('Inventory') 
 					WHERE	
 						r.intInventoryReceiptId = @intInventoryReceiptId
 						AND 1 = CASE WHEN r.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ri.intOrderId IS NULL THEN 1
@@ -151,6 +157,9 @@ BEGIN
 							,ReceiptItem.intInventoryReceiptId 						
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+							INNER JOIN tblICItem Item
+								ON Item.intItemId = ReceiptItem.intItemId 
+								AND Item.strType IN ('Inventory') 
 					WHERE	
 						Receipt.intInventoryReceiptId = @intInventoryReceiptId
 						AND 1 = CASE WHEN Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ReceiptItem.intOrderId IS NULL THEN 1
