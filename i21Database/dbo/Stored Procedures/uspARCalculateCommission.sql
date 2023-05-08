@@ -132,7 +132,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			,dblAmount	NUMERIC(18,6)
 			,dtmSourceDate	DATETIME
 		)
-	
+
 		--GET REVENUE BY GL ACCOUNTS
 		INSERT INTO @tmpTransactionTable
 		SELECT 
@@ -175,7 +175,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			WHERE I.ysnPosted = 1
 				AND IC.intCategoryId IS NOT NULL
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-				AND (C.ysnPaid is null or C.ysnPaid = 0)
+				AND ISNULL(C.ysnPaid, 0) = 0
 				AND CPIC.intCommissionPlanId = @intCommissionPlanId
 			GROUP BY I.intInvoiceId, I.dtmPostDate
 
@@ -201,8 +201,11 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				,dtmSourceDate	= I.dtmPostDate
 			FROM tblARInvoice I
 			INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+			LEFT JOIN tblARCommissionDetail CD on I.intInvoiceId = CD.intSourceId
+			LEFT JOIN tblARCommission C on CD.intCommissionId = C.intCommissionId
 			WHERE I.ysnPosted = 1
 			  AND I.intEntitySalespersonId IS NOT NULL
+			  AND ISNULL(C.ysnPaid, 0) = 0
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND SP.intCommissionPlanId = @intCommissionPlanId
 
@@ -258,8 +261,11 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			FROM tblARInvoice I
 			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 			INNER JOIN tblARCommissionPlanItem CPI ON ID.intItemId = CPI.intItemId
+			LEFT JOIN tblARCommissionDetail CD on I.intInvoiceId = CD.intSourceId
+			LEFT JOIN tblARCommission C on CD.intCommissionId = C.intCommissionId
 			WHERE I.ysnPosted = 1
 			  AND ID.intItemId IS NOT NULL
+			  AND ISNULL(C.ysnPaid, 0) = 0
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND CPI.intCommissionPlanId = @intCommissionPlanId
 			GROUP BY I.intInvoiceId, I.dtmPostDate
@@ -360,5 +366,3 @@ ELSE IF @strBasis = @BASIS_CONDITIONAL
 			 , intConcurrencyId			= 1
 	END
 GO
-
-
