@@ -642,6 +642,14 @@ END
 
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
+	-- Update the Outbound LS Delivered qty with the Ticket Net Units
+	UPDATE LD
+	SET dblDeliveredQuantity = dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, LD.intItemUOMId, SC.dblNetUnits)
+	FROM tblLGLoadDetail LD
+	INNER JOIN tblSCTicket SC ON SC.intLoadId = LD.intLoadId
+	WHERE LD.intLoadId = @intLoadId
+	AND SC.intTicketId = @intTicketId
+
 	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
 	UPDATE tblSCTicket
 	SET dblDWGOriginalNetUnits = dblNetUnits
