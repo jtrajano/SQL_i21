@@ -1,6 +1,6 @@
 ﻿/*
 	DEVOPER'S NOTEBOOK
-	IMPORTAN NOTE - ANY MODIFICATION HERE SHOULD BE APPLIED TO uspSCPrintPrewviewTicketViewReport AS WELL
+	IMPORTAN NOTE - ANY MODIFICATION HERE SHOULD BE APPLIED TO uspSCPrintPreviewTicketViewReport AS WELL
 	THANK YOU
 */
 CREATE VIEW dbo.vyuSCPrintPreviewTicketView
@@ -229,6 +229,10 @@ AS SELECT
 	,Destination.strLocationName as strDestinationLocationName
 	,DestinationSubLocation.strSubLocationName as strDestinationSubLocation
 	,DestinationStorageLocation.strName as strDestinationStorageLocation
+
+	, LOAD_LOCATION.strLoadAddress AS strLoadAddress
+	, ENTITY_DEFAULT_LOCATION.strEntityDefaultLocationAddress strEntityDefaultLocationAddress
+	, GR_COMPANY_PREFERENCE.ysnShowLoadOutAddressForFullSheetTicket AS ysnShowLoadOutAddressForFullSheetTicket
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -302,3 +306,57 @@ AS SELECT
 	OUTER APPLY(
 		SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
 	) SMCompanySetup
+
+	OUTER APPLY (
+		SELECT
+			TOP 1
+			LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										NULL
+										,NULL
+										,NULL
+										,NULL
+										,tblSCScaleSetup.strAddress
+										,tblSCScaleSetup.strCity
+										,tblSCScaleSetup.strState
+										,tblSCScaleSetup.strZipCode
+										,NULL))
+
+			AS strLoadAddress
+
+		FROM tblEMEntityLocation ENTITY_LOCATION
+			JOIN tblLGLoadDetail LOAD_DETAIL
+				ON ENTITY_LOCATION.intEntityLocationId = LOAD_DETAIL.intCustomerEntityLocationId
+					
+		WHERE ENTITY_LOCATION.intEntityId = SC.intEntityId
+			AND LOAD_DETAIL.intLoadDetailId = SC.intLoadDetailId
+			AND (LOAD_DETAIL.intCustomerEntityLocationId IS NOT NULL AND LOAD_DETAIL.intCustomerEntityLocationId > 0)
+			
+	) LOAD_LOCATION
+
+	
+	OUTER APPLY (
+		SELECT
+			TOP 1
+			LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										NULL
+										,NULL
+										,NULL
+										,NULL
+										,ENTITY_LOCATION.strAddress
+										,ENTITY_LOCATION.strCity
+										,ENTITY_LOCATION.strState
+										,ENTITY_LOCATION.strZipCode
+										,NULL))
+
+			AS strEntityDefaultLocationAddress
+
+		FROM tblEMEntityLocation ENTITY_LOCATION
+		WHERE ENTITY_LOCATION.intEntityId = SC.intEntityId
+			AND ENTITY_LOCATION.ysnDefaultLocation = 1
+			
+	) ENTITY_DEFAULT_LOCATION
+	OUTER APPLY
+	(
+		SELECT TOP 1 ISNULL(ysnShowLoadOutAddressForFullSheetTicket,0) AS ysnShowLoadOutAddressForFullSheetTicket  
+		FROM tblGRCompanyPreference 
+	) GR_COMPANY_PREFERENCE
