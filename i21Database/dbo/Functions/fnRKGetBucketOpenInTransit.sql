@@ -46,20 +46,19 @@ BEGIN
 ;WITH OutTransit (
 	  dblQty
 	, intTransactionReferenceId
-	--, intContractDetailId
+	, intContractDetailId
 	
 ) AS (
 
 	SELECT 
 		dblQty = SUM(dblQty)
 		, intTransactionReferenceId
-		--, intContractDetailId
+		, intContractDetailId
 	FROM tblRKDPRInTransitHelperLog
 	WHERE dtmDate < = @dtmDate
 	AND intCommodityId = @intCommodityId
-	AND intInvoiceId IS NOT NULL
 	GROUP BY intTransactionReferenceId
-		--, intContractDetailId
+		, intContractDetailId
 )
 
 
@@ -109,27 +108,27 @@ FROM (
 		, c.intItemId
 		, c.strItemNo
 		, c.intCategoryId
-		, c.strCategoryCode 
+		, c.strCategoryCode
 		, c.intCommodityId
 		, c.strCommodityCode
 		, c.strTransactionNumber
 		, c.strTransactionType
 		, c.intTransactionRecordHeaderId
-		, intOrigUOMId = null
-		, intContractDetailId = null
-		, intContractHeaderId = null
-		, strContractNumber = ''
-		, strContractSeq = ''
-		, intTicketId = null
-		, strTicketNumber = ''
-		, intFutureMarketId = null
-		, strFutureMarket = ''
-		, intFutureMonthId = null
-		, strFutureMonth = ''
-		, strDeliveryDate = ''--dbo.fnRKFormatDate(c.dtmEndDate, 'MMM yyyy')
+		, c.intOrigUOMId
+		, c.intContractDetailId
+		, c.intContractHeaderId
+		, c.strContractNumber
+		, c.strContractSeq
+		, c.intTicketId
+		, c.strTicketNumber
+		, c.intFutureMarketId
+		, c.strFutureMarket
+		, c.intFutureMonthId
+		, c.strFutureMonth
+		, strDeliveryDate = dbo.fnRKFormatDate(c.dtmEndDate, 'MMM yyyy')
 		, strType = CASE WHEN strBucketType = 'Sales In-Transit' THEN 'Sales' ELSE 'Purchase' END
-		, intCurrencyId =null
-		, strCurrency = ''
+		, intCurrencyId
+		, strCurrency
 	from vyuRKGetSummaryLog c
 	where strBucketType = 'Sales In-Transit'
 	and strTransactionType = 'Inventory Shipment'
@@ -151,29 +150,29 @@ FROM (
 		, c.strTransactionNumber
 		, c.strTransactionType
 		, c.intTransactionRecordHeaderId
-		--, c.intOrigUOMId
-		--, c.intContractDetailId
-		--, c.intContractHeaderId
-		--, c.strContractNumber
-		--, c.strContractSeq
-		--, c.intTicketId
-		--, c.strTicketNumber
-		--, c.intFutureMarketId
-		--, c.strFutureMarket
-		--, c.intFutureMonthId
-		--, c.strFutureMonth
-		--, dtmEndDate 
-		--, strBucketType 
-		--, intCurrencyId
-		--, strCurrency
+		, c.intOrigUOMId
+		, c.intContractDetailId
+		, c.intContractHeaderId
+		, c.strContractNumber
+		, c.strContractSeq
+		, c.intTicketId
+		, c.strTicketNumber
+		, c.intFutureMarketId
+		, c.strFutureMarket
+		, c.intFutureMonthId
+		, c.strFutureMonth
+		, dtmEndDate 
+		, strBucketType 
+		, intCurrencyId
+		, strCurrency
 ) t
 LEFT JOIN OutTransit OT 
 	ON OT.intTransactionReferenceId = t.intTransactionRecordHeaderId 
-	--AND ( t.intContractDetailId IS NULL AND OT.intContractDetailId IS NULL
-	--		OR
-	--	 (t.intContractDetailId IS NOT NULL AND OT.intContractDetailId IS NOT NULL
-	--		AND OT.intContractDetailId = t.intContractDetailId)
-	--	)
+	AND ( t.intContractDetailId IS NULL AND OT.intContractDetailId IS NULL
+			OR
+		 (t.intContractDetailId IS NOT NULL AND OT.intContractDetailId IS NOT NULL
+			AND OT.intContractDetailId = t.intContractDetailId)
+		)
 WHERE (t.dblTotal + ISNULL(OT.dblQty, 0)) <> 0
 
 RETURN
