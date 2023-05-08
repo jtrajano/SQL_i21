@@ -775,13 +775,13 @@ BEGIN TRY
 
 
 			--CHECK FOR UNIT DISCREPANCY
-			SELECT @dblTicketNetUnits , @dblMatchContractUnits
-			IF @dblTicketNetUnits != @dblMatchContractUnits
-			BEGIN
-				DECLARE @EMESSAGE NVARCHAR(MAX) = 'Direct in units (' + LTRIM(ROUND(ISNULL(CAST( @dblMatchContractUnits AS NUMERIC(18, 4)),0), 2)) + ') does not match Direct out units (' + LTRIM(ROUND(ISNULL(CAST(@dblTicketNetUnits AS NUMERIC(18, 4)),0), 2)) + '). Units should match to proceed with the distribution.'
-				RAISERROR(@EMESSAGE, 11, 1);
+			-- SELECT @dblTicketNetUnits , @dblMatchContractUnits
+			-- IF @dblTicketNetUnits != @dblMatchContractUnits
+			-- BEGIN
+			-- 	DECLARE @EMESSAGE NVARCHAR(MAX) = 'Direct in units (' + LTRIM(ROUND(ISNULL(CAST( @dblMatchContractUnits AS NUMERIC(18, 4)),0), 2)) + ') does not match Direct out units (' + LTRIM(ROUND(ISNULL(CAST(@dblTicketNetUnits AS NUMERIC(18, 4)),0), 2)) + '). Units should match to proceed with the distribution.'
+			-- 	RAISERROR(@EMESSAGE, 11, 1);
 
-			END
+			-- END
 
 			---RECORD ALLOCATION				
 			BEGIN

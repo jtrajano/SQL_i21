@@ -5,6 +5,7 @@
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
 	,@dblQtyFromCt DECIMAL(24,10) = 0
 	,@dtmClientPostDate DATETIME = NULL
+	,@postCnt INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -4086,12 +4087,31 @@ BEGIN TRY
 	EXEC [dbo].[uspGRRiskSummaryLog2]
 		@StorageHistoryIds = @intStorageHistoryIds
 
-	--IF(@success = 0)
-	--BEGIN
-	--	SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
-	--	RAISERROR (@ErrMsg, 16, 1);
-	--	GOTO SettleStorage_Exit;
-	--END	
+	IF(@ysnFromPriceBasisContract = 0 AND ISNULL(@postCnt,0) = 0)
+	BEGIN
+		--throw an error if settlement was not logged successfully in DPR Summary Log
+		--note: this will just be a temporary fix as we couldn't replicate the issue where the settlements are not being logged in the summary log
+		IF NOT EXISTS(SELECT 1 FROM @intStorageHistoryIds)
+		BEGIN
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please click OK to continue.', 16, 1);
+			GOTO SettleStorage_Exit;
+		END
+
+		DECLARE @IDS Id
+
+		INSERT INTO @IDS
+		SELECT IDS.intId
+		FROM @intStorageHistoryIds IDS
+		LEFT JOIN tblRKSummaryLog RK	
+			ON RK.intStorageHistoryId = IDS.intId
+		WHERE RK.intSummaryLogId IS NULL	
+
+		IF EXISTS(SELECT TOP 1 1 FROM @IDS)
+		BEGIN
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please click OK to continue.', 16, 1);
+			GOTO SettleStorage_Exit;
+		END
+	END
 	
 	SettleStorage_Exit:
 END TRY

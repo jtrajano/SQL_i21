@@ -13,8 +13,13 @@ SELECT DISTINCT
 	 , ysnPrepaid				= NULL  
 	 , intCategoryId			= intCategoryId
 	 , strCategory				= strCategory
-	 , strPrepayment			= CASE WHEN ISNULL(strPrepayment, '') = '' THEN 'Not Selectable without Prepayment' ELSE strPrepayment END
+	 , strPrepayment			= CASE WHEN ISNULL(strPrepayment, '') = '' AND CP.ysnAllowContractWithoutPrepayment = 0 THEN 'Not Selectable without Prepayment' ELSE strPrepayment END
+	 , strItemNo				= CTICD.strItemNo
 FROM dbo.tblCTItemContractHeader CTICH
+CROSS APPLY 
+   ( 
+   SELECT ysnAllowContractWithoutPrepayment FROM tblARCompanyPreference
+   ) CP
 INNER JOIN (
 	SELECT 
 		  CTICD.intItemContractHeaderId
@@ -22,6 +27,7 @@ INNER JOIN (
 		, intCategoryId = ISNULL(ICC.intCategoryId, 0)
 		, strCategory	= ICC.strCategoryCode
 		, strPrepayment	= ARI.strInvoiceNumber
+		, strItemNo		= ICI.strItemNo
 	FROM tblCTItemContractDetail CTICD
 	INNER JOIN tblICItem ICI
 	ON CTICD.intItemId = ICI.intItemId
@@ -34,7 +40,7 @@ INNER JOIN (
 	LEFT JOIN tblARInvoice ARI
 	ON ARID.intInvoiceId = ARI.intInvoiceId
 	WHERE CTICD.intContractStatusId IN (1, 4, 5)
-	GROUP BY CTICD.intItemContractHeaderId, CTICD.intItemId, ICC.intCategoryId, ICC.strCategoryCode, ARI.strInvoiceNumber
+	GROUP BY CTICD.intItemContractHeaderId, CTICD.intItemId, ICC.intCategoryId, ICC.strCategoryCode, ARI.strInvoiceNumber, ICI.strItemNo
 
 	UNION ALL
 
@@ -44,6 +50,7 @@ INNER JOIN (
 		, intCategoryId = CTICHC.intCategoryId
 		, strCategory	= ICC.strCategoryCode
 		, strPrepayment	= ARI.strInvoiceNumber
+		, strItemNo		= ''
 	FROM tblCTItemContractHeaderCategory CTICHC
 	INNER JOIN tblICCategory ICC
 	ON CTICHC.intCategoryId = ICC.intCategoryId
@@ -55,3 +62,4 @@ INNER JOIN (
 	ON ARID.intInvoiceId = ARI.intInvoiceId
 	GROUP BY CTICHC.intItemContractHeaderId, CTICHC.intCategoryId, ICC.strCategoryCode, ARI.strInvoiceNumber
 ) CTICD ON CTICH.intItemContractHeaderId = CTICD.intItemContractHeaderId
+GO

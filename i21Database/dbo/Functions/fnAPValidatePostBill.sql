@@ -707,7 +707,6 @@ BEGIN
 			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], B.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND @AllowIntraEntries = 1
 		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND (
 			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR
@@ -730,7 +729,6 @@ BEGIN
 			SELECT * FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], C.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 		) OVERRIDESEGMENT
 		WHERE A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND @AllowIntraEntries = 1
 		AND OVERRIDESEGMENT.bitOverriden = 0
 		AND (
 			(OVERRIDESEGMENT.bitSameCompanySegment = 0 AND @OverrideCompanySegment = 1) OR

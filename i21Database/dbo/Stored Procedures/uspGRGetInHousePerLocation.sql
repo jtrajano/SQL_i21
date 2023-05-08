@@ -103,18 +103,13 @@ BEGIN
 	INNER JOIN tblARInvoice AR
 		ON AR.intInvoiceId = CompOwn.intTransactionRecordHeaderId
 			AND AR.intSalesOrderId IS NULL
-			AND AR.strInvoiceNumber = CompOwn.strTransactionNumber
-	OUTER APPLY (
-		SELECT TOP 1 intInvoiceDetailId
-		FROM tblARInvoiceDetail
-		WHERE intInvoiceId = AR.intInvoiceId
-			AND intItemId = CompOwn.intItemId
-			AND intTicketId IS NOT NULL
-	) ID
-	WHERE CompOwn.intItemId = ISNULL(null,CompOwn.intItemId)
-		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId))
+	INNER JOIN tblARInvoiceDetail AD
+		ON AD.intInvoiceDetailId = CompOwn.intTransactionRecordId
+			AND AD.intTicketId IS NULL
+	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
+		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
+			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 		AND CompOwn.strTransactionType = 'Invoice'
-		AND (CASE WHEN ID.intInvoiceDetailId IS NULL THEN 1 ELSE 0 END) = 1
 
 	--=================================
 	-- Company Owned *** Sales Order

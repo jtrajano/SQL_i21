@@ -27,8 +27,10 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY IM.intItemId, IL.intLocationId) 
  , intBundleItemId = NULL  
  , UOM.intUnitMeasureId
  , UOM.strUnitMeasure
+  , IU.intItemUOMId 
 FROM tblICItem      IM  
 JOIN tblICItemLocation    IL ON IL.intItemId    = IM.intItemId  
+INNER JOIN tblICItemUOM IU on IU.intItemId = IM.intItemId  
 LEFT JOIN tblICCategory    CR ON CR.intCategoryId   = IM.intCategoryId  
 LEFT JOIN tblICCommodity   CO ON CO.intCommodityId   = IM.intCommodityId  
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId AND CA.strType = 'Origin'  
@@ -42,6 +44,6 @@ LEFT JOIN vyuICGetBundleItem  BI ON BI.intBundleItemId   = IM.intItemId
    JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
    WHERE IUOM.ysnStockUnit = 1 AND IUOM.intItemId = IM.intItemId
    ) UOM 
-WHERE IM.strType = 'Non-Inventory'  
- OR (IM.strType = 'Inventory' AND (ISNULL(IM.intCommodityId, 0) = 0 OR ISNULL(CO.ysnExchangeTraded, 0) = 0))
-
+WHERE (IM.strType = 'Non-Inventory'    
+ OR (IM.strType = 'Inventory' AND (ISNULL(IM.intCommodityId, 0) = 0 OR ISNULL(CO.ysnExchangeTraded, 0) = 0)))
+ and IU.ysnStockUnit = 1

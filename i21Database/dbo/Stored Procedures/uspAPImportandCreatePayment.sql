@@ -29,6 +29,18 @@ BEGIN TRY
 	DECLARE @paymentMethodId INT = NULL;
 	DECLARE @payToAddress INT = NULL;
 
+	--EFT Import Config
+	DECLARE @archieveServer NVARCHAR(MAX) = NULL
+	
+	SELECT TOP 1 
+		@archieveServer = strArchiveServer 
+	FROM tblAPCompanyPreference
+
+	IF ISNULL(dbo.fnTrim(@archieveServer), '') = ''
+	BEGIN
+		RAISERROR('Archived Failed. Directory not exists or permission denied.', 16, 1);
+	END
+
 	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL AND strNotes NOT LIKE '%Will create empty payment%'
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
