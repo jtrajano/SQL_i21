@@ -170,12 +170,9 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
 			INNER JOIN tblICCategory IC ON ICI.intCategoryId = IC.intCategoryId
 			INNER JOIN tblARCommissionPlanItemCategory CPIC ON IC.intCategoryId = CPIC.intItemCategoryId
-			LEFT JOIN tblARCommissionDetail CD on I.intInvoiceId = CD.intSourceId
-			LEFT JOIN tblARCommission C on CD.intCommissionId = C.intCommissionId
 			WHERE I.ysnPosted = 1
 				AND IC.intCategoryId IS NOT NULL
-				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-				AND (C.ysnPaid is null or C.ysnPaid = 0)
+				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 				AND CPIC.intCommissionPlanId = @intCommissionPlanId
 			GROUP BY I.intInvoiceId, I.dtmPostDate
 
