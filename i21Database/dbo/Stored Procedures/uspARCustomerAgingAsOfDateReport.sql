@@ -615,7 +615,13 @@ LEFT JOIN
       intEntityCustomerId
     , intInvoiceId  
 	, dblAmountPaid
-    , dblTotalDue	= dblInvoiceTotal - dblAmountPaid
+    , dblTotalDue	= CASE WHEN strType = 'CF Tran' AND @ysnPrintFromCFLocal = 0 
+						THEN CASE WHEN @dtmBalanceForwardDate IS NULL 
+								THEN dblInvoiceTotal - dblAmountPaid 
+								ELSE 0
+							END 
+						ELSE dblInvoiceTotal - dblAmountPaid 
+					  END
     , dblAvailableCredit
 	, dblPrepayments
 	, CASE WHEN strType = 'CF Tran' 
