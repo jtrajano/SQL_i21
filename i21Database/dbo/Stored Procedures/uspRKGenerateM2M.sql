@@ -3993,22 +3993,21 @@ BEGIN TRY
 			, intMarketZoneId
 			, strMarketZoneCode
 			, strLocationName 
-			, dblResult = case when strPricingType = 'Cash' THEN 
-									ROUND(dblResultCash, 2) 
-								else 
-									ROUND((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty, 2)
-						 END
+			, dblResult = CASE WHEN strPricingType = 'Cash' 
+							THEN ROUND(dblResultCash, 2) 
+							ELSE ROUND((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty, 2)
+							END
 			, dblMarketFuturesResult = CASE WHEN strContractOrInventoryType = 'Inventory' THEN 0
 											WHEN strPricingType = 'Basis' THEN 0
-											ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty)
+											ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) 
+												+ (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty)
 											END
-			, dblResultRatio = (CASE WHEN dblContractRatio <> 0 AND dblMarketRatio <> 0 THEN ((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty)
-										- (CASE WHEN strContractOrInventoryType = 'Inventory' THEN 0
-												WHEN strPricingType = 'Basis' THEN 0
-												ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty) END)
+			, dblResultRatio = (CASE WHEN dblContractRatio <> 0 AND dblMarketRatio <> 0 AND strContractOrInventoryType <> 'Inventory'
+									THEN ((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty)
+										- (CASE WHEN strPricingType = 'Basis' THEN 0
+												ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) 
+													+ (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty) END)
 										- dblResultBasis
-									WHEN strContractOrInventoryType = 'Inventory' THEN
-										0
 									ELSE 0 END)
 			, intSpreadMonthId
 			, strSpreadMonth
@@ -4066,67 +4065,31 @@ BEGIN TRY
 				, intPricingTypeId
 				, strPricingType
 				, dblContractRatio = ISNULL(dblCalculatedContractRatio, 0)
-				--Contract Basis
-				, dblContractBasis = (CASE WHEN strPricingType ! = 'HTA'
-											THEN (CASE WHEN @ysnCanadianCustomer = 1
-														THEN (CASE WHEN intCurrencyId = @intCurrencyId 
-																-- CONTRACT CURRENCY = M2M CURRENCY
-																THEN dblContractBasis
-																ELSE ISNULL(dblContractBasis, 0) * dblRateCT
-																END
-															  )
-														ELSE dblContractBasis * dblRateCT END)
-										ELSE 0 END)
-				--Contract Futures
+				-- Contract Basis
+				, dblContractBasis = dblCalculatedBasis
+				-- Contract Futures
 				, dblActualFutures = dblCalculatedFutures
-				, dblFutures = (CASE WHEN strPricingType = 'Basis' AND strPriOrNotPriOrParPriced = 'Partially Priced' THEN dblFutures --((dblLotsFixed * dblPriceWORollArb) + ((dblNoOfLots - dblLotsFixed) * dblConvertedFuturePrice)) / dblNoOfLots
-								WHEN strPricingType = 'Basis' THEN ISNULL(dblFutures, 0)
-								WHEN strPricingType = 'Priced' THEN dblCalculatedFutures
-								ELSE dblCalculatedFutures END)
-				, dblCash --Contract Cash
+				, dblFutures = CASE WHEN strPricingType = 'Basis' THEN ISNULL(dblFutures, 0)
+									WHEN strPricingType = 'Priced' THEN dblCalculatedFutures
+									ELSE dblCalculatedFutures END
+				-- Contract Cash
+				, dblCash
+				-- Contract Costs
 				, dblCosts = ABS(dblCosts) 
-				--Market Basis
-				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
-										CASE WHEN @ysnCanadianCustomer = 1 
-											THEN ISNULL(dblMarketBasis, 0) * dblFinalRate
-										ELSE (ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0)) * dblFinalRate END
-									ELSE 0 END)
+				-- Market Basis
+				, dblMarketBasis = dblCalculatedMarketBasis
 				, dblMarketRatio
-				, dblFuturePrice = (ISNULL(dblFuturePrice, 0) * dblRateFP)--Market Futures
+				-- Market Futures 
+				, dblFuturePrice = dblCalculatedMarketFutures
 				, intContractTypeId
-				, dblAdjustedContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 
-													THEN (CASE WHEN intCurrencyId = @intCurrencyId
-															-- CONTRACT CURRENCY = M2M CURRENCY
-															THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0)
-															ELSE  (ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0))
-																			* dblFinalRate
-															END
-														)
-												ELSE (ISNULL(dblContractBasis, 0) * dblFinalRate) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0) END)
+				, dblAdjustedContractPrice = dblCalculatedBasis + (dblCalculatedFutures * dblCalculatedContractRatio) + ISNULL(dblCash, 0) + ISNULL(dblCosts, 0)
 				, dblCashPrice
 				--Market Price
-				, dblMarketPrice = CASE WHEN @ysnCanadianCustomer = 1 
-											THEN (CASE WHEN strMBCurrency = strFPCurrency
-													THEN  (ISNULL(dblMarketBasis, 0) + (dblFuturePrice * CASE WHEN ISNULL(dblMarketRatio, 0) = 0 THEN 1 ELSE dblMarketRatio END) + ISNULL(dblCashPrice, 0))
-																	* dblFinalRate
-													ELSE 
-														(ISNULL(dblMarketBasis, 0) * dblFinalRate) + 
-														((dblFuturePrice * CASE WHEN ISNULL(dblMarketRatio, 0) = 0 THEN 1 ELSE dblMarketRatio END) + ISNULL(dblCashPrice, 0) * dblRateFP)
-													END
-												  )
-											ELSE (ISNULL(dblMarketBasis, 0) * dblFinalRate) + ((ISNULL(dblFuturePrice, 0) * dblFinalRate) * CASE WHEN ISNULL(dblMarketRatio, 0) = 0 THEN 1 ELSE ISNULL(dblMarketRatio, 0) END) + ISNULL(dblCashPrice, 0) END
+				, dblMarketPrice = dblCalculatedMarketBasis + (dblCalculatedMarketFutures * dblCalculatedMarketRatio) + ISNULL(dblCashPrice, 0)
 				, dblResultBasis = dblResultBasis
 				, dblResultCash
 				--Contract Price
-				, dblContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 
-											THEN (CASE WHEN intCurrencyId = @intCurrencyId
-													-- CONTRACT CURRENCY = M2M CURRENCY
-													THEN ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0)
-													ELSE  (ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0))
-																	* dblFinalRate
-													END
-												)
-										ELSE (ISNULL(dblContractBasis, 0) * dblFinalRate) + (ISNULL(dblCalculatedFutures, 0) * ISNULL(dblCalculatedContractRatio, 1)) + ISNULL(dblCash, 0) END)
+				, dblContractPrice = dblCalculatedBasis + (dblCalculatedFutures * dblCalculatedContractRatio) + ISNULL(dblCash, 0) 
 				, intQuantityUOMId
 				, intCommodityUnitMeasureId
 				, intPriceUOMId
@@ -4171,52 +4134,23 @@ BEGIN TRY
 				, t.intCurrencyId
 			FROM (
 				SELECT t.*
-					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Unpriced' THEN dblConvertedFuturePrice
-															WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Partially Priced'
-															THEN ((dblLotsFixed * dblPriceWORollArb) + ((dblNoOfLots - dblLotsFixed) * dblConvertedFuturePrice)) / dblNoOfLots
-															ELSE 
-																CASE WHEN @ysnCanadianCustomer = 1 
-																	THEN 
-																		CASE WHEN intCurrencyId = @intCurrencyId	
-																			THEN ISNULL(dblFutures, 0)
-																			ELSE ISNULL(dblFutures, 0) * dblRateCT END 
-																	ELSE  ISNULL(dblFutures, 0) * dblRateCT END
-															END), 0)
-					, dblCalculatedContractRatio = CASE WHEN dblContractRatio IS NOT NULL THEN dblContractRatio * dblRateCT ELSE 1 END
+					, dblCalculatedBasis = CASE WHEN strPricingType != 'HTA' THEN ISNULL(dblContractBasis, 0) * dblRateCT ELSE 0 END
+					, dblCalculatedFutures = ISNULL((CASE WHEN strPricingType = 'Ratio' AND strPriOrNotPriOrParPriced = 'Partially Priced'
+														THEN ISNULL(((dblLotsFixed * dblPriceWORollArb) + ((dblNoOfLots - dblLotsFixed) * (ISNULL(dblFutures, 0) * dblRateCT))) 
+																/ dblNoOfLots, 0)
+														ELSE ISNULL(dblFutures, 0) * dblRateCT
+														END), 0)
+					, dblCalculatedContractRatio = CASE WHEN ISNULL(dblContractRatio, 0) = 0 THEN 1 ELSE dblContractRatio * dblRateCT END
+					, dblCalculatedMarketBasis = CASE WHEN strPricingType != 'HTA' 
+													THEN (	ISNULL(dblMarketBasis, 0) +
+															CASE WHEN @ysnCanadianCustomer != 1 THEN ISNULL(dblInvMarketBasis, 0) ELSE 0 END
+														  )
+													ELSE 0 END * dblRateMB 
+					, dblCalculatedMarketFutures = ISNULL(dblFuturePrice, 0) * dblRateFP
+					, dblCalculatedMarketRatio = CASE WHEN ISNULL(dblMarketRatio, 0) = 0 THEN 1 ELSE dblMarketRatio END
 				FROM (
 					SELECT #Temp.*
 						-- IF RATE TYPE IS CONTRACT = CHECK CONTRACT FOREX. IF NO VALUE, USE SYSTEM WIDE FOREX INSTEAD
-
-						-- RATE FOR FUTURE PRICE (SETTLEMENT PRICE) CURRENCY TO M2M CURRENCY 
-						, dblRateFP = CASE WHEN FPCurrency.intCurrencyID = @intCurrencyId
-									  THEN 1
-									  ELSE
-										  CASE WHEN @strRateType = 'Contract' 
-										  THEN
-											ISNULL((SELECT TOP 1 dblRate FROM tblCTContractDetail
-													WHERE dtmFXValidFrom <= @dtmCurrentDay AND dtmFXValidTo >= @dtmCurrentDay
-														AND ISNULL(dblRate, 0) <> 0
-														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate forex
-																						WHERE forex.intFromCurrencyId = FPCurrency.intCurrencyID AND forex.intToCurrencyId = @intCurrencyId)
-														AND intContractDetailId = #Temp.intContractDetailId), dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
-											ELSE dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END
-									  END
-
-						-- RATE FOR MARKET BASIS (BASIS ENTRY) CURRENCY TO M2M CURRENCY 
-						, dblRateMB = CASE WHEN MBCurrency.intCurrencyID = @intCurrencyId
-									  THEN 1
-									  ELSE
-										  CASE WHEN @strRateType = 'Contract' 
-										  THEN
-											ISNULL((SELECT TOP 1 dblRate FROM tblCTContractDetail
-													WHERE dtmFXValidFrom <= @dtmCurrentDay AND dtmFXValidTo >= @dtmCurrentDay
-														AND ISNULL(dblRate, 0) <> 0
-														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate forex
-																						WHERE forex.intFromCurrencyId = MBCurrency.intCurrencyID AND forex.intToCurrencyId = @intCurrencyId)
-														AND intContractDetailId = #Temp.intContractDetailId), dbo.fnRKGetCurrencyConvertion(MBCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
-											ELSE dbo.fnRKGetCurrencyConvertion(MBCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END
-									  END
-
 						-- RATE FOR CONTRACT CURRENCY TO M2M CURRENCY
 						, dblRateCT = CASE WHEN intCurrencyId = @intCurrencyId
 									  THEN 1
@@ -4224,45 +4158,50 @@ BEGIN TRY
 										  CASE WHEN @strRateType = 'Contract' 
 										  THEN
 											ISNULL((SELECT TOP 1 dblRate FROM tblCTContractDetail
-													WHERE dtmFXValidFrom <= @dtmCurrentDay AND dtmFXValidTo >= @dtmCurrentDay
+													WHERE ISNULL(dtmFXValidFrom, @dtmCurrentDay) <= @dtmCurrentDay AND ISNULL(dtmFXValidTo, @dtmCurrentDay) >= @dtmCurrentDay
 														AND ISNULL(dblRate, 0) <> 0
-														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate forex
-																						WHERE forex.intFromCurrencyId = Currency.intCurrencyID AND forex.intToCurrencyId = @intCurrencyId)
-														AND intContractDetailId = #Temp.intContractDetailId), dbo.fnRKGetCurrencyConvertion(Currency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
+														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId 
+																						FROM tblSMCurrencyExchangeRate forex
+																						WHERE forex.intFromCurrencyId = Currency.intCurrencyID 
+																						AND forex.intToCurrencyId = @intCurrencyId)
+														AND intContractDetailId = #Temp.intContractDetailId)
+												, dbo.fnRKGetCurrencyConvertion(Currency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
 											ELSE dbo.fnRKGetCurrencyConvertion(Currency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END
 									  END
-
-						, dblFinalRate = CASE WHEN MBCurrency.intCurrencyID = @intCurrencyId
+						-- RATE FOR MARKET BASIS (BASIS ENTRY) CURRENCY TO M2M CURRENCY 
+						, dblRateMB = CASE WHEN MBCurrency.intCurrencyID = @intCurrencyId
 									  THEN 1
 									  ELSE
 										  CASE WHEN @strRateType = 'Contract' 
 										  THEN
 											ISNULL((SELECT TOP 1 dblRate FROM tblCTContractDetail
-													WHERE dtmFXValidFrom <= @dtmCurrentDay AND dtmFXValidTo >= @dtmCurrentDay
+													WHERE ISNULL(dtmFXValidFrom, @dtmCurrentDay) <= @dtmCurrentDay AND ISNULL(dtmFXValidTo, @dtmCurrentDay) >= @dtmCurrentDay
 														AND ISNULL(dblRate, 0) <> 0
-														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate forex
-																						WHERE forex.intFromCurrencyId = MBCurrency.intCurrencyID AND forex.intToCurrencyId = @intCurrencyId)
-														AND intContractDetailId = #Temp.intContractDetailId), dbo.fnRKGetCurrencyConvertion(MBCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
+														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId 
+																						FROM tblSMCurrencyExchangeRate forex
+																						WHERE forex.intFromCurrencyId = MBCurrency.intCurrencyID 
+																						AND forex.intToCurrencyId = @intCurrencyId)
+														AND intContractDetailId = #Temp.intContractDetailId)
+												, dbo.fnRKGetCurrencyConvertion(MBCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
 											ELSE dbo.fnRKGetCurrencyConvertion(MBCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END
 									  END
-
-						, dblConvertedFuturePrice = (CASE WHEN @ysnCanadianCustomer = 1
-															-- SAME CURRENCY (NO CONVERSION)
-															THEN (CASE WHEN FPCurrency.intCurrencyID = @intCurrencyId THEN ISNULL(dblFuturePrice, 0)
-																	-- DIFFERENT CURRENCY (WITH CONVERSION)
-																	-- IF RATE TYPE IS CONTRACT = CHECK CONTRACT FOREX. IF NO VALUE, USE SYSTEM WIDE FOREX INSTEAD
-																	ELSE (CASE WHEN @strRateType = 'Contract' THEN ISNULL(dblFuturePrice, 0) *
-																			ISNULL((SELECT TOP 1 dblRate FROM tblCTContractDetail
-																					WHERE dtmFXValidFrom <= @dtmCurrentDay AND dtmFXValidTo >= @dtmCurrentDay
-																						AND ISNULL(dblRate, 0) <> 0
-																						AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId FROM tblSMCurrencyExchangeRate forex
-																														WHERE forex.intFromCurrencyId = FPCurrency.intCurrencyID AND forex.intToCurrencyId = @intCurrencyId)
-																						AND intContractDetailId = #Temp.intContractDetailId), dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
-																			ELSE ISNULL(dblFuturePrice, 0) * dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END)
-																	END
-																)
-															ELSE ISNULL(dblFuturePrice, 0) * dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END)
-												
+						-- RATE FOR FUTURE PRICE (SETTLEMENT PRICE) CURRENCY TO M2M CURRENCY 
+						, dblRateFP = CASE WHEN FPCurrency.intCurrencyID = @intCurrencyId
+									  THEN 1
+									  ELSE
+										  CASE WHEN @strRateType = 'Contract' 
+										  THEN
+											ISNULL((SELECT TOP 1 dblRate FROM tblCTContractDetail
+													WHERE ISNULL(dtmFXValidFrom, @dtmCurrentDay) <= @dtmCurrentDay AND ISNULL(dtmFXValidTo, @dtmCurrentDay) >= @dtmCurrentDay
+														AND ISNULL(dblRate, 0) <> 0
+														AND intCurrencyExchangeRateId = (SELECT TOP 1 intCurrencyExchangeRateId 
+																						FROM tblSMCurrencyExchangeRate forex
+																						WHERE forex.intFromCurrencyId = FPCurrency.intCurrencyID 
+																						AND forex.intToCurrencyId = @intCurrencyId)
+														AND intContractDetailId = #Temp.intContractDetailId)
+												, dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId))
+											ELSE dbo.fnRKGetCurrencyConvertion(FPCurrency.intCurrencyID, @intCurrencyId, @intMarkToMarketRateTypeId) END
+									  END
 						, strMainCurrency = Currency.strCurrency
 						, strMBCurrency = MBCurrency.strCurrency
 						, strFPCurrency = FPCurrency.strCurrency
