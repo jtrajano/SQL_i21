@@ -238,7 +238,13 @@ BEGIN
 			, ISNULL(PRINT_PREVIEW.intTicketPrintOptionId, PRINT_RELATED_TABLE.intTicketPrintOptionId) AS intTicketPrintOptionId
 			, strDestinationLocationName
 			, strDestinationSubLocation
-			, strDestinationStorageLocation 
+			, strDestinationStorageLocation
+
+
+			, strLoadAddress
+			, strEntityDefaultLocationAddress
+			, ysnShowLoadOutAddressForFullSheetTicket
+
 		FROM
 			vyuSCPrintPreviewTicketView PRINT_PREVIEW
 		JOIN @PRINT_RELATED_TABLE PRINT_RELATED_TABLE

@@ -39,6 +39,9 @@
     
     [strSpecialTicketImportImplementation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 
+
+    [ysnShowLoadOutAddressForFullSheetTicket] BIT NOT NULL DEFAULT(0),
+
     --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
     
 
