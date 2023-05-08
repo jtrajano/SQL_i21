@@ -42,7 +42,7 @@
 	[ysnToBeDeleted]				BIT NOT NULL DEFAULT 0,
 	[dblPreviousQty]				NUMERIC(18,6) NULL,
 
-	[dtmPrevFixationDate]				DATETIME NOT NULL,
+	[dtmPrevFixationDate]				DATETIME NULL,
 	[dblPrevQuantity]					NUMERIC(18,6) NULL,
 	[dblPrevCashPrice]					NUMERIC(18,6) NULL,
 
