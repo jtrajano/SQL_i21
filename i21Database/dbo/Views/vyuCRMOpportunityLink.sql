@@ -93,6 +93,10 @@
 			,o.strLocationName
 			,strEntityLocation = p.strLocationName
 			,strLostToCompetitor = q.strName
+			,strEntityType = CASE WHEN w.strType IS NOT NULL
+											THEN 'Customer'
+											ELSE 'Vendor'
+									  END COLLATE Latin1_General_CI_AS --(case when a.strDirection = 'Purchase' then 'Vendor' else 'Customer' end) COLLATE Latin1_General_CI_AS
 			,strDirectionEntityType = (case when a.strDirection = 'Purchase' then 'Vendor' else 'Customer' end) COLLATE Latin1_General_CI_AS
 			,strLOBType = (select top 1 r.strType from tblSMLineOfBusiness r, tblCRMOpportunityLob s where r.strType = 'Software' and r.intLineOfBusinessId = s.intLineOfBusinessId and s.intOpportunityId = a.intOpportunityId)
 			,a.intIndustrySegmentId
@@ -131,3 +135,11 @@
 			left join tblCRMIndustrySegment t on t.intIndustrySegmentId = a.intIndustrySegmentId
 			left join tblCRMOpportunityType u on u.intOpportunityTypeId = a.intOpportunityTypeId
 			left join tblCRMBrandMaintenance v on v.intBrandMaintenanceId = a.intBrandMaintenanceId
+			outer apply 
+			(
+				select top 1 strType
+				from tblEMEntityType
+				where intEntityId = a.intCustomerId and
+					  strType in ('Customer', 'Prospect')
+			) w
+GO
