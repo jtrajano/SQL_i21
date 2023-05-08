@@ -7,12 +7,9 @@ GO
     WHERE strAccountType IN ('Asset','Liability', 'Equity')
     AND A.ysnRevalue IS NULL
 
-    -- FOR primary segment range query
+
     ;WITH cte AS (
-
-        SELECT ROW_NUMBER() OVER(ORDER BY strCode ASC) rowId, intAccountSegmentId FROM tblGLAccountSegment A JOIN 
-        tblGLAccountStructure B ON A.intAccountStructureId = A.intAccountStructureId WHERE strType= 'Primary'
+        SELECT ROW_NUMBER() OVER(ORDER BY strAccountId ASC) rowId, intAccountId FROM tblGLAccount
     )
-    UPDATE A SET intPrimaryOrderId = rowId FROM tblGLAccountSegment A JOIN cte B ON A.intAccountSegmentId = B.intAccountSegmentId
-
+    UPDATE A SET intOrderId = rowId FROM tblGLAccount A JOIN cte B ON A.intAccountId = B.intAccountId
 GO
