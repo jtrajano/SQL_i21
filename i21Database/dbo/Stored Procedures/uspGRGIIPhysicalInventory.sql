@@ -149,9 +149,6 @@ WHERE t.ysnIsUnposted <> 1
 	AND t.dtmDate < @dtmReportDate 
 	AND I.intCommodityId = ISNULL(@intCommodityId, I.intCommodityId)
 	AND CL.ysnLicensed = 1
-	AND (t.intCostingMethod = 5 AND t.strTransactionForm = 'Invoice' --get the ACTUAL PRICE only for the invoice transactions
-			OR (t.intCostingMethod IS NOT NULL AND (t.intCostingMethod <> 5 AND t.strTransactionForm <> 'Invoice'))
-		)
 GROUP BY t.intItemId
 		,ItemLocation.intLocationId
 		,t.intLotId
