@@ -153,6 +153,7 @@ BEGIN TRY
 	FROM tblSMLogoPreference
 	WHERE ysnAllOtherReports = 1
 		AND intCompanyLocationId = @intCompanyLocationId
+		AND DATALENGTH(imgLogo) > 0
 
 	IF @imgLogo IS NULL
 	BEGIN
@@ -165,6 +166,7 @@ BEGIN TRY
 	FROM tblSMLogoPreferenceFooter
 	WHERE ysnAllOtherReports = 1
 		AND intCompanyLocationId = @intCompanyLocationId
+		AND DATALENGTH(imgLogo) > 0
 
 	IF @imgFooterLogo IS NULL
 	BEGIN
