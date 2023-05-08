@@ -562,6 +562,8 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardD
 										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 										  , @ysnFromBalanceForward		= 1
+										  , @dtmBalanceForwardDate		= @dtmBalanceForwardDateLocal
+										  , @ysnPrintFromCF				= @ysnPrintFromCFLocal
 
 INSERT INTO #BALANCEFORWARDTABLE WITH (TABLOCK)  (
 	  intEntityCustomerId
@@ -1276,9 +1278,7 @@ IF @ysnPrintCreditBalanceLocal = 0
 		  AND strStatementFormat = 'Balance Forward'
 		  AND intEntityCustomerId IN (
 			  SELECT DISTINCT intEntityCustomerId
-			  FROM tblARCustomerAgingStagingTable AGINGREPORT
-			  WHERE AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
-				AND AGINGREPORT.strAgingType = 'Summary'
-				AND AGINGREPORT.dblTotalAR < 0
+			  FROM #AGINGTABLE AGINGREPORT
+			  WHERE AGINGREPORT.dblTotalAR < 0
 		  )
 	END
