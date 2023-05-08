@@ -105,6 +105,7 @@ IF @intEmailTemplate = 1
 		SET @body += '<br><br>'
 		SET @body +='Sincerely, <br>'
 		SET @body +=(select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId) + '<br>'
+		SET @body +=(SELECT TOP 1 ISNULL(strCompanyName, '') FROM tblSMCompanySetup) + '<br>'
 		SET @body +='#LOGO#'
 		SET @body +='<br>'
 		SET @body +='</html>'
