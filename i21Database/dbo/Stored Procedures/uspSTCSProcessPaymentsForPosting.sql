@@ -11,8 +11,12 @@ DECLARE @dblAmount						DECIMAL (18,6) = 0
 DECLARE @dblConsAmountForInvoice		DECIMAL (18,6) = 0
 DECLARE @dblConsAmountForCreditMemo		DECIMAL (18,6) = 0
 DECLARE @dblTotalSalesRemaining			DECIMAL (18,6) = 0
+DECLARE @dblDealerCommission			DECIMAL (18,6) = 0
 DECLARE @dblTotalPaymentRemaining		DECIMAL (18,6) = 0
 DECLARE @dblPreviousRemainingPayment	DECIMAL (18,6) = 0
+DECLARE @dblFuelSales					DECIMAL (18,6) = 0
+DECLARE @ysnPaymentCompleteInSingleMOP	BIT = 0
+DECLARE @ysnCommissionDeducted			BIT = 0
 
 DECLARE @intPaymentOptionsPrimId int  
   
@@ -24,13 +28,15 @@ SELECT intPaymentOptionsPrimId
 FROM  
 dbo.tblSTCheckoutPaymentOptions CPO  
 WHERE CPO.intCheckoutId = @intCheckoutId
+ORDER BY CPO.dblAmount DESC
 
 SELECT 
-@dblTotalSalesRemaining = dblTotalSales
+@dblTotalSalesRemaining = dblTotalSales - dblDealerCommission
+,@dblFuelSales = dblTotalSales
+,@dblDealerCommission = dblDealerCommission
 ,@dblTotalPaymentRemaining = dblTotalPaidOuts
 FROM tblSTCheckoutHeader
 WHERE intCheckoutId = @intCheckoutId
-
 
 OPEN MY_CURSOR
 FETCH NEXT FROM MY_CURSOR INTO @intPaymentOptionsPrimId
@@ -46,18 +52,38 @@ BEGIN
 	FROM tblSTCheckoutPaymentOptions CPO
 	INNER JOIN tblSTCheckoutHeader CH
 		ON CH.intCheckoutId = CPO.intCheckoutId
-	WHERE CPO.intPaymentOptionsPrimId = @intPaymentOptionsPrimId 
+	WHERE CPO.intPaymentOptionsPrimId = @intPaymentOptionsPrimId
 
-	SET @dblTotalSalesRemaining = @dblTotalSalesRemaining - @dblAmount;
-	SET @dblTotalPaymentRemaining = @dblTotalPaymentRemaining - @dblAmount;
-
-	IF @dblTotalSalesRemaining > 0
+	IF (@dblTotalSalesRemaining < @dblAmount) AND @ysnPaymentCompleteInSingleMOP = 0
 	BEGIN
-		UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 1, dblConsAmountForInvoice = @dblAmount, dblConsAmountForCreditMemo = 0 WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId
+		IF @ysnCommissionDeducted = 0
+		BEGIN
+			SET @dblTotalSalesRemaining = @dblTotalSalesRemaining - (@dblAmount + @dblDealerCommission);	
+			SET @ysnCommissionDeducted = 1;
+		END
+		ELSE
+		BEGIN
+			SET @dblTotalSalesRemaining = @dblTotalSalesRemaining - @dblAmount;
+		END		
+		SET @dblTotalPaymentRemaining = @dblTotalPaymentRemaining - @dblAmount;
+
+		UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 1, dblConsAmountForInvoice = @dblFuelSales - @dblDealerCommission, dblConsAmountForCreditMemo = (@dblTotalSalesRemaining + @dblDealerCommission) * -1 WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId
+		SET @ysnPaymentCompleteInSingleMOP = 1;
 	END
-	ELSE IF @dblTotalSalesRemaining < 0
-	BEGIN				
-		UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 0, dblConsAmountForInvoice = (CASE WHEN @dblPreviousRemainingPayment < 0 THEN 0 ELSE @dblPreviousRemainingPayment END), dblConsAmountForCreditMemo = (CASE WHEN @dblPreviousRemainingPayment < 0 THEN @dblAmount ELSE @dblTotalSalesRemaining * -1 END)  WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId 
+	ELSE
+	BEGIN		
+		SET @dblTotalSalesRemaining = @dblTotalSalesRemaining - @dblAmount;	
+		SET @dblTotalPaymentRemaining = @dblTotalPaymentRemaining - @dblAmount;
+
+		IF @dblTotalSalesRemaining > 0
+		BEGIN
+			UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 1, dblConsAmountForInvoice = @dblAmount, dblConsAmountForCreditMemo = 0 WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId
+		END
+		ELSE IF @dblTotalSalesRemaining < 0
+		BEGIN				
+			UPDATE tblSTCheckoutPaymentOptions SET ysnConsMOPForInvoice = 0, dblConsAmountForInvoice = (CASE WHEN @dblPreviousRemainingPayment < 0 THEN 0 ELSE @dblPreviousRemainingPayment END), dblConsAmountForCreditMemo = (CASE WHEN @dblPreviousRemainingPayment < 0 THEN @dblAmount ELSE @dblTotalSalesRemaining * -1 END)  WHERE intPaymentOptionsPrimId = @intPaymentOptionsPrimId 
+		END
+		SET @ysnPaymentCompleteInSingleMOP = 1;
 	END
 
 	SET @dblPreviousRemainingPayment = @dblTotalSalesRemaining;
