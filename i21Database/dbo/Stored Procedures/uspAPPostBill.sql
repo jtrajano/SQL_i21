@@ -432,6 +432,7 @@ DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0
 
 --CHARGES COST ADJUSTMENT
 DECLARE @ChargesToAdjust as OtherChargeCostAdjustmentTableType
+DECLARE @PrepaidChargesToAdjust as OtherChargeCostAdjustmentTableType
 INSERT INTO @ChargesToAdjust 
 (
 	[intInventoryReceiptChargeId] 
@@ -580,6 +581,7 @@ WHERE
 	AND A.intTransactionReversed IS NULL
 	AND A.intTransactionType IN (1)
 	AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
+/*
 UNION ALL
 SELECT 
 	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId 
@@ -641,6 +643,7 @@ WHERE
 	AND A.intTransactionType IN (1)
 	AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1
 	
+*/
 UNION ALL
 SELECT 
 	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
@@ -727,9 +730,86 @@ AND B.intInventoryReceiptChargeId IS NOT NULL
 AND rc.ysnInventoryCost = 1
 AND A.intTransactionReversed IS NULL
 AND A.intTransactionType IN (3)
+AND ISNULL(B.ysnPrepaidOtherCharge,0) = 0
+
+INSERT INTO @PrepaidChargesToAdjust
+(
+	[intInventoryReceiptChargeId] 
+	,[dblNewValue] 
+	,[dblNewForexValue]
+	,[dtmDate] 
+	,[intTransactionId] 
+	,[intTransactionDetailId] 
+	,[strTransactionId] 
+	,[intCurrencyId] 
+	,[intForexRateTypeId] 
+	,[dblForexRate] 
+)
+SELECT 
+	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId 
+	,[dblNewValue] = 
+			CASE 
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+					CAST(
+						(
+							((B.dblCost * dblQtyReceived) / ISNULL(r.intSubCurrencyCents, 1)) * rc.dblForexRate
+						)  
+						AS DECIMAL(18,2)
+					)
+				ELSE
+					CAST(
+						(B.dblCost * B.dblQtyReceived) * rc.dblForexRate
+						AS DECIMAL(18,2)
+					) 
+			END
+			* CASE WHEN A.intTransactionType IN (1) THEN 1 ELSE -1 END
+	 ,[dblNewForexValue] =
+			CASE 
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+						CAST(
+							(
+								((B.dblCost * B.dblQtyReceived))
+								/ ISNULL(r.intSubCurrencyCents, 1) 
+							)  
+							AS DECIMAL(18,2)
+						)
+				ELSE 
+						CAST(
+							((B.dblCost * B.dblQtyReceived))
+							AS DECIMAL(18,2)
+						)
+			END
+			* CASE WHEN A.intTransactionType IN (1) THEN 1 ELSE -1 END
+	,[dtmDate] = A.dtmDate
+	,[intTransactionId] = A.intBillId
+	,[intTransactionDetailId] = B.intBillDetailId
+	,[strTransactionId] = A.strBillId
+	,[intCurrencyId] = rc.intCurrencyId
+	,[intForexRateTypeId] = rc.intForexRateTypeId
+	,[dblForexRate] = rc.dblForexRate
+FROM 
+	tblAPBill A INNER JOIN tblAPBillDetail B
+		ON A.intBillId = B.intBillId
+	INNER JOIN (
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+			ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+		)
+	ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId 
+WHERE 
+	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+	AND B.intInventoryReceiptChargeId IS NOT NULL 
+	AND rc.ysnInventoryCost = 1
+	AND (
+		(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
+		OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
+	)
+	AND A.intTransactionReversed IS NULL
+	AND A.intTransactionType IN (1,3)
+	AND ISNULL(B.ysnPrepaidOtherCharge,0) = 1
 
 -- Remove zero cost adjustments. 
 DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
+DELETE FROM @PrepaidChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
 -- SELECT 
 -- 	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
 -- 	,[dblNewValue]					= B.dblCost - B.dblOldCost
@@ -1281,6 +1361,91 @@ BEGIN
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
 
+	SELECT * FROM @PrepaidChargesToAdjust
+
+	--Call the Item's Cost Adjustment from the Prepaid Other Charges. 
+	IF EXISTS(SELECT 1 FROM @PrepaidChargesToAdjust)
+	BEGIN
+		BEGIN TRY
+			EXEC @intReturnValue = uspICPostCostAdjustmentFromOtherCharge 
+				@ChargesToAdjust = @PrepaidChargesToAdjust 
+				,@strBatchId = @batchId 
+				,@intEntityUserSecurityId = @userId 
+				,@ysnPost = @post
+				,@strTransactionType = DEFAULT
+		END TRY
+		BEGIN CATCH
+			SET @errorAdjustment = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+	
+	-- Create the GL entries for the Prepaid Cost Adjustment
+	IF EXISTS(SELECT 1 FROM @PrepaidChargesToAdjust)
+	BEGIN 
+		INSERT INTO @GLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId			
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate
+			,intSourceEntityId
+			,intCommodityId
+			,intCurrencyExchangeRateTypeId
+		)
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+			@strBatchId = @batchId
+			,@intEntityUserSecurityId = @userId
+			,@strGLDescription = DEFAULT
+			,@ysnPost = @post
+			,@AccountCategory_Cost_Adjustment = 'Other Charge Expense'
+
+	
+		--DELETE FAILED BILLS
+		DELETE A
+		FROM #tmpPostBillData A
+		WHERE EXISTS (
+			SELECT 1
+			FROM tblAPBill B
+			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
+			INNER JOIN @PrepaidChargesToAdjust D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
+			WHERE A.intBillId = B.intBillId
+			AND EXISTS (
+				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
+			)
+		)
+
+		SET @failedAdjustment = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedAdjustment;
+		SET @totalRecords = @totalRecords - @failedAdjustment;
+	END
 END
 ELSE
 BEGIN
