@@ -1590,6 +1590,14 @@ BEGIN TRY
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
+	-- Removes duplicate Freight Item when combo freight is on
+	IF (@ysnComboFreight = 1)  
+	BEGIN  
+		DECLARE @intTopFreight INT
+		SELECT TOP 1 @intTopFreight = intId FROM @EntriesForInvoice WHERE intLoadDistributionDetailId = @intComboFreightDistId AND intItemId = @intFreightItemId
+		DELETE FROM @EntriesForInvoice WHERE intId IN (SELECT intId FROM @EntriesForInvoice WHERE intLoadDistributionDetailId = @intComboFreightDistId AND intItemId = @intFreightItemId AND intId != @intTopFreight)  
+	END 
+
 	-- CHECK IF INTERNAL CARRIER
 	IF EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice E
 	LEFT JOIN tblSMShipVia S ON S.intEntityId = E.intShipViaId
