@@ -38,6 +38,13 @@ DECLARE @temp_xml_table TABLE (
 	,[datatype]		NVARCHAR(50)
 )
 
+DECLARE @temp_CommodityAttribute TABLE (
+	 [id]					INT
+	,[intInvoiceDetailId]	INT
+	,[intOriginId]			INT
+	,[strCommodityOrigin]	NVARCHAR(50)
+)
+
 -- Prepare the XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
@@ -70,6 +77,24 @@ WITH (
 	, [endgroup]   NVARCHAR(50)
 	, [datatype]   NVARCHAR(50)
 )
+
+INSERT INTO @temp_CommodityAttribute
+(
+	 [intInvoiceDetailId]
+	,[intOriginId]
+	,[strCommodityOrigin]
+)
+SELECT
+	 [intInvoiceDetailId]	= ARID.[intInvoiceDetailId]
+	,[intOriginId]			= ICI.[intOriginId]
+	,[strCommodityOrigin]	= ICCA.[strDescription]
+FROM tblARInvoice ARI WITH (NOLOCK) 
+LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.intInvoiceId = ARID.intInvoiceId
+LEFT JOIN tblICItem ICI WITH (NOLOCK) ON ICI.intItemId = ARID.intItemId
+LEFT JOIN tblICCommodityAttribute ICCA WITH (NOLOCK) ON ICI.intOriginId = ICCA.intCommodityAttributeId
+WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
+OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
+OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
 
 SELECT	@intEntityUserId = [from]
 FROM	@temp_xml_table
@@ -113,8 +138,8 @@ SELECT
 	,strCompanyAddress			= @strCompanyFullAddress
 	,strInvoiceNumber			= ARI.strInvoiceNumber
 	,strCustomerName			= ARCS.strName
-	,strLocationName			= SMCL.strLocationName + ',' +  + [dbo].[fnConvertDateToReportDateFormat](ARI.dtmDate, 0)
-	,strContractNumber			= CTCDV.strContractNumber + '-' + CAST(CTCDV.intContractSeq AS NVARCHAR(100)) + ' dated ' + [dbo].[fnConvertDateToReportDateFormat](CTCDV.dtmContractDate, 0)
+	,strLocationName			= ISNULL(NULLIF(SMCL.strCity, ''), '') + ',' + FORMAT(ARI.dtmDate, 'dd.MM.yyyy')
+	,strContractNumber			= CTCDV.strContractNumber + '-' + CAST(CTCDV.intContractSeq AS NVARCHAR(100)) + ' dated ' + FORMAT(CTCDV.dtmContractDate, 'dd.MM.yyyy')
 	,strOrigin					= CTCDV.strItemOrigin
 	,strFreightTerm				= CTCDV.strFreightTerm
 	,strWeight					= CTCDV.strWeight
@@ -123,15 +148,15 @@ SELECT
 	,strGrade					= CTCDV.strGrade
 	,dtmDueDate					= CAST(ARI.dtmDueDate AS DATE)
 	,strTerm					= SMT.strTerm
-	,strItemDescription			= ARGID.strItemDescription
+	,strItemDescription			= ISNULL(NULLIF(TCA.strCommodityOrigin COLLATE SQL_Latin1_General_CP1_CS_AS, '') + ', ', '') + ARGID.strItemDescription + ISNULL(', ' + NULLIF(ICIRIL.strCertificate, ''), '')
 	,strQtyShipped				= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
 	,strShipmentGrossWt			= CONVERT(VARCHAR,CAST(ARGID.dblShipmentGrossWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
 	,strShipmentTareWt			= CONVERT(VARCHAR,CAST(ARGID.dblShipmentTareWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
 	,strShipmentNetWt			= CONVERT(VARCHAR,CAST(ARGID.dblShipmentNetWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
-	,strCurrenyPriceUOM			= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARGID.dblPrice AS MONEY),1), '.00','') + ' ' + ARGID.strPriceUnitMeasure
+	,strCurrenyPriceUOM			= REPLACE(CONVERT(VARCHAR,CAST(ARGID.dblPrice AS MONEY),1), '.00','') + ' ' + ARGID.strCurrency + '/' + ARGID.strUnitMeasure
 	,strEDICode					= ICC.strEDICode
 	,ysnCustomsReleased			= ISNULL(LGL.ysnCustomsReleased, 0)
-	,strBOLNumber				= LGL.strBLNumber + ' dd ' + [dbo].[fnConvertDateToReportDateFormat](LGL.dtmBLDate, 0)
+	,strBOLNumber				= LGL.strBLNumber + ' dd ' + FORMAT(LGL.dtmBLDate, 'dd.MM.yyyy')
 	,strDestinationCity			= LGL.strDestinationCity
 	,strMVessel					= LGL.strMVessel
 	,strPaymentComments			= dbo.fnEliminateHTMLTags(ISNULL(ARI.strPaymentInstructions, ''), 0)
@@ -141,6 +166,7 @@ SELECT
 	,strIBAN					= CMBA.strIBAN
 	,strSWIFT					= CMBA.strSWIFT
 	,strBICCode					= CMBA.strBICCode
+	,strBankAddress				= ISNULL(NULLIF(CMB.strAddress, ''), '')
 	,blbFooterLogo				= SMLPF.imgLogo
 	,dblInvoiceSubtotal			= ARI.dblInvoiceSubtotal
 	,strInvoiceSubtotal			= ARGID.strCurrency + ' ' + REPLACE(CONVERT(VARCHAR,CAST(ARI.dblInvoiceSubtotal AS MONEY),1), '.00','')
@@ -191,6 +217,10 @@ SELECT
 									WHEN ARI.strType = 'Provisional' THEN ARGID.dblProvisionalTotal 
 									ELSE 0
 								  END
+	,strFLOIDNo					= 'FLO ID No ' + ISNULL(NULLIF(CAST(SMCL.strFLOID AS VARCHAR(20)), ''), '')
+	,strBioINSPECTANo			= 'BIO INSPECTA No ' + ISNULL(NULLIF(SMCL.strBioINSPECTANo, ''), '')
+	,strStorageLocation			= LGLDLV.strStorageLocation
+	,strCommodityDescription	= ICC.strDescription
 FROM tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId
@@ -207,6 +237,9 @@ LEFT JOIN tblCMBankAccount CMBA WITH (NOLOCK) ON ISNULL(ISNULL(ARI.intPayToCashB
 LEFT JOIN tblCMBank CMB WITH (NOLOCK) ON CMBA.intBankId = CMB.intBankId
 LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = ARI.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
+LEFT JOIN tblICInventoryReceiptItemLot ICIRIL WITH (NOLOCK) ON ARGID.intLotId = ICIRIL.intLotId
+LEFT JOIN vyuLGLoadDetailLotsView LGLDLV WITH (NOLOCK) ON ARGID.intLoadDetailId = LGLDLV.intLoadDetailId
+LEFT JOIN @temp_CommodityAttribute TCA ON ARGID.intInvoiceDetailId = TCA.intInvoiceDetailId 
 WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
 OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
 OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
