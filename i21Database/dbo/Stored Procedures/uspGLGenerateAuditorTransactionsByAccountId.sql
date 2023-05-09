@@ -109,17 +109,26 @@ BEGIN
        
 
         IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) <> 0)
-            SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdTo AS NVARCHAR(5))
+        BEGIN
+            IF @intAccountIDFrom > @intAccountIdTo
+                SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdTo AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdFrom AS NVARCHAR(5))
+            ELSE
+                SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdTo AS NVARCHAR(5))
+        END
         
         IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) = 0)
             SET @strSQL = @strSQL + '  AND B.intOrderId =  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5))
 
         
         IF (ISNULL(@intPrimaryFrom, 0) <> 0 AND ISNULL(@intPrimaryTo, 0) <> 0)
-            SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryTo AS NVARCHAR(5))
-        
+        BEGIN
+            IF @intPrimaryFrom > @intPrimaryTo
+                SET @strSQL = @strSQL + '  AND B.intPrimaryOrderId BETWEEN  ' +  CAST( @intPrimaryTo AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryFrom AS NVARCHAR(5))
+            ELSE
+                SET @strSQL = @strSQL + '  AND B.intPrimaryOrderId BETWEEN  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryTo AS NVARCHAR(5))
+        END
         IF (ISNULL(@intPrimaryFrom, 0) <> 0 AND ISNULL(@intPrimaryTo, 0) = 0)
-            SET @strSQL = @strSQL + '  AND B.intOrderId =  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5))
+            SET @strSQL = @strSQL + '  AND B.intPrimaryOrderId =  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5))
 
 
 
