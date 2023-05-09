@@ -252,12 +252,27 @@ BEGIN TRY
 			strERPBatchNumber		= CD.strERPBatchNumber,
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
-			strStraussQuantity		=  CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE @htmlDoc END +  @fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + ' '  + '<div>' + @fontBoldQuantityUOM + UM.strUnitMeasure +'</span>' + '</div>'							
-									   + @fontBoldStatus + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END) + '</span>',
+			strStraussQuantity		= CASE WHEN CHARINDEX('intContractStatusId',@strAmendedColumnsDetails, 0) > 0
+												OR CHARINDEX('dblQuantity',@strAmendedColumnsDetails, 0) > 0
+										   THEN CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc 
+													 WHEN LEN(IM.strDescription) > 150 THEN @htmlDoc
+													 WHEN LEN(IBM.strItemNo) > 150 THEN @htmlDoc
+												ELSE (CASE WHEN  CH.intPricingTypeId = 1 AND LEN('('+ IBM.strItemNo + ') ' + IM.strDescription) > 150  THEN @htmlDoc ELSE '' END)  END +  @fontBoldQuantity + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + '</span>' + @fontBoldQuantityUOM + ' ' + UM.strUnitMeasure +'</span>' 												
+												+ @fontBoldStatus + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END) + '</span>'
+										   ELSE
+												dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END)
+									   END,
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
-			strStraussPrice			= CASE WHEN CH.intPricingTypeId = 2
+			strStraussPrice			= CASE WHEN CHARINDEX('dblCashPrice',@strAmendedColumnsDetails, 0) > 0
+										   OR CHARINDEX('dblBasis',@strAmendedColumnsDetails, 0) > 0
+										   OR CHARINDEX('intFutureMarketId',@strAmendedColumnsDetails, 0) > 0
+										   OR CHARINDEX('dblFutures',@strAmendedColumnsDetails, 0) > 0
+										   OR CHARINDEX('intCurrencyId',@strAmendedColumnsDetails, 0) > 0
+										   OR CHARINDEX('intFutureMonthId',@strAmendedColumnsDetails, 0) > 0
+									  THEN
+										(CASE WHEN CH.intPricingTypeId = 2
 											THEN  @fontBold + 'PTBF basis ' +  '</span>' + @fontBoldFutureMarket + MA.strFutMarketName + space(20)  + '</span>' + ' ' + @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + '</span>'
 			 									+ CASE WHEN CD.dblBasis < 0 THEN  @fontBold + ' minus ' + '</span>'  ELSE  @fontBold +  ' plus ' + '</span>' END
 			 									+ @fontBoldCurrency + BCU.strCurrency+  '</span>' + ' '
@@ -265,14 +280,36 @@ BEGIN TRY
 			 									+ @fontBold + ' at ' + CD.strFixationBy + '''s option prior to FND of ' + '</span>'
 			 									+ @fontBoldFutureMonth + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)  + '</span>'
 			 									+ '<div style="font-family:Arial;font-size:13px;">' + ' or prior to presentation of documents,whichever is earlier.' + '</div>'
-			 								ELSE + @htmlDoc + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' + ' ' + @fontBoldCurrency + BCU.strCurrency + '</span>' + '<span>'+@fontBold + ' PER ' + '</span>' +  @fontBold + PU.strUnitMeasure + '</span>' 
-			 						   END,
+			 								ELSE + ( CASE WHEN CH.intPricingTypeId = 2 OR LEN('('+ IBM.strItemNo + ') ' + IM.strDescription) > 150 THEN @htmlDoc 
+													      ELSE  '</br>' END ) + @fontBoldCashPrice + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2)+ '</span>' +  @fontBoldCurrency +' ' + BCU.strCurrency + '</span>' + '<span>'+@fontBold + ' per ' + '</span>' +  @fontBold + PU.strUnitMeasure + '</span>' 
+			 						   END)
+									
+									 ELSE
+										 CASE WHEN CH.intPricingTypeId = 2
+											THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+ CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END
+			 									+ BCU.strCurrency + ' '
+			 									+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/' + BUM.strUnitMeasure
+			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
+			 									+ DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+ ' or prior to presentation of documents,whichever is earlier.'
+			 								ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
+			 						   END
+									 END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		=  CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE @htmlDoc END +CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
-										   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
-										   WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
-									  ELSE @fontBoldStartDate + CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + '</span>' + ' - ' + @fontBoldEndDate + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) + '</span>'
-									  END,
+			strStraussShipment		=  CASE WHEN CHARINDEX('dtmStartDate',@strAmendedColumnsDetails, 0) > 0  OR CHARINDEX('dtmEndDate',@strAmendedColumnsDetails, 0) > 0
+											THEN (CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE ( CASE WHEN CH.intPricingTypeId = 2 OR LEN('('+ IBM.strItemNo + ') ' + IM.strDescription) > 150 THEN @htmlDoc 
+																											  ELSE  '' END ) END +CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+													   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+													   WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+												  ELSE @fontBoldStartDate + CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + '</span>' + ' - ' + @fontBoldEndDate + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) + '</span>'
+												  END)
+									   ELSE	
+											(CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+												 WHEN SM.strReportDateFormat = 'M/d/yy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+												WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+											ELSE  CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) END)
+									   END, 
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',
 			strWalterOrigin			= dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin'),
