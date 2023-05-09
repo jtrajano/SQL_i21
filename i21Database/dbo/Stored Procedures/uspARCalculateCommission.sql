@@ -157,40 +157,6 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			,intConcurrencyId		= 1
 		FROM @tmpTransactionTable
 
-		--GET INVOICE LINETOTAL BY ITEM CATEGORY
-		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
-		BEGIN
-			INSERT INTO @tmpTransactionTable
-			SELECT 
-				 intSourceId	= I.intInvoiceId
-				,dblAmount		= SUM(ID.dblTotal + ID.dblTotalTax)
-				,dtmSourceDate	= I.dtmPostDate
-			FROM tblARInvoice I
-			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-			INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
-			INNER JOIN tblICCategory IC ON ICI.intCategoryId = IC.intCategoryId
-			INNER JOIN tblARCommissionPlanItemCategory CPIC ON IC.intCategoryId = CPIC.intItemCategoryId
-			LEFT JOIN tblARCommissionDetail CD on I.intInvoiceId = CD.intSourceId
-			LEFT JOIN tblARCommission C on CD.intCommissionId = C.intCommissionId
-			WHERE I.ysnPosted = 1
-				AND IC.intCategoryId IS NOT NULL
-				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-				AND ISNULL(C.ysnPaid, 0) = 0
-				AND CPIC.intCommissionPlanId = @intCommissionPlanId
-			GROUP BY I.intInvoiceId, I.dtmPostDate
-
-			INSERT INTO tblARCommissionRecapDetail
-			SELECT 
-				 intCommissionRecapId	= @intCommissionRecapId
-				,intEntityId			= @intEntityId
-				,intSourceId			= intSourceId
-				,strSourceType			= 'tblARInvoice'
-				,dtmSourceDate			= dtmSourceDate
-				,dblAmount				= dblAmount
-				,intConcurrencyId		= 1
-			FROM @tmpTransactionTable
-		END
-
 		--GET INVOICE TOTAL BY SALESPERSON
 		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
 		BEGIN
@@ -248,7 +214,39 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			FROM @tmpTransactionTable
 		END
 
-		
+		--GET INVOICE LINETOTAL BY ITEM CATEGORY
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
+		BEGIN
+			INSERT INTO @tmpTransactionTable
+			SELECT 
+				 intSourceId	= I.intInvoiceId
+				,dblAmount		= SUM(ID.dblTotal + ID.dblTotalTax)
+				,dtmSourceDate	= I.dtmPostDate
+			FROM tblARInvoice I
+			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+			INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
+			INNER JOIN tblICCategory IC ON ICI.intCategoryId = IC.intCategoryId
+			INNER JOIN tblARCommissionPlanItemCategory CPIC ON IC.intCategoryId = CPIC.intItemCategoryId
+			LEFT JOIN tblARCommissionDetail CD on I.intInvoiceId = CD.intSourceId
+			LEFT JOIN tblARCommission C on CD.intCommissionId = C.intCommissionId
+			WHERE I.ysnPosted = 1
+				AND IC.intCategoryId IS NOT NULL
+				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+				AND ISNULL(C.ysnPaid, 0) = 0
+				AND CPIC.intCommissionPlanId = @intCommissionPlanId
+			GROUP BY I.intInvoiceId, I.dtmPostDate
+
+			INSERT INTO tblARCommissionRecapDetail
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblARInvoice'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
+		END
 		
 		--GET INVOICE LINETOTAL BY ITEM
 		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
