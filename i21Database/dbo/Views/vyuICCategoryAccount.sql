@@ -5,6 +5,7 @@ SELECT
 	Category.intCategoryId, 
 	Category.strCategoryCode, 
 	AccountCategory.strAccountCategory,
+	AccountCategory.intAccountCategoryId,
 	Account.*
 FROM tblICCategory Category
 INNER JOIN tblICCategoryAccount CategoryAccount
