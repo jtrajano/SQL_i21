@@ -121,7 +121,7 @@ BEGIN TRY
   UPDATE A
   SET A.dblAdjustedTax = (A.dblTax * @percentage) - A.dblAdjustedTax
      ,A.dblTax = (A.dblTax * @percentage) - A.dblAdjustedTax
-     ,ysnTaxAdjusted = (CAST 0 AS BIT)
+     ,ysnTaxAdjusted = CAST(0 AS BIT)
   FROM tblAPBillDetailTax A
   INNER JOIN #tmpBillDetail B
     ON A.intBillDetailId = B.intBillDetailId
