@@ -599,7 +599,49 @@ CREATE TABLE #tmpDailyStockPosition
 		WHERE intEntityId = @intUserId
 	)
 	BEGIN 
-		INSERT INTO tblICStagingDailyStockPosition
+		INSERT INTO tblICStagingDailyStockPosition (
+				guidSessionId			
+				,intKey				
+				,intCommodityId		
+				,strCommodityCode	
+				,dtmDate				
+				,intCategoryId		
+				,strCategoryCode		
+				,intLocationId		
+				,strLocationName		
+				,intItemId			
+				,strItemNo			
+				,strDescription		
+				,intItemUOMId		
+				,strItemUOM			
+				,dblOpeningQty		
+				,dblOpeningOnSiteQty	
+				,dblOpeningInTransitInbound 
+				,dblOpeningInTransitOutbound
+				,dblTotalOpeningQty		
+				,dblReceivedQty			
+				,dblInventoryCountQty	
+				,dblInvoicedQty			
+				,dblAdjustments			
+				,dblTransfersReceived	
+				,dblTransfersShipped		
+				,dblInTransitInbound		
+				,dblInTransitOutbound	
+				,dblConsumed				
+				,dblProduced				
+				,dblClosingOnSiteQty											
+				,dblClosingInTransitInbound	
+				,dblClosingInTransitOutbound	
+				,dblClosingQty			
+				,strStatus				
+				,intConcurrencyId		
+				,dtmDateModified			
+				,dtmDateCreated			
+				,intModifiedByUserId		
+				,intCreatedByUserId		
+				,ysnBuilding				
+				,dblShippedQty			
+		)
 		SELECT	guidSessionId			= @guidSessionId,
 				intKey					= CAST(ROW_NUMBER() OVER(ORDER BY Item.intCommodityId, Item.intItemId) AS INT),
 				intCommodityId			= Item.intCommodityId,
@@ -614,6 +656,7 @@ CREATE TABLE #tmpDailyStockPosition
 				strDescription			= Item.strDescription,
 				intItemUOMId			= StockUOM.intItemUOMId,
 				strItemUOM				= sUOM.strUnitMeasure,
+				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblOpeningOnSiteQty		= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblOpeningInTransitInbound = ISNULL(tmpDSP.dblOpeningInTransitInbound, 0),
 				dblOpeningInTransitOutbound = ISNULL(tmpDSP.dblOpeningInTransitOutbound, 0),

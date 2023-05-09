@@ -19,6 +19,7 @@
 	dblOpeningInTransitInbound NUMERIC(28, 2) NULL,
 	dblOpeningInTransitOutbound NUMERIC(28, 2) NULL,
 	dblTotalOpeningQty NUMERIC(28, 2) NULL,
+	dblOpeningQty NUMERIC(28, 2) NULL,
 	dblReceivedQty NUMERIC(28, 2) NULL,		
 	dblInventoryCountQty NUMERIC(28, 2) NULL,		
 	dblInvoicedQty NUMERIC(28, 2) NULL,		
