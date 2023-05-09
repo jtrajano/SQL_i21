@@ -667,7 +667,13 @@ FROM (
 	SELECT intEntityCustomerId		= TBL.intEntityCustomerId
 		, intInvoiceId				= TBL.intInvoiceId
 		, dblAmountPaid				= TBL.dblAmountPaid
-		, dblTotalDue				= CASE WHEN strType = 'CF Tran' AND @ysnPrintFromCFLocal = 0 AND @dtmBalanceForwardDate IS NOT NULL THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
+		, dblTotalDue				= CASE WHEN strType = 'CF Tran' AND @ysnPrintFromCFLocal = 0 
+										THEN CASE WHEN @dtmBalanceForwardDate IS NULL 
+												THEN dblInvoiceTotal - dblAmountPaid 
+												ELSE 0
+											END 
+										ELSE dblInvoiceTotal - dblAmountPaid 
+									  END
 		, dblAvailableCredit		= TBL.dblAvailableCredit
 		, dblPrepayments			= TBL.dblPrepayments
 		, dblFuture					= CASE WHEN strType = 'CF Tran' 

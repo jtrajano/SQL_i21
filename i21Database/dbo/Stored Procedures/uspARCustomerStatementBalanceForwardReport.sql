@@ -566,6 +566,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardD
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 										  , @ysnFromBalanceForward		= 1
 										  , @dtmBalanceForwardDate		= @dtmBalanceForwardDateLocal
+										  , @ysnPrintFromCF				= @ysnPrintFromCFLocal
 
 INSERT INTO #BALANCEFORWARDTABLE WITH (TABLOCK)  (
 	  intEntityCustomerId
