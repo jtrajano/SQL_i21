@@ -128,3 +128,4 @@ LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = I.intCompanyLo
 WHERE I.ysnPosted = 1
   AND dblInvoiceTotal > 0
   AND ISNULL(I.intPeriodsToAccrue, 0) > 1
+  AND I.dtmPostDate <= @dtmAsOfDate
