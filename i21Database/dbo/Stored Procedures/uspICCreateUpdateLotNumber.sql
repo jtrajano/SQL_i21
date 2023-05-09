@@ -1244,6 +1244,7 @@ BEGIN
 		END 
 
 		-- Update the rejected lot
+		IF @ysnRejected = 1
 		BEGIN 
 			EXEC uspICMoveRejectLot @intSplitFromLotId, @intInsertedLotId
 		END 
