@@ -763,7 +763,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						SELECT intInvoiceDetailId			= @intInvoiceDetailId
 						     , intContractDetailId			= NULL
 							 , intContractHeaderId			= NULL
-							 , intTicketId					= NULL
+							 , intTicketId					= @intTicketId
 							 , intItemId					= @intItemId
 							 , intItemUOMId					= @intItemUOMId
 							 , intSiteId					= @intSiteId
@@ -776,7 +776,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						SELECT intInvoiceDetailId			= @intInvoiceDetailId
 						     , intContractDetailId			= NULL
 							 , intContractHeaderId			= NULL
-							 , intTicketId					= NULL
+							 , intTicketId					= @intTicketId
 							 , intItemId					= intItemId
 							 , intItemUOMId					= intItemUOMId
 							 , intSiteId					= @intSiteId
@@ -855,7 +855,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intItemWeightUOMId				= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemWeightUOMId ELSE NULL END
 			, intContractDetailId				= IDTOADD.intContractDetailId
 			, intContractHeaderId				= IDTOADD.intContractHeaderId
-			, intTicketId						= @intTicketId
+			, intTicketId						= IDTOADD.intTicketId
 			, intTaxGroupId						= ID.intTaxGroupId
 			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
 			, strAddonDetailKey					= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
