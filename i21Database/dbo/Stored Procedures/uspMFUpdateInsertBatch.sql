@@ -163,6 +163,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , ysnTeaOrganic					= T.ysnTeaOrganic
 				  , dblTeaTaste						= T.dblTeaTaste
 				  , dblTeaVolume					= T.dblTeaVolume
+				  , strFines						= T.strFines
 				  , intTealingoItemId				= T.intTealingoItemId
 				  , dtmWarehouseArrival				= T.dtmWarehouseArrival
 				  , intYearManufacture				= T.intYearManufacture
@@ -314,6 +315,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , ysnTeaOrganic
 				  , dblTeaTaste
 				  , dblTeaVolume
+				  , strFines
 				  , intTealingoItemId
 				  , dtmWarehouseArrival
 				  , intYearManufacture
@@ -431,6 +433,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 					 , ysnTeaOrganic
 					 , dblTeaTaste
 					 , dblTeaVolume
+					 , strFines
 					 , intTealingoItemId
 					 , dtmWarehouseArrival
 					 , intYearManufacture
