@@ -319,7 +319,7 @@ BEGIN TRY
 
 					SET @dblAdjustByQuantity = - @dblNewWeight
 
-					SET @dblSummaryQty = -dblNewWeight;
+					SET @dblSummaryQty = -@dblNewWeight;
 				END
 				/* End of Inventory Transfer for Non Lot Track Item */
 		END
@@ -333,7 +333,7 @@ BEGIN TRY
 											 , @intTransactionTypeId	= 8
 											 , @ysnPosted				= 1
 
-			SET @dblSummaryQty = dblAdjustByQuantity;
+			SET @dblSummaryQty = @dblAdjustByQuantity;
 		END
 		/* End of Adjust by Consume Source Location. */
 	
