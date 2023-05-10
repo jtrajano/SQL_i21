@@ -30,7 +30,8 @@ RETURNS TABLE AS RETURN
    END   
    * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
       ELSE 1 END AS DECIMAL(18,2)) AS dblForeignTotal  
-  ,B.dblQtyReceived as dblTotalUnits  
+  ,B.dblQtyReceived * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
+      ELSE 1 END as dblTotalUnits  
   ,B.intAccountId  
   ,G.intCurrencyExchangeRateTypeId  
   ,G.strCurrencyExchangeRateType  
