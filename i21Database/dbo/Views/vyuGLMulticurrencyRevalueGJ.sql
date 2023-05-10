@@ -28,6 +28,7 @@ SELECT   strTransactionType
 			,intAccountId			= 	GJ.intAccountId
 			,GJ.dtmDate	
 			,SM.strCurrency
+			,ysnNegative			
 FROM tblGLDetail GJ JOIN vyuGLAccountDetail COA ON COA.intAccountId = GJ.intAccountId
 LEFT JOIN tblSMCompanyPreference CP on CP.intDefaultCurrencyId = GJ.intCurrencyId
 JOIN tblSMCurrency SM ON SM.intCurrencyID = GJ.intCurrencyId
