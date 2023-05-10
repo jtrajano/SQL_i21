@@ -1289,9 +1289,6 @@
     <None Include="Scripts\Post-Deployment\ST\53_FileFieldMapping_Passport_FGMA.sql" />
     <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
     <Build Include="dbo\Views\vyuTMInventoryReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
-    <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
-    <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
   </ItemGroup>
   <ItemGroup>
