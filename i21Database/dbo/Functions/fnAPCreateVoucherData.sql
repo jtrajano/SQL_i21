@@ -63,6 +63,7 @@ RETURNS @returntable TABLE
 	--Tax Override
 	[strTaxPoint] 		NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] 	INT NULL,
+	[intFreightTermId]	INT NULL,
 	[intProfitCenter] 	INT NULL
 )
 AS
@@ -181,6 +182,7 @@ BEGIN
 		[strComments]						,
 		[strTaxPoint]						,
 		[intTaxLocationId]					,
+		[intFreightTermId],
 		[intProfitCenter]
 	)
 	SELECT
@@ -277,9 +279,11 @@ BEGIN
 		[strComments]						= A.strComments,
 		[strTaxPoint]						= A.strTaxPoint,
 		[intTaxLocationId]					= A.intTaxLocationId,
+		[intFreightTermId] 				= ISNULL(CT.intFreightTermId, A.intFreightTermId),
 		[intProfitCenter]					= payableLoc.intProfitCenter
 	FROM voucherPayables A
 	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.intEntityId
+	LEFT JOIN tblCTContractHeader CT ON A.intContractHeaderId = CT.intContractHeaderId
 	-- LEFT JOIN tblEMEntityLocation B ON vendor.intEntityId = B.intEntityId AND B.ysnDefaultLocation = 1--vendor default location
 	-- LEFT JOIN tblEMEntityLocation B2 ON B2.intEntityLocationId = A.intShipFromId AND B2.intEntityId = A.intEntityVendorId --voucher payable ship from vendor
 	-- LEFT JOIN tblEMEntityLocation B3 ON B3.intEntityLocationId = A.intShipFromId AND B2.intEntityId = A.intShipFromEntityId --voucher payable ship from entity

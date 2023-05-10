@@ -482,6 +482,7 @@ BEGIN TRY
 		[strComments]			,
 		[strTaxPoint]			,
 		[intTaxLocationId]		,
+		[intFreightTermId],
 		[intProfitCenter]
 	)
 	VALUES (
@@ -542,6 +543,7 @@ BEGIN TRY
 		[strComments]			,
 		[strTaxPoint]			,
 		[intTaxLocationId]		,
+		[intFreightTermId],
 		[intProfitCenter]
 	)
 	OUTPUT 
