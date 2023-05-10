@@ -1371,6 +1371,8 @@
     <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
     <Build Include="dbo\Views\vyuTMInventoryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
+    <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
+    <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
