@@ -318,6 +318,8 @@ BEGIN TRY
 														, @intEntityUserSecurityId = @intUserId;
 
 					SET @dblAdjustByQuantity = - @dblNewWeight
+
+					SET @dblSummaryQty = -dblNewWeight;
 				END
 				/* End of Inventory Transfer for Non Lot Track Item */
 		END
@@ -330,6 +332,8 @@ BEGIN TRY
 			EXEC dbo.uspICPostStockReservation @intTransactionId		= @intWorkOrderId
 											 , @intTransactionTypeId	= 8
 											 , @ysnPosted				= 1
+
+			SET @dblSummaryQty = dblAdjustByQuantity;
 		END
 		/* End of Adjust by Consume Source Location. */
 	
