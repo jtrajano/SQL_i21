@@ -110,7 +110,7 @@ BEGIN
 
         IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) <> 0)
         BEGIN
-            IF @intAccountIDFrom > @intAccountIdTo
+            IF @intAccountIdFrom > @intAccountIdTo
                 SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdTo AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdFrom AS NVARCHAR(5))
             ELSE
                 SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdTo AS NVARCHAR(5))
