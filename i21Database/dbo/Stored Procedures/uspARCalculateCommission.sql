@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARCalculateCommission]
+﻿ALTER PROCEDURE [dbo].[uspARCalculateCommission]
 	@intCommissionPlanId	INT,
 	@intEntityId			INT,
 	@intCommissionRecapId	INT,
@@ -175,16 +175,17 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND SP.intCommissionPlanId = @intCommissionPlanId
 
-			INSERT INTO tblARCommissionRecapDetail
-			SELECT 
-				 intCommissionRecapId	= @intCommissionRecapId
-				,intEntityId			= @intEntityId
-				,intSourceId			= intSourceId
-				,strSourceType			= 'tblARInvoice'
-				,dtmSourceDate			= dtmSourceDate
-				,dblAmount				= dblAmount
-				,intConcurrencyId		= 1
-			FROM @tmpTransactionTable
+			--INSERT INTO tblARCommissionRecapDetail
+			--SELECT 
+			--	 intCommissionRecapId	= @intCommissionRecapId
+			--	,intEntityId			= @intEntityId
+			--	,intSourceId			= intSourceId
+			--	,strSourceType			= 'tblARInvoice'
+			--	,dtmSourceDate			= dtmSourceDate
+			--	,dblAmount				= dblAmount
+			--	,intConcurrencyId		= 1
+			--FROM @tmpTransactionTable
+			select * from @tmpTransactionTable
 		END
 
 		--GET BILLABLE RATES BY AGENT
@@ -215,8 +216,8 @@ ELSE IF @strBasis = @BASIS_REVENUE
 		END
 
 		--GET INVOICE LINETOTAL BY ITEM CATEGORY
-		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
-		BEGIN
+		--IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
+		--BEGIN
 			INSERT INTO @tmpTransactionTable
 			SELECT 
 				 intSourceId	= I.intInvoiceId
@@ -233,24 +234,25 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				AND IC.intCategoryId IS NOT NULL
 				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 				AND ISNULL(C.ysnPaid, 0) = 0
+				AND I.intEntitySalespersonId IS NULL
 				AND CPIC.intCommissionPlanId = @intCommissionPlanId
 			GROUP BY I.intInvoiceId, I.dtmPostDate
 
-			INSERT INTO tblARCommissionRecapDetail
-			SELECT 
-				 intCommissionRecapId	= @intCommissionRecapId
-				,intEntityId			= @intEntityId
-				,intSourceId			= intSourceId
-				,strSourceType			= 'tblARInvoice'
-				,dtmSourceDate			= dtmSourceDate
-				,dblAmount				= dblAmount
-				,intConcurrencyId		= 1
-			FROM @tmpTransactionTable
-		END
+			--INSERT INTO tblARCommissionRecapDetail
+			--SELECT 
+			--	 intCommissionRecapId	= @intCommissionRecapId
+			--	,intEntityId			= @intEntityId
+			--	,intSourceId			= intSourceId
+			--	,strSourceType			= 'tblARInvoice'
+			--	,dtmSourceDate			= dtmSourceDate
+			--	,dblAmount				= dblAmount
+			--	,intConcurrencyId		= 1
+			--FROM @tmpTransactionTable
+		--END
 		
 		--GET INVOICE LINETOTAL BY ITEM
-		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
-		BEGIN
+		--IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
+		--BEGIN
 			INSERT INTO @tmpTransactionTable
 			SELECT 
 				 intSourceId	= I.intInvoiceId
@@ -278,7 +280,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				,dblAmount				= dblAmount
 				,intConcurrencyId		= 1
 			FROM @tmpTransactionTable
-		END
+		--END
 		
 		IF @ysnMarginalSales = 1
 		BEGIN
