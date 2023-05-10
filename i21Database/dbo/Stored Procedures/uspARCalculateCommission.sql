@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspARCalculateCommission]
+﻿CREATE PROCEDURE [dbo].[uspARCalculateCommission]
 	@intCommissionPlanId	INT,
 	@intEntityId			INT,
 	@intCommissionRecapId	INT,
