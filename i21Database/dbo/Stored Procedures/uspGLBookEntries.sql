@@ -99,8 +99,9 @@ BEGIN
 			,intSourceEntityId
 			,[intConcurrencyId]
 			,[ysnPostAction]
-			,dtmDateEnteredMin
+			,[dtmDateEnteredMin]
 			,[intCompanyLocationId]
+			,[strSourceAccount]
 	)
 	SELECT 
 			dbo.fnRemoveTimeOnDate(dtmDate)
@@ -149,6 +150,7 @@ BEGIN
 			,@ysnPost
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
 			,[intCompanyLocationId]
+			,ISNULL(GLEntries.strSourceAccountId, ISNULL(_GL.sourceAccount,'') + ' ' + ISNULL(SM.sourceCurrency,''))
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
@@ -156,6 +158,12 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
 			CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F
 			LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON forexRateType.strCurrencyExchangeRateType = GLEntries.strRateType
+			OUTER APPLY(
+				SELECT TOP 1 strAccountId sourceAccount FROM tblGLAccount WHERE intAccountId = GLEntries.intAccountIdOverride
+			)_GL
+			OUTER APPLY(
+				SELECT strCurrency sourceCurrency FROM tblSMCurrency WHERE intCurrencyID = GLEntries.intSourceCurrencyId
+			)SM
 
 END
 ;
