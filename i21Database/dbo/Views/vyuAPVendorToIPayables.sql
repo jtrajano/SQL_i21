@@ -65,8 +65,8 @@ tag05 as(
 ),
 tag06 as(
 	select '06' strTag, intEntityId,
-	'06|C0000549|' + VendorNbr + '|0090|1|' + AddressType + '||' 
-	+ VendorName + '|' + Street1 + ',' 
+	'06|C0000549|' + VendorNbr + '|0090|1|' + AddressType + '|' 
+	+ VendorName + ',' + Street1 + ',' 
 	+ Street2 + ',' + strCity + ','
 	+ strState + ',' 
 	+ strZipCode + ',' + strCountry   
