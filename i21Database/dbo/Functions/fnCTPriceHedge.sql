@@ -118,7 +118,7 @@ BEGIN
 		,t.intFutureMonthId
 		,t.intTraderId
 		,t.intBrokerageAccountId
-		,s.dblHedgedLots
+		,dblHedgedLots   = CASE WHEN s.ysnIsHedged = 1 then s.dblHedgedLots ELSE s.dblAssignedLots END
 		,strHedgeMonth = REPLACE(fm.strFutureMonth,' ','('+fm.strSymbol+') ') COLLATE Latin1_General_CI_AS
 		,strBroker = e.strName
 		,strAccount = a.strAccountNumber
