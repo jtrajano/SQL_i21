@@ -12,22 +12,24 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intRecipeId						   INT
-	  , @dblRecipeQty						   NUMERIC(38, 20)
-	  , @intManufacturingProcessId			   INT
-	  , @ysnShowOtherFactoryLots			   BIT
-	  , @ysnShowAvailableLotsByStorageLocation BIT
-	  , @ysnEnableParentLot					   BIT = 0
-	  , @strLotStatusIds					   NVARCHAR(50)
-	  , @index								   INT
-	  , @id									   INT
-	  ,@intManufacturingCellId					INT
-	  ,@ysnDisplayLandedPriceInBlendManagement	INT
+DECLARE @intRecipeId							INT
+	  , @dblRecipeQty							NUMERIC(38, 20)
+	  , @intManufacturingProcessId				INT
+	  , @ysnShowOtherFactoryLots				BIT
+	  , @ysnShowAvailableLotsByStorageLocation	BIT
+	  , @ysnEnableParentLot						BIT = 0
+	  , @strLotStatusIds						NVARCHAR(50)
+	  , @index									INT
+	  , @id										INT
+	  , @intManufacturingCellId					INT
+	  , @ysnDisplayLandedPriceInBlendManagement	INT
 
-DECLARE @tblSourceSubLocation AS TABLE (
-		intRecordId INT identity(1, 1)
-		,intSubLocationId INT
-		);
+
+DECLARE @tblSourceSubLocation AS TABLE 
+(
+	intRecordId			INT IDENTITY(1, 1)
+  , intSubLocationId	INT
+);
 
 DECLARE @tblLotStatus AS TABLE
 (
@@ -167,8 +169,8 @@ SELECT Lot.intLotId
 	 , Lot.strNotes										AS strRemarks
 	 , Item.dblRiskScore
 	 , RecipeItem.dblQuantity / @dblRecipeQty			AS dblConfigRatio
-	 , CAST(ISNULL(LotQuality.Density, 0) AS DECIMAL)	AS dblDensity
-	 , CAST(ISNULL(LotQuality.Score, 0) AS DECIMAL)		AS dblScore
+	 , CAST(ISNULL(0, 0) AS DECIMAL)	AS dblDensity
+	 , CAST(ISNULL(0, 0) AS DECIMAL)	AS dblScore
 	 , Lot.intParentLotId
 	 , StorageLocation.intStorageLocationId
 	 , LotUnitMeasure.strUnitMeasure					AS strPhysicalItemUOM
@@ -218,7 +220,7 @@ LEFT JOIN tblMFWorkOrderRecipeItem AS WorkOrderRecipeItem ON WorkOrderRecipeItem
 LEFT JOIN tblMFRecipeItem AS RecipeItem ON RecipeItem.intItemId = Item.intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId
 LEFT JOIN tblICItemUOM AS RecipeItemUOM ON IsNULL(WorkOrderRecipeItem.intItemUOMId,RecipeItem.intItemUOMId) = RecipeItemUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure AS RecipeItemUnitOfMeasure ON RecipeItemUOM.intUnitMeasureId = RecipeItemUnitOfMeasure.intUnitMeasureId 
-LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
+--LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
 LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = Lot.intLotId
 LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
 LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
