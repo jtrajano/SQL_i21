@@ -315,10 +315,10 @@ AS SELECT
 										,NULL
 										,NULL
 										,NULL
-										,tblSCScaleSetup.strAddress
-										,tblSCScaleSetup.strCity
-										,tblSCScaleSetup.strState
-										,tblSCScaleSetup.strZipCode
+										,ENTITY_LOCATION.strAddress
+										,ENTITY_LOCATION.strCity
+										,ENTITY_LOCATION.strState
+										,ENTITY_LOCATION.strZipCode
 										,NULL))
 
 			AS strLoadAddress
