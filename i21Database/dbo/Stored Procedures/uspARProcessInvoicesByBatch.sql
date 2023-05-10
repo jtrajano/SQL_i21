@@ -66,6 +66,9 @@ SET @NewBatchId = @BatchId
 IF ISNULL(@BatchId,'') = ''
 	EXEC dbo.uspSMGetStartingNumber 3, @NewBatchId OUT
 
+DECLARE @TempBatchIdForUpdatedId NVARCHAR(40)
+EXEC dbo.uspSMGetStartingNumber 3, @TempBatchIdForUpdatedId OUT
+
 BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
 	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries 
@@ -1947,8 +1950,9 @@ BEGIN TRY
 
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
+	BEGIN
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBatchId --NULL #mark 101
+			 @BatchId			= @TempBatchIdForUpdatedId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1960,7 +1964,13 @@ BEGIN TRY
 			,@EndTransaction	= NULL
 			,@Exclude			= NULL
 			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError	
+			,@RaiseError		= @RaiseError
+
+
+			UPDATE tblGLPostRecap
+			SET strBatchId = @NewBatchId
+			WHERE strBatchId = @TempBatchIdForUpdatedId
+	END
 
 END TRY
 BEGIN CATCH
