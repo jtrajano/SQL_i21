@@ -94,7 +94,10 @@ BEGIN TRY
 		,strLoadNumber
 		,CONVERT(VARCHAR(10), IsNULL(L.dtmDeliveredDate,dtmScheduledDate), 101) AS [dtmScheduledDate]
 		,(CL.strLocationName + CHAR(13) + CHAR(10) + CL.strAddress + CHAR(13) + CHAR(10) + CL.strCity + ',  ' + strStateProvince + '  ' + strZipPostalCode) AS strShipperAddress --- + CHAR(13) + CHAR(10) + 'Phone : ' + CL.strPhone
-		,E.strName + CHAR(13) + CHAR(10) + EL.strLocationName + CHAR(13) + CHAR(10) + EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ',' + strState AS [To Address]
+		,CASE WHEN L.intLoadId IS NOT NULL
+			THEN E.strName + CHAR(13) + CHAR(10) + EL.strLocationName + CHAR(13) + CHAR(10) + EL.strAddress + CHAR(13) + CHAR(10) + EL.strCity + ',' + EL.strState
+			ELSE EP.strName + CHAR(13) + CHAR(10) + EPL.strLocationName + CHAR(13) + CHAR(10) + EPL.strAddress + CHAR(13) + CHAR(10) + EPL.strCity + ',' + EPL.strState
+			END AS [To Address]
 		,strPropertyName
 		,strPropertyValue
 		,CASE 
@@ -137,6 +140,7 @@ BEGIN TRY
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId and LD.intItemId =S.intItemId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity E ON EL.intEntityId = E.intEntityId
+	LEFT JOIN (tblEMEntity EP INNER JOIN tblEMEntityLocation EPL ON EPL.intEntityId = EP.intEntityId AND EPL.ysnDefaultLocation = 1) ON EP.intEntityId = S.intEntityId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = ISNULL(LD.intSCompanyLocationId, S.intLocationId)
 	--WHERE S.intSampleId = @intSampleId
 	GROUP BY strItemNo
@@ -152,7 +156,12 @@ BEGIN TRY
 		,EL.strLocationName
 		,EL.strAddress
 		,EL.strCity
-		,strState
+		,EL.strState
+		,EP.strName
+		,EPL.strLocationName
+		,EPL.strAddress
+		,EPL.strCity
+		,EPL.strState
 		,strPropertyName
 		,strPropertyValue
 		,strTestMethod
@@ -165,6 +174,7 @@ BEGIN TRY
 		,PRD.strNote
 		,TR.intSequenceNo
 		,strResult
+		,L.intLoadId
 	ORDER BY TR.intSequenceNo
 END TRY
 
