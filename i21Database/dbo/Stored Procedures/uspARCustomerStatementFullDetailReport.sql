@@ -113,7 +113,7 @@ CREATE TABLE #STATEMENTREPORT (
 	, strType					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strPONumber				NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
 	, strItemNo					NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
-	, strItemDescription		NVARCHAR(200) COLLATE Latin1_General_CI_AS	NULL
+	, strItemDescription		NVARCHAR(500) COLLATE Latin1_General_CI_AS	NULL
 	, strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, strStatementFooterComment	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS	NULL
 	, strPaymentMethod			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL
