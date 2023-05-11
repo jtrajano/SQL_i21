@@ -10,7 +10,8 @@ BEGIN TRY
 	DECLARE	@intSContractDetailId AS INT
 	DECLARE	@intPContractHeaderId AS INT
 	DECLARE	@intPContractDetailId AS INT
-	DECLARE	@dblQuantity AS NUMERIC(18,6)
+	DECLARE	@dblPQuantity AS NUMERIC(18,6)
+	DECLARE	@dblSQuantity AS NUMERIC(18,6)
 	DECLARE	@intScreenId AS INT
 	DECLARE @ysnCancelled AS BIT
 
@@ -47,7 +48,8 @@ BEGIN TRY
 		intSContractDetailId INT, 
 		intPContractHeaderId INT, 
 		intPContractDetailId INT, 
-		dblQuantity NUMERIC(18,6)
+		dblSQuantity NUMERIC(18,6),
+		dblPQuantity NUMERIC(18,6)
 	)
 
 	INSERT INTO #Temp
@@ -58,7 +60,8 @@ BEGIN TRY
 		intSContractDetailId,
 		intPContractHeaderId,
 		intPContractDetailId,
-		dblSDetailQuantity
+		dblSDetailQuantity,
+		dblPDetailQuantity
 	FROM vyuLGAllocationDetails
 	WHERE intAllocationHeaderId = @intAllocationHeaderId
   
@@ -78,15 +81,25 @@ BEGIN TRY
 			@intSContractDetailId = intSContractDetailId,
 			@intPContractHeaderId = intPContractHeaderId,
 			@intPContractDetailId = intPContractDetailId,
-			@dblQuantity = dblQuantity
+			@dblSQuantity = dblSQuantity,
+			@dblPQuantity = dblPQuantity
 		FROM #Temp WHERE intRowNum = @Counter  
 
 		IF (@ysnCancel = 1)
 		BEGIN
-			SET @dblQuantity = @dblQuantity * -1
+			SET @dblSQuantity = @dblSQuantity * -1
+			SET @dblPQuantity = @dblPQuantity * -1
+
 			EXEC dbo.[uspCTUpdateAllocatedQuantity]
 				@intContractDetailId = @intSContractDetailId,
-				@dblQuantityToUpdate = @dblQuantity,
+				@dblQuantityToUpdate = @dblSQuantity,
+				@intUserId = @UserId,
+				@intExternalId = @intAllocationDetailId,
+				@strScreenName = 'Allocation'
+
+			EXEC dbo.[uspCTUpdateAllocatedQuantity]
+				@intContractDetailId = @intPContractDetailId,
+				@dblQuantityToUpdate = @dblPQuantity,
 				@intUserId = @UserId,
 				@intExternalId = @intAllocationDetailId,
 				@strScreenName = 'Allocation'
@@ -107,7 +120,14 @@ BEGIN TRY
 		BEGIN
 			EXEC dbo.[uspCTUpdateAllocatedQuantity]
 				@intContractDetailId = @intSContractDetailId,
-				@dblQuantityToUpdate = @dblQuantity,
+				@dblQuantityToUpdate = @dblSQuantity,
+				@intUserId = @UserId,
+				@intExternalId = @intAllocationDetailId,
+				@strScreenName = 'Allocation'
+
+			EXEC dbo.[uspCTUpdateAllocatedQuantity]
+				@intContractDetailId = @intPContractDetailId,
+				@dblQuantityToUpdate = @dblPQuantity,
 				@intUserId = @UserId,
 				@intExternalId = @intAllocationDetailId,
 				@strScreenName = 'Allocation'
