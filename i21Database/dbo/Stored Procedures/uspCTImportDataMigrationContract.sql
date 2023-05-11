@@ -222,6 +222,7 @@ AS
 				,dblHistoricRate
 				,strHistoricType
 				,strWarehouse
+				,strFXPriceUOM
 				,guiUniqueId
 				,intImportFrom
 			)
@@ -288,6 +289,7 @@ AS
 				,dblHistoricRate = src.dblHistoricRate
 				,strHistoricType = substring(ltrim(rtrim(src.strHistoricType)),1,100)
 				,strWarehouse = substring(ltrim(rtrim(src.strWarehouse)),1,100)
+				,strFXPriceUOM = substring(ltrim(rtrim(src.strFXPriceUOM)),1,50)
 				,guiUniqueId = @guiUniqueId
 				,intImportFrom = 2
 
@@ -393,7 +395,8 @@ AS
 				ysnWarehouse bit,
 				intCountryId INT,
 				dblNetWeight numeric(18,6),
-				intNetWeightUOMId int
+				intNetWeightUOMId int,
+				intFXPriceUOMId int null
 			); 
 
 			IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -458,6 +461,7 @@ AS
 				,intCountryId
 				,dblNetWeight
 				,intNetWeightUOMId
+				,intFXPriceUOMId
 			)
 			SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 					intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -525,6 +529,7 @@ AS
 					,intCountryId = wc.intCountryId
 					,dblNetWeight = dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,nwuom.intUnitMeasureId, CI.dblQuantity)
 					,intNetWeightUOMId = nwuom.intItemUOMId
+					,intFXPriceUOMId = case when isnull(CY.intCurrencyID,0) = isnull(ic.intCurrencyID,0) then null else fxitemuom.intItemUOMId end
 
 			FROM	tblCTContractImport			CI	LEFT
 			JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -586,6 +591,8 @@ AS
 			left join tblSMCompanyLocationSubLocation wc on wc.strSubLocationName = CI.strWarehouse and wc.intCompanyLocationId = CL.intCompanyLocationId
 			left join tblSMCity ftpc on ftpc.strCity = CI.strWarehouse
 			left join tblICItemUOM nwuom on nwuom.intItemId = IM.intItemId and nwuom.ysnStockUnit = 1
+			left join tblICUnitMeasure fxuom on fxuom.strUnitMeasure = CI.strFXPriceUOM
+			left join tblICItemUOM fxitemuom on fxitemuom.intItemId = IM.intItemId and fxitemuom.intUnitMeasureId = fxuom.intUnitMeasureId
 			WHERE CI.guiUniqueId = @guiUniqueId and CI.intImportFrom = 2;
 
 			select @intActiveContractImportId = min(intContractImportId) from tblCTContractImport where guiUniqueId = @guiUniqueId and intImportFrom = 2;
@@ -625,6 +632,7 @@ AS
 					when t.ysnWarehouse = 1 and isnull(c.strWarehouse,'') <> '' and t.intWarehouseId is null then ' Warehouse Location: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.ysnWarehouse = 0 and isnull(c.strWarehouse,'') <> '' and t.intINCOLocationTypeId is null then ' Port / City: "' + c.strWarehouse + '" does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					when t.intNetWeightUOMId is null then 'Net Weight UOM: Item "' + c.strItem + '" has no UOM Stock Unit for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
+					when t.intFXPriceUOMId is null and isnull(c.strFXPriceUOM,'') <> '' and t.intCurrencyId <> t.intInvoiceCurrencyId then 'FX Price UOM: "' + c.strFXPriceUOM + '" UOM does not exists for contract ' + c.strContractNumber + '-' + convert(nvarchar(20),c.intContractSeq) + '.'
 					else @validationErrorMsg
 					end,
 					@strCertificationIdName = t.strCertification,
@@ -947,6 +955,7 @@ AS
 						,dblHistoricalRate
 						,intHistoricalRateTypeId
 						,intBasisUOMId
+						,intFXPriceUOMId
 					)
 					SELECT
 						  @intContractHeaderId
@@ -999,6 +1008,7 @@ AS
 						,dblHistoricalRate
 						,intHistoricalRateTypeId
 						,intBasisUOMId
+						,intFXPriceUOMId
 					FROM #tmpExtracted
 					WHERE
 							ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
@@ -1088,6 +1098,8 @@ AS
 						,dblTotalCost
 						,dblNoOfLots
 						,intCurrencyExchangeRateId
+						,intFXPriceUOMId
+						,dblFXPrice
 						)
 					SELECT
 							@intContractHeaderId
@@ -1147,6 +1159,8 @@ AS
 						,dblTotalCost = case when intPricingTypeId = 1 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * isnull(dblCashPrice,1) else null end
 						,dblNoOfLots = case when round(1*dblNoOfLots,0) = 0 then 1 else round(1*dblNoOfLots,0) end
 						,intCurrencyExchangeRateId
+						,intFXPriceUOMId
+						,dblFXPrice = case when isnull(intFXPriceUOMId,0) > 0 and isnull(dblRate,0) <> 0 and (case when intPricingTypeId = 1 then (isnull(dblBasis,0) + isnull(dblFutures,0)) else isnull(dblCashPrice,0) end) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId, intFXPriceUOMId, ((case when intPricingTypeId = 1 then (isnull(dblBasis,0) + isnull(dblFutures,0)) else isnull(dblCashPrice,0) end) * dblRate)) else null end
 					FROM #tmpExtracted
 					WHERE
 							ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)

@@ -63,6 +63,7 @@
 	[dblHistoricRate] numeric(18,6) null,
 	[strHistoricType] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strWarehouse] nvarchar(100)  COLLATE Latin1_General_CI_AS NULL,
+	[strFXPriceUOM] nvarchar(100)  COLLATE Latin1_General_CI_AS NULL,
 	[ysnImported] [bit] NULL,
 	[intImportedById] [int] NULL,
 	[dtmImported] [datetime] NULL,
