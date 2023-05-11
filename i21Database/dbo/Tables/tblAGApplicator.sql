@@ -7,6 +7,7 @@
 	[strCity]						NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strState]						NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strZipCode]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strLineOfBusiness]				NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
 	[strFreightBilledBy]			NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive]						BIT            DEFAULT ((1)) NOT NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT (1), 
