@@ -61,7 +61,7 @@
 	SC.intContractId,
 	SC.intDiscountLocationId,
 	SC.intItemId,
-	IR.intEntityVendorId AS intEntityId,
+	intEntityId = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.intEntityId ELSE IR.intEntityVendorId END,
 	SC.intLoadId,
 	SC.intMatchTicketId,
 	SC.intSubLocationId,
