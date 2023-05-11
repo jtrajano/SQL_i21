@@ -64,7 +64,8 @@ SELECT DISTINCT (SELECT COUNT(*) FROM tblLGPickLotDetail WHERE intPickLotHeaderI
   intPurchaseItemUOMId = (SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intLotUnitMeasureId),
   ysnShowOptionality = CAST(CASE WHEN EXISTS(SELECT 1 FROM tblCTContractOptionality WHERE intContractDetailId = SCD.intContractDetailId) THEN 1 ELSE 0 END AS BIT),
   SCH.intFreightTermId,
-  FT.strFreightTerm
+  FT.strFreightTerm,
+  dblAmount = dbo.fnMultiply(dbo.fnCalculateQtyBetweenUOM((SELECT IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = IM.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId), A.intSeqPriceUOMId,PL.dblNetWt), A.dblSeqPrice)
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
@@ -83,4 +84,5 @@ LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = Recei
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = SCH.intFreightTermId
+CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(SCD.intContractDetailId) A
 WHERE PL.intPickLotDetailId NOT IN (SELECT IsNull(LD.intPickLotDetailId, 0) FROM tblLGLoadDetail LD)
