@@ -18,6 +18,7 @@ BEGIN
 DECLARE @SummaryLog AS RKSummaryLog
 DECLARE @LogHelper AS RKMiscField
 DECLARE @dblPreviousNoOfLots NUMERIC(24,10)
+DECLARE @intPreviousLogId INT
 
 IF @action = 'HEADER DELETE' --This scenario is when you delete the entire derivative entry. 
 BEGIN
@@ -275,49 +276,42 @@ BEGIN
 			, @intRollingMonthId = intRollingMonthId
 		FROM #tmpDerivative der
 
-		INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
-		SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
-			SELECT strFieldName = 'intOptionMonthId', strValue = CAST(@intOptionMonthId AS NVARCHAR)
-			UNION ALL SELECT 'strOptionMonth', @strOptionMonth
-			UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
-			UNION ALL SELECT 'strOptionType', @strOptionType
-			UNION ALL SELECT 'strInstrumentType', @strInstrumentType
-			UNION ALL SELECT 'intBrokerageAccountId', CAST(@intBrokerageAccountId AS NVARCHAR)
-			UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
-			UNION ALL SELECT 'strBroker', @strBroker
-			UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
-			UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
-			UNION ALL SELECT 'intTraderId', CAST(@intTraderId AS NVARCHAR)
-			UNION ALL SELECT 'strStatus', @strStatus
-			UNION ALL SELECT 'dtmFilledDate', CAST(@dtmFilledDate AS NVARCHAR)
-			UNION ALL SELECT 'intRollingMonthId', CAST(@intRollingMonthId AS NVARCHAR)
-		) t WHERE ISNULL(strValue, '') != ''
+		--INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
+		--SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
+		--	SELECT strFieldName = 'intOptionMonthId', strValue = CAST(@intOptionMonthId AS NVARCHAR)
+		--	UNION ALL SELECT 'strOptionMonth', @strOptionMonth
+		--	UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
+		--	UNION ALL SELECT 'strOptionType', @strOptionType
+		--	UNION ALL SELECT 'strInstrumentType', @strInstrumentType
+		--	UNION ALL SELECT 'intBrokerageAccountId', CAST(@intBrokerageAccountId AS NVARCHAR)
+		--	UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
+		--	UNION ALL SELECT 'strBroker', @strBroker
+		--	UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
+		--	UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
+		--	UNION ALL SELECT 'intTraderId', CAST(@intTraderId AS NVARCHAR)
+		--	UNION ALL SELECT 'strStatus', @strStatus
+		--	UNION ALL SELECT 'dtmFilledDate', CAST(@dtmFilledDate AS NVARCHAR)
+		--	UNION ALL SELECT 'intRollingMonthId', CAST(@intRollingMonthId AS NVARCHAR)
+		--) t WHERE ISNULL(strValue, '') != ''
 
 		select @dblPreviousNoOfLots = sum(dblOrigNoOfLots)
 		from tblRKSummaryLog
 		where intTransactionRecordId = @intFutOptTransactionId
 		and strTransactionType = 'Derivative Entry'
 
+		SELECT TOP 1 @intPreviousLogId = intSummaryLogId
+		FROM tblRKSummaryLog
+		WHERE intTransactionRecordId = @intFutOptTransactionId
+			AND strBucketType = 'Derivatives'
+			AND strTransactionType = 'Derivative Entry'
+			AND strTransactionNumber = @strTransactionNumber
+			AND ysnNegate IS NULL
+			AND strAction NOT IN ('Deleted Derivative')
+		ORDER BY intSummaryLogId DESC
+
 		EXEC uspSMGetStartingNumber 148, @strBatchId OUTPUT
 
-		IF EXISTS(SELECT TOP 1 1
-			FROM tblRKSummaryLog
-			WHERE intTransactionRecordId = @intFutOptTransactionId
-				AND strBucketType = 'Derivatives'
-				AND strTransactionType = 'Derivative Entry'
-				AND strTransactionNumber = @strTransactionNumber
-				AND (intCommodityId <> @intCommodityId 
-					OR strDistributionType <> @strBuySell 
-					OR intFutureMarketId <> @intFutureMarketId 
-					OR dblOrigNoOfLots <> @dblNoOfLots
-					OR dblPrice <> @dblPrice
-					OR intFutureMonthId <> @intFutureMonthId
-					OR intBookId <> @intBookId
-					OR intSubBookId <> @intSubBookId
-					OR intLocationId <> @intLocationId
-					OR strNotes <> @strNotes
-				)
-				AND ysnNegate IS NULL)
+		IF @intPreviousLogId IS NOT NULL
 		BEGIN
 				INSERT INTO tblRKSummaryLog(strBatchId
 					, dtmCreatedDate
@@ -417,37 +411,16 @@ BEGIN
 					AND strBucketType = 'Derivatives'
 					AND strTransactionType = 'Derivative Entry'
 					AND strTransactionNumber = @strTransactionNumber
-						AND (intCommodityId <> @intCommodityId 
-						OR strDistributionType <> @strBuySell 
-						OR intFutureMarketId <> @intFutureMarketId 
-						OR dblOrigNoOfLots <> @dblNoOfLots
-						OR dblPrice <> @dblPrice
-						OR intFutureMonthId <> @intFutureMonthId
-						OR intBookId <> @intBookId
-						OR intSubBookId <> @intSubBookId
-						OR intLocationId <> @intLocationId
-						OR strNotes <> @strNotes
-					)
-					AND ysnNegate IS NULL 
+					AND ysnNegate IS NULL
+					AND intSummaryLogId = @intPreviousLogId
 
 				UPDATE tblRKSummaryLog SET ysnNegate = 1
 				WHERE intTransactionRecordId = @intFutOptTransactionId
 					AND strBucketType = 'Derivatives'
 					AND strTransactionType = 'Derivative Entry'
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId 
-						OR strDistributionType <> @strBuySell 
-						OR intFutureMarketId <> @intFutureMarketId 
-						OR dblOrigNoOfLots <> @dblNoOfLots
-						OR dblPrice <> @dblPrice
-						OR intFutureMonthId <> @intFutureMonthId
-						OR intBookId <> @intBookId
-						OR intSubBookId <> @intSubBookId
-						OR intLocationId <> @intLocationId
-						OR strNotes <> @strNotes
-					)
 					AND ysnNegate IS NULL 
-
+					AND intSummaryLogId = @intPreviousLogId
 		END
 
 
