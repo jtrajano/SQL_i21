@@ -1149,6 +1149,181 @@ BEGIN
 	END 
 END
 
+-- Fix the discrepancy in case of Weight Gain / Loss between IR and Inbound Shipment and both are using Freight Terms as Origin. 
+BEGIN 
+		------------------------------------------------------------------------------------------
+		---- 5. Add GL entry to correct discrepancy between Inbound Shipment and IR
+		------------------------------------------------------------------------------------------
+		--/*
+		--	Debit or Credit ........... Inventory Adjustment 
+		--*/	
+		INSERT INTO @GLEntriesForTheDiscrepancy (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]	
+		) 
+		SELECT 
+			[dtmDate] = t.dtmDate
+			,[strBatchId] = t.strBatchId
+			,[intAccountId] = ga.intAccountId
+			,[dblDebit] = Credit.[Value]	
+			,[dblCredit] = Debit.[Value]
+			,[dblDebitUnit] = 0
+			,[dblCreditUnit] = 0 
+			,[strDescription] = 
+				ISNULL(@strGLDescription, ISNULL(ga.strDescription, '')) + ' ' 
+				+ dbo.fnFormatMessage(
+					'Weight Gain/Loss for %s.'
+					,i.strItemNo
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+					,DEFAULT 
+				)
+			,[strCode] = 'IC'
+			,[strReference] = ''
+			,[intCurrencyId] = t.intCurrencyId 
+			,[dblExchangeRate] = t.dblForexRate
+			,[dtmDateEntered] = GETDATE()
+			,[dtmTransactionDate] = t.dtmDate
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo] = t.intInventoryTransactionId
+			,[ysnIsUnposted] = 0 
+			,[intUserId] = @intEntityUserSecurityId
+			,[intEntityId] = @intEntityUserSecurityId
+			,[strTransactionId] = t.strTransactionId
+			,[intTransactionId] = t.intTransactionId
+			,[strTransactionType] = ty.strName
+			,[strTransactionForm] = ty.strTransactionForm
+			,[strModuleName] = @ModuleName
+			,[intConcurrencyId] = 1
+			,[dblDebitForeign] = CreditForeign.[Value] 
+			,[dblDebitReport] = NULL 
+			,[dblCreditForeign]	= DebitForeign.[Value] 
+			,[dblCreditReport]	= NULL
+			,[dblReportingRate]	= t.dblForexRate
+			,[dblForeignRate] = t.dblForexRate
+			,[strRateType] = currencyRateType.strCurrencyExchangeRateType
+			,[intSourceEntityId] = t.intSourceEntityId
+			,[intCommodityId] = i.intCommodityId
+		FROM 
+			(
+				SELECT 
+					r.strReceiptNumber
+					,ri.intItemId
+					,ri.intInventoryReceiptId
+					,ri.intInventoryReceiptItemId
+					,t.* 
+				FROM 
+					tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					INNER JOIN tblICItem i 
+						ON ri.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+					CROSS APPLY (
+						SELECT 
+							dblValue = ROUND(SUM(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0)), 2)
+							,dblForexValue = NULL --ROUND(SUM(dbo.fnMultiply(t.dblQty, ISNULL(t.dblForexCost, 0)) + ISNULL(t.dblForexValue, 0)), 2)
+						FROM 
+							tblICInventoryTransaction t 
+						WHERE	
+							t.strTransactionId = r.strReceiptNumber
+							AND t.intTransactionId = r.intInventoryReceiptId
+							AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+							AND t.strBatchId = @strBatchId
+							AND t.ysnIsUnposted = 0 
+					) t 			
+					LEFT JOIN tblSMFreightTerms ft
+						ON r.intFreightTermId = ft.intFreightTermId
+				WHERE
+					r.strReceiptNumber = 'IR-680'
+					AND r.intSourceType = 2 -- Inbound Shipment 
+					AND ft.strFobPoint = 'Origin'
+					AND t.dblValue <> 0 
+			) d
+			INNER JOIN tblICItem i 
+				ON d.intItemId = i.intItemId
+			CROSS APPLY (
+				SELECT TOP 1 
+					ga.* 
+				FROM 
+					@icGLAccounts ga
+				WHERE 
+					ga.intItemId = d.intItemId 
+			) glAccnt 
+			CROSS APPLY (
+				SELECT TOP 1 
+					t.*
+				FROM 
+					tblICInventoryTransaction t 
+				WHERE
+					t.strTransactionId = d.strReceiptNumber
+					AND t.strBatchId = @strBatchId
+					AND t.intTransactionId = d.intInventoryReceiptId
+					AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+					AND t.intItemId = d.intItemId
+			) t
+			CROSS APPLY dbo.fnGetDebit(
+				d.dblValue
+			) Debit
+			CROSS APPLY dbo.fnGetCredit(
+				d.dblValue
+			) Credit
+			CROSS APPLY dbo.fnGetDebit(
+				d.dblForexValue
+			) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(
+				d.dblForexValue
+			) CreditForeign
+			INNER JOIN tblGLAccount ga 
+				ON ga.intAccountId = glAccnt.intInventoryAdjustmentAccountId
+			LEFT JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId	
+		WHERE
+			ABS(ISNULL(d.dblValue,0)) <> 0 
+			
+END
+
 -- Return the GL entries to correct the discrepancy back to the caller. 
 SELECT 
 	[dtmDate] 
