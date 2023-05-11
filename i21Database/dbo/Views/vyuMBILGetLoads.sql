@@ -67,6 +67,8 @@ SELECT lh.intLoadHeaderId
 	, pd.intDispatchOrderRouteId
 	, dd.intDispatchOrderDetailId
 	, ysnLockPrice = ISNULL(tm.ysnLockPrice, CAST(0 AS BIT))
+	, dd.dblGross as dblDistributionDetailGross
+	, dd.dblNet as dblDistributionDetailNet
 FROM tblMBILPickupDetail pd
 JOIN tblMBILDeliveryDetail dd ON dd.intPickupDetailId = pd.intPickupDetailId
 LEFT JOIN tblTRSupplyPoint sp ON sp.intEntityVendorId = pd.intEntityId AND sp.intEntityLocationId = pd.intEntityLocationId
