@@ -111,7 +111,12 @@ BEGIN
 	SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
 
 	SELECT @intSalespersonId = intSalespersonId FROM @loop
-	SELECT @strSalespersonName = strName FROM tblEMEntity WHERE intEntityId = @intSalespersonId
+	
+	--CHECK IF NOT GRAIN TEMPLATE TO USE THE SALESPERSON NAME IN THE CONTRACT
+	IF (@strDefaultContractReport = 'Grain')
+	BEGIN
+		SELECT @strSalespersonName = strName FROM tblEMEntity WHERE intEntityId = @intSalespersonId
+	END 
 
 	IF @strMailType = 'Contract'
 	BEGIN
