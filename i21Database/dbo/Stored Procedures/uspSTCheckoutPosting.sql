@@ -747,7 +747,7 @@ BEGIN
 							-- ROLLBACK
 							GOTO ExitWithRollback
 						end catch
-
+					
 
 						-- Insert all Pump Items here using positive amount
 						INSERT INTO @EntriesForInvoice(
@@ -1231,6 +1231,8 @@ BEGIN
 								-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 								AND DT.dblTotalSalesAmountComputed = 0
 								AND CPT.dblAmount > 0
+								AND @ysnConsignmentStore = 0 
+
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
@@ -5318,7 +5320,7 @@ BEGIN
 												,[intShipmentId]			= NULL
 												,[intTransactionId]			= NULL
 												,[intEntityId]				= @intCurrentUserId
-												,[ysnResetDetails]			= CASE
+												,[ysnResetDetails]			= CASE 
 																				WHEN @intCurrentInvoiceId IS NOT NULL
 																					THEN CAST(0 AS BIT)
 																				ELSE CAST(1 AS BIT)
