@@ -28,7 +28,6 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , intSubLocationId 		= b.intSubLocationId
 	 , strStorageUnit			= d.strSubLocationName
 	 , strStorageLocation		= c.strName
-	 , strRequired				= I.strRequired
 FROM vyuICGetItemStock I WITH (NOLOCK)
 INNER JOIN (
 	SELECT RI.*
@@ -52,13 +51,12 @@ INNER JOIN (
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM
 ) UOM ON RECIPE.intItemUOMId = UOM.intItemUOMId
-LEFT JOIN tblICItemLocation b
+left join tblICItemLocation b
 	on I.intItemLocationId = b.intItemLocationId
-LEFT JOIN tblICStorageLocation c
+left join tblICStorageLocation c
 	on c.intStorageLocationId = b.intStorageLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation d
+left join tblSMCompanyLocationSubLocation d
 	on d.intCompanyLocationSubLocationId = b.intSubLocationId
-
 UNION ALL
 
 SELECT intRecipeId				= NULL
@@ -89,7 +87,6 @@ SELECT intRecipeId				= NULL
 	 , intSubLocationId 		= b.intSubLocationId
 	 , strStorageUnit			= d.strSubLocationName
 	 , strStorageLocation		= c.strName
-	 , strRequired				= NULL
 FROM dbo.tblICItemBundle BUNDLE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -110,11 +107,11 @@ INNER JOIN (
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM WITH (NOLOCK)
 ) UOM ON UOM.intItemUOMId = ISNULL(BUNDLE.intItemUnitMeasureId, I.intStockUOMId)
-LEFT JOIN tblICItemLocation b
+left join tblICItemLocation b
 		on I.intItemLocationId = b.intItemLocationId
-LEFT JOIN tblICStorageLocation c
+left join tblICStorageLocation c
 	on c.intStorageLocationId = b.intStorageLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation d
+left join tblSMCompanyLocationSubLocation d
 	on d.intCompanyLocationSubLocationId = b.intSubLocationId
 INNER JOIN (
 	SELECT intItemId
@@ -124,9 +121,8 @@ INNER JOIN (
 		 , strLotTracking
 		 , strBundleType
 	FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
-	ON BUNDLE.intItemId = ITEM.intItemId
-	AND ISNULL(ITEM.strBundleType, ''
-) <> 'Option'
+			ON BUNDLE.intItemId = ITEM.intItemId
+			AND ISNULL(ITEM.strBundleType, '') <> 'Option'
 
 UNION ALL
 
@@ -158,7 +154,6 @@ SELECT intRecipeId				= NULL
 	 , intSubLocationId 		= b.intSubLocationId
 	 , strStorageUnit			= d.strSubLocationName
 	 , strStorageLocation		= c.strName
-	 , strRequired				= NULL
 FROM dbo.tblICItemBundle BUNDLE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
@@ -179,11 +174,11 @@ INNER JOIN (
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM WITH (NOLOCK)
 ) UOM ON UOM.intItemUOMId = I.intStockUOMId
-LEFT JOIN tblICItemLocation b
+left join tblICItemLocation b
 		on I.intItemLocationId = b.intItemLocationId
-LEFT JOIN tblICStorageLocation c
+left join tblICStorageLocation c
 	on c.intStorageLocationId = b.intStorageLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation d
+left join tblSMCompanyLocationSubLocation d
 	on d.intCompanyLocationSubLocationId = b.intSubLocationId
 INNER JOIN (
 	SELECT intItemId
@@ -193,6 +188,5 @@ INNER JOIN (
 		 , strLotTracking
 		 , strBundleType
 	FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
-	ON BUNDLE.intItemId = ITEM.intItemId
-	AND ISNULL(ITEM.strBundleType, ''
-) = 'Option'
+			ON BUNDLE.intItemId = ITEM.intItemId
+			AND ISNULL(ITEM.strBundleType, '') = 'Option'
