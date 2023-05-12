@@ -109,11 +109,15 @@
 	--ReceiptItem.intInventoryReceiptId,
 	----ReceiptItem.intInventoryReceiptItemId,
 	--ReceiptItem.strReceiptNumber,
-    IRD.dblGross,
-    dblNet =  CASE WHEN DS.intDeliverySheetId IS NULL
-			THEN IRD.dblNet
-			ELSE IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
-			END,
+    CASE WHEN SC.intTicketType = 6 or SC.strInOutFlag='O' THEN SC.dblGrossUnits ELSE IRD.dblGross END AS dblGross,
+    dblNet =  CASE WHEN (SC.intTicketType = 6 or SC.strInOutFlag='O')  THEN SC.dblNetUnits 
+			ELSE 
+				CASE WHEN DS.intDeliverySheetId IS NULL
+				THEN IRD.dblNet
+				ELSE IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
+				END 
+			END
+			,
 	(SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2) * (CASE WHEN TS.intTicketSplitId IS NULL THEN 1 ELSE TS.dblSplitPercent / 100 END) AS dblLineGrossWeight,
 	(SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2) * (CASE WHEN TS.intTicketSplitId IS NULL THEN 1 ELSE TS.dblSplitPercent / 100 END) AS dblLineNetWeight,
 	tblGRDiscountId.strDiscountId,
