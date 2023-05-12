@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[tblICInventorySubLedgerReport]
   strTransactionNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
   dtmDate DATETIME NOT NULL,
   intItemId INT NOT NULL,
-  strProduct NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+  strProduct NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,
   intPurchaseContractId INT NULL,
   strPurchaseContractNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
   strSequenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
