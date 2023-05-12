@@ -1965,6 +1965,16 @@ GO
 			,[ysnEnable]			= 0
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Item No' AND [strModule] = 'Inventory')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 186
+			,[strTransactionType]	= N'Rail sheet'
+			,[strPrefix]			= N'RS-'
+			,[intNumber]			= 1
+			,[intDigits]			= Null
+			,[strModule]			= 'Ticket Management'
+			,[ysnEnable]			= 0
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Rail sheet' AND [strModule] = 'Ticket Management')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
