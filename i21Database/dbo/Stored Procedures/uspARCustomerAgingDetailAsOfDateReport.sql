@@ -397,6 +397,7 @@ LEFT JOIN (
 	GROUP BY intTransactionId, dtmDate, strTransactionType
 ) NSF ON I.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE ysnPosted = 1
+	AND I.ysnForgiven = 0
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
 	AND I.strTransactionType <> 'Cash Refund'
@@ -773,3 +774,4 @@ LEFT JOIN (
 WHERE ISNULL(UNPAID.intInvoiceId, 0) <> 0
 AND intEntityUserId = @intEntityUserId 
 AND strAgingType = 'Detail'
+GO
