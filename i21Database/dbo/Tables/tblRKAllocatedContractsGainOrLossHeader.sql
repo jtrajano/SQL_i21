@@ -20,6 +20,7 @@
     [strBatchId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intCompanyId] INT NULL , 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
+    [strRateType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblRKAllocatedContractsGainOrLossHeader] PRIMARY KEY ([intAllocatedContractsGainOrLossHeaderId]), 
     CONSTRAINT [AK_tblRKAllocatedContractsGainOrLossHeader_strRecordName] UNIQUE ([strRecordName]), 
     CONSTRAINT [FK_tblRKAllocatedContractsGainOrLossHeader_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
