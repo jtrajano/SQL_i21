@@ -193,6 +193,7 @@ BEGIN TRY
 				FROM tblLGLoad L
 				JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 				WHERE L.intLoadId = @intLoadId
+					AND I.ysnReturned = 0 and I.strTransactionType NOT IN ('Credit Memo', 'Proforma Invoice')
 				) AND @ysnPost = 0
 			BEGIN
 				SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
