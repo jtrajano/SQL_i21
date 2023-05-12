@@ -178,6 +178,37 @@ SELECT
 	,intProfitCenter					= CLOC.intProfitCenter
 	,intOpportunityId					= INV.intOpportunityId
 	,strOpportunityName					= OPUR.strName
+	,strDefaultPayToBankAccountNo		= DBA.strBankAccountNo
+	,intPayToCashBankAccountId			= ISNULL(INV.intPayToCashBankAccountId,0)
+	,strPayToCashBankAccountNo			= PFCBA.strBankAccountNo
+	,strSourceOfPayTo					= INV.strSourceOfPayTo
+	,strPaymentInstructions				= INV.strPaymentInstructions
+	,strTransactionNo					= INV.strTransactionNo
+	,intBankId							= INV.intBankId
+	,strBankName						= B.strBankName
+	,intBankAccountId					= INV.intBankAccountId
+	,strBankAccountNo					= BA.strBankAccountNo
+	,intBorrowingFacilityId				= INV.intBorrowingFacilityId
+	,strBorrowingFacility				= BF.strBorrowingFacilityId
+	,intBorrowingFacilityLimitId		= INV.intBorrowingFacilityLimitId
+	,strBorrowingFacilityLimit			= BFL.strBorrowingFacilityLimit
+	,intBorrowingFacilityLimitDetailId	= INV.intBorrowingFacilityLimitDetailId
+	,strBorrowingFacilityLimitDetail	= BFLD.strLimitDescription
+	,strBankReferenceNo					= INV.strBankReferenceNo
+	,strBankTransactionId				= INV.strBankTransactionId
+	,dblLoanAmount						= INV.dblLoanAmount
+	,intBankValuationRuleId				= INV.intBankValuationRuleId
+	,strBankValuationRule				= BVR.strBankValuationRule
+	,strTradeFinanceComments			= INV.strTradeFinanceComments
+	,strGoodsStatus						= INV.strGoodsStatus
+	,intTaxLocationId                  	= INV.intTaxLocationId
+	,strTaxLocation						= TAXLOCATION.strLocationName
+	,strTaxPoint                        = INV.strTaxPoint
+	,ysnOverrideTaxPoint                = CAST(CASE WHEN ISNULL(INV.strTaxPoint,'') = '' THEN 0 ELSE 1 END AS BIT)
+	,ysnOverrideTaxLocation             = CAST(CASE WHEN ISNULL(INV.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
+	,strSourcedFrom						= CASE WHEN ISNULL(INV.intDefaultPayToBankAccountId,0) <> 0 THEN INV.strSourcedFrom ELSE '' END
+	,dblSurcharge						= INV.dblSurcharge
+	,intDefaultPayToBankAccountId		= ISNULL(INV.intDefaultPayToBankAccountId,0)
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT 
@@ -293,6 +324,15 @@ OUTER APPLY(
 	FROM dbo.tblSMInterCompany
 	WHERE intInterCompanyId = CUS.intInterCompanyId
 ) INTERCOMPANY
+LEFT JOIN vyuCMBankAccount DBA ON DBA.intBankAccountId = ISNULL(INV.intDefaultPayToBankAccountId,0)
+LEFT JOIN vyuCMBankAccount PFCBA ON PFCBA.intBankAccountId = ISNULL(INV.intPayToCashBankAccountId,0)
+LEFT JOIN tblCMBank B ON B.intBankId = ISNULL(INV.intBankId,0)
+LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = ISNULL(INV.intBankAccountId,0)
+LEFT JOIN tblCMBorrowingFacility BF ON BF.intBorrowingFacilityId = ISNULL(INV.intBorrowingFacilityId,0)
+LEFT JOIN tblCMBorrowingFacilityLimit BFL ON BFL.intBorrowingFacilityLimitId = ISNULL(INV.intBorrowingFacilityLimitId,0)
+LEFT JOIN tblCMBorrowingFacilityLimitDetail BFLD ON BFLD.intBorrowingFacilityLimitDetailId = ISNULL(INV.intBorrowingFacilityLimitDetailId,0)
+LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = ISNULL(INV.intBankValuationRuleId,0)
+LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INV.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INV.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 LEFT JOIN
 (
 	SELECT  

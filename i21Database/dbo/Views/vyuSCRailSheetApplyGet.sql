@@ -22,13 +22,22 @@
 
 		,RailSheetApply.intConcurrencyId
 		,RailSheet.intEntityId
+		
+		, Ticket.strTicketNumber AS strTicketNumber
 		from tblSCRailSheetApply RailSheetApply
 		join tblSCRailSheet RailSheet
 			on RailSheetApply.intRailSheetId = RailSheet.intRailSheetId
+		LEFT JOIN tblSCRailSheetTicketApply RailSheetTicketApply
+			ON RailSheetApply.intRailSheetApplyId = RailSheetTicketApply.intRailSheetApplyId
+		LEFT JOIN tblSCRailSheetTicket RailSheetTicket
+			ON RailSheetTicketApply.intRailSheetTicketId = RailSheetTicket.intRailSheetTicketId
+		LEFT JOIN tblSCTicket Ticket
+			ON RailSheetTicket.intTicketId = Ticket.intTicketId
 		left join tblCTContractDetail ContractDetail
 			on RailSheetApply.intContractDetailId = ContractDetail.intContractDetailId
 		left join tblCTContractHeader ContractHeader
 			on ContractDetail.intContractHeaderId = ContractHeader.intContractHeaderId
 		left join tblCTPricingType PricingType
 			on ContractHeader.intPricingTypeId = PricingType.intPricingTypeId
+		
 go

@@ -6,28 +6,18 @@ SELECT		a.intStoreId,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnRegisterConnectivity, 0) as ysnRegisterConnectivity,
 			ISNULL(c.dblUploadSpeed,0) as dblUploadSpeed,
-			(CASE WHEN FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') = FORMAT(GETDATE() - 1, 'd','us') 
-			AND
-			(
-				SELECT (CASE WHEN ch.ysnPosted = 1 THEN 'Posted' ELSE ch.strCheckoutStatus END) 
-				FROM tblSTCheckoutHeader ch
-				WHERE 
-				ch.intStoreId = a.intStoreId 
-				AND
-				ch.dtmCheckoutDate = dbo.fnSTGetCurrentBusinessDay(a.intStoreId)
-			) = 'Posted'
-			THEN 'Current'
-			ELSE FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') END) as dtmCurrentBusinessDay,
+			(CASE WHEN FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') = FORMAT(GETDATE(), 'd','us') THEN 'Current'
+				ELSE FORMAT(dbo.fnSTGetCurrentBusinessDay(a.intStoreId), 'd','us') END) as dtmCurrentBusinessDay,
 			a.ysnConsignmentStore,
 			reg.strStoreAppFileVersion as strStoreAppVersion,
-			(
+			ISNULL((
 				SELECT (CASE WHEN ch.ysnPosted = 1 THEN 'Posted' ELSE ch.strCheckoutStatus END) 
 				FROM tblSTCheckoutHeader ch
 				WHERE 
 				ch.intStoreId = a.intStoreId 
 				AND
 				ch.dtmCheckoutDate = dbo.fnSTGetCurrentBusinessDay(a.intStoreId)
-			) AS strEODStatus
+			), 'No Open End of Day') AS strEODStatus
 FROM		tblSTStore a
 LEFT JOIN	(	SELECT		intStoreId,
 							ysnInternetConnectivity,

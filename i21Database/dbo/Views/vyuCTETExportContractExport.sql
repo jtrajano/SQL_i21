@@ -69,7 +69,8 @@ AS
        ,0 --NULL --@GetAllAvailablePricing    
        ,NULL --@CurrencyExchangeRate --18.3    
        ,NULL --@CurrencyExchangeRateTypeId --18.3    
-       ,0 --@ysnFromItemSelection--18.3    
+       ,0 --@ysnFromItemSelection--18.3
+       ,0 --@ysnDisregardContractQty    
        )    
      ) B    
       

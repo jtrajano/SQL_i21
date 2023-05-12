@@ -33,7 +33,8 @@
 	,@GetAllAvailablePricing		BIT
 	,@CurrencyExchangeRate			NUMERIC(18,6)
 	,@CurrencyExchangeRateTypeId	INT
-	,@ysnFromItemSelection				BIT = 0
+	,@ysnFromItemSelection			BIT = 0
+	,@ysnDisregardContractQty		BIT = 0
 )
 RETURNS @returntable TABLE
 (
@@ -166,7 +167,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,@PriceUOM						= strPriceUOM
 			,@termIdOut						= intTermId
 			,@IsMaxPrice					= ysnMaxPrice
-			,@ContractPricingLevelId = intCompanyLocationPricingLevelId
+			,@ContractPricingLevelId 		= intCompanyLocationPricingLevelId
 		FROM
 			[dbo].[fnARGetContractPricingDetails](
 				 @ItemId
@@ -180,6 +181,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 				,@ContractDetailId
 				,@OriginalQuantity
 				,@AllowQtyToExceed
+				,@ysnDisregardContractQty
 			);
 			
 			
