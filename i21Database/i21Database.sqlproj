@@ -7279,6 +7279,9 @@
     <Build Include="dbo\Functions\fnARGetCustomerDefaultContact.sql" />
     <Build Include="dbo\Functions\fnEliminateHTMLTags.sql" />
     <Build Include="dbo\Views\vyuARCollectionCreditViewReport.sql" />
+    <Build Include="dbo\Views\vyuMFOrderHeader.sql" />
+    <Build Include="dbo\Views\vyuMFStageWorkOrderCategory.sql" />
+    <Build Include="dbo\Views\vyuMFStageWorkOrderItem.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql">
       <AnsiNulls>Off</AnsiNulls>
     </None>
