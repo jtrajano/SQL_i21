@@ -38,11 +38,12 @@ DECLARE @temp_xml_table TABLE (
 	,[datatype]		NVARCHAR(50)
 )
 
-DECLARE @temp_CommodityAttribute TABLE (
+DECLARE @temp_AdditionalItemDetail TABLE (
 	 [id]					INT
 	,[intInvoiceDetailId]	INT
 	,[intOriginId]			INT
 	,[strCommodityOrigin]	NVARCHAR(50)
+	,[strLotCertificate]	NVARCHAR(100)
 )
 
 -- Prepare the XML 
@@ -78,24 +79,6 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
-INSERT INTO @temp_CommodityAttribute
-(
-	 [intInvoiceDetailId]
-	,[intOriginId]
-	,[strCommodityOrigin]
-)
-SELECT
-	 [intInvoiceDetailId]	= ARID.[intInvoiceDetailId]
-	,[intOriginId]			= ICI.[intOriginId]
-	,[strCommodityOrigin]	= ICCA.[strDescription]
-FROM tblARInvoice ARI WITH (NOLOCK) 
-LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.intInvoiceId = ARID.intInvoiceId
-LEFT JOIN tblICItem ICI WITH (NOLOCK) ON ICI.intItemId = ARID.intItemId
-LEFT JOIN tblICCommodityAttribute ICCA WITH (NOLOCK) ON ICI.intOriginId = ICCA.intCommodityAttributeId
-WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
-OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
-OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-
 SELECT	@intEntityUserId = [from]
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'intSrCurrentUserId'
@@ -119,6 +102,29 @@ WHERE	[fieldname] = 'intInvoiceId'
 SELECT @strInvoiceIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strInvoiceIds'
+
+INSERT INTO @temp_AdditionalItemDetail
+(
+	 [intInvoiceDetailId]
+	,[intOriginId]
+	,[strCommodityOrigin]
+	,[strLotCertificate]
+)
+SELECT
+	 [intInvoiceDetailId]	= ARID.[intInvoiceDetailId]
+	,[intOriginId]			= ICI.[intOriginId]
+	,[strCommodityOrigin]	= ICCA.[strDescription]
+	,[strLotCertificate]	= ItemLotId.strCertificate
+FROM tblARInvoice ARI WITH (NOLOCK) 
+LEFT JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.intInvoiceId = ARID.intInvoiceId
+LEFT JOIN tblICItem ICI WITH (NOLOCK) ON ICI.intItemId = ARID.intItemId
+LEFT JOIN tblICCommodityAttribute ICCA WITH (NOLOCK) ON ICI.intOriginId = ICCA.intCommodityAttributeId
+OUTER APPLY (SELECT TOP 1 ICIRIL.strCertificate FROM tblARInvoiceDetailLot ARIDL WITH (NOLOCK) 
+			LEFT JOIN tblICInventoryReceiptItemLot ICIRIL WITH (NOLOCK) ON ARIDL.intLotId = ICIRIL.intLotId
+			WHERE ARID.intInvoiceDetailId = ARIDL.intInvoiceDetailId) ItemLotId
+WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
+OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
+OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
 
 IF EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId) RETURN
 
@@ -148,7 +154,7 @@ SELECT
 	,strGrade					= CTCDV.strGrade
 	,dtmDueDate					= CAST(ARI.dtmDueDate AS DATE)
 	,strTerm					= SMT.strTerm
-	,strItemDescription			= ISNULL(NULLIF(TCA.strCommodityOrigin COLLATE SQL_Latin1_General_CP1_CS_AS, '') + ', ', '') + ARGID.strItemDescription + ISNULL(', ' + NULLIF(ICIRIL.strCertificate, ''), '')
+	,strItemDescription			= ISNULL(NULLIF(TAID.strCommodityOrigin COLLATE SQL_Latin1_General_CP1_CS_AS, '') + ', ', '') + ARGID.strItemDescription + ISNULL(', ' + NULLIF(TAID.strLotCertificate, ''), '')
 	,strQtyShipped				= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
 	,strShipmentGrossWt			= CONVERT(VARCHAR,CAST(ARGID.dblShipmentGrossWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
 	,strShipmentTareWt			= CONVERT(VARCHAR,CAST(ARGID.dblShipmentTareWt AS MONEY),1) + ' ' + ARGID.strWeightUnitMeasure
@@ -237,9 +243,8 @@ LEFT JOIN tblCMBankAccount CMBA WITH (NOLOCK) ON ISNULL(ISNULL(ARI.intPayToCashB
 LEFT JOIN tblCMBank CMB WITH (NOLOCK) ON CMBA.intBankId = CMB.intBankId
 LEFT JOIN tblSMLogoPreference SMLP ON SMLP.intCompanyLocationId = ARI.intCompanyLocationId AND (ysnARInvoice = 1 OR ysnDefault = 1)
 LEFT JOIN tblSMLogoPreferenceFooter SMLPF ON SMLPF.intCompanyLocationId = ARI.intCompanyLocationId AND (SMLPF.ysnARInvoice = 1 OR SMLPF.ysnDefault = 1)
-LEFT JOIN tblICInventoryReceiptItemLot ICIRIL WITH (NOLOCK) ON ARGID.intLotId = ICIRIL.intLotId
 LEFT JOIN vyuLGLoadDetailLotsView LGLDLV WITH (NOLOCK) ON ARGID.intLoadDetailId = LGLDLV.intLoadDetailId
-LEFT JOIN @temp_CommodityAttribute TCA ON ARGID.intInvoiceDetailId = TCA.intInvoiceDetailId 
+LEFT JOIN @temp_AdditionalItemDetail TAID ON ARGID.intInvoiceDetailId = TAID.intInvoiceDetailId 
 WHERE ARI.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo 
 OR ARI.intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
 OR ARI.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
