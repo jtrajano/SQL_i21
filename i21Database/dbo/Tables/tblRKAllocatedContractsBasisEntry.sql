@@ -24,6 +24,8 @@
 	[intCropYearId] INT NULL,
 	[intStorageLocationId] INT NULL,
 	[intStorageUnitId] INT NULL,
+	[intMTMPointId] INT NULL,
+	[strCertification] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKAllocatedContractsBasisEntry] PRIMARY KEY ([intAllocatedContractsBasisEntryId]), 
     CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblRKAllocatedContractsGainOrLossHeader] FOREIGN KEY ([intAllocatedContractsGainOrLossHeaderId]) REFERENCES [tblRKAllocatedContractsGainOrLossHeader]([intAllocatedContractsGainOrLossHeaderId]) ON DELETE CASCADE, 
@@ -39,5 +41,6 @@
 	CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblSMCity_intDestinationPortId] FOREIGN KEY (intDestinationPortId) REFERENCES [dbo].[tblSMCity] (intCityId),
 	CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblCTCropYear_intCropYearId] FOREIGN KEY (intCropYearId) REFERENCES [dbo].[tblCTCropYear] (intCropYearId),
 	CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblSMCompanyLocationSubLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] (intCompanyLocationSubLocationId),
-	CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId)
+	CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblICStorageLocation_intStorageUnitId] FOREIGN KEY (intStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId),
+	CONSTRAINT [FK_tblRKAllocatedContractsBasisEntry_tblCTMTMPoint_intMTMPointId] FOREIGN KEY (intMTMPointId) REFERENCES [dbo].[tblCTMTMPoint] (intMTMPointId)
 )

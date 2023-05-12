@@ -30,6 +30,7 @@ SELECT H.intAllocatedContractsGainOrLossHeaderId
     , H.strBatchId
     , H.intCompanyId
     , H.intConcurrencyId
+	, H.strRateType
 	, ysnEvaluationByLocation = ISNULL(companyConfig.ysnEvaluationByLocation, CAST(0 AS BIT))
 	, ysnEvaluationByMarketZone = ISNULL(companyConfig.ysnEvaluationByMarketZone, CAST(0 AS BIT))
 	, ysnEvaluationByOriginPort = ISNULL(companyConfig.ysnEvaluationByOriginPort, CAST(0 AS BIT))
@@ -37,6 +38,8 @@ SELECT H.intAllocatedContractsGainOrLossHeaderId
 	, ysnEvaluationByCropYear = ISNULL(companyConfig.ysnEvaluationByCropYear, CAST(0 AS BIT))
 	, ysnEvaluationByStorageLocation = ISNULL(companyConfig.ysnEvaluationByStorageLocation, CAST(0 AS BIT))
 	, ysnEvaluationByStorageUnit = ISNULL(companyConfig.ysnEvaluationByStorageUnit, CAST(0 AS BIT))
+	, ysnIncludeProductInformation = ISNULL(companyConfig.ysnIncludeProductInformation, CAST(0 AS BIT))
+	, ysnEnableMTMPoint = ISNULL(CTCompanyConfig.ysnEnableMTMPoint, CAST(0 AS BIT))
 FROM tblRKAllocatedContractsGainOrLossHeader H
 LEFT JOIN tblICCommodity c ON c.intCommodityId = H.intCommodityId
 LEFT JOIN tblRKM2MBasis b ON b.intM2MBasisId = H.intBasisEntryId
@@ -55,5 +58,11 @@ OUTER APPLY (
 	, ysnEvaluationByCropYear
 	, ysnEvaluationByStorageLocation
 	, ysnEvaluationByStorageUnit
+	, ysnIncludeProductInformation
 	FROM tblRKCompanyPreference
 ) companyConfig
+OUTER APPLY (
+	SELECT TOP 1 
+	  ysnEnableMTMPoint
+	FROM tblCTCompanyPreference
+) CTCompanyConfig
