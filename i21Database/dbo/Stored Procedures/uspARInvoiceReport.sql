@@ -398,8 +398,7 @@ LEFT JOIN (
 		,strVFDDocumentNumber		= ID.strVFDDocumentNumber
 		,strUnitMeasure				= UM.strUnitMeasure
 		,strItemNo					= ITEM.strItemNo
-		,strInvoiceComments			= CASE WHEN @ysnIncludeHazmatMessage = 0 OR ITEM.ysnHazardMaterial = 0 THEN ITEM.strInvoiceComments 
-										ELSE ISNULL(NULLIF(ITEM.strInvoiceComments, '') + CHAR(13)+CHAR(10), '') + ISNULL(NULLIF(ITEMTAG.strMessage, ''), '') END
+		,strInvoiceComments			= CASE WHEN @ysnIncludeHazmatMessage = 0 THEN ITEM.strInvoiceComments ELSE ITEM.strInvoiceComments + ' - ' + ITEMTAG.strMessage END
 		,strItemType				= ITEM.strType
 		,strItemDescription			= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
 		,ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
