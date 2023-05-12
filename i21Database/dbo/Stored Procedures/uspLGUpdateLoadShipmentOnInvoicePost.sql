@@ -93,6 +93,18 @@ BEGIN TRY
 		FROM tblLGLoad 
 		WHERE intLoadId = @intLoadId
 
+		SELECT @intAllocationDetailId = intAllocationDetailId
+			,@intOutboundLoadDetailId = intLoadDetailId
+		FROM tblLGLoadDetail
+		WHERE intSContractDetailId = @intSContractDetailId
+			AND intLoadId = @intLoadId
+
+		SELECT 
+			@intAllocationPContractDetailId = intPContractDetailId,
+			@intAllocationHeaderId = intAllocationHeaderId
+		FROM tblLGAllocationDetail
+		WHERE intAllocationDetailId = @intAllocationDetailId
+
 		IF (@intPurchaseSale = 2)
 		BEGIN
 			IF @intSContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
@@ -100,18 +112,6 @@ BEGIN TRY
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + @dblLoadDetailQty
 				WHERE intContractDetailId = @intSContractDetailId
-
-				SELECT @intAllocationDetailId = intAllocationDetailId
-					,@intOutboundLoadDetailId = intLoadDetailId
-				FROM tblLGLoadDetail
-				WHERE intSContractDetailId = @intSContractDetailId
-					AND intLoadId = @intLoadId
-
-				SELECT 
-					@intAllocationPContractDetailId = intPContractDetailId,
-					@intAllocationHeaderId = intAllocationHeaderId
-				FROM tblLGAllocationDetail
-				WHERE intAllocationDetailId = @intAllocationDetailId
 				
 				SELECT @dblPurchasedLotQty = SUM(LDL.dblLotQuantity)
 				FROM tblLGLoad L
@@ -124,36 +124,6 @@ BEGIN TRY
 									+ (CASE WHEN ISNULL(@Post,0) =  1 THEN @dblPurchasedLotQty ELSE @dblPurchasedLotQty *(-1) END 
 										* CASE WHEN (@strInvoiceType = 'Credit Memo') THEN -1 ELSE 1 END)
 				WHERE intContractDetailId = @intAllocationPContractDetailId
-
-				/* When Posting Credit Memo from Return, Unpost and Cancel LS */
-				IF (ISNULL(@ysnFromReturn, 0) = 1 AND @intShipmentStatus NOT IN (4, 12))
-				BEGIN
-					IF (@Post = 1)
-					BEGIN
-						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
-						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
-
-						-- Automatic Allocation Cancellation
-						IF (@ysnCancelAllocation = 1)
-						BEGIN
-							EXEC uspLGCancelAllocation
-								@intAllocationHeaderId = @intAllocationHeaderId,
-								@ysnCancel = @ysnCancelAllocation,
-								@UserId = @UserId
-						END
-					END
-					ELSE
-					BEGIN
-						-- Automatic Allocation Reverse Cancellation
-						EXEC uspLGCancelAllocation
-							@intAllocationHeaderId = @intAllocationHeaderId,
-							@ysnCancel = 0,
-							@UserId = @UserId
-
-						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
-						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
-					END
-				END
 			END
 		END
 		ELSE IF (@intPurchaseSale = 3)
@@ -180,6 +150,36 @@ BEGIN TRY
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + (@dblInvoicedQty * -1)
 				WHERE intContractDetailId = @intSContractDetailId
+			END
+		END
+
+		/* When Posting Credit Memo from Return, Unpost and Cancel LS */
+		IF (ISNULL(@ysnFromReturn, 0) = 1 AND @intShipmentStatus NOT IN (4, 12))
+		BEGIN
+			IF (@Post = 1)
+			BEGIN
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
+				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+
+				-- Automatic Allocation Cancellation
+				IF (@ysnCancelAllocation = 1)
+				BEGIN
+					EXEC uspLGCancelAllocation
+						@intAllocationHeaderId = @intAllocationHeaderId,
+						@ysnCancel = @ysnCancelAllocation,
+						@UserId = @UserId
+				END
+			END
+			ELSE
+			BEGIN
+				-- Automatic Allocation Reverse Cancellation
+				EXEC uspLGCancelAllocation
+					@intAllocationHeaderId = @intAllocationHeaderId,
+					@ysnCancel = 0,
+					@UserId = @UserId
+
+				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
 			END
 		END
 
