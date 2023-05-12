@@ -241,7 +241,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 												, ysnRejected
 												, ysnPayroll
 												, ysnPayables
-												, ysnJournal
+												, ISNULL(ysnJournal, CONVERT(BIT,0))
 												, ISNULL(dblTotalAmount, 0)
 												, strReason
 												, 1
@@ -373,7 +373,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																		, ysnRejected
 																		, ysnPayroll
 																		, ysnPayables
-																		, ysnJournal
+																		, ISNULL(ysnJournal, CONVERT(BIT, 0))
 																		, ISNULL(@dblLineTotal, 0)
 																		, strReason
 																		, 1
@@ -416,3 +416,4 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 					DELETE FROM @tblARCommissionSchedules WHERE intCommissionScheduleId = @intActiveCommSchedId
 				END
 		END
+GO

@@ -61,7 +61,7 @@
 	SC.intContractId,
 	SC.intDiscountLocationId,
 	SC.intItemId,
-	IR.intEntityVendorId AS intEntityId,
+	intEntityId = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.intEntityId ELSE IR.intEntityVendorId END,
 	SC.intLoadId,
 	SC.intMatchTicketId,
 	SC.intSubLocationId,
@@ -154,7 +154,7 @@
 				FOR XML PATH('')
 			),2,1000)
 	END COLLATE Latin1_General_CI_AS AS  strGradeReading
-	,IR.intEntityVendorId
+	,intEntityVendorId = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.intEntityId ELSE IR.intEntityVendorId END
 	,DS.intDeliverySheetId
 	,DS.strDeliverySheetNumber
 	,DS.strSplitDescription

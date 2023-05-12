@@ -582,6 +582,7 @@ BEGIN
 			,NULL--@CurrencyExchangeRate
 			,NULL--@CurrencyExchangeRateTypeId
 			,0--@ysnFromItemSelection
+			,0--@ysnDisregardContractQty
 		) AS tblARPricing
 	WHERE strGUID = @strGUID AND tblCFImportTransactionStagingTable.intUserId = @intUserId
 	

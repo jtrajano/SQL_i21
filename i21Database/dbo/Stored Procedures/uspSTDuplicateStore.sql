@@ -532,8 +532,8 @@ BEGIN TRANSACTION
 					SELECT
 							@NewStoreId
 						,CASE WHEN strRegisterClass = 'SAPPHIRE/COMMANDER'
-							THEN 'COMMANDER-' + CAST((SELECT TOP 1 intStoreNo FROM tblSTStore WHERE intStoreId = @NewStoreId) AS VARCHAR(200))
-						ELSE strRegisterClass + ' - ' + CAST((SELECT TOP 1 intStoreNo FROM tblSTStore WHERE intStoreId = @NewStoreId) AS VARCHAR(200)) 
+							THEN CAST('COMMANDER-' + strRegisterName + '-' + CAST((SELECT TOP 1 intStoreNo FROM tblSTStore WHERE intStoreId = @NewStoreId) AS VARCHAR(20)) AS VARCHAR(20))
+						ELSE CAST(strRegisterClass + '-' + strRegisterName + ' - ' + CAST((SELECT TOP 1 intStoreNo FROM tblSTStore WHERE intStoreId = @NewStoreId) AS VARCHAR(20)) AS VARCHAR(20))
 						END AS strRegisterName
 						,strRegisterClass
 						,ysnRegisterDataLoad
