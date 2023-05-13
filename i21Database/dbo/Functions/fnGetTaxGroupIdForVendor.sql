@@ -325,6 +325,16 @@ BEGIN
 	IF ISNULL(@TaxGroupId,0) <> 0
 		RETURN @TaxGroupId;	
 
+	--Vendor Ship From Location
+	SELECT TOP 1 @TaxGroupId = EMEL.intTaxGroupId
+	FROM tblAPVendor APV
+	INNER JOIN tblEMEntityLocation EMEL
+	ON APV.intShipFromId = EMEL.intEntityLocationId
+	WHERE APV.intEntityId = @VendorId
+
+	IF ISNULL(@TaxGroupId,0) <> 0 AND ISNULL(@VendorLocationId, 0) = 0
+		RETURN @TaxGroupId;
+
 	--Company Location
 	SELECT TOP 1
 		@TaxGroupId = [intTaxGroupId]
