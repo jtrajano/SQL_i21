@@ -18,6 +18,22 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Receive Payments'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
+DECLARE  @DueToAccountId					INT
+        ,@DueFromAccountId					INT
+        ,@AllowIntraCompanyEntries			BIT
+        ,@AllowIntraLocationEntries			BIT
+        ,@AllowIntraCompanyEntriesPayment	BIT
+        ,@AllowIntraLocationEntriesPayment	BIT
+
+SELECT TOP 1
+     @AllowIntraCompanyEntries			= ISNULL(ysnAllowIntraCompanyEntries, 0)
+    ,@AllowIntraLocationEntriesPayment	= ISNULL(ysnAllowIntraLocationEntries, 0)
+    ,@DueToAccountId					= ISNULL([intDueToAccountId], 0)
+    ,@DueFromAccountId					= ISNULL([intDueFromAccountId], 0)
+    ,@AllowIntraCompanyEntriesPayment	= ISNULL(ysnAllowIntraCompanyEntriesPayment, 0)
+    ,@AllowIntraLocationEntries			= ISNULL(ysnAllowIntraLocationEntriesPayment, 0)
+FROM tblARCompanyPreference
+
 IF @Post = 1
 BEGIN
     INSERT #ARPaymentGLEntries
@@ -1265,6 +1281,206 @@ BEGIN
         ,NULL
     FROM
         [dbo].[fnAPCreateClaimARGLEntries](@TempPaymentIds, @UserId, @BatchId)
+
+    --DUE TO ACCOUNT CREDIT
+	INSERT #ARPaymentGLEntries
+        ([dtmDate]
+        ,[strBatchId]
+        ,[intAccountId]
+        ,[dblDebit]
+        ,[dblCredit]
+        ,[dblDebitUnit]
+        ,[dblCreditUnit]
+        ,[strDescription]
+        ,[strCode]
+        ,[strReference]
+        ,[intCurrencyId]
+        ,[dblExchangeRate]
+        ,[dtmDateEntered]
+        ,[dtmTransactionDate]
+        ,[strJournalLineDescription]
+        ,[intJournalLineNo]
+        ,[ysnIsUnposted]
+        ,[intUserId]
+        ,[intEntityId]
+        ,[strTransactionId]
+        ,[intTransactionId]
+        ,[strTransactionType]
+        ,[strTransactionForm]
+        ,[strModuleName]
+        ,[intConcurrencyId]
+        ,[dblDebitForeign]
+        ,[dblDebitReport]
+        ,[dblCreditForeign]
+        ,[dblCreditReport]
+        ,[dblReportingRate]
+        ,[dblForeignRate]
+        ,[strRateType]
+        ,[strDocument]
+        ,[strComments]
+        ,[strSourceDocumentId]
+        ,[intSourceLocationId]
+        ,[intSourceUOMId]
+        ,[dblSourceUnitDebit]
+        ,[dblSourceUnitCredit]
+        ,[intCommodityId]
+        ,[intSourceEntityId]
+        ,[ysnRebuild])
+	SELECT
+		 [dtmDate]                      = P.[dtmDatePaid]
+		,[strBatchId]                   = P.[strBatchId]
+		,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
+		,[dblDebit]                     = PD.[dblAmountPaid]
+		,[dblCredit]                    = @ZeroDecimal
+		,[dblDebitUnit]                 = @ZeroDecimal
+		,[dblCreditUnit]                = @ZeroDecimal
+		,[strDescription]               = 'Payment from ' + PD.strTransactionId + ' Intra-Company Due To Account'
+		,[strCode]                      = @CODE
+		,[strReference]                 = P.[strCustomerNumber]
+		,[intCurrencyId]                = P.[intCurrencyId]
+		,[dblExchangeRate]              = ISNULL(P.[dblExchangeRate], 1)
+		,[dtmDateEntered]               = P.[dtmPostDate]
+		,[dtmTransactionDate]           = P.[dtmDatePaid]
+		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
+		,[intJournalLineNo]             = P.[intTransactionId]
+		,[ysnIsUnposted]                = 0
+		,[intUserId]                    = P.[intUserId]
+		,[intEntityId]                  = P.[intEntityId]
+		,[strTransactionId]             = P.[strTransactionId]
+		,[intTransactionId]             = P.[intTransactionId]
+		,[strTransactionType]           = @SCREEN_NAME
+		,[strTransactionForm]           = @SCREEN_NAME
+		,[strModuleName]                = @MODULE_NAME
+		,[intConcurrencyId]             = 1
+		,[dblDebitForeign]              = PD.[dblAmountPaid]
+		,[dblDebitReport]               = PD.[dblBaseAmountPaid]
+		,[dblCreditForeign]             = @ZeroDecimal
+		,[dblCreditReport]              = @ZeroDecimal
+		,[dblReportingRate]             = P.[dblExchangeRate]
+		,[dblForeignRate]               = P.[dblExchangeRate]
+		,[strRateType]                  = P.[strRateType]
+		,[strDocument]                  = NULL
+		,[strComments]                  = NULL
+		,[strSourceDocumentId]          = NULL
+		,[intSourceLocationId]          = NULL
+		,[intSourceUOMId]               = NULL
+		,[dblSourceUnitDebit]           = NULL
+		,[dblSourceUnitCredit]          = NULL
+		,[intCommodityId]               = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
+		,[ysnRebuild]                   = NULL
+	FROM #ARPostPaymentHeader P
+	INNER JOIN #ARPostPaymentDetail PD ON P.[intTransactionId] = PD.[intTransactionId]
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](PD.[intTransactionAccountId], @DueToAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	) OVERRIDESEGMENT
+	WHERE
+		P.[ysnPost] = 1
+        AND PD.[strTransactionType] <> 'Claim'
+		AND (PD.[dblPayment] <> @ZeroDecimal OR PD.[dblBasePayment] <> @ZeroDecimal)
+		AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesPayment = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesPayment = 1))
+		AND ([dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 3) = 0)
+
+	--DUE FROM ACCOUNT DEBIT
+	INSERT #ARPaymentGLEntries
+        ([dtmDate]
+        ,[strBatchId]
+        ,[intAccountId]
+        ,[dblDebit]
+        ,[dblCredit]
+        ,[dblDebitUnit]
+        ,[dblCreditUnit]
+        ,[strDescription]
+        ,[strCode]
+        ,[strReference]
+        ,[intCurrencyId]
+        ,[dblExchangeRate]
+        ,[dtmDateEntered]
+        ,[dtmTransactionDate]
+        ,[strJournalLineDescription]
+        ,[intJournalLineNo]
+        ,[ysnIsUnposted]
+        ,[intUserId]
+        ,[intEntityId]
+        ,[strTransactionId]
+        ,[intTransactionId]
+        ,[strTransactionType]
+        ,[strTransactionForm]
+        ,[strModuleName]
+        ,[intConcurrencyId]
+        ,[dblDebitForeign]
+        ,[dblDebitReport]
+        ,[dblCreditForeign]
+        ,[dblCreditReport]
+        ,[dblReportingRate]
+        ,[dblForeignRate]
+        ,[strRateType]
+        ,[strDocument]
+        ,[strComments]
+        ,[strSourceDocumentId]
+        ,[intSourceLocationId]
+        ,[intSourceUOMId]
+        ,[dblSourceUnitDebit]
+        ,[dblSourceUnitCredit]
+        ,[intCommodityId]
+        ,[intSourceEntityId]
+        ,[ysnRebuild])
+	SELECT
+		 [dtmDate]                      = P.[dtmDatePaid]
+		,[strBatchId]                   = P.[strBatchId]
+		,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
+		,[dblDebit]                     = @ZeroDecimal
+		,[dblCredit]                    = PD.[dblAmountPaid]
+		,[dblDebitUnit]                 = @ZeroDecimal
+		,[dblCreditUnit]                = @ZeroDecimal
+		,[strDescription]               = 'Payment from ' + PD.strTransactionId + ' Intra-Company Due From Account'
+		,[strCode]                      = @CODE
+		,[strReference]                 = P.[strCustomerNumber]
+		,[intCurrencyId]                = P.[intCurrencyId]
+		,[dblExchangeRate]              = ISNULL(P.[dblExchangeRate], 1)
+		,[dtmDateEntered]               = P.[dtmPostDate]
+		,[dtmTransactionDate]           = P.[dtmDatePaid]
+		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
+		,[intJournalLineNo]             = P.[intTransactionId]
+		,[ysnIsUnposted]                = 0
+		,[intUserId]                    = P.[intUserId]
+		,[intEntityId]                  = P.[intEntityId]
+		,[strTransactionId]             = P.[strTransactionId]
+		,[intTransactionId]             = P.[intTransactionId]
+		,[strTransactionType]           = @SCREEN_NAME
+		,[strTransactionForm]           = @SCREEN_NAME
+		,[strModuleName]                = @MODULE_NAME
+		,[intConcurrencyId]             = 1
+		,[dblDebitForeign]              = @ZeroDecimal
+		,[dblDebitReport]               = @ZeroDecimal
+		,[dblCreditForeign]             = PD.[dblAmountPaid]
+		,[dblCreditReport]              = PD.[dblBaseAmountPaid]
+		,[dblReportingRate]             = P.[dblExchangeRate]
+		,[dblForeignRate]               = P.[dblExchangeRate]
+		,[strRateType]                  = P.[strRateType]
+		,[strDocument]                  = NULL
+		,[strComments]                  = NULL
+		,[strSourceDocumentId]          = NULL
+		,[intSourceLocationId]          = NULL
+		,[intSourceUOMId]               = NULL
+		,[dblSourceUnitDebit]           = NULL
+		,[dblSourceUnitCredit]          = NULL
+		,[intCommodityId]               = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
+		,[ysnRebuild]                   = NULL
+	FROM #ARPostPaymentHeader P
+	INNER JOIN #ARPostPaymentDetail PD ON P.[intTransactionId] = PD.[intTransactionId]
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](P.[intUndepositedFundsId], @DueFromAccountId, @AllowIntraCompanyEntries, @AllowIntraLocationEntries, 0)
+	) OVERRIDESEGMENT
+	WHERE
+		P.[ysnPost] = 1
+        AND PD.[strTransactionType] <> 'Claim'
+		AND (PD.[dblPayment] <> @ZeroDecimal OR PD.[dblBasePayment] <> @ZeroDecimal)
+		AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesPayment = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesPayment = 1))
+		AND ([dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 3) = 0)
 END
 					
 IF @Post = 0
