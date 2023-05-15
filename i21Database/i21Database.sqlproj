@@ -920,6 +920,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherLoadShipmentCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnLGGetForexRateFromContract.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
