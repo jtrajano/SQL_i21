@@ -55,7 +55,7 @@ BEGIN
 		intItemUOMId INT 
 	)
 END
-	   
+
 -- Create the temp table for the audit log. 
 IF OBJECT_ID('tempdb..#tmpItemLocationForCStore_AuditLog') IS NULL  
 	CREATE TABLE #tmpItemLocationForCStore_AuditLog (
