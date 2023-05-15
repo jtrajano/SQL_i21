@@ -31,5 +31,6 @@ BEGIN
 	SELECT 60016 ,'Foreign Debit and credit amounts are not balanced.' UNION ALL
 	SELECT 60017 ,'Debit / Credit value has greater than 2 decimal scale.' UNION ALL
 	SELECT 60018 ,'Fiscal Period not found for the given post date.'
+	SELECT 60019 , 'Unable to post {0}. Company Segment entries are out of balanced.'
 	RETURN
 END
