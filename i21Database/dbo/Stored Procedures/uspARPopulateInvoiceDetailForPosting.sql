@@ -1408,6 +1408,12 @@ UPDATE tblARPostInvoiceHeader
 SET dblAverageExchangeRate = CASE WHEN dblInvoiceTotal <> 0 THEN dbo.fnRoundBanker(dblBaseInvoiceTotal / dblInvoiceTotal, 6) ELSE 1 END
 WHERE strSessionId = @strSessionId
 
+UPDATE ARI
+SET dblCurrencyExchangeRate = dblAverageExchangeRate
+FROM tblARInvoice ARI
+INNER JOIN tblARPostInvoiceHeader ARPIH ON ARI.intInvoiceId = ARPIH.intInvoiceId
+WHERE strSessionId = @strSessionId
+
 UPDATE ARPID
 SET 
      dblBaseInvoiceTotal    = ARPIH.dblBaseInvoiceTotal
