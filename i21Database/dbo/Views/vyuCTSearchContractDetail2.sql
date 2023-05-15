@@ -410,7 +410,7 @@ LEFT JOIN hedge ab ON ab.intContractDetailId = a.intContractDetailId
 LEFT JOIN tblICCommodityUnitMeasure ac WITH(NOLOCK) ON ac.intCommodityId = b.intCommodityId AND ac.ysnStockUnit = 1  
 LEFT JOIN tblICItemUOM ad WITH(NOLOCK) ON ad.intItemId = a.intItemId AND ad.intUnitMeasureId = i.intUnitMeasureId  
 LEFT JOIN tblICItemUOM ae WITH(NOLOCK) ON ae.intItemId = a.intItemId AND ae.intUnitMeasureId = ac.intUnitMeasureId  
-LEFT JOIN tblCTBook zc WITH(NOLOCK) ON zc.intBookId = a.intBookId  
+LEFT JOIN tblCTBook zc WITH(NOLOCK) ON zc.intBookId = b.intBookId  
 LEFT JOIN tblICCommodity af WITH(NOLOCK) ON af.intCommodityId = b.intCommodityId  
 LEFT JOIN tblICCommodityUnitMeasure ag WITH(NOLOCK) ON ag.intCommodityUnitMeasureId = b.intCommodityUOMId  
 LEFT JOIN tblICItemUOM ah WITH(NOLOCK) ON ah.intItemId = a.intItemId AND ah.intUnitMeasureId = a.intUnitMeasureId  
