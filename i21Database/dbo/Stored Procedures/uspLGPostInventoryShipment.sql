@@ -1064,7 +1064,7 @@ BEGIN
 		,@ysnPost
 
 	-- Add/Remove Pending Claim entry
-	EXEC uspLGAddPendingClaim @intTransactionId, 2, @ysnPost
+	EXEC uspLGAddPendingClaim @intTransactionId, 2, NULL, @ysnPost
 
 	COMMIT TRAN @TransactionName
 END

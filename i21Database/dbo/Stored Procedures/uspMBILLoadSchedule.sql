@@ -368,7 +368,7 @@ SET MBP.[intSellerId] = DO.intSellerId
 ,MBP.[strLoadRefNo]= DO.strLoadRef
 ,MBP.[intItemId]= DOD.intItemId
 ,MBP.[dblQuantity]= DOD.dblQuantity
-,MBP.[strPONumber]= NULL 
+,MBP.[strPONumber]= DOD.strPONumber
 ,MBP.[strItemUOM]= NULL
 ,MBP.[strBOL] = ''
 ,MBP.intDispatchOrderRouteId = DOR.intDispatchOrderRouteId
@@ -379,8 +379,8 @@ INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispat
 INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1 and MBP.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId
 WHERE MBL.intDriverId = @intDriverId and MBP.ysnPickup = 0
 
-INSERT INTO tblMBILPickupDetail(intDispatchOrderDetailId,strType,intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intSellerId,intSalespersonId,strLoadRefNo,intItemId,dblQuantity,intDispatchOrderRouteId)
-Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DOD.intVendorId,DOD.intVendorLocationId,DOD.intCompanyLocationId,DO.intSellerId,DOD.intSalespersonId,DOD.strLoadRef,DOD.intItemId,DOD.dblQuantity,DOR.intDispatchOrderRouteId
+INSERT INTO tblMBILPickupDetail(intDispatchOrderDetailId,strType,intLoadHeaderId,intEntityId,intEntityLocationId,intCompanyLocationId,intSellerId,intSalespersonId,strLoadRefNo,intItemId,dblQuantity,intDispatchOrderRouteId,strPONumber)
+Select DOD.intDispatchOrderDetailId,DOD.strOrderType,MBL.intLoadHeaderId,DOD.intVendorId,DOD.intVendorLocationId,DOD.intCompanyLocationId,DO.intSellerId,DOD.intSalespersonId,DOD.strLoadRef,DOD.intItemId,DOD.dblQuantity,DOR.intDispatchOrderRouteId,DOD.strPONumber
 from tblLGDispatchOrder DO
 INNER JOIN tblLGDispatchOrderDetail DOD on DO.intDispatchOrderId = DOD.intDispatchOrderId
 INNER JOIN tblLGDispatchOrderRoute DOR on DOD.intDispatchOrderId = DOR.intDispatchOrderId AND DOD.intItemId = DOR.intItemId AND DOR.intStopType = 1
@@ -485,7 +485,7 @@ DELETE FROM tblMBILPickupDetail WHERE intDispatchOrderDetailId NOT IN(SELECT int
 DELETE FROM tblMBILDeliveryDetail WHERE intDispatchOrderDetailId NOT IN(SELECT intDispatchOrderDetailId FROM tblLGDispatchOrderDetail) and intDispatchOrderDetailId is not null and 
  intDeliveryHeaderId IN(Select intDeliveryHeaderId from tblMBILDeliveryHeader d join tblMBILLoadHeader l on d.intLoadHeaderId = d.intLoadHeaderId where l.intDriverId = @intDriverId) and ysnDelivered = 0
 DELETE FROM tblMBILDeliveryHeader WHERE NOT EXISTS(SELECT intDeliveryHeaderId FROM tblMBILDeliveryDetail WHERE tblMBILDeliveryDetail.intDeliveryHeaderId = tblMBILDeliveryHeader.intDeliveryHeaderId) and intLoadHeaderId IN(SELECT intLoadHeaderId FROM tblMBILLoadHeader where intDriverId = @intDriverId)
-DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatchOrderId FROM tblLGDispatchOrder) and intDispatchOrderId is not null AND intDriverId = @intDriverId 
+DELETE FROM tblMBILLoadHeader WHERE intDispatchOrderId NOT IN(SELECT intDispatchOrderId FROM tblLGDispatchOrder) and intDispatchOrderId is not null AND intDriverId = @intDriverId  and intLoadHeaderId not in(Select intLoadHeaderId from tblMBILDeliveryHeader)
 
 
 --RetainAge scenario

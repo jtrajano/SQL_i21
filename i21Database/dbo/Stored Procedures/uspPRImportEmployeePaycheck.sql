@@ -632,12 +632,12 @@ BEGIN
   FROM  
   (  
   SELECT   
-   PCE.dblTotalHours  
-  ,PCE.dblTotalEarning  
-  ,(PCE.dblTotalEarning - PCD.dblTotalDeduction) AS dblAdjustedGross  
-  ,PCTE.dblTotalTax  
-  ,PCD.dblTotalDeduction  
-  ,(PCE.dblTotalEarning - (PCTE.dblTotalTax + PCD.dblTotalDeduction)) AS dblTotalNetPay  
+   ISNULL(PCE.dblTotalHours ,0) AS dblTotalHours
+  ,ISNULL(PCE.dblTotalEarning  ,0) AS dblTotalEarning
+  ,(ISNULL(PCE.dblTotalEarning ,0)- ISNULL(PCD.dblTotalDeduction,0)) AS dblAdjustedGross  
+  ,ISNULL(PCTE.dblTotalTax  ,0) AS dblTotalTax
+  ,ISNULL(PCD.dblTotalDeduction,0) AS   dblTotalDeduction
+  ,(ISNULL(PCE.dblTotalEarning,0) - (ISNULL(PCTE.dblTotalTax,0) + ISNULL(PCD.dblTotalDeduction,0))) AS dblTotalNetPay  
   ,ISNULL(PCTC.dblTotalTax,0) AS dblTotalCompanyTax  
  FROM tblPRPaycheck PC  
  LEFT JOIN   
@@ -675,6 +675,7 @@ BEGIN
  ON PC.intPaycheckId = PCTC.intPaycheckId  
  WHERE PC.intPaycheckId = @intNewPaycheckId  
  )PCS  
+ WHERE tblPRPaycheck.intPaycheckId = @intNewPaycheckId
   
  --DELETE GROUPINGS      
  DELETE FROM #TempPaycheckGroupId WHERE intOriginalPaycheckId = @PaycheckGroupId      

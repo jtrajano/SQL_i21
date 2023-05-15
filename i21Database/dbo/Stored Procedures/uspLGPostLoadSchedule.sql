@@ -181,7 +181,7 @@ BEGIN TRY
 				END
 
 				--Insert Pending Claim for Outbound
-				EXEC dbo.uspLGAddPendingClaim @intLoadId, 2, @ysnPost
+				EXEC dbo.uspLGAddPendingClaim @intLoadId, 2, NULL, @ysnPost
 			END
 		END
 		ELSE IF @intPurchaseSale = 3
@@ -249,7 +249,7 @@ BEGIN TRY
 				END
 			
 				--Insert Pending Claim for Inbound and Outbound
-				EXEC dbo.uspLGAddPendingClaim @intLoadId, 3, @ysnPost
+				EXEC dbo.uspLGAddPendingClaim @intLoadId, 3, NULL, @ysnPost
 			END
 		END
 		ELSE IF @intPurchaseSale = 4

@@ -55,7 +55,9 @@ BEGIN
 			,[ysnReturn]
 			,[ysnStage]
 			,[intStorageLocationId]
-			,[intSubLocationId])
+			,[intSubLocationId]
+			,[intScaleTicketId]
+			)
 		
 
 
@@ -104,7 +106,7 @@ BEGIN
 			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = NULL
 			,[intSubLocationId] = NULL
-
+			,TICKET.intTicketId
 		FROM (
 			SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 			,[strTransactionNumber] = L.[strLoadNumber]
@@ -230,15 +232,14 @@ BEGIN
 			WHERE LOAD_COST_FOR_VENDOR.intLoadId = @LOAD_ID
 				AND TICKET.intTicketId = @TICKET_ID
 				--AND A.intLoadCostId = ISNULL(NULL, A.intLoadCostId)
-				
+				AND (LOAD_COST_FOR_VENDOR.ysnAccrue = 1)
 				AND LOAD_COST_FOR_VENDOR.intLoadId NOT IN 
 					(SELECT IsNull(BD.intLoadId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 					WHERE BD.intItemId = LOAD_COST_FOR_VENDOR.intItemId AND Item.strType = 'Other Charge' AND ISNULL(LOAD_COST_FOR_VENDOR.ysnAccrue,0) = 1)
 					/**/
 				--AND NOT (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL)
-
-
-	SELECT * FROM @voucherPayable
+	
+	-- SELECT * FROM @voucherPayable
 
 	DECLARE @ERROR_MESSAGE NVARCHAR(1000)
 	IF (@POST = 1)

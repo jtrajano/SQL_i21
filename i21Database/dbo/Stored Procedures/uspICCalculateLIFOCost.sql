@@ -68,6 +68,7 @@ DECLARE @BatchId NVARCHAR(40) = ''
 DECLARE @InventoryCount_TransactionType INT = 10
 DECLARE @strCountDescription AS NVARCHAR(255)
 DECLARE @ItemsForConsignment AS ItemCostingTableType
+DECLARE @strTransactionId AS NVARCHAR(50) = CAST(NEWID() AS NVARCHAR(50))
 
 INSERT INTO @ItemsForConsignment (  
       intItemId  
@@ -91,27 +92,27 @@ INSERT INTO @ItemsForConsignment (
     , dblForexRate
     , intCategoryId
 )
-SELECT
-      @ItemId
-    , @ItemLocationId
-    , @ItemUOMId
-    , @Date
-    , -@Quantity
-    , @UnitQty
-    , COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost, @StandardCost, 0) + ISNULL(@MiscellaneousCost, 0)
-    , 0
-    , 0
-    , @DefaultCurrencyId
-    , 1
-    , 1
-    , 1
-    , CAST(NEWID() AS nvarchar(200))
-    , @InventoryCount_TransactionType
-    , NULL
-    , NULL
-    , NULL
-    , 1
-    , @CategoryId
+SELECT    
+      intItemId = @ItemId
+    , intItemLocationId = @ItemLocationId
+    , intItemUOMId = @ItemUOMId
+    , dtmDate = @Date
+    , dblQty = -@Quantity
+    , dblUOMQty = @UnitQty
+    , dblCost = COALESCE(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @LastCost, @StandardCost, 0) 
+    , dblValue = 0
+    , dblSalesPrice = 0
+    , intCurrencyId = @DefaultCurrencyId
+    , dblExchangeRate = 1
+    , intTransactionId = 1
+    , intTransactionDetailId = 1
+    , strTransactionId = @strTransactionId
+    , intTransactionTypeId = @InventoryCount_TransactionType
+    , intLotId = NULL
+    , intSubLocationId = NULL
+    , intStorageLocationId = NULL
+    , dblForexRate = 1
+    , intCategoryId = @CategoryId
 
 EXEC dbo.uspICPostCosting 
       @ItemsForConsignment  
@@ -142,25 +143,25 @@ SELECT @CostingMethod = dbo.fnGetCostingMethod(@ItemId, @ItemLocationId)
 
 IF @CostingMethod = 3 -- LIFO
 BEGIN
-    DECLARE @RunningTotals TABLE (RowNumber INT, TransactionId INT, Date DATETIME, Qty NUMERIC(38, 20), RunningQty NUMERIC(38, 20), 
-      Cost NUMERIC(18, 6), AvgCost NUMERIC(18, 6), ItemUOMId INT)
+    --DECLARE @RunningTotals TABLE (RowNumber INT, TransactionId INT, Date DATETIME, Qty NUMERIC(38, 20), RunningQty NUMERIC(38, 20), 
+    --  Cost NUMERIC(18, 6), AvgCost NUMERIC(18, 6), ItemUOMId INT)
 
-    INSERT INTO @RunningTotals
-    SELECT ROW_NUMBER() OVER (ORDER BY t.dtmDate DESC) RowNumber,
-        t.intTransactionId,
-        t.dtmDate,
-        dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblQty) dblQty,
-        SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblQty)) OVER (ORDER BY t.dtmDate DESC) as dblRunningQty,
-        dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblCost) dblCost,
-        AVG(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblCost)) OVER(ORDER BY t.dtmDate DESC ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AvgCost,
-        t.intItemUOMId
-    FROM tblICInventoryTransaction t
-    WHERE t.intItemId = @ItemId
-        AND t.intItemLocationId = @ItemLocationId
-        AND t.dblQty > 0
-        AND t.ysnIsUnposted = 0
-        AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
-    ORDER BY t.dtmDate DESC
+    --INSERT INTO @RunningTotals
+    --SELECT ROW_NUMBER() OVER (ORDER BY t.dtmDate DESC) RowNumber,
+    --    t.intTransactionId,
+    --    t.dtmDate,
+    --    dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblQty) dblQty,
+    --    SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblQty)) OVER (ORDER BY t.dtmDate DESC) as dblRunningQty,
+    --    dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblCost) dblCost,
+    --    AVG(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockUOMId, t.dblCost)) OVER(ORDER BY t.dtmDate DESC ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AvgCost,
+    --    t.intItemUOMId
+    --FROM tblICInventoryTransaction t
+    --WHERE t.intItemId = @ItemId
+    --    AND t.intItemLocationId = @ItemLocationId
+    --    AND t.dblQty > 0
+    --    AND t.ysnIsUnposted = 0
+    --    AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @Date) = 1
+    --ORDER BY t.dtmDate DESC
 
     -- DECLARE @RowNumber INT
 
@@ -187,28 +188,80 @@ BEGIN
     --       SELECT @Cost = @LastCost--(SELECT TOP 1 AvgCost FROM @RunningTotals ORDER BY RowNumber DESC)
     -- END
 
-    DECLARE @MinRow INT
-    SELECT @MinRow = MIN(RowNumber)
-    FROM @RunningTotals
-    WHERE RunningQty >= @Quantity
-
-    SELECT *, AVG(Cost) OVER(ORDER BY RowNumber ASC ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
-    FROM @RunningTotals
+    --DECLARE @MinRow INT
+    --SELECT @MinRow = MIN(RowNumber)
+    --FROM @RunningTotals
     --WHERE RunningQty >= @Quantity
 
-    SELECT @Cost = AVG(Cost) OVER(ORDER BY RowNumber ASC ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
-    FROM @RunningTotals
-    WHERE RowNumber <= @MinRow
+    --SELECT *, AVG(Cost) OVER(ORDER BY RowNumber ASC ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+    --FROM @RunningTotals
+    ----WHERE RunningQty >= @Quantity
 
-    IF @Cost IS NULL
-        SELECT @Cost = (SELECT TOP 1 AvgCost FROM @RunningTotals ORDER BY RowNumber DESC)
+    --SELECT @Cost = AVG(Cost) OVER(ORDER BY RowNumber ASC ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+    --FROM @RunningTotals
+    --WHERE RowNumber <= @MinRow
+
+    --IF @Cost IS NULL
+    --    SELECT @Cost = (SELECT TOP 1 AvgCost FROM @RunningTotals ORDER BY RowNumber DESC)
+
+	-- Get the cost from generated inventory transaction.
+	IF EXISTS (
+		SELECT 1 
+		FROM (
+			SELECT cnt = COUNT(t.intInventoryTransactionId) 
+			FROM tblICInventoryTransaction t 
+			WHERE 
+				t.strTransactionId = @strTransactionId 
+				AND t.ysnIsUnposted = 0
+		) c 
+		WHERE 
+			c.cnt > 1 
+	) 
+	BEGIN 
+		SELECT 
+			@Cost = 
+				dbo.fnDivide(
+					SUM(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0)) 
+					,SUM(t.dblQty)
+				)
+		FROM 
+			tblICInventoryTransaction t 
+		WHERE 
+			t.strTransactionId = @strTransactionId 
+			AND t.ysnIsUnposted = 0
+			AND t.dblQty <> 0 
+	END 
+	ELSE 
+	BEGIN 
+		SELECT 
+			@Cost = t.dblCost 				
+		FROM 
+			tblICInventoryTransaction t 
+		WHERE 
+			t.strTransactionId = @strTransactionId 
+			AND t.ysnIsUnposted = 0
+			AND t.dblQty <> 0 
+	END 
 
     IF @ShowBucket = 1
     BEGIN
-        -- SELECT 'Avg', * FROM @RunningTotals
-        SELECT 'Costs', @Cost Cost, @LastCost LastCost, @StandardCost StdCost, @AverageCost AvgCost, 
-        dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0) fnRunning,
-        dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId) fnAvg
+        --SELECT * FROM @RunningTotals
+		SELECT 
+			t.*	
+		FROM 
+			tblICInventoryTransaction t 
+		WHERE 
+			t.strTransactionId = @strTransactionId 
+			AND t.ysnIsUnposted = 0
+
+        SELECT 
+			'Costs'
+			, @Cost Cost
+			, @LastCost LastCost
+			, @StandardCost StdCost
+			, @AverageCost AvgCost
+			, dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0) fnRunning
+			, dbo.fnICGetMovingAverageCost(@ItemId, @ItemLocationId, @LastTransactionId) fnAvg
     END
 END
 ELSE

@@ -179,6 +179,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 				, [strInvoiceOriginId]
 				, [ysnUseOriginIdAsInvoiceNumber]
 				, [intPerformerId]
+				, [intDispatchId]
 			)
 		-- SELECT 
 		-- 	 [intInvoiceId]

@@ -5,7 +5,7 @@ SELECT
 	, bd.intBillId intVoucherId
 	, ch.strContractNumber
 	, cd.intContractSeq
-	, cd.intItemId
+	, bd.intItemId
 	, i.strItemNo
 	, i.strDescription strItemDescription
 	, bds.strSourceNumber
@@ -80,10 +80,11 @@ SELECT
 	, tax.ysnTaxExempt
 	, tax.ysnTaxOnly
 	, tax.strTaxCode
+	, i.strType AS strInventoryItemType
 FROM tblAPBillDetail bd
 LEFT JOIN tblCTContractHeader ch ON ch.intContractHeaderId = bd.intContractHeaderId
 LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = bd.intContractDetailId
-LEFT JOIN tblICItem i ON i.intItemId = cd.intItemId
+LEFT JOIN tblICItem i ON i.intItemId = bd.intItemId
 LEFT JOIN vyuAPBillDetailSource bds ON bds.intBillDetailId = bd.intBillDetailId
 LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = bd.intStorageLocationId
 LEFT JOIN tblSCTicket sc ON sc.intTicketId = bd.intScaleTicketId

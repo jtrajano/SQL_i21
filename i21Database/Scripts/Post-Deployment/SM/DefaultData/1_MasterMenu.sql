@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '401K' AND strModuleName = 'Payroll')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Tank Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5213,39 +5213,23 @@ UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'TankManagement.view.Event
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Report' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Inventory Report', N'Tank Management', @TankManagementReportParentMenuId, N'Inventory Report', N'Report', N'Screen', N'TankManagement.view.InventoryHistory?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Inventory Report', N'Tank Management', @TankManagementReportParentMenuId, N'Inventory Report', N'Report', N'Screen', N'TankManagement.view.InventoryHistory?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 5, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'TankManagement.view.InventoryHistory?showSearch=true' WHERE strMenuName = 'Inventory Report' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Tank Reconciliation', N'Tank Management', @TankManagementReportParentMenuId, N'Tank Reconciliation', N'Report', N'Screen', N'TankManagement.view.TankReconciliation', N'small-menu-report', 0, 0, 0, 1, 6, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'TankManagement.view.TankReconciliation' WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId
+
 /* START OF DELETING */
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Call Entries' AND strModuleName = N'Tank Management' AND strType = 'Report' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Work Order Status' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Lease Billing Report' AND strModuleName = N'Tank Management' AND strType = 'Report' AND intParentMenuID = @TankManagementParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Call Entries' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Work Orders' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Resolve Sync Conflict' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Dispatch Deliveries' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Degree Day Clock' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Event Types' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Device Types' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Lease Codes' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Meter Types' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Clock Reading History' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Lease Billing Incentive' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Event Automation' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Lease Billing' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementActivitiesParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Renew Julian Deliveries' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Missed Julian Deliveries' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Device Actions' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Device Lease Detail' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Fill Group' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Out of Range Burn Rates' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Leak Check / Gas Check' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'On Hold Detail' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Customer List by Route' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Two-Part Delivery Fill Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
---DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Tank Inventory' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementReportParentMenuId
 /* END OF DELETING */
+
+
+
+
 
 /* CARD FUELING */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0)
@@ -5593,17 +5577,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Site Stat
 ELSE
 	UPDATE tblSMMasterMenu SET  intSort = 6, strCommand = N'Store.view.SiteStatus?showSearch=true' WHERE strMenuName = 'Site Status' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mass Add/Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mass Update' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Mass Add/Update Item Pricing', N'Store', @StorePricebookParentMenuId, N'Mass Add/Update Item Pricing', N'Pricebook', N'Screen', N'Store.view.UpdateItemPricing', N'small-menu-pricebook', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Mass Update', N'Store', @StorePricebookParentMenuId, N'Mass Update', N'Pricebook', N'Screen', N'Store.view.UpdateItemPricing', N'small-menu-pricebook', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.UpdateItemPricing' WHERE strMenuName = 'Mass Add/Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
-
---IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
---	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
---	VALUES (N'Retail Price Adjustments', N'Store', @StorePricebookParentMenuId, N'Retail Price Adjustments', N'Pricebook', N'Screen', N'Store.view.RetailPriceAdjustment?showSearch=true&searchCommand=SearchRetailPriceAdjustment', N'small-menu-pricebook', 0, 0, 0, 1, 1, 1)
---ELSE
---	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Store.view.RetailPriceAdjustment?showSearch=true&searchCommand=SearchRetailPriceAdjustment' WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.UpdateItemPricing' WHERE strMenuName = 'Mass Update' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Revert Mass Pricebook Changes' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -5694,12 +5672,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stores' A
 	VALUES (N'Stores', N'Store', @StoreMaintenanceParentMenuId, N'Stores', N'Maintenance', N'Screen', N'Store.view.Store?showSearch=true&searchCommand=SearchStore', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Store.view.Store?showSearch=true&searchCommand=SearchStore' WHERE strMenuName = 'Stores' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
-
--- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
--- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
--- 	VALUES (N'Lottery Games', N'Store', @StoreMaintenanceParentMenuId, N'Lottery Games', N'Maintenance', N'Screen', N'Store.view.LotteryGame', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
--- ELSE
--- 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Store.view.LotteryGame' WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cashier' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -5859,7 +5831,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Subcategories' AND strModuleNam
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Checkout Transaction Journal' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Consolidated Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
-
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Mass Add/Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
 /* STOP DELETE */
 
 /* CRM - Customer Relation Management */

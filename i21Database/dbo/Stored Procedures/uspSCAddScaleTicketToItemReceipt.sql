@@ -890,7 +890,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						-- 	,@NEW_GUID
 						-- FROM
 						
-
+						/*
 						DELETE FROM @LOAD_OTHER_CHARGES
 						WHERE intId IN (SELECT intId FROM @LOAD_OTHER_CHARGES CHARGES 
 							INNER JOIN tblICItem ITEM
@@ -898,7 +898,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 										AND ITEM.ysnInventoryCost = 0
 								WHERE intOtherChargeEntityVendorId <> @intEntityId
 							AND ysnAllowVoucher = 1) 
-						
+						*/
+
+						--SELECT * FROM @LOAD_OTHER_CHARGES
 						/* -- CONTRACT RELATED CHARGES -- */
 
 						/* -- CONTRACT RELATED CHARGES */
@@ -1147,7 +1149,15 @@ IF ISNULL(@intFreightItemId,0) = 0
 						DELETE FROM @LOAD_OTHER_CHARGES
 					END
 
-				END	
+				END 
+
+				UPDATE L
+				SET
+					intShipmentStatus = 4,
+					dtmDeliveredDate = T.dtmTicketDateTime
+				FROM tblLGLoad L
+				INNER JOIN tblSCTicket T ON T.intLoadId = L.intLoadId
+				WHERE L.intLoadId = @intLoadId
 			END
 		ELSE
 			BEGIN

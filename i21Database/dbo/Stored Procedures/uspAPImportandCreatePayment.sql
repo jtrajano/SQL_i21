@@ -29,22 +29,71 @@ BEGIN TRY
 	DECLARE @paymentMethodId INT = NULL;
 	DECLARE @payToAddress INT = NULL;
 
-	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL AND strNotes NOT LIKE '%Will create empty payment%'
+	--IMPORT TYPE WITH VENDOR MAPPING
+	DECLARE @iRelyEFT INT = 5
+				 ,@DTNDetail INT = 4
+	
+	--EFT Import Config
+	DECLARE @archiveServer NVARCHAR(MAX) = NULL
+	DECLARE @importServer NVARCHAR(MAX) = NULL
+	
+	SELECT TOP 1 
+		@archiveServer = strArchiveServer
+		,@importServer = strFromServer
+	FROM tblAPCompanyPreference
+
+	IF ISNULL(dbo.fnTrim(@archiveServer), '') = ''
+		AND ISNULL(dbo.fnTrim(@importServer), '') != ''
+	BEGIN
+		RAISERROR('Archived Failed. Directory not exists or permission denied.', 16, 1);
+	END
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
+
+	CREATE TABLE #tmpMultiVouchersImport (
+		dtmDatePaid DATETIME,
+		intEntityVendorId INT,
+		strCheckNumber NVARCHAR(100),
+		intIds NVARCHAR(100)
+	)
+
+	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL AND strNotes NOT LIKE '%Will create empty payment%'
+
+	INSERT INTO #tmpMultiVouchersImport (dtmDatePaid, intEntityVendorId, strCheckNumber, intIds)
+	-- IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
 	SELECT dtmDatePaid,
 		--    intEntityVendorId,
 			md.intEntityVendorId, -- use the vendor set on CSV
 		   strCheckNumber,
 		--    intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
-		intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
+		intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(MAX), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
 						AND md.strMapVendorName = I2.strEntityVendorName AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
 IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
-	INTO #tmpMultiVouchersImport
+	-- INTO #tmpMultiVouchersImport
 	FROM tblAPImportPaidVouchersForPayment I
-	INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
+	INNER JOIN (
+  tblGLVendorMappingDetail md 
+  INNER JOIN tblGLVendorMapping vm
+  ON  md.intVendorMappingId = vm.intVendorMappingId
+ )
+ ON I.strEntityVendorName = md.strMapVendorName
+ AND I.intEntityVendorId = md.intEntityVendorId
+ WHERE @templateId IN (@iRelyEFT, @DTNDetail)
+	-- INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
  	GROUP BY dtmDatePaid, md.intEntityVendorId, strCheckNumber, intCustomPartition , md.strMapVendorName 
 	--GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
+
+	UNION ALL
+	--TEMPLATE WITHOUT VENDOR MAPPING
+	SELECT dtmDatePaid,
+					intEntityVendorId,
+					strCheckNumber,
+					intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(MAX), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
+												  AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
+													IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
+	FROM tblAPImportPaidVouchersForPayment I
+	WHERE @templateId NOT IN (@iRelyEFT, @DTNDetail)
+	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition 
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchersImport)
 	BEGIN
@@ -53,7 +102,7 @@ IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPa
 		SELECT TOP 1 @currencyId = intCurrencyId FROM vyuCMBankAccount WHERE intBankAccountId = @bankAccountId
 		SELECT TOP 1 @paymentMethodId = intPaymentMethodId, @payToAddress = intDefaultLocationId FROM vyuAPVendor WHERE intEntityId = @vendorId
 
-		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), intBillId)
+		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(MAX), intBillId)
 		FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0, DEFAULT, DEFAULT)
 
 		IF NULLIF(@billIds, '') IS NOT NULL

@@ -13,6 +13,13 @@ SELECT
 	, item.ysnFuelItem
 	, st.intStoreId
 	, st.intStoreNo
+	, CAST(CASE WHEN LEN(uom.strLongUPCCode) IN (10, 11, 12) 
+				THEN RIGHT('0000' + dbo.fnSTRemoveCheckDigit(ISNULL(uom.strUPCA, uom.strLongUPCCode)), 11)
+			WHEN LEN(uom.strLongUPCCode) IN (10, 11, 12, 13, 14, 15) 
+				THEN RIGHT('0000' + dbo.fnSTRemoveCheckDigit(ISNULL(uom.strSCC14, uom.strLongUPCCode)), 13) 
+			ELSE uom.strLongUPCCode
+			END AS BIGINT)
+		AS intUPCNoCheckDigit
 	, uom.*
 FROM tblICItemUOM uom
 INNER JOIN tblICItem item

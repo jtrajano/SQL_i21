@@ -66,6 +66,9 @@ SET @NewBatchId = @BatchId
 IF ISNULL(@BatchId,'') = ''
 	EXEC dbo.uspSMGetStartingNumber 3, @NewBatchId OUT
 
+DECLARE @TempBatchIdForUpdatedId NVARCHAR(40)
+EXEC dbo.uspSMGetStartingNumber 3, @TempBatchIdForUpdatedId OUT
+
 BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
 	SELECT * INTO #TempInvoiceEntries FROM @InvoiceEntries 
@@ -368,7 +371,8 @@ BEGIN
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
-	)								
+		,[intDispatchId]
+	)
 	SELECT		 	
 		 [intId]							= IE.[intId]
 		,[strTransactionType]				= IE.[strTransactionType]
@@ -519,6 +523,7 @@ BEGIN
 		,[strBinNumber]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strBinNumber] ELSE NULL END)
 		,[strGroupNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strGroupNumber] ELSE NULL END)
 		,[strFeedDiet]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFeedDiet] ELSE NULL END)
+		,[intDispatchId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intDispatchId] ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -739,7 +744,8 @@ BEGIN
             ,[dblAddOnQuantity]
 			,[strBinNumber]
 			,[strGroupNumber]
-			,[strFeedDiet])
+			,[strFeedDiet]
+			,[intDispatchId])
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -891,6 +897,7 @@ BEGIN
 			,[strBinNumber]							= ITG.[strBinNumber]
 			,[strGroupNumber]						= ITG.[strGroupNumber]
 			,[strFeedDiet]							= ITG.[strFeedDiet]
+			,[intDispatchId]						= ITG.[intDispatchId]
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
@@ -1949,8 +1956,9 @@ BEGIN TRY
 
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
+	BEGIN
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBatchId --NULL #mark 101
+			 @BatchId			= @TempBatchIdForUpdatedId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1962,7 +1970,13 @@ BEGIN TRY
 			,@EndTransaction	= NULL
 			,@Exclude			= NULL
 			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError	
+			,@RaiseError		= @RaiseError
+
+
+			UPDATE tblGLPostRecap
+			SET strBatchId = @NewBatchId
+			WHERE strBatchId = @TempBatchIdForUpdatedId
+	END
 
 END TRY
 BEGIN CATCH

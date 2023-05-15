@@ -1341,6 +1341,119 @@ BEGIN TRY
 				-- [END] - Revert ITEM SPECIAL PRICING
 				-- ==================================================================================================================================================
 
+				
+
+				-- ITEM LOCATION
+				-- ==================================================================================================================================================
+				-- [START] - Revert ITEM LOCATION Counted Daily
+				-- ==================================================================================================================================================
+				IF EXISTS(
+							SELECT TOP 1 1 
+							FROM vyuSTSearchRevertHolderDetail detail
+							WHERE detail.strTableName = N'tblICItemLocation' 
+								AND detail.intRevertHolderId = @intRevertHolderId
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND detail.strPreviewOldData != detail.strPreviewNewData
+						 )
+					BEGIN
+				
+				
+	
+						-- Create
+						DECLARE @tempITEMLOCATIONCounted TABLE (
+								intItemLocationId			INT		NOT NULL,
+								ysnCountedDaily				BIT		NULL
+						)
+
+
+
+
+						-- Insert
+						INSERT INTO @tempITEMLOCATIONCounted
+						(
+							intItemLocationId,
+							ysnCountedDaily
+						)
+						SELECT DISTINCT
+							intItemLocationId		= piv.intItemLocationId,
+							ysnCountedDaily			= piv.ysnCountedDaily
+						FROM (
+							SELECT detail.intItemLocationId
+								 , detail.strTableColumnName
+								 , detail.strOldData
+							FROM vyuSTSearchRevertHolderDetail detail
+							INNER JOIN tblICItemLocation ItemLoc
+								ON detail.intItemLocationId = ItemLoc.intItemLocationId
+							WHERE detail.strTableName = N'tblICItemLocation'
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND detail.strPreviewOldData != detail.strPreviewNewData
+						) src
+						PIVOT (
+							MAX(strOldData) FOR strTableColumnName IN (ysnCountedDaily)
+						) piv
+
+
+
+
+
+						-- Record row count
+						-- SET @intRevertItemLocationRecords = (SELECT COUNT(intItemLocationId) FROM @tempITEMLOCATION)
+						SET @intRevertItemLocationRecords = (
+																SELECT COUNT(detail.intItemLocationId)
+																FROM vyuSTSearchRevertHolderDetail detail
+																WHERE detail.strTableName = N'tblICItemLocation' 
+																	AND detail.intRevertHolderId = @intRevertHolderId
+																	AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+																	AND detail.strPreviewOldData != detail.strPreviewNewData
+															 )
+
+	
+
+
+						-- LOOP ITEM LOCATIONS's
+						WHILE EXISTS(SELECT TOP 1 1 FROM @tempITEMLOCATIONCounted)
+							BEGIN			
+	
+								DECLARE		@intItemLocationCountedId			INT,
+											@ysnCountedDailyCounted			BIT
+				
+
+								SELECT TOP 1 
+											@intItemLocationId			= temp.intItemLocationId,
+											@ysnCountedDaily			= ISNULL(temp.ysnCountedDaily, ItemLoc.ysnCountedDaily)
+								FROM @tempITEMLOCATIONCounted temp
+								INNER JOIN tblICItemLocation ItemLoc
+									ON temp.intItemLocationId = ItemLoc.intItemLocationId
+								ORDER BY temp.intItemLocationId ASC
+
+
+
+
+								-- UPDATE ITEM LOCATION
+								EXEC [dbo].[uspICUpdateItemLocationPricingForCStore]
+										-- filter params
+										@strScreen = 'RetailPriceAdjustment'
+										,@intItemLocationId							= @intItemLocationId                -- *** SET VALUE TO UPDATE SPECIFIC RECORD ***
+										-- update params 
+										,@ysnCountedDaily							= @ysnCountedDaily 
+
+										,@intEntityUserSecurityId					= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
+
+
+
+								-- Remove
+								DELETE FROM @tempITEMLOCATIONCounted WHERE intItemLocationId = @intItemLocationId
+		
+							END
+					END
+				ELSE
+					BEGIN
+						PRINT 'No Records found to update - tblICItemLocation'
+					END
+				-- ==================================================================================================================================================
+				-- [END] - Revert ITEM LOCATION
+				-- ==================================================================================================================================================
+
 			END
 
 		ELSE IF(@intRevertType = 3)

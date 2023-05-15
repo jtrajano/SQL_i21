@@ -93,5 +93,6 @@ ELSE IF @CostingMethod = 1
 BEGIN
   SET @Cost = ISNULL(dbo.fnICGetItemRunningCost(@ItemId, @LocationId, NULL, NULL, NULL, NULL, NULL, @Date, 0), @AverageCost)
 END
+
 ELSE
   RAISERROR('Costing method is invalid or not supported.', 11, 1)

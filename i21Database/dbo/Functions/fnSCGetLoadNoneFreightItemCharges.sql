@@ -258,34 +258,26 @@ BEGIN
 												END								
 			,[intContractHeaderId]				= (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
 			,[intContractDetailId]				= RE.intContractDetailId 
-			,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 AND ISNULL(LoadCost.intVendorId,0) <> RE.intEntityVendorId THEN 1 ELSE 0 END
+			,[ysnAccrue]						= 0 --LoadCost.ysnAccrue
 			,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 			,[strChargesLink]					= RE.strChargesLink
-			,[ysnAllowVoucher]					= CASE 
-													-- THIS WILL CHARGE THE ENTITY
-													WHEN ISNULL(LoadCost.intVendorId,0) <= 0 AND LoadCost.ysnPrice = 1 THEN 
-														0
-													WHEN ISNULL(LoadCost.intVendorId,0) > 0 
-														AND ISNULL(LoadCost.intVendorId,0) <> RE.intEntityVendorId THEN 
-														LoadCost.ysnAccrue 
-													ELSE  
-														RE.ysnAllowVoucher 
-													END
+			,[ysnAllowVoucher]					= LoadCost.ysnPrice
 			,[intLoadShipmentId]			= RE.intLoadShipmentId 
 			,[intLoadShipmentCostId]		= LoadCost.intLoadCostId
 			,intTaxGroupId = RE.intTaxGroupId
 			FROM @ReceiptStagingTable RE 			
 			INNER JOIN tblSCTicket SC 
 				ON SC.intTicketId = RE.intSourceId
-			INNER JOIN tblLGLoadDetail LoadDetail
-				ON SC.intLoadId = LoadDetail.intLoadId				
+			--INNER JOIN tblLGLoadDetail LoadDetail
+			--	ON SC.intLoadId = LoadDetail.intLoadId				
 			LEFT JOIN tblLGLoadCost LoadCost 
-				ON LoadCost.intLoadId = LoadDetail.intLoadId
+				ON LoadCost.intLoadId = SC.intLoadId
 			LEFT JOIN tblICItem IC 
 				ON IC.intItemId = LoadCost.intItemId
 			WHERE LoadCost.dblRate != 0 
 				AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE LoadCost.intItemId END 
 				AND (LoadCost.strEntityType <> 'Customer' OR LoadCost.strEntityType IS NULL)
+				AND LoadCost.ysnPrice = 1
 
 	END
 	

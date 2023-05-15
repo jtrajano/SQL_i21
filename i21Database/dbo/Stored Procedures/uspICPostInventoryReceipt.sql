@@ -1660,7 +1660,14 @@ BEGIN
 					,t.[intItemLocationId] 
 					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
-					,dblQty = -ri.dblOpenReceive
+					,dblQty = 
+						-ri.dblOpenReceive
+						--CASE 
+						--	WHEN ri.intComputeItemTotalOption = 1 AND t.intItemUOMId = ri.intUnitMeasureId THEN -ri.dblOpenReceive
+						--	WHEN ri.intComputeItemTotalOption = 0 AND t.intItemUOMId = ri.intWeightUOMId THEN -ri.dblNet 
+						--	ELSE 
+						--		-ri.dblOpenReceive
+						--END 
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
