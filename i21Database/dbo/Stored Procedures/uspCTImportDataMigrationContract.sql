@@ -89,6 +89,9 @@ AS
 		,@strCertificationContractNumber nvarchar(50)
 		,@strActiveCertificationContractNumber nvarchar(50)
 		,@intActiveCertificationSeqNo int
+		,@ysnTransactionAndApproval bit
+		--,@dtmTransationDate datetime = getdate()
+		--,@intTransactionId int
 		;
 		
 		DECLARE @intContractImportId INT
@@ -930,6 +933,22 @@ AS
 						insert into tblCTContractDocument (intContractHeaderId,intDocumentId,intConcurrencyId,intContractDocumentRefId)
 						select intContractHeaderId=@intContractHeaderId,intDocumentId=intDocumentId,intConcurrencyId=1,intContractDocumentRefId=null from @RequiredDocumentIds;
 					end
+
+					--exec uspSMInsertTransaction
+					--	@screenNamespace = 'ContractManagement.view.Contract'
+					--	,@strTransactionNo = @strContractNumber
+					--	,@intEntityId  = @intUserId
+					--	,@intKeyValue  = @intContractHeaderId
+					--	,@dtmDate = @dtmTransationDate
+					--	,@output = @intTransactionId OUTPUT
+
+					exec uspSMTransactionInsertApprovalStatus
+						  @screenNamespace = 'ContractManagement.view.Contract'
+						  ,@recordId  = @intContractHeaderId
+						  ,@intEntityId = @intUserId
+						  ,@status = 'No Need for Approval'
+						  ,@remarks = 'Imported Contract'
+						  ,@result = @ysnTransactionAndApproval OUTPUT
 
 					DELETE FROM #tmpContractDetail
 
