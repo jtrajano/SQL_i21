@@ -340,8 +340,8 @@ WHERE strError IS NULL
 -- Add Bonus Depreciation and Section 179 to monthly depreciation on the first month only
 UPDATE A
 SET 
-	A.dblDepre =  ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0),
-	A.dblMonth = ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0)
+	A.dblDepre =  ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / totalMonths) + ISNULL(BD.dblBonusDepreciation, 0),
+	A.dblMonth = ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / totalMonths) + ISNULL(BD.dblBonusDepreciation, 0)
 FROM  @tblAssetInfo A
 JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId AND BD.intBookDepreciationId = A.intBookDepreciationId
 JOIN @Id I ON I.intId = A.intAssetId
