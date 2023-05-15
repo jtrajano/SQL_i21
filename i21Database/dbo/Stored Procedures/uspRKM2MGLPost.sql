@@ -464,6 +464,7 @@ BEGIN TRY
 	
 		UPDATE tblRKM2MPostPreview SET strReversalBatchId = @strReversalBatchId WHERE intM2MHeaderId = @intM2MHeaderId
 
+		SELECT * FROM @tblResult
 	COMMIT TRAN	
 END TRY
 
