@@ -581,7 +581,7 @@ BEGIN
 	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
-		  AND A.ysnConvertedToDebitMemo = 0 --EXCLUDE CONVERTED DEBIT MEMO
+		  -- AND A.ysnConvertedToDebitMemo = 0 --EXCLUDE CONVERTED DEBIT MEMO
 	
 	--DEBIT DUE TO FOR LOCATION
 	UNION ALL 
@@ -2188,16 +2188,16 @@ BEGIN
 	-- CONVERTED DEBIT MEMO
 	===========================
 	*/
-	--CREDIT SIDE
+	--DEBIT SIDE
 	UNION ALL 
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
-		[dblDebit]						=	0,
-		[dblCredit]						=	-voucherDetails.dblTotal,
-		[dblDebitUnit]					= 0,
-		[dblCreditUnit]					=		-ISNULL(voucherDetails.dblTotalUnits,0),
+		[dblDebit]						=	voucherDetails.dblTotal,
+		[dblCredit]						= 0,
+		[dblDebitUnit]					= 0, --ISNULL(voucherDetails.dblTotalUnits,0),
+		[dblCreditUnit]					=	0,
 		[strDescription]				=	NULL,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -2216,23 +2216,23 @@ BEGIN
 		[strTransactionType]			=	'Debit Memo',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	0,
+		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	-voucherDetails.dblForeignTotal,
+		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
 		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
-		[strComments]					=	D.strName + ' - ' + voucherDetails.strComment,
+		[strComments]					=	D.strName,
 		[intConcurrencyId]				=	1,
-		[dblSourceUnitCredit]			=	-ISNULL(voucherDetails.dblTotalUnits,0),
+		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId) voucherDetails
+			CROSS APPLY dbo.fnAPGetDebitMemoItemCostAdjGLEntry(A.intBillId) voucherDetails
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 	OUTER APPLY (

@@ -210,5 +210,5 @@ RETURNS TABLE AS RETURN
 	) shipmentChargeTax
 	WHERE A.intBillId = @billId
 	AND (A.intTransactionType = 1 AND A.ysnFinalVoucher = 1)
-	OR (ISNULL(ysnConvertedToDebitMemo,0) = 1)
+	-- OR (ISNULL(ysnConvertedToDebitMemo,0) = 1)
 )

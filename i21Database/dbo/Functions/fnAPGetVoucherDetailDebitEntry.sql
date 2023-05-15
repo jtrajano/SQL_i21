@@ -8,8 +8,9 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,B.strMiscDescription
 		,CAST(
-			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal 
+			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) AND ISNULL(A.ysnConvertedToDebitMemo,0) = 0 THEN -B.dblTotal 
 						WHEN A.intTransactionType = 16 THEN (B.dblTotal * (B.dblProvisionalPercentage / 100))
+						WHEN A.intTransactionType = 3 AND ISNULL(A.ysnConvertedToDebitMemo,0) = 1 THEN B.dblFinalVoucherTotal
 					ELSE
 						CASE	WHEN B.intCustomerStorageId > 0 THEN  --COST ADJUSTMENT FOR SETTLE STORAGE ITEM
 									CASE WHEN B.dblOldCost IS NOT NULL
@@ -50,8 +51,9 @@ RETURNS TABLE AS RETURN
 					END
 			* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) AS dblTotal
 		,CAST(
-			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal 
+			CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) AND ISNULL(A.ysnConvertedToDebitMemo,0) = 0 THEN -B.dblTotal 
 					WHEN A.intTransactionType = 16 THEN (B.dblTotal * (B.dblProvisionalPercentage / 100)) 
+					WHEN A.intTransactionType = 3 AND ISNULL(A.ysnConvertedToDebitMemo,0) = 1 THEN B.dblFinalVoucherTotal
 					ELSE
 						CASE	WHEN B.intCustomerStorageId > 0 THEN 
 									CASE WHEN B.dblOldCost IS NOT NULL
@@ -91,13 +93,14 @@ RETURNS TABLE AS RETURN
 						END
 			END AS DECIMAL(18,2)) AS dblForeignTotal
 		,(CASE WHEN F.intItemId IS NULL OR B.intInventoryReceiptChargeId > 0 OR F.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN B.dblQtyReceived
-			   ELSE
+			ELSE
 		       --units is only of inventory item
 			   dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
 												  THEN B.intWeightUOMId ELSE B.intUnitOfMeasureId END), 
 													itemUOM.intItemUOMId, CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
 					 
-		END) * (CASE WHEN A.intTransactionType NOT IN (1,14,16) THEN -1 ELSE 1 END)
+		END) * (CASE WHEN A.intTransactionType = 3 AND A.ysnConvertedToDebitMemo = 1 THEN 1
+		WHEN A.intTransactionType NOT IN (1,14,16) THEN -1 ELSE 1 END)
 		* (CASE WHEN A.intTransactionType = 16 THEN A.dblProvisionalPercentage / 100
 						WHEN A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 THEN (100 - A.dblProvisionalPercentage) / 100
 						ELSE 1 END
@@ -191,6 +194,7 @@ RETURNS TABLE AS RETURN
 	AND ISNULL(H.ysnInventoryCost, 0) = 0 --EXCLUDE LS INVENTORIED CHAGES
 	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 	AND A.ysnFinalVoucher = 0 -- EXCLUDE FINAL VOUCHER
+	-- AND ISNULL(A.ysnConvertedToDebitMemo,0) = 0 -- EXCLUDE FINAL VOUCHER
 	
 	UNION ALL
 	--FINAL VOUCHER

@@ -30,6 +30,11 @@ BEGIN TRY
           @weight DECIMAL(18,6) = 0,  
           @averageCost DECIMAL(18,6) = 0,  
           @detailTotal DECIMAL(18,6) = 0,  
+          @finalCost DECIMAL(18,6) = 0,
+          @oldNetWeight DECIMAL(18,6) = 0,
+          @qty DECIMAL(18,6) = 0,
+          @netWt DECIMAL(18,6) = 0,
+          @finalVoucherCost DECIMAL(18,6) = 0,
           @rowCount INT = 0,  
         @intBillDetailId INT = 0,  
           @percentage DECIMAL(18,6) = 0,  
@@ -45,6 +50,11 @@ BEGIN TRY
     dblProvisionalTotal,  
     dblProvisionalCost,  
     dblProvisionalPercentage,  
+    dblOldNetWeight,
+    dblOldCost,
+    dblFinalQtyReceived,
+    dblQtyReceived,
+    dblQtyOrdered,
     dblProvisionalWeight 
   INTO #tmpBillDetail FROM tblAPBillDetail  
   WHERE intBillId = @billId  
@@ -61,6 +71,11 @@ BEGIN TRY
       @cost = CASE WHEN @diffCost <> 0 THEN @diffCost ELSE dblCost END,  
       @weight = CASE WHEN @diffWeight <> 0 THEN @diffWeight ELSE dblNetWeight END,  
       @percentage = dblProvisionalPercentage / 100,  
+      @qty = dblQtyReceived,
+      @finalVoucherCost = dblCost, --Final voucher new cost
+      --We will use old net weight if the net wt from final voucher is also  else the orig wt as final wt 
+      @oldNetWeight = CASE WHEN ISNULL(dblOldNetWeight, 0) <> 0 THEN dblOldNetWeight ELSE dblNetWeight END,
+      @finalCost = dblCost,
       @intBillDetailId = intBillDetailId  
     FROM #tmpBillDetail WHERE RowNum = @rowNum  
   
@@ -99,6 +114,11 @@ BEGIN TRY
       SET dblTotal = @detailTotal  
          ,dblNetWeight = @weight   
          ,dblCost = @averageCost  
+         ,dblOldNetWeight = @oldNetWeight
+         ,dblOldCost = @finalVoucherCost
+         ,dblFinalQtyReceived = @qty
+         ,dblQtyReceived = @weight
+         ,dblQtyOrdered = @weight
       WHERE intBillDetailId = @intBillDetailId  
       SET @rowNum = @rowNum +  1  
   END  
@@ -107,6 +127,11 @@ BEGIN TRY
   SET  A.dblTotal = B.dblTotal  
        ,A.dblNetWeight = B.dblNetWeight  
        ,A.dblCost = B.dblCost  
+       ,A.dblOldNetWeight = B.dblOldNetWeight
+       ,A.dblOldCost = B.dblOldCost
+       ,dblQtyReceived = B.dblQtyReceived
+       ,dblQtyOrdered = B.dblQtyOrdered
+       ,dblFinalQtyReceived = B.dblFinalQtyReceived
        ,A.dblTax = (TX.dblTax * @percentage) - TX.dblAdjustedTax
   FROM tblAPBillDetail A INNER JOIN #tmpBillDetail B  
   ON A.intBillDetailId = B.intBillDetailId AND A.intBillId = @billId  
