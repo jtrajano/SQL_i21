@@ -126,7 +126,7 @@ BEGIN
 				SELECT A.strTransactionId, strTransactionId strText,60018, MIN(A.strModuleName)
 				FROM	@GLEntriesToValidate A JOIN tblGLAccount B
 				ON A.intAccountId = B.intAccountId
-				CROSS APPLY( SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption WHERE ysnRestrictCompanyOOB = 1)CP
+				WHERE EXISTS( SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption WHERE ysnRestrictCompanyOOB = 1)
 				GROUP BY intCompanySegmentId, A.strTransactionId
 				HAVING SUM(dblDebit - dblCredit) <> 0
 
