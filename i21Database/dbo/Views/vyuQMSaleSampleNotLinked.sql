@@ -59,7 +59,8 @@
 		strFreightTerm strFreightTermS,
 		strINCOLocation strINCOLocationS,
 		intContractStatusId intContractStatusIdS,
-		intContractHeaderId intContractHeaderIdS
+		intContractHeaderId intContractHeaderIdS,
+		intContractTypeId intContractTypeIdS
         FROM vyuCTContractDetailView
 		WHERE intContractDetailId = S1.intContractDetailId    
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
@@ -77,5 +78,5 @@
       
     WHERE
 	ISNULL(S1.intRelatedSampleId,0) = 0
-	and charindex('S',S1.strContractNumber)=1	
+	and V1.intContractTypeIdS = 2	
 
