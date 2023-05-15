@@ -33,7 +33,8 @@
 		strFreightTerm strFreightTermP,
 		strINCOLocation strINCOLocationP,
 		intContractStatusId intContractStatusIdP,
-		intContractHeaderId intContractHeaderIdP
+		intContractHeaderId intContractHeaderIdP,
+		intContractTypeId intContractTypeIdP
         FROM vyuCTContractDetailView
 		WHERE intContractDetailId = S1.intContractDetailId    
 		AND intContractStatusId NOT IN( 3, 5, 6 )   
@@ -70,7 +71,8 @@
 			strFreightTerm strFreightTermS,
 			strINCOLocation strINCOLocationS,
 			intContractStatusId intContractStatusIdS,
-			intContractHeaderId intContractHeaderIdS
+			intContractHeaderId intContractHeaderIdS,
+			intContractTypeId intContractTypeIdS
 			FROM vyuCTContractDetailView
 			WHERE intContractDetailId = S2.intContractDetailId  
 			AND intContractStatusId NOT IN( 3, 5, 6 )   
@@ -78,7 +80,7 @@
 		
 		WHERE 
 		S2.intRelatedSampleId = S1.intSampleId
-		 and charindex('S',S2.strContractNumber)=1	
+		 and V2.intContractTypeIdS = 2
 	)V
 
 	OUTER APPLY(
@@ -90,4 +92,4 @@
 		group by intPContractDetailId
 	)A
    
-  where  charindex('P', S1.strContractNumber) =1
+  where V1.intContractTypeIdP = 1
