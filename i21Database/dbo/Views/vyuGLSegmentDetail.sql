@@ -17,6 +17,7 @@ SELECT
 	U.strStructureName  COLLATE Latin1_General_CI_AS strStructureName,
 	ISNULL(Mapping.c,0)  ysnUsed,
 	S.dtmObsoleteDate,
+	S.intPrimaryOrderId,
 	S.intConcurrencyId
 FROM            
 	dbo.tblGLAccountSegment AS S LEFT OUTER JOIN
@@ -27,5 +28,3 @@ FROM
 		SELECT  TOP 1 CONVERT(BIT,1)    c FROM tblGLAccountSegmentMapping M WHERE M.intAccountSegmentId = S.intAccountSegmentId
 	)Mapping
 GO
-
-
