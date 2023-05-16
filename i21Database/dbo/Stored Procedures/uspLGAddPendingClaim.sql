@@ -260,9 +260,10 @@ BEGIN
 													THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100)
 												ELSE 0.0 END
 							,dblWeightLoss = RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END
-							,dblClaimableWt = CASE WHEN (ABS((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)) > (LD.dblNet * WG.dblFranchise / 100))
-												THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)
-												ELSE 0.0 END
+							,dblClaimableWt = RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END +
+												CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
+													THEN (LD.dblNet * WG.dblFranchise / 100) ELSE 0.0
+												END
 							,dblSeqPrice = AD.dblSeqPrice
 							,strSeqCurrency = AD.strSeqCurrency
 							,strSeqPriceUOM = AD.strSeqPriceUOM
