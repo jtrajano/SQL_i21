@@ -29,9 +29,12 @@ AS
 				account.intUnnaturalAccountId,
 				unnaturalAccount.strAccountId COLLATE Latin1_General_CI_AS strUnnaturalAccountId,
 				account.intLocationSegmentId,
+				account.intLOBSegmentId,
 				locationSegment.strCode COLLATE Latin1_General_CI_AS strLocationSegmentId,
 				lobSegment.strCode COLLATE Latin1_General_CI_AS strLOBSegmentId,
-				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId
+				companySegment.strCode COLLATE Latin1_General_CI_AS strCompanySegmentId,
+				account.intOrderId,
+				sg.intPrimaryOrderId
 FROM            dbo.tblGLAccount account 
 				CROSS APPLY (
 					SELECT 
@@ -39,7 +42,8 @@ FROM            dbo.tblGLAccount account
 					cat.intAccountCategoryId, 
 					cat.strAccountCategory, 
 					cat.ysnGLRestricted, 
-					cat.ysnAPRestricted
+					cat.ysnAPRestricted,
+					segment.intPrimaryOrderId
 					FROM dbo.tblGLAccountSegmentMapping mapping 
 					LEFT JOIN dbo.tblGLAccountSegment segment ON segment.intAccountSegmentId = mapping.intAccountSegmentId
 					LEFT JOIN dbo.tblGLAccountCategory cat ON segment.intAccountCategoryId = cat.intAccountCategoryId
