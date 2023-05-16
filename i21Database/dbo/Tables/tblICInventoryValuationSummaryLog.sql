@@ -13,3 +13,7 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummaryLog]
 	ON [dbo].[tblICInventoryValuationSummaryLog]([strPeriod] ASC)
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummaryLog_Rebuilding]
+	ON [dbo].[tblICInventoryValuationSummaryLog]([ysnRebuilding] ASC)
+GO
