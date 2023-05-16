@@ -18,6 +18,7 @@
     [intCurrencyExchangeRateTypeId] INT NULL, 
 	[strOldAccountId]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intUnnaturalAccountId] INT NULL,
+    [intOrderId] INT NULL,
     CONSTRAINT [PK_GLAccount_AccountId] PRIMARY KEY CLUSTERED ([intAccountId] ASC),
     CONSTRAINT [FK_tblGLAccount_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_tblGLAccount_tblGLAccountUnit] FOREIGN KEY ([intAccountUnitId]) REFERENCES [dbo].[tblGLAccountUnit] ([intAccountUnitId]),
@@ -33,6 +34,26 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_tblGLAccount_strAccountId] ON [dbo].[tblGLA
 	[strAccountId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 70) ON [PRIMARY]
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLAccount_intOrderId] ON [dbo].[tblGLAccount]
+(
+	[intOrderId] ASC
+)
+INCLUDE([strAccountId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, 
+IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLAccount_SegmentIds] ON [dbo].[tblGLAccount]
+(
+	[intLocationSegmentId] ASC,
+	[intLOBSegmentId] ASC,
+	[intCompanySegmentId] ASC
+)
+INCLUDE([strAccountId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+
+
+
 
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccount', @level2type=N'COLUMN',@level2name=N'intAccountId'
 GO

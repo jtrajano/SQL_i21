@@ -65,7 +65,11 @@ AS
         CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
         RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS strCurrencyExchangeRateType,
         ISNULL(LocationSegment.strChartDesc, '') COLLATE Latin1_General_CI_AS strLocationSegmentDescription,
-        ISNULL(LOBSegment.strChartDesc, '')  COLLATE Latin1_General_CI_AS strLOBSegmentDescription
+        ISNULL(LOBSegment.strChartDesc, '')  COLLATE Latin1_General_CI_AS strLOBSegmentDescription,
+        A.intCurrencyId,
+        B.intLocationSegmentId,
+        B.intLOBSegmentId,
+        A.strSourceAccount
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -85,18 +89,6 @@ AS
 	 OUTER APPLY (
 		SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
 	 )SE
-     OUTER APPLY (
-        SELECT TOP 1 AccSeg.strChartDesc FROM tblGLAccountSegment AccSeg 
-        JOIN tblGLAccountSegmentMapping AccSegMap ON AccSegMap.intAccountSegmentId = AccSeg.intAccountSegmentId
-        JOIN tblGLAccountStructure AccStruct ON AccStruct.intAccountStructureId = AccSeg.intAccountStructureId
-        WHERE AccSegMap.intAccountId = A.intAccountId
-            AND AccStruct.intStructureType = 3
-     ) LocationSegment
-     OUTER APPLY (
-        SELECT TOP 1 AccSeg.strChartDesc FROM tblGLAccountSegment AccSeg 
-        JOIN tblGLAccountSegmentMapping AccSegMap ON AccSegMap.intAccountSegmentId = AccSeg.intAccountSegmentId
-        JOIN tblGLAccountStructure AccStruct ON AccStruct.intAccountStructureId = AccSeg.intAccountStructureId
-        WHERE AccSegMap.intAccountId = A.intAccountId
-            AND AccStruct.intStructureType = 5
-     ) LOBSegment
+     OUTER APPLY (SELECT TOP 1 strCode,strChartDesc FROM tblGLAccountSegment WHERE intAccountSegmentId = B.intLocationSegmentId) LocationSegment
+     OUTER APPLY (SELECT TOP 1 strCode,strChartDesc FROM tblGLAccountSegment WHERE intAccountSegmentId = B.intLOBSegmentId) LOBSegment
 GO
