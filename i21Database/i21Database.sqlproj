@@ -1292,6 +1292,7 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\15_ReadingSourceType.sql" />
     <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
