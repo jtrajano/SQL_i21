@@ -45,6 +45,129 @@ DECLARE @strTransactionForm NVARCHAR(255)
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
+DECLARE @Items TABLE (
+	intItemId INT NULL 
+	,intItemLocationId INT NULL 
+	,intInTransitSourceLocationId INT NULL 
+	,intTransactionTypeId INT NULL 
+)
+
+INSERT INTO @Items (
+	intItemId 
+	,intItemLocationId 
+	,intInTransitSourceLocationId
+	,intTransactionTypeId 
+)
+SELECT
+	DISTINCT 
+	t.intItemId
+	,t.intItemLocationId
+	,t.intInTransitSourceLocationId 
+	,t.intTransactionTypeId 
+FROM	
+	tblICInventoryTransaction t INNER JOIN tblICItem i
+		ON t.intItemId = i.intItemId
+	INNER JOIN #tmpRebuildList list	
+		ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+		AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+WHERE	
+	t.strBatchId = @strBatchId
+	AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+
+-- Get the GL Account ids to use
+DECLARE @GLAccounts AS dbo.ItemGLAccount; 
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intInventoryId 
+	,intContraInventoryId 
+	,intAutoNegativeId 
+	,intTransactionTypeId
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Adjustment) 
+		,intTransactionTypeId
+FROM	
+	(
+		SELECT DISTINCT intItemId, intItemLocationId, intTransactionTypeId
+		FROM @Items
+	) Query
+
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intInventoryId 
+	,intContraInventoryId 
+	,intAutoNegativeId 
+	,intTransactionTypeId
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Adjustment) 
+		,intTransactionTypeId
+FROM	
+	(
+		SELECT DISTINCT 
+			i.intItemId
+			, intItemLocationId = i.intInTransitSourceLocationId
+			, i.intTransactionTypeId
+		FROM 
+			@Items i
+			OUTER APPLY (
+				SELECT TOP 1 
+					g.intItemId
+				FROM @GLAccounts g
+				WHERE
+					g.intItemId = i.intItemId
+					AND g.intItemLocationId = i.intInTransitSourceLocationId
+					AND g.intTransactionTypeId = i.intTransactionTypeId
+			) g
+		WHERE 
+			i.intInTransitSourceLocationId IS NOT NULL 
+			AND g.intItemId IS NULL 
+	) Query
+
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intInventoryId 
+	,intContraInventoryId 
+	,intAutoNegativeId 
+	,intTransactionTypeId
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Adjustment) 
+		,intTransactionTypeId
+FROM	
+	(
+		SELECT DISTINCT 
+			i.intItemId
+			, i.intItemLocationId
+			, intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+		FROM 
+			@Items i
+			OUTER APPLY (
+				SELECT TOP 1 
+					g.intItemId
+				FROM @GLAccounts g
+				WHERE
+					g.intItemId = i.intItemId
+					AND g.intItemLocationId = i.intItemLocationId
+					AND g.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			) g
+		WHERE 
+			g.intItemId IS NULL 
+	) Query
+
+/*
 -- Get the GL Account ids to use
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
 INSERT INTO @GLAccounts (
@@ -78,7 +201,6 @@ FROM	(
 							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				WHERE	t.strBatchId = @strBatchId
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-						--AND i.strType <> 'Non-Inventory'
 				UNION ALL 
 				SELECT	DISTINCT 
 						t.intItemId
@@ -92,7 +214,6 @@ FROM	(
 				WHERE	t.strBatchId = @strBatchId
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intInTransitSourceLocationId IS NOT NULL
-						--AND i.strType <> 'Non-Inventory'
 				UNION ALL 
 				SELECT	DISTINCT 
 						t.intItemId
@@ -107,9 +228,10 @@ FROM	(
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemLocationId IS NOT NULL
 						AND t.intInTransitSourceLocationId IS NULL
-						--AND i.strType <> 'Non-Inventory'
 			) InnerQuery
 		) Query
+
+*/
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -185,13 +307,19 @@ BEGIN
 	SET @intItemId = NULL
 
 	SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
-			AND EXISTS (
-				SELECT	TOP 1 1 
+			@intItemId = e.intItemId 
+			,@strItemNo = e.strItemNo
+			,@strLocationName = c.strLocationName
+	FROM	@GLAccounts ItemGLAccount
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = ItemGLAccount.intItemId
+				AND il.intItemLocationId = ItemGLAccount.intItemLocationId 						
+			INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			OUTER APPLY (			
+				SELECT	TOP 1 
+						i.intItemId
+						,i.strItemNo 
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 							ON t.intTransactionTypeId = TransType.intTransactionTypeId
 						INNER JOIN tblICItem i 
@@ -199,22 +327,14 @@ BEGIN
 						INNER JOIN #tmpRebuildList list	
 							ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-				WHERE	t.strBatchId = @strBatchId
+				WHERE	t.strBatchId = @strBatchId						
+						AND t.intItemId = ItemGLAccount.intItemId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoVariance, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
-						AND t.intItemId = Item.intItemId
-						AND t.dblQty * t.dblCost + t.dblValue <> 0
-			)
+						AND t.dblQty * t.dblCost + t.dblValue <> 0						
+			) e
+	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+			AND e.intItemId IS NOT NULL  
 
-	SELECT	TOP 1 
-			@strLocationName = c.strLocationName
-	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @GLAccounts ItemGLAccount
-				ON ItemGLAccount.intItemId = il.intItemId
-				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-	WHERE	il.intItemId = @intItemId
-			AND ItemGLAccount.intAutoNegativeId IS NULL 			
-	
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
@@ -250,20 +370,9 @@ FROM	@GLAccounts
 -- Get the default transaction form name
 SELECT TOP 1 
 		@strTransactionForm = TransType.strTransactionForm
-FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
-			ON t.intTransactionTypeId = TransType.intTransactionTypeId
-		INNER JOIN tblICItem i
-			ON i.intItemId = t.intItemId 
-		INNER JOIN #tmpRebuildList list	
-			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
-			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-		INNER JOIN @GLAccounts GLAccounts
-			ON t.intItemId = GLAccounts.intItemId
-			AND t.intItemLocationId = GLAccounts.intItemLocationId
-			AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-WHERE	t.strBatchId = @strBatchId
+FROM	
+		@GLAccounts GLAccounts INNER JOIN dbo.tblICInventoryTransactionType TransType
+			ON GLAccounts.intTransactionTypeId = TransType.intTransactionTypeId
 ;
 
 -- Get the functional currency

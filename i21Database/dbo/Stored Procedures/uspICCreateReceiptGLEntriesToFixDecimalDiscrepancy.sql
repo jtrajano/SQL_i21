@@ -77,10 +77,13 @@ BEGIN
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 		WHERE
-			t.strTransactionId = @strReceiptNumber
-			AND t.strBatchId = @strBatchId			
-			AND t.intInTransitSourceLocationId IS NULL 
+			t.strBatchId = @strBatchId			
+			AND t.strTransactionId = @strReceiptNumber
+			--AND t.intInTransitSourceLocationId IS NULL 
 	) query
 END 
 
@@ -90,16 +93,35 @@ DECLARE @threshold NUMERIC(38, 20) = 0.05
 -- Fix the discrepancy for the In-Transit
 BEGIN
 
-	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy') IS NOT NULL  
-	BEGIN 
-		DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy
-	END 
+	--IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy') IS NOT NULL  
+	--BEGIN 
+	--	DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy
+	--END 
 
-	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy') IS NULL  
-	BEGIN 
-		CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy (
-			intId INT IDENTITY(1, 1) 
-			,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy') IS NULL  
+	--BEGIN 
+	--	CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy (
+	--		intId INT IDENTITY(1, 1) 
+	--		,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,intInventoryReceiptId INT NULL
+	--		,intInventoryReceiptItemId INT NULL
+	--		,strReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,intSourceType INT NULL 
+	--		,intFreightTermId INT NULL 
+	--		,strFobPoint NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,dblDebit NUMERIC(18, 6) NULL 
+	--		,dblCredit NUMERIC(18, 6) NULL 
+	--		,dblDebitForeign NUMERIC(18, 6) NULL 
+	--		,dblCreditForeign NUMERIC(18, 6) NULL 
+	--		,dblForexRate NUMERIC(18, 6) NULL 
+	--		,intItemId INT 
+	--	)
+	--END 
+
+	DECLARE @uspICReceiptGLEntriesForDecimalDiscrepancy TABLE (
+			--intId INT IDENTITY(1, 1) 
+			strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 			,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 			,intInventoryReceiptId INT NULL
 			,intInventoryReceiptItemId INT NULL
@@ -112,13 +134,12 @@ BEGIN
 			,dblDebitForeign NUMERIC(18, 6) NULL 
 			,dblCreditForeign NUMERIC(18, 6) NULL 
 			,dblForexRate NUMERIC(18, 6) NULL 
-			,intItemId INT 
-		)
-	END 
+			,intItemId INT 	
+	)
 	
 	-- Get the discrepancy per receipt line item
 	BEGIN 
-		INSERT INTO #uspICReceiptGLEntriesForDecimalDiscrepancy (
+		INSERT INTO @uspICReceiptGLEntriesForDecimalDiscrepancy (
 			strReceiptNumber 
 			,strBatchId 
 			,intInventoryReceiptId
@@ -185,7 +206,7 @@ BEGIN
 			,t.dblForexRate
 	END 
 
-	IF EXISTS (SELECT TOP 1 1 FROM #uspICReceiptGLEntriesForDecimalDiscrepancy) 
+	IF EXISTS (SELECT TOP 1 1 FROM @uspICReceiptGLEntriesForDecimalDiscrepancy) 
 	BEGIN 
 		-------------------------------------------------------------------------------------
 		---- 1. Add GL entry to correct discrepancy in the foreign currency during In-Transit
@@ -279,9 +300,12 @@ BEGIN
 			,[intSourceEntityId] = t.intSourceEntityId
 			,[intCommodityId] = i.intCommodityId
 		FROM 
-			#uspICReceiptGLEntriesForDecimalDiscrepancy d
+			@uspICReceiptGLEntriesForDecimalDiscrepancy d
 			INNER JOIN tblICItem i 
 				ON d.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			CROSS APPLY (
 				SELECT TOP 1 
 					ga.* 
@@ -301,14 +325,12 @@ BEGIN
 						AND gd.intAccountId = glAccnt.intInTransitAccountId
 						AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
 				WHERE
-					t.strTransactionId = d.strReceiptNumber
-					AND t.strBatchId = d.strBatchId
-					AND t.intTransactionId = d.intInventoryReceiptId
-					AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+					t.strBatchId = d.strBatchId
 					AND t.intItemId = d.intItemId
-					--AND t.intCurrencyId <> @intFunctionalCurrencyId
+					AND t.strTransactionId = d.strReceiptNumber					
+					AND t.intTransactionId = d.intInventoryReceiptId
+					AND t.intTransactionDetailId = d.intInventoryReceiptItemId					
 					AND t.intCurrencyId IS NOT NULL 
-
 			) t
 			CROSS APPLY dbo.fnGetDebit(
 				ISNULL(dblDebitForeign, 0) - ISNULL(dblCreditForeign, 0)
@@ -418,9 +440,12 @@ BEGIN
 			,[intSourceEntityId] = t.intSourceEntityId
 			,[intCommodityId] = i.intCommodityId
 		FROM 
-			#uspICReceiptGLEntriesForDecimalDiscrepancy d
+			@uspICReceiptGLEntriesForDecimalDiscrepancy d
 			INNER JOIN tblICItem i 
 				ON d.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			CROSS APPLY (
 				SELECT TOP 1 
 					ga.* 
@@ -440,11 +465,11 @@ BEGIN
 						AND gd.intAccountId = glAccnt.intInTransitAccountId
 						AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
 				WHERE
-					t.strTransactionId = d.strReceiptNumber
-					AND t.strBatchId = d.strBatchId
-					AND t.intTransactionId = d.intInventoryReceiptId
-					AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+					t.strBatchId = d.strBatchId
 					AND t.intItemId = d.intItemId
+					AND t.strTransactionId = d.strReceiptNumber					
+					AND t.intTransactionId = d.intInventoryReceiptId
+					AND t.intTransactionDetailId = d.intInventoryReceiptItemId					
 			) t
 			CROSS APPLY dbo.fnGetDebit(
 				ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0)
@@ -467,35 +492,54 @@ END
 -- Fix the discrepancy for the AP Clearing
 BEGIN
 
-	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing') IS NOT NULL  
-	BEGIN 
-		DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing
-	END 
+	--IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing') IS NOT NULL  
+	--BEGIN 
+	--	DROP TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing
+	--END 
 
-	IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing') IS NULL  
-	BEGIN 
-		CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (
-			intId INT IDENTITY(1, 1) 
-			,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-			,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-			,intInventoryReceiptId INT NULL
-			,intInventoryReceiptItemId INT NULL
-			,strReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-			,intSourceType INT NULL 
-			,intFreightTermId INT NULL 
-			,strFobPoint NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-			,dblGLAPClearing NUMERIC(18, 6) NULL 
-			,dblGLAPClearingForeign NUMERIC(18, 6) NULL 
-			,dblAPClearing NUMERIC(18, 6) NULL 
-			,dblAPClearingForeign NUMERIC(18, 6) NULL 
-			,dblForexRate NUMERIC(18, 6) NULL 
-			,intItemId INT 
-		)
-	END 
+	--IF OBJECT_ID('tempdb..#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing') IS NULL  
+	--BEGIN 
+	--	CREATE TABLE #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (
+	--		intId INT IDENTITY(1, 1) 
+	--		,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,intInventoryReceiptId INT NULL
+	--		,intInventoryReceiptItemId INT NULL
+	--		,strReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,intSourceType INT NULL 
+	--		,intFreightTermId INT NULL 
+	--		,strFobPoint NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	--		,dblGLAPClearing NUMERIC(18, 6) NULL 
+	--		,dblGLAPClearingForeign NUMERIC(18, 6) NULL 
+	--		,dblAPClearing NUMERIC(18, 6) NULL 
+	--		,dblAPClearingForeign NUMERIC(18, 6) NULL 
+	--		,dblForexRate NUMERIC(18, 6) NULL 
+	--		,intItemId INT 
+	--	)
+
+	--	CREATE NONCLUSTERED INDEX [IX_ICReceiptGLEntriesForDecimalDiscrepancy_APClearing] ON #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (intInventoryReceiptItemId ASC)
+	--END 
+
+	DECLARE @uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing TABLE (
+		strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intInventoryReceiptId INT NULL
+		,intInventoryReceiptItemId INT NULL
+		,strReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intSourceType INT NULL 
+		,intFreightTermId INT NULL 
+		,strFobPoint NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,dblGLAPClearing NUMERIC(18, 6) NULL 
+		,dblGLAPClearingForeign NUMERIC(18, 6) NULL 
+		,dblAPClearing NUMERIC(18, 6) NULL 
+		,dblAPClearingForeign NUMERIC(18, 6) NULL 
+		,dblForexRate NUMERIC(18, 6) NULL 
+		,intItemId INT 	
+	)
 
 	-- Get the discrepancy per receipt line item
 	BEGIN 
-		INSERT INTO #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (
+		INSERT INTO @uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing (
 			strReceiptNumber 
 			,strBatchId 
 			,intInventoryReceiptId
@@ -508,20 +552,32 @@ BEGIN
 			,dblForexRate 
 			,dblGLAPClearing 
 			,dblGLAPClearingForeign 
+			,dblAPClearing 
+			,dblAPClearingForeign 
 		)
 		SELECT 
-			t.strTransactionId
-			,t.strBatchId 
-			,t.intTransactionId
-			,t.intTransactionDetailId
+			r.strReceiptNumber
+			,@strBatchId 
+			,r.intInventoryReceiptId
+			,ri.intInventoryReceiptItemId
 			,r.strReceiptType 
 			,r.intSourceType 
 			,r.intFreightTermId 
 			,ft.strFobPoint 		
-			,t.intItemId
-			,dblForexRate = t.dblForexRate
-			,dblGLAPClearing = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
-			,dblGLAPClearingForeign = SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)) 
+			,i.intItemId
+			,dblForexRate = ri.dblForexRate
+			,dblGLAPClearing = gd.dblGLAPClearing  --SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
+			,dblGLAPClearingForeign = gd.dblGLAPClearingForeign --SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)) 
+			,dblAPClearing = 
+				CASE 
+					WHEN r.intCurrencyId <> @intFunctionalCurrencyId THEN ROUND(dbo.fnMultiply(ri.dblLineTotal, ri.dblForexRate), 2) 
+					ELSE ri.dblLineTotal
+				END
+			,dblAPClearingForeign = 
+				CASE 
+					WHEN r.intCurrencyId = @intFunctionalCurrencyId THEN ri.dblLineTotal
+					ELSE NULL 
+				END
 		FROM 
 			tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
@@ -530,64 +586,77 @@ BEGIN
 			INNER JOIN #tmpRebuildList list	
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-			INNER JOIN tblICInventoryTransaction t 
-				ON t.strTransactionId = r.strReceiptNumber
-				AND t.intTransactionId = r.intInventoryReceiptId
-				AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
-			INNER JOIN @GLEntries gd
-				ON gd.strTransactionId = t.strTransactionId
-				AND gd.strBatchId = t.strBatchId
-				AND gd.intJournalLineNo = t.intInventoryTransactionId
-			INNER JOIN @icGLAccounts ga 
-				ON ga.intItemId = ri.intItemId
-				AND ga.intAPClearingAccountId = gd.intAccountId
+			CROSS APPLY (
+				SELECT 
+					dblGLAPClearing = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
+					,dblGLAPClearingForeign = SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)) 
+				FROM 
+					tblICInventoryTransaction t 
+					INNER JOIN @GLEntries gd
+						ON gd.strTransactionId = t.strTransactionId
+						AND gd.strBatchId = t.strBatchId
+						AND gd.intJournalLineNo = t.intInventoryTransactionId
+					INNER JOIN @icGLAccounts ga 
+						ON ga.intItemId = ri.intItemId
+						AND ga.intAPClearingAccountId = gd.intAccountId
+				WHERE
+					t.strBatchId = @strBatchId
+					AND t.strTransactionId = r.strReceiptNumber
+					AND t.intItemId = i.intItemId 
+					AND t.intTransactionId = r.intInventoryReceiptId
+					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+			) gd
 			LEFT JOIN tblSMFreightTerms ft
 				ON r.intFreightTermId = ft.intFreightTermId
 		WHERE
-			t.strTransactionId = @strReceiptNumber
-			AND t.strBatchId = @strBatchId
-			AND t.ysnIsUnposted = 0 
-		GROUP BY
-			t.strTransactionId
-			,t.strBatchId 
-			,t.intTransactionId
-			,t.intTransactionDetailId
-			,r.strReceiptType 
-			,r.intSourceType 
-			,r.intFreightTermId 
-			,ft.strFobPoint 		
-			,t.intItemId
-			,t.dblForexRate
+			r.strReceiptNumber = @strReceiptNumber
+		--GROUP BY
+		--	t.strTransactionId
+		--	,t.strBatchId 
+		--	,t.intTransactionId
+		--	,t.intTransactionDetailId
+		--	,r.strReceiptType 
+		--	,r.intSourceType 
+		--	,r.intFreightTermId 
+		--	,ft.strFobPoint 		
+		--	,t.intItemId
+		--	,t.dblForexRate
+		--	,r.intCurrencyId
 
-		-- Recompute the expected AP Clearing amount. 
-		UPDATE ap
-		SET
-			dblAPClearing = ROUND(dbo.fnMultiply(ri.dblLineTotal, ap.dblForexRate), 2) 
-			,dblAPClearingForeign = ri.dblLineTotal
-		FROM 
-			#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing ap INNER JOIN tblICInventoryReceiptItem ri
-				ON ap.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 
-			INNER JOIN tblICInventoryReceipt r 
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-		WHERE
-			r.intCurrencyId <> @intFunctionalCurrencyId
+		---- Recompute the expected AP Clearing amount. 
+		--UPDATE ap
+		--SET
+		--	dblAPClearing = ROUND(dbo.fnMultiply(ri.dblLineTotal, ap.dblForexRate), 2) 
+		--	,dblAPClearingForeign = ri.dblLineTotal
+		--FROM
+		--	(
+		--		tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceipt r		
+		--			ON 
+		--			r.strReceiptNumber = @strReceiptNumber
+		--			AND ri.intInventoryReceiptId = r.intInventoryReceiptId					
+		--			AND r.intCurrencyId <> @intFunctionalCurrencyId
+		--	)
+		--	INNER JOIN @uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing ap 
+		--		ON ap.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 			
 
-		-- Recompute the expected AP Clearing amount. 
-		UPDATE ap
-		SET
-			dblAPClearing = ri.dblLineTotal
-			,dblAPClearingForeign = NULL 
-		FROM 
-			#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing ap INNER JOIN tblICInventoryReceiptItem ri
-				ON ap.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 
-			INNER JOIN tblICInventoryReceipt r 
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-		WHERE
-			r.intCurrencyId = @intFunctionalCurrencyId			
+		---- Recompute the expected AP Clearing amount. 
+		--UPDATE ap
+		--SET
+		--	dblAPClearing = ri.dblLineTotal
+		--	,dblAPClearingForeign = NULL 
+		--FROM (
+		--	tblICInventoryReceiptItem ri INNER JOIN tblICInventoryReceipt r 
+		--		ON r.strReceiptNumber = @strReceiptNumber
+		--		AND r.intCurrencyId = @intFunctionalCurrencyId			
+		--		AND ri.intInventoryReceiptId = r.intInventoryReceiptId				
+		--	)
+		--	INNER JOIN @uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing ap 
+		--		ON ap.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 
+			
 	END 
 
 
-	IF EXISTS (SELECT TOP 1 1 FROM #uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing)
+	IF EXISTS (SELECT TOP 1 1 FROM @uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing)
 	BEGIN 
 		----------------------------------------------------------------------------------------
 		-- 3. Add GL entry to correct discrepancy in the foreign currency during AP Clearing
@@ -684,9 +753,12 @@ BEGIN
 				,glAccnt.intAPClearingAccountId
 				,glAccnt.intInventoryAdjustmentAccountId
 			FROM 
-				#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing d
+				@uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing d
 				INNER JOIN tblICItem i 
 					ON d.intItemId = i.intItemId
+				INNER JOIN #tmpRebuildList list	
+					ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				CROSS APPLY (
 					SELECT TOP 1 
 						ga.* 
@@ -706,12 +778,11 @@ BEGIN
 							AND gd.intAccountId = glAccnt.intAPClearingAccountId
 							AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
 					WHERE
-						t.strTransactionId = d.strReceiptNumber
-						AND t.strBatchId = d.strBatchId
-						AND t.intTransactionId = d.intInventoryReceiptId
-						AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+						t.strBatchId = d.strBatchId
 						AND t.intItemId = d.intItemId
-						--AND t.intCurrencyId <> @intFunctionalCurrencyId
+						AND t.strTransactionId = d.strReceiptNumber						
+						AND t.intTransactionId = d.intInventoryReceiptId
+						AND t.intTransactionDetailId = d.intInventoryReceiptItemId						
 				) t
 				CROSS APPLY dbo.fnGetDebit(
 					ISNULL(dblGLAPClearingForeign, 0) - ISNULL(d.dblAPClearingForeign , 0)
@@ -964,9 +1035,12 @@ BEGIN
 				,glAccnt.intAPClearingAccountId
 				,glAccnt.intInventoryAdjustmentAccountId
 			FROM 
-				#uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing d
+				@uspICReceiptGLEntriesForDecimalDiscrepancy_APClearing d
 				INNER JOIN tblICItem i 
 					ON d.intItemId = i.intItemId
+				INNER JOIN #tmpRebuildList list	
+					ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				CROSS APPLY (
 					SELECT TOP 1 
 						ga.* 
@@ -985,13 +1059,12 @@ BEGIN
 							AND gd.intJournalLineNo = t.intInventoryTransactionId
 							AND gd.intAccountId = glAccnt.intAPClearingAccountId
 							AND (gd.strJournalLineDescription = '' OR gd.strJournalLineDescription IS NULL)
-					WHERE
-						t.strTransactionId = d.strReceiptNumber
-						AND t.strBatchId = d.strBatchId
-						AND t.intTransactionId = d.intInventoryReceiptId
-						AND t.intTransactionDetailId = d.intInventoryReceiptItemId
+					WHERE						
+						t.strBatchId = d.strBatchId
 						AND t.intItemId = d.intItemId
-						--AND t.intCurrencyId = @intFunctionalCurrencyId
+						AND t.strTransactionId = d.strReceiptNumber
+						AND t.intTransactionId = d.intInventoryReceiptId
+						AND t.intTransactionDetailId = d.intInventoryReceiptItemId						
 				) t
 				CROSS APPLY dbo.fnGetDebit(
 					ISNULL(dblGLAPClearing, 0) - ISNULL(d.dblAPClearing, 0)

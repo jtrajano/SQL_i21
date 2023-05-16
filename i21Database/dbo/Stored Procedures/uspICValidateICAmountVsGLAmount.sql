@@ -14,6 +14,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
 
+IF EXISTS (SELECT TOP 1 1 FROM tblICCompanyPreference WHERE ysnSkipICGLValidation = 1)
+BEGIN 
+	RETURN; 
+END 
+
 -- Create the temp table for the specific items/categories to rebuild
 IF OBJECT_ID('tempdb..#uspICValidateICAmountVsGLAmount_result') IS NOT NULL  
 BEGIN 
@@ -24,7 +29,7 @@ IF OBJECT_ID('tempdb..#uspICValidateICAmountVsGLAmount_result') IS NULL
 BEGIN 
 	CREATE TABLE #uspICValidateICAmountVsGLAmount_result (
 		intId INT IDENTITY(1, 1) 
-		,strTransactionType NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		,strTransactionType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,dblICAmount NUMERIC(18, 6) NULL 
@@ -32,10 +37,10 @@ BEGIN
 		,intAccountId INT NULL 
 		,strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 		,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		--,CONSTRAINT [PK_ValidateICAmountVsGLAmount_result] PRIMARY KEY NONCLUSTERED ([intId]) 
 	)
 
-	--CREATE NONCLUSTERED INDEX [IX_ValidateICAmountVsGLAmount_result]
-	--	ON [dbo].[#uspICValidateICAmountVsGLAmount_result](strTransactionType asc, strTransactionId asc, strBatchId asc, intAccountId asc)
+	--EXEC ('CREATE CLUSTERED INDEX [IX_ValidateICAmountVsGLAmount_result] ON [#uspICValidateICAmountVsGLAmount_result] (strTransactionId ASC, strBatchId ASC, strTransactionType ASC, intAccountId ASC)')
 END 
 
 DECLARE @difference AS NUMERIC(18, 6) 
@@ -100,36 +105,42 @@ BEGIN
 	-- Check the 'Inventory' Account
 	SELECT TOP 1 
 		@strItemNo = items.strItemNo 
-		,@strAccountCategory = ac.strAccountCategory
+		,@strAccountCategory = sg.strAccountCategory
 	FROM (
 			SELECT DISTINCT 
 				i.strItemNo
 				,i.intItemId 
 				,t.intItemLocationId 
 			FROM 
-				tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-					ON t.intTransactionTypeId = ty.intTransactionTypeId			
-				INNER JOIN tblICItem i
-					ON i.intItemId = t.intItemId 
+				tblICInventoryTransaction t 
 				INNER JOIN @glTransactions gl
 					ON t.strTransactionId = gl.strTransactionId 
 					AND t.strBatchId = gl.strBatchId
+				INNER JOIN tblICInventoryTransactionType ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId			
+				INNER JOIN tblICItem i
+					ON i.intItemId = t.intItemId 				
 			WHERE
 				t.intInTransitSourceLocationId IS NULL 
 		) items
 		CROSS APPLY dbo.fnGetItemGLAccountAsTable(items.intItemId, items.intItemLocationId, 'Inventory') itemAccount
 		INNER JOIN tblGLAccount ga ON ga.intAccountId = itemAccount.intAccountId 
-		INNER JOIN tblGLAccountSegmentMapping gs
-			ON gs.intAccountId = ga.intAccountId
-		INNER JOIN tblGLAccountSegment gm
-			ON gm.intAccountSegmentId = gs.intAccountSegmentId
-		INNER JOIN tblGLAccountCategory ac 
-			ON ac.intAccountCategoryId = gm.intAccountCategoryId 	
-		INNER JOIN tblGLAccountStructure gst
-			ON gm.intAccountStructureId = gst.intAccountStructureId
+		CROSS APPLY (
+			SELECT 
+				cat.strAccountCategory
+			FROM 
+				dbo.tblGLAccountSegmentMapping mapping INNER JOIN dbo.tblGLAccountSegment segment 
+					ON segment.intAccountSegmentId = mapping.intAccountSegmentId
+				INNER JOIN dbo.tblGLAccountCategory cat 
+					ON segment.intAccountCategoryId = cat.intAccountCategoryId
+				INNER JOIN dbo.tblGLAccountStructure struc 
+					ON segment.intAccountStructureId = struc.intAccountStructureId 
+					AND struc.strType = 'Primary'
+			WHERE 
+				intAccountId = ga.intAccountId
+		) sg
 	WHERE
-		gst.strType = 'Primary'		
-		AND ac.strAccountCategory NOT IN ('Inventory')
+		sg.strAccountCategory NOT IN ('Inventory')
 
 	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
@@ -195,22 +206,25 @@ BEGIN
 				SUM (
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
+			,[intAccountId] = ga.intAccountId --dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+			tblICInventoryTransaction t 
+			INNER JOIN @glTransactions gl
+				ON t.strTransactionId = gl.strTransactionId 
+				AND t.strBatchId = gl.strBatchId			
+			INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
-			INNER JOIN @glTransactions gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
+			INNER JOIN tblGLAccount ga
+				ON ga.strAccountId = t.strAccountIdInventory
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
-		GROUP BY 
-			ty.strName 
-			,t.strTransactionId
+		GROUP BY 			
+			t.strTransactionId
 			,t.strBatchId
-			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
+			,ty.strName 
+			,ga.intAccountId  -- dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 
 		---- Get the Consume Inventory Transactions 
 		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
@@ -342,11 +356,12 @@ BEGIN
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
 		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId		
+			tblICInventoryTransaction t 
 			INNER JOIN @glTransactions gl
 				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId					
+				AND t.strBatchId = gl.strBatchId		
+			INNER JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId		
 		WHERE	
 			(ty.strName = @strTransactionType OR @strTransactionType IS NULL) 
 			--AND (dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
@@ -354,7 +369,8 @@ BEGIN
 			AND (FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
 			AND (FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 			AND t.intInTransitSourceLocationId IS NULL 
-		GROUP BY ty.strName 
+		GROUP 
+			BY ty.strName 
 	END 
 END 
 
@@ -380,33 +396,50 @@ BEGIN
 				,[strTransactionId] = gd.strTransactionId
 				,[strBatchId] = gd.strBatchId
 				,[intAccountId] = gd.intAccountId 
-				,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+				,[dblGLAmount] = gd.[dblGLAmount] --SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
 				,[strAccountDescription] = ga.strDescription
 			FROM	
-				@GLEntries gd INNER JOIN tblGLAccount ga
+				(
+					SELECT 
+						[strTransactionType] = gd.strTransactionType
+						,[strTransactionId] = gd.strTransactionId
+						,[strBatchId] = gd.strBatchId
+						,[intAccountId] = gd.intAccountId 
+						,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))									
+					FROM @GLEntries gd 				
+						GROUP BY 				
+							gd.strTransactionId
+							,gd.strBatchId
+							,gd.strTransactionType
+							,gd.intAccountId 				
+				) gd
+				INNER JOIN tblGLAccount ga
 					ON gd.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegmentMapping gs
-					ON gs.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegment gm
-					ON gm.intAccountSegmentId = gs.intAccountSegmentId
-				INNER JOIN tblGLAccountCategory ac 
-					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				CROSS APPLY (
+					SELECT 
+						cat.strAccountCategory
+					FROM 
+						dbo.tblGLAccountSegmentMapping mapping INNER JOIN dbo.tblGLAccountSegment segment 
+							ON segment.intAccountSegmentId = mapping.intAccountSegmentId
+						INNER JOIN dbo.tblGLAccountCategory cat 
+							ON segment.intAccountCategoryId = cat.intAccountCategoryId
+						INNER JOIN dbo.tblGLAccountStructure struc 
+							ON segment.intAccountStructureId = struc.intAccountStructureId 
+							AND struc.strType = 'Primary'
+					WHERE 
+						intAccountId = ga.intAccountId
+				) sg
 			WHERE 			
 				1 = 
 					CASE 
-						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 
 						ELSE 0 
 					END 
-			GROUP BY 				
-				gd.strTransactionType
-				,gd.strTransactionId
-				,gd.strBatchId
-				,gd.intAccountId 
-				,ga.strDescription
+
 		) AS glResult 
 			ON 
 				result.strTransactionId = glResult.strTransactionId
@@ -442,41 +475,59 @@ BEGIN
 				,[strTransactionId] = gd.strTransactionId
 				,[strBatchId] = gd.strBatchId
 				,[intAccountId] = gd.intAccountId 
-				,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+				,[dblGLAmount] = gd.[dblGLAmount] --SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
 				,[strAccountDescription] = ga.strDescription
 			FROM	
-				tblGLDetail gd INNER JOIN tblGLAccount ga
-					ON gd.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegmentMapping gs
-					ON gs.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegment gm
-					ON gm.intAccountSegmentId = gs.intAccountSegmentId
-				INNER JOIN tblGLAccountCategory ac 
-					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
-				INNER JOIN @glTransactions list
-					ON gd.strTransactionId = list.strTransactionId
-					AND gd.strBatchId = list.strBatchId
+				--tblGLDetail gd 
+				(
+					SELECT 
+						[strTransactionType] = gd.strTransactionType
+						,[strTransactionId] = gd.strTransactionId
+						,[strBatchId] = gd.strBatchId
+						,[intAccountId] = gd.intAccountId 
+						,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))									
+					FROM 
+						tblGLDetail gd INNER JOIN @glTransactions list
+							ON gd.strTransactionId = list.strTransactionId
+							AND gd.strBatchId = list.strBatchId				
+					WHERE
+						(FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+						AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
+						AND gd.ysnIsUnposted = 0 
+					GROUP BY 				
+						gd.strTransactionId
+						,gd.strBatchId
+						,gd.strTransactionType
+						,gd.intAccountId 				
+				) gd				
+				INNER JOIN tblGLAccount ga
+					ON ga.intAccountId = gd.intAccountId 
+				CROSS APPLY (
+					SELECT 
+						cat.strAccountCategory
+					FROM 
+						dbo.tblGLAccountSegmentMapping mapping INNER JOIN dbo.tblGLAccountSegment segment 
+							ON segment.intAccountSegmentId = mapping.intAccountSegmentId
+						INNER JOIN dbo.tblGLAccountCategory cat 
+							ON segment.intAccountCategoryId = cat.intAccountCategoryId
+						INNER JOIN dbo.tblGLAccountStructure struc 
+							ON segment.intAccountStructureId = struc.intAccountStructureId 
+							AND struc.strType = 'Primary'
+					WHERE 
+						intAccountId = ga.intAccountId
+				) sg
 			WHERE 
 				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				--AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				--AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
-				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
-				AND gd.ysnIsUnposted = 0 
 				AND 1 = 
 					CASE 
-						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
-			GROUP BY 				
-				gd.strTransactionType
-				,gd.strTransactionId
-				,gd.strBatchId
-				,gd.intAccountId 
-				,ga.strDescription
 		) AS glResult 
 			ON 
 				result.strTransactionId = glResult.strTransactionId
@@ -523,29 +574,37 @@ BEGIN
 			FROM	
 				@GLEntries gd INNER JOIN tblGLAccount ga
 					ON gd.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegmentMapping gs
-					ON gs.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegment gm
-					ON gm.intAccountSegmentId = gs.intAccountSegmentId
-				INNER JOIN tblGLAccountCategory ac 
-					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				CROSS APPLY (
+					SELECT 
+						cat.strAccountCategory
+					FROM 
+						dbo.tblGLAccountSegmentMapping mapping INNER JOIN dbo.tblGLAccountSegment segment 
+							ON segment.intAccountSegmentId = mapping.intAccountSegmentId
+						INNER JOIN dbo.tblGLAccountCategory cat 
+							ON segment.intAccountCategoryId = cat.intAccountCategoryId
+						INNER JOIN dbo.tblGLAccountStructure struc 
+							ON segment.intAccountStructureId = struc.intAccountStructureId 
+							AND struc.strType = 'Primary'
+					WHERE 
+						intAccountId = ga.intAccountId
+				) sg
 			WHERE 
 				1 = 
 					CASE 
-						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 
 			GROUP BY 				
-				CASE 
+				gd.strTransactionId
+				,gd.strBatchId
+				,CASE 
 					WHEN gd.strTransactionType = 'Inventory Adjustment' THEN 'Inventory Auto Variance'
 					ELSE gd.strTransactionType
 				END COLLATE Latin1_General_CI_AS
-				,gd.strTransactionId
-				,gd.strBatchId
 				,gd.intAccountId 
 				,ga.strDescription
 		) AS glResult 
@@ -585,39 +644,57 @@ BEGIN
 					,[strTransactionId] = gd.strTransactionId
 					,[strBatchId] = gd.strBatchId
 					,[intAccountId] = gd.intAccountId 
-					,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+					,[dblGLAmount] = gd.[dblGLAmount] --SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
 					,[strAccountDescription] = ga.strDescription
-				FROM	
-					tblGLDetail gd INNER JOIN @glTransactions glTrans
-						ON gd.strTransactionId = glTrans.strTransactionId
-						AND gd.strBatchId = glTrans.strBatchId 
+				FROM
+					(
+						SELECT 
+							[strTransactionType] = gd.strTransactionType
+							,[strTransactionId] = gd.strTransactionId
+							,[strBatchId] = gd.strBatchId
+							,[intAccountId] = gd.intAccountId 
+							,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))	
+						FROM 
+							tblGLDetail gd INNER JOIN @glTransactions glTrans
+								ON gd.strTransactionId = glTrans.strTransactionId
+								AND gd.strBatchId = glTrans.strBatchId 
+						WHERE
+							(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 							
+							AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+							AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+							AND gd.ysnIsUnposted = 0 
+						GROUP BY 				
+							gd.strTransactionId
+							,gd.strBatchId
+							,gd.strTransactionType
+							,gd.intAccountId 							
+					) gd 
 					INNER JOIN tblGLAccount ga
-						ON gd.intAccountId = ga.intAccountId
-					INNER JOIN tblGLAccountSegmentMapping gs
-						ON gs.intAccountId = ga.intAccountId
-					INNER JOIN tblGLAccountSegment gm
-						ON gm.intAccountSegmentId = gs.intAccountSegmentId
-					INNER JOIN tblGLAccountCategory ac 
-						ON ac.intAccountCategoryId = gm.intAccountCategoryId 
-				WHERE 
-					(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
-					AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-					AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-					AND gd.ysnIsUnposted = 0 
-					AND 1 = 
+						ON ga.intAccountId = gd.intAccountId
+					CROSS APPLY (
+						SELECT 
+							cat.strAccountCategory
+						FROM 
+							dbo.tblGLAccountSegmentMapping mapping INNER JOIN dbo.tblGLAccountSegment segment 
+								ON segment.intAccountSegmentId = mapping.intAccountSegmentId
+							INNER JOIN dbo.tblGLAccountCategory cat 
+								ON segment.intAccountCategoryId = cat.intAccountCategoryId
+							INNER JOIN dbo.tblGLAccountStructure struc 
+								ON segment.intAccountStructureId = struc.intAccountStructureId 
+								AND struc.strType = 'Primary'
+						WHERE 
+							intAccountId = ga.intAccountId
+					) sg
+				WHERE
+					1 = 
 						CASE 
-							WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+							WHEN gd.strTransactionType = 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 							--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
-							WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-							WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+							WHEN gd.strTransactionType <> 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
+							WHEN gd.strTransactionType = 'Storage Settlement' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 							ELSE 0 
 						END 
-				GROUP BY 				
-					gd.strTransactionType
-					,gd.strTransactionId
-					,gd.strBatchId
-					,gd.intAccountId 
-					,ga.strDescription
+
 			) AS glResult 
 				ON 
 					result.strTransactionId = glResult.strTransactionId
@@ -653,36 +730,50 @@ BEGIN
 		USING (
 			SELECT 
 				[strTransactionType] = gd.strTransactionType
-				,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+				,[dblGLAmount] = gd.[dblGLAmount] --SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
 			FROM	
-				tblGLDetail gd INNER JOIN tblGLAccount ga
-					ON gd.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegmentMapping gs
-					ON gs.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegment gm
-					ON gm.intAccountSegmentId = gs.intAccountSegmentId
-				INNER JOIN tblGLAccountCategory ac 
-					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
-				INNER JOIN @glTransactions list
-					ON gd.strTransactionId = list.strTransactionId
-					AND gd.strBatchId = list.strBatchId
-			WHERE 
-				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
-				--AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-				--AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
-				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
-				AND 1 = 
+				(
+					SELECT
+						[strTransactionType] = gd.strTransactionType
+						,gd.intAccountId
+						,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))									
+					FROM tblGLDetail gd INNER JOIN @glTransactions list
+							ON gd.strTransactionId = list.strTransactionId
+							AND gd.strBatchId = list.strBatchId				
+					WHERE
+						(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
+						AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+						AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
+					GROUP BY 
+						gd.strTransactionType
+						,gd.intAccountId
+				) gd
+				INNER JOIN tblGLAccount ga
+					ON ga.intAccountId = gd.intAccountId 
+				CROSS APPLY (
+					SELECT 
+						cat.strAccountCategory
+					FROM 
+						dbo.tblGLAccountSegmentMapping mapping INNER JOIN dbo.tblGLAccountSegment segment 
+							ON segment.intAccountSegmentId = mapping.intAccountSegmentId
+						INNER JOIN dbo.tblGLAccountCategory cat 
+							ON segment.intAccountCategoryId = cat.intAccountCategoryId
+						INNER JOIN dbo.tblGLAccountStructure struc 
+							ON segment.intAccountStructureId = struc.intAccountStructureId 
+							AND struc.strType = 'Primary'
+					WHERE 
+						intAccountId = ga.intAccountId
+				) sg
+			WHERE
+				1 = 
 					CASE 
-						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND sg.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND sg.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 
-			GROUP BY 
-				gd.strTransactionType
 		) AS glResult 
 			ON result.strTransactionType = glResult.strTransactionType
 		WHEN MATCHED THEN 

@@ -34,6 +34,6 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummary_strPeriod_commodity
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummary_intItemId_strPeriod]
-	ON [dbo].[tblICInventoryValuationSummary]([intItemId] ASC, [strPeriod] ASC)
+	ON [dbo].[tblICInventoryValuationSummary]([intItemId] ASC, [strPeriod] ASC, [intItemLocationId] ASC, [intInTransitLocationId] ASC)
 GO
 

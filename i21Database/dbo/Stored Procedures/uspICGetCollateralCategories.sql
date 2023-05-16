@@ -91,6 +91,9 @@ FROM
 				OR (
 					t2.strTransactionForm IN ('Produce', 'Consume')
 				)
+				OR (
+					ty2.strName IN ('Cost Adjustment')
+				)
 			)
 	) collateralCategory
 WHERE
@@ -99,6 +102,7 @@ WHERE
 	AND (
 		(t.dblQty < 0 AND ty.strName IN ('Inventory Adjustment - Item Change','Consume'))
 		OR (ty.strName IN ('Cost Adjustment', 'Produce') AND t.strTransactionForm IN ('Produce'))
+		OR (ty.strName IN ('Cost Adjustment'))
 	)
 
 SET @continueLoop = @@ROWCOUNT
@@ -150,6 +154,9 @@ BEGIN
 					OR (
 						t2.strTransactionForm IN ('Produce', 'Consume')
 					)
+					OR (
+						ty2.strName IN ('Cost Adjustment')
+					)
 				)
 				AND NOT EXISTS (SELECT TOP  1 1 FROM #tmpCollateralCategories c WHERE c.intCategoryId = i2.intCategoryId)
 		) collateralCategory
@@ -158,6 +165,7 @@ BEGIN
 		AND (
 			(t.dblQty < 0 AND ty.strName IN ('Inventory Adjustment - Item Change','Consume'))
 			OR (ty.strName IN ('Cost Adjustment', 'Produce') AND t.strTransactionForm IN ('Produce'))
+			OR (ty.strName IN ('Cost Adjustment'))
 		)
 		AND c.lvl = @loop
 

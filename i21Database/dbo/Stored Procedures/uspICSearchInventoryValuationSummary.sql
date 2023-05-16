@@ -193,11 +193,10 @@ USING (
 					,t.intInTransitSourceLocationId
 				FROM 
 					tblICInventoryTransaction t 
-				WHERE
-					--dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
-					FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(f.dtmEndDate AS FLOAT))
-					AND t.intItemId = Item.intItemId
+				WHERE				
+					t.intItemId = Item.intItemId
 					AND t.intItemLocationId = Item.intItemLocationId
+					AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(f.dtmEndDate AS FLOAT))
 				GROUP BY 
 					t.intItemId
 					,t.intItemLocationId
@@ -227,8 +226,8 @@ USING (
 					il.intItemLocationId = COALESCE(InTransit.intItemLocationId, t.intItemLocationId, Item.intItemLocationId) 
 			) ItemLocation
 			LEFT JOIN tblICItemPricing ItemPricing 
-				ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-				AND ItemPricing.intItemId = Item.intItemId
+				ON ItemPricing.intItemId = Item.intItemId
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 			OUTER APPLY (
 				SELECT	TOP 1 
 						t2.intItemUOMId 

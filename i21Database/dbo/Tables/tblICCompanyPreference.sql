@@ -33,5 +33,6 @@
 	[ysnInitialFamilyClassAdjustment] BIT NULL DEFAULT(0),
 	[ysnUpdateJournalLineDescription] BIT NULL DEFAULT(0),
 	[ysnEnableIntraCompanyTransfer] BIT NULL,
+	[ysnSkipICGLValidation] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
