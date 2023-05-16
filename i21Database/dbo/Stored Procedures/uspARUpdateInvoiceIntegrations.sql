@@ -7,6 +7,7 @@
 	,@Post				BIT	= 0
 	,@Recap				BIT	= 1
 	,@FromPosting		BIT = 0
+	,@LogTradeFinanceInfo	BIT = 0
 	,@strSessionId		NVARCHAR(50) = NULL
 AS  
 
