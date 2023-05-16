@@ -1374,6 +1374,9 @@
     <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
     <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankVarianceCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCalculateTankVariance.sql" />
+    <Build Include="dbo\Views\vyuSTGetTankVarianceCalculation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
