@@ -34,10 +34,10 @@
 	)
 GO
 
-	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog_intInventoryFIFOId]
-	--	ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intId] ASC)
-	--	INCLUDE (dblQty, dblCost);
-	--GO 
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog_intInventoryFIFOId]
+		ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryFIFOId] ASC)
+		INCLUDE (intInventoryCostAdjustmentTypeId);
+	GO 
 
 	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog]
 	--	ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryFIFOId] ASC)
@@ -47,3 +47,9 @@ GO
 		ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryTransactionId] ASC)
 		INCLUDE ([dblQty], [dblCost], [dblValue], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
 GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog_RebuildCosting]
+		ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intInventoryCostAdjustmentTypeId] ASC, [intOtherChargeItemId] ASC)
+		INCLUDE ([intInventoryFIFOId], [intInventoryTransactionId], [dblCost]);
+GO
+
