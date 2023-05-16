@@ -27,6 +27,7 @@ SELECT Payment.intPaymentId
 	--, Payment.inti21PaymentId
 	, inti21PaymentId = i21Payment.intPaymentId
 	, Payment.intConcurrencyId
+	, Shift.strShiftNo
 FROM tblMBILPayment Payment
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Payment.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Payment.intLocationId
