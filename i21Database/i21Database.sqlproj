@@ -1742,6 +1742,7 @@
     <Build Include="dbo\Tables\tblCTContractImportTemp.sql" />
     <Build Include="dbo\Functions\fnAPGetYear1099.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailContract.sql" />
+    <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
