@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTGetPricebookExport]
 AS
-SELECT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM.intItemUOMId AS NVARCHAR(1000)) + '0' + CAST(ST.intStoreId AS NVARCHAR(1000)) COLLATE Latin1_General_CI_AS AS strUniqueId
+SELECT DISTINCT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM.intItemUOMId AS NVARCHAR(1000)) + '0' + CAST(ST.intStoreId AS NVARCHAR(1000)) COLLATE Latin1_General_CI_AS AS strUniqueId
     , ST.intStoreId
 	, ST.intStoreNo
 	, Item.strItemNo
