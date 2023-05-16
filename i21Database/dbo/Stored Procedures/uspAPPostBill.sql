@@ -66,7 +66,7 @@ CREATE TABLE #tmpInvalidBillData (
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @GLEntries AS RecapTableType 
-DECLARE @GLEntriesTemp AS RecapTableType 
+--DECLARE @GLEntriesTemp AS RecapTableType 
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
@@ -1035,7 +1035,7 @@ BEGIN
 					,NULL
 					,@ValueToPost
 
-			INSERT INTO @GLEntriesTemp (
+			INSERT INTO @GLEntries (
 					[dtmDate] 
 					,[strBatchId]
 					,[intAccountId]
@@ -1078,158 +1078,158 @@ BEGIN
 				,@strGLDescription = NULL
 				,@AccountCategory_Cost_Adjustment = DEFAULT 
 
-			--DELETE APC ACCOUNT IN CREDIT SIDE THIS IS SUPPOSED TO BE AP ACCOUNT BUT IC MODULE ASK US TO REMOVE IT AS AP ACCOUNT IS NOT HANDLED BY THEIR SP
-			DELETE GL 
-			FROM @GLEntriesTemp GL
-			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
-			WHERE AD.intAccountCategoryId = 45 AND GL.dblCredit <> 0
+			-- --DELETE APC ACCOUNT IN CREDIT SIDE THIS IS SUPPOSED TO BE AP ACCOUNT BUT IC MODULE ASK US TO REMOVE IT AS AP ACCOUNT IS NOT HANDLED BY THEIR SP
+			-- DELETE GL 
+			-- FROM @GLEntriesTemp GL
+			-- INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
+			-- WHERE AD.intAccountCategoryId = 45 AND GL.dblCredit <> 0
 
-			INSERT INTO @GLEntries
-			SELECT * FROM @GLEntriesTemp
+			-- INSERT INTO @GLEntries
+			-- SELECT * FROM @GLEntriesTemp
 
-			--CONVERT OTHER CHARGE CURRENCY TO ITEM CURRENCY
-			DELETE GL 
-			FROM @GLEntriesTemp GL
-			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
-			WHERE AD.intAccountCategoryId = 45
+			-- --CONVERT OTHER CHARGE CURRENCY TO ITEM CURRENCY
+			-- DELETE GL 
+			-- FROM @GLEntriesTemp GL
+			-- INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
+			-- WHERE AD.intAccountCategoryId = 45
 			
-			--WASH OUT ENTRY
-			INSERT INTO @GLEntries (
-					[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm] 
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-					,[intSourceEntityId]
-					,[intCommodityId]
-					,[strRateType]
-			)
-			SELECT 	[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblCredit]
-					,[dblDebit]
-					,[dblCreditUnit]
-					,[dblDebitUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,[intCurrencyId]
-					,[dblExchangeRate]
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm] 
-					,[strModuleName]
-					,[intConcurrencyId]
-					,[dblCreditForeign]
-					,[dblCreditReport]
-					,[dblDebitForeign]
-					,[dblDebitReport]
-					,[dblReportingRate]
-					,[dblForeignRate]
-					,[intSourceEntityId]
-					,[intCommodityId]
-					,[strRateType]
-			FROM @GLEntriesTemp
-			UNION ALL
-			SELECT 	[dtmDate] 
-					,[strBatchId]
-					,[intAccountId]
-					,[dblDebit]
-					,[dblCredit]
-					,[dblDebitUnit]
-					,[dblCreditUnit]
-					,[strDescription]
-					,[strCode]
-					,[strReference]
-					,LS.intPriceCurrencyId
-					,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
-					,[dtmDateEntered]
-					,[dtmTransactionDate]
-					,[strJournalLineDescription]
-					,[intJournalLineNo]
-					,[ysnIsUnposted]
-					,[intUserId]
-					,[intEntityId]
-					,[strTransactionId]					
-					,[intTransactionId]
-					,[strTransactionType]
-					,[strTransactionForm] 
-					,[strModuleName]
-					,[intConcurrencyId]
-					,dbo.fnDivide(dbo.fnMultiply(dblDebitForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
-					,[dblDebitReport]
-					,dbo.fnDivide(dbo.fnMultiply(dblCreditForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
-					,[dblCreditReport]
-					,[dblReportingRate]
-					,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
-					,[intSourceEntityId]
-					,[intCommodityId]
-					,ItemCurrencyToFunctional.strCurrencyExchangeRateType
-			FROM @GLEntriesTemp GLEntries
-			OUTER APPLY (
-				SELECT TOP 1 intPriceCurrencyId
-				FROM tblICInventoryTransaction IT
-				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
-				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
-				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
-			) LS
-			OUTER APPLY (
-			SELECT TOP 1 
-					dblForexRate = ISNULL(dblRate, 0),
-					strCurrencyExchangeRateType
-				FROM vyuGLExchangeRate
-				INNER JOIN tblICInventoryTransaction IT
-					ON IT.intInventoryTransactionId = GLEntries.intJournalLineNo
-				WHERE intFromCurrencyId = GLEntries.intCurrencyId
-					AND intToCurrencyId = @intFunctionalCurrencyId
-					AND intCurrencyExchangeRateTypeId = IT.intForexRateTypeId
-				ORDER BY dtmValidFromDate DESC
-			) ChargeCurrencyToFunctional
-			OUTER APPLY (
-				SELECT TOP 1
-					dblForexRate = ISNULL(dblRate,0),
-					strCurrencyExchangeRateType
-				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = LS.intPriceCurrencyId
-				AND intToCurrencyId = @intFunctionalCurrencyId
-				ORDER BY dtmValidFromDate DESC
-			) ItemCurrencyToFunctional
-			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
+			-- --WASH OUT ENTRY
+			-- INSERT INTO @GLEntries (
+			-- 		[dtmDate] 
+			-- 		,[strBatchId]
+			-- 		,[intAccountId]
+			-- 		,[dblDebit]
+			-- 		,[dblCredit]
+			-- 		,[dblDebitUnit]
+			-- 		,[dblCreditUnit]
+			-- 		,[strDescription]
+			-- 		,[strCode]
+			-- 		,[strReference]
+			-- 		,[intCurrencyId]
+			-- 		,[dblExchangeRate]
+			-- 		,[dtmDateEntered]
+			-- 		,[dtmTransactionDate]
+			-- 		,[strJournalLineDescription]
+			-- 		,[intJournalLineNo]
+			-- 		,[ysnIsUnposted]
+			-- 		,[intUserId]
+			-- 		,[intEntityId]
+			-- 		,[strTransactionId]					
+			-- 		,[intTransactionId]
+			-- 		,[strTransactionType]
+			-- 		,[strTransactionForm] 
+			-- 		,[strModuleName]
+			-- 		,[intConcurrencyId]
+			-- 		,[dblDebitForeign]
+			-- 		,[dblDebitReport]
+			-- 		,[dblCreditForeign]
+			-- 		,[dblCreditReport]
+			-- 		,[dblReportingRate]
+			-- 		,[dblForeignRate]
+			-- 		,[intSourceEntityId]
+			-- 		,[intCommodityId]
+			-- 		,[strRateType]
+			-- )
+			-- SELECT 	[dtmDate] 
+			-- 		,[strBatchId]
+			-- 		,[intAccountId]
+			-- 		,[dblCredit]
+			-- 		,[dblDebit]
+			-- 		,[dblCreditUnit]
+			-- 		,[dblDebitUnit]
+			-- 		,[strDescription]
+			-- 		,[strCode]
+			-- 		,[strReference]
+			-- 		,[intCurrencyId]
+			-- 		,[dblExchangeRate]
+			-- 		,[dtmDateEntered]
+			-- 		,[dtmTransactionDate]
+			-- 		,[strJournalLineDescription]
+			-- 		,[intJournalLineNo]
+			-- 		,[ysnIsUnposted]
+			-- 		,[intUserId]
+			-- 		,[intEntityId]
+			-- 		,[strTransactionId]					
+			-- 		,[intTransactionId]
+			-- 		,[strTransactionType]
+			-- 		,[strTransactionForm] 
+			-- 		,[strModuleName]
+			-- 		,[intConcurrencyId]
+			-- 		,[dblCreditForeign]
+			-- 		,[dblCreditReport]
+			-- 		,[dblDebitForeign]
+			-- 		,[dblDebitReport]
+			-- 		,[dblReportingRate]
+			-- 		,[dblForeignRate]
+			-- 		,[intSourceEntityId]
+			-- 		,[intCommodityId]
+			-- 		,[strRateType]
+			-- FROM @GLEntriesTemp
+			-- UNION ALL
+			-- SELECT 	[dtmDate] 
+			-- 		,[strBatchId]
+			-- 		,[intAccountId]
+			-- 		,[dblDebit]
+			-- 		,[dblCredit]
+			-- 		,[dblDebitUnit]
+			-- 		,[dblCreditUnit]
+			-- 		,[strDescription]
+			-- 		,[strCode]
+			-- 		,[strReference]
+			-- 		,LS.intPriceCurrencyId
+			-- 		,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
+			-- 		,[dtmDateEntered]
+			-- 		,[dtmTransactionDate]
+			-- 		,[strJournalLineDescription]
+			-- 		,[intJournalLineNo]
+			-- 		,[ysnIsUnposted]
+			-- 		,[intUserId]
+			-- 		,[intEntityId]
+			-- 		,[strTransactionId]					
+			-- 		,[intTransactionId]
+			-- 		,[strTransactionType]
+			-- 		,[strTransactionForm] 
+			-- 		,[strModuleName]
+			-- 		,[intConcurrencyId]
+			-- 		,dbo.fnDivide(dbo.fnMultiply(dblDebitForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
+			-- 		,[dblDebitReport]
+			-- 		,dbo.fnDivide(dbo.fnMultiply(dblCreditForeign, ISNULL(ChargeCurrencyToFunctional.dblForexRate,1)),ItemCurrencyToFunctional.dblForexRate)
+			-- 		,[dblCreditReport]
+			-- 		,[dblReportingRate]
+			-- 		,ISNULL(ItemCurrencyToFunctional.dblForexRate, 1)
+			-- 		,[intSourceEntityId]
+			-- 		,[intCommodityId]
+			-- 		,ItemCurrencyToFunctional.strCurrencyExchangeRateType
+			-- FROM @GLEntriesTemp GLEntries
+			-- OUTER APPLY (
+			-- 	SELECT TOP 1 intPriceCurrencyId
+			-- 	FROM tblICInventoryTransaction IT
+			-- 	INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
+			-- 	INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+			-- 	WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
+			-- ) LS
+			-- OUTER APPLY (
+			-- SELECT TOP 1 
+			-- 		dblForexRate = ISNULL(dblRate, 0),
+			-- 		strCurrencyExchangeRateType
+			-- 	FROM vyuGLExchangeRate
+			-- 	INNER JOIN tblICInventoryTransaction IT
+			-- 		ON IT.intInventoryTransactionId = GLEntries.intJournalLineNo
+			-- 	WHERE intFromCurrencyId = GLEntries.intCurrencyId
+			-- 		AND intToCurrencyId = @intFunctionalCurrencyId
+			-- 		AND intCurrencyExchangeRateTypeId = IT.intForexRateTypeId
+			-- 	ORDER BY dtmValidFromDate DESC
+			-- ) ChargeCurrencyToFunctional
+			-- OUTER APPLY (
+			-- 	SELECT TOP 1
+			-- 		dblForexRate = ISNULL(dblRate,0),
+			-- 		strCurrencyExchangeRateType
+			-- 	FROM vyuGLExchangeRate
+			-- 	WHERE intFromCurrencyId = LS.intPriceCurrencyId
+			-- 	AND intToCurrencyId = @intFunctionalCurrencyId
+			-- 	ORDER BY dtmValidFromDate DESC
+			-- ) ItemCurrencyToFunctional
+			-- WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
 
 			UPDATE @GLEntries SET strModuleName = 'Accounts Payable'
 		END TRY
@@ -1707,7 +1707,7 @@ BEGIN
 					,NULL
 					,@ValueToPost
 
-			INSERT INTO @GLEntriesTemp (
+			INSERT INTO @GLEntries (
 					[dtmDate] 
 					,[strBatchId]
 					,[intAccountId]
