@@ -56,7 +56,7 @@ select '02' strTag, intEntityId,
 from cte 
 ),
 tag03 as(
-	select '03' strTag,intEntityId,'03|C0000549|1|0090|Corrigan Administration Services LLC' strData from cte
+	select '03' strTag,intEntityId,'03|C0000549|'+ VendorNbr + '|0090|Corrigan Administration Services LLC' strData from cte
 ),
 tag05 as(
 	select '05' strTag, intEntityId,
