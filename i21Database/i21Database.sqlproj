@@ -891,6 +891,7 @@
     <Build Include="dbo\Stored Procedures\uspLGCancelPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
+    <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
