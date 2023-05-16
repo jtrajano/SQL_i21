@@ -274,10 +274,12 @@ BEGIN
 				ON LoadCost.intLoadId = SC.intLoadId
 			LEFT JOIN tblICItem IC 
 				ON IC.intItemId = LoadCost.intItemId
-			WHERE LoadCost.dblRate != 0 
+			WHERE LoadCost.dblRate > 0 
 				AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE LoadCost.intItemId END 
 				AND (LoadCost.strEntityType <> 'Customer' OR LoadCost.strEntityType IS NULL)
 				AND LoadCost.ysnPrice = 1
+				AND ISNULL(LoadCost.ysnVendorPrepayment, 0) = 0
+				AND ISNULL(RE.ysnIsStorage, 0) = 0
 
 	END
 	
