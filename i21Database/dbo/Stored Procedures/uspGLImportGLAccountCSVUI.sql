@@ -294,7 +294,7 @@ AS
                                   FROM   tblGLCOACrossReference
                                   WHERE  strCompanyId = 'Legacy')
 
-    EXEC dbo.uspGLUpdateAccountLocationId
+    EXEC dbo.uspGLUpdateAccountSegmentId
 
     IF EXISTS (SELECT TOP 1 1
                FROM   sys.objects

@@ -10,20 +10,14 @@ BEGIN
 	EXEC('
 		CREATE PROCEDURE  [dbo].[uspGLBuildAccount]
 			@intUserId INT,
-			@intCurrencyId INT = 0
+			@intCurrencyId INT = NULL
 		AS
 
 		SET QUOTED_IDENTIFIER OFF
 		SET ANSI_NULLS ON
 		SET NOCOUNT ON
 
-		-- +++++ INSERT ACCOUNT Id +++++ --
-		IF @intCurrencyId = 0
-			SELECT TOP 1 @intCurrencyId=intDefaultCurrencyId FROM tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
-		IF ISNULL(@intCurrencyId, 0)= 0
-		BEGIN
-			RAISERROR(''Functional Currency is not setup properly. Please set it up in Company Configuration Screen.'', 16, 1);
-		END
+		IF @intCurrencyId = 0 SET @intCurrencyId = NULL
 
 		-- +++++ INSERT ACCOUNT Id +++++ --
 		INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
@@ -120,7 +114,7 @@ BEGIN
 		END
 
 
-		EXEC dbo.uspGLUpdateAccountLocationId
+		EXEC dbo.uspGLUpdateAccountSegmentId
 		EXEC uspGLAccountOriginSync @intUserId
 		EXEC dbo.uspGLInsertOriginCrossReferenceMapping
 
