@@ -468,7 +468,7 @@ BEGIN TRY
 						SELECT DISTINCT BILL.intBillId FROM tblAPBill BILL
 							JOIN tblAPBillDetail BILL_DETAIL
 								ON BILL.intBillId = BILL_DETAIL.intBillId
-						WHERE BILL.intTransactionType = 2
+						WHERE BILL.intTransactionType IN ( 2, 3)
 							AND intScaleTicketId = @intTicketId
 						
 						DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
