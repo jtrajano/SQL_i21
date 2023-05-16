@@ -1683,6 +1683,9 @@
     <Build Include="dbo\Views\vyuSCGrainBankTransactions.sql" />
     <Build Include="dbo\Views\vyuSCGrainBankInvoiceTransaction.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailContract.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankVarianceCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCalculateTankVariance.sql" />
+    <Build Include="dbo\Views\vyuSTGetTankVarianceCalculation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
