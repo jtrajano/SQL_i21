@@ -222,4 +222,17 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnOverrideTaxGroup]					BIT												NULL
 	,[dblSurcharge]							NUMERIC(18, 6)									NULL
 	,intDispatchId							INT												NULL
+	,[intBankId]							INT												NULL		-- Key Value from tblCMBank (Bank)
+	,[intBankAccountId]						INT												NULL		-- Key Value from tblCMBankAccount (Bank Account)
+	,[intBorrowingFacilityId]				INT												NULL		-- Key Value from tblCMBorrowingFacility
+	,[intBorrowingFacilityLimitId]			INT												NULL		-- Key Value from tblCMBorrowingFacilityLimit
+	,[strTradeFinanceNo]					NVARCHAR(50)									NULL
+	,[intFacilityId]						INT												NULL
+	,[intLoanLimitId]						INT												NULL
+	,[strBankReferenceNo]					NVARCHAR(100)									NULL
+	,[strBankTransactionId]					NVARCHAR(100)									NULL
+	,[dblLoanAmount]						NUMERIC(18, 6)									NULL
+	,[intBankValuationRuleId]				INT												NULL
+	,[strTradeFinanceComments]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGoodsStatus]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 )
