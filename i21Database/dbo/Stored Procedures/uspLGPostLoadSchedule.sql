@@ -205,6 +205,23 @@ BEGIN TRY
 				RETURN 0;
 			END
 
+			-- Validate if a Voucher has been created before unposting
+			IF EXISTS (
+				SELECT TOP 1 B.strBillId 
+				FROM tblAPBillDetail BD
+				INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+				WHERE intLoadId = @intLoadId
+				) AND @ysnPost = 0
+			BEGIN
+				SELECT TOP 1 @strInvoiceNo = B.strBillId
+				FROM tblAPBillDetail BD
+				INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+				WHERE intLoadId = @intLoadId
+				SELECT @strMsg = 'Voucher ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the voucher and try again.';
+				RAISERROR (@strMsg,16,1);
+				RETURN 0;
+			END
+
 			EXEC uspLGPostInTransitCosting 
 				@intLoadId = @intLoadId
 				,@ysnPost = @ysnPost
