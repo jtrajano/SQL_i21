@@ -3801,131 +3801,131 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
-			--IF @strLoadCost IS NOT NULL
-			--BEGIN
-			--	EXEC sp_xml_preparedocument @idoc OUTPUT
-			--		,@strLoadCost
+			IF @strLoadCost IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadCost
 
-			--	--Load cost
-			--	INSERT INTO tblLGLoadCost (
-			--		[intConcurrencyId]
-			--		,[intLoadId]
-			--		,[intItemId]
-			--		,[intVendorId]
-			--		,[strEntityType]
-			--		,[strCostMethod]
-			--		,[intCurrencyId]
-			--		,[dblRate]
-			--		,[dblAmount]
-			--		,[dblFX]
-			--		,[intItemUOMId]
-			--		,[ysnAccrue]
-			--		,[ysnMTM]
-			--		,[ysnPrice]
-			--		,[intBillId]
-			--		,[intLoadCostRefId]
-			--		)
-			--	SELECT 1 AS [intConcurrencyId]
-			--		,@intNewLoadId
-			--		,I.intItemId
-			--		,E.intEntityId [intVendorId]
-			--		,ET.strType
-			--		,x.[strCostMethod]
-			--		,CU.[intCurrencyID]
-			--		,x.[dblRate]
-			--		,x.[dblAmount]
-			--		,x.[dblFX]
-			--		,IU.[intItemUOMId]
-			--		,x.[ysnAccrue]
-			--		,x.[ysnMTM]
-			--		,x.[ysnPrice]
-			--		,NULL [intBillId]
-			--		,[intLoadCostId]
-			--	FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
-			--			[intLoadCostId] [int]
-			--			,[intLoadId] [int]
-			--			,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
-			--			,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
-			--			,[dblRate] [numeric](18, 6)
-			--			,[dblAmount] [numeric](18, 6)
-			--			,[dblFX] [numeric](18, 6)
-			--			,[ysnAccrue] [bit]
-			--			,[ysnMTM] [bit]
-			--			,[ysnPrice] [bit]
-			--			,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			--			,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			--			,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			--			,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			--			) x
-			--	LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-			--	LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			--	LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-			--		AND E.strEntityNo <> ''
-			--	LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-			--		AND ET.strType = 'Vendor'
-			--	LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-			--		AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			--	LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
-			--	WHERE NOT EXISTS (
-			--			SELECT *
-			--			FROM tblLGLoadCost LC
-			--			WHERE LC.intLoadId = @intNewLoadId
-			--				AND LC.intLoadCostRefId = x.intLoadCostId
-			--			)
+				--Load cost
+				INSERT INTO tblLGLoadCost (
+					[intConcurrencyId]
+					,[intLoadId]
+					,[intItemId]
+					,[intVendorId]
+					,[strEntityType]
+					,[strCostMethod]
+					,[intCurrencyId]
+					,[dblRate]
+					,[dblAmount]
+					,[dblFX]
+					,[intItemUOMId]
+					,[ysnAccrue]
+					,[ysnMTM]
+					,[ysnPrice]
+					,[intBillId]
+					,[intLoadCostRefId]
+					)
+				SELECT 1 AS [intConcurrencyId]
+					,@intNewLoadId
+					,I.intItemId
+					,E.intEntityId [intVendorId]
+					,ET.strType
+					,x.[strCostMethod]
+					,CU.[intCurrencyID]
+					,x.[dblRate]
+					,x.[dblAmount]
+					,x.[dblFX]
+					,IU.[intItemUOMId]
+					,x.[ysnAccrue]
+					,x.[ysnMTM]
+					,x.[ysnPrice]
+					,NULL [intBillId]
+					,[intLoadCostId]
+				FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
+						[intLoadCostId] [int]
+						,[intLoadId] [int]
+						,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
+						,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
+						,[dblRate] [numeric](18, 6)
+						,[dblAmount] [numeric](18, 6)
+						,[dblFX] [numeric](18, 6)
+						,[ysnAccrue] [bit]
+						,[ysnMTM] [bit]
+						,[ysnPrice] [bit]
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
+					AND E.strEntityNo <> ''
+				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+					AND ET.strType = 'Vendor'
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadCost LC
+						WHERE LC.intLoadId = @intNewLoadId
+							AND LC.intLoadCostRefId = x.intLoadCostId
+						)
 
-			--	UPDATE LC
-			--	SET [intConcurrencyId] = LC.[intConcurrencyId] + 1
-			--		,[intItemId] = I.[intItemId]
-			--		,[intVendorId] = E.intEntityId
-			--		,[strEntityType] = ET.[strType]
-			--		,[strCostMethod] = x.[strCostMethod]
-			--		,[intCurrencyId] = CU.[intCurrencyID]
-			--		,[dblRate] = x.[dblRate]
-			--		,[dblAmount] = x.[dblAmount]
-			--		,[dblFX] = x.[dblFX]
-			--		,[intItemUOMId] = IU.[intItemUOMId]
-			--		,[ysnAccrue] = x.[ysnAccrue]
-			--		,[ysnMTM] = x.[ysnMTM]
-			--		,[ysnPrice] = x.[ysnPrice]
-			--	FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
-			--			[intLoadCostId] [int]
-			--			,[intLoadId] [int]
-			--			,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
-			--			,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
-			--			,[dblRate] [numeric](18, 6)
-			--			,[dblAmount] [numeric](18, 6)
-			--			,[dblFX] [numeric](18, 6)
-			--			,[ysnAccrue] [bit]
-			--			,[ysnMTM] [bit]
-			--			,[ysnPrice] [bit]
-			--			,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			--			,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			--			,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			--			,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			--			) x
-			--	JOIN tblLGLoadCost LC ON LC.intLoadId = @intNewLoadId
-			--		AND LC.intLoadCostRefId = x.intLoadCostId
-			--	LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-			--	LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			--	LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-			--		AND E.strEntityNo <> ''
-			--	LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-			--		AND ET.strType = 'Vendor'
-			--	LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-			--		AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			--	LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
+				UPDATE LC
+				SET [intConcurrencyId] = LC.[intConcurrencyId] + 1
+					,[intItemId] = I.[intItemId]
+					,[intVendorId] = E.intEntityId
+					,[strEntityType] = ET.[strType]
+					,[strCostMethod] = x.[strCostMethod]
+					,[intCurrencyId] = CU.[intCurrencyID]
+					,[dblRate] = x.[dblRate]
+					,[dblAmount] = x.[dblAmount]
+					,[dblFX] = x.[dblFX]
+					,[intItemUOMId] = IU.[intItemUOMId]
+					,[ysnAccrue] = x.[ysnAccrue]
+					,[ysnMTM] = x.[ysnMTM]
+					,[ysnPrice] = x.[ysnPrice]
+				FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
+						[intLoadCostId] [int]
+						,[intLoadId] [int]
+						,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
+						,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
+						,[dblRate] [numeric](18, 6)
+						,[dblAmount] [numeric](18, 6)
+						,[dblFX] [numeric](18, 6)
+						,[ysnAccrue] [bit]
+						,[ysnMTM] [bit]
+						,[ysnPrice] [bit]
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblLGLoadCost LC ON LC.intLoadId = @intNewLoadId
+					AND LC.intLoadCostRefId = x.intLoadCostId
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
+					AND E.strEntityNo <> ''
+				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+					AND ET.strType = 'Vendor'
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
 
-			--	DELETE LC
-			--	FROM tblLGLoadCost LC
-			--	WHERE LC.intLoadId = @intNewLoadId
-			--		AND NOT EXISTS (
-			--			SELECT *
-			--			FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (intLoadCostId INT) x
-			--			WHERE LC.intLoadCostRefId = x.intLoadCostId
-			--			)
+				DELETE LC
+				FROM tblLGLoadCost LC
+				WHERE LC.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (intLoadCostId INT) x
+						WHERE LC.intLoadCostRefId = x.intLoadCostId
+						)
 
-			--	EXEC sp_xml_removedocument @idoc
-			--END
+				EXEC sp_xml_removedocument @idoc
+			END
 
 			IF @strLoadStorageCost IS NOT NULL
 			BEGIN
