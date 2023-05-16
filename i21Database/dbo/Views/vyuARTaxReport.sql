@@ -407,13 +407,14 @@ OUTER APPLY (
 		(
 			SELECT DISTINCT ',' + LTRIM(strPaymentInfo)
 			FROM tblARPayment
-			WHERE intPaymentId = ARPD.intPaymentId
-			
+			WHERE intPaymentId IN (
+				SELECT intPaymentId
+				FROM tblARPaymentDetail
+				WHERE intInvoiceId = INVOICE.intInvoiceId
+			)
 			FOR XML PATH('')
-		), 1, 1, ''
+		), 1, 2, ''
 	)
-	FROM tblARPaymentDetail ARPD
-	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 WHERE INVOICE.ysnPosted = 1
