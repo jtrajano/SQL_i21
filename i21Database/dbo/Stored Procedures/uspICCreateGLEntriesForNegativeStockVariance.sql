@@ -73,10 +73,9 @@ FROM	(
 						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId					
-					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)					
-					--AND i.strType <> 'Non-Inventory'
-					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL)
+					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)									
 					AND t.intTransactionTypeId IN (@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock, @InventoryTransactionTypeId_AutoNegative)
+					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL)
 		) Query
 
 -- Validate the GL Accounts
@@ -214,26 +213,34 @@ SELECT
 FROM	@GLAccounts
 ;
 
+---- Get the default transaction form name
+--SELECT TOP 1 
+--		@strTransactionForm = TransType.strTransactionForm
+--FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+--			ON t.intTransactionTypeId = TransType.intTransactionTypeId
+--		INNER JOIN tblICItem i
+--			ON i.intItemId = t.intItemId 
+--		INNER JOIN #tmpRebuildList list	
+--			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+--			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+--		INNER JOIN @GLAccounts GLAccounts
+--			ON t.intItemId = GLAccounts.intItemId
+--			AND t.intItemLocationId = GLAccounts.intItemLocationId
+--			AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
+--		INNER JOIN dbo.tblGLAccount
+--			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+--WHERE	t.strBatchId = @strBatchId		
+--		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+--		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+--		AND t.intTransactionTypeId IN (@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock, @InventoryTransactionTypeId_AutoNegative)
+--;
+
 -- Get the default transaction form name
 SELECT TOP 1 
 		@strTransactionForm = TransType.strTransactionForm
-FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
-			ON t.intTransactionTypeId = TransType.intTransactionTypeId
-		INNER JOIN tblICItem i
-			ON i.intItemId = t.intItemId 
-		INNER JOIN #tmpRebuildList list	
-			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
-			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-		INNER JOIN @GLAccounts GLAccounts
-			ON t.intItemId = GLAccounts.intItemId
-			AND t.intItemLocationId = GLAccounts.intItemLocationId
-			AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-WHERE	t.strBatchId = @strBatchId		
-		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
-		AND t.intTransactionTypeId IN (@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock, @InventoryTransactionTypeId_AutoNegative)
+FROM	
+		@GLAccounts GLAccounts INNER JOIN dbo.tblICInventoryTransactionType TransType
+			ON GLAccounts.intTransactionTypeId = TransType.intTransactionTypeId
 ;
 
 -- Get the functional currency
@@ -453,3 +460,4 @@ FROM	ForGLEntries_CTE
 WHERE	ForGLEntries_CTE.intTransactionTypeId IN (@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock, @InventoryTransactionTypeId_AutoNegative)
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 ;
+

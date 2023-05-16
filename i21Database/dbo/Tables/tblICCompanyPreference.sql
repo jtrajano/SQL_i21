@@ -34,5 +34,6 @@
 	[ysnUpdateJournalLineDescription] BIT NULL DEFAULT(0),
 	[ysnMigrateComputedValueField] BIT NULL,
 	[ysnEnableIntraCompanyTransfer] BIT NULL,
+	[ysnSkipICGLValidation] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
