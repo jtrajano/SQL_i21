@@ -29,7 +29,7 @@ BEGIN TRY
 		INNER JOIN tblLGAllocationDetail AD ON AD.intAllocationHeaderId = AH.intAllocationHeaderId
 		INNER JOIN tblLGLoadDetail LD ON LD.intAllocationDetailId = AD.intAllocationDetailId
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		WHERE AH.intAllocationHeaderId = @intAllocationHeaderId AND L.intShipmentStatus != 10
+		WHERE AH.intAllocationHeaderId = @intAllocationHeaderId AND L.intShipmentStatus != 10 AND L.intShipmentType != 2
 	)
 	BEGIN
 		RAISERROR('Cannot cancel the Allocation. The Load associated with it is being used. Try cancelling the Load first.', 16, 1)  
