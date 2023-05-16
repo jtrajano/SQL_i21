@@ -59,6 +59,8 @@ FROM            dbo.tblGLAccount account
 				LEFT JOIN dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
 				LEFT JOIN dbo.tblGLAccount unnaturalAccount on unnaturalAccount.intAccountId = account.intUnnaturalAccountId
 				LEFT JOIN dbo.tblGLAccountSegment locationSegment ON locationSegment.intAccountSegmentId = account.intLocationSegmentId
+				LEFT JOIN dbo.tblGLAccountSegment lobSegment ON lobSegment.intAccountSegmentId = account.intLOBSegmentId
+				LEFT JOIN dbo.tblGLAccountSegment companySegment ON locationSegment.intAccountSegmentId = account.intCompanySegmentId
 GO
 
 
