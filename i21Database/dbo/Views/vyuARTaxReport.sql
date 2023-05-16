@@ -461,13 +461,14 @@ OUTER APPLY (
 		(
 			SELECT DISTINCT ',' + LTRIM(strPaymentInfo)
 			FROM tblARPayment
-			WHERE intPaymentId = ARPD.intPaymentId
-			
+			WHERE intPaymentId IN (
+				SELECT intPaymentId
+				FROM tblARPaymentDetail
+				WHERE intInvoiceId = INVOICE.intInvoiceId
+			)
 			FOR XML PATH('')
-		), 1, 1, ''
+		), 1, 2, ''
 	)
-	FROM tblARPaymentDetail ARPD
-	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
 OUTER APPLY (
 	SELECT TOP 1
