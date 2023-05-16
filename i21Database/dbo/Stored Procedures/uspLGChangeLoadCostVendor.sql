@@ -53,6 +53,7 @@ BEGIN
 			,[dblTax]
 			,[dblDiscount]
 			,[dblExchangeRate]
+			,[intCurrencyExchangeRateTypeId]
 			,[ysnSubCurrency]
 			,[intSubCurrencyCents]
 			,[intAccountId]
@@ -104,7 +105,8 @@ BEGIN
 			,[intFreightTermId] = NULL
 			,[dblTax] = 0
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = CASE WHEN (A.intCurrencyId <> @DefaultCurrencyId) THEN 0 ELSE 1 END
+			,[dblExchangeRate] = A.dblFX
+			,[intCurrencyExchangeRateTypeId] = FX.intForexRateTypeId
 			,[ysnSubCurrency] =	CC.ysnSubCurrency
 			,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
@@ -142,12 +144,24 @@ BEGIN
 							'AP Clearing'
 						) itemAccnt
 			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = A.intCurrencyId
 			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 			OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
 						WHERE CT.intContractDetailId = CTC.intContractDetailId
 							AND A.intItemId = CTC.intItemId
 							AND A.intEntityVendorId = CTC.intVendorId
 						) CTC
+			OUTER APPLY (SELECT	TOP 1  
+				intForexRateTypeId = RD.intRateTypeId
+				,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+							THEN 1/RD.[dblRate] 
+							ELSE RD.[dblRate] END 
+				FROM tblSMCurrencyExchangeRate ER
+				JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+				WHERE @DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
+					AND ((ER.intFromCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+						OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
+				ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE A.intLoadCostId = @intLoadCostId
             AND A.intLoadDetailId NOT IN 
                 (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
