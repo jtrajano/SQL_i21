@@ -218,7 +218,9 @@ BEGIN TRY
 
 					IF @strDistributionOption = 'LRF'
 					BEGIN						
-						EXEC uspSCCreateTicketLoadCostPayable @TICKET_ID = @intTicketId, @POST = 0						
+
+						EXEC uspSCCreateTicketLoadCostPayable @TICKET_ID = @intTicketId, @POST = 0
+						
 					END
 
 
@@ -264,6 +266,7 @@ BEGIN TRY
 
 					WHILE @@FETCH_STATUS = 0
 					BEGIN
+						
 						SELECT @intShipmentReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
 
 						DECLARE @_intIRVendorId INT
@@ -274,17 +277,17 @@ BEGIN TRY
 							[intBillId] [INT] PRIMARY KEY,
 							UNIQUE ([intBillId])
 						);
+
 						INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(AP.intBillId) FROM tblAPBillDetail AP
 						LEFT JOIN tblICInventoryReceiptItem IC ON IC.intInventoryReceiptItemId = AP.intInventoryReceiptItemId
-						WHERE IC.intInventoryReceiptId = @InventoryReceiptId
-						SELECT @InventoryReceiptId
+						WHERE IC.intInventoryReceiptId = @InventoryReceiptId						
 						DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
 						FOR
 						SELECT intBillId FROM #tmpVoucherDetail
 						OPEN voucherCursor;
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 						WHILE @@FETCH_STATUS = 0
-						BEGIN								
+						BEGIN				
 							EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
 							SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 							IF @ysnPosted = 1
@@ -306,8 +309,7 @@ BEGIN TRY
 									RAISERROR(@ErrorMessage, 11, 1);
 									RETURN;
 								END
-							END
-
+							END							
 							DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 							/*
@@ -450,6 +452,67 @@ BEGIN TRY
 					END
 					CLOSE intListCursor  
 					DEALLOCATE intListCursor 
+
+
+
+					IF @strDistributionOption = 'LRF'
+					BEGIN						
+
+						IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetailLRF') IS NOT NULL
+							DROP TABLE #tmpVoucherDetailLRF
+						CREATE TABLE #tmpVoucherDetailLRF (
+							[intBillId] [INT] PRIMARY KEY,
+							UNIQUE ([intBillId])
+						);
+						--- GET ALL THE PREPAYMENT  CREATED FROM VENDOR PREPAYMENT LOAD COST CHARGE
+						INSERT INTO #tmpVoucherDetailLRF(intBillId)
+						SELECT DISTINCT BILL.intBillId FROM tblAPBill BILL
+							JOIN tblAPBillDetail BILL_DETAIL
+								ON BILL.intBillId = BILL_DETAIL.intBillId
+						WHERE BILL.intTransactionType = 2
+							AND intScaleTicketId = @intTicketId
+						
+						DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
+						FOR
+						SELECT intBillId FROM #tmpVoucherDetailLRF
+						OPEN voucherCursor;
+						FETCH NEXT FROM voucherCursor INTO @intBillId;
+						WHILE @@FETCH_STATUS = 0
+						BEGIN								
+							EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
+							SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+							
+							IF @ysnPosted = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill]
+									@post = 0
+									,@recap = 0
+									,@isBatch = 0
+									,@param = @intBillId
+									,@userId = @intUserId
+									,@success = @success OUTPUT
+									,@batchIdUsed = @batchIdUsed OUTPUT
+								END
+							IF ISNULL(@success, 0) = 0
+							BEGIN
+								SELECT @ErrorMessage = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+								IF ISNULL(@ErrorMessage, '') != ''
+								BEGIN
+									RAISERROR(@ErrorMessage, 11, 1);
+									RETURN;
+								END
+							END
+							
+							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2							
+							--DELETE FROM tblAPBill WHERE intBillId =  @intBillId
+							FETCH NEXT FROM voucherCursor INTO @intBillId;
+						END
+
+						CLOSE voucherCursor  
+						DEALLOCATE voucherCursor
+					END
+
+
 
 					-----UPDATE Contract scehdule and balances
 					--IF(@strDistributionOption = 'SPL')
@@ -702,7 +765,7 @@ BEGIN TRY
 								, @intMatchLoadContractId = LGLD.intSContractDetailId
 								FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 								WHERE LGL.intTicketId = @intMatchTicketId
-								SELECT @intMatchLoadDetailId
+								--SELECT @intMatchLoadDetailId
 								IF ISNULL(@intMatchLoadDetailId, 0) > 0
 								BEGIN
 									
