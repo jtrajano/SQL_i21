@@ -1283,7 +1283,7 @@ BEGIN
         [dbo].[fnAPCreateClaimARGLEntries](@TempPaymentIds, @UserId, @BatchId)
 
     --DUE TO ACCOUNT CREDIT
-	INSERT #ARPaymentGLEntries
+    INSERT #ARPaymentGLEntries
         ([dtmDate]
         ,[strBatchId]
         ,[intAccountId]
@@ -1330,7 +1330,7 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
-		,[dblDebit]                     = PD.[dblAmountPaid]
+		,[dblDebit]                     = PD.[dblPayment]
 		,[dblCredit]                    = @ZeroDecimal
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
@@ -1352,8 +1352,8 @@ BEGIN
 		,[strTransactionForm]           = @SCREEN_NAME
 		,[strModuleName]                = @MODULE_NAME
 		,[intConcurrencyId]             = 1
-		,[dblDebitForeign]              = PD.[dblAmountPaid]
-		,[dblDebitReport]               = PD.[dblBaseAmountPaid]
+		,[dblDebitForeign]              = PD.[dblPayment]
+		,[dblDebitReport]               = PD.[dblBasePayment]
 		,[dblCreditForeign]             = @ZeroDecimal
 		,[dblCreditReport]              = @ZeroDecimal
 		,[dblReportingRate]             = P.[dblExchangeRate]
@@ -1431,7 +1431,7 @@ BEGIN
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
 		,[dblDebit]                     = @ZeroDecimal
-		,[dblCredit]                    = PD.[dblAmountPaid]
+		,[dblCredit]                    = PD.[dblPayment]
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Payment from ' + PD.strTransactionId + ' Intra-Company Due From Account'
@@ -1454,8 +1454,8 @@ BEGIN
 		,[intConcurrencyId]             = 1
 		,[dblDebitForeign]              = @ZeroDecimal
 		,[dblDebitReport]               = @ZeroDecimal
-		,[dblCreditForeign]             = PD.[dblAmountPaid]
-		,[dblCreditReport]              = PD.[dblBaseAmountPaid]
+		,[dblCreditForeign]             = PD.[dblPayment]
+		,[dblCreditReport]              = PD.[dblBasePayment]
 		,[dblReportingRate]             = P.[dblExchangeRate]
 		,[dblForeignRate]               = P.[dblExchangeRate]
 		,[strRateType]                  = P.[strRateType]
