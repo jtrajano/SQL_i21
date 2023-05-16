@@ -73,39 +73,39 @@ BEGIN
 	GOTO _EXIT
 END
 
--- Check if it has an existing inventory trnsaction. If yes, update it instead of creating a new record. 
-BEGIN 
-	SELECT TOP 1 
-		@InventoryTransactionIdentityId = t.intInventoryTransactionId
-	FROM 
-		tblICInventoryTransaction t
-	WHERE
-		t.strTransactionId = @strTransactionId
-		AND t.strBatchId = @strBatchId
-		AND t.intTransactionId = @intTransactionId
-		AND t.intTransactionDetailId = @intTransactionDetailId
-		AND t.intItemId = @intItemId
-		AND t.intItemLocationId = @intItemLocationId
-		AND t.intItemUOMId = @intItemUOMId
-		AND t.intTransactionTypeId = @intTransactionTypeId
-		AND (t.intLotId = @intLotId OR (t.intLotId IS NULL AND @intLotId IS NULL))
-		AND (t.intSubLocationId = @intSubLocationId OR (t.intSubLocationId IS NULL AND @intSubLocationId IS NULL))
-		AND (t.intStorageLocationId = @intStorageLocationId OR (t.intStorageLocationId IS NULL AND intStorageLocationId IS NULL))
-		AND (t.dblCost = @dblCost OR (t.dblCost IS NULL AND @dblCost IS NULL))
-		AND (t.dblSalesPrice = @dblSalesPrice OR (t.dblSalesPrice IS NULL AND @dblSalesPrice IS NULL))
-		AND (t.intRelatedTransactionId = @intRelatedTransactionId OR (t.intRelatedTransactionId IS NULL AND @intRelatedTransactionId IS NULL))
-		AND (t.strRelatedTransactionId = @strRelatedTransactionId OR (t.strRelatedTransactionId IS NULL AND @strRelatedTransactionId IS NULL))
-		AND (t.strActualCostId = @strActualCostId OR (t.strActualCostId IS NULL AND @strActualCostId IS NULL))
-		AND @dblQty < 0 
-		AND t.dblQty < 0 
+---- Check if it has an existing inventory trnsaction. If yes, update it instead of creating a new record. 
+--BEGIN 
+--	SELECT TOP 1 
+--		@InventoryTransactionIdentityId = t.intInventoryTransactionId
+--	FROM 
+--		tblICInventoryTransaction t
+--	WHERE
+--		t.strTransactionId = @strTransactionId
+--		AND t.strBatchId = @strBatchId
+--		AND t.intTransactionId = @intTransactionId
+--		AND t.intTransactionDetailId = @intTransactionDetailId
+--		AND t.intItemId = @intItemId
+--		AND t.intItemLocationId = @intItemLocationId
+--		AND t.intItemUOMId = @intItemUOMId
+--		AND t.intTransactionTypeId = @intTransactionTypeId
+--		AND (t.intLotId = @intLotId OR (t.intLotId IS NULL AND @intLotId IS NULL))
+--		AND (t.intSubLocationId = @intSubLocationId OR (t.intSubLocationId IS NULL AND @intSubLocationId IS NULL))
+--		AND (t.intStorageLocationId = @intStorageLocationId OR (t.intStorageLocationId IS NULL AND intStorageLocationId IS NULL))
+--		AND (t.dblCost = @dblCost OR (t.dblCost IS NULL AND @dblCost IS NULL))
+--		AND (t.dblSalesPrice = @dblSalesPrice OR (t.dblSalesPrice IS NULL AND @dblSalesPrice IS NULL))
+--		AND (t.intRelatedTransactionId = @intRelatedTransactionId OR (t.intRelatedTransactionId IS NULL AND @intRelatedTransactionId IS NULL))
+--		AND (t.strRelatedTransactionId = @strRelatedTransactionId OR (t.strRelatedTransactionId IS NULL AND @strRelatedTransactionId IS NULL))
+--		AND (t.strActualCostId = @strActualCostId OR (t.strActualCostId IS NULL AND @strActualCostId IS NULL))
+--		AND @dblQty < 0 
+--		AND t.dblQty < 0 
 
-	UPDATE tblICInventoryTransaction 
-	SET 
-		dblQty = dblQty + @dblQty
-	WHERE 
-		intInventoryTransactionId = @InventoryTransactionIdentityId
-		AND @InventoryTransactionIdentityId IS NOT NULL 
-END 
+--	UPDATE tblICInventoryTransaction 
+--	SET 
+--		dblQty = dblQty + @dblQty
+--	WHERE 
+--		intInventoryTransactionId = @InventoryTransactionIdentityId
+--		AND @InventoryTransactionIdentityId IS NOT NULL 
+--END 
 
 -- If it does not exists, create a new transaction. 
 IF @InventoryTransactionIdentityId IS NULL 
@@ -297,8 +297,47 @@ BEGIN
 	-----------------------------------------
 	BEGIN 
 		EXEC uspICPostStockDailyQuantity 
-			@intInventoryTransactionId = @InventoryTransactionIdentityId
-			,@dblQty = @dblQty
+			NULL 
+			,0 
+			,@intItemId 
+			,@intItemLocationId 
+			,@intItemUOMId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
+			,@dtmDate 
+			,@dblQty 
+			,@dblUOMQty 
+			,@dblCost 
+			,@dblValue 
+			,@dblSalesPrice 
+			,@intCurrencyId 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@intLotId 
+			,@intRelatedInventoryTransactionId 
+			,@intRelatedTransactionId 
+			,@strRelatedTransactionId 
+			,@strTransactionForm 
+			,@intEntityUserSecurityId 
+			,@intCostingMethod 
+			,@intFobPointId 
+			,@intInTransitSourceLocationId 
+			,@intForexRateTypeId 
+			,@dblForexRate 
+			,@strDescription 
+			,@strActualCostId 
+			,@dblUnitRetail 
+			,@dblCategoryCostValue 
+			,@dblCategoryRetailValue 
+			,@intSourceEntityId 
+			,@intTransactionItemUOMId 
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 	END 
 END 
 

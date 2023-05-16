@@ -50,7 +50,7 @@ Type the overview for the table here.
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemPricing_Posting]
 		ON [dbo].[tblICItemPricing]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE ([dblLastCost], [dblStandardCost], [dblAverageCost])
+		INCLUDE ([dblLastCost], [dblStandardCost], [dblAverageCost], [strPricingMethod], [ysnIsPendingUpdate])
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -172,15 +172,15 @@ Type the overview for the table here.
 	
 	GO
 	
-CREATE TRIGGER [dbo].[trgtblICItemPricingDateChanged]
-    ON [dbo].[tblICItemPricing]
-   AFTER INSERT, UPDATE
-AS 
-BEGIN
-    SET NOCOUNT ON;
+--CREATE TRIGGER [dbo].[trgtblICItemPricingDateChanged]
+--    ON [dbo].[tblICItemPricing]
+--   AFTER INSERT, UPDATE
+--AS 
+--BEGIN
+--    SET NOCOUNT ON;
 
-   UPDATE tblICItemPricing
-      SET tblICItemPricing.dtmDateChanged = GETDATE()
-     FROM   inserted
-    WHERE tblICItemPricing.intItemPricingId = inserted.intItemPricingId
-END
+--   UPDATE tblICItemPricing
+--      SET tblICItemPricing.dtmDateChanged = GETDATE()
+--     FROM   inserted
+--    WHERE tblICItemPricing.intItemPricingId = inserted.intItemPricingId
+--END
