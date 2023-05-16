@@ -690,61 +690,6 @@ BEGIN TRY
 
 					/* End of Update Existing record if there's record found. */
 					END
-
-					/* Alter data of TIN Number. */
-					IF @strTINNumber IS NOT NULL
-						BEGIN
-							DECLARE @strOldTINNumber NVARCHAR(100)
-								,@intOldCompanyLocationId INT
-
-							-- Insert / Update TIN number linked to the sample / batch
-							SELECT @strOldTINNumber = TIN.strTINNumber
-								,@intOldCompanyLocationId = B.intLocationId
-							FROM tblQMTINClearance TIN
-							INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
-							OUTER APPLY (
-								SELECT intBatchId
-									,intLocationId
-								FROM tblMFBatch
-								WHERE intBatchId = @intProductValueId
-								) B
-							WHERE S.intSampleId = @intSampleId
-
-
-							/* Create new data of TIN Number. */
-							IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
-								BEGIN
-									/* Delink old TIN number if there's an existing one and the TIN number has changed. */
-									IF @strOldTINNumber IS NOT NULL
-										BEGIN
-											EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strOldTINNumber
-																	 , @intBatchId			 = @intBatchId
-																	 , @intCompanyLocationId = @intOldCompanyLocationId
-																	 , @intEntityId			 = @intEntityUserId
-																	 , @ysnDelink			 = 1
-										END
-									/* End of Delink old TIN number if there's an existing one and the TIN number has changed. */
-
-									/* Link new TIN number with the pre-shipment sample / batch. */
-									EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strTINNumber
-															 , @intBatchId			 = @intProductValueId
-															 , @intCompanyLocationId = @intMixingUnitLocationId
-															 , @intEntityId			 = @intEntityUserId
-															 , @ysnDelink			 = 0
-
-									UPDATE tblQMSample
-									SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId
-															 FROM tblQMTINClearance
-															 WHERE strTINNumber = @strTINNumber
-															   AND intBatchId = @intProductValueId
-															   AND intCompanyLocationId = @intMixingUnitLocationId)
-									WHERE intSampleId = @intSampleId;
-
-								/* End Create new data of TIN Number. */
-								END
-
-					/* End of Alter data of TIN Number. */
-					END
 			
 			/* End of Check if Batch ID is supplied in the template. */
 			END
@@ -1565,6 +1510,61 @@ BEGIN TRY
 				SET intProductTypeId = 13
 					,intProductValueId = @intBatchId
 				WHERE intSampleId = @intSampleId
+			END
+
+			/* Alter data of TIN Number. */
+			IF @strTINNumber IS NOT NULL
+				BEGIN
+					DECLARE @strOldTINNumber NVARCHAR(100)
+						,@intOldCompanyLocationId INT
+
+					-- Insert / Update TIN number linked to the sample / batch
+					SELECT @strOldTINNumber = TIN.strTINNumber
+						,@intOldCompanyLocationId = B.intLocationId
+					FROM tblQMTINClearance TIN
+					INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
+					OUTER APPLY (
+						SELECT intBatchId
+							,intLocationId
+						FROM tblMFBatch
+						WHERE intBatchId = @intBatchId
+						) B
+					WHERE S.intSampleId = @intSampleId
+
+
+					/* Create new data of TIN Number. */
+					IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
+						BEGIN
+							/* Delink old TIN number if there's an existing one and the TIN number has changed. */
+							IF @strOldTINNumber IS NOT NULL
+								BEGIN
+									EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strOldTINNumber
+																, @intBatchId			 = @intBatchId
+																, @intCompanyLocationId = @intOldCompanyLocationId
+																, @intEntityId			 = @intEntityUserId
+																, @ysnDelink			 = 1
+								END
+							/* End of Delink old TIN number if there's an existing one and the TIN number has changed. */
+
+							/* Link new TIN number with the pre-shipment sample / batch. */
+							EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strTINNumber
+														, @intBatchId			 = @intBatchId
+														, @intCompanyLocationId = @intMixingUnitLocationId
+														, @intEntityId			 = @intEntityUserId
+														, @ysnDelink			 = 0
+
+							UPDATE tblQMSample
+							SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId
+														FROM tblQMTINClearance
+														WHERE strTINNumber = @strTINNumber
+														AND intBatchId = @intBatchId
+														AND intCompanyLocationId = @intMixingUnitLocationId)
+							WHERE intSampleId = @intSampleId;
+
+						/* End Create new data of TIN Number. */
+						END
+
+			/* End of Alter data of TIN Number. */
 			END
 		END
 
