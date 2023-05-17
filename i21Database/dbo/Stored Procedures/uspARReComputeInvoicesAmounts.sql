@@ -65,7 +65,7 @@ INNER JOIN
 	@InvoiceIds IID
 		ON ARID.[intInvoiceId] = IID.[intHeaderId]
 	
-	
+
 UPDATE ARID
 SET
 	 ARID.[dblQtyOrdered]					= ISNULL(ARID.[dblQtyOrdered], @ZeroDecimal)
@@ -227,7 +227,7 @@ SET
 										THEN
 											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblShipmentNetWt]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblUnitPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblShipmentNetWt]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
 										ELSE
-											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]())
+											[dbo].fnRoundBanker([dbo].fnRoundBanker(((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()) - [dbo].fnRoundBanker((((ARID.[dblPrice] / ARID.[dblSubCurrencyRate]) * ARID.[dblQtyShipped]) * (ARID.[dblDiscount]/100.00)), [dbo].[fnARGetDefaultDecimal]()), [dbo].[fnARGetDefaultDecimal]()) - ARID.[dblTotalTax]
 									END							
 								  )
 							END)
@@ -252,8 +252,8 @@ INNER JOIN
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 WHERE
 	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
-		
-	
+		 
+
 UPDATE ARI	
 SET
 	 ARI.[dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
