@@ -444,10 +444,10 @@ BEGIN
 		tblCMBorrowingFacilityLimitDetail
 	WHERE intBorrowingFacilityLimitId = @BorrowingFacilityLimitId
 	  AND ysnDefault = 1
+END
 
 	SET @DefaultPayToBankAccountId = dbo.fnARGetCustomerDefaultPayToBankAccount(@EntityCustomerId, @DefaultCurrency, @CompanyLocationId)
 	SET @PayToCashBankAccountId = ISNULL(@PayToCashBankAccountId, ISNULL(@BankAccountId, @DefaultPayToBankAccountId))
-END
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
