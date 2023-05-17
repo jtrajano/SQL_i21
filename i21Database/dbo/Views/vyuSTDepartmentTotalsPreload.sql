@@ -31,7 +31,3 @@ SELECT DISTINCT
 FROM dbo.tblICCategory AS Cat 
 INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments 
 	ON StoreDepartments.intCategoryId = Cat.intCategoryId
-WHERE (CASE 
-	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
-	THEN StoreDepartments.intGeneralItemId 
-	ELSE StoreDepartments.intSubcategoryItemId END) IS NOT NULL
