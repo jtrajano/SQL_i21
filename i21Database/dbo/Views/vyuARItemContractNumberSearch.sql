@@ -13,8 +13,9 @@ SELECT DISTINCT
 	 , ysnPrepaid				= NULL  
 	 , intCategoryId			= intCategoryId
 	 , strCategory				= strCategory
-	 , strPrepayment			= CASE WHEN ISNULL(strPrepayment, '') = '' AND CP.ysnAllowContractWithoutPrepayment = 0 THEN 'Not Selectable without Prepayment' ELSE strPrepayment END
+	 , strPrepayment			= CASE WHEN (ISNULL(strPrepayment, '') = '' or strPrepayment = strInvoiceNumber) AND CP.ysnAllowContractWithoutPrepayment = 0 THEN 'Not Selectable without Prepayment' ELSE strPrepayment END
 	 , strItemNo				= CTICD.strItemNo
+	 , strInvoiceNumber			= CTICD.strInvoiceNumber
 FROM dbo.tblCTItemContractHeader CTICH
 CROSS APPLY 
    ( 
@@ -28,6 +29,7 @@ INNER JOIN (
 		, strCategory	= ICC.strCategoryCode
 		, strPrepayment	= ARI.strInvoiceNumber
 		, strItemNo		= ICI.strItemNo
+		, strInvoiceNumber = ARI.strInvoiceNumber
 	FROM tblCTItemContractDetail CTICD
 	INNER JOIN tblICItem ICI
 	ON CTICD.intItemId = ICI.intItemId
@@ -51,6 +53,7 @@ INNER JOIN (
 		, strCategory	= ICC.strCategoryCode
 		, strPrepayment	= ARI.strInvoiceNumber
 		, strItemNo		= ''
+		, strInvoiceNumber =''
 	FROM tblCTItemContractHeaderCategory CTICHC
 	INNER JOIN tblICCategory ICC
 	ON CTICHC.intCategoryId = ICC.intCategoryId
