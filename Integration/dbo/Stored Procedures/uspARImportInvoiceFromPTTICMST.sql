@@ -101,7 +101,7 @@ SELECT
 							END),
 	[strSourceTransaction] = 'Store Charge',
 	[strSourceId] = pttic_ivc_no,
-	[intSourceId] = pttic_ivc_no,
+	[intSourceId] = A4GLIdentity,
 	[strComments] = pttic_comments,
 	[intAccountId] = @ARAccount, 
 	[ysnPost] = 0,
