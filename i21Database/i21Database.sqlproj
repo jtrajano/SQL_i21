@@ -1377,6 +1377,15 @@
     <Build Include="dbo\Tables\tblSTCheckoutTankVarianceCalculation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCalculateTankVariance.sql" />
     <Build Include="dbo\Views\vyuSTGetTankVarianceCalculation.sql" />
+    <Build Include="dbo\Tables\tblTMTankReconciliation.sql" />
+    <Build Include="dbo\Tables\tblTMTankReconciliationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGenerateDataForTankReconciliation.sql" />
+    <Build Include="dbo\Views\vyuTMTankReconciliation.sql" />
+    <Build Include="dbo\Functions\fnTMIsConsumptionSiteAtAStore.sql" />
+    <Build Include="dbo\Functions\fnTMGetFuelTankReadingStartOrEndVolume.sql" />
+    <Build Include="dbo\Functions\fnTMGetSalesFromStoreEOD.sql" />
+    <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
+    <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
