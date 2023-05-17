@@ -32,12 +32,10 @@ SELECT
 	,dtmSContractDate
 	,strCustomer
 	,dblQty = ROUND(dblQty, 2)
+	,dblUnitQty = ROUND(dblUnitQty, 2)
 	,strUOM
 	,intDays
 	,dblSBasis = ROUND(dblSBasis, 2)
-	,intCurrencyId
-	,strCurrency
-	,intUnitMeasureId
 	,intCompanyLocationId
 	,intCommodityId
 	,intAllocationDetailId
