@@ -1531,6 +1531,7 @@
     <Build Include="dbo\Stored Procedures\uspSMBatchAuditLogNested.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
+    <Build Include="dbo\Views\vyuMFDemandDetailContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
