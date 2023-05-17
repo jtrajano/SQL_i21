@@ -36,7 +36,7 @@ BEGIN
 			, intScaleSetupId INT
 			, intTicketFormatId INT
 			, intTicketPrintOptionId INT
-
+			
 			, [ysnSuppressCashPrice] BIT NULL 
 			, [ysnSuppressCompanyName] BIT NULL
 			, [ysnSuppressSplit] BIT NULL
@@ -46,6 +46,17 @@ BEGIN
 
 			, [intSuppressDiscountOptionId] INT NULL
 		)
+
+
+
+		SET  @intTicketPrintOptionId = ISNULL(@intTicketPrintOptionId, -1)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketPrintOption WHERE intTicketPrintOptionId = @intTicketPrintOptionId AND intScaleSetupId = @intScaleSetupId)
+		BEGIN
+			SELECT TOP 1 @intTicketPrintOptionId = intTicketPrintOptionId FROM tblSCTicketPrintOption
+				WHERE intScaleSetupId = @intScaleSetupId
+					AND ysnPrintCustomerCopy = 1
+		END
+
 
 		--PUT THE VARIABLE IN THE TEMP TABLE
 		--USE THE PARAMETER AS THE VALUE
@@ -69,6 +80,8 @@ BEGIN
 			FROM @PRINT_RELATED_TABLE PRINT_RELATED_TABLE
 				JOIN tblSCTicketFormat TICKET_FORMAT
 					ON PRINT_RELATED_TABLE.intTicketFormatId = TICKET_FORMAT.intTicketFormatId
+
+			
 		END
 	
 		SELECT
@@ -249,6 +262,7 @@ BEGIN
 			vyuSCPrintPreviewTicketView PRINT_PREVIEW
 		JOIN @PRINT_RELATED_TABLE PRINT_RELATED_TABLE
 			ON PRINT_PREVIEW.intTicketId = PRINT_RELATED_TABLE.intTicketId
+				AND PRINT_PREVIEW.intTicketPrintOptionId = PRINT_RELATED_TABLE.intTicketPrintOptionId
 		WHERE PRINT_PREVIEW.intTicketId = @intTicketId
 	END
 	
