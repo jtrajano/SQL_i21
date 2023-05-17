@@ -2490,6 +2490,7 @@
     <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
     <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPGetDebitMemoItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPValidatePostPayment.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
