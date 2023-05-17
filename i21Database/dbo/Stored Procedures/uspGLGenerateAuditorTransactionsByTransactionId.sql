@@ -10,6 +10,9 @@ BEGIN
 	SET ANSI_NULLS ON;
 	SET NOCOUNT ON;
 
+
+    SET @dtmDateTo = DATEADD(SECOND,59, DATEADD(MINUTE, 59, DATEADD(HOUR, 23, DATEADD(dd, 0, DATEDIFF(dd, 0, @dtmDateTo)))))
+
     DECLARE @strError NVARCHAR(MAX)
 
     DELETE [dbo].[tblGLAuditorTransaction] WHERE intGeneratedBy = @intEntityId AND intType = 1;

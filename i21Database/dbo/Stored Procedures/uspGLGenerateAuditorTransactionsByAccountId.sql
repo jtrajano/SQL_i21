@@ -22,6 +22,9 @@ BEGIN
     DECLARE @intDefaultCurrencyId INT, @strDefaultCurrency NVARCHAR(10)
     SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId, @strDefaultCurrency= strCurrency FROM 
     tblSMCompanyPreference A JOIN tblSMCurrency B on A.intDefaultCurrencyId = B.intCurrencyID
+
+    SET @dtmDateTo = DATEADD(SECOND,59, DATEADD(MINUTE, 59, DATEADD(HOUR, 23, DATEADD(dd, 0, DATEDIFF(dd, 0, @dtmDateTo)))))
+
     BEGIN TRANSACTION;
 
 
