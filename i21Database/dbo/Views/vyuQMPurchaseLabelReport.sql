@@ -12,7 +12,7 @@ CASE WHEN intSampleTypeId =2 THEN A.dblB1QtyBought ELSE A.dblRepresentingQty END
 A.strGardenMark,  
 CASE WHEN A.intContractDetailId IS NULL THEN B.strTeaType ELSE CT.strTeaType END strTeaType,  
 CASE WHEN A.intContractDetailId IS NULL THEN B.dblWeightPerUnit ELSE CT.dblWeightPerUnit END dblWeightPerUnit,
-CASE WHEN A.intContractDetailId IS NULL THEN B.dblWeightPerUnit * B.dblTotalQuantity ELSE CT.dblWeightPerUnit* CT.dblTotalQuantity END dblTotalWeight,
+A.dblSampleQty AS dblTotalWeight,
 A.strRepresentLotNumber,
 A.strSaleNumber,
 A.dblB1Price, 
