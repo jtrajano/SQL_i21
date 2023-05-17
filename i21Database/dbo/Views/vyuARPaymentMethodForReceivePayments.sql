@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARPaymentMethodForReceivePayments]
 AS
 SELECT 
-	 intId					= ROW_NUMBER() OVER(ORDER BY intPaymentMethodID DESC)
+	 intId					= CAST(ROW_NUMBER() OVER(ORDER BY intPaymentMethodID DESC) AS INT)
 	,intPaymentMethodID		= PM.intPaymentMethodID
 	,strPaymentMethod		= PM.strPaymentMethod
 	,ysnActive				= PM.ysnActive
@@ -18,7 +18,7 @@ WHERE strPaymentMethod <> 'Credit Card' and ysnActive = 1
 UNION ALL 
 
 SELECT 
-	 intId					= ROW_NUMBER() OVER(ORDER BY ECI.intEntityCardInfoId) + (SELECT COUNT(*) FROM tblSMPaymentMethod WHERE strPaymentMethod <> 'Credit Card' and ysnActive = 1)
+	 intId					= CAST(ROW_NUMBER() OVER(ORDER BY ECI.intEntityCardInfoId) + (SELECT COUNT(*) FROM tblSMPaymentMethod WHERE strPaymentMethod <> 'Credit Card' and ysnActive = 1) AS INT)
 	,intPaymentMethodID		= 11
 	,strCreditCardNumber	= ECI.strCreditCardNumber
 	,ysnActive				= ECI.ysnActive
