@@ -442,6 +442,13 @@ BEGIN
 				,strCommodityCode
 		) A
 
+		/*GET IA*/
+		DECLARE @dblDPIA DECIMAL(18,6)
+		SELECT @dblDPIA = ABS(SUM(dblIn) - SUM(dblOut))
+		FROM #DelayedPricingALL AA
+		WHERE strTransactionType = 'Inventory Adjustment'
+			AND dtmDate = @dtmReportDate
+
 		/*****BEGINNING*****/
 		INSERT INTO @CompanyOwnedData
 		SELECT 3
@@ -587,6 +594,34 @@ BEGIN
 			,strUOM
 			,D.dblUnits
 
+		DECLARE @dblDPReversedSettlementsWithNoPayment DECIMAL(18,6)
+		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
+		SELECT @dblDPReversedSettlementsWithNoPayment = SUM(dblUnpaid)
+			,@dblDPReversedSettlementsWithPayment = SUM(dblPaid)
+		FROM (
+			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+			FROM tblGRStorageHistory SH
+			INNER JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblGRStorageType ST
+				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			INNER JOIN tblICCommodity IC
+				ON IC.intCommodityId = CS.intCommodityId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemUOMId = CS.intItemUOMId
+			INNER JOIN tblICUnitMeasure UM
+				ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+			LEFT JOIN tblAPBill AP
+				ON (AP.strVendorOrderNumber = SH.strSettleTicket OR AP.strVendorOrderNumber = CS.strStorageTicketNumber)
+					AND AP.intTransactionType = 2 --VPRE
+			WHERE SH.strType = 'Reverse Settlement'
+				AND CS.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+			GROUP BY AP.intBillId
+		) A
 
 		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
 		DECLARE @dblShipped DECIMAL(18,6)
@@ -652,14 +687,15 @@ BEGIN
 			,dblTotalBeginning = 0--ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) - ISNULL(CO.total,0)
 			,dblTotalIncrease = CU.total + 
 								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN 0 ELSE ISNULL(@dblIACompanyOwned,0) END + 
-								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN 0 ELSE ISNULL(@dblInternalTransfersDiff,0) END --+ 
+								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN 0 ELSE ISNULL(@dblInternalTransfersDiff,0) END + 
 								--ISNULL(@dblReceivedCompanyOwned,0)
+								ISNULL(@dblDPReversedSettlementsWithPayment,0)
 			,dblTotalDecrease = ABS(
 								(ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) +
 								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ISNULL(@dblIACompanyOwned,0) ELSE 0 END + 
-								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN ISNULL(@dblInternalTransfersDiff,0) ELSE 0 END + 
-								ISNULL(RS.dblUnits,0)
-								) --- ISNULL(DP.total,0))
+								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN ISNULL(@dblInternalTransfersDiff,0) ELSE 0 END +
+								ISNULL(@dblDPReversedSettlementsWithPayment,0)
+								) - ISNULL(@dblDPIA,0)
 			,0
 			,@strUOM
 		FROM (
@@ -686,33 +722,6 @@ BEGIN
 				AND A.intCommodityId = @intCommodityId
 			GROUP BY A.intCommodityId
 		) DP
-		OUTER APPLY (
-			/*
-				Reversed settlement for the day 
-			*/
-			SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
-			FROM tblGRStorageHistory SH
-			INNER JOIN tblGRCustomerStorage CS
-				ON CS.intCustomerStorageId = SH.intCustomerStorageId
-			INNER JOIN tblGRStorageType ST
-				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-					AND ST.ysnDPOwnedType = 1 --(DP only)
-			INNER JOIN tblICCommodity IC
-				ON IC.intCommodityId = CS.intCommodityId
-			INNER JOIN tblSMCompanyLocation CL
-				ON CL.intCompanyLocationId = CS.intCompanyLocationId
-			INNER JOIN tblICItemUOM UOM
-				ON UOM.intItemUOMId = CS.intItemUOMId
-			INNER JOIN tblICUnitMeasure UM
-				ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-			INNER JOIN tblAPBill AP
-				ON (AP.strVendorOrderNumber = SH.strSettleTicket OR AP.strVendorOrderNumber = CS.strStorageTicketNumber)
-					AND AP.intTransactionType = 12
-			WHERE SH.strType = 'Reverse Settlement'
-				AND CS.intCommodityId = @intCommodityId
-				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
-			GROUP BY UM.strUnitMeasure
-		) RS
 			ON DP.intCommodityId = CO.intCommodityId
 	END
 	/*******END******COMPANY OWNERSHIP (PAID)*************/
@@ -722,7 +731,8 @@ BEGIN
 	/******INCREASE*******/
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
-	SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
+	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
+		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0) + ISNULL(@dblDPReversedSettlementsWithPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
 		SELECT total = SUM(A.dblTotalDecrease)
@@ -734,30 +744,26 @@ BEGIN
 	) DP
 		ON DP.intCommodityId = C.intCommodityId
 	OUTER APPLY (
-		/*
-			Reversed settlement for the day 
-		*/
-		SELECT SUM(ISNULL(SH.dblUnits,0)) dblUnits
-		FROM tblGRStorageHistory SH
+		SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
+		FROM vyuGRTransferStorageSearchView TS
+		INNER JOIN tblGRStorageType ST_FROM
+			ON ST_FROM.intStorageScheduleTypeId = TS.intFromStorageTypeId
+		INNER JOIN tblGRStorageType ST_TO
+			ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 		INNER JOIN tblGRCustomerStorage CS
-			ON CS.intCustomerStorageId = SH.intCustomerStorageId
-		INNER JOIN tblGRStorageType ST
-			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-		INNER JOIN tblICCommodity IC
-			ON IC.intCommodityId = CS.intCommodityId
-		INNER JOIN tblSMCompanyLocation CL
-			ON CL.intCompanyLocationId = CS.intCompanyLocationId
+			ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
 		INNER JOIN tblICItemUOM UOM
 			ON UOM.intItemUOMId = CS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM
 			ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-		INNER JOIN tblAPBill AP
-			ON (AP.strVendorOrderNumber = SH.strSettleTicket OR AP.strVendorOrderNumber = CS.strStorageTicketNumber)
-				AND AP.intTransactionType = 12
-		WHERE SH.strType = 'Reverse Settlement'
-			AND CS.intCommodityId = C.intCommodityId
-			AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
-	) RS
+		/*
+			Transfer from Company owned to customer owned
+		*/
+		WHERE ST_FROM.strOwnedPhysicalStock = 'Company'
+			AND ST_TO.strOwnedPhysicalStock = 'Customer'
+			AND TS.intCommodityId = @intCommodityId
+			AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmReportDate
+	) TS
 	WHERE C.dtmReportDate = @dtmReportDate
 		AND C.intOrderNo = 2
 
