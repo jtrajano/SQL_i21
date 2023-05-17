@@ -66,4 +66,25 @@ SELECT DISTINCT * FROM (
   ad.intAccountCategoryId = 45      
  AND C.ysnIsUnposted = 0       
  AND (C.dblCredit != 0 OR C.dblDebit != 0)   
+ UNION ALL --0 cost item with tax
+ SELECT
+    ad.strAccountId    
+   ,D.intAccountId    
+   ,A.strReceiptNumber    
+   ,B.intInventoryReceiptItemId  
+   ,NULL AS intTransactionChargeId   
+   ,A.intInventoryReceiptId    
+   ,B.intItemId 
+ FROM tblICInventoryReceipt A
+ INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+ INNER JOIN tblICInventoryReceiptItemTax C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+ INNER JOIN tblGLDetail D
+  ON D.strTransactionId = A.strReceiptNumber    
+ AND D.intJournalLineNo = C.intInventoryReceiptItemTaxId
+  INNER JOIN vyuGLAccountDetail ad    
+  ON ad.intAccountId = D.intAccountId    
+ WHERE B.dblUnitCost = 0
+ AND C.dblTax != 0
+ AND D.ysnIsUnposted = 0
+ AND ad.intAccountCategoryId = 45
 ) tmp
