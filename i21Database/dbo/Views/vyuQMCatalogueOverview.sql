@@ -45,6 +45,7 @@ SELECT S.intSampleId
 	, S.dblSupplierValuationPrice
 	, strLastPrice = '0.0'
 	, S.intCompanyLocationId
+	, strBroker = Broker.strName
 FROM tblQMSample S
 LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 LEFT JOIN tblAPVendor VAN ON VAN.intEntityId = S.intEntityId
@@ -55,6 +56,7 @@ LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocat
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICCommodityAttribute GMO ON GardenMark.intOriginId = GMO.intCommodityAttributeId AND GMO.strType = 'Origin'
 LEFT JOIN tblMFBatch Batch ON Batch.intSampleId = S.intSampleId AND Batch.intLocationId =S.intLocationId 
+LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = Batch.intBrokerId
 LEFT JOIN dbo.vyuICSearchItem I ON I.intItemId = S.intItemId
 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = S.intMarketZoneId
