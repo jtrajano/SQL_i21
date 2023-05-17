@@ -8,7 +8,9 @@ strBTSwapToFXGLAccountId = E.strAccountId,
 strBTBankFeesAccountId = F.strAccountId,
 strBTInTransitAccountId = G.strAccountId,
 strBTForexDiffAccountId = H.strAccountId,
-strBankReconciliationBankFeesAccountId = I.strAccountId
+strBankReconciliationBankFeesAccountId = I.strAccountId,
+strBankFileFormatPrenoteAP = J.strName,
+strBankFileFormatPrenoteAR = K.strName
 FROM tblCMCompanyPreferenceOption A
 OUTER APPLY(
     SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intBTForwardFromFXGLAccountId
@@ -34,3 +36,9 @@ OUTER APPLY(
 OUTER APPLY(
     SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intBankReconciliationBankFeesAccountId
 )I
+OUTER APPLY(
+    SELECT TOP 1 strName FROM tblCMBankFileFormat WHERE intBankFileFormatId = A.intBankFileFormatPrenoteAPId
+)J
+OUTER APPLY(
+    SELECT TOP 1 strName FROM tblCMBankFileFormat WHERE intBankFileFormatId = A.intBankFileFormatPrenoteARId
+)K
