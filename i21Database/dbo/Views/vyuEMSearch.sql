@@ -31,7 +31,8 @@ SELECT
 		Applicator,
 		VendorOrCustomer =  Vendor + Customer,
 		b.strFederalTaxId,
-		strDefaultEntityType = ET.strType
+		strDefaultEntityType = ET.strType,
+		(select top 1 license.dtmLicenseExpirationDate  from tblAGApplicatorLicense license where a.intEntityId = license.intEntityId order by dtmLicenseExpirationDate asc) as dtmLicenseExpirationDate
 	FROM 		
 			(SELECT	intEntityId,
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
