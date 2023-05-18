@@ -5,6 +5,7 @@ SELECT
 	EffectiveItemPrice.intEffectiveItemPriceId,
 	EffectiveItemPrice.intItemId,
 	Item.strItemNo,
+	Item.strDescription,
 	EffectiveItemPrice.intItemLocationId,
 	ItemLocation.strLocationName,
 	EffectiveItemPrice.dblRetailPrice,
