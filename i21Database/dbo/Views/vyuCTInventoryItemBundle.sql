@@ -32,7 +32,8 @@ AS
 			ICC.strRegion,
 			ICC.strSeason,
 			ICC.strClass,
-			ICC.strProductLine
+			ICC.strProductLine,
+		   strXrefVendorProduct = x.strVendorProduct
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
 	JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	LEFT
@@ -42,6 +43,7 @@ AS
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		LEFT
 	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId LEFT 
 	JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId
+	left join tblICItemVendorXref x on x.intItemId = IM.intItemId
 			
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material')
 
@@ -76,7 +78,8 @@ AS
 			ICC.strRegion,
 			ICC.strSeason,
 			ICC.strClass,
-			ICC.strProductLine
+			ICC.strProductLine,
+		   strXrefVendorProduct = x.strVendorProduct
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -86,6 +89,7 @@ AS
 	LEFT JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		
 	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
 	LEFT JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId	
+	left join tblICItemVendorXref x on x.intItemId = IM.intItemId
 	WHERE	IM.strType IN ('Bundle')
 
 	UNION ALL
@@ -118,7 +122,8 @@ AS
 			ICC.strRegion,
 			ICC.strSeason,
 			ICC.strClass,
-			ICC.strProductLine
+			ICC.strProductLine,
+		   strXrefVendorProduct = x.strVendorProduct
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -129,6 +134,7 @@ AS
 	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
 	JOIN	vyuICGetBundleItem		BI	ON	BI.intBundleItemId			=	IM.intItemId 
 	LEFT  JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId
+	left join tblICItemVendorXref x on x.intItemId = IM.intItemId
 	--LEFT JOIN	vyuICGetBundleItem		B2	ON	B2.intItemId				=	IM.intItemId
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')
 	
@@ -162,7 +168,8 @@ AS
 			ICC.strRegion,
 			ICC.strSeason,
 			ICC.strClass,
-			ICC.strProductLine
+			ICC.strProductLine,
+		   strXrefVendorProduct = x.strVendorProduct
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -173,6 +180,7 @@ AS
 	LEFT JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		
 	JOIN	vyuICGetBundleItem		B2	ON	B2.intItemId				=	IM.intItemId
 	LEFT  JOIN	 vyuICGetCompactItem ICC ON ICC.intItemId = IM.intItemId
+	left join tblICItemVendorXref x on x.intItemId = IM.intItemId
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')
 
 
