@@ -21,6 +21,6 @@ BEGIN
 				dblQuantity < 0 AND --meaning outgoing
 				(dtmCreated >= @dtmDate AND dtmCreated < DATEADD(DAY, 1, @dtmDate))
 
-	RETURN @dblReturnValue
+	RETURN ISNULL(@dblReturnValue,0)
 END
 GO
