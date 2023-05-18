@@ -165,13 +165,12 @@ BEGIN TRY
 				WHERE ARPrice.intItemId = QD.intItemId
 					AND ARPrice.intEntityCustomerId = @CustomerId
 					AND ARPrice.intCustomerLocationId = EL.intEntityLocationId
-					AND ((ARPrice.strPriceBasis = 'O'
-							AND ARPrice.intEntityVendorId = SP.intEntityVendorId
-							AND ARPrice.intEntityLocationId = SP.intEntityLocationId)
-						OR (ARPrice.strPriceBasis = 'R'
-							AND ARPrice.intRackVendorId = SP.intEntityVendorId
-							AND ARPrice.intRackLocationId = SP.intEntityLocationId)
-					)) SpecialPrice
+					AND (
+						(ARPrice.strPriceBasis = 'O' AND ((ARPrice.intEntityVendorId = SP.intEntityVendorId AND ARPrice.intEntityLocationId = SP.intEntityLocationId) OR ARPrice.intEntityLocationId IS NULL))
+						OR 
+						(ARPrice.strPriceBasis = 'R' AND ((ARPrice.intRackVendorId = SP.intEntityVendorId AND ARPrice.intRackLocationId = SP.intEntityLocationId) OR ARPrice.intRackLocationId IS NULL))
+						)
+					) SpecialPrice
 			WHERE QD.ysnQuote = 1
 				AND EL.intEntityId = @CustomerId
 
@@ -237,8 +236,8 @@ BEGIN TRY
 				LEFT JOIN (
 					SELECT SP.intSpecialPriceId
 						, SP.dblDeviation
-						, dblRackPrice = (CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, OriginRack.intSupplyPointId, SP.intItemId, SP.strCostToUse)
-											WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, FixedRack.intSupplyPointId, SP.intRackItemId, SP.strCostToUse) END)
+						, dblRackPrice = (CASE WHEN SP.strPriceBasis = 'O' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, ISNULL(OriginRack.intSupplyPointId,@SupplyPointId), SP.intItemId, SP.strCostToUse)
+											WHEN SP.strPriceBasis = 'R' THEN [dbo].[fnTRGetRackPrice] (@dtmEffectiveDate, ISNULLL(FixedRack.intSupplyPointId,@SupplyPointId), SP.intRackItemId, SP.strCostToUse) END)
 					FROM tblARCustomerSpecialPrice SP
 					LEFT JOIN vyuTRSupplyPointView OriginRack ON OriginRack.intEntityVendorId = SP.intEntityVendorId
 						AND OriginRack.intEntityLocationId = SP.intEntityLocationId
