@@ -349,7 +349,9 @@ BEGIN
 			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[strJournalLineDescription] =  CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  
+				THEN 'Bank Account From Entry using Historical Rate.' 
+				ELSE '' END + GLAccnt.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
