@@ -96,7 +96,7 @@ BEGIN
 						a.strDescription,
 						c.strDescription,
 						@dtmDateFrom,
-						dbo.fnICGetItemRunningStockQty(a.intProduct, a.intLocationId, null, null, null, null, null, DATEADD(MINUTE, -1, @dtmDateFrom), 1) AS dtmStartVolume,
+						ISNULL(dbo.fnICGetItemRunningStockQty(a.intProduct, a.intLocationId, null, null, null, null, null, DATEADD(MINUTE, -1, @dtmDateFrom), 1),0) AS dtmStartVolume,
 						dbo.fnTMGetDeliveries(@dtmDateFrom, a.intSiteID, 0) as dblDeliveries,
 						CASE
 							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1
@@ -154,7 +154,7 @@ BEGIN
 						a.strDescription,
 						c.strDescription,
 						@dtmDateFrom,
-						dbo.fnICGetItemRunningStockQty(a.intProduct, a.intLocationId, null, null, null, null, null, DATEADD(MINUTE, -1, @dtmDateFrom), 1) AS dtmStartVolume,
+						ISNULL(dbo.fnICGetItemRunningStockQty(a.intProduct, a.intLocationId, null, null, null, null, null, DATEADD(MINUTE, -1, @dtmDateFrom), 1), 0) AS dtmStartVolume,
 						dbo.fnTMGetDeliveries(@dtmDateFrom, a.intSiteID, 0) as dblDeliveries,
 						CASE
 							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1

@@ -10,7 +10,10 @@
     [dblCalculatedInventory]            AS (dblStartVolume + dblDeliveries - dblSales),
     [dblEndVolume]                      NUMERIC (18, 6) DEFAULT 0 NOT NULL,
     [dblBookVariance]                   AS (dblEndVolume - (dblStartVolume + dblDeliveries - dblSales)),
-    [dblBookVariancePercentage]         AS ((dblEndVolume - (dblStartVolume + dblDeliveries - dblSales)) / dblEndVolume) * 100,
+    [dblBookVariancePercentage]         AS CASE WHEN dblEndVolume = 0 
+                                            THEN 0
+                                            ELSE ((dblEndVolume - (dblStartVolume + dblDeliveries - dblSales)) / dblEndVolume) * 100
+                                            END,
     [ysnIncluded]                       BIT             DEFAULT 1 NOT NULL,
     [intConcurrencyId]                  INT             DEFAULT 1 NOT NULL,
 
