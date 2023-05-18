@@ -4,6 +4,8 @@ CREATE PROCEDURE [dbo].[uspTRLoadProcessToInventoryReceipt]
 	,@ysnRecap AS BIT
 	,@ysnPostOrUnPost AS BIT
 	,@BatchId NVARCHAR(20) = NULL
+	,@ysnIRViewOnly AS BIT = 0    
+	,@strReceiptLink NVARCHAR(20) = NULL    
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -27,7 +29,7 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@SurchargeUOMId as int,
 		@FreightUOMId as int,
 		@FreightCostAllocationMethod AS INT
-
+		
 SELECT	TOP 1 @defaultCurrency = CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
 											WHERE	CP.intCompanyPreferenceId = 1 
@@ -51,10 +53,14 @@ BEGIN
      				ON SP.intSupplyPointId = TR.intSupplyPointId
 				LEFT JOIN vyuICGetItemStock IC
 			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId	
+				LEFT JOIN tblICInventoryReceipt IR ON TR.intInventoryReceiptId = IR.intInventoryReceiptId
      	WHERE	TL.intLoadHeaderId = @intLoadHeaderId 
      			AND TR.strOrigin = 'Terminal'
 				AND IC.strType != 'Non-Inventory'
-     			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
+     			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
+				AND TR.intInventoryReceiptId IS NOT NULL
+				AND IR.ysnPosted = 1;
+				
 	SELECT @total = COUNT(*) FROM #tmpAddItemReceiptResult;
     IF (@total = 0)
 	   BEGIN
@@ -67,8 +73,13 @@ BEGIN
 
 END
 
-	-- Validate Freight Only Distribution
-	SELECT DISTINCT LR.strReceiptLine
+	-- List all Distributions along with Customer Freight 
+	SELECT DISTINCT strReceiptLine = LR.strReceiptLine
+		,dblUnitCost = ISNULL(LR.dblUnitCost, 0) 
+		,dblFreightRate =  ISNULL(LR.dblFreightRate, 0) 
+		,dblPurSurcharge = ISNULL(LR.dblPurSurcharge, 0)
+		,ysnFreightOnly = ISNULL(CF.ysnFreightOnly, 0)
+		,intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
 	INTO #tmpList
 	FROM tblTRLoadDistributionDetail DD
 	JOIN tblTRLoadDistributionHeader DH ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -79,30 +90,81 @@ END
 										AND CF.inCustomerLocationId = DH.intShipToLocationId
 										AND CF.intCategoryId = I.intCategoryId
 										AND CF.strZipCode = SP.strZipCode
-	WHERE ISNULL(CF.ysnFreightOnly, 0) = 1
-		AND (ISNULL(LR.dblUnitCost, 0) != 0 OR ISNULL(LR.dblFreightRate, 0) != 0 OR ISNULL(LR.dblPurSurcharge, 0) != 0)
-		AND DH.intLoadHeaderId = @intLoadHeaderId
+
 	
-	DECLARE @ysnCompanyOwnedCarrier BIT = 0
-	SELECT @ysnCompanyOwnedCarrier = ISNULL(ysnCompanyOwnedCarrier, 0) FROM tblSMShipVia
+	--WHERE ISNULL(CF.ysnFreightOnly, 0) = 1
+		--AND (ISNULL(LR.dblUnitCost, 0) != 0 OR ISNULL(LR.dblFreightRate, 0) != 0 OR ISNULL(LR.dblPurSurcharge, 0) != 0)
+		WHERE (LR.strReceiptLine = @strReceiptLink OR @strReceiptLink IS NULL)
+		AND DH.intLoadHeaderId = @intLoadHeaderId
+
+	DECLARE @ysnCompanyOwnedInternalCarrier BIT = 0
+	SELECT @ysnCompanyOwnedInternalCarrier = ISNULL(ysnCompanyOwnedCarrier, 0) FROM tblSMShipVia
 	WHERE intEntityId = (SELECT intShipViaId = ISNULL(intShipViaId, 0) FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId)
+	AND strFreightBilledBy = 'Internal Carrier'
+	
+	
+	----@ysnPostOrUnPost
+	DECLARE	@FreightOnlyids AS NVARCHAR(MAX)
+	--SELECT	@FreightOnlyids = STUFF((SELECT DISTINCT ', ' + RTRIM(LTRIM(strReceiptLine))
+	--						FROM #tmpList --WHERE dblUnitCost != 0 OR dblFreightRate != 0 OR dblPurSurcharge!= 0
+	--						FOR XML PATH('')), 1, 2, '')
 
-	IF EXISTS (SELECT TOP 1 1 FROM #tmpList) AND (ISNULL(@ysnCompanyOwnedCarrier, 0) <> 1)
-	BEGIN
-		DECLARE	@ids AS NVARCHAR(MAX)
+		
+	--VALIDATE/disalllow if Freight there is Freight only and no amount in  fields
+	--but ALLOW/Skip validation error if there is at least one that is NON-Freight Only 
 
-		SELECT	@ids = STUFF((SELECT DISTINCT ', ' + RTRIM(LTRIM(strReceiptLine))
-								FROM #tmpList
-								FOR XML PATH('')), 1, 2, '')
 
-		SET @ErrMsg = 'Receipts (' + @ids + ') that was distributed as Freight Only should not have any cost, freight, or surcharge.'
-		RAISERROR(@ErrMsg, 16, 1)
-	END
+		SELECT * INTO #receipts FROM #tmpList
+			
+		IF(@ysnIRViewOnly = 1 AND @strReceiptLink IS NOT NULL)
+			BEGIN
+					IF EXISTS(	SELECT TOP 1 1 FROM #tmpList WHERE ysnFreightOnly = 1 )  AND NOT EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ysnFreightOnly = 0)
+					BEGIN
+						SET @ErrMsg = 'Inventory Receipt is not available for Receipt (' + @strReceiptLink + ') that was distributed as Freight Only.'
+						RAISERROR(@ErrMsg, 16, 1)
+					END
+			END
+					
+		ELSE
+			BEGIN
+				--LOOP thru each Recipt then check each distribution per Receipt link
+				DECLARE @RLink NVARCHAR(50)
+				WHILE EXISTS (SELECT TOP 1 1 FROM #receipts) 
+					BEGIN
+					SELECT TOP 1  @RLink = strReceiptLine FROM #receipts 
+
+
+					IF EXISTS(	SELECT TOP 1 1 FROM #receipts WHERE ysnFreightOnly = 1 AND strReceiptLine = @RLink AND dblUnitCost != 0 OR dblFreightRate != 0 OR dblPurSurcharge!= 0)  
+					   AND NOT EXISTS(SELECT TOP 1 1 FROM #receipts WHERE ysnFreightOnly = 0 AND strReceiptLine = @RLink )
+						BEGIN
+								IF(ISNULL(@ysnCompanyOwnedInternalCarrier,0) = 0)
+								BEGIN
+									SET @ErrMsg = 'Receipt (' + @RLink + ') that was distributed as Freight Only should not have any cost, freight, or surcharge.'
+									RAISERROR(@ErrMsg, 16, 1)
+								END
+						END
+					ELSE
+						BEGIN
+							IF(ISNULL(@ysnCompanyOwnedInternalCarrier,0) = 0)
+									BEGIN
+										SET @ErrMsg = 'Receipt (' + @RLink + ') that was distributed as Freight Only should not have any cost, freight, or surcharge.'
+										RAISERROR(@ErrMsg, 16, 1)
+									END
+						END
+					--RAISERROR(@ErrMsg, 16, 1)
+
+					DELETE	FROM #receipts WHERE	strReceiptLine = @RLink 
+					END
+			END
+			
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpList WHERE ysnFreightOnly = 1 AND ISNULL(@ysnCompanyOwnedInternalCarrier,0) = 1 ) 
+			BEGIN
+				RETURN
+			END
+
 
 	DROP TABLE #tmpList
 	-- End of Freight Only Validation
-
-
 
 	SELECT strReceiptType			= CASE WHEN min(TR.intContractDetailId) IS NULL THEN 'Direct'
 											WHEN min(TR.intContractDetailId) IS NOT NULL THEN 'Purchase Contract' END
@@ -174,7 +236,7 @@ END
 		,intSourceType
 		,intTaxGroupId
 	
-	-- Insert Entries to Stagging table that needs to processed to Transport Load
+	---- Insert Entries to Stagging table that needs to processed to Transport Load
 	INSERT into @ReceiptStagingTable(
 			strReceiptType
 			,intEntityVendorId
@@ -397,7 +459,7 @@ _PostOrUnPost:
 	DECLARE @ReceiptId INT
 			,@intEntityId INT
 			,@strTransactionId NVARCHAR(50);
-
+			
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemReceiptResult) 
 	BEGIN
 
