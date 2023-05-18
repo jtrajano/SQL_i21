@@ -255,12 +255,12 @@ BEGIN TRY
 			,[strMiscDescription] = item.strDescription
 			,[dblOrderQty] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
 							THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
-							ELSE LD.dblQuantity END - ISNULL(B.dblQtyBilled, 0)
+							ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0) - ISNULL(B.dblQtyBilled, 0)
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intOrderUOMId] = LD.intItemUOMId
 			,[dblQuantityToBill] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
 						THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
-						ELSE LD.dblQuantity END - ISNULL(B.dblQtyBilled, 0)
+						ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
 			,[dblCost] = (CASE WHEN intPurchaseSale = 3 
@@ -276,7 +276,7 @@ BEGIN TRY
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
 			,[dblNetWeight] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
 							THEN ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
-							ELSE LD.dblNet END - ISNULL(B.dblNetWeight, 0)
+							ELSE LD.dblNet -ISNULL(LD.dblDeliveredNet,0) END - ISNULL(B.dblNetWeight, 0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = SC.intCurrencyID
@@ -290,8 +290,8 @@ BEGIN TRY
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
 			,[ysnStage] = CAST(1 AS BIT)
-			,[intStorageLocationId] = ISNULL(LWC.intSubLocationId, CT.intSubLocationId)
-			,[intSubLocationId] = ISNULL(LWC.intStorageLocationId, CT.intStorageLocationId)
+			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
+			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 			/*Payment Info*/
 			,[intPayFromBankAccountId] = BA.intBankAccountId
 			,[strFinancingSourcedFrom] = CASE WHEN (BA.intBankAccountId IS NOT NULL) THEN 'Logistics' ELSE '' END
@@ -332,12 +332,7 @@ BEGIN TRY
 						AND BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge'
 						AND BD.intLoadId = L.intLoadId AND BD.intLoadDetailId = LD.intLoadDetailId) B
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
-		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
-		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
-		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
-		OUTER APPLY (
+		LEFT JOIN (
 			SELECT 
 				W.intLoadId,
 				W.intLoadWarehouseId,
@@ -346,12 +341,15 @@ BEGIN TRY
 				strSubLocation = CLSL.strSubLocationName,
 				strStorageLocation = SL.strName
 			FROM tblLGLoadWarehouse W
-			INNER JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId AND LWC.intLoadWarehouseId = W.intLoadWarehouseId
-			INNER JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
 			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
-			WHERE W.intLoadId = L.intLoadId
-		) AS LWC
+			) LW ON LW.intLoadId = L.intLoadId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadWarehouseId = LW.intLoadWarehouseId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
+		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+		LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = L.intBankAccountId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadContainerId = LWC.intLoadContainerId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		WHERE L.intLoadId = @intLoadId
 			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
 
