@@ -184,18 +184,6 @@ BEGIN
 			ON CO.intCommodityId = V.intCommodityId
 		GROUP BY V.intCommodityId
 
-		--/******INCREASE*******/
-		--UPDATE C
-		--SET dblTotalIncrease = V.total
-		--FROM @CompanyOwnedData C
-		--INNER JOIN (
-		--	SELECT intCommodityId
-		--		,total = SUM(dblQty)
-		--	FROM #Vouchers2
-		--	GROUP BY intCommodityId
-		--) V
-		--	ON C.intCommodityId = V.intCommodityId
-
 		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
 		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
 		BEGIN
@@ -277,6 +265,8 @@ BEGIN
 			,UM_REF.intCommodityUnitMeasureId
 		) A
 
+		/*DELETE PAY*/
+
 		UPDATE C
 		SET dblTotalDecrease = ISNULL(A.dblQty,0) + ISNULL(@dblVoidedPayment,0)
 		FROM @CompanyOwnedData C
@@ -349,8 +339,6 @@ BEGIN
 		) A ON A.intCommodityId = C.intCommodityId
 		WHERE C.intOrderNo = 2
 			AND C.dtmReportDate = @dtmReportDate
-
-		
 
 		DROP TABLE #Vouchers
 	END
@@ -569,11 +557,14 @@ BEGIN
 
 		DECLARE @dblDPReversedSettlementsWithNoPayment DECIMAL(18,6)
 		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
+		DECLARE @dblDPSettlementsWithDeletedPayment DECIMAL(18,6)
 		SELECT @dblDPReversedSettlementsWithNoPayment = SUM(dblUnpaid)
 			,@dblDPReversedSettlementsWithPayment = SUM(dblPaid)
+			,@dblDPSettlementsWithDeletedPayment = SUM(dblPaid2)
 		FROM (
-			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 			FROM tblGRStorageHistory SH
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -590,10 +581,10 @@ BEGIN
 			LEFT JOIN tblAPBill AP
 				ON (AP.strVendorOrderNumber = SH.strSettleTicket OR AP.strVendorOrderNumber = CS.strStorageTicketNumber)
 					AND AP.intTransactionType = 2 --VPRE
-			WHERE SH.strType = 'Reverse Settlement'
+			WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
 				AND CS.intCommodityId = @intCommodityId
 				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
-			GROUP BY AP.intBillId
+			GROUP BY AP.intBillId, SH.strType
 		) A
 
 		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
@@ -705,7 +696,7 @@ BEGIN
 	/******INCREASE*******/
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
-	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
+	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + @dblDPSettlementsWithDeletedPayment) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
 		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0) + ISNULL(@dblDPReversedSettlementsWithPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
