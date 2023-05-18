@@ -479,6 +479,15 @@ ELSE
 DECLARE @SystemManagerLicensingParentMenuId INT
 SELECT @SystemManagerLicensingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Licensing' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Azure AD (SSO)' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Azure AD (SSO)', N'System Manager', @SystemManagerParentMenuId, N'Azure AD (SSO)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1, intRow = 1 WHERE strMenuName = 'Azure AD (SSO)' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+
+DECLARE @SystemManagerAzureADParentMenuId INT
+SELECT @SystemManagerAzureADParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Azure AD (SSO)' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
 	VALUES (N'Setup', N'System Manager', @SystemManagerParentMenuId, N'Setup', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1, 1)
@@ -643,11 +652,34 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CRM.view.CustomerLicense?showSearch=true&searchCommand=CustomerLicense' WHERE strMenuName = 'Customer Licenses' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerLicensingParentMenuId
 
+/* Azure AD (SSO) */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Azure AD Mapped Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAzureADParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Azure AD Mapped Users', N'System Manager', @SystemManagerAzureADParentMenuId, N'Azure AD Mapped Users', N'Azure AD (SSO)', N'Screen', N'EntityManagement.view.UpdateActiveDirectoryUsers', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'EntityManagement.view.UpdateActiveDirectoryUsers' WHERE strMenuName = 'Azure AD Mapped Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAzureADParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Azure AD New Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAzureADParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Azure AD New Users', N'System Manager', @SystemManagerAzureADParentMenuId, N'Azure AD New Users', N'Azure AD (SSO)', N'Screen', N'EntityManagement.view.MapActiveDirectory', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'EntityManagement.view.MapActiveDirectory' WHERE strMenuName = 'Azure AD New Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAzureADParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerSetupParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Rapid Deployment', N'System Manager', @SystemManagerSetupParentMenuId, N'Rapid Deployment', N'Setup', N'Screen', N'i21.view.RapidDeployment?strModule=System Manager', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'i21.view.RapidDeployment?strModule=System Manager' WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerSetupParentMenuId
+
+
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerSetupParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Rapid Deployment', N'System Manager', @SystemManagerSetupParentMenuId, N'Rapid Deployment', N'Setup', N'Screen', N'i21.view.RapidDeployment?strModule=System Manager', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'i21.view.RapidDeployment?strModule=System Manager' WHERE strMenuName = 'Rapid Deployment' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerSetupParentMenuId
+
 
 --/* Start of Remodule*/
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'i21 Updates' AND strModuleName = 'Service Pack' AND intParentMenuID = @UtilitiesParentMenuId)
