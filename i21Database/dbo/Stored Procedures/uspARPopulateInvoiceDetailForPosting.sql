@@ -1399,7 +1399,7 @@ INNER JOIN (
         ,dblBaseDiscountAmount      = SUM(dblBaseDiscountAmount)
         ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
         ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
-		,dblCurrencyExchangeRate	= SUM(dblCurrencyExchangeRate)
+		,dblCurrencyExchangeRate	= AVG(dblCurrencyExchangeRate)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId

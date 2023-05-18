@@ -30,111 +30,6 @@ BEGIN
         ,@OverrideLineOfBusinessSegment = ysnOverrideLineOfBusinessSegment
     FROM tblARCompanyPreference
 
-    INSERT #ARPaymentGLEntries
-        ([dtmDate]
-        ,[strBatchId]
-        ,[intAccountId]
-        ,[dblDebit]
-        ,[dblCredit]
-        ,[dblDebitUnit]
-        ,[dblCreditUnit]
-        ,[strDescription]
-        ,[strCode]
-        ,[strReference]
-        ,[intCurrencyId]
-        ,[dblExchangeRate]
-        ,[dtmDateEntered]
-        ,[dtmTransactionDate]
-        ,[strJournalLineDescription]
-        ,[intJournalLineNo]
-        ,[ysnIsUnposted]
-        ,[intUserId]
-        ,[intEntityId]
-        ,[strTransactionId]
-        ,[intTransactionId]
-        ,[strTransactionType]
-        ,[strTransactionForm]
-        ,[strModuleName]
-        ,[intConcurrencyId]
-        ,[dblDebitForeign]
-        ,[dblDebitReport]
-        ,[dblCreditForeign]
-        ,[dblCreditReport]
-        ,[dblReportingRate]
-        ,[dblForeignRate]
-        ,[strRateType]
-        ,[strDocument]
-        ,[strComments]
-        ,[strSourceDocumentId]
-        ,[intSourceLocationId]
-        ,[intSourceUOMId]
-        ,[dblSourceUnitDebit]
-        ,[dblSourceUnitCredit]
-        ,[intCommodityId]
-        ,[intSourceEntityId]
-        ,[ysnRebuild])
-	--DEBIT PAYMENT HEADER
-	SELECT
-		 [dtmDate]                      = P.[dtmDatePaid]
-		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = ACCOUNT.intAccountId
-		,[dblDebit]                     = CASE WHEN P.[dblBaseAmountPaid] < 0 THEN @ZeroDecimal ELSE ABS(P.[dblBaseAmountPaid]) END
-		,[dblCredit]                    = CASE WHEN P.[dblBaseAmountPaid] < 0 THEN ABS(P.[dblBaseAmountPaid]) ELSE @ZeroDecimal END
-		,[dblDebitUnit]                 = @ZeroDecimal
-		,[dblCreditUnit]                = @ZeroDecimal
-		,[strDescription]               = 'Payment from ' + P.strCustomerName
-		,[strCode]                      = @CODE
-		,[strReference]                 = P.[strCustomerNumber]
-		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblExchangeRate], 1)
-		,[dtmDateEntered]               = P.[dtmPostDate]
-		,[dtmTransactionDate]           = P.[dtmDatePaid]
-		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
-		,[intJournalLineNo]             = P.[intTransactionId]
-		,[ysnIsUnposted]                = 0
-		,[intUserId]                    = P.[intUserId]
-		,[intEntityId]                  = P.[intEntityId]
-		,[strTransactionId]             = P.[strTransactionId]
-		,[intTransactionId]             = P.[intTransactionId]
-		,[strTransactionType]           = @SCREEN_NAME
-		,[strTransactionForm]           = @SCREEN_NAME
-		,[strModuleName]                = @MODULE_NAME
-		,[intConcurrencyId]             = 1
-		,[dblDebitForeign]              = CASE WHEN P.[dblAmountPaid] < 0 THEN @ZeroDecimal ELSE ABS(P.[dblAmountPaid]) END
-		,[dblDebitReport]               = CASE WHEN P.[dblBaseAmountPaid] < 0 THEN @ZeroDecimal ELSE ABS(P.[dblBaseAmountPaid]) END
-		,[dblCreditForeign]             = CASE WHEN P.[dblAmountPaid] < 0 THEN ABS(P.[dblAmountPaid]) ELSE @ZeroDecimal END
-		,[dblCreditReport]              = CASE WHEN P.[dblBaseAmountPaid] < 0 THEN ABS(P.[dblBaseAmountPaid]) ELSE @ZeroDecimal END
-		,[dblReportingRate]             = P.[dblExchangeRate]
-		,[dblForeignRate]               = P.[dblExchangeRate]
-		,[strRateType]                  = P.[strRateType]
-		,[strDocument]                  = NULL
-		,[strComments]                  = NULL
-		,[strSourceDocumentId]          = NULL
-		,[intSourceLocationId]          = NULL
-		,[intSourceUOMId]               = NULL
-		,[dblSourceUnitDebit]           = NULL
-		,[dblSourceUnitCredit]          = NULL
-		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = P.[intEntityCustomerId]
-		,[ysnRebuild]                   = NULL
-	FROM
-		#ARPostPaymentHeader P
-    OUTER APPLY (
-	    SELECT TOP 1 intAccountId = intOverrideAccount
-        FROM dbo.[fnARGetOverrideAccount](
-                 P.[intARAccountId]
-                ,CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
-				    WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
-			        ELSE P.[intAccountId]
-				 END
-                ,@OverrideCompanySegment
-				,@OverrideLocationSegment
-				,0
-			 )
-    ) ACCOUNT
-	WHERE
-		P.[ysnPost] = 1
-
     --CREDIT OVERPAYMENT
     INSERT #ARPaymentGLEntries
         ([dtmDate]
@@ -1299,117 +1194,117 @@ BEGIN
     FROM
         [dbo].[fnAPCreateClaimARGLEntries](@TempPaymentIds, @UserId, @BatchId)
 
-    --GAINLOSS FROM ROUNDING DECIMALS
-	IF NOT EXISTS(SELECT NULL FROM #ARPaymentGLEntries WHERE intAccountId IN (
-		SELECT TOP 1 GAINLOSS.intAccountId FROM #ARPostPaymentDetail P
-		OUTER APPLY (SELECT TOP 1 intAccountId = intOverrideAccount FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)) GAINLOSS)
-	)
-	BEGIN
-		INSERT #ARPaymentGLEntries
-			([dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,[strDocument]
-			,[strComments]
-			,[strSourceDocumentId]
-			,[intSourceLocationId]
-			,[intSourceUOMId]
-			,[dblSourceUnitDebit]
-			,[dblSourceUnitCredit]
-			,[intCommodityId]
-			,[intSourceEntityId]
-			,[ysnRebuild])
-		SELECT TOP 1
-			 [dtmDate]                      = P.[dtmDatePaid]
-			,[strBatchId]                   = P.[strBatchId]
-			,[intAccountId]                 = GAINLOSS.[intAccountId]
-			,[dblDebit]                     = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN ABS(ConversionRoundingGainLoss.dblConversionDifference) ELSE @ZeroDecimal END
-			,[dblCredit]                    = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN @ZeroDecimal ELSE ABS(ConversionRoundingGainLoss.dblConversionDifference) END
-			,[dblDebitUnit]                 = @ZeroDecimal
-			,[dblCreditUnit]                = @ZeroDecimal
-			,[strDescription]               = 'Payment for ' + P.strTransactionNumber
-			,[strCode]                      = @CODE
-			,[strReference]                 = P.[strCustomerNumber]
-			,[intCurrencyId]                = FUNCTIONCURRENCY.[intCurrencyId]
-			,[dblExchangeRate]              = 1
-			,[dtmDateEntered]               = P.[dtmPostDate]
-			,[dtmTransactionDate]           = P.[dtmDatePaid]
-			,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
-			,[intJournalLineNo]             = P.[intTransactionDetailId]
-			,[ysnIsUnposted]                = 0
-			,[intUserId]                    = P.[intUserId]
-			,[intEntityId]                  = P.[intEntityId]
-			,[strTransactionId]             = P.[strTransactionId]
-			,[intTransactionId]             = P.[intTransactionId]
-			,[strTransactionType]           = @SCREEN_NAME
-			,[strTransactionForm]           = @SCREEN_NAME
-			,[strModuleName]                = @MODULE_NAME
-			,[intConcurrencyId]             = 1
-			,[dblDebitForeign]              = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN ABS(ConversionRoundingGainLoss.dblConversionDifference) ELSE @ZeroDecimal END
-			,[dblDebitReport]               = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN ABS(ConversionRoundingGainLoss.dblConversionDifference) ELSE @ZeroDecimal END
-			,[dblCreditForeign]             = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN @ZeroDecimal ELSE ABS(ConversionRoundingGainLoss.dblConversionDifference) END
-			,[dblCreditReport]              = CASE WHEN ConversionRoundingGainLoss.dblConversionDifference < 0 THEN @ZeroDecimal ELSE ABS(ConversionRoundingGainLoss.dblConversionDifference) END
-			,[dblReportingRate]             = 1
-			,[dblForeignRate]               = 1
-			,[strRateType]                  = P.[strRateType]
-			,[strDocument]                  = NULL
-			,[strComments]                  = NULL
-			,[strSourceDocumentId]          = NULL
-			,[intSourceLocationId]          = NULL
-			,[intSourceUOMId]               = NULL
-			,[dblSourceUnitDebit]           = NULL
-			,[dblSourceUnitCredit]          = NULL
-			,[intCommodityId]               = NULL
-			,[intSourceEntityId]            = P.[intEntityCustomerId]
-			,[ysnRebuild]                   = NULL
-		FROM
-			#ARPostPaymentDetail P
-		OUTER APPLY (
-			SELECT TOP 1 intAccountId = intOverrideAccount
-			FROM dbo.[fnARGetOverrideAccount](P.[intTransactionAccountId], P.[intGainLossAccount], @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-		) GAINLOSS
-		OUTER APPLY (
-			SELECT TOP 1 [intCurrencyId] = intDefaultCurrencyId FROM tblSMCompanyPreference
-		) FUNCTIONCURRENCY
-		OUTER APPLY (
-			SELECT [dblConversionDifference] = (SUM([dblDebit]) - SUM([dblCredit])) FROM #ARPaymentGLEntries
-		) ConversionRoundingGainLoss
-		WHERE
-				P.[ysnPost] = 1
-			AND P.[strTransactionType] <> 'Claim'
-			AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
-			AND ConversionRoundingGainLoss.dblConversionDifference BETWEEN -1 AND 1 
-			AND ConversionRoundingGainLoss.dblConversionDifference <> 0
-	END
+	INSERT #ARPaymentGLEntries
+        ([dtmDate]
+        ,[strBatchId]
+        ,[intAccountId]
+        ,[dblDebit]
+        ,[dblCredit]
+        ,[dblDebitUnit]
+        ,[dblCreditUnit]
+        ,[strDescription]
+        ,[strCode]
+        ,[strReference]
+        ,[intCurrencyId]
+        ,[dblExchangeRate]
+        ,[dtmDateEntered]
+        ,[dtmTransactionDate]
+        ,[strJournalLineDescription]
+        ,[intJournalLineNo]
+        ,[ysnIsUnposted]
+        ,[intUserId]
+        ,[intEntityId]
+        ,[strTransactionId]
+        ,[intTransactionId]
+        ,[strTransactionType]
+        ,[strTransactionForm]
+        ,[strModuleName]
+        ,[intConcurrencyId]
+        ,[dblDebitForeign]
+        ,[dblDebitReport]
+        ,[dblCreditForeign]
+        ,[dblCreditReport]
+        ,[dblReportingRate]
+        ,[dblForeignRate]
+        ,[strRateType]
+        ,[strDocument]
+        ,[strComments]
+        ,[strSourceDocumentId]
+        ,[intSourceLocationId]
+        ,[intSourceUOMId]
+        ,[dblSourceUnitDebit]
+        ,[dblSourceUnitCredit]
+        ,[intCommodityId]
+        ,[intSourceEntityId]
+        ,[ysnRebuild])
+	--DEBIT PAYMENT HEADER
+	SELECT
+		 [dtmDate]                      = P.[dtmDatePaid]
+		,[strBatchId]                   = P.[strBatchId]
+		,[intAccountId]                 = ACCOUNT.intAccountId
+		,[dblDebit]                     = CASE WHEN GL.dblCredit < 0 THEN @ZeroDecimal ELSE ABS(GL.dblCredit) END
+		,[dblCredit]                    = CASE WHEN GL.dblCredit < 0 THEN ABS(GL.dblCredit) ELSE @ZeroDecimal END
+		,[dblDebitUnit]                 = @ZeroDecimal
+		,[dblCreditUnit]                = @ZeroDecimal
+		,[strDescription]               = 'Payment from ' + P.strCustomerName
+		,[strCode]                      = @CODE
+		,[strReference]                 = P.[strCustomerNumber]
+		,[intCurrencyId]                = P.[intCurrencyId]
+		,[dblExchangeRate]              = ISNULL(P.[dblExchangeRate], 1)
+		,[dtmDateEntered]               = P.[dtmPostDate]
+		,[dtmTransactionDate]           = P.[dtmDatePaid]
+		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
+		,[intJournalLineNo]             = P.[intTransactionId]
+		,[ysnIsUnposted]                = 0
+		,[intUserId]                    = P.[intUserId]
+		,[intEntityId]                  = P.[intEntityId]
+		,[strTransactionId]             = P.[strTransactionId]
+		,[intTransactionId]             = P.[intTransactionId]
+		,[strTransactionType]           = @SCREEN_NAME
+		,[strTransactionForm]           = @SCREEN_NAME
+		,[strModuleName]                = @MODULE_NAME
+		,[intConcurrencyId]             = 1
+		,[dblDebitForeign]              = CASE WHEN P.[dblAmountPaid] < 0 THEN @ZeroDecimal ELSE ABS(P.[dblAmountPaid]) END
+		,[dblDebitReport]               = CASE WHEN P.[dblBaseAmountPaid] < 0 THEN @ZeroDecimal ELSE ABS(P.[dblBaseAmountPaid]) END
+		,[dblCreditForeign]             = CASE WHEN P.[dblAmountPaid] < 0 THEN ABS(P.[dblAmountPaid]) ELSE @ZeroDecimal END
+		,[dblCreditReport]              = CASE WHEN P.[dblBaseAmountPaid] < 0 THEN ABS(P.[dblBaseAmountPaid]) ELSE @ZeroDecimal END
+		,[dblReportingRate]             = P.[dblExchangeRate]
+		,[dblForeignRate]               = P.[dblExchangeRate]
+		,[strRateType]                  = P.[strRateType]
+		,[strDocument]                  = NULL
+		,[strComments]                  = NULL
+		,[strSourceDocumentId]          = NULL
+		,[intSourceLocationId]          = NULL
+		,[intSourceUOMId]               = NULL
+		,[dblSourceUnitDebit]           = NULL
+		,[dblSourceUnitCredit]          = NULL
+		,[intCommodityId]               = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
+		,[ysnRebuild]                   = NULL
+	FROM
+		#ARPostPaymentHeader P
+	INNER JOIN (
+		SELECT
+			 intTransactionId	= intTransactionId
+			,dblCredit			= SUM(dblCredit) - SUM(dblDebit)
+		FROM #ARPaymentGLEntries
+		GROUP BY intTransactionId
+	) GL ON P.intTransactionId = GL.intTransactionId
+    OUTER APPLY (
+	    SELECT TOP 1 intAccountId = intOverrideAccount
+        FROM dbo.[fnARGetOverrideAccount](
+                 P.[intARAccountId]
+                ,CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+				    WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
+			        ELSE P.[intAccountId]
+				 END
+                ,@OverrideCompanySegment
+				,@OverrideLocationSegment
+				,0
+			 )
+    ) ACCOUNT
+	WHERE
+		P.[ysnPost] = 1
 END
 					
 IF @Post = 0
