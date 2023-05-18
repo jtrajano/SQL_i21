@@ -263,7 +263,7 @@ SELECT
 	,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
 	,[dblQtyShipped]						= ABS(cfTrans.dblQuantity)
 	,[dblDiscount]							= 0
-	,[dblPrice]								= ABS(cfTrans.dblCalculatedGrossPrice)
+	,[dblPrice]								= ABS(cfTrans.dblCalculatedNetPrice)
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
