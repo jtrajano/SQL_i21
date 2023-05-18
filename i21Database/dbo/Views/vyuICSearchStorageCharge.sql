@@ -38,6 +38,7 @@ SELECT
     ,G.dblCustomerNoOfDays
 	,G.strRateType
 	,H.strItemNo
+	,strItemDescription = H.strDescription
 	,I.strLotNumber
 	,I.strLotAlias
 	,I.strWarrantNo
