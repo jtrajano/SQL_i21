@@ -118,7 +118,7 @@ SELECT	1 intItemId
 		,CL.strLocationName
 		,t.intInTransitSourceLocationId
 		,CL.ysnLicensed
-		,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty))
+		,dblQty = SUM(QTY.dblResultQty)
 		,UOM.strUnitMeasure
 FROM tblICInventoryTransaction t
 INNER JOIN (
@@ -141,6 +141,7 @@ OUTER APPLY (
 	WHERE intCommodityId = I.intCommodityId
 		AND intUnitMeasureId = ISNULL(UOML.intUnitMeasureId,UOM2.intUnitMeasureId)
 ) UM_REF
+OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty) QTY
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 INNER JOIN tblSMCompanyLocation CL 
@@ -165,7 +166,7 @@ SELECT	1 intItemId
 		--t.intTransactionTypeId,			
 		,NULL intInTransitSourceLocationId
 		,CL.ysnLicensed
-		,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty))
+		,dblQty = SUM(QTY.dblResultQty)
 		,UOM.strUnitMeasure
 FROM tblICInventoryTransactionStorage t
 INNER JOIN (
@@ -190,6 +191,7 @@ OUTER APPLY (
 	WHERE intCommodityId = I.intCommodityId
 		AND intUnitMeasureId = ISNULL(UOML.intUnitMeasureId,UOM2.intUnitMeasureId)
 ) UM_REF
+OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,UM.intCommodityUnitMeasureId,t.dblQty) QTY
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 WHERE t.ysnIsUnposted <> 1

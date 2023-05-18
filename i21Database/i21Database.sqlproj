@@ -9253,6 +9253,7 @@
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
+    <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
