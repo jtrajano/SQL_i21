@@ -112,7 +112,7 @@ DECLARE @tmpAllocatedContracts TABLE (
 	  intAllocatedContractsGainOrLossHeaderId INT
 	, strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strTransactionReferenceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, intTransactionReferennceId INT 
+	, intTransactionReferenceId INT 
 	--Buy =================================================================================
 	, strPurchaseContract  NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strPurchaseCounterparty NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -127,6 +127,7 @@ DECLARE @tmpAllocatedContracts TABLE (
 	, strPurchaseCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPurchaseStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPurchaseStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblPurchaseAllocatedQtyDisplay NUMERIC(24,6)
 	, dblPurchaseAllocatedQty NUMERIC(24,6)
 	, strPurchaseCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPurchaseItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -183,6 +184,7 @@ DECLARE @tmpAllocatedContracts TABLE (
 	, strSalesCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSalesStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSalesStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblSalesAllocatedQtyDisplay NUMERIC(24,6)
 	, dblSalesAllocatedQty NUMERIC(24,6)
 	, strSalesCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSalesItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -278,6 +280,16 @@ BEGIN
 END
 
 
+IF @intMarkToMarketRateTypeId IS NULL AND @strRateType = 'Configuration'
+BEGIN
+	SET @ErrMsg = 'Missing Mark to Market Rate Type setup in Company Configuration > Multi Currency > Mark to Market.'
+	RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
+END
+
+IF @strRateType = 'Contract'
+BEGIN
+	SET @intMarkToMarketRateTypeId = NULL
+END
 
 INSERT INTO @tmpAllocatedContracts
 SELECT
@@ -299,7 +311,8 @@ SELECT
 	, strPurchaseCropYear = CASE WHEN @ysnEvaluationByCropYear = 0 THEN NULL ELSE P_cropYear.strCropYear END
 	, strPurchaseStorageLocation = CASE WHEN @ysnEvaluationByStorageLocation = 0 THEN NULL ELSE P_storageLocation.strSubLocationName END
 	, strPurchaseStorageUnit = CASE WHEN @ysnEvaluationByStorageUnit = 0 THEN NULL ELSE P_storageUnit.strName END
-	, dblPurchaseAllocatedQty = dbo.fnCalculateQtyBetweenUOM(P_ItemUOM.intItemUOMId,P_HeaderQtyUOM.intItemUOMId, ALD.dblPAllocatedQty)
+	, dblPurchaseAllocatedQtyDisplay = dbo.fnCalculateQtyBetweenUOM(P_ItemUOM.intItemUOMId,P_HeaderQtyUOM.intItemUOMId, ALD.dblPAllocatedQty)
+	, dblPurchaseAllocatedQty = dbo.fnCalculateQtyBetweenUOM(P_ItemUOM.intItemUOMId,P_HeaderPriceUOM.intItemUOMId, ALD.dblPAllocatedQty)
 	, strPurchaseCommodityCode = P_COM.strCommodityCode
 	, strPurchaseItemNo = P_I.strItemNo
 	, strPurchaseOrigin = CASE WHEN @ysnIncludeProductInformation = 0 THEN NULL ELSE P_CA.strDescription END
@@ -334,9 +347,9 @@ SELECT
 	 							* PRate.dblRateCT
 	, strPurchaseInvoiceStatus = PCD.strFinancialStatus
 	, dblPurchaseContractRatio = PCD.dblRatio
-	, dblPurchaseContractFutures = (dbo.fnCalculateQtyBetweenUOM(P_HeaderPriceUOM.intItemUOMId, PCD.intBasisUOMId, PCD.dblFutures) / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
-	 							* PRate.dblRateCT
-	, dblPurchaseContractCash = (dbo.fnCalculateQtyBetweenUOM(P_HeaderPriceUOM.intItemUOMId, PCD.intBasisUOMId, PCD.dblCashPrice) / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+	, dblPurchaseContractFutures = (dbo.fnCalculateQtyBetweenUOM(P_HeaderPriceUOM.intItemUOMId, PCD.intPriceItemUOMId, PCD.dblFutures) / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+	 							* PRate.dblRateCT 
+	, dblPurchaseContractCash = (dbo.fnCalculateQtyBetweenUOM(P_HeaderPriceUOM.intItemUOMId, PCD.intPriceItemUOMId, PCD.dblCashPrice) / CASE WHEN P_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 	 							* PRate.dblRateCT
 	, dblPurchaseContractCosts = NULL
 	, dblPurchaseValue = NULL
@@ -374,7 +387,8 @@ SELECT
 	, strSalesCropYear = CASE WHEN @ysnEvaluationByCropYear = 0 THEN NULL ELSE S_cropYear.strCropYear END
 	, strSalesStorageLocation = CASE WHEN @ysnEvaluationByStorageLocation = 0 THEN NULL ELSE S_storageLocation.strSubLocationName END
 	, strSalesStorageUnit = CASE WHEN @ysnEvaluationByStorageUnit = 0 THEN NULL ELSE S_storageUnit.strName END
-	, dblSalesAllocatedQty = dbo.fnCalculateQtyBetweenUOM(S_ItemUOM.intItemUOMId,S_HeaderQtyUOM.intItemUOMId, ALD.dblSAllocatedQty)
+	, dblSalesAllocatedQtyDisplay = dbo.fnCalculateQtyBetweenUOM(S_ItemUOM.intItemUOMId,S_HeaderQtyUOM.intItemUOMId, ALD.dblSAllocatedQty)
+	, dblSalesAllocatedQty = dbo.fnCalculateQtyBetweenUOM(S_ItemUOM.intItemUOMId,S_HeaderPriceUOM.intItemUOMId, ALD.dblSAllocatedQty)
 	, strSalesCommodityCode = S_COM.strCommodityCode
 	, strSalesItemNo = S_I.strItemNo
 	, strSalesOrigin = CASE WHEN @ysnIncludeProductInformation = 0 THEN NULL ELSE S_CA.strDescription END
@@ -409,9 +423,9 @@ SELECT
 	 							* SRate.dblRateCT
 	, strSalesInvoiceStatus = SCD.strFinancialStatus
 	, dblSalesContractRatio = SCD.dblRatio
-	, dblSalesContractFutures = (dbo.fnCalculateQtyBetweenUOM(S_HeaderPriceUOM.intItemUOMId, SCD.intBasisUOMId, SCD.dblFutures) / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+	, dblSalesContractFutures = (dbo.fnCalculateQtyBetweenUOM(S_HeaderPriceUOM.intItemUOMId, SCD.intPriceItemUOMId, SCD.dblFutures) / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 	 							* SRate.dblRateCT
-	, dblSalesContractCash = (dbo.fnCalculateQtyBetweenUOM(S_HeaderPriceUOM.intItemUOMId, SCD.intBasisUOMId, SCD.dblCashPrice) / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+	, dblSalesContractCash = (dbo.fnCalculateQtyBetweenUOM(S_HeaderPriceUOM.intItemUOMId, SCD.intPriceItemUOMId, SCD.dblCashPrice) / CASE WHEN S_PriceCur.ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 	 							* SRate.dblRateCT
 	, dblSalesContractCosts = NULL
 	, dblSalesValue = NULL
@@ -534,8 +548,8 @@ FROM tblLGAllocationDetail ALD
 																						WHERE forex.intFromCurrencyId = PCD.intCurrencyId
 																						AND forex.intToCurrencyId = @intCurrencyId)
 														AND intContractDetailId = PCD.intContractDetailId)
-												, dbo.fnRKGetCurrencyConvertion(PCD.intCurrencyId, @intCurrencyId, DEFAULT))
-										ELSE dbo.fnRKGetCurrencyConvertion(PCD.intCurrencyId, @intCurrencyId, DEFAULT) END
+												, dbo.fnRKGetCurrencyConvertion(PCD.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId))
+										ELSE dbo.fnRKGetCurrencyConvertion(PCD.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId) END
 									END
 		) PRate
 		OUTER APPLY (
@@ -552,8 +566,8 @@ FROM tblLGAllocationDetail ALD
 																						WHERE forex.intFromCurrencyId = SCD.intCurrencyId
 																						AND forex.intToCurrencyId = @intCurrencyId)
 														AND intContractDetailId = SCD.intContractDetailId)
-												, dbo.fnRKGetCurrencyConvertion(SCD.intCurrencyId, @intCurrencyId, DEFAULT))
-										ELSE dbo.fnRKGetCurrencyConvertion(SCD.intCurrencyId, @intCurrencyId, DEFAULT) END
+												, dbo.fnRKGetCurrencyConvertion(SCD.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId))
+										ELSE dbo.fnRKGetCurrencyConvertion(SCD.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId) END
 									END
 		) SRate
 		LEFT JOIN tblCTMTMPoint PMTMPoint
@@ -808,8 +822,8 @@ OUTER APPLY (
 																			WHERE forex.intFromCurrencyId = SP.intCurrencyId
 																			AND forex.intToCurrencyId = @intCurrencyId)
 											AND intContractDetailId = AC.intPurchaseContractDetailId)
-									, dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, DEFAULT))
-								ELSE dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, DEFAULT) END
+									, dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId))
+								ELSE dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId) END
 							END
 ) SettlementRate
 WHERE AC.dblPurchaseContractFutures IS NULL
@@ -835,8 +849,8 @@ OUTER APPLY (
 																			WHERE forex.intFromCurrencyId = SP.intCurrencyId
 																			AND forex.intToCurrencyId = @intCurrencyId)
 											AND intContractDetailId = AC.intSalesContractDetailId)
-									, dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, DEFAULT))
-								ELSE dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, DEFAULT) END
+									, dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId))
+								ELSE dbo.fnRKGetCurrencyConvertion(SP.intCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId) END
 							END
 ) SettlementRate
 WHERE AC.dblSalesContractFutures IS NULL
@@ -1083,8 +1097,8 @@ BEGIN
 																			WHERE forex.intFromCurrencyId = basisDetail.intMarketBasisCurrencyId
 																			AND forex.intToCurrencyId = @intCurrencyId)
 											AND intContractDetailId = AC.intPurchaseContractDetailId)
-									, dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, DEFAULT))
-								ELSE dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, DEFAULT) END
+									, dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId))
+								ELSE dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId) END
 							END
 	) MBRate
 	WHERE AC.dblPurchaseContractBasis IS NULL
@@ -1108,8 +1122,8 @@ BEGIN
 																			WHERE forex.intFromCurrencyId = basisDetail.intMarketBasisCurrencyId
 																			AND forex.intToCurrencyId = @intCurrencyId)
 											AND intContractDetailId = AC.intSalesContractDetailId)
-									, dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, DEFAULT))
-								ELSE dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, DEFAULT) END
+									, dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId))
+								ELSE dbo.fnRKGetCurrencyConvertion(basisDetail.intMarketBasisCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId) END
 							END
 	) MBRate
 	WHERE AC.dblSalesContractBasis IS NULL
@@ -1310,7 +1324,8 @@ SELECT
 	, strPurchaseCropYear = NULL
 	, strPurchaseStorageLocation = NULL
 	, strPurchaseStorageUnit = NULL
-	, dblPurchaseAllocatedQty =  dbo.fnCTConvertQuantityToTargetCommodityUOM(qtyUOM.intCommodityUnitMeasureId,CUM.intCommodityUnitMeasureId, ISNULL(psd.dblMatchQty, 0.00)) * fm.dblContractSize
+	, dblPurchaseAllocatedQtyDisplay =  dbo.fnCTConvertQuantityToTargetCommodityUOM(qtyUOM.intCommodityUnitMeasureId,CUM.intCommodityUnitMeasureId, ISNULL(psd.dblMatchQty, 0.00)) * fm.dblContractSize
+	, dblPurchaseAllocatedQty =  dbo.fnCTConvertQuantityToTargetCommodityUOM(priceUOM.intCommodityUnitMeasureId,CUM.intCommodityUnitMeasureId, ISNULL(psd.dblMatchQty, 0.00)) * fm.dblContractSize
 	, strPurchaseCommodityCode = COM.strCommodityCode
 	, strPurchaseItemNo = NULL
 	, strPurchaseOrigin = NULL
@@ -1367,6 +1382,7 @@ SELECT
 	, strSalesStorageLocation = NULL
 	, strSalesStorageUnit = NULL
 	, dblSalesAllocatedQty =  dbo.fnCTConvertQuantityToTargetCommodityUOM(qtyUOM.intCommodityUnitMeasureId,CUM.intCommodityUnitMeasureId, ISNULL(psd.dblMatchQty, 0.00)) * fm.dblContractSize
+	, dblSalesAllocatedQty =  dbo.fnCTConvertQuantityToTargetCommodityUOM(priceUOM.intCommodityUnitMeasureId,CUM.intCommodityUnitMeasureId, ISNULL(psd.dblMatchQty, 0.00)) * fm.dblContractSize
 	, strSalesCommodityCode = COM.strCommodityCode
 	, strSalesItemNo = NULL
 	, strSalesOrigin = NULL
@@ -1453,8 +1469,241 @@ AND strTransactionType = 'Derivative'
 
 DELETE FROM tblRKAllocatedContractsTransaction WHERE intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 
-INSERT INTO tblRKAllocatedContractsTransaction
-SELECT *,intConcurrencyId = 1 FROM @tmpAllocatedContracts
+INSERT INTO tblRKAllocatedContractsTransaction (
+	  intAllocatedContractsGainOrLossHeaderId
+	, strTransactionType
+	, strTransactionReferenceNo
+	, intTransactionReferenceId
+	, strPurchaseContract
+	, strPurchaseCounterparty
+	, strPurchaseFutureMarket
+	, intPurchaseFutureMarketId
+	, strPurchaseFutureMonth
+	, intPurchaseFutureMonthId
+	, strPurchaseLocationName
+	, strPurchaseMarketZoneCode
+	, strPurchaseOriginPort
+	, strPurchaseDestinationPort
+	, strPurchaseCropYear
+	, strPurchaseStorageLocation
+	, strPurchaseStorageUnit
+	, dblPurchaseAllocatedQtyDisplay
+	, dblPurchaseAllocatedQty
+	, strPurchaseCommodityCode
+	, strPurchaseItemNo
+	, strPurchaseOrigin
+	, strPurchaseProductLine
+	, strPurchaseClass
+	, strPurchaseSeason
+	, strPurchaseRegion
+	, strPurchaseGrade
+	, strPurchaseProductType
+	, strPurchasePosition
+	, strPurchasePeriodTo
+	, strPurchaseStartDate
+	, strPurchaseEndDate
+	, dtmPurchasePlannedAvailabilityDate
+	, strPurchasePriOrNotPriOrParPriced
+	, strPurchasePricingType
+	, dblPurchaseContractBasis
+	, strPurchaseInvoiceStatus
+	, dblPurchaseContractRatio
+	, dblPurchaseContractFutures
+	, dblPurchaseContractCash
+	, dblPurchaseContractCosts
+	, dblPurchaseValue
+	, intPurchaseQuantityUnitMeasureId
+	, intPurchaseContractDetailId
+	, intPurchaseContractHeaderId
+	, intPurchaseContractTypeId
+	, intPurchaseFreightTermId
+	, intPurchaseCommodityId
+	, intPurchaseItemId
+	, intPurchaseCompanyLocationId
+	, intPurchaseMarketZoneId
+	, intPurchaseOriginPortId
+	, intPurchaseDestinationPortId
+	, intPurchaseCropYearId
+	, intPurchaseStorageLocationId
+	, intPurchaseStorageUnitId
+	, intPurchaseMTMPointId
+	, strPurchaseMTMPoint
+	, strPurchaseCertification
+	, strSalesContract
+	, strSalesCounterparty
+	, strSalesFutureMarket
+	, intSalesFutureMarketId
+	, strSalesFutureMonth
+	, intSalesFutureMonthId
+	, strSalesLocationName
+	, strSalesMarketZoneCode
+	, strSalesOriginPort
+	, strSalesDestinationPort
+	, strSalesCropYear
+	, strSalesStorageLocation
+	, strSalesStorageUnit
+	, dblSalesAllocatedQtyDisplay
+	, dblSalesAllocatedQty
+	, strSalesCommodityCode
+	, strSalesItemNo
+	, strSalesOrigin
+	, strSalesProductLine
+	, strSalesClass
+	, strSalesSeason
+	, strSalesRegion
+	, strSalesGrade
+	, strSalesProductType
+	, strSalesPosition
+	, strSalesPeriodTo
+	, strSalesStartDate
+	, strSalesEndDate
+	, dtmSalesPlannedAvailabilityDate
+	, strSalesPriOrNotPriOrParPriced
+	, strSalesPricingType
+	, dblSalesContractBasis
+	, strSalesInvoiceStatus
+	, dblSalesContractRatio
+	, dblSalesContractFutures
+	, dblSalesContractCash
+	, dblSalesContractCosts
+	, dblSalesValue
+	, intSalesQuantityUnitMeasureId
+	, intSalesContractDetailId
+	, intSalesContractHeaderId
+	, intSalesContractTypeId
+	, intSalesFreightTermId
+	, intSalesCommodityId
+	, intSalesItemId
+	, intSalesCompanyLocationId
+	, intSalesMarketZoneId
+	, intSalesOriginPortId
+	, intSalesDestinationPortId
+	, intSalesCropYearId
+	, intSalesStorageLocationId
+	, intSalesStorageUnitId
+	, intSalesMTMPointId
+	, strSalesMTMPoint
+	, strSalesCertification
+	, dblMatchedPnL
+	, intConcurrencyId
+)
+SELECT intAllocatedContractsGainOrLossHeaderId
+	, strTransactionType
+	, strTransactionReferenceNo
+	, intTransactionReferenceId
+	, strPurchaseContract
+	, strPurchaseCounterparty
+	, strPurchaseFutureMarket
+	, intPurchaseFutureMarketId
+	, strPurchaseFutureMonth
+	, intPurchaseFutureMonthId
+	, strPurchaseLocationName
+	, strPurchaseMarketZoneCode
+	, strPurchaseOriginPort
+	, strPurchaseDestinationPort
+	, strPurchaseCropYear
+	, strPurchaseStorageLocation
+	, strPurchaseStorageUnit
+	, dblPurchaseAllocatedQtyDisplay
+	, dblPurchaseAllocatedQty 
+	, strPurchaseCommodityCode
+	, strPurchaseItemNo
+	, strPurchaseOrigin
+	, strPurchaseProductLine
+	, strPurchaseClass
+	, strPurchaseSeason
+	, strPurchaseRegion
+	, strPurchaseGrade
+	, strPurchaseProductType
+	, strPurchasePosition
+	, strPurchasePeriodTo
+	, strPurchaseStartDate
+	, strPurchaseEndDate
+	, dtmPurchasePlannedAvailabilityDate
+	, strPurchasePriOrNotPriOrParPriced
+	, strPurchasePricingType
+	, dblPurchaseContractBasis
+	, strPurchaseInvoiceStatus
+	, dblPurchaseContractRatio
+	, dblPurchaseContractFutures
+	, dblPurchaseContractCash
+	, dblPurchaseContractCosts
+	, dblPurchaseValue
+	, intPurchaseQuantityUnitMeasureId
+	, intPurchaseContractDetailId
+	, intPurchaseContractHeaderId
+	, intPurchaseContractTypeId
+	, intPurchaseFreightTermId
+	, intPurchaseCommodityId
+	, intPurchaseItemId
+	, intPurchaseCompanyLocationId
+	, intPurchaseMarketZoneId
+	, intPurchaseOriginPortId
+	, intPurchaseDestinationPortId
+	, intPurchaseCropYearId
+	, intPurchaseStorageLocationId
+	, intPurchaseStorageUnitId
+	, intPurchaseMTMPointId
+	, strPurchaseMTMPoint
+	, strPurchaseCertification
+	, strSalesContract
+	, strSalesCounterparty
+	, strSalesFutureMarket
+	, intSalesFutureMarketId
+	, strSalesFutureMonth
+	, intSalesFutureMonthId
+	, strSalesLocationName
+	, strSalesMarketZoneCode
+	, strSalesOriginPort
+	, strSalesDestinationPort
+	, strSalesCropYear
+	, strSalesStorageLocation
+	, strSalesStorageUnit
+	, dblSalesAllocatedQtyDisplay
+	, dblSalesAllocatedQty
+	, strSalesCommodityCode
+	, strSalesItemNo
+	, strSalesOrigin
+	, strSalesProductLine
+	, strSalesClass
+	, strSalesSeason
+	, strSalesRegion
+	, strSalesGrade
+	, strSalesProductType
+	, strSalesPosition
+	, strSalesPeriodTo
+	, strSalesStartDate
+	, strSalesEndDate
+	, dtmSalesPlannedAvailabilityDate
+	, strSalesPriOrNotPriOrParPriced
+	, strSalesPricingType
+	, dblSalesContractBasis
+	, strSalesInvoiceStatus
+	, dblSalesContractRatio
+	, dblSalesContractFutures
+	, dblSalesContractCash
+	, dblSalesContractCosts
+	, dblSalesValue
+	, intSalesQuantityUnitMeasureId
+	, intSalesContractDetailId
+	, intSalesContractHeaderId
+	, intSalesContractTypeId
+	, intSalesFreightTermId
+	, intSalesCommodityId
+	, intSalesItemId
+	, intSalesCompanyLocationId
+	, intSalesMarketZoneId
+	, intSalesOriginPortId
+	, intSalesDestinationPortId
+	, intSalesCropYearId
+	, intSalesStorageLocationId
+	, intSalesStorageUnitId
+	, intSalesMTMPointId
+	, strSalesMTMPoint
+	, strSalesCertification
+	, dblMatchedPnL
+	, intConcurrencyId = 1 
+FROM @tmpAllocatedContracts t
 
 --=========================================================
 --End - Inserting Transaction Data
@@ -1483,8 +1732,8 @@ INSERT INTO tblRKAllocatedContractsSummary(
 SELECT intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 	, strSummary = strTransactionType
 	, intCommodityId = @intCommodityId
-	, dblPurchaseAllocatedQty = SUM(ISNULL(dblPurchaseAllocatedQty, 0))
-	, dblSalesAllocatedQty = SUM(ISNULL(dblSalesAllocatedQty, 0))
+	, dblPurchaseAllocatedQty = SUM(ISNULL(dblPurchaseAllocatedQtyDisplay, 0))
+	, dblSalesAllocatedQty = SUM(ISNULL(dblSalesAllocatedQtyDisplay, 0))
 	, dblTotal = SUM(ISNULL(dblMatchedPnL, 0))
 	, dblFutures = SUM(ISNULL(dblSalesContractFutures, 0) - ISNULL(dblPurchaseContractFutures, 0) )
 	, dblBasis = SUM(ISNULL(dblSalesContractBasis, 0) - ISNULL(dblPurchaseContractBasis, 0) )

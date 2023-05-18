@@ -18,6 +18,7 @@
 	, strPurchaseCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPurchaseStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPurchaseStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblPurchaseAllocatedQtyDisplay NUMERIC(24,6)
 	, dblPurchaseAllocatedQty NUMERIC(24,6)
 	, strPurchaseCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPurchaseItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -72,6 +73,7 @@
 	, strSalesCropYear NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSalesStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSalesStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblSalesAllocatedQtyDisplay NUMERIC(24,6)
 	, dblSalesAllocatedQty NUMERIC(24,6)
 	, strSalesCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strSalesItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
