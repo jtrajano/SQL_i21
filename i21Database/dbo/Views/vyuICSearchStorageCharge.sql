@@ -38,6 +38,7 @@ SELECT
     ,G.dblCustomerNoOfDays
 	,G.strRateType
 	,H.strItemNo
+	,strItemDescription = H.strDescription
 	,I.strLotNumber
 	,strItemUOM = L.strUnitMeasure
 	,strWeightUOMId = N.strUnitMeasure
