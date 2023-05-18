@@ -310,7 +310,7 @@ END
 					,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
 					,[dblQtyShipped]						= ABS(cfTrans.dblQuantity) 
 					,[dblDiscount]							= 0
-					,[dblPrice]								= ABS(cfTrans.dblCalculatedNetPrice)
+					,[dblPrice]								= ABS(cfTrans.dblCalculatedGrossPrice)
 					,[ysnRefreshPrice]						= 0
 					,[strMaintenanceType]					= ''
 					,[strFrequency]							= ''
