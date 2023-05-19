@@ -141,7 +141,17 @@ BEGIN
 
 	IF @dblCommission < 0
 	BEGIN
-		SET @strMessage = 'Negative Dealer commissions have been calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' which is an indication that this fuel''s cost basis isn''t correctly set. Please correct the cost basis before processing this day.'
+		DECLARE @strPrice NVARCHAR(20)
+		DECLARE @strCost NVARCHAR(20)
+		DECLARE @strCommission NVARCHAR(20)
+
+		SET @strPrice = (SELECT FORMAT(@dblPrice, 'N', 'en-us'));
+		SET @strCost = (SELECT FORMAT(@Cost, 'N', 'en-us'));
+		SET @strCommission = (SELECT FORMAT(@dblCommission, 'N', 'en-us'));
+
+		SET @strMessage = 'Negative Dealer commissions have been calculated for fuel grade ' + @strItemNo + '-' + @strItemDescription + ' (Price: ' + @strPrice + ', Cost: ' + @strCost + ', Commission for this Item: ' + @strCommission + ') ' +
+							' which is an indication that this fuel''s cost basis isn''t correctly set. Please correct the cost basis before processing this day.'
+
 		INSERT tblSTCheckoutProcessErrorWarning (intCheckoutProcessId, intCheckoutId, strMessageType, strMessage, intConcurrencyId)
 		VALUES (@intCheckoutProcessId, @intCheckoutId, 'F', @strMessage, 1) 
 	END
