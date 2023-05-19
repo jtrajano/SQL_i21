@@ -32,6 +32,7 @@ CREATE TABLE [dbo].[tblGLRevalueDetails](
     intLOBSegmentOverrideId INT,
     intCompanySegmentOverrideId INT,
 	intNewCurrencyExchangeRateTypeId INT NULL,
+	ysnNegative BIT NULL,
  CONSTRAINT [PK_tblGLRevalueDetails] PRIMARY KEY CLUSTERED 
 (
 	[intConsolidationDetailId] ASC
