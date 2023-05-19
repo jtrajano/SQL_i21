@@ -898,6 +898,27 @@ BEGIN
         AND P.[intUndepositedFundsId] IS NOT NULL
         AND GLA.[ysnActive] != @OneBit
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Undeposited Funds Account is blank.
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Undeposited Funds Account for Company Location ' + CL.[strLocationName] + ' is blank.'
+	FROM #ARPostPaymentHeader P
+    INNER JOIN tblSMCompanyLocation CL ON P.[intCompanyLocationId] = CL.[intCompanyLocationId]
+    WHERE P.[ysnPost] = @OneBit
+      AND P.[intCompanyLocationId] IS NOT NULL
+      AND CL.[intUndepositedFundsId] IS NULL
+
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
