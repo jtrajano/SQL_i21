@@ -34,8 +34,8 @@ SELECT TOP 1
     ,@FreightExpenseAccount     = ISNULL([intFreightExpenseAccount], 0)
     ,@SurchargeRevenueAccount   = ISNULL([intSurchargeRevenueAccount], 0)
     ,@SurchargeExpenseAccount   = ISNULL([intSurchargeExpenseAccount], 0)
-    ,@AllowIntraCompanyEntriesInvoice  = ISNULL(ysnAllowIntraCompanyEntries, 0)
-    ,@AllowIntraLocationEntriesInvoice = ISNULL(ysnAllowIntraLocationEntries, 0)
+    ,@AllowIntraCompanyEntriesInvoice  = ISNULL(ysnAllowIntraCompanyEntriesInvoice, 0)
+    ,@AllowIntraLocationEntriesInvoice = ISNULL(ysnAllowIntraLocationEntriesInvoice, 0)
 FROM tblARCompanyPreference
 
 --REVERSE PROVISIONAL INVOICE
@@ -316,7 +316,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
     EXISTS(SELECT NULL FROM tblARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId] AND ARID.strSessionId = @strSessionId)
   )
   AND I.strType <> 'Tax Adjustment'
-  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+  AND ISNULL(I.[strItemType], '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesInvoice = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesInvoice = 1))
   AND @DueToAccountId <> 0
