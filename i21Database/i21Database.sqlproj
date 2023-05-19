@@ -1300,6 +1300,7 @@
     <Build Include="dbo\Functions\fnTMGetSalesFromStoreEOD.sql" />
     <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
