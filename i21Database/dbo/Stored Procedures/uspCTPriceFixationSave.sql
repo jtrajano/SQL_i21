@@ -800,14 +800,14 @@ BEGIN TRY
 				
 				UPDATE	CD
 				SET		CD.intPricingTypeId		=	1,
-						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(PF.dblPriceWORollArb,0) end))  / 
+						CD.dblFutures			=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end))  / 
 													CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 															WHEN	@intFinalCurrencyId <> @intCurrencyId	
 															AND		@ysnFinalSubCurrency = 1				THEN 100 
 															ELSE	1
 													END,
 						CD.dblCashPrice			=	(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intPriceCommodityUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
+														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
 														CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																AND		@ysnBasisSubCurrency = 1				THEN 100 
@@ -817,7 +817,7 @@ BEGIN TRY
 													(
 														CASE WHEN CH.intPricingTypeId = 8 THEN CD.dblRatio ELSE 1 END *
 														(
-															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(PF.dblPriceWORollArb,0) end)) / 
+															dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,(case when @ysnApplyFuturesFromPricing = 1 then (ISNULL(PF.dblPriceWORollArb,0) / isnull(PF.dblFX,1)) else  ISNULL(dblPriceWORollArb,0) end)) / 
 															CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
 																	WHEN	@intFinalCurrencyId <> @intCurrencyId	
 																	AND		@ysnFinalSubCurrency = 1				THEN 100 
