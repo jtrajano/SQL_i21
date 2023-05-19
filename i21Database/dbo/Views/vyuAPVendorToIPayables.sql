@@ -15,10 +15,11 @@ ISNULL(P.strPhone,'') COLLATE Latin1_General_CI_AS strPhone,
 ISNULL(ContactDetails.strFax,'') COLLATE Latin1_General_CI_AS strFax,
 ISNULL(A.strEmail,'') COLLATE Latin1_General_CI_AS  strEmail,
 ISNULL(A.strTerm, '') COLLATE Latin1_General_CI_AS  strTerm,
-ISNULL(EM.ysnActive, CAST (0 AS BIT) ) ysnActive
+ISNULL(EM.ysnActive, CAST (0 AS BIT) ) ysnActive,
+E.strName strContactName
 from vyuAPVendor A
 outer apply (select top 1 strAddress, strCity,strState, strZipCode, strCountry from tblEMEntityLocation where A.intEntityId = intEntityId ) B
-outer apply (select top 1 intEntityContactId from tblEMEntityToContact where intEntityId = A.intEntityId) E
+outer apply (select top 1 strName,intEntityContactId from tblEMEntityToContact C JOIN tblEMEntity B ON C.intEntityContactId=B.intEntityId where C.intEntityId = A.intEntityId) E
 left join tblEMEntityPhoneNumber P on P.intEntityId = E.intEntityContactId
 OUTER APPLY(
 	SELECT TOP 1 strValue strFax FROM tblEMContactDetail CD 
@@ -46,7 +47,7 @@ EML AS (
 ),
 tag01 as(
 select '01' strTag, intEntityId,
-'01|C0000549|' + VendorNbr + '|' + Street1 + '||' + City+ '|' +CountryCode+ '|' +strZipCode+ '|' +strCountry+ '|' +strPhone+ '|' +strFax+ '|' +strEmail  strData
+'01|C0000549|' + VendorNbr + '|' + VendorName + '|' + Street1 + '||' + City+ '|' +CountryCode+ '|' +strZipCode+ '|' +strCountry+ '|' + strContactName + '|' +strPhone+ '|' +strFax+ '|' +strEmail  strData
 from cte 
 ),
 tag02 as(
@@ -55,7 +56,7 @@ select '02' strTag, intEntityId,
 from cte 
 ),
 tag03 as(
-	select '03' strTag,intEntityId,'03|C0000549|1|0090|Corrigan Administration Services LLC' strData from cte
+	select '03' strTag,intEntityId,'03|C0000549|'+ VendorNbr + '|0090|Corrigan Administration Services LLC' strData from cte
 ),
 tag05 as(
 	select '05' strTag, intEntityId,
@@ -64,8 +65,8 @@ tag05 as(
 ),
 tag06 as(
 	select '06' strTag, intEntityId,
-	'06|C0000549|' + VendorNbr + '|' + AddressType + '||' 
-	+ VendorName + '|' + Street1 + ',' 
+	'06|C0000549|' + VendorNbr + '|0090|1|' + AddressType + '|' 
+	+ VendorName + ',' + Street1 + ',' 
 	+ Street2 + ',' + strCity + ','
 	+ strState + ',' 
 	+ strZipCode + ',' + strCountry   
@@ -84,6 +85,8 @@ cteOrder as(
 select strTag, intEntityId, strData from tag01
 UNION ALL
 select strTag, intEntityId, strData from tag02
+UNION ALL
+select strTag, intEntityId, strData from tag03
 UNION ALL
 select strTag, intEntityId, strData from tag05
 UNION ALL
