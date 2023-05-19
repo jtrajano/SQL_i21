@@ -350,6 +350,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					FROM agcusmst
 						LEFT JOIN tblEMEntity ON rtrim(ltrim(agcus_key)) COLLATE Latin1_General_CI_AS =  strEntityNo COLLATE Latin1_General_CI_AS
 					WHERE agcus_key COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer) --Import only those are not yet imported
+					  AND agcus_active_yn = ''Y''
 					ORDER BY agcusmst.agcus_key 
 			
 			OPEN tmpagcusmst;
