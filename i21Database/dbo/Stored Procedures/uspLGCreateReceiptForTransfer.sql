@@ -96,6 +96,8 @@ BEGIN TRY
 		,[dblCost]
 		,[intCostUOMId]
 		,[intCurrencyId]
+		,[intSubCurrencyCents]
+		,[ysnSubCurrency]
 		,[dblExchangeRate]
 		,[intLotId]
 		,[intSubLocationId]
@@ -121,8 +123,8 @@ BEGIN TRY
 		,[intItemId] = LD.intItemId
 		,[intItemLocationId] = LD.intPCompanyLocationId
 		,[intItemUOMId] = LD.intItemUOMId
-		,[intContractHeaderId] = NULL
-		,[intContractDetailId] = NULL
+		,[intContractHeaderId] = CD.intContractHeaderId
+		,[intContractDetailId] = CD.intContractDetailId
 		,[dtmDate] = GETDATE()
 		,[intShipViaId] = CD.intShipViaId
 		,[dblQty] = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0)
@@ -132,7 +134,9 @@ BEGIN TRY
 		,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
 		,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
 		,[intCostUOMId] = dbo.fnGetMatchingItemUOMId(LD.intItemId, ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId))
-		,[intCurrencyId] = @DefaultCurrencyId
+		,[intCurrencyId] = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
+		,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
+		,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE ISNULL(LSC.ysnSubCurrency, AD.ysnSeqSubCurrency) END
 		,[dblExchangeRate] = 1
 		,[intLotId] = NULL
 		,[intSubLocationId] = LD.intSSubLocationId
@@ -320,8 +324,8 @@ BEGIN TRY
 		,[strParentLotNumber] = PLot.strParentLotNumber
 		,[intSubLocationId] = LD.intSSubLocationId
 		,[intStorageLocationId] = LD.intSStorageLocationId
-		,[intContractHeaderId] = NULL
-		,[intContractDetailId] = NULL
+		,[intContractHeaderId] = CD.intContractHeaderId
+		,[intContractDetailId] = CD.intContractDetailId
 		,[intItemUnitMeasureId] = LD.intItemUOMId
 		,[intItemId] = LD.intItemId
 		,[dblQuantity] = LDL.dblLotQuantity
@@ -344,6 +348,7 @@ BEGIN TRY
 		JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblICParentLot PLot ON PLot.intParentLotId = Lot.intParentLotId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
