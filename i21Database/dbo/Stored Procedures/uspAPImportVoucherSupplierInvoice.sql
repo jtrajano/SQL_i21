@@ -529,7 +529,7 @@ FROM (
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Market Zone ' + ISNULL(strChannel,'') FROM #tmpConvertedSupplierInvoiceData WHERE intMarketZoneId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Storage Location ' + ISNULL(strSubLocationName,'') FROM #tmpConvertedSupplierInvoiceData WHERE intSubLocationId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Storage Location ' + ISNULL(strSubLocationName,'') FROM #tmpConvertedSupplierInvoiceData WHERE intSubLocationId IS NULL
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Supplier Pre Invoice Number is blank' FROM #tmpConvertedSupplierInvoiceData WHERE strVendorOrderNumber IS NULL
 	-- UNION ALL
