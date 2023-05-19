@@ -825,7 +825,7 @@ DECLARE
 		
 	SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))		
 	
-	IF (@intType = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpLGContractPrice) AND EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice))
+	IF (@intType = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpLGContractPrice WHERE intPriceFixationDetailId IS NOT NULL) AND EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice))
 	BEGIN
 		/* INSERT tblCTPriceFixationDetailAPAR */
 		INSERT INTO tblCTPriceFixationDetailAPAR (
