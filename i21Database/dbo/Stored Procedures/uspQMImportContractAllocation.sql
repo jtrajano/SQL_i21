@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspQMImportContractAllocation 
+CREATE PROCEDURE uspQMImportContractAllocation
 (
 	@intImportLogId INT
 ) 
@@ -209,6 +209,23 @@ BEGIN TRY
 			,@strRemarks = 'Updated from Contract Line Allocation Import'
 			,@ysnCreate = 0
 			,@ysnBeforeUpdate = 1
+
+
+		IF EXISTS(
+			SELECT 1 FROM tblQMSample S
+			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = @intContractDetailId
+			INNER JOIN tblICItemUOM SUOM ON SUOM.intItemId = S.intItemId AND SUOM.intUnitMeasureId = S.intRepresentingUOMId
+			WHERE S.intSampleId = @intSampleId
+			AND dbo.fnCalculateQtyBetweenUOM(SUOM.intItemUOMId, CD.intItemUOMId, S.dblRepresentingQty) > CD.dblQuantity
+		)
+		BEGIN
+			UPDATE IC
+			SET ysnSuccess = 0, ysnProcessed = 1
+				,strLogResult = 'Allocated Qty cannot be greater than Contracted Qty'
+			FROM tblQMImportCatalogue IC
+			WHERE IC.intImportCatalogueId = @intImportCatalogueId
+			GOTO CONT
+		END
 
 		-- Update Sample
 		UPDATE S
