@@ -124,6 +124,18 @@ FROM (
 		,FT.strFreightTerm
 		,strSCertificate = SCC.strCertificates
 		,strSCropYear = SCY.strCropYear
+
+		-- Added Pricing Details from Purchase Contract
+		,strPriceStatus = PT.strPricingType
+		,dblSeqPrice = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CDP.dblCashPrice ELSE ADP.dblSeqPrice END
+		,intSeqCurrencyId = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CDP.intCurrencyId ELSE ADP.intSeqCurrencyId END
+		,strSeqCurrency = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.strCurrency ELSE ADP.strSeqCurrency END
+		,intSeqPriceUOMId = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CDP.intPriceItemUOMId ELSE ADP.intSeqPriceUOMId END
+		,strSeqPriceUOM = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN UM.strUnitMeasure ELSE ADP.strSeqPriceUOM END 
+		,intRateTypeId = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CDP.intRateTypeId ELSE NULL END
+		,dblRate = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN dbo.fnCTGetTransactionForexRate(CDP.intContractDetailId) ELSE NULL END
+		,strCurrencyExchangeRateType = CASE WHEN ISNULL(ADP.ysnValidFX,0) = 1 AND ADP.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END
+
 	FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 	CROSS JOIN tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -214,6 +226,13 @@ FROM (
 					WHERE intRecordId IN (CDP.intContractHeaderId, CDS.intContractHeaderId)
 					AND strApprovalStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications', '')
 				) APRV
+	OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
+	LEFT JOIN vyuLGAdditionalColumnForContractDetailView ADP ON CDP.intContractDetailId = ADP.intContractDetailId
+	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CDP.intPricingTypeId
+	LEFT JOIN tblSMCurrency CPCU ON CPCU.intCurrencyID = CDP.intCurrencyId
+	LEFT JOIN tblICItemUOM PIU ON PIU.intItemUOMId = CDP.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = PIU.intUnitMeasureId
+	LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CDP.intRateTypeId
 	WHERE ((AD.dblPAllocatedQty - CASE WHEN (ShipType.intShipmentType = 2) THEN IsNull(LDSI.dblPShippedQuantity, 0) ELSE IsNull(LDS.dblPShippedQuantity, 0) END + IsNull(PL.dblLotPickedQty, 0)) > 0)
 		AND ((AD.dblSAllocatedQty - CASE WHEN (ShipType.intShipmentType = 2) THEN IsNull(LDSI.dblSShippedQuantity, 0) ELSE IsNull(LDS.dblSShippedQuantity, 0) END - IsNull(PL.dblSalePickedQty, 0)) > 0)
 		AND ISNULL(APRV.ysnUnapproved, 0) = 0
