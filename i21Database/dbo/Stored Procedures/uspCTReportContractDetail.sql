@@ -246,7 +246,7 @@ BEGIN TRY
 			strLots				    = dbo.fnRemoveTrailingZeroes(CD.dblNoOfLots),
 			dblRatio			    = dbo.fnCTChangeNumericScale(CD.dblRatio,4),
 			strMarketMonth			= MA.strFutMarketName + ' ' + REPLACE(MO.strFutureMonth ,' ','-') ,
-			strAmendedColumnsDetails= @strAmendedColumnsDetails,
+			strAmendedColumnsDetails= ISNULL(@strAmendedColumnsDetails,'strEmptyAmendedColumnsDetails'),
 			strAmendedColumns		= CASE WHEN ISNULL(@strDetailAmendedColumns,'') <>'' THEN @strDetailAmendedColumns ELSE  AM.strAmendedColumns END,
 			strCommodityCode		= CO.strCommodityCode,
 			strERPBatchNumber		= CD.strERPBatchNumber,

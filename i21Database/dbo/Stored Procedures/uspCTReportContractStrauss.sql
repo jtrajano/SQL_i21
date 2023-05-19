@@ -432,7 +432,7 @@ BEGIN TRY
 													END + '</span>'
 		 ,dtmContractDate						= CH.dtmContractDate
 		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END) + (CASE WHEN @strAmendedDate  IS NULL THEN '' ELSE ' - ('+ @strAmendedDate + ')' END)
-		 ,strAmendedTerm						= ISNULL(@strAmendedTerm,NULL)
+		 ,strAmendedTerm						= ISNULL(@strAmendedTerm,'strEmptyAmendedTerm')
 		 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
@@ -459,7 +459,7 @@ BEGIN TRY
 		,ysnExternal							= @ysnExternal
 		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)
 		,strReferenceNo							= CASE WHEN LTRIM(RTRIM(ISNULL(CH.strCustomerContract, ''))) <> '' THEN 'Your Ref. ' + ltrim(rtrim(CH.strCustomerContract)) ELSE NULL END
-		,strAmendedColumns 						= @strAmendedColumns
+		,strAmendedColumns 						= ISNULL(@strAmendedColumns,'strEmptyAmendedColumns')
 
 	FROM tblCTContractHeader CH
 	LEFT JOIN vyuCTEntity EC WITH (NOLOCK) ON EC.intEntityId = CH.intCounterPartyId AND EC.strEntityType = 'Customer'
