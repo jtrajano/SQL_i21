@@ -670,6 +670,7 @@
     <Build Include="dbo\Tables\tblICCommodityAttribute3.sql" />
     <Build Include="dbo\Tables\tblICCommodityAttribute4.sql" />
     <Build Include="dbo\Views\vyuAPVendorStatement.sql" />
+    <Build Include="dbo\Views\vyuAPVendorToIPayables.sql" />
     <Build Include="dbo\Views\vyuAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Views\vyuAPDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVendorStatement.sql" />
@@ -2589,6 +2590,7 @@
     <Build Include="dbo\Functions\fnGetProcessToInventoryShipmentErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnSplitString.sql" />
+    <Build Include="dbo\Functions\fnSplitStringWithRowId.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedQty.sql" />
     <Build Include="dbo\Views\vyuPOStatus.sql" />
@@ -9075,6 +9077,7 @@
     <Build Include="dbo\Tables\tblAPVendorContactSynergy.sql" />
     <Build Include="dbo\Tables\tblAPVendorContactInfoSynergy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPVendorExportTransformSynergy.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVendorToIPayablesJob.sql" />
     <Build Include="dbo\Views\vyuAPVendorSynergy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVendorExportSynergy.sql" />
     <Build Include="dbo\Views\vyuAPVoucherInfo.sql" />
