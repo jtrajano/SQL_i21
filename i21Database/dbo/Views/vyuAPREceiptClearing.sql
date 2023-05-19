@@ -210,7 +210,7 @@ left join (
 
 
 WHERE 
-    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+    NOT (receiptItem.dblUnitCost = 0 AND receiptItem.dblTax = 0) -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
 --CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
@@ -349,7 +349,7 @@ left join (
 	on Shrek.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 
 WHERE 
-    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+    NOT (receiptItem.dblUnitCost = 0 AND receiptItem.dblTax = 0) -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
 --CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment

@@ -54,7 +54,7 @@ ELSE IF (@Type = 'Date Driven')
 		END
 		
 	END	
-ELSE IF (@Type = 'Date Driven')
+ELSE IF (@Type = 'Specific Date')
 	BEGIN
 		RETURN @DiscountDate
 	END	

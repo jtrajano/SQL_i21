@@ -40,6 +40,8 @@ BEGIN
 		,@strCertificationName NVARCHAR(MAX)
 		,@intPriceContractId INT
 	DECLARE @tblCTContractDetail TABLE (intContractDetailId INT)
+	DECLARE @intContractScreenId INT
+		,@intPriceContractScreenId INT
 
 	SELECT @ysnDestinationPortMandatoryInPOExport = IsNULL(ysnDestinationPortMandatoryInPOExport, 0)
 	FROM tblIPCompanyPreference
@@ -175,6 +177,10 @@ BEGIN
 				AND ISNULL(strFeedStatus, '') = ''
 		END
 
+		SELECT @intContractScreenId = intScreenId
+		FROM tblSMScreen
+		WHERE strNamespace = 'ContractManagement.view.Contract'
+
 		IF NOT EXISTS (
 				SELECT TOP 1 1
 				FROM tblSMTransaction
@@ -183,7 +189,7 @@ BEGIN
 						,'Approved with Modifications'
 						)
 					AND intRecordId = @intContractHeaderId
-					AND intScreenId = 15
+					AND intScreenId = @intContractScreenId
 				)
 		BEGIN
 			--UPDATE tblCTContractFeed
@@ -201,6 +207,10 @@ BEGIN
 		FROM dbo.tblCTPriceFixation
 		WHERE intContractHeaderId = @intContractHeaderId
 
+		SELECT @intPriceContractScreenId = intScreenId
+		FROM tblSMScreen
+		WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
 		IF @intPriceContractId IS NOT NULL
 		BEGIN
 			IF NOT EXISTS (
@@ -211,7 +221,7 @@ BEGIN
 							,'Approved with Modifications'
 							)
 						AND intRecordId = @intPriceContractId
-						AND intScreenId = 123
+						AND intScreenId = @intPriceContractScreenId
 					)
 			BEGIN
 				SELECT @ysnPriceApproved = 0
@@ -292,17 +302,19 @@ BEGIN
 			+ '<MSG_TYPE>' + CASE WHEN UPPER(CF.strRowState) = 'ADDED' THEN 'PO_CREATE' ELSE 'PO_UPDATE' END + '</MSG_TYPE>'
 			+ '<SENDER>i21</SENDER>'
 			+ '<RECEIVER>SAP</RECEIVER>'
+			+ '<SNDPRT>LS</SNDPRT>'
+			+ '<SNDPRN>IRE01</SNDPRN>'
 			+ '</CTRL_POINT>'
 			+ '<HEADER>'
 			+ '<CONTRACT_NO>' + ISNULL(CF.strContractNumber, '') + '</CONTRACT_NO>'
 			+ '<PO_NUMBER>' + ISNULL(CF.strERPPONumber, '') + '</PO_NUMBER>'
 			+ '<VENDOR>' + ISNULL(strVendorAccountNum, '') + '</VENDOR>'
 			+ '<BOOK>' + ISNULL(B.strBook, '') + '</BOOK>'
-			+ '<PAYMENT_TERM>' + ISNULL(CF.strTerm, '') + '</PAYMENT_TERM>'
+			+ '<PAYMENT_TERM>' + dbo.fnEscapeXML(ISNULL(CF.strTerm, '')) + '</PAYMENT_TERM>'
 			+ '<INCO_TERM>' + ISNULL(CF.strContractBasis, '') + '</INCO_TERM>'
 			+ '<POSITION>' + ISNULL(strPosition, '') + '</POSITION>'
-			+ '<WEIGHT_TERM>' + ISNULL(W.strWeightGradeDesc, '') + '</WEIGHT_TERM>'
-			+ '<APPROVAL_BASIS>' + ISNULL(G.strWeightGradeDesc, '') + '</APPROVAL_BASIS>'
+			+ '<WEIGHT_TERM>' + dbo.fnEscapeXML(ISNULL(W.strWeightGradeDesc, '')) + '</WEIGHT_TERM>'
+			+ '<APPROVAL_BASIS>' + dbo.fnEscapeXML(ISNULL(G.strWeightGradeDesc, '')) + '</APPROVAL_BASIS>'
 			+ '<CREATE_DATE>' + ISNULL(CONVERT(NVARCHAR, CH.dtmCreated, 112), '') + '</CREATE_DATE>'
 			+ '<CREATED_BY>' + ISNULL(CF.strCreatedBy, '') + '</CREATED_BY>'
 			+ '<TRACKING_NO>' + LTRIM(ISNULL(CF.intContractFeedId, '')) + '</TRACKING_NO>'
@@ -320,7 +332,7 @@ BEGIN
 		SELECT @strDetailXML = @strDetailXML + '<LINE_ITEM>'
 			+ '<SEQUENCE_NO>' + LTRIM(ISNULL(CF.intContractSeq, '')) + '</SEQUENCE_NO>'
 			+ '<PO_LINE_ITEM_NO>' + CASE WHEN UPPER(RS.strOrgRowState) = 'MODIFIED' THEN ISNULL(CF.strERPItemNumber, '') ELSE '' END + '</PO_LINE_ITEM_NO>'
-			+ '<ITEM_NO>' + ISNULL(I.strItemNo, '') + '</ITEM_NO>'
+			+ '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(I.strItemNo, '')) + '</ITEM_NO>'
 			+ '<SUB_LOCATION>' + dbo.fnEscapeXML(ISNULL(CF.strSubLocation, '')) + '</SUB_LOCATION>'
 			+ '<STORAGE_LOCATION>' + dbo.fnEscapeXML(ISNULL(CF.strStorageLocation, '')) + '</STORAGE_LOCATION>'
 			+ '<QUANTITY>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>'
