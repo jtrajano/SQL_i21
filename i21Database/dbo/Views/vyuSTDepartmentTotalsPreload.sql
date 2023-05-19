@@ -34,4 +34,4 @@ INNER JOIN dbo.vyuSTStoreDepartments AS StoreDepartments
 WHERE (CASE 
 	WHEN StoreDepartments.strCategoriesOrSubcategories = 'C'
 	THEN StoreDepartments.intGeneralItemId 
-	ELSE StoreDepartments.intSubcategoryItemId END) IS NOT NULL 
+	ELSE StoreDepartments.intSubcategoryItemId END) IS NOT NULL
