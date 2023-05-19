@@ -1750,6 +1750,7 @@
     <None Include="Scripts\Post-Deployment\ST\54_FileFieldMapping_Passport_FGMD.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPO_DA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateEmail_DA.sql" />
+    <Build Include="dbo\Views\vyuQMListProperty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
