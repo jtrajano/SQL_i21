@@ -141,6 +141,7 @@ BEGIN
 
 	IF @dblCommission < 0
 	BEGIN
+		--CS-559
 		DECLARE @strPrice NVARCHAR(20)
 		DECLARE @strCost NVARCHAR(20)
 		DECLARE @strCommission NVARCHAR(20)
