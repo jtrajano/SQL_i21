@@ -1,5 +1,6 @@
 CREATE PROCEDURE dbo.uspApiCalculateTax (
 	  @UniqueId UNIQUEIDENTIFIER
+	, @TransactionType NVARCHAR(20) -- Sale/Purchase
 	, @ItemId INT
 	, @UOMId INT
 	, @LocationId INT
@@ -89,18 +90,19 @@ INSERT INTO @tblRestApiItemTaxes (
 	, strTaxClass
 	, ysnAddToCost
 	, ysnOverrideTaxGroup)
-EXEC [dbo].[uspARGetItemTaxes]
+EXEC [dbo].[uspApiGetItemTaxes]
 	@ItemId= @ItemId,
 	@LocationId= @LocationId,
-	@CustomerId= @CustomerId,
-	@CustomerLocationId= @CustomerLocationId,
+	@EntityId= @CustomerId,
+	@EntityLocationId= @CustomerLocationId,
 	@TransactionDate= @TransactionDate,
+	@TransactionType = @TransactionType,
 	@TaxGroupId= @TaxGroupId,
 	@SiteId= default,
 	@FreightTermId= @FreightTermId,
 	@CardId= default,
 	@VehicleId= default,
-	@ItemUOMId= @ItemUOMId,
+	@UOMId= @UOMId,
 	@CurrencyId= @CurrencyId,
 	@CurrencyExchangeRateTypeId= default,
 	@CurrencyExchangeRate= 1

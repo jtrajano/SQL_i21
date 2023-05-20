@@ -3495,6 +3495,7 @@
     <Build Include="dbo\Views\vyuApiVendorRebateItem.sql" />
     <Build Include="dbo\Views\vyuApiVendorRebatesSetup.sql" />
     <Build Include="dbo\Views\vyuApiVendorRebateUom.sql" />
+    <Build Include="dbo\Views\vyuApiGetPurchaseTaxDetail.sql" />
     <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
