@@ -393,7 +393,7 @@ IF ISNULL(@ysnInvoice, 1) = 1 OR ISNULL(@ysnRebuild, 0) = 1
 			SELECT intTransactionId
 				 , strTransactionId
 				 , intTransactionDetailId
-				 , dblCost	= SUM(ICIT.dblCost * (ABS(ICIT.dblQty) * ICIT.dblUOMQty))
+				 , dblCost	= ABS(AVG(ICIT.dblQty * ICIT.dblCost))--SUM(ICIT.dblCost * ABS(ICIT.dblQty) * ICIT.dblUOMQty)
 			FROM tblICInventoryTransaction ICIT
 			INNER JOIN tblARInvoiceDetailComponent ARIDC ON ICIT.intTransactionDetailId = ARIDC.intInvoiceDetailId
 														AND ICIT.intItemId = ARIDC.intComponentItemId
