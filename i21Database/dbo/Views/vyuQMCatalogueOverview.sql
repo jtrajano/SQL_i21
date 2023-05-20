@@ -49,9 +49,9 @@ SELECT S.intSampleId
 FROM tblQMSample S
 LEFT JOIN tblQMSaleYear SaleYear ON SaleYear.intSaleYearId = S.intSaleYearId 
 LEFT JOIN tblAPVendor VAN ON VAN.intEntityId = S.intEntityId
-LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = S.intEntityId
 LEFT JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
 LEFT JOIN tblQMGardenMark GardenMark ON GardenMark.intGardenMarkId = S.intGardenMarkId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GardenMark.intProducerId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICCommodityAttribute GMO ON GardenMark.intOriginId = GMO.intCommodityAttributeId AND GMO.strType = 'Origin'
