@@ -669,7 +669,7 @@ BEGIN TRY
 		,intBatchId = BATCH_TBO.intBatchId
 		,strTINNumber = IMP.strTINNumber
 		,intSubBookId = NULL
-		,strPackageType=NULL
+		,strPackageType=strPackageType
 		,SeasonCropYear.intCropYearId
 	FROM tblQMImportCatalogue IMP
 	INNER JOIN tblQMImportLog IL ON IL.intImportLogId = IMP.intImportLogId
@@ -891,6 +891,7 @@ BEGIN TRY
 						,strComment
 						,intCreatedUserId
 						,dtmCreated
+						,intBookId
 						,intSubBookId
 						-- Auction Fields
 						,intSaleYearId
@@ -989,6 +990,7 @@ BEGIN TRY
 						,strComment = S.strComment
 						,intCreatedUserId = @intEntityUserId
 						,dtmCreated = @dtmDateCreated
+						,intBookId = S.intBookId
 						,intSubBookId = S.intSubBookId
 						-- Auction Fields
 						,intSaleYearId = S.intSaleYearId
