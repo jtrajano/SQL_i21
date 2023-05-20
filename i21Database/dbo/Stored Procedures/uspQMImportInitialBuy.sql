@@ -61,12 +61,10 @@ BEGIN TRY
 	-- From Location Code
 	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Receiving Storage Location
-	LEFT JOIN (
-		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
-		) ON IMP.strReceivingStorageLocation IS NOT NULL
+	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND TBO2.strLocationName = IMP.strBuyingCenter
-	
+		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -515,11 +513,10 @@ BEGIN TRY
 		-- From Location Code
 		LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 		-- Receiving Storage Location
-		LEFT JOIN (
-		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
-		) ON IMP.strReceivingStorageLocation IS NOT NULL
+		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+		LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND TBO2.strLocationName = IMP.strBuyingCenter
+		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber

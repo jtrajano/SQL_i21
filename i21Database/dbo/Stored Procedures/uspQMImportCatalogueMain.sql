@@ -673,7 +673,7 @@ BEGIN TRY
 		,intBatchId = BATCH_TBO.intBatchId
 		,strTINNumber = IMP.strTINNumber
 		,intSubBookId = NULL
-		,strPackageType=NULL
+		,strPackageType=strPackageType
 		,SeasonCropYear.intCropYearId
 		,intWgtUnitMeasureId=NULL
 	FROM tblQMImportCatalogue IMP
@@ -897,6 +897,7 @@ BEGIN TRY
 						,strComment
 						,intCreatedUserId
 						,dtmCreated
+						,intBookId
 						,intSubBookId
 						-- Auction Fields
 						,intSaleYearId
@@ -938,6 +939,8 @@ BEGIN TRY
 						,dblTareWeight
 						,strCourierRef
 						,intCropYearId
+						,intMarketZoneId
+						,intCurrencyId
 						)
 					-- ,intTINClearanceId
 					SELECT intConcurrencyId = 1
@@ -965,6 +968,7 @@ BEGIN TRY
 						,strComment = S.strComment
 						,intCreatedUserId = @intEntityUserId
 						,dtmCreated = @dtmDateCreated
+						,intBookId = S.intBookId
 						,intSubBookId = S.intSubBookId
 						-- Auction Fields
 						,intSaleYearId = S.intSaleYearId
@@ -1006,6 +1010,8 @@ BEGIN TRY
 						,dblTareWeight=@dblTareWeight
 						,strCourierRef = @strCourierRef
 						,@intCropYearId
+						,intMarketZoneId = S.intMarketZoneId
+						,intCurrencyId = S.intCurrencyId
 					FROM tblQMSample S
 					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 					WHERE B.intBatchId = @intBatchId

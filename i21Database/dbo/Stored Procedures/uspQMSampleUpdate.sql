@@ -1498,6 +1498,51 @@ BEGIN
         AND P.strPropertyName = 'Mouth Feel'
       WHERE TR.intSampleId = S.intSampleId
       ) MOUTH_FEEL
+    -- Density
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Density'
+      WHERE TR.intSampleId = S.intSampleId
+      ) Density
+    -- Moisture
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Moisture'
+      WHERE TR.intSampleId = S.intSampleId
+      ) Moisture
+    -- Fines
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Fines'
+      WHERE TR.intSampleId = S.intSampleId
+      ) Fines
+    -- Volume
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Volume'
+      WHERE TR.intSampleId = S.intSampleId
+      ) Volume
+    -- Dust Level
+    OUTER APPLY (
+      SELECT TR.strPropertyValue
+        ,TR.dblPinpointValue
+      FROM tblQMTestResult TR
+      JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+        AND P.strPropertyName = 'Dust Level'
+      WHERE TR.intSampleId = S.intSampleId
+      ) DustLevel
     -- Colour
     LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
     -- Manufacturing Leaf Type
