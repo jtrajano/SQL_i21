@@ -14,14 +14,19 @@ SELECT intSampleId					= S.intSampleId
 	 , strQtyUOM					= RIUM.strUnitMeasure
 	 , dblWeight					= ISNULL(S.dblSampleQty, 0)
 	 , dblWeightPerQty				= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, ISNULL(S.dblSampleQty, 0)), 0)
+	 , strPackageType				= PIUM.strUnitMeasure
 	 , dblBasePrice					= ISNULL(S.dblBasePrice, 0)
+	 , dblTastingScore				= ISNULL(PV.dblActualValue, 0)
 	 , strSupplier					= SUP.strName
 	 , strTeaLingoItem				= ITEM.strItemNo
 	 , strCompanyName				= COMP.strCompanyName
 	 , strCompanyAddress			= COMP.strAddress
 	 , strCityStateZip				= COMP.strCity + ', ' + COMP.strState + ', ' + COMP.strZip
 	 , strCompanyCountry			= COMP.strCountry
-	 , blbHeaderLogo				= dbo.fnSMGetCompanyLogo('Header')
+	 , strTest						= S.strComments2 
+	 , strGardenMark				= GM.strGardenMark
+	 , strMarketZoneCode			= MZ.strMarketZoneCode
+	 , strLeafStyleSize				= ISNULL(B.strBrandCode, '') + ISNULL(VG.strName, '')
 FROM tblQMSample S
 LEFT JOIN tblEMEntity SUP ON S.intEntityId = SUP.intEntityId
 LEFT JOIN tblEMEntity E ON S.intBrokerId = E.intEntityId
@@ -30,6 +35,17 @@ LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
+LEFT JOIN tblICUnitMeasure PIUM ON PIUM.intUnitMeasureId = S.intPackageTypeId
+LEFT JOIN tblQMGardenMark GM ON S.intGardenMarkId = GM.intGardenMarkId
+LEFT JOIN tblARMarketZone MZ ON S.intMarketZoneId = MZ.intMarketZoneId
+LEFT JOIN tblICBrand B ON ITEM.intBrandId = B.intBrandId
+LEFT JOIN tblCTValuationGroup VG ON S.intValuationGroupId = VG.intValuationGroupId
+OUTER APPLY (
+	SELECT TOP 1 dblActualValue = CAST(ISNULL(NULLIF(TR.strPropertyValue, ''), '0') AS NUMERIC(18, 6))
+	FROM tblQMTestResult TR 
+	INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId AND P.strPropertyName = 'Taste' 
+	WHERE TR.intSampleId = S.intSampleId
+) PV
 OUTER APPLY (
 	SELECT TOP 1 *
 	FROM tblSMCompanySetup
