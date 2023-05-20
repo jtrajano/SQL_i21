@@ -76,9 +76,11 @@ AS
 			
 			--Required by other modules
 
-			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,
+			intStorageLocationId = isnull(sla.intStorageLocationId, SL.intStorageLocationId),			IM.strLotTracking,				isnull(sla.strName, SL.strName)						AS	strStorageLocationName,
 			SU.strStockUOM,						SU.strStockUOMType,				ISNULL(IU.dblUnitQty,0)			AS	dblItemUOMCF,  
-			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(SU.intStockUOM,0)		AS	intStockUOM,		
+			intCompanyLocationSubLocationId = isnull(sba.intCompanyLocationSubLocationId, SB.intCompanyLocationSubLocationId)
+			,strSubLocationName = isnull(sba.strSubLocationName,SB.strSubLocationName)
+			,ISNULL(SU.intStockUOM,0)		AS	intStockUOM,		
 												CS.strContractStatus,			ISNULL(SU.dblStockUOMCF,0)		AS	dblStockUOMCF,	
 			IX.strIndex,						VR.strVendorId,					
 			SP.intSupplyPointId,												SP.intEntityVendorId			AS	intTerminalId,
@@ -262,8 +264,9 @@ AS
 	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
 	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				
 												AND	IL.intLocationId			=	CD.intCompanyLocationId		LEFT
-	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
-	JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
+	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId
+	left join tblICStorageLocation sla on sla.intStorageLocationId = CD.intStorageLocationId
+	LEFT JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DP	ON	DP.intCityId				=	CD.intLoadingPortId			LEFT
 	JOIN	tblSMCity						DC	ON	DC.intCityId				=	CD.intDestinationCityId		LEFT
@@ -290,8 +293,9 @@ AS
 				JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 				WHERE	IU.ysnStockUnit = 1
 			)								SK	ON	SK.intItemId				=	CD.intItemId				LEFT
-	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId 	LEFT
-	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND 
+	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId
+	left join tblSMCompanyLocationSubLocation sba on sba.intCompanyLocationSubLocationId = CD.intSubLocationId
+	LEFT JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND 
 													SP.intEntityLocationId = IX.intVendorLocationId				LEFT
 	JOIN	(
 				SELECT		intContractDetailId,ISNULL(SUM(dblReservedQuantity),0) AS dblReservedQuantity 

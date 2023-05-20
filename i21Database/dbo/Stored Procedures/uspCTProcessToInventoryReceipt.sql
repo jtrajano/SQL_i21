@@ -139,7 +139,7 @@ AS
 				intCostUOMId				=	CASE WHEN CD.intPricingTypeId = 2 OR ISNULL(CD.intCurrencyExchangeRateId, 0) = 0 THEN 
 													CD.intBasisUOMId 
 												ELSE
-													CD.intFXPriceUOMId 
+													ISNULL(CD.intFXPriceUOMId,CD.intPriceItemUOMId)
 												END,
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
 				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
