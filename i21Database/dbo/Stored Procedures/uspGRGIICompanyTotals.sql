@@ -589,22 +589,6 @@ BEGIN
 		GROUP BY intCommodityId
 			,strUOM
 
-		--SET @dblSODecrease = NULL
-		--SELECT @dblSODecrease = SUM(dblDecrease)
-		--FROM tblGRGIICustomerStorage CS
-		--INNER JOIN tblGRStorageType ST
-		--	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-		--		AND ST.ysnReceiptedStorage = 0
-		--		AND ST.ysnCustomerStorage = 0
-		--		AND ST.ysnDPOwnedType = 0
-		--		AND ST.ysnGrainBankType = 0
-		--		AND ST.strOwnedPhysicalStock = 'Customer'
-		--WHERE intCommodityId = @intCommodityId 
-		--	AND strUOM = @strUOM 
-		--	AND dtmReportDate = @dtmReportDate
-		--GROUP BY intCommodityId
-		--	,strUOM
-
 		SET @dblSODecrease = NULL
 		SELECT @dblSODecrease = SUM(dblDecrease) - (ISNULL(@dblIACustomerOwned,0) * -1)
 		FROM tblGRGIICustomerStorage CS
@@ -641,18 +625,20 @@ BEGIN
 
 		SET @dblInternalTransfersDiff = @dblInternalTransfersReceived - @dblInternalTransfersShipped
 
-		--GET RECEIVED THAT ARE COMPANY OWNED
-		--DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
-		--SET @dblReceivedCompanyOwned = NULL
-		--SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
-		--FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
-		--INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
-		--LEFT JOIN tblCTContractDetail CD
-		--	ON CD.intContractDetailId = CompOwn.intContractDetailId
-		--WHERE intCommodityId = @intCommodityId
-		--	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
-		--	AND CompOwn.strTransactionType = 'Inventory Receipt'
-		--	AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
+		--GET RECEIVED THAT ARE COMPANY OWNED AND HAVE VOUCHERS ALREADY
+		DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
+		SET @dblReceivedCompanyOwned = NULL
+		SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal))
+		FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = CompOwn.intContractDetailId
+		INNER JOIN tblAPBillDetail APD
+			ON APD.intInventoryReceiptItemId = CompOwn.intTransactionRecordId
+		WHERE intCommodityId = @intCommodityId
+			AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
+			AND CompOwn.strTransactionType = 'Inventory Receipt'
+			AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
 
 		--GET TRANSFERS FROM LICENSED TO NON-LICENSED LOCATIONS FOR THE DAY
 		DECLARE @dblTransfers DECIMAL(18,6)
@@ -734,7 +720,7 @@ BEGIN
 	/******INCREASE*******/
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
-	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
+	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + ISNULL(@dblReceivedCompanyOwned,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
 		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
