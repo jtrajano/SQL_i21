@@ -475,6 +475,7 @@ BEGIN TRY
 						  , strComment
 						  , intCreatedUserId
 						  , dtmCreated
+						  , intBookId
 						  , intSubBookId
 						  /* Auction Fields */
 						  , intSaleYearId
@@ -511,6 +512,7 @@ BEGIN TRY
 						  , strSampleBoxNumber
 						  , strComments3
 						  , intBrokerId
+						  , intPackageTypeId
 						)
 						SELECT intConcurrencyId			= 1
 							 , intSampleTypeId			= @intTemplateSampleTypeId
@@ -537,6 +539,7 @@ BEGIN TRY
 							 , strComment				= S.strComment
 							 , intCreatedUserId			= @intEntityUserId
 							 , dtmCreated				= @dtmDateCreated
+							 , intBookId				= S.intBookId
 							 , intSubBookId				= S.intSubBookId
 							 /* Auction Fields */
 							 , intSaleYearId			= S.intSaleYearId
@@ -573,6 +576,7 @@ BEGIN TRY
 							 , strSampleBoxNumber		= S.strSampleBoxNumber
 							 , strComments3				= S.strComments3
 							 , intBrokerId				= S.intBrokerId
+							 , intPackageTypeId			= S.intPackageTypeId
 						FROM tblQMSample S
 						INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 						WHERE B.intBatchId = @intBatchId
@@ -1101,11 +1105,6 @@ BEGIN TRY
 		WHERE intRow = @intCounter
 
 		IF @intImportType = 2
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFBatch
-				WHERE strBatchId = @strBatchNo
-				)
 		BEGIN
 			DELETE FROM @MFBatchTableType
 			
@@ -1116,6 +1115,7 @@ BEGIN TRY
 				,dtmSalesDate
 				,strTeaType
 				,intBrokerId
+				,intSupplierId
 				,strVendorLotNumber
 				,intBuyingCenterLocationId
 				,intStorageLocationId
@@ -1216,6 +1216,14 @@ BEGIN TRY
 				,dtmShippingDate
 				,strFines
 				,intCountryId
+
+				,dblOriginalTeaTaste
+				,dblOriginalTeaHue
+				,dblOriginalTeaIntensity
+				,dblOriginalTeaMouthfeel
+				,dblOriginalTeaAppearance
+				,dblOriginalTeaVolume
+				,dblOriginalTeaMoisture
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1223,8 +1231,9 @@ BEGIN TRY
 				,dtmSalesDate = S.dtmSaleDate
 				,strTeaType = CT.strCatalogueType
 				,intBrokerId = S.intBrokerId
+				,intSupplierId = S.intEntityId
 				,strVendorLotNumber = S.strRepresentLotNumber
-				,intBuyingCenterLocationId = S.intCompanyLocationId
+				,intBuyingCenterLocationId = BT.intBuyingCenterLocationId
 				,intStorageLocationId = S.intDestinationStorageLocationId
 				,intStorageUnitId = NULL
 				,intBrokerWarehouseId = NULL
@@ -1245,7 +1254,7 @@ BEGIN TRY
 						THEN NULL
 					ELSE CAST(Density.strPropertyValue AS NUMERIC(18, 6))
 					END
-				,strBuyingOrderNumber = S.strBuyingOrderNo
+				,strBuyingOrderNumber = BT.strBuyingOrderNumber
 				,intSubBookId = S.intSubBookId
 				,strContainerNumber = S.strContainerNumber
 				,intCurrencyId = S.intCurrencyId
@@ -1270,7 +1279,7 @@ BEGIN TRY
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
-				,intOriginalItemId = S.intItemId
+				,intOriginalItemId = BT.intTealingoItemId
 				,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 				,strPlant = MU.strVendorRefNoPrefix 
 				,dblTotalQuantity = S.dblSampleQty 
@@ -1354,7 +1363,15 @@ BEGIN TRY
 				,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
 				,dtmShippingDate = @dtmCurrentDate
 				,strFines = Fines.strPropertyValue 
-				,intCountryId=S.intCountryID 
+				,intCountryId=S.intCountryID
+
+				,dblOriginalTeaTaste = BT.dblTeaTaste
+				,dblOriginalTeaHue = BT.dblTeaHue
+				,dblOriginalTeaIntensity = BT.dblTeaIntensity
+				,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
+				,dblOriginalTeaAppearance = BT.dblTeaAppearance
+				,dblOriginalTeaVolume = BT.dblTeaVolume
+				,dblOriginalTeaMoisture = BT.dblTeaMoisture
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -1362,10 +1379,11 @@ BEGIN TRY
 			INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 			LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 			LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
-			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
+			LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = @intMixingUnitLocationId
 			LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 			LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
+			LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intLocationId = S.intCompanyLocationId AND BT.intLocationId = BT.intMixingUnitLocationId
 			-- Appearance
 			OUTER APPLY (
 				SELECT TR.strPropertyValue
@@ -1485,6 +1503,7 @@ BEGIN TRY
 			DECLARE @intInput INT
 				,@intInputSuccess INT
 
+			-- Start insert/update batch
 			IF EXISTS (
 					SELECT *
 					FROM @MFBatchTableType

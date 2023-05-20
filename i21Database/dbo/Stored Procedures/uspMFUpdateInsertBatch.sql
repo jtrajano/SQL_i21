@@ -90,7 +90,6 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 			  AND A.intBuyingCenterLocationId = B.intBuyingCenterLocationId
 			  AND A.intSubBookId = B.intSubBookId
 			  AND A.intLocationId = B.intLocationId
-			  AND A.intSampleId = B.intSampleId
 			  AND A.intSupplierId = B.intSupplierId
 		WHERE B.intId = @id;
 
