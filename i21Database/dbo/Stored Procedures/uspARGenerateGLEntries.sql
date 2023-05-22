@@ -2,7 +2,7 @@
      @Post              BIT				= 0
     ,@Recap             BIT				= 0
     ,@PostDate          DATETIME        = NULL
-    ,@BatchId           NVARCHAR(40)    = NULL
+    ,@BatchId           NVARCHAR(50)    = NULL
     ,@UserId            INT             = NULL
 AS
 SET QUOTED_IDENTIFIER OFF

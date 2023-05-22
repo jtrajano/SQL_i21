@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceRecap]
      @Post              BIT				= 0
     ,@Recap             BIT				= 0
-    ,@BatchId           NVARCHAR(40)
+    ,@BatchId           NVARCHAR(50)
     ,@PostDate          DATETIME                
     ,@UserId            INT
 	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
