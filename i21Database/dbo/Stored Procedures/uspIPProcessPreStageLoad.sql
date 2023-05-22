@@ -12,6 +12,10 @@ BEGIN TRY
 		,@intToCompanyId INT
 		,@intToEntityId INT
 		,@strToTransactionType NVARCHAR(100)
+		,@intContractDetailId INT
+		,@intContractHeaderId INT
+		,@intEntityId INT
+
 	DECLARE @tblLGIntrCompLogisticsPreStg TABLE (
 		intLoadPreStageId INT
 		,intLoadId INT
@@ -101,6 +105,9 @@ BEGIN TRY
 			,@strToTransactionType = NULL
 			,@intToCompanyLocationId = NULL
 			,@intToBookId = NULL
+			,@intContractDetailId = NULL
+			,@intContractHeaderId = NULL
+			,@intEntityId=NULL
 
 		SELECT @intLoadId = intLoadId
 			,@strRowState = strRowState
@@ -110,6 +117,26 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 		FROM @tblLGIntrCompLogisticsPreStg
 		WHERE intLoadPreStageId = @intLoadPreStageId
+
+		SELECT @intContractDetailId=intPContractDetailId
+		FROM dbo.tblLGLoadDetail
+		WHERE intLoadId=@intLoadId
+
+		SELECT @intContractHeaderId=intContractHeaderId  
+		FROM dbo.tblCTContractDetail 	 
+		WHERE intContractDetailId =@intContractDetailId
+
+		SELECT @intEntityId=intEntityId
+		FROM dbo.tblCTContractHeader 
+		WHERE intContractHeaderId =  @intContractHeaderId
+
+		IF NOT EXISTS(SELECT *FROM dbo.tblCTBookVsEntity WHERE intEntityId =@intEntityId)
+		BEGIN
+			UPDATE dbo.tblLGIntrCompLogisticsPreStg
+			SET strFeedStatus = 'IGNORE'
+			WHERE intLoadPreStageId = @intLoadPreStageId
+			GOTO X
+		END 
 
 		EXEC dbo.uspLGPopulateLoadXML @intLoadId
 			,@strToTransactionType
@@ -122,7 +149,7 @@ BEGIN TRY
 		UPDATE dbo.tblLGIntrCompLogisticsPreStg
 		SET strFeedStatus = 'Processed'
 		WHERE intLoadPreStageId = @intLoadPreStageId
-
+X:
 		SELECT @intLoadPreStageId = MIN(intLoadPreStageId)
 		FROM @tblLGIntrCompLogisticsPreStg
 		WHERE intLoadPreStageId > @intLoadPreStageId
