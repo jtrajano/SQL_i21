@@ -169,6 +169,8 @@ CREATE TABLE tblARPostInvoiceDetail (
     ,[dblProvisionalTotal]                  NUMERIC(18,6)   NOT NULL DEFAULT 0
     ,[dblBaseProvisionalTotal]              NUMERIC(18,6)   NOT NULL DEFAULT 0
     ,dblBaseProvisionalTotalTax             NUMERIC(18,6)   NOT NULL DEFAULT 0
+    ,dblTotalTax                            NUMERIC(18,6)   NOT NULL DEFAULT 0
+    ,dblBaseTotalTax                        NUMERIC(18,6)   NOT NULL DEFAULT 0
 );
 GO
 CREATE INDEX [idx_tblARPostInvoiceDetail_intInvoiceId] ON [dbo].[tblARPostInvoiceDetail] (intInvoiceId)

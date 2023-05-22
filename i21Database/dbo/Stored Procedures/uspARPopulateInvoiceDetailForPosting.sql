@@ -505,10 +505,12 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
-    ,[dblPercentage]
-    ,[dblProvisionalTotal]
-    ,[dblBaseProvisionalTotal]
+    ,dblPercentage
+    ,dblProvisionalTotal
+    ,dblBaseProvisionalTotal
     ,dblBaseProvisionalTotalTax
+    ,dblTotalTax
+    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -660,10 +662,12 @@ SELECT
     ,[ysnAllowIntraEntries]             = @AllowIntraEntries
     ,[ysnSkipIntraEntriesValiation]     = @SkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
-    ,[dblPercentage]                    = ARID.[dblPercentage]
-    ,[dblProvisionalTotal]              = ARID.[dblProvisionalTotal]
-    ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+    ,dblPercentage                      = ARID.dblPercentage
+    ,dblProvisionalTotal                = ARID.dblProvisionalTotal
+    ,dblBaseProvisionalTotal            = ROUND(ARID.dblProvisionalTotal * ARID.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
     ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
+    ,dblTotalTax                        = ARID.dblTotalTax
+    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -836,6 +840,12 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,dblPercentage
+    ,dblProvisionalTotal
+    ,dblBaseProvisionalTotal
+    ,dblBaseProvisionalTotalTax
+    ,dblTotalTax
+    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1047,6 +1057,12 @@ SELECT
     ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,dblPercentage                      = ARID.dblPercentage
+    ,dblProvisionalTotal                = ARID.dblProvisionalTotal
+    ,dblBaseProvisionalTotal            = ROUND(ARID.dblProvisionalTotal * ARID.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+    ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
+    ,dblTotalTax                        = ARID.dblTotalTax
+    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1207,6 +1223,12 @@ INSERT tblARPostInvoiceDetail WITH (TABLOCK)
     ,[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]
     ,[strSessionId]
+    ,dblPercentage
+    ,dblProvisionalTotal
+    ,dblBaseProvisionalTotal
+    ,dblBaseProvisionalTotalTax
+    ,dblTotalTax
+    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1354,6 +1376,12 @@ SELECT
     ,[ysnAllowIntraEntries]             = ARI.[ysnAllowIntraEntries]
     ,[ysnSkipIntraEntriesValiation]     = ARI.ysnSkipIntraEntriesValiation
     ,[strSessionId]                     = @strSessionId
+    ,dblPercentage                      = ARID.dblPercentage
+    ,dblProvisionalTotal                = ARID.dblProvisionalTotal
+    ,dblBaseProvisionalTotal            = ROUND(ARID.dblProvisionalTotal * ARID.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal())
+    ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
+    ,dblTotalTax                        = ARID.dblTotalTax
+    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1394,7 +1422,7 @@ INNER JOIN (
     SELECT
          intInvoiceId               = intInvoiceId
         ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
-        ,dblBaseTax                 = SUM(dblBaseTax)
+        ,dblBaseTax                 = SUM(dblBaseTotalTax)
         ,dblBaseDiscountAmount      = SUM(dblBaseDiscountAmount)
         ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
         ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
