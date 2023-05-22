@@ -27,7 +27,7 @@ SELECT Payment.intPaymentId
 	--, Payment.inti21PaymentId
 	, inti21PaymentId = i21Payment.intPaymentId
 	, Payment.intConcurrencyId
-	, Shift.strShiftNo
+	, CASE WHEN Shift.intShiftNumber IS NULL THEN CONVERT(NVARCHAR(50),Shift.strShiftNo)  ELSE CONVERT(NVARCHAR(50),Shift.intShiftNumber) END as strShiftNo
 FROM tblMBILPayment Payment
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Payment.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Payment.intLocationId
