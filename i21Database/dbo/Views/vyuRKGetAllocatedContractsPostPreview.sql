@@ -12,8 +12,8 @@ SELECT pp.intAllocatedContractsPostRecapId
     --, pp.strAccountGroup
     , dblDebit = CASE WHEN header.ysnPosted = 1 THEN pp.dblCredit ELSE pp.dblDebit END
     , dblCredit = CASE WHEN header.ysnPosted = 1 THEN pp.dblDebit ELSE pp.dblCredit END
-	--, dblDebitForeign = CASE WHEN header.ysnPosted = 1 THEN pp.dblCreditForeign ELSE pp.dblDebitForeign END
- --   , dblCreditForeign = CASE WHEN header.ysnPosted = 1 THEN pp.dblDebitForeign ELSE pp.dblCreditForeign END
+	, dblDebitForeign = CASE WHEN header.ysnPosted = 1 THEN pp.dblCreditForeign ELSE pp.dblDebitForeign END
+    , dblCreditForeign = CASE WHEN header.ysnPosted = 1 THEN pp.dblDebitForeign ELSE pp.dblCreditForeign END
     , dblDebitUnit = CASE WHEN header.ysnPosted = 1 THEN pp.dblCreditUnit ELSE pp.dblDebitUnit END
     , dblCreditUnit = CASE WHEN header.ysnPosted = 1 THEN pp.dblDebitUnit ELSE pp.dblCreditUnit END
     , strDescription = strAccountDescription

@@ -116,6 +116,8 @@
 	, strSalesMTMPoint NVARCHAR(300) COLLATE Latin1_General_CI_AS
 	, strSalesCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, dblMatchedPnL NUMERIC(24,6)
+	, dblContractFXRate NUMERIC(24,6)
+	, intTransactionCurrencyId INT NULL
     , intConcurrencyId INT NULL DEFAULT ((1)) 
     CONSTRAINT [PK_tblRKAllocatedContractsTransaction] PRIMARY KEY ([intAllocatedContractsTransactionId]), 
     CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblRKAllocatedContractsGainOrLossHeader] FOREIGN KEY ([intAllocatedContractsGainOrLossHeaderId]) REFERENCES [tblRKAllocatedContractsGainOrLossHeader]([intAllocatedContractsGainOrLossHeaderId]) ON DELETE CASCADE, 
@@ -142,5 +144,6 @@
 	CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblCTCropYear_intCropYearId_Sales] FOREIGN KEY (intSalesCropYearId) REFERENCES [dbo].[tblCTCropYear] (intCropYearId),
 	CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblSMCompanyLocationSubLocation_intStorageLocationId_Sales] FOREIGN KEY (intSalesStorageLocationId) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] (intCompanyLocationSubLocationId),
 	CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblICStorageLocation_intStorageUnitId_Sales] FOREIGN KEY (intSalesStorageUnitId) REFERENCES [dbo].[tblICStorageLocation] (intStorageLocationId),
-	CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblCTMTMPoint_intMTMPointId_Sales] FOREIGN KEY (intSalesMTMPointId) REFERENCES [dbo].[tblCTMTMPoint] (intMTMPointId)
+	CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblCTMTMPoint_intMTMPointId_Sales] FOREIGN KEY (intSalesMTMPointId) REFERENCES [dbo].[tblCTMTMPoint] (intMTMPointId),
+	CONSTRAINT [FK_tblRKAllocatedContractsTransaction_tblSMCurrency_intCurrencyID] FOREIGN KEY (intTransactionCurrencyId) REFERENCES [dbo].[tblSMCurrency] (intCurrencyID)
 )
