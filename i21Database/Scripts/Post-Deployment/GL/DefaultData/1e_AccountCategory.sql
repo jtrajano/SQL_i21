@@ -141,8 +141,9 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 162, name = 'General Ledger Unrealized Gain or Loss' UNION ALL--GL-8450
 			SELECT id = 163, name = 'General Ledger Unrealized Gain or Loss Offset' UNION ALL --GL-8450
 			SELECT id = 164, name = 'In-Transit Direct' UNION ALL--GL-8450
-			SELECT id = 165, name = 'Inter Company' UNION ALL --GL-9005
-			SELECT id = 166, name = 'Intra Company' UNION ALL --GL-9940
+		
+			SELECT id = 165, name = 'Intra Company' UNION ALL --GL-9940
+			SELECT id = 166, name = 'Inter Company' UNION ALL --GL-9005
 
 			SELECT id = 167, name = 'Intra-Company Due From' UNION ALL --IC-11349
 			SELECT id = 168, name = 'Intra-Company Due To' --IC-11349
