@@ -117,6 +117,10 @@ BEGIN
 	BEGIN
 		SELECT @strSalespersonName = strName FROM tblEMEntity WHERE intEntityId = @intSalespersonId
 	END 
+	ELSE
+	BEGIN
+		set @strSalespersonName = (select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId)
+	END
 
 	IF @strMailType = 'Contract'
 	BEGIN
@@ -259,7 +263,11 @@ BEGIN
 	ELSE
 	SET @body +='Sincerely, <br>'
 		
-	if (@strMailType = 'Contract')
+	IF (@strMailType = 'Contract')
+	BEGIN
+		SET @body +=@strSalespersonName
+	END
+	IF (@strMailType = 'Price Contract')
 	BEGIN
 		SET @body +=@strSalespersonName
 	END
