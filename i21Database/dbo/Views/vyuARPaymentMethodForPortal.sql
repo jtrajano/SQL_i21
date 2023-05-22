@@ -27,7 +27,7 @@ OUTER APPLY (
 	WHERE ysnDefaultAccount = 1
 	  AND strPaymentMethod = 'ACH'
 ) ACH
-WHERE strPaymentMethod IN ('ACH', 'eCheck')
+WHERE strPaymentMethod IN ('ACH')
   AND ysnActive = 1
 
 UNION ALL
