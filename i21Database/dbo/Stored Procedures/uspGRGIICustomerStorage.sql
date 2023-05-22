@@ -50,9 +50,11 @@ WHERE [fieldname] = 'intCommodityId'
 SET @dtmReportDate = CASE WHEN @dtmReportDate IS NULL THEN dbo.fnRemoveTimeOnDate(GETDATE()) ELSE @dtmReportDate END
 
 DECLARE @CustomerStorageData AS TABLE (
-	dtmReportDate DATETIME
+	intId INT IDENTITY(1,1)
+	,dtmReportDate DATETIME
 	,intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,intStorageTypeId INT
 	,strStorageTypeDescription NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,dblBeginningBalance DECIMAL(18,6) DEFAULT 0
 	,dblIncrease DECIMAL(18,6) DEFAULT 0
@@ -195,7 +197,8 @@ BEGIN
 	SELECT @dtmReportDate
 		,@intCommodityId
 		,@strCommodity
-		,strStorageTypeDescription
+		,intStorageScheduleTypeId
+		,strStorageTypeDescription		
 		,SUM(dblIn) - SUM(dblOut)
 		,0
 		,0
@@ -203,12 +206,13 @@ BEGIN
 		,@strUOM
 	FROM #CustomerOwnershipBal A
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)		
-	GROUP BY strCommodityCode,strStorageTypeDescription
+	GROUP BY strCommodityCode,strStorageTypeDescription,intStorageScheduleTypeId
 
 	INSERT INTO @CustomerStorageData
 	SELECT @dtmReportDate
 		,@intCommodityId
 		,@strCommodity
+		,intStorageScheduleTypeId
 		,strStorageTypeDescription
 		,0
 		,0
@@ -264,13 +268,24 @@ DELETE FROM #StorageTypes
 UPDATE @CustomerStorageData SET dblEndingBalance = ISNULL(dblBeginningBalance,0) + ISNULL(dblIncrease,0) - ISNULL(dblDecrease,0)
 
 INSERT INTO tblGRGIICustomerStorage
-SELECT * FROM @CustomerStorageData
+SELECT dtmReportDate
+	,intCommodityId
+	,strCommodityCode
+	,intStorageTypeId
+	,strStorageTypeDescription	
+	,dblBeginningBalance
+	,dblIncrease
+	,dblDecrease
+	,dblEndingBalance
+	,strUOM
+FROM @CustomerStorageData
 
 INSERT INTO @CustomerStorageData
 SELECT
 	dtmReportDate
 	,intCommodityId
 	,strCommodityCode
+	,9999
 	,'TOTAL STORAGE OBLIGATION'
 	,SUM(dblBeginningBalance)
 	,SUM(dblIncrease)
@@ -283,6 +298,16 @@ GROUP BY dtmReportDate
 	,strCommodityCode
 	,strUOM
 
-SELECT * FROM @CustomerStorageData ORDER BY intCommodityId
+SELECT dtmReportDate
+	,intCommodityId
+	,strCommodityCode
+	,strStorageTypeDescription	
+	,dblBeginningBalance
+	,dblIncrease
+	,dblDecrease
+	,dblEndingBalance
+	,strUOM
+FROM @CustomerStorageData
+ ORDER BY intId,intCommodityId
 
 END
