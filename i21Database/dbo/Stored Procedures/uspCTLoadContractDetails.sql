@@ -759,8 +759,11 @@ BEGIN TRY
 		order by
 			b.intTransactionType
 	) BDB
+	outer apply (
+		select TOP  1 intContractTypeId from  tblCTContractHeader where intContractHeaderId = @intContractHeaderId
+	)ctType
     outer apply (
-        select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
+        select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where (CASE WHEN ctType.intContractTypeId = 1 THEN lga.intPContractDetailId ELSE lga.intSContractDetailId END) =  CD.intContractDetailId
     ) AD
 	LEFT JOIN tblICItemUOM FB ON FB.intItemUOMId = CD.intFreightBasisUOMId
 	LEFT JOIN tblICUnitMeasure FBUM ON FBUM.intUnitMeasureId = FB.intUnitMeasureId
