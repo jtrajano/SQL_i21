@@ -226,10 +226,12 @@ DECLARE @tmpAllocatedContracts TABLE (
 	, intSalesMTMPointId INT
 	, strSalesMTMPoint NVARCHAR(300) COLLATE Latin1_General_CI_AS
 	, strSalesCertification NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-
 	, dblMatchedPnL NUMERIC(24,6)
+	, dblContractFXRate NUMERIC(24,6)
+	, intTransactionCurrencyId INT
 )
 
+IF (ISNULL(@dtmPostDate, '') = '') SET @dtmPostDate = GETDATE()
 
 IF (ISNULL(@strRecordName, '') = '')
 BEGIN		
@@ -446,8 +448,9 @@ SELECT
 	, intSalesMTMPointId = CASE WHEN @ysnEnableMTMPoint = 0 THEN NULL ELSE SCD.intMTMPointId END
 	, strSalesMTMPoint = CASE WHEN @ysnEnableMTMPoint = 0 THEN NULL ELSE SMTMPoint.strMTMPoint END
 	, strSalesCertification = CASE WHEN @ysnIncludeProductInformation = 0 THEN NULL ELSE SCC.strContractCertifications END
-
 	, dblMatchedPnL = NULL
+	, dblContractFXRate = PRate.dblRateCT
+	, dblTransactionCurrencyId =  P_PriceCur.intCurrencyID
 FROM tblLGAllocationDetail ALD
 		INNER JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 		--Purchase Contract
@@ -1423,8 +1426,9 @@ SELECT
 	, intSalesMTMPointId = NULL
 	, strSalesMTMPoint = NULL
 	, strSalesCertification = NULL
-
 	, dblMatchedPnL = NULL
+	, dblContractFXRate = NULL
+	, intTransactionCurrencyId = NULL
 FROM tblRKMatchFuturesPSHeader psh
 JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId
 JOIN tblRKFutOptTransaction buy ON psd.intLFutOptTransactionId = buy.intFutOptTransactionId
@@ -1585,6 +1589,8 @@ INSERT INTO tblRKAllocatedContractsTransaction (
 	, strSalesMTMPoint
 	, strSalesCertification
 	, dblMatchedPnL
+	, dblContractFXRate
+	, intTransactionCurrencyId
 	, intConcurrencyId
 )
 SELECT intAllocatedContractsGainOrLossHeaderId
@@ -1702,6 +1708,8 @@ SELECT intAllocatedContractsGainOrLossHeaderId
 	, strSalesMTMPoint
 	, strSalesCertification
 	, dblMatchedPnL
+	, dblContractFXRate
+	, intTransactionCurrencyId
 	, intConcurrencyId = 1 
 FROM @tmpAllocatedContracts t
 
@@ -1719,15 +1727,15 @@ FROM @tmpAllocatedContracts t
 DELETE FROM tblRKAllocatedContractsSummary WHERE intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 
 INSERT INTO tblRKAllocatedContractsSummary(
-	intAllocatedContractsGainOrLossHeaderId
-	,strSummary
-	,intCommodityId
-	,dblPurchaseAllocatedQty
-	,dblSalesAllocatedQty
-	,dblTotal
-	,dblFutures
-	,dblBasis
-	,dblCash
+	  intAllocatedContractsGainOrLossHeaderId
+	, strSummary
+	, intCommodityId
+	, dblPurchaseAllocatedQty
+	, dblSalesAllocatedQty
+	, dblTotal
+	, dblFutures
+	, dblBasis
+	, dblCash
 )
 SELECT intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 	, strSummary = strTransactionType
@@ -1755,28 +1763,28 @@ ORDER BY strTransactionType DESC
 
 DELETE FROM tblRKAllocatedContractsPostRecap WHERE intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 
-DECLARE @intAllocatedContractGainOrLossId INT
-		,@strAllocatedContractGainOrLossId NVARCHAR(40)
-		,@strAllocatedContractGainOrLossIdDescription NVARCHAR(255)
-		,@intAllocatedContractGainOrLossOffsetId INT
-		,@strAllocatedContractGainOrLossOffsetId NVARCHAR(40)
-		,@strAllocatedContractGainOrLossOffsetIdDescription NVARCHAR(255)
+DECLARE   @intAllocatedContractGainOrLossId INT
+		, @strAllocatedContractGainOrLossId NVARCHAR(40)
+		, @strAllocatedContractGainOrLossIdDescription NVARCHAR(255)
+		, @intAllocatedContractGainOrLossOffsetId INT
+		, @strAllocatedContractGainOrLossOffsetId NVARCHAR(40)
+		, @strAllocatedContractGainOrLossOffsetIdDescription NVARCHAR(255)
 
 SELECT 
-	@intAllocatedContractGainOrLossId = intAllocatedContractGainOrLossId 
-	,@intAllocatedContractGainOrLossOffsetId = intAllocatedContractGainOrLossOffsetId
+	  @intAllocatedContractGainOrLossId = intAllocatedContractGainOrLossId 
+	, @intAllocatedContractGainOrLossOffsetId = intAllocatedContractGainOrLossOffsetId
 FROM tblRKCompanyPreference
 
 
 SELECT
-	@intAllocatedContractGainOrLossId = fn.intAccountId
+	  @intAllocatedContractGainOrLossId = fn.intAccountId
 	, @strAllocatedContractGainOrLossId = fn.strAccountNo
 	, @strAllocatedContractGainOrLossIdDescription = CASE WHEN fn.ysnHasError = 1 THEN fn.strErrorMessage ELSE gl.strDescription END
 FROM dbo.fnRKGetAccountIdForLocationLOB('Allocated Contracts Gain or Loss', @intAllocatedContractGainOrLossId, @intCommodityId, @intLocationId) fn
 LEFT JOIN tblGLAccount gl ON gl.intAccountId = fn.intAccountId
 
 SELECT
-	@intAllocatedContractGainOrLossOffsetId = fn.intAccountId
+	  @intAllocatedContractGainOrLossOffsetId = fn.intAccountId
 	, @strAllocatedContractGainOrLossOffsetId = fn.strAccountNo
 	, @strAllocatedContractGainOrLossOffsetIdDescription = CASE WHEN fn.ysnHasError = 1 THEN fn.strErrorMessage ELSE gl.strDescription END
 FROM dbo.fnRKGetAccountIdForLocationLOB('Allocated Contracts Gain or Loss Offset', @intAllocatedContractGainOrLossOffsetId, @intCommodityId, @intLocationId) fn
@@ -1784,65 +1792,68 @@ LEFT JOIN tblGLAccount gl ON gl.intAccountId = fn.intAccountId
 
 
 
-INSERT INTO tblRKAllocatedContractsPostRecap(
-	intAllocatedContractsGainOrLossHeaderId
-	,dtmPostDate
-	,intAccountId
-	,strAccountId
-	,dblDebit
-	,dblCredit
-	,dblDebitUnit
-	,dblCreditUnit
-	,strAccountDescription
-	,intCurrencyId
-	,dtmTransactionDate
-	,strTransactionId
-	,intTransactionId
-	,strTransactionType
-	,strTransactionForm
-	,strModuleName
-	,strCode
-	,intConcurrencyId
-	,dblExchangeRate
-	,dtmDateEntered
-	,ysnIsUnposted
-	,intEntityId
-	,strReference
-	,intUserId
-	,intSourceLocationId
-	,intSourceUOMId
-	,intCommodityId
+INSERT INTO tblRKAllocatedContractsPostRecap (
+	  intAllocatedContractsGainOrLossHeaderId
+	, dtmPostDate
+	, intAccountId
+	, strAccountId
+	, dblDebit
+	, dblCredit
+	, dblDebitForeign
+	, dblCreditForeign
+	, dblDebitUnit
+	, dblCreditUnit
+	, strAccountDescription
+	, intCurrencyId
+	, dtmTransactionDate
+	, strTransactionId
+	, intTransactionId
+	, strTransactionType
+	, strTransactionForm
+	, strModuleName
+	, strCode
+	, intConcurrencyId
+	, dblExchangeRate
+	, dtmDateEntered
+	, ysnIsUnposted
+	, intEntityId
+	, strReference
+	, intUserId
+	, intSourceLocationId
+	, intSourceUOMId
+	, intCommodityId
 )
 SELECT 
-	intAllocatedContractsGainOrLossHeaderId
-	,dtmPostDate
-	,intAccountId
-	,strAccountId
-	,dblDebit
-	,dblCredit
-	,dblDebitUnit
-	,dblCreditUnit
-	,strAccountDescription
-	,intCurrencyId
-	,dtmTransactionDate
-	,strTransactionId
-	,intTransactionId
-	,strTransactionType
-	,strTransactionForm
-	,strModuleName
-	,strCode
-	,intConcurrencyId
-	,dblExchangeRate
-	,dtmDateEntered
-	,ysnIsUnposted
-	,intEntityId
-	,strReference
-	,intUserId
-	,intSourceLocationId
-	,intSourceUOMId
-	,intCommodityId
+	  intAllocatedContractsGainOrLossHeaderId
+	, dtmPostDate
+	, intAccountId
+	, strAccountId
+	, dblDebit
+	, dblCredit
+	, dblDebitForeign = ISNULL(dblDebit, 0) / ISNULL(dblExchangeRate, 1)
+	, dblCreditForeign = ISNULL(dblCredit, 0) / ISNULL(dblExchangeRate, 1)
+	, dblDebitUnit
+	, dblCreditUnit
+	, strAccountDescription
+	, intCurrencyId
+	, dtmTransactionDate
+	, strTransactionId
+	, intTransactionId
+	, strTransactionType
+	, strTransactionForm
+	, strModuleName
+	, strCode
+	, intConcurrencyId
+	, dblExchangeRate
+	, dtmDateEntered
+	, ysnIsUnposted
+	, intEntityId
+	, strReference
+	, intUserId
+	, intSourceLocationId
+	, intSourceUOMId
+	, intCommodityId
 FROM (
-
 	SELECT intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 		, @dtmPostDate AS dtmPostDate
 		, intAccountId = @intAllocatedContractGainOrLossId
@@ -1861,7 +1872,12 @@ FROM (
 		, strModuleName = 'Risk Management'
 		, strCode = 'RK'
 		, intConcurrencyId = 1
-		, dblExchangeRate = 1
+		, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblContractFXRate, 0) <> 0
+									THEN ISNULL(dblContractFXRate, 1)
+								WHEN (@strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0)
+									OR (@strRateType = 'Contract' AND ISNULL(dblContractFXRate, 0) = 0)
+									THEN ISNULL(dbo.fnRKGetCurrencyConvertion(t.intTransactionCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId), 1)
+								ELSE 1 END
 		, dtmDateEntered = @dtmCurrentDate
 		, ysnIsUnposted = 0
 		, intEntityId = @intUserId
@@ -1872,7 +1888,7 @@ FROM (
 		, intCommodityId = @intCommodityId
 		, intAllocatedContractsTransactionId
 		, intSortId = 2
-	FROM tblRKAllocatedContractsTransaction
+	FROM tblRKAllocatedContractsTransaction t
 	WHERE intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 		AND strTransactionType IN ('Physical')
 		AND ISNULL(dblMatchedPnL, 0) <> 0
@@ -1897,7 +1913,12 @@ FROM (
 		, strModuleName = 'Risk Management'
 		, strCode = 'RK'
 		, intConcurrencyId = 1
-		, dblExchangeRate = 1
+		, dblExchangeRate = CASE WHEN @strRateType = 'Contract' AND ISNULL(dblContractFXRate, 0) <> 0
+									THEN ISNULL(dblContractFXRate, 1)
+								WHEN @strRateType = 'Configuration' AND ISNULL(@intCurrencyId, 0) <> 0 
+									OR (@strRateType = 'Contract' AND ISNULL(dblContractFXRate, 0) = 0)
+									THEN ISNULL(dbo.fnRKGetCurrencyConvertion(t.intTransactionCurrencyId, @intCurrencyId, @intMarkToMarketRateTypeId), 1)
+								ELSE 1 END
 		, dtmDateEntered = @dtmCurrentDate
 		, ysnIsUnposted = 0
 		, intEntityId = @intUserId
@@ -1908,7 +1929,7 @@ FROM (
 		, intCommodityId = @intCommodityId
 		, intAllocatedContractsTransactionId
 		, intSortId = 2
-	FROM tblRKAllocatedContractsTransaction
+	FROM tblRKAllocatedContractsTransaction t
 	WHERE intAllocatedContractsGainOrLossHeaderId = @intAllocatedContractsGainOrLossHeaderId
 		AND strTransactionType IN ('Physical')
 		AND ISNULL(dblMatchedPnL, 0) <> 0
