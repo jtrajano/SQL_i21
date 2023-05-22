@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetInboundShipmentPickedSalesReport]
-		@xmlParam NVARCHAR(MAX) = NULL  
+		@xmlParam NVARCHAR(MAX) = NULL,
+		@xmlParam2 INT = NULL 
 AS
 BEGIN
 	--DECLARE @intReferenceNumber			INT,
@@ -74,5 +75,8 @@ FROM tblLGLoadContainer LC
 WHERE 
 	PLH.intType = 2
 	AND L.strLoadNumber = @xmlParam	
+	AND (ISNULL(@xmlParam2, 0) = 0 
+	OR (ISNULL(@xmlParam2, 0) > 0 AND @xmlParam2 = PLH.intCustomerEntityId)
+	OR (ISNULL(@xmlParam2, 0) < 0 AND PLH.intCustomerEntityId IS NULL))
 
 END
