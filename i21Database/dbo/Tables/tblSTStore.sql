@@ -114,7 +114,7 @@
 	-- [intCustomerPaymentItemId] int NULL,
 	[intOverShortItemId] int NULL,
 	[strStoreAppWebUrl] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[guidStoreAppConnectionId] UNIQUEIDENTIFIER NULL, 
+	[guidStoreAppConnectionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
 	[strStoreAppMacAddress] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmStoreAppLastDateLog] DATETIME NULL,
 	[strStoreAppFileVersion] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
