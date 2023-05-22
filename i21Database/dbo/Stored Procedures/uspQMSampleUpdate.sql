@@ -1300,6 +1300,7 @@ BEGIN
       ,dblTeaIntensityPinpoint
       ,dblTeaMouthFeelPinpoint
       ,dblTeaAppearancePinpoint
+      ,intSupplierId
 
       ,dblOriginalTeaTaste
       ,dblOriginalTeaHue
@@ -1431,6 +1432,7 @@ BEGIN
       ,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
       ,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
       ,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
+      ,intSupplierId = S.intEntityId
 
       ,dblOriginalTeaTaste = ISNULL(BT.dblTeaTaste, TASTE.dblPinpointValue)
       ,dblOriginalTeaHue = ISNULL(BT.dblTeaHue, HUE.dblPinpointValue)
@@ -1443,11 +1445,12 @@ BEGIN
     INNER JOIN tblICItem I ON I.intItemId = S.intItemId
     LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
-    LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo
+    LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
     LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
     LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
     LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
     LEFT JOIN tblSMCompanyLocation TBO ON TBO.intCompanyLocationId = S.intLocationId AND (TBO.intCompanyLocationId <> ISNULL(MU.intCompanyLocationId, 0))
+    LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intLocationId = S.intCompanyLocationId
     LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
     LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
     LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
@@ -1590,15 +1593,17 @@ BEGIN
       SET B.intLocationId = L.intCompanyLocationId
         ,strBatchId = @strBatchId
         --,intSampleId = NULL
-        ,dblOriginalTeaTaste = dblTeaTaste
-        ,dblOriginalTeaHue = dblTeaHue
-        ,dblOriginalTeaIntensity = dblTeaIntensity
-        ,dblOriginalTeaMouthfeel = dblTeaMouthFeel
-        ,dblOriginalTeaAppearance = dblTeaAppearance
+        ,dblOriginalTeaTaste = B.dblTeaTaste
+        ,dblOriginalTeaHue = B.dblTeaHue
+        ,dblOriginalTeaIntensity = B.dblTeaIntensity
+        ,dblOriginalTeaMouthfeel = B.dblTeaMouthFeel
+        ,dblOriginalTeaAppearance = B.dblTeaAppearance
         ,strPlant=L.strVendorRefNoPrefix
+        ,strERPPONumber = BT.strERPPONumber
       FROM @MFBatchTableType B
       JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
       JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+      LEFT JOIN tblMFBatch BT ON BT.strBatchId = B.strBatchId AND BT.intLocationId = L.intCompanyLocationId
 
       EXEC uspMFUpdateInsertBatch @MFBatchTableType
         ,@intInput OUTPUT
