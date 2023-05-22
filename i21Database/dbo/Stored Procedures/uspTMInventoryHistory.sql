@@ -1,6 +1,6 @@
 
 CREATE PROCEDURE [dbo].[uspTMInventoryHistory]
-	@intSiteNumber int
+	@intSiteId int
 AS
 BEGIN
 
@@ -52,7 +52,7 @@ BEGIN
 	FROM tblTMSite A
 		INNER JOIN tblTMTankReading B
 		ON B.intSiteId = A.intSiteID
-	where A.intSiteNumber = @intSiteNumber and ((DATEDIFF (day, B.dtmDateTime, getdate())) <= 28)
+	where A.intSiteID = @intSiteId and ((DATEDIFF (day, B.dtmDateTime, getdate())) <= 28)
 	order by B.dtmDateTime desc
 
     OPEN DataCursor
