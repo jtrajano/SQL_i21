@@ -59,7 +59,8 @@ BEGIN
 			WHERE		a.intSiteID IN (
 										SELECT		intSiteID 
 										FROM		tblTMSite
-										WHERE		@strConsumptionSiteFilter = 'All Sites'
+										WHERE		@strConsumptionSiteFilter = 'All Sites' AND
+													ysnCompanySite = 1
 										
 										UNION
 										
@@ -117,7 +118,8 @@ BEGIN
 			WHERE		a.intSiteID IN (
 										SELECT		intSiteID 
 										FROM		tblTMSite
-										WHERE		@strConsumptionSiteFilter = 'All Sites'
+										WHERE		@strConsumptionSiteFilter = 'All Sites' AND
+													ysnCompanySite = 1
 										
 										UNION
 										
@@ -175,7 +177,8 @@ BEGIN
 			WHERE		a.intSiteID IN (
 										SELECT		intSiteID 
 										FROM		tblTMSite
-										WHERE		@strConsumptionSiteFilter = 'All Sites'
+										WHERE		@strConsumptionSiteFilter = 'All Sites' AND
+													ysnCompanySite = 1
 										
 										UNION
 										
