@@ -28,7 +28,7 @@ SELECT intPaymentId						= P.intPaymentId
 	 , intEntityId						= P.intEntityId
 	 , intWriteOffAccountId				= NULLIF(P.intWriteOffAccountId, 0)
 	 , intCurrencyExchangeRateTypeId	= P.intCurrencyExchangeRateTypeId
-	 , strPaymentMethod					= P.strPaymentMethod
+	 , strPaymentMethod					= PM.strPaymentMethod
 	 , intEntityCardInfoId				= P.intEntityCardInfoId
 	 , ysnProcessCreditCard				= P.ysnProcessCreditCard
 	 , ysnProcessedToNSF				= P.ysnProcessedToNSF
@@ -50,6 +50,7 @@ FROM tblARPayment P WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch C ON C.intEntityId = P.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = P.intLocationId
 INNER JOIN tblSMCurrency CUR ON CUR.intCurrencyID = P.intCurrencyId
+INNER JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 LEFT JOIN tblGLAccount GL ON P.intWriteOffAccountId = GL.intAccountId
 LEFT JOIN tblSMCurrencyExchangeRateType SERT ON SERT.intCurrencyExchangeRateTypeId = P.intCurrencyExchangeRateTypeId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = P.intBankAccountId
