@@ -33,8 +33,6 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	intBankFileFormatPrenoteAPId BIT NULL,
 	intBankFileFormatPrenoteARId BIT NULL,
 	intConcurrencyId int NULL,
-	intBankFileFormatPrenoteAPId INT NULL,
-	intBankFileFormatPrenoteARId INT NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
 	[intCompanyPreferenceOptionId] ASC
