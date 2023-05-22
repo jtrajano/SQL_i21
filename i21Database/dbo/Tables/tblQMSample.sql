@@ -165,7 +165,7 @@
     [intB5PriceUOMId] INT NULL,
 	[strB5PriceUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[ysnBought] BIT NULL,
-		
+	[intPackageTypeId] INT NULL,		
 	CONSTRAINT [PK_tblQMSample] PRIMARY KEY ([intSampleId]), 
 	CONSTRAINT [AK_tblQMSample_strSampleNumber] UNIQUE ([strSampleNumber]), 
 	CONSTRAINT [FK_tblQMSample_tblQMSample] FOREIGN KEY ([intParentSampleId]) REFERENCES [tblQMSample]([intSampleId]), 
