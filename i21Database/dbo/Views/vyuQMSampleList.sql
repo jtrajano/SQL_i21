@@ -225,7 +225,7 @@ SELECT S.intSampleId
 	, PackageType.strUnitMeasure AS strPackageType
 	, ISNULL(S.strCourierRef, strAirwayBillCode) AS strAirwayBillCode 
 	, Batch.strTaster 
-	, S.ysnBought
+	, ISNULL(S.ysnBought, 0) AS ysnBought 
 	, SeasonCropYear.strCropYear AS strSeasonCropYear
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
