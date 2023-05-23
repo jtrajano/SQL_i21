@@ -501,19 +501,19 @@ DECLARE @invalidPayables AS TABLE (strVendorOrderNumber NVARCHAR(MAX) COLLATE La
 INSERT INTO @invalidPayables
 SELECT strVendorOrderNumber, strError
 FROM (
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find Company Location ' + strLocationName AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intLocationId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Cannot find Company Location ' + strLocationName AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intLocationId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find vendor ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Cannot find vendor ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Vendor ' + strVendorId + ' is not an active vendor.' AS strError FROM #tmpConvertedSupplierInvoiceData WHERE ysnActive = 0
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Vendor ' + strVendorId + ' is not an active vendor.' AS strError FROM #tmpConvertedSupplierInvoiceData WHERE ysnActive = 0
 	UNION ALL
 	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find transaction type ' + strPurchaseType FROM #tmpConvertedSupplierInvoiceData WHERE intTransactionType IS NULL
 	-- UNION ALL
 	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find distribution type  ' + strDetailInfo FROM #tmpConvertedSupplierInvoiceData WHERE dblQuantityToBill IS NULL AND strDetailInfo IS NOT NULL
 	-- UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': No default vendor expense account setup ' FROM #tmpConvertedSupplierInvoiceData WHERE intAccountId IS NULL --AND strDateOrAccount IS NOT NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': No default vendor expense account setup ' FROM #tmpConvertedSupplierInvoiceData WHERE intAccountId IS NULL --AND strDateOrAccount IS NOT NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid vendor format ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL AND strVendorId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid vendor format ' + strVendorId AS strError FROM #tmpConvertedSupplierInvoiceData WHERE intEntityVendorId IS NULL AND strVendorId IS NULL
 	-- UNION ALL
 	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid transaction type ' + ISNULL(strPurchaseType,'') FROM #tmpConvertedSupplierInvoiceData WHERE intTransactionType IS NULL --AND CAST(intVoucherType AS NVARCHAR) IS NULL
 	-- UNION ALL
@@ -521,15 +521,15 @@ FROM (
 	-- UNION ALL
 	-- SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid account format ' FROM #tmpConvertedSupplierInvoiceData WHERE intAccountId IS NULL AND strDateOrAccount IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Sale Year ' + CAST(intSaleYear AS NVARCHAR) FROM #tmpConvertedSupplierInvoiceData WHERE intSaleYearId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Sale Year ' + CAST(intSaleYear AS NVARCHAR) FROM #tmpConvertedSupplierInvoiceData WHERE intSaleYearId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Catalogue Type ' + ISNULL(strCatalogueType,'') FROM #tmpConvertedSupplierInvoiceData WHERE intCatalogueTypeId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Catalogue Type ' + ISNULL(strCatalogueType,'') FROM #tmpConvertedSupplierInvoiceData WHERE intCatalogueTypeId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Purchase Group ' + ISNULL(strPurchasingGroup,'') FROM #tmpConvertedSupplierInvoiceData WHERE intPurchasingGroupId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Purchase Group ' + ISNULL(strPurchasingGroup,'') FROM #tmpConvertedSupplierInvoiceData WHERE intPurchasingGroupId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Market Zone ' + ISNULL(strChannel,'') FROM #tmpConvertedSupplierInvoiceData WHERE intMarketZoneId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Market Zone ' + ISNULL(strChannel,'') FROM #tmpConvertedSupplierInvoiceData WHERE intMarketZoneId IS NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Invalid Storage Location ' + ISNULL(strSubLocationName,'') FROM #tmpConvertedSupplierInvoiceData WHERE intSubLocationId IS NULL
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': Invalid Storage Location ' + ISNULL(strSubLocationName,'') FROM #tmpConvertedSupplierInvoiceData WHERE intSubLocationId IS NULL
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Supplier Pre Invoice Number is blank' FROM #tmpConvertedSupplierInvoiceData WHERE strVendorOrderNumber IS NULL
 	-- UNION ALL
@@ -544,13 +544,13 @@ ORDER BY intPartitionId
 IF EXISTS(SELECT 1 FROM @multipleMatchesInvoice)
 BEGIN
 	INSERT INTO @invalidPayables
-	SELECT DISTINCT strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': multiple match for voucher(s) found.'  FROM @multipleMatchesInvoice
+	SELECT DISTINCT strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': multiple match for voucher(s) found.'  FROM @multipleMatchesInvoice
 END
 
 IF EXISTS(SELECT 1 FROM @multipleMatchesInvoiceDetails)
 BEGIN
 	INSERT INTO @invalidPayables
-	SELECT DISTINCT strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': multiple match for voucher detail(s) found.'  FROM @multipleMatchesInvoiceDetails
+	SELECT DISTINCT strVendorOrderNumber, 'Line with Invoice No. ' + ISNULL(strVendorOrderNumber,'') + ': multiple match for voucher detail(s) found.'  FROM @multipleMatchesInvoiceDetails
 END
 
 --LOG ALL
