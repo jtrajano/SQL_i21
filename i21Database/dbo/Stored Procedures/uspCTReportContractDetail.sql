@@ -261,8 +261,8 @@ BEGIN TRY
 												+ @fontBoldStatus + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END) + '</span>'
 										   ELSE
 												dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END)
-									   END,
-			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
+									   END, 
+			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) and IBM.strItemNo IS NOT NULL then '(' + ISNULL(IBM.strItemNo,'') + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
 			strStraussPrice			= CASE WHEN CHARINDEX('dblCashPrice',@strAmendedColumnsDetails, 0) > 0
