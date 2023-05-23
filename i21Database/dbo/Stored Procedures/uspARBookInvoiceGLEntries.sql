@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARBookInvoiceGLEntries]
      @Post              BIT				= 0
-	,@BatchId           NVARCHAR(50)
+	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@raiseError		AS BIT			= 0
 AS

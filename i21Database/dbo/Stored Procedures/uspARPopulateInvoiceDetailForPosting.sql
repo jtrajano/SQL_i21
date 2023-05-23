@@ -9,7 +9,7 @@
     ,@Post              BIT				= 0
     ,@Recap             BIT				= 0
     ,@PostDate          DATETIME        = NULL
-    ,@BatchId           NVARCHAR(50)    = NULL
+    ,@BatchId           NVARCHAR(40)    = NULL
     ,@AccrueLicense     BIT             = 0
     ,@TransType         NVARCHAR(25)    = 'all'
     ,@UserId            INT				= 1

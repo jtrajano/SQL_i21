@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostInvoiceIntegrations]
      @Post              BIT				= 0
-	,@BatchId           NVARCHAR(50)
+	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
 	,@raiseError  AS BIT   = 0
