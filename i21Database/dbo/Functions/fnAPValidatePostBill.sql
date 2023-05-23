@@ -577,6 +577,7 @@ BEGIN
 				FROM tblAPBillDetailTax B
 				WHERE B.intBillDetailId = A2.intBillDetailId
 				AND B.strCalculationMethod != 'Using Texas Fee Matrix'
+				AND B.ysnTaxExempt = 0
 			) tmp
 		) taxDetails
 		WHERE 
