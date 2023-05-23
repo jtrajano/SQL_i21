@@ -509,6 +509,8 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblProvisionalTotal]
     ,[dblBaseProvisionalTotal]
     ,dblBaseProvisionalTotalTax
+    ,dblTotalTax
+    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -665,6 +667,8 @@ SELECT
     ,[dblProvisionalTotal]              = ARID.[dblProvisionalTotal]
     ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
+    ,dblTotalTax                        = ARID.dblTotalTax
+    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
 INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -838,6 +842,8 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
+    ,dblTotalTax
+    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1050,6 +1056,8 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
+    ,dblTotalTax                        = ARID.dblTotalTax
+    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
 INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1211,6 +1219,8 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strSessionId]
     ,[dblFreightCharge]
     ,[dblSurcharge]
+    ,dblTotalTax
+    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1359,6 +1369,8 @@ SELECT
     ,[strSessionId]                     = @strSessionId
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
+    ,dblTotalTax                        = ARID.dblTotalTax
+    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
 INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1409,7 +1421,7 @@ INNER JOIN (
     SELECT
          intInvoiceId               = intInvoiceId
         ,dblBaseLineItemGLAmount    = SUM(dblBaseLineItemGLAmount) 
-        ,dblBaseTax                 = SUM(dblBaseTax)
+        ,dblBaseTax                 = SUM(dblBaseTotalTax)
         ,dblBaseDiscountAmount      = SUM(dblBaseDiscountAmount)
         ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
         ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
@@ -1419,8 +1431,10 @@ INNER JOIN (
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
 WHERE strSessionId = @strSessionId
 
-UPDATE tblARPostInvoiceHeader
-SET dblAverageExchangeRate = CASE WHEN dblInvoiceTotal <> 0 THEN dbo.fnRoundBanker(dblBaseInvoiceTotal / dblInvoiceTotal, 6) ELSE 1 END
+UPDATE ARI
+SET dblCurrencyExchangeRate = dblAverageExchangeRate
+FROM tblARInvoice ARI
+INNER JOIN tblARPostInvoiceHeader ARPIH ON ARI.intInvoiceId = ARPIH.intInvoiceId
 WHERE strSessionId = @strSessionId
 
 UPDATE ARPID
