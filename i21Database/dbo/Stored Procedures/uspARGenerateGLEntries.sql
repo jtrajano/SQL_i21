@@ -501,25 +501,4 @@ INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 WHERE GL.intSourceEntityId IS NULL
   AND GL.strSessionId = @strSessionId
 
-IF @Post = 1 AND EXISTS(
-	SELECT TOP 1 1
-	FROM tblARCompanyPreference
-	WHERE ysnOverrideLineOfBusinessSegment = 1
-)
-BEGIN
-	UPDATE ARPIGLE
-	SET ARPIGLE.intAccountId = LOB.intAccountId
-	FROM tblARPostInvoiceGLEntries ARPIGLE
-	INNER JOIN tblARPostInvoiceHeader ARPIH ON ARPIGLE.intTransactionId = ARPIH.intInvoiceId
-	OUTER APPLY (
-		SELECT TOP 1 intAccountId = dbo.[fnGetGLAccountIdFromProfitCenter](ARPIGLE.intAccountId, ISNULL(intSegmentCodeId, 0))
-		FROM tblSMLineOfBusiness
-		WHERE intLineOfBusinessId = ISNULL(ARPIH.intLineOfBusinessId, 0)
-	) LOB
-	WHERE ARPIGLE.strSessionId = @strSessionId
-	AND ARPIGLE.strCode = 'IC'
-	AND ARPIGLE.[dblCredit] > 0 -- COGS Only
-	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
-END
-
 RETURN 0
