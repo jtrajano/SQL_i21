@@ -3,7 +3,7 @@
     [intCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
-    [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
+    [strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
     [dblCredit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblCredit]  DEFAULT ((0)),
