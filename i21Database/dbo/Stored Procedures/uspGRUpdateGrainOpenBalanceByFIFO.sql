@@ -390,8 +390,6 @@ BEGIN TRY
 				ON AR.intInvoiceId = SH.intInvoiceId
 		END
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
-
 		IF @strSourceType = 'InventoryShipment'
 		BEGIN
 		      IF EXISTS( SELECT 1
@@ -407,7 +405,7 @@ BEGIN TRY
 				 SET intTicketId			  = A.intSourceId
 					,dtmHistoryDate			= A.dtmShipDate
 				--,SH.intTransactionTypeId  = 1
-				FROM [tblGRStorageHistory] SH
+				FROM @StorageHistoryStagingTable SH
 				CROSS APPLY (
 					SELECT ShipmentItem.intSourceId
 					,Shipment.dtmShipDate
@@ -423,6 +421,8 @@ BEGIN TRY
 				AND [strType]='Reduced By Inventory Shipment'
 			 END
 		END
+
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 		SELECT 
 			 [intCustomerStorageId]
