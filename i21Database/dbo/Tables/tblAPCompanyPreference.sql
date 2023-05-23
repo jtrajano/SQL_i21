@@ -42,7 +42,6 @@
     [ysnOverrideAPLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
     intBudgetCode int, 
     [ysnAllowFinalizeVoucherWithoutReceipt]	    BIT NOT NULL DEFAULT(0),
-    [ysnOverrideAPLineOfBusinessSegment]        BIT NOT NULL DEFAULT(0),
     intBudgetCode int,
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
