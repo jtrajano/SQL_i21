@@ -80,7 +80,7 @@ SET ANSI_WARNINGS OFF
 									  END
 	  , LIA.[intInventoryAccountId]	= OVERRIDESEGMENTINVENTORY.intOverrideAccount
 	FROM @LineItemAccounts LIA
-	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.[intDetailId] = ARID.[intInvoiceDetailId]
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.[intDetailId] = ARID.[intInvoiceDetailId] AND ARID.strSessionId = @strSessionId
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	OUTER APPLY (
 		SELECT TOP 1 intSegmentCodeId
@@ -125,7 +125,6 @@ SET ANSI_WARNINGS OFF
 		)
 	) OVERRIDESEGMENTINVENTORY
 	WHERE ARID.[strItemType] NOT IN ('Non-Inventory', 'Service', 'Other Charge', 'Software')
-	  AND ARID.strSessionId = @strSessionId
 
 	--NON-INVENTORY, SERVICE, OTHER CHARGE
 	UPDATE LIA
@@ -134,7 +133,7 @@ SET ANSI_WARNINGS OFF
 								ELSE OVERRIDESEGMENT.intOverrideAccount 
 							 END
 	FROM @LineItemAccounts LIA
-	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	
+	INNER JOIN tblARPostInvoiceDetail ARID ON LIA.intDetailId = ARID.intInvoiceDetailId	AND ARID.strSessionId = @strSessionId
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	OUTER APPLY (
 		SELECT TOP 1 intSegmentCodeId

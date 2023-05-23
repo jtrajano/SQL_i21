@@ -2344,6 +2344,7 @@ BEGIN
 	WHERE ARCP.ysnOverrideLineOfBusinessSegment = 1
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
+	AND ARPIH.strSessionId = @strSessionId
 	AND ARPID.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -2368,7 +2369,7 @@ BEGIN
 	INNER JOIN tblARInvoice ARI ON ARPIH.intOriginalInvoiceId = ARI.intInvoiceId
 	WHERE ARPIH.strType = 'Tax Adjustment'
 	AND ARI.ysnPosted = 0
-	AND strSessionId = @strSessionId
+	AND ARPIH.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
 		([intInvoiceId]
