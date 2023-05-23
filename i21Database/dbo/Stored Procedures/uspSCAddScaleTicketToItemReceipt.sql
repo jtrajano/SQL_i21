@@ -940,7 +940,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = LoadCost.intItemUOMId
 									LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 									INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON RE.[intEntityVendorId] = D1.[intEntityId]
-									OUTER APPLY dbo.fnGetItemGLAccountAsTable(RE.intItemId, ItemLoc.intItemLocationId, 'AP Account') itemAccnt
+									OUTER APPLY dbo.fnGetItemGLAccountAsTable(IC.intItemId, ItemLoc.intItemLocationId, 'AP Account') itemAccnt
 									LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 											
 
@@ -1018,7 +1018,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = LoadCost.intItemUOMId
 									LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 									INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON RE.[intEntityVendorId] = D1.[intEntityId]
-									OUTER APPLY dbo.fnGetItemGLAccountAsTable(RE.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+									OUTER APPLY dbo.fnGetItemGLAccountAsTable(IC.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense') itemAccnt
 									LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 												
 
@@ -1053,6 +1053,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						--			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON RE.[intEntityVendorId] = D1.[intEntityId]
 						--			OUTER APPLY dbo.fnGetItemGLAccountAsTable(RE.intItemId, ItemLoc.intItemLocationId, 'AP Account') itemAccnt
 						--			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+												
 
 						exec uspAPCreateVoucher    
 							@voucherPayables = @voucherPayable    
