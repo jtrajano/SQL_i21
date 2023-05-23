@@ -134,8 +134,7 @@ BEGIN TRY
 				CASE 
 					WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis
 					ELSE
-						dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, CD.intBasisUnitMeasureId,commUOM.intUnitMeasureId,CD.dblBasis) / 
-						--dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
+						dbo.[fnCTConvertPriceToTargetCommodityUOM]( BU.intCommodityUnitMeasureId,CD.intPriceCommodityUOMId,CD.dblBasis) / 
 						CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
 								WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
 								AND		CD.ysnBasisSubCurrency = 1			THEN 100 
