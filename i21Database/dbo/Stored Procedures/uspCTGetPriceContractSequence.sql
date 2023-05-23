@@ -37,7 +37,7 @@ BEGIN TRY
 																	WHEN intBasisCurrencyId <> intCurrencyId AND ysnBasisSubCurrency = 1 THEN 100
 																	ELSE 0.01 END), 0)
 																+ ISNULL((SELECT dblFreightBasis FROM tblCTContractDetail WHERE intContractDetailId = t.intContractDetailId), 0) END
-										ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intBasisCommodityUOMId,intFinalPriceUOMId,dblOriginalBasis) /
+										ELSE dbo.[fnCTConvertPriceToTargetCommodityUOM](intBasisCommodityUOMId,intFinalPriceUOMId,dblOriginalBasis) /
 											CASE WHEN intBasisCurrencyId = intCurrencyId THEN 1
 												WHEN intBasisCurrencyId <> intCurrencyId AND ysnBasisSubCurrency = 1 THEN 100
 												ELSE 0.01 END END
@@ -183,7 +183,7 @@ BEGIN TRY
 																	WHEN intBasisCurrencyId <> intCurrencyId AND ysnBasisSubCurrency = 1 THEN 100
 																	ELSE 0.01 END), 0)
 																+ ISNULL((SELECT dblFreightBasis FROM tblCTContractDetail WHERE intContractDetailId = t.intContractDetailId), 0) END
-										ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intBasisCommodityUOMId,intFinalPriceUOMId,dblOriginalBasis) /
+										ELSE dbo.[fnCTConvertPriceToTargetCommodityUOM](intBasisCommodityUOMId,intFinalPriceUOMId,dblOriginalBasis) /
 											CASE WHEN intBasisCurrencyId = intCurrencyId THEN 1
 												WHEN intBasisCurrencyId <> intCurrencyId AND ysnBasisSubCurrency = 1 THEN 100
 												ELSE 0.01 END END

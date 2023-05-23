@@ -894,6 +894,7 @@
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
     <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
+    <Build Include="dbo\Functions\fnCTConvertPriceToTargetCommodityUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
