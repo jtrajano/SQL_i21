@@ -97,6 +97,7 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblSMCurrency currency ON currency.intCurrencyID = voucher.intCurrencyId
 	OUTER APPLY (
 		SELECT TOP 1
+			 ISNULL(CP.ysnRetrieveBillByLocationVendorCurrency,0) ysnRetrieveBillByLocationVendorCurrency,
 			 ISNULL(CP.ysnAllowSingleLocationEntries,0) ysnAllowSingleLocationEntries
 		FROM tblAPCompanyPreference CP
 	) CP
@@ -135,17 +136,25 @@ RETURNS TABLE AS RETURN
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
 					ELSE 1 END)
-	AND 1 = (CASE WHEN @payFromBankAccountId > 0 --AND voucher.intPayFromBankAccountId > 0
-					THEN (CASE WHEN @payFromBankAccountId = ISNULL(voucher.intPayFromBankAccountId,0) OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
+	AND 1 = (CASE WHEN @payFromBankAccountId > 0 THEN--AND voucher.intPayFromBankAccountId > 0
+						CASE WHEN CP.ysnRetrieveBillByLocationVendorCurrency = 1 THEN
+							(CASE WHEN @payFromBankAccountId = ISNULL(voucher.intPayFromBankAccountId,0) OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
+						ELSE
+							(CASE WHEN @payFromBankAccountId = ISNULL(voucher.intPayFromBankAccountId,0) THEN 1 ELSE 0 END)
+						END 
 					ELSE 1 END)
-	AND 1 = (CASE WHEN @payToBankAccountId > 0 AND voucher.intPayToBankAccountId > 0
-					THEN (CASE WHEN @payToBankAccountId = ISNULL(voucher.intPayToBankAccountId,0) OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
+	AND 1 = (CASE WHEN @payToBankAccountId > 0 AND voucher.intPayToBankAccountId > 0 THEN 
+						CASE WHEN CP.ysnRetrieveBillByLocationVendorCurrency = 1 THEN 
+							(CASE WHEN @payToBankAccountId = ISNULL(voucher.intPayToBankAccountId,0) OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
+						ELSE 
+							CASE WHEN @payToBankAccountId = ISNULL(voucher.intPayToBankAccountId,0) THEN 1 ELSE 0 END
+						END
+					ELSE 1 END)		
+	AND 1 = (CASE WHEN CP.ysnRetrieveBillByLocationVendorCurrency = 1 THEN
+						CASE WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 1 THEN
+							(CASE WHEN voucher.intShipToId = @companyLocationId THEN 1 ELSE 0 END)
+						WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 0 THEN
+							(CASE WHEN voucher.intShipToId = @companyLocationId OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
+						ELSE 1 END
 					ELSE 1 END)
-	AND 1 = (CASE WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 1
-						THEN (CASE WHEN voucher.intShipToId = @companyLocationId THEN 1
-									ELSE 0 END)
-					WHEN @companyLocationId > 0 AND CP.ysnAllowSingleLocationEntries = 0 
-						THEN (CASE WHEN voucher.intShipToId = @companyLocationId OR voucher.intTransactionType IN (2, 3) THEN 1
-									ELSE 0 END)
-					ELSE 1 END)
-)
+					)
