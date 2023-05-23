@@ -90,6 +90,7 @@
 	[strPowerBIClientId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBISecretId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIWorkspaceId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnPowerBIProfilePipeline]						BIT NULL,
 	[strPowerBITenantId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBICapacityId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfileId]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
