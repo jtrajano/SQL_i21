@@ -403,8 +403,6 @@ BEGIN TRY
 				ON AR.intInvoiceId = SH.intInvoiceId
 		END
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
-
 		IF @strSourceType = 'InventoryShipment'
 		BEGIN
 			UPDATE SH 
@@ -425,6 +423,8 @@ BEGIN TRY
 			) A
 			WHERE SH.intInventoryShipmentId=@IntSourceKey
 		END
+
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 		SELECT 
 			 [intCustomerStorageId]
