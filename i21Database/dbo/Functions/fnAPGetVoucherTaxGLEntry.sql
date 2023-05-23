@@ -73,6 +73,7 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15)
 	AND D.strCalculationMethod != 'Using Texas Fee Matrix'
+	AND D.ysnTaxExempt = 0
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
@@ -104,4 +105,5 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15)
 	AND D.strCalculationMethod = 'Using Texas Fee Matrix'
+	AND D.ysnTaxExempt = 0
 )

@@ -245,6 +245,7 @@ BEGIN
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
 				AND R2.strCalculationMethod != 'Using Texas Fee Matrix'
+				AND R2.ysnTaxExempt = 0
 				UNION ALL --TEXAS FEE
 				SELECT DISTINCT
 					-1,
@@ -260,6 +261,7 @@ BEGIN
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
 				AND R2.strCalculationMethod = 'Using Texas Fee Matrix'
+				AND R2.ysnTaxExempt = 0
 				-- UNION ALL --discount
 				-- SELECT
 				-- 	(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
