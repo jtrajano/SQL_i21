@@ -32,7 +32,6 @@ BEGIN
 						d.intSiteID = @intSiteId AND
 						(a.dtmLoadDateTime >= @dtmDate AND a.dtmLoadDateTime < DATEADD(DAY, 1, @dtmDate)) AND
 						ysnPosted = 1
-			GROUP BY	a.dtmLoadDateTime
 		END
 		ELSE
 		BEGIN
@@ -46,9 +45,7 @@ BEGIN
 			ON			c.intSiteId = d.intSiteID
 			WHERE		d.ysnCompanySite = 1 AND 
 						d.intSiteID = @intSiteId AND
-						(a.dtmLoadDateTime >= @dtmDate AND a.dtmLoadDateTime < DATEADD(DAY, 1, @dtmDate)) AND
-						ysnPosted = 1
-			GROUP BY	a.dtmLoadDateTime
+						(a.dtmLoadDateTime >= @dtmDate AND a.dtmLoadDateTime < DATEADD(DAY, 1, @dtmDate))
 		END
 	END
 	ELSE
@@ -83,6 +80,6 @@ BEGIN
 		END
 	END
 	
-	RETURN @dblReturnValue
+	RETURN ISNULL(@dblReturnValue, 0)
 END
 GO
