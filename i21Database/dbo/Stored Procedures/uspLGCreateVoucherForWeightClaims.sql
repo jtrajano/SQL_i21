@@ -20,6 +20,7 @@ BEGIN TRY
 	DECLARE @dblNetWeight NUMERIC(18,6)
 	DECLARE @intBillId INT
 	DECLARE @intVoucherType INT
+	DECLARE @ysnWeightClaimsImpactGL INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -84,6 +85,9 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('Please configure ''AP Account'' for the company location.',16,1)
 	END
+
+	SELECT TOP 1 @ysnWeightClaimsImpactGL = ISNULL(ysnWeightClaimsImpactGL, 0) 
+	FROM tblLGCompanyPreference 
 
 	INSERT INTO @voucherDetailData (
 		   intWeightClaimId
@@ -353,7 +357,7 @@ BEGIN TRY
 			,[intSubCurrencyCents] = VDD.intSubCurrencyCents
 			,[intAccountId] = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
 			,[ysnReturn] = CAST(CASE WHEN (@intVoucherType = 11) THEN 1 ELSE 0 END AS BIT)
-			,[ysnStage] = CAST(0 AS BIT)
+			,[ysnStage] = @ysnWeightClaimsImpactGL
 			,[intSubLocationId] = VDD.intSubLocationId
 			,[intStorageLocationId] = VDD.intStorageLocationId
 		FROM @voucherDetailData VDD
