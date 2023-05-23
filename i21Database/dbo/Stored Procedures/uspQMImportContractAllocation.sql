@@ -217,6 +217,7 @@ BEGIN TRY
 			INNER JOIN tblICItemUOM SUOM ON SUOM.intItemId = S.intItemId AND SUOM.intUnitMeasureId = S.intRepresentingUOMId
 			WHERE S.intSampleId = @intSampleId
 			AND dbo.fnCalculateQtyBetweenUOM(SUOM.intItemUOMId, CD.intItemUOMId, S.dblRepresentingQty) > CD.dblQuantity
+			OR (Select dblUnitQty from tblICItemUOM where intItemUOMId = CD.intItemUOMId) != (select strNoOfPackagesUOM from tblQMImportCatalogue WHERE intImportCatalogueId = @intImportCatalogueId)
 		)
 		BEGIN
 			UPDATE IC
