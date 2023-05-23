@@ -1707,17 +1707,14 @@ BEGIN
 		FROM tblGRStorageHistory SH
 		JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
 		JOIN tblSCTicket Ticket 
-			ON CS.intDeliverySheetId = Ticket.intDeliverySheetId		
+			ON CS.intDeliverySheetId = Ticket.intDeliverySheetId	
+				AND SH.intTicketId = Ticket.intTicketId
 		WHERE SH.[strType] IN ('From Delivery Sheet')	 
 			AND Ticket.intTicketId = @intTicketId
 
+		
 				
 	END
-
-
-	
-
-
 
 	IF(ISNULL(@_intStorageHistoryId,0) > 0)
 	BEGIN
