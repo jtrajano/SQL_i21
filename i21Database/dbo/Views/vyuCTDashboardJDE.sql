@@ -6,7 +6,7 @@ WITH containers as (
 	select intLoadId,strContainerNumber from tblLGLoadContainer
 ),
 lgLoad AS (
-	SELECT LD.intPContractDetailId
+	SELECT intPContractDetailId = isnull(LD.intPContractDetailId, LD.intSContractDetailId)
 		, LO.strLoadNumber
 		, LO.strOriginPort
 		, LO.strDestinationPort
@@ -54,7 +54,7 @@ lgLoad AS (
 		) con ON con.intLoadId = LO.intLoadId
 	WHERE (LO.intShipmentType = 2 or LO.intShipmentType = 1)
 		AND LO.intShipmentStatus <> 10
-	GROUP BY LD.intPContractDetailId
+	GROUP BY LD.intPContractDetailId, LD.intSContractDetailId
 		, LO.strLoadNumber
 		, SL.strName
 		, LO.strOriginPort

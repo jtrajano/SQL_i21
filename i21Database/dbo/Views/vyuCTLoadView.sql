@@ -14,7 +14,7 @@ AS
 				,LO.strFVoyageNumber
 				,LO.strBLNumber
 				,LD.dblQuantity
-				,LD.intPContractDetailId intContractDetailId
+				,ISNULL(LD.intPContractDetailId,LD.intSContractDetailId) intContractDetailId
 				,LO.intShipmentType
 				,'Shipment' COLLATE Latin1_General_CI_AS AS strShipmentType
 				,LO.dtmETAPOL
@@ -92,7 +92,7 @@ LEFT	JOIN	tblEMEntity FA on FA.intEntityId = LO.intForwardingAgentEntityId
 				,LO.strFVoyageNumber
 				,LO.strBLNumber
 				,LD.dblQuantity 
-				,LD.intPContractDetailId intContractDetailId
+				,ISNULL(LD.intPContractDetailId,LD.intSContractDetailId) intContractDetailId
 				,LO.intShipmentType
 				,'Shipping Instructions' COLLATE Latin1_General_CI_AS AS strShipmentType
 				,LO.dtmETAPOL
