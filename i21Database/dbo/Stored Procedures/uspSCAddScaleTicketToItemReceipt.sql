@@ -1030,7 +1030,20 @@ IF ISNULL(@intFreightItemId,0) = 0
 									AND ISNULL(LoadCost.ysnAccrue, 0) = 0
 									AND RE.ysnIsStorage = 1
 						
-						
+						DECLARE @ACCOUNT_CHECKING NVARCHAR(MAX) = ''
+						SELECT 
+
+							@ACCOUNT_CHECKING = @ACCOUNT_CHECKING + CASE WHEN [intTransactionType] = 2 THEN 'AP account for ' + strMiscDescription + ' is missing.' --VENDOR PREPAYMENT
+																		WHEN [intTransactionType] = 3  THEN 'Other charge expense account for ' + strMiscDescription + ' is missing.'-- DEBIT MEMO
+											END 	 
+						FROM @voucherPayable
+						WHERE ISNULL(intAccountId, 0) = 0
+						IF @ACCOUNT_CHECKING != ''
+						BEGIN
+							RAISERROR(@ACCOUNT_CHECKING, 16, 1);
+							RETURN;
+
+						END
 						--SELECT '---'
 						--SELECT 'uspSCAddScaleTicketToItemReceipt'
 						--SELECT * FROM @voucherPayable
