@@ -210,6 +210,19 @@ BEGIN TRY
 			,@ysnCreate = 0
 			,@ysnBeforeUpdate = 1
 
+		IF EXISTS(
+			SELECT 1 FROM tblCTContractDetail CD
+			WHERE CD.intContractDetailId = @intContractDetailId
+			AND (Select dblUnitQty from tblICItemUOM where intItemUOMId = CD.intItemUOMId) != (select strNoOfPackagesUOM from tblQMImportCatalogue WHERE intImportCatalogueId = @intImportCatalogueId)
+		)
+		BEGIN
+			UPDATE IC
+			SET ysnSuccess = 0, ysnProcessed = 1
+				,strLogResult = 'Allocated Qty UOM does not match the item in contract'
+			FROM tblQMImportCatalogue IC
+			WHERE IC.intImportCatalogueId = @intImportCatalogueId
+			GOTO CONT
+		END
 
 		IF EXISTS(
 			SELECT 1 FROM tblQMSample S
