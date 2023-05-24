@@ -290,6 +290,7 @@ BEGIN
 		WHEN @msgId = 80274 THEN 'Forex Rate for the Cost Adjustment is missing.'
 		WHEN @msgId = 80275 THEN 'In-Transit value cannot be adjusted for %s. Item type must be an "Inventory" type'
 		WHEN @msgId = 80276 THEN 'Vendor Change is not allowed if %s has a voucher already. %s is already used in %s.'
+		WHEN @msgId = 80277 THEN 'Forex Rate between %s and the other charge %s should be the same.'
 	END 
 
 	RETURN @msg COLLATE Latin1_General_CI_AS

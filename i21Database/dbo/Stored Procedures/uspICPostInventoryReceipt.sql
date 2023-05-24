@@ -649,6 +649,48 @@ BEGIN
 			GOTO With_Rollback_Exit; 
 		END 		 
 	END
+
+	-- Check if the other charge is using the same currency assigned to item. 
+	-- If yes, check if both are using the same forex rate. If not, throw the error. 
+	BEGIN 
+		SELECT @strItemNo = NULL
+				,@intItemId = NULL 
+				,@strChargeItem = NULL 
+
+		SELECT TOP 1 
+				@strTransactionId = Receipt.strReceiptNumber 
+				,@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strChargeItem = otherCharge.strChargeItem
+		FROM	dbo.tblICInventoryReceipt Receipt 
+				INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+				CROSS APPLY (				
+					SELECT TOP 1 
+						strChargeItem = charge.strItemNo
+						,rc.dblForexRate
+					FROM 
+						tblICInventoryReceiptItemAllocatedCharge ac INNER JOIN tblICInventoryReceiptCharge rc
+							ON ac.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
+						INNER JOIN tblICItem charge
+							ON charge.intItemId = rc.intChargeId
+					WHERE
+						ac.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						AND rc.ysnInventoryCost = 1
+						AND rc.intCurrencyId = Receipt.intCurrencyId
+						AND ReceiptItem.dblForexRate <> rc.dblForexRate
+				) otherCharge
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+
+		IF @intItemId IS NOT NULL AND @strChargeItem IS NOT NULL 
+		BEGIN 
+			-- 'Forex Rate between %s and the other charge %s should be the same.'
+			EXEC uspICRaiseError 80277, @strItemNo, @strChargeItem;
+			GOTO With_Rollback_Exit; 
+		END 			
+	END 
 END
 --------------------------------------------------------------------------------------------  
 -- END Validate  
