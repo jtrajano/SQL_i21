@@ -2408,10 +2408,7 @@ BEGIN TRY
 			FROM (
 				SELECT *
 					, dblMarketBasis = CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 
-											THEN 
-												CASE WHEN @ysnCanadianCustomer = 1 
-													THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) 
-													ELSE ISNULL(dblMarketBasis1, 0) END 
+											THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) 
 											ELSE 0 
 											END
 					, dblAdjustedContractPrice = CASE WHEN intPricingTypeId = 6 THEN ISNULL(dblCosts, 0) + (ISNULL(dblCash, 0))
@@ -2759,10 +2756,7 @@ BEGIN TRY
 				FROM (
 					SELECT *
 						, dblMarketBasis = CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 
-											THEN 
-												CASE WHEN @ysnCanadianCustomer = 1 
-													THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId, CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) 
-													ELSE ISNULL(dblMarketBasis1, 0) END 
+											THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) 
 											ELSE 0 
 											END
 						, CASE WHEN intPricingTypeId = 6 THEN ISNULL(dblCosts, 0) + (ISNULL(dblCash, 0))
@@ -3120,10 +3114,7 @@ BEGIN TRY
 			FROM (
 				SELECT *
 					, dblMarketBasis = CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 
-											THEN 
-												CASE WHEN @ysnCanadianCustomer = 1 
-													THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId, CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) 
-													ELSE ISNULL(dblMarketBasis1, 0) END 
+											THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,CASE WHEN ISNULL(intMarketBasisUOM, 0) = 0 THEN intPriceUOMId ELSE intMarketBasisUOM END, ISNULL(dblMarketBasis1, 0)) 
 											ELSE 0 
 											END
 					, CASE WHEN intPricingTypeId = 6 THEN ISNULL(dblCosts, 0) + (ISNULL(dblCash, 0))
