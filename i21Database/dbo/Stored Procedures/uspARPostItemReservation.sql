@@ -1,11 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[uspARPostItemResevation]
-  @strSessionId		NVARCHAR(50)	= NULL
+﻿CREATE PROCEDURE [dbo].[uspARPostItemReservation]
+	 @strSessionId		NVARCHAR(50)= NULL
+	,@ysnReversePost	BIT			= 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
-
 SET XACT_ABORT ON  
 
 DECLARE  @InitTranCount				INT
@@ -37,7 +37,7 @@ FROM tblARPostInvoiceDetail ARID
 INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransactionId] 
                                      AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
                                      AND ARID.[intItemId] = ICSR.[intItemId]
-WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
+WHERE (ICSR.[ysnPosted] <> ARID.[ysnPost] OR @ysnReversePost = 1)
   AND ICSR.intInventoryTransactionType = @TransactionTypeId
   AND ARID.strSessionId = @strSessionId
 
@@ -50,9 +50,11 @@ JOIN tblICItemBundle BDL ON BDL.intItemId = ARID.intItemId
 INNER JOIN tblICStockReservation ICSR ON ARID.[intInvoiceId] = ICSR.[intTransactionId] 
                                      AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
                                      AND BDL.[intBundleItemId] = ICSR.[intItemId]
-WHERE ICSR.[ysnPosted] <> ARID.[ysnPost]
+WHERE (ICSR.[ysnPosted] <> ARID.[ysnPost] OR @ysnReversePost = 1)
   AND ICSR.intInventoryTransactionType = @TransactionTypeId
   AND ARID.strSessionId = @strSessionId
+
+
 
 IF EXISTS(SELECT TOP 1 1 FROM @InvoiceIds)
 BEGIN
@@ -75,7 +77,10 @@ BEGIN
 		, intItemLocationId			= SR.intItemLocationId
 		, intItemUOMId				= SR.intItemUOMId
 		, intLotId					= SR.intLotId
-		, dblQty					= CASE WHEN I.ysnPost = 1 THEN -SR.dblQty ELSE SR.dblQty END
+		, dblQty					= CASE WHEN I.ysnPost = 1 
+										THEN -SR.dblQty 
+										ELSE SR.dblQty 
+									  END * CASE WHEN @ysnReversePost = 1 THEN -1 ELSE 1 END
 		, intTransactionId			= SR.intTransactionId
 		, strTransactionId			= SR.strTransactionId
 		, intTransactionTypeId		= SR.intInventoryTransactionType
@@ -85,14 +90,16 @@ BEGIN
 	FROM tblICStockReservation SR
 	INNER JOIN @InvoiceIds I ON SR.intTransactionId = I.intHeaderId
 	WHERE SR.intInventoryTransactionType = @TransactionTypeId
-	--   AND SR.ysnPosted = I.ysnPost
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsToReserve) 
 		BEGIN 
 			EXEC dbo.uspICIncreaseReservedQty @ItemsToReserve
 
 			UPDATE SR 			
-			SET	ysnPosted = I.ysnPost
+			SET	ysnPosted = CASE 
+								WHEN @ysnReversePost = 1 THEN CASE WHEN I.ysnPost = 1 THEN 0 ELSE 1 END 
+								ELSE I.ysnPost 
+							END
 			FROM tblICStockReservation SR
 			INNER JOIN @InvoiceIds I ON SR.intTransactionId = I.intHeaderId
 			WHERE SR.intInventoryTransactionType = @TransactionTypeId

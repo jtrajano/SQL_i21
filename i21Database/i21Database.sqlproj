@@ -8535,7 +8535,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateItemsForInTransitCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateItemsForStorageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceRecap.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostItemResevation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostItemReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspARPrePostInvoiceIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessSplitOnInvoicePost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTransactionAccountOnPost.sql" />

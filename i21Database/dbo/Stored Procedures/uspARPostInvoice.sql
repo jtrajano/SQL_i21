@@ -273,10 +273,6 @@ IF((@totalInvalid >= 1 AND @totalRecords <= 0) OR (@totalInvalid >= 1 AND @rollb
 	END
 
 BEGIN TRY
-
-	IF @recap = 0
-		EXEC [dbo].[uspARPostItemResevation] @strSessionId = @strRequestId
-
 	IF @recap = 1
     BEGIN
         EXEC [dbo].[uspARPostInvoiceRecap]
@@ -287,6 +283,8 @@ BEGIN TRY
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
 			   ,@strSessionId	 = @strRequestId
+
+		EXEC [dbo].[uspARPostItemReservation] @strSessionId = @strRequestId, @ysnReversePost = 1
 
         GOTO Do_Commit
     END
