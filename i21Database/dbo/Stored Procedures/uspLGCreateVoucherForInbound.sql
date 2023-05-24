@@ -253,9 +253,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = NULL
 			,[intItemId] = LD.intItemId
 			,[strMiscDescription] = item.strDescription
-			,[dblOrderQty] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
-							THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
-							ELSE LD.dblQuantity END - ISNULL(B.dblQtyBilled, 0)
+			,[dblOrderQty] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intOrderUOMId] = LD.intItemUOMId
 			,[dblQuantityToBill] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
