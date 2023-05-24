@@ -79,6 +79,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, intDefaultPayToBankAccountId		= CUSTOMER.intDefaultPayToBankAccountId
 	, strDefaultPayToBankAccountNo		= CUSTOMER.strDefaultPayToBankAccountNo
 	, strPaymentInstructions			= CMBA.strPaymentInstructions
+	, ysnUAP							= CUSTOMER.ysnUAP
 	, CUSTOMER.ysnPrintPriceOnPrintTicket
 	, custLocation.intTicketCopies
 	, custLocation.ysnRequireStickReading
