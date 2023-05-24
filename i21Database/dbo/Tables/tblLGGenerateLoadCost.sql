@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[tblLGGenerateLoadCost]
 	[intItemUOMId] [INT] NULL,
 	[ysnAccrue] [BIT] NOT NULL CONSTRAINT [DF_tblLGGenerateLoadCost_ysnAccrue] DEFAULT ((1)),
 	[ysnPrice] [BIT] NULL DEFAULT ((0)),
+	[ysnVendorPrepayment] [BIT] NULL DEFAULT ((0)),
 
 	CONSTRAINT [PK_tblLGGenerateLoadCost] PRIMARY KEY ([intGenerateLoadCostId]), 
 	CONSTRAINT [FK_tblLGGenerateLoadCost_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intGenerateLoadId]) REFERENCES [tblLGGenerateLoad]([intGenerateLoadId]) ON DELETE CASCADE,
