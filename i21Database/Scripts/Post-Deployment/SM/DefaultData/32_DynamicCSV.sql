@@ -2809,7 +2809,6 @@ UPDATE tblSMCSVDynamicImport SET
 		BEGIN
 			SET @intSpecialPriceId = CONVERT(INT,@id)
 		END
-
 		
 		IF(@customer_id = '''')
 		BEGIN
@@ -2819,16 +2818,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-				(Select TOP 1 1 from tblARCustomer
-				Where strCustomerNumber = @customer_id)  AND  @customer_id <> ''''
+			IF NOT EXISTS (SELECT TOP 1 1 from tblARCustomer WHERE strCustomerNumber = @customer_id) AND @customer_id <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage = @ValidationMessage + '' ''+''intEntityCustomerId :''+CAST(@intEntityCustomerId AS NVARCHAR(100))+'' is not Exist''
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Customer Number :''+ @customer_id +'' does not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @intEntityCustomerId =   (Select TOP 1 intEntityId from tblARCustomer  where strCustomerNumber  = @customer_id)
+				SET @intEntityCustomerId =   (SELECT TOP 1 intEntityId FROM tblARCustomer  WHERE strCustomerNumber  = @customer_id)
 			END
 		END
 
@@ -2838,21 +2835,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-			(
-			    SELECT TOP 1 1
-			    FROM tblEMEntityLocation
-			    WHERE strLocationName = @customer_location
-			) AND @customer_location <> ''''
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityLocation WHERE strLocationName = @customer_location) AND @customer_location <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''customer_location id :'' + CAST(@intCustomerLocationId AS NVARCHAR(100))
-			          + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Customer Location:'' + @customer_location + '' does not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @intCustomerLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location and intEntityId=@intEntityCustomerId)
+				SET @intCustomerLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE strLocationName = @customer_location AND intEntityId = @intEntityCustomerId)
 			END
 		END
 
@@ -2865,9 +2855,7 @@ UPDATE tblSMCSVDynamicImport SET
 			IF (@price_basis NOT IN (''X'', ''F'', ''C'', ''A'', ''S'', ''M'', ''R'', ''V'', ''T'', ''L'', ''O''))
 			BEGIN
 				SET @IsValid = 0
-				SET @ValidationMessage
-					= @ValidationMessage + '' '' + ''price_basis : '' + @price_basis
-						+ '' is not Exist''
+				SET @ValidationMessage = @ValidationMessage + '' '' + ''price_basis : '' + @price_basis + '' is not Exist''
 			END
 			ELSE
 			BEGIN
@@ -2881,22 +2869,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-			(
-			    Select TOP 1
-			        1
-			    from tblAPVendor
-			    Where strVendorId = @origin_vendor_no
-			) AND  @origin_vendor_no <> ''''
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblAPVendor WHERE strVendorId = @origin_vendor_no) AND @origin_vendor_no <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''origin_vendor_no  :'' + CAST(@intEntityVendorId AS NVARCHAR(100))
-			          + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Origin Vendor No.:'' + @origin_vendor_no + '' does not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @intEntityVendorId =   (Select TOP 1 intEntityId from tblAPVendor  where strVendorId  = @origin_vendor_no)
+				SET @intEntityVendorId = (SELECT TOP 1 intEntityId FROM tblAPVendor WHERE strVendorId = @origin_vendor_no)
 			END
 		END
 
@@ -2906,22 +2886,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-			(
-			    Select TOP 1
-			        1
-			    from tblSMCompanyLocation
-			    Where strLocationName = @origin_vendor_location
-			) AND  @origin_vendor_location <> ''''
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE strLocationName = @origin_vendor_location) AND @origin_vendor_location <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''origin_vendor_location  :'' + CAST(@intEntityLocationId AS NVARCHAR(100))
-			          + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Origin Vendor Location:'' + @origin_vendor_location + '' does not Exist''
 			END
 			ELSE
 			BEGIN
-					SET @intRackLocationId =   (Select TOP 1 intCompanyLocationId from tblSMCompanyLocation  where  strLocationNumber = @origin_vendor_location)
+				SET @intRackLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @origin_vendor_location)
 			END
 		END
 
@@ -2931,15 +2903,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS (Select TOP 1 1 from tblICItem Where strItemNo = @item_no) AND  @item_no <> ''''
+			IF NOT EXISTS (Select TOP 1 1 from tblICItem Where strItemNo = @item_no) AND @item_no <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''item_no  :'' + CAST(@intItemId AS NVARCHAR(100)) + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Item No.:'' + @item_no + '' does not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @intItemId =   (Select TOP 1 intItemId from tblICItem  where  strItemNo = @item_no)
+				SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @item_no)
 			END
 		END
 
@@ -2949,21 +2920,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-			(
-			    Select TOP 1
-			        1
-			    from tblICCategory
-			    Where strCategoryCode = @item_category
-			) AND  @item_category <> ''''
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCategory WHERE strCategoryCode = @item_category) AND @item_category <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''item_no  :'' + CAST(@intCategoryId AS NVARCHAR(100)) + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Item Category Code:'' + @item_category + '' does not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @intCategoryId =  (Select TOP 1 intCategoryId from tblICCategory  where  strCategoryCode = @item_category)
+				SET @intCategoryId = (SELECT TOP 1 intCategoryId FROM tblICCategory WHERE strCategoryCode = @item_category)
 			END
 		END
 
@@ -3038,8 +3002,7 @@ UPDATE tblSMCSVDynamicImport SET
 		IF(@begin_date = '''')
 		BEGIN
 			SET @IsValid = 0
-			SET @ValidationMessage = @ValidationMessage + '' ''+''begin_date should not be Empty''
-		
+			SET @ValidationMessage = @ValidationMessage + '' ''+''begin_date should not be Empty''		
 		END
 		ELSE
 		BEGIN
@@ -3077,22 +3040,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-			(
-			    Select TOP 1
-			        1
-			    from tblAPVendor
-			    Where strVendorId = @fixed_rack_vendor_no
-			) AND  @fixed_rack_vendor_no <> ''''
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE strVendorId = @fixed_rack_vendor_no) AND  @fixed_rack_vendor_no <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''fixed_rack_vendor_no :'' + CAST(@intRackVendorId AS NVARCHAR(100))
-			          + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Fixed Rack Vendor No.:'' + @fixed_rack_vendor_no + '' does not Exist''
 			END
 			ELSE 
 			BEGIN
-				SET @intRackVendorId =  (Select TOP 1 intEntityId from tblAPVendor  where  strVendorId = @fixed_rack_vendor_no)
+				SET @intRackVendorId = (SELECT TOP 1 intEntityId FROM tblAPVendor WHERE strVendorId = @fixed_rack_vendor_no)
 			END
 		END
 
@@ -3102,22 +3057,14 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF NOT EXISTS
-			(
-			    Select TOP 1
-			        1
-			    from tblICItem
-			    Where strItemNo = @fixed_rack_no
-			) AND  @fixed_rack_no <> ''''
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = @fixed_rack_no) AND @fixed_rack_no <> ''''
 			BEGIN
 			    SET @IsValid = 0
-			    SET @ValidationMessage
-			        = @ValidationMessage + '' '' + ''fixed_rack_no :'' + CAST(@intRackItemId AS NVARCHAR(100))
-			          + '' is not Exist''
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Fixed Rack No.:'' + @fixed_rack_no + '' does not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @intRackItemId =  (Select TOP 1 intItemId from tblICItem  where  strItemNo = @fixed_rack_no)
+				SET @intRackItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @fixed_rack_no)
 			END
 		END
 
@@ -3145,7 +3092,6 @@ UPDATE tblSMCSVDynamicImport SET
 				SET @intRackLocationId =  (Select TOP 1 intEntityLocationId from tblEMEntityLocation  where  strLocationName = @fixed_rack_vendor_location)
 			END
 		END
-
 
 		IF @IsValid = 1
 		BEGIN
@@ -3195,8 +3141,7 @@ UPDATE tblSMCSVDynamicImport SET
 				@intRackLocationId,
 				@strInvoiceType,
 				0			
-		END
-		
+		END		
 	'
 	WHERE intCSVDynamicImportId = @NewHeaderId
 
