@@ -682,7 +682,7 @@ GROUP BY intAccountId,intAccountIdOverride,
     intLOBSegmentOverrideId,  
     intCompanySegmentOverrideId,
     intSourceCurrencyId,
-    strSourceAccountId
+    strSourceAccountId = CASE WHEN @strTransactionType = 'GL' THEN strSourceAccountId  ELSE '' END
     from @RevalTable A
   
   
@@ -773,7 +773,7 @@ GROUP BY intAccountId,intAccountIdOverride,
     intLOBSegmentOverrideId,  
     intCompanySegmentOverrideId,
     intSourceCurrencyId,
-    strSourceAccountId
+    strSourceAccountId = CASE WHEN @strTransactionType = 'GL' THEN strSourceAccountId ELSE '' END
 	FROM
 	@RevalTable A
 
