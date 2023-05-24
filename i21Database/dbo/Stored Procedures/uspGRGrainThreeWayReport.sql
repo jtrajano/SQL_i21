@@ -266,4 +266,27 @@ BEGIN
 	DELETE FROM @Commodities WHERE intCommodityId = @intCommodityId
 END
 
-SELECT * FROM @FinalReport ORDER BY strCommodityCode
+SELECT * 
+FROM @FinalReport 
+WHERE dblInventoryCompanyOwned <> 0
+	OR dblInventoryStockDetails <> 0
+	OR dblDPRCompanyOwned <> 0
+	OR dblDPRCustomerOwned <> 0
+	OR dblDiffCompanyOwned <> 0
+	OR dblDiffCustomerOwned <> 0
+	OR dblDPRDelayedPricing <> 0
+	OR dblDPROpenStorage <> 0
+	OR dblDPRWarehouseReceipt <> 0
+	OR dblDPRTerminal <> 0
+	OR dblDPRGrainBank <> 0
+	OR dblGrainDelayedPricing <> 0
+	OR dblGrainOpenStorage <> 0
+	OR dblGrainWarehouseReceipt <> 0
+	OR dblGrainTerminal <> 0
+	OR dblGrainGrainBank <> 0
+	OR dblDiffDelayedPricing <> 0
+	OR dblDiffOpenStorage <> 0
+	OR dblDiffWarehouseReceipt <> 0
+	OR dblDiffTerminal <> 0
+	OR dblDiffGrainBank <> 0 
+ORDER BY strCommodityCode
