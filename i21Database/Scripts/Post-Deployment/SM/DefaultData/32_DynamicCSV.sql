@@ -2931,6 +2931,8 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 		END
 
+		SET @strCustomerGroup = CAST(@customer_group AS NVARCHAR(MAX))
+
 		IF(@deviation = '''')
 		BEGIN
 			SET @dblDeviation = NULL
