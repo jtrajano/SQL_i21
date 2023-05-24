@@ -92,8 +92,8 @@ BEGIN
 			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
 			,strDistributionType
 			,strTransactionNumber
-			,dblIn = CASE WHEN dblTotal > 0 THEN QTY.dblResultQty ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(QTY.dblResultQty) ELSE 0 END
+			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
+			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
 			,ST.intStorageScheduleTypeId
 			,CusOwn.strStorageTypeDescription
 			,CusOwn.strCommodityCode
@@ -104,15 +104,14 @@ BEGIN
 				AND CL.ysnLicensed = 1
 		LEFT JOIN tblGRStorageType ST 
 			ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-		OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 		WHERE CusOwn.intCommodityId = @intCommodityId
 		UNION ALL
 		SELECT
 			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
 			,strDistributionType
 			,strTransactionNumber			
-			,dblIn = CASE WHEN dblTotal > 0 THEN QTY.dblResultQty ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(QTY.dblResultQty) ELSE 0 END
+			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
+			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
 			,intStorageScheduleTypeId = -5
 			,'Hold'
 			,OH.strCommodityCode
@@ -121,7 +120,6 @@ BEGIN
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = OH.intLocationId
 				AND CL.ysnLicensed = 1
-		OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 		WHERE OH.intCommodityId = @intCommodityId
 	) t
 
@@ -160,9 +158,8 @@ BEGIN
 		FROM #CustomerOwnershipALL AA
 		INNER JOIN (
 			SELECT strTransactionNumber,strStorageTypeDescription
-				,total = SUM(QTY.dblResultQty) 
+				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
 			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
-			OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 			WHERE strTransactionType NOT IN ('Storage Settlement','Inventory Shipment')
 			GROUP BY strTransactionNumber,strStorageTypeDescription
 		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeDescription = AA.strStorageTypeDescription

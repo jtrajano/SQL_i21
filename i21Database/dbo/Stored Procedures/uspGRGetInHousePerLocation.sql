@@ -55,12 +55,11 @@ BEGIN
 	)
 	SELECT
 		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
-		,dblTotal = QTY.dblResultQty
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
 		,CompOwn.strTransactionNumber
 		,strTransactionType
 		,CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
-			-- WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
-			WHEN EXISTS(SELECT TOP 1 1 FROM vyuRKGetSummaryLog WHERE intCommodityId = @intCommodityId AND intTransactionRecordId = CompOwn.intTransactionRecordHeaderId AND strBucketType = 'Delayed Pricing') THEN 'DP'
+			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
 			WHEN CompOwn.intContractHeaderId IS NOT NULL 
 				THEN ISNULL(
 			     (SELECT TOP 1 strDistributionOption FROM tblSCTicket WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId),
@@ -73,7 +72,6 @@ BEGIN
 		,CompOwn.strLocationName
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmDate,@intCommodityId,NULL) CompOwn
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
-	OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
@@ -94,7 +92,7 @@ BEGIN
 	)
 	SELECT
 		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
-		,dblTotal = QTY.dblResultQty
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal * -1)
 		,CompOwn.strTransactionNumber
 		,CompOwn.strTransactionType
 		,'SO' --set strDistribution the same as Sales Order just to easily get the Invoice
@@ -108,7 +106,6 @@ BEGIN
 	INNER JOIN tblARInvoiceDetail AD
 		ON AD.intInvoiceDetailId = CompOwn.intTransactionRecordId
 			AND AD.intTicketId IS NULL
-	OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal * -1) QTY
 	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
@@ -129,7 +126,7 @@ BEGIN
 	)
 	SELECT
 		dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),AR.dtmPostDate,110),110)
-		,dblTotal = QTY.dblResultQty
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(CO.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SC.dblNetUnits)
 		,AR.strInvoiceNumber
 		,'Invoice'
 		,'SO'
@@ -148,7 +145,6 @@ BEGIN
 	INNER JOIN tblICCommodityUnitMeasure CO
 		ON CO.intCommodityId = IC.intCommodityId
 			AND CO.intUnitMeasureId = UOM.intUnitMeasureId
-	OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(CO.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SC.dblNetUnits) QTY
 	WHERE IC.intItemId = ISNULL(@intItemId,IC.intItemId)
 		AND (AR.intCompanyLocationId= ISNULL(@intLocationId,AR.intCompanyLocationId)
 			OR AR.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
@@ -169,7 +165,7 @@ BEGIN
 	)
 	SELECT
 		dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
-		,dblTotal = QTY.dblResultQty
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
 		,strTransactionType
 		,ST.strStorageTypeCode
 		,strOwnership = 'Customer Owned'
@@ -177,7 +173,6 @@ BEGIN
 		,CusOwn.strLocationName
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmDate,@intCommodityId,NULL) CusOwn
 	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CusOwn.strDistributionType
-	OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 	WHERE ISNULL(CusOwn.strStorageType,'') <> 'ITR' AND CusOwn.intTypeId IN (1,3,4,5,8,9)
 		AND CusOwn.intItemId = ISNULL(@intItemId,CusOwn.intItemId)
 		AND (CusOwn.intLocationId = ISNULL(@intLocationId,CusOwn.intLocationId)
@@ -198,14 +193,13 @@ BEGIN
 		,strLocationName
 	)
 	SELECT CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
-		,dblTotal = QTY.dblResultQty
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
 		,'On Hold'
 		,'HLD'
 		,'HOLD'
 		,intLocationId
 		,OnHold.strLocationName
 	FROM dbo.fnRKGetBucketOnHold(@dtmDate,@intCommodityId,NULL) OnHold
-	OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 	WHERE OnHold.intItemId = ISNULL(@intItemId,OnHold.intItemId)
 		AND (OnHold.intLocationId = ISNULL(@intLocationId,OnHold.intLocationId)
 			OR OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
