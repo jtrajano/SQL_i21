@@ -318,9 +318,9 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.strType <> 'Tax Adjustment'
   AND ISNULL(I.[strItemType], '') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
-  AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesInvoice = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesInvoice = 1))
+  AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesInvoice = 1 AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0) 
+		OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesInvoice = 1 AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0))
   AND @DueToAccountId <> 0
-  AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId
 
 --PROVISIONAL INVOICES
@@ -969,9 +969,9 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
   AND (I.[dblQtyShipped] <> @ZeroDecimal OR (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal))
   AND I.strType <> 'Tax Adjustment'
-  AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesInvoice = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesInvoice = 1))
+  AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesInvoice = 1 AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0) 
+		OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesInvoice = 1 AND [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0))
   AND @DueFromAccountId <> 0
-  AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], I.[intSalesAccountId], 3) = 0)
   AND I.strSessionId = @strSessionId
 
 --SOFTWARE MAINTENANCE/SAAS CREDIT
