@@ -5,6 +5,7 @@
 	,@intTransactionTypeId AS INT 
 	,@ysnPost AS BIT = 1 	
 	,@intRebuildItemId AS INT = NULL -- Used when rebuilding the stocks. 
+	,@ysnRebuild AS BIT = NULL 
 AS
 
 -- Constant Variables
@@ -1591,7 +1592,7 @@ BEGIN
 END
 
 -- Create the AP Clearing
-IF @ysnPost = 1 
+IF @ysnPost = 1 AND (@ysnRebuild = 0 OR @ysnRebuild IS NULL) 
 BEGIN 
 	DECLARE 
 	@intVoucherInvoiceNoOption TINYINT
