@@ -1692,6 +1692,7 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
+    <Build Include="dbo\User Defined Types\GLMissingAccounts.sql" />
     <Build Include="dbo\User Defined Types\RevalTableType.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
