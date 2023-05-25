@@ -940,8 +940,9 @@ IF ISNULL(@intFreightItemId,0) = 0
 									LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = LoadCost.intItemUOMId
 									LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 									INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON RE.[intEntityVendorId] = D1.[intEntityId]
-									OUTER APPLY dbo.fnGetItemGLAccountAsTable(IC.intItemId, ItemLoc.intItemLocationId, 'AP Account') itemAccnt
-									LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+									LEFT JOIN tblSMCompanyLocation COMPANY_LOCATION 
+										ON SC.intProcessingLocationId = COMPANY_LOCATION.intCompanyLocationId
+									LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = COMPANY_LOCATION.intAPAccount
 											
 
 								WHERE LoadCost.dblRate > 0 									
