@@ -57,37 +57,37 @@ BEGIN
 	SET @final_condition = @final_condition + ' 1 = 1' 
 	
 	-- Query Parameters
-	DECLARE @dtmTicketDateTimeFrom DATETIME
-	DECLARE @dtmTicketDateTimeTo DATETIME
+	-- DECLARE @dtmTicketDateTimeFrom DATETIME
+	-- DECLARE @dtmTicketDateTimeTo DATETIME
 	
 	DECLARE @MaxTicketNumber int = 999999999
-	SELECT @dtmTicketDateTimeTo = [to]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'dtmReceiptDate';
+	-- SELECT @dtmTicketDateTimeTo = [to]
+	-- FROM @temp_xml_table
+	-- WHERE [fieldname] = 'dtmReceiptDate';
 
-	SELECT @dtmTicketDateTimeFrom = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'dtmReceiptDate';
+	-- SELECT @dtmTicketDateTimeFrom = [from]
+	-- FROM @temp_xml_table
+	-- WHERE [fieldname] = 'dtmReceiptDate';
 
 	IF OBJECT_ID('tempdb..#tmpSampleExport') IS NOT NULL DROP TABLE #tmpSampleExport    
 
 	DECLARE @sFrom nvarchar(50)
 	DECLARE @sTo nvarchar(50)
 
-	IF(@dtmTicketDateTimeFrom IS NULL)
-		SET @sFrom = CONVERT(nvarchar, GETDATE(), 111)
-	ELSE
-		SET @sFrom = CONVERT(nvarchar, @dtmTicketDateTimeFrom, 111)
+	-- IF(@dtmTicketDateTimeFrom IS NULL)
+	-- 	SET @sFrom = CONVERT(nvarchar, GETDATE(), 111)
+	-- ELSE
+	-- 	SET @sFrom = CONVERT(nvarchar, @dtmTicketDateTimeFrom, 111)
 
 
-	IF (@dtmTicketDateTimeTo IS NULL)
-		SET @sTo = CONVERT(nvarchar,  DATEADD(DAY, 1, GETDATE()), 111)
-	ELSE 
-		SET @sTo = CONVERT(nvarchar, DATEADD(day, 1, @dtmTicketDateTimeTo), 111)
+	-- IF (@dtmTicketDateTimeTo IS NULL)
+	-- 	SET @sTo = CONVERT(nvarchar,  DATEADD(DAY, 1, GETDATE()), 111)
+	-- ELSE 
+	-- 	SET @sTo = CONVERT(nvarchar, DATEADD(day, 1, @dtmTicketDateTimeTo), 111)
 
 	
-	SELECT @sTo = REPLACE(@sTo, '/', '-') 
-			,@sFrom = REPLACE(@sFrom, '/', '-') 
+	-- SELECT @sTo = REPLACE(@sTo, '/', '-') 
+	-- 		,@sFrom = REPLACE(@sFrom, '/', '-') 
 
 	SELECT TOP 0 * into #tmpSampleExport FROM vyuGRGrainFlowReport
 	DECLARE @sqlcmd NVARCHAR(500)
