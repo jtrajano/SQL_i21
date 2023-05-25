@@ -15,6 +15,8 @@ print 'BEGIN POST DEPLOYMENT'
 
 
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
+GO
+print 'Test'
 :r .\SetInLineToOff.sql
 :r .\EncryptionDataFix.sql
 
