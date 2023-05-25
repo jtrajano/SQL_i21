@@ -230,13 +230,13 @@ BEGIN
                 FROM #TransactionGroupAll
                 ORDER BY strAccountId
 
-				-- SELECT
-				-- 	@beginBalance               = 0,
-				-- 	@beginBalanceDebit          = 0,
-				-- 	@beginBalanceCredit         = 0,
-				-- 	@beginBalanceForeign        = 0,
-				-- 	@beginBalanceDebitForeign   = 0,
-				-- 	@beginBalanceCreditForeign  = 0
+				SELECT
+					@beginBalance               = 0,
+					@beginBalanceDebit          = 0,
+					@beginBalanceCredit         = 0,
+					@beginBalanceForeign        = 0,
+					@beginBalanceDebitForeign   = 0,
+					@beginBalanceCreditForeign  = 0
                 
                 -- SELECT
 				-- 	--@beginBalance=          ISNULL(beginBalance,0),
