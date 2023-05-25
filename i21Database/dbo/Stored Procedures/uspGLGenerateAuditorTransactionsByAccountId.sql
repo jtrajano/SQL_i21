@@ -181,7 +181,7 @@ BEGIN
                 , intCurrencyId
                 , strLOBSegmentId  strLOBSegmentDescription 
                 , strLocationSegmentId strLocation
-                , A.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
+                , B.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
             WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
             DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo)
                 GROUP BY A.intAccountId, strAccountId, intCurrencyId, strCurrency
