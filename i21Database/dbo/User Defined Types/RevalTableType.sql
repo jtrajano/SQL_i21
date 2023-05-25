@@ -29,9 +29,6 @@ CREATE TYPE [dbo].[RevalTableType] AS TABLE (
     intCompanySegmentOverrideId INT NULL,
     strNewAccountIdOverride NVARCHAR(40) Collate Latin1_General_CI_AS NULL,
     intNewAccountIdOverride INT NULL,
-    strOverrideAccountError NVARCHAR(800) Collate Latin1_General_CI_AS NULL,
-	intSourceCurrencyId INT NULL,
-	strSourceAccountId NVARCHAR(100) Collate Latin1_General_CI_AS NULL
-
+    strOverrideAccountError NVARCHAR(800) Collate Latin1_General_CI_AS NULL
 )
 

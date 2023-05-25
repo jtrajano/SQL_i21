@@ -57,7 +57,6 @@
 	[intLedgerId] INT NULL,
 	[intSubledgerId] INT NULL,
 	[ysnIntraCompanyEntry] BIT NULL,
-	strSourceAccountId NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
-	intSourceCurrencyId INT NULL
+	strSourceAccountId NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL
 )
 

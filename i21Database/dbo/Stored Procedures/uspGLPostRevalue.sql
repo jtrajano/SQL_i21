@@ -183,15 +183,14 @@ DECLARE
                   ,intAccountIdOverride  
                   ,intLocationSegmentOverrideId  
                   ,intLOBSegmentOverrideId  
-                  ,intCompanySegmentOverrideId
-                  ,intSourceCurrencyId
+                  ,intCompanySegmentOverrideId  
                   )  
                   SELECT   
-                   [strTransactionId]
-                  ,[intTransactionId]
-                  ,[intAccountId]
-                  ,[strDescription]
-                  ,[dtmTransactionDate]
+                   [strTransactionId]  
+                  ,[intTransactionId]  
+                  ,[intAccountId]  
+                  ,[strDescription]  
+                  ,[dtmTransactionDate]  
                   ,[dblDebit]
                   ,[dblCredit]  
                   ,[dblExchangeRate] 
@@ -215,7 +214,6 @@ DECLARE
                   ,intLocationSegmentOverrideId  
                   ,intLOBSegmentOverrideId  
                   ,intCompanySegmentOverrideId  
-                  ,intSourceCurrencyId
                   FROM dbo.fnGLCreateGLPostRevaluEntries(@intConsolidationId,@strPeriod,@dateNow,@strPostBatchId,@defaultType,@intEntityId,@strTransactionType)
           END
           ELSE
@@ -541,8 +539,7 @@ DECLARE
         ,[intJournalLineNo]  
         ,[strTransactionType]  
         ,[strTransactionForm]  
-        ,strModuleName 
-        ,strSourceAccountId
+        ,strModuleName  
         )     
         SELECT   
         [strTransactionId]    
@@ -568,8 +565,7 @@ DECLARE
         ,[intJournalLineNo]    
         ,[strTransactionType]   
         ,[strTransactionForm]  
-        ,strModuleName
-        ,strSourceAccount
+        ,strModuleName  
         FROM tblGLDetail A   
         WHERE strTransactionId = @strConsolidationNumber  
         AND ysnIsUnposted = 0  
@@ -627,9 +623,7 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,
-    intSourceCurrencyId,
-    strSourceAccountId
+    intCompanySegmentOverrideId
    )
    SELECT 
     dtmDate,  
@@ -659,9 +653,7 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,
-    intSourceCurrencyId,
-    strSourceAccountId
+    intCompanySegmentOverrideId
     from @RevalTable A
   
   
@@ -718,9 +710,7 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,
-    intSourceCurrencyId,
-    strSourceAccountId
+    intCompanySegmentOverrideId
    )
    SELECT 
     dtmDate,  
@@ -750,9 +740,7 @@ GROUP BY intAccountId,intAccountIdOverride,
     intAccountIdOverride,  
     intLocationSegmentOverrideId,  
     intLOBSegmentOverrideId,  
-    intCompanySegmentOverrideId,
-    intSourceCurrencyId,
-    strSourceAccountId
+    intCompanySegmentOverrideId
 	FROM
 	@RevalTable A
 

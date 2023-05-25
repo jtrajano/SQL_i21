@@ -64,7 +64,6 @@ AS RETURN(
                         ,[ysnIsUnposted]    
                         ,[intConcurrencyId]    
                         ,intCurrencyId = intFunctionalCurrencyId  --functional gain/loss
-                        ,intSourceCurrencyId =  intCurrencyId
                         ,[intUserId]     
                         ,[intEntityId]     
                         ,[dtmDateEntered]    
@@ -98,7 +97,6 @@ AS RETURN(
                         ,[ysnIsUnposted]    
                         ,[intConcurrencyId]   
                         ,intCurrencyId -- offset is in source currency 
-                        ,intSourceCurrencyId = intCurrencyId
                         ,[intUserId]     
                         ,[intEntityId]     
                         ,[dtmDateEntered]   
@@ -135,7 +133,6 @@ AS RETURN(
           ,[ysnIsUnposted]    
           ,A.[intConcurrencyId]    
           ,[intCurrencyId]
-          ,[intSourceCurrencyId]
           ,[intUserId]     
           ,[intEntityId]     
           ,[dtmDateEntered]    
