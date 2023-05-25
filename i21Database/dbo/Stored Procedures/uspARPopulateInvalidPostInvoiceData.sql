@@ -2941,6 +2941,32 @@ BEGIN
 	AND ISNULL(LOB.intAccountId, 0) = 0
 	AND ISNULL(ARPIH.intLineOfBusinessId, 0) <> 0
 	AND ARPIH.strSessionId = @strSessionId
+
+	--VALIDATE RESTRICTED CHEMICAL ITEMS
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Applicator is required for restricted items.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail I
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblICItem ITEM ON I.intItemId = ITEM.intItemId
+	WHERE I.strSessionId = @strSessionId
+	  AND ITEM.ysnRestrictedChemical = 1
+	  AND INV.intEntityApplicatorId IS NULL
 END
 
 IF @Post = @ZeroBit
