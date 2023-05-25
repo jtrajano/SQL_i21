@@ -3,6 +3,7 @@
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
+	,@ysnRebuild AS BIT = 0 
 AS
 
 DECLARE @SourceType_NONE AS INT = 0
@@ -431,17 +432,20 @@ BEGIN
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId = 
-					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1
-					THEN dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-					ELSE 
-						CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-						THEN 
-							CASE WHEN TaxCode.ysnAddToCost = 1
-							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
-							ELSE ex.intPurchaseTaxExemptionAccountId
+					CASE 
+						WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+							dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+						ELSE 
+							CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL THEN 
+								CASE WHEN TaxCode.ysnAddToCost = 1 THEN 
+									dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
+								ELSE 
+									--ex.intPurchaseTaxExemptionAccountId
+									ISNULL(dbo.fnGetLocationAwareGLAccount(ex.intPurchaseTaxExemptionAccountId, Receipt.intLocationId), ex.intPurchaseTaxExemptionAccountId) 
+								END
+							ELSE 
+								ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
 							END
-						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
-						END
 					END
 				,intAPClearingAccountId				= CAST(NULL AS INT) 
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
@@ -498,17 +502,21 @@ BEGIN
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId = 
-					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1
-					THEN dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-					ELSE 
-						CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-						THEN 
-							CASE WHEN TaxCode.ysnAddToCost = 1
-							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
-							ELSE ex.intPurchaseTaxExemptionAccountId
+					CASE 
+						WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+							dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+						ELSE 
+							CASE 
+								WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL  THEN 
+									CASE WHEN TaxCode.ysnAddToCost = 1 THEN 
+										dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
+									ELSE 
+										--ex.intPurchaseTaxExemptionAccountId
+										ISNULL(dbo.fnGetLocationAwareGLAccount(ex.intPurchaseTaxExemptionAccountId, Receipt.intLocationId), ex.intPurchaseTaxExemptionAccountId)
+									END
+								ELSE 
+									ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
 							END
-						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
-						END
 					END
 				,intAPClearingAccountId				= CAST(NULL AS INT) 
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
@@ -649,9 +657,11 @@ BEGIN
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= 
-				CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-					THEN ex.intPurchaseTaxExemptionAccountId
-					ELSE GLAccount.intAccountId
+				CASE 
+					WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL THEN 
+						ex.intPurchaseTaxExemptionAccountId
+					ELSE 
+						GLAccount.intAccountId
 				END
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
@@ -839,6 +849,7 @@ END
 ;
 
 -- Create the AP Clearing
+IF (@ysnRebuild = 0 OR @ysnRebuild IS NULL) -- Do not create the AP Clearing if rebuilding the GL entries. 
 BEGIN 
 	DECLARE 
 	@intVoucherInvoiceNoOption TINYINT
