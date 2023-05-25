@@ -49,7 +49,7 @@ SET NOCOUNT ON
 			)
 
 			SET @strAccountUsed = (
-				SELECT  RTRIM(LEFT(@strAccountUsed,(LEN(@strAccountUsed) - 3))) 
+				SELECT TRIM(LEFT(@strAccountUsed,(LEN(@strAccountUsed) - 3))) 
 			)
 
 			UPDATE tblFRRowDesign SET strAccountsUsed = @strAccountUsed  WHERE intRowDetailId = @intRowDetailId
