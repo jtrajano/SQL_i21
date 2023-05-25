@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFProductionReport] 
 (
 	@intDay				INT = 1
-  , @strType			NVARCHAR = NULL /* eg. Production, RMUsageDetail, RMUsagePerLot, PMUsageDetail, . Sending NULL Value will return all. */
-  , @strLocation		NVARCHAR = NULL /* Location Name. Sending NULL Value will return all. */
-  , @strExcludeItem		NVARCHAR = NULL /* Item No (Product / WSI Item)*/
-  , @strExcludeCategory	NVARCHAR = NULL /* Category (Product Category/ WSI Item Category)*/
+  , @strType			NVARCHAR(MAX) = NULL /* eg. Production, RMUsageDetail, RMUsagePerLot, PMUsageDetail, . Sending NULL Value will return all. */
+  , @strLocation		NVARCHAR(MAX) = NULL /* Location Name. Sending NULL Value will return all. */
+  , @strExcludeItem		NVARCHAR(MAX) = NULL /* Item No (Product / WSI Item)*/
+  , @strExcludeCategory	NVARCHAR(MAX) = NULL /* Category (Product Category/ WSI Item Category)*/
 ) 
 AS
 /****************************************************************
@@ -59,7 +59,7 @@ ELSE
 	END
 
 /* Production */
-IF (@strType = 'Production' OR @strType = NULL)
+IF (@strType = 'Production' OR @strType IS NULL)
 	BEGIN
 		SELECT [Production Date]
 		     , [Item]
@@ -94,7 +94,7 @@ IF (@strType = 'Production' OR @strType = NULL)
 	END
 
 /* RMUsageDetail */
-IF (@strType = 'RMUsageDetail' OR @strType = NULL)
+IF (@strType = 'RMUsageDetail' OR @strType IS NULL)
 	BEGIN
 		SELECT [Dump Date]
 			 , [Product]
@@ -132,7 +132,7 @@ IF (@strType = 'RMUsageDetail' OR @strType = NULL)
 	END
 
 /* RMUsagePerLot */
-IF (@strType = 'RMUsagePerLot' OR @strType = NULL)
+IF (@strType = 'RMUsagePerLot' OR @strType IS NULL)
 	BEGIN
 		SELECT [Dump Date]
 			 , [Product]
@@ -169,7 +169,7 @@ IF (@strType = 'RMUsagePerLot' OR @strType = NULL)
 	END
 
 /* PMUsageDetail */
-IF (@strType = 'PMUsageDetail' OR @strType = NULL)
+IF (@strType = 'PMUsageDetail' OR @strType IS NULL)
 	BEGIN
 		SELECT [Dump Date]
 			 , [Product]
@@ -206,7 +206,7 @@ IF (@strType = 'PMUsageDetail' OR @strType = NULL)
 	END
 
 /* OverUnderWeight */
-IF (@strType = 'OverUnderWeight' OR @strType = NULL)
+IF (@strType = 'OverUnderWeight' OR @strType IS NULL)
 	BEGIN
 		SELECT [Production Date]
 			 , Item
@@ -238,3 +238,5 @@ IF (@strType = 'OverUnderWeight' OR @strType = NULL)
 			   , intWorkOrderId
 
 	END
+
+
