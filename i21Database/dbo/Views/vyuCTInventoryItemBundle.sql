@@ -34,7 +34,9 @@ AS
 			ICC.strClass,
 			ICC.strProductLine,
 		   strXrefVendorProduct = x.strVendorProduct,
-		   strXrefCustomerProduct = xc.strCustomerProduct
+		   strXrefCustomerProduct = xc.strCustomerProduct,
+		   x.intVendorId,
+		   xc.intCustomerId
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
 	JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	LEFT
@@ -82,7 +84,9 @@ AS
 			ICC.strClass,
 			ICC.strProductLine,
 		   strXrefVendorProduct = x.strVendorProduct,
-		   strXrefCustomerProduct = xc.strCustomerProduct
+		   strXrefCustomerProduct = xc.strCustomerProduct,
+		   x.intVendorId,
+		   xc.intCustomerId
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -128,7 +132,9 @@ AS
 			ICC.strClass,
 			ICC.strProductLine,
 		   strXrefVendorProduct = x.strVendorProduct,
-		   strXrefCustomerProduct = xc.strCustomerProduct
+		   strXrefCustomerProduct = xc.strCustomerProduct,
+		   x.intVendorId,
+		   xc.intCustomerId
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -176,7 +182,9 @@ AS
 			ICC.strClass,
 			ICC.strProductLine,
 		   strXrefVendorProduct = x.strVendorProduct,
-		   strXrefCustomerProduct = xc.strCustomerProduct
+		   strXrefCustomerProduct = xc.strCustomerProduct,
+		   x.intVendorId,
+		   xc.intCustomerId
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		
 	LEFT JOIN	tblICCategory			CR	ON	CR.intCategoryId			=	IM.intCategoryId	
@@ -193,3 +201,4 @@ AS
 
 
 	) fq
+
