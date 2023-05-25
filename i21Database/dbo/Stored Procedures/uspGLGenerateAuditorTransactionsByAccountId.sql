@@ -161,7 +161,7 @@ BEGIN
             INTO #TransactionGroupAll
             FROM vyuGLAccountDetail GL
 
-            ;WITH groups AS(
+           -- ;WITH groups AS(
             SELECT 
                 intAccountId
                 , strAccountId
@@ -169,34 +169,35 @@ BEGIN
                 , intCurrencyId
                 , strLOBSegmentDescription
                 , strLocation
-                , strAccountDescription   
+                , strAccountDescription  
+            INTO #TransactionGroup  
             FROM ##AuditorTransactions 
             GROUP BY intAccountId, strAccountId, intCurrencyId, strCurrency
             ,strLOBSegmentDescription,strLocation, strAccountDescription
-                UNION
+            --    UNION
             --GETS THE PREVIOUS YEAR
-            SELECT  A.intAccountId
-                , strAccountId
-                , strCurrency
-                , intCurrencyId
-                , strLOBSegmentId  strLOBSegmentDescription 
-                , strLocationSegmentId strLocation
-                , B.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
-            WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
-            DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo)
-                GROUP BY A.intAccountId, strAccountId, intCurrencyId, strCurrency
-            ,strLOBSegmentId,strLocationSegmentId, B.strDescription
-            )
-            SELECT
-              intAccountId
-                , strAccountId
-                , strCurrency
-                , intCurrencyId
-                , strLOBSegmentDescription
-                , strLocation
-                , strAccountDescription
-              INTO #TransactionGroup 
-              FROM groups
+            -- SELECT  A.intAccountId
+            --     , strAccountId
+            --     , strCurrency
+            --     , intCurrencyId
+            --     , strLOBSegmentId  strLOBSegmentDescription 
+            --     , strLocationSegmentId strLocation
+            --     , B.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
+            -- WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
+            -- DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo)
+            --     GROUP BY A.intAccountId, strAccountId, intCurrencyId, strCurrency
+            -- ,strLOBSegmentId,strLocationSegmentId, B.strDescription
+            -- )
+            -- SELECT
+            --   intAccountId
+            --     , strAccountId
+            --     , strCurrency
+            --     , intCurrencyId
+            --     , strLOBSegmentDescription
+            --     , strLocation
+            --     , strAccountDescription
+            --   INTO #TransactionGroup 
+            --   FROM groups
 
 
 
@@ -269,7 +270,7 @@ BEGIN
                             ysnGroupFooter
                             ,ysnGroupHeader
                             , intType
-                            , intGeneratedBy      
+                    , intGeneratedBy      
                             , dtmDateGenerated
                             , strTotalTitle
                             , strGroupTitle
@@ -351,7 +352,7 @@ BEGIN
                             , dblSourceUnitCredit
                             , dblDebitUnit
                             , dblCreditUnit
-                            , strCommodityCode 
+            , strCommodityCode 
                             , strSourceDocumentId
                             , strLocation
                             , strCompanyLocation 
@@ -429,7 +430,7 @@ BEGIN
                                 , @dtmNow
                                 , intEntityId
                                 , strBatchId
-                                , intAccountId
+                   , intAccountId
                                 , strTransactionId
                                 , intTransactionId
                                 , intCurrencyId
@@ -504,7 +505,7 @@ BEGIN
                                 , dblCredit
                                 , dblDebitUnit
                                 , dblCreditUnit
-                                , dblSourceUnitDebit
+                           , dblSourceUnitDebit
                                 , dblSourceUnitCredit
                                 , dblDebitForeign
                                 , dblCreditForeign
@@ -576,7 +577,7 @@ BEGIN
             ##AuditorTransactions  A 
 
         END
-        ELSE
+   ELSE
         BEGIN
             IF isnull(@ysnSuppressZero,0) = 0 
             BEGIN
