@@ -84,10 +84,10 @@ INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoi
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
 INNER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ICIUOM.[intItemUOMId] = ARID.[intItemUOMId]
 CROSS APPLY (
-     SELECT intItemUOMId 
+     SELECT TOP 1 intItemUOMId 
      FROM tblICItemUOM WITH (NOLOCK)
      WHERE intItemId = ARID.intItemId
-     AND ysnStockUnit = 1
+	 ORDER BY ysnStockUnit DESC
  ) ICIUOM_STOCK
 LEFT OUTER JOIN (
 	SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId 
