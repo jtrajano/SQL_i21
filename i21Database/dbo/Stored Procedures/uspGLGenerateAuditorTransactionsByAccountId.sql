@@ -185,7 +185,7 @@ BEGIN
             WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
             DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo)
                 GROUP BY A.intAccountId, strAccountId, intCurrencyId, strCurrency
-            ,strLOBSegmentId,strLocationSegmentId, A.strDescription
+            ,strLOBSegmentId,strLocationSegmentId, B.strDescription
             )
             SELECT
               intAccountId
