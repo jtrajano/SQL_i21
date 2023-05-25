@@ -888,7 +888,23 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[dblQuantityToBill] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE RE.dblNet END
 								,[dblQtyToBillUnitQty] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
 								,[intQtyToBillUOMId] = LoadCost.intItemUOMId
-								,[dblCost] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN ABS(ISNULL(LoadCost.dblAmount, LoadCost.dblRate)) ELSE ABS(ISNULL(LoadCost.dblRate, LoadCost.dblAmount)) END 
+								,[dblCost] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') 
+									THEN ABS(
+												ROUND(
+														dbo.fnMultiply(
+															dbo.fnDivide(RE.dblQty , SC.dblNetUnits)
+																, ISNULL(LoadCost.dblAmount, LoadCost.dblRate)
+															), 2
+												)
+											) 
+									ELSE ABS(
+												ROUND(
+														dbo.fnMultiply(
+															dbo.fnDivide(RE.dblQty , SC.dblNetUnits)
+																, ISNULL(LoadCost.dblRate, LoadCost.dblAmount)
+															), 2
+												)
+											) END 
 								,[dblCostUnitQty] = 1 -- need to clarify how to handle this
 														--CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemCostUOM.dblUnitQty,1) END
 								,[intCostUOMId] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN NULL ELSE LoadCost.intItemUOMId END
