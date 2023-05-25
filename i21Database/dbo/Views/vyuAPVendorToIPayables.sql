@@ -4,7 +4,7 @@ WITH cte as(
 select 
 A.intEntityId,
 A.strName VendorName,
-ISNULL(strVendorId,'') COLLATE Latin1_General_CI_AS  VendorNbr ,
+ISNULL(strEntityNo,'') COLLATE Latin1_General_CI_AS  VendorNbr ,
 ISNULL(Address1.Street1, '') COLLATE Latin1_General_CI_AS  Street1,
 --ISNULL(Address2.Street2, '') COLLATE Latin1_General_CI_AS  Street2,
 ISNULL(B.strCity,'') COLLATE Latin1_General_CI_AS  City,
@@ -31,7 +31,7 @@ outer apply (select Item Street1 from  dbo.fnSplitStringWithRowId(B.strAddress, 
 EML AS ( 
 	select A.intEntityId,
 	B.strName VendorName,
-	ISNULL(B.strVendorId,'') COLLATE Latin1_General_CI_AS  VendorNbr ,
+	ISNULL(B.strEntityNo,'') COLLATE Latin1_General_CI_AS  VendorNbr ,
 	ISNULL(A.strLocationName,'')  COLLATE Latin1_General_CI_AS AddressType,  
 	ISNULL(A.strAddress,'')  COLLATE Latin1_General_CI_AS strAddress,
 	ISNULL(A.strCity,'')  COLLATE Latin1_General_CI_AS strCity,
@@ -40,7 +40,7 @@ EML AS (
 	ISNULL(A.strCountry,'')  COLLATE Latin1_General_CI_AS strCountry,
 	ISNULL(Address1.Street1 ,'') COLLATE Latin1_General_CI_AS Street1,
 	ISNULL(Address2.Street2,'') COLLATE Latin1_General_CI_AS Street2
-	from  tblEMEntityLocation A join vyuAPVendor B ON A.intEntityId = B.intEntityId
+	from  tblEMEntityLocation A join vyuAPVendorSearch B ON A.intEntityId = B.intEntityId
 	outer apply (select Item Street1 from  dbo.fnSplitStringWithRowId(A.strAddress, char(10))  where RowId = 1 ) Address1
 	outer apply (select Item Street2 from  dbo.fnSplitStringWithRowId(A.strAddress, char(10))  where RowId = 2 ) Address2
 ),
