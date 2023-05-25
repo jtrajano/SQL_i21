@@ -253,7 +253,7 @@ BEGIN
 			,[intCostUOMId]						= LoadCost.intItemUOMId
 			,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 			,[dblAmount]						= CASE
-													WHEN LoadCost.strCostMethod = 'Amount' THEN  ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 2)
+													WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(dbo.fnMultiply(dbo.fnDivide(RE.dblQty , SC.dblNetUnits), LoadCost.dblRate), 2)
 													ELSE 0
 												END								
 			,[intContractHeaderId]				= (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
