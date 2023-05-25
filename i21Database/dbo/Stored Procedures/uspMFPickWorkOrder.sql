@@ -270,7 +270,7 @@ BEGIN TRY
 													  END
 		 , @strPackagingCategory					= ISNULL(Category.strCategoryCode, '')
 		 , @strCycleCountbasedonRecipeTolerance		= CASE WHEN strAttributeName = 'Cycle Count based on Recipe Tolerance' THEN strAttributeValue
-														   ELSE ISNULL(@strCycleCountbasedonRecipeTolerance, '11sss1')
+														   ELSE ISNULL(@strCycleCountbasedonRecipeTolerance, 'False')
 													  END
 		 , @intPMStageLocationId					= CASE WHEN  strAttributeName = 'PM Production Staging Location' THEN strAttributeValue
 														   ELSE @intPMStageLocationId
