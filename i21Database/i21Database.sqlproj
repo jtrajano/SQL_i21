@@ -11607,6 +11607,7 @@
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
