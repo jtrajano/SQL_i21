@@ -635,6 +635,43 @@ BEGIN
 		WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND B.intTransactionType = 15 AND TC.intTaxAdjustmentAccountId IS NULL 
 
+		--VALIDATE TAX EXEMPTION ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'The Tax Exemption account of Tax Code - ' + TC.strTaxCode + ' was not set.',
+			'Bill',
+			B.strBillId,
+			B.intBillId,
+			39
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
+		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
+		WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND B.intTransactionType <> 15 AND TC.intPurchaseTaxExemptionAccountId IS NULL 
+
+		--VALIDATE EXPENSE ACCOUNT OVERRIDE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'The Expense account override of Tax Code - ' + TC.strTaxCode + ' was not set to item ' + itm.strItemNo + '.',
+			'Bill',
+			B.strBillId,
+			B.intBillId,
+			39
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
+		LEFT JOIN tblSMTaxCode TC ON TC.intTaxCodeId = BDT.intTaxCodeId
+		LEFT JOIN tblICItem itm ON BD.intItemId = itm.intItemId
+		LEFT JOIN tblICItemLocation loc
+				ON loc.intItemId = BD.intItemId AND loc.intLocationId = B.intShipToId
+			LEFT JOIN tblICItemLocation detailloc
+				ON detailloc.intItemId = BD.intItemId AND detailloc.intLocationId = BD.intLocationId
+		WHERE B.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND B.intTransactionType <> 15 
+		AND TC.ysnExpenseAccountOverride = 1
+		AND dbo.[fnGetItemGLAccount](BD.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Other Charge Expense') IS NULL
+
 		--You cannot post intra-location transaction without due to account. 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
