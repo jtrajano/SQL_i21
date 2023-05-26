@@ -18,9 +18,9 @@ SELECT
 	,A.intTermsId
 	,C.strTerm
 FROM tblEMEntityLocation A
-INNER JOIN tblSMTaxGroup B
+LEFT JOIN tblSMTaxGroup B
 	ON A.intTaxGroupId = B.intTaxGroupId
-INNER JOIN tblSMTerm C
+LEFT JOIN tblSMTerm C
 	ON A.intTermsId = C.intTermID
 
 GO
