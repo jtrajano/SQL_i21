@@ -1764,6 +1764,7 @@
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_DA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPInboundType_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipment_DA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
