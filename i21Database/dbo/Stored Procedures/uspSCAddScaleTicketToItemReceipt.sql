@@ -949,7 +949,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									AND ISNULL(LoadCost.ysnVendorPrepayment, 0) = 1
 									And ISNULL(LoadCost.ysnPrice, 0) = 0 
 									AND ISNULL(LoadCost.ysnAccrue, 0) = 0
-									AND RE.ysnIsStorage = 0
+									-- AND RE.ysnIsStorage = 0
 							
 							UNION ALL
 							-- FOR STORAGE DEBIT MEMO
