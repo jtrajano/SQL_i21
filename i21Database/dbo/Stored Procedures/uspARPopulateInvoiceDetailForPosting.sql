@@ -462,9 +462,7 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblDiscountAmount]
     ,[dblBaseDiscountAmount]
     ,[dblTotal]
-    ,[dblBaseTotal]
     ,[dblLineItemGLAmount]
-    ,[dblBaseLineItemGLAmount]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
@@ -474,13 +472,9 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strFrequency]
     ,[dtmMaintenanceDate]
     ,[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]
     ,[dblLicenseGLAmount]
-    ,[dblBaseLicenseGLAmount]
     ,[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]
-    ,[dblBaseMaintenanceGLAmount]    
     ,[ysnLeaseBilling]
     ,[intSiteId]
     ,[intPerformerId]
@@ -510,7 +504,6 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblBaseProvisionalTotal]
     ,dblBaseProvisionalTotalTax
     ,dblTotalTax
-    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -620,9 +613,7 @@ SELECT
     ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblTotal]                         = ARID.[dblTotal]
-    ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = dbo.fnRoundBanker(ISNULL(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -632,13 +623,9 @@ SELECT
     ,[strFrequency]                     = ARID.[strFrequency]
     ,[dtmMaintenanceDate]               = ARID.[dtmMaintenanceDate]
     ,[dblLicenseAmount]                 = ARID.[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]             = ARID.[dblBaseLicenseAmount]
     ,[dblLicenseGLAmount]               = ARID.[dblLicenseAmount]
-    ,[dblBaseLicenseGLAmount]           = ARID.[dblBaseLicenseAmount]
     ,[dblMaintenanceAmount]             = ARID.[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]         = ARID.[dblBaseMaintenanceAmount]
-    ,[dblMaintenanceGLAmount]           = ARID.[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceGLAmount]       = ARID.[dblBaseMaintenanceAmount]    
+    ,[dblMaintenanceGLAmount]           = ARID.[dblMaintenanceAmount] 
     ,[ysnLeaseBilling]                  = ARID.[ysnLeaseBilling]
     ,[intSiteId]                        = ARID.[intSiteId]
     ,[intPerformerId]                   = ARID.[intPerformerId]
@@ -668,7 +655,6 @@ SELECT
     ,[dblBaseProvisionalTotal]          = ROUND(ARID.[dblProvisionalTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,dblBaseProvisionalTotalTax         = ARID.dblBaseProvisionalTotalTax
     ,dblTotalTax                        = ARID.dblTotalTax
-    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
 INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -799,9 +785,7 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblDiscountAmount]
     ,[dblBaseDiscountAmount]
     ,[dblTotal]
-    ,[dblBaseTotal]
     ,[dblLineItemGLAmount]
-    ,[dblBaseLineItemGLAmount]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
@@ -811,13 +795,9 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strFrequency]
     ,[dtmMaintenanceDate]
     ,[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]
     ,[dblLicenseGLAmount]
-    ,[dblBaseLicenseGLAmount]
     ,[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]
-    ,[dblBaseMaintenanceGLAmount]
     ,[ysnLeaseBilling]
     ,[intSiteId]
     ,[intPerformerId]
@@ -843,7 +823,6 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblFreightCharge]
     ,[dblSurcharge]
     ,dblTotalTax
-    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -953,9 +932,7 @@ SELECT
     ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblTotal]                         = ARID.[dblTotal]
-    ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = dbo.fnRoundBanker(ISNULL(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -965,7 +942,6 @@ SELECT
     ,[strFrequency]                     = ARID.[strFrequency]
     ,[dtmMaintenanceDate]               = ARID.[dtmMaintenanceDate]
     ,[dblLicenseAmount]                 = ARID.[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]             = ARID.[dblBaseLicenseAmount]
     ,[dblLicenseGLAmount]               = (CASE WHEN ARID.[strMaintenanceType] = 'License Only'
                                                       THEN ISNULL(ARID.[dblTotal], @ZeroDecimal) + (CASE WHEN (ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0) THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision) END)
                                                       ELSE
@@ -985,27 +961,7 @@ SELECT
 																	[dbo].fnRoundBanker((ISNULL(ARID.[dblLicenseAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
                                                             END)
                                                 END)
-    ,[dblBaseLicenseGLAmount]           = (CASE WHEN ARID.[strMaintenanceType] = 'License Only'
-                                                      THEN ISNULL(ARID.[dblBaseTotal], @ZeroDecimal) + (CASE WHEN (ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0) THEN @ZeroDecimal ELSE [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision) END)
-                                                      ELSE
-                                                            (CASE WHEN ISNULL(ARID.[dblDiscount], @ZeroDecimal) > @ZeroDecimal 
-																THEN
-																	[dbo].fnRoundBanker(ARID.[dblBaseTotal] * ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision), @Precision)/ @OneHundredDecimal), @Precision) 
-																	+
-																	(CASE WHEN ARI.[intPeriodsToAccrue] > 1 AND ARI.[ysnAccrueLicense] = 0  
-																	      THEN @ZeroDecimal 
-																		  ELSE [dbo].fnRoundBanker(
-																	                 ([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision))
-																		             *
-																					 ([dbo].fnRoundBanker(@OneHundredDecimal - [dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision), @Precision)/ @OneHundredDecimal)
-																			   , @Precision) 
-																     END) 
-																ELSE
-																	[dbo].fnRoundBanker((ISNULL(ARID.[dblBaseLicenseAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
-                                                            END)
-                                                END)
     ,[dblMaintenanceAmount]             = ARID.[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]         = ARID.[dblBaseMaintenanceAmount]
     ,[dblMaintenanceGLAmount]             = (CASE WHEN ARID.[strMaintenanceType] IN ('Maintenance Only', 'SaaS')
                                                       THEN ISNULL(ARID.[dblTotal], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.dblPrice), @Precision)), @Precision)
                                                       ELSE
@@ -1017,19 +973,6 @@ SELECT
 																   , @Precision) 
                                                                ELSE
                                                                    [dbo].fnRoundBanker((ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
-                                                           END)
-                                          END)
-    ,[dblBaseMaintenanceGLAmount]         = (CASE WHEN ARID.[strMaintenanceType] IN ('Maintenance Only', 'SaaS')
-                                                      THEN ISNULL(ARID.[dblBaseTotal], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.dblBasePrice), @Precision)), @Precision)
-                                                      ELSE
-                                                           (CASE WHEN ISNULL(ARID.[dblDiscount], @ZeroDecimal) > @ZeroDecimal 
-                                                               THEN
-                                                                   [dbo].fnRoundBanker(ARID.[dblBaseTotal] * ([dbo].fnRoundBanker(((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision)/ @OneHundredDecimal), @Precision) 
-																         + 
-																         [dbo].fnRoundBanker(([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision)) * ([dbo].fnRoundBanker(((ISNULL(ARID.dblBaseMaintenanceAmount, @ZeroDecimal) * ARID.[dblQtyShipped]) / ARID.[dblBaseTotal]) * @OneHundredDecimal, @Precision)/ @OneHundredDecimal)
-																   , @Precision) 
-                                                               ELSE
-                                                                   [dbo].fnRoundBanker((ISNULL(ARID.[dblBaseMaintenanceAmount], @ZeroDecimal) * ARID.[dblQtyShipped]), @Precision)		
                                                            END)
                                           END)
     ,[ysnLeaseBilling]                  = ARID.[ysnLeaseBilling]
@@ -1057,7 +1000,6 @@ SELECT
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
     ,dblTotalTax                        = ARID.dblTotalTax
-    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
 INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1180,9 +1122,7 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblDiscountAmount]
     ,[dblBaseDiscountAmount]
     ,[dblTotal]
-    ,[dblBaseTotal]
     ,[dblLineItemGLAmount]
-    ,[dblBaseLineItemGLAmount]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
@@ -1192,9 +1132,7 @@ INSERT INTO tblARPostInvoiceDetail
     ,[strFrequency]
     ,[dtmMaintenanceDate]
     ,[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]
     ,[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]
     ,[ysnLeaseBilling]
     ,[intSiteId]
     ,[intPerformerId]
@@ -1220,7 +1158,6 @@ INSERT INTO tblARPostInvoiceDetail
     ,[dblFreightCharge]
     ,[dblSurcharge]
     ,dblTotalTax
-    ,dblBaseTotalTax
 )
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
@@ -1330,9 +1267,7 @@ SELECT
     ,[dblDiscountAmount]				= ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblPrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblBaseDiscountAmount]            = ISNULL([dbo].fnRoundBanker(((ARID.[dblDiscount]/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.[dblQtyShipped] * ARID.[dblBasePrice]), @Precision)), @Precision), @ZeroDecimal)
     ,[dblTotal]                         = ARID.[dblTotal]
-    ,[dblBaseTotal]                     = ARID.[dblBaseTotal]
     ,[dblLineItemGLAmount]              = ISNULL(ARID.dblTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblPrice), @Precision)), @Precision)
-    ,[dblBaseLineItemGLAmount]          = dbo.fnRoundBanker(ISNULL(ARID.dblTotal * ARID.[dblCurrencyExchangeRate], @ZeroDecimal) + [dbo].fnRoundBanker(((ARID.dblDiscount/@OneHundredDecimal) * [dbo].fnRoundBanker((ARID.dblQtyShipped * ARID.dblBasePrice), @Precision)), @Precision), @Precision)
     ,[intCurrencyExchangeRateTypeId]    = ARID.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
@@ -1342,9 +1277,7 @@ SELECT
     ,[strFrequency]                     = ARID.[strFrequency]
     ,[dtmMaintenanceDate]               = ARID.[dtmMaintenanceDate]
     ,[dblLicenseAmount]                 = ARID.[dblLicenseAmount]
-    ,[dblBaseLicenseAmount]             = ARID.[dblBaseLicenseAmount]
     ,[dblMaintenanceAmount]             = ARID.[dblMaintenanceAmount]
-    ,[dblBaseMaintenanceAmount]         = ARID.[dblBaseMaintenanceAmount]
     ,[ysnLeaseBilling]                  = ARID.[ysnLeaseBilling]
     ,[intSiteId]                        = ARID.[intSiteId]
     ,[intPerformerId]                   = ARID.[intPerformerId]
@@ -1370,7 +1303,6 @@ SELECT
     ,[dblFreightCharge]                 = ISNULL(ARI.[dblFreightCharge], 0)
     ,[dblSurcharge]                     = ISNULL(ARI.[dblSurcharge], 0)
     ,dblTotalTax                        = ARID.dblTotalTax
-    ,dblBaseTotalTax                    = dbo.fnRoundBanker(ISNULL(ARID.dblTotalTax * ARID.dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
 FROM tblARPostInvoiceHeader ARI WITH (NOLOCK)
 INNER JOIN tblARInvoiceDetail ARID WITH (NOLOCK) ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
@@ -1410,6 +1342,18 @@ INNER JOIN tblTRLoadReceipt LR WITH (NOLOCK) ON DH.intLoadHeaderId = LR.intLoadH
 INNER JOIN tblTRSupplyPoint SP WITH (NOLOCK) ON LR.intSupplyPointId = SP.intSupplyPointId
 WHERE ID.strSessionId = @strSessionId
   AND DH.strDestination = 'Customer'
+
+UPDATE ID
+SET
+     dblBaseTotal               = dbo.fnRoundBanker(ISNULL(dblTotal * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+    ,dblBaseLineItemGLAmount    = dbo.fnRoundBanker(ISNULL(dblLineItemGLAmount * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+    ,dblBaseLicenseAmount       = dbo.fnRoundBanker(ISNULL(dblLicenseAmount * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+    ,dblBaseLicenseGLAmount     = dbo.fnRoundBanker(ISNULL(dblLicenseGLAmount * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+    ,dblBaseMaintenanceAmount   = dbo.fnRoundBanker(ISNULL(dblMaintenanceAmount * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+    ,dblBaseMaintenanceGLAmount = dbo.fnRoundBanker(ISNULL(dblMaintenanceGLAmount * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+    ,dblBaseTotalTax            = dbo.fnRoundBanker(ISNULL(dblTotalTax * dblCurrencyExchangeRate, @ZeroDecimal), @Precision)
+FROM tblARPostInvoiceDetail ID
+WHERE ID.strSessionId = @strSessionId
 
 UPDATE ARPIH
 SET dblBaseInvoiceTotal = dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 100 
