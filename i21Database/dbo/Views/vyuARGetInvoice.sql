@@ -129,7 +129,7 @@ SELECT
 	,strLocationName					= CLOC.strLocationName
 	,strSalespersonName					= SPER.strName
 	,strContactName						= INVCON.strName
-	,strApplicatorName					= APER.strName
+	,strApplicatorName					= APER.strEntityNo
 	,strApplicatorType					= APER.strType
 	,strShipVia							= SHIPVIA.strShipVia
 	,strAccountId						= ACCT.strAccountId
@@ -280,6 +280,7 @@ OUTER APPLY (
 	SELECT TOP 1 A.intEntityId
 			   , A.strName
 			   , B.strType
+			   , A.strEntityNo
 	FROM tblEMEntity A WITH (NOLOCK)
 	INNER JOIN tblEMEntityType B WITH (NOLOCK) ON B.intEntityId = A.intEntityId
 	WHERE INV.intEntityApplicatorId = A.intEntityId
