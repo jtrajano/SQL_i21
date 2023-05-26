@@ -131,6 +131,7 @@ BEGIN TRY
 		WHERE intContractHeaderId =  @intContractHeaderId
 
 		IF NOT EXISTS(SELECT *FROM dbo.tblCTBookVsEntity WHERE intEntityId =@intEntityId)
+		AND EXISTS(SELECT *FROM tblIPMultiCompany WHERE ysnCurrentCompany =1 and ysnParent =0 )
 		BEGIN
 			UPDATE dbo.tblLGIntrCompLogisticsPreStg
 			SET strFeedStatus = 'IGNORE'
