@@ -155,7 +155,8 @@
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
-	,@OpportunityId							INT 			= 0
+	,@OpportunityId							INT 			= NULL
+	,@intEntityApplicatorId					INT 			= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -472,6 +473,7 @@ BEGIN TRY
 		,[intLineOfBusinessId]
 		,[intICTId]
 		,[intSalesOrderId]
+		,[intEntityApplicatorId]
 	)
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
@@ -558,6 +560,7 @@ BEGIN TRY
 		,[intLineOfBusinessId]				= @intLineOfBusinessId
 		,[intICTId]							= @intICTId
 		,[intSalespersonId]					= @intSalesOrderId
+		,[intEntityApplicatorId]			= @intEntityApplicatorId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
