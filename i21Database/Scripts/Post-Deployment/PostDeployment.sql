@@ -781,6 +781,7 @@ print 'Test'
 
 -- MBIL - Mobile Billing
 :r .\MBIL\InsertLongTruckScreen.sql
+:r .\MBIL\InsertDefaultMobileCompanyPref.sql
 
 -- Clean up i21 database objects
 :r .\SM\01_CleanupObjects.sql
