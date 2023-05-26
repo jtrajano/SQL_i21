@@ -2895,7 +2895,27 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 		END
 
-		SET @strCustomerGroup = CAST(@customer_group AS NVARCHAR(MAX))
+		IF(@customer_group IS NOT NULL AND @customer_group <> '''')
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomerGroup WHERE strGroupName = @customer_group) AND @customer_group <> ''''
+			BEGIN
+			    SET @IsValid = 0
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Customer Group Name: '' + @customer_group + '' does not Exist''
+			END
+			ELSE IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomerGroup CG 
+							   INNER JOIN tblARCustomerGroupDetail CGD ON CG.intCustomerGroupId = CGD.intCustomerGroupId 
+							   INNER JOIN tblARCustomer C ON CGD.intEntityId = C.intEntityId 
+							   WHERE CG.strGroupName = @customer_group 
+								  AND C.strCustomerNumber = @customer_id)
+			BEGIN
+				SET @IsValid = 0
+			    SET @ValidationMessage = @ValidationMessage + '' '' + ''Customer: '' + @customer_id + '' does not Exist in Customer Group: '' + @customer_group
+			END
+			ELSE
+			BEGIN
+				SET @strCustomerGroup = CAST(@customer_group AS NVARCHAR(MAX))
+			END
+		END
 
 		IF(@deviation = '''')
 		BEGIN
