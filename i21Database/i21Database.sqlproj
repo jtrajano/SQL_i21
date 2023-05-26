@@ -11707,6 +11707,7 @@
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
+    <None Include="Scripts\Post-Deployment\MBIL\InsertDefaultMobileCompanyPref.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
