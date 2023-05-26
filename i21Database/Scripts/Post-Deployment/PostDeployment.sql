@@ -762,6 +762,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MBIL - Mobile Billing
 :r .\MBIL\InsertLongTruckScreen.sql
+:r .\MBIL\InsertDefaultCompanyPrefData.sql
 
 -- Clean up i21 database objects
 :r .\SM\01_CleanupObjects.sql
