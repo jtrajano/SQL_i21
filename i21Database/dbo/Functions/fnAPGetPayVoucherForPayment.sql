@@ -136,7 +136,7 @@ RETURNS TABLE AS RETURN
 	AND 1 = (CASE WHEN @paymentId = 0
 					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
 					ELSE 1 END)
-	AND 1 = (CASE WHEN @payFromBankAccountId > 0 THEN--AND voucher.intPayFromBankAccountId > 0
+	AND 1 = (CASE WHEN @payFromBankAccountId > 0 AND voucher.intPayFromBankAccountId > 0 THEN
 						CASE WHEN CP.ysnRetrieveBillByLocationVendorCurrency = 1 THEN
 							(CASE WHEN @payFromBankAccountId = ISNULL(voucher.intPayFromBankAccountId,0) OR voucher.intTransactionType IN (2, 3) THEN 1 ELSE 0 END)
 						ELSE
