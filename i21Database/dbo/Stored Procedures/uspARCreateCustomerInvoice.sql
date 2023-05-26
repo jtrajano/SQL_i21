@@ -172,6 +172,7 @@
 	,@PayToCashBankAccountId				INT				= NULL
 	,@PaymentInstructions					NVARCHAR(MAX)	= NULL
 	,@ItemDispatchId						INT				= NULL
+	,@intEntityApplicatorId					INT 			= NULL
 AS
 
 BEGIN
@@ -566,6 +567,7 @@ BEGIN TRY
 		,[strPaymentInstructions]
 		,[intPayToCashBankAccountId]
 		,strPrintFormat
+		,[intEntityApplicatorId]
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -682,6 +684,7 @@ BEGIN TRY
 		,[strPaymentInstructions]			= ISNULL(@PaymentInstructions, CMBA.strPaymentInstructions)
 		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
 		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
+		,[intEntityApplicatorId]			= @intEntityApplicatorId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
