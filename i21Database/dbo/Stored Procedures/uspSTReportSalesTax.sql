@@ -355,10 +355,10 @@ BEGIN
 					, '' AS strStoreName
 					, T5.intCategoryId
 					, T5.strDescription
-					, ISNULL( SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, SUM(T1.intItemsSold) AS intItemsSold
+					, ISNULL( AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
+					, AVG(T1.intItemsSold) AS intItemsSold
 					, T4.ysnUseTaxFlag2
-					, ISNULL(SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
+					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
 				FROM tblSTCheckoutHeader T0
 				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
@@ -382,10 +382,10 @@ BEGIN
 					, T2.strDescription AS strStoreName
 					, T5.intCategoryId
 					, T5.strDescription
-					, ISNULL (SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, SUM(T1.intItemsSold) AS intItemsSold
+					, ISNULL (AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
+					, AVG(T1.intItemsSold) AS intItemsSold
 					, T4.ysnUseTaxFlag2
-					, ISNULL(SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
+					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
 				FROM tblSTCheckoutHeader T0
 				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
@@ -416,10 +416,10 @@ BEGIN
 					, '' AS strStoreName
 					, T5.intCategoryId
 					, T5.strDescription
-					, ISNULL(SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, SUM(T1.intItemsSold) AS intItemsSold
+					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
+					, AVG(T1.intItemsSold) AS intItemsSold
 					, T4.ysnUseTaxFlag2
-					, ISNULL(SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
+					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
 				FROM tblSTCheckoutHeader T0
 				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
@@ -444,10 +444,10 @@ BEGIN
 					, T2.strDescription AS strStoreName
 					, T5.intCategoryId
 					, T5.strDescription
-					, ISNULL(SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
-					, SUM(T1.intItemsSold) AS intItemsSold
+					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotalSalesAmountRaw
+					, AVG(T1.intItemsSold) AS intItemsSold
 					, T4.ysnUseTaxFlag2
-					, ISNULL(SUM(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
+					, ISNULL(AVG(T1.dblTotalSalesAmountRaw), 0) AS dblTotal
 				FROM tblSTCheckoutHeader T0
 				INNER JOIN tblSTCheckoutDepartmetTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
 				INNER JOIN tblSTStore T2 ON T0.intStoreId = T2.intStoreId
