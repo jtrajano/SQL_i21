@@ -379,19 +379,6 @@ BEGIN TRY
 										END
 			,[intUserId] 				= @intUserId
 		FROM @StorageTicketInfoByFIFO
-		CROSS APPLY (
-			SELECT ShipmentItem.intSourceId
-				,Shipment.dtmShipDate
-			FROM tblICInventoryShipment Shipment
-			JOIN tblICInventoryShipmentItem ShipmentItem
-				ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
-			JOIN tblGRStorageType ST
-				ON ST.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId
-			WHERE Shipment.intInventoryShipmentId = @IntSourceKey
-				AND @strSourceType = 'InventoryShipment'
-			--AND [strType]='Reduced By Inventory Shipment'
-			--AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL
-		) A
 		WHERE strItemType = 'Inventory'
 
 		IF @strSourceType = 'Invoice'
@@ -405,23 +392,14 @@ BEGIN TRY
 
 		IF @strSourceType = 'InventoryShipment'
 		BEGIN
-		      IF EXISTS( SELECT 1
-						FROM tblICInventoryShipment Shipment
-						JOIN tblICInventoryShipmentItem ShipmentItem
-							ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
-						JOIN tblGRStorageType ST
-							ON ST.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId
-						WHERE Shipment.intInventoryShipmentId = @IntSourceKey
-				)
-			 BEGIN
-				 UPDATE SH 
-				 SET intTicketId			  = A.intSourceId
-					,dtmHistoryDate			= A.dtmShipDate
-				--,SH.intTransactionTypeId  = 1
-				FROM @StorageHistoryStagingTable SH
-				CROSS APPLY (
-					SELECT ShipmentItem.intSourceId
-					,Shipment.dtmShipDate
+			UPDATE SH 
+				SET intTicketId			  = A.intSourceId
+				,dtmHistoryDate			= A.dtmShipDate
+			--,SH.intTransactionTypeId  = 1
+			FROM @StorageHistoryStagingTable SH
+			CROSS APPLY (
+				SELECT ShipmentItem.intSourceId
+				,Shipment.dtmShipDate
 				FROM tblICInventoryShipment Shipment
 				JOIN tblICInventoryShipmentItem ShipmentItem
 					ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
@@ -429,10 +407,8 @@ BEGIN TRY
 					ON ST.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId
 				WHERE Shipment.intInventoryShipmentId = @IntSourceKey
 					AND @strSourceType = 'InventoryShipment'
-				) A
-				WHERE SH.intInventoryShipmentId=@IntSourceKey 
-				AND [strType]='Reduced By Inventory Shipment'
-			 END
+			) A
+			WHERE SH.intInventoryShipmentId=@IntSourceKey
 		END
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
