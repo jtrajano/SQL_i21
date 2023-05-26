@@ -1302,7 +1302,6 @@
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
     <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
-    <Build Include="Scripts\Post-Deployment\MBIL\InsertDefaultCompanyPrefData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
