@@ -806,6 +806,14 @@ BEGIN TRY
 			,dtmShippingDate
 			,intCountryId
 			,intSupplierId
+
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -939,6 +947,14 @@ BEGIN TRY
 			,dtmShippingDate=@dtmShippingDate
 			,intCountryId=ORIGIN.intCountryID 
 			,intSupplierId=S.intEntityId
+
+			,dblOriginalTeaTaste = BT.dblTeaTaste
+			,dblOriginalTeaHue = BT.dblTeaHue
+			,dblOriginalTeaIntensity = BT.dblTeaIntensity
+			,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
+			,dblOriginalTeaAppearance = BT.dblTeaAppearance
+			,dblOriginalTeaVolume = BT.dblTeaVolume
+			,dblOriginalTeaMoisture = BT.dblTeaMoisture
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -951,6 +967,7 @@ BEGIN TRY
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
+		LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intLocationId = S.intCompanyLocationId AND BT.intLocationId = BT.intBuyingCenterLocationId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
