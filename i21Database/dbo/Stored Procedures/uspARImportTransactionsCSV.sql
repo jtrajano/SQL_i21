@@ -392,6 +392,28 @@ BEGIN
 	  AND ISNULL(ICIL.intItemLocationId, 0) <> 0 
 	  AND ISNULL(ICIL.intCostingMethod,0) = 0
 	  AND ISNULL(ysnSuccess, 1) = 1
+
+	--VALIDATE FISCAL YEAR FOR AR
+    UPDATE ILD
+    SET [ysnImported]        = 0
+      , [ysnSuccess]        = 0
+      , [strEventResult]    = 'Unable to find an open fiscal year period for Accounts Receivable module to match the transaction date.'
+    FROM tblARImportLogDetail ILD
+    LEFT JOIN tblGLFiscalYearPeriod FYP ON ILD.dtmPostDate BETWEEN FYP.dtmStartDate AND FYP.dtmEndDate
+    WHERE ILD.intImportLogId = @ImportLogId
+      AND ISNULL(ysnSuccess, 1) = 1
+      AND (FYP.intFiscalYearId IS NULL OR (FYP.intFiscalYearId IS NOT NULL AND FYP.ysnAROpen = 0))
+
+    --VALIDATE FISCAL YEAR FOR IC
+    UPDATE ILD
+    SET [ysnImported]        = 0
+      , [ysnSuccess]        = 0
+      , [strEventResult]    = 'Unable to find an open fiscal year period for Inventory module to match the transaction date.'
+    FROM tblARImportLogDetail ILD
+    LEFT JOIN tblGLFiscalYearPeriod FYP ON ILD.dtmPostDate BETWEEN FYP.dtmStartDate AND FYP.dtmEndDate
+    WHERE ILD.intImportLogId = @ImportLogId
+      AND ISNULL(ysnSuccess, 1) = 1
+      AND (FYP.intFiscalYearId IS NULL OR (FYP.intFiscalYearId IS NOT NULL AND FYP.ysnINVOpen = 0))
 END
 	
 --CONTRACT NUMBER DOES NOT EXISTS
