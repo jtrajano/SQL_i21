@@ -170,13 +170,16 @@ BEGIN
 		DECLARE @dblDPReversedSettlementsWithNoPayment DECIMAL(18,6)
 		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
 		DECLARE @dblDPSettlementsWithDeletedPayment DECIMAL(18,6)
+		DECLARE @dblSettlementsWithDeletedPayment DECIMAL(18,6)
 		SELECT @dblDPReversedSettlementsWithNoPayment = SUM(dblUnpaid)
 			,@dblDPReversedSettlementsWithPayment = SUM(dblPaid)
 			,@dblDPSettlementsWithDeletedPayment = SUM(dblPaid2)
+			,@dblSettlementsWithDeletedPayment = SUM(dblPaid3) --must be added only on the unpaid decrease if reversal was done on the same day that the settlement was processed
 		FROM (
 			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid3 = CASE WHEN AP.intBillId IS NOT NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) = dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 			FROM tblGRStorageHistory SH
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -193,48 +196,51 @@ BEGIN
 			LEFT JOIN tblAPBill AP
 				ON (AP.strVendorOrderNumber = SH.strSettleTicket OR AP.strVendorOrderNumber = CS.strStorageTicketNumber)
 					AND AP.intTransactionType = 2 --VPRE
+			LEFT JOIN tblGRStorageHistory SH_2
+				ON SH_2.strSettleTicket = SH.strSettleTicket
+					AND SH_2.strType = 'Settlement'
 			WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
 				AND CS.intCommodityId = @intCommodityId
 				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
-			GROUP BY AP.intBillId, SH.strType
+			GROUP BY AP.intBillId, SH.strType, SH_2.dtmHistoryDate,SH.dtmHistoryDate
 		) A
 
-		--settlements from yesterday that were reversed the next day
-		DECLARE @dblSettlementsFromYesterday DECIMAL(18,6)
-		DECLARE @dblSettlementsFromYesterday2 DECIMAL(18,6) --get the reversed settlements from the next day when the report is printed prior to the current date
-		--SELECT @dblSettlementsFromYesterday = SUM(dblUnpaid)
-		--FROM (
-			SELECT @dblSettlementsFromYesterday = SUM(A.dblSettlementsFromYesterday)
-				,@dblSettlementsFromYesterday2 = SUM(A.dblSettlementsFromYesterday2)
-			FROM (
-				SELECT dblSettlementsFromYesterday = CASE WHEN dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-					,dblSettlementsFromYesterday2 = CASE WHEN dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) > @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
-				FROM tblGRStorageHistory SH
-				INNER JOIN tblGRCustomerStorage CS
-					ON CS.intCustomerStorageId = SH.intCustomerStorageId
-				INNER JOIN tblGRStorageType ST
-					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				INNER JOIN tblICCommodity IC
-					ON IC.intCommodityId = CS.intCommodityId
-				INNER JOIN tblSMCompanyLocation CL
-					ON CL.intCompanyLocationId = CS.intCompanyLocationId
-				INNER JOIN tblICItemUOM UOM
-					ON UOM.intItemUOMId = CS.intItemUOMId
-				INNER JOIN tblICUnitMeasure UM
-					ON UM.intUnitMeasureId = UOM.intUnitMeasureId
-				INNER JOIN (
-					SELECT dtmHistoryDate = dbo.fnRemoveTimeOnDate(dtmHistoryDate) 
-						,strSettleTicket
-					FROM tblGRStorageHistory 
-					WHERE strType = 'Settlement'
-				) STRS
-					ON STRS.strSettleTicket = SH.strSettleTicket
-				WHERE (SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL)
-					AND CS.intCommodityId = @intCommodityId
-					AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) > STRS.dtmHistoryDate
-					--AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
-				GROUP BY SH.dtmHistoryDate
-			) A
+		
+		--DECLARE @dblSettlementsFromYesterday DECIMAL(18,6) --settlements from yesterday that were reversed the next day
+		--DECLARE @dblSettlementsFromYesterday2 DECIMAL(18,6) --get the reversed settlements from the next day when the report is printed prior to the current date
+		----SELECT @dblSettlementsFromYesterday = SUM(dblUnpaid)
+		----FROM (
+		--	SELECT @dblSettlementsFromYesterday = SUM(A.dblSettlementsFromYesterday)
+		--		,@dblSettlementsFromYesterday2 = SUM(A.dblSettlementsFromYesterday2)
+		--	FROM (
+		--		SELECT dblSettlementsFromYesterday = CASE WHEN dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+		--			,dblSettlementsFromYesterday2 = CASE WHEN dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) > @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+		--		FROM tblGRStorageHistory SH
+		--		INNER JOIN tblGRCustomerStorage CS
+		--			ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		--		INNER JOIN tblGRStorageType ST
+		--			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+		--		INNER JOIN tblICCommodity IC
+		--			ON IC.intCommodityId = CS.intCommodityId
+		--		INNER JOIN tblSMCompanyLocation CL
+		--			ON CL.intCompanyLocationId = CS.intCompanyLocationId
+		--		INNER JOIN tblICItemUOM UOM
+		--			ON UOM.intItemUOMId = CS.intItemUOMId
+		--		INNER JOIN tblICUnitMeasure UM
+		--			ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+		--		INNER JOIN (
+		--			SELECT dtmHistoryDate = dbo.fnRemoveTimeOnDate(dtmHistoryDate) 
+		--				,strSettleTicket
+		--			FROM tblGRStorageHistory 
+		--			WHERE strType = 'Settlement'
+		--		) STRS
+		--			ON STRS.strSettleTicket = SH.strSettleTicket
+		--		WHERE (SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL)
+		--			AND CS.intCommodityId = @intCommodityId
+		--			AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) > STRS.dtmHistoryDate
+		--			--AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+		--		GROUP BY SH.dtmHistoryDate
+		--	) A
 
 		/****BEGINNING****/
 		INSERT INTO @CompanyOwnedData
@@ -333,8 +339,10 @@ BEGIN
 			,UM_REF.intCommodityUnitMeasureId
 		) A
 
+		--SELECT ISNULL(@dblVoidedPayment,0),ISNULL(@dblSettlementsFromYesterday2,0),ISNULL(@dblDPSettlementsWithDeletedPayment,0),ISNULL(@dblDPReversedSettlementsWithPayment,0),ISNULL(@dblDPReversedSettlementsWithNoPayment,0),ISNULL(@dblSettlementsWithDeletedPayment,0)
+
 		UPDATE C
-		SET dblTotalDecrease = ISNULL(A.dblQty,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblSettlementsFromYesterday2,0)
+		SET dblTotalDecrease = ISNULL(A.dblQty,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + ISNULL(@dblSettlementsWithDeletedPayment,0)
 		FROM @CompanyOwnedData C
 		LEFT JOIN (
 			SELECT AA.intCommodityId
@@ -589,6 +597,22 @@ BEGIN
 		GROUP BY intCommodityId
 			,strUOM
 
+		--SET @dblSODecrease = NULL
+		--SELECT @dblSODecrease = SUM(dblDecrease)
+		--FROM tblGRGIICustomerStorage CS
+		--INNER JOIN tblGRStorageType ST
+		--	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+		--		AND ST.ysnReceiptedStorage = 0
+		--		AND ST.ysnCustomerStorage = 0
+		--		AND ST.ysnDPOwnedType = 0
+		--		AND ST.ysnGrainBankType = 0
+		--		AND ST.strOwnedPhysicalStock = 'Customer'
+		--WHERE intCommodityId = @intCommodityId 
+		--	AND strUOM = @strUOM 
+		--	AND dtmReportDate = @dtmReportDate
+		--GROUP BY intCommodityId
+		--	,strUOM
+
 		SET @dblSODecrease = NULL
 		SELECT @dblSODecrease = SUM(dblDecrease) - (ISNULL(@dblIACustomerOwned,0) * -1)
 		FROM tblGRGIICustomerStorage CS
@@ -625,20 +649,18 @@ BEGIN
 
 		SET @dblInternalTransfersDiff = @dblInternalTransfersReceived - @dblInternalTransfersShipped
 
-		--GET RECEIVED THAT ARE COMPANY OWNED AND HAVE VOUCHERS ALREADY
-		DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
-		SET @dblReceivedCompanyOwned = NULL
-		SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal))
-		FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
-		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
-		LEFT JOIN tblCTContractDetail CD
-			ON CD.intContractDetailId = CompOwn.intContractDetailId
-		INNER JOIN tblAPBillDetail APD
-			ON APD.intInventoryReceiptItemId = CompOwn.intTransactionRecordId
-		WHERE intCommodityId = @intCommodityId
-			AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
-			AND CompOwn.strTransactionType = 'Inventory Receipt'
-			AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
+		--GET RECEIVED THAT ARE COMPANY OWNED
+		--DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
+		--SET @dblReceivedCompanyOwned = NULL
+		--SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
+		--FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
+		--INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
+		--LEFT JOIN tblCTContractDetail CD
+		--	ON CD.intContractDetailId = CompOwn.intContractDetailId
+		--WHERE intCommodityId = @intCommodityId
+		--	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
+		--	AND CompOwn.strTransactionType = 'Inventory Receipt'
+		--	AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
 
 		--GET TRANSFERS FROM LICENSED TO NON-LICENSED LOCATIONS FOR THE DAY
 		DECLARE @dblTransfers DECIMAL(18,6)
@@ -673,7 +695,7 @@ BEGIN
 								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN 0 ELSE ISNULL(@dblIACompanyOwned,0) END + 
 								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN 0 ELSE ISNULL(@dblInternalTransfersDiff,0) END --+ 
 								--ISNULL(@dblReceivedCompanyOwned,0)
-								--ISNULL(@dblDPReversedSettlementsWithPayment,0) + 
+								--ISNULL(@dblDPReversedSettlementsWithPayment,0) --+ 
 								--ISNULL(@dblDPSettlementsWithDeletedPayment,0)
 			,dblTotalDecrease = ABS(
 								(ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) +
@@ -720,8 +742,8 @@ BEGIN
 	/******INCREASE*******/
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
-	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + ISNULL(@dblReceivedCompanyOwned,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
-		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)
+	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
+		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
 		SELECT total = SUM(A.dblTotalDecrease)
