@@ -510,9 +510,9 @@ BEGIN
                                 , 'Total'
                                 , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                                 , @intEntityId
-                                , @dblTotalDebit- @dblTotalCredit + @beginBalance
-                                , @dblTotalDebit + CASE WHEN @beginBalance > 0 THEN @beginBalance ELSE 0 END
-                                , @dblTotalCredit - CASE WHEN @beginBalance < 0 THEN  @beginBalance ELSE 0 END
+                                , ISNULL(@dblTotalDebit,0)- ISNULL(@dblTotalCredit,0) + @beginBalance
+                                , ISNULL(@dblTotalDebit,0) + CASE WHEN @beginBalance > 0 THEN @beginBalance ELSE 0 END
+                                , ISNULL(@dblTotalCredit,0) - CASE WHEN @beginBalance < 0 THEN  @beginBalance ELSE 0 END
                                 , @dblTotalDebitUnit
                                 , @dblTotalCreditUnit
                                 , @dblTotalSourceUnitDebit
