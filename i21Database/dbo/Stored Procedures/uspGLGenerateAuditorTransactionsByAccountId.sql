@@ -26,15 +26,7 @@ BEGIN
     SET @dtmDateTo = DATEADD(SECOND,59, DATEADD(MINUTE, 59, DATEADD(HOUR, 23, DATEADD(dd, 0, DATEDIFF(dd, 0, @dtmDateTo)))))
 
     BEGIN TRANSACTION;
-
-
-
-
     BEGIN TRY
-
-
-
-
         IF OBJECT_ID('tempdb..##AuditorTransactions') IS NOT NULL
             DROP TABLE ##AuditorTransactions
         DECLARE @strSQL NVARCHAR(MAX) =
@@ -101,58 +93,52 @@ BEGIN
 			)U
             WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo'
             
+         DECLARE @strWhere NVARCHAR(MAX) = ''
         IF ( ISNULL(@intLocationSegmentId,0) <> 0)
-            SET @strSQL = @strSQL + '  AND B.intLocationSegmentId =  ' +  CAST( @intLocationSegmentId AS NVARCHAR(5))
+            SET @strWhere = @strWhere + '  AND B.intLocationSegmentId =  ' +  CAST( @intLocationSegmentId AS NVARCHAR(5))
         
         IF ( ISNULL(@intLOBSegmentId,0) <> 0)
-            SET @strSQL = @strSQL + '  AND B.intLOBSegmentId =  ' +  CAST( @intLOBSegmentId AS NVARCHAR(5))
-        
+            SET @strWhere = @strWhere + '  AND B.intLOBSegmentId =  ' +  CAST( @intLOBSegmentId AS NVARCHAR(5)) 
+    
          IF ( ISNULL(@intCurrencyId,0) <> 0)
-            SET @strSQL = @strSQL + '  AND A.intCurrencyId =  ' +  CAST( @intCurrencyId AS NVARCHAR(5))
+            SET @strWhere = @strWhere + '  AND A.intCurrencyId =  ' +  CAST( @intCurrencyId AS NVARCHAR(5))
        
+        DECLARE @strWhere1 NVARCHAR(MAX)
 
         IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) <> 0)
         BEGIN
             IF @intAccountIdFrom > @intAccountIdTo
-                SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdTo AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdFrom AS NVARCHAR(5))
+                SET @strWhere =  @strWhere + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdTo AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdFrom AS NVARCHAR(5))
             ELSE
-                SET @strSQL = @strSQL + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdTo AS NVARCHAR(5))
+                SET @strWhere =  @strWhere + '  AND B.intOrderId BETWEEN  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intAccountIdTo AS NVARCHAR(5))
         END
         
         IF (ISNULL(@intAccountIdFrom, 0) <> 0 AND ISNULL(@intAccountIdTo, 0) = 0)
-            SET @strSQL = @strSQL + '  AND B.intOrderId =  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5))
+        BEGIN
+            SET @strWhere =  @strWhere + '  AND B.intOrderId =  ' +  CAST( @intAccountIdFrom AS NVARCHAR(5))    
+        END
 
         
         IF (ISNULL(@intPrimaryFrom, 0) <> 0 AND ISNULL(@intPrimaryTo, 0) <> 0)
         BEGIN
             IF @intPrimaryFrom > @intPrimaryTo
-                SET @strSQL = @strSQL + '  AND B.intPrimaryOrderId BETWEEN  ' +  CAST( @intPrimaryTo AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryFrom AS NVARCHAR(5))
+ 
+                SET @strWhere =  @strWhere + '  AND B.intPrimaryOrderId BETWEEN  ' +  CAST( @intPrimaryTo AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryFrom AS NVARCHAR(5))
             ELSE
-                SET @strSQL = @strSQL + '  AND B.intPrimaryOrderId BETWEEN  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryTo AS NVARCHAR(5))
+                SET @strWhere =  @strWhere + '  AND B.intPrimaryOrderId BETWEEN  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5)) + ' AND ' + CAST( @intPrimaryTo AS NVARCHAR(5))
         END
         IF (ISNULL(@intPrimaryFrom, 0) <> 0 AND ISNULL(@intPrimaryTo, 0) = 0)
-            SET @strSQL = @strSQL + '  AND B.intPrimaryOrderId =  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5))
+            SET @strWhere =  @strWhere +  '  AND B.intPrimaryOrderId =  ' +  CAST( @intPrimaryFrom AS NVARCHAR(5))
 
-
-
-        SET @strSQL = @strSQL + ') SELECT * INTO ##AuditorTransactions FROM T ORDER BY T.intOrderId, T.intCurrencyId, T.dtmDate, T.intGLDetailId'
+        SET @strSQL = @strSQL + @strWhere + ') SELECT * INTO ##AuditorTransactions FROM T ORDER BY T.intOrderId, T.intCurrencyId, T.dtmDate, T.intGLDetailId'
         DECLARE @params NVARCHAR(100) = '@dtmDateFrom DATETIME, @dtmDateTo DATETIME'
-        
+
         EXEC sp_executesql @strSQL, @params, @dtmDateFrom= @dtmDateFrom, @dtmDateTo=@dtmDateTo
-
-
         DECLARE @dtmNow DATETIME = GETDATE()
-       
-
-       
-
-
-        IF OBJECT_ID('tempdb..#TransactionGroup') IS NOT NULL
-            DROP TABLE #TransactionGroup
+        IF OBJECT_ID('tempdb..##TransactionGroup') IS NOT NULL
+            DROP TABLE ##TransactionGroup
          IF OBJECT_ID('tempdb..#TransactionGroupAll') IS NOT NULL
             DROP TABLE #TransactionGroupAll
-
-       
             SELECT
                 intAccountId, strAccountId,
                 strLOBSegmentId strLOBSegmentDescription, 
@@ -160,8 +146,8 @@ BEGIN
                 GL.strDescription strAccountDescription 
             INTO #TransactionGroupAll
             FROM vyuGLAccountDetail GL
-
-           -- ;WITH groups AS(
+            DECLARE @sqlGroups NVARCHAR(MAX) = 
+           ';WITH groups AS(
             SELECT 
                 intAccountId
                 , strAccountId
@@ -169,40 +155,38 @@ BEGIN
                 , intCurrencyId
                 , strLOBSegmentDescription
                 , strLocation
-                , strAccountDescription  
-            INTO #TransactionGroup  
+                , strAccountDescription
             FROM ##AuditorTransactions 
             GROUP BY intAccountId, strAccountId, intCurrencyId, strCurrency
             ,strLOBSegmentDescription,strLocation, strAccountDescription
-            --    UNION
+               UNION
             --GETS THE PREVIOUS YEAR
-            -- SELECT  A.intAccountId
-            --     , strAccountId
-            --     , strCurrency
-            --     , intCurrencyId
-            --     , strLOBSegmentId  strLOBSegmentDescription 
-            --     , strLocationSegmentId strLocation
-            --     , B.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
-            -- WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
-            -- DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo)
-            --     GROUP BY A.intAccountId, strAccountId, intCurrencyId, strCurrency
-            -- ,strLOBSegmentId,strLocationSegmentId, B.strDescription
-            -- )
-            -- SELECT
-            --   intAccountId
-            --     , strAccountId
-            --     , strCurrency
-            --     , intCurrencyId
-            --     , strLOBSegmentDescription
-            --     , strLocation
-            --     , strAccountDescription
-            --   INTO #TransactionGroup 
-            --   FROM groups
+            SELECT  A.intAccountId
+                , strAccountId
+                , SM.strCurrency
+                , A.intCurrencyId
+                , strLOBSegmentId  strLOBSegmentDescription 
+                , strLocationSegmentId strLocation
+                , B.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
+                JOIN tblSMCurrency SM on SM.intCurrencyID = A.intCurrencyId
+            WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
+            DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo) ' + @strWhere + '
+                GROUP BY A.intAccountId, strAccountId, A.intCurrencyId, SM.strCurrency
+            ,strLOBSegmentId,strLocationSegmentId, B.strDescription
+            )
+            SELECT
+              intAccountId
+                , strAccountId
+                , strCurrency
+                , intCurrencyId
+                , strLOBSegmentDescription
+                , strLocation
+                , strAccountDescription
+              INTO ##TransactionGroup 
+              FROM groups'
 
+            EXEC sp_executesql @sqlGroups, @params, @dtmDateFrom= @dtmDateFrom, @dtmDateTo=@dtmDateTo      
 
-
-
-            
             DECLARE @intAccountIdLoop INT = 0
             DECLARE @intCurrencyIdLoop INT = 0
             DECLARE @_intAccountId INT
@@ -245,12 +229,12 @@ BEGIN
 				-- 	@beginBalanceCredit=    ISNULL(beginBalanceCredit,0)
 				-- 	FROM dbo.fnGLGetBeginningBalanceAuditorReport(@strAccountId,@dtmDateFrom)
                         -- Total record
-				IF EXISTS(SELECT 1 FROM #TransactionGroup where @_intAccountId =intAccountId)
+				IF EXISTS(SELECT 1 FROM ##TransactionGroup where @_intAccountId =intAccountId)
 				BEGIN
-                    WHILE EXISTS ( SELECT 1 FROM #TransactionGroup WHERE @_intAccountId = intAccountId)
+                    WHILE EXISTS ( SELECT 1 FROM ##TransactionGroup WHERE @_intAccountId = intAccountId)
                     BEGIN
                         SELECT TOP 1 @_intCurrencyId = intCurrencyId
-                        FROM #TransactionGroup WHERE @_intAccountId = intAccountId
+                        FROM ##TransactionGroup WHERE @_intAccountId = intAccountId
                         ORDER BY intCurrencyId
                         
                         SELECT
@@ -270,7 +254,7 @@ BEGIN
                             ysnGroupFooter
                             ,ysnGroupHeader
                             , intType
-                    , intGeneratedBy      
+                            , intGeneratedBy      
                             , dtmDateGenerated
                             , strTotalTitle
                             , strGroupTitle
@@ -301,7 +285,7 @@ BEGIN
                                 , strLOBSegmentDescription
                                 , strAccountDescription
                                 , 1
-                                FROM #TransactionGroup 
+                                FROM ##TransactionGroup 
                                 WHERE intAccountId = @_intAccountId
                                 AND @_intCurrencyId = intCurrencyId
 
@@ -542,12 +526,12 @@ BEGIN
                                 , strLOBSegmentDescription
                                 , strAccountDescription
                                 , 1
-                                FROM #TransactionGroup 
+                                FROM ##TransactionGroup 
                                 WHERE intAccountId = @_intAccountId
                                 AND @_intCurrencyId = intCurrencyId
                             
                                 --SET @beginBalance = @beginBalance +  (@dblTotalDebit - @dblTotalCredit)
-                                DELETE #TransactionGroup WHERE @_intAccountId = intAccountId AND @_intCurrencyId = intCurrencyId
+                                DELETE ##TransactionGroup WHERE @_intAccountId = intAccountId AND @_intCurrencyId = intCurrencyId
                     END --  while exist in #TransactionGroup
 				END -- if exist in #TransactionGroup
 				DELETE FROM #TransactionGroupAll WHERE @_intAccountId = intAccountId
@@ -599,12 +583,6 @@ BEGIN
                 0 dblEndingBalance
             END
         END
-
-      
-        
-            
-
-            
     END TRY
     BEGIN CATCH
         SET @strError = ERROR_MESSAGE()
