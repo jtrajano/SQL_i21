@@ -8,7 +8,7 @@ BEGIN
 		,dblQuantity = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN NULL ELSE LDCL.dblQuantity END
 		,strUnitMeasure = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN NULL ELSE UOM.strUnitMeasure END
 		,strFreightTerm = FT.strFreightTerm
-		,dtmLastFreeDate = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN 'N/A' ELSE CONVERT(nvarchar(10), LW.dtmLastFreeDate) END
+		,dtmLastFreeDate = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN 'N/A' ELSE LW.dtmLastFreeDate END
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
