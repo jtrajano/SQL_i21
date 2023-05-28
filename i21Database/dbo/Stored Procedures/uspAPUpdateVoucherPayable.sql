@@ -20,6 +20,7 @@ DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayable';
 DECLARE @primaryKeys TABLE(intBillDetailId INT, intVoucherPayableId INT);
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @voucherPayableTax AS VoucherDetailTax;
+DECLARE @voucherPayableTaxNew AS VoucherDetailTax;
 DECLARE @post BIT = ~@decrease;
 DECLARE @transCount INT = @@TRANCOUNT;
 
@@ -246,6 +247,64 @@ SELECT
 FROM dbo.fnAPCreateVoucherPayableTaxFromDetail(@voucherDetailIds) A
 INNER JOIN @primaryKeys B ON A.intBillDetailId = B.intBillDetailId
 WHERE ysnStage = 1
+
+DECLARE @detailsCnt TABLE(intId INT)
+INSERT INTO @detailsCnt
+SELECT intId FROM @voucherDetailIds
+
+DECLARE @count INT = 0
+DECLARE @billDetailId INT;
+
+WHILE(EXISTS(SELECT TOP 1 1 FROM @detailsCnt))
+BEGIN
+	SELECT  TOP 1 @billDetailid = intId FROM @detailsCnt
+
+	INSERT INTO @voucherPayableTaxNew(
+		[intVoucherPayableId]       
+		,[intTaxGroupId]				
+		,[intTaxCodeId]				
+		,[intTaxClassId]				
+		,[strTaxableByOtherTaxes]	
+		,[strCalculationMethod]		
+		,[dblRate]					
+		,[intAccountId]				
+		,[dblTax]					
+		,[dblAdjustedTax]			
+		,[ysnTaxAdjusted]			
+		,[ysnSeparateOnBill]			
+		,[ysnCheckOffTax]			
+		,[ysnTaxExempt]              
+		,[ysnTaxOnly]
+	)
+	SELECT
+		A1.[intVoucherPayableId]       
+		,tax.[intTaxGroupId]				
+		,tax.[intTaxCodeId]				
+		,tax.[intTaxClassId]				
+		,tax.[strTaxableByOtherTaxes]	
+		,tax.[strCalculationMethod]		
+		,tax.[dblRate]					
+		,tax.[intTaxAccountId]				
+		,tax.[dblTax]					
+		,tax.[dblAdjustedTax]			
+		,tax.[ysnTaxAdjusted]			
+		,tax.[ysnSeparateOnBill]			
+		,tax.[ysnCheckoffTax]			
+		,tax.[ysnTaxExempt]              
+		,tax.[ysnTaxOnly]	
+	FROM tblAPBillDetail A2
+	INNER JOIN @primaryKeys A1 ON A1.intBillDetailId = A2.intBillDetailId
+	INNER JOIN tblAPBill A3 ON A2.intBillId = A3.intBillId
+	INNER JOIN (tblICInventoryReceiptItem A4 INNER JOIN tblICInventoryReceipt A5 ON A4.intInventoryReceiptId = A5.intInventoryReceiptId)
+		ON A4.intInventoryReceiptItemId = A2.intInventoryReceiptItemId
+	CROSS APPLY dbo.fnAPRecomputeTaxes(@voucherPayableTax, A4.dblUnitCost, (CASE WHEN A2.intWeightUOMId > 0 AND A2.dblNetWeight <> 0 THEN A2.dblNetWeight ELSE A2.dblQtyReceived END)) tax
+	WHERE A2.intBillDetailId = @billDetailId
+
+	DELETE A
+	FROM @detailsCnt A
+	WHERE A.intId = @billDetailId
+
+END
 
 --GENERATE TAXES for IR Other Charges using Prepaid Other Charges Screen
 --IR Other charges that are not added to Add Payables
