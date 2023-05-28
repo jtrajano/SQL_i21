@@ -257,7 +257,7 @@ DECLARE @billDetailId INT;
 
 WHILE(EXISTS(SELECT TOP 1 1 FROM @detailsCnt))
 BEGIN
-	SELECT  TOP 1 @billDetailid = intId FROM @detailsCnt
+	SELECT  TOP 1 @billDetailId = intId FROM @detailsCnt
 
 	INSERT INTO @voucherPayableTaxNew(
 		[intVoucherPayableId]       
