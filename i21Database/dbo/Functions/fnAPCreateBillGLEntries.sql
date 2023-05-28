@@ -1690,7 +1690,7 @@ BEGIN
 	LEFT JOIN (tblAPVendor D INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType F ON F.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+		  AND B.ysnOverrideTaxGroup = 1 AND (B.intTaxGroupId <> C.intSourceTaxGroupId OR B.intTaxGroupId IS NULL)
 
 	--TAX ADJUSTMENT FOR OVERRIDE TAX LOCATION DEBIT
 	UNION ALL 
@@ -1745,7 +1745,7 @@ BEGIN
 	LEFT JOIN tblICItemLocation H ON H.intItemId = B.intItemId AND H.intLocationId = B.intLocationId
 	LEFT JOIN tblICItemLocation I ON I.intItemId = B.intItemId AND I.intLocationId = A.intShipToId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-		  AND B.ysnOverrideTaxGroup = 1 AND B.intTaxGroupId <> C.intSourceTaxGroupId
+		  AND B.ysnOverrideTaxGroup = 1 AND (B.intTaxGroupId <> C.intSourceTaxGroupId OR B.intTaxGroupId IS NULL)
 
 	/*
 	===============================
