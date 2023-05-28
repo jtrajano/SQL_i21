@@ -261,7 +261,10 @@ BEGIN TRY
 						ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = COALESCE(LD.dblUnitPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+			,[dblCost] =	CASE WHEN CH.intPricingTypeId = 2 AND CT.intPricingTypeId = 1 -- Priced basis contract
+								THEN ISNULL(dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+								ELSE COALESCE(LD.dblUnitPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+							END
 			,[dblOptionalityPremium] = LD.dblOptionalityPremium
 			,[dblQualityPremium] = LD.dblQualityPremium
 			,[dblCostUnitQty] = CAST(ISNULL(AD.dblCostUnitQty,1) AS DECIMAL(38,20))
