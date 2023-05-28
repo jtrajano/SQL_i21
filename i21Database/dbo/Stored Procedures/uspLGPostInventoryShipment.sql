@@ -553,34 +553,42 @@ BEGIN
 			,intSourceEntityId
 			,dblForexCost
 			)
-		SELECT [intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[dtmDate]
-			,-[dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
-			,[strTransactionId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[intTransactionId]
-			,[strTransactionId]
-			,[intTransactionDetailId]
+		SELECT t.[intItemId]
+			,t.[intItemLocationId]
+			,ISNULL(t.[intItemUOMId], originalShipment.[intItemUOMId])
+			,t.[dtmDate]
+			,-t.[dblQty]
+			,t.[dblUOMQty]
+			,t.[dblCost]
+			,t.[dblValue]
+			,t.[dblSalesPrice]
+			,t.[intCurrencyId]
+			,t.[dblExchangeRate]
+			,t.[intTransactionId]
+			,t.[intTransactionDetailId]
+			,t.[strTransactionId]
+			,t.[intTransactionTypeId]
+			,t.[intLotId]
+			,t.[intTransactionId]
+			,t.[strTransactionId]
+			,t.[intTransactionDetailId]
 			,[intFobPointId] = @intFOBPointId
 			,[intInTransitSourceLocationId] = t.intItemLocationId
 			,[intForexRateTypeId] = t.intForexRateTypeId
 			,[dblForexRate] = t.dblForexRate
 			,t.intSourceEntityId
-			,t.dblForexCost
 		FROM tblICInventoryTransaction t
+		OUTER APPLY (
+			SELECT * 
+			FROM tblICInventoryTransaction ot
+			WHERE ot.strTransactionId = @strTransactionId
+				AND ot.ysnIsUnposted = 0
+				AND ot.strBatchId = @strBatchId
+				AND @intFOBPointId = 2
+				AND ot.intTransactionTypeId = 46
+				AND ot.dblQty < 0
+				) originalShipment
 		WHERE t.strTransactionId = @strTransactionId
-			AND t.intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
 			AND t.ysnIsUnposted = 0
 			AND t.strBatchId = @strBatchId
 			AND @intFOBPointId = 2
