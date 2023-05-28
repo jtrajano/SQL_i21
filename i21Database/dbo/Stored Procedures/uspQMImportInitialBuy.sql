@@ -865,7 +865,7 @@ BEGIN TRY
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = S.intItemId
+			,intOriginalItemId = BT.intTealingoItemId
 			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblSampleQty
