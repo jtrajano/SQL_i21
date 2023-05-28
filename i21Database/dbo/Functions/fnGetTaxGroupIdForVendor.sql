@@ -332,7 +332,7 @@ BEGIN
 	ON APV.intShipFromId = EMEL.intEntityLocationId
 	WHERE APV.intEntityId = @VendorId
 
-	IF ISNULL(@TaxGroupId,0) <> 0 AND ISNULL(@VendorLocationId, 0) = 0
+	IF ISNULL(@TaxGroupId,0) <> 0 AND ISNULL(@VendorLocationId, 0) = 0 AND LEN(@FOB) < 1
 		RETURN @TaxGroupId;
 
 	--Company Location
