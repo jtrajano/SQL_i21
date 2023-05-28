@@ -28,7 +28,10 @@ BEGIN
 			@strInstoreTo				NVARCHAR(MAX),
 			@strReleaseOrderText		NVARCHAR(MAX),
 			@strWarehouseEntityName		NVARCHAR(MAX),
-			@strShippingLineName		NVARCHAR(MAX)
+			@strShippingLineName		NVARCHAR(MAX),
+			@dateToday					DATETIME
+
+	SET @dateToday = dbo.fnRemoveTimeOnDate(GETDATE());
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -879,7 +882,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
 			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0),
 			strFinancingPledgingInstr = RR.strRemarks,
-			L.strFreightPayment
+			L.strFreightPayment,
+			dtmDateToday = @dateToday
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END

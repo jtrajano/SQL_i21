@@ -2,7 +2,8 @@
 
 CREATE PROCEDURE [dbo].[uspLGGetInboundShipmentContainerReportForInStore1]
 	@xmlParam NVARCHAR(MAX) = NULL,
-	@xmlParam2 INT = NULL
+	@xmlParam2 INT = NULL,
+	@xmlParam3 INT = NULL
 AS
 BEGIN
 	DECLARE @ysnLoadNumber BIT
@@ -69,4 +70,5 @@ BEGIN
 					(SELECT intContainerId FROM tblLGPickLotDetail PLD 
 					LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
 					WHERE PLH.intType = 2)))
+		AND ISNULL(@xmlParam3, 0) = LW.intLoadWarehouseId
 END
