@@ -210,7 +210,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						BOOK.intBookId IS NULL
-						--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
@@ -231,12 +231,14 @@ BEGIN TRY
 				END+ CASE 
 				WHEN (
 						FROM_LOC_CODE.intCityId IS NULL
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'FROM LOCATION CODE, '
 				ELSE ''
 				END +CASE 
 				WHEN (
 						RSL.intCompanyLocationSubLocationId IS NULL
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'RECEIVING STORAGE LOCATION, '
 				ELSE ''
@@ -348,6 +350,7 @@ BEGIN TRY
 			OR (
 				BOOK.intBookId IS NULL
 				--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+				AND ISNULL(IMP.ysnBought, 0) = 1
 				)
 			OR (
 				CURRENCY.intCurrencyID IS NULL
@@ -356,11 +359,17 @@ BEGIN TRY
 			OR (
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
+				AND ISNULL(IMP.ysnBought, 0) = 1
 				)
-				OR FROM_LOC_CODE.intCityId IS NULL
-				OR RSL.intCompanyLocationSubLocationId IS NULL
-				
-			)
+			OR (
+				FROM_LOC_CODE.intCityId IS NULL
+				AND ISNULL(IMP.ysnBought, 0) = 1
+				)
+			OR (
+				RSL.intCompanyLocationSubLocationId IS NULL
+				AND ISNULL(IMP.ysnBought, 0) = 1
+				)
+		)
 
 	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
@@ -1036,6 +1045,7 @@ BEGIN TRY
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			AND IsNULL(S.dblB1QtyBought, 0) > 0
+			AND IsNULL(S.ysnBought, 0) = 1
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
