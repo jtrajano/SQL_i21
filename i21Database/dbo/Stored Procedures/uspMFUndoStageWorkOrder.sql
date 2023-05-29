@@ -89,7 +89,7 @@ BEGIN TRY
 		 , @dtmProductionDate		= dtmProductionDate
 		 , @intDestinationLotId		= intDestinationLotId
 		 , @intMainItemId			= intMainItemId
-		 , @dblLotQuantity			= dblLotQuantity
+		 , @dblLotQuantity			= dbo.fnMFConvertQuantityToTargetItemUOM(intEnteredItemUOMId, intItemUOMId, dblLotQuantity)
 		 , @intEnteredUOMId			= intEnteredItemUOMId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
@@ -286,7 +286,7 @@ BEGIN TRY
 																	  -- Parameters for the new values: 
 																	  , @dblAdjustByQuantity		= @dblExcessStageQty
 																	  , @dblNewUnitCost				= NULL
-																	  , @intItemUOMId				= @intEnteredUOMId
+																	  , @intItemUOMId				= @intNewItemUOMId
 																	  -- Parameters used for linking or FK (foreign key) relationships
 																	  , @intSourceId				= @intWorkOrderId
 																	  , @intSourceTransactionTypeId = 8
