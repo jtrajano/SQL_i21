@@ -892,6 +892,8 @@
     <Build Include="dbo\Stored Procedures\uspLGCreateLoadForDivertContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspICDelinkInboundShipmentReceiptWithVoucher.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
+    <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
