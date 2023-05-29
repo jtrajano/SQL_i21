@@ -577,6 +577,7 @@ BEGIN
 			,[intForexRateTypeId] = t.intForexRateTypeId
 			,[dblForexRate] = t.dblForexRate
 			,t.intSourceEntityId
+			,t.[dblForexCost]
 		FROM tblICInventoryTransaction t
 		OUTER APPLY (
 			SELECT * 
