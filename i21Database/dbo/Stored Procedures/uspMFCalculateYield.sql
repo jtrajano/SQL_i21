@@ -722,7 +722,7 @@ BEGIN TRY
 												ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 												END
 											) - ISNULL((
-												SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+												SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 												FROM tblICStockReservation SR
 												JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 												WHERE SR.intLotId = L.intLotId
@@ -748,7 +748,7 @@ BEGIN TRY
 												ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 												END
 											) - ISNULL((
-												SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+												SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 												FROM tblICStockReservation SR
 												JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 												WHERE SR.intLotId = L.intLotId
@@ -791,7 +791,7 @@ BEGIN TRY
 													ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 													END
 												) - ISNULL((
-													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 													FROM tblICStockReservation SR
 													JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 													WHERE SR.intLotId = L.intLotId
@@ -817,7 +817,7 @@ BEGIN TRY
 													ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 													END
 												) - ISNULL((
-													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 													FROM tblICStockReservation SR
 													JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 													WHERE SR.intLotId = L.intLotId
@@ -868,7 +868,7 @@ BEGIN TRY
 													ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 													END
 												) - ISNULL((
-													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 													FROM tblICStockReservation SR
 													JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 													WHERE SR.intLotId = L.intLotId
@@ -894,7 +894,7 @@ BEGIN TRY
 													ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 													END
 												) - ISNULL((
-													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 													FROM tblICStockReservation SR
 													JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 													WHERE SR.intLotId = L.intLotId
@@ -933,7 +933,7 @@ BEGIN TRY
 													ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 													END
 												) - ISNULL((
-													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 													FROM tblICStockReservation SR
 													JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 													WHERE SR.intLotId = L.intLotId
@@ -959,7 +959,7 @@ BEGIN TRY
 													ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 													END
 												) - ISNULL((
-													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+													SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intItemUOMId, L1.intWeightUOMId), ISNULL(SR.dblQty, 0)))
 													FROM tblICStockReservation SR
 													JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 													WHERE SR.intLotId = L.intLotId
