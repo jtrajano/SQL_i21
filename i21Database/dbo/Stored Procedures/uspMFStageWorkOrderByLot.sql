@@ -1116,19 +1116,16 @@ BEGIN TRY
 		END
 		/* End of Item Level Inventory Transfer. */
 
-
-	SELECT @intRecipeItemUOMId = CASE WHEN RI.intItemUOMId IS NOT NULL THEN RI.intItemUOMId
-									  /* Retrieve Substitute Item UOM. */
-									  ELSE (SELECT RS.intItemUOMId
-											FROM tblMFWorkOrderRecipeSubstituteItem RS
-											WHERE RS.intWorkOrderId = @intWorkOrderId
-											  AND RS.intSubstituteItemId = @intInputItemId)
-								END
+	SELECT @intRecipeItemUOMId = RI.intItemUOMId
 	FROM tblMFWorkOrderRecipeItem RI
-	WHERE RI.intWorkOrderId			= @intWorkOrderId
-	  AND RI.intItemId				= @intInputItemId
-	  AND RI.intRecipeItemTypeId	= 1
+	WHERE RI.intWorkOrderId = @intWorkOrderId AND RI.intItemId = @intInputItemId AND RI.intRecipeItemTypeId = 1
 
+	IF @intRecipeItemUOMId IS NULL
+		BEGIN
+			SELECT @intRecipeItemUOMId = RS.intItemUOMId
+			FROM tblMFWorkOrderRecipeSubstituteItem RS
+			WHERE RS.intWorkOrderId = @intWorkOrderId AND RS.intSubstituteItemId = @intInputItemId
+		END
 
 	IF @strMultipleMachinesShareCommonStagingLocation = 'True'
 		BEGIN
@@ -1202,7 +1199,7 @@ BEGIN TRY
 	ELSE
 		BEGIN
 			UPDATE tblMFProductionSummary
-			SET dblInputQuantity = dblInputQuantity + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight), 0)
+			SET dblInputQuantity = ISNULL(dblInputQuantity, 0) + ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, @intRecipeItemUOMId, @dblInputWeight), 0)
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intInputItemId
 				AND ISNULL(intMachineId, 0) = (CASE WHEN intMachineId IS NOT NULL THEN ISNULL(@intMachineId, 0)

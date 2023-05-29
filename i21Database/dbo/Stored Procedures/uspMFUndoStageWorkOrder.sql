@@ -87,7 +87,7 @@ BEGIN TRY
 		 , @dtmProductionDate		= dtmProductionDate
 		 , @intDestinationLotId		= intDestinationLotId
 		 , @intMainItemId			= intMainItemId
-		 , @dblLotQuantity			= dblLotQuantity
+		 , @dblLotQuantity			= dbo.fnMFConvertQuantityToTargetItemUOM(intEnteredItemUOMId, intItemUOMId, dblLotQuantity)
 		 , @intEnteredUOMId			= intEnteredItemUOMId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
@@ -274,7 +274,7 @@ BEGIN TRY
 																	  -- Parameters for the new values: 
 																	  , @dblAdjustByQuantity		= @dblExcessStageQty
 																	  , @dblNewUnitCost				= NULL
-																	  , @intItemUOMId				= @intEnteredUOMId
+																	  , @intItemUOMId				= @intNewItemUOMId
 																	  -- Parameters used for linking or FK (foreign key) relationships
 																	  , @intSourceId				= @intWorkOrderId
 																	  , @intSourceTransactionTypeId = 8
@@ -305,8 +305,7 @@ BEGIN TRY
 											  , @strTransactionId		= @strTransferNo
 											  , @intEntityUserSecurityId = @intUserId;
 
-			SELECT @dblAdjustByQuantity = -@dblNewWeight /* Negate for reversal*/
-				 , @dblSummaryQty		= -@dblNewWeight /* Negate for reversal*/
+			SELECT @dblAdjustByQuantity = - @dblNewWeight
 		END
 		/* End of Inventory Transfer for Non Lot Track Item */
 
