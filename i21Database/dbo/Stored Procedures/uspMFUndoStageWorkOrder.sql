@@ -305,7 +305,8 @@ BEGIN TRY
 											  , @strTransactionId		= @strTransferNo
 											  , @intEntityUserSecurityId = @intUserId;
 
-			SELECT @dblAdjustByQuantity = - @dblNewWeight
+			SELECT @dblAdjustByQuantity = -@dblNewWeight /* Negate for reversal*/
+				 , @dblSummaryQty		= -@dblNewWeight /* Negate for reversal*/
 		END
 		/* End of Inventory Transfer for Non Lot Track Item */
 
