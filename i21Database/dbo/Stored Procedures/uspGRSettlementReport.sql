@@ -28,7 +28,8 @@ DECLARE	@strCompanyName		NVARCHAR(500)
 	,@strState				NVARCHAR(500)
 	,@strZip				NVARCHAR(500)
 	,@strCountry			NVARCHAR(500)
-	,@strPhone				NVARCHAR(500)			
+	,@strPhone				NVARCHAR(500)	
+	,@ysnExport				BIT		
 
 DECLARE @temp_xml_table TABLE 
 (
@@ -182,16 +183,31 @@ SELECT @strReportLogId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strReportLogId'
 
-IF @strReportLogId IS NOT NULL
+SELECT @ysnExport = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnExport'
+
+DECLARE @cnt INT
+SELECT @cnt= COUNT(*) FROM tblSRReportLog WHERE strReportLogId = @strReportLogId
+
+IF ISNULL(@ysnExport,0) = 0
 BEGIN
-	IF EXISTS (SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	IF @strReportLogId IS NOT NULL
 	BEGIN
+		IF @cnt > 0
+		BEGIN
+			RETURN
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
+		END
+	END
+END
+ELSE
+BEGIN
+	IF @cnt > 1
 		RETURN
-	END
-	ELSE
-	BEGIN
-		INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
-	END
 END
 
 SET @strTransactionId = CASE 
