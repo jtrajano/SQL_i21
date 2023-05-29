@@ -1068,7 +1068,7 @@ BEGIN TRY
 						,intContractDetailId		= @ContractDetailId
 						,intCustomerStorageId		= @intCustomerStorageId
 						,dblUnits					= - @dblStorageUnits
-						,intSourceItemUOMId			= @CommodityStockUomId
+						,intSourceItemUOMId			= @intCashPriceUOMId--@CommodityStockUomId
 						,intPricingTypeHeader		= 5
 				END
 
@@ -1131,7 +1131,7 @@ BEGIN TRY
 							SET dblRemainingUnits = 0
 							WHERE intSettleStorageKey = @SettleStorageKey
 
-							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@CommodityStockUomId, intItemUOMId, @dblStorageUnits)
+							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@intCashPriceUOMId/*@CommodityStockUomId*/, intItemUOMId, @dblStorageUnits)
 							FROM tblCTContractDetail
 							WHERE intContractDetailId = @intContractDetailId
 
@@ -1205,7 +1205,7 @@ BEGIN TRY
 							SET dblRemainingUnits = dblRemainingUnits - @dblContractUnits
 							WHERE intSettleStorageKey = @SettleStorageKey
 
-							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@CommodityStockUomId, intItemUOMId, @dblContractUnits)
+							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@intCashPriceUOMId/*@CommodityStockUomId*/, intItemUOMId, @dblContractUnits)
 							FROM tblCTContractDetail
 							WHERE intContractDetailId = @intContractDetailId
 
