@@ -12317,6 +12317,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_intCommodityStockUOMId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />
