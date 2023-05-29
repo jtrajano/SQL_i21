@@ -253,13 +253,13 @@ BEGIN
 			,[intCostUOMId]						= LoadCost.intItemUOMId
 			,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 			,[dblAmount]						= CASE
-													WHEN LoadCost.strCostMethod = 'Amount' THEN  ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 2)
+													WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(dbo.fnMultiply(dbo.fnDivide(RE.dblQty , SC.dblNetUnits), LoadCost.dblRate), 2)
 													ELSE 0
 												END								
 			,[intContractHeaderId]				= (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
 			,[intContractDetailId]				= RE.intContractDetailId 
 			,[ysnAccrue]						= 0 --LoadCost.ysnAccrue
-			,[ysnPrice]							= LoadCost.ysnPrice
+			,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 			,[strChargesLink]					= RE.strChargesLink
 			,[ysnAllowVoucher]					= LoadCost.ysnPrice
 			,[intLoadShipmentId]			= RE.intLoadShipmentId 
@@ -274,10 +274,12 @@ BEGIN
 				ON LoadCost.intLoadId = SC.intLoadId
 			LEFT JOIN tblICItem IC 
 				ON IC.intItemId = LoadCost.intItemId
-			WHERE LoadCost.dblRate != 0 
+			WHERE LoadCost.dblRate > 0 
 				AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE LoadCost.intItemId END 
 				AND (LoadCost.strEntityType <> 'Customer' OR LoadCost.strEntityType IS NULL)
 				AND LoadCost.ysnPrice = 1
+				AND ISNULL(LoadCost.ysnVendorPrepayment, 0) = 0
+				AND ISNULL(RE.ysnIsStorage, 0) = 0
 
 	END
 	

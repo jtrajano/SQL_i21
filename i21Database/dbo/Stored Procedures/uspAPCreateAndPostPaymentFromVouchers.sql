@@ -234,11 +234,10 @@ BEGIN
 		ysnLienExists,
 		intPayFromBankAccountId,
 		intPayToBankAccountId,
-		intShipToId,
 		intPartitionId
 	)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayFromBankAccountId, intDefaultPayToBankAccountId, intShipToId, intPartitionId
+		intBillId, intInvoiceId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intDefaultPayFromBankAccountId, intDefaultPayToBankAccountId, intPartitionId
 	FROM
 	(
 		SELECT 

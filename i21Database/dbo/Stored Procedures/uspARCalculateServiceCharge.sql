@@ -137,10 +137,11 @@ BEGIN
 		FROM @tblCurrency
 
 		DECLARE @tblCustomer TABLE (
-			 intEntityId INT
-			,intServiceChargeId INT
-			,intTermId INT
-			,ysnActive BIT
+			 intEntityId 			INT
+			,intServiceChargeId 	INT
+			,intTermId 				INT
+			,ysnActive 				BIT
+			,intCurrencyId			INT 
 		)
 		DECLARE @tblComputedBalance TABLE (
 			 intEntityId INT
@@ -175,16 +176,16 @@ BEGIN
 		--GET SELECTED CUSTOMERS
 		IF (@customerIds = '')
 		BEGIN
-			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive) 
-			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
+			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive, intCurrencyId) 
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive, C.intCurrencyId
 			FROM tblARCustomer C
 			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
 			WHERE ISNULL(C.intServiceChargeId, 0) <> 0  and (C.ysnActive = 1 or (C.ysnActive = 0 and C.dblARBalance <> 0))
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive)
-			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
+			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive, intCurrencyId)
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive, C.intCurrencyId
 			FROM tblARCustomer C
 			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
 			INNER JOIN (
@@ -275,7 +276,7 @@ BEGIN
 				) C ON C.intEntityId = AGING.intEntityCustomerId	
 				WHERE AGING.intEntityUserId = @intEntityUserId 
 				AND AGING.strAgingType = 'Detail'
-				AND intCurrencyId = @intCurrencyId
+				AND AGING.intCurrencyId = @intCurrencyId
 				AND (intCompanyLocationId = @intCompanyLocationId OR @ysnPrintByLocation = 0)
 				GROUP BY AGING.intEntityCustomerId
 				HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @ZeroDecimal
@@ -568,6 +569,7 @@ BEGIN
 						AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId)) < @asOfDate
 						AND CB.dblBudgetAmount > @ZeroDecimal
 						AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
+						AND C.intCurrencyId = @intCurrencyId
 					END
 
 					--REMOVE INACTIVE CUSTOMERS WITH ZERO BALANCE

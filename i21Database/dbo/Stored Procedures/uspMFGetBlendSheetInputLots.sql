@@ -59,6 +59,7 @@ BEGIN
 			 ,wi.strFW
 			  ,MT.strDescription AS strProductType
 			,B.strBrandCode
+			,wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -120,6 +121,7 @@ BEGIN
 			 ,'' As strFW
 			  ,MT.strDescription AS strProductType
 				,B.strBrandCode
+			,wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -179,6 +181,8 @@ BEGIN
 	 ,'' As strFW
 	  ,MT.strDescription AS strProductType
 	,B.strBrandCode
+	,wi.dblQuantity  AS dblRequiredQtyPerSheet
+
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId

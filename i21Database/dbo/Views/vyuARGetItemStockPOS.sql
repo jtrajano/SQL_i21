@@ -46,6 +46,7 @@ FROM (
 		 , IUOM.intItemUOMId
 	FROM dbo.tblICItem ITEM WITH (NOLOCK)
 	INNER JOIN dbo.tblICItemUOM IUOM WITH (NOLOCK) ON ITEM.intItemId = IUOM.intItemId
+	WHERE IUOM.ysnStockUOM = 1
 
 	UNION ALL
 

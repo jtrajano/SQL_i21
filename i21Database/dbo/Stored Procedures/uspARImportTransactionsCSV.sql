@@ -188,6 +188,7 @@ LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = ILD.strLocationName
 WHERE ILD.intImportLogId = @ImportLogId  
   AND ISNULL(L.intCompanyLocationId, 0) = 0
   AND ISNULL(ysnSuccess, 1) = 1
+  AND @ImportFormat <> @IMPORTFORMAT_CARQUEST
 
 --SALES ACCOUNT
 UPDATE ILD
@@ -260,12 +261,12 @@ SET [ysnImported]		= 0
   , [ysnSuccess]        = 0
   , [strEventResult]	= 'The Salesperson provided does not exists. '
 FROM tblARImportLogDetail ILD
-LEFT JOIN tblARCustomer C ON C.strCustomerNumber=ILD.strCustomerNumber
-LEFT JOIN tblARSalesperson S on ILD.strSalespersonNumber=S.strSalespersonId
+LEFT JOIN tblEMEntity E ON ILD.strSalespersonNumber = E.strEntityNo
+LEFT JOIN tblARSalesperson S on S.intEntityId = E.intEntityId
 WHERE ILD.intImportLogId = @ImportLogId 
-  AND ISNULL(C.intEntityId, 0) <> 0 
   AND @IsTank = 0 
-  AND ISNULL(intSalespersonId, 0) = 0 AND ILD.strSalespersonNumber <> ''
+  AND E.intEntityId IS NULL 
+  AND ILD.strSalespersonNumber <> ''
   AND ISNULL(ysnSuccess, 1) = 1
 
 --CUSTOMER CREDIT LIMIT
@@ -391,6 +392,28 @@ BEGIN
 	  AND ISNULL(ICIL.intItemLocationId, 0) <> 0 
 	  AND ISNULL(ICIL.intCostingMethod,0) = 0
 	  AND ISNULL(ysnSuccess, 1) = 1
+
+	--VALIDATE FISCAL YEAR FOR AR
+    UPDATE ILD
+    SET [ysnImported]        = 0
+      , [ysnSuccess]        = 0
+      , [strEventResult]    = 'Unable to find an open fiscal year period for Accounts Receivable module to match the transaction date.'
+    FROM tblARImportLogDetail ILD
+    LEFT JOIN tblGLFiscalYearPeriod FYP ON ILD.dtmPostDate BETWEEN FYP.dtmStartDate AND FYP.dtmEndDate
+    WHERE ILD.intImportLogId = @ImportLogId
+      AND ISNULL(ysnSuccess, 1) = 1
+      AND (FYP.intFiscalYearId IS NULL OR (FYP.intFiscalYearId IS NOT NULL AND FYP.ysnAROpen = 0))
+
+    --VALIDATE FISCAL YEAR FOR IC
+    UPDATE ILD
+    SET [ysnImported]        = 0
+      , [ysnSuccess]        = 0
+      , [strEventResult]    = 'Unable to find an open fiscal year period for Inventory module to match the transaction date.'
+    FROM tblARImportLogDetail ILD
+    LEFT JOIN tblGLFiscalYearPeriod FYP ON ILD.dtmPostDate BETWEEN FYP.dtmStartDate AND FYP.dtmEndDate
+    WHERE ILD.intImportLogId = @ImportLogId
+      AND ISNULL(ysnSuccess, 1) = 1
+      AND (FYP.intFiscalYearId IS NULL OR (FYP.intFiscalYearId IS NOT NULL AND FYP.ysnINVOpen = 0))
 END
 	
 --CONTRACT NUMBER DOES NOT EXISTS

@@ -73,7 +73,7 @@ BEGIN TRY
 	
 	IF (@ysnFreightTermCost = 0)
 	BEGIN
-		RETURN
+		goto _return;
 	END
 
 	SELECT * INTO #tmpCosts
@@ -86,6 +86,12 @@ BEGIN TRY
 		AND intCommodityId = @intCommodityId
 		--AND ISNULL(intProductTypeId, ISNULL(@intProductTypeId, 0)) = ISNULL(@intProductTypeId, 0)
 		--AND ISNULL(intProductLineId, ISNULL(@intProductLineId, 0)) = ISNULL(@intProductLineId, 0)
+
+	if not exists (select top 1 1 from #tmpCosts)
+	begin
+		select @ysnFreightTermCost = 0;
+		goto _return;
+	end
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCosts)
 	BEGIN
@@ -297,6 +303,25 @@ BEGIN TRY
 			cross apply (select * from tblSMCurrency where intCurrencyID = @intSequenceCurrencyId) seqCurrency
 		END
 	END
+
+	_return:
+
+	IF (@ysnFreightTermCost = 0)
+	begin
+		SELECT intCostItemId = 0
+			, strCostItem = null
+			, intEntityId = null
+			, strEntityName = null
+			, intCurrencyId = null
+			, strCurrency = null
+			, intItemUOMId = null
+			, strUnitMeasure = null
+			, strCostMethod = null
+			, dblRate = 0.00
+			, dblAmount = 0.00
+			, dblFX = 0.00
+			, ysnAccrue = convert(bit,0)
+	end
 
 END TRY      
 BEGIN CATCH       

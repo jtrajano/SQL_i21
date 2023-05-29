@@ -82,6 +82,13 @@ SELECT
 	,E.intCustomerID
 	,D.intLocationId
 	,intEntityIdBillTo = J.intEntityId
+	,Q.ysnEnableLeaseBillingAboveMinUse 
+	,Q.strLeaseBillingIncentiveCalculation
+	,C.strBillingType
+	,B.dblTankCapacity
+	,dblTotalGallons1 = II.dblTotalGallons
+	,dblTotalGallons2 = HH.dblTotalGallons
+	,dblTotalCapacity
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId

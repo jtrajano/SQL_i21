@@ -146,6 +146,7 @@ RETURNS TABLE AS RETURN
 	AND 1 = (CASE WHEN @bankAccountId > 0 AND voucher.intPayFromBankAccountId > 0
 					THEN (CASE WHEN @bankAccountId = voucher.intPayFromBankAccountId THEN 1 ELSE 0 END)
 					ELSE 1 END)
+	AND 1 = (CASE WHEN forPay.intSelectedByUserId IS NULL OR forPay.intSelectedByUserId = @userId THEN 1 ELSE 0 END)
 	UNION ALL
 	SELECT  
 		forPay.intForPaymentId  

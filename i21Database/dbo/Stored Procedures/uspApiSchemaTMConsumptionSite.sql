@@ -444,6 +444,29 @@ BEGIN
 	AND CS.guiApiUniqueId = @guiApiUniqueId
 	AND ISNULL(CS.strJulianCalendar, '') != ''
 
+	-- VALIDATE RequireClock
+	INSERT INTO tblApiImportLogDetail (
+		guiApiImportLogDetailId
+		, guiApiImportLogId
+		, strField
+		, strValue
+		, strLogLevel
+		, strStatus
+		, intRowNo
+		, strMessage
+	)
+	SELECT guiApiImportLogDetailId = NEWID()
+		, guiApiImportLogId = @guiLogId
+		, strField = 'Require Clock'
+		, strValue = CS.ysnRequireClock
+		, strLogLevel = 'Error'
+		, strStatus = 'Failed'
+		, intRowNo = CS.intRowNumber
+		, strMessage = 'Clock is required'
+	FROM tblApiSchemaTMConsumptionSite CS
+	WHERE CS.ysnRequireClock = 1 
+	AND CS.guiApiUniqueId = @guiApiUniqueId
+	AND ISNULL(CS.strClock, '') = ''
 
 	-- CHECK IF ALREADY EXISTS IN CONSUMPTION SITE
 
@@ -505,6 +528,13 @@ BEGIN
 		, @ysnDeliveryTicketPrinted BIT = NULL
 		, @ysnPrintARBalance BIT = NULL
 		, @intNextDeliveryDegreeDay INT = NULL
+		, @ysnRequireClock BIT = NULL
+		, @ysnRoutingAlert bit = NULL
+		, @ysnRequirePump bit = NULL
+		, @dblLastDeliveredGal numeric(18, 6)  = NULL
+		, @dblEstimatedGallonsLeft numeric(18, 6)  = NULL
+		, @dblEstimatedPercentLeft numeric(18, 6)  = NULL
+
 		, @intCustomerNumber INT = NULL
 
 	DECLARE DataCursor CURSOR LOCAL FAST_FORWARD
@@ -568,6 +598,12 @@ BEGIN
 		,CS.ysnDeliveryTicketPrinted AS ysnDeliveryTicketPrinted   
 		,CS.ysnPrintARBalance AS ysnPrintARBalance
 		,CS.intNextDeliveryDegreeDay AS intNextDeliveryDegreeDay
+		,CS.ysnRequireClock AS ysnRequireClock 
+		,CS.ysnRoutingAlert AS ysnRoutingAlert
+		,CS.ysnRequirePump AS ysnRequirePump
+		,CS.dblLastDeliveredGal AS dblLastDeliveredGal
+		,CS.dblEstimatedGallonsLeft AS dblEstimatedGallonsLeft
+		,CS.dblEstimatedPercentLeft AS dblEstimatedPercentLeft
 		,E.intEntityId
 	FROM tblApiSchemaTMConsumptionSite CS
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CS.strCustomerEntityNo
@@ -578,7 +614,7 @@ BEGIN
 	INNER JOIN [tblEMEntityType] DT ON DT.intEntityId = D.intEntityId AND DT.strType = 'Salesperson'
 	INNER JOIN tblTMRoute R ON R.strRouteId = CS.strRoute
 	INNER JOIN tblSMCompanyLocation CL ON CL.strLocationName = CS.strLocationName
-	INNER JOIN tblTMClock CK ON CK.strClockNumber = CS.strClock
+	LEFT JOIN tblTMClock CK ON CK.strClockNumber = CS.strClock
 	INNER JOIN tblARAccountStatus A ON A.strAccountStatusCode = CS.strAccountStatus
 	INNER JOIN tblICItem I ON I.strItemNo = CS.strItemNo
 	INNER JOIN tblTMFillMethod FM ON FM.strFillMethod = CS.strFillMethod
@@ -621,7 +657,8 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
+		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
 		, @intCustomerNumber
 	WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -631,10 +668,8 @@ BEGIN
 			BEGIN
 				
 				--- Check for TM Customer Record
-				SET @intCustomerId  = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = @intCustomerNumber)
 				IF(@intCustomerId IS NULL)
 				BEGIN
-					
 					INSERT INTO tblTMCustomer(
 						intCustomerNumber
 						,intCurrentSiteNumber
@@ -646,7 +681,7 @@ BEGIN
 				END
 
 				DECLARE @intSiteId INT = NULL
-				SELECT TOP 1 @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
 				
 				
 				-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
@@ -667,7 +702,7 @@ BEGIN
 					-- ADD NEW SITE		
 					DECLARE @intSiteNumber INT = NULL
 
-					SET @intSiteNumber = CONVERT(int,@strSiteNumber)
+					SELECT @intSiteNumber = CONVERT(int,@strSiteNumber)
 
 					INSERT INTO tblTMSite (intCustomerID
 						, strBillingBy
@@ -726,6 +761,12 @@ BEGIN
 						,ysnPrintDeliveryTicket 
 						,ysnPrintARBalance
 						,intNextDeliveryDegreeDay
+						,ysnRequireClock
+						,ysnRoutingAlert
+						,ysnRequirePump
+						,dblLastDeliveredGal 
+						,dblEstimatedGallonsLeft 
+						,dblEstimatedPercentLeft
 
 						, guiApiUniqueId
 						, intRowNumber)
@@ -744,7 +785,7 @@ BEGIN
 						, @strClassFill
 						, @intFillGroupId
 						, @intHoldReasonId
-						, @intSiteNumber
+						, ISNULL(@intSiteNumber, 0)
 						
 						, @ysnActive
 						, @strSiteDescription
@@ -786,7 +827,12 @@ BEGIN
 						,@ysnDeliveryTicketPrinted
 						,@ysnPrintARBalance
 						,@intNextDeliveryDegreeDay
-						
+						,@ysnRequireClock
+						,@ysnRoutingAlert
+						,@ysnRequirePump
+						,@dblLastDeliveredGal
+						,@dblEstimatedGallonsLeft
+						,@dblEstimatedPercentLeft
 						, @guiLogId
 						, @intRowNumber)
 
@@ -870,7 +916,12 @@ BEGIN
 						, ysnPrintDeliveryTicket = @ysnDeliveryTicketPrinted
 						, ysnPrintARBalance = @ysnPrintARBalance
 						, intNextDeliveryDegreeDay = @intNextDeliveryDegreeDay
-
+						, ysnRequireClock = @ysnRequireClock
+						,ysnRoutingAlert = @ysnRoutingAlert
+						,ysnRequirePump = @ysnRequirePump
+						,dblLastDeliveredGal = @dblLastDeliveredGal
+						,dblEstimatedGallonsLeft = @dblEstimatedGallonsLeft
+						,dblEstimatedPercentLeft = @dblEstimatedPercentLeft
 						, guiApiUniqueId = @guiLogId
 						, intRowNumber = @intRowNumber
 					WHERE intSiteID = @intSiteId
@@ -951,7 +1002,8 @@ BEGIN
 		, @strAddress, @strZipCode, @strCity, @strState, @strCountry, @dblLatitude, @dblLongitude, @strSequence, @strFacilityNo, @dblCapacity, @dblReserve, @dblPriceAdj
 		, @ysnSaleTax, @strRecurringPONo, @ysnHold, @ysnHoldDDCalc, @strHoldReason, @dtmHoldStartDate, @dtmHoldEndDate
 		, @ysnLost, @dtmLostDate, @strLostReason, @intGlobalJulianCalendarId, @dtmNextJulianDate, @dblSummerDailyRate, @dblWinterDailyRate, @dblBurnRate, @dblPreviousBurnRate, @dblDDBetweenDelivery, @ysnAdjBurnRate, @ysnPromptFull
-		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay
+		, @strSiteDescription, @strSiteNumber, @strCustomerEntityNo, @ysnActive, @intSiteLocationId,@dtmLastDeliveryDate,@dblLastGalsInTank,@ysnDeliveryTicketPrinted,@ysnPrintARBalance,@intNextDeliveryDegreeDay,@ysnRequireClock
+		,@ysnRoutingAlert,@ysnRequirePump,@dblLastDeliveredGal,@dblEstimatedGallonsLeft,@dblEstimatedPercentLeft
 		, @intCustomerNumber
 	END
 	CLOSE DataCursor

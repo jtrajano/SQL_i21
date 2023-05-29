@@ -61,7 +61,7 @@
 	SC.intContractId,
 	SC.intDiscountLocationId,
 	SC.intItemId,
-	IR.intEntityVendorId AS intEntityId,
+	intEntityId = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.intEntityId ELSE IR.intEntityVendorId END,
 	SC.intLoadId,
 	SC.intMatchTicketId,
 	SC.intSubLocationId,
@@ -84,8 +84,8 @@
 	SC.strDistributionOption = 'SPL' THEN 'Split' WHEN
 	SC.strDistributionOption = 'HLD' THEN 'Hold' END) AS
 	strStorageTypeDescription,
-	tblEMEntity.strEntityNo,
-	tblEMEntity.strName,
+	strEntityNo = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.strEntityNo ELSE tblEMEntity.strEntityNo END,
+	strName = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.strName ELSE tblEMEntity.strName END,
 	EMLocation.strAddress,
 	EMLocation.strCity,
 	EMLocation.strCountry,
@@ -109,11 +109,15 @@
 	--ReceiptItem.intInventoryReceiptId,
 	----ReceiptItem.intInventoryReceiptItemId,
 	--ReceiptItem.strReceiptNumber,
-    IRD.dblGross,
-    dblNet =  CASE WHEN DS.intDeliverySheetId IS NULL
-			THEN IRD.dblNet
-			ELSE IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
-			END,
+    CASE WHEN SC.intTicketType = 6 or SC.strInOutFlag='O' THEN SC.dblGrossUnits ELSE IRD.dblGross END AS dblGross,
+    dblNet =  CASE WHEN (SC.intTicketType = 6 or SC.strInOutFlag='O')  THEN SC.dblNetUnits 
+			ELSE 
+				CASE WHEN DS.intDeliverySheetId IS NULL
+				THEN IRD.dblNet
+				ELSE IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
+				END 
+			END
+			,
 	(SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2) * (CASE WHEN TS.intTicketSplitId IS NULL THEN 1 ELSE TS.dblSplitPercent / 100 END) AS dblLineGrossWeight,
 	(SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2) * (CASE WHEN TS.intTicketSplitId IS NULL THEN 1 ELSE TS.dblSplitPercent / 100 END) AS dblLineNetWeight,
 	tblGRDiscountId.strDiscountId,
@@ -154,11 +158,13 @@
 				FOR XML PATH('')
 			),2,1000)
 	END COLLATE Latin1_General_CI_AS AS  strGradeReading
-	,IR.intEntityVendorId
+	,intEntityVendorId = CASE WHEN tblEMEntity.intEntityId IS NULL THEN TICKET_ENTITY.intEntityId ELSE IR.intEntityVendorId END
 	,DS.intDeliverySheetId
 	,DS.strDeliverySheetNumber
 	,DS.strSplitDescription
   FROM tblSCTicket SC
+  INNER JOIN tblEMEntity TICKET_ENTITY 
+		ON SC.intEntityId = TICKET_ENTITY.intEntityId
   INNER JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
   LEFT JOIN tblICInventoryReceiptItem IRD
 		ON SC.intTicketId = IRD.intSourceId	
@@ -166,6 +172,7 @@
   LEFT JOIN tblICInventoryReceipt IR
 		ON IRD.intInventoryReceiptId = IR.intInventoryReceiptId
         AND IR.intSourceType = 1
+
   LEFT JOIN tblEMEntity tblEMEntity ON tblEMEntity.intEntityId = IR.intEntityVendorId
   LEFT JOIN tblSCTicketSplit TS ON TS.intTicketId = SC.intTicketId AND TS.intCustomerId = IR.intEntityVendorId
   LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = tblEMEntity.intEntityId AND EMLocation.ysnDefaultLocation = 1

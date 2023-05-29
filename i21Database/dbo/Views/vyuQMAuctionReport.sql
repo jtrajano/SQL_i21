@@ -14,8 +14,9 @@ SELECT intSampleId					= S.intSampleId
 	 , strQtyUOM					= RIUM.strUnitMeasure
 	 , dblWeight					= ISNULL(S.dblSampleQty, 0)
 	 , dblWeightPerQty				= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, ISNULL(S.dblSampleQty, 0)), 0)
+	 , strPackageType				= PIUM.strUnitMeasure
 	 , dblBasePrice					= ISNULL(S.dblBasePrice, 0)
-	 , dblTastingScore				= ISNULL(PV.dblPinpointValue, 0)
+	 , dblTastingScore				= ISNULL(PV.dblActualValue, 0)
 	 , strSupplier					= SUP.strName
 	 , strTeaLingoItem				= ITEM.strItemNo
 	 , strCompanyName				= COMP.strCompanyName
@@ -34,20 +35,16 @@ LEFT JOIN tblICItem ITEM ON S.intItemId = ITEM.intItemId
 LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = S.intGradeId
 LEFT JOIN tblICUnitMeasure SIUM ON SIUM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMId
+LEFT JOIN tblICUnitMeasure PIUM ON PIUM.intUnitMeasureId = S.intPackageTypeId
 LEFT JOIN tblQMGardenMark GM ON S.intGardenMarkId = GM.intGardenMarkId
 LEFT JOIN tblARMarketZone MZ ON S.intMarketZoneId = MZ.intMarketZoneId
-LEFT JOIN tblICBrand B ON ITEM.intBrandId = B.intBrandId
-LEFT JOIN tblCTValuationGroup VG ON ITEM.intValuationGroupId = VG.intValuationGroupId
+LEFT JOIN tblICBrand B ON S.intBrandId = B.intBrandId
+LEFT JOIN tblCTValuationGroup VG ON S.intValuationGroupId = VG.intValuationGroupId
 OUTER APPLY (
-	SELECT TOP 1 PPVP.dblPinpointValue 
-	FROM tblQMProduct P  
-	INNER JOIN tblQMProductProperty PP ON PP.intProductId = P.intProductId
-	INNER JOIN tblQMProperty PROP ON PROP.intPropertyId = PP.intPropertyId	
-    LEFT JOIN tblQMProductPropertyValidityPeriod PPVP ON PP.intProductPropertyId = PPVP.intProductPropertyId
-      AND DATEPART(dayofyear, GETDATE()) BETWEEN DATEPART(dayofyear , PPVP.dtmValidFrom) AND DATEPART(dayofyear , PPVP.dtmValidTo)
-    WHERE PP.intProductId = P.intProductId AND PROP.strPropertyName = 'Taste'
-	  AND P.intProductValueId = ITEM.intItemId
-	  AND P.intProductTypeId =  2
+	SELECT TOP 1 dblActualValue = CAST(ISNULL(NULLIF(TR.strPropertyValue, ''), '0') AS NUMERIC(18, 6))
+	FROM tblQMTestResult TR 
+	INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId AND P.strPropertyName = 'Taste' 
+	WHERE TR.intSampleId = S.intSampleId
 ) PV
 OUTER APPLY (
 	SELECT TOP 1 *

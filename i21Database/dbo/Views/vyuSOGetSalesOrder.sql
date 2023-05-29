@@ -89,7 +89,7 @@ SELECT intSalesOrderId				= SO.intSalesOrderId
 	 , intCreditLimitReached		= CUSTOMER.intCreditLimitReached
 	 , dtmCreditLimitReached		= CUSTOMER.dtmCreditLimitReached
 	 , strContactName				= CONTACT.strName
-	 , strApplicatorName			= APPLICATOR.strName
+	 , strApplicatorName			= APPLICATOR.strEntityNo
 	 , strTerm						= TERM.strTerm
      , strAccountId					= ACCT.strAccountId
      , strFobPoint					= FREIGHT.strFobPoint
@@ -137,6 +137,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intEntityId
 		 , strName
+           , strEntityNo
 	FROM tblEMEntity WITH (NOLOCK)
 ) APPLICATOR ON APPLICATOR.intEntityId = SO.intEntityApplicatorId
 JOIN (

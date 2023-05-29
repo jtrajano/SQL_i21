@@ -30,6 +30,10 @@ BEGIN TRY
 		AND SEASON.strDescription = IMP.strColour
 	-- Garden Mark
 	LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
+	-- Producer
+	LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GARDEN.intProducerId
+	-- Producer Type
+	LEFT JOIN tblEMEntityType ProdType ON ProdType.intEntityId = Producer.intEntityId AND ProdType.strType = 'Producer'
 	-- Garden Geo Origin
 	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin AND ISNULL(ORIGIN.strISOCode, '') <> ''
 	-- Sustainability
@@ -94,6 +98,13 @@ BEGIN TRY
 						--AND ISNULL(IMP.strGardenMark, '') <> ''
 						)
 					THEN 'GARDEN MARK, '
+				ELSE ''
+				END + CASE 
+				WHEN (
+						Producer.intEntityId IS NULL
+						--AND ISNULL(IMP.strGardenMark, '') <> ''
+						)
+					THEN 'Proudcer ID, '
 				ELSE ''
 				END + CASE 
 				WHEN (
@@ -267,6 +278,10 @@ BEGIN TRY
 				--AND ISNULL(IMP.strGardenMark, '') <> ''
 				)
 			OR (
+				Producer.intEntityId IS NULL
+				--AND ISNULL(IMP.strGardenMark, '') <> ''
+				)
+			OR (
 				ORIGIN.intCountryID IS NULL
 				--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
 				)
@@ -388,6 +403,7 @@ BEGIN TRY
 		,@strSeason NVARCHAR(50)
 		,@dblGrossWeight NUMERIC(18, 6)
 		,@intGardenMarkId INT
+		,@intProducerId INT
 		,@strGardenMark NVARCHAR(100)
 		,@intOriginId INT
 		,@strCountry NVARCHAR(100)
@@ -476,6 +492,7 @@ BEGIN TRY
 		,strSeason = SEASON.strDescription
 		,dblGrossWeight = IMP.dblGrossWeight
 		,intGardenMarkId = GARDEN.intGardenMarkId
+		,intProducerId = Producer.intEntityId
 		,strGardenMark = GARDEN.strGardenMark
 		,intOriginId = CA.intCommodityAttributeId
 		,strCountry = CA.strDescription
@@ -551,6 +568,10 @@ BEGIN TRY
 		AND SEASON.strDescription = IMP.strColour
 	-- Garden Mark
 	LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
+	-- PRODUCER
+	LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GARDEN.intProducerId 
+	-- Producer Type
+	LEFT JOIN tblEMEntityType ProdType ON ProdType.intEntityId = Producer.intEntityId AND ProdType.strType = 'Producer'
 	-- Garden Geo Origin
 	LEFT JOIN (
 		tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID
@@ -626,6 +647,7 @@ BEGIN TRY
 		,strSeason = NULL
 		,dblGrossWeight = NULL
 		,intGardenMarkId = NULL
+		,intProducerId = NULL
 		,strGardenMark = NULL
 		,intOriginId = NULL
 		,strCountry = NULL
@@ -673,7 +695,7 @@ BEGIN TRY
 		,intBatchId = BATCH_TBO.intBatchId
 		,strTINNumber = IMP.strTINNumber
 		,intSubBookId = NULL
-		,strPackageType=NULL
+		,strPackageType=strPackageType
 		,SeasonCropYear.intCropYearId
 		,intWgtUnitMeasureId=NULL
 	FROM tblQMImportCatalogue IMP
@@ -724,6 +746,7 @@ BEGIN TRY
 		,@strSeason
 		,@dblGrossWeight
 		,@intGardenMarkId
+		,@intProducerId
 		,@strGardenMark
 		,@intOriginId
 		,@strCountry
@@ -897,6 +920,7 @@ BEGIN TRY
 						,strComment
 						,intCreatedUserId
 						,dtmCreated
+						,intBookId
 						,intSubBookId
 						-- Auction Fields
 						,intSaleYearId
@@ -909,6 +933,7 @@ BEGIN TRY
 						,intManufacturingLeafTypeId
 						,intSeasonId
 						,intGardenMarkId
+						,intProducerId
 						,dtmManufacturingDate
 						,intTotalNumberOfPackageBreakups
 						,intNetWtPerPackagesUOMId
@@ -938,6 +963,8 @@ BEGIN TRY
 						,dblTareWeight
 						,strCourierRef
 						,intCropYearId
+						,intMarketZoneId
+						,intCurrencyId
 						)
 					-- ,intTINClearanceId
 					SELECT intConcurrencyId = 1
@@ -965,6 +992,7 @@ BEGIN TRY
 						,strComment = S.strComment
 						,intCreatedUserId = @intEntityUserId
 						,dtmCreated = @dtmDateCreated
+						,intBookId = S.intBookId
 						,intSubBookId = S.intSubBookId
 						-- Auction Fields
 						,intSaleYearId = S.intSaleYearId
@@ -977,6 +1005,7 @@ BEGIN TRY
 						,intManufacturingLeafTypeId = S.intManufacturingLeafTypeId
 						,intSeasonId = S.intSeasonId
 						,intGardenMarkId = S.intGardenMarkId
+						,intProducerId = S.intProducerId
 						,dtmManufacturingDate = S.dtmManufacturingDate
 						,intTotalNumberOfPackageBreakups = S.intTotalNumberOfPackageBreakups
 						,intNetWtPerPackagesUOMId = S.intNetWtPerPackagesUOMId
@@ -1006,6 +1035,8 @@ BEGIN TRY
 						,dblTareWeight=@dblTareWeight
 						,strCourierRef = @strCourierRef
 						,@intCropYearId
+						,intMarketZoneId = S.intMarketZoneId
+						,intCurrencyId = S.intCurrencyId
 					FROM tblQMSample S
 					INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 					WHERE B.intBatchId = @intBatchId
@@ -1282,6 +1313,7 @@ BEGIN TRY
 				,intManufacturingLeafTypeId
 				,intSeasonId
 				,intGardenMarkId
+				,intProducerId
 				,dtmManufacturingDate
 				,intTotalNumberOfPackageBreakups
 				,intNetWtPerPackagesUOMId
@@ -1380,6 +1412,7 @@ BEGIN TRY
 				,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
 				,intSeasonId = @intSeasonId
 				,intGardenMarkId = @intGardenMarkId
+				,intProducerId = @intProducerId
 				,dtmManufacturingDate = @dtmManufacturingDate
 				,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
 				,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
@@ -1659,6 +1692,7 @@ BEGIN TRY
 				,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
 				,intSeasonId = @intSeasonId
 				,intGardenMarkId = @intGardenMarkId
+				,intProducerId = @intProducerId
 				,dtmManufacturingDate = @dtmManufacturingDate
 				,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
 				,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
@@ -1727,6 +1761,7 @@ BEGIN TRY
 			,@strSeason
 			,@dblGrossWeight
 			,@intGardenMarkId
+			,@intProducerId
 			,@strGardenMark
 			,@intOriginId
 			,@strCountry

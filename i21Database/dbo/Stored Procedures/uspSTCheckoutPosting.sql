@@ -138,9 +138,9 @@ BEGIN
 		DECLARE @dblInvoiceAndCheckoutDifference DECIMAL(18,6) = 0
 		DECLARE @dblConsTolerance DECIMAL(18,6) = 0.01
 		DECLARE @dblOutsideFuelDiscount DECIMAL(18,6) = 0
-		DECLARE @dblInsideFuelDiscount DECIMAL(18,6) = 0
+		--DECLARE @dblInsideFuelDiscount DECIMAL(18,6) = 0
 		DECLARE @ysnConsMeterReadingsForDollars BIT = 0
-		DECLARE @ysnConsIncludeInsideDiscount BIT = 0
+		--DECLARE @ysnConsIncludeInsideDiscount BIT = 0
 		DECLARE @ysnConsAddOutsideFuelDiscounts BIT = 0
 		DECLARE @ysnConsCashOverShort BIT = 0
 		DECLARE @intConsInvoiceId AS INT
@@ -226,7 +226,7 @@ BEGIN
 				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
 				, @strCheckoutType = strCheckoutType
 				, @dblOutsideFuelDiscount = dblEditableOutsideFuelDiscount
-				, @dblInsideFuelDiscount = dblEditableInsideFuelDiscount
+				--, @dblInsideFuelDiscount = dblEditableInsideFuelDiscount
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -747,7 +747,7 @@ BEGIN
 							-- ROLLBACK
 							GOTO ExitWithRollback
 						end catch
-
+					
 
 						-- Insert all Pump Items here using positive amount
 						INSERT INTO @EntriesForInvoice(
@@ -838,6 +838,7 @@ BEGIN
 										,[intSubCurrencyId]
 										,[dblSubCurrencyRate]
 										,[intSubLocationId]
+										,[intCompanyLocationSubLocationId]
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
@@ -956,7 +957,8 @@ BEGIN
 										,[dblCurrencyExchangeRate]	= 1.000000
 										,[intSubCurrencyId]			= @intCurrencyId
 										,[dblSubCurrencyRate]		= 1.000000
-										,[intSubLocationId]			= IL.intSubLocationId
+										,[intSubLocationId]			= NULL
+										,[intCompanyLocationSubLocationId] = tmSite.intCompanyLocationSubLocationId
 										--,0
 										--,1
 							FROM tblSTCheckoutPumpTotals CPT
@@ -996,6 +998,9 @@ BEGIN
 							) Tax
 								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
 								AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
+							LEFT JOIN tblTMSite tmSite
+								ON ST.intCompanyLocationId = tmSite.intLocationId AND
+									I.intItemId = tmSite.intProduct
 							WHERE CPT.intCheckoutId = @intCheckoutId
 								AND CPT.dblAmount > 0
 								AND TPI.intTaxGroupId IS NOT NULL
@@ -1231,6 +1236,8 @@ BEGIN
 								-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 								AND DT.dblTotalSalesAmountComputed = 0
 								AND CPT.dblAmount > 0
+								AND @ysnConsignmentStore = 0 
+
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
@@ -3680,7 +3687,7 @@ BEGIN
 						BEGIN
 							IF @strConsInvoiceType = 'CSFuelInvoice'
 							BEGIN
-								INSERT INTO @EntriesForCSCreditMemo(
+								INSERT INTO @EntriesForInvoice(
 												 [strSourceTransaction]
 												,[strTransactionType]
 												,[strType]
@@ -3772,7 +3779,7 @@ BEGIN
 											)
 											SELECT 
 												 [strSourceTransaction]		= 'Invoice'
-												,[strTransactionType]		= 'Credit Memo'
+												,[strTransactionType]		= 'Invoice'
 												,[strType]					= @strInvoiceTypeMain
 												,[intSourceId]				= @intCheckoutId
 												,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
@@ -3821,21 +3828,15 @@ BEGIN
 												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
 												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
-
 												--,[dblQtyShipped]			= CASE
-												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-												--										THEN 1
-												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+												--									-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+												--									WHEN @strInvoiceTransactionTypeMain = @strCASH
 												--										THEN -1
-												--							END
-												,[dblQtyShipped]			= 1
+												--									WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+												--										THEN 1
+												--								END
+												,[dblQtyShipped]			= -1
 												,[dblDiscount]				= 0
-
-												--,[dblPrice]					= CASE
-												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
-												--										THEN ISNULL(CH.dblCashOverShort, 0)
-												--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
-												--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
 												,[dblPrice]					= ISNULL(DC.dblCommissionAmount, 0)
 												,[ysnRefreshPrice]			= 0
 												,[strMaintenanceType]		= NULL
@@ -4285,7 +4286,7 @@ BEGIN
 												,[dblDiscount]				= 0
 												,[dblPrice]					= CASE 
 																				WHEN @ysnConsMeterReadingsForDollars = 0
-																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0) + ISNULL(CH.dblEditableInsideFuelDiscount, 0))
+																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0)) --+ ISNULL(CH.dblEditableInsideFuelDiscount, 0))
 																				WHEN @ysnConsMeterReadingsForDollars = 1
 																					THEN ABS(ISNULL(CH.dblEditableOutsideFuelDiscount, 0))
 																				ELSE 
@@ -4341,7 +4342,7 @@ BEGIN
 									JOIN vyuEMEntityCustomerSearch vC 
 										ON ST.intCheckoutCustomerId = vC.intEntityId									
 									WHERE CH.intCheckoutId = @intCheckoutId
-										AND (ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0 OR ISNULL(CH.dblEditableInsideFuelDiscount,0) <> 0)
+										AND (ISNULL(CH.dblEditableOutsideFuelDiscount,0) <> 0) --OR ISNULL(CH.dblEditableInsideFuelDiscount,0) <> 0)
 						END
 				END
 				----------------------------------------------------------------------
@@ -5324,7 +5325,7 @@ BEGIN
 												,[intShipmentId]			= NULL
 												,[intTransactionId]			= NULL
 												,[intEntityId]				= @intCurrentUserId
-												,[ysnResetDetails]			= CASE
+												,[ysnResetDetails]			= CASE 
 																				WHEN @intCurrentInvoiceId IS NOT NULL
 																					THEN CAST(0 AS BIT)
 																				ELSE CAST(1 AS BIT)
@@ -6214,6 +6215,50 @@ BEGIN
 				----------------- RECEIVE LOTTERY  -------------------
 				------------------------------------------------------
 
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
+				INSERT INTO		tblTMTankReading (intConcurrencyId, dtmDateTime, intReadingSource, intTankNumber, dblFuelVolume, intCheckoutId, ysnManual, intSiteId, intDeviceId, intDeviceTankMonitorId, strSerialNumber)
+                SELECT			1 as intConcurrencyId, 
+								dtmFuelInventoryDate, 
+								CASE
+									WHEN ysnIsManualEntry = 0
+									THEN 2
+									WHEN ysnIsManualEntry = 1
+									THEN 3
+									ELSE 1
+									END as intReadingSource,
+								storeFuelTank.intRegisterTankNumber as intTankNumber, 
+								dblGallons, 
+								intCheckoutId,
+								CASE
+									WHEN ysnIsManualEntry = 0
+									THEN 0
+									WHEN ysnIsManualEntry = 1
+									THEN 1
+									ELSE 1
+									END as ysnManual,
+								siteDevice.intSiteID,
+								fuelInventory.intDeviceId,
+								siteDeviceTankMonitor.intDeviceTankMonitorId,
+								tankMonitorDevice.strSerialNumber                
+				FROM			tblSTCheckoutFuelInventory fuelInventory
+				INNER JOIN		tblTMDevice device
+				ON				fuelInventory.intDeviceId = device.intDeviceId
+				INNER JOIN		tblSTStoreFuelTanks storeFuelTank
+				ON				fuelInventory.intDeviceId = storeFuelTank.intDeviceId
+				LEFT JOIN		tblTMSiteDevice siteDevice 
+				ON				fuelInventory.intDeviceId = siteDevice.intDeviceId
+				LEFT JOIN		tblTMSiteDeviceTankMonitor siteDeviceTankMonitor
+				ON				siteDevice.intSiteID = siteDeviceTankMonitor.intSiteId
+				LEFT JOIN		tblTMDeviceTankMonitor deviceTankMonitor
+				ON				siteDeviceTankMonitor.intDeviceTankMonitorId = deviceTankMonitor.intDeviceTankMonitorId
+				LEFT JOIN		tblTMDevice tankMonitorDevice
+				ON				tankMonitorDevice.intDeviceId = deviceTankMonitor.intDeviceId
+                WHERE			fuelInventory.intCheckoutId = @intCheckoutId
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
 
 				----------------------------------------------------------------------
 				------------------------------- POST ---------------------------------
@@ -6360,7 +6405,9 @@ BEGIN
 											,[dblSubCurrencyRate]
 											,[dblCurrencyExchangeRate]
 											,[ysnRecap]
-											,[intSubLocationId])
+											,[intSubLocationId]
+											,[intCompanyLocationSubLocationId]
+											)
 										SELECT 
 											ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 											,[strTransactionType]
@@ -6453,6 +6500,7 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[ysnRecap]
 											,[intSubLocationId]
+											,[intCompanyLocationSubLocationId]
 										FROM @EntriesForInvoice
 
 
@@ -6899,7 +6947,7 @@ IF(@ysnDebug = 1)
 								(
 									SELECT
 											CASE
-											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+												WHEN (@strInvoiceTransactionTypeMain = @strCASH)
 													THEN CASE
 														WHEN Inv.dblInvoiceTotal = (
 															(CASE
@@ -7013,7 +7061,15 @@ IF(@ysnDebug = 1)
 																	THEN CH.dblTotalDeposits
 															END) 
 														- CH.dblCustomerPayments + CH.dblATMReplenished)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+															THEN 
+																CASE 
+																	WHEN @ysnConsignmentStore = 1
+																	THEN
+																		'The Sum of the Methods of Payments - Gross Fuel Sales + Dealer''s Commissions is not equal to the calculated Bank Deposit/Draft. Posting will not continue: Total Variance: ' +
+																		CAST(ISNULL(dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId), 0) 
+																		- (ISNULL(dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId), 0) + ISNULL(dbo.fnSTGetDealerCommission(@intCheckoutId), 0)) AS NVARCHAR(50))
+																	ELSE
+																		'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CASE
 																														WHEN @ysnConsignmentStore = 1
@@ -7026,6 +7082,7 @@ IF(@ysnDebug = 1)
 																															THEN CH.dblTotalDeposits
 																													END), 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																	END
 														WHEN Inv.dblInvoiceTotal < (
 														(CASE
 																WHEN @ysnConsignmentStore = 1
@@ -7081,19 +7138,28 @@ IF(@ysnDebug = 1)
 																	THEN CH.dblTotalDeposits
 															END)
 														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
-																														WHEN @ysnConsignmentStore = 1
-																															THEN (CASE
-																																	WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
-																																		THEN @dblConsTotalDeposits
-																																	ELSE CH.dblTotalDeposits
-																																END)
-																														WHEN @ysnConsignmentStore = 0
-																															THEN CH.dblTotalDeposits
-																													END) * -1), 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+															THEN 
+																CASE 
+																	WHEN @ysnConsignmentStore = 1
+																	THEN
+																		'The Sum of the Methods of Payments - Gross Fuel Sales + Dealer''s Commissions is not equal to the calculated Bank Deposit/Draft. Posting will not continue: Total Variance: ' +
+																		CAST(ISNULL(dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId), 0) 
+																		- (ISNULL(dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId), 0) + ISNULL(dbo.fnSTGetDealerCommission(@intCheckoutId), 0)) AS NVARCHAR(50))
+																	ELSE
+																		'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																						+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																						+ 'Total Deposits: ' + CAST(ISNULL(((CASE
+																																WHEN @ysnConsignmentStore = 1
+																																	THEN (CASE
+																																			WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
+																																				THEN @dblConsTotalDeposits
+																																			ELSE CH.dblTotalDeposits
+																																		END)
+																																WHEN @ysnConsignmentStore = 0
+																																	THEN CH.dblTotalDeposits
+																															END) * -1), 0) AS NVARCHAR(50)) + '<br>'
+																						+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																	END
 														WHEN Inv.dblInvoiceTotal < ((
 														(CASE
 																WHEN @ysnConsignmentStore = 1
@@ -7969,21 +8035,30 @@ IF(@ysnDebug = 1)
 																	THEN CH.dblTotalDeposits
 															END)
 														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
-															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
-																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
-																														WHEN @ysnConsignmentStore = 1
-																															THEN (CASE
-																																	WHEN @strConsInvoiceType = 'Invoice' AND CH.dblTotalDeposits > 0
+															THEN 
+																CASE 
+																	WHEN @ysnConsignmentStore = 1
+																	THEN
+																		'The Sum of the Methods of Payments - Gross Fuel Sales + Dealer''s Commissions is not equal to the calculated Bank Deposit/Draft. Posting will not continue: Total Variance: ' +
+																		CAST(ISNULL(dbo.fnSTTotalAmountOfDepositablePaymentMethods(@intCheckoutId), 0) 
+																		- (ISNULL(dbo.fnSTGetGrossFuelSalesByCheckoutId(@intCheckoutId), 0) + ISNULL(dbo.fnSTGetDealerCommission(@intCheckoutId), 0)) AS NVARCHAR(50))
+																	ELSE
+																		'Total of Sales Invoice is higher than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
+																							+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																							+ 'Total Deposits: ' + CAST(ISNULL(((CASE
+																																	WHEN @ysnConsignmentStore = 1
+																																		THEN (CASE
+																																				WHEN @strConsInvoiceType = 'Invoice' AND CH.dblTotalDeposits > 0
+																																					THEN CH.dblTotalDeposits
+																																				WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
+																																					THEN @dblConsTotalDeposits
+																																				ELSE 0 --CH.dblTotalDeposits
+																																			END)
+																																	WHEN @ysnConsignmentStore = 0
 																																		THEN CH.dblTotalDeposits
-																																	WHEN @strConsInvoiceType = 'CSFuelInvoice' AND CH.dblTotalDeposits < 1
-																																		THEN @dblConsTotalDeposits
-																																	ELSE 0 --CH.dblTotalDeposits
-																																END)
-																														WHEN @ysnConsignmentStore = 0
-																															THEN CH.dblTotalDeposits
-																													END) * -1), 0) AS NVARCHAR(50)) + '<br>'
-																				+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																																END) * -1), 0) AS NVARCHAR(50)) + '<br>'
+																							+ 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+																	END
 														WHEN Inv.dblInvoiceTotal < ((
 														(CASE
 																WHEN @ysnConsignmentStore = 1
@@ -8750,6 +8825,14 @@ IF(@ysnDebug = 1)
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
+				DELETE FROM tblTMTankReading WHERE intCheckoutId = @intCheckoutId
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
+
 				----------------------------------------------------------------------
 				--------------- START UN-POST RECEIVE PAYMENTS -----------------------
 				----------------------------------------------------------------------

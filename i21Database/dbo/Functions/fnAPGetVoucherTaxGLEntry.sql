@@ -24,7 +24,15 @@ RETURNS TABLE AS RETURN
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
-		,CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL 
+		,CASE WHEN D.ysnTaxExempt = 1
+			THEN (
+				CASE WHEN D.dblAdjustedTax < D.dblTax THEN tc.intPurchaseTaxExemptionAccountId ELSE 
+					CASE WHEN tc.ysnExpenseAccountOverride = 1 THEN dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Other Charge Expense')
+					ELSE tc.intPurchaseTaxAccountId END
+				END
+			)
+		ELSE
+			CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL 
 						AND receiptItem.intTaxGroupId > 0 
 						AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
 				 OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
@@ -34,6 +42,7 @@ RETURNS TABLE AS RETURN
 				 AND B.intTaxGroupId = receiptItem.intTaxGroupId
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
+			END 
 		END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
 		,G.strCurrencyExchangeRateType
@@ -42,6 +51,8 @@ RETURNS TABLE AS RETURN
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBillDetailTax D
 		ON B.intBillDetailId = D.intBillDetailId
+	INNER JOIN tblSMTaxCode tc
+		ON D.intTaxCodeId = tc.intTaxCodeId
 	LEFT JOIN tblICInventoryReceiptItem receiptItem
 		ON B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceiptCharge charges
@@ -73,6 +84,7 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15)
 	AND D.strCalculationMethod != 'Using Texas Fee Matrix'
+	AND D.ysnTaxExempt = 0
 	-- AND D.dblTax != 0
 	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
 	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
@@ -104,4 +116,5 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3,15)
 	AND D.strCalculationMethod = 'Using Texas Fee Matrix'
+	AND D.ysnTaxExempt = 0
 )

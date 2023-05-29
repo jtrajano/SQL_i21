@@ -128,10 +128,10 @@ LEFT OUTER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGL.[intLoadId] = ARID.[intLoadId
 LEFT OUTER JOIN tblSCTicket T WITH (NOLOCK) ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARID.intItemUOMId = ICIUOM.intItemUOMId
  CROSS APPLY (
-     SELECT intItemUOMId 
+     SELECT TOP 1 intItemUOMId 
      FROM tblICItemUOM WITH (NOLOCK)
      WHERE intItemId = ARID.intItemId
-     AND ysnStockUnit = 1
+     ORDER BY ysnStockUnit DESC
  ) ICIUOM_STOCK
 WHERE ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
@@ -233,10 +233,10 @@ INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intBundleItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.intBundleItemId = ICI.[intItemId]
 CROSS APPLY (
-     SELECT intItemUOMId 
+     SELECT TOP 1 intItemUOMId 
      FROM tblICItemUOM WITH (NOLOCK)
      WHERE intItemId = ARID.intItemId
-     AND ysnStockUnit = 1
+     ORDER BY ysnStockUnit DESC
  ) ICIUOM_STOCK
 LEFT OUTER JOIN tblICItemUOM ICIUOM WITH (NOLOCK) ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
 LEFT JOIN tblICCategory CAT ON ICI.intCategoryId = CAT.intCategoryId

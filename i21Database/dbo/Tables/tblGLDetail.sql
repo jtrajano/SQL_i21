@@ -64,7 +64,7 @@
 GO
 CREATE NONCLUSTERED INDEX [IX_tblGLDetail_Valuation]
 	ON [dbo].[tblGLDetail]([strTransactionId], [strBatchId])
-	INCLUDE (dtmDate, strTransactionType);
+	INCLUDE (dtmDate, strTransactionType, ysnIsUnposted, strCode);
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblEMEntityCredential_9_1290448367__K2_3] ON [dbo].[tblEMEntityCredential]

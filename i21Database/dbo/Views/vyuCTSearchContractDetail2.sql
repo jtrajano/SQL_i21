@@ -1,4 +1,4 @@
-﻿Create VIEW [dbo].[vyuCTSearchContractDetail2]  
+﻿CREATE VIEW [dbo].[vyuCTSearchContractDetail2]  
   
 AS  
   
@@ -59,7 +59,7 @@ WITH shipmentstatus AS (
           WHEN ISNULL(eee.dblUnitQty, 0) = ISNULL(fff.dblUnitQty, 0) THEN ddd.dblRepresentingQty  
           ELSE ddd.dblRepresentingQty * (ISNULL(eee.dblUnitQty, 0) / ISNULL(fff.dblUnitQty, 0)) END)  
   FROM tblCTContractDetail ccc WITH(NOLOCK)  
-   inner join tblQMSample ddd WITH(NOLOCK) on ddd.intProductValueId = ccc.intContractDetailId and ddd.intTypeId = 1  
+   inner join tblQMSample ddd WITH(NOLOCK) on ddd.intContractDetailId = ccc.intContractDetailId and ddd.intTypeId = 1  
    inner join tblICItemUOM eee WITH(NOLOCK) on eee.intUnitMeasureId = ddd.intRepresentingUOMId  
    inner join tblICItemUOM fff WITH(NOLOCK) on fff.intItemId = ccc.intItemId and fff.intUnitMeasureId = ccc.intUnitMeasureId  
      
@@ -360,6 +360,7 @@ SELECT a.intContractDetailId
  , strFeedPriceCurrency = FCU.strCurrency  
  , ysnApprovedCT = SMTR.ysnApproved
  , strApprovalStatus = SMTR.strApprovalStatus
+ , LL.strName AS strLogisticsLeadName
 FROM tblCTContractDetail a WITH(NOLOCK)  
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId  
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId  
@@ -472,6 +473,7 @@ LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
 LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- CT-5315  
 --OUTER APPLY dbo.fnCTGetSampleDetail(a.intContractDetailId) QA  
 LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = a.intItemId  
+LEFT JOIN tblEMEntity LL on LL.intEntityId = a.intLogisticsLeadId
 LEFT JOIN (  
     SELECT *  
     FROM  

@@ -112,6 +112,14 @@ BEGIN
 				WHERE (DebitScale.Passed = -1 OR CreditScale.Passed = -1)
 				AND @ysnPost = 1
 				AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')
+				UNION
+				SELECT A.strTransactionId, strTransactionId strText,60018, MIN(A.strModuleName)
+				FROM	@GLEntriesToValidate A JOIN tblGLAccount B
+				ON A.intAccountId = B.intAccountId
+				WHERE EXISTS( SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption WHERE ysnRestrictCompanyOOB = 1)
+				GROUP BY intCompanySegmentId, A.strTransactionId
+				HAVING SUM(dblDebit - dblCredit) <> 0
+
 		) --END WITH
 		INSERT INTO @tbl 
 		SELECT strTransactionId

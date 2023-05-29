@@ -15,6 +15,8 @@ print 'BEGIN POST DEPLOYMENT'
 
 
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
+GO
+print 'Test'
 :r .\SetInLineToOff.sql
 :r .\EncryptionDataFix.sql
 
@@ -638,6 +640,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\49_FileFieldMapping_Radiant_Department.sql
 :r .\ST\51_FileFieldMapping_Commander_Validate.sql
 :r .\ST\52_FileFieldMapping_Commander_Category.sql
+:r .\ST\53_FileFieldMapping_Passport_FGMA.sql
+:r .\ST\54_FileFieldMapping_Passport_FGMD.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\40_Rename_And_Alter_int_trl_dept_number.sql

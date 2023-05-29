@@ -43,6 +43,7 @@ SELECT CP.intCompanyPreferenceId
 	, CP.intAdjustmentAccountId
 	, GLA.strAccountId strAdjustmentAccountId
 	, CP.dblAdjustmentTolerance
+	, CP.ysnIncludeSurchargeInQuote
 	, CP.ysnAllowBlankDriver
 	, CP.ysnAllowBlankTruck
 	, CP.ysnAllowBlankTrailer

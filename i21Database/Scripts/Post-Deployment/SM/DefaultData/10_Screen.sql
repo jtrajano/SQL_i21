@@ -400,11 +400,11 @@ GO
        IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.CheckoutHeader')
               BEGIN
                      INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
-                     VALUES (N'', N'Checkouts', N'Store.view.CheckoutHeader', N'Store', N'', 0, N'Store')
+                     VALUES (N'', N'End of Day', N'Store.view.CheckoutHeader', N'Store', N'', 0, N'Store')
               END    
        ELSE
               BEGIN
-                     UPDATE tblSMScreen SET strScreenName = N'Checkouts', strModule = N'Store', strGroupName = N'Store'  WHERE strNamespace = 'Store.view.CheckoutHeader'
+                     UPDATE tblSMScreen SET strScreenName = N'End of Day', strModule = N'Store', strGroupName = N'Store'  WHERE strNamespace = 'Store.view.CheckoutHeader'
               END
        --- Promotion Item List
        IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Store.view.PromotionItemList')

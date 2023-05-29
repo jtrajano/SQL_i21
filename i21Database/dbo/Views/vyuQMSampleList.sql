@@ -5,7 +5,7 @@ SELECT S.intSampleId
 	,S.strSampleRefNo
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
-	,CH1.strContractNumber AS strContract
+	,ISNULL(CH1.strContractNumber, CH.strContractNumber) AS strContract
 	,dbo.fnQMGetAssignedSequences(S.intSampleId) COLLATE Latin1_General_CI_AS AS strAssignedSequences
 	,CY.strCommodityCode
 	,CY.strDescription AS strCommodityDescription
@@ -225,7 +225,7 @@ SELECT S.intSampleId
 	, PackageType.strUnitMeasure AS strPackageType
 	, ISNULL(S.strCourierRef, strAirwayBillCode) AS strAirwayBillCode 
 	, Batch.strTaster 
-	, S.ysnBought
+	, ISNULL(S.ysnBought, 0) AS ysnBought 
 	, SeasonCropYear.strCropYear AS strSeasonCropYear
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId

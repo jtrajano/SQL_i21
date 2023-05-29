@@ -1069,10 +1069,14 @@ BEGIN
 		WHERE POSP.strPaymentMethod IN ('Cash', 'Check')
 			AND ( (POS.strPOSType = 'Returned' OR POS.strPOSType = 'Return')
 				OR POS.strPOSType = 'Mixed' AND POSP.dblAmount < 0 )
+
 		UPDATE tblARPOSEndOfDay
 		SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) + ISNULL(@dblCashReceipt, 0)
 			, dblCashReturn			 = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturn, 0)
 		WHERE intPOSEndOfDayId = @intPOSEndOfDayId
+
+		IF @InitTranCount = 0
+			COMMIT TRANSACTION
 	END TRY
 	BEGIN CATCH
 		SELECT @strErrorMsg = ERROR_MESSAGE()					

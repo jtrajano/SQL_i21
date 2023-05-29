@@ -40,7 +40,8 @@ DECLARE @queryString NVARCHAR(MAX)
 DECLARE @intSubRowDetailId NVARCHAR(MAX)  
 DECLARE @strCurrency NVARCHAR(50)    
 DECLARE @strQuery NVARCHAR(max)        
-DECLARE @ysnUnnaturalAccount INT = 0  
+DECLARE @ysnUnnaturalAccount INT = 0    
+DECLARE @queryStringFilter NVARCHAR(MAX)  
 DECLARE @hasAccount BIT 
 
 CREATE TABLE #tempGLAccount (
@@ -133,11 +134,16 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 
 		IF @intSegmentCode <> 0
 			BEGIN	
-				INSERT INTO #tempGLAccount    		
-				SELECT T0.* FROM #tempGLAccount2 T0
-				INNER JOIN tblGLTempCOASegment T1
-				ON T0.intAccountId = T1.intAccountId
-				WHERE T1.Location in (select strSegmentCode from tblFRSegmentFilterGroupDetail where intSegmentFilterGroupId = @intSegmentCode)
+
+				SET @queryStringFilter = ' WHERE ' + (SELECT TOP 1 strFilterString FROM tblFRSegmentFilterGroup WHERE  intSegmentFilterGroupId = @intSegmentCode)   
+
+				SET @queryStringFilter =  'SELECT T0.* FROM #tempGLAccount2 T0  
+				INNER JOIN tblGLTempCOASegment T1  
+				ON T0.intAccountId = T1.intAccountId   ' + @queryStringFilter
+	    
+				INSERT INTO #tempGLAccount        
+				EXEC (@queryStringFilter)         	
+
 			END	
 		ELSE	
 			BEGIN	

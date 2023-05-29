@@ -37,7 +37,7 @@ BEGIN TRY
     UPDATE S
     SET strBatchNo = NULL
     FROM tblQMSample S
-    INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+    INNER JOIN tblMFBatch B ON B.strBatchId = S.strBatchNo AND B.intLocationId = S.intCompanyLocationId
     WHERE B.strBatchId = @strBatchId
     AND (B.intLocationId = @intLocationId OR B.intBuyingCenterLocationId = @intLocationId)
 

@@ -61,12 +61,10 @@ BEGIN TRY
 	-- From Location Code
 	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Receiving Storage Location
-	LEFT JOIN (
-		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
-		) ON IMP.strReceivingStorageLocation IS NOT NULL
+	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND TBO2.strLocationName = IMP.strBuyingCenter
-	
+		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
@@ -210,7 +208,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						BOOK.intBookId IS NULL
-						--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
@@ -231,12 +229,14 @@ BEGIN TRY
 				END+ CASE 
 				WHEN (
 						FROM_LOC_CODE.intCityId IS NULL
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'FROM LOCATION CODE, '
 				ELSE ''
 				END +CASE 
 				WHEN (
 						RSL.intCompanyLocationSubLocationId IS NULL
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'RECEIVING STORAGE LOCATION, '
 				ELSE ''
@@ -348,6 +348,7 @@ BEGIN TRY
 			OR (
 				BOOK.intBookId IS NULL
 				--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+				AND ISNULL(IMP.ysnBought, 0) = 1
 				)
 			OR (
 				CURRENCY.intCurrencyID IS NULL
@@ -356,11 +357,17 @@ BEGIN TRY
 			OR (
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
+				AND ISNULL(IMP.ysnBought, 0) = 1
 				)
-				OR FROM_LOC_CODE.intCityId IS NULL
-				OR RSL.intCompanyLocationSubLocationId IS NULL
-				
-			)
+			OR (
+				FROM_LOC_CODE.intCityId IS NULL
+				AND ISNULL(IMP.ysnBought, 0) = 1
+				)
+			OR (
+				RSL.intCompanyLocationSubLocationId IS NULL
+				AND ISNULL(IMP.ysnBought, 0) = 1
+				)
+		)
 
 	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
@@ -515,11 +522,10 @@ BEGIN TRY
 		-- From Location Code
 		LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 		-- Receiving Storage Location
-		LEFT JOIN (
-		tblSMCompanyLocationSubLocation RSL INNER JOIN tblSMCompanyLocation TBO2 ON TBO2.intCompanyLocationId = RSL.intCompanyLocationId
-		) ON IMP.strReceivingStorageLocation IS NOT NULL
+		LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+		LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND TBO2.strLocationName = IMP.strBuyingCenter
+		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
 		) ON SY.strSaleYear = IMP.strSaleYear
 		AND CL.strLocationName = IMP.strBuyingCenter
 		AND S.strSaleNumber = IMP.strSaleNumber
@@ -768,6 +774,7 @@ BEGIN TRY
 			,ysnTeaOrganic
 			,dblTeaTaste
 			,dblTeaVolume
+			,strFines
 			,intTealingoItemId
 			,dtmWarehouseArrival
 			,intYearManufacture
@@ -799,6 +806,14 @@ BEGIN TRY
 			,dtmShippingDate
 			,intCountryId
 			,intSupplierId
+
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -850,7 +865,7 @@ BEGIN TRY
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = S.intItemId
+			,intOriginalItemId = BT.intTealingoItemId
 			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblSampleQty
@@ -899,7 +914,8 @@ BEGIN TRY
 					THEN NULL
 				ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
 				END
-			,dblTeaVolume = NULL
+			,dblTeaVolume = CASE WHEN ISNULL(VOLUME.strPropertyValue, '') = '' THEN NULL ELSE VOLUME.strPropertyValue END
+			,strFines = CASE WHEN ISNULL(FINES.strPropertyValue, '') = '' THEN NULL ELSE FINES.strPropertyValue END
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture = Datepart(YYYY,S.dtmManufacturingDate)
@@ -931,6 +947,14 @@ BEGIN TRY
 			,dtmShippingDate=@dtmShippingDate
 			,intCountryId=ORIGIN.intCountryID 
 			,intSupplierId=S.intEntityId
+
+			,dblOriginalTeaTaste = BT.dblTeaTaste
+			,dblOriginalTeaHue = BT.dblTeaHue
+			,dblOriginalTeaIntensity = BT.dblTeaIntensity
+			,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
+			,dblOriginalTeaAppearance = BT.dblTeaAppearance
+			,dblOriginalTeaVolume = BT.dblTeaVolume
+			,dblOriginalTeaMoisture = BT.dblTeaMoisture
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -943,6 +967,7 @@ BEGIN TRY
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
+		LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intLocationId = S.intCompanyLocationId AND BT.intLocationId = BT.intBuyingCenterLocationId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -997,6 +1022,24 @@ BEGIN TRY
 				AND P.strPropertyName = 'Moisture'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOISTURE
+		--Volume
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Volume'
+			WHERE TR.intSampleId = S.intSampleId
+			) VOLUME
+		--Fines
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Fines'
+			WHERE TR.intSampleId = S.intSampleId
+			) FINES
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
@@ -1016,6 +1059,7 @@ BEGIN TRY
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			AND IsNULL(S.dblB1QtyBought, 0) > 0
+			AND IsNULL(S.ysnBought, 0) = 1
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
@@ -1071,6 +1115,8 @@ BEGIN TRY
 					,dblOriginalTeaIntensity = dblTeaIntensity
 					,dblOriginalTeaMouthfeel = dblTeaMouthFeel
 					,dblOriginalTeaAppearance = dblTeaAppearance
+					,dblOriginalTeaVolume = dblTeaVolume
+					,dblOriginalTeaMoisture = dblTeaMoisture
 					,strPlant=L.strVendorRefNoPrefix
 				FROM @MFBatchTableType B
 				JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId

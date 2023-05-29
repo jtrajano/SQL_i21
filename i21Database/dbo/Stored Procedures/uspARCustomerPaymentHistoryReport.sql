@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerPaymentHistoryReport]
-	@xmlParam NVARCHAR(MAX) = NULL,
-	@customerId INT = NULL
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -22,26 +21,28 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	END
 
 -- Declare the variables.
-DECLARE @dtmDateTo				DATETIME
-      , @dtmDateFrom			DATETIME
-	  , @strCustomerName		NVARCHAR(100)
-	  , @strRecordNumberFrom	NVARCHAR(100)
-	  , @strRecordNumberTo		NVARCHAR(100)
-	  , @strInvoiceNumberFrom	NVARCHAR(100)
-	  , @strInvoiceNumberTo		NVARCHAR(100)
-	  , @strPaymentMethod		NVARCHAR(100)
-	  , @xmlDocumentId			INT
-	  , @query					NVARCHAR(MAX)
-	  , @filter					NVARCHAR(MAX) = ''
-	  , @fieldname				NVARCHAR(50)
-	  , @condition				NVARCHAR(20)
-	  , @id						INT 
-	  , @from					NVARCHAR(100)
-	  , @to						NVARCHAR(100)
-	  , @join					NVARCHAR(10)
-	  , @begingroup				NVARCHAR(50)
-	  , @endgroup				NVARCHAR(50)
-	  , @datatype				NVARCHAR(50)
+DECLARE @dtmDateTo					DATETIME
+      , @dtmDateFrom				DATETIME
+	  , @strCustomerName			NVARCHAR(100)
+	  , @strRecordNumberFrom		NVARCHAR(100)
+	  , @strRecordNumberTo			NVARCHAR(100)
+	  , @strRecordNumberCondition	NVARCHAR(100)
+	  , @strInvoiceNumberFrom		NVARCHAR(100)
+	  , @strInvoiceNumberTo			NVARCHAR(100)
+	  , @strInvoiceNumberCondition	NVARCHAR(100)
+	  , @strPaymentMethod			NVARCHAR(100)
+	  , @xmlDocumentId				INT
+	  , @query						NVARCHAR(MAX)
+	  , @filter						NVARCHAR(MAX) = ''
+	  , @fieldname					NVARCHAR(50)
+	  , @condition					NVARCHAR(20)
+	  , @id							INT 
+	  , @from						NVARCHAR(100)
+	  , @to							NVARCHAR(100)
+	  , @join						NVARCHAR(10)
+	  , @begingroup					NVARCHAR(50)
+	  , @endgroup					NVARCHAR(50)
+	  , @datatype					NVARCHAR(50)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -81,11 +82,13 @@ WHERE	[fieldname] IN ('strName', 'strCustomerName')
 
 SELECT  @strRecordNumberFrom = ISNULL([from], '')
 	  , @strRecordNumberTo = ISNULL([to], '')
+	  , @strRecordNumberCondition = ISNULL([condition], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strRecordNumber'
 
 SELECT  @strInvoiceNumberFrom = ISNULL([from], '')
 	  , @strInvoiceNumberTo = ISNULL([to], '')
+	  , @strInvoiceNumberCondition = ISNULL([condition], '')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strInvoiceNumber'
 
@@ -179,7 +182,7 @@ WHERE @strCustomerName IS NULL
    OR (@strCustomerName IS NOT NULL AND EC.strName = @strCustomerName)
 
 --RECORD NUMBER FILTERS
-IF @strRecordNumberFrom IS NOT NULL
+IF ISNULL(@strRecordNumberFrom, '') <> ''
 	BEGIN
 		SELECT TOP 1 @intRecordNumberFrom = P.intPaymentId
 		FROM tblARPayment P
@@ -193,7 +196,7 @@ ELSE
 		INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 	END
 
-IF @strRecordNumberTo IS NOT NULL
+IF ISNULL(@strRecordNumberTo, '') <> ''
 	BEGIN
 		SELECT TOP 1 @intRecordNumberTo = intPaymentId
 		FROM tblARPayment P
@@ -207,8 +210,13 @@ ELSE
 		INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 	END
 
+IF UPPER(ISNULL(@strRecordNumberCondition, '')) = 'EQUAL TO' AND @intRecordNumberFrom IS NOT NULL
+	BEGIN
+		SET @intRecordNumberTo = @intRecordNumberFrom
+	END
+
 --INVOICE NUMBER FILTERS
-IF @strInvoiceNumberFrom IS NOT NULL
+IF ISNULL(@strInvoiceNumberFrom, '') <> ''
 	BEGIN
 		SELECT TOP 1 @intInvoiceNumberFrom = intInvoiceId
 		FROM tblARInvoice I
@@ -222,7 +230,12 @@ ELSE
 		INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 	END
 
-IF @strInvoiceNumberTo IS NOT NULL
+IF UPPER(ISNULL(@strInvoiceNumberCondition, '')) = 'EQUAL TO' AND @intInvoiceNumberFrom IS NOT NULL
+	BEGIN
+		SET @intInvoiceNumberTo = @intInvoiceNumberFrom
+	END
+
+IF ISNULL(@strInvoiceNumberTo, '') <> ''
 	BEGIN
 		SELECT TOP 1 @intInvoiceNumberTo = intInvoiceId
 		FROM tblARInvoice I
