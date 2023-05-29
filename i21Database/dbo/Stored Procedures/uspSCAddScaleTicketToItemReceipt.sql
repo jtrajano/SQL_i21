@@ -897,14 +897,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 															), 2
 												)
 											) 
-									ELSE ABS(
-												ROUND(
-														dbo.fnMultiply(
-															dbo.fnDivide(RE.dblQty , SC.dblNetUnits)
-																, ISNULL(LoadCost.dblRate, LoadCost.dblAmount)
-															), 2
-												)
-											) END 
+									ELSE  ABS(ISNULL(LoadCost.dblRate, LoadCost.dblAmount)) END 
 								,[dblCostUnitQty] = 1 -- need to clarify how to handle this
 														--CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemCostUOM.dblUnitQty,1) END
 								,[intCostUOMId] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN NULL ELSE LoadCost.intItemUOMId END
@@ -953,7 +946,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									AND ISNULL(LoadCost.ysnVendorPrepayment, 0) = 1
 									And ISNULL(LoadCost.ysnPrice, 0) = 0 
 									AND ISNULL(LoadCost.ysnAccrue, 0) = 0
-									AND RE.ysnIsStorage = 0
+									-- AND RE.ysnIsStorage = 0
 							
 							UNION ALL
 							-- FOR STORAGE DEBIT MEMO
@@ -992,14 +985,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 															), 2
 												)
 											) 
-									ELSE ABS(
-												ROUND(
-														dbo.fnMultiply(
-															dbo.fnDivide(RE.dblQty , SC.dblNetUnits)
-																, ISNULL(LoadCost.dblRate, LoadCost.dblAmount)
-															), 2
-												)
-											) END 
+									ELSE ABS(ISNULL(LoadCost.dblRate, LoadCost.dblAmount)) END 
 								,[dblCostUnitQty] = 1 -- need to clarify how to handle this
 														--CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemCostUOM.dblUnitQty,1) END
 								,[intCostUOMId] = CASE WHEN LoadCost.strCostMethod IN ('Amount','Percentage') THEN NULL ELSE LoadCost.intItemUOMId END

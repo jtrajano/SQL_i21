@@ -42,65 +42,58 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
+DECLARE  @tmpOpenInTransit TABLE
+(
+	dblTotal NUMERIC(18,6)
+	, intTransactionRecordHeaderId INT
+	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+)
+
 
 ;WITH OutTransit (
 	  dblQty
 	, intTransactionReferenceId
-	, intContractDetailId
-	
+	, strTransactionType
 ) AS (
 
 	SELECT 
-		dblQty = SUM(dblQty)
+		dblQty = ROUND(SUM(dblQty),2)
 		, intTransactionReferenceId
-		, intContractDetailId
+		, strTransactionType = strTransactionType COLLATE Latin1_General_CI_AS
 	FROM tblRKDPRInTransitHelperLog
 	WHERE dtmDate < = @dtmDate
 	AND intCommodityId = @intCommodityId
-	GROUP BY intTransactionReferenceId
-		, intContractDetailId
+	GROUP BY intTransactionReferenceId, strTransactionType
 )
 
 
+
+insert into @tmpOpenInTransit
+select dblTotal = (t.dblTotal + ISNULL(OT.dblQty, 0)), intTransactionRecordHeaderId, t.strTransactionType from (
+	select 
+		dblTotal = ROUND(SUM(SL.dblOrigQty),2)
+		, intTransactionRecordHeaderId
+		, strTransactionType
+	from vyuRKGetSummaryLog SL
+	WHERE strBucketType = 'Sales In-Transit'
+		and strTransactionType IN('Inventory Shipment','Outbound Shipment')
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), SL.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
+		AND ISNULL(SL.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(SL.intCommodityId, 0)) 
+		AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
+	GROUP BY intTransactionRecordHeaderId, strTransactionNumber, strTransactionType
+) t
+LEFT JOIN OutTransit OT 
+	ON OT.intTransactionReferenceId = t.intTransactionRecordHeaderId and OT.strTransactionType = t.strTransactionType
+WHERE (t.dblTotal + ISNULL(OT.dblQty, 0)) <> 0
+
+
+
 INSERT INTO @returntable
-SELECT    t.strBucketType
-		, t.dtmCreatedDate
-		, t.dtmTransactionDate
-		, dblTotal = (t.dblTotal + ISNULL(OT.dblQty, 0))
-		, t.intEntityId
-		, t.strEntityName
-		, t.intLocationId
-		, t.strLocationName
-		, t.intItemId
-		, t.strItemNo
-		, t.intCategoryId
-		, t.strCategoryCode
-		, t.intCommodityId
-		, t.strCommodityCode
-		, t.strTransactionNumber
-		, t.strTransactionType
-		, t.intTransactionRecordHeaderId
-		, t.intOrigUOMId
-		, t.intContractDetailId
-		, t.intContractHeaderId
-		, t.strContractNumber
-		, t.strContractSeq
-		, t.intTicketId
-		, t.strTicketNumber
-		, t.intFutureMarketId
-		, t.strFutureMarket
-		, t.intFutureMonthId
-		, t.strFutureMonth
-		, t.strDeliveryDate
-		, t.strType
-		, t.intCurrencyId
-		, t.strCurrency
-FROM (
 	SELECT
 		  c.strBucketType
-		, dtmCreatedDate = MAX(c.dtmCreatedDate)
+		, c.dtmCreatedDate
 		, c.dtmTransactionDate
-		, dblTotal = SUM(c.dblOrigQty)
+		, dblTotal = c.dblOrigQty
 		, c.intEntityId
 		, c.strEntityName
 		, c.intLocationId
@@ -130,50 +123,13 @@ FROM (
 		, intCurrencyId
 		, strCurrency
 	from vyuRKGetSummaryLog c
+	inner join @tmpOpenInTransit o on o.intTransactionRecordHeaderId = c.intTransactionRecordHeaderId and  o.strTransactionType = c.strTransactionType
 	where strBucketType = 'Sales In-Transit'
-	and strTransactionType = 'Inventory Shipment'
+	AND c.strTransactionType IN('Inventory Shipment','Outbound Shipment')
 	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 	AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 	AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
-	GROUP BY  c.strBucketType
-		, c.dtmTransactionDate
-		, c.intEntityId
-		, c.strEntityName
-		, c.intLocationId
-		, c.strLocationName
-		, c.intItemId
-		, c.strItemNo
-		, c.intCategoryId
-		, c.strCategoryCode
-		, c.intCommodityId
-		, c.strCommodityCode
-		, c.strTransactionNumber
-		, c.strTransactionType
-		, c.intTransactionRecordHeaderId
-		, c.intOrigUOMId
-		, c.intContractDetailId
-		, c.intContractHeaderId
-		, c.strContractNumber
-		, c.strContractSeq
-		, c.intTicketId
-		, c.strTicketNumber
-		, c.intFutureMarketId
-		, c.strFutureMarket
-		, c.intFutureMonthId
-		, c.strFutureMonth
-		, dtmEndDate 
-		, strBucketType 
-		, intCurrencyId
-		, strCurrency
-) t
-LEFT JOIN OutTransit OT 
-	ON OT.intTransactionReferenceId = t.intTransactionRecordHeaderId 
-	AND ( t.intContractDetailId IS NULL AND OT.intContractDetailId IS NULL
-			OR
-		 (t.intContractDetailId IS NOT NULL AND OT.intContractDetailId IS NOT NULL
-			AND OT.intContractDetailId = t.intContractDetailId)
-		)
-WHERE (t.dblTotal + ISNULL(OT.dblQty, 0)) <> 0
 
 RETURN
+
 END
