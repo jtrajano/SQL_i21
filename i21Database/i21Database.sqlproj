@@ -922,6 +922,8 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMTransactionInsertApprovalStatus.sql" />
     <Build Include="dbo\Functions\fnCTConvertPriceToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
+    <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
