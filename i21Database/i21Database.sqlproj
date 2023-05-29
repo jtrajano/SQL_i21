@@ -9773,4 +9773,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\AR\DefaultData\96_RebuildReportFields.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GR\Fix_intCommodityStockUOMId.sql" />
+  </ItemGroup>
 </Project>
