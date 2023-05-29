@@ -1137,6 +1137,13 @@ BEGIN
 		,A.intTransactionId
 	FROM dbo.fnAPValidateBillGLEntries(@GLEntries, @billIdGL) A
 
+	--Delete Invalid GL Entries
+	DELETE A
+	FROM @GLEntries A
+	INNER JOIN  @invalidGL B ON A.intTransactionId = B.intId
+	INNER JOIN tblAPPostResult C ON B.intId = C.intTransactionId
+	WHERE C.strMessage NOT LIKE '%success%' AND C.strBatchNumber = @batchId
+	
 	--DELETE INVALID
 	DELETE A
 	FROM #tmpPostBillData A
