@@ -76,7 +76,7 @@ BEGIN
 		INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = EFT.efeft_eft_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		LEFT  JOIN ssbnkmst OBNK ON OBNK.ssbnk_code = EFT.efeft_bnk_no
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE EFT.efeft_eft_type_cv = 'C' AND  CUS.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = CUS.intEntityId
+		WHERE BNK.intBankId IS NOT NULL AND EFT.efeft_eft_type_cv = 'C' AND  CUS.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = CUS.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType])
 
 		INSERT INTO [dbo].[tblEMEntityEFTInformation]
@@ -122,7 +122,7 @@ BEGIN
 		INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = EFT.efeft_eft_no COLLATE SQL_Latin1_General_CP1_CS_AS
 		LEFT  JOIN ssbnkmst OBNK ON OBNK.ssbnk_code = EFT.efeft_bnk_no
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityId
+		WHERE BNK.intBankId IS NOT NULL AND EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType])
 
 		CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
