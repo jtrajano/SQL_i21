@@ -431,6 +431,17 @@ BEGIN TRY
 			,intCustomerStorageId   = @intCustomerStorageId
 			,dblUnits				= @dblTotalUnitsForSettle
 			,intChargeAndPremiumId				= @intChargeAndPremiumId
+
+		UPDATE SS
+		SET intCommodityStockUomId = CO_UOM.intCommodityUnitMeasureId
+		FROM tblGRSettleStorage SS
+		INNER JOIN tblICItemUOM ITEM_UOM
+			ON ITEM_UOM.intItemUOMId = SS.intItemUOMId
+		INNER JOIN tblICCommodityUnitMeasure CO_UOM
+			ON CO_UOM.intCommodityId = SS.intCommodityId
+				AND CO_UOM.intUnitMeasureId = ITEM_UOM.intUnitMeasureId
+		WHERE SS.intParentSettleStorageId = @intSettleStorageId
+
 		DELETE FROM @MainSettleStorageToSave WHERE intSettleStorageKey = @intSettleStorageKey
 	END
 
