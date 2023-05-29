@@ -1079,6 +1079,35 @@ BEGIN
 
 	--handel error here as we do not get the error here
 	IF @totalRecords = 1 AND @isBatch = 0
+	DECLARE @invalidGL AS Id
+	DECLARE @billIdGL AS Id
+	INSERT INTO @billIdGL
+	SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+	--VALIDATE GL ENTRIES
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	OUTPUT inserted.intTransactionId INTO @invalidGL
+	SELECT
+		A.strError
+		,A.strTransactionType
+		,A.strTransactionId
+		,@batchId
+		,A.intTransactionId
+	FROM dbo.fnAPValidateBillGLEntries(@GLEntries, @billIdGL) A
+
+	--Delete Invalid GL Entries
+	DELETE A
+	FROM @GLEntries A
+	INNER JOIN  @invalidGL B ON A.intTransactionId = B.intId
+	INNER JOIN tblAPPostResult C ON B.intId = C.intTransactionId
+	WHERE C.strMessage NOT LIKE '%success%' AND C.strBatchNumber = @batchId
+	
+	--DELETE INVALID
+	DELETE A
+	FROM #tmpPostBillData A
+	INNER JOIN @invalidGL B ON A.intBillId = B.intId
+
+	IF EXISTS(SELECT 1 FROM #tmpPostBillData)
 	BEGIN
 		BEGIN TRY
 		EXEC uspGLBookEntries @GLEntries, @post
