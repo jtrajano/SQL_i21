@@ -308,7 +308,8 @@ BEGIN TRY
 			-- Template Sample Type
 			LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
 			-- Mixing Location
-			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+			LEFT JOIN tblSMCompanyLocation MU
+				ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
 			-- Batch MU
 			LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 				AND BATCH_MU.intLocationId = MU.intCompanyLocationId
@@ -513,6 +514,8 @@ BEGIN TRY
 						  , strComments3
 						  , intBrokerId
 						  , intPackageTypeId
+						  , intCurrencyId
+						  , intMarketZoneId
 						)
 						SELECT intConcurrencyId			= 1
 							 , intSampleTypeId			= @intTemplateSampleTypeId
@@ -577,6 +580,8 @@ BEGIN TRY
 							 , strComments3				= S.strComments3
 							 , intBrokerId				= S.intBrokerId
 							 , intPackageTypeId			= S.intPackageTypeId
+							 , intCurrencyId			= S.intCurrencyId
+							 , intMarketZoneId			= S.intMarketZoneId
 						FROM tblQMSample S
 						INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 						WHERE B.intBatchId = @intBatchId
@@ -760,13 +765,12 @@ BEGIN TRY
 			END
 		END
 
-		IF @intImportType = 2 
-			BEGIN
-				SELECT @intBookId = intBookId
-				FROM tblCTBook 
-				WHERE strBook = @strB1GroupNumber
-			END
-		
+		-- IF @intImportType = 2 
+		-- 	BEGIN
+		-- 		SELECT @intBookId = intBookId
+		-- 		FROM tblCTBook 
+		-- 		WHERE strBook = @strB1GroupNumber
+		-- 	END
 
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -780,7 +784,7 @@ BEGIN TRY
 			,intLastModifiedUserId = @intEntityUserId
 			,dtmLastModified = @dtmDateCreated
 			,intSampleStatusId = 3 -- Approved
-			,intBookId= Case When @intImportType=2 then @intBookId Else intBookId End 
+			-- ,intBookId = Case When @intImportType=2 then @intBookId Else intBookId End 
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -1233,7 +1237,7 @@ BEGIN TRY
 				,intBrokerId = S.intBrokerId
 				,intSupplierId = S.intEntityId
 				,strVendorLotNumber = S.strRepresentLotNumber
-				,intBuyingCenterLocationId = BT.intBuyingCenterLocationId
+				,intBuyingCenterLocationId = ISNULL(BT.intBuyingCenterLocationId, TBO.intCompanyLocationId)
 				,intStorageLocationId = S.intDestinationStorageLocationId
 				,intStorageUnitId = NULL
 				,intBrokerWarehouseId = NULL
@@ -1380,6 +1384,7 @@ BEGIN TRY
 			LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 			LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 			LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = @intMixingUnitLocationId
+			LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
 			LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 			LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
@@ -1527,7 +1532,7 @@ BEGIN TRY
 					,@intItemId = @intItemId
 
 				UPDATE tblQMSample
-				SET strBatchNo = @strBatchId
+				SET strBatchNo = ISNULL(@strBatchId, @strBatchNo)
 					,intProductTypeId = 13
 					,intProductValueId = @intBatchId
 				WHERE intSampleId = @intSampleId
