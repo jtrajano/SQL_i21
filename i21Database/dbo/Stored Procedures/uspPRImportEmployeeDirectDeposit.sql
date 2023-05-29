@@ -134,7 +134,7 @@ DECLARE @intBankId AS INT
 												(
 													@intEntityNo
 													-- ,(SELECT TOP 1 intBankId FROM tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)))
-													@intBankId,
+													,@intBankId
 													,@strBankName
 													,dbo.fnAESEncryptASym(@strAccountNumber)
 													,@strAccountType
