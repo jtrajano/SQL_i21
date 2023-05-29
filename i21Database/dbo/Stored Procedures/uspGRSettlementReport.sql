@@ -129,6 +129,8 @@ DECLARE @Settlement AS TABLE
 	,strSplitDescription					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strDSSplitNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,ysnPosted							BIT
+	,strPaymentRecordNumber				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,dtmDatePaid						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 )
 	
 DECLARE @tblPayment AS TABLE 
@@ -304,6 +306,8 @@ BEGIN
 				,strSplitDescription
 				,strDSSplitNumber
 				,ysnPosted
+				,strPaymentRecordNumber
+				,dtmDatePaid
 			)
 			/*-------------------------------------------------------
 			*********NON-STORAGE DISTRIBUTION FROM SCALE*************
@@ -476,6 +480,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -779,6 +785,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1049,6 +1057,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1355,6 +1365,8 @@ BEGIN
 				,strSplitDescription			= DS.strSplitDescription
 				,strDSSplitNumber				= ES.strSplitNumber
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1698,6 +1710,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1989,6 +2003,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -2257,6 +2273,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -2558,6 +2576,8 @@ BEGIN
 				,strSplitDescription			= DS.strSplitDescription
 				,strDSSplitNumber				= ES.strSplitNumber
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
