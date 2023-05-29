@@ -177,10 +177,13 @@ SELECT Lot.intLotId
 	 , Item.intCategoryId
 	 , LotStatus.strSecondaryStatus
 	 , LotInventory.dblReservedQtyInTBS					AS dblReservedQtyInTBS
-	 , CASE WHEN (NULLIF(Item.intUnitPerLayer,'') IS NULL OR Item.intUnitPerLayer = 0) AND (NULLIF(Item.intLayerPerPallet,'') IS NULL OR Item.intLayerPerPallet = 0) THEN 0
-			WHEN (CASE WHEN ISNULL(Lot.dblQty,0) > 0 THEN Lot.dblQty ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty) END) = 0 THEN 0
-			ELSE CAST(Lot.dblQty / (Item.intUnitPerLayer * Item.intLayerPerPallet) AS NUMERIC(18, 2))
-	   END AS dblNoOfPallet
+	 , CASE WHEN (NULLIF(Item.intUnitPerLayer, '') IS NULL OR Item.intUnitPerLayer = 0)
+         AND (NULLIF(Item.intLayerPerPallet, '') IS NULL OR Item.intLayerPerPallet = 0)
+         THEN 0 WHEN (CASE WHEN ISNULL(Lot.dblQty, 0) > 0 THEN Lot.dblQty
+              ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty)
+				  END) = 0 THEN 0WHEN Item.intUnitPerLayer * Item.intLayerPerPallet = 0 THEN 0
+					ELSE CAST(Lot.dblQty / (Item.intUnitPerLayer * Item.intLayerPerPallet) AS NUMERIC(18, 2))
+		END AS dblNoOfPallet
 	 , AuctionCenter.strLocationName AS strAuctionCenter
 	 , ISNULL(SaleYear.strSaleYear, Batch.intSalesYear) AS strSaleYear
 	 , Batch.intSales
