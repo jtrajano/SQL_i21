@@ -109,12 +109,7 @@ RETURNS TABLE AS RETURN
 		INNER JOIN tblEMEntityGroupDetail egd ON eg.intEntityGroupId = egd.intEntityGroupId
 		WHERE egd.intEntityId = forPay.intEntityVendorId
 	) entityGroup
-	-- WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
-	WHERE 1 = (
-							CASE WHEN ISNULL(@paymentMethodId,0) > 0 AND ISNULL(@paymentMethodId,0) NOT IN (3) THEN
-								CASE WHEN forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL THEN 1 ELSE 0 END
-							ELSE 1 END
-						)
+	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
 			ELSE 
