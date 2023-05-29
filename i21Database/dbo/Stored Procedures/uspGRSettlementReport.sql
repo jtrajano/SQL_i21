@@ -27,7 +27,8 @@ DECLARE	@strCompanyName		NVARCHAR(500)
 	,@strState				NVARCHAR(500)
 	,@strZip				NVARCHAR(500)
 	,@strCountry			NVARCHAR(500)
-	,@strPhone				NVARCHAR(500)			
+	,@strPhone				NVARCHAR(500)	
+	,@ysnExport				BIT		
 
 DECLARE @temp_xml_table TABLE 
 (
@@ -160,6 +161,37 @@ WHERE [fieldname] = 'intBankAccountId'
 SELECT @strTransactionId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strTransactionId'
+
+SELECT @strReportLogId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportLogId'
+
+SELECT @ysnExport = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnExport'
+
+DECLARE @cnt INT
+SELECT @cnt= COUNT(*) FROM tblSRReportLog WHERE strReportLogId = @strReportLogId
+
+IF ISNULL(@ysnExport,0) = 0
+BEGIN
+	IF @strReportLogId IS NOT NULL
+	BEGIN
+		IF @cnt > 0
+		BEGIN
+			RETURN
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
+		END
+	END
+END
+ELSE
+BEGIN
+	IF @cnt > 1
+		RETURN
+END
 
 SET @strTransactionId = CASE 
 							 WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL
