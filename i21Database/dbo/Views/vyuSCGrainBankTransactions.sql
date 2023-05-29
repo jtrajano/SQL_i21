@@ -169,7 +169,11 @@
 	, STORAGE.intCustomerStorageId 
 	, STORAGE.intStorageTypeId 
 	, HISTORY.intStorageHistoryId
-	, -1 * case when GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId is not null and 
+	, CASE WHEN HISTORY.strType = 'Reduced By Invoice' THEN -1 
+		WHEN HISTORY.strType = 'Reverse By Invoice' THEN 1 
+		ELSE 1
+		END
+		* case when GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId is not null and 
 			GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId != UOM.intUnitMeasureId then
 			round(dbo.fnGRConvertQuantityToTargetItemUOM(
 									STORAGE.intItemId
