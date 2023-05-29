@@ -39,9 +39,10 @@ BEGIN TRY
 	DECLARE @intFutOptTransactionHeaderId INT
 	SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
 
-	EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'HEADER DELETE'
 	DELETE FROM tblRKFutOptTransactionHeader WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 	EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, @intFutOptTransactionHeaderId, @intUserId, 'HEADER DELETE'
+	EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'HEADER DELETE'
+
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
