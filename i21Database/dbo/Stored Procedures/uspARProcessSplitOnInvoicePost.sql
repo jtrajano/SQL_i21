@@ -65,6 +65,7 @@ BEGIN TRY
 	  AND I.strType <> 'Transport Delivery'
 	  AND ((I.strTransactionType IN ('Invoice', 'Credit Memo') AND I.strType = 'Standard') OR I.strTransactionType NOT IN ('Invoice', 'Credit Memo'))
 	  AND I.strSessionId = @strSessionId
+	  AND I.ysnSplitted = 0
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM #SPLITINVOICEDETAILS)
 		RETURN;
@@ -121,6 +122,7 @@ BEGIN TRY
 		, intOriginalInvoiceId
 		, strPONumber
 		, strBOLNumber
+		, ysnSplitted
 
 		, intItemId
 		, intItemUOMId
@@ -130,6 +132,8 @@ BEGIN TRY
 		, dblDiscount
 		, dblPrice
 		, ysnRecomputeTax
+		, intCustomerStorageId
+		, intStorageScheduleTypeId
 	)
 	SELECT intId				= I.intInvoiceId
 		, intSourceId			= I.intInvoiceId
@@ -151,6 +155,7 @@ BEGIN TRY
 		, intOriginalInvoiceId	= I.intInvoiceId
 		, strPONumber			= NULL--I.strPONumber
 		, strBOLNumber			= I.strBOLNumber
+		, ysnSplitted            = 1
 
 		, intItemId				= I.intItemId
 		, intItemUOMId			= I.intItemUOMId
@@ -160,6 +165,8 @@ BEGIN TRY
 		, dblDiscount			= I.dblDiscount
 		, dblPrice				= I.dblPrice
 		, ysnRecomputeTax		= 1
+		, intCustomerStorageId	= I.intCustomerStorageId
+		, intStorageScheduleTypeId	= I.intStorageScheduleTypeId
 	FROM #SPLITINVOICEDETAILS SD
 	INNER JOIN tblARPostInvoiceDetail I ON I.intInvoiceId = SD.intInvoiceId
 	WHERE I.intContractDetailId IS NULL
@@ -180,10 +187,9 @@ BEGIN TRY
 	  , intEntityCustomerId		= II.intSplitEntityId
 	  , intShipToLocationId		= SPLITENTITY.intShipToId
 	  , intBillToLocationId		= SPLITENTITY.intBillToId
-	  , intTermId				= SPLITENTITY.intTermsId
 	  , intEntityContactId		= SPLITENTITY.intEntityContactId
 	  , intEntitySalespersonId	= SPLITENTITY.intSalespersonId
-	  , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(I.dtmDate, SPLITENTITY.intTermsId)
+	  , dtmDueDate              = dbo.fnGetDueDateBasedOnTerm(I.dtmDate, I.intTermId)
 	  , dblAmountDue			= dblAmountDue * II.dblSplitPercent	  
 	  , dblInvoiceSubtotal		= dblInvoiceSubtotal * II.dblSplitPercent
 	  , dblInvoiceTotal			= dblInvoiceTotal * II.dblSplitPercent
