@@ -48,7 +48,9 @@ SELECT DE.intFutOptTransactionId
 										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
 										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0))
 										OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null)
-										OR ysnPosted = 1)
+										OR ysnPosted = 1
+										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLots,0) <> 0 OR ISNULL(dblHedgedLots,0) <>  0))
+										OR intFutOptTransactionId IN (SELECT DISTINCT intFutOptTransactionId FROM tblCTPriceFixationDetail WHERE intFutOptTransactionId is not null))
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
 	, dblAvailableContract = ISNULL(DE.dblPContractBalanceLots, 0.00)
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
