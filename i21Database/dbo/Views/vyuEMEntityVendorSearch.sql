@@ -81,6 +81,7 @@ SELECT DISTINCT
 	, intDefaultPayToBankAccountId		= NULL
 	, strDefaultPayToBankAccountNo		= NULL
 	, strPaymentInstructions			= NULL
+	, ysnUAP							= NULL
 FROM tblAPVendor Vendor
 INNER JOIN tblEMEntity entityToVendor ON Vendor.intEntityId = entityToVendor.intEntityId
 --LEFT JOIN tblEMEntity entityToSalesperson ON Vendor.intSalespersonId = entityToSalesperson.intEntityId
