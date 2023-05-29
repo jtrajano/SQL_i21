@@ -87,16 +87,16 @@ SELECT
 	strDocumentNumber					=	A.strDocumentNumber,
 	intPurchasingGroupId				=	F.intPurchasingGroupId,
 	strPurchasingGroup					=	A.strBook,
-	intNumOfPackagesUOM					=	CAST(A.dblWeightBreakup1 AS INT),
-	dblWeightBreakup1Bags				=	CAST(A.dblWeightBreakup1Bags AS DECIMAL(18,6)),
-	intNumOfPackagesUOM2				=	CAST(A.dblWeightBreakup2 AS INT),
-	dblWeightBreakup2Bags				=	CAST(A.dblWeightBreakup2Bags AS DECIMAL(18,6)),
-	intNumOfPackagesUOM3				=	CAST(A.dblWeightBreakup3 AS INT),
-	dblWeightBreakup3Bags				=	CAST(A.dblWeightBreakup3Bags AS DECIMAL(18,6)),
-	dblWeightBreakup4					=	A.dblWeightBreakup4,
-	dblWeightBreakup4Bags				=	A.dblWeightBreakup4Bags,
-	dblWeightBreakup5					=	A.dblWeightBreakup5,
-	dblWeightBreakup5Bags				=	A.dblWeightBreakup5Bags
+	dblWeightBreakup1Bags				=	CAST(A.dblWeightBreakup1 AS DECIMAL(18,6)),
+	intNumOfPackagesUOM					=	CAST(A.dblWeightBreakup1Bags AS INT),
+	dblWeightBreakup2Bags				=	CAST(A.dblWeightBreakup2 AS DECIMAL(18,6)),
+	intNumOfPackagesUOM2				=	CAST(A.dblWeightBreakup2Bags AS INT),
+	dblWeightBreakup3Bags				=	CAST(A.dblWeightBreakup3 AS DECIMAL(18,6)),
+	intNumOfPackagesUOM3				=	CAST(A.dblWeightBreakup3Bags AS INT),
+	dblWeightBreakup4Bags				=	A.dblWeightBreakup4,
+	dblWeightBreakup4					=	A.dblWeightBreakup4Bags,
+	dblWeightBreakup5Bags				=	A.dblWeightBreakup5,
+	dblWeightBreakup5					=	A.dblWeightBreakup5Bags
 INTO #tmpConvertedSupplierInvoiceData
 FROM tblAPImportVoucherSupplierInvoice A
 LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityId = C2.intEntityId) ON C2.strName = A.strVendorId
