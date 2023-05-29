@@ -317,7 +317,7 @@ IF @IsCancel = 0
 				,@PeriodsToAccrue						= @PeriodsToAccrue		
 				,@ItemId								= NULL
 				,@ItemIsInventory						= 0
-				,@ItemDocumentNumber					= NULL			
+				,@ItemDocumentNumber					= NULL
 				,@ItemDescription						= NULL
 				,@ItemUOMId								= NULL
 				,@ItemQtyOrdered						= 0.000000
@@ -394,6 +394,7 @@ IF @IsCancel = 0
 				([intInvoiceId]
 				,[strDocumentNumber]
 				,[intItemId]
+				,intCategoryId
 				,[strItemDescription]		
 				,[intOrderUOMId]
 				,[dblQtyOrdered]
@@ -476,6 +477,7 @@ IF @IsCancel = 0
 				[intInvoiceId]							= @CreatedInvoiceId
 				,[strDocumentNumber]					= ''
 				,[intItemId]							= ARID.[intItemId]
+				,intCategoryId							= ARID.intCategoryId
 				,[strItemDescription]					= CONVERT(NVARCHAR(100), ARID.[intInvoiceDetailId])		
 				,[intOrderUOMId]						= NULL
 				,[dblQtyOrdered]						= NULL
