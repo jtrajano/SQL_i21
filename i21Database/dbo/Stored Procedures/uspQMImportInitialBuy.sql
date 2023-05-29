@@ -208,7 +208,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						BOOK.intBookId IS NULL
-						--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'BUYER1 GROUP NUMBER, '
 				ELSE ''
@@ -229,12 +229,14 @@ BEGIN TRY
 				END+ CASE 
 				WHEN (
 						FROM_LOC_CODE.intCityId IS NULL
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'FROM LOCATION CODE, '
 				ELSE ''
 				END +CASE 
 				WHEN (
 						RSL.intCompanyLocationSubLocationId IS NULL
+						AND ISNULL(IMP.ysnBought, 0) = 1
 						)
 					THEN 'RECEIVING STORAGE LOCATION, '
 				ELSE ''
@@ -346,6 +348,7 @@ BEGIN TRY
 			OR (
 				BOOK.intBookId IS NULL
 				--AND ISNULL(IMP.strB1GroupNumber, '') <> ''
+				AND ISNULL(IMP.ysnBought, 0) = 1
 				)
 			OR (
 				CURRENCY.intCurrencyID IS NULL
@@ -354,11 +357,17 @@ BEGIN TRY
 			OR (
 				STRATEGY.intSubBookId IS NULL
 				AND ISNULL(IMP.strStrategy, '') <> ''
+				AND ISNULL(IMP.ysnBought, 0) = 1
 				)
-				OR FROM_LOC_CODE.intCityId IS NULL
-				OR RSL.intCompanyLocationSubLocationId IS NULL
-				
-			)
+			OR (
+				FROM_LOC_CODE.intCityId IS NULL
+				AND ISNULL(IMP.ysnBought, 0) = 1
+				)
+			OR (
+				RSL.intCompanyLocationSubLocationId IS NULL
+				AND ISNULL(IMP.ysnBought, 0) = 1
+				)
+		)
 
 	EXECUTE uspQMImportValidationTastingScore @intImportLogId;
 
@@ -797,6 +806,14 @@ BEGIN TRY
 			,dtmShippingDate
 			,intCountryId
 			,intSupplierId
+
+			,dblOriginalTeaTaste
+			,dblOriginalTeaHue
+			,dblOriginalTeaIntensity
+			,dblOriginalTeaMouthfeel
+			,dblOriginalTeaAppearance
+			,dblOriginalTeaVolume
+			,dblOriginalTeaMoisture
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -848,7 +865,7 @@ BEGIN TRY
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = S.intItemId
+			,intOriginalItemId = BT.intTealingoItemId
 			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblSampleQty
@@ -930,6 +947,14 @@ BEGIN TRY
 			,dtmShippingDate=@dtmShippingDate
 			,intCountryId=ORIGIN.intCountryID 
 			,intSupplierId=S.intEntityId
+
+			,dblOriginalTeaTaste = BT.dblTeaTaste
+			,dblOriginalTeaHue = BT.dblTeaHue
+			,dblOriginalTeaIntensity = BT.dblTeaIntensity
+			,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
+			,dblOriginalTeaAppearance = BT.dblTeaAppearance
+			,dblOriginalTeaVolume = BT.dblTeaVolume
+			,dblOriginalTeaMoisture = BT.dblTeaMoisture
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -942,6 +967,7 @@ BEGIN TRY
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
+		LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intLocationId = S.intCompanyLocationId AND BT.intLocationId = BT.intBuyingCenterLocationId
 		-- Appearance
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -1033,6 +1059,7 @@ BEGIN TRY
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			AND IsNULL(S.dblB1QtyBought, 0) > 0
+			AND IsNULL(S.ysnBought, 0) = 1
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
