@@ -352,6 +352,7 @@ BEGIN TRY
 			,ysnTeaOrganic
 			,dblTeaTaste
 			,dblTeaVolume
+			,strFines
 			,intTealingoItemId
 			,dtmWarehouseArrival
 			,intYearManufacture
@@ -477,7 +478,12 @@ BEGIN TRY
 					THEN NULL
 				ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
 				END
-			,dblTeaVolume = NULL
+			,dblTeaVolume = CASE 
+				WHEN ISNULL(VOLUME.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE CAST(VOLUME.strPropertyValue AS NUMERIC(18, 6))
+				END
+			,strFines = CASE WHEN ISNULL(FINES.strPropertyValue, '') = '' THEN NULL ELSE FINES.strPropertyValue END
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
@@ -565,6 +571,24 @@ BEGIN TRY
 				AND P.strPropertyName = 'Moisture'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOISTURE
+		--Volume
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Volume'
+			WHERE TR.intSampleId = S.intSampleId
+			) VOLUME
+		--Fines
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Fines'
+			WHERE TR.intSampleId = S.intSampleId
+			) FINES
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
