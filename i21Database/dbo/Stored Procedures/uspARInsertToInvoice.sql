@@ -112,7 +112,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT,
 							strAddonDetailKey				VARCHAR(MAX) NULL,
 							ysnAddonParent					BIT NULL,
 							dblAddOnQuantity              	NUMERIC(38,20) NULL,
-							dblStandardWeight				NUMERIC(38,20) NULL)
+							dblStandardWeight				NUMERIC(38,20) NULL,
+							intCustomerStorageId			INT NULL)
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							intItemId						INT, 
@@ -171,7 +172,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							strAddonDetailKey				VARCHAR(MAX) NULL,
 							ysnAddonParent					BIT NULL,
 							dblAddOnQuantity              	NUMERIC(38,20) NULL,
-							dblStandardWeight				NUMERIC(38,20) NULL)
+							dblStandardWeight				NUMERIC(38,20) NULL,
+							intCustomerStorageId			INT NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -241,6 +243,7 @@ SELECT intItemId						= SI.intItemId
 	 , ysnAddonParent					= SOD.ysnAddonParent
 	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
 	 , dblStandardWeight				= SOD.dblStandardWeight
+	 , intCustomerStorageId				= SOD.intCustomerStorageId
 FROM tblSOSalesOrder SO 
 INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -315,6 +318,7 @@ SELECT intItemId						= SOD.intItemId
 	 , ysnAddonParent					= SOD.ysnAddonParent
 	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
 	 , dblStandardWeight				= SOD.dblStandardWeight
+	 , intCustomerStorageId				= NULL
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -379,6 +383,7 @@ SELECT intItemId						= ICSI.intItemId
 	 , ysnAddonParent					= SOD.ysnAddonParent
 	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
 	 , dblStandardWeight				= SOD.dblStandardWeight
+	 , intCustomerStorageId				= SOD.intCustomerStorageId
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
@@ -447,6 +452,7 @@ SELECT intItemId						= ARSI.intItemId
 	 , ysnAddonParent					= ARSI.ysnAddonParent
 	 , dblAddOnQuantity					= ARSI.dblAddOnQuantity
 	 , dblStandardWeight				= ARSI.dblStandardWeight
+	 , intCustomerStorageId				= ARSI.intCustomerStorageId
 FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -821,7 +827,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strAddonDetailKey]
 					,[ysnAddonParent]
 					,[dblAddOnQuantity]
-					,[dblStandardWeight])
+					,[dblStandardWeight]
+					,[intCustomerStorageId])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -870,6 +877,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[ysnAddonParent]
 					,[dblAddOnQuantity]
 					,[dblStandardWeight]
+					,[intCustomerStorageId]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -994,7 +1002,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemAddonDetailKey					VARCHAR(MAX),
 						@ItemAddonParent					BIT,
 						@ItemAddOnQuantity                  NUMERIC(38,20),
-						@ItemStandardWeight					NUMERIC(38,20)
+						@ItemStandardWeight					NUMERIC(38,20),
+						@ItemCustomerStorageId				INT
 
 				SELECT TOP 1
 						@intItemToInvoiceId					= intItemToInvoiceId,
@@ -1047,7 +1056,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemAddonDetailKey					= strAddonDetailKey,
 						@ItemAddonParent					= ysnAddonParent,
 						@ItemAddOnQuantity                  = dblAddOnQuantity,
-						@ItemStandardWeight					= dblStandardWeight
+						@ItemStandardWeight					= dblStandardWeight,
+						@ItemCustomerStorageId				= intCustomerStorageId
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -1105,6 +1115,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemAddonParent					= @ItemAddonParent
 							,@ItemAddOnQuantity					= @ItemAddOnQuantity
 							,@ItemStandardWeight				= @ItemStandardWeight
+							,@ItemCustomerStorageId				= @ItemCustomerStorageId
 
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN
