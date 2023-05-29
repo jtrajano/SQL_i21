@@ -564,7 +564,7 @@ SELECT strReferenceNumber			= I.strInvoiceNumber
 	 , dblAmountDue					= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END    
 	 , dblPastDue					= CASE WHEN @dtmDateTo > I.[dtmDueDate] AND I.strTransactionType IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0) ELSE 0 END    
 	 , dblMonthlyBudget				= I.dblMonthlyBudget
-	 , strDescription				= CASE WHEN I.strType = 'Service Charge' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE ITEM.strDescription END    
+	 , strDescription				= CASE WHEN I.strType = 'Service Charge' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE ID.strItemDescription END    
 	 , strItemNo					= ITEM.strItemNo    
 	 , dblQtyOrdered				= ID.dblQtyOrdered    
 	 , dblQtyShipped				= ID.dblQtyShipped    
