@@ -709,7 +709,8 @@ BEGIN TRY
 	-- Sale Number
 	LEFT JOIN tblQMSample AS S ON IMP.strSaleNumber = S.strSampleNumber
 	-- Mixing Location
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocation MU
+		ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
 	-- Batch MU
 	LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 		AND BATCH_MU.intLocationId = MU.intCompanyLocationId
@@ -1345,6 +1346,8 @@ BEGIN TRY
 				,intPackageTypeId 
 				,dblTareWeight
 				,intCropYearId
+				,intCurrencyId
+				,intBookId
 				)
 			-- ,strBuyingOrderNo
 			SELECT intConcurrencyId = 1
@@ -1445,6 +1448,19 @@ BEGIN TRY
 				,dblTareWeight=@dblTareWeight
 				,intCropYearId = @intCropYearId
 
+				-- Populated for bulking process only
+				,intCurrencyId = (SELECT CUR.intCurrencyID
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId)
+				,intBookId = (SELECT BOOK.intBookId
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCompanyLocation MU
+										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId)
 			SET @intSampleId = SCOPE_IDENTITY()
 
 			-- Sample Detail
