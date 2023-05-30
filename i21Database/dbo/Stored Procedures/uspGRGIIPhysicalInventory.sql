@@ -40,7 +40,8 @@ DECLARE @intCommodityId INT
 DECLARE @dtmReportDate DATETIME
 
 DECLARE @PhysicalInventoryData AS TABLE (
-	dtmReportDate DATETIME
+	intOrderId INT IDENTITY(1,1)
+	,dtmReportDate DATETIME
 	,strLicensed NVARCHAR(20) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
@@ -403,7 +404,23 @@ UPDATE @PhysicalInventoryData
 SET dblBegInventory = ISNULL(dblBegInventory,0), dblEndInventory = ISNULL(dblBegInventory,0) + ISNULL(dblReceived,0) - ISNULL(dblShipped,0) + ISNULL(dblInternalTransfersReceived,0) - ISNULL(dblInternalTransfersShipped,0) + ISNULL(dblNetAdjustments,0)
 
 INSERT INTO tblGRGIIPhysicalInventory
-SELECT * 
+SELECT 
+	dtmReportDate
+	,strLicensed
+	,intCommodityId
+	,strCommodityCode
+	,strCommodityDescription
+	,strLocationName
+	,dblBegInventory
+	,dblReceived
+	,dblShipped
+	,dblInternalTransfersReceived
+	,dblInternalTransfersShipped
+	,dblNetAdjustments
+	,dblEndInventory
+	,strUOM
+	,dblIACompanyOwned
+	,dblIACustomerOwned
 FROM @PhysicalInventoryData
 
 INSERT INTO @PhysicalInventoryData
@@ -445,5 +462,6 @@ SELECT
 	,dblEndInventory
 	,strUOM
 FROM @PhysicalInventoryData
+ORDER BY intOrderId
 
 END
