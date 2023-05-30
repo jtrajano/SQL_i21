@@ -6,6 +6,7 @@
 	,@strCustomerIds			NVARCHAR(MAX) = NULL
 	,@strSalespersonIds			NVARCHAR(MAX) = NULL
 	,@strCompanyLocationIds		NVARCHAR(MAX) = NULL
+	,@strCompanyNameIds			NVARCHAR(MAX) = NULL
 	,@strAccountStatusIds		NVARCHAR(MAX) = NULL	
 	,@intEntityUserId			INT = NULL
 	,@ysnPaidInvoice			BIT = NULL
@@ -117,6 +118,7 @@ BEGIN
 			@strCustomerIdsLocal		NVARCHAR(MAX) = NULL,
 			@strSalespersonIdsLocal		NVARCHAR(MAX) = NULL,		
 			@strCompanyLocationIdsLocal NVARCHAR(MAX) = NULL,
+			@strCompanyNameIdsLocal		NVARCHAR(MAX) = NULL,
 			@strAccountStatusIdsLocal	NVARCHAR(MAX) = NULL,
 			@strCompanyName				NVARCHAR(100) = NULL,
 			@strCompanyAddress			NVARCHAR(500) = NULL,
@@ -126,6 +128,8 @@ BEGIN
 			@strCustomerAgingBy		    NVARCHAR(250) = NULL
 
 	DECLARE  @DELCUSTOMERS		Id
+			,@COMPANY			Id
+			,@DECOMPANY			Id
 			,@ADLOCATION		Id
 			,@DELLOCATION		Id
 			,@DELACCOUNTSTATUS	Id
@@ -234,6 +238,7 @@ BEGIN
 	SET @strCustomerIdsLocal		= NULLIF(@strCustomerIds, '')
 	SET @strSalespersonIdsLocal		= NULLIF(@strSalespersonIds, '')
 	SET @strCompanyLocationIdsLocal	= NULLIF(@strCompanyLocationIds, '')
+	SET @strCompanyNameIdsLocal		= NULLIF(@strCompanyNameIds, '')
 	SET @strAccountStatusIdsLocal	= NULLIF(@strAccountStatusIds, '')
 	SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 	SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
@@ -291,6 +296,24 @@ BEGIN
 		INSERT INTO @ADLOCATION
 		SELECT CL.intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation CL WITH (NOLOCK) 
+	END
+
+	IF ISNULL(@strCompanyNameIdsLocal, '') <> ''
+	BEGIN
+		INSERT INTO @DECOMPANY
+		SELECT DISTINCT intID
+		FROM dbo.fnGetRowsFromDelimitedValues(@strCompanyNameIdsLocal)	
+		
+		INSERT INTO @COMPANY
+		SELECT GL.intAccountId
+		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
+		INNER JOIN @DECOMPANY COMPANY ON GL.intAccountId = COMPANY.intId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @COMPANY
+		SELECT GL.intAccountId
+		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
 	END
 
 	IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
@@ -384,6 +407,7 @@ BEGIN
 	FROM tblARInvoice I
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN @ADLOCATION CL ON I.intCompanyLocationId = CL.intId
+	INNER JOIN @COMPANY CO ON I.intAccountId = CO.intId
 	INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
 	WHERE I.strInvoiceOriginId IS NOT NULL 
 	  AND I.strTransactionType = 'Credit Memo' 
@@ -402,6 +426,7 @@ BEGIN
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN @ADLOCATION CL ON I.intCompanyLocationId = CL.intId
+	INNER JOIN @COMPANY CO ON I.intAccountId = CO.intId
 	INNER JOIN(
 		SELECT ID.strDocumentNumber from tblARInvoice INV
 		INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
@@ -490,6 +515,7 @@ BEGIN
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN @ADLOCATION CL ON I.intCompanyLocationId = CL.intId
+	INNER JOIN @COMPANY CO ON I.intAccountId = CO.intId
 	LEFT JOIN @FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 	INNER JOIN @GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 	LEFT JOIN (
@@ -533,6 +559,7 @@ BEGIN
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN @ADLOCATION CL ON I.intCompanyLocationId = CL.intId
+	INNER JOIN @COMPANY CO ON I.intAccountId = CO.intId
 	WHERE I.strTransactionType = 'Cash Refund'
 	  AND I.ysnPosted = 1
 	  AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
