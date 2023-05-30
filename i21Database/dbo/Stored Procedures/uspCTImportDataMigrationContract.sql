@@ -588,7 +588,7 @@ AS
 			)cero on cero.strCurrencyExchangeRate = CI.strRevolutionCurrencyPair
 			left join tblSMCurrencyExchangeRateType ert on ert.strCurrencyExchangeRateType = CI.strHistoricType
 			left join tblCTPricingType pt on pt.strPricingType = CI.strPricingType
-			left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
+			left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID) and cp.intToCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID)
 			left join tblICUnitMeasure pum on pum.strUnitMeasure = CI.strPriceUOM
 			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
 			left join tblSMCompanyLocationSubLocation wc on wc.strSubLocationName = CI.strWarehouse and wc.intCompanyLocationId = CL.intCompanyLocationId
