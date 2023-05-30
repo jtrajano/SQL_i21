@@ -20,4 +20,3 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
-
