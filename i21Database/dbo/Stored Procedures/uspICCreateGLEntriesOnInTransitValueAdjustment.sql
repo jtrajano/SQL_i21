@@ -311,6 +311,7 @@ WITH ForGLEntries_CTE (
 	,intOtherChargeItemId
 	,intOtherChargeLocationId
 	,[other charge]
+	,ysnReversal
 )
 AS
 (	
@@ -341,6 +342,7 @@ AS
 			,adjLog.intOtherChargeItemId
 			,[intOtherChargeLocationId] = otherChargeLocation.intItemLocationId
 			,[other charge] = charge.strItemNo
+			,ysnReversal = CASE WHEN ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2) < 0 THEN 1 ELSE 0 END 
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -416,11 +418,12 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+		,strDescription				= dbo.fnCreateInTransitValueAdjDescription (
 										@strGLDescription
 										,tblGLAccount.strDescription
 										,ForGLEntries_CTE.[other charge]
 										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.ysnReversal
 									) 
 		,strCode					= 'ITA' -- In-Transit Adjustment
 		,strReference				= '' 
@@ -470,11 +473,12 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= dbo.fnCreateCostAdjGLDescription(
+		,strDescription				= dbo.fnCreateInTransitValueAdjDescription (
 										@strGLDescription
 										,tblGLAccount.strDescription
 										,ForGLEntries_CTE.[other charge]
 										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.ysnReversal
 									)
 		,strCode					= 'ITA' -- In-Transit Adjustment
 		,strReference				= '' 
