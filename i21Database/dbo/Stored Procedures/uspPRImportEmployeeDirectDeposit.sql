@@ -26,6 +26,7 @@ DECLARE @intOrder AS INT
 DECLARE @ysnActive AS BIT
 DECLARE @EmployeeCount AS INT
 DECLARE @BankCount AS INT
+DECLARE @intBankId AS INT
 
 	INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
 	SELECT
@@ -62,6 +63,7 @@ DECLARE @BankCount AS INT
 		SET @intOrder	= NULL
 		SET @ysnActive	= NULL
 		SET @EmployeeEntityNo = NULL
+		SET @intBankId = NULL
 
 		SELECT TOP 1 
 			 @strEmployeeId = LTRIM(RTRIM(intEntityNo))
@@ -86,9 +88,12 @@ DECLARE @BankCount AS INT
 		  AND intBankId = (SELECT TOP 1 intBankId FROM tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)))
 		  AND dbo.fnAESDecryptASym(strAccountNumber) = @strAccountNumber
 
+		SELECT TOP 1 @intBankId = intBankId FROM tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName))
 
-		IF (@strBankName IS NOT NULL AND @strBankName != '')
+
+		IF (@strBankName IS NOT NULL AND @strBankName != '' AND @intBankId IS NOT NULL)
 		BEGIN
+			
 			IF (@strAccountType IS NOT NULL AND @strAccountType != '')
 			BEGIN
 				IF (@strAccountNumber IS NOT NULL AND @strAccountNumber != '')
@@ -128,7 +133,8 @@ DECLARE @BankCount AS INT
 												VALUES
 												(
 													@intEntityNo
-													,(SELECT TOP 1 intBankId FROM tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)))
+													-- ,(SELECT TOP 1 intBankId FROM tblCMBank where LTRIM(RTRIM(strBankName)) = LTRIM(RTRIM(@strBankName)))
+													,@intBankId
 													,@strBankName
 													,dbo.fnAESEncryptASym(@strAccountNumber)
 													,@strAccountType
@@ -177,7 +183,7 @@ DECLARE @BankCount AS INT
 												WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 												UPDATE tblEMEntityEFTInformation SET
-													intBankId = (SELECT TOP 1 intBankId FROM tblCMBank where strBankName = @strBankName), 
+													intBankId = @intBankId, 
 													strBankName = @strBankName, 
 													strAccountNumber = dbo.fnAESEncryptASym(@strAccountNumber), 
 													strAccountType = @strAccountType,
