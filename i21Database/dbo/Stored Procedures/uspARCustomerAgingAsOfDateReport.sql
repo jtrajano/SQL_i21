@@ -7,6 +7,7 @@
 	, @strCustomerIds				NVARCHAR(MAX) = NULL
 	, @strSalespersonIds			NVARCHAR(MAX) = NULL
 	, @strCompanyLocationIds		NVARCHAR(MAX) = NULL
+	, @strCompanyNameIds			NVARCHAR(MAX) = NULL
 	, @strAccountStatusIds			NVARCHAR(MAX) = NULL
 	, @strUserId					NVARCHAR(MAX) = NULL
 	, @ysnIncludeCredits			BIT = 1
@@ -26,6 +27,7 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strSalespersonIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strCompanyLocationIdsLocal		NVARCHAR(MAX)	= NULL,
+		@strCompanyNameIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strAccountStatusIdsLocal		NVARCHAR(MAX)	= NULL,
 		@strCompanyName					NVARCHAR(100)	= NULL,
 		@strCompanyAddress				NVARCHAR(500)	= NULL,
@@ -46,17 +48,21 @@ IF(OBJECT_ID('tempdb..#AGINGSTAGING') IS NOT NULL) DROP TABLE #AGINGSTAGING
 IF(OBJECT_ID('tempdb..#AGINGGLACCOUNTS') IS NOT NULL) DROP TABLE #AGINGGLACCOUNTS
 IF(OBJECT_ID('tempdb..#ADSALESPERSON') IS NOT NULL) DROP TABLE #ADSALESPERSON
 IF(OBJECT_ID('tempdb..#ADLOCATION') IS NOT NULL) DROP TABLE #ADLOCATION
+IF(OBJECT_ID('tempdb..#COMPANY') IS NOT NULL) DROP TABLE #COMPANY
 IF(OBJECT_ID('tempdb..#ADACCOUNTSTATUS') IS NOT NULL) DROP TABLE #ADACCOUNTSTATUS
 IF(OBJECT_ID('tempdb..#DELCUSTOMERS') IS NOT NULL) DROP TABLE #DELCUSTOMERS
 IF(OBJECT_ID('tempdb..#DELLOCATION') IS NOT NULL) DROP TABLE #DELLOCATION
+IF(OBJECT_ID('tempdb..#DECOMPANY') IS NOT NULL) DROP TABLE #DECOMPANY
 IF(OBJECT_ID('tempdb..#DELACCOUNTSTATUS') IS NOT NULL) DROP TABLE #DELACCOUNTSTATUS
 IF(OBJECT_ID('tempdb..#CREDITMEMOPAIDREFUNDED') IS NOT NULL) DROP TABLE #CREDITMEMOPAIDREFUNDED 
 
 CREATE TABLE #DELCUSTOMERS (intEntityCustomerId	INT	NOT NULL PRIMARY KEY)
 CREATE TABLE #DELLOCATION (intCompanyLocationId INT NOT NULL PRIMARY KEY)
+CREATE TABLE #DECOMPANY (intAccountId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #DELACCOUNTSTATUS (intAccountStatusId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADSALESPERSON (intSalespersonId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADLOCATION (intCompanyLocationId INT NOT NULL PRIMARY KEY)
+CREATE TABLE #COMPANY (intAccountId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADACCOUNTSTATUS (intAccountStatusId INT, intEntityCustomerId INT)
 CREATE TABLE #AGINGPOSTEDINVOICES (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
@@ -160,6 +166,7 @@ SET @ysnPrintFromCFLocal			= ISNULL(@ysnPrintFromCF, 0)
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
 SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')
 SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')
+SET @strCompanyNameIdsLocal			= NULLIF(@strCompanyNameIds, '')
 SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')
 SET @ysnOverrideCashFlowLocal  		= ISNULL(@ysnOverrideCashFlow, 0)
 SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
@@ -228,6 +235,25 @@ ELSE
 		INSERT INTO #ADLOCATION
 		SELECT CL.intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation CL WITH (NOLOCK) 
+	END
+
+--COMPANY FILTER
+IF ISNULL(@strCompanyNameIdsLocal, '') <> ''
+	BEGIN
+		INSERT INTO #DECOMPANY
+		SELECT DISTINCT intAccountId =  intID		
+		FROM dbo.fnGetRowsFromDelimitedValues(@strCompanyNameIdsLocal)
+
+		INSERT INTO #COMPANY
+		SELECT GL.intAccountId
+		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
+		INNER JOIN #DECOMPANY COMPANY ON GL.intAccountId = COMPANY.intAccountId
+	END
+ELSE
+	BEGIN
+		INSERT INTO #COMPANY
+		SELECT GL.intAccountId
+		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
 	END
 
 --ACCOUNT STATUS FILTER
@@ -328,6 +354,7 @@ SELECT SC.intInvoiceId
 FROM tblARInvoice I
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
 WHERE I.strInvoiceOriginId IS NOT NULL 
   AND I.strTransactionType = 'Credit Memo' 
@@ -349,6 +376,7 @@ SELECT
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 INNER JOIN(
 	SELECT ID.strDocumentNumber from tblARInvoice INV
 	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
@@ -402,6 +430,7 @@ SELECT I.intInvoiceId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 LEFT JOIN (
@@ -499,6 +528,7 @@ FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
