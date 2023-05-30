@@ -376,6 +376,7 @@ SET ANSI_WARNINGS ON
 		BEGIN TRY 		
 			IF @intReceiptId IS NOT NULL
 			BEGIN
+				EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intShipmentId, NULL, NULL, NULL, @intEntityUserSecurityId
 				EXEC uspAPReverseVoucherPayable @voucherPayable, @voucherPayableTax, 0, @intEntityUserSecurityId
 			END
 			ELSE
