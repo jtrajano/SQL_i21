@@ -21,9 +21,3 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
-GO
-
-UPDATE tblAPCompanyPreference SET ysnRemittanceAdvice_DisplayVendorAccountNumber = 1 WHERE ysnRemittanceAdvice_DisplayVendorAccountNumber IS NULL
-
-GO
-
