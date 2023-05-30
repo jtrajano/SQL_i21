@@ -68,6 +68,6 @@ OUTER APPLY (
 	AND intEntityId = ENTITY.intEntityId ORDER BY dtmEffectiveDate desc
 ) F 
 OUTER APPLY(
-	SELECT TOP 1 ysnRemittanceAdvice_DisplayVendorAccountNumber ysnDisplayVendorAccountNumber FROM tblCMCompanyPreferenceOption
+	SELECT TOP 1 ysnRemittanceAdvice_DisplayVendorAccountNumber ysnDisplayVendorAccountNumber FROM tblAPCompanyPreference
 )CP
 WHERE CHK.intBankTransactionTypeId IN (22, 23, 123)
