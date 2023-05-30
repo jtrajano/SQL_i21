@@ -17,6 +17,7 @@ DECLARE @intBankAccountId AS INT
 	,@strTransactionId AS NVARCHAR(MAX)
 	,@intPaymentKey INT
 	,@strPaymentNo AS NVARCHAR(40)
+	,@strReportLogId AS NVARCHAR(100)
 
 DECLARE @xmlDocumentId AS INT
 
