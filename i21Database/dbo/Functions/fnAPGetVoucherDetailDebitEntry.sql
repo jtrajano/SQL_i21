@@ -133,6 +133,10 @@ RETURNS TABLE AS RETURN
 		ON B.intItemId = F.intItemId
 	LEFT JOIN tblLGLoadCost H
 		ON H.intLoadCostId = B.intLoadShipmentCostId
+	LEFT JOIN tblLGLoadDetail I
+		ON I.intLoadDetailId = B.intLoadDetailId
+	LEFT JOIN tblSMFreightTerms J ON J.intFreightTermId = A.intFreightTermId
+	LEFT JOIN tblICFobPoint K ON K.strFobPoint = J.strFobPoint
 	-- LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
 	LEFT JOIN tblLGWeightClaimDetail WCD
 		ON WCD.intWeightClaimDetailId = B.intWeightClaimDetailId
@@ -191,7 +195,7 @@ RETURNS TABLE AS RETURN
 	) storageOldCost
 	WHERE A.intBillId = @billId
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
-	AND ISNULL(H.ysnInventoryCost, 0) = 0 --EXCLUDE LS INVENTORIED CHAGES
+	AND (ISNULL(H.ysnInventoryCost, 0) = 0 OR K.intFobPointId IN (2) OR (I.intPriceCurrencyId = H.intCurrencyId AND B.dblOldCost IS NULL)) --EXCLUDE LS INVENTORIED CHAGES
 	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 	AND A.ysnFinalVoucher = 0 -- EXCLUDE FINAL VOUCHER
 	-- AND ISNULL(A.ysnConvertedToDebitMemo,0) = 0 -- EXCLUDE FINAL VOUCHER
