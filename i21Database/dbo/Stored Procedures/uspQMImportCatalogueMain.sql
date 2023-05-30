@@ -115,6 +115,7 @@ BEGIN TRY
 				ELSE ''
 				END + CASE 
 				WHEN (
+						IMP.strChannel = 'AUC' AND
 						WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
 						--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 						)
@@ -250,6 +251,7 @@ BEGIN TRY
 				END
 				+ CASE 
 				WHEN (
+						IMP.strChannel = 'AUC' AND
 						IsDate(IMP.dtmSaleDate)=0
 						)
 					THEN 'SALE DATE, '
@@ -286,6 +288,7 @@ BEGIN TRY
 				--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
 				)
 			OR (
+				IMP.strChannel = 'AUC' AND
 				WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
 				--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 				)
@@ -353,7 +356,7 @@ BEGIN TRY
 				OR IsNumeric(IMP.dblTotalQtyOffered )=0
 				OR IsNumeric(IMP.intTotalNumberOfPackageBreakups)=0
 				OR IsNumeric(IMP.intNoOfPackages )=0
-				OR IsDate(IMP.dtmSaleDate )=0
+				OR (IsDate(IMP.dtmSaleDate )=0 AND IMP.strChannel = 'AUC')
 			)
 
 	-- Check if vendor is mapped to the TBO
