@@ -379,20 +379,6 @@ BEGIN TRY
 										END
 			,[intUserId] 				= @intUserId
 		FROM @StorageTicketInfoByFIFO
-		CROSS APPLY (
-			SELECT ShipmentItem.intSourceId
-				,Shipment.dtmShipDate
-			FROM tblICInventoryShipment Shipment
-			JOIN tblICInventoryShipmentItem ShipmentItem
-				ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
-			JOIN tblGRStorageType ST
-				ON ST.intStorageScheduleTypeId = ShipmentItem.intStorageScheduleTypeId
-			WHERE Shipment.intInventoryShipmentId = @IntSourceKey
-				AND @strSourceType = 'InventoryShipment'
-			--AND [strType]='Reduced By Inventory Shipment'
-			--AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL
-		) A
-		WHERE strItemType = 'Inventory'
 
 		IF @strSourceType = 'Invoice'
 		BEGIN
