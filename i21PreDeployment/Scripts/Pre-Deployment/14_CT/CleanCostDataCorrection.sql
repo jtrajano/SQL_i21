@@ -32,55 +32,56 @@ BEGIN
 
 IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intPricingStatus' AND object_id = OBJECT_ID(N'tblCTContractDetail'))
 BEGIN
+	IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'trgCTContractDetail')
+	BEGIN
+		exec
+		('
 
-	exec
-	('
+			ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
 
-		ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
-
-		update a set
-		intPricingStatus = (
-							case
-								when a.intPricingTypeId = 1
-								then 2
-								else
-									(
-									case
-										when pricing.dblQuantity > pricing.dblPricedQuantity
-										then 1
-										when pricing.dblQuantity >= pricing.dblPricedQuantity
-										then 2
-										else 0
-									end
-									)
-							end
-							)
-		from
-		tblCTContractDetail a
-		left join
-		(
-			select
-			cd.intContractDetailId
-			,cd.intPricingTypeId
-			,cd.dblQuantity
-			,dblPricedQuantity = sum(pfd.dblQuantity)
-			from tblCTContractDetail cd, tblCTPriceFixation pf, tblCTPriceFixationDetail pfd
+			update a set
+			intPricingStatus = (
+								case
+									when a.intPricingTypeId = 1
+									then 2
+									else
+										(
+										case
+											when pricing.dblQuantity > pricing.dblPricedQuantity
+											then 1
+											when pricing.dblQuantity >= pricing.dblPricedQuantity
+											then 2
+											else 0
+										end
+										)
+								end
+								)
+			from
+			tblCTContractDetail a
+			left join
+			(
+				select
+				cd.intContractDetailId
+				,cd.intPricingTypeId
+				,cd.dblQuantity
+				,dblPricedQuantity = sum(pfd.dblQuantity)
+				from tblCTContractDetail cd, tblCTPriceFixation pf, tblCTPriceFixationDetail pfd
+				where
+				cd.intPricingTypeId <> 1
+				and pf.intContractDetailId = cd.intContractDetailId
+				and pfd.intPriceFixationId = pf.intPriceFixationId
+				group by
+				cd.intContractDetailId
+				,cd.intPricingTypeId
+				,cd.dblQuantity
+			) as pricing on pricing.intContractDetailId = a.intContractDetailId
 			where
-			cd.intPricingTypeId <> 1
-			and pf.intContractDetailId = cd.intContractDetailId
-			and pfd.intPriceFixationId = pf.intPriceFixationId
-			group by
-			cd.intContractDetailId
-			,cd.intPricingTypeId
-			,cd.dblQuantity
-		) as pricing on pricing.intContractDetailId = a.intContractDetailId
-		where
-		a.intPricingStatus is null;
+			a.intPricingStatus is null;
 
-		ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
-		
-	');
-
+			ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
+			
+		');
+	END
 	
 	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail'))
 		AND EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblRKDailyAveragePriceDetail')) 
