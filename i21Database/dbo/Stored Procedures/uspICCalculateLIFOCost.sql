@@ -6,7 +6,9 @@ CREATE PROCEDURE [dbo].[uspICCalculateLIFOCost] (
     @Cost NUMERIC(18, 6) OUTPUT,     -- The cost of the item. This is the output value of this procedure.
     @ItemUOMId INT,                  -- The item UOM ID. This is optional and will default to ID of the GALLONS uom.
     @ShowBucket BIT = 0,              -- Lists the cost bucket
-    @MiscellaneousCost NUMERIC(18, 6) = 0
+    @MiscellaneousCost NUMERIC(18, 6) = 0,
+	@SubLocationId INT = NULL,
+	@StorageLocationId INT = NULL
 )
 AS
 
@@ -109,8 +111,8 @@ SELECT
     , strTransactionId = @strTransactionId
     , intTransactionTypeId = @InventoryCount_TransactionType
     , intLotId = NULL
-    , intSubLocationId = NULL
-    , intStorageLocationId = NULL
+    , intSubLocationId = @SubLocationId
+    , intStorageLocationId = @StorageLocationId
     , dblForexRate = 1
     , intCategoryId = @CategoryId
 
