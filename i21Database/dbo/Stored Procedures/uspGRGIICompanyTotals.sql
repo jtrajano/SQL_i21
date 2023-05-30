@@ -507,7 +507,7 @@ BEGIN
 
 		/*GET IA*/
 		DECLARE @dblDPIA DECIMAL(18,6)
-		SELECT @dblDPIA = ABS(SUM(dblIn) - SUM(dblOut))
+		SELECT @dblDPIA =SUM(dblIn) - SUM(dblOut)
 		FROM #DelayedPricingALL AA
 		WHERE strTransactionType = 'Inventory Adjustment'
 			AND dtmDate = @dtmReportDate
@@ -584,7 +584,7 @@ BEGIN
 			AND dtmReportDate = @dtmReportDate
 		GROUP BY intCommodityId
 			,strUOM
-
+			
 		--CUSTOMER STORAGE TOTAL
 		DECLARE @dblCustomerStorage DECIMAL(18,6)
 		DECLARE @dblSODecrease DECIMAL(18,6)
@@ -685,6 +685,11 @@ BEGIN
 		WHERE dbo.fnRemoveTimeOnDate(IT.dtmTransferDate) = @dtmReportDate
 			AND IC.intCommodityId = @intCommodityId
 
+			--select '@dblIACompanyOwned'=@dblIACompanyOwned,'@dblIACustomerOwned'=@dblIACustomerOwned,'@dblDPIA'=@dblDPIA,'@dblInternalTransfersDiff'=@dblInternalTransfersDiff
+
+		IF ISNULL(@dblIACompanyOwned,0) <> 0
+			SET @dblIACompanyOwned = ISNULL(@dblIACompanyOwned,0) - ISNULL(@dblDPIA,0)--CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ISNULL(@dblIACompanyOwned,0) + ISNULL(@dblDPIA,0) ELSE ISNULL(@dblIACompanyOwned,0) - ISNULL(@dblDPIA,0) END
+
 		INSERT INTO @CompanyOwnedData
 		SELECT 1
 			,@dtmReportDate
@@ -692,14 +697,14 @@ BEGIN
 			,'   COMPANY OWNERSHIP (PAID)'
 			,dblTotalBeginning = 0--ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) - ISNULL(CO.total,0)
 			,dblTotalIncrease = CU.total + 
-								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN 0 ELSE ISNULL(@dblIACompanyOwned,0) - ISNULL(@dblDPIA,0) END + 
+								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN 0 ELSE ISNULL(@dblIACompanyOwned,0) END + 
 								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN 0 ELSE ISNULL(@dblInternalTransfersDiff,0) END --+ 
 								--ISNULL(@dblReceivedCompanyOwned,0)
 								--ISNULL(@dblDPReversedSettlementsWithPayment,0) --+ 
 								--ISNULL(@dblDPSettlementsWithDeletedPayment,0)
 			,dblTotalDecrease = ABS(
 								(ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) +
-								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ISNULL(@dblIACompanyOwned,0) + ISNULL(@dblDPIA,0) ELSE 0 END + 
+								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ISNULL(@dblIACompanyOwned,0) ELSE 0 END + 
 								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN ISNULL(@dblInternalTransfersDiff,0) ELSE 0 END +
 								ISNULL(@dblDPReversedSettlementsWithPayment,0) + 
 								ISNULL(@dblVoidedPayment,0) +
@@ -750,7 +755,7 @@ BEGIN
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
 	--SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
-	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + (ISNULL(DP.total,0) - ISNULL(@dblDPIA,0))) - ISNULL(TS.dblUnits,0)
+	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + (ISNULL(DP.total,0) + ISNULL(@dblDPIA,0))) - ISNULL(TS.dblUnits,0)
 		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
