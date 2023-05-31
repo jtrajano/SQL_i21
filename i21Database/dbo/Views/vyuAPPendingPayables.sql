@@ -21,7 +21,7 @@ SELECT
 				THEN CAST((A.dblQuantityToBill) *  (A.dblCost)  * (A.dblQtyToBillUnitQty/ ISNULL(NULLIF(A.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 			ELSE CAST((A.dblQuantityToBill) * (A.dblCost)  AS DECIMAL(18,2))  --Orig Calculation
 		END)
-	END),0) + A.dblTax AS dblTotal
+	END),0) AS dblTotal
 	,A.intVoucherPayableId
 	,A.intEntityVendorId
 	,A.strVendorId
