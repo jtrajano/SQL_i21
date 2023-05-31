@@ -62,7 +62,7 @@ IF EXISTS(SELECT *
 		  , ysnParentLot			BIT
 		  , strRowState				NVARCHAR(50)
 		  , strSecondaryStatus		NVARCHAR(50)
-		  , dblNoOfPallet			NUMERIC(18, 2)
+		  , dblNoOfPallet			NUMERIC(18, 0)
 		  ,strFW					NVARCHAR(3)
 		    ,strProductType					NVARCHAR(100)
 			  ,strBrandCode					NVARCHAR(100)
