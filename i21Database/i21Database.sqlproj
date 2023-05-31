@@ -1389,6 +1389,12 @@
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
