@@ -341,7 +341,9 @@ BEGIN
 			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE AmountForeign.Val  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strDescription
+			,[strDescription]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  
+				THEN 'Bank Account From Entry using Historical Rate.' 
+				ELSE '' END
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= @intCurrencyIdFrom
@@ -349,9 +351,7 @@ BEGIN
 			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] =  CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  
-				THEN 'Bank Account From Entry using Historical Rate.' 
-				ELSE '' END + GLAccnt.strDescription
+			,[strJournalLineDescription] = GLAccnt.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
