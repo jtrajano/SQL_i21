@@ -184,10 +184,13 @@ GO
 			WHERE strNamespace = 'Payroll.view.TimeOffRequest'
 		END
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ActivityEmail') 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.ActivityEmail') 
 		BEGIN
-			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'Activity Email', N'Activity Email', N'SystemManager.view.ActivityEmail', N'System Manager', N'tblSMActivity', 0, N'System Manager')
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'SystemManager.view.ActivityEmail') 
+			BEGIN
+				INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+				VALUES (N'Activity Email', N'Activity Email', N'SystemManager.view.ActivityEmail', N'System Manager', N'tblSMActivity', 0, N'System Manager')
+			END
 		END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CRM.view.Opportunity') 
