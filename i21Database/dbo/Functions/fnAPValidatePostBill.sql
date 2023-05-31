@@ -914,6 +914,8 @@ BEGIN
 		WHERE  B.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
 		AND B.ysnPosted = 1
 		AND IRC.ysnWithGLReversal = 1
+		AND BD.intInventoryReceiptChargeId IS NULL
+		AND BD.intInventoryReceiptItemId IS NULL
 
 		--PROVISIONAL VOUCHER IS ALREADY FINALIZED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
