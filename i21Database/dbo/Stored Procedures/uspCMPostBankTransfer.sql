@@ -343,7 +343,7 @@ BEGIN
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId or @intCurrencyIdFrom <> @intDefaultCurrencyId  
 				THEN 'Bank Account From Entry using Historical Rate.' 
-				ELSE '' END
+				ELSE A.strDescription END
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= @intCurrencyIdFrom
