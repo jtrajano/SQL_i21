@@ -41,42 +41,33 @@ BEGIN
 				ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
 		END
 
-			update a set
-			intPricingStatus = (
-								case
-									when a.intPricingTypeId = 1
-									then 2
-									else
-										(
-										case
-											when pricing.dblQuantity > pricing.dblPricedQuantity
-											then 1
-											when pricing.dblQuantity >= pricing.dblPricedQuantity
-											then 2
-											else 0
-										end
-										)
-								end
-								)
-			from
-			tblCTContractDetail a
-			left join
-			(
-				select
-				cd.intContractDetailId
-				,cd.intPricingTypeId
-				,cd.dblQuantity
-				,dblPricedQuantity = sum(pfd.dblQuantity)
-				from tblCTContractDetail cd, tblCTPriceFixation pf, tblCTPriceFixationDetail pfd
-				where
-				cd.intPricingTypeId <> 1
-				and pf.intContractDetailId = cd.intContractDetailId
-				and pfd.intPriceFixationId = pf.intPriceFixationId
-				group by
-				cd.intContractDetailId
-				,cd.intPricingTypeId
-				,cd.dblQuantity
-			) as pricing on pricing.intContractDetailId = a.intContractDetailId
+		update a set
+		intPricingStatus = (
+							case
+								when a.intPricingTypeId = 1
+								then 2
+								else
+									(
+									case
+										when pricing.dblQuantity > pricing.dblPricedQuantity
+										then 1
+										when pricing.dblQuantity >= pricing.dblPricedQuantity
+										then 2
+										else 0
+									end
+									)
+							end
+							)
+		from
+		tblCTContractDetail a
+		left join
+		(
+			select
+			cd.intContractDetailId
+			,cd.intPricingTypeId
+			,cd.dblQuantity
+			,dblPricedQuantity = sum(pfd.dblQuantity)
+			from tblCTContractDetail cd, tblCTPriceFixation pf, tblCTPriceFixationDetail pfd
 			where
 			cd.intPricingTypeId <> 1
 			and pf.intContractDetailId = cd.intContractDetailId
@@ -96,10 +87,6 @@ BEGIN
 		
 	');
 
-			ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
-			
-		');
-	END
 	
 	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail'))
 		AND EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblRKDailyAveragePriceDetail')) 
