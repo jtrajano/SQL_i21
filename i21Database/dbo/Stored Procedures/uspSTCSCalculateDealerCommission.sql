@@ -28,6 +28,7 @@ BEGIN TRY
 	DECLARE @ysnStopProcessing BIT = 0
 	DECLARE @ysnStopProcessingFinal BIT = 0
 	DECLARE @intLatestWarningId INT = (SELECT DISTINCT TOP 1 intCheckoutProcessErrorWarningId FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutProcessId = @intCheckoutProcessId ORDER BY intCheckoutProcessErrorWarningId DESC)
+	DECLARE @intSubLocationId INT
   
 	DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 	FOR  
