@@ -81,6 +81,7 @@ Type the overview for the table here.
 		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		[ysnAllowEditCost] BIT NULL DEFAULT ((0)),
 		[ysnOverrideTaxGroup] BIT NULL DEFAULT ((0)),
+		[intItemVendorXrefId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]), -- ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

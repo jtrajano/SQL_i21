@@ -266,7 +266,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
 		,ReceiptItem.intComputeItemTotalOption
 		,strLongUPCCode = COALESCE(ItemWeightUOM.strLongUPCCode, ItemUOM.strLongUPCCode, '')
-
+		,vendorXRef.strVendorProduct
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN tblSMCurrencyExchangeRateType forexType
@@ -514,3 +514,6 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 						Receipt.strReceiptType = 'Purchase Contract'
 					)	
 		) PCOView
+
+		LEFT JOIN tblICItemVendorXref vendorXRef 
+			ON vendorXRef.intItemVendorXrefId = ReceiptItem.intItemVendorXrefId

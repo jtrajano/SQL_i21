@@ -39,6 +39,22 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemVendorXref_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [tblVRVendorSetup]([intVendorSetupId]) ON DELETE CASCADE,
 		CONSTRAINT [FK_tblICItemVendorXref_tblICDataSource] FOREIGN KEY ([intDataSourceId]) REFERENCES [tblICDataSource]([intDataSourceId])
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItemVendorXref_intItemId]
+		ON [dbo].[tblICItemVendorXref]([intItemId] ASC, [intItemLocationId] ASC)
+		INCLUDE ([intVendorId])
+	GO
+	
+	CREATE NONCLUSTERED INDEX [IX_tblICItemVendorXref_intVendorId]
+		ON [dbo].[tblICItemVendorXref]([intVendorId] ASC)
+		INCLUDE ([intItemLocationId], [intItemId])
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItemVendorXref_strVendorProduct]
+		ON [dbo].[tblICItemVendorXref]([strVendorProduct] ASC)
+		INCLUDE ([intItemId], [intItemLocationId], [intVendorId])
+	GO
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
