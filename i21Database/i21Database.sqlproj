@@ -375,6 +375,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessTFLogs.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportSummaryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnCMCashFlowTransactions.sql" />
     <Build Include="dbo\Functions\fnCMGetFEINByCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
@@ -1461,6 +1462,8 @@
     <Build Include="dbo\Stored Procedures\uspSCGrainBankStatementInvoicesSubReport.sql" />
     <Build Include="dbo\Views\vyuSCGrainBankTransactions.sql" />
     <Build Include="dbo\Views\vyuSCGrainBankInvoiceTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
