@@ -43,9 +43,7 @@ SELECT DE.intFutOptTransactionId
 								WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
 										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
 										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
-										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
-										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLots,0) <> 0 OR ISNULL(dblHedgedLots,0) <>  0))
-										OR intFutOptTransactionId IN (SELECT DISTINCT intFutOptTransactionId FROM tblCTPriceFixationDetail WHERE intFutOptTransactionId is not null))
+										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)) 
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
 	, strHedgeType = 'Contract Futures' COLLATE Latin1_General_CI_AS
 	, intHedgeContractId = hedgecontractheader.intContractHeaderId 
