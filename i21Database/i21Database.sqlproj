@@ -1315,6 +1315,12 @@
     <Build Include="dbo\Tables\tblTMJobs.sql" />
     <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
