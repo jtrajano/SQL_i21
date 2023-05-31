@@ -753,6 +753,40 @@ BEGIN
 	/*******START******UPDATE COMPANY OWNERSHIP (UNPAID)*************/
 	
 	/******INCREASE*******/
+	DECLARE @dblCompanyOwnedIRVoucher DECIMAL(18,6)
+	SET @dblCompanyOwnedIRVoucher = NULL
+	SELECT @dblCompanyOwnedIRVoucher = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
+	FROM tblAPBillDetail BD
+	INNER JOIN tblAPBill AP
+		ON AP.intBillId = BD.intBillId
+	INNER JOIN tblICItem IC
+		ON IC.intItemId = BD.intItemId
+			AND IC.strType = 'Inventory'
+	INNER JOIN tblICItemUOM UOM	
+		ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
+			OR (UOM.intItemId = IC.intItemId
+				AND UOM.ysnStockUnit = 1)
+			)
+	OUTER APPLY (
+		SELECT TOP 1 intCommodityUnitMeasureId
+		FROM tblICCommodityUnitMeasure
+		WHERE intCommodityId = IC.intCommodityId
+			AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+	) UM_REF
+	LEFT JOIN tblICInventoryReceiptItem IR
+		ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+	WHERE (
+			((AP.ysnPosted = 0 OR AP.ysnPaid = 0) AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) = @dtmReportDate)
+			OR 
+			(dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) = @dtmReportDate AND AP.ysnPaid = 1 AND dbo.fnRemoveTimeOnDate(AP.dtmDatePaid) >= @dtmReportDate)
+		)
+		AND IC.intCommodityId = @intCommodityId
+		AND AP.intTransactionType = 1
+		AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
+				OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
+			)
+
+
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
 	--SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
@@ -761,7 +795,7 @@ BEGIN
 								ISNULL(@dblVoidedPayment,0) + 
 								ISNULL(@dblDPSettlementsWithDeletedPayment,0) + 
 								(ISNULL(DP.total,0) + ISNULL(@dblDPIA,0)) +
-								ISNULL(@dblReceivedCompanyOwned,0)
+								ISNULL(@dblCompanyOwnedIRVoucher,0)
 							) - 
 							ISNULL(TS.dblUnits,0)
 		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0)
