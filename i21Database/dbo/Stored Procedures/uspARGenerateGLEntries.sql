@@ -472,9 +472,9 @@ SELECT [dtmDate]
 	,[strTransactionForm]
 	,[strModuleName]
 	,[intConcurrencyId]
-	,[dblDebitForeign]
+	,[dblDebitForeign]				= CASE WHEN ISNULL(dblExchangeRate, 1) = 1 THEN dblDebit ELSE dblDebitForeign END
 	,[dblDebitReport]
-	,[dblCreditForeign]
+	,[dblCreditForeign]				= CASE WHEN ISNULL(dblExchangeRate, 1) = 1 THEN dblCredit ELSE dblCreditForeign END
 	,[dblCreditReport]
 	,[dblReportingRate]
 	,[dblForeignRate]
