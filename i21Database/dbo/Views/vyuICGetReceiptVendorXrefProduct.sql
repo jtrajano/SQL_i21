@@ -1,8 +1,8 @@
-CREATE VIEW [dbo].[vyuICGetReceiptItem]
+CREATE VIEW [dbo].[vyuICGetReceiptVendorXrefProduct]
 AS 
 
 SELECT 
-	intKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intItemId, ItemLocation.intLocationId) AS INT)
+	intKey = CAST(ROW_NUMBER() OVER(ORDER BY VendorXref.intItemVendorXrefId, ItemLocation.intLocationId) AS INT)
 	,Item.intItemId
 	,Item.strItemNo
 	,Item.strDescription
@@ -59,20 +59,31 @@ SELECT
 	,ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT)
 	,ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
 	,Item.intComputeItemTotalOption
-	,strVendorProduct = COALESCE(vendorXRefByLocation.strVendorProduct, vendorXRefWithNoLocation.strVendorProduct) 
-	,strProductDescription = COALESCE(vendorXRefByLocation.strProductDescription, vendorXRefWithNoLocation.strProductDescription) 
-	,intXrefVendorId =  COALESCE(vendorXRefByLocation.intVendorId, vendorXRefWithNoLocation.intVendorId) 
-	,intVendorXRefItemUOMId = COALESCE(vendorXRefByLocation.intItemUnitMeasureId, vendorXRefWithNoLocation.intItemUnitMeasureId) 
-	,intItemVendorXrefId  = COALESCE(vendorXRefByLocation.intItemVendorXrefId, vendorXRefWithNoLocation.intItemVendorXrefId) 
+	,strVendorProduct = VendorXref.strVendorProduct
+	,strProductDescription = VendorXref.strProductDescription
+	,intVendorId =  VendorXref.intVendorId
+	,strVendorId = v.strVendorId
+	,intVendorXRefItemUOMId = VendorXref.intItemUnitMeasureId
+	,intItemVendorXrefId  = VendorXref.intItemVendorXrefId
 FROM 
-	tblICItem Item
+	tblICItemVendorXref VendorXref		
+
+	INNER JOIN  tblICItem Item
+		ON Item.intItemId = VendorXref.intItemId
+
+	INNER JOIN tblAPVendor v
+		ON v.intEntityId = VendorXref.intVendorId
 
 	LEFT JOIN (
 		tblICItemLocation ItemLocation INNER JOIN tblSMCompanyLocation l 
 			ON l.intCompanyLocationId = ItemLocation.intLocationId
 	)
 		ON ItemLocation.intItemId = Item.intItemId
-		AND ItemLocation.intLocationId IS NOT NULL 
+		AND ItemLocation.intLocationId IS NOT NULL
+		AND (
+			VendorXref.intItemLocationId = ItemLocation.intItemLocationId
+			OR VendorXref.intItemLocationId IS NULL 
+		)
 
 	OUTER APPLY (
 		SELECT TOP 1 
@@ -94,6 +105,10 @@ FROM
 		WHERE		
 			ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
 			AND ReceiveUOM.ysnAllowPurchase = 1	
+			AND (
+				VendorXref.intItemUnitMeasureId = ReceiveUOM.intItemUOMId
+				OR VendorXref.intItemUnitMeasureId IS NULL 
+			)
 	) ReceiveUOM		
 
 	OUTER APPLY (
@@ -132,6 +147,10 @@ FROM
 			ItemUOM.intItemId = Item.intItemId			
 			AND ItemUOM.ysnAllowPurchase = 1
 			AND ReceiveUOM.intItemUOMId IS NULL
+			AND (
+				VendorXref.intItemUnitMeasureId = ItemUOM.intItemUOMId
+				OR VendorXref.intItemUnitMeasureId IS NULL 
+			)
 	) ItemUOM		
 
 	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(
@@ -177,38 +196,3 @@ FROM
 			AND ChargeItem.strType = 'Other Charge'
 	) AddOnOtherCharge
 
-	OUTER APPLY (
-		SELECT 
-			xref.intItemVendorXrefId
-			,xref.intVendorId
-			,xref.strProductDescription
-			,xref.strVendorProduct
-			,xref.intItemUnitMeasureId
-		FROM 
-			tblICItemVendorXref xref
-		WHERE 
-			xref.intItemId = Item.intItemId
-			AND xref.intItemLocationId = ItemLocation.intItemLocationId
-			AND (
-				xref.intItemUnitMeasureId = ISNULL(ReceiveUOM.intUnitMeasureId, ItemUOM.intUnitMeasureId)
-				OR xref.intItemUnitMeasureId IS NULL 
-			)
-	) vendorXRefByLocation
-
-	OUTER APPLY (
-		SELECT 
-			xref.intItemVendorXrefId
-			,xref.intVendorId
-			,xref.strProductDescription
-			,xref.strVendorProduct
-			,xref.intItemUnitMeasureId
-		FROM 
-			tblICItemVendorXref xref
-		WHERE 
-			xref.intItemId = Item.intItemId
-			AND xref.intItemLocationId IS NULL
-			AND (
-				xref.intItemUnitMeasureId = ISNULL(ReceiveUOM.intItemUOMId, ItemUOM.intItemUOMId)
-				OR xref.intItemUnitMeasureId IS NULL 
-			)
-	) vendorXRefWithNoLocation
