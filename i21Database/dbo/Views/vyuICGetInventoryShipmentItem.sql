@@ -86,6 +86,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.dblBasis
 	, ShipmentItem.dblFutures
 	, ShipmentItem.strFuturesMonth
+	, xref.strCustomerProduct
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -108,4 +109,5 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON ShipmentItem.intForexRateTypeId = forexRateType.intCurrencyExchangeRateTypeId
 	LEFT JOIN tblICStorageLocation DockDoor ON DockDoor.intStorageLocationId = ShipmentItem.intDockDoorId
 	LEFT JOIN tblICItemUOM ItemPriceUOM ON ItemPriceUOM.intItemUOMId = ShipmentItem.intPriceUOMId
-	LEFT JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = ItemPriceUOM.intUnitMeasureId    
+	LEFT JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = ItemPriceUOM.intUnitMeasureId   
+	LEFT JOIN tblICItemCustomerXref xref ON xref.intItemCustomerXrefId = ShipmentItem.intItemCustomerXrefId
