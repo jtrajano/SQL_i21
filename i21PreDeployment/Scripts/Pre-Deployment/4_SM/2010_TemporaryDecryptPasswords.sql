@@ -2,25 +2,29 @@
 	PRINT N'START TEMPORARY DECRYPT PASSWORDS'
 	BEGIN
 		
-		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLEMENTITYSMTPINFORMATION')
+		IF EXISTS(SELECT TOP 1 1 FROM   sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnAESDecryptASym]'))
 		BEGIN
-			UPDATE	tblEMEntitySMTPInformation
-			SET		strPassword = dbo.fnAESDecryptASym(strPassword)
-			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
-		END
+			IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLEMENTITYSMTPINFORMATION')
+			BEGIN
+				UPDATE	tblEMEntitySMTPInformation
+				SET		strPassword = dbo.fnAESDecryptASym(strPassword)
+				WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+			END
 
-		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLSMINTERCOMPANY')
-		BEGIN
-			UPDATE	tblSMInterCompany
-			SET		strPassword = dbo.fnAESDecryptASym(strPassword)
-			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
-		END
+			IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLSMINTERCOMPANY')
+			BEGIN
+				UPDATE	tblSMInterCompany
+				SET		strPassword = dbo.fnAESDecryptASym(strPassword)
+				WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+			END
 
-		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLRMCONNECTION')
-		BEGIN
-			UPDATE	tblRMConnection
-			SET		strPassword = dbo.fnAESDecryptASym(strPassword)
-			WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+			IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLRMCONNECTION')
+			BEGIN
+				UPDATE	tblRMConnection
+				SET		strPassword = dbo.fnAESDecryptASym(strPassword)
+				WHERE	dbo.fnAESDecryptASym(strPassword) IS NOT NULL
+			END
+
 		END
 
 	END
