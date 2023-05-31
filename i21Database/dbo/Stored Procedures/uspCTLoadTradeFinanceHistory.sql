@@ -10,7 +10,6 @@ AS
 			,intTransactionHeaderId
 			,intTransactionDetailId
 			,strBankName
-			,strBankName
 			,strBankAccount
 			,strBorrowingFacility
 			,strBankReferenceNo
