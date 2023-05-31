@@ -90,6 +90,7 @@
 	[strExpressAcceptorID]						NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strExpressAccountToken]					NVARCHAR(140) COLLATE Latin1_General_CI_AS NULL,
 	[ysnOverrideARAccountLineOfBusinessSegment]	BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnOverrideARAccountLineOfBusinessSegment] DEFAULT((0)),
+	[ysnIncludeHazmatMessage]					BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnIncludeHazmatMessage] DEFAULT((0)),
 	[ysnAllowIntraCompanyEntriesInvoice]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraCompanyEntriesInvoice] DEFAULT((0)),
 	[ysnAllowIntraCompanyEntriesPayment]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraCompanyEntriesPayment] DEFAULT((0)),
 	[ysnAllowIntraLocationEntriesInvoice]		BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAllowIntraLocationEntriesInvoice] DEFAULT((0)),
