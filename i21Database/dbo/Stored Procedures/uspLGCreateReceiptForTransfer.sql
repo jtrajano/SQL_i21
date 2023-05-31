@@ -317,7 +317,7 @@ BEGIN TRY
 		,[strBillOfLadding]
 		,[strTrackingNumber]
 		)
-	SELECT DISTINCT [intLotId] = LDL.intNewLotId
+	SELECT DISTINCT [intLotId] = ISNULL(LDL.intNewLotId, Lot.intLotId)
 		,[strLotNumber] = CASE WHEN ISNULL(LDL.strNewLotNumber, '') <> '' THEN LDL.strNewLotNumber ELSE Lot.strLotNumber END
 		,[strLotAlias] = Lot.strLotAlias
 		,[intParentLotId] = Lot.intParentLotId
