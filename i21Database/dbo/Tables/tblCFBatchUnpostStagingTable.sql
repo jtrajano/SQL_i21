@@ -14,6 +14,7 @@
     [strCustomerName]              NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intItemId]                    INT            NULL,
     [strItemId]                    NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strItemDescription]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strResult]                    NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]             INT            CONSTRAINT [DF_tblCFBatchUnpostStagingTable_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFBatchUnpostStagingTable] PRIMARY KEY CLUSTERED ([intBatchUnpostStagingTableId] ASC) WITH (FILLFACTOR = 70)
