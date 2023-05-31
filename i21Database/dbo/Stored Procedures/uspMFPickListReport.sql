@@ -461,8 +461,10 @@ Begin --Sales Order Pick List
 									JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
 									)
 						ELSE ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '')
-						END COLLATE Latin1_General_CI_AS AS strDescription,
-					dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
+						END COLLATE Latin1_General_CI_AS AS strDescription
+				  , CASE WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty <> 0 THEN  dbo.fnRemoveTrailingZeroes(pld.dblShippedQty) 
+						 ELSE  dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity)
+					END AS dblPickQuantity,
 					um.strUnitMeasure AS strPickUOM,
 					l.strGarden,
 					@intWorkOrderCount AS intWorkOrderCount,
