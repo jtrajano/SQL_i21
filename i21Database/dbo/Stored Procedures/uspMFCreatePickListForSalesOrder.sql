@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFCreatePickListForSalesOrder]
+(
 	@intSalesOrderId int
+)
 AS
 
 DECLARE @intLocationId			INT
@@ -16,6 +18,7 @@ DECLARE @intLocationId			INT
 	  , @dblDefaultResidueQty	NUMERIC(38, 20)
 	  , @intSubLocationId		INT
 	  , @intStorageLocationId	INT
+	  , @dblPickedQty			NUMERIC(38, 20)
 
 DECLARE @tblInputItem TABLE (intRowNo			  INT IDENTITY(1, 1)
 						   , intItemId			  INT
@@ -240,8 +243,18 @@ WHILE @intMinItem IS NOT NULL
 
 						GOTO NEXT_ITEM
 					END
-				ELSE
+				ELSE	
 					BEGIN
+						/* Set Available Qty same as Required Qty if item Negative Invetory is Yes. */
+						IF (SELECT intAllowNegativeInventory FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @intLocationId) = 1
+							BEGIN
+								SET @dblPickedQty = @dblRequiredQty;
+							END
+						ELSE
+							BEGIN
+								SET @dblPickedQty = @dblAvailableQty;
+							END
+
 						INSERT INTO @tblPickedLot(intLotId
 												, intItemId
 												, dblQty
@@ -252,7 +265,7 @@ WHILE @intMinItem IS NOT NULL
 												, dblItemRequiredQty)
 						SELECT @intLotId
 							 , @intItemId
-							 , @dblAvailableQty
+							 , @dblPickedQty
 							 , intItemUOMId
 							 , intLocationId
 							 , intSubLocationId
@@ -271,6 +284,16 @@ WHILE @intMinItem IS NOT NULL
 
 		IF ISNULL(@dblRequiredQty, 0) > 0
 			BEGIN
+				/* Set Available Qty same as Required Qty if item Negative Invetory is Yes. */
+				IF (SELECT intAllowNegativeInventory FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @intLocationId) = 1
+					BEGIN
+						SET @dblPickedQty = @dblRequiredQty;
+					END
+				ELSE
+					BEGIN
+						SET @dblPickedQty = @dblAvailableQty;
+					END
+
 				INSERT INTO @tblPickedLot(intLotId
 										, intItemId
 										, dblQty
@@ -281,7 +304,7 @@ WHILE @intMinItem IS NOT NULL
 										, dblItemRequiredQty)
 				Select 0
 					 , @intItemId
-					 , 0
+					 , @dblPickedQty
 					 , @intItemUOMId
 					 , @intLocationId
 					 , 0
