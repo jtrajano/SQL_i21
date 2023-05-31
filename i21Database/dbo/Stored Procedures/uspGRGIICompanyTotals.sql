@@ -99,6 +99,7 @@ BEGIN
 	
 	/*******START******COMPANY OWNERSHIP (UNPAID)*************/
 	BEGIN
+		/*for beginning*/
 		SELECT *
 		INTO #Vouchers
 		FROM (
@@ -650,17 +651,17 @@ BEGIN
 		SET @dblInternalTransfersDiff = @dblInternalTransfersReceived - @dblInternalTransfersShipped
 
 		--GET RECEIVED THAT ARE COMPANY OWNED
-		--DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
-		--SET @dblReceivedCompanyOwned = NULL
-		--SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
-		--FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
-		--INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
-		--LEFT JOIN tblCTContractDetail CD
-		--	ON CD.intContractDetailId = CompOwn.intContractDetailId
-		--WHERE intCommodityId = @intCommodityId
-		--	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
-		--	AND CompOwn.strTransactionType = 'Inventory Receipt'
-		--	AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
+		DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
+		SET @dblReceivedCompanyOwned = NULL
+		SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
+		FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = CompOwn.intContractDetailId
+		WHERE intCommodityId = @intCommodityId
+			AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
+			AND CompOwn.strTransactionType = 'Inventory Receipt'
+			AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
 
 		--GET TRANSFERS FROM LICENSED TO NON-LICENSED LOCATIONS FOR THE DAY
 		DECLARE @dblTransfers DECIMAL(18,6)
@@ -755,7 +756,14 @@ BEGIN
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
 	--SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
-	SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + (ISNULL(DP.total,0) + ISNULL(@dblDPIA,0))) - ISNULL(TS.dblUnits,0)
+	SET dblTotalIncrease = (
+								ISNULL(@dblSODecrease,0) + 
+								ISNULL(@dblVoidedPayment,0) + 
+								ISNULL(@dblDPSettlementsWithDeletedPayment,0) + 
+								(ISNULL(DP.total,0) + ISNULL(@dblDPIA,0)) +
+								ISNULL(@dblReceivedCompanyOwned,0)
+							) - 
+							ISNULL(TS.dblUnits,0)
 		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
