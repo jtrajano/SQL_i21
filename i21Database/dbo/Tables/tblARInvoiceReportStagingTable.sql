@@ -127,6 +127,7 @@
 	[dtmLoadedDate]						DATETIME		NULL,
 	[dtmScaleDate]						DATETIME		NULL,
 	[blbLogo]							VARBINARY (MAX) NULL,
+	[imgLogo]							VARBINARY (MAX) NULL,
 	[blbSignature]						VARBINARY (MAX) NULL,
 	[dtmCreated]						DATETIME		NULL,
 	[dblTaxExempt]						NUMERIC (18, 6)	NULL,
