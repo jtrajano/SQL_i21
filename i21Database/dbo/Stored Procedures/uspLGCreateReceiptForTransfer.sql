@@ -340,7 +340,7 @@ BEGIN TRY
 		,[intLocationId] = LD.intSCompanyLocationId
 		,[intShipViaId] = L.intHaulerEntityId
 		,[intShipFromId] = LD.intPCompanyLocationId
-		,[intCurrencyId] = @DefaultCurrencyId
+		,[intCurrencyId] = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
 		,[intSourceType] =  9 --TEMPORARY Source Type for Transfer Shipment
 		,[strBillOfLadding] = L.strBLNumber
 		,[strTrackingNumber] = Lot.strTrackingNumber
@@ -349,6 +349,8 @@ BEGIN TRY
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 		LEFT JOIN tblICParentLot PLot ON PLot.intParentLotId = Lot.intParentLotId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
