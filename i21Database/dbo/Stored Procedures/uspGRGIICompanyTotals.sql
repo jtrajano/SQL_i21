@@ -825,8 +825,9 @@ BEGIN
 		/*
 			Transfer from Company owned to customer owned
 		*/
-		WHERE ST_FROM.strOwnedPhysicalStock = 'Company'
-			AND ST_TO.strOwnedPhysicalStock = 'Customer'
+		WHERE ((ST_FROM.strOwnedPhysicalStock = 'Company' AND ST_TO.strOwnedPhysicalStock = 'Customer')
+				OR (ST_FROM.strOwnedPhysicalStock = 'Customer' AND ST_TO.strOwnedPhysicalStock = 'Customer')
+			)
 			AND TS.intCommodityId = @intCommodityId
 			AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmReportDate
 	) TS
