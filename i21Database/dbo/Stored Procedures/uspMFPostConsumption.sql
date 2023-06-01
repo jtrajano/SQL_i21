@@ -240,7 +240,14 @@ BEGIN
 		,HeaderDistItem.intCompanyLocationId
 		,HeaderDistItem.dtmInvoiceDateTime
 		,strActualCostId = (
-			CASE 
+			CASE WHEN Receipt.strOrigin = 'Terminal'
+				AND HeaderDistItem.strDestination = 'Location'
+				AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Terminal'
+				AND HeaderDistItem.strDestination = 'Location'
+				AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
+					THEN NULL
 				WHEN Receipt.strOrigin = 'Terminal'
 					THEN LoadHeader.strTransaction
 				WHEN Receipt.strOrigin = 'Location'
@@ -255,6 +262,10 @@ BEGIN
 					AND HeaderDistItem.strDestination = 'Location'
 					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
 					THEN LoadHeader.strTransaction
+				WHEN Receipt.strOrigin = 'Location'
+					AND HeaderDistItem.strDestination = 'Location'
+					AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
+					THEN NULL
 				END
 			)
 	INTO #tmpBlendIngredients
@@ -357,7 +368,7 @@ BEGIN
 		,dtmDate = @dtmDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = ISNULL(l.dblLastCost, LotTransaction.dblCost)
+		,dblCost = l.dblLastCost
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -374,12 +385,6 @@ BEGIN
 	JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
 	JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
-	OUTER APPLY (SELECT TOP 1 ICLotTransaction.dblCost
-				 FROM tblICInventoryLotTransaction AS ICLotTransaction
-				 WHERE ICLotTransaction.intLotId = l.intLotId 
-				   AND ICLotTransaction.intStorageLocationId = l.intStorageLocationId 
-				   AND ICLotTransaction.intSubLocationId = l.intSubLocationId 
-				 ORDER BY dtmCreated desc) AS LotTransaction
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND IsNULL(cl.ysnPosted, 0) = 0
 
