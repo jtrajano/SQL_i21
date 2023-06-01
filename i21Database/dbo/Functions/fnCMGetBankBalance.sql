@@ -44,11 +44,12 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_PAYCHECK AS INT = 121
 		,@VOID_ACH AS INT = 122
 		,@VOID_DIRECT_DEPOSIT AS INT = 123
+		,@intDefaultCurrencyId INT
 		
 DECLARE @openingBalance AS NUMERIC(18,6)		
 DECLARE @returnBalance AS NUMERIC(18,6)	
 
-
+SELECT TOP 1 @intDefaultCurrencyId= intDefaultCurrencyId FROM tblSMCompanyPreference 
 
 
 -- Get the opening balance from the first bank reconciliation record. 
