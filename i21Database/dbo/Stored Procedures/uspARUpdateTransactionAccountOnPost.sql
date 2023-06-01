@@ -256,6 +256,7 @@ SET ANSI_WARNINGS OFF
 	) OVERRIDESEGMENT
 	WHERE ARID.strSessionId = @strSessionId
 	AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
+	AND ARID.strType <> 'Tax Adjustment'
 
     UPDATE PID
     SET  
