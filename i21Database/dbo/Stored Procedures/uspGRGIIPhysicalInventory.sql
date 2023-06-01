@@ -240,6 +240,47 @@ SELECT DISTINCT
 	,strCommodityDescription
 FROM @PhysicalInventoryData
 
+--add missing locs in commodities
+SELECT DISTINCT intCommodityId
+	,strCommodityCode
+	,strCommodityDescription
+	,strUOM
+INTO #Coms
+FROM @PhysicalInventoryData
+
+INSERT INTO @PhysicalInventoryData
+SELECT @dtmReportDate
+	,1
+	,C.intCommodityId
+	,C.strCommodityCode
+	,C.strCommodityDescription
+	,CL.strLocationName
+	,0
+	,NULL
+	,NULL
+	,NULL
+	,NULL
+	,NULL
+	,0
+	,C.strUOM	
+	,0
+	,0
+FROM tblSMCompanyLocation CL
+OUTER APPLY (
+	SELECT * FROM #Coms
+) C
+OUTER APPLY (
+	SELECT P.strLocationName
+		,P.intCommodityId
+	FROM @PhysicalInventoryData P
+	WHERE P.strLocationName = CL.strLocationName
+		AND P.intCommodityId = C.intCommodityId
+) I
+WHERE CL.ysnLicensed = 1
+	AND I.strLocationName IS NULL
+
+DROP TABLE #Coms
+
 DECLARE @intCompanyLocationId INT
 DECLARE @strLocationName NVARCHAR(200)
 DECLARE @intCommodityId2 INT
@@ -358,47 +399,6 @@ BEGIN
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
-
---add missing locs in commodities
-SELECT DISTINCT intCommodityId
-	,strCommodityCode
-	,strCommodityDescription
-	,strUOM
-INTO #Coms
-FROM @PhysicalInventoryData
-
-INSERT INTO @PhysicalInventoryData
-SELECT @dtmReportDate
-	,1
-	,C.intCommodityId
-	,C.strCommodityCode
-	,C.strCommodityDescription
-	,CL.strLocationName
-	,0
-	,NULL
-	,NULL
-	,NULL
-	,NULL
-	,NULL
-	,0
-	,C.strUOM	
-	,0
-	,0
-FROM tblSMCompanyLocation CL
-OUTER APPLY (
-	SELECT * FROM #Coms
-) C
-OUTER APPLY (
-	SELECT P.strLocationName
-		,P.intCommodityId
-	FROM @PhysicalInventoryData P
-	WHERE P.strLocationName = CL.strLocationName
-		AND P.intCommodityId = C.intCommodityId
-) I
-WHERE CL.ysnLicensed = 1
-	AND I.strLocationName IS NULL
-
-DROP TABLE #Coms
 
 UPDATE @PhysicalInventoryData
 SET dblBegInventory = ISNULL(dblBegInventory,0), dblEndInventory = ISNULL(dblBegInventory,0) + ISNULL(dblReceived,0) - ISNULL(dblShipped,0) + ISNULL(dblInternalTransfersReceived,0) - ISNULL(dblInternalTransfersShipped,0) + ISNULL(dblNetAdjustments,0)
