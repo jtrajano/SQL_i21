@@ -615,7 +615,7 @@ BEGIN
 		--	,strUOM
 
 		SET @dblSODecrease = NULL
-		SELECT @dblSODecrease = SUM(dblDecrease) - (ISNULL(@dblIACustomerOwned,0) * -1)
+		SELECT @dblSODecrease = SUM(dblDecrease) - (ISNULL(@dblIACustomerOwned,0) * -1) - ISNULL(TS.dblUnits,0)
 		FROM tblGRGIICustomerStorage CS
 		INNER JOIN tblGRStorageType ST
 			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -623,12 +623,34 @@ BEGIN
 				AND ST.ysnCustomerStorage = 0
 				AND ST.ysnDPOwnedType = 0
 				AND ST.ysnGrainBankType = 0
-				AND ST.strOwnedPhysicalStock = 'Customer'		
+				AND ST.strOwnedPhysicalStock = 'Customer'
+		OUTER APPLY (
+			SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
+			FROM vyuGRTransferStorageSearchView TS
+			INNER JOIN tblGRStorageType ST_FROM
+				ON ST_FROM.intStorageScheduleTypeId = TS.intFromStorageTypeId
+			INNER JOIN tblGRStorageType ST_TO
+				ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
+			INNER JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemUOMId = CS.intItemUOMId
+			INNER JOIN tblICUnitMeasure UM
+				ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+			/*
+				Transfer from Company owned to customer owned
+			*/
+			WHERE (ST_FROM.strOwnedPhysicalStock = 'Customer' AND ST_TO.strOwnedPhysicalStock = 'Customer')
+				AND TS.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmReportDate
+				AND (ST_FROM.intStorageScheduleTypeId = ST.intStorageScheduleTypeId AND ST_TO.intStorageScheduleTypeId <> ST.intStorageScheduleTypeId)
+		) TS
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
 			AND dtmReportDate = @dtmReportDate
-		GROUP BY intCommodityId
-			,strUOM		
+		--GROUP BY intCommodityId
+		--	,strUOM		
+		GROUP BY TS.dblUnits
 
 		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
 		DECLARE @dblShipped DECIMAL(18,6)
@@ -825,9 +847,7 @@ BEGIN
 		/*
 			Transfer from Company owned to customer owned
 		*/
-		WHERE ((ST_FROM.strOwnedPhysicalStock = 'Company' AND ST_TO.strOwnedPhysicalStock = 'Customer')
-				OR (ST_FROM.strOwnedPhysicalStock = 'Customer' AND ST_TO.strOwnedPhysicalStock = 'Customer')
-			)
+		WHERE (ST_FROM.strOwnedPhysicalStock = 'Company' AND ST_TO.strOwnedPhysicalStock = 'Customer')
 			AND TS.intCommodityId = @intCommodityId
 			AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmReportDate
 	) TS
