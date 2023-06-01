@@ -260,7 +260,7 @@ BEGIN TRY
 			, intTemplateSampleTypeId	= TEMPLATE_SAMPLE_TYPE.intSampleTypeId
 			, intCompanyLocationId		= MU.intCompanyLocationId
 			, intColourId				= COLOUR.intCommodityAttributeId
-			, strColour					= COLOUR.strDescription
+			, strColour					= IsNULL(COLOUR.strDescription,BATCH_MU.strTeaColour )
 			, intBrandId				= SIZE.intBrandId
 			, strBrand					= SIZE.strBrandCode
 			, strComments				= IMP.strRemarks
@@ -514,8 +514,8 @@ BEGIN TRY
 						  , strComments3
 						  , intBrokerId
 						  , intPackageTypeId
-						  , intCurrencyId
 						  , intMarketZoneId
+						  , intCurrencyId
 						)
 						SELECT intConcurrencyId			= 1
 							 , intSampleTypeId			= @intTemplateSampleTypeId
@@ -580,8 +580,8 @@ BEGIN TRY
 							 , strComments3				= S.strComments3
 							 , intBrokerId				= S.intBrokerId
 							 , intPackageTypeId			= S.intPackageTypeId
-							 , intCurrencyId			= S.intCurrencyId
 							 , intMarketZoneId			= S.intMarketZoneId
+							 , intCurrencyId			= S.intCurrencyId
 						FROM tblQMSample S
 						INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 						WHERE B.intBatchId = @intBatchId
@@ -1228,6 +1228,7 @@ BEGIN TRY
 				,dblOriginalTeaAppearance
 				,dblOriginalTeaVolume
 				,dblOriginalTeaMoisture
+				,strERPPONumber
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1250,9 +1251,9 @@ BEGIN TRY
 				,strAirwayBillCode = ISNULL(S.strCourierRef, @strAirwayBillNumberCode)
 				,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 				,strAWBSampleReference = S.strAWBSampleReference
-				,dblBasePrice = @dblB1Price
+				,dblBasePrice = BT.dblBasePrice
 				,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-				,dblBoughtPrice = @dblB1Price
+				,dblBoughtPrice = BT.dblBoughtPrice
 				,dblBulkDensity = CASE 
 					WHEN ISNULL(Density.strPropertyValue, '') = ''
 						THEN NULL
@@ -1271,15 +1272,15 @@ BEGIN TRY
 				,dtmExpiration = NULL
 				,intFromPortId = S.intFromLocationCodeId
 				,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
-				,dtmInitialBuy = @dtmCurrentDate
+				,dtmInitialBuy = BT.dtmInitialBuy
 				,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-				,dblLandedPrice = NULL
+				,dblLandedPrice = BT.dblLandedPrice
 				,strLeafCategory = LEAF_CATEGORY.strAttribute2
 				,strLeafManufacturingType = LEAF_TYPE.strDescription
 				,strLeafSize = BRAND.strBrandCode
 				,strLeafStyle = STYLE.strName
 				,intBookId = S.intBookId
-				,dblPackagesBought = @dblB1QtyBought
+				,dblPackagesBought = BT.dblPackagesBought
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
@@ -1288,8 +1289,8 @@ BEGIN TRY
 				,strPlant = MU.strVendorRefNoPrefix 
 				,dblTotalQuantity = S.dblSampleQty 
 				,strSampleBoxNumber = S.strSampleBoxNumber
-				,dblSellingPrice = NULL
-				,dtmStock = @dtmCurrentDate
+				,dblSellingPrice = BT.dblSellingPrice
+				,dtmStock = BT.dtmStock
 				,ysnStrategic = NULL
 				,strTeaLingoSubCluster = REGION.strDescription
 				,dtmSupplierPreInvoiceDate = NULL
@@ -1338,7 +1339,7 @@ BEGIN TRY
 					ELSE CAST(Volume.strPropertyValue AS NUMERIC(18, 6))
 					END
 				,intTealingoItemId = S.intItemId
-				,dtmWarehouseArrival = NULL
+				,dtmWarehouseArrival = BT.dtmWarehouseArrival
 				,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
 				,strPackageSize = PT.strUnitMeasure
 				,intPackageUOMId = S.intNetWtPerPackagesUOMId
@@ -1365,7 +1366,7 @@ BEGIN TRY
 				,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
 				,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 				,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
-				,dtmShippingDate = @dtmCurrentDate
+				,dtmShippingDate = BT.dtmShippingDate
 				,strFines = Fines.strPropertyValue 
 				,intCountryId=S.intCountryID
 
@@ -1376,6 +1377,7 @@ BEGIN TRY
 				,dblOriginalTeaAppearance = BT.dblTeaAppearance
 				,dblOriginalTeaVolume = BT.dblTeaVolume
 				,dblOriginalTeaMoisture = BT.dblTeaMoisture
+				,strERPPONumber=BT.strERPPONumber
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId

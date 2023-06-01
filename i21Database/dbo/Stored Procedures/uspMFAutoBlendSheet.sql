@@ -59,6 +59,7 @@ IF EXISTS(SELECT *
 		  , strSubLocationName		NVARCHAR(50)
 		  , intSubLocationId		INT
 		  , strLotAlias				NVARCHAR(50)
+		  , strGarden				NVARCHAR(50)
 		  , ysnParentLot			BIT
 		  , strRowState				NVARCHAR(50)
 		  , strSecondaryStatus		NVARCHAR(50)

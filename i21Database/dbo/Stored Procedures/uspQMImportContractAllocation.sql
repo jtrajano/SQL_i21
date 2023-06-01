@@ -372,7 +372,6 @@ BEGIN TRY
 			,ysnTeaOrganic
 			,dblTeaTaste
 			,dblTeaVolume
-			,strFines
 			,intTealingoItemId
 			,dtmWarehouseArrival
 			,intYearManufacture
@@ -430,7 +429,11 @@ BEGIN TRY
 			,intCurrencyId = S.intCurrencyId
 			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
-			,strDustContent = NULL
+			,strDustContent = CASE 
+				WHEN ISNULL(DUST.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE DUST.strPropertyValue
+				END
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
@@ -438,8 +441,8 @@ BEGIN TRY
 			,intFromPortId = CD.intLoadingPortId
 			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = NULL
-			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-			,dblLandedPrice = NULL
+			,dblWeightPerUnit = (Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)
+			,dblLandedPrice = CD.dblLandedPrice
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
 			,strLeafSize = BRAND.strBrandCode
@@ -454,7 +457,7 @@ BEGIN TRY
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblSampleQty 
 			,strSampleBoxNumber = S.strSampleBoxNumber
-			,dblSellingPrice = NULL
+			,dblSellingPrice = CD.dblSalesPrice 
 			,dtmStock = CD.dtmUpdatedAvailabilityDate 
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = REGION.strDescription
@@ -500,10 +503,9 @@ BEGIN TRY
 				END
 			,dblTeaVolume = CASE 
 				WHEN ISNULL(VOLUME.strPropertyValue, '') = ''
-					THEN NULL
+					THEN I.dblBlendWeight
 				ELSE CAST(VOLUME.strPropertyValue AS NUMERIC(18, 6))
-				END
-			,strFines = CASE WHEN ISNULL(FINES.strPropertyValue, '') = '' THEN NULL ELSE FINES.strPropertyValue END
+				END  
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
@@ -601,15 +603,15 @@ BEGIN TRY
 				AND P.strPropertyName = 'Volume'
 			WHERE TR.intSampleId = S.intSampleId
 			) VOLUME
-		--Fines
+		--Dust
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
 				,TR.dblPinpointValue
 			FROM tblQMTestResult TR
 			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Fines'
+				AND P.strPropertyName = 'Dust Level'
 			WHERE TR.intSampleId = S.intSampleId
-			) FINES
+			) DUST
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
