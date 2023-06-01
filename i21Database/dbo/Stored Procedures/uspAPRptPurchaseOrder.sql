@@ -73,14 +73,17 @@ BEGIN
 	FROM @temp_xml_table WHERE [fieldname] = 'intPurchaseId'
 END
 
+--Invalid Image Logo
+DECLARE @invalidImgLogo VARBINARY = 0x
+
 -- GET LOGO
 SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header')
 
 SELECT 
 	A.*,
 	NULL strCorrected,
-	CASE WHEN LP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END strLogoType,
-	ISNULL(LP.imgLogo, @imgLogo) imgLogo,
+	CASE WHEN LP.imgLogo IS NOT NULL AND LP.imgLogo != @invalidImgLogo  THEN 'Logo' ELSE 'Attachment' END strLogoType,  
+ 	CASE WHEN LP.imgLogo IS NOT NULL AND LP.imgLogo != @invalidImgLogo THEN LP.imgLogo ELSE @imgLogo END imgLogo,
 	LPF.imgLogo imgFooter
 FROM [vyuAPRptPurchase] A
 LEFT JOIN tblSMLogoPreference LP ON LP.intCompanyLocationId = A.intShipToId AND LP.ysnDefault = 1
