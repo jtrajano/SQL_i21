@@ -394,7 +394,7 @@ BEGIN
 				   AND ICLotTransaction.intStorageLocationId = l.intStorageLocationId 
 				   AND ICLotTransaction.intSubLocationId = l.intSubLocationId 
 				 ORDER BY dtmCreated desc) AS LotTransaction
-	WHERE cl.intWorkOrderId = @intWorkOrderId
+	WHERE cl.intWorkOrderId = @intWorkOrderId AND IsNULL(cl.ysnPosted, 0) = 0
 
 	UPDATE tblMFWorkOrderConsumedLot
 	SET ysnPosted = 1
