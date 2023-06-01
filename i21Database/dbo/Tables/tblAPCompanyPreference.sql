@@ -38,6 +38,7 @@
     [ysnOverrideCompanySegment]		    BIT NOT NULL DEFAULT(0),
 	[ysnOverrideLocationSegment]	    BIT NOT NULL DEFAULT(0),
 	[ysnOverrideLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0), 
+    [ysnRemittanceAdvice_DisplayVendorAccountNumber] BIT NULL DEFAULT(1),
     intBudgetCode int, 
     [ysnOverrideAPLineOfBusinessSegment]	BIT NOT NULL DEFAULT(0),
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)

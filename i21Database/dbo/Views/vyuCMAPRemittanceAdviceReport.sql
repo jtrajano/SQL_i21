@@ -45,6 +45,7 @@ SELECT CHK.dtmDate
 			+ ' on ' + 
 			CONVERT(varchar(11), PYMT.dtmDatePaid,106)
 		, PYMTDTL.intPaymentDetailId
+		, CP.ysnDisplayVendorAccountNumber
 		, CASE WHEN O.intUTCOffset IS NULL THEN GETDATE() ELSE DATEADD(MINUTE, O.intUTCOffset * -1, GETUTCDATE()) END dtmCurrent
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
@@ -80,4 +81,7 @@ OUTER APPLY (
 OUTER APPLY(
 	SELECT intUTCOffset from [tblCMCompanyPreferenceOption]
 )O
+OUTER APPLY(
+	SELECT TOP 1 ysnRemittanceAdvice_DisplayVendorAccountNumber ysnDisplayVendorAccountNumber FROM tblAPCompanyPreference
+)CP
 WHERE CHK.intBankTransactionTypeId IN (22, 23, 123)
