@@ -1762,9 +1762,9 @@
     <Build Include="dbo\Functions\fnTMGetSalesFromStoreEOD.sql" />
     <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_DA.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessSAPInboundType_DA.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipment_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
