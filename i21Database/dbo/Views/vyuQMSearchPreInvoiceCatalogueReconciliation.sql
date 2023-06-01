@@ -16,7 +16,7 @@ SELECT intBillDetailId					    = BD.intBillDetailId
      , dblSupplierPreInvoicePrice			= BD.dblCost
 	 , dblSupplierPrice						= S.dblB1Price
      , dblPreInvoiceLotQty					= BD.dblQtyReceived
-	 , dblLotQty							= S.dblSampleQty
+	 , dblLotQty							= MFB.dblTotalQuantity 
      , dblTotalNoPackageBreakups			= ISNULL(BD.dblPackageBreakups, 0)
 	 , intPreInvoiceGardenMarkId			= GM.intGardenMarkId
      , strPreInvoiceGarden					= GM.strGardenMark
@@ -51,7 +51,7 @@ FROM tblAPBillDetail BD
 INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
 INNER JOIN tblQMSaleYear SY ON CAST(BD.intSaleYear AS NVARCHAR(10)) = SY.strSaleYear
 INNER JOIN tblQMSample S ON S.intSaleYearId = SY.intSaleYearId 
-		                AND S.intLocationId = B.intShipToId
+		                AND S.intLocationId = BD.intLocationId
 						AND S.strSaleNumber = BD.strSaleNumber
 						AND S.intCatalogueTypeId = BD.intCatalogueTypeId
 						AND S.intEntityId = B.intEntityVendorId

@@ -162,7 +162,8 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLocationId = intCompanyLocationId
 				FROM dbo.tblSMCompanyLocation
-				WHERE strLocationType = 'Plant' AND (
+				WHERE strLocationType = 'Plant'
+					AND (
 						CASE 
 							WHEN @strProductionOrder = 'True'
 								THEN strVendorRefNoPrefix
@@ -465,7 +466,27 @@ BEGIN TRY
 						,@dtmCreatedDate
 						,1 AS intConcurrencyId
 						,NULL AS intCompanyId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblMFBlendDemand
+					SET strDemandNo = @strOrderNo
+						,intItemId = @intItemId
+						,dblQuantity = @dblQuantity
+						,intManufacturingCellId = @intManufacturingCellId
+						,intMachineId = @intMachineId
+						,dtmDueDate = @dtmDueDate
+						,dtmLastModified = @dtmCreatedDate
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE strOrderNo = @strOrderNo
+				END
 
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblMFBlendRequirement
+						WHERE strReferenceNo = @strOrderNo
+						)
+				BEGIN
 					EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 						,@intItemId = @intItemId
 						,@intManufacturingId = NULL
@@ -526,7 +547,13 @@ BEGIN TRY
 								WHEN @intLeadTime IS NULL
 									OR @intLeadTime = 0
 									THEN 1
-								ELSE (Case When Round(@dblQuantity / @intLeadTime,0)=0 then 1 Else Round(@dblQuantity / @intLeadTime,0) End)
+								ELSE (
+										CASE 
+											WHEN Round(@dblQuantity / @intLeadTime, 0) = 0
+												THEN 1
+											ELSE Round(@dblQuantity / @intLeadTime, 0)
+											END
+										)
 								END
 							)
 						,1
@@ -578,15 +605,20 @@ BEGIN TRY
 						,dtmLastModified = @dtmCreatedDate
 						,intConcurrencyId = intConcurrencyId + 1
 						--,dblBlenderSize = @intLeadTime
-						,dblEstNoOfBlendSheet=(
+						,dblEstNoOfBlendSheet = (
 							CASE 
 								WHEN @intLeadTime IS NULL
 									OR @intLeadTime = 0
 									THEN 1
-								ELSE (Case When Round(@dblQuantity / @intLeadTime,0)=0 then 1 Else Round(@dblQuantity / @intLeadTime,0) End)
+								ELSE (
+										CASE 
+											WHEN Round(@dblQuantity / @intLeadTime, 0) = 0
+												THEN 1
+											ELSE Round(@dblQuantity / @intLeadTime, 0)
+											END
+										)
 								END
 							)
-						
 					WHERE strReferenceNo = @strOrderNo
 				END
 			END

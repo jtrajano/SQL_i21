@@ -134,11 +134,13 @@ BEGIN TRY
 							CASE 
 								WHEN TransactionType = 8
 									THEN - Convert(NUMERIC(18, 6), Quantity)
+								WHEN TransactionType = 20
+									THEN Convert(NUMERIC(18, 6), NetWeight)
 								ELSE Convert(NUMERIC(18, 6), Quantity)
 								END
 							)
 					END
-				,QuantityUOM
+				,CASE WHEN TransactionType = 20 THEN NetWeightUOM ELSE QuantityUOM END
 				,CASE 
 					WHEN NetWeight = ''
 						THEN NULL
@@ -207,7 +209,7 @@ BEGIN TRY
 			ORDER BY TransactionType DESC
 				,OrderNo
 				,Notes
-				,CONVERT(NUMERIC(18, 6), Quantity)
+				,12
 
 			UPDATE b
 			SET strCompanyLocation = a.strCompanyLocation
