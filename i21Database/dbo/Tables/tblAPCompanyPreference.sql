@@ -17,7 +17,7 @@
     [strVoucherReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[intVoucherInvoiceNoOption] TINYINT             NULL,
 	[intDebitMemoInvoiceNoOption] TINYINT             NULL,
+    [ysnRemittanceAdvice_DisplayVendorAccountNumber] BIT NULL DEFAULT(1),
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
-
