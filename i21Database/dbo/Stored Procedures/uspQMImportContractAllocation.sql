@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspQMImportContractAllocation 
+CREATE PROCEDURE uspQMImportContractAllocation
 (
 	@intImportLogId INT
 ) 
@@ -12,6 +12,14 @@ BEGIN TRY
 			,@intRowCount INT
 			,@intRow INT = 0
 			,@ysnLastRow BIT
+			,@dblAllocatedQty numeric(18,6)
+			,@dblContractQuantity  numeric(18,6)
+			,@dblContractPrice numeric(18,6)
+	DECLARE @intToDeleteBatchLocationId INT
+	DECLARE
+		@ysnSuccess BIT
+		,@strErrorMessage NVARCHAR(MAX)
+		,@strReferenceNo NVARCHAR(50)
 
 	SET @strTxnIdentifier = convert(nvarchar(36),NEWID())
 
@@ -44,10 +52,12 @@ BEGIN TRY
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
 				WHEN (CH.intContractHeaderId IS NULL)
+				AND ISNULL(IMP.strContractNumber, '') <> ''
 					THEN 'CONTRACT NUMBER, '
 				ELSE ''
 				END + CASE 
 				WHEN (CD.intContractDetailId IS NULL)
+				AND ISNULL(IMP.intContractItem, 0) >0
 					THEN 'CONTRACT ITEM, '
 				ELSE ''
 				END + CASE 
@@ -90,8 +100,8 @@ BEGIN TRY
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
 		AND (
-			(CH.intContractHeaderId IS NULL)
-			OR (CD.intContractDetailId IS NULL)
+			(CH.intContractHeaderId IS NULL AND ISNULL(IMP.strContractNumber, '') <> '')
+			OR (CD.intContractDetailId IS NULL AND ISNULL(IMP.intContractItem, 0) >0)
 			OR (
 				SAMPLE_STATUS.intSampleStatusId IS NULL
 				AND ISNULL(IMP.strSampleStatus, '') <> ''
@@ -209,7 +219,7 @@ BEGIN TRY
 	BEGIN
 		SET @intRow = @intRow + 1
 		-- If the contract and sample item does not match, throw an error
-		IF @ysnSampleContractItemMatch = 0
+		IF @ysnSampleContractItemMatch = 0 AND @intContractDetailId IS NOT NULL
 		BEGIN
 			UPDATE tblQMImportCatalogue
 			SET ysnSuccess = 0
@@ -227,6 +237,56 @@ BEGIN TRY
 			,@ysnCreate = 0
 			,@ysnBeforeUpdate = 1
 
+		--IF EXISTS(
+		--	SELECT 1 FROM tblCTContractDetail CD
+		--	WHERE CD.intContractDetailId = @intContractDetailId
+		--	AND (Select dblUnitQty from tblICItemUOM where intItemUOMId = CD.intItemUOMId) != (select strNoOfPackagesUOM from tblQMImportCatalogue WHERE intImportCatalogueId = @intImportCatalogueId)
+		--)
+		--BEGIN
+		--	UPDATE IC
+		--	SET ysnSuccess = 0, ysnProcessed = 1
+		--		,strLogResult = 'Allocated Qty UOM does not match the item in contract'
+		--	FROM tblQMImportCatalogue IC
+		--	WHERE IC.intImportCatalogueId = @intImportCatalogueId
+		--	GOTO CONT
+		--END
+
+		IF @intContractDetailId IS NOT NULL
+		BEGIN
+			SELECT @dblAllocatedQty=0
+			SELECT @dblContractQuantity=0
+			SELECT @dblContractPrice=0
+
+			SELECT @dblAllocatedQty=SUM(dblRepresentingQty) 
+			FROM tblQMSample S
+			WHERE intContractDetailId = @intContractDetailId
+				OR intSampleId = @intSampleId
+
+			SELECT @dblContractQuantity=dblQuantity
+					,@strReferenceNo=strReferenceNo  
+					,@dblContractPrice=dblCashPrice
+			FROM tblCTContractDetail 
+			WHERE intContractDetailId = @intContractDetailId
+				
+			IF @dblAllocatedQty>@dblContractQuantity
+			BEGIN
+				UPDATE IC
+				SET ysnSuccess = 0, ysnProcessed = 1
+					,strLogResult = 'Allocated Qty cannot be greater than Contracted Qty'
+				FROM tblQMImportCatalogue IC
+				WHERE IC.intImportCatalogueId = @intImportCatalogueId
+				GOTO CONT
+			END
+			IF @dblCashPrice>@dblContractPrice
+			BEGIN
+				UPDATE IC
+				SET ysnSuccess = 0, ysnProcessed = 1
+					,strLogResult = 'Cash Price is different between catalogue and contract sequence.'
+				FROM tblQMImportCatalogue IC
+				WHERE IC.intImportCatalogueId = @intImportCatalogueId
+				GOTO CONT
+			END
+		END
 		-- Update Sample
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -238,29 +298,57 @@ BEGIN TRY
 			,intBookId = @intBookId
 			,intSubBookId = @intSubBookId
 			,intCurrencyId = @intCurrencyID
+			,strBuyingOrderNo =@strReferenceNo
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
 		SELECT @ysnLastRow = CASE WHEN @intRow = @intRowCount THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
-		-- Update Contract Cash Price
-		IF ISNULL(@dblCashPrice, 0) <> 0
-			EXEC uspCTUpdateSequencePrice
-				@intContractDetailId = @intContractDetailId
-				,@dblNewPrice = @dblCashPrice
-				,@intUserId = @intEntityUserId
-				,@strScreen = 'Contract Line Allocation Import'
-				,@ysnLastRecord = @ysnLastRow
-				,@strTxnIdentifier = @strTxnIdentifier
+		---- Update Contract Cash Price
+		--IF ISNULL(@dblCashPrice, 0) <> 0 AND @intContractDetailId IS NOT NULL
+		--	EXEC uspCTUpdateSequencePrice
+		--		@intContractDetailId = @intContractDetailId
+		--		,@dblNewPrice = @dblCashPrice
+		--		,@intUserId = @intEntityUserId
+		--		,@strScreen = 'Contract Line Allocation Import'
+		--		,@ysnLastRecord = @ysnLastRow
+		--		,@strTxnIdentifier = @strTxnIdentifier
 
-		UPDATE tblQMTestResult
-		SET intProductTypeId = 8 --Contract Line Item
-			,intProductValueId = @intContractDetailId
-		WHERE intSampleId = @intSampleId
+		IF @intContractDetailId IS NOT NULL
+		BEGIN
+			UPDATE tblQMTestResult
+			SET intProductTypeId = 8 --Contract Line Item
+				,intProductValueId = @intContractDetailId
+			WHERE intSampleId = @intSampleId
+		END
 
 		UPDATE tblQMImportCatalogue
 		SET intSampleId = @intSampleId
 		WHERE intImportCatalogueId = @intImportCatalogueId
+
+		SELECT
+			@strBatchId = B.strBatchId
+			,@intToDeleteBatchLocationId = B.intBuyingCenterLocationId
+		FROM tblQMSample S
+		INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+		WHERE S.intSampleId = @intSampleId
+
+		IF @strBatchId IS NOT NULL AND @intContractDetailId IS NULL
+		BEGIN
+			-- Delete batch for both TBO and MU
+			EXEC uspMFDeleteBatch
+				@strBatchId = @strBatchId
+				,@intLocationId = @intToDeleteBatchLocationId
+				,@ysnSuccess = @ysnSuccess OUTPUT
+				,@strErrorMessage = @strErrorMessage OUTPUT
+
+			IF @ysnSuccess = 0
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = @strErrorMessage
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+		END
 
 		-- Call uspMFUpdateInsertBatch
 		DELETE
@@ -367,6 +455,7 @@ BEGIN TRY
 			,intMarketZoneId
 			,dtmShippingDate 
 			,intCountryId
+			,intSupplierId
 			)
 		SELECT strBatchId = S.strBatchNo
 			,intSales = CAST(S.strSaleNumber AS INT)
@@ -392,13 +481,17 @@ BEGIN TRY
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 			,dblBoughtPrice = CD.dblCashPrice 
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = CH.strExternalContractNumber
+			,strBuyingOrderNumber = CD.strReference 
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
 			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
-			,strDustContent = NULL
+			,strDustContent = CASE 
+				WHEN ISNULL(DUST.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE DUST.strPropertyValue
+				END
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
@@ -406,8 +499,8 @@ BEGIN TRY
 			,intFromPortId = CD.intLoadingPortId
 			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = NULL
-			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-			,dblLandedPrice = NULL
+			,dblWeightPerUnit = (Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)
+			,dblLandedPrice = CD.dblLandedPrice
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
 			,strLeafSize = BRAND.strBrandCode
@@ -422,7 +515,7 @@ BEGIN TRY
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblSampleQty 
 			,strSampleBoxNumber = S.strSampleBoxNumber
-			,dblSellingPrice = NULL
+			,dblSellingPrice = CD.dblSalesPrice 
 			,dtmStock = CD.dtmUpdatedAvailabilityDate 
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = REGION.strDescription
@@ -466,7 +559,11 @@ BEGIN TRY
 					THEN NULL
 				ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
 				END
-			,dblTeaVolume = NULL
+			,dblTeaVolume = CASE 
+				WHEN ISNULL(VOLUME.strPropertyValue, '') = ''
+					THEN I.dblBlendWeight
+				ELSE CAST(VOLUME.strPropertyValue AS NUMERIC(18, 6))
+				END  
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
 			,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
@@ -491,7 +588,8 @@ BEGIN TRY
 			,intMixingUnitLocationId=MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
 			,dtmShippingDate=CD.dtmEtaPol
-			,intCountryId=S.intCountryID
+			,intCountryId=ORIGIN.intCountryID
+			,intSupplierId=S.intEntityId
 		FROM tblQMSample S
 		INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 		INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -500,6 +598,7 @@ BEGIN TRY
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
 		LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
+		LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = S.intCountryID
 		LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 		LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 		Left JOIN tblCTBook B on B.intBookId =S.intBookId 
@@ -553,6 +652,24 @@ BEGIN TRY
 				AND P.strPropertyName = 'Moisture'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOISTURE
+		--Volume
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Volume'
+			WHERE TR.intSampleId = S.intSampleId
+			) VOLUME
+		--Dust
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Dust Level'
+			WHERE TR.intSampleId = S.intSampleId
+			) DUST
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
@@ -571,6 +688,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
+			AND S.intContractDetailId IS NOT NULL
 			
 		DECLARE @intInput INT
 			,@intInputSuccess INT

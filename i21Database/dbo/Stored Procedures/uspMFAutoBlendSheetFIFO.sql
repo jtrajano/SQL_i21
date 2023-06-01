@@ -162,6 +162,7 @@ BEGIN TRY
 		,strSubLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,intSubLocationId INT
 		,strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strGarden NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,ysnParentLot BIT
 		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strSecondaryStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -3805,6 +3806,7 @@ BEGIN TRY
 			,CSL.strSubLocationName
 			,CSL.intCompanyLocationSubLocationId AS intSubLocationId
 			,L.strLotAlias
+			,L.strGarden AS strGarden
 			,CAST(0 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
@@ -3864,6 +3866,7 @@ BEGIN TRY
 			,csl.strSubLocationName
 			,csl.intCompanyLocationSubLocationId AS intSubLocationId
 			,''
+			,'' AS strGarden
 			,0
 			,'Added'
 			,''
@@ -3919,6 +3922,7 @@ BEGIN TRY
 			,CLSL.strSubLocationName AS strSubLocationName
 			,SL.intSubLocationId AS intSubLocationId
 			,PL.strParentLotAlias AS strLotAlias
+			,'' AS strGarden
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus
@@ -3981,6 +3985,7 @@ BEGIN TRY
 			,'' AS strSubLocationName
 			,0 AS intSubLocationId
 			,PL.strParentLotAlias AS strLotAlias
+			,'' AS strGarden
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 			,ls.strSecondaryStatus

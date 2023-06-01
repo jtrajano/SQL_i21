@@ -15,6 +15,8 @@ BEGIN TRY
 		  , @dblB1QtyBought		NUMERIC(18,6)
 		  , @intBookId			INT
 		  , @strB1GroupNumber   NVARCHAR(50)
+		  , @intLotId			INT
+		  , @strNewLotNumber	nvarchar(50)
 		  
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
@@ -95,7 +97,7 @@ BEGIN TRY
 			+ CASE WHEN (ISNULL(IMP.strIntensity, '') <> '' AND ISNUMERIC(IMP.strIntensity) = 0) THEN 'INTENSITY, '
 				ELSE ''
 			END
-			+ CASE WHEN (ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0) THEN 'TASTE, '
+			+ CASE WHEN (ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strTaste) = 0) THEN 'TASTE, '
 				ELSE ''
 			END
 			+ CASE WHEN (ISNULL(IMP.strMouthfeel, '') <> '' AND ISNUMERIC(IMP.strMouthfeel) = 0) THEN 'MOUTH FEEL, '
@@ -111,7 +113,7 @@ BEGIN TRY
 		OR	(ISNULL(IMP.strAppearance, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
 		OR	(ISNULL(IMP.strHue, '') <> '' AND ISNUMERIC(IMP.strHue) = 0)
 		OR	(ISNULL(IMP.strIntensity, '') <> '' AND ISNUMERIC(IMP.strIntensity) = 0)
-		OR	(ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strAppearance) = 0)
+		OR	(ISNULL(IMP.strTaste, '') <> '' AND ISNUMERIC(IMP.strTaste) = 0)
 		OR	(ISNULL(IMP.strMouthfeel, '') <> '' AND ISNUMERIC(IMP.strMouthfeel) = 0)
 		)
 	/* End Validate Numeric Fields */
@@ -258,7 +260,7 @@ BEGIN TRY
 			, intTemplateSampleTypeId	= TEMPLATE_SAMPLE_TYPE.intSampleTypeId
 			, intCompanyLocationId		= MU.intCompanyLocationId
 			, intColourId				= COLOUR.intCommodityAttributeId
-			, strColour					= COLOUR.strDescription
+			, strColour					= IsNULL(COLOUR.strDescription,BATCH_MU.strTeaColour )
 			, intBrandId				= SIZE.intBrandId
 			, strBrand					= SIZE.strBrandCode
 			, strComments				= IMP.strRemarks
@@ -306,7 +308,8 @@ BEGIN TRY
 			-- Template Sample Type
 			LEFT JOIN tblQMSampleType TEMPLATE_SAMPLE_TYPE ON TEMPLATE_SAMPLE_TYPE.strSampleTypeName = IMP.strSampleTypeName
 			-- Mixing Location
-			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+			LEFT JOIN tblSMCompanyLocation MU
+				ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
 			-- Batch MU
 			LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 				AND BATCH_MU.intLocationId = MU.intCompanyLocationId
@@ -345,11 +348,6 @@ BEGIN TRY
 	CREATE INDEX [IX_tmpQMCatalogueImport_intRow] ON ##tmpQMCatalogueImport(intRow)
 
 	/* Clear test properties of the previous item. */
-	DELETE TR
-	FROM tblQMTestResult TR
-	INNER JOIN ##tmpQMCatalogueImport R ON TR.intSampleId = R.intSampleId
-	WHERE R.intSampleId IS NOT NULL
-	AND R.intImportType = 1
 
 	DECLARE @intCounter INT = 1
 		  , @intMax		INT
@@ -473,6 +471,7 @@ BEGIN TRY
 						  , strComment
 						  , intCreatedUserId
 						  , dtmCreated
+						  , intBookId
 						  , intSubBookId
 						  /* Auction Fields */
 						  , intSaleYearId
@@ -509,6 +508,9 @@ BEGIN TRY
 						  , strSampleBoxNumber
 						  , strComments3
 						  , intBrokerId
+						  , intPackageTypeId
+						  , intMarketZoneId
+						  , intCurrencyId
 						)
 						SELECT intConcurrencyId			= 1
 							 , intSampleTypeId			= @intTemplateSampleTypeId
@@ -535,6 +537,7 @@ BEGIN TRY
 							 , strComment				= S.strComment
 							 , intCreatedUserId			= @intEntityUserId
 							 , dtmCreated				= @dtmDateCreated
+							 , intBookId				= S.intBookId
 							 , intSubBookId				= S.intSubBookId
 							 /* Auction Fields */
 							 , intSaleYearId			= S.intSaleYearId
@@ -571,6 +574,9 @@ BEGIN TRY
 							 , strSampleBoxNumber		= S.strSampleBoxNumber
 							 , strComments3				= S.strComments3
 							 , intBrokerId				= S.intBrokerId
+							 , intPackageTypeId			= S.intPackageTypeId
+							 , intMarketZoneId			= S.intMarketZoneId
+							 , intCurrencyId			= S.intCurrencyId
 						FROM tblQMSample S
 						INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 						WHERE B.intBatchId = @intBatchId
@@ -585,13 +591,14 @@ BEGIN TRY
 																	  , @ysnCreate		 = 1
 
 						SELECT @intOriginalItemId = intTealingoItemId
+								,@strBatchId	=	strBatchId
 						FROM tblMFBatch
 						WHERE intBatchId = @intProductValueId;
 
 						UPDATE dbo.tblMFBatch
 						SET intSampleId = @intSampleId
 							,intTealingoItemId = @intItemId
-							,intOriginalItemId = @intOriginalItemId
+							,intOriginalItemId = CASE WHEN intOriginalItemId IS NULL OR intOriginalItemId=@intDefaultItemId THEN @intOriginalItemId ELSE intOriginalItemId END
 						WHERE intBatchId = @intProductValueId;
 
 						/* Batch Pre Stage Process. */
@@ -633,8 +640,6 @@ BEGIN TRY
 				ELSE
 					/* Update Existing record if there's record found. */
 					BEGIN
-						DELETE tblQMTestResult WHERE intSampleId = @intBatchSampleId;
-
 						/* Create Audit Log. */
 						EXEC uspQMGenerateSampleCatalogueImportAuditLog @intSampleId		= @intBatchSampleId
 																	  , @intUserEntityId	= @intEntityUserId
@@ -659,7 +664,7 @@ BEGIN TRY
 
 								UPDATE tblMFBatch
 								SET intTealingoItemId = @intItemId
-								  , intOriginalItemId = @intOriginalItemId
+								  , intOriginalItemId = CASE WHEN intOriginalItemId IS NULL OR intOriginalItemId=@intDefaultItemId THEN @intOriginalItemId ELSE intOriginalItemId END
 								WHERE intBatchId = @intProductValueId
 
 								/* Batch Pre Stage Process. */
@@ -668,65 +673,31 @@ BEGIN TRY
 														  , @intOriginalItemId	= @intOriginalItemId
 														  , @intItemId			= @intItemId
 
+								IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
+								BEGIN
+									SELECT @strBatchId=NULL
+									SELECT @strBatchId=strBatchId FROM tblMFBatch WHERE intBatchId=@intBatchId
+									IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchId AND intItemId<>@intItemId)
+									BEGIN
+										SELECT @intLotId=NULL
+										SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+										EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+														,@intNewItemId =@intItemId
+														,@intUserId =@intEntityUserId
+														,@strNewLotNumber  = @strNewLotNumber OUTPUT
+														,@dtmDate =@dtmCurrentDate
+														,@strReasonCode  = NULL
+														,@strNotes  = NULL
+														,@ysnBulkChange  = 0
+														,@ysnProducedItemChange  = 0
+														,@dblPhysicalCount  = NULL
+									END
+								END
+
 							/* End of Update Item Id if it was not supplied. */
 							END
 
 					/* End of Update Existing record if there's record found. */
-					END
-
-					/* Alter data of TIN Number. */
-					IF @strTINNumber IS NOT NULL
-						BEGIN
-							DECLARE @strOldTINNumber NVARCHAR(100)
-								,@intOldCompanyLocationId INT
-
-							-- Insert / Update TIN number linked to the sample / batch
-							SELECT @strOldTINNumber = TIN.strTINNumber
-								,@intOldCompanyLocationId = B.intLocationId
-							FROM tblQMTINClearance TIN
-							INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
-							OUTER APPLY (
-								SELECT intBatchId
-									,intLocationId
-								FROM tblMFBatch
-								WHERE intBatchId = @intProductValueId
-								) B
-							WHERE S.intSampleId = @intSampleId
-
-
-							/* Create new data of TIN Number. */
-							IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
-								BEGIN
-									/* Delink old TIN number if there's an existing one and the TIN number has changed. */
-									IF @strOldTINNumber IS NOT NULL
-										BEGIN
-											EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strOldTINNumber
-																	 , @intBatchId			 = @intBatchId
-																	 , @intCompanyLocationId = @intOldCompanyLocationId
-																	 , @intEntityId			 = @intEntityUserId
-																	 , @ysnDelink			 = 1
-										END
-									/* End of Delink old TIN number if there's an existing one and the TIN number has changed. */
-
-									/* Link new TIN number with the pre-shipment sample / batch. */
-									EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strTINNumber
-															 , @intBatchId			 = @intProductValueId
-															 , @intCompanyLocationId = @intMixingUnitLocationId
-															 , @intEntityId			 = @intEntityUserId
-															 , @ysnDelink			 = 0
-
-									UPDATE tblQMSample
-									SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId
-															 FROM tblQMTINClearance
-															 WHERE strTINNumber = @strTINNumber
-															   AND intBatchId = @intProductValueId
-															   AND intCompanyLocationId = @intMixingUnitLocationId)
-									WHERE intSampleId = @intSampleId;
-
-								/* End Create new data of TIN Number. */
-								END
-
-					/* End of Alter data of TIN Number. */
 					END
 			
 			/* End of Check if Batch ID is supplied in the template. */
@@ -787,13 +758,12 @@ BEGIN TRY
 			END
 		END
 
-		IF @intImportType = 2 
-			BEGIN
-				SELECT @intBookId = intBookId
-				FROM tblCTBook 
-				WHERE strBook = @strB1GroupNumber
-			END
-		
+		-- IF @intImportType = 2 
+		-- 	BEGIN
+		-- 		SELECT @intBookId = intBookId
+		-- 		FROM tblCTBook 
+		-- 		WHERE strBook = @strB1GroupNumber
+		-- 	END
 
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -807,7 +777,7 @@ BEGIN TRY
 			,intLastModifiedUserId = @intEntityUserId
 			,dtmLastModified = @dtmDateCreated
 			,intSampleStatusId = 3 -- Approved
-			,intBookId= Case When @intImportType=2 then @intBookId Else intBookId End 
+			-- ,intBookId = Case When @intImportType=2 then @intBookId Else intBookId End 
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
@@ -818,8 +788,29 @@ BEGIN TRY
 
 		UPDATE tblMFBatch
 		SET intTealingoItemId = @intItemId
-			,intOriginalItemId = @intOriginalItemId
+			,intOriginalItemId = CASE WHEN intOriginalItemId IS NULL OR intOriginalItemId=@intDefaultItemId THEN @intOriginalItemId ELSE intOriginalItemId END
 		WHERE intBatchId = @intProductValueId
+
+		IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
+		BEGIN
+			SELECT @strBatchId=NULL
+			SELECT @strBatchId=strBatchId FROM tblMFBatch WHERE intBatchId=@intBatchId
+			IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchId and intItemId<>@intItemId)
+			BEGIN
+				SELECT @intLotId=NULL
+				SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
+				EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
+								,@intNewItemId =@intItemId
+								,@intUserId =@intEntityUserId
+								,@strNewLotNumber  = @strNewLotNumber OUTPUT
+								,@dtmDate =@dtmCurrentDate
+								,@strReasonCode  = NULL
+								,@strNotes  = NULL
+								,@ysnBulkChange  = 0
+								,@ysnProducedItemChange  = 0
+								,@dblPhysicalCount  = NULL
+			END
+		END
 
 		DECLARE @intProductId INT
 
@@ -1111,11 +1102,6 @@ BEGIN TRY
 		WHERE intRow = @intCounter
 
 		IF @intImportType = 2
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFBatch
-				WHERE strBatchId = @strBatchNo
-				)
 		BEGIN
 			DELETE FROM @MFBatchTableType
 			
@@ -1126,6 +1112,7 @@ BEGIN TRY
 				,dtmSalesDate
 				,strTeaType
 				,intBrokerId
+				,intSupplierId
 				,strVendorLotNumber
 				,intBuyingCenterLocationId
 				,intStorageLocationId
@@ -1226,6 +1213,15 @@ BEGIN TRY
 				,dtmShippingDate
 				,strFines
 				,intCountryId
+
+				,dblOriginalTeaTaste
+				,dblOriginalTeaHue
+				,dblOriginalTeaIntensity
+				,dblOriginalTeaMouthfeel
+				,dblOriginalTeaAppearance
+				,dblOriginalTeaVolume
+				,dblOriginalTeaMoisture
+				,strERPPONumber
 				)
 			SELECT strBatchId = @strBatchNo
 				,intSales = CAST(S.strSaleNumber AS INT)
@@ -1233,8 +1229,9 @@ BEGIN TRY
 				,dtmSalesDate = S.dtmSaleDate
 				,strTeaType = CT.strCatalogueType
 				,intBrokerId = S.intBrokerId
+				,intSupplierId = S.intEntityId
 				,strVendorLotNumber = S.strRepresentLotNumber
-				,intBuyingCenterLocationId = S.intCompanyLocationId
+				,intBuyingCenterLocationId = ISNULL(BT.intBuyingCenterLocationId, TBO.intCompanyLocationId)
 				,intStorageLocationId = S.intDestinationStorageLocationId
 				,intStorageUnitId = NULL
 				,intBrokerWarehouseId = NULL
@@ -1247,15 +1244,15 @@ BEGIN TRY
 				,strAirwayBillCode = ISNULL(S.strCourierRef, @strAirwayBillNumberCode)
 				,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
 				,strAWBSampleReference = S.strAWBSampleReference
-				,dblBasePrice = @dblB1Price
+				,dblBasePrice = BT.dblBasePrice
 				,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-				,dblBoughtPrice = @dblB1Price
+				,dblBoughtPrice = BT.dblBoughtPrice
 				,dblBulkDensity = CASE 
 					WHEN ISNULL(Density.strPropertyValue, '') = ''
 						THEN NULL
 					ELSE CAST(Density.strPropertyValue AS NUMERIC(18, 6))
 					END
-				,strBuyingOrderNumber = S.strBuyingOrderNo
+				,strBuyingOrderNumber = BT.strBuyingOrderNumber
 				,intSubBookId = S.intSubBookId
 				,strContainerNumber = S.strContainerNumber
 				,intCurrencyId = S.intCurrencyId
@@ -1268,15 +1265,15 @@ BEGIN TRY
 				,dtmExpiration = NULL
 				,intFromPortId = S.intFromLocationCodeId
 				,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
-				,dtmInitialBuy = @dtmCurrentDate
+				,dtmInitialBuy = BT.dtmInitialBuy
 				,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-				,dblLandedPrice = NULL
+				,dblLandedPrice = BT.dblLandedPrice
 				,strLeafCategory = LEAF_CATEGORY.strAttribute2
 				,strLeafManufacturingType = LEAF_TYPE.strDescription
 				,strLeafSize = BRAND.strBrandCode
 				,strLeafStyle = STYLE.strName
 				,intBookId = S.intBookId
-				,dblPackagesBought = @dblB1QtyBought
+				,dblPackagesBought = BT.dblPackagesBought
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
@@ -1285,8 +1282,8 @@ BEGIN TRY
 				,strPlant = MU.strVendorRefNoPrefix 
 				,dblTotalQuantity = S.dblSampleQty 
 				,strSampleBoxNumber = S.strSampleBoxNumber
-				,dblSellingPrice = NULL
-				,dtmStock = @dtmCurrentDate
+				,dblSellingPrice = BT.dblSellingPrice
+				,dtmStock = BT.dtmStock
 				,ysnStrategic = NULL
 				,strTeaLingoSubCluster = REGION.strDescription
 				,dtmSupplierPreInvoiceDate = NULL
@@ -1335,7 +1332,7 @@ BEGIN TRY
 					ELSE CAST(Volume.strPropertyValue AS NUMERIC(18, 6))
 					END
 				,intTealingoItemId = S.intItemId
-				,dtmWarehouseArrival = NULL
+				,dtmWarehouseArrival = BT.dtmWarehouseArrival
 				,intYearManufacture =  Datepart(YYYY,S.dtmManufacturingDate)
 				,strPackageSize = PT.strUnitMeasure
 				,intPackageUOMId = S.intNetWtPerPackagesUOMId
@@ -1362,9 +1359,18 @@ BEGIN TRY
 				,dblTeaIntensityPinpoint = INTENSITY.dblPinpointValue
 				,dblTeaMouthFeelPinpoint = MOUTH_FEEL.dblPinpointValue
 				,dblTeaAppearancePinpoint = APPEARANCE.dblPinpointValue
-				,dtmShippingDate = @dtmCurrentDate
+				,dtmShippingDate = BT.dtmShippingDate
 				,strFines = Fines.strPropertyValue 
-				,intCountryId=S.intCountryID 
+				,intCountryId=S.intCountryID
+
+				,dblOriginalTeaTaste = BT.dblTeaTaste
+				,dblOriginalTeaHue = BT.dblTeaHue
+				,dblOriginalTeaIntensity = BT.dblTeaIntensity
+				,dblOriginalTeaMouthfeel = BT.dblTeaMouthFeel
+				,dblOriginalTeaAppearance = BT.dblTeaAppearance
+				,dblOriginalTeaVolume = BT.dblTeaVolume
+				,dblOriginalTeaMoisture = BT.dblTeaMoisture
+				,strERPPONumber=BT.strERPPONumber
 			FROM tblQMSample S
 			INNER JOIN tblQMImportCatalogue IMP ON IMP.intSampleId = S.intSampleId
 			INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
@@ -1372,7 +1378,8 @@ BEGIN TRY
 			INNER JOIN tblICItem I ON I.intItemId = S.intItemId
 			LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
 			LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
-			LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = B.strBook
+			LEFT JOIN tblSMCompanyLocation MU ON MU.intCompanyLocationId = @intMixingUnitLocationId
+			LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
 			LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 			LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
@@ -1496,6 +1503,7 @@ BEGIN TRY
 			DECLARE @intInput INT
 				,@intInputSuccess INT
 
+			-- Start insert/update batch
 			IF EXISTS (
 					SELECT *
 					FROM @MFBatchTableType
@@ -1512,6 +1520,7 @@ BEGIN TRY
 				SELECT @intBatchId = intBatchId
 				FROM tblMFBatch
 				WHERE strBatchId = @strBatchNo
+				AND intLocationId = intMixingUnitLocationId
 
 				EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
 					,@intUserId = @intEntityUserId
@@ -1519,7 +1528,7 @@ BEGIN TRY
 					,@intItemId = @intItemId
 
 				UPDATE tblQMSample
-				SET strBatchNo = @strBatchId
+				SET strBatchNo = ISNULL(@strBatchId, @strBatchNo)
 					,intProductTypeId = 13
 					,intProductValueId = @intBatchId
 				WHERE intSampleId = @intSampleId
@@ -1528,6 +1537,61 @@ BEGIN TRY
 				SET intProductTypeId = 13
 					,intProductValueId = @intBatchId
 				WHERE intSampleId = @intSampleId
+			END
+
+			/* Alter data of TIN Number. */
+			IF @strTINNumber IS NOT NULL
+				BEGIN
+					DECLARE @strOldTINNumber NVARCHAR(100)
+						,@intOldCompanyLocationId INT
+
+					-- Insert / Update TIN number linked to the sample / batch
+					SELECT @strOldTINNumber = TIN.strTINNumber
+						,@intOldCompanyLocationId = B.intLocationId
+					FROM tblQMTINClearance TIN
+					INNER JOIN tblQMSample S ON S.intTINClearanceId = TIN.intTINClearanceId
+					OUTER APPLY (
+						SELECT intBatchId
+							,intLocationId
+						FROM tblMFBatch
+						WHERE intBatchId = @intBatchId
+						) B
+					WHERE S.intSampleId = @intSampleId
+
+
+					/* Create new data of TIN Number. */
+					IF ISNULL(@strOldTINNumber, '') <> IsNULL(@strTINNumber, '') OR ISNULL(@intOldCompanyLocationId, 0) <> @intMixingUnitLocationId
+						BEGIN
+							/* Delink old TIN number if there's an existing one and the TIN number has changed. */
+							IF @strOldTINNumber IS NOT NULL
+								BEGIN
+									EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strOldTINNumber
+																, @intBatchId			 = @intBatchId
+																, @intCompanyLocationId = @intOldCompanyLocationId
+																, @intEntityId			 = @intEntityUserId
+																, @ysnDelink			 = 1
+								END
+							/* End of Delink old TIN number if there's an existing one and the TIN number has changed. */
+
+							/* Link new TIN number with the pre-shipment sample / batch. */
+							EXEC uspQMUpdateTINBatchId @strTINNumber		 = @strTINNumber
+														, @intBatchId			 = @intBatchId
+														, @intCompanyLocationId = @intMixingUnitLocationId
+														, @intEntityId			 = @intEntityUserId
+														, @ysnDelink			 = 0
+
+							UPDATE tblQMSample
+							SET intTINClearanceId = (SELECT TOP 1 intTINClearanceId
+														FROM tblQMTINClearance
+														WHERE strTINNumber = @strTINNumber
+														AND intBatchId = @intBatchId
+														AND intCompanyLocationId = @intMixingUnitLocationId)
+							WHERE intSampleId = @intSampleId;
+
+						/* End Create new data of TIN Number. */
+						END
+
+			/* End of Alter data of TIN Number. */
 			END
 		END
 

@@ -162,7 +162,8 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLocationId = intCompanyLocationId
 				FROM dbo.tblSMCompanyLocation
-				WHERE strLocationType = 'Plant' AND (
+				WHERE strLocationType = 'Plant'
+					AND (
 						CASE 
 							WHEN @strProductionOrder = 'True'
 								THEN strVendorRefNoPrefix
@@ -465,7 +466,27 @@ BEGIN TRY
 						,@dtmCreatedDate
 						,1 AS intConcurrencyId
 						,NULL AS intCompanyId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblMFBlendDemand
+					SET strDemandNo = @strOrderNo
+						,intItemId = @intItemId
+						,dblQuantity = @dblQuantity
+						,intManufacturingCellId = @intManufacturingCellId
+						,intMachineId = @intMachineId
+						,dtmDueDate = @dtmDueDate
+						,dtmLastModified = @dtmCreatedDate
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE strOrderNo = @strOrderNo
+				END
 
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblMFBlendRequirement
+						WHERE strReferenceNo = @strOrderNo
+						)
+				BEGIN
 					EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 						,@intItemId = @intItemId
 						,@intManufacturingId = NULL
@@ -526,7 +547,13 @@ BEGIN TRY
 								WHEN @intLeadTime IS NULL
 									OR @intLeadTime = 0
 									THEN 1
-								ELSE Ceiling(@dblQuantity / @intLeadTime)
+								ELSE (
+										CASE 
+											WHEN Round(@dblQuantity / @intLeadTime, 0) = 0
+												THEN 1
+											ELSE Round(@dblQuantity / @intLeadTime, 0)
+											END
+										)
 								END
 							)
 						,1
@@ -561,6 +588,13 @@ BEGIN TRY
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE strOrderNo = @strOrderNo
 
+					SELECT @intLeadTime = 0
+
+					SELECT @intLeadTime = dblLeadTime
+					FROM tblICItemLocation IL
+					WHERE IL.intItemId = @intItemId
+						AND IL.intLocationId = @intLocationId
+
 					UPDATE tblMFBlendRequirement
 					SET intItemId = @intItemId
 						,dblQuantity = @dblQuantity
@@ -570,7 +604,21 @@ BEGIN TRY
 						,dtmDueDate = @dtmDueDate
 						,dtmLastModified = @dtmCreatedDate
 						,intConcurrencyId = intConcurrencyId + 1
-						,dblBlenderSize = @dblQuantity
+						--,dblBlenderSize = @intLeadTime
+						,dblEstNoOfBlendSheet = (
+							CASE 
+								WHEN @intLeadTime IS NULL
+									OR @intLeadTime = 0
+									THEN 1
+								ELSE (
+										CASE 
+											WHEN Round(@dblQuantity / @intLeadTime, 0) = 0
+												THEN 1
+											ELSE Round(@dblQuantity / @intLeadTime, 0)
+											END
+										)
+								END
+							)
 					WHERE strReferenceNo = @strOrderNo
 				END
 			END

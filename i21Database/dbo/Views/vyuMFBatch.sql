@@ -97,7 +97,7 @@ SELECT
     A.intPackageUOMId,
     A.dblTareWeight,
     A.strTaster,
-    strFeedStock = Item.strShortName,
+    strFeedStock = OriginalItem.strShortName,
     A.strFlourideLimit,
     A.strLocalAuctionNumber,
     A.strPOStatus,

@@ -42,6 +42,7 @@ BEGIN TRY
 			Select *
 			FROM dbo.tblMFWorkOrderPreStage
 			WHERE intStatusId IS NULL
+			AND strRowState <>'Deleted'
 			)
 	BEGIN
 		RETURN
@@ -67,6 +68,7 @@ BEGIN TRY
 	SELECT TOP (@limit) PS.intWorkOrderPreStageId
 	FROM dbo.tblMFWorkOrderPreStage PS
 	WHERE PS.intStatusId IS NULL
+	AND strRowState <>'Deleted'
 	ORDER BY intWorkOrderPreStageId
 
 	SELECT @intWorkOrderPreStageId = MIN(intWorkOrderPreStageId)
@@ -177,11 +179,11 @@ BEGIN TRY
 		+ '<OrderNo>' + IsNULL(BR.strReferenceNo,'')   + '</OrderNo>' 
 			+ '<BlendCode>' + I.strItemNo + '</BlendCode>' 
 				+ '<BlendDescription>' + I.strDescription  + '</BlendDescription>' 
-				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), W.dtmApprovedDate , 126),'') + '</DateApproved>' 
+				+ '<DateApproved>' + IsNULL(CONVERT(VARCHAR(33), IsNULL(W.dtmApprovedDate,GETDATE()) , 126),'') + '</DateApproved>' 
 				+ '<Mixes>' + [dbo].[fnRemoveTrailingZeroes]( BR.dblEstNoOfBlendSheet) + '</Mixes>'
-				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](ROUND(P.dblTotalPart,0)) + '</Parts>'
-				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblPlannedQuantity/BR.dblEstNoOfBlendSheet,0)) + '</NetWtPerMix>'
-				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(W.dblPlannedQuantity,0) ) + '</TotalBlendWt>'
+				+ '<Parts>' + [dbo].[fnRemoveTrailingZeroes](ROUND(P.dblTotalPart,3)) + '</Parts>'
+				+ '<NetWtPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(P.dblExpectedWeight/BR.dblEstNoOfBlendSheet,3)) + '</NetWtPerMix>'
+				+ '<TotalBlendWt>' + [dbo].[fnRemoveTrailingZeroes](Round(P.dblExpectedWeight,3) ) + '</TotalBlendWt>'
 				+ '<Volume>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblVolume),0) + '</Volume>'
 				+ '<DustLevel>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblDustLevel),0) + '</DustLevel>'
 				+ '<Moisture>' + IsNULL([dbo].[fnRemoveTrailingZeroes](@dblMoisture),0) + '</Moisture>'
@@ -196,7 +198,7 @@ BEGIN TRY
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 		JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
-		OUTER APPLY(SELECT SUM(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet) dblTotalPart
+		OUTER APPLY(SELECT SUM(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet) dblTotalPart,Round(SUM(Round(WI.dblQuantity,3)),3) dblExpectedWeight
 					FROM dbo.tblMFWorkOrderInputLot WI
 					JOIN tblMFBlendRequirement BR ON BR.intBlendRequirementId = W.intBlendRequirementId
 					WHERE WI.intWorkOrderId = W.intWorkOrderId) P
@@ -215,10 +217,10 @@ BEGIN TRY
 		+ '<MaterialDescription>' + I.strDescription  + '</MaterialDescription>' 
 		+ '<Origin>'+IsNULL(B.strTeaOrigin,'')+'</Origin>' 
 		+ '<Location>' + IsNULL(LTRIM(SUBSTRING(ISNULL(CS.strSubLocationName, ''), CHARINDEX('/', CS.strSubLocationName) + 1, LEN(CS.strSubLocationName))) , '')  + '</Location>' 
-		+ '<Parts>' +  [dbo].[fnRemoveTrailingZeroes](Round(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet,0)  ) + '</Parts>' 
-		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](Round(L.dblWeightPerQty,0) ) + '</WeightPerPack>' 
-		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity/BR.dblEstNoOfBlendSheet,0)) + '</WeightPerMix>' 
-		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity,0) ) + '</WeightPerBatch>' 
+		+ '<Parts>' +  [dbo].[fnRemoveTrailingZeroes](Round(WI.dblIssuedQuantity/BR.dblEstNoOfBlendSheet,3)  ) + '</Parts>' 
+		+ '<WeightPerPack>' + [dbo].[fnRemoveTrailingZeroes](Round(L.dblWeightPerQty,3) ) + '</WeightPerPack>' 
+		+ '<WeightPerMix>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity/BR.dblEstNoOfBlendSheet,3)) + '</WeightPerMix>' 
+		+ '<WeightPerBatch>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblQuantity,3) ) + '</WeightPerBatch>' 
 		+ '<WeightUOM>' + IsNULL(UM.strUnitMeasure,'')  + '</WeightUOM>' 
 		+ '<Bags>' + [dbo].[fnRemoveTrailingZeroes](Round(WI.dblIssuedQuantity ,3)) + '</Bags>' 
 		+ '<FW>' + IsNULL(WI.strFW,'')  + '</FW>' 

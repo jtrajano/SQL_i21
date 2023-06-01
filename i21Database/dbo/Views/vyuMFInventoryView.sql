@@ -127,7 +127,7 @@ SELECT l.intLotId
 	,l.intUnitPallet
 	,LI.intWorkOrderId
 	,mp.intAttributeTypeId
-	,DATEDIFF(dd, l.dtmDateCreated, GETDATE()) AS intAge
+	,DATEDIFF(dd, IsNULL(l.dtmManufacturedDate, l.dtmDateCreated), GETDATE()) AS intAge
 	,DATEDIFF(dd, GETDATE(), l.dtmExpiryDate) AS intRemainingLife
 	,LI.dtmLastMoveDate
 	,LI.dtmDueDate
