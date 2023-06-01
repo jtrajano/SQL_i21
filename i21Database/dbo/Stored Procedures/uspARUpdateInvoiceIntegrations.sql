@@ -183,6 +183,8 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds = @InvoiceIds, @strSessionId = @strSessionId
 	EXEC dbo.[uspARUpdateInvoiceReportFields] @InvoiceIds, 0
 	IF @FromPosting = 1 EXEC dbo.[uspARUpdateLotReleased] @intInvoiceId, @intUserId, @Post
+	IF @FromPosting = 0 EXEC uspARPopulateInvoiceDetailForPosting @Param = @intInvoiceId, @strSessionId = @strSessionId
+	IF @FromPosting = 0 EXEC uspARUpdateTransactionAccountOnPost @strSessionId = @strSessionId
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
 		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
