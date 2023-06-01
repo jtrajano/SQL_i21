@@ -2,6 +2,7 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	[intCompanyPreferenceOptionId] [int] IDENTITY(1,1) NOT NULL,
 	[intUTCOffset] [int] NULL,
 	[intConcurrencyId] [int] NULL,
+	[ysnRemittanceAdvice_DisplayVendorAccountNumber] BIT NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
 	[intCompanyPreferenceOptionId] ASC
