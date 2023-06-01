@@ -24,8 +24,7 @@ OUTER APPLY (
 		FROM tblCMBankAccount BA 
 		WHERE EFT.intBankId = BA.intBankId 
 	) BA
-	WHERE ysnDefaultAccount = 1
-	  AND strPaymentMethod = 'ACH'
+	WHERE strPaymentMethod = 'ACH'
 ) ACH
 WHERE strPaymentMethod IN ('ACH')
   AND ysnActive = 1
