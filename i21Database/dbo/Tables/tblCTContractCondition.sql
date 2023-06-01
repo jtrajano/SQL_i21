@@ -5,6 +5,7 @@
     [intConditionId] INT NOT NULL, 
     [strConditionDescription] nvarchar(max) COLLATE Latin1_General_CI_AS,
 	[ysnPrimeCustomer] BIT NULL DEFAULT((0)),
+    [intContractCertificationId] INT  NULL, 
     [intConcurrencyId] INT NOT NULL,
 	CONSTRAINT [PK_tblCTContractCondition_intContractConditionId] PRIMARY KEY CLUSTERED ([intContractConditionId] ASC),
 	CONSTRAINT [UQ_tblCTContractCondition_intContractHeaderId_intConditionId] UNIQUE ([intContractHeaderId], [intConditionId]), 
