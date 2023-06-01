@@ -105,6 +105,8 @@ BEGIN
         SELECT TOP 1 @intBillId = b.intBillId
         FROM tblAPBill b
         JOIN tblARInvoice i ON b.strVendorOrderNumber = i.strInvoiceNumber
+        JOIN tblARInvoiceDetail id ON id.intInvoiceId = i.intInvoiceId
+        JOIN tblVRRebate vr ON vr.intInvoiceDetailId = id.intInvoiceDetailId
         WHERE i.intInvoiceId = @InvoiceId
 
         IF @intBillId IS NOT NULL
