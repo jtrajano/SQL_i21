@@ -1765,6 +1765,9 @@
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeDeductionYTD.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeEarningYTD.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeTaxYTD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
