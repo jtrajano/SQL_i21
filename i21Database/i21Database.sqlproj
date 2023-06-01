@@ -11118,6 +11118,7 @@
     <Build Include="dbo\Tables\tblCTBasisCost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadBasisCost.sql" />
     <Build Include="dbo\Views\vyuCTContractBasisCostView.sql" />
+    <Build Include="dbo\Functions\fnCTConvertPriceToTargetItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
