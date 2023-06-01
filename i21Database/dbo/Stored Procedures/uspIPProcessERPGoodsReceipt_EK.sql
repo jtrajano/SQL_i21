@@ -29,6 +29,12 @@ BEGIN TRY
 		,@intInventoryReceiptId INT
 		,@intNewStageReceiptId INT
 		,@strActualLocationName NVARCHAR(100)
+		,@strGarden nvarchar(50)
+		,@intGradeId int
+		,@intMixingUnitLocationId int
+		,@strMixingUnit nvarchar(50)
+		,@strVendorLotNumber  nvarchar(50)
+
 	DECLARE @strERPPONumber NVARCHAR(50)
 		,@strERPItemNumber NVARCHAR(50)
 		,@strERPPONumber2 NVARCHAR(50)
@@ -67,6 +73,8 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@intBatchId INT
 		,@dblDeliveredQuantity NUMERIC(18, 6)
+		,@intGardenMarkId INT
+		,@strLeafGrade NVARCHAR(50)
 	DECLARE @strLotNo NVARCHAR(50)
 		,@dblLotQuantity NUMERIC(18, 6)
 		,@strLotQuantityUOM NVARCHAR(50)
@@ -587,6 +595,7 @@ BEGIN TRY
 
 					SELECT TOP 1 @strERPPONumber = strERPPONumber
 						,@strERPItemNumber = strERPPOLineNo
+						,@dtmLotManufacturedDate=IsNULL(@dtmLotManufacturedDate,B.dtmProductionBatch)
 					FROM tblMFBatch B WITH (NOLOCK)
 					WHERE B.strBatchId = @strLotNo
 						--AND B.intLocationId = @intCompanyLocationId
@@ -698,8 +707,20 @@ BEGIN TRY
 						--WHERE t.intItemId = @intItemId
 						--	AND t.intUnitMeasureId = @intLotQtyUnitMeasureId
 
+						SELECT @intGardenMarkId = NULL,
+								@strLeafGrade = NULL,
+								@intMixingUnitLocationId = NULL,
+								@strMixingUnit =NULL,
+								@strVendorLotNumber=NULL
+
 						-- Take Qty UOM from Batch
-						SELECT TOP 1 @intQtyItemUOMId = IUOM.intItemUOMId
+						SELECT TOP 1 @intQtyItemUOMId	=	IUOM.intItemUOMId
+									,@intGardenMarkId	=	B.intGardenMarkId
+									,@strLeafGrade	=	B.strLeafGrade
+									,@strLotMarks	=	B.strTeaGardenChopInvoiceNumber
+									,@intMixingUnitLocationId=intMixingUnitLocationId
+									,@strVendorLotNumber=B.strVendorLotNumber 
+									,@dtmLotManufacturedDate=IsNULL(@dtmLotManufacturedDate,B.dtmProductionBatch)
 						FROM tblMFBatch B WITH (NOLOCK)
 						JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
 							AND IUOM.intUnitMeasureId = B.intPackageUOMId
@@ -708,6 +729,21 @@ BEGIN TRY
 							--AND B.intLocationId = @intCompanyLocationId
 
 						SELECT @intLotQtyItemUOMId = @intQtyItemUOMId
+
+						SELECT @strGarden	=	NULL
+						SELECT @strGarden	=	strGardenMark 
+						FROM tblQMGardenMark 
+						WHERE intGardenMarkId =@intGardenMarkId
+
+						SELECT @intGradeId	=	NULL
+						SELECT @intGradeId	=	intCommodityAttributeId  
+						FROM tblICCommodityAttribute 
+						WHERE strDescription  =@strLeafGrade
+						AND strType ='Grade'
+
+						SELECT @strMixingUnit =strLocationName 
+						FROM tblSMCompanyLocation 
+						WHERE intCompanyLocationId=@intMixingUnitLocationId
 
 						IF ISNULL(@intLotQtyItemUOMId, 0) = 0
 						BEGIN
@@ -846,7 +882,7 @@ BEGIN TRY
 						,intContractDetailId = @intContractDetailId
 						,dtmDate = @dtmReceiptDate
 						,intShipViaId = CD.intShipViaId
-						,dblQty = @dblQuantity
+						,dblQty = ROUND(@dblQuantity,0)
 						,intGrossNetUOMId = @intNetWeightItemUOMId
 						,dblGross = @dblGrossWeight
 						,dblTare = @dblTareWeight
@@ -939,17 +975,20 @@ BEGIN TRY
 						,strParentLotNumber
 						,intLotStatusId
 						,dtmManufacturedDate
+						,strGarden
+						,intGradeId
+						,strVendorLotId 
 						)
 					SELECT intLotId = NULL
 						,strLotNumber = @strLotNo
-						,strLotAlias = NULL
+						,strLotAlias = @strMixingUnit
 						,intSubLocationId = RI.intSubLocationId
 						,intStorageLocationId = ISNULL(@intLotStorageLocationId, RI.intStorageLocationId)
 						,intContractHeaderId = RI.intContractHeaderId
 						,intContractDetailId = RI.intContractDetailId
 						,intItemUnitMeasureId = @intLotQtyItemUOMId
 						,intItemId = RI.intItemId
-						,dblQuantity = @dblLotQuantity
+						,dblQuantity = ROUND(@dblLotQuantity,0)
 						,dblGrossWeight = @dblLotGrossWeight
 						,dblTareWeight = @dblLotTareWeight
 						,dblCost = RI.dblCost
@@ -970,6 +1009,9 @@ BEGIN TRY
 						,strParentLotNumber = NULL
 						,intLotStatusId = NULL
 						,dtmManufacturedDate = @dtmLotManufacturedDate
+						,strGarden=@strGarden
+						,intGradeId=@intGradeId
+						,strVendorLotId=@strVendorLotNumber
 					FROM @ReceiptStagingTable RI
 					WHERE RI.intLoadShipmentDetailId = @intLoadDetailId
 

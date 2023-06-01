@@ -194,7 +194,7 @@ SELECT Lot.intLotId
 	 , SubCluster.strDescription	 AS strSubCluster
 	 , Batch.dblTeaAppearance
 	 , Batch.dblTeaVolume
-	 , DATEDIFF(DAY, Lot.dtmDateCreated, GETDATE()) AS intAge
+	 , DATEDIFF(DAY, IsNULL(Lot.dtmManufacturedDate ,Lot.dtmDateCreated), GETDATE()) AS intAge
 	 , MT.strDescription AS strProductType
 	 , B.strBrandCode
 	 , Batch.strTasterComments
