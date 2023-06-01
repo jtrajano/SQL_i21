@@ -144,7 +144,7 @@ BEGIN TRY
 			DECLARE @ysnTaxFlag4 AS BIT = CAST(@strNewUseTaxFlag4ysn AS BIT)
 			DECLARE @ysnFoodStampable AS BIT = CAST(@strNewFoodStampableysn AS BIT)
 			DECLARE @ysnReturnable AS BIT = CAST(@strNewReturnableysn AS BIT)
-			DECLARE @ysnSaleable AS BIT = CAST(@strNewSaleableysn AS BIT)
+			DECLARE @ysnSaleable AS BIT = CAST(@strNewSaleAbleysn AS BIT)
 			DECLARE @ysnPrePriced AS BIT = CAST(@strNewPrePricedysn AS BIT)
 			DECLARE @ysnApplyBlueLaw1 AS BIT = CAST(@strNewBlueLaw1ysn AS BIT)
 			DECLARE @ysnApplyBlueLaw2 AS BIT = CAST(@strNewBlueLaw2ysn AS BIT)
