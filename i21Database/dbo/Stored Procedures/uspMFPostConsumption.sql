@@ -240,14 +240,7 @@ BEGIN
 		,HeaderDistItem.intCompanyLocationId
 		,HeaderDistItem.dtmInvoiceDateTime
 		,strActualCostId = (
-			CASE WHEN Receipt.strOrigin = 'Terminal'
-				AND HeaderDistItem.strDestination = 'Location'
-				AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
-					THEN LoadHeader.strTransaction
-				WHEN Receipt.strOrigin = 'Terminal'
-				AND HeaderDistItem.strDestination = 'Location'
-				AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
-					THEN NULL
+			CASE 
 				WHEN Receipt.strOrigin = 'Terminal'
 					THEN LoadHeader.strTransaction
 				WHEN Receipt.strOrigin = 'Location'
@@ -262,13 +255,8 @@ BEGIN
 					AND HeaderDistItem.strDestination = 'Location'
 					AND Receipt.intCompanyLocationId != HeaderDistItem.intCompanyLocationId
 					THEN LoadHeader.strTransaction
-				WHEN Receipt.strOrigin = 'Location'
-					AND HeaderDistItem.strDestination = 'Location'
-					AND Receipt.intCompanyLocationId = HeaderDistItem.intCompanyLocationId
-					THEN NULL
 				END
 			)
-		 , LoadHeader.strTransaction
 	INTO #tmpBlendIngredients
 	FROM tblTRLoadDistributionDetail DistItem
 	LEFT JOIN tblTRLoadDistributionHeader HeaderDistItem ON HeaderDistItem.intLoadDistributionHeaderId = DistItem.intLoadDistributionHeaderId
@@ -301,8 +289,6 @@ BEGIN
 		,intSourceTransactionId
 		,strSourceTransactionId
 		,strActualCostId
-		,strSourceNumber
-		,strSourceType
 		)
 	SELECT intItemId = cl.intItemId
 		,intItemLocationId = il.intItemLocationId
@@ -323,11 +309,11 @@ BEGIN
 		,intStorageLocationId = cl.intStorageLocationId
 		,intSourceTransactionId = @INVENTORY_CONSUME
 		,strSourceTransactionId = @strTransactionId
-		,strActualCostId = (SELECT TOP 1 BlendItems.strActualCostId FROM #tmpBlendIngredients BlendItems WHERE BlendItems.intItemId = cl.intItemId )
-		,strTransaction = (SELECT TOP 1 BlendItems.strTransaction FROM #tmpBlendIngredients BlendItems WHERE BlendItems.intItemId = cl.intItemId)
-		,CASE WHEN (SELECT TOP 1 BlendItems.strTransaction FROM #tmpBlendIngredients BlendItems WHERE BlendItems.intItemId = cl.intItemId) IS NOT NULL THEN 'Transports'
-			  ELSE NULL
-		 END
+		,strActualCostId = (
+								SELECT TOP 1 BlendItems.strActualCostId
+								FROM #tmpBlendIngredients BlendItems
+								WHERE BlendItems.intItemId = cl.intItemId
+							)
 	FROM dbo.tblMFWorkOrderConsumedLot cl
 	JOIN dbo.tblICItem i ON cl.intItemId = i.intItemId
 	JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemIssuedUOMId = ItemUOM.intItemUOMId
@@ -371,7 +357,7 @@ BEGIN
 		,dtmDate = @dtmDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = l.dblLastCost
+		,dblCost = ISNULL(l.dblLastCost, LotTransaction.dblCost)
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -388,6 +374,12 @@ BEGIN
 	JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
 	JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
 	LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+	OUTER APPLY (SELECT TOP 1 ICLotTransaction.dblCost
+				 FROM tblICInventoryLotTransaction AS ICLotTransaction
+				 WHERE ICLotTransaction.intLotId = l.intLotId 
+				   AND ICLotTransaction.intStorageLocationId = l.intStorageLocationId 
+				   AND ICLotTransaction.intSubLocationId = l.intSubLocationId 
+				 ORDER BY dtmCreated desc) AS LotTransaction
 	WHERE cl.intWorkOrderId = @intWorkOrderId
 		AND IsNULL(cl.ysnPosted, 0) = 0
 
