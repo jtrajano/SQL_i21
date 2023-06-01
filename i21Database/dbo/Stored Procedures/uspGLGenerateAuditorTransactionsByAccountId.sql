@@ -168,7 +168,14 @@ BEGIN
             INTO #TransactionGroupAll
             FROM vyuGLAccountDetail GL
             DECLARE @sqlGroups NVARCHAR(MAX) = 
-           ';WITH groups AS(
+
+            
+
+           '
+           DECLARE @dtmFrom DATETIME
+           SELECT TOP 1 @dtmFrom= dtmDateFrom FROM tblGLFiscalYear WHERE dtmDateFrom < @dtmDateFrom ORDER BY dtmDateFrom
+           
+           ;WITH groups AS(
             SELECT 
                 intAccountId
                 , strAccountId
@@ -190,8 +197,8 @@ BEGIN
                 , strLocationSegmentId strLocation
                 , B.strDescription strAccountDescription FROM tblGLDetail A JOIN vyuGLAccountDetail B on A.intAccountId = B.intAccountId
             WHERE A.ysnIsUnposted = 0 AND A.dtmDate BETWEEN
-            DATEADD(YEAR, -1, @dtmDateFrom) AND DATEADD(YEAR, -1, @dtmDateTo) ' + @strWhere + '
-                GROUP BY A.intAccountId, strAccountId, intCurrencyId, strCurrency
+            @dtmFrom AND DATEADD(SECOND, -1, @dtmDateFrom) ' + @strWhere + '
+                GROUP BY A.intAccountId, strAccountId, A.intCurrencyId, SM.strCurrency
             ,strLOBSegmentId,strLocationSegmentId, B.strDescription
             )
             SELECT
@@ -205,7 +212,7 @@ BEGIN
               INTO ##TransactionGroup 
               FROM groups'
 
-            EXEC sp_executesql @sqlGroups, @params, @dtmDateFrom= @dtmDateFrom, @dtmDateTo=@dtmDateTo      
+            EXEC sp_executesql @sqlGroups, N'@dtmDateFrom DATETIME', @dtmDateFrom= @dtmDateFrom  
 
             DECLARE @intAccountIdLoop INT = 0
             DECLARE @intCurrencyIdLoop INT = 0
@@ -249,11 +256,13 @@ BEGIN
 				-- 	@beginBalanceCredit=    ISNULL(beginBalanceCredit,0)
 				-- 	FROM dbo.fnGLGetBeginningBalanceAuditorReport(@strAccountId,@dtmDateFrom)
                         -- Total record
+                DECLARE @_strAccountId NVARCHAR(60)
+                DECLARE @_beginBalance NUMERIC(18,6)
 				IF EXISTS(SELECT 1 FROM ##TransactionGroup where @_intAccountId =intAccountId)
 				BEGIN
                     WHILE EXISTS ( SELECT 1 FROM ##TransactionGroup WHERE @_intAccountId = intAccountId)
                     BEGIN
-                        SELECT TOP 1 @_intCurrencyId = intCurrencyId
+                        SELECT TOP 1 @_intCurrencyId = intCurrencyId, @_strAccountId = strAccountId
                         FROM ##TransactionGroup WHERE @_intAccountId = intAccountId
                         ORDER BY intCurrencyId
                         
@@ -269,6 +278,7 @@ BEGIN
 
                         IF @intAccountIdLoop <> @_intAccountId
                         BEGIN
+                            SELECT @_beginBalance =ISNULL( beginBalance , 0) from dbo.fnGLGetBeginningBalanceAuditorReport(@_strAccountId,@dtmDateFrom)
                             SET @intAccountIdLoop = @_intAccountId
                             INSERT INTO tblGLAuditorTransaction (
                             ysnGroupFooter
@@ -297,8 +307,8 @@ BEGIN
                                 , 'Beginning Balance'
                                 , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                                 , @intEntityId
-                                , @beginBalance
-                                , @beginBalanceForeign            
+                                , @_beginBalance --@beginBalance
+                                , @_beginBalance --@beginBalanceForeign            
                                 , strCurrency
                                 , strAccountId
                                 , strLocation
