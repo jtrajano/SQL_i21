@@ -1763,8 +1763,8 @@
     <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -12174,7 +12174,7 @@
     <Build Include="dbo\Views\vyuGLLineOfBusinessAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
     <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
-     <Build Include="dbo\Views\vyuCTAmendmentTab.sql" />
+    <Build Include="dbo\Views\vyuCTAmendmentTab.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
