@@ -1768,6 +1768,11 @@
     <Build Include="dbo\Views\vyuPREmployeeDeductionYTD.sql" />
     <Build Include="dbo\Views\vyuPREmployeeEarningYTD.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTaxYTD.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPInboundType_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipment_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPReceipt_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPReceipt_DA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
