@@ -705,7 +705,7 @@ BEGIN
 								--ISNULL(@dblDPSettlementsWithDeletedPayment,0)
 			,dblTotalDecrease = ABS(
 								(ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) +
-								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ISNULL(@dblIACompanyOwned,0) ELSE 0 END + 
+								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ABS(ISNULL(@dblIACompanyOwned,0)) ELSE 0 END + 
 								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN ISNULL(@dblInternalTransfersDiff,0) ELSE 0 END +
 								ISNULL(@dblDPReversedSettlementsWithPayment,0) + 
 								ISNULL(@dblVoidedPayment,0) +
