@@ -109,7 +109,9 @@ DECLARE @FinalReport AS TABLE
 
 INSERT INTO @Locations
 --SELECT TOP 2 * FROM (
-SELECT DISTINCT intCompanyLocationId, strLocationName FROM vyuGRStorageSearchView--) A
+SELECT DISTINCT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation --WHERE ysnActive = 1--) A
+
+--select * from @Locations
 
 INSERT INTO @Commodities
 SELECT DISTINCT intCommodityId, strCommodityCode FROM vyuGRStorageSearchView WHERE intCommodityId = ISNULL(@intCommodityId,intCommodityId)
