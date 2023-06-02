@@ -90,6 +90,7 @@ WHERE	ysnPosted = 1
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL( B.dblDebit, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
 			ON A.intTransactionId = B.intTransactionId
+				JOIN tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountId
 WHERE	A.ysnPosted = 1
 		AND A.ysnCheckVoid = 0
 		AND A.intBankAccountId = @intBankAccountId
