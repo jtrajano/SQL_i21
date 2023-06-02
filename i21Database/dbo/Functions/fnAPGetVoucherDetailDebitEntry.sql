@@ -180,6 +180,5 @@ RETURNS TABLE AS RETURN
 	) storageOldCost
 	WHERE A.intBillId = @billId
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
-	AND (ISNULL(H.ysnInventoryCost, 0) = 0 OR K.intFobPointId IN (2) OR (I.intPriceCurrencyId = H.intCurrencyId AND B.dblOldCost IS NULL)) --EXCLUDE LS INVENTORIED CHAGES
 	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 )

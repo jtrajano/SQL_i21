@@ -814,22 +814,16 @@ BEGIN
 				,@strGLDescription = NULL
 				,@AccountCategory_Cost_Adjustment = DEFAULT 
 
-			--DELETE APC ACCOUNT IN CREDIT SIDE THIS IS SUPPOSED TO BE AP ACCOUNT BUT IC MODULE ASK US TO REMOVE IT AS AP ACCOUNT IS NOT HANDLED BY THEIR SP
-			DELETE GL 
-			FROM @GLEntriesTemp GL
-			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
-			WHERE AD.intAccountCategoryId = 45 AND GL.dblCredit <> 0
-
-			INSERT INTO @GLEntries
-			SELECT * FROM @GLEntriesTemp
-
-			--CONVERT OTHER CHARGE CURRENCY TO ITEM CURRENCY
+			--DELETE APC ACCOUNT THIS IS SUPPOSED TO BE AP ACCOUNT BUT IC MODULE ASK US TO REMOVE IT AS AP ACCOUNT IS NOT HANDLED BY THEIR SP
 			DELETE GL 
 			FROM @GLEntriesTemp GL
 			INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = GL.intAccountId
 			WHERE AD.intAccountCategoryId = 45
+
+			INSERT INTO @GLEntries
+			SELECT * FROM @GLEntriesTemp
 			
-			--WASH OUT ENTRY
+			--WASH OUT ENTRY AND CONVERT OTHER CHARGE CURRENCY TO ITEM CURRENCY
 			INSERT INTO @GLEntries (
 					[dtmDate] 
 					,[strBatchId]
@@ -900,7 +894,36 @@ BEGIN
 					,[intSourceEntityId]
 					,[intCommodityId]
 					,[strRateType]
-			FROM @GLEntriesTemp
+			FROM @GLEntriesTemp GLEntries
+			OUTER APPLY (
+				SELECT TOP 1 intPriceCurrencyId
+				FROM tblICInventoryTransaction IT
+				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
+				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
+			) LS
+			OUTER APPLY (
+			SELECT TOP 1 
+					dblForexRate = ISNULL(dblRate, 0),
+					strCurrencyExchangeRateType
+				FROM vyuGLExchangeRate
+				INNER JOIN tblICInventoryTransaction IT
+					ON IT.intInventoryTransactionId = GLEntries.intJournalLineNo
+				WHERE intFromCurrencyId = GLEntries.intCurrencyId
+					AND intToCurrencyId = @intFunctionalCurrencyId
+					AND intCurrencyExchangeRateTypeId = IT.intForexRateTypeId
+				ORDER BY dtmValidFromDate DESC
+			) ChargeCurrencyToFunctional
+			OUTER APPLY (
+				SELECT TOP 1
+					dblForexRate = ISNULL(dblRate,0),
+					strCurrencyExchangeRateType
+				FROM vyuGLExchangeRate
+				WHERE intFromCurrencyId = LS.intPriceCurrencyId
+				AND intToCurrencyId = @intFunctionalCurrencyId
+				ORDER BY dtmValidFromDate DESC
+			) ItemCurrencyToFunctional
+			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
 			UNION ALL
 			SELECT 	[dtmDate] 
 					,[strBatchId]
