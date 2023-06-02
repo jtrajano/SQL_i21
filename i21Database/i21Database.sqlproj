@@ -9466,6 +9466,7 @@
     <Build Include="dbo\Views\vyuQMSampleHeaderView.sql" />
     <Build Include="dbo\Views\vyuQMSampleTestResultView.sql" />
     <Build Include="dbo\Views\vyuQMSampleDetailView.sql" />
+    <Build Include="dbo\Views\vyuQMSampleEntryView.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleProcessAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleTransferAckXML.sql" />
