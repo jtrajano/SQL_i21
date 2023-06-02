@@ -129,7 +129,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 	BEGIN
 		DECLARE @tmpTransactionTable TABLE (
 			 intSourceId	INT
-			,dblAmount	NUMERIC(18,6)
+			,dblAmount		NUMERIC(18,6)
 			,dtmSourceDate	DATETIME
 		)
 
@@ -163,10 +163,19 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			INSERT INTO @tmpTransactionTable
 			SELECT 
 				 intSourceId	= I.intInvoiceId
-				,dblAmount		= ISNULL(I.dblInvoiceTotal, 0)
+				,dblAmount		= CASE WHEN @strCalculationType = @CALCTYPE_PERUNIT 
+									   THEN ID.dblTotalQty * @dblCalculationAmount
+									   ELSE ISNULL(I.dblInvoiceTotal, 0) 
+								  END
 				,dtmSourceDate	= I.dtmPostDate
 			FROM tblARInvoice I
 			INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
+			INNER JOIN (
+				SELECT dblTotalQty	= SUM(dblQtyShipped)
+					 , intInvoiceId
+				FROM tblARInvoiceDetail
+				GROUP BY intInvoiceId
+			) ID ON I.intInvoiceId = ID.intInvoiceId
 			LEFT JOIN tblARCommissionDetail CD on I.intInvoiceId = CD.intSourceId
 			LEFT JOIN tblARCommission C on CD.intCommissionId = C.intCommissionId
 			WHERE I.ysnPosted = 1
@@ -175,17 +184,16 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
 			  AND SP.intCommissionPlanId = @intCommissionPlanId
 
-			--INSERT INTO tblARCommissionRecapDetail
-			--SELECT 
-			--	 intCommissionRecapId	= @intCommissionRecapId
-			--	,intEntityId			= @intEntityId
-			--	,intSourceId			= intSourceId
-			--	,strSourceType			= 'tblARInvoice'
-			--	,dtmSourceDate			= dtmSourceDate
-			--	,dblAmount				= dblAmount
-			--	,intConcurrencyId		= 1
-			--FROM @tmpTransactionTable
-			select * from @tmpTransactionTable
+			INSERT INTO tblARCommissionRecapDetail
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblARInvoice'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
 		END
 
 		--GET BILLABLE RATES BY AGENT
@@ -216,8 +224,8 @@ ELSE IF @strBasis = @BASIS_REVENUE
 		END
 
 		--GET INVOICE LINETOTAL BY ITEM CATEGORY
-		--IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
-		--BEGIN
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
+		BEGIN
 			INSERT INTO @tmpTransactionTable
 			SELECT 
 				 intSourceId	= I.intInvoiceId
@@ -238,21 +246,21 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				AND CPIC.intCommissionPlanId = @intCommissionPlanId
 			GROUP BY I.intInvoiceId, I.dtmPostDate
 
-			--INSERT INTO tblARCommissionRecapDetail
-			--SELECT 
-			--	 intCommissionRecapId	= @intCommissionRecapId
-			--	,intEntityId			= @intEntityId
-			--	,intSourceId			= intSourceId
-			--	,strSourceType			= 'tblARInvoice'
-			--	,dtmSourceDate			= dtmSourceDate
-			--	,dblAmount				= dblAmount
-			--	,intConcurrencyId		= 1
-			--FROM @tmpTransactionTable
-		--END
+			INSERT INTO tblARCommissionRecapDetail
+			SELECT 
+				 intCommissionRecapId	= @intCommissionRecapId
+				,intEntityId			= @intEntityId
+				,intSourceId			= intSourceId
+				,strSourceType			= 'tblARInvoice'
+				,dtmSourceDate			= dtmSourceDate
+				,dblAmount				= dblAmount
+				,intConcurrencyId		= 1
+			FROM @tmpTransactionTable
+		END
 		
 		--GET INVOICE LINETOTAL BY ITEM
-		--IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
-		--BEGIN
+		IF(NOT EXISTS(SELECT TOP 1 NULL FROM @tmpTransactionTable WHERE dblAmount > 0))
+		BEGIN
 			INSERT INTO @tmpTransactionTable
 			SELECT 
 				 intSourceId	= I.intInvoiceId
@@ -280,7 +288,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 				,dblAmount				= dblAmount
 				,intConcurrencyId		= 1
 			FROM @tmpTransactionTable
-		--END
+		END
 		
 		IF @ysnMarginalSales = 1
 		BEGIN
@@ -339,6 +347,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 							WHEN @strCalculationType = @CALCTYPE_FLAT THEN @dblCalculationAmount
 						END
 		WHERE intCommissionRecapId = @intCommissionRecapId
+		  AND @strCalculationType IN (@CALCTYPE_PERCENT, @CALCTYPE_FLAT)
 
 		DELETE FROM tblARCommissionRecapDetail WHERE dblAmount <= 0.000000
 
@@ -365,4 +374,3 @@ ELSE IF @strBasis = @BASIS_CONDITIONAL
 			 , dblAmount				= @dblLineTotal
 			 , intConcurrencyId			= 1
 	END
-GO
