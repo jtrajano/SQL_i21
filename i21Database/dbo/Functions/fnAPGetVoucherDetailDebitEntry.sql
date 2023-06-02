@@ -195,7 +195,6 @@ RETURNS TABLE AS RETURN
 	) storageOldCost
 	WHERE A.intBillId = @billId
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
-	AND (ISNULL(H.ysnInventoryCost, 0) = 0 OR K.intFobPointId IN (2) OR (I.intPriceCurrencyId = H.intCurrencyId AND B.dblOldCost IS NULL)) --EXCLUDE LS INVENTORIED CHAGES
 	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 	AND A.ysnFinalVoucher = 0 -- EXCLUDE FINAL VOUCHER
 	-- AND ISNULL(A.ysnConvertedToDebitMemo,0) = 0 -- EXCLUDE FINAL VOUCHER
@@ -312,5 +311,4 @@ RETURNS TABLE AS RETURN
 	AND A.intTransactionType IN (1)
 	AND A.ysnFinalVoucher = 1
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
-	AND ISNULL(H.ysnInventoryCost, 0) = 0 --EXCLUDE LS INVENTORIED CHAGES
 )
