@@ -186,5 +186,10 @@ CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intInventoryShipmentChargeId]
 	INCLUDE ([intInvoiceId])
 GO
 
-CREATE INDEX [IX_tblARInvoiceDetail_[intInvoiceId] ON [dbo].[tblARInvoice] ([intInvoiceId] ASC)
+CREATE INDEX [IX_tblARInvoiceDetail_intInvoiceId] ON [dbo].[tblARInvoice] ([intInvoiceId] ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intTicketId]
+	ON [dbo].[tblARInvoiceDetail] ([intTicketId])
+	INCLUDE ([intInvoiceId])
 GO
