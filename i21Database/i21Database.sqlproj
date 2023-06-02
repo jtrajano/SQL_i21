@@ -1309,6 +1309,7 @@
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
+    <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
