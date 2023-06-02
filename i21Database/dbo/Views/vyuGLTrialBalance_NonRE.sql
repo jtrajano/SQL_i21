@@ -9,7 +9,6 @@ WITH DETAIL AS(
 		tblGLAccount A
 		inner join tblGLFiscalYear F on 1=1
 		JOIN tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
-	WHERE A.intAccountId <> F.intRetainAccount
 )
 ,ACCOUNTTYPE AS
 (
@@ -20,23 +19,25 @@ WITH DETAIL AS(
 SELECT
 	A.intAccountId, A.intFiscalYearId,A.intGLFiscalYearPeriodId
 	,A.PeriodStart
-	,ISNULL(YTD.beginningBalance,0) YTD
-	,ISNULL(MTD.beginningBalance,0) MTD  
+	,D.intCurrencyId
+	,YTD =	SUM(ISNULL(D.dblDebit, 0) - ISNULL(D.dblCredit,0))
+	,MTD =	SUM(CASE WHEN D.dtmDate BETWEEN A.PeriodStart AND A.PeriodEnd
+				THEN ISNULL(D.dblDebit, 0) - ISNULL(D.dblCredit,0)
+				ELSE 0
+			END)
 FROM 
-	ACCOUNTTYPE A 
-OUTER APPLY (  
-	SELECT SUM(ISNULL(dblDebit, 0) - ISNULL(dblCredit,0)) beginningBalance
-	FROM  tblGLDetail D  WHERE D.intAccountId = A.intAccountId
+	ACCOUNTTYPE A
+LEFT JOIN tblGLDetail D
+	ON D.intAccountId = A.intAccountId
 	AND D.ysnIsUnposted = 0
 	AND dtmDate BETWEEN 
 		CASE WHEN A.strAccountType IN ('Expense', 'Revenue') THEN A.FiscalStart 
 		ELSE '01-01-1900'
 		END 
 	AND A.PeriodEnd
-)YTD
-OUTER APPLY (  
-	SELECT SUM(ISNULL(dblDebit, 0) - ISNULL(dblCredit,0)) beginningBalance
-	FROM tblGLDetail D 
-	WHERE D.dtmDate BETWEEN A.PeriodStart AND A.PeriodEnd and D.ysnIsUnposted = 0
-	AND D.intAccountId = A.intAccountId
-)MTD
+GROUP BY
+	A.intAccountId
+	,A.intFiscalYearId
+	,A.intGLFiscalYearPeriodId
+	,A.PeriodStart
+	,D.intCurrencyId
