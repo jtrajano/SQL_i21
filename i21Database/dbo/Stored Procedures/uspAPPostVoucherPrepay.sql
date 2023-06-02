@@ -65,7 +65,7 @@ WHERE NOT EXISTS (
 	WHERE B.intTransactionId = A.intId
 )
 
-SELECT @totalRecords = COUNT(*) FROM @validVoucherPrepay
+SELECT @totalRecords = COUNT(*) FROM @voucherPrepayIdData
 
 IF @totalRecords = 0 
 BEGIN
