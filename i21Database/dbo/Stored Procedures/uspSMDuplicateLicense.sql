@@ -17,6 +17,7 @@ BEGIN
 	[intNumberOfUser],
 	[intMaxStores],
 	[intMaxConsignmentStores],
+	[intPowerBIRefreshes],
 	[strDescription],
 	[strURL],
 	[ysnExternalAccess],
@@ -35,6 +36,7 @@ BEGIN
 	[intNumberOfUser],
 	[intMaxStores],
 	[intMaxConsignmentStores],
+	CASE WHEN ISNULL([intPowerBIRefreshes], 0) <> 0 THEN [intPowerBIRefreshes] ELSE 4 END,
 	CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strDescription] 
 		   ELSE 'DUP: ' + [strDescription] + ' (' + CAST(@intCount AS NVARCHAR) + ')' END,
