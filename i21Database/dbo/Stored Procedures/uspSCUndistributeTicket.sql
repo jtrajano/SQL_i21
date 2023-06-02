@@ -27,6 +27,7 @@ DECLARE @InventoryReceiptId INT
 		,@intInvoiceId INT
 		,@success INT
 		,@ysnPosted BIT
+		,@intTransactionType INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@batchIdUsed AS NVARCHAR(100)
@@ -490,9 +491,11 @@ BEGIN TRY
 						WHILE @@FETCH_STATUS = 0
 						BEGIN								
 							EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
-							SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+							SELECT @ysnPosted = ysnPosted, @intTransactionType = intTransactionType  
+							FROM tblAPBill WHERE intBillId = @intBillId
 							
 							IF @ysnPosted = 1
+								IF @intTransactionType <> 2 
 								BEGIN
 									EXEC [dbo].[uspAPPostBill]
 									@post = 0
@@ -503,6 +506,27 @@ BEGIN TRY
 									,@success = @success OUTPUT
 									,@batchIdUsed = @batchIdUsed OUTPUT
 								END
+								ELSE
+								BEGIN
+
+									exec uspAPPostVoucherPrepay 
+										@post=0
+										,@recap=0
+										,@param= @intBillId
+										,@userId=@intUserId
+										,@batchIdUsed=@batchIdUsed output
+										,@success=@success output										
+
+								END	
+								
+								
+
+
+								
+
+
+
+
 							IF ISNULL(@success, 0) = 0
 							BEGIN
 								SELECT @ErrorMessage = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
