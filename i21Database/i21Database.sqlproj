@@ -1301,7 +1301,6 @@
     <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
   </ItemGroup>
   <ItemGroup>
