@@ -29,93 +29,147 @@ BEGIN TRY
 		,dblPrice NUMERIC(18,6)
 	)
 
-	
+	DECLARE @intContractPricingTypeId INT 
+	DECLARE @PRICING_TYPE_HTA INT = 3
+
+
+	SELECT 
+		@intContractPricingTypeId = HEADER.intPricingTypeId	
+	FROM tblCTContractDetail DETAIL
+		JOIN tblCTContractHeader HEADER
+			ON DETAIL.intContractHeaderId = HEADER.intContractHeaderId
+	WHERE DETAIL.intContractDetailId = @intContractDetailId
 
 
 	if @ysnOutbound = 0
 	begin
 
-		IF OBJECT_ID('tempdb..#tmpContractPrice') IS NOT NULL DROP TABLE #tmpContractPrice
+		
+		DECLARE @tmpContractPrice TABLE(
+			intContractDetailId	int
+			,intPriceFixationId	int
+			,intPriceFixationDetailId	int
+			,dblCashPrice	numeric(18, 6)		
+			,dblAvailableQuantity	numeric(38, 6)
+		)
 
-		SELECT
-			*
-		INTO #tmpContractPrice
-		FROM vyuCTAvailableQuantityForVoucher
+		
+		INSERT INTO @tmpContractPrice (intContractDetailId, intPriceFixationId, intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity)
+		
+		SELECT intContractDetailId, intPriceFixationId, intPriceFixationDetailId, dblFinalprice, dblAvailableQuantity 
+		FROM vyuCTGetAvailablePriceForVoucher
 		WHERE intContractDetailId = @intContractDetailId
 		ORDER BY intPriceFixationDetailId ASC
 
 		SELECT @dblContractAvailablePrice = SUM(dblAvailableQuantity)
-		FROM #tmpContractPrice
+		FROM @tmpContractPrice
 
+		
 		--check if there is available Price Quantity
 		IF(ISNULL(@dblContractAvailablePrice,0) >= @dblQty)
 		BEGIN
-			SELECT TOP 1 
-				@_intPriceFixationDetailId = intPriceFixationDetailId
-				,@_dblPrice = dblCashPrice
-				,@_dblPriceAvailable = dblAvailableQuantity
-			FROM #tmpContractPrice
-			ORDER BY intPriceFixationDetailId
+			-- there are two ways to price an HTA Contract
+			/*
+				1. is through the sequence contract by setting the pricing type of the sequence as Priced
+				2. is through the pricing screen.
 
-			SET @dblRemainingQty = @dblQty
-			WHILE ISNULL(@_intPriceFixationDetailId,0) > 0 AND @dblRemainingQty > 0
+				If the use uses the sequence pricing, it will not have a price fixation detail id and will not satisfy the condition we used for checking the price fixation detail id
+				the code change is if the pricing quantity is enough it will get the pricing and available quantity and insert it to our return table
+
+			*/
+			IF @intContractPricingTypeId = @PRICING_TYPE_HTA  AND EXISTS(SELECT TOP 1 1 FROM @tmpContractPrice WHERE intPriceFixationId IS NULL)
 			BEGIN
-			
-				IF(@_dblPriceAvailable >= @dblRemainingQty)
-				BEGIN
-					INSERT INTO  @returnTable(
-						intContractDetailId
-						,intPriceFixationDetailId
-						,dblQuantity
-						,dblPrice 
-					)
-					SELECT 
-						intContractDetailId = @intContractDetailId
-						,intPriceFixationDetailId = @_intPriceFixationDetailId
-						,dblQuantity = @dblRemainingQty
-						,dblPrice  = @_dblPrice
 
-					SET @dblRemainingQty = 0	
-				END
-				ELSE
-				BEGIN
-					INSERT INTO  @returnTable(
-						intContractDetailId
-						,intPriceFixationDetailId
-						,dblQuantity
-						,dblPrice 
-					)
-					SELECT 
-						intContractDetailId = @intContractDetailId
-						,intPriceFixationDetailId = @_intPriceFixationDetailId
-						,dblQuantity = @_dblPriceAvailable
-						,dblPrice  = @_dblPrice
+				SELECT TOP 1 
+					@_dblPrice = dblCashPrice
+				FROM @tmpContractPrice
 
-					SET @dblRemainingQty = @dblRemainingQty - @_dblPriceAvailable
-				END
-			
-			
-				--LOOP iterator
+				INSERT INTO  @returnTable(
+					intContractDetailId
+					,intPriceFixationDetailId
+					,dblQuantity
+					,dblPrice 
+				)
+				SELECT 
+					intContractDetailId = @intContractDetailId
+					,intPriceFixationDetailId = NULL
+					,dblQuantity = @dblQty
+					,dblPrice  = @_dblPrice
+
+			END
+			ELSE
+			BEGIN
+				
+				SELECT TOP 1 
+					@_intPriceFixationDetailId = intPriceFixationDetailId
+					,@_dblPrice = dblCashPrice
+					,@_dblPriceAvailable = dblAvailableQuantity
+				FROM @tmpContractPrice
+				ORDER BY intPriceFixationDetailId
+
+				SET @dblRemainingQty = @dblQty
+				WHILE ISNULL(@_intPriceFixationDetailId,0) > 0 AND @dblRemainingQty > 0
 				BEGIN
-					IF NOT EXISTS (SELECT TOP 1 1 
-								FROM #tmpContractPrice 
-								WHERE intPriceFixationDetailId > @_intPriceFixationDetailId
-								ORDER BY intPriceFixationDetailId)
+				
+					IF(@_dblPriceAvailable >= @dblRemainingQty)
 					BEGIN
-						SET @_intPriceFixationDetailId = NULL
-					END 
+						INSERT INTO  @returnTable(
+							intContractDetailId
+							,intPriceFixationDetailId
+							,dblQuantity
+							,dblPrice 
+						)
+						SELECT 
+							intContractDetailId = @intContractDetailId
+							,intPriceFixationDetailId = @_intPriceFixationDetailId
+							,dblQuantity = @dblRemainingQty
+							,dblPrice  = @_dblPrice
+
+						SET @dblRemainingQty = 0	
+					END
 					ELSE
 					BEGIN
-						SELECT TOP 1 
-							@_intPriceFixationDetailId = intPriceFixationDetailId 
-							,@_dblPrice = dblCashPrice
-							,@_dblPriceAvailable = dblAvailableQuantity
-						FROM #tmpContractPrice 
-						WHERE intPriceFixationDetailId > @_intPriceFixationDetailId
-						ORDER BY intPriceFixationDetailId
+						INSERT INTO  @returnTable(
+							intContractDetailId
+							,intPriceFixationDetailId
+							,dblQuantity
+							,dblPrice 
+						)
+						SELECT 
+							intContractDetailId = @intContractDetailId
+							,intPriceFixationDetailId = @_intPriceFixationDetailId
+							,dblQuantity = @_dblPriceAvailable
+							,dblPrice  = @_dblPrice
+
+						SET @dblRemainingQty = @dblRemainingQty - @_dblPriceAvailable
+					END
+				
+				
+					--LOOP iterator
+					BEGIN
+						IF NOT EXISTS (SELECT TOP 1 1 
+									FROM @tmpContractPrice 
+									WHERE intPriceFixationDetailId > @_intPriceFixationDetailId
+									ORDER BY intPriceFixationDetailId)
+						BEGIN
+							SET @_intPriceFixationDetailId = NULL
+						END 
+						ELSE
+						BEGIN
+							SELECT TOP 1 
+								@_intPriceFixationDetailId = intPriceFixationDetailId 
+								,@_dblPrice = dblCashPrice
+								,@_dblPriceAvailable = dblAvailableQuantity
+							FROM @tmpContractPrice 
+							WHERE intPriceFixationDetailId > @_intPriceFixationDetailId
+							ORDER BY intPriceFixationDetailId
+						END
 					END
 				END
+
+			
 			END
+	
 		END
 
 		SELECT 
@@ -124,7 +178,7 @@ BEGIN TRY
 			,dblQuantity 
 			,dblPrice 
 		FROM @returnTable
-
+		
 	end 
 	else
 	begin
