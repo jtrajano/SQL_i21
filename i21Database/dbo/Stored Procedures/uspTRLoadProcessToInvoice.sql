@@ -1687,9 +1687,12 @@ BEGIN TRY
 					WHERE intInvoiceId = @InvoiceId
 				)
 
-			UPDATE tblTRLoadHeader 
-			SET ysnPosted = @ysnPostOrUnPost
-			WHERE intLoadHeaderId = @intLoadHeaderId
+			IF (@ysnRecap != 1)
+			BEGIN
+				UPDATE tblTRLoadHeader 
+				SET ysnPosted = @ysnPostOrUnPost
+				WHERE intLoadHeaderId = @intLoadHeaderId
+			END
 
 			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
 		END
@@ -1702,9 +1705,12 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdated
 
-			UPDATE tblTRLoadHeader 
-			SET ysnPosted = @ysnPostOrUnPost
-			WHERE intLoadHeaderId = @intLoadHeaderId
+			IF (@ysnRecap != 1)
+			BEGIN
+				UPDATE tblTRLoadHeader 
+				SET ysnPosted = @ysnPostOrUnPost
+				WHERE intLoadHeaderId = @intLoadHeaderId
+			END
 
 			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
 		END
