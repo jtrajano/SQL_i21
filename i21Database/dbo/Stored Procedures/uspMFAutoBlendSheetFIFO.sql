@@ -2855,7 +2855,7 @@ BEGIN TRY
 								,CASE 
 									WHEN IsNULL(@dblNoOfPallets, 0) = 0
 										THEN 0
-									ELSE @dblNoOfPallets / @dblIssuedQuantity
+									ELSE @dblIssuedQuantity / @dblNoOfPallets
 									END
 								,@strFW
 
