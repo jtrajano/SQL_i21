@@ -1,9 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuGLTrialBalanceRE_NonRE]
 AS
-WITH BeginningBalance AS(
-	SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD  FROM vyuGLTrialBalance_NonRE 
-	-- UNION ALL
-	-- SELECT intAccountId, intGLFiscalYearPeriodId, YTD,MTD FROM  vyuGLTrialBalance_RE 
+WITH
+OverrrideSetting AS(
+	SELECT TOP 1 ISNULL(ysnREOverride,0) ysnREOverride FROM tblGLCompanyPreferenceOption
+),
+BeginningBalance AS(
+	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId 
+	FROM vyuGLTrialBalance_NonRE
+	UNION ALL
+	SELECT intAccountId, intGLFiscalYearPeriodId,YTD,MTD,intCurrencyId 
+	FROM vyuGLTrialBalance_RE , OverrrideSetting O WHERE O.ysnREOverride = 0
 )
 SELECT 
 ISNULL(B.MTD,0)MTDBalance,
@@ -28,7 +34,7 @@ F.strPeriod
 FROM tblGLAccount A
 LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
 LEFT JOIN tblGLFiscalYearPeriod F on F.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
-LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
+LEFT JOIN tblSMCurrency C on C.intCurrencyID = B.intCurrencyId
 LEFT JOIN tblGLAccountGroup G ON G.intAccountGroupId = A.intAccountGroupId
 LEFT JOIN tblGLAccountUnit U on U.intAccountUnitId = A.intAccountUnitId
 CROSS APPLY(
