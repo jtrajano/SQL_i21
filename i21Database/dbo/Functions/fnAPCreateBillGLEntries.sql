@@ -2270,7 +2270,7 @@ BEGIN
 		[strTransactionType]			=	A.strTransactionType,
 		[strTransactionForm]			=	A.strTransactionForm,
 		[strModuleName]					=	A.strModuleName,
-		[dblDebitForeign]				=	0,
+		[dblDebitForeign]				=	SUM(dblCredit - dblDebit),
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
