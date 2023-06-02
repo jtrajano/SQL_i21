@@ -99,39 +99,211 @@ BEGIN
 	
 	/*******START******COMPANY OWNERSHIP (UNPAID)*************/
 	BEGIN
+		/*for beginning*/
 		SELECT *
 		INTO #Vouchers
 		FROM (
-		SELECT IC.intCommodityId
-			,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
+			SELECT IC.intCommodityId
+				,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
+			FROM tblAPBillDetail BD
+			INNER JOIN tblAPBill AP
+				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD.intItemId
+					AND IC.strType = 'Inventory'
+			INNER JOIN tblICItemUOM UOM	
+				ON UOM.intItemUOMId = BD.intUnitOfMeasureId
+			OUTER APPLY (
+				SELECT TOP 1 intCommodityUnitMeasureId
+				FROM tblICCommodityUnitMeasure
+				WHERE intCommodityId = IC.intCommodityId
+					AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+			) UM_REF
+			INNER JOIN tblGRSettleStorageBillDetail SBD
+				ON SBD.intBillId = BD.intBillId		
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
+			WHERE (
+					((AP.ysnPosted = 0 OR AP.ysnPaid = 0) AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate)
+					OR 
+					(dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate AND AP.ysnPaid = 1 AND dbo.fnRemoveTimeOnDate(AP.dtmDatePaid) = @dtmReportDate)
+				)
+				AND IC.intCommodityId = @intCommodityId
+			GROUP BY IC.intCommodityId
+				,UM_REF.intCommodityUnitMeasureId
+			UNION ALL
+			SELECT IC.intCommodityId
+				,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
+			FROM tblAPBillDetail BD
+			INNER JOIN tblAPBill AP
+				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD.intItemId
+					AND IC.strType = 'Inventory'
+			INNER JOIN tblICItemUOM UOM	
+				ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
+					OR (UOM.intItemId = IC.intItemId
+						AND UOM.ysnStockUnit = 1)
+					)
+			OUTER APPLY (
+				SELECT TOP 1 intCommodityUnitMeasureId
+				FROM tblICCommodityUnitMeasure
+				WHERE intCommodityId = IC.intCommodityId
+					AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+			) UM_REF
+			LEFT JOIN tblICInventoryReceiptItem IR
+				ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+			WHERE (
+					((AP.ysnPosted = 0 OR AP.ysnPaid = 0) AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate)
+					OR 
+					(dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate AND AP.ysnPaid = 1 AND dbo.fnRemoveTimeOnDate(AP.dtmDatePaid) = @dtmReportDate)
+				)
+				AND IC.intCommodityId = @intCommodityId
+				AND AP.intTransactionType = 1
+				AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
+						OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
+					)
+			GROUP BY IC.intCommodityId
+				,UM_REF.intCommodityUnitMeasureId
+		) A
+
+		DECLARE @dblDPReversedSettlementsWithNoPayment DECIMAL(18,6)
+		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
+		DECLARE @dblDPSettlementsWithDeletedPayment DECIMAL(18,6)
+		DECLARE @dblSettlementsWithDeletedPayment DECIMAL(18,6)
+		SELECT @dblDPReversedSettlementsWithNoPayment = SUM(dblUnpaid)
+			,@dblDPReversedSettlementsWithPayment = SUM(dblPaid)
+			,@dblDPSettlementsWithDeletedPayment = SUM(dblPaid2)
+			,@dblSettlementsWithDeletedPayment = SUM(dblPaid3) --must be added only on the unpaid decrease if reversal was done on the same day that the settlement was processed
+		FROM (
+			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid3 = CASE WHEN AP.intBillId IS NOT NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) = dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+			FROM tblGRStorageHistory SH
+			INNER JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblGRStorageType ST
+				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+			INNER JOIN tblICCommodity IC
+				ON IC.intCommodityId = CS.intCommodityId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemUOMId = CS.intItemUOMId
+			INNER JOIN tblICUnitMeasure UM
+				ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+			LEFT JOIN tblAPBill AP
+				ON (AP.strVendorOrderNumber = SH.strSettleTicket OR AP.strVendorOrderNumber = CS.strStorageTicketNumber)
+					AND AP.intTransactionType = 2 --VPRE
+			LEFT JOIN tblGRStorageHistory SH_2
+				ON SH_2.strSettleTicket = SH.strSettleTicket
+					AND SH_2.strType = 'Settlement'
+			WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
+				AND CS.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+			GROUP BY AP.intBillId, SH.strType, SH_2.dtmHistoryDate,SH.dtmHistoryDate
+		) A
+
+		
+		--DECLARE @dblSettlementsFromYesterday DECIMAL(18,6) --settlements from yesterday that were reversed the next day
+		--DECLARE @dblSettlementsFromYesterday2 DECIMAL(18,6) --get the reversed settlements from the next day when the report is printed prior to the current date
+		----SELECT @dblSettlementsFromYesterday = SUM(dblUnpaid)
+		----FROM (
+		--	SELECT @dblSettlementsFromYesterday = SUM(A.dblSettlementsFromYesterday)
+		--		,@dblSettlementsFromYesterday2 = SUM(A.dblSettlementsFromYesterday2)
+		--	FROM (
+		--		SELECT dblSettlementsFromYesterday = CASE WHEN dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+		--			,dblSettlementsFromYesterday2 = CASE WHEN dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) > @dtmReportDate THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+		--		FROM tblGRStorageHistory SH
+		--		INNER JOIN tblGRCustomerStorage CS
+		--			ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		--		INNER JOIN tblGRStorageType ST
+		--			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+		--		INNER JOIN tblICCommodity IC
+		--			ON IC.intCommodityId = CS.intCommodityId
+		--		INNER JOIN tblSMCompanyLocation CL
+		--			ON CL.intCompanyLocationId = CS.intCompanyLocationId
+		--		INNER JOIN tblICItemUOM UOM
+		--			ON UOM.intItemUOMId = CS.intItemUOMId
+		--		INNER JOIN tblICUnitMeasure UM
+		--			ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+		--		INNER JOIN (
+		--			SELECT dtmHistoryDate = dbo.fnRemoveTimeOnDate(dtmHistoryDate) 
+		--				,strSettleTicket
+		--			FROM tblGRStorageHistory 
+		--			WHERE strType = 'Settlement'
+		--		) STRS
+		--			ON STRS.strSettleTicket = SH.strSettleTicket
+		--		WHERE (SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL)
+		--			AND CS.intCommodityId = @intCommodityId
+		--			AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) > STRS.dtmHistoryDate
+		--			--AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
+		--		GROUP BY SH.dtmHistoryDate
+		--	) A
+
+		/****BEGINNING****/
+		INSERT INTO @CompanyOwnedData
+		SELECT 2
+			,@dtmReportDate
+			,V.intCommodityId
+			,'   COMPANY OWNERSHIP (UNPAID)'
+			,SUM(V.dblQty) --+ ISNULL(@dblSettlementsFromYesterday,0)
+			,0
+			,0
+			,0
+			,@strUOM
+		FROM #Vouchers V
+		INNER JOIN tblICCommodity CO
+			ON CO.intCommodityId = V.intCommodityId
+		GROUP BY V.intCommodityId
+
+		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
+		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
+		BEGIN
+			INSERT INTO @CompanyOwnedData
+			SELECT 2
+				,@dtmReportDate
+				,@intCommodityId
+				,'   COMPANY OWNERSHIP (UNPAID)'
+				,0
+				,0
+				,0
+				,0
+				,@strUOM
+		END
+
+		/******DECREASE*******/
+		DECLARE @dblVoidedPayment DECIMAL(18,6)
+		SELECT @dblVoidedPayment = SUM(dblQty) FROM (
+		SELECT dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(SS.intCommodityStockUomId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBill AP
 			ON AP.intBillId = BD.intBillId
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = BD.intItemId
 				AND IC.strType = 'Inventory'
-		INNER JOIN tblICItemUOM UOM	
-			ON UOM.intItemUOMId = BD.intUnitOfMeasureId
-		OUTER APPLY (
-			SELECT TOP 1 intCommodityUnitMeasureId
-			FROM tblICCommodityUnitMeasure
-			WHERE intCommodityId = IC.intCommodityId
-				AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
-		) UM_REF
 		INNER JOIN tblGRSettleStorageBillDetail SBD
-			ON SBD.intBillId = BD.intBillId		
+			ON SBD.intBillId = BD.intBillId
+		INNER JOIN tblGRSettleStorage SS
+			ON SS.intSettleStorageId = SBD.intSettleStorageId
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = AP.intShipToId
 				AND CL.ysnLicensed = 1
-		WHERE (AP.ysnPosted = 0 OR AP.ysnPaid = 0
-			)
+		INNER JOIN (
+			tblAPPaymentDetail PD
+			INNER JOIN tblAPPayment PYMT
+				ON PYMT.intPaymentId = PD.intPaymentId
+		) ON PD.intOrigBillId = AP.intBillId
+			AND PYMT.ysnNewFlag = 1
+		WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
 			AND IC.intCommodityId = @intCommodityId
-			AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate
+			AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) = @dtmReportDate
 		GROUP BY IC.intCommodityId
-			,UM_REF.intCommodityUnitMeasureId
+			,SS.intCommodityStockUomId
 		UNION ALL
-		SELECT IC.intCommodityId
-			,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
+		SELECT dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
 		FROM tblAPBillDetail BD
 		INNER JOIN tblAPBill AP
 			ON AP.intBillId = BD.intBillId
@@ -151,10 +323,15 @@ BEGIN
 		) UM_REF
 		LEFT JOIN tblICInventoryReceiptItem IR
 			ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-		WHERE (AP.ysnPosted = 0 OR AP.ysnPaid = 0
-			)
+		INNER JOIN (
+			tblAPPaymentDetail PD
+			INNER JOIN tblAPPayment PYMT
+				ON PYMT.intPaymentId = PD.intPaymentId
+		) ON PD.intOrigBillId = AP.intBillId
+			AND PYMT.ysnNewFlag = 1
+		WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
 			AND IC.intCommodityId = @intCommodityId
-			AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) < @dtmReportDate
+			AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) = @dtmReportDate
 			AND AP.intTransactionType = 1
 			AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
 					OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
@@ -163,57 +340,14 @@ BEGIN
 			,UM_REF.intCommodityUnitMeasureId
 		) A
 
-		/****BEGINNING****/
-		INSERT INTO @CompanyOwnedData
-		SELECT 2
-			,@dtmReportDate
-			,V.intCommodityId
-			,'   COMPANY OWNERSHIP (UNPAID)'
-			,SUM(V.dblQty)
-			,0
-			,0
-			,0
-			,@strUOM
-		FROM #Vouchers V
-		INNER JOIN tblICCommodity CO
-			ON CO.intCommodityId = V.intCommodityId
-		GROUP BY V.intCommodityId
+		--SELECT ISNULL(@dblVoidedPayment,0),ISNULL(@dblSettlementsFromYesterday2,0),ISNULL(@dblDPSettlementsWithDeletedPayment,0),ISNULL(@dblDPReversedSettlementsWithPayment,0),ISNULL(@dblDPReversedSettlementsWithNoPayment,0),ISNULL(@dblSettlementsWithDeletedPayment,0)
 
-		--/******INCREASE*******/
-		--UPDATE C
-		--SET dblTotalIncrease = V.total
-		--FROM @CompanyOwnedData C
-		--INNER JOIN (
-		--	SELECT intCommodityId
-		--		,total = SUM(dblQty)
-		--	FROM #Vouchers
-		--	WHERE dtmPostDate = @dtmReportDate
-		--	GROUP BY intCommodityId
-		--) V
-		--	ON C.intCommodityId = V.intCommodityId
-		--WHERE C.dtmReportDate = @dtmReportDate
-		--	AND C.intOrderNo = 2
-
-		--ADD IF DP DOES NOT EXIST FOR THE COMMODITY
-		IF NOT EXISTS(SELECT 1 FROM @CompanyOwnedData WHERE intOrderNo = 2)
-		BEGIN
-			INSERT INTO @CompanyOwnedData
-			SELECT 2
-				,@dtmReportDate
-				,@intCommodityId
-				,'   COMPANY OWNERSHIP (UNPAID)'
-				,0
-				,0
-				,0
-				,0
-				,@strUOM
-		END
-
-		/******DECREASE*******/
 		UPDATE C
-		SET dblTotalDecrease = A.dblQty
+		SET dblTotalDecrease = ISNULL(A.dblQty,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + ISNULL(@dblSettlementsWithDeletedPayment,0)
 		FROM @CompanyOwnedData C
-		INNER JOIN (
+		LEFT JOIN (
+			SELECT AA.intCommodityId
+				,dblQty = SUM(AA.dblQty) FROM (
 			SELECT IC.intCommodityId
 				,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(SS.intCommodityStockUomId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
 			FROM tblAPBillDetail BD
@@ -239,11 +373,47 @@ BEGIN
 				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) = @dtmReportDate
 			GROUP BY IC.intCommodityId
 				,SS.intCommodityStockUomId
+			UNION ALL
+			SELECT IC.intCommodityId
+				,dblQty = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))		
+			FROM tblAPBillDetail BD
+			INNER JOIN tblAPBill AP
+				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblICItem IC
+				ON IC.intItemId = BD.intItemId
+					AND IC.strType = 'Inventory'
+			INNER JOIN tblICItemUOM UOM	
+				ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
+					OR (UOM.intItemId = IC.intItemId
+						AND UOM.ysnStockUnit = 1)
+					)
+			OUTER APPLY (
+				SELECT TOP 1 intCommodityUnitMeasureId
+				FROM tblICCommodityUnitMeasure
+				WHERE intCommodityId = IC.intCommodityId
+					AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+			) UM_REF
+			LEFT JOIN tblICInventoryReceiptItem IR
+				ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+			INNER JOIN (
+				tblAPPaymentDetail PD
+				INNER JOIN tblAPPayment PYMT
+					ON PYMT.intPaymentId = PD.intPaymentId
+			) ON PD.intBillId = AP.intBillId
+			WHERE ISNULL(PYMT.strPaymentInfo,'') <> ''
+				AND IC.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(PYMT.dtmDatePaid) = @dtmReportDate
+				AND AP.intTransactionType = 1
+				AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
+						OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
+					)
+			GROUP BY IC.intCommodityId
+				,UM_REF.intCommodityUnitMeasureId
+			) AA
+			GROUP BY intCommodityId
 		) A ON A.intCommodityId = C.intCommodityId
 		WHERE C.intOrderNo = 2
 			AND C.dtmReportDate = @dtmReportDate
-
-		
 
 		DROP TABLE #Vouchers
 	END
@@ -336,6 +506,13 @@ BEGIN
 				,strCommodityCode
 		) A
 
+		/*GET IA*/
+		DECLARE @dblDPIA DECIMAL(18,6)
+		SELECT @dblDPIA =SUM(dblIn) - SUM(dblOut)
+		FROM #DelayedPricingALL AA
+		WHERE strTransactionType = 'Inventory Adjustment'
+			AND dtmDate = @dtmReportDate
+
 		/*****BEGINNING*****/
 		INSERT INTO @CompanyOwnedData
 		SELECT 3
@@ -397,16 +574,18 @@ BEGIN
 		--PHYSICAL INVENTORY TOTAL
 		DECLARE @dblPhysicalInventory DECIMAL(18,6)
 		DECLARE @dblIACompanyOwned DECIMAL(18,6)
+		DECLARE @dblIACustomerOwned DECIMAL(18,6)
 		SET @dblPhysicalInventory = NULL
 		SELECT @dblPhysicalInventory = SUM(dblBegInventory) 
 			,@dblIACompanyOwned = SUM(dblIACompanyOwned)
+			,@dblIACustomerOwned = SUM(dblIACustomerOwned)
 		FROM tblGRGIIPhysicalInventory 
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
 			AND dtmReportDate = @dtmReportDate
 		GROUP BY intCommodityId
 			,strUOM
-
+			
 		--CUSTOMER STORAGE TOTAL
 		DECLARE @dblCustomerStorage DECIMAL(18,6)
 		DECLARE @dblSODecrease DECIMAL(18,6)
@@ -419,8 +598,24 @@ BEGIN
 		GROUP BY intCommodityId
 			,strUOM
 
+		--SET @dblSODecrease = NULL
+		--SELECT @dblSODecrease = SUM(dblDecrease)
+		--FROM tblGRGIICustomerStorage CS
+		--INNER JOIN tblGRStorageType ST
+		--	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+		--		AND ST.ysnReceiptedStorage = 0
+		--		AND ST.ysnCustomerStorage = 0
+		--		AND ST.ysnDPOwnedType = 0
+		--		AND ST.ysnGrainBankType = 0
+		--		AND ST.strOwnedPhysicalStock = 'Customer'
+		--WHERE intCommodityId = @intCommodityId 
+		--	AND strUOM = @strUOM 
+		--	AND dtmReportDate = @dtmReportDate
+		--GROUP BY intCommodityId
+		--	,strUOM
+
 		SET @dblSODecrease = NULL
-		SELECT @dblSODecrease = SUM(dblDecrease)
+		SELECT @dblSODecrease = SUM(dblDecrease) - (ISNULL(@dblIACustomerOwned,0) * -1) - ISNULL(TS.dblUnits,0)
 		FROM tblGRGIICustomerStorage CS
 		INNER JOIN tblGRStorageType ST
 			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -429,12 +624,33 @@ BEGIN
 				AND ST.ysnDPOwnedType = 0
 				AND ST.ysnGrainBankType = 0
 				AND ST.strOwnedPhysicalStock = 'Customer'
+		OUTER APPLY (
+			SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
+			FROM vyuGRTransferStorageSearchView TS
+			INNER JOIN tblGRStorageType ST_FROM
+				ON ST_FROM.intStorageScheduleTypeId = TS.intFromStorageTypeId
+			INNER JOIN tblGRStorageType ST_TO
+				ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
+			INNER JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+			INNER JOIN tblICItemUOM UOM
+				ON UOM.intItemUOMId = CS.intItemUOMId
+			INNER JOIN tblICUnitMeasure UM
+				ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+			/*
+				Transfer from Company owned to customer owned
+			*/
+			WHERE (ST_FROM.strOwnedPhysicalStock = 'Customer' AND ST_TO.strOwnedPhysicalStock = 'Customer')
+				AND TS.intCommodityId = @intCommodityId
+				AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmReportDate
+				AND (ST_FROM.intStorageScheduleTypeId = ST.intStorageScheduleTypeId AND ST_TO.intStorageScheduleTypeId <> ST.intStorageScheduleTypeId)
+		) TS
 		WHERE intCommodityId = @intCommodityId 
 			AND strUOM = @strUOM 
 			AND dtmReportDate = @dtmReportDate
-		GROUP BY intCommodityId
-			,strUOM
-
+		--GROUP BY intCommodityId
+		--	,strUOM		
+		GROUP BY TS.dblUnits
 
 		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
 		DECLARE @dblShipped DECIMAL(18,6)
@@ -462,10 +678,12 @@ BEGIN
 		SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
 		FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
-		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = CompOwn.intContractDetailId
 		WHERE intCommodityId = @intCommodityId
 			AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
 			AND CompOwn.strTransactionType = 'Inventory Receipt'
+			AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
 
 		--GET TRANSFERS FROM LICENSED TO NON-LICENSED LOCATIONS FOR THE DAY
 		DECLARE @dblTransfers DECIMAL(18,6)
@@ -490,50 +708,149 @@ BEGIN
 		WHERE dbo.fnRemoveTimeOnDate(IT.dtmTransferDate) = @dtmReportDate
 			AND IC.intCommodityId = @intCommodityId
 
+			--select '@dblIACompanyOwned'=@dblIACompanyOwned,'@dblIACustomerOwned'=@dblIACustomerOwned,'@dblDPIA'=@dblDPIA,'@dblInternalTransfersDiff'=@dblInternalTransfersDiff
+
+		IF ISNULL(@dblIACompanyOwned,0) <> 0
+			SET @dblIACompanyOwned = ISNULL(@dblIACompanyOwned,0) - ISNULL(@dblDPIA,0)--CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ISNULL(@dblIACompanyOwned,0) + ISNULL(@dblDPIA,0) ELSE ISNULL(@dblIACompanyOwned,0) - ISNULL(@dblDPIA,0) END
+
 		INSERT INTO @CompanyOwnedData
 		SELECT 1
 			,@dtmReportDate
 			,@intCommodityId
 			,'   COMPANY OWNERSHIP (PAID)'
-			,dblTotalBeginning = ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) - ISNULL(CO.total,0)
-			,dblTotalIncrease = CU.total + ISNULL(@dblIACompanyOwned,0) + ISNULL(@dblInternalTransfersDiff,0) + ISNULL(@dblReceivedCompanyOwned,0)
-			,dblTotalDecrease = ABS((ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) - ISNULL(DP.total,0))
+			,dblTotalBeginning = 0--ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) - ISNULL(CO.total,0)
+			,dblTotalIncrease = CU.total + 
+								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN 0 ELSE ISNULL(@dblIACompanyOwned,0) END + 
+								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN 0 ELSE ISNULL(@dblInternalTransfersDiff,0) END --+ 
+								--ISNULL(@dblReceivedCompanyOwned,0)
+								--ISNULL(@dblDPReversedSettlementsWithPayment,0) --+ 
+								--ISNULL(@dblDPSettlementsWithDeletedPayment,0)
+			,dblTotalDecrease = ABS(
+								(ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) +
+								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ABS(ISNULL(@dblIACompanyOwned,0)) ELSE 0 END + 
+								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN ABS(ISNULL(@dblInternalTransfersDiff,0)) ELSE 0 END +
+								ISNULL(@dblDPReversedSettlementsWithPayment,0) + 
+								ISNULL(@dblVoidedPayment,0) +
+								ISNULL(@dblDPSettlementsWithDeletedPayment,0)
+								) --- ISNULL(@dblDPIA,0)
 			,0
 			,@strUOM
-		FROM (
-			SELECT total = SUM(A.dblTotalBeginning)
-				,A.intCommodityId
-			FROM @CompanyOwnedData A
-			WHERE intOrderNo IN (2,3) --COMPANY OWNERSHIP (UNPAID) AND DELAYED PRICING
-				AND A.intCommodityId = @intCommodityId
-			GROUP BY A.intCommodityId
-		) CO
-		INNER JOIN (
+		FROM (			
 			SELECT total = A.dblTotalDecrease
 				,A.intCommodityId
 			FROM @CompanyOwnedData A
 			WHERE intOrderNo = 2 --COMPANY OWNERSHIP (UNPAID)
 				AND A.intCommodityId = @intCommodityId
 		) CU
-			ON CU.intCommodityId = CO.intCommodityId
-		LEFT JOIN (
-			SELECT total = SUM(A.dblTotalDecrease)
-				,A.intCommodityId
-			FROM @CompanyOwnedData A
-			WHERE intOrderNo = 3
-				AND A.intCommodityId = @intCommodityId
-			GROUP BY A.intCommodityId
-		) DP
-			ON CU.intCommodityId = CO.intCommodityId
+		--FROM (
+		--	SELECT total = SUM(A.dblTotalBeginning)
+		--		,A.intCommodityId
+		--	FROM @CompanyOwnedData A
+		--	WHERE intOrderNo IN (2,3) --COMPANY OWNERSHIP (UNPAID) AND DELAYED PRICING
+		--		AND A.intCommodityId = @intCommodityId
+		--	GROUP BY A.intCommodityId
+		--) CO
+		--INNER JOIN (
+		--	SELECT total = A.dblTotalDecrease
+		--		,A.intCommodityId
+		--	FROM @CompanyOwnedData A
+		--	WHERE intOrderNo = 2 --COMPANY OWNERSHIP (UNPAID)
+		--		AND A.intCommodityId = @intCommodityId
+		--) CU
+		--	ON CU.intCommodityId = CO.intCommodityId		
+		--LEFT JOIN (
+		--	SELECT total = SUM(A.dblTotalDecrease)
+		--		,A.intCommodityId
+		--	FROM @CompanyOwnedData A
+		--	WHERE intOrderNo = 3
+		--		AND A.intCommodityId = @intCommodityId
+		--	GROUP BY A.intCommodityId
+		--) DP
+		--	ON DP.intCommodityId = CO.intCommodityId
+
+
 	END
 	/*******END******COMPANY OWNERSHIP (PAID)*************/
 
 	/*******START******UPDATE COMPANY OWNERSHIP (UNPAID)*************/
 	
 	/******INCREASE*******/
+	DECLARE @dblCompanyOwnedIRVoucher DECIMAL(18,6)
+	SET @dblCompanyOwnedIRVoucher = NULL
+	SELECT @dblCompanyOwnedIRVoucher = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(UM_REF.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,BD.dblQtyReceived))
+	FROM tblAPBillDetail BD
+	INNER JOIN tblAPBill AP
+		ON AP.intBillId = BD.intBillId
+	INNER JOIN tblICItem IC
+		ON IC.intItemId = BD.intItemId
+			AND IC.strType = 'Inventory'
+	INNER JOIN tblICItemUOM UOM	
+		ON (UOM.intItemUOMId = BD.intUnitOfMeasureId
+			OR (UOM.intItemId = IC.intItemId
+				AND UOM.ysnStockUnit = 1)
+			)
+	OUTER APPLY (
+		SELECT TOP 1 intCommodityUnitMeasureId
+		FROM tblICCommodityUnitMeasure
+		WHERE intCommodityId = IC.intCommodityId
+			AND intUnitMeasureId = ISNULL(UOM.intUnitMeasureId,@intCommodityUnitMeasureId)
+	) UM_REF
+	LEFT JOIN tblICInventoryReceiptItem IR
+		ON IR.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+	WHERE (
+			((AP.ysnPosted = 0 OR AP.ysnPaid = 0) AND dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) = @dtmReportDate)
+			OR 
+			(dbo.fnRemoveTimeOnDate(AP.dtmDateCreated) = @dtmReportDate AND AP.ysnPaid = 1 AND dbo.fnRemoveTimeOnDate(AP.dtmDatePaid) >= @dtmReportDate)
+		)
+		AND IC.intCommodityId = @intCommodityId
+		AND AP.intTransactionType = 1
+		AND ((BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NULL AND BD.intContractDetailId IS NULL)
+				OR (BD.intSettleStorageId IS NULL AND BD.intCustomerStorageId IS NULL AND BD.intInventoryReceiptItemId IS NOT NULL AND IR.intOwnershipType = 1)
+			)
+
+
 	UPDATE C
-	SET dblTotalIncrease = ISNULL(@dblSODecrease,0)
+	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
+	--SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
+	SET dblTotalIncrease = (
+								ISNULL(@dblSODecrease,0) + 
+								ISNULL(@dblVoidedPayment,0) + 
+								ISNULL(@dblDPSettlementsWithDeletedPayment,0) + 
+								(ISNULL(DP.total,0) + ISNULL(@dblDPIA,0)) +
+								ISNULL(@dblCompanyOwnedIRVoucher,0)
+							) - 
+							ISNULL(TS.dblUnits,0)
+		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0)
 	FROM @CompanyOwnedData C
+	LEFT JOIN (
+		SELECT total = SUM(A.dblTotalDecrease)
+			,A.intCommodityId
+		FROM @CompanyOwnedData A
+		WHERE intOrderNo = 3
+			AND A.intCommodityId = @intCommodityId
+		GROUP BY A.intCommodityId
+	) DP
+		ON DP.intCommodityId = C.intCommodityId
+	OUTER APPLY (
+		SELECT SUM(ISNULL(dblDeductedUnits,0)) dblUnits
+		FROM vyuGRTransferStorageSearchView TS
+		INNER JOIN tblGRStorageType ST_FROM
+			ON ST_FROM.intStorageScheduleTypeId = TS.intFromStorageTypeId
+		INNER JOIN tblGRStorageType ST_TO
+			ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
+		INNER JOIN tblGRCustomerStorage CS
+			ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+		INNER JOIN tblICItemUOM UOM
+			ON UOM.intItemUOMId = CS.intItemUOMId
+		INNER JOIN tblICUnitMeasure UM
+			ON UM.intUnitMeasureId = UOM.intUnitMeasureId
+		/*
+			Transfer from Company owned to customer owned
+		*/
+		WHERE (ST_FROM.strOwnedPhysicalStock = 'Company' AND ST_TO.strOwnedPhysicalStock = 'Customer')
+			AND TS.intCommodityId = @intCommodityId
+			AND dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate) = @dtmReportDate
+	) TS
 	WHERE C.dtmReportDate = @dtmReportDate
 		AND C.intOrderNo = 2
 
@@ -546,7 +863,7 @@ BEGIN
 			,@dtmReportDate
 			,intCommodityId
 			,'              Total Company Owned'
-			,SUM(ISNULL(dblTotalBeginning,0))
+			,ISNULL(@dblPhysicalInventory,0) - ISNULL(@dblCustomerStorage,0) --SUM(ISNULL(dblTotalBeginning,0))
 			,SUM(ISNULL(dblTotalIncrease,0))
 			,SUM(ISNULL(dblTotalDecrease,0))
 			,0
@@ -556,6 +873,25 @@ BEGIN
 		GROUP BY intCommodityId
 	END
 	/*******END******TOTAL COMPANY OWNED*************/
+
+	/*******START******UPDATE COMPANY OWNERSHIP (PAID)*************/
+	
+	/******BEGINNING*******/
+	DECLARE @totalCO DECIMAL(18,6)
+	DECLARE @totalDP DECIMAL(18,6)
+	DECLARE @totalCOUnpaid DECIMAL(18,6)
+
+	SET @totalCO = (SELECT dblTotalBeginning FROM @CompanyOwnedData WHERE intOrderNo = 4)
+	SET @totalDP = (SELECT dblTotalBeginning FROM @CompanyOwnedData WHERE intOrderNo = 3)
+	SET @totalCOUnpaid = (SELECT dblTotalBeginning FROM @CompanyOwnedData WHERE intOrderNo = 2)
+
+	UPDATE C
+	SET dblTotalBeginning = ISNULL(@totalCO,0) - ISNULL(@totalDP,0) - ISNULL(@totalCOUnpaid,0)
+	FROM @CompanyOwnedData C
+	WHERE C.dtmReportDate = @dtmReportDate
+		AND C.intOrderNo = 1
+
+	/*******END******UPDATE COMPANY OWNERSHIP (PAID)*************/
 
 	/*******START******BLANK*************/
 	BEGIN
