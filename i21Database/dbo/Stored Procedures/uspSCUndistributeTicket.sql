@@ -427,8 +427,18 @@ BEGIN TRY
 							END
 							IF @dblLoadUsedQty <> 0
 							BEGIN
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
 
+								IF ISNULL(@intInventoryReceiptItemUsed, 0) <> 0
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
+								END								
+								ELSE
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId
+
+								END
+
+									
 								-- Update the LS status back to scheduled and remove delivered date
 								UPDATE L
 								SET
@@ -1633,43 +1643,71 @@ BEGIN TRY
 										END
 										ELSE
 										BEGIN
-											IF(@dblLoadUsedQty > @dblContractAvailableQty)
+
+											IF @dblTicketScheduledQty <= @dblContractAvailableQty
 											BEGIN
-												SET @dblLoadUsedQty = @dblContractAvailableQty
+												SET @dblLoadUsedQty = @dblTicketScheduledQty
 											END
-										END
-
-										IF @dblLoadUsedQty <> 0
-										BEGIN
-										
-											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryShipmentItemUsed, 'Inventory Shipment', @intTicketItemUOMId
-
-											IF(ISNULL(@ysnLoadContract,0) = 0)
+											ELSE
 											BEGIN
-												IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketAutoScaleLog WHERE intTicketId = @intTicketId AND ysnHeader = 1)
+												IF(@dblTicketScheduledQty > @dblLoadUsedQty)
 												BEGIN
-													----- Check Load Quantity
-													SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@_dblOriginalLoadUsedQty)
-														,@_dblLoadItemUOMId = intItemUOMId
-														,@_dblLoadQuantity = dblQuantity
-													FROM tblLGLoadDetail
-													WHERE intLoadDetailId = @intTicketLoadDetailId
-
-													SET @_dblLoadQtyVsUsedDiff = (SELECT @_dblCovertedLoadQtyUsed - @_dblLoadQuantity)
-
-													IF @_dblOriginalLoadUsedQty > @_dblLoadQuantity AND (@_dblLoadQtyVsUsedDiff <> 0) 
+													IF(@dblLoadUsedQty > @dblContractAvailableQty)
 													BEGIN
-														SET @_dblLoadQtyVsUsedDiff = @_dblLoadQtyVsUsedDiff * -1
-														EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadQtyVsUsedDiff, @intUserId, @intTicketId, 'Auto - Scale', @_dblLoadItemUOMId														
+														SET @dblLoadUsedQty = @dblContractAvailableQty
 													END
 												END
 												ELSE
 												BEGIN
-
-													EXEC uspSCAutoScaleLogResetSchdule @TICKET_ID = @intTicketId, @USER_ID = @intUserId
-
+													SET @dblLoadUsedQty = @dblContractAvailableQty
 												END
 											END
+
+
+										END
+
+										IF @dblLoadUsedQty <> 0
+										BEGIN
+											
+											IF ISNULL(@intInventoryShipmentItemUsed, 0) <> 0
+											BEGIN
+												
+												EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryShipmentItemUsed, 'Inventory Shipment', @intTicketItemUOMId
+
+												IF(ISNULL(@ysnLoadContract,0) = 0)
+												BEGIN
+													IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketAutoScaleLog WHERE intTicketId = @intTicketId AND ysnHeader = 1)
+													BEGIN
+														----- Check Load Quantity
+														SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@_dblOriginalLoadUsedQty)
+															,@_dblLoadItemUOMId = intItemUOMId
+															,@_dblLoadQuantity = dblQuantity
+														FROM tblLGLoadDetail
+														WHERE intLoadDetailId = @intTicketLoadDetailId
+
+														SET @_dblLoadQtyVsUsedDiff = (SELECT @_dblCovertedLoadQtyUsed - @_dblLoadQuantity)
+
+														IF @_dblOriginalLoadUsedQty > @_dblLoadQuantity AND (@_dblLoadQtyVsUsedDiff <> 0) 
+														BEGIN
+															SET @_dblLoadQtyVsUsedDiff = @_dblLoadQtyVsUsedDiff * -1
+															EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadQtyVsUsedDiff, @intUserId, @intTicketId, 'Auto - Scale', @_dblLoadItemUOMId														
+														END
+													END
+													ELSE
+													BEGIN
+
+														EXEC uspSCAutoScaleLogResetSchdule @TICKET_ID = @intTicketId, @USER_ID = @intUserId
+
+													END
+												END
+
+											END
+											ELSE
+											BEGIN
+												EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId
+
+											END
+										
 										END
 									END
 								END
