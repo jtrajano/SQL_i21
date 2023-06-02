@@ -1166,27 +1166,6 @@ BEGIN
 				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
 				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 			) LS
-			OUTER APPLY (
-			SELECT TOP 1 
-					dblForexRate = ISNULL(dblRate, 0),
-					strCurrencyExchangeRateType
-				FROM vyuGLExchangeRate
-				INNER JOIN tblICInventoryTransaction IT
-					ON IT.intInventoryTransactionId = GLEntries.intJournalLineNo
-				WHERE intFromCurrencyId = GLEntries.intCurrencyId
-					AND intToCurrencyId = @intFunctionalCurrencyId
-					AND intCurrencyExchangeRateTypeId = IT.intForexRateTypeId
-				ORDER BY dtmValidFromDate DESC
-			) ChargeCurrencyToFunctional
-			OUTER APPLY (
-				SELECT TOP 1
-					dblForexRate = ISNULL(dblRate,0),
-					strCurrencyExchangeRateType
-				FROM vyuGLExchangeRate
-				WHERE intFromCurrencyId = LS.intPriceCurrencyId
-				AND intToCurrencyId = @intFunctionalCurrencyId
-				ORDER BY dtmValidFromDate DESC
-			) ItemCurrencyToFunctional
 			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
 			UNION ALL
 			SELECT 	[dtmDate] 
