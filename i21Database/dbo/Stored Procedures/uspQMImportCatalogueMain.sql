@@ -1723,7 +1723,7 @@ BEGIN TRY
 				,intProductLineId = @intProductLineId
 				,ysnOrganic = @ysnOrganic
 				,dblGrossWeight = @dblGrossWeight
-				,strBatchNo = @strBatchNo
+				,strBatchNo = CASE WHEN ISNULL(@strBatchNo, '') = '' THEN S.strBatchNo ELSE @strBatchNo END
 				,str3PLStatus = @str3PLStatus
 				,strAdditionalSupplierReference = @strAdditionalSupplierReference
 				,intAWBSampleReceived = @intAWBSampleReceived
@@ -1743,10 +1743,24 @@ BEGIN TRY
 				,intB1QtyUOMId = null
 				,dblB1Price = null
 				,intB1PriceUOMId = null
-				,intBookId = null
+				-- ,intBookId = null
 				,intPackageTypeId=@intPackageTypeId
 				,strCourierRef = @strCourierRef
 				,intCropYearId = @intCropYearId
+
+				-- Populated for bulking process only
+				,intCurrencyId = ISNULL((SELECT CUR.intCurrencyID
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId), S.intCurrencyId)
+				,intBookId = ISNULL((SELECT BOOK.intBookId
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCompanyLocation MU
+										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId), S.intBookId)
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 
