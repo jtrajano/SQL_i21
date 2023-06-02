@@ -4908,7 +4908,7 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO @tmpCPEDetail (intM2MHeaderId
 				, intContractHeaderId
-				, strContractSeq
+				, strContractSeq 
 				, strEntityName
 				, intEntityId
 				, dblM2M
@@ -4961,17 +4961,11 @@ BEGIN TRY
 					, dblPValueQty = 0.0
 					, dblPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblPFutures = ISNULL(fd.dblFutures, 0)
-					, dblQtyPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																				, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																				, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0)))
-					, dblUPValueQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																					, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																					, fd.dblOpenQty)
+					, dblQtyPrice = fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0))
+					, dblUPValueQty = fd.dblOpenQty
 					, dblUPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblUPFutures = ISNULL(fd.dblFuturePrice, 0)
-					, dblQtyUnFixedPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId 
-																					, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																					, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0))))
+					, dblQtyUnFixedPrice = fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0)))
 				FROM #tmpCPE fd
 				JOIN tblAPVendor e ON e.intEntityId = fd.intEntityId
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
@@ -5042,17 +5036,11 @@ BEGIN TRY
 					, dblPValueQty = 0.0
 					, dblPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblPFutures = ISNULL(fd.dblFutures, 0)
-					, dblQtyPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																				, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																				, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0)))
-					, dblUPValueQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																				, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																				, fd.dblOpenQty)
+					, dblQtyPrice = fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0))
+					, dblUPValueQty = fd.dblOpenQty
 					, dblUPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblUPFutures = ISNULL(fd.dblFuturePrice, 0)
-					, dblQtyUnFixedPrice =  dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																						, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																						, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0))))
+					, dblQtyUnFixedPrice = fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0)))
 					, dblCreditLimit
 					, dblOpenInvoicedValue = e.dblARBalance--(select sum(dblAmountDue) from vyuARInvoiceSearch where intEntityCustomerId = fd.intEntityId)
 				FROM #tmpCPE fd
@@ -5118,17 +5106,11 @@ BEGIN TRY
 					, dblPValueQty = 0.0
 					, dblPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblPFutures = ISNULL(fd.dblFutures, 0)
-					, dblQtyPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																				, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																				, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + (select top 1 isnull(dblFuturePrice,0) from #tblSettlementPrice where intContractDetailId = fd.intContractDetailId)))
-					, dblUPValueQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																					, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																					, fd.dblOpenQty)
+					, dblQtyPrice = fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0))
+					, dblUPValueQty = fd.dblOpenQty
 					, dblUPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblUPFutures = ISNULL(fd.dblFuturePrice, 0)
-					, dblQtyUnFixedPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
-																						, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																						, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + (select top 1 isnull(dblFuturePrice,0) from #tblSettlementPrice where intContractDetailId = fd.intContractDetailId)))
+					, dblQtyUnFixedPrice = fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0)))
 				FROM #tmpCPE fd
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
 			) t
