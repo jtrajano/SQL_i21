@@ -175,6 +175,7 @@
     <None Include="Scripts\Pre-Deployment\4_SM\2120_DropAxxisTempTables.sql" />
     <None Include="Scripts\Pre-Deployment\27_SCH\1_FixOrphanDistribution.sql" />
     <None Include="Scripts\Pre-Deployment\28_VR\1_RemoveDuplicateUOMMapping.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateOverrideTaxGroupColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
