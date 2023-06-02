@@ -321,6 +321,8 @@ BEGIN
 									ON itemPricing.intItemLocationId = itemLocation.intItemLocationId
 								INNER JOIN tblICItemUOM iu
 									ON i.intItemId = iu.intItemId
+								INNER JOIN tblICCategoryLocation cl
+									ON i.intCategoryId = cl.intCategoryId
 						WHERE	(
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = itemLocation.intLocationId) 			
@@ -1106,7 +1108,7 @@ BEGIN
 				,@toValue = @auditLog_intVendorId_New
 		END
 
-		IF ISNULL(@auditLog_intMinimumAge_Original, 0) <> ISNULL(@auditLog_intMinimumAge_Original, 0)
+		IF ISNULL(@auditLog_intMinimumAge_Original, 0) <> ISNULL(@auditLog_intMinimumAge_New, 0)
 		BEGIN 
 			EXEC dbo.uspSMAuditLog 
 				@keyValue = @auditLog_intItemLocationId
