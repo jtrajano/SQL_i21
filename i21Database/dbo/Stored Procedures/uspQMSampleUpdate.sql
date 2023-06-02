@@ -1443,7 +1443,6 @@ BEGIN
     INNER JOIN tblQMSaleYear SY ON SY.intSaleYearId = S.intSaleYearId
     INNER JOIN tblQMCatalogueType CT ON CT.intCatalogueTypeId = S.intCatalogueTypeId
     INNER JOIN tblICItem I ON I.intItemId = S.intItemId
-    LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = S.intContractHeaderId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = S.intContractDetailId
     LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
     LEFT JOIN tblICCommodityAttribute REGION ON REGION.intCommodityAttributeId = I.intRegionId
