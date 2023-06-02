@@ -54,7 +54,7 @@ BEGIN
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
-			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+			 , CAST((i.intUnitPerLayer * i.intLayerPerPallet) / (wi.dblIssuedQuantity) AS NUMERIC (18, 0)) AS dblNoOfPallet
 			 ,wi.strFW
 			  ,MT.strDescription AS strProductType
 			,B.strBrandCode
@@ -113,7 +113,7 @@ BEGIN
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
-			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+			 , CAST((i.intUnitPerLayer * i.intLayerPerPallet) / (wi.dblIssuedQuantity) AS NUMERIC (18, 0)) AS dblNoOfPallet
 			 ,'' As strFW
 			  ,MT.strDescription AS strProductType
 				,B.strBrandCode
@@ -172,7 +172,7 @@ BEGIN
 	, i.intCategoryId
 	, wi.intStorageLocationId 
     , LS.strSecondaryStatus
-	 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
+	, CAST((i.intUnitPerLayer * i.intLayerPerPallet) / (wi.dblIssuedQuantity) AS NUMERIC (18, 0)) AS dblNoOfPallet
 	 ,'' As strFW
 	  ,MT.strDescription AS strProductType
 	,B.strBrandCode
