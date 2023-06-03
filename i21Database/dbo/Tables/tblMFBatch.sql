@@ -142,3 +142,6 @@ CREATE NONCLUSTERED INDEX [IX_tblMFBatch_batch_check]
 ON [dbo].[tblMFBatch] ([intSales],[intSalesYear],[dtmSalesDate],[strTeaType],[strVendorLotNumber],[intBuyingCenterLocationId],[intSubBookId],[intLocationId])
 INCLUDE ([strBatchId])
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblMFBatch_strTeaGroup] ON [dbo].[tblMFBatch](strTeaGroup)
+GO
