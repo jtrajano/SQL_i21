@@ -77,7 +77,7 @@ BEGIN
 			   END AS dblNoOfPallet
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
-             ,wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -160,7 +160,7 @@ BEGIN
 			   END AS dblNoOfPallet
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
-             ,wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -224,7 +224,9 @@ BEGIN
 	, CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
 	, '' As strFW
 	, MT.strDescription AS strProductType
-	,B.strBrandCode
+	, B.strBrandCode
+	, wi.dblQuantity  AS dblRequiredQtyPerSheet
+
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
