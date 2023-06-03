@@ -1774,6 +1774,9 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPReceipt_DA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPReceipt_DA.sql" />
     <Build Include="dbo\Views\vyuPRGetPayGroupEmployeeToProcess.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitorStatus.sql" />
+    <Build Include="dbo\Views\vyuTMTankMonitorStatusSearch.sql" />
+    <Build Include="dbo\Tables\tblTMJobs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

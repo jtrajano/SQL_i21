@@ -46,7 +46,7 @@
     [strInternalId]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     
     [intTankSiteNumber] INT NULL, 
-
+    [strTMSAppFileVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
    
 
 
