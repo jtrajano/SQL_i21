@@ -55,11 +55,24 @@ BEGIN
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
-			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
-			 ,wi.strFW
-			  ,MT.strDescription AS strProductType
-			,B.strBrandCode
-			,wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , wi.strFW
+			 , MT.strDescription AS strProductType
+			 , B.strBrandCode
+			 , AuctionCenter.strLocationName AS strAuctionCenter
+			 , Batch.intSalesYear AS intSaleYear
+			 , Batch.intSales AS intSaleNo
+			 , Batch.dblTeaTaste
+			 , Batch.dblTeaHue
+			 , Batch.dblTeaIntensity
+			 , Batch.dblTeaMouthFeel
+			 , SubCluster.strDescription	AS strSubCluster
+			 , Batch.dblTeaAppearance
+			 , ISNULL(Batch.dblTeaVolume, 0) AS dblTeaVolume
+			 , DATEDIFF(DAY, l.dtmDateCreated, GETDATE()) AS intAge
+			 , CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
+			 , Batch.strLeafGrade
+			 , Garden.strGardenMark
+			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -117,11 +130,24 @@ BEGIN
 			 , i.intCategoryId
 			 , LS.strSecondaryStatus
 			 , wi.intStorageLocationId
-			 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
-			 ,'' As strFW
-			  ,MT.strDescription AS strProductType
-				,B.strBrandCode
-			,wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , '' As strFW
+			 , MT.strDescription AS strProductType
+			 , B.strBrandCode
+			 , AuctionCenter.strLocationName AS strAuctionCenter
+			 , Batch.intSalesYear AS intSaleYear
+			 , Batch.intSales
+			 , Batch.dblTeaTaste
+			 , Batch.dblTeaHue
+			 , Batch.dblTeaIntensity
+			 , Batch.dblTeaMouthFeel
+			 , SubCluster.strDescription	AS strSubCluster
+			 , Batch.dblTeaAppearance
+			 , ISNULL(Batch.dblTeaVolume, 0) AS dblTeaVolume
+			 , DATEDIFF(DAY, l.dtmDateCreated, GETDATE()) AS intAge
+			 , CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
+			 , Batch.strLeafGrade
+			 , Garden.strGardenMark
+			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -136,8 +162,13 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
 		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId = i.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId = i.intBrandId
+		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
+		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
+		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+		LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
+		LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 END
 ELSE
@@ -177,12 +208,11 @@ BEGIN
 	, i.intCategoryId
 	, wi.intStorageLocationId 
     , LS.strSecondaryStatus
-	 ,i.intUnitPerLayer * i.intLayerPerPallet AS dblNoOfPallets
-	 ,'' As strFW
-	  ,MT.strDescription AS strProductType
-	,B.strBrandCode
-	,wi.dblQuantity  AS dblRequiredQtyPerSheet
-
+	, CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
+	, '' As strFW
+	, MT.strDescription AS strProductType
+	, B.strBrandCode
+	, wi.dblQuantity  AS dblRequiredQtyPerSheet
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
