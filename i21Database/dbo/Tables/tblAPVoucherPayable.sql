@@ -19,6 +19,7 @@
 	[strSourceNumber]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorOrderNumber]			NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCheckComment]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
+	[strRemarks]					NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseDetailId]			INT NULL,
 	[strPurchaseOrderNumber]		NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[intContractHeaderId]			INT NULL,
