@@ -46,6 +46,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intTermId]						INT NULL, --default to vendor location term setup
 	[strBillOfLading]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strCheckComment]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
+	[strRemarks]					NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[intAPAccount]					INT NULL, --if null, we will use default setup
 	[intComputeTotalOption] 		TINYINT NOT NULL DEFAULT(0),
 	/*Detail info*/
