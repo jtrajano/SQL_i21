@@ -171,7 +171,7 @@ SELECT
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]                       = - dbo.fnRoundBanker((CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
-										THEN CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId = 1 THEN CTD.dblQuantity 
+										THEN CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CD.dblQuantity AND PT.strPricingType <> 'Basis' THEN CD.dblQuantity 
 										ELSE ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) END ELSE ICISI.[dblQuantity] END AS NUMERIC(18, 10))) * CAST(ICIT.[dblQty] AS NUMERIC(18, 10)), 6)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -206,10 +206,9 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICIS.[int
 										 AND ICIT.[ysnIsUnposted] = 0
 										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
 LEFT JOIN tblARInvoiceDetailLot ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-LEFT JOIN(
-	SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
-	INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
-) CTD ON CTD.intContractDetailId = ARID.intContractDetailId
+LEFT JOIN tblCTContractDetail CD ON ARID.intContractDetailId = CD.intContractDetailId
+LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+LEFT JOIN tblCTPricingType PT ON CH.intPricingTypeId = PT.intPricingTypeId
 WHERE ARID.[intLoadDetailId] IS NULL
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
