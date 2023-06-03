@@ -1310,6 +1310,9 @@
     <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitorStatus.sql" />
+    <Build Include="dbo\Views\vyuTMTankMonitorStatusSearch.sql" />
+    <Build Include="dbo\Tables\tblTMJobs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
