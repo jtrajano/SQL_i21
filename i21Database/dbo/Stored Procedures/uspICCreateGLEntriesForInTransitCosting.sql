@@ -345,7 +345,7 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			--AND t.intFobPointId IS NOT NULL 	
-			--AND t.intInTransitSourceLocationId IS NOT NULL 
+			AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 			AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 )
