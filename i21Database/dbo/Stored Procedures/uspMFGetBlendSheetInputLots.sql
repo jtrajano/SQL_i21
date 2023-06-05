@@ -96,10 +96,10 @@ BEGIN
 		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
 		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
 		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
-		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
-		LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
-		LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
-		WHERE wi.intWorkOrderId = @intWorkOrderId
+		 LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+		 LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
+		 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
+		 WHERE wi.intWorkOrderId = @intWorkOrderId
 	END
 	ELSE /* When blend sheet created from Sales Order, directly produced in blend production screen, then only consumed lot table will have the values, to show in blend management screen from traceability */
 		SELECT wi.intWorkOrderConsumedLotId AS intWorkOrderInputLotId
@@ -161,28 +161,28 @@ BEGIN
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
 			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
-		FROM tblMFWorkOrderConsumedLot wi 
-		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
-		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
-		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		JOIN tblICLot l ON wi.intLotId = l.intLotId
-		JOIN tblICLotStatus LS ON l.intLotStatusId = LS.intLotStatusId
-		JOIN tblICItem i ON l.intItemId = i.intItemId
-		JOIN tblICItemUOM iu1 ON wi.intItemIssuedUOMId = iu1.intItemUOMId
-		JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
-		JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = l.intLocationId
-		LEFT JOIN tblSMCompanyLocationSubLocation sbl ON sbl.intCompanyLocationSubLocationId = l.intSubLocationId
-		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
-		LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
-		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
-		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
-		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
-		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
-		LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
-		LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
-		WHERE wi.intWorkOrderId = @intWorkOrderId
+		 FROM tblMFWorkOrderConsumedLot wi 
+		 JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
+		 JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
+		 JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+		 JOIN tblICLot l ON wi.intLotId = l.intLotId
+		 JOIN tblICLotStatus LS ON l.intLotStatusId = LS.intLotStatusId
+		 JOIN tblICItem i ON l.intItemId = i.intItemId
+		 JOIN tblICItemUOM iu1 ON wi.intItemIssuedUOMId = iu1.intItemUOMId
+		 JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
+		 JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = l.intLocationId
+		 LEFT JOIN tblSMCompanyLocationSubLocation sbl ON sbl.intCompanyLocationSubLocationId = l.intSubLocationId
+		 LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+		 LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
+		 LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
+		 LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
+		 LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
+		 LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
+		 LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
+		 LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+		 LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
+		 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
+		 WHERE wi.intWorkOrderId = @intWorkOrderId
 END
 ELSE
 BEGIN
@@ -225,7 +225,7 @@ BEGIN
 	, '' As strFW
 	, MT.strDescription AS strProductType
 	, B.strBrandCode
-	, wi.dblQuantity  AS dblRequiredQtyPerSheet
+	,wi.dblQuantity  AS dblRequiredQtyPerSheet
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
