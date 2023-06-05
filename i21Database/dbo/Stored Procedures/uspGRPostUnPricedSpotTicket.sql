@@ -101,12 +101,17 @@ BEGIN TRY
 					ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblICItem Item 
 					ON Item.intItemId = SC.intItemId
-				LEFT JOIN tblICInventoryReceiptItem IRI
+				JOIN tblICInventoryReceiptItem IRI
 					ON IRI.intSourceId = SC.intTicketId and IRI.intItemId = Item.intItemId
-				LEFT JOIN tblICInventoryReceipt IR
+				JOIN tblICInventoryReceipt IR
 					ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+						AND IR.intEntityVendorId = @intEntityId
+						AND IR.intSourceType = 1
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
+
+									
+
 				DELETE FROM @voucherItems
 				DELETE FROM @voucherItemsTax
 
