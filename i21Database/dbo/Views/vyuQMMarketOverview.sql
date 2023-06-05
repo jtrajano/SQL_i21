@@ -179,6 +179,7 @@ HeaderData AS(
 ),
 CurrentWeek AS(
 	SELECT 
+	ROW_NUMBER() OVER(ORDER BY CAST(A.strSaleNumber AS INT) ASC) AS intRowId,
 	DATEPART(ww, A.dtmSaleDate) WeekNo
 	, A.strSaleNumber--1
 	, A.dtmSaleDate--2
@@ -200,13 +201,12 @@ CurrentWeek AS(
 	, ROUND(B.AverageItemTaste,2) dblItemAverageTasteUL --20
 	, ROUND(B.dblTeaActualTaste,2) - ROUND(B.AverageItemTaste ,2) dblItemAverageTasteChange --21
 	, B.strCurrency 
-	FROM HeaderData A LEFT JOIN ItemSaleStat B ON
+	FROM HeaderData A JOIN ItemSaleStat B ON
 	A.strSaleNumber = B.strSaleNumber
 	OUTER APPLY(
 		SELECT TOP 1 ISNULL(AveragePrice,0) AveragePrice FROM ItemWeeklySaleStat WHERE strTeaGroup = B.strTeaGroup AND DATEPART(ww, A.dtmSaleDate) = WeekNo
 		AND B.strCurrency= strCurrency
 	)U
-    WHERE EXISTS (SELECT 1 FROM tblMFBatch BT WHERE BT.intSales = CAST(A.strSaleNumber AS INT))
 )
 SELECT B.*
 , ROUND(V.AveragePrice,2) dblItemAveragePrevWeekPrice--14
