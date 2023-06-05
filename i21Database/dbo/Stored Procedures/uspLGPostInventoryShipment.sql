@@ -583,6 +583,7 @@ BEGIN
 			SELECT * 
 			FROM tblICInventoryTransaction ot
 			WHERE ot.strTransactionId = @strTransactionId
+				AND ot.intTransactionDetailId = t.intTransactionDetailId
 				AND ot.ysnIsUnposted = 0
 				AND ot.strBatchId = @strBatchId
 				AND @intFOBPointId = 2
