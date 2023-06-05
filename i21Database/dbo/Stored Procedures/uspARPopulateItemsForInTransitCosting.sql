@@ -178,8 +178,8 @@ SELECT
 	,[dblQty]                       = - dbo.fnRoundBanker((CAST(ARID.dblQtyShipped AS NUMERIC(18, 10))/CAST(
 											CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 
 												 THEN 
-													CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CTD.dblQuantity AND PT.strPricingType <> 'Basis' 
-														 THEN CTD.dblQuantity 
+													CASE WHEN ICISI.ysnDestinationWeightsAndGrades = 1 AND ICISI.dblDestinationQuantity > CD.dblQuantity AND PT.strPricingType <> 'Basis' 
+														 THEN CD.dblQuantity 
 														 ELSE ISNULL(ICISI.[dblDestinationQuantity], ICISI.[dblQuantity]) 
 												    END
 												 WHEN (T.ysnTicketApplied = 1 AND T.ysnTicketInTransit = 1)
