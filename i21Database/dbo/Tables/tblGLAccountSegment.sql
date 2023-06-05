@@ -192,7 +192,7 @@ SELECT
             --ActionType = 'UPDATE'
 
 
-			set @changeDescription = 'UPDATE ' +  @StructureName +' Segment ' + @Code 
+			set @changeDescription = 'Updated ' +  @StructureName +' Segment ' + @Code 
 			IF @ChartDesc_New <>  @ChartDesc_Old
 			BEGIN
 				 SET @changeDescription = @changeDescription + ' Chart Description'
@@ -277,7 +277,7 @@ SELECT
 
 IF EXISTS(SELECT 1 FROM  @tblGLAccountSegmentLog)
 		BEGIN
-				set @changeDescription = 'DELETE Segment ' + @Code 
+				set @changeDescription = 'Deleted Segment ' + @Code 
 					EXEC uspSMAuditLog
 					@keyValue = @AccountSegmentString,                                          -- Primary Key Value
 					@screenName = 'GeneralLedger.view.SegmentAccounts',            -- Screen Namespace
