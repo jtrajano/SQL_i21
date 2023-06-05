@@ -21,6 +21,7 @@ Type the overview for the table here.
 		[strPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblLastCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblStandardCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+		[dblCaseCost] NUMERIC(18,6) NULL DEFAULT((0)),
 		[dblAverageCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblDefaultGrossPrice] NUMERIC(18, 6) NULL DEFAULT ((0)),
