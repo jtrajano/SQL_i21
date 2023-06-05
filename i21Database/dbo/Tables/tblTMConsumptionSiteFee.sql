@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblTMConsumptionSiteFee] (
 [intConcurrencyId]   INT  DEFAULT 1 NOT NULL,
 [intConsumptionSiteFeeId] INT IDENTITY (1, 1) NOT NULL,
-[DateTime] DATETIME        DEFAULT 0 NULL,
+[dtmDateTime] DATETIME        DEFAULT 0 NULL,
 [strType]			NVARCHAR (100)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 [strDecription]			NVARCHAR (100)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 [dblFee]			NUMERIC (18, 6) DEFAULT 0 NULL,
