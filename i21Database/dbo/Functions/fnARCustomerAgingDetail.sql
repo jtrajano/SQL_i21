@@ -142,6 +142,7 @@ BEGIN
 		,strCustomerName		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,dblCreditLimit			NUMERIC(18, 6)
 	)
+
 	DECLARE @ADACCOUNTSTATUS TABLE (
 		 intAccountStatusId INT
 		,intEntityCustomerId INT
@@ -151,25 +152,30 @@ BEGIN
 		 intPaymentId			INT												NOT NULL PRIMARY KEY
 		,dtmDatePaid			DATETIME										NULL
 		,dblAmountPaid			NUMERIC(18, 6)									NULL DEFAULT 0
-		,ysnInvoicePrepayment	BIT												NULL
+		,ysnInvoicePrepayment	BIT												NULL INDEX IX1 NONCLUSTERED
 		,intPaymentMethodId		INT												NULL
 		,strRecordNumber		NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 	)
+
 	DECLARE @INVOICETOTALPREPAYMENTS TABLE (
-		 intInvoiceId	INT				NULL
+		 intInvoiceId	INT				NOT NULL PRIMARY KEY
 		,dblPayment		NUMERIC(18, 6)	NULL DEFAULT 0
 		,dblBasePayment	NUMERIC(18, 6)	NULL DEFAULT 0
+		,dblABSPayment	NUMERIC(18, 6)	NULL DEFAULT 0
 	)
+
 	DECLARE @GLACCOUNTS TABLE (	
 		 intAccountId		INT												NOT NULL PRIMARY KEY
 		,strAccountCategory	NVARCHAR (100)   COLLATE Latin1_General_CI_AS	NULL
 	)
+
 	DECLARE @CASHREFUNDS TABLE (
-		 intOriginalInvoiceId			INT												NULL
+		 intOriginalInvoiceId		INT												NULL
 		,strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 		,dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
 		,dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
 	)
+
 	DECLARE @CASHRETURNS TABLE (
 		 intInvoiceId			INT												NOT NULL PRIMARY KEY
 		,intOriginalInvoiceId	INT												NULL
@@ -179,32 +185,36 @@ BEGIN
 		,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 		,dtmPostDate			DATETIME										NULL
 	)
+
 	DECLARE @FORGIVENSERVICECHARGE TABLE (
 		 intInvoiceId		INT												NOT NULL PRIMARY KEY
 		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
+
 	DECLARE @CREDITMEMOPAIDREFUNDED TABLE (
 		 intInvoiceId		INT												NOT NULL PRIMARY KEY
 		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 		,strDocumentNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
+
 	DECLARE @CANCELLEDINVOICE TABLE (
 		 intInvoiceId		INT												NOT NULL PRIMARY KEY
 		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 		,ysnPaid			BIT												NULL
 	)
+
 	DECLARE @CANCELLEDCMINVOICE TABLE (
 		 intInvoiceId		INT												NOT NULL PRIMARY KEY
 		,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	)
 
 	DECLARE @POSTEDINVOICES TABLE (
-	     intInvoiceId				INT												NOT NULL PRIMARY KEY
-		,intEntityCustomerId		INT												NOT NULL
-		,intPaymentId				INT												NULL	 
+	     intInvoiceId				INT												NOT NULL	PRIMARY KEY
+		,intEntityCustomerId		INT												NOT NULL	INDEX IX1 NONCLUSTERED
+		,intPaymentId				INT												NULL		INDEX IX2 NONCLUSTERED
 		,intCompanyLocationId		INT												NULL
 		,intEntitySalespersonId		INT												NULL
-		,strTransactionType			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NOT NULL
+		,strTransactionType			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NOT NULL	INDEX IX3 NONCLUSTERED
 		,strType					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL DEFAULT 'Standard' 
 		,strBOLNumber				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 		,strInvoiceNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
@@ -373,10 +383,12 @@ BEGIN
 		  intInvoiceId
 		, dblPayment
 		, dblBasePayment
+		, dblABSPayment
 	)
-	SELECT intInvoiceId = PD.intInvoiceId
+	SELECT intInvoiceId 	= PD.intInvoiceId
 		 , dblPayment		= SUM(PD.dblPayment) + SUM(PD.dblWriteOffAmount)
 		 , dblBasePayment	= SUM(PD.dblBasePayment) + SUM(PD.dblBaseWriteOffAmount)
+		 , dblABSPayment	= ABS(SUM(PD.dblPayment) + SUM(PD.dblWriteOffAmount))
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
 	INNER JOIN @ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvoicePrepayment = 0
 	INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
@@ -617,7 +629,7 @@ BEGIN
 			LEFT JOIN @ADSALESPERSON SALESPERSON ON INVOICES.intEntitySalespersonId = SALESPERSON.intId
 			WHERE SALESPERSON.intId IS NULL 
 		END
-
+		
 	INSERT INTO @tempReturntable
 	SELECT strCustomerName		= CUSTOMER.strCustomerName
 		 , strCustomerNumber	= CUSTOMER.strCustomerNumber
@@ -809,6 +821,7 @@ BEGIN
 		FROM dbo.tblAPPaymentDetail APD WITH (NOLOCK)
 		INNER JOIN tblAPPayment P ON APD.intPaymentId = P.intPaymentId
 		WHERE P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+		  AND APD.intInvoiceId IS NOT NULL
 		GROUP BY APD.intInvoiceId
 	) APD ON I.intInvoiceId = APD.intInvoiceId
 	LEFT JOIN @CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
@@ -860,15 +873,17 @@ BEGIN
 	  , I.strType
 	  , strRecordNumber		= PAYMENT.strRecordNumber
 	FROM @POSTEDINVOICES I
-	LEFT JOIN (
+	INNER JOIN (
 		SELECT PD.intInvoiceId
 			 , P.intPaymentId
 			 , P.strRecordNumber
 			 , P.dtmDatePaid
-			 , dblTotalPayment		= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) + ISNULL(dblWriteOffAmount, 0) - ISNULL(dblInterest, 0)
-			 , dblBaseTotalPayment	= ISNULL(dblBasePayment, 0) + ISNULL(dblBaseDiscount, 0) + ISNULL(dblBaseWriteOffAmount, 0) - ISNULL(dblBaseInterest, 0)
+			 , dblTotalPayment		= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0) - ISNULL(PD.dblInterest, 0)
+			 , dblBaseTotalPayment	= ISNULL(PD.dblBasePayment, 0) + ISNULL(PD.dblBaseDiscount, 0) + ISNULL(PD.dblBaseWriteOffAmount, 0) - ISNULL(PD.dblBaseInterest, 0)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 		INNER JOIN @ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN @POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId
+		WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
 
 		UNION ALL 
 
