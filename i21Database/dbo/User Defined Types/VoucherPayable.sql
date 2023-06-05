@@ -113,7 +113,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	/*Tax info*/
 	[intFreightTermId]				INT NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
-	[ysnOverrideTaxGroup] 			BIT NULL,
+	[ysnOverrideTaxGroup] 			BIT NOT NULL DEFAULT(0),
 	[dblTax]						DECIMAL(18,2) NOT NULL DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
 	/*Discount Info*/
 	[dblDiscount]					DECIMAL(18,2) NOT NULL DEFAULT(0),
