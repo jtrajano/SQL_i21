@@ -104,6 +104,7 @@
 	[ysnOverridePayFromBankAccount] BIT NULL DEFAULT 0,
 	[intPayFromBankAccountId] INT NULL,
 	[intPayToBankAccountId] INT NULL,
+	[intPaymentMethodId]	 INT NULL,
 	--Trade Finance Info
 	[strFinanceTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankId] INT NULL,
