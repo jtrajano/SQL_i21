@@ -68,19 +68,20 @@ FROM tblApiSchemaCustomer SC
 WHERE guiApiUniqueId = @guiApiUniqueId
 AND PATINDEX('%[^a-zA-Z0-9]%', RTRIM(LTRIM(SC.strCustomerNumber))) > 0
 
-INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
-SELECT
-      guiApiImportLogDetailId = NEWID()
-    , guiApiImportLogId = @guiLogId
-    , strField = 'Customer Number'
-    , strValue = strCustomerNumber
-    , strLogLevel = 'Error'
-    , strStatus = 'Failed'
-    , intRowNo = intRowNumber
-    , strMessage = 'Customer Number ('+ strCustomerNumber + ') does not exists.'
-FROM tblApiSchemaCustomer SC
-WHERE guiApiUniqueId = @guiApiUniqueId
-AND EXISTS (SELECT TOP 1 NULL FROM tblARCustomer WHERE strCustomerNumber = SC.strCustomerNumber)
+----COMMENTED OUT FOR UPDATE PURPOSES - AR-16432
+--INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+--SELECT
+--      guiApiImportLogDetailId = NEWID()
+--    , guiApiImportLogId = @guiLogId
+--    , strField = 'Customer Number'
+--    , strValue = strCustomerNumber
+--    , strLogLevel = 'Error'
+--    , strStatus = 'Failed'
+--    , intRowNo = intRowNumber
+--    , strMessage = 'Customer Number ('+ strCustomerNumber + ') does not exists.'
+--FROM tblApiSchemaCustomer SC
+--WHERE guiApiUniqueId = @guiApiUniqueId
+--AND EXISTS (SELECT TOP 1 NULL FROM tblARCustomer WHERE strCustomerNumber = SC.strCustomerNumber)
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -563,6 +564,13 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	SET @intEntityId = NULL
 	SET @ysnNew = 1
+
+	IF(ISNULL(@strEntityNumber, '') = '') AND (ISNULL(NULLIF(@strCustomerNumber, ''), '') <> '')
+	BEGIN
+		SELECT @strEntityNumber = E.strEntityNo
+		FROM tblEMEntity E
+		WHERE E.intEntityId = (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = @strCustomerNumber)
+	END
 
 	IF(ISNULL(@strEntityNumber, '') = '')
 	BEGIN
