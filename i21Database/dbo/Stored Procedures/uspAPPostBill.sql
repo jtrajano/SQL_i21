@@ -889,7 +889,7 @@ INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND B.intTransactionType IN (1) AND FP.intFobPointId NOT IN (2) AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND B.intTransactionType IN (1) AND ISNULL(FP.intFobPointId, 0) NOT IN (2) AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 UNION ALL
 SELECT 
 	[intItemId] = LD.intItemId
@@ -924,7 +924,7 @@ INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND B.intTransactionType IN (1) AND FP.intFobPointId NOT IN (2) AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND B.intTransactionType IN (1) AND ISNULL(FP.intFobPointId, 0) NOT IN (2) AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 
 IF ISNULL(@post,0) = 1
 BEGIN	
