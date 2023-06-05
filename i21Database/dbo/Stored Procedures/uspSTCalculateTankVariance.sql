@@ -4,12 +4,13 @@
 	@ysnFromEdit AS BIT
 )
 AS BEGIN
-	DECLARE @dtmCheckoutDate DATETIME
+	DECLARE @dtmCheckoutDate DATETIME 
 	DECLARE @intStoreId INT
 	DECLARE @intPreviousCheckoutId INT
 	DECLARE @dblPreviousCheckoutTankMonitorFuelVolume DECIMAL(18, 6)
 	DECLARE @dblDeliveries DECIMAL(18, 6) = 0
 	DECLARE @dblRowDelivery DECIMAL(18, 6) = 0
+	DECLARE @dblEndFuelVolume DECIMAL(18, 6) = 0
 	DECLARE @intDeviceId INT
 	DECLARE @intSiteId INT
 	DECLARE @dtmStartDate DATETIME
@@ -112,12 +113,19 @@ AS BEGIN
 						intCheckoutId = @intCheckoutId
 		END
 
+		SELECT		@dblEndFuelVolume = dblGallons
+		FROM		tblSTCheckoutFuelInventory
+		WHERE		intDeviceId = @intDeviceId AND
+					intCheckoutId = @intCheckoutId
+
 		SET @dblDeliveries = ISNULL(@dblDeliveries, 0)
+		SET @dblEndFuelVolume = ISNULL(@dblEndFuelVolume, 0)
 
 		UPDATE	tblSTCheckoutTankVarianceCalculation
 		SET		dblStartFuelVolume = @dblPreviousCheckoutTankMonitorFuelVolume,
 				dblDeliveries = @dblDeliveries,
-				dblCalculatedVariance = ABS((@dblPreviousCheckoutTankMonitorFuelVolume + @dblDeliveries - dblSales) - dblEndFuelVolume)
+				dblCalculatedVariance = ABS((@dblPreviousCheckoutTankMonitorFuelVolume + @dblDeliveries - dblSales) - dblEndFuelVolume),
+				dblEndFuelVolume = @dblEndFuelVolume
 		WHERE	intCheckoutId = @intCheckoutId AND intDeviceId = @intDeviceId
 
 		FETCH NEXT FROM MY_CURSOR INTO @intDeviceId
