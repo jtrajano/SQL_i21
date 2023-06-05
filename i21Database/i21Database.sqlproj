@@ -1398,6 +1398,7 @@
     <Build Include="dbo\Tables\tblTMTankMonitorStatus.sql" />
     <Build Include="dbo\Views\vyuTMTankMonitorStatusSearch.sql" />
     <Build Include="dbo\Tables\tblTMJobs.sql" />
+    <Build Include="dbo\Tables\tblTMConsumptionSiteFee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
