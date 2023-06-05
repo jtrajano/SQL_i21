@@ -83,6 +83,9 @@ SELECT
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
 	A.ysnPrepayHasPayment,
 	A.intShipToId,
+	A.strHold,
+	A.intPaymentMethodId,
+	pm.strPaymentMethod,
 	ISNULL(A.dblAverageExchangeRate, 1) dblAverageExchangeRate,
 	(A.dblTax * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblTaxForeign,
 	(A.dblTotal * ISNULL(A.dblAverageExchangeRate, 1)) * (CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END) AS dblTotalForeign,
@@ -115,6 +118,8 @@ FROM
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN
 		ON EN.intEntityId = A.intContactId
+	LEFT JOIN dbo.tblSMPaymentMethod pm
+		ON pm.intPaymentMethodID = A.intPaymentMethodId
 	-- LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 	-- 		ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate	
 	OUTER APPLY dbo.fnAPGetVoucherLatestPayment(A.intBillId) Payment
