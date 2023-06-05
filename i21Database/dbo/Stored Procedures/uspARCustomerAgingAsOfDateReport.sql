@@ -353,7 +353,7 @@ SELECT SC.intInvoiceId
 FROM tblARInvoice I
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
+--INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
 WHERE I.strInvoiceOriginId IS NOT NULL 
   AND I.strTransactionType = 'Credit Memo' 
@@ -375,7 +375,7 @@ SELECT
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
+--INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 INNER JOIN(
 	SELECT ID.strDocumentNumber from tblARInvoice INV
 	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
@@ -429,7 +429,7 @@ SELECT I.intInvoiceId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
+--INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 WHERE ysnPosted = 1
@@ -521,7 +521,7 @@ FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
+--INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
