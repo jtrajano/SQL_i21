@@ -685,38 +685,6 @@ BEGIN
 			AND CompOwn.strTransactionType = 'Inventory Receipt'
 			AND ISNULL(CD.intPricingTypeId,0) <> 5 --EXCLUDE DP
 
-
-		--GET SHIPPED, IT RECEIVED AND SHIPPED FOR THE DAY
-		DECLARE @dblShipped DECIMAL(18,6)
-		DECLARE @dblInternalTransfersReceived DECIMAL(18,6)
-		DECLARE @dblInternalTransfersShipped DECIMAL(18,6)
-		DECLARE @dblInternalTransfersDiff DECIMAL(18,6)
-		SET @dblShipped = NULL
-		SET @dblInternalTransfersReceived = NULL
-		SET @dblInternalTransfersShipped = NULL
-		SET @dblInternalTransfersDiff = NULL
-
-		SELECT @dblShipped = SUM(ISNULL(dblShipped,0))
-			,@dblInternalTransfersReceived = SUM(ISNULL(dblInternalTransfersReceived,0))
-			,@dblInternalTransfersShipped = SUM(ISNULL(dblInternalTransfersShipped,0))
-		FROM tblGRGIIPhysicalInventory 
-		WHERE intCommodityId = @intCommodityId 
-			AND strUOM = @strUOM 
-			AND dtmReportDate = @dtmReportDate
-
-		SET @dblInternalTransfersDiff = @dblInternalTransfersReceived - @dblInternalTransfersShipped
-
-		--GET RECEIVED THAT ARE COMPANY OWNED
-		DECLARE @dblReceivedCompanyOwned DECIMAL(18,6)
-		SET @dblReceivedCompanyOwned = NULL
-		SELECT @dblReceivedCompanyOwned = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal))
-		FROM dbo.fnRKGetBucketCompanyOwned(@dtmReportDate,@intCommodityId,NULL) CompOwn
-		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CompOwn.intLocationId AND CL.ysnLicensed = 1
-		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
-		WHERE intCommodityId = @intCommodityId
-			AND CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) = @dtmReportDate
-			AND CompOwn.strTransactionType = 'Inventory Receipt'
-
 		--GET TRANSFERS FROM LICENSED TO NON-LICENSED LOCATIONS FOR THE DAY
 		DECLARE @dblTransfers DECIMAL(18,6)
 		SET @dblTransfers = NULL
