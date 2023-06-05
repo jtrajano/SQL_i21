@@ -152,7 +152,7 @@ BEGIN
 		 intPaymentId			INT												NOT NULL PRIMARY KEY
 		,dtmDatePaid			DATETIME										NULL
 		,dblAmountPaid			NUMERIC(18, 6)									NULL DEFAULT 0
-		,ysnInvoicePrepayment	BIT												NULL INDEX IX1 NONCLUSTERED
+		,ysnInvoicePrepayment	BIT												NULL 
 		,intPaymentMethodId		INT												NULL
 		,strRecordNumber		NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 	)
@@ -210,11 +210,11 @@ BEGIN
 
 	DECLARE @POSTEDINVOICES TABLE (
 	     intInvoiceId				INT												NOT NULL	PRIMARY KEY
-		,intEntityCustomerId		INT												NOT NULL	INDEX IX1 NONCLUSTERED
-		,intPaymentId				INT												NULL		INDEX IX2 NONCLUSTERED
+		,intEntityCustomerId		INT												NOT NULL	
+		,intPaymentId				INT												NULL		
 		,intCompanyLocationId		INT												NULL
 		,intEntitySalespersonId		INT												NULL
-		,strTransactionType			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NOT NULL	INDEX IX3 NONCLUSTERED
+		,strTransactionType			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NOT NULL	
 		,strType					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL DEFAULT 'Standard' 
 		,strBOLNumber				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 		,strInvoiceNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
