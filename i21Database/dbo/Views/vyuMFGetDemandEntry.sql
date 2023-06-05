@@ -1,19 +1,20 @@
 ﻿CREATE VIEW vyuMFGetDemandEntry
 AS
 SELECT DD.intDemandDetailId
-	,DD.intDemandHeaderId
-	,DH.strDemandNo
-	,DH.strDemandName
-	,DH.dtmDate
-	,B.strBook
-	,SB.strSubBook
-	,I.strItemNo
-	,I.strType
-	,I1.strItemNo AS strSubstituteItemNo
-	,dtmDemandDate
-	,dblQuantity
-	,UOM.strUnitMeasure AS strItemUOM
-	,CL.strLocationName
+	 , DD.intDemandHeaderId
+	 , DH.strDemandNo
+	 , DH.strDemandName
+	 , DH.dtmDate
+	 , B.strBook
+	 , SB.strSubBook
+	 , I.strItemNo
+	 , I.strType
+	 , I1.strItemNo AS strSubstituteItemNo
+	 , dtmDemandDate
+	 , dblQuantity
+	 , UOM.strUnitMeasure AS strItemUOM
+	 , CL.strLocationName
+	 , I.strDescription
 FROM tblMFDemandHeader DH
 JOIN tblMFDemandDetail DD ON DD.intDemandHeaderId = DH.intDemandHeaderId
 LEFT JOIN tblCTBook B ON B.intBookId = DH.intBookId
