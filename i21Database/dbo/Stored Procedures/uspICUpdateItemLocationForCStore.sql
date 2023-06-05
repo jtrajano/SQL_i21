@@ -354,8 +354,7 @@ BEGIN
 								)
 								AND (
 									@strDescription IS NULL 
-									OR i.strDescription = @strDescription 
-								)
+									OR i.strDescription LIKE '%' + @strDescription + '%'								)
 								AND (
 									@dblRetailPriceFrom IS NULL 
 									OR ISNULL(itemPricing.dblSalePrice, 0) >= @dblRetailPriceFrom 
