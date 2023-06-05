@@ -27,7 +27,7 @@ SELECT DISTINCT RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 101)) COLLATE Latin1_Gener
 						WHERE WC1.intWorkOrderId = W.intWorkOrderId AND WC1.intItemId = WC.intItemId AND WC1.intSequenceNo = 9999
 			    ), 0) AS [Damaged]
 			  , W.intWorkOrderId
-			  , W.dtmPlannedDate
+			  , RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 23)) COLLATE Latin1_General_CI_AS AS dtmPlannedDate 
 			  , W.intLocationId			
 			  , CompanyLocation.strLocationName
 			  , Category.strCategoryCode
