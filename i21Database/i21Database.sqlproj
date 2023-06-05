@@ -1302,11 +1302,8 @@
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
-=======
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
->>>>>>> 5f584f97a0 (AR-16531)
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
