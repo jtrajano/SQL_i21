@@ -500,7 +500,8 @@ SET @query = '
 		,A.dblAverageExchangeRate as dblHistoricRate
 		,(tmpAgingSummaryTotal.dblAmountDue * A.dblAverageExchangeRate) as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
-		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
+		,CASE WHEN ISNULL(tmpAgingSummaryTotal.dblAmountDue, 0) < 0 THEN -ABS(ISNULL(GLRD.dblNewAmount, 0)) ELSE ISNULL(GLRD.dblNewAmount, 0) END  dblCurrencyRevalueAmount
+		-- ,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
 		FROM  
 		(
 			SELECT 
