@@ -28,7 +28,7 @@ SELECT RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 101)) COLLATE Latin1_General_CI_AS 
 			   WHERE P.strPropertyName = 'Sweeps in lbs' AND TR.intProductTypeId = 12 AND TR.intProductValueId = W.intWorkOrderId AND ISNUMERIC(TR.strPropertyValue) = 1
 			), 0) [Total sweeps (lb)]
 	 , W.intWorkOrderId
- 	 , W.dtmPlannedDate
+ 	 , RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 23)) COLLATE Latin1_General_CI_AS AS dtmPlannedDate
 	 , W.intLocationId			
 	 , CompanyLocation.strLocationName
 	 , Category.strCategoryCode

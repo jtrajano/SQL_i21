@@ -13,7 +13,7 @@ SELECT RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 101)) COLLATE Latin1_General_CI_AS 
 	 , UM.strUnitMeasure		AS [Weight UOM]
 	 , MFC.strCellName			AS [Line]
 	 , W.intWorkOrderId
-	 , W.dtmPlannedDate
+	 , RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 23)) COLLATE Latin1_General_CI_AS AS dtmPlannedDate
 	 , W.intLocationId
 	 , CompanyLocation.strLocationName
 	 , Category.strCategoryCode

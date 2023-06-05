@@ -52,7 +52,7 @@ FROM
 		 , WI.dblQuantity			AS [Weight]
 		 , UM.strUnitMeasure		AS [Weight UOM]
 		 , W.intWorkOrderId
-		 , W.dtmPlannedDate
+		 , RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 23)) COLLATE Latin1_General_CI_AS AS dtmPlannedDate
 		 , W.intLocationId			
 		 , CompanyLocation.strLocationName
 		 , Category.strCategoryCode
