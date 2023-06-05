@@ -46,7 +46,7 @@ FROM
 			WHERE L1.strLotNumber = IL.strLotNumber AND L1.dblWeightPerQty > 1
 		   ) AS intItemUOMId
 		 , W.intWorkOrderId
-		 , W.dtmPlannedDate
+		 , RTRIM(CONVERT(CHAR, W.dtmPlannedDate, 23)) COLLATE Latin1_General_CI_AS AS dtmPlannedDate
 		 , W.intLocationId			
 		 , CompanyLocation.strLocationName
 		 , Category.strCategoryCode
