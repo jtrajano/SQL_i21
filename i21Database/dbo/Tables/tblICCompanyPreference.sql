@@ -31,5 +31,10 @@
 	[ysnUpdateInventoryTransactionAccountId] BIT NULL DEFAULT(0),	
 	[strSingleOrMultipleLots] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnUpdateJournalLineDescription] BIT NULL DEFAULT(0),
+	[ysnEnableIntraCompanyTransfer] BIT NULL,
+	[ysnSkipICGLValidation] BIT NULL,
+	[ysnOverrideCompanySegment] BIT NULL,
+	[ysnOverrideLocationSegment] BIT NULL,
+	[ysnOverrideLOBSegment] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

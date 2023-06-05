@@ -1,28 +1,32 @@
 ﻿
 /*
- fnGetItemGLAccount is a function that returns the GL account id. 
+ fnGetItemCommodityGLAccount is a function that returns the GL account id. 
  
  Parameters: 
 	 @intItemId: The item id where the g/l account may have an override. 
 	 @intLocationId: The location is where "default" g/l account id is defined. If nothing is found in the item level and category level, this is the g/l account id used. 
 	 @strAccountDescription: The specific account description to retrieve. For example: "Inventory", "Cost of Goods"
+	 @intCommodityId: The specific commodity to use for Line of Business 
  
  Sample usage: 
  DECLARE @intItemId AS INT
-		 ,@intLocationId AS INT;
+		 ,@intLocationId AS INT
+		 ,@intCommodityId AS INT;
 		 
  SET @intItemId = 1;
  SET @intLocationId = 1;
+ SET @intCommodityId = 1;
  
- SELECT	Inventory = dbo.fnGetItemGLAccount(@intItemId, @intLocationId, 'Inventory')
-		,COGS = dbo.fnGetItemGLAccount(@intItemId, @intLocationId, 'Cost of Goods')
+ SELECT	Inventory = dbo.fnGetItemCommodityGLAccount(@intItemId, @intLocationId, 'Inventory', @intCommodityId)
+		,COGS = dbo.fnGetItemCommodityGLAccount(@intItemId, @intLocationId, 'Cost of Goods', @intCommodityId)
  
 */
 
-CREATE FUNCTION [dbo].[fnGetItemGLAccount] (
+CREATE FUNCTION [dbo].[fnGetItemCommodityGLAccount] (
 	@intItemId INT
 	,@intItemLocationId INT
 	,@strAccountDescription NVARCHAR(255)
+	,@intCommodityId INT 
 )
 RETURNS INT
 AS 
@@ -73,11 +77,9 @@ BEGIN
 					ISNULL(@intGLAccountId_CompanySegment, @intGLAccountId_LocationSegment) 
 					,lob.intSegmentCodeId
 				)
-	FROM	dbo.tblICItem i INNER JOIN dbo.tblICItemLocation il 
-				ON i.intItemId = il.intItemId				
-			INNER JOIN tblICCommodity c
-				ON c.intCommodityId = i.intCommodityId
-			CROSS APPLY (
+	FROM	tblICCommodity c				
+			CROSS APPLY
+			(
 				SELECT TOP 1 
 					ysnOverrideLOBSegment
 				FROM 
@@ -92,7 +94,8 @@ BEGIN
 					AND (preference.ysnOverrideLOBSegment = 1 OR preference.ysnOverrideLOBSegment IS NULL) 
 			) lob
 	WHERE
-			il.intItemLocationId = @intItemLocationId
+			c.intCommodityId = @intCommodityId
+			AND @intCommodityId IS NOT NULL 
 			AND (preference.ysnOverrideLOBSegment = 1) 
 			AND (
 				@intGLAccountId_LocationSegment IS NOT NULL 
