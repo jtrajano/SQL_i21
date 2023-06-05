@@ -1405,6 +1405,10 @@
     <Build Include="dbo\Functions\fnGetItemCommodityGLAccount.sql" />
     <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendorXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorXref.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCustomerXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
