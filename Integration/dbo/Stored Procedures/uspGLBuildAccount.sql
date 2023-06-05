@@ -42,17 +42,21 @@ BEGIN
 		ORDER BY A.strAccountId
 
 
-		DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50)
+		DECLARE @_intAccountId NVARCHAR(50) , @_strAccountId NVARCHAR(50),@changeDescription NVARCHAR(100)
 		WHILE EXISTS (SELECT 1 FROM  @tblAuditLogAccount )
 		BEGIN
 			SELECT TOP 1 @_intAccountId=intAccountId, @_strAccountId = A.strAccountId FROM tblGLAccount A 
 			JOIN @tblAuditLogAccount B ON A.strAccountId = B.strAccountId WHERE A.strAccountId = B.strAccountId
-
+			SET @changeDescription =N''Build Account '' + @_strAccountId 
 			EXEC uspSMAuditLog
 			@keyValue = @_intAccountId,                                          -- Primary Key Value
 			@screenName = ''GeneralLedger.view.EditAccount'',            -- Screen Namespace
 			@entityId = @intUserId,                                              -- Entity Id.
-			@actionType = ''Created''                                 
+			@actionType = ''Created'',                   
+			@changeDescription = @changeDescription,
+			@fromValue = '''',
+			@toValue = @_strAccountId
+
 			DELETE FROM @tblAuditLogAccount WHERE strAccountId = @_strAccountId
 		END
 	
