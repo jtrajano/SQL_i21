@@ -114,7 +114,14 @@ BEGIN TRY
 		,@intInventoryTransactionType INT
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
 		,@ItemsToReserve1 AS dbo.ItemReservationTableType
-
+		,@intWorkOrderInputLotId INT
+	DECLARE @StockReservation TABLE(intStockId int identity(1,1),intStockReservationId int, dblQty numeric(18,6))
+	DECLARE @intRecordId INT
+		,@intStockId INT		
+		
+	DECLARE @dblBalance NUMERIC(18,6), @intConsumedLotId INT
+	DECLARE @tblMFWorkOrderInputLot TABLE(intRecordId int identity(1,1),intLotId INT, dblBalance NUMERIC(18,6), intConsumedLotId INT)
+												
 	DECLARE @tblICStockReservation TABLE (
 		intTransactionId INT
 		,intInventoryTransactionType INT
@@ -1278,6 +1285,24 @@ BEGIN TRY
 						,intSourceTransactionId = 8
 						,strSourceTransactionId = @intTransactionId
 
+						--*********************
+						SELECT @intWorkOrderId = NULL
+							,@intWorkOrderInputLotId=NULL
+						
+						SELECT @intWorkOrderId = intWorkOrderId
+						FROM tblMFWorkOrder
+						WHERE strERPOrderNo = @strOrderNo
+						
+						SELECT @intWorkOrderInputLotId =intWorkOrderInputLotId  
+						FROM dbo.tblMFWorkOrderInputLot WI
+						WHERE WI.intWorkOrderId =@intWorkOrderId 
+						AND WI.intLotId IN (SELECT L.intLotId FROM tblICLot L Where strLotNumber=@strLotNo )
+
+						UPDATE dbo.tblMFWorkOrderInputLot 
+						SET intConsumedLotId =@intLotId, dblConsumedQty =IsNULL(dblConsumedQty,0)+@dblQuantity 
+						WHERE intWorkOrderInputLotId =@intWorkOrderInputLotId 
+						--*********************
+
 					IF @intTransactionTypeId = 8
 						AND @ysnReservationByStorageLocation = 0
 					BEGIN
@@ -1628,7 +1653,99 @@ BEGIN TRY
 							UPDATE tblMFBlendRequirement
 							SET intStatusId = 2
 							WHERE strReferenceNo = @strOrderNo
-						END
+
+							INSERT INTO @tblMFWorkOrderInputLot (
+								intLotId
+								,dblBalance
+								,intConsumedLotId
+								)
+							SELECT intLotId
+								,dblQuantity + IsNULL(dblConsumedQty, 0)
+								,intConsumedLotId
+							FROM dbo.tblMFWorkOrderInputLot
+							WHERE intWorkOrderId = @intWorkOrderId
+								AND dblQuantity + IsNULL(dblConsumedQty, 0) > 1
+
+							SELECT @intRecordId = MIN(intRecordId)
+							FROM @tblMFWorkOrderInputLot
+
+							WHILE @intRecordId IS NOT NULL
+							BEGIN
+								SELECT @intLotId = NULL
+									,@dblBalance = NULL
+									,@intConsumedLotId = NULL
+
+								SELECT @intLotId = intLotId
+									,@dblBalance = dblBalance
+									,@intConsumedLotId = intConsumedLotId
+								FROM @tblMFWorkOrderInputLot
+								WHERE intRecordId = @intRecordId
+
+								DELETE
+								FROM @StockReservation
+
+								INSERT INTO @StockReservation (
+									intStockReservationId
+									,dblQty
+									)
+								SELECT intStockReservationId
+									,dblQty
+								FROM dbo.tblICStockReservation
+								WHERE intLotId = @intLotId
+									AND dblQty > 1
+
+								INSERT INTO @StockReservation (
+									intStockReservationId
+									,dblQty
+									)
+								SELECT intStockReservationId
+									,dblQty
+								FROM dbo.tblICStockReservation
+								WHERE intLotId = @intConsumedLotId
+									AND dblQty > 1
+
+								SELECT @intStockId = MIN(intStockId)
+								FROM @StockReservation
+
+								WHILE @intStockId IS NOT NULL
+									AND @dblBalance > 0
+								BEGIN
+									SELECT @intStockReservationId = NULL
+										,@dblQty = NULL
+
+									SELECT @intStockReservationId = intStockReservationId
+										,@dblQty = dblQty
+									FROM @StockReservation
+									WHERE intStockId = @intStockId
+
+									IF @dblQty >= @dblBalance
+									BEGIN
+										SELECT @dblBalance = 0
+
+										UPDATE dbo.tblICStockReservation
+										SET dblQty = dblQty - @dblBalance
+										WHERE intStockReservationId = @intStockReservationId
+									END
+									ELSE
+									BEGIN
+										SELECT @dblBalance = @dblBalance - @dblQty
+
+										UPDATE dbo.tblICStockReservation
+										SET dblQty = 0
+										WHERE intStockReservationId = @intStockReservationId
+									END
+
+									SELECT @intStockId = MIN(intStockId)
+									FROM @StockReservation
+									WHERE intStockId > @intStockId
+								END
+
+								SELECT @intRecordId = MIN(intRecordId)
+								FROM @tblMFWorkOrderInputLot
+								WHERE intRecordId > @intRecordId
+							END
+								END
+
 
 						DELETE
 						FROM @ItemsForPost

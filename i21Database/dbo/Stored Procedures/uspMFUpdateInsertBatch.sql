@@ -137,7 +137,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , strLeafStyle					= T.strLeafStyle
 				  , dblPackagesBought				= T.dblPackagesBought
 				  , strTeaOrigin					= T.strTeaOrigin
-				  --, intOriginalItemId				= T.intOriginalItemId
+				  , intOriginalItemId				= T.intOriginalItemId
 				  , dblPackagesPerPallet			= T.dblPackagesPerPallet
 				  , strPlant						= T.strPlant
 				  , dblTotalQuantity				= T.dblTotalQuantity
