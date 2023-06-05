@@ -69,15 +69,10 @@ BEGIN
 			 , Batch.dblTeaAppearance
 			 , ISNULL(Batch.dblTeaVolume, 0) AS dblTeaVolume
 			 , DATEDIFF(DAY, l.dtmDateCreated, GETDATE()) AS intAge
-			 , CASE WHEN (NULLIF(i.intUnitPerLayer,'') IS NULL OR i.intUnitPerLayer = 0) AND (NULLIF(i.intLayerPerPallet,'') IS NULL OR i.intLayerPerPallet = 0) THEN 0
-					WHEN (CASE WHEN ISNULL(wi.dblIssuedQuantity,0) > 0 THEN wi.dblIssuedQuantity 
-							   ELSE dbo.fnMFConvertQuantityToTargetItemUOM(wi.intItemUOMId, l.intItemUOMId, wi.dblIssuedQuantity) 
-						  END) = 0 THEN 0
-					ELSE CAST(wi.dblIssuedQuantity / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC(18, 0))
-			   END AS dblNoOfPallet
+			 , CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
-             ,wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -149,15 +144,10 @@ BEGIN
 			 , Batch.dblTeaAppearance
 			 , ISNULL(Batch.dblTeaVolume, 0) AS dblTeaVolume
 			 , DATEDIFF(DAY, l.dtmDateCreated, GETDATE()) AS intAge
-			 , CASE WHEN (NULLIF(i.intUnitPerLayer,'') IS NULL OR i.intUnitPerLayer = 0) AND (NULLIF(i.intLayerPerPallet,'') IS NULL OR i.intLayerPerPallet = 0) THEN 0
-					WHEN (CASE WHEN ISNULL(wi.dblIssuedQuantity,0) > 0 THEN wi.dblIssuedQuantity 
-							   ELSE dbo.fnMFConvertQuantityToTargetItemUOM(wi.intItemUOMId, l.intItemUOMId, wi.dblIssuedQuantity) 
-						  END) = 0 THEN 0
-					ELSE CAST(wi.dblIssuedQuantity / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC(18, 0))
-			   END AS dblNoOfPallet
+			 , CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
-             ,wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -172,8 +162,8 @@ BEGIN
 		LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		LEFT JOIN vyuQMGetLotQuality q ON l.intLotId = q.intLotId
 		LEFT JOIN tblMFRecipeItem ri ON wi.intRecipeItemId = ri.intRecipeItemId
-		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId=i.intProductTypeId
-		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
+		LEFT JOIN tblICCommodityAttribute MT on MT.intCommodityAttributeId = i.intProductTypeId
+		LEFT JOIN tblICBrand B on B.intBrandId = i.intBrandId
 		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
 		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
 		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
@@ -221,7 +211,8 @@ BEGIN
 	, CAST((wi.dblIssuedQuantity) / (i.intUnitPerLayer * i.intLayerPerPallet) AS NUMERIC (18, 0)) AS dblNoOfPallet
 	, '' As strFW
 	, MT.strDescription AS strProductType
-	,B.strBrandCode
+	, B.strBrandCode
+	, wi.dblQuantity  AS dblRequiredQtyPerSheet
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
