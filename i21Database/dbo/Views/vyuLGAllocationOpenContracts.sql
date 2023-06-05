@@ -43,7 +43,8 @@ SELECT
 	,strPurchaseSale = CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END COLLATE Latin1_General_CI_AS
 	,strCommodity = Comm.strDescription
 	,CL.strLocationName
-	,ysnAllowedToShow = CAST(CASE WHEN CD.intContractStatusId IN (1,4,5,6) THEN 1 ELSE 0 END AS BIT)
+	,ysnAllowedToShow = CAST(CASE WHEN (CH.intContractTypeId = 1 AND CD.intContractStatusId IN (1,4,5,6)) 
+									OR (CH.intContractTypeId = 2 AND CD.intContractStatusId IN (1, 4)) THEN 1 ELSE 0 END AS BIT)
 	,PT.strPricingType
 	,CD.dblCashPrice
 	,CD.dblAdjustment
