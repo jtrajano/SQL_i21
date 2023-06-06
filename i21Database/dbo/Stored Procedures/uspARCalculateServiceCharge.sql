@@ -37,10 +37,11 @@ BEGIN
 	FROM @tblTransactionCurrency
 
 	DECLARE @tblCustomer TABLE (
-		 intEntityId INT
-		,intServiceChargeId INT
-		,intTermId INT
-		,ysnActive BIT
+		  intEntityId			INT NOT NULL PRIMARY KEY
+		, intServiceChargeId	INT
+		, intTermId				INT
+		, ysnActive				BIT
+		, dtmLastServiceCharge	DATETIME
 	)
 	DECLARE @tblComputedBalance TABLE (
 		 intEntityId INT
@@ -132,6 +133,9 @@ BEGIN
 		RETURN 0
 	END
 
+	UPDATE @tblCustomer
+	SET dtmLastServiceCharge = ISNULL(dtmLastServiceCharge, '01/01/1900')
+
 	--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 	IF (@calculation = 'By Customer Balance')
 	BEGIN
@@ -143,6 +147,7 @@ BEGIN
 		SELECT SC.intServiceChargeId, SC.intGracePeriod
 		FROM @tblCustomer C
 		INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
+		WHERE SC.dblServiceChargeAPR > 0
 		GROUP BY SC.intServiceChargeId, SC.intGracePeriod
 
 		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblServiceCharges)
@@ -158,7 +163,9 @@ BEGIN
 			FROM @tblServiceCharges
 
 			INSERT INTO @tblCustomersByBalance (intEntityCustomerId)
-			SELECT DISTINCT intEntityId FROM @tblCustomer WHERE intServiceChargeId = @intSCtoCompute
+			SELECT DISTINCT intEntityId 
+			FROM @tblCustomer 
+			WHERE intServiceChargeId = @intSCtoCompute
 
 			SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 			FROM (
@@ -184,27 +191,22 @@ BEGIN
 
 			--PROCESS BY AGING BALANCE	
 			INSERT INTO @tblComputedBalance (
-				 intEntityId
-				,dblTotalAR
+				  intEntityId
+				, dblTotalAR
 			)
-			SELECT 
-				 intEntityId= AGING.intEntityCustomerId
-				,dblTotalAR	= SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+			SELECT intEntityId	= AGING.intEntityCustomerId
+				 , dblTotalAR	= SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
 			FROM tblARCustomerAgingStagingTable AGING
 			INNER JOIN @tblCustomer TC ON AGING.intEntityCustomerId = TC.intEntityId
-			INNER JOIN (
-				SELECT intEntityId
-				FROM dbo.tblARCustomer WITH (NOLOCK)		
-				WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-			) C ON C.intEntityId = AGING.intEntityCustomerId	
 			WHERE AGING.intEntityUserId = @intEntityUserId 
-			AND AGING.strAgingType = 'Detail'
-			AND intCurrencyId = @intTransactionCurrency
+			  AND AGING.strAgingType = 'Detail'
+			  AND intCurrencyId = @intTransactionCurrency
+			  AND TC.dtmLastServiceCharge < @asOfDate
 			GROUP BY AGING.intEntityCustomerId
 			HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @ZeroDecimal
 
 			DELETE FROM @tblServiceCharges WHERE intServiceChargeId = @intSCtoCompute
-
+			
 			--UPDATE CUSTOMERS LAST SERVICE CHARGE DATE
 			IF @isRecap = 0 AND @upToDateCustomer = 1 AND @calculation = 'By Customer Balance'
 			BEGIN
@@ -444,7 +446,7 @@ BEGIN
 						WHERE BALANCE.intEntityId = @entityId
 					END
 					
-					DELETE FROM @tblComputedBalance
+					DELETE FROM @tblComputedBalance WHERE intEntityId = @entityId
 				END
 
 				--GET CUSTOMER BUDGET DUE
