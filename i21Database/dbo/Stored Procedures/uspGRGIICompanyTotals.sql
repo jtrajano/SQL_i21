@@ -147,6 +147,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -226,6 +229,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -278,6 +284,7 @@ BEGIN
 				ON IC.intCommodityId = CS.intCommodityId
 			INNER JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemUOMId = CS.intItemUOMId
 			INNER JOIN tblICUnitMeasure UM
@@ -365,6 +372,9 @@ BEGIN
 			FROM tblAPBillDetail BD
 			INNER JOIN tblAPBill AP
 				ON AP.intBillId = BD.intBillId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = AP.intShipToId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItem IC
 				ON IC.intItemId = BD.intItemId
 					AND IC.strType = 'Inventory'
@@ -619,6 +629,9 @@ BEGIN
 				ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = CS.intCompanyLocationId
+					AND CL.ysnLicensed = 1
 			INNER JOIN tblICItemUOM UOM
 				ON UOM.intItemUOMId = CS.intItemUOMId
 			INNER JOIN tblICUnitMeasure UM
@@ -768,6 +781,9 @@ BEGIN
 	FROM tblAPBillDetail BD
 	INNER JOIN tblAPBill AP
 		ON AP.intBillId = BD.intBillId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = AP.intShipToId
+			AND CL.ysnLicensed = 1
 	INNER JOIN tblICItem IC
 		ON IC.intItemId = BD.intItemId
 			AND IC.strType = 'Inventory'
@@ -828,6 +844,9 @@ BEGIN
 			ON ST_TO.intStorageScheduleTypeId = TS.intToStorageTypeId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = TS.intFromCustomerStorageId
+		INNER JOIN tblSMCompanyLocation CL
+			ON CL.intCompanyLocationId = CS.intCompanyLocationId
+				AND CL.ysnLicensed = 1
 		INNER JOIN tblICItemUOM UOM
 			ON UOM.intItemUOMId = CS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM
