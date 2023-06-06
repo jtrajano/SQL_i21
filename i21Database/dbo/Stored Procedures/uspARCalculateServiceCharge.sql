@@ -137,11 +137,11 @@ BEGIN
 		FROM @tblCurrency
 
 		DECLARE @tblCustomer TABLE (
-			 intEntityId 			INT
-			,intServiceChargeId 	INT
-			,intTermId 				INT
-			,ysnActive 				BIT
-			,intCurrencyId			INT 
+			  intEntityId           INT NOT NULL PRIMARY KEY
+			, intServiceChargeId 	INT
+			, intTermId 			INT
+			, ysnActive 			BIT
+			, dtmLastServiceCharge  DATETIME
 		)
 		DECLARE @tblComputedBalance TABLE (
 			 intEntityId INT
@@ -176,16 +176,16 @@ BEGIN
 		--GET SELECTED CUSTOMERS
 		IF (@customerIds = '')
 		BEGIN
-			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive, intCurrencyId) 
-			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive, C.intCurrencyId
+			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive) 
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
 			FROM tblARCustomer C
 			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
 			WHERE ISNULL(C.intServiceChargeId, 0) <> 0  and (C.ysnActive = 1 or (C.ysnActive = 0 and C.dblARBalance <> 0))
 		END
 		ELSE
 		BEGIN
-			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive, intCurrencyId)
-			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive, C.intCurrencyId
+			INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive)
+			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
 			FROM tblARCustomer C
 			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
 			INNER JOIN (
@@ -208,6 +208,9 @@ BEGIN
 			RAISERROR(120042, 16, 1)
 			RETURN 0
 		END
+
+		UPDATE @tblCustomer
+    	SET dtmLastServiceCharge = ISNULL(dtmLastServiceCharge, '01/01/1900')
 
 		--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 		IF (@calculation = 'By Customer Balance')
@@ -261,23 +264,18 @@ BEGIN
 
 				--PROCESS BY AGING BALANCE	
 				INSERT INTO @tblComputedBalance (
-					 intEntityId
-					,dblTotalAR
+					  intEntityId
+					, dblTotalAR
 				)
-				SELECT 
-					 intEntityId= AGING.intEntityCustomerId
-					,dblTotalAR	= SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+				SELECT intEntityId	= AGING.intEntityCustomerId
+					 , dblTotalAR	= SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
 				FROM tblARCustomerAgingStagingTable AGING
 				INNER JOIN @tblCustomer TC ON AGING.intEntityCustomerId = TC.intEntityId
-				INNER JOIN (
-					SELECT intEntityId
-					FROM dbo.tblARCustomer WITH (NOLOCK)		
-					WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-				) C ON C.intEntityId = AGING.intEntityCustomerId	
 				WHERE AGING.intEntityUserId = @intEntityUserId 
-				AND AGING.strAgingType = 'Detail'
-				AND AGING.intCurrencyId = @intCurrencyId
-				AND (intCompanyLocationId = @intCompanyLocationId OR @ysnPrintByLocation = 0)
+				  AND AGING.strAgingType = 'Detail'
+				  AND intCurrencyId = @intCurrencyId
+				  AND TC.dtmLastServiceCharge < @asOfDate
+				  AND (intCompanyLocationId = @intCompanyLocationId OR @ysnPrintByLocation = 0)
 				GROUP BY AGING.intEntityCustomerId
 				HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @ZeroDecimal
 
@@ -524,7 +522,7 @@ BEGIN
 							WHERE BALANCE.intEntityId = @entityId
 						END
 					
-						DELETE FROM @tblComputedBalance
+						DELETE FROM @tblComputedBalance WHERE intEntityId = @entityId
 					END
 
 					--GET CUSTOMER BUDGET DUE
@@ -569,7 +567,6 @@ BEGIN
 						AND DATEADD(DAY, SC.intGracePeriod, dbo.fnGetDueDateBasedOnTerm(CASE WHEN ISNULL(CB.ysnForgiven, 0) = 0 AND ISNULL(CB.ysnCalculated, 0) = 0 THEN CB.dtmBudgetDate ELSE CB.dtmCalculated END, C.intTermId)) < @asOfDate
 						AND CB.dblBudgetAmount > @ZeroDecimal
 						AND (CB.ysnCalculated = 0 OR CB.ysnForgiven = 1)
-						AND C.intCurrencyId = @intCurrencyId
 					END
 
 					--REMOVE INACTIVE CUSTOMERS WITH ZERO BALANCE
