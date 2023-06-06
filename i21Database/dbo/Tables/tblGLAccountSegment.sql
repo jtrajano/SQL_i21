@@ -128,7 +128,7 @@ BEGIN
 		@keyValue = @AccountSegmentString,                                          -- Primary Key Value
 		@screenName = 'GeneralLedger.view.SegmentAccounts',            -- Screen Namespace
 		@entityId = @EntityId,                                              -- Entity Id.
-		@actionType = 'Created',                                  -- Action Type (Processed, Posted, Unposted and etc.)
+		@actionType = 'Added',                                  -- Action Type (Processed, Posted, Unposted and etc.)
         
 		--- Below is just optional if you need a tree level information
 		@changeDescription = @changeDescription , -- Description
