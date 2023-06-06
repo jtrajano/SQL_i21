@@ -29,8 +29,8 @@ FROM (
 		,dblAllocatedQty = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
 								THEN ISNULL(PLD.dblLotPickedQty, 0)
 								ELSE ISNULL(CD.dblAllocatedQty, 0) END
-		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
-		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0)
+		,dblPickedQty = ISNULL(ICL.dblQty, 0)
+		,dblAllocatedPickedQty = ISNULL(PLD.dblLotPickedQty, 0)
 		,strShippingLine = Shipment.strShippingLine
 		,strVessel = Shipment.strMVessel
 		,strIMONumber = L.strIMONumber
@@ -159,8 +159,8 @@ FROM (
 		,dblContainerQty = IRI.dblOpenReceive
 		,dblOpenQuantity = Spot.dblQty - ISNULL(PLD.dblLotPickedQty, 0)
 		,dblAllocatedQty = ISNULL(PLD.dblLotPickedQty, 0)
-		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
-		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0)
+		,dblPickedQty = ISNULL(ICL.dblQty, 0)
+		,dblAllocatedPickedQty = ISNULL(PLD.dblLotPickedQty, 0)
 		,strShippingLine = SL.strName
 		,strVessel = L.strMVessel
 		,strIMONumber = L.strIMONumber
@@ -292,8 +292,8 @@ FROM (
 		,dblContainerQty = COALESCE(LC.dblQuantity, LD.dblQuantity, 0)
 		,dblOpenQuantity = CAST(0 AS NUMERIC(18, 6))
 		,dblAllocatedQty = COALESCE(LC.dblQuantity, LD.dblQuantity, 0)
-		,dblPledgedQty = CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
-		,dblAllocatedPledgedQty = COALESCE(LC.dblQuantity, LD.dblQuantity, 0) + CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH PLEDGED QTY AFTER GL-7326
+		,dblPickedQty = CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH Picked QTY AFTER GL-7326
+		,dblAllocatedPickedQty = COALESCE(LC.dblQuantity, LD.dblQuantity, 0) + CAST(0 AS NUMERIC(18, 6)) --UPDATE WITH Picked QTY AFTER GL-7326
 		,strShippingLine = SL.strName
 		,strVessel = L.strMVessel
 		,strIMONumber = L.strIMONumber
