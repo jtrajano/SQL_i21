@@ -695,32 +695,36 @@ BEGIN
 	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
 
 	--VALIDATE THE AMOUNT IN CASE THE LOGIC CHANGES THE TWO SP ABOVE AND IT IS FAULTY
-	DECLARE @invalidAmount AS Id
-	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
-	OUTPUT inserted.intTransactionId INTO @invalidAmount 
-	SELECT 
-		A.strBillId + ' has invalid amount due.',
-		'Payable',
-		C.strPaymentRecordNum,
-		C.ysnLienExists,
-		C.intPaymentId,
-		@batchId
-	FROM tblAPBill A
-	INNER JOIN (tblAPPaymentDetail B INNER JOIN tblAPPayment C ON B.intPaymentId = C.intPaymentId)
-		ON A.intBillId = B.intBillId
-	WHERE 
-		C.intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
-	AND 
-	(
-		--amount due should be total less payment
-		(A.dblAmountDue != (A.dblTotal - A.dblPayment))
-		OR
-		--amount due cannot be greater than the total
-		(A.dblAmountDue > A.dblTotal)
-		OR
-		--amount due cannot be negative
-		(A.dblAmountDue < 0)
-	)
+	DECLARE @invalidAmount AS Id  
+	DECLARE @invalidAmountTbl AS TABLE(intId INT)
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)  
+	OUTPUT inserted.intTransactionId INTO @invalidAmountTbl   
+	SELECT   
+	A.strBillId + ' has invalid amount due.',  
+	'Payable',  
+	C.strPaymentRecordNum,  
+	C.ysnLienExists,  
+	C.intPaymentId,  
+	@batchId  
+	FROM tblAPBill A  
+	INNER JOIN (tblAPPaymentDetail B INNER JOIN tblAPPayment C ON B.intPaymentId = C.intPaymentId)  
+	ON A.intBillId = B.intBillId  
+	WHERE   
+	C.intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)  
+	AND   
+	(  
+	--amount due should be total less payment  
+	(A.dblAmountDue != (A.dblTotal - A.dblPayment))  
+	OR  
+	--amount due cannot be greater than the total  
+	(A.dblAmountDue > A.dblTotal)  
+	OR  
+	--amount due cannot be negative  
+	(A.dblAmountDue < 0)  
+	)  
+	
+	INSERT INTO @invalidAmount
+	SELECT DISTINCT intId  FROM @invalidAmountTbl
 
 	SET @invalidCount = @totalInvalid + (SELECT COUNT(*) FROM @invalidAmount)
 
