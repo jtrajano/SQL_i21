@@ -96,6 +96,9 @@ BEGIN
 		LEFT JOIN tblICBrand B on B.intBrandId=i.intBrandId
 		LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = l.intLotId
 		LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
+		LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId
+		LEFT JOIN tblICCommodityAttribute AS SubCluster ON i.intRegionId = SubCluster.intCommodityAttributeId
+		LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = Batch.intGardenMarkId
 		WHERE wi.intWorkOrderId = @intWorkOrderId
 	END
 	ELSE /* When blend sheet created from Sales Order, directly produced in blend production screen, then only consumed lot table will have the values, to show in blend management screen from traceability */
