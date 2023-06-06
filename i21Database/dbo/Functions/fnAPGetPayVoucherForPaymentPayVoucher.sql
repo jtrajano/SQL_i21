@@ -96,6 +96,7 @@ RETURNS TABLE AS RETURN
 		,voucher.intPayToBankAccountId
 		,eft.strAccountNumber strPayToBankAccount
 		,accountDetail.strAccountId strAPAccount
+		,forPay.strHold
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
@@ -224,6 +225,7 @@ RETURNS TABLE AS RETURN
 		,ISNULL(voucher.intPayToCashBankAccountId, ISNULL(voucher.intDefaultPayToBankAccountId, 0)) intPayToBankAccountId  
 		,eft.strAccountNumber strPayToBankAccount  
 		,accountDetail.strAccountId strAPAccount  
+		,forPay.strHold
 	FROM vyuAPBillForPayment forPay  
 	INNER JOIN tblARInvoice voucher ON voucher.intInvoiceId = forPay.intInvoiceId  
 	LEFT JOIN tblAPPaymentDetail payDetail  
