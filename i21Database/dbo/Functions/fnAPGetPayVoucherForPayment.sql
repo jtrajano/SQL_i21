@@ -94,6 +94,7 @@ RETURNS TABLE AS RETURN
 		,forPay.intPayToBankAccountId
 		,eft.strAccountNumber strPayToBankAccount
 		,accountDetail.strAccountId strAPAccount
+		,forPay.strHold
 	FROM vyuAPBillForPayment forPay
 	LEFT JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblARInvoice invoice ON invoice.intInvoiceId = forPay.intInvoiceId
