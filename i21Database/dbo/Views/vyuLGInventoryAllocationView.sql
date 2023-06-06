@@ -30,11 +30,7 @@ FROM (
 								THEN ISNULL(PLD.dblLotPickedQty, 0)
 								ELSE ISNULL(CD.dblAllocatedQty, 0) END
 		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
-		,dblAllocatedPledgedQty = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
-									THEN ISNULL(PLD.dblLotPickedQty, 0)
-								ELSE ISNULL(CD.dblAllocatedQty, 0) END
-						+ ISNULL(ICL.dblQty, 0)
-
+		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0)
 		,strShippingLine = Shipment.strShippingLine
 		,strVessel = Shipment.strMVessel
 		,strIMONumber = L.strIMONumber
@@ -109,10 +105,7 @@ FROM (
 		,dblBalToPick = CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
 							THEN ISNULL(PLD.dblLotPickedQty, 0)
 							ELSE ISNULL(CD.dblAllocatedQty, 0) END -
-						CASE WHEN HP.ysnHasPickContainers IS NOT NULL 
-							THEN ISNULL(PLD.dblLotPickedQty, 0)
-							ELSE ISNULL(CD.dblAllocatedQty, 0) END
-							+ ISNULL(ICL.dblQty, 0)
+						ISNULL(PLD.dblLotPickedQty, 0)
 		
 		,strCropYear = NULL
 		,strCertificate = NULL
@@ -167,7 +160,7 @@ FROM (
 		,dblOpenQuantity = Spot.dblQty - ISNULL(PLD.dblLotPickedQty, 0)
 		,dblAllocatedQty = ISNULL(PLD.dblLotPickedQty, 0)
 		,dblPledgedQty = ISNULL(ICL.dblQty, 0)
-		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
+		,dblAllocatedPledgedQty = ISNULL(PLD.dblLotPickedQty, 0)
 		,strShippingLine = SL.strName
 		,strVessel = L.strMVessel
 		,strIMONumber = L.strIMONumber
@@ -239,7 +232,7 @@ FROM (
 		,LWC.strID2
 		,LWC.strID3
 
-		,dblBalToPick = ISNULL(PLD.dblLotPickedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0) + ISNULL(ICL.dblQty, 0)
+		,dblBalToPick = ISNULL(PLD.dblLotPickedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0)
 
 		,strCropYear = CY.strCropYear
 		,strCertificate = IRIL.strCertificate
