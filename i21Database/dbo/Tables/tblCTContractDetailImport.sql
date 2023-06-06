@@ -19,7 +19,7 @@
 	strItemSpecification NVARCHAR(250) NULL,
 	strPurchasingGroup NVARCHAR(50) NULL,
 	strFarmNo NVARCHAR(50) NULL,
-	strGrade NVARCHAR(50) NULL,
+	strGrade NVARCHAR(200) NULL,
 	strGarden NVARCHAR(50) NULL,
 	strVendorLotId NVARCHAR(50) NULL,
 	dblQuantity NUMERIC(18, 6) NOT NULL DEFAULT((0)),

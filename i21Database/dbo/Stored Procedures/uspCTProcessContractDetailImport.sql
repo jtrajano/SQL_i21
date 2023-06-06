@@ -57,7 +57,6 @@ BEGIN
 			, pg.intPurchasingGroupId
 			, ci.strPurchasingGroup
 			, ci.strFarmNo
-			, ci.strGrade
 			, gm.intGardenMarkId
 			, ci.strGarden
 			, ci.strVendorLotId
@@ -156,6 +155,8 @@ BEGIN
 			, ci.guiUniqueId
 			, ci.ysnImported
 			, ci.strMessage
+			, ci.strGrade
+			, wg.intWeightGradeId
 		INTO #tmpList
 		FROM tblCTContractDetailImport ci
 		LEFT JOIN tblCTContractHeader ch on ch.strContractNumber = ci.strContractNumber collate database_default
@@ -210,7 +211,9 @@ BEGIN
 
 		--Garden
 		LEFT JOIN tblQMGardenMark gm on gm.strGardenMark = ci.strGarden collate database_default
-		
+			--Grade
+		LEFT JOIN tblCTWeightGrade wg on wg.strWeightGradeDesc = ci.strGrade collate database_default and wg.ysnActive = 1 and wg.ysnGrade = 1
+	
 		--Shipping Line
 		LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActive = 1 and ci.strShippineLine = Ent.strEntityName collate database_default
 		
@@ -394,6 +397,20 @@ BEGIN
 				   ,1
 			FROM #tmpList 
 			WHERE guiUniqueId = @guiUniqueId AND isnull(intGardenMarkId,0) = 0 and strGarden <> ''
+		END
+
+
+		IF EXISTS(SELECT TOP 1 1 FROM #tmpList where isnull(intWeightGradeId,0) = 0 and strGrade <> '')
+		BEGIN
+		INSERT INTO tblCTErrorImportLogs
+			SELECT guiUniqueId
+				   ,'Invalid Grade'
+				   ,strContractNumber
+				   ,intSequence
+				   ,'Fail'
+				   ,1
+			FROM #tmpList 
+			WHERE guiUniqueId = @guiUniqueId AND isnull(intWeightGradeId,0) = 0 and strGrade <> ''
 		END
 
 
