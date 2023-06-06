@@ -30,6 +30,22 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemCustomerXref_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICItemCustomerXref_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityId])
 	)
+	GO
+	
+	CREATE NONCLUSTERED INDEX [IX_tblICItemCustomerXref_intItemId]
+		ON [dbo].[tblICItemCustomerXref]([intItemId] ASC, [intItemLocationId] ASC)
+		INCLUDE ([intCustomerId])
+	GO
+	
+	CREATE NONCLUSTERED INDEX [IX_tblICItemCustomerXref_intVendorId]
+		ON [dbo].[tblICItemCustomerXref]([intCustomerId] ASC)
+		INCLUDE ([intItemLocationId], [intItemId])
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItemCustomerXref_strCustomerProduct]
+		ON [dbo].[tblICItemCustomerXref]([strCustomerProduct] ASC)
+		INCLUDE ([intItemId], [intItemLocationId], [intCustomerId])
+	GO
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',

@@ -79,6 +79,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL
 		intClassId INT 
 	)
 
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_UOMId') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_UOMId (
+		intItemUOMId INT 
+	)
+
 -- Create the temp table for the audit log. 
 IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NULL  
 	CREATE TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog (
@@ -314,6 +319,10 @@ BEGIN
 									AND itemLocation.intItemLocationId = ISNULL(@intItemLocationId, itemLocation.intItemLocationId)
 								LEFT JOIN tblICItemPricing itemPricing
 									ON itemPricing.intItemLocationId = itemLocation.intItemLocationId
+								INNER JOIN tblICItemUOM iu
+									ON i.intItemId = iu.intItemId
+								INNER JOIN tblICCategoryLocation cl
+									ON i.intCategoryId = cl.intCategoryId
 						WHERE	(
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = itemLocation.intLocationId) 			
@@ -340,9 +349,12 @@ BEGIN
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Class WHERE intClassId = itemLocation.intClassId )			
 								)
 								AND (
-									@strDescription IS NULL 
-									OR i.strDescription = @strDescription 
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_UOMId)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_UOMId WHERE intItemUOMId = iu.intItemUOMId )			
 								)
+								AND (
+									@strDescription IS NULL 
+									OR i.strDescription LIKE '%' + @strDescription + '%'								)
 								AND (
 									@dblRetailPriceFrom IS NULL 
 									OR ISNULL(itemPricing.dblSalePrice, 0) >= @dblRetailPriceFrom 
@@ -1095,7 +1107,7 @@ BEGIN
 				,@toValue = @auditLog_intVendorId_New
 		END
 
-		IF ISNULL(@auditLog_intMinimumAge_Original, 0) <> ISNULL(@auditLog_intMinimumAge_Original, 0)
+		IF ISNULL(@auditLog_intMinimumAge_Original, 0) <> ISNULL(@auditLog_intMinimumAge_New, 0)
 		BEGIN 
 			EXEC dbo.uspSMAuditLog 
 				@keyValue = @auditLog_intItemLocationId

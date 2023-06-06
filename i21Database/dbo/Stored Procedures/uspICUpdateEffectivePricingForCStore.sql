@@ -131,7 +131,9 @@ BEGIN
 					@dblStandardCost AS dblNewStandardCost
 			FROM	tblICItemLocation il								
 						INNER JOIN tblICItem i
-							ON i.intItemId = il.intItemId						
+							ON i.intItemId = il.intItemId					
+						INNER JOIN tblICItemUOM iu
+							ON i.intItemId = iu.intItemId					
 			WHERE	
 					i.intItemId = ISNULL(@intItemId, i.intItemId)
 					AND (
@@ -157,6 +159,10 @@ BEGIN
 					AND (
 						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
 						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class WHERE intClassId = il.intClassId )			
+					)
+					AND (
+						NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_UOMId)
+						OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_UOMId WHERE intItemUOMId = iu.intItemUOMId )			
 					)
 					AND (
 						@strDescription IS NULL 

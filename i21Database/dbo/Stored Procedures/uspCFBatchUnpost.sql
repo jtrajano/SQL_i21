@@ -190,6 +190,7 @@ BEGIN
 			,strCustomerName
 			,intItemId
 			,strItemId
+			,strItemDescription
 			,strGuid
 			,strResult
 		)
@@ -207,6 +208,7 @@ BEGIN
 			,c.strName
 			,i.intItemId
 			,i.strProductNumber
+			,ic.strDescription
 			,@guid
 			,''Ready''
 		FROM tblCFTransaction as t
@@ -216,6 +218,8 @@ BEGIN
 		ON t.intSiteId = s.intSiteId
 		INNER JOIN tblCFItem as i
 		ON t.intProductId = i.intItemId
+		INNER JOIN tblICItem as ic
+		ON ic.intItemId = i.intItemId
 		INNER JOIN vyuCFAccountCustomer c
 		ON t.intCustomerId = c.intCustomerId' + @whereClause)
 

@@ -48,7 +48,7 @@ BEGIN TRY
 				@strSubcategoryId             NVARCHAR(MAX),
 				@strFamilyId			   NVARCHAR(MAX),
 				@strClassId                NVARCHAR(MAX),
-				@intItemUOMId              INT, -- @intUpcCode                INT,
+				@UOMId					   NVARCHAR(MAX),
 				@strDescription            NVARCHAR(250),
 				@dblPriceBetween1          DECIMAL (18,6),
 				@dblPriceBetween2          DECIMAL (18,6),
@@ -106,7 +106,7 @@ BEGIN TRY
 				@strSubcategoryId		=   Subcategory,
 				@strFamilyId			=   Family,
 				@strClassId				=   Class,
-				@intItemUOMId			=   intItemUOMId, --UPCCode,
+				@UOMId					=   UPCCode,
 				@strDescription			=   ItmDescription,
 				@Region				    =   Region,
 				@District			    =   District,
@@ -166,7 +166,7 @@ BEGIN TRY
 				Subcategory               NVARCHAR(MAX),
 				Family                    NVARCHAR(MAX),
 				Class                     NVARCHAR(MAX),
-				intItemUOMId              INT,
+				UPCCode					  NVARCHAR(MAX),
 				ItmDescription            NVARCHAR(250),
 				Region					  NVARCHAR(20),
 				District				  NVARCHAR(20),
@@ -272,6 +272,14 @@ BEGIN TRY
 				CREATE TABLE #tmpUpdateItemForCStore_Class (
 					intClassId INT 
 				)
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_UOMId') IS NULL  
+				BEGIN
+
+					CREATE TABLE #tmpUpdateItemForCStore_UOMId (
+						intItemUOMId INT 
+					)
+				END
 		END 
 
 
@@ -620,25 +628,17 @@ BEGIN TRY
 					SELECT [intID] AS intClassId
 					FROM [dbo].[fnGetRowsFromDelimitedValues](@strClassId)
 				END
+
+			IF(@UOMId IS NOT NULL AND @UOMId != '')
+				BEGIN
+					INSERT INTO #tmpUpdateItemForCStore_UOMId (
+						intItemUOMId
+					)
+					--SELECT intClassId = CAST(@strClassId AS INT)
+					SELECT [intID] AS intItemUOMId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@UOMId)
+				END
 		END
-
-
-		-- Get strUpcCode
-		DECLARE @strUpcCode AS NVARCHAR(20) = NULL
-		DECLARE @intItemId AS INT			= NULL
-		IF(@intItemUOMId IS NOT NULL)
-			BEGIN
-				SELECT 
-					@strUpcCode = CASE
-										WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' 
-											THEN strLongUPCCode ELSE strUpcCode
-									END,
-					@intItemId = intItemId
-				FROM tblICItemUOM 
-				WHERE intItemUOMId = @intItemUOMId
-			END
-		
-		
 
 		-- MARK START UPDATE
 		SET @dtmDateTimeModifiedFrom = GETUTCDATE()
@@ -703,7 +703,6 @@ BEGIN TRY
 	
 
 		BEGIN TRY
-			SET @strUpcCode			= NULLIF(@strUpcCode, '')
 			SET @strDescription		= NULLIF(@strDescription, '')
 			SET @intNewCategory		= NULLIF(@intNewCategory, '')
 			SET @strNewCountCode	= NULLIF(@strNewCountCode, '')
@@ -716,8 +715,8 @@ BEGIN TRY
 							@strDescription				= @strDescription 
 							,@dblRetailPriceFrom		= NULL  
 							,@dblRetailPriceTo			= NULL 
-							,@intItemId					= @intItemId 
-							,@intItemUOMId				= @intItemUOMId 
+							,@intItemId					= NULL 
+							,@intItemUOMId				= NULL 
 							-- update params
 							,@intCategoryId				= @intNewCategory
 							,@strCountCode				= @strNewCountCode
@@ -798,7 +797,7 @@ BEGIN TRY
 			-- Item Location
 			EXEC [dbo].[uspICUpdateItemLocationForCStore]
 			    -- filter params
-				@strUpcCode = @strUpcCode 
+				@strUpcCode = NULL 
 				,@strDescription = @strDescription 
 				,@dblRetailPriceFrom = @dblPriceBetween1  
 				,@dblRetailPriceTo =  @dblPriceBetween2 
@@ -911,11 +910,11 @@ BEGIN TRY
 
 
 		-- IF RECAP
-		IF (@ysnRecap = 1)
-			BEGIN
-				SELECT '#tmpUpdateItemForCStore_itemAuditLog', * FROM #tmpUpdateItemForCStore_itemAuditLog
-				SELECT '#tmpUpdateItemLocationForCStore_itemLocationAuditLog', * FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog
-			END
+		--IF (@ysnRecap = 1)
+		--	BEGIN
+		--		SELECT '#tmpUpdateItemForCStore_itemAuditLog', * FROM #tmpUpdateItemForCStore_itemAuditLog
+		--		SELECT '#tmpUpdateItemLocationForCStore_itemLocationAuditLog', * FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog
+		--	END
 
 		---- TEST
 		--IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_itemAuditLog)
@@ -1714,13 +1713,12 @@ BEGIN TRY
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 			)
-			AND 
-			(
-				-- http://jira.irelyserver.com/browse/ST-846 
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-			)
-			AND UOM.ysnStockUnit = 1
+			--AND 
+			--(
+			--	-- http://jira.irelyserver.com/browse/ST-846 
+			--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+			--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
+			--)
 		
 
 
@@ -2063,11 +2061,14 @@ BEGIN TRY
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 							END
 							
-						IF ISNULL(@strUpcCode, '') != ''
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_UOMId)
 							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UPC Code</b></p>'
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UOM</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @strUpcCode + '</p>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + UOM.strLongUPCCode + '</p>'
+									FROM #tmpUpdateItemForCStore_UOMId tempUOM
+									INNER JOIN tblICItemUOM UOM
+										ON tempUOM.intItemUOMId = UOM.intItemUOMId
 
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 							END
@@ -2211,6 +2212,9 @@ BEGIN TRY
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NOT NULL 
 				DROP TABLE #tmpUpdateItemForCStore_Class 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_UOMId') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_UOMId 
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
 				BEGIN

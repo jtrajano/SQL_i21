@@ -20,6 +20,7 @@
 	[strLicenseKey]						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnNew]							BIT NOT NULL DEFAULT 0,
 	[intCompanyId]						INT NULL,
+	[intPowerBIRefreshes]				INT NULL,
     [intConcurrencyId]					INT CONSTRAINT [DF_tblARCustomerLicenseInformation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
     CONSTRAINT [PK_tblARCustomerLicenseInformation] PRIMARY KEY CLUSTERED ([intCustomerLicenseInformationId] ASC),

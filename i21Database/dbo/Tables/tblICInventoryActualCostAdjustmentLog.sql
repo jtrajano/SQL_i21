@@ -43,3 +43,8 @@ GO
 		ON [dbo].[tblICInventoryActualCostAdjustmentLog]([intInventoryTransactionId] ASC)
 		INCLUDE ([dblQty], [dblCost], [dblValue], [ysnIsUnposted], [intInventoryCostAdjustmentTypeId]);
 GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCostAdjustmentLog_RebuildCosting]
+		ON [dbo].[tblICInventoryActualCostAdjustmentLog]([intInventoryCostAdjustmentTypeId] ASC, [intOtherChargeItemId] ASC)
+		INCLUDE ([intInventoryActualCostId], [intInventoryTransactionId], [dblCost]);
+GO

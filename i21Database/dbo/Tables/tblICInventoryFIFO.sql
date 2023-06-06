@@ -123,5 +123,8 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_Posting2]
 		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
 		INCLUDE (dblStockIn, dblStockOut);
-	GO	
+	GO
+		CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_MovingAvg]
+		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC, [strTransactionId] ASC, [intTransactionId] ASC, [intTransactionDetailId] ASC)
+		INCLUDE (dblStockIn, ysnIsUnposted);	
 	GO	

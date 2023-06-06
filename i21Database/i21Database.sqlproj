@@ -1373,6 +1373,33 @@
     <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
     <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutTankVarianceCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCalculateTankVariance.sql" />
+    <Build Include="dbo\Views\vyuSTGetTankVarianceCalculation.sql" />
+    <Build Include="dbo\Tables\tblTMTankReconciliation.sql" />
+    <Build Include="dbo\Tables\tblTMTankReconciliationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGenerateDataForTankReconciliation.sql" />
+    <Build Include="dbo\Views\vyuTMTankReconciliation.sql" />
+    <Build Include="dbo\Functions\fnTMIsConsumptionSiteAtAStore.sql" />
+    <Build Include="dbo\Functions\fnTMGetFuelTankReadingStartOrEndVolume.sql" />
+    <Build Include="dbo\Functions\fnTMGetSalesFromStoreEOD.sql" />
+    <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
+    <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitorStatus.sql" />
+    <Build Include="dbo\Views\vyuTMTankMonitorStatusSearch.sql" />
+    <Build Include="dbo\Tables\tblTMJobs.sql" />
+    <Build Include="dbo\Tables\tblTMConsumptionSiteFee.sql" />
+    <Build Include="dbo\Views\vyuTMConsumptionSiteFee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3108,6 +3135,7 @@
     <Build Include="dbo\Views\vyuApiVendorRebateItem.sql" />
     <Build Include="dbo\Views\vyuApiVendorRebatesSetup.sql" />
     <Build Include="dbo\Views\vyuApiVendorRebateUom.sql" />
+    <Build Include="dbo\Views\vyuApiGetPurchaseTaxDetail.sql" />
     <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
@@ -11267,6 +11295,7 @@
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -11690,6 +11719,7 @@
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
+    <None Include="Scripts\Post-Deployment\MBIL\InsertDefaultMobileCompanyPref.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -11923,5 +11953,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_intCommodityStockUOMId.sql" />
   </ItemGroup>
 </Project>

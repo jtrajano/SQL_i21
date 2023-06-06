@@ -11,10 +11,6 @@ BEGIN
   
 DELETE FROM tblGLOverrideSegment WHERE dtmDate < DATEADD(HOUR, -1, @DateEntered)  
   
-;WITH cte AS (  
-  
-    SELECT intId FROM tblGLAccountSegmentMapping A JOIN @AccountIds B on A.intAccountId = B.intId WHERE @CompanySegmentId = intAccountSegmentId  
-)   
 INSERT INTO tblGLOverrideSegment(  
       intAccountIdFrom,  
         intAccountIdTo,  
@@ -43,11 +39,8 @@ OUTER APPLY (
 OUTER APPLY(  
   
     SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = O.strNewAccountId  
-)T  
-WHERE A.intId NOT IN (SELECT intId FROM cte)  
+)T
   
-    
-      
 IF EXISTS(SELECT 1 FROM tblGLOverrideSegment where  @Guid = guidId AND intAccountIdTo IS NULL)  
 BEGIN
     DECLARE  @MissingAccounts GLMissingAccounts 

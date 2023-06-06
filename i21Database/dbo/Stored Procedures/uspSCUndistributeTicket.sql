@@ -27,6 +27,7 @@ DECLARE @InventoryReceiptId INT
 		,@intInvoiceId INT
 		,@success INT
 		,@ysnPosted BIT
+		,@intTransactionType INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@batchIdUsed AS NVARCHAR(100)
@@ -217,7 +218,9 @@ BEGIN TRY
 
 					IF @strDistributionOption = 'LRF'
 					BEGIN						
-						EXEC uspSCCreateTicketLoadCostPayable @TICKET_ID = @intTicketId, @POST = 0						
+
+						EXEC uspSCCreateTicketLoadCostPayable @TICKET_ID = @intTicketId, @POST = 0
+						
 					END
 
 
@@ -263,6 +266,7 @@ BEGIN TRY
 
 					WHILE @@FETCH_STATUS = 0
 					BEGIN
+						
 						SELECT @intShipmentReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
 
 						DECLARE @_intIRVendorId INT
@@ -273,17 +277,17 @@ BEGIN TRY
 							[intBillId] [INT] PRIMARY KEY,
 							UNIQUE ([intBillId])
 						);
+
 						INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(AP.intBillId) FROM tblAPBillDetail AP
 						LEFT JOIN tblICInventoryReceiptItem IC ON IC.intInventoryReceiptItemId = AP.intInventoryReceiptItemId
-						WHERE IC.intInventoryReceiptId = @InventoryReceiptId
-						SELECT @InventoryReceiptId
+						WHERE IC.intInventoryReceiptId = @InventoryReceiptId						
 						DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
 						FOR
 						SELECT intBillId FROM #tmpVoucherDetail
 						OPEN voucherCursor;
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 						WHILE @@FETCH_STATUS = 0
-						BEGIN								
+						BEGIN				
 							EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
 							SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 							IF @ysnPosted = 1
@@ -305,8 +309,7 @@ BEGIN TRY
 									RAISERROR(@ErrorMessage, 11, 1);
 									RETURN;
 								END
-							END
-
+							END							
 							DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 							/*
@@ -424,8 +427,18 @@ BEGIN TRY
 							END
 							IF @dblLoadUsedQty <> 0
 							BEGIN
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
 
+								IF ISNULL(@intInventoryReceiptItemUsed, 0) <> 0
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
+								END								
+								ELSE
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId
+
+								END
+
+									
 								-- Update the LS status back to scheduled and remove delivered date
 								UPDATE L
 								SET
@@ -449,6 +462,90 @@ BEGIN TRY
 					END
 					CLOSE intListCursor  
 					DEALLOCATE intListCursor 
+
+
+
+					IF @strDistributionOption = 'LRF'
+					BEGIN						
+
+						IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetailLRF') IS NOT NULL
+							DROP TABLE #tmpVoucherDetailLRF
+						CREATE TABLE #tmpVoucherDetailLRF (
+							[intBillId] [INT] PRIMARY KEY,
+							UNIQUE ([intBillId])
+						);
+						--- GET ALL THE PREPAYMENT  CREATED FROM VENDOR PREPAYMENT LOAD COST CHARGE
+						INSERT INTO #tmpVoucherDetailLRF(intBillId)
+						SELECT DISTINCT BILL.intBillId FROM tblAPBill BILL
+							JOIN tblAPBillDetail BILL_DETAIL
+								ON BILL.intBillId = BILL_DETAIL.intBillId
+						WHERE BILL.intTransactionType IN ( 2, 3)
+							AND intScaleTicketId = @intTicketId
+						
+						DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
+						FOR
+						SELECT intBillId FROM #tmpVoucherDetailLRF
+						OPEN voucherCursor;
+						FETCH NEXT FROM voucherCursor INTO @intBillId;
+						WHILE @@FETCH_STATUS = 0
+						BEGIN								
+							EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
+							SELECT @ysnPosted = ysnPosted, @intTransactionType = intTransactionType  
+							FROM tblAPBill WHERE intBillId = @intBillId
+							
+							IF @ysnPosted = 1
+								IF @intTransactionType <> 2 
+								BEGIN
+									EXEC [dbo].[uspAPPostBill]
+									@post = 0
+									,@recap = 0
+									,@isBatch = 0
+									,@param = @intBillId
+									,@userId = @intUserId
+									,@success = @success OUTPUT
+									,@batchIdUsed = @batchIdUsed OUTPUT
+								END
+								ELSE
+								BEGIN
+
+									exec uspAPPostVoucherPrepay 
+										@post=0
+										,@recap=0
+										,@param= @intBillId
+										,@userId=@intUserId
+										,@batchIdUsed=@batchIdUsed output
+										,@success=@success output										
+
+								END	
+								
+								
+
+
+								
+
+
+
+
+							IF ISNULL(@success, 0) = 0
+							BEGIN
+								SELECT @ErrorMessage = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+								IF ISNULL(@ErrorMessage, '') != ''
+								BEGIN
+									RAISERROR(@ErrorMessage, 11, 1);
+									RETURN;
+								END
+							END
+							
+							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2							
+							--DELETE FROM tblAPBill WHERE intBillId =  @intBillId
+							FETCH NEXT FROM voucherCursor INTO @intBillId;
+						END
+
+						CLOSE voucherCursor  
+						DEALLOCATE voucherCursor
+					END
+
+
 
 					-----UPDATE Contract scehdule and balances
 					--IF(@strDistributionOption = 'SPL')
@@ -701,7 +798,7 @@ BEGIN TRY
 								, @intMatchLoadContractId = LGLD.intSContractDetailId
 								FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 								WHERE LGL.intTicketId = @intMatchTicketId
-								SELECT @intMatchLoadDetailId
+								--SELECT @intMatchLoadDetailId
 								IF ISNULL(@intMatchLoadDetailId, 0) > 0
 								BEGIN
 									
@@ -1543,43 +1640,71 @@ BEGIN TRY
 										END
 										ELSE
 										BEGIN
-											IF(@dblLoadUsedQty > @dblContractAvailableQty)
+
+											IF @dblTicketScheduledQty <= @dblContractAvailableQty
 											BEGIN
-												SET @dblLoadUsedQty = @dblContractAvailableQty
+												SET @dblLoadUsedQty = @dblTicketScheduledQty
 											END
-										END
-
-										IF @dblLoadUsedQty <> 0
-										BEGIN
-										
-											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryShipmentItemUsed, 'Inventory Shipment', @intTicketItemUOMId
-
-											IF(ISNULL(@ysnLoadContract,0) = 0)
+											ELSE
 											BEGIN
-												IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketAutoScaleLog WHERE intTicketId = @intTicketId AND ysnHeader = 1)
+												IF(@dblTicketScheduledQty > @dblLoadUsedQty)
 												BEGIN
-													----- Check Load Quantity
-													SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@_dblOriginalLoadUsedQty)
-														,@_dblLoadItemUOMId = intItemUOMId
-														,@_dblLoadQuantity = dblQuantity
-													FROM tblLGLoadDetail
-													WHERE intLoadDetailId = @intTicketLoadDetailId
-
-													SET @_dblLoadQtyVsUsedDiff = (SELECT @_dblCovertedLoadQtyUsed - @_dblLoadQuantity)
-
-													IF @_dblOriginalLoadUsedQty > @_dblLoadQuantity AND (@_dblLoadQtyVsUsedDiff <> 0) 
+													IF(@dblLoadUsedQty > @dblContractAvailableQty)
 													BEGIN
-														SET @_dblLoadQtyVsUsedDiff = @_dblLoadQtyVsUsedDiff * -1
-														EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadQtyVsUsedDiff, @intUserId, @intTicketId, 'Auto - Scale', @_dblLoadItemUOMId														
+														SET @dblLoadUsedQty = @dblContractAvailableQty
 													END
 												END
 												ELSE
 												BEGIN
-
-													EXEC uspSCAutoScaleLogResetSchdule @TICKET_ID = @intTicketId, @USER_ID = @intUserId
-
+													SET @dblLoadUsedQty = @dblContractAvailableQty
 												END
 											END
+
+
+										END
+
+										IF @dblLoadUsedQty <> 0
+										BEGIN
+											
+											IF ISNULL(@intInventoryShipmentItemUsed, 0) <> 0
+											BEGIN
+												
+												EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryShipmentItemUsed, 'Inventory Shipment', @intTicketItemUOMId
+
+												IF(ISNULL(@ysnLoadContract,0) = 0)
+												BEGIN
+													IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketAutoScaleLog WHERE intTicketId = @intTicketId AND ysnHeader = 1)
+													BEGIN
+														----- Check Load Quantity
+														SELECT @_dblCovertedLoadQtyUsed = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,intItemUOMId,@_dblOriginalLoadUsedQty)
+															,@_dblLoadItemUOMId = intItemUOMId
+															,@_dblLoadQuantity = dblQuantity
+														FROM tblLGLoadDetail
+														WHERE intLoadDetailId = @intTicketLoadDetailId
+
+														SET @_dblLoadQtyVsUsedDiff = (SELECT @_dblCovertedLoadQtyUsed - @_dblLoadQuantity)
+
+														IF @_dblOriginalLoadUsedQty > @_dblLoadQuantity AND (@_dblLoadQtyVsUsedDiff <> 0) 
+														BEGIN
+															SET @_dblLoadQtyVsUsedDiff = @_dblLoadQtyVsUsedDiff * -1
+															EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadQtyVsUsedDiff, @intUserId, @intTicketId, 'Auto - Scale', @_dblLoadItemUOMId														
+														END
+													END
+													ELSE
+													BEGIN
+
+														EXEC uspSCAutoScaleLogResetSchdule @TICKET_ID = @intTicketId, @USER_ID = @intUserId
+
+													END
+												END
+
+											END
+											ELSE
+											BEGIN
+												EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId
+
+											END
+										
 										END
 									END
 								END

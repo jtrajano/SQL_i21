@@ -148,6 +148,7 @@ BEGIN TRY
 			, ysnBlendedItem
 			, intTaxGroupId
 			, dblFreightUnit
+			, ysnComboFreight
 		INTO #tmpDistributionDetail
 		FROM tblTRLoadDistributionDetail
 		WHERE intLoadDistributionHeaderId = @loadDistributionHeaderId
@@ -168,6 +169,7 @@ BEGIN TRY
 				, ysnBlendedItem
 				, intTaxGroupId
 				, dblFreightUnit
+				, ysnComboFreight
 				, intConcurrencyId)
 			SELECT intLoadDistributionHeaderId
 				, strReceiptLink
@@ -180,6 +182,7 @@ BEGIN TRY
 				, ysnBlendedItem
 				, intTaxGroupId
 				, dblFreightUnit
+				, ysnComboFreight
 				, 1
 			FROM #tmpDistributionDetail
 			WHERE intLoadDistributionDetailId = @loadDistributionDetailId

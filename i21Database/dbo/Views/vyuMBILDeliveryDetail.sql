@@ -18,6 +18,8 @@ SELECT detail.intDeliveryDetailId
 	  ,detail.intShiftId
       ,detail.dblWaterInches
       ,detail.intContractDetailId
+      ,detail.dblGross
+      ,detail.dblNet
 FROM tblMBILDeliveryDetail detail            
 INNER JOIN tblICItem item ON detail.intItemId = item.intItemId
 INNER JOIN tblMBILDeliveryHeader deliveryHeader on detail.intDeliveryHeaderId = deliveryHeader.intDeliveryHeaderId

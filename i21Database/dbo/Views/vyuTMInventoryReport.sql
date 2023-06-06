@@ -12,6 +12,7 @@ AS
 			,dblUllage = dblUllage.dblUllage
 			,dblTotalCapacity = dblTotalCapacity.dblTotalCapacity
 			,dblWaterHeight = dblWaterHeight.dblWaterHeight
+			,intSiteID = A.intSiteID
 		FROM tblTMSite A
 		INNER JOIN tblTMCustomer B	
 			ON A.intCustomerID = B.intCustomerID

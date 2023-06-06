@@ -50,7 +50,11 @@ CROSS APPLY(
 		ELSE 0
 		END
 	ELSE
-		CASE WHEN RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,'')))
+		CASE 
+			WHEN 
+			RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,'')))
+			OR 
+			TRY_CAST(C.strReferenceNo AS INT) = TRY_CAST(ABR.strReferenceNo AS INT)
 		THEN 1
 		ELSE 0
 		END

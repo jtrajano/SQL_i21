@@ -285,6 +285,8 @@ BEGIN TRY
 		       ,@BatchIdUsed     = @batchIdUsed OUT
 			   ,@strSessionId	 = @strRequestId
 
+		EXEC [dbo].[uspARPostItemReservation] @strSessionId = @strRequestId, @ysnReversePost = 1
+
         GOTO Do_Commit
     END
 
