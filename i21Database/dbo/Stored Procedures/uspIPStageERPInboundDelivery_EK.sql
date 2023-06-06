@@ -73,6 +73,7 @@ BEGIN TRY
 				,strContainerType
 				,strVoyage
 				,strVessel
+				,strIBDNo
 				)
 			OUTPUT INSERTED.strBatchId
 			INTO @tblIPBatch
@@ -91,6 +92,7 @@ BEGIN TRY
 				,ContainerType
 				,Voyage
 				,Vessel
+				,IBDNo
 			FROM OPENXML(@idoc, 'root/Header', 2) WITH (
 					DocNo BIGINT '../CtrlPoint/DocNo'
 					,PurchGroup NVARCHAR(50)
@@ -106,6 +108,7 @@ BEGIN TRY
 					,ContainerType NVARCHAR(50)
 					,Voyage NVARCHAR(50)
 					,Vessel NVARCHAR(50)
+					,IBDNo NVARCHAR(50)
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strBatchId, '') + ','
