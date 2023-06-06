@@ -4,11 +4,11 @@ AS
 BEGIN
 	SELECT DISTINCT 
 		strCustomer = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN 'Unsold' ELSE EM.strName END
-		,SHeader.strContractNumber AS strSContractNumber
+		,strSContractNumber = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN '' ELSE SHeader.strContractNumber END
 		,dblQuantity = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN NULL ELSE LDCL.dblQuantity END
 		,strUnitMeasure = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN NULL ELSE UOM.strUnitMeasure END
-		,strFreightTerm = FT.strFreightTerm
-		,dtmLastFreeDate = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN 'N/A' ELSE LW.dtmLastFreeDate END
+		,strFreightTerm = CASE WHEN ISNULL(SHeader.strContractNumber, '0') = '0' THEN NULL ELSE FT.strFreightTerm END
+		,dtmLastFreeDate = LW.dtmLastFreeDate
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
