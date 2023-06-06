@@ -6,6 +6,7 @@ SELECT
 	,intSubLocationId = IL.intSubLocationId
 	,intEntityId = E.intEntityId
 	,intEntityLocationId = EL.intEntityLocationId
+	,intCustomerId = TMS.intCustomerID
 	,intSiteId = TMO.intSiteID
 	,intDeviceId = SD.intDeviceId
 	,strSerialNumber = SD.strSerialNumber
