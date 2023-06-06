@@ -487,7 +487,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
 :R .\GR\Fix_SettleStorage_Basis.sql
-
+:R .\GR\Fix_intCommodityStockUOMId.sql
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql
@@ -769,6 +769,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MBIL - Mobile Billing
 :r .\MBIL\InsertLongTruckScreen.sql
+:r .\MBIL\InsertDefaultMobileCompanyPref.sql
 
 -- Clean up i21 database objects
 :r .\SM\01_CleanupObjects.sql

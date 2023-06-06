@@ -243,6 +243,7 @@ BEGIN
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
 				AND R2.strCalculationMethod != 'Using Texas Fee Matrix'
+				AND R2.ysnTaxExempt = 0
 				UNION ALL --TEXAS FEE
 				SELECT DISTINCT
 					-1,
@@ -258,6 +259,7 @@ BEGIN
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
                 WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
 				AND R2.strCalculationMethod = 'Using Texas Fee Matrix'
+				AND R2.ysnTaxExempt = 0
 				-- UNION ALL --discount
 				-- SELECT
 				-- 	(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
@@ -1218,6 +1220,8 @@ BEGIN
 				ON A.intEntityVendorId = C.[intEntityId]
 			INNER JOIN tblAPBillDetailTax D
 				ON B.intBillDetailId = D.intBillDetailId
+			INNER JOIN tblSMTaxCode tc
+				ON D.intTaxCodeId = tc.intTaxCodeId
 			LEFT JOIN tblICInventoryReceiptCharge charges
 				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
 			LEFT JOIN tblICInventoryReceipt receipts
@@ -1228,6 +1232,8 @@ BEGIN
 				ON B.intItemId = B2.intItemId
 			LEFT JOIN tblICItemLocation loc
 				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItemLocation detailloc
+				ON detailloc.intItemId = B.intItemId AND detailloc.intLocationId = B.intLocationId
 			LEFT JOIN tblICItem F
 				ON B.intItemId = F.intItemId
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
@@ -1235,6 +1241,7 @@ BEGIN
 		  AND A.intTransactionType <> 15
 		  AND D.ysnTaxAdjusted = 1
 		  AND D.strCalculationMethod != 'Using Texas Fee Matrix'
+		  AND D.ysnTaxExempt = 0
 		  --AND D.dblTax != 0 --include zero because we load the exempted tax, we expect that it will be adjusted to non zero
 		  --AND (B.intInventoryReceiptItemId > 0 OR B.intInventoryShipmentChargeId > 0 OR B.intCustomerStorageId > 0) --create tax adjustment only for integration
 	GROUP BY A.dtmDate
@@ -1265,6 +1272,164 @@ BEGIN
 	,A.intStoreLocationId
 	,E.strName
 	,B.strComment
+	UNION ALL --TAX EXEMPT
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	CASE WHEN D.dblAdjustedTax > D.dblTax 
+											THEN 
+												tc.intPurchaseTaxAccountId
+											ELSE 
+												CASE WHEN tc.ysnExpenseAccountOverride = 1 THEN dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Other Charge Expense')
+												WHEN tc.ysnAddToCost = 1 THEN dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Inventory')
+												ELSE tc.intPurchaseTaxExemptionAccountId END
+											END,
+		[dblDebit]						=	CAST((ISNULL(D.dblAdjustedTax, D.dblTax) - D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	D.intBillDetailTaxId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	CAST(ISNULL(D.dblAdjustedTax, D.dblTax) - D.dblTax AS DECIMAL(18,2)), 
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			INNER JOIN tblAPBillDetailTax D
+				ON B.intBillDetailId = D.intBillDetailId
+			INNER JOIN tblSMTaxCode tc
+				ON D.intTaxCodeId = tc.intTaxCodeId
+			LEFT JOIN tblICInventoryReceiptCharge charges
+				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+			LEFT JOIN tblICInventoryReceipt receipts
+				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
+				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			LEFT JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItemLocation detailloc
+				ON detailloc.intItemId = B.intItemId AND detailloc.intLocationId = B.intLocationId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND A.intTransactionType IN (1,3)
+		  AND A.intTransactionType <> 15
+		  AND D.ysnTaxAdjusted = 1
+		  AND D.strCalculationMethod != 'Using Texas Fee Matrix'
+		  AND D.ysnTaxExempt = 1
+	UNION ALL
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	CASE WHEN D.dblAdjustedTax < D.dblTax 
+											THEN 
+												tc.intPurchaseTaxExemptionAccountId
+											ELSE 
+												CASE WHEN tc.ysnExpenseAccountOverride = 1 THEN dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Other Charge Expense')
+													WHEN tc.ysnAddToCost = 1 THEN dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'Inventory')
+												ELSE tc.intPurchaseTaxAccountId END
+											END,
+		[dblDebit]						=	0,
+		[dblCredit]						=	CAST((ISNULL(D.dblAdjustedTax, D.dblTax) - D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	NULL,
+		[strCode]						=	'AP',	
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	D.intBillDetailTaxId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	CAST(ISNULL(D.dblAdjustedTax, D.dblTax) - D.dblTax AS DECIMAL(18,2)), 
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			INNER JOIN tblAPBillDetailTax D
+				ON B.intBillDetailId = D.intBillDetailId
+			INNER JOIN tblSMTaxCode tc
+				ON D.intTaxCodeId = tc.intTaxCodeId
+			LEFT JOIN tblICInventoryReceiptCharge charges
+				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+			LEFT JOIN tblICInventoryReceipt receipts
+				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
+				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			INNER JOIN tblICItem B2
+				ON B.intItemId = B2.intItemId
+			LEFT JOIN tblICItemLocation loc
+				ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
+			LEFT JOIN tblICItemLocation detailloc
+				ON detailloc.intItemId = B.intItemId AND detailloc.intLocationId = B.intLocationId
+			LEFT JOIN tblICItem F
+				ON B.intItemId = F.intItemId
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND A.intTransactionType IN (1,3)
+		  AND A.intTransactionType <> 15
+		  AND D.ysnTaxAdjusted = 1
+		  AND D.strCalculationMethod != 'Using Texas Fee Matrix'
+		  AND D.ysnTaxExempt = 1
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

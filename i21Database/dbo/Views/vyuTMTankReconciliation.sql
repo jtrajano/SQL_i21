@@ -42,7 +42,17 @@ SELECT		b.intTankReconciliationDetailId,
 				WHEN a.strConsumptionSiteFilter = 'Stores'
 				THEN a.strStoresIncludedDescription
 				ELSE ''
-				END AS strConsumptionSiteFilterValue
+				END AS strConsumptionSiteFilterValue,
+			CASE
+				WHEN a.strReportName = 'Regulatory'
+				THEN 'Start Volume'
+				ELSE '*Start Volume'
+				END AS strStartVolumeLabel,
+			CASE
+				WHEN a.strReportName = 'Regulatory'
+				THEN ''
+				ELSE '* = For Audited\Unaudited Reports, all manual adjustments that increase inventory are reflected in the Start Volume of the following day.'
+				END AS strFooter
 FROM		tblTMTankReconciliationDetail b
 INNER JOIN	tblTMTankReconciliation a
 ON			a.intTankReconciliationId = b.intTankReconciliationId

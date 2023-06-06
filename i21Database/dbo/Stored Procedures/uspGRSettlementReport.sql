@@ -28,7 +28,8 @@ DECLARE	@strCompanyName		NVARCHAR(500)
 	,@strState				NVARCHAR(500)
 	,@strZip				NVARCHAR(500)
 	,@strCountry			NVARCHAR(500)
-	,@strPhone				NVARCHAR(500)			
+	,@strPhone				NVARCHAR(500)	
+	,@ysnExport				BIT		
 
 DECLARE @temp_xml_table TABLE 
 (
@@ -129,6 +130,8 @@ DECLARE @Settlement AS TABLE
 	,strSplitDescription					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strDSSplitNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,ysnPosted							BIT
+	,strPaymentRecordNumber				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,dtmDatePaid						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 )
 	
 DECLARE @tblPayment AS TABLE 
@@ -180,16 +183,31 @@ SELECT @strReportLogId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strReportLogId'
 
-IF @strReportLogId IS NOT NULL
+SELECT @ysnExport = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnExport'
+
+DECLARE @cnt INT
+SELECT @cnt= COUNT(*) FROM tblSRReportLog WHERE strReportLogId = @strReportLogId
+
+IF ISNULL(@ysnExport,0) = 0
 BEGIN
-	IF EXISTS (SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+	IF @strReportLogId IS NOT NULL
 	BEGIN
+		IF @cnt > 0
+		BEGIN
+			RETURN
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
+		END
+	END
+END
+ELSE
+BEGIN
+	IF @cnt > 1
 		RETURN
-	END
-	ELSE
-	BEGIN
-		INSERT INTO tblSRReportLog (strReportLogId, dtmDate) VALUES (@strReportLogId, GETUTCDATE())
-	END
 END
 
 SET @strTransactionId = CASE 
@@ -304,6 +322,8 @@ BEGIN
 				,strSplitDescription
 				,strDSSplitNumber
 				,ysnPosted
+				,strPaymentRecordNumber
+				,dtmDatePaid
 			)
 			/*-------------------------------------------------------
 			*********NON-STORAGE DISTRIBUTION FROM SCALE*************
@@ -476,6 +496,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -778,6 +800,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -968,7 +992,7 @@ BEGIN
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
 				,dblTax							= BillDtl.dblTax + ISNULL(BillByReceipt.dblTax,0)
-				,dblNetTotal					= (BillDtl.dblTotal+ BillDtl.dblTax) + BillByReceipt.dblTax
+				,dblNetTotal					= (BillDtl.dblTotal+ BillDtl.dblTax) + ISNULL(BillByReceipt.dblTax,0)
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0) = 0 THEN 'Dist Type'
 													ELSE 'Contract'
@@ -1047,6 +1071,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1352,6 +1378,8 @@ BEGIN
 				,strSplitDescription			= DS.strSplitDescription
 				,strDSSplitNumber				= ES.strSplitNumber
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -1603,7 +1631,7 @@ BEGIN
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
 				,dblTax							= BillDtl.dblTax
-				,dblNetTotal					= (BillDtl.dblTotal+ BillDtl.dblTax) + BillByReceipt.dblTax
+				,dblNetTotal					= (BillDtl.dblTotal+ BillDtl.dblTax) + ISNULL(BillByReceipt.dblTax,0)
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
 													ELSE 'Contract'
@@ -1694,6 +1722,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1984,6 +2014,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -2253,6 +2285,8 @@ BEGIN
 				,strSplitDescription			= NULL
 				,strDSSplitNumber				= NULL
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -2553,6 +2587,8 @@ BEGIN
 				,strSplitDescription			= DS.strSplitDescription
 				,strDSSplitNumber				= ES.strSplitNumber
 				,ysnPosted						= PYMT.ysnPosted
+				,strPaymentRecordNumber			= PYMT.strPaymentRecordNum
+				,dtmDatePaid					= dbo.fnGRConvertDateToReportDateFormat(PYMT.dtmDatePaid)
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId

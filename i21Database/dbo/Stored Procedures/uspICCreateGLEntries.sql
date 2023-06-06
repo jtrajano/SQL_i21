@@ -217,25 +217,34 @@ SELECT
 FROM	@GLAccounts
 ;
 
+---- Get the default transaction form name
+--SELECT TOP 1 
+--		@strTransactionForm = TransType.strTransactionForm
+--FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+--			ON t.intTransactionTypeId = TransType.intTransactionTypeId
+--		INNER JOIN tblICItem i
+--			ON i.intItemId = t.intItemId 
+--		INNER JOIN #tmpRebuildList list	
+--			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+--			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+--		INNER JOIN @GLAccounts GLAccounts
+--			ON t.intItemId = GLAccounts.intItemId
+--			AND t.intItemLocationId = GLAccounts.intItemLocationId
+--			AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
+--		INNER JOIN dbo.tblGLAccount
+--			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+--WHERE	t.strBatchId = @strBatchId
+--		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+--		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+--;
+
+
 -- Get the default transaction form name
 SELECT TOP 1 
 		@strTransactionForm = TransType.strTransactionForm
-FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
-			ON t.intTransactionTypeId = TransType.intTransactionTypeId
-		INNER JOIN tblICItem i
-			ON i.intItemId = t.intItemId 
-		INNER JOIN #tmpRebuildList list	
-			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
-			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-		INNER JOIN @GLAccounts GLAccounts
-			ON t.intItemId = GLAccounts.intItemId
-			AND t.intItemLocationId = GLAccounts.intItemLocationId
-			AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-WHERE	t.strBatchId = @strBatchId
-		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+FROM	
+		@GLAccounts GLAccounts INNER JOIN dbo.tblICInventoryTransactionType TransType
+			ON GLAccounts.intTransactionTypeId = TransType.intTransactionTypeId
 ;
 
 -- Get the functional currency

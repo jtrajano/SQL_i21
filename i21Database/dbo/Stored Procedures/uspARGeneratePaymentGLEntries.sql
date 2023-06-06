@@ -1330,15 +1330,15 @@ BEGIN
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
-		,[dblDebit]                     = PD.[dblPayment]
+		,[dblDebit]                     = SUM(PD.[dblPayment])
 		,[dblCredit]                    = @ZeroDecimal
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
-		,[strDescription]               = 'Payment from ' + PD.strTransactionId + ' Intra-Company Due To Account'
+		,[strDescription]               = 'Payment from ' + P.[strTransactionId] + ' Intra-Company Due To Account'
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
 		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblExchangeRate], 1)
+		,[dblExchangeRate]              = P.[dblExchangeRate]
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -1352,8 +1352,8 @@ BEGIN
 		,[strTransactionForm]           = @SCREEN_NAME
 		,[strModuleName]                = @MODULE_NAME
 		,[intConcurrencyId]             = 1
-		,[dblDebitForeign]              = PD.[dblPayment]
-		,[dblDebitReport]               = PD.[dblBasePayment]
+		,[dblDebitForeign]              = SUM(PD.[dblPayment])
+		,[dblDebitReport]               = SUM(PD.[dblBasePayment])
 		,[dblCreditForeign]             = @ZeroDecimal
 		,[dblCreditReport]              = @ZeroDecimal
 		,[dblReportingRate]             = P.[dblExchangeRate]
@@ -1379,8 +1379,23 @@ BEGIN
 		P.[ysnPost] = 1
         AND PD.[strTransactionType] <> 'Claim'
 		AND (PD.[dblPayment] <> @ZeroDecimal OR PD.[dblBasePayment] <> @ZeroDecimal)
-		AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesPayment = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesPayment = 1))
-		AND ([dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 3) = 0)
+		AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesPayment = 1 AND [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 6) = 0) 
+			OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesPayment = 1 AND [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 3) = 0))
+	GROUP BY P.[dtmDatePaid]
+			,P.[strBatchId]
+			,P.[strTransactionId]
+			,P.[strCustomerNumber]
+			,P.[intCurrencyId]
+			,P.[dtmPostDate]
+			,P.[intTransactionId]
+			,P.[intUserId]
+			,P.[intEntityId]
+			,P.[strTransactionId]
+			,P.[intTransactionId]
+			,P.[strRateType]
+			,P.[intEntityCustomerId]
+			,P.[dblExchangeRate]
+			,OVERRIDESEGMENT.intOverrideAccount
 
 	--DUE FROM ACCOUNT DEBIT
 	INSERT #ARPaymentGLEntries
@@ -1431,14 +1446,14 @@ BEGIN
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = OVERRIDESEGMENT.intOverrideAccount
 		,[dblDebit]                     = @ZeroDecimal
-		,[dblCredit]                    = PD.[dblPayment]
+		,[dblCredit]                    = SUM(PD.[dblPayment])
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
-		,[strDescription]               = 'Payment from ' + PD.strTransactionId + ' Intra-Company Due From Account'
+		,[strDescription]               = 'Payment from ' + P.[strTransactionId] + ' Intra-Company Due From Account'
 		,[strCode]                      = @CODE
 		,[strReference]                 = P.[strCustomerNumber]
 		,[intCurrencyId]                = P.[intCurrencyId]
-		,[dblExchangeRate]              = ISNULL(P.[dblExchangeRate], 1)
+		,[dblExchangeRate]              = P.[dblExchangeRate]
 		,[dtmDateEntered]               = P.[dtmPostDate]
 		,[dtmTransactionDate]           = P.[dtmDatePaid]
 		,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -1454,8 +1469,8 @@ BEGIN
 		,[intConcurrencyId]             = 1
 		,[dblDebitForeign]              = @ZeroDecimal
 		,[dblDebitReport]               = @ZeroDecimal
-		,[dblCreditForeign]             = PD.[dblPayment]
-		,[dblCreditReport]              = PD.[dblBasePayment]
+		,[dblCreditForeign]             = SUM(PD.[dblPayment])
+		,[dblCreditReport]              = SUM(PD.[dblBasePayment])
 		,[dblReportingRate]             = P.[dblExchangeRate]
 		,[dblForeignRate]               = P.[dblExchangeRate]
 		,[strRateType]                  = P.[strRateType]
@@ -1479,8 +1494,23 @@ BEGIN
 		P.[ysnPost] = 1
         AND PD.[strTransactionType] <> 'Claim'
 		AND (PD.[dblPayment] <> @ZeroDecimal OR PD.[dblBasePayment] <> @ZeroDecimal)
-		AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesPayment = 1) OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesPayment = 1))
-		AND ([dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 3) = 0)
+		AND ((@AllowIntraCompanyEntries = 1 AND @AllowIntraCompanyEntriesPayment = 1 AND [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 6) = 0) 
+			OR (@AllowIntraLocationEntries = 1 AND @AllowIntraLocationEntriesPayment = 1 AND [dbo].[fnARCompareAccountSegment](P.[intUndepositedFundsId], PD.[intTransactionAccountId], 3) = 0))
+	GROUP BY P.[dtmDatePaid]
+			,P.[strBatchId]
+			,P.strTransactionId
+			,P.[strCustomerNumber]
+			,P.[intCurrencyId]
+			,P.[dtmPostDate]
+			,P.[intTransactionId]
+			,P.[intUserId]
+			,P.[intEntityId]
+			,P.[strTransactionId]
+			,P.[intTransactionId]
+			,P.[strRateType]
+			,P.[intEntityCustomerId]
+			,P.[dblExchangeRate]
+			,OVERRIDESEGMENT.intOverrideAccount
 END
 					
 IF @Post = 0

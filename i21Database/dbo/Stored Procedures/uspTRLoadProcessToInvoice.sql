@@ -70,17 +70,7 @@ BEGIN TRY
 		,[strInvoiceOriginId]					= ''
 		,[strPONumber]							= DH.strPurchaseOrder
 		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, DD.strBillOfLading)
-		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
-														(CASE 
-															WHEN BlendingIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendingIngredient.strSupplyPoint, ''))
-															WHEN BlendingIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-															WHEN BlendingIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(BlendingIngredient.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-														END))
-													ELSE (CASE
-														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))
-														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-													END) END COLLATE Latin1_General_CI_AS
+		,[strComments]							= ''
 		/*
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
@@ -1120,6 +1110,21 @@ BEGIN TRY
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
+
+
+	-- GET SURCHARGE SUM FOR COMBO FREIGHT CALCULATION
+	DECLARE @dblFreightQtySurchargeTotal DECIMAL(18,6) = 0
+
+	SELECT @dblFreightQtySurchargeTotal = SUM(IE.dblFreightQty)
+	FROM #tmpSourceTableFinal IE 
+		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
+	WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 
+		AND IE.ysnComboFreight = 1 
+		AND IE.intId > 0 
+		AND ISNULL(IE.dblSurcharge, 0) != 0)
+
+
+
 	DECLARE @FreightSurchargeEntries AS InvoiceIntegrationStagingTable
 
 	--Surcharge Item
@@ -1326,8 +1331,12 @@ BEGIN TRY
 			,[strItemDescription]					= Item.strDescription
 			,[intOrderUOMId]						= @intSurchargeItemUOMId
 			,[intItemUOMId]							= @intSurchargeItemUOMId
-			,[dblQtyOrdered]						= CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
-			,[dblQtyShipped]						= CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+			,[dblQtyOrdered]						= CASE WHEN IE.ysnComboFreight = 1 THEN CASE WHEN @dblFreightQtySurchargeTotal <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(@dblFreightQtySurchargeTotal, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+													  ELSE CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+													  END
+			,[dblQtyShipped]						= CASE WHEN IE.ysnComboFreight = 1 THEN CASE WHEN @dblFreightQtySurchargeTotal <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(@dblFreightQtySurchargeTotal, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+													  ELSE CASE WHEN IE.dblFreightQty <= IE.dblComboMinimumUnits THEN ISNULL(IE.dblComboMinimumUnits, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) ELSE ISNULL(IE.dblFreightQty, 0.000000) * ISNULL(IE.[dblComboFreightRate], 0.000000) END
+													  END
 			,[dblDiscount]							= 0
 			,[dblPrice]								= ISNULL(IE.dblComboSurcharge, 0.000000) / 100
 			,[ysnRefreshPrice]						= 0
@@ -1697,9 +1706,12 @@ BEGIN TRY
 					WHERE intInvoiceId = @InvoiceId
 				)
 
-			UPDATE tblTRLoadHeader 
-			SET ysnPosted = @ysnPostOrUnPost
-			WHERE intLoadHeaderId = @intLoadHeaderId
+			IF (@ysnRecap != 1)
+			BEGIN
+				UPDATE tblTRLoadHeader 
+				SET ysnPosted = @ysnPostOrUnPost
+				WHERE intLoadHeaderId = @intLoadHeaderId
+			END
 
 			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
 		END
@@ -1712,9 +1724,12 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdated
 
-			UPDATE tblTRLoadHeader 
-			SET ysnPosted = @ysnPostOrUnPost
-			WHERE intLoadHeaderId = @intLoadHeaderId
+			IF (@ysnRecap != 1)
+			BEGIN
+				UPDATE tblTRLoadHeader 
+				SET ysnPosted = @ysnPostOrUnPost
+				WHERE intLoadHeaderId = @intLoadHeaderId
+			END
 
 			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
 		END

@@ -43,6 +43,7 @@
     [strTimeOut]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [intPollingIntervalMinute] INT NULL, 
     [intTankSiteNumber] INT NULL, 
+    [strTMSAppFileVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     --[intTankMonitorId]          INT NULL,
    
 

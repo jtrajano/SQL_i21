@@ -4,19 +4,19 @@ CREATE TABLE [dbo].[tblApiSchemaTransformItemUOM] (
     intRowNumber INT NULL,
 	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The item number.
 	strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The unit of measure.
-	dblUnitQty NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The unit quantity.
+	dblUnitQty NUMERIC(38, 20) NULL, -- The unit quantity.
 	strWeightUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The weight unit of measure.
 	strUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The Long UPC.
 	strShortUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The Short UPC.
 	ysnIsStockUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- Check if stock unit.
 	ysnAllowPurchase NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- Check if allowed purchase.
 	ysnAllowSale NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- Check if allowed sale.
-	dblLength NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The length.
-	dblWidth NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The width.
-	dblHeight NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The height.
+	dblLength NUMERIC(38, 20) NULL, -- The length.
+	dblWidth NUMERIC(38, 20) NULL, -- The width.
+	dblHeight NUMERIC(38, 20) NULL, -- The height.
 	strDimensionUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The dimension unit of measure.
-	dblWeight NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The weight.
-	dblVolume NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The volume.
+	dblWeight NUMERIC(38, 20) NULL, -- The weight.
+	dblVolume NUMERIC(38, 20) NULL, -- The volume.
 	strVolumeUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, -- The volume unit of measure.
-	dblMaxQty NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- The max quantity.
+	dblMaxQty NUMERIC(38, 20) NULL -- The max quantity.
 )

@@ -59,7 +59,8 @@ BEGIN
 			WHERE		a.intSiteID IN (
 										SELECT		intSiteID 
 										FROM		tblTMSite
-										WHERE		@strConsumptionSiteFilter = 'All Sites'
+										WHERE		@strConsumptionSiteFilter = 'All Sites' AND
+													ysnCompanySite = 1
 										
 										UNION
 										
@@ -97,7 +98,7 @@ BEGIN
 						c.strDescription,
 						@dtmDateFrom,
 						ISNULL(dbo.fnICGetItemRunningStockQty(a.intProduct, a.intLocationId, null, null, null, null, null, DATEADD(MINUTE, -1, @dtmDateFrom), 1),0) AS dtmStartVolume,
-						dbo.fnTMGetDeliveries(@dtmDateFrom, a.intSiteID, 0) as dblDeliveries,
+						dbo.fnTMGetDeliveries(@dtmDateFrom, a.intSiteID, 1) as dblDeliveries,
 						CASE
 							WHEN dbo.fnTMIsConsumptionSiteAtAStore(a.intSiteID) = 1
 							THEN dbo.fnTMGetSalesFromStoreEOD(@dtmDateFrom, a.intSiteID)
@@ -117,7 +118,8 @@ BEGIN
 			WHERE		a.intSiteID IN (
 										SELECT		intSiteID 
 										FROM		tblTMSite
-										WHERE		@strConsumptionSiteFilter = 'All Sites'
+										WHERE		@strConsumptionSiteFilter = 'All Sites' AND
+													ysnCompanySite = 1
 										
 										UNION
 										
@@ -175,7 +177,8 @@ BEGIN
 			WHERE		a.intSiteID IN (
 										SELECT		intSiteID 
 										FROM		tblTMSite
-										WHERE		@strConsumptionSiteFilter = 'All Sites'
+										WHERE		@strConsumptionSiteFilter = 'All Sites' AND
+													ysnCompanySite = 1
 										
 										UNION
 										

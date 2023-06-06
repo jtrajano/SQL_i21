@@ -156,6 +156,7 @@ BEGIN TRY
 							<th>&nbsp;Sequence No</th>
 							<th>&nbsp;ERP PO No</th>
 							<th>&nbsp;Location</th>
+							<th>&nbsp;Vendor</th>
 							<th>&nbsp;Message</th>
 						</tr>'
 
@@ -164,6 +165,7 @@ BEGIN TRY
 			FROM tblCTContractFeed CF WITH (NOLOCK)
 			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CH.intContractTypeId = 1
+			JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
 			WHERE CF.intStatusId IN (1, 3)
 				AND CF.ysnMailSent = 0
 			)
@@ -173,11 +175,13 @@ BEGIN TRY
 				   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, CF.intContractSeq), '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CF.strERPPONumber, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CF.strLocationName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(E.strName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CF.strMessage, '') + '</td>' + 
 			'</tr>'
 			FROM tblCTContractFeed CF WITH (NOLOCK)
 			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CH.intContractTypeId = 1
+			JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
 			WHERE CF.intStatusId IN (1, 3)
 				AND CF.ysnMailSent = 0
 
@@ -186,6 +190,7 @@ BEGIN TRY
 			FROM tblCTContractFeed CF WITH (NOLOCK)
 			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CH.intContractTypeId = 1
+			JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
 			WHERE CF.intStatusId IN (1, 3)
 				AND CF.ysnMailSent = 0
 		END
@@ -198,6 +203,7 @@ BEGIN TRY
 							<th>&nbsp;Sequence No</th>
 							<th>&nbsp;ERP CO No</th>
 							<th>&nbsp;Location</th>
+							<th>&nbsp;Customer</th>
 							<th>&nbsp;Message</th>
 						</tr>'
 
@@ -206,6 +212,7 @@ BEGIN TRY
 			FROM tblCTContractFeed CF WITH (NOLOCK)
 			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CH.intContractTypeId = 2
+			JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
 			WHERE CF.intStatusId IN (1, 3)
 				AND CF.ysnMailSent = 0
 			)
@@ -215,11 +222,13 @@ BEGIN TRY
 				   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, CF.intContractSeq), '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CF.strERPPONumber, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CF.strLocationName, '') + '</td>' + 
+				   '<td>&nbsp;' + ISNULL(E.strName, '') + '</td>' + 
 				   '<td>&nbsp;' + ISNULL(CF.strMessage, '') + '</td>' + 
 			'</tr>'
 			FROM tblCTContractFeed CF WITH (NOLOCK)
 			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CH.intContractTypeId = 2
+			JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
 			WHERE CF.intStatusId IN (1, 3)
 				AND CF.ysnMailSent = 0
 
@@ -228,6 +237,7 @@ BEGIN TRY
 			FROM tblCTContractFeed CF WITH (NOLOCK)
 			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CF.intContractHeaderId
 				AND CH.intContractTypeId = 2
+			JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = CH.intEntityId
 			WHERE CF.intStatusId IN (1, 3)
 				AND CF.ysnMailSent = 0
 		END
