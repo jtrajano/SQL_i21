@@ -120,8 +120,7 @@ BEGIN
             @Code  = Code,
             @AccountSegmentString = cast(AccountSegmentId as nvarchar(50)),
             @AccountSegmentId = AccountSegmentId,
-			@StructureName = A.strStructureName,
-            @EntityId = EntityId
+			@StructureName = A.strStructureName
             FROM vyuGLSegmentDetail A join @tblGLAccountSegmentLog B ON A.intAccountSegmentId = B.AccountSegmentId
 
 	 SET @changeDescription = 'Created ' + @StructureName + ' Segment ' + @Code
@@ -173,8 +172,7 @@ SELECT
 			@AccountGroup_Old = GRP_Old.strAccountGroup,
 			@AccountCategory_New = CAT_New.strAccountCategory,
 			@AccountCategory_Old = CAT_Old.strAccountCategory,
-			@StructureName = A.strStructureName
-            
+			@StructureName = A.strStructureName 
             FROM vyuGLSegmentDetail A join @tblGLAccountSegmentLog B ON A.intAccountSegmentId = B.AccountSegmentId
 			outer apply(
 				select top 1 strAccountGroup from tblGLAccountGroup WHERE intAccountGroupId = AccountGroup_New
