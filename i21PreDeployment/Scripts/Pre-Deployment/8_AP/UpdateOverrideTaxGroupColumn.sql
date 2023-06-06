@@ -1,10 +1,13 @@
 ﻿--THIS WILL UPDATE THE tblAPBillDetail.ysnOverrideTaxGroup
-GO
-
-IF COL_LENGTH('tblAPBillDetail','ysnOverrideTaxGroup') IS NOT NULL
+IF EXISTS(SELECT * FROM sys.columns WHERE [name] = N'ysnOverrideTaxGroup' AND [object_id] = OBJECT_ID(N'tblAPBillDetail'))
 BEGIN
-	UPDATE tblAPBillDetail SET ysnOverrideTaxGroup = 0 
-	WHERE ysnOverrideTaxGroup IS NULL
+	EXEC('
+		IF (EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail A WHERE A.ysnOverrideTaxGroup IS NULL))
+		BEGIN
+			UPDATE A
+				SET A.ysnOverrideTaxGroup = 0
+				FROM tblAPBillDetail A
+				WHERE A.ysnOverrideTaxGroup IS NULL
+		END
+	')
 END
-
-GO
