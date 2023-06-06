@@ -128,7 +128,7 @@ BEGIN
 		,strLocationName
 	)
 	SELECT
-		dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),AR.dtmPostDate,110),110)
+		dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),SC.dtmTicketDateTime,110),110)
 		,dblTotal = QTY.dblResultQty
 		,AR.strInvoiceNumber
 		,'Invoice'
