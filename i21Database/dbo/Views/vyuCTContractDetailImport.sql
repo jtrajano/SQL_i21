@@ -70,7 +70,7 @@ SELECT CD.intContractDetailImportId
  ,dblTotalCost = CD.dblCashPrice * CD.dblQuantity    * CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))    
  ,dblRealQuantity = CD.dblQuantity  * (CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10)) )
  ,dtmCashFlowDate = CD.dtmEndDate + ISNULL(SMT.intBalanceDue, 0)
- , wg.intWeightGradeId
+ , intGradeId = wg.intWeightGradeId
 FROM tblCTContractDetailImport    CD    
 LEFT JOIN tblCTContractHeader    CH  ON CH.strContractNumber   = CD.strContractNumber collate database_default    
 LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId and CH.intCommodityUOMId = CUM.intCommodityUnitMeasureId  
