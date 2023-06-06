@@ -66,6 +66,7 @@ BEGIN
 		,strPriceUOM = PUM.strUnitMeasure
 		,ysnSubCurrency = PCU.ysnSubCurrency
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
+		,intTMCustomerId = TMS.intCustomerID
 		,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 		,strSerialNumber = TMD.strSerialNumber
 	FROM tblLGLoadDetail LoadDetail
