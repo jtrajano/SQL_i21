@@ -404,9 +404,10 @@ INNER JOIN tblTMSite TMS on TMS.intSiteID = TMD.intSiteID
 WHERE intStopType = 2 and intDispatchStatus = 3 AND 
  NOT EXISTS(SELECT intDeliveryHeaderId
  FROM tblMBILDeliveryHeader p
- WHERE p.intLoadHeaderId = MB.intLoadHeaderId  AND DO.intDriverEntityId = @intDriverId AND 
+ WHERE p.intLoadHeaderId = MB.intLoadHeaderId  AND 
 isnull(p.intEntityLocationId,0) = isnull(DOD.intEntityLocationId,0) AND 
 isnull(p.intCompanyLocationId,0) = isnull(CASE WHEN TMS.ysnCompanySite  = 1 then TMS.intLocationId ELSE DO.intCompanyLocationId END,isnull(p.intCompanyLocationId,0)))
+AND DO.intDriverEntityId = @intDriverId 
 
 UPDATE MBDH
 SET MBDH.intLoadHeaderId = MB.intLoadHeaderId
