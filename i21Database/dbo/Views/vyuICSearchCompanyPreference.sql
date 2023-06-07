@@ -9,6 +9,11 @@ SELECT
 	,i.strItemNo
 	,(SELECT ysnEnable FROM tblSMStartingNumber WHERE intStartingNumberId = '185') AS ysnEnable
 	,strEnableIntraCompanyTransfer = CASE WHEN ic.ysnEnableIntraCompanyTransfer = 1 THEN 'Yes' ELSE 'No' END 
+	,startingNumber.ysnEnable
+	,strEnableIntraCompanyTransfer = CASE WHEN ic.ysnEnableIntraCompanyTransfer = 1 THEN 'Yes' ELSE 'No' END 	
+	,strOverrideCompanySegment = CASE WHEN ic.ysnOverrideCompanySegment = 1 OR ic.ysnOverrideCompanySegment IS NULL THEN 'Yes' ELSE 'No' END 
+	,strOverrideLocationSegment = CASE WHEN ic.ysnOverrideLocationSegment = 1 OR ic.ysnOverrideLocationSegment IS NULL THEN 'Yes' ELSE 'No' END 
+	,strOverrideLOBSegment = CASE WHEN ic.ysnOverrideLOBSegment = 1 THEN 'Yes' ELSE 'No' END 
 FROM 
 	tblICCompanyPreference ic
 	OUTER APPLY (
