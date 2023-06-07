@@ -1791,6 +1791,7 @@
     <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
