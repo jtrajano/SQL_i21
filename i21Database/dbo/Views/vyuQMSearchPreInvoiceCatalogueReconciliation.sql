@@ -45,6 +45,8 @@ SELECT intBillDetailId					    = BD.intBillDetailId
 	 , strReconciliationNumber				= CR.strReconciliationNumber
 	 , strBatchId							= MFB.strBatchId
 	 , intBatchId							= MFB.intBatchId
+	 , intBrokerId							= S.intBrokerId
+	 , strBrokerName						= EB.strName
 FROM tblAPBillDetail BD
 INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
 INNER JOIN tblQMSaleYear SY ON CAST(BD.intSaleYear AS NVARCHAR(10)) = SY.strSaleYear
@@ -69,6 +71,7 @@ LEFT JOIN tblICCommodityAttribute CA ON BD.strComment = CA.strDescription AND CA
 LEFT JOIN tblICCommodityAttribute CAS ON S.intGradeId = CAS.intCommodityAttributeId AND CAS.strType = 'Grade'
 LEFT JOIN tblSMTransaction SMT ON CR.strReconciliationNumber = SMT.strTransactionNo AND CR.intCatalogueReconciliationId = SMT.intRecordId
 LEFT JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId AND MFB.intLocationId = MFB.intBuyingCenterLocationId
+LEFT JOIN tblEMEntity EB ON S.intBrokerId = EB.intEntityId
 WHERE (CRD.intCatalogueReconciliationDetailId IS NULL
     OR (CRD.intCatalogueReconciliationDetailId IS NOT NULL 
 	  AND (SMT.intTransactionId IS NOT NULL AND SMT.strApprovalStatus NOT IN ('No Need for Approval', 'Approved')))

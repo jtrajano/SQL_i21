@@ -62,6 +62,8 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , ysnIBDReceived                             = CASE WHEN MFB.strERPPONumber IS NULL OR MFB.strERPPONumber = '' THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
      , strBatchId							= MFB.strBatchId
 	, intBatchId							= MFB.intBatchId
+     , intBrokerId							= S.intBrokerId
+     , strBrokerName						= EB.strName
 FROM tblQMCatalogueReconciliationDetail CRD 
 INNER JOIN tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId
 INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = CRD.intBillDetailId
@@ -80,3 +82,4 @@ LEFT JOIN tblICCommodityAttribute CA ON CRD.intGradeId = CA.intCommodityAttribut
 LEFT JOIN tblICCommodityAttribute PGCA ON CRD.intPreInvoiceGradeId = PGCA.intCommodityAttributeId AND PGCA.strType = 'Grade'
 LEFT JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'CatalogueReconciliation'
 LEFT JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId AND MFB.intLocationId = MFB.intBuyingCenterLocationId
+LEFT JOIN tblEMEntity EB ON S.intBrokerId = EB.intEntityId
