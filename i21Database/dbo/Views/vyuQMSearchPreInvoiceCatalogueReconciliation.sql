@@ -39,6 +39,10 @@ SELECT intBillDetailId					    = BD.intBillDetailId
 	 , strApprovalStatus					= SMT.strApprovalStatus
 	 , intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
 	 , strReconciliationNumber				= CR.strReconciliationNumber
+	 , strBatchId							= MFB.strBatchId
+	 , intBatchId							= MFB.intBatchId
+	 , intBrokerId							= S.intBrokerId
+	 , strBrokerName						= EB.strName
 FROM tblAPBillDetail BD
 INNER JOIN tblAPBill B ON BD.intBillId = B.intBillId
 INNER JOIN tblQMSaleYear SY ON CAST(BD.intSaleYear AS NVARCHAR(10)) = SY.strSaleYear
@@ -60,8 +64,9 @@ LEFT JOIN tblQMCatalogueType CT ON BD.intCatalogueTypeId = CT.intCatalogueTypeId
 LEFT JOIN tblQMGardenMark GM ON BD.intGardenMarkId = GM.intGardenMarkId
 LEFT JOIN tblICCommodityAttribute CA ON BD.strComment = CA.strDescription AND CA.strType = 'Grade'
 LEFT JOIN tblSMTransaction SMT ON CR.strReconciliationNumber = SMT.strTransactionNo AND CR.intCatalogueReconciliationId = SMT.intRecordId
-WHERE B.ysnPosted = 0
-  AND (CRD.intCatalogueReconciliationDetailId IS NULL
+LEFT JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId AND MFB.intLocationId = MFB.intBuyingCenterLocationId
+LEFT JOIN tblEMEntity EB ON S.intBrokerId = EB.intEntityId
+WHERE (CRD.intCatalogueReconciliationDetailId IS NULL
     OR (CRD.intCatalogueReconciliationDetailId IS NOT NULL 
 	  AND (SMT.intTransactionId IS NOT NULL AND SMT.strApprovalStatus NOT IN ('No Need for Approval', 'Approved')))
 	  )

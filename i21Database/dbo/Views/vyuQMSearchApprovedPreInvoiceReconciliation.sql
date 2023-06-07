@@ -59,6 +59,14 @@ SELECT intCatalogueReconciliationId			= CR.intCatalogueReconciliationId
      , strPreInvoiceGarden					= PIGM.strGardenMark
      , strGrade							= CA.strDescription
      , strPreInvoiceGrade					= PGCA.strDescription
+     , dblValue                                   = ISNULL(CRD.dblBasePrice, 0) * ISNULL(CRD.dblQuantity, 0)
+     , dblInvoiceValue                            = ISNULL(CRD.dblPreInvoicePrice, 0) * ISNULL(CRD.dblPreInvoiceQuantity, 0)
+     , strERPPONumber                             = MFB.strERPPONumber
+     , ysnIBDReceived                             = CASE WHEN MFB.strERPPONumber IS NULL OR MFB.strERPPONumber = '' THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+     , strBatchId							= MFB.strBatchId
+	, intBatchId							= MFB.intBatchId
+     , intBrokerId							= S.intBrokerId
+     , strBrokerName						= EB.strName
 FROM tblQMCatalogueReconciliationDetail CRD 
 INNER JOIN tblQMCatalogueReconciliation CR ON CR.intCatalogueReconciliationId = CRD.intCatalogueReconciliationId
 INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = CRD.intBillDetailId
@@ -76,3 +84,5 @@ LEFT JOIN tblQMGardenMark PIGM ON CRD.intPreInvoiceGardenMarkId = PIGM.intGarden
 LEFT JOIN tblICCommodityAttribute CA ON CRD.intGradeId = CA.intCommodityAttributeId AND CA.strType = 'Grade'
 LEFT JOIN tblICCommodityAttribute PGCA ON CRD.intPreInvoiceGradeId = PGCA.intCommodityAttributeId AND PGCA.strType = 'Grade'
 LEFT JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'CatalogueReconciliation'
+LEFT JOIN tblMFBatch MFB ON S.intSampleId = MFB.intSampleId AND MFB.intLocationId = MFB.intBuyingCenterLocationId
+LEFT JOIN tblEMEntity EB ON S.intBrokerId = EB.intEntityId
