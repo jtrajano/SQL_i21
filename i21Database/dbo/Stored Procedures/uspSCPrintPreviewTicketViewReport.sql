@@ -47,8 +47,20 @@ BEGIN
 			, [intSuppressDiscountOptionId] INT NULL
 		)
 
+		IF @intScaleSetupId IS NULL 
+		BEGIN
+			SELECT @intScaleSetupId = intScaleSetupId
+			FROM tblSCTicket WHERE intTicketId = @intTicketId
 
+		END
+		
+		IF @intTicketFormatId IS NULL
+		BEGIN
+			SELECT @intTicketFormatId = intTicketFormatId
+			FROM tblSCTicketPrintOption 
+			WHERE intScaleSetupId = @intScaleSetupId AND ysnPrintCustomerCopy = 1
 
+		END
 		SET  @intTicketPrintOptionId = ISNULL(@intTicketPrintOptionId, -1)
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketPrintOption WHERE intTicketPrintOptionId = @intTicketPrintOptionId AND intScaleSetupId = @intScaleSetupId)
 		BEGIN
