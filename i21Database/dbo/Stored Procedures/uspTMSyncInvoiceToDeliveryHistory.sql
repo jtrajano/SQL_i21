@@ -108,6 +108,7 @@ BEGIN
 	INTO #tmpTMInvoiceDispatchIds
 	FROM tblARInvoiceDetail
 	WHERE intInvoiceId = @InvoiceId
+		AND intDispatchId IS NOT NULL
 	
 	-- Process Delivery
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTMInvoiceDetail)
