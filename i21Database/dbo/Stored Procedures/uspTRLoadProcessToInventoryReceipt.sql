@@ -145,7 +145,7 @@ END
 						END
 					ELSE
 						BEGIN
-							IF(ISNULL(@ysnCompanyOwnedInternalCarrier,0) = 0)
+							IF(ISNULL(@ysnCompanyOwnedInternalCarrier,0) = 0 AND NOT EXISTS(SELECT TOP 1 1 FROM #receipts WHERE ysnFreightOnly = 1 AND strReceiptLine = @RLink AND dblUnitCost != 0 OR dblFreightRate != 0 OR dblPurSurcharge!= 0))
 									BEGIN
 										SET @ErrMsg = 'Receipt (' + @RLink + ') that was distributed as Freight Only should not have any cost, freight, or surcharge.'
 										RAISERROR(@ErrMsg, 16, 1)
