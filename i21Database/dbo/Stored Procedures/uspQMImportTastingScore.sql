@@ -1518,6 +1518,7 @@ BEGIN TRY
 				SELECT @intBatchId = intBatchId
 				FROM tblMFBatch
 				WHERE strBatchId = @strBatchNo
+				AND intLocationId = intMixingUnitLocationId
 
 				EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
 					,@intUserId = @intEntityUserId
