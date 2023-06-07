@@ -460,12 +460,12 @@ BEGIN TRY
 			BEGIN 
 				IF(@dblQuantity < @dblTotalPriced)
 				BEGIN 
-					SET @ErrMsg = 'Contract is already Fully Priced, Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+					SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 					RAISERROR(@ErrMsg, 16, 1)
 				END
 				IF(@dblQuantity > @dblTotalPriced)
 				BEGIN 
-					SET @ErrMsg = 'Contract is already Fully Priced, Quantity cannot be increase above price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+					SET @ErrMsg = 'Quantity cannot be increase above price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 					RAISERROR(@ErrMsg, 16, 1)
 				END
 			END
