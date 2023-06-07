@@ -1724,6 +1724,7 @@
     <Build Include="dbo\Views\vyuAPStraussVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganPaymentExportIPayables.sql" />
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
