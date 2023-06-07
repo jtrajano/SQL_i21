@@ -1400,6 +1400,7 @@
     <Build Include="dbo\Tables\tblTMJobs.sql" />
     <Build Include="dbo\Tables\tblTMConsumptionSiteFee.sql" />
     <Build Include="dbo\Views\vyuTMConsumptionSiteFee.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
