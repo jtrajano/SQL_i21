@@ -76,6 +76,13 @@ CREATE NONCLUSTERED INDEX IX_tblGLDetail_StrCodeYsnIsPostedTransactionType
 ON [dbo].[tblGLDetail] ([strCode],[ysnIsUnposted],[strTransactionType]) INCLUDE ([dblDebit],[dblCredit],[strTransactionId],[intTransactionId])
 GO
 
+CREATE NONCLUSTERED INDEX IX_tbblGLDetailYsnIsUnposted 
+ON [dbo].[tblGLDetail] ([ysnIsUnposted]) INCLUDE ([dblDebit],[dblCredit],[strTransactionId],[intTransactionId])
+GO
+CREATE NONCLUSTERED INDEX IX_tblGLDetailBatchId
+ON [dbo].[tblGLDetail] ([strBatchId])
+GO
+
 CREATE STATISTICS [_dta_stat_1702557399_9_5_1] ON [dbo].[tblGLAccount]([intAccountUnitId], [intAccountGroupId], [intAccountId])
 GO
 CREATE STATISTICS [_dta_stat_1702557399_5_1] ON [dbo].[tblGLAccount]([intAccountGroupId], [intAccountId])
