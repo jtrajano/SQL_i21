@@ -53,8 +53,19 @@ WHILE @intRowPointer IS NOT NULL
 		/* Update shipped qty if there's already pick list on sales order. */
 		IF (@intPickListId <> 0) 
 			BEGIN
+				DECLARE @dblTotalPickQty		NUMERIC(38, 20) = 1;
+
+				/* Get the Total Count of Pick List Detail. */
+				SELECT @dblTotalPickQty = SUM(dblPickQuantity)
+				FROM tblMFPickListDetail AS PickListDetail
+				JOIN tblMFPickList AS PickList ON PickListDetail.intPickListId = PickList.intPickListId
+				WHERE PickList.intSalesOrderId = @intSalesOrderId;
+
 				UPDATE PickListDetail
-				SET PickListDetail.dblShippedQty = ISNULL(PickListDetail.dblShippedQty, 0) + SubQuery.dblShippedQuantity
+				SET PickListDetail.dblShippedQty = ISNULL(PickListDetail.dblShippedQty, 0) 
+					/* Set Value based on Picked Qty Percentage. */
+					+ ((PickListDetail.dblPickQuantity / @dblTotalPickQty) * SubQuery.dblShippedQuantity)
+
 				  , intLastModifiedUserId		 = @intEntityUserSecurityId
 				  , dtmLastModified				 = GETDATE()
 				FROM tblMFPickListDetail AS PickListDetail
@@ -267,6 +278,3 @@ WHILE @intRowPointer IS NOT NULL
 		FROM @tblSalesOrder 
 		WHERE intRowNo > @intRowPointer
 	END;
-
-
-
