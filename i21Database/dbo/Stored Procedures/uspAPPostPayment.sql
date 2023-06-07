@@ -617,7 +617,7 @@ IF EXISTS(
 		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT 
 	INNER JOIN @payments ID ON ID.intId = A.intPaymentId
-	INNER JOIN @GLEntries GL ON GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
+	-- INNER JOIN @GLEntries GL ON GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
 )
 BEGIN
 --HANDLE DECIMAL LOSS FOR MULTI CURRENCY
