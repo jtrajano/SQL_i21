@@ -8,19 +8,24 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- ++++++ CLEAN-OUT DRIVER's ORDER LIST ++++++ --
-IF (ISNULL(@intShiftId, '') != '')
-BEGIN
-	DELETE tblMBILOrder WHERE intShiftId = @intShiftId
-END
-ELSE
-BEGIN
-	DELETE tblMBILOrder WHERE intDriverId = @intDriverId AND intOrderId NOT IN (SELECT intOrderId FROM tblMBILInvoice WHERE intOrderId IS NOT NULL)
-END
+IF (ISNULL(@intShiftId, '') != '')  
+BEGIN  
+ DELETE tblMBILOrder WHERE intShiftId = @intShiftId  
+END  
+ELSE  
+BEGIN  
+ DELETE tblMBILOrder   
+ WHERE intDriverId = @intDriverId AND   
+ NOT EXISTS (  
+  SELECT intOrderId FROM tblMBILInvoice  
+  WHERE tblMBILInvoice.intOrderId = tblMBILOrder.intOrderId  
+ )  
+END 
 
--- ++++++ CLEAN-OUT ORDERS WITH POSTED INVOICE  ++++++ --
-BEGIN
-	DELETE tblMBILOrder WHERE intOrderId IN (SELECT intOrderId FROM tblMBILInvoice WHERE ysnPosted = 1)
-END
+---- ++++++ CLEAN-OUT ORDERS WITH POSTED INVOICE  ++++++ --
+--BEGIN
+--	DELETE tblMBILOrder WHERE intOrderId IN (SELECT intOrderId FROM tblMBILInvoice WHERE ysnPosted = 1)
+--END
 
 ---- ++++++ CALL TM SP FOR OVERRAGE ++++++
 --DECLARE  @TMDispatchId INT = NULL
