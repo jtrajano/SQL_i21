@@ -13,6 +13,7 @@ AS
 		,intBankAccountId    = PayGroup.intBankAccountId
 		,dblHours			 = SUM(ISNULL(PayGroupDetail.dblHoursToProcess, 0))
 		,dblTotal			 = SUM(ISNULL(PayGroupDetail.dblTotal, 0))
+		,intPayGroupId		 = PayGroup.intPayGroupId
 	 FROM tblPRPayGroupDetail PayGroupDetail
 		INNER JOIN tblPREmployee Employee
 	ON PayGroupDetail.intEntityEmployeeId = Employee.intEntityId
