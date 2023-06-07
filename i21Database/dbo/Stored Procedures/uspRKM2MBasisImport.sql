@@ -9,7 +9,7 @@ BEGIN TRY
 
 	BEGIN TRAN
 	
-	IF (@intM2MBasisId = 0)
+	IF (ISNULL(@intM2MBasisId, 0) = 0)
 	BEGIN
 		INSERT INTO tblRKM2MBasis (
 			  intConcurrencyId
@@ -129,7 +129,7 @@ BEGIN TRY
 
 	COMMIT TRAN
 
-	IF (@intM2MBasisId = 0)
+	IF (ISNULL(@intM2MBasisId, 0) = 0)
 	BEGIN
 		EXEC uspIPInterCompanyPreStageM2MBasis @intM2MBasisId = @intNewBasisId
 			, @strRowState = 'Added'
