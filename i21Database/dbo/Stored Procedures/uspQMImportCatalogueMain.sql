@@ -1242,6 +1242,24 @@ BEGIN TRY
 			AND E.intEntityId = @intSupplierEntityId
 			AND S.strRepresentLotNumber = @strRefNo
 
+		IF @intSampleId IS NOT NULL AND @str3PLStatus ='Delete'
+		BEGIN
+			IF NOT EXISTS(SELECT *FROM dbo.tblMFBatch WHERE intSampleId=@intSampleId )
+			BEGIN
+				DELETE FROM tblQMSample WHERE intSampleId=@intSampleId 
+			END
+			Else
+			Begin
+				UPDATE tblQMImportCatalogue
+				SET strLogResult = 'Batch is available in the system. Please remove the batch first before removing the catalogue.' 
+					,ysnProcessed = 1
+					,ysnSuccess = 0
+				WHERE intImportCatalogueId = @intImportCatalogueId;
+
+				GOTO CONT
+			End
+		END
+
 		-- If sample does not exist yet
 		IF @intSampleId IS NULL
 		BEGIN
