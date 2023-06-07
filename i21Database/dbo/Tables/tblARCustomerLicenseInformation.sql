@@ -20,6 +20,7 @@
 	[strLicenseKey]						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnNew]							BIT NOT NULL DEFAULT 0,
 	[intCompanyId]						INT NULL,
+	[strLicenseEdition]					VARCHAR(40) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Standard',
 	[intPowerBIRefreshes]				INT NULL,
     [intConcurrencyId]					INT CONSTRAINT [DF_tblARCustomerLicenseInformation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
