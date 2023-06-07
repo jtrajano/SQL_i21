@@ -1438,7 +1438,6 @@
     <Build Include="dbo\Tables\tblSMGridLayout.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
-    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetPostedLot.sql" />
