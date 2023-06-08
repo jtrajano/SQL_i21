@@ -1401,6 +1401,7 @@
     <Build Include="dbo\Tables\tblTMConsumptionSiteFee.sql" />
     <Build Include="dbo\Views\vyuTMConsumptionSiteFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
+    <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
