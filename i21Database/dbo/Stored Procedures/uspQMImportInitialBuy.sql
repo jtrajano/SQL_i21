@@ -865,7 +865,7 @@ BEGIN TRY
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = BT.intTealingoItemId
+			,intOriginalItemId = ISNULL(BT.intTealingoItemId, S.intItemId)
 			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblSampleQty
@@ -1109,7 +1109,7 @@ BEGIN TRY
 				UPDATE B
 				SET B.intLocationId = L.intCompanyLocationId
 					,strBatchId = @strBatchId
-					--,intSampleId = NULL
+					,intSampleId = NULL
 					,dblOriginalTeaTaste = dblTeaTaste
 					,dblOriginalTeaHue = dblTeaHue
 					,dblOriginalTeaIntensity = dblTeaIntensity

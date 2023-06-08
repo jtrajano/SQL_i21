@@ -17,7 +17,7 @@
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@accrueLicense		AS BIT				= 0
 	,@raiseError		AS BIT				= 0
-	,@rollbackAll		AS BIT				= 0
+	,@rollbackAll		AS BIT				= 1
 
  WITH RECOMPILE
 AS

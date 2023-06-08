@@ -425,6 +425,7 @@ BEGIN TRY
 	END
 	ELSE IF @RowState = 'Modified'
 	BEGIN
+		
 		SELECT	@ysnMultiplePriceFixation	=	ISNULL(@ysnMultiplePriceFixation,ysnMultiplePriceFixation)
 		FROM	tblCTContractHeader
 		WHERE	intContractHeaderId	=	@intContractHeaderId
@@ -451,6 +452,23 @@ BEGIN TRY
 			SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
 			RAISERROR(@ErrMsg, 16, 1)
 		END
+
+		--CHECK IF FULLY PRICED AND CONTRACT QTY NOT EQUAL TO PRICING
+		DECLARE @strPriceStatus NVARCHAR(100);
+		SELECT @strPriceStatus = strStatus FROM vyuCTPriceContractStatus where intContractHeaderId = @intContractHeaderId	
+		IF(@strPriceStatus = 'Fully Priced')
+			BEGIN 
+				IF(@dblQuantity < @dblTotalPriced)
+				BEGIN 
+					SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+					RAISERROR(@ErrMsg, 16, 1)
+				END
+				IF(@dblQuantity > @dblTotalPriced)
+				BEGIN 
+					SET @ErrMsg = 'Quantity cannot be increase above price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+					RAISERROR(@ErrMsg, 16, 1)
+				END
+			END
 	END
 
 	--Common added and modified

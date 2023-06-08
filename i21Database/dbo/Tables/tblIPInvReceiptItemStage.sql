@@ -21,6 +21,10 @@
 	strCostCurrency				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strContainerNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strTrackingNo				INT,
+	dblCleanGrossWeight			NUMERIC(18, 6),
+	dblCleanTareWeight			NUMERIC(18, 6),
+	dblCleanNetWeight			NUMERIC(18, 6),
+	strCleanNetWeightUOM		NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
 	intTrxSequenceNo			BIGINT,
 	intParentTrxSequenceNo		BIGINT,

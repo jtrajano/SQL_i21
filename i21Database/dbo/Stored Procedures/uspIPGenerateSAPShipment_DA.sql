@@ -4,6 +4,7 @@ BEGIN
 	DECLARE @strXml NVARCHAR(MAX)
 		,@strHeaderXML NVARCHAR(MAX)
 		,@strDetailXML NVARCHAR(MAX)
+		,@strError NVARCHAR(MAX) = ''
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strLoadStgIds NVARCHAR(MAX)
@@ -30,6 +31,7 @@ BEGIN
 		,@dblGrossWt NUMERIC(18, 6)
 		,@strWeightUOM NVARCHAR(50)
 	DECLARE @strContractNumber NVARCHAR(50)
+		,@intContractSeq INT
 		,@strVendorAccountNum NVARCHAR(50)
 		,@strPosition NVARCHAR(100)
 		,@dtmScheduledDate DATETIME
@@ -117,7 +119,7 @@ BEGIN
 		IF @intShipmentStatus = 10
 		BEGIN
 			UPDATE tblLGLoadStg
-			SET strFeedStatus = 'Ack Rcvd'
+			SET strFeedStatus = 'NA'
 				,strMessage = 'LS is already cancelled. '
 			WHERE intLoadStgId = @intLoadStgId
 
@@ -138,7 +140,8 @@ BEGIN
 				) > 1
 		BEGIN
 			UPDATE tblLGLoadStg
-			SET strMessage = 'LS cannot have multiple line items. '
+			SET strFeedStatus = 'NA'
+				,strMessage = 'LS cannot have multiple line items. '
 			WHERE intLoadStgId = @intLoadStgId
 
 			GOTO NEXT_SHIPMENT
@@ -161,6 +164,7 @@ BEGIN
 				,@strWeightUOM = NULL
 
 			SELECT @strContractNumber = NULL
+				,@intContractSeq = NULL
 				,@strVendorAccountNum = NULL
 				,@strPosition = NULL
 				,@dtmScheduledDate = NULL
@@ -186,6 +190,7 @@ BEGIN
 			WHERE intLGLoadDetailStgId = @intLGLoadDetailStgId
 
 			SELECT @strContractNumber = CH.strContractNumber
+				,@intContractSeq = CD.intContractSeq
 				,@strVendorAccountNum = V.strVendorAccountNum
 				,@strPosition = P.strPosition
 				,@dtmScheduledDate = L.dtmScheduledDate
@@ -204,14 +209,134 @@ BEGIN
 			JOIN dbo.tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN dbo.tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			JOIN dbo.vyuAPVendor V WITH (NOLOCK) ON V.intEntityId = LD.intVendorEntityId
-			JOIN dbo.tblCTPosition P WITH (NOLOCK) ON P.intPositionId = L.intPositionId
 			JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = LD.intItemId
+			LEFT JOIN dbo.tblCTPosition P WITH (NOLOCK) ON P.intPositionId = L.intPositionId
 			LEFT JOIN dbo.tblSMCity LP WITH (NOLOCK) ON LP.intCityId = CD.intLoadingPortId
 			LEFT JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = CD.intDestinationPortId
+
+			SELECT @strDetailXML = '<LINE_ITEM>'
+
+			SELECT @strDetailXML += '<SEQUENCE_NO>' + LTRIM(ISNULL(@intContractSeq, '')) + '</SEQUENCE_NO>'
+
+			SELECT @strDetailXML += '<PO_LINE_ITEM_NO>' + ISNULL(@strExternalPOItemNumber, '') + '</PO_LINE_ITEM_NO>'
+
+			SELECT @strDetailXML += '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(@strItemNo, '')) + '</ITEM_NO>'
+
+			SELECT @strDetailXML += '<SHORT_NAME>' + ISNULL(@strShortName, '') + '</SHORT_NAME>'
+
+			SELECT @strDetailXML += '<COMMODITY>' + ISNULL(@strCommodityCode, '') + '</COMMODITY>'
+
+			SELECT @strDetailXML += '<GROSS_WEIGHT>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), @dblGrossWt)), '') + '</GROSS_WEIGHT>'
+
+			SELECT @strDetailXML += '<WEIGHT_UOM>' + ISNULL(@strWeightUOM, '') + '</WEIGHT_UOM>'
+
+			SELECT @strDetailXML += '</LINE_ITEM>'
 
 			SELECT @intLGLoadDetailStgId = MIN(intLGLoadDetailStgId)
 			FROM @tblLGLoadDetailStg
 			WHERE intLGLoadDetailStgId > @intLGLoadDetailStgId
+		END
+
+		IF ISNULL(@strDetailXML, '') <> ''
+		BEGIN
+			SELECT @strError = ''
+
+			IF ISNULL(@strExternalPONumber, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'External PO Number cannot be blank. '
+			END
+
+			IF ISNULL(@strPosition, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Position cannot be blank. '
+			END
+
+			IF ISNULL(@strLoadingCity, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Loading Port cannot be blank. '
+			END
+
+			IF ISNULL(@strDestinationCity, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Destination Port cannot be blank. '
+			END
+
+			IF @dtmETAPOL IS NULL
+			BEGIN
+				SELECT @strError = @strError + 'ETA POL cannot be blank. '
+			END
+
+			IF @dtmETSPOL IS NULL
+			BEGIN
+				SELECT @strError = @strError + 'ETS POL cannot be blank. '
+			END
+
+			IF @dtmETAPOD IS NULL
+			BEGIN
+				SELECT @strError = @strError + 'ETA POD cannot be blank. '
+			END
+
+			IF @strError <> ''
+			BEGIN
+				UPDATE tblLGLoadStg
+				SET strFeedStatus = 'NA'
+					,strMessage = @strError
+				WHERE intLoadStgId = @intLoadStgId
+
+				GOTO NEXT_SHIPMENT
+			END
+
+			SELECT @strHeaderXML = '<ROOT_PO>'
+
+			SELECT @strHeaderXML += '<CTRL_POINT>'
+
+			SELECT @strHeaderXML += '<DOC_NO>' + LTRIM(ISNULL(@intLoadStgId, '')) + '</DOC_NO>'
+
+			SELECT @strHeaderXML += '<MSG_TYPE>' + 'LS_CREATE' + '</MSG_TYPE>'
+
+			SELECT @strHeaderXML += '<SENDER>i21</SENDER>'
+
+			SELECT @strHeaderXML += '<RECEIVER>SAP</RECEIVER>'
+
+			SELECT @strHeaderXML += '<SNDPRT>LS</SNDPRT>'
+
+			SELECT @strHeaderXML += '<SNDPRN>IRE02</SNDPRN>'
+
+			SELECT @strHeaderXML += '</CTRL_POINT>'
+
+			SELECT @strHeaderXML += '<HEADER>'
+
+			SELECT @strHeaderXML += '<LS_NO>' + ISNULL(@strLoadNumber, '') + '</LS_NO>'
+
+			SELECT @strHeaderXML += '<CONTRACT_NO>' + ISNULL(@strContractNumber, '') + '</CONTRACT_NO>'
+
+			SELECT @strHeaderXML += '<PO_NUMBER>' + ISNULL(@strExternalPONumber, '') + '</PO_NUMBER>'
+
+			SELECT @strHeaderXML += '<VENDOR>' + ISNULL(@strVendorAccountNum, '') + '</VENDOR>'
+
+			SELECT @strHeaderXML += '<POSITION>' + dbo.fnEscapeXML(ISNULL(@strPosition, '')) + '</POSITION>'
+
+			SELECT @strHeaderXML += '<SCHEDULED_DATE>' + ISNULL(CONVERT(NVARCHAR, @dtmScheduledDate, 112), '') + '</SCHEDULED_DATE>'
+
+			SELECT @strHeaderXML += '<QUANTITY>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), @dblDeliveredQty)), '') + '</QUANTITY>'
+
+			SELECT @strHeaderXML += '<QUANTITY_UOM>' + ISNULL(@strUnitOfMeasure, '') + '</QUANTITY_UOM>'
+
+			SELECT @strHeaderXML += '<BOL_NO>' + dbo.fnEscapeXML(ISNULL(@strBLNumber, '')) + '</BOL_NO>'
+
+			SELECT @strHeaderXML += '<BOL_DATE>' + ISNULL(CONVERT(NVARCHAR, @dtmBLDate, 112), '') + '</BOL_DATE>'
+
+			SELECT @strHeaderXML += '<LOAD_PORT>' + ISNULL(@strLoadingCity, '') + '</LOAD_PORT>'
+
+			SELECT @strHeaderXML += '<DEST_PORT>' + ISNULL(@strDestinationCity, '') + '</DEST_PORT>'
+
+			SELECT @strHeaderXML += '<ETA_POL>' + ISNULL(CONVERT(NVARCHAR, @dtmETAPOL, 112), '') + '</ETA_POL>'
+
+			SELECT @strHeaderXML += '<ETS_POL>' + ISNULL(CONVERT(NVARCHAR, @dtmETSPOL, 112), '') + '</ETS_POL>'
+
+			SELECT @strHeaderXML += '<ETA_POD>' + ISNULL(CONVERT(NVARCHAR, @dtmETAPOD, 112), '') + '</ETA_POD>'
+
+			SELECT @strHeaderXML += '</HEADER>'
 		END
 
 		SELECT @strXml = @strHeaderXML + @strDetailXML + '</ROOT_PO>'

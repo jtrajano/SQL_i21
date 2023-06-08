@@ -44,11 +44,12 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_PAYCHECK AS INT = 121
 		,@VOID_ACH AS INT = 122
 		,@VOID_DIRECT_DEPOSIT AS INT = 123
+		,@intDefaultCurrencyId INT
 		
 DECLARE @openingBalance AS NUMERIC(18,6)		
 DECLARE @returnBalance AS NUMERIC(18,6)	
 
-
+SELECT TOP 1 @intDefaultCurrencyId= intDefaultCurrencyId FROM tblSMCompanyPreference 
 
 
 -- Get the opening balance from the first bank reconciliation record. 
@@ -89,6 +90,7 @@ WHERE	ysnPosted = 1
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL( B.dblDebit, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
 			ON A.intTransactionId = B.intTransactionId
+				JOIN tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountId
 WHERE	A.ysnPosted = 1
 		AND A.ysnCheckVoid = 0
 		AND A.intBankAccountId = @intBankAccountId
@@ -98,7 +100,24 @@ WHERE	A.ysnPosted = 1
 			@BANK_INTEREST, @BANK_LOAN, @BROKER_SETTLEMENT, 
 			@BROKER_COMMISSION, @BANK_FEES, @TREASURY_STOCK_PURCHASE
 		)
+		AND C.intCurrencyId = @intDefaultCurrencyId
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
+
+SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCreditForeign, 0)), 0) - ISNULL(SUM(ISNULL( B.dblDebitForeign, 0)), 0)
+FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
+			ON A.intTransactionId = B.intTransactionId
+			JOIN tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountId
+WHERE	A.ysnPosted = 1
+		AND A.ysnCheckVoid = 0
+		AND A.intBankAccountId = @intBankAccountId
+		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, A.dtmDate) AS FLOAT)) AS DATETIME)		
+		AND A.intBankTransactionTypeId IN (
+			@BANK_TRANSACTION, @BANK_WITHDRAWAL,@NSF, 
+			@BANK_INTEREST, @BANK_LOAN, @BROKER_SETTLEMENT, 
+			@BROKER_COMMISSION, @BANK_FEES
+		)
+		AND C.intCurrencyId <> @intDefaultCurrencyId
+HAVING	ISNULL(SUM(ISNULL(B.dblCreditForeign, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebitForeign, 0)), 0) <> 0
 
 -- Get bank amounts for the rest of the transactions like deposits, transfer (dep), and etc.
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount , 0)), 0)

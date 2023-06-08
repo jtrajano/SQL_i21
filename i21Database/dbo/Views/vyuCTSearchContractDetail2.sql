@@ -156,7 +156,7 @@ SELECT a.intContractDetailId
  , n.strLocationName  
  , o.strCurrency  
  , p.strContractStatus  
- , strShipmentStatus = ISNULL(r.strShipmentStatus,'Open')  
+ , strShipmentStatus = ISNULL(LD.strShipmentStatus,'Open')  
  , strFinancialStatus = CASE WHEN b.intContractTypeId = 1 THEN CASE WHEN a.ysnFinalPNL = 1 THEN 'Final P&L Created'  
                  WHEN a.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'  
                  ELSE CASE WHEN s.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received'  
@@ -377,7 +377,7 @@ LEFT JOIN tblCTContractOptHeader m WITH(NOLOCK) ON m.intContractOptHeaderId = a.
 LEFT JOIN tblSMCompanyLocation n WITH(NOLOCK) ON n.intCompanyLocationId = a.intCompanyLocationId  
 LEFT JOIN tblSMCurrency o WITH(NOLOCK) ON o.intCurrencyID = a.intCurrencyId  
 LEFT JOIN tblCTContractStatus p WITH(NOLOCK) ON p.intContractStatusId = a.intContractStatusId  
-LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId  
+--LEFT JOIN shipmentstatus r ON r.intContractDetailId = a.intContractDetailId  
  LEFT JOIN tblICItemUOM FUOM on FUOM.intItemUOMId = a.intFeedPriceItemUOMId  
  LEFT JOIN tblICUnitMeasure FUM on FUM.intUnitMeasureId = FUOM.intUnitMeasureId  
  LEFT JOIN tblSMCurrency FCU on FCU.intCurrencyID = a.intFeedPriceCurrencyId  
@@ -474,6 +474,7 @@ LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- 
 --OUTER APPLY dbo.fnCTGetSampleDetail(a.intContractDetailId) QA  
 LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = a.intItemId  
 LEFT JOIN tblEMEntity LL on LL.intEntityId = a.intLogisticsLeadId
+OUTER APPLY dbo.fnCTGetShipmentStatus(a.intContractDetailId) LD
 LEFT JOIN (  
     SELECT *  
     FROM  

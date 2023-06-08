@@ -22,6 +22,7 @@ DECLARE @CustomerStorageStagingTable	AS CustomerStorageStagingTable
 		,@currencyDecimal				INT
 		,@intEntityId					INT
 		,@intCustomerStorageId			INT
+		
 		,@strDistributionOption			NVARCHAR(3)
 		,@intStorageScheduleTypeId		INT
 		,@intStorageScheduleId			INT
@@ -222,6 +223,7 @@ BEGIN TRY
 		,intEntityId INT
 		,ysnCompanyOwned BIT
 		,dblPercent NUMERIC(36,20)
+		,intStorageScheduleTypeId INT--intStorageTypeId  < Customer Storage Equivalent
 	)
 
 
@@ -246,6 +248,7 @@ BEGIN TRY
 			intEntityId = DSS.intEntityId
 			,ysnCompanyOwned = A.ysnCompanyOwned
 			,dblPercent = DSS.dblSplitPercent/A.dblPercent * 100
+			,intStorageScheduleTypeId = DSS.intStorageScheduleTypeId
 		FROM tblSCDeliverySheetSplit DSS
 		INNER JOIN tblGRStorageType ST
 			ON DSS.intStorageScheduleTypeId = ST.intStorageScheduleTypeId
@@ -359,9 +362,9 @@ BEGIN TRY
 			SET @dblTempAdjustByQuantity = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
 			DELETE FROM @storageHistoryData
 
-			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblPercent, ysnCompanyOwned FROM @splitPerEntityBasedOnCustomerCompany
+			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblPercent, ysnCompanyOwned, intStorageScheduleTypeId FROM @splitPerEntityBasedOnCustomerCompany
 			OPEN splitCursor;  
-			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @ysnLoopIsDP;  
+			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @ysnLoopIsDP, @intStorageScheduleTypeId;  
 			WHILE @@FETCH_STATUS = 0  
 			BEGIN
 				SET @dblFinalSplitQty = ROUND((@dblTempAdjustByQuantity * @dblSplitPercent) / 100, @currencyDecimal);
@@ -404,12 +407,13 @@ BEGIN TRY
 						ON GR.intStorageTypeId = ST.intStorageScheduleTypeId
 							AND CASE WHEN ISNULL(ST.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 2 END = @intOwnershipType
 					WHERE GR.intDeliverySheetId = @intDeliverySheetId AND intEntityId = @intEntityId
+						AND GR.intStorageTypeId = @intStorageScheduleTypeId
 					
 					
 
 					SET @ysnLoopIsDP = NULL
 					SET @intLoopDPContractDetailId = NULL 
-				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent,@ysnLoopIsDP;
+				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent,@ysnLoopIsDP, @intStorageScheduleTypeId;
 			END
 			CLOSE splitCursor;  
 			DEALLOCATE splitCursor;

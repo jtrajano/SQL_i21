@@ -31,3 +31,10 @@ GO
 
 CREATE INDEX [IX_tblSMTransaction_intRecordId] ON [dbo].[tblSMTransaction] ([intRecordId])
 GO
+
+
+CREATE NONCLUSTERED INDEX [IX_tblSMTransaction_ysnLocked] 
+ ON [dbo].[tblSMTransaction] ([ysnLocked]) 
+INCLUDE ([dtmLockedDate],[intLockedBy])
+
+GO

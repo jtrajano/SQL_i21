@@ -1762,9 +1762,27 @@
     <Build Include="dbo\Functions\fnTMGetSalesFromStoreEOD.sql" />
     <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeDeductionYTD.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeEarningYTD.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeTaxYTD.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_DA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPInboundType_DA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPShipment_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPReceipt_DA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPReceipt_DA.sql" />
+    <Build Include="dbo\Views\vyuPRGetPayGroupEmployeeToProcess.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitorStatus.sql" />
+    <Build Include="dbo\Views\vyuTMTankMonitorStatusSearch.sql" />
+    <Build Include="dbo\Tables\tblTMJobs.sql" />
+    <Build Include="dbo\Tables\tblTMConsumptionSiteFee.sql" />
+    <Build Include="dbo\Views\vyuTMConsumptionSiteFee.sql" />
+    <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
+    <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDestinationOverageContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -12174,7 +12192,7 @@
     <Build Include="dbo\Views\vyuGLLineOfBusinessAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetOfferList.sql" />
     <Build Include="dbo\Functions\fnCTGetFreightRateMatrixFromCommodity.sql" />
-     <Build Include="dbo\Views\vyuCTAmendmentTab.sql" />
+    <Build Include="dbo\Views\vyuCTAmendmentTab.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -12408,6 +12426,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\CRMHubspotDefaults.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_intCommodityStockUOMId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CRM\O365IntegrationDefaults.sql" />

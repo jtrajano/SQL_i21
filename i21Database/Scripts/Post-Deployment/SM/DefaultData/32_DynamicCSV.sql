@@ -486,7 +486,7 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @approvalpastdueid					int
 		declare @approvalpricechargeid				int
 		declare @freighttermid						int
-		declare @taxgroupId							int
+		declare @taxgroupid							int
 		declare @lobid								int
 
 		if ISNULL(@entityno, '''') = '''' AND ISNULL(@detailcustomerno, '''') <> ''''
