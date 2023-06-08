@@ -30,6 +30,7 @@ AS
 			SEQ.strSequenceNumber,
 			SEQ.dtmContractDate,
 			SEQ.strItemNo,
+			SEQ.strItemDescription,
 			SEQ.strEntityName		 AS  strSeller, 
 			SEQ.dtmStartDate,
 			SEQ.dtmEndDate,

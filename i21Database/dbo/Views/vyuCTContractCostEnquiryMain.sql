@@ -16,6 +16,7 @@ AS
 			,strGrade
 			,strWeight
 			,strItemNo
+			,strItemDescription
 			,strOrigin
 			,strProductType
 			,strProductLine
@@ -62,6 +63,7 @@ AS
 			,cd.strGrade
 			,cd.strWeight
 			,i.strItemNo
+			,i.strDescription AS strItemDescription
 			,c.strCountry strOrigin
 			,cp.strDescription strProductType
 			,pl.strDescription strProductLine
