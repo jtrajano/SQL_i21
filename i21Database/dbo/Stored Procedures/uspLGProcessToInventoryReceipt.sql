@@ -1013,7 +1013,7 @@ BEGIN TRY
 			,[ysnAccrue] = 1
 			,[strReceiptType] = 'Purchase Contract'
 			,[intShipViaId] = NULL
-			,[intCurrencyId] = L.intCurrencyId
+			,[intCurrencyId] = CT.intCurrencyId
 			,[intEntityVendorId] = CT.intVendorEntityId
 			,[intLocationId] = CT.intPCompanyLocationId
 			,[ysnPrice] = 0
@@ -1038,10 +1038,14 @@ BEGIN TRY
 		LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId 
 		OUTER APPLY (SELECT TOP 1 CD.intContractHeaderId, CD.intContractDetailId, 
 						LD.intVendorEntityId, LD.intPCompanyLocationId, EL.intEntityLocationId
+						,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
 					FROM tblLGLoadDetail LD 
 					JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId AND EL.ysnDefaultLocation = 1
+					LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+					LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+					LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 					WHERE intLoadId = @intLoadId) CT
 		WHERE L.intLoadId = @intLoadId
 		
