@@ -1709,6 +1709,7 @@
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
+    <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
