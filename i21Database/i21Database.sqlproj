@@ -1781,6 +1781,7 @@
     <Build Include="dbo\Views\vyuTMConsumptionSiteFee.sql" />
     <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
