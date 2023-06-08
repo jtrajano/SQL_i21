@@ -74,24 +74,24 @@ BEGIN
 		CLOSE @CursorTran  
 		DEALLOCATE @CursorTran
 
-		IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess id
-					WHERE intImportDtnId <> @intImportLoadId
-						AND ISNULL(ysnSuccess, 0) = 0
-						AND ISNULL(ysnVarianceIssue, 0) = 0
-						AND ISNULL(ysnException, 0) = 0)
-		BEGIN
-			DECLARE	@strIds AS NVARCHAR(MAX)
-			SELECT @strIds = STUFF((SELECT DISTINCT ', ' + LTRIM(id.intImportDtnDetailId)
-									FROM vyuTRGetImportDTNForReprocess id
-									WHERE intImportDtnId <> @intImportLoadId
-										AND ISNULL(id.ysnSuccess, 0) = 0
-										AND ISNULL(id.ysnVarianceIssue, 0) = 0
-										AND ISNULL(id.ysnException, 0) = 0
-									FOR XML PATH('')
-								),1,2, '')
+		--IF EXISTS (SELECT TOP 1 1 FROM vyuTRGetImportDTNForReprocess id
+		--			WHERE intImportDtnId <> @intImportLoadId
+		--				AND ISNULL(ysnSuccess, 0) = 0
+		--				AND ISNULL(ysnVarianceIssue, 0) = 0
+		--				AND ISNULL(ysnException, 0) = 0)
+		--BEGIN
+		--	DECLARE	@strIds AS NVARCHAR(MAX)
+		--	SELECT @strIds = STUFF((SELECT DISTINCT ', ' + LTRIM(id.intImportDtnDetailId)
+		--							FROM vyuTRGetImportDTNForReprocess id
+		--							WHERE intImportDtnId <> @intImportLoadId
+		--								AND ISNULL(id.ysnSuccess, 0) = 0
+		--								AND ISNULL(id.ysnVarianceIssue, 0) = 0
+		--								AND ISNULL(id.ysnException, 0) = 0
+		--							FOR XML PATH('')
+		--						),1,2, '')
 
-			EXEC uspTRReprocessImportDtn @strIds, @intUserId
-		END
+		--	EXEC uspTRReprocessImportDtn @strIds, @intUserId
+		--END
 	END TRY
 	BEGIN CATCH
 		SELECT 
