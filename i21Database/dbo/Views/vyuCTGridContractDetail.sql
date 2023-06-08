@@ -155,6 +155,7 @@ AS
 			CD.intContractStatusId intCurrentContractStatusId,
 			MZ.strMarketZoneCode,
 			IM.strItemNo,
+			IM.strDescription as strItemDescription,
 			XM.strUnitMeasure strAdjustmentUOM,
 			CL.strLocationName,
 			FT.strFreightTerm,

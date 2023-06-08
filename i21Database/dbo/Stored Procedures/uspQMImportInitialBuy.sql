@@ -870,7 +870,7 @@ BEGIN TRY
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = BT.intTealingoItemId
+			,intOriginalItemId = ISNULL(BT.intTealingoItemId, S.intItemId)
 			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 			,strPlant = @strPlantCode
 			,dblTotalQuantity = S.dblB1QtyBought*(Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)
