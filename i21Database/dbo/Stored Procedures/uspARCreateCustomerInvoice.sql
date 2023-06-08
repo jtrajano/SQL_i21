@@ -475,6 +475,7 @@ BEGIN TRY
 		,[intICTId]
 		,[intSalesOrderId]
 		,[intEntityApplicatorId]
+		,[intOpportunityId]
 	)
 	SELECT [strInvoiceNumber]			= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]			= @TransactionType
@@ -562,6 +563,7 @@ BEGIN TRY
 		,[intICTId]							= @intICTId
 		,[intSalespersonId]					= @intSalesOrderId
 		,[intEntityApplicatorId]			= @intEntityApplicatorId
+		,[intOpportunityId]					= @OpportunityId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
