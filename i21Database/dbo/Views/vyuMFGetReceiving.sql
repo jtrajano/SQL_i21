@@ -1,32 +1,32 @@
 ﻿CREATE VIEW [dbo].[vyuMFGetReceiving]
 AS
 SELECT IR.intInventoryReceiptId 
-	,IR.strReceiptNumber
-	,IR.dtmReceiptDate
-	,CL.strLocationName
-	,E.strName AS strVendor
-	,IR.strVendorRefNo
-	,IR.strWarehouseRefNo AS strOrderEntryNumber
-	,IR.strBillOfLading
-	,E1.strName AS strReceiver
-	,IR.strVessel AS strBatch
-	,I.strItemNo
-	,I.strDescription
-	,IRL.strVendorLotId
-	,IRL.strParentLotNumber
-	,IRL.strLotNumber
-	,IRL.dblQuantity
-	,UM.strUnitMeasure
-	,IRL.dblGrossWeight
-	,IRL.strContainerNo
-	,IRL.strGarden strSealNo
-	,IRL.intUnitPallet AS intExpectedQuantity
-	,IRL.dtmManufacturedDate
-	,IRL.dtmExpiryDate
-	,IRL.strRemarks
-	,IRL.strCondition
-	,SL.strName AS strStorageLocation
-	,C.strCountry
+	 , IR.strReceiptNumber
+	 , RTRIM(CONVERT(CHAR, IR.dtmReceiptDate, 23)) COLLATE Latin1_General_CI_AS AS dtmReceiptDate 
+	 , CL.strLocationName
+	 , E.strName AS strVendor
+	 , IR.strVendorRefNo
+	 , IR.strWarehouseRefNo AS strOrderEntryNumber
+	 , IR.strBillOfLading
+	 , E1.strName AS strReceiver
+	 , IR.strVessel AS strBatch
+	 , I.strItemNo
+	 , I.strDescription
+	 , IRL.strVendorLotId
+	 , IRL.strParentLotNumber
+	 , IRL.strLotNumber
+	 , IRL.dblQuantity
+	 , UM.strUnitMeasure
+	 , IRL.dblGrossWeight
+	 , IRL.strContainerNo
+	 , IRL.strGarden strSealNo
+	 , IRL.intUnitPallet AS intExpectedQuantity
+	 , IRL.dtmManufacturedDate
+	 , IRL.dtmExpiryDate
+	 , IRL.strRemarks
+	 , IRL.strCondition
+	 , SL.strName AS strStorageLocation
+	 , C.strCountry
 FROM dbo.tblICInventoryReceipt IR
 JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 JOIN dbo.tblICInventoryReceiptItemLot IRL ON IRL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId

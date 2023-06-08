@@ -634,7 +634,7 @@ VALUES
 	,dblRate							
 	/*Tax info*/						
 	,intTaxGroupId	
-	,ysnOverrideTaxGroup					
+	,ISNULL(ysnOverrideTaxGroup, 0)				
 	,dblTax								
 	/*Bundle info*/						
 	,intBundletUOMId					

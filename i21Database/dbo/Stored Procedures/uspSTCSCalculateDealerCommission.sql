@@ -28,6 +28,7 @@ BEGIN TRY
 	DECLARE @ysnStopProcessing BIT = 0
 	DECLARE @ysnStopProcessingFinal BIT = 0
 	DECLARE @intLatestWarningId INT = (SELECT DISTINCT TOP 1 intCheckoutProcessErrorWarningId FROM tblSTCheckoutProcessErrorWarning WHERE intCheckoutProcessId = @intCheckoutProcessId ORDER BY intCheckoutProcessErrorWarningId DESC)
+	DECLARE @intSubLocationId INT
   
 	DECLARE MY_CURSOR CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 	FOR  
@@ -76,7 +77,8 @@ BEGIN TRY
 		IF @ysnAutoBlend = 0
 		BEGIN
 			BEGIN TRY
-				EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId 
+				SET @intSubLocationId = (SELECT intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intItemId);
+				EXEC [dbo].[uspICCalculateCost] @intItemId, @intCompanyLocationId, @dblQty, NULL, @Cost OUT, @intItemUOMId, NULL, NULL, @intSubLocationId, NULL
 			END TRY
 			BEGIN CATCH
 				SET @ysnStopProcessing = 1;
@@ -120,7 +122,8 @@ BEGIN TRY
 					SET @MFGCost = NULL
 
 					BEGIN TRY
-						EXEC [dbo].[uspICCalculateCost] @intMFGItemId, @intCompanyLocationId, @dblQty, NULL, @MFGCost OUT, @intMFGItemUOMId  
+						SET @intSubLocationId = (SELECT intCompanyLocationSubLocationId FROM tblTMSite WHERE intLocationId = @intCompanyLocationId AND intProduct = @intMFGItemId);
+						EXEC [dbo].[uspICCalculateCost] @intMFGItemId, @intCompanyLocationId, @dblQty, NULL, @MFGCost OUT, @intMFGItemUOMId, NULL, NULL, @intSubLocationId, NULL
 					END TRY
 					BEGIN CATCH
 						SET @ysnStopProcessing = 1;

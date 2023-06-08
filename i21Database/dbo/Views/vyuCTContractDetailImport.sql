@@ -70,6 +70,7 @@ SELECT CD.intContractDetailImportId
  ,dblTotalCost = CD.dblCashPrice * CD.dblQuantity    * CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10))    
  ,dblRealQuantity = CD.dblQuantity  * (CAST(ICF.dblUnitQty as numeric(18,10)) / CAST(ICT.dblUnitQty  as numeric(18,10)) )
  ,dtmCashFlowDate = CD.dtmEndDate + ISNULL(SMT.intBalanceDue, 0)
+ , intGradeId = wg.intCommodityAttributeId  
 FROM tblCTContractDetailImport    CD    
 LEFT JOIN tblCTContractHeader    CH  ON CH.strContractNumber   = CD.strContractNumber collate database_default    
 LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId and CH.intCommodityUOMId = CUM.intCommodityUnitMeasureId  
@@ -98,6 +99,9 @@ LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActi
  LEFT JOIN tblICItemUOM ICF on qIuom.intUnitMeasureId   = ICF.intUnitMeasureId and IT.intItemId   = ICF.intItemId    
  LEFT JOIN tblICItemUOM ICT on CUM.intUnitMeasureId = ICT.intUnitMeasureId and IT.intItemId = ICT.intItemId
  LEFT JOIN tblSMTerm SMT on SMT.intTermID = CH.intTermId
+ LEFT JOIN (
+	select intCommodityAttributeId, intCommodityId, strDescription from [tblICCommodityAttribute] where strType = 'Grade'
+ ) wg on CH.intCommodityId = wg.intCommodityId and wg.strDescription = CD.strGrade  collate database_default       
 GO
 
 

@@ -110,6 +110,22 @@ BEGIN TRY
 		,@intSubLocationId2 INT
 		,@intStorageLocationId2 INT
 		,@intTransactionId2 INT
+		,@ysnReservationByStorageLocation BIT
+		,@intInventoryTransactionType INT
+		,@ItemsToUnReserve AS dbo.ItemReservationTableType
+		,@ItemsToReserve1 AS dbo.ItemReservationTableType
+		,@intWorkOrderInputLotId INT
+	DECLARE @StockReservation TABLE(intStockId int identity(1,1),intStockReservationId int, dblQty numeric(18,6))
+	DECLARE @intRecordId INT
+		,@intStockId INT		
+		
+	DECLARE @dblBalance NUMERIC(18,6), @intConsumedLotId INT
+	DECLARE @tblMFWorkOrderInputLot TABLE(intRecordId int identity(1,1),intLotId INT, dblBalance NUMERIC(18,6), intConsumedLotId INT)
+												
+	DECLARE @tblICStockReservation TABLE (
+		intTransactionId INT
+		,intInventoryTransactionType INT
+		)
 
 	SELECT @dtmDate = GETDATE()
 
@@ -416,14 +432,12 @@ BEGIN TRY
 			--	OR @strItemNo = ''
 			--BEGIN
 			--	SELECT @strError = 'Item cannot be blank.'
-
 			--	RAISERROR (
 			--			@strError
 			--			,16
 			--			,1
 			--			)
 			--END
-
 			SELECT @intItemId = NULL
 
 			SELECT @intItemId = intItemId
@@ -433,19 +447,17 @@ BEGIN TRY
 			--IF @intItemId IS NULL
 			--BEGIN
 			--	SELECT @strError = 'Item ' + @strItemNo + ' is not available.'
-
 			--	RAISERROR (
 			--			@strError
 			--			,16
 			--			,1
 			--			)
 			--END
-
 			SELECT @intLotId = NULL
 				,@dblQty = NULL
 				,@dblWeight = NULL
-			--SELECT @intItemId = NULL
 
+			--SELECT @intItemId = NULL
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
 				,@intLotItemUOMId = intItemUOMId
@@ -459,12 +471,18 @@ BEGIN TRY
 						ELSE dblWeight
 						END
 					)
-				,@intItemId =(CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END)
+				,@intItemId = (
+					CASE 
+						WHEN @intItemId IS NOT NULL
+							THEN @intItemId
+						ELSE intItemId
+						END
+					)
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
 
-		IF @intTransactionTypeId NOT IN (
+			IF @intTransactionTypeId NOT IN (
 					16
 					,18
 					)
@@ -523,7 +541,13 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLotItemUOMId = intItemUOMId
 					,@dblWeightPerQty = dblWeightPerQty
-					,@intItemId =(CASE WHEN @intItemId IS NOT NULL THEN @intItemId ELSE intItemId END)
+					,@intItemId = (
+						CASE 
+							WHEN @intItemId IS NOT NULL
+								THEN @intItemId
+							ELSE intItemId
+							END
+						)
 				FROM tblICLot
 				WHERE strLotNumber = @strLotNo
 					AND dblWeightPerQty > 1
@@ -854,7 +878,7 @@ BEGIN TRY
 						,intContractDetailId = @intInventoryTransferDetailId
 						,dtmDate = GETDATE()
 						,intShipViaId = IT.intShipViaId
-						,dblQty = @dblLotQuantity
+						,dblQty = Case When Round(@dblLotQuantity,0)=0 Then 1 Else Round(@dblLotQuantity,0) End
 						,intGrossNetUOMId = @intNetWeightItemUOMId
 						,dblGross = dbo.fnMFConvertQuantityToTargetItemUOM(ITD.intItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity)
 						,dblNet = dbo.fnMFConvertQuantityToTargetItemUOM(ITD.intItemUOMId, @intNetWeightItemUOMId, @dblLotQuantity)
@@ -1045,11 +1069,6 @@ BEGIN TRY
 
 				SELECT @intItemUOMId = @intLotItemUOMId
 
-				--Update tblICItemLocation
-				--Set intAllowNegativeInventory=1
-				--WHERE intItemId =@intItemId
-				--AND intLocationId =@intCompanyLocationId 
-
 				EXEC dbo.uspMFLotMove @intLotId = @intLotId
 					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
 					,@intNewStorageLocationId = @intNewStorageLocationId
@@ -1068,11 +1087,6 @@ BEGIN TRY
 					,@intWorkOrderId = NULL
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
 					,@ysnExternalSystemMove = 1
-
-				--Update tblICItemLocation
-				--Set intAllowNegativeInventory=3
-				--WHERE intItemId =@intItemId
-				--AND intLocationId =@intCompanyLocationId 
 
 				SELECT @strAdjustmentNo = NULL
 
@@ -1127,6 +1141,15 @@ BEGIN TRY
 					,- 8
 					)
 			BEGIN
+				SELECT @ysnReservationByStorageLocation=IsNULL(ysnDefaultPalletTagReprintonPositiveRelease,0)
+				FROM tblSMCompanyLocation
+				WHERE intCompanyLocationId =@intCompanyLocationId 
+
+				IF @ysnReservationByStorageLocation IS NULL
+				BEGIN
+					SELECT @ysnReservationByStorageLocation=0 
+				END
+
 				IF @strLotNo = ''
 				BEGIN
 					SELECT @intWorkOrderId = NULL
@@ -1134,20 +1157,37 @@ BEGIN TRY
 
 					SELECT @intWorkOrderId = intWorkOrderId
 						,@strWorkOrderNo = strWorkOrderNo
+						,@intCompanyLocationId=intLocationId
 					FROM tblMFWorkOrder
 					WHERE strERPOrderNo = @strOrderNo
 
-					DELETE
-					FROM @ItemsToReserve
+					SELECT @ysnReservationByStorageLocation=IsNULL(ysnDefaultPalletTagReprintonPositiveRelease,0)
+					FROM tblSMCompanyLocation
+					WHERE intCompanyLocationId =@intCompanyLocationId 
 
-					EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-						,@intWorkOrderId
-						,8
+					IF @ysnReservationByStorageLocation IS NULL
+					BEGIN
+						SELECT @ysnReservationByStorageLocation=0 
+					END
+
+					IF @ysnReservationByStorageLocation = 0
+					BEGIN
+						DELETE
+						FROM @ItemsToReserve
+
+						EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+							,@intWorkOrderId
+							,8
+					END
 
 					UPDATE tblMFWorkOrder
 					SET intStatusId = 13
 						,dtmCompletedDate = GETDATE()
 					WHERE intWorkOrderId = @intWorkOrderId
+
+					UPDATE tblMFBlendRequirement
+					SET intStatusId = 2
+					WHERE strReferenceNo = @strOrderNo
 				END
 				ELSE
 				BEGIN
@@ -1190,7 +1230,7 @@ BEGIN TRY
 					IF @dblWeight - abs(@dblQuantity) < 0
 						AND ABS(@dblWeight - abs(@dblQuantity)) < 1
 					BEGIN
-						SELECT @dblQuantity = @dblWeight
+						SELECT @dblQuantity = Case When @intTransactionTypeId=8 Then -@dblWeight Else @dblWeight End
 					END
 
 					--Lot Tracking
@@ -1245,7 +1285,26 @@ BEGIN TRY
 						,intSourceTransactionId = 8
 						,strSourceTransactionId = @intTransactionId
 
-					IF @intTransactionTypeId=8
+						--*********************
+						SELECT @intWorkOrderId = NULL
+							,@intWorkOrderInputLotId=NULL
+						
+						SELECT @intWorkOrderId = intWorkOrderId
+						FROM tblMFWorkOrder
+						WHERE strERPOrderNo = @strOrderNo
+						
+						SELECT @intWorkOrderInputLotId =intWorkOrderInputLotId  
+						FROM dbo.tblMFWorkOrderInputLot WI
+						WHERE WI.intWorkOrderId =@intWorkOrderId 
+						AND WI.intLotId IN (SELECT L.intLotId FROM tblICLot L Where strLotNumber=@strLotNo )
+
+						UPDATE dbo.tblMFWorkOrderInputLot 
+						SET intConsumedLotId =@intLotId, dblConsumedQty =IsNULL(dblConsumedQty,0)+@dblQuantity 
+						WHERE intWorkOrderInputLotId =@intWorkOrderInputLotId 
+						--*********************
+
+					IF @intTransactionTypeId = 8
+						AND @ysnReservationByStorageLocation = 0
 					BEGIN
 						SELECT @intWorkOrderId = NULL
 							,@strWorkOrderNo = NULL
@@ -1255,12 +1314,12 @@ BEGIN TRY
 						FROM tblMFWorkOrder
 						WHERE strERPOrderNo = @strOrderNo
 
-						SELECT @intStockReservationId =NULL
-							,@intStockReservationId2  =NULL
-							,@intLotId2  =NULL
-							,@intSubLocationId2  =NULL
-							,@intStorageLocationId2  =NULL
-							,@intTransactionId2 =NULL
+						SELECT @intStockReservationId = NULL
+							,@intStockReservationId2 = NULL
+							,@intLotId2 = NULL
+							,@intSubLocationId2 = NULL
+							,@intStorageLocationId2 = NULL
+							,@intTransactionId2 = NULL
 
 						SELECT @intStockReservationId = NULL
 
@@ -1277,7 +1336,7 @@ BEGIN TRY
 								,@intLotId2 = intLotId
 								,@intSubLocationId2 = intSubLocationId
 								,@intStorageLocationId2 = intStorageLocationId
-								,@intTransactionId2=intTransactionId
+								,@intTransactionId2 = intTransactionId
 							FROM tblICStockReservation SR
 							WHERE dblQty = abs(@dblQuantity)
 								AND intTransactionId = @intWorkOrderId
@@ -1287,11 +1346,12 @@ BEGIN TRY
 									FROM tblICLot L
 									WHERE L.strLotNumber = @strLotNo
 									)
-						SELECT @intStockReservationId = intStockReservationId
-						FROM tblICStockReservation
-						WHERE intLotId = @intLotId
-							AND dblQty = abs(@dblQuantity)
-							AND ysnPosted = 0
+
+							SELECT @intStockReservationId = intStockReservationId
+							FROM tblICStockReservation
+							WHERE intLotId = @intLotId
+								AND dblQty = abs(@dblQuantity)
+								AND ysnPosted = 0
 
 							UPDATE tblICStockReservation
 							SET intLotId = @intLotId2
@@ -1325,39 +1385,102 @@ BEGIN TRY
 						FROM tblMFWorkOrder
 						WHERE strERPOrderNo = @strOrderNo
 
-						DELETE
-						FROM @ItemsToReserve2
+						IF @ysnReservationByStorageLocation = 0
+						BEGIN
+							DELETE
+							FROM @ItemsToReserve2
 
-						INSERT INTO @ItemsToReserve2 (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId
-							,dblQty
-							,intTransactionId
-							,strTransactionId
-							,intTransactionTypeId
-							)
-						SELECT intItemId = SR.intItemId
-							,intItemLocationId = SR.intItemLocationId
-							,intItemUOMId = SR.intItemUOMId
-							,intLotId = SR.intLotId
-							,intSubLocationId = SR.intSubLocationId
-							,intStorageLocationId = SR.intStorageLocationId
-							,dblQty = SR.dblQty
-							,intTransactionId = SR.intTransactionId
-							,strTransactionId = SR.strTransactionId
-							,intTransactionTypeId = 8
-						FROM tblICStockReservation SR
-						WHERE SR.intTransactionId = @intWorkOrderId
-							AND SR.strTransactionId = @strWorkOrderNo
-							AND SR.intInventoryTransactionType = 8
+							INSERT INTO @ItemsToReserve2 (
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId
+								,dblQty
+								,intTransactionId
+								,strTransactionId
+								,intTransactionTypeId
+								)
+							SELECT intItemId = SR.intItemId
+								,intItemLocationId = SR.intItemLocationId
+								,intItemUOMId = SR.intItemUOMId
+								,intLotId = SR.intLotId
+								,intSubLocationId = SR.intSubLocationId
+								,intStorageLocationId = SR.intStorageLocationId
+								,dblQty = SR.dblQty
+								,intTransactionId = SR.intTransactionId
+								,strTransactionId = SR.strTransactionId
+								,intTransactionTypeId = 8
+							FROM tblICStockReservation SR
+							WHERE SR.intTransactionId = @intWorkOrderId
+								AND SR.strTransactionId = @strWorkOrderNo
+								AND SR.intInventoryTransactionType = 8
 
-						EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-							,@intWorkOrderId
-							,8
+							EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+								,@intWorkOrderId
+								,8
+						END
+						ELSE
+						BEGIN
+							INSERT INTO @tblICStockReservation (
+								intTransactionId
+								,intInventoryTransactionType
+								)
+							SELECT DISTINCT TOP 1 R.intTransactionId
+								,R.intInventoryTransactionType
+							FROM tblICStockReservation R
+							JOIN @ItemsForPost L ON L.intLotId = R.intLotId
+								AND ysnPosted = 0
+								AND R.dblQty > 0
+
+							DELETE
+							FROM @ItemsToReserve2
+
+							INSERT INTO @ItemsToReserve2 (
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId
+								,dblQty
+								,intTransactionId
+								,strTransactionId
+								,intTransactionTypeId
+								)
+							SELECT SR.intItemId
+								,SR.intItemLocationId
+								,SR.intItemUOMId
+								,SR.intLotId
+								,SR.intSubLocationId
+								,SR.intStorageLocationId
+								,SR.dblQty
+								,SR.intTransactionId
+								,SR.strTransactionId
+								,SR.intInventoryTransactionType
+							FROM tblICStockReservation SR
+							JOIN @tblICStockReservation SR1 ON SR1.intTransactionId = SR.intTransactionId
+								AND SR1.intInventoryTransactionType = SR.intInventoryTransactionType
+
+							SELECT @intTransactionId = MIN(intTransactionId)
+							FROM @tblICStockReservation
+
+							WHILE @intTransactionId IS NOT NULL
+							BEGIN
+								SELECT @intInventoryTransactionType = intInventoryTransactionType
+								FROM @tblICStockReservation
+								WHERE intTransactionId = @intTransactionId
+
+								EXEC dbo.uspICCreateStockReservation @ItemsToUnReserve
+									,@intTransactionId
+									,@intInventoryTransactionType
+
+								SELECT @intTransactionId = MIN(intTransactionId)
+								FROM @tblICStockReservation
+								WHERE intTransactionId > @intTransactionId
+							END
+						END
 
 						DELETE
 						FROM @GLEntries
@@ -1413,40 +1536,111 @@ BEGIN TRY
 						IF @intOrderCompleted = 0
 							AND @intWorkOrderStatusId <> 13
 						BEGIN
-							INSERT INTO @ItemsToReserve (
-								intItemId
-								,intItemLocationId
-								,intItemUOMId
-								,intLotId
-								,intSubLocationId
-								,intStorageLocationId
-								,dblQty
-								,intTransactionId
-								,strTransactionId
-								,intTransactionTypeId
-								)
-							SELECT intItemId = SR.intItemId
-								,intItemLocationId = SR.intItemLocationId
-								,intItemUOMId = SR.intItemUOMId
-								,intLotId = SR.intLotId
-								,intSubLocationId = SR.intSubLocationId
-								,intStorageLocationId = SR.intStorageLocationId
-								,dblQty = Case When SR.dblQty + IsNULL(RR1.dblQty, 0)<0 Then 0 Else SR.dblQty + IsNULL(RR1.dblQty, 0) End
-								,intTransactionId = SR.intTransactionId
-								,strTransactionId = SR.strTransactionId
-								,intTransactionTypeId = 8
-							FROM @ItemsToReserve2 SR
-							JOIN tblICLot L ON L.intLotId = SR.intLotId
-							OUTER APPLY (
-								SELECT TOP 1 RR.dblQty
-								FROM @ItemsForPost RR
-								JOIN tblICLot L2 ON L2.intLotId = RR.intLotId
-								WHERE L2.strLotNumber=L.strLotNumber
-								) RR1
+							IF @ysnReservationByStorageLocation = 0
+							BEGIN
+								INSERT INTO @ItemsToReserve (
+									intItemId
+									,intItemLocationId
+									,intItemUOMId
+									,intLotId
+									,intSubLocationId
+									,intStorageLocationId
+									,dblQty
+									,intTransactionId
+									,strTransactionId
+									,intTransactionTypeId
+									)
+								SELECT intItemId = SR.intItemId
+									,intItemLocationId = SR.intItemLocationId
+									,intItemUOMId = SR.intItemUOMId
+									,intLotId = SR.intLotId
+									,intSubLocationId = SR.intSubLocationId
+									,intStorageLocationId = SR.intStorageLocationId
+									,dblQty = CASE 
+										WHEN SR.dblQty + IsNULL(RR1.dblQty, 0) < 0
+											THEN 0
+										ELSE SR.dblQty + IsNULL(RR1.dblQty, 0)
+										END
+									,intTransactionId = SR.intTransactionId
+									,strTransactionId = SR.strTransactionId
+									,intTransactionTypeId = 8
+								FROM @ItemsToReserve2 SR
+								JOIN tblICLot L ON L.intLotId = SR.intLotId
+								OUTER APPLY (
+									SELECT TOP 1 RR.dblQty
+									FROM @ItemsForPost RR
+									JOIN tblICLot L2 ON L2.intLotId = RR.intLotId
+									WHERE L2.strLotNumber = L.strLotNumber
+									) RR1
 
-							EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-								,@intWorkOrderId
-								,8
+								EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+									,@intWorkOrderId
+									,8
+							END
+							ELSE
+							BEGIN
+								SELECT @intTransactionId = NULL
+
+								SELECT @intTransactionId = MIN(intTransactionId)
+								FROM @tblICStockReservation
+
+								WHILE @intTransactionId IS NOT NULL
+								BEGIN
+									SELECT @intInventoryTransactionType = NULL
+
+									SELECT @intInventoryTransactionType = intInventoryTransactionType
+									FROM @tblICStockReservation
+									WHERE intTransactionId = @intTransactionId
+
+									DELETE
+									FROM @ItemsToReserve1
+
+									INSERT INTO @ItemsToReserve1 (
+										intItemId
+										,intItemLocationId
+										,intItemUOMId
+										,intLotId
+										,intSubLocationId
+										,intStorageLocationId
+										,dblQty
+										,intTransactionId
+										,strTransactionId
+										,intTransactionTypeId
+										)
+									SELECT intItemId = SR.intItemId
+										,intItemLocationId = SR.intItemLocationId
+										,intItemUOMId = SR.intItemUOMId
+										,intLotId = SR.intLotId
+										,intSubLocationId = SR.intSubLocationId
+										,intStorageLocationId = SR.intStorageLocationId
+										,dblQty = CASE 
+											WHEN SR.dblQty + IsNULL(RR1.dblQty, 0) < 0
+												THEN 0
+											ELSE SR.dblQty + IsNULL(RR1.dblQty, 0)
+											END
+										,intTransactionId = SR.intTransactionId
+										,strTransactionId = SR.strTransactionId
+										,intTransactionTypeId = 8
+									FROM @ItemsToReserve2 SR
+									JOIN tblICLot L ON L.intLotId = SR.intLotId
+									OUTER APPLY (
+										SELECT TOP 1 RR.dblQty
+										FROM @ItemsForPost RR
+										JOIN tblICLot L2 ON L2.intLotId = RR.intLotId
+										WHERE L2.strLotNumber = L.strLotNumber
+										) RR1
+									WHERE intTransactionId = @intTransactionId
+										AND intTransactionTypeId = @intInventoryTransactionType
+
+									EXEC dbo.uspICCreateStockReservation @ItemsToReserve1
+										,@intTransactionId
+										,@intInventoryTransactionType
+
+									SELECT @intTransactionId = MIN(intTransactionId)
+									FROM @tblICStockReservation
+									WHERE intTransactionId > @intTransactionId
+								END
+							END
 						END
 
 						IF @intOrderCompleted = 1
@@ -1455,7 +1649,103 @@ BEGIN TRY
 							SET intStatusId = 13
 								,dtmCompletedDate = GETDATE()
 							WHERE intWorkOrderId = @intWorkOrderId
-						END
+
+							UPDATE tblMFBlendRequirement
+							SET intStatusId = 2
+							WHERE strReferenceNo = @strOrderNo
+
+							INSERT INTO @tblMFWorkOrderInputLot (
+								intLotId
+								,dblBalance
+								,intConsumedLotId
+								)
+							SELECT intLotId
+								,dblQuantity + IsNULL(dblConsumedQty, 0)
+								,intConsumedLotId
+							FROM dbo.tblMFWorkOrderInputLot
+							WHERE intWorkOrderId = @intWorkOrderId
+								AND dblQuantity + IsNULL(dblConsumedQty, 0) > 1
+
+							SELECT @intRecordId = MIN(intRecordId)
+							FROM @tblMFWorkOrderInputLot
+
+							WHILE @intRecordId IS NOT NULL
+							BEGIN
+								SELECT @intLotId = NULL
+									,@dblBalance = NULL
+									,@intConsumedLotId = NULL
+
+								SELECT @intLotId = intLotId
+									,@dblBalance = dblBalance
+									,@intConsumedLotId = intConsumedLotId
+								FROM @tblMFWorkOrderInputLot
+								WHERE intRecordId = @intRecordId
+
+								DELETE
+								FROM @StockReservation
+
+								INSERT INTO @StockReservation (
+									intStockReservationId
+									,dblQty
+									)
+								SELECT intStockReservationId
+									,dblQty
+								FROM dbo.tblICStockReservation
+								WHERE intLotId = @intLotId
+									AND dblQty > 1
+
+								INSERT INTO @StockReservation (
+									intStockReservationId
+									,dblQty
+									)
+								SELECT intStockReservationId
+									,dblQty
+								FROM dbo.tblICStockReservation
+								WHERE intLotId = @intConsumedLotId
+									AND dblQty > 1
+
+								SELECT @intStockId = MIN(intStockId)
+								FROM @StockReservation
+
+								WHILE @intStockId IS NOT NULL
+									AND @dblBalance > 0
+								BEGIN
+									SELECT @intStockReservationId = NULL
+										,@dblQty = NULL
+
+									SELECT @intStockReservationId = intStockReservationId
+										,@dblQty = dblQty
+									FROM @StockReservation
+									WHERE intStockId = @intStockId
+
+									IF @dblQty >= @dblBalance
+									BEGIN
+										SELECT @dblBalance = 0
+
+										UPDATE dbo.tblICStockReservation
+										SET dblQty = dblQty - @dblBalance
+										WHERE intStockReservationId = @intStockReservationId
+									END
+									ELSE
+									BEGIN
+										SELECT @dblBalance = @dblBalance - @dblQty
+
+										UPDATE dbo.tblICStockReservation
+										SET dblQty = 0
+										WHERE intStockReservationId = @intStockReservationId
+									END
+
+									SELECT @intStockId = MIN(intStockId)
+									FROM @StockReservation
+									WHERE intStockId > @intStockId
+								END
+
+								SELECT @intRecordId = MIN(intRecordId)
+								FROM @tblMFWorkOrderInputLot
+								WHERE intRecordId > @intRecordId
+							END
+								END
+
 
 						DELETE
 						FROM @ItemsForPost

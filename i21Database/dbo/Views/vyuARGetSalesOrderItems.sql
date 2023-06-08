@@ -62,6 +62,7 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , ysnAddonParent					= SODETAIL.ysnAddonParent
 	 , dblAddOnQuantity					= SODETAIL.dblAddOnQuantity
 	 , dblStandardWeight				= SODETAIL.dblStandardWeight
+	 , intCustomerStorageId				= SODETAIL.intCustomerStorageId
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT SOD.intSalesOrderId
@@ -109,6 +110,7 @@ INNER JOIN (
 		 , ITEM.strType
 		 , ITEM.strLotTracking
 		 , ITEM.strBundleType
+		 , SOD.intCustomerStorageId
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	LEFT JOIN tblICItem ITEM WITH (NOLOCK) ON SOD.intItemId = ITEM.intItemId
 	WHERE ((SOD.dblQtyOrdered > 0 AND SOD.dblQtyShipped < SOD.dblQtyOrdered) OR (SOD.dblQtyOrdered < 0 AND SOD.dblQtyShipped > SOD.dblQtyOrdered))
@@ -162,6 +164,7 @@ INNER JOIN (
 		 , ITEMCOMP.strType
 		 , ITEMCOMP.strLotTracking
 		 , ITEMCOMP.strBundleType
+		 , SOD.intCustomerStorageId
 	FROM  vyuARGetItemComponents COMP
 	INNER JOIN tblSOSalesOrderDetail SOD WITH (NOLOCK) ON COMP.intItemId = SOD.intItemId
 	INNER JOIN tblICItem ITEMCOMP WITH (NOLOCK) ON COMP.intComponentItemId = ITEMCOMP.intItemId

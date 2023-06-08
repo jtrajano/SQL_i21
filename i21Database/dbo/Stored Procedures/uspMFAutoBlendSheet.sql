@@ -59,10 +59,11 @@ IF EXISTS(SELECT *
 		  , strSubLocationName		NVARCHAR(50)
 		  , intSubLocationId		INT
 		  , strLotAlias				NVARCHAR(50)
+		  , strGarden				NVARCHAR(50)
 		  , ysnParentLot			BIT
 		  , strRowState				NVARCHAR(50)
 		  , strSecondaryStatus		NVARCHAR(50)
-		  , dblNoOfPallet			NUMERIC(18, 2)
+		  , dblNoOfPallet			NUMERIC(18, 0)
 		  ,strFW					NVARCHAR(3)
 		    ,strProductType					NVARCHAR(100)
 			  ,strBrandCode					NVARCHAR(100)

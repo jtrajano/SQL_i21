@@ -298,17 +298,22 @@ BEGIN TRY
 									 END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		=  CASE WHEN CHARINDEX('dtmStartDate',@strAmendedColumnsDetails, 0) > 0  OR CHARINDEX('dtmEndDate',@strAmendedColumnsDetails, 0) > 0
-											THEN (CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc ELSE ( CASE WHEN CH.intPricingTypeId = 2 OR LEN('('+ IBM.strItemNo + ') ' + IM.strDescription) > 150 THEN @htmlDoc 
-																											  ELSE  '' END ) END +CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
-													   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
-													   WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
-												  ELSE @fontBoldStartDate + CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + '</span>' + ' - ' + @fontBoldEndDate + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) + '</span>'
-												  END)
+											THEN  ((CASE WHEN CH.intPricingTypeId = 2 THEN @htmlDoc   ELSE ( CASE WHEN LEN('('+ IBM.strItemNo + ') ' + IM.strDescription) > 150 THEN @htmlDoc ELSE  '' END )
+													END) + 
+													
+													(CASE 														
+														WHEN SM.strReportDateFormat = 'M/d/yyyy'	THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'																																		
+														WHEN SM.strReportDateFormat = 'M/d/yy'		THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'
+														WHEN SM.strReportDateFormat = 'dd-MMM-yyyy' THEN @fontBoldStartDate + dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0)+ '</span>' + ' - ' + @fontBoldEndDate +dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0) + '</span>'												  
+													ELSE @fontBoldStartDate + CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + '</span>' + ' - ' + @fontBoldEndDate + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) + '</span>'
+													END)
+												   )
 									   ELSE	
 											(CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
-												 WHEN SM.strReportDateFormat = 'M/d/yy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
-												WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
-											ELSE  CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) END)
+												  WHEN SM.strReportDateFormat = 'M/d/yy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+												  WHEN SM.strReportDateFormat = 'dd-MMM-yyyy'  THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
+											ELSE  CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) 
+											END)
 									   END, 
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',

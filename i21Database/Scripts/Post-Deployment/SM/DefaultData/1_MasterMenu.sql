@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Report' AND strModuleName = 'Tank Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Monitor Status' AND strModuleName = 'Tank Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5277,6 +5277,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Virtual M
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'TankManagement.view.VirtualMeterBilling' WHERE strMenuName = 'Virtual Meter Billing' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Monitor Status' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Tank Monitor Status', N'Tank Management', @TankManagementActivitiesParentMenuId, N'Tank Monitor Status', N'Activity', N'Screen', N'TankManagement.view.TankMonitorStatus?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 8, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'TankManagement.view.TankMonitorStatus?showSearch=true' WHERE strMenuName = 'Tank Monitor Status' AND strModuleName = 'Tank Management' AND strType = 'Screen' AND intParentMenuID = @TankManagementActivitiesParentMenuId
+
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Customer Inquiry' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'TankManagement.view.CustomerInquiry?showSearch=true' WHERE strMenuName = N'Customer Inquiry' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementMaintenanceParentMenuId
 
@@ -5876,6 +5882,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Tax
 ELSE 
  	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Store.view.SalesTaxReport' WHERE strMenuName = 'Sales Tax Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
  
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Tank Reconciliation', N'Store', @StoreReportParentMenuId, N'Tank Reconciliation', N'Report', N'Screen', N'TankManagement.view.TankReconciliation', N'small-menu-report', 0, 0, 0, 1, 8, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'TankManagement.view.TankReconciliation' WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @StoreReportParentMenuId
 
 --Lottery
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)

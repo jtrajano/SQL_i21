@@ -115,6 +115,7 @@ BEGIN TRY
 				ELSE ''
 				END + CASE 
 				WHEN (
+						IMP.strChannel = 'AUC' AND
 						WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
 						--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 						)
@@ -250,9 +251,17 @@ BEGIN TRY
 				END
 				+ CASE 
 				WHEN (
+						IMP.strChannel = 'AUC' AND
 						IsDate(IMP.dtmSaleDate)=0
 						)
 					THEN 'SALE DATE, '
+				ELSE ''
+				END+CASE
+				WHEN (
+						IMP.strChannel = 'AUC' AND
+						IsDate(IMP.dtmPromptDate)=0
+						)
+					THEN 'PROMPT DATE, '
 				ELSE ''
 				END
 				
@@ -286,6 +295,7 @@ BEGIN TRY
 				--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
 				)
 			OR (
+				IMP.strChannel = 'AUC' AND
 				WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
 				--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 				)
@@ -353,7 +363,8 @@ BEGIN TRY
 				OR IsNumeric(IMP.dblTotalQtyOffered )=0
 				OR IsNumeric(IMP.intTotalNumberOfPackageBreakups)=0
 				OR IsNumeric(IMP.intNoOfPackages )=0
-				OR IsDate(IMP.dtmSaleDate )=0
+				OR (IsDate(IMP.dtmSaleDate )=0 AND IMP.strChannel = 'AUC')
+				OR (IsDate(IMP.dtmPromptDate )=0 AND IMP.strChannel = 'AUC')
 			)
 
 	-- Check if vendor is mapped to the TBO
@@ -706,7 +717,8 @@ BEGIN TRY
 	-- Sale Number
 	LEFT JOIN tblQMSample AS S ON IMP.strSaleNumber = S.strSampleNumber
 	-- Mixing Location
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocation MU
+		ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
 	-- Batch MU
 	LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 		AND BATCH_MU.intLocationId = MU.intCompanyLocationId
@@ -1230,6 +1242,24 @@ BEGIN TRY
 			AND E.intEntityId = @intSupplierEntityId
 			AND S.strRepresentLotNumber = @strRefNo
 
+		IF @intSampleId IS NOT NULL AND @str3PLStatus ='Delete'
+		BEGIN
+			IF NOT EXISTS(SELECT *FROM dbo.tblMFBatch WHERE intSampleId=@intSampleId )
+			BEGIN
+				DELETE FROM tblQMSample WHERE intSampleId=@intSampleId 
+			END
+			Else
+			Begin
+				UPDATE tblQMImportCatalogue
+				SET strLogResult = 'Batch is available in the system. Please remove the batch first before removing the catalogue.' 
+					,ysnProcessed = 1
+					,ysnSuccess = 0
+				WHERE intImportCatalogueId = @intImportCatalogueId;
+
+				GOTO CONT
+			End
+		END
+
 		-- If sample does not exist yet
 		IF @intSampleId IS NULL
 		BEGIN
@@ -1342,6 +1372,8 @@ BEGIN TRY
 				,intPackageTypeId 
 				,dblTareWeight
 				,intCropYearId
+				,intCurrencyId
+				,intBookId
 				)
 			-- ,strBuyingOrderNo
 			SELECT intConcurrencyId = 1
@@ -1442,6 +1474,19 @@ BEGIN TRY
 				,dblTareWeight=@dblTareWeight
 				,intCropYearId = @intCropYearId
 
+				-- Populated for bulking process only
+				,intCurrencyId = (SELECT CUR.intCurrencyID
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId)
+				,intBookId = (SELECT BOOK.intBookId
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCompanyLocation MU
+										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId)
 			SET @intSampleId = SCOPE_IDENTITY()
 
 			-- Sample Detail
@@ -1704,7 +1749,7 @@ BEGIN TRY
 				,intProductLineId = @intProductLineId
 				,ysnOrganic = @ysnOrganic
 				,dblGrossWeight = @dblGrossWeight
-				,strBatchNo = @strBatchNo
+				,strBatchNo = CASE WHEN ISNULL(@strBatchNo, '') = '' THEN S.strBatchNo ELSE @strBatchNo END
 				,str3PLStatus = @str3PLStatus
 				,strAdditionalSupplierReference = @strAdditionalSupplierReference
 				,intAWBSampleReceived = @intAWBSampleReceived
@@ -1724,10 +1769,24 @@ BEGIN TRY
 				,intB1QtyUOMId = null
 				,dblB1Price = null
 				,intB1PriceUOMId = null
-				,intBookId = null
+				-- ,intBookId = null
 				,intPackageTypeId=@intPackageTypeId
 				,strCourierRef = @strCourierRef
 				,intCropYearId = @intCropYearId
+
+				-- Populated for bulking process only
+				,intCurrencyId = ISNULL((SELECT CUR.intCurrencyID
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId), S.intCurrencyId)
+				,intBookId = ISNULL((SELECT BOOK.intBookId
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCompanyLocation MU
+										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId), S.intBookId)
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 

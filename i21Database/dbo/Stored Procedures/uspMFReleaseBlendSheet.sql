@@ -76,6 +76,7 @@ BEGIN TRY
 		,@dblTBSQuantity NUMERIC(18, 6)
 		,@strFW NVARCHAR(3)
 		,@intRecordId INT
+		,@intSavedWorkOrderId INT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -218,10 +219,6 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet NUMERIC(38, 20)
 		,strFW NVARCHAR(3)
 		,ysnOverrideRecipe BIT
-		,dblUpperTolerance NUMERIC(38, 20)
-		,dblLowerTolerance NUMERIC(38, 20)
-		,dblCalculatedUpperTolerance NUMERIC(38, 20)
-		,dblCalculatedLowerTolerance NUMERIC(38, 20)
 		)
 	DECLARE @tblPreItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -328,10 +325,6 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet
 		,strFW
 		,ysnOverrideRecipe
-		,dblUpperTolerance 
-		,dblLowerTolerance
-		,dblCalculatedUpperTolerance 
-		,dblCalculatedLowerTolerance 
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -353,10 +346,6 @@ DECLARE @tblFW TABLE (
 		,dblNoOfPallet
 		,strFW
 		,ysnOverrideRecipe
-		,dblUpperTolerance 
-		,dblLowerTolerance
-		,dblCalculatedUpperTolerance 
-		,dblCalculatedLowerTolerance 
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -378,10 +367,6 @@ DECLARE @tblFW TABLE (
 			,dblNoOfPallet NUMERIC(38, 20)
 			,strFW NVARCHAR(50)
 			,ysnOverrideRecipe BIT
-			,dblUpperTolerance NUMERIC(38, 20)
-			,dblLowerTolerance NUMERIC(38, 20)
-			,dblCalculatedUpperTolerance NUMERIC(38, 20)
-			,dblCalculatedLowerTolerance NUMERIC(38, 20)
 			)
 
 	INSERT INTO @tblPreLot (
@@ -1143,6 +1128,8 @@ DECLARE @tblFW TABLE (
 			,@ysnOverrideRecipe=ysnOverrideRecipe
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		Select @intSavedWorkOrderId=@intWorkOrderId
 
 		DELETE
 		FROM tblMFWorkOrder
@@ -2027,10 +2014,6 @@ DECLARE @tblFW TABLE (
 			,strERPComment
 			,strERPOrderNo
 			,ysnOverrideRecipe 
-			,dblUpperTolerance
-			,dblLowerTolerance
-			,dblCalculatedUpperTolerance
-			,dblCalculatedLowerTolerance
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -2078,10 +2061,6 @@ DECLARE @tblFW TABLE (
 			,@strERPComment
 			,@strERPOrderNo
 			,ysnOverrideRecipe
-			,dblUpperTolerance
-			,dblLowerTolerance
-			,dblCalculatedUpperTolerance
-			,dblCalculatedLowerTolerance
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -2096,6 +2075,16 @@ DECLARE @tblFW TABLE (
 				,@intLocationId = @intLocationId
 				,@intUserId = @intUserId
 				,@intWorkOrderId = @intWorkOrderId
+		END
+		ELSE
+		BEGIN
+			UPDATE dbo.tblMFWorkOrderRecipeItem
+			SET intWorkOrderId=@intWorkOrderId
+			WHERE intWorkOrderId= @intSavedWorkOrderId
+
+			UPDATE dbo.tblMFWorkOrderRecipe
+			SET intWorkOrderId=@intWorkOrderId
+			WHERE intWorkOrderId= @intSavedWorkOrderId
 		END
 
 		--Check for Input Items validity

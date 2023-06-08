@@ -675,11 +675,12 @@ BEGIN TRY
 		FROM dbo.tblQMSample S WITH (NOLOCK)  
 		JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = S.intItemId  
 		AND S.intSampleId = @intSampleId  
-		JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId  
+		JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId 
+		JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId = S.intDestinationStorageLocationId
 		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intOriginId = CA.intCountryID  
 		AND LLT.intBuyingCenterId = S.intCompanyLocationId  
 		AND LLT.intReceivingPlantId = @intPlantId  
-		AND LLT.intReceivingStorageLocation = S.intDestinationStorageLocationId  
+		AND LLT.strReceivingStorageLocation=SL.strSubLocationName  
 		AND LLT.intChannelId = S.intMarketZoneId  
 		AND LLT.intPortOfDispatchId = S.intFromLocationCodeId  
 		JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = LLT.intPortOfArrivalId 
@@ -738,7 +739,7 @@ BEGIN TRY
 			,dblGrossWeight
 			,dtmInitialBuy
 			,dblWeightPerUnit
-			,dblLandedPrice
+			--,dblLandedPrice
 			,strLeafCategory
 			,strLeafManufacturingType
 			,strLeafSize
@@ -753,7 +754,7 @@ BEGIN TRY
 			,strPlant
 			,dblTotalQuantity
 			,strSampleBoxNumber
-			,dblSellingPrice
+			--,dblSellingPrice
 			,dtmStock
 			,ysnStrategic
 			,strTeaLingoSubCluster
@@ -845,17 +846,21 @@ BEGIN TRY
 			,intCurrencyId = S.intCurrencyId
 			,dtmProductionBatch = S.dtmManufacturingDate
 			,dtmTeaAvailableFrom = NULL
-			,strDustContent = NULL
+			,strDustContent = CASE 
+				WHEN ISNULL(DUST.strPropertyValue, '') = ''
+					THEN NULL
+				ELSE DUST.strPropertyValue
+				END
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
 			,dtmExpiration = NULL
 			,intFromPortId = S.intFromLocationCodeId
-			,dblGrossWeight = S.dblSampleQty +IsNULL(S.dblTareWeight,0) 
+			,dblGrossWeight = (S.dblB1QtyBought*(Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)) +IsNULL(S.dblTareWeight,0) 
 			,dtmInitialBuy = @dtmCurrentDate 
 			--,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-			,dblWeightPerUnit = Case When IsNULL(S.dblB1QtyBought,0)>0 Then S.dblSampleQty/S.dblB1QtyBought Else 1 End
-			,dblLandedPrice = NULL
+			,dblWeightPerUnit = (Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)
+			--,dblLandedPrice = NULL
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
 			,strLeafSize = BRAND.strBrandCode
@@ -865,12 +870,12 @@ BEGIN TRY
 			,intItemUOMId = S.intSampleUOMId
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = BT.intTealingoItemId
+			,intOriginalItemId = ISNULL(BT.intTealingoItemId, S.intItemId)
 			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 			,strPlant = @strPlantCode
-			,dblTotalQuantity = S.dblSampleQty
+			,dblTotalQuantity = S.dblB1QtyBought*(Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)
 			,strSampleBoxNumber = S.strSampleBoxNumber
-			,dblSellingPrice = NULL
+			--,dblSellingPrice = NULL
 			,dtmStock = @dtmStock
 			,ysnStrategic = NULL
 			,strTeaLingoSubCluster = REGION.strDescription
@@ -914,7 +919,11 @@ BEGIN TRY
 					THEN NULL
 				ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
 				END
-			,dblTeaVolume = CASE WHEN ISNULL(VOLUME.strPropertyValue, '') = '' THEN NULL ELSE VOLUME.strPropertyValue END
+			,dblTeaVolume = CASE 
+				WHEN ISNULL(VOLUME.strPropertyValue, '') = ''
+					THEN I.dblBlendWeight
+				ELSE CAST(VOLUME.strPropertyValue AS NUMERIC(18, 6))
+				END 
 			,strFines = CASE WHEN ISNULL(FINES.strPropertyValue, '') = '' THEN NULL ELSE FINES.strPropertyValue END
 			,intTealingoItemId = S.intItemId
 			,dtmWarehouseArrival = NULL
@@ -1022,15 +1031,6 @@ BEGIN TRY
 				AND P.strPropertyName = 'Moisture'
 			WHERE TR.intSampleId = S.intSampleId
 			) MOISTURE
-		--Volume
-		OUTER APPLY (
-			SELECT TR.strPropertyValue
-				,TR.dblPinpointValue
-			FROM tblQMTestResult TR
-			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-				AND P.strPropertyName = 'Volume'
-			WHERE TR.intSampleId = S.intSampleId
-			) VOLUME
 		--Fines
 		OUTER APPLY (
 			SELECT TR.strPropertyValue
@@ -1040,6 +1040,25 @@ BEGIN TRY
 				AND P.strPropertyName = 'Fines'
 			WHERE TR.intSampleId = S.intSampleId
 			) FINES
+		--Volume
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Volume'
+			WHERE TR.intSampleId = S.intSampleId
+			) VOLUME
+		--Dust
+		OUTER APPLY (
+			SELECT TR.strPropertyValue
+				,TR.dblPinpointValue
+			FROM tblQMTestResult TR
+			JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+				AND P.strPropertyName = 'Dust Level'
+			WHERE TR.intSampleId = S.intSampleId
+			) DUST
+		
 		-- Colour
 		LEFT JOIN tblICCommodityAttribute COLOUR ON COLOUR.intCommodityAttributeId = S.intSeasonId
 		-- Manufacturing Leaf Type
@@ -1109,7 +1128,7 @@ BEGIN TRY
 				UPDATE B
 				SET B.intLocationId = L.intCompanyLocationId
 					,strBatchId = @strBatchId
-					--,intSampleId = NULL
+					,intSampleId = NULL
 					,dblOriginalTeaTaste = dblTeaTaste
 					,dblOriginalTeaHue = dblTeaHue
 					,dblOriginalTeaIntensity = dblTeaIntensity

@@ -815,6 +815,7 @@ BEGIN TRY
 
 		UPDATE T
 		SET dblBalance = CASE WHEN (@ysnEnableValueBasedContract = 1 AND @strContractBase = 'Value')  THEN  T.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE T.dblBalance END 
+		    , dblAvailableQty =  CASE WHEN (@ysnEnableValueBasedContract = 1 AND @strContractBase = 'Value')  THEN  T.dblBalance - ISNULL(CT.dblApprovedQty,0) ELSE T.dblBalance END  - ISNULL(T.dblScheduleQty, 0)
 			, strContainerNumber = CT.strContainerNumber
 			, strSampleTypeName = CT.strSampleTypeName
 			, strSampleStatus = CT.strSampleStatus

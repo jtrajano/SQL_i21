@@ -128,10 +128,11 @@ BEGIN
 		FROM @tblCurrency
 
 		DECLARE @tblCustomer TABLE (
-			 intEntityId INT
-			,intServiceChargeId INT
-			,intTermId INT
-			,ysnActive BIT
+			  intEntityId           INT NOT NULL PRIMARY KEY
+			, intServiceChargeId 	INT
+			, intTermId 			INT
+			, ysnActive 			BIT
+			, dtmLastServiceCharge  DATETIME
 		)
 		DECLARE @tblComputedBalance TABLE (
 			 intEntityId INT
@@ -199,6 +200,9 @@ BEGIN
 			RETURN 0
 		END
 
+		UPDATE @tblCustomer
+    	SET dtmLastServiceCharge = ISNULL(dtmLastServiceCharge, '01/01/1900')
+
 		--GET CUSTOMER AGING IF CALCULATION IS BY CUSTOMER BALANCE
 		IF (@calculation = 'By Customer Balance')
 		BEGIN
@@ -251,23 +255,18 @@ BEGIN
 
 				--PROCESS BY AGING BALANCE	
 				INSERT INTO @tblComputedBalance (
-					 intEntityId
-					,dblTotalAR
+					  intEntityId
+					, dblTotalAR
 				)
-				SELECT 
-					 intEntityId= AGING.intEntityCustomerId
-					,dblTotalAR	= SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+				SELECT intEntityId	= AGING.intEntityCustomerId
+					 , dblTotalAR	= SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
 				FROM tblARCustomerAgingStagingTable AGING
 				INNER JOIN @tblCustomer TC ON AGING.intEntityCustomerId = TC.intEntityId
-				INNER JOIN (
-					SELECT intEntityId
-					FROM dbo.tblARCustomer WITH (NOLOCK)		
-					WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-				) C ON C.intEntityId = AGING.intEntityCustomerId	
 				WHERE AGING.intEntityUserId = @intEntityUserId 
-				AND AGING.strAgingType = 'Detail'
-				AND intCurrencyId = @intCurrencyId
-				AND (intCompanyLocationId = @intCompanyLocationId OR @ysnPrintByLocation = 0)
+				  AND AGING.strAgingType = 'Detail'
+				  AND intCurrencyId = @intCurrencyId
+				  AND TC.dtmLastServiceCharge < @asOfDate
+				  AND (intCompanyLocationId = @intCompanyLocationId OR @ysnPrintByLocation = 0)
 				GROUP BY AGING.intEntityCustomerId
 				HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @ZeroDecimal
 
@@ -514,7 +513,7 @@ BEGIN
 							WHERE BALANCE.intEntityId = @entityId
 						END
 					
-						DELETE FROM @tblComputedBalance
+						DELETE FROM @tblComputedBalance WHERE intEntityId = @entityId
 					END
 
 					--GET CUSTOMER BUDGET DUE

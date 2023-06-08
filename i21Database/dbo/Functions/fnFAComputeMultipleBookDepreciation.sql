@@ -340,8 +340,8 @@ WHERE strError IS NULL
 -- Add Bonus Depreciation and Section 179 to monthly depreciation on the first month only
 UPDATE A
 SET 
-	A.dblDepre =  ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0),
-	A.dblMonth = ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / intMonthDivisor) + ISNULL(BD.dblBonusDepreciation, 0)
+	A.dblDepre =  ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / totalMonths) + ISNULL(BD.dblBonusDepreciation, 0),
+	A.dblMonth = ((ISNULL(A.dblBasis,0)  + ISNULL(BD.dblSection179, 0) - ISNULL(BD.dblBonusDepreciation, 0)) / totalMonths) + ISNULL(BD.dblBonusDepreciation, 0)
 FROM  @tblAssetInfo A
 JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId AND BD.intBookDepreciationId = A.intBookDepreciationId
 JOIN @Id I ON I.intId = A.intAssetId
@@ -426,6 +426,43 @@ OUTER APPLY(
 	END
 )Import
 WHERE dblImportGAAPDepToDate IS NOT NULL AND ISNULL(dtmImportedDepThru,0) > 0
+
+--Add Depreciaition Import FA-489
+
+UPDATE T0 
+SET T0.dblDepre = 0 , T0.dblMonth = 0
+FROM @tblAssetInfo T0
+INNER JOIN  tblFABookDepreciation T1 
+ON T0.intBookId = T1.intBookId AND T0.intAssetId = T1.intAssetId
+WHERE YEAR(dtmImportDepThruDate) = YEAR(dtmDepreciationToDate)
+AND MONTH(dtmDepreciationToDate) + 1 < MONTH(dtmImportDepThruDate) 
+
+--For First Depreciation
+UPDATE T0   
+SET T0.dblDepre = 0 , T0.dblMonth = 0  
+FROM @tblAssetInfo T0  
+INNER JOIN  tblFABookDepreciation T1   
+ON T0.intBookId = T1.intBookId AND T0.intAssetId = T1.intAssetId  
+WHERE YEAR(dtmImportDepThruDate) = YEAR(dtmDepreciationToDate)  
+AND MONTH(dtmDepreciationToDate) < MONTH(dtmImportDepThruDate)   
+AND intMonth = 1
+
+UPDATE T0 
+SET T0.dblDepre = T0.dblDepre + ISNULL(dblImportDepreciationToDate,0)
+FROM @tblAssetInfo T0
+INNER JOIN  tblFABookDepreciation T1 
+ON T0.intBookId = T1.intBookId AND T0.intAssetId = T1.intAssetId
+WHERE YEAR(dtmDepreciationToDate) > YEAR(dtmImportDepThruDate)
+AND MONTH(dtmDepreciationToDate) + 1 > MONTH(dtmImportDepThruDate) 
+
+UPDATE T0 
+SET T0.dblDepre = (T0.dblDepre + ISNULL(dblImportDepreciationToDate,0)) - T0.dblMonth , T0.dblMonth = 0
+FROM @tblAssetInfo T0
+INNER JOIN  tblFABookDepreciation T1 
+ON T0.intBookId = T1.intBookId AND T0.intAssetId = T1.intAssetId
+WHERE YEAR(dtmDepreciationToDate) = YEAR(dtmImportDepThruDate)
+AND MONTH(dtmDepreciationToDate) + 1 = MONTH(dtmImportDepThruDate) 
+
 
 Skip_Tax_Monthly_Depreciation:
 
