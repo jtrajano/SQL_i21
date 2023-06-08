@@ -391,7 +391,10 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 ELSE 
 	BEGIN 
 		/* New PickList. */
-		SELECT p.intItemId
+		SELECT 0 AS intPickListDetailId
+			 , 0 AS intPickListId
+			 , 0 AS intSalesOrderId
+			 , p.intItemId
 			 , i.strItemNo
 			 , i.strDescription
 			 , l.intLotId
