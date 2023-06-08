@@ -568,6 +568,7 @@ BEGIN TRY
 		,[intPayToCashBankAccountId]
 		,strPrintFormat
 		,[intEntityApplicatorId]
+		,[intOpportunityId]
 	)
 	SELECT [strInvoiceNumber]				= CASE WHEN @UseOriginIdAsInvoiceNumber = 1 THEN @InvoiceOriginId ELSE NULL END
 		,[strTransactionType]				= @TransactionType
@@ -685,6 +686,7 @@ BEGIN TRY
 		,[intPayToCashBankAccountId]		= @PayToCashBankAccountId
 		,strPrintFormat						= CASE WHEN @TransactionType = 'Customer Prepayment' THEN 'Prepayment' ELSE '' END
 		,[intEntityApplicatorId]			= @intEntityApplicatorId
+		,[intOpportunityId]					= @OpportunityId
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
