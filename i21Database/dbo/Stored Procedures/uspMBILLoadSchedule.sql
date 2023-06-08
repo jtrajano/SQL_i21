@@ -264,7 +264,7 @@ INNER JOIN tblMBILDeliveryHeader delivery on load.intLoadHeaderId = delivery.int
 isnull(a.intCustomerId,0) = isnull(delivery.intEntityId,0) and 
 isnull(a.intCustomerLocationId,0) = isnull(delivery.intEntityLocationId,0) and
 isnull(a.intSCompanyLocationId,a.intPCompanyLocationId) = delivery.intCompanyLocationId AND 
-delivery.ysnRequirePump = TMS.ysnRequirePump
+ISNULL(delivery.ysnRequirePump,-1) = ISNULL(TMS.ysnRequirePump,-1)
 left join tblMBILPickupDetail pickupdetail on a.intLoadDetailId = pickupdetail.intLoadDetailId 
 LEFT JOIN tblTMOrder t on a.intTMDispatchId = t.intDispatchId 
 Where a.intDriverEntityId = @intDriverId
@@ -460,7 +460,7 @@ INNER JOIN tblLGDispatchOrderDetail DOD ON DO.intDispatchOrderId = DOD.intDispat
 INNER JOIN tblMBILLoadHeader MBH ON MBH.strLoadNumber = DO.strDispatchOrderNumber
 INNER JOIN tblTMDispatch TMD on TMD.intDispatchID = DOD.intTMDispatchId
 INNER JOIN tblTMSite TMS on TMS.intSiteID = TMD.intSiteID
-INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,CASE WHEN TMS.ysnCompanySite  = 1 THEN TMS.intLocationId else DO.intCompanyLocationId end) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId) and MBDH.ysnRequirePump = TMS.ysnRequirePump
+INNER JOIN tblMBILDeliveryHeader MBDH ON MBH.intLoadHeaderId = MBDH.intLoadHeaderId AND ISNULL(DOD.intEntityLocationId,CASE WHEN TMS.ysnCompanySite  = 1 THEN TMS.intLocationId else DO.intCompanyLocationId end) = ISNULL(MBDH.intEntityLocationId,MBDH.intCompanyLocationId) and ISNULL(MBDH.ysnRequirePump,-1) = ISNULL(TMS.ysnRequirePump,-1)
 LEFT JOIN tblMBILDeliveryDetail MBDL ON MBDL.intDispatchOrderDetailId = DOD.intDispatchOrderDetailId and MBDL.intDeliveryHeaderId = MBDH.intDeliveryHeaderId 
 LEFT JOIN tblTMOrder t on DOD.intTMDispatchId = t.intDispatchId
 WHERE intStopType = 2 AND intDispatchStatus = 3 and MBDL.intDispatchOrderDetailId is null AND DO.intDriverEntityId = @intDriverId
