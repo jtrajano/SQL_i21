@@ -14,6 +14,7 @@ SELECT
 				    END COLLATE Latin1_General_CI_AS
       ,chk.[dtmShiftDateForImport]  
       ,chk.[dtmShiftClosedDate]  
+      ,chk.[strCheckoutStartDate] 
       ,chk.[strCheckoutCloseDate]  
       ,chk.[dblProcessXMLVersion]  
       ,chk.[strStatus]  
@@ -260,6 +261,7 @@ GROUP BY
       ,chk.[strManagersPassword]  
       ,chk.[dtmShiftDateForImport]  
       ,chk.[dtmShiftClosedDate]  
+      ,chk.[strCheckoutStartDate]  
       ,chk.[strCheckoutCloseDate]  
       ,chk.[dblProcessXMLVersion]  
       ,chk.[strStatus]  
