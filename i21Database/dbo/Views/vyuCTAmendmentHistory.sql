@@ -17,6 +17,7 @@ FROM
 			,intContractTypeId              =  CH.intContractTypeId
 			,strContractType	            =  TP.strContractType
 			,strItemChanged		            =  SAL.strItemChanged
+			,strItemDescription				=  I.strDescription
 			--,strOldValue		            =  SAL.strOldValue
 			,strOldValue = (
 					case
@@ -63,6 +64,7 @@ FROM
 		LEFT JOIN tblICCommodity	       CO  ON CO.intCommodityId			 = CH.intCommodityId
 		LEFT JOIN tblSMCompanyLocation	   CL  ON CL.intCompanyLocationId    = CD.intCompanyLocationId
 		LEFT JOIN vyuEMEntity			   CS  ON CS.intEntityId	 		= CH.intSalespersonId
+		LEFT JOIN tblICItem				   I   ON I.intItemId				= CD.intItemId
 	) tblAmendment
 	GROUP BY
 		intSequenceAmendmentLogId,
@@ -88,4 +90,5 @@ FROM
 		dtmSigned,
 		intSalesPersonId,
 		strSalesPerson,
-		intConcurrencyId
+		intConcurrencyId,
+		strItemDescription
