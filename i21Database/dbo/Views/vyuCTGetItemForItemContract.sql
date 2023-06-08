@@ -76,8 +76,8 @@ AS
 		 , IM.ysnBasisContract    
 		 , intBundleId = BI.intItemId    
 		 , intBundleItemId = NULL    
-		 , UOM.intUnitMeasureId  
-		 , UOM.strUnitMeasure  
+		 , intUnitMeasureId = CASE WHEN  UOM.ysnStockUnit = 0 THEN NULL ELSE UOM.intUnitMeasureId   END
+		 , strUnitMeasure = CASE WHEN UOM.ysnStockUnit = 0 THEN NULL ELSE UOM.strUnitMeasure   END
 		  , UOM.intItemUOMId   
 		FROM tblICItem      IM    
 		JOIN tblICItemLocation    IL ON IL.intItemId    = IM.intItemId    
@@ -90,7 +90,7 @@ AS
 		 CROSS APPLY   
 		   (   
 			SELECT * FROM (
-				 SELECT TOP 1 IUOM.intItemId, IUOM.intUnitMeasureId, UOM.strUnitMeasure  , intItemUOMId
+				 SELECT TOP 1 IUOM.intItemId, IUOM.intUnitMeasureId, UOM.strUnitMeasure  , intItemUOMId, IUOM.ysnStockUnit 
 				   FROM tblICItemUOM IUOM  
 				   JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId  
 				   WHERE  IUOM.intItemId = IM.intItemId   
