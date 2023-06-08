@@ -40,6 +40,7 @@ BEGIN TRY
 	INNER JOIN	tblICItem c
 	ON			b.intItemId = c.intItemId
 	WHERE		a.intCheckoutId = @intCheckoutId
+	AND a.dblPrice <> 0 AND a.dblQuantity <> 0 AND a.dblAmount <> 0
   
 	SELECT		@intStoreId = CH.intStoreId  
 	FROM		dbo.tblSTCheckoutHeader CH  
@@ -71,6 +72,7 @@ BEGIN TRY
 		INNER JOIN	tblICItem Item
 		ON			UOM.intItemId = Item.intItemId
 		WHERE		CPT.intPumpTotalsId = @intPumpTotalsId  
+		AND CPT.dblPrice <> 0 AND CPT.dblQuantity <> 0 AND CPT.dblAmount <> 0
 	
 		SET @Cost = NULL
 
