@@ -663,7 +663,7 @@ BEGIN TRY
 
 		IF (ISNULL(@intPricingTypeId, 0) NOT IN (0, 3))
 		BEGIN
-			if exists(select top 1 1 from @cbLogTemp where intContractStatusId = 3 and (intContractStatusId <> @intPreviousHistoryContractStatusId or intPricingTypeId <> @intPricingTypeId) and dblQty <> @dblSeqHistoryPreviousQty)
+			if exists(select top 1 1 from @cbLogTemp where (intContractStatusId <> @intPreviousHistoryContractStatusId or intPricingTypeId <> @intPricingTypeId) and dblQty <> @dblSeqHistoryPreviousQty)
 			begin
 				select @ysnChangePricingTypeAndQuantity = 1;
 			end
