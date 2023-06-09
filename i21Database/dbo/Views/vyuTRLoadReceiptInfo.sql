@@ -22,11 +22,14 @@ SELECT LR.intLoadReceiptId
 	, LD.strLoadNumber
 	, strZipCode = (CASE WHEN ISNULL(LR.intSupplyPointId, '') <> '' THEN ISNULL(SP.strZipCode, CL.strZipPostalCode) ELSE CL.strZipPostalCode END)
 	, SP.strFreightSalesUnit
-FROM tblTRLoadReceipt LR 
-LEFT JOIN vyuTRTerminal TM ON TM.intEntityVendorId = LR.intTerminalId
-LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = LR.intSupplyPointId
-LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LR.intCompanyLocationId
-LEFT JOIN tblICItem I ON I.intItemId = LR.intItemId
-LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LR.intContractDetailId
-LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = LR.intTaxGroupId
+    , SBL.strSubLocationName 'strBulkStorageLocationName'
+	, LR.intBulkStorageLocationId
+FROM tblTRLoadReceipt LR   
+LEFT JOIN vyuTRTerminal TM ON TM.intEntityVendorId = LR.intTerminalId  
+LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = LR.intSupplyPointId  
+LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LR.intCompanyLocationId  
+LEFT JOIN tblICItem I ON I.intItemId = LR.intItemId  
+LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LR.intContractDetailId  
+LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = LR.intTaxGroupId  
 LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = LR.intLoadDetailId
+LEFT JOIN tblSMCompanyLocationSubLocation SBL ON SBL.intCompanyLocationSubLocationId = LR.intBulkStorageLocationId

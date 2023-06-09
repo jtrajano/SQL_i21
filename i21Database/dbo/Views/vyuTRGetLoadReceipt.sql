@@ -45,6 +45,7 @@ SELECT Receipt.intLoadReceiptId
 								WHEN ISNULL(LoadSchedule.dblQuantity,0) != 0 THEN LoadSchedule.dblQuantity END
 	, dblReceivedQuantity = CASE WHEN SupplyPoint.strGrossOrNet = 'Gross' THEN Receipt.dblGross
 								WHEN SupplyPoint.strGrossOrNet = 'Net' THEN Receipt.dblNet END
+	, intBulkStorageLocationId = Receipt.intBulkStorageLocationId
 
 FROM tblTRLoadReceipt Receipt
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = Receipt.intLoadHeaderId
