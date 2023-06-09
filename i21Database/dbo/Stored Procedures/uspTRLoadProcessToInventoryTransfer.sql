@@ -143,7 +143,7 @@ BEGIN TRY
 		,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
 		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
-		,[intFromSubLocationId]     = MIN(TMSite.intCompanyLocationSubLocationId)
+		,[intFromSubLocationId]     = MIN(TR.intBulkStorageLocationId)
 		,[intToSubLocationId]       = MIN(TMSite.intCompanyLocationSubLocationId)
 		,[intFromStorageLocationId] = NULL
 		,[intToStorageLocationId]   = NULL

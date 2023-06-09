@@ -175,6 +175,7 @@ BEGIN TRY
 		,dblComboSurcharge						= DD.dblComboSurcharge
 		,intInventoryReceiptId					= TR.intInventoryReceiptId
 		,intDispatchId							= DD.intTMOId
+		,[intCompanyLocationSubLocationId]		= TR.intBulkStorageLocationId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -1022,6 +1023,7 @@ BEGIN TRY
 		,[strBOLNumberDetail]
 		,[ysnBlended]
 		,[intDispatchId]
+		,[intCompanyLocationSubLocationId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1107,6 +1109,7 @@ BEGIN TRY
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
 		,ysnBlended								= TR.ysnBlended
 		,intDispatchId							= TR.intDispatchId
+		,intCompanyLocationSubLocationId		= TR.intCompanyLocationSubLocationId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
