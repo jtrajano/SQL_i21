@@ -176,6 +176,7 @@ BEGIN TRY
 		,intInventoryReceiptId					= TR.intInventoryReceiptId
 		,intDispatchId							= DD.intTMOId
 		,ysnUseOriginIdAsInvoiceNumber			= CASE WHEN (MBIL.intDeliveryHeaderId IS NOT NULL AND ISNULL(MBIL.strDeliveryNumber, '') <> '') THEN 1 ELSE  0 END
+		,[intCompanyLocationSubLocationId]		= TR.intBulkStorageLocationId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -1028,6 +1029,7 @@ BEGIN TRY
 		,[ysnBlended]
 		,[intDispatchId]
 		,[ysnUseOriginIdAsInvoiceNumber]
+		,[intCompanyLocationSubLocationId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1114,6 +1116,7 @@ BEGIN TRY
 		,ysnBlended								= TR.ysnBlended
 		,intDispatchId							= TR.intDispatchId
 		,ysnUseOriginIdAsInvoiceNumber			= TR.ysnUseOriginIdAsInvoiceNumber
+		,intCompanyLocationSubLocationId		= TR.intCompanyLocationSubLocationId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
