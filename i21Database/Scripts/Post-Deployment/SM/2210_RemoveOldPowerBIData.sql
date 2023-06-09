@@ -35,7 +35,8 @@ END
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference WHERE ysnPowerBIProfilePipeline = NULL)
 BEGIN
-	UPDATE tblSMCompanyPreference SET ysnPowerBIProfilePipeline = 1
+	UPDATE tblSMCompanyPreference SET ysnPowerBIProfilePipeline = 1, strPowerBIWorkspaceId = ''
+
 END
 
 
