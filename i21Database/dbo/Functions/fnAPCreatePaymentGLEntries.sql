@@ -454,7 +454,7 @@ BEGIN
 																										ELSE voucher.dblTotal END)
 															END
 													)
-														*  ISNULL(NULLIF(voucher.dblAverageExchangeRate,0),1))
+														*  ISNULL(NULLIF(ROUND(voucher.dblAverageExchangeRate,5),0),1))
 											AS DECIMAL(18,2))) * (
 																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14,16) AND A.ysnPrepay = 0)
 																			OR
