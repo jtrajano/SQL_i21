@@ -209,8 +209,8 @@ BEGIN
 			,intTicketProductId 			    = Ticket.intTicketProductId 
 			,intModuleId 					    = Ticket.intModuleId 
 			,intVersionId 					    = Ticket.intVersionId 
-			,intAssignedTo 					    = Ticket.intAssignedTo 
-			,intAssignedToEntity 			    = Ticket.intAssignedToEntity 
+			,intAssignedTo 					    = GroupUserConfig.intUserSecurityEntityId 
+			,intAssignedToEntity 			    = GroupUserConfig.intUserSecurityEntityId 
 			,intCreatedUserId 				    = Ticket.intCreatedUserId 
 			,intCreatedUserEntityId 		    = Ticket.intCreatedUserEntityId 
 		    ,dtmCreated 					    = Ticket.dtmCreated 
@@ -282,6 +282,16 @@ BEGIN
 		FROM tblHDProjectTask
 		WHERE intProjectId = @intProjectId
 	) ProjectCount
+		INNER JOIN tblHDModule Module
+	ON Module.intModuleId = Ticket.intModuleId
+	CROSS APPLY
+	(
+	 SELECT TOP 1 y.intUserSecurityEntityId
+	 FROM tblHDGroupUserConfig y
+	 WHERE y.intTicketGroupId = Module.intTicketGroupId
+	 ORDER BY y.ysnOwner DESC,
+		   y.ysnEscalation DESC
+	) GroupUserConfig
 	WHERE Ticket.intTicketId = @intTicketId
 
 	SET @intNewTicketId = SCOPE_IDENTITY()
