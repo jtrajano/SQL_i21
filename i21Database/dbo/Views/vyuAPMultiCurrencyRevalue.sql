@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuAPMultiCurrencyRevalue]
 AS
 SELECT DISTINCT
-	strTransactionType		=	'Voucher',
+	strTransactionType		=	v.strTransactionType,
 	strTransactionId		=	A.strBillId,
 	strTransactionDate		=	A.dtmDate,
 	strTransactionDueDate	=	A.dtmDueDate,
@@ -11,7 +11,7 @@ SELECT DISTINCT
 	strLocation				=	EL.strLocationName,
 	strTicket				=	'',
 	strContractNumber		=	CH.strContractNumber,
-	strItemId				=	strName,
+	strItemId				=	B2.strName,
 	dblQuantity				=	BD.dblQtyReceived,
 	dblUnitPrice			=	0,
 	dblAmount				=	A.dblTotal,
@@ -29,8 +29,8 @@ SELECT DISTINCT
 	intAccountId			= 	 A.intAccountId,
 	intCompanyLocationId	=	 A.intShipToId
 FROM tblAPBill A
-INNER JOIN tblAPBillDetail BD
-	ON BD.intBillId = A.intBillId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = A.intBillId
+JOIN vyuAPBill v ON v.intBillId = A.intBillId
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.[intEntityId] = B2.intEntityId) 
 	ON A.intEntityVendorId = B.[intEntityId]
 LEFT JOIN dbo.tblEMEntityLocation EL
