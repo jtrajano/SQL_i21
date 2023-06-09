@@ -1461,6 +1461,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGrainBankStatementInvoicesSubReport.sql" />
     <Build Include="dbo\Views\vyuSCGrainBankTransactions.sql" />
     <Build Include="dbo\Views\vyuSCGrainBankInvoiceTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpost.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
