@@ -213,7 +213,7 @@ BEGIN
 		,strPriceInfo = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + InvDetPriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,InvDetPriceUOM.strUnitMeasure)
 		,strPriceInfo2 = InvDetPriceCur.strCurrency + ' ' + LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' / ' + isnull(rtPriceUOMTranslation.strTranslation,InvDetPriceUOM.strUnitMeasure)
 		,InvDet.dblTotal
-		,strQtyOrderedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(CASE WHEN ISNULL(LD.dblPrintableBags, 0) <> 0 THEN LD.dblPrintableBags ELSE InvDet.dblQtyOrdered END, 2))) + ' ' + isnull(rtOUOMTranslation.strTranslation,OUOM.strUnitMeasure)
+		,strQtyOrderedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(ISNULL(LD.dblPrintableBags, InvDet.dblQtyOrdered), 2))) + ' ' + isnull(rtOUOMTranslation.strTranslation,OUOM.strUnitMeasure)
 		,strQtyShippedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyShipped, 2))) + ' ' + isnull(rtSUOMTranslation.strTranslation,SUOM.strUnitMeasure)
 		,strInvoiceCurrency = InvCur.strCurrency
 		,strPriceCurrency = PriceCur.strCurrency
