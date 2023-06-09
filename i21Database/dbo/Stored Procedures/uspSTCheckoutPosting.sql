@@ -6210,6 +6210,50 @@ BEGIN
 				----------------- RECEIVE LOTTERY  -------------------
 				------------------------------------------------------
 
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
+				INSERT INTO		tblTMTankReading (intConcurrencyId, dtmDateTime, intReadingSource, intTankNumber, dblFuelVolume, intCheckoutId, ysnManual, intSiteId, intDeviceId, intDeviceTankMonitorId, strSerialNumber)
+                SELECT			1 as intConcurrencyId, 
+								dtmFuelInventoryDate, 
+								CASE
+									WHEN ysnIsManualEntry = 0
+									THEN 2
+									WHEN ysnIsManualEntry = 1
+									THEN 3
+									ELSE 1
+									END as intReadingSource,
+								storeFuelTank.intRegisterTankNumber as intTankNumber, 
+								dblGallons, 
+								intCheckoutId,
+								CASE
+									WHEN ysnIsManualEntry = 0
+									THEN 0
+									WHEN ysnIsManualEntry = 1
+									THEN 1
+									ELSE 1
+									END as ysnManual,
+								siteDevice.intSiteID,
+								fuelInventory.intDeviceId,
+								siteDeviceTankMonitor.intDeviceTankMonitorId,
+								tankMonitorDevice.strSerialNumber                
+				FROM			tblSTCheckoutFuelInventory fuelInventory
+				INNER JOIN		tblTMDevice device
+				ON				fuelInventory.intDeviceId = device.intDeviceId
+				INNER JOIN		tblSTStoreFuelTanks storeFuelTank
+				ON				fuelInventory.intDeviceId = storeFuelTank.intDeviceId
+				LEFT JOIN		tblTMSiteDevice siteDevice 
+				ON				fuelInventory.intDeviceId = siteDevice.intDeviceId
+				LEFT JOIN		tblTMSiteDeviceTankMonitor siteDeviceTankMonitor
+				ON				siteDevice.intSiteID = siteDeviceTankMonitor.intSiteId
+				LEFT JOIN		tblTMDeviceTankMonitor deviceTankMonitor
+				ON				siteDeviceTankMonitor.intDeviceTankMonitorId = deviceTankMonitor.intDeviceTankMonitorId
+				LEFT JOIN		tblTMDevice tankMonitorDevice
+				ON				tankMonitorDevice.intDeviceId = deviceTankMonitor.intDeviceId
+                WHERE			fuelInventory.intCheckoutId = @intCheckoutId
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
 
 				----------------------------------------------------------------------
 				------------------------------- POST ---------------------------------
@@ -8773,6 +8817,14 @@ IF(@ysnDebug = 1)
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
+				DELETE FROM tblTMTankReading WHERE intCheckoutId = @intCheckoutId
+				------------------------------------------------------
+				---------- TRANSFER TANK READINGS TO TM  -------------
+				------------------------------------------------------
+
 				----------------------------------------------------------------------
 				--------------- START UN-POST RECEIVE PAYMENTS -----------------------
 				----------------------------------------------------------------------

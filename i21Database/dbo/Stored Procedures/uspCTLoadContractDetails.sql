@@ -395,6 +395,7 @@ BEGIN TRY
 		, intCurrentContractStatusId = CD.intContractStatusId
 		, strMarketZoneCode = dbo.[fnCTGetSeqDisplayField](CD.intMarketZoneId, 'tblARMarketZone')
 		, IM.strItemNo
+		, IM.strDescription AS strItemDescription
 		, strAdjustmentUOM = dbo.[fnCTGetSeqDisplayField](CD.intAdjItemUOMId, 'tblICItemUOM')
 		, CL.strLocationName
 		, FT.strFreightTerm

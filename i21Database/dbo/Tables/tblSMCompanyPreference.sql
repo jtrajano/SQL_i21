@@ -97,6 +97,8 @@
 	[strPowerBIProfileName]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfileWorkspaceId]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfileWorkspaceName]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIProfileDevWorkspaceId]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIProfileTestWorkspaceId]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIServicePrincipalId]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfilePipelineId]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPowerBIProfilePipelineName]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,

@@ -256,6 +256,13 @@ BEGIN TRY
 						)
 					THEN 'SALE DATE, '
 				ELSE ''
+				END+CASE
+				WHEN (
+						IMP.strChannel = 'AUC' AND
+						IsDate(IMP.dtmPromptDate)=0
+						)
+					THEN 'PROMPT DATE, '
+				ELSE ''
 				END
 				
 		) MSG
@@ -357,6 +364,7 @@ BEGIN TRY
 				OR IsNumeric(IMP.intTotalNumberOfPackageBreakups)=0
 				OR IsNumeric(IMP.intNoOfPackages )=0
 				OR (IsDate(IMP.dtmSaleDate )=0 AND IMP.strChannel = 'AUC')
+				OR (IsDate(IMP.dtmPromptDate )=0 AND IMP.strChannel = 'AUC')
 			)
 
 	-- Check if vendor is mapped to the TBO

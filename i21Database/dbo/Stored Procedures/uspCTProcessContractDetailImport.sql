@@ -156,7 +156,7 @@ BEGIN
 			, ci.ysnImported
 			, ci.strMessage
 			, ci.strGrade
-			, wg.intWeightGradeId
+			, intWeightGradeId = wg.intCommodityAttributeId
 		INTO #tmpList
 		FROM tblCTContractDetailImport ci
 		LEFT JOIN tblCTContractHeader ch on ch.strContractNumber = ci.strContractNumber collate database_default
@@ -212,7 +212,9 @@ BEGIN
 		--Garden
 		LEFT JOIN tblQMGardenMark gm on gm.strGardenMark = ci.strGarden collate database_default
 			--Grade
-		LEFT JOIN tblCTWeightGrade wg on wg.strWeightGradeDesc = ci.strGrade collate database_default and wg.ysnActive = 1 and wg.ysnGrade = 1
+		 LEFT JOIN (
+			select intCommodityAttributeId, intCommodityId, strDescription from [tblICCommodityAttribute] where strType = 'Grade'
+		 ) wg on ch.intCommodityId = wg.intCommodityId and wg.strDescription = ci.strGrade  collate database_default   
 	
 		--Shipping Line
 		LEFT JOIN vyuCTEntity Ent on Ent.strEntityType = 'Shipping Line' and Ent.ysnActive = 1 and ci.strShippineLine = Ent.strEntityName collate database_default
