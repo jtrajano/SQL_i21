@@ -1403,6 +1403,8 @@
     <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
     <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
     <Build Include="dbo\Functions\fnGetItemCommodityGLAccount.sql" />
+    <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
