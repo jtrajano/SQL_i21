@@ -100,9 +100,18 @@ LEFT JOIN tblICItem im ON im.intItemId = cd.intItemId
 LEFT JOIN tblICItem i ON i.intItemId = cd.intItemId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = i.intOriginId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
+OUTER APPLY (
+	SELECT TOP 1 
+		intMarkExpiredMonthPositionId
+	FROM tblRKCompanyPreference
+) rkCP
 INNER JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
-	AND ISNULL(fm1.ysnExpired, 0) = 0 
-	AND ISNULL(fm1.dtmLastTradingDate, (SELECT currentDate FROM parameter_tbl)) >=  (SELECT currentDate FROM parameter_tbl)
+	AND ((ISNULL(rkCP.intMarkExpiredMonthPositionId, 0) <> 1)
+		  OR
+		 (ISNULL(rkCP.intMarkExpiredMonthPositionId, 0) = 1
+			AND ISNULL(fm1.ysnExpired, 0) = 0 
+			AND ISNULL(fm1.dtmLastTradingDate, (SELECT currentDate FROM parameter_tbl)) >=  (SELECT currentDate FROM parameter_tbl))
+		)
 LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
 LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId

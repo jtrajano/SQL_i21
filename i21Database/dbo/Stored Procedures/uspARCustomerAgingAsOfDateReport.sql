@@ -61,7 +61,10 @@ CREATE TABLE #DECOMPANY (intAccountId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #DELACCOUNTSTATUS (intAccountStatusId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADSALESPERSON (intSalespersonId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADLOCATION (intCompanyLocationId INT NOT NULL PRIMARY KEY)
-CREATE TABLE #COMPANY (intAccountId INT NOT NULL PRIMARY KEY)
+CREATE TABLE #COMPANY (
+	 intAccountId					INT												NOT NULL PRIMARY KEY
+	 ,intId							INT												NOT NULL
+)
 CREATE TABLE #ADACCOUNTSTATUS (intAccountStatusId INT, intEntityCustomerId INT)
 CREATE TABLE #AGINGPOSTEDINVOICES (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
@@ -117,6 +120,7 @@ CREATE TABLE #CASHREFUNDS (
 	 , strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 	 , dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
 	 , dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
+	 ,intAccountId					INT												NOT NULL
 )
 CREATE TABLE #CASHRETURNS (
       intInvoiceId					INT												NOT NULL PRIMARY KEY
@@ -130,11 +134,13 @@ CREATE TABLE #CASHRETURNS (
 CREATE TABLE #FORGIVENSERVICECHARGE (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
 	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	 ,intAccountId					INT												NOT NULL
 )
 CREATE TABLE #CREDITMEMOPAIDREFUNDED (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
 	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	 , strDocumentNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	 ,intAccountId					INT												NOT NULL
 )
 
 DECLARE @ADCUSTOMERS TABLE (
@@ -244,15 +250,9 @@ IF ISNULL(@strCompanyNameIdsLocal, '') <> ''
 		FROM dbo.fnGetRowsFromDelimitedValues(@strCompanyNameIdsLocal)
 
 		INSERT INTO #COMPANY
-		SELECT GL.intAccountId
+		SELECT GL.intAccountId, GL.intAccountId
 		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
 		INNER JOIN #DECOMPANY COMPANY ON GL.intAccountId = COMPANY.intAccountId
-	END
-ELSE
-	BEGIN
-		INSERT INTO #COMPANY
-		SELECT GL.intAccountId
-		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
 	END
 
 --ACCOUNT STATUS FILTER
@@ -347,13 +347,14 @@ GROUP BY intAccountId,
 INSERT INTO #FORGIVENSERVICECHARGE (
 	   intInvoiceId
 	 , strInvoiceNumber
+	 , intAccountId
 )
 SELECT SC.intInvoiceId
 	 , SC.strInvoiceNumber
+	 , SC.intAccountId
 FROM tblARInvoice I
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
---INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
 WHERE I.strInvoiceOriginId IS NOT NULL 
   AND I.strTransactionType = 'Credit Memo' 
@@ -362,20 +363,26 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #FORGIVENSERVICECHARGE WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
+
 --#CREDITMEMOPAIDREFUNDED
 INSERT INTO #CREDITMEMOPAIDREFUNDED (
 	   intInvoiceId
 	 , strInvoiceNumber
 	 , strDocumentNumber
+	 , intAccountId
 )
 SELECT 
 	 I.intInvoiceId
 	,I.strInvoiceNumber
 	,REFUND.strDocumentNumber
+	,I.intAccountId
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
---INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 INNER JOIN(
 	SELECT ID.strDocumentNumber from tblARInvoice INV
 	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
@@ -388,6 +395,11 @@ AND I.strTransactionType <> 'Cash Refund'
 AND I.strTransactionType = 'Credit Memo'
 AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #CREDITMEMOPAIDREFUNDED WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
 
 --#AGINGPOSTEDINVOICES
 INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
@@ -408,6 +420,7 @@ INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
 	 , dblDiscount
 	 , dblInterest
 	 , ysnForgiven
+	 , intAccountId
 )
 SELECT I.intInvoiceId
 	 , I.intPaymentId
@@ -426,10 +439,10 @@ SELECT I.intInvoiceId
 	 , I.dblDiscount
 	 , I.dblInterest
 	 , I.ysnForgiven
+	 , I.intAccountId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
---INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 WHERE ysnPosted = 1
@@ -442,6 +455,11 @@ WHERE ysnPosted = 1
 	)
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #AGINGPOSTEDINVOICES WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
 
 INSERT INTO @CANCELLEDINVOICE (
 	 intInvoiceId
@@ -513,20 +531,26 @@ INSERT INTO #CASHREFUNDS (
 	   intOriginalInvoiceId
 	 , strDocumentNumber
 	 , dblRefundTotal
+	 , intAccountId
 )
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	, strDocumentNumber		= ID.strDocumentNumber
 	, dblRefundTotal		= SUM(ID.dblTotal)
+	, intAccountId          = I.intAccountId
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
---INNER JOIN #COMPANY CO ON I.intAccountId = CO.intAccountId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber, I.intAccountId
+
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #CASHREFUNDS WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
 
 DELETE FROM #AGINGPOSTEDINVOICES
 WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM #CASHREFUNDS CF INNER  JOIN #CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber)
