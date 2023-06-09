@@ -4,6 +4,7 @@ AS
 BEGIN
 	SELECT LoadDetail.*
 		,strItemDescription = Item.strDescription
+		,strItemNo = Item.strItemNo
 		,strPLocationName = PCL.strLocationName
 		,strSLocationName = SCL.strLocationName
 		,strPSubLocationName = PCLSL.strSubLocationName
