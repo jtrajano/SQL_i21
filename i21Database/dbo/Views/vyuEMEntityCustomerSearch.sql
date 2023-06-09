@@ -21,7 +21,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, dtmLastInvoice		= LASTINVOICE.dtmDate
 	, dtmLastPayment		= LASTPAYMENT.dtmDatePaid
 	, ysnActive				= CUSTOMER.ysnActive
-	, strMobile				= entityMobile.strPhone
+	, strMobile				= entityContact.strMobile
 	, strEmail				= entityContact.strEmail
 	, strContactName		= entityContact.strName
 	, intEntityContactId	= entityContact.intEntityId
@@ -102,12 +102,6 @@ OUTER APPLY (
 	WHERE entityToContact.intEntityContactId = EPN.intEntityId
 	ORDER BY intEntityPhoneNumberId
 ) entityPhone
-OUTER APPLY (
-	SELECT TOP 1 strPhone
-	FROM tblEMEntityMobileNumber EMN
-	WHERE entityToContact.intEntityContactId = EMN.intEntityId
-	ORDER BY intEntityMobileNumberId
-) entityMobile
 OUTER APPLY (
 	SELECT TOP 1 intTermId	= P.intTermId
 			   , strTerm	= T.strTerm
