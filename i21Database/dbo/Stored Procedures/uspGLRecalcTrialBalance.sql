@@ -10,8 +10,8 @@ INSERT into tblGLTrialBalance (
 			,dtmDateModified
 			,strPeriod
 			,strCurrency
+			,strCompanySegment
 			,intConcurrencyId
-
 		)
 
 SELECT 
@@ -22,6 +22,7 @@ SELECT
 			,@dtmDate
 			,strPeriod
 			,strCurrency
+			,strCompanySegment
 			,1
 FROM  vyuGLTrialBalanceRE_NonRE VTB
 
