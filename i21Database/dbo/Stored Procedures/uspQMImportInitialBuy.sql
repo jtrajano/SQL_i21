@@ -224,7 +224,7 @@ BEGIN TRY
 				END + CASE 
 				WHEN (
 						CURRENCY.intConcurrencyId IS NULL
-						--AND ISNULL(IMP.strCurrency, '') <> ''
+						AND ISNULL(IMP.strCurrency, '') <> ''
 						)
 					THEN 'CURRENCY, '
 				ELSE ''
@@ -351,7 +351,7 @@ BEGIN TRY
 				)
 			OR (
 				CURRENCY.intCurrencyID IS NULL
-				--AND ISNULL(IMP.strCurrency, '') <> ''
+				AND ISNULL(IMP.strCurrency, '') <> ''
 				)
 			OR (
 				STRATEGY.intSubBookId IS NULL
@@ -427,8 +427,8 @@ BEGIN TRY
 		,strPurchasingGroup = COMPANY_CODE.strName
 		,intBookId = BOOK.intBookId
 		,strBook = BOOK.strBook
-		,intCurrencyId = CURRENCY.intCurrencyID
-		,strCurrency = CURRENCY.strCurrency
+		,intCurrencyId = ISNULL(CURRENCY.intCurrencyID,CUR.intCurrencyID)
+		,strCurrency = ISNULL(CURRENCY.strCurrency,CUR.strCurrency)
 		,ysnBought = IMP.ysnBought
 		,intSubBookId = STRATEGY.intSubBookId
 		,strBuyingOrderNumber = IMP.strBuyingOrderNumber
@@ -526,6 +526,7 @@ BEGIN TRY
 		AND CT.strCatalogueType = IMP.strCatalogueType
 		AND E.strName = IMP.strSupplier
 		AND S.strRepresentLotNumber = IMP.strLotNumber
+		OUTER APPLY(Select intCurrencyID, strCurrency from tblSMCurrency WHERE intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) AS CUR
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
 
