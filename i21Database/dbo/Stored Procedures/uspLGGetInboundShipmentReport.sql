@@ -585,7 +585,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strShipperVendor = CASE WHEN (SELECT COUNT(intContractCertificationId) FROM [vyuCTContractCertification] WHERE intContractDetailId = LD.intSContractDetailId) > 0 OR LD.ysnPrintShipper = 1 THEN ShipperVendor.strName ELSE NULL END,
 			intCustomerEntityId = CASE WHEN (@intCustomerEntityId = 0) THEN 0 ELSE ISNULL(LD.intCustomerEntityId, -1) END,
 			strFinancingPledgingInstr = RR.strRemarks,
-			L.strFreightPayment
+			L.strFreightPayment,
+			strBankInstr = NULL,
+			strWarehouseInstr = NULL
 		FROM tblLGLoad L
 		CROSS APPLY (SELECT intLoadId, intCustomerEntityId, intSContractDetailId, ysnPrintShipper, intVendorEntityId, intPContractDetailId, intPCompanyLocationId 
 				FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId 
@@ -883,7 +885,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			intCustomerEntityId = ISNULL(@intCustomerEntityId, 0),
 			strFinancingPledgingInstr = RR.strRemarks,
 			L.strFreightPayment,
-			dtmDateToday = @dateToday
+			dtmDateToday = @dateToday,
+			strBankInstr = BankInstr.strConditionName,
+			strWarehouseInstr = WarehouseInstr.strConditionName
 		FROM		tblLGLoad L
 		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN(L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
@@ -953,6 +957,24 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				,strFooterLogoType = CASE WHEN CLLF.blbLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
 		) LOGO
 		LEFT JOIN vyuLGGetReportRemark RR ON RR.intValueId = L.intBorrowingFacilityId AND RR.strType = 'Borrowing Facility' AND RR.intLocationId = LD.intPCompanyLocationId
+		OUTER APPLY (
+			SELECT
+				STUFF((
+					SELECT CHAR(10) + LGC.strConditionDescription
+					FROM tblLGLoadCondition LGC
+					INNER JOIN tblCTCondition CTC ON CTC.intConditionId = LGC.intConditionId AND CTC.strType = 'Instore Letter - Bank'
+					WHERE LGC.intLoadId = L.intLoadId
+					FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS strConditionName
+		) AS BankInstr
+		OUTER APPLY (
+			SELECT
+				STUFF((
+					SELECT CHAR(10) + LGC.strConditionDescription
+					FROM tblLGLoadCondition LGC
+					INNER JOIN tblCTCondition CTC ON CTC.intConditionId = LGC.intConditionId AND CTC.strType = 'Instore Letter - Warehouse'
+					WHERE LGC.intLoadId = L.intLoadId
+					FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS strConditionName
+		) AS WarehouseInstr
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
 END
