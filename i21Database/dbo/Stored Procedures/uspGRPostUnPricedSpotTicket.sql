@@ -37,6 +37,7 @@ BEGIN TRY
 		   ,@voucherItems AS VoucherPayable
 		   ,@voucherItemsTax AS VoucherDetailTax
 		   ,@intTicketId as INT
+	DECLARE @intInventoryReceiptId AS INT
 
 	SET @dtmDate = GETDATE()
 
@@ -67,6 +68,14 @@ BEGIN TRY
 		,intEntityId INT NULL
 	)
 
+	DECLARE @intCntId INT
+	DECLARE @Receipts AS TABLE 
+	(
+		intId INT IDENTITY(1,1)
+		,intInventoryReceiptId INT
+		,intTicketId INT
+	)
+
 	INSERT INTO @tblEntity (intEntityId)
 	SELECT DISTINCT intEntityId
 	FROM tblGRUnPricedSpotTicket
@@ -87,15 +96,14 @@ BEGIN TRY
 				FROM @tblEntity
 				WHERE intEntityKey = @intEntityKey
 
-				DELETE
-				FROM @voucherDetailStorage
+				DELETE FROM @voucherDetailStorage
 
-				DECLARE @intInventoryReceiptId AS INT
-
-				--Inventory Item
-				SELECT @intInventoryReceiptId = IRI.intInventoryReceiptId,
-					   @intItemId = IRI.intItemId,
-					   @intTicketId = SpotTicket.intTicketId
+				--SELECT @intInventoryReceiptId = IRI.intInventoryReceiptId,
+				--	   @intItemId = IRI.intItemId,
+				--	   @intTicketId = SpotTicket.intTicketId
+				INSERT INTO @Receipts
+				SELECT IRI.intInventoryReceiptId,
+					   SpotTicket.intTicketId
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
@@ -107,168 +115,166 @@ BEGIN TRY
 					ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
-				DELETE FROM @voucherItems
-				DELETE FROM @voucherItemsTax
 
-				UPDATE tblICInventoryReceiptItem
-				SET ysnAllowVoucher = CASE WHEN ISNULL(ysnAllowVoucher,0) = 0 THEN CASE WHEN @dblCashPrice > 0 THEN 1 ELSE 0 END ELSE ysnAllowVoucher END
-				WHERE intInventoryReceiptId = @intInventoryReceiptId
+				WHILE ISNULL((SELECT COUNT(*) FROM @Receipts),0) > 0
+				BEGIN
+					SET @intCntId = NULL
+					SET @intInventoryReceiptId = NULL
+					SET @intTicketId = NULL
 
-				UPDATE  A
-					SET ysnAllowVoucher = ISNULL(B.ysnAllowVoucher,0)
-				FROM tblICInventoryReceiptCharge A
-				INNER JOIN  tblICInventoryReceiptItem B
-					ON A.strChargesLink = B.strChargesLink
-				WHERE A.intInventoryReceiptId = @intInventoryReceiptId
-					AND B.intInventoryReceiptId = @intInventoryReceiptId
-					AND B.ysnAllowVoucher = 1
+					SELECT TOP 1 
+						@intCntId				= intId
+						,@intInventoryReceiptId	= intInventoryReceiptId 
+						,@intTicketId			= intTicketId
+					FROM @Receipts 
+					ORDER BY intId
+
+					DELETE FROM @voucherItems
+					DELETE FROM @voucherItemsTax
+
+					UPDATE tblICInventoryReceiptItem
+					SET ysnAllowVoucher = CASE WHEN ISNULL(ysnAllowVoucher,0) = 0 THEN CASE WHEN @dblCashPrice > 0 THEN 1 ELSE 0 END ELSE ysnAllowVoucher END
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+					UPDATE  A
+						SET ysnAllowVoucher = ISNULL(B.ysnAllowVoucher,0)
+					FROM tblICInventoryReceiptCharge A
+					INNER JOIN  tblICInventoryReceiptItem B
+						ON A.strChargesLink = B.strChargesLink
+					WHERE A.intInventoryReceiptId = @intInventoryReceiptId
+						AND B.intInventoryReceiptId = @intInventoryReceiptId
+						AND B.ysnAllowVoucher = 1
 				
 
-				BEGIN /* BUILD VOUCHER DETAIL AND PAYABLE */
-					BEGIN
-					INSERT INTO @voucherItems(
-							[intEntityVendorId]			
-							,[intTransactionType]		
-							,[intLocationId]	
-							,[intShipToId]	
-							,[intShipFromId]			
-							,[intShipFromEntityId]
-							,[intPayToAddressId]
-							,[intCurrencyId]					
-							,[dtmDate]				
-							,[strVendorOrderNumber]			
-							,[strReference]						
-							,[strSourceNumber]					
-							,[intPurchaseDetailId]				
-							,[intContractHeaderId]				
-							,[intContractDetailId]				
-							,[intContractSeqId]					
-							,[intScaleTicketId]					
-							,[intInventoryReceiptItemId]		
-							,[intInventoryReceiptChargeId]		
-							,[intInventoryShipmentItemId]		
-							,[intInventoryShipmentChargeId]		
-							,[intLoadShipmentId]				
-							,[intLoadShipmentDetailId]	
-							,[intLoadShipmentCostId]			
-							,[intItemId]						
-							,[intPurchaseTaxGroupId]			
-							,[strMiscDescription]				
-							,[dblOrderQty]						
-							,[dblOrderUnitQty]					
-							,[intOrderUOMId]					
-							,[dblQuantityToBill]				
-							,[dblQtyToBillUnitQty]				
-							,[intQtyToBillUOMId]				
-							,[dblCost]							
-							,[dblCostUnitQty]					
-							,[intCostUOMId]						
-							,[dblNetWeight]						
-							,[dblWeightUnitQty]					
-							,[intWeightUOMId]					
-							,[intCostCurrencyId]
-							,[dblTax]							
-							,[dblDiscount]
-							,[intCurrencyExchangeRateTypeId]	
-							,[dblExchangeRate]					
-							,[ysnSubCurrency]					
-							,[intSubCurrencyCents]				
-							,[intAccountId]						
-							,[intShipViaId]						
-							,[intTermId]						
-							,[strBillOfLading]					
-							,[ysnReturn]
-							,[dtmVoucherDate]
-							,[intStorageLocationId]
-							,[intSubLocationId]
-							,[ysnStage]
-							,[intBookId]
-							,[intSubBookId]
-							,[intLotId]
-					)
-					SELECT 
-						GP.[intEntityVendorId]
-						,GP.[intTransactionType]
-						,GP.[intLocationId]	
-						,[intShipToId] = GP.intLocationId	
-						,[intShipFromId] = GP.intShipFromId	 		
-						,[intShipFromEntityId] = GP.intShipFromEntityId
-						,[intPayToAddressId] = GP.intPayToAddressId
-						,GP.[intCurrencyId]					
-						,GP.[dtmDate]				
-						,GP.[strVendorOrderNumber]		
-						,GP.[strReference]						
-						,GP.[strSourceNumber]					
-						,GP.[intPurchaseDetailId]				
-						,GP.[intContractHeaderId]				
-						,GP.[intContractDetailId]				
-						,[intContractSeqId] = NULL					
-						,GP.[intScaleTicketId]					
-						,GP.[intInventoryReceiptItemId]		
-						,GP.[intInventoryReceiptChargeId]		
-						,GP.[intInventoryShipmentItemId]		
-						,GP.[intInventoryShipmentChargeId]		
-						,GP.[intLoadShipmentId]				
-						,GP.[intLoadShipmentDetailId]	
-						,GP.[intLoadShipmentCostId]				
-						,GP.[intItemId]						
-						,GP.[intPurchaseTaxGroupId]			
-						,GP.[strMiscDescription]				
-						,GP.dblOrderQty
-						,[dblOrderUnitQty] = 0.00					
-						,[intOrderUOMId] = NULL	 				
-						,GP.[dblQuantityToBill]
-						,GP.[dblQtyToBillUnitQty]				
-						,GP.[intQtyToBillUOMId]				
-						,[dblCost] = CASE WHEN GP.[intInventoryReceiptChargeId] IS NOT NULL THEN GP.dblUnitCost ELSE @dblCashPrice END
-						,ISNULL(GP.[dblCostUnitQty], 1) 
-						,GP.[intCostUOMId]						
-						,GP.[dblNetWeight]						
-						,ISNULL([dblWeightUnitQty], 1) 
-						,GP.[intWeightUOMId]					
-						,GP.[intCostCurrencyId]
-						,GP.[dblTax]							
-						,GP.[dblDiscount]
-						,GP.[intCurrencyExchangeRateTypeId]	
-						,[dblExchangeRate] = GP.dblRate					
-						,GP.[ysnSubCurrency]					
-						,GP.[intSubCurrencyCents]				
-						,GP.[intAccountId]						
-						,GP.[intShipViaId]						
-						,GP.[intTermId]						
-						,GP.[strBillOfLading]					
-						,GP.[ysnReturn]	
-						,GP.dtmDate
-						,GP.intStorageLocationId
-						,GP.intSubLocationId
-						,0
-						,GP.intBookId
-						,GP.intSubBookId
-						,GP.intLotId
-					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1, DEFAULT) GP
-
-					END 
-
-					-- Assemble Item Taxes
-					BEGIN
-						INSERT INTO @voucherItemsTax(
-							[intVoucherPayableId]
-							,[intTaxGroupId]				
-							,[intTaxCodeId]				
-							,[intTaxClassId]				
-							,[strTaxableByOtherTaxes]	
-							,[strCalculationMethod]		
-							,[dblRate]					
-							,[intAccountId]				
-							,[dblTax]					
-							,[dblAdjustedTax]			
-							,[ysnTaxAdjusted]			
-							,[ysnSeparateOnBill]			
-							,[ysnCheckOffTax]		
-							,[ysnTaxExempt]	
-							,[ysnTaxOnly]
+					BEGIN /* BUILD VOUCHER DETAIL AND PAYABLE */
+						BEGIN
+						INSERT INTO @voucherItems(
+								[intEntityVendorId]			
+								,[intTransactionType]		
+								,[intLocationId]	
+								,[intShipToId]	
+								,[intShipFromId]			
+								,[intShipFromEntityId]
+								,[intPayToAddressId]
+								,[intCurrencyId]					
+								,[dtmDate]				
+								,[strVendorOrderNumber]			
+								,[strReference]						
+								,[strSourceNumber]					
+								,[intPurchaseDetailId]				
+								,[intContractHeaderId]				
+								,[intContractDetailId]				
+								,[intContractSeqId]					
+								,[intScaleTicketId]					
+								,[intInventoryReceiptItemId]		
+								,[intInventoryReceiptChargeId]		
+								,[intInventoryShipmentItemId]		
+								,[intInventoryShipmentChargeId]		
+								,[intLoadShipmentId]				
+								,[intLoadShipmentDetailId]	
+								,[intLoadShipmentCostId]			
+								,[intItemId]						
+								,[intPurchaseTaxGroupId]			
+								,[strMiscDescription]				
+								,[dblOrderQty]						
+								,[dblOrderUnitQty]					
+								,[intOrderUOMId]					
+								,[dblQuantityToBill]				
+								,[dblQtyToBillUnitQty]				
+								,[intQtyToBillUOMId]				
+								,[dblCost]							
+								,[dblCostUnitQty]					
+								,[intCostUOMId]						
+								,[dblNetWeight]						
+								,[dblWeightUnitQty]					
+								,[intWeightUOMId]					
+								,[intCostCurrencyId]
+								,[dblTax]							
+								,[dblDiscount]
+								,[intCurrencyExchangeRateTypeId]	
+								,[dblExchangeRate]					
+								,[ysnSubCurrency]					
+								,[intSubCurrencyCents]				
+								,[intAccountId]						
+								,[intShipViaId]						
+								,[intTermId]						
+								,[strBillOfLading]					
+								,[ysnReturn]
+								,[dtmVoucherDate]
+								,[intStorageLocationId]
+								,[intSubLocationId]
+								,[ysnStage]
+								,[intBookId]
+								,[intSubBookId]
+								,[intLotId]
 						)
-						SELECT [intVoucherPayableId]
+						SELECT 
+							GP.[intEntityVendorId]
+							,GP.[intTransactionType]
+							,GP.[intLocationId]	
+							,[intShipToId] = GP.intLocationId	
+							,[intShipFromId] = GP.intShipFromId	 		
+							,[intShipFromEntityId] = GP.intShipFromEntityId
+							,[intPayToAddressId] = GP.intPayToAddressId
+							,GP.[intCurrencyId]					
+							,GP.[dtmDate]				
+							,GP.[strVendorOrderNumber]		
+							,GP.[strReference]						
+							,GP.[strSourceNumber]					
+							,GP.[intPurchaseDetailId]				
+							,GP.[intContractHeaderId]				
+							,GP.[intContractDetailId]				
+							,[intContractSeqId] = NULL					
+							,GP.[intScaleTicketId]					
+							,GP.[intInventoryReceiptItemId]		
+							,GP.[intInventoryReceiptChargeId]		
+							,GP.[intInventoryShipmentItemId]		
+							,GP.[intInventoryShipmentChargeId]		
+							,GP.[intLoadShipmentId]				
+							,GP.[intLoadShipmentDetailId]	
+							,GP.[intLoadShipmentCostId]				
+							,GP.[intItemId]						
+							,GP.[intPurchaseTaxGroupId]			
+							,GP.[strMiscDescription]				
+							,GP.dblOrderQty
+							,[dblOrderUnitQty] = 0.00					
+							,[intOrderUOMId] = NULL	 				
+							,GP.[dblQuantityToBill]
+							,GP.[dblQtyToBillUnitQty]				
+							,GP.[intQtyToBillUOMId]				
+							,[dblCost] = CASE WHEN GP.[intInventoryReceiptChargeId] IS NOT NULL THEN GP.dblUnitCost ELSE @dblCashPrice END
+							,ISNULL(GP.[dblCostUnitQty], 1) 
+							,GP.[intCostUOMId]						
+							,GP.[dblNetWeight]						
+							,ISNULL([dblWeightUnitQty], 1) 
+							,GP.[intWeightUOMId]					
+							,GP.[intCostCurrencyId]
+							,GP.[dblTax]							
+							,GP.[dblDiscount]
+							,GP.[intCurrencyExchangeRateTypeId]	
+							,[dblExchangeRate] = GP.dblRate					
+							,GP.[ysnSubCurrency]					
+							,GP.[intSubCurrencyCents]				
+							,GP.[intAccountId]						
+							,GP.[intShipViaId]						
+							,GP.[intTermId]						
+							,GP.[strBillOfLading]					
+							,GP.[ysnReturn]	
+							,GP.dtmDate
+							,GP.intStorageLocationId
+							,GP.intSubLocationId
+							,0
+							,GP.intBookId
+							,GP.intSubBookId
+							,GP.intLotId
+						FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1, DEFAULT) GP
+
+						END 
+
+						-- Assemble Item Taxes
+						BEGIN
+							INSERT INTO @voucherItemsTax(
+								[intVoucherPayableId]
 								,[intTaxGroupId]				
 								,[intTaxCodeId]				
 								,[intTaxClassId]				
@@ -282,87 +288,107 @@ BEGIN TRY
 								,[ysnSeparateOnBill]			
 								,[ysnCheckOffTax]		
 								,[ysnTaxExempt]	
-								,[ysnTaxOnly]	
-						FROM dbo.fnICGeneratePayablesTaxes(
-								@voucherItems
-								,@intInventoryReceiptId
-								,DEFAULT 
+								,[ysnTaxOnly]
 							)
+							SELECT [intVoucherPayableId]
+									,[intTaxGroupId]				
+									,[intTaxCodeId]				
+									,[intTaxClassId]				
+									,[strTaxableByOtherTaxes]	
+									,[strCalculationMethod]		
+									,[dblRate]					
+									,[intAccountId]				
+									,[dblTax]					
+									,[dblAdjustedTax]			
+									,[ysnTaxAdjusted]			
+									,[ysnSeparateOnBill]			
+									,[ysnCheckOffTax]		
+									,[ysnTaxExempt]	
+									,[ysnTaxOnly]	
+							FROM dbo.fnICGeneratePayablesTaxes(
+									@voucherItems
+									,@intInventoryReceiptId
+									,DEFAULT 
+								)
+						END
+
+						EXEC [dbo].[uspAPCreateVoucher]
+									@voucherPayables = @voucherItems
+									,@voucherPayableTax = @voucherItemsTax
+									,@userId = @intEntityId
+									,@throwError = 0
+									,@error = @ErrMsg OUTPUT
+									,@createdVouchersId = @intCreatedBillId OUTPUT
+
+					END
+				
+					IF @intCreatedBillId IS NOT NULL
+					BEGIN
+						DELETE
+						FROM @detailCreated
+
+						INSERT INTO @detailCreated
+						SELECT intBillDetailId
+						FROM tblAPBillDetail
+						WHERE intBillId = @intCreatedBillId
+
+						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+						IF @@ERROR <> 0
+							GOTO UnPriced_Exit;
+
+						UPDATE bd
+						SET bd.dblRate = CASE 
+											 WHEN ISNULL(bd.dblRate, 0) = 0 THEN 1
+											 ELSE bd.dblRate
+										 END
+						FROM tblAPBillDetail bd
+						WHERE bd.intBillId = @intCreatedBillId
+
+						UPDATE tblAPBill
+						SET strVendorOrderNumber = @strPriceTicket
+							,dblTotal = (
+											SELECT ROUND(SUM(bd.dblTotal) + SUM(bd.dblTax), 2)
+											FROM tblAPBillDetail bd
+											WHERE bd.intBillId = @intCreatedBillId
+										)
+						WHERE intBillId = @intCreatedBillId
+
+						IF @@ERROR <> 0
+							GOTO UnPriced_Exit;
+
+						EXEC [dbo].[uspAPPostBill] @post = 1
+							,@recap = 0
+							,@isBatch = 0
+							,@param = @intCreatedBillId
+							,@userId = @intCreatedUserId
+							,@success = @success OUTPUT
+
+						IF @@ERROR <> 0
+							GOTO UnPriced_Exit;
+
+						UPDATE SpotTicket
+						SET intBillId = @intCreatedBillId
+						FROM tblGRUnPricedSpotTicket SpotTicket
+						JOIN tblSCTicket SC 
+							ON SC.intTicketId = SpotTicket.intTicketId
+						WHERE SpotTicket.intUnPricedId = @intUnPricedId 
+							AND SpotTicket.intEntityId = @intEntityId
+							AND SpotTicket.intTicketId = @intTicketId
+
+						UPDATE SC
+						SET dblUnitPrice = @dblFuturesPrice
+						   ,dblUnitBasis = @dblFuturesBasis
+						FROM tblGRUnPricedSpotTicket SpotTicket
+						JOIN tblSCTicket SC 
+							ON SC.intTicketId = SpotTicket.intTicketId
+						WHERE SpotTicket.intUnPricedId = @intUnPricedId 
+							AND SpotTicket.intEntityId = @intEntityId
+
 					END
 
-					EXEC [dbo].[uspAPCreateVoucher]
-								@voucherPayables = @voucherItems
-								,@voucherPayableTax = @voucherItemsTax
-								,@userId = @intEntityId
-								,@throwError = 0
-								,@error = @ErrMsg OUTPUT
-								,@createdVouchersId = @intCreatedBillId OUTPUT
-
-				END
-				
-				IF @intCreatedBillId IS NOT NULL
-				BEGIN
-					DELETE
-					FROM @detailCreated
-
-					INSERT INTO @detailCreated
-					SELECT intBillDetailId
-					FROM tblAPBillDetail
-					WHERE intBillId = @intCreatedBillId
-
-					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
-
-					IF @@ERROR <> 0
-						GOTO UnPriced_Exit;
-
-					UPDATE bd
-					SET bd.dblRate = CASE 
-										 WHEN ISNULL(bd.dblRate, 0) = 0 THEN 1
-										 ELSE bd.dblRate
-									 END
-					FROM tblAPBillDetail bd
-					WHERE bd.intBillId = @intCreatedBillId
-
-					UPDATE tblAPBill
-					SET strVendorOrderNumber = @strPriceTicket
-						,dblTotal = (
-										SELECT ROUND(SUM(bd.dblTotal) + SUM(bd.dblTax), 2)
-										FROM tblAPBillDetail bd
-										WHERE bd.intBillId = @intCreatedBillId
-									)
-					WHERE intBillId = @intCreatedBillId
-
-					IF @@ERROR <> 0
-						GOTO UnPriced_Exit;
-
-					EXEC [dbo].[uspAPPostBill] @post = 1
-						,@recap = 0
-						,@isBatch = 0
-						,@param = @intCreatedBillId
-						,@userId = @intCreatedUserId
-						,@success = @success OUTPUT
-
-					IF @@ERROR <> 0
-						GOTO UnPriced_Exit;
-
-					UPDATE SpotTicket
-					SET intBillId = @intCreatedBillId
-					FROM tblGRUnPricedSpotTicket SpotTicket
-					JOIN tblSCTicket SC 
-						ON SC.intTicketId = SpotTicket.intTicketId
-					WHERE SpotTicket.intUnPricedId = @intUnPricedId 
-						AND SpotTicket.intEntityId = @intEntityId
-
-					UPDATE SC
-					SET dblUnitPrice = @dblFuturesPrice
-					   ,dblUnitBasis = @dblFuturesBasis
-					FROM tblGRUnPricedSpotTicket SpotTicket
-					JOIN tblSCTicket SC 
-						ON SC.intTicketId = SpotTicket.intTicketId
-					WHERE SpotTicket.intUnPricedId = @intUnPricedId 
-						AND SpotTicket.intEntityId = @intEntityId
-
-				END
+					DELETE FROM @Receipts WHERE intId = @intCntId
+				END			
 
 				SELECT @intEntityKey = MIN(intEntityKey)
 				FROM @tblEntity
