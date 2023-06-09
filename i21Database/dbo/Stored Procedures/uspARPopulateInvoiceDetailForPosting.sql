@@ -1358,8 +1358,8 @@ FROM tblARPostInvoiceDetail ID
 WHERE ID.strSessionId = @strSessionId
 
 UPDATE ARPIH
-SET  dblBaseInvoiceTotal    = dbo.fnRoundBanker((ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax + ISNULL(ARIDF.dblBaseTax, 0)) - ARPID.dblBaseDiscountAmount, @Precision)
-    ,dblAverageExchangeRate    = ARPID.dblCurrencyExchangeRate
+SET  dblBaseInvoiceTotal	= dbo.fnRoundBanker((ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount, @Precision)
+	,dblAverageExchangeRate	= ARPID.dblCurrencyExchangeRate
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
@@ -1372,7 +1372,6 @@ INNER JOIN (
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
-LEFT JOIN tblARInvoiceDeliveryFee ARIDF ON ARPIH.intInvoiceId = ARIDF.intInvoiceId
 WHERE strSessionId = @strSessionId
 
 UPDATE ARI
