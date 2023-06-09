@@ -1711,6 +1711,7 @@
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
     <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
     <Build Include="dbo\Tables\tblSCTicketDestinationOverageContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
