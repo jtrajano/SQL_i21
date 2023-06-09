@@ -42,7 +42,8 @@ SELECT
  ,Rte.dtmHoursTo
  ,Rte.strEntityName 
  ,Rte.strOrderStatus
- ,Rte.strItemNo
+ ,strItemNo = I.strItemNo
+ ,strItemDescription = Rte.strItemNo
  ,Rte.dblQuantity
  ,Rte.strCustomerReference
  ,Rte.strOrderComments
@@ -62,3 +63,5 @@ SELECT
  ,Rte.dtmDeliveryEnd
 FROM tblLGRouteOrder Rte
 JOIN vyuLGRoute R ON R.intRouteId = Rte.intRouteId
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = Rte.intSiteID
+OUTER APPLY (SELECT TOP 1 strItemNo FROM tblICItem WHERE intItemId = TMS.intProduct) I

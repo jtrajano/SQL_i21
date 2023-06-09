@@ -48,7 +48,8 @@ BEGIN
 		,strOrderStatus = TMO.strOrderStatus
 		,strDriver = TMO.strDriverName
 		,intItemId = TMS.intProduct
-		,strItemNo = TMO.strProduct
+		,strItemNo = I.strItemNo
+		,strItemDescription = TMO.strProduct
 		,intCategoryId = I.intCategoryId
 		,dblOnHand = NULL
 		,dblOrderedQty = NULL

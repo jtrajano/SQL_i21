@@ -22,6 +22,7 @@ FROM (
 		,strVendor = ENP.strName
 		,strVendorContract = CHP.strCustomerContract
 		,strPItemDescription = ITP.strDescription
+		,strPItemNo = ITP.strItemNo
 		,dtmPStartDate = CDP.dtmStartDate
 		,dtmPEndDate = CDP.dtmEndDate
 		,strPPosition = PP.strPosition
@@ -47,6 +48,7 @@ FROM (
 		,strCustomer = ENS.strName
 		,strCustomerContract = CHS.strCustomerContract
 		,strSItemDescription = ITS.strDescription
+		,strSItemNo = ITS.strItemNo
 		,dtmSStartDate = CDS.dtmStartDate
 		,dtmSEndDate = CDS.dtmEndDate
 		,strSPosition = PS.strPosition
@@ -165,6 +167,7 @@ FROM (
 		,strVendor = ENP.strName
 		,strVendorContract = CHP.strCustomerContract
 		,strPItemDescription = ITP.strDescription
+		,strPItemNo = ITP.strItemNo
 		,dtmPStartDate = CDP.dtmStartDate
 		,dtmPEndDate = CDP.dtmEndDate
 		,strPPosition = PP.strPosition
@@ -190,6 +193,7 @@ FROM (
 		,strCustomer = ENS.strName
 		,strCustomerContract = CHS.strCustomerContract
 		,strSItemDescription = ITS.strDescription
+		,strSItemNo = ITS.strItemNo
 		,dtmSStartDate = CDS.dtmStartDate
 		,dtmSEndDate = CDS.dtmEndDate
 		,strSPosition = PS.strPosition
