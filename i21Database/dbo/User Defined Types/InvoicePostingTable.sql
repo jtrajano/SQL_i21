@@ -158,4 +158,5 @@
 	,[intInterCompanyId]					INT				NULL
     ,[strReceiptNumber]						NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
 	,[ysnInterCompany]                      BIT             NULL
+    ,intDispatchId                          INT             NULL
 )

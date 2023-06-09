@@ -1728,6 +1728,13 @@ BEGIN
 			AND ISNULL(CategoryPricing.intCategoryId, 0) = COALESCE(@intCategoryId, CategoryPricing.intCategoryId, 0) 
 END 
 
+-------------------------------------------------------------------------------------------------------------------
+-- In case of category change, fix the Inventory GL Account id used by the Receipt other charges. 
+-------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC uspICFixOtherChargeGLEntries @strReceiptNumber = NULL, @dtmDate = @dtmStartDate
+END
+
 -- Execute the repost stored procedure
 BEGIN 
 	DECLARE @strBatchId AS NVARCHAR(40)
@@ -2163,6 +2170,12 @@ BEGIN
 					@strBatchId
 					,@strAccountToCounterInventory
 					,@intEntityUserSecurityId
+					,NULL 	
+					,NULL 
+					,NULL -- This is only used when rebuilding the stocks. 
+					,@strTransactionId -- This is only used when rebuilding the stocks. 
+					,NULL -- This is only used when rebuilding the stocks. 
+					,NULL 
 
 				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 				BEGIN 
@@ -2716,7 +2729,7 @@ BEGIN
 						,@strGLDescription
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks.
-						,NULL --,@strTransactionId -- This is only used when rebuilding the stocks.
+						,@strTransactionId -- This is only used when rebuilding the stocks.
 						,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
@@ -4349,8 +4362,8 @@ BEGIN
 			BEGIN 
 				SET @strMissingLotBatchId = NULL 
 
-				-- In case of category change, fix the Inventory GL Account id used by the Receipt other charges. 
-				EXEC uspICFixOtherChargeGLEntries @strReceiptNumber = @strTransactionId
+				---- In case of category change, fix the Inventory GL Account id used by the Receipt other charges. 
+				--EXEC uspICFixOtherChargeGLEntries @strReceiptNumber = @strTransactionId
 
 				INSERT INTO @ItemsToPost (
 						intItemId  

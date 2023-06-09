@@ -7115,7 +7115,8 @@ BEGIN
 			FROM tblICItemLocation where intItemId = @intExpensedItemId and intLocationId = @intLocationId
 
 			DECLARE @strExpensedItem NVARCHAR(MAX)
-			SELECT TOP 1 @strExpensedItem = strItemNo FROM tblICItem WHERE intItemId = @intExpensedItemId
+			DECLARE @strExpensedItemDescription NVARCHAR(MAX)
+			SELECT TOP 1 @strExpensedItem = strItemNo , @strExpensedItemDescription = strDescription FROM tblICItem WHERE intItemId = @intExpensedItemId
 
 			IF(ISNULL(@isExpensedItemHaveSiteLocation,0) = 0)
 			BEGIN
@@ -8051,6 +8052,7 @@ BEGIN
 			,@ysnExpensed				 AS ysnExpensed
 			,@intExpensedItemId			 AS intExpensedItemId
 			,@strExpensedItem			 AS strExpensedItem
+			,@strExpensedItemDescription AS strExpensedItemDescription
 
 		END
 	---------------------------------------------------

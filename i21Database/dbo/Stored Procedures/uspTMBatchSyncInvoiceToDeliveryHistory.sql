@@ -9,6 +9,7 @@ BEGIN
 	DECLARE @siteId INT
 	DECLARE @InvoicesToProcess Id
 	DECLARE @dtmDateToProcess DATETIME
+	DECLARE @TMOrderHistoryStagingTable AS TMOrderHistoryStagingTable
 	
 	DECLARE @errorTable TABLE(
 			intInvoiceId INT
@@ -24,6 +25,10 @@ BEGIN
 			,strInvoiceNumber NVARCHAR(50)
 	)
 
+	DECLARE @insertedHistory TABLE (  --- Will reset inside the loop
+		intSiteID 			  INT
+		,intDeliveryHistoryId INT
+	)
 
 	---Check for Invoice Dates
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTMInvoiceAndDate') IS NOT NULL
@@ -67,7 +72,7 @@ BEGIN
 			SELECT TOP 1 @intInvoiceForSyncId = intId FROM @InvoicesToProcess
 
 			EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @intUserId, @ResultLogForSync OUT
-			RETURN
+			GOTO NEXTREC
 		END
 
 		--Get Validation result
@@ -119,6 +124,8 @@ BEGIN
 			,A.intPerformerId
 			,A.dblPercentFull
 			,A.dblNewMeterReading
+			,A.intDispatchId
+			,B.dtmInvoiceDate
 		INTO #tmpInvoiceDetail
 		FROM tblARInvoiceDetail A
 		INNER JOIN @processingTable B
@@ -310,6 +317,7 @@ BEGIN
 						,A.dblClockAccumulatedDegreeDay
 						,A.dblCalculatedBurnRate
 						,A.ysnMaxExceed
+						,A.intDispatchId
 					INTO #tmpInvoiceDateEqualLastDeliveryDateDetail
 					FROM #tmpFinalNonServiceInvoiceDetail A
 					INNER JOIN tblTMSite B
@@ -461,117 +469,30 @@ BEGIN
 						---GEt the list of sites to be updated
 						SELECT DISTINCT 
 							A.intSiteId
+							,A.intDispatchId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, A.dtmInvoiceDate), 0)
 						INTO #tmpSiteUpdateList1
 						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
 						
 						
 
 						--- Insert Dispatch to tblTMDispatchHistory table
-						INSERT INTO tblTMDispatchHistory (
-							[intDispatchId]            
-							,[intSiteId]
-							,[intDeliveryHistoryId]                
-							,[dblPercentLeft]           
-							,[dblQuantity]              
-							,[dblMinimumQuantity]       
-							,[intProductId]             
-							,[intSubstituteProductId]   
-							,[dblPrice]                 
-							,[dblTotal]                 
-							,[dtmRequestedDate]         
-							,[intPriority]              
-							,[strComments]              
-							,[ysnCallEntryPrinted]      
-							,[intDriverId]              
-							,[intDispatchDriverId]      
-							,[strDispatchLoadNumber]    
-							,[dtmCallInDate]            
-							,[ysnSelected]              
-							,[strRoute]                 
-							,[strSequence]              
-							,[intUserId]                
-							,[dtmLastUpdated]           
-							,[ysnDispatched]            
-							,[strCancelDispatchMessage] 
-							,[intDeliveryTermId]        
-							,[dtmDispatchingDate]       
-							,[strWillCallStatus]			
-							,[strPricingMethod]			
-							,[strOrderNumber]			
-							,[dtmDeliveryDate]			
-							,[dblDeliveryQuantity]		
-							,[dblDeliveryPrice]			
-							,[dblDeliveryTotal]			
-							,[intContractId]				
-							,[ysnLockPrice]				
-							,[intRouteId]				
-							,[ysnReceived]				
-							,[ysnLeakCheckRequired]
-							,[dblOriginalPercentLeft]		
-							,[dtmReceivedDate]
-							,intPaymentId
-							,dblOveragePrice
-							,dblOverageQty
-							,strOriginalPricingMethod
-						)	
-						SELECT 
-							[intDispatchId]				= A.[intDispatchID]
-							,[intSiteId]				= A.intSiteID
-							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
-							,A.[dblPercentLeft]           
-							,A.[dblQuantity]              
-							,A.[dblMinimumQuantity]       
-							,[intProductId]				= A.[intProductID] 
-							,[intSubstituteProductId]   = A.[intSubstituteProductID]
-							,A.[dblPrice]                 
-							,A.[dblTotal]                 
-							,A.[dtmRequestedDate]         
-							,A.[intPriority]              
-							,A.[strComments]              
-							,A.[ysnCallEntryPrinted]      
-							,[intDriverId]              = A.[intDriverID]              
-							,[intDispatchDriverId]		= A.[intDispatchDriverID]   
-							,A.[strDispatchLoadNumber]    
-							,A.[dtmCallInDate]            
-							,A.[ysnSelected]              
-							,A.[strRoute]                 
-							,A.[strSequence]              
-							,[intUserId]				= A.[intUserID]
-							,A.[dtmLastUpdated]           
-							,A.[ysnDispatched]            
-							,A.[strCancelDispatchMessage] 
-							,[intDeliveryTermId]		= A.[intDeliveryTermID] 
-							,A.[dtmDispatchingDate]       
-							,A.[strWillCallStatus]			
-							,A.[strPricingMethod]			
-							,A.[strOrderNumber]			
-							,A.[dtmDeliveryDate]			
-							,A.[dblDeliveryQuantity]		
-							,A.[dblDeliveryPrice]			
-							,A.[dblDeliveryTotal]			
-							,A.[intContractId]				
-							,A.[ysnLockPrice]				
-							,A.[intRouteId]				
-							,A.[ysnReceived]				
-							,A.[ysnLeakCheckRequired]
-							,A.[dblOriginalPercentLeft]
-							,A.[dtmReceivedDate]
-							,A.intPaymentId
-							,A.dblOveragePrice
-							,A.dblOverageQty
-							,A.strOriginalPricingMethod
-						FROM tblTMDispatch A
-						INNER JOIN #tmpSiteUpdateList1 B
-							ON A.intSiteID = B.intSiteId
-						INNER JOIN tblTMDeliveryHistory C
-							ON A.intSiteID = C.intSiteID
-								AND C.dtmInvoiceDate = @dtmDateToProcess
-						
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT DISTINCT
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= intLastDeliveryHistoryId 
+						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail
+						WHERE intDispatchId IS NOT NULL
 
-
-						--Delete Order
-						DELETE FROM tblTMDispatch
-						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1 WHERE intSiteId IS NOT NULL)
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 
 
 						---- Update forecasted and estimated % left
@@ -603,12 +524,14 @@ BEGIN
 					
 					SELECT
 						A.*
+						,intRow = ROW_NUMBER() OVER(PARTITION BY A.intSiteId ORDER BY A.intInvoiceId ASC)
 					INTO #tmpInvoiceDateGreaterThanLastDelivery
 					FROM #tmpFinalNonServiceInvoiceDetail A
 					WHERE A.ysnLessThanLastDeliveryDate = 0
 
 					IF EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDateGreaterThanLastDelivery)
 					BEGIN
+						DELETE FROM @insertedHistory
 						INSERT INTO tblTMDeliveryHistory(
 							strInvoiceNumber
 							,strBulkPlantNumber
@@ -679,6 +602,7 @@ BEGIN
 							,dtmRunOutDate
 							,dtmForecastedDelivery
 						)
+						OUTPUT INSERTED.intSiteID,INSERTED.intDeliveryHistoryID INTO @insertedHistory
 						SELECT
 							strInvoiceNumber = C.strInvoiceNumber
 							,strBulkPlantNumber = D.strLocationName
@@ -759,6 +683,7 @@ BEGIN
 							ON B.intItemId = E.intItemId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
+								AND G.intDispatchID = B.intDispatchId
 						INNER JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -779,6 +704,7 @@ BEGIN
 						)K
 						WHERE B.ysnLessThanLastDeliveryDate = 0
 							AND B.ysnMultipleInvoiceHeader = 1
+							AND B.intRow = 1
 
 						------------------------------------------------------------------
 						---Insert into out of range table
@@ -847,6 +773,8 @@ BEGIN
 							,A.dblInvoiceTotalQuantity
 							,A.dblNewBurnRate
 							,A.intInvoiceId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmDateToProcess), 0)
+							,A.intDispatchId
 						INTO #tmpSiteUpdateList
 						FROM #tmpInvoiceDateGreaterThanLastDelivery A
 						WHERE A.ysnLessThanLastDeliveryDate = 0
@@ -900,110 +828,26 @@ BEGIN
 				
 
 						--- Insert Dispatch to tblTMDispatchHistory table
-						INSERT INTO tblTMDispatchHistory (
-							[intDispatchId]            
-							,[intSiteId]
-							,[intDeliveryHistoryId]                
-							,[dblPercentLeft]           
-							,[dblQuantity]              
-							,[dblMinimumQuantity]       
-							,[intProductId]             
-							,[intSubstituteProductId]   
-							,[dblPrice]                 
-							,[dblTotal]                 
-							,[dtmRequestedDate]         
-							,[intPriority]              
-							,[strComments]              
-							,[ysnCallEntryPrinted]      
-							,[intDriverId]              
-							,[intDispatchDriverId]      
-							,[strDispatchLoadNumber]    
-							,[dtmCallInDate]            
-							,[ysnSelected]              
-							,[strRoute]                 
-							,[strSequence]              
-							,[intUserId]                
-							,[dtmLastUpdated]           
-							,[ysnDispatched]            
-							,[strCancelDispatchMessage] 
-							,[intDeliveryTermId]        
-							,[dtmDispatchingDate]       
-							,[strWillCallStatus]			
-							,[strPricingMethod]			
-							,[strOrderNumber]			
-							,[dtmDeliveryDate]			
-							,[dblDeliveryQuantity]		
-							,[dblDeliveryPrice]			
-							,[dblDeliveryTotal]			
-							,[intContractId]				
-							,[ysnLockPrice]				
-							,[intRouteId]				
-							,[ysnReceived]				
-							,[ysnLeakCheckRequired]
-							,[dblOriginalPercentLeft]		
-							,[dtmReceivedDate]
-							,intPaymentId
-							,dblOveragePrice
-							,dblOverageQty
-							,strOriginalPricingMethod
-						)	
-						SELECT 
-							[intDispatchId]				= A.[intDispatchID]
-							,[intSiteId]				= A.intSiteID
-							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
-							,A.[dblPercentLeft]           
-							,A.[dblQuantity]              
-							,A.[dblMinimumQuantity]       
-							,[intProductId]				= A.[intProductID] 
-							,[intSubstituteProductId]   = A.[intSubstituteProductID]
-							,A.[dblPrice]                 
-							,A.[dblTotal]                 
-							,A.[dtmRequestedDate]         
-							,A.[intPriority]              
-							,A.[strComments]              
-							,A.[ysnCallEntryPrinted]      
-							,[intDriverId]              = A.[intDriverID]              
-							,[intDispatchDriverId]		= A.[intDispatchDriverID]   
-							,A.[strDispatchLoadNumber]    
-							,A.[dtmCallInDate]            
-							,A.[ysnSelected]              
-							,A.[strRoute]                 
-							,A.[strSequence]              
-							,[intUserId]				= A.[intUserID]
-							,A.[dtmLastUpdated]           
-							,A.[ysnDispatched]            
-							,A.[strCancelDispatchMessage] 
-							,[intDeliveryTermId]		= A.[intDeliveryTermID] 
-							,A.[dtmDispatchingDate]       
-							,A.[strWillCallStatus]			
-							,A.[strPricingMethod]			
-							,A.[strOrderNumber]			
-							,A.[dtmDeliveryDate]			
-							,A.[dblDeliveryQuantity]		
-							,A.[dblDeliveryPrice]			
-							,A.[dblDeliveryTotal]			
-							,A.[intContractId]				
-							,A.[ysnLockPrice]				
-							,A.[intRouteId]				
-							,A.[ysnReceived]				
-							,A.[ysnLeakCheckRequired]
-							,A.[dblOriginalPercentLeft]
-							,A.[dtmReceivedDate]
-							,A.intPaymentId
-							,A.dblOveragePrice
-							,A.dblOverageQty
-							,A.strOriginalPricingMethod
-						FROM tblTMDispatch A
-						INNER JOIN #tmpSiteUpdateList B
-							ON A.intSiteID = B.intSiteId
-						INNER JOIN tblTMDeliveryHistory C
-							ON A.intSiteID = C.intSiteID
-								AND C.dtmInvoiceDate = @dtmDateToProcess
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT DISTINCT
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= B.intDeliveryHistoryId 
+						FROM #tmpInvoiceDateGreaterThanLastDelivery A
+						INNER JOIN @insertedHistory B
+							ON A.intSiteId = B.intSiteId
+						WHERE intDispatchId IS NOT NULL
+							
+						
 
-
-						--Delete Order
-						DELETE FROM tblTMDispatch
-						WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList)
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 
 
 						---- Update forecasted and estimated % left
@@ -1192,6 +1036,7 @@ BEGIN
 		------------------------------- END Virtual Billing
 		-----------------------------------------------------------------------------------------------
 
+		NEXTREC:
 		--- Loop Iterator
 		SET @dtmDateToProcess = (SELECT TOP 1 dtmDate FROM #tmpTMInvoiceDateList WHERE dtmDate > @dtmDateToProcess ORDER BY dtmDate ASC)
 	END			

@@ -1301,7 +1301,9 @@
     <Build Include="dbo\Functions\fnTMGetDeliveries.sql" />
     <Build Include="dbo\Functions\fnTMGetSalesFromIC.sql" />
     <Build Include="dbo\Stored Procedures\uspSTSyncStorageLocationToItemLocation.sql" />
-    <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
+    <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3285,6 +3287,7 @@
     <Build Include="dbo\Tables\tblNRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARCustomerConsumptionSite.sql" />
+    <Build Include="dbo\Views\vyuARCustomerConsumptionDispatch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateInboundIntransitQty.sql" />
     <None Include="Scripts\Post-Deployment\EM\012_DeleteOldTables.sql" />
     <Build Include="dbo\Tables\tblSTMassUpdateReportMaster.sql" />

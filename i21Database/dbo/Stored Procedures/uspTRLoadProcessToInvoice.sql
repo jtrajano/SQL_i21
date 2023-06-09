@@ -70,17 +70,7 @@ BEGIN TRY
 		,[strInvoiceOriginId]					= ''
 		,[strPONumber]							= DH.strPurchaseOrder
 		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, DD.strBillOfLading)
-		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
-														(CASE 
-															WHEN BlendingIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendingIngredient.strSupplyPoint, ''))
-															WHEN BlendingIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-															WHEN BlendingIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(BlendingIngredient.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-														END))
-													ELSE (CASE
-														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))
-														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-													END) END COLLATE Latin1_General_CI_AS
+		,[strComments]							= ''
 		/*
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
@@ -184,6 +174,7 @@ BEGIN TRY
 		,dblComboMinimumUnits					= DD.dblComboMinimumUnits
 		,dblComboSurcharge						= DD.dblComboSurcharge
 		,intInventoryReceiptId					= TR.intInventoryReceiptId
+		,intDispatchId							= DD.intTMOId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -1030,6 +1021,7 @@ BEGIN TRY
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
 		,[ysnBlended]
+		,[intDispatchId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1114,6 +1106,7 @@ BEGIN TRY
 		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
 		,ysnBlended								= TR.ysnBlended
+		,intDispatchId							= TR.intDispatchId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
@@ -1694,9 +1687,12 @@ BEGIN TRY
 					WHERE intInvoiceId = @InvoiceId
 				)
 
-			UPDATE tblTRLoadHeader 
-			SET ysnPosted = @ysnPostOrUnPost
-			WHERE intLoadHeaderId = @intLoadHeaderId
+			IF (@ysnRecap != 1)
+			BEGIN
+				UPDATE tblTRLoadHeader 
+				SET ysnPosted = @ysnPostOrUnPost
+				WHERE intLoadHeaderId = @intLoadHeaderId
+			END
 
 			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
 		END
@@ -1709,9 +1705,12 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdated
 
-			UPDATE tblTRLoadHeader 
-			SET ysnPosted = @ysnPostOrUnPost
-			WHERE intLoadHeaderId = @intLoadHeaderId
+			IF (@ysnRecap != 1)
+			BEGIN
+				UPDATE tblTRLoadHeader 
+				SET ysnPosted = @ysnPostOrUnPost
+				WHERE intLoadHeaderId = @intLoadHeaderId
+			END
 
 			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
 		END

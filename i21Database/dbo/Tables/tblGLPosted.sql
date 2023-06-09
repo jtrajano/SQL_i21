@@ -16,3 +16,8 @@
 	[intSubledgerId]		INT             NOT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblGLPosted] PRIMARY KEY CLUSTERED ([intAccountId] ASC,[dtmDate] ASC,[intCurrencyId] ASC,[strCode] ASC,[intLedgerId] ASC,[intSubledgerId] ASC),
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGLPosted_intAccountId_strCode_intCurrencyId_dtmDate]
+    ON [dbo].[tblGLPosted]([intAccountId] ASC, [strCode] ASC, [intCurrencyId] ASC, [dtmDate] ASC)
+    INCLUDE (dblDebit, dblCredit, dblDebitUnit, dblCreditUnit, dblDebitForeign, dblCreditForeign);
+GO

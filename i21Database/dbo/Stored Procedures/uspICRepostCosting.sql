@@ -81,9 +81,12 @@ DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL
 DECLARE @ItemsToPost AS ItemCostingTableType
 
 -- If stocks are all negative, group the records by Qty regardless of cost. 
-IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
-	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
-	AND NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strBatchId = @strBatchId AND dblQty < 0) 
+--IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
+--	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
+--	AND NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strBatchId = @strBatchId AND dblQty < 0) 
+
+-- If stocks are all negative, group the records by Qty regardless of cost. 
+IF NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 	
 BEGIN 
 	INSERT INTO @ItemsToPost (
 		[intItemId] 
@@ -124,14 +127,15 @@ BEGIN
 		,[strSourceType]
 		,[strSourceNumber]
 	)
+	
 	SELECT 
 		[intItemId] 
 		,[intItemLocationId] 
 		,[intItemUOMId] 
 		,[dtmDate] 
-		,SUM([dblQty]) 
+		,[dblQty]
 		,[dblUOMQty] 
-		,[dblCost] = 0 
+		,[dblCost] = ISNULL(NULLIF(tpCost.dblCost, 0), lastCost.dblLastCost) 
 		,[dblValue] 
 		,[dblSalesPrice] 
 		,[intCurrencyId] 
@@ -162,79 +166,145 @@ BEGIN
 		,[intTicketId]
 		,[strSourceType]
 		,[strSourceNumber]
-	FROM 
-		@ItemsToPostRaw
-	GROUP BY 
-		[intItemId] 
-		,[intItemLocationId] 
-		,[intItemUOMId] 
-		,[dtmDate] 
-		,[dblUOMQty] 
-		,[dblCost]
-		,[dblValue] 
-		,[dblSalesPrice] 
-		,[intCurrencyId] 
-		,[dblExchangeRate] 
-		,[intTransactionId] 
-		,[intTransactionDetailId] 
-		,[strTransactionId] 
-		,[intTransactionTypeId] 
-		,[intLotId] 
-		,[intSubLocationId] 
-		,[intStorageLocationId] 
-		,[ysnIsStorage] 
-		,[strActualCostId] 
-		,[intSourceTransactionId] 
-		,[strSourceTransactionId] 
-		,[intInTransitSourceLocationId] 
-		,[intForexRateTypeId] 
-		,[dblForexRate] 
-		,[intStorageScheduleTypeId] 
-		,[dblUnitRetail] 
-		,[intCategoryId] 
-		,[dblAdjustCostValue] 
-		,[dblAdjustRetailValue] 
-		,[intCostingMethod] 
-		,[ysnAllowVoucher] 
-		,[intSourceEntityId] 
-		,[strBOLNumber]
-		,[intTicketId]
-		,[strSourceType]
-		,[strSourceNumber]
+	FROM (
+			SELECT 
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblQty] = SUM([dblQty]) 
+				,[dblUOMQty] 
+				,[dblCost] = 0 
+				,[dblValue] 
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[ysnIsStorage] 
+				,[strActualCostId] 
+				,[intSourceTransactionId] 
+				,[strSourceTransactionId] 
+				,[intInTransitSourceLocationId] 
+				,[intForexRateTypeId] 
+				,[dblForexRate] 
+				,[intStorageScheduleTypeId] 
+				,[dblUnitRetail] 
+				,[intCategoryId] 
+				,[dblAdjustCostValue] 
+				,[dblAdjustRetailValue] 
+				,[intCostingMethod] 
+				,[ysnAllowVoucher] 
+				,[intSourceEntityId] 
+				,[strBOLNumber]
+				,[intTicketId]
+				,[strSourceType]
+				,[strSourceNumber]
+			FROM 
+				@ItemsToPostRaw
+			GROUP BY 
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[dtmDate] 
+				,[dblUOMQty] 
+				--,[dblCost]
+				,[dblValue] 
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[intTransactionDetailId] 
+				,[strTransactionId] 
+				,[intTransactionTypeId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[ysnIsStorage] 
+				,[strActualCostId] 
+				,[intSourceTransactionId] 
+				,[strSourceTransactionId] 
+				,[intInTransitSourceLocationId] 
+				,[intForexRateTypeId] 
+				,[dblForexRate] 
+				,[intStorageScheduleTypeId] 
+				,[dblUnitRetail] 
+				,[intCategoryId] 
+				,[dblAdjustCostValue] 
+				,[dblAdjustRetailValue] 
+				,[intCostingMethod] 
+				,[ysnAllowVoucher] 
+				,[intSourceEntityId] 
+				,[strBOLNumber]
+				,[intTicketId]
+				,[strSourceType]
+				,[strSourceNumber]
+		) tp
+		OUTER APPLY (
+			SELECT TOP 1 
+				tpRaw.dblCost
+			FROM 
+				@ItemsToPostRaw tpRaw
+			WHERE 
+				tpRaw.intItemId = tp.intItemId
+				AND tpRaw.intItemLocationId = tp.intItemLocationId
+				AND tpRaw.strTransactionId = tp.strTransactionId
+				AND ISNULL(tpRaw.intTransactionDetailId, 0) = ISNULL(tp.intTransactionDetailId, 0) 			
+		) tpCost
+		OUTER APPLY (
+			SELECT TOP 1
+				dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, tp.intItemUOMId, p.dblLastCost) 
+			FROM 
+				tblICItemPricing p INNER JOIN tblICItemUOM iu
+					ON p.intItemId = iu.intItemId
+					AND iu.ysnStockUnit = 1
+			WHERE
+				p.intItemId = tp.intItemId
+				AND p.intItemLocationId = tp.intItemLocationId			
+		) lastCost
 
-	-- Make sure the cost is repopulated. 
-	-- Either it will use the dblCost from @ItemsToPostRaw or use the item's last cost. 
-	UPDATE	tp
-	SET		tp.dblCost = ISNULL(NULLIF(tpCost.dblCost, 0), lastCost.dblLastCost)
-	FROM	@ItemsToPost tp 
-			CROSS APPLY (
-				SELECT TOP 1 
-					tpRaw.dblCost
-				FROM 
-					@ItemsToPostRaw tpRaw
-				WHERE 
-					tpRaw.intItemId = tp.intItemId
-					AND tpRaw.intItemLocationId = tp.intItemLocationId
-					AND tpRaw.strTransactionId = tp.strTransactionId
-					AND ISNULL(tpRaw.intTransactionDetailId, 0) = ISNULL(tp.intTransactionDetailId, 0) 			
-			) tpCost
-			OUTER APPLY (
-				SELECT TOP 1
-					dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, tp.intItemUOMId, p.dblLastCost) 
-				FROM 
-					tblICItemPricing p INNER JOIN tblICItemUOM iu
-						ON p.intItemId = iu.intItemId
-						AND iu.ysnStockUnit = 1
-				WHERE
-					p.intItemId = tp.intItemId
-					AND p.intItemLocationId = tp.intItemLocationId			
-			) lastCost
+	---- Make sure the cost is repopulated. 
+	---- Either it will use the dblCost from @ItemsToPostRaw or use the item's last cost. 
+	--UPDATE	tp
+	--SET		tp.dblCost = ISNULL(NULLIF(tpCost.dblCost, 0), lastCost.dblLastCost)
+	--FROM	@ItemsToPost tp 
+	--		OUTER APPLY (
+	--			SELECT TOP 1 
+	--				tpRaw.dblCost
+	--			FROM 
+	--				@ItemsToPostRaw tpRaw
+	--			WHERE 
+	--				tpRaw.intItemId = tp.intItemId
+	--				AND tpRaw.intItemLocationId = tp.intItemLocationId
+	--				AND tpRaw.strTransactionId = tp.strTransactionId
+	--				AND ISNULL(tpRaw.intTransactionDetailId, 0) = ISNULL(tp.intTransactionDetailId, 0) 			
+	--		) tpCost
+	--		OUTER APPLY (
+	--			SELECT TOP 1
+	--				dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, tp.intItemUOMId, p.dblLastCost) 
+	--			FROM 
+	--				tblICItemPricing p INNER JOIN tblICItemUOM iu
+	--					ON p.intItemId = iu.intItemId
+	--					AND iu.ysnStockUnit = 1
+	--			WHERE
+	--				p.intItemId = tp.intItemId
+	--				AND p.intItemLocationId = tp.intItemLocationId			
+	--		) lastCost
 
 END
+
 -- If stocks are all positive, group the records by cost. 
-ELSE IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
-	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
-	AND NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strBatchId = @strBatchId AND dblQty < 0) 
+--ELSE IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
+--	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
+--	AND NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strBatchId = @strBatchId AND dblQty < 0) 
+
+-- If stocks are all positive, group the records by cost. 
+ELSE IF NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 	
 BEGIN 
 	INSERT INTO @ItemsToPost (
 		[intItemId] 

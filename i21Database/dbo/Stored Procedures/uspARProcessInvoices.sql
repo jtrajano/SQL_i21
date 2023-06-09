@@ -340,6 +340,7 @@ DECLARE  @Id									INT
 		,@ItemOptionalityPremium				NUMERIC(18, 6)
 		,@ItemComputedGrossPrice				NUMERIC(18, 6)
 		,@ItemOverrideTaxGroup					BIT
+		,@ItemDispatchId						INT
 
 --INSERT
 BEGIN TRY
@@ -561,6 +562,7 @@ BEGIN
 		,@ItemOptionalityPremium		= (CASE WHEN @GroupingOption = 0 THEN [dblOptionalityPremium] ELSE NULL END)
 		,@ItemComputedGrossPrice		= (CASE WHEN @GroupingOption = 0 THEN [dblComputedGrossPrice] ELSE NULL END)
 		,@ItemOverrideTaxGroup			= (CASE WHEN @GroupingOption = 0 THEN [ysnOverrideTaxGroup] ELSE NULL END)
+		,@ItemDispatchId				= (CASE WHEN @GroupingOption = 0 THEN intDispatchId ELSE NULL END)
 	FROM
 		@InvoiceEntries
 	WHERE
@@ -854,6 +856,7 @@ BEGIN
 			,@ItemOptionalityPremium		= @ItemOptionalityPremium
 			,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 			,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+			,@ItemDispatchId				= @ItemDispatchId
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 			BEGIN
@@ -1040,6 +1043,7 @@ BEGIN
 					,@ItemOptionalityPremium        = [dblOptionalityPremium]
 					,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 					,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
+					,@ItemDispatchId				= [intDispatchId]
 				FROM
 					@InvoiceEntries
 				WHERE
@@ -1145,6 +1149,7 @@ BEGIN
 						,@ItemOptionalityPremium        = @ItemOptionalityPremium
 						,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 						,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+						,@ItemDispatchId				= @ItemDispatchId
 
 					IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 						BEGIN
@@ -1836,6 +1841,7 @@ BEGIN TRY
                         ,@ItemOptionalityPremium        = [dblOptionalityPremium]
 						,@ItemComputedGrossPrice		= [dblComputedGrossPrice]
 						,@ItemOverrideTaxGroup			= [ysnOverrideTaxGroup]
+						,@ItemDispatchId				= [intDispatchId]
 					FROM
 						@InvoiceEntries
 					WHERE
@@ -1933,6 +1939,7 @@ BEGIN TRY
 							,@ItemOptionalityPremium        = @ItemOptionalityPremium
 							,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 							,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+							,@ItemDispatchId				= @ItemDispatchId
 
 						IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 							BEGIN

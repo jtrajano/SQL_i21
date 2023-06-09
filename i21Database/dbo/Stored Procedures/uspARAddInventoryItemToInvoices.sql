@@ -159,9 +159,59 @@ AND NOT EXISTS(	SELECT NULL
 --   AND ISNULL(IT.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
 --   AND IT.strType = 'Tank Delivery'
 
-DELETE I
-FROM tblARInvoice I
-INNER JOIN @InvalidRecords IR ON IR.intInvoiceId = I.intInvoiceId
+DECLARE @TankDeliveries 	[InvoicePostingTable]
+
+INSERT INTO @TankDeliveries (
+	  intInvoiceId
+	, dtmDate
+	, strInvoiceNumber
+	, strTransactionType
+	, intItemId
+	, strBatchId
+	, intEntityId
+	, intUserId
+	, intSiteId
+	, ysnLeaseBilling
+	,intDispatchId
+)
+SELECT DISTINCT 
+	  intInvoiceId			= IT.intInvoiceId
+	, dtmDate				= IT.dtmDate
+	, strInvoiceNumber		= IT.strSourceId
+	, strTransactionType	= IT.strTransactionType
+	, intItemId				= IT.intItemId
+	, strBatchId			= NULL
+	, intEntityId			= IT.intEntityId
+	, intUserId				= @UserId
+	, intSiteId				= IT.intSiteId
+	, ysnLeaseBilling		= IT.ysnLeaseBilling
+	,intDispatchId			= IT.intDispatchId
+FROM @ItemEntries IT
+WHERE IT.intSiteId IS NOT NULL
+
+IF EXISTS (SELECT TOP 1 1 FROM @TankDeliveries)
+	BEGIN
+		INSERT INTO @InvalidRecords(
+			 [intId]
+			,[strMessage]		
+			,[strTransactionType]
+			,[strType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intInvoiceId]
+		)
+		SELECT [intId]				= IT.intId
+			,[strMessage]			= TM.[strPostingError]
+			,[strTransactionType]	= IT.[strTransactionType]
+			,[strType]				= IT.[strType]
+			,[strSourceTransaction] = IT.[strSourceTransaction]
+			,[intSourceId]			= IT.[intSourceId]
+			,[strSourceId]			= IT.[strSourceId]
+			,[intInvoiceId]			= IT.[intInvoiceId]
+		FROM @ItemEntries IT
+		INNER JOIN [dbo].[fnTMGetInvalidInvoicesForSync](@TankDeliveries, 1) TM ON IT.intInvoiceId = TM.intInvoiceId
+	END
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
@@ -183,6 +233,10 @@ BEGIN
 	ELSE
 		SAVE TRANSACTION @Savepoint
 END
+
+DELETE I
+FROM tblARInvoice I
+INNER JOIN @InvalidRecords IR ON IR.intInvoiceId = I.intInvoiceId
 	
 DECLARE  @IntegrationLog InvoiceIntegrationLogStagingTable
 DELETE FROM @IntegrationLog
@@ -549,7 +603,9 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intTempDetailIdForTaxes]			INT												NULL
 	,[strBinNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strGroupNumber]	    			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strFeedDiet]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL)
+	,[strFeedDiet]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,intDispatchId						INT												NULL
+)
 
 INSERT INTO #InvoiceInventoryItem
 	([intInvoiceId]
@@ -682,7 +738,9 @@ INSERT INTO #InvoiceInventoryItem
 	,[intTempDetailIdForTaxes]
 	,[strBinNumber]
 	,[strGroupNumber]
-	,[strFeedDiet])
+	,[strFeedDiet]
+	,intDispatchId
+)
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
@@ -831,6 +889,7 @@ SELECT
 	,[strBinNumber]							= IE.[strBinNumber]
 	,[strGroupNumber]						= IE.[strGroupNumber]
 	,[strFeedDiet]							= IE.[strFeedDiet]
+	,intDispatchId							= IE.intDispatchId
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -1020,6 +1079,7 @@ USING
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
+		,intDispatchId
 	FROM
 		#InvoiceInventoryItem
 	)
@@ -1147,7 +1207,8 @@ INSERT(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
-	)
+	,intDispatchId
+)
 VALUES(
 	 [intInvoiceId]
 	,[strDocumentNumber]
@@ -1269,6 +1330,7 @@ VALUES(
 	,[strBinNumber]
 	,[strGroupNumber]
 	,[strFeedDiet]
+	,intDispatchId
 )
 	OUTPUT  
 		ISNULL(@IntegrationLogId, -9999)						--[intIntegrationLogId]

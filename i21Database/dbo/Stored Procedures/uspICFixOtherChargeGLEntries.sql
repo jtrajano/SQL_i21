@@ -1,12 +1,24 @@
 CREATE PROCEDURE [dbo].[uspICFixOtherChargeGLEntries]
 	@strReceiptNumber AS NVARCHAR(50) 
+	,@dtmDate AS DATETIME 
 AS
+
+RETURN; 
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS ON
+
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)	
+END 
 
 UPDATE affectedGd
 SET 
@@ -23,9 +35,21 @@ FROM
 		ON charge.intItemId = rc.intChargeId
 	INNER JOIN tblICItem item
 		ON item.intItemId = ri.intItemId
+	INNER JOIN #tmpRebuildList list	
+		ON item.intItemId = COALESCE(list.intItemId, item.intItemId)
+		AND item.intCategoryId = COALESCE(list.intCategoryId, item.intCategoryId)
+	INNER JOIN tblICItemLocation il
+		ON il.intItemId = item.intItemId
+		AND il.intLocationId = r.intLocationId
+	CROSS APPLY dbo.fnGetItemGLAccountAsTable (
+		item.intItemId
+		,il.intItemLocationId 
+		,'Inventory'
+	) expectedGLInventoryAccount	
+	
 	CROSS APPLY (
 		SELECT
-			gd.*
+			gd.intGLDetailId
 		FROM 
 			tblGLDetail gd INNER JOIN tblGLAccount ga 
 				ON gd.intAccountId = ga.intAccountId
@@ -43,18 +67,11 @@ FROM
 			AND gd.intJournalLineNo = allocCharge.intInventoryReceiptItemId
 			AND gd.strDescription LIKE '%Charges from ' + charge.strItemNo + ' for ' + item.strItemNo 
 			AND ac.strAccountCategory IN ('Inventory')
+			AND gd.intAccountId <> expectedGLInventoryAccount.intAccountId
 	) gd 
-
 	INNER JOIN tblGLDetail affectedGd
-		ON affectedGd.intGLDetailId = gd.intGLDetailId
-	INNER JOIN tblICItemLocation il
-		ON il.intItemId = item.intItemId
-		AND il.intLocationId = r.intLocationId
-	OUTER APPLY dbo.fnGetItemGLAccountAsTable (
-		item.intItemId
-		,il.intItemLocationId 
-		,'Inventory'
-	) expectedGLInventoryAccount
+		ON affectedGd.intGLDetailId = gd.intGLDetailId	
 WHERE
-	r.strReceiptNumber = @strReceiptNumber
-	AND gd.intAccountId <> expectedGLInventoryAccount.intAccountId
+	(r.strReceiptNumber = @strReceiptNumber OR @strReceiptNumber IS NULL) 
+	AND r.dtmReceiptDate >= @dtmDate
+	

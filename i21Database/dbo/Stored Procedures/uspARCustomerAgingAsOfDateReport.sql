@@ -7,6 +7,7 @@
 	, @strCustomerIds				NVARCHAR(MAX) = NULL
 	, @strSalespersonIds			NVARCHAR(MAX) = NULL
 	, @strCompanyLocationIds		NVARCHAR(MAX) = NULL
+	, @strCompanyNameIds			NVARCHAR(MAX) = NULL
 	, @strAccountStatusIds			NVARCHAR(MAX) = NULL
 	, @strUserId					NVARCHAR(MAX) = NULL
 	, @ysnIncludeCredits			BIT = 1
@@ -25,6 +26,7 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strSalespersonIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strCompanyLocationIdsLocal		NVARCHAR(MAX)	= NULL,
+		@strCompanyNameIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strAccountStatusIdsLocal		NVARCHAR(MAX)	= NULL,
 		@strCompanyName					NVARCHAR(100)	= NULL,
 		@strCompanyAddress				NVARCHAR(500)	= NULL,
@@ -45,17 +47,24 @@ IF(OBJECT_ID('tempdb..#AGINGSTAGING') IS NOT NULL) DROP TABLE #AGINGSTAGING
 IF(OBJECT_ID('tempdb..#AGINGGLACCOUNTS') IS NOT NULL) DROP TABLE #AGINGGLACCOUNTS
 IF(OBJECT_ID('tempdb..#ADSALESPERSON') IS NOT NULL) DROP TABLE #ADSALESPERSON
 IF(OBJECT_ID('tempdb..#ADLOCATION') IS NOT NULL) DROP TABLE #ADLOCATION
+IF(OBJECT_ID('tempdb..#COMPANY') IS NOT NULL) DROP TABLE #COMPANY
 IF(OBJECT_ID('tempdb..#ADACCOUNTSTATUS') IS NOT NULL) DROP TABLE #ADACCOUNTSTATUS
 IF(OBJECT_ID('tempdb..#DELCUSTOMERS') IS NOT NULL) DROP TABLE #DELCUSTOMERS
 IF(OBJECT_ID('tempdb..#DELLOCATION') IS NOT NULL) DROP TABLE #DELLOCATION
+IF(OBJECT_ID('tempdb..#DECOMPANY') IS NOT NULL) DROP TABLE #DECOMPANY
 IF(OBJECT_ID('tempdb..#DELACCOUNTSTATUS') IS NOT NULL) DROP TABLE #DELACCOUNTSTATUS
 IF(OBJECT_ID('tempdb..#CREDITMEMOPAIDREFUNDED') IS NOT NULL) DROP TABLE #CREDITMEMOPAIDREFUNDED 
 
 CREATE TABLE #DELCUSTOMERS (intEntityCustomerId	INT	NOT NULL PRIMARY KEY)
 CREATE TABLE #DELLOCATION (intCompanyLocationId INT NOT NULL PRIMARY KEY)
+CREATE TABLE #DECOMPANY (intAccountId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #DELACCOUNTSTATUS (intAccountStatusId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADSALESPERSON (intSalespersonId INT NOT NULL PRIMARY KEY)
 CREATE TABLE #ADLOCATION (intCompanyLocationId INT NOT NULL PRIMARY KEY)
+CREATE TABLE #COMPANY (
+	 intAccountId					INT												NOT NULL PRIMARY KEY
+	 ,intId							INT												NOT NULL
+)
 CREATE TABLE #ADACCOUNTSTATUS (intAccountStatusId INT, intEntityCustomerId INT)
 CREATE TABLE #AGINGPOSTEDINVOICES (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
@@ -111,6 +120,7 @@ CREATE TABLE #CASHREFUNDS (
 	 , strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
 	 , dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
 	 , dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
+	 ,intAccountId					INT												NOT NULL
 )
 CREATE TABLE #CASHRETURNS (
       intInvoiceId					INT												NOT NULL PRIMARY KEY
@@ -124,11 +134,13 @@ CREATE TABLE #CASHRETURNS (
 CREATE TABLE #FORGIVENSERVICECHARGE (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
 	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	 ,intAccountId					INT												NOT NULL
 )
 CREATE TABLE #CREDITMEMOPAIDREFUNDED (
 	   intInvoiceId					INT												NOT NULL PRIMARY KEY
 	 , strInvoiceNumber				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	 , strDocumentNumber			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+	 ,intAccountId					INT												NOT NULL
 )
 
 DECLARE @ADCUSTOMERS TABLE (
@@ -159,6 +171,7 @@ SET @ysnPrintFromCFLocal			= ISNULL(@ysnPrintFromCF, 0)
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
 SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')
 SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')
+SET @strCompanyNameIdsLocal			= NULLIF(@strCompanyNameIds, '')
 SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')
 SET @ysnOverrideCashFlowLocal  		= ISNULL(@ysnOverrideCashFlow, 0)
 SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
@@ -227,6 +240,19 @@ ELSE
 		INSERT INTO #ADLOCATION
 		SELECT CL.intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation CL WITH (NOLOCK) 
+	END
+
+--COMPANY FILTER
+IF ISNULL(@strCompanyNameIdsLocal, '') <> ''
+	BEGIN
+		INSERT INTO #DECOMPANY
+		SELECT DISTINCT intAccountId =  intID		
+		FROM dbo.fnGetRowsFromDelimitedValues(@strCompanyNameIdsLocal)
+
+		INSERT INTO #COMPANY
+		SELECT GL.intAccountId, GL.intAccountId
+		FROM dbo.vyuARDistinctGLCompanyAccountIds GL WITH (NOLOCK) 
+		INNER JOIN #DECOMPANY COMPANY ON GL.intAccountId = COMPANY.intAccountId
 	END
 
 --ACCOUNT STATUS FILTER
@@ -321,9 +347,11 @@ GROUP BY intAccountId,
 INSERT INTO #FORGIVENSERVICECHARGE (
 	   intInvoiceId
 	 , strInvoiceNumber
+	 , intAccountId
 )
 SELECT SC.intInvoiceId
 	 , SC.strInvoiceNumber
+	 , SC.intAccountId
 FROM tblARInvoice I
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
@@ -335,16 +363,23 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #FORGIVENSERVICECHARGE WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
+
 --#CREDITMEMOPAIDREFUNDED
 INSERT INTO #CREDITMEMOPAIDREFUNDED (
 	   intInvoiceId
 	 , strInvoiceNumber
 	 , strDocumentNumber
+	 , intAccountId
 )
 SELECT 
 	 I.intInvoiceId
 	,I.strInvoiceNumber
 	,REFUND.strDocumentNumber
+	,I.intAccountId
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
@@ -360,6 +395,11 @@ AND I.strTransactionType <> 'Cash Refund'
 AND I.strTransactionType = 'Credit Memo'
 AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #CREDITMEMOPAIDREFUNDED WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
 
 --#AGINGPOSTEDINVOICES
 INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
@@ -380,6 +420,7 @@ INSERT INTO #AGINGPOSTEDINVOICES WITH (TABLOCK) (
 	 , dblDiscount
 	 , dblInterest
 	 , ysnForgiven
+	 , intAccountId
 )
 SELECT I.intInvoiceId
 	 , I.intPaymentId
@@ -398,6 +439,7 @@ SELECT I.intInvoiceId
 	 , I.dblDiscount
 	 , I.dblInterest
 	 , I.ysnForgiven
+	 , I.intAccountId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
@@ -413,6 +455,11 @@ WHERE ysnPosted = 1
 	)
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #AGINGPOSTEDINVOICES WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
 
 INSERT INTO @CANCELLEDINVOICE (
 	 intInvoiceId
@@ -484,10 +531,12 @@ INSERT INTO #CASHREFUNDS (
 	   intOriginalInvoiceId
 	 , strDocumentNumber
 	 , dblRefundTotal
+	 , intAccountId
 )
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
 	, strDocumentNumber		= ID.strDocumentNumber
 	, dblRefundTotal		= SUM(ID.dblTotal)
+	, intAccountId          = I.intAccountId
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -496,7 +545,12 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND (I.intOriginalInvoiceId IS NOT NULL OR (ID.strDocumentNumber IS NOT NULL AND ID.strDocumentNumber <> ''))
   AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber, I.intAccountId
+
+IF EXISTS (SELECT TOP 1 1 FROM #COMPANY)
+    BEGIN
+        DELETE FROM #CASHREFUNDS WHERE intAccountId NOT IN (SELECT intId FROM #COMPANY)
+    END
 
 DELETE FROM #AGINGPOSTEDINVOICES
 WHERE strInvoiceNumber IN (SELECT CF.strDocumentNumber FROM #CASHREFUNDS CF INNER  JOIN #CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber)

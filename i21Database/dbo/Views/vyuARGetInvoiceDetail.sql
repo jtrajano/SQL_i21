@@ -191,6 +191,9 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnOverrideForexRate					= INV.ysnOverrideForexRate
 	 , strReasonablenessComment				= INV.strReasonablenessComment
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
+	 , ysnTankRequired						= ITMNO.ysnTankRequired
+	 , intDispatchId						= INV.intDispatchId
+	 , strOrderNumber						= ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -233,6 +236,17 @@ LEFT JOIN (
 		 , strSiteNumber	= REPLACE(STR([intSiteNumber], 4), SPACE(1), '0') 
 	FROM tblTMSite  WITH(NOLOCK)
 ) CSITE ON INV.intSiteId = CSITE.intSiteID
+LEFT JOIN (
+	SELECT 
+		intDispatchId = intDispatchID
+		,strOrderNumber
+	FROM tblTMDispatch  WITH(NOLOCK)
+	UNION 
+	SELECT DISTINCT
+		 intDispatchId = intDispatchId
+		,strOrderNumber
+	FROM tblTMDispatchHistory  WITH(NOLOCK)
+) CORDER ON INV.intDispatchId = CORDER.intDispatchId
 LEFT JOIN ( 
 	SELECT intContractDetailId
 		 , strContractNumber
@@ -298,7 +312,8 @@ LEFT JOIN (
 		 , strRequired
 		 , strMaintenanceCalculationMethod
 		 , dblDefaultFull
-		 , ysnAvailableTM							
+		 , ysnAvailableTM
+		 , ysnTankRequired
 	FROM tblICItem ICITM WITH(NOLOCK)
 	LEFT JOIN tblSMModule MODULE WITH(NOLOCK) ON ICITM.intModuleId = MODULE.intModuleId
 ) ITMNO ON INV.intItemId = ITMNO.intItemId

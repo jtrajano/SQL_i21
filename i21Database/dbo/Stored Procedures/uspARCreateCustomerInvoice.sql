@@ -167,6 +167,7 @@
 	,@TaxPoint								NVARCHAR(50)	= NULL
 	,@ItemOverrideTaxGroup					BIT				= 0
 	,@Surcharge								NUMERIC(18, 6)	= 0
+	,@ItemDispatchId						INT				= NULL
 AS
 
 BEGIN
@@ -792,6 +793,7 @@ BEGIN TRY
 		,@ItemOptionalityPremium		= @ItemOptionalityPremium
 		,@ItemComputedGrossPrice		= @ItemComputedGrossPrice
 		,@ItemOverrideTaxGroup			= @ItemOverrideTaxGroup
+		,@ItemDispatchId				= @ItemDispatchId
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
