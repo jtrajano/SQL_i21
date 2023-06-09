@@ -8,8 +8,7 @@
 	intGLFiscalYearPeriodId int NULL,
 	intConcurrencyId int NULL,
 	dtmDateModified datetime NULL,
-	strPeriod NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-	strCompanySegment NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+	strPeriod NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
  CONSTRAINT [PK_tblGLTrialBalance] PRIMARY KEY CLUSTERED 
 (
 	[intTrialBalanceId] ASC

@@ -30,8 +30,7 @@ ISNULL(A.ysnActive,0) ysnActive,
 F.dtmStartDate dtmDateFrom,
 F.dtmEndDate dtmDateTo,
 B.intGLFiscalYearPeriodId,
-F.strPeriod,
-Seg.strCompanySegment
+F.strPeriod
 FROM tblGLAccount A
 LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
 LEFT JOIN tblGLFiscalYearPeriod F on F.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
@@ -47,8 +46,5 @@ OUTER APPLY(
 	JOIN tblGLAccountCategory C on C.intAccountCategoryId = S.intAccountCategoryId
 	WHERE M.intAccountId = A.intAccountId and S.intAccountStructureId = P.intAccountStructureId
 )Cat
-OUTER APPLY(
-	SELECT TOP 1 strCode strCompanySegment FROM tblGLAccountSegment WHERE intAccountSegmentId = A.intCompanySegmentId
-)Seg
 GO
 
