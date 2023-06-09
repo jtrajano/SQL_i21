@@ -87,9 +87,21 @@ BEGIN
 	EXEC [dbo].[uspCMRefreshUndepositedFundsFromOrigin]	@intBankAccountId = @intBankAccountId,@intUserId = @intUserId
 
 
-	DECLARE @strLocation NVARCHAR(50)
+	DECLARE @strLocation nvarchar(50)
 	SELECT @strLocation = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName' --and condition in ('Equal To' , 'Between')
 
+
+	
+	DECLARE @intCompanySegmentFrom INT
+	DECLARE @intCompanySegmentTo INT
+	DECLARE @strCompanyCondition NVARCHAR(30)
+	SELECT @intCompanySegmentFrom = CAST([from]AS INT),  @intCompanySegmentTo = CAST([to]AS INT), @strCompanyCondition =  [condition]  
+	FROM @temp_xml_table WHERE [fieldname] = 'strCompanySegment' 
+
+
+
+
+DECLARE @strSQL NVARCHAR(MAX) ='
 	select
 	0 as rowId,
 	@dtmDateFrom as dtmDateFrom,
@@ -97,23 +109,24 @@ BEGIN
 	@dtmCMDate as dtmCMDateParam,
 	@strLocation as strLocationParam,
 	null as dtmDate,
-	'' AS strName,
-	'' AS strSourceTransactionId,
-	'' AS strPaymentMethod,
-	'' AS strSourceSystem,
-	'' AS strEODNumber,
-	'' AS strEODDrawer,
+	'''' AS strName,
+	'''' AS strSourceTransactionId,
+	'''' AS strPaymentMethod,
+	'''' AS strSourceSystem,
+	'''' AS strEODNumber,
+	'''' AS strEODDrawer,
 	cast(0 as bit) AS ysnEODComplete,
-	'' AS strCardType,
-	'' AS strLocationName,
-	'' AS strUserName,
-	'' AS strTransactionId,
+	'''' AS strCardType,
+	'''' AS strLocationName,
+	'''' AS strUserName,
+	'''' AS strTransactionId,
 	cast(0 as bit)  AS ysnPosted,
 	null AS dtmCMDate,
 	0 AS dblAmount,
-	'' AS strBatchId
+	'''' AS strBatchId,
+	'''' strCompanySegment
+	'''' strAccountId
 	UNION
-
 	SELECT 
 	a.rowId,
 	@dtmDateFrom as dtmDateFrom,
@@ -135,15 +148,34 @@ BEGIN
 	a.ysnPosted,
 	a.dtmCMDate,
 	a.dblAmount,
-	GL.strBatchId
+	GL.strBatchId,
+	a.strCompanySegment,
+	a.strAccountId
 	FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo,@dtmCMDate) a
 	OUTER APPLY(
 		SELECT TOP 1 strBatchId FROM tblGLDetail 
 		WHERE strTransactionId = a.strSourceTransactionId 
-		AND strTransactionType = 'Receive Payments'
+		AND strTransactionType = ''Receive Payments''
 		AND ysnIsUnposted = 0
 	)GL
+	WHERE ISNULL(@strLocation, a.strLocationName) = a.strLocationName '
+		 
 
-	WHERE ISNULL(@strLocation, a.strLocationName) = a.strLocationName
+IF (@strCompanyCondition = 'Between')
+	IF ( @intCompanySegmentFrom IS NOT NULL AND @intCompanySegmentTo IS NOT NULL )
+	SET @strSQL = @strSQL + ' AND CAST(a.strCompanySegment AS INT)  BETWEEN ' +  CAST(@intCompanySegmentFrom AS NVARCHAR(10))  + ' AND ' +  CAST(@intCompanySegmentTo AS NVARCHAR(10))
+ELSE IF ( @intCompanySegmentFrom IS NOT NULL AND @intCompanySegmentTo IS NULL ) GOTO _Equal
+
+
+
+IF (@strCompanyCondition = 'Equal To'  AND @intCompanySegmentFrom IS NOT NULL )BEGIN
+	_Equal:
+	SET @strSQL = @strSQL + ' AND CAST(a.strCompanySegment AS INT) = ' +  CAST(@intCompanySegmentFrom AS NVARCHAR(10))  
+END
+
+--SELECT @strSQL
+EXEC sp_executesql @strSQL
+,N' @dtmDateFrom DATETIME, @dtmDateTo DATETIME, @dtmCMDate DATETIME,@strLocation NVARCHAR(50)'
+, @dtmDateFrom = @dtmDateFrom, @dtmDateTo=@dtmDateTo,@dtmCMDate=@dtmCMDate,@strLocation = @strLocation
 
 END

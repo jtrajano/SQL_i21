@@ -28,6 +28,15 @@ WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
 							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 						) COLLATE Latin1_General_CI_AS
 		)
+
+UPDATE U SET intBankDepositId = D.intTransactionId FROM tblCMUndepositedFund U JOIN tblCMBankTransactionDetail D ON D.intUndepositedFundId = U.intUndepositedFundId
+JOIN tblCMBankTransaction B ON B.intTransactionId = D.intTransactionId
+-- set intBankDepositId to null if Bank Deposit is non-existing/ deleted.
+UPDATE A SET intBankDepositId = NULL FROM tblCMUndepositedFund A LEFT JOIN tblCMBankTransaction B on A.intBankDepositId = B.intTransactionId
+WHERE B.intTransactionId IS NULL AND A.intBankDepositId IS NOT NULL
+
+DELETE FROM tblCMUndepositedFund WHERE intBankDepositId IS NULL
+
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 IF @intBankAccountId IS NOT NULL
@@ -88,6 +97,7 @@ SELECT
 		,ysnEODComplete = NULL
 		,strPaymentInfo = '' COLLATE Latin1_General_CI_AS
 		,b.intCurrencyId
+		,intAccountId = 0
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS
 UNION SELECT DISTINCT
@@ -109,7 +119,8 @@ UNION SELECT DISTINCT
 	strEODDrawer = strDrawerName ,		
     ysnEODComplete = ysnCompleted ,
 	v.strPaymentInfo,
-	v.intCurrencyId
+	v.intCurrencyId,
+	v.intAccountId
 FROM vyuARUndepositedPayment v
 LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
 WHERE isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
@@ -135,6 +146,7 @@ INSERT INTO tblCMUndepositedFund (
     	,ysnEODComplete
 		,strReferenceNo
 		,intCurrencyId
+		,intAccountId
 )
 SELECT 
 		intBankAccountId
@@ -156,6 +168,7 @@ SELECT
     	,ysnEODComplete 
 		,strPaymentInfo
 		,intCurrencyId
+		,intAccountId
 		
 FROM CTE
 WHERE 
