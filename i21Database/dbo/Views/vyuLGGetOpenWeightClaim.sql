@@ -70,6 +70,7 @@ SELECT
 	,dtmTransDate = CAST(NULL AS DATETIME)
 	,dtmActualWeighingDate = CAST(NULL AS DATETIME)
 	,strItemNo = I.strItemNo
+	,strDescription = I.strDescription
 	,strCommodityCode = I.strCommodityCode
 	,strContractItemNo = CONI.strContractItemNo
 	,strContractItemName = CONI.strContractItemName
@@ -95,6 +96,7 @@ FROM tblLGPendingClaim PC
 	CROSS APPLY (SELECT TOP 1 
 					I.intItemId
 					,I.strItemNo
+					,I.strDescription
 					,C.strCommodityCode 
 					,OG2.strCountry
 				 FROM tblICItem I 
