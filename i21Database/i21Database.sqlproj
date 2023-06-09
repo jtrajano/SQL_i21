@@ -1321,6 +1321,8 @@
     <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
