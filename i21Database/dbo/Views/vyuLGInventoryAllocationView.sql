@@ -158,7 +158,7 @@ FROM (
 		,strWarrantNo = Lot.strWarrantNo
 		,dblContainerQty = IRI.dblOpenReceive
 		,dblOpenQuantity = Spot.dblQty - ISNULL(PLD.dblLotPickedQty, 0)
-		,dblAllocatedQty = ISNULL(PLD.dblLotPickedQty, 0)
+		,dblAllocatedQty = ISNULL(CD.dblAllocatedQty, 0)
 		,dblPickedQty = ISNULL(ICL.dblQty, 0)
 		,dblAllocatedPickedQty = ISNULL(PLD.dblLotPickedQty, 0)
 		,strShippingLine = SL.strName
@@ -232,7 +232,7 @@ FROM (
 		,LWC.strID2
 		,LWC.strID3
 
-		,dblBalToPick = ISNULL(PLD.dblLotPickedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0)
+		,dblBalToPick = ISNULL(CD.dblAllocatedQty, 0) - ISNULL(PLD.dblLotPickedQty, 0)
 
 		,strCropYear = CY.strCropYear
 		,strCertificate = IRIL.strCertificate
