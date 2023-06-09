@@ -13,6 +13,7 @@ SELECT intCuppingSessionId			= CS.intCuppingSessionId
 	 , strOrigin					= O.strDescription
 	 , strExtension					= EX.strDescription
 	 , strItemNo					= I.strItemNo
+	 , strDescription				= I.strDescription
 	 , strEntity					= E.strName
 	 , strContractType				= CT.strContractType
 	 , strContractNumber			= CH.strContractNumber
