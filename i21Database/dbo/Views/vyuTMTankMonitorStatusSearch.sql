@@ -11,7 +11,7 @@ SELECT		a.intDeviceId,
 				END AS strPollingIntervalMinute,
 			ISNULL(b.ysnInternetConnectivity, 0) as ysnInternetConnectivity,
 			ISNULL(b.ysnATGConnectivity, 0) as ysnATGConnectivity,
-			b.dtmDate,
+			c.dtmDateTime as dtmDate,
 			a.strTMSAppFileVersion
 FROM		tblTMDevice a
 LEFT JOIN	(	SELECT		intDeviceId,
@@ -24,4 +24,11 @@ LEFT JOIN	(	SELECT		intDeviceId,
 														GROUP BY	intDeviceId)) b
 ON			a.intDeviceId = b.intDeviceId AND
 			DATEDIFF(MINUTE, b.dtmDate, GETDATE()) <= 2
+LEFT JOIN	(	SELECT		dtmDateTime,
+							strSerialNumber
+				FROM		tblTMTankReading
+				WHERE		intTankReadingId IN (	SELECT		MAX(intTankReadingId)
+													FROM		tblTMTankReading
+													GROUP BY	strSerialNumber)) c
+ON			a.strSerialNumber = c.strSerialNumber
 WHERE		a.intDeviceTypeId = 4
