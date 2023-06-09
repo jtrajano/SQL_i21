@@ -750,11 +750,23 @@ BEGIN
 		) Surgecharge ON Surgecharge.intLoadDistributionDetailId = ID.intLoadDistributionDetailId AND Surgecharge.intInvoiceId = ID.intInvoiceId
 		LEFT JOIN (
 			SELECT 
-				SUM(dblRate) [taxRate]
-				, intInvoiceId
-			FROM vyuARTaxDetailMCPReport
-			GROUP BY intInvoiceId
-		) Taxes ON ID.intInvoiceId = Taxes.intInvoiceId
+				   intInvoiceDetailId	= DETAIL.intInvoiceDetailId
+				 , taxRate				= SUM(ISNULL(IDT.dblRate, 0))
+			FROM dbo.tblARInvoiceDetail DETAIL WITH (NOLOCK)
+			INNER JOIN (
+				SELECT intInvoiceDetailId
+					 , intTaxCodeId
+					 , strCalculationMethod
+					 , dblRate
+					 , dblTax
+					 , dblAdjustedTax
+				FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
+			) IDT ON DETAIL.intInvoiceDetailId = IDT.intInvoiceDetailId
+			WHERE DETAIL.intInvoiceId = 52027
+				AND IDT.dblAdjustedTax <> 0
+			GROUP BY DETAIL.intInvoiceId, DETAIL.intInvoiceDetailId
+			HAVING SUM(ISNULL(IDT.dblAdjustedTax, 0)) <> 0
+		) Taxes ON ID.intInvoiceDetailId = Taxes.intInvoiceDetailId
 		WHERE I.strType IN ('Bundle','Inventory')
 	) LIC ON I.intInvoiceDetailId = LIC.intInvoiceDetailId
 
