@@ -135,8 +135,8 @@ SELECT
 	,ysnOverrideTaxLocation     = CAST(CASE WHEN ISNULL(INVOICE.intTaxLocationId,0) > 0 THEN 1 ELSE 0 END AS BIT)
 	,ysnOverrideTaxGroup		= DETAIL.ysnOverrideTaxGroup
 	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
-	,dblTotalAmount				= (DETAIL.dblLineTotal + DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
-	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal()) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dblTotalAmount				= (DETAIL.dblLineTotal + DETAIL.dblTax) * dbo.fnARGetInvoiceAmountMultiplier(INVOICE.strTransactionType)
+	,dblTotalAmountFunctional	= dbo.fnRoundBanker((DETAIL.dblBaseLineTotal + DETAIL.dblBaseTax) * dbo.fnARGetInvoiceAmountMultiplier(INVOICE.strTransactionType), 2)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -150,8 +150,8 @@ INNER JOIN (
 		,dblRate				= IDT.dblRate
 		,dblPrice				= ID.dblPrice
 		,dblQtyShipped			= ID.dblQtyShipped
-		,dblLineTotal			= ID.dblQtyShipped * ID.dblPrice
-		,dblBaseLineTotal		= ID.dblQtyShipped * ID.dblBasePrice
+		,dblLineTotal			= ID.dblTotal
+		,dblBaseLineTotal		= dbo.fnRoundBanker(ID.dblTotal * ID.dblCurrencyExchangeRate, 2)
 		,dblAdjustedTax			= IDT.dblAdjustedTax
 		,dblBaseAdjustedTax		= IDT.dblBaseAdjustedTax
 		,dblTax					= IDT.dblTax
@@ -407,13 +407,14 @@ OUTER APPLY (
 		(
 			SELECT DISTINCT ',' + LTRIM(strPaymentInfo)
 			FROM tblARPayment
-			WHERE intPaymentId = ARPD.intPaymentId
-			
+			WHERE intPaymentId IN (
+				SELECT intPaymentId
+				FROM tblARPaymentDetail
+				WHERE intInvoiceId = INVOICE.intInvoiceId
+			)
 			FOR XML PATH('')
-		), 1, 1, ''
+		), 1, 2, ''
 	)
-	FROM tblARPaymentDetail ARPD
-	WHERE intInvoiceId = INVOICE.intInvoiceId
 ) PAYMENT
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
 WHERE INVOICE.ysnPosted = 1
