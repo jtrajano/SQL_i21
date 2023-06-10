@@ -281,11 +281,6 @@ AS
 			ICC.strProductLine,
 			CD.dtmPrepaymentDate,
 			CD.dblPrepaymentAmount,
-			CD.intLocalCurrencyId,
-			CD.intLocalUOMId,	 
-			CD.dblLocalCashPrice,
-			ILU.strUnitMeasure AS strLocalUOM,
-			LUC.strCurrency AS strLocalCurrency,
 			CD.intAverageUOMId,
 			CD.dblAverageQuantity,
 			IAU.strUnitMeasure AS strAverageUOM,
@@ -335,8 +330,25 @@ AS
 			, strHistoricalRateType = HRT.strCurrencyExchangeRateType
 			, strLogisticsLeadName = LL.strName
 			, CD.intLogisticsLeadId
+			,CD.intFuturesCurrencyId
+			,CD.intFuturesUOMId
+			,CD.intBudgetCurrencyId
+			,CD.intBudgetUOMId
+			,CD.intCashCurrencyId
+			,strFuturesCurrency = fcu.strCurrency
+			,strBudgetCurrency = bcu.strCurrency
+			,strCashCurrency = ccu.strCurrency
+			,strFuturesUOM = fum.strUnitMeasure
+			,strBudgetUOM = bum.strUnitMeasure
 	FROM			tblCTContractDetail				CD
-			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
+			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId
+	left join tblSMCurrency fcu on fcu.intCurrencyID = CD.intFuturesCurrencyId
+	left join tblSMCurrency bcu on bcu.intCurrencyID = CD.intBudgetCurrencyId
+	left join tblSMCurrency ccu on ccu.intCurrencyID = CD.intCashCurrencyId
+	left join tblICItemUOM fuom on fuom.intItemUOMId = CD.intFuturesUOMId
+	left join tblICUnitMeasure fum on fum.intUnitMeasureId = fuom.intUnitMeasureId
+	left join tblICItemUOM buom on buom.intItemUOMId = CD.intBudgetUOMId
+	left join tblICUnitMeasure bum on bum.intUnitMeasureId = buom.intUnitMeasureId
 	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
 	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
@@ -397,8 +409,6 @@ AS
 	LEFT    JOIN	tblICItemUOM					VU	ON	VU.intItemUOMId						=		CD.intConvPriceUOMId
 	LEFT    JOIN	tblICUnitMeasure				VM	ON	VM.intUnitMeasureId					=		VU.intUnitMeasureId			--strConvertedUOM
 	LEFT    JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=		CD.intStorageLocationId		--strStorageLocationName
-	LEFT    JOIN	tblICItemUOM					LU	ON	LU.intItemUOMId						=		CD.intLocalUOMId
-	LEFT    JOIN	tblICUnitMeasure				ILU	ON	ILU.intUnitMeasureId				=		LU.intUnitMeasureId			--strLocalUOM
 	LEFT	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId						=		CD.intAverageUOMId
 	LEFT	JOIN	tblICUnitMeasure				IAU ON	IAU.intUnitMeasureId				=		AU.intUnitMeasureId			--strAverageUOM
 
@@ -414,7 +424,6 @@ AS
 	LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
 	LEFT    JOIN	tblSMCurrency					BC	ON	BC.intCurrencyID					=		CD.intBasisCurrencyId		--strBasisCurrency
 	LEFT    JOIN	tblSMCurrency					CC	ON	CC.intCurrencyID					=		CD.intConvPriceCurrencyId	--strConvertedCurrency
-	LEFT    JOIN	tblSMCurrency					LUC	ON	LUC.intCurrencyID					=		CD.intLocalCurrencyId		--strLocalCurrency
 
 	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
 	LEFT    JOIN	tblSMCurrency					MY	ON	MY.intCurrencyID					=		MA.intCurrencyId			--strMarketCurrency

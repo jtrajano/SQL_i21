@@ -197,9 +197,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 
 	dblBudgetPrice numeric(18, 6) NULL,
 	dblTotalBudget numeric(18, 6) NULL,
-	intLocalCurrencyId INT NULL,
-	intLocalUOMId INT NULL,
-	dblLocalCashPrice NUMERIC (18, 6) NULL,
 
 	intAverageUOMId INT NULL,
 	dblAverageQuantity NUMERIC (18, 6) NULL,
@@ -241,6 +238,13 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strTaxLocation] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] [int] NULL,
 	[intMTMPointId] [int] NULL,
+
+	[intFuturesCurrencyId] [int] NULL,
+	[intFuturesUOMId] [int] NULL,
+	[intBudgetCurrencyId] [int] NULL,
+	[intBudgetUOMId] [int] NULL,
+	[intCashCurrencyId] [int] NULL,
+
 
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
@@ -315,7 +319,12 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMPurchasingGroup_intPurchasingGroupId] FOREIGN KEY ([intPurchasingGroupId]) REFERENCES [tblSMPurchasingGroup]([intPurchasingGroupId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY (intSubLocationId) REFERENCES tblSMCompanyLocationSubLocation(intCompanyLocationSubLocationId),
-	CONSTRAINT [FK_tblCTContractDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES tblICStorageLocation(intStorageLocationId)
+	CONSTRAINT [FK_tblCTContractDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY (intStorageLocationId) REFERENCES tblICStorageLocation(intStorageLocationId),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intFuturesUOMId_intItemUOMId] FOREIGN KEY (intFuturesUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intBudgetUOMId_intItemUOMId] FOREIGN KEY (intBudgetUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intBudgetCurrencyId_intCurrencyId] FOREIGN KEY ([intBudgetCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intCashCurrencyId_intCurrencyId] FOREIGN KEY ([intCashCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 ) 
 
 GO
