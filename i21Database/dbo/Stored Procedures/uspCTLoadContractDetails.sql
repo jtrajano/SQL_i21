@@ -586,11 +586,6 @@ BEGIN TRY
 		, CD.dblPrepaymentAmount
 		, CD.dblBudgetPrice
 		, CD.dblTotalBudget
-		, CD.intLocalCurrencyId
-		, CD.intLocalUOMId
-		, CD.dblLocalCashPrice
-		, ILU.strUnitMeasure AS strLocalUOM
-		, LUC.strCurrency AS strLocalCurrency
 		, CD.intAverageUOMId
 		, CD.dblAverageQuantity
 		, IAU.strUnitMeasure AS strAverageUOM
@@ -645,8 +640,25 @@ BEGIN TRY
 		, strMTMPoint = mtmp.strMTMPoint
 		, strLogisticsLeadName = LL.strName
 		, CD.intLogisticsLeadId
+		,CD.intFuturesCurrencyId
+		,CD.intFuturesUOMId
+		,CD.intBudgetCurrencyId
+		,CD.intBudgetUOMId
+		,CD.intCashCurrencyId
+		,strFuturesCurrency = fcu.strCurrency
+		,strBudgetCurrency = bcu.strCurrency
+		,strCashCurrency = ccu.strCurrency
+		,strFuturesUOM = fum.strUnitMeasure
+		,strBudgetUOM = bum.strUnitMeasure
 	FROM tblCTContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
+	left join tblSMCurrency fcu on fcu.intCurrencyID = CD.intFuturesCurrencyId
+	left join tblSMCurrency bcu on bcu.intCurrencyID = CD.intBudgetCurrencyId
+	left join tblSMCurrency ccu on ccu.intCurrencyID = CD.intCashCurrencyId
+	left join tblICItemUOM fuom on fuom.intItemUOMId = CD.intFuturesUOMId
+	left join tblICUnitMeasure fum on fum.intUnitMeasureId = fuom.intUnitMeasureId
+	left join tblICItemUOM buom on buom.intItemUOMId = CD.intBudgetUOMId
+	left join tblICUnitMeasure bum on bum.intUnitMeasureId = buom.intUnitMeasureId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
 	LEFT JOIN tblSMCountry credC on credC.intCountryID = CD.intLCPlaceOfIssuingId
 	LEFT JOIN tblSMTerm credT on credT.intTermID = CD.intLCPaymentTermId
@@ -740,9 +752,6 @@ BEGIN TRY
 		ORDER BY c.intTransactionId DESC
 	) AP
 	-- Commodity Attributes
-	LEFT JOIN tblICItemUOM   LU	ON	LU.intItemUOMId	= CD.intLocalUOMId
-	LEFT JOIN tblICUnitMeasure ILU ON ILU.intUnitMeasureId = LU.intUnitMeasureId	--strLocalUOM
-	LEFT JOIN tblSMCurrency	LUC	ON LUC.intCurrencyID = CD.intLocalCurrencyId		--strLocalCurrency
 	LEFT JOIN tblICItemUOM   AU	ON	AU.intItemUOMId	= CD.intAverageUOMId
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId

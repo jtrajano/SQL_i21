@@ -49,7 +49,6 @@ AS
 			CH.intDaysForFinance,
 			CH.intSampleTypeId,
 			NM.strSampleTypeName,
-			CH.ysnLocalCurrency,
 			CH.ysnPrintCropYear
 	FROM	tblCTContractHeader					CH
 	cross apply (select * from tblCTCompanyPreference) CP
