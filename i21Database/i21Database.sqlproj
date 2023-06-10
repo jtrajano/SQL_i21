@@ -9263,6 +9263,8 @@
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentCurrentAvg.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentAvg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
