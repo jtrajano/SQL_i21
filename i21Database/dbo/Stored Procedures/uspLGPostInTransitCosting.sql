@@ -387,19 +387,19 @@ SET ANSI_WARNINGS ON
 		SELECT 
 			[intItemId] = LD.intItemId
 			,[intOtherChargeItemId] = ShipmentCharges.intItemId
-			,[intItemLocationId] = IL.intItemLocationId
+			,[intItemLocationId] = LD.intItemLocationId
 			,[dtmDate] = L.dtmScheduledDate
 			,[dblValue] = ShipmentCharges.dblAmount 
 			,[intTransactionId] = L.intLoadId
-			,[intTransactionDetailId] = LD.intLoadDetailId
+			,[intTransactionDetailId] = ShipmentCharges.intLoadCostId
 			,[strTransactionId] = L.strLoadNumber
 			,[intTransactionTypeId] = @INBOUND_SHIPMENT_TYPE
 			,[intLotId] = NULL
 			,[intSourceTransactionId] = L.intLoadId
 			,[strSourceTransactionId] = L.strLoadNumber
-			,[intSourceTransactionDetailId] = LD.intLoadDetailId
+			,[intSourceTransactionDetailId] = ShipmentCharges.intLoadCostId
 			,[intFobPointId] = FP.intFobPointId
-			,[intInTransitSourceLocationId] = IL.intItemLocationId
+			,[intInTransitSourceLocationId] = LD.intItemLocationId
 			,[intCurrencyId] = ShipmentCharges.intCurrencyId
 			,[intForexRateTypeId] = NULL --CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
 			,[dblForexRate] = ShipmentCharges.dblFX --CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
@@ -409,9 +409,17 @@ SET ANSI_WARNINGS ON
 			,[strBOLNumber] = NULL 
 			,[intTicketId] = NULL 
 		FROM dbo.tblLGLoad L
-		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		-- INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+		CROSS APPLY(
+			SELECT
+				LD.intItemId
+				,IL.intItemLocationId
+			FROM tblLGLoadDetail LD
+			INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+			WHERE LD.intLoadId = L.intLoadId
+			GROUP BY LD.intItemId, IL.intItemLocationId
+		) LD
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId
@@ -594,19 +602,19 @@ SET ANSI_WARNINGS ON
 		SELECT 
 			[intItemId] = LD.intItemId
 			,[intOtherChargeItemId] = ShipmentCharges.intItemId
-			,[intItemLocationId] = IL.intItemLocationId
+			,[intItemLocationId] = LD.intItemLocationId
 			,[dtmDate] = L.dtmScheduledDate
 			,[dblValue] = ShipmentCharges.dblAmount * -1
 			,[intTransactionId] = L.intLoadId
-			,[intTransactionDetailId] = LD.intLoadDetailId
+			,[intTransactionDetailId] = ShipmentCharges.intLoadCostId
 			,[strTransactionId] = L.strLoadNumber
 			,[intTransactionTypeId] = @INBOUND_SHIPMENT_TYPE
 			,[intLotId] = NULL
 			,[intSourceTransactionId] = L.intLoadId
 			,[strSourceTransactionId] = L.strLoadNumber
-			,[intSourceTransactionDetailId] = LD.intLoadDetailId
+			,[intSourceTransactionDetailId] = ShipmentCharges.intLoadCostId
 			,[intFobPointId] = FP.intFobPointId
-			,[intInTransitSourceLocationId] = IL.intItemLocationId
+			,[intInTransitSourceLocationId] = LD.intItemLocationId
 			,[intCurrencyId] = ShipmentCharges.intCurrencyId
 			,[intForexRateTypeId] = NULL --CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.intCurrencyExchangeRateTypeId,1) END
 			,[dblForexRate] = ShipmentCharges.dblFX --CASE WHEN (ISNULL(CSC.intMainCurrencyId, CSC.intCurrencyID) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(FX.dblForexRate,1) END
@@ -616,9 +624,17 @@ SET ANSI_WARNINGS ON
 			,[strBOLNumber] = NULL 
 			,[intTicketId] = NULL 
 		FROM dbo.tblLGLoad L
-		INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		INNER JOIN tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = L.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+		CROSS APPLY(
+			SELECT
+				LD.intItemId
+				,IL.intItemLocationId
+			FROM tblLGLoadDetail LD
+			INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+			WHERE LD.intLoadId = L.intLoadId
+			GROUP BY LD.intItemId, IL.intItemLocationId
+		) LD
+		-- INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CSC ON CSC.intCurrencyID = ShipmentCharges.intCurrencyId

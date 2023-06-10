@@ -157,8 +157,7 @@ BEGIN TRY
 			,P.intItemId
 			,P.intTransactionType
 		FROM tblAPVoucherPayable P 
-		INNER JOIN (tblLGLoad L INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId)
-			ON P.intLoadShipmentDetailId = LD.intLoadDetailId
+		INNER JOIN tblLGLoad L ON L.intLoadId = P.intLoadShipmentId
 		WHERE (L.intLoadId = @intLoadShipmentId AND @intLoadShipmentCostId IS NULL AND P.intLoadShipmentCostId > 0) OR
 		(P.intLoadShipmentCostId = @intLoadShipmentCostId)
 		

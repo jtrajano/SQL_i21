@@ -278,7 +278,7 @@ BEGIN
 		,intCurrencyId
 		,intShipmentCurrencyId
 		,dblExchangeRate
-		,intShipmentItemId
+		,intShipmentCostId
 		,strTransactionTypeName
 		,strTransactionForm
 		,ysnAccrue
@@ -292,10 +292,10 @@ BEGIN
 		)
 	AS (
 		SELECT dtmDate = GETDATE()
-			,ShipmentItem.intItemId
+			,LD.intItemId
 			,intChargeId = ShipmentCharges.intItemId
-			,ItemLocation.intItemLocationId
-			,intChargeItemLocation = ChargeItemLocation.intItemLocationId
+			,LD.intItemLocationId
+			,intChargeItemLocation = LD.intChargeItemLocationId
 			,intTransactionId = Shipment.intLoadId
 			,strTransactionId = Shipment.strLoadNumber
 			,dblCost = ShipmentCharges.dblAmount * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
@@ -303,18 +303,66 @@ BEGIN
 			,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId)
 			,intShipmentCurrencyId = @intInvoiceCurrency
 			,dblExchangeRate = ISNULL(1, 1)
-			,ShipmentItem.intLoadDetailId
+			,intShipmentCostId = ShipmentCharges.intLoadCostId
 			,strTransactionTypeName = TransType.strName
 			,strTransactionForm = 'Logistics'
 			,ShipmentCharges.ysnAccrue
 			,ShipmentCharges.ysnPrice
 			,dblForexRate = CASE WHEN (ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId) = @DefaultCurrencyId) THEN 1 ELSE ISNULL(ShipmentCharges.dblFX,1) END
-			,strRateType = CRT.strCurrencyExchangeRateType --1
+			,strRateType = LD.strCurrencyExchangeRateType --1
 			,Charge.strItemNo
 			,intEntityId = 1
 			,ShipmentCharges.ysnInventoryCost
 			-- This is used for inventoried other charge that is converted to shipment currency
-			,intShipmentExchangeRateTypeId = CASE --if contract FX tab is setup
+			-- ,intShipmentExchangeRateTypeId = CASE --if contract FX tab is setup
+			-- 						 WHEN AD.ysnValidFX = 1 THEN 
+			-- 							CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+			-- 									THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
+			-- 								WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+			-- 									THEN NULL --foreign price to functional FX, use NULL
+			-- 								WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+			-- 									THEN NULL --foreign price to foreign FX, use master FX rate
+			-- 								ELSE ShipmentItem.intForexRateTypeId END
+			-- 						 ELSE  --if contract FX tab is not setup
+			-- 							CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+			-- 								THEN NULL
+			-- 								ELSE ShipmentItem.intForexRateTypeId END
+			-- 						 END
+			,LD.intShipmentExchangeRateTypeId
+		FROM dbo.tblLGLoad Shipment
+		INNER JOIN dbo.tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = Shipment.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
+		INNER JOIN tblICItem Charge ON Charge.intItemId = ShipmentCharges.intItemId
+		CROSS APPLY (
+			SELECT
+				ShipmentItem.intItemId
+				,ItemLocation.intItemLocationId
+				,FX.intShipmentExchangeRateTypeId
+				,intChargeItemLocationId = ChargeItemLocation.intItemLocationId
+				,CRT.strCurrencyExchangeRateType
+			FROM dbo.tblLGLoadDetail ShipmentItem
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
+					CASE 
+						WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSContractDetailId
+						WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPContractDetailId
+					END
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+			LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ShipmentItem.intItemId
+				AND ItemLocation.intLocationId = 
+					CASE 
+						WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSCompanyLocationId
+						WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
+					END
+			LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = ShipmentCharges.intItemId
+				AND ChargeItemLocation.intLocationId = 
+					CASE 
+						WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSCompanyLocationId
+						WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
+					END
+			LEFT JOIN tblCTContractCost CC ON CC.intContractDetailId = CD.intContractDetailId AND CC.intItemId = ShipmentCharges.intItemId
+			LEFT JOIN tblSMCurrencyExchangeRateType CRT ON CRT.intCurrencyExchangeRateTypeId = CC.intRateTypeId
+			OUTER APPLY (
+				SELECT intShipmentExchangeRateTypeId = CASE --if contract FX tab is setup
 									 WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN CD.intRateTypeId --functional price to foreign FX, use inverted contract FX rate
@@ -328,32 +376,16 @@ BEGIN
 											THEN NULL
 											ELSE ShipmentItem.intForexRateTypeId END
 									 END
-		FROM dbo.tblLGLoad Shipment
-		INNER JOIN dbo.tblLGLoadDetail ShipmentItem ON Shipment.intLoadId = ShipmentItem.intLoadId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = 
-				CASE 
-					WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSContractDetailId
-					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPContractDetailId
-				END
-		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
-		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
-		INNER JOIN dbo.tblLGLoadCost ShipmentCharges ON ShipmentCharges.intLoadId = Shipment.intLoadId AND ShipmentCharges.strEntityType = 'Vendor'
-		INNER JOIN tblICItem Charge ON Charge.intItemId = ShipmentCharges.intItemId
-		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ShipmentItem.intItemId
-			AND ItemLocation.intLocationId = 
-				CASE 
-					WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSCompanyLocationId
-					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
-				END
-		LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = ShipmentCharges.intItemId
-			AND ChargeItemLocation.intLocationId = 
-				CASE 
-					WHEN @intPurchaseSale IN (2,3) THEN ShipmentItem.intSCompanyLocationId
-					WHEN @intPurchaseSale = 1 THEN ShipmentItem.intPCompanyLocationId
-				END
+			) FX
+			WHERE Shipment.intLoadId = ShipmentItem.intLoadId
+			GROUP BY
+				ShipmentItem.intItemId
+				,ItemLocation.intItemLocationId
+				,FX.intShipmentExchangeRateTypeId
+				,ChargeItemLocation.intItemLocationId
+				,CRT.strCurrencyExchangeRateType
+		) LD
 		LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
-		LEFT JOIN tblCTContractCost CC ON CC.intContractDetailId = CD.intContractDetailId AND CC.intItemId = ShipmentCharges.intItemId
-		LEFT JOIN tblSMCurrencyExchangeRateType CRT ON CRT.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 		-- OUTER APPLY (SELECT TOP 1 dblForexRate = ISNULL(dblRate,0) FROM vyuGLExchangeRate
 		-- 			OUTER APPLY(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) tsp
 		-- 			WHERE intFromCurrencyId = ShipmentCharges.intCurrencyId AND intToCurrencyId = tsp.intDefaultCurrencyId
@@ -411,7 +443,7 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentCostId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
@@ -465,7 +497,7 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentCostId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
@@ -539,7 +571,7 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentCostId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId
@@ -591,7 +623,7 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,dtmTransactionDate = ForGLEntries_CTE.dtmDate
 		,strJournalLineDescription = ''
-		,intJournalLineNo = ForGLEntries_CTE.intShipmentItemId
+		,intJournalLineNo = ForGLEntries_CTE.intShipmentCostId
 		,ysnIsUnposted = 0
 		,intUserId = @intEntityUserSecurityId
 		,intEntityId = ForGLEntries_CTE.intEntityId

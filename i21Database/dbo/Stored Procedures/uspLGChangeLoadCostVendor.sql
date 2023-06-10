@@ -72,44 +72,47 @@ BEGIN
         SELECT
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
-			,[intLocationId] = A.intCompanyLocationId
-			,[intCurrencyId] = A.intCurrencyId
-			,[dtmDate] = A.dtmProcessDate
+			,[intLocationId] = LD.intCompanyLocationId
+			,[intCurrencyId] = LD.intCurrencyID
+			,[dtmDate] = L.dtmScheduledDate
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
-			,[strSourceNumber] = LTRIM(A.strLoadNumber)
-			,[intContractHeaderId] = CH.intContractHeaderId
-			,[intContractDetailId] = CT.intContractDetailId
-			,[intContractSeqId] = CT.intContractSeq
-			,[intContractCostId] = CTC.intContractCostId
+			,[strSourceNumber] = LTRIM(L.strLoadNumber)
+			,[intContractHeaderId] = LD.intContractHeaderId
+			,[intContractDetailId] = LD.intContractDetailId
+			,[intContractSeqId] = LD.intContractSeq
+			,[intContractCostId] = LD.intContractCostId
 			,[intInventoryReceiptItemId] = NULL
-			,[intLoadShipmentId] = A.intLoadId
+			,[intLoadShipmentId] = L.intLoadId
 			,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
-			,[intLoadShipmentDetailId] = A.intLoadDetailId
-			,[intLoadShipmentCostId] = A.intLoadCostId
-			,[intItemId] = A.intItemId
-			,[strMiscDescription] = A.strItemDescription
-			,[dblOrderQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
-			,[dblOrderUnitQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
-			,[intOrderUOMId] = A.intItemUOMId
-			,[dblQuantityToBill] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
-			,[dblQtyToBillUnitQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
-			,[intQtyToBillUOMId] = A.intItemUOMId
-			,[dblCost] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN ISNULL(A.dblTotal, A.dblPrice) ELSE ISNULL(A.dblPrice, A.dblTotal) END 
-			,[dblCostUnitQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemCostUOM.dblUnitQty,1) END
-			,[intCostUOMId] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN NULL ELSE A.intPriceItemUOMId END
+			,[intLoadShipmentDetailId] = NULL--A.intLoadDetailId
+			,[intLoadShipmentCostId] = LC.intLoadCostId
+			,[intItemId] = LC.intItemId
+			,[strMiscDescription] = CASE WHEN ISNULL(ICI.[strDescription], '') = ''
+										THEN ICI.[strItemNo]
+										ELSE ICI.[strDescription]
+									END
+			,[dblOrderQty] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+			,[dblOrderUnitQty] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(LD.dblUnitQty,1) END
+			,[intOrderUOMId] = LD.intItemUOMId
+			,[dblQuantityToBill] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+			,[dblQtyToBillUnitQty] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(LD.dblUnitQty,1) END
+			,[intQtyToBillUOMId] = LD.intItemUOMId
+			,[dblCost] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN ISNULL(LC.dblAmount, LC.dblRate) ELSE ISNULL(LC.dblRate, LC.dblAmount) END 
+			,[dblCostUnitQty] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemCostUOM.dblUnitQty,1) END
+			,[intCostUOMId] = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN NULL ELSE LC.intItemUOMId END
 			,[dblNetWeight] = 0
 			,[dblWeightUnitQty] = 1
 			,[intWeightUOMId] = NULL
-			,[intCostCurrencyId] = A.intCurrencyId
+			,[intCostCurrencyId] = LD.intCurrencyID
 			,[intFreightTermId] = NULL
 			,[dblTax] = 0
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = A.dblFX
+			,[dblExchangeRate] = LC.dblFX
 			,[intCurrencyExchangeRateTypeId] = FX.intForexRateTypeId
-			,[ysnSubCurrency] =	CC.ysnSubCurrency
-			,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
-			,[intAccountId] = apClearing.intAccountId
+			,[ysnSubCurrency] =	LD.ysnSubCurrency
+			,[intSubCurrencyCents] = ISNULL(LD.intCent,0)
+			,[intAccountId] = LD.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
 			,[ysnStage] = CAST(1 AS BIT)
@@ -121,36 +124,82 @@ BEGIN
 			,[intPayFromBankAccountId] = NULL
 			,[strFinancingSourcedFrom] = NULL
 			,[strFinancingTransactionNumber] = NULL
-		FROM vyuLGLoadCostForVendor A
+		FROM tblLGLoadCost LC
 			OUTER APPLY tblLGCompanyPreference CP
-			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
-			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-			JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL) 
+			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+			JOIN tblAPVendor ARC ON LC.intVendorId = ARC.intEntityId
+			JOIN tblICItem ICI ON ICI.intItemId = LC.intItemId
+			CROSS APPLY (
+				SELECT SUM(LD.dblQuantity) dblQuantity
+					,CUR.intCurrencyID
+					,CTC.intContractCostId
+					,CH.intContractHeaderId
+					,CT.intContractDetailId
+					,CT.intContractSeq
+					,IUOM.intItemUOMId
+					,ItemUOM.dblUnitQty
+					,CC.ysnSubCurrency
+					,CC.intCent
+					,apClearing.intAccountId
+					,[intCompanyLocationId] = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSCompanyLocationId ELSE LD.intPCompanyLocationId END
+				FROM tblLGLoadDetail LD
+				JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND LC.ysnAccrue = 1 AND LC.intVendorId IS NOT NULL) 
 																	THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
-			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
-			JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
-			LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = A.intCurrencyId
-			LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
-			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
-			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-			LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightItemUOMId
-			LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
-			LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intPriceItemUOMId
-			LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON @intNewVendorEntityId = D1.[intEntityId]
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-							A.intItemId,
+				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
+				JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
+				LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = COALESCE(LC.intCurrencyId, ARC.[intCurrencyId],
+					(SELECT TOP 1 intDefaultCurrencyId
+					FROM tblSMCompanyPreference
+					WHERE intDefaultCurrencyId IS NOT NULL
+						AND intDefaultCurrencyId <> 0
+					))
+				LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = CUR.intCurrencyID
+				LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LC.intItemId and ItemLoc.intLocationId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSCompanyLocationId ELSE LD.intPCompanyLocationId END
+				OUTER APPLY (
+					SELECT intItemUOMId = dbo.fnGetMatchingItemUOMId(ICI.[intItemId], LD.intItemUOMId)
+				) IUOM
+				OUTER APPLY (
+					SELECT intWeightItemUOMId = dbo.fnGetMatchingItemUOMId(ICI.[intItemId], LD.intWeightItemUOMId)
+				) WUOM
+				LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = IUOM.intItemUOMId
+				LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+				LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = WUOM.intWeightItemUOMId
+				LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+				OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+							LC.intItemId,
 							ItemLoc.intItemLocationId,
 							'AP Clearing'
 						) itemAccnt
-			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
-			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = A.intCurrencyId
-			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
-			OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+				LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+				OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
 						WHERE CT.intContractDetailId = CTC.intContractDetailId
-							AND A.intItemId = CTC.intItemId
-							AND A.intEntityVendorId = CTC.intVendorId
+							AND LC.intItemId = CTC.intItemId
+							AND LC.intVendorId = CTC.intVendorId
 						) CTC
+				WHERE LD.intLoadId = L.intLoadId
+					AND LD.intLoadDetailId NOT IN 
+					(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
+					WHERE BD.intItemId = LC.intItemId AND Item.strType = 'Other Charge' AND ISNULL(LC.ysnAccrue,0) = 1)
+				GROUP BY
+					CUR.intCurrencyID
+					,CTC.intContractCostId
+					,CH.intContractHeaderId
+					,CT.intContractDetailId
+					,CT.intContractSeq
+					,IUOM.intItemUOMId
+					,ItemUOM.dblUnitQty
+					,CC.ysnSubCurrency
+					,CC.intCent
+					,apClearing.intAccountId
+					,LD.intSCompanyLocationId
+					,LD.intPCompanyLocationId
+			) LD
+			LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = LC.intItemUOMId
+			LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
+			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON @intNewVendorEntityId = D1.[intEntityId]
+			
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = LD.intCurrencyID
+			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 			OUTER APPLY (SELECT	TOP 1  
 				intForexRateTypeId = RD.intRateTypeId
 				,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
@@ -162,11 +211,9 @@ BEGIN
 					AND ((ER.intFromCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
 						OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
 				ORDER BY RD.dtmValidFromDate DESC) FX
-			WHERE A.intLoadCostId = @intLoadCostId
-            AND A.intLoadDetailId NOT IN 
-                (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
-                WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1)
-            AND NOT (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL)
+			WHERE LC.intLoadCostId = @intLoadCostId
+            
+            AND NOT (COC.ysnCreateOtherCostPayable = 1 AND LD.intContractCostId IS NOT NULL)
 
 
 			-- Assemble Item Taxes  @@@Copied From uspLGProcessPayables
@@ -240,14 +287,14 @@ BEGIN
 					,[ysnTaxExempt]					= vendorTax.[ysnTaxExempt]
 					,[ysnTaxOnly]					= 0
 				FROM @voucherPayable payables
-				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = payables.intLoadShipmentDetailId
+				LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = payables.intLoadShipmentDetailId
 				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND payables.intLoadShipmentId = L.intLoadId
-				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-				INNER JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
-				INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1
-				INNER JOIN tblICItem I ON I.intItemId = LD.intItemId
+				LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+				LEFT JOIN tblAPVendor V ON V.intEntityId = LD.intVendorEntityId
+				LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.ysnDefaultLocation = 1
+				LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
 				left join tblLGLoadCost Cost on Cost.intLoadId = LD.intLoadId and @intNewVendorEntityId = Cost.intVendorId
 				left join tblEMEntityLocation LCost ON LCost.intEntityId =@intNewVendorEntityId AND LCost.ysnDefaultLocation = 1
 				OUTER APPLY [dbo].[fnGetItemTaxComputationForVendor](

@@ -164,43 +164,61 @@ BEGIN TRY
 		,intStorageLocationId
 		)
 	SELECT 
-		intVendorEntityId = V.intEntityVendorId
-		,intLoadId = LD.intLoadId
-		,intLoadDetailId = LD.intLoadDetailId
-		,intContractHeaderId = CH.intContractHeaderId
-		,intContractDetailId = CD.intContractDetailId
-		,intItemId = V.intItemId
-		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,dblQtyReceived = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
-		,dblCost = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN ISNULL(V.dblTotal, V.dblPrice) ELSE ISNULL(V.dblPrice, V.dblTotal) END 
-		,intCostUOMId = V.intPriceItemUOMId
-		,intLoadCostId = V.intLoadCostId
+		intVendorEntityId = LC.intVendorId
+		,intLoadId = L.intLoadId
+		,intLoadDetailId = NULL--LD.intLoadDetailId
+		,intContractHeaderId = LD.intContractHeaderId
+		,intContractDetailId = LD.intContractDetailId
+		,intItemId = LC.intItemId
+		,intAccountId = [dbo].[fnGetItemGLAccount](LC.intItemId, LD.intItemLocationId, 'AP Clearing')
+		,dblQtyReceived = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+		,dblCost = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN ISNULL(LC.dblAmount, LC.dblRate) ELSE ISNULL(LC.dblRate, LC.dblAmount) END 
+		,intCostUOMId = LC.intItemUOMId
+		,intLoadCostId = LC.intLoadCostId
 		,ysnInventoryCost = I.ysnInventoryCost
 		,ysnAccrue = LC.ysnAccrue
-		,intItemUOMId = V.intItemUOMId
-		,dblUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
-		,dblCostUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
-		,intCurrencyId = V.intCurrencyId
-		,intCurrencyExchangeRateTypeId = FX.intForexRateTypeId
-		,dblExchangeRate = COALESCE(LC.dblFX, FX.dblFXRate, 1)
+		,intItemUOMId = LD.intItemUOMId
+		,dblUnitQty = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(LD.dblUnitQty,1) END
+		,dblCostUnitQty = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
+		,intCurrencyId = LD.intCurrencyID
+		,intCurrencyExchangeRateTypeId = LD.intForexRateTypeId
+		,dblExchangeRate = COALESCE(LC.dblFX, LD.dblFXRate, 1)
 		,intSubLocationId = NULL
 		,intStorageLocationId = NULL
-	FROM vyuLGLoadCostForVendor V
-	JOIN tblLGLoadCost LC ON LC.intLoadCostId = V.intLoadCostId
-	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+	-- FROM vyuLGLoadCostForVendor V
+	FROM tblLGLoadCost LC
+	INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+	JOIN tblAPVendor ARC ON LC.intVendorId = ARC.intEntityId
+	-- JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
+	CROSS APPLY (
+		SELECT
+			CD.intContractHeaderId
+			,CD.intContractDetailId
+			,ItemLoc.intItemLocationId
+			,intCurrencyId = CUR.intCurrencyID
+			,ItemUOM.intItemUOMId
+			,ItemUOM.dblUnitQty
+			,CUR.intCurrencyID
+			,FX.intForexRateTypeId
+			,FX.dblFXRate
+			,SUM(LD.dblQuantity) dblQuantity
+		FROM tblLGLoadDetail LD
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
 			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
 				THEN LD.intSContractDetailId
 			ELSE LD.intPContractDetailId
 			END
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
-		AND ItemLoc.intLocationId = CD.intCompanyLocationId
-	JOIN tblICItem I ON I.intItemId = V.intItemId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = V.intItemUOMId
-	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
-	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = V.intCurrencyId
-	OUTER APPLY (SELECT	TOP 1  
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
+			AND ItemLoc.intLocationId = CD.intCompanyLocationId
+		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LC.[intItemId], LD.intItemUOMId)
+		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = ISNULL(ISNULL(LC.[intCurrencyId], ARC.[intCurrencyId]), (
+			SELECT TOP 1 intDefaultCurrencyId
+			FROM tblSMCompanyPreference
+			WHERE intDefaultCurrencyId IS NOT NULL
+				AND intDefaultCurrencyId <> 0
+			))
+		OUTER APPLY (SELECT	TOP 1  
 					intForexRateTypeId = RD.intRateTypeId
 					,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
 					FROM tblSMCurrencyExchangeRate ER
@@ -209,8 +227,23 @@ BEGIN TRY
 						AND ((ER.intFromCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
 							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)))
 					ORDER BY RD.dtmValidFromDate DESC) FX
-	WHERE V.intLoadId = @intLoadId AND V.intBillId IS NULL
-		AND ((V.intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts)) OR (NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts))) 
+		WHERE LD.intLoadId = L.intLoadId
+		GROUP BY
+			CD.intContractHeaderId
+			,CD.intContractDetailId
+			,ItemLoc.intItemLocationId
+			,CUR.intCurrencyID
+			,ItemUOM.intItemUOMId
+			,ItemUOM.dblUnitQty
+			,CUR.intCurrencyID
+			,FX.intForexRateTypeId
+			,FX.dblFXRate
+	) LD	
+	JOIN tblICItem I ON I.intItemId = LC.intItemId
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = LC.intItemUOMId
+	
+	WHERE L.intLoadId = @intLoadId AND LC.intBillId IS NULL
+		AND ((LC.intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts)) OR (NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts))) 
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId

@@ -7,7 +7,7 @@ BEGIN TRY
 	DECLARE @intCostItemId INT
 	DECLARE @strErrorMessage NVARCHAR(MAX)
 
-	SELECT intLoadCostId, intItemId INTO #tmpLoadCost FROM tblLGLoadCost WHERE intLoadId = @intLoadId
+	SELECT intLoadCostId, intItemId INTO #tmpLoadCost FROM tblLGLoadCost WHERE intLoadId = @intLoadId AND ISNULL(dblAmount, 0) = 0
 
 	--Loop through each Cost
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpLoadCost)

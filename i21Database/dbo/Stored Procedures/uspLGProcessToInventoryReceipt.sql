@@ -256,49 +256,88 @@ BEGIN TRY
 			,[ysnAllowVoucher]
 			)
 		SELECT 
-			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
-			,[intChargeId] = CV.intItemId
-			,[strCostMethod] = CV.strCostMethod
-			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblShipmentUnitPrice], LOD.dblQuantityTotal), LD.dblQuantity) 
+			[intOtherChargeEntityVendorId] = LC.intVendorId
+			,[intChargeId] = LC.intItemId
+			,[strCostMethod] = LC.strCostMethod
+			,[dblRate] = CASE WHEN LC.strCostMethod = 'Amount' THEN 0
+							ELSE dbo.fnMultiply(dbo.fnDivide(LC.dblRate, LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
 			,[dblAmount] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN VP.dblTotal
-							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblTotal], LOD.dblQuantityTotal), LD.dblQuantity) 
+							ELSE dbo.fnMultiply(dbo.fnDivide(LC.dblAmount, LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
 			,[dblQuantity] = NULL
-			,[intCostUOMId] = CV.intPriceItemUOMId
-			,[intContractHeaderId] = CD.intContractHeaderId
-			,[intContractDetailId] = LD.intPContractDetailId
+			,[intCostUOMId] = LC.intItemUOMId
+			,[intContractHeaderId] = LD.intContractHeaderId
+			,[intContractDetailId] = LD.intContractDetailId
 			,[ysnAccrue] = 1
 			,[strReceiptType] = 'Direct'
 			,[intShipViaId] = NULL
 			,[intCurrencyId] = L.intCurrencyId
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
-			,[ysnPrice] = CV.ysnPrice
-			,[ysnSubCurrency] = CUR.ysnSubCurrency
-			,[intCostCurrencyId] = CV.intCurrencyId
-			,[intShipFromId] = EL.intEntityLocationId
+			,[ysnPrice] = LC.ysnPrice
+			,[ysnSubCurrency] = LD.ysnSubCurrency
+			,[intCostCurrencyId] = LD.intCostCurrencyId
+			,[intShipFromId] = LD.intEntityLocationId
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
-			,[intLoadShipmentDetailId] = CV.intLoadDetailId
-			,[intLoadShipmentCostId] = CV.intLoadCostId
+			,[intLoadShipmentDetailId] = NULL--CV.intLoadDetailId
+			,[intLoadShipmentCostId] = LC.intLoadCostId
 			,[ysnLock] = CASE WHEN (VCHR.intBillId IS NOT NULL AND VCHR.ysnPosted = 1) THEN 1 ELSE 0 END
 			,[ysnWithGLReversal] = 1 -- CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NULL) THEN 1 ELSE 0 END
-		FROM vyuLGLoadCostForVendor CV
-		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
-		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		JOIN tblICItem I ON I.intItemId = CV.intItemId
-		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
-		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
-		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
+		FROM tblLGLoadCost LC
+		JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+		JOIN tblICItem I ON I.intItemId = LC.intItemId
+		JOIN tblAPVendor ARC ON ARC.intEntityId = LC.intVendorId
+		CROSS APPLY (
+			SELECT
+				LD.intVendorEntityId
+				,LD.intPCompanyLocationId
+				,CD.intContractHeaderId
+				,CD.intContractDetailId
+				,intCurrencyId = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+				,intCostCurrencyId = CUR.intCurrencyID
+				,CUR.ysnSubCurrency
+				,EL.intEntityLocationId
+				,SUM(LD.dblQuantity) dblQuantity
+			FROM tblLGLoadDetail LD
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = COALESCE(LC.intCurrencyId, ARC.intCurrencyId,
+					(SELECT TOP 1 intDefaultCurrencyId
+					FROM tblSMCompanyPreference
+					WHERE intDefaultCurrencyId IS NOT NULL
+						AND intDefaultCurrencyId <> 0
+					))
+			WHERE LD.intLoadId = L.intLoadId
+			GROUP BY
+				LD.intVendorEntityId
+				,LD.intPCompanyLocationId
+				,CD.intContractHeaderId
+				,CD.intContractDetailId
+				,AD.ysnValidFX
+				,AD.intSeqCurrencyId
+				,LSC.intMainCurrencyId
+				,LSC.intCurrencyID
+				,SC.intMainCurrencyId
+				,SC.intCurrencyID
+				,CUR.intCurrencyID
+				,CUR.ysnSubCurrency
+				,EL.intEntityLocationId
+		) LD
+		-- JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
+		-- LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		-- LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = LC.intItemId
 		LEFT JOIN tblAPBill AB ON AB.intBillId = VP.intBillId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
-		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
-		WHERE CV.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
+		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = LC.intLoadCostId) VCHR
+		WHERE L.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
 
 		UNION ALL
 
@@ -950,53 +989,86 @@ BEGIN TRY
 			,[ysnAllowVoucher]
 			)
 		SELECT 
-			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
-			,[intChargeId] = CV.intItemId
-			,[strCostMethod] = CV.strCostMethod
-			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblShipmentUnitPrice], LOD.dblQuantityTotal), LD.dblQuantity) 
+			[intOtherChargeEntityVendorId] = ARC.intEntityId
+			,[intChargeId] = LC.intItemId
+			,[strCostMethod] = LC.strCostMethod
+			,[dblRate] = CASE WHEN LC.strCostMethod = 'Amount' THEN 0
+							ELSE dbo.fnMultiply(dbo.fnDivide(LC.dblRate, LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
 			,[dblAmount] = CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN VP.dblTotal
-							ELSE dbo.fnMultiply(dbo.fnDivide(CV.[dblTotal], LOD.dblQuantityTotal), LD.dblQuantity) 
+							ELSE dbo.fnMultiply(dbo.fnDivide(LC.dblAmount, LOD.dblQuantityTotal), LD.dblQuantity) 
 							END
 			,[dblQuantity] = NULL
-			,[intCostUOMId] = CV.intPriceItemUOMId
-			,[intContractHeaderId] = CD.intContractHeaderId
-			,[intContractDetailId] = LD.intPContractDetailId
+			,[intCostUOMId] = LC.intItemUOMId
+			,[intContractHeaderId] = LD.intContractHeaderId
+			,[intContractDetailId] = LD.intContractDetailId
 			,[ysnAccrue] = 1
 			,[strReceiptType] = 'Purchase Contract'
 			,[intShipViaId] = NULL
-			,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+			,[intCurrencyId] = LD.intCurrencyId
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
-			,[ysnPrice] = CV.ysnPrice
-			,[ysnSubCurrency] = CUR.ysnSubCurrency
-			,[intCostCurrencyId] = CV.intCurrencyId
-			,[intShipFromId] = EL.intEntityLocationId
+			,[ysnPrice] = LC.ysnPrice
+			,[ysnSubCurrency] = LD.ysnSubCurrency
+			,[intCostCurrencyId] = LD.intCostCurrencyId
+			,[intShipFromId] = LD.intEntityLocationId
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
 			,[intLoadShipmentId] = L.intLoadId
-			,[intLoadShipmentDetailId] = CV.intLoadDetailId
-			,[intLoadShipmentCostId] = CV.intLoadCostId
-			,[dblForexRate] = CV.dblFX
+			,[intLoadShipmentDetailId] = NULL--CV.intLoadDetailId
+			,[intLoadShipmentCostId] = LC.intLoadCostId
+			,[dblForexRate] = LC.dblFX
 			,[ysnLock] = CASE WHEN (VCHR.intBillId IS NOT NULL AND VCHR.ysnPosted = 1) THEN 1 ELSE 0 END
 			,[ysnWithGLReversal] = 1 --CASE WHEN ISNULL(VP.intLoadId, 0) <> 0 THEN 1 ELSE 0 END
 			,[ysnAllowVoucher] = CASE WHEN (VCHR.intBillId IS NULL) THEN 1 ELSE 0 END
-		FROM vyuLGLoadCostForVendor CV
-		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
-		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		JOIN tblICItem I ON I.intItemId = CV.intItemId
-		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
-		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-		JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
-		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
-		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
-		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
-		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = CV.intItemId
+		FROM tblLGLoadCost LC
+		JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+		JOIN tblICItem I ON I.intItemId = LC.intItemId
+		JOIN tblAPVendor ARC ON ARC.intEntityId = LC.intVendorId
+		CROSS APPLY (
+			SELECT
+				LD.intVendorEntityId
+				,LD.intPCompanyLocationId
+				,CD.intContractHeaderId
+				,CD.intContractDetailId
+				,intCurrencyId = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+				,intCostCurrencyId = CUR.intCurrencyID
+				,CUR.ysnSubCurrency
+				,EL.intEntityLocationId
+				,SUM(LD.dblQuantity) dblQuantity
+			FROM tblLGLoadDetail LD
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = COALESCE(LC.intCurrencyId, ARC.intCurrencyId,
+					(SELECT TOP 1 intDefaultCurrencyId
+					FROM tblSMCompanyPreference
+					WHERE intDefaultCurrencyId IS NOT NULL
+						AND intDefaultCurrencyId <> 0
+					))
+			WHERE LD.intLoadId = L.intLoadId
+			GROUP BY
+				LD.intVendorEntityId
+				,LD.intPCompanyLocationId
+				,CD.intContractHeaderId
+				,CD.intContractDetailId
+				,AD.ysnValidFX
+				,AD.intSeqCurrencyId
+				,LSC.intMainCurrencyId
+				,LSC.intCurrencyID
+				,SC.intMainCurrencyId
+				,SC.intCurrencyID
+				,CUR.intCurrencyID
+				,CUR.ysnSubCurrency
+				,EL.intEntityLocationId
+		) LD
+		LEFT JOIN tblAPBillDetail VP ON VP.intLoadId = L.intLoadId AND VP.intItemId = LC.intItemId
 		LEFT JOIN tblAPBill AB ON AB.intBillId = VP.intBillId
 		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
-		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = CV.intLoadCostId) VCHR
-		WHERE CV.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
+		OUTER APPLY (SELECT TOP 1 B.intBillId, B.ysnPosted FROM tblAPBill B JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId WHERE BD.intLoadShipmentCostId = LC.intLoadCostId) VCHR
+		WHERE L.intLoadId = @intLoadId AND ISNULL(AB.intTransactionType, 0) <> 3
 
 		UNION ALL
 
