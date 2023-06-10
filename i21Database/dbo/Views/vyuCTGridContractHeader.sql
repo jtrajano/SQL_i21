@@ -158,7 +158,6 @@ AS
 			CH.intCompanyLocationId,
 			NM.strLocationName,
 			CH.intDaysForFinance,
-			CH.ysnLocalCurrency,
 			NM.ysnProvisionalVoucher,
 			NM.strProvisionalVoucherIds,
 			CH.ysnPrintCropYear,
