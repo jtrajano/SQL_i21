@@ -262,19 +262,22 @@ BEGIN
 				,UM_REF.intCommodityUnitMeasureId
 		) A
 
-		DECLARE @dblDPReversedSettlementsWithNoPayment DECIMAL(18,6)
+		DECLARE @dblReversedSettlementsWithNoPayment DECIMAL(18,6)
 		DECLARE @dblDPReversedSettlementsWithPayment DECIMAL(18,6)
-		DECLARE @dblDPSettlementsWithDeletedPayment DECIMAL(18,6)
 		DECLARE @dblSettlementsWithDeletedPayment DECIMAL(18,6)
-		SELECT @dblDPReversedSettlementsWithNoPayment = SUM(dblUnpaid)
+		DECLARE @dblSettlementsWithDeletedPaymentSameDay DECIMAL(18,6)
+		DECLARE @dblSettlementReversedOnDiffDay DECIMAL(18,6)
+		SELECT @dblReversedSettlementsWithNoPayment = SUM(dblUnpaid)
 			,@dblDPReversedSettlementsWithPayment = SUM(dblPaid)
-			,@dblDPSettlementsWithDeletedPayment = SUM(dblPaid2)
-			,@dblSettlementsWithDeletedPayment = SUM(dblPaid3) --must be added only on the unpaid decrease if reversal was done on the same day that the settlement was processed
+			,@dblSettlementsWithDeletedPayment = SUM(dblPaid2)
+			,@dblSettlementsWithDeletedPaymentSameDay = SUM(dblPaid3) --must be added only on the unpaid decrease if reversal was done on the same day that the settlement was processed
+			,@dblSettlementReversedOnDiffDay = SUM(dblPaid4) --add on the unpaid beginning when a settlement is reversed on a different day
 		FROM (
 			SELECT dblUnpaid = CASE WHEN AP.intBillId IS NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid2 = CASE WHEN AP.intBillId IS NOT NULL AND SH.strType = 'Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 				,dblPaid3 = CASE WHEN AP.intBillId IS NOT NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) = dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
+				,dblPaid4 = CASE WHEN AP.intBillId IS NULL AND dbo.fnRemoveTimeOnDate(SH_2.dtmHistoryDate) < dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) AND SH.strType = 'Reverse Settlement' THEN SUM(ISNULL(SH.dblUnits,0)) ELSE 0 END
 			FROM tblGRStorageHistory SH
 			INNER JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -307,7 +310,7 @@ BEGIN
 			,@dtmReportDate
 			,V.intCommodityId
 			,'   COMPANY OWNERSHIP (UNPAID)'
-			,SUM(V.dblQty) - ISNULL(@dblVoidedPaymentOldVoucherAddInBeginning,0) - ISNULL(@dblVoidedPaymentOldVoucher,0)
+			,(SUM(V.dblQty) + ISNULL(@dblSettlementReversedOnDiffDay,0)) - ISNULL(@dblVoidedPaymentOldVoucherAddInBeginning,0) - ISNULL(@dblVoidedPaymentOldVoucher,0)
 			,0
 			,0
 			,0
@@ -333,10 +336,10 @@ BEGIN
 		END
 
 		/******DECREASE*******/
-		--SELECT ISNULL(@dblVoidedPayment,0),ISNULL(@dblSettlementsFromYesterday2,0),ISNULL(@dblDPSettlementsWithDeletedPayment,0),ISNULL(@dblDPReversedSettlementsWithPayment,0),ISNULL(@dblDPReversedSettlementsWithNoPayment,0),ISNULL(@dblSettlementsWithDeletedPayment,0)
+		--SELECT ISNULL(@dblVoidedPayment,0),ISNULL(@dblSettlementsFromYesterday2,0),ISNULL(@dblSettlementsWithDeletedPayment,0),ISNULL(@dblDPReversedSettlementsWithPayment,0),ISNULL(@dblReversedSettlementsWithNoPayment,0),ISNULL(@dblSettlementsWithDeletedPaymentSameDay,0)
 
 		UPDATE C
-		SET dblTotalDecrease = ISNULL(A.dblQty,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0) + ISNULL(@dblSettlementsWithDeletedPayment,0) + ISNULL(@dblVoidedPayment,0)
+		SET dblTotalDecrease = ISNULL(A.dblQty,0) + ISNULL(@dblSettlementsWithDeletedPayment,0) + ISNULL(@dblSettlementsWithDeletedPaymentSameDay,0) + ISNULL(@dblVoidedPayment,0)
 		FROM @CompanyOwnedData C
 		LEFT JOIN (
 			SELECT AA.intCommodityId
@@ -723,14 +726,14 @@ BEGIN
 								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN 0 ELSE ISNULL(@dblInternalTransfersDiff,0) END --+ 
 								--ISNULL(@dblReceivedCompanyOwned,0)
 								--ISNULL(@dblDPReversedSettlementsWithPayment,0) --+ 
-								--ISNULL(@dblDPSettlementsWithDeletedPayment,0)
+								--ISNULL(@dblSettlementsWithDeletedPayment,0)
 			,dblTotalDecrease = ABS(
 								(ISNULL(@dblShipped,0) + ISNULL(@dblTransfers,0)) +
 								CASE WHEN ISNULL(@dblIACompanyOwned,0) < 0 THEN ABS(ISNULL(@dblIACompanyOwned,0)) ELSE 0 END + 
 								CASE WHEN ISNULL(@dblInternalTransfersDiff,0) < 0 THEN ABS(ISNULL(@dblInternalTransfersDiff,0)) ELSE 0 END +
 								ISNULL(@dblDPReversedSettlementsWithPayment,0) + 
 								ISNULL(@dblVoidedPayment,0) +
-								ISNULL(@dblDPSettlementsWithDeletedPayment,0) + 
+								ISNULL(@dblSettlementsWithDeletedPayment,0) + 
 								ISNULL(@dblVoidedPaymentOldVoucher,0)
 								) --- ISNULL(@dblDPIA,0)
 			,0
@@ -814,17 +817,17 @@ BEGIN
 
 	UPDATE C
 	--SET dblTotalIncrease = ISNULL(@dblSODecrease,0) + ISNULL(@dblIACustomerOwned,0) + ISNULL(DP.total,0) + ISNULL(RS.dblUnits,0)
-	--SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblDPSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
+	--SET dblTotalIncrease = (ISNULL(@dblSODecrease,0) + ISNULL(DP.total,0) + ISNULL(@dblVoidedPayment,0) + ISNULL(@dblSettlementsWithDeletedPayment,0)) - ISNULL(@dblDPIA,0) - ISNULL(TS.dblUnits,0)
 	SET dblTotalIncrease = (
 								ISNULL(@dblSODecrease,0) + 
 								ISNULL(@dblVoidedPayment,0) + 
-								ISNULL(@dblDPSettlementsWithDeletedPayment,0) + 
+								ISNULL(@dblSettlementsWithDeletedPayment,0) + 
 								(ISNULL(DP.total,0) + ISNULL(@dblDPIA,0)) +
 								ISNULL(@dblCompanyOwnedIRVoucher,0) + 
 								ISNULL(@dblVoidedPaymentOldVoucher,0)
 							) - 
 							ISNULL(TS.dblUnits,0)
-		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblDPReversedSettlementsWithNoPayment,0)
+		,dblTotalDecrease = dblTotalDecrease + ISNULL(@dblReversedSettlementsWithNoPayment,0)
 	FROM @CompanyOwnedData C
 	LEFT JOIN (
 		SELECT total = SUM(A.dblTotalDecrease)
