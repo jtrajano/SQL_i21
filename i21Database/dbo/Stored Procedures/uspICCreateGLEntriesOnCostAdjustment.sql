@@ -59,6 +59,9 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 -- Declare the cost adjustment types
 DECLARE @costAdjustmentType_DETAILED AS TINYINT = 1
 		,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+		,@costAdjustmentType_RETROACTIVE_DETAILED AS TINYINT = 3
+		,@costAdjustmentType_RETROACTIVE_SUMMARIZED AS TINYINT = 4
+		,@costAdjustmentType_CURRENT_AVG AS TINYINT = 5
 
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
@@ -704,7 +707,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED)
 	UNION ALL 
 	-- FIFO SUMMARIZED
 	SELECT	t.dtmDate
@@ -755,7 +758,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED, @costAdjustmentType_CURRENT_AVG)
 
 	-- LIFO DETAILED
 	UNION ALL 
@@ -796,7 +799,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED, @costAdjustmentType_CURRENT_AVG)
 	-- LIFO SUMMARIZED
 	UNION ALL 
 	SELECT	t.dtmDate
@@ -847,7 +850,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED)
 
 	-- LOT DETAILED
 	UNION ALL 
@@ -888,7 +891,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED, @costAdjustmentType_CURRENT_AVG)
 	-- LOT SUMMARIZED
 	UNION ALL 
 	SELECT	t.dtmDate
@@ -939,7 +942,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED) 
 
 	-- ACTUAL COST DETAILED
 	UNION ALL 
@@ -980,7 +983,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_DETAILED, @costAdjustmentType_RETROACTIVE_DETAILED, @costAdjustmentType_CURRENT_AVG)
 	-- ACTUAL SUMMARIZED
 	UNION ALL 
 	SELECT	t.dtmDate
@@ -1031,7 +1034,7 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ISNULL(cbLog.dblValue, 0) <> 0 
-			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) IN (@costAdjustmentType_SUMMARIZED, @costAdjustmentType_RETROACTIVE_SUMMARIZED)
 
 	-- AUTO VARIANCE 
 	UNION ALL 
