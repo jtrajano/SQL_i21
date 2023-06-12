@@ -66,7 +66,7 @@ BEGIN TRY
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblIPAuctionStockPreStage
-			WHERE dtmProcessedDate = @dtmStartDayOfWeek
+			WHERE dtmProcessedDate = @dtmCurrentDate
 			)
 	BEGIN
 		DELETE
@@ -83,7 +83,7 @@ BEGIN TRY
 				ORDER BY intItemId
 				)
 			,intItemId
-			,@dtmStartDayOfWeek
+			,@dtmCurrentDate
 			,intLocationId
 			,intCurrencyId
 		FROM (

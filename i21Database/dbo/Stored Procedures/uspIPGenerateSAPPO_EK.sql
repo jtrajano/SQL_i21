@@ -16,6 +16,7 @@ BEGIN TRY
 		,@strFinalXML NVARCHAR(MAX) = ''
 		,@ysnTrackMFTActivity BIT
 		,@strLocalForLocal nvarchar(50)
+		,@intTealingoItemId INT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -281,6 +282,7 @@ BEGIN TRY
 					SELECT 1
 					FROM tblIPContractFeed CF WITH (NOLOCK)
 					WHERE CF.intLoadId = @intLoadId
+						AND intStatusId Is NULL 
 						AND CF.strVendorAccountNum <> @strVendorAccountNum
 					)
 			BEGIN
@@ -744,11 +746,14 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Batch Id cannot be blank. '
 			END
 
+			SELECT @intTealingoItemId=NULL
+
 			SELECT @strTeaOrigin = B.strTeaOrigin
 				,@strTeaLingoItem = B.strItemNo
 				,@strPlant = CL.strVendorRefNoPrefix
 				,@dtmProductionBatch = B.dtmProductionBatch
 				,@dtmExpiration = B.dtmExpiration
+				,@intTealingoItemId=B.intTealingoItemId
 			FROM vyuMFBatch B WITH (NOLOCK)
 			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
 			WHERE B.intBatchId = @intBatchId
@@ -840,12 +845,12 @@ BEGIN TRY
 				+ '<OriginOfTea>' + ISNULL(@strISOCode, '') + '</OriginOfTea>'
 				+ '<OriginalTeaLingoItem>' + ISNULL(I.strItemNo, '') + '</OriginalTeaLingoItem>'
 				+ '<PackagesPerPallet>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblPackagesPerPallet, 0))) + '</PackagesPerPallet>'
-				+ '<Plant>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') OR @ysnTrackMFTActivity=1 OR ISNULL(CL.strOregonFacilityNumber, '')=ISNULL(CL.strVendorRefNoPrefix, '') THEN '' ELSE ISNULL(CL.strVendorRefNoPrefix, '') END + '</Plant>'
+				+ '<Plant>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') OR @ysnTrackMFTActivity=1 THEN '' ELSE ISNULL(CL.strVendorRefNoPrefix, '') END + '</Plant>'
 				+ '<TotalQuantity>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblTotalQuantity, 0))) + '</TotalQuantity>'
 				+ '<SampleBoxNo>' + ISNULL(B.strSampleBoxNumber, '') + '</SampleBoxNo>'
 				+ '<SellingPrice>' + LTRIM(CONVERT(NUMERIC(18, 2), ISNULL(B.dblSellingPrice, 0))) + '</SellingPrice>'
 				+ '<StockDate>' + ISNULL(CONVERT(VARCHAR(33), B.dtmStock, 126), '') + '</StockDate>'
-				+ '<StorageLocation>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') OR @ysnTrackMFTActivity=1 OR ISNULL(CL.strOregonFacilityNumber, '')=ISNULL(CL.strVendorRefNoPrefix, '') THEN '' ELSE ISNULL(B.strStorageLocation, '') END + '</StorageLocation>'
+				+ '<StorageLocation>' + CASE WHEN ISNULL(@strBuyingCountry, '') = ISNULL(@strMixingUnitCountry, '') OR @ysnTrackMFTActivity=1 THEN '' ELSE ISNULL(B.strStorageLocation, '') END + '</StorageLocation>'
 				+ '<SubChannel>' + ISNULL(B.strSubChannel, '') + '</SubChannel>'
 				+ '<StrategicFlag>' + LTRIM(ISNULL(B.ysnStrategic, '')) + '</StrategicFlag>'
 				+ '<SubClusterTeaLingo>' + ISNULL(B.strTeaLingoSubCluster, '') + '</SubClusterTeaLingo>'
@@ -888,6 +893,7 @@ BEGIN TRY
 				+ '<ContainerType>' + ISNULL(B.strContainerType, '') + '</ContainerType>'
 				+ '<Voyage>' + ISNULL(B.strVoyage, '') + '</Voyage>'
 				+ '<Vessel>' + ISNULL(B.strVessel, '') + '</Vessel>'
+				+ '<ETD>' + ISNULL(CONVERT(VARCHAR(33), B.dtmEtaPol, 126), '') + '</ETD>'
 				+ '</Batch>'
 			FROM vyuMFBatch B WITH (NOLOCK)
 			--LEFT JOIN dbo.tblQMSample S WITH (NOLOCK) ON S.intSampleId = B.intSampleId
@@ -898,6 +904,11 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItem I1 WITH (NOLOCK) ON I1.intItemId = B.intTealingoItemId
 			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
 			WHERE B.intBatchId = @intBatchId
+
+			EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
+					,@intUserId = 1
+					,@intOriginalItemId = @intTealingoItemId
+					,@intItemId = @intTealingoItemId
 
 			IF ISNULL(@strBatchXML, '') = ''
 			BEGIN

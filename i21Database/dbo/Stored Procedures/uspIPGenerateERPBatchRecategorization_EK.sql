@@ -240,6 +240,7 @@ BEGIN TRY
 				+ '<ContainerType>' + ISNULL(B.strContainerType, '') + '</ContainerType>'
 				+ '<Voyage>' + ISNULL(B.strVoyage, '') + '</Voyage>'
 				+ '<Vessel>' + ISNULL(B.strVessel, '') + '</Vessel>'
+				+ '<ETD>' + ISNULL(CONVERT(VARCHAR(33), B.dtmEtaPol, 126), '') + '</ETD>'
 				+ '</Batch>'
 			FROM vyuMFBatch B WITH (NOLOCK)
 			LEFT JOIN dbo.tblSMCurrency C WITH (NOLOCK) ON C.intCurrencyID = B.intCurrencyId
