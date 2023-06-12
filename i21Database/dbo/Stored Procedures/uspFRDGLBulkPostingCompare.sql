@@ -24,7 +24,7 @@ INSERT INTO tblGLPostedCompare (intAccountId,dtmDate,dblDebit,dblCredit,dblDebit
    T0.dblDebit,T0.dblCredit,                  
    T0.dblDebitForeign,T0.dblCreditForeign,                  
    T0.dblDebitUnit,T0.dblCreditUnit,                  
-   T0.strCode,ISNULL(T0.intCurrencyId,T1.intCurrencyID)intCurrencyID,ISNULL(T0.intLedgerId,0)intLedgerId,T0.dtmDateEntered FROM                    
+    ISNULL(T0.strCode,'') AS strCode,ISNULL(T0.intCurrencyId,T1.intCurrencyID)intCurrencyID,ISNULL(T0.intLedgerId,0)intLedgerId,T0.dtmDateEntered FROM                    
    tblGLDetail T0          
    LEFT JOIN tblGLAccount T1          
    ON T0.intAccountId = T1.intAccountId          
