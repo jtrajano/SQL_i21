@@ -88,9 +88,10 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 			  AND A.strTeaType = B.strTeaType
 			  AND A.strVendorLotNumber = B.strVendorLotNumber
 			  AND A.intBuyingCenterLocationId = B.intBuyingCenterLocationId
-			  AND A.intSubBookId = B.intSubBookId
+			  --AND A.intSubBookId = B.intSubBookId
 			  AND A.intLocationId = B.intLocationId
 			  AND A.intSupplierId = B.intSupplierId
+			  AND IsNULL(A.intBrokerId,0) = IsNULL(B.intBrokerId,0)
 		WHERE B.intId = @id;
 
 		/* Update Existing Batch if @strBatchId is not empty. */
