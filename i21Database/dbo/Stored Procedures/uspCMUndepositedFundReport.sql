@@ -124,7 +124,7 @@ DECLARE @strSQL NVARCHAR(MAX) ='
 	null AS dtmCMDate,
 	0 AS dblAmount,
 	'''' AS strBatchId,
-	'''' strCompanySegment
+	'''' strCompanySegment,
 	'''' strAccountId
 	UNION
 	SELECT 
