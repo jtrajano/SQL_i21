@@ -883,12 +883,15 @@ BEGIN
 			AND RI.intRecipeItemTypeId = 1
 			AND NOT EXISTS (
 				SELECT *
-				FROM tblMFRecipeItemStage
+				FROM tblMFRecipeItemStage RIS
+				JOIN tblSMCompanyLocation L on L.strLocationName =RIS.strLocationName 
 				WHERE strRecipeItemNo = I.strItemNo
 					AND strRecipeHeaderItemNo = HI.strItemNo
+					AND RIS.strValidFrom=RI.dtmValidFrom 
+					AND L.intCompanyLocationId =R.intLocationId 
 				)
 			AND RI.ysnImported = 1
-
+			
 		NEXT_RECIPE:
 
 		SELECT @intMinId = MIN(intRecipeStageId)
