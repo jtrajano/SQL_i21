@@ -147,6 +147,7 @@ SELECT
 	,strFines=A.strFines
 	,dtmPOCreated=A.dtmPOCreated
 	,strIBDNo=A.strIBDNo
+	,dtmEtaPol=CD.dtmEtaPol
 FROM tblMFBatch A
 LEFT JOIN tblMFBatch B ON A.intParentBatchId = B.intBatchId
 LEFT JOIN tblQMGardenMark Garden ON Garden.intGardenMarkId = A.intGardenMarkId
