@@ -10,11 +10,11 @@ SELECT intSampleId					= S.intSampleId
 	 , strLotNumber					= S.strRepresentLotNumber
 	 , strGrade						= GRADE.strDescription
 	 , strInvoiceNumber				= S.strChopNumber
-	 , dblQuantity					= ISNULL(S.dblRepresentingQty, 0)
-	 , strQtyUOM					= RIUM.strUnitMeasure
+	 , dblQuantity					= PIUM.strUnitMeasure
+	 , strQtyUOM					= PIUM.strUnitMeasure--RIUM.strUnitMeasure
 	 , dblWeight					= ISNULL(S.dblSampleQty, 0)
-	 , dblWeightPerQty				= ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, ISNULL(S.dblSampleQty, 0)), 0)
-	 , strPackageType				= PIUM.strUnitMeasure
+	 , dblWeightPerQty				= RIUM.strUnitMeasure--ISNULL(dbo.fnCalculateQtyBetweenUoms(ITEM.strItemNo, SIUM.strUnitMeasure, RIUM.strUnitMeasure, ISNULL(S.dblSampleQty, 0)), 0)
+	 , strPackageType				= ISNULL([dbo].[fnRemoveTrailingZeroes](S.dblRepresentingQty), 0)
 	 , dblBasePrice					= ISNULL(S.dblBasePrice, 0)
 	 , dblTastingScore				= ISNULL(PV.dblActualValue, 0)
 	 , strSupplier					= SUP.strName
@@ -55,8 +55,8 @@ OUTER APPLY (
 	SELECT dblMinPrice	= MIN(ISNULL(dblB1Price, 0))
 		 , dblMaxPrice  = MAX(ISNULL(dblB1Price, 0))
 	FROM tblQMSample A
-	WHERE A.strSaleNumber IS NOT NULL
-	  AND A.strSaleNumber = S.strSaleNumber
-	GROUP BY A.strSaleNumber
+	WHERE A.intGardenMarkId=S.intGardenMarkId 
+		and A.intGradeId =S.intGradeId 
+	  AND A.dtmSaleDate IN (Select MAX(B.dtmSaleDate) from tblQMSample B Where B.dtmSaleDate<= S.dtmSaleDate) 
 ) AUCPRICE
 WHERE S.strSaleNumber IS NOT NULL
