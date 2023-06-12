@@ -6,7 +6,6 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 -- Sample XML string structure:
 --SET @xmlparam = '
@@ -106,8 +105,8 @@ IF @dtmStatementDate IS NOT NULL
 )
 SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dtmStatementDate				= @dtmStatementDate
-		,strCbkNo						= BankAccnt.strCbkNo
-		,strBankName					= Bank.strBankName
+		,strBankAccountNo				= BankAccnt.strBankAccountNo
+		,strCurrency					= BankAccnt.strCurrency
 		,strGLAccountId					= GL.strAccountId
 		,dblGLBalance					= isnull([dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
 		,dblBankAccountBalance			= isnull([dbo].[fnCMGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
@@ -119,7 +118,7 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dblUnclearedPaymentsNotVoidYet	= isnull(UnClearedPaymentNotVoidYet.totalAmount,0)
 		,dblUnclearedDeposits			= isnull(UnClearedDeposit.totalAmount,0)
 		,strCompanyName
-FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
+FROM	dbo.vyuCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intBankId = Bank.intBankId
 		INNER JOIN dbo.tblGLAccount GL
 			ON BankAccnt.intGLAccountId = GL.intAccountId
