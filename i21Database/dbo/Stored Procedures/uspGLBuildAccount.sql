@@ -38,17 +38,23 @@
 		ORDER BY A.strAccountId
 
 
-	DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50)
+	DECLARE @_intAccountId INT , @_strAccountId NVARCHAR(50),@changeDescription NVARCHAR(100)
 	WHILE EXISTS (SELECT 1 FROM  @tblAccount )
 	BEGIN
 		SELECT TOP 1 @_intAccountId=intAccountId, @_strAccountId = A.strAccountId FROM tblGLAccount A 
 		JOIN @tblAccount B ON A.strAccountId = B.strAccountId WHERE A.strAccountId = B.strAccountId
 
-		EXEC uspSMAuditLog
-        @keyValue = @_intAccountId,                                          -- Primary Key Value
-        @screenName = 'GeneralLedger.view.EditAccount',            -- Screen Namespace
-        @entityId = @intUserId,                                              -- Entity Id.
-        @actionType = 'Created'                                 
+		set @changeDescription =N'Build Account ' + @_strAccountId 
+		
+			EXEC uspSMAuditLog
+			@keyValue = @_intAccountId,                                          -- Primary Key Value
+			@screenName = 'GeneralLedger.view.EditAccount',            -- Screen Namespace
+			@entityId = @intUserId,                                              -- Entity Id.
+			@actionType = 'Created',              
+			@changeDescription = @changeDescription,
+			@fromValue = '',
+			@toValue = @_strAccountId
+                                
 		DELETE FROM @tblAccount WHERE strAccountId = @_strAccountId
 	END
 	-- +++++ INSERT CROSS REFERENCE +++++ --
