@@ -255,7 +255,7 @@ BEGIN
 	USING (
 				SELECT	intAccountId
 						,dtmDate = dbo.fnRemoveTimeOnDate(GLEntries.dtmDate)
-						,strCode
+						,strCode = ISNULL(strCode, '')				
 						,dblDebit = SUM(CASE WHEN @ysnPost = 1 THEN Debit.Value ELSE Credit.Value * -1 END)
 						,dblCredit = SUM(CASE WHEN @ysnPost = 1 THEN Credit.Value ELSE Debit.Value * -1 END)
 						,dblDebitForeign = SUM(CASE WHEN @ysnPost = 1 THEN DebitForeign.Value ELSE CreditForeign.Value * -1 END)
