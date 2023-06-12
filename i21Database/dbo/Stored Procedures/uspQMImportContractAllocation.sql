@@ -12,6 +12,14 @@ BEGIN TRY
 			,@intRowCount INT
 			,@intRow INT = 0
 			,@ysnLastRow BIT
+			,@dblAllocatedQty numeric(18,6)
+			,@dblContractQuantity  numeric(18,6)
+			,@dblContractPrice numeric(18,6)
+	DECLARE @intToDeleteBatchLocationId INT
+	DECLARE
+		@ysnSuccess BIT
+		,@strErrorMessage NVARCHAR(MAX)
+		,@strReferenceNo NVARCHAR(50)
 
 	SET @strTxnIdentifier = convert(nvarchar(36),NEWID())
 
@@ -44,10 +52,12 @@ BEGIN TRY
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 
 				WHEN (CH.intContractHeaderId IS NULL)
+				AND ISNULL(IMP.strContractNumber, '') <> ''
 					THEN 'CONTRACT NUMBER, '
 				ELSE ''
 				END + CASE 
 				WHEN (CD.intContractDetailId IS NULL)
+				AND ISNULL(IMP.intContractItem, 0) >0
 					THEN 'CONTRACT ITEM, '
 				ELSE ''
 				END + CASE 
@@ -90,8 +100,8 @@ BEGIN TRY
 	WHERE IMP.intImportLogId = @intImportLogId
 		AND IMP.ysnSuccess = 1
 		AND (
-			(CH.intContractHeaderId IS NULL)
-			OR (CD.intContractDetailId IS NULL)
+			(CH.intContractHeaderId IS NULL AND ISNULL(IMP.strContractNumber, '') <> '')
+			OR (CD.intContractDetailId IS NULL AND ISNULL(IMP.intContractItem, 0) >0)
 			OR (
 				SAMPLE_STATUS.intSampleStatusId IS NULL
 				AND ISNULL(IMP.strSampleStatus, '') <> ''
@@ -209,7 +219,7 @@ BEGIN TRY
 	BEGIN
 		SET @intRow = @intRow + 1
 		-- If the contract and sample item does not match, throw an error
-		IF @ysnSampleContractItemMatch = 0
+		IF @ysnSampleContractItemMatch = 0 AND @intContractDetailId IS NOT NULL
 		BEGIN
 			UPDATE tblQMImportCatalogue
 			SET ysnSuccess = 0
@@ -227,37 +237,56 @@ BEGIN TRY
 			,@ysnCreate = 0
 			,@ysnBeforeUpdate = 1
 
-		IF EXISTS(
-			SELECT 1 FROM tblCTContractDetail CD
-			WHERE CD.intContractDetailId = @intContractDetailId
-			AND (Select dblUnitQty from tblICItemUOM where intItemUOMId = CD.intItemUOMId) != (select strNoOfPackagesUOM from tblQMImportCatalogue WHERE intImportCatalogueId = @intImportCatalogueId)
-		)
-		BEGIN
-			UPDATE IC
-			SET ysnSuccess = 0, ysnProcessed = 1
-				,strLogResult = 'Allocated Qty UOM does not match the item in contract'
-			FROM tblQMImportCatalogue IC
-			WHERE IC.intImportCatalogueId = @intImportCatalogueId
-			GOTO CONT
-		END
+		--IF EXISTS(
+		--	SELECT 1 FROM tblCTContractDetail CD
+		--	WHERE CD.intContractDetailId = @intContractDetailId
+		--	AND (Select dblUnitQty from tblICItemUOM where intItemUOMId = CD.intItemUOMId) != (select strNoOfPackagesUOM from tblQMImportCatalogue WHERE intImportCatalogueId = @intImportCatalogueId)
+		--)
+		--BEGIN
+		--	UPDATE IC
+		--	SET ysnSuccess = 0, ysnProcessed = 1
+		--		,strLogResult = 'Allocated Qty UOM does not match the item in contract'
+		--	FROM tblQMImportCatalogue IC
+		--	WHERE IC.intImportCatalogueId = @intImportCatalogueId
+		--	GOTO CONT
+		--END
 
-		IF EXISTS(
-			SELECT 1 FROM tblQMSample S
-			INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = @intContractDetailId
-			INNER JOIN tblICItemUOM SUOM ON SUOM.intItemId = S.intItemId AND SUOM.intUnitMeasureId = S.intRepresentingUOMId
-			WHERE S.intSampleId = @intSampleId
-			AND dbo.fnCalculateQtyBetweenUOM(SUOM.intItemUOMId, CD.intItemUOMId, S.dblRepresentingQty) > CD.dblQuantity
-			OR (Select dblUnitQty from tblICItemUOM where intItemUOMId = CD.intItemUOMId) != (select strNoOfPackagesUOM from tblQMImportCatalogue WHERE intImportCatalogueId = @intImportCatalogueId)
-		)
+		IF @intContractDetailId IS NOT NULL
 		BEGIN
-			UPDATE IC
-			SET ysnSuccess = 0, ysnProcessed = 1
-				,strLogResult = 'Allocated Qty cannot be greater than Contracted Qty'
-			FROM tblQMImportCatalogue IC
-			WHERE IC.intImportCatalogueId = @intImportCatalogueId
-			GOTO CONT
-		END
+			SELECT @dblAllocatedQty=0
+			SELECT @dblContractQuantity=0
+			SELECT @dblContractPrice=0
 
+			SELECT @dblAllocatedQty=SUM(dblRepresentingQty) 
+			FROM tblQMSample S
+			WHERE intContractDetailId = @intContractDetailId
+				OR intSampleId = @intSampleId
+
+			SELECT @dblContractQuantity=dblQuantity
+					,@strReferenceNo=strReferenceNo  
+					,@dblContractPrice=dblCashPrice
+			FROM tblCTContractDetail 
+			WHERE intContractDetailId = @intContractDetailId
+				
+			IF @dblAllocatedQty>@dblContractQuantity
+			BEGIN
+				UPDATE IC
+				SET ysnSuccess = 0, ysnProcessed = 1
+					,strLogResult = 'Allocated Qty cannot be greater than Contracted Qty'
+				FROM tblQMImportCatalogue IC
+				WHERE IC.intImportCatalogueId = @intImportCatalogueId
+				GOTO CONT
+			END
+			IF @dblCashPrice>@dblContractPrice
+			BEGIN
+				UPDATE IC
+				SET ysnSuccess = 0, ysnProcessed = 1
+					,strLogResult = 'Cash Price is different between catalogue and contract sequence.'
+				FROM tblQMImportCatalogue IC
+				WHERE IC.intImportCatalogueId = @intImportCatalogueId
+				GOTO CONT
+			END
+		END
 		-- Update Sample
 		UPDATE S
 		SET intConcurrencyId = S.intConcurrencyId + 1
@@ -269,29 +298,57 @@ BEGIN TRY
 			,intBookId = @intBookId
 			,intSubBookId = @intSubBookId
 			,intCurrencyId = @intCurrencyID
+			,strBuyingOrderNo =@strReferenceNo
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
 		SELECT @ysnLastRow = CASE WHEN @intRow = @intRowCount THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
-		-- Update Contract Cash Price
-		IF ISNULL(@dblCashPrice, 0) <> 0
-			EXEC uspCTUpdateSequencePrice
-				@intContractDetailId = @intContractDetailId
-				,@dblNewPrice = @dblCashPrice
-				,@intUserId = @intEntityUserId
-				,@strScreen = 'Contract Line Allocation Import'
-				,@ysnLastRecord = @ysnLastRow
-				,@strTxnIdentifier = @strTxnIdentifier
+		---- Update Contract Cash Price
+		--IF ISNULL(@dblCashPrice, 0) <> 0 AND @intContractDetailId IS NOT NULL
+		--	EXEC uspCTUpdateSequencePrice
+		--		@intContractDetailId = @intContractDetailId
+		--		,@dblNewPrice = @dblCashPrice
+		--		,@intUserId = @intEntityUserId
+		--		,@strScreen = 'Contract Line Allocation Import'
+		--		,@ysnLastRecord = @ysnLastRow
+		--		,@strTxnIdentifier = @strTxnIdentifier
 
-		UPDATE tblQMTestResult
-		SET intProductTypeId = 8 --Contract Line Item
-			,intProductValueId = @intContractDetailId
-		WHERE intSampleId = @intSampleId
+		IF @intContractDetailId IS NOT NULL
+		BEGIN
+			UPDATE tblQMTestResult
+			SET intProductTypeId = 8 --Contract Line Item
+				,intProductValueId = @intContractDetailId
+			WHERE intSampleId = @intSampleId
+		END
 
 		UPDATE tblQMImportCatalogue
 		SET intSampleId = @intSampleId
 		WHERE intImportCatalogueId = @intImportCatalogueId
+
+		SELECT
+			@strBatchId = B.strBatchId
+			,@intToDeleteBatchLocationId = B.intBuyingCenterLocationId
+		FROM tblQMSample S
+		INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
+		WHERE S.intSampleId = @intSampleId
+
+		IF @strBatchId IS NOT NULL AND @intContractDetailId IS NULL
+		BEGIN
+			-- Delete batch for both TBO and MU
+			EXEC uspMFDeleteBatch
+				@strBatchId = @strBatchId
+				,@intLocationId = @intToDeleteBatchLocationId
+				,@ysnSuccess = @ysnSuccess OUTPUT
+				,@strErrorMessage = @strErrorMessage OUTPUT
+
+			IF @ysnSuccess = 0
+				UPDATE tblQMImportCatalogue
+				SET ysnProcessed = 1, ysnSuccess = 0, strLogResult = @strErrorMessage
+				WHERE intImportCatalogueId = @intImportCatalogueId
+
+				GOTO CONT
+		END
 
 		-- Call uspMFUpdateInsertBatch
 		DELETE
@@ -425,7 +482,7 @@ BEGIN TRY
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
 			,dblBoughtPrice = CD.dblCashPrice 
 			,dblBulkDensity = NULL
-			,strBuyingOrderNumber = CH.strExternalContractNumber
+			,strBuyingOrderNumber = CD.strReference 
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
@@ -628,6 +685,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intRepresentingUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
+			AND S.intContractDetailId IS NOT NULL
 			
 		DECLARE @intInput INT
 			,@intInputSuccess INT

@@ -30,6 +30,7 @@ BEGIN TRY
 		, strTeaGardenChopInvoiceNumber		= CRD.strPreInvoiceChopNo
 		, intGardenMarkId					= CRD.intPreInvoiceGardenMarkId
 		, dblTotalQuantity					= dbo.fnCalculateQtyBetweenUOM(WIUOM.intItemUOMId, QIUOM.intItemUOMId, CRD.dblPreInvoiceQuantity)
+		, dblBoughtPrice					=CRD.dblBasePrice
 	INTO #MFBATCH
 	FROM tblMFBatch B
 	INNER JOIN tblQMCatalogueReconciliationDetail CRD ON B.intSampleId = CRD.intSampleId
@@ -42,6 +43,7 @@ BEGIN TRY
 		AND ((B.strTeaGardenChopInvoiceNumber <> CRD.strPreInvoiceChopNo AND CRD.strPreInvoiceChopNo = CRD.strChopNo)
 		OR (B.intGardenMarkId <> CRD.intPreInvoiceGardenMarkId AND CRD.intPreInvoiceGardenMarkId = CRD.intGardenMarkId)
 		OR (B.strLeafGrade <> CA.strDescription AND CRD.intPreInvoiceGradeId = CRD.intGradeId)
+		OR (B.dblBasePrice <> CRD.dblBasePrice AND CRD.dblPreInvoicePrice  = CRD.dblBasePrice)
 		OR (B.dblTotalQuantity <> CRD.dblPreInvoiceQuantity AND CRD.dblPreInvoiceQuantity = CRD.dblQuantity))
 
 	--UPDATE BATCH
@@ -52,6 +54,8 @@ BEGIN TRY
 			  , strTeaGardenChopInvoiceNumber	= MFB.strTeaGardenChopInvoiceNumber
 			  , intGardenMarkId					= MFB.intGardenMarkId
 			  , dblTotalQuantity				= MFB.dblTotalQuantity
+			  , dblBoughtPrice					= MFB.dblBoughtPrice
+			  , dblBasePrice					= MFB.dblBoughtPrice
 			FROM tblMFBatch MF
 			INNER JOIN #MFBATCH MFB ON MF.intBatchId = MFB.intBatchId
 		END
