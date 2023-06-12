@@ -1372,7 +1372,12 @@ INNER JOIN (
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
-LEFT JOIN tblARInvoiceDeliveryFee ARIDF ON ARPIH.intInvoiceId = ARIDF.intInvoiceId
+LEFT JOIN (
+    SELECT intInvoiceId
+           , dblBaseTax = SUM(dblBaseTax)
+    FROM tblARInvoiceDeliveryFee
+    GROUP BY intInvoiceId
+        ) ARIDF ON ARPIH.intInvoiceId = ARIDF.intInvoiceId
 WHERE strSessionId = @strSessionId
 
 UPDATE ARI
