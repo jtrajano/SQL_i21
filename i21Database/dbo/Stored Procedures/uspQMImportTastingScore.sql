@@ -1280,7 +1280,7 @@ BEGIN TRY
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
-				,intOriginalItemId = S.intItemId
+				,intOriginalItemId = BT.intOriginalItemId
 				,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 				,strPlant = MU.strVendorRefNoPrefix 
 				,dblTotalQuantity = S.dblSampleQty 
