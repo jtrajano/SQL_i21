@@ -28,10 +28,6 @@ BEGIN TRY
 	DECLARE @currencyId INT = NULL;
 	DECLARE @paymentMethodId INT = NULL;
 	DECLARE @payToAddress INT = NULL;
-
-	--IMPORT TYPE WITH VENDOR MAPPING
-	DECLARE @iRelyEFT INT = 5
-				 ,@DTNDetail INT = 4
 	
 	--EFT Import Config
 	DECLARE @archiveServer NVARCHAR(MAX) = NULL
@@ -63,37 +59,19 @@ BEGIN TRY
 	-- IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
 	SELECT dtmDatePaid,
 		--    intEntityVendorId,
-			md.intEntityVendorId, -- use the vendor set on CSV
+			ISNULL(md.intEntityVendorId, I.intEntityVendorId), -- use the vendor set on CSV
 		   strCheckNumber,
 		--    intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
 		intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(MAX), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
-						AND md.strMapVendorName = I2.strEntityVendorName AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
-IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
+						AND ISNULL(md.strMapVendorName, I.strEntityVendorName) = I2.strEntityVendorName AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
+					IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
 	-- INTO #tmpMultiVouchersImport
 	FROM tblAPImportPaidVouchersForPayment I
-	INNER JOIN (
-  tblGLVendorMappingDetail md 
-  INNER JOIN tblGLVendorMapping vm
-  ON  md.intVendorMappingId = vm.intVendorMappingId
- )
- ON I.strEntityVendorName = md.strMapVendorName
- AND I.intEntityVendorId = md.intEntityVendorId
- WHERE @templateId IN (@iRelyEFT, @DTNDetail)
-	-- INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
- 	GROUP BY dtmDatePaid, md.intEntityVendorId, strCheckNumber, intCustomPartition , md.strMapVendorName 
-	--GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
-
-	UNION ALL
-	--TEMPLATE WITHOUT VENDOR MAPPING
-	SELECT dtmDatePaid,
-					intEntityVendorId,
-					strCheckNumber,
-					intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(MAX), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
-												  AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
-													IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
-	FROM tblAPImportPaidVouchersForPayment I
-	WHERE @templateId NOT IN (@iRelyEFT, @DTNDetail)
-	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition 
+	LEFT JOIN (
+		tblGLVendorMappingDetail md 
+		INNER JOIN tblGLVendorMapping vm ON md.intVendorMappingId = vm.intVendorMappingId
+ 	) ON I.strEntityVendorName = md.strMapVendorName
+ 	GROUP BY dtmDatePaid, md.intEntityVendorId, I.intEntityVendorId, I.strEntityVendorName, strCheckNumber, intCustomPartition, md.strMapVendorName 
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchersImport)
 	BEGIN
