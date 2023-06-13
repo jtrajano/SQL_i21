@@ -19,7 +19,7 @@ SELECT DISTINCT
 	intForexRateType		=	BD.intCurrencyExchangeRateTypeId,
 	strForexRateType		=	CER.strCurrencyExchangeRateType,
 	dblForexRate			=	BD.dblRate,
-	dblHistoricAmount		=	A.dblTotal * BD.dblRate,
+	dblHistoricAmount		=	ROUND(A.dblTotal * BD.dblRate,2),
 	dblNewForexRate         =    0, --Calcuate By GL
     dblNewAmount            =    0, --Calcuate By GL
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
