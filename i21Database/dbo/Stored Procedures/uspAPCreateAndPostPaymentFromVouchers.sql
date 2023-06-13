@@ -174,6 +174,7 @@ BEGIN
 		,vendor.strVendorId
 		,entity.strName
 		,payTo.strCheckPayeeName
+		,ISNULL(voucher.dtmBillDate, invoice.dtmDate) AS dtmBillDate
 		,ISNULL(voucher.dtmDueDate, invoice.dtmDueDate) AS dtmDueDate
 		,ISNULL(voucher.strBillId, invoice.strInvoiceNumber) AS strBillId
 		,ISNULL(voucher.strVendorOrderNumber, invoice.strInvoiceNumber) AS strVendorOrderNumber
