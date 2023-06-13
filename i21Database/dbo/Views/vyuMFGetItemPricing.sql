@@ -15,7 +15,6 @@ SELECT Item.intItemId
 	 , ISNULL(SalePrice.dblSalePrice, 0) AS dblSalePrice
 FROM tblICItem AS Item 
 JOIN tblICItemUOM AS ItemUOM ON Item.intItemId = ItemUOM.intItemId
-JOIN tblICItemPricing AS ItemPricing ON Item.intItemId = ItemPricing.intItemId
 JOIN tblICUnitMeasure AS UnitMeasure ON ItemUOM.intUnitMeasureId = UnitMeasure.intUnitMeasureId
 LEFT JOIN tblICCategory AS Category ON Item.intCategoryId = Category.intCategoryId
 OUTER APPLY (SELECT TOP 1 dblSalePrice 
