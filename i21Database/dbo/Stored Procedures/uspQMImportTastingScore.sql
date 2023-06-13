@@ -1376,6 +1376,7 @@ BEGIN TRY
 			LEFT JOIN tblICBrand BRAND ON BRAND.intBrandId = S.intBrandId
 			LEFT JOIN tblCTValuationGroup STYLE ON STYLE.intValuationGroupId = S.intValuationGroupId
 			LEFT JOIN tblICUnitMeasure PT on PT.intUnitMeasureId=S.intPackageTypeId
+			LEFT JOIN tblMFBatch BT ON BT.strBatchId = S.strBatchNo AND BT.intLocationId = S.intCompanyLocationId AND BT.intLocationId = BT.intMixingUnitLocationId
 			-- Appearance
 			OUTER APPLY (
 				SELECT TR.strPropertyValue
