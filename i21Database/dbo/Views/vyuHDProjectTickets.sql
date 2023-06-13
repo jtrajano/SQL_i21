@@ -10,7 +10,7 @@
 			,t.strSubject
 			,strCustomerName = '' COLLATE Latin1_General_CI_AS
 			,strContactName = conEnt.strName
-			,strModule = m.strModule
+			,strModule = smmo.strModule
 			,strPriority = prio.strPriority
 			,strAssignedTo = assEnt.strName
 			,intAssignedToEntityId = t.intAssignedToEntity
@@ -53,6 +53,7 @@
 			*/
 			left outer join tblEMEntity conEnt on conEnt.intEntityId = t.intCustomerContactId
 			left outer join tblHDModule m on m.intModuleId = t.intModuleId
+			inner join tblSMModule smmo on smmo.intModuleId = m.intSMModuleId 
 			left outer join tblEMEntity assEnt on assEnt.intEntityId = t.intAssignedToEntity
 			left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
 			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
@@ -61,5 +62,5 @@
 			left outer join tblHDTicketPriority prio on prio.intTicketPriorityId = t.intTicketPriorityId
 			left join tblHDTicket TemplateTicket on TemplateTicket.intTicketId = task.intTemplateTicketId 
 		where t.intTicketTypeId not in (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')
-
 GO
+
