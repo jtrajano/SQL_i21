@@ -1,4 +1,4 @@
-﻿CREATE [dbo].[uspMFAutoBlendSheetHeader]
+﻿CREATE PROCEDURE [dbo].[uspMFAutoBlendSheetHeader]
 	@intLocationId		   INT
   , @intBlendRequirementId INT
   , @dblQtyToProduce	   NUMERIC(18, 6)
