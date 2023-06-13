@@ -209,8 +209,8 @@ BEGIN
 			,intTicketProductId 			    = Ticket.intTicketProductId 
 			,intModuleId 					    = Ticket.intModuleId 
 			,intVersionId 					    = Ticket.intVersionId 
-			,intAssignedTo 					    = Ticket.intAssignedTo 
-			,intAssignedToEntity 			    = Ticket.intAssignedToEntity 
+			,intAssignedTo 					    = COALESCE(ProjectModule.intTrainerId, ProjectModule.intProjectManagerId)
+			,intAssignedToEntity 			    = COALESCE(ProjectModule.intTrainerId, ProjectModule.intProjectManagerId)
 			,intCreatedUserId 				    = Ticket.intCreatedUserId 
 			,intCreatedUserEntityId 		    = Ticket.intCreatedUserEntityId 
 		    ,dtmCreated 					    = Ticket.dtmCreated 
@@ -282,6 +282,14 @@ BEGIN
 		FROM tblHDProjectTask
 		WHERE intProjectId = @intProjectId
 	) ProjectCount
+	CROSS APPLY
+	(
+		SELECT TOP 1 intProjectManagerId
+					,intTrainerId
+		FROM tblHDProjectModule 
+		WHERE intModuleId = Ticket.intModuleId AND
+			  intProjectId = @intProjectId
+	) ProjectModule
 	WHERE Ticket.intTicketId = @intTicketId
 
 	SET @intNewTicketId = SCOPE_IDENTITY()
