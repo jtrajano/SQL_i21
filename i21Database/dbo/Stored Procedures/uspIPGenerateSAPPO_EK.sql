@@ -805,7 +805,7 @@ BEGIN TRY
 				+ '<VendorLotNumber>' + ISNULL(B.strVendorLotNumber, '') + '</VendorLotNumber>'
 				+ '<AuctionCenter>' + ISNULL(B.strBuyingCenterLocation, '') + '</AuctionCenter>'
 				+ '<ThirdPartyWHStatus>' + ISNULL(B.str3PLStatus, '') + '</ThirdPartyWHStatus>'
-				+ '<AdditionalSupplierReference>' + ISNULL(LEFT(B.strSupplierReference, 15), '') + '</AdditionalSupplierReference>'
+				+ '<AdditionalSupplierReference>' + dbo.fnEscapeXML(ISNULL(LEFT(B.strSupplierReference, 15), '')) + '</AdditionalSupplierReference>'
 				+ '<AirwayBillNumberCode>' + ISNULL(B.strAirwayBillCode, '') + '</AirwayBillNumberCode>'
 				+ '<AWBSampleReceived>' + ISNULL(B.strAWBSampleReceived, '') + '</AWBSampleReceived>'
 				+ '<AWBSampleReference>' + ISNULL(LEFT(B.strAWBSampleReference, 15), '') + '</AWBSampleReference>'
