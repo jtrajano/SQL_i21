@@ -29,6 +29,7 @@
     [ysnEODComplete]			BIT NULL,
 	[intCurrencyId]				INT NULL,
     [intConcurrencyId]			INT DEFAULT 1 NOT NULL,
+	[intAccountId]				INT NULL,
     CONSTRAINT [PK_tblCMUndepositedFund] PRIMARY KEY CLUSTERED ([intUndepositedFundId] ASC)
 );
 GO
