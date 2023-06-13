@@ -579,7 +579,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
-:r .\SM\1830_ReIndexTables.sql
+-- :r .\SM\1830_ReIndexTables.sql
 :r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
