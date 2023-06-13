@@ -29,7 +29,9 @@ a.strUserName,
 c.strTransactionId,
 ysnPosted,
 c.dtmDate dtmCMDate,
-a.dblAmount 
+a.dblAmount,
+a.strCompanySegment,
+a.strAccountId
 from vyuCMUndepositedFund a
 inner join tblCMUndepositedFund d on d.intUndepositedFundId = a.intUndepositedFundId
 left outer join tblCMBankTransactionDetail b on a.intUndepositedFundId = b.intUndepositedFundId
@@ -55,7 +57,9 @@ a.strUserName,
 c.strTransactionId,
 ysnPosted,
 c.dtmDate dtmCMDate,
-a.dblAmount 
+a.dblAmount,
+a.strCompanySegment,
+a.strAccountId
 from vyuCMUndepositedFund a
 inner join tblCMUndepositedFund d on d.intUndepositedFundId = a.intUndepositedFundId
 left outer join tblCMBankTransactionDetail b on a.intUndepositedFundId = b.intUndepositedFundId
@@ -86,7 +90,9 @@ c.dtmDate dtmCMDate,
 (case when c.strTransactionId like 'BWD%' and c.dtmDate >= @dtmCMDate -- DATEADD( SECOND, 1, @dtmDateTo)
 --DATEADD(DAY,1, a.dtmDate) 
 then a.dblAmount*0
-else a.dblAmount end) as dblAmount
+else a.dblAmount end) as dblAmount,
+a.strCompanySegment,
+a.strAccountId
 from vyuCMUndepositedFund a
 inner join tblCMUndepositedFund d on d.intUndepositedFundId = a.intUndepositedFundId
 left outer join tblCMBankTransactionDetail b on a.intUndepositedFundId = b.intUndepositedFundId
@@ -110,7 +116,9 @@ a.strUserName,
 c.strTransactionId,
 ysnPosted,
 c.dtmDate,
-a.dblAmount
+a.dblAmount,
+a.strCompanySegment,
+a.strAccountId
 having (case when c.strTransactionId like 'BWD%' or c.strTransactionId like 'BTRN%' and
 c.dtmDate >= @dtmCMDate -- DATEADD( SECOND, 1, @dtmDateTo)
 then a.dblAmount*0
