@@ -178,6 +178,17 @@ BEGIN
 		END
 	END
 
+	--Checked if the vendor is on-hold
+	IF EXISTS (
+		SELECT 	TOP 1 1 FROM tblAPVendor A
+    INNER JOIN tblAPBill B ON A.intEntityId = B.intEntityVendorId
+		WHERE B.intBillId IN (SELECT intID FROM #tmpBillsId)
+		AND A.ysnPymtCtrlHold = CAST(1 AS BIT) 
+	)
+	BEGIN
+		RAISERROR('Vendor payment is currently on hold.', 16, 1);
+	END
+
 	--Compute Discount Here, if there is no value computed or added
 	UPDATE A
 		SET dblDiscount = CAST(dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmBillDate, A.intTermsId, A.dblTotal) AS DECIMAL(18,2))
