@@ -33,6 +33,7 @@
 	ysnValidateLotNo BIT NULL DEFAULT 0,
 	ysnFilterSupplierByLocation BIT NULL DEFAULT 0,
 	ysnCreateBatchOnSampleSave BIT NULL DEFAULT 0,
+	ysnValidateSampleQty BIT NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblQMCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intApproveLotStatus] FOREIGN KEY ([intApproveLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
 	CONSTRAINT [FK_tblQMCompanyPreference_tblICLotStatus_intRejectLotStatus] FOREIGN KEY ([intRejectLotStatus]) REFERENCES [tblICLotStatus]([intLotStatusId]),
