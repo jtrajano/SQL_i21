@@ -634,15 +634,24 @@ BEGIN
 				SET @intCustomerId  = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = @intCustomerNumber)
 				IF(@intCustomerId IS NULL)
 				BEGIN
-					
-					INSERT INTO tblTMCustomer(
-						intCustomerNumber
-						,intCurrentSiteNumber
-					)
-					SELECT intCustomerNumber 	= @intCustomerNumber
-						,intCurrentSiteNumber	= CONVERT(int,@strSiteNumber)
+					SELECT TOP 1 
+						@intCustomerId = T.intCustomerID
+					FROM tblApiSchemaTMConsumptionSite CS  
+					INNER JOIN tblEMEntity E ON E.strEntityNo = @strCustomerEntityNo  
+					INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1  
+					LEFT JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId  
 
-					SET @intCustomerId = SCOPE_IDENTITY()
+					IF(@intCustomerId IS NULL)  
+					BEGIN  
+						INSERT INTO tblTMCustomer(
+							intCustomerNumber
+							,intCurrentSiteNumber
+						)
+						SELECT intCustomerNumber 	= @intCustomerNumber
+							,intCurrentSiteNumber	= CONVERT(int,@strSiteNumber)
+
+						SET @intCustomerId = SCOPE_IDENTITY()
+					END
 				END
 
 				DECLARE @intSiteId INT = NULL
