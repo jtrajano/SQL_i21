@@ -5,7 +5,7 @@ SELECT
 intConsumptionSiteFeeId,
 dtmDateTime,
 strType,
-strDecription,
+strDescription,
 dblFee,
 intSiteId
 from [dbo].[tblTMConsumptionSiteFee] 

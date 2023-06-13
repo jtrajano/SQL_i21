@@ -6,6 +6,7 @@
 [strDescription]			NVARCHAR (100)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 [dblFee]			NUMERIC (18, 6) DEFAULT 0 NULL,
 [intSiteId]			INT NOT	NULL,
+[ysnEdited]           BIT             DEFAULT 0 NOT NULL,
 CONSTRAINT [PK_tblTMConsumptionSiteFee] PRIMARY KEY ([intConsumptionSiteFeeId]),
 CONSTRAINT [FK_tblTMConsumptionSiteFee_tblTMSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 )
