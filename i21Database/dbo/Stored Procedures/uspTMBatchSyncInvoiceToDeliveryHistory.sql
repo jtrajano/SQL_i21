@@ -9,6 +9,7 @@ BEGIN
 	DECLARE @siteId INT
 	DECLARE @InvoicesToProcess Id
 	DECLARE @dtmDateToProcess DATETIME
+	DECLARE @TMOrderHistoryStagingTable AS TMOrderHistoryStagingTable
 	
 	DECLARE @errorTable TABLE(
 			intInvoiceId INT
@@ -24,6 +25,10 @@ BEGIN
 			,strInvoiceNumber NVARCHAR(50)
 	)
 
+	DECLARE @insertedHistory TABLE (  --- Will reset inside the loop
+		intSiteID 			  INT
+		,intDeliveryHistoryId INT
+	)
 
 	---Check for Invoice Dates
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTMInvoiceAndDate') IS NOT NULL
@@ -120,6 +125,7 @@ BEGIN
 			,A.dblPercentFull
 			,A.dblNewMeterReading
 			,A.intDispatchId
+			,B.dtmInvoiceDate
 		INTO #tmpInvoiceDetail
 		FROM tblARInvoiceDetail A
 		INNER JOIN @processingTable B
@@ -284,7 +290,7 @@ BEGIN
 
 
 		--------------------------------------------------------------------------
-		-------------Insert into Delivery History
+		-------------Insert into Delivery History  for tank delivery
 		--------------------------------------------------------------------------
 		
 				--------------------------------------------------------------------------------------------------
@@ -311,6 +317,7 @@ BEGIN
 						,A.dblClockAccumulatedDegreeDay
 						,A.dblCalculatedBurnRate
 						,A.ysnMaxExceed
+						,A.intDispatchId
 					INTO #tmpInvoiceDateEqualLastDeliveryDateDetail
 					FROM #tmpFinalNonServiceInvoiceDetail A
 					INNER JOIN tblTMSite B
@@ -462,19 +469,30 @@ BEGIN
 						---GEt the list of sites to be updated
 						SELECT DISTINCT 
 							A.intSiteId
+							,A.intDispatchId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, A.dtmInvoiceDate), 0)
 						INTO #tmpSiteUpdateList1
 						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
 						
+						
 
+						--- Insert Dispatch to tblTMDispatchHistory table
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT DISTINCT
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= intLastDeliveryHistoryId 
+						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail
+						WHERE intDispatchId IS NOT NULL
 
-						--Delete Order
-						DELETE FROM tblTMDispatch
-						-- WHERE intSiteID IN (SELECT intSiteId FROM #tmpSiteUpdateList1)
-						WHERE intDispatchID IN (SELECT A.intDispatchId 
-												FROM #tmpInvoiceDateEqualLastDeliveryDateDetail A
-												INNER JOIN tblARInvoice B
-													ON A.intInvoiceId = B.intInvoiceId
-												WHERE B.ysnPosted = 1)
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 
 
 						---- Update forecasted and estimated % left
@@ -506,13 +524,14 @@ BEGIN
 					
 					SELECT
 						A.*
-						,intRow = ROW_NUMBER() OVER(PARTITION BY A.intSiteId,A.intInvoiceId ORDER BY A.intInvoiceId ASC)
+						,intRow = ROW_NUMBER() OVER(PARTITION BY A.intSiteId ORDER BY A.intInvoiceId ASC)
 					INTO #tmpInvoiceDateGreaterThanLastDelivery
 					FROM #tmpFinalNonServiceInvoiceDetail A
 					WHERE A.ysnLessThanLastDeliveryDate = 0
 
 					IF EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDateGreaterThanLastDelivery)
 					BEGIN
+						DELETE FROM @insertedHistory
 						INSERT INTO tblTMDeliveryHistory(
 							strInvoiceNumber
 							,strBulkPlantNumber
@@ -583,6 +602,7 @@ BEGIN
 							,dtmRunOutDate
 							,dtmForecastedDelivery
 						)
+						OUTPUT INSERTED.intSiteID,INSERTED.intDeliveryHistoryID INTO @insertedHistory
 						SELECT
 							strInvoiceNumber = C.strInvoiceNumber
 							,strBulkPlantNumber = D.strLocationName
@@ -663,6 +683,7 @@ BEGIN
 							ON B.intItemId = E.intItemId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
+								AND G.intDispatchID = B.intDispatchId
 						INNER JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -752,6 +773,8 @@ BEGIN
 							,A.dblInvoiceTotalQuantity
 							,A.dblNewBurnRate
 							,A.intInvoiceId
+							,dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmDateToProcess), 0)
+							,A.intDispatchId
 						INTO #tmpSiteUpdateList
 						FROM #tmpInvoiceDateGreaterThanLastDelivery A
 						WHERE A.ysnLessThanLastDeliveryDate = 0
@@ -805,115 +828,26 @@ BEGIN
 				
 
 						--- Insert Dispatch to tblTMDispatchHistory table
-						INSERT INTO tblTMDispatchHistory (
-							[intDispatchId]            
-							,[intSiteId]
-							,[intDeliveryHistoryId]                
-							,[dblPercentLeft]           
-							,[dblQuantity]              
-							,[dblMinimumQuantity]       
-							,[intProductId]             
-							,[intSubstituteProductId]   
-							,[dblPrice]                 
-							,[dblTotal]                 
-							,[dtmRequestedDate]         
-							,[intPriority]              
-							,[strComments]              
-							,[ysnCallEntryPrinted]      
-							,[intDriverId]              
-							,[intDispatchDriverId]      
-							,[strDispatchLoadNumber]    
-							,[dtmCallInDate]            
-							,[ysnSelected]              
-							,[strRoute]                 
-							,[strSequence]              
-							,[intUserId]                
-							,[dtmLastUpdated]           
-							,[ysnDispatched]            
-							,[strCancelDispatchMessage] 
-							,[intDeliveryTermId]        
-							,[dtmDispatchingDate]       
-							,[strWillCallStatus]			
-							,[strPricingMethod]			
-							,[strOrderNumber]			
-							,[dtmDeliveryDate]			
-							,[dblDeliveryQuantity]		
-							,[dblDeliveryPrice]			
-							,[dblDeliveryTotal]			
-							,[intContractId]				
-							,[ysnLockPrice]				
-							,[intRouteId]				
-							,[ysnReceived]				
-							,[ysnLeakCheckRequired]
-							,[dblOriginalPercentLeft]		
-							,[dtmReceivedDate]
-							,intPaymentId
-							,dblOveragePrice
-							,dblOverageQty
-							,strOriginalPricingMethod
-						)	
-						SELECT TOP 1 
-							[intDispatchId]				= A.[intDispatchID]
-							,[intSiteId]				= A.intSiteID
-							,[intDeliveryHistoryId]		= C.intDeliveryHistoryID
-							,A.[dblPercentLeft]           
-							,A.[dblQuantity]              
-							,A.[dblMinimumQuantity]       
-							,[intProductId]				= A.[intProductID] 
-							,[intSubstituteProductId]   = A.[intSubstituteProductID]
-							,A.[dblPrice]                 
-							,A.[dblTotal]                 
-							,A.[dtmRequestedDate]         
-							,A.[intPriority]              
-							,A.[strComments]              
-							,A.[ysnCallEntryPrinted]      
-							,[intDriverId]              = A.[intDriverID]              
-							,[intDispatchDriverId]		= A.[intDispatchDriverID]   
-							,A.[strDispatchLoadNumber]    
-							,A.[dtmCallInDate]            
-							,A.[ysnSelected]              
-							,A.[strRoute]                 
-							,A.[strSequence]              
-							,[intUserId]				= A.[intUserID]
-							,A.[dtmLastUpdated]           
-							,A.[ysnDispatched]            
-							,A.[strCancelDispatchMessage] 
-							,[intDeliveryTermId]		= A.[intDeliveryTermID] 
-							,A.[dtmDispatchingDate]       
-							,A.[strWillCallStatus]			
-							,A.[strPricingMethod]			
-							,A.[strOrderNumber]			
-							,A.[dtmDeliveryDate]			
-							,A.[dblDeliveryQuantity]		
-							,A.[dblDeliveryPrice]			
-							,A.[dblDeliveryTotal]			
-							,A.[intContractId]				
-							,A.[ysnLockPrice]				
-							,A.[intRouteId]				
-							,A.[ysnReceived]				
-							,A.[ysnLeakCheckRequired]
-							,A.[dblOriginalPercentLeft]
-							,A.[dtmReceivedDate]
-							,A.intPaymentId
-							,A.dblOveragePrice
-							,A.dblOverageQty
-							,A.strOriginalPricingMethod
-						FROM tblTMDispatch A
-						INNER JOIN #tmpSiteUpdateList B
-							ON A.intSiteID = B.intSiteId
-						INNER JOIN tblTMDeliveryHistory C
-							ON A.intSiteID = C.intSiteID
-								AND B.intInvoiceId = C.intInvoiceId
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT DISTINCT
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= B.intDeliveryHistoryId 
+						FROM #tmpInvoiceDateGreaterThanLastDelivery A
+						INNER JOIN @insertedHistory B
+							ON A.intSiteId = B.intSiteId
+						WHERE intDispatchId IS NOT NULL
+							
 						
 
-
-						--Delete Order
-						DELETE FROM tblTMDispatch
-						WHERE intDispatchID IN (SELECT A.intDispatchId 
-												FROM #tmpInvoiceDateGreaterThanLastDelivery A
-												INNER JOIN tblARInvoice B
-													ON A.intInvoiceId = B.intInvoiceId
-												WHERE B.ysnPosted = 1)
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 
 
 						---- Update forecasted and estimated % left
@@ -935,6 +869,172 @@ BEGIN
 				------------------END Invoice date is greater than the last delivery date
 				--------------------------------------------------------------------------------------------------
 
+		--------------------------------------------------------------------------
+		-------------END Insert into Delivery History for tank delivery
+		--------------------------------------------------------------------------
+
+		-----------------------------------------------------------------------------------------------
+		------------------------------- Start Virtual Billing
+		-----------------------------------------------------------------------------------------------
+		
+		BEGIN
+			IF OBJECT_ID (N'tempdb.dbo.#tmpTMInvoiceDetailVirtualMeter') IS NOT NULL DROP TABLE #tmpTMInvoiceDetailVirtualMeter
+
+			SELECT 
+				A.intInvoiceId
+				,A.intInvoiceDetailId
+				,A.intSiteId
+				,A.dblQtyShipped
+				,A.dblTotal
+				,A.dblTotalTax
+				,A.intItemId
+				,A.intPerformerId
+				,A.dblPercentFull
+				,A.dblNewMeterReading
+				,A.dblPreviousMeterReading
+			INTO #tmpTMInvoiceDetailVirtualMeter
+			FROM tblARInvoiceDetail A
+			INNER JOIN @processingTable B
+				ON A.intInvoiceId = B.intInvoiceId
+			WHERE A.intSiteId IS NOT NULL
+				AND (A.ysnVirtualMeterReading = 1)
+
+
+			--- INsert to delivery History
+			INSERT INTO tblTMDeliveryHistory(
+				strInvoiceNumber
+				,strBulkPlantNumber
+				,dtmInvoiceDate
+				,strProductDelivered
+				,dblQuantityDelivered
+				,intDegreeDayOnDeliveryDate
+				,intDegreeDayOnLastDeliveryDate
+				,dblBurnRateAfterDelivery
+				,dblCalculatedBurnRate
+				,ysnAdjustBurnRate
+				,intElapsedDegreeDaysBetweenDeliveries
+				,intElapsedDaysBetweenDeliveries
+				,strSeason
+				,dblWinterDailyUsageBetweenDeliveries
+				,dblSummerDailyUsageBetweenDeliveries
+				,dblGallonsInTankbeforeDelivery
+				,dblGallonsInTankAfterDelivery
+				,dblEstimatedPercentBeforeDelivery
+				,dblActualPercentAfterDelivery
+				,dblMeterReading
+				,dblLastMeterReading
+				,intUserID
+				,dtmLastUpdated
+				,intSiteID
+				,strSalesPersonID
+				,dblExtendedAmount
+				,ysnForReview
+				,dtmMarkForReviewDate
+				,dblWillCallCalculatedQuantity
+				,dblWillCallDesiredQuantity
+				,intWillCallDriverId
+				,intWillCallProductId
+				,intWillCallSubstituteProductId
+				,dblWillCallPrice
+				,intWillCallDeliveryTermId
+				,dtmWillCallRequestedDate
+				,intWillCallPriority
+				,dblWillCallTotal
+				,strWillCallComments
+				,dtmWillCallCallInDate
+				,intWillCallUserId
+				,ysnWillCallPrinted
+				,dtmWillCallDispatch
+				,strWillCallOrderNumber
+				,intWillCallContractId
+				,ysnMeterReading
+				,intInvoiceId
+				,intInvoiceDetailId
+				,intWillCallRouteId
+				,intWillCallDispatchId
+				,ysnWillCallLeakCheckRequired
+				,dblWillCallPercentLeft
+				,dblWillCallOriginalPercentLeft
+				,dtmNextDeliveryDate
+				,dtmRunOutDate
+				,dtmForecastedDelivery
+			)
+			SELECT 
+				strInvoiceNumber = C.strInvoiceNumber
+				,strBulkPlantNumber = D.strLocationName
+				,dtmInvoiceDate = C.dtmDate
+				,strProductDelivered = E.strItemNo
+				,dblQuantityDelivered = CASE WHEN (C.strType = 'Credit Memo' OR C.strType = 'Cash Refund') THEN 0 - ISNULL(B.dblQtyShipped,0.0) ELSE ISNULL(B.dblQtyShipped,0.0) END
+				,intDegreeDayOnDeliveryDate = NULL
+				,intDegreeDayOnLastDeliveryDate = NULL
+				,dblBurnRateAfterDelivery = A.dblBurnRate
+				,dblCalculatedBurnRate = A.dblBurnRate
+				,ysnAdjustBurnRate = A.ysnAdjustBurnRate
+				,intElapsedDegreeDaysBetweenDeliveries = 0
+				,intElapsedDaysBetweenDeliveries = 0
+				,strSeason = (CASE WHEN MONTH(C.dtmDate) >= H.intBeginSummerMonth AND  MONTH(C.dtmDate) < H.intBeginWinterMonth THEN 'Summer' ELSE 'Winter' END)
+				,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
+				,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
+				,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
+				,dblGallonsInTankAfterDelivery = A.dblTotalCapacity * (ISNULL(B.dblPercentFull,0)/100)
+				,dblEstimatedPercentBeforeDelivery = A.dblEstimatedPercentLeft
+				,dblActualPercentAfterDelivery = B.dblPercentFull
+				,dblMeterReading = B.dblNewMeterReading
+				,dblLastMeterReading = B.dblPreviousMeterReading
+				,intUserID = @intUserId
+				,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
+				,intSiteID = A.intSiteID
+				,strSalesPersonID = I.strEntityNo
+				,dblExtendedAmount = CASE WHEN (C.strType = 'Credit Memo' OR C.strType = 'Cash Refund') THEN 0 - ISNULL(B.dblTotal,0.0) ELSE ISNULL(B.dblTotal,0.0) END
+				,ysnForReview = 0
+				,dtmMarkForReviewDate = NULL
+				,dblWillCallCalculatedQuantity  = NULL
+				,dblWillCallDesiredQuantity = NULL
+				,intWillCallDriverId = NULL
+				,intWillCallProductId = NULL
+				,intWillCallSubstituteProductId = NULL
+				,dblWillCallPrice = NULL
+				,intWillCallDeliveryTermId = NULL
+				,dtmWillCallRequestedDate = NULL
+				,intWillCallPriority = NULL
+				,dblWillCallTotal = NULL
+				,strWillCallComments = NULL
+				,dtmWillCallCallInDate = NULL
+				,intWillCallUserId = NULL
+				,ysnWillCallPrinted = NULL
+				,dtmWillCallDispatch = NULL
+				,strWillCallOrderNumber = NULL
+				,intWillCallContractId = NULL
+				,ysnMeterReading = 1
+				,intInvoiceId = C.intInvoiceId
+				,intInvoiceDetailId = B.intInvoiceDetailId
+				,intWillCallRouteId = G.intRouteId
+				,intWillCallDispatchId = G.intDispatchID
+				,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
+				,dblWillCallPercentLeft = G.dblPercentLeft
+				,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
+				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+				,dtmRunOutDate = A.dtmRunOutDate
+				,dtmForecastedDelivery = A.dtmForecastedDelivery
+			FROM tblTMSite A
+			INNER JOIN #tmpTMInvoiceDetailVirtualMeter B
+				ON A.intSiteID = B.intSiteId
+			INNER JOIN tblARInvoice C
+				ON B.intInvoiceId = C.intInvoiceId
+			INNER JOIN tblSMCompanyLocation D
+				ON C.intCompanyLocationId = D.intCompanyLocationId
+			INNER JOIN tblICItem E
+				ON B.intItemId = E.intItemId
+			LEFT JOIN tblTMDispatch G
+				ON A.intSiteID = G.intSiteID
+			INNER JOIN tblTMClock H
+				ON A.intClockID = H.intClockID
+			LEFT JOIN tblEMEntity I
+				ON I.intEntityId = C.intEntitySalespersonId
+		END
+		-----------------------------------------------------------------------------------------------
+		------------------------------- END Virtual Billing
+		-----------------------------------------------------------------------------------------------
 
 		NEXTREC:
 		--- Loop Iterator

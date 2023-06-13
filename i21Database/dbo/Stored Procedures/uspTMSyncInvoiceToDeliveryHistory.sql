@@ -46,6 +46,7 @@ BEGIN
 	DECLARE @intScreenId INT
 	DECLARE @ysnRequireClock BIT
 	DECLARE @intDispatchId INT
+	DECLARE @TMOrderHistoryStagingTable TMOrderHistoryStagingTable
 	
 
 
@@ -98,6 +99,16 @@ BEGIN
 		AND intSiteId IS NOT NULL
 		AND ISNULL(ysnLeaseBilling,0) <> 1
 		AND ISNULL(ysnVirtualMeterReading,0) <> 1
+
+	---Get all the DispatchId used in the invoice
+	IF OBJECT_ID('tempdb..#tmpTMInvoiceDispatchIds') IS NOT NULL DROP TABLE #tmpTMInvoiceDispatchIds
+	SELECT DISTINCT
+		intDispatchId
+		,intInvoiceDetailId
+	INTO #tmpTMInvoiceDispatchIds
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = @InvoiceId
+		AND intDispatchId IS NOT NULL
 	
 	-- Process Delivery
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTMInvoiceDetail)
@@ -357,20 +368,25 @@ BEGIN
 						--WHERE intSiteID = @intSiteId
 						print 'Virtual Meter'
 					END
+
+
+					---- update site last gals delivered base on delivery history Detail totals and last Reading update
 					UPDATE tblTMSite
 					SET dtmLastReadingUpdate = @dtmInvoiceDate
-						,dblLastDeliveredGal = dblQuantityTotal
+						,dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
 					FROM(
-						SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
-							,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
-						FROM #tmpSiteInvoiceLineItems
+						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+							,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+						FROM tblTMDeliveryHistoryDetail 
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					)A
 					WHERE intSiteID = @intSiteId
 					
-					---Update Site Estimated Gals and last gals in tank
+					---Update Site Estimated Gals and Estimated % in tank
 					UPDATE tblTMSite
 					SET dblEstimatedPercentLeft = A.dblPercentAfterDelivery
 						,dblEstimatedGallonsLeft = ISNULL(A.dblPercentAfterDelivery,0.0) * tblTMSite.dblTotalCapacity /100
+						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(A.dblPercentAfterDelivery,0)/100
 					FROM(
 						SELECT   
 							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
@@ -379,17 +395,8 @@ BEGIN
 					)A
 					WHERE tblTMSite.intSiteID = @intSiteId
 
-					UPDATE tblTMSite
-					SET dblLastDeliveredGal = A.dblShippedQuantity
-						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(A.dblPercentAfterDelivery,0)/100
-					FROM(
-						SELECT   
-							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
-							,dblShippedQuantity = SUM(ISNULL(dblQuantityDelivered,0.0))
-						FROM tblTMDeliveryHistoryDetail	
-						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId	 
-					)A
-					WHERE tblTMSite.intSiteID = @intSiteId
+
+					
 					
 					---- get the invoicedetail Id of the highest percent full
 					SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId 
@@ -452,7 +459,128 @@ BEGIN
 						END
 						
 					END
+
+
+
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds))
+					BEGIN
+						/*
+						--- Insert Dispatch to tblTMDispatchHistory table
+						INSERT INTO tblTMDispatchHistory (
+							[intDispatchId]            
+							,[intSiteId]
+							,[intDeliveryHistoryId]                
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]             
+							,[intSubstituteProductId]   
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              
+							,[intDispatchDriverId]      
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]                
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]        
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]		
+							,[dtmReceivedDate]
+							,intPaymentId
+						)	
+						SELECT  
+							[intDispatchId]				= [intDispatchID]
+							,[intSiteId]				= intSiteID
+							,[intDeliveryHistoryId]		= @intNewDeliveryHistoryId             
+							,[dblPercentLeft]           
+							,[dblQuantity]              
+							,[dblMinimumQuantity]       
+							,[intProductId]				= [intProductID] 
+							,[intSubstituteProductId]   = [intSubstituteProductID]
+							,[dblPrice]                 
+							,[dblTotal]                 
+							,[dtmRequestedDate]         
+							,[intPriority]              
+							,[strComments]              
+							,[ysnCallEntryPrinted]      
+							,[intDriverId]              = [intDriverID]              
+							,[intDispatchDriverId]		= [intDispatchDriverID]   
+							,[strDispatchLoadNumber]    
+							,[dtmCallInDate]            
+							,[ysnSelected]              
+							,[strRoute]                 
+							,[strSequence]              
+							,[intUserId]				= [intUserID]
+							,[dtmLastUpdated]           
+							,[ysnDispatched]            
+							,[strCancelDispatchMessage] 
+							,[intDeliveryTermId]		= [intDeliveryTermID] 
+							,[dtmDispatchingDate]       
+							,[strWillCallStatus]			
+							,[strPricingMethod]			
+							,[strOrderNumber]			
+							,[dtmDeliveryDate]			
+							,[dblDeliveryQuantity]		
+							,[dblDeliveryPrice]			
+							,[dblDeliveryTotal]			
+							,[intContractId]				
+							,[ysnLockPrice]				
+							,[intRouteId]				
+							,[ysnReceived]				
+							,[ysnLeakCheckRequired]
+							,[dblOriginalPercentLeft]
+							,[dtmReceivedDate]
+							,intPaymentId
+						FROM tblTMDispatch
+						WHERE intSiteID = @intSiteId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds)
+
+						DELETE FROM tblTMDispatch
+						WHERE intSiteID = @intSiteId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds)
+
+						*/
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT 
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= @intNewDeliveryHistoryId 
+						FROM #tmpTMInvoiceDispatchIds
+
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
+					END
 					
+					
+
 					---- Update forecasted nad estimated % left
 					IF(@ysnRequireClock = 1)
 					BEGIN
@@ -528,6 +656,17 @@ BEGIN
 							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 						)A
 						WHERE tblTMDeliveryHistory.intDeliveryHistoryID = @intNewDeliveryHistoryId
+
+						---- update last gals delivered base on delivery history Detail totals
+						UPDATE tblTMSite
+						SET dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM tblTMDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
 						
 						-----Update Site
 						IF(@strBillingBy <> 'Virtual Meter')
@@ -677,6 +816,7 @@ BEGIN
 							ON B.intInvoiceDetailId = F.intInvoiceDetailId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
+								AND G.intDispatchID = (SELECT TOP 1 intDispatchId FROM #tmpTMInvoiceDispatchIds ORDER BY intDispatchId)
 						LEFT JOIN tblTMClock H
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblEMEntity I
@@ -723,6 +863,17 @@ BEGIN
 						--	)A
 						--	WHERE intSiteID = @intSiteId
 						--END
+
+						---- update last gals delivered base on delivery history Detail totals
+						UPDATE tblTMSite
+						SET dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM tblTMDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
 				
 					END
 
@@ -905,6 +1056,7 @@ BEGIN
 						ON B.intInvoiceDetailId = F.intInvoiceDetailId
 					LEFT JOIN tblTMDispatch G
 						ON A.intSiteID = G.intSiteID
+							AND G.intDispatchID = (SELECT TOP 1 intDispatchId FROM #tmpTMInvoiceDispatchIds ORDER BY intDispatchId)
 					LEFT JOIN tblTMClock H
 						ON A.intClockID = H.intClockID
 					LEFT JOIN tblEMEntity I
@@ -969,19 +1121,24 @@ BEGIN
 					--	WHERE intSiteID = @intSiteId
 					--END
 
-					
+					---- update last gals delivered base on delivery history Detail totals
+					UPDATE tblTMSite
+					SET dblLastDeliveredGal = ISNULL(dblQuantityTotal,0)
+					FROM(
+						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+							,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+						FROM tblTMDeliveryHistoryDetail 
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+					)A
+					WHERE intSiteID = @intSiteId
 					
 
 					UPDATE tblTMSite
 					SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
 						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-						
-						,dblLastDeliveredGal = @dblQuantityShipped
 						,dtmLastDeliveryDate = @dtmInvoiceDate
 						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 						,ysnDeliveryTicketPrinted = 0
-						
-						
 						,dtmLastReadingUpdate = @dtmInvoiceDate
 					WHERE intSiteID = @intSiteId
 
@@ -1040,6 +1197,7 @@ BEGIN
 					END
 
 				
+					
 			
 					----Update Next Julian Calendar Date of the site
 					--TM-3174 - Remove this part that cause a blank for next julian calendar
@@ -1048,17 +1206,12 @@ BEGIN
 					--	,intConcurrencyId = intConcurrencyId + 1
 					--WHERE intSiteID = @intSiteId
 					
-					IF(@ysnRequireClock = 1)
-					BEGIN
-						---- Update forecasted nad estimated % left
-						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
-						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
-						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
-					END
+					
 					
 
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID = @intDispatchId)
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds))
 					BEGIN
+						/*
 						--- Insert Dispatch to tblTMDispatchHistory table
 						INSERT INTO tblTMDispatchHistory (
 							[intDispatchId]            
@@ -1104,7 +1257,7 @@ BEGIN
 							,[dtmReceivedDate]
 							,intPaymentId
 						)	
-						SELECT TOP 1 
+						SELECT 
 							[intDispatchId]				= [intDispatchID]
 							,[intSiteId]				= intSiteID
 							,[intDeliveryHistoryId]		= @intNewDeliveryHistoryId             
@@ -1149,12 +1302,39 @@ BEGIN
 							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds) 
+						
+						DELETE FROM tblTMDispatch
+						WHERE intSiteID = @intSiteId
+							AND intDispatchID IN (SELECT intDispatchId FROM #tmpTMInvoiceDispatchIds)
+							
+						*/
+
+						DELETE FROM @TMOrderHistoryStagingTable
+						INSERT INTO @TMOrderHistoryStagingTable(
+							intDispatchId
+							,ysnDelete
+							,intSourceType
+							,intDeliveryHistoryId
+						)
+						SELECT 
+							intDispatchId				= intDispatchId
+							,ysnDelete 					= 1
+							,intSourceType				= 1
+							,intDeliveryHistoryId		= @intNewDeliveryHistoryId 
+						FROM #tmpTMInvoiceDispatchIds
+
+						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 					END
+					
 
-
-					DELETE FROM tblTMDispatch
-					WHERE intSiteID = @intSiteId
-						AND intDispatchID = @intDispatchId
+					IF(@ysnRequireClock = 1)
+					BEGIN
+						---- Update forecasted nad estimated % left
+						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+						EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					END
 				END
 				
 			END
@@ -1339,6 +1519,7 @@ BEGIN
 			ON B.intItemId = E.intItemId
 		LEFT JOIN tblTMDispatch G
 			ON A.intSiteID = G.intSiteID
+				AND G.intDispatchID = (SELECT TOP 1 intDispatchId FROM #tmpTMInvoiceDispatchIds ORDER BY intDispatchId)
 		LEFT JOIN tblTMClock H
 			ON A.intClockID = H.intClockID
 		LEFT JOIN tblEMEntity I
