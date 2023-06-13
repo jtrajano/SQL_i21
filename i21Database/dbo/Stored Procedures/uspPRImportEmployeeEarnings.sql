@@ -549,7 +549,7 @@ DECLARE @intPayGroupIdCount AS INT
 				NEWID()
 				, guiApiImportLogId = @guiLogId
 				, strField = 'Employee Earnings'
-				, strValue = SE.strAccountID
+				, strValue = SE.strPayGroup
 				, strLogLevel = 'Error'
 				, strStatus = 'Failed'
 				, intRowNo = SE.intRowNumber
