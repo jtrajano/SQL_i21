@@ -89,7 +89,9 @@ BEGIN
 		R.intBillId
 		,R.intItemId
 		,ITEM.intItemLocationId
-	FROM dbo.tblAPBillDetail R
+	FROM @ids B
+	INNER JOIN dbo.tblAPBillDetail R
+		ON R.intBillId = B.intID
 	INNER JOIN tblICItem item 
 		ON item.intItemId = R.intItemId
 	INNER JOIN tblGRSettleStorageBillDetail SBD
