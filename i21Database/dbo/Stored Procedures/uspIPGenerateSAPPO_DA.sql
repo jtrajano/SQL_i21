@@ -333,6 +333,7 @@ BEGIN
 			+ '<SEQUENCE_NO>' + LTRIM(ISNULL(CF.intContractSeq, '')) + '</SEQUENCE_NO>'
 			+ '<PO_LINE_ITEM_NO>' + CASE WHEN UPPER(RS.strOrgRowState) = 'MODIFIED' THEN ISNULL(CF.strERPItemNumber, '') ELSE '' END + '</PO_LINE_ITEM_NO>'
 			+ '<ITEM_NO>' + dbo.fnEscapeXML(ISNULL(I.strItemNo, '')) + '</ITEM_NO>'
+			+ '<SHORT_NAME>' + ISNULL(I.strShortName, '') + '</SHORT_NAME>'
 			+ '<SUB_LOCATION>' + dbo.fnEscapeXML(ISNULL(CF.strSubLocation, '')) + '</SUB_LOCATION>'
 			+ '<STORAGE_LOCATION>' + dbo.fnEscapeXML(ISNULL(CF.strStorageLocation, '')) + '</STORAGE_LOCATION>'
 			+ '<QUANTITY>' + ISNULL(CONVERT(NVARCHAR(50), CONVERT(NUMERIC(18, 2), CF.dblQuantity)), '') + '</QUANTITY>'
