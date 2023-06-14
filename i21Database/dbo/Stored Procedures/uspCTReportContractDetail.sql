@@ -191,7 +191,7 @@ BEGIN TRY
 	
 
 
-	SELECT	intContractHeaderId		= CD.intContractHeaderId,
+	SELECT DISTINCT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
 			strPeriod				= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
 			strAtlasPeriod			= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' -   ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
