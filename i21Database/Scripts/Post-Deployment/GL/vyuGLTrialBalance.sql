@@ -3,12 +3,6 @@
 DECLARE @Lob NVARCHAR(10) ='', @Company  NVARCHAR(10) = '',
 @LobQuery NVARCHAR(100), @CompanyQuery NVARCHAR(100)
 
-SET @Lob = ''
-SET @LobQuery = ''''' COLLATE Latin1_General_CI_AS strLOBCode ,'
-
-SET @Company = ''
-SET @CompanyQuery = ''''' COLLATE Latin1_General_CI_AS strCompanySegment ,'
-
 IF COL_LENGTH('tblGLTempCOASegment','LOB') IS NOT NULL 
 BEGIN
 	SET @Lob = ',[LOB]'
