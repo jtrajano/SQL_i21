@@ -649,7 +649,7 @@ BEGIN
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
     INNER JOIN tblAPVendor V ON P.intEntityVendorId = V.intEntityId
 		INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId
-		WHERE P.intPaymentId IN (SELECT intID FROM @paymentIds)
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND V.ysnPymtCtrlHold = CAST(1 AS BIT) 
 	END
 	ELSE
