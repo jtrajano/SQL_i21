@@ -130,7 +130,8 @@ DECLARE @ysnSuccess BIT
  BEGIN  
   SELECT @dblConvertedSampleQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intSampleUOMId, @intRepresentingUOMId, @dblSampleQty)  
   
-  IF @dblConvertedSampleQty > @dblRepresentingQty  
+  IF (@dblConvertedSampleQty > @dblRepresentingQty)
+    AND (EXISTS (SELECT 1 FROM dbo.tblQMCompanyPreference WHERE ysnValidateSampleQty = 1))  
   BEGIN  
    RAISERROR (  
      'Sample Qty cannot be greater than Representing Qty. '  
