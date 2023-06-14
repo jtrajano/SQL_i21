@@ -52,14 +52,14 @@ BEGIN
 			@keyValue = @_intAccountId,                                          -- Primary Key Value
 			@screenName = ''GeneralLedger.view.EditAccount'',            -- Screen Namespace
 			@entityId = @intUserId,                                              -- Entity Id.
-			@actionType = ''Created'',                   
+			@actionType = ''Build'',                   
 			@changeDescription = @changeDescription,
 			@fromValue = '''',
 			@toValue = @_strAccountId
 
 			DELETE FROM @tblAuditLogAccount WHERE strAccountId = @_strAccountId
 		END
-		
+	
 		-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
 		IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference WHERE strCompanyId = ''Legacy'')
         BEGIN
