@@ -855,7 +855,17 @@ BEGIN
 	INSERT INTO @paymentForBankTransaction
 	-- SELECT intPaymentId FROM #tmpPayablePostData
 	SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds
-	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @paymentForBankTransaction, @post = @post, @userId = @userId, @batchId = @batchIdUsed
+
+	IF EXISTS (
+		SELECT TOP 1 1 FROM tblAPPayment A
+		INNER JOIN @paymentForBankTransaction B ON A.intPaymentId = B.intId
+		INNER JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
+		WHERE C.strPaymentMethod != 'Debit Memos and Payments'
+		AND A.dblAmountPaid > 0
+	)
+	BEGIN
+		EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @paymentForBankTransaction, @post = @post, @userId = @userId, @batchId = @batchIdUsed
+	END
 
 	--Insert Successfully posted transactions.
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, ysnLienExists, intTransactionId)
