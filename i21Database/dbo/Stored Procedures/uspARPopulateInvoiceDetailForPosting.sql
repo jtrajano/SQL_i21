@@ -1358,7 +1358,7 @@ WHERE ID.strSessionId = @strSessionId
 UPDATE ARPIH
 SET dblBaseInvoiceTotal = dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 100 
                             THEN (ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax) - ARPID.dblBaseDiscountAmount
-                            ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount
+                            ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax + ISNULL(ARIDF.dblBaseTax, 0)) - ARPID.dblBaseDiscountAmount
                           END, @Precision)
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
@@ -1373,6 +1373,12 @@ INNER JOIN (
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
+LEFT JOIN (
+    SELECT intInvoiceId
+           , dblBaseTax = SUM(dblBaseTax)
+    FROM tblARInvoiceDeliveryFee
+    GROUP BY intInvoiceId
+        ) ARIDF ON ARPIH.intInvoiceId = ARIDF.intInvoiceId
 WHERE strSessionId = @strSessionId
 
 UPDATE ARI

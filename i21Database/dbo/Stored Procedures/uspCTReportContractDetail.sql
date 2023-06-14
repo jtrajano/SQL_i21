@@ -191,7 +191,7 @@ BEGIN TRY
 	
 
 
-	SELECT	intContractHeaderId		= CD.intContractHeaderId,
+	SELECT DISTINCT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
 			strPeriod				= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
 			strAtlasPeriod			= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' -   ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
@@ -328,8 +328,8 @@ BEGIN TRY
 			--EKATERRA
 			strTealingo				= ISNULL(ICI.strItemNo,IBM.strItemNo),
 			strTargetNoPackage		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity), --Qty Sequence
-			strPkgType				= UM.strUnitMeasure, --Qty UOM
-			strAvgWeight			= U7.strUnitMeasure, --Net UOM
+			strPkgType				= MFB.strPackageSize, --Bactch Package Size
+			strAvgWeight			= dbo.fnRemoveTrailingZeroes(MFB.dblWeightPerUnit), --Batch Weight Per Unit
 			strApproxWeight			= dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), --NETWEIGHT
 			strPriceKg				= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId,KG.intItemUOMId,CD.dblCashPrice),2), 
 			strTotalValue			= ROUND(CD.dblTotalCost,2) ,
@@ -374,7 +374,8 @@ BEGIN TRY
 	JOIN	tblSMCity			CT	WITH (NOLOCK) ON	CT.intCityId			=	CH.intINCOLocationTypeId LEFT
 	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId LEFT
 	JOIN	tblCTBook			CB	WITH (NOLOCK) ON	CB.intBookId			=   CD.intBookId
-	LEFT JOIN tblICItemUOM      KG  WITH (NOLOCK) ON	CD.intPriceItemUOMId			=   KG.intItemUOMId AND KG.intUnitMeasureId = 4
+	LEFT JOIN tblICItemUOM      KG  WITH (NOLOCK) ON	CD.intPriceItemUOMId	=   KG.intItemUOMId AND KG.intUnitMeasureId = 4
+	LEFT JOIN tblMFBatch 		MFB WITH (NOLOCK) ON 	CD.intContractDetailId 	= 	MFB.intContractDetailId	
 	CROSS JOIN tblCTCompanyPreference   CP
 	CROSS JOIN (
 		SELECT strReportDateFormat

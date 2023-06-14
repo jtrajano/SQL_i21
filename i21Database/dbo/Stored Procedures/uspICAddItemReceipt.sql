@@ -1612,7 +1612,7 @@ BEGIN
 								ISNULL(RawData.intOtherChargeEntityVendorId, RawData.intEntityVendorId)	-- @VendorId
 								,RawData.intLocationId			--,@CompanyLocationId
 								,NULL							--,@ItemId
-								,RawData.intShipFromId			--,@VendorLocationId
+								,NULL							--RawData.intShipFromId --,@VendorLocationId
 								,NULL							--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
 								,default						--,@FOB
 							)

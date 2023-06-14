@@ -1302,22 +1302,22 @@ BEGIN TRY
   strCFEmail       = arCustomerContact.strEmail  
  ,strCFEmailDistributionOption =   
  (SELECT (CASE   
-  WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')  
+   WHEN (LOWER(ISNULL(emEntity.strDocumentDelivery,'')) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')  
    THEN 'print , email , CF Invoice'  
   
-  WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')  
+  WHEN (LOWER(ISNULL(emEntity.strDocumentDelivery,'')) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')  
    THEN 'email , CF Invoice'  
   
-  WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')  
+  WHEN ( (LOWER(ISNULL(emEntity.strDocumentDelivery,'')) not like '%email%' OR  LOWER(ISNULL(emEntity.strDocumentDelivery,'')) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')  
    THEN 'email , CF Invoice'  
   
-  WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')  
+  WHEN ( LOWER(ISNULL(emEntity.strDocumentDelivery,'')) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')  
    THEN 'print'  
   
-  WHEN ( LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')  
+  WHEN ( LOWER(ISNULL(emEntity.strDocumentDelivery,'')) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')  
    THEN 'print'  
   
-  WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')  
+  WHEN (  (LOWER(ISNULL(emEntity.strDocumentDelivery,'')) not like '%email%' OR  LOWER(ISNULL(emEntity.strDocumentDelivery,'')) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')  
    THEN 'print'  
   ELSE 'print'  
  END))               

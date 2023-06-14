@@ -140,7 +140,7 @@ SELECT
 	,strCustomerName		= ARCS.strName
 	,strLocationName		= SMCL.strLocationName + ',' +  + [dbo].[fnConvertDateToReportDateFormat](ARI.dtmDate, 0)
 	,strItemNo				= ARGID.strItemNo
-	,strItemDescription		= ARGID.strItemDescription
+	,strItemDescription		= CASE WHEN ARI.strType = 'Service Charge' THEN ARGID.strSCInvoiceNumber ELSE ARGID.strItemDescription END
 	,strQtyShipped			= CONVERT(VARCHAR,CAST(ARGID.dblQtyShipped AS MONEY),1) + ' ' + ARGID.strUnitMeasure
 	,strFreightTerm         = FREIGHT.strFreightTerm
 	,strSalespersonName     = ISNULL(SP.strName, SOADD.strName)
@@ -169,6 +169,7 @@ SELECT
 	,intInvoiceDetailLotId	= ARGIDL.intInvoiceDetailLotId
 	,blbLogo                = ISNULL(SMLP.imgLogo, @blbLogo)
 	,strLogoType			= CASE WHEN SMLP.imgLogo IS NOT NULL THEN 'Logo' ELSE 'Attachment' END
+	,strDisplayInvoiceType	= CASE WHEN ARI.strType = 'Service Charge' THEN 'Service Charge Invoice:' ELSE 'Invoice:' END
 FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 INNER JOIN vyuARCustomerSearch ARCS WITH (NOLOCK) ON ARI.intEntityCustomerId = ARCS.intEntityId 
 INNER JOIN tblSMCompanyLocation SMCL WITH (NOLOCK) ON ARI.intCompanyLocationId = SMCL.intCompanyLocationId

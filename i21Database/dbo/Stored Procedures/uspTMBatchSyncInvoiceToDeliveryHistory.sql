@@ -490,6 +490,7 @@ BEGIN
 							,intSourceType				= 1
 							,intDeliveryHistoryId		= intLastDeliveryHistoryId 
 						FROM #tmpInvoiceDateEqualLastDeliveryDateDetail
+						WHERE intDispatchId IS NOT NULL
 
 						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 
@@ -842,6 +843,8 @@ BEGIN
 						FROM #tmpInvoiceDateGreaterThanLastDelivery A
 						INNER JOIN @insertedHistory B
 							ON A.intSiteId = B.intSiteId
+						WHERE intDispatchId IS NOT NULL
+							
 						
 
 						EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId

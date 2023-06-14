@@ -521,6 +521,15 @@ CROSS APPLY (
 ) CONSUMPTIONSITE
 WHERE I.strType = 'Tank Delivery'
 
+--UPDATE SERVICE CHARGE DETAILS
+UPDATE I
+SET strItem				= ID.strSCInvoiceNumber
+  , strItemNo 			= ID.strSCInvoiceNumber
+  , strItemDescription	= ID.strSCInvoiceNumber
+FROM #INVOICES I 
+INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
+WHERE I.strType = 'Service Charge'
+
 --UPDATE CUSTOMER
 UPDATE I
 SET strCustomerNumber		= C.strCustomerNumber

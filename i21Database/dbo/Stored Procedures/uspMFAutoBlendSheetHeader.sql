@@ -13,6 +13,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @idoc INT
+DECLARE @ysnRecipeHeaderValidation INT = 0
 
 IF(SELECT ISNULL(COUNT(1), 0) FROM tblMFBlendRequirementRule WHERE intBlendRequirementId = @intBlendRequirementId) = 0
 	BEGIN 
@@ -61,6 +62,11 @@ IF (ISNULL(@strXml, '') <> '')
 			END
 	END
 
+/* Retrieve Recipe Header Validation */
+SELECT @ysnRecipeHeaderValidation = ISNULL(ysnRecipeHeaderValidation, 0)
+FROM tblMFCompanyPreference
+
+
 /* Returned Data. */
 SELECT 0								AS intWorkOrderId
 	 , ''								AS strWorkOrderNo
@@ -100,5 +106,6 @@ LEFT JOIN tblMFManufacturingCell AS MachineCell ON BlendRequirement.intManufactu
 LEFT JOIN tblMFMachine AS Machine ON BlendRequirement.intMachineId = Machine.intMachineId
 LEFT JOIN tblMFMachineIssuedUOMType AS MachineIssuedUOM ON Machine.intIssuedUOMTypeId = MachineIssuedUOM.intIssuedUOMTypeId
 LEFT JOIN tblMFRecipe AS Recipe ON BlendRequirement.intItemId = Recipe.intItemId AND BlendRequirement.intLocationId = Recipe.intLocationId AND Recipe.ysnActive = 1
-LEFT JOIN tblMFManufacturingProcessAttribute AS ProcessAttribute on Recipe.intManufacturingProcessId = ProcessAttribute.intManufacturingProcessId AND ProcessAttribute.intLocationId = BlendRequirement.intLocationId
+							   		/* Filter recipe with Validity if Company Configuration Recipe Header Validation is set to true. */
+							   AND (@ysnRecipeHeaderValidation = 1 AND GETDATE() BETWEEN Recipe.dtmValidFrom AND Recipe.dtmValidTo)
 WHERE BlendRequirement.intBlendRequirementId = @intBlendRequirementId

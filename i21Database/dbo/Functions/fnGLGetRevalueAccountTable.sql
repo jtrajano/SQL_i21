@@ -6,6 +6,7 @@ AS
 RETURN
 (
 	SELECT 'AP'		strModule,'Payables' strType, [intAccountsPayableUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'AP'		strModule,'Receivables' strType, [intAccountsPayableUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'AR'		strModule,'Receivables' strType, [intAccountsReceivableUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'INV'	strModule,'Payables' strType, [intInventoryUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'INV'	strModule,'Receivables' strType, [intInventoryUnrealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
@@ -21,6 +22,7 @@ RETURN
 	SELECT 'GL'		strModule, 'Receivables' strType, [intGeneralLedgerRealizedId] AccountId , OffSet = 0 FROM tblSMMultiCurrency UNION ALL
 
 	SELECT 'AP'		strModule,'Payables' strType, [intAccountsPayableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
+	SELECT 'AP'		strModule,'Receivables' strType, [intAccountsPayableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'AR'		strModule,'Receivables' strType, [intAccountsReceivableOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'INV'	strModule,'Payables' strType, [intInventoryOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL
 	SELECT 'INV'	strModule,'Receivables' strType, [intInventoryOffsetId] AccountId , OffSet = 1 FROM tblSMMultiCurrency UNION ALL

@@ -321,8 +321,8 @@ BEGIN
 		UPDATE tblSCTicket 
 			SET strTicketStatus = 'C',
 				intStorageScheduleTypeId = -3,
-				strDistributionOption =	'SPT',
-				intBillId = @intBillId
+				strDistributionOption =	'SPT'
+				--,intBillId = @intBillId
 			WHERE intTicketId = @CURRENT_TICKET_ID
 
 		-- release the ticket from processing

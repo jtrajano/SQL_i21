@@ -1781,6 +1781,15 @@
     <Build Include="dbo\Views\vyuTMConsumptionSiteFee.sql" />
     <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
+    <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDestinationOverageContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpost.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactVendorXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -2999,7 +3008,6 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
-    <Build Include="dbo\Index\IX_tblGLDtail_intTransactionId_strTransactionType.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Index\IX_tblCMResponsiblePartyMatching_strType.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
@@ -3222,7 +3230,6 @@
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
     <Build Include="dbo\Triggers\trgCMDeleteResponsiblePartTaskDetail.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
-    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetPostedLot.sql" />
@@ -11706,6 +11713,8 @@
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
+    <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

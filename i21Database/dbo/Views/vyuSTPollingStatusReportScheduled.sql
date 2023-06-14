@@ -3,6 +3,7 @@ AS
 SELECT DISTINCT
 sts.intStoreId,
 stcp.intCheckoutProcessId,
+stcpew.intCheckoutProcessErrorWarningId,
 stcp.strGuid, 
 FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
 CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
@@ -41,7 +42,6 @@ WHERE cpewOutMsg.intCheckoutProcessErrorWarningId =
 	JOIN tblSTCheckoutProcess cpInMsg
 		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId
 	WHERE cpInMsg.intStoreId = sts.intStoreId
-	--SELECT * FROM tblSTStore WHERE intStoreNo = 113
 	GROUP BY cpInMsg.intStoreId
 )))
 AS strMessage
@@ -54,29 +54,9 @@ JOIN dbo.tblSTCheckoutHeader CH
 	ON stcpew.intCheckoutId = CH.intCheckoutId
 WHERE 
 FORMAT(stcp.dtmCheckoutProcessDate, 'd','us') = FORMAT(GETDATE(), 'd','us')
-AND stcpew.intCheckoutProcessErrorWarningId IN
-(
-	SELECT MAX(intCheckoutProcessErrorWarningId) 
-	FROM tblSTCheckoutProcessErrorWarning cpewInMsg
-	JOIN tblSTCheckoutProcess cpInMsg
-		ON cpewInMsg.intCheckoutProcessId = cpInMsg.intCheckoutProcessId
-	WHERE cpInMsg.intStoreId IN (SELECT intStoreId FROM tblSTStore)
-	GROUP BY cpInMsg.intStoreId
-)
---AND stcpew.strMessageType <> 'F'
-GROUP BY
-sts.intStoreId,
-stcp.intCheckoutProcessId,
-stcp.strGuid, 
-FORMAT(stcp.dtmCheckoutProcessDate, 'd','us'),
-stcp.dtmCheckoutProcessDate,
-CH.dtmCheckoutDate,
-sts.intStoreNo, 
-sts.strDescription,
-stcpew.strMessage
-HAVING CH.dtmCheckoutDate IS NOT NULL
+AND CH.dtmCheckoutDate IS NOT NULL
 UNION
-SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, 
+SELECT a.intStoreId, 0 as intCheckoutProcessId, 0 as intCheckoutProcessErrorWarningId, '' AS strGuid, 
 FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
 CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
 FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,
@@ -185,7 +165,7 @@ a.intStoreId IN
 AND
 a.ysnConsignmentStore = 1
 UNION
-SELECT a.intStoreId, 0 as intCheckoutProcessId, '' AS strGuid, 
+SELECT a.intStoreId, 0 as intCheckoutProcessId, 0 as intCheckoutProcessErrorWarningId, '' AS strGuid, 
 FORMAT(GETDATE(), 'd','us') AS strActualReportDate,
 CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportTime,
 FORMAT(GETDATE(), 'd','us') + ' ' + CONVERT(varchar(15),CONVERT(TIME, GETDATE()),100) AS strActualReportDateTime,

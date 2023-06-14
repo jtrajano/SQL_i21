@@ -71,3 +71,4 @@ WHERE ISNULL(SC.dblUnitPrice,0) = 0
 	AND SC.intTicketTypeId != 10
 	AND APD.intBillDetailId IS NULL
 	AND AID.intInvoiceDetailId IS NULL
+	AND ISNULL(SC.ysnTicketInTransit, 0) = 0

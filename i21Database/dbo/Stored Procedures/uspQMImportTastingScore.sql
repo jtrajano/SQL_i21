@@ -1276,7 +1276,7 @@ BEGIN TRY
 				,intItemUOMId = S.intSampleUOMId
 				,intWeightUOMId = S.intSampleUOMId
 				,strTeaOrigin = S.strCountry
-				,intOriginalItemId = BT.intTealingoItemId
+				,intOriginalItemId = BT.intOriginalItemId
 				,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
 				,strPlant = MU.strVendorRefNoPrefix 
 				,dblTotalQuantity = S.dblSampleQty 
@@ -1518,6 +1518,7 @@ BEGIN TRY
 				SELECT @intBatchId = intBatchId
 				FROM tblMFBatch
 				WHERE strBatchId = @strBatchNo
+				AND intLocationId = intMixingUnitLocationId
 
 				EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
 					,@intUserId = @intEntityUserId

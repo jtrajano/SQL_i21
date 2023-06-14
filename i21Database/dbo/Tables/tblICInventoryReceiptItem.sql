@@ -84,6 +84,7 @@ Type the overview for the table here.
 		[dblBasis] NUMERIC(38,20) NULL,
 		[dblFutures] NUMERIC(38,20) NULL,
 		[strFuturesMonth] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+		[intItemVendorXrefId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]), -- ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

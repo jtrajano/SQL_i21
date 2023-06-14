@@ -332,7 +332,7 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 			 , l.strLotNumber
 			 , pld.intStorageLocationId
 			 , sl.strName			AS strStorageLocationName
-			 , CASE WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty <> 0 THEN pld.dblShippedQty
+			 , CASE WHEN ISNULL(pld.dblShippedQty, 0) <> 0 THEN pld.dblShippedQty
 					ELSE pld.dblQuantity 
 			   END AS dblPickQuantity
 			 , pld.intItemUOMId		AS intPickUOMId
@@ -342,7 +342,8 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 			 , sbl.strSubLocationName
 			 , pld.intLocationId
 			 , i.strLotTracking
-			 , CASE WHEN pld.dblShippedQty > pld.dblPickQuantity THEN pld.dblShippedQty
+			 , CASE WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty > pld.dblPickQuantity THEN pld.dblShippedQty
+					WHEN pld.dblShippedQty IS NOT NULL AND pld.dblShippedQty > pld.dblPickQuantity THEN pld.dblShippedQty
 					ELSE pld.dblPickQuantity 
 			   END AS dblItemRequiredQty
 		FROM tblMFPickListDetail pld 
@@ -390,7 +391,10 @@ IF EXISTS (SELECT 1 FROM tblMFPickList WHERE intSalesOrderId = @intSalesOrderId)
 ELSE 
 	BEGIN 
 		/* New PickList. */
-		SELECT p.intItemId
+		SELECT 0 AS intPickListDetailId
+			 , 0 AS intPickListId
+			 , 0 AS intSalesOrderId
+			 , p.intItemId
 			 , i.strItemNo
 			 , i.strDescription
 			 , l.intLotId

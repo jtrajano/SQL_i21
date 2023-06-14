@@ -130,7 +130,8 @@ DECLARE @ysnSuccess BIT
  BEGIN  
   SELECT @dblConvertedSampleQty = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intSampleUOMId, @intRepresentingUOMId, @dblSampleQty)  
   
-  IF @dblConvertedSampleQty > @dblRepresentingQty  
+  IF (@dblConvertedSampleQty > @dblRepresentingQty)
+    AND (EXISTS (SELECT 1 FROM dbo.tblQMCompanyPreference WHERE ysnValidateSampleQty = 1))  
   BEGIN  
    RAISERROR (  
      'Sample Qty cannot be greater than Representing Qty. '  
@@ -861,6 +862,7 @@ DECLARE @ysnSuccess BIT
   ,dtmValidTo  
   ,strPropertyRangeText  
   ,dblMinValue  
+  ,dblPinpointValue
   ,dblMaxValue  
   ,dblLowValue  
   ,dblHighValue  
@@ -901,6 +903,7 @@ DECLARE @ysnSuccess BIT
   ,dtmValidTo  
   ,strPropertyRangeText  
   ,dblMinValue  
+  ,dblPinpointValue
   ,dblMaxValue  
   ,dblLowValue  
   ,dblHighValue  
@@ -943,6 +946,7 @@ DECLARE @ysnSuccess BIT
    ,dtmValidTo DATETIME  
    ,strPropertyRangeText NVARCHAR(MAX)  
    ,dblMinValue NUMERIC(18, 6)  
+   ,dblPinpointValue NUMERIC(18, 6)  
    ,dblMaxValue NUMERIC(18, 6)  
    ,dblLowValue NUMERIC(18, 6)  
    ,dblHighValue NUMERIC(18, 6)  

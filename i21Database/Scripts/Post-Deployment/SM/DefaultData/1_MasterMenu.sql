@@ -10,7 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Monitor Status' AND strModuleName = 'Tank Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Commissions' AND strModuleName = 'Store')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5882,11 +5882,17 @@ ELSE
  	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Store.view.SalesTaxReport' WHERE strMenuName = 'Sales Tax Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
  
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @StoreReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Tank Reconciliation', N'Store', @StoreReportParentMenuId, N'Tank Reconciliation', N'Report', N'Screen', N'TankManagement.view.TankReconciliation', N'small-menu-report', 0, 0, 0, 1, 8, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'TankManagement.view.TankReconciliation' WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @StoreReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Commissions' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @TankManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Dealer Commissions', N'Store', @StoreReportParentMenuId, N'Dealer Commissions', N'Report', N'Screen', N'Store.view.DealerCommission', N'small-menu-report', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Store.view.DealerCommission' WHERE strMenuName = 'Dealer Commissions' AND strModuleName = 'Store' AND strType = 'Screen' AND intParentMenuID = @StoreReportParentMenuId
 
 --Lottery
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)
@@ -5939,8 +5945,22 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Retail Price Adjustments' AND s
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Subcategories' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId 
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Checkout Transaction Journal' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Consolidated Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId 
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Consolidated Checkout' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Mass Add/Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
+IF (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Tank Reconciliation' AND strModuleName = 'Store') > 1
+BEGIN
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store' AND intMenuID NOT IN
+	(
+		SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Tank Reconciliation' AND strModuleName = 'Store'
+	)
+END
+IF (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Dealer Commissions' AND strModuleName = 'Store') > 1
+BEGIN
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Commissions' AND strModuleName = 'Store' AND intMenuID NOT IN
+	(
+		SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Commissions' AND strModuleName = 'Store'
+	)
+END
 /* STOP DELETE */
 
 /* CRM - Customer Relation Management */
