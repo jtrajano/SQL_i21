@@ -43,7 +43,7 @@
 			@keyValue = @_intAccountId,                                          -- Primary Key Value
 			@screenName = 'GeneralLedger.view.EditAccount',            -- Screen Namespace
 			@entityId = @intUserId,                                              -- Entity Id.
-			@actionType = 'Created',              
+			@actionType = 'Build',              
 			@changeDescription = @changeDescription,
 			@fromValue = '',
 			@toValue = @_strAccountId
