@@ -470,7 +470,10 @@ BEGIN TRY
 							,@intContractId
 							,@strDistributionOption
 							,@LineItems
-
+					IF(@ysnProcessToInTransit = 1)
+					BEGIN
+						UPDATE @ItemsForItemShipment SET ysnAllowVoucher = 1 WHERE intItemId = @intItemId
+					END
 					-- Validate the items to receive
 					EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment;
 				END
