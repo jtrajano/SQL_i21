@@ -12,7 +12,7 @@ SELECT
 ,intItemStockUomId		 = V.intItemUOMIdTo
 ,strItemStockUOM		 = UnitMeasure.strUnitMeasure
 ,intBillId				 = T.intBillId
-,strBillId				 = Bill.strBillId
+,strBillId				 = ISNULL(Bill.strBillId,'')
 ,intInvoiceId			 = T.intInvoiceId
 ,strInvoiceNumber		 = Invoice.strInvoiceNumber  
 FROM tblGRUnPriced S
