@@ -1718,7 +1718,7 @@
     <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
-    <Build Include="dbo\Views\vyuAPStrausBill.sql" />
+    <Build Include="dbo\Views\vyuAPStraussBill.sql" />
     <Build Include="dbo\Views\vyuAPStraussBillDetail.sql" />
     <Build Include="dbo\Views\vyuAPStraussPendingPayables.sql" />
     <Build Include="dbo\Views\vyuAPStraussVendor.sql" />
