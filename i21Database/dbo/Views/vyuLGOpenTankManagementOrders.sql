@@ -42,6 +42,8 @@ SELECT
 	,ysnLeakCheckRequired = TMO.ysnLeakCheckRequired
 	,dblPercentLeft = TMO.dblPercentLeft
 	,dblARBalance = TMO.dblCustomerBalance
+	,dblPrice = TMO.dblPrice
+	,dblTotal = TMO.dblTotal
 	,strFillMethod = TMO.strFillMethod
 	,ysnHold = TMO.ysnHold
 	,ysnRoutingAlert = TMO.ysnRoutingAlert
