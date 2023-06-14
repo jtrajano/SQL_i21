@@ -6,8 +6,7 @@
 [dtmTransDate] DATETIME NOT NULL,
 [intType] INT NOT NULL,
 
-[intPContractDetailId] INT NULL,
-[intPEntityId] INT NULL,
+[intPContractDetailId] INT NULL, 
 [strPVendorContract] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL,
 [dtmPArrivalDate] DATETIME NULL,
 [intPEquipmentTypeId] INT NULL,
@@ -63,6 +62,5 @@ CONSTRAINT [FK_tblLGGenerateLoad_tblLGAllocationDetail_intAllocationDetailId] FO
 CONSTRAINT [FK_tblLGGenerateLoad_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 
 CONSTRAINT [FK_tblLGGenerateLoad_tblSMCompanyLocation_intPCompanyLocationId] FOREIGN KEY ([intPCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-CONSTRAINT [FK_tblLGGenerateLoad_tblSMCompanyLocation_intSCompanyLocationId] FOREIGN KEY ([intSCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-CONSTRAINT [FK_tblLGGenerateLoad_tblEMEntity_intPEntityId] FOREIGN KEY([intPEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
+CONSTRAINT [FK_tblLGGenerateLoad_tblSMCompanyLocation_intSCompanyLocationId] FOREIGN KEY ([intSCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )

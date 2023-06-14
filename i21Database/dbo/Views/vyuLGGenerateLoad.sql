@@ -1,14 +1,8 @@
 ﻿CREATE VIEW vyuLGGenerateLoad
 AS
 SELECT GL.intGenerateLoadId
-	  ,CASE
-	   WHEN PCH.intEntityId IS NULL 
-		THEN GL.intPEntityId
-	   ELSE PCH.intEntityId END AS intVendorEntityId
-		,CASE 
-	   WHEN PCH.intEntityId IS NULL 
-		THEN EV2.strName
-	   ELSE EV.strName END AS strVendorName
+	  ,PCH.intEntityId			AS intVendorEntityId
+	  ,EV.strName				AS strVendorName
 	  ,EVL.intEntityLocationId	AS intVEntityLocationId
 	  ,EVL.strLocationName		AS strVendorLocation
 	  ,PCH.intContractHeaderId	AS intPContractHeaderId
@@ -115,7 +109,6 @@ LEFT JOIN tblCTContractDetail	PCD		ON		PCD.intContractDetailId		=	GL.intPContrac
 LEFT JOIN tblCTContractHeader	PCH		ON		PCH.intContractHeaderId		=	PCD.intContractHeaderId
 LEFT JOIN tblCTPosition			PPT		ON		PPT.intPositionId			=	PCH.intPositionId
 LEFT JOIN tblEMEntity			EV		ON		EV.intEntityId				=	PCH.intEntityId
-LEFT JOIN tblEMEntity		    EV2		ON		EV2.intEntityId				=	GL.intPEntityId --for generating loads without contract
 LEFT JOIN tblEMEntityLocation	EVL		ON		EVL.intEntityLocationId		=	GL.intPEntityLocationId
 LEFT JOIN tblICItem				PIM		ON		PIM.intItemId				=	PCD.intItemId --obsolete
 LEFT JOIN tblSMCompanyLocation	PCL		ON		PCL.intCompanyLocationId	=	GL.intPCompanyLocationId
