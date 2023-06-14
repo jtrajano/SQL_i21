@@ -7,6 +7,7 @@ SELECT
 	isnull(a.strVendorAccountNum,'') strVendorAccountNum,
 	isnull(i.strPaymentMethod, '') strPaymentMethod,
 	isnull(g.strTerm, '') strTerm,
+	isnull(g.strTermCode, '') strTermCode,
 	isnull(f.strApprovalList, '') strApprovalList,
 	isnull(a.strTaxState,'') strTaxState,
 	isnull(h.strTaxCode,'') strTaxCode,
