@@ -1608,6 +1608,18 @@ BEGIN
         ,NULL
         ,1
 
+      DECLARE @intBatchId INT
+
+      SELECT @intBatchId = intBatchId
+      FROM tblMFBatch B
+      INNER JOIN tblQMSample S ON S.strBatchNo = B.strBatchId AND S.intLocationId = B.intLocationId
+      WHERE S.intSampleId = @intSampleId
+
+      EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
+					,@intUserId = @intLastModifiedUserId
+					,@intOriginalItemId = @intItemId
+					,@intItemId = @intItemId
+
       UPDATE tblQMSample
       SET strBatchNo = @strBatchId
       WHERE intSampleId = @intSampleId				
