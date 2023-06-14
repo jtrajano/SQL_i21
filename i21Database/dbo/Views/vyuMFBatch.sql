@@ -170,7 +170,7 @@ LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = A.intContractDetail
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN tblQMSample S ON S.intSampleId = A.intSampleId
 LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intEntityId
+LEFT JOIN tblEMEntity E1 ON E1.intEntityId = A.intSupplierId
 OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
