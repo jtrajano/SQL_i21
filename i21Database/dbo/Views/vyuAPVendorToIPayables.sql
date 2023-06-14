@@ -14,7 +14,7 @@ ISNULL(B.strCountry,'') COLLATE Latin1_General_CI_AS strCountry,
 ISNULL(P.strPhone,'') COLLATE Latin1_General_CI_AS strPhone,
 ISNULL(ContactDetails.strFax,'') COLLATE Latin1_General_CI_AS strFax,
 ISNULL(A.strEmail,'') COLLATE Latin1_General_CI_AS  strEmail,
-ISNULL(A.strTerm, '') COLLATE Latin1_General_CI_AS  strTerm,
+ISNULL(A.strTermCode, '') COLLATE Latin1_General_CI_AS  strTerm,
 ISNULL(A.ysnActive, CAST (0 AS BIT) ) ysnActive,
 E.strName strContactName
 from vyuAPVendorSearch A
