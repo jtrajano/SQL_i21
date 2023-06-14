@@ -151,6 +151,14 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   SET @strDocumentDelivery1 = NULL
   SET @strDocumentDelivery2 = NULL
   SET @strDocumentDelivery3 = NULL
+
+  SET @Department1 = NULL
+  SET @Department2 = NULL
+  SET @Department3 = NULL
+
+  SET @EmployeeGlLocation1 = NULL
+  SET @EmployeeGlLocation2 = NULL
+  SET @EmployeeGlLocation3 = NULL
   SELECT TOP 1   
     @EmployeeID = strEmployeeId   
    ,@LineOfBusiness1 = LTRIM(RTRIM(temp.strLineOfBusiness1))  
@@ -621,15 +629,16 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
       DELETE FROM #TempEmployeeDetails WHERE strEmployeeId = @EmployeeID  
    END  
   
-  IF (@ysnImport = 1)  
-  BEGIN  
+  BEGIN TRY
+	  IF (@ysnImport = 1)  
+	BEGIN  
   
    IF @EntityId IS NULL  
     BEGIN  
     
     SELECT @EntityCount = COUNT(strEntityNo) FROM tblEMEntity WHERE strEntityNo = @EmployeeID
 
-    IF(@EntityCount != 0)
+    IF(@EntityCount != 0 OR @EntityCount IS NOT NULL)
     BEGIN
       INSERT INTO tblEMEntity (  
       strName  
@@ -919,7 +928,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
   
        --RETURN  
   
-     IF @Department1 IS NOT NULL   
+     IF @Department1 IS NOT NULL AND @Department1 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department1)  
       BEGIN  
@@ -931,7 +940,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        
      END  
   
-     IF @Department2 IS NOT NULL  
+     IF @Department2 IS NOT NULL AND @Department2 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department2)  
       BEGIN  
@@ -943,7 +952,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        
      END  
   
-     IF @Department3 IS NOT NULL  
+     IF @Department3 IS NOT NULL  AND @Department3 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department3)  
       BEGIN  
@@ -1015,7 +1024,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      --SET IDENTITY_INSERT tblEMEntityLineOfBusiness OFF  
       
   
-     IF @SupervisorId1 IS NOT NULL  
+     IF @SupervisorId1 IS NOT NULL AND @SupervisorId1 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId1)  
       BEGIN  
@@ -1026,7 +1035,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
       END  
      END  
   
-     IF @SupervisorId2 IS NOT NULL  
+     IF @SupervisorId2 IS NOT NULL  AND @SupervisorId2 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId2)  
       BEGIN  
@@ -1037,7 +1046,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
       END  
      END  
   
-     IF @SupervisorId3 IS NOT NULL  
+     IF @SupervisorId3 IS NOT NULL  AND @SupervisorId3 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId3)  
       BEGIN  
@@ -1049,7 +1058,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      END  
   
       
-     IF @EmployeeGlLocation1 IS NOT NULL  
+     IF @EmployeeGlLocation1 IS NOT NULL  AND @EmployeeGlLocation1 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1)  
       BEGIN  
@@ -1061,7 +1070,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      END  
   
       
-     IF @EmployeeGlLocation2 IS NOT NULL  
+     IF @EmployeeGlLocation2 IS NOT NULL   AND @EmployeeGlLocation2 != ''
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2)  
       BEGIN  
@@ -1073,7 +1082,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      END  
   
       
-     IF @EmployeeGlLocation3 IS NOT NULL  
+     IF @EmployeeGlLocation3 IS NOT NULL  AND @EmployeeGlLocation3 != '' 
      BEGIN  
       IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3)  
       BEGIN  
@@ -1331,7 +1340,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      --DELETE EXISTING RECORD  
      DELETE FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = @EntityId  
   
-     IF @Department1 IS NOT NULL  
+     IF @Department1 IS NOT NULL  AND @Department1 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department1)  
        BEGIN  
@@ -1342,7 +1351,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        END  
       END  
   
-     IF @Department2 IS NOT NULL  
+     IF @Department2 IS NOT NULL  AND @Department2 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department2)  
        BEGIN  
@@ -1353,7 +1362,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        END  
       END  
       
-     IF @Department3 IS NOT NULL  
+     IF @Department3 IS NOT NULL  AND @Department3 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department3)  
        BEGIN  
@@ -1495,7 +1504,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      DELETE FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId  
   
      --UPDATE SUPERVISOR DATA  
-     IF @SupervisorId1 IS NOT NULL  
+     IF @SupervisorId1 IS NOT NULL AND @SupervisorId1 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId1)  
        BEGIN  
@@ -1507,7 +1516,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
        END  
         
       END  
-     IF @SupervisorId2 IS NOT NULL  
+     IF @SupervisorId2 IS NOT NULL   AND @SupervisorId2 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId2)  
        BEGIN  
@@ -1518,7 +1527,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
         END  
        END  
       END  
-     IF @SupervisorId3 IS NOT NULL  
+     IF @SupervisorId3 IS NOT NULL   AND @SupervisorId3 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId3)  
        BEGIN  
@@ -1533,7 +1542,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
      --DELETE EXISTING RECORD BEFORE RE-INSERT  
      DELETE FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId  
   
-     IF @EmployeeGlLocation1 IS NOT NULL  
+     IF @EmployeeGlLocation1 IS NOT NULL  AND @EmployeeGlLocation1 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1)  
        BEGIN  
@@ -1544,7 +1553,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
         END  
        END  
       END  
-     IF @EmployeeGlLocation2 IS NOT NULL  
+     IF @EmployeeGlLocation2 IS NOT NULL  AND @EmployeeGlLocation2 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2)  
        BEGIN  
@@ -1555,7 +1564,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
         END  
        END  
       END  
-     IF @EmployeeGlLocation3 IS NOT NULL  
+     IF @EmployeeGlLocation3 IS NOT NULL  AND @EmployeeGlLocation3 != ''
       BEGIN  
        IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3)  
        BEGIN  
@@ -1584,6 +1593,29 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
    WHERE SE.guiApiUniqueId = @guiApiUniqueId  
    AND SE.strEmployeeId = @EmployeeID  
   END  
+ END TRY
+
+  BEGIN CATCH
+	    INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)  
+		SELECT TOP 1  
+		NEWID()  
+		, guiApiImportLogId = @guiLogId  
+		, strField = 'Employee Record'  
+		, strValue = @EmployeeID  
+		, strLogLevel = 'Error'  
+		, strStatus = 'Failed'  
+		, intRowNo = SE.intRowNumber  
+		, strMessage = 'Issues encountered while importing employee records. Please try again.'  
+		FROM tblApiSchemaEmployee SE  
+		LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId  
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId  
+		AND SE.strEmployeeId = @EmployeeID  
+
+		DELETE FROM #TempEmployeeDetails WHERE strEmployeeId = @EmployeeID  
+  END CATCH
+
+
+
  END  
   
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDetails'))   
