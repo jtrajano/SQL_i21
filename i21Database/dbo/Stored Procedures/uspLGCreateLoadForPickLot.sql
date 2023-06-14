@@ -9,7 +9,6 @@ BEGIN TRY
 	DECLARE @intMinAllocationRecordId INT
 	DECLARE @intAllocationHeaderId INT
 	DECLARE @intSContractDetailId INT
-	DECLARE @intPContractDetailId INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @strPickLotNumber NVARCHAR(100)
 	DECLARE @dblScheduledQty NUMERIC(18,6)
@@ -97,9 +96,7 @@ BEGIN TRY
 	BEGIN
 		IF (@intNumAllocInfo = 1)
 		BEGIN
-			SELECT 
-				@intSContractDetailId = intSContractDetailId,
-				@intPContractDetailId = intPContractDetailId
+			SELECT @intSContractDetailId = intSContractDetailId
 			FROM tblLGAllocationDetail AD
 			INNER JOIN @tblAllocationInfo AI ON AI.intAllocationDetailId = AD.intAllocationDetailId
 
@@ -304,7 +301,7 @@ BEGIN TRY
 			ysnMTM,
 			ysnPrice
 		FROM vyuLGContractCostView
-		WHERE (intContractDetailId = @intSContractDetailId OR intContractDetailId = @intPContractDetailId)
+		WHERE intContractDetailId = @intSContractDetailId
 			AND ISNULL(ysnBasis, 0) = 0 AND ISNULL(ysnBilled, 0) = 0
 
 	END
