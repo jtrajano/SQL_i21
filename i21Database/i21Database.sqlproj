@@ -1540,7 +1540,7 @@
     <Build Include="dbo\Views\vyuMFRecipeItemReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
-    <Build Include="dbo\Views\vyuAPStrausBill.sql" />
+    <Build Include="dbo\Views\vyuAPStraussBill.sql" />
     <Build Include="dbo\Views\vyuAPStraussBillDetail.sql" />
     <Build Include="dbo\Views\vyuAPStraussPendingPayables.sql" />
     <Build Include="dbo\Views\vyuAPStraussVendor.sql" />

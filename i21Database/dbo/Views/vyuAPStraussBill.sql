@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPStrausBill]
+﻿CREATE VIEW [dbo].[vyuAPStraussBill]
 AS
 SELECT
 	bb.strBillBatchNumber,
