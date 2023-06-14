@@ -43,10 +43,8 @@ BEGIN TRY
 	IF @strTicketType = 'Inbound'
 	BEGIN
 		INSERT INTO @tblBill (intBillId)
-		SELECT DISTINCT A.intBillId
-		FROM tblGRUnPricedSpotTicket A
-		INNER JOIN tblAPBill B
-			ON B.intBillId = A.intBillId
+		SELECT DISTINCT intBillId
+		FROM tblGRUnPricedSpotTicket
 		WHERE intUnPricedId = @intUnPricedId
 
 		SELECT @intBillKey = MIN(intBillKey)
