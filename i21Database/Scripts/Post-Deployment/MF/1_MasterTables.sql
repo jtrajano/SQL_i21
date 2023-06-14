@@ -2708,6 +2708,12 @@ BEGIN
     VALUES('ICIFoodsPalletLabel',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'SSCCPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('SSCCPalletLabel',1,1)
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFInventoryShipmentRestrictionType
