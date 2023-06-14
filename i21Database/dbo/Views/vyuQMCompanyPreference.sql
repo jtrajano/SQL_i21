@@ -41,6 +41,7 @@ SELECT CP.intCompanyPreferenceId
 	 , CP.ysnValidateLotNo
 	 , CP.ysnFilterSupplierByLocation
 	 , CP.ysnCreateBatchOnSampleSave
+	 , CP.ysnValidateSampleQty
 FROM tblQMCompanyPreference CP
 LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = CP.intApproveLotStatus
 LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = CP.intRejectLotStatus
