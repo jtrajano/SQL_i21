@@ -106,9 +106,8 @@ IF @dtmStatementDate IS NOT NULL
 )
 SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dtmStatementDate				= @dtmStatementDate
-		,strBankAccountNo				= BankAccnt.strBankAccountNo
+		,strCbkNo						= BankAccnt.strCbkNo
 		,strBankName					= Bank.strBankName
-		,strCurrency					= BankAccnt.strCurrency
 		,strGLAccountId					= GL.strAccountId
 		,dblGLBalance					= isnull([dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
 		,dblBankAccountBalance			= isnull([dbo].[fnCMGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
