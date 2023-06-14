@@ -176,7 +176,7 @@ BEGIN /* Inbound Claims */
 			,strItemNo = I.strItemNo
 			,intEntityId = WCD.intPartyEntityId
 			,intAPClearingAccountId = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'AP Clearing')
-			,intExpenseAccountId = V.intGLAccountExpenseId
+			,intExpenseAccountId = dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, 'Other Charge Expense')
 			,ysnWeightLoss = CAST(CASE WHEN WCD.dblClaimableWt < 0 THEN 1 ELSE 0 END AS BIT)
 		FROM tblLGWeightClaimDetail WCD
 			INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
@@ -188,7 +188,6 @@ BEGIN /* Inbound Claims */
 				FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId AND intPContractDetailId = WCD.intContractDetailId) LD
 			LEFT JOIN tblICItemLocation IL ON IL.intItemId = WCD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
-			LEFT JOIN tblAPVendor V ON V.intEntityId = WCD.intPartyEntityId
 			OUTER APPLY (
 				SELECT	TOP 1  
 					intForexRateTypeId = ERD.intRateTypeId
