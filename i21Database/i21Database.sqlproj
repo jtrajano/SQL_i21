@@ -1423,11 +1423,11 @@
     <Build Include="dbo\User Defined Types\TransferFromSettlementStagingTable.sql" />
     <Build Include="dbo\User Defined Types\TransferSettlementReferenceStagingTable.sql" />
     <Build Include="dbo\User Defined Types\TransferToSettlementStagingTable.sql" />
-  <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
-  <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
-  <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
-  <Build Include="dbo\Views\vyuHDTicketLink.sql" />
-  <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateBlendRequirementRule.sql" />
+    <Build Include="dbo\Views\vyuQMGetSupplier.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDUpdateJiraIconUrl.sql" />
+    <Build Include="dbo\Views\vyuHDTicketLink.sql" />
+    <Build Include="dbo\Views\vyuGRGrainFlowReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainFlowReport.sql" />
     <None Include="Scripts\Post-Deployment\ST\50_TransferMappingFromIcToSt.sql" />
     <Build Include="dbo\Views\vyuSCTicketApplyTransparency.sql" />
@@ -1464,6 +1464,7 @@
     <Build Include="dbo\Views\vyuSCGrainBankInvoiceTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
