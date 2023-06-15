@@ -84,7 +84,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 		FROM @MFBatchTableType B
 		LEFT JOIN tblMFBatch A ON A.intSalesYear = B.intSalesYear
 			  AND A.intSales = B.intSales
-			  AND A.dtmSalesDate = B.dtmSalesDate
+			--   AND A.dtmSalesDate = B.dtmSalesDate
 			  AND A.strTeaType = B.strTeaType
 			  AND A.strVendorLotNumber = B.strVendorLotNumber
 			  AND A.intBuyingCenterLocationId = B.intBuyingCenterLocationId
