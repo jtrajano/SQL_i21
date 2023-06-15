@@ -193,6 +193,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , dblTeaMouthFeelPinpoint			= T.dblTeaMouthFeelPinpoint	
 				  , dblTeaAppearancePinpoint		= T.dblTeaAppearancePinpoint
 				  , dtmShippingDate					= T.dtmShippingDate	
+				  , dtmSalesDate					= T.dtmSalesDate
 				FROM tblMFBatch AS A
 				OUTER APPLY (SELECT *
 							 FROM @MFBatchTableType
