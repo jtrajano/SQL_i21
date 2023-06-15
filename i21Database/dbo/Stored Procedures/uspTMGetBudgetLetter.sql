@@ -217,7 +217,7 @@ BEGIN
 					,strCustomerZip = RTRIM(B.vwcus_zip)
 					,intEntityCustomerId = B.A4GLIdentity
 					,dblBudget = B.vwcus_budget_amt
-					,dtmFirstDueDate = ''' + CONVERT(NVARCHAR, @strFirstPaymentDue, 101) + '''
+					,dtmFirstDueDate = ''' + ISNULL(CONVERT(NVARCHAR, @strFirstPaymentDue, 101),'') + '''
 					,blbLetterBody = H.blbMessage 
 					,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
 					,intDeliveryTermId = I.A4GLIdentity
@@ -247,7 +247,7 @@ BEGIN
 					,strCustomerZip = E.strZipCode
 					,intEntityCustomerId = B.intEntityId
 					,dblBudget = B.dblMonthlyBudget
-					,dtmFirstDueDate = ''' + CONVERT(NVARCHAR, @strFirstPaymentDue, 101) + '''
+					,dtmFirstDueDate = ''' + ISNULL(CONVERT(NVARCHAR, @strFirstPaymentDue, 101),'') + '''
 					,blbLetterBody = H.blbMessage 
 					,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
 					,intDeliveryTermId = B.intTermsId
