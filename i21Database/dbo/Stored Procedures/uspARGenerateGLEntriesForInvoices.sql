@@ -343,7 +343,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND @DueFromAccountId <> 0
   AND ([dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 6) = 0 OR [dbo].[fnARCompareAccountSegment](I.[intAccountId], ARID.[intSalesAccountId], 3) = 0)
 
---PROVISIONAL INVOICES
+--FINAL INVOICE DEBIT
 INSERT tblARPostInvoiceGLEntries WITH (TABLOCK) (
      [dtmDate]
     ,[strBatchId]

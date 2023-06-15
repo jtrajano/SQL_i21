@@ -346,8 +346,8 @@ WHERE strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer P
 AND strSessionId = @strSessionId
 
 UPDATE HEADER
-SET ysnForApproval = CAST(1 AS BIT)
-  , strDescription = FAT.strApprovalStatus
+SET  ysnForApproval	= CAST(1 AS BIT)
+	,strDescription = FAT.strApprovalStatus
 FROM tblARPostInvoiceHeader HEADER
 INNER JOIN vyuARForApprovalTransction FAT ON HEADER.intInvoiceId = FAT.intTransactionId
 WHERE FAT.strScreenName = 'Invoice'
@@ -1413,10 +1413,11 @@ INNER JOIN (
 WHERE ID.strSessionId = @strSessionId
 
 UPDATE ARPIH
-SET dblBaseInvoiceTotal = dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 100 
-                            THEN (ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax) - ARPID.dblBaseDiscountAmount
-                            ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount
-                          END, @Precision)
+SET dblBaseInvoiceTotal		= dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 100 AND strType = 'Provisional'
+								THEN (ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax) - ARPID.dblBaseDiscountAmount
+								ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount
+							  END, @Precision)
+	,dblAverageExchangeRate	= ARPID.dblCurrencyExchangeRate
 FROM tblARPostInvoiceHeader ARPIH
 INNER JOIN (
     SELECT
@@ -1426,14 +1427,17 @@ INNER JOIN (
         ,dblBaseDiscountAmount      = SUM(dblBaseDiscountAmount)
         ,dblBaseProvisionalTotal    = SUM(dblBaseProvisionalTotal)
         ,dblBaseProvisionalTotalTax = SUM(dblBaseProvisionalTotalTax)
+		,dblCurrencyExchangeRate	= AVG(dblCurrencyExchangeRate)
     FROM tblARPostInvoiceDetail
     WHERE strSessionId = @strSessionId
     GROUP BY intInvoiceId
 ) ARPID ON ARPIH.intInvoiceId = ARPID.intInvoiceId
 WHERE strSessionId = @strSessionId
 
-UPDATE tblARPostInvoiceHeader
-SET dblAverageExchangeRate = CASE WHEN dblInvoiceTotal <> 0 THEN dbo.fnRoundBanker(dblBaseInvoiceTotal / dblInvoiceTotal, 6) ELSE 1 END
+UPDATE ARI
+SET dblCurrencyExchangeRate = dblAverageExchangeRate
+FROM tblARInvoice ARI
+INNER JOIN tblARPostInvoiceHeader ARPIH ON ARI.intInvoiceId = ARPIH.intInvoiceId
 WHERE strSessionId = @strSessionId
 
 UPDATE ARPID
