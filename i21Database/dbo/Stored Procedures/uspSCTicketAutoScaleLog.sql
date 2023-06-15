@@ -5,6 +5,10 @@
 AS
 BEGIN
 	PRINT 'TICKET LOG'
-	INSERT INTO tblSCTicketAutoScaleLog(intTicketId, dblUnit, intContractDetailId) 
-	SELECT @TICKET_ID, @UNIT, @CONTRACT_ID
+
+	IF @UNIT > 0 	
+	BEGIN
+		INSERT INTO tblSCTicketAutoScaleLog(intTicketId, dblUnit, intContractDetailId) 
+		SELECT @TICKET_ID, @UNIT, @CONTRACT_ID
+	END
 END
