@@ -1310,6 +1310,8 @@
     <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCorriganPaymentExportIPayables.sql" />
+    <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
