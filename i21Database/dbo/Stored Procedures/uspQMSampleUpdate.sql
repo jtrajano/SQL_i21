@@ -1147,7 +1147,7 @@ DECLARE @ysnSuccess BIT
  EXEC dbo.uspQMSampleAmendment @intSampleId = @intSampleId, @intUserId = @intLastModifiedUserId
 
 IF EXISTS (SELECT 1 FROM tblQMCompanyPreference WHERE ysnCreateBatchOnSampleSave = 1)
-AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND (ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0)
+-- AND EXISTS (SELECT 1 FROM tblQMSample WHERE intSampleId = @intSampleId AND ((ISNULL(dblB1QtyBought, 0) <> 0 AND ISNULL(dblB1Price, 0) <> 0) OR ISNULL(intContractDetailId, 0) <> 0))
 BEGIN
   IF EXISTS(
     SELECT 1
@@ -1155,6 +1155,7 @@ BEGIN
     WHERE intSampleId = @intSampleId
     AND ISNULL(dblB1QtyBought, 0) = 0 AND ISNULL(dblB1Price, 0) = 0
     AND ISNULL(intContractDetailId, 0) = 0
+    AND ISNULL(strBatchNo, '') <> ''
   )
   BEGIN
     DECLARE @intToDeleteBatchLocationId INT
@@ -1592,27 +1593,30 @@ BEGIN
         ,@strBatchId OUTPUT
         ,0
 
-      UPDATE B
-      SET B.intLocationId = L.intCompanyLocationId
-        ,strBatchId = @strBatchId
-        --,intSampleId = NULL
-        ,dblOriginalTeaTaste = B.dblTeaTaste
-        ,dblOriginalTeaHue = B.dblTeaHue
-        ,dblOriginalTeaIntensity = B.dblTeaIntensity
-        ,dblOriginalTeaMouthfeel = B.dblTeaMouthFeel
-        ,dblOriginalTeaAppearance = B.dblTeaAppearance
-        ,strPlant=L.strVendorRefNoPrefix
-        ,strERPPONumber = BT.strERPPONumber
-      FROM @MFBatchTableType B
-      JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
-      JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
-      LEFT JOIN tblMFBatch BT ON BT.strBatchId = B.strBatchId AND BT.intLocationId = L.intCompanyLocationId
+      IF EXISTS(SELECT 1 FROM @MFBatchTableType WHERE intLocationId = intBuyingCenterLocationId)
+      BEGIN
+        UPDATE B
+        SET B.intLocationId = L.intCompanyLocationId
+          ,strBatchId = @strBatchId
+          --,intSampleId = NULL
+          ,dblOriginalTeaTaste = B.dblTeaTaste
+          ,dblOriginalTeaHue = B.dblTeaHue
+          ,dblOriginalTeaIntensity = B.dblTeaIntensity
+          ,dblOriginalTeaMouthfeel = B.dblTeaMouthFeel
+          ,dblOriginalTeaAppearance = B.dblTeaAppearance
+          ,strPlant=L.strVendorRefNoPrefix
+          ,strERPPONumber = BT.strERPPONumber
+        FROM @MFBatchTableType B
+        JOIN tblCTBook Bk ON Bk.intBookId = B.intBookId
+        JOIN tblSMCompanyLocation L ON L.strLocationName = Bk.strBook
+        LEFT JOIN tblMFBatch BT ON BT.strBatchId = B.strBatchId AND BT.intLocationId = L.intCompanyLocationId
 
-      EXEC uspMFUpdateInsertBatch @MFBatchTableType
-        ,@intInput OUTPUT
-        ,@intInputSuccess OUTPUT
-        ,NULL
-        ,1
+        EXEC uspMFUpdateInsertBatch @MFBatchTableType
+          ,@intInput OUTPUT
+          ,@intInputSuccess OUTPUT
+          ,NULL
+          ,1
+      END
 
       UPDATE tblQMSample
       SET strBatchNo = @strBatchId
