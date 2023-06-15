@@ -1304,6 +1304,11 @@
     <Build Include="dbo\Stored Procedures\uspFRDUpdateAccountUsedForCluster.sql" />
     <Build Include="dbo\Stored Procedures\uspICCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
+    <Build Include="dbo\Tables\tblTMTankMonitorStatus.sql" />
+    <Build Include="dbo\Views\vyuTMTankMonitorStatusSearch.sql" />
+    <Build Include="dbo\Tables\tblTMJobs.sql" />
+    <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3896,6 +3901,7 @@
     <Build Include="dbo\Views\vyuMFGetChangeOverGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
     <Build Include="dbo\Tables\tblGLOriginAccounts.sql" />
+    <Build Include="dbo\Tables\tblGLOverrideSegment.sql" />
     <Build Include="dbo\Tables\tblPATEstateCorporationDetail.sql" />
     <Build Include="dbo\Tables\tblPATCustomerVolume.sql" />
     <Build Include="dbo\Tables\tblRKM2MBasis.sql" />
@@ -4290,6 +4296,7 @@
     <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBatchPostEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLOverrideSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromVoucherBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspWHGetCompanyPreferenceValueList.sql" />
     <Build Include="dbo\Stored Procedures\uspWMGetUserLocationListWMS.sql" />

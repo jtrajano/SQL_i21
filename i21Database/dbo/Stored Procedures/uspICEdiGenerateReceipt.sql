@@ -56,10 +56,46 @@ DECLARE @Charges TABLE(
 	, ItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS, RecordType NVARCHAR(50)
 )
 
+
+-- Validate if month and day needs to be swapped
+DECLARE @InvoiceDate AS VARCHAR(100) = 
+	(SELECT Value 
+	FROM tblICEdiMapObject o
+	INNER JOIN tblICEdiMap m ON m.Id = o.MapId
+	WHERE [Key] = 'InvoiceDate' 
+	AND m.UniqueId = @UniqueId)
+
+BEGIN TRY
+	SET @InvoiceDate =  CAST(@InvoiceDate AS DATETIME)
+END TRY
+
+BEGIN CATCH
+
+	DECLARE @Day AS VARCHAR(2) = SUBSTRING(@InvoiceDate, 1, 2)
+	DECLARE @Month AS VARCHAR(2) = SUBSTRING(@InvoiceDate, 4, 2)
+
+	SET @InvoiceDate = STUFF(@InvoiceDate, 1, 2, @Month)
+	SET @InvoiceDate = STUFF(@InvoiceDate, 4, 2, @Day)
+
+	UPDATE
+		tblICEdiMapObject
+	SET
+		tblICEdiMapObject.Value = @InvoiceDate
+	FROM
+		tblICEdiMapObject AS emo
+		INNER JOIN tblICEdiMap AS em
+			ON em.Id = emo.MapId
+	WHERE
+		[Key] = 'InvoiceDate' 
+		AND em.UniqueId = @UniqueId
+END CATCH
+
+
 INSERT INTO @Stores EXEC [dbo].[uspICEdiGenerateMappingObjects] '0', @UniqueId
 INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
 INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
 INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
+
 
 -- Implied decimal conversions
 UPDATE @Invoices 
@@ -162,7 +198,7 @@ FROM
 		ON st.intStoreNo = CAST(s.StoreNumber AS INT)
 WHERE 
 	CAST(s.StoreNumber AS INT) = st.intStoreNo
-
+	
 /**********************************************************************************************
 	BEGIN VALIDATION
 **********************************************************************************************/
@@ -216,8 +252,8 @@ BEGIN
 					tblICItemUOM u INNER JOIN tblICItem it 
 						ON it.intItemId = u.intItemId
 				WHERE
-					SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
-					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))		
+					CAST(dbo.fnSTRemoveCheckDigit(ISNULL(u.strUPCA, u.strLongUPCCode)) AS BIGINT)
+					= dbo.fnSTRemoveCheckDigit(i.ItemUpc)
 			) itemBasedOnUpcCode
 			FULL OUTER JOIN (
 				SELECT TOP 1 
@@ -292,8 +328,8 @@ BEGIN
 					tblICItemUOM u INNER JOIN tblICItem it 
 						ON it.intItemId = u.intItemId
 				WHERE
-					SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
-					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))		
+					CAST(dbo.fnSTRemoveCheckDigit(ISNULL(u.strUPCA, u.strLongUPCCode)) AS BIGINT)
+					= dbo.fnSTRemoveCheckDigit(i.ItemUpc)
 			) itemBasedOnUpcCode
 			FULL OUTER JOIN (
 				SELECT TOP 1 
@@ -372,8 +408,8 @@ BEGIN
 						tblICItemUOM lookupUom INNER JOIN tblICItem item
 							ON item.intItemId = lookupUom.intItemId			
 					WHERE
-						SUBSTRING(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode), PATINDEX('%[^0]%', ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)+'.'), LEN(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)))
-						= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
+						CAST(dbo.fnSTRemoveCheckDigit(ISNULL(lookupUom.strUPCA, lookupUom.strLongUPCCode)) AS BIGINT)
+						= dbo.fnSTRemoveCheckDigit(i.ItemUpc)
 				) itemBasedOnUpcCode
 				FULL OUTER JOIN (
 					SELECT TOP 1 
@@ -488,7 +524,7 @@ INSERT INTO @ReceiptStagingTable(
 	, strImportDescription
 	, strDataSource
 )
-SELECT 
+SELECT DISTINCT
 	strReceiptType = 'Direct' 
 	,intEntityVendorId = v.intEntityId 
 	,intShipFromId = el.intEntityLocationId 
@@ -564,8 +600,8 @@ FROM
 					tblICItemUOM lookupUom INNER JOIN tblICItem item
 						ON item.intItemId = lookupUom.intItemId			
 				WHERE
-					SUBSTRING(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode), PATINDEX('%[^0]%', ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)+'.'), LEN(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)))
-					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
+					CAST(dbo.fnSTRemoveCheckDigit(ISNULL(lookupUom.strUPCA, lookupUom.strLongUPCCode)) AS BIGINT)
+					= dbo.fnSTRemoveCheckDigit(i.ItemUpc)
 			) itemBasedOnUpcCode
 			FULL OUTER JOIN (
 				SELECT TOP 1 
@@ -604,11 +640,11 @@ FROM
 	LEFT OUTER JOIN tblICItemUOM stockUnit 
 		ON stockUnit.intItemId = it.intItemId
 		AND stockUnit.ysnStockUnit = 1
-	LEFT JOIN tblICUnitMeasure symbolUOM 
-		ON symbolUOM.strSymbol = i.UnitOfMeasure
 	LEFT JOIN tblICItemUOM symbolItemUOM 
 		ON symbolItemUOM.intItemId = it.intItemId
-		AND symbolItemUOM.intUnitMeasureId = symbolUOM.intUnitMeasureId
+		AND CAST(dbo.fnSTRemoveCheckDigit(ISNULL(symbolItemUOM.strUPCA, symbolItemUOM.strLongUPCCode)) AS BIGINT) = dbo.fnSTRemoveCheckDigit(i.ItemUpc)
+	LEFT JOIN tblICUnitMeasure symbolUOM
+		ON symbolUOM.strSymbol = i.UnitOfMeasure
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM 
@@ -667,7 +703,6 @@ FROM
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
 		AND ISNULL(c.Amount, 0) <> 0
-
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
 BEGIN 
 	EXEC dbo.uspICAddItemReceipt 
@@ -711,7 +746,6 @@ BEGIN
 	GOTO LogErrors;
 	RETURN
 END
-
 -- Log valid items
 INSERT INTO tblICImportLogDetail(
 	intImportLogId

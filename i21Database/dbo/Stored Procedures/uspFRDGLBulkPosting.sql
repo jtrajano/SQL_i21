@@ -21,7 +21,7 @@ INSERT INTO tblGLPosted (intAccountId,dtmDate,dblDebit,dblCredit,dblDebitForeign
    SUM(dblDebit)dblDebit,SUM(dblCredit)dblCredit,              
    SUM(dblDebitForeign)dblDebitForeign,SUM(dblCreditForeign)dblCreditForeign,              
    SUM(dblDebitUnit)dblDebitUnit,SUM(dblCreditUnit)dblCreditUnit,              
-   T0.strCode,ISNULL(T0.intCurrencyId,T1.intCurrencyID)intCurrencyID,ISNULL(T0.intLedgerId,0)intLedgerId,ISNULL(T0.intSubledgerId,0)intSubledgerId FROM                
+    ISNULL(T0.strCode,'') AS strCode ,ISNULL(T0.intCurrencyId,T1.intCurrencyID)intCurrencyID,ISNULL(T0.intLedgerId,0)intLedgerId,ISNULL(T0.intSubledgerId,0)intSubledgerId FROM                
    tblGLDetail T0      
    LEFT JOIN tblGLAccount T1      
    ON T0.intAccountId = T1.intAccountId      

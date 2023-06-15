@@ -44,7 +44,9 @@ SELECT
 	B.intPayFromBankAccountId,
 	BA.strBankAccountNo strPayFromBankAccount,
 	EFT.intEntityEFTInfoId,
-	EFT.strAccountNumber
+	EFT.strAccountNumber,
+	pm.strPaymentMethod,
+	B.intPaymentMethodId
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -89,6 +91,7 @@ FROM
 	) ctBookEntities
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intPayFromBankAccountId
 	LEFT JOIN vyuAPEntityEFTInformation EFT ON EFT.intEntityId = B.intEntityId AND EFT.intCurrencyId = ISNULL(C.intDefaultCurrencyId, B.intCurrencyId) AND EFT.ysnDefaultAccount = 1
+	LEFT JOIN tblSMPaymentMethod pm ON pm.intPaymentMethodID = B.intPaymentMethodId
 GO
 
 
