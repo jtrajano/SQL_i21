@@ -75,10 +75,6 @@ BEGIN TRY
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLoadDetail
 
-			SELECT @intLoadShippingInstructionId = intLoadShippingInstructionId
-			FROM tblLGLoad
-			WHERE intLoadId = @intLoadId
-
 			UPDATE tblQMSample
 			SET intLoadContainerId = NULL
 				,intLoadDetailId = NULL
@@ -152,19 +148,6 @@ BEGIN TRY
 			EXEC [uspLGCreateLoadIntegrationLSPLog] @intLoadId = @intLoadId
 				,@strRowState = 'Delete'
 				,@intShipmentType = @intShipmentType
-
-			IF (ISNULL(@intLoadShippingInstructionId,0) <> 0)
-			BEGIN
-				UPDATE tblLGLoad
-				SET intShipmentStatus = 7
-					,strExternalShipmentNumber = NULL
-					,intConcurrencyId = intConcurrencyId + 1
-				WHERE intLoadId = @intLoadShippingInstructionId
-
-				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
-					,@strRowState = 'Added'
-					,@intShipmentType = 2
-			END
 		END
 		ELSE
 		BEGIN

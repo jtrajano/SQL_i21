@@ -31,6 +31,7 @@ BEGIN TRY
 	DECLARE @intShipmentStatus INT
 	DECLARE @ysnFromReturn BIT
 	DECLARE @intAllocationHeaderId INT
+	DECLARE @intLoadShippingInstructionId INT
 
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
@@ -105,6 +106,10 @@ BEGIN TRY
 		FROM tblLGAllocationDetail
 		WHERE intAllocationDetailId = @intAllocationDetailId
 
+		SELECT @intLoadShippingInstructionId = intLoadShippingInstructionId
+		FROM tblLGLoad
+		WHERE intLoadId = @intLoadId
+
 		IF (@intPurchaseSale = 2)
 		BEGIN
 			IF @intSContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
@@ -161,6 +166,12 @@ BEGIN TRY
 				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 0, @intEntityUserSecurityId = @UserId
 				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
 
+				-- SI Cancellation
+				IF (ISNULL(@intLoadShippingInstructionId,0) <> 0)
+				BEGIN
+					EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadShippingInstructionId, @ysnCancel = 1, @intEntityUserSecurityId = @UserId, @intShipmentType = 2
+				END
+
 				-- Automatic Allocation Cancellation
 				IF (@ysnCancelAllocation = 1)
 				BEGIN
@@ -177,6 +188,12 @@ BEGIN TRY
 					@intAllocationHeaderId = @intAllocationHeaderId,
 					@ysnCancel = 0,
 					@UserId = @UserId
+
+				-- SI Reverse Cancellation
+				IF (ISNULL(@intLoadShippingInstructionId,0) <> 0)
+				BEGIN
+					EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadShippingInstructionId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 2
+				END
 
 				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId = @intLoadId, @ysnCancel = 0, @intEntityUserSecurityId = @UserId, @intShipmentType = 1
 				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId = @intLoadId, @ysnPost = 1, @intEntityUserSecurityId = @UserId
