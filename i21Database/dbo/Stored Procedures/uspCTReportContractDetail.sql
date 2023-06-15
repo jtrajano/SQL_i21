@@ -391,6 +391,9 @@ BEGIN TRY
 		FROM tblSMCompanyPreference
 	) SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		1 = CASE WHEN CP.strDefaultContractReport = 'ContractEkaterra' AND CD.intContractStatusId <> 3 THEN 1
+					 WHEN CP.strDefaultContractReport != 'ContractEkaterra' THEN 1
+				ELSE 0 END 
 	--AND		CD.intContractStatusId <> 3
 
 END TRY
