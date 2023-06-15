@@ -43,6 +43,10 @@ IF @intWorkOrderId = 0
 		 , ri.dblLowerTolerance
 		 , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) dblUpperToleranceQty
 		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) dblLowerToleranceQty 
+		 , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) + ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblUpperTolerance) AS dblCalculatedUpperTolerance
+		 , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) - ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblLowerTolerance) AS dblCalculatedLowerTolerance 
+		 , Machine.strName AS strMachine
+		 , a.dblEstNoOfBlendSheet
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 
@@ -55,6 +59,9 @@ IF @intWorkOrderId = 0
 	LEFT JOIN tblMFRecipeItem ri ON r.intRecipeId =ri.intRecipeId and a.intItemId = ri.intItemId and intRecipeItemTypeId =2 
 	LEFT JOIN tblMFBudget bg ON a.intItemId = bg.intItemId AND a.intLocationId = bg.intLocationId AND bg.intYear = YEAR(GETDATE()) AND bg.intBudgetTypeId = 2
 	LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
+	OUTER APPLY (SELECT TOP 1 MFMachine.strName
+				 FROM tblMFMachine AS MFMachine
+				 WHERE MFMachine.intMachineId = a.intMachineId) AS Machine
 	WHERE a.intStatusId = 1
 
 --Positive means WorkOrderId
@@ -83,6 +90,8 @@ IF @intWorkOrderId > 0
 		 , ISNULL(f.dblCalculatedUpperTolerance, (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity))) AS dblCalculatedUpperTolerance
 		 , ISNULL(f.dblCalculatedLowerTolerance, (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))) AS dblCalculatedLowerTolerance 
 		 , f.ysnOverrideRecipe
+		 , Machine.strName AS strMachine
+		 , a.dblEstNoOfBlendSheet
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId = c.intUnitMeasureId 
@@ -97,6 +106,9 @@ IF @intWorkOrderId > 0
 				 FROM tblMFWorkOrder AS WorkOrder
 				 JOIN tblMFWorkOrderStatus AS WorkOrderStatus ON WorkOrder.intStatusId = WorkOrderStatus.intStatusId
 				 WHERE WorkOrder.intBlendRequirementId = a.intBlendRequirementId) AS WorkOrderStatus
+	OUTER APPLY (SELECT TOP 1 MFMachine.strName
+				 FROM tblMFMachine AS MFMachine
+				 WHERE MFMachine.intMachineId = a.intMachineId) AS Machine
 	WHERE f.intWorkOrderId = @intWorkOrderId
 	GROUP BY a.intBlendRequirementId
 		 , a.strDemandNo
@@ -119,6 +131,8 @@ IF @intWorkOrderId > 0
 		 , ISNULL(f.dblCalculatedUpperTolerance, (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)))
 		 , ISNULL(f.dblCalculatedLowerTolerance, (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))) 
 		 , f.ysnOverrideRecipe
+		 , Machine.strName
+		 , a.dblEstNoOfBlendSheet
 
 
 --Negative means BlendRequirementId
@@ -143,6 +157,8 @@ IF @intWorkOrderId < 0
 		 , ri.dblLowerTolerance				AS dblLowerTolerance
 		 , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedUpperTolerance
 		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedLowerTolerance 
+		 , Machine.strName AS strMachine
+		 , a.dblEstNoOfBlendSheet
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 
@@ -152,6 +168,9 @@ IF @intWorkOrderId < 0
 	LEFT JOIN tblICItemLocation g ON b.intItemId = g.intItemId AND g.intLocationId = a.intLocationId
 	LEFT JOIN tblICItemPricing h ON h.intItemId = b.intItemId AND g.intItemLocationId = h.intItemLocationId
 	LEFT JOIN tblSMCompanyLocation AS CompanyLocation ON a.intLocationId = CompanyLocation.intCompanyLocationId
+	OUTER APPLY (SELECT TOP 1 MFMachine.strName
+				 FROM tblMFMachine AS MFMachine
+				 WHERE MFMachine.intMachineId = a.intMachineId) AS Machine
 	WHERE a.intBlendRequirementId = ABS(@intWorkOrderId)
 	GROUP BY a.intBlendRequirementId
 		 , a.strDemandNo
@@ -173,3 +192,5 @@ IF @intWorkOrderId < 0
 		 , ri.dblLowerTolerance				
 		 , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) 
 		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))
+		 , Machine.strName
+		 , a.dblEstNoOfBlendSheet
