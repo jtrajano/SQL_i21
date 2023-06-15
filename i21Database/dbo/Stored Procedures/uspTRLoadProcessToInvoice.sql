@@ -67,7 +67,7 @@ BEGIN TRY
 		,[intFreightTermId]						= EL.intFreightTermId
 		,[intShipViaId]							= ISNULL(TL.intShipViaId, EL.intShipViaId) 
 		,[intPaymentMethodId]					= 0
-		,[strInvoiceOriginId]					= ''
+		,[strInvoiceOriginId]					= CASE WHEN (MBIL.intDeliveryHeaderId IS NOT NULL AND ISNULL(MBIL.strDeliveryNumber, '') <> '') THEN MBIL.strDeliveryNumber ELSE  TL.strTransaction END
 		,[strPONumber]							= DH.strPurchaseOrder
 		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, DD.strBillOfLading)
 		,[strComments]							= ''
@@ -175,6 +175,7 @@ BEGIN TRY
 		,dblComboSurcharge						= DD.dblComboSurcharge
 		,intInventoryReceiptId					= TR.intInventoryReceiptId
 		,intDispatchId							= DD.intTMOId
+		,ysnUseOriginIdAsInvoiceNumber			= CASE WHEN (MBIL.intDeliveryHeaderId IS NOT NULL AND ISNULL(MBIL.strDeliveryNumber, '') <> '') THEN 1 ELSE  0 END
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -237,6 +238,7 @@ BEGIN TRY
 	LEFT JOIN tblSMTermPullPoint TPPC ON TPPC.strPullPoint = CASE WHEN TR.strOrigin = 'Location' THEN 'Company Location' ELSE TR.strOrigin END
     AND TPPC.intCategoryId = IC.intCategoryId
 
+	LEFT JOIN tblMBILDeliveryHeader MBIL ON DH.intDeliveryHeaderId = MBIL.intDeliveryHeaderId
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 		-- AND (TL.intMobileLoadHeaderId IS NULL
@@ -1022,6 +1024,7 @@ BEGIN TRY
 		,[strBOLNumberDetail]
 		,[ysnBlended]
 		,[intDispatchId]
+		,[ysnUseOriginIdAsInvoiceNumber]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1107,6 +1110,7 @@ BEGIN TRY
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
 		,ysnBlended								= TR.ysnBlended
 		,intDispatchId							= TR.intDispatchId
+		,ysnUseOriginIdAsInvoiceNumber			= TR.ysnUseOriginIdAsInvoiceNumber
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
@@ -1689,9 +1693,9 @@ BEGIN TRY
 
 			IF (@ysnRecap != 1)
 			BEGIN
-				UPDATE tblTRLoadHeader 
-				SET ysnPosted = @ysnPostOrUnPost
-				WHERE intLoadHeaderId = @intLoadHeaderId
+			UPDATE tblTRLoadHeader 
+			SET ysnPosted = @ysnPostOrUnPost
+			WHERE intLoadHeaderId = @intLoadHeaderId
 			END
 
 			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
@@ -1707,9 +1711,9 @@ BEGIN TRY
 
 			IF (@ysnRecap != 1)
 			BEGIN
-				UPDATE tblTRLoadHeader 
-				SET ysnPosted = @ysnPostOrUnPost
-				WHERE intLoadHeaderId = @intLoadHeaderId
+			UPDATE tblTRLoadHeader 
+			SET ysnPosted = @ysnPostOrUnPost
+			WHERE intLoadHeaderId = @intLoadHeaderId
 			END
 
 			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
