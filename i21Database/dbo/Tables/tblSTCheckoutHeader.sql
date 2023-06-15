@@ -43,6 +43,7 @@
 	[dblATMEndBalanceCalculated]		DECIMAL(18, 6) NULL,
 	[dblATMEndBalanceActual]			DECIMAL(18, 6) NULL,
 	[dblATMVariance]					DECIMAL(18, 6) NULL,
+    [ysnNoEffectOnDeposit]              BIT NULL DEFAULT((0)),
 
 	-- CHANGE FUND
 	[dblChangeFundBegBalance]			DECIMAL(18, 6) NULL,
