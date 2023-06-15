@@ -762,8 +762,7 @@ BEGIN
 					 , dblAdjustedTax
 				FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 			) IDT ON DETAIL.intInvoiceDetailId = IDT.intInvoiceDetailId
-			WHERE DETAIL.intInvoiceId = 52027
-				AND IDT.dblAdjustedTax <> 0
+			WHERE IDT.dblAdjustedTax <> 0
 			GROUP BY DETAIL.intInvoiceId, DETAIL.intInvoiceDetailId
 			HAVING SUM(ISNULL(IDT.dblAdjustedTax, 0)) <> 0
 		) Taxes ON ID.intInvoiceDetailId = Taxes.intInvoiceDetailId
