@@ -18,6 +18,7 @@ SELECT intSampleId					= S.intSampleId
 	 , dblBasePrice					= ISNULL(S.dblBasePrice, 0)
 	 , dblTastingScore				= ISNULL(PV.dblActualValue, 0)
 	 , strSupplier					= SUP.strName
+	 , strProducer 					= PRODUCER.strName
 	 , strTeaLingoItem				= ITEM.strItemNo
 	 , strCompanyName				= COMP.strCompanyName
 	 , strCompanyAddress			= COMP.strAddress
@@ -38,6 +39,7 @@ LEFT JOIN tblICUnitMeasure RIUM ON RIUM.intUnitMeasureId = S.intRepresentingUOMI
 LEFT JOIN tblICUnitMeasure PIUM ON PIUM.intUnitMeasureId = S.intPackageTypeId
 LEFT JOIN tblQMGardenMark GM ON S.intGardenMarkId = GM.intGardenMarkId
 LEFT JOIN tblARMarketZone MZ ON S.intMarketZoneId = MZ.intMarketZoneId
+LEFT JOIN tblEMEntity PRODUCER ON GM.intProducerId = PRODUCER.intEntityId
 LEFT JOIN tblICBrand B ON S.intBrandId = B.intBrandId
 LEFT JOIN tblCTValuationGroup VG ON S.intValuationGroupId = VG.intValuationGroupId
 OUTER APPLY (
