@@ -10399,6 +10399,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuGLLocationAccountId.sql" />
     <Build Include="dbo\Views\vyuGLCompanyAccountId.sql" />
+    <Build Include="dbo\Views\vyuGLCompanyOutOfBalance.sql" /> 
     <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
