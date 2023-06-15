@@ -72,6 +72,7 @@
 	[ysnAddonParent]					BIT				NULL,
 	[ysnItemContract]					BIT				NULL,
 	[guiApiItemTaxIdentifier]			UNIQUEIDENTIFIER NULL,
+	[intItemCustomerXrefId]				INT				NULL,
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

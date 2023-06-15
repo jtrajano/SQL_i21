@@ -194,6 +194,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , ysnTankRequired						= ITMNO.ysnTankRequired
 	 , intDispatchId						= INV.intDispatchId
 	 , strOrderNumber						= ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
+	 , xref.strCustomerProduct
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -367,4 +368,5 @@ LEFT JOIN (
 	WHERE intInvoiceDetailId IS NOT NULL
 	GROUP BY intInvoiceDetailId
 ) APAR ON INV.intInvoiceDetailId = APAR.intInvoiceDetailId
+LEFT JOIN tblICItemCustomerXref xref ON xref.intItemCustomerXrefId = INV.intItemCustomerXrefId
 GO
