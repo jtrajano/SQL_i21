@@ -1,4 +1,5 @@
-﻿-- This function returns an accurate result when multiplying high precision/scale numbers in SQL server. 
+﻿---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- This function returns an accurate result when multiplying high precision/scale numbers in SQL server. 
 -- It multiplies the numbers using the whole number part, determine where to place the decimal point in the string, and then return as a numeric with 20 decimal places. 
 CREATE FUNCTION [dbo].[fnMultiply] (
 	@factor1 AS NUMERIC(38,20)
@@ -69,10 +70,10 @@ BEGIN
 		DECLARE @stringFactor1 AS NVARCHAR(40) = CAST(@factor1 AS NVARCHAR(40)) 
 				,@stringFactor2 AS NVARCHAR(40) = CAST(@factor2 AS NVARCHAR(40)) 
 
-		DECLARE	@shortenFactor1 AS NUMERIC(38, 20) = LEFT(@stringFactor1, CHARINDEX('.', @stringFactor1) + 6)
-				,@shortenFactor2 AS NUMERIC(38, 20)	= LEFT(@stringFactor2, CHARINDEX('.', @stringFactor2) + 6)
+		DECLARE	@shortenFactor1 AS NUMERIC(22, 10) = LEFT(@stringFactor1, CHARINDEX('.', @stringFactor1) + 6)
+				,@shortenFactor2 AS NUMERIC(22, 10)	= LEFT(@stringFactor2, CHARINDEX('.', @stringFactor2) + 6)
 
-		DECLARE @shortenMultiply AS NUMERIC(38,20) = @shortenFactor1 * @shortenFactor2			
+		DECLARE @shortenMultiply AS NUMERIC(38,20) = @shortenFactor1 * @shortenFactor2				
 		
 		SET @rawResult = REPLICATE('0',PATINDEX('%[^0]%', REPLACE(REPLACE(@shortenMultiply, '.', ''), '-', '')) - 1) + @rawResult +  REPLICATE('0', 5) 
 	END 	
@@ -101,8 +102,8 @@ BEGIN
 	-- If the native method have a different result than fnMultiply, then use the result from native calculation. 
 	-- Better to have an correct number with lesser decimal values than a wrong value. 
 	-- Ex: 45.35929094356398 x 22.0462 is 1,000 in the native calculation but fnMultiply returns 100.00 instead. 
-	IF ROUND(@product, 5) <> ROUND(@factor1 * @factor2, 5)
+	IF ROUND(@product, 5) <> ROUND(@shortenFactor1 * @shortenFactor2, 5)
 		RETURN (@factor1 * @factor2)
-	
+
 	RETURN @product
 END
