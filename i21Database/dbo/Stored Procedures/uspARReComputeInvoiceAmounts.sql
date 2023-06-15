@@ -17,65 +17,68 @@ DECLARE  @ZeroDecimal			DECIMAL(18,6)
 		,@strTransType			NVARCHAR(50)
 		,@OriginalInvoiceId		INT
 		,@CurrencyExchangeRate	DECIMAL(18,6)
+		,@Percentage			DECIMAL(18,6)
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
 
-UPDATE
-	tblARInvoiceDetail
+UPDATE ARID
 SET
-	 [dblCurrencyExchangeRate]	= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END
-WHERE
-	[intInvoiceId] = @InvoiceIdLocal
+	  dblCurrencyExchangeRate	= CASE WHEN ISNULL(ARID.dblCurrencyExchangeRate, @ZeroDecimal) = @ZeroDecimal 
+									THEN 1.000000 
+									ELSE ARID.dblCurrencyExchangeRate
+								  END
+	,@Percentage				= ISNULL(CTCH.dblProvisionalInvoicePct, 100)
+	,dblPercentage				= @Percentage
+	,dblProvisionalTotal		= (@Percentage / 100) * dblTotal
+FROM tblARInvoiceDetail ARID
+LEFT JOIN (
+	SELECT
+		 intContractHeaderId
+		,dblProvisionalInvoicePct
+	FROM tblCTContractHeader 
+) CTCH ON CTCH.intContractHeaderId = ARID.intContractHeaderId
 
-UPDATE
-	tblARInvoice
+UPDATE tblARInvoice
 SET
-	 [dblCurrencyExchangeRate]	= dbo.fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
-FROM
-	(
-		SELECT 
-			 [dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
-			,[intCount]					= COUNT([intInvoiceId])
-			,[intInvoiceId]				= [intInvoiceId]
-		FROM
-			tblARInvoiceDetail
-		WHERE
-			[intInvoiceId] = @InvoiceIdLocal
-		GROUP BY
-			[intInvoiceId]
-	)
-	 T
-WHERE
-	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
-	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
+	 dblCurrencyExchangeRate= dbo.fnRoundBanker(ISNULL(T.dblCurrencyExchangeRate, 1.000000) / ISNULL(T.intCount, 1.000000), 6)
+	,dblPercentage			= @Percentage
+FROM (
+	SELECT 
+		 dblCurrencyExchangeRate= SUM(dblCurrencyExchangeRate)
+		,intCount				= COUNT(intInvoiceId)
+		,intInvoiceId			= intInvoiceId
+	FROM tblARInvoiceDetail
+	WHERE
+		intInvoiceId = @InvoiceIdLocal
+	GROUP BY
+		 intInvoiceId
+) T
+WHERE tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
+AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
 						
 SELECT
 	 @CurrencyId			= [intCurrencyId]
 	,@OriginalInvoiceId		= [intOriginalInvoiceId]
 	,@strTransType			= [strTransactionType]
 	,@CurrencyExchangeRate	= (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END)
-FROM
-	tblARInvoice
+FROM tblARInvoice
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
-
-UPDATE
-	tblARInvoiceDetailTax
+UPDATE tblARInvoiceDetailTax
 SET
 	 [dblRate]				= ISNULL([dblRate], @ZeroDecimal)
 	,[dblBaseRate]			= ISNULL([dblBaseRate], ISNULL([dblRate], @ZeroDecimal))
 	,[dblTax]				= ISNULL([dblTax], @ZeroDecimal)
 	,[dblAdjustedTax]		= dbo.fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), dbo.fnARGetDefaultDecimal())
 	,[dblBaseAdjustedTax]	= dbo.fnRoundBanker(ISNULL([dblBaseAdjustedTax], @ZeroDecimal), dbo.fnARGetDefaultDecimal())
-	,[ysnTaxAdjusted]		= ISNULL([ysnTaxAdjusted], 0)
+	,[ysnTaxAdjusted]		= ISNULL(ysnTaxAdjusted, 0)
+	,dblProvisionalTax		= (@Percentage / 100) * ISNULL(dblAdjustedTax, 0)
 WHERE 
 	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceIdLocal)
 	
-	
-UPDATE
-	ARID
+UPDATE ARID
 SET
 	 [dblQtyOrdered]					= ISNULL([dblQtyOrdered], @ZeroDecimal)
 	,[dblQtyShipped]					= ISNULL([dblQtyShipped], @ZeroDecimal)
@@ -165,57 +168,49 @@ SET  [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
 	,[dblLoanAmount]						= CASE WHEN ISNULL(strTransactionNo, '') <> '' THEN ISNULL([dblInvoiceSubtotal], @ZeroDecimal) ELSE NULL END
 WHERE [intInvoiceId] = @InvoiceIdLocal
 
-
---IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
---BEGIN
-	UPDATE I
-	SET [dblDiscountAvailable]					= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceSubtotal] + [dblShipping] END)  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END, 2)
-		,[dblBaseDiscountAvailable]				= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceSubtotal] + [dblBaseShipping] END)  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END, 2)
-		,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
-		,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
-		,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
-		,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
-	FROM tblARInvoice I
-	INNER JOIN (
-		SELECT [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
-			,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
-			,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
-			,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
-			,[intInvoiceId]						= [intInvoiceId]
-		FROM tblARInvoiceDetail
-		WHERE [intInvoiceId] = @InvoiceIdLocal
-		GROUP BY [intInvoiceId]
-	) T ON I.[intInvoiceId] = T.[intInvoiceId]
-	   AND I.[intInvoiceId] = @InvoiceIdLocal
-	INNER JOIN tblSMTerm TERM ON I.intTermId = TERM.intTermID		
---END
-
-
+UPDATE I
+SET [dblDiscountAvailable]					= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceSubtotal] + [dblShipping] END)  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END, 2)
+	,[dblBaseDiscountAvailable]				= ROUND(CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceSubtotal] + [dblBaseShipping] END)  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END, 2)
+	,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
+	,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
+	,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
+	,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
+FROM tblARInvoice I
+INNER JOIN (
+	SELECT [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
+		,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
+		,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
+		,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
+		,[intInvoiceId]						= [intInvoiceId]
+	FROM tblARInvoiceDetail
+	WHERE [intInvoiceId] = @InvoiceIdLocal
+	GROUP BY [intInvoiceId]
+) T ON I.[intInvoiceId] = T.[intInvoiceId]
+	AND I.[intInvoiceId] = @InvoiceIdLocal
+INNER JOIN tblSMTerm TERM ON I.intTermId = TERM.intTermID		
 
 IF (@AvailableDiscountOnly = 1)
 	RETURN 1;
 
 	
-UPDATE
-	tblARInvoiceDetail
+UPDATE tblARInvoiceDetail
 SET
-	  [dblTotalTax]		= ISNULL(T.[dblAdjustedTax], @ZeroDecimal)
-	 ,[dblBaseTotalTax]	= ISNULL(T.[dblBaseAdjustedTax], @ZeroDecimal)
-FROM
-	(
-		SELECT
-			 SUM([dblAdjustedTax]) [dblAdjustedTax]
-			,SUM([dblBaseAdjustedTax]) [dblBaseAdjustedTax]
-			,[intInvoiceDetailId]
-		FROM
-			tblARInvoiceDetailTax
-		GROUP BY
-			[intInvoiceDetailId]	
-	)
-	 T
-WHERE
-	tblARInvoiceDetail.[intInvoiceDetailId] = T.[intInvoiceDetailId]
-	AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
+	  dblTotalTax				= ISNULL(T.dblAdjustedTax, @ZeroDecimal)
+	 ,dblBaseTotalTax			= ISNULL(T.dblBaseAdjustedTax, @ZeroDecimal)
+	 ,dblProvisionalTotalTax	= ISNULL(dblProvisionalTax, @ZeroDecimal)
+	 ,dblBaseProvisionalTotalTax= dblProvisionalTax * dblCurrencyExchangeRate
+FROM (
+	SELECT
+		 dblAdjustedTax		= SUM([dblAdjustedTax])
+		,dblBaseAdjustedTax	= SUM([dblBaseAdjustedTax])
+		,dblProvisionalTax	= SUM(dblProvisionalTax)
+		,[intInvoiceDetailId]
+	FROM
+		tblARInvoiceDetailTax
+	GROUP BY
+		[intInvoiceDetailId]
+) T
+WHERE tblARInvoiceDetail.[intInvoiceDetailId] = T.[intInvoiceDetailId]AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceIdLocal
 
 UPDATE ARID
 SET ARID.dblTotal	= CASE WHEN ISNULL(ICI.[strType], '') = 'Comment' 
@@ -247,8 +242,7 @@ LEFT OUTER JOIN tblICItem ICI ON ARID.[intItemId] = ICI.[intItemId]
 WHERE ARID.[intInvoiceId] = @InvoiceIdLocal
 		
 	
-UPDATE
-	tblARInvoice
+UPDATE tblARInvoice
 SET
 	 [dblTax]					= ISNULL(T.[dblTotalTax], @ZeroDecimal)
 	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
@@ -259,30 +253,28 @@ SET
 	,[dblAmountDue]				= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblAmountDue] END
 	,[dblBaseAmountDue]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseAmountDue] END
 	,[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
-FROM
-	(
-		SELECT 
-			 [dblTotalTax]				= SUM([dblTotalTax])
-			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
-			,[dblTotal]					= SUM([dblTotal])
-			,[dblBaseTotal]				= SUM([dblBaseTotal])
-			,[dblTotalStandardWeight]	= SUM(dbo.fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), dbo.fnARGetDefaultDecimal()))
-			,[intInvoiceId]				= [intInvoiceId]
-		FROM
-			tblARInvoiceDetail
-		WHERE
-			[intInvoiceId] = @InvoiceIdLocal
-		GROUP BY
-			[intInvoiceId]
-	)
-	 T
+	,dblProvisionalTotal		= ISNULL(T.dblProvisionalTotal, @ZeroDecimal)
+FROM (
+	SELECT 
+		 [dblTotalTax]				= SUM([dblTotalTax])
+		,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
+		,[dblTotal]					= SUM([dblTotal])
+		,[dblBaseTotal]				= SUM([dblBaseTotal])
+		,[dblTotalStandardWeight]	= SUM(dbo.fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), dbo.fnARGetDefaultDecimal()))
+		,dblProvisionalTotal		= SUM(dblProvisionalTotal)
+		,[intInvoiceId]				= [intInvoiceId]
+	FROM
+		tblARInvoiceDetail
+	WHERE
+		[intInvoiceId] = @InvoiceIdLocal
+	GROUP BY
+		[intInvoiceId]
+) T
 WHERE
 	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
 	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
-	
-	
-UPDATE
-	ARI
+
+UPDATE ARI
 SET
 	 [dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
 	,[dblBaseInvoiceTotal]	= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping])

@@ -1413,7 +1413,7 @@ INNER JOIN (
 WHERE ID.strSessionId = @strSessionId
 
 UPDATE ARPIH
-SET dblBaseInvoiceTotal		= dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 100 
+SET dblBaseInvoiceTotal		= dbo.fnRoundBanker(CASE WHEN ARPIH.dblPercentage <> 100 AND strType = 'Provisional'
 								THEN (ARPID.dblBaseProvisionalTotal + ARPID.dblBaseProvisionalTotalTax) - ARPID.dblBaseDiscountAmount
 								ELSE (ARPID.dblBaseLineItemGLAmount + ARPID.dblBaseTax) - ARPID.dblBaseDiscountAmount
 							  END, @Precision)
