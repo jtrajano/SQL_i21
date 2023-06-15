@@ -862,6 +862,7 @@ DECLARE @ysnSuccess BIT
   ,dtmValidTo  
   ,strPropertyRangeText  
   ,dblMinValue  
+  ,dblPinpointValue
   ,dblMaxValue  
   ,dblLowValue  
   ,dblHighValue  
@@ -902,6 +903,7 @@ DECLARE @ysnSuccess BIT
   ,dtmValidTo  
   ,strPropertyRangeText  
   ,dblMinValue  
+  ,dblPinpointValue
   ,dblMaxValue  
   ,dblLowValue  
   ,dblHighValue  
@@ -944,6 +946,7 @@ DECLARE @ysnSuccess BIT
    ,dtmValidTo DATETIME  
    ,strPropertyRangeText NVARCHAR(MAX)  
    ,dblMinValue NUMERIC(18, 6)  
+   ,dblPinpointValue NUMERIC(18, 6)  
    ,dblMaxValue NUMERIC(18, 6)  
    ,dblLowValue NUMERIC(18, 6)  
    ,dblHighValue NUMERIC(18, 6)  
