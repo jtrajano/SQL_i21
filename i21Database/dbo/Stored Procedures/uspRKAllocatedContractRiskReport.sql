@@ -327,6 +327,6 @@ BEGIN
 		ORDER BY SAssign.intAssignFuturesToContractSummaryId DESC
 	) SHistoricSA
 	WHERE CHP.intCommodityId = ISNULL(@intCommodityId, CHP.intCommodityId)
-	AND (PArb.dblNoOfLots IS NOT NULL OR PArbAssignDer.dblNoOfLots IS NOT NULL)	
-	AND (SArb.dblNoOfLots IS NOT NULL OR SArbAssignDer.dblNoOfLots IS NOT NULL)	
+	--AND (PArb.dblNoOfLots IS NOT NULL OR PArbAssignDer.dblNoOfLots IS NOT NULL)	
+	--AND (SArb.dblNoOfLots IS NOT NULL OR SArbAssignDer.dblNoOfLots IS NOT NULL)	
 END
