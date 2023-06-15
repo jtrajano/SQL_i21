@@ -55,6 +55,7 @@
 	[ysnRecurring] BIT NULL DEFAULT 0 ,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [UK_dbo.tblPOPurchase_strPurchaseOrderNumber] UNIQUE (strPurchaseOrderNumber),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblPOOrderStatus_intOrderStatusId] FOREIGN KEY (intOrderStatusId) REFERENCES tblPOOrderStatus(intOrderStatusId),

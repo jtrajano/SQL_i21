@@ -10855,6 +10855,7 @@
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiCalculateTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiCalculatePOTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetTaxDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspApiUpdateTaxDetails.sql" />
