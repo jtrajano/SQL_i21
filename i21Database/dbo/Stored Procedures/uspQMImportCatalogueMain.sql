@@ -30,10 +30,10 @@ BEGIN TRY
 		AND SEASON.strDescription = IMP.strColour
 	-- Garden Mark
 	LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
-	-- Producer
-	LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GARDEN.intProducerId
-	-- Producer Type
-	LEFT JOIN tblEMEntityType ProdType ON ProdType.intEntityId = Producer.intEntityId AND ProdType.strType = 'Producer'
+	-- -- Producer
+	-- LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GARDEN.intProducerId
+	-- -- Producer Type
+	-- LEFT JOIN tblEMEntityType ProdType ON ProdType.intEntityId = Producer.intEntityId AND ProdType.strType = 'Producer'
 	-- Garden Geo Origin
 	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin AND ISNULL(ORIGIN.strISOCode, '') <> ''
 	-- Sustainability
@@ -99,14 +99,7 @@ BEGIN TRY
 						)
 					THEN 'GARDEN MARK, '
 				ELSE ''
-				END + CASE 
-				WHEN (
-						Producer.intEntityId IS NULL
-						--AND ISNULL(IMP.strGardenMark, '') <> ''
-						)
-					THEN 'Proudcer ID, '
-				ELSE ''
-				END + CASE 
+				END +  CASE 
 				WHEN (
 						ORIGIN.intCountryID IS NULL
 						--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
@@ -284,10 +277,6 @@ BEGIN TRY
 			--	)
 			OR (
 				GARDEN.intGardenMarkId IS NULL
-				--AND ISNULL(IMP.strGardenMark, '') <> ''
-				)
-			OR (
-				Producer.intEntityId IS NULL
 				--AND ISNULL(IMP.strGardenMark, '') <> ''
 				)
 			OR (
