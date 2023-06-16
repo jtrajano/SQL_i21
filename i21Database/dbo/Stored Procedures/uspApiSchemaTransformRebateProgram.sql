@@ -417,25 +417,6 @@ DECLARE @CreatedProgramItems TABLE (
 	, intRowNumber INT NULL
 )
 
--- SELECT
--- 	  v.strProgram, p.intProgramId, p.strProgram, rp.strVendorProgram
-	
--- FROM tblApiSchemaTransformRebateProgram rp
--- OUTER APPLY (
--- 	SELECT uv.strProgram, uv.intVendorSetupId
--- 	FROM @UniqueVendors uv
--- 	JOIN vyuAPVendor v ON v.intEntityId = uv.intEntityId
--- 	WHERE uv.strProgram = rp.strVendorProgram
--- 		AND (rp.strVendor = v.strVendorId OR rp.strVendor = v.strName)
--- ) v
--- OUTER APPLY (
--- 	SELECT TOP 1 xp.intProgramId, xp.strProgram
--- 	FROM tblVRProgram xp
--- 	WHERE xp.strVendorProgram = rp.strVendorProgram
--- 		AND xp.intVendorSetupId = v.intVendorSetupId
--- ) p
--- WHERE rp.guiApiUniqueId = @guiApiUniqueId
-
 INSERT INTO @CreatedProgramItems
 SELECT
 	  p.intProgramId
