@@ -15,7 +15,7 @@ SELECT
 						THEN SplPrc.dblCost
 					WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
 						THEN effectiveCost.dblCost --Effective Cost
-					ELSE ip.dblLastCost
+					ELSE ip.dblStandardCost
 				END AS dblLastCost
 FROM tblICItemPricing ip
 JOIN tblICItemUOM UM
