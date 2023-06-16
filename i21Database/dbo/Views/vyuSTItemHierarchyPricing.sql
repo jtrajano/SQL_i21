@@ -13,7 +13,7 @@ SELECT
 				END AS dblSalePrice,
 	CASE WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
 						THEN SplPrc.dblCost
-					WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+					WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
 						THEN effectiveCost.dblCost --Effective Cost
 					ELSE ip.dblLastCost
 				END AS dblLastCost
@@ -44,6 +44,7 @@ LEFT JOIN
 				intItemId,
 				intItemLocationId,
 				dblCost,
+				dtmEffectiveCostDate,
 				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
 		FROM tblICEffectiveItemCost
 		WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
