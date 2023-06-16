@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateM2M]
-	@intM2MHeaderId INT OUTPUT
+	  @intM2MHeaderId INT OUTPUT
 	, @strRecordName NVARCHAR(50) = NULL
 	, @intCommodityId INT = NULL
 	, @intM2MTypeId INT
@@ -136,6 +136,8 @@ BEGIN TRY
 		, @ysnEnableMTMPoint BIT
 		, @ysnIncludeProductInformation BIT
 		, @intFunctionalCurrencyId INT
+		, @intRiskViewId INT
+		, @ysnM2MAllowLotControlledItems BIT
 
 	SELECT TOP 1 @strM2MView = strM2MView
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
@@ -159,6 +161,8 @@ BEGIN TRY
         , @ysnEvaluationByStorageUnit = ysnEvaluationByStorageUnit 
 		, @ysnEnableAllocatedContractsGainOrLoss = ysnEnableAllocatedContractsGainOrLoss
 		, @ysnIncludeProductInformation = ysnIncludeProductInformation
+		, @intRiskViewId = intRiskViewId
+		, @ysnM2MAllowLotControlledItems = ysnM2MAllowLotControlledItems
 	FROM tblRKCompanyPreference
 
 	SELECT @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
@@ -2887,7 +2891,10 @@ BEGIN TRY
 							, cd.ysnFMSubCurrency
 						FROM @tblOpenContractList cd
 						JOIN vyuRKGetPurchaseInventory l ON cd.intContractDetailId = l.intContractDetailId
-						JOIN tblICItem i ON cd.intItemId = i.intItemId AND i.strLotTracking <> 'No'						
+						JOIN tblICItem i 
+							ON cd.intItemId = i.intItemId 
+							AND i.strLotTracking = CASE WHEN ISNULL(@intRiskViewId, 0) = 2 OR ISNULL(@ysnM2MAllowLotControlledItems, 0) = 1 
+													THEN i.strLotTracking ELSE 'No' END
 						WHERE cd.intCommodityId = @intCommodityId
 					)t
 				)t1
@@ -3600,6 +3607,8 @@ BEGIN TRY
 						AND ISNULL(strTicketStatus, '') <> 'V'
 						AND convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)< = convert(datetime, @dtmEndDate)
 						AND ysnInTransit = 0
+						AND i.strLotTracking = CASE WHEN ISNULL(@intRiskViewId, 0) = 2 OR ISNULL(@ysnM2MAllowLotControlledItems, 0) = 1 
+												THEN i.strLotTracking ELSE 'No' END
 					GROUP BY i.intItemId
 							, i.strItemNo
 							, s.intItemLocationId
@@ -3680,7 +3689,8 @@ BEGIN TRY
 			WHERE col.intCommodityId = @intCommodityId
 			AND col.intLocationId = ISNULL(@intLocationId, col.intLocationId) 
 			AND col.ysnIncludeInPriceRiskAndCompanyTitled = 1
-
+			AND i.strLotTracking = CASE WHEN ISNULL(@intRiskViewId, 0) = 2 OR ISNULL(@ysnM2MAllowLotControlledItems, 0) = 1 
+									THEN i.strLotTracking ELSE 'No' END
 			DECLARE @intCollateralId INT
 					, @intCommodityIdCollateral INT
 					, @intItemIdCollateral INT
@@ -7717,7 +7727,8 @@ BEGIN TRY
 		LEFT JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = CH.intCompanyId
 		WHERE CH.intCommodityId = CASE WHEN ISNULL(@intCommodityId, 0) = 0 THEN CH.intCommodityId
 									ELSE @intCommodityId END		
-			AND Item.strLotTracking <> 'No'
+			AND Item.strLotTracking = CASE WHEN ISNULL(@intRiskViewId, 0) = 2 OR ISNULL(@ysnM2MAllowLotControlledItems, 0) = 1 
+									THEN Item.strLotTracking ELSE 'No' END
 			AND CL.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 											ELSE @intLocationId END
 			AND ISNULL(CH.intCompanyId, 0) = CASE WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId, 0)

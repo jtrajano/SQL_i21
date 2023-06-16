@@ -532,8 +532,16 @@ FROM (
 		ON CLASS.intCommodityAttributeId = i.intClassVarietyId
 	LEFT JOIN tblICCommodityAttribute REGION
 		ON REGION.intCommodityAttributeId = i.intRegionId
+	OUTER APPLY (
+		SELECT TOP 1 
+			  intRiskViewId
+			, ysnM2MAllowLotControlledItems
+		FROM tblRKCompanyPreference
+	) rkcp
 	WHERE dblQuantity > 0
-		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
+		AND it.strLotTracking = CASE WHEN ISNULL(rkcp.intRiskViewId, 0) = 2 OR ISNULL(rkcp.ysnM2MAllowLotControlledItems, 0) = 1 
+									THEN it.strLotTracking ELSE 'No' END
+) iis
 OUTER APPLY (
 	SELECT DISTINCT TOP 1 cd.intItemId
 		, cd.intCompanyLocationId
