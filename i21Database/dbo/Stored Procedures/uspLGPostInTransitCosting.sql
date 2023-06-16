@@ -468,7 +468,8 @@ SET ANSI_WARNINGS ON
 				,[dblForeignRate]
 				,[intSourceEntityId]
 				,[intCommodityId]
-				,[strRateType]
+				,[intCurrencyExchangeRateTypeId]
+				,[strRateType]				
 		)			
 		EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
 			@strBatchId = @strBatchId
@@ -682,7 +683,8 @@ SET ANSI_WARNINGS ON
 				,[dblForeignRate]
 				,[intSourceEntityId]
 				,[intCommodityId]
-				,[strRateType]
+				,[intCurrencyExchangeRateTypeId]
+				,[strRateType]				
 		)			
 		EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
 			@strBatchId = @strBatchId

@@ -307,6 +307,7 @@ WITH ForGLEntries_CTE (
 	,intSourceEntityId
 	,intCommodityId
 	,strRateType
+	,intCurrencyExchangeRateTypeId
 	,dblForexValue
 	,intOtherChargeItemId
 	,intOtherChargeLocationId
@@ -338,11 +339,13 @@ AS
 			,t.intSourceEntityId
 			,i.intCommodityId
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
+			,currencyRateType.intCurrencyExchangeRateTypeId
 			,dblForexValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0), 2)
 			,adjLog.intOtherChargeItemId
 			,[intOtherChargeLocationId] = otherChargeLocation.intItemLocationId
 			,[other charge] = charge.strItemNo
 			,ysnReversal = CASE WHEN ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2) < 0 THEN 1 ELSE 0 END 
+			
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -403,6 +406,7 @@ INSERT INTO @GLEntries (
 	,intSourceEntityId
 	,intCommodityId
 	,strRateType
+	,intCurrencyExchangeRateTypeId
 )
 
 /*-----------------------------------------------------------------------------------
@@ -451,6 +455,7 @@ SELECT
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 		,strRateType				= ForGLEntries_CTE.strRateType 
+		,intCurrencyExchangeRateTypeId	= ForGLEntries_CTE.intCurrencyExchangeRateTypeId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -506,6 +511,7 @@ SELECT
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 		,strRateType				= ForGLEntries_CTE.strRateType 
+		,intCurrencyExchangeRateTypeId	= ForGLEntries_CTE.intCurrencyExchangeRateTypeId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
 			ON ForGLEntries_CTE.intOtherChargeItemId = OtherChargeGLAccounts.intItemId
@@ -554,6 +560,7 @@ SELECT
 	,[dblForeignRate]
 	,[intSourceEntityId]
 	,[intCommodityId]
-	,[strRateType]
+	,[intCurrencyExchangeRateTypeId]
+	,[strRateType]	
 FROM 
 	@GLEntries

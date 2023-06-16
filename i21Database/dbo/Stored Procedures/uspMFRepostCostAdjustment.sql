@@ -406,6 +406,7 @@ BEGIN TRY
 				,intSourceEntityId
 				,intCommodityId
 				,intCurrencyExchangeRateTypeId
+				,strRateType
 				)
 			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 				@strBatchId = @strBatchIdForRepost

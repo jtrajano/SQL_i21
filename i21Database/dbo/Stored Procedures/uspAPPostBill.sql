@@ -1069,7 +1069,8 @@ BEGIN
 					,[dblForeignRate]
 					,[intSourceEntityId]
 					,[intCommodityId]
-					,[strRateType]
+					,[intCurrencyExchangeRateTypeId]
+					,[strRateType]					
 			)			
 			EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
 				@strBatchId = @batchId
@@ -1318,6 +1319,7 @@ BEGIN
 			,intSourceEntityId
 			,intCommodityId
 			,intCurrencyExchangeRateTypeId
+			,strRateType
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
@@ -1421,6 +1423,7 @@ BEGIN
 			,intSourceEntityId
 			,intCommodityId
 			,intCurrencyExchangeRateTypeId
+			,strRateType
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
@@ -1743,9 +1746,10 @@ BEGIN
 					,[dblForeignRate]
 					,[intSourceEntityId]
 					,[intCommodityId]
-					,[strRateType]
+					,[intCurrencyExchangeRateTypeId]
+					,[strRateType]					
 			)			
-			EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment								
+			EXEC @intReturnValue = dbo.uspICCreateGLEntriesOnInTransitValueAdjustment
 				@strBatchId = @batchId
 				,@strTransactionId = NULL
 				,@intEntityUserSecurityId = @userId
@@ -1840,6 +1844,7 @@ BEGIN
 			,intSourceEntityId
 			,intCommodityId
 			,intCurrencyExchangeRateTypeId
+			,strRateType
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
