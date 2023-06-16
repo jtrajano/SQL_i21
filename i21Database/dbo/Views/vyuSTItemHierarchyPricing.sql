@@ -9,7 +9,7 @@ SELECT
 						THEN SplPrc.dblUnitAfterDiscount 
 					WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
 						THEN effectivePrice.dblRetailPrice --Effective Retail Price
-					ELSE ip.dblSalePrice
+					ELSE ip.dblSalePrice * UM.dblUnitQty
 				END AS dblSalePrice,
 	CASE WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
 						THEN SplPrc.dblCost
