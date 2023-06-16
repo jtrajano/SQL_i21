@@ -10399,6 +10399,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuGLLocationAccountId.sql" />
     <Build Include="dbo\Views\vyuGLCompanyAccountId.sql" />
+    <Build Include="dbo\Views\vyuGLCompanyOutOfBalance.sql" /> 
     <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
@@ -10941,6 +10942,7 @@
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiCalculateTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiCalculatePOTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetTaxDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspApiUpdateTaxDetails.sql" />

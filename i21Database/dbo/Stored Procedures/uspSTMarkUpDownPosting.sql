@@ -97,55 +97,55 @@ BEGIN TRY
 
 
 	-- VALIDATE @isRequiredGLEntries = true
-	DECLARE @tblTempItemCheck TABLE 
-	(
-		[intCategoryId] int NULL,
-		[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
-		[ysnHasItem] BIT
-	)
+	--DECLARE @tblTempItemCheck TABLE 
+	--(
+	--	[intCategoryId] int NULL,
+	--	[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
+	--	[ysnHasItem] BIT
+	--)
 
-	DECLARE @tblTempItemValuationCheck TABLE 
-	(
-		[intCategoryId] int NULL,
-		[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
-		[ysnHasItemValuation] BIT,
-		[ysnHasItemCosting] BIT,
-		[intLocationId] INT
-	)
-	SELECT DISTINCT @strItemNo = COALESCE(@strItemNo + ',', '') +  CONVERT(VARCHAR(50),Item.strItemNo)
-	FROM tblSTMarkUpDownDetail MUD
-	INNER JOIN tblSTMarkUpDown MU 
-		ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
-	JOIN tblICCategory Category
-		ON MUD.intCategoryId = Category.intCategoryId
-	INNER JOIN tblICItem Item
-		ON MUD.intItemId = Item.intItemId
-	INNER JOIN tblICItemUOM ItemUOM
-		ON Item.intItemId = ItemUOM.intItemId
-	INNER JOIN tblICItemLocation ItemLocation
-		ON ItemLocation.intItemId = Item.intItemId 
-		AND ItemLocation.intLocationId = @intLocationId 
-		AND ItemLocation.intCostingMethod != 6
-	WHERE MU.intMarkUpDownId = @intMarkUpDownId
+	--DECLARE @tblTempItemValuationCheck TABLE 
+	--(
+	--	[intCategoryId] int NULL,
+	--	[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
+	--	[ysnHasItemValuation] BIT,
+	--	[ysnHasItemCosting] BIT,
+	--	[intLocationId] INT
+	--)
+	--SELECT DISTINCT @strItemNo = COALESCE(@strItemNo + ',', '') +  CONVERT(VARCHAR(50),Item.strItemNo)
+	--FROM tblSTMarkUpDownDetail MUD
+	--INNER JOIN tblSTMarkUpDown MU 
+	--	ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
+	--JOIN tblICCategory Category
+	--	ON MUD.intCategoryId = Category.intCategoryId
+	--INNER JOIN tblICItem Item
+	--	ON MUD.intItemId = Item.intItemId
+	--INNER JOIN tblICItemUOM ItemUOM
+	--	ON Item.intItemId = ItemUOM.intItemId
+	--INNER JOIN tblICItemLocation ItemLocation
+	--	ON ItemLocation.intItemId = Item.intItemId 
+	--	AND ItemLocation.intLocationId = @intLocationId 
+	--	AND ItemLocation.intCostingMethod != 6
+	--WHERE MU.intMarkUpDownId = @intMarkUpDownId
 		
-	--Validate if items to be updated have a Category on Costing Method
-	IF (@strItemNo != '')
-		BEGIN
-			IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
-				BEGIN 
-					SET @strItemNo = RIGHT(@strItemNo, LEN(@strItemNo) - 1)
-					SET @intCommaCount = len(@strItemNo) - LEN(REPLACE(@strItemNo,',',''))
+	----Validate if items to be updated have a Category on Costing Method
+	--IF (@strItemNo != '')
+	--	BEGIN
+	--		IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+	--			BEGIN 
+	--				SET @strItemNo = RIGHT(@strItemNo, LEN(@strItemNo) - 1)
+	--				SET @intCommaCount = len(@strItemNo) - LEN(REPLACE(@strItemNo,',',''))
 					
-					IF (@intCommaCount > 0)
-						BEGIN
-							SET @strStatusMsg = 'Item #: ' + @strItemNo + ' have no Category Costing Method on its Location Setup'
-							GOTO With_Rollback_Exit
-						END
-					ELSE
-						SET @strStatusMsg = 'Item #: ' + @strItemNo + ' has no Category Costing Method on its Location Setup'
-						GOTO With_Rollback_Exit
-				END
-		END
+	--				IF (@intCommaCount > 0)
+	--					BEGIN
+	--						SET @strStatusMsg = 'Item #: ' + @strItemNo + ' have no Category Costing Method on its Location Setup'
+	--						GOTO With_Rollback_Exit
+	--					END
+	--				ELSE
+	--					SET @strStatusMsg = 'Item #: ' + @strItemNo + ' has no Category Costing Method on its Location Setup'
+	--					GOTO With_Rollback_Exit
+	--			END
+	--	END
 
 	--IF(@isRequiredGLEntries = CAST(1 AS BIT))
 	--	BEGIN
@@ -304,7 +304,7 @@ BEGIN TRY
 						INNER JOIN tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = Item.intItemId 
 							AND ItemLocation.intLocationId = @intLocationId 
-							AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
+							--AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
 
 						----If Item Manage, query item fields that are needed
 						--LEFT JOIN (
@@ -446,7 +446,7 @@ BEGIN TRY
 							INNER JOIN tblICItemLocation ItemLocation
 								ON ItemLocation.intItemId = item.intItemId 
 								AND ItemLocation.intLocationId = @intLocationId  
-								AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
+								--AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
 							INNER JOIN tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
 							WHERE item.intCategoryId = MUD.intCategoryId
