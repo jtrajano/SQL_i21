@@ -477,7 +477,7 @@ LEFT JOIN
       intEntityCustomerId
     , intInvoiceId  
 	, dblAmountPaid
-    , dblTotalDue	= dblInvoiceTotal - dblAmountPaid
+    , dblTotalDue	= CASE WHEN strType = 'CF Tran' THEN 0 ELSE dblInvoiceTotal - dblAmountPaid END
     , dblAvailableCredit
 	, dblPrepayments
 	, CASE WHEN strType = 'CF Tran' 
