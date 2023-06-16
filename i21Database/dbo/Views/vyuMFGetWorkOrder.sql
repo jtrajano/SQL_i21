@@ -215,3 +215,5 @@ GROUP BY C.intManufacturingCellId
 	   , W.strERPServicePONumber
 	   , M.strName 
 	   , E1.strName
+	   , TrialBlendSheetStatus.strName
+	   , W.dtmApprovedDate
