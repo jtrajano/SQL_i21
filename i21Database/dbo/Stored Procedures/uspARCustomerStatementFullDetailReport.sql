@@ -59,10 +59,9 @@ SET @intEntityUserIdLocal				= ISNULL(@intEntityUserId, 0)
 SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = ISNULL(LTRIM(RTRIM(strAddress)), '') + CHAR(13) + CHAR(10) + ISNULL(NULLIF(strCity, ''), '') + ISNULL(', ' + NULLIF(strState, ''), '') + ISNULL(', ' + NULLIF(strZip, ''), '') + ISNULL(', ' + NULLIF(strCountry, ''), '')
+SELECT TOP 1 strCompanyName = strCompanyName
+		   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-ORDER BY intCompanySetupID DESC
 
 IF (@@version NOT LIKE '%2008%')
 BEGIN
