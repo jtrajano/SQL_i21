@@ -1727,6 +1727,7 @@
     <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
     <Build Include="dbo\Tables\tblSMPowerBIDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSyncItemCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10723,6 +10724,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuGLLocationAccountId.sql" />
     <Build Include="dbo\Views\vyuGLCompanyAccountId.sql" />
+    <Build Include="dbo\Views\vyuGLCompanyOutOfBalance.sql" /> 
     <None Include="Scripts\Post-Deployment\GL\vyuGLCompanyAccountId.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
