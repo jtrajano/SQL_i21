@@ -21,7 +21,7 @@ SELECT intEntityId			= CUSTOMER.intEntityId
 	, dtmLastInvoice		= LASTINVOICE.dtmDate
 	, dtmLastPayment		= LASTPAYMENT.dtmDatePaid
 	, ysnActive				= CUSTOMER.ysnActive
-	, strMobile				= entityContact.strMobile
+	, strMobile				= entityMobile.strPhone
 	, strEmail				= entityContact.strEmail
 	, strContactName		= entityContact.strName
 	, intEntityContactId	= entityContact.intEntityId
@@ -99,6 +99,7 @@ LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocatio
 LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId AND billLocation.ysnActive = 1
 LEFT JOIN tblEMEntity entityToSalesperson ON entityToSalesperson.intEntityId = ISNULL(shipLocation.intSalespersonId, CUSTOMER.intSalespersonId)
 LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
+LEFT JOIN tblEMEntityMobileNumber entityMobile ON entityToContact.intEntityContactId = entityMobile.intEntityId
 LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.intCurrencyID
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
 LEFT JOIN vyuEMEntityType entityType ON CUSTOMER.intEntityId = entityType.intEntityId
