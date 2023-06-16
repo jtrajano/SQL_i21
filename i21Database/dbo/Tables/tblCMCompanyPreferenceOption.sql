@@ -32,6 +32,8 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	ysnShowFeeColumns_BankRecon BIT NULL,
 	ysnProcessMultipleBankAccounts BIT NULL,
 	intConcurrencyId int NULL,
+	ysnAllowBetweenLocations_Transfer BIT NULL,
+	ysnAllowBetweenCompanies_Transfer BIT NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
 	[intCompanyPreferenceOptionId] ASC
