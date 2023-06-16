@@ -4,11 +4,12 @@ SELECT CHK.dtmDate
 		, strCheckNumber = CHK.strReferenceNo
 		, CHK.dblAmount, CHK.strPayee, strAmountInWords = LTRIM (RTRIM(REPLACE (CHK.strAmountInWords, '*', ''))) + REPLICATE (' *',30)
 		, CHK.strMemo, CHK.strTransactionId, CHK.intTransactionId
-		, CHK.intBankAccountId, strCompanyName = COMPANY.strCompanyName
+		, CHK.intBankAccountId
+		, strCompanyName = COMPANY.strLocationName
 		, strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress
 		, COMPANY.strCity
-		, COMPANY.strState
-		, COMPANY.strZip) COLLATE Latin1_General_CI_AS
+		, COMPANY.strStateProvince
+		, COMPANY.strZipPostalCode) COLLATE Latin1_General_CI_AS
 		, strBank = UPPER (Bank.strBankName)
 		, strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress, Bank.strCity, Bank.strState, Bank.strZipCode) COLLATE Latin1_General_CI_AS
 		, strVendorId = ISNULL (VENDOR.strVendorId, '--')
@@ -46,6 +47,7 @@ SELECT CHK.dtmDate
 			CONVERT(varchar(11), PYMT.dtmDatePaid,106)
 		, PYMTDTL.intPaymentDetailId
 		, CASE WHEN O.intUTCOffset IS NULL THEN GETDATE() ELSE DATEADD(MINUTE, O.intUTCOffset * -1, GETUTCDATE()) END dtmCurrent
+		, ACCT.strCurrency
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
 INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
@@ -57,8 +59,8 @@ LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL (PYMT.[intEntityVe
 LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId 
 LEFT JOIN tblEMEntityLocation LOCATION ON VENDOR.intEntityId = LOCATION.intEntityId 
 AND ysnDefaultLocation = 1 
-LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = 
-	(SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup) 
+LEFT JOIN tblSMCompanyLocation COMPANY ON COMPANY.intCompanyLocationId = 
+	PYMT.intCompanyLocationId
 LEFT JOIN vyuCMBankAccount ACCT ON ACCT.intBankAccountId = BA.intBankAccountId
 OUTER APPLY (
 	SELECT TOP 1 RIGHT (RTRIM (dbo.fnAESDecryptASym (strAccountNumber)),4) strAccountNumber 
