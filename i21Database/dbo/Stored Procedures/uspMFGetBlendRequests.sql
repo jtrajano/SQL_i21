@@ -179,6 +179,7 @@ IF @intWorkOrderId < 0
 		 , a.intItemId
 		 , b.strItemNo
 		 , b.strDescription
+		 , a.dblQuantity
 		 , CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
 				ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
 		   END 
