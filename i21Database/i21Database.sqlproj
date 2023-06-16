@@ -1790,6 +1790,7 @@
     <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
