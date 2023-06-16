@@ -858,6 +858,8 @@ BEGIN
 		WHERE
 			rc.intInventoryReceiptId = @intInventoryReceiptId
 			AND rc.intNewEntityVendorId IS NOT NULL 
+			AND rcTax.ysnReversed IS NULL 
+			AND rcTax.intReverseInventoryReceiptChargeTaxId IS NULL 
 
 		DECLARE @intEntityUserSecurityId AS INT
 		SELECT @intEntityUserSecurityId = COALESCE(intModifiedByUserId, intCreatedByUserId, intEntityId) 
