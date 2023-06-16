@@ -758,6 +758,26 @@ BEGIN
 END
 GO
 
+GO
+DECLARE @intCommodityId INT
+SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Wheat'
+
+IF NOT EXISTS (SELECT 1 FROM tblIPSAPInternalOrder WHERE intCommodityId = @intCommodityId) AND (ISNULL(@intCommodityId, 0) > 0)
+BEGIN
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079042',@intCommodityId,0
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079043',@intCommodityId,1
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079044',@intCommodityId,2
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079045',@intCommodityId,3
+END
+GO
+
 -- Internal Order No script for Dev Server. Should not run this in Production Server
 /*
 GO
