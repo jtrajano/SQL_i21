@@ -73,7 +73,7 @@ BEGIN TRY
 		INNER JOIN	tblICItem Item
 		ON			UOM.intItemId = Item.intItemId
 		WHERE		CPT.intPumpTotalsId = @intPumpTotalsId  
-		AND CPT.dblPrice <> 0 AND CPT.dblQuantity <> 0 AND CPT.dblAmount <> 0
+		AND CPT.dblPrice <> 0 AND CPT.dblQuantity <> 0 AND CPT.dblAmount <> 0 
 	
 		SET @Cost = NULL
 
