@@ -26,6 +26,7 @@ BEGIN
 				,@TaxUnitMeasureId	INT
 				,@ReceiptDate		DATETIME 
 				,@NewVendorEntityId	INT	
+				,@HasNewVendorTax  BIT = 0 
 
 		DECLARE @Taxes AS TABLE (
 			--id						INT
@@ -92,10 +93,10 @@ BEGIN
 					WHERE	taxGroup.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor (
 								rc.intNewEntityVendorId	-- @VendorId
 								,r.intLocationId	--,@CompanyLocationId
-								,NULL							--,@ItemId
-								,r.intShipFromId				--,@VendorLocationId
-								,NULL							--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
-								,DEFAULT						--,@FOB
+								,NULL				--,@ItemId
+								,NULL				--r.intShipFromId --,@VendorLocationId
+								,NULL				--,@FreightTermId -- NOTE: There is no freight terms for Other Charges. 
+								,DEFAULT			--,@FOB
 							)
 				) taxHierarcy 
 			WHERE
@@ -422,6 +423,8 @@ BEGIN
 			BEGIN 
 				DECLARE @maxInventoryReceiptChargeTaxId AS INT 
 
+				SET @HasNewVendorTax = 1
+
 				SELECT @maxInventoryReceiptChargeTaxId = MAX(intInventoryReceiptChargeTaxId)
 				FROM  tblICInventoryReceiptChargeTax rcTax
 				WHERE rcTax.intInventoryReceiptChargeId = @InventoryReceiptChargeId
@@ -568,7 +571,7 @@ BEGIN
 			) Taxes
 				ON Charge.intInventoryReceiptChargeId = Taxes.intInventoryReceiptChargeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND @ysnNewVendorId = 0 
+			AND (@ysnNewVendorId = 0 OR @HasNewVendorTax = 1) 
 
 	-- Update the AP Clearing with a new Vendor. 
 	IF @ysnNewVendorId = 1
