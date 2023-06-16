@@ -84,6 +84,8 @@ SELECT C.intManufacturingCellId
 	 , W.strERPServicePONumber
 	 , M.strName AS strMachineName
 	 , E1.strName AS strVendorName
+	 , TrialBlendSheetStatus.strName AS strTrialBlendSheetStatus
+	 , W.dtmApprovedDate
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
@@ -126,6 +128,9 @@ OUTER APPLY (SELECT TOP 1 strItemNo
 OUTER APPLY (SELECT TOP 1 intOrderHeaderId
 			 FROM tblMFStageWorkOrder
 			 WHERE intWorkOrderId = W.intWorkOrderId) AS Schedule
+OUTER APPLY (SELECT TOP 1 MFWorkOrderStatus.strName
+			 FROM tblMFWorkOrderStatus AS MFWorkOrderStatus
+			 WHERE MFWorkOrderStatus.intStatusId = W.intTrialBlendSheetStatusId) AS TrialBlendSheetStatus
 GROUP BY C.intManufacturingCellId
 	   , C.strCellName
 	   , W.intWorkOrderId

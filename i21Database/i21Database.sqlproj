@@ -1532,6 +1532,8 @@
     <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" 
     <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransactionData.sql" />
+    <Build Include="dbo\Views\vyuMFTransactionData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
