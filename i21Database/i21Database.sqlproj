@@ -1534,6 +1534,8 @@
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransactionData.sql" />
+    <Build Include="dbo\Views\vyuMFTransactionData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
