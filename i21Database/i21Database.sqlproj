@@ -1529,6 +1529,7 @@
     <Build Include="dbo\Views\vyuRKCustomDailyAveragePriceDetail.sql" />
     <Build Include="dbo\Views\vyuRKCustomDerivativeEntry.sql" />
     <Build Include="dbo\Views\vyuRKCustomSettlementPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
     <Build Include="dbo\Functions\fnCTGetTaxGroupIdForCustomer.sql" />
