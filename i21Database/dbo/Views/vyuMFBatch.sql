@@ -175,6 +175,7 @@ OUTER APPLY(
     SELECT TOP 1 intTINClearanceId, strTINNumber 
     FROM  tblQMTINClearance  
     WHERE intBatchId = A.intBatchId 
+    ORDER BY intTINClearanceId DESC
 )TIN
 OUTER APPLY(
     SELECT TOP 1 strItemNo,strDescription, strShortName,

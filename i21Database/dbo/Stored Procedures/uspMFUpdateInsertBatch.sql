@@ -84,7 +84,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 		FROM @MFBatchTableType B
 		LEFT JOIN tblMFBatch A ON A.intSalesYear = B.intSalesYear
 			  AND A.intSales = B.intSales
-			  AND A.dtmSalesDate = B.dtmSalesDate
+			--   AND A.dtmSalesDate = B.dtmSalesDate
 			  AND A.strTeaType = B.strTeaType
 			  AND A.strVendorLotNumber = B.strVendorLotNumber
 			  AND A.intBuyingCenterLocationId = B.intBuyingCenterLocationId
@@ -202,6 +202,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , dblTeaMouthFeelPinpoint			= T.dblTeaMouthFeelPinpoint	
 				  , dblTeaAppearancePinpoint		= T.dblTeaAppearancePinpoint
 				  , dtmShippingDate					= T.dtmShippingDate	
+				  , dtmSalesDate					= T.dtmSalesDate
 				FROM tblMFBatch AS A
 				OUTER APPLY (SELECT *
 							 FROM @MFBatchTableType

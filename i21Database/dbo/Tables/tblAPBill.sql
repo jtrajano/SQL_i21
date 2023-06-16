@@ -106,6 +106,7 @@
 	[ysnOverridePayFromBankAccount] BIT NULL DEFAULT 0,
 	[intPayFromBankAccountId] INT NULL,
 	[intPayToBankAccountId] INT NULL,
+	[intPaymentMethodId]	 INT NULL,
 	--Trade Finance Info
 	[strFinanceTradeNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intBankId] INT NULL,
@@ -122,6 +123,7 @@
 	[dblProvisionalPercentage] DECIMAL (18, 6) NOT NULL DEFAULT 100,
 	[ysnFinalVoucher] BIT NULL DEFAULT 0,
 	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[strHold] NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] INT NULL,
 	[intProfitCenter] INT NULL
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),

@@ -17,6 +17,7 @@ BEGIN TRY
 		,@dtmStartDayOfWeek DATETIME
 		,@dtmStartDayOfLast7Days DATETIME
 		,@dtmStartDayOfLast28Days DATETIME
+		,@intUnitMeasureId INT
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
@@ -158,6 +159,10 @@ BEGIN TRY
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
 	FROM tblSMCompanyPreference
 
+	SELECT @intUnitMeasureId=intUnitMeasureId
+	FROM dbo.tblICUnitMeasure
+	WHERE strUnitMeasure='KG'
+
 	INSERT INTO @tblIPAuctionStock7 (
 		intItemId
 		,intLocationId
@@ -181,7 +186,7 @@ BEGIN TRY
 		AND S.intLocationId = AI.intLocationId
 		AND S.intCurrencyId=AI.intCurrencyId
 	LEFT JOIN tblICUnitMeasureConversion UC ON UC.intUnitMeasureId = S.intB1QtyUOMId
-		AND UC.intStockUnitMeasureId = 4
+		AND UC.intStockUnitMeasureId = @intUnitMeasureId
 	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast7Days
 			AND @dtmStartDayOfWeek
 		AND S.intMarketZoneId = 1
@@ -208,7 +213,7 @@ BEGIN TRY
 		AND S.intLocationId = AI.intLocationId
 		AND S.intCurrencyId=AI.intCurrencyId
 	LEFT JOIN tblICUnitMeasureConversion UC ON UC.intUnitMeasureId = S.intB1QtyUOMId
-		AND UC.intStockUnitMeasureId = 4
+		AND UC.intStockUnitMeasureId = @intUnitMeasureId
 	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast28Days
 			AND @dtmStartDayOfWeek
 		AND S.intMarketZoneId = 1
