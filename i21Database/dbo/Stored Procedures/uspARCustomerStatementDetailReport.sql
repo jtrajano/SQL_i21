@@ -118,10 +118,9 @@ DECLARE @CANCELLEDCMINVOICE TABLE (
 )
 
 --COMPANY INFO
-SELECT TOP 1 @strCompanyName	= strCompanyName
-		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry + CHAR(13) + CHAR(10) + strPhone
-FROM tblSMCompanySetup WITH (NOLOCK)
-ORDER BY intCompanySetupID DESC
+SELECT TOP 1 strCompanyName = strCompanyName
+		   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
