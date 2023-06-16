@@ -1725,6 +1725,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCorriganPaymentExportIPayables.sql" />
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
