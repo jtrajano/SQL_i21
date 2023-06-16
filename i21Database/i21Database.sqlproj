@@ -1722,6 +1722,7 @@
     <Build Include="dbo\Views\vyuAPStraussBillDetail.sql" />
     <Build Include="dbo\Views\vyuAPStraussPendingPayables.sql" />
     <Build Include="dbo\Views\vyuAPStraussVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransactionData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
