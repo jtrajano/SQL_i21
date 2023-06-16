@@ -39,7 +39,7 @@ BEGIN TRY
 				JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=		CD.intItemUOMId			LEFT
 				JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId					=		CD.intPriceItemUOMId	LEFT
 				JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=		PU.intUnitMeasureId		LEFT
-				JOIN	tblICItemUOM				BU	ON	PU.intItemUOMId					=		CD.intBasisUOMId		LEFT
+				JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId					=		CD.intBasisUOMId		LEFT
 				JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = BU.intUnitMeasureId LEFT 
 				JOIN	tblICCommodityUnitMeasure	FU	ON	FU.intCommodityUnitMeasureId	=		PF.intFinalPriceUOMId	LEFT
 				JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=		FU.intUnitMeasureId		CROSS	
@@ -66,7 +66,7 @@ BEGIN TRY
 				LEFT JOIN	tblICItemUOM				QU	ON	QU.intItemUOMId					=		CD.intItemUOMId			
 				LEFT JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId					=		CD.intPriceItemUOMId	
 				LEFT JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=		PU.intUnitMeasureId	
-				LEFT JOIN	tblICItemUOM				BU	ON	PU.intItemUOMId					=		CD.intBasisUOMId		
+				LEFT JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId					=		CD.intBasisUOMId		
 				LEFT JOIN tblICUnitMeasure QUM ON QUM.intUnitMeasureId = BU.intUnitMeasureId  
 
 				LEFT JOIN	tblICCommodityUnitMeasure	FU	ON	FU.intCommodityUnitMeasureId	=		CD.intPriceItemUOMId	
