@@ -412,28 +412,31 @@ IF (@intTableCount = 3)
 
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
 							BEGIN
-								-- INSERT
-								INSERT INTO tblSTRegisterSetupDetail 
-								(
-									intRegisterSetupId, 
-									intImportFileHeaderId, 
-									strImportFileHeaderName, 
-									strFileType, strFilePrefix, 
-									strFileNamePattern, 
-									strURICommand, 
-									strStoredProcedure, 
-									intConcurrencyId
-								)
-								SELECT 
-									intRegisterSetupId			= @intRegisterSetupId, 
-									intImportFileHeaderId		= @intImportFileHeaderId, 
-									strImportFileHeaderName		= @strImportFileHeader, 
-									strFileType					= @strFileType, 
-									strFilePrefix				= @strFilePrefix, 
-									strFileNamePattern			= @strFileNamePattern, 
-									strURICommand				= NULL, 
-									strStoredProcedure			= @strStoredProcedure, 
-									intConcurrencyId			= 1
+								IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND strImportFileHeaderName = @strImportFileHeader AND strStoredProcedure = @strStoredProcedure)
+								BEGIN
+									-- INSERT
+									INSERT INTO tblSTRegisterSetupDetail 
+									(
+										intRegisterSetupId, 
+										intImportFileHeaderId, 
+										strImportFileHeaderName, 
+										strFileType, strFilePrefix, 
+										strFileNamePattern, 
+										strURICommand, 
+										strStoredProcedure, 
+										intConcurrencyId
+									)
+									SELECT 
+										intRegisterSetupId			= @intRegisterSetupId, 
+										intImportFileHeaderId		= @intImportFileHeaderId, 
+										strImportFileHeaderName		= @strImportFileHeader, 
+										strFileType					= @strFileType, 
+										strFilePrefix				= @strFilePrefix, 
+										strFileNamePattern			= @strFileNamePattern, 
+										strURICommand				= NULL, 
+										strStoredProcedure			= @strStoredProcedure, 
+										intConcurrencyId			= 1
+								END
 							END
 						ELSE
 							BEGIN
