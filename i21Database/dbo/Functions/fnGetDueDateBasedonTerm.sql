@@ -49,7 +49,13 @@ ELSE IF (@strType = 'Date Driven')
 					SET @intMonthToAdd = 0
 			END
 		ELSE 
-			SET @intMonthToAdd = 1		
+			BEGIN
+				IF @intInvoiceDate > @intDueNextMonth
+					SET @intMonthToAdd = 1		
+				ELSE
+					SET @intMonthToAdd = 0
+			END
+			--SET @intMonthToAdd = 1		
 
         SET @dtmDueDateTemp = DATEADD(MONTH, @intMonthToAdd, @dtmTransactionDate)
         SET @intDaysInDueMonth = [dbo].[fnGetDaysInMonth](@dtmDueDateTemp)
