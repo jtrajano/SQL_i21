@@ -30,6 +30,7 @@
 	[intLoadDetailId]    INT             NULL,
 	[intLoadShipmentCostId]    INT             NULL,
 	[intLoadId]    INT             NULL,
+	[intLoadHeaderId] INT NULL,
 	[intWeightClaimId]    INT             NULL,
 	[intWeightClaimDetailId]    INT             NULL,
 	[intScaleTicketId]    INT             NULL,
@@ -130,6 +131,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblAPBillReallocation] FOREIGN KEY ([intReallocationId]) REFERENCES tblAPBillReallocation([intReallocationId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblTRLoadHeader] FOREIGN KEY ([intLoadHeaderId]) REFERENCES tblTRLoadHeader([intLoadHeaderId]),
 ) ON [PRIMARY];
 
 

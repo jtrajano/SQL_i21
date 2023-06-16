@@ -26,6 +26,7 @@ BEGIN
 			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(A.intLoadHeaderId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 	LEFT JOIN tblAPVoucherPayableCompleted B
 			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
@@ -35,6 +36,7 @@ BEGIN
 			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(B.intLoadHeaderId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND A.dblQuantityToBill = 0
 	WHERE A.intVoucherPayableId IS NULL AND B.intVoucherPayableId IS NOT NULL
@@ -53,6 +55,7 @@ BEGIN
 			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intLoadHeaderId,-1) = ISNULL(A.intLoadHeaderId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND A.dblQuantityToBill < C.dblQuantityToBill
 

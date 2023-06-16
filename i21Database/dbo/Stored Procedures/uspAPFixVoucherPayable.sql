@@ -31,6 +31,7 @@ MERGE INTO tblAPVoucherPayable AS destination
    ,D.[intInventoryShipmentChargeId]  
    ,D.[intLoadShipmentId]      
    ,D.[intLoadShipmentDetailId]    
+   ,D.[intLoadHeaderId]   
    ,D.[intItemId]        
    ,D.[strItemNo]        
    ,D.[intPurchaseTaxGroupId]     
@@ -92,7 +93,8 @@ MERGE INTO tblAPVoucherPayable AS destination
   AND ISNULL(D.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)  
   AND ISNULL(D.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)  
   AND ISNULL(D.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)  
-  AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadDetailId,-1)  
+  AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadDetailId,-1)
+  AND ISNULL(D.intLoadHeaderId,-1) = ISNULL(B.intLoadHeaderId,-1)  
   AND ISNULL(D.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)  
   WHERE   
    B.intBillDetailId IS NULL --REINSERT THOSE PAYABLES WHICH VOUCHER WAS DELETED BUT WE DID NOT RE-INSERT THE PAYABLES  
@@ -124,7 +126,8 @@ MERGE INTO tblAPVoucherPayable AS destination
   ,[intInventoryShipmentItemId]   
   ,[intInventoryShipmentChargeId]  
   ,[intLoadShipmentId]      
-  ,[intLoadShipmentDetailId]    
+  ,[intLoadShipmentDetailId]
+  ,[intLoadHeaderId]
   ,[intItemId]        
   ,[strItemNo]        
   ,[intPurchaseTaxGroupId]     
@@ -202,7 +205,8 @@ MERGE INTO tblAPVoucherPayable AS destination
   ,SourceData.[intInventoryShipmentItemId]   
   ,SourceData.[intInventoryShipmentChargeId]  
   ,SourceData.[intLoadShipmentId]      
-  ,SourceData.[intLoadShipmentDetailId]    
+  ,SourceData.[intLoadShipmentDetailId]
+  ,SourceData.[intLoadHeaderId]
   ,SourceData.[intItemId]        
   ,SourceData.[strItemNo]        
   ,SourceData.[intPurchaseTaxGroupId]     
