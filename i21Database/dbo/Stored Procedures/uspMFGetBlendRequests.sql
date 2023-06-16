@@ -156,8 +156,10 @@ IF @intWorkOrderId < 0
 		 , a.strReferenceNo					AS strERPOrderNo
 		 , ri.dblUpperTolerance				AS dblUpperTolerance
 		 , ri.dblLowerTolerance				AS dblLowerTolerance
-		 , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedUpperTolerance
-		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedLowerTolerance 
+		 --  , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedUpperTolerance
+		--  , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedLowerTolerance 
+		 , (a.dblQuantity + (a.dblQuantity * (ri.dblUpperTolerance / 100))) AS dblCalculatedUpperTolerance
+		 , (a.dblQuantity - (a.dblQuantity * (ri.dblLowerTolerance / 100))) AS dblCalculatedLowerTolerance 
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
 	FROM tblMFBlendRequirement a 
@@ -178,6 +180,7 @@ IF @intWorkOrderId < 0
 		 , a.intItemId
 		 , b.strItemNo
 		 , b.strDescription
+		 , a.dblQuantity
 		 , CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
 				ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
 		   END 
