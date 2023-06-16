@@ -34,6 +34,8 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@InitTranCount INT
 		,@Savepoint NVARCHAR(32)
 		,@ExchangeRate NUMERIC(18,6)
+		,@ExchangeRateId INT
+		,@ExchangeRateTypeId INT
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARAddInvoiceToPayment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -128,6 +130,8 @@ SELECT
 	,@InvoiceNumber			= [strInvoiceNumber]
 	,@TransactionType		= [strTransactionType]
 	,@dtmDiscountDate		= [dtmDiscountDate]
+	,@ExchangeRateId		= I.intCurrencyExchangeRateId
+	,@ExchangeRateTypeId	= I.intCurrencyExchangeRateTypeId
 FROM [vyuARInvoicesForPaymentIntegration] I
 WHERE
 	[intInvoiceId] = @InvoiceId
@@ -216,6 +220,9 @@ BEGIN TRY
 		,[strInvoiceReportNumber]
 		,[intConcurrencyId]
 		,[dtmDiscountDate]
+		,[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]
 		)
 	SELECT
 		 [intPaymentId]				= @PaymentId
@@ -239,6 +246,9 @@ BEGIN TRY
 		,[strInvoiceReportNumber]	= @InvoiceReportNumber
 		,[intConcurrencyId]			= 0
 		,[dtmDiscountDate]			= @dtmDiscountDate
+		,[intCurrencyExchangeRateTypeId]= @ExchangeRateTypeId
+		,[intCurrencyExchangeRateId]	= @ExchangeRateId
+		,[dblCurrencyExchangeRate]	= ISNULL(NULLIF(ARI.[dblCurrencyExchangeRate],0), @ExchangeRate)
 	FROM	
 		tblARInvoice ARI	
 	WHERE
