@@ -34,6 +34,7 @@
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intLoadHeaderId]				INT NULL,
 	[intWeightClaimId]				INT NULL,
 	[intWeightClaimDetailId]		INT NULL,
 	[intCustomerStorageId]			INT NULL,
