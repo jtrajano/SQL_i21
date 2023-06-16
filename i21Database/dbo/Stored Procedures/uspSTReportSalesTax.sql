@@ -745,49 +745,67 @@ BEGIN
 			BEGIN
 				IF (@ysnSummary = 1)
 				BEGIN
-					SELECT  T0.intStoreId
-						, T4.intStoreNo
-						, T4.strDescription AS strStoreName
-						, 'Fuel Sales Tax Total' AS strDescription
-						, SUM (T5.dblTax) AS dblTax
-						, SUM (T1.dblAmount) AS dblAmount
-					FROM tblSTCheckoutHeader T0
-					INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
-					INNER JOIN tblICItemUOM T2 ON T1.intPumpCardCouponId = T2.intItemUOMId
-					INNER JOIN tblICItem T3 ON T2.intItemId = T3.intItemId
-					INNER JOIN tblSTStore T4 ON T0.intStoreId = T4.intStoreId
-					INNER JOIN vyuARInvoiceTaxDetail T5 ON T0.intInvoiceId = T5.intInvoiceId AND T3.intItemId = T5.intItemId
-					INNER JOIN tblSMTaxGroup T6 ON T5.strTaxGroup = T6.strTaxGroup
-					WHERE ISNULL (T0.intInvoiceId,0) <> 0
-						AND T5.ysnTaxExempt = 0
-						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-						AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
-					GROUP BY T0.intStoreId, T4.intStoreNo, T4.strDescription
-					ORDER BY T0.intStoreId
+					SELECT 
+						intStoreId, intStoreNo, strStoreName, strDescription, SUM(dblTax) AS dblTax, SUM(dblAmount) AS dblAmount
+					FROM (
+						SELECT 
+							intStoreId, intStoreNo, strStoreName, strDescription, dblTax, dblAmount = CASE WHEN intRowId = 1 THEN dblAmount ELSE 0 END
+						FROM (
+							SELECT T0.intStoreId
+							, T4.intStoreNo
+							, T4.strDescription AS strStoreName
+							, 'Fuel Sales Tax Total' AS strDescription
+							, T5.dblTax
+							, T1.dblAmount
+							, T5.intInvoiceDetailId
+							, intRowId = ROW_NUMBER() OVER (PARTITION BY T5.intInvoiceDetailId ORDER BY T5.intInvoiceDetailId, T5.intInvoiceDetailTaxId)
+						FROM tblSTCheckoutHeader T0
+						INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
+						INNER JOIN tblICItemUOM T2 ON T1.intPumpCardCouponId = T2.intItemUOMId
+						INNER JOIN tblICItem T3 ON T2.intItemId = T3.intItemId
+						INNER JOIN tblSTStore T4 ON T0.intStoreId = T4.intStoreId
+						INNER JOIN vyuARInvoiceTaxDetail T5 ON T0.intInvoiceId = T5.intInvoiceId AND  T3.intItemId = T5.intItemId
+						INNER JOIN tblSMTaxGroup T6 ON T5.strTaxGroup = T6.strTaxGroup
+						WHERE ISNULL (T0.intInvoiceId,0) <> 0
+							AND T5.ysnTaxExempt = 0
+							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+							AND T0.intStoreId = 6
+						) as tbl
+					) tbl
+					GROUP BY intStoreId, intStoreNo, strStoreName, strDescription
 				END
 				ELSE
 				BEGIN
-					SELECT T0.intStoreId
-						, T4.intStoreNo
-						, T4.strDescription AS strStoreName
-						, T4.strDescription + ' - ' + T6.strDescription AS strDescription
-						, SUM (T5.dblTax) AS dblTax
-						, SUM(T1.dblAmount) AS dblAmount
-					FROM tblSTCheckoutHeader T0
-					INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
-					INNER JOIN tblICItemUOM T2 ON T1.intPumpCardCouponId = T2.intItemUOMId
-					INNER JOIN tblICItem T3 ON T2.intItemId = T3.intItemId
-					INNER JOIN tblSTStore T4 ON T0.intStoreId = T4.intStoreId
-					INNER JOIN vyuARInvoiceTaxDetail T5 ON T0.intInvoiceId = T5.intInvoiceId AND T3.intItemId = T5.intItemId
-					INNER JOIN tblSMTaxGroup T6 ON T5.strTaxGroup = T6.strTaxGroup
-					WHERE ISNULL (T0.intInvoiceId,0) <> 0
-						AND T5.ysnTaxExempt = 0
-						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
-						AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
-						AND T0.intStoreId IN (SELECT Item FROM @tmpStores)
-					GROUP BY T0.intStoreId, T4.intStoreNo, T4.strDescription, T6.strDescription
-					ORDER BY T0.intStoreId
+					SELECT 
+						intStoreId, intStoreNo, strStoreName, strDescription, SUM(dblTax) AS dblTax, SUM(dblAmount) AS dblAmount
+					FROM (
+						SELECT 
+							intStoreId, intStoreNo, strStoreName, strDescription, dblTax, dblAmount = CASE WHEN intRowId = 1 THEN dblAmount ELSE 0 END
+						FROM (
+							SELECT T0.intStoreId
+							, T4.intStoreNo
+							, T4.strDescription AS strStoreName
+							, T4.strDescription + ' - ' + T6.strDescription AS strDescription
+							, T5.dblTax
+							, T1.dblAmount
+							, T5.intInvoiceDetailId
+							, intRowId = ROW_NUMBER() OVER (PARTITION BY T5.intInvoiceDetailId ORDER BY T5.intInvoiceDetailId, T5.intInvoiceDetailTaxId)
+						FROM tblSTCheckoutHeader T0
+						INNER JOIN tblSTCheckoutPumpTotals T1 ON T0.intCheckoutId = T1.intCheckoutId
+						INNER JOIN tblICItemUOM T2 ON T1.intPumpCardCouponId = T2.intItemUOMId
+						INNER JOIN tblICItem T3 ON T2.intItemId = T3.intItemId
+						INNER JOIN tblSTStore T4 ON T0.intStoreId = T4.intStoreId
+						INNER JOIN vyuARInvoiceTaxDetail T5 ON T0.intInvoiceId = T5.intInvoiceId AND  T3.intItemId = T5.intItemId
+						INNER JOIN tblSMTaxGroup T6 ON T5.strTaxGroup = T6.strTaxGroup
+						WHERE ISNULL (T0.intInvoiceId,0) <> 0
+							AND T5.ysnTaxExempt = 0
+							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(@dtmFrom AS FLOAT)) AS DATETIME)
+							AND CAST(FLOOR(CAST(T0.dtmCheckoutDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmTo AS FLOAT)) AS DATETIME)
+							AND T0.intStoreId = 6
+						) as tbl
+					) tbl
+					GROUP BY intStoreId, intStoreNo, strStoreName, strDescription
 				END
 			END
 		END
