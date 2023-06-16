@@ -152,6 +152,9 @@ BEGIN TRY
 
 						UPDATE tblMFWorkOrder
 						SET intStatusId = 19
+							,intTrialBlendSheetStatusId	= NULL
+							,intApprovedBy				= NULL
+						   ,dtmApprovedDate				= NULL
 						WHERE intWorkOrderId = @intWorkOrderId
 
 						EXEC dbo.uspICCreateStockReservation @ItemsToReserve
