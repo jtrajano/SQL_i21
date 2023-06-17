@@ -9268,6 +9268,8 @@
     <Build Include="dbo\Stored Procedures\uspMFProductionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentCurrentAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentAvg.sql" />
+    <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPrepaidPayablesForeignPartial.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
