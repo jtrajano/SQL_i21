@@ -8,6 +8,8 @@
 	,@intFromStorageLocationId INT = NULL
 	,@dblLotQty NUMERIC(18, 6) = NULL
 	,@intItemUOMId INT = NULL
+	,@dblRequiredQty NUMERIC(18, 6) = NULL
+	,@dblRequiredWeight NUMERIC(18, 6) = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -101,7 +103,7 @@ BEGIN TRY
 		,IsNULL(@intDefaultConsumptionLocationId,@intToStorageLocationId)
 		,@intItemId
 		,@intLotId
-		,@dblLotQty
+		,CASE WHEN @dblLotQty > @dblRequiredQty THEN @dblRequiredQty  ELSE @dblLotQty END
 		,@intItemUOMId
 		,CASE 
 			WHEN @intWeightUOMId IS NULL

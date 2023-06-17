@@ -1013,6 +1013,8 @@ BEGIN TRY
 						,@intFromStorageLocationId = @intStorageLocationId
 						,@dblLotQty = @dblWeight
 						,@intItemUOMId = @intLotItemUOMId
+						,@dblRequiredQty = @dblRequiredQty
+						,@dblRequiredWeight = @dblRequiredWeight
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 
@@ -1181,6 +1183,8 @@ BEGIN TRY
 						,@intFromStorageLocationId = @intStorageLocationId
 						,@dblLotQty = @dblWeight
 						,@intItemUOMId = @intLotItemUOMId
+						,@dblRequiredQty = @dblRequiredQty
+						,@dblRequiredWeight = @dblRequiredWeight
 
 					SET @dblRequiredWeight = @dblRequiredWeight - @dblWeight
 
