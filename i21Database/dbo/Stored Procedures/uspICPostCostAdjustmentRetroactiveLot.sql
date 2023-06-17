@@ -777,9 +777,21 @@ BEGIN
 				,[dblCost] = NULL 
 				,[dblValue] = 
 					CASE	WHEN @IsSourceTransaction = 1 THEN 
-								@t_dblQty * @CostAdjustmentPerCb
+								CASE 
+									WHEN @dblForexRate <> 0 THEN 
+										@t_dblQty * @ForexCostAdjustmentPerCb * @dblForexRate
+									ELSE 
+										@t_dblQty * @CostAdjustmentPerCb
+								END		
+
 							WHEN @t_dblQty < 0 THEN 
-								@t_dblQty * @CostAdjustmentPerCb
+								--@t_dblQty * @CostAdjustmentPerCb
+								CASE 
+									WHEN @dblForexRate <> 0 THEN 
+										@t_dblQty * @ForexCostAdjustmentPerCb * @dblForexRate
+									ELSE 
+										@t_dblQty * @CostAdjustmentPerCb
+								END		
 							ELSE 
 								0
 					END 

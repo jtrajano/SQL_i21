@@ -1804,7 +1804,6 @@ FROM	ForGLEntries_CTE
 WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value		
 		AND ForGLEntries_CTE.intOtherChargeItemId IS NULL 
 		AND intTypeId = 1
-		AND ForGLEntries_CTE.intCurrencyId = ForGLEntries_CTE.intOtherChargeCurrencyId
 
 -- Cost Adjustment from Other Charges
 UNION ALL 
@@ -3284,3 +3283,4 @@ FROM	@GLEntries
 --			AND GLEntries.strCode = 'ICA'
 --			AND ysnIsUnposted = 0 
 --END 
+

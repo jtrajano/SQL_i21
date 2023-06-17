@@ -669,7 +669,13 @@ BEGIN
 					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
-								@t_dblQty * @CostAdjustmentPerCb
+								--@t_dblQty * @CostAdjustmentPerCb
+								CASE 
+									WHEN @dblForexRate <> 0 THEN 
+										@t_dblQty * @ForexCostAdjustmentPerCb * @dblForexRate
+									ELSE 
+										@t_dblQty * @CostAdjustmentPerCb
+								END 
 							ELSE 
 								0
 					END 
