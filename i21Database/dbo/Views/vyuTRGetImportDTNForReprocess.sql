@@ -49,6 +49,7 @@ FROM (
 		FROM tblICInventoryReceipt IR
 		JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 		JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+		JOIN tblAPBill B ON BD.intBillId = B.intBillId AND IR.intEntityVendorId = B.intEntityVendorId 
 		) HasVoucher ON HasVoucher.intInventoryReceiptId = d.intInventoryReceiptId
 	WHERE ISNULL(ysnReImport, 0) = 0
 ) tbl
