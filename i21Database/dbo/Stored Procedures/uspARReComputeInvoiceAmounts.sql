@@ -17,7 +17,6 @@ DECLARE  @ZeroDecimal			DECIMAL(18,6)
 		,@strTransType			NVARCHAR(50)
 		,@OriginalInvoiceId		INT
 		,@CurrencyExchangeRate	DECIMAL(18,6)
-		,@Percentage			DECIMAL(18,6)
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
@@ -28,9 +27,8 @@ SET
 									THEN 1.000000 
 									ELSE ARID.dblCurrencyExchangeRate
 								  END
-	,@Percentage				= ISNULL(CTCH.dblProvisionalInvoicePct, 100)
-	,dblPercentage				= @Percentage
-	,dblProvisionalTotal		= (@Percentage / 100) * dblTotal
+	,dblPercentage				= ISNULL(CTCH.dblProvisionalInvoicePct, 100)
+	,dblProvisionalTotal		= (ISNULL(CTCH.dblProvisionalInvoicePct, 100) / 100) * dblTotal
 FROM tblARInvoiceDetail ARID
 LEFT JOIN (
 	SELECT
@@ -42,11 +40,12 @@ LEFT JOIN (
 UPDATE tblARInvoice
 SET
 	 dblCurrencyExchangeRate= dbo.fnRoundBanker(ISNULL(T.dblCurrencyExchangeRate, 1.000000) / ISNULL(T.intCount, 1.000000), 6)
-	,dblPercentage			= @Percentage
+	,dblPercentage			= T.dblPercentage
 FROM (
 	SELECT 
 		 dblCurrencyExchangeRate= SUM(dblCurrencyExchangeRate)
 		,intCount				= COUNT(intInvoiceId)
+		,dblPercentage			= AVG(dblPercentage)
 		,intInvoiceId			= intInvoiceId
 	FROM tblARInvoiceDetail
 	WHERE
@@ -66,7 +65,7 @@ FROM tblARInvoice
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
-UPDATE tblARInvoiceDetailTax
+UPDATE ARIDT
 SET
 	 [dblRate]				= ISNULL([dblRate], @ZeroDecimal)
 	,[dblBaseRate]			= ISNULL([dblBaseRate], ISNULL([dblRate], @ZeroDecimal))
@@ -74,9 +73,16 @@ SET
 	,[dblAdjustedTax]		= dbo.fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), dbo.fnARGetDefaultDecimal())
 	,[dblBaseAdjustedTax]	= dbo.fnRoundBanker(ISNULL([dblBaseAdjustedTax], @ZeroDecimal), dbo.fnARGetDefaultDecimal())
 	,[ysnTaxAdjusted]		= ISNULL(ysnTaxAdjusted, 0)
-	,dblProvisionalTax		= (@Percentage / 100) * ISNULL(dblAdjustedTax, 0)
-WHERE 
-	intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceIdLocal)
+	,dblProvisionalTax		= (ARID.dblPercentage / 100) * ISNULL(dblAdjustedTax, 0)
+FROM tblARInvoiceDetailTax ARIDT
+INNER JOIN (
+	SELECT 
+		 intInvoiceId
+		,intInvoiceDetailId
+		,dblPercentage
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = @InvoiceIdLocal
+) ARID ON ARIDT.intInvoiceDetailId = ARID.intInvoiceDetailId
 	
 UPDATE ARID
 SET
