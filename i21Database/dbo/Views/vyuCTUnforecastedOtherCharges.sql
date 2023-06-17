@@ -39,7 +39,7 @@
 					/ (CASE WHEN ISNULL(cu.ysnSubCurrency, CONVERT(BIT, 0)) = CONVERT(BIT, 1) THEN ISNULL(cu.intCent, 1) ELSE 1 END)
 			,cc.strCostMethod
 			,cu.strCurrency
-			,cc.dblFX
+			,dblFX  = ISNULL(cc.dblFX, 1)
 			,ch.intContractHeaderId
 			,cd.intContractDetailId
 			,en.intEntityId
