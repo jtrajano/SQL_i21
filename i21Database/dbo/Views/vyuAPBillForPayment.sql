@@ -67,6 +67,7 @@ FROM (
 						CASE 
 						WHEN voucher.intTransactionType = 1  THEN 0
 						WHEN voucher.intTransactionType = 14 THEN 0
+						WHEN voucher.intTransactionType = 16 THEN 0
 						WHEN voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 0 THEN 0
 						WHEN voucher.intTransactionType = 13 AND voucher.ysnPrepayHasPayment = 0 THEN 0
 						ELSE 1 END
@@ -154,6 +155,7 @@ FROM (
 						CASE voucher.intTransactionType
 							WHEN 1  THEN 0
 							WHEN 14 THEN 0
+							WHEN 16 THEN 0
 						ELSE 1 END
 					AS BIT)
 		,voucher.dblPaymentTemp
