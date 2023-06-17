@@ -16,7 +16,7 @@ BEGIN TRY
 
 	If @dtmFrom IS NULL
 	BEGIN
-		SELECT CL.strLocationName,  Cast(''  as varchar(100)) strDates, Count(1) intNoOfContract
+		SELECT CL.strLocationName,  Cast(''  as varchar(100)) strPeriod, Count(1) intNoOfContract
 		FROM tblCTContractHeader CH
 		INNER JOIN tblSMCompanyLocation CL ON CH.intCompanyLocationId = CL.intCompanyLocationId
 		GROUP BY CL.strLocationName
@@ -24,7 +24,7 @@ BEGIN TRY
 	ELSE 
 	BEGIN
 
-		SELECT CL.strLocationName,  Cast( Cast(@dtmFrom as Varchar) + ' - ' +  Cast(@dtmTo as Varchar) as varchar(100)) strDates, Count(1) intNoOfContract
+		SELECT CL.strLocationName,  Cast( Cast(@dtmFrom as Varchar) + ' - ' +  Cast(@dtmTo as Varchar) as varchar(100)) strPeriod, Count(1) intNoOfContract
 		FROM tblCTContractHeader CH
 		INNER JOIN tblSMCompanyLocation CL ON CH.intCompanyLocationId = CL.intCompanyLocationId
 		Where CH.dtmContractDate Between @dtmFrom and @dtmTo
