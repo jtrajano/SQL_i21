@@ -361,19 +361,26 @@ AS
 				ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0)), 2)
 			,dblComputedBaseValue1 = 
 				CASE 
-					WHEN @intFunctionalCurrencyId <> t.intCurrencyId THEN 
+					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND t.dblForexCost <> 0 THEN 
 						ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0)), 2) * t.dblForexRate
 					ELSE 
 						NULL
 				END 
 			,dblComputedBaseValue2 = 
 				CASE 
-					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND latestForexRate.dblRate <> t.dblForexRate THEN 
+					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND latestForexRate.dblRate <> t.dblForexRate AND t.dblForexCost <> 0 THEN 
 						ROUND((ISNULL(t.dblQty, 0) * ISNULL(t.dblForexCost, 0) + ISNULL(t.dblForexValue, 0)), 2) * latestForexRate.dblRate
 					ELSE 
 						NULL
 				END 
-			,dblLatestForexRate = ISNULL(latestForexRate.dblRate, t.dblExchangeRate) 
+			,dblLatestForexRate = --ISNULL(latestForexRate.dblRate, t.dblExchangeRate) 
+				CASE 
+					WHEN @intFunctionalCurrencyId <> t.intCurrencyId AND t.dblForexCost <> 0 THEN 
+						ISNULL(latestForexRate.dblRate, t.dblExchangeRate) 
+					ELSE 
+						t.dblExchangeRate
+				END 
+
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
