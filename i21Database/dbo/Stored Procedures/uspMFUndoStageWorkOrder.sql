@@ -317,7 +317,8 @@ BEGIN TRY
 														, @strTransactionId		= @strTransferNo
 														, @intEntityUserSecurityId = @intUserId;
 
-					SET @dblAdjustByQuantity = - @dblNewWeight
+					SELECT @dblAdjustByQuantity = -@dblNewWeight /* Negate for reversal */
+						 , @dblSummaryQty		= -@dblNewWeight /* Negate for reversal */
 				END
 				/* End of Inventory Transfer for Non Lot Track Item */
 		END
@@ -355,7 +356,7 @@ BEGIN TRY
 		AND RI.intRecipeItemTypeId	= 1
 
 
-	SET @dblAdjustByQuantity = ABS(@dblAdjustByQuantity)
+	SET @dblSummaryQty = ABS(@dblSummaryQty)
 
 	/* Update Production Summary - Negate Input/Stage Qty. */
 	UPDATE tblMFProductionSummary
