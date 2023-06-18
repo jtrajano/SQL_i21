@@ -1512,6 +1512,37 @@ BEGIN
 			END 
 		END 
 
+		-- Validate if a non-inventoried other charge already has a voucher. Do not accept it. 
+		DECLARE @strBillId AS NVARCHAR(50) 
+		SET @valueChargeId = NULL 
+		SET @strCharge = NULL 
+
+		SELECT TOP 1 
+				@valueChargeId = RawData.intChargeId
+				,@strCharge = charge.strItemNo
+				,@strBillId = voucherExist.strBillId
+		FROM	@OtherCharges RawData INNER JOIN tblICItem charge
+					ON RawData.intChargeId = charge.intItemId
+				OUTER APPLY (
+					SELECT TOP 1 
+						b.strBillId
+					FROM 
+						tblAPBill b INNER JOIN tblAPBillDetail bd
+							ON b.intBillId = bd.intBillId
+					WHERE
+						bd.intLoadShipmentCostId = RawData.intLoadShipmentCostId				
+				) voucherExist
+		WHERE	RawData.ysnInventoryCost = 0 
+				AND RawData.intLoadShipmentCostId IS NOT NULL
+				AND voucherExist.strBillId IS NOT NULL 
+
+		IF @valueChargeId IS NOT NULL AND @strBillId IS NOT NULL
+		BEGIN
+			-- 'Other charge {other charge} is already in {voucher no}. It is not allowed to be converted to Inventory Receipt.'
+			EXEC uspICRaiseError 80278, @strCharge, @strBillId;
+			GOTO _Exit_With_Rollback;
+		END
+
 		-- Insert the Other Charges
 		INSERT INTO dbo.tblICInventoryReceiptCharge (
 				[intInventoryReceiptId]
