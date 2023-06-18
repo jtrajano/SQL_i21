@@ -284,6 +284,14 @@ BEGIN
 		WHEN @msgId = 80268 THEN '%s is a missing lot it should not have a negative quantity.'
 		WHEN @msgId = 80269 THEN 'Multiple lots are not allowed for %s. See the company configuration &#8594; Receipts &#8594; Single or Multiple Lots option.'
 		WHEN @msgId = 80270 THEN 'Available Qty in %s is %f. Releasing %f is not allowed.'
+		WHEN @msgId = 80271 THEN '%s is currently in a Voucher. Please remove it in %s first before you can unpost the Destination Weight/Grade.'
+		WHEN @msgId = 80272 THEN 'Item Category %s does not exists on Storage %s.'
+		WHEN @msgId = 80273 THEN 'Quantity in lot number %s is now zero on %s in %s. Auto variance is posted to zero out its inventory valuation.'
+		WHEN @msgId = 80274 THEN 'Forex Rate for the Cost Adjustment is missing.'
+		WHEN @msgId = 80275 THEN 'In-Transit value cannot be adjusted for %s. Item type must be an "Inventory" type'
+		WHEN @msgId = 80276 THEN 'Vendor Change is not allowed if %s has a voucher already. %s is already used in %s.'
+		WHEN @msgId = 80277 THEN 'Forex Rate between %s and the other charge %s should be the same.'
+		WHEN @msgId = 80278 THEN 'Other charge %s is already in %s. It is not allowed to be converted to Inventory Receipt.'
 	END 
 
 	RETURN @msg
