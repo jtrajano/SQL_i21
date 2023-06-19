@@ -17,7 +17,7 @@ with cte as(
 ),
 cteOrder as(
 	select *,
-	row_number() over(partition by strTransactionId order by strCode) rowId
+	row_number() over(partition by strTransactionId order by strCompanySegment) rowId
 	from cte 
 ),
 cteFirst as(
