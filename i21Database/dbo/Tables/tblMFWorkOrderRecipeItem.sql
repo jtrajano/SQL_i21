@@ -47,7 +47,6 @@
 	ysnComplianceItem BIT NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_ysnComplianceItem] DEFAULT 0,
 	dblCompliancePercent NUMERIC(18, 6),
     CONSTRAINT [PK_tblMFWorkOrderRecipeItem_intWorkOrderRecipeItemId] PRIMARY KEY (intWorkOrderRecipeItemId), 
-    CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId],[intWorkOrderId]) REFERENCES [tblMFWorkOrderRecipe]([intRecipeId],[intWorkOrderId]),-- ON DELETE CASCADE, 
     CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFRecipeItemType_intRecipeItemTypeId] FOREIGN KEY ([intRecipeItemTypeId]) REFERENCES [tblMFRecipeItemType]([intRecipeItemTypeId]),
