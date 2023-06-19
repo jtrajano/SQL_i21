@@ -34,8 +34,8 @@ BEGIN
 			@strMessage NVARCHAR(MAX) = NULL,
 			@strBillOfLading NVARCHAR(200) = NULL,
 			@dtmPullDate DATETIME = NULL,
-			@strSource NVARCHAR(20) = NULL
-	
+			@strSource NVARCHAR(20) = NULL,
+			@ysnDefault BIT = NULL
 		BEGIN TRANSACTION
 
 		DECLARE @CursorTran AS CURSOR
@@ -281,8 +281,15 @@ BEGIN
 			ELSE
 			BEGIN
 				SELECT @intCustomerId = CRB.intCustomerId, @intShipToId = CRB.intCustomerLocationId, @intCustomerCompanyLocationId = CRB.intCompanyLocationId
-				FROM tblTRCrossReferenceBol CRB 
-				WHERE CRB.strType = 'Destination' AND CRB.strImportValue = @strDestination
+				FROM tblTRCrossReferenceBol CRB
+				WHERE CRB.strType = 'Destination' AND CRB.strImportValue = @strDestination AND ISNULL(ysnDefault, 0) = 0
+
+				IF (ISNULL(@intCustomerId, 0) = 0)
+				BEGIN
+					SELECT TOP 1 @intCustomerId = CRB.intCustomerId, @intShipToId = CRB.intCustomerLocationId, @intCustomerCompanyLocationId = CRB.intCompanyLocationId
+					FROM tblTRCrossReferenceBol CRB
+					WHERE CRB.strType = 'Destination' AND ISNULL(ysnDefault, 0) = 1
+				END
 			END
 
             IF (@intCustomerId IS NULL)
