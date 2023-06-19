@@ -45,6 +45,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , ISNULL(WorkOrder.dblCalculatedUpperTolerance, RecipeOutput.dblCalculatedUpperTolerance) AS dblCalculatedUpperTolerance
 	 , ISNULL(WorkOrder.dblCalculatedLowerTolerance, RecipeOutput.dblCalculatedLowerTolerance) AS dblCalculatedLowerTolerance
 	 , WorkOrder.ysnOverrideRecipe
+	 , BlendRequirement.dblEstNoOfBlendSheet
 FROM tblMFWorkOrder AS WorkOrder 
 JOIN tblICItem AS Item ON WorkOrder.intItemId = Item.intItemId
 JOIN tblICItemUOM AS ItemUOM ON WorkOrder.intItemUOMId = ItemUOM.intItemUOMId
