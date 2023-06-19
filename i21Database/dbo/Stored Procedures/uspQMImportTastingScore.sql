@@ -602,10 +602,10 @@ BEGIN TRY
 						WHERE intBatchId = @intProductValueId;
 
 						/* Batch Pre Stage Process. */
-						EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
-												  , @intUserId			= @intEntityUserId
-												  , @intOriginalItemId  = @intOriginalItemId
-												  , @intItemId			= @intItemId
+						-- EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
+						-- 						  , @intUserId			= @intEntityUserId
+						-- 						  , @intOriginalItemId  = @intOriginalItemId
+						-- 						  , @intItemId			= @intItemId
 
 						/* Create Sample Detail. */
 						INSERT INTO tblQMSampleDetail 
@@ -668,10 +668,10 @@ BEGIN TRY
 								WHERE intBatchId = @intProductValueId
 
 								/* Batch Pre Stage Process. */
-								EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
-														  , @intUserId			= @intEntityUserId
-														  , @intOriginalItemId	= @intOriginalItemId
-														  , @intItemId			= @intItemId
+								-- EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
+								-- 						  , @intUserId			= @intEntityUserId
+								-- 						  , @intOriginalItemId	= @intOriginalItemId
+								-- 						  , @intItemId			= @intItemId
 
 								IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
 								BEGIN
@@ -781,10 +781,10 @@ BEGIN TRY
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
-		EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
-				,@intUserId = @intEntityUserId
-				,@intOriginalItemId = @intOriginalItemId
-				,@intItemId = @intItemId
+		-- EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
+		-- 		,@intUserId = @intEntityUserId
+		-- 		,@intOriginalItemId = @intOriginalItemId
+		-- 		,@intItemId = @intItemId
 
 		UPDATE tblMFBatch
 		SET intTealingoItemId = @intItemId
@@ -1522,9 +1522,12 @@ BEGIN TRY
 				WHERE strBatchId = @strBatchNo
 				AND intLocationId = intMixingUnitLocationId
 
+				SELECT TOP 1 @intOriginalItemId = intOriginalItemId
+				FROM @MFBatchTableType
+
 				EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
 					,@intUserId = @intEntityUserId
-					,@intOriginalItemId = @intItemId
+					,@intOriginalItemId = @intOriginalItemId
 					,@intItemId = @intItemId
 
 				UPDATE tblQMSample
