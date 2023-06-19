@@ -932,7 +932,66 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
 
-	--REVERSAL
+	--CHARGES
+	UNION ALL
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		--[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
+		--										ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
+		--[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
+		[intAccountId]					=	voucherDetails.intAccountId, --NO NEED TO GET THE ACCOUNT WHEN CREATING GL ENTRIES, ACCOUNT ON TRANSACTION DETAIL SHOULD BE THE ONE TO USE
+		[dblDebit]						=	voucherDetails.dblTotal,
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	voucherDetails.dblTotalUnits,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3, DEFAULT),
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	voucherDetails.strMiscDescription,
+		[intJournalLineNo]				=	voucherDetails.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,      
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			CROSS APPLY dbo.fnAPGetVoucherChargeItemGLEntry(A.intBillId) voucherDetails
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+		  AND voucherDetails.intBillDetailId IS NOT NULL
+		  AND A.intTransactionType <> 15
+
+	--REVERSAL ON NON-INVENTORY COST DM (APC)
 	UNION ALL
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -980,28 +1039,28 @@ BEGIN
 		[intCommodityId]				=	A.intCommodityId,
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
-	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherChargeItemGLEntry(A.intBillId) voucherDetails
-			INNER JOIN tblAPBillDetail B ON B.intBillDetailId = voucherDetails.intBillDetailId
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
+	FROM [dbo].tblAPBill A 
+	CROSS APPLY (
+		SELECT intBillDetailId, strMiscDescription, dblTotal, dblTotalUnits, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblRate, dblForeignTotal FROM dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId)
+		UNION ALL
+		SELECT intBillDetailId, strMiscDescription, dblTotal, dblTotalUnits, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblRate, dblForeignTotal FROM dbo.fnAPGetVoucherChargeItemGLEntry(A.intBillId)
+	) voucherDetails
+	INNER JOIN tblAPBillDetail B ON B.intBillDetailId = voucherDetails.intBillDetailId
+	INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = intLoadShipmentCostId
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId) ON A.intEntityVendorId = C.[intEntityId]
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND voucherDetails.intBillDetailId IS NOT NULL
-		  AND A.intTransactionType <> 15
-		  AND B.intLoadShipmentCostId IS NOT NULL
-		  AND B.intInventoryReceiptChargeId IS NULL
+		  AND A.intTransactionType IN (3)
+		  AND LC.ysnInventoryCost = 0
 
-	--CHARGES
+	--REVERSAL ON NON-INVENTORY COST DM (EXPENSE)
 	UNION ALL
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		--[intAccountId]					=	CASE WHEN D.[intInventoryReceiptChargeId] IS NULL OR D.ysnInventoryCost = 0 THEN B.intAccountId
-		--										ELSE dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') END,
-		--[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
-		[intAccountId]					=	voucherDetails.intAccountId, --NO NEED TO GET THE ACCOUNT WHEN CREATING GL ENTRIES, ACCOUNT ON TRANSACTION DETAIL SHOULD BE THE ONE TO USE
-		[dblDebit]						=	voucherDetails.dblTotal,
-		[dblCredit]						=	0, -- Bill
+		[intAccountId]					=	voucherDetails.intExpenseAccountId,
+		[dblDebit]						=	voucherDetails.dblTotal, -- Bill
+		[dblCredit]						=	0,
 		[dblDebitUnit]					=	voucherDetails.dblTotalUnits,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3),
@@ -1027,9 +1086,9 @@ BEGIN
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,      
+		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,  
 		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	0,
+		[dblCreditForeign]				=	0, 
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
@@ -1042,13 +1101,19 @@ BEGIN
 		[intCommodityId]				=	A.intCommodityId,
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
-	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherChargeItemGLEntry(A.intBillId) voucherDetails
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
+	FROM [dbo].tblAPBill A 
+	CROSS APPLY (
+		SELECT intBillDetailId, strMiscDescription, intExpenseAccountId, dblTotal, dblTotalUnits, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblRate, dblForeignTotal FROM dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId)
+		UNION ALL
+		SELECT intBillDetailId, strMiscDescription, intExpenseAccountId, dblTotal, dblTotalUnits, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblRate, dblForeignTotal FROM dbo.fnAPGetVoucherChargeItemGLEntry(A.intBillId)
+	) voucherDetails
+	INNER JOIN tblAPBillDetail B ON B.intBillDetailId = voucherDetails.intBillDetailId
+	INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = intLoadShipmentCostId
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId) ON A.intEntityVendorId = C.[intEntityId]
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND voucherDetails.intBillDetailId IS NOT NULL
-		  AND A.intTransactionType <> 15
+		  AND A.intTransactionType IN (3)
+		  AND LC.ysnInventoryCost = 0
 
 	--CREDIT TAX ADJUSTMENT
 	UNION ALL
@@ -1182,6 +1247,114 @@ BEGIN
 	-- ,loc.intItemLocationId
 	-- ,B.intInventoryReceiptItemId
 	-- ,B.intInventoryReceiptChargeId
+
+	--REVERSAL ON NON-INVENTORY TAX COST DM (APC)
+	UNION ALL
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[dblDebit]						=	0,
+		[dblCredit]						=	voucherDetails.dblTotal,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, OVERRIDESEGMENT.intOverrideAccount),
+		[strCode]						=	'AP',	
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	voucherDetails.intBillDetailTaxId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	0,
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	voucherDetails.dblForeignTotal,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			OUTER APPLY (
+			SELECT intOverrideAccount
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND A.intTransactionType IN (3)
+
+	--REVERSAL ON NON-INVENTORY TAX COST DM (EXPENSE)
+	UNION ALL
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	voucherDetails.intExpenseAccountId,
+		[dblDebit]						=	voucherDetails.dblTotal,
+		[dblCredit]						=	0,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, OVERRIDESEGMENT.intOverrideAccount),
+		[strCode]						=	'AP',	
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	voucherDetails.intBillDetailTaxId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate,0),1),
+		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	E.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			OUTER APPLY (
+			SELECT intOverrideAccount
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			) OVERRIDESEGMENT
+	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND A.intTransactionType IN (3)
 	
 	--TAXES OF DUE TO FOR LOCATION
 	UNION ALL
