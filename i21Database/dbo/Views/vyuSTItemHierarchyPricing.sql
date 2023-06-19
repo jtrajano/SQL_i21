@@ -14,8 +14,8 @@ SELECT
 	CASE WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
 						THEN SplPrc.dblCost
 					WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
-						THEN effectiveCost.dblCost --Effective Cost
-					ELSE ip.dblStandardCost
+						THEN effectiveCost.dblCost * UM.dblUnitQty --Effective Cost
+					ELSE ip.dblStandardCost * UM.dblUnitQty
 				END AS dblLastCost
 FROM tblICItemPricing ip
 JOIN tblICItemUOM UM
