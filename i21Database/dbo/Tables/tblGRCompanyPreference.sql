@@ -42,6 +42,7 @@
 	[intGrainBankUnitMeasureId] INT NULL, 
     [ysnShowLoadOutAddressForFullSheetTicket] BIT NOT NULL DEFAULT(0),
 
+    [ysnOverrideDefaultFreightItem] BIT NOT NULL DEFAULT(0),
     --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
     
 

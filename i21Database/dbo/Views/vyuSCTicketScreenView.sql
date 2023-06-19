@@ -262,7 +262,11 @@
 	,SCT.ysnFixRounding
 	,SCT.ysnTicketInTransit
 	,SCT.ysnTicketApplied
-FROM tblSCTicket SCT WITH(NOLOCK)
+	
+	
+	,SCT.intOverrideFreightItemId
+	,ICItemFreightItem.strItemNo AS strOverrideFreightItemNo
+  FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag
@@ -279,6 +283,7 @@ FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblEMEntityLocation EMEntityFarm on EMEntityFarm.intEntityLocationId = SCT.intFarmFieldId
 
 	LEFT JOIN tblICItem ICItem on ICItem.intItemId = SCT.intItemId
+	LEFT JOIN tblICItem ICItemFreightItem on ICItemFreightItem.intItemId = SCT.intOverrideFreightItemId
 	LEFT JOIN tblICCommodity ICCommodity on ICCommodity.intCommodityId = SCT.intCommodityId
 	LEFT JOIN tblICStorageLocation ICStorageLocation on ICStorageLocation.intStorageLocationId = SCT.intStorageLocationId
 	LEFT JOIN tblICStorageLocation ICStorageLocationTransfer on ICStorageLocationTransfer.intStorageLocationId = SCT.intStorageLocationToId
