@@ -379,6 +379,7 @@ BEGIN TRY
 										END
 			,[intUserId] 				= @intUserId
 		FROM @StorageTicketInfoByFIFO
+		WHERE strItemType = 'Inventory'
 
 		IF @strSourceType = 'Invoice'
 		BEGIN
