@@ -173,6 +173,10 @@
     [ysnTicketInTransit] BIT NOT NULL DEFAULT 0, 
     [ysnTicketApplied] BIT NOT NULL DEFAULT 0, 
     [dblInTransitQuantity] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+
+    [intOverrideFreightItemId] INT NULL, 
+
+
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -184,6 +188,7 @@
     CONSTRAINT [FK_tblSCTicket_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSCTicket_tblICItem_intOverrideFreightItemId] FOREIGN KEY ([intOverrideFreightItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSCTicket_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCTicket_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]),
 	CONSTRAINT [FK_tblSCTicket_tblCTContractDetail_intContractId] FOREIGN KEY ([intContractId]) REFERENCES [tblCTContractDetail],
