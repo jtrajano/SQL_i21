@@ -43,8 +43,18 @@ DECLARE @intScaleStationId AS INT
 		,@intDeliverySheetId INT
 		,@intFreightItemId INT;
 DECLARE @_intStorageHistoryId INT
-	
-SELECT @intFreightItemId = SCSetup.intFreightItemId
+DECLARE @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID BIT
+
+
+SELECT 
+	@COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = ISNULL(ysnOverrideDefaultFreightItem, 0)
+FROM tblGRCompanyPreference
+
+SELECT @intFreightItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+							AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+							THEN SC.intOverrideFreightItemId 
+						ELSE SCSetup.intFreightItemId 
+					END
 	, @intHaulerId = SC.intHaulerId
 	, @ysnDeductFreightFarmer = SC.ysnFarmerPaysFreight 
 	, @ysnDeductFeesCusVen = SC.ysnCusVenPaysFees
@@ -1180,7 +1190,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						-- JOIN tblICItem ICI on RE.intItemId = @intFreightItemId
 						LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+						LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																	AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																	THEN SC.intOverrideFreightItemId 
+																ELSE SCS.intFreightItemId
+															END
 						WHERE RE.dblFreightRate != 0
 				END
 				ELSE IF ISNULL(@intFreightItemId,0) != 0
@@ -1225,7 +1239,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intShipFromId]					= RE.intShipFromId
 							,[intCurrencyId]  					= RE.intCurrencyId
 							,[intCostCurrencyId]				= RE.intCurrencyId
-							,[intChargeId]						= SCS.intFreightItemId
+							,[intChargeId]						= CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																			AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																			THEN SC.intOverrideFreightItemId 
+																		ELSE SCS.intFreightItemId
+																	END
 							,[intForexRateTypeId]				= RE.intForexRateTypeId
 							,[dblForexRate]						= RE.dblForexRate
 							,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
@@ -1265,7 +1283,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 							FROM @ReceiptStagingTable RE
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+							LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																			AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																			THEN SC.intOverrideFreightItemId 
+																		ELSE SCS.intFreightItemId
+																	END
 							OUTER APPLY(
 								SELECT * FROM tblCTContractCost WHERE intContractDetailId = RE.intContractDetailId 
 								AND dblRate != 0 
@@ -1342,7 +1364,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 							LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+							LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																			AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																			THEN SC.intOverrideFreightItemId 
+																		ELSE SCS.intFreightItemId
+																	END
 							WHERE ContractCost.intItemId = @intFreightItemId 
 								AND RE.intContractDetailId IS NOT NULL 
 								AND ContractCost.dblRate != 0
@@ -1416,7 +1442,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 								FROM @ReceiptStagingTable RE 
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-								LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+								LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																			AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																			THEN SC.intOverrideFreightItemId 
+																		ELSE SCS.intFreightItemId
+																	END
 								WHERE RE.dblFreightRate != 0 AND RE.intContractDetailId IS NULL
 						END
 				END
