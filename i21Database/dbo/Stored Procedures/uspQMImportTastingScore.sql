@@ -191,8 +191,8 @@ BEGIN TRY
 			 , intSampleId				= S.intSampleId
 			 , intValuationGroupId		= STYLE.intValuationGroupId
 			 , strValuationGroup		= STYLE.strName
-			 , strOrigin				= ORIGIN.strISOCode
-			 , strSustainability		= SUSTAINABILITY.strDescription
+			 , strOrigin				= IMP.strGardenGeoOrigin
+			 , strSustainability		= LEFT(SUSTAINABILITY.strDescription, 1)
 			 , strMusterLot				= IMP.strMusterLot
 			 , strMissingLot			= IMP.strMissingLot
 			 , strComments2				= IMP.strTastersRemarks
@@ -268,7 +268,7 @@ BEGIN TRY
 			, intValuationGroupId		= STYLE.intValuationGroupId
 			, strValuationGroup			= STYLE.strName
 			, strOrigin					= IMP.strGardenGeoOrigin 
-			, strSustainability			= IMP.strSustainability
+			, strSustainability			= LEFT(IMP.strSustainability, 1)
 			, strMusterLot				= IMP.strMusterLot
 			, strMissingLot				= IMP.strMissingLot
 			, strComments2				= IMP.strTastersRemarks
