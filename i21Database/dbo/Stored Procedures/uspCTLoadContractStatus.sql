@@ -221,7 +221,8 @@ BEGIN TRY
 					JOIN	(
 								SELECT		RV.intPContractDetailId,
 											CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intPUnitMeasureId,LP.intWeightUOMId,dblPAllocatedQty)),0) AS NUMERIC(18, 6))  AS dblAllocatedQty
-								FROM		tblLGAllocationDetail	RV		
+								FROM		tblLGAllocationDetail	RV
+								INNER JOIN	tblLGAllocationHeader	AH ON AH.intAllocationHeaderId = RV.intAllocationHeaderId AND AH.ysnCancelled = 0
 								JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intPContractDetailId AND CD.intContractDetailId = @intContractDetailId	 CROSS	
 								APPLY		tblLGCompanyPreference	LP
 								Group By	intPContractDetailId,CD.intItemId,RV.intPUnitMeasureId,LP.intWeightUOMId
@@ -229,7 +230,8 @@ BEGIN TRY
 					JOIN	(
 								SELECT		intSContractDetailId,
 											CAST(ISNULL(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty)),0) AS NUMERIC(18, 6))  AS dblAllocatedQty
-								FROM		tblLGAllocationDetail	RV		
+								FROM		tblLGAllocationDetail	RV	
+								INNER JOIN	tblLGAllocationHeader	AH ON AH.intAllocationHeaderId = RV.intAllocationHeaderId AND AH.ysnCancelled = 0
 								JOIN		tblCTContractDetail		CD	ON	CD.intContractDetailId = RV.intSContractDetailId AND CD.intContractDetailId = @intContractDetailId	 CROSS	
 								APPLY		tblLGCompanyPreference	LP 
 								Group By	intSContractDetailId,CD.intItemId,RV.intSUnitMeasureId,LP.intWeightUOMId
@@ -683,7 +685,7 @@ BEGIN TRY
 				EY2.strName strCounterPartyName
 
 		FROM	tblLGAllocationDetail	AD
-		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId
+		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId AND AH.ysnCancelled = 0
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intSContractDetailId AND	CD.intContractDetailId		=	@intContractDetailId
 		JOIN	tblCTContractDetail		CD2	ON	CD2.intContractDetailId		=	AD.intPContractDetailId 
 
@@ -694,6 +696,7 @@ BEGIN TRY
 		JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId		
 		JOIN	tblEMEntity				EY2	ON	EY2.intEntityId				=	CH2.intEntityId		
 		CROSS	APPLY	tblLGCompanyPreference	LP
+
 
 		UNION ALL 
 
@@ -709,7 +712,7 @@ BEGIN TRY
 				EY2.strName strCounterPartyName
 
 		FROM	tblLGAllocationDetail	AD
-		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId
+		JOIN	tblLGAllocationHeader	AH	ON	AH.intAllocationHeaderId	=	AD.intAllocationHeaderId AND AH.ysnCancelled = 0
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId		=	AD.intPContractDetailId AND	CD.intContractDetailId		=	@intContractDetailId
 		JOIN	tblCTContractDetail		CD2	ON	CD2.intContractDetailId		=	AD.intSContractDetailId 
 
