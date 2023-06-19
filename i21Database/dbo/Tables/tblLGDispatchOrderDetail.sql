@@ -9,6 +9,7 @@
 	[strOrderNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strOrderType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[strPONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strReleasePONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intSequence] INT NULL,
 	[intLoadSeq] INT NULL,
 	[intEntityId] INT NULL,

@@ -23,6 +23,7 @@ SELECT
 	,DOD.strOrderNumber
 	,DOD.strOrderType
 	,DOD.strPONumber
+	,DOD.strReleasePONumber
 	,strTerminalName = TCN.strName
 	,strTerminalControlNumber = TCN.strTerminalControlNumber
 	,strFromSupplier = V.strName
