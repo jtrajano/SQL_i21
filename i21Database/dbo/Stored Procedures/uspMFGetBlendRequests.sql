@@ -91,6 +91,7 @@ IF @intWorkOrderId > 0
 		 , f.ysnOverrideRecipe
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
+		 , a.dblBlenderSize
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId = c.intUnitMeasureId 
@@ -134,6 +135,7 @@ IF @intWorkOrderId > 0
 		 , f.ysnOverrideRecipe
 		 , Machine.strName
 		 , a.dblEstNoOfBlendSheet
+		 , a.dblBlenderSize
 
 
 --Negative means BlendRequirementId
@@ -162,6 +164,7 @@ IF @intWorkOrderId < 0
 		 , (a.dblQuantity - (a.dblQuantity * (ri.dblLowerTolerance / 100))) AS dblCalculatedLowerTolerance 
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
+		 , a.dblBlenderSize
 	FROM tblMFBlendRequirement a 
 	JOIN tblICItem b ON a.intItemId = b.intItemId 
 	JOIN tblICItemUOM c ON b.intItemId = c.intItemId AND a.intUOMId=c.intUnitMeasureId 
@@ -198,3 +201,4 @@ IF @intWorkOrderId < 0
 		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity))
 		 , Machine.strName
 		 , a.dblEstNoOfBlendSheet
+		 , a.dblBlenderSize
