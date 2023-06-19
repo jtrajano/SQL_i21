@@ -1194,9 +1194,9 @@ BEGIN TRY
 			,strVendorLotNumber = S.strRepresentLotNumber
 			,intBuyingCenterLocationId = ISNULL(TBO.intCompanyLocationId, BT.intBuyingCenterLocationId)
 			,intStorageLocationId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intDestinationStorageLocationId ELSE CD.intSubLocationId END
-			,intStorageUnitId = NULL
-			,intBrokerWarehouseId = NULL
-			,intParentBatchId = NULL
+			,intStorageUnitId = BT.intStorageUnitId
+			,intBrokerWarehouseId = BT.intBrokerWarehouseId
+			,intParentBatchId = BT.intParentBatchId
 			,intInventoryReceiptId = S.intInventoryReceiptId
 			,intSampleId = S.intSampleId
 			,intContractDetailId = S.intContractDetailId
@@ -1207,24 +1207,24 @@ BEGIN TRY
 			,strAWBSampleReference = S.strAWBSampleReference
 			,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblBasePrice ELSE CD.dblCashPrice END
 			,ysnBoughtAsReserved = S.ysnBoughtAsReserve
-			,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE CD.dblCashPrice END
-			,dblBulkDensity = NULL
+			,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
+			,dblBulkDensity = BT.dblBulkDensity
 			,strBuyingOrderNumber = CASE WHEN CD.intContractDetailId IS NULL THEN S.strBuyingOrderNo ELSE CH.strExternalContractNumber END
 			,intSubBookId = S.intSubBookId
 			,strContainerNumber = S.strContainerNumber
 			,intCurrencyId = S.intCurrencyId
 			,dtmProductionBatch = S.dtmManufacturingDate
-			,dtmTeaAvailableFrom = NULL
-			,strDustContent = NULL
+			,dtmTeaAvailableFrom = BT.dtmTeaAvailableFrom
+			,strDustContent = BT.strDustContent
 			,ysnEUCompliant = S.ysnEuropeanCompliantFlag
 			,strTBOEvaluatorCode = ECTBO.strName
 			,strEvaluatorRemarks = S.strComments3
-			,dtmExpiration = NULL
+			,dtmExpiration = BT.dtmExpiration
 			,intFromPortId = CD.intLoadingPortId
 			,dblGrossWeight = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblGrossWeight ELSE S.dblSampleQty +IsNULL(S.dblTareWeight,0) END
-			,dtmInitialBuy = NULL
+			,dtmInitialBuy = BT.dtmInitialBuy
 			,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
-			,dblLandedPrice = NULL
+			,dblLandedPrice = BT.dblLandedPrice
 			,strLeafCategory = LEAF_CATEGORY.strAttribute2
 			,strLeafManufacturingType = LEAF_TYPE.strDescription
 			,strLeafSize = BRAND.strBrandCode
@@ -1234,16 +1234,16 @@ BEGIN TRY
 			,intItemUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intRepresentingUOMId ELSE S.intSampleUOMId END
 			,intWeightUOMId = S.intSampleUOMId
 			,strTeaOrigin = S.strCountry
-			,intOriginalItemId = S.intItemId
-			,dblPackagesPerPallet = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20) END
-			,strPlant = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE TBO.strOregonFacilityNumber END
+			,intOriginalItemId = ISNULL(BT.intOriginalItemId, S.intItemId)
+			,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
+			,strPlant = TBO.strOregonFacilityNumber
 			,dblTotalQuantity = S.dblSampleQty
 			,strSampleBoxNumber = S.strSampleBoxNumber
-			,dblSellingPrice = NULL
-			,dtmStock = CD.dtmUpdatedAvailabilityDate
-			,ysnStrategic = NULL
-			,strTeaLingoSubCluster = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE REGION.strDescription END
-			,dtmSupplierPreInvoiceDate = NULL
+			,dblSellingPrice = BT.dblSellingPrice
+			,dtmStock = ISNULL(CD.dtmUpdatedAvailabilityDate, BT.dtmStock)
+			,ysnStrategic = BT.ysnStrategic
+			,strTeaLingoSubCluster = REGION.strDescription
+			,dtmSupplierPreInvoiceDate = BT.dtmSupplierPreInvoiceDate
 			,strSustainability = SUSTAINABILITY.strDescription
 			,strTasterComments = S.strComments2
 			,dblTeaAppearance = CASE 
@@ -1279,27 +1279,27 @@ BEGIN TRY
 				THEN NULL
 				ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
 				END
-			,dblTeaVolume = NULL
+			,dblTeaVolume = BT.dblTeaVolume
 			,intTealingoItemId = S.intItemId
-			,dtmWarehouseArrival = NULL
-			,intYearManufacture = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE Datepart(YYYY,S.dtmManufacturingDate) END
-			,strPackageSize = CASE WHEN CD.intContractDetailId IS NULL THEN NULL ELSE PT.strUnitMeasure END
+			,dtmWarehouseArrival = BT.dtmWarehouseArrival
+			,intYearManufacture = Datepart(YYYY,S.dtmManufacturingDate)
+			,strPackageSize = PT.strUnitMeasure
 			,intPackageUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intNetWtPerPackagesUOMId ELSE S.intRepresentingUOMId END
 			,dblTareWeight = S.dblTareWeight
 			,strTaster = BT.strTaster
-			,strFeedStock = NULL
-			,strFlourideLimit = NULL
-			,strLocalAuctionNumber = NULL
-			,strPOStatus = NULL
-			,strProductionSite = NULL
-			,strReserveMU = NULL
-			,strQualityComments = NULL
-			,strRareEarth = NULL
-			,strFreightAgent = NULL
-			,strSealNumber = NULL
-			,strContainerType = NULL
-			,strVoyage = NULL
-			,strVessel = NULL
+			,strFeedStock = BT.strFeedStock
+			,strFlourideLimit = BT.strFlourideLimit
+			,strLocalAuctionNumber = BT.strLocalAuctionNumber
+			,strPOStatus = BT.strPOStatus
+			,strProductionSite = BT.strProductionSite
+			,strReserveMU = BT.strReserveMU
+			,strQualityComments = BT.strQualityComments
+			,strRareEarth = BT.strRareEarth
+			,strFreightAgent = BT.strFreightAgent
+			,strSealNumber = BT.strSealNumber
+			,strContainerType = BT.strContainerType
+			,strVoyage = BT.strVoyage
+			,strVessel = BT.strVessel
 			,intLocationId = S.intLocationId
 			,intMixingUnitLocationId = MU.intCompanyLocationId
 			,intMarketZoneId = S.intMarketZoneId
@@ -1458,6 +1458,10 @@ BEGIN TRY
 				,@strBatchId OUTPUT
 				,0
 
+			UPDATE tblQMSample
+			SET strBatchNo = @strBatchId
+			WHERE intSampleId = @intSampleId
+
 			IF EXISTS(SELECT 1 FROM @MFBatchTableType WHERE intLocationId = intBuyingCenterLocationId)
 			BEGIN
 				UPDATE B
@@ -1482,22 +1486,26 @@ BEGIN TRY
 				,NULL
 				,1
 			END
+			ELSE
+			BEGIN
+				DECLARE @intBatchId INT
+				DECLARE @intOriginalItemId INT
 
-			DECLARE @intBatchId INT
+				SELECT @intBatchId = intBatchId
+				FROM tblMFBatch B
+				INNER JOIN tblQMSample S ON S.strBatchNo = B.strBatchId AND S.intLocationId = B.intLocationId
+				WHERE S.intSampleId = @intSampleId
 
-			SELECT @intBatchId = intBatchId
-			FROM tblMFBatch B
-			INNER JOIN tblQMSample S ON S.strBatchNo = B.strBatchId AND S.intLocationId = B.intLocationId
-			WHERE S.intSampleId = @intSampleId
+				SELECT TOP 1 @intOriginalItemId = intOriginalItemId
+				FROM @MFBatchTableType
 
-			EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
-							,@intUserId = @intCreatedUserId
-							,@intOriginalItemId = @intItemId
-							,@intItemId = @intItemId
+				EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
+								,@intUserId = @intCreatedUserId
+								,@intOriginalItemId = @intOriginalItemId
+								,@intItemId = @intItemId
+			END
 
-			UPDATE tblQMSample
-			SET strBatchNo = @strBatchId
-			WHERE intSampleId = @intSampleId
+			
 		END
 	END
 
