@@ -37,7 +37,7 @@ DECLARE @ParamTemp             NVARCHAR(MAX)	= @Param
 
 DECLARE	@DiscountAccountId          INT
        ,@DeferredRevenueAccountId   INT
-       ,@ExcludeInvoiceFromPayment	BIT
+       ,@ExcludeInvoiceFromPayment	BIT = 0
        ,@ImpactForProvisional    	BIT
        ,@AllowOtherUserToPost       BIT
        ,@ZeroBit                    BIT
