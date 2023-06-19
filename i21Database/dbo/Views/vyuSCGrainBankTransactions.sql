@@ -30,8 +30,12 @@
 	, STORAGE.intItemId
 	, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
 	FROM tblGRCustomerStorage  STORAGE
+		JOIN tblGRStorageType STORAGE_TYPE 
+			ON STORAGE.intStorageTypeId = STORAGE_TYPE.intStorageScheduleTypeId
+				AND STORAGE_TYPE.ysnGrainBankType = 1
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
+		
 		JOIN tblSCTicket TICKET
 			ON HISTORY.intTicketId = TICKET.intTicketId
 		JOIN tblICItemUOM ITEM_UOM
@@ -53,6 +57,59 @@
 		AND STORAGE.intStorageTypeId = @STORAGE_SCHEDULE_TYPE_ID
 		
 		*/
+	UNION ALL
+
+	SELECT 
+	'TICKET' AS strMode
+	, HISTORY.intTransactionTypeId
+	, TICKET.strTicketNumber AS strTransactionId
+	, TICKET.strDistributionOption AS strTransactionType
+	, TICKET.dtmTicketDateTime AS dtmTransactionDate
+
+
+	, STORAGE.intEntityId
+	, STORAGE.intCustomerStorageId 
+	, STORAGE.intStorageTypeId 
+	, HISTORY.intStorageHistoryId
+
+	, -1 * case when GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId is not null and 
+			GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId != UOM.intUnitMeasureId then
+			round(dbo.fnGRConvertQuantityToTargetItemUOM(
+									TICKET.intItemId
+									, UOM.intUnitMeasureId
+									, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
+									, HISTORY.dblUnits) , 4)
+		else
+			HISTORY.dblUnits
+		end as dblUnits
+		
+
+	, STORAGE.intStorageScheduleId
+	, STORAGE.intItemId
+	, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
+	FROM tblGRCustomerStorage  STORAGE
+		JOIN tblGRStorageType STORAGE_TYPE 
+			ON STORAGE.intStorageTypeId = STORAGE_TYPE.intStorageScheduleTypeId
+				AND STORAGE_TYPE.ysnGrainBankType = 1
+		JOIN tblGRStorageHistory HISTORY
+			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
+		
+		JOIN tblSCTicket TICKET
+			ON HISTORY.intTicketId = TICKET.intTicketId
+		JOIN tblICItemUOM ITEM_UOM
+					on TICKET.intItemUOMIdTo = ITEM_UOM.intItemUOMId
+						and TICKET.intItemId = ITEM_UOM.intItemId
+		
+		JOIN tblICUnitMeasure UOM
+				on ITEM_UOM.intUnitMeasureId = UOM.intUnitMeasureId
+		OUTER APPLY(
+			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
+		) GR_COMPANY_PREFERENCE
+
+	WHERE 
+		HISTORY.intTransactionTypeId = 8
+
+
 	UNION ALL
 
 	SELECT 
@@ -83,6 +140,9 @@
 	, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
 
 	FROM tblGRCustomerStorage  STORAGE
+		JOIN tblGRStorageType STORAGE_TYPE 
+			ON STORAGE.intStorageTypeId = STORAGE_TYPE.intStorageScheduleTypeId
+				AND STORAGE_TYPE.ysnGrainBankType = 1
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
 		JOIN tblGRTransferStorage TRANSFERS
@@ -133,6 +193,9 @@
 	
 	, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
 	FROM tblGRCustomerStorage  STORAGE
+		JOIN tblGRStorageType STORAGE_TYPE 
+			ON STORAGE.intStorageTypeId = STORAGE_TYPE.intStorageScheduleTypeId
+				AND STORAGE_TYPE.ysnGrainBankType = 1
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
 		JOIN tblGRSettleStorage SETTLEMENT
@@ -188,6 +251,9 @@
 	
 	, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
 	FROM tblGRCustomerStorage  STORAGE
+		JOIN tblGRStorageType STORAGE_TYPE 
+			ON STORAGE.intStorageTypeId = STORAGE_TYPE.intStorageScheduleTypeId
+				AND STORAGE_TYPE.ysnGrainBankType = 1
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
 		JOIN tblARInvoice INVOICE
