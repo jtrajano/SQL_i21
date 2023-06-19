@@ -21,6 +21,9 @@
 	, STORAGE.intItemId
 	, INVOICE_DETAIL.strItemDescription 
 	FROM tblGRCustomerStorage  STORAGE
+		JOIN tblGRStorageType STORAGE_TYPE 
+			ON STORAGE.intStorageTypeId = STORAGE_TYPE.intStorageScheduleTypeId
+				AND STORAGE_TYPE.ysnGrainBankType = 1
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
 		JOIN tblARInvoice INVOICE
