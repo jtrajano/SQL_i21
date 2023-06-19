@@ -787,16 +787,12 @@ BEGIN TRY
 			LEFT JOIN @tblMFStagedQty S ON S.intItemId = R.intItemId
 
 			UPDATE OD
-			SET dblQty = CASE 
-					WHEN dblQty - R.dblRemainingQty < 0
-						THEN 0
-					ELSE dblQty - R.dblRemainingQty
-					END
-				,dblWeight = CASE 
-					WHEN dblWeight - R.dblRemainingQty < 0
-						THEN 0
-					ELSE dblWeight - R.dblRemainingQty
-					END
+			SET dblQty = CASE WHEN R.dblRemainingQty - dblQty < 0 THEN 0
+							  ELSE dblQty
+						 END
+			  , dblWeight = CASE WHEN R.dblRemainingQty - dblWeight < 0 THEN 0
+								 ELSE dblWeight
+							END
 				,dblSurplusQtyInStageLocation = R.dblRemainingQty
 			FROM @OrderDetail OD
 			LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
