@@ -36,6 +36,7 @@ RETURNS TABLE AS RETURN
   ,G.intCurrencyExchangeRateTypeId  
   ,G.strCurrencyExchangeRateType  
   ,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate  
+  ,dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'Other Charge Expense') intExpenseAccountId
  FROM tblAPBill A  
  INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId  
  INNER JOIN tblICItem B2  
@@ -48,6 +49,8 @@ RETURNS TABLE AS RETURN
   ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId  
  LEFT JOIN tblICItem F  
   ON B.intItemId = F.intItemId  
+ LEFT JOIN tblICItemLocation loc
+  ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
  LEFT JOIN dbo.tblSMCurrencyExchangeRateType G  
   ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId  
  LEFT JOIN tblLGLoadCost H
