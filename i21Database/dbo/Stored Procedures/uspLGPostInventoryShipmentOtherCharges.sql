@@ -21,6 +21,12 @@ END
 
 SELECT @intPurchaseSale = intPurchaseSale FROM tblLGLoad WHERE intLoadId = @intLoadId
 
+-- Get OverrideLOBSegment from company preference
+BEGIN
+	DECLARE @ysnOverrideLOBSegment AS BIT
+	SELECT @ysnOverrideLOBSegment = ysnOverrideLOBSegment FROM tblLGCompanyPreference
+END
+
 -- Get the invoice currency
 SELECT @intInvoiceCurrency =
 	CASE WHEN AD.ysnValidFX = 1
@@ -136,13 +142,26 @@ BEGIN
 		,intAPClearing = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing)
 		,intTransactionTypeId = @intTransactionTypeId
 	FROM (
-		SELECT DISTINCT OtherCharges.intItemId
-			,ItemLocation.intItemLocationId
+		SELECT DISTINCT 
+			intItemId = CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+							THEN LoadDetail.intItemId
+							ELSE OtherCharges.intItemId
+						END
+			,intItemLocationId = CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+							THEN LoadItemLocation.intItemLocationId
+							ELSE ItemLocation.intItemLocationId
+						END
 		FROM dbo.tblLGLoad LOAD
 		INNER JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = LOAD.intLoadId
 		INNER JOIN dbo.tblLGLoadCost OtherCharges ON LOAD.intLoadId = OtherCharges.intLoadId AND OtherCharges.strEntityType = 'Vendor'
 		LEFT JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = OtherCharges.intItemId
 			AND ItemLocation.intLocationId = 		
+			CASE 
+				WHEN @intPurchaseSale IN (2,3) THEN LoadDetail.intSCompanyLocationId
+				WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
+			END
+		LEFT JOIN dbo.tblICItemLocation LoadItemLocation ON LoadItemLocation.intItemId = LoadDetail.intItemId
+			AND LoadItemLocation.intLocationId = 		
 			CASE 
 				WHEN @intPurchaseSale IN (2,3) THEN LoadDetail.intSCompanyLocationId
 				WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
@@ -470,8 +489,18 @@ BEGIN
 		,strRateType = ForGLEntries_CTE.strRateType
 	FROM ForGLEntries_CTE
 	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-		AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON 
+		OtherChargesGLAccounts.intChargeId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemId
+				ELSE ForGLEntries_CTE.intChargeId
+			END
+		AND 
+		OtherChargesGLAccounts.intItemLocationId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemLocationId
+				ELSE ForGLEntries_CTE.intChargeItemLocation
+			END
 	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = Account.intAccountId
 	-- CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
@@ -524,8 +553,18 @@ BEGIN
 		,strRateType = ItemCurrencyToFunctional.strCurrencyExchangeRateType
 	FROM ForGLEntries_CTE
 	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-		AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON 
+		OtherChargesGLAccounts.intChargeId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemId
+				ELSE ForGLEntries_CTE.intChargeId
+			END
+		AND 
+		OtherChargesGLAccounts.intItemLocationId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemLocationId
+				ELSE ForGLEntries_CTE.intChargeItemLocation
+			END
 	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = Account.intAccountId
 	OUTER APPLY (SELECT TOP 1 
 					dblForexRate = ISNULL(dblRate,0),
@@ -597,8 +636,18 @@ BEGIN
 		,dblForeignRate = ForGLEntries_CTE.dblForexRate
 		,strRateType = ForGLEntries_CTE.strRateType
 	FROM ForGLEntries_CTE
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-		AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON 
+		OtherChargesGLAccounts.intChargeId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemId
+				ELSE ForGLEntries_CTE.intChargeId
+			END
+		AND 
+		OtherChargesGLAccounts.intItemLocationId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemLocationId
+				ELSE ForGLEntries_CTE.intChargeItemLocation
+			END
 	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 	-- CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
@@ -649,8 +698,18 @@ BEGIN
 		,dblForeignRate = ForGLEntries_CTE.dblForexRate
 		,strRateType = ForGLEntries_CTE.strRateType
 	FROM ForGLEntries_CTE
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
-		AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON 
+		OtherChargesGLAccounts.intChargeId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemId
+				ELSE ForGLEntries_CTE.intChargeId
+			END
+		AND 
+		OtherChargesGLAccounts.intItemLocationId =
+			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+				THEN ForGLEntries_CTE.intItemLocationId
+				ELSE ForGLEntries_CTE.intChargeItemLocation
+			END
 	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = OtherChargesGLAccounts.intAPClearing
 	-- CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit

@@ -29,6 +29,12 @@ SET ANSI_WARNINGS ON
 	DECLARE @strGLDescription AS NVARCHAR(500) = NULL
 	DECLARE @intInvoiceCurrency AS INT
 
+	-- Get OverrideLOBSegment from company preference
+	BEGIN
+		DECLARE @ysnOverrideLOBSegment AS BIT
+		SELECT @ysnOverrideLOBSegment = ysnOverrideLOBSegment FROM tblLGCompanyPreference
+	END
+
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
 		,@strTransactionId = strLoadNumber
@@ -386,7 +392,7 @@ SET ANSI_WARNINGS ON
 		)
 		SELECT 
 			[intItemId] = LD.intItemId
-			,[intOtherChargeItemId] = ShipmentCharges.intItemId
+			,[intOtherChargeItemId] = LD.intItemId
 			,[intItemLocationId] = LD.intItemLocationId
 			,[dtmDate] = L.dtmScheduledDate
 			,[dblValue] = ShipmentCharges.dblAmount 
