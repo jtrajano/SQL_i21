@@ -65,6 +65,8 @@ SELECT
 	,strItemDescription = I.strDescription
 	,DOD.dblQuantity
 	,DOD.dblStandardWeight
+	,DOD.dblPrice
+	,DOD.dblTotal
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
 	,DOD.intEntityShipViaId
