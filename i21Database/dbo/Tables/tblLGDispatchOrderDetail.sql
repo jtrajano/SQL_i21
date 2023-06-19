@@ -32,6 +32,8 @@
 	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantity] NUMERIC(18, 6) NULL,
 	[dblStandardWeight] NUMERIC(18, 6) NULL,
+	[dblPrice] NUMERIC(18, 6) NULL,
+	[dblTotal] NUMERIC(18, 6) NULL,
 	[strOrderComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strDeliveryComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intLoadId] INT NULL, 
