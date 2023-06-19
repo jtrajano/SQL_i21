@@ -697,7 +697,7 @@ BEGIN TRY
 			SELECT TOP 1 
 			RL.intStoreId,
 			RL.strBookNumber,
-			'Low to High',
+			'High to Low',
 			RL.intLotteryGameId,
 			RL.dtmReceiptDate,
 			LG.intStartingNumber,
