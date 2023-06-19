@@ -50,7 +50,7 @@ WITH QUERY AS(
 	SELECT top 1 [dbo].fnGLGetCMGLDetailBalance(EOP.Value, BA.intGLAccountId) Value -- this is in us / functional currency  
 	)GLBalance  
 	OUTER APPLY(  
-	SELECT top 1 case when BankBalance.Value = 0 or  GLBalance.Value = 0 then NULL else  BankBalance.Value/GLBalance.Value   END  Value  
+	SELECT top 1 case when BankBalance.Value = 0 or  GLBalance.Value = 0 then NULL else  GLBalance.Value/BankBalance.Value   END  Value  
 	)Rate  
 )
 SELECT * from QUERY WHERE dblHistoricAmount <> 0
