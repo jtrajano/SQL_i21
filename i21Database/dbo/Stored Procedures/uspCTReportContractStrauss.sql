@@ -444,7 +444,7 @@ BEGIN TRY
 													ELSE '' + dbo.fnCTChangeNumericScale(@dblCashPrice,2) + ' ' + @strPriceCurrencyAndUOMForPriced2 END
 		,strStraussShipmentLabel				= (CASE WHEN PO.strPositionType = 'Spot' THEN 'DELIVERY' ELSE 'SHIPMENT' END)
 		,strStraussShipment						= CONVERT(VARCHAR, @dtmStartDate, 101) + ' - ' + CONVERT(VARCHAR, @dtmEndDate, 101)
-		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE @strDestinationPort END)
+		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE ISNULL(@strDestinationPort,'') END)
 		,strFreightTerm							= CB.strFreightTerm + ' (' + CB.strDescription + ')'
 		,strCity								= ISNULL(CT.strCity, '')
 		,strWeightGradeDesc						= ISNULL(W1.strWeightGradeDesc, '')
