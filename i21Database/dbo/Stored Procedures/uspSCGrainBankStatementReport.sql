@@ -99,7 +99,9 @@ begin
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	
+	-- Reset the start date time
+	SELECT @dtmStartDate = CAST(CAST(@dtmStartDate AS DATE) AS DATETIME)
+	SELECT @dtmEndDate = CAST(CAST(@dtmEndDate AS DATE) AS DATETIME)
 
 	-- #SCENARIO TO CHECK - MANUAL DISTRIBUTION FOR GB
 	-- #SCENARIO TO CHECK - TICKET SPLIT
