@@ -2,7 +2,13 @@
 CREATE VIEW vyuGLCompanyOutOfBalance
 AS
 with cte as(
-	select C.strCode, strTransactionId, sum(isnull(dblDebit,0) - isnull(dblCredit,0))dblTotal from tblGLDetail A 
+	select 
+		min(A.intTransactionId)intTransactionId,
+		min(A.strModuleName) strModuleName,
+		min(A.strTransactionForm)strTransactionForm,
+		C.strCode strCompanySegment, strTransactionId, 
+		sum(isnull(dblDebit,0) - isnull(dblCredit,0))dblTotal
+	from tblGLDetail A 
 	join tblGLAccount B on A.intAccountId = B.intAccountId
 	join tblGLAccountSegment C on C.intAccountSegmentId = B.intCompanySegmentId
 	join tblGLAccountStructure S on C.intAccountStructureId = C.intAccountStructureId
@@ -28,7 +34,9 @@ cteUnbalanced as(
 	where (a.dblTotal + b.dblTotal) <> 0
 )
 select 
-ROW_NUMBER() OVER(ORDER BY B.strTransactionId, A.strCode) rowId,
-B.strTransactionId, A.strCode, dblTotal from cte A join cteUnbalanced B on A.strTransactionId = B.strTransactionId
-
-
+intTransactionId,
+strModuleName,
+strTransactionForm,
+B.strTransactionId, A.strCompanySegment, dblTotal 
+from cte A join 
+cteUnbalanced B on A.strTransactionId = B.strTransactionId
