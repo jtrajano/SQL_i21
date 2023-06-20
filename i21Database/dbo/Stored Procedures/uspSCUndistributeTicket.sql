@@ -174,6 +174,15 @@ BEGIN TRY
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
+
+		-- if the ticket is selected at the zero spot ticket, inform the user that it is added and need to remove the ticket from zero spot transaction
+		IF EXISTS(SELECT TOP 1 1 FROM tblGRUnPricedSpotTicket WHERE intTicketId = @intTicketId)
+		BEGIN
+			
+			RAISERROR('ZPT transaction exists and it needs to be deleted first.', 11, 1);
+		END
+
+
 		IF ISNULL(@ysnDeliverySheet, 0) = 0
 		BEGIN
 			SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
