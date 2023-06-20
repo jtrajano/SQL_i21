@@ -39,7 +39,7 @@ WHERE NULLIF(strReferenceNo, '') IS NOT NULL
 /* Confirmed Blend Sheets */
 UNION ALL
 SELECT dtmReleasedDate					AS dtmDate
-	 , intBlendRequirementId			AS intTransactionId
+	 , intWorkOrderId					AS intTransactionId
 	 , strWorkOrderNo					AS strTransactionNo
 	 , 'SAP Blend Sheet'				AS strTransactionType
 	 , CompanyLocation.strLocationName	AS strLocationName
