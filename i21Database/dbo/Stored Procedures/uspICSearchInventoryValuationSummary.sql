@@ -133,6 +133,7 @@ USING (
 		,ysnInTransit = CAST(CASE WHEN InTransit.intItemLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 		,f.strPeriod
 		,strKey = CAST(Item.intItemId AS NVARCHAR(100)) + CAST(ItemLocation.intItemLocationId AS NVARCHAR(100)) + @strPeriod
+		,strCompany = t.strCode  
 	FROM	tblGLFiscalYearPeriod f	
 			CROSS APPLY (
 				SELECT TOP 1 
@@ -191,8 +192,10 @@ USING (
 					,t.intItemId
 					,t.intItemLocationId
 					,t.intInTransitSourceLocationId
+					,compAcc.strCode  
 				FROM 
 					tblICInventoryTransaction t 
+					OUTER APPLY(SELECT strCode FROM vyuGLCompanyAccountId WHERE strAccountId = t.strAccountIdInventory)  compAcc  
 				WHERE				
 					t.intItemId = Item.intItemId
 					AND t.intItemLocationId = Item.intItemLocationId
@@ -201,6 +204,7 @@ USING (
 					t.intItemId
 					,t.intItemLocationId
 					,t.intInTransitSourceLocationId				
+					,compAcc.strCode  
 			) t
 
 			OUTER APPLY (
@@ -303,7 +307,8 @@ WHEN MATCHED THEN
 		,summaryLog.intLocationId = query.intLocationId
 		,summaryLog.intInTransitLocationId = query.intInTransitLocationId
 		,summaryLog.ysnInTransit = query.ysnInTransit
-		,summaryLog.strKey = query.strKey 
+		,summaryLog.strKey = query.strKey
+		,summaryLog.strCompany = query.strCompany  
 
 WHEN NOT MATCHED THEN 
 	INSERT (
@@ -327,6 +332,7 @@ WHEN NOT MATCHED THEN
 		,ysnInTransit
 		,strPeriod
 		,strKey
+		,strCompany  
 	)
 	VALUES (
 		query.intInventoryValuationKeyId 
@@ -348,7 +354,8 @@ WHEN NOT MATCHED THEN
 		,query.intInTransitLocationId
 		,query.ysnInTransit
 		,query.strPeriod
-		,query.strKey		
+		,query.strKey	
+		,query.strCompany
 	)
 ;
 	
