@@ -868,6 +868,7 @@
     <Build Include="dbo\Tables\tblNRScheduleTransaction.sql" />
     <Build Include="dbo\Tables\tblNRUCC.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidations.sql">
+    <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspSMCreateImport.sql" />
