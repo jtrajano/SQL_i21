@@ -36,6 +36,8 @@
 	dblNoOfPallet NUMERIC(38, 20),
 	ysnTBSReserved BIT,
 	ysnOverrideRecipe BIT,
+	dblConsumedQty NUMERIC(38, 20) NULL,
+	intConsumedLotId INT,
     CONSTRAINT [PK_tblMFWorkOrderInputLot_intWorkOrderInputLotId] PRIMARY KEY ([intWorkOrderInputLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderInputLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderInputLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
