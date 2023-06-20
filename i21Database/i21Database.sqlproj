@@ -1796,6 +1796,7 @@
     <Build Include="dbo\Views\vyuMFTransactionData.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
     <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
   </ItemGroup>
   <ItemGroup>
