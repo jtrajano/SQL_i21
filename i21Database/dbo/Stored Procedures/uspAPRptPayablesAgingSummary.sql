@@ -137,7 +137,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SELECT @dtmDueDate = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
-SELECT @strCompanyName = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
+SELECT @strCompanyName = [from], @strCompanyName = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
 SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
 SET @innerQuery = 'SELECT --DISTINCT
 				   intBillId

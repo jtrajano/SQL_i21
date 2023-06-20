@@ -151,7 +151,7 @@ WITH (
 SELECT @strAccountId = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SELECT @strCompanyName = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
+SELECT @strCompanyName = [from], @strCompanyName = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
 SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
