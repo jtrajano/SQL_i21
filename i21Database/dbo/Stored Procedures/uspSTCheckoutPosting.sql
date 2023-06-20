@@ -3825,9 +3825,9 @@ BEGIN
 												,[intItemId]				= I.intItemId
 												,[ysnInventory]				= 1
 												,[strItemDescription]		= I.strDescription
-												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[intOrderUOMId]			= UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
-												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+												,[intItemUOMId]				= UOM.intItemUOMId
 												--,[dblQtyShipped]			= CASE
 												--									-- Refference:  http://jira.irelyserver.com/browse/ST-1558
 												--									WHEN @strInvoiceTransactionTypeMain = @strCASH
@@ -3884,6 +3884,10 @@ BEGIN
 										ON CH.intCheckoutId = DC.intCheckoutId
 									JOIN tblICItem I 
 										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemUOM UOM 
+										ON I.intItemId = UOM.intItemId
+									JOIN tblICUnitMeasure UM
+										ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 									JOIN tblICItemLocation IL
 										ON I.intItemId = IL.intItemId
 										AND ST.intCompanyLocationId = IL.intLocationId
@@ -4032,9 +4036,9 @@ BEGIN
 												,[intItemId]				= I.intItemId
 												,[ysnInventory]				= 1
 												,[strItemDescription]		= I.strDescription
-												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[intOrderUOMId]			= UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
-												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+												,[intItemUOMId]				= UOM.intItemUOMId
 
 												--,[dblQtyShipped]			= CASE
 												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
@@ -4105,6 +4109,10 @@ BEGIN
 										ON CH.intCheckoutId = DC.intCheckoutId
 									JOIN tblICItem I 
 										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemUOM UOM 
+										ON I.intItemId = UOM.intItemId
+									JOIN tblICUnitMeasure UM
+										ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 									JOIN tblICItemLocation IL
 										ON I.intItemId = IL.intItemId
 										AND ST.intCompanyLocationId = IL.intLocationId
@@ -4118,8 +4126,6 @@ BEGIN
 				----------------------------------------------------------------------
 				------------------------- END DEALER COMMISSION ------------------------
 				----------------------------------------------------------------------
-
-
 
 
 				IF @ysnConsignmentStore = 1 AND @ysnConsAddOutsideFuelDiscounts = 1
