@@ -137,6 +137,8 @@ SELECT
 	,strInvoiceOriginId			= INVOICE.strInvoiceOriginId
 	,dblTotalAmount				= (DETAIL.dblLineTotal + DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	,dblTotalAmountFunctional	= ROUND((DETAIL.dblLineTotal + DETAIL.dblTax) * DETAIL.dblCurrencyExchangeRate, dbo.fnARGetDefaultDecimal()) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	,dtmDateCreated				= CAST(INVOICE.dtmDateCreated AS DATE)
+	,dtmUpdatedDate				= CAST(AUDITLOG.dtmUpdatedDate AS DATE)
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
@@ -417,4 +419,19 @@ OUTER APPLY (
 	)
 ) PAYMENT
 LEFT JOIN vyuARTaxLocation TAXLOCATION ON TAXLOCATION.intTaxLocationId = ISNULL(INVOICE.intTaxLocationId,0) AND TAXLOCATION.strType = CASE WHEN INVOICE.strTaxPoint = 'Destination' THEN 'Entity' ELSE 'Company' END
+OUTER APPLY (
+	SELECT TOP 1
+        [SMT].[intRecordId]	AS [intInvoiceId], 
+        DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), [VSMAD].[changeDate]) AS [dtmUpdatedDate]
+    FROM [dbo].[vyuSMAuditDetail] AS [VSMAD]
+    INNER JOIN [dbo].[tblSMLog] AS [SML] ON [VSMAD].[intLogId] = [SML].[intLogId]
+    LEFT OUTER JOIN [dbo].[tblSMTransaction] AS [SMT] ON [SML].[intTransactionId] = [SMT].[intTransactionId]
+    LEFT OUTER JOIN [dbo].[tblSMScreen] AS [SMS] ON [SMT].[intScreenId] = [SMS].[intScreenId]
+    WHERE ([SML].[strType] = 'Audit') 
+	AND ([VSMAD].[intParentAuditId] IS NULL) 
+	AND ([VSMAD].[hidden] = 0 OR [VSMAD].[hidden] IS NULL) 
+	AND (([SMS].[strNamespace] = 'AccountsReceivable.view.Invoice') OR (([SMS].[strNamespace] IS NULL) AND ('AccountsReceivable.view.Invoice' IS NULL))) 
+	AND [SMT].[intRecordId] = INVOICE.[intInvoiceId]
+	ORDER BY [VSMAD].[changeDate] DESC
+) AUDITLOG
 WHERE INVOICE.ysnPosted = 1

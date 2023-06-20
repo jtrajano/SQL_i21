@@ -22,7 +22,7 @@ BEGIN
 		 , strStorageLocationName
 		 , intItemUOMId
 		 , strQtyUOM
-		 , intWeightUOMId
+		 , ISNULL(intWeightUOMId, intItemUOMId) AS intWeightUOMId
 		 , strWeightUOM
 		 , strVendor
 		 , strCurrency

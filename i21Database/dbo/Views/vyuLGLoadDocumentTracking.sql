@@ -3,6 +3,11 @@ AS
 SELECT CH.strContractNumber
 	,CH.intContractHeaderId
 	,CD.intContractSeq
+	,CDJ.strOrigin AS strOrigin
+	,CDJ.strERPPONumber AS strERPPONumber
+	,CDJ.strDestinationPoint AS strDestinationPoint
+	,CDJ.strShipper AS strVesselShipper
+	,CDJ.strCertificationName AS strCertificationName
 	,strVendorName = Vendor.strName 
 	,strCustomerName = Customer.strName
 	,I.strItemNo
@@ -207,4 +212,15 @@ LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN tblSMCity DP WITH(NOLOCK) ON DP.intCityId = CD.intDestinationPortId
+LEFT JOIN tblEMEntity EP WITH(NOLOCK) ON EP.intEntityId = CD.intShipperId
+LEFT JOIN  (
+	SELECT
+	strContractNumber
+	,strOrigin
+	,strERPPONumber
+	,strDestinationPoint
+	,strShipper
+	,strCertificationName
+	FROM vyuCTDashboardJDE) AS CDJ on CDJ.strContractNumber = CH.strContractNumber
 WHERE L.intShipmentType = 1

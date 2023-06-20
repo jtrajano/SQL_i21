@@ -78,6 +78,7 @@ FROM (
 		,voucher.intPayToBankAccountId
 		,vendor.strVendorPayToId
 		,voucher.intSelectedByUserId
+		,voucher.strHold
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -163,6 +164,7 @@ FROM (
 		,voucher.intPayToBankAccountId
 		,vendor.strVendorPayToId
 		,paySched.intSelectedByUserId
+		,voucher.strHold
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -238,6 +240,7 @@ FROM (
 		,A.intPayToBankAccountId
 		,vendor.strVendorPayToId
 		,intSelectedByUserId = CAST(NULL AS INT)
+		,NULL
 		FROM vyuARInvoicesForPayment A  
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
 		ON vendor.intEntityId = A.intEntityCustomerId  

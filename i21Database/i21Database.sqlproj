@@ -1790,6 +1790,15 @@
     <Build Include="dbo\Views\vyuICGetShipmentCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCustomerXrefProduct.sql" />
     <Build Include="dbo\Views\vyuICGetCompactCustomerXrefProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransactionData.sql" />
+    <Build Include="dbo\Views\vyuMFTransactionData.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportSalesTax.sql" />
+    <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSyncItemCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

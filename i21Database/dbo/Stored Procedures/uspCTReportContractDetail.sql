@@ -315,7 +315,7 @@ BEGIN TRY
 											ELSE  CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)) 
 											END)
 									   END, 
-			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end),
+			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else ISNULL(CTY.strCity,'') end),
 			strWalterPositionLabel	= ISNULL(strPosition,'') + ' ' + 'Period',
 			strWalterOrigin			= dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin'),
 			strWalterPricing		= CASE WHEN CD.intPricingTypeId in (1,6) THEN 'Priced at ' + LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) +' ' + CY.strCurrency + '/' + PU.strUnitMeasure ELSE 
@@ -391,6 +391,9 @@ BEGIN TRY
 		FROM tblSMCompanyPreference
 	) SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		1 = CASE WHEN CP.strDefaultContractReport = 'ContractEkaterra' AND CD.intContractStatusId <> 3 THEN 1
+					 WHEN CP.strDefaultContractReport != 'ContractEkaterra' THEN 1
+				ELSE 0 END 
 	--AND		CD.intContractStatusId <> 3
 
 END TRY

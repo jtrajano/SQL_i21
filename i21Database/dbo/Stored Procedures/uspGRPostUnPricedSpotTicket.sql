@@ -102,19 +102,20 @@ BEGIN TRY
 				--	   @intItemId = IRI.intItemId,
 				--	   @intTicketId = SpotTicket.intTicketId
 				INSERT INTO @Receipts
-				SELECT IRI.intInventoryReceiptId,
+				SELECT IR.intInventoryReceiptId,
 					   SpotTicket.intTicketId
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblICItem Item 
 					ON Item.intItemId = SC.intItemId
-				JOIN tblICInventoryReceiptItem IRI
-					ON IRI.intSourceId = SC.intTicketId and IRI.intItemId = Item.intItemId
-				JOIN tblICInventoryReceipt IR
-					ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-						AND IR.intEntityVendorId = @intEntityId
-						AND IR.intSourceType = 1
+				LEFT JOIN (tblICInventoryReceiptItem IRI
+					INNER JOIN tblICInventoryReceipt IR
+						ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					)
+					ON IRI.intSourceId = SC.intTicketId
+						AND IRI.intItemId = Item.intItemId
+						AND IR.intEntityVendorId = SpotTicket.intEntityId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
 
@@ -591,11 +592,14 @@ BEGIN TRY
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
-				LEFT JOIN tblICInventoryShipmentItem ISI 
+				LEFT JOIN (
+					tblICInventoryShipmentItem ISI 
+					JOIN tblICInventoryShipment ICS 
+						ON	ICS.intInventoryShipmentId = ISI.intInventoryShipmentId 
+							AND ICS.intSourceType = 1
+					)
 					ON ISI.intSourceId = SC.intTicketId
-				LEFT JOIN tblICInventoryShipment ICS 
-					ON	ICS.intInventoryShipmentId = ISI.intInventoryShipmentId 
-						AND ICS.intSourceType = 1
+						AND ICS.intEntityCustomerId =SpotTicket.intEntityId
 				JOIN tblICItem Item 
 					ON Item.intItemId = SC.intItemId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
@@ -690,11 +694,14 @@ BEGIN TRY
 					ON a.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 				JOIN tblICItem DItem 
 					ON DItem.intItemId = a.intItemId
-				LEFT JOIN tblICInventoryShipmentItem ISI 
+				LEFT JOIN (
+					tblICInventoryShipmentItem ISI 
+					JOIN tblICInventoryShipment ICS 
+						ON	ICS.intInventoryShipmentId = ISI.intInventoryShipmentId 
+							AND ICS.intSourceType = 1
+					)
 					ON ISI.intSourceId = SC.intTicketId
-				LEFT JOIN tblICInventoryShipment ICS 
-					ON	ICS.intInventoryShipmentId = ISI.intInventoryShipmentId 
-						AND ICS.intSourceType = 1
+						AND ICS.intEntityCustomerId =SpotTicket.intEntityId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
 					AND ISNULL(QM.dblDiscountDue, 0) <> 0

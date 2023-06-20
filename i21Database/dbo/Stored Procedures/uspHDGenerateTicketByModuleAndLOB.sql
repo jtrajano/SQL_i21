@@ -276,19 +276,23 @@ BEGIN
 			,dtmStartDate 						= Ticket.dtmStartDate 
 			,strNote 							= Ticket.strNote 
 	FROM tblHDTicket Ticket
+		INNER JOIN tblHDModule HDModule
+	ON Ticket.intModuleId = HDModule.intModuleId
 	OUTER APPLY
 	(
 		SELECT intProjectTaskIdCount = COUNT(intProjectTaskId)
 		FROM tblHDProjectTask
 		WHERE intProjectId = @intProjectId
 	) ProjectCount
-	CROSS APPLY
+	OUTER APPLY
 	(
 		SELECT TOP 1 intProjectManagerId
 					,intTrainerId
-		FROM tblHDProjectModule 
-		WHERE intModuleId = Ticket.intModuleId AND
-			  intProjectId = @intProjectId
+		FROM tblHDProjectModule a
+			INNER JOIN tblHDModule b
+		ON a.intModuleId = b.intModuleId
+		WHERE b.intSMModuleId = HDModule.intSMModuleId AND
+			  a.intProjectId = @intProjectId 
 	) ProjectModule
 	WHERE Ticket.intTicketId = @intTicketId
 

@@ -191,8 +191,8 @@ BEGIN TRY
 			 , intSampleId				= S.intSampleId
 			 , intValuationGroupId		= STYLE.intValuationGroupId
 			 , strValuationGroup		= STYLE.strName
-			 , strOrigin				= ORIGIN.strISOCode
-			 , strSustainability		= SUSTAINABILITY.strDescription
+			 , strOrigin				= IMP.strGardenGeoOrigin
+			 , strSustainability		= LEFT(SUSTAINABILITY.strDescription, 1)
 			 , strMusterLot				= IMP.strMusterLot
 			 , strMissingLot			= IMP.strMissingLot
 			 , strComments2				= IMP.strTastersRemarks
@@ -268,7 +268,7 @@ BEGIN TRY
 			, intValuationGroupId		= STYLE.intValuationGroupId
 			, strValuationGroup			= STYLE.strName
 			, strOrigin					= IMP.strGardenGeoOrigin 
-			, strSustainability			= IMP.strSustainability
+			, strSustainability			= LEFT(IMP.strSustainability, 1)
 			, strMusterLot				= IMP.strMusterLot
 			, strMissingLot				= IMP.strMissingLot
 			, strComments2				= IMP.strTastersRemarks
@@ -602,10 +602,10 @@ BEGIN TRY
 						WHERE intBatchId = @intProductValueId;
 
 						/* Batch Pre Stage Process. */
-						EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
-												  , @intUserId			= @intEntityUserId
-												  , @intOriginalItemId  = @intOriginalItemId
-												  , @intItemId			= @intItemId
+						-- EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
+						-- 						  , @intUserId			= @intEntityUserId
+						-- 						  , @intOriginalItemId  = @intOriginalItemId
+						-- 						  , @intItemId			= @intItemId
 
 						/* Create Sample Detail. */
 						INSERT INTO tblQMSampleDetail 
@@ -668,10 +668,10 @@ BEGIN TRY
 								WHERE intBatchId = @intProductValueId
 
 								/* Batch Pre Stage Process. */
-								EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
-														  , @intUserId			= @intEntityUserId
-														  , @intOriginalItemId	= @intOriginalItemId
-														  , @intItemId			= @intItemId
+								-- EXEC dbo.uspMFBatchPreStage @intBatchId			= @intProductValueId
+								-- 						  , @intUserId			= @intEntityUserId
+								-- 						  , @intOriginalItemId	= @intOriginalItemId
+								-- 						  , @intItemId			= @intItemId
 
 								IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
 								BEGIN
@@ -781,10 +781,10 @@ BEGIN TRY
 		FROM tblQMSample S
 		WHERE S.intSampleId = @intSampleId
 
-		EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
-				,@intUserId = @intEntityUserId
-				,@intOriginalItemId = @intOriginalItemId
-				,@intItemId = @intItemId
+		-- EXEC dbo.uspMFBatchPreStage @intBatchId = @intProductValueId
+		-- 		,@intUserId = @intEntityUserId
+		-- 		,@intOriginalItemId = @intOriginalItemId
+		-- 		,@intItemId = @intItemId
 
 		UPDATE tblMFBatch
 		SET intTealingoItemId = @intItemId
@@ -1520,9 +1520,12 @@ BEGIN TRY
 				WHERE strBatchId = @strBatchNo
 				AND intLocationId = intMixingUnitLocationId
 
+				SELECT TOP 1 @intOriginalItemId = intOriginalItemId
+				FROM @MFBatchTableType
+
 				EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
 					,@intUserId = @intEntityUserId
-					,@intOriginalItemId = @intItemId
+					,@intOriginalItemId = @intOriginalItemId
 					,@intItemId = @intItemId
 
 				UPDATE tblQMSample

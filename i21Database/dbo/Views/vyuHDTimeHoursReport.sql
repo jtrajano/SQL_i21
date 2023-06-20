@@ -39,7 +39,8 @@
 			,n.strStatus
 			,o.intMilestoneId
 			,o.strMileStone
-			,strDepartment = dbo.fnEMGetEmployeeDepartment(g.intEntityId) COLLATE Latin1_General_CI_AS
+			,strDepartment = empDept.Department -- dbo.fnEMGetEmployeeDepartment(g.intEntityId) COLLATE Latin1_General_CI_AS
+			,a.strJIRALink
 		from
 			tblHDTicketHoursWorked a
 			join tblHDTicket b on b.intTicketId = a.intTicketId
@@ -56,6 +57,18 @@
 			left join tblHDTicketType m on m.intTicketTypeId = b.intTicketTypeId
 			left join tblHDTicketStatus n on n.intTicketStatusId = b.intTicketStatusId
 			left join tblHDMilestone o on o.intMilestoneId = b.intMilestoneId
+		    LEFT JOIN (
+				SELECT intEntityEmployeeId AS intEntityId, 
+						STUFF((SELECT ',' + dept.strDepartment 
+							   FROM	tblPREmployeeDepartment prDept
+									INNER JOIN tblPRDepartment AS dept ON
+									prDept.intDepartmentId = dept.intDepartmentId
+								WHERE prDept.intEntityEmployeeId = x.intEntityEmployeeId
+								FOR XML PATH('')), 1,1,'') AS Department
+				FROM	tblPREmployeeDepartment AS x
+				GROUP BY intEntityEmployeeId
+			) AS empDept ON
+			empDept.intEntityId = a.intAgentEntityId
 		where a.intAgentEntityId is not null and a.intAgentEntityId > 0
 
 		union all
@@ -98,14 +111,28 @@
 			,strStatus = null
 			,intMilestoneId = null
 			,strMileStone = null
-			,strDepartment = dbo.fnEMGetEmployeeDepartment(a.intPREntityEmployeeId) COLLATE Latin1_General_CI_AS
+			,strDepartment = empDept.Department --dbo.fnEMGetEmployeeDepartment(a.intPREntityEmployeeId) COLLATE Latin1_General_CI_AS
+			,strJIRALink = null
 		from
 			tblHDTimeOffRequest a
 			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
 			inner join tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
 			inner join tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
 			inner join tblSMTransaction e on 1=1
+			LEFT JOIN (
+				SELECT intEntityEmployeeId AS intEntityId, 
+						STUFF((SELECT ',' + dept.strDepartment 
+							   FROM	tblPREmployeeDepartment prDept
+									INNER JOIN tblPRDepartment AS dept ON
+									prDept.intDepartmentId = dept.intDepartmentId
+								WHERE prDept.intEntityEmployeeId = x.intEntityEmployeeId
+								FOR XML PATH('')), 1,1,'') AS Department
+				FROM	tblPREmployeeDepartment AS x
+				GROUP BY intEntityEmployeeId
+			) AS empDept ON
+			empDept.intEntityId = d.intEntityId
 		where
 			(e.intScreenId = (select intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest') 
 				 and e.intRecordId = a.intPRTimeOffRequestId 
 				 and (e.strApprovalStatus = 'Approved' or e.strApprovalStatus = 'Approved with Modification'))
+GO

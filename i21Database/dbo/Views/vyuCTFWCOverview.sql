@@ -62,7 +62,8 @@ AS
 				strLotNo = CTD.strVendorLotID, 
 				strTimeStamp =  CONVERT(VARCHAR(20),getdate(), 100),
 				dtmManufacturingDate = MFB.dtmProductionBatch,
-				dblNetWeight = CTD.dblNetWeight 
+				dblNetWeight = CTD.dblNetWeight,
+				CTD.strReference 
 			FROM	tblCTContractHeader	CH	
 			INNER JOIN tblCTContractDetail		CTD  WITH (NOLOCK) ON CTD.intContractHeaderId = CH.intContractHeaderId
 			LEFT JOIN tblLGLoadDetail			LGD  WITH (NOLOCK) ON CTD.intContractDetailId = LGD.intPContractDetailId

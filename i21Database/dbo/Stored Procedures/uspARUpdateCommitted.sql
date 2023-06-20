@@ -33,7 +33,7 @@ BEGIN
 	--SO shipped
 	SELECT [intItemId]				= ARID.[intItemId]
 		, [intItemLocationId]		= ARID.[intItemLocationId]
-		, [intItemUOMId]			= SOTD.[intItemUOMId]
+		, [intItemUOMId]			= ARID.[intItemUOMId]
 		, [dtmDate]					= ARID.[dtmDate]
 		, [dblQty]					= (CASE WHEN dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], SOTD.[intItemUOMId], ARID.[dblQtyShipped]) > SOTD.[dblQtyOrdered]
 											THEN SOTD.[dblQtyOrdered]

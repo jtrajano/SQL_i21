@@ -1,7 +1,8 @@
 CREATE FUNCTION [dbo].[fnGLGetBeginningBalanceAuditorReport] 
 (	
 	@strAccountId NVARCHAR(100),
-	@dtmDate DATETIME
+	@dtmDate DATETIME,
+	@intCurrencyId INT
 )
 RETURNS @tbl TABLE (
 strAccountId NVARCHAR(100),
@@ -36,8 +37,14 @@ BEGIN
 			FROM tblGLAccount A
 				LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 				LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
-				CROSS APPLY (SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear where @dtmDate >= dtmDateFrom AND @dtmDate <= dtmDateTo) D
-			WHERE strAccountId = @strAccountId and ( C.dtmDate >= D.dtmDateFrom and  C.dtmDate < @dtmDate) and strCode <> ''  and ysnIsUnposted = 0
+				CROSS APPLY (
+					SELECT dtmDateFrom,dtmDateTo from tblGLFiscalYear WHERE @dtmDate >= dtmDateFrom 
+					AND @dtmDate <= dtmDateTo
+				) D
+			WHERE strAccountId = @strAccountId AND ( C.dtmDate >= D.dtmDateFrom 
+			AND  C.dtmDate < @dtmDate) AND strCode <> ''  
+			AND ysnIsUnposted = 0
+			AND @intCurrencyId = C.intCurrencyId
 			GROUP BY strAccountId
 	ELSE
 		INSERT  @tbl
@@ -56,7 +63,9 @@ BEGIN
 		FROM tblGLAccount A
 			LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
 			LEFT JOIN tblGLDetail C ON A.intAccountId = C.intAccountId
-		WHERE strAccountId = @strAccountId and C.dtmDate < @dtmDate and strCode <> '' and ysnIsUnposted = 0
+		WHERE strAccountId = @strAccountId AND C.dtmDate < @dtmDate 
+		AND strCode <> '' AND ysnIsUnposted = 0 
+		AND @intCurrencyId = C.intCurrencyId
 		GROUP BY strAccountId
     RETURN
 END

@@ -390,7 +390,7 @@ BEGIN
 				INNER JOIN tblICItem				IM			ON IM.intItemId = CBL.intItemId
 				INNER JOIN tblSMCompanyLocation		L			ON L.intCompanyLocationId = CBL.intLocationId
 				INNER JOIN tblCTContractHeader		CH			ON CH.intContractHeaderId = CBL.intContractHeaderId			
-				INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND CASE WHEN ISNULL(CH.intEntitySelectedLocationId,0) = 0 THEN EY.intDefaultLocationId ELSE CH.intEntitySelectedLocationId END =  (CASE  WHEN ISNULL(CH.intEntitySelectedLocationId,0) != 0 THEN CH.intEntitySelectedLocationId ELSE EY.intDefaultLocationId END )
+				INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND CASE WHEN ISNULL(CH.intEntitySelectedLocationId,0) = 0 THEN EY.intDefaultLocationId ELSE CH.intEntitySelectedLocationId END =  (CASE  WHEN ISNULL(CH.intEntitySelectedLocationId,0) != 0 THEN CH.intEntitySelectedLocationId ELSE EY.intDefaultLocationId END ) AND EY.ysnDefaultLocation = 1
 				INNER JOIN tblCTContractDetail		CD			ON CD.intContractDetailId = CBL.intContractDetailId
 				INNER JOIN tblICItemUOM				ItemUOM		ON ItemUOM.intItemUOMId = CD.intItemUOMId
 				INNER JOIN tblICUnitMeasure			IUM			ON IUM.intUnitMeasureId = ItemUOM.intUnitMeasureId
