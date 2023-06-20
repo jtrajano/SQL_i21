@@ -36,7 +36,10 @@ BEGIN
 	exec
 	('
 
-		ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
+		IF (OBJECT_ID(N''[dbo].[trgCTContractDetail]'') IS NOT NULL)
+		BEGIN
+				ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
+		END
 
 		update a set
 		intPricingStatus = (
