@@ -44,7 +44,13 @@ SELECT Invoice.intInvoiceId
  , Invoice.strDiversionNumber
  , Invoice.intStateId
  , trstate.strStateName
+ , ISNULL(items.dblGallonsDelivered, 0) as dblGallonsDelivered
 FROM tblMBILInvoice Invoice    
+LEFT JOIN (
+  SELECT intInvoiceId, SUM(dblQuantity) as dblGallonsDelivered
+  FROM tblMBILInvoiceItem
+  GROUP BY intInvoiceId
+) as items ON items.intInvoiceId = Invoice.intInvoiceId
 --LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId    
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId    
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Invoice.intLocationId    
