@@ -100,7 +100,7 @@ SELECT
                   ISNULL(chk.dblATMWithdrawal, 0)  
                  ) + ISNULL(chk.dblATMReplenished, 0)  
                  )  
-  
+    , chk.ysnNoEffectOnDeposit
     ,chk.[dblChangeFundBegBalance]  
    --,dblChangeFundBegBalance = (  
    --      ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)  
@@ -291,6 +291,7 @@ GROUP BY
       ,chk.[dblATMEndBalanceCalculated]  
       ,chk.[dblATMEndBalanceActual]  
       ,chk.[dblATMVariance]  
+	  ,chk.ysnNoEffectOnDeposit
       ,chk.[dblChangeFundBegBalance]  
       ,chk.[dblChangeFundEndBalance]  
       ,chk.[dblChangeFundChangeReplenishment]  
