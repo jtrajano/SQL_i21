@@ -51,7 +51,7 @@ DECLARE
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountId AS INT
-	,@ysnBankAccountActive AS BIT
+	,@ysnBankAccountActive AS BIT=0
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
@@ -59,6 +59,9 @@ DECLARE
 	,@RecapTable AS RecapTableType 
 	,@GLEntries AS RecapTableType
 	
+	IF  OBJECT_ID('tempdb..#tmpGLDetail') IS NOT NULL
+	DROP TABLE #tmpGLDetail
+
 	-- CREATE THE TEMPORARY TABLE 
 	CREATE TABLE #tmpGLDetail (
 		[dtmDate] [datetime] NOT NULL
@@ -149,7 +152,6 @@ BEGIN
 		RAISERROR('Unable to find an open fiscal year period to match the transaction date.', 11, 1)
 		GOTO Post_Rollback
 	END
-
 	-- Validate the date against the FY Periods per module
 	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDateByModule(@dtmDate,@MODULE_NAME) = 0)
 	BEGIN 
@@ -205,13 +207,10 @@ BEGIN
 	
 	DECLARE @GLAccountSetupIsValid INT = 0
 
-	SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
-	FROM	tblCMBankAccount CM JOIN vyuGLAccountDetail GL 
-	ON GL.intAccountId = CM.intGLAccountId
-	WHERE	intBankAccountId = @intBankAccountId
-	GROUP BY intBankAccountId, CM.ysnActive, GL.ysnActive
-	
-	IF @ysnBankAccountActive = 0
+	DECLARE @intGLAccountId int, @GLAccountActive bit = 0
+	select @intGLAccountId = intGLAccountId , @ysnBankAccountActive=ISNULL(ysnActive,0) from tblCMBankAccount where @intBankAccountId = intBankAccountId
+	select top 1 @GLAccountSetupIsValid = 1, @GLAccountActive =ISNULL(ysnActive,0) from vyuGLAccountDetail where intAccountId = @intGLAccountId
+	IF @ysnBankAccountActive = 0 or @GLAccountActive = 0
 	BEGIN
 		-- 'The bank account is inactive.'
 		RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)
@@ -223,7 +222,6 @@ BEGIN
 	RAISERROR('The GL Account associated with the bank has invalid setup or non existent.', 11, 1)
 		GOTO Post_Rollback
 	END
-	
 
 	-- Check Company preference: Allow User Self Post
 	IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId
