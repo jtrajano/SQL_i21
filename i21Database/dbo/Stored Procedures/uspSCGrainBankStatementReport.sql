@@ -417,7 +417,7 @@ begin
 			, '' AS strItemNo
 
 			, BALANCES.dblBeginningBalance AS dblBeginningBalance
-			, BALANCES.dblEndingBalance AS dblEndingBalance
+			, BALANCES.dblBeginningBalance AS dblEndingBalance
 
 			, @COMPANY_PREFERENCE_REPORT_UOM_STRING AS strBalanceUOM
 			, @COMPANY_PREFERENCE_GRAIN_BANK_UOM_STRING AS strUnitUOM
