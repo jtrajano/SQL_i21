@@ -1326,6 +1326,7 @@
     <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganPaymentExportIPayables.sql" />
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
