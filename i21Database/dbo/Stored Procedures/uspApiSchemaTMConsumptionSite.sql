@@ -670,24 +670,14 @@ BEGIN
 				--- Check for TM Customer Record
 				IF(@intCustomerId IS NULL)
 				BEGIN
-					SELECT TOP 1 
-						@intCustomerId = T.intCustomerID
-					FROM tblApiSchemaTMConsumptionSite CS  
-					INNER JOIN tblEMEntity E ON E.strEntityNo = @strCustomerEntityNo  
-					INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1  
-					LEFT JOIN tblTMCustomer T ON T.intCustomerNumber = E.intEntityId  
+					INSERT INTO tblTMCustomer(
+						intCustomerNumber
+						,intCurrentSiteNumber
+					)
+					SELECT intCustomerNumber 	= @intCustomerNumber
+						,intCurrentSiteNumber	= CONVERT(int,@strSiteNumber)
 
-					IF(@intCustomerId IS NULL)  
-					BEGIN  
-						INSERT INTO tblTMCustomer(
-							intCustomerNumber
-							,intCurrentSiteNumber
-						)
-						SELECT intCustomerNumber 	= @intCustomerNumber
-							,intCurrentSiteNumber	= CONVERT(int,@strSiteNumber)
-
-						SET @intCustomerId = SCOPE_IDENTITY()
-					END
+					SET @intCustomerId = SCOPE_IDENTITY()
 				END
 
 				DECLARE @intSiteId INT = NULL
