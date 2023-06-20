@@ -905,10 +905,10 @@ BEGIN TRY
 			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
 			WHERE B.intBatchId = @intBatchId
 
-			EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
-					,@intUserId = 1
-					,@intOriginalItemId = @intTealingoItemId
-					,@intItemId = @intTealingoItemId
+			--EXEC dbo.uspMFBatchPreStage @intBatchId = @intBatchId
+			--		,@intUserId = 1
+			--		,@intOriginalItemId = @intTealingoItemId
+			--		,@intItemId = @intTealingoItemId
 
 			IF ISNULL(@strBatchXML, '') = ''
 			BEGIN
