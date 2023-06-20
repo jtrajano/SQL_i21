@@ -691,7 +691,7 @@ BEGIN
 				END
 
 				DECLARE @intSiteId INT = NULL
-				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = ISNULL(CONVERT(int,@strSiteNumber),0)
 				
 				
 				-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
@@ -795,7 +795,7 @@ BEGIN
 						, @strClassFill
 						, @intFillGroupId
 						, @intHoldReasonId
-						, ISNULL(@intSiteNumber, 0) + 1
+						, @intSiteNumber
 						
 						, @ysnActive
 						, @strSiteDescription
@@ -834,10 +834,10 @@ BEGIN
 
 						,@dtmLastDeliveryDate
 						,@dblLastGalsInTank
-						,@ysnDeliveryTicketPrinted
+						,ISNULL(@ysnDeliveryTicketPrinted,0)
 						,@ysnPrintARBalance
 						,@intNextDeliveryDegreeDay
-						,@ysnRequireClock
+						,ISNULL(@ysnRequireClock,0)
 						,@ysnRoutingAlert
 						,@ysnRequirePump
 						,@dblLastDeliveredGal
