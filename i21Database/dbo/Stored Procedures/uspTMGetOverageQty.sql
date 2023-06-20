@@ -32,9 +32,9 @@ BEGIN
 			SET @dblOverage = @dblQuantity - @dblAvailable
 		END
 
-	ELSE
-		BEGIN
-			SET @dblOverage = @dblQuantity
-		END
+	--ELSE
+		--BEGIN
+		--	SET @dblOverage = @dblQuantity
+		--END
 
 END
