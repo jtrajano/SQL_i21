@@ -246,20 +246,45 @@ BEGIN
                         FROM ##TransactionGroup WHERE @_intAccountId = intAccountId
                         ORDER BY intCurrencyId
                         
-                        SELECT
-                        @beginBalance               =   ISNULL(beginBalance ,0),
-                        @beginBalanceDebit          =   ISNULL(beginBalanceDebit,0),
-				        @beginBalanceCredit         =   ISNULL(beginBalanceCredit,0),
-                        @beginBalanceForeign        =   ISNULL(beginBalanceForeign,0),
-                        @beginBalanceDebitForeign   =   ISNULL(beginBalanceDebitForeign,0),
-                        @beginBalanceCreditForeign  =   ISNULL(beginBalanceCreditForeign,0)
-                        FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@_intCurrencyId)
+                        -- SELECT
+                        -- @beginBalance               =   ISNULL(beginBalance ,0),
+                        -- @beginBalanceDebit          =   ISNULL(beginBalanceDebit,0),
+				        -- @beginBalanceCredit         =   ISNULL(beginBalanceCredit,0),
+                        -- @beginBalanceForeign        =   ISNULL(beginBalanceForeign,0),
+                        -- @beginBalanceDebitForeign   =   ISNULL(beginBalanceDebitForeign,0),
+                        -- @beginBalanceCreditForeign  =   ISNULL(beginBalanceCreditForeign,0)
+                        -- FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@_intCurrencyId)
+                            
+                     
+
                                 -- Total record
 
-                        IF @intAccountIdLoop <> @_intAccountId
+                        IF @intAccountIdLoop <> @_intAccountId OR @_intCurrencyId <> @intCurrencyIdLoop
                         BEGIN
-                            SELECT @_beginBalance =ISNULL( beginBalance , 0) from dbo.fnGLGetBeginningBalanceAuditorReport(@_strAccountId,@dtmDateFrom)
+                            -- SELECT @beginBalance =ISNULL( beginBalance , 0) 
+
+                            -- IF @intAccountIdLoop <> @_intAccountId 
+                            -- SELECT   @beginBalanceDebit          =   0,
+                            -- @beginBalanceCredit         =   0,
+                            -- @beginBalanceForeign        =   0,
+                            -- @beginBalanceDebitForeign   =   0,
+                            -- @beginBalanceCreditForeign  =   0
+                            
+                            
+                            -- from dbo.fnGLGetBeginningBalanceAuditorReport(@_strAccountId,@dtmDateFrom, @_intCurrencyId)
+                            SELECT
+                            @beginBalance               =   ISNULL(beginBalance ,0),
+                            @beginBalanceDebit          =   ISNULL(beginBalanceDebit,0),
+                            @beginBalanceCredit         =   ISNULL(beginBalanceCredit,0),
+                            @beginBalanceForeign        =   ISNULL(beginBalanceForeign,0),
+                            @beginBalanceDebitForeign   =   ISNULL(beginBalanceDebitForeign,0),
+                            @beginBalanceCreditForeign  =   ISNULL(beginBalanceCreditForeign,0)
+                            FROM dbo.fnGLGetBeginningBalanceAuditorReportForeign(@strAccountId,@dtmDateFrom,@_intCurrencyId)
+
+
                             SET @intAccountIdLoop = @_intAccountId
+                            SET @intCurrencyIdLoop = @_intCurrencyId
+
                             INSERT INTO tblGLAuditorTransaction (
                             ysnGroupFooter
                             ,ysnGroupHeader
@@ -287,8 +312,8 @@ BEGIN
                                 , 'Beginning Balance'
                                 , 'Account ID: ' + strAccountId + ', Currency: ' + strCurrency
                                 , @intEntityId
-                                , @_beginBalance --@beginBalance
-                                , @_beginBalance --@beginBalanceForeign            
+                                , @beginBalance --@beginBalance
+                                , @beginBalanceForeign --@beginBalanceForeign            
                                 , strCurrency
                                 , strAccountId
                                 , strLocation
@@ -401,7 +426,7 @@ BEGIN
                                 , dblSourceUnitCredit
                                 , dblDebitUnit
                                 , dblCreditUnit
-                            , strCommodityCode 
+                                , strCommodityCode 
                                 , strSourceDocumentId
                                 , strLocation
                                 , strCompanyLocation 
@@ -501,9 +526,10 @@ BEGIN
                                 , dblCreditUnit
                                 , dblSourceUnitDebit
                                 , dblSourceUnitCredit
+                                , dblEndingBalanceForeign
                                 , dblDebitForeign
                                 , dblCreditForeign
-                                , dblEndingBalanceForeign
+                        
                                 , strCurrency
                                 , strAccountId
                                 , strLocation
@@ -527,9 +553,9 @@ BEGIN
                                 , @dblTotalCreditUnit
                                 , @dblTotalSourceUnitDebit
                                 , @dblTotalSourceUnitCredit
-                                , @dblTotalDebitForeign
-                                , @dblTotalCreditForeign     
-                                , @dblTotalDebitForeign- @dblTotalCreditForeign  + @beginBalanceForeign
+                                , ISNULL(@dblTotalDebitForeign,0)- ISNULL(@dblTotalCreditForeign,0) + @beginBalanceForeign
+                                , ISNULL(@dblTotalDebitForeign,0) + CASE WHEN @beginBalanceForeign > 0 THEN @beginBalanceForeign ELSE 0 END
+                                , ISNULL(@dblTotalCreditForeign,0) - CASE WHEN @beginBalanceForeign < 0 THEN  @beginBalanceForeign ELSE 0 END                  
                                 , strCurrency
                                 , strAccountId
                                 , strLocation
