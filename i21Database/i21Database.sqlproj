@@ -1445,6 +1445,7 @@
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
      <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
+     <Build Include="dbo\Tables\tblSMPowerBIDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
