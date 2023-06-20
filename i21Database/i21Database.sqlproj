@@ -1309,6 +1309,7 @@
     <Build Include="dbo\Tables\tblTMJobs.sql" />
     <Build Include="dbo\Views\vyuSTDealerCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCorriganImport.sql" />
+    <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -241,6 +241,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intTaxLocationId] [int] NULL,
 	ysnRoll BIT NULL DEFAULT 0, 
 	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intItemXrefId int null,
 
 
 
