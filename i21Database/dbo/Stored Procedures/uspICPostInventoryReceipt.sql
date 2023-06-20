@@ -93,12 +93,12 @@ FROM	tblICCompanyPreference
 -- Change the source type to 'Store' if the IR's location configured in the store. 
 BEGIN 
 	UPDATE	r
-	SET		r.intSourceType = @SOURCE_TYPE_Store 
+	SET		r.intSourceType = @SOURCE_TYPE_Store
 	FROM	dbo.tblICInventoryReceipt r LEFT JOIN tblSTStore s
 				ON r.intLocationId = s.intCompanyLocationId
 	WHERE	strReceiptNumber = @strTransactionId  
 			AND s.intCompanyLocationId IS NOT NULL 
-			AND r.intSourceType <> @SOURCE_TYPE_Store
+			AND r.intSourceType NOT IN (@SOURCE_TYPE_Store, @SOURCE_TYPE_Transport)
 END 
 
 -- Read the transaction info   
