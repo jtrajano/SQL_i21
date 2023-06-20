@@ -805,7 +805,6 @@ BEGIN TRY
 	LEFT JOIN vyuCTGetQualityCodes QC ON QC.intItemId = CD.intItemId
 	LEFT JOIN tblCTMTMPoint mtmp on mtmp.intMTMPointId = CD.intMTMPointId
 	LEFT JOIN tblEMEntity LL on LL.intEntityId = CD.intLogisticsLeadId
-
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 
 	IF NOT EXISTS(

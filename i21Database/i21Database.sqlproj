@@ -1816,6 +1816,7 @@
     <Build Include="dbo\Views\vyuTMDeliverySite.sql" />
     <Build Include="dbo\User Defined Types\ItemInTransitValueOnlyTableType.sql" />
     <Build Include="dbo\Functions\fnLGGetForexRateFromContract.sql" />
+    <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

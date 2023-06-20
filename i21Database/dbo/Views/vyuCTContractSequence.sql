@@ -63,7 +63,9 @@ AS
 			CD.intCurrencyExchangeRateId,
 			strVendorLotID = case when ltrim(rtrim(CD.strVendorLotID)) = '' then null else CD.strVendorLotID end,
 			strReference = case when ltrim(rtrim(CD.strReference)) = '' then null else CD.strReference end,
-			strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate')
+			strExchangeRate = dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId, 'tblSMCurrencyExchangeRate'),
+			CD.intItemXrefId
+			, strItemXrefProduct = case when CH.intContractTypeId = 1 then vx.strVendorProduct else cx.strCustomerProduct end
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
@@ -100,3 +102,5 @@ AS
 	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId				=	CD.intSubBookId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	UL	ON	UL.intCompanyLocationSubLocationId	=	CD.intSubLocationId
 	LEFT JOIN tblSMCurrency ICU on ICU.intCurrencyID = CD.intInvoiceCurrencyId
+	left join tblICItemVendorXref vx on vx.intItemVendorXrefId = CD.intItemXrefId
+	left join tblICItemCustomerXref cx on cx.intItemCustomerXrefId = CD.intItemXrefId
