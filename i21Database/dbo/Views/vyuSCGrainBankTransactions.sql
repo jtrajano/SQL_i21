@@ -237,10 +237,10 @@
 		ELSE 1
 		END
 		* case when GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId is not null and 
-			GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId != UOM.intUnitMeasureId then
+			GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId != STORAGE.intUnitMeasureId then
 			round(dbo.fnGRConvertQuantityToTargetItemUOM(
 									STORAGE.intItemId
-									, UOM.intUnitMeasureId
+									, STORAGE.intUnitMeasureId
 									, GR_COMPANY_PREFERENCE.intGrainBankUnitMeasureId
 									, HISTORY.dblUnits) , 4)
 		else
@@ -257,18 +257,7 @@
 		JOIN tblGRStorageHistory HISTORY
 			ON STORAGE.intCustomerStorageId = HISTORY.intCustomerStorageId
 		JOIN tblARInvoice INVOICE
-			ON HISTORY.intInvoiceId = INVOICE.intInvoiceId
-		JOIN tblARInvoiceDetail INVOICE_DETAIL
-			ON INVOICE.intInvoiceId = INVOICE_DETAIL.intInvoiceId
-				AND STORAGE.intItemId = INVOICE_DETAIL.intItemId
-	
-		
-		JOIN tblICItemUOM ITEM_UOM
-					on STORAGE.intItemUOMId = ITEM_UOM.intItemUOMId
-						and STORAGE.intItemId = ITEM_UOM.intItemId
-		
-		JOIN tblICUnitMeasure UOM
-				on ITEM_UOM.intUnitMeasureId = UOM.intUnitMeasureId
+			ON HISTORY.intInvoiceId = INVOICE.intInvoiceId		
 		OUTER APPLY(
 			SELECT intGrainBankUnitMeasureId FROM tblGRCompanyPreference
 		) GR_COMPANY_PREFERENCE
