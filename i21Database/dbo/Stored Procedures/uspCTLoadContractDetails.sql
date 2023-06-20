@@ -625,6 +625,8 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
+		, CD.intItemXrefId
+		, strItemXrefProduct = case when CT.intContractTypeId = 1 then vx.strVendorProduct else cx.strCustomerProduct end
 	FROM tblCTContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -716,6 +718,8 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
 	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
+	left join tblICItemVendorXref vx on vx.intItemVendorXrefId = CD.intItemXrefId
+	left join tblICItemCustomerXref cx on cx.intItemCustomerXrefId = CD.intItemXrefId
 
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 
