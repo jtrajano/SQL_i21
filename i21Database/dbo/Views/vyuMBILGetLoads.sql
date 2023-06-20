@@ -4,7 +4,8 @@ AS
 
 SELECT lh.intLoadHeaderId
 	, lh.strLoadNumber
-	, strType = CASE WHEN pd.intEntityId IS NOT NULL  THEN 'Drop Ship' ELSE 'OutBound' END  
+	, strType = CASE WHEN dh.intEntityId IS NOT NULL and pd.intEntityId IS NOT NULL THEN 'Drop Ship' 
+				  WHEN dh.intEntityId IS NULL and pd.intEntityId IS NOT NULL THEN 'Inbound' ELSE 'OutBound' END
 	, lh.intDispatchOrderId
 	, lh.intLoadId
 	, lh.intDriverId
