@@ -21,9 +21,17 @@ BEGIN
 	WHERE B.intContractDetailId = @intContractDetailId
 				
 	IF(@dblAvailable > 0)
+		DECLARE @dblQuantityToUpdate DECIMAL(18,6) = NULL
+
+		---Check Quantity is greater than contract available if yes then schedule the whole available Qty if not then schedule the quantity
+		IF(@dblQuantity > @dblAvailable)
 		BEGIN
+			SET @dblQuantityToUpdate = @dblAvailable
+
+			--get The overage
 			SET @dblOverage = @dblQuantity - @dblAvailable
 		END
+
 	ELSE
 		BEGIN
 			SET @dblOverage = @dblQuantity
