@@ -96,6 +96,7 @@ BEGIN TRY
 				AND S.intMarketZoneId = 1
 				and S.intLocationId IS NOT NULL
 				and S.intCurrencyId IS NOT NULL
+				AND isNULL(S.dblB1QtyBought , 0) + isNULL(S.dblB2QtyBought , 0) + isNULL(S.dblB3QtyBought , 0) + isNULL(S.dblB4QtyBought , 0) + isNULL(S.dblB5QtyBought , 0)>0
 			) AS DT
 		ORDER BY intItemId
 	END
@@ -185,6 +186,7 @@ BEGIN TRY
 	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast7Days
 			AND @dtmStartDayOfWeek
 		AND S.intMarketZoneId = 1
+		AND isNULL(S.dblB1QtyBought , 0) + isNULL(S.dblB2QtyBought , 0) + isNULL(S.dblB3QtyBought , 0) + isNULL(S.dblB4QtyBought , 0) + isNULL(S.dblB5QtyBought , 0)>0
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
@@ -212,6 +214,7 @@ BEGIN TRY
 	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast28Days
 			AND @dtmStartDayOfWeek
 		AND S.intMarketZoneId = 1
+		AND isNULL(S.dblB1QtyBought , 0) + isNULL(S.dblB2QtyBought , 0) + isNULL(S.dblB3QtyBought , 0) + isNULL(S.dblB4QtyBought , 0) + isNULL(S.dblB5QtyBought , 0)>0
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
