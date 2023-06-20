@@ -5,6 +5,7 @@ with cte as(
 	select 
 		min(A.intTransactionId)intTransactionId,
 		min(A.strModuleName) strModuleName,
+		min(A.strTransactionForm)strTransactionForm,
 		C.strCode strCompanySegment, strTransactionId, 
 		sum(isnull(dblDebit,0) - isnull(dblCredit,0))dblTotal
 	from tblGLDetail A 
@@ -35,6 +36,7 @@ cteUnbalanced as(
 select 
 intTransactionId,
 strModuleName,
+strTransactionForm,
 B.strTransactionId, A.strCompanySegment, dblTotal 
 from cte A join 
 cteUnbalanced B on A.strTransactionId = B.strTransactionId
