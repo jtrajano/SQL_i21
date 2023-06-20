@@ -144,7 +144,7 @@ BEGIN TRY
 				LEFT JOIN @LatestBasisEntries t
 					ON  REPLACE(ISNULL(t.strFutMarketName, ''), ',','.') = ISNULL(i.strFutMarketName, '')
 					AND REPLACE(ISNULL(t.strCommodityCode, ''), ',','.') = ISNULL(i.strCommodityCode, '')
-					AND TRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.')) = ISNULL(i.strItemNo, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.'))) = ISNULL(i.strItemNo, '')
 					AND REPLACE(ISNULL(t.strLocationName, ''), ',','.') = ISNULL(i.strLocation, '')
 					AND REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.') = ISNULL(i.strMarketZone, '')
 					AND REPLACE(ISNULL(t.strOriginPort, ''), ',','.') = ISNULL(i.strOriginPort, '')
@@ -286,7 +286,7 @@ BEGIN TRY
 				SET @PreviousErrMsg += 'Invalid Commodity.'
 			END
 
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE TRIM(REPLACE(strItemNo, ',', '.')) = @strItemNo)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE RTRIM(LTRIM(REPLACE(strItemNo, ',', '.'))) = @strItemNo)
 			BEGIN
 				SET @PreviousErrMsg += CASE WHEN @PreviousErrMsg <> '' THEN ', ' ELSE '' END
 				SET @PreviousErrMsg += 'Invalid Item No.'
@@ -411,7 +411,7 @@ BEGIN TRY
 		INNER JOIN @LatestBasisEntries t
 			ON  REPLACE(ISNULL(t.strFutMarketName, ''), ',','.') = ISNULL(i.strFutMarketName, '')
 			AND REPLACE(ISNULL(t.strCommodityCode, ''), ',','.') = ISNULL(i.strCommodityCode, '')
-			AND TRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.')) = ISNULL(i.strItemNo, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.'))) = ISNULL(i.strItemNo, '')
 			AND REPLACE(ISNULL(t.strLocationName, ''), ',','.') = ISNULL(i.strLocation, '')
 			AND REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.') = ISNULL(i.strMarketZone, '')
 			AND REPLACE(ISNULL(t.strOriginPort, ''), ',','.') = ISNULL(i.strOriginPort, '')
@@ -457,7 +457,7 @@ BEGIN TRY
 		INNER JOIN @LatestBasisEntries t
 			ON  REPLACE(ISNULL(t.strFutMarketName, ''), ',','.') = ISNULL(i.strFutMarketName, '')
 			AND REPLACE(ISNULL(t.strCommodityCode, ''), ',','.') = ISNULL(i.strCommodityCode, '')
-			AND TRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.')) = ISNULL(i.strItemNo, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.'))) = ISNULL(i.strItemNo, '')
 			AND REPLACE(ISNULL(t.strLocationName, ''), ',','.') = ISNULL(i.strLocation, '')
 			AND REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.') = ISNULL(i.strMarketZone, '')
 			AND REPLACE(ISNULL(t.strOriginPort, ''), ',','.') = ISNULL(i.strOriginPort, '')
