@@ -897,6 +897,9 @@
     <Build Include="dbo\Functions\fnCTConvertPriceToTargetCommodityUOM.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisImport_ErrLog.sql" />
     <Build Include="dbo\Views\vyuRKBasisEntryEvaluationConfig.sql" />
+    <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
+    <Build Include="dbo\Functions\fnGetItemCommodityGLAccount.sql" />
+    <Build Include="dbo\Views\vyuAPGetItemGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
