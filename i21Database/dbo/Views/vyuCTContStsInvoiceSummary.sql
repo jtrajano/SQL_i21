@@ -22,7 +22,7 @@ AS
 				JOIN	(
 							SELECT		intContractDetailId,
 							CASE WHEN (MAX(tblARInvoice.strTransactionType) NOT IN ('Credit Memo') AND  ISNULL(MAX(tblARInvoice.intInvoiceId),0) NOT IN (SELECT ISNULL(MAX(intInvoiceId),0) FROM tblLGWeightClaimDetail))
-							THEN CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18, 6)) ELSE MAX(dblTotal) - MIN(dblTotal) END dblTotal,
+							THEN CAST(ISNULL(SUM(CASE WHEN tblARInvoice.strTransactionType ='Credit Memo' THEN -dblTotal ELSE dblTotal END),0)AS NUMERIC(18, 6)) ELSE MAX(dblTotal) - MIN(dblTotal) END dblTotal,
 							MAX(strCurrency)  strCurrency,
 								CASE WHEN (MAX(tblARInvoice.strTransactionType) NOT IN ('Credit Memo') AND  ISNULL(MAX(tblARInvoice.intInvoiceId),0) NOT IN (SELECT ISNULL(MAX(intInvoiceId),0) FROM tblLGWeightClaimDetail))
 								THEN CAST(ISNULL(SUM(CASE WHEN tblARInvoice.strTransactionType ='Credit Memo' THEN -dblNetWeight ELSE dblNetWeight END),0)AS NUMERIC(18, 6)) ELSE MAX(dblNetWeight) - MIN(dblNetWeight) END dblNetWeight
