@@ -32,9 +32,17 @@ BEGIN TRY
     IF @strType='Reduced By Inventory Shipment'
 	BEGIN
 		UPDATE CS
-		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
+		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblTotalUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
+		JOIN (
+			SELECT intCustomerStorageId
+				,dblTotalUnits = SUM(dblUnits)
+			FROM tblGRStorageHistory
+			WHERE intInventoryShipmentId = @IntSourceKey 
+				AND strType = @strType 
+				AND intInventoryReceiptId IS NULL
+			GROUP BY intCustomerStorageId
+		) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
 
 		INSERT INTO @StorageHistoryStagingTable
 		(
@@ -136,9 +144,17 @@ BEGIN TRY
 	ELSE IF  @strType='Reduced By Scale'
 	BEGIN
 		UPDATE CS
-		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
+		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblTotalUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intTicketId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL 
+		JOIN (
+			SELECT intCustomerStorageId
+				,dblTotalUnits = SUM(dblUnits)
+			FROM tblGRStorageHistory
+			WHERE intTicketId = @IntSourceKey
+				AND strType = @strType 
+				AND intInventoryReceiptId IS NULL
+			GROUP BY intCustomerStorageId
+		) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
 
 		INSERT INTO @StorageHistoryStagingTable
 		(
@@ -239,9 +255,17 @@ BEGIN TRY
 	ELSE IF  @strType='Reduced By Invoice'
 	BEGIN
 		UPDATE CS
-		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnits
+		SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblTotalUnits
 		FROM tblGRCustomerStorage CS
-		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInvoiceId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
+		JOIN (
+			SELECT intCustomerStorageId
+				,dblTotalUnits = SUM(dblUnits)
+			FROM tblGRStorageHistory
+			WHERE intInvoiceId = @IntSourceKey 
+				AND strType = @strType 
+				AND intInventoryReceiptId IS NULL
+			GROUP BY intCustomerStorageId
+		) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
 
 		INSERT INTO @StorageHistoryStagingTable
 		(
