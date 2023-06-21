@@ -53,11 +53,11 @@ FROM tblSMCompanyLocation L
 DELETE FROM tblARInvoiceReportStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
   AND strRequestId = @strRequestId 
-  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
+  AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost','Format 10 - Berry Trucking')
 
 --MAIN QUERY
 SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
-	 , strCompanyAddress		= CASE WHEN SELECTEDINV.strInvoiceFormat <> 'Format 9 - Berry Oil' 
+	 , strCompanyAddress		= CASE WHEN (SELECTEDINV.strInvoiceFormat <> 'Format 9 - Berry Oil' AND SELECTEDINV.strInvoiceFormat <> 'Format 10 - Berry Trucking')
 	 								   THEN 
 	 										CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
 									   			 WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
@@ -79,11 +79,11 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , intShipToLocationId		= INV.intShipToLocationId
 	 , strBillToLocationName	= EMBT.strEntityNo
 	 , strShipToLocationName	= EMST.strEntityNo
-	 , strBillToAddress			= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 9 - Berry Oil' 
+	 , strBillToAddress			= CASE WHEN (SELECTEDINV.strInvoiceFormat = 'Format 9 - Berry Oil' OR SELECTEDINV.strInvoiceFormat = 'Format 10 - Berry Trucking')
 									   THEN ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(' ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(' ' + INV.strBillToCountry), '')
 	 							  	   ELSE ISNULL(RTRIM(INV.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strBillToCity), '') + ISNULL(RTRIM(', ' + INV.strBillToState), '') + ISNULL(RTRIM(', ' + INV.strBillToZipCode), '') + ISNULL(RTRIM(', ' + INV.strBillToCountry), '')
 								  END
-	 , strShipToAddress			= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 9 - Berry Oil'
+	 , strShipToAddress			= CASE WHEN (SELECTEDINV.strInvoiceFormat = 'Format 9 - Berry Oil' OR SELECTEDINV.strInvoiceFormat = 'Format 10 - Berry Trucking')
 	 								   THEN CAST(ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(' ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(' ' + INV.strShipToCountry), '') AS NVARCHAR(MAX))
 									   ELSE CAST(ISNULL(RTRIM(INV.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToAddress) + CHAR(13) + char(10), '') + ISNULL(RTRIM(INV.strShipToCity), '') + ISNULL(RTRIM(', ' + INV.strShipToState), '') + ISNULL(RTRIM(', ' + INV.strShipToZipCode), '') + ISNULL(RTRIM(', ' + INV.strShipToCountry), '') AS NVARCHAR(MAX))
 								  END
@@ -97,7 +97,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId,0)
 	 , intSiteId				= INVOICEDETAIL.intSiteId
 	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
-	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('Format 5 - Honstein', 'Format 9 - Berry Oil') THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
+	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('Format 5 - Honstein', 'Format 9 - Berry Oil','Format 10 - Berry Trucking') THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
 	 , strItemNo				= INVOICEDETAIL.strItemNo
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strContractNo			= INVOICEDETAIL.strContractNo
@@ -402,7 +402,7 @@ OUTER APPLY (
 ) [MESSAGES]
 WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId
-  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Format 9 - Berry Oil')
+  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Format 9 - Berry Oil','Format 10 - Berry Trucking')
 
 --HONSTEIN TAX DETAILS
 IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
@@ -599,9 +599,9 @@ BEGIN
 		AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
 		AND STAGING.strItemNo <> 'State Sales Tax'
 END
-ELSE IF EXISTS (SELECT TOP 1 1 FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 9 - Berry Oil')
+ELSE IF EXISTS (SELECT TOP 1 1 FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking'))
 BEGIN
-	DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 9 - Berry Oil'
+	DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat  IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 	INSERT INTO tblARInvoiceTaxReportStagingTable (
 		  [intTransactionId]
 		, [intTransactionDetailId]
@@ -661,7 +661,7 @@ BEGIN
 				 , dblAdjustedTax 		= SUM(dblAdjustedTax)
 				 , dblRate				= SUM(dblRate)
 			FROM tblARInvoiceTaxReportStagingTable			
-			WHERE strInvoiceFormat = 'Format 9 - Berry Oil'
+			WHERE strInvoiceFormat IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 			  AND intEntityUserId = @intEntityUserId
 			  AND strRequestId = @strRequestId
 			GROUP BY intTransactionId, intTransactionDetailId
@@ -669,13 +669,13 @@ BEGIN
 				  AND ITEMPRICE.intInvoiceDetailId = TAXPRICE.intInvoiceDetailId
 		WHERE ITEMPRICE.intEntityUserId = @intEntityUserId
 		  AND ITEMPRICE.strRequestId = @strRequestId
-		  AND ITEMPRICE.strInvoiceFormat = 'Format 9 - Berry Oil'
+		  AND ITEMPRICE.strInvoiceFormat IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 		GROUP BY ITEMPRICE.intInvoiceId, ITEMPRICE.intInvoiceDetailId
 	) TOTALPRICE ON STAGING.intInvoiceId = TOTALPRICE.intInvoiceId
 	            AND STAGING.intInvoiceDetailId = TOTALPRICE.intInvoiceDetailId
 	WHERE STAGING.intEntityUserId = @intEntityUserId
 	  AND STAGING.strRequestId = @strRequestId
-	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
+	  AND STAGING.strInvoiceFormat  IN('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 
 	UPDATE STAGING
 	SET dblInvoiceSubtotal = ISNULL(DETAIL.dblLineTotal, 0)
@@ -686,12 +686,12 @@ BEGIN
 		FROM tblARInvoiceReportStagingTable DETAIL		
 		WHERE DETAIL.intEntityUserId = @intEntityUserId
 		  AND DETAIL.strRequestId = @strRequestId
-		  AND DETAIL.strInvoiceFormat = 'Format 9 - Berry Oil'
+		  AND DETAIL.strInvoiceFormat  IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 		GROUP BY DETAIL.intInvoiceId
 	) DETAIL ON STAGING.intInvoiceId = DETAIL.intInvoiceId
 	WHERE STAGING.intEntityUserId = @intEntityUserId
 	  AND STAGING.strRequestId = @strRequestId
-	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
+	  AND STAGING.strInvoiceFormat IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 	  
 	UPDATE STAGING
 	SET dblInvoiceTax = ISNULL(SST.dblTotalSST, 0)
@@ -709,7 +709,7 @@ BEGIN
 	) SST ON STAGING.intInvoiceId = SST.intInvoiceId
 	WHERE STAGING.intEntityUserId = @intEntityUserId
 	  AND STAGING.strRequestId = @strRequestId
-	  AND STAGING.strInvoiceFormat = 'Format 9 - Berry Oil'
+	  AND STAGING.strInvoiceFormat IN ('Format 9 - Berry Oil','Format 10 - Berry Trucking')
 END
 
 IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 2 - With Laid in Cost')
