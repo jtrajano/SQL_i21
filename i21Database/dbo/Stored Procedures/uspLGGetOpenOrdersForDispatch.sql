@@ -68,6 +68,7 @@ BEGIN
 		,ysnRoutingAlert = TMO.ysnRoutingAlert
 		,strRoute = TMR.strRouteId
 		,strRecurringPONumber = TMS.strRecurringPONumber
+		,strReleasePONumber = TMS.strReleasePONumber
 	FROM vyuTMGeneratedCallEntry TMO 
 		LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
 		LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
