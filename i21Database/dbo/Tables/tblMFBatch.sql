@@ -4,7 +4,7 @@ CREATE TABLE tblMFBatch
 	strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intSales INT NOT NULL,
 	intSalesYear INT NOT NULL,
-	dtmSalesDate DATETIME NOT NULL,
+	dtmSalesDate DATETIME NULL,
 	strTeaType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intBrokerId INT NULL,
 	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -139,7 +139,7 @@ CREATE NONCLUSTERED INDEX [IX_tblMFBatch_strBatchId_intLocationId] ON [dbo].[tbl
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblMFBatch_batch_check]
-ON [dbo].[tblMFBatch] ([intSales],[intSalesYear],[dtmSalesDate],[strTeaType],[strVendorLotNumber],[intBuyingCenterLocationId],[intSubBookId],[intLocationId])
+ON [dbo].[tblMFBatch] ([intSales],[intSalesYear],[strTeaType],[strVendorLotNumber],[intBuyingCenterLocationId],[intSubBookId],[intLocationId])
 INCLUDE ([strBatchId])
 GO
 
