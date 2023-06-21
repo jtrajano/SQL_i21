@@ -142,29 +142,29 @@ BEGIN TRY
 		EXISTS (SELECT TOP 1 1
 				FROM tblRKM2MBasisImport i
 				LEFT JOIN @LatestBasisEntries t
-					ON  REPLACE(ISNULL(t.strFutMarketName, ''), ',','.') = ISNULL(i.strFutMarketName, '')
-					AND REPLACE(ISNULL(t.strCommodityCode, ''), ',','.') = ISNULL(i.strCommodityCode, '')
+					ON  RTRIM(LTRIM(REPLACE(ISNULL(t.strFutMarketName, ''), ',','.'))) = ISNULL(i.strFutMarketName, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCommodityCode, ''), ',','.'))) = ISNULL(i.strCommodityCode, '')
 					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.'))) = ISNULL(i.strItemNo, '')
-					AND REPLACE(ISNULL(t.strLocationName, ''), ',','.') = ISNULL(i.strLocation, '')
-					AND REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.') = ISNULL(i.strMarketZone, '')
-					AND REPLACE(ISNULL(t.strOriginPort, ''), ',','.') = ISNULL(i.strOriginPort, '')
-					AND REPLACE(ISNULL(t.strDestinationPort, ''), ',','.') = ISNULL(i.strDestinationPort, '')
-					AND REPLACE(ISNULL(t.strCropYear, ''), ',','.') = ISNULL(i.strCropYear, '')
-					AND REPLACE(ISNULL(t.strStorageLocation, ''), ',','.') = ISNULL(i.strStorageLocation, '')
-					AND REPLACE(ISNULL(t.strStorageUnit, ''), ',','.') = ISNULL(i.strStorageUnit, '')
-					AND REPLACE(ISNULL(t.strPeriodTo, ''), ',','.') = ISNULL(i.strPeriodTo, '')
-					AND REPLACE(ISNULL(t.strContractType, ''), ',','.') = ISNULL(i.strContractType, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strLocationName, ''), ',','.'))) = ISNULL(i.strLocation, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.'))) = ISNULL(i.strMarketZone, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strOriginPort, ''), ',','.'))) = ISNULL(i.strOriginPort, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strDestinationPort, ''), ',','.'))) = ISNULL(i.strDestinationPort, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCropYear, ''), ',','.'))) = ISNULL(i.strCropYear, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strStorageLocation, ''), ',','.'))) = ISNULL(i.strStorageLocation, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strStorageUnit, ''), ',','.'))) = ISNULL(i.strStorageUnit, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strPeriodTo, ''), ',','.'))) = ISNULL(i.strPeriodTo, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strContractType, ''), ',','.'))) = ISNULL(i.strContractType, '')
 					AND ((ISNULL(@ysnIncludeProductInformation, 0) = 0)
 						  OR
 						 (ISNULL(@ysnIncludeProductInformation, 0) = 1
-							AND REPLACE(ISNULL(t.strProductType, ''), ',','.') = ISNULL(i.strProductType, '')
-							AND REPLACE(ISNULL(t.strGrade, ''), ',','.') = ISNULL(i.strGrade, '')
-							AND REPLACE(ISNULL(t.strProductLine, ''), ',','.') = ISNULL(i.strProductLine, '')
-							AND REPLACE(ISNULL(t.strClass, ''), ',','.') = ISNULL(i.strClass, '')
-							AND REPLACE(ISNULL(t.strCertification, ''), ',','.') = ISNULL(i.strCertification, '')
+							AND RTRIM(LTRIM(REPLACE(ISNULL(t.strProductType, ''), ',','.'))) = ISNULL(i.strProductType, '')
+							AND RTRIM(LTRIM(REPLACE(ISNULL(t.strGrade, ''), ',','.'))) = ISNULL(i.strGrade, '')
+							AND RTRIM(LTRIM(REPLACE(ISNULL(t.strProductLine, ''), ',','.'))) = ISNULL(i.strProductLine, '')
+							AND RTRIM(LTRIM(REPLACE(ISNULL(t.strClass, ''), ',','.'))) = ISNULL(i.strClass, '')
+							AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCertification, ''), ',','.'))) = ISNULL(i.strCertification, '')
 						))
-					AND REPLACE(ISNULL(t.strMTMPoint, ''), ',','.') = ISNULL(i.strMTMPoint, '')
-					AND REPLACE(ISNULL(t.strContractInventory, ''), ',','.') = ISNULL(i.strContractInventory, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strMTMPoint, ''), ',','.'))) = ISNULL(i.strMTMPoint, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strContractInventory, ''), ',','.'))) = ISNULL(i.strContractInventory, '')
 					AND t.strContractInventory = 'Contract'
 				WHERE i.strContractInventory = 'Contract'
 				AND t.intRowNumber IS NULL
@@ -280,7 +280,7 @@ BEGIN TRY
 		-- INVENTORY RECORD VALIDATIONS
 		IF @strContractInventory = 'Inventory'
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodity WHERE REPLACE(strCommodityCode, ',', '.') = @strCommodityCode)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodity WHERE RTRIM(LTRIM(REPLACE(strCommodityCode, ',', '.'))) = @strCommodityCode)
 			BEGIN
 				SET @PreviousErrMsg += CASE WHEN @PreviousErrMsg <> '' THEN ', ' ELSE '' END
 				SET @PreviousErrMsg += 'Invalid Commodity.'
@@ -292,7 +292,7 @@ BEGIN TRY
 				SET @PreviousErrMsg += 'Invalid Item No.'
 			END
 			
-			IF @ysnEvaluationByLocation = 1 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE REPLACE(strLocationName, ',', '.') = @strLocation)
+			IF @ysnEvaluationByLocation = 1 AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE RTRIM(LTRIM(REPLACE(strLocationName, ',', '.'))) = @strLocation)
 			BEGIN
 				SET @PreviousErrMsg += CASE WHEN @PreviousErrMsg <> '' THEN ', ' ELSE '' END
 				SET @PreviousErrMsg += 'Invalid Location.'
@@ -409,29 +409,29 @@ BEGIN TRY
 			, i.strMTMPoint = t.strMTMPoint
 		FROM tblRKM2MBasisImport i
 		INNER JOIN @LatestBasisEntries t
-			ON  REPLACE(ISNULL(t.strFutMarketName, ''), ',','.') = ISNULL(i.strFutMarketName, '')
-			AND REPLACE(ISNULL(t.strCommodityCode, ''), ',','.') = ISNULL(i.strCommodityCode, '')
+			ON  RTRIM(LTRIM(REPLACE(ISNULL(t.strFutMarketName, ''), ',','.'))) = ISNULL(i.strFutMarketName, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCommodityCode, ''), ',','.'))) = ISNULL(i.strCommodityCode, '')
 			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.'))) = ISNULL(i.strItemNo, '')
-			AND REPLACE(ISNULL(t.strLocationName, ''), ',','.') = ISNULL(i.strLocation, '')
-			AND REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.') = ISNULL(i.strMarketZone, '')
-			AND REPLACE(ISNULL(t.strOriginPort, ''), ',','.') = ISNULL(i.strOriginPort, '')
-			AND REPLACE(ISNULL(t.strDestinationPort, ''), ',','.') = ISNULL(i.strDestinationPort, '')
-			AND REPLACE(ISNULL(t.strCropYear, ''), ',','.') = ISNULL(i.strCropYear, '')
-			AND REPLACE(ISNULL(t.strStorageLocation, ''), ',','.') = ISNULL(i.strStorageLocation, '')
-			AND REPLACE(ISNULL(t.strStorageUnit, ''), ',','.') = ISNULL(i.strStorageUnit, '')
-			AND REPLACE(ISNULL(t.strPeriodTo, ''), ',','.') = ISNULL(i.strPeriodTo, '')
-			AND REPLACE(ISNULL(t.strContractType, ''), ',','.') = ISNULL(i.strContractType, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strLocationName, ''), ',','.'))) = ISNULL(i.strLocation, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.'))) = ISNULL(i.strMarketZone, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strOriginPort, ''), ',','.'))) = ISNULL(i.strOriginPort, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strDestinationPort, ''), ',','.'))) = ISNULL(i.strDestinationPort, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCropYear, ''), ',','.'))) = ISNULL(i.strCropYear, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strStorageLocation, ''), ',','.'))) = ISNULL(i.strStorageLocation, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strStorageUnit, ''), ',','.'))) = ISNULL(i.strStorageUnit, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strPeriodTo, ''), ',','.'))) = ISNULL(i.strPeriodTo, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strContractType, ''), ',','.'))) = ISNULL(i.strContractType, '')
 			AND ((ISNULL(@ysnIncludeProductInformation, 0) = 0)
 					OR
 					(ISNULL(@ysnIncludeProductInformation, 0) = 1
-					AND REPLACE(ISNULL(t.strProductType, ''), ',','.') = ISNULL(i.strProductType, '')
-					AND REPLACE(ISNULL(t.strGrade, ''), ',','.') = ISNULL(i.strGrade, '')
-					AND REPLACE(ISNULL(t.strProductLine, ''), ',','.') = ISNULL(i.strProductLine, '')
-					AND REPLACE(ISNULL(t.strClass, ''), ',','.') = ISNULL(i.strClass, '')
-					AND REPLACE(ISNULL(t.strCertification, ''), ',','.') = ISNULL(i.strCertification, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strProductType, ''), ',','.'))) = ISNULL(i.strProductType, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strGrade, ''), ',','.'))) = ISNULL(i.strGrade, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strProductLine, ''), ',','.'))) = ISNULL(i.strProductLine, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strClass, ''), ',','.'))) = ISNULL(i.strClass, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCertification, ''), ',','.'))) = ISNULL(i.strCertification, '')
 				))
-			AND REPLACE(ISNULL(t.strMTMPoint, ''), ',','.') = ISNULL(i.strMTMPoint, '')
-			AND REPLACE(ISNULL(t.strContractInventory, ''), ',','.') = ISNULL(i.strContractInventory, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strMTMPoint, ''), ',','.'))) = ISNULL(i.strMTMPoint, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strContractInventory, ''), ',','.'))) = ISNULL(i.strContractInventory, '')
 			AND t.strContractInventory = 'Contract'
 		WHERE i.strContractInventory = 'Contract'
 
@@ -455,29 +455,29 @@ BEGIN TRY
 			, i.strMTMPoint = t.strMTMPoint
 		FROM tblRKM2MBasisImport i
 		INNER JOIN @LatestBasisEntries t
-			ON  REPLACE(ISNULL(t.strFutMarketName, ''), ',','.') = ISNULL(i.strFutMarketName, '')
-			AND REPLACE(ISNULL(t.strCommodityCode, ''), ',','.') = ISNULL(i.strCommodityCode, '')
+			ON  RTRIM(LTRIM(REPLACE(ISNULL(t.strFutMarketName, ''), ',','.'))) = ISNULL(i.strFutMarketName, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCommodityCode, ''), ',','.'))) = ISNULL(i.strCommodityCode, '')
 			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strItemNo, ''), ',','.'))) = ISNULL(i.strItemNo, '')
-			AND REPLACE(ISNULL(t.strLocationName, ''), ',','.') = ISNULL(i.strLocation, '')
-			AND REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.') = ISNULL(i.strMarketZone, '')
-			AND REPLACE(ISNULL(t.strOriginPort, ''), ',','.') = ISNULL(i.strOriginPort, '')
-			AND REPLACE(ISNULL(t.strDestinationPort, ''), ',','.') = ISNULL(i.strDestinationPort, '')
-			AND REPLACE(ISNULL(t.strCropYear, ''), ',','.') = ISNULL(i.strCropYear, '')
-			AND REPLACE(ISNULL(t.strStorageLocation, ''), ',','.') = ISNULL(i.strStorageLocation, '')
-			AND REPLACE(ISNULL(t.strStorageUnit, ''), ',','.') = ISNULL(i.strStorageUnit, '')
-			AND REPLACE(ISNULL(t.strPeriodTo, ''), ',','.') = ISNULL(i.strPeriodTo, '')
-			AND REPLACE(ISNULL(t.strContractType, ''), ',','.') = ISNULL(i.strContractType, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strLocationName, ''), ',','.'))) = ISNULL(i.strLocation, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strMarketZoneCode, ''), ',','.'))) = ISNULL(i.strMarketZone, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strOriginPort, ''), ',','.'))) = ISNULL(i.strOriginPort, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strDestinationPort, ''), ',','.'))) = ISNULL(i.strDestinationPort, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCropYear, ''), ',','.'))) = ISNULL(i.strCropYear, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strStorageLocation, ''), ',','.'))) = ISNULL(i.strStorageLocation, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strStorageUnit, ''), ',','.'))) = ISNULL(i.strStorageUnit, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strPeriodTo, ''), ',','.'))) = ISNULL(i.strPeriodTo, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strContractType, ''), ',','.'))) = ISNULL(i.strContractType, '')
 			AND ((ISNULL(@ysnIncludeProductInformation, 0) = 0)
 					OR
 					(ISNULL(@ysnIncludeProductInformation, 0) = 1
-					AND REPLACE(ISNULL(t.strProductType, ''), ',','.') = ISNULL(i.strProductType, '')
-					AND REPLACE(ISNULL(t.strGrade, ''), ',','.') = ISNULL(i.strGrade, '')
-					AND REPLACE(ISNULL(t.strProductLine, ''), ',','.') = ISNULL(i.strProductLine, '')
-					AND REPLACE(ISNULL(t.strClass, ''), ',','.') = ISNULL(i.strClass, '')
-					AND REPLACE(ISNULL(t.strCertification, ''), ',','.') = ISNULL(i.strCertification, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strProductType, ''), ',','.'))) = ISNULL(i.strProductType, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strGrade, ''), ',','.'))) = ISNULL(i.strGrade, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strProductLine, ''), ',','.'))) = ISNULL(i.strProductLine, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strClass, ''), ',','.'))) = ISNULL(i.strClass, '')
+					AND RTRIM(LTRIM(REPLACE(ISNULL(t.strCertification, ''), ',','.'))) = ISNULL(i.strCertification, '')
 				))
-			AND REPLACE(ISNULL(t.strMTMPoint, ''), ',','.') = ISNULL(i.strMTMPoint, '')
-			AND REPLACE(ISNULL(t.strContractInventory, ''), ',','.') = ISNULL(i.strContractInventory, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strMTMPoint, ''), ',','.'))) = ISNULL(i.strMTMPoint, '')
+			AND RTRIM(LTRIM(REPLACE(ISNULL(t.strContractInventory, ''), ',','.'))) = ISNULL(i.strContractInventory, '')
 			AND t.strContractInventory = 'Inventory'
 		WHERE i.strContractInventory = 'Inventory'
 	END
