@@ -435,16 +435,16 @@ BEGIN TRY
 						END
 					)
 			END AS dblPhysicalCount
-		,IU.intItemUOMId AS intPhysicalItemUOMId
-		,UM.intUnitMeasureId AS intUnitUOMId
-		,UM.strUnitMeasure AS strPhysicalItemUOM
-		,Prod.strLotNumber AS strOutputLotNumber
-		,Prod.strParentLotNumber
-		,Prod.intContainerId
-		,Cont.strContainerId
-		,Prod.dblTareWeight
-		,Prod.dblGrossWeight
-		,Prod.dblNetWeight AS dblProduceQty
+		, IU.intItemUOMId AS intPhysicalItemUOMId
+		, UM.intUnitMeasureId AS intUnitUOMId
+		, UM.strUnitMeasure AS strPhysicalItemUOM
+		, Prod.strLotNumber AS strOutputLotNumber
+		, Prod.strParentLotNumber
+		, Prod.intContainerId
+		, Cont.strContainerId
+		, Prod.dblTareWeight
+		, Prod.dblGrossWeight
+		, Prod.dblNetWeight AS dblProduceQty
 		,IsNULL(IU1.intItemUOMId, IU2.intItemUOMId) AS intActualItemUOMId
 		,UM1.intUnitMeasureId AS intActualItemUnitMeasureId
 		,UM1.strUnitMeasure AS strActualItemUnitMeasure
@@ -467,6 +467,7 @@ BEGIN TRY
 		,IsNULL(I.intUnitPerLayer * I.intLayerPerPallet, 0) AS intCasesPerPallet
 		,(SELECT TOP 1 intCertificationId FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS intCertificationId
 		,(SELECT TOP 1 strCertificationName FROM vyuCTItemCertification WHERE intItemId = I.intItemId ORDER BY intItemCertificationId) AS strCertificationName
+		, I.intWeightUOMId
 	INTO #ProductionDetail
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
@@ -490,83 +491,87 @@ BEGIN TRY
 	OUTER APPLY (SELECT TOP 1 ICIUOM.dblUnitQty AS dblUnitPerQty
 				 FROM tblICItemLocation AS ICILocation
 				 LEFT JOIN tblICItemUOM AS ICIUOM ON ICILocation.intGrossUOMId = ICIUOM.intItemUOMId
-				 WHERE ICILocation.intItemId = ri.intItemId AND ICILocation.intLocationId = @intLocationId AND ICIUOM.ysnStockUnit = 1) as ItemStockUOM
+				 WHERE ICILocation.intItemId = ri.intItemId AND ICILocation.intLocationId = @intLocationId AND ICIUOM.ysnStockUnit = 1) as ItemStockUOM	
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 
-	IF NOT EXISTS (SELECT * FROM #ProductionDetail WHERE intCasesPerPallet > 0)
+	IF NOT EXISTS (
+			SELECT *
+			FROM #ProductionDetail
+			WHERE intCasesPerPallet > 0
+			)
 		BEGIN
 			SELECT intStorageLocationId
-				,strStorageLocationName
-				,intStorageSubLocationId
-				,intActualItemId
-				,strActualItemNo
-				,strActualItemDescription
-				,(
-					CASE 
-						WHEN intActualItemId = @intItemId
-							AND @strType = 'O'
-							THEN @dblQuantity
-						ELSE dblPhysicalCount
-						END
-					) AS dblPhysicalCount
-				,(
-					CASE 
-						WHEN intActualItemId = @intItemId
-							AND @strType = 'O'
-							THEN @intQuantityItemUOMId
-						ELSE intPhysicalItemUOMId
-						END
-					) AS intPhysicalItemUOMId
-				,intUnitUOMId
-				,(
-					CASE 
-						WHEN intActualItemId = @intItemId
-							AND @strType = 'O'
-							THEN @strQuantityUnitMeasure
-						ELSE strPhysicalItemUOM
-						END
-					)strPhysicalItemUOM
-				,strOutputLotNumber
-				,strParentLotNumber
-				,intContainerId
-				,strContainerId
-				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblTareWeight IS NOT NULL THEN @dblTareWeight
-						ELSE dblTareWeight
-				  END) AS dblTareWeight
-				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblGrossWeight IS NOT NULL THEN @dblGrossWeight 
-					   ELSE dblPhysicalCount * dblWeight
-				  END) AS dblGrossWeight
-				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblNetWeight IS NOT NULL THEN @dblNetWeight
-						ELSE dblPhysicalCount * dblWeight
-				  END) AS dblProduceQty
-				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @intWeightItemUOMId IS NOT NULL THEN @intWeightItemUOMId 
-						ELSE intActualItemUOMId
-				  END) intActualItemUOMId
-				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @intActualItemUnitMeasureId IS NOT NULL THEN @intActualItemUnitMeasureId 
-					   ELSE intActualItemUnitMeasureId
-				  END) intActualItemUnitMeasureId
-				,(CASE WHEN intActualItemId = @intItemId AND @strType = 'O' AND @intActualItemUnitMeasureId IS NOT NULL THEN @strActualItemUnitMeasure
-						ELSE strActualItemUnitMeasure
-				  END) strActualItemUnitMeasure
-				,(CASE  WHEN intActualItemId = @intItemId AND @strType = 'O' AND @dblWeightPerUnit IS NOT NULL THEN @dblWeightPerUnit 
-						ELSE dblWeight
-				  END) AS dblUnitQty
-				,strReferenceNo
-				,strComment
-				,intRowNo
-				,strLotAlias
-				,intCategoryId
-				,strLotTracking
-				,dblPhysicalCount AS dblReadingQuantity
-				,ysnFillPartialPallet
-				,intParentLotId
-				,strLotNumber
-				,intLotId
-				,intProduceUnitMeasureId
-				,intCertificationId
-				,strCertificationName
+				 , strStorageLocationName
+				 , intStorageSubLocationId
+				 , intActualItemId
+				 , strActualItemNo
+				 , strActualItemDescription
+				 , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblQuantity
+						 ELSE dblPhysicalCount
+					END) AS dblPhysicalCount
+				 , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @intQuantityItemUOMId
+						 ELSE intPhysicalItemUOMId
+					END) AS intPhysicalItemUOMId
+				 , intUnitUOMId
+				 , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @strQuantityUnitMeasure
+						 ELSE strPhysicalItemUOM
+					END)strPhysicalItemUOM
+				 , strOutputLotNumber
+				 , strParentLotNumber
+				 , intContainerId
+				 , strContainerId
+				 , ISNULL((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblTareWeight 
+						 ELSE dblTareWeight
+					END), 0) dblTareWeight
+				 , ISNULL((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblGrossWeight
+							   ELSE dblPhysicalCount * dblWeight
+						   END), ItemGrossWeight.dblGrossWeight) AS dblGrossWeight
+				 , ISNULL((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblNetWeight
+					     ELSE dblPhysicalCount * dblWeight
+				    END), ISNULL((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblGrossWeight
+							   ELSE dblPhysicalCount * dblWeight
+						   END), ItemGrossWeight.dblGrossWeight) - ISNULL((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblTareWeight 
+						 ELSE dblTareWeight
+					END), 0)) AS dblProduceQty
+				 , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @intWeightItemUOMId
+						 ELSE intActualItemUOMId
+					END) AS intActualItemUOMId
+				 , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @intActualItemUnitMeasureId
+						 ELSE intActualItemUnitMeasureId
+					END) AS intActualItemUnitMeasureId
+				 , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @strActualItemUnitMeasure
+						 ELSE strActualItemUnitMeasure
+					END) strActualItemUnitMeasure
+				 , ISNULL((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblWeightPerUnit
+								ELSE dblWeight
+						   END), ItemGrossWeight.dblWeightPerUnit) AS dblUnitQty
+				 , strReferenceNo
+				 , strComment
+				 , intRowNo
+				 , strLotAlias
+				 , intCategoryId
+				 , strLotTracking
+				 , dblPhysicalCount AS dblReadingQuantity
+				 , ysnFillPartialPallet
+				 , intParentLotId
+				 , strLotNumber
+				 , intLotId
+				 , intProduceUnitMeasureId
+				 , intCertificationId
+				 , strCertificationName
 			FROM #ProductionDetail DT
+			OUTER APPLY (SELECT [dbo].[fnMFConvertQuantityToTargetItemUOM]((CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @intQuantityItemUOMId
+																				 ELSE intPhysicalItemUOMId
+																			END)
+																		  , ICItemUOM.intItemUOMId
+																		  , (CASE WHEN intActualItemId = @intItemId AND @strType = 'O' THEN @dblQuantity
+																				  ELSE dblPhysicalCount
+																			 END)) AS dblGrossWeight
+							  , dblUnitQty AS dblWeightPerUnit 
+						 FROM tblICItemUOM AS ICItemUOM
+						 WHERE intItemId = DT.intActualItemId AND intUnitMeasureId = DT.intWeightUOMId) AS ItemGrossWeight
+			
 		END
 	ELSE
 	BEGIN
