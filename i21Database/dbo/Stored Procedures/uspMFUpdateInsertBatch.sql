@@ -38,7 +38,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 			BEGIN
 				SELECT @errorMessage = 'Sales year (intSalesYear) is missing';
 			END
-		ELSE IF EXISTS (SELECT 1 FROM @MFBatchTableType WHERE @id = intId AND dtmSalesDate IS NULL)
+		ELSE IF EXISTS (SELECT 1 FROM @MFBatchTableType batch JOIN tblQMSample S ON S.intSampleId = batch.intSampleId WHERE @id = intId AND dtmSalesDate IS NULL AND S.intMarketZoneId = 1 )
 			BEGIN
 				SELECT @errorMessage = 'Sales date (dtmSalesDate) is missing';
 			END
