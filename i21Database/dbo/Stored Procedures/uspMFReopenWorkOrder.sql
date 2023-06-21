@@ -238,143 +238,147 @@ BEGIN TRY
 	END
 
 	IF @strAttributeValue = 'False' and @strCycleCount='False'--Is Instant Consumption
-	BEGIN
-		SELECT @strBatchId = NULL
-			,@intBatchId = NULL
-
-		SELECT @strBatchId = strBatchId
-			,@intBatchId = intBatchId
-		FROM tblMFWorkOrderConsumedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-
-		DELETE
-		FROM @GLEntries
-
-		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			,[intSourceEntityId]
-			,intCommodityId
-			)
-		EXEC dbo.uspICUnpostCosting @intBatchId
-			,@strWorkOrderNo
-			,@strBatchId
-			,@intUserId
-			,0
-
-		IF EXISTS (
-				SELECT *
-				FROM @GLEntries
-				)
 		BEGIN
+			SELECT @strBatchId = NULL
+				,@intBatchId = NULL
+
+			SELECT @strBatchId = strBatchId
+				,@intBatchId = intBatchId
+			FROM tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+
+			DELETE
+			FROM @GLEntries
+
+			/* Added from: MFG-5204 / MFG-5007 */
+			EXEC uspSMGetStartingNumber 3
+									  , @strBatchIdForUnpost OUTPUT 
+
+			INSERT INTO @GLEntries (
+				[dtmDate]
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,intCommodityId
+				)
+			EXEC dbo.uspICUnpostCosting @intBatchId
+									  , @strWorkOrderNo
+									  , @strBatchIdForUnpost
+									  , @intUserId
+									  , 0
+
 			IF EXISTS (
-						SELECT *
-						FROM tblMFWorkOrderRecipeItem WRI
-						JOIN tblICItem I ON I.intItemId = WRI.intItemId
-						WHERE I.strType = 'Other Charge'
-							AND WRI.intWorkOrderId = @intWorkOrderId
-						)
-				BEGIN
-					EXEC dbo.uspGLBookEntries @GLEntries
-						,0
-						,1
-						,1
-				END
-				ELSE
-				BEGIN
-					EXEC dbo.uspGLBookEntries @GLEntries
-						,0
-				END
+					SELECT *
+					FROM @GLEntries
+					)
+			BEGIN
+				IF EXISTS (
+							SELECT *
+							FROM tblMFWorkOrderRecipeItem WRI
+							JOIN tblICItem I ON I.intItemId = WRI.intItemId
+							WHERE I.strType = 'Other Charge'
+								AND WRI.intWorkOrderId = @intWorkOrderId
+							)
+					BEGIN
+						EXEC dbo.uspGLBookEntries @GLEntries
+							,0
+							,1
+							,1
+					END
+					ELSE
+					BEGIN
+						EXEC dbo.uspGLBookEntries @GLEntries
+							,0
+					END
+			END
+
+			DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
+
+			DELETE
+			FROM dbo.tblMFWorkOrderConsumedLot
+			OUTPUT deleted.intWorkOrderConsumedLotId
+			INTO @tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intBatchId = @intBatchId
+				AND intItemId NOT IN (
+					SELECT intItemId
+					FROM tblMFWorkOrderProducedLot
+					WHERE intWorkOrderId = @intWorkOrderId
+						AND intSpecialPalletLotId IS NOT NULL
+					)
+
+			UPDATE tblMFProductionSummary
+			SET dblConsumedQuantity = 0
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemTypeId IN (
+					1
+					,3
+					)
+
+			DELETE
+			FROM dbo.tblMFWorkOrderProducedLotTransaction
+			WHERE intWorkOrderId = @intWorkOrderId
+
+			INSERT INTO tblMFInventoryAdjustment (
+				dtmDate
+				,intTransactionTypeId
+				,intItemId
+				,intSourceLotId
+				,dblQty
+				,intItemUOMId
+				,intUserId
+				,intLocationId
+				,intStorageLocationId
+				,intWorkOrderConsumedLotId
+				,dtmBusinessDate
+				,intBusinessShiftId
+				,intWorkOrderId
+				)
+			SELECT dtmDate
+				,intTransactionTypeId
+				,IA.intItemId
+				,intSourceLotId
+				,- dblQty
+				,intItemUOMId
+				,intUserId
+				,intLocationId
+				,intStorageLocationId
+				,IA.intWorkOrderConsumedLotId
+				,dtmBusinessDate
+				,intBusinessShiftId
+				,intWorkOrderId
+			FROM tblMFInventoryAdjustment IA
+			JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
 		END
-
-		DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
-
-		DELETE
-		FROM dbo.tblMFWorkOrderConsumedLot
-		OUTPUT deleted.intWorkOrderConsumedLotId
-		INTO @tblMFWorkOrderConsumedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intBatchId = @intBatchId
-			AND intItemId NOT IN (
-				SELECT intItemId
-				FROM tblMFWorkOrderProducedLot
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND intSpecialPalletLotId IS NOT NULL
-				)
-
-		UPDATE tblMFProductionSummary
-		SET dblConsumedQuantity = 0
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intItemTypeId IN (
-				1
-				,3
-				)
-
-		DELETE
-		FROM dbo.tblMFWorkOrderProducedLotTransaction
-		WHERE intWorkOrderId = @intWorkOrderId
-
-		INSERT INTO tblMFInventoryAdjustment (
-			dtmDate
-			,intTransactionTypeId
-			,intItemId
-			,intSourceLotId
-			,dblQty
-			,intItemUOMId
-			,intUserId
-			,intLocationId
-			,intStorageLocationId
-			,intWorkOrderConsumedLotId
-			,dtmBusinessDate
-			,intBusinessShiftId
-			,intWorkOrderId
-			)
-		SELECT dtmDate
-			,intTransactionTypeId
-			,IA.intItemId
-			,intSourceLotId
-			,- dblQty
-			,intItemUOMId
-			,intUserId
-			,intLocationId
-			,intStorageLocationId
-			,IA.intWorkOrderConsumedLotId
-			,dtmBusinessDate
-			,intBusinessShiftId
-			,intWorkOrderId
-		FROM tblMFInventoryAdjustment IA
-		JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
-	END
 
 	SELECT @strAutoCycleCountOnWorkOrderClose = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
