@@ -856,6 +856,7 @@ INSERT INTO @ValueToPost (
 	,[strBOLNumber] 
 	,[intTicketId]
 )
+--INVENTORY COST INCREASE TRANSIT
 SELECT 
 	[intItemId] = LD.intItemId
 	,[intOtherChargeItemId] = BD.intItemId
@@ -891,9 +892,12 @@ CROSS APPLY (
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) 
+--IF COST ADJUSTMENT OR DIFFERENT CURRENCY FROM THE GOODS
+AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
 --DON'T INCLUDE CANCELLED PAYABLE
 AND B.dblAmountDue != 0
+--INVENTORY COST DECREASE TRANSIT
 UNION ALL
 SELECT 
 	[intItemId] = LD.intItemId
@@ -930,7 +934,87 @@ CROSS APPLY (
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
+WHERE ISNULL(LC.ysnInventoryCost, 0) = 1 AND BD.intLoadShipmentCostId IS NOT NULL AND BD.intInventoryReceiptChargeId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) 
+--IF COST ADJUSTMENT OR DIFFERENT CURRENCY FROM THE GOODS
+AND (LD.intPriceCurrencyId <> LC.intCurrencyId OR BD.dblOldCost IS NOT NULL)
+--DON'T INCLUDE CANCELLED PAYABLE
+AND B.dblAmountDue != 0
+--INVENTORY GOODS INCREASE TRANSIT
+UNION ALL
+SELECT 
+	[intItemId] = BD.intItemId
+	,[intOtherChargeItemId] = NULL
+	,[intItemLocationId] = IL.intItemLocationId
+	,[dtmDate] = B.dtmDate
+	,[dblValue] = BD.dblTotal
+	,[intTransactionId] = B.intBillId
+	,[intTransactionDetailId] = BD.intBillDetailId
+	,[strTransactionId] = B.strBillId
+	,[intTransactionTypeId] = 27 --Voucher
+	,[intLotId] = NULL
+	,[intSourceTransactionId] = L.intLoadId
+	,[strSourceTransactionId] = L.strLoadNumber
+	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intFobPointId] = FP.intFobPointId
+	,[intInTransitSourceLocationId] = IL.intItemLocationId
+	,[intCurrencyId] = B.intCurrencyId
+	,[intForexRateTypeId] = BD.intCurrencyExchangeRateTypeId
+	,[dblForexRate] = BD.dblRate
+	,[intSourceEntityId] = NULL
+	,[strSourceType] = NULL
+	,[strSourceNumber] = NULL 
+	,[strBOLNumber] = NULL 
+	,[intTicketId] = NULL 
+FROM @voucherIds IDS
+INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
+LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+WHERE BD.intLoadDetailId IS NOT NULL AND BD.intInventoryReceiptItemId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) 
+--IF COST ADJUSTMENT
+AND BD.dblOldCost IS NOT NULL
+--DON'T INCLUDE CANCELLED PAYABLE
+AND B.dblAmountDue != 0
+--INVENTORY COST DECREASE TRANSIT
+UNION ALL
+SELECT 
+	[intItemId] = BD.intItemId
+	,[intOtherChargeItemId] = NULL
+	,[intItemLocationId] = IL.intItemLocationId
+	,[dtmDate] = B.dtmDate
+	,[dblValue] = LD.dblAmount * -1
+	,[intTransactionId] = B.intBillId
+	,[intTransactionDetailId] = BD.intBillDetailId
+	,[strTransactionId] = B.strBillId
+	,[intTransactionTypeId] = 27 --Voucher
+	,[intLotId] = NULL
+	,[intSourceTransactionId] = L.intLoadId
+	,[strSourceTransactionId] = L.strLoadNumber
+	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intFobPointId] = FP.intFobPointId
+	,[intInTransitSourceLocationId] = IL.intItemLocationId
+	,[intCurrencyId] = B.intCurrencyId
+	,[intForexRateTypeId] = BD.intCurrencyExchangeRateTypeId
+	,[dblForexRate] = BD.dblRate
+	,[intSourceEntityId] = NULL
+	,[strSourceType] = NULL
+	,[strSourceNumber] = NULL 
+	,[strBOLNumber] = NULL 
+	,[intTicketId] = NULL 
+FROM @voucherIds IDS
+INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
+INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
+LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+WHERE BD.intLoadDetailId IS NOT NULL AND BD.intInventoryReceiptItemId IS NULL AND ISNULL(FP.intFobPointId, 0) NOT IN (2) 
+--IF COST ADJUSTMENT OR DIFFERENT CURRENCY FROM THE GOODS
+AND BD.dblOldCost IS NOT NULL
 --DON'T INCLUDE CANCELLED PAYABLE
 AND B.dblAmountDue != 0
 
@@ -1377,8 +1461,6 @@ BEGIN
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
 
-	SELECT * FROM @PrepaidChargesToAdjust
-
 	--Call the Item's Cost Adjustment from the Prepaid Other Charges. 
 	IF EXISTS(SELECT 1 FROM @PrepaidChargesToAdjust)
 	BEGIN
@@ -1396,7 +1478,7 @@ BEGIN
 			GOTO Post_Rollback
 		END CATCH
 	END
-	
+
 	-- Create the GL entries for the Prepaid Cost Adjustment
 	IF EXISTS(SELECT 1 FROM @PrepaidChargesToAdjust)
 	BEGIN 
