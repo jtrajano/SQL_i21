@@ -127,6 +127,13 @@ BEGIN TRY
 	and cd.dblQuantity > isnull(pricing.dblPricedQty,0)
 	and ISNULL(cd.intSplitFromId,0) = 0;
 
+	UPDATE tblCTContractHeader
+	SET dtmPeriodEndDate = null
+	   ,dtmPeriodStartDate = null
+	   ,dblValue = null
+	   ,intValueCurrencyId = null
+	WHERE strContractBase = 'Quantity' and intContractHeaderId = @intContractHeaderId
+
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
 			@dblNoOfLots				=	dblNoOfLots,
