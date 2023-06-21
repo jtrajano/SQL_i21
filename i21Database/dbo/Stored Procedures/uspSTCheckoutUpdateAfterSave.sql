@@ -68,20 +68,20 @@ BEGIN
 				WHERE intCheckoutId = @intCheckoutId
 
 
-
-				IF(@strRegisterClass = 'SAPPHIRE/COMMANDER' AND @strRegisterUsername != '' AND @strRegisterPassword != '')
-					BEGIN
-						UPDATE Register
-							SET Register.strSAPPHIREUserName = @strRegisterUsername
-							  , Register.strSAPPHIREPassword = @strRegisterPassword
-						FROM tblSTRegister Register
-						JOIN tblSTStore Store
-							ON Register.intRegisterId = Store.intRegisterId
-						JOIN tblSTCheckoutHeader CH
-							ON Store.intStoreId = CH.intStoreId
-						WHERE CH.intCheckoutId = @intCheckoutId
-							AND Register.strRegisterClass = 'SAPPHIRE/COMMANDER'
-					END
+				-- has been removed - ST-2681
+				--IF(@strRegisterClass = 'SAPPHIRE/COMMANDER' AND @strRegisterUsername != '' AND @strRegisterPassword != '')
+				--	BEGIN
+				--		UPDATE Register
+				--			SET Register.strSAPPHIREUserName = @strRegisterUsername
+				--			  , Register.strSAPPHIREPassword = @strRegisterPassword
+				--		FROM tblSTRegister Register
+				--		JOIN tblSTStore Store
+				--			ON Register.intRegisterId = Store.intRegisterId
+				--		JOIN tblSTCheckoutHeader CH
+				--			ON Store.intStoreId = CH.intStoreId
+				--		WHERE CH.intCheckoutId = @intCheckoutId
+				--			AND Register.strRegisterClass = 'SAPPHIRE/COMMANDER'
+				--	END
 			END
 
 
