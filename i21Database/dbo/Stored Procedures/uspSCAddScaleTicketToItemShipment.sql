@@ -98,6 +98,15 @@ DECLARE @ShipmentStagingTable AS ShipmentStagingTable,
         @total as int,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int;
+
+DECLARE @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID BIT
+
+
+SELECT 
+	@COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = ISNULL(ysnOverrideDefaultFreightItem, 0)
+FROM tblGRCompanyPreference
+
+
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 BEGIN 
 	CREATE TABLE #tmpAddItemShipmentResult (
@@ -504,7 +513,11 @@ END
 
 	-- INSERT OTHER CHARGES 
 	BEGIN 
-		SELECT @intFreightItemId = SCSetup.intFreightItemId
+		SELECT @intFreightItemId =  CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+							AND ISNULL(SCTicket.intOverrideFreightItemId, 0) > 0 
+							THEN SCTicket.intOverrideFreightItemId 
+						ELSE SCSetup.intFreightItemId
+					END
 		, @intHaulerId = SCTicket.intHaulerId
 		, @ysnDeductFreightFarmer = SCTicket.ysnFarmerPaysFreight 
 		, @ysnDeductFeesCusVen = SCTicket.ysnCusVenPaysFees
@@ -806,7 +819,11 @@ END
 									LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 									LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-									LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+									LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 									WHERE LoadCost.intItemId = @intFreightItemId AND LoadDetail.intSContractDetailId = @intLoadContractId
 									AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0
 
@@ -958,7 +975,11 @@ END
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 									LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-									LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+									LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 									WHERE ContractCost.intItemId = @intFreightItemId AND SE.intOrderId = @intLoadContractId AND ContractCost.dblRate != 0
 
 									INSERT INTO @ShipmentChargeStagingTable
@@ -1106,7 +1127,11 @@ END
 									FROM @ShipmentStagingTable SE 
 									INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 									LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-									LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+									LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 									WHERE SC.dblFreightRate > 0
 
 									INSERT INTO @ShipmentChargeStagingTable
@@ -1410,7 +1435,11 @@ END
 							FROM @ShipmentStagingTable SE 
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+							LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 							WHERE SC.dblFreightRate > 0
 						END
 					ELSE IF ISNULL(@intFreightItemId,0) != 0
@@ -1468,7 +1497,11 @@ END
 								,[intContractId]			= SE.intOrderId
 								,[intContractDetailId]		= SE.intLineNo
 								,[intCurrencyId]  			= isnull(CT.intCurrencyId, SE.intCurrencyId)
-								,[intChargeId]				= SCS.intFreightItemId
+								,[intChargeId]				= CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 								,[strCostMethod]			= SC.strCostMethod
 								,[dblRate]					= CASE
 																WHEN SC.strCostMethod = 'Amount' THEN 0
@@ -1497,7 +1530,11 @@ END
 								FROM @ShipmentStagingTable SE
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-								LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+								LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 								OUTER APPLY(
 									SELECT * FROM tblCTContractCost WHERE intContractDetailId = SE.intLineNo 
 									AND dblRate != 0 
@@ -1581,7 +1618,11 @@ END
 								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-								LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+								LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 								WHERE ContractCost.intItemId = @intFreightItemId AND SE.intOrderId IS NOT NULL AND ContractCost.dblRate != 0
 
 								INSERT INTO @ShipmentChargeStagingTable
@@ -1652,7 +1693,11 @@ END
 								FROM @ShipmentStagingTable SE 
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
-								LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
+								LEFT JOIN tblICItem IC ON IC.intItemId = CASE WHEN @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID = 1 
+																		AND ISNULL(SC.intOverrideFreightItemId, 0) > 0 
+																		THEN SC.intOverrideFreightItemId 
+																	ELSE SCS.intFreightItemId
+																END
 								WHERE SC.dblFreightRate > 0 AND SE.intLineNo IS NULL
 							END
 					END
