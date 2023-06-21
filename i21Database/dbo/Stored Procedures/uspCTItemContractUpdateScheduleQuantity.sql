@@ -68,7 +68,7 @@ BEGIN TRY
 	-- VALIDATION #1
 	IF @dblOrigScheduled + @dblQuantityToUpdate > @dblOrigBalance
 	BEGIN		
-		IF ((@dblOrigScheduled + @dblQuantityToUpdate) - @dblOrigBalance) = @dblTolerance --ct-8443
+		IF ((@dblOrigScheduled + @dblQuantityToUpdate) - @dblOrigBalance) > @dblTolerance
 		BEGIN
 			RAISERROR('Available quantity for the item contract %s and line number %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strItemContractNumber,@strLineNo,@strAvailable,@strQuantityToUpdate)
 		END
