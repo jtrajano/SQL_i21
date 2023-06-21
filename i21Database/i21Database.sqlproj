@@ -7181,6 +7181,7 @@
     <Build Include="dbo\Tables\tblICLockedSubLocation.sql" />
     <Build Include="dbo\Tables\tblLockedStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance.sql" />
+    <Build Include="dbo\Views\vyuGLTrialBalance_RE.sql" />
     <None Include="Scripts\Post-Deployment\GL\vyuGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalance_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInboundShipmentReceiptWithVoucher.sql" />
