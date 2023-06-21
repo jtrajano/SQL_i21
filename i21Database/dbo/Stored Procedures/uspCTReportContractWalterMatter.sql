@@ -125,7 +125,7 @@ BEGIN TRY
 
 	SELECT	@strContractConditions = STUFF(								
 			(
-					SELECT	CHAR(13)+CHAR(10) + DM.strConditionDesc
+					SELECT	CHAR(13)+CHAR(10) + ISNULL(CD.strConditionDescription, DM.strConditionDesc)
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
