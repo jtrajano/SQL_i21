@@ -20,7 +20,7 @@ AS BEGIN
         + '%' -- To be updated by sub cluster
         + STYLE.strName -- Leaf Style
         + ORIGIN.strISOCode -- Origin
-        + (Case When SUSTAINABILITY.strDescription <> '' Then '-' + SUSTAINABILITY.strDescription Else '' End) -- Rain Forest / Sustainability
+        + (Case When SUSTAINABILITY.strDescription <> '' Then '-' + LEFT(SUSTAINABILITY.strDescription, 1) Else '' End) -- Rain Forest / Sustainability
     OUTER APPLY dbo.fnQMGetSampleTastingScore(S.intSampleId) STS
     -- Match sample tasting score values with Item template's pinpoint values
     OUTER APPLY (
