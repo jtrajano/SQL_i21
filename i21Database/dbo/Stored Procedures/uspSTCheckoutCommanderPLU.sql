@@ -286,7 +286,9 @@ BEGIN
 													WHEN CAST(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) AS INT) = 0
 														THEN 0
 													ELSE ISNULL( NULLIF( CAST(dblnetSalesamount AS DECIMAL(18, 6)) ,0) , 0) /   CAST(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) AS INT)
-												END
+												END,
+				intModifier						= intpluBasemodifier
+				
 			INTO #tblTempForCalculation
 			FROM #tblTemp
 			-- ==================================================================================================================
@@ -417,7 +419,7 @@ BEGIN
 				  , intCalculationId	= TempChk.intCalculationId
 				FROM #tblTempForCalculation TempChk
 				INNER JOIN tblICItemUOM UOM
-					ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT)
+					ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT) AND ISNULL(TempChk.intModifier, ISNULL(UOM.intModifier, -1)) = ISNULL(UOM.intModifier, -1)
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
@@ -498,7 +500,7 @@ BEGIN
 				  , intCalculationId	=TempChk.intCalculationId
 				FROM #tblTempForCalculation TempChk
 				INNER JOIN tblICItemUOM UOM
-					ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT)
+					ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT) AND ISNULL(TempChk.intModifier, ISNULL(UOM.intModifier, -1)) = ISNULL(UOM.intModifier, -1)
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
