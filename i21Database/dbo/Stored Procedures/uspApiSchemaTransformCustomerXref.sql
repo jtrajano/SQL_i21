@@ -60,9 +60,9 @@ DECLARE @tblErrorCustomerXref TABLE(
 )
 
 -- Error Types
--- 1 - Duplicate Imported Customer Xref
--- 2 - Existing Customer Xref
--- 3 - Invalid Item
+-- 1 - Invalid Item
+-- 2 - Invalid Location
+-- 3 - Invalid Customer
 
 --Validate Records
 INSERT INTO @tblErrorCustomerXref
@@ -72,54 +72,11 @@ INSERT INTO @tblErrorCustomerXref
 	intRowNumber, 
 	intErrorType
 )
-SELECT -- Duplicate Imported Customer Xref
-	strItemNo = DuplicateImportCustomerXref.strItemNo,
-	strFieldValue = DuplicateImportCustomerXref.strCustomerProduct,
-	intRowNumber = DuplicateImportCustomerXref.intRowNumber,
-	intErrorType = 1
-FROM
-(
-	SELECT 
-		strItemNo,
-		strCustomerProduct,
-		intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo, strCustomerProduct ORDER BY strItemNo)
-	FROM 
-		@tblFilteredCustomerXref
-) AS DuplicateImportCustomerXref
-WHERE RowNumber > 1
-UNION
-SELECT -- Existing Customer Xref
-	strItemNo = FilteredCustomerXref.strItemNo,
-	strFieldValue = FilteredCustomerXref.strCustomerProduct,
-	intRowNumber = FilteredCustomerXref.intRowNumber,
-	intErrorType = 2
-FROM
-@tblFilteredCustomerXref FilteredCustomerXref 
-INNER JOIN
-tblICItem Item
-ON
-FilteredCustomerXref.strItemNo = Item.strItemNo
-INNER JOIN
-vyuICSearchItemCustomerXref CustomerXrefDetail
-ON
-FilteredCustomerXref.strCustomerProduct = CustomerXrefDetail.strCustomerProduct
-AND
-FilteredCustomerXref.strCustomerName = CustomerXrefDetail.strName
-INNER JOIN
-tblICItemCustomerXref ItemCustomerXref
-ON
-Item.intItemId = ItemCustomerXref.intItemId
-AND
-CustomerXrefDetail.intItemCustomerXrefId = ItemCustomerXref.intItemCustomerXrefId
-WHERE
-@ysnAllowOverwrite = 0
-UNION
 SELECT -- Invalid Item
 	strItemNo = FilteredCustomerXref.strItemNo,
 	strFieldValue = FilteredCustomerXref.strItemNo,
 	intRowNumber = FilteredCustomerXref.intRowNumber,
-	intErrorType = 3
+	intErrorType = 1
 FROM
 @tblFilteredCustomerXref FilteredCustomerXref
 LEFT JOIN
@@ -128,6 +85,36 @@ ON
 FilteredCustomerXref.strItemNo = Item.strItemNo
 WHERE
 Item.intItemId IS NULL
+UNION
+SELECT -- Invalid Location
+	strItemNo = FilteredCustomerXref.strItemNo,
+	strFieldValue = FilteredCustomerXref.strLocationName,
+	intRowNumber = FilteredCustomerXref.intRowNumber,
+	intErrorType = 2
+FROM
+@tblFilteredCustomerXref FilteredCustomerXref
+LEFT JOIN
+vyuICGetItemLocation ItemLocation
+ON
+FilteredCustomerXref.strLocationName = ItemLocation.strLocationName
+AND
+FilteredCustomerXref.strItemNo = ItemLocation.strItemNo
+WHERE
+ItemLocation.intItemId IS NULL
+UNION
+SELECT -- Invalid Customer
+	strItemNo = FilteredCustomerXref.strItemNo,
+	strFieldValue = FilteredCustomerXref.strCustomerName,
+	intRowNumber = FilteredCustomerXref.intRowNumber,
+	intErrorType = 3
+FROM
+@tblFilteredCustomerXref FilteredCustomerXref
+LEFT JOIN
+vyuARCustomer Customer
+ON
+FilteredCustomerXref.strCustomerName = Customer.strName
+WHERE
+Customer.intEntityId IS NULL
 
 INSERT INTO tblApiImportLogDetail 
 (
@@ -144,28 +131,30 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN ErrorCustomerXref.intErrorType IN(1,2)
-		THEN 'Customer Product'
-		ELSE 'Item No'
+		WHEN ErrorCustomerXref.intErrorType IN(1)
+		THEN 'Item No'
+		WHEN ErrorCustomerXref.intErrorType IN(2)
+		THEN 'Location'
+		ELSE 'Customer'
 	END,
 	strValue = ErrorCustomerXref.strFieldValue,
 	strLogLevel =  CASE
-		WHEN ErrorCustomerXref.intErrorType IN(1,2)
-		THEN 'Warning'
-		ELSE 'Error'
+		WHEN ErrorCustomerXref.intErrorType IN(1,2,3)
+		THEN 'Error'
+		ELSE 'Warning'
 	END,
 	strStatus = CASE
-		WHEN ErrorCustomerXref.intErrorType IN(1,2)
-		THEN 'Skipped'
-		ELSE 'Failed'
+		WHEN ErrorCustomerXref.intErrorType IN(1,2,3)
+		THEN 'Failed'
+		ELSE 'Skipped'
 	END,
 	intRowNo = ErrorCustomerXref.intRowNumber,
 	strMessage = CASE
 		WHEN ErrorCustomerXref.intErrorType = 1
-		THEN 'Duplicate imported Customer Xref: ' + ErrorCustomerXref.strFieldValue + ' on item: ' + ErrorCustomerXref.strItemNo + '.'
+		THEN 'Item: ' + ErrorCustomerXref.strFieldValue + ' does not exist.'
 		WHEN ErrorCustomerXref.intErrorType = 2
-		THEN 'Customer Xref: ' + ErrorCustomerXref.strFieldValue + ' on item: ' + ErrorCustomerXref.strItemNo + ' already exists and overwrite is not enabled.'
-		ELSE 'Item: ' + ErrorCustomerXref.strFieldValue + ' does not exist.'
+		THEN 'Location: ' + ErrorCustomerXref.strFieldValue + ' does not exist.'
+		ELSE 'Customer: ' + ErrorCustomerXref.strFieldValue + ' does not exist.'
 	END
 FROM @tblErrorCustomerXref ErrorCustomerXref
 WHERE ErrorCustomerXref.intErrorType IN(1, 2, 3)

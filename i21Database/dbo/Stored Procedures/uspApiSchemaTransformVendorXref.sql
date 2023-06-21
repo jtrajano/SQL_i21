@@ -63,9 +63,9 @@ DECLARE @tblErrorVendorXref TABLE(
 )
 
 -- Error Types
--- 1 - Duplicate Imported Vendor Xref
--- 2 - Existing Vendor Xref
--- 3 - Invalid Item
+-- 1 - Invalid Item
+-- 2 - Invalid Location
+-- 3 - Invalid Vendor
 
 --Validate Records
 INSERT INTO @tblErrorVendorXref
@@ -75,49 +75,6 @@ INSERT INTO @tblErrorVendorXref
 	intRowNumber, 
 	intErrorType
 )
-SELECT -- Duplicate Imported Vendor Xref
-	strItemNo = DuplicateImportVendorXref.strItemNo,
-	strFieldValue = DuplicateImportVendorXref.strVendorProduct,
-	intRowNumber = DuplicateImportVendorXref.intRowNumber,
-	intErrorType = 1
-FROM
-(
-	SELECT 
-		strItemNo,
-		strVendorProduct,
-		intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo, strVendorProduct ORDER BY strItemNo)
-	FROM 
-		@tblFilteredVendorXref
-) AS DuplicateImportVendorXref
-WHERE RowNumber > 1
-UNION
-SELECT -- Existing Vendor Xref
-	strItemNo = FilteredVendorXref.strItemNo,
-	strFieldValue = FilteredVendorXref.strVendorProduct,
-	intRowNumber = FilteredVendorXref.intRowNumber,
-	intErrorType = 2
-FROM
-@tblFilteredVendorXref FilteredVendorXref 
-INNER JOIN
-tblICItem Item
-ON
-FilteredVendorXref.strItemNo = Item.strItemNo
-INNER JOIN
-vyuICSearchItemVendorXref VendorXrefDetail
-ON
-FilteredVendorXref.strVendorProduct = VendorXrefDetail.strVendorProduct
-AND
-FilteredVendorXref.strVendorName = VendorXrefDetail.strName
-INNER JOIN
-tblICItemVendorXref ItemVendorXref
-ON
-Item.intItemId = ItemVendorXref.intItemId
-AND
-VendorXrefDetail.intItemVendorXrefId = ItemVendorXref.intItemVendorXrefId
-WHERE
-@ysnAllowOverwrite = 0
-UNION
 SELECT -- Invalid Item
 	strItemNo = FilteredVendorXref.strItemNo,
 	strFieldValue = FilteredVendorXref.strItemNo,
@@ -131,6 +88,36 @@ ON
 FilteredVendorXref.strItemNo = Item.strItemNo
 WHERE
 Item.intItemId IS NULL
+UNION
+SELECT -- Invalid Location
+	strItemNo = FilteredVendorXref.strItemNo,
+	strFieldValue = FilteredVendorXref.strLocationName,
+	intRowNumber = FilteredVendorXref.intRowNumber,
+	intErrorType = 2
+FROM
+@tblFilteredVendorXref FilteredVendorXref
+LEFT JOIN
+vyuICGetItemLocation ItemLocation
+ON
+FilteredVendorXref.strLocationName = ItemLocation.strLocationName
+AND
+FilteredVendorXref.strItemNo = ItemLocation.strItemNo
+WHERE
+ItemLocation.intItemId IS NULL
+UNION
+SELECT -- Invalid Vendor
+	strItemNo = FilteredVendorXref.strItemNo,
+	strFieldValue = FilteredVendorXref.strVendorName,
+	intRowNumber = FilteredVendorXref.intRowNumber,
+	intErrorType = 3
+FROM
+@tblFilteredVendorXref FilteredVendorXref
+LEFT JOIN
+vyuAPVendor Vendor
+ON
+FilteredVendorXref.strVendorName = Vendor.strName
+WHERE
+Vendor.intEntityId IS NULL
 
 INSERT INTO tblApiImportLogDetail 
 (
@@ -147,28 +134,30 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN ErrorVendorXref.intErrorType IN(1,2)
-		THEN 'Vendor Product'
-		ELSE 'Item No'
+		WHEN ErrorVendorXref.intErrorType IN(1)
+		THEN 'Item No'
+		WHEN ErrorVendorXref.intErrorType IN(2)
+		THEN 'Location'
+		ELSE 'Vendor'
 	END,
 	strValue = ErrorVendorXref.strFieldValue,
 	strLogLevel =  CASE
-		WHEN ErrorVendorXref.intErrorType IN(1,2)
-		THEN 'Warning'
-		ELSE 'Error'
+		WHEN ErrorVendorXref.intErrorType IN(1,2,3)
+		THEN 'Error'
+		ELSE 'Warning'
 	END,
 	strStatus = CASE
-		WHEN ErrorVendorXref.intErrorType IN(1,2)
-		THEN 'Skipped'
-		ELSE 'Failed'
+		WHEN ErrorVendorXref.intErrorType IN(1,2,3)
+		THEN 'Failed'
+		ELSE 'Skipped'
 	END,
 	intRowNo = ErrorVendorXref.intRowNumber,
 	strMessage = CASE
 		WHEN ErrorVendorXref.intErrorType = 1
-		THEN 'Duplicate imported Vendor Xref: ' + ErrorVendorXref.strFieldValue + ' on item: ' + ErrorVendorXref.strItemNo + '.'
+		THEN 'Item: ' + ErrorVendorXref.strFieldValue + ' does not exist.'
 		WHEN ErrorVendorXref.intErrorType = 2
-		THEN 'Vendor Xref: ' + ErrorVendorXref.strFieldValue + ' on item: ' + ErrorVendorXref.strItemNo + ' already exists and overwrite is not enabled.'
-		ELSE 'Item: ' + ErrorVendorXref.strFieldValue + ' does not exist.'
+		THEN 'Location: ' + ErrorVendorXref.strFieldValue + ' does not exist.'
+		ELSE 'Vendor: ' + ErrorVendorXref.strFieldValue + ' does not exist.'
 	END
 FROM @tblErrorVendorXref ErrorVendorXref
 WHERE ErrorVendorXref.intErrorType IN(1, 2, 3)
