@@ -40,7 +40,7 @@ IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 /****** Object:  Step [Generate CSV File]    Script Date: 4/18/2023 6:24:07 PM ******/
 DECLARE @strDate  NVARCHAR(20) =  REPLACE(CONVERT(nvarchar(20), GETDATE(), 102),'.','')
 DECLARE @command NVARCHAR(MAX) =
-N'sqlcmd -S '+ @@SERVERNAME +' -d ' + DB_NAME() + '  -Q "SET NOCOUNT ON; select * from vyuAPCorriganPaymentToIPayables order by strPaymentRefNbr DESC;" -s "|" -o "' + @folderPath +'\C0000549_PAYMENT_'+ @strDate +'.csv" -W -w 1024 -h-1'
+N'sqlcmd -S '+ @@SERVERNAME +' -d ' + DB_NAME() + '  -Q "SET NOCOUNT ON; select * from vyuAPCorriganPaymentToIPayables;" -s "|" -o "' + @folderPath +'\C0000549_PAYMENT_'+ @strDate +'.csv" -W -w 1024 -h-1'
 --N'sqlcmd -S .\MSSQL2019 -d ' + DB_NAME() + ' -U irely -P iRely486  -Q "SET NOCOUNT ON; select strData from vyuAPVendorToIPayables order by intEntityId, strTag;" -o "' + @folderPath +'\C0000549_VENDOR_'+ @strDate +'.csv" -W -w 1024 -h-1'
 EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Generate CSV File', 
 		@step_id=1, 
