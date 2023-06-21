@@ -725,6 +725,7 @@ BEGIN TRY
 		,[ysnComboFreight]
 		,[dblComboFreightRate]
 		,[intInventoryReceiptId]
+		,[ysnUseOriginIdAsInvoiceNumber]
 	)
 	SELECT
 		0 AS intId
@@ -814,6 +815,7 @@ BEGIN TRY
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
 		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
+		,[ysnUseOriginIdAsInvoiceNumber]        = IE.ysnUseOriginIdAsInvoiceNumber
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1) AND ysnComboFreight = 0
@@ -906,6 +908,7 @@ BEGIN TRY
 		,[ysnComboFreight]						= IE.ysnComboFreight
 		,[dblComboFreightRate]					= IE.dblComboFreightRate
 		,[intInventoryReceiptId]				= IE.intInventoryReceiptId
+		,[ysnUseOriginIdAsInvoiceNumber]        = IE.ysnUseOriginIdAsInvoiceNumber
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE (ISNULL(IE.dblComboFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1 AND ysnComboFreight = 1)
