@@ -205,7 +205,7 @@ WHERE
 (
    intEntityUserId = @intEntityUserId 
    AND strRequestId = @strRequestId 
-   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
+   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost','Format 10 - Berry Trucking')
 )
 OR		dtmCreated < DATEADD(DAY, DATEDIFF(DAY, 0, @dtmCurrentDate), 0) 
 OR		dtmCreated IS NULL
@@ -1022,4 +1022,4 @@ WHERE intEntityUserId = @intEntityUserId
   AND strRequestId = @strRequestId 
   AND ysnIncludeInvoicePrice = 1
   AND strInvoiceType = 'Transport Delivery'
-  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost','Format 10 - Berry Trucking')
