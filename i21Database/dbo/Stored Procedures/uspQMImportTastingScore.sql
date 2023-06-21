@@ -192,7 +192,7 @@ BEGIN TRY
 			 , intValuationGroupId		= STYLE.intValuationGroupId
 			 , strValuationGroup		= STYLE.strName
 			 , strOrigin				= IMP.strGardenGeoOrigin
-			 , strSustainability		= LEFT(SUSTAINABILITY.strDescription, 1)
+			 , strSustainability		= SUSTAINABILITY.strDescription
 			 , strMusterLot				= IMP.strMusterLot
 			 , strMissingLot			= IMP.strMissingLot
 			 , strComments2				= IMP.strTastersRemarks
@@ -268,7 +268,7 @@ BEGIN TRY
 			, intValuationGroupId		= STYLE.intValuationGroupId
 			, strValuationGroup			= STYLE.strName
 			, strOrigin					= IMP.strGardenGeoOrigin 
-			, strSustainability			= LEFT(IMP.strSustainability, 1)
+			, strSustainability			= IMP.strSustainability
 			, strMusterLot				= IMP.strMusterLot
 			, strMissingLot				= IMP.strMissingLot
 			, strComments2				= IMP.strTastersRemarks
@@ -731,7 +731,7 @@ BEGIN TRY
 				+ '%' -- To be updated by sub cluster
 				+ @strValuationGroup -- Leaf Style
 				+ @strOrigin -- Origin
-				+(Case When @strSustainability<>'' Then '-' + @strSustainability Else '' End) -- Rain Forest / Sustainability
+				+(Case When @strSustainability<>'' Then '-' + LEFT(@strSustainability,1) Else '' End) -- Rain Forest / Sustainability
 			 JOIN tblQMProduct P ON P.intProductValueId = ITEM.intItemId AND P.intProductTypeId =  2 -- Item
              JOIN tblQMProductProperty PP ON PP.intProductId = P.intProductId
              JOIN tblQMProperty PROP ON PROP.intPropertyId = PP.intPropertyId
