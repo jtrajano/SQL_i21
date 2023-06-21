@@ -605,7 +605,7 @@ SELECT
 	,[intLotId] = NULL
 	,[intSourceTransactionId] = L.intLoadId
 	,[strSourceTransactionId] = L.strLoadNumber
-	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intSourceTransactionDetailId] = LC.intLoadCostId
 	,[intFobPointId] = FP.intFobPointId
 	,[intInTransitSourceLocationId] = IL.intItemLocationId
 	,[intCurrencyId] = B.intCurrencyId
@@ -621,7 +621,9 @@ INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = BD.intLoadShipmentCostId
 INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+CROSS APPLY (
+	SELECT TOP 1 intPriceCurrencyId, intItemId, intPCompanyLocationId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId
+) LD
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
@@ -642,7 +644,7 @@ SELECT
 	,[intLotId] = NULL
 	,[intSourceTransactionId] = L.intLoadId
 	,[strSourceTransactionId] = L.strLoadNumber
-	,[intSourceTransactionDetailId] = LD.intLoadDetailId
+	,[intSourceTransactionDetailId] = LC.intLoadCostId
 	,[intFobPointId] = FP.intFobPointId
 	,[intInTransitSourceLocationId] = IL.intItemLocationId
 	,[intCurrencyId] = B.intCurrencyId
@@ -658,7 +660,9 @@ INNER JOIN tblAPBill B ON B.intBillId = IDS.intId
 INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = BD.intLoadShipmentCostId
 INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+CROSS APPLY (
+	SELECT TOP 1 intPriceCurrencyId, intItemId, intPCompanyLocationId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId
+) LD
 INNER JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = B.intFreightTermId
 LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
@@ -900,10 +904,12 @@ BEGIN
 					,[strRateType]
 			FROM @GLEntriesTemp GLEntries
 			OUTER APPLY (
-				SELECT TOP 1 intPriceCurrencyId
+				SELECT TOP 1 LD.intPriceCurrencyId
 				FROM tblICInventoryTransaction IT
 				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
-				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+				CROSS APPLY (
+					SELECT TOP 1 intPriceCurrencyId FROM tblLGLoadDetail WHERE intLoadId = BD.intLoadId
+				) LD
 				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 			) LS
 			WHERE LS.intPriceCurrencyId <> GLEntries.intCurrencyId
@@ -944,10 +950,12 @@ BEGIN
 					,ItemCurrencyToFunctional.strCurrencyExchangeRateType
 			FROM @GLEntriesTemp GLEntries
 			OUTER APPLY (
-				SELECT TOP 1 intPriceCurrencyId
+				SELECT TOP 1 LD.intPriceCurrencyId
 				FROM tblICInventoryTransaction IT
 				INNER JOIN tblAPBillDetail BD ON BD.intBillDetailId = IT.intTransactionDetailId
-				INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = BD.intLoadDetailId
+				CROSS APPLY (
+					SELECT TOP 1 intPriceCurrencyId FROM tblLGLoadDetail WHERE intLoadId = BD.intLoadId
+				) LD
 				WHERE IT.intInventoryTransactionId = GLEntries.intJournalLineNo
 			) LS
 			OUTER APPLY (
