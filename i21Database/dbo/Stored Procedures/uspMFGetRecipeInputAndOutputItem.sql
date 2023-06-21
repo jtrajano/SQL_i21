@@ -368,38 +368,19 @@ BEGIN TRY
 	IF @dblCalculatedQuantity IS NULL
 		SELECT @dblCalculatedQuantity = 1
 
-	SELECT (
-			CASE 
-				WHEN SL.intStorageLocationId IS NULL
-					AND r.intItemId = ri.intItemId
-					THEN SL1.intStorageLocationId
-				ELSE SL.intStorageLocationId
-				END
-			) AS intStorageLocationId
-		,(
-			CASE 
-				WHEN SL.intStorageLocationId IS NULL
-					AND r.intItemId = ri.intItemId
-					THEN SL1.strName
-				ELSE SL.strName
-				END
-			) AS strStorageLocationName
-		,(
-			CASE 
-				WHEN SL.intStorageLocationId IS NULL
-					AND r.intItemId = ri.intItemId
-					THEN SL1.intSubLocationId
-				ELSE SL.intSubLocationId
-				END
-			) AS intStorageSubLocationId
-		,I.intItemId AS intActualItemId
-		,I.strItemNo AS strActualItemNo
-		,I.strDescription AS strActualItemDescription
-		,CASE 
-			WHEN C.strCategoryCode = @strPackagingCategory
-				AND @ysnProducedQtyByWeight = 1
-				AND P.dblMaxWeightPerPack > 0
-				THEN (
+	SELECT ISNULL((CASE WHEN SL.intStorageLocationId IS NULL AND r.intItemId = ri.intItemId THEN SL1.intStorageLocationId
+						ELSE SL.intStorageLocationId
+				   END), SL1.intStorageLocationId) AS intStorageLocationId
+		 , ISNULL((CASE WHEN SL.intStorageLocationId IS NULL AND r.intItemId = ri.intItemId THEN SL1.strName
+						ELSE SL.strName
+				   END), SL1.strName) AS strStorageLocationName
+		 , ISNULL((CASE WHEN SL.intStorageLocationId IS NULL AND r.intItemId = ri.intItemId THEN SL1.intSubLocationId
+				 ELSE SL.intSubLocationId
+			END), SL1.intSubLocationId) AS intStorageSubLocationId
+		 , I.intItemId AS intActualItemId
+		 , I.strItemNo AS strActualItemNo
+		 , I.strDescription AS strActualItemDescription
+		 , CASE WHEN C.strCategoryCode = @strPackagingCategory AND @ysnProducedQtyByWeight = 1 AND P.dblMaxWeightPerPack > 0 THEN (
 						CASE 
 							WHEN 1 = 1
 								THEN (
