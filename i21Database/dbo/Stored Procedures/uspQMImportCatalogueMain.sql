@@ -1119,7 +1119,7 @@ BEGIN TRY
 						GOTO CONT
 					END
 
-				IF @strTINNumber IS NOT NULL
+				IF ISNULL(@strTINNumber, '') <> ''
 					BEGIN
 						DECLARE @strOldTINNumber NVARCHAR(100)
 							,@intOldCompanyLocationId INT
