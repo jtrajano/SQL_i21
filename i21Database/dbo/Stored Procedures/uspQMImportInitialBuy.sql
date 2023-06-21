@@ -1079,7 +1079,6 @@ BEGIN TRY
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
 			AND IsNULL(S.dblB1QtyBought, 0) > 0
-			AND IsNULL(S.ysnBought, 0) = 1
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
@@ -1090,7 +1089,7 @@ BEGIN TRY
 				)
 		BEGIN
 			-- If the buyer 1 qty and price fields are blank, delete the existing batch
-			IF ISNULL(@dblB1QtyBought, 0) = 0 AND ISNULL(@dblB1Price, 0) = 0
+			IF (ISNULL(@dblB1QtyBought, 0) = 0 AND ISNULL(@dblB1Price, 0) = 0) OR @ysnBought = 0
 			BEGIN
 				DECLARE @intToDeleteBatchLocationId INT
 
