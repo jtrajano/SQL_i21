@@ -49,6 +49,7 @@ DECLARE @STORY_MODE SMALLINT = 1
 SELECT @BATCH_ID = NEWID()
 
 
+DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 DECLARE @_intStorageHistoryId INT
 DECLARE @COMPANY_PREFERENCE_OVERRIDE_FREIGHT_ITEM_ID BIT
 
@@ -835,7 +836,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						/* -- LOAD RELATED CHARGES -- */
 					
 						DECLARE @voucherPayable AS VoucherPayable
-						DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+						
 						DECLARE @error NVARCHAR(1000)
 						INSERT INTO @voucherPayable(
 								[intEntityVendorId]
@@ -1940,7 +1941,7 @@ BEGIN
 	END
 END
 
-
+UPDATE @ReceiptStagingTable SET intCurrencyId = @DefaultCurrencyId WHERE intCurrencyId IS NULL
 -- update @OtherCharges set dblRate = isnull(dblRate, 0) where dblRate is null
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
