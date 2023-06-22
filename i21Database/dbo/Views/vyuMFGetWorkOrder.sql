@@ -81,6 +81,7 @@ SELECT C.intManufacturingCellId
 	,csl.strSubLocationName
 	,cs.strName AS strCustomerName
 	,d.strName AS strDepartmentName
+	,R.ysnActive
 	,ISNULL(C.ysnIncludeSchedule, 0) AS ysnIncludeSchedule
 	,(
 		CASE 
@@ -115,7 +116,7 @@ JOIN dbo.tblMFWorkOrderProductionType PT ON PT.intProductionTypeId = W.intProduc
 LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 	AND R.intLocationId = C.intLocationId
-	AND R.ysnActive = 1
+	-- AND R.ysnActive = 1
 JOIN dbo.tblSMUserSecurity US ON US.[intEntityId] = W.intCreatedUserId
 LEFT JOIN dbo.tblSMUserSecurity SS ON SS.[intEntityId] = W.intSupervisorId
 JOIN dbo.tblSMUserSecurity LM ON LM.[intEntityId] = W.intLastModifiedUserId
