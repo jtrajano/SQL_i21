@@ -43,7 +43,7 @@ WITH payInfo (
 			WHEN E.strPaymentMethod = 'ACH' THEN 'CACH'
 		ELSE 'NULL'
 		END AS strPaymentType,
-		C.dblTotal AS dblInvoiceTotal,
+		B.dblTotal AS dblInvoiceTotal,
 		B.dblDiscount AS dblDiscountAmount,
 		B.dblPayment AS dblNetAmount,
 		B.dblPayment AS dblPayment,
@@ -52,12 +52,12 @@ WITH payInfo (
 			WHEN G.dtmCheckPrinted IS NOT NULL THEN 'PAID'
 			WHEN E.strPaymentMethod NOT IN ('ACH','Check') AND A.ysnPosted = 1 THEN 'PAID'
 			WHEN A.ysnPosted = 1 THEN 'RCVD'
-		ELSE 'RCVD' END AS strStatus,
+		ELSE '' END AS strStatus,
 		FORMAT(CAST(G.dtmClr AS DATE), 'yyyy-MM-dd') AS dtmClearedDate,
 		'iRely i21' AS strStatusMessage,
 		C.strBillId AS strVoucherNbr,
 		'NULL' AS strPaymentRoutingCode,
-		H.strTerm AS strTerms,
+		H.strTermCode AS strTerms,
 		FORMAT(CAST(A.dtmDatePaid AS DATE), 'yyyy-MM-dd') AS dtmAccountingPeriod
 	FROM tblAPPayment A
 	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -65,8 +65,11 @@ WITH payInfo (
 	INNER JOIN (tblAPVendor D INNER JOIN tblEMEntity D2 ON D.intEntityId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityId
 	INNER JOIN tblSMPaymentMethod E ON A.intPaymentMethodId = E.intPaymentMethodID
 	INNER JOIN tblSMCurrency F ON F.intCurrencyID = A.intCurrencyId
-	INNER JOIN tblCMBankTransaction G ON A.strPaymentRecordNum = G.strTransactionId
 	INNER JOIN tblSMTerm H ON C.intTermsId = H.intTermID
+	LEFT JOIN tblCMBankTransaction G ON A.strPaymentRecordNum = G.strTransactionId
+	-- WHERE
+	-- 	A.ysnPosted = 1
+	-- AND G.ysnCheckVoid = 0
 	UNION ALL
 	SELECT
 		'01' AS strRecordCode,
@@ -85,7 +88,7 @@ WITH payInfo (
 			WHEN E.strPaymentMethod = 'ACH' THEN 'CACH'
 		ELSE 'NULL'
 		END AS strPaymentType,
-		C.dblInvoiceTotal AS dblInvoiceTotal,
+		B.dblTotal AS dblInvoiceTotal,
 		B.dblDiscount AS dblDiscountAmount,
 		B.dblPayment AS dblNetAmount,
 		B.dblPayment AS dblPayment,
@@ -94,12 +97,12 @@ WITH payInfo (
 			WHEN G.dtmCheckPrinted IS NOT NULL THEN 'PAID'
 			WHEN E.strPaymentMethod NOT IN ('ACH','Check') AND A.ysnPosted = 1 THEN 'PAID'
 			WHEN A.ysnPosted = 1 THEN 'RCVD'
-		ELSE 'RCVD' END AS strStatus,
+		ELSE '' END AS strStatus,
 		FORMAT(CAST(G.dtmClr AS DATE), 'yyyy-MM-dd') AS dtmClearedDate,
 		'iRely i21' AS strStatusMessage,
 		C.strInvoiceNumber AS strVoucherNbr,
 		'NULL' AS strPaymentRoutingCode,
-		H.strTerm AS strTerms,
+		H.strTermCode AS strTerms,
 		FORMAT(CAST(A.dtmDatePaid AS DATE), 'yyyy-MM-dd') AS dtmAccountingPeriod
 	FROM tblAPPayment A
 	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -107,8 +110,11 @@ WITH payInfo (
 	INNER JOIN (tblAPVendor D INNER JOIN tblEMEntity D2 ON D.intEntityId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityId
 	INNER JOIN tblSMPaymentMethod E ON A.intPaymentMethodId = E.intPaymentMethodID
 	INNER JOIN tblSMCurrency F ON F.intCurrencyID = A.intCurrencyId
-	INNER JOIN tblCMBankTransaction G ON A.strPaymentRecordNum = G.strTransactionId
 	INNER JOIN tblSMTerm H ON C.intTermId = H.intTermID
+	LEFT JOIN tblCMBankTransaction G ON A.strPaymentRecordNum = G.strTransactionId
+	-- WHERE
+	-- 	A.ysnPosted = 1
+	-- AND G.ysnCheckVoid = 0
 )
 
 
@@ -127,7 +133,7 @@ FROM payInfo A
 ORDER BY strPaymentRefNbr DESC
 UNION ALL
 SELECT
-	strRecordCode, strCustomerID, CAST(intCount AS NVARCHAR(100)) + '|' + CAST(dblInvoiceAmountTotal AS NVARCHAR(100))
+	'99', strCustomerID, CAST(intCount AS NVARCHAR(100)) + '|' + CAST(dblInvoiceAmountTotal AS NVARCHAR(100))
 FROM (
 	SELECT
 		strRecordCode, strCustomerID, COUNT(*) AS intCount, SUM(CAST(dblInvoiceTotal AS DECIMAL(18,2))) AS dblInvoiceAmountTotal
