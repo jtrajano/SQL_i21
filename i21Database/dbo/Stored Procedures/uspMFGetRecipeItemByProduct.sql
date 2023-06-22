@@ -54,7 +54,7 @@ IF @intWorkOrderId = 0
 		JOIN tblMFRecipeItemType rt ON rt.intRecipeItemTypeId = ri.intRecipeItemTypeId
 		WHERE r.intItemId = @intItemId
 			AND r.intLocationId = @intLocationId
-			AND r.ysnActive = 1
+			--AND r.ysnActive = 1
 			AND (ri.intRecipeItemTypeId = 2
 				OR (
 					ri.intRecipeItemTypeId = 1
