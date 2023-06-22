@@ -71,15 +71,10 @@ BEGIN TRY
 	INNER JOIN tblEMEntity Z ON Z.strName = [from] COLLATE Latin1_General_CI_AS
 	WHERE [fieldname] = 'strEntityName'
 
-    IF EXISTS (SELECT 1 FROM @temp_xml_table X WHERE [fieldname] = 'strMarketZoneCode')
-        INSERT INTO @tblMarketZoneId
-        SELECT Z.intMarketZoneId FROM @temp_xml_table X
-        INNER JOIN tblARMarketZone Z ON Z.strMarketZoneCode = [from] COLLATE Latin1_General_CI_AS
-        WHERE [fieldname] = 'strMarketZoneCode'
-    ELSE
-        INSERT INTO @tblMarketZoneId
-		SELECT intMarketZoneId
-		FROM tblARMarketZone
+    INSERT INTO @tblMarketZoneId
+    SELECT Z.intMarketZoneId FROM @temp_xml_table X
+    INNER JOIN tblARMarketZone Z ON Z.strMarketZoneCode = [from] COLLATE Latin1_General_CI_AS
+    WHERE [fieldname] = 'strMarketZoneCode'
     
     INSERT INTO @tblItemId
 	SELECT Z.intItemId FROM @temp_xml_table X
