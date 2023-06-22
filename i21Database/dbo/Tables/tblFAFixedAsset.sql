@@ -61,6 +61,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[ysnHasNewAccountPosted]		BIT DEFAULT (0) NOT NULL,
     [intConcurrencyId]				INT DEFAULT 1 NOT NULL,
 	[intAssetTaxJurisdictionId]		INT NULL,
+	[ysnOverrideLocation]		BIT DEFAULT (1) NOT NULL,
 	[intFixedAssetJournalId] INT NULL,
 	[strAssetTagNo]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
