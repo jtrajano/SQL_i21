@@ -749,7 +749,6 @@ BEGIN TRY
 				,@strPlant = CL.strVendorRefNoPrefix
 				,@dtmProductionBatch = B.dtmProductionBatch
 				,@dtmExpiration = B.dtmExpiration
-				,@intTealingoItemId=B.intTealingoItemId
 				,@strBatchId = B.strBatchId
 			FROM vyuMFBatch B WITH (NOLOCK)
 			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
