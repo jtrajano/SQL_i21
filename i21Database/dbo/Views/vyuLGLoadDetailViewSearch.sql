@@ -291,6 +291,7 @@ SELECT   L.intLoadId
 
 		,[strCreatedBy] = EM.strName
 		,L.dtmCreatedOn
+		,strShipper = Shipper.strName
 FROM tblLGLoadDetail LD
 JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -378,3 +379,4 @@ OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved'
 				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = L.intMarketZoneId
 LEFT JOIN tblEMEntity EM ON EM.intEntityId = L.intCreatedById
+LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = L.intShipperEntityId
