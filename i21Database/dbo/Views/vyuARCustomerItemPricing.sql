@@ -136,11 +136,10 @@ SELECT
 	,[dblSubCurrencyRate]		= IP.[dblSubCurrencyRate]
 	,[strSubCurrency]			= IP.[strSubCurrency]
 	,[ysnDefaultPricing]		= CAST(0 AS BIT)
-FROM
-	tblARInvoiceDetail ARID
-INNER JOIN
-	tblARInvoice ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+FROM tblARInvoiceDetail ARID
+INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN tblARCustomer C ON ARI.intEntityCustomerId = C.intEntityId
+LEFT JOIN tblSMCompanyLocationPricingLevel CLPL ON ARI.intCompanyLocationId = CLPL.intCompanyLocationId AND CLPL.strPricingLevelName = C.strLevel
 CROSS APPLY
 	dbo.[fnARGetItemPricingDetails](
 		 ARID.[intItemId]			--@ItemId
@@ -169,7 +168,7 @@ CROSS APPLY
 		,NULL						--@LastCost
 		,ARI.[intShipToLocationId]	--@ShipToLocationId
 		,NULL						--@VendorLocationId
-		,NULL						--@PricingLevelId
+		,CLPL.[intCompanyLocationPricingLevelId]						--@PricingLevelId
 		,NULL						--@AllowQtyToExceed
 		,ARI.[strType]				--@InvoiceType
 		,ARI.[intTermId]			--@TermId
