@@ -1,4 +1,4 @@
-﻿  
+﻿
 Create PROCEDURE [dbo].[uspCTProcessContractDetailImport]  
  @intUserId INT,  
  @strFileName NVARCHAR(100),  
@@ -37,8 +37,8 @@ BEGIN
    , ci.intSequence  
    , cs.intContractStatusId  
    , ci.strStatus  
-   , ci.dtmStartDate  
-   , ci.dtmEndDate  
+   , dtmStartDate = ISNULL(ci.dtmStartDate  , ch.dtmPeriodStartDate) 
+   , dtmEndDate = ISNULL(ci.dtmEndDate  , ch.dtmPeriodEndDate)  
    , ci.dtmM2MDate  
    , ci.dtmPlannedAvailability  
    , ci.dtmEventStartDate  
@@ -225,16 +225,28 @@ BEGIN
   Declare @ysnCompanyLocationInContractHeader as BIT  
   select @ysnCompanyLocationInContractHeader = ysnCompanyLocationInContractHeader from tblCTCompanyPreference  
   
-  
+
   INSERT INTO tblCTErrorImportLogs  
 		SELECT guiUniqueId  
-        ,'Start date and End Date fields are required.'  
+        ,'Start Date field is required.'  
         ,strContractNumber  
         ,intSequence  
         ,'Fail'  
         ,1  
 		FROM #tmpList   
-		WHERE guiUniqueId = @guiUniqueId AND   strContractBase = 'Quantity' AND (dtmStartDate IS NULL or dtmEndDate IS NULL)
+		WHERE guiUniqueId = @guiUniqueId  AND (dtmStartDate IS NULL)
+
+		
+
+   INSERT INTO tblCTErrorImportLogs  
+		SELECT guiUniqueId  
+        ,'End Date field is required.'  
+        ,strContractNumber  
+        ,intSequence  
+        ,'Fail'  
+        ,1  
+		FROM #tmpList   
+		WHERE guiUniqueId = @guiUniqueId  AND (dtmEndDate IS NULL)
 
   IF @ysnCompanyLocationInContractHeader = CAST(1  as BIT)  
   BEGIN  
