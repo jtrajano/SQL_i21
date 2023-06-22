@@ -194,9 +194,13 @@
 	-- -------------------------------------------------------------------------------------------------------------------------------------------------
 	PRINT ('*****NULL EFT/ACH CURRENCY ID FROM LOWER VERSION TO 22.1 OR HIGHER UPDATE TO VENDOR DEFAULT CURRENCY *****')
 	
+	DECLARE @intCurrencyId INT
+	SELECT	TOP 1 @intCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD'
+
+	
 	UPDATE	a
-	SET		a.intCurrencyId = c.intCurrencyId,
-			a.strCurrency	= d.strCurrency
+	SET		a.intCurrencyId = ISNULL(c.intCurrencyId, @intCurrencyId),
+			a.strCurrency	= ISNULL(d.strCurrency, 'USD')
 	FROM	tblEMEntityEFTInformation	AS a
 
 			INNER JOIN tblEMEntity		AS b ON
@@ -208,8 +212,7 @@
 			LEFT JOIN tblSMCurrency		AS d ON
 			c.intCurrencyId = d.intCurrencyID
 
-	WHERE	a.intCurrencyId IS NULL AND
-			d.intCurrencyID IS NOT NULL
+	WHERE	a.intCurrencyId IS NULL
 	
 	PRINT ('*****END NULL EFT/ACH CURRENCY ID FROM LOWER VERSION TO 22.1 OR HIGHER UPDATE TO VENDOR DEFAULT CURRENCY *****')
 
