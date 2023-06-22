@@ -59,7 +59,7 @@ BEGIN TRY
 	from [vyuGRReportSplitView]
 		where ( @strMainEntityName is null or strMainEntityName = @strMainEntityName )
 
-	order by intSplitId 
+	order by intSplitId, intSplitDetailId ASC 
 
 END TRY
 BEGIN CATCH
