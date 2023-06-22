@@ -37,7 +37,7 @@ INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = CUOM_TO.intUnitMeasureId
 INNER JOIN tblSMCompanyLocation CL 
 	ON CL.intCompanyLocationId = IT.intCompanyLocationId
-OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(CUOM_FROM.intCommodityUnitMeasureId, CUOM_TO.intCommodityUnitMeasureId, IT.dblQty) CUOMQTY
+OUTER APPLY dbo.fnGRTConvertQuantityToTargetCommodityUOM(CUOM_FROM.intCommodityUnitMeasureId, CUOM_TO.intCommodityUnitMeasureId, IT.dblQty) CUOMQTY
 WHERE IT.ysnIsUnposted <> 1
     AND IT.intInTransitSourceLocationId IS NULL
 

@@ -15,8 +15,6 @@
 	,dtmReversalDate DATETIME DEFAULT(GETDATE())
 )
 
-GO
-
 CREATE NONCLUSTERED INDEX [IX_tblGRReversedSettlementsWithVoidedPayments]
 	ON [dbo].[tblGRReversedSettlementsWithVoidedPayments] ([strSettleStorageTicket],[dblUnits],[dtmVoucherCreated],[dtmPaymentDate],[dtmVoidPaymentDate])
 GO
