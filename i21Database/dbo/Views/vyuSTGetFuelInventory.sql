@@ -7,7 +7,8 @@ SELECT		fuelInventory.intFuelInventoryId,
 			fuelInventory.dtmFuelInventoryDate,
 			fuelInventory.intConcurrencyId,
 			item.strItemNo,
-			device.strSerialNumber
+			device.strSerialNumber,
+			fuelInventory.ysnIsManualEntry
 FROM		tblSTCheckoutFuelInventory fuelInventory
 INNER JOIN	tblTMDevice device
 ON			fuelInventory.intDeviceId = device.intDeviceId
