@@ -123,7 +123,7 @@ IF @intWorkOrderId > 0
 		 , a.intLocationId
 		 , a.intManufacturingCellId
 		 , h.dblStandardCost
-		 , f.intManufacturingProcessId
+		 , ISNULL(f.intManufacturingProcessId, e.intManufacturingProcessId)
 		 , CompanyLocation.strLocationName 
 		 , ISNULL(NULLIF(f.strERPOrderNo, ''), a.strReferenceNo)	
 		 , ISNULL(WorkOrderStatus.strName, 'Not Released')			
