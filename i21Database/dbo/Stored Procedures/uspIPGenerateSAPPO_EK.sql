@@ -754,6 +754,7 @@ BEGIN TRY
 				,@dtmProductionBatch = B.dtmProductionBatch
 				,@dtmExpiration = B.dtmExpiration
 				,@intTealingoItemId=B.intTealingoItemId
+				,@strBatchId = B.strBatchId
 			FROM vyuMFBatch B WITH (NOLOCK)
 			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
 			WHERE B.intBatchId = @intBatchId
@@ -933,6 +934,15 @@ BEGIN TRY
 					,strMessage = NULL
 					,strFeedStatus = 'Awt Ack'
 				WHERE intContractFeedId = @intContractFeedId
+
+				--De-link PO in Batch for cancelled / deleted line items
+				IF @strDetailRowState = 'D'
+				BEGIN
+					UPDATE tblMFBatch
+					SET strERPPONumber = NULL
+						,strERPPOLineNo = NULL
+					WHERE strBatchId = @strBatchId
+				END
 
 				UPDATE tblLGLoad
 				SET dtmDispatchMailSent = GETDATE()
