@@ -11294,6 +11294,7 @@
     <Build Include="dbo\Functions\fnGREndOfMonthProcedureInventory.sql" />
     <Build Include="dbo\Functions\fnGRDelayedPricingTransaction.sql" />
     <Build Include="dbo\Functions\fnGRInTransitTransaction.sql" />
+    <Build Include="dbo\Functions\fnGRTConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Views\vyuGRPhysicalInventoryTransaction.sql" />
     <Build Include="dbo\Functions\fnGRValuationSummaryVsDPRCompanyOwned.sql" />
     <Build Include="dbo\Functions\fnGRDPRvsGrain.sql" />

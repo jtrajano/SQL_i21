@@ -1,8 +1,8 @@
-CREATE FUNCTION [dbo].[fnGRConvertQuantityToTargetCommodityUOM]
+CREATE FUNCTION [dbo].[fnGRTConvertQuantityToTargetCommodityUOM]
 (
-    @intCommodityUOMIdFrom INT,
-    @intCommodityUOMIdTo INT,
-    @dblQty NUMERIC(38,20)
+	@intCommodityUOMIdFrom INT,
+	@intCommodityUOMIdTo INT,
+	@dblQty NUMERIC(38,20)
 )
 RETURNS TABLE
 AS RETURN
@@ -12,7 +12,7 @@ AS RETURN
                                 WHEN CUOM_FROM.dblUnitQty = CUOM_TO.dblUnitQty
                                     THEN @dblQty
                                 WHEN CUOM_TO.dblUnitQty <> 0
-                                    THEN CAST((@dblQty * CUOM_FROM.dblUnitQty) AS NUMERIC(38,20)) / CUOM_TO.dblUnitQty       
+                                    THEN CAST((@dblQty * CUOM_FROM.dblUnitQty) AS NUMERIC(38,20)) / CUOM_TO.dblUnitQty							
                                 ELSE
                                     NULL 
                             END
