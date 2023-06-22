@@ -130,6 +130,7 @@ SELECT strCompanyName			= CASE WHEN L.strUseLocationAddress = 'Letterhead' THEN 
 	 , dtmCreated				= @dtmDateNow
 	 , strType					= INV.strType
 	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
+	 , strFooterComment  		= ISNULL(INV.strFooterComments,'')
 INTO #INVOICES
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN #MCPINVOICES SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
@@ -327,6 +328,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	 , strPaymentInfo
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
+	 , strInvoiceFooterComment
 )
 SELECT strCompanyName
 	 , strCompanyAddress
@@ -388,6 +390,7 @@ SELECT strCompanyName
 	 , strPaymentInfo
 	 , dtmCreated
 	 , ysnPrintInvoicePaymentDetail
+	 , strInvoiceFooterComment = strFooterComment
 FROM #INVOICES
 
 UPDATE STAGING
