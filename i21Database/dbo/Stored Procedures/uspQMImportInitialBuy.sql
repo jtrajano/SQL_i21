@@ -1059,7 +1059,6 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM QIUOM ON QIUOM.intItemId = S.intItemId AND QIUOM.intUnitMeasureId = S.intB1QtyUOMId
 		WHERE S.intSampleId = @intSampleId
 			AND IMP.intImportLogId = @intImportLogId
-			AND IsNULL(S.dblB1QtyBought, 0) > 0
 
 		DECLARE @intInput INT
 			,@intInputSuccess INT
