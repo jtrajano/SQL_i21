@@ -110,6 +110,7 @@
 	[ysnPrepaidOtherCharge] BIT NULL DEFAULT 0,
 	[ysnUnforecastedCharge] BIT NULL DEFAULT 0,
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
+	[ysnOverrideSubTotal] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
