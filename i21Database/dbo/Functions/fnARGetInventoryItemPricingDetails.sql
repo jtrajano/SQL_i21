@@ -36,6 +36,7 @@ BEGIN
 			,@DiscountBy		NVARCHAR(50)
 			,@PromotionType		NVARCHAR(50)
 			,@intSort			INT
+			,@PriceLevel 		NVARCHAR(100)
 
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())	
 	SET @intSort = 0
@@ -144,9 +145,7 @@ BEGIN
 		END
 		
 	IF ISNULL(@PricingLevelId,0) <> 0
-	BEGIN
-
-		DECLARE @PriceLevel AS NVARCHAR(100)
+	BEGIN		
 		SELECT TOP 1 @PriceLevel = strPricingLevelName FROM tblSMCompanyLocationPricingLevel WHERE intCompanyLocationPricingLevelId = @PricingLevelId
 		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId)
 			BEGIN
@@ -198,6 +197,7 @@ BEGIN
 		AND ISNULL(ICPL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 		AND ((@Quantity BETWEEN ISNULL(ICPL.dblMin, 0) AND ISNULL(ICPL.dblMax,0) ) OR (ISNULL(ICPL.dblMin, 0) = @ZeroDecimal AND ISNULL(ICPL.dblMax, 0) = @ZeroDecimal))
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(ICPL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
+		AND (@PricingLevelId IS NULL OR (@PricingLevelId IS NOT NULL AND SMPL.strPricingLevelName <> @PriceLevel))
 	ORDER BY CAST(ISNULL(ICPL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
 	IF(ISNULL(@Price, @ZeroDecimal) <> @ZeroDecimal)
