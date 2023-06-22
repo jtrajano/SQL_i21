@@ -157,10 +157,10 @@ BEGIN
 	) ON ES.intSplitId = ADJ.intSplitId	
 	LEFT JOIN tblICItem ICF
 		ON ICF.intItemId = @intFreightItemId
-		-- '@voucherPayable',* from @voucherPayable
+		--select  '@voucherPayable',* from @voucherPayable
 
 	UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1, dblOrderQty = dblOrderQty * -1 WHERE dblQuantityToBill < 0 AND intTransactionType = 1
-
+	
 	EXEC uspAPCreateVoucher
 		@voucherPayables = @voucherPayable
 		,@voucherPayableTax = @voucherPayableTax
@@ -200,26 +200,51 @@ BEGIN
 		EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 		--update qty, cost and tax based on the rate above
-		UPDATE APD
-		SET dblQtyOrdered	= ROUND((CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) ELSE (ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ESD.dblSplitPercent / 100)) END) / BDT.dblRate,6)
-			,dblCost		= CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) ELSE (ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) * (ESD.dblSplitPercent / 100)) END / ROUND((CASE WHEN ADJ.intSplitId IS NULL THEN ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) ELSE (ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ESD.dblSplitPercent / 100)) END) / BDT.dblRate,6)
-		FROM tblAPBillDetail APD 
-		INNER JOIN tblAPBill APB
-			ON APD.intBillId = APB.intBillId
-		INNER JOIN tblAPBillDetailTax BDT
-			ON BDT.intBillDetailId = APD.intBillDetailId
-		INNER JOIN @detailCreated 
-			ON APD.intBillDetailId = intId
-		INNER JOIN @AdjustSettlementsStagingTable ADJ
-			ON ADJ.intEntityId = APB.intEntityVendorId
-		LEFT JOIN (
-			tblEMEntitySplit ES
-			INNER JOIN tblEMEntitySplitDetail ESD
-				ON ESD.intSplitId = ES.intSplitId
-			INNER JOIN tblEMEntity EM
-				ON EM.intEntityId = ESD.intEntityId
-		) ON ES.intSplitId = ADJ.intSplitId
-		WHERE APD.dblTax <> 0
+		--NO SPLIT
+		IF EXISTS(SELECT 1 FROM @AdjustSettlementsStagingTable WHERE intSplitId IS NULL)
+		BEGIN
+			UPDATE APD
+			SET dblQtyOrdered	= ROUND(ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) / BDT.dblRate,6)
+				,dblCost		= ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) / ABS(ISNULL(ADJ.dblCkoffAdjustment,0))
+			FROM tblAPBillDetail APD 
+			INNER JOIN tblAPBill APB
+				ON APD.intBillId = APB.intBillId
+			INNER JOIN tblAPBillDetailTax BDT
+				ON BDT.intBillDetailId = APD.intBillDetailId
+			INNER JOIN @detailCreated 
+				ON APD.intBillDetailId = intId
+			INNER JOIN @AdjustSettlementsStagingTable ADJ
+				ON ADJ.intEntityId = APB.intEntityVendorId
+			WHERE APD.dblTax <> 0
+		END
+		ELSE
+		--WITH SPLIT
+		BEGIN			
+			UPDATE APD
+			SET dblQtyOrdered	= ROUND((ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ADJ.dblSplitPercent / 100)) / BDT.dblRate,6)
+				,dblCost		= (ABS(ADJ.dblAdjustmentAmount + ISNULL(ADJ.dblCkoffAdjustment,0)) * (ADJ.dblSplitPercent / 100))
+									/ 
+								ROUND((ABS(ISNULL(ADJ.dblCkoffAdjustment,0)) * (ADJ.dblSplitPercent / 100)) / BDT.dblRate,6)
+			FROM tblAPBillDetail APD 
+			INNER JOIN tblAPBill APB
+				ON APD.intBillId = APB.intBillId
+			INNER JOIN tblAPBillDetailTax BDT
+				ON BDT.intBillDetailId = APD.intBillDetailId
+			INNER JOIN @detailCreated 
+				ON APD.intBillDetailId = intId
+			OUTER APPLY (
+				SELECT A.dblCkoffAdjustment,A.dblAdjustmentAmount,ESD.dblSplitPercent
+				FROM @AdjustSettlementsStagingTable A
+				INNER JOIN (
+					tblEMEntitySplit ES
+					INNER JOIN tblEMEntitySplitDetail ESD
+						ON ESD.intSplitId = ES.intSplitId
+					INNER JOIN tblEMEntity EM
+						ON EM.intEntityId = ESD.intEntityId
+				) ON ES.intSplitId = A.intSplitId
+			) ADJ
+			WHERE APD.dblTax <> 0
+		END
 
 		UPDATE APD
 		SET dblQtyReceived = dblQtyOrdered
