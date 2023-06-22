@@ -7,12 +7,11 @@ CREATE PROCEDURE uspCMGridClear
 )
 AS
 BEGIN
-	IF (@intRelatedId IS NOT NULL)
+	IF ISNULL(@intRelatedId,0) = 0
 		DELETE FROM tblCMGridSelectedRow 
-		WHERE strType = @strType AND guidId = @guidId AND intRelatedId = @intRelatedId
+		WHERE strType = @strType 
 	ELSE
 		DELETE FROM tblCMGridSelectedRow 
-		WHERE strType = @strType AND guidId = @guidId 
-	
-
+		WHERE strType = @strType AND guidId = @guidId AND intRelatedId = @intRelatedId
+		
 END

@@ -7,7 +7,7 @@ CREATE PROCEDURE uspCMGridSelect
 )
 AS
 BEGIN
-	IF @intRelatedId IS NULL
+	IF ISNULL(@intRelatedId,0) = 0
 	BEGIN
 		DELETE FROM tblCMGridSelectedRow WHERE strType = @strType
 		INSERT INTO tblCMGridSelectedRow (guidId, strType, intRelatedId)
