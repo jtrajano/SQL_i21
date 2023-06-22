@@ -215,7 +215,7 @@ BEGIN
 		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
 		DECLARE @dblCheckoutTotalCustomerPayments AS DECIMAL(18,6)
 		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
-		DECLARE @strCheckoutType NVARCHAR(100)		
+		DECLARE @strCheckoutType NVARCHAR(100)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
 				, @intConsCreditMemoId = intConsCreditMemoId
@@ -486,7 +486,7 @@ BEGIN
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END
-					
+
 				-- Cash over/short item id
 				IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intOverShortItemId IS NULL)
 					BEGIN
@@ -524,7 +524,7 @@ BEGIN
 					
 						-- ROLLBACK
 						GOTO ExitWithRollback
-					END
+					END	
 
 					-- FUEL DISCOUNT ITEM ID
 					IF EXISTS(SELECT TOP 1 1 FROM tblSTStore WHERE intStoreId = @intStoreId AND intConsFuelDiscountItemId IS NULL)
@@ -3825,9 +3825,9 @@ BEGIN
 												,[intItemId]				= I.intItemId
 												,[ysnInventory]				= 1
 												,[strItemDescription]		= I.strDescription
-												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[intOrderUOMId]			= UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
-												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+												,[intItemUOMId]				= UOM.intItemUOMId
 												--,[dblQtyShipped]			= CASE
 												--									-- Refference:  http://jira.irelyserver.com/browse/ST-1558
 												--									WHEN @strInvoiceTransactionTypeMain = @strCASH
@@ -3884,6 +3884,10 @@ BEGIN
 										ON CH.intCheckoutId = DC.intCheckoutId
 									JOIN tblICItem I 
 										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemUOM UOM 
+										ON I.intItemId = UOM.intItemId
+									JOIN tblICUnitMeasure UM
+										ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 									JOIN tblICItemLocation IL
 										ON I.intItemId = IL.intItemId
 										AND ST.intCompanyLocationId = IL.intLocationId
@@ -4032,9 +4036,9 @@ BEGIN
 												,[intItemId]				= I.intItemId
 												,[ysnInventory]				= 1
 												,[strItemDescription]		= I.strDescription
-												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[intOrderUOMId]			= UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
-												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+												,[intItemUOMId]				= UOM.intItemUOMId
 
 												--,[dblQtyShipped]			= CASE
 												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
@@ -4105,6 +4109,10 @@ BEGIN
 										ON CH.intCheckoutId = DC.intCheckoutId
 									JOIN tblICItem I 
 										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemUOM UOM 
+										ON I.intItemId = UOM.intItemId
+									JOIN tblICUnitMeasure UM
+										ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 									JOIN tblICItemLocation IL
 										ON I.intItemId = IL.intItemId
 										AND ST.intCompanyLocationId = IL.intLocationId
@@ -4118,8 +4126,6 @@ BEGIN
 				----------------------------------------------------------------------
 				------------------------- END DEALER COMMISSION ------------------------
 				----------------------------------------------------------------------
-
-
 
 
 				IF @ysnConsignmentStore = 1 AND @ysnConsAddOutsideFuelDiscounts = 1
@@ -6954,7 +6960,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN CAST(1 AS BIT)
 														WHEN Inv.dblInvoiceTotal > (
 															(CASE
@@ -6967,7 +6973,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN CAST(0 AS BIT)
 														WHEN Inv.dblInvoiceTotal < (
 															(CASE
@@ -6980,7 +6986,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN CAST(0 AS BIT)
 												END
 												WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
@@ -6996,7 +7002,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(1 AS BIT)
 															WHEN Inv.dblInvoiceTotal > ((
 															(CASE
@@ -7009,7 +7015,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 															WHEN Inv.dblInvoiceTotal < ((
 															(CASE
@@ -7022,7 +7028,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 												END
 											END AS ysnEqual
@@ -7041,7 +7047,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
 														WHEN Inv.dblInvoiceTotal > (
 														(CASE
@@ -7054,7 +7060,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN 
 																CASE 
 																	WHEN @ysnConsignmentStore = 1
@@ -7090,7 +7096,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CASE
@@ -7118,7 +7124,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
 														WHEN Inv.dblInvoiceTotal > ((
 														(CASE
@@ -7131,7 +7137,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 
 																CASE 
 																	WHEN @ysnConsignmentStore = 1
@@ -7165,7 +7171,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
@@ -7962,7 +7968,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(1 AS BIT)
 															WHEN Inv.dblInvoiceTotal > ((
 															(CASE
@@ -7977,7 +7983,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 															WHEN Inv.dblInvoiceTotal < ((
 															(CASE
@@ -7992,7 +7998,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 												END
 											END AS ysnEqual
@@ -8013,7 +8019,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
 														WHEN Inv.dblInvoiceTotal > ((
 														(CASE
@@ -8028,7 +8034,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 
 																CASE 
 																	WHEN @ysnConsignmentStore = 1
@@ -8066,7 +8072,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
@@ -8156,7 +8162,6 @@ IF(@ysnDebug = 1)
 								--- CS-72 - Record Successful Day Processing in Polling Status Report. ---
 								---------------------------------- END -----------------------------------
 								--------------------------------------------------------------------------
-
 
 								SET @ysnUpdateCheckoutStatus = 1
 								SET @strStatusMsg = 'Success'
@@ -8978,133 +8983,6 @@ IF(@ysnDebug = 1)
 
 
 									IF @ysnConsignmentStore = 1 AND @strInvoiceTransactionTypeMain = 'Invoice' AND @strConsInvoiceType <> 'CSFuelInvoice'
-									BEGIN
-											-- Use Recieve Payment UDP
-											INSERT INTO @PaymentsForInsert(
-													[intId]
-													,[strSourceTransaction]
-													,[intSourceId]
-													,[strSourceId]
-													,[intPaymentId]
-													,[intEntityCustomerId]
-													,[intCompanyLocationId]
-													,[intCurrencyId]
-													,[dtmDatePaid]
-													,[intPaymentMethodId]
-													,[strPaymentMethod]
-													,[strPaymentInfo]
-													,[strNotes]
-													,[intAccountId]
-													,[intBankAccountId]
-													,[intWriteOffAccountId]		
-													,[dblAmountPaid]
-													,[intExchangeRateTypeId]
-													,[dblExchangeRate]
-													,[strReceivePaymentType]
-													,[strPaymentOriginalId]
-													,[ysnUseOriginalIdAsPaymentNumber]
-													,[ysnApplytoBudget]
-													,[ysnApplyOnAccount]
-													,[ysnInvoicePrepayment]
-													,[ysnImportedFromOrigin]
-													,[ysnImportedAsPosted]
-													,[ysnAllowPrepayment]		
-													,[ysnPost]
-													,[ysnRecap]
-													,[ysnUnPostAndUpdate]
-													,[intEntityId]
-													--Detail																																															
-													,[intPaymentDetailId]
-													,[intInvoiceId]
-													,[strTransactionType]
-													,[intBillId]
-													,[strTransactionNumber]
-													,[intTermId]
-													,[intInvoiceAccountId]
-													,[ysnApplyTermDiscount]
-													,[dblDiscount]
-													,[dblDiscountAvailable]
-													,[dblInterest]
-													,[dblPayment]
-													,[strInvoiceReportNumber]
-													,[intCurrencyExchangeRateTypeId]
-													,[intCurrencyExchangeRateId]
-													,[dblCurrencyExchangeRate]
-													,[ysnAllowOverpayment]
-													,[ysnFromAP]
-													)								
-												SELECT
-													 [intId]								= @intCheckoutId -- ROW_NUMBER() OVER(ORDER BY CCP.intCustPaymentsId ASC)
-													,[strSourceTransaction]					= 'Invoice'
-													,[intSourceId]							= @intCheckoutId
-													,[strSourceId]							= CAST(@intCheckoutId AS NVARCHAR(50)) --CAST(@intCheckoutId AS NVARCHAR(50))	--CAST(CCP.intCustPaymentsId AS NVARCHAR(50))
-													,[intPaymentId]							= Payment.intPaymentId										-- Payment Id(Insert new Invoice if NULL, else Update existing) 
-													,[intEntityCustomerId]					= @intEntityCustomerId
-													,[intCompanyLocationId]					= @intCompanyLocationId --ST.intCompanyLocationId
-													,[intCurrencyId]						= @intCurrencyId
-													,[dtmDatePaid]							= @dtmCheckoutDate
-													,[intPaymentMethodId]					= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'ACH')
-													,[strPaymentMethod]						= 'ACH'
-													,[strPaymentInfo]						= ''
-													,[strNotes]								= 'Consignment Store Payment'
-													,[intAccountId]							= NULL		-- Account Id ([tblGLAccount].[intAccountId])
-													,[intBankAccountId]						= (SELECT intBankAccountId FROM tblSMCompanyLocation a
-																								INNER JOIN tblCMBankAccount b ON
-																								a.intCashAccount = b.intGLAccountId
-																								WHERE intCompanyLocationId = @intCompanyLocationId)
-													,[intWriteOffAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])	
-													,[dblAmountPaid]						= (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId  = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))
-													,[intExchangeRateTypeId]				= NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
-													,[dblExchangeRate]						= NULL
-													,[strReceivePaymentType]				= 'Cash Receipts'
-													,[strPaymentOriginalId]					= NULL	-- Reference to the original/parent record
-																														-- This will also be used to create separate RCV for all rows in Customer Payments tab
-													,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
-													,[ysnApplytoBudget]						= 0
-													,[ysnApplyOnAccount]					= 0
-													,[ysnInvoicePrepayment]					= 0
-													,[ysnImportedFromOrigin]				= NULL
-													,[ysnImportedAsPosted]					= NULL
-													,[ysnAllowPrepayment]					= 0
-													,[ysnPost]								= @ysnPost			-- 1. Post, 0. UnPost
-													,[ysnRecap]								= @ysnRecap
-													,[ysnUnPostAndUpdate]					= 1 -- To UNPOST
-													,[intEntityId]							= @intCurrentUserId
-													--Detail																																															
-													,[intPaymentDetailId]					= PaymentDetail.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
-													,[intInvoiceId]							= PaymentDetail.intInvoiceId --@intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
-													,[strTransactionType]					= NULL
-													,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
-													,[strTransactionNumber]					= NULL		-- Transaction Number 
-													,[intTermId]							= NULL		-- Term Id(If NULL, customer's default will be used) 
-													,[intInvoiceAccountId]					= NULL		-- Account Id ([tblGLAccount].[intAccountId])
-													,[ysnApplyTermDiscount]					= 0
-													,[dblDiscount]							= 0.000000		-- Discount
-													,[dblDiscountAvailable]					= NULL		-- Discount 
-													,[dblInterest]							= 0.000000		-- Interest
-													,[dblPayment]							= (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId  = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))		-- Payment	
-													,[strInvoiceReportNumber]				= NULL		-- Transaction Number
-													,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
-													,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
-													,[dblCurrencyExchangeRate]				= NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate 
-													,[ysnAllowOverpayment]					= 0
-													,[ysnFromAP]							= NULL 
-												FROM tblSTCheckoutHeader CH
-												JOIN tblARPaymentIntegrationLogDetail ILD
-													ON CH.intReceivePaymentsIntegrationLogId = ILD.intIntegrationLogId
-												JOIN tblARPayment Payment
-													ON ILD.intPaymentId = Payment.intPaymentId
-												INNER JOIN tblARPaymentDetail PaymentDetail
-													ON Payment.intPaymentId = PaymentDetail.intPaymentId
-												INNER JOIN tblARInvoice Inv
-													ON PaymentDetail.intInvoiceId = Inv.intInvoiceId
-												WHERE CH.intCheckoutId = @intCheckoutId
-													AND Inv.ysnPosted = 1
-													AND ILD.intPaymentDetailId IS NOT NULL
-									END
-
-
-									IF @ysnConsignmentStore = 1 AND @strInvoiceTransactionTypeMain = 'Invoice'
 									BEGIN
 											-- Use Recieve Payment UDP
 											INSERT INTO @PaymentsForInsert(
