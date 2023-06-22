@@ -99,7 +99,6 @@ BEGIN
 	
 	/*******START******COMPANY OWNERSHIP (UNPAID)*************/
 	BEGIN
-		--VOIDED PAYMENTS ***SETTLEMENTS ARE NOT REVERSED YET
 		DECLARE @dblVoidedPayment DECIMAL(18,6)
 		DECLARE @dblVoidedPaymentOldVoucher DECIMAL(18,6)
 		DECLARE @dblVoidedPaymentOldVoucherAddInBeginning DECIMAL(18,6)
@@ -190,13 +189,6 @@ BEGIN
 				AND PYMT.strPaymentRecordNum LIKE '%V'
 		) A
 		--select '@dblVoidedPayment'=@dblVoidedPayment,'@dblVoidedPaymentOldVoucher'=@dblVoidedPaymentOldVoucher,'@dblVoidedPaymentOldVoucherAddInBeginning'=@dblVoidedPaymentOldVoucherAddInBeginning
-
-		--REVERSED SETTLEMENTS WITH VOIDED PAYMENTS
-		DECLARE @dblReversedSettlementsWithVoidedPayment DECIMAL(18,6) --add in paid decrease
-		SELECT @dblReversedSettlementsWithVoidedPayment = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityStockUOMId,@intCommodityUnitMeasureId,dblUnits))
-		FROM tblGRReversedSettlementsWithVoidedPayments
-		WHERE intCommodityId = @intCommodityId
-			AND dbo.fnRemoveTimeOnDate(dtmVoidPaymentDate) = @dtmReportDate
 
 		/*for beginning*/
 		SELECT *
@@ -309,7 +301,6 @@ BEGIN
 			WHERE ((SH.strType = 'Reverse Settlement' AND SH.intSettleStorageId IS NULL) OR (SH.strType = 'Settlement' AND SH.intSettleStorageId IS NOT NULL))
 				AND CS.intCommodityId = @intCommodityId
 				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) = @dtmReportDate
-				AND SH.strSettleTicket NOT IN (SELECT strSettleStorageTicket FROM tblGRReversedSettlementsWithVoidedPayments)
 			GROUP BY AP.intBillId, SH.strType, SH_2.dtmHistoryDate,SH.dtmHistoryDate
 		) A
 
@@ -743,8 +734,7 @@ BEGIN
 								ISNULL(@dblDPReversedSettlementsWithPayment,0) + 
 								ISNULL(@dblVoidedPayment,0) +
 								ISNULL(@dblSettlementsWithDeletedPayment,0) + 
-								ISNULL(@dblVoidedPaymentOldVoucher,0) +
-								ISNULL(@dblReversedSettlementsWithVoidedPayment,0)
+								ISNULL(@dblVoidedPaymentOldVoucher,0)
 								) --- ISNULL(@dblDPIA,0)
 			,0
 			,@strUOM
@@ -755,6 +745,31 @@ BEGIN
 			WHERE intOrderNo = 2 --COMPANY OWNERSHIP (UNPAID)
 				AND A.intCommodityId = @intCommodityId
 		) CU
+		--FROM (
+		--	SELECT total = SUM(A.dblTotalBeginning)
+		--		,A.intCommodityId
+		--	FROM @CompanyOwnedData A
+		--	WHERE intOrderNo IN (2,3) --COMPANY OWNERSHIP (UNPAID) AND DELAYED PRICING
+		--		AND A.intCommodityId = @intCommodityId
+		--	GROUP BY A.intCommodityId
+		--) CO
+		--INNER JOIN (
+		--	SELECT total = A.dblTotalDecrease
+		--		,A.intCommodityId
+		--	FROM @CompanyOwnedData A
+		--	WHERE intOrderNo = 2 --COMPANY OWNERSHIP (UNPAID)
+		--		AND A.intCommodityId = @intCommodityId
+		--) CU
+		--	ON CU.intCommodityId = CO.intCommodityId		
+		--LEFT JOIN (
+		--	SELECT total = SUM(A.dblTotalDecrease)
+		--		,A.intCommodityId
+		--	FROM @CompanyOwnedData A
+		--	WHERE intOrderNo = 3
+		--		AND A.intCommodityId = @intCommodityId
+		--	GROUP BY A.intCommodityId
+		--) DP
+		--	ON DP.intCommodityId = CO.intCommodityId
 
 
 	END
