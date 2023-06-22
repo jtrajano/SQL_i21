@@ -25,6 +25,7 @@ BEGIN
 	DECLARE @ysnPrintTimeOnInvoices				BIT
 	DECLARE @ysnPrintTimeOnReports				BIT
 	DECLARE @ysnPrintMiscellaneous				BIT
+	DECLARE @ysnShowSST				BIT
 	DECLARE @ysnShowDriverPinDescriptionOnly	BIT
 	DECLARE @ysnShowVehicleDescriptionOnly		BIT
 	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
@@ -55,6 +56,7 @@ BEGIN
 	,@ysnPrintTimeOnInvoices			 =  ysnPrintTimeOnInvoices		
 	,@ysnPrintTimeOnReports				 =  ysnPrintTimeOnReports		
 	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous
+	,@ysnShowSST				 =  ysnShowSST
 	,@ysnSummaryByDriverPin				 =  ysnSummaryByDriverPin
 	,@strDetailDisplay					 =  strDetailDisplay
 	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
@@ -89,7 +91,8 @@ BEGIN
 	,ysnSummaryByDeptVehicleProd	  = 	 @ysnSummaryByDeptVehicleProd	
 	,ysnPrintTimeOnInvoices			  = 	 @ysnPrintTimeOnInvoices		
 	,ysnPrintTimeOnReports			  = 	 @ysnPrintTimeOnReports			
-	,ysnPrintMiscellaneous			  = 	 @ysnPrintMiscellaneous			
+	,ysnPrintMiscellaneous			  = 	 @ysnPrintMiscellaneous		
+	,ysnShowSST			  = 	 @ysnShowSST		
 	,ysnShowDriverPinDescriptionOnly  =		 @ysnShowDriverPinDescriptionOnly
 	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
 	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin

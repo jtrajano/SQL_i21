@@ -44,6 +44,7 @@ SELECT
 ,cfAccount.strPrintRemittancePage
 ,cfAccount.strPrintPricePerGallon
 ,cfAccount.ysnPrintMiscellaneous
+,cfAccount.ysnShowSST
 ,cfAccount.strPrintSiteAddress
 ,cfAccount.ysnSummaryByCard
 ,cfAccount.ysnSummaryByDepartmentProduct
