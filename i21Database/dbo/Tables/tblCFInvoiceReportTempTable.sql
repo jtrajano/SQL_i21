@@ -70,7 +70,6 @@
     [dblTaxExceptSST]                 NUMERIC (18, 6) NULL,
     [dblInvoiceTotal]                 NUMERIC (18, 6) NULL,
     [ysnPrintMiscellaneous]           BIT             NULL,
-    [ysnShowSST]           BIT             NULL,
     [ysnSummaryByCard]                BIT             NULL,
     [ysnSummaryByDepartmentProduct]   BIT             NULL,
     [ysnSummaryByDepartment]          BIT             NULL,
