@@ -251,7 +251,8 @@ BEGIN
 			POSCode						NVARCHAR(15),
 			intPOSCode					BIGINT,
 			dblAveragePrice				DECIMAL(18, 6),
-			dblAveragePriceWthDiscounts DECIMAL(18, 6)
+			dblAveragePriceWthDiscounts DECIMAL(18, 6),
+			intModifier					INT
 		)
 
 
@@ -269,7 +270,8 @@ BEGIN
 			POSCode,
 			intPOSCode,
 			dblAveragePrice,
-			dblAveragePriceWthDiscounts
+			dblAveragePriceWthDiscounts,
+			intModifier
 		)
 		SELECT 
 			intCheckoutId				= @intCheckoutId,
@@ -291,7 +293,8 @@ BEGIN
 											WHEN ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) ) = 0
 												THEN 0
 											ELSE ISNULL( NULLIF( CAST(Chk.dblISMSalesTotalsSalesAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsRefundAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsDiscountAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsPromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) )
-										END
+										END,
+			intModifier					= Chk.intItemCodePOSCodeModifier
 		FROM @tblTemp Chk
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
@@ -410,7 +413,7 @@ BEGIN
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN #tmp_tblICItemUOM UOM
-				ON TempChk.intPOSCode = intUPCCode2
+				ON TempChk.intPOSCode = intUPCCode2 AND ISNULL(TempChk.intModifier, ISNULL(UOM.intModifier, -1)) = ISNULL(UOM.intModifier, -1)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
@@ -468,7 +471,7 @@ BEGIN
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN #tmp_tblICItemUOM UOM
-				ON TempChk.intPOSCode = intUPCCode2
+				ON TempChk.intPOSCode = intUPCCode2 AND ISNULL(TempChk.intModifier, ISNULL(UOM.intModifier, -1)) = ISNULL(UOM.intModifier, -1)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
