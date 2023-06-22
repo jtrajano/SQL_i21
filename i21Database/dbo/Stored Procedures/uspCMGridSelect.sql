@@ -2,7 +2,8 @@ CREATE PROCEDURE uspCMGridSelect
 (
 	@guidId UNIQUEIDENTIFIER,
 	@strType NVARCHAR(40),
-	@intRelatedId INT = NULL
+	@intRelatedId INT = NULL,
+	@count INT OUTPUT
 
 )
 AS
@@ -23,5 +24,7 @@ BEGIN
 		INSERT INTO tblCMGridSelectedRow (guidId, strType, intRelatedId)
 		SELECT @guidId, @strType, @intRelatedId
 	END
+
+	SELECT @count= COUNT(*) FROM tblCMGridSelectedRow WHERE @guidId = guidId
 
 END
