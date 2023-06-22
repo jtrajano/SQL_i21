@@ -92,7 +92,7 @@ BEGIN
 		,0
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
-		select sum((dblUnits * case when strType = 'Settlement' AND intSettleStorageId IS NOT NULL then -1 else 1 end )) as dblOpenBalance
+		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
