@@ -10,6 +10,7 @@ select
 	, Split.strSplitNumber + '   -   ' + Split.strDescription as strSplitInfo 
 	, EntitySplitDetail.strName as strSplitDetailName
 	, SplitDetail.dblSplitPercent
+	, SplitDetail.intSplitDetailId
 	from tblEMEntitySplit Split
 	join tblEMEntitySplitDetail SplitDetail
 		on Split.intSplitId = SplitDetail.intSplitId
@@ -17,4 +18,5 @@ select
 		on SplitDetail.intEntityId = EntitySplitDetail.intEntityId
 	join tblEMEntity MainEntity
 		on Split.intEntityId = MainEntity.intEntityId
+	
 	--where Split.intEntityId = 11275
