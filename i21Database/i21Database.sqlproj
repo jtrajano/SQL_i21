@@ -1799,6 +1799,10 @@
     <Build Include="dbo\Tables\tblSMPowerBIDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICSyncItemCategory.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryViewReport.sql" />
+    <Build Include="dbo\Views\vyuMFRecipeReport.sql" />
+    <Build Include="dbo\Views\vyuMFRecipeItemReport.sql" />
+    <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
