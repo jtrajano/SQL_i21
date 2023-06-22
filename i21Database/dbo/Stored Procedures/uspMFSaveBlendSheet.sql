@@ -477,11 +477,23 @@ BEGIN TRY
 	FROM tblMFBlendRequirement
 	WHERE intBlendRequirementId = @intBlendRequirementId;
 
-	SELECT @intManufacturingProcessId = Recipe.intManufacturingProcessId
-	FROM tblMFRecipe AS Recipe
-	JOIN @tblBlendSheet AS BlendSheet ON Recipe.intItemId = BlendSheet.intItemId
-		AND Recipe.intLocationId = BlendSheet.intLocationId
-		AND ysnActive = 1
+	IF (SELECT ysnRecipeHeaderValidation FROM tblMFCompanyPreference) = 1
+		BEGIN
+			SELECT TOP 1 @intManufacturingProcessId = Recipe.intManufacturingProcessId
+			FROM tblMFRecipe AS Recipe
+			JOIN @tblBlendSheet AS BlendSheet ON Recipe.intItemId = BlendSheet.intItemId 
+											 AND Recipe.intLocationId = BlendSheet.intLocationId
+											 AND ysnActive = 1
+			WHERE GETDATE() BETWEEN Recipe.dtmValidFrom AND Recipe.dtmValidTo
+		END
+	ELSE
+		BEGIN
+			SELECT TOP 1 @intManufacturingProcessId = Recipe.intManufacturingProcessId
+			FROM tblMFRecipe AS Recipe
+			JOIN @tblBlendSheet AS BlendSheet ON Recipe.intItemId = BlendSheet.intItemId 
+											 AND Recipe.intLocationId = BlendSheet.intLocationId
+											 AND ysnActive = 1
+		END
 
 	SELECT @intBlendItemId = intItemId
 		,@intLocationId = intLocationId
