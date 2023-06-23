@@ -502,6 +502,7 @@ BEGIN TRY
 						  , strAWBSampleReference
 						  , dblBasePrice
 						  , ysnBoughtAsReserve
+						  , strBuyingOrderNo
 						  , ysnEuropeanCompliantFlag
 						  , intEvaluatorsCodeAtTBOId
 						  , intFromLocationCodeId
@@ -510,6 +511,33 @@ BEGIN TRY
 						  , intBrokerId
 						  , intPackageTypeId
 						  , intMarketZoneId
+						  /*Initial Buy Field*/
+						  , intBuyer1Id
+						  , dblB1QtyBought
+						  , intB1QtyUOMId
+						  , dblB1Price
+						  , intB1PriceUOMId
+						  , intBuyer2Id
+						  , dblB2QtyBought
+						  , intB2QtyUOMId
+						  , dblB2Price
+						  , intB2PriceUOMId
+						  , intBuyer3Id
+						  , dblB3QtyBought
+						  , intB3QtyUOMId
+						  , dblB3Price
+						  , intB3PriceUOMId
+						  , intBuyer4Id
+						  , dblB4QtyBought
+						  , intB4QtyUOMId
+						  , dblB4Price
+						  , intB4PriceUOMId
+						  , intBuyer5Id
+						  , dblB5QtyBought
+						  , intB5QtyUOMId
+						  , dblB5Price
+						  , intB5PriceUOMId
+						  , strB5PriceUOM
 						  , intCurrencyId
 						)
 						SELECT intConcurrencyId			= 1
@@ -568,6 +596,7 @@ BEGIN TRY
 							 , strAWBSampleReference	= S.strAWBSampleReference
 							 , dblBasePrice				= S.dblBasePrice
 							 , ysnBoughtAsReserve		= S.ysnBoughtAsReserve
+							 , strBuyingOrderNo			= S.strBuyingOrderNo
 							 , ysnEuropeanCompliantFlag = S.ysnEuropeanCompliantFlag
 							 , intEvaluatorsCodeAtTBOId = S.intEvaluatorsCodeAtTBOId
 							 , intFromLocationCodeId	= S.intFromLocationCodeId
@@ -576,7 +605,35 @@ BEGIN TRY
 							 , intBrokerId				= S.intBrokerId
 							 , intPackageTypeId			= S.intPackageTypeId
 							 , intMarketZoneId			= S.intMarketZoneId
-							 , intCurrencyId			= S.intCurrencyId
+
+							 /*Initial Buy Field*/
+							 , intBuyer1Id				= S.intBuyer1Id
+						 	 , dblB1QtyBought			= S.dblB1QtyBought
+						 	 , intB1QtyUOMId			= S.intB1QtyUOMId
+						 	 , dblB1Price				= S.dblB1Price
+							 , intB1PriceUOMId			= S.intB1PriceUOMId
+						 	 , intBuyer2Id				= S.intBuyer2Id
+						 	 , dblB2QtyBought			= S.dblB2QtyBought
+						 	 , intB2QtyUOMId			= S.intB2QtyUOMId
+						 	 , dblB2Price				= S.dblB2Price
+						 	 , intB2PriceUOMId			= S.intB2PriceUOMId
+						 	 , intBuyer3Id				= S.intBuyer3Id
+						 	 , dblB3QtyBought			= S.dblB3QtyBought
+						 	 , intB3QtyUOMId			= S.intB3QtyUOMId
+						 	 , dblB3Price				= S.dblB3Price
+						 	 , intB3PriceUOMId			= S.intB3PriceUOMId
+						 	 , intBuyer4Id				= S.intBuyer4Id
+						 	 , dblB4QtyBought			= S.dblB4QtyBought
+						 	 , intB4QtyUOMId			= S.intB4QtyUOMId
+						 	 , dblB4Price				= S.dblB4Price
+						 	 , intB4PriceUOMId			= S.intB4PriceUOMId
+						 	 , intBuyer5Id				= S.intBuyer5Id
+						 	 , dblB5QtyBought			= S.dblB5QtyBought
+						 	 , intB5QtyUOMId			= S.intB5QtyUOMId
+						 	 , dblB5Price				= S.dblB5Price
+						 	 , intB5PriceUOMId			= S.intB5PriceUOMId
+						 	 , strB5PriceUOM			= S.strB5PriceUOM
+						 	 , intCurrencyId			= S.intCurrencyId
 						FROM tblQMSample S
 						INNER JOIN tblMFBatch B ON B.intSampleId = S.intSampleId
 						WHERE B.intBatchId = @intBatchId

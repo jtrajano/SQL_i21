@@ -1334,7 +1334,7 @@ BEGIN
       ,strAirwayBillCode = S.strCourierRef
       ,strAWBSampleReceived = CAST(S.intAWBSampleReceived AS NVARCHAR(50))
       ,strAWBSampleReference = S.strAWBSampleReference
-      ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblBasePrice ELSE CD.dblCashPrice END
+      ,dblBasePrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
       ,ysnBoughtAsReserved = S.ysnBoughtAsReserve
       ,dblBoughtPrice = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblB1Price ELSE CD.dblCashPrice END
       ,dblBulkDensity = BT.dblBulkDensity
@@ -1350,7 +1350,7 @@ BEGIN
       ,strEvaluatorRemarks = S.strComments3
       ,dtmExpiration = BT.dtmExpiration
       ,intFromPortId = CD.intLoadingPortId
-      ,dblGrossWeight = CASE WHEN CD.intContractDetailId IS NULL THEN S.dblGrossWeight ELSE S.dblSampleQty +IsNULL(S.dblTareWeight,0) END
+      ,dblGrossWeight = CASE WHEN CD.intContractDetailId IS NULL THEN (S.dblB1QtyBought*(Case When IsNULL(S.dblRepresentingQty ,0)>0 Then S.dblSampleQty/S.dblRepresentingQty Else 1 End)) +IsNULL(S.dblTareWeight,0)  ELSE S.dblSampleQty +IsNULL(S.dblTareWeight,0) END
       ,dtmInitialBuy = BT.dtmInitialBuy
       ,dblWeightPerUnit = dbo.fnCalculateQtyBetweenUOM(QIUOM.intItemUOMId, WIUOM.intItemUOMId, 1)
       ,dblLandedPrice = BT.dblLandedPrice
@@ -1365,7 +1365,7 @@ BEGIN
       ,strTeaOrigin = S.strCountry
       ,intOriginalItemId = ISNULL(BT.intOriginalItemId, S.intItemId)
       ,dblPackagesPerPallet = IsNULL(I.intUnitPerLayer *I.intLayerPerPallet,20)
-      ,strPlant = TBO.strOregonFacilityNumber
+      ,strPlant = CASE WHEN TBO.strOregonFacilityNumber IS NULL THEN MU.strVendorRefNoPrefix ELSE TBO.strOregonFacilityNumber END
       ,dblTotalQuantity = S.dblSampleQty
       ,strSampleBoxNumber = S.strSampleBoxNumber
       ,dblSellingPrice = BT.dblSellingPrice
