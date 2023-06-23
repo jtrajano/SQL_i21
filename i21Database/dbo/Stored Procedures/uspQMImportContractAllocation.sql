@@ -277,7 +277,7 @@ BEGIN TRY
 				WHERE IC.intImportCatalogueId = @intImportCatalogueId
 				GOTO CONT
 			END
-			IF @dblCashPrice>@dblContractPrice
+			IF ISNULL(@dblCashPrice, 0) <> @dblContractPrice
 			BEGIN
 				UPDATE IC
 				SET ysnSuccess = 0, ysnProcessed = 1
