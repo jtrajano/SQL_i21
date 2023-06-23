@@ -27,6 +27,7 @@
 	[dblComboMinimumUnits] DECIMAL(18, 6) NULL,
 	[dblComboSurcharge] DECIMAL(18, 6) NULL,
 	[intDispatchOrderRouteId] INT NULL,
+	[intBulkStorageLocationId] INT NULL
 	CONSTRAINT [PK_tblTRLoadReceipt] PRIMARY KEY ([intLoadReceiptId]),
 	CONSTRAINT [FK_tblTRLoadReceipt_tblTRLoadHeader_intLoadHeaderId] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [dbo].[tblTRLoadHeader] ([intLoadHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRLoadReceipt_tblAPVendor_intTermianlId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] (intEntityId),
