@@ -45,7 +45,6 @@ SELECT
 	,ysnPPTransferCostForRemote=ISNULL(ysnPPTransferCostForRemote,0)
 	,ysnPPTransferCostForNetwork=ISNULL(ysnPPTransferCostForNetwork,0)
 	,ysnPrintMiscellaneous=ISNULL(ysnPrintMiscellaneous,0)
-	,ysnShowSST=ISNULL(ysnShowSST,0)
 	,ysnDepartmentGrouping=ISNULL(ysnDepartmentGrouping,0)
 	,ysnSummaryByDeptVehicleProd=ISNULL(ysnSummaryByDeptVehicleProd,0)
 	,ysnQuoteTaxExempt=ISNULL(ysnQuoteTaxExempt,0)
