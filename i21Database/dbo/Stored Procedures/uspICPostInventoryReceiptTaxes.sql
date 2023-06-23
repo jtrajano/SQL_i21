@@ -144,7 +144,7 @@ BEGIN
 							-- This meas, use the commodity if of the first item in the inventory receipt. 
 							OUTER APPLY (
 								SELECT TOP 1 
-									Item.intCommodityId
+									i.intCommodityId
 								FROM 
 									tblICInventoryReceiptItem ri INNER JOIN tblICItem i
 										ON i.intItemId = ri.intItemId
@@ -179,7 +179,7 @@ BEGIN
 							-- This meas, use the commodity if of the first item in the inventory receipt. 
 							OUTER APPLY (
 								SELECT TOP 1 
-									Item.intCommodityId
+									i.intCommodityId
 								FROM 
 									tblICInventoryReceiptItem ri INNER JOIN tblICItem i
 										ON i.intItemId = ri.intItemId
