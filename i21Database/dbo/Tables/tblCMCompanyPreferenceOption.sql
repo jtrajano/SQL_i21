@@ -32,6 +32,8 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	ysnShowFeeColumns_BankRecon BIT NULL,
 	intBankFileFormatPrenoteAPId INT NULL,
 	intBankFileFormatPrenoteARId INT NULL,
+	ysnRemittanceAdvice_DisplayVendorAccountNumber BIT NULL,
+	ysnRemittanceAdvice_AttachSettlement BIT NULL,
 	intConcurrencyId int NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
