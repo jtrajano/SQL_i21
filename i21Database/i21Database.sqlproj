@@ -1804,6 +1804,7 @@
     <Build Include="dbo\Views\vyuMFRecipeItemReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
