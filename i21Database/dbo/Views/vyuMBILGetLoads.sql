@@ -4,7 +4,7 @@ AS
 
 SELECT lh.intLoadHeaderId
 	, lh.strLoadNumber
-	, strType = CASE WHEN dh.intEntityId IS NOT NULL AND lh.strType = 'Inbound' THEN 'Drop Ship' ELSE lh.strType END
+	, strType = CASE WHEN pd.intEntityId IS NOT NULL  THEN 'Drop Ship' ELSE 'OutBound' END  
 	, lh.intDispatchOrderId
 	, lh.intLoadId
 	, lh.intDriverId
@@ -29,13 +29,14 @@ SELECT lh.intLoadHeaderId
 	, pd.intCompanyLocationId as intReceiptCompanyLocationId
 	, el.strZipCode as strZipPostalCode
 	, pd.dblPickupQuantity
-	, pd.dblGross
-	, pd.dblNet
+	, dblGross = case when tms.ysnCompanySite = 1 then isnull(dd.dblDeliveredQty,0) else pd.dblGross end
+	, dblNet = case when tms.ysnCompanySite = 1 then isnull(dd.dblDeliveredQty,0) else pd.dblNet end
 	, pd.dtmPickupFrom
 	, pd.dtmPickupTo
 	, pd.dtmActualPickupFrom
 	, pd.dtmActualPickupTo
 	, pd.strBOL
+	, LGLoadDetail.intItemUOMId
 	, pd.strItemUOM
 	, pd.strLoadRefNo
 	, pd.strNote
@@ -47,7 +48,7 @@ SELECT lh.intLoadHeaderId
 	, dh.intEntityId as intCustomerId
 	, dh.intEntityLocationId as intCustomerLocationId
 	, dh.intCompanyLocationId as intDistributionCompanyLocationId
-	, intSalesPersonId = ISNULL(dh.intSalesPersonId, ISNULL(cel.intSalespersonId, arc.intSalespersonId))
+	, intCustomerSalesPersonId = ISNULL(dh.intSalesPersonId, ISNULL(cel.intSalespersonId, arc.intSalespersonId))
 	, dh.dtmActualDelivery
 	, dd.intDeliveryDetailId
 	, dd.intTMDispatchId
@@ -65,6 +66,9 @@ SELECT lh.intLoadHeaderId
 	, lh.intStateId
 	, pd.intDispatchOrderRouteId
 	, dd.intDispatchOrderDetailId
+	, ysnLockPrice = ISNULL(tm.ysnLockPrice, CAST(0 AS BIT))
+	, ISNULL(dd.dblGross,dd.dblDeliveredQty) as dblDistributionDetailGross
+	, ISNULL(dd.dblNet,dd.dblDeliveredQty) as dblDistributionDetailNet
 FROM tblMBILPickupDetail pd
 JOIN tblMBILDeliveryDetail dd ON dd.intPickupDetailId = pd.intPickupDetailId
 LEFT JOIN tblTRSupplyPoint sp ON sp.intEntityVendorId = pd.intEntityId AND sp.intEntityLocationId = pd.intEntityLocationId
