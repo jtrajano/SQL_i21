@@ -1544,6 +1544,7 @@
     <Build Include="dbo\Views\vyuMFRecipeReport.sql" />
     <Build Include="dbo\Views\vyuMFRecipeItemReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
+    <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

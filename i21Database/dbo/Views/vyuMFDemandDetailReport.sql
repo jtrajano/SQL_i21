@@ -14,8 +14,4 @@ SELECT strItemNo				AS [Item]
 	 , dblQuantity				AS [Quantity]
 	 , strItemUOM				AS [Item UOM]
 	 , strLocationName			AS [Location]
-	 , strDemandNo				AS [Demand No]
-	 , strDemandName			AS [Demand Name]
-	 , strBook					AS [Book]
-	 , strSubBook				AS [Sub Book]
 FROM vyuMFGetDemandEntry
