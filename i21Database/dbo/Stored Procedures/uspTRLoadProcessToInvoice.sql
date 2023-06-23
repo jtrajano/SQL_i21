@@ -41,7 +41,11 @@ BEGIN TRY
 	SELECT TOP 1 @intSurchargeItemId = intItemId, @strSurchargeItemNo = strItemNo 
 	FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 
-	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0), @ysnComboFreight = ISNULL(ysnComboFreight, 0), @ysnGrossNet = ISNULL(ysnAllowDifferentUnits, 0) FROM tblTRCompanyPreference
+	 SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)  
+	 , @ysnComboFreight = ISNULL(ysnComboFreight, 0)  
+	 , @ysnGrossNet = ISNULL(ysnAllowDifferentUnits, 0)  
+	 , @intSendBolAttachmentOption = ISNULL(intSendBolAttachmentOptionId, 3)  
+	 FROM tblTRCompanyPreference    
 
 	BEGIN TRANSACTION
 
