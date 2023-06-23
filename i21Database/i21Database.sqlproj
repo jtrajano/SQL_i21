@@ -1741,6 +1741,7 @@
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
