@@ -294,7 +294,6 @@ BEGIN TRY
 	,dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
-	,ysnShowSST
 	,ysnSummaryByCard
 	,ysnSummaryByDepartmentProduct
 	,ysnSummaryByDepartment
@@ -579,7 +578,6 @@ BEGIN TRY
 	,ISNULL(dblDiscountEP						,0) AS dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
-	,ysnShowSST
 	,ysnSummaryByCard			
 	,ysnSummaryByDepartmentProduct
 	,ysnSummaryByDepartment		

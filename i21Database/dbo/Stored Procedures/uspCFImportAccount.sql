@@ -50,7 +50,6 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
   DECLARE @ysnPPTransferCostForRemote  BIT  
   DECLARE @ysnPPTransferCostForNetwork BIT  
   DECLARE @ysnPrintMiscellaneous   BIT  
-  DECLARE @ysnShowSST   BIT  
   DECLARE @intFeeProfileId    INT  
   DECLARE @strPrintSiteAddress   NVARCHAR(250)  
   DECLARE @dtmLastBillingCycleDate  DATETIME  
@@ -368,12 +367,6 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
            when RTRIM(LTRIM(cfact_print_misc_auth_yn)) = 'Y' then 'TRUE'  
            else 'FALSE'  
            end),  
-      @ysnShowSST = (case  
-           when RTRIM(LTRIM(cfact_print_misc_auth_yn)) = 'N' then 'FALSE'  
-           when RTRIM(LTRIM(cfact_print_misc_auth_yn)) = 'Y' then 'TRUE'  
-           else 'FALSE'  
-           end),  
-           
      @intFeeProfileId = (SELECT TOP 1 intFeeProfileId   
                                                 FROM tblCFFeeProfile   
                                                 WHERE strFeeProfileId = RTRIM(LTRIM(cfact_fee_prf_id)) COLLATE Latin1_General_CI_AS),  
@@ -426,7 +419,6 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
      ,[ysnPPTransferCostForRemote]   
      ,[ysnPPTransferCostForNetwork]  
      ,[ysnPrintMiscellaneous]  
-     ,[ysnShowSST]
      ,[intFeeProfileId]  
      ,[strPrintSiteAddress]  
      ,[dtmLastBillingCycleDate]  
@@ -466,7 +458,6 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
      ,@ysnPPTransferCostForRemote   
      ,@ysnPPTransferCostForNetwork  
      ,@ysnPrintMiscellaneous    
-     ,@ysnShowSST
      ,@intFeeProfileId     
      ,@strPrintSiteAddress    
      ,@dtmLastBillingCycleDate   

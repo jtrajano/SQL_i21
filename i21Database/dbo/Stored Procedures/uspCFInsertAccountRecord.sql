@@ -28,7 +28,6 @@ CREATE PROCEDURE [dbo].[uspCFInsertAccountRecord]
  ,@ysnSummaryByDepartment  NVARCHAR(MAX)  =  'N'  
  ,@ysnVehicleRequire    NVARCHAR(MAX)  =  'N'  
  ,@ysnPrintMiscellaneous   NVARCHAR(MAX)  =  'N'  
- ,@ysnShowSST   NVARCHAR(MAX)  =  'N'  
  ,@ysnSummaryByVehicle   NVARCHAR(MAX)  =  'N'  
  ,@ysnSummaryByCardProduct  NVARCHAR(MAX)  =  'N'  
  ,@ysnSummaryByDeptCardProduct NVARCHAR(MAX)  =  'N'  
@@ -580,44 +579,6 @@ IF(ISNULL(@strDepartmentGrouping,'') = '')
    VALUES (@strCustomerId,'Invalid print miscellaneous value '+ @ysnPrintMiscellaneous +'. Value should be Y or N only')  
    SET @ysnHasError = 1  
   END  
-
-  
- --Print Miscellaneous  
- IF (@ysnShowSST = 'N')  
-  BEGIN   
-   SET @ysnShowSST = 0  
-  END  
- ELSE IF (@ysnShowSST = 'Y')  
-  BEGIN  
-   SET @ysnShowSST = 1   
-  END  
- ELSE  
-  BEGIN   
-   INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
-   VALUES (@strCustomerId,'Invalid show SST value '+ @ysnShowSST +'. Value should be Y or N only')  
-   SET @ysnHasError = 1  
-  END  
-
-  
-
-   --Print Miscellaneous  
- IF (@ysnShowSST = 'N')  
-  BEGIN   
-   SET @ysnShowSST = 0  
-  END  
- ELSE IF (@ysnShowSST = 'Y')  
-  BEGIN  
-   SET @ysnShowSST = 1   
-  END  
- ELSE  
-  BEGIN   
-   INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)  
-   VALUES (@strCustomerId,'Invalid show SST value '+ @ysnShowSST +'. Value should be Y or N only')  
-   SET @ysnHasError = 1  
-  END  
-
-
-  
   
  --Primary Sort Options  
  IF(@strPrimarySortOptions NOT IN ('Card','Vehicle','Department','Miscellaneous'))  
@@ -799,7 +760,6 @@ IF(ISNULL(@strDepartmentGrouping,'') = '')
    ,intPriceRuleGroup  
    ,strPrintPricePerGallon  
    ,ysnPrintMiscellaneous  
-   ,ysnShowSST
    ,intFeeProfileId  
    ,strPrintSiteAddress  
    ,dtmLastBillingCycleDate  
@@ -843,7 +803,6 @@ IF(ISNULL(@strDepartmentGrouping,'') = '')
    ,@intPriceRuleGroup  
    ,@strPrintPricePerGallon  
    ,@ysnPrintMiscellaneous  
-   ,@ysnShowSST
    ,@intFeeProfileId  
    ,@strPrintSiteAddress  
    ,@dtmLastBillingCycleDate  
