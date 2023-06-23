@@ -7,7 +7,7 @@ AS
 				CTD.intContractDetailId,
 				strPONumber = LGL.strCustomerReference,	
 				dtmOriginalETD = CTD.dtmOriginalETD,
-				dtmCurrentETD = CTD.dtmEtaPod,
+				dtmCurrentETD = CTD.dtmEtaPol,
 				dtmOriginalStockDate = LGL.dtmPlannedAvailabilityDate,
 				dtmRevisedStockDate = CTD.dtmPlannedAvailabilityDate, 
 				strContractNumber = CH.strContractNumber,
