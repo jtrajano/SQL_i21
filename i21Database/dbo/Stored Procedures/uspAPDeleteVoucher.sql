@@ -65,7 +65,8 @@ BEGIN TRY
 	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
 	BEGIN
 		--Do not allow to delete if details have associated storage and contract
-		IF @callerModule = 0 --AP
+		--IF DELETED ON VOUCHER SCREEN AND HAVE SETTLE STORAGE
+		IF @callerModule = 0 AND EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intBillId = @intBillId)
 		BEGIN
 			RAISERROR('Unable to delete. Please use pricing screen to delete the voucher.', 16, 1);
 			RETURN;	

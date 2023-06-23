@@ -206,6 +206,10 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBaseUnappliedAmount]           NUMERIC(18,6)   NULL
     ,[dblPayment]                       NUMERIC(18,6)   NULL
     ,[dblBasePayment]                   NUMERIC(18,6)   NULL
+	,[dblAdjustedBaseInterest]          NUMERIC(18,6)   NULL
+	,[dblAdjustedBaseWriteOffAmount]    NUMERIC(18,6)   NULL
+	,[dblAdjustedBasePayment]           NUMERIC(18,6)   NULL
+	,[dblAdjustedBaseDiscount]          NUMERIC(18,6)   NULL
     ,[dblDiscount]                      NUMERIC(18,6)   NULL
     ,[dblBaseDiscount]                  NUMERIC(18,6)   NULL
 	,[dblWriteOffAmount]				NUMERIC(18,6)   NULL

@@ -35,6 +35,7 @@ BEGIN
 	DECLARE @dtmDeliveryDate DATETIME
 	DECLARE @dblElapseDDForCalc NUMERIC(18,6)
 	DECLARE @dblElapseDDDuringHold NUMERIC(18,6)
+	DECLARE @intInvoiceId INT
 
 	DECLARE @intDeliveryDateLifetimeAccumDD INT
 	DECLARE @intLastDeliveryDateLifetimeAccumDD INT
@@ -42,6 +43,7 @@ BEGIN
 	DECLARE @intClockBeginWinterMonth INT
 	
 	
+	SET @ysnMultipleInvoice = 1
 	IF(@intDeliveryHistoryId IS NULL)
 	BEGIN
 		---Get Site Info
@@ -98,7 +100,7 @@ BEGIN
 	SET @dblElapseDDBetweenDelivery = ABS(@intDeliveryDateLifetimeAccumDD - @intLastDeliveryDateLifetimeAccumDD)
 	
 	--get percent after deliver
-	SELECT TOP 1 @dblPercentAfterDelivery = dblPercentFull FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId 
+	SELECT TOP 1 @dblPercentAfterDelivery = dblPercentFull, @intInvoiceId  = intInvoiceId FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId 
 
 	--- get Invoice detail total
 	-------CHECK if multiple Invoice scenario
@@ -116,6 +118,7 @@ BEGIN
 			,@dblInvoiceQuantity = SUM(dblQtyShipped)
 		FROM tblARInvoiceDetail
 		WHERE intSiteId = (SELECT TOP 1 intSiteId FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId)
+			AND intInvoiceId = @intInvoiceId
 	END
 	
 	----Check for flow meter
