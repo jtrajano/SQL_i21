@@ -1374,6 +1374,8 @@
     <Build Include="dbo\Views\vyuFABookDepreciationReportWithCompany.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYear.sql" />
     <Build Include="dbo\Views\vyuTMGetEntityLocationDetail.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployee401K.sql" />
+    <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutTankVarianceCalculation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCalculateTankVariance.sql" />
     <Build Include="dbo\Views\vyuSTGetTankVarianceCalculation.sql" />
@@ -1410,6 +1412,7 @@
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
+    <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3833,6 +3836,7 @@
     <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
+    <Build Include="dbo\Functions\fnSplitStringWithRowId.sql" />
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
@@ -4400,6 +4404,7 @@
     <Build Include="dbo\Tables\tblMFReadingPoint.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyContractSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBatchPostEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLOverrideSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromVoucherBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspWHGetCompanyPreferenceValueList.sql" />
     <Build Include="dbo\Stored Procedures\uspWMGetUserLocationListWMS.sql" />
@@ -11171,6 +11176,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Views\vyuAPVendorWIthPayables.sql" />
+    <Build Include="dbo\Views\vyuAPVendorToIPayables.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLogRadiant.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutRadiantTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSCreateCheckoutProcessEntry.sql" />

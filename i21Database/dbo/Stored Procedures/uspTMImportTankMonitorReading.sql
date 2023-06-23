@@ -132,6 +132,10 @@
 		BEGIN
 			select @ts_capacity =dblTotalCapacity from tblTMSite where intSiteID = @siteId
 		END
+		IF(@ts_capacity = 0)
+		BEGIN
+			select @ts_capacity =dblTotalCapacity from tblTMSite where intSiteID = @siteId
+		END
 		IF(@siteId IS NULL)
 		BEGIN 
 			SET @resultLog = @resultLog COLLATE Latin1_General_CI_AS + @ExceptionValue + ': Not Matching.' + char(10)
