@@ -18,6 +18,7 @@
     [ysnSentToHost] BIT NULL, 
     [strReason] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL,
+	[dblLastCost] NUMERIC(18, 6) NULL, 
     CONSTRAINT [PK_tblSTMarkUpDownDetail] PRIMARY KEY CLUSTERED ([intMarkUpDownDetailId] ASC), 
 	CONSTRAINT [FK_tblSTMarkUpDownDetail_tblSTMarkUpDown_intMarkUpDownId] FOREIGN KEY ([intMarkUpDownId]) REFERENCES [dbo].[tblSTMarkUpDown] ([intMarkUpDownId]) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblSTMarkUpDownDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
