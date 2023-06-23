@@ -176,7 +176,8 @@ BEGIN
 		INNER JOIN tblCCSite S ON S.intSiteId = SD.intSiteId
 		LEFT JOIN vyuEMEntityBasicWithType ET ON ET.intEntityId = S.intCustomerId
 		LEFT JOIN tblEMEntity E ON E.intEntityId = S.intCustomerId
-		WHERE strMiscDescription IN ('Dealer Site Gross', 'Dealer Site Net')
+		WHERE strMiscDescription IN ('Dealer Site Gross', 'Dealer Site Net','Company Owned Gross')
+		AND S.intCustomerId IS NOT NULL
 		OPEN @Cursor1099KTran
 		FETCH NEXT FROM @Cursor1099KTran INTO @dtmDate1099K, @dtmVoucherDate1099K, @intCustomerId1099K, @intShipToId1099K, @strVendorOrderNumber1099K, @intAccountId, @intLocationId1099K
 			,@intCCSiteDetailId1099K, @strMiscDescription1099K, @dblCost1099K, @dblQuantityToBill1099K, @Vendor1099K, @strCustomerName, @str1099Form
@@ -262,26 +263,26 @@ BEGIN
 			
 			IF(@apType <> 'Cash Deposited')  
 			BEGIN
-			EXEC [dbo].[uspAPCreateVoucher] 
-			@voucherPayables = @Voucher
-			,@userId = @userId
-			,@error = @errorMessage OUTPUT
-			,@createdVouchersId = @createdVouchersId OUTPUT
+						EXEC [dbo].[uspAPCreateVoucher] 
+						@voucherPayables = @Voucher
+						,@userId = @userId
+						,@error = @errorMessage OUTPUT
+						,@createdVouchersId = @createdVouchersId OUTPUT
 
-			IF(ISNULL(@errorMessage, '') != '')
-			BEGIN
-				SET @success = 0
-				RAISERROR(@errorMessage,16,1)			
-			END	
+						IF(ISNULL(@errorMessage, '') != '')
+						BEGIN
+							SET @success = 0
+							RAISERROR(@errorMessage,16,1)			
+						END	
 
-			EXEC [dbo].[uspAPPostBill]
-			@post = @post
-			,@recap = @recap
-			,@isBatch = 0
-			,@transactionType = 'Credit Card'
-			,@param = @createdVouchersId
-			,@userId = @userId
-			,@success = @success OUTPUT
+						EXEC [dbo].[uspAPPostBill]
+						@post = @post
+						,@recap = @recap
+						,@isBatch = 0
+						,@transactionType = 'Credit Card'
+						,@param = @createdVouchersId
+						,@userId = @userId
+						,@success = @success OUTPUT
 			END
 
 			IF(@success = 1 OR @apType = 'Cash Deposited')  

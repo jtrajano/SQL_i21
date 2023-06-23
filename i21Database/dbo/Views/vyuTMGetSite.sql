@@ -89,7 +89,6 @@ SELECT dblBurnRate = site.dblBurnRate
 	, strDescription = site.strDescription
 	, strFillGroup = site.strFillGroup
 	, strInstruction = site.strInstruction
-
 	, strRecurringPONumber = site.strRecurringPONumber
 	, strReleasePONumber = site.strReleasePONumber
 	, strSequenceID = site.strSequenceID

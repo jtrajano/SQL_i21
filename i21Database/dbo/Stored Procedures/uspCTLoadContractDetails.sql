@@ -659,6 +659,8 @@ BEGIN TRY
 		, CD.dblHistoricalRate
 		, CD.intHistoricalRateTypeId
 		, strHistoricalRateType = HRT.strCurrencyExchangeRateType
+		, CD.intItemXrefId
+		, strItemXrefProduct = case when CT.intContractTypeId = 1 then vx.strVendorProduct else cx.strCustomerProduct end
 		, strQualityCode = QC.strQualityCode
 		, strQualityDescription = QC.strQualityDesc
 		, CD.dtmEtaPol
@@ -791,6 +793,8 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure IAU ON IAU.intUnitMeasureId = AU.intUnitMeasureId	--strAverageUOM
 	LEFT JOIN tblICCategory ICCA ON ICCA.intCategoryId = CD.intCategoryId
 	left join tblSMTaxGroup TG on TG.intTaxGroupId = CD.intTaxGroupId
+	left join tblICItemVendorXref vx on vx.intItemVendorXrefId = CD.intItemXrefId
+	left join tblICItemCustomerXref cx on cx.intItemCustomerXrefId = CD.intItemXrefId
 	LEFT JOIN tblQMGardenMark GM on GM.intGardenMarkId = CD.intGardenMarkId
 	LEFT JOIN tblCTReasonCode RC on RC.intReasonCodeId = CD.intReasonCodeId
 	LEFT JOIN vyuCTGetQualityCodes QC ON QC.intItemId = CD.intItemId

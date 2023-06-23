@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[tblMBILDeliveryHeader]
 	[dtmDeliveryFrom] [datetime] null,
 	[dtmDeliveryTo] [datetime] null,
 	[dtmActualDelivery] [datetime] null,
+	[ysnRequirePump] [bit] null,
 	[intConcurrencyId] [int] DEFAULT(1) NULL,
  CONSTRAINT [PK_tblMBILDeliveryHeader] PRIMARY KEY CLUSTERED([intDeliveryHeaderId]),
  CONSTRAINT [FK_tblMBILDeliveryHeader_tblMBILLoadHeader] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [tblMBILLoadHeader]([intLoadHeaderId])

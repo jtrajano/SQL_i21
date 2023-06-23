@@ -115,6 +115,7 @@ SELECT L.intLoadId
 	,SB.strSubBook
 	,L.ysnAllowReweighs
 	,L.ysnShowOptionality
+	,L.ysnCancelled
 	,L.intUserLoc
 	,MZ.strMarketZoneCode
 FROM tblLGLoad L

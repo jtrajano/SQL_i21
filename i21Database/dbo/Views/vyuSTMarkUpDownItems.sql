@@ -53,4 +53,5 @@ INNER JOIN (
 INNER JOIN tblSTStore ST 
 	ON IL.intLocationId = ST.intCompanyLocationId
 WHERE I.strLotTracking = 'No'
-AND IL.intCostingMethod = 6
+AND ISNULL(I.intCategoryId, 0) <> 0
+--AND IL.intCostingMethod = 6

@@ -655,7 +655,7 @@ BEGIN
 				END
 
 				DECLARE @intSiteId INT = NULL
-				SELECT TOP 1 @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = CONVERT(int,@strSiteNumber)
+				SELECT @intSiteId = intSiteID FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = ISNULL(CONVERT(int,@strSiteNumber),0)
 				
 				
 				-- IF ONE OF THE REQUIRED FIELDS FOR ADDRESS IS NULL THEN IT WILL GET THE CUSTOMER ADDRESS
@@ -736,6 +736,12 @@ BEGIN
 						,ysnPrintARBalance
 						,intNextDeliveryDegreeDay
 
+						,ysnRequireClock
+						,ysnRoutingAlert
+						,ysnRequirePump
+						,dblLastDeliveredGal 
+						,dblEstimatedGallonsLeft 
+						,dblEstimatedPercentLeft
 						, guiApiUniqueId
 						, intRowNumber)
 					VALUES (@intCustomerId
@@ -792,10 +798,15 @@ BEGIN
 
 						,@dtmLastDeliveryDate
 						,@dblLastGalsInTank
-						,@ysnDeliveryTicketPrinted
+						,ISNULL(@ysnDeliveryTicketPrinted,0)
 						,@ysnPrintARBalance
 						,@intNextDeliveryDegreeDay
-						
+						,ISNULL(@ysnRequireClock,0)
+						,@ysnRoutingAlert
+						,@ysnRequirePump
+						,@dblLastDeliveredGal
+						,@dblEstimatedGallonsLeft
+						,@dblEstimatedPercentLeft
 						, @guiLogId
 						, @intRowNumber)
 

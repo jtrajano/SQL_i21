@@ -148,6 +148,7 @@ AS
 			,CP.ysnForceReasonCodeForAmendments
 			,CP.ysnEnableNetWeightAdjustment
 			,CP.ysnSequenceImportToCreateCBLogs
+			,CP.ysnEnableItemXrefVendorProduct
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId

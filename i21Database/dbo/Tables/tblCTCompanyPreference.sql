@@ -133,6 +133,7 @@
 	ysnForceReasonCodeForAmendments BIT NULL DEFAULT 0,
 	ysnEnableNetWeightAdjustment BIT NULL DEFAULT 0,
 	ysnSequenceImportToCreateCBLogs BIT NULL DEFAULT 0,
+	ysnEnableItemXrefVendorProduct BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblICUnitMeasure_intCleanCostUOMId_intUnitMeasureId] FOREIGN KEY ([intCleanCostUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

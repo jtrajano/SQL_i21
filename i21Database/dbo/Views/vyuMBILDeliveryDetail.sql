@@ -16,6 +16,9 @@ SELECT detail.intDeliveryDetailId
       ,detail.intTMSiteId
 	  ,detail.intShiftId
       ,detail.dblWaterInches
+      ,detail.intContractDetailId
+      ,detail.dblGross
+      ,detail.dblNet
 FROM tblMBILDeliveryDetail detail            
 INNER JOIN tblICItem item ON detail.intItemId = item.intItemId
 WHERE NOT EXISTS(SELECT o.intDispatchId

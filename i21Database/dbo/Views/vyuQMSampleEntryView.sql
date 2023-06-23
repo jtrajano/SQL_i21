@@ -1,7 +1,8 @@
 CREATE VIEW [dbo].[vyuQMSampleEntryView]
 AS
 Select 
-S.strSampleNumber
+S.intSampleId
+,S.strSampleNumber
 ,S.strSampleRefNo
 ,ST.strSampleTypeName
 ,CH.strContractNumber AS strContract
@@ -22,14 +23,16 @@ S.strSampleNumber
 ,SB.strSubBook
 ,S.strSampleNote
 ,S.strComment
+,E.intEntityId AS intPartyName
 ,E.strName AS strPartyName
 ,S.strRefNo
 ,S.strSamplingMethod
 ,S.dtmTestedOn
 ,U.strName AS strTestedUserName
 ,S.dblSampleQty
-,UM.strUnitMeasure AS strSampleUOM
+,S.intSampleUOMId
 ,S.dblRepresentingQty
+,UM.strUnitMeasure AS strSampleUOM
 ,UM1.strUnitMeasure AS strRepresentingUOM
 ,S.strMarks
 ,S.dtmTestingStartDate

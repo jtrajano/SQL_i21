@@ -318,6 +318,7 @@ WHERE vts.guiApiUniqueId = @guiApiUniqueId
 		JOIN tblVRVendorSetup xvs ON xvs.intVendorSetupId = xp.intVendorSetupId
 		WHERE xp.intVendorSetupId = v.intVendorSetupId
 			AND xvs.intEntityId = v.intEntityId
+			AND (xp.strVendorProgram = vts.strVendorProgram)
 	)
 		
 UPDATE p

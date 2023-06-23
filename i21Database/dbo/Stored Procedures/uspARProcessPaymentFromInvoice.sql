@@ -151,6 +151,8 @@ BEGIN
 	RETURN 0;
 END
 
+DECLARE
+	 @dblCurrencyExchangeRate NUMERIC(18,6) = 0.000000
 
 DECLARE
 	 @EntityCustomerId	INT
@@ -303,9 +305,12 @@ BEGIN TRY
 				RETURN 0;
 			END
 		
+		SET @dblCurrencyExchangeRate = ISNULL((SELECT TOP 1 dblExchangeRate FROM tblARPayment WHERE intPaymentId = @NewId), 0)
+
 		UPDATE tblARInvoice
 		SET
 			[intPaymentId]	= @NewId
+			,[dblCurrencyExchangeRate] = ISNULL(NULLIF([dblCurrencyExchangeRate], 0), @dblCurrencyExchangeRate)
 		WHERE
 			[intInvoiceId] = @InvoiceId 
 END TRY

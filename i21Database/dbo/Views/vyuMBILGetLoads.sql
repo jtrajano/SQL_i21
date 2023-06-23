@@ -78,4 +78,7 @@ JOIN tblMBILDeliveryHeader dh ON dh.intDeliveryHeaderId = dd.intDeliveryHeaderId
 OUTER APPLY tblTRCompanyPreference trc
 JOIN tblMBILLoadHeader lh ON lh.intLoadHeaderId = dh.intLoadHeaderId
 LEFT JOIN tblARCustomer arc ON arc.intEntityId = dh.intEntityId
-LEFT JOIN tblEMEntityLocation cel on cel.intEntityLocationId = dh.intEntityLocationId
+LEFT JOIN tblEMEntityLocation cel ON cel.intEntityLocationId = dh.intEntityLocationId
+LEFT JOIN tblTMDispatch tm on tm.intDispatchID = dd.intTMDispatchId
+LEFT JOIN tblTMSite tms on tm.intSiteID = tms.intSiteID
+LEFT JOIN vyuLGLoadDetailView LGLoadDetail ON LGLoadDetail.intLoadDetailId = pd.intLoadDetailId

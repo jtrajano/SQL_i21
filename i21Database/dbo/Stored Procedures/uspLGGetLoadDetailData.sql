@@ -69,6 +69,7 @@ BEGIN
 		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
 		,strSiteID = RIGHT('000'+ CAST(TMS.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 		,strSerialNumber = TMD.strSerialNumber
+		,strXRefVendorProduct = IVX.strVendorProduct
 		,intBatchId = QB.intBatchId
 		,strBatchId = QB.strBatchId
 		,strTeaGardenChopInvoiceNumber = QB.strTeaGardenChopInvoiceNumber
@@ -129,6 +130,7 @@ BEGIN
 	LEFT JOIN tblSMCountry						CO				ON		CO.intCountryID = (CASE WHEN ISNULL(ICI.intCountryId, 0) = 0 THEN ISNULL(CA.intCountryID, 0) ELSE ICI.intCountryId END)
 	LEFT JOIN tblTMSite							TMS				ON		TMS.intSiteID = LoadDetail.intTMSiteId
 	LEFT JOIN tblTMDevice						TMD				ON		TMD.intDeviceId = LoadDetail.intTMDeviceId
+    LEFT JOIN tblICItemVendorXref				IVX				ON		IVX.intVendorId = LoadDetail.intVendorEntityId
 	LEFT JOIN tblMFBatch						QB				ON		QB.intBatchId = LoadDetail.intBatchId
 	LEFT JOIN tblQMSample						QS				ON		QS.intSampleId = QB.intSampleId
 	LEFT JOIN tblQMCatalogueType				QCT				ON		QCT.intCatalogueTypeId = QS.intCatalogueTypeId

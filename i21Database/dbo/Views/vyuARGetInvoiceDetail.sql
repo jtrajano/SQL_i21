@@ -192,10 +192,13 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strReasonablenessComment				= INV.strReasonablenessComment
 	 , ysnOverrideTaxGroup               	= ISNULL(INV.ysnOverrideTaxGroup, 0)
 	 , ysnTankRequired						= ITMNO.ysnTankRequired
+	 , intDispatchId						= INV.intDispatchId
+	 , strOrderNumber						= ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
+	 , xref.strCustomerProduct
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
 	 , intDispatchId                        = INV.intDispatchId
-	 , strOrderNumber                       = ISNULL(CORDER.strOrderNumber, '') COLLATE Latin1_General_CI_AS
+	 
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -370,4 +373,5 @@ LEFT JOIN (
 	WHERE intInvoiceDetailId IS NOT NULL
 	GROUP BY intInvoiceDetailId
 ) APAR ON INV.intInvoiceDetailId = APAR.intInvoiceDetailId
+LEFT JOIN tblICItemCustomerXref xref ON xref.intItemCustomerXrefId = INV.intItemCustomerXrefId
 GO
