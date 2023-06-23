@@ -913,6 +913,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			LEFT JOIN tblARCustomer
 				ON agcusmst.agcus_key COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE tblARCustomer.strCustomerNumber IS NULL
+			  AND agcus_active_yn = ''Y''
 		END
 		
 	END'

@@ -1679,6 +1679,12 @@
     <Build Include="dbo\Views\vyuSTJobs.sql" />
     <Build Include="dbo\Views\vyuSTGetCheckoutDepartmentTotalsCS.sql" />
     <Build Include="dbo\Functions\fnSTGetEODDepositByCheckoutId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICompanyTotals.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICustomerStorageTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIIPhysicalInventory.sql" />
+    <Build Include="dbo\Tables\tblGRGIICustomerStorage.sql" />
+    <Build Include="dbo\Tables\tblGRGIIPhysicalInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGrainBankStatementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGrainBankStatementInvoicesSubReport.sql" />
     <Build Include="dbo\Views\vyuSCGrainBankTransactions.sql" />
@@ -1733,6 +1739,8 @@
     <Build Include="dbo\Views\vyuMFRecipeItemReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReducePickListFromInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -43,8 +43,10 @@ BEGIN TRY
 	IF @strTicketType = 'Inbound'
 	BEGIN
 		INSERT INTO @tblBill (intBillId)
-		SELECT DISTINCT intBillId
-		FROM tblGRUnPricedSpotTicket
+		SELECT DISTINCT A.intBillId
+		FROM tblGRUnPricedSpotTicket A
+		INNER JOIN tblAPBill B
+			ON B.intBillId = A.intBillId
 		WHERE intUnPricedId = @intUnPricedId
 
 		SELECT @intBillKey = MIN(intBillKey)
@@ -129,12 +131,15 @@ BEGIN TRY
 	SET dblUnitPrice = 0
 		,dblUnitBasis = 0
 	FROM tblGRUnPricedSpotTicket SpotTicket
-	JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
+	JOIN tblSCTicket SC 
+		ON SC.intTicketId = SpotTicket.intTicketId
 	WHERE SpotTicket.intUnPricedId = @intUnPricedId
 
 	UPDATE tblGRUnPriced 
 	SET ysnPosted = 0
 	WHERE intUnPricedId = @intUnPricedId
+
+	UPDATE tblGRUnPricedSpotTicket SET intBillId = NULL, intInvoiceId = NULL WHERE intUnPricedId = intUnPricedId
 
 END TRY
 
