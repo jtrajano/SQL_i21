@@ -489,5 +489,6 @@
     <None Include="dbo\Stored Procedures\uspPRImportOriginEarningTypes.sql" />
     <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
     <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateTMGetSiteView.sql" />
   </ItemGroup>
 </Project>
