@@ -33,6 +33,7 @@ BEGIN TRY
 	  , @ysnComboFreight BIT = 0  
 	  , @intComboFreightDistId INT = NULL
 	  , @ysnGrossNet BIT = 0
+	  , @intSendBolAttachmentOption INT = NULL
 
 	SELECT @intFreightItemId = intFreightItemId, @strFreightItemNo = I.strItemNo
 	FROM tblTRLoadHeader H INNER JOIN tblICItem I ON I.intItemId = H.intFreightItemId
