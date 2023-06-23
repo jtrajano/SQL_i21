@@ -33,6 +33,7 @@
     [ysnPPTransferCostForRemote]      BIT             NULL,
     [ysnPPTransferCostForNetwork]     BIT             NULL,
     [ysnPrintMiscellaneous]           BIT             NULL,
+    [ysnShowSST]                      BIT             NULL,
     [intFeeProfileId]                 INT             NULL,
     [strPrintSiteAddress]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [dtmLastBillingCycleDate]         DATETIME        NULL,
