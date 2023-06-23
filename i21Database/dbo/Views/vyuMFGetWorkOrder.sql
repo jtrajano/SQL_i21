@@ -205,6 +205,7 @@ GROUP BY C.intManufacturingCellId
 	   , csl.strSubLocationName
 	   , cs.strName 
 	   , d.strName 
+	   , R.ysnActive
 	   , ysnIncludeSchedule
 	   , CASE WHEN ISNULL(C.ysnIncludeSchedule, 0) = 0 THEN Schedule.intOrderHeaderId
 			  ELSE NULL
