@@ -1084,10 +1084,13 @@ BEGIN TRY
 											intInvoiceDetailId
 										from
 											tblARInvoiceDetail ARD with (nolock)
+											join tblARInvoice I on I.intInvoiceId = ARD.intInvoiceId
 										WHERE
 											ARD.intContractDetailId = @intContractDetailId
 											and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
 											and ARD.intInventoryShipmentChargeId is null
+											and isnull(ARD.ysnReturned,0) = 0
+											and I.strTransactionType = 'Invoice'
 										) ARD
 									
 						WHERE
@@ -1385,19 +1388,24 @@ BEGIN TRY
 					dtmInvoiceDate = null
 				FROM tblICInventoryShipmentItem RI with (nolock)
 				JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+				left join tblARInvoiceDetail di on di.intInventoryShipmentItemId = RI.intInventoryShipmentItemId and isnull(di.ysnReturned,0) = 1
 				OUTER APPLY (
 								select top 1
 									intInvoiceDetailId
 								from
 									tblARInvoiceDetail ARD with (nolock)
+									join tblARInvoice I on I.intInvoiceId = ARD.intInvoiceId
 								WHERE
 									ARD.intContractDetailId = @intContractDetailId
 									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
 									and ARD.intInventoryShipmentChargeId is null
+									and isnull(ARD.ysnReturned,0) = 0
+									and I.strTransactionType = 'Invoice'
 								) ARD
 								
 				WHERE
-					RI.intLineNo = @intContractDetailId	
+					RI.intLineNo = @intContractDetailId
+					and isnull(di.intInvoiceDetailId,0) = 0
 			) t
 			ORDER BY t.intInventoryShipmentItemId
 

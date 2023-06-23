@@ -419,7 +419,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
 :R .\GR\Fix_SettleStorage_Basis.sql
+:r "..\..\..\Integration\dbo\Stored Procedures\uspGRImportStorageTicket.sql"
 :R .\GR\Fix_intCommodityStockUOMId.sql
+
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql

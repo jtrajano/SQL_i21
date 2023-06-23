@@ -9271,6 +9271,9 @@
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPrepaidPayablesForeignPartial.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
+    <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
+    <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9580,6 +9583,12 @@
     <None Include="Scripts\Post-Deployment\QM\2_DefaultConfigurationData.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainThreeWayReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainRoth.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICompanyTotals.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIICustomerStorageTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGIIPhysicalInventory.sql" />
+    <Build Include="dbo\Tables\tblGRGIICustomerStorage.sql" />
+    <Build Include="dbo\Tables\tblGRGIIPhysicalInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

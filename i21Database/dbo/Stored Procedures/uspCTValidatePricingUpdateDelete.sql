@@ -75,6 +75,8 @@ begin try
 					join tblARInvoice i on i.intInvoiceId = di.intInvoiceId
 				where
 					isnull(i.ysnPosted,0) = 1
+					and i.strTransactionType = 'Invoice'
+					and isnull(di.ysnReturned,0) = 0
 					and ar.intPriceFixationDetailId = @intPriceFixationDetailId
 				end
 			else
@@ -119,6 +121,7 @@ begin try
 						join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId
 					where
 						ar.intPriceFixationDetailId = @intPriceFixationDetailId
+						and isnull(di.ysnReturned,0) = 0
 				end
 				else
 				begin
@@ -161,6 +164,8 @@ begin try
 			where
 				pfd.intPriceFixationDetailId = @intPriceFixationDetailId
 				and isnull(i.ysnPosted,0) <> 1
+				and i.strTransactionType = 'Invoice'
+				and isnull(di.ysnReturned,0) = 0
 			order by
 				di.intInvoiceDetailId desc
 
