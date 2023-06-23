@@ -204,7 +204,7 @@ BEGIN TRY
 			,SUM(LD.dblQuantity) dblQuantity
 		FROM tblLGLoadDetail LD
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+			WHEN ((ISNULL(LD.intPContractDetailId, 0) = 0) AND LD.intSContractDetailId = LC.intContractDetailId)
 				THEN LD.intSContractDetailId
 			ELSE LD.intPContractDetailId
 			END

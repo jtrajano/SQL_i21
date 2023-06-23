@@ -277,7 +277,7 @@ BEGIN
 					,intLoadItemUOMId = LD.intItemUOMId
 					,SUM(LD.dblQuantity) dblQuantity
 				FROM tblLGLoadDetail LD
-				JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intVendorId IS NOT NULL) 
+				JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND (L.intPurchaseSale = 2 OR L.intPurchaseSale = 3) AND A.ysnAccrue = 1 AND A.intVendorId IS NOT NULL AND LD.intSContractDetailId = A.intContractDetailId) 
 																		THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 				LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSCompanyLocationId ELSE LD.intPCompanyLocationId END
