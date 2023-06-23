@@ -51,6 +51,7 @@ SELECT TL.intLoadHeaderId
 	, strTractor = smtr.strTruckNumber
 	, strSalesUnit = NULL
 	, strInvoiceType = NULL
+	, IVX.strProductDescription AS strItemDescription 
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
@@ -67,6 +68,7 @@ left join tblTRState e on e.intStateId = TL.intStateId
 left join tblSCTruckDriverReference dr on dr.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
 left join tblSMShipViaTruck smtr on smtr.intEntityShipViaTruckId = TL.intTruckId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
+LEFT JOIN tblICItemVendorXref IVX ON IVX.intItemVendorXrefId = TR.intItemVendorXrefId  
 
 
 UNION ALL
@@ -115,6 +117,7 @@ SELECT TL.intLoadHeaderId
 	, strTractor = smtr.strTruckNumber
 	, strSalesUnit = EL.strSaleUnits
 	, strInvoiceType = Invoice.strType
+	, ICX.strProductDescription AS strItemDescription
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -134,3 +137,4 @@ LEFT JOIN vyuTRLinkedReceipts Receipts ON Receipts.intLoadDistributionDetailId =
 LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
 LEFT JOIN tblTMDispatchHistory TMH ON TMH.intDispatchId = DD.intTMOId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
+LEFT JOIN tblICItemCustomerXref ICX ON ICX.intItemCustomerXrefId = DD.intItemCustomerXrefId  
