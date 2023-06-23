@@ -54,14 +54,14 @@ WITH payInfo (
 			WHEN A.ysnPosted = 1 THEN 'RCVD'
 		ELSE '' END AS strStatus,
 		FORMAT(CAST(G.dtmClr AS DATE), 'yyyy-MM-dd') AS dtmClearedDate,
-		'iRely i21' AS strStatusMessage,
+		A.strCheckMessage AS strStatusMessage,
 		C.strBillId AS strVoucherNbr,
 		'NULL' AS strPaymentRoutingCode,
 		H.strTermCode AS strTerms,
 		FORMAT(CAST(A.dtmDatePaid AS DATE), 'yyyy-MM-dd') AS dtmAccountingPeriod
 	FROM tblAPPayment A
 	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+	INNER JOIN tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
 	INNER JOIN (tblAPVendor D INNER JOIN tblEMEntity D2 ON D.intEntityId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityId
 	INNER JOIN tblSMPaymentMethod E ON A.intPaymentMethodId = E.intPaymentMethodID
 	INNER JOIN tblSMCurrency F ON F.intCurrencyID = A.intCurrencyId
@@ -99,14 +99,14 @@ WITH payInfo (
 			WHEN A.ysnPosted = 1 THEN 'RCVD'
 		ELSE '' END AS strStatus,
 		FORMAT(CAST(G.dtmClr AS DATE), 'yyyy-MM-dd') AS dtmClearedDate,
-		'iRely i21' AS strStatusMessage,
+		A.strCheckMessage AS strStatusMessage,
 		C.strInvoiceNumber AS strVoucherNbr,
 		'NULL' AS strPaymentRoutingCode,
 		H.strTermCode AS strTerms,
 		FORMAT(CAST(A.dtmDatePaid AS DATE), 'yyyy-MM-dd') AS dtmAccountingPeriod
 	FROM tblAPPayment A
 	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-	INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
+	INNER JOIN tblARInvoice C ON ISNULL(B.intInvoiceId,B.intOrigInvoiceId) = C.intInvoiceId
 	INNER JOIN (tblAPVendor D INNER JOIN tblEMEntity D2 ON D.intEntityId = D2.intEntityId) ON A.intEntityVendorId = D.intEntityId
 	INNER JOIN tblSMPaymentMethod E ON A.intPaymentMethodId = E.intPaymentMethodID
 	INNER JOIN tblSMCurrency F ON F.intCurrencyID = A.intCurrencyId
