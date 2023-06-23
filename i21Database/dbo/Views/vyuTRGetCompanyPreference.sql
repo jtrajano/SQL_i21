@@ -47,6 +47,11 @@ SELECT CP.intCompanyPreferenceId
 	, CP.ysnAllowBlankDriver
 	, CP.ysnAllowBlankTruck
 	, CP.ysnAllowBlankTrailer
+	, CP.intSendBolAttachmentOptionId  
+	, strSendBolAttachmentOption = (CASE WHEN CP.intSendBolAttachmentOptionId = 1 THEN 'One-to-one relationship between BoL and Customer'    
+           WHEN CP.intSendBolAttachmentOptionId = 2 THEN 'Send to All Customer that received the Product'    
+           WHEN CP.intSendBolAttachmentOptionId = 3 THEN 'Do not send'    
+           ELSE NULL END) COLLATE Latin1_General_CI_AS    
 FROM tblTRCompanyPreference CP
 LEFT JOIN tblSMImportFileHeader Import on Import.intImportFileHeaderId = CP.intRackPriceImportMappingId
 LEFT JOIN tblSMImportFileHeader ImportBol ON ImportBol.intImportFileHeaderId = CP.intBolImportFormatId 
