@@ -48,7 +48,7 @@ SELECT lh.intLoadHeaderId
 	, dh.intEntityId as intCustomerId
 	, dh.intEntityLocationId as intCustomerLocationId
 	, dh.intCompanyLocationId as intDistributionCompanyLocationId
-	, intSalesPersonId = ISNULL(dh.intSalesPersonId, ISNULL(cel.intSalespersonId, arc.intSalespersonId))
+	, intCustomerSalesPersonId = ISNULL(dh.intSalesPersonId, ISNULL(cel.intSalespersonId, arc.intSalespersonId))
 	, dh.dtmActualDelivery
 	, dd.intDeliveryDetailId
 	, dd.intTMDispatchId
