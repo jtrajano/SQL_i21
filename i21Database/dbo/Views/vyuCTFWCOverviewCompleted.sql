@@ -35,8 +35,8 @@ AS
 				dblTargetNetWeight = CTD.dblNetWeight,
 				strTargetQtyUOM = ICQM.strUnitMeasure,
 				dblTargetQty = CTD.dblQuantity,
-				dblAllocatedQty = LGAS.dblAllocatedQuantity,
-				dblBalanceToAllocatedQty = CTD.dblQuantity - LGAS.dblAllocatedQuantity,
+				dblAllocatedQty = QA.dblApprovedQty,--LGAS.dblAllocatedQuantity, 
+				dblBalanceToAllocatedQty = CTD.dblQuantity - QA.dblApprovedQty,--LGAS.dblAllocatedQuantity,
 				strFCOrigin = MFB.strTeaOrigin,
 				strFCGardenMark = GM.strGardenMark,
 				strFCGradeCode = MFB.strLeafGrade,
@@ -85,7 +85,7 @@ AS
 			LEFT JOIN tblICUnitMeasure			ICM  WITH (NOLOCK) ON ICM.intUnitMeasureId	  = ICN.intUnitMeasureId
 			LEFT JOIN tblICItemUOM				ICQ  WITH (NOLOCK) ON ICQ.intItemUOMId		  =	CTD.intItemUOMId
 			LEFT JOIN tblICUnitMeasure			ICQM WITH (NOLOCK) ON ICQM.intUnitMeasureId	  = ICQ.intUnitMeasureId
-			LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK) ON LGAS.strPurchaseContractNumber = CH.strContractNumber  AND LGAS.intContractDetailId = CTD.intContractDetailId
+			--LEFT JOIN vyuLGAllocationStatus     LGAS WITH (NOLOCK) ON LGAS.strPurchaseContractNumber = CH.strContractNumber  AND LGAS.intContractDetailId = CTD.intContractDetailId
 			LEFT JOIN tblICStorageLocation		SL	 WITH (NOLOCK) ON SL.intStorageLocationId = CTD.intStorageLocationId
 			LEFT JOIN tblCTBook					CTB	 WITH (NOLOCK) ON CTB.intBookId			  = CH.intBookId
 			LEFT JOIN tblSMCity					LP	 WITH (NOLOCK) ON LP.intCityId			  =	CTD.intLoadingPortId
@@ -95,6 +95,7 @@ AS
 			LEFT JOIN tblQMSaleYear				SY	 WITH (NOLOCK) ON SY.intSaleYearId		  = MFB.intSalesYear
 			LEFT JOIN tblSMPurchasingGroup		PG	 WITH (NOLOCK) ON PG.intPurchasingGroupId = CTD.intPurchasingGroupId
 			LEFT JOIN tblARMarketZone			MZ   WITH (NOLOCK) ON MZ.intMarketZoneId	  = CTD.intMarketZoneId
+			OUTER APPLY dbo.fnCTGetSampleDetail(CTD.intContractDetailId) QA
 			WHERE CTD.intContractStatusId IN ( 5) --Open, Unconfirmed,Re-Open
 
 			
