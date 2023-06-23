@@ -491,7 +491,9 @@ BEGIN
 			,@strLocationName
 			,@strUOM
 		FROM #tblInOut
-		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment','Invoice')
+		WHERE (strTransactionType IN ('Outbound Shipment','Invoice', 'Inventory Shipment'))
+			--	OR (strTransactionType = 'Inventory Shipment' AND strOwnership = 'Company Owned')
+			--)
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
 

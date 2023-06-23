@@ -28,7 +28,8 @@ BEGIN
 			@strContractItemName	NVARCHAR(100),
 			@strEntityName			NVARCHAR(100),
 			@intBrokerageAccountId	INT,
-			@strAccountNumber		NVARCHAR(100)
+			@strAccountNumber		NVARCHAR(100),
+			@currentDate date = getdate();
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -205,8 +206,8 @@ BEGIN
 		SELECT TOP 1 intFutureMonthId,REPLACE(strFutureMonth,' ','('+strSymbol+') ') strFutureMonth FROM tblRKFuturesMonth
 		WHERE intFutureMarketId = @intMarketId
 		AND CAST(@dtmEndDate AS DATE) <= CAST(dtmLastTradingDate AS DATE)
-		AND CAST(GETDATE() AS DATE) <= CAST(dtmLastTradingDate AS DATE)
-		AND ysnExpired = 0
+		AND @currentDate <= CAST(dtmLastTradingDate AS DATE)
+		AND isnull(ysnExpired,0) = 0
 		ORDER BY dtmLastTradingDate ASC
 		--AND ysnExpired <> 1
 		--AND ISNULL(	dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))		

@@ -151,6 +151,7 @@ SELECT L.intLoadId
 	,L.intSubBookId
 	,SB.strSubBook
 	,L.ysnAllowReweighs
+	,L.ysnCancelled
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET

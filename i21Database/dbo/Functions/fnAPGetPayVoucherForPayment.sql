@@ -106,10 +106,7 @@ RETURNS TABLE AS RETURN
 						(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	AND 1 = (CASE WHEN @paymentId = 0
-					THEN (CASE WHEN ((forPay.ysnInPayment IS NULL OR forPay.ysnInPayment = 0) OR forPay.ysnPrepayHasPayment <> 0) THEN 1 ELSE 0 END)
-					ELSE 1 END)
-	AND 1 = (CASE WHEN @paymentId = 0
-					THEN (CASE WHEN forPay.ysnInPaymentSched = 0 THEN 1 ELSE 0 END)
+					THEN (CASE WHEN ((forPay.ysnInPayment IS NULL OR forPay.ysnInPayment = 0) OR forPay.ysnPrepayHasPayment <> 0) THEN 1 WHEN forPay.ysnInPaymentSched = 1 THEN 1 ELSE 0 END)
 					ELSE 1 END)
 	-- UNION ALL
 	-- SELECT
