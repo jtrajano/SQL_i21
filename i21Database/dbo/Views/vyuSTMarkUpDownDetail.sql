@@ -75,7 +75,8 @@ SELECT
 
 	--CategoryPricing
 	dblDeptLevelTotalCostValue				=	ISNULL(catPricing.dblTotalCostValue, 0),
-	dblDeptLevelTotalRetailValue			=	ISNULL(catPricing.dblTotalRetailValue, 0)
+	dblDeptLevelTotalRetailValue			=	ISNULL(catPricing.dblTotalRetailValue, 0),
+	dblLastCost =	ISNULL(markDetail.dblLastCost, 0)
 FROM tblSTMarkUpDownDetail markDetail
 INNER JOIN tblSTMarkUpDown mark
 	ON markDetail.intMarkUpDownId = mark.intMarkUpDownId

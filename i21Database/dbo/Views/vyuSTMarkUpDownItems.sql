@@ -14,7 +14,8 @@ I.strItemNo
 ,vyupriceHierarchy.dblSalePrice
 ,vyupriceHierarchyStockUnit.dblSalePrice AS dblRetailItemPerUnit
 ,vyupriceHierarchyStockUnit.dblSalePrice AS dblStockUnitPrice
-,I.intCategoryId
+,I.intCategoryId,
+vyupriceHierarchy.dblLastCost
 FROM tblICItem I 
 INNER JOIN tblICItemLocation IL 
 	ON I.intItemId = IL.intItemId
