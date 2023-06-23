@@ -345,6 +345,8 @@ AS
 			, CD.dblPurchasePrice
 			, CD.dblLandedPrice
 			, CD.dblSalesPrice
+			, CD.intItemXrefId
+			, strItemXrefProduct = case when CH.intContractTypeId = 1 then vx.strVendorProduct else cx.strCustomerProduct end
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT JOIN tblEMEntity credE on credE.intEntityId = CD.intLCApplicantId
@@ -502,3 +504,5 @@ AS
 	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId
 	-- Commodity Attributes
 	LEFT JOIN vyuICGetCompactItem ICC ON ICC.intItemId = CD.intItemId
+	left join tblICItemVendorXref vx on vx.intItemVendorXrefId = CD.intItemXrefId
+	left join tblICItemCustomerXref cx on cx.intItemCustomerXrefId = CD.intItemXrefId

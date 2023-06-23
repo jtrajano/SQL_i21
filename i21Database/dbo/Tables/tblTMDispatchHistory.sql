@@ -24,7 +24,7 @@
     [strSequence]              NVARCHAR (10)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [intUserId]                INT             DEFAULT 0 NULL,
     [dtmLastUpdated]           DATETIME        DEFAULT 0 NULL,
-    [ysnDispatched]            BIT             NULL,
+    [ysnDispatched]            BIT             NULL,        
     [strCancelDispatchMessage] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intDeliveryTermId]        INT             NULL,
     [dtmDispatchingDate]       DATETIME        NULL,

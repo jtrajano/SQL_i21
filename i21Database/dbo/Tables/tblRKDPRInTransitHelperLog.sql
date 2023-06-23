@@ -9,6 +9,7 @@
     [strBucketType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [dblQty] NUMERIC(24, 10) NULL,
 	[intContractDetailId] INT NULL,
+	[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKDPRInTransitHelperLog] PRIMARY KEY ([intDPRInTransitHelperLogId])
 )

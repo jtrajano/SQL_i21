@@ -11,7 +11,7 @@ SELECT
 	,DOD.intEntityId
 	,DOD.intEntityLocationId
 	,intSiteId = DOD.intTMSiteId
-	
+	,intTMCustomerId = TMC.intCustomerID
 	,strDispatchOrderNumber = DO.strDispatchOrderNumber
 	,DO.intDispatchStatus
 	,strDispatchStatus = CASE (DO.intDispatchStatus) 
@@ -66,5 +66,7 @@ LEFT JOIN tblSMShipVia SV ON SV.intEntityId = DO.intEntityShipViaId
 LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = DOR.intEntityShipViaTruckId
 LEFT JOIN tblSMShipViaTrailer SVTL ON SVTL.intEntityShipViaTrailerId = DO.intEntityShipViaTrailerId
 LEFT JOIN tblEMEntity DV ON DV.intEntityId = DOR.intDriverEntityId
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = DOD.intTMSiteId
+LEFT JOIN tblTMCustomer TMC ON TMC.intCustomerID = TMS.intCustomerID
 
 GO

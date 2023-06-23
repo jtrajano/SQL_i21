@@ -20,7 +20,8 @@
 	, ysnInTransit BIT
 	, strPeriod NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, dtmDateLastSynced DATETIME2 NULL
-	, strKey NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	, strKey NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strCompany NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	CONSTRAINT [PK_tblICInventoryValuationSummary] PRIMARY KEY ([intInventoryValuationSummaryId]))
 
 GO

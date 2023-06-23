@@ -37,6 +37,7 @@
 	[dblForexRate] DECIMAL(18, 6) NOT NULL DEFAULT 0,  
 	[ysnSubCurrency] BIT NOT NULL DEFAULT 0,
     [strAdditionalInfo] NVARCHAR(400) NULL, 
+	[intItemVendorXrefId] INT NULL,
 	[guiApiItemTaxIdentifier] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [FK_tblPOPurchaseDetail_tblPOPurchase] FOREIGN KEY ([intPurchaseId]) REFERENCES [dbo].[tblPOPurchase] ([intPurchaseId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblPOPurchaseDetail_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),

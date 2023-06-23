@@ -372,7 +372,8 @@ BEGIN
 		,[strBinNumber]
 		,[strGroupNumber]
 		,[strFeedDiet]
-	)								
+		,[intDispatchId]
+	)
 	SELECT		 	
 		 [intId]							= IE.[intId]
 		,[strTransactionType]				= IE.[strTransactionType]
@@ -523,6 +524,7 @@ BEGIN
 		,[strBinNumber]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strBinNumber] ELSE NULL END)
 		,[strGroupNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strGroupNumber] ELSE NULL END)
 		,[strFeedDiet]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFeedDiet] ELSE NULL END)
+		,[intDispatchId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intDispatchId] ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -743,7 +745,8 @@ BEGIN
             ,[dblAddOnQuantity]
 			,[strBinNumber]
 			,[strGroupNumber]
-			,[strFeedDiet])
+			,[strFeedDiet]
+			,[intDispatchId])
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -895,6 +898,7 @@ BEGIN
 			,[strBinNumber]							= ITG.[strBinNumber]
 			,[strGroupNumber]						= ITG.[strGroupNumber]
 			,[strFeedDiet]							= ITG.[strFeedDiet]
+			,[intDispatchId]						= ITG.[intDispatchId]
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN

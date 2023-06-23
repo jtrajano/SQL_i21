@@ -75,6 +75,8 @@ SELECT intDispatchId = TMOrder.intDispatchId
 	, Customer.intShipToId	
 	, Site.intLocationId
 	, intShiftId = @intShiftId
+	, Dispatch.ysnLockPrice
+	, Site.strRecurringPONumber
 INTO #Dispatch
 FROM tblTMOrder TMOrder
 INNER JOIN tblTMDispatch Dispatch ON TMOrder.intDispatchId = Dispatch.intDispatchID
@@ -112,7 +114,9 @@ INSERT INTO tblMBILOrder(intDispatchId
 	, intStopNumber
 	, intTaxStateId
 	, intShipToId
-	, intLocationId)
+	, intLocationId
+	, ysnLockPrice
+	, strRecurringPONumber)
 SELECT DISTINCT intDispatchId
 	, strOrderNumber
 	, strOrderStatus
@@ -126,6 +130,8 @@ SELECT DISTINCT intDispatchId
 	, intTaxStateID
 	, intShipToId
 	, intLocationId
+	, ysnLockPrice
+	, strRecurringPONumber
 FROM #Dispatch
 LEFT JOIN tblSMTerm ON tblSMTerm.intTermID = #Dispatch.intTermId
 WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Dispatched','Routed')

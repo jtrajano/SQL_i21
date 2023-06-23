@@ -4,6 +4,7 @@ AS
 SELECT	vp.intVendorPricingId
 		,i.intItemId 
 		,i.strItemNo	
+		,i.strDescription
 		,e.strName
 		,strEntityLocation = el.strLocationName			
 		,vp.dtmBeginDate

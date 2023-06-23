@@ -248,6 +248,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	strContractReference NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intGardenMarkId] [int] NULL,
 	[intReasonCodeId] [int] NULL,
+	intItemXrefId int null,
 
 	dblPurchasePrice NUMERIC(18, 6) NULL DEFAULT(0),
 	dblLandedPrice NUMERIC(18, 6) NULL DEFAULT(0),

@@ -103,6 +103,7 @@ BEGIN
 	INNER JOIN tblARInvoice AR
 		ON AR.intInvoiceId = CompOwn.intTransactionRecordHeaderId
 			AND AR.intSalesOrderId IS NULL
+			AND AR.strInvoiceNumber = CompOwn.strTransactionNumber
 	INNER JOIN tblARInvoiceDetail AD
 		ON AD.intInvoiceDetailId = CompOwn.intTransactionRecordId
 			AND AD.intTicketId IS NULL

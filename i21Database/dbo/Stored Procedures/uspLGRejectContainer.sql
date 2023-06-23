@@ -18,12 +18,15 @@ BEGIN TRY
 	DECLARE @intRecordId INT
 	DECLARE @strReceiptNumber NVARCHAR(100)
 	DECLARE @ysnPosted BIT
+	DECLARE @ysnWeightClaimsByContainer BIT
 	DECLARE @tblLoadContract TABLE 
 			(intRecordId INT Identity(1, 1)
 			,intContractDetailId INT
 			,intLoadDetailId INT
 			,intLoadDetailItemUOMId INT
 			,dblLinkQty NUMERIC(18, 6))
+
+	SELECT TOP 1 @ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 0) FROM tblLGCompanyPreference
 
 	SELECT @intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		  ,@strLoadContainerNumber = LC.strContainerNumber
@@ -123,7 +126,11 @@ BEGIN TRY
 	--If Rejected from Inventory Return, update Pending Claim entry
 	IF (@strScreenName = 'Inventory Return')
 	BEGIN
-		EXEC uspLGAddPendingClaim @intLoadId, 1
+		-- Insert to Pending Claims
+		IF (@ysnWeightClaimsByContainer = 1)
+			EXEC uspLGAddPendingClaim @intLoadId, 1, @intLoadContainerId
+		ELSE
+			EXEC uspLGAddPendingClaim @intLoadId, 1
 	END
 
 END TRY

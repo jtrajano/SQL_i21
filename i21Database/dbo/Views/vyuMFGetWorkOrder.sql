@@ -1,92 +1,108 @@
 ﻿CREATE VIEW vyuMFGetWorkOrder
 AS
 SELECT C.intManufacturingCellId
-	 , C.strCellName
-	 , W.intWorkOrderId
-	 , W.strWorkOrderNo
-	 , W.strReferenceNo
-	 , W.dblBatchSize
-	 , MCUOM.strUnitMeasure AS strBatchSizeUOM
-	 , W.dblQuantity
-	 , W.dtmExpectedDate
-	 , W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
-	 , W.dblProducedQuantity
-	 , W.strComment AS strWorkOrderComments
-	 , W.dtmOrderDate
-	 ,  WIPItemNo.strItemNo AS strWIPItemNo
-	 , IC.intCategoryId
-	 , IC.strCategoryCode
-	 , IC.strDescription AS strCategoryDesc
-	 , I.strType
-	 , I.intItemId
-	 , I.strItemNo
-	 , I.strDescription
-	 , IU.intItemUOMId
-	 , U.intUnitMeasureId
-	 , U.strUnitMeasure
-	 , WS.intStatusId
-	 , WS.strName AS strStatusName
-	 , (CASE WHEN ISNULL(WS1.strName, 'New') = 'New' THEN 'Not Started'
-			 ELSE WS1.strName
-		END) AS strCountStatusName
-	 , PT.intProductionTypeId
-	 , PT.strName AS strProductionType
-	 , W.dtmPlannedDate
-	 , SH.intShiftId
-	 , SH.strShiftName
-	 , P.intPackTypeId
-	 , P.strPackName
-	 , W.dtmCreated
-	 , W.intCreatedUserId
-	 , US.strUserName
-	 , W.dtmLastModified
-	 , W.intLastModifiedUserId
-	 , LM.strUserName AS strLastModifiedUser
-	 , W.intExecutionOrder
-	 , W.strVendorLotNo
-	 , W.strLotNumber
-	 , W.intLocationId
-	 , W.strSalesOrderNo
-	 , W.strCustomerOrderNo
-	 , PW.intWorkOrderId AS intParentWorkOrderId
-	 , PW.strWorkOrderNo AS strParentWorkOrderNo
-	 , W.intManufacturingProcessId
-	 , MP.strProcessName
-	 , W.intSupervisorId
-	 , SS.strUserName AS strSupervisor
-	 , W.intBlendRequirementId
-	 , MP.intAttributeTypeId
-	 , W.dtmLastProducedDate
-	 , SW.strComments AS strScheduleComment
-	 , SL.intStorageLocationId
-	 , SL.strName AS [strStorageLocation]
-	 , CLSL.strSubLocationName AS strCompanySubLocationName
-	 , WS.strBackColorName
-	 , SL.intSubLocationId
-	 , BR.strDemandNo
-	 , W.intCountStatusId
-	 , I.intLayerPerPallet
-	 , I.intUnitPerLayer
-	 , I.strLotTracking
-	 , csl.strSubLocationName
-	 , cs.strName AS strCustomerName
-	 , d.strName AS strDepartmentName
-	 , R.ysnActive
-	 , ISNULL(C.ysnIncludeSchedule, 0) AS ysnIncludeSchedule
-	 , (CASE WHEN ISNULL(C.ysnIncludeSchedule, 0) = 0 THEN Schedule.intOrderHeaderId
-			 ELSE NULL
-		END) AS intOrderId
-	 , W.dtmActualProductionStartDate
-	 , W.dtmActualProductionEndDate
-	 , SO.strSalesOrderNumber
-	 , E.strName AS strSalesRepresentative
-	 , L.strLoadNumber
-	 , WRMH.strServiceContractNo
-	 , W.strERPServicePONumber
-	 , M.strName AS strMachineName
-	 , E1.strName AS strVendorName
-	 , TrialBlendSheetStatus.strName AS strTrialBlendSheetStatus
-	 , W.dtmApprovedDate
+	,C.strCellName
+	,W.intWorkOrderId
+	,W.strWorkOrderNo
+	,W.strReferenceNo
+	,W.dblBatchSize
+	,MCUOM.strUnitMeasure AS strBatchSizeUOM
+	,W.dblQuantity
+	,W.dtmExpectedDate
+	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
+	,W.dblProducedQuantity
+	,W.strComment AS strWorkOrderComments
+	,W.dtmOrderDate
+	,(
+		SELECT TOP 1 strItemNo
+		FROM dbo.tblMFRecipeItem RI
+		JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
+		WHERE RI.intRecipeId = R.intRecipeId
+			AND WI.strType = 'Assembly/Blend'
+		) AS strWIPItemNo
+	,IC.intCategoryId
+	,IC.strCategoryCode
+	,IC.strDescription AS strCategoryDesc
+	,I.strType
+	,I.intItemId
+	,I.strItemNo
+	,I.strDescription
+	,IU.intItemUOMId
+	,U.intUnitMeasureId
+	,U.strUnitMeasure
+	,WS.intStatusId
+	,WS.strName AS strStatusName
+	,(
+		CASE 
+			WHEN ISNULL(WS1.strName, 'New') = 'New'
+				THEN 'Not Started'
+			ELSE WS1.strName
+			END
+		) AS strCountStatusName
+	,PT.intProductionTypeId
+	,PT.strName AS strProductionType
+	,W.dtmPlannedDate
+	,SH.intShiftId
+	,SH.strShiftName
+	,P.intPackTypeId
+	,P.strPackName
+	,W.dtmCreated
+	,W.intCreatedUserId
+	,US.strUserName
+	,W.dtmLastModified
+	,W.intLastModifiedUserId
+	,LM.strUserName AS strLastModifiedUser
+	,W.intExecutionOrder
+	,W.strVendorLotNo
+	,W.strLotNumber
+	,W.intLocationId
+	,W.strSalesOrderNo
+	,W.strCustomerOrderNo
+	,PW.intWorkOrderId AS intParentWorkOrderId
+	,PW.strWorkOrderNo AS strParentWorkOrderNo
+	,W.intManufacturingProcessId
+	,MP.strProcessName
+	,W.intSupervisorId
+	,SS.strUserName AS strSupervisor
+	,W.intBlendRequirementId
+	,MP.intAttributeTypeId
+	,W.dtmLastProducedDate
+	,SW.strComments AS strScheduleComment
+	,SL.intStorageLocationId
+	,SL.strName AS [strStorageLocation]
+	,CLSL.strSubLocationName AS strCompanySubLocationName
+	,WS.strBackColorName
+	,SL.intSubLocationId
+	,BR.strDemandNo
+	,W.intCountStatusId
+	,I.intLayerPerPallet
+	,I.intUnitPerLayer
+	,I.strLotTracking
+	,csl.strSubLocationName
+	,cs.strName AS strCustomerName
+	,d.strName AS strDepartmentName
+	,R.ysnActive
+	,ISNULL(C.ysnIncludeSchedule, 0) AS ysnIncludeSchedule
+	,(
+		CASE 
+			WHEN ISNULL(C.ysnIncludeSchedule, 0) = 0
+				THEN (
+						SELECT TOP 1 intOrderHeaderId
+						FROM tblMFStageWorkOrder
+						WHERE intWorkOrderId = W.intWorkOrderId
+						)
+			ELSE NULL
+			END
+		) AS intOrderId
+		,W.dtmActualProductionStartDate
+		,W.dtmActualProductionEndDate
+		,SO.strSalesOrderNumber
+		,E.strName AS strSalesRepresentative
+		,L.strLoadNumber
+		,WRMH.strServiceContractNo
+		,W.strERPServicePONumber
+		,M.strName AS strMachineName
+		,E1.strName AS strVendorName
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId

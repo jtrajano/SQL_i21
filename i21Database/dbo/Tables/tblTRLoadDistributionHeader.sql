@@ -13,6 +13,7 @@
 	[intInvoiceId] INT NULL,	
 	[intConcurrencyId] [int] NOT NULL,
 	[ysnMobileInvoice] [BIT] NULL,
+	[intDeliveryHeaderId] INT NULL,
 	CONSTRAINT [PK_tblTRLoadDistributionHeader] PRIMARY KEY ([intLoadDistributionHeaderId]),
 	CONSTRAINT [FK_tblTRLoadDistributionHeader_tblTRLoadHeader_intLoadHeaderId] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [dbo].[tblTRLoadHeader] ([intLoadHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRLoadDistributionHeader_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] (intEntityId),

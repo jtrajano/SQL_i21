@@ -13,6 +13,7 @@ CREATE PROCEDURE dbo.uspApiCalculateTax (
 	, @Price NUMERIC(18, 6)
 	, @FreightTermId INT
 	, @ItemTaxIdentifier UNIQUEIDENTIFIER
+	, @Tax NUMERIC(18, 6) OUTPUT
 )
 AS
 
@@ -186,7 +187,7 @@ SELECT
 	@dblTax = SUM(dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, NULL, @guiTaxesUniqueId, t.intRestApiItemTaxesId))
 FROM tblRestApiItemTaxes t
 WHERE t.guiTaxesUniqueId = @guiTaxesUniqueId
-
+SET @Tax = ISNULL(@dblTax, 0)
 SELECT ISNULL(@dblTax, 0) as dblTax
 
 DELETE FROM tblRestApiItemTaxes WHERE guiTaxesUniqueId = @guiTaxesUniqueId

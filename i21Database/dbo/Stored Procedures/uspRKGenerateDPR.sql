@@ -3582,7 +3582,7 @@ BEGIN TRY
 				, strLocationName
 				, intFutOptTransactionHeaderId
 				, strInternalTradeNo
-
+				, dblNoOfLot
 				)
 			SELECT strCommodityCode
 				, 'Net Hedge' COLLATE Latin1_General_CI_AS
@@ -3595,6 +3595,7 @@ BEGIN TRY
 				, strLocationName
 				, intFutOptTransactionHeaderId
 				, strInternalTradeNo
+				, dblNoOfLot
 			FROM @ListContractHedge
 			WHERE intCommodityId = @intCommodityId AND strType = 'Crush'
 

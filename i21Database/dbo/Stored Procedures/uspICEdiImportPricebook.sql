@@ -2236,12 +2236,12 @@ USING (
 										 END / CASE WHEN ISNUMERIC(Pricebook.strCaseBoxSizeQuantityPerCaseBox) = 1 THEN CAST(Pricebook.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 													ELSE 1
 											   END, Price.dblStandardCost)
-		 , dblLastCost			= (CASE WHEN ISNULL(Price.dblLastCost, 0) = 0 THEN ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+		 , dblLastCost			= (CASE WHEN ISNULL(Price.dblLastCost, 0) = 0 THEN ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1  THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) / ISNULL(CAST(ISNULL(Pricebook.strCaseBoxSizeQuantityPerCaseBox, '1') AS NUMERIC(16, 8)), 1)
 																							  ELSE NULL 
 																						  END, Price.dblLastCost)
 									   ELSE Price.dblLastCost
 								  END)
-		 , dblAverageCost		= (CASE WHEN ISNULL(Price.dblAverageCost, 0) = 0 THEN ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) 
+		 , dblAverageCost		= (CASE WHEN ISNULL(Price.dblAverageCost, 0) = 0 THEN ISNULL(CASE WHEN ISNUMERIC(Pricebook.strCaseCost) = 1 THEN CAST(Pricebook.strCaseCost AS NUMERIC(38, 20)) / ISNULL(CAST(ISNULL(Pricebook.strCaseBoxSizeQuantityPerCaseBox, '1') AS NUMERIC(16, 8)), 1)
 																							  ELSE NULL 
 																						  END, Price.dblAverageCost)
 									   ELSE Price.dblAverageCost

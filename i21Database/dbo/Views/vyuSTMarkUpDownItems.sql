@@ -14,7 +14,8 @@ I.strItemNo
 ,vyupriceHierarchy.dblSalePrice
 ,vyupriceHierarchyStockUnit.dblSalePrice AS dblRetailItemPerUnit
 ,vyupriceHierarchyStockUnit.dblSalePrice AS dblStockUnitPrice
-,I.intCategoryId
+,I.intCategoryId,
+vyupriceHierarchy.dblLastCost
 FROM tblICItem I 
 INNER JOIN tblICItemLocation IL 
 	ON I.intItemId = IL.intItemId
@@ -52,4 +53,5 @@ INNER JOIN (
 INNER JOIN tblSTStore ST 
 	ON IL.intLocationId = ST.intCompanyLocationId
 WHERE I.strLotTracking = 'No'
-AND IL.intCostingMethod = 6
+AND ISNULL(I.intCategoryId, 0) <> 0
+--AND IL.intCostingMethod = 6
