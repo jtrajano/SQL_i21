@@ -32,6 +32,7 @@ SELECT ST.*
 	   , CustomerCharge.strDescription as strCustomerChargeDescription
 	   , CashTransaction.strDescription as strCashTransactionDescription
 	   , strConsFuelDiscountItem			 =    FuelDiscountItem.strItemNo
+	   , strRegisterClass                   = Register.strRegisterClass
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
@@ -86,3 +87,4 @@ LEFT JOIN tblCMBank Bank
 	ON ConsBankDepositDraftId.intBankId = Bank.intBankId
 LEFT JOIN tblGLAccount ConsARAccountId
 	ON ST.intConsDelearCommissionARAccountId = ConsARAccountId.intAccountId
+LEFT JOIN tblSTRegister Register ON ST.intRegisterId = Register.intRegisterId

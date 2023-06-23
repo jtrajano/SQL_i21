@@ -108,6 +108,8 @@
 	[strUpdateStoreAppInterval]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
 	[ysnAllowAutoUpdate]				BIT	NULL, 
 	[strDaysToRetrieveTranslog]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL, 
+    [ysnUsesThirdPartyInterfaceForXmlFiles] BIT NULL,
+    [strPassportIpAddress] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTRegister] PRIMARY KEY CLUSTERED ([intRegisterId] ASC), 
