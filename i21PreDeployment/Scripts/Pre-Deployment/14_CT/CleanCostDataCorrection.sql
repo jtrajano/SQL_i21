@@ -90,9 +90,7 @@ BEGIN
 		
 	');
 
-			ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
-			
-		');
+		
 	END
 	
 	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail'))
