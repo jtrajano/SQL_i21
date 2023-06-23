@@ -5,7 +5,7 @@ AS
 
 DECLARE @intItemForFreightId	INT = (SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference)
 
-DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil')
+DELETE FROM tblARInvoiceTaxReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil','Format 10 - Berry Trucking')
 INSERT INTO tblARInvoiceTaxReportStagingTable (
 	  [intTransactionId]
 	, [intTransactionDetailId]
@@ -57,7 +57,7 @@ INNER JOIN (
 	FROM tblARInvoiceReportStagingTable
 	WHERE intEntityUserId = @intEntityUserId 
 	AND strRequestId = @strRequestId 
-	AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil')
+	AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil','Format 10 - Berry Trucking')
 ) I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId	

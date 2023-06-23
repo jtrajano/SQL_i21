@@ -215,7 +215,7 @@ BEGIN
 		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
 		DECLARE @dblCheckoutTotalCustomerPayments AS DECIMAL(18,6)
 		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
-		DECLARE @strCheckoutType NVARCHAR(100)		
+		DECLARE @strCheckoutType NVARCHAR(100)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
 				, @intConsCreditMemoId = intConsCreditMemoId
@@ -3825,9 +3825,9 @@ BEGIN
 												,[intItemId]				= I.intItemId
 												,[ysnInventory]				= 1
 												,[strItemDescription]		= I.strDescription
-												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[intOrderUOMId]			= UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
-												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+												,[intItemUOMId]				= UOM.intItemUOMId
 												--,[dblQtyShipped]			= CASE
 												--									-- Refference:  http://jira.irelyserver.com/browse/ST-1558
 												--									WHEN @strInvoiceTransactionTypeMain = @strCASH
@@ -3884,6 +3884,10 @@ BEGIN
 										ON CH.intCheckoutId = DC.intCheckoutId
 									JOIN tblICItem I 
 										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemUOM UOM 
+										ON I.intItemId = UOM.intItemId
+									JOIN tblICUnitMeasure UM
+										ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 									JOIN tblICItemLocation IL
 										ON I.intItemId = IL.intItemId
 										AND ST.intCompanyLocationId = IL.intLocationId
@@ -4032,9 +4036,9 @@ BEGIN
 												,[intItemId]				= I.intItemId
 												,[ysnInventory]				= 1
 												,[strItemDescription]		= I.strDescription
-												,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
+												,[intOrderUOMId]			= UOM.intItemUOMId
 												,[dblQtyOrdered]			= 0 -- 1
-												,[intItemUOMId]				= NULL -- UOM.intItemUOMId
+												,[intItemUOMId]				= UOM.intItemUOMId
 
 												--,[dblQtyShipped]			= CASE
 												--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
@@ -4105,6 +4109,10 @@ BEGIN
 										ON CH.intCheckoutId = DC.intCheckoutId
 									JOIN tblICItem I 
 										ON ST.intConsDealerCommissionItemId = I.intItemId 
+									JOIN tblICItemUOM UOM 
+										ON I.intItemId = UOM.intItemId
+									JOIN tblICUnitMeasure UM
+										ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 									JOIN tblICItemLocation IL
 										ON I.intItemId = IL.intItemId
 										AND ST.intCompanyLocationId = IL.intLocationId
@@ -4118,8 +4126,6 @@ BEGIN
 				----------------------------------------------------------------------
 				------------------------- END DEALER COMMISSION ------------------------
 				----------------------------------------------------------------------
-
-
 
 
 				IF @ysnConsignmentStore = 1 AND @ysnConsAddOutsideFuelDiscounts = 1
@@ -6960,7 +6966,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN CAST(1 AS BIT)
 														WHEN Inv.dblInvoiceTotal > (
 															(CASE
@@ -6973,7 +6979,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN CAST(0 AS BIT)
 														WHEN Inv.dblInvoiceTotal < (
 															(CASE
@@ -6986,7 +6992,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN CAST(0 AS BIT)
 												END
 												WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
@@ -7002,7 +7008,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(1 AS BIT)
 															WHEN Inv.dblInvoiceTotal > ((
 															(CASE
@@ -7015,7 +7021,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 															WHEN Inv.dblInvoiceTotal < ((
 															(CASE
@@ -7028,7 +7034,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 												END
 											END AS ysnEqual
@@ -7047,7 +7053,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
 														WHEN Inv.dblInvoiceTotal > (
 														(CASE
@@ -7060,7 +7066,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN 
 																CASE 
 																	WHEN @ysnConsignmentStore = 1
@@ -7096,7 +7102,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END))
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL((CASE
@@ -7124,7 +7130,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
 														WHEN Inv.dblInvoiceTotal > ((
 														(CASE
@@ -7137,7 +7143,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 
 																CASE 
 																	WHEN @ysnConsignmentStore = 1
@@ -7171,7 +7177,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE
@@ -7968,7 +7974,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(1 AS BIT)
 															WHEN Inv.dblInvoiceTotal > ((
 															(CASE
@@ -7983,7 +7989,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 															WHEN Inv.dblInvoiceTotal < ((
 															(CASE
@@ -7998,7 +8004,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END) 
-															- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+															- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 																THEN CAST(0 AS BIT)
 												END
 											END AS ysnEqual
@@ -8019,7 +8025,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments + ATM Replenished'
 														WHEN Inv.dblInvoiceTotal > ((
 														(CASE
@@ -8034,7 +8040,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 
 																CASE 
 																	WHEN @ysnConsignmentStore = 1
@@ -8072,7 +8078,7 @@ IF(@ysnDebug = 1)
 																WHEN @ysnConsignmentStore = 0
 																	THEN CH.dblTotalDeposits
 															END)
-														- CH.dblCustomerPayments + CH.dblATMReplenished) * -1)
+														- CH.dblCustomerPayments + (CASE WHEN ISNULL(CH.ysnNoEffectOnDeposit, 0) = 0 THEN CH.dblATMReplenished ELSE 0 END)) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments + ATM Replenished. Posting will not continue.<br>'
 																				+ 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
 																				+ 'Total Deposits: ' + CAST(ISNULL(((CASE

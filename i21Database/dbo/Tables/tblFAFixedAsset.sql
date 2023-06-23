@@ -63,6 +63,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intAssetTaxJurisdictionId]		INT NULL,
 	[intFixedAssetJournalId] INT NULL,
 	[ysnOverrideLocation]		BIT DEFAULT (1) NOT NULL,
+	[strAssetTagNo]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

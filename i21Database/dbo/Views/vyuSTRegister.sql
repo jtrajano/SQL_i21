@@ -156,16 +156,9 @@ SELECT reg.intRegisterId
 	, reg.[strUpdateStoreAppInterval]
 	, reg.[ysnAllowAutoUpdate]			
 	, reg.[strDaysToRetrieveTranslog]	
+	, reg.[ysnUsesThirdPartyInterfaceForXmlFiles]	
+	, reg.[strPassportIpAddress]	
 	, reg.intConcurrencyId 
 FROM tblSTRegister reg
 INNER JOIN tblSTStore st
 	ON st.intStoreId = reg.intStoreId
-
---SELECT R.intRegisterId
---    , R.intStoreId
---    , R.strRegisterName
---    , R.strRegisterClass
---    ,S.intStoreNo 
---FROM tblSTRegister R
---INNER JOIN tblSTStore S 
---	ON S.intStoreId = R.intStoreId

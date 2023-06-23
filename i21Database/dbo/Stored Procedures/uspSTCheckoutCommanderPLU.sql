@@ -286,7 +286,9 @@ BEGIN
 													WHEN CAST(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) AS INT) = 0
 														THEN 0
 													ELSE ISNULL( NULLIF( CAST(dblnetSalesamount AS DECIMAL(18, 6)) ,0) , 0) /   CAST(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) AS INT)
-												END
+												END,
+				intModifier						= intpluBasemodifier
+				
 			INTO #tblTempForCalculation
 			FROM #tblTemp
 			-- ==================================================================================================================
@@ -389,63 +391,79 @@ BEGIN
 					, intConcurrencyId
 					, intCalculationId
 				)
-				SELECT 
-					intCheckoutId		= @intCheckoutId
-				  , intItemUPCId		= UOM.intItemUOMId
-				  , strInvalidUPCCode   = NULL
-				  , strDescription		= I.strDescription
-				  , intVendorId			= IL.intVendorId
-				  , intQtySold			= (TempChk.SalesQuantity)
-				  , dblCurrentPrice		= CASE 
-											WHEN (TempChk.SalesQuantity) = 0
-												THEN 0
-											ELSE (TempChk.SalesAmount)  /  (TempChk.SalesQuantity)
-										END
-				  , dblDiscountAmount	= (TempChk.DiscountAmount + TempChk.PromotionAmount)
-				  -- , dblRefundAmount     = Chk.RefundAmount
-				  , dblGrossSales		= (TempChk.SalesAmount)
-				  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
-				  , dblItemStandardCost = ISNULL(CAST(
-													CASE
-														WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
-															THEN effectiveCost.dblCost --Effective Retail Price
-														ELSE P.dblStandardCost 
-													END 
-												AS DECIMAL(18,6))
-											,0)
-				  , intConcurrencyId	= 1
-				  , intCalculationId	= TempChk.intCalculationId
-				FROM #tblTempForCalculation TempChk
-				INNER JOIN tblICItemUOM UOM
-					ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT)
-				INNER JOIN dbo.tblICItem I 
-					ON I.intItemId = UOM.intItemId
-				INNER JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId
-				INNER JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
-				INNER JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
-				LEFT JOIN dbo.tblICItemPricing P 
-					ON IL.intItemLocationId = P.intItemLocationId 
-					AND I.intItemId = P.intItemId
-				LEFT JOIN 
-				(
-					SELECT * FROM (
-						SELECT 
-								intItemId,
-								intItemLocationId,
-								dtmEffectiveCostDate,
-								dblCost,
-								ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
-						FROM tblICEffectiveItemCost
-						WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
-					) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
-				) AS effectiveCost
-					ON P.intItemId = effectiveCost.intItemId
-					AND P.intItemLocationId = effectiveCost.intItemLocationId
-				WHERE S.intStoreId = @intStoreId
-					AND ISNULL(TempChk.POSCode, '') != ''
+				SELECT intCheckoutId
+				  , intItemUPCId
+				  , strInvalidUPCCode
+				  , strDescription
+				  , intVendorId
+				  , intQtySold
+				  , dblCurrentPrice
+				  , dblDiscountAmount
+				  , dblGrossSales
+				  , dblTotalSales
+				  , dblItemStandardCost
+				  , intConcurrencyId
+				  , intCalculationId
+				FROM (
+					SELECT 
+						intCheckoutId		= @intCheckoutId
+					  , intItemUPCId		= UOM.intItemUOMId
+					  , strInvalidUPCCode   = NULL
+					  , strDescription		= I.strDescription
+					  , intVendorId			= IL.intVendorId
+					  , intQtySold			= (TempChk.SalesQuantity)
+					  , dblCurrentPrice		= CASE 
+												WHEN (TempChk.SalesQuantity) = 0
+													THEN 0
+												ELSE (TempChk.SalesAmount)  /  (TempChk.SalesQuantity)
+											END
+					  , dblDiscountAmount	= (TempChk.DiscountAmount + TempChk.PromotionAmount)
+					  -- , dblRefundAmount     = Chk.RefundAmount
+					  , dblGrossSales		= (TempChk.SalesAmount)
+					  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
+					  , dblItemStandardCost = ISNULL(CAST(
+														CASE
+															WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+																THEN effectiveCost.dblCost --Effective Retail Price
+															ELSE P.dblStandardCost 
+														END 
+													AS DECIMAL(18,6))
+												,0)
+					  , intConcurrencyId	= 1
+					  , intCalculationId	= TempChk.intCalculationId
+					  , intRowNumber		= ROW_NUMBER() OVER (PARTITION BY UOM.intItemId ORDER BY UOM.intItemUOMId)
+					FROM #tblTempForCalculation TempChk
+					INNER JOIN tblICItemUOM UOM
+						ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT) AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
+					INNER JOIN dbo.tblICItem I 
+						ON I.intItemId = UOM.intItemId
+					INNER JOIN dbo.tblICItemLocation IL 
+						ON IL.intItemId = I.intItemId
+					INNER JOIN dbo.tblSMCompanyLocation CL 
+						ON CL.intCompanyLocationId = IL.intLocationId
+					INNER JOIN dbo.tblSTStore S 
+						ON S.intCompanyLocationId = CL.intCompanyLocationId
+					LEFT JOIN dbo.tblICItemPricing P 
+						ON IL.intItemLocationId = P.intItemLocationId 
+						AND I.intItemId = P.intItemId
+					LEFT JOIN 
+					(
+						SELECT * FROM (
+							SELECT 
+									intItemId,
+									intItemLocationId,
+									dtmEffectiveCostDate,
+									dblCost,
+									ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
+							FROM tblICEffectiveItemCost
+							WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
+						) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+					) AS effectiveCost
+						ON P.intItemId = effectiveCost.intItemId
+						AND P.intItemLocationId = effectiveCost.intItemLocationId
+					WHERE S.intStoreId = @intStoreId
+						AND ISNULL(TempChk.POSCode, '') != ''
+				) tbl WHERE intRowNumber = 1
 
 			-- ==================================================================================================================
 			-- End: All Item Movement
@@ -474,60 +492,76 @@ BEGIN
 					, intConcurrencyId
 					, intCalculationId
 				)
-				SELECT 
-					intCheckoutId		= @intCheckoutId
-				  , intItemUPCId		= UOM.intItemUOMId
-				  , strInvalidUPCCode	= NULL
-				  , strDescription		= I.strDescription
-				  , intVendorId			= IL.intVendorId
-				  , intQtySold			= (TempChk.RefundCount * -1)
-				  , dblCurrentPrice		= (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-				  , dblDiscountAmount	= 0
-				  -- , dblRefundAmount     = Chk.RefundAmount
-				  , dblGrossSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-				  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-				  , dblItemStandardCost = ISNULL(CAST(
-													CASE
-														WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
-															THEN effectiveCost.dblCost --Effective Retail Price
-														ELSE P.dblStandardCost 
-													END 
-												AS DECIMAL(18,6))
-											,0)
-				  , intConcurrencyId	= 1
-				  , intCalculationId	=TempChk.intCalculationId
-				FROM #tblTempForCalculation TempChk
-				INNER JOIN tblICItemUOM UOM
-					ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT)
-				INNER JOIN dbo.tblICItem I 
-					ON I.intItemId = UOM.intItemId
-				INNER JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId	
-				INNER JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
-				INNER JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
-				LEFT JOIN dbo.tblICItemPricing P 
-					ON IL.intItemLocationId = P.intItemLocationId 
-					AND I.intItemId = P.intItemId
-				LEFT JOIN 
-				(
-					SELECT * FROM (
-						SELECT 
-								intItemId,
-								intItemLocationId,
-								dtmEffectiveCostDate,
-								dblCost,
-								ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
-						FROM tblICEffectiveItemCost
-						WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
-					) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
-				) AS effectiveCost
-					ON P.intItemId = effectiveCost.intItemId
-					AND P.intItemLocationId = effectiveCost.intItemLocationId
-				WHERE S.intStoreId = @intStoreId
-					AND TempChk.RefundCount > 0 -- Only Items with REFUND
-					AND ISNULL(TempChk.POSCode, '') != ''
+				SELECT intCheckoutId
+				  , intItemUPCId
+				  , strInvalidUPCCode
+				  , strDescription
+				  , intVendorId
+				  , intQtySold
+				  , dblCurrentPrice
+				  , dblDiscountAmount
+				  , dblGrossSales
+				  , dblTotalSales
+				  , dblItemStandardCost
+				  , intConcurrencyId
+				  , intCalculationId
+				FROM (
+					SELECT 
+						intCheckoutId		= @intCheckoutId
+					  , intItemUPCId		= UOM.intItemUOMId
+					  , strInvalidUPCCode	= NULL
+					  , strDescription		= I.strDescription
+					  , intVendorId			= IL.intVendorId
+					  , intQtySold			= (TempChk.RefundCount * -1)
+					  , dblCurrentPrice		= (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
+					  , dblDiscountAmount	= 0
+					  -- , dblRefundAmount     = Chk.RefundAmount
+					  , dblGrossSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
+					  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
+					  , dblItemStandardCost = ISNULL(CAST(
+														CASE
+															WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+																THEN effectiveCost.dblCost --Effective Retail Price
+															ELSE P.dblStandardCost 
+														END 
+													AS DECIMAL(18,6))
+												,0)
+					  , intConcurrencyId	= 1
+					  , intCalculationId	= TempChk.intCalculationId
+					  , intRowNumber		= ROW_NUMBER() OVER (PARTITION BY UOM.intItemId ORDER BY UOM.intItemUOMId)
+					FROM #tblTempForCalculation TempChk
+					INNER JOIN tblICItemUOM UOM
+						ON TempChk.intPOSCode = CAST(ISNULL(UOM.strUPCA, UOM.strLongUPCCode) AS BIGINT) AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
+					INNER JOIN dbo.tblICItem I 
+						ON I.intItemId = UOM.intItemId
+					INNER JOIN dbo.tblICItemLocation IL 
+						ON IL.intItemId = I.intItemId	
+					INNER JOIN dbo.tblSMCompanyLocation CL 
+						ON CL.intCompanyLocationId = IL.intLocationId
+					INNER JOIN dbo.tblSTStore S 
+						ON S.intCompanyLocationId = CL.intCompanyLocationId
+					LEFT JOIN dbo.tblICItemPricing P 
+						ON IL.intItemLocationId = P.intItemLocationId 
+						AND I.intItemId = P.intItemId
+					LEFT JOIN 
+					(
+						SELECT * FROM (
+							SELECT 
+									intItemId,
+									intItemLocationId,
+									dtmEffectiveCostDate,
+									dblCost,
+									ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
+							FROM tblICEffectiveItemCost
+							WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
+						) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+					) AS effectiveCost
+						ON P.intItemId = effectiveCost.intItemId
+						AND P.intItemLocationId = effectiveCost.intItemLocationId
+					WHERE S.intStoreId = @intStoreId
+						AND TempChk.RefundCount > 0 -- Only Items with REFUND
+						AND ISNULL(TempChk.POSCode, '') != ''
+				) tbl WHERE intRowNumber = 1
 
 			-- ==================================================================================================================
 			-- End: Item Movement Add extra line for refund

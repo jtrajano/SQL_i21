@@ -273,11 +273,12 @@ BEGIN
 	DTNDetail_GL AS (
 		SELECT
 			A.strDocNum,
+			A.intDistributionNo,
 			A.strCFNbr + '-' + B.strCFNbr + '-' + C.strCFNbr + '-' + D.strCFNbr AS strDetailAccount
 		FROM DTNDetail_GLtmp A
-		LEFT JOIN DTNDetail_GLtmp B ON A.strDocNum = B.strDocNum AND B.intCFNbrId = 2
-		LEFT JOIN DTNDetail_GLtmp C ON A.strDocNum = C.strDocNum AND C.intCFNbrId = 3
-		LEFT JOIN DTNDetail_GLtmp D ON A.strDocNum = D.strDocNum AND D.intCFNbrId = 4
+		LEFT JOIN DTNDetail_GLtmp B ON A.strDocNum = B.strDocNum AND B.intCFNbrId = 2 AND A.intDistributionNo = B.intDistributionNo
+		LEFT JOIN DTNDetail_GLtmp C ON A.strDocNum = C.strDocNum AND C.intCFNbrId = 3 AND A.intDistributionNo = C.intDistributionNo
+		LEFT JOIN DTNDetail_GLtmp D ON A.strDocNum = D.strDocNum AND D.intCFNbrId = 4 AND A.intDistributionNo = D.intDistributionNo
 		WHERE A.intCFNbrId = 1
 	)
 	
@@ -315,7 +316,7 @@ BEGIN
 		,intLineNo
 	)
 	SELECT --*
-		intPartitionId					= 	ROW_NUMBER() OVER(ORDER BY A.strDocNum) --1 voucher per 1 payable
+		intPartitionId					= 	DENSE_RANK() OVER(ORDER BY A.strDocNum)
 		,intTransactionType				=	CASE WHEN A.dblTotal < 0 THEN 3 ELSE 1 END
 		,strVendorOrderNumber			=	A.strVendorOrderNumber
 		,intEntityVendorId				=	C.intEntityId
@@ -350,8 +351,8 @@ BEGIN
 	INNER JOIN DTNHeader2 A2 ON A.strDocNum = A2.strDocNum
 	INNER JOIN DTNHeader3_Payment A3 ON A.strDocNum = A3.strDocNum
 	INNER JOIN DTNDetail A4 ON A.strDocNum = A4.strDocNum
-	INNER JOIN DTNDetail_GL A5 ON A.strDocNum = A5.strDocNum
-	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId) ON A.strCustVendNum = C.strVendorId
+	INNER JOIN DTNDetail_GL A5 ON A.strDocNum = A5.strDocNum AND A4.intDistributionNo = A5.intDistributionNo
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON C.intEntityId = D.intEntityId) ON A.strCustVendNum = D.strEntityNo
 	LEFT JOIN (tblEMEntityToContact C2 INNER JOIN tblEMEntity C3 ON C2.intEntityId = C3.intEntityId)
 		ON C2.ysnDefaultContact = 1 AND C2.intEntityId = C.intEntityId
 	LEFT JOIN tblEMEntityLocation F ON F.strLocationName = A2.strPayTo AND D.intEntityId = F.intEntityId
