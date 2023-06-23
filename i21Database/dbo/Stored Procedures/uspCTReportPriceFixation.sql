@@ -377,11 +377,22 @@ BEGIN TRY
 		   ,strFixPriceLabel = (CASE WHEN SPC.strStatus = 'Fully Priced' THEN 'Final Contract Price'
 									 WHEN SPC.strStatus = 'Partially Priced' THEN 'Average Fixed Price'
 								ELSE 'Average Fixed Price' END)
-			
+		   ,strAverageWM = CONVERT(NVARCHAR,CAST(PF.dblPriceWORollArb  AS Money),1) + ' ' + 
+					   CASE WHEN isnull(@ysnEnableFXFieldInContractPricing,0) = 1 THEN IC.strCurrency ELSE  CY.strDescription END + 
+					   ' ' + @per + ' ' + ISNULL(rtrt3.strTranslation,PM2.strUnitMeasure)			
+		   ,strDifferentialWM = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertPriceToTargetCommodityUOM(BU.intCommodityUnitMeasureId,CD2.intPriceCommodityUOMId, CD.dblBasis) AS NUMERIC(18, 6)),2) + 
+					   ' ' + CASE WHEN ISNULL(@ysnEnableFXFieldInContractPricing,0) = 1 THEN IC.strCurrency ELSE  CY.strDescription END + ' ' + @per +
+					   ' ' + isnull(rtrt3.strTranslation,PM2.strUnitMeasure) 
+		   ,strFinalPriceWM =	CONVERT(NVARCHAR,CAST(PF.dblFinalPrice  AS Money),1) + 
+							' ' + CASE WHEN isnull(@ysnEnableFXFieldInContractPricing,0) = 1 THEN IC.strCurrency ELSE  CY.strDescription END + 
+							' ' + @per + ' ' + isnull(rtrt3.strTranslation,PM2.strUnitMeasure) 
 	FROM	tblCTPriceFixation PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
+	JOIN	vyuCTContractSequence		CD2	ON	CD2.intContractDetailId			=	PF.intContractDetailId
+	LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CD2.intCommodityId 
+												AND BU.intUnitMeasureId		=	CD2.intBasisUnitMeasureId
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=	CD.intCompanyLocationId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	
@@ -395,7 +406,9 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId		
 	LEFT JOIN tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId	
 	LEFT JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId				=	CH.intCommodityId		
-			 									AND  PU.intUnitMeasureId		=	PM.intUnitMeasureId		
+			 									AND  PU.intUnitMeasureId		=	PM.intUnitMeasureId	
+	LEFT JOIN tblICItemUOM				CM2	ON	CM2.intItemUOMId				=	CD.intPriceItemUOMId
+	LEFT JOIN tblICUnitMeasure			PM2	ON	PM2.intUnitMeasureId			=	CM2.intUnitMeasureId															
 	LEFT JOIN tblSMCurrencyExchangeRate	ER	ON	ER.intCurrencyExchangeRateId	=	CD.intCurrencyExchangeRateId	
 	LEFT JOIN tblSMCurrency				FY	ON	FY.intCurrencyID				=	ER.intFromCurrencyId	
 	LEFT JOIN tblSMCurrency				TY	ON	TY.intCurrencyID				=	ER.intToCurrencyId		
