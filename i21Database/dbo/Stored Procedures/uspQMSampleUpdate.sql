@@ -1596,7 +1596,7 @@ BEGIN
         UPDATE B
         SET B.intLocationId = L.intCompanyLocationId
           ,strBatchId = @strBatchId
-          --,intSampleId = NULL
+          ,intSampleId = BT.intSampleId
           ,dblOriginalTeaTaste = B.dblTeaTaste
           ,dblOriginalTeaHue = B.dblTeaHue
           ,dblOriginalTeaIntensity = B.dblTeaIntensity
