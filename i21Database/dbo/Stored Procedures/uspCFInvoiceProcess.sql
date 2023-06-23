@@ -481,6 +481,7 @@ BEGIN TRY
 		,dblFeeRate
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
+		,ysnShowSST
 		,ysnSummaryByCard
 		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
@@ -652,6 +653,7 @@ BEGIN TRY
 		,dblFeeRate
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
+		,ysnShowSST
 		,ysnSummaryByCard
 		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
