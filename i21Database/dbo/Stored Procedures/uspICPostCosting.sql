@@ -1008,6 +1008,9 @@ END
 -- On Lotted Items, make sure valuation is zero if the lot qty is going to be zero. 
 ---------------------------------------------------------------------------------------
 BEGIN 
+	DECLARE @LotsWithZeroStock AS ItemCostingZeroStockTableType
+			,@LotCurrentValue AS NUMERIC(38, 20)
+			
 	-- Get the qualified items for auto-negative. 
 	INSERT INTO @LotsWithZeroStock (
 			intItemId
