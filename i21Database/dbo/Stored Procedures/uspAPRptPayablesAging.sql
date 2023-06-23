@@ -65,7 +65,7 @@ DECLARE @ysnFilter NVARCHAR(50) = 0;
 DECLARE @dtmDateFilter NVARCHAR(50);
 DECLARE @strPeriod NVARCHAR(50)
 DECLARE @strPeriodTo NVARCHAR(50)
-DECLARE @strCompanyName NVARCHAR(100)
+DECLARE @strCompanyDetailName NVARCHAR(100)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -151,7 +151,6 @@ WITH (
 SELECT @strAccountId = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SELECT @strCompanyName = [from], @strCompanyName = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
 SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
@@ -310,34 +309,6 @@ BEGIN
 	END
 END
 
-IF ISNULL(@strCompanyName, '') <> ''
-BEGIN 
-	BEGIN
-		SET @innerQuery = @innerQuery + CASE 
-										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-		SET @deletedQuery = @deletedQuery + CASE 
-										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-		SET @prepaidInnerQuery = @prepaidInnerQuery + 
-										CASE 
-										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-		SET @arQuery = @arQuery + 
-										CASE 
-										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-	END
-END
-
 IF @strPeriod IS NOT NULL
 BEGIN 
 	IF @condition = 'Equal To' OR @condition = 'Like' OR @condition = 'Starts With' OR @condition = 'Ends With'
@@ -400,7 +371,6 @@ BEGIN
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'strPeriod'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
@@ -509,7 +479,16 @@ END
 		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)				  
 	END  
 	
-	
+	SELECT @strTerm = [fieldname], 
+		   @from = [from], 
+		   @to = [to], 
+		   @join = [join], 
+		   @datatype = [datatype] 
+	FROM @temp_xml_table WHERE [fieldname] = 'strCompanyDetailName';
+	IF @strTerm IS NOT NULL
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)				  
+	END  
 
 SET @query = '
 	SELECT * FROM (
@@ -527,6 +506,7 @@ SET @query = '
 		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,(I.strCode + '' - '' + H.strCompanyName) AS strCompanyDetailName
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -593,6 +573,9 @@ SET @query = '
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
+		JOIN tblGLAccountSegmentMapping G ON G.intAccountId = D.intAccountId
+		JOIN tblGLCompanyDetails H ON H.intAccountSegmentId = G.intAccountSegmentId
+		LEFT JOIN tblGLAccountSegment I ON I.intAccountSegmentId = G.intAccountSegmentId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL --voided deleted voucher
 		SELECT
@@ -609,6 +592,7 @@ SET @query = '
 		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,(I.strCode + '' - '' + H.strCompanyName) AS strCompanyDetailName
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -664,6 +648,9 @@ SET @query = '
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
+		JOIN tblGLAccountSegmentMapping G ON G.intAccountId = D.intAccountId
+		JOIN tblGLCompanyDetails H ON H.intAccountSegmentId = G.intAccountSegmentId
+		LEFT JOIN tblGLAccountSegment I ON I.intAccountSegmentId = G.intAccountSegmentId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL
 		SELECT
@@ -680,6 +667,7 @@ SET @query = '
 		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,(I.strCode + '' - '' + H.strCompanyName) AS strCompanyDetailName
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -733,6 +721,9 @@ SET @query = '
 		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
+		JOIN tblGLAccountSegmentMapping G ON G.intAccountId = D.intAccountId
+		JOIN tblGLCompanyDetails H ON H.intAccountSegmentId = G.intAccountSegmentId
+		LEFT JOIN tblGLAccountSegment I ON I.intAccountSegmentId = G.intAccountSegmentId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		AND D.strAccountCategory = ''AP Account''
 ) MainQuery'

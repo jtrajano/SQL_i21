@@ -59,7 +59,7 @@ DECLARE @ysnFilter NVARCHAR(50) = 0
 DECLARE @dtmDateFilter NVARCHAR(50)
 DECLARE @strPeriod NVARCHAR(50)
 DECLARE @strPeriodTo NVARCHAR(50)
-DECLARE @strCompanyName NVARCHAR(100)
+DECLARE @strCompanyDetailName NVARCHAR(100)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -137,7 +137,6 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SELECT @dtmDueDate = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
-SELECT @strCompanyName = [from], @strCompanyName = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
 SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
 SET @innerQuery = 'SELECT --DISTINCT
 				   intBillId
@@ -149,9 +148,9 @@ SET @innerQuery = 'SELECT --DISTINCT
 				   ,dtmDate
 				   ,dtmDueDate
 				   ,FP.strPeriod
-				FROM dbo.vyuAPPayables A
+				FROM dbo.vyuAPPayables
 				LEFT JOIN dbo.tblGLFiscalYearPeriod FP
-				ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
+				ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
 SET @deletedQuery = 'SELECT --DISTINCT 
 					intBillId
@@ -164,9 +163,9 @@ SET @deletedQuery = 'SELECT --DISTINCT
 					,dtmDate
 					,FP.strPeriod
 					,intCount
-				  FROM dbo.vyuAPPayablesAgingDeleted A
+				  FROM dbo.vyuAPPayablesAgingDeleted
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
-				  ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
+				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
 SET @deletedForeignQuery = 'SELECT --DISTINCT 
 					intBillId
@@ -190,9 +189,9 @@ SET @prepaidInnerQuery = 'SELECT --DISTINCT
 					,dtmDate
 					,FP.strPeriod
 					,intPrepaidRowType
-				  FROM dbo.vyuAPPrepaidPayables A
+				  FROM dbo.vyuAPPrepaidPayables
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
-				  ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
+				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
 SET @arQuery = 'SELECT --DISTINCT 
 					intInvoiceId
@@ -203,9 +202,9 @@ SET @arQuery = 'SELECT --DISTINCT
 					,dblInterest
 					,dtmDate
 					,FP.strPeriod
-				  FROM dbo.vyuAPSalesForPayables A
+				  FROM dbo.vyuAPSalesForPayables
 				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
-				  ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
+				  ON dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR dtmDate = FP.dtmStartDate OR dtmDate = FP.dtmEndDate'
 
 SET @payablesForeignQuery = 'SELECT --DISTINCT 
 					intBillId
@@ -275,34 +274,6 @@ BEGIN
     
 END
 
-IF ISNULL(@strCompanyName, '') <> ''
-BEGIN 
-	BEGIN
-		SET @innerQuery = @innerQuery + CASE 
-										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-		SET @deletedQuery = @deletedQuery + CASE 
-										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-		SET @prepaidInnerQuery = @prepaidInnerQuery + 
-										CASE 
-										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-		SET @arQuery = @arQuery + 
-										CASE 
-										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
-										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
-										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
-										END
-	END
-END
-
 IF @strPeriod IS NOT NULL
 BEGIN 
 	IF @condition = 'Equal To' OR @condition = 'Like' OR @condition = 'Starts With' OR @condition = 'Ends With'
@@ -365,7 +336,6 @@ BEGIN
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'strPeriod'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
@@ -434,6 +404,7 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,(I.strCode + '' - '' + H.strCompanyName) AS strCompanyDetailName
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
@@ -511,6 +482,9 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
 		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		JOIN tblGLAccountSegmentMapping G ON G.intAccountId = D.intAccountId
+		JOIN tblGLCompanyDetails H ON H.intAccountSegmentId = G.intAccountSegmentId
+		LEFT JOIN tblGLAccountSegment I ON I.intAccountSegmentId = G.intAccountSegmentId
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL --voided deleted voucher
@@ -525,6 +499,7 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,(I.strCode + '' - '' + H.strCompanyName) AS strCompanyDetailName
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
@@ -590,6 +565,9 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
 		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		JOIN tblGLAccountSegmentMapping G ON G.intAccountId = D.intAccountId
+		JOIN tblGLCompanyDetails H ON H.intAccountSegmentId = G.intAccountSegmentId
+		LEFT JOIN tblGLAccountSegment I ON I.intAccountSegmentId = G.intAccountSegmentId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
@@ -606,6 +584,7 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,(I.strCode + '' - '' + H.strCompanyName) AS strCompanyDetailName
 		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
 		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
@@ -657,6 +636,9 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityCustomerId]
 		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		JOIN tblGLAccountSegmentMapping G ON G.intAccountId = D.intAccountId
+		JOIN tblGLCompanyDetails H ON H.intAccountSegmentId = G.intAccountSegmentId
+		LEFT JOIN tblGLAccountSegment I ON I.intAccountSegmentId = G.intAccountSegmentId
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		AND D.strAccountCategory = ''AP Account''
