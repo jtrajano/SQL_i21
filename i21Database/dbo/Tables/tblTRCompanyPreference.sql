@@ -33,6 +33,7 @@
 	[ysnAllowBlankDriver] BIT NULL DEFAULT ((1)),
 	[ysnAllowBlankTruck] BIT NULL DEFAULT ((1)),
 	[ysnAllowBlankTrailer] BIT NULL DEFAULT ((1)),
+	[intSendBolAttachmentOptionId] INT NULL,
 	CONSTRAINT [PK_tblTRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
     CONSTRAINT [FK_tblTRCompanyPreference_tblSMImportFileHeader] FOREIGN KEY ([intRackPriceImportMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId]), 
     CONSTRAINT [FK_tblTRCompanyPreference_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia](intEntityId),

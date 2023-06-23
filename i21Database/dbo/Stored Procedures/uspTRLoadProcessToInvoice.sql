@@ -1808,29 +1808,75 @@ BEGIN TRY
 			AND  TA.strName NOT LIKE 'BOL_%'
 			--FOR BOL Attachment
 			UNION
-			SELECT TA.intAttachmentId, I.intInvoiceId
-			FROM tblTRLoadDistributionHeader DH 
-			INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId
-			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-			INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId
-			LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
-			LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName
-			WHERE LH.intLoadHeaderId = @intLoadHeaderId
-			AND DH.intInvoiceId IS NOT NULL
-			AND TA.strScreen = 'Transports.view.TransportLoads'
-			AND IA.strName IS NULL
-			AND DH.strDestination = 'Customer'
-			AND TA.strName LIKE 'BOL_%'
-			AND DH.intInvoiceId in (
-				SELECT DH1.intInvoiceId
-				FROM tblTRLoadDistributionHeader DH1
-				INNER JOIN tblTRLoadDistributionDetail DD1 ON DH1.intLoadDistributionHeaderId = DD1.intLoadDistributionHeaderId
-				WHERE DH1.intLoadHeaderId = @intLoadHeaderId
-				AND DD1.strReceiptLink in 
-					(SELECT strReceiptLine 
-					FROM tblTRLoadReceipt LR3 INNER JOIN tblTRSupplyPoint SP ON LR3.intSupplyPointId = SP.intSupplyPointId
-					WHERE intLoadHeaderId = @intLoadHeaderId
-					AND (CONVERT(NVARCHAR(20), SP.intEntityLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)))
+			SELECT TA.intAttachmentId, I.intInvoiceId  
+			FROM tblTRLoadDistributionHeader DH   
+			INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId  
+			INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId  
+			INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId  
+			LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId  
+			LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName  
+			WHERE LH.intLoadHeaderId = @intLoadHeaderId  
+			AND DH.intInvoiceId IS NOT NULL  
+			AND TA.strScreen = 'Transports.view.TransportLoads'  
+			AND IA.strName IS NULL  
+			AND DH.strDestination = 'Customer'  
+			AND TA.strName LIKE 'BOL_%'  
+			AND DH.intInvoiceId in (  
+			SELECT DH1.intInvoiceId  
+			FROM tblTRLoadDistributionHeader DH1  
+			INNER JOIN tblTRLoadDistributionDetail DD1 ON DH1.intLoadDistributionHeaderId = DD1.intLoadDistributionHeaderId  
+			WHERE DH1.intLoadHeaderId = @intLoadHeaderId  
+			AND DD1.strReceiptLink in   
+				(SELECT strReceiptLine   
+				FROM tblTRLoadReceipt LR3 INNER JOIN tblTRSupplyPoint SP ON LR3.intSupplyPointId = SP.intSupplyPointId  
+				WHERE intLoadHeaderId = @intLoadHeaderId  
+				AND @intSendBolAttachmentOption != 3
+				AND (
+					(CONVERT(NVARCHAR(20), SP.intEntityLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)
+					AND @intSendBolAttachmentOption = 2
+					AND 1 <= (SELECT COUNT(ReceiptLink) FROM
+							(
+								SELECT DISTINCT
+										DD2.strReceiptLink 'ReceiptLink'
+									, DD2.strBillOfLading 'BillofLading'
+									, DH2.intShipToLocationId 'ShipToId'
+								FROM tblTRLoadDistributionDetail DD2 
+									LEFT JOIN tblTRLoadDistributionHeader DH2 ON DH2.intLoadDistributionHeaderId = DD2.intLoadDistributionHeaderId
+									LEFT JOIN tblTRLoadReceipt LR ON DD2.strReceiptLink = LR.strReceiptLine AND LR.strBillOfLading = DD2.strBillOfLading
+									LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
+								WHERE LR.intLoadHeaderId = @intLoadHeaderId
+									AND DD2.strReceiptLink = LR3.strReceiptLine
+								GROUP BY DD2.strReceiptLink
+									, DD2.strBillOfLading
+									, DH2.intShipToLocationId
+							) A
+						)
+					)
+
+					OR 
+
+					(CONVERT(NVARCHAR(20), SP.intEntityLocationId) = SUBSTRING(LTRIM(RTRIM(NULLIF(TA.strComment, ''))), 12, LTRIM(RTRIM(LEN(NULLIF(TA.strComment, '')))) - 1)
+					AND @intSendBolAttachmentOption = 1
+					AND 1 = (SELECT COUNT(ReceiptLink) FROM
+								(
+								SELECT DISTINCT
+										DD2.strReceiptLink 'ReceiptLink'
+									, DD2.strBillOfLading 'BillofLading'
+									, DH2.intShipToLocationId 'ShipToId'
+								FROM tblTRLoadDistributionDetail DD2 
+									LEFT JOIN tblTRLoadDistributionHeader DH2 ON DH2.intLoadDistributionHeaderId = DD2.intLoadDistributionHeaderId
+									LEFT JOIN tblTRLoadReceipt LR ON DD2.strReceiptLink = LR.strReceiptLine AND LR.strBillOfLading = DD2.strBillOfLading
+									LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
+								WHERE LR.intLoadHeaderId = @intLoadHeaderId
+									AND DD2.strReceiptLink = LR3.strReceiptLine
+								GROUP BY DD2.strReceiptLink
+									, DD2.strBillOfLading
+									, DH2.intShipToLocationId
+							) A
+						)
+					)
+					)
+				)
 			)
 
 
