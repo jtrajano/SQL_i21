@@ -8932,6 +8932,8 @@
     <None Include="Scripts\Post-Deployment\IC\26_ComputedValueField.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Functions\fnGRSettlementManualChargeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentCurrentAvg.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentAvg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
