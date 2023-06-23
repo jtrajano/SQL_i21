@@ -220,3 +220,4 @@ GROUP BY C.intManufacturingCellId
 	   , E1.strName
 	   , TrialBlendSheetStatus.strName
 	   , W.dtmApprovedDate
+	   , R.ysnActive
