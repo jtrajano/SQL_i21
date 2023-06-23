@@ -463,7 +463,7 @@ begin try
 					,int1099Category
 					,dbl1099
 					,ysnStage
-					,intPriceFixationDetailId
+					--,intPriceFixationDetailId
 					,dblRatio
 					/*Payment Info*/
 					, [intPayFromBankAccountId]
@@ -590,7 +590,7 @@ begin try
 					,dbl1099 = vp.dbl1099
 					,ysnStage = --0--vp.ysnStage
 						CASE WHEN hasExistingPayable.intVoucherPayableId IS NOT NULL THEN 1 ELSE 0 END 
-					,intPriceFixationDetailId = @intPriceFixationDetailId
+					--,intPriceFixationDetailId = @intPriceFixationDetailId
 					,dblRatio = 
 						dbo.fnDivide(
 							@dblTransactionQuantity

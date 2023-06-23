@@ -4330,6 +4330,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grain Inv
 ELSE
     UPDATE tblSMMasterMenu SET intSort = 1, strDescription = N'Grain Inventory Inquiry', strCommand = N'Grain.view.GrainInventoryInquiry' WHERE strMenuName = 'Grain Inventory Inquiry' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grain Inventory Inquiry Summary' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+    VALUES (N'Grain Inventory Inquiry Summary', N'Ticket Management', @TicketManagementReportParentMenuId, N'Grain Inventory Inquiry Summary Description', N'Report', N'Screen', N'Grain.view.GrainInventoryInquirySummary', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET intSort = 1, strDescription = N'Grain Inventory Inquiry Summary', strCommand = N'Grain.view.GrainInventoryInquirySummary' WHERE strMenuName = 'Grain Inventory Inquiry Summary' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Evidence' AND strDescription = 'Production Evidence Description' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Production Evidence', N'Ticket Management', @TicketManagementReportParentMenuId, N'Production Evidence Description', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=ProductionEvidenceReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 2, 1)

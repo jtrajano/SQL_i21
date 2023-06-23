@@ -32,9 +32,12 @@ BEGIN
 
 IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intPricingStatus' AND object_id = OBJECT_ID(N'tblCTContractDetail'))
 BEGIN
+	IF EXISTS (SELECT * FROM sys.triggers WHERE name = 'trgCTContractDetail')
+	BEGIN
+		exec
+		('
 
-	exec
-	('
+			ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
 
 		IF (OBJECT_ID(N''[dbo].[trgCTContractDetail]'') IS NOT NULL)
 		BEGIN
@@ -87,6 +90,10 @@ BEGIN
 		
 	');
 
+			ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
+			
+		');
+	END
 	
 	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail'))
 		AND EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblRKDailyAveragePriceDetail')) 

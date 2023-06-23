@@ -113,6 +113,7 @@ SELECT L.intLoadId
 	,SB.strSubBook
 	,L.ysnAllowReweighs
 	,L.ysnShowOptionality
+	,L.ysnCancelled
 FROM tblLGLoad L
 JOIN vyuLGShipmentStatus LSS ON LSS.intLoadId = L.intLoadId
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId

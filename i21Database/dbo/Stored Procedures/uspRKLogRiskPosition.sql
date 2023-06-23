@@ -73,6 +73,7 @@ BEGIN
 		, @intStorageHistoryId INT
 		, @intInventoryReceiptItemId INT
 		, @intLoadDetailId INT
+		, @intCommodityDefaultUOMId INT
 
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strBucketType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -144,7 +145,8 @@ BEGIN
 		[intInventoryReceiptId] INT NULL,
 		[strBucketType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[dblQty] NUMERIC(24, 10) NULL,
-		[intContractDetailId] INT NULL
+		[intContractDetailId] INT NULL,
+		[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	SELECT @intTotal = COUNT(*) FROM @SummaryLogs
@@ -291,6 +293,9 @@ BEGIN
 			, @intLoadDetailId =  intLoadDetailId
 		FROM #tmpSummaryLogs
 		ORDER BY dtmTransactionDate
+
+		--Get Commodity Stock and Default UOM
+        SELECT @intCommodityDefaultUOMId  = intCommodityUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1 and ysnDefault = 1
 
 		IF OBJECT_ID('tempdb..#tmpPrevLog') IS NOT NULL
 			DROP TABLE #tmpPrevLog
@@ -1047,7 +1052,7 @@ BEGIN
 				, @intCommodityId
 				, @intItemId
 				, intProductTypeId = NULL--I.intProductTypeId
-				, intOrigUOMId = @intCommodityUOMId
+				, intOrigUOMId = @intCommodityDefaultUOMId
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
@@ -1066,7 +1071,7 @@ BEGIN
 							 @strTransactionType = 'Consume' 
 							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'OUT' ELSE 'IN' END
 						ELSE '' END
-				, dblOrigQty = @dblQty
+				, dblOrigQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(@intCommodityUOMId,@intCommodityDefaultUOMId, @dblQty)
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
@@ -1079,6 +1084,7 @@ BEGIN
 				   (@strBucketType = 'Purchase In-Transit' AND @strTransactionType IN ('Inventory Receipt'))
 				BEGIN
 					DECLARE @intTransactionReferenceId INT
+					DECLARE @strTransactionTypeHelperLog NVARCHAR(50) 
 					SELECT @intTransactionReferenceId = NULL
 
 					SELECT @intTransactionReferenceId = (select top 1 SI.intInventoryShipmentId 
@@ -1096,6 +1102,8 @@ BEGIN
 							SELECT @intTransactionReferenceId = (SELECT TOP 1 intLoadId
 																FROM tblARInvoice
 																WHERE intInvoiceId = @intTransactionRecordHeaderId)
+
+							SET @strTransactionTypeHelperLog = 'Outbound Shipment'
 						END
 						ELSE 
 						BEGIN
@@ -1114,8 +1122,15 @@ BEGIN
 							SELECT @intTransactionReferenceId = (SELECT TOP 1 intInventoryReceiptItemId
 																FROM tblICInventoryReceiptItem
 																WHERE intInventoryReceiptId = @intTransactionRecordHeaderId)
+
+							SET @strTransactionTypeHelperLog = 'Inventory Receipt'
 						END
 					END
+					ELSE
+					BEGIN
+						SET @strTransactionTypeHelperLog = 'Inventory Shipment'
+					END
+
 
 				
 					--TODO: Get In-Transit off-setting entry
@@ -1130,6 +1145,7 @@ BEGIN
 								, strBucketType
 								, dblQty
 								, intContractDetailId
+								, strTransactionType
 						)
 						SELECT 
 							  @dtmTransactionDate
@@ -1140,6 +1156,7 @@ BEGIN
 							, @strBucketType
 							, @dblQty
 							, @intContractDetailId
+							, @strTransactionTypeHelperLog
 						
 
 					END
@@ -1155,6 +1172,7 @@ BEGIN
 								, strBucketType
 								, dblQty
 								, intContractDetailId
+								, strTransactionType
 						)
 						SELECT 
 							  @dtmTransactionDate
@@ -1165,6 +1183,7 @@ BEGIN
 							, @strBucketType
 							, @dblQty
 							, @intContractDetailId
+							, @strTransactionTypeHelperLog
 
 					END
 				END
@@ -1990,6 +2009,7 @@ BEGIN
 		, strBucketType
 		, dblQty
 		, intContractDetailId
+		, strTransactionType
 	)
 	SELECT
 		  dtmDate
@@ -2000,6 +2020,7 @@ BEGIN
 		, strBucketType
 		, dblQty
 		, intContractDetailId
+		, strTransactionType
 	FROM @DPRInTransitHelperLog
 	ORDER BY dtmDate
 
