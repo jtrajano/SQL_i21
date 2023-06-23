@@ -135,12 +135,15 @@ SET @query = '
 			CASE WHEN C.intOffsetId > 0 THEN C.dblQuantity * -1 ELSE 0 END AS dblOffsetQuantity,
 			CASE WHEN C.intOffsetId > 0 THEN ROUND(C.dblAmount * -1, 2) ELSE 0 END AS dblOffsetAmount,
 			A.strAccountId,
-			FP.strPeriod
+			FP.strPeriod,
+			(ASG.strCode + '' - '' + CD.strCompanyName) as strCompanyName
 		FROM tblAPClearing C
 		INNER JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId) ON C.intEntityVendorId = V.intEntityId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = C.intLocationId
 		INNER JOIN tblGLAccount A ON A.intAccountId = C.intAccountId
 		LEFT JOIN tblGLFiscalYearPeriod FP ON C.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR C.dtmDate = FP.dtmStartDate OR C.dtmDate = FP.dtmEndDate
+		LEFT JOIN tblGLCompanyDetails CD ON A.intCompanySegmentId = CD.intAccountSegmentId 
+		LEFT JOIN tblGLAccountSegment ASG ON CD.intAccountSegmentId = ASG.intAccountSegmentId 
 	) rawClearing
 '
 
