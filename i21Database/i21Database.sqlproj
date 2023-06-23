@@ -1328,6 +1328,7 @@
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
