@@ -37,17 +37,19 @@ WITH shipmentstatus AS (
 
 , lgallocationS AS (
 	SELECT intSContractDetailId
-		, dblAllocatedQty = ISNULL(SUM(dblSAllocatedQty), 0)
+		, dblAllocatedQty =  CASE WHEN ISNULL(AH.ysnCancelled,0) = 1 THEN ISNULL(SUM(dblSAllocatedQty), 0) - ISNULL(SUM(dblSAllocatedQty), 0) ELSE  ISNULL(SUM(dblSAllocatedQty), 0) END 
 		, intAllocationUOMId = MIN(intSUnitMeasureId)
-	FROM tblLGAllocationDetail WITH(NOLOCK)
-	GROUP BY intSContractDetailId)
+	FROM tblLGAllocationDetail AD WITH(NOLOCK)
+	INNER JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
+	GROUP BY intSContractDetailId, AH.ysnCancelled)
 
 , lgalloationP AS (
 	SELECT intContractDetailId = intPContractDetailId
-		, dblAllocatedQty = ISNULL(SUM(dblPAllocatedQty), 0)
+		, dblAllocatedQty = CASE WHEN ISNULL(AH.ysnCancelled,0) = 1 THEN ISNULL(SUM(dblPAllocatedQty), 0) - ISNULL(SUM(dblPAllocatedQty), 0) ELSE  ISNULL(SUM(dblPAllocatedQty), 0) END
 		, intAllocationUOMId = MIN(intPUnitMeasureId)
-	FROM tblLGAllocationDetail WITH(NOLOCK)
-	GROUP BY intPContractDetailId)
+	FROM tblLGAllocationDetail AD WITH(NOLOCK)
+	INNER JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
+	GROUP BY intPContractDetailId, AH.ysnCancelled)
 
 , approved AS (
 	SELECT intContractDetailId
@@ -172,7 +174,7 @@ SELECT a.intContractDetailId
 	, a.intAdjItemUOMId
 	, y.strUnitMeasure
 	, a.dblAdjustment
-	, z.dblAllocatedQty
+	, isnull(z.dblAllocatedQty, co.dblAllocatedQty) AS dblAllocatedQty
 	, za.strApprovalBasis
 	--, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
