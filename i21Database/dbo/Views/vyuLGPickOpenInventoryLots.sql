@@ -225,6 +225,8 @@ FROM (
 		LEFT JOIN tblCTContractHeader SCTHeader ON SCTHeader.intContractHeaderId = SCTDetail.intContractHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
 		LEFT JOIN vyuLGRejectedLotNumber RJTD ON Lot.intLotId = RJTD.intLotId
+		LEFT JOIN tblMFLotInventory ML ON ML.intLotId = Lot.intLotId
+		LEFT JOIN tblMFWorkOrder MW ON MW.intWorkOrderId = ML.intWorkOrderId
 		OUTER APPLY (SELECT TOP 1 strBundleItemNo = BI.strItemNo FROM tblICItem BI 
 						INNER JOIN tblICItemBundle IB ON IB.intItemId = BI.intItemId
 					 WHERE IB.intBundleItemId = Item.intItemId) Bundle
@@ -238,6 +240,7 @@ FROM (
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
 		AND ((Lot.intSourceTransactionTypeId = 4 AND Receipt.ysnPosted = 1)
-			OR (Lot.intSourceTransactionTypeId = 47 AND InvAdj.ysnPosted = 1))
+			OR (Lot.intSourceTransactionTypeId = 47 AND InvAdj.ysnPosted = 1)
+			OR (Lot.intSourceTransactionTypeId = 9 AND MW.intStatusId = 13))
 	) InvLots
 GO
