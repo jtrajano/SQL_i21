@@ -137,9 +137,9 @@ BEGIN
 		)
 	SELECT Query.intItemId
 		,Query.intItemLocationId
-		,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
-		,intOtherChargeIncome = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome)
-		,intAPClearing = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing)
+		,intOtherChargeExpense = OtherChargeExpense.intAccountId
+		,intOtherChargeIncome = OtherChargeIncome.intAccountId
+		,intAPClearing = APClearing.intAccountId
 		,intTransactionTypeId = @intTransactionTypeId
 	FROM (
 		SELECT DISTINCT 
@@ -167,7 +167,10 @@ BEGIN
 				WHEN @intPurchaseSale = 1 THEN LoadDetail.intPCompanyLocationId
 			END
 		WHERE OtherCharges.intLoadId = @intLoadId
-		) Query
+		) AS Query
+	CROSS APPLY (SELECT intAccountId FROM dbo.fnGetItemGLAccountAsTable(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)) OtherChargeExpense
+	CROSS APPLY (SELECT intAccountId FROM dbo.fnGetItemGLAccountAsTable(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome)) OtherChargeIncome
+	CROSS APPLY (SELECT intAccountId FROM dbo.fnGetItemGLAccountAsTable(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing)) APClearing
 
 	-- Check for missing AP Clearing Account Id
 	BEGIN
@@ -488,19 +491,17 @@ BEGIN
 		,dblForeignRate = ForGLEntries_CTE.dblForexRate
 		,strRateType = ForGLEntries_CTE.strRateType
 	FROM ForGLEntries_CTE
-	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON 
-		OtherChargesGLAccounts.intChargeId =
-			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
-				THEN ForGLEntries_CTE.intItemId
-				ELSE ForGLEntries_CTE.intChargeId
-			END
-		AND 
-		OtherChargesGLAccounts.intItemLocationId =
-			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
-				THEN ForGLEntries_CTE.intItemLocationId
-				ELSE ForGLEntries_CTE.intChargeItemLocation
-			END
+	CROSS APPLY dbo.fnGetItemGLAccountAsTable(
+		CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+			THEN ForGLEntries_CTE.intItemId
+			ELSE ForGLEntries_CTE.intChargeId
+		END, 
+		CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+			THEN ForGLEntries_CTE.intItemLocationId
+			ELSE ForGLEntries_CTE.intChargeItemLocation
+		END, 
+		@ACCOUNT_CATEGORY_InventoryInTransit
+	) Account
 	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = Account.intAccountId
 	-- CROSS APPLY dbo.fnGetDebitFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Debit
 	-- CROSS APPLY dbo.fnGetCreditFunctional(ForGLEntries_CTE.dblCost, ForGLEntries_CTE.intCurrencyId, @intFunctionalCurrencyId, ForGLEntries_CTE.dblForexRate) Credit
@@ -552,19 +553,17 @@ BEGIN
 		,dblForeignRate = ISNULL(ItemCurrencyToFunctional.dblForexRate,1)
 		,strRateType = ItemCurrencyToFunctional.strCurrencyExchangeRateType
 	FROM ForGLEntries_CTE
-	CROSS APPLY dbo.fnGetItemGLAccountAsTable(ForGLEntries_CTE.intItemId, ForGLEntries_CTE.intItemLocationId, @ACCOUNT_CATEGORY_InventoryInTransit) Account
-	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON 
-		OtherChargesGLAccounts.intChargeId =
-			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
-				THEN ForGLEntries_CTE.intItemId
-				ELSE ForGLEntries_CTE.intChargeId
-			END
-		AND 
-		OtherChargesGLAccounts.intItemLocationId =
-			CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
-				THEN ForGLEntries_CTE.intItemLocationId
-				ELSE ForGLEntries_CTE.intChargeItemLocation
-			END
+	CROSS APPLY dbo.fnGetItemGLAccountAsTable(
+		CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+			THEN ForGLEntries_CTE.intItemId
+			ELSE ForGLEntries_CTE.intChargeId
+		END, 
+		CASE WHEN ISNULL(@ysnOverrideLOBSegment, 0) = 1
+			THEN ForGLEntries_CTE.intItemLocationId
+			ELSE ForGLEntries_CTE.intChargeItemLocation
+		END, 
+		@ACCOUNT_CATEGORY_InventoryInTransit
+	) Account
 	INNER JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = Account.intAccountId
 	OUTER APPLY (SELECT TOP 1 
 					dblForexRate = ISNULL(dblRate,0),
