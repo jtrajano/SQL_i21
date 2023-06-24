@@ -341,6 +341,7 @@ FROM (
 		  AND ysnProcessedToNSF = 0
 		  AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
 		  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))  BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +')				
+		  AND I.strTransactionType <> ''Cash Refund''
 	) I ON I.intEntityCustomerId = C.intEntityId		
 	LEFT JOIN (
 		SELECT intPaymentId	
