@@ -320,68 +320,68 @@ BEGIN
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
-			OUTER APPLY
-            (
-                SELECT R.intBillDetailId,
-					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
-					(R.dblTotal) AS dblTotal, 
-					R.dblRate  AS dblRate, 
-					exRates.intCurrencyExchangeRateTypeId, 
-					exRates.strCurrencyExchangeRateType,
-					dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
-									ELSE
-									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
-											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
-											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-								END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END),
-					R.strComment,
-					R.intAccountId
-                FROM dbo.tblAPBillDetail R
-				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
-                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
-				OUTER APPLY (
-					SELECT TOP 1 stockUnit.*
-					FROM tblICItemUOM stockUnit 
-					WHERE 
-						item.intItemId = stockUnit.intItemId 
-					AND stockUnit.ysnStockUnit = 1
-				) itemUOM
-                WHERE R.intBillId = A.intBillId
-				UNION ALL --taxes
-				SELECT R.intBillDetailId,
-					2 intFormat,
-					CASE WHEN R.intInventoryReceiptChargeId > 0 
-								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
-												AND charges.ysnPrice = 1
-											THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
-						ELSE R2.dblAdjustedTax
-					END 
-				AS dblTotal ,
-				 R.dblRate  AS dblRate, 
-				 exRates.intCurrencyExchangeRateTypeId,
-				  exRates.strCurrencyExchangeRateType,
-				  0,
-				  '',
-				R.intAccountId
-                FROM dbo.tblAPBillDetail R
-				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
-				LEFT JOIN tblICInventoryReceiptCharge charges
-					ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
-				LEFT JOIN tblICInventoryReceipt receipts
-					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
-                LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
-                WHERE R.intBillId = A.intBillId
-            ) Details
-			OUTER APPLY (
-				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-			) OVERRIDESEGMENT
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+		ON A.intEntityVendorId = C.[intEntityId]
+	OUTER APPLY
+	(
+		SELECT R.intBillDetailId,
+			CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
+			(R.dblTotal) AS dblTotal, 
+			R.dblRate  AS dblRate, 
+			exRates.intCurrencyExchangeRateTypeId, 
+			exRates.strCurrencyExchangeRateType,
+			dblUnits = (CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType NOT IN ('Inventory','Finished Good', 'Raw Material') THEN R.dblQtyReceived
+							ELSE
+							dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
+									THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
+									itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
+						END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END),
+			R.strComment,
+			R.intAccountId
+		FROM dbo.tblAPBillDetail R
+		LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
+		LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+		OUTER APPLY (
+			SELECT TOP 1 stockUnit.*
+			FROM tblICItemUOM stockUnit 
+			WHERE 
+				item.intItemId = stockUnit.intItemId 
+			AND stockUnit.ysnStockUnit = 1
+		) itemUOM
+		WHERE R.intBillId = A.intBillId
+		UNION ALL --taxes
+		SELECT R.intBillDetailId,
+			2 intFormat,
+			CASE WHEN R.intInventoryReceiptChargeId > 0 
+						THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
+										AND charges.ysnPrice = 1
+									THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
+				ELSE R2.dblAdjustedTax
+			END 
+		AS dblTotal ,
+			R.dblRate  AS dblRate, 
+			exRates.intCurrencyExchangeRateTypeId,
+			exRates.strCurrencyExchangeRateType,
+			0,
+			'',
+		R.intAccountId
+		FROM dbo.tblAPBillDetail R
+		INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
+		LEFT JOIN tblICInventoryReceiptCharge charges
+			ON R.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+		LEFT JOIN tblICInventoryReceipt receipts
+			ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+		LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+		WHERE R.intBillId = A.intBillId
+	) Details
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueFromAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	  	  AND @AllowIntraEntries = 1
-          AND @DueFromAccountId <> 0
-          AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
+		  AND @AllowIntraEntries = 1
+		  AND @DueFromAccountId <> 0
+		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], Details.[intAccountId], 3) = 0
 		  AND A.intTransactionType <> 15
 
 	--PREPAY, DEBIT MEMO ENTRIES
@@ -525,12 +525,12 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
+		[intAccountId]					=	voucherDetails.intAccountId,
 		[dblDebit]						=	voucherDetails.dblTotal,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(voucherDetails.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
-		[strDescription]				= dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1, OVERRIDESEGMENT.intOverrideAccount),
+		[strDescription]				=   dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1, voucherDetails.intAccountId),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -572,13 +572,8 @@ BEGIN
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId) voucherDetails
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
-	OUTER APPLY (
-		SELECT intOverrideAccount
-		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-	) OVERRIDESEGMENT
+	CROSS APPLY dbo.fnAPGetVoucherDetailDebitEntry(A.intBillId) voucherDetails
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId) ON A.intEntityVendorId = C.[intEntityId]
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType <> 15
 		  -- AND A.ysnConvertedToDebitMemo = 0 --EXCLUDE CONVERTED DEBIT MEMO
@@ -639,13 +634,13 @@ BEGIN
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
 	OUTER APPLY (
-		SELECT intOverrideAccount
+		SELECT intOverrideAccount 
 		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
 	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-	      AND @AllowIntraEntries = 1
-	      AND @DueToAccountId <> 0
-	      AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId, 3) = 0
+		  AND @AllowIntraEntries = 1
+		  AND @DueToAccountId <> 0
+		  AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], voucherDetails.intAccountId, 3) = 0
 		  AND A.intTransactionType <> 15
 
 	-- UNION ALL
@@ -1112,12 +1107,12 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	voucherDetails.intExpenseAccountId,
+		[intAccountId]					=	OVERRIDESEGMENT.intOverrideAccount,
 		[dblDebit]						=	voucherDetails.dblTotal, -- Bill
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	voucherDetails.dblTotalUnits,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3, DEFAULT),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3, OVERRIDESEGMENT.intOverrideAccount),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -1164,6 +1159,10 @@ BEGIN
 	INNER JOIN tblAPBillDetail B ON B.intBillDetailId = voucherDetails.intBillDetailId
 	INNER JOIN tblLGLoadCost LC ON LC.intLoadCostId = intLoadShipmentCostId
 	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId) ON A.intEntityVendorId = C.[intEntityId]
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intExpenseAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND voucherDetails.intBillDetailId IS NOT NULL
 		  AND A.intTransactionType IN (3)
@@ -1221,7 +1220,7 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 		  AND A.intTransactionType = 15
 
-	--TAXES
+--TAXES
 	UNION ALL
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -1366,7 +1365,7 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, OVERRIDESEGMENT.intOverrideAccount),
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2, voucherDetails.intExpenseAccountId),
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -1400,13 +1399,8 @@ BEGIN
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
-			OUTER APPLY (
-			SELECT intOverrideAccount
-			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], voucherDetails.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-			) OVERRIDESEGMENT
+	CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId) ON A.intEntityVendorId = C.[intEntityId]
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType IN (3)
 	
@@ -1454,15 +1448,13 @@ BEGIN
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber
 	FROM	[dbo].tblAPBill A 
-			CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
-			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId)
-				ON A.intEntityVendorId = C.[intEntityId]
-			INNER JOIN [dbo].tblAPBillDetail B 
-				ON voucherDetails.intBillDetailId = B.intBillDetailId
-			OUTER APPLY (
-				SELECT intOverrideAccount
-				FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
-			) OVERRIDESEGMENT
+	CROSS APPLY dbo.fnAPGetVoucherTaxGLEntry(A.intBillId) voucherDetails
+	LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId) ON A.intEntityVendorId = C.[intEntityId]
+	INNER JOIN [dbo].tblAPBillDetail B ON voucherDetails.intBillDetailId = B.intBillDetailId
+	OUTER APPLY (
+		SELECT intOverrideAccount
+		FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @DueToAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+	) OVERRIDESEGMENT
 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	  	  AND @AllowIntraEntries = 1
 	  	  AND @DueToAccountId <> 0
