@@ -45,7 +45,7 @@ BEGIN TRY
 		INNER JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId
 		OUTER APPLY (
 			SELECT intOverrideAccount
-			FROM dbo.[fnARGetOverrideAccount](B.intAccountId, BDT.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+			FROM dbo.[fnARGetOverrideAccount](B.intAccountId, BDT.intAccountId, @OverrideCompanySegment, @OverrideLocationSegment, 0)
 		) OVERRIDESEGMENT
 
 	IF @transCount = 0 COMMIT TRANSACTION
