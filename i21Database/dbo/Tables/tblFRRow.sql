@@ -6,6 +6,7 @@
     [intMapId]         INT            NULL,
     [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
     [ysnObsolete]	   BIT            DEFAULT 0 NOT NULL,
+    [intAccountGroupClusterId]  INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRRow] PRIMARY KEY CLUSTERED ([intRowId] ASC)
 );
 
