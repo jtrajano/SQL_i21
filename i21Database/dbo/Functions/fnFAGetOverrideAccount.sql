@@ -30,12 +30,23 @@ BEGIN
 		,@intNewAccountId INT = NULL
 		,@strNewAccountId NVARCHAR(40)
 		,@strError NVARCHAR(MAX) = NULL
+		,@ysnOverrideLocation BIT
 
-	SELECT @intCompanyLocationId = intCompanyLocationId FROM tblFAFixedAsset WHERE intAssetId = @intAssetId
-	SELECT @intLocationSegmentId = intProfitCenter, @intCompanySegmentId = intCompanySegment FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+  SET @ysnOverrideLocation =  ( SELECT ysnOverrideLocation FROM tblFAFixedAsset WHERE intAssetId = @intAssetId  )
 
-	SELECT @strNewAccountId = dbo.fnGLGetOverrideAccountBySegment(@intAccountId, @intLocationSegmentId, NULL, @intCompanySegmentId)
-	SELECT @intNewAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAccountId
+  IF @ysnOverrideLocation = 1	
+  BEGIN
+		SELECT @intCompanyLocationId = intCompanyLocationId FROM tblFAFixedAsset WHERE intAssetId = @intAssetId  
+		SELECT @intLocationSegmentId = intProfitCenter, @intCompanySegmentId = intCompanySegment FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId  
+  
+		SELECT @strNewAccountId = dbo.fnGLGetOverrideAccountBySegment(@intAccountId, @intLocationSegmentId, NULL, @intCompanySegmentId)  
+		SELECT @intNewAccountId = intAccountId FROM tblGLAccount WHERE strAccountId = @strNewAccountId  
+  END
+  ELSE
+  BEGIN
+		SELECT @strNewAccountId = (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intAccountId)
+		SELECT @intNewAccountId = @intAccountId
+  END
 
 	IF (@intNewAccountId IS NULL)
 	BEGIN
