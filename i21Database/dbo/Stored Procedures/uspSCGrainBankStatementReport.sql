@@ -116,6 +116,7 @@ begin
 		,dtmTransactionDate		DATE
 		,intItemId				INT
 		,strTransactionId		NVARCHAR(100)
+		,strStorageTicketNo		NVARCHAR(100)
 		,strTransactionType		NVARCHAR(100)
 		,dblRunningUnits		NUMERIC(18,4)
 		,intRowNumber			INT
@@ -193,6 +194,7 @@ begin
 		intStorageScheduleId,	
 		dtmTransactionDate,
 		strTransactionId,
+		strStorageTicketNo,
 		strTransactionType,
 		rn = ROW_NUMBER() OVER (PARTITION BY intEntityId, intItemId, intStorageTypeId,intStorageScheduleId ORDER BY intStorageHistoryId),
 		intItemId,
@@ -213,6 +215,7 @@ begin
 			dtmTransactionDate,
 			intItemId,		
 			strTransactionId,
+			strStorageTicketNo,
 			strTransactionType,
 
 			dblRunningUnits = CAST(dblUnits AS NUMERIC(18, 4)),
@@ -235,6 +238,7 @@ begin
 			GRAINBANK_TRANSACTION.dtmTransactionDate,
 			GRAINBANK_TRANSACTION.intItemId,		
 			GRAINBANK_TRANSACTION.strTransactionId,
+			GRAINBANK_TRANSACTION.strStorageTicketNo,
 			GRAINBANK_TRANSACTION.strTransactionType,
 
 		
@@ -260,6 +264,7 @@ begin
 		,dtmTransactionDate		
 		,intItemId				
 		,strTransactionId		
+		,strStorageTicketNo		
 		,strTransactionType		
 		,dblRunningUnits		
 		,intRowNumber
@@ -276,6 +281,7 @@ begin
 		dtmTransactionDate,
 		intItemId,		
 		strTransactionId,
+		strStorageTicketNo,
 		strTransactionType,
 
 		dblRunningUnits,
@@ -362,7 +368,9 @@ begin
 			,DATA_TABLE.intStorageScheduleId	
 			,DATA_TABLE.dtmTransactionDate		
 			,DATA_TABLE.intItemId				
-			,DATA_TABLE.strTransactionId		
+			,DATA_TABLE.strTransactionId	
+			,DATA_TABLE.strStorageTicketNo
+				
 			,DATA_TABLE.strTransactionType		
 			,DATA_TABLE.dblRunningUnits		
 			,DATA_TABLE.intRowNumber 
@@ -407,7 +415,8 @@ begin
 			,BALANCES.intStorageScheduleId	
 			,NULL AS dtmTransactionDate		
 			,BALANCES.intItemId AS intItemId				
-			,NULL AS strTransactionId		
+			,NULL AS strTransactionId	
+			,NULL AS strStorageTicketNo	
 			,NULL AS strTransactionType		
 			,0 AS dblRunningUnits		
 			,1 AS intRowNumber 

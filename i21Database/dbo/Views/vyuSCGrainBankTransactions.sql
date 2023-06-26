@@ -5,7 +5,12 @@
 	'TICKET' AS strMode
 	, HISTORY.intTransactionTypeId
 	, TICKET.strTicketNumber AS strTransactionId
-	, TICKET.strDistributionOption AS strTransactionType
+	, '' AS strStorageTicketNo
+	, CASE WHEN TICKET.strDistributionOption = 'SPL' THEN 'Split' 
+		WHEN TICKET.intTicketTypeId = 3 THEN 'Transfer In'
+		WHEN TICKET.intTicketTypeId = 4 THEN 'Transfer Out'
+
+		ELSE 'Delivered' END AS strTransactionType
 	, TICKET.dtmTicketDateTime AS dtmTransactionDate
 
 
@@ -63,7 +68,8 @@
 	'TICKET' AS strMode
 	, HISTORY.intTransactionTypeId
 	, TICKET.strTicketNumber AS strTransactionId
-	, TICKET.strDistributionOption AS strTransactionType
+	, '' AS strStorageTicketNo
+	, CASE WHEN TICKET.strDistributionOption = 'SPL' THEN 'Split' ELSE 'Loaded Out' END AS strTransactionType
 	, TICKET.dtmTicketDateTime AS dtmTransactionDate
 
 
@@ -116,7 +122,8 @@
 	'TRANSFER' AS strMode
 	, HISTORY.intTransactionTypeId
 	, TRANSFERS.strTransferStorageTicket AS strTransactionId
-	, 'TRANSFER' AS strTransactionType 
+	, '' AS strStorageTicketNo
+	, 'Transfer' AS strTransactionType
 	, TRANSFERS.dtmTransferStorageDate AS dtmTransactionDate
 
 
@@ -169,6 +176,7 @@
 	'SETTLEMENT' AS strMode
 	, HISTORY.intTransactionTypeId
 	, SETTLEMENT.strStorageTicket AS strTransactionId
+	, '' AS strStorageTicketNo
 	, 'SETTLEMENT' AS strTransactionType 
 	, SETTLEMENT.dtmCreated AS dtmTransactionDate
 
@@ -223,7 +231,8 @@
 	'INVOICE' AS strMode
 	, HISTORY.intTransactionTypeId
 	, INVOICE.strInvoiceNumber AS strTransactionId
-	, 'INVOICE' AS strTransactionType
+	, STORAGE.strStorageTicketNumber AS strStorageTicketNo
+	, HISTORY.strType AS strTransactionType
 	, INVOICE.dtmDate AS dtmTransactionDate
 
 
