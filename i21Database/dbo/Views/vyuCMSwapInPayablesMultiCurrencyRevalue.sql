@@ -3,8 +3,8 @@ AS
 SELECT DISTINCT
 	strTransactionType		=	'Swap In With Swap Out Posted (Payables)' COLLATE Latin1_General_CI_AS,
 	strTransactionId		=	BT.strTransactionId,
-	strTransactionDate		=	BT.dtmDate,
-	strTransactionDueDate	=	BT.dtmInTransit,
+	strTransactionDate		=	SwapOut.dtmDate,
+	strTransactionDueDate	=	SwapOut.dtmInTransit,
 	strVendorName			=	'' COLLATE Latin1_General_CI_AS,
 	strCommodity			=	'' COLLATE Latin1_General_CI_AS,
 	strLineOfBusiness		=	'' COLLATE Latin1_General_CI_AS,
@@ -38,7 +38,7 @@ OUTER APPLY (
 	SELECT TOP 1 ysnRevalue_Swap FROM tblCMCompanyPreferenceOption
 ) RevalueOptions
 OUTER APPLY (
-	SELECT TOP 1 ISNULL(ysnPosted, 0) ysnPosted FROM tblCMBankTransfer WHERE intTransactionId = BankSwap.intSwapShortId
+	SELECT TOP 1 ISNULL(ysnPosted, 0) ysnPosted, dtmDate, dtmIntransit FROM tblCMBankTransfer WHERE intTransactionId = BankSwap.intSwapShortId
 ) SwapOut
 WHERE
 	BT.ysnPosted = 0
