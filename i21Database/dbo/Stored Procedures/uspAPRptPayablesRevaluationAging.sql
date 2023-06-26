@@ -500,7 +500,8 @@ SET @query = '
 		,A.dblAverageExchangeRate as dblHistoricRate
 		,(tmpAgingSummaryTotal.dblAmountDue * A.dblAverageExchangeRate) as dblHistoricAmount
 		,ISNULL(GLRD.dblNewForexRate, 0) as dblCurrencyRevalueRate
-		,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
+		,CASE WHEN ISNULL(tmpAgingSummaryTotal.dblAmountDue, 0) < 0 THEN -ABS(ISNULL(GLRD.dblNewAmount, 0)) ELSE ISNULL(GLRD.dblNewAmount, 0) END  dblCurrencyRevalueAmount
+		-- ,ISNULL(GLRD.dblNewAmount, 0) as dblCurrencyRevalueAmount
 		FROM  
 		(
 			SELECT 
@@ -535,11 +536,17 @@ SET @query = '
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN tblSMCurrency CUR ON A.intCurrencyId = CUR.intCurrencyID
-		LEFT JOIN (
-			SELECT strTransactionId, dblNewForexRate, dblNewAmount
-			FROM vyuGLRevalueDetails
-			GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
-		) GLRD ON A.strBillId = GLRD.strTransactionId
+		OUTER APPLY (
+			SELECT TOP 1 RVD.strTransactionId, RVD.dblNewForexRate, RVD.dblNewAmount
+			FROM vyuGLRevalueDetails RVD
+			INNER JOIN tblGLRevalue RV
+			ON RVD.intConsolidationId = RV.intConsolidationId
+			WHERE A.strBillId = RVD.strTransactionId
+			AND RV.ysnPosted = 1
+			AND RV.dtmDate <= '+ ISNULL(@dtmDateFilter, GETDATE())  +'
+			GROUP BY  RVD.strTransactionId, RVD.dblNewForexRate, RVD.dblNewAmount, RV.dtmDate
+			ORDER BY RV.dtmDate DESC
+		) GLRD
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL --voided deleted voucher
 		SELECT
@@ -586,11 +593,17 @@ SET @query = '
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN tblSMCurrency CUR ON A.intCurrencyId = CUR.intCurrencyID
-		LEFT JOIN (
-			SELECT strTransactionId, dblNewForexRate, dblNewAmount
-			FROM vyuGLRevalueDetails
-			GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
-		) GLRD ON A.strBillId = GLRD.strTransactionId 
+		OUTER APPLY (
+			SELECT TOP 1 RVD.strTransactionId, RVD.dblNewForexRate, RVD.dblNewAmount
+			FROM vyuGLRevalueDetails RVD
+			INNER JOIN tblGLRevalue RV
+			ON RVD.intConsolidationId = RV.intConsolidationId
+			WHERE A.strBillId = RVD.strTransactionId
+			AND RV.ysnPosted = 1
+			AND RV.dtmDate <= '+ ISNULL(@dtmDateFilter, GETDATE())  +'
+			GROUP BY  RVD.strTransactionId, RVD.dblNewForexRate, RVD.dblNewAmount, RV.dtmDate
+			ORDER BY RV.dtmDate DESC
+		) GLRD
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL
 		SELECT
@@ -636,11 +649,17 @@ SET @query = '
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN tblSMCurrency CUR ON A.intCurrencyId = CUR.intCurrencyID
-		LEFT JOIN (
-			SELECT strTransactionId, dblNewForexRate, dblNewAmount
-			FROM vyuGLRevalueDetails
-			GROUP BY strTransactionId, dblNewForexRate, dblNewAmount
-		) GLRD ON A.strInvoiceNumber = GLRD.strTransactionId 
+		OUTER APPLY (
+			SELECT TOP 1 RVD.strTransactionId, RVD.dblNewForexRate, RVD.dblNewAmount
+			FROM vyuGLRevalueDetails RVD
+			INNER JOIN tblGLRevalue RV
+			ON RVD.intConsolidationId = RV.intConsolidationId
+			WHERE A.strInvoiceNumber = RVD.strTransactionId
+			AND RV.ysnPosted = 1
+			AND RV.dtmDate <= '+ ISNULL(@dtmDateFilter, GETDATE())  +' 
+			GROUP BY  RVD.strTransactionId, RVD.dblNewForexRate, RVD.dblNewAmount, RV.dtmDate
+			ORDER BY RV.dtmDate DESC
+		) GLRD
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		AND D.strAccountCategory = ''AP Account''
 ) MainQuery'

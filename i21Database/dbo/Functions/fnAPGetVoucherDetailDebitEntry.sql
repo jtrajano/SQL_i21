@@ -58,6 +58,8 @@ RETURNS TABLE AS RETURN
 		END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END) as dblTotalUnits
 		,CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL 
 				THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing') --AP-3492 use AP Clearing if tansaction is From IS
+				WHEN B.intWeightClaimDetailId IS NOT NULL AND WCD.intWeightClaimDetailId IS NOT NULL
+					THEN dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
 				ELSE B.intAccountId
 		END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
@@ -81,6 +83,8 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblICItem F
 		ON B.intItemId = F.intItemId
 	-- LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
+	LEFT JOIN tblLGWeightClaimDetail WCD
+		ON WCD.intWeightClaimDetailId = B.intWeightClaimDetailId
 	OUTER APPLY (
 		SELECT TOP 1 stockUnit.*
 		FROM tblICItemUOM stockUnit 

@@ -32,6 +32,7 @@ DECLARE @vouchers AS TABLE(
 	,intInsuranceChargeDetailId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
+	,intWeightClaimDetailId INT NULL
 	);
 DECLARE @payablesDeleted AS TABLE(
 	intVoucherPayableId INT NOT NULL
@@ -53,6 +54,7 @@ DECLARE @payablesDeleted AS TABLE(
 	,intInsuranceChargeDetailId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
+	,intWeightClaimDetailId INT NULL
 	);
 DECLARE @voucherIds NVARCHAR(MAX);
 DECLARE @recordCountToDelete INT = 0;
@@ -95,6 +97,7 @@ BEGIN
 		,B.intInsuranceChargeDetailId
 		,B.intItemId
 		,A.intTransactionType
+		,B.intWeightClaimDetailId
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherPayable C
@@ -117,6 +120,7 @@ BEGIN
 		AND ISNULL(C.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
 		AND ISNULL(C.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
 		AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
+		AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(B.intWeightClaimDetailId,-1)
 	
 	IF EXISTS(SELECT 1 FROM @vouchers)
 	BEGIN
@@ -141,6 +145,7 @@ BEGIN
 			,deleted.intInsuranceChargeDetailId
 			,deleted.intItemId
 			,deleted.intTransactionType
+			,deleted.intWeightClaimDetailId
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
 		INNER JOIN @vouchers B ON A.intTransactionType = CASE WHEN B.intTransactionType = 16 THEN 1 ELSE B.intTransactionType END
@@ -160,7 +165,8 @@ BEGIN
 			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
 			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
 			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
-			AND ISNULL(A.intItemId,-1) = ISNULL(A.intItemId,-1)
+			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
+			AND ISNULL(A.intWeightClaimDetailId,-1) = ISNULL(B.intWeightClaimDetailId,-1)
 		WHERE A.dblQuantityToBill = 0
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;
@@ -191,6 +197,7 @@ BEGIN
 			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
 			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
+			AND ISNULL(A.intWeightClaimDetailId,-1) = ISNULL(B.intWeightClaimDetailId,-1)
 	END
 
 	--IF THERE IS STILL VOUCHERS TO DELETE, MEANS IT IS NOT VALID AS THERE ARE VOUCHERS CREATED AND THERE STILL REMAINING QTY TO BILL
@@ -225,6 +232,7 @@ BEGIN
 			,deleted.intInsuranceChargeDetailId
 			,deleted.intItemId
 			,deleted.intTransactionType
+			,deleted.intWeightClaimDetailId
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable B 
@@ -246,6 +254,7 @@ BEGIN
 			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(B.intStorageChargeId,-1)
 			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(B.intInsuranceChargeDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
+			AND ISNULL(A.intWeightClaimDetailId,-1) = ISNULL(B.intWeightClaimDetailId,-1)
 		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,-1) = ISNULL(C.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(C.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(C.intContractDetailId,-1)
@@ -263,6 +272,7 @@ BEGIN
 			AND ISNULL(A.intStorageChargeId,-1) = ISNULL(C.intStorageChargeId,-1)
 			AND ISNULL(A.intInsuranceChargeDetailId,-1) = ISNULL(C.intInsuranceChargeDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(C.intItemId,-1)
+			AND ISNULL(A.intWeightClaimDetailId,-1) = ISNULL(C.intWeightClaimDetailId,-1)
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;

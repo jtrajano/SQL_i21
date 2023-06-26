@@ -7,6 +7,8 @@
 	@voucherIds NVARCHAR(MAX),
 	@invoiceIds NVARCHAR(MAX),
 	@sort NVARCHAR(500),
+	@exchangeRate DECIMAL (18, 6),
+	@rateType INT,
 	@batchPaymentId NVARCHAR(255) OUTPUT,
 	@postedCount INT OUTPUT,
 	@unpostedCount INT OUTPUT,
@@ -43,7 +45,6 @@ BEGIN
 	DECLARE @clientSort NVARCHAR(500) = @sort;
 	DECLARE @instructionCode INT;
 	DECLARE @functionalCurrency INT;
-	DECLARE @rateType INT;
 
 	--GET DEFAULT COMPANY CONFIGURATIONS
 	SELECT TOP 1 @instructionCode = intInstructionCode, 
@@ -53,7 +54,7 @@ BEGIN
 	SELECT TOP 1 @functionalCurrency = intDefaultCurrencyId
 	FROM tblSMCompanyPreference
 
-	SELECT TOP 1 @rateType = intAccountsPayableRateTypeId
+	SELECT TOP 1 @rateType = CASE WHEN NULLIF(@bankAccount, 0) IS NULL THEN intAccountsPayableRateTypeId ELSE ISNULL(NULLIF(@rateType, 0), intAccountsPayableRateTypeId) END
 	FROM tblSMMultiCurrency
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchers') IS NOT NULL DROP TABLE #tmpMultiVouchers
@@ -124,7 +125,7 @@ BEGIN
 		END
 
 		UPDATE BAI
-		SET BAI.dblRate = ER.dblRate
+		SET BAI.dblRate = CASE WHEN NULLIF(@bankAccount, 0) IS NULL THEN ER.dblRate ELSE ISNULL(NULLIF(@exchangeRate, 0), ER.dblRate) END
 		FROM #tmpBankAccountInfo BAI
 		OUTER APPLY (
 			SELECT TOP 1 exchangeRateDetail.dblRate

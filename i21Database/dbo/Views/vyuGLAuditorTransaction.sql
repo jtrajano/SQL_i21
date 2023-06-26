@@ -65,9 +65,8 @@ SELECT
 	,A.ysnSummary
 	,A.ysnSummaryFooter
 	,A.ysnSpace
-	,CASE WHEN (A.strTotalTitle = 'Total') THEN '' ELSE A.strUserName END COLLATE Latin1_General_CI_AS strUserName
+	,G.strName strUserName
 FROM tblGLAuditorTransaction A
 LEFT JOIN tblGLAccount ACC ON ACC.intAccountId = A.intAccountId
 LEFT JOIN tblGLAccountGroup AG ON AG.intAccountGroupId = ACC.intAccountGroupId
-
-
+LEFT JOIN tblEMEntity G ON G.intEntityId = A.intGeneratedBy

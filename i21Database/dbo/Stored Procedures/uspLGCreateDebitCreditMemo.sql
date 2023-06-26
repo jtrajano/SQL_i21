@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspLGCreateDebitCreditMemo 
 	 @intWeightClaimId INT
 	,@intEntityUserSecurityId INT
-	,@intNewId INT OUTPUT
+	,@strNewIds NVARCHAR(100) OUTPUT
 	,@intMemoType INT OUTPUT
 AS
 BEGIN TRY
@@ -23,14 +23,14 @@ BEGIN TRY
 		EXEC uspLGCreateVoucherForWeightClaims 
 			 @intWeightClaimId = @intWeightClaimId
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@strBillId = @intNewId OUTPUT
+			,@strBillId = @strNewIds OUTPUT
 	END
 	ELSE IF (@intPurchaseSale = 2)
 	BEGIN
 		EXEC uspLGCreateInvoiceForWeightClaims 
 			 @intWeightClaimId = @intWeightClaimId
 			,@intUserId = @intEntityUserSecurityId
-			,@NewInvoiceId = @intNewId OUTPUT
+			,@NewInvoiceId = @strNewIds OUTPUT
 	END
 	ELSE IF (@intPurchaseSale = 3)
 	BEGIN
@@ -53,7 +53,7 @@ BEGIN TRY
 			EXEC uspLGCreateVoucherForWeightClaims 
 				 @intWeightClaimId = @intWeightClaimId
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@strBillId = @intNewId OUTPUT
+				,@strBillId = @strNewIds OUTPUT
 			SET @intMemoType = 1
 		END
 		ELSE 
@@ -61,7 +61,7 @@ BEGIN TRY
 			EXEC uspLGCreateInvoiceForWeightClaims 
 				 @intWeightClaimId = @intWeightClaimId
 				,@intUserId = @intEntityUserSecurityId
-				,@NewInvoiceId = @intNewId OUTPUT
+				,@NewInvoiceId = @strNewIds OUTPUT
 			SET @intMemoType = 2
 		END
 	END

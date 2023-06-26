@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspLGCreateInvoiceForWeightClaims 
 	 @intWeightClaimId INT
 	,@intUserId INT
-	,@NewInvoiceId INT = NULL OUTPUT
+	,@NewInvoiceId NVARCHAR(100) = NULL OUTPUT
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -466,7 +466,8 @@ BEGIN TRY
 		,@CreatedIvoices = @CreatedIvoices OUTPUT
 		,@UpdatedIvoices = @UpdatedIvoices OUTPUT
 
-	SELECT TOP 1 @NewInvoiceId = intInvoiceId
+	DECLARE @intNewInvoiceId INT
+	SELECT TOP 1 @intNewInvoiceId = intInvoiceId
 	FROM tblARInvoice
 	WHERE intInvoiceId IN (
 			SELECT intID
@@ -474,7 +475,7 @@ BEGIN TRY
 			)
 
 	UPDATE tblLGWeightClaimDetail
-	SET intInvoiceId = @NewInvoiceId
+	SET intInvoiceId = @intNewInvoiceId
 	WHERE intWeightClaimId = @intWeightClaimId
 
 	RETURN @NewInvoiceId

@@ -8,7 +8,7 @@
 	@intVendorEntityId INT
 AS
 BEGIN
-	SELECT
+	SELECT DISTINCT
 		LC.intLoadConditionId,
 		LC.intConditionId,
 		CTC.strConditionName,
@@ -37,8 +37,8 @@ BEGIN
 		ICI.intOriginId = @intOriginId AND
 		L.strOriginPort = @strOriginPort AND
 		L.strDestinationPort = @strDestinationPort AND
-		CC.intCertificationId = @intCertificationId AND
 		LD.intVendorEntityId = @intVendorEntityId AND
+		COALESCE(CC.intCertificationId, 1) = CASE WHEN @intCertificationId = 0 THEN COALESCE(CC.intCertificationId, 1) ELSE @intCertificationId END AND
 		COALESCE(L.intShippingLineEntityId, 1) = CASE WHEN @intShippingLineEntityId = 0 THEN COALESCE(L.intShippingLineEntityId, 1) ELSE @intShippingLineEntityId END AND
 		COALESCE(LD.intPSubLocationId, 1) = CASE WHEN @intPSubLocationId = 0 THEN COALESCE(LD.intPSubLocationId, 1) ELSE @intPSubLocationId END AND
 		LC.intConditionId IS NOT NULL

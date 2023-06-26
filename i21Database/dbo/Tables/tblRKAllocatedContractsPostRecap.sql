@@ -1,4 +1,5 @@
-﻿CREATE TABLE [dbo].[tblRKAllocatedContractsPostRecap](
+﻿CREATE TABLE [dbo].[tblRKAllocatedContractsPostRecap]
+(
 	[intAllocatedContractsPostRecapId] INT IDENTITY(1,1) NOT NULL,
 	[intAllocatedContractsGainOrLossHeaderId] INT NOT NULL, 
 	[dtmPostDate] DATETIME NOT NULL,
@@ -8,6 +9,8 @@
 	[strAccountId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	[dblDebit] NUMERIC(18, 6) NULL,
 	[dblCredit] NUMERIC(18, 6) NULL,
+	[dblDebitForeign] NUMERIC(18, 6) NULL,
+	[dblCreditForeign] NUMERIC(18, 6) NULL,
 	[dblDebitUnit] NUMERIC(18, 6) NULL,
 	[dblCreditUnit] NUMERIC(18, 6) NULL,
 	[strAccountDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,

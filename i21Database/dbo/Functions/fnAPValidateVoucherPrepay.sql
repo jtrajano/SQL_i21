@@ -231,6 +231,22 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds)
 		AND @AllowSingleEntries = 1
 		AND [dbo].[fnARCompareAccountSegment](A.[intAccountId], OVERRIDESEGMENT.intOverrideAccount, 3) = 0
+
+		--VALIDATE PAY TO BANK ACCOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Pay To Bank Account is required.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			45
+		FROM tblAPBill A
+		INNER JOIN vyuAPVendor B ON B.intEntityId = A.intEntityVendorId
+		WHERE 
+			A.intBillId IN (SELECT [intId] FROM @voucherPrepayIds) 
+		AND A.intPayToBankAccountId IS NULL
+		AND B.intPaymentMethodId = 2 --ACH
+		AND A.intTransactionType NOT IN (3)
 	END
 	ELSE
 	BEGIN

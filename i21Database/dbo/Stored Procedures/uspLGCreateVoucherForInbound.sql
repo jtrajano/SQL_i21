@@ -257,9 +257,7 @@ BEGIN TRY
 			,[intLoadShipmentCostId] = NULL
 			,[intItemId] = LD.intItemId
 			,[strMiscDescription] = item.strDescription
-			,[dblOrderQty] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
-							THEN ISNULL(LDCL.dblQuantity, LD.dblQuantity) 
-							ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0) - ISNULL(B.dblQtyBilled, 0)
+			,[dblOrderQty] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intOrderUOMId] = LD.intItemUOMId
 			,[dblQuantityToBill] = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) 
@@ -267,13 +265,10 @@ BEGIN TRY
 						ELSE LD.dblQuantity - ISNULL(LD.dblDeliveredQuantity,0) END - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = (CASE WHEN intPurchaseSale = 3 
-							THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
-							ELSE 
-								CASE WHEN AD.ysnValidFX = 1 THEN CT.dblFXPrice
-								ELSE ISNULL(LD.dblUnitPrice, 0)
-								END
-							END)
+			,[dblCost] =	CASE WHEN CH.intPricingTypeId = 2 AND CT.intPricingTypeId = 1 -- Priced basis contract
+								THEN ISNULL(dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+								ELSE COALESCE(LD.dblUnitPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0)
+							END
 			,[dblOptionalityPremium] = LD.dblOptionalityPremium
 			,[dblQualityPremium] = LD.dblQualityPremium
 			,[dblCostUnitQty] = CAST(ISNULL(AD.dblCostUnitQty,1) AS DECIMAL(38,20))

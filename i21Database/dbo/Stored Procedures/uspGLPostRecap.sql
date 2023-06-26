@@ -65,6 +65,7 @@ INSERT INTO tblGLPostRecap (
 		,strNewAccountIdOverride
 		,ysnIntraCompanyEntry
 		,intLOBSegmentOverrideId
+		,strSourceAccountId
 		,[intConcurrencyId]
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
@@ -111,6 +112,7 @@ SELECT	[dtmDate]
 		,strNewAccountIdOverride
 		,ysnIntraCompanyEntry
 		,intLOBSegmentOverrideId
+		,ISNULL(udtRecap.strSourceAccountId,  ISNULL(_GL.sourceAccount,'') + ' ' + ISNULL( SM.sourceCurrency,'') )
 		,[intConcurrencyId] = 1
 FROM	@RecapTable udtRecap LEFT JOIN tblGLAccount gl
 			ON udtRecap.intAccountId = gl.intAccountId
@@ -118,7 +120,11 @@ FROM	@RecapTable udtRecap LEFT JOIN tblGLAccount gl
 		LEFT JOIN tblGLAccountGroup gg
 			ON gg.intAccountGroupId = gl.intAccountGroupId
 		LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON forexRateType.strCurrencyExchangeRateType = udtRecap.strRateType
-
-
+		OUTER APPLY(
+			SELECT TOP 1 strAccountId sourceAccount FROM tblGLAccount WHERE intAccountId = udtRecap.intAccountIdOverride
+		)_GL
+		OUTER APPLY(
+			SELECT strCurrency sourceCurrency FROM tblSMCurrency WHERE intCurrencyID = udtRecap.intSourceCurrencyId
+		)SM
 
 _Exit: 

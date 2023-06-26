@@ -297,16 +297,16 @@ BEGIN
 												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 														- B.dblInterest, voucher.dblTotal) * voucher.dblAverageExchangeRate
-												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 1 OR voucher.intTransactionType = 3 THEN -1 ELSE 1 END) ,
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	'Gain/Loss',
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
-		[intCurrencyId]					=	A.intCurrencyId,
-		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	A.dblExchangeRate,
+		[intCurrencyId]					=	@functionalCurrency,
+		[intCurrencyExchangeRateTypeId]=	NULL,
+		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Posted Gain/Loss',
@@ -320,13 +320,31 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[intConcurrencyId]				=	1,
-		[dblDebitForeign]				=	0,      
+		[dblDebitForeign]				=	--CAST(A.dblAmountPaid * A.dblExchangeRate AS DECIMAL(18,2)) -
+											-- (CAST(
+											-- 	dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+											-- 	AS DECIMAL(18,2))
+											-- -
+											-- CAST(
+											-- 	dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
+											-- 	AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+											(CAST(
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1)
+												AS DECIMAL(18,2))
+											-
+											CAST(
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) * voucher.dblAverageExchangeRate
+												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 1  OR voucher.intTransactionType = 3 THEN -1 ELSE 1 END),
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
 		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	A.dblExchangeRate,
-		[strRateType]					=	rateType.strCurrencyExchangeRateType
+		[dblForeignRate]				=	1,
+		[strRateType]					=	NULL
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
@@ -743,182 +761,105 @@ BEGIN
 		--A.strNotes,
 		--A.dtmDatePaid
 
-		--THIS IS FOR DETAILED ENTRIES ROUNDING ISSUE NOT CURRENTLY APPLICABLE IN 20.1
-		UNION ALL	
-		--ROUNDING ISSUE
-		SELECT	
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, P.dtmDatePaid), 0),
-		[strBatchId]					=	@batchId,
-		[intAccountId]					=	PAY.intAccountId,
-		[dblDebit]						=  	CASE WHEN PAY.dblDifference <> 0 AND PAY.dblDifference < 1 AND PAY.dblDifference > -1 THEN PAY.dblDifference ELSE 0 END,
-		[dblCredit]						=	0,
-		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	0,
-		[strDescription]				=	'Posted Payment',
-		[strCode]						=	'AP',
-		[strReference]					=	P.strNotes,
-		[intCurrencyId]					=	P.intCurrencyId,
-		[intCurrencyExchangeRateTypeId]=	R.intCurrencyExchangeRateTypeId,
-		[dblExchangeRate]				=	P.dblExchangeRate,
-		[dtmDateEntered]				=	GETDATE(),
-		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Decimal Loss',
-		[intJournalLineNo]				=	1,
-		[ysnIsUnposted]					=	0,
-		[intUserId]						=	@intUserId,
-		[intEntityId]					=	@intUserId,
-		[strTransactionId]				=	P.strPaymentRecordNum,
-		[intTransactionId]				=	P.intPaymentId,
-		[strTransactionType]			=	@SCREEN_NAME,
-		[strTransactionForm]			=	@SCREEN_NAME,
-		[strModuleName]					=	@MODULE_NAME,
-		[intConcurrencyId]				=	1,
-		[dblDebitForeign]				=	CASE WHEN PAY.dblDifferenceForeign <> 0 AND PAY.dblDifferenceForeign < 1 AND PAY.dblDifferenceForeign > -1 THEN PAY.dblDifferenceForeign ELSE 0 END,   
-		[dblDebitReport]				=	0,
-		[dblCreditForeign]				=	0,
-		[dblCreditReport]				=	0,
-		[dblReportingRate]				=	0,
-		[dblForeignRate]				=	P.dblExchangeRate,
-		[strRateType]					=	R.strCurrencyExchangeRateType
-		FROM tblAPPayment P
-		LEFT JOIN tblSMCurrencyExchangeRateType R ON R.intCurrencyExchangeRateTypeId = P.intCurrencyExchangeRateTypeId
-		INNER JOIN (
-				SELECT PD.intAccountId, PD.intPaymentId, ROUND(SUM(DT.dblDifference),2) dblDifference, ROUND(SUM(DT.dblDifferenceForeign),2) dblDifferenceForeign FROM tblAPPaymentDetail PD
-				INNER JOIN tblAPBill B ON PD.intBillId = B.intBillId
-				OUTER APPLY (
-						SELECT SUM(IT.dblTotal) dblTotal, SUM(IT.dblTotalForeign) dblTotalForeign FROM 
-						(
-							--ITEMS
-							SELECT ROUND(dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-							* ISNULL((NULLIF(BD.dblRate, 0)), 1), 2) dblTotal,
-							ROUND(dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal), 2) dblTotalForeign
-							FROM tblAPBillDetail BD
-							WHERE BD.intBillId = B.intBillId
-							UNION ALL
-							--TAXES
-							SELECT ROUND(dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-							* ISNULL(NULLIF(BD.dblRate, 0), 1), 2) dblTotal,
-							ROUND(dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal), 2) dblTotalForeign
-							FROM tblAPBillDetail BD
-							INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
-							WHERE BD.intBillId = B.intBillId
-						) IT
-				) RT
-				OUTER APPLY (
+	--ROUNDING ISSUE FOR NON FOREIGN TRANSACTION
+	INSERT INTO @returntable
+	SELECT	
+	[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, P.dtmDatePaid), 0),
+	[strBatchId]					=	@batchId,
+	[intAccountId]					=	PAY.intAccountId,
+	[dblDebit]						=  	CASE WHEN PAY.dblDifference <> 0 AND PAY.dblDifference < 1 AND PAY.dblDifference > -1 THEN PAY.dblDifference ELSE 0 END,
+	[dblCredit]						=	0,
+	[dblDebitUnit]					=	0,
+	[dblCreditUnit]					=	0,
+	[strDescription]				=	'Posted Payment',
+	[strCode]						=	'AP',
+	[strReference]					=	P.strNotes,
+	[intCurrencyId]					=	P.intCurrencyId,
+	[intCurrencyExchangeRateTypeId]=	R.intCurrencyExchangeRateTypeId,
+	[dblExchangeRate]				=	P.dblExchangeRate,
+	[dtmDateEntered]				=	GETDATE(),
+	[dtmTransactionDate]			=	NULL,
+	[strJournalLineDescription]		=	'Posted Decimal Loss',
+	[intJournalLineNo]				=	1,
+	[ysnIsUnposted]					=	0,
+	[intUserId]						=	@intUserId,
+	[intEntityId]					=	@intUserId,
+	[strTransactionId]				=	P.strPaymentRecordNum,
+	[intTransactionId]				=	P.intPaymentId,
+	[strTransactionType]			=	@SCREEN_NAME,
+	[strTransactionForm]			=	@SCREEN_NAME,
+	[strModuleName]					=	@MODULE_NAME,
+	[intConcurrencyId]				=	1,
+	[dblDebitForeign]				=	CASE WHEN PAY.dblDifferenceForeign <> 0 AND PAY.dblDifferenceForeign < 1 AND PAY.dblDifferenceForeign > -1 THEN PAY.dblDifferenceForeign ELSE 0 END,   
+	[dblDebitReport]				=	0,
+	[dblCreditForeign]				=	0,
+	[dblCreditReport]				=	0,
+	[dblReportingRate]				=	0,
+	[dblForeignRate]				=	P.dblExchangeRate,
+	[strRateType]					=	R.strCurrencyExchangeRateType
+	FROM tblAPPayment P
+	LEFT JOIN tblSMCurrencyExchangeRateType R ON R.intCurrencyExchangeRateTypeId = P.intCurrencyExchangeRateTypeId
+	INNER JOIN (
+			SELECT PD.intAccountId, PD.intPaymentId, ROUND(SUM(DT.dblDifference),2) dblDifference, ROUND(SUM(DT.dblDifferenceForeign),2) dblDifferenceForeign FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPBill B ON PD.intBillId = B.intBillId
+			OUTER APPLY (
 					SELECT SUM(IT.dblTotal) dblTotal, SUM(IT.dblTotalForeign) dblTotalForeign FROM 
 					(
 						--ITEMS
-						SELECT dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-						* ISNULL(NULLIF(BD.dblRate, 0), 1) dblTotal,
-						dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) dblTotalForeign
+						SELECT ROUND(dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
+						* ISNULL((NULLIF(BD.dblRate, 0)), 1), 2) dblTotal,
+						ROUND(dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal), 2) dblTotalForeign
 						FROM tblAPBillDetail BD
 						WHERE BD.intBillId = B.intBillId
 						UNION ALL
 						--TAXES
-						SELECT dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-						* ISNULL(NULLIF(BD.dblRate, 0), 1) dblTotal,
-						dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) dblTotalForeign
+						SELECT ROUND(dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
+						* ISNULL(NULLIF(BD.dblRate, 0), 1), 2) dblTotal,
+						ROUND(dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal), 2) dblTotalForeign
 						FROM tblAPBillDetail BD
 						INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
 						WHERE BD.intBillId = B.intBillId
 					) IT
-				) UT
-				OUTER APPLY (
-					SELECT UT.dblTotal - RT.dblTotal dblDifference,
-					UT.dblTotalForeign - RT.dblTotalForeign dblDifferenceForeign
-				) DT
-					WHERE PD.intPaymentId IN (SELECT intId FROM @paymentIds) AND
-			((DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1) OR (DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1))
-			AND PD.dblPayment <> 0
-  		GROUP BY PD.intAccountId, PD.intPaymentId
-		) PAY ON PAY.intPaymentId = P.intPaymentId
-
-		--THIS IS FOR DETAILED ENTRIES ROUNDING ISSUE NOT CURRENTLY APPLICABLE IN 20.1
-		-- UNION ALL	
-		-- --ROUNDING ISSUE
-		-- SELECT	
-		-- [dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, P.dtmDatePaid), 0),
-		-- [strBatchId]					=	@batchId,
-		-- [intAccountId]					=	PD.intAccountId,
-		-- [dblDebit]						=  	CASE WHEN DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1 THEN DT.dblDifference ELSE 0 END,
-		-- [dblCredit]						=	0,
-		-- [dblDebitUnit]					=	0,
-		-- [dblCreditUnit]					=	0,
-		-- [strDescription]				=	'Posted Payment',
-		-- [strCode]						=	'AP',
-		-- [strReference]					=	P.strNotes,
-		-- [intCurrencyId]					=	P.intCurrencyId,
-		-- [intCurrencyExchangeRateTypeId]=	R.intCurrencyExchangeRateTypeId,
-		-- [dblExchangeRate]				=	P.dblExchangeRate,
-		-- [dtmDateEntered]				=	GETDATE(),
-		-- [dtmTransactionDate]			=	NULL,
-		-- [strJournalLineDescription]		=	(SELECT strBillId FROM tblAPBill WHERE intBillId = PD.intBillId),
-		-- [intJournalLineNo]				=	PD.intPaymentDetailId,
-		-- [ysnIsUnposted]					=	0,
-		-- [intUserId]						=	@intUserId,
-		-- [intEntityId]					=	@intUserId,
-		-- [strTransactionId]				=	P.strPaymentRecordNum,
-		-- [intTransactionId]				=	P.intPaymentId,
-		-- [strTransactionType]			=	@SCREEN_NAME,
-		-- [strTransactionForm]			=	@SCREEN_NAME,
-		-- [strModuleName]					=	@MODULE_NAME,
-		-- [intConcurrencyId]				=	1,
-		-- [dblDebitForeign]				=	CASE WHEN DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1 THEN DT.dblDifferenceForeign ELSE 0 END,   
-		-- [dblDebitReport]				=	0,
-		-- [dblCreditForeign]				=	0,
-		-- [dblCreditReport]				=	0,
-		-- [dblReportingRate]				=	0,
-		-- [dblForeignRate]				=	P.dblExchangeRate,
-		-- [strRateType]					=	R.strCurrencyExchangeRateType
-		-- FROM tblAPPayment P
-		-- INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId 
-		-- INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		-- LEFT JOIN tblSMCurrencyExchangeRateType R ON R.intCurrencyExchangeRateTypeId = P.intCurrencyExchangeRateTypeId
-		-- OUTER APPLY (
-		-- 	SELECT SUM(IT.dblTotal) dblTotal, SUM(IT.dblTotalForeign) dblTotalForeign FROM 
-		-- 	(
-		-- 		--ITEMS
-		-- 		SELECT ROUND(dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-		-- 		* ISNULL((NULLIF(BD.dblRate, 0)), 1), 2) dblTotal,
-		-- 		ROUND(dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal), 2) dblTotalForeign
-		-- 		FROM tblAPBillDetail BD
-		-- 		WHERE BD.intBillId = B.intBillId
-		-- 		UNION ALL
-		-- 		--TAXES
-		-- 		SELECT ROUND(dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-		-- 		* ISNULL(NULLIF(BD.dblRate, 0), 1), 2) dblTotal,
-		-- 		ROUND(dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal), 2) dblTotalForeign
-		-- 		FROM tblAPBillDetail BD
-		-- 		INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
-		-- 		WHERE BD.intBillId = B.intBillId
-		-- 	) IT
-		-- ) RT
-		-- OUTER APPLY (
-		-- 	SELECT SUM(IT.dblTotal) dblTotal, SUM(IT.dblTotalForeign) dblTotalForeign FROM 
-		-- 	(
-		-- 		--ITEMS
-		-- 		SELECT dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-		-- 		* ISNULL(NULLIF(BD.dblRate, 0), 1) dblTotal,
-		-- 		dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) dblTotalForeign
-		-- 		FROM tblAPBillDetail BD
-		-- 		WHERE BD.intBillId = B.intBillId
-		-- 		UNION ALL
-		-- 		--TAXES
-		-- 		SELECT dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
-		-- 		* ISNULL(NULLIF(BD.dblRate, 0), 1) dblTotal,
-		-- 		dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) dblTotalForeign
-		-- 		FROM tblAPBillDetail BD
-		-- 		INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
-		-- 		WHERE BD.intBillId = B.intBillId
-		-- 	) IT
-		-- ) UT
-		-- OUTER APPLY (
-		-- 	SELECT CAST(ROUND(UT.dblTotal, 2) - ROUND(RT.dblTotal, 2) AS DECIMAL(18, 2)) dblDifference,
-		-- 	CAST(ROUND(UT.dblTotalForeign, 2) - ROUND(RT.dblTotalForeign, 2) AS DECIMAL(18, 2)) dblDifferenceForeign
-		-- ) DT
-		-- WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds) AND
-		-- ((DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1) OR (DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1))
-		-- AND PD.dblPayment <> 0
+			) RT
+			OUTER APPLY (
+				SELECT SUM(IT.dblTotal) dblTotal, SUM(IT.dblTotalForeign) dblTotalForeign FROM 
+				(
+					--ITEMS
+					SELECT dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
+					* ISNULL(NULLIF(BD.dblRate, 0), 1) dblTotal,
+					dbo.fnAPGetPaymentAmountFactor(BD.dblTotal, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) dblTotalForeign
+					FROM tblAPBillDetail BD
+					WHERE BD.intBillId = B.intBillId
+					UNION ALL
+					--TAXES
+					SELECT dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) 
+					* ISNULL(NULLIF(BD.dblRate, 0), 1) dblTotal,
+					dbo.fnAPGetPaymentAmountFactor(DT.dblAdjustedTax, PD.dblPayment + (CASE WHEN (PD.dblPayment + PD.dblDiscount = PD.dblAmountDue) THEN PD.dblDiscount ELSE 0 END) - PD.dblInterest, B.dblTotal) dblTotalForeign
+					FROM tblAPBillDetail BD
+					INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
+					WHERE BD.intBillId = B.intBillId
+				) IT
+			) UT
+			OUTER APPLY (
+				SELECT UT.dblTotal - RT.dblTotal dblDifference,
+				UT.dblTotalForeign - RT.dblTotalForeign dblDifferenceForeign
+			) DT
+				WHERE PD.intPaymentId IN (SELECT intId FROM @paymentIds) AND
+		((DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1) OR (DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1))
+		AND PD.dblPayment <> 0
+	GROUP BY PD.intAccountId, PD.intPaymentId
+	) PAY ON PAY.intPaymentId = P.intPaymentId
+	OUTER APPLY (
+		SELECT TOP 1 1 isForex
+		FROM tblAPPayment A
+		OUTER APPLY (
+			SELECT intOverrideAccount
+			FROM dbo.[fnARGetOverrideAccount](A.[intAccountId], @GainLossAccount, @OverrideCompanySegment, @OverrideLocationSegment, @OverrideLineOfBusinessSegment)
+		) OVERRIDESEGMENT 
+		INNER JOIN @paymentIds ID ON ID.intId = A.intPaymentId
+		INNER JOIN @returntable GL ON GL.intAccountId = OVERRIDESEGMENT.intOverrideAccount
+	) FOREX
+	WHERE (PAY.dblDifference <> 0 OR dblDifferenceForeign <> 0) AND FOREX.isForex <> 1
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

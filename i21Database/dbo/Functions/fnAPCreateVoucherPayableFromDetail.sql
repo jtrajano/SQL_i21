@@ -121,6 +121,7 @@ RETURNS TABLE AS RETURN
 		OR	B.intPriceFixationDetailId > 0
 		OR	B.intInsuranceChargeDetailId > 0
 		OR	B.intStorageChargeId > 0
+		OR 	B.intWeightClaimDetailId > 0
 	)
 )
 

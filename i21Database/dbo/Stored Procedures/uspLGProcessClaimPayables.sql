@@ -113,7 +113,7 @@ BEGIN
 			,[dblCost] = WCD.dblUnitPrice
 			,[dblCostUnitQty] = IU.dblUnitQty
 			,[intCostUOMId] = WCD.intPriceItemUOMId
-			,[dblNetWeight] = CASE WHEN (strCondition = 'Missing') THEN WCD.dblFromNet ELSE WCD.dblToNet END
+			,[dblNetWeight] = ABS(WCD.dblClaimableWt) --CASE WHEN (strCondition = 'Missing') THEN WCD.dblFromNet ELSE WCD.dblToNet END
 			,[dblNetShippedWeight] = WCD.dblFromNet
 			,[dblWeightLoss] = ABS(WCD.dblWeightLoss)
 			,[dblFranchiseWeight] = CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END
