@@ -4370,22 +4370,22 @@ BEGIN TRY
 			, strEntityName
 			, strDeliveryDate
 			, strContractEndMonth)
-		SELECT strCommodityCode
+		SELECT CH.strCommodityCode
 			, strType = 'Avail for Spot Sale' COLLATE Latin1_General_CI_AS
 			, strContractType
-			, dblTotal
-			, intContractHeaderId
-			, strContractNumber
+			, CH.dblTotal
+			, CH.intContractHeaderId
+			, CH.strContractNumber
 			, strShipmentNumber
 			, intInventoryShipmentId
-			, intTicketId
-			, strTicketNumber
+			, DI.intTicketId
+			, DI.strTicketNumber
 			, intFromCommodityUnitMeasureId
-			, intCommodityId
-			, strLocationName
+			, CH.intCommodityId
+			, CH.strLocationName
 			, strCurrency
-			, intItemId
-			, strItemNo
+			, CH.intItemId
+			, CH.strItemNo
 			, intCategoryId
 			, strCategory
 			, intFutureMarketId
@@ -4395,10 +4395,12 @@ BEGIN TRY
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
-			, strEntityName
+			, CH.strEntityName
 			, strDeliveryDate
 			, strContractEndMonth
-		FROM @ListContractHedge WHERE strType = 'Basis Risk' AND intCommodityId = @intCommodityId AND @ysnExchangeTraded = 1
+		FROM @ListContractHedge CH
+		LEFT JOIN #tempDropshipInTransit DI ON CH.intContractHeaderId = DI.intContractHeaderId
+		WHERE strType = 'Basis Risk' AND CH.intCommodityId = @intCommodityId AND @ysnExchangeTraded = 1
 				
 		INSERT INTO @ListContractHedge (strCommodityCode
 			, intContractHeaderId
@@ -4421,15 +4423,17 @@ BEGIN TRY
 			, intFutureMonthId
 			, strFutureMonth
 			, strEntityName
-			, strDeliveryDate)
+			, strDeliveryDate
+			, intTicketId
+			, strTicketNumber)
 		SELECT *
 		FROM (
 			SELECT cd.strCommodityCode
 				, cd.intContractHeaderId
-				, strContractNumber
+				, cd.strContractNumber
 				, strType = 'Avail for Spot Sale' COLLATE Latin1_General_CI_AS
 				, strContractType
-				, strLocationName
+				, cd.strLocationName
 				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 				, dblTotal = - (cd.dblBalance)
 				, cd.intItemUOMId
@@ -4437,20 +4441,23 @@ BEGIN TRY
 				, cd.intLocationId
 				, strCurrency
 				, intContractTypeId
-				, intItemId
-				, strItemNo
+				, cd.intItemId
+				, cd.strItemNo
 				, strCategory
 				, intFutureMarketId
 				, strFutureMarket
 				, intFutureMonthId
 				, strFutureMonth
-				, strEntityName
+				, cd.strEntityName
 				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
+				, DI.intTicketId
+				, DI.strTicketNumber
 			FROM #tmpContractBalance cd
+			LEFT JOIN #tempDropshipInTransit DI ON cd.intContractHeaderId = DI.intContractHeaderId
 			WHERE intContractTypeId = 1 AND strType IN ('Purchase Priced','Purchase Basis') AND cd.intCommodityId = @intCommodityId
 				AND cd.intLocationId = ISNULL(@intLocationId, cd.intLocationId)
 		) t WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-				
+					
 		INSERT INTO @FinalContractHedge (intCommodityId
 			, strCommodityCode
 			, intContractHeaderId
