@@ -40,6 +40,6 @@
     [ysnRemittanceAdvice_DisplayVendorAccountNumber] BIT NULL DEFAULT(1),
     intBudgetCode int, 
    
-    [ysnRemittanceAdvice_DisplayVendorAccountNumber] BIT NULL DEFAULT(1),
+    
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );

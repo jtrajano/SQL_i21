@@ -197,7 +197,6 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , xref.strCustomerProduct
 	 , intLineOfBusinessId					= ICATEGORY.intLineOfBusinessId
 	 , intOriginalInvoiceDetailId			= INV.intOriginalInvoiceDetailId
-	 , intDispatchId                        = INV.intDispatchId
 	 
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
