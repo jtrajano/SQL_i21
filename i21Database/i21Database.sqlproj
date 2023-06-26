@@ -2027,6 +2027,8 @@
     <Build Include="dbo\Tables\tblGLModuleList.sql" />
     <Build Include="dbo\Tables\tblGLPostHistory.sql" />
     <Build Include="dbo\Tables\tblGLRecurringHistory.sql" />
+    <Build Include="dbo\Tables\tblGLREMaskAccount.sql" />
+    <Build Include="dbo\Tables\tblGLISMaskAccount.sql" />
     <Build Include="dbo\Tables\tblGLSummary.sql" />
     <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLSubsidiaryAccountMapping.sql" />
@@ -2262,6 +2264,8 @@
     <Build Include="dbo\Functions\fnGetClearedDeposits.sql" />
     <Build Include="dbo\Functions\fnGetBankCurrentEndingBalance.sql" />
     <Build Include="dbo\Functions\fnGetBankBeginningBalance.sql" />
+    <Build Include="dbo\Functions\fnCTGetTransactionForexRate.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractCostTransactionForexRate.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconClearedPaymentsSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconClearedDepositsSubReport.sql" />
@@ -3399,6 +3403,7 @@
     <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
     <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPGetDebitMemoItemCostAdjGLEntry.sql" />
     <Build Include="dbo\Functions\fnAPValidatePostPayment.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
@@ -4043,6 +4048,7 @@
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
     <Build Include="dbo\Views\vyuGLJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalYearStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalAccountOverride.sql" />
     <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOrderCommitted.sql" />
@@ -11743,7 +11749,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketClearLoadDetail.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateTicketLoadCostPayable.sql" />
-    <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
+    
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
@@ -12077,6 +12083,7 @@
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\DB\7_RiskDemoData.sql" />
     <None Include="Scripts\Post-Deployment\GL\02_UpdateGeneralJournalDetailCurrency.sql" />
+    <None Include="Scripts\Post-Deployment\GL\03_UpdateForeignDebitCredit.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\38_UpdateDefaultData.sql" />
     <Build Include="dbo\Functions\fnCTCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBTOverrideGLAccount.sql" />

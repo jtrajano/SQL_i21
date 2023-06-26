@@ -34,6 +34,50 @@ BEGIN
 	) glEntries
 	WHERE
 		A.dblTotal != ISNULL(glEntries.dblTotal,0)
+		AND A.ysnFinalVoucher = 0 AND A.intTransactionType != 16 -- Exclude provisional and finalize voucher
+	GROUP BY A.intBillId, A.strBillId
+
+	INSERT @returntable
+	SELECT
+		A.strBillId + ' total do not match with AP Account GL entries total.'
+		,'Bill'
+		,A.strBillId
+		,A.intBillId
+		,1
+	FROM tblAPBill A
+	INNER JOIN @billIds A2 ON A.intBillId = A2.intId
+	
+	OUTER APPLY (
+		SELECT
+			ABS(SUM(dblCreditForeign - dblDebitForeign)) AS dblTotal
+		FROM @GLEntries B
+		INNER JOIN vyuGLAccountDetail C ON B.intAccountId = C.intAccountId
+		WHERE B.strTransactionId = A.strBillId
+			AND C.intAccountCategoryId IN (1, 53)
+	) glEntries
+	WHERE
+		A.intTransactionType = 16 AND A.dblProvisionalTotal != ISNULL(glEntries.dblTotal,0) 
+	GROUP BY A.intBillId, A.strBillId
+	INSERT @returntable
+	SELECT
+		A.strBillId + ' total do not match with AP Account GL entries total.'
+		,'Bill'
+		,A.strBillId
+		,A.intBillId
+		,1
+	FROM tblAPBill A
+	INNER JOIN @billIds A2 ON A.intBillId = A2.intId
+	
+	OUTER APPLY (
+		SELECT
+			ABS(SUM(dblCreditForeign - dblDebitForeign)) AS dblTotal
+		FROM @GLEntries B
+		INNER JOIN vyuGLAccountDetail C ON B.intAccountId = C.intAccountId
+		WHERE B.strTransactionId = A.strBillId
+			AND C.intAccountCategoryId IN (1, 53)
+	) glEntries
+	WHERE
+		A.intTransactionType = 1 AND A.ysnFinalVoucher = 1 AND A.dblTotal - A.dblProvisionalTotal != ISNULL(glEntries.dblTotal,0) 
 	GROUP BY A.intBillId, A.strBillId
 	RETURN;
 END

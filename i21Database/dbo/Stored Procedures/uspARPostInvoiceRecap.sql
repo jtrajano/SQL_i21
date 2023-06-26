@@ -204,7 +204,7 @@ BEGIN TRY
 		,[dtmDate]							= A.[dtmDate]
 		,[ysnIsUnposted]					= A.[ysnIsUnposted]
 		,[intConcurrencyId]					= A.[intConcurrencyId]	
-		,[dblExchangeRate]					= ISNULL(RATETYPE.dblCurrencyExchangeRate, @OneDecimal)
+		,[dblExchangeRate]					= ISNULL(A.dblExchangeRate, @OneDecimal)
 		,[intUserId]						= A.[intUserId]
 		,[dtmDateEntered]					= A.[dtmDateEntered]
 		,[strBatchId]						= A.[strBatchId]
@@ -214,8 +214,8 @@ BEGIN TRY
 		,[strTransactionType]				= A.[strTransactionType]
 		,[strAccountId]						= B.[strAccountId]
 		,[strAccountGroup]					= C.[strAccountGroup]
-		,[strRateType]						= RATETYPE.strCurrencyExchangeRateType
-		,[intCurrencyExchangeRateTypeId]	= RATETYPE.[intCurrencyExchangeRateTypeId]
+		,[strRateType]						= A.strRateType
+		,[intCurrencyExchangeRateTypeId]	= A.[intCurrencyExchangeRateTypeId]
 	FROM @GLEntries A
 	INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
 	INNER JOIN dbo.tblGLAccountGroup C ON B.intAccountGroupId = C.intAccountGroupId			
@@ -223,18 +223,6 @@ BEGIN TRY
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, @ZeroDecimal) - ISNULL(A.dblCredit, @ZeroDecimal)) Credit
 	CROSS APPLY dbo.fnGetDebitUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) DebitUnit
 	CROSS APPLY dbo.fnGetCreditUnit(ISNULL(A.dblDebitUnit, @ZeroDecimal) - ISNULL(A.dblCreditUnit, @ZeroDecimal)) CreditUnit
-	OUTER APPLY (
-		SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal,dblCurrencyExchangeRate,ID.[intCurrencyExchangeRateTypeId]
-		FROM dbo.tblARInvoice I
-		CROSS APPLY (
-			SELECT TOP 1 intCurrencyExchangeRateTypeId = ISNULL(intCurrencyExchangeRateTypeId, @DefaultCurrencyExchangeRateTypeId)
-			FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
-			WHERE intInvoiceId = I.intInvoiceId
-		) ID
-		INNER JOIN tblSMCurrencyExchangeRateType SMCERT WITH (NOLOCK) ON SMCERT.intCurrencyExchangeRateTypeId = ID.intCurrencyExchangeRateTypeId
-		WHERE I.strInvoiceNumber = A.strTransactionId 
-			AND I.intInvoiceId = A.intTransactionId
-	) RATETYPE  	
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					

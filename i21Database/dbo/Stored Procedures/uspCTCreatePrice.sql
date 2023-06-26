@@ -3,7 +3,7 @@
 	,@dblQuantityToPrice numeric(18,6)
 	,@dblFutures numeric(18,6)
 	,@intUserId int
-	,@intAssignFuturesToContractSummaryId int
+	,@intAssignFuturesToContractSummaryId int = null
 	,@ysnAllowToPriceRemainingQtyToPrice bit = 0
 	,@dblAssignedLots numeric(18,6) = 0
 AS

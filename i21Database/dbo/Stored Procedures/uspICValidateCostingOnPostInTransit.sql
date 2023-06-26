@@ -18,6 +18,7 @@
 
 CREATE PROCEDURE [dbo].[uspICValidateCostingOnPostInTransit]
 	@ItemsToValidate ItemInTransitCostingTableType READONLY
+	,@ValueToPost AS ItemInTransitValueOnlyTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -63,6 +64,21 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors
 			, Item.dblQty
 			, Item.intLotId
 			, Item.dblCost
+		) Errors
+
+-- Cross-check each items against the function that does the validation. 
+-- Store the result in a temporary table. 
+INSERT INTO #FoundErrors
+SELECT	Errors.intItemId
+		,Errors.intItemLocationId
+		,intSubLocationId = NULL --Item.intSubLocationId
+		,intStorageLocationId = NULL -- Item.intStorageLocationId
+		,Errors.strText
+		,Errors.intErrorCode
+		,Item.intTransactionTypeId
+FROM	@ValueToPost Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitAdjustmentErrors(
+			Item.intItemId
+			, ISNULL(Item.intInTransitSourceLocationId, Item.intItemLocationId) 
 		) Errors
 
 -- Check for invalid items in the temp table. 
@@ -156,5 +172,21 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- '{Item} is a bundle type and it is not allowed to receive nor reduce stocks.'
 	EXEC uspICRaiseError 80202, @strItemNo
+	RETURN -1
+END 
+
+-- Check if the caller is trying to adjust the in-transit value for an invalid item type. 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 80275
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'In-Transit value cannot be adjusted for {Other Charge}. Item type must be an "Inventory" type.'
+	EXEC uspICRaiseError 80275, @strItemNo
 	RETURN -1
 END 

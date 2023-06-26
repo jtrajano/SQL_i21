@@ -43,6 +43,7 @@ DECLARE @intId AS INT
 		,@dblQty AS NUMERIC(38,20) 
 		,@dblUOMQty AS NUMERIC(38,20)
 		,@dblCost AS NUMERIC(38,20)
+		,@dblForexCost AS NUMERIC(38,20)
 		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
 		--,@dblExchangeRate AS NUMERIC (38,20) 
@@ -107,6 +108,7 @@ SELECT  intId
 		,-dblQty
 		,dblUOMQty
 		,dblCost
+		,dblForexCost
 		,dblSalesPrice
 		,intCurrencyId
 		--,dblExchangeRate
@@ -139,6 +141,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblQty
 	,@dblUOMQty
 	,@dblCost
+	,@dblForexCost
 	,@dblSalesPrice
 	,@intCurrencyId
 	--,@dblExchangeRate
@@ -199,6 +202,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -233,6 +237,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -267,6 +272,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -302,6 +308,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -337,6 +344,7 @@ BEGIN
 			,@dblQty 
 			,@dblUOMQty 
 			,@dblCost 
+			,@dblForexCost
 			,@dblSalesPrice 
 			,@intCurrencyId 
 			--,@dblExchangeRate 
@@ -392,6 +400,7 @@ BEGIN
 		,@dblQty
 		,@dblUOMQty
 		,@dblCost
+		,@dblForexCost
 		,@dblSalesPrice
 		,@intCurrencyId
 		--,@dblExchangeRate

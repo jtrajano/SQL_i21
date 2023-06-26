@@ -27,6 +27,11 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInActualCost
 	,@UpdatedActualCostId AS INT OUTPUT 
 	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
 	,@intRelatedTransactionId AS INT OUTPUT
+	,@intCurrencyId AS INT 
+	,@intForexRateTypeId AS INT
+	,@dblForexRate AS NUMERIC(38, 20) 
+	,@dblForexCost AS NUMERIC(38, 20) 
+	,@ForexCostUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -46,6 +51,7 @@ SET @NewActualCostId = NULL;
 SET @UpdatedActualCostId = NULL;
 SET @strRelatedTransactionId = NULL;
 SET @intRelatedTransactionId = NULL;
+SET @ForexCostUsed = NULL;
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -81,6 +87,7 @@ WHEN MATCHED THEN
 					END
 		-- retrieve the cost from the cost bucket. 
 		,@CostUsed = ActualCost_bucket.dblCost
+		,@ForexCostUsed = ActualCost_bucket.dblForexCost 
 
 		-- retrieve the negative qty that was offset by the incoming stock 
 		,@QtyOffset = 
@@ -108,6 +115,10 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[dblForexCost] 
 		,[intConcurrencyId]
 	)
 	VALUES (
@@ -124,6 +135,10 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
+		,@intCurrencyId 
+		,@intForexRateTypeId 
+		,@dblForexRate 
+		,@dblForexCost
 		,1	
 	)
 ;
@@ -150,6 +165,10 @@ BEGIN
 		,[intTransactionDetailId]
 		,[dtmCreated]
 		,[intCreatedEntityId]
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[dblForexCost] 
 		,[intConcurrencyId]
 	)
 	VALUES (
@@ -166,6 +185,10 @@ BEGIN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
+		,@intCurrencyId 
+		,@intForexRateTypeId 
+		,@dblForexRate 
+		,@dblForexCost
 		,1
 	)
 

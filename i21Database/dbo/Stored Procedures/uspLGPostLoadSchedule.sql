@@ -3,7 +3,8 @@
 	@intEntityUserSecurityId INT,
 	@ysnPost BIT,
 	@ysnRecap BIT = 0,
-	@strBatchId NVARCHAR(40) = NULL OUTPUT
+	@strBatchId NVARCHAR(40) = NULL OUTPUT,
+	@dtmPostedDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intPurchaseSale INT
@@ -41,7 +42,7 @@ BEGIN TRY
 
 	IF ISNULL(@intSourceType,0) = 1
 	BEGIN
-		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId AND @ysnRecap = 0
+		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=ISNULL(@dtmPostedDate, GETDATE()) WHERE intLoadId = @intLoadId AND @ysnRecap = 0
 
 		SELECT @strAuditLogActionType = CASE WHEN ISNULL(@ysnPost,0) = 1 THEN 'Posted' ELSE 'Unposted' END
 		EXEC uspSMAuditLog	
@@ -123,7 +124,7 @@ BEGIN TRY
 				END
 				ELSE 
 				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+					UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = ISNULL(@dtmPostedDate, GETDATE()) WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 					EXEC uspLGProcessReweighs @intLoadId, NULL, NULL
 				END
 
@@ -201,7 +202,7 @@ BEGIN TRY
 			BEGIN
 				IF(@ysnPost = 0)
 				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = ISNULL(@dtmPostedDate, GETDATE()) WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 				END
 
 				IF(ISNULL(@strFOBPoint,'') = 'Origin')
@@ -272,7 +273,7 @@ BEGIN TRY
 
 				UPDATE tblLGLoad
 				SET ysnPosted = @ysnPost
-					,dtmPostedDate = GETDATE()
+					,dtmPostedDate = ISNULL(@dtmPostedDate, GETDATE())
 					,intShipmentStatus = CASE 
 						WHEN @ysnPost = 1
 							THEN 6
@@ -291,7 +292,7 @@ BEGIN TRY
 					WHERE Header.intLoadId = @intLoadId
 
 				IF(ISNULL(@strFOBPoint,'') = 'Origin')
-				BEGIN	
+				BEGIN 
 					IF (@ysnCancel = 1) 
 						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
 					ELSE

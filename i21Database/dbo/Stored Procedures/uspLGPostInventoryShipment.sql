@@ -410,20 +410,7 @@ BEGIN
 										THEN FX.intForexRateTypeId
 										ELSE LoadDetail.intForexRateTypeId END
 									END
-			,dblForexRate = CASE --if contract FX tab is setup
-									WHEN AD.ysnValidFX = 1 THEN 
-									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-											THEN dbo.fnDivide(1, ISNULL(CD.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
-										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-											THEN 1 --foreign price to functional FX, use 1
-										WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-										ELSE ISNULL(LoadDetail.dblForexRate,1) END
-									ELSE  --if contract FX tab is not setup
-									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
-										THEN ISNULL(FX.dblFXRate, 1)
-										ELSE ISNULL(LoadDetail.dblForexRate,1) END
-									END
+			,dblForexRate = ISNULL(LoadDetail.dblSFunctionalFxRate, dbo.fnLGGetForexRateFromContract(CD.intContractDetailId))
 		FROM tblLGLoad L
 		INNER JOIN tblLGLoadDetail LoadDetail ON L.intLoadId = LoadDetail.intLoadId
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
@@ -564,32 +551,45 @@ BEGIN
 			,intForexRateTypeId
 			,dblForexRate
 			,intSourceEntityId
+			,dblForexCost
 			)
-		SELECT [intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[dtmDate]
-			,-[dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
-			,[strTransactionId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[intTransactionId]
-			,[strTransactionId]
-			,[intTransactionDetailId]
+		SELECT t.[intItemId]
+			,t.[intItemLocationId]
+			,ISNULL(t.[intItemUOMId], originalShipment.[intItemUOMId])
+			,t.[dtmDate]
+			,-t.[dblQty]
+			,t.[dblUOMQty]
+			,t.[dblCost]
+			,t.[dblValue]
+			,t.[dblSalesPrice]
+			,t.[intCurrencyId]
+			,t.[dblExchangeRate]
+			,t.[intTransactionId]
+			,t.[intTransactionDetailId]
+			,t.[strTransactionId]
+			,t.[intTransactionTypeId]
+			,t.[intLotId]
+			,t.[intTransactionId]
+			,t.[strTransactionId]
+			,t.[intTransactionDetailId]
 			,[intFobPointId] = @intFOBPointId
 			,[intInTransitSourceLocationId] = t.intItemLocationId
 			,[intForexRateTypeId] = t.intForexRateTypeId
 			,[dblForexRate] = t.dblForexRate
 			,t.intSourceEntityId
+			,t.[dblForexCost]
 		FROM tblICInventoryTransaction t
+		OUTER APPLY (
+			SELECT * 
+			FROM tblICInventoryTransaction ot
+			WHERE ot.strTransactionId = @strTransactionId
+				AND ot.intTransactionDetailId = t.intTransactionDetailId
+				AND ot.ysnIsUnposted = 0
+				AND ot.strBatchId = @strBatchId
+				AND @intFOBPointId = 2
+				AND ot.intTransactionTypeId = 46
+				AND ot.dblQty < 0
+				) originalShipment
 		WHERE t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
 			AND t.strBatchId = @strBatchId

@@ -33,7 +33,9 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 		[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblForexCost] NUMERIC(38, 20) NULL, 
 		[dblValue] NUMERIC(38, 20) NULL, 
+		[dblForexValue] NUMERIC(38, 20) NULL, 
 		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intCurrencyId] INT NULL,
 		[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL, -- OBSOLETE, use dblForexRate instead. 
@@ -73,7 +75,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[intTicketId] INT NULL,
 		[strAccountIdInventory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strAccountIdInTransit] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strAccountIdInTransit] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
 		-- AUDIT (UTC)---
 		[dtmDateCreated] DATETIME2 NULL,
 		[dtmDateModified] DATETIME2 NULL,	

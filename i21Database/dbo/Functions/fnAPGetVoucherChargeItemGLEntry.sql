@@ -8,6 +8,7 @@ RETURNS TABLE AS RETURN
   B.intBillDetailId  
   ,B.strMiscDescription  
   ,CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal   
+        WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 1 THEN B.dblTotal   
   --if charge entity vendor and voucher vendor is the same, meaning the charge added on voucher is for third party  
   --meaning, we don't need to reverse the sign of the amount  
      ELSE (CASE WHEN A.intEntityVendorId = ISNULL(NULLIF(D.intEntityVendorId,0), D2.intEntityVendorId) AND   
@@ -20,6 +21,7 @@ RETURNS TABLE AS RETURN
    * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
       ELSE 1 END AS DECIMAL(18,2)) AS dblTotal  
   ,CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal   
+        WHEN ISNULL(B.ysnPrepaidOtherCharge,0) = 1 THEN B.dblTotal   
      ELSE (CASE WHEN A.intEntityVendorId = ISNULL(NULLIF(D.intEntityVendorId,0), D2.intEntityVendorId) AND   
          D.ysnPrice = 1   
        THEN D.dblAmount * -1   
@@ -28,11 +30,13 @@ RETURNS TABLE AS RETURN
    END   
    * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
       ELSE 1 END AS DECIMAL(18,2)) AS dblForeignTotal  
-  ,B.dblQtyReceived as dblTotalUnits  
+  ,B.dblQtyReceived * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
+      ELSE 1 END as dblTotalUnits  
   ,B.intAccountId  
   ,G.intCurrencyExchangeRateTypeId  
   ,G.strCurrencyExchangeRateType  
   ,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate  
+  ,dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'Other Charge Expense') intExpenseAccountId
  FROM tblAPBill A  
  INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId  
  INNER JOIN tblICItem B2  
@@ -45,8 +49,12 @@ RETURNS TABLE AS RETURN
   ON B.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId  
  LEFT JOIN tblICItem F  
   ON B.intItemId = F.intItemId  
+ LEFT JOIN tblICItemLocation loc
+  ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
  LEFT JOIN dbo.tblSMCurrencyExchangeRateType G  
   ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId  
+ LEFT JOIN tblLGLoadCost H
+  ON H.intLoadCostId = B.intLoadShipmentCostId
  WHERE A.intBillId = @billId  
- AND B.intInventoryReceiptChargeId IS NOT NULL  
+ AND B.intInventoryReceiptChargeId IS NOT NULL
 )

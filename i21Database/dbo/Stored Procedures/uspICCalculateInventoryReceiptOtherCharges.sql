@@ -72,6 +72,7 @@ BEGIN
 			,[ysnPrice]
 			,[ysnInventoryCost]
 			,[strChargesLink]
+			,[dblOriginalCalculatedAmount]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -99,6 +100,17 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 			,[strChargesLink]				= Charge.strChargesLink
+
+			,[dblOriginalCalculatedAmount]	= 
+					ROUND (			
+						Charge.dblOriginalRate 
+						* dbo.fnCalculateQtyBetweenUOM(
+							ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+							, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
+							, COALESCE(NULLIF(ReceiptItem.dblNet, 0), ReceiptItem.dblOpenReceive, 0) --CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
+						)
+						, 2
+					)
 	FROM	tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
@@ -223,6 +235,7 @@ BEGIN
 			,[ysnPrice]
 			,[ysnInventoryCost]
 			,[strChargesLink]
+			,[dblOriginalCalculatedAmount]	
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -250,6 +263,16 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 			,[strChargesLink]				= Charge.strChargesLink
+			,[dblOriginalCalculatedAmount]	= 
+					ROUND (			
+						Charge.dblOriginalRate 
+						* dbo.fnCalculateQtyBetweenUOM(
+							ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
+							, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
+							, ISNULL(ReceiptItem.dblGross, 0)
+						)
+						, 2
+					)
 	FROM	tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
@@ -375,6 +398,7 @@ BEGIN
 			,[ysnPrice]
 			,[ysnInventoryCost]
 			,[strChargesLink]
+			,[dblOriginalCalculatedAmount]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -410,6 +434,28 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 			,[strChargesLink]				= Charge.strChargesLink
+			,[dblOriginalCalculatedAmount] = 
+						ROUND (
+							(ISNULL(Charge.dblOriginalRate, 0) / 100)
+							*  
+							CASE 
+								WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+									-- Convert the line total to transaction currency. 
+									ISNULL(ReceiptItem.dblLineTotal, 0) * ReceiptItem.dblForexRate
+								ELSE 
+									ISNULL(ReceiptItem.dblLineTotal, 0)
+							END 
+							* 
+							-- and then convert the transaction currency to the other charge currency. 
+							CASE WHEN ISNULL(Charge.intCurrencyId, Receipt.intCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(Charge.dblForexRate, 0) <> 0 THEN 
+									1 / Charge.dblForexRate
+								ELSE 
+									1
+							END 
+											
+							--ISNULL(ReceiptItem.dblLineTotal, ReceiptItem.dblOpenReceive * ReceiptItem.dblUnitCost) 
+							, 2
+						)
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem ChargeItem 
@@ -502,6 +548,7 @@ BEGIN
 			,[ysnPrice]
 			,[ysnInventoryCost]
 			,[strChargesLink]
+			,[dblOriginalCalculatedAmount]
 	)
 	SELECT	[intInventoryReceiptId]			= Receipt.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -517,6 +564,7 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 			,[strChargesLink]				= Charge.strChargesLink
+			,[dblOriginalCalculatedAmount]	= ROUND(Charge.dblOriginalAmount, 2)
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem ChargeItem 
@@ -544,6 +592,7 @@ BEGIN
 			,[ysnPrice]
 			,[ysnInventoryCost]
 			,[strChargesLink]
+			,[dblOriginalCalculatedAmount]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -559,6 +608,7 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 			,[strChargesLink]				= Charge.strChargesLink
+			,[dblOriginalCalculatedAmount]	= Charge.dblOriginalRate
 	FROM	tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
@@ -680,6 +730,7 @@ BEGIN
 			,[ysnPrice]
 			,[ysnInventoryCost]
 			,[strChargesLink]
+			,[dblOriginalCalculatedAmount]
 	)
 	SELECT	[intInventoryReceiptId]			= Receipt.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -695,6 +746,7 @@ BEGIN
 			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 			,[strChargesLink]				= Charge.strChargesLink
+			,[dblOriginalCalculatedAmount]	= ROUND(dbo.fnMultiply(Charge.dblOriginalQuantity, Charge.dblOriginalRate), 2)
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem ChargeItem 

@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentSimplifiedAvg]
 	,@intCostUOMId AS INT 
 	,@dblNewCost AS NUMERIC(38,20)
 	,@dblNewValue AS NUMERIC(38,20)
+	,@dblNewForexValue AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(40)
@@ -30,6 +31,13 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentSimplifiedAvg]
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 	,@IsEscalate AS BIT = 0 
 	,@intSourceEntityId AS INT = NULL 
+	,@intCurrencyId AS INT = NULL 
+	,@intForexRateTypeId AS INT = NULL
+	,@dblForexRate AS NUMERIC(38, 20) 
+	,@intOtherChargeCurrencyId AS INT = NULL 
+	,@intOtherChargeForexRateTypeId AS INT = NULL 
+	,@dblOtherChargeForexRate AS NUMERIC(38, 20) 
+	,@dblOtherChargeValue AS NUMERIC(38, 20) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -116,6 +124,7 @@ BEGIN
 			,@CurrentValue AS NUMERIC(38, 20)
 
 			,@CostAdjustment AS NUMERIC(38, 20)			
+			,@ForexCostAdjustment AS NUMERIC(38, 20)			
 			,@OriginalAverageCost AS NUMERIC(38, 20)
 			,@NewAverageCost AS NUMERIC(38, 20)
 
@@ -136,6 +145,10 @@ BEGIN
 			,@t_strRelatedTransactionId AS NVARCHAR(50)
 			,@t_intRelatedTransactionId AS INT 
 			,@t_NegativeStockCost AS NUMERIC(38, 20)
+
+			,@t_intCurrencyId AS INT 
+			,@t_dblForexRate AS NUMERIC(38, 20)
+			,@t_dblForexValue AS NUMERIC(38, 20)
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
@@ -159,11 +172,18 @@ END
 
 -- Compute the cost adjustment
 BEGIN 
-	SET @CostAdjustment = 
-		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
+	SET @ForexCostAdjustment = 
+		CASE	WHEN @dblNewForexValue IS NOT NULL THEN @dblNewForexValue
 				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
 				ELSE NULL 
-		END 
+		END 	
+
+	SET @CostAdjustment = 
+		CASE	WHEN @dblNewValue IS NOT NULL THEN @dblNewValue
+				WHEN @dblQty IS NOT NULL AND NULLIF(@dblForexRate, 0) <> 1 THEN @dblQty * ISNULL(@dblNewCost, 0) * @dblForexRate
+				WHEN @dblQty IS NOT NULL THEN @dblQty * ISNULL(@dblNewCost, 0) 
+				ELSE NULL 
+		END 	
 
 	-- If there is no cost adjustment, exit immediately. 
 	IF @CostAdjustment IS NULL 
@@ -370,6 +390,14 @@ BEGIN
 		,[intCreatedUserId] 
 		,[intCreatedEntityUserId] 
 		,[intOtherChargeItemId] 
+		,[dblForexValue]
+		,[intCurrencyId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+		,[intOtherChargeCurrencyId]
+		,[intOtherChargeForexRateTypeId]
+		,[dblOtherChargeForexRate]
+		,[dblOtherChargeValue]
 	)
 	SELECT
 		[intInventoryFIFOId] = @CostBucketId
@@ -387,7 +415,15 @@ BEGIN
 		,[intCreatedUserId] = @intEntityUserSecurityId
 		,[intCreatedEntityUserId] = @intEntityUserSecurityId
 		,[intOtherChargeItemId] = @intOtherChargeItemId 
-	
+		,[dblForexValue] = @ForexCostAdjustment 
+		,[intCurrencyId] = @intCurrencyId
+		,[intForexRateTypeId] = @intForexRateTypeId
+		,[dblForexRate] = @dblForexRate
+		,[intOtherChargeCurrencyId] = @intOtherChargeCurrencyId
+		,[intOtherChargeForexRateTypeId] = @intOtherChargeForexRateTypeId
+		,[dblOtherChargeForexRate] = @dblOtherChargeForexRate
+		,[dblOtherChargeValue] = @dblOtherChargeValue
+		
 	EXEC [uspICPostInventoryTransaction]
 		@intItemId								= @intItemId
 		,@intItemLocationId						= @intItemLocationId
@@ -399,8 +435,9 @@ BEGIN
 		,@dblUOMQty								= 0
 		,@dblCost								= 0
 		,@dblValue								= @CostAdjustment
+		,@dblForexValue							= @ForexCostAdjustment
 		,@dblSalesPrice							= 0
-		,@intCurrencyId							= NULL 
+		,@intCurrencyId							= @intCurrencyId 
 		,@intTransactionId						= @intTransactionId
 		,@intTransactionDetailId				= @intTransactionDetailId
 		,@strTransactionId						= @strTransactionId
@@ -416,8 +453,8 @@ BEGIN
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 		,@intFobPointId							= @intFobPointId 
 		,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-		,@intForexRateTypeId					= NULL
-		,@dblForexRate							= 1
+		,@intForexRateTypeId					= @intForexRateTypeId
+		,@dblForexRate							= @dblForexRate
 		,@strDescription						= @strDescription	
 
 	UPDATE	tblICInventoryTransaction 
@@ -452,6 +489,10 @@ BEGIN
 		,[intCreatedUserId] 
 		,[intCreatedEntityUserId] 
 		,[intOtherChargeItemId] 
+		,[dblForexValue] 
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
 	)
 	SELECT
 		[intInventoryFIFOId] = @CostBucketId
@@ -469,9 +510,14 @@ BEGIN
 		,[intCreatedUserId] = @intEntityUserSecurityId
 		,[intCreatedEntityUserId] = @intEntityUserSecurityId
 		,[intOtherChargeItemId] = @intOtherChargeItemId 
+		,[dblForexValue] = -@ForexCostAdjustment 
+		,[intCurrencyId] = @intCurrencyId
+		,[intForexRateTypeId] = @intForexRateTypeId
+		,[dblForexRate] = @dblForexRate
 
 	BEGIN 
 		DECLARE @soldCostAdjustment AS NUMERIC(18, 6) = -@CostAdjustment
+		DECLARE @soldForexCostAdjustment AS NUMERIC(18, 6) = -@ForexCostAdjustment
 
 		SET @strNewCost = CONVERT(NVARCHAR, CAST(@soldCostAdjustment AS MONEY), 1)
 
@@ -491,6 +537,7 @@ BEGIN
 				,@dblUOMQty								= 0
 				,@dblCost								= 0
 				,@dblValue								= @soldCostAdjustment
+				,@dblForexValue							= @soldForexCostAdjustment
 				,@dblSalesPrice							= 0
 				,@intCurrencyId							= NULL 
 				,@intTransactionId						= @intTransactionId
@@ -508,8 +555,8 @@ BEGIN
 				,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 				,@intFobPointId							= @intFobPointId 
 				,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
-				,@intForexRateTypeId					= NULL
-				,@dblForexRate							= 1
+				,@intForexRateTypeId					= @intForexRateTypeId
+				,@dblForexRate							= @dblForexRate
 				,@strDescription						= @strDescription	
 
 				UPDATE	tblICInventoryTransaction 

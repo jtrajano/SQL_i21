@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICRepostBillCostAdjustment]
+﻿CREATE PROCEDURE [dbo].[uspAPRepostBillCostAdjustment]
 	@strBillId AS NVARCHAR(50)
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
@@ -301,6 +301,7 @@ BEGIN
 		,[intCostUOMId] 
 		--,[dblVoucherCost] 
 		,[dblNewValue]
+		,[dblNewForexValue]
 		,[intCurrencyId] 
 		--,[dblExchangeRate] 
 		,[intTransactionId] 
@@ -317,6 +318,8 @@ BEGIN
 		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
 	)
 	SELECT 
 		[intItemId] 
@@ -326,10 +329,9 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[intCostUOMId] 
-		--,[dblVoucherCost] 
 		,[dblNewValue]
+		,[dblNewForexValue]
 		,[intCurrencyId] 
-		--,[dblExchangeRate] 
 		,[intTransactionId] 
 		,[intTransactionDetailId] 
 		,[strTransactionId] 
@@ -344,6 +346,8 @@ BEGIN
 		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
 	FROM dbo.fnAPCreateReceiptItemCostAdjustment(
 			@voucherIds
 			, @intFunctionalCurrencyId
@@ -355,61 +359,131 @@ BEGIN
 	(
 		[intInventoryReceiptChargeId] 
 		,[dblNewValue] 
+		,[dblNewForexValue]
 		,[dtmDate] 
 		,[intTransactionId] 
 		,[intTransactionDetailId] 
 		,[strTransactionId] 
+		,[intCurrencyId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
 	)
 	SELECT 
 		[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
 		,[dblNewValue] = --B.dblCost - B.dblOldCost
-				CASE 
-				WHEN ISNULL(rc.dblForexRate, 1) <> 1 THEN 
-				-- Formula: 
-				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-				-- 2. convert to sub currency cents. 
-				-- 3. and then convert into functional currency. 
+			CASE 
+				WHEN ISNULL(rc.dblForexRate, 1) <> 1 AND ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. convert to sub currency cents. 
+					-- 3. and then convert into functional currency. 
 					CAST(
-					((B.dblQtyReceived * B.dblCost)
-						/ ISNULL(r.intSubCurrencyCents, 1) 
-						* ISNULL(rc.dblForexRate, 1)) 
-					AS DECIMAL(18,2))
+						(
+							(B.dblQtyReceived * B.dblCost)
+							/ ISNULL(r.intSubCurrencyCents, 1) 
+							* ISNULL(rc.dblForexRate, 1)
+						) 
+						AS DECIMAL(18,2)
+					)
 					- 
 					CAST(
-					((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-						/ ISNULL(r.intSubCurrencyCents, 1) 
-						* ISNULL(rc.dblForexRate, 1) )
-					AS DECIMAL(18,2))
+						(
+							(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+							/ ISNULL(r.intSubCurrencyCents, 1) 
+							* ISNULL(rc.dblForexRate, 1) 
+						)
+						AS DECIMAL(18,2)
+					)
+				WHEN ISNULL(rc.dblForexRate, 1) <> 1 AND ISNULL(rc.ysnSubCurrency, 0) = 0 THEN 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. and then convert into functional currency. 
+					CAST(
+						(
+							(B.dblQtyReceived * B.dblCost)
+							* ISNULL(rc.dblForexRate, 1)
+						) 
+						AS DECIMAL(18,2)
+					)
+					- 
+					CAST(
+						(
+							(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+							* ISNULL(rc.dblForexRate, 1) 
+						)
+						AS DECIMAL(18,2)
+					)
 				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
-				-- Formula: 
-				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-				-- 2. and then convert into functional currency. 
-				CAST(
-					(
-						(B.dblQtyReceived * B.dblCost)
-						/ ISNULL(r.intSubCurrencyCents, 1) )  
-				AS DECIMAL(18,2))
-					- 
-					CAST(
-					(
-						(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-						/ ISNULL(r.intSubCurrencyCents, 1))
-					AS DECIMAL(18,2))
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. and then convert into functional currency. 
+						CAST(
+							(
+								(B.dblQtyReceived * B.dblCost)
+								/ ISNULL(r.intSubCurrencyCents, 1) 
+							)  
+							AS DECIMAL(18,2)
+						)
+						- 
+						CAST(
+							(
+								(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+								/ ISNULL(r.intSubCurrencyCents, 1)
+							)
+							AS DECIMAL(18,2)
+						)
 				ELSE
-				-- Formula: 
-				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+						CAST(
+							(B.dblQtyReceived * B.dblCost)  
+							AS DECIMAL(18,2)
+						)
+						- 
+						CAST(
+							(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+							AS DECIMAL(18,2)
+						)
+			END 
+		,[dblNewForexValue] = --B.dblCost - B.dblOldCost
+			CASE 
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					-- 2. and then convert into functional currency. 
 					CAST(
-					(B.dblQtyReceived * B.dblCost )  
-					AS DECIMAL(18,2))
+						(
+							(B.dblQtyReceived * B.dblCost) / ISNULL(r.intSubCurrencyCents, 1) 
+						)  
+						AS DECIMAL(18,2)
+					)
 					- 
 					CAST(
-					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
-					AS DECIMAL(18,2))
-				END  
+					(
+						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+						/ ISNULL(r.intSubCurrencyCents, 1))
+						AS DECIMAL(18,2)
+					)
+				ELSE
+					-- Formula: 
+					-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					CAST(
+						(B.dblQtyReceived * B.dblCost )  
+						AS DECIMAL(18,2)
+					)
+					- 
+					CAST(
+						(B.dblQtyReceived * COALESCE(NULLIF(rc.dblRate, 0), rc.dblAmount, 0))
+						AS DECIMAL(18,2)
+					)
+			END  			
 		,[dtmDate] = A.dtmDate
 		,[intTransactionId] = A.intBillId
 		,[intTransactionDetailId] = B.intBillDetailId
 		,[strTransactionId] = A.strBillId
+		,[intCurrencyId] = rc.intCurrencyId
+		,[intForexRateTypeId] = rc.intForexRateTypeId
+		,[dblForexRate] = B.dblRate
 	FROM 
 		tblAPBill A INNER JOIN tblAPBillDetail B
 			ON A.intBillId = B.intBillId
@@ -485,39 +559,41 @@ BEGIN
 	-- Create the GL entries for the cost adjustment. 
 	BEGIN 
 		INSERT INTO @billGLEntries (
-			dtmDate						
-			,strBatchId					
-			,intAccountId				
-			,dblDebit					
-			,dblCredit					
-			,dblDebitUnit				
-			,dblCreditUnit				
-			,strDescription				
-			,strCode					
-			,strReference				
-			,intCurrencyId				
-			,dblExchangeRate			
-			,dtmDateEntered				
-			,dtmTransactionDate			
-			,strJournalLineDescription  
-			,intJournalLineNo			
-			,ysnIsUnposted				
-			,intUserId					
-			,intEntityId				
-			,strTransactionId			
-			,intTransactionId			
-			,strTransactionType			
-			,strTransactionForm			
-			,strModuleName				
-			,intConcurrencyId			
-			,dblDebitForeign			
-			,dblDebitReport				
-			,dblCreditForeign			
-			,dblCreditReport			
-			,dblReportingRate			
-			,dblForeignRate				
+			dtmDate
+			,strBatchId
+			,intAccountId
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,strReference
+			,intCurrencyId
+			,dblExchangeRate
+			,dtmDateEntered
+			,dtmTransactionDate
+			,strJournalLineDescription
+			,intJournalLineNo
+			,ysnIsUnposted
+			,intUserId
+			,intEntityId
+			,strTransactionId
+			,intTransactionId
+			,strTransactionType
+			,strTransactionForm
+			,strModuleName
+			,intConcurrencyId
+			,dblDebitForeign
+			,dblDebitReport
+			,dblCreditForeign
+			,dblCreditReport
+			,dblReportingRate
+			,dblForeignRate 
 			,intSourceEntityId
 			,intCommodityId
+			,intCurrencyExchangeRateTypeId
+			,strRateType
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @strBatchId

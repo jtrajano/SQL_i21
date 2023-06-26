@@ -66,10 +66,12 @@ BEGIN
 					AND Item.strType IN ('Inventory') 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = 
-								-- Convert the other charge amount to functional currency. 
 								SUM(
 									dblCalculatedAmount
-									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
+								)
+							,dblOriginalTotalOtherCharge = 
+								SUM(
+									dblOriginalCalculatedAmount
 								)
 							,CalculatedCharge.ysnAccrue 
 							,CalculatedCharge.intEntityVendorId
@@ -153,6 +155,15 @@ BEGIN
 								)
 								, 2 
 							)
+				,dblOriginalAmount = ROUND (
+								ISNULL(dblOriginalAmount, 0) 
+								+ (
+									Source_Query.dblOriginalTotalOtherCharge
+									* dbo.fnCalculateStockUnitQty(Source_Query.Qty, Source_Query.dblUnitQty)
+									/ Source_Query.dblTotalStockUnit 
+								)
+								, 2 
+							)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalStockUnit, 0) <> 0 THEN 
@@ -166,12 +177,14 @@ BEGIN
 			,[ysnInventoryCost]
 			,[ysnPrice]
 			,[strChargesLink]
+			,[dblOriginalAmount]
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
 			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
+			--dblAmount:
 			,ROUND (
 				Source_Query.dblTotalOtherCharge
 				* dbo.fnCalculateStockUnitQty(Source_Query.Qty, Source_Query.dblUnitQty)
@@ -182,6 +195,13 @@ BEGIN
 			,Source_Query.ysnInventoryCost
 			,Source_Query.ysnPrice
 			,Source_Query.strChargesLink
+			--dblOriginalAmount:
+			,ROUND (
+				Source_Query.dblOriginalTotalOtherCharge
+				* dbo.fnCalculateStockUnitQty(Source_Query.Qty, Source_Query.dblUnitQty)
+				/ Source_Query.dblTotalStockUnit 
+				, 2	
+			)
 		)
 	;
 END 

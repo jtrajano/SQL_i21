@@ -36,6 +36,7 @@ DECLARE @intId AS INT
 		,@dblQty AS NUMERIC(38, 20) 
 		,@dblUOMQty AS NUMERIC(38, 20)
 		,@dblCost AS NUMERIC(38, 20)
+		,@dblForexCost AS NUMERIC(38, 20)
 		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
 		--,@dblExchangeRate AS DECIMAL (38, 20) 
@@ -84,6 +85,7 @@ INSERT INTO @StorageToPost (
     ,[dblQty]
 	,[dblUOMQty]
     ,[dblCost]
+	,[dblForexCost]
 	,[dblValue]
 	,[dblSalesPrice]
 	,[intCurrencyId]
@@ -123,6 +125,7 @@ SELECT
     ,[dblQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateQtyBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblQty) ELSE p.dblQty END 
 	,[dblUOMQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN iu.dblUnitQty ELSE p.dblUOMQty END 
     ,[dblCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblCost) ELSE p.dblCost END 
+	,[dblForexCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblForexCost) ELSE p.dblForexCost END 
 	,[dblValue] = p.dblValue 
 	,[dblSalesPrice] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblSalesPrice) ELSE p.dblSalesPrice END 
 	,[intCurrencyId] = p.intCurrencyId
@@ -189,6 +192,7 @@ SELECT  intId
 		,dblQty
 		,dblUOMQty
 		,dblCost
+		,dblForexCost
 		,dblSalesPrice
 		,intCurrencyId
 		--,dblExchangeRate
@@ -221,6 +225,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblQty
 	,@dblUOMQty
 	,@dblCost
+	,@dblForexCost
 	,@dblSalesPrice
 	,@intCurrencyId
 	--,@dblExchangeRate
@@ -282,6 +287,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -316,6 +322,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -351,6 +358,7 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@dblCost
+			,@dblForexCost
 			,@dblSalesPrice
 			,@intCurrencyId
 			--,@dblExchangeRate
@@ -399,6 +407,7 @@ BEGIN
 		,@dblQty
 		,@dblUOMQty
 		,@dblCost
+		,@dblForexCost
 		,@dblSalesPrice
 		,@intCurrencyId
 		--,@dblExchangeRate

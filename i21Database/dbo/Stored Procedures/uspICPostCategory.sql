@@ -16,6 +16,7 @@ CREATE PROCEDURE [dbo].[uspICPostCategory]
 	,@dblQty AS NUMERIC(38,20)
 	,@dblUOMQty AS NUMERIC(38,20)
 	,@dblCost AS NUMERIC(38,20)	
+	,@dblForexCost AS NUMERIC(38,20)	
 	,@dblUnitRetail AS NUMERIC(38,20)
 	,@dblSalesPrice AS NUMERIC(18,6)	
 	,@intCurrencyId AS INT
@@ -250,6 +251,7 @@ BEGIN
 		,@dblQty  = @dblQty
 		,@dblUOMQty = @dblUOMQty
 		,@dblCost = @dblCost
+		,@dblForexCost = @dblForexCost
 		,@dblValue = @dblValue 
 		,@dblSalesPrice = @dblSalesPrice
 		,@intCurrencyId = @intCurrencyId
