@@ -38,7 +38,7 @@ OUTER APPLY (
 	SELECT TOP 1 ysnRevalue_Swap FROM tblCMCompanyPreferenceOption
 ) RevalueOptions
 OUTER APPLY (
-	SELECT TOP 1 ISNULL(ysnPosted, 0) ysnPosted, dtmDate, dtmIntransit FROM tblCMBankTransfer WHERE intTransactionId = BankSwap.intSwapShortId
+	SELECT TOP 1 ISNULL(ysnPosted, 0) ysnPosted, dtmDate, dtmInTransit FROM tblCMBankTransfer WHERE intTransactionId = BankSwap.intSwapShortId
 ) SwapOut
 WHERE
 	BT.ysnPosted = 0
