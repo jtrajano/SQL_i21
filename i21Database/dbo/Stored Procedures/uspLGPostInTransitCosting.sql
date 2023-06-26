@@ -392,7 +392,7 @@ SET ANSI_WARNINGS ON
 		)
 		SELECT 
 			[intItemId] = LD.intItemId
-			,[intOtherChargeItemId] = LD.intItemId
+			,[intOtherChargeItemId] = ShipmentCharges.intItemId
 			,[intItemLocationId] = LD.intItemLocationId
 			,[dtmDate] = L.dtmScheduledDate
 			,[dblValue] = ShipmentCharges.dblAmount 
