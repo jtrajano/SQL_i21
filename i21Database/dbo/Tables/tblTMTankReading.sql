@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[tblTMTankReading] (
     [intTankReadingId]          INT             IDENTITY (1, 1) NOT NULL,
 	[dtmDateTime]				DATETIME 		NULL,
 	[intReadingSource]			INT NULL,
-	[intDeviceTankMonitorId]	INT NOT NULL,
+	[intDeviceTankMonitorId]	INT NULL,
 	[intTankNumber]				INT				NULL,
 	[strTankStatus]				NVARCHAR (100)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
 	[intFuelGrade]				INT				NULL,
