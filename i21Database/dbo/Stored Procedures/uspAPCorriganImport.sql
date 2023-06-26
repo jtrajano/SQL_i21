@@ -375,10 +375,14 @@ BEGIN
 	END CATCH
 END
 
+	DECLARE @defaultAPAccount NVARCHAR(50) = '200000-0000-0000-0090'
+	DECLARE @apAccountId INT = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @defaultAPAccount)
+
 	INSERT INTO @voucherPayables(
 		intPartitionId
 		,strVendorOrderNumber
 		,intTransactionType
+		,intAPAccount
 		,intEntityVendorId
 		,intLocationId
 		,intShipToId
@@ -404,6 +408,7 @@ END
 		intPartitionId			= 	intPartitionId, --1 voucher per 1 payable
 		strVendorOrderNumber	=	strVendorOrderNumber,
 		intTransactionType 		=	intTransactionType,
+		intAPAccount			=	@apAccountId,
 		intEntityVendorId		=	intEntityVendorId,
 		intLocationId			=	intShipToId,
 		intShipToId				=	intShipToId,
