@@ -1408,7 +1408,11 @@ BEGIN
           THEN NULL
         ELSE CAST(TASTE.strPropertyValue AS NUMERIC(18, 6))
         END
-      ,dblTeaVolume = BT.dblTeaVolume
+      ,dblTeaVolume = CASE 
+        WHEN ISNULL(Volume.strPropertyValue, '') = ''
+          THEN ISNULL(I.dblBlendWeight, BT.dblTeaVolume)
+        ELSE CAST(Volume.strPropertyValue AS NUMERIC(18, 6))
+        END
       ,intTealingoItemId = S.intItemId
       ,dtmWarehouseArrival = BT.dtmWarehouseArrival
       ,intYearManufacture = Datepart(YYYY,S.dtmManufacturingDate)
