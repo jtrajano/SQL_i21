@@ -482,6 +482,7 @@
     <Build Include="dbo\Views\vyuCMSwapInPayablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapInReceivablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Views\vyuCMSwapMultiCurrencyRevalue.sql" />   
     <Build Include="dbo\Stored Procedures\uspRKCreateOtcForwardFromCT.sql" />
     <Build Include="dbo\Views\vyuRKGetOtcForwards.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadForwardCurrency.sql" />
