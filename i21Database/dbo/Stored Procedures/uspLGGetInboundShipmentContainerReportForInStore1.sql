@@ -39,10 +39,10 @@ BEGIN
 		,strMarks = CASE WHEN (LV.intPurchaseSale = 2) THEN ICL.strMarkings ELSE LC.strMarks END 
 		,LDV.strItemUOM
 		,dblContainerContractQty = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblLotQuantity ELSE LDCL.dblQuantity END
-		,dblContainerGrossWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblGross ELSE LC.dblGrossWt END
+		,dblContainerGrossWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblGross ELSE LDCL.dblLinkGrossWt END
 		,LDV.strWeightItemUOM
-		,dblContainerTareWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblTare ELSE LC.dblTareWt END
-		,dblContainerNetWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblNet ELSE LC.dblNetWt END
+		,dblContainerTareWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblTare ELSE LDCL.dblLinkTareWt END
+		,dblContainerNetWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblNet ELSE LDCL.dblLinkNetWt END
 		,LC.intLoadContainerId
 		,LV.strLoadNumber
 	FROM vyuLGLoadDetailView LDV
