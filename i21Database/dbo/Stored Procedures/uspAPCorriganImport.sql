@@ -327,7 +327,7 @@ BEGIN
 		,intPayToId						=	F.intEntityLocationId	
 		,strPayTo						=	A2.strPayTo
 		,intCurrencyId					=	H.intCurrencyID
-		,dblCost						=	A4.dblTotal
+		,dblCost						=	A4.dblTotal * (CASE WHEN A.dblTotal < 0 THEN -1 ELSE 1 END)
 		,dblQuantityToBill				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,dblQuantityOrdered				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,intContactId					=	C3.intEntityId
