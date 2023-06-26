@@ -19,7 +19,7 @@
     [ysnPhoneConfirmed]					BIT            DEFAULT ((1)) NOT NULL,
     [strSecurityStamp]					NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS DEFAULT NEWID(),
     [ysnTwoFactorEnabled]				BIT            DEFAULT ((0)) NOT NULL,
-    [dtmLockoutEndDateUtc]				DATETIME       NULL,
+    [dtmLockoutEndDateUtc]				DATETIMEOFFSET(7)       NULL,
     [ysnLockoutEnabled]					BIT            DEFAULT ((0)) NOT NULL,
     [intAccessFailedCount]				INT            DEFAULT ((0)) NOT NULL,
 	[intGridLayoutConcurrencyId]		INT			   DEFAULT ((1)) NOT NULL,
