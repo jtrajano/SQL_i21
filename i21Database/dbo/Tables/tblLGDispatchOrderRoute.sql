@@ -26,6 +26,7 @@
 	[strOrderNumber] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strOrderType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
+	[strItemDescription] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantity] NUMERIC(18, 6) NULL,
 	[dblStandardWeight] NUMERIC(18, 6) NULL,
 	[strOrderComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
