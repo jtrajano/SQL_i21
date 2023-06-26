@@ -1814,6 +1814,7 @@
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
     <Build Include="dbo\Views\vyuTMDeliverySite.sql" />
+    <Build Include="dbo\User Defined Types\ItemInTransitValueOnlyTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11749,7 +11750,6 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketClearLoadDetail.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateTicketLoadCostPayable.sql" />
-    
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
