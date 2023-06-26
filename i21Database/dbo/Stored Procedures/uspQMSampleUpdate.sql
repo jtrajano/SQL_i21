@@ -1412,7 +1412,7 @@ BEGIN
       ,intTealingoItemId = S.intItemId
       ,dtmWarehouseArrival = BT.dtmWarehouseArrival
       ,intYearManufacture = Datepart(YYYY,S.dtmManufacturingDate)
-      ,strPackageSize = PT.strUnitMeasure
+      ,strPackageSize = ISNULL(PT.strUnitMeasure,BT.strPackageSize)
       ,intPackageUOMId = CASE WHEN CD.intContractDetailId IS NULL THEN S.intNetWtPerPackagesUOMId ELSE S.intRepresentingUOMId END
       ,dblTareWeight = S.dblTareWeight
       ,strTaster = BT.strTaster
