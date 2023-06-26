@@ -1633,6 +1633,7 @@
     <Build Include="dbo\Tables\tblTMDispatchHistorySource.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICDailyInventoryReceiptDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetNoOfContract.sql" />
     <Build Include="dbo\Tables\tblTMDeviceTankMonitor.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceTankMonitor.sql" />
     <None Include="Scripts\Post-Deployment\TM\8_MigrateTankMonitorFromSiteDeviceToDeviceTankMonitor.sql" />
@@ -9711,6 +9712,7 @@
     <Build Include="dbo\Views\vyuQMSampleHeaderView.sql" />
     <Build Include="dbo\Views\vyuQMSampleTestResultView.sql" />
     <Build Include="dbo\Views\vyuQMSampleDetailView.sql" />
+    <Build Include="dbo\Views\vyuQMSampleEntryView.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleProcessAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleTransferAckXML.sql" />
