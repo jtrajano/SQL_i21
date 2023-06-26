@@ -294,6 +294,7 @@ AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 IF @strModule = 'CM Swaps'
 BEGIN
+WITH cte AS(
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType, strTransactionId COLLATE Latin1_General_CI_AS strTransactionId, 
 	strTransactionDate dtmDate, strTransactionDueDate dtmDueDate, strVendorName COLLATE Latin1_General_CI_AS strVendorName,
@@ -308,6 +309,7 @@ SELECT
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
 FROM vyuCMSwapMultiCurrencyRevalue
+)
 INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
