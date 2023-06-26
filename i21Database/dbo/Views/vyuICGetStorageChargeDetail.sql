@@ -41,6 +41,7 @@ SELECT
 	,A.intTotalAccumulatedDays
 	----Details from other table
 	,C.strItemNo
+	,strItemDescription = C.strDescription
 	,D.strLotNumber
 	,D.strLotAlias
 	,D.strWarrantNo

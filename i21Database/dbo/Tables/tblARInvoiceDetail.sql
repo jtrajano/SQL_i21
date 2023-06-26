@@ -146,6 +146,7 @@
 	[dblServiceChargeAmountDue]				NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblServiceChargeAmountDue] DEFAULT ((0)) NULL,
 	[dblServiceChargeAPR]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblServiceChargeAPR] DEFAULT ((0)) NULL,
 	[ysnOverrideTaxGroup]					BIT												NULL,
+	[intItemCustomerXrefId]					INT												NULL,
 	intDispatchId							INT												NULL,
     [dblPercentage]							NUMERIC(18, 6)									NOT NULL	DEFAULT ((100)),
 	[dblProvisionalTotal]					NUMERIC(18, 6)									NOT NULL	DEFAULT ((0)),

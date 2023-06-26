@@ -238,6 +238,8 @@ BEGIN
 END
 
 DELETE FROM tblRestApiInvoiceStaging WHERE guiUniqueId = @guiUniqueId
-SELECT * FROM @Logs
+
+INSERT INTO tblApiRESTErrorLog(guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel)
+SELECT @guiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel FROM @Logs
 
 RETURN 0

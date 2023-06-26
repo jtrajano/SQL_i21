@@ -17,6 +17,7 @@ BEGIN
 		SET ANSI_NULLS ON
 		SET NOCOUNT ON
 
+		-- +++++ INSERT ACCOUNT Id +++++ --
 		IF @intCurrencyId = 0 SET @intCurrencyId = NULL
 
 
@@ -59,8 +60,7 @@ BEGIN
 
 			DELETE FROM @tblAuditLogAccount WHERE strAccountId = @_strAccountId
 		END
-		
-
+	
 		-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
 		IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference WHERE strCompanyId = ''Legacy'')
         BEGIN

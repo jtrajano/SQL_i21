@@ -17,6 +17,7 @@ BEGIN TRY
 		,@dtmStartDayOfWeek DATETIME
 		,@dtmStartDayOfLast7Days DATETIME
 		,@dtmStartDayOfLast28Days DATETIME
+		,@intUnitMeasureId INT
 
 	SELECT @dtmCurrentDate = Convert(CHAR, GETDATE(), 101)
 
@@ -66,7 +67,7 @@ BEGIN TRY
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblIPAuctionStockPreStage
-			WHERE dtmProcessedDate = @dtmStartDayOfWeek
+			WHERE dtmProcessedDate = @dtmCurrentDate
 			)
 	BEGIN
 		DELETE
@@ -83,7 +84,7 @@ BEGIN TRY
 				ORDER BY intItemId
 				)
 			,intItemId
-			,@dtmStartDayOfWeek
+			,@dtmCurrentDate
 			,intLocationId
 			,intCurrencyId
 		FROM (
@@ -96,6 +97,7 @@ BEGIN TRY
 				AND S.intMarketZoneId = 1
 				and S.intLocationId IS NOT NULL
 				and S.intCurrencyId IS NOT NULL
+				AND isNULL(S.dblB1QtyBought , 0) + isNULL(S.dblB2QtyBought , 0) + isNULL(S.dblB3QtyBought , 0) + isNULL(S.dblB4QtyBought , 0) + isNULL(S.dblB5QtyBought , 0)>0
 			) AS DT
 		ORDER BY intItemId
 	END
@@ -158,6 +160,10 @@ BEGIN TRY
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
 	FROM tblSMCompanyPreference
 
+	SELECT @intUnitMeasureId=intUnitMeasureId
+	FROM dbo.tblICUnitMeasure
+	WHERE strUnitMeasure='KG'
+
 	INSERT INTO @tblIPAuctionStock7 (
 		intItemId
 		,intLocationId
@@ -181,10 +187,11 @@ BEGIN TRY
 		AND S.intLocationId = AI.intLocationId
 		AND S.intCurrencyId=AI.intCurrencyId
 	LEFT JOIN tblICUnitMeasureConversion UC ON UC.intUnitMeasureId = S.intB1QtyUOMId
-		AND UC.intStockUnitMeasureId = 4
+		AND UC.intStockUnitMeasureId = @intUnitMeasureId
 	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast7Days
 			AND @dtmStartDayOfWeek
 		AND S.intMarketZoneId = 1
+		AND isNULL(S.dblB1QtyBought , 0) + isNULL(S.dblB2QtyBought , 0) + isNULL(S.dblB3QtyBought , 0) + isNULL(S.dblB4QtyBought , 0) + isNULL(S.dblB5QtyBought , 0)>0
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId
@@ -208,10 +215,11 @@ BEGIN TRY
 		AND S.intLocationId = AI.intLocationId
 		AND S.intCurrencyId=AI.intCurrencyId
 	LEFT JOIN tblICUnitMeasureConversion UC ON UC.intUnitMeasureId = S.intB1QtyUOMId
-		AND UC.intStockUnitMeasureId = 4
+		AND UC.intStockUnitMeasureId = @intUnitMeasureId
 	WHERE S.dtmSaleDate BETWEEN @dtmStartDayOfLast28Days
 			AND @dtmStartDayOfWeek
 		AND S.intMarketZoneId = 1
+		AND isNULL(S.dblB1QtyBought , 0) + isNULL(S.dblB2QtyBought , 0) + isNULL(S.dblB3QtyBought , 0) + isNULL(S.dblB4QtyBought , 0) + isNULL(S.dblB5QtyBought , 0)>0
 	GROUP BY S.intItemId
 		,S.intLocationId
 		,S.intCurrencyId

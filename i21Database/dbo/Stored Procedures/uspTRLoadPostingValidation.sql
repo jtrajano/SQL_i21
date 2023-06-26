@@ -651,7 +651,7 @@ BEGIN TRY
 			SET @err = 'Default Issue UOM is not setup for item ' + @strItem + ' under location ' + @strItemLocation
 			RAISERROR(@err , 16, 1)
 		END
-		IF (ISNULL(@dblUnits, 0) = 0)
+		IF (ISNULL(@dblUnits, 0) = 0  AND @ysnAllowDifferentUnits = 0)
 		BEGIN
 			RAISERROR('Distribution Units cannot be 0', 16, 1)
 		END

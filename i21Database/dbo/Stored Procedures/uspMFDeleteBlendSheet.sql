@@ -97,9 +97,12 @@ BEGIN TRY
 			RaisError(@strErrMsg,16,1)
 		End
 
-		Exec dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId=@intWorkOrderId
+		IF @intStatusId IN (2,19)
+		BEGIN
+			Exec dbo.uspMFDeleteTrialBlendSheetReservation @intWorkOrderId=@intWorkOrderId
+		END
 
-		If @intStatusId in (2,9) or (@intTransactionFrom=4 and @intStatusId=10)
+		IF @intStatusId in (2,9,19,20,13) or (@intTransactionFrom=4 and @intStatusId=10)
 		Begin			
 			Delete from tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
 			Update tblMFBlendRequirement Set dblIssuedQty=ISNULL(dblIssuedQty,0) - ISNULL(@dblQuantity,0) where intBlendRequirementId=@intBlendRequirementId
@@ -109,7 +112,7 @@ BEGIN TRY
 			Else
 				Update tblMFBlendRequirement Set intStatusId=2 where intBlendRequirementId=@intBlendRequirementId
 
-			If @intStatusId=9 or (@intTransactionFrom=4 and @intStatusId=10)
+			If @intStatusId IN (9,18,20) or (@intTransactionFrom=4 and @intStatusId=10)
 				Begin
 					UPDATE tblMFWorkOrder
 					SET intExecutionOrder = intExecutionOrder - 1

@@ -97,6 +97,7 @@ CREATE TABLE #INVOICES (
 	 , strSeals						NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , strLotNumber					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , blbLogo						VARBINARY(MAX)	NULL
+	 , imgLogo						VARBINARY(MAX)	NULL
 	 , strAddonDetailKey			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , strBOLNumberDetail			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
 	 , ysnHasAddOnItem				BIT				NULL
@@ -120,7 +121,9 @@ CREATE TABLE #INVOICES (
 	 , intItemId					INT 			NULL
 )
 
-DECLARE @blbLogo						VARBINARY (MAX) = NULL
+DECLARE 
+		@blbLogo						VARBINARY (MAX) = NULL
+	  , @imgLogo						VARBINARY (MAX) = NULL
       , @blbStretchedLogo				VARBINARY (MAX) = NULL
 	  , @ysnPrintInvoicePaymentDetail	BIT = 0
 	  , @strInvoiceReportName			NVARCHAR(100) = NULL
@@ -137,12 +140,27 @@ FROM tblTRCompanyPreference
 ORDER BY intCompanyPreferenceId DESC
 	  
 --LOGO
-SELECT TOP 1 @blbLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.CompanyPreference') 
-  AND A.strComment = 'Header'
-ORDER BY A.intAttachmentId DESC
+DECLARE 
+     @strLogoType NVARCHAR(50)
+    ,@intCompanyLocationId INT
+
+SELECT @intCompanyLocationId = intCompanyLocationId
+FROM tblARInvoice I 
+WHERE I.strInvoiceNumber = strInvoiceNumber
+
+SELECT TOP 1 
+	@imgLogo = imgLogo
+    ,@strLogoType = 'Logo'
+FROM 
+	tblSMLogoPreference
+WHERE 
+	ysnAllOtherReports = 1
+    AND intCompanyLocationId = @intCompanyLocationId
+
+IF @imgLogo IS NULL
+BEGIN
+    SELECT @imgLogo = dbo.fnSMGetCompanyLogo('Header') ,@strLogoType = 'Attachment'
+END
 
 --STRETCHED LOGO
 SELECT TOP 1 @blbStretchedLogo = U.blbFile 
@@ -152,7 +170,7 @@ WHERE A.strScreen IN ('SystemManager.CompanyPreference', 'SystemManager.view.Com
   AND A.strComment = 'Stretched Header'
 ORDER BY A.intAttachmentId DESC
 
-SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
+SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @imgLogo)
 
 --AR PREFERENCE
 SELECT TOP 1 @ysnPrintInvoicePaymentDetail	= ysnPrintInvoicePaymentDetail
@@ -187,7 +205,7 @@ WHERE
 (
    intEntityUserId = @intEntityUserId 
    AND strRequestId = @strRequestId 
-   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
+   AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost','Format 10 - Berry Trucking')
 )
 OR		dtmCreated < DATEADD(DAY, DATEDIFF(DAY, 0, @dtmCurrentDate), 0) 
 OR		dtmCreated IS NULL
@@ -259,7 +277,7 @@ INSERT INTO #INVOICES (
 	, ysnPrintInvoicePaymentDetail
 	, ysnListBundleSeparately
 	, strLotNumber
-	, blbLogo
+	, imgLogo
 	, strAddonDetailKey
 	, strBOLNumberDetail
 	, ysnHasAddOnItem
@@ -359,7 +377,7 @@ SELECT
 	, ysnPrintInvoicePaymentDetail 	= @ysnPrintInvoicePaymentDetail
 	, ysnListBundleSeparately		= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CAST(0 AS BIT))
 	, strLotNumber					= CAST('' AS NVARCHAR(200))
-	, blbLogo                  		= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END)
+	, imgLogo                  		= ISNULL(SMLP.imgLogo, CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @imgLogo END)
 	, strAddonDetailKey				= INVOICEDETAIL.strAddonDetailKey
 	, strBOLNumberDetail			= INVOICEDETAIL.strBOLNumberDetail
 	, ysnHasAddOnItem				= CAST(0 AS BIT)
@@ -862,7 +880,7 @@ INSERT INTO tblARInvoiceReportStagingTable WITH (TABLOCK) (
 	, strTrailer
 	, strSeals
 	, strLotNumber
-	, blbLogo
+	, imgLogo
 	, strAddonDetailKey
 	, strBOLNumberDetail
 	, ysnHasAddOnItem
@@ -965,7 +983,7 @@ SELECT
 	, strTrailer
 	, strSeals
 	, strLotNumber
-	, blbLogo
+	, imgLogo
 	, strAddonDetailKey
 	, strBOLNumberDetail
 	, ysnHasAddOnItem
@@ -1013,4 +1031,4 @@ WHERE intEntityUserId = @intEntityUserId
   AND strRequestId = @strRequestId 
   AND ysnIncludeInvoicePrice = 1
   AND strInvoiceType = 'Transport Delivery'
-  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost')
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Format 2', 'Format 9 - Berry Oil', 'Format 2 - With Laid in Cost','Format 10 - Berry Trucking')

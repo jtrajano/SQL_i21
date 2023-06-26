@@ -22,6 +22,21 @@ BEGIN
 				)
 	END
 
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrderInputLot WI
+			JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
+			WHERE WI.intWorkOrderId = @intWorkOrderId
+				AND WI.dblQuantity > L.dblWeight
+			)
+	BEGIN
+		RAISERROR (
+				'Batch/Lot Qty is not available in the selected storage location.'
+				,16
+				,1
+				)
+	END
+
 	UPDATE tblMFWorkOrder
 	SET intStatusId = 18
 		,dtmLastModified = GETDATE()

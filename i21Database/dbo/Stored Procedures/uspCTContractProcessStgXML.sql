@@ -4244,6 +4244,8 @@ BEGIN TRY
 
 					SELECT @intTransactionRefId = SCOPE_IDENTITY()
 
+					IF ISNULL(@intTransactionRefId, 0) <> 0
+					BEGIN
 					INSERT INTO tblSMApproval (
 						dtmDate
 						,dblAmount
@@ -4266,6 +4268,7 @@ BEGIN TRY
 						,1
 						,1
 						,@intTransactionRefId
+				END
 				END
 				ELSE
 				BEGIN
@@ -4368,6 +4371,8 @@ BEGIN TRY
 					WHERE strUserName = 'irelyadmin'
 				END
 
+				IF ISNULL(@intTransactionRefId, 0) <> 0 AND EXISTS(SELECT TOP 1 1 FROM tblSMTransaction WHERE intTransactionId = @intTransactionRefId)
+				BEGIN
 				INSERT INTO tblSMLog (
 					dtmDate
 					,strRoute
@@ -4390,6 +4395,8 @@ BEGIN TRY
 
 				SELECT @intLogId = SCOPE_IDENTITY();
 
+					IF ISNULL(@intLogId, 0) <> 0
+					BEGIN
 				EXEC sp_xml_removedocument @idoc
 
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -4460,6 +4467,8 @@ BEGIN TRY
 						)
 				FROM @tblSMAudit A
 				JOIN tblSMAudit A1 ON A.intAuditId = A1.intAuditId
+					END
+				END
 
 				DECLARE @strSQL NVARCHAR(MAX)
 					,@strServerName NVARCHAR(50)

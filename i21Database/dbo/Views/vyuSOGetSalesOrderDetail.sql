@@ -105,6 +105,7 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
 	 , intCategoryId					= ITEM.intCategoryId
 	 , strItemContractCategory			= ITEMCONTRACT.strContractCategoryId
 	 , strItemContractCategoryCode		= ITEMCONTRACT.strCategory
+     , xref.strCustomerProduct
 FROM tblSOSalesOrderDetail SOD WITH(NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -204,3 +205,4 @@ LEFT JOIN (
 		 , strStorageTypeDescription
 	FROM tblGRStorageType WITH(NOLOCK)
 ) STORAGETYPE ON SOD.intStorageScheduleTypeId = STORAGETYPE.intStorageScheduleTypeId
+LEFT JOIN tblICItemCustomerXref xref ON xref.intItemCustomerXrefId = SOD.intItemCustomerXrefId

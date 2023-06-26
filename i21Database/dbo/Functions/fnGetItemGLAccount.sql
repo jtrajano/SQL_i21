@@ -29,16 +29,25 @@ AS
 BEGIN 
 	DECLARE @intGLAccountId_LocationSegment AS INT
 			,@intGLAccountId_CompanySegment AS INT 
+			,@intGLAccountId_LOBSegment AS INT 
 
 
 	-- Generate the gl account id based on "location" segment. 
+	SELECT @intGLAccountId_LocationSegment = dbo.fnGetItemBaseGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
 	SELECT	@intGLAccountId_LocationSegment = 
 				dbo.fnGetGLAccountIdFromProfitCenter(
-					dbo.fnGetItemBaseGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
+					@intGLAccountId_LocationSegment
 					,dbo.fnGetItemProfitCenter(tblICItemLocation.intLocationId)
 				)	
 	FROM	dbo.tblICItemLocation
+			CROSS APPLY (
+				SELECT TOP 1 
+					ysnOverrideLocationSegment
+				FROM 
+					tblICCompanyPreference
+			) preference 
 	WHERE	intItemLocationId = @intItemLocationId
+			AND (preference.ysnOverrideLocationSegment = 1 OR preference.ysnOverrideLocationSegment IS NULL) 
 
 	-- Generate the gl account id based on "company" segment. 
 	SELECT	@intGLAccountId_CompanySegment = 			
@@ -47,12 +56,48 @@ BEGIN
 					,dbo.fnGetItemCompanySegment(tblICItemLocation.intLocationId)
 				)
 	FROM	dbo.tblICItemLocation
+			CROSS APPLY (
+				SELECT TOP 1 
+					ysnOverrideCompanySegment
+				FROM 
+					tblICCompanyPreference
+			) preference 
 	WHERE
 			intItemLocationId = @intItemLocationId
 			AND @intGLAccountId_LocationSegment IS NOT NULL 
+			AND (preference.ysnOverrideCompanySegment = 1 OR preference.ysnOverrideCompanySegment IS NULL) 
 
-	IF @intGLAccountId_CompanySegment IS NOT NULL 
-		RETURN @intGLAccountId_CompanySegment
-	
-	RETURN @intGLAccountId_LocationSegment
+	-- Generate the gl account id based on "lob" segment. 
+	SELECT	@intGLAccountId_LOBSegment = 			
+				dbo.fnGetGLAccountIdFromProfitCenter(
+					ISNULL(@intGLAccountId_CompanySegment, @intGLAccountId_LocationSegment) 
+					,lob.intSegmentCodeId
+				)
+	FROM	dbo.tblICItem i INNER JOIN dbo.tblICItemLocation il 
+				ON i.intItemId = il.intItemId				
+			INNER JOIN tblICCommodity c
+				ON c.intCommodityId = i.intCommodityId
+			CROSS APPLY (
+				SELECT TOP 1 
+					ysnOverrideLOBSegment
+				FROM 
+					tblICCompanyPreference
+			) preference 
+			CROSS APPLY (
+				SELECT * 
+				FROM 
+					tblSMLineOfBusiness lob
+				WHERE
+					lob.intLineOfBusinessId = c.intLineOfBusinessId
+					AND (preference.ysnOverrideLOBSegment = 1 OR preference.ysnOverrideLOBSegment IS NULL) 
+			) lob
+	WHERE
+			il.intItemLocationId = @intItemLocationId
+			AND (preference.ysnOverrideLOBSegment = 1) 
+			AND (
+				@intGLAccountId_LocationSegment IS NOT NULL 
+				OR @intGLAccountId_CompanySegment IS NOT NULL 
+			)
+
+	RETURN COALESCE(@intGLAccountId_LOBSegment, @intGLAccountId_CompanySegment, @intGLAccountId_LocationSegment) 
 END 

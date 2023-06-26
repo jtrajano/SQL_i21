@@ -11,6 +11,7 @@
     [intFutureMonthId] INT NULL, 
 	[strFutureMonth] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
     [dblOpenQty] NUMERIC(24, 6) NULL, 
+    [dblOpenQtyDisplay] NUMERIC(24, 6) NULL, 
     [intCommodityId] INT NULL,
 	[strCommodityCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
     [intItemId] INT NULL,

@@ -59,6 +59,7 @@ DECLARE @ysnFilter NVARCHAR(50) = 0
 DECLARE @dtmDateFilter NVARCHAR(50)
 DECLARE @strPeriod NVARCHAR(50)
 DECLARE @strPeriodTo NVARCHAR(50)
+DECLARE @strCompanyName NVARCHAR(100)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -136,6 +137,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SELECT @dtmDueDate = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
+SELECT @strCompanyName = [from], @strCompanyName = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName';
 SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
 SET @innerQuery = 'SELECT --DISTINCT
 				   intBillId
@@ -273,6 +275,34 @@ BEGIN
     
 END
 
+IF ISNULL(@strCompanyName, '') <> ''
+BEGIN 
+	BEGIN
+		SET @innerQuery = @innerQuery + CASE 
+										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
+										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
+										END
+		SET @deletedQuery = @deletedQuery + CASE 
+										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
+										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
+										END
+		SET @prepaidInnerQuery = @prepaidInnerQuery + 
+										CASE 
+										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
+										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
+										END
+		SET @arQuery = @arQuery + 
+										CASE 
+										WHEN @dtmDueDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strCompanyName = ''' + @strCompanyName + ''''
+										ELSE ' WHERE strCompanyName = ''' + @strCompanyName + ''''
+										END
+	END
+END
+
 IF @strPeriod IS NOT NULL
 BEGIN 
 	IF @condition = 'Equal To' OR @condition = 'Like' OR @condition = 'Starts With' OR @condition = 'Ends With'
@@ -335,6 +365,7 @@ BEGIN
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strCompanyName'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'strPeriod'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)

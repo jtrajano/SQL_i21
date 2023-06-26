@@ -90,12 +90,12 @@ BEGIN
 			BEGIN			
 				IF(ISNULL(@strMessage, '') != '')
 				BEGIN
-					UPDATE tblTRImportDtnDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportDtnDetailId = @intImportDtnDetailId 
+					UPDATE tblTRImportDtnDetail SET strMessage = @strMessage, ysnValid = CASE WHEN @strMessage = 'Does not match to any Inventory Receipt' THEN 1 ELSE 0 END WHERE intImportDtnDetailId = @intImportDtnDetailId 
 				END	
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportDtnDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportDtnDetailId = @intImportDtnDetailId 
+				UPDATE tblTRImportDtnDetail SET strMessage = @strMessage, ysnValid = CASE WHEN @strMessage = 'Does not match to any Inventory Receipt' THEN 1 ELSE 0 END WHERE intImportDtnDetailId = @intImportDtnDetailId 
 			END
 
 			FETCH NEXT FROM @CursorTran INTO @intImportDtnId, @intImportDtnDetailId, @strSeller, @strTerm, @ysnValid, @strMessage

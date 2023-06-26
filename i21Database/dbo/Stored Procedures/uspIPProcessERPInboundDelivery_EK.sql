@@ -32,6 +32,7 @@ BEGIN TRY
 		,@strVessel NVARCHAR(50)
 		,@intCompanyLocationId INT
 		,@strError NVARCHAR(MAX)
+		,@strIBDNo NVARCHAR(50)
 
 	SELECT @dtmDate = GETDATE()
 
@@ -85,6 +86,7 @@ BEGIN TRY
 				,@strContainerType = NULL
 				,@strVoyage = NULL
 				,@strVessel = NULL
+				,@strIBDNo	= NULL
 
 			SELECT @strCompanyLocation = strCompanyLocation
 				,@dtmCreatedDate = dtmCreatedDate
@@ -100,6 +102,7 @@ BEGIN TRY
 				,@strContainerType = strContainerType
 				,@strVoyage = strVoyage
 				,@strVessel = strVessel
+				,@strIBDNo = strIBDNo
 			FROM tblIPInboundDeliveryStage
 			WHERE intInboundDeliveryStageId = @intInboundDeliveryStageId
 
@@ -138,6 +141,7 @@ BEGIN TRY
 				,strContainerType = @strContainerType
 				,strVoyage = @strVoyage
 				,strVessel = @strVessel
+				,strIBDNo = @strIBDNo
 			WHERE strBatchId = @strBatchId
 
 			MOVE_TO_ARCHIVE:
@@ -160,6 +164,7 @@ BEGIN TRY
 				,strContainerType
 				,strVoyage
 				,strVessel
+				,strIBDNo
 				)
 			SELECT intInboundDeliveryStageId
 				,intTrxSequenceNo
@@ -177,6 +182,7 @@ BEGIN TRY
 				,strContainerType
 				,strVoyage
 				,strVessel
+				,strIBDNo
 			FROM tblIPInboundDeliveryStage
 			WHERE intInboundDeliveryStageId = @intInboundDeliveryStageId
 
@@ -215,6 +221,7 @@ BEGIN TRY
 				,strVoyage
 				,strVessel
 				,strMessage
+				,strIBDNo
 				)
 			SELECT intInboundDeliveryStageId
 				,intTrxSequenceNo
@@ -233,6 +240,7 @@ BEGIN TRY
 				,strVoyage
 				,strVessel
 				,@ErrMsg AS strStatusText
+				,strIBDNo
 			FROM tblIPInboundDeliveryStage
 			WHERE intInboundDeliveryStageId = @intInboundDeliveryStageId
 

@@ -4,6 +4,7 @@ SELECT
 	Item.intItemId,
 	CustomerXref.intItemCustomerXrefId,
 	Item.strItemNo,
+	Item.strDescription,
 	ItemLocation.strLocationName,
 	Customer.strName,
 	CustomerXref.strCustomerProduct,

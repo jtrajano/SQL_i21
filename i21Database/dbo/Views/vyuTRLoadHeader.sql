@@ -51,6 +51,7 @@ SELECT TL.intLoadHeaderId
 	, strTractor = smtr.strTruckNumber
 	, strSalesUnit = NULL
 	, strInvoiceType = NULL
+	, strSiteNumber = ''  
 FROM tblTRLoadHeader TL
 LEFT JOIN tblTRLoadReceipt TR ON TL.intLoadHeaderId = TR.intLoadHeaderId
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.[intEntityVendorId] = TR.intTerminalId
@@ -115,6 +116,7 @@ SELECT TL.intLoadHeaderId
 	, strTractor = smtr.strTruckNumber
 	, strSalesUnit = EL.strSaleUnits
 	, strInvoiceType = Invoice.strType
+	, strSiteNumber = RIGHT('000' + CAST(site.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
 FROM tblTRLoadHeader TL
 JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
 LEFT JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
@@ -134,3 +136,4 @@ LEFT JOIN vyuTRLinkedReceipts Receipts ON Receipts.intLoadDistributionDetailId =
 LEFT JOIN tblTMDispatch TMD ON TMD.intDispatchID = DD.intTMOId
 LEFT JOIN tblTMDispatchHistory TMH ON TMH.intDispatchId = DD.intTMOId
 LEFT JOIN tblLGDispatchOrder LGD ON LGD.intDispatchOrderId = TL.intDispatchOrderId
+LEFT JOIN tblTMSite site ON DD.intSiteId = site.intSiteID

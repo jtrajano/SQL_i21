@@ -12,6 +12,7 @@ SELECT
 	,A.strDescription
 	,A.intConcurrencyId
 	,strChargeItemNo = C.strItemNo
+	,strChargeItemDescription = C.strDescription
 	,strInsurerName = B.strName
 FROM tblICInsuranceRate A
 LEFT JOIN tblEMEntity B

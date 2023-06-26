@@ -65,7 +65,7 @@ BEGIN TRY
 			SET @SuccessfulCount = @SuccessfulCount + 1
 			IF @Post = 1 AND @Recap=1
 			BEGIN
-				SET @Message = 'Post Preview is not applicable for Transport Load'
+				SET @Message = 'Post Preview failed. Post Preview is not applicable to Transport Load. (Transaction posted successfully)'
 			END
 			ELSE 
 			BEGIN

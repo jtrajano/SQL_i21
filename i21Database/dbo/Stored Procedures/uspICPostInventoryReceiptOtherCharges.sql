@@ -288,33 +288,85 @@ BEGIN
 			) Query
 
 
-	-- Get the GL Account ids to use for the other charges. 
+	---- Get the GL Account ids to use for the other charges. 
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount; 
-	INSERT INTO @OtherChargesGLAccounts (
-		intChargeId 
-		,intItemLocationId 
-		,intOtherChargeExpense 
-		,intOtherChargeIncome 
-		,intAPClearing
-		,intTransactionTypeId
-	)
-	SELECT	Query.intChargeId
-			,Query.intItemLocationId
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense) 
-			,intOtherChargeIncome = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome) 
-			,intAPClearing = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing) 
-			,intTransactionTypeId = @intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						OtherCharges.intChargeId
-						,ItemLocation.intItemLocationId
-				FROM	tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptCharge OtherCharges 
-							ON Receipt.intInventoryReceiptId = OtherCharges.intInventoryReceiptId
-						LEFT JOIN tblICItemLocation ItemLocation
-							ON ItemLocation.intItemId = OtherCharges.intChargeId
-							AND ItemLocation.intLocationId = Receipt.intLocationId
-				WHERE	OtherCharges.intInventoryReceiptId = @intInventoryReceiptId
-			) Query
+	DECLARE @ysnOverrideLOBSegment AS BIT 
+	SELECT TOP 1 
+		@ysnOverrideLOBSegment = ysnOverrideLOBSegment
+	FROM tblICCompanyPreference	
+
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN
+		-- Get the GL Account ids to use for the other charges in Line of Business
+		INSERT INTO @OtherChargesGLAccounts (
+			intChargeId 
+			,intItemLocationId 
+			,intOtherChargeExpense 
+			,intOtherChargeIncome 
+			,intAPClearing
+			,intTransactionTypeId
+		)
+		SELECT	Query.intChargeId
+				,Query.intItemLocationId
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense, Query.intCommodityId) 
+				,intOtherChargeIncome = dbo.fnGetItemCommodityGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome, Query.intCommodityId) 
+				,intAPClearing = dbo.fnGetItemCommodityGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing, Query.intCommodityId) 
+				,intTransactionTypeId = @intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intChargeId = Charge.intItemId
+							,ChargeLocation.intItemLocationId
+							,intCommodityId = ISNULL(receiptCommodity.intCommodityId, Charge.intCommodityId) 
+					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
+								ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+							INNER JOIN tblICItem Charge 
+								ON Charge.intItemId = ReceiptCharge.intChargeId
+							-- We will assume it will post only one kind of commodity per IR. See http://inet.irelyserver.com/display/AP/Override+Line+of+Business+-+AP
+							-- This meas, use the commodity if of the first item in the inventory receipt. 
+							OUTER APPLY (
+								SELECT TOP 1 
+									Item.intCommodityId
+								FROM 
+									tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem Item
+										ON Item.intItemId = ReceiptItem.intItemId
+								WHERE
+									ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							) receiptCommodity
+							LEFT JOIN dbo.tblICItemLocation ChargeLocation
+								ON ChargeLocation.intItemId = Charge.intItemId
+								AND ChargeLocation.intLocationId = Receipt.intLocationId
+					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				) Query
+	END 
+	ELSE 
+	BEGIN
+		INSERT INTO @OtherChargesGLAccounts (
+			intChargeId 
+			,intItemLocationId 
+			,intOtherChargeExpense 
+			,intOtherChargeIncome 
+			,intAPClearing
+			,intTransactionTypeId
+		)
+		SELECT	Query.intChargeId
+				,Query.intItemLocationId
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense) 
+				,intOtherChargeIncome = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome) 
+				,intAPClearing = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing) 
+				,intTransactionTypeId = @intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							OtherCharges.intChargeId
+							,ItemLocation.intItemLocationId
+					FROM	tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptCharge OtherCharges 
+								ON Receipt.intInventoryReceiptId = OtherCharges.intInventoryReceiptId
+							LEFT JOIN tblICItemLocation ItemLocation
+								ON ItemLocation.intItemId = OtherCharges.intChargeId
+								AND ItemLocation.intLocationId = Receipt.intLocationId
+					WHERE	OtherCharges.intInventoryReceiptId = @intInventoryReceiptId
+				) Query
+
+	END 
 
 	-- -- Check for missing AP Clearing Account Id
 	-- BEGIN 

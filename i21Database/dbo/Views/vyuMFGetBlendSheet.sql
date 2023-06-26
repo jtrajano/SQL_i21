@@ -24,6 +24,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , ReleasedBy.strName				As strReleasedBy
 	 , WorkOrder.strERPOrderNo			AS strERPOrderNo
 	 , WorkOrder.strERPComment			AS strERPComment
+	  , WorkOrder.strERPComment			AS strComment
 	 , ISNULL(WorkOrder.intCompanyId, WorkOrder.intLocationId) AS intCompanyLocationId
 	 , WorkOrderRecipe.intRecipeId
 	 , WorkOrder.intItemId

@@ -24,6 +24,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @strSalespersonIds				NVARCHAR(MAX)	  	  
 	  , @strAccountStatusIds			NVARCHAR(MAX)
 	  , @strCompanyLocationIds			NVARCHAR(MAX)
+	  , @strCompanyNameIds				NVARCHAR(MAX)
 	  , @xmlDocumentId					INT
 	  , @filter							NVARCHAR(MAX) = ''
 	  , @fieldname						NVARCHAR(50)
@@ -89,7 +90,7 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
-WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation'))
+WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation', 'strDescription'))
 	BEGIN
 		SELECT TOP 1 @condition = [condition]
 				   , @from		= REPLACE(ISNULL([from], ''), '''''', '''')
@@ -97,7 +98,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 				   , @fieldname = [fieldname]
 				   , @id		= [id]
 		FROM @temp_xml_table 
-		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation')
+		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation', 'strDescription')
 
 		IF UPPER(@condition) = UPPER('Equal To')
 			BEGIN				
@@ -149,6 +150,18 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 							FOR XML PATH ('')
 						) C (intCompanyLocationId)
 					END
+				ELSE IF @fieldname = 'strDescription'
+					BEGIN
+						SELECT @strCompanyNameIds = ISNULL(@strCompanyNameIds, '') + LEFT(intAccountId, LEN(intAccountId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intAccountId AS VARCHAR(200))  + ', '
+							FROM vyuARDistinctGLCompanyAccountIds GL
+							INNER JOIN @temp_xml_table TT ON GL.strDescription = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							WHERE TT.fieldname = 'strDescription'
+							  AND TT.condition = 'Equal To'
+							FOR XML PATH ('')
+						) C (intAccountId)
+					END
 			END
 		ELSE IF @condition = 'Not Equal To'
 			BEGIN
@@ -196,6 +209,16 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 							FOR XML PATH ('')
 						) C (intCompanyLocationId)
 					END
+				ELSE IF @fieldname = 'strDescription'
+					BEGIN
+						SELECT @strCompanyNameIds = LEFT(intAccountId, LEN(intAccountId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intAccountId AS VARCHAR(200))  + ', '
+							FROM vyuARDistinctGLCompanyAccountIds 
+							WHERE strDescription <> @from
+							FOR XML PATH ('')
+						) C (intAccountId)
+					END
 			END
 		ELSE IF @condition = 'Between'
 			BEGIN
@@ -238,6 +261,16 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 							WHERE strLocationName BETWEEN @from AND @to
 							FOR XML PATH ('')
 						) C (intCompanyLocationId)
+					END
+				ELSE IF @fieldname = 'strDescription'
+					BEGIN
+						SELECT @strCompanyNameIds = LEFT(intAccountId, LEN(intAccountId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intAccountId AS VARCHAR(200))  + ', '
+							FROM vyuARDistinctGLCompanyAccountIds 
+							WHERE strDescription BETWEEN @from AND @to
+							FOR XML PATH ('')
+						) C (intAccountId)
 					END
 			END
 
@@ -308,6 +341,7 @@ BEGIN
 											, @strCustomerIds			= @strCustomerIds
 											, @strSalespersonIds		= @strSalespersonIds
 											, @strCompanyLocationIds	= @strCompanyLocationIds
+											, @strCompanyNameIds		= @strCompanyNameIds
 											, @strAccountStatusIds		= @strAccountStatusIds
 											, @strSourceTransaction		= @strSourceTransaction										
 											, @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus

@@ -48,7 +48,8 @@ BEGIN
 		,strOrderStatus = TMO.strOrderStatus
 		,strDriver = TMO.strDriverName
 		,intItemId = TMS.intProduct
-		,strItemNo = TMO.strProduct
+		,strItemNo = I.strItemNo
+		,strItemDescription = TMO.strProduct
 		,intCategoryId = I.intCategoryId
 		,dblOnHand = NULL
 		,dblOrderedQty = NULL
@@ -67,6 +68,7 @@ BEGIN
 		,ysnHold = TMO.ysnHold
 		,ysnRoutingAlert = TMO.ysnRoutingAlert
 		,strRoute = TMR.strRouteId
+		,strRecurringPONumber = TMS.strRecurringPONumber
 	FROM vyuTMGeneratedCallEntry TMO 
 		LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
 		LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId

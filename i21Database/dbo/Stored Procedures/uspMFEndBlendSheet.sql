@@ -144,6 +144,7 @@ End
 				,strMethodName NVARCHAR(50)
 				,intMethodId INT
 				,intSequenceNo int
+				,dblPinpointValue NUMERIC(18, 6)
 			   )
 
 			Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference

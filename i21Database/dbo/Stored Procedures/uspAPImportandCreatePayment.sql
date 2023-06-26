@@ -80,7 +80,7 @@ BEGIN TRY
 		SELECT TOP 1 @currencyId = intCurrencyId FROM vyuCMBankAccount WHERE intBankAccountId = @bankAccountId
 		SELECT TOP 1 @paymentMethodId = intPaymentMethodId, @payToAddress = intDefaultLocationId FROM vyuAPVendor WHERE intEntityId = @vendorId
 
-		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), intBillId)
+		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(MAX), intBillId)
 		FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0, DEFAULT, DEFAULT)
 
 		IF NULLIF(@billIds, '') IS NOT NULL

@@ -5,6 +5,7 @@
 	, @strCustomerIds			NVARCHAR(MAX) = NULL
 	, @strSalespersonIds		NVARCHAR(MAX) = NULL
 	, @strCompanyLocationIds	NVARCHAR(MAX) = NULL
+	, @strCompanyNameIds		NVARCHAR(MAX) = NULL
 	, @strAccountStatusIds		NVARCHAR(MAX) = NULL	
 	, @intEntityUserId			INT = NULL
 	, @ysnPaidInvoice			BIT = NULL
@@ -26,6 +27,7 @@ DECLARE @dtmDateFromLocal				DATETIME = NULL
 	  , @strCustomerIdsLocal			NVARCHAR(MAX) = NULL
 	  , @strSalespersonIdsLocal			NVARCHAR(MAX) = NULL
 	  , @strCompanyLocationIdsLocal		NVARCHAR(MAX) = NULL
+	  , @strCompanyNameIdsLocal			NVARCHAR(MAX) = NULL
 	  , @strAccountStatusIdsLocal		NVARCHAR(MAX) = NULL	
 	  , @intEntityUserIdLocal			INT = NULL
 	  , @ysnPaidInvoiceLocal			BIT = NULL
@@ -39,7 +41,8 @@ SET @dtmDateToLocal					= ISNULL(@dtmDateTo, CAST(GETDATE() AS DATE))
 SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')	
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')	
 SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')	
-SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')	
+SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')
+SET @strCompanyNameIdsLocal			= NULLIF(@strCompanyNameIds, '')
 SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')		
 SET @intEntityUserIdLocal			= NULLIF(@intEntityUserId, 0)
 SET @ysnPaidInvoiceLocal			= ISNULL(@ysnPaidInvoice, 1)
@@ -60,6 +63,7 @@ FROM [dbo].[fnARCustomerAgingDetail] (
 	,@strCustomerIdsLocal
 	,@strSalespersonIdsLocal
 	,@strCompanyLocationIdsLocal
+	,@strCompanyNameIdsLocal
 	,@strAccountStatusIdsLocal
 	,@intEntityUserIdLocal
 	,@ysnPaidInvoiceLocal

@@ -48,6 +48,7 @@ SELECT
 	,WC.ysnPosted
 	,WC.dtmPosted
 	,I.strItemNo
+	,I.strDescription
 	,C.strCommodityCode
 	,CONI.strContractItemNo
 	,CONI.strContractItemName

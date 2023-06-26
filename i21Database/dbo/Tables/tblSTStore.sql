@@ -2,7 +2,7 @@
 (
 	[intStoreId] INT NOT NULL IDENTITY, 
     [intStoreNo] INT NOT NULL, 
-    [strDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
+    [strDescription] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
     [strRegion] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strDistrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strAddress] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL, 

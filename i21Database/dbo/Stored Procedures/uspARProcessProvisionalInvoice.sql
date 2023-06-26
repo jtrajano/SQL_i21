@@ -492,5 +492,3 @@ BEGIN
 END
 	
 RETURN 1;
-
-GO

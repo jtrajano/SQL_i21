@@ -145,7 +145,11 @@ BEGIN
      IF(ISNULL(@dblRackPriceUnitCost, 0) != 0)  
      BEGIN  
       SET @dblUnitCost = @dblRackPriceUnitCost  
-     END  
+     END
+     ELSE
+	 BEGIN
+      SET @dblUnitCost = 0  
+	 END 
     END  
     ELSE  
     BEGIN  

@@ -76,6 +76,7 @@ BEGIN TRY
 		,@dblTBSQuantity NUMERIC(18, 6)
 		,@strFW NVARCHAR(3)
 		,@intRecordId INT
+		,@intSavedWorkOrderId INT
 	DECLARE @intCategoryId INT
 	DECLARE @strInActiveItems NVARCHAR(max)
 	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
@@ -1144,6 +1145,8 @@ DECLARE @tblFW TABLE (
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
+		Select @intSavedWorkOrderId=@intWorkOrderId
+
 		DELETE
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
@@ -2096,6 +2099,16 @@ DECLARE @tblFW TABLE (
 				,@intLocationId = @intLocationId
 				,@intUserId = @intUserId
 				,@intWorkOrderId = @intWorkOrderId
+		END
+		ELSE
+		BEGIN
+			UPDATE dbo.tblMFWorkOrderRecipeItem
+			SET intWorkOrderId=@intWorkOrderId
+			WHERE intWorkOrderId= @intSavedWorkOrderId
+
+			UPDATE dbo.tblMFWorkOrderRecipe
+			SET intWorkOrderId=@intWorkOrderId
+			WHERE intWorkOrderId= @intSavedWorkOrderId
 		END
 
 		--Check for Input Items validity

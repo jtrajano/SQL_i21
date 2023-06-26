@@ -250,7 +250,8 @@ BEGIN
 			POSCode						NVARCHAR(15),
 			intPOSCode					BIGINT,
 			dblAveragePrice				DECIMAL(18, 6),
-			dblAveragePriceWthDiscounts DECIMAL(18, 6)
+			dblAveragePriceWthDiscounts DECIMAL(18, 6),
+			intModifier					INT
 		)
 
 
@@ -268,7 +269,8 @@ BEGIN
 			POSCode,
 			intPOSCode,
 			dblAveragePrice,
-			dblAveragePriceWthDiscounts
+			dblAveragePriceWthDiscounts,
+			intModifier
 		)
 		SELECT 
 			intCheckoutId				= @intCheckoutId,
@@ -290,7 +292,8 @@ BEGIN
 											WHEN ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) ) = 0
 												THEN 0
 											ELSE ISNULL( NULLIF( CAST(Chk.dblISMSalesTotalsSalesAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsRefundAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsDiscountAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsPromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) )
-										END
+										END,
+			intModifier					= Chk.intItemCodePOSCodeModifier
 		FROM @tblTemp Chk
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
@@ -388,41 +391,57 @@ BEGIN
 				, intConcurrencyId
 				, intCalculationId
 			)
-			SELECT 
-				intCheckoutId		= @intCheckoutId
-			  , intItemUPCId		= UOM.intItemUOMId
-			  , strInvalidUPCCode   = NULL
-			  , strDescription		= I.strDescription
-			  , intVendorId			= IL.intVendorId
-			  , intQtySold			= (TempChk.SalesQuantity)
-			  , dblCurrentPrice		= CASE 
-										WHEN (TempChk.SalesQuantity) = 0
-											THEN 0
-										ELSE (TempChk.SalesAmount)  /  (TempChk.SalesQuantity)
-									END
-			  , dblDiscountAmount	= (TempChk.DiscountAmount + TempChk.PromotionAmount)
-			  -- , dblRefundAmount     = Chk.RefundAmount
-			  , dblGrossSales		= (TempChk.SalesAmount)
-			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
-			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
-			  , intConcurrencyId	= 1
-			  , intCalculationId	= TempChk.intCalculationId
-			FROM @tblTempForCalculation TempChk
-			INNER JOIN #tmp_tblICItemUOM UOM
-				ON TempChk.intPOSCode = intUPCCode2
-			INNER JOIN dbo.tblICItem I 
-				ON I.intItemId = UOM.intItemId
-			INNER JOIN dbo.tblICItemLocation IL 
-				ON IL.intItemId = I.intItemId
-			LEFT JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId 
-				AND I.intItemId = P.intItemId
-			INNER JOIN dbo.tblSMCompanyLocation CL 
-				ON CL.intCompanyLocationId = IL.intLocationId
-			INNER JOIN dbo.tblSTStore S 
-				ON S.intCompanyLocationId = CL.intCompanyLocationId
-			WHERE S.intStoreId = @intStoreId
-				AND ISNULL(TempChk.POSCode, '') != ''
+			SELECT intCheckoutId
+			  , intItemUPCId
+			  , strInvalidUPCCode
+			  , strDescription
+			  , intVendorId
+			  , intQtySold
+			  , dblCurrentPrice
+			  , dblDiscountAmount
+			  , dblGrossSales
+			  , dblTotalSales
+			  , dblItemStandardCost
+			  , intConcurrencyId
+			  , intCalculationId
+			FROM (
+				SELECT 
+					intCheckoutId		= @intCheckoutId
+				  , intItemUPCId		= UOM.intItemUOMId
+				  , strInvalidUPCCode   = NULL
+				  , strDescription		= I.strDescription
+				  , intVendorId			= IL.intVendorId
+				  , intQtySold			= (TempChk.SalesQuantity)
+				  , dblCurrentPrice		= CASE 
+											WHEN (TempChk.SalesQuantity) = 0
+												THEN 0
+											ELSE (TempChk.SalesAmount)  /  (TempChk.SalesQuantity)
+										END
+				  , dblDiscountAmount	= (TempChk.DiscountAmount + TempChk.PromotionAmount)
+				  -- , dblRefundAmount     = Chk.RefundAmount
+				  , dblGrossSales		= (TempChk.SalesAmount)
+				  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
+				  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
+				  , intConcurrencyId	= 1
+				  , intCalculationId	= TempChk.intCalculationId
+				  , intRowNumber		= ROW_NUMBER() OVER (PARTITION BY UOM.intItemId ORDER BY UOM.intItemUOMId)
+				FROM @tblTempForCalculation TempChk
+				INNER JOIN #tmp_tblICItemUOM UOM
+					ON TempChk.intPOSCode = intUPCCode2 AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
+				INNER JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
+				INNER JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				LEFT JOIN dbo.tblICItemPricing P 
+					ON IL.intItemLocationId = P.intItemLocationId 
+					AND I.intItemId = P.intItemId
+				INNER JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				INNER JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+					AND ISNULL(TempChk.POSCode, '') != ''
+			) tbl WHERE intRowNumber = 1
 		-- ==================================================================================================================
 		-- End: All Item Movement
 		-- ==================================================================================================================
@@ -450,38 +469,54 @@ BEGIN
 				, intConcurrencyId
 				, intCalculationId
 			)
-			SELECT 
-				intCheckoutId		= @intCheckoutId
-			  , intItemUPCId		= UOM.intItemUOMId
-			  , strInvalidUPCCode	= NULL
-			  , strDescription		= I.strDescription
-			  , intVendorId			= IL.intVendorId
-			  , intQtySold			= (TempChk.RefundCount * -1)
-			  , dblCurrentPrice		= (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-			  , dblDiscountAmount	= 0
-			  -- , dblRefundAmount     = Chk.RefundAmount
-			  , dblGrossSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-			  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
-			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
-			  , intConcurrencyId	= 1
-			  , intCalculationId	= TempChk.intCalculationId
-			FROM @tblTempForCalculation TempChk
-			INNER JOIN #tmp_tblICItemUOM UOM
-				ON TempChk.intPOSCode = intUPCCode2
-			INNER JOIN dbo.tblICItem I 
-				ON I.intItemId = UOM.intItemId
-			INNER JOIN dbo.tblICItemLocation IL 
-				ON IL.intItemId = I.intItemId
-			LEFT JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId 
-				AND I.intItemId = P.intItemId
-			INNER JOIN dbo.tblSMCompanyLocation CL 
-				ON CL.intCompanyLocationId = IL.intLocationId
-			INNER JOIN dbo.tblSTStore S 
-				ON S.intCompanyLocationId = CL.intCompanyLocationId
-			WHERE S.intStoreId = @intStoreId
-				AND TempChk.RefundCount > 0 -- Only Items with REFUND
-				AND ISNULL(TempChk.POSCode, '') != ''
+			SELECT intCheckoutId
+			  , intItemUPCId
+			  , strInvalidUPCCode
+			  , strDescription
+			  , intVendorId
+			  , intQtySold
+			  , dblCurrentPrice
+			  , dblDiscountAmount
+			  , dblGrossSales
+			  , dblTotalSales
+			  , dblItemStandardCost
+			  , intConcurrencyId
+			  , intCalculationId
+			FROM (
+				SELECT 
+					intCheckoutId		= @intCheckoutId
+				  , intItemUPCId		= UOM.intItemUOMId
+				  , strInvalidUPCCode	= NULL
+				  , strDescription		= I.strDescription
+				  , intVendorId			= IL.intVendorId
+				  , intQtySold			= (TempChk.RefundCount * -1)
+				  , dblCurrentPrice		= (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
+				  , dblDiscountAmount	= 0
+				  -- , dblRefundAmount     = Chk.RefundAmount
+				  , dblGrossSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
+				  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
+				  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
+				  , intConcurrencyId	= 1
+				  , intCalculationId	= TempChk.intCalculationId
+				  , intRowNumber		= ROW_NUMBER() OVER (PARTITION BY UOM.intItemId ORDER BY UOM.intItemUOMId)
+				FROM @tblTempForCalculation TempChk
+				INNER JOIN #tmp_tblICItemUOM UOM
+					ON TempChk.intPOSCode = intUPCCode2 AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
+				INNER JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
+				INNER JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				LEFT JOIN dbo.tblICItemPricing P 
+					ON IL.intItemLocationId = P.intItemLocationId 
+					AND I.intItemId = P.intItemId
+				INNER JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				INNER JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+					AND TempChk.RefundCount > 0 -- Only Items with REFUND
+					AND ISNULL(TempChk.POSCode, '') != ''
+			) tbl WHERE intRowNumber = 1
 		-- ==================================================================================================================
 		-- End: Item Movement Add extra line for refund
 		-- ==================================================================================================================

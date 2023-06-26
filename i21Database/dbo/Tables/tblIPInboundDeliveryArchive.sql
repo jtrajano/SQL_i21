@@ -18,4 +18,5 @@
 	,strVessel NVARCHAR(50)  COLLATE Latin1_General_CI_AS 
 	,intStatusId int
 	,strMessage	  NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS 
+	,strIBDNo NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS
 	)

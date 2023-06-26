@@ -63,7 +63,7 @@ DECLARE @ReportData TABLE
 	,strLabel NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	,strSign NVARCHAR(2) COLLATE Latin1_General_CI_AS
 	,dblUnits DECIMAL(18,6)
-	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,strCommodityCode NVARCHAR(80) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,intCompanyLocationId INT
 	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -78,7 +78,7 @@ DECLARE @InventoryData TABLE
 	,strLabel NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	,strSign NVARCHAR(2) COLLATE Latin1_General_CI_AS
 	,dblUnits DECIMAL(18,6)
-	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,strCommodityCode NVARCHAR(80) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,intCompanyLocationId INT
 	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -88,7 +88,7 @@ DECLARE @InventoryData TABLE
 DECLARE @InventoryDataCompanyOwned TABLE
 (
 	dblUnits DECIMAL(18,6)
-	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,strCommodityCode NVARCHAR(80) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,intCompanyLocationId INT
 	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -114,7 +114,7 @@ DECLARE @InventoryShipmentCustomerOwned TABLE
 )
 
 DECLARE @intCommodityId2 INT
-DECLARE @strCommodityCode NVARCHAR(20)
+DECLARE @strCommodityCode NVARCHAR(80)
 DECLARE @strUOM NVARCHAR(20)
 DECLARE @intCommodityUnitMeasureId AS INT
 
@@ -491,7 +491,9 @@ BEGIN
 			,@strLocationName
 			,@strUOM
 		FROM #tblInOut
-		WHERE strTransactionType IN ('Inventory Shipment','Outbound Shipment','Invoice')
+		WHERE (strTransactionType IN ('Outbound Shipment','Invoice', 'Inventory Shipment'))
+			--	OR (strTransactionType = 'Inventory Shipment' AND strOwnership = 'Company Owned')
+			--)
 			AND dtmDate IS NOT NULL
 			AND intCompanyLocationId = @intCompanyLocationId
 
@@ -764,7 +766,7 @@ DECLARE @StorageObligationData TABLE
 	,strLabel NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strSign NVARCHAR(2) COLLATE Latin1_General_CI_AS
 	,dblUnits DECIMAL(18,6)
-	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,strCommodityCode NVARCHAR(80) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,intCompanyLocationId INT
 	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -778,7 +780,7 @@ DECLARE @StorageObligationDataDUMMY TABLE
 	,strLabel NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strSign NVARCHAR(2) COLLATE Latin1_General_CI_AS
 	,dblUnits DECIMAL(18,6)
-	,strCommodityCode NVARCHAR(20) COLLATE Latin1_General_CI_AS
+	,strCommodityCode NVARCHAR(80) COLLATE Latin1_General_CI_AS
 	,intCommodityId INT
 	,intCompanyLocationId INT
 	,strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS

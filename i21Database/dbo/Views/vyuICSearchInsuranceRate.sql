@@ -13,6 +13,7 @@ SELECT
 	,A.[strDescription]
 	,A.intConcurrencyId
 	,strChargeItemNo = C.strItemNo
+	,strChargeItemDescription = C.strDescription
 	,D.strRateType
 	,D.strAppliedTo
 	,D.dblRate

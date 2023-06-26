@@ -49,7 +49,7 @@ BEGIN
 			 , sl.strName AS strStorageLocationName
 			 , l.strNotes AS strRemarks
 			 , i.dblRiskScore
-			 , ri.dblQuantity/@dblRecipeQty AS dblConfigRatio
+			 , ISNULL(ri.dblQuantity/@dblRecipeQty, 0) AS dblConfigRatio
 			 , CAST(ISNULL(q.Density,0) AS DECIMAL) AS dblDensity
 			 , CAST(ISNULL(q.Score,0) AS DECIMAL) AS dblScore
 			 , i.intCategoryId
@@ -132,7 +132,7 @@ BEGIN
 			 , sl.strName AS strStorageLocationName
 			 , l.strNotes AS strRemarks
 			 , i.dblRiskScore
-			 , ri.dblQuantity / @dblRecipeQty AS dblConfigRatio
+			 , ISNULL(ri.dblQuantity / @dblRecipeQty, 0) AS dblConfigRatio
 			 , CAST(ISNULL(q.Density,0) AS DECIMAL) AS dblDensity
 			 , CAST(ISNULL(q.Score,0) AS DECIMAL) AS dblScore
 			 , i.intCategoryId

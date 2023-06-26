@@ -7,6 +7,7 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Header.dtmDate
 	, Detail.intItemId
 	, Item.strItemNo
+	, Item.strDescription
 	, Detail.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
 	, Detail.dblEffectiveDepth

@@ -37,7 +37,7 @@ SELECT
 	B.dtmExpectedDate,
 	SN.strSourceNumber,
 	Form1099.strText str1099Form,
-	CASE WHEN Category1099.strText IS NULL THEN 'None' ELSE Category1099.strText END str1099Category,
+	Category1099.strText str1099Category,
 	A.intBillId
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.tblAPBillDetail B ON A.intBillId = B.intBillId

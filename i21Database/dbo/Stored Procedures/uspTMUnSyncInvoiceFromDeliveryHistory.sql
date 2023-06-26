@@ -114,6 +114,7 @@ BEGIN
 	INTO #tmpTMInvoiceDispatchIds
 	FROM tblARInvoiceDetail
 	WHERE intInvoiceId = @InvoiceId
+		AND intDispatchId IS NOT NULL
 	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeliveryHistory WHERE ysnProcessed = 0)
 	BEGIN
@@ -671,7 +672,6 @@ BEGIN
 		,intSourceType				= 1
 		,intDeliveryHistoryId		= NULL
 	FROM #tmpTMInvoiceDispatchIds 
-	WHERE intDispatchId IS NOT NULL
 
 	EXEC uspTMArchiveRestoreOrders @TMOrderHistoryStagingTable, @intUserId
 	

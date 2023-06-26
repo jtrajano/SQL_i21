@@ -348,6 +348,9 @@ IF(ISNULL(@NewInvoiceId, 0) <> 0) AND @PostPrepayment = 1AND @ysnHasEFTBudget = 
 			,[strInvoiceReportNumber]
 			,[intConcurrencyId]
 			,[dtmDiscountDate]
+			,[intCurrencyExchangeRateTypeId]
+		    ,[intCurrencyExchangeRateId]
+		    ,[dblCurrencyExchangeRate]
 			)
 		SELECT
 			 [intPaymentId]					= @PaymentId
@@ -371,6 +374,9 @@ IF(ISNULL(@NewInvoiceId, 0) <> 0) AND @PostPrepayment = 1AND @ysnHasEFTBudget = 
 			,[strInvoiceReportNumber]		= ''
 			,[intConcurrencyId]				= 0
 			,[dtmDiscountDate]				= NULL
+			,[intCurrencyExchangeRateTypeId]= @ItemCurrencyExchangeRateTypeId
+			,[intCurrencyExchangeRateId]	= @ItemCurrencyExchangeRateId
+			,[dblCurrencyExchangeRate]		= @ItemCurrencyExchangeRate
 		FROM    
 			tblARInvoice ARI    
 		WHERE

@@ -6,6 +6,7 @@
 			,ch.ysnQuantityAtHeaderLevel
 			,dblHeaderBalance = ch.dblQuantity - sum(cd.dblQuantity - cd.dblBalance)
 			,dblHeaderAvailable = ch.dblQuantity - (sum(cd.dblQuantity - cd.dblBalance) + sum(isnull(cd.dblScheduleQty,0)))
+			,ch.intContractTypeId
 		from
 			tblCTContractDetail cd
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -13,6 +14,7 @@
 			ch.intContractHeaderId
 			,ch.ysnQuantityAtHeaderLevel
 			,ch.dblQuantity
+			,ch.intContractTypeId
 	)
 	select
 		intContractDetailId = cd.intContractDetailId
@@ -243,6 +245,10 @@
 		,intTaxLocationId = cd.intTaxLocationId
 		,ysnRoll = cd.ysnRoll
 		,strContractReference = cd.strContractReference
+		,intItemXrefId = cd.intItemXrefId
+		,strItemXrefProduct = case when h.intContractTypeId = 1 then vx.strVendorProduct else cx.strCustomerProduct end
 	from
 		tblCTContractDetail cd
 		left join header h on h.intContractHeaderId = cd.intContractHeaderId
+		left join tblICItemVendorXref vx on vx.intItemVendorXrefId = cd.intItemXrefId
+		left join tblICItemCustomerXref cx on cx.intItemCustomerXrefId = cd.intItemXrefId

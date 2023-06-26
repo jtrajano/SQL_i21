@@ -886,7 +886,7 @@ BEGIN TRY
 				, strTransactionReference = 'Unit - Price Fixation'
 				, @intContractHeaderId
 				, @intContractDetailId
-				, @intHeaderPricingType
+				, intPricingTypeId
 				, intTransactionReferenceId = intContractHeaderId
 				, strTransactionReferenceNo = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
 				, @intCommodityId
@@ -924,7 +924,7 @@ BEGIN TRY
 				, strTransactionReference = 'Unit - Price Fixation'
 				, @intContractHeaderId
 				, @intContractDetailId
-				, 1 --Priced
+				, intPricingTypeId
 				, intTransactionReferenceId = intContractHeaderId
 				, strTransactionReferenceNo = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
 				, @intCommodityId

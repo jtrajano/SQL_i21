@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblICEffectiveItemCost]
 	[intItemId] INT NOT NULL,
 	[intItemLocationId] INT NOT NULL,
 	[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT ((0)),
+	[dblCaseCost] NUMERIC(18, 6) NULL DEFAULT((0)),
 	[dtmEffectiveCostDate] DATETIME NOT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)),
 	[dtmDateCreated] DATETIME NULL,

@@ -33,6 +33,7 @@ SELECT
 	dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * ItemUOM.dblUnitQty, 0),
 	ItemPricing.strPricingMethod,
 	dblLastCost = ISNULL(ItemPricing.dblLastCost * ItemUOM.dblUnitQty, 0),
+	dblCaseCost = ISNULL(ItemPricing.dblCaseCost * ItemUOM.dblUnitQty, 0),
 	dblStandardCost = ISNULL(ItemPricing.dblStandardCost * ItemUOM.dblUnitQty, 0),
 	dblAverageCost = ISNULL(ItemPricing.dblAverageCost * ItemUOM.dblUnitQty, 0),
 	dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ItemUOM.dblUnitQty, 0),

@@ -1104,6 +1104,8 @@ BEGIN
 	FROM tblARPostInvoiceDetail I			
 	WHERE I.[intPeriodsToAccrue] > 1
 	  AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+	  AND I.[strItemType] IS NOT NULL
+	  AND I.[strItemType] <> ''
 	  AND I.strSessionId = @strSessionId
 
 	INSERT INTO tblARPostInvalidInvoiceData
@@ -1754,6 +1756,31 @@ BEGIN
 	) CREDITS ON CREDITS.intInvoiceId = I.intInvoiceId
 	WHERE CREDITS.dblCreditsApplied > I.dblAmountDue
 	  AND I.strSessionId = @strSessionId
+
+	--INVALID CATEGORY FOR BUNDLE ITEM
+	INSERT INTO tblARPostInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+		,[strSessionId])
+	SELECT
+		 [intInvoiceId]			= ID.[intInvoiceId]
+		,[strInvoiceNumber]		= ID.[strInvoiceNumber]		
+		,[strTransactionType]	= ID.[strTransactionType]
+		,[intInvoiceDetailId]	= ID.[intInvoiceDetailId]
+		,[intItemId]			= ID.[intItemId]
+		,[strBatchId]			= ID.[strBatchId]
+		,[strPostingError]		= 'Category for bundle item ' + ITEM.strItemNo + ' is required.'
+		,[strSessionId]			= @strSessionId
+	FROM tblARPostInvoiceDetail ID
+	INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
+	WHERE ID.strSessionId = @strSessionId
+	  AND ITEM.strType = 'Bundle'
+	  AND ITEM.intCategoryId IS NULL
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration

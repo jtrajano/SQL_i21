@@ -5,6 +5,7 @@ SELECT
 	s.intInventoryShiftPhysicalCountId
 	,c.strCountGroup
 	,i.strItemNo
+	,i.strDescription
 	,s.dtmDate
 	,dblBegin = s.dblSystemCount
 	,dblQtyReceived = s.dblQtyReceived

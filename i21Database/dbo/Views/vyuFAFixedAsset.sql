@@ -103,7 +103,8 @@ FA.intConcurrencyId,
 TaxJurisdiction.strTaxJurisdiction,
 FA.ysnOverrideLocation,
 CASE WHEN FA.ysnOverrideLocation = 1 THEN 'Yes' ELSE 'No' END AS  strOverrideLocation, 
-ysnLocationOverride = (SELECT TOP 1 CASE WHEN ysnLocationOverride  = 1 THEN CAST(0 as bit) ELSE CAST(1 as bit) END FROM tblFACompanyPreferenceOption)   
+ysnLocationOverride = (SELECT TOP 1 CASE WHEN ysnLocationOverride  = 1 THEN CAST(0 as bit) ELSE CAST(1 as bit) END FROM tblFACompanyPreferenceOption),
+FA.strAssetTagNo 
 FROM tblFAFixedAsset FA       
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId        
 LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccountId        

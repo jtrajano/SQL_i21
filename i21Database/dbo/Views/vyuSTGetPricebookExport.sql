@@ -27,10 +27,10 @@ SELECT DISTINCT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAS
 			ELSE ItemUOM.strLongUPCCode
 			END 
 		AS strLongUPCCode
-	, dblLastCost = CAST(ItemPricing.dblLastCost AS NUMERIC(18, 6))
+	, dblLastCost = CAST(itemHierarchyPricing.dblLastCost AS NUMERIC(18, 6))
 	, dblSalePrice = CAST(itemHierarchyPricing.dblSalePrice AS NUMERIC(18, 6))
 	, dblUnitQty = CAST(ItemUOM.dblUnitQty AS NUMERIC(18, 6))
-	, dblUOMCost = CAST(ItemUOM.dblUnitQty * ItemPricing.dblLastCost AS NUMERIC(18, 6))
+	, dblUOMCost = CAST(itemHierarchyPricing.dblLastCost AS NUMERIC(18, 6))
 	, ItemUOM.ysnStockUnit
 	, dblAvailableQty = CAST(ItemStock.dblAvailableQty AS NUMERIC(18, 6))
 	, dblOnHand = CAST(ItemStock.dblOnHand AS NUMERIC(18, 6))
