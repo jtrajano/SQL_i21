@@ -299,7 +299,7 @@ BEGIN TRY
 			END
 
 			IF ((ISNULL(@ysnEvaluationByLocation, 0) = 0 AND ISNULL(@strLocation, '') <> '')
-				OR ISNULL(@strMarketZone, '') <> ''
+				OR (ISNULL(@ysnEvaluationByMarketZone, 0) = 0 AND ISNULL(@strMarketZone, '') <> '')
 				OR ISNULL(@strOriginPort, '') <> ''
 				OR ISNULL(@strDestinationPort, '') <> ''
 				OR ISNULL(@strCropYear, '') <> ''
