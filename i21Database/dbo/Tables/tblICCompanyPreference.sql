@@ -19,7 +19,7 @@
 	[strTransferReportFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Transfer Report Format - 1', 
 	[strCountSheetReportFormat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Count Sheet Report Format -1', 
 	[ysnMigrateNewInventoryTransaction] BIT NULL,
-    [dtmDateCreated] DATETIME NULL,
+    [dtmDateCreated] DATETIME NULL, 
     [dtmDateModified] DATETIME NULL,
     [intCreatedByUserId] INT NULL,
     [intModifiedByUserId] INT NULL,
@@ -35,5 +35,8 @@
 	[ysnMigrateComputedValueField] BIT NULL,
 	[ysnEnableIntraCompanyTransfer] BIT NULL,
 	[ysnSkipICGLValidation] BIT NULL,
+    [ysnOverrideCompanySegment] BIT NULL,
+	[ysnOverrideLocationSegment] BIT NULL,
+	[ysnOverrideLOBSegment] BIT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
