@@ -13,6 +13,7 @@
     [intAccountCategoryId] INT NULL, 
     [intEntityIdLastModified] INT NULL, 
     [intCode]  AS (CONVERT([int],[strCode])),
+	[intPrimaryOrderId] INT NULL,
     CONSTRAINT [PK_GLAccountSegment_AccountSegmentId] PRIMARY KEY CLUSTERED ([intAccountSegmentId] ASC),
     CONSTRAINT [FK_tblGLAccountSegment_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]),
     CONSTRAINT [FK_tblGLAccountSegment_tblGLAccountStructure] FOREIGN KEY ([intAccountStructureId]) REFERENCES [dbo].[tblGLAccountStructure] ([intAccountStructureId])
