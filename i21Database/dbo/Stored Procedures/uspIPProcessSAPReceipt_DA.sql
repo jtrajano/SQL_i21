@@ -629,8 +629,8 @@ BEGIN TRY
 							ELSE 0
 							END
 						)
-					,intForexRateTypeId = NULL
-					,dblForexRate = NULL
+					,intForexRateTypeId = CD.intRateTypeId
+					,dblForexRate = CD.dblRate
 					,intContainerId = CL.intLoadContainerId
 					,intFreightTermId = L.intFreightTermId
 					,intBookId = L.intBookId
@@ -717,13 +717,7 @@ BEGIN TRY
 					,strContainerNo = C.strContainerNumber
 					,intSort = NULL
 					,strMarkings = C.strMarks
-					,strCondition = (
-						CASE 
-							WHEN RI.dblNet > C.dblNetWt
-								THEN 'Clean Wgt'
-							ELSE NULL
-							END
-						)
+					,strCondition = 'Clean Wgt'
 					,intEntityVendorId = RI.intEntityVendorId
 					,strReceiptType = RI.strReceiptType
 					,intLocationId = RI.intLocationId
