@@ -8,7 +8,7 @@ AS
 	Created By: Jonathan Valenzuela
 	Date: 06/22/2023
 *****************************************************************/
-SELECT strLotNumber				AS [Item]
+SELECT strLotNumber				AS [Lot No]
 	 , strParentLotNumber		AS [Parent Lot No]
 	 , strPrimaryStatus			AS [Status]
 	 , strItemNo				AS [Item Number]
