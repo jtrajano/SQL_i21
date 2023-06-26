@@ -294,7 +294,6 @@ AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 IF @strModule = 'CM Swaps'
 BEGIN
-WITH cte AS(
 SELECT 
 	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType, strTransactionId COLLATE Latin1_General_CI_AS strTransactionId, 
 	strTransactionDate dtmDate, strTransactionDueDate dtmDueDate, strVendorName COLLATE Latin1_General_CI_AS strVendorName,
@@ -308,23 +307,7 @@ SELECT
 	,intLOBSegmentCodeId = NULL
 	,intNewCurrencyExchangeRateTypeId = NULL
 	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
-FROM vyuCMSwapReceivableMultiCurrencyRevalue
-UNION ALL
-SELECT 
-	strTransactionType COLLATE Latin1_General_CI_AS strTransactionType, strTransactionId COLLATE Latin1_General_CI_AS strTransactionId, 
-	strTransactionDate dtmDate, strTransactionDueDate dtmDueDate, strVendorName COLLATE Latin1_General_CI_AS strVendorName,
-	strCommodity COLLATE Latin1_General_CI_AS strCommodity,strLineOfBusiness COLLATE Latin1_General_CI_AS strLineOfBusiness,
-	strLocation COLLATE Latin1_General_CI_AS strLocation, strTicket COLLATE Latin1_General_CI_AS strTicket,strContractNumber COLLATE Latin1_General_CI_AS strContractId,
-	strItemId COLLATE Latin1_General_CI_AS strItemId, dblQuantity, dblUnitPrice, dblAmount dblTransactionAmount, intCurrencyId, intForexRateType intCurrencyExchangeRateTypeId, 
-	strForexRateType COLLATE Latin1_General_CI_AS strForexRateType, dblForexRate dblHistoricForexRate, dblHistoricAmount, dblAmountDifference,
-	strModule = 'CM Swaps' COLLATE Latin1_General_CI_AS, strType = 'Payables'  COLLATE Latin1_General_CI_AS
-	,intAccountId
-	,intCompanyLocationId
-	,intLOBSegmentCodeId = NULL
-	,intNewCurrencyExchangeRateTypeId = NULL
-	,strNewForexRateType = '' COLLATE Latin1_General_CI_AS
-FROM vyuCMSwapPayableMultiCurrencyRevalue
-)
+FROM vyuCMSwapMultiCurrencyRevalue
 INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
