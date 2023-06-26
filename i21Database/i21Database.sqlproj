@@ -1810,6 +1810,7 @@
     <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
+    <Build Include="dbo\Views\vyuTMDeliverySite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
