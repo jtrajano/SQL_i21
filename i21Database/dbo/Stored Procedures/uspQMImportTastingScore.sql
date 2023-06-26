@@ -1384,7 +1384,7 @@ BEGIN TRY
 					END
 				,dblTeaVolume = CASE 
 					WHEN ISNULL(Volume.strPropertyValue, '') = ''
-						THEN NULL
+						THEN I.dblBlendWeight
 					ELSE CAST(Volume.strPropertyValue AS NUMERIC(18, 6))
 					END
 				,intTealingoItemId = S.intItemId
