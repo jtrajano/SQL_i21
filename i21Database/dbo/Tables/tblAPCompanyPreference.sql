@@ -23,5 +23,6 @@
     [intImportTypeId]               INT NOT NULL DEFAULT 5,
     [intConcurrencyId]              INT NOT NULL DEFAULT 0,
     [ysnRemittanceAdvice_DisplayVendorAccountNumber] BIT NULL DEFAULT(1),
+    [ysnRemittanceAdvice_AttachSettlement] BIT NULL,
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
