@@ -197,7 +197,9 @@ END
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
-		,strActualCostId			= ISNULL(min(TL.strTransaction), min(BID.strTransaction))
+		,strActualCostId			= CASE WHEN MIN(TR.strOrigin) = 'Terminal' AND MIN(DH.strDestination) = 'Location' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId) THEN NULL
+										   ELSE ISNULL(min(TL.strTransaction), min(BID.strTransaction)) 
+									  END
 		,intTaxGroupId				= min(TR.intTaxGroupId)
 		,strVendorRefNo				= min(TR.strBillOfLading)
 		,strSourceId				= min(TL.strTransaction)
