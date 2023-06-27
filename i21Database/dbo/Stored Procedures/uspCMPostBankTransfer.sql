@@ -573,6 +573,8 @@ IF @ysnPost = 1
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
+  EXEC uspGLInsertIntraCompanyEntries
+    IF @@ERROR <> 0 GOTO Post_Rollback    
 
  INSERT INTO @GLEntries(    
    [strTransactionId]    
@@ -634,6 +636,10 @@ IF @ysnPost = 1
       ,[strTransactionForm]    
       ,[strModuleName]      
     FROM #tmpGLDetail    
+
+
+    
+    
         
     DECLARE @PostResult INT    
     EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1    
@@ -897,6 +903,9 @@ IF @ysnPost = 1
   EXEC uspCMBTOverrideGLAccount @intGLAccountIdFrom, @intBankTransferTypeId 
     IF @@ERROR <> 0 GOTO Post_Rollback    
 
+
+  EXEC uspGLInsertIntraCompanyEntries
+    IF @@ERROR <> 0 GOTO Post_Rollback    
   
  -- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable    
  INSERT INTO @RecapTable (    
