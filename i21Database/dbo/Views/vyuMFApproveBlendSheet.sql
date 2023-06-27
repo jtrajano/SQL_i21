@@ -15,7 +15,7 @@ SELECT WorkOrder.intWorkOrderId
 	 , CAST(InputLot.dblIssuedQuantity AS NUMERIC(18, 6))	AS dblNoOfPackages
 	 , CAST(InputLot.dblQuantity AS NUMERIC(18, 6))			AS dblAllocQty
 	 , CAST(Batch.dblSellingPrice AS NUMERIC(18, 6))		AS dblSellingPrice
-	 , CAST((InputLot.dblQuantity * 1) AS NUMERIC(18, 6))	AS dblAllocQtyInUsd
+	 , CAST((InputLot.dblQuantity * Batch.dblSellingPrice) AS NUMERIC(18, 6))	AS dblAllocQtyInUsd
 	 , CAST(ISNULL((InputLotItem.intUnitPerLayer * InputLotItem.intLayerPerPallet), 0.000000) AS NUMERIC(18,6)) AS dblPackagesPerPaller
 	 , BuyingCenterLocation.strLocationName			 AS strAuction
 	 , Batch.strTeaOrigin							 AS strOrigin
@@ -30,12 +30,12 @@ SELECT WorkOrder.intWorkOrderId
 	 , Batch.strTeaGardenChopInvoiceNumber			 AS strChop
 	 , Batch.strLeafSize							 AS strLeafSize
 	 , CAST(0.000000 AS NUMERIC(18, 6))				 AS dblPurchasePrice
-	 , CAST(0.000000 AS NUMERIC(18, 6))				 AS dblBasePrice
+	 , CAST(Batch.dblBasePrice AS NUMERIC(18, 6))	 AS dblBasePrice	
 	 , CAST(Batch.dblLandedPrice  AS NUMERIC(18, 6)) AS dblLandedPrice
 	 , WorkOrderItem.strDescription					 AS strMaterialDescription
 	 , ''											 AS strUTK
-	 , CAST(0.000000  AS NUMERIC(18, 6))			 AS dblActualQty
-	 , CAST(0.000000  AS NUMERIC(18, 6))			 AS dblActualQtyInUSD
+	 , CAST(ABS(dblConsumedQty)  AS NUMERIC(18, 6))			 AS dblActualQty
+	 , CAST((ABS(dblConsumedQty) * Batch.dblSellingPrice)  AS NUMERIC(18, 6))			 AS dblActualQtyInUSD
 	 , Entity.strName								 AS strApprovedBy
 	 , Batch.strTeaColour							 AS strColor
 	 , ''											 AS strDustContent
