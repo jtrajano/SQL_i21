@@ -24,6 +24,8 @@ SELECT LR.intLoadReceiptId
 	, SP.strFreightSalesUnit
     , SBL.strSubLocationName 'strBulkStorageLocationName'
 	, LR.intBulkStorageLocationId
+	, LR.intItemVendorXrefId  
+	, VX.strVendorProduct  
 FROM tblTRLoadReceipt LR   
 LEFT JOIN vyuTRTerminal TM ON TM.intEntityVendorId = LR.intTerminalId  
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = LR.intSupplyPointId  
@@ -33,3 +35,4 @@ LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LR.intContractD
 LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = LR.intTaxGroupId  
 LEFT JOIN vyuLGLoadDetailView LD ON LD.intLoadDetailId = LR.intLoadDetailId
 LEFT JOIN tblSMCompanyLocationSubLocation SBL ON SBL.intCompanyLocationSubLocationId = LR.intBulkStorageLocationId
+LEFT JOIN tblICItemVendorXref VX ON LR.intItemVendorXrefId = VX.intItemVendorXrefId
