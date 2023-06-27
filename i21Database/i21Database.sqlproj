@@ -11491,6 +11491,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfDIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\DeferredPaymentInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertIntraCompanyEntries.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusinessId.sql" />
