@@ -85,7 +85,11 @@ BEGIN TRY
 				FROM tblAPImportPaidVouchersForPayment I 
 				WHERE 
 					I.strBillId = B.strBillId 
-				AND I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)))
+				AND 1 = (CASE 
+									WHEN I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber))) THEN 1
+									WHEN dbo.fnRemoveLeadingZero(I.strVendorOrderNumber) = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber))) THEN 1
+									ELSE 0 END
+								)
 				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue * (CASE WHEN B.intTransactionType = 1 THEN 1 ELSE  -1 END))
 				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			) forPayment
