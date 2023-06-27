@@ -38,6 +38,7 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 	[dblRemainingDollarValue]			[numeric](18, 6) NULL,
 	guiApiUniqueId UNIQUEIDENTIFIER NULL,
 	intApiRowNumber INT NULL,
+	[intSplitId]						[int] NULL, 
 
 	--[strShipToLocationName]				[nvarchar](50) NULL,
 	--[strShipToAddress]					[nvarchar](MAX) NULL,
