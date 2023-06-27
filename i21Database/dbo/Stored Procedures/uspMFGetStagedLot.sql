@@ -42,6 +42,7 @@ BEGIN
 								END, LI.dblRequiredQty))
 			ELSE NULL
 			END AS dblRequiredQty
+		, NULL AS intLocationId
 	FROM dbo.tblICLot L
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.dblQty > 0
