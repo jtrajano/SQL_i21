@@ -54,6 +54,7 @@ DECLARE @CustomerStorageData AS TABLE (
 	,dtmReportDate DATETIME
 	,intCommodityId INT
 	,strCommodityCode NVARCHAR(40) COLLATE Latin1_General_CI_AS
+	,intStorageTypeId INT
 	,strStorageTypeDescription NVARCHAR(40) COLLATE Latin1_General_CI_AS
 	,dblBeginningBalance DECIMAL(18,6) DEFAULT 0
 	,dblIncrease DECIMAL(18,6) DEFAULT 0
@@ -93,8 +94,8 @@ BEGIN
 			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
 			,strDistributionType
 			,strTransactionNumber
-			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
+			,dblIn = CASE WHEN dblTotal > 0 THEN QTY.dblResultQty ELSE 0 END
+			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(QTY.dblResultQty) ELSE 0 END
 			,ST.intStorageScheduleTypeId
 			,CusOwn.strStorageTypeDescription
 			,CusOwn.strCommodityCode
@@ -105,14 +106,15 @@ BEGIN
 				AND CL.ysnLicensed = 1
 		LEFT JOIN tblGRStorageType ST 
 			ON ST.strStorageTypeDescription = CusOwn.strDistributionType
+		OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 		WHERE CusOwn.intCommodityId = @intCommodityId
 		UNION ALL
 		SELECT
 			dtmDate = CONVERT(VARCHAR(10),dtmTransactionDate,110)
 			,strDistributionType
 			,strTransactionNumber			
-			,dblIn = CASE WHEN dblTotal > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) ELSE 0 END
-			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) ELSE 0 END
+			,dblIn = CASE WHEN dblTotal > 0 THEN QTY.dblResultQty ELSE 0 END
+			,dblOut = CASE WHEN dblTotal < 0 THEN ABS(QTY.dblResultQty) ELSE 0 END
 			,intStorageScheduleTypeId = -5
 			,'Hold'
 			,OH.strCommodityCode
@@ -121,6 +123,7 @@ BEGIN
 		INNER JOIN tblSMCompanyLocation CL
 			ON CL.intCompanyLocationId = OH.intLocationId
 				AND CL.ysnLicensed = 1
+		OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 		WHERE OH.intCommodityId = @intCommodityId
 	) t
 
@@ -159,8 +162,9 @@ BEGIN
 		FROM #CustomerOwnershipALL AA
 		INNER JOIN (
 			SELECT strTransactionNumber,strStorageTypeDescription
-				,total = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)) 
+				,total = SUM(QTY.dblResultQty) 
 			FROM dbo.fnRKGetBucketCustomerOwned(@dtmReportDate,@intCommodityId,NULL)
+			OUTER APPLY dbo.fnGRConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal) QTY
 			WHERE strTransactionType NOT IN ('Storage Settlement','Inventory Shipment')
 			GROUP BY strTransactionNumber,strStorageTypeDescription
 		) A ON A.strTransactionNumber = AA.strTransactionNumber AND A.total <> 0 AND A.strStorageTypeDescription = AA.strStorageTypeDescription
@@ -196,7 +200,8 @@ BEGIN
 	SELECT @dtmReportDate
 		,@intCommodityId
 		,@strCommodity
-		,strStorageTypeDescription
+		,intStorageScheduleTypeId
+		,strStorageTypeDescription		
 		,SUM(dblIn) - SUM(dblOut)
 		,0
 		,0
@@ -204,13 +209,14 @@ BEGIN
 		,@strUOM
 	FROM #CustomerOwnershipBal A
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < CONVERT(DATETIME, @dtmReportDate)		
-	GROUP BY strCommodityCode,strStorageTypeDescription
+	GROUP BY strCommodityCode,strStorageTypeDescription,intStorageScheduleTypeId
 
 	INSERT INTO @CustomerStorageData
 	SELECT @dtmReportDate
 		,@intCommodityId
 		,@strCommodity
-		,strStorageTypeDescription
+		,intStorageScheduleTypeId
+		,strStorageTypeDescription		
 		,0
 		,0
 		,0
@@ -241,7 +247,7 @@ BEGIN
 
 	--DECREASE FOR THE DAY
 	UPDATE CSD
-	SET dblIncrease = STORAGE.TOTAL
+	SET dblDecrease = STORAGE.TOTAL
 	FROM @CustomerStorageData CSD
 	INNER JOIN (
 		SELECT TOTAL = SUM(dblOut)
@@ -268,7 +274,8 @@ INSERT INTO tblGRGIICustomerStorage
 SELECT dtmReportDate
 	,intCommodityId
 	,strCommodityCode
-	,strStorageTypeDescription
+	,intStorageTypeId
+	,strStorageTypeDescription	
 	,dblBeginningBalance
 	,dblIncrease
 	,dblDecrease
@@ -281,6 +288,7 @@ SELECT
 	dtmReportDate
 	,intCommodityId
 	,strCommodityCode
+	,9999
 	,'TOTAL STORAGE OBLIGATION'
 	,SUM(dblBeginningBalance)
 	,SUM(dblIncrease)
@@ -293,6 +301,16 @@ GROUP BY dtmReportDate
 	,strCommodityCode
 	,strUOM
 
-SELECT * FROM @CustomerStorageData ORDER BY intId,intCommodityId
+SELECT dtmReportDate
+	,intCommodityId
+	,strCommodityCode
+	,strStorageTypeDescription	
+	,dblBeginningBalance
+	,dblIncrease
+	,dblDecrease
+	,dblEndingBalance
+	,strUOM
+FROM @CustomerStorageData
+ ORDER BY intId,intCommodityId
 
 END
