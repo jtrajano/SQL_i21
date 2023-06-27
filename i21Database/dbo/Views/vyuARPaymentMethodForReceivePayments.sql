@@ -13,7 +13,7 @@ SELECT
 	,ysnExemptCreditCardFee	= CAST(1 AS BIT)
 	,strDescription			= PM.strDescription
 FROM tblSMPaymentMethod PM
-WHERE strPaymentMethod <> 'Credit Card' and ysnActive = 1
+WHERE strPaymentMethod <> 'Credit Card' --and ysnActive = 1
 
 UNION ALL 
 
