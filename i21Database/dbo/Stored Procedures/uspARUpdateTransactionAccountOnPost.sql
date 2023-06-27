@@ -270,6 +270,13 @@ SET ANSI_WARNINGS OFF
 	AND (@OverrideCompanySegment = 1 OR @OverrideLocationSegment = 1)
 	AND ARID.strType <> 'Tax Adjustment'
 
+	UPDATE ARITD
+	SET intSalesTaxAccountId = dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, CL.intProfitCenter)
+	FROM tblARInvoiceDetailTax ARITD
+	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId 
+	INNER JOIN tblSMCompanyLocation CL ON ARID.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE ARID.strSessionId = @strSessionId
+
     UPDATE PID
     SET  
 		 PID.[intItemAccountId]             = ARID.[intAccountId]
