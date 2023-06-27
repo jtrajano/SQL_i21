@@ -63,7 +63,6 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrLanguageId'
 
-
 	/*Declared variables for translating expression*/
 	declare @per nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'per'),'per');
 	declare @at nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'at'),'at');
@@ -101,7 +100,7 @@ BEGIN TRY
 						 ELSE NULL END,
 			dblFX = PD.dblFX,
 		    ysnEnableFXFieldInContractPricing = @ysnEnableFXFieldInContractPricing
-			
+
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 	LEFT	JOIN tblCTPriceContract		PC	ON  PC.intPriceContractId			=   PF.intPriceContractId
@@ -121,10 +120,8 @@ BEGIN TRY
 
 	LEFT	JOIN	tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
 	LEFT	JOIN	tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = CM.intUnitMeasureId
-	LEFT	JOIN	tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'		
-	LEFT	JOIN 	tblICCommodityUnitMeasure	PM1	ON	PM1.intCommodityUnitMeasureId	=	PD.intPricingUOMId
-	LEFT	JOIN 	tblICUnitMeasure			PM2	ON	PM2.intUnitMeasureId			=	PM1.intUnitMeasureId
-	
+	LEFT	JOIN	tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'	
+	LEFT	JOIN tblICUnitMeasure			PM2	ON	PM2.intUnitMeasureId			=	PD.intQtyItemUOMId
 
 	CROSS JOIN tblCTCompanyPreference   CP		
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
@@ -138,3 +135,4 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
+GO
