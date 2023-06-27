@@ -94,8 +94,11 @@ OUTER APPLY	(
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM vyuAPBillForImport forImport
 		WHERE forImport.intEntityVendorId = A.intEntityVendorId 
-			AND LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber
-			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
+			AND 1 = (CASE WHEN LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber THEN 1
+								WHEN LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = dbo.fnRemoveLeadingZero(A.strVendorOrderNumber) THEN 1
+								ELSE 0 END
+							)
+				AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
 			--forImport.ysnInPaymentSched > THIS IS EXPECTING THAT THE DISCOUNT WHAS PART OF PAYMENT SCHEDULE tblAPVoucherPaymentSchedule.dblDiscount
 			--HOWEVER, DISCOUNT MAY STILL EXISTS ON IMPORT BUT NOT ON tblAPVoucherPaymentSchedule.dblDiscount
 			--IT IS BETTER TO NO CHECK FOR DISCOUNT, JUST COMPARE THE PAYMENT
@@ -180,7 +183,10 @@ OUTER APPLY	(
 		INNER JOIN tblAPVendor childVend ON forImport.intEntityVendorId = childVend.intEntityId
 		INNER JOIN tblAPVendor parentVendor ON childVend.strVendorPayToId = parentVendor.strVendorId
 		WHERE parentVendor.intEntityId = A.intEntityVendorId 
-			AND LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber
+			AND 1 = (CASE WHEN LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = A.strVendorOrderNumber THEN 1
+								WHEN LTRIM(RTRIM(ISNULL(forImport.strPaymentScheduleNumber, forImport.strVendorOrderNumber))) = dbo.fnRemoveLeadingZero(A.strVendorOrderNumber) THEN 1
+								ELSE 0 END
+							)
 			AND ISNULL(forImport.dblTotal, dblAmountDue) = ((A.dblPayment + A.dblDiscount) - A.dblInterest)
 			--IF PAYMENT SCHEDULE COMPARE DISCOUNT ON PAYMENT TEMP
 			--ELSE DISCOUNT WILL BE 0, DISCOUNT HAS BEEN HANDLED ABOVE (A.dblPayment + A.dblDiscount)
