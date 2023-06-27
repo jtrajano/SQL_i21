@@ -70,19 +70,7 @@ BEGIN
 													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
-												ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
-												END) 
-											END)
-		,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash')
-											THEN @ZeroDecimal 
-											ELSE (
-												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
-												THEN 
-													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
-													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(ARIR.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARIR.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
-													END
-												ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+												ELSE CASE WHEN ARI.strType = 'Provisional' THEN ISNULL(ARI.dblProvisionalTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END
 												END) 
 											END)
 		,ARI.dblDiscount				= @ZeroDecimal
