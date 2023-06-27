@@ -153,6 +153,7 @@ AS
 			,CP.ysnUseCostCurrencyToFunctionalCurrencyRateInContractCost
 			,CP.intTransactionForexId
 			,strTransactionForex = case when CP.intTransactionForexId = 2 then 'Current' else 'Contract' end
+			,CP.ysnRequireStorageLocation
 	FROM	tblCTCompanyPreference		CP
 	LEFT JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId
 	LEFT JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId
