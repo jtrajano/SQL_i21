@@ -533,7 +533,7 @@ SELECT DISTINCT
 	,intSourceId = 0 
 	,intItemId = it.intItemId 
 	,intItemLocationId = ISNULL(il.intItemLocationId, -1) 
-	,intItemUOMId = ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) 
+	,intItemUOMId = ISNULL(il.intReceiveUOMId, ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) )
 	,dblQuantity = 
 		CASE 
 			WHEN i.UnitMultiplier > 1 AND symbolItemUOM.intItemUOMId IS NULL THEN i.Quantity * i.UnitMultiplier 
