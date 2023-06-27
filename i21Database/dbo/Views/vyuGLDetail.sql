@@ -63,9 +63,6 @@ AS
         A.dtmDateEnteredMin,
         FP.strPeriod,
         CL.strLocationName COLLATE Latin1_General_CI_AS strCompanyLocation,
-        L.strLedgerName,
-        LD.strLedgerName COLLATE Latin1_General_CI_AS strSubledgerName,
-        A.intSubsidiaryCompanyId,
         RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS strCurrencyExchangeRateType,
         ISNULL(LocationSegment.strChartDesc, '') COLLATE Latin1_General_CI_AS strLocationSegmentDescription,
         ISNULL(LOBSegment.strChartDesc, '')  COLLATE Latin1_General_CI_AS strLOBSegmentDescription,
@@ -82,8 +79,6 @@ AS
      LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
      LEFT JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId = A.intFiscalPeriodId
      LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
-     LEFT JOIN tblGLLedger L ON L.intLedgerId = A.intLedgerId
-     LEFT JOIN tblGLLedgerDetail LD ON LD.intLedgerDetailId = A.intSubledgerId
      LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
