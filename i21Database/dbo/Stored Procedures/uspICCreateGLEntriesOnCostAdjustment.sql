@@ -146,153 +146,331 @@ END
 
 -- Get the GL Account ids for the Other Charges 
 BEGIN 
-	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount; 
+	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount;
+
+	DECLARE @ysnOverrideLOBSegment AS BIT 
+	SELECT TOP 1 
+		@ysnOverrideLOBSegment = ysnOverrideLOBSegment
+	FROM tblICCompanyPreference	
 
 	-- FIFO LOG
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intContraInventoryId
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-			) Query
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId)
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost						
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+				) Query
+	END 
+	ELSE
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost						
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+				) Query
+	END
+	;
 
 	-- LIFO LOG
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intContraInventoryId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
-						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
-							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
-							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-						AND t.intItemLocationId IS NOT NULL 
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-			) Query
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query	
+	END 
+	ELSE 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query	
+	END 
 	;
 
 	-- LOT LOG 
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intContraInventoryId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
-						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
-							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
-							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-						AND t.intItemLocationId IS NOT NULL 
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-			) Query
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END 
+	ELSE
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END 
 	;
 
 	-- ACTUAL COST LOG 
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intContraInventoryId 
-			,intOtherChargeExpense
-			,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
-			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						intItemId = cbLog.intOtherChargeItemId
-						, intItemLocationId = ocl.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
-							ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-							AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
-						INNER JOIN tblICItemLocation il
-							ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
-						INNER JOIN tblICItemLocation ocl
-							ON ocl.intItemId = cbLog.intOtherChargeItemId
-							AND ocl.intLocationId = il.intLocationId
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId)
+				,intOtherChargeExpense = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
 						
-						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
-							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
-							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
 
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND cbLog.intOtherChargeItemId IS NOT NULL 
-						AND t.intItemLocationId IS NOT NULL 
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-			) Query
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END
+	ELSE
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intContraInventoryId 
+				,intOtherChargeExpense
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment)
+				,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_OtherCharge_Expense) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							intOtherChargeItemId = cbLog.intOtherChargeItemId
+							, intItemLocationId = ocl.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+								ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+								AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+							INNER JOIN tblICItemLocation il
+								ON il.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+							INNER JOIN tblICItemLocation ocl
+								ON ocl.intItemId = cbLog.intOtherChargeItemId
+								AND ocl.intLocationId = il.intLocationId
+						
+							LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
+								ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
+								AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+								AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND cbLog.intOtherChargeItemId IS NOT NULL 
+							AND t.intItemLocationId IS NOT NULL 
+							AND OtherChargeGLAccounts.intItemId IS NULL 
+				) Query
+	END
 	;
 END
 

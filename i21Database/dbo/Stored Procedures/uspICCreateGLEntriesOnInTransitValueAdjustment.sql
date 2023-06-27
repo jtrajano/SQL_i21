@@ -159,39 +159,84 @@ END
 -- Get the GL Account ids to use for the other charges. 
 BEGIN 
 	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount; 
-	INSERT INTO @OtherChargeGLAccounts (
-			intItemId 
-			,intItemLocationId 
-			,intInventoryId 
-			,intContraInventoryId 
-			,intTransactionTypeId
-	)
-	SELECT	Query.intOtherChargeItemId
-			,Query.intItemLocationId
-			,intInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_InTransit) 
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment) 
-			,intTransactionTypeId
-	FROM	(
-				SELECT	DISTINCT 
-						adjLog.intOtherChargeItemId
-						, intItemLocationId = il.intItemLocationId
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t 
-						INNER JOIN tblICItem i
-							ON t.intItemId = i.intItemId 
-						INNER JOIN #tmpRebuildList list	
-							ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
-							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)							
-						INNER JOIN tblICInventoryValueAdjustmentLog adjLog
-							ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
-						INNER JOIN tblICItemLocation il 
-							ON il.intItemId = adjLog.intOtherChargeItemId
-							AND il.intLocationId = t.intCompanyLocationId
-				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
-			) Query
-	;
+	DECLARE @ysnOverrideLOBSegment AS BIT 
+	SELECT TOP 1 
+		@ysnOverrideLOBSegment = ysnOverrideLOBSegment
+	FROM tblICCompanyPreference	
+
+	IF @ysnOverrideLOBSegment = 1 
+	BEGIN 
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intInventoryId 
+				,intContraInventoryId 
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_InTransit, Query.intCommodityId) 
+				,intContraInventoryId = dbo.fnGetItemCommodityGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment, Query.intCommodityId) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							adjLog.intOtherChargeItemId
+							, intItemLocationId = il.intItemLocationId
+							, t.intTransactionTypeId
+							, i.intCommodityId
+					FROM	dbo.tblICInventoryTransaction t 
+							INNER JOIN tblICItem i
+								ON t.intItemId = i.intItemId 
+							INNER JOIN #tmpRebuildList list	
+								ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)							
+							INNER JOIN tblICInventoryValueAdjustmentLog adjLog
+								ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
+							INNER JOIN tblICItemLocation il 
+								ON il.intItemId = adjLog.intOtherChargeItemId
+								AND il.intLocationId = t.intCompanyLocationId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+				) Query
+		;
+	END 
+	ELSE
+	BEGIN
+		INSERT INTO @OtherChargeGLAccounts (
+				intItemId 
+				,intItemLocationId 
+				,intInventoryId 
+				,intContraInventoryId 
+				,intTransactionTypeId
+		)
+		SELECT	Query.intOtherChargeItemId
+				,Query.intItemLocationId
+				,intInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_InTransit) 
+				,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intOtherChargeItemId, Query.intItemLocationId, @AccountCategory_Cost_Adjustment) 
+				,intTransactionTypeId
+		FROM	(
+					SELECT	DISTINCT 
+							adjLog.intOtherChargeItemId
+							, intItemLocationId = il.intItemLocationId
+							, t.intTransactionTypeId
+					FROM	dbo.tblICInventoryTransaction t 
+							INNER JOIN tblICItem i
+								ON t.intItemId = i.intItemId 
+							INNER JOIN #tmpRebuildList list	
+								ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)							
+							INNER JOIN tblICInventoryValueAdjustmentLog adjLog
+								ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
+							INNER JOIN tblICItemLocation il 
+								ON il.intItemId = adjLog.intOtherChargeItemId
+								AND il.intLocationId = t.intCompanyLocationId
+					WHERE	t.strBatchId = @strBatchId
+							AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+							AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+				) Query
+		;
+	END 
 END 
 
 -- Validate the GL Accounts
