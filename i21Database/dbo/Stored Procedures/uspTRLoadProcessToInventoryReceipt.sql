@@ -180,20 +180,31 @@ END
 		,intContractDetailId		= min(TR.intContractDetailId)
 		,dtmDate					= min(TL.dtmLoadDateTime)
 		,intShipViaId				= min(TL.intShipViaId)
-		,dblQty						= CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN min(TR.dblGross)
-											WHEN min(SP.strGrossOrNet) = 'Net' THEN min(TR.dblNet) END
-		,dblCost					= min(TR.dblUnitCost)
-		,intCurrencyId				= @defaultCurrency
-		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= NULL --No LOTS from transport
-		,intSubLocationId			= MIN(TMSite.intCompanyLocationSubLocationId) -- No Storage Location from transport unless COmpany Consumption Site
-		,intStorageLocationId		= NULL -- No Sub Location from transport
-		,ysnIsStorage				= 0 -- No Storage from transports
-		,dblFreightRate				= min(TR.dblFreightRate)
-		,intSourceId				= min(TR.intLoadReceiptId)
-		,intSourceType		 		= 3 -- Source type for transports is 3 
-		,dblGross					= min(TR.dblGross)
-		,dblNet						= min(TR.dblNet)
+		,dblQty      = 
+						ISNULL(
+					  CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN SUM(DD.dblDistributionGrossSalesUnits)
+				      WHEN min(SP.strGrossOrNet) = 'Net' THEN SUM(DD.dblDistributionNetSalesUnits) 
+					  --ELSE
+						  --SUM(DD.dblDistributionNetSalesUnits) 
+					  END  
+					  ,0)
+
+		,dblCost					= min(TR.dblUnitCost)  
+		,intCurrencyId				= @defaultCurrency 
+		,dblExchangeRate   = 1 -- Need to check this  
+		,intLotId     = NULL --No LOTS from transport  
+		,intSubLocationId     =		CASE WHEN (MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)) THEN  MIN(TMSite.intCompanyLocationSubLocationId)
+									ELSE
+										NULL
+									END
+		,intStorageLocationId  = NULL -- No Sub Location from transport  
+		,ysnIsStorage    = 0 -- No Storage from transports  
+		,dblFreightRate    = min(TR.dblFreightRate)  
+		,intSourceId    = min(TR.intLoadReceiptId)  
+		,intSourceType     = 3 -- Source type for transports is 3   
+		,dblGross     =  ISNULL(SUM(DD.dblDistributionGrossSalesUnits),0)--select * from tblTRLoadDistributionDetail
+		,dblNet      =  ISNULL(SUM(DD.dblDistributionNetSalesUnits),0)
+
 		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
 		,dblSurcharge				= min(TR.dblPurSurcharge)
 		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
@@ -228,7 +239,7 @@ END
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
 			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
-    group by TR.intLoadReceiptId
+    group by TR.intLoadReceiptId,DH.strDestination,  DH.intCompanyLocationId,DD.intLoadDistributionDetailId
 	ORDER BY intEntityVendorId
 		,strBillOfLadding
 		,strReceiptType
