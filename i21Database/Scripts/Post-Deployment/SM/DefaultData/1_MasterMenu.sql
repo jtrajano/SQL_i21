@@ -1268,7 +1268,7 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Auditor Transactions by Transaction ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Auditor Transactions by Transaction ID', N'General Ledger', @GeneralLedgerReportParentMenuId, N'Auditor Transactions by Transaction Id', N'Report', N'Screen', N'GeneralLedger.view.AuditorTransactionsByAccountId', N'small-menu-report', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Auditor Transactions by Transaction ID', N'General Ledger', @GeneralLedgerReportParentMenuId, N'Auditor Transactions by Transaction Id', N'Report', N'Screen', N'GeneralLedger.view.AuditorTransactionsByTransactionId', N'small-menu-report', 0, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GeneralLedger.view.AuditorTransactionsByTransactionId' WHERE strMenuName = N'Auditor Transactions by Transaction ID' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerReportParentMenuId
 
