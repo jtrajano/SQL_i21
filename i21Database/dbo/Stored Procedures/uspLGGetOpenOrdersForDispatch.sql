@@ -54,6 +54,8 @@ BEGIN
 		,dblOrderedQty = NULL
 		,dblQuantity = TMO.dblQuantity
 		,dblStandardWeight = TMO.dblQuantity * ISNULL(SW.dblStandardWeight, 0)
+		,dblPrice = TMO.dblPrice
+		,dblTotal = TMO.dblTotal
 		,strCustomerReference = ''
 		,strOrderComments = TMO.strComments
 		,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
