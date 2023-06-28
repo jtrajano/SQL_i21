@@ -14,12 +14,12 @@ SELECT DISTINCT
 	strItemId				=	B2.strName,
 	dblQuantity				=	BD.dblQtyReceived,
 	dblUnitPrice			=	0,
-	dblAmount				=	A.dblTotal,
+	dblAmount				=	A.dblTotal * (CASE WHEN strTransactionType ='Debit Memo' THEN -1 ELSE 1 END),
 	intCurrencyId			=	A.intCurrencyId,
 	intForexRateType		=	BD.intCurrencyExchangeRateTypeId,
 	strForexRateType		=	CER.strCurrencyExchangeRateType,
 	dblForexRate			=	BD.dblRate,
-	dblHistoricAmount		=	ROUND(A.dblTotal * BD.dblRate,2),
+	dblHistoricAmount		=	ROUND((A.dblTotal * CASE WHEN strTransactionType ='Debit Memo' THEN -1 ELSE 1 END * BD.dblRate),2),
 	dblNewForexRate         =    0, --Calcuate By GL
     dblNewAmount            =    0, --Calcuate By GL
     dblUnrealizedDebitGain  =    0, --Calcuate By GL
@@ -46,4 +46,3 @@ LEFT JOIN dbo.tblICCommodity CC
 LEFT JOIN dbo.tblSMCurrencyExchangeRateType CER
 	ON CER.intCurrencyExchangeRateTypeId = BD.intCurrencyExchangeRateTypeId
 WHERE A.ysnPosted = 1 AND A.ysnPaid = 0
-
