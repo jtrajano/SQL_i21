@@ -725,18 +725,6 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 							 , dblPrice				= @dblDWGSpotPrice
 							 , ysnCharge			= CAST(0 AS BIT)
 
-						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge)
-						SELECT intInvoiceDetailId	= @intInvoiceDetailId
-						     , intContractDetailId	= NULL
-							 , intContractHeaderId	= NULL
-							 , intTicketId			= NULL
-							 , intItemId			= intItemId
-							 , intItemUOMId			= intItemUOMId
-							 , dblQtyShipped		= 1
-							 , dblPrice				= dbo.fnSCCalculateDiscount(@intTicketForDiscountId, intTicketDiscountId, @dblQtyOverAged, intItemUOMId, 0) * -1
-							 , ysnCharge			= CAST(1 AS BIT)
-						FROM #SHIPMENTCHARGES
-
 						SET @dblQtyOverAged = 0
 					END
 			END
