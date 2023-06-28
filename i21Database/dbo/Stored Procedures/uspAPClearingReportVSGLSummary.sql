@@ -604,6 +604,26 @@ SET @cteQuery = N';WITH forClearing
       ,strLocationName    
      FROM vyuAPPatClearing    
      ' + @innerQueryFilter + '    
+    ),
+    tktClearing AS (
+      SELECT  
+        dtmDate  
+        ,intEntityVendorId  
+        ,strTicketNumber  
+        ,intTicketId  
+        ,NULL AS intTicketDetailId
+        ,intItemId  
+        ,intBillId  
+        ,strBillId  
+        ,intBillDetailId  
+        ,dblVoucherTotal  
+        ,dblVoucherQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+      FROM vyuSCDirectAPClearing
+      ' + @innerQueryFilter + '  
     )';    
 END    
 ELSE    
@@ -796,6 +816,25 @@ BEGIN
       ,intLocationId    
       ,strLocationName    
      FROM vyuAPPatClearing   
+    ),
+    tktClearing AS (
+      SELECT  
+        dtmDate  
+        ,intEntityVendorId  
+        ,strTicketNumber  
+        ,intTicketId  
+        ,NULL AS intTicketDetailId
+        ,intItemId  
+        ,intBillId  
+        ,strBillId  
+        ,intBillDetailId  
+        ,dblVoucherTotal  
+        ,dblVoucherQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+      FROM vyuSCDirectAPClearing
     )';    
 END    
   
@@ -1574,7 +1613,62 @@ INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity
   INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)    
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId    
  CROSS APPLY tblSMCompanySetup compSetup    
- WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END  
+ WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
+ UNION ALL 
+ --SCALE TICKET
+ SELECT  
+  tkt.strTicketNumber
+  ,tkt.dtmTicketDateTime
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId 
+  ,tkt.intEntityId
+  ,NULL strBillOfLading  
+  ,'''' AS strOrderNumber  
+  ,CASE WHEN DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())<=0   
+   THEN 0  
+  ELSE ISNULL(DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE()),0) END AS intAging  
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
+  ,tmpAPOpenClearing.strLocationName  
+  ,tmpAPOpenClearing.dblReceiptQty AS dblQtyToReceive  
+  ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
+  ,tmpAPOpenClearing.dblReceiptTotal AS dblTotal  
+  ,tmpAPOpenClearing.dblVoucherTotal AS dblVoucherAmount  
+  ,tmpAPOpenClearing.dblClearingQty AS dblQtyToVoucher  
+  ,tmpAPOpenClearing.dblReceiptTotal - tmpAPOpenClearing.dblVoucherTotal AS dblAmountToVoucher  
+  ,GETDATE() as dtmCurrentDate  
+  ,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) AS strCompanyAddress  
+  ,compSetup.strCompanyName  
+  FROM    
+  (  
+    SELECT  
+      B.intEntityVendorId  
+      ,B.intTicketId
+      ,B.strTicketNumber  
+      ,SUM(B.dblReceiptTotal) AS   dblReceiptTotal
+      ,SUM(B.dblReceiptQty) AS dblReceiptQty  
+      ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
+      ,SUM(B.dblVoucherQty) AS dblVoucherQty  
+      ,SUM(B.dblReceiptQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+      ,SUM(B.dblReceiptTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount
+      ,B.intLocationId  
+      ,B.strLocationName
+    FROM tktClearing B  
+    --WHERE B.intTicketId = 102516
+    GROUP BY   
+    intEntityVendorId  
+    ,intTicketId
+    ,strTicketNumber 
+    ,intLocationId
+    ,strLocationName
+  ) tmpAPOpenClearing  
+  INNER JOIN tblSCTicket tkt ON tmpAPOpenClearing.intTicketId = tkt.intTicketId
+    INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
+    ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+  CROSS APPLY tblSMCompanySetup compSetup  
+  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END  
 ) MainQuery  
 ) tmp '    
     
