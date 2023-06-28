@@ -683,7 +683,7 @@ FROM
 	INNER JOIN @Invoices inv 
 		ON inv.FileIndex = c.FileIndex
 	INNER JOIN tblICItem i 
-		ON i.strItemNo = c.ItemDescription
+		ON i.strDescription = c.ItemDescription
 	CROSS APPLY (
 		SELECT TOP 1 
 			v.*
