@@ -635,32 +635,32 @@ BEGIN TRY
 					,intFreightTermId = L.intFreightTermId
 					,intBookId = L.intBookId
 					,intSubBookId = L.intSubBookId
-					,intSort = NULL
+					,intSort = CL.intLoadContainerId
 					,intLoadShipmentId = L.intLoadId
 					,intLoadShipmentDetailId = LD.intLoadDetailId
 					,strVendorRefNo = @strReceiptNumber
 					,dblUnitRetail = @dblCost
-				FROM tblIPInvReceiptItemStage RI
-				JOIN tblICItem I ON I.strItemNo = RI.strItemNo
+				FROM tblIPInvReceiptItemStage RI WITH (NOLOCK)
+				JOIN tblICItem I WITH (NOLOCK) ON I.strItemNo = RI.strItemNo
 					AND RI.intStageReceiptItemId = @intStageReceiptItemId
-				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+				JOIN tblICItemLocation IL WITH (NOLOCK) ON IL.intItemId = I.intItemId
 					AND IL.intLocationId = @intLocationId
-				JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+				JOIN tblICItemUOM IU WITH (NOLOCK) ON IU.intItemId = I.intItemId
+				JOIN tblICUnitMeasure UM WITH (NOLOCK) ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitMeasure = RI.strQuantityUOM
-				JOIN tblSMCompanyLocationSubLocation CSL ON CSL.strSubLocationName = RI.strSubLocationName
+				JOIN tblSMCompanyLocationSubLocation CSL WITH (NOLOCK) ON CSL.strSubLocationName = RI.strSubLocationName
 					AND CSL.intCompanyLocationId = @intLocationId
-				JOIN tblICStorageLocation SL ON SL.strName = RI.strStorageLocationName
+				JOIN tblICStorageLocation SL WITH (NOLOCK) ON SL.strName = RI.strStorageLocationName
 					AND SL.intSubLocationId = CSL.intCompanyLocationSubLocationId
-				JOIN tblLGLoadDetail LD ON LD.intItemId = I.intItemId
+				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intItemId = I.intItemId
 					AND LD.intLoadDetailId = @intLoadDetailId
-				JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId
-				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				JOIN tblEMEntityLocation EL WITH (NOLOCK) ON EL.intEntityId = LD.intVendorEntityId
+				JOIN tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
 					AND L.intLoadId = @intLoadId
-				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-				JOIN tblLGLoadDetailContainerLink CL ON CL.intLoadDetailId = LD.intLoadDetailId
+				JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblLGLoadDetailContainerLink CL WITH (NOLOCK) ON CL.intLoadDetailId = LD.intLoadDetailId
 					AND CL.intLoadContainerId = @intLoadContainerId
-				JOIN tblLGLoadContainer C ON C.intLoadContainerId = CL.intLoadContainerId
+				JOIN tblLGLoadContainer C WITH (NOLOCK) ON C.intLoadContainerId = CL.intLoadContainerId
 
 				IF NOT EXISTS (
 						SELECT 1
@@ -711,11 +711,11 @@ BEGIN TRY
 					,intItemUnitMeasureId = RI.intItemUOMId
 					,intItemId = RI.intItemId
 					,dblQuantity = RI.dblQty
-					,dblGrossWeight = RI.dblGross
-					,dblTareWeight = ISNULL(C.dblTareWt, 0)
+					,dblGrossWeight = RIS.dblCleanGrossWeight
+					,dblTareWeight = ISNULL(RIS.dblCleanTareWeight, 0)
 					,dblCost = RI.dblCost
 					,strContainerNo = C.strContainerNumber
-					,intSort = NULL
+					,intSort = RI.intSort
 					,strMarkings = C.strMarks
 					,strCondition = 'Clean Wgt'
 					,intEntityVendorId = RI.intEntityVendorId
@@ -727,8 +727,9 @@ BEGIN TRY
 					,intSourceType = RI.intSourceType
 					,strBillOfLadding = RI.strBillOfLadding
 				FROM @ReceiptStagingTable RI
-				JOIN tblLGLoadContainer C ON C.intLoadContainerId = RI.intContainerId
+				JOIN tblLGLoadContainer C WITH (NOLOCK) ON C.intLoadContainerId = RI.intContainerId
 					AND RI.intContainerId = @intLoadContainerId
+				JOIN tblIPInvReceiptItemStage RIS WITH (NOLOCK) ON RIS.intStageReceiptItemId = @intStageReceiptItemId
 
 				SELECT @intStageReceiptItemId = MIN(intStageReceiptItemId)
 				FROM tblIPInvReceiptItemStage WITH (NOLOCK)
