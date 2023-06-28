@@ -119,6 +119,37 @@ BEGIN TRY
 		END
 	END
 
+	IF @strMessageType = 'Goods Receipt'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Receipt No.</th>
+							<th>&nbsp;BL Number</th>
+							<th>&nbsp;Location</th>
+							<th>&nbsp;Message</th>
+						</tr>'
+
+		IF EXISTS (
+				SELECT 1
+				FROM tblIPInvReceiptError t WITH (NOLOCK)
+				WHERE t.ysnMailSent = 0
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>' + 
+				   '<td>&nbsp;' + ISNULL(t.strReceiptNumber, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strBLNumber, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strLocationName, '') + '</td>' +
+					'<td>&nbsp;' + ISNULL(t.strErrorMessage, '') + '</td>' +
+			'</tr>'
+			FROM tblIPInvReceiptError t WITH (NOLOCK)
+			WHERE t.ysnMailSent = 0
+
+			UPDATE t
+			SET ysnMailSent = 1
+			FROM tblIPInvReceiptError t
+			WHERE t.ysnMailSent = 0
+		END
+	END
+
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
 	SET @strMessage = @strStyle + @strHtml
