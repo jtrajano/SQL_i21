@@ -92,12 +92,44 @@ WHERE (t.dblTotal + ISNULL(OT.dblQty, 0)) <> 0
 
 
 
-INSERT INTO @returntable
-	SELECT  
+insert into @returntable 
+select  c.strBucketType
+		, c.dtmCreatedDate 
+		, c.dtmTransactionDate 
+		, o.dblTotal 
+		, c.intEntityId
+		, c.strEntityName
+		, c.intLocationId
+		, c.strLocationName
+		, c.intItemId
+		, c.strItemNo
+		, c.intCategoryId
+		, c.strCategoryCode
+		, c.intCommodityId
+		, c.strCommodityCode
+		, c.strTransactionNumber
+		, c.strTransactionType
+		, c.intTransactionRecordHeaderId
+		, c.intOrigUOMId
+		, c.intContractDetailId
+		, c.intContractHeaderId
+		, c.strContractNumber
+		, c.strContractSeq
+		, c.intTicketId
+		, c.strTicketNumber
+		, c.intFutureMarketId
+		, c.strFutureMarket
+		, c.intFutureMonthId
+		, c.strFutureMonth
+		, strDeliveryDate 
+		, strType
+		, intCurrencyId
+		, strCurrency from  (
+	SELECT  DISTINCT
 		  c.strBucketType
 		, dtmCreatedDate = MAX(c.dtmCreatedDate)
 		, dtmTransactionDate = MAX(c.dtmTransactionDate)
-		, dblTotal = SUM(o.dblTotal)
+		, dblTotal = sum(dblOrigQty)
 		, c.intEntityId
 		, c.strEntityName
 		, c.intLocationId
@@ -126,8 +158,8 @@ INSERT INTO @returntable
 		, strType = CASE WHEN strBucketType = 'Sales In-Transit' THEN 'Sales' ELSE 'Purchase' END
 		, intCurrencyId
 		, strCurrency
+	--into #tmpInTransit
 	from vyuRKGetSummaryLog c
-	inner join @tmpOpenInTransit o on o.intTransactionRecordHeaderId = c.intTransactionRecordHeaderId and  o.strTransactionType = c.strTransactionType and o.intContractDetailId = c.intContractDetailId
 	where strBucketType = 'Sales In-Transit'
 	AND c.strTransactionType IN('Inventory Shipment','Outbound Shipment')
 	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
@@ -160,6 +192,10 @@ INSERT INTO @returntable
 		, c.strFutureMonth
 		, intCurrencyId
 		, strCurrency
+) c
+inner join @tmpOpenInTransit o on o.intTransactionRecordHeaderId = c.intTransactionRecordHeaderId and  o.strTransactionType = c.strTransactionType and c.intContractDetailId = o.intContractDetailId
+
+
 
 
 RETURN
