@@ -90,6 +90,11 @@ AS
 		,@strActiveCertificationContractNumber nvarchar(50)
 		,@intActiveCertificationSeqNo int
 		,@ysnTransactionAndApproval bit
+		,@ysnBasisComponentPurchase bit
+		,@ysnBasisComponentSales bit
+		,@ysnEnableOutrightPricing bit
+		,@intContractRateTypeId int
+		,@ysnEnableBudgetForBasisPricing bit
 		--,@dtmTransationDate datetime = getdate()
 		--,@intTransactionId int
 		;
@@ -399,7 +404,12 @@ AS
 				intCountryId INT,
 				dblNetWeight numeric(18,6),
 				intNetWeightUOMId int,
-				intFXPriceUOMId int null
+				intFXPriceUOMId int null,
+				intFuturesUOMId int NULL,
+				intBudgetCurrencyId int NULL,
+				intBudgetUOMId int NULL,
+				intCashCurrencyId int NULL,
+				intRateTypeId int null
 			); 
 
 			IF OBJECT_ID('tempdb..#tmpXMLHeader') IS NOT NULL  					
@@ -415,6 +425,8 @@ AS
 				)
 			END
 
+			select @ysnBasisComponentPurchase = isnull(ysnBasisComponentPurchase,0), @ysnBasisComponentSales = isnull(ysnBasisComponentSales,0), @ysnEnableOutrightPricing = isnull(ysnEnableOutrightPricing,0), @ysnEnableBudgetForBasisPricing = ysnEnableBudgetForBasisPricing from tblCTCompanyPreference;
+			select top 1 @intContractRateTypeId = intContractRateTypeId from tblSMMultiCurrency;
 
 			INSERT	INTO #tmpExtracted
 			(
@@ -465,6 +477,11 @@ AS
 				,dblNetWeight
 				,intNetWeightUOMId
 				,intFXPriceUOMId
+				,intFuturesUOMId
+				,intCashCurrencyId
+				,intRateTypeId
+				,intBudgetUOMId
+				,intBudgetCurrencyId
 			)
 			SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
 					intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
@@ -479,11 +496,29 @@ AS
 					dtmEndDate			=	CI.dtmEndDate,			intCompanyLocationId		=	CL.intCompanyLocationId, 
 					dblQuantity			=	CI.dblQuantity,			intContractStatusId			=	1,
 					dblBalance			=	CI.dblQuantity,			dtmStartDate				=	CI.dtmStartDate,
-					intPriceItemUOMId	=	puom.intItemUOMId,		dtmCreated					=	GETDATE(),
+					intPriceItemUOMId	=	case when @ysnEnableOutrightPricing = 1 and pt.intPricingTypeId = 1 then fxitemuom.intItemUOMId else puom.intItemUOMId end,
+					dtmCreated			=	GETDATE(),
 					intConcurrencyId	=	1,						intCreatedById				=	@intUserId,
 					intFutureMarketId	=	MA.intFutureMarketId,	intFutureMonthId			=	MO.intFutureMonthId,
-					dblFutures			=	CI.dblFutures,			dblBasis					=	CI.dblBasis,
-					dblCashPrice		=	CI.dblCashPrice,		strRemark					=	CI.strRemark,
+					dblFutures			=	case when pt.intPricingTypeId = 2 then null else CI.dblFutures end,
+					dblBasis			=
+						case
+						when
+							@ysnEnableOutrightPricing = 1
+							and pt.intPricingTypeId = 1
+						then
+							(
+								dbo.fnCTConvertPriceToTargetItemUOM(fxitemuom.intItemUOMId,puom.intItemUOMId,CI.dblCashPrice,1)
+								-
+								CI.dblFutures
+							)
+							/
+							isnull(CI.dblFXRate,1)
+						else
+							CI.dblBasis
+						end,
+					dblCashPrice		=	case when pt.intPricingTypeId = 2 then null else CI.dblCashPrice end,
+					strRemark			=	CI.strRemark,
 					intPricingTypeId	=	pt.intPricingTypeId,
 					dblTotalCost		=	CI.dblCashPrice * CI.dblQuantity,
 					intCurrencyId		=	CY.intCurrencyID,
@@ -513,7 +548,7 @@ AS
 					,ysnCashFlowOverride = case when upper(CI.strCashFlowOverride) = 'Y' then 1 else 0 end
 					,dtmCashFlowDate = CI.dtmCashFlowDate
 					,intMarketZoneId = mz.intMarketZoneId
-					,dblBudgetPrice = CI.dblBudgetPrice
+					,dblBudgetPrice = case when pt.intPricingTypeId = 1 then null else CI.dblBudgetPrice end
 					,intItemBundleId = ib.intItemId
 					,intCostTermId = ctm.intFreightTermId
 					,intMTMPointId = mtmp.intMTMPointId
@@ -533,6 +568,11 @@ AS
 					,dblNetWeight = dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,IU.intUnitMeasureId,nwuom.intUnitMeasureId, CI.dblQuantity)
 					,intNetWeightUOMId = nwuom.intItemUOMId
 					,intFXPriceUOMId = case when isnull(CY.intCurrencyID,0) = isnull(ic.intCurrencyID,0) then null else fxitemuom.intItemUOMId end
+					,intFuturesUOMId = case when @ysnEnableOutrightPricing = 1 and pt.intPricingTypeId = 1 then puom.intItemUOMId else null end
+					,intCashCurrencyId = case when @ysnEnableOutrightPricing = 1 and pt.intPricingTypeId = 1 then ic.intCurrencyID else null end
+					,intRateTypeId = @intContractRateTypeId
+					,intBudgetUOMId = case when @ysnEnableBudgetForBasisPricing = 1 and pt.intPricingTypeId = 2 then puom.intItemUOMId else null end
+					,intBudgetCurrencyId = case when @ysnEnableBudgetForBasisPricing = 1 and pt.intPricingTypeId =  2 then CY.intCurrencyID else null end
 
 			FROM	tblCTContractImport			CI	LEFT
 			JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -975,6 +1015,11 @@ AS
 						,intHistoricalRateTypeId
 						,intBasisUOMId
 						,intFXPriceUOMId
+						,intFuturesUOMId
+						,intCashCurrencyId
+						,intRateTypeId
+						,intBudgetUOMId
+						,intBudgetCurrencyId
 					)
 					SELECT
 						  @intContractHeaderId
@@ -1028,6 +1073,11 @@ AS
 						,intHistoricalRateTypeId
 						,intBasisUOMId
 						,intFXPriceUOMId
+						,intFuturesUOMId
+						,intCashCurrencyId
+						,intRateTypeId
+						,intBudgetUOMId
+						,intBudgetCurrencyId
 					FROM #tmpExtracted
 					WHERE
 							ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
@@ -1119,6 +1169,11 @@ AS
 						,intCurrencyExchangeRateId
 						,intFXPriceUOMId
 						,dblFXPrice
+						,intFuturesUOMId
+						,intCashCurrencyId
+						,intRateTypeId
+						,intBudgetUOMId
+						,intBudgetCurrencyId
 						)
 					SELECT
 							@intContractHeaderId
@@ -1140,7 +1195,16 @@ AS
 						, intFutureMonthId
 						, dblFutures
 						, dblBasis
-						, dblCashPrice = case when intPricingTypeId = 1 then isnull(dblBasis,0) + isnull(dblFutures,0) else dblCashPrice end
+						, dblCashPrice = 
+							case
+							when
+								@ysnEnableOutrightPricing = 1
+								and @intPricingTypeId = 1
+							then
+								dblCashPrice
+							else
+								case when intPricingTypeId = 1 then isnull(dblBasis,0) + isnull(dblFutures,0) else dblCashPrice end
+							end
 						, strRemark
 						, intPricingTypeId
 						, intCurrencyId
@@ -1174,12 +1238,56 @@ AS
 						,strDestinationPointType = case when isnull(intDestinationPortId,0) <> 0 then 'Port' else null end
 						,intBasisCurrencyId = intCurrencyId
 						,intBasisUOMId = intBasisUOMId
-						,dblTotalBudget = case when isnull(dblBudgetPrice,0) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBudgetPrice,0) + isnull(dblBasis,0)) else null end
-						,dblTotalCost = case when intPricingTypeId = 1 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * isnull(dblCashPrice,1) else null end
+						,dblTotalBudget =
+							case
+							when
+								isnull(dblBudgetPrice,0) <> 0
+							then
+								dbo.fnCTConvertPriceToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity, 0)
+								*
+								(
+									dbo.fnCTConvertPriceToTargetItemUOM(intBasisUOMId,intPriceItemUOMId, (isnull(dblBudgetPrice,0) + isnull(dblBasis,0)), 1)
+									/
+									isnull(dblRate,1)
+								)
+							else
+								null
+							end
+						,dblTotalCost =
+							case
+							when
+								@ysnEnableOutrightPricing = 1
+								and @intPricingTypeId = 1
+							then
+								dbo.fnCTConvertPriceToTargetItemUOM(intItemUOMId,intFuturesUOMId,dblQuantity,0)
+								*
+								(
+									dbo.fnCTConvertPriceToTargetItemUOM(intPriceItemUOMId,intFuturesUOMId,dblCashPrice,1)
+									/
+									isnull(dblRate,1)
+								)
+							else
+								case when intPricingTypeId = 1 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * (isnull(dblBasis,0) + isnull(dblFutures,0)) when intPricingTypeId = 6 then dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intPriceItemUOMId, dblQuantity) * isnull(dblCashPrice,1) else null end
+							end
+						
 						,dblNoOfLots = case when round(1*dblNoOfLots,0) = 0 then 1 else round(1*dblNoOfLots,0) end
 						,intCurrencyExchangeRateId
 						,intFXPriceUOMId
-						,dblFXPrice = case when isnull(intFXPriceUOMId,0) > 0 and isnull(dblRate,0) <> 0 and (case when intPricingTypeId = 1 then (isnull(dblBasis,0) + isnull(dblFutures,0)) else isnull(dblCashPrice,0) end) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId, intFXPriceUOMId, ((case when intPricingTypeId = 1 then (isnull(dblBasis,0) + isnull(dblFutures,0)) else isnull(dblCashPrice,0) end) * dblRate)) else null end
+						,dblFXPrice =
+							case
+							when
+								@ysnEnableOutrightPricing = 1
+								and @intPricingTypeId = 1
+							then
+								dblCashPrice
+							else
+								case when isnull(intFXPriceUOMId,0) > 0 and isnull(dblRate,0) <> 0 and (case when intPricingTypeId = 1 then (isnull(dblBasis,0) + isnull(dblFutures,0)) else isnull(dblCashPrice,0) end) <> 0 then dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId, intFXPriceUOMId, ((case when intPricingTypeId = 1 then (isnull(dblBasis,0) + isnull(dblFutures,0)) else isnull(dblCashPrice,0) end) * dblRate)) else null end
+							end
+						,intFuturesUOMId
+						,intCashCurrencyId
+						,intRateTypeId
+						,intBudgetUOMId
+						,intBudgetCurrencyId
 					FROM #tmpExtracted
 					WHERE
 							ISNULL(intContractTypeId, 0) = ISNULL(@intContractTypeId, 0)
@@ -1208,7 +1316,7 @@ AS
 					end
 
 					set @ysnBasisComponent = 0;
-					select @ysnBasisComponent = case when @intContractTypeId = 1 then isnull(ysnBasisComponentPurchase,0) else isnull(ysnBasisComponentSales,0) end from tblCTCompanyPreference;
+					select @ysnBasisComponent = case when @intContractTypeId = 1 then @ysnBasisComponentPurchase else @ysnBasisComponentSales end;
 					if (@ysnBasisComponent = 1)
 					begin
 						if not exists (select top 1 1 from tblCTBasisCost)
