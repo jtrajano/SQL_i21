@@ -928,6 +928,7 @@
     <Build Include="dbo\Functions\fnCreateInTransitValueAdjDescription.sql" />
     <Build Include="dbo\Functions\fnGetItemCommodityGLAccount.sql" />
     <Build Include="dbo\Views\vyuAPGetItemGLAccount.sql" />
+    <Build Include="dbo\Functions\fnRKGetM2MValuationAverageCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
