@@ -50,7 +50,8 @@ BEGIN TRY
 			@dblFutures					NUMERIC(18, 6),
 			@ysnUniqueEntityReference	BIT,
 			@ysnUsed					BIT = 0,
-			@dblTotalPriced				NUMERIC(18, 6) = 0
+			@dblTotalPriced				NUMERIC(18, 6) = 0,
+			@strContractBase 			NVARCHAR(50)
 
 	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
 	--SELECT	@XML	=	dbo.[fnCTRemoveStringXMLTag](@XML,'strAmendmentLog')
@@ -139,7 +140,8 @@ BEGIN TRY
 		--JOIN tblICItemUOM tCum ON tCum.intItemUOMId = pfd.intQtyItemUOMId
 		WHERE intContractHeaderId = @intContractHeaderId 
 	) tbl
-
+	
+	SELECT @strContractBase  = ISNULL(strContractBase,'') FROM  tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId 
 	DECLARE @strEntityName NVARCHAR(100)
 	
 
@@ -164,15 +166,18 @@ BEGIN TRY
 				SET @ErrMsg = 'Commodity is missing while creating contract.'
 				RAISERROR(@ErrMsg, 16, 1)
 			END
-			IF	@intCommodityUOMId IS NULL
+			IF @strContractBase != 'Value'
 			BEGIN
-				SET @ErrMsg = 'UOM is missing while creating contract.'
-				RAISERROR(@ErrMsg, 16, 1)
-			END
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intCommodityUnitMeasureId = @intCommodityUOMId)
-			BEGIN
-				SET @ErrMsg = 'Combination of commodity id and UOM id is not matching.'
-				RAISERROR(@ErrMsg, 16, 1)
+				IF	@intCommodityUOMId IS NULL
+				BEGIN
+					SET @ErrMsg = 'UOM is missing while creating contract.'
+					RAISERROR(@ErrMsg, 16, 1)
+				END
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intCommodityUnitMeasureId = @intCommodityUOMId)
+				BEGIN
+					SET @ErrMsg = 'Combination of commodity id and UOM id is not matching.'
+					RAISERROR(@ErrMsg, 16, 1)
+				END
 			END
 		END
 		
