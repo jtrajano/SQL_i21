@@ -14,12 +14,12 @@ SELECT DISTINCT
 	,strItemId					= ICI.strItemNo
 	,dblQuantity				= ARID.dblQtyShipped
 	,dblUnitPrice				= ARID.dblPrice
-	,dblAmount					= ARID.dblTotal
+	,dblAmount					= ARID.dblTotal * (CASE WHEN strTransactionType ='Credit Memo' THEN -1 ELSE 1 END)
 	,intCurrencyId				= ARI.intCurrencyId
 	,intForexRateType			= ARID.intCurrencyExchangeRateTypeId
 	,strForexRateType			= SMCERT.strCurrencyExchangeRateType 
 	,dblForexRate				= ARID.dblCurrencyExchangeRate
-	,dblHistoricAmount			= ARID.dblTotal * ARID.dblCurrencyExchangeRate
+	,dblHistoricAmount			= ARID.dblTotal * (CASE WHEN strTransactionType ='Credit Memo' THEN -1 ELSE 1 END) * ARID.dblCurrencyExchangeRate
 	,dblNewForexRate			= 0 --Calcuate By GL
 	,dblNewAmount				= 0 --Calcuate By GL
 	,dblUnrealizedDebitGain		= 0 --Calcuate By GL
