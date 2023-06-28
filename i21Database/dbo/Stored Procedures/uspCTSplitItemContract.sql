@@ -66,9 +66,12 @@ SET NOCOUNT ON
 			ALTER TABLE #tblCTItemContractHeader DROP COLUMN intItemContractHeaderId
 
 			SELECT	@strStartingNumber = 'Item Contract'
-			EXEC	uspCTGetStartingNumber @strStartingNumber,@strContractNumber OUTPUT
+			--EXEC	uspCTGetStartingNumber @strStartingNumber,@strContractNumber OUTPUT
 
+			SELECT @strContractNumber = strPrefix + LTRIM(intNumber) FROM tblSMStartingNumber WHERE strTransactionType = @strStartingNumber  
+			UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE  strTransactionType = @strStartingNumber 
 			
+			select @strContractNumber
 			UPDATE tblCTItemContractHeader
 			SET ysnSplit = CAST(1 as BIT)
 			WHERE intItemContractHeaderId = @intItemContractHeaderId
@@ -78,7 +81,8 @@ SET NOCOUNT ON
 					strContractNumber	=	@strContractNumber,
 					intEntityId			=	@intEntityId, 
 					intConcurrencyId	=	1,
-					intSplitId			=	 null
+					intSplitId			=	 null,
+					ysnSplit					=	CAST(0 as BIT)
 
 			EXEC	uspCTGetTableDataInXML '#tblCTItemContractHeader',null,@XML OUTPUT							
 			EXEC	uspCTInsertINTOTableFromXML 'tblCTItemContractHeader',@XML,@intNewContractHeaderId OUTPUT
@@ -91,8 +95,7 @@ SET NOCOUNT ON
 
 			SELECT @intContractSeq = MIN(intItemContractDetailId) FROM tblCTItemContractDetail WHERE intItemContractHeaderId = @intItemContractHeaderId and intContractStatusId not in (2,3)
 			
-				SELECT * FROM tblCTItemContractDetail WHERE intItemContractHeaderId = @intItemContractHeaderId and intContractStatusId not in (2,3)
-
+				
 			WHILE ISNULL(@intContractSeq,0) > 0
 			BEGIN
 
@@ -120,15 +123,18 @@ SET NOCOUNT ON
 			END
 
 
-			UPDATE tblCTItemContractDetail
-			SET intContractStatusId = 3
-			WHERE intItemContractHeaderId = @intItemContractHeaderId
 
 
 			-----Create Detail for New Contract
 			SELECT @intSplitDetailId = ISNULL(MIN(intSplitDetailId),0) FROM tblEMEntitySplitDetail WHERE intSplitId = @intSplitId and intSplitDetailId > @intSplitDetailId
 			
 		END
+
+		
+			UPDATE tblCTItemContractDetail
+			SET intContractStatusId = 3
+			WHERE intItemContractHeaderId = @intItemContractHeaderId
+
 		
 END TRY
 
