@@ -172,13 +172,13 @@ UPDATE A
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId,
-		A.intEntityVendorId = B.intEntityVendorId
+		A.intEntityVendorId = B.intParentEntityVendorId
 FROM tblAPImportPaidVouchersForPayment A
 INNER JOIN @cteTbl cte ON cte.intId = A.intId
 OUTER APPLY	(
 	SELECT *
 	FROM (
-		SELECT forImport.*, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
+		SELECT forImport.*, parentVendor.intEntityId intParentEntityVendorId, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM vyuAPBillForImport forImport
 		INNER JOIN tblAPVendor childVend ON forImport.intEntityVendorId = childVend.intEntityId
 		INNER JOIN tblAPVendor parentVendor ON childVend.strVendorPayToId = parentVendor.strVendorId
@@ -342,13 +342,13 @@ UPDATE A
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId,
-		A.intEntityVendorId = B.intEntityVendorId
+		A.intEntityVendorId = B.intParentEntityVendorId
 FROM tblAPImportPaidVouchersForPayment A
 INNER JOIN @cteTbl cte ON cte.intId = A.intId
 OUTER APPLY	(
 	SELECT *
 	FROM (
-		SELECT forImport.*, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
+		SELECT forImport.*, parentVendor.intEntityId intParentEntityVendorId, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM vyuAPBillForImport forImport
 		INNER JOIN tblAPVendor childVend ON forImport.intEntityVendorId = childVend.intEntityId
 		INNER JOIN tblAPVendor parentVendor ON childVend.strVendorPayToId = parentVendor.strVendorId
