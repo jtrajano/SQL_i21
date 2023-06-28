@@ -1443,6 +1443,7 @@
     <Build Include="dbo\Tables\tblGRReversedSettlementsWithVoidedPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
