@@ -125,7 +125,7 @@
 	[dblProvisionalAmountDue] DECIMAL (18, 6) NULL DEFAULT 0,
 	[dblFinalVoucherTotal] DECIMAL (18, 6) NULL,
 	[ysnFinalVoucher] BIT NULL DEFAULT 0,
-	[ysnConvertedDebitMemo] BIT NULL DEFAULT 0,
+	[ysnConvertedToDebitMemo] BIT NULL DEFAULT 0,
 	[strTaxPoint] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strHold] NVARCHAR (20) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxLocationId] INT NULL,
