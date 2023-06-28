@@ -1,7 +1,7 @@
-CREATE VIEW [dbo].[vyuCMSwapMultiCurrencyRevalue]
+CREATE VIEW [dbo].[vyuCMSwapReceivableMultiCurrencyRevalue]
 AS
 SELECT DISTINCT
-	strTransactionType		=	'Swap' COLLATE Latin1_General_CI_AS,
+	strTransactionType		=	'Swap Receivables' COLLATE Latin1_General_CI_AS,
 	strTransactionId		=	SwapShort.strTransactionId,
 	strTransactionDate		=	SwapShort.dtmDate,
 	strTransactionDueDate	=	SwapShort.dtmInTransit,
@@ -14,12 +14,12 @@ SELECT DISTINCT
 	strItemId				=	'' COLLATE Latin1_General_CI_AS,
 	dblQuantity				=	NULL,
 	dblUnitPrice			=	NULL,
-	dblAmount    			=   SwapShort.dblAmountForeignFrom,
+	dblAmount    			=   SwapShort.dblReceivableFx,
 	intCurrencyId			=	SwapShort.intCurrencyIdAmountFrom,
 	intForexRateType		=	SwapShort.intRateTypeIdAmountFrom,
 	strForexRateType		=	RateType.strCurrencyExchangeRateType,
-	dblForexRate			=	SwapShort.dblRateAmountFrom,
-	dblHistoricAmount		=	SwapShort.dblAmountFrom,
+	dblForexRate			=	SwapShort.dblReceivableFn/SwapShort.dblReceivableFx,
+	dblHistoricAmount		=	SwapShort.dblReceivableFn,
 	dblAmountDifference		=	ISNULL(SwapShort.dblDifference, 0),
 	dblNewForexRate         =   0, -- Calcuate By GL
     dblNewAmount            =   0, -- Calcuate By GL
@@ -33,7 +33,7 @@ FROM tblCMBankSwap BankSwap
 JOIN tblCMBankTransfer SwapShort
 	ON SwapShort.intTransactionId = BankSwap.intSwapShortId
 LEFT JOIN tblSMCurrencyExchangeRateType RateType
-	ON RateType.intCurrencyExchangeRateTypeId = SwapShort.intRateTypeIdAmountTo
+	ON RateType.intCurrencyExchangeRateTypeId = SwapShort.intRateTypeIdAmountFrom
 CROSS APPLY (
 	SELECT TOP 1 ysnRevalue_Swap FROM tblCMCompanyPreferenceOption
 	WHERE ysnRevalue_Swap = 1
