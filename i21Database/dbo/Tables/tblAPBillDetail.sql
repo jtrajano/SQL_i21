@@ -106,6 +106,8 @@
 	[dblProvisionalQtyReceived] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblProvisionalTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblFinalVoucherTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[ysnPrepaidOtherCharge] BIT NULL DEFAULT 0,
+	[ysnUnforecastedCharge] BIT NULL DEFAULT 0,
 	[dblOldNetWeight] DECIMAL(18, 6) NULL, --Final voucher net wt
 	[dblFinalQtyReceived] DECIMAL(18, 6) NULL, -- Final voucher qty
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
