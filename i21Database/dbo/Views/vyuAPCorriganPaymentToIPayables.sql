@@ -35,14 +35,15 @@ WITH payInfo (
 		FORMAT(CAST(C.dtmBillDate AS DATE), 'yyyy-MM-dd') AS dtmInvoiceDate,
 		'NULL' AS strPONbr,
 		FORMAT(CAST(C.dtmDueDate AS DATE), 'yyyy-MM-dd') AS dtmInvoiceDueDate,
-		A.strPaymentRecordNum AS strPaymentRefNbr,
+		A.strPaymentInfo AS strPaymentRefNbr,
 		FORMAT(CAST(A.dtmDatePaid AS DATE), 'yyyy-MM-dd') AS dtmPaymentDate,
-		CASE
-			WHEN E.strPaymentMethod = 'Check' THEN 'CHCK'
-			WHEN E.strPaymentMethod = 'eCheck' THEN 'VCRD'
-			WHEN E.strPaymentMethod = 'ACH' THEN 'CACH'
-		ELSE 'NULL'
-		END AS strPaymentType,
+		-- CASE
+		-- 	WHEN E.strPaymentMethod = 'Check' THEN 'CHCK'
+		-- 	WHEN E.strPaymentMethod = 'eCheck' THEN 'VCRD'
+		-- 	WHEN E.strPaymentMethod = 'ACH' THEN 'CACH'
+		-- ELSE 'NULL'
+		-- END 
+		'CHCK' AS strPaymentType,
 		B.dblTotal AS dblInvoiceTotal,
 		B.dblDiscount AS dblDiscountAmount,
 		B.dblPayment AS dblNetAmount,
@@ -80,14 +81,15 @@ WITH payInfo (
 		FORMAT(CAST(C.dtmDate AS DATE), 'yyyy-MM-dd') AS dtmInvoiceDate,
 		'NULL' AS strPONbr,
 		FORMAT(CAST(C.dtmDueDate AS DATE), 'yyyy-MM-dd') AS dtmInvoiceDueDate,
-		A.strPaymentRecordNum AS strPaymentRefNbr,
+		A.strPaymentInfo AS strPaymentRefNbr,
 		FORMAT(CAST(A.dtmDatePaid AS DATE), 'yyyy-MM-dd') AS dtmPaymentDate,
-		CASE
-			WHEN E.strPaymentMethod = 'Check' THEN 'CHCK'
-			WHEN E.strPaymentMethod = 'eCheck' THEN 'VCRD'
-			WHEN E.strPaymentMethod = 'ACH' THEN 'CACH'
-		ELSE 'NULL'
-		END AS strPaymentType,
+		-- CASE
+		-- 	WHEN E.strPaymentMethod = 'Check' THEN 'CHCK'
+		-- 	WHEN E.strPaymentMethod = 'eCheck' THEN 'VCRD'
+		-- 	WHEN E.strPaymentMethod = 'ACH' THEN 'CACH'
+		-- ELSE 'NULL'
+		-- END 
+		'CHCK' AS strPaymentType,
 		B.dblTotal AS dblInvoiceTotal,
 		B.dblDiscount AS dblDiscountAmount,
 		B.dblPayment AS dblNetAmount,
