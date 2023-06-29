@@ -469,11 +469,12 @@ BEGIN
 	WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table begenning data'
 END
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table beginning data')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKDPRInTransitHelperLog' AND COLUMN_NAME = 'strTransactionType')
+AND NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for DPR In-Transit Helper Log table beginning data with strTransactionType')
 BEGIN
+	DELETE FROM tblRKDPRInTransitHelperLog
 
 	insert into tblRKDPRInTransitHelperLog (
-
 		  dtmDate
 		, intCommodityId
 		, intTransactionReferenceId
@@ -482,6 +483,7 @@ BEGIN
 		, strBucketType
 		, dblQty
 		, intContractDetailId
+		, strTransactionType
 	)
 	select 
 		  dtmDate = SL.dtmTransactionDate
@@ -491,16 +493,35 @@ BEGIN
 		, intInventoryReceiptId = NULL
 		, SL.strBucketType
 		, dblQty = SL.dblOrigQty
-		, intContractDetailId = SL.intContractDetailId
+		, intContractDetailId = ISNULL(SL.intContractDetailId,SI.intLineNo)
+		, strTransactionType = 'Inventory Shipment'
 	from tblRKSummaryLog SL
 	inner join tblARInvoiceDetail ID ON ID.intInvoiceDetailId = SL.intTransactionRecordId
 	inner join tblICInventoryShipmentItem SI ON SI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
 	where SL.strBucketType = 'Sales In-Transit'
 	and SL.strTransactionType = 'Invoice'
 
-    --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
-    INSERT INTO tblEMEntityPreferences (strPreference, strValue) VALUES ('RM data fix for DPR In-Transit Helper Log table beginning data','1')
-END   
+	UNION ALL
+	select 
+		  dtmDate = SL.dtmTransactionDate
+		, SL.intCommodityId
+		, intTransactionReferenceId = LD.intLoadId
+		, intInvoiceId = SL.intTransactionRecordHeaderId
+		, intInventoryReceiptId = NULL
+		, SL.strBucketType
+		, dblQty = SL.dblOrigQty
+		, intContractDetailId = ISNULL(SL.intContractDetailId,LD.intSContractDetailId)
+		, strTransactionType = 'Outbound Shipment'
+	from tblRKSummaryLog SL
+	inner join tblARInvoiceDetail ID ON ID.intInvoiceDetailId = SL.intTransactionRecordId
+	inner join tblLGLoadDetail LD ON LD.intLoadDetailId = ID.intLoadDetailId
+	where SL.strBucketType = 'Sales In-Transit'
+	and SL.strTransactionType = 'Invoice'
+
+	--Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference, strValue) VALUES ('RM data fix for DPR In-Transit Helper Log table beginning data with strTransactionType','1')
+END
+
 
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
