@@ -60,6 +60,7 @@
 	[intCurrencyDecimal]							INT NOT NULL DEFAULT 2,
 	[intLockedRecordExpiration]						INT NOT NULL DEFAULT 60,
 	[ysnValidatePassword]							BIT NOT NULL DEFAULT 0,
+	[ysnShowRejectedToAllUsers]						BIT NOT NULL DEFAULT 1,
 	[ysnAutoRefreshOnOpen]							BIT NOT NULL DEFAULT 0,
 	[intAnnouncementFontColorId]					INT NULL,
 	[intAnnouncementBackgroundColorId]				INT NULL,
