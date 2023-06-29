@@ -22,29 +22,29 @@ BEGIN TRY
 		  , @intLocationId					INT
 		  , @intWorkOrderId					INT
 		  , @dblPartialQuantity				NUMERIC(24, 10)
-		  , @strType						NVARCHAR(1)
+		  , @strType						NVARCHAR(50)
 		  , @intTransferStorageLocationId	INT
 		  , @intProductId					INT
 		  , @dblCalculatedQuantity			DECIMAL(24, 10)
 		  , @ysnSubstituteItem				BIT
 		  , @intMainItemId					INT
-		  , @strWorkOrderNo					NVARCHAR(50) 
+		  , @strWorkOrderNo					NVARCHAR(250) 
 		  , @dblTareWeight					DECIMAL(24, 10)
 		  , @dblGrossWeight					DECIMAL(24, 10)
 		  , @dblNetWeight					DECIMAL(24, 10)
 		  , @intWeightItemUOMId				INT
 		  , @dblWeightPerUnit				DECIMAL(24, 10)
 		  , @intActualItemUnitMeasureId		INT
-		  , @strActualItemUnitMeasure		NVARCHAR(50)
+		  , @strActualItemUnitMeasure		NVARCHAR(250)
 		  , @intQuantityUnitMeasureId		INT
-		  , @strQuantityUnitMeasure			NVARCHAR(50)
+		  , @strQuantityUnitMeasure			NVARCHAR(250)
 
 	CREATE TABLE #tblMFConsumptionDetail 
 	(
 		intContainerId			INT
-	  , strContainerId			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strContainerId			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , intStorageLocationId	INT
-	  , strStorageLocationName  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strStorageLocationName  NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , intStorageSubLocationId INT
 	  , intInputItemId			INT
 	  , strInputItemNo			NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
@@ -52,17 +52,17 @@ BEGIN TRY
 	  , dblInputQuantity		NUMERIC(38, 20) NULL
 	  , intInputItemUOMId		INT
 	  , intUnitMeasureId		INT
-	  , strInputItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInputItemUnitMeasure NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , intInputLotId			INT
-	  , strInputLotNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInputLotNumber		NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , dblInputLotQuantity		NUMERIC(38, 20) NULL
-	  , strInputLotUnitMeasure	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInputLotUnitMeasure	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , ysnEmptyOutSource		BIT
 	  , dtmFeedTime				DATETIME
-	  , strReferenceNo			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strReferenceNo			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , dtmActualInputDateTime	DATETIME
 	  , intRowNo				INT IDENTITY(1, 1)
-	  , strInventoryTracking	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	  , strInventoryTracking	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	  , ysnInputItem			BIT
 	  , intMainItemId			INT
 	)
@@ -90,14 +90,14 @@ BEGIN TRY
 		,ysnFillPartialPallet BIT
 		,ysnSelected BIT
 		,intStorageLocationId INT
-		,strLotNumber NVARCHAR(50)
-		,strParentLotNumber NVARCHAR(50)
+		,strLotNumber NVARCHAR(250)
+		,strParentLotNumber NVARCHAR(250)
 		,intContainerId INT
-		,strReferenceNo NVARCHAR(50)
+		,strReferenceNo NVARCHAR(250)
 		,strRemarks NVARCHAR(MAX)
-		,strLotAlias NVARCHAR(50)
+		,strLotAlias NVARCHAR(250)
 		,intParentLotId INT
-		,strThirdPartyLotNumber NVARCHAR(50)
+		,strThirdPartyLotNumber NVARCHAR(250)
 		,intThirdPartyLotId INT
 		)
 	DECLARE @tblMFConsumeItem TABLE (
@@ -109,10 +109,10 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,intContainerId INT
 		,intInputLotId INT
-		,strLotNumber NVARCHAR(50)
+		,strLotNumber NVARCHAR(250)
 		,ysnEmptyOutSource BIT
 		,dtmFeedTime DATETIME
-		,strReferenceNo NVARCHAR(50)
+		,strReferenceNo NVARCHAR(250)
 		)
 
 	INSERT INTO @tblMFProduceItem (
@@ -169,14 +169,14 @@ BEGIN TRY
 			,intWeightItemUOMId INT
 			,dblWeightPerUnit NUMERIC(24, 10)
 			,intStorageLocationId INT
-			,strLotNumber NVARCHAR(50)
-			,strParentLotNumber NVARCHAR(50)
+			,strLotNumber NVARCHAR(250)
+			,strParentLotNumber NVARCHAR(250)
 			,intContainerId INT
-			,strReferenceNo NVARCHAR(50)
+			,strReferenceNo NVARCHAR(250)
 			,strRemarks NVARCHAR(MAX)
-			,strLotAlias NVARCHAR(50)
+			,strLotAlias NVARCHAR(250)
 			,intParentLotId INT
-			,strThirdPartyLotNumber NVARCHAR(50)
+			,strThirdPartyLotNumber NVARCHAR(250)
 			,intThirdPartyLotId INT
 			)
 
@@ -221,10 +221,10 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,intContainerId INT
 			,intInputLotId INT
-			,strLotNumber NVARCHAR(50)
+			,strLotNumber NVARCHAR(250)
 			,ysnEmptyOutSource BIT
 			,dtmFeedTime DATETIME
-			,strReferenceNo NVARCHAR(50)
+			,strReferenceNo NVARCHAR(250)
 			)
 
 	SELECT @intItemId = intItemId
