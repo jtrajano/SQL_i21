@@ -101,8 +101,7 @@ BEGIN TRY
 			, @strTransactionId = strTransactionId
 			, @intTransactionId = intTransactionId
 			, @strTransactionType = strTransactionType
-			, @dblAmount = (dblDebit + dblCredit)
-			
+			, @dblAmount = (dblCredit - dblDebit)
 		FROM #tmpPostRecap
 
 		IF (@strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit')
@@ -126,7 +125,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -164,7 +163,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -202,7 +201,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -240,7 +239,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Ratio Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -259,7 +258,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Cash Inventory Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
