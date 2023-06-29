@@ -1604,7 +1604,7 @@ BEGIN TRY
 			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store End of Day', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'Agronomy') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
-			--,[intAccountId]				= @AccountId 
+			,[intAccountId]				= ISNULL([dbo].[fnARGetInvoiceTypeAccount](@TransactionType, @CompanyLocationId), intAccountId)
 			,[intCurrencyId]			= @CurrencyId
 			,[intTermId]				= ISNULL(@TermId, C.[intTermsId])
 			,[intSourceId] 				= @NewSourceId
