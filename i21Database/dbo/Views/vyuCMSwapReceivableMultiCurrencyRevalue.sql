@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuCMSwapReceivableMultiCurrencyRevalue]
 AS
 SELECT DISTINCT
 	strTransactionType		=	'Swap Receivables' COLLATE Latin1_General_CI_AS,
-	strTransactionId		=	SwapShort.strTransactionId,
+	strTransactionId		=	strBankSwapId,
 	strTransactionDate		=	SwapShort.dtmDate,
 	strTransactionDueDate	=	SwapShort.dtmInTransit,
 	strVendorName			=	'' COLLATE Latin1_General_CI_AS,
