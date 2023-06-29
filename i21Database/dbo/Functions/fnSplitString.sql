@@ -22,7 +22,7 @@ CREATE FUNCTION [dbo].[fnSplitString]
 )
 RETURNS @Output TABLE
 (
-	Item NVARCHAR(1000)
+	Item NVARCHAR(1000) COLLATE SQL_Latin1_General_CP1_CI_AS
 )
 AS
 BEGIN

@@ -502,7 +502,7 @@
     <Build Include="dbo\Views\vyuCMSwapInPayablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapInReceivablesMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapInReceivablesInTransitMultiCurrencyRevalue.sql" />
-    <Build Include="dbo\Views\vyuCMSwapPayableMultiCurrencyRevalue.sql" />   
+    <Build Include="dbo\Views\vyuCMSwapPayableMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuCMSwapReceivableMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCreateOtcForwardFromCT.sql" />
     <Build Include="dbo\Views\vyuRKGetOtcForwards.sql" />
@@ -1819,6 +1819,7 @@
     <Build Include="dbo\User Defined Types\ItemInTransitValueOnlyTableType.sql" />
     <Build Include="dbo\Functions\fnLGGetForexRateFromContract.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
+    <None Include="Scripts\Post-Deployment\Azure-Preparation\Azure-Preparation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1916,6 +1917,7 @@
     <Folder Include="Scripts\Post-Deployment\MBIL" />
     <Folder Include="dbo\" />
     <Folder Include="Scripts\Post-Deployment\GL\Views\" />
+    <Folder Include="Scripts\Post-Deployment\Azure-Preparation" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
@@ -2460,8 +2462,6 @@
     <Build Include="dbo\Tables\tblICItem.sql" />
     <Build Include="dbo\Tables\tblCMBankFileAudit.sql" />
     <Build Include="dbo\Tables\tblCMAddendaSequence.sql" />
-    <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />

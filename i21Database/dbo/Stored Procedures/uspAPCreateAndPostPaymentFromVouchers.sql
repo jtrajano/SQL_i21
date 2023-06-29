@@ -215,7 +215,7 @@ BEGIN
 										vyuAPVoucherCommodity VC 
 										WHERE voucher.intBillId = VC.intBillId)
 			FOR XML PATH('')), 
-			1, 1, '') AS strPayee
+			1, 1, '') COLLATE Latin1_General_CI_AS AS strPayee
 	) lienInfo
 	WHERE voucher.intSelectedByUserId = @userId
 

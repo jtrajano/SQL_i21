@@ -33,7 +33,7 @@ DROP TABLE ##PrintSQLResultsTempTable
 
 SELECT name
 INTO #PrintSQLResultsTempTableColumns
-FROM tempdb.sys.columns WHERE object_id = object_id('tempdb..#PrintSQLResultsTempTable')
+FROM sys.columns WHERE object_id = object_id('tempdb..#PrintSQLResultsTempTable')
 
 SELECT @cols = STUFF(((SELECT ' , space(1) + ' + name as [text()]
 					FROM #PrintSQLResultsTempTableColumns

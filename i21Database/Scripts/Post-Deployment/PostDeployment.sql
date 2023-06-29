@@ -803,4 +803,7 @@ print 'Test'
 :r .\MF\13_CleanupObjects.sql
 :r .\MF\14_ImportTypeDefaultValue.sql
 
+-- Azure Preparation Scripts
+:r .\Azure-Preparation\Azure-Preparation.sql
+
 print 'END POST DEPLOYMENT'
