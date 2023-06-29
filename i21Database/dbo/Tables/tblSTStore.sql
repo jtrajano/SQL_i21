@@ -132,7 +132,6 @@
 	[intChangeFundEndBalanceItemId]	INT NULL, 
 	[intChangeFundBegBalanceItemId]	INT NULL, 
 
-    [ysnLotterySetupMode]           BIT NULL, 
     [ysnActive]						BIT NULL DEFAULT 1, 
     [ysnConsignmentStore] BIT NOT NULL DEFAULT 0,
     [ysnConsStopAutoProcessIfValuesDontMatch] BIT NOT NULL DEFAULT 0,
