@@ -19,6 +19,7 @@ SELECT SiteDetail.intSiteDetailId
 	, Vendor.strLocationName
 	, strVendorName = Vendor.strName
 	, SiteHeader.dtmDate
+	, SiteDetail.strTransactionSource
 FROM tblCCSiteDetail SiteDetail
 INNER JOIN tblCCSiteHeader SiteHeader ON SiteDetail.intSiteHeaderId = SiteHeader.intSiteHeaderId
 LEFT JOIN vyuCCSite [Site] ON [Site].intSiteId = SiteDetail.intSiteId
