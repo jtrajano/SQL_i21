@@ -50,7 +50,6 @@ SELECT
    ELSE ''
   END COLLATE Latin1_General_CI_AS AS strSAPPHIRECheckoutPullTimeSet
   -- Will be used to load Beg Balance in checkout
-   , st.ysnLotterySetupMode
    , st.intCompanyLocationId
 FROM tblSTStore st
 LEFT JOIN tblSTRegister rt

@@ -47,7 +47,6 @@ BEGIN TRY
 	DECLARE @inventoryReceiptid INT
 	DECLARE @storeId INT
 	DECLARE @checkoutId INT
-	DECLARE @lotterySetupMode BIT
 	DECLARE @lotteryGame NVARCHAR(MAX)
 	DECLARE @lotteryBook NVARCHAR(MAX)
 	
@@ -98,29 +97,6 @@ BEGIN TRY
 				,'There are no records to process.'
 				,(CASE WHEN @ProcessType = 1 THEN 'Create IR' ELSE 'Update IR' END)
 			
-
-			GOTO EXITWITHROLLBACK
-			RETURN
-		END
-
-		SELECT TOP 1 @lotterySetupMode = ISNULL(ysnLotterySetupMode,0)
-		FROM tblSTStore WHERE intStoreId = @storeId
-
-		IF (ISNULL(@lotterySetupMode,0) = 1)
-		BEGIN
-			SET @Success = CAST(1 AS BIT)
-			SET @StatusMsg = 'Lottery Setup Mode - No need to create IR.'
-
-			INSERT INTO @tblSTTempLotteryProcessError
-			(
-				 [intCheckoutId]
-				,[strError]			
-				,[strProcess]	
-			)
-			SELECT 
-			 @UserId
-			,@StatusMsg
-			,(CASE WHEN @ProcessType = 1 THEN 'Create IR' ELSE 'Update IR' END)
 
 			GOTO EXITWITHROLLBACK
 			RETURN
