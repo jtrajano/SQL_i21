@@ -28,11 +28,11 @@ BEGIN
 
 			INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
 			SELECT @contactAdminRoleId, 
-			intMenuID, 0, Menu.intSort
+			Menu.intMenuID, 0, Menu.intSort
 			FROM tblSMMasterMenu Menu
 			INNER JOIN tblSMContactMenu ContactMenu ON Menu.intMenuID = ContactMenu.intMasterMenuId
 			INNER JOIN tblSMUserRoleMenu RoleMenu ON RoleMenu.intMenuId = Menu.intMenuID AND RoleMenu.intUserRoleId = 999 AND RoleMenu.ysnVisible = 1
-			WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @contactAdminRoleId)
+			WHERE Menu.intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @contactAdminRoleId)
 
 			UPDATE tblSMUserRoleMenu
 			SET intParentMenuId = tblPatch.intRoleParentID
