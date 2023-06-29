@@ -509,11 +509,12 @@ AS
 						then
 							round(((
 								dbo.fnCTConvertPriceToTargetItemUOM(fxitemuom.intItemUOMId,puom.intItemUOMId,CI.dblCashPrice,1)
-								-
-								CI.dblFutures
+								/
+								isnull(CI.dblFXRate,1)
 							)
-							/
-							isnull(CI.dblFXRate,1)),2)
+							-
+							CI.dblFutures)
+							,2)
 						else
 							CI.dblBasis
 						end,
