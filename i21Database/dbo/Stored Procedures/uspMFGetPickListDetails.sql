@@ -862,6 +862,18 @@ Begin
 			From @tblRemainingPickedItemsForProduction tpl
 		End
 
-		Select tpl.*,ti.intConsumptionMethodId from @tblPickList tpl Left Join @tblInputItem ti on tpl.intItemId=ti.intItemId
+		Select tpl.*,ti.intConsumptionMethodId
+			 , 0.00 AS dblItemRequiredQty
+			 , NULL AS dtmCreated
+			 , NULL AS dtmLastModified
+			 , NULL AS intCreatedUserId
+			 , NULL AS intLastModifiedUserId
+			 , NULL AS intConcurrencyId
+			 , NULL AS intLocationId 
+			 , NULL AS intRowNo 
+			 , NULL AS intSubLocationId 
+			 , NULL AS strLotTracking 
+			 , NULL AS strSubLocationName 
+		from @tblPickList tpl Left Join @tblInputItem ti on tpl.intItemId=ti.intItemId
 	End
 End
