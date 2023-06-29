@@ -537,7 +537,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], LG.[dblQuantity]), @ZeroDecimal)
+	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ARID.[intOrderUOMId], ARID.dblShipmentNetWtProvisional), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -582,13 +582,15 @@ FROM (
 		, ARPID.ysnFromProvisional
 		, ARPID.ysnProvisionalWithGL
 		, ARPID.intItemWeightUOMId
-		, INVD.dblShipmentNetWt
+		, dblShipmentNetWtProvisional = INVD.dblShipmentNetWt
 		, ARPID.strType
 		, ARPID.strBOLNumber
 		, ARPID.intEntityCustomerId
+		, INVD.intOrderUOMId
 	FROM tblARInvoiceDetail INVD
-	INNER JOIN tblARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
-										  AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
+	INNER JOIN tblARPostInvoiceDetail ARPID 
+	ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
+	AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
 	WHERE ARPID.strSessionId = @strSessionId
 ) ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
@@ -673,7 +675,9 @@ FROM (
 		, ARPID.strBOLNumber 
 		, ARPID.intEntityCustomerId
 	FROM tblARInvoiceDetail INVD
-	INNER JOIN tblARPostInvoiceDetail ARPID ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
+	INNER JOIN tblARPostInvoiceDetail ARPID 
+	ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId 
+	AND INVD.dblShipmentNetWt <> ARPID.dblShipmentNetWt
 	WHERE ARPID.strSessionId = @strSessionId
 ) ARID
 INNER JOIN tblLGLoadDetail LGD WITH (NOLOCK) ON LGD.[intLoadDetailId] = ARID.[intLoadDetailId]
