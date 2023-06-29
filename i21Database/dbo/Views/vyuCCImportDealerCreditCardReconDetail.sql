@@ -22,8 +22,10 @@ SELECT D.intImportDealerCreditCardReconDetailId,
     strCustomerName = S.strCustomerName,
 	D.ysnValid,
 	D.strMessage,
-	D.ysnGeneric
+	D.ysnGeneric,
+	RD.strFileName
  FROM tblCCImportDealerCreditCardReconDetail D 
  LEFT JOIN vyuCCSite S ON S.intSiteId = D.intSiteId
  LEFT JOIN tblCCVendorDefault V ON V.intVendorDefaultId = D.intVendorDefaultId
  LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityId = V.intVendorId
+ LEFT JOIN tblCCImportDealerCreditCardRecon RD ON D.intImportDealerCreditCardReconId = RD.intImportDealerCreditCardReconId
