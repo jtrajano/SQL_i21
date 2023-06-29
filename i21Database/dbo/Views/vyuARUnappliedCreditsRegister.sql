@@ -35,6 +35,7 @@ FROM (
 	) PD ON I.intInvoiceId = PD.intInvoiceId	
 	WHERE I.ysnPosted = 1
 	  AND I.ysnPaid = 0
+	  AND I.ysnRefundProcessed = 0
 	  AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	  AND I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Customer Prepayment')
 	  AND NOT (I.strType = 'CF Tran' AND strTransactionType = 'Credit Memo')
