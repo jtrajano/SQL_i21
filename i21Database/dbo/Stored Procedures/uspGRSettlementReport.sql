@@ -404,8 +404,8 @@ BEGIN
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
-				,dblTax							= BillDtl.dblTax + ISNULL(BillByReceiptChargeTax.dblTax,0)
-				,dblNetTotal					= BillDtl.dblTotal + BillDtl.dblTax
+				,dblTax							= BillDtl.dblTax --+ ISNULL(BillByReceipt.dblTax,0) --should be the tax for inv items only
+				,dblNetTotal					= (BillDtl.dblTotal + BillDtl.dblTax) --tax for discounts should be excluded
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
 													ELSE 'Contract'
@@ -421,8 +421,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
-				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceipt.dblTax, 0) -- subtotal
+				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceipt.dblTax, 0) --tax discount should be excluded
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= CASE 
@@ -1634,8 +1634,8 @@ BEGIN
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
-				,dblTax							= BillDtl.dblTax
-				,dblNetTotal					= (BillDtl.dblTotal+ BillDtl.dblTax) + ISNULL(BillByReceipt.dblTax,0)
+				,dblTax							= BillDtl.dblTax --+ ISNULL(BillByReceipt.dblTax,0) --should be the tax for inv items only
+				,dblNetTotal					= (BillDtl.dblTotal + BillDtl.dblTax) --tax for discounts should be excluded
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
 													ELSE 'Contract'
@@ -1651,8 +1651,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
-				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceipt.dblTax, 0) -- subtotal
+				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceipt.dblTax, 0) --tax discount should be excluded
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= CASE 
