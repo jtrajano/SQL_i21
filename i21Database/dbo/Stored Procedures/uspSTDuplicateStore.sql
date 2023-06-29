@@ -225,7 +225,6 @@ BEGIN TRANSACTION
 						--,intATMFundWithdrawalItemId
 						--,strHandheldScannerServerFolderPath
 						,intConcurrencyId
-						,ysnLotterySetupMode
 						,ysnActive
 						,ysnConsignmentStore
 						,ysnConsStopAutoProcessIfValuesDontMatch
@@ -368,7 +367,6 @@ BEGIN TRANSACTION
 						--,intATMFundVarianceItemId
 						--,intATMFundWithdrawalItemId
 						,intConcurrencyId
-						,ysnLotterySetupMode
 						,ysnActive
 						,ysnConsignmentStore
 						,ysnConsStopAutoProcessIfValuesDontMatch
