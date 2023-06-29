@@ -65,7 +65,6 @@ SELECT DISTINCT
 	 , perm_uRole.strName			AS strUserRoleName
 	 , perm_uRole.strRoleType		AS strUserRoleType 
 	 , Store.strState
-	 , ysnLotterySetupMode = ISNULL(Store.ysnLotterySetupMode,0)
 	 , Store.ysnConsignmentStore
 FROM tblEMEntity em
 INNER JOIN tblSMUserSecurity USec
