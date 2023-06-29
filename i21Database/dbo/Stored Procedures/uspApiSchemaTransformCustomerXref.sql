@@ -168,6 +168,31 @@ FROM
 		ON FilteredCustomerXref.intRowNumber = ErrorCustomerXref.intRowNumber
 WHERE ErrorCustomerXref.intErrorType IN(1, 2, 3)
 
+INSERT INTO tblApiImportLogDetail 
+(
+	guiApiImportLogDetailId,
+	guiApiImportLogId,
+	strField,
+	strValue,
+	strLogLevel,
+	strStatus,
+	intRowNo,
+	strMessage,
+	strAction
+)
+SELECT
+	guiApiImportLogDetailId = NEWID(),
+	guiApiImportLogId = @guiLogId,
+	strField = 'Customer Xref',
+	strValue = FilteredCustomerXref.strCustomerProduct,
+	strLogLevel = 'Info',
+	strStatus = 'Success',
+	intRowNo = FilteredCustomerXref.intRowNumber,
+	strMessage = 'The Customer Xref ' + FilteredCustomerXref.strCustomerProduct + ' was imported successfully.',
+	strAction = 'Import Finished'
+FROM @tblFilteredCustomerXref FilteredCustomerXref
+WHERE FilteredCustomerXref.guiApiUniqueId = @guiApiUniqueId
+
 --Transform and Insert statement
 ;MERGE INTO tblICItemCustomerXref AS TARGET
 USING
