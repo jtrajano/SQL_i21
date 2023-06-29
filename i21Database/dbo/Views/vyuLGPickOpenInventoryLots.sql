@@ -87,7 +87,7 @@ FROM (
        ,dtmDateCreated = Lot.dtmDateCreated
        ,intCreatedUserId = Lot.intCreatedUserId
        ,intConcurrencyId = Lot.intConcurrencyId
-       ,dtmReceiptDate = Receipt.dtmReceiptDate
+       ,dtmReceiptDate = CASE WHEN (Lot.intSourceTransactionTypeId = 47) THEN InvAdj.dtmAdjustmentDate ELSE Receipt.dtmReceiptDate END
        ,intInventoryReceiptItemLotId = ReceiptLot.intInventoryReceiptItemLotId
        ,strCondition = Lot.strCondition
        ,intSourceId = ReceiptItem.intSourceId
@@ -154,12 +154,14 @@ FROM (
 	   ,dblAllocReserved = (ISNULL(AL.dblAllocatedQty, 0) + ISNULL(SR.dblReservedQty, 0) ) - ISNULL(PL.dblLotPickedQty, 0)
 	FROM tblICLot Lot
 		LEFT JOIN tblICWarrantStatus WS ON WS.intWarrantStatus = Lot.intWarrantStatus
-		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId)
+		LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId) AND Lot.intSourceTransactionTypeId = 4
 		LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		LEFT JOIN tblICInventoryAdjustmentDetail InvAdjDet ON InvAdjDet.intNewLotId = ISNULL(Lot.intSplitFromLotId, Lot.intLotId) AND Lot.intSourceTransactionTypeId = 47
+		LEFT JOIN tblICInventoryAdjustment InvAdj ON InvAdj.intInventoryAdjustmentId = InvAdjDet.intInventoryAdjustmentId
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
-		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId 
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
@@ -222,7 +224,7 @@ FROM (
 					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) PL
 	WHERE Lot.dblQty > 0 
 		AND ISNULL(Lot.strCondition, '') NOT IN ('Missing', 'Swept', 'Skimmed')
-		AND (Receipt.intInventoryReceiptId IS NULL
-			OR (Receipt.intInventoryReceiptId IS NOT NULL AND Receipt.ysnPosted = 1))
+		AND ((Lot.intSourceTransactionTypeId = 4 AND Receipt.ysnPosted = 1)
+			OR (Lot.intSourceTransactionTypeId = 47 AND InvAdj.ysnPosted = 1))
 	) InvLots
 GO

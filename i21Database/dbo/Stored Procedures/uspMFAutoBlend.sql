@@ -570,8 +570,8 @@ BEGIN TRY
 				 , S.intItemId
 				 , S.dblOnHand - S.dblUnitReserved 
 				 , @intLocationId
-				 , S.intStorageLocationId
 				 , S.intSubLocationId
+				 , S.intStorageLocationId				 
 				 , NULL
 				 , NULL
 				 , 0

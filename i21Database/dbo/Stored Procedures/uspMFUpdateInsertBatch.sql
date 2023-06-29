@@ -137,7 +137,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , strLeafStyle					= T.strLeafStyle
 				  , dblPackagesBought				= T.dblPackagesBought
 				  , strTeaOrigin					= T.strTeaOrigin
-				  , intOriginalItemId				= T.intOriginalItemId
+				  --, intOriginalItemId				= T.intOriginalItemId
 				  , dblPackagesPerPallet			= T.dblPackagesPerPallet
 				  , strPlant						= T.strPlant
 				  , dblTotalQuantity				= T.dblTotalQuantity
@@ -164,6 +164,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , ysnTeaOrganic					= T.ysnTeaOrganic
 				  , dblTeaTaste						= T.dblTeaTaste
 				  , dblTeaVolume					= T.dblTeaVolume
+				  , strFines						= T.strFines
 				  , intTealingoItemId				= T.intTealingoItemId
 				  , dtmWarehouseArrival				= T.dtmWarehouseArrival
 				  , intYearManufacture				= T.intYearManufacture
@@ -316,6 +317,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 				  , ysnTeaOrganic
 				  , dblTeaTaste
 				  , dblTeaVolume
+				  , strFines
 				  , intTealingoItemId
 				  , dtmWarehouseArrival
 				  , intYearManufacture
@@ -433,6 +435,7 @@ WHILE EXISTS (SELECT 1 FROM @tbl)
 					 , ysnTeaOrganic
 					 , dblTeaTaste
 					 , dblTeaVolume
+					 , strFines
 					 , intTealingoItemId
 					 , dtmWarehouseArrival
 					 , intYearManufacture

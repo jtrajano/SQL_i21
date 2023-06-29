@@ -30,6 +30,10 @@ BEGIN TRY
 		AND SEASON.strDescription = IMP.strColour
 	-- Garden Mark
 	LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
+	-- -- Producer
+	-- LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GARDEN.intProducerId
+	-- -- Producer Type
+	-- LEFT JOIN tblEMEntityType ProdType ON ProdType.intEntityId = Producer.intEntityId AND ProdType.strType = 'Producer'
 	-- Garden Geo Origin
 	LEFT JOIN tblSMCountry ORIGIN ON ORIGIN.strISOCode = IMP.strGardenGeoOrigin AND ISNULL(ORIGIN.strISOCode, '') <> ''
 	-- Sustainability
@@ -95,7 +99,7 @@ BEGIN TRY
 						)
 					THEN 'GARDEN MARK, '
 				ELSE ''
-				END + CASE 
+				END +  CASE 
 				WHEN (
 						ORIGIN.intCountryID IS NULL
 						--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
@@ -104,6 +108,7 @@ BEGIN TRY
 				ELSE ''
 				END + CASE 
 				WHEN (
+						IMP.strChannel = 'AUC' AND
 						WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
 						--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 						)
@@ -239,9 +244,17 @@ BEGIN TRY
 				END
 				+ CASE 
 				WHEN (
+						IMP.strChannel = 'AUC' AND
 						IsDate(IMP.dtmSaleDate)=0
 						)
 					THEN 'SALE DATE, '
+				ELSE ''
+				END+CASE
+				WHEN (
+						IMP.strChannel = 'AUC' AND
+						IsDate(IMP.dtmPromptDate)=0
+						)
+					THEN 'PROMPT DATE, '
 				ELSE ''
 				END
 				
@@ -271,6 +284,7 @@ BEGIN TRY
 				--AND ISNULL(IMP.strGardenGeoOrigin, '') <> ''
 				)
 			OR (
+				IMP.strChannel = 'AUC' AND
 				WAREHOUSE_CODE.intCompanyLocationSubLocationId IS NULL
 				--AND ISNULL(IMP.strWarehouseCode, '') <> ''
 				)
@@ -338,7 +352,8 @@ BEGIN TRY
 				OR IsNumeric(IMP.dblTotalQtyOffered )=0
 				OR IsNumeric(IMP.intTotalNumberOfPackageBreakups)=0
 				OR IsNumeric(IMP.intNoOfPackages )=0
-				OR IsDate(IMP.dtmSaleDate )=0
+				OR (IsDate(IMP.dtmSaleDate )=0 AND IMP.strChannel = 'AUC')
+				OR (IsDate(IMP.dtmPromptDate )=0 AND IMP.strChannel = 'AUC')
 			)
 
 	-- Check if vendor is mapped to the TBO
@@ -388,6 +403,7 @@ BEGIN TRY
 		,@strSeason NVARCHAR(50)
 		,@dblGrossWeight NUMERIC(18, 6)
 		,@intGardenMarkId INT
+		,@intProducerId INT
 		,@strGardenMark NVARCHAR(100)
 		,@intOriginId INT
 		,@strCountry NVARCHAR(100)
@@ -476,6 +492,7 @@ BEGIN TRY
 		,strSeason = SEASON.strDescription
 		,dblGrossWeight = IMP.dblGrossWeight
 		,intGardenMarkId = GARDEN.intGardenMarkId
+		,intProducerId = Producer.intEntityId
 		,strGardenMark = GARDEN.strGardenMark
 		,intOriginId = CA.intCommodityAttributeId
 		,strCountry = CA.strDescription
@@ -551,6 +568,10 @@ BEGIN TRY
 		AND SEASON.strDescription = IMP.strColour
 	-- Garden Mark
 	LEFT JOIN tblQMGardenMark GARDEN ON GARDEN.strGardenMark = IMP.strGardenMark
+	-- PRODUCER
+	LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = GARDEN.intProducerId 
+	-- Producer Type
+	LEFT JOIN tblEMEntityType ProdType ON ProdType.intEntityId = Producer.intEntityId AND ProdType.strType = 'Producer'
 	-- Garden Geo Origin
 	LEFT JOIN (
 		tblICCommodityAttribute CA INNER JOIN tblSMCountry ORIGIN ON ORIGIN.intCountryID = CA.intCountryID
@@ -626,6 +647,7 @@ BEGIN TRY
 		,strSeason = NULL
 		,dblGrossWeight = NULL
 		,intGardenMarkId = NULL
+		,intProducerId = NULL
 		,strGardenMark = NULL
 		,intOriginId = NULL
 		,strCountry = NULL
@@ -684,7 +706,8 @@ BEGIN TRY
 	-- Sale Number
 	LEFT JOIN tblQMSample AS S ON IMP.strSaleNumber = S.strSampleNumber
 	-- Mixing Location
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocation MU
+		ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
 	-- Batch MU
 	LEFT JOIN tblMFBatch BATCH_MU ON BATCH_MU.strBatchId = IMP.strBatchNo
 		AND BATCH_MU.intLocationId = MU.intCompanyLocationId
@@ -724,6 +747,7 @@ BEGIN TRY
 		,@strSeason
 		,@dblGrossWeight
 		,@intGardenMarkId
+		,@intProducerId
 		,@strGardenMark
 		,@intOriginId
 		,@strCountry
@@ -910,6 +934,7 @@ BEGIN TRY
 						,intManufacturingLeafTypeId
 						,intSeasonId
 						,intGardenMarkId
+						,intProducerId
 						,dtmManufacturingDate
 						,intTotalNumberOfPackageBreakups
 						,intNetWtPerPackagesUOMId
@@ -1009,6 +1034,7 @@ BEGIN TRY
 						,intManufacturingLeafTypeId = S.intManufacturingLeafTypeId
 						,intSeasonId = S.intSeasonId
 						,intGardenMarkId = S.intGardenMarkId
+						,intProducerId = S.intProducerId
 						,dtmManufacturingDate = S.dtmManufacturingDate
 						,intTotalNumberOfPackageBreakups = S.intTotalNumberOfPackageBreakups
 						,intNetWtPerPackagesUOMId = S.intNetWtPerPackagesUOMId
@@ -1363,6 +1389,7 @@ BEGIN TRY
 				,intManufacturingLeafTypeId
 				,intSeasonId
 				,intGardenMarkId
+				,intProducerId
 				,dtmManufacturingDate
 				,intTotalNumberOfPackageBreakups
 				,intNetWtPerPackagesUOMId
@@ -1391,6 +1418,8 @@ BEGIN TRY
 				,intPackageTypeId 
 				,dblTareWeight
 				,intCropYearId
+				,intCurrencyId
+				,intBookId
 				)
 			-- ,strBuyingOrderNo
 			SELECT intConcurrencyId = 1
@@ -1461,6 +1490,7 @@ BEGIN TRY
 				,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
 				,intSeasonId = @intSeasonId
 				,intGardenMarkId = @intGardenMarkId
+				,intProducerId = @intProducerId
 				,dtmManufacturingDate = @dtmManufacturingDate
 				,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
 				,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
@@ -1490,6 +1520,19 @@ BEGIN TRY
 				,dblTareWeight=@dblTareWeight
 				,intCropYearId = @intCropYearId
 
+				-- Populated for bulking process only
+				,intCurrencyId = (SELECT CUR.intCurrencyID
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId)
+				,intBookId = (SELECT BOOK.intBookId
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCompanyLocation MU
+										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId)
 			SET @intSampleId = SCOPE_IDENTITY()
 
 			-- Sample Detail
@@ -1740,6 +1783,7 @@ BEGIN TRY
 				,intManufacturingLeafTypeId = @intManufacturingLeafTypeId
 				,intSeasonId = @intSeasonId
 				,intGardenMarkId = @intGardenMarkId
+				,intProducerId = @intProducerId
 				,dtmManufacturingDate = @dtmManufacturingDate
 				,intTotalNumberOfPackageBreakups = @intTotalNumberOfPackageBreakups
 				,intNetWtPerPackagesUOMId = @intNetWtPerPackagesUOMId
@@ -1751,7 +1795,7 @@ BEGIN TRY
 				,intProductLineId = @intProductLineId
 				,ysnOrganic = @ysnOrganic
 				,dblGrossWeight = @dblGrossWeight
-				,strBatchNo = @strBatchNo
+				,strBatchNo = CASE WHEN ISNULL(@strBatchNo, '') = '' THEN S.strBatchNo ELSE @strBatchNo END
 				,str3PLStatus = @str3PLStatus
 				,strAdditionalSupplierReference = @strAdditionalSupplierReference
 				,intAWBSampleReceived = @intAWBSampleReceived
@@ -1771,10 +1815,24 @@ BEGIN TRY
 				,intB1QtyUOMId = null
 				,dblB1Price = null
 				,intB1PriceUOMId = null
-				,intBookId = null
+				-- ,intBookId = null
 				,intPackageTypeId=@intPackageTypeId
 				,strCourierRef = @strCourierRef
 				,intCropYearId = @intCropYearId
+
+				-- Populated for bulking process only
+				,intCurrencyId = ISNULL((SELECT CUR.intCurrencyID
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCurrency CUR ON CUR.strCurrency = IMP.strCurrency
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId), S.intCurrencyId)
+				,intBookId = ISNULL((SELECT BOOK.intBookId
+									FROM tblQMImportCatalogue IMP
+									INNER JOIN tblSMCompanyLocation MU
+										ON MU.strLocationName = CASE WHEN ISNULL(IMP.strGroupNumber, '') <> '' AND ISNULL(IMP.strContractNumber, '') <> '' THEN IMP.strGroupNumber ELSE IMP.strB1GroupNumber END
+									INNER JOIN tblCTBook BOOK ON BOOK.strBook = MU.strLocationName
+									WHERE ISNULL(IMP.strBatchNo, '') <> ''
+									AND IMP.intImportCatalogueId = @intImportCatalogueId), S.intBookId)
 			FROM tblQMSample S
 			WHERE S.intSampleId = @intSampleId
 
@@ -1808,6 +1866,7 @@ BEGIN TRY
 			,@strSeason
 			,@dblGrossWeight
 			,@intGardenMarkId
+			,@intProducerId
 			,@strGardenMark
 			,@intOriginId
 			,@strCountry

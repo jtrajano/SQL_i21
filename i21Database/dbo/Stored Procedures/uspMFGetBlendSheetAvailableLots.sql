@@ -12,21 +12,24 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intRecipeId						   INT
-	  , @dblRecipeQty						   NUMERIC(38, 20)
-	  , @intManufacturingProcessId			   INT
-	  , @ysnShowOtherFactoryLots			   BIT
-	  , @ysnShowAvailableLotsByStorageLocation BIT
-	  , @ysnEnableParentLot					   BIT = 0
-	  , @strLotStatusIds					   NVARCHAR(50)
-	  , @index								   INT
-	  , @id									   INT
-	  ,@intManufacturingCellId INT
+DECLARE @intRecipeId							INT
+	  , @dblRecipeQty							NUMERIC(38, 20)
+	  , @intManufacturingProcessId				INT
+	  , @ysnShowOtherFactoryLots				BIT
+	  , @ysnShowAvailableLotsByStorageLocation	BIT
+	  , @ysnEnableParentLot						BIT = 0
+	  , @strLotStatusIds						NVARCHAR(50)
+	  , @index									INT
+	  , @id										INT
+	  , @intManufacturingCellId					INT
+	  , @ysnDisplayLandedPriceInBlendManagement	INT
 
-DECLARE @tblSourceSubLocation AS TABLE (
-		intRecordId INT identity(1, 1)
-		,intSubLocationId INT
-		);
+
+DECLARE @tblSourceSubLocation AS TABLE 
+(
+	intRecordId			INT IDENTITY(1, 1)
+  , intSubLocationId	INT
+);
 
 DECLARE @tblLotStatus AS TABLE
 (
@@ -40,7 +43,7 @@ DECLARE @tblReservedQty TABLE
 );
 
 /* Get Value of Enable Parent Lot from Manufacturing Configuration. */
-SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) 
+SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0) ,@ysnDisplayLandedPriceInBlendManagement=IsNULL(ysnDisplayLandedPriceInBlendManagement,0)
 FROM tblMFCompanyPreference;
 
 /* Get Manufacturing Process ID where Attribute is Blending (2). */
@@ -150,7 +153,7 @@ SELECT Lot.intLotId
 	 , CASE WHEN ISNULL(Lot.dblWeight,0) > 0 THEN Lot.dblWeight ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty) END AS dblPhysicalQty
 	 , ISNULL(Lot.intWeightUOMId, RecipeItemUOM.intItemUOMId)						AS intItemUOMId 
 	 , ISNULL(UnitOfMeasure.strUnitMeasure, RecipeItemUnitOfMeasure.strUnitMeasure) AS strUOM
-	 , Lot.dblLastCost									AS dblUnitCost
+	 , Case When @ysnDisplayLandedPriceInBlendManagement=1 Then IsNULL(Batch.dblLandedPrice,0) Else Lot.dblLastCost End									AS dblUnitCost
 	 , CASE WHEN ISNULL(Lot.dblWeight,0) > 0 THEN Lot.dblWeightPerQty ELSE LotItemUOM.dblUnitQty / RecipeItemUOM.dblUnitQty END AS dblWeightPerUnit
 	 , UnitOfMeasure.strUnitMeasure						AS strWeightPerUnitUOM
 	 , Lot.intItemUOMId									AS intPhysicalItemUOMId
@@ -166,8 +169,8 @@ SELECT Lot.intLotId
 	 , Lot.strNotes										AS strRemarks
 	 , Item.dblRiskScore
 	 , RecipeItem.dblQuantity / @dblRecipeQty			AS dblConfigRatio
-	 , CAST(ISNULL(LotQuality.Density, 0) AS DECIMAL)	AS dblDensity
-	 , CAST(ISNULL(LotQuality.Score, 0) AS DECIMAL)		AS dblScore
+	 , CAST(ISNULL(0, 0) AS DECIMAL)	AS dblDensity
+	 , CAST(ISNULL(0, 0) AS DECIMAL)	AS dblScore
 	 , Lot.intParentLotId
 	 , StorageLocation.intStorageLocationId
 	 , LotUnitMeasure.strUnitMeasure					AS strPhysicalItemUOM
@@ -217,7 +220,7 @@ LEFT JOIN tblMFWorkOrderRecipeItem AS WorkOrderRecipeItem ON WorkOrderRecipeItem
 LEFT JOIN tblMFRecipeItem AS RecipeItem ON RecipeItem.intItemId = Item.intItemId AND RecipeItem.intRecipeItemId = @intRecipeItemId
 LEFT JOIN tblICItemUOM AS RecipeItemUOM ON IsNULL(WorkOrderRecipeItem.intItemUOMId,RecipeItem.intItemUOMId) = RecipeItemUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure AS RecipeItemUnitOfMeasure ON RecipeItemUOM.intUnitMeasureId = RecipeItemUnitOfMeasure.intUnitMeasureId 
-LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
+--LEFT JOIN vyuQMGetLotQuality AS LotQuality ON (CASE WHEN (SELECT TOP 1 ISNULL(ysnEnableParentLot, 0) FROM tblMFCompanyPreference) = 1 THEN Lot.intParentLotId ELSE Lot.intLotId END) = LotQuality.intLotId
 LEFT JOIN tblMFLotInventory AS LotInventory ON LotInventory.intLotId = Lot.intLotId
 LEFT JOIN tblMFBatch AS Batch ON LotInventory.intBatchId = Batch.intBatchId
 LEFT JOIN tblSMCompanyLocation AS AuctionCenter ON Batch.intBuyingCenterLocationId = AuctionCenter.intCompanyLocationId

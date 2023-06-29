@@ -123,12 +123,13 @@ BEGIN TRY
 		JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = S.intItemId
 			AND S.intSampleId = @intSampleId
 		JOIN dbo.tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = I.intOriginId
+		JOIN dbo.tblSMCompanyLocationSubLocation CLSL WITH (NOLOCK) ON CLSL.intCompanyLocationSubLocationId = S.intDestinationStorageLocationId
 		JOIN dbo.tblMFLocationLeadTime LLT WITH (NOLOCK) ON LLT.intOriginId = CA.intCountryID
 			AND LLT.intBuyingCenterId = S.intCompanyLocationId
 			AND LLT.intReceivingPlantId = @intPlantId
-			AND LLT.intReceivingStorageLocation = S.intDestinationStorageLocationId
 			AND LLT.intChannelId = S.intMarketZoneId
 			AND LLT.intPortOfDispatchId = S.intFromLocationCodeId
+			AND LLT.strReceivingStorageLocation = CLSL.strSubLocationName
 		JOIN dbo.tblSMCity DP WITH (NOLOCK) ON DP.intCityId = LLT.intPortOfArrivalId
 
 		INSERT INTO tblIPPriceFeed

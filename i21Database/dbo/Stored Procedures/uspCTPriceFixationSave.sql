@@ -1105,8 +1105,8 @@ BEGIN TRY
 			 --,strOldValue			  =  0
 			 ,strOldValue			  =  (
 											case
-											when PFD.dblFinalPrice <> CD.dblCashPrice then isnull(SALPart.strNewValue,'0')
-											else isnull(SALFull.strNewValue,'0')
+											when PFD.dblFinalPrice <> CD.dblCashPrice then isnull(SALPart.strNewValue,'')
+											else isnull(SALFull.strNewValue,'')
 											end
 										 )
 			 ,strNewValue		      =  PFD.dblFinalPrice

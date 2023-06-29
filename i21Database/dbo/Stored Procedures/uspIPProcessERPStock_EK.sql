@@ -386,8 +386,8 @@ BEGIN TRY
 						,1
 						)
 			END
-
 			-- Cost UOM Conversion
+
 			SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 
 			SELECT @intLotId = L.intLotId
@@ -421,7 +421,7 @@ BEGIN TRY
 				END
 
 				-- Take Qty from Batch
-				SELECT TOP 1 @dblQty = CEILING(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0))
+				SELECT TOP 1 @dblQty = Round(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0),0)
 					,@intQtyItemUOMId = IUOM.intItemUOMId
 				FROM tblMFBatch B WITH (NOLOCK)
 				JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
@@ -429,6 +429,17 @@ BEGIN TRY
 					AND B.strBatchId = @strLotNumber
 					AND B.intTealingoItemId = @intItemId
 					AND B.intLocationId = @intCompanyLocationId
+
+				IF ISNULL(@dblQty, 0) = 0
+				BEGIN
+					SELECT TOP 1 @dblQty = Round(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, IUOM.intItemUOMId, @dblNetWeight), 0),0)
+						,@intQtyItemUOMId = IUOM.intItemUOMId
+					FROM tblMFBatch B WITH (NOLOCK)
+					JOIN tblICItemUOM IUOM WITH (NOLOCK) ON IUOM.intItemId = B.intTealingoItemId
+						AND IUOM.intUnitMeasureId = B.intPackageUOMId
+						AND B.strBatchId = @strLotNumber
+						AND B.intTealingoItemId = @intItemId
+				END
 
 				IF ISNULL(@dblQty, 0) = 0
 				BEGIN

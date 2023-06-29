@@ -751,27 +751,6 @@ BEGIN TRY
 									END
 								END
 
-								IF @intImportType=2 AND @intItemId<>@intOriginalItemId AND @intItemId<>@intDefaultItemId AND @intOriginalItemId<>@intDefaultItemId
-								BEGIN
-									SELECT @strBatchId=NULL
-									SELECT @strBatchId=strBatchId FROM tblMFBatch WHERE intBatchId=@intBatchId
-									IF EXISTS(SELECT *FROM tblICLot WHERE strLotNumber=@strBatchId AND intItemId<>@intItemId)
-									BEGIN
-										SELECT @intLotId=NULL
-										SELECT @intLotId=intLotId FROM tblICLot WHERE strLotNumber=@strBatchId
-										EXEC dbo.uspMFLotItemChange @intLotId =@intLotId
-														,@intNewItemId =@intItemId
-														,@intUserId =@intEntityUserId
-														,@strNewLotNumber  = @strNewLotNumber OUTPUT
-														,@dtmDate =@dtmCurrentDate
-														,@strReasonCode  = NULL
-														,@strNotes  = NULL
-														,@ysnBulkChange  = 0
-														,@ysnProducedItemChange  = 0
-														,@dblPhysicalCount  = NULL
-									END
-								END
-
 							/* End of Update Item Id if it was not supplied. */
 							END
 

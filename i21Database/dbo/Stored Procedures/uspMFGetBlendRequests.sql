@@ -160,7 +160,7 @@ IF @intWorkOrderId < 0
 		--  , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedUpperTolerance
 		--  , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) AS dblCalculatedLowerTolerance 
 		 , (a.dblQuantity + (a.dblQuantity * (ri.dblUpperTolerance / 100))) AS dblCalculatedUpperTolerance
-		 , (a.dblQuantity - (a.dblQuantity * (ri.dblLowerTolerance / 100))) AS dblCalculatedLowerTolerance 
+		 , (a.dblQuantity - (a.dblQuantity * (ri.dblLowerTolerance / 100))) AS dblCalculatedLowerTolerance  
 		 , Machine.strName AS strMachine
 		 , a.dblEstNoOfBlendSheet
 		 , a.dblBlenderSize
@@ -182,7 +182,7 @@ IF @intWorkOrderId < 0
 		 , a.intItemId
 		 , b.strItemNo
 		 , b.strDescription
-		 , a.dblQuantity
+		 , a.dblQuantity 
 		 , CASE WHEN (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) <= 0 THEN 0 
 				ELSE (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
 		   END 

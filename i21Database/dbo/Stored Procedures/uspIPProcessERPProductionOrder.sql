@@ -56,6 +56,8 @@ BEGIN TRY
 		,@dblTeaVolume NUMERIC(18, 6)
 		,@intValidDate INT
 		,@intPrevWorkOrderId INT = 0
+		,@dblLowerTolerance NUMERIC(18, 6)
+		,@dblUpperTolerance NUMERIC(18, 6)
 	DECLARE @tblProductProperty AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intPropertyId INT
@@ -167,6 +169,8 @@ BEGIN TRY
 				WHERE strUserName = 'IRELYADMIN'
 
 			SELECT @intLocationId = intCompanyLocationId
+				,@dblLowerTolerance=dblSanitizationOrderInputQtyTolerancePercentage 
+				,@dblUpperTolerance=dblSanitizationOrderOutputQtyTolerancePercentage 
 			FROM dbo.tblSMCompanyLocation
 			WHERE strVendorRefNoPrefix = @strLocationNumber
 				AND strLocationType = 'Plant'
@@ -396,6 +400,10 @@ BEGIN TRY
 					,intConcurrencyId
 					,intTransactionFrom
 					,strERPOrderNo
+					,dblLowerTolerance
+					,dblUpperTolerance
+					,dblCalculatedLowerTolerance
+					,dblCalculatedUpperTolerance
 					)
 				SELECT @strWorkOrderNo
 					,@intBlendItemId
@@ -431,6 +439,10 @@ BEGIN TRY
 					,1
 					,NULL AS intTransactionFrom
 					,@strReferenceNo
+					,@dblLowerTolerance
+					,@dblUpperTolerance
+					,@dblOrderQuantity-(@dblOrderQuantity*@dblLowerTolerance/100)
+					,@dblOrderQuantity+(@dblOrderQuantity*@dblUpperTolerance/100)
 
 				SELECT @intWorkOrderId = SCOPE_IDENTITY()
 
