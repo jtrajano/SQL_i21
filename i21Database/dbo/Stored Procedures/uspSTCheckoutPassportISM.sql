@@ -171,9 +171,10 @@ BEGIN
 
 		
 
-			SELECT CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUPCCode2, * INTO #tmp_tblICItemUOM
+			SELECT CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUPCCode2, UOM.*, ItemLoc.intLocationId INTO #tmp_tblICItemUOM
 			FROM tblICItemUOM UOM
-			WHERE strLongUPCCode IS NOT NULL AND strLongUPCCode NOT LIKE '%.%'
+			INNER JOIN tblICItem Item ON Item.intItemId = UOM.intItemId
+			INNER JOIN tblICItemLocation ItemLoc ON Item.intItemId = ItemLoc.intItemId
 			
 			SELECT CAST(dbo.fnSTRemoveCheckDigit(ISNULL(UOM.strUPCA, UOM.strLongUPCCode)) AS BIGINT) AS intUPCCode2, * INTO #tmp_vyuSTItemUOMPosCodeFormat
 			FROM vyuSTItemUOMPosCodeFormat UOM
@@ -203,29 +204,28 @@ BEGIN
 			, @intCheckoutId
 			, 1
 		FROM @tblTemp Chk
-		WHERE CAST(Chk.intRegisterUpcCode AS BIGINT) NOT IN
-		(
-			SELECT DISTINCT
-				intUPCCode2 AS intUpcCode
-			FROM @tblTemp Chk
-			INNER JOIN #tmp_vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = intUPCCode2
-			INNER JOIN dbo.tblICItem I 
-				ON I.intItemId = UOM.intItemId
-			INNER JOIN dbo.tblICItemLocation IL 
-				ON IL.intItemId = I.intItemId
-				AND UOM.intLocationId = IL.intLocationId
-			LEFT JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId 
-				AND I.intItemId = P.intItemId
-			INNER JOIN dbo.tblSMCompanyLocation CL 
-				ON CL.intCompanyLocationId = IL.intLocationId
-			INNER JOIN dbo.tblSTStore S 
-				ON S.intCompanyLocationId = CL.intCompanyLocationId
-			WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.strItemCodePOSCode, '') != ''
-		)
-			AND ISNULL(Chk.strItemCodePOSCode, '') != ''
+		LEFT JOIN (
+				SELECT DISTINCT intUPCCode2
+					, UOM.intUpcCode
+					, UOM.strLongUPCCode
+					, UOM.strUPCA
+					, UOM.strUpcCode
+				FROM #tmp_tblICItemUOM UOM
+				INNER JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
+				INNER JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				LEFT JOIN dbo.tblICItemPricing P 
+					ON IL.intItemLocationId = P.intItemLocationId 
+					AND I.intItemId = P.intItemId
+				INNER JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				INNER JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+			) uom ON Chk.intRegisterUpcCode IN (uom.intUpcCode, uom.intUPCCode2, uom.strLongUPCCode, uom.strUPCA, uom.strUpcCode)
+			WHERE  ISNULL(Chk.strItemCodePOSCode, '') != ''
+				AND ISNULL(COALESCE(uom.intUpcCode, uom.intUPCCode2, uom.strLongUPCCode, uom.strUPCA, uom.strUpcCode), '') = ''
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -344,10 +344,12 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			WHERE TempChk.intPOSCode NOT IN
-			(
-				SELECT DISTINCT
-					intUPCCode2 AS intPOSCode
+			LEFT JOIN (
+				SELECT DISTINCT intUPCCode2
+					, UOM.intUpcCode
+					, UOM.strLongUPCCode
+					, UOM.strUPCA
+					, UOM.strUpcCode
 				FROM #tmp_tblICItemUOM UOM
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
@@ -361,10 +363,9 @@ BEGIN
 				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-					AND UOM.strLongUPCCode IS NOT NULL
-					AND UOM.intUpcCode IS NOT NULL
-			)
-			AND ISNULL(TempChk.POSCode, '') != ''
+			) uom ON TempChk.intPOSCode IN (uom.intUpcCode, uom.intUPCCode2, uom.strLongUPCCode, uom.strUPCA, uom.strUpcCode)
+			WHERE  ISNULL(TempChk.POSCode, '') != ''
+				AND ISNULL(COALESCE(uom.intUpcCode, uom.intUPCCode2, uom.strLongUPCCode, uom.strUPCA, uom.strUpcCode), '') = ''
 		-- ==================================================================================================================
 		-- End: Insert first those UPC's that are not existing in i21
 		-- ==================================================================================================================
@@ -428,7 +429,8 @@ BEGIN
 				  , intRowNumber		= ROW_NUMBER() OVER (PARTITION BY UOM.intItemId ORDER BY UOM.intItemUOMId)
 				FROM @tblTempForCalculation TempChk
 				INNER JOIN #tmp_tblICItemUOM UOM
-					ON TempChk.intPOSCode = intUPCCode2 AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
+					ON TempChk.intPOSCode IN (UOM.intUpcCode, UOM.intUPCCode2, UOM.strLongUPCCode, UOM.strUPCA, UOM.strUpcCode)
+						AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
@@ -502,7 +504,8 @@ BEGIN
 					, intRowNumber		= ROW_NUMBER() OVER (PARTITION BY UOM.intItemId ORDER BY UOM.intItemUOMId)
 				FROM @tblTempForCalculation TempChk
 				INNER JOIN #tmp_tblICItemUOM UOM
-					ON TempChk.intPOSCode = intUPCCode2 AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
+					ON TempChk.intPOSCode IN (UOM.intUpcCode, UOM.intUPCCode2, UOM.strLongUPCCode, UOM.strUPCA, UOM.strUpcCode)
+						AND ISNULL(TempChk.intModifier, -1) = ISNULL(UOM.intModifier, ISNULL(TempChk.intModifier, -1))
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
