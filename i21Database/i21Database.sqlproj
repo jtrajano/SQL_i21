@@ -2773,7 +2773,6 @@
     <Build Include="dbo\Stored Procedures\uspGLInsertSubsidiaryGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateParentCompany.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateInterCompanyBankTransaction.sql" />

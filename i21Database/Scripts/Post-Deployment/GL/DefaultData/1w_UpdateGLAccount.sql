@@ -1,5 +1,5 @@
 GO
-    EXEC dbo.uspGLUpdateAccountLocationId
+    EXEC dbo.uspGLUpdateAccountSegmentId
 GO
     UPDATE A SET A.ysnRevalue = 1
     FROM tblGLAccount A 
