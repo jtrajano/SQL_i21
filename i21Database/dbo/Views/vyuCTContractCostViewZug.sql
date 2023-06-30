@@ -21,7 +21,8 @@ SELECT
 			CC.dblAccruedAmount,
 			CC.strStatus,
 			dtmAccrualDate,
-			CC.dblRemainingPercent
+			CC.dblRemainingPercent,
+			IM.strItemNo as strCostName
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN		tblCTContractHeader CH ON CH.intContractHeaderId	=	CD.intContractHeaderId

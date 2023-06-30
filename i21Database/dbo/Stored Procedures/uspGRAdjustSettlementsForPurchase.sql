@@ -17,6 +17,7 @@ BEGIN
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @detailCreated Id
+	DECLARE @voucherIds Id
 
 	SET @intPrepayTypeId = CASE WHEN @intAdjustmentTypeId = 1 THEN CASE WHEN @intContractDetailId IS NULL THEN 1 /*Standard*/ ELSE 2 /*Unit*/ END ELSE NULL END
 
@@ -157,8 +158,7 @@ BEGIN
 	) ON ES.intSplitId = ADJ.intSplitId	
 	LEFT JOIN tblICItem ICF
 		ON ICF.intItemId = @intFreightItemId
-		
-	--select '@voucherPayable',* from @voucherPayable
+		-- '@voucherPayable',* from @voucherPayable
 
 	UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1, dblOrderQty = dblOrderQty * -1 WHERE dblQuantityToBill < 0 AND intTransactionType = 1
 
@@ -183,6 +183,12 @@ BEGIN
 			SELECT value FROM dbo.fnCommaSeparatedValueToTable(@createdVouchersId)
 		) BL
 			ON BL.value = BD.intBillId	
+
+		INSERT INTO @voucherIds
+		SELECT DISTINCT intBillId 
+		FROM tblAPBillDetail A
+		INNER JOIN @detailCreated B
+			ON B.intId = A.intBillDetailId
 
 		UPDATE APD
 		SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
@@ -334,6 +340,8 @@ BEGIN
 			) ON ES.intSplitId = A.intSplitId				
 		) ADJ
 			ON ADJ.intEntityId = APB.intEntityVendorId
+
+		EXEC uspAPUpdateVoucherTotal @voucherIds
 		/*END *** NOTE: If the Tax's calculation method is Percentage, Override the tax with the CKOFF Adjustment*/
 		-- select 'GG',dblQtyOrdered,dblQtyReceived,dblNetWeight,dblCost,dblTax,dblTotal,* FROM tblAPBillDetail a inner join @detailCreated b on b.intId = a.intBillDetailId ORDER BY intBillDetailId DESC
 	END

@@ -1688,7 +1688,7 @@ BEGIN TRY
 								BEGIN
 									SELECT @dblBalance = NULL
 
-									SELECT @dblBalance = dblQty
+									SELECT @dblBalance = SUM(dblQty)
 									FROM @ItemsForPost
 									WHERE intLotId = @intRecordId
 

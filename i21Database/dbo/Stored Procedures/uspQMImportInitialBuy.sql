@@ -61,10 +61,10 @@ BEGIN TRY
 	-- From Location Code
 	LEFT JOIN tblSMCity FROM_LOC_CODE ON FROM_LOC_CODE.strCity = IMP.strFromLocationCode
 	-- Receiving Storage Location
-	LEFT JOIN tblSMCompanyLocation MU ON MU.strLocationName = IMP.strB1GroupNumber
+	LEFT JOIN tblSMCompanyLocation TBO ON TBO.strLocationName = IMP.strBuyingCenter
 	LEFT JOIN tblSMCompanyLocationSubLocation RSL ON IMP.strReceivingStorageLocation IS NOT NULL
 		AND RSL.strSubLocationName = IMP.strReceivingStorageLocation
-		AND RSL.intCompanyLocationId = MU.intCompanyLocationId
+		AND RSL.intCompanyLocationId = TBO.intCompanyLocationId
 	-- Format log message
 	OUTER APPLY (
 		SELECT strLogMessage = CASE 

@@ -41,8 +41,6 @@ IF @intWorkOrderId = 0
 		 , a.strReferenceNo AS strERPOrderNo
 		 , ri.dblUpperTolerance
 		 , ri.dblLowerTolerance
-		 , (ri.dblCalculatedUpperTolerance * (a.dblQuantity / e.dblQuantity)) dblUpperToleranceQty
-		 , (ri.dblCalculatedLowerTolerance * (a.dblQuantity / e.dblQuantity)) dblLowerToleranceQty 
 		 , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) + ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblUpperTolerance) AS dblCalculatedUpperTolerance
 		 , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) - ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblLowerTolerance) AS dblCalculatedLowerTolerance 
 		 , Machine.strName AS strMachine
@@ -63,6 +61,44 @@ IF @intWorkOrderId = 0
 				 FROM tblMFMachine AS MFMachine
 				 WHERE MFMachine.intMachineId = a.intMachineId) AS Machine
 	WHERE a.intStatusId = 1
+	GROUP BY a.intBlendRequirementId
+		   , a.strDemandNo
+		   , a.intItemId
+		   , b.strItemNo
+		   , b.strDescription
+		   , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) 
+		   , c.intItemUOMId
+		   , d.strUnitMeasure 
+		   , a.dtmDueDate
+		   , a.intLocationId
+		   , a.intManufacturingCellId 
+		   , a.intMachineId
+		   , a.dblBlenderSize
+		   , g.dblStandardCost
+		   , mc.strCellName
+		   , r.intManufacturingProcessId
+		   , CASE MONTH(GETDATE()) WHEN 1 THEN bg.dblJan 
+		  						 WHEN 2 THEN bg.dblFeb 
+		  						 WHEN 3 THEN bg.dblMar 
+		  						 WHEN 4 THEN bg.dblApr 
+		  						 WHEN 5 THEN bg.dblMay 
+		  						 WHEN 6 THEN bg.dblJun 
+		  						 WHEN 7 THEN bg.dblJul 
+		  						 WHEN 8 THEN bg.dblAug 
+		  						 WHEN 9 THEN bg.dblSep 
+		  						 WHEN 10 THEN bg.dblOct 
+		  						 WHEN 11 THEN bg.dblNov 
+		  						 WHEN 12 THEN bg.dblDec 
+		     END
+		   , CompanyLocation.strLocationName 
+		   , a.strReferenceNo 
+		   , ri.dblUpperTolerance
+		   , ri.dblLowerTolerance
+		   , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) + ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblUpperTolerance) 
+		   , (a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) - ((a.dblQuantity - ISNULL(a.dblIssuedQty, 0)) / ri.dblLowerTolerance) 
+		   , Machine.strName 
+		   , a.dblEstNoOfBlendSheet
+	ORDER BY a.intBlendRequirementId
 
 --Positive means WorkOrderId
 IF @intWorkOrderId > 0
@@ -176,7 +212,7 @@ IF @intWorkOrderId < 0
 	OUTER APPLY (SELECT TOP 1 MFMachine.strName
 				 FROM tblMFMachine AS MFMachine
 				 WHERE MFMachine.intMachineId = a.intMachineId) AS Machine
-	WHERE a.intBlendRequirementId = ABS(@intWorkOrderId)
+	WHERE a.intBlendRequirementId = ABS(@intWorkOrderId)	
 	GROUP BY a.intBlendRequirementId
 		 , a.strDemandNo
 		 , a.intItemId

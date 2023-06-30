@@ -88,7 +88,7 @@ BEGIN
 		R.strMiscDescription,
 		R.intBillId
 		,R.intItemId
-		,ITEM.intItemLocationId
+		,_ITEM.intItemLocationId
 	FROM @ids B
 	INNER JOIN dbo.tblAPBillDetail R
 		ON R.intBillId = B.intID
@@ -120,7 +120,7 @@ BEGIN
 			ON IL.intItemId = IC.intItemId
 				AND IL.intLocationId = A.intLocationId
 		WHERE intBillId = R.intBillId			
-	) ITEM
+	) _ITEM
 	OUTER APPLY (
 		SELECT TOP 1 stockUnit.*
 		FROM tblICItemUOM stockUnit 
