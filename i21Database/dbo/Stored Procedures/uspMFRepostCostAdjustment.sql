@@ -281,7 +281,7 @@ BEGIN TRY
 		,[intStorageLocationId] =IsNULL(L.intStorageLocationId,PL.intStorageLocationId)
 		,[ysnIsStorage] = NULL
 		,[strActualCostId] = NULL
-		,[intSourceTransactionId] = intBatchId
+		,[intSourceTransactionId] = PL.intBatchId
 		,[intSourceTransactionDetailId] = PL.intWorkOrderProducedLotId
 		,[strSourceTransactionId] = strWorkOrderNo
 		,intFobPointId = 2

@@ -45,7 +45,7 @@ BEGIN TRY
 	FROM tblSMCompanyLocation CL
 	WHERE intCompanyLocationId = @intLocationId
 
-	SELECT @intCurrencyId = intCurrencyId
+	SELECT @intCurrencyId = WRMH.intCurrencyId
 		,@ysnSubCurrency = ysnSubCurrency
 		,@intCents = CU.intCent
 		,@intVendorEntityId = intVendorEntityId

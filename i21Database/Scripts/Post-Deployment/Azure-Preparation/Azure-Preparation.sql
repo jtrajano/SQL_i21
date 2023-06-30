@@ -133,3 +133,8 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspSTUpdateShiftPhysicalCount]'))
 	EXEC('DROP FUNCTION [dbo].[uspSTUpdateShiftPhysicalCount]')
+
+-- Manufacturing
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspMFInventoryAdjustment_CreatePostLotItemChange]'))
+	EXEC('DROP FUNCTION [dbo].[uspMFInventoryAdjustment_CreatePostLotItemChange]')
