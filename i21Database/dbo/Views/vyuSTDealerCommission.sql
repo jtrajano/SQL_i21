@@ -9,13 +9,13 @@ SELECT      a.intStoreId,
             b.dblDealerCommission,
             CASE
                 WHEN b.strCheckoutStatus = 'Posted'
-                THEN b.dblTotalSales
+                THEN b.dblDealerCommission
                 ELSE 0
                 END AS dblPaid,
             CASE
                 WHEN b.strCheckoutStatus = 'Posted'
                 THEN 0
-                ELSE b.dblTotalSales
+                ELSE b.dblDealerCommission
                 END AS dblBalance
 FROM        tblSTStore a
 LEFT JOIN   tblSTCheckoutHeader b
