@@ -85,3 +85,23 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspCMGetBankAccountRegister]'))
 	EXEC('DROP FUNCTION [dbo].[uspCMGetBankAccountRegister]')
+
+-- Patronage
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnPATCreateIssueStockGLEntries]'))
+	EXEC('DROP FUNCTION [dbo].[fnPATCreateIssueStockGLEntries]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnPATCreateRetireStockGLEntries]'))
+	EXEC('DROP FUNCTION [dbo].[fnPATCreateRetireStockGLEntries]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnPATGetCustomerRequiredDetailsForVoucher]'))
+	EXEC('DROP FUNCTION [dbo].[fnPATGetCustomerRequiredDetailsForVoucher]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspPATBillToCustomerVolume]'))
+	EXEC('DROP FUNCTION [dbo].[uspPATBillToCustomerVolume]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspPATProcessRefundsToVoucher]'))
+	EXEC('DROP FUNCTION [dbo].[uspPATProcessRefundsToVoucher]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspPATProcessVoid]'))
+	EXEC('DROP FUNCTION [dbo].[uspPATProcessVoid]')
