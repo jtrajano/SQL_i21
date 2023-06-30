@@ -46,3 +46,8 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[tblAPVoucherPayableCompleted2017]'))
 	EXEC('DROP FUNCTION [dbo].[tblAPVoucherPayableCompleted2017]')
+
+-- Logistics
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[vyuLGDashboardJDE]'))
+	EXEC('DROP FUNCTION [dbo].[vyuLGDashboardJDE]')
