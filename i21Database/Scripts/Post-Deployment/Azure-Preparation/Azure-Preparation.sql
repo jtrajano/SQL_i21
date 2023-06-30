@@ -51,3 +51,29 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[vyuLGDashboardJDE]'))
 	EXEC('DROP FUNCTION [dbo].[vyuLGDashboardJDE]')
+
+-- Accounts Receivable
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspARDeleteCustomer]'))
+	EXEC('DROP FUNCTION [dbo].[uspARDeleteCustomer]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspARImportInvoiceCSV]'))
+	EXEC('DROP FUNCTION [dbo].[uspARImportInvoiceCSV]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspARUpdatePOSLog]'))
+	EXEC('DROP FUNCTION [dbo].[uspARUpdatePOSLog]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspARPostInvoicesIntegrationsNew]'))
+	EXEC('DROP FUNCTION [dbo].[uspARPostInvoicesIntegrationsNew]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnARGetInvoiceDetailsForPosting]'))
+	EXEC('DROP FUNCTION [dbo].[fnARGetInvoiceDetailsForPosting]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnARGetCustomerDefaultCurreny]'))
+	EXEC('DROP FUNCTION [dbo].[fnARGetCustomerDefaultCurreny]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnGetTaxMasterIdForCustomer]'))
+	EXEC('DROP FUNCTION [dbo].[fnGetTaxMasterIdForCustomer]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnGetTaxGroupTaxCodes]'))
+	EXEC('DROP FUNCTION [dbo].[fnGetTaxGroupTaxCodes]')

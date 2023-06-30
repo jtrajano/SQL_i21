@@ -53,7 +53,7 @@ FROM (
 					GROUP BY POSEOD.strEODNo
 					FOR XML PATH('')
 				), 1, 2, '')
-			)
+			) COLLATE Latin1_General_CI_AS
 		 , strPOSDrawerName = (
 				STUFF((
 					SELECT ', ' + POSDRAWER.strPOSDrawerName
@@ -64,7 +64,7 @@ FROM (
 					GROUP BY POSDRAWER.strPOSDrawerName
 					FOR XML PATH('')
 				), 1, 2, '')
-			)
+			) COLLATE Latin1_General_CI_AS
 	) POSEOD
 	LEFT JOIN tblARPOSEndOfDay EodCLose ON EodCLose.strEODNo = POSEOD.strEODNo	
 	WHERE PAYMENT.ysnPosted = 1
