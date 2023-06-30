@@ -158,8 +158,11 @@ BEGIN TRY
 								AND AP.ysnPosted = 1 --include only the posted vouchers
 						FOR XML PATH('')
 					),1,1,'')
+
+	--a.1 save the voided payment before reversing the settlement
+	EXEC uspGRSaveVoidedPayments @billList,@dtmClientPostDate
 	
-	--a. unpost the payments first before unposting the voucher
+	--a.2 unpost the payments first before unposting the voucher
 	WHILE EXISTS(SELECT 1 FROM @billList)
 	BEGIN
 		SELECT TOP 1 @BillId = intId FROM @billList
