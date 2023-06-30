@@ -189,7 +189,7 @@ BEGIN TRY
 
 	IF @ForDelete = 1
 	BEGIN
-		EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
+		--EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
 		
 		DELETE FROM tblARPricingHistory 
 		WHERE intTransactionId = @InvoiceId

@@ -8,7 +8,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @SummaryLogs AS RKSummaryLog
 
-	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9) OR (intTransactionTypeId = 6 AND strType = 'Reduced By Invoice')) ) = 1
+	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9) OR (intTransactionTypeId = 6 AND strType IN ('Reduced By Invoice', 'Invoice Deletion'))) ) = 1
 	--IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,3,4,5,8,9)) ) = 1
 	BEGIN
 		INSERT INTO @SummaryLogs
@@ -108,7 +108,7 @@ BEGIN TRY
 												WHEN sh.strType = 'Settlement' THEN 9
 												WHEN sh.strType = 'Reverse Settlement' THEN 33
 												WHEN intTransactionTypeId = 9 THEN 20
-												WHEN intTransactionTypeId = 6 THEN CASE WHEN (SELECT COUNT(*) FROM tblGRStorageHistory WHERE strInvoice = sh.strInvoice AND intCustomerStorageId = sh.intCustomerStorageId) > 1 THEN 73 ELSE 16 END
+												WHEN intTransactionTypeId = 6 THEN CASE WHEN (SELECT COUNT(*) FROM tblGRStorageHistory WHERE strInvoice = sh.strInvoice AND intCustomerStorageId = sh.intCustomerStorageId) > 1 THEN CASE WHEN sh.strType = 'Reduced by Invoice' THEN 73 ELSE 63 END ELSE 16 END
 											END
 			,strStorageTypeCode 			= strStorageTypeCode
 			,ysnReceiptedStorage 			= ysnReceiptedStorage
