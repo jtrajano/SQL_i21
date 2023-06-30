@@ -458,7 +458,4 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\16_FixCurrencyIdInPayments.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <Build Include="Scripts\Pre-Deployment\9_FRD\5_2210_to_2220.sql" />
-  </ItemGroup>
 </Project>
