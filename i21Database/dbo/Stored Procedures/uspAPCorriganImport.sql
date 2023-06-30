@@ -327,7 +327,7 @@ BEGIN
 		,intPayToId						=	F.intEntityLocationId	
 		,strPayTo						=	A2.strPayTo
 		,intCurrencyId					=	H.intCurrencyID
-		,dblCost						=	A4.dblTotal
+		,dblCost						=	A4.dblTotal * (CASE WHEN A.dblTotal < 0 THEN -1 ELSE 1 END)
 		,dblQuantityToBill				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,dblQuantityOrdered				=	IIF(A4.dblQuantity=0,1,A4.dblQuantity)
 		,intContactId					=	C3.intEntityId
@@ -374,10 +374,14 @@ BEGIN
 	END CATCH
 END
 
+	DECLARE @defaultAPAccount NVARCHAR(50) = '200000-0000-0000-0090'
+	DECLARE @apAccountId INT = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @defaultAPAccount)
+
 	INSERT INTO @voucherPayables(
 		intPartitionId
 		,strVendorOrderNumber
 		,intTransactionType
+		,intAPAccount
 		,intEntityVendorId
 		,intLocationId
 		,intShipToId
@@ -403,6 +407,7 @@ END
 		intPartitionId			= 	intPartitionId, --1 voucher per 1 payable
 		strVendorOrderNumber	=	strVendorOrderNumber,
 		intTransactionType 		=	intTransactionType,
+		intAPAccount			=	@apAccountId,
 		intEntityVendorId		=	intEntityVendorId,
 		intLocationId			=	intShipToId,
 		intShipToId				=	intShipToId,

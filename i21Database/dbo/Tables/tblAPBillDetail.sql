@@ -101,6 +101,15 @@
 	[ysnOverrideForexRate] BIT NOT NULL DEFAULT 0,
 	[strReasonablenessComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[dblProvisionalPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 100, 
+	[dblProvisionalCost] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[dblProvisionalWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblProvisionalQtyReceived] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblProvisionalTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[dblFinalVoucherTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[ysnPrepaidOtherCharge] BIT NULL DEFAULT 0,
+	[ysnUnforecastedCharge] BIT NULL DEFAULT 0,
+	[dblOldNetWeight] DECIMAL(18, 6) NULL, --Final voucher net wt
+	[dblFinalQtyReceived] DECIMAL(18, 6) NULL, -- Final voucher qty
 	[ysnNetWeightChanged] BIT NOT NULL DEFAULT 0,
 	[intSaleYear] INT NULL,
 	[strSaleNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
