@@ -401,9 +401,9 @@ AS
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			INNER JOIN tblICInventoryValueAdjustmentLog adjLog
 				ON adjLog.intInventoryTransactionId = t.intInventoryTransactionId
-			INNER JOIN tblICItem charge
+			LEFT JOIN tblICItem charge
 				ON charge.intItemId = adjLog.intOtherChargeItemId
-			INNER JOIN tblICItemLocation otherChargeLocation
+			LEFT JOIN tblICItemLocation otherChargeLocation
 				ON otherChargeLocation.intItemId = adjLog.intOtherChargeItemId
 				AND otherChargeLocation.intLocationId = t.intCompanyLocationId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
@@ -513,7 +513,7 @@ FROM	ForGLEntries_CTE
 		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
 		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
 
--- AP Clearing
+-- AP Clearing (For other charges)
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -568,6 +568,64 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
 		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
 		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
+
+-- AP Clearing (Item)
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= dbo.fnCreateInTransitValueAdjDescription (
+										@strGLDescription
+										,tblGLAccount.strDescription
+										,ForGLEntries_CTE.[other charge]
+										,ForGLEntries_CTE.strItemNo
+										,ForGLEntries_CTE.ysnReversal
+									)
+		,strCode					= 'ITA' -- In-Transit Adjustment
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0 -- CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
+		,intUserId					= @intEntityUserSecurityId
+		,intEntityId				= @intEntityUserSecurityId 
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CreditForeign.Value 
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= DebitForeign.Value 
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
+		,strRateType				= ForGLEntries_CTE.strRateType 
+		,intCurrencyExchangeRateTypeId	= ForGLEntries_CTE.intCurrencyExchangeRateTypeId
+FROM	ForGLEntries_CTE
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
+		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
+		OUTER APPLY dbo.fnGetDebit(dblForexValue) DebitForeign
+		OUTER APPLY dbo.fnGetCredit(dblForexValue) CreditForeign
+WHERE
+	ForGLEntries_CTE.intOtherChargeItemId IS NULL 
 ;
 
 -- Return the GL entries back to the caller. 
