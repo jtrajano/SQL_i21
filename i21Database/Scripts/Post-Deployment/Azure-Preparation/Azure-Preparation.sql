@@ -128,3 +128,8 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRProcessToInvoice]'))
 	EXEC('DROP FUNCTION [dbo].[uspTRProcessToInvoice]')
+
+-- Store
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspSTUpdateShiftPhysicalCount]'))
+	EXEC('DROP FUNCTION [dbo].[uspSTUpdateShiftPhysicalCount]')
