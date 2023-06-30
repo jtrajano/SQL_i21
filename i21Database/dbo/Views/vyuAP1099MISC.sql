@@ -105,9 +105,9 @@ SELECT
 		+ ISNULL(dblRents,0)
 		+ ISNULL(dblRoyalties,0)
 		+ ISNULL(dblSubstitutePayments,0)
-		+ ISNULL(dblSubstitutePayments,0)
-		+ ISNULL(dblSubstitutePayments,0)
-		+ ISNULL(dblSubstitutePayments,0)) AS dblTotalPayment
+		+ ISNULL(dblFishResale,0)
+		+ ISNULL(dblDeferrals,0)
+		+ ISNULL(dblDeferredCompensation,0)) AS dblTotalPayment
 FROM MISC1099 A
 GROUP BY intEntityVendorId
 	,strEmployerAddress

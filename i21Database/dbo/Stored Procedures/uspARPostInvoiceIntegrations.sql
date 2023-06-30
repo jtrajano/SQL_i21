@@ -113,6 +113,37 @@ BEGIN
 
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
 	EXEC dbo.uspARCreateRCVForCreditMemo @intUserId = @UserId
+
+	--UPDATE PREPAIDS/CREDIT MEMO FOR CASH REFUND
+	UPDATE I
+	SET 
+		 dblAmountDue		= dblAmountDue - dblAppliedInvoiceAmount
+		,dblBaseAmountDue	= dblBaseAmountDue - dblAppliedInvoiceAmount
+		,dblPayment			= dblPayment + dblAppliedInvoiceAmount
+		,dblBasePayment		= dblBasePayment + dblAppliedInvoiceAmount
+		,ysnPaid			= CASE WHEN dblInvoiceTotal = dblPayment + dblAppliedInvoiceAmount THEN 1 ELSE 0 END
+		,ysnRefundProcessed	= CASE WHEN dblInvoiceTotal = dblPayment + dblAppliedInvoiceAmount THEN 1 ELSE 0 END
+	FROM tblARInvoice I
+	INNER JOIN (										
+		SELECT 
+			 intPrepaymentId		= PC.intPrepaymentId
+			,dblAppliedInvoiceAmount= PC.dblAppliedInvoiceDetailAmount
+		FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK)
+		INNER JOIN (
+			SELECT DISTINCT intInvoiceId 
+			FROM ##ARPostInvoiceHeader I
+			CROSS APPLY (
+				SELECT TOP 1 intPrepaymentId
+				FROM tblARPrepaidAndCredit WITH (NOLOCK)
+				WHERE intInvoiceId = I.intInvoiceId 
+				  AND ysnApplied = 1
+				  AND dblAppliedInvoiceDetailAmount > 0
+			) PREPAIDS
+			WHERE I.strTransactionType = 'Cash Refund'
+		) CR ON PC.intInvoiceId = CR.intInvoiceId
+		WHERE PC.ysnApplied = 1
+		  AND PC.dblAppliedInvoiceDetailAmount > 0
+	) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
 	
 	--AUTO APPLY PREPAIDS
 	EXEC dbo.uspARAutoApplyPrepaids @intEntityUserId = @UserId
@@ -159,7 +190,7 @@ BEGIN
 	BEGIN
 		UPDATE ARI
 		SET ARI.ysnPosted					= 0
-			, ARI.ysnPaid						= 0
+			, ARI.ysnPaid					= 0
 			, ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
 												THEN @ZeroDecimal
 												ELSE (
@@ -197,11 +228,6 @@ BEGIN
 			, ARI.intPeriodId				= NULL
 		FROM ##ARPostInvoiceHeader PID
 		INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON PID.intInvoiceId = ARI.intInvoiceId 					
-		CROSS APPLY (
-			SELECT COUNT(intPrepaidAndCreditId) PPC 
-			FROM tblARPrepaidAndCredit 
-			WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
-		) PPC
 		LEFT OUTER JOIN (
 			SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
 			FROM	tblARPaymentDetail PD
@@ -216,7 +242,6 @@ BEGIN
 	WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM ##ARPostInvoiceHeader WHERE [ysnPost] = 0)
 								
 	--UPDATE PREPAIDS/CREDIT MEMO FOR CASH REFUND
-	BEGIN
 	UPDATE I
 	SET dblAmountDue		= dblAmountDue + dblAppliedInvoiceAmount
 	  , dblBaseAmountDue	= dblBaseAmountDue + dblAppliedInvoiceAmount
@@ -244,7 +269,6 @@ BEGIN
 		WHERE PC.ysnApplied = 1
 		  AND PC.dblAppliedInvoiceDetailAmount > 0
 	) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
-	END
 
 	--DELETE UNDEPOSITED FUND FOR CASH
 	DELETE CF 

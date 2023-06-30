@@ -36,7 +36,10 @@ BEGIN
 	exec
 	('
 
-		ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
+		IF (OBJECT_ID(N''[dbo].[trgCTContractDetail]'') IS NOT NULL)
+		BEGIN
+				ALTER TABLE tblCTContractDetail DISABLE TRIGGER trgCTContractDetail;
+		END
 
 		update a set
 		intPricingStatus = (
@@ -77,7 +80,10 @@ BEGIN
 		where
 		a.intPricingStatus is null;
 
-		ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
+		IF (OBJECT_ID(N''[dbo].[trgCTContractDetail]'') IS NOT NULL)
+		BEGIN
+				ALTER TABLE tblCTContractDetail ENABLE TRIGGER trgCTContractDetail;
+		END
 		
 	');
 
@@ -101,6 +107,30 @@ GO
 		EXEC 
 		('
 			update tblCTContractCost set intPrevConcurrencyId = 0 where intPrevConcurrencyId is null
+		');
+	END
+GO
+	IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblCTContractDetail')
+	BEGIN
+		EXEC 
+		('
+			update d set
+			d.intPricingTypeId =
+				case
+				when h.intPricingTypeId = 5 then 5
+				else
+					case
+					when d.dblBasis is null and d.dblFutures is null and d.dblCashPrice is null then 4
+					when d.dblBasis is not null and d.dblFutures is null and d.dblCashPrice is null then 2
+					when d.dblBasis is not null and d.dblFutures is not null and d.dblCashPrice is not null then 1
+					when d.dblBasis is null and d.dblFutures is not null and d.dblCashPrice is null then 3
+					when d.dblBasis is null and d.dblFutures is null and d.dblCashPrice is not null then 6
+					else h.intPricingTypeId
+					end
+				end
+			from tblCTContractDetail d
+			join tblCTContractHeader h on h.intContractHeaderId = d.intContractHeaderId
+			where d.intPricingTypeId is null
 		');
 	END
 GO

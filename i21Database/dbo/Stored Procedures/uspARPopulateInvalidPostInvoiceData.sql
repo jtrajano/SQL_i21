@@ -17,20 +17,20 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
- --IC Reserve Stock
-IF @Recap = @ZeroBit	
-	EXEC dbo.uspARPostItemResevation
+DECLARE @ItemsForContracts InvoicePostingTable
 
-DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
-DECLARE @ItemsForContracts					[InvoicePostingTable]
 EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
 
 IF @Post = @OneBit
 BEGIN
-    DECLARE @InvoiceIds 						[InvoiceId]
-	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
-	DECLARE @ItemsForCosting 					[ItemCostingTableType]
-	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
+    DECLARE @InvoiceIds 					InvoiceId
+	DECLARE @PostInvoiceDataFromIntegration	InvoicePostingTable
+	DECLARE @ItemsForCosting 				ItemCostingTableType
+	DECLARE @ItemsForInTransitCosting 		ItemInTransitCostingTableType
+	DECLARE @ItemsForStoragePosting 		ItemCostingTableType
+
+	IF @Recap = @ZeroBit	
+		EXEC dbo.uspARPostItemReservation
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]
@@ -76,7 +76,7 @@ BEGIN
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
-			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
+			 AND ABS(COSTING.dblQty) > dbo.fnRoundBanker(ICT.dblAvailableQty,6)
 			 AND ICT.intItemId = COSTING.intItemId
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
 	OUTER APPLY (
@@ -86,6 +86,27 @@ BEGIN
 	) IL
 	WHERE I.strTransactionType = 'Invoice'
 	AND (I.[ysnFromProvisional] = 0 OR (I.[ysnFromProvisional] = 1 AND IL.[intLoadId] IS NULL))
+
+	INSERT INTO ##ARInvalidInvoiceData (
+		  [intInvoiceId]
+		, [strInvoiceNumber]
+		, [strTransactionType]
+		, [intInvoiceDetailId]
+		, [intItemId]
+		, [strBatchId]
+		, [strPostingError]
+	)
+	SELECT [intInvoiceId]			= I.[intInvoiceId]
+		 , [strInvoiceNumber]		= I.[strInvoiceNumber]		
+		 , [strTransactionType]		= I.[strTransactionType]
+		 , [intInvoiceDetailId]		= I.[intInvoiceDetailId] 
+		 , [intItemId]				= I.[intItemId] 
+		 , [strBatchId]				= I.[strBatchId]
+		 , [strPostingError]		= 'Post date cannot be earlier than load shipment scheduled date.'
+	FROM ##ARPostInvoiceDetail I
+	INNER JOIN tblLGLoadDetail LGLD ON I.intLoadDetailId = LGLD.intLoadDetailId
+	INNER JOIN tblLGLoad LGL ON LGLD.intLoadId = LGL.intLoadId
+	WHERE I.dtmPostDate < CAST(LGL.dtmScheduledDate AS DATE)
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -597,6 +618,30 @@ BEGIN
 			OR
 			(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.[intInvoiceId] = I.[intInvoiceId] AND tblARPrepaidAndCredit.[ysnApplied] = 1 AND tblARPrepaidAndCredit.[dblAppliedInvoiceDetailAmount] <> 0 ))
 			)
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Prepayment Date vs Invoice Post Date
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]	
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]      = 'Payment Date(' + CONVERT(NVARCHAR(30), I.dtmPostDate, 101) + ') cannot be earlier than the Invoice(' + CREDIT.strInvoiceNumber + ') Post Date(' + CONVERT(NVARCHAR(30), CREDIT.dtmPostDate, 101) + ')!'
+	FROM 
+		##ARPostInvoiceHeader I
+	INNER JOIN tblARPrepaidAndCredit ARPAC ON I.intInvoiceId = ARPAC.intInvoiceId
+	INNER JOIN tblARInvoice CREDIT ON ARPAC.intPrepaymentId = CREDIT.intInvoiceId
+    WHERE CAST(CREDIT.dtmPostDate AS DATE) > CAST(I.dtmPostDate AS DATE)
+	AND ARPAC.dblAppliedInvoiceDetailAmount > 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1447,33 +1492,41 @@ BEGIN
 	WHERE I.strTransactionType = 'Cash Refund'
 	  AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 
-	DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
- 
-	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
+	INSERT INTO ##ARInvalidInvoiceData
+	(
+		 [intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+	)
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= NULL
+		,[intItemId]			= NULL
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + 
+								  STUFF((
+										SELECT ', ' + strItemNo
+										FROM tblICItem ICI
+										INNER JOIN tblARInvoiceDetail ARID ON ICI.intItemId = ARID.intItemId
+										WHERE ARID.intInvoiceId = I.intInvoiceId
+										GROUP BY strItemNo
+										FOR XML PATH('')
+								  ), 1, 1, '') 
+								  + ') and make the appropriate edits.'
 	FROM ##ARPostInvoiceDetail I
 	WHERE ISNULL(I.intStorageLocationId, 0) > 0
 	AND ISNULL(I.intSubLocationId, 0) = 0
- 
-	IF (@strItemBlankStorageLocation IS NOT NULL)
-	BEGIN
-		INSERT INTO ##ARInvalidInvoiceData
-			([intInvoiceId]
-			,[strInvoiceNumber]
-			,[strTransactionType]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[strBatchId]
-			,[strPostingError])
-		SELECT
-			 [intInvoiceId]   = I.[intInvoiceId]
-			,[strInvoiceNumber]  = I.[strInvoiceNumber]  
-			,[strTransactionType] = I.[strTransactionType]
-			,[intInvoiceDetailId] = I.[intInvoiceDetailId]
-			,[intItemId]   = I.[intItemId]
-			,[strBatchId]   = I.[strBatchId]
-			,[strPostingError]  = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
-		FROM ##ARPostInvoiceDetail I
-	END
+	GROUP BY 
+		 I.intInvoiceId
+		,I.strInvoiceNumber
+		,I.strTransactionType
+		,I.strBatchId
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]

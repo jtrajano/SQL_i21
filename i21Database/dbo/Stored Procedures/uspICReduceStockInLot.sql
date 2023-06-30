@@ -66,7 +66,19 @@ BEGIN
 				SELECT 
 					dblAvailable = SUM(cb.dblStockAvailable)
 				FROM
-					tblICInventoryLot cb
+					tblICInventoryLot cb 
+					OUTER APPLY (
+						SELECT TOP 1 
+							storageLocation.intStorageLocationId
+							,unitType.strStorageUnitType
+						FROM 
+							tblICStorageLocation storageLocation INNER JOIN tblICStorageUnitType unitType
+								ON storageLocation.intStorageUnitTypeId = unitType.intStorageUnitTypeId
+						WHERE 
+							storageLocation.intStorageLocationId = cb.intStorageLocationId
+							AND unitType.strInternalCode IN ('STAGING', 'PROD_STAGING')
+					) stagingLocation 
+						
 				WHERE
 					cb.intItemId = @intItemId
 					AND cb.intItemLocationId = @intItemLocationId
@@ -74,20 +86,37 @@ BEGIN
 					AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 					AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 					AND cb.dblStockAvailable <> 0
-					AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND (
+						FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+						OR stagingLocation.intStorageLocationId IS NOT NULL 
+					)
 			) cbAvailable
 			OUTER APPLY (
 				SELECT	TOP 1 
 						intInventoryLotId
 				FROM	tblICInventoryLot cb 
+						OUTER APPLY (
+							SELECT TOP 1 
+								storageLocation.intStorageLocationId
+								,unitType.strStorageUnitType
+							FROM 
+								tblICStorageLocation storageLocation INNER JOIN tblICStorageUnitType unitType
+									ON storageLocation.intStorageUnitTypeId = unitType.intStorageUnitTypeId
+							WHERE 
+								storageLocation.intStorageLocationId = cb.intStorageLocationId
+								AND unitType.strInternalCode IN ('STAGING', 'PROD_STAGING')
+						) stagingLocation 
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intLotId = @intLotId
 						AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 						AND cb.dblStockAvailable <> 0		
-						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))										
 						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
+						AND (
+							FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))										
+							OR stagingLocation.intStorageLocationId IS NOT NULL 
+						)
 				ORDER BY 
 					cb.dtmDate ASC, cb.intInventoryLotId ASC 
 			) cb

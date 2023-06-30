@@ -208,7 +208,8 @@ BEGIN TRY
 		, intSequenceUsageHistoryId
 		, dtmDateAdded
 		, intUserId
-		, intFreightTermId)
+		, intFreightTermId
+		, ysnSummaryLog)
 	OUTPUT inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 	SELECT CD.intContractHeaderId
 		, CD.intContractDetailId
@@ -277,6 +278,7 @@ BEGIN TRY
 		, CASE WHEN @ysnUseContractDate = 1 THEN GETDATE() ELSE NULL END
 		, intUserId = @intUserId
 		, intFreightTermId = CH.intFreightTermId
+		, 1
 	FROM tblCTContractDetail CD WITH(NOLOCK)
 	JOIN tblCTContractHeader CH WITH(NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
@@ -351,7 +353,7 @@ BEGIN TRY
 			, intSequenceUsageHistoryId = CASE WHEN intContractStatusId IN (1, 4) THEN null ELSE intSequenceUsageHistoryId END
 			, ysnIsClosed = CASE WHEN intContractStatusId IN (1, 4) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 		INTO #tempSequenceHistoryCompare
-		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
+		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId and ysnSummaryLog = 1 ORDER BY intSequenceHistoryId DESC
 
 		SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
 
@@ -366,86 +368,86 @@ BEGIN TRY
 			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1 AND 1=0)
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
 		BEGIN
-			DELETE
+			update tblCTSequenceHistory set ysnSummaryLog = 0
+			WHERE intSequenceHistoryId = @intSequenceHistoryId;
+		END		
+		SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
+		FROM tblCTSequenceHistory WITH(NOLOCK)
+		WHERE intSequenceHistoryId < @intSequenceHistoryId
+			AND intContractDetailId = @intContractDetailId;
+		
+		IF @intPrevHistoryId IS NOT NULL
+		BEGIN
+			SELECT @dblPrevQty = dblQuantity
+				, @dblPrevBal = dblBalance
+				, @intPrevStatusId = intContractStatusId
+				, @dblPrevFutures = dblFutures
+				, @dblPrevBasis = dblBasis
+				, @dblPrevCashPrice = dblCashPrice
+			FROM tblCTSequenceHistory
+			WHERE intSequenceHistoryId = @intPrevHistoryId;
+			
+			SELECT @dblQuantity = dblQuantity
+				, @dblBalance = dblBalance
+				, @intContractStatusId = intContractStatusId
+				, @dblFutures = dblFutures
+				, @dblBasis = dblBasis
+				, @dblCashPrice = dblCashPrice
+				, @intPricingTypeId = intPricingTypeId
 			FROM tblCTSequenceHistory
 			WHERE intSequenceHistoryId = @intSequenceHistoryId;
-		END
-		ELSE
-		BEGIN			
-			SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
-			FROM tblCTSequenceHistory WITH(NOLOCK)
-			WHERE intSequenceHistoryId < @intSequenceHistoryId
-				AND intContractDetailId = @intContractDetailId;
 			
-			IF @intPrevHistoryId IS NOT NULL
+			IF ISNULL(@dblPrevQty, 0) <> ISNULL(@dblQuantity, 0)
 			BEGIN
-				SELECT @dblPrevQty = dblQuantity
-					, @dblPrevBal = dblBalance
-					, @intPrevStatusId = intContractStatusId
-					, @dblPrevFutures = dblFutures
-					, @dblPrevBasis = dblBasis
-					, @dblPrevCashPrice = dblCashPrice
-				FROM tblCTSequenceHistory
-				WHERE intSequenceHistoryId = @intPrevHistoryId;
-				
-				SELECT @dblQuantity = dblQuantity
-					, @dblBalance = dblBalance
-					, @intContractStatusId = intContractStatusId
-					, @dblFutures = dblFutures
-					, @dblBasis = dblBasis
-					, @dblCashPrice = dblCashPrice
-					, @intPricingTypeId = intPricingTypeId
-				FROM tblCTSequenceHistory
+				IF (ISNULL(@dblQuantity, 0) > ISNULL(@dblPrevQty, 0) AND @strSource <> 'Contract' AND @intPricingTypeId <> 5)
+				BEGIN
+					SET @strSource = 'Contract'
+				END
+				UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty
+					, ysnQtyChange = 1
 				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				
-				IF ISNULL(@dblPrevQty, 0) <> ISNULL(@dblQuantity, 0)
-				BEGIN
-					IF (ISNULL(@dblQuantity, 0) > ISNULL(@dblPrevQty, 0) AND @strSource <> 'Contract' AND @intPricingTypeId <> 5)
-					BEGIN
-						SET @strSource = 'Contract'
-					END
-					UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty
-						, ysnQtyChange = 1
-					WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				END;
-				
-				IF ISNULL(@dblPrevBal, 0) <> ISNULL(@dblBalance, 0)
-				BEGIN
-					UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal
-						, ysnBalanceChange = 1
-					WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				END;
-				
-				IF ISNULL(@intPrevStatusId, 0) <> ISNULL(@intContractStatusId, 0)
-				BEGIN
-					UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId
-						, ysnStatusChange = 1
-					WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				END;
-				
-				IF ISNULL(@dblPrevFutures, 0) <> ISNULL(@dblFutures, 0)
-				BEGIN
-					UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures
-						, ysnFuturesChange = 1
-					WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				END;
-				
-				IF ISNULL(@dblPrevBasis, 0) <> ISNULL(@dblBasis, 0)
-				BEGIN
-					UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis
-						, ysnBasisChange = 1
-					WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				END;
-				
-				IF ISNULL(@dblPrevCashPrice, 0) <> ISNULL(@dblCashPrice, 0)
-				BEGIN
-					UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice
-						, ysnCashPriceChange = 1
-					WHERE intSequenceHistoryId = @intSequenceHistoryId;
-				END;
-			END
+			END;
+			
+			IF ISNULL(@dblPrevBal, 0) <> ISNULL(@dblBalance, 0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal
+					, ysnBalanceChange = 1
+				WHERE intSequenceHistoryId = @intSequenceHistoryId;
+			END;
+			
+			IF ISNULL(@intPrevStatusId, 0) <> ISNULL(@intContractStatusId, 0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId
+					, ysnStatusChange = 1
+				WHERE intSequenceHistoryId = @intSequenceHistoryId;
+			END;
+			
+			IF ISNULL(@dblPrevFutures, 0) <> ISNULL(@dblFutures, 0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures
+					, ysnFuturesChange = 1
+				WHERE intSequenceHistoryId = @intSequenceHistoryId;
+			END;
+			
+			IF ISNULL(@dblPrevBasis, 0) <> ISNULL(@dblBasis, 0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis
+					, ysnBasisChange = 1
+				WHERE intSequenceHistoryId = @intSequenceHistoryId;
+			END;
+			
+			IF ISNULL(@dblPrevCashPrice, 0) <> ISNULL(@dblCashPrice, 0)
+			BEGIN
+				UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice
+					, ysnCashPriceChange = 1
+				WHERE intSequenceHistoryId = @intSequenceHistoryId;
+			END;
+		END
+
+		IF (@intSequenceHistoryCount = 1 or (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 2))
+		begin
 
 			EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId
 				, @intContractDetailId = @intContractDetailId
@@ -453,7 +455,8 @@ BEGIN TRY
 				, @strProcess = @strProcess
 				, @contractDetail = @contractDetails
 				, @intUserId = @intUserId;
-		END
+
+		end
 		
 		SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId)
 		FROM @SCOPE_IDENTITY

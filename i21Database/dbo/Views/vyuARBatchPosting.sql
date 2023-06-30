@@ -24,7 +24,7 @@ WHERE
 	AND ISNULL(ysnRecurring,0) = 0 
 	AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
     AND ISNULL(strCreditCode,'') <> 'Reject Orders'
-
+    AND C.ysnActive = 1
 UNION ALL
 
 SELECT 

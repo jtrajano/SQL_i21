@@ -31,8 +31,8 @@ BEGIN TRY
 	(
 		[fieldname] NVARCHAR(50)
 		,[condition] NVARCHAR(20)
-		,[from] NVARCHAR(50)
-		,[to] NVARCHAR(50)
+		,[from] NVARCHAR(MAX)
+		,[to] NVARCHAR(MAX)
 		,[join] NVARCHAR(10)
 		,[begingroup] NVARCHAR(50)
 		,[endgroup] NVARCHAR(50)
@@ -45,7 +45,8 @@ BEGIN TRY
 	SELECT @strMainEntityName = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strMainEntityName';
-
+	
+	SELECT @strMainEntityName = REPLACE(@strMainEntityName, '''''', '''')
 	
 	select 
 	strMainEntityName	
@@ -58,7 +59,7 @@ BEGIN TRY
 	from [vyuGRReportSplitView]
 		where ( @strMainEntityName is null or strMainEntityName = @strMainEntityName )
 
-	order by intSplitId 
+	order by strMainEntityName, intEntityId, strSplitInfo , intSplitDetailId ASC 
 
 END TRY
 BEGIN CATCH

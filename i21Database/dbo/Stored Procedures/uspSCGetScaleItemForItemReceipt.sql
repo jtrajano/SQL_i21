@@ -65,7 +65,19 @@ BEGIN TRY
 							ELSE
 							ISNULL(
 								(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis), 0)
-								FROM dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, ScaleTicket.dtmTicketDateTime, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
+								FROM dbo.fnRKGetFutureAndBasisPrice (
+									1 -- intTicketType
+									,ScaleTicket.intCommodityId -- intCommodityId
+									,right(convert(varchar, ScaleTicket.dtmTicketDateTime, 106),8) -- strSeqMonth
+									,3 -- intSequenceTypeId
+									,NULL -- intFutureMarketId
+									,NULL -- intFutureMonthId
+									,ScaleTicket.intProcessingLocationId -- intLocationId
+									,NULL -- intMarketZoneId
+									,0 -- dblBasisCost
+									,ScaleTicket.intItemId -- intItemId
+									,ScaleTicket.intCurrencyId -- intCurrencyId
+								)
 								LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
 								LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
 							)

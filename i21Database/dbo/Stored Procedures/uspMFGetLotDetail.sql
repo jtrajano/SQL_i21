@@ -25,7 +25,7 @@ BEGIN
 		,intItemUOMId
 		,strQtyUOM
 		,dblWeight
-		,intWeightUOMId
+		,ISNULL(intWeightUOMId, intItemUOMId) AS intWeightUOMId
 		,strWeightUOM
 		,dblWeightPerQty
 		,strLotAlias

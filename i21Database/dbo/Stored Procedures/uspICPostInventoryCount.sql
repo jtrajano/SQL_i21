@@ -222,6 +222,7 @@ FROM tblICInventoryCount IC
 	LEFT JOIN tblICItem Item ON Item.intItemId = ICDetail.intItemId
 WHERE ISNULL(NULLIF(IC.strCountBy, ''), 'Item') = 'Item' AND IC.strCountNo = @strTransactionId AND Item.strLotTracking != 'No' AND (ICDetail.intLotId IS NULL OR ICDetail.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ICDetail.intItemId))
 
+
 IF @ItemNo IS NOT NULL
 BEGIN
 	-- Lot Number is invalid or missing for item {Item No.}
@@ -288,6 +289,7 @@ IF @@ERROR <> 0 GOTO With_Rollback_Exit
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
 BEGIN  
+
 	DECLARE @ItemsForAdjust AS ItemCostingTableType  
 	-----------------------------------
 	--  Call Quantity Change 
@@ -375,25 +377,26 @@ BEGIN
 					END
 			,dblUOMQty				= 
 					CASE 
+						WHEN Header.strCountBy = 'Retail Count' THEN 
+							ItemUOM.dblUnitQty
+						
 						WHEN Header.strCountBy = 'Pack' THEN 
-							StockUOM.dblUnitQty
-					
+							StockUOM.dblUnitQty						
+						
 						-- If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
 						THEN 
 							ItemUOM.dblUnitQty
-						WHEN Detail.intWeightUOMId IS NULL THEN 
-							ItemUOM.dblUnitQty
 						ELSE 
-							CASE WHEN Detail.intLotId IS NOT NULL THEN LotWeightUOM.dblUnitQty ELSE WeightUOM.dblUnitQty END
-					END
+							ISNULL(LotWeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
+					END 
 			,dblCost				= 
 					
 					CASE 
-						WHEN Header.strCountBy = 'Pack' THEN 
-							ISNULL(
+						WHEN Header.strCountBy = 'Pack' THEN 							
+							COALESCE(
 								dbo.fnCalculateCostBetweenUOM (
 									Detail.intItemUOMId
 									,StockUOM.intItemUOMId
@@ -405,16 +408,17 @@ BEGIN
 									END							
 								)
 								, ItemPricing.dblLastCost
+								, ItemPricing.dblStandardCost  
 							) 
-						ELSE 
+						ELSE 							
 							COALESCE (
 								CASE 
 									WHEN (Detail.dblPhysicalCount > Detail.dblSystemCount AND ISNULL(Detail.dblNewCost,0) > 0) THEN 
-										Detail.dblNewCost 
+										Detail.dblNewCost
 									ELSE 
 										NULL 
 								END
-								,Detail.dblLastCost
+								,NULLIF(Detail.dblLastCost, 0) 
 								,dbo.fnCalculateCostBetweenUOM(
 									StockUOM.intItemUOMId
 									,CASE 
@@ -427,8 +431,8 @@ BEGIN
 										ELSE 
 											ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
 									END
-									,  ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)
-								)
+									,  COALESCE(NULLIF(ItemLot.dblLastCost, 0), NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
+								)								
 							)
 					END
 

@@ -361,6 +361,26 @@ SET @cteQuery = N';WITH forClearing
       ,strLocationName  
      FROM vyuAPPatClearing  
      ' + @innerQueryFilter + '  
+    ),
+    tktClearing AS (
+      SELECT  
+        dtmDate  
+        ,intEntityVendorId  
+        ,strTicketNumber  
+        ,intTicketId  
+        ,NULL AS intTicketDetailId
+        ,intItemId  
+        ,intBillId  
+        ,strBillId  
+        ,intBillDetailId  
+        ,dblVoucherTotal  
+        ,dblVoucherQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+      FROM vyuSCDirectAPClearing
+      ' + @innerQueryFilter + '
     )';  
 END  
 ELSE  
@@ -553,6 +573,25 @@ BEGIN
       ,intLocationId  
       ,strLocationName  
      FROM vyuAPPatClearing 
+    ),
+    tktClearing AS (
+      SELECT  
+        dtmDate  
+        ,intEntityVendorId  
+        ,strTicketNumber  
+        ,intTicketId  
+        ,NULL AS intTicketDetailId
+        ,intItemId  
+        ,intBillId  
+        ,strBillId  
+        ,intBillDetailId  
+        ,dblVoucherTotal  
+        ,dblVoucherQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+      FROM vyuSCDirectAPClearing
     )';  
 END 
 
@@ -1108,6 +1147,50 @@ INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity
                 ON refundEntity.intRefundCustomerId = tmpAPOpenClearing.intRefundCustomerId
  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY refund.dtmRefundDate, tmpAPOpenClearing.intEntityVendorId  
+ UNION ALL
+--SCALE TICKET
+  SELECT  
+    tmpAPOpenClearing.intEntityVendorId
+    ,	CASE WHEN DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())>=0 AND DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())<=30 
+      THEN SUM(tmpAPOpenClearing.dblClearingAmount)
+      ELSE 0 
+    END AS dbl1, 
+    CASE WHEN DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())>30 AND DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())<=60
+      THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+      ELSE 0 
+    END AS dbl30, 
+    CASE WHEN DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())>60 AND DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())<=90 
+      THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+      ELSE 0 
+    END AS dbl60,
+    CASE WHEN DATEDIFF(dayofyear,tkt.dtmTicketDateTime,GETDATE())>90  
+      THEN SUM(tmpAPOpenClearing.dblClearingAmount) ELSE 0 
+    END AS dbl90
+  FROM    
+  (  
+    SELECT  
+      B.intEntityVendorId  
+      ,B.intTicketId
+      ,B.strTicketNumber  
+      ,SUM(B.dblReceiptTotal) AS   dblReceiptTotal
+      ,SUM(B.dblReceiptQty) AS dblReceiptQty  
+      ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
+      ,SUM(B.dblVoucherQty) AS dblVoucherQty  
+      ,SUM(B.dblReceiptQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+      ,SUM(B.dblReceiptTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount
+    FROM tktClearing B  
+    --WHERE B.intTicketId = 102516
+    GROUP BY   
+    intEntityVendorId  
+    ,intTicketId
+    ,strTicketNumber 
+  ) tmpAPOpenClearing  
+  INNER JOIN tblSCTicket tkt ON tmpAPOpenClearing.intTicketId = tkt.intTicketId
+    INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
+    ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+  CROSS APPLY tblSMCompanySetup compSetup  
+  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
+  GROUP BY tkt.dtmTicketDateTime, tmpAPOpenClearing.intEntityVendorId
 ) resultData 
 INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON resultData.intEntityVendorId = vendor.intEntityId  

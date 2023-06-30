@@ -70,6 +70,8 @@ BEGIN TRY
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
 	
+
+	DECLARE @MODE INT = 1
 	SET @ErrMsg =	'uspSCGetContractsAndAllocate '+ 
 					LTRIM(@intTicketId) +',' + 
 					LTRIM(@intEntityId) +',' +
@@ -81,7 +83,8 @@ BEGIN TRY
 					LTRIM(ISNULL(@ysnAutoDistribution,0))	+',' +
 					'''' + LTRIM(ISNULL(@strDistributionOption,0))	+''',' +
 					LTRIM(ISNULL(@intLoadDetailId,0))	
-	PRINT(@ErrMsg)
+	IF @MODE = 1
+		PRINT(@ErrMsg)
 
 	DECLARE @Processed TABLE
 	(
@@ -467,9 +470,12 @@ BEGIN TRY
 			GOTO CONTINUEISH
 		END
 
+		EXEC uspSCTicketAutoScaleLogHeader @TICKET_ID = @intTicketId
+
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 			OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND @dblNetUnits <= (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) )
 		BEGIN
+			
 			INSERT	INTO @Processed 
 			SELECT @intContractDetailId
 				,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
@@ -478,8 +484,10 @@ BEGIN TRY
 				,0
 				,@intLoadDetailId
 
+			
 			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
 			BEGIN
+				IF @MODE = 1 PRINT 'SECTION 1'
 				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
 				EXEC	uspCTUpdateScheduleQuantity 
 						@intContractDetailId	=	@intContractDetailId,
@@ -487,11 +495,16 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intTicketId,
 						@strScreenName			=	'Auto - Scale'
+
+				EXEC uspSCTicketAutoScaleLog @TICKET_ID = @intTicketId
+					, @UNIT = @dblInreaseSchBy 
+					, @CONTRACT_ID = @intContractDetailId
 			END
 			ELSE
 			BEGIN
 				IF(@strDistributionOption = 'LOD') AND @dblScheduleQty > @dblNetUnits AND @intContractDetailId = @intTicketContractDetailId
 				BEGIN 
+					
 					SET @dblInreaseSchBy = 0
 					IF(@dblTicketScheduledQuantity >= @dblScheduleQty)
 					BEGIN
@@ -499,25 +512,32 @@ BEGIN TRY
 						SET @dblInreaseSchBy  = (@dblScheduleQty - @dblNetUnits) * -1
 						IF(@dblInreaseSchBy <> 0)
 						BEGIN
+							IF @MODE = 1 PRINT 'SECTION 2'
 							EXEC	uspCTUpdateScheduleQuantity 
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblInreaseSchBy,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
 									@strScreenName			=	'Auto - Scale'
+
+							EXEC uspSCTicketAutoScaleLog @TICKET_ID = @intTicketId
+								, @UNIT = @dblInreaseSchBy 
+								, @CONTRACT_ID = @intContractDetailId
 						END
 					END
 					ELSE
 					BEGIN
 						IF @dblTicketScheduledQuantity > @dblNetUnits
 						BEGIN
+							IF @MODE = 1 PRINT 'SECTION 3 CALCULATION 1'
 							SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
 						END
 						ELSE
 						BEGIN
 							---This block should only be utilized if using the auto distribution
 							---if code pass here and not from auto distribution need to review
-
+							
+							IF @MODE = 1 PRINT 'SECTION 3 CALCULATION 2'
 							SET @dblInreaseSchBy  = (@dblNetUnits - @dblTicketScheduledQuantity)
 
 							---Check if contract available qty can accomodate the increase in schedule
@@ -531,12 +551,20 @@ BEGIN TRY
 
 						IF(ISNULL(@dblInreaseSchBy,0) <> 0)
 						BEGIN
+							
+							IF @MODE = 1 PRINT 'SECTION 3 - INCREASE SCHEDULE BY : ' + CAST(@dblInreaseSchBy AS NVARCHAR)
 							EXEC	uspCTUpdateScheduleQuantity 
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblInreaseSchBy,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
+									@strScreenName			=	'Auto - Scale'									
+
+							EXEC uspSCTicketAutoScaleLog @TICKET_ID = @intTicketId
+								, @UNIT = @dblInreaseSchBy 
+								, @CONTRACT_ID = @intContractDetailId
+
+
 						END
 					END
 				END
@@ -570,7 +598,12 @@ BEGIN TRY
 										@dblQuantityToUpdate	=	@dblInreaseSchBy,
 										@intUserId				=	@intUserId,
 										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
+										@strScreenName			=	'Auto - Scale'								
+
+								EXEC uspSCTicketAutoScaleLog @TICKET_ID = @intTicketId
+									, @UNIT = @dblInreaseSchBy 
+									, @CONTRACT_ID = @intContractDetailId
+
 							END
 						END
 					END
@@ -586,7 +619,12 @@ BEGIN TRY
 										@dblQuantityToUpdate	=	@dblInreaseSchBy,
 										@intUserId				=	@intUserId,
 										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
+										@strScreenName			=	'Auto - Scale'								
+
+								EXEC uspSCTicketAutoScaleLog @TICKET_ID = @intTicketId
+									, @UNIT = @dblInreaseSchBy 
+									, @CONTRACT_ID = @intContractDetailId
+
 							END
 						END
 						ELSE
@@ -596,7 +634,12 @@ BEGIN TRY
 								@dblQuantityToUpdate	=	@dblNetUnits,
 								@intUserId				=	@intUserId,
 								@intExternalId			=	@intTicketId,
-								@strScreenName			=	'Auto - Scale'
+								@strScreenName			=	'Auto - Scale'								
+
+							EXEC uspSCTicketAutoScaleLog @TICKET_ID = @intTicketId
+								, @UNIT = @dblNetUnits 
+								, @CONTRACT_ID = @intContractDetailId
+
 						END
 					END
 					

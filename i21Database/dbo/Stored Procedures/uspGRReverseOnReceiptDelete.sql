@@ -44,7 +44,13 @@ BEGIN TRY
 				BEGIN
 					RAISERROR('Invoice exists for the Grain Ticket for this receipt.',16, 1);
 				END
-				ELSE IF EXISTS(SELECT 1 FROM [tblAPBillDetail] WHERE [intCustomerStorageId] = @intCustomerStorageId)
+				ELSE IF EXISTS(SELECT 1 
+					FROM [tblAPBillDetail] BD
+					INNER JOIN tblAPBill AP
+						ON AP.intBillId = BD.intBillId
+					WHERE [intCustomerStorageId] = @intCustomerStorageId
+						AND AP.intTransactionType = 1 --Voucher transaction only
+				)
 				BEGIN
 					RAISERROR('Voucher exists for this Delivery Sheet.',16, 1);
 				END

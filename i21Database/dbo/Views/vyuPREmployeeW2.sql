@@ -61,7 +61,7 @@ FROM
 	tblPREmployeeW2 [W2]
 	INNER JOIN tblPREmployee [EMP] ON [W2].intEntityEmployeeId = [EMP].[intEntityId]
 	INNER JOIN tblEMEntity [EM] ON [EM].intEntityId = [EMP].[intEntityId]
-	INNER JOIN tblEMEntityToContact [EC] ON [EC].intEntityId = [EM].intEntityId
+	INNER JOIN tblEMEntityToContact [EC] ON [EC].intEntityId = [EM].intEntityId AND [EC].ysnDefaultContact = 1
 	INNER JOIN tblEMEntity [EM2] ON [EM2].intEntityId = [EC].intEntityContactId
 	INNER JOIN tblEMEntityLocation [EML] ON [EM].intEntityId = [EML].intEntityId AND [EML].ysnDefaultLocation = 1
 	OUTER APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) [COM]

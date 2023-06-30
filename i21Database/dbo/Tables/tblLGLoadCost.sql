@@ -18,6 +18,9 @@ CREATE TABLE [dbo].[tblLGLoadCost]
 	[intBillId] [int] NULL,
 	[intLoadCostRefId] INT NULL,
 
+
+	[ysnVendorPrepayment] [BIT] NULL,
+
 	CONSTRAINT [PK_tblLGLoadCost] PRIMARY KEY ([intLoadCostId]), 
 	CONSTRAINT [FK_tblLGLoadCost_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblLGLoadCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

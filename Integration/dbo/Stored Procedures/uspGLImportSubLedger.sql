@@ -287,8 +287,12 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			WHILE @@FETCH_STATUS = 0
     			BEGIN
     				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0, @intAccountId = NULL
-    				IF NOT EXISTS (
-    					SELECT * FROM tblGLCOACrossReference WHERE @glije_acct_no = strExternalId)
+
+					SELECT TOP 1 @intAccountId= b.intAccountId FROM tblGLCOACrossReference a
+    				JOIN tblGLAccount b ON a.inti21Id = b.intAccountId 
+					WHERE cast(replace(@glije_acct_no,''.'', '''') as bigint) = cast(replace(strCurrentExternalId,''-'', '''') as bigint)
+
+    				IF @intAccountId IS NULL 
     				BEGIN
     					--IF @importLogId = 0
     					--	EXEC uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
@@ -335,8 +339,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 
     					SET @isValid = 0
     				END
-    				SELECT @intAccountId= b.intAccountId FROM tblGLCOACrossReference a
-    				JOIN tblGLAccount b ON a.inti21Id = b.intAccountId WHERE a.strExternalId = @glije_acct_no
+    			
 					
 
     				SELECT @dtmDate =CONVERT(DATE, SUBSTRING(@glije_date,1,4) + ''/'' + SUBSTRING(@glije_date,5,2) + ''/'' + SUBSTRING(@glije_date,7,2))

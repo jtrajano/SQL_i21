@@ -287,7 +287,9 @@ BEGIN
 			EXEC('uspSMMergeRole ' + @CurMergeId + ',' + @PrimaryKeyString)
 			
 			EXEC('delete from tblEMEntityType WHERE intEntityId = ' + @CurMergeId + ' and strType IN (SELECT strType from tblEMEntityType WHERE intEntityId = ' + @PrimaryKeyString + ')' )
-			EXEC('update tblEMEntityLocation set ysnDefaultLocation = 0, strLocationName= ''' + @CurMergeId + ' '' + strLocationName  WHERE intEntityId = ' + @CurMergeId)
+			EXEC('update tblEMEntityLocation set ysnDefaultLocation = 0 WHERE intEntityId = ' + @CurMergeId)
+			EXEC('update tblEMEntityLocation set strLocationName= ''' + @CurMergeId + ' '' + strLocationName  WHERE intEntityId = ' + @CurMergeId + '
+				and strLocationName in (select strLocationName from tblEMEntityLocation where intEntityId = ' +  @PrimaryKeyString + ' )')
 			EXEC('update tblEMEntityToContact set ysnDefaultContact = 0 WHERE intEntityId = ' + @CurMergeId)
 			
 			SET @CurStatement = ''

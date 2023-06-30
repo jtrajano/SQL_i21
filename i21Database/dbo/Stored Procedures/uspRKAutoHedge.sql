@@ -161,13 +161,15 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @dblNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
 		END
+		
+		EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, NULL, @intUserId, ''
 
 		EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId = @intFutOptTransactionId
 			, @intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 			, @strScreenName = @strScreenName
 			, @intUserId = @intUserId
 			, @action = 'UPDATE'
-			, @ysnLogRiskSummary = 1
+			, @ysnLogRiskSummary = 0
 	END
 	ELSE
 	BEGIN		

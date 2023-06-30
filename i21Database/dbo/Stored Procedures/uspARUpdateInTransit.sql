@@ -33,7 +33,7 @@ BEGIN
 		, dblQty							= (CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL 
 												THEN ROUND(ID.dblQtyShipped/ CASE WHEN ICSI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICSI.[dblDestinationQuantity], ICSI.[dblQuantity]) ELSE ICSI.[dblQuantity] END, 2) * ICSI.[dblQuantity]
 												ELSE ID.dblQtyShipped
-											END) * CASE WHEN ID.ysnPost = 1 THEN -1 ELSE 0 END
+											END) * CASE WHEN ID.ysnPost = 1 THEN -1 ELSE 1 END
 		, intInvoiceId						= ID.intInvoiceId
 		, strInvoiceNumber					= ID.strInvoiceNumber
 		, intTransactionTypeId				= @INVENTORY_INVOICE_TYPE

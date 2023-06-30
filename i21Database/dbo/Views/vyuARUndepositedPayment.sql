@@ -6,6 +6,7 @@ SELECT DISTINCT
 	 , dtmDate					= TRANSACTIONS.dtmDate
 	 , strName					= CUSTOMER.strName
 	 , dblAmount				= TRANSACTIONS.dblAmount
+	 , dblBaseAmount			= TRANSACTIONS.dblBaseAmount
 	 , strSourceSystem			= 'AR' COLLATE Latin1_General_CI_AS
 	 , intBankAccountId			= TRANSACTIONS.intBankAccountId
 	 , intLocationId			= TRANSACTIONS.intCompanyLocationId
@@ -23,6 +24,7 @@ FROM (
 		 , intSourceTransactionId	= PAYMENT.intPaymentId		 
 		 , dtmDate					= PAYMENT.dtmDatePaid
 		 , dblAmount				= CASE WHEN (ISNULL(PAYMENT.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('Prepay')) THEN PAYMENT.dblAmountPaid *-1 ELSE PAYMENT.dblAmountPaid END
+		 , dblBaseAmount			= CASE WHEN (ISNULL(PAYMENT.dblBaseAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('Prepay')) THEN PAYMENT.dblBaseAmountPaid *-1 ELSE PAYMENT.dblBaseAmountPaid END
 		 , intBankAccountId			= PAYMENT.intBankAccountId
 		 , intEntityCustomerId		= PAYMENT.intEntityCustomerId
 		 , intCompanyLocationId		= PAYMENT.intLocationId
@@ -77,6 +79,7 @@ FROM (
 		 , intSourceTransactionId	= INVOICE.intInvoiceId
 		 , dtmDate					= INVOICE.dtmPostDate
 		 , dblAmount				= INVOICE.dblInvoiceTotal
+		 , dblBaseAmount			= INVOICE.dblBaseInvoiceTotal
 		 , intBankAccountId			= NULL
 		 , intEntityCustomerId		= INVOICE.intEntityCustomerId
 		 , intCompanyLocationId		= INVOICE.intCompanyLocationId
@@ -106,6 +109,7 @@ FROM (
 		 , intSourceTransactionId	= EOD.intPOSEndOfDayId 
 		 , dtmDate					= EOD.dtmClose
 		 , dblAmount				= EOD.dblFinalEndingBalance - ((EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0) + ISNULL(EOD.dblCashPaymentReceived,0)) - ABS(ISNULL(EOD.dblCashReturn,0)))
+		 , dblBaseAmount			= EOD.dblFinalEndingBalance - ((EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0) + ISNULL(EOD.dblCashPaymentReceived,0)) - ABS(ISNULL(EOD.dblCashReturn,0)))
 		 , intBankAccountId			= NULL
 		 , intEntityCustomerId		= EOD.intEntityId
 		 , intLocationId			= DRAWER.intCompanyLocationId	

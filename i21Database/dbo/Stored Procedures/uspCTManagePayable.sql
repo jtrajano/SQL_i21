@@ -120,7 +120,7 @@ INSERT INTO @voucherPayables(
 	,[strBillOfLading]			
 	,[ysnReturn]						
 )
-SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1, @remove);
+SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1, @remove) where intEntityVendorId is not null;
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables)
 BEGIN	

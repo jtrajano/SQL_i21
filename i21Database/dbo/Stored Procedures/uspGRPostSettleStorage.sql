@@ -5,6 +5,7 @@
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
 	,@dblQtyFromCt DECIMAL(24,10) = 0
 	,@dtmClientPostDate DATETIME = NULL
+	,@postCnt INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -1067,7 +1068,7 @@ BEGIN TRY
 						,intContractDetailId		= @ContractDetailId
 						,intCustomerStorageId		= @intCustomerStorageId
 						,dblUnits					= - @dblStorageUnits
-						,intSourceItemUOMId			= @CommodityStockUomId
+						,intSourceItemUOMId			= @intCashPriceUOMId--@CommodityStockUomId
 						,intPricingTypeHeader		= 5
 				END
 
@@ -1130,7 +1131,7 @@ BEGIN TRY
 							SET dblRemainingUnits = 0
 							WHERE intSettleStorageKey = @SettleStorageKey
 
-							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@CommodityStockUomId, intItemUOMId, @dblStorageUnits)
+							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@intCashPriceUOMId/*@CommodityStockUomId*/, intItemUOMId, @dblStorageUnits)
 							FROM tblCTContractDetail
 							WHERE intContractDetailId = @intContractDetailId
 
@@ -1204,7 +1205,7 @@ BEGIN TRY
 							SET dblRemainingUnits = dblRemainingUnits - @dblContractUnits
 							WHERE intSettleStorageKey = @SettleStorageKey
 
-							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@CommodityStockUomId, intItemUOMId, @dblContractUnits)
+							SELECT @dblUnitsForContract = dbo.fnCTConvertQtyToTargetItemUOM(@intCashPriceUOMId/*@CommodityStockUomId*/, intItemUOMId, @dblContractUnits)
 							FROM tblCTContractDetail
 							WHERE intContractDetailId = @intContractDetailId
 
@@ -2554,7 +2555,7 @@ BEGIN TRY
 					,[intContractHeaderId]			= case WHEN a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= case WHEN a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] =  CASE 
-														WHEN @ysnDPOwnedType = 0 THEN case when @strItemNo = c.[strItemNo] then  IRI.intInventoryReceiptItemId else null end
+														WHEN @ysnDPOwnedType = 0 THEN NULL
 														ELSE 
 															CASE 
 																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
@@ -2766,8 +2767,8 @@ BEGIN TRY
 					,[dtmVoucherDate]				= @dtmClientPostDate
 
 					, intLinkingId		= isnull(a.intSettleContractId, -90)
-					,intStorageLocationId =  case when @strItemNo = c.[strItemNo] then  SC.intStorageLocationId else null end
-					,intSubLocationId =  case when @strItemNo = c.[strItemNo] then  SC.intSubLocationId  else null end 
+					,intStorageLocationId =  case when @strItemNo = c.[strItemNo] then  CS.intStorageLocationId else null end
+					,intSubLocationId =  case when @strItemNo = c.[strItemNo] then  CS.intCompanyLocationSubLocationId  else null end 
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -2778,34 +2779,29 @@ BEGIN TRY
 					ON SST.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
-				left join tblSCTicket SC on SC.intTicketId = CS.intTicketId
-				left join tblICInventoryReceiptItem IRI on SC.intTicketId = IRI.intSourceId
 				LEFT JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
 						AND DSC.intItemId = a.intItemId
-				--LEFT JOIN tblGRStorageHistory STH
-				--	ON STH.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN (
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
 										AND 
-											CASE WHEN (SH.strType = 'From Transfer') THEN 
+											(CASE WHEN (SH.strType = 'From Transfer') THEN 
 												CASE WHEN SH.intContractHeaderId is not null then  
 													case when SH.intContractHeaderId = RI.intContractHeaderId then 
 														1 
 													else
 														0
 													end
-												else 
-													1 
+												else 1
 												end
 											ELSE 
 												(CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) 
 													THEN 1 
 												ELSE 0 												
 												END) 
-											END = 1
+											END) = 1
 				)  
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
@@ -2815,6 +2811,7 @@ BEGIN TRY
 								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
 								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 								AND CS.intTicketId IS NOT NULL
+								AND (RI.intOwnershipType = 2 OR (RI.intOwnershipType = 1 AND @ysnDPOwnedType = 1))
 				LEFT JOIN (
 						tblICInventoryReceiptCharge RC
 						INNER JOIN tblGRStorageHistory SHC
@@ -2864,7 +2861,8 @@ BEGIN TRY
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
-				 
+
+				-- select 'test',* from @voucherPayable
 				-- Charge and Premium
 				INSERT INTO @voucherPayable
 				(
@@ -3288,6 +3286,26 @@ BEGIN TRY
 				delete from @voucherPayable where dblQuantityToBill = 0
 
 				DECLARE @dblVoucherTotalPrecision DECIMAL(18,6) = round(@dblVoucherTotal,2)
+
+				--check the total voucher line item in the staging table before creating a voucher
+				IF (SELECT SUM(P.dblQuantityToBill)
+				FROM @voucherPayable P
+				INNER JOIN tblICItem IC
+					ON IC.intItemId = P.intItemId
+						AND IC.strType = 'Inventory'
+				) > (
+					SELECT SUM(A.dblUnits) 
+					FROM @SettleVoucherCreate A
+					INNER JOIN tblICItem IC
+					ON IC.intItemId = A.intItemId
+						AND IC.strType = 'Inventory'
+					WHERE A.intItemId = IC.intItemId
+				)
+				BEGIN
+					BEGIN
+						RAISERROR('Unable to post settlement.<br/> Voucher Quantity for Inventory Item is greater than the Storage Settlement Quantity.',16,1)
+					END
+				END
 
 				--IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
 				IF EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
@@ -4012,12 +4030,31 @@ BEGIN TRY
 	EXEC [dbo].[uspGRRiskSummaryLog2]
 		@StorageHistoryIds = @intStorageHistoryIds
 
-	--IF(@success = 0)
-	--BEGIN
-	--	SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
-	--	RAISERROR (@ErrMsg, 16, 1);
-	--	GOTO SettleStorage_Exit;
-	--END	
+	IF(@ysnFromPriceBasisContract = 0 AND ISNULL(@postCnt,0) = 0)
+	BEGIN
+		--throw an error if settlement was not logged successfully in DPR Summary Log
+		--note: this will just be a temporary fix as we couldn't replicate the issue where the settlements are not being logged in the summary log
+		IF NOT EXISTS(SELECT 1 FROM @intStorageHistoryIds)
+		BEGIN
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please click OK to continue.', 16, 1);
+			GOTO SettleStorage_Exit;
+		END
+
+		DECLARE @IDS Id
+
+		INSERT INTO @IDS
+		SELECT IDS.intId
+		FROM @intStorageHistoryIds IDS
+		LEFT JOIN tblRKSummaryLog RK	
+			ON RK.intStorageHistoryId = IDS.intId
+		WHERE RK.intSummaryLogId IS NULL	
+
+		IF EXISTS(SELECT TOP 1 1 FROM @IDS)
+		BEGIN
+			RAISERROR ('Unable to log settlement/s in DPR Summary Log.<br/> Please click OK to continue.', 16, 1);
+			GOTO SettleStorage_Exit;
+		END
+	END
 	
 	SettleStorage_Exit:
 END TRY

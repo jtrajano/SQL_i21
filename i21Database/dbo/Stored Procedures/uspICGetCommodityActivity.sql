@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICGetCommodityActivity]
+﻿ CREATE PROCEDURE [dbo].[uspICGetCommodityActivity]
 	@dtmDate  AS DATETIME,
 	@guidSessionId UNIQUEIDENTIFIER,
 	@intUserId INT
@@ -50,7 +50,7 @@ SELECT
 	,a.intLocationId
 	,a.strLocationName
 	,a.strItemUOM
-	,sum(a.dblOpeningQty) AS dblOpeningQty
+	,sum(a.dblTotalOpeningQty) AS dblOpeningQty
 	,sum(a.dblReceivedQty) AS dblReceivedQty
 	,sum(a.dblInventoryCountQty) AS dblInventoryCountQty
 	,sum(a.dblInvoicedQty) AS dblInvoicedQty

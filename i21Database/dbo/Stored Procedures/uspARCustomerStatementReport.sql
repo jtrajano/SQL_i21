@@ -89,16 +89,16 @@ DECLARE @temp_cf_table TABLE(
 	,[dtmInvoiceDate]			DATETIME
 )
 
-DECLARE @CREDITMEMOPAIDREFUNDED TABLE (
-	 intInvoiceId			INT												NOT NULL PRIMARY KEY
-	,strInvoiceNumber		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
+DECLARE @REFUNDEDINVOICES TABLE (
+	 intInvoiceId		INT												NOT NULL PRIMARY KEY
+	,strInvoiceNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,strDocumentNumber	NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 )
 DECLARE @CASHREFUNDS TABLE (
-	 intOriginalInvoiceId			INT												NULL
-	,strDocumentNumber			NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
-	,dblRefundTotal				NUMERIC(18, 6)									NULL DEFAULT 0
-	,dblBaseRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
+	 intOriginalInvoiceId	INT												NULL
+	,strDocumentNumber		NVARCHAR (25)   COLLATE Latin1_General_CI_AS	NULL
+	,dblRefundTotal			NUMERIC(18, 6)									NULL DEFAULT 0
+	,dblBaseRefundTotal		NUMERIC(18, 6)									NULL DEFAULT 0
 )
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
@@ -295,7 +295,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom				= @dtmDateFromLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 
 UPDATE C
-SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strBillToLocationName ELSE NULL END, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+SET strFullAddress				= CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strLocationName ELSE '' END + CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(CS.strBillToAddress)), '') + CHAR(13) + char(10) + ISNULL(NULLIF(CS.strBillToCity, ''), '') + ISNULL(', ' + NULLIF(CS.strBillToState, ''), '') + ISNULL(', ' + NULLIF(CS.strBillToZipCode, ''), '') + ISNULL(', ' + NULLIF(CS.strBillToCountry, ''), '')
   , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
 FROM #CUSTOMERS C
 INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
@@ -480,24 +480,26 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 SELECT @dblTotalAR = SUM(dblTotalAR) FROM tblARCustomerAgingStagingTable
 
---@CREDITMEMOPAIDREFUNDED
-INSERT INTO @CREDITMEMOPAIDREFUNDED (
-	   intInvoiceId
-	 , strInvoiceNumber
-	 , strDocumentNumber
+--@REFUNDEDINVOICES
+INSERT INTO @REFUNDEDINVOICES (
+	 intInvoiceId
+	,strInvoiceNumber
+	,strDocumentNumber
 )
-SELECT I.intInvoiceId,I.strInvoiceNumber,REFUND.strDocumentNumber
+SELECT 
+	 I.intInvoiceId
+	,I.strInvoiceNumber
+	,REFUND.strDocumentNumber
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN(
 	SELECT ID.strDocumentNumber from tblARInvoice INV
 	INNER JOIN tblARInvoiceDetail ID ON INV.intInvoiceId=ID.intInvoiceId
 	where   strTransactionType='Cash Refund' and ysnPosted = 1
-)REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
+) REFUND ON REFUND.strDocumentNumber = I.strInvoiceNumber
 WHERE I.ysnPosted = 1 
-	AND (I.ysnPaid = 1 OR I.ysnRefundProcessed = 1)
+	AND I.ysnRefundProcessed = 1
 	AND I.strTransactionType <> 'Cash Refund'
-	AND I.strTransactionType = 'Credit Memo'
 	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
 --@CASHREFUNDS
@@ -604,8 +606,11 @@ END;
 
 
 DELETE FROM  @temp_statement_table
-WHERE strReferenceNumber IN (SELECT CF.strDocumentNumber FROM @CASHREFUNDS CF INNER  JOIN @CREDITMEMOPAIDREFUNDED CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber) 
-
+WHERE strReferenceNumber IN (
+	SELECT CF.strDocumentNumber 
+	FROM @CASHREFUNDS CF 
+	INNER JOIN @REFUNDEDINVOICES CMPF ON CF.strDocumentNumber = CMPF.strDocumentNumber
+) 
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = @strStatementFormatLocal
 INSERT INTO tblARCustomerStatementStagingTable (
@@ -756,4 +761,3 @@ IF @ysnPrintCreditBalanceLocal = 0
 				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
 		  )
 	END
-

@@ -25,6 +25,7 @@ BEGIN
 			AS  
 				SELECT 
 					strSerialNumber = A.strSerialNumber
+					,strAssetNumber = A.strAssetNumber
 					,strDeviceType = D.strDeviceType
 					,strManufacturerId = L.strManufacturerId
 					,strManufacturerName = L.strManufacturerName

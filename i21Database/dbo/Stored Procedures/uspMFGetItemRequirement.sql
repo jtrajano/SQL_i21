@@ -522,7 +522,8 @@ BEGIN
 		UPDATE L
 		SET dblQty = CASE 
 				WHEN L.dblQty - IsNULL(R.dblPlannedQty, 0) > 0
-					THEN L.dblQty - IsNULL(R.dblPlannedQty, 0)
+					--THEN L.dblQty - IsNULL(R.dblPlannedQty, 0)
+					THEN L.dblQty
 				ELSE 0
 				END
 		FROM @tblMFLot L

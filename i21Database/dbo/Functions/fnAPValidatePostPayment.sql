@@ -637,6 +637,20 @@ BEGIN
 		AND PD.dblDiscount <> 0
 		AND CL.intDiscountAccountId IS NULL
 
+		--DO NOT ALLOW TO POST PAYMENT FOR VOUCHERS OF VENDOR WITH CURRENTLY ON HOLD
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Unable to post payment of ' + B.strBillId + ',  payment of vendor '+ E.strName + '  is on hold',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+    INNER JOIN tblAPVendor V ON P.intEntityVendorId = V.intEntityId
+		INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND V.ysnPymtCtrlHold = CAST(1 AS BIT) 
 	END
 	ELSE
 	BEGIN

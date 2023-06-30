@@ -36,7 +36,7 @@ BEGIN
 			, intScaleSetupId INT
 			, intTicketFormatId INT
 			, intTicketPrintOptionId INT
-
+			
 			, [ysnSuppressCashPrice] BIT NULL 
 			, [ysnSuppressCompanyName] BIT NULL
 			, [ysnSuppressSplit] BIT NULL
@@ -46,6 +46,29 @@ BEGIN
 
 			, [intSuppressDiscountOptionId] INT NULL
 		)
+
+		IF @intScaleSetupId IS NULL 
+		BEGIN
+			SELECT @intScaleSetupId = intScaleSetupId
+			FROM tblSCTicket WHERE intTicketId = @intTicketId
+
+		END
+		
+		IF @intTicketFormatId IS NULL
+		BEGIN
+			SELECT @intTicketFormatId = intTicketFormatId
+			FROM tblSCTicketPrintOption 
+			WHERE intScaleSetupId = @intScaleSetupId AND ysnPrintCustomerCopy = 1
+
+		END
+		SET  @intTicketPrintOptionId = ISNULL(@intTicketPrintOptionId, -1)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketPrintOption WHERE intTicketPrintOptionId = @intTicketPrintOptionId AND intScaleSetupId = @intScaleSetupId)
+		BEGIN
+			SELECT TOP 1 @intTicketPrintOptionId = intTicketPrintOptionId FROM tblSCTicketPrintOption
+				WHERE intScaleSetupId = @intScaleSetupId
+					AND ysnPrintCustomerCopy = 1
+		END
+
 
 		--PUT THE VARIABLE IN THE TEMP TABLE
 		--USE THE PARAMETER AS THE VALUE
@@ -69,6 +92,8 @@ BEGIN
 			FROM @PRINT_RELATED_TABLE PRINT_RELATED_TABLE
 				JOIN tblSCTicketFormat TICKET_FORMAT
 					ON PRINT_RELATED_TABLE.intTicketFormatId = TICKET_FORMAT.intTicketFormatId
+
+			
 		END
 	
 		SELECT
@@ -231,18 +256,25 @@ BEGIN
 			, blbSignature
 			, intUserId
 			, intDecimalPrecision
-			, PRINT_RELATED_TABLE.ysnSuppressCashPrice
+			, ISNULL(PRINT_PREVIEW.ysnSuppressCashPrice ,PRINT_RELATED_TABLE.ysnSuppressCashPrice) AS ysnSuppressCashPrice 
 			, strSealNumbers
 			, strTimezone
 			, strTrailerId
-			, PRINT_RELATED_TABLE.intTicketPrintOptionId
+			, ISNULL(PRINT_PREVIEW.intTicketPrintOptionId, PRINT_RELATED_TABLE.intTicketPrintOptionId) AS intTicketPrintOptionId
 			, strDestinationLocationName
 			, strDestinationSubLocation
-			, strDestinationStorageLocation 
+			, strDestinationStorageLocation
+
+
+			, strLoadAddress
+			, strEntityDefaultLocationAddress
+			, ysnShowLoadOutAddressForFullSheetTicket
+
 		FROM
 			vyuSCPrintPreviewTicketView PRINT_PREVIEW
 		JOIN @PRINT_RELATED_TABLE PRINT_RELATED_TABLE
 			ON PRINT_PREVIEW.intTicketId = PRINT_RELATED_TABLE.intTicketId
+				AND PRINT_PREVIEW.intTicketPrintOptionId = PRINT_RELATED_TABLE.intTicketPrintOptionId
 		WHERE PRINT_PREVIEW.intTicketId = @intTicketId
 	END
 	

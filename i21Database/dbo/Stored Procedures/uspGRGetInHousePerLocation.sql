@@ -24,7 +24,8 @@ BEGIN
 	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
 		,@intCommodityStockUOMId = intUnitMeasureId
 	FROM tblICCommodityUnitMeasure
-	WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
+	WHERE intCommodityId = @intCommodityId 
+		AND ysnStockUnit = 1
 
 	
 	DECLARE @tblResult TABLE (
@@ -75,6 +76,80 @@ BEGIN
 		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
 			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
 		--AND ((strTransactionType = 'Invoice' and CompOwn.intTicketId IS NOT NULL) OR (strTransactionType <> 'Invoice')) --Invoices from Scale and other transactions
+
+	--=============================
+	-- Company Owned *** Invoices that are not linked to scale tickets
+	--=============================
+	INSERT INTO @tblResult (
+		dtmDate
+		,dblTotal
+		,strTransactionNo
+		,strTransactionType
+		,strDistribution
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT
+		  dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmTransactionDate,110),110)
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,CompOwn.dblTotal * -1)
+		,CompOwn.strTransactionNumber
+		,CompOwn.strTransactionType
+		,'SO' --set strDistribution the same as Sales Order just to easily get the Invoice
+		,strOwnership = 'Company Owned'
+		,CompOwn.intLocationId
+		,CompOwn.strLocationName
+	FROM dbo.fnRKGetBucketCompanyOwned(@dtmDate,@intCommodityId,NULL) CompOwn
+	INNER JOIN tblARInvoice AR
+		ON AR.intInvoiceId = CompOwn.intTransactionRecordHeaderId
+			AND AR.intSalesOrderId IS NULL
+			AND AR.strInvoiceNumber = CompOwn.strTransactionNumber
+	INNER JOIN tblARInvoiceDetail AD
+		ON AD.intInvoiceDetailId = CompOwn.intTransactionRecordId
+			AND AD.intTicketId IS NULL
+	WHERE CompOwn.intItemId = ISNULL(@intItemId,CompOwn.intItemId)
+		AND (CompOwn.intLocationId = ISNULL(@intLocationId,CompOwn.intLocationId)
+			OR CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
+		AND CompOwn.strTransactionType = 'Invoice'
+
+	--=================================
+	-- Company Owned *** Sales Order
+	--=================================
+	INSERT INTO @tblResult (
+		dtmDate
+		,dblTotal
+		,strTransactionNo
+		,strTransactionType
+		,strDistribution
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT
+		dtmDate = CONVERT(DATETIME,CONVERT(VARCHAR(10),SC.dtmTicketDateTime,110),110)
+		,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(CO.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SC.dblNetUnits)
+		,AR.strInvoiceNumber
+		,'Invoice'
+		,'SO'
+		,strOwnership = 'Company Owned'
+		,AR.intCompanyLocationId
+		,CL.strLocationName
+	FROM tblSCTicket SC
+	INNER JOIN tblICItemUOM UOM
+		ON UOM.intItemUOMId = SC.intItemUOMIdTo
+	INNER JOIN tblARInvoice AR
+		ON AR.intSalesOrderId = SC.intSalesOrderId
+	INNER JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = AR.intCompanyLocationId
+	INNER JOIN tblICItem IC
+		ON IC.intItemId = UOM.intItemId
+	INNER JOIN tblICCommodityUnitMeasure CO
+		ON CO.intCommodityId = IC.intCommodityId
+			AND CO.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE IC.intItemId = ISNULL(@intItemId,IC.intItemId)
+		AND (AR.intCompanyLocationId= ISNULL(@intLocationId,AR.intCompanyLocationId)
+			OR AR.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation))
+		AND IC.intCommodityId = ISNULL(@intCommodityId, IC.intCommodityId)
 
 	--=============================
 	-- Customer Owned
@@ -361,7 +436,44 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Inventory Shipment', 'Invoice')
+		WHERE strTransactionType = 'Inventory Shipment'
+		GROUP BY dtmDate
+			,strDistribution 
+			,strTransactionType
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+	) t
+	WHERE dblTotal <> 0
+
+	INSERT INTO @tblResultInventory
+	(
+		dtmDate
+		,dblInvIn
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT dtmDate
+		,ABS(dblTotal)
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	FROM (
+		SELECT dtmDate 
+			,dblTotal = SUM(ISNULL(dblTotal,0))
+			,strDistribution 
+			,strTransactionType
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResult
+		WHERE strTransactionType = 'Invoice'
+			AND strDistribution = 'SO'
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType
@@ -397,7 +509,7 @@ BEGIN
 			,intCompanyLocationId
 			,strLocationName
 		FROM @tblResult
-		WHERE strTransactionType IN ('Outbound Shipment')
+		WHERE strTransactionType = 'Outbound Shipment'
 		GROUP BY dtmDate
 			,strDistribution 
 			,strTransactionType
@@ -434,6 +546,43 @@ BEGIN
 			,strLocationName
 		FROM @tblResult
 		WHERE strTransactionType LIKE 'Inventory Adjustment%'
+			AND dblTotal > 0
+		GROUP BY dtmDate
+			,strDistribution 
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+			,intCompanyLocationId
+	) t
+
+	INSERT INTO @tblResultInventory
+	(
+		dtmDate
+		,dblAdjustments
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	)
+	SELECT dtmDate
+		,dblTotal 
+		,strDistribution 
+		,strTransactionType
+		,strOwnership
+		,intCompanyLocationId
+		,strLocationName
+	FROM (
+		SELECT dtmDate 
+			,dblTotal = SUM(ISNULL(dblTotal,0))
+			,strDistribution  = CASE WHEN ISNULL(strDistribution,'') <> '' THEN strDistribution ELSE 'ADJ' END
+			,strTransactionType = 'Inventory Adjustment'
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResult
+		WHERE strTransactionType LIKE 'Inventory Adjustment%'
+			AND dblTotal < 0
 		GROUP BY dtmDate
 			,strDistribution 
 			,strOwnership
@@ -505,7 +654,49 @@ BEGIN
 			,strLocationName
 		FROM @tblResultInventory
 		WHERE dtmDate = @dtmDate
+			AND strTransactionType <> 'Inventory Adjustment'
 		GROUP BY dtmDate,strTransactionType,strOwnership,strOwnership,intCompanyLocationId,strLocationName
+		UNION ALL
+		SELECT dtmDate
+			,dblInvIn = 0
+			,dblInvOut = 0
+			,dblAdjustments = SUM(dblAdjustments)
+			--,strDistribution
+			--,r.dblBalanceInv
+			--,r.dblBalanceCompanyOwned
+			--,r.dblBalanceCustomerOwned 
+			--,r.dblSalesInTransit
+			,strTransactionType
+			,intCommodityId = @intCommodityId
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResultInventory
+		WHERE dtmDate = @dtmDate
+			AND strTransactionType = 'Inventory Adjustment'
+			AND dblAdjustments < 0
+		GROUP BY dtmDate,strTransactionType,strOwnership,strOwnership,intCompanyLocationId,strLocationName
+		UNION ALL
+		SELECT dtmDate
+			,dblInvIn = 0
+			,dblInvOut = 0
+			,dblAdjustments = SUM(dblAdjustments)
+			--,strDistribution
+			--,r.dblBalanceInv
+			--,r.dblBalanceCompanyOwned
+			--,r.dblBalanceCustomerOwned 
+			--,r.dblSalesInTransit
+			,strTransactionType
+			,intCommodityId = @intCommodityId
+			,strOwnership
+			,intCompanyLocationId
+			,strLocationName
+		FROM @tblResultInventory
+		WHERE dtmDate = @dtmDate
+			AND strTransactionType = 'Inventory Adjustment'
+			AND dblAdjustments > 0
+		GROUP BY dtmDate,strTransactionType,strOwnership,strOwnership,intCompanyLocationId,strLocationName
+		
 
 	DROP TABLE #LicensedLocation
 END

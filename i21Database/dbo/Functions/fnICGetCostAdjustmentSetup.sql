@@ -24,6 +24,9 @@ AS
 BEGIN 
 	DECLARE @costAdjustmentType_DETAILED AS TINYINT = 1
 			,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+			,@costAdjustmentType_RETROACTIVE_DETAILED AS TINYINT = 3
+			,@costAdjustmentType_RETROACTIVE_SUMMARIZED AS TINYINT = 4
+			,@costAdjustmentType_CURRENT_AVG AS TINYINT = 5
 			,@intCostAdjustmentType AS TINYINT
 
 	SELECT 		
@@ -31,8 +34,16 @@ BEGIN
 			CASE 
 				WHEN il.intLocationId IS NULL THEN 
 					@costAdjustmentType_DETAILED -- Default In-transit location as Detailed. 
+
+				WHEN il.intCostingMethod = 1 THEN 
+					CASE 
+						WHEN il.intCostAdjustmentType = @costAdjustmentType_SUMMARIZED THEN @costAdjustmentType_RETROACTIVE_SUMMARIZED
+						WHEN il.intCostAdjustmentType = @costAdjustmentType_DETAILED THEN @costAdjustmentType_RETROACTIVE_DETAILED
+						ELSE 
+							ISNULL(il.intCostAdjustmentType, @costAdjustmentType_RETROACTIVE_SUMMARIZED)
+					END 
 				ELSE 
-					il.intCostAdjustmentType
+					ISNULL(il.intCostAdjustmentType, @costAdjustmentType_SUMMARIZED)					
 			END 
 	FROM 
 		tblICItemLocation il

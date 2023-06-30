@@ -348,14 +348,18 @@ BEGIN
 		AND ReceiptCharge.intEntityVendorId = ReceiptChargesToBill.intEntityVendorId
 		AND 1 = 
 			CASE 
-				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN 
-					--AND ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
-					CASE						
-						WHEN ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) = 0 THEN 0
-						WHEN ABS(ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) - ISNULL(ReceiptCharge.dblAmount, 0)) BETWEEN 0.01 AND 0.03 THEN 0 -- tolerate 0.01 to 0.03 discrepancy due to pro-rated charges. 
-						WHEN ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1
-						ELSE 0
-					END 
+				-- START: Disable this validation since AP is now tracking the AP clearing. 
+				---------------------------------------------------------------------------------------------
+				--WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN 
+				--	--AND ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+				--	CASE						
+				--		WHEN ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) = 0 THEN 0
+				--		WHEN ABS(ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) - ISNULL(ReceiptCharge.dblAmount, 0)) BETWEEN 0.01 AND 0.03 THEN 0 -- tolerate 0.01 to 0.03 discrepancy due to pro-rated charges. 
+				--		WHEN ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1
+				--		ELSE 0
+				--	END 
+				---------------------------------------------------------------------------------------------
+				-- END: Disable this validation since AP is now tracking the AP clearing. 
 				WHEN ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) = 0 THEN 0 
 				WHEN ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) > ISNULL(ReceiptChargesToBill.dblQuantity, 0) THEN 1 
 				ELSE 

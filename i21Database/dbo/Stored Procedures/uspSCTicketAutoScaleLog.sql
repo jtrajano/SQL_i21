@@ -1,0 +1,14 @@
+﻿CREATE PROCEDURE [dbo].[uspSCTicketAutoScaleLog]
+	@TICKET_ID INT
+	,@UNIT NUMERIC(18, 6)
+	,@CONTRACT_ID INT	
+AS
+BEGIN
+	PRINT 'TICKET LOG'
+
+	IF @UNIT > 0 	
+	BEGIN
+		INSERT INTO tblSCTicketAutoScaleLog(intTicketId, dblUnit, intContractDetailId) 
+		SELECT @TICKET_ID, @UNIT, @CONTRACT_ID
+	END
+END

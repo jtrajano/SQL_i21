@@ -64,6 +64,9 @@ BEGIN
 								 ELSE 0
 							END 					
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId 
+					AND Item.strType IN ('Inventory') 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = 
 								-- Convert the other charge amount to functional currency. 
@@ -104,6 +107,9 @@ BEGIN
 							,ReceiptItem.strChargesLink
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+							INNER JOIN tblICItem Item
+								ON Item.intItemId = ReceiptItem.intItemId 
+								AND Item.strType IN ('Inventory') 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 					GROUP BY ReceiptItem.intInventoryReceiptId, ReceiptItem.strChargesLink
 				) TotalCostOfItemsPerContract 

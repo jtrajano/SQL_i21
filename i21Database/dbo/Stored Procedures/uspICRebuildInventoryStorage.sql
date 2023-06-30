@@ -543,9 +543,9 @@ BEGIN
 		SELECT	id = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
-							-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+							-CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 						ELSE
-							CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+							CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 					END 
 				,id2 = t.intInventoryTransactionStorageId
 				,intSortByQty = 
@@ -661,7 +661,7 @@ BEGIN
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
-					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 				ELSE
 					NULL
 			END DESC 
@@ -707,7 +707,7 @@ BEGIN
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 
-					CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+					CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 				ELSE
 					1
 			END ASC
@@ -719,7 +719,7 @@ BEGIN
 			ON #tmpICInventoryTransactionStorage(sortId ASC);
 
 		INSERT INTO #tmpICInventoryTransactionStorage
-		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
 				,id2 = intInventoryTransactionStorageId
 				,intSortByQty = 
 					CASE 
@@ -770,7 +770,7 @@ BEGIN
 		FROM	#tmpUnOrderedICTransactionStorage t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
-			intInventoryTransactionStorageId ASC,  CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
+			intInventoryTransactionStorageId ASC,  CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT) ASC 
 	END
 END
 

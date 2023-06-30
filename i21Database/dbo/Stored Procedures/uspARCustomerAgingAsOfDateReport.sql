@@ -412,9 +412,14 @@ INNER JOIN #ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN #AGINGGLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
+LEFT JOIN (
+	SELECT intTransactionId, dtmDate, strTransactionType
+	FROM dbo.tblARNSFStagingTableDetail
+	GROUP BY intTransactionId, dtmDate, strTransactionType
+) NSF ON I.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE ysnPosted = 1
-  AND I.ysnProcessedToNSF = 0
-  AND strTransactionType <> 'Cash Refund'
+  AND (I.ysnProcessedToNSF = 0 OR (I.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
+  AND I.strTransactionType <> 'Cash Refund'
   AND ( 
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
@@ -601,7 +606,7 @@ WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit
 
 LEFT JOIN
           
-(SELECT DISTINCT 
+(SELECT  
       intEntityCustomerId
     , intInvoiceId  
 	, dblAmountPaid
@@ -728,5 +733,4 @@ A.intEntityCustomerId	 = B.intEntityCustomerId
 AND A.intInvoiceId		 = B.intInvoiceId
 
 GROUP BY A.intEntityCustomerId) AS AGING
-INNER JOIN #ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
-ORDER BY strCustomerName
+INNER JOIN #ADCUSTOMERS CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId

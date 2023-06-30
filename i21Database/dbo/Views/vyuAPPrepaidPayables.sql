@@ -4,6 +4,8 @@
 CREATE VIEW [dbo].[vyuAPPrepaidPayables]
 AS
 
+SELECT payables.*
+FROM (
 --VENDOR PREPAYMENT
 --POSITIVE PART
 SELECT
@@ -11,8 +13,8 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(A.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblTotal
-	, CAST(A.dblAmountDue * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountDue 
+	, CAST(A.dblTotal AS DECIMAL(18,2)) AS dblTotal
+	, CAST(A.dblAmountDue AS DECIMAL(18,2)) AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0
@@ -25,6 +27,7 @@ SELECT
 	, prepaidDetail.intAccountId
 	, prepaidDetail.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, intPrepaidRowType = 1
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -39,7 +42,6 @@ OUTER APPLY (
 	LEFT JOIN tblGLAccount accnt ON bd.intAccountId = accnt.intAccountId
 	WHERE bd.intBillId = A.intBillId
 ) prepaidDetail
-
 WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
 AND A.intTransactionReversed IS NULL --Remove if already reversed, negative part will be offset by the reversal transaction
 AND NOT EXISTS (
@@ -51,7 +53,7 @@ SELECT
 	  A.dtmDatePaid AS dtmDate 
 	, ISNULL(B.intBillId ,B.intOrigBillId) AS intBillId  
 	, C.strBillId
-	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
+	, CAST(B.dblPayment AS DECIMAL(18,2))  AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -66,6 +68,7 @@ SELECT
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 1
 FROM dbo.tblAPPayment  A
  INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -76,12 +79,6 @@ LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
-OUTER APPLY (
-	SELECT TOP 1
-		bd.dblRate
-	FROM tblAPBillDetail bd
-	WHERE bd.intBillId = C.intBillId
-) prepaidDetail		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
@@ -96,7 +93,7 @@ SELECT
 	  A.dtmDate AS dtmDate 
 	, A.intBillId  
 	, A.strBillId
-	, CAST(A.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
+	, CAST(A.dblTotal AS DECIMAL(18,2))  AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, A.dblWithheld
@@ -111,11 +108,12 @@ SELECT
 	, prepaidDetail.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 1
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate, bd.intAccountId
@@ -141,8 +139,8 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(A.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2)) * -1 AS dblTotal
-	, CAST(A.dblAmountDue * prepaidDetail.dblRate AS DECIMAL(18,2)) * -1 AS dblAmountDue
+	, CAST(A.dblTotal AS DECIMAL(18,2)) * -1 AS dblTotal
+	, CAST(A.dblAmountDue AS DECIMAL(18,2)) * -1 AS dblAmountDue
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0
@@ -155,18 +153,13 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 2
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-OUTER APPLY (
-	SELECT TOP 1
-		bd.dblRate
-	FROM tblAPBillDetail bd
-	WHERE bd.intBillId = A.intBillId
-) prepaidDetail	
 WHERE A.intTransactionType IN (2, 13) AND A.ysnPosted = 1
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
@@ -177,8 +170,8 @@ SELECT
 	, A.intBillId --Use the original prepaid primary key but display the bill id of reversal (-R)
 	, B.strBillId 
 	, 0 AS dblAmountPaid 
-	, CAST(B.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblTotal
-	, CAST(B.dblAmountDue * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountDue
+	, CAST(B.dblTotal AS DECIMAL(18,2)) AS dblTotal
+	, CAST(B.dblAmountDue AS DECIMAL(18,2)) AS dblAmountDue
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0
@@ -191,6 +184,7 @@ SELECT
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 2
 FROM dbo.tblAPBill A
 INNER JOIN tblAPBill B ON A.intTransactionReversed = B.intBillId
@@ -198,12 +192,6 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
-OUTER APPLY (
-	SELECT TOP 1
-		bd.dblRate
-	FROM tblAPBillDetail bd
-	WHERE bd.intBillId = B.intBillId
-) prepaidDetail	
 WHERE B.intTransactionType IN (12) AND A.ysnPosted = 1 AND B.ysnPosted = 1
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
@@ -214,12 +202,12 @@ SELECT
 	  A.dtmDatePaid AS dtmDate 
 	, B.intBillId  
 	, C.strBillId
-	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountPaid     
+	, CAST(B.dblPayment AS DECIMAL(18,2)) AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
-	, CAST(B.dblDiscount * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblDiscount
-	, CAST(B.dblInterest * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblInterest
+	, CAST(B.dblDiscount AS DECIMAL(18,2)) AS dblDiscount
+	, CAST(B.dblInterest AS DECIMAL(18,2)) AS dblInterest
 	, dblPrepaidAmount = 0   
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
@@ -229,6 +217,7 @@ SELECT
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 2
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -239,12 +228,6 @@ LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
 LEFT JOIN dbo.tblGLAccount F ON B.intAccountId = F.intAccountId
-OUTER APPLY (
-	SELECT TOP 1
-		bd.dblRate
-	FROM tblAPBillDetail bd
-	WHERE bd.intBillId = C.intBillId
-) prepaidDetail		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
@@ -272,6 +255,7 @@ SELECT
 	,C.intAccountId
 	,F.strAccountId
 	,EC.strClass
+	, A.intCurrencyId
 	,2
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
@@ -290,7 +274,7 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId AS intTransactionId,   
 	 C.strBillId ,
-	 B.dblPayment * ISNULL(A.dblExchangeRate,1) * - 1 AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
+	 B.dblPayment * - 1 AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = 0
@@ -305,6 +289,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	,2
 FROM dbo.tblARPayment  A
  LEFT JOIN dbo.tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -322,7 +307,7 @@ UNION ALL --CLAIM TRANSACTION IN AR
 SELECT A.dtmDatePaid AS dtmDate,   
 	 F.intBillId AS intTransactionId,   
 	 F.strBillId ,
-	 (B.dblPayment + prepaid.dblFranchiseAmount) * ISNULL(A.dblExchangeRate,1) * - 1 AS dblAmountPaid,
+	 (B.dblPayment + prepaid.dblFranchiseAmount) * - 1 AS dblAmountPaid,
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = 0
@@ -337,6 +322,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, B.intAccountId
 	, accnt.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 2
 FROM dbo.tblARPayment  A
  LEFT JOIN dbo.tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -358,4 +344,7 @@ OUTER APPLY (
 LEFT JOIN tblAPBill F ON F.intBillId = prepaid.intPrepayTransactionId
  WHERE A.ysnPosted = 1  
 	AND C.intTransactionType IN (11)
-
+) payables
+CROSS APPLY tblSMCompanyPreference compPref
+WHERE payables.intCurrencyId = compPref.intDefaultCurrencyId
+GO

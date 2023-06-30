@@ -240,7 +240,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -486,7 +486,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -598,7 +598,7 @@ SELECT
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
-    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
+    ,[intSubLocationId]                 = CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ARID.[intSubLocationId] END
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
     ,[ysnBlended]                       = ARID.[ysnBlended]
@@ -807,7 +807,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -979,7 +979,7 @@ SELECT
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
-    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
+    ,[intSubLocationId]                 = CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ARID.[intSubLocationId] END
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ICI.[ysnAutoBlend]
     ,[ysnBlended]                       = ARID.[ysnBlended]    
@@ -1175,7 +1175,7 @@ SELECT
     ,[dblTax]                           = ARI.[dblTax]
     ,[dblBaseTax]                       = ARI.[dblBaseTax]
     ,[dblAmountDue]                     = ARI.[dblAmountDue]
-    ,[dblBaseAmountDue]                 = ARI.[dblBaseAmountDue]
+    ,[dblBaseAmountDue]                 = ROUND(ARI.[dblAmountDue] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
     ,[dblPayment]                       = ARI.[dblPayment]
     ,[dblBasePayment]                   = ARI.[dblBasePayment]
     ,[dblProvisionalAmount]             = ARI.[dblProvisionalAmount]
@@ -1283,7 +1283,7 @@ SELECT
     ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
-    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
+    ,[intSubLocationId]                 = ARID.[intSubLocationId]
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit

@@ -1204,6 +1204,27 @@ IF ISNULL(@intExistingInvoiceId, 0) = 0
 			,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
 
 		SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
+
+		--LOG PRICE FIXATION
+		IF @ysnHasPriceFixation = 1
+			BEGIN
+				INSERT INTO tblCTPriceFixationDetailAPAR (
+					intPriceFixationDetailId
+					, intInvoiceId
+					, intInvoiceDetailId
+					, intConcurrencyId
+				)
+				SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+					, intInvoiceId				= ID.intInvoiceId
+					, intInvoiceDetailId		= ID.intInvoiceDetailId
+					, intConcurrencyId			= 1
+				FROM tblARInvoiceDetail ID
+				INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+				WHERE ID.intInvoiceId = @NewInvoiceId
+				AND PRICE.ysnProcessed = 1
+				AND ID.intInventoryShipmentItemId IS NOT NULL
+				AND ID.intInventoryShipmentChargeId IS NULL
+			END
 	END
 ELSE
 --INSERT TO EXISTING INVOICE
@@ -1246,6 +1267,7 @@ ELSE
 				, intStorageLocationId
 				, intSubLocationId
 				, intCompanyLocationSubLocationId
+				, intPriceFixationDetailId
 			)
 			SELECT intInvoiceDetailId				= NULL
 				, strSourceTransaction				= 'Direct'
@@ -1282,6 +1304,7 @@ ELSE
 				, intStorageLocationId				= EI.intStorageLocationId
 				, intSubLocationId					= EI.intSubLocationId
 				, intCompanyLocationSubLocationId	= EI.intSubLocationId
+				, intPriceFixationDetailId			= EI.intPriceFixationDetailId
 			FROM @EntriesForInvoice EI
 
 			EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
@@ -1292,27 +1315,28 @@ ELSE
 
 			EXEC dbo.uspARUpdateInvoiceIntegrations @intExistingInvoiceId, 0, @UserId
 			EXEC dbo.uspARReComputeInvoiceTaxes @intExistingInvoiceId
-	END
 
---LOG PRICE FIXATION
-IF @ysnHasPriceFixation = 1
-	BEGIN
-		INSERT INTO tblCTPriceFixationDetailAPAR (
-			  intPriceFixationDetailId
-			, intInvoiceId
-			, intInvoiceDetailId
-			, intConcurrencyId
-		)
-		SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
-		     , intInvoiceId				= ID.intInvoiceId
-			 , intInvoiceDetailId		= ID.intInvoiceDetailId
-			 , intConcurrencyId			= 1
-		FROM tblARInvoiceDetail ID
-		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.intPriceFixationDetailId = PRICE.intPriceFixationDetailId
-		WHERE ID.intInvoiceId = @NewInvoiceId
-		  AND PRICE.ysnProcessed = 1
-		  AND ID.intInventoryShipmentItemId IS NOT NULL
-		  AND ID.intInventoryShipmentChargeId IS NULL
+			--LOG PRICE FIXATION
+			IF @ysnHasPriceFixation = 1
+				BEGIN
+					INSERT INTO tblCTPriceFixationDetailAPAR (
+						intPriceFixationDetailId
+						, intInvoiceId
+						, intInvoiceDetailId
+						, intConcurrencyId
+					)
+					SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+						, intInvoiceId				= ID.intInvoiceId
+						, intInvoiceDetailId		= ID.intInvoiceDetailId
+						, intConcurrencyId			= 1
+					FROM tblARInvoiceDetail ID
+					INNER JOIN @EntriesForInvoice EI ON ID.intContractDetailId = EI.intContractDetailId AND ID.intTicketId = EI.intTicketId AND ID.intInventoryShipmentItemId = EI.intInventoryShipmentItemId AND ID.intPriceFixationDetailId = EI.intPriceFixationDetailId
+					INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+					WHERE ID.intInvoiceId = @NewInvoiceId
+					  AND PRICE.ysnProcessed = 1
+					  AND ID.intInventoryShipmentItemId IS NOT NULL
+					  AND ID.intInventoryShipmentChargeId IS NULL
+				END
 	END
 
 RETURN @NewInvoiceId

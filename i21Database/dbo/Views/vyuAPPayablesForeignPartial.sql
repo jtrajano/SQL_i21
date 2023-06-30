@@ -433,7 +433,7 @@ FROM (
   A.dtmDate      
   ,A.intBillId      
   ,A.strBillId      
-  ,B.dblAmountApplied      
+  ,B.dblAmountApplied  * ISNULL(voucherDetailApplied.dblRate,1)
   ,0 AS dblTotal      
   ,0 AS dblAmountDue      
   ,0 AS dblWithheld      
@@ -455,7 +455,7 @@ FROM (
  INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId      
  INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]      
  LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId        
- OUTER APPLY (      
+  OUTER APPLY (      
   SELECT TOP 1      
    voucherDetail.dblRate      
   FROM tblAPBillDetail voucherDetail      
@@ -469,7 +469,7 @@ FROM (
   A.dtmDate      
   ,A.intBillId      
   ,A.strBillId      
-  ,ROUND(B.dblAmountApplied * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END), 2)    
+  ,ROUND(B.dblAmountApplied * ISNULL(voucherDetailApplied.dblRate,1) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END), 2)    
   ,0 AS dblTotal      
   ,0 AS dblAmountDue      
   ,0 AS dblWithheld      
@@ -492,6 +492,12 @@ FROM (
  INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]      
  LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId      
  LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId        
+   OUTER APPLY (      
+  SELECT TOP 1      
+   voucherDetail.dblRate      
+  FROM tblAPBillDetail voucherDetail      
+  WHERE voucherDetail.intBillDetailId = B.intBillDetailApplied      
+ ) voucherDetailApplied  
  WHERE C.ysnPosted = 1 AND A.intTransactionType = 3 AND B.ysnApplied = 1 AND A.ysnPosted = 1      
  UNION ALL      
  SELECT --OVERPAYMENT      
