@@ -263,10 +263,11 @@ FROM @tblInventoryTransactionGrouped t
 	) 
 		ON ItemUOM.intItemUOMId = t.intItemUOMId
 	OUTER APPLY (
-        SELECT (cl.dblStockIn - cl.dblStockOut) dblLotQty
+        SELECT TOP 1 (cl.dblStockIn - cl.dblStockOut) dblLotQty
         FROM tblICInventoryLot cl
         WHERE cl.intLotId = ad.intLotId
             AND cl.ysnIsUnposted = 0
+		ORDER BY cl.dtmDate DESC
     ) lot
 	CROSS APPLY (
 		SELECT
