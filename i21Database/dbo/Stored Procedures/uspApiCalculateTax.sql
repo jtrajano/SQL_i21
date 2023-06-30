@@ -1,5 +1,6 @@
 CREATE PROCEDURE dbo.uspApiCalculateTax (
 	  @UniqueId UNIQUEIDENTIFIER
+	, @TransactionType NVARCHAR(20) -- Sale/Purchase
 	, @ItemId INT
 	, @UOMId INT
 	, @LocationId INT
@@ -12,6 +13,7 @@ CREATE PROCEDURE dbo.uspApiCalculateTax (
 	, @Price NUMERIC(18, 6)
 	, @FreightTermId INT
 	, @ItemTaxIdentifier UNIQUEIDENTIFIER
+	, @Tax NUMERIC(18, 6) OUTPUT
 )
 AS
 
@@ -89,18 +91,19 @@ INSERT INTO @tblRestApiItemTaxes (
 	, strTaxClass
 	, ysnAddToCost
 	, ysnOverrideTaxGroup)
-EXEC [dbo].[uspARGetItemTaxes]
+EXEC [dbo].[uspApiGetItemTaxes]
 	@ItemId= @ItemId,
 	@LocationId= @LocationId,
-	@CustomerId= @CustomerId,
-	@CustomerLocationId= @CustomerLocationId,
+	@EntityId= @CustomerId,
+	@EntityLocationId= @CustomerLocationId,
 	@TransactionDate= @TransactionDate,
+	@TransactionType = @TransactionType,
 	@TaxGroupId= @TaxGroupId,
 	@SiteId= default,
 	@FreightTermId= @FreightTermId,
 	@CardId= default,
 	@VehicleId= default,
-	@ItemUOMId= @ItemUOMId,
+	@UOMId= @UOMId,
 	@CurrencyId= @CurrencyId,
 	@CurrencyExchangeRateTypeId= default,
 	@CurrencyExchangeRate= 1
@@ -184,7 +187,7 @@ SELECT
 	@dblTax = SUM(dbo.fnRestApiCalculateItemtax(@Amount, @Price, @UOMId, NULL, @guiTaxesUniqueId, t.intRestApiItemTaxesId))
 FROM tblRestApiItemTaxes t
 WHERE t.guiTaxesUniqueId = @guiTaxesUniqueId
-
+SET @Tax = ISNULL(@dblTax, 0)
 SELECT ISNULL(@dblTax, 0) as dblTax
 
 DELETE FROM tblRestApiItemTaxes WHERE guiTaxesUniqueId = @guiTaxesUniqueId

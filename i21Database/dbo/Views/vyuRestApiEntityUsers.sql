@@ -1,7 +1,8 @@
 CREATE VIEW [dbo].[vyuRestApiEntityUsers]
 AS
 SELECT
-    Contact.intEntityId,
+    Security.intEntityId,
+    Contact.intEntityId AS intContactEntityId,
 	NULLIF(Contact.strEmail, '') strEmail,
     Contact.strName,
 	Security.strUserName, 
@@ -11,7 +12,12 @@ SELECT
 	Contact.ysnActive,
 	EntityContact.intEntityLocationId,
 	Security.ysnDisabled,
-	Security.ysnLockedOut
+	Security.ysnLockedOut,
+	Security.intCompanyLocationId,
+	EntityLocation.intFreightTermId,
+	EntityLocation.intShipViaId,
+	EntityLocation.intDefaultCurrencyId,
+	EntityLocation.intTermsId
 FROM tblEMEntityToContact EntityContact
 JOIN tblEMEntity Contact ON EntityContact.intEntityContactId = Contact.intEntityId
 JOIN tblSMUserSecurity Security ON EntityContact.intEntityId = Security.intEntityId

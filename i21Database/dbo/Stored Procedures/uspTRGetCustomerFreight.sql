@@ -132,7 +132,8 @@ SET	@dblMinimumUnitsOut = 0
     END
 	ELSE
 	BEGIN
-	    select top 1 @ysnFreightOnly = convert(bit,0),
+	    select top 1 @intFreightXRefId = intBulkPlantFreightId,
+					@ysnFreightOnly = convert(bit,0),
 	                @strFreightType = BPF.strFreightType,
 	           		@intEntityShipViaId = BPF.intShipViaId,
 	           		@intMiles = convert(int,BPF.dblFreightMiles),
@@ -147,7 +148,27 @@ SET	@dblMinimumUnitsOut = 0
 	            where BPF.strZipCode = @strZipCode
 	           			and BPF.intCategoryId = @intCategoryid
                         and BPF.intCompanyLocationId = @intShipToId
+						and BPF.intShipViaId = @intShipViaId
 
+		IF (@intFreightXRefId IS NULL)
+		BEGIN
+			SELECT TOP 1 @intFreightXRefId = intBulkPlantFreightId
+				,@ysnFreightOnly = CONVERT(BIT, 0)  
+				,@strFreightType = BP.strFreightType
+				,@intEntityShipViaId = BP.intShipViaId
+				,@intMiles = CONVERT(INT, BP.dblFreightMiles)
+				,@dblFreightRateIn = ISNULL(BP.dblFreightRateIn, 0)
+				,@dblFreightRateOut = ISNULL(BP.dblFreightRate, 0) 
+				,@ysnFreightInPrice = convert(BIT, 0)
+				,@dblMinimumUnitsIn = ISNULL(BP.dblMinimumUnitsIn, 0) 
+				,@dblMinimumUnitsOut = ISNULL(BP.dblMinimumUnits, 0)  
+				,@intTariffType   = BP.intEntityTariffTypeId 
+				,@dblSurchargeRateOut = ISNULL(BP.dblSurchargeOut, 0)  
+			FROM tblTRBulkPlantFreight BP
+			WHERE BP.strZipCode = @strZipCode  
+				AND BP.intCategoryId = @intCategoryid  
+				AND BP.intCompanyLocationId = @intShipToId
+		END
     END
 
 

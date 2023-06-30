@@ -496,6 +496,7 @@ SET @query = '
 		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,S.strCode + '' - '' + CD.strCompanyName AS strCompanyDetailName
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -558,7 +559,9 @@ SET @query = '
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
-		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN tblGLCompanyDetails CD ON CD.intAccountSegmentId = D.intCompanySegmentId
+		LEFT JOIN tblGLAccountSegment S ON S.intAccountSegmentId = CD.intAccountSegmentId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
@@ -578,6 +581,7 @@ SET @query = '
 		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,S.strCode + '' - '' + CD.strCompanyName AS strCompanyDetailName
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -629,7 +633,9 @@ SET @query = '
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityVendorId]
-		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN tblGLCompanyDetails CD ON CD.intAccountSegmentId = D.intCompanySegmentId
+		LEFT JOIN tblGLAccountSegment S ON S.intAccountSegmentId = CD.intAccountSegmentId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
@@ -649,6 +655,7 @@ SET @query = '
 		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,S.strCode + '' - '' + CD.strCompanyName AS strCompanyDetailName
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -700,6 +707,8 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = A.[intEntityCustomerId]
 		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		LEFT JOIN tblGLCompanyDetails CD ON CD.intAccountSegmentId = D.intCompanySegmentId
+		LEFT JOIN tblGLAccountSegment S ON S.intAccountSegmentId = CD.intAccountSegmentId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0

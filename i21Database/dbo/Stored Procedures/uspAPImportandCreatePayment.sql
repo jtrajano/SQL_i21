@@ -28,10 +28,6 @@ BEGIN TRY
 	DECLARE @currencyId INT = NULL;
 	DECLARE @paymentMethodId INT = NULL;
 	DECLARE @payToAddress INT = NULL;
-
-	--IMPORT TYPE WITH VENDOR MAPPING
-	DECLARE @iRelyEFT INT = 5
-				 ,@DTNDetail INT = 4
 	
 	--EFT Import Config
 	DECLARE @archiveServer NVARCHAR(MAX) = NULL
@@ -48,52 +44,17 @@ BEGIN TRY
 		RAISERROR('Archived Failed. Directory not exists or permission denied.', 16, 1);
 	END
 
-	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
-
-	CREATE TABLE #tmpMultiVouchersImport (
-		dtmDatePaid DATETIME,
-		intEntityVendorId INT,
-		strCheckNumber NVARCHAR(100),
-		intIds NVARCHAR(100)
-	)
-
 	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL AND strNotes NOT LIKE '%Will create empty payment%'
 
-	INSERT INTO #tmpMultiVouchersImport (dtmDatePaid, intEntityVendorId, strCheckNumber, intIds)
-	-- IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
-	SELECT dtmDatePaid,
-		--    intEntityVendorId,
-			md.intEntityVendorId, -- use the vendor set on CSV
-		   strCheckNumber,
-		--    intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
-		intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(MAX), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
-						AND md.strMapVendorName = I2.strEntityVendorName AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
-IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
-	-- INTO #tmpMultiVouchersImport
-	FROM tblAPImportPaidVouchersForPayment I
-	INNER JOIN (
-  tblGLVendorMappingDetail md 
-  INNER JOIN tblGLVendorMapping vm
-  ON  md.intVendorMappingId = vm.intVendorMappingId
- )
- ON I.strEntityVendorName = md.strMapVendorName
- AND I.intEntityVendorId = md.intEntityVendorId
- WHERE @templateId IN (@iRelyEFT, @DTNDetail)
-	-- INNER JOIN tblGLVendorMappingDetail md ON I.strEntityVendorName = md.strMapVendorName
- 	GROUP BY dtmDatePaid, md.intEntityVendorId, strCheckNumber, intCustomPartition , md.strMapVendorName 
-	--GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
+	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
 
-	UNION ALL
-	--TEMPLATE WITHOUT VENDOR MAPPING
 	SELECT dtmDatePaid,
-					intEntityVendorId,
-					strCheckNumber,
-					intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(MAX), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid 
-												  AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber 
-													IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')  
+		   intEntityVendorId,
+		   strCheckNumber,
+		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
+	INTO #tmpMultiVouchersImport
 	FROM tblAPImportPaidVouchersForPayment I
-	WHERE @templateId NOT IN (@iRelyEFT, @DTNDetail)
-	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition 
+	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchersImport)
 	BEGIN
@@ -124,7 +85,11 @@ IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPa
 				FROM tblAPImportPaidVouchersForPayment I 
 				WHERE 
 					I.strBillId = B.strBillId 
-				AND I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)))
+				AND 1 = (CASE 
+									WHEN I.strVendorOrderNumber = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber))) THEN 1
+									WHEN dbo.fnRemoveLeadingZero(I.strVendorOrderNumber) = LTRIM(RTRIM(ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber))) THEN 1
+									ELSE 0 END
+								)
 				AND ((I.dblPayment + I.dblDiscount) - I.dblInterest) = ISNULL(PS.dblPayment, B.dblAmountDue * (CASE WHEN B.intTransactionType = 1 THEN 1 ELSE  -1 END))
 				AND I.intId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds))
 			) forPayment

@@ -3044,6 +3044,7 @@
     <Build Include="dbo\Views\vyuApiVendorRebateItem.sql" />
     <Build Include="dbo\Views\vyuApiVendorRebatesSetup.sql" />
     <Build Include="dbo\Views\vyuApiVendorRebateUom.sql" />
+    <Build Include="dbo\Views\vyuApiGetPurchaseTaxDetail.sql" />
     <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
@@ -4431,6 +4432,8 @@
     <Build Include="dbo\Views\vyuPATTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrder.sql" />
+    <Build Include="dbo\Views\vyuApiPurchaseOrderDetail.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
     <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
@@ -10840,6 +10843,7 @@
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiCalculateTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiCalculatePOTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspApiGetTaxDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspApiUpdateTaxDetails.sql" />
