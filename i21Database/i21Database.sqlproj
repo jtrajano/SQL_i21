@@ -1465,6 +1465,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdatePickListFromInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnICGetInventoryReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
+     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
