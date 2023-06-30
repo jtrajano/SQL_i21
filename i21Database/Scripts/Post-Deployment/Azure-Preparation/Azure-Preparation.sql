@@ -77,3 +77,11 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnGetTaxGroupTaxCodes]'))
 	EXEC('DROP FUNCTION [dbo].[fnGetTaxGroupTaxCodes]')
+
+-- General Ledger
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspGLUpdateSegmentCategory]'))
+	EXEC('DROP FUNCTION [dbo].[uspGLUpdateSegmentCategory]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspCMGetBankAccountRegister]'))
+	EXEC('DROP FUNCTION [dbo].[uspCMGetBankAccountRegister]')

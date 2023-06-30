@@ -59,7 +59,7 @@ SELECT
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuAPMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND intCurrencyId <> @intDefaultCurrencyId
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CT'
@@ -80,7 +80,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuCTMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND intCurrencyId <> @intDefaultCurrencyId
+AND A.intCurrencyId <> @intDefaultCurrencyId
  END
 IF @strModule = 'AR' 
 BEGIN
@@ -100,7 +100,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM vyuARMultiCurrencyRevalue A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND intCurrencyId <> @intDefaultCurrencyId
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'INV'
@@ -182,7 +182,7 @@ INSERT INTO  @tblMulti
 SELECT A.*, strCurrency
 FROM cte A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate <= @dtmDate
-AND intCurrencyId <> @intDefaultCurrencyId
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM'
@@ -205,7 +205,7 @@ BEGIN
 FROM vyuCMMultiCurrencyRevalue A
 LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE dtmDate = @dtmDate
-AND @intDefaultCurrencyId <> intCurrencyId
+AND @intDefaultCurrencyId <> A.intCurrencyId
 END
 
 IF @strModule = 'FA'
@@ -227,7 +227,7 @@ BEGIN
 	,strCurrency COLLATE Latin1_General_CI_AS strCurrency
 FROM dbo.fnFAMultiCurrencyRevalue(@dtmDate) A LEFT JOIN tblSMCurrency B on A.intCurrencyId = B.intCurrencyID
 WHERE strTransactionDate <= @dtmDate
-AND intCurrencyId <> @intDefaultCurrencyId
+AND A.intCurrencyId <> @intDefaultCurrencyId
 END
 
 IF @strModule = 'CM Forwards'
@@ -431,7 +431,7 @@ WITH CTE AS(
 	strAccountId
 	FROM @tblMulti A JOIN tblGLAccount B ON B.intAccountId = A.intAccountId
 	GROUP BY
-	intCurrencyId,
+	A.intCurrencyId,
 	strCurrency,
 	strAccountId,
 	A.intAccountId,

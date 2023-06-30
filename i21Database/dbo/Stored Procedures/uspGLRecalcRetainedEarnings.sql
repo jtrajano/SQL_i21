@@ -164,7 +164,7 @@ BEGIN
             ,@dtmEndDate          
             ,[ysnIsUnposted]          
             ,1          
-            ,[intCurrencyId]          
+            ,A.[intCurrencyId]          
             ,@intEntityId         
             ,@intEntityId           
             ,@dtmNow        

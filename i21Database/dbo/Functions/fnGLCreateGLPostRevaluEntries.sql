@@ -134,7 +134,7 @@ AS RETURN(
           ,[dtmDate]      
           ,[ysnIsUnposted]    
           ,A.[intConcurrencyId]    
-          ,[intCurrencyId]
+          ,A.[intCurrencyId]
           ,[intSourceCurrencyId]
           ,[intUserId]     
           ,[intEntityId]     
