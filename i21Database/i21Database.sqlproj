@@ -1444,6 +1444,7 @@
     <Build Include="dbo\Stored Procedures\uspGRSaveVoidedPayments.sql" />
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
+     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
