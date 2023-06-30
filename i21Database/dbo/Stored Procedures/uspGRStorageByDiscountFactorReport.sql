@@ -216,11 +216,11 @@ BEGIN TRY
 								SELECT ''','''+ c.name
 								FROM (						
 										SELECT name
-										FROM tempdb.sys.columns
+										FROM sys.columns
 										WHERE object_id = object_id('tempdb..##TempTableHeaders2') 
 										UNION ALL
 										SELECT name
-										FROM tempdb.sys.columns
+										FROM sys.columns
 										WHERE object_id = object_id('tempdb..##TempTableAddColumns')
 								) c
 								FOR XML PATH('')), 1, 1, '''');

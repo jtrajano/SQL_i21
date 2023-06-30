@@ -138,3 +138,14 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspMFInventoryAdjustment_CreatePostLotItemChange]'))
 	EXEC('DROP FUNCTION [dbo].[uspMFInventoryAdjustment_CreatePostLotItemChange]')
+
+-- Motor Fuel Tax
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTFGT103RunTax]'))
+	EXEC('DROP FUNCTION [dbo].[uspTFGT103RunTax]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTFOriginDataIntegration]'))
+	EXEC('DROP FUNCTION [dbo].[uspTFOriginDataIntegration]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTFRunTax]'))
+	EXEC('DROP FUNCTION [dbo].[uspTFRunTax]')
