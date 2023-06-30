@@ -705,7 +705,7 @@ BEGIN TRY
 		SELECT	AD.intAllocationDetailId,
 				CH.strContractNumber + '-' + LTRIM(CD.intContractSeq) strSequenceNumber,
 				EY.strName strEntityName,
-				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,LP.intWeightUOMId,dblSAllocatedQty) dblAllocatedQty,
+				dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,LP.intWeightUOMId,dblPAllocatedQty) dblAllocatedQty,
 				AD.intSContractDetailId,
 				'Purchase' strContractType,
 				AD.intAllocationHeaderId,
