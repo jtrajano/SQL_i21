@@ -501,7 +501,7 @@ AS
 					,intHistoricalRateTypeId = ert.intCurrencyExchangeRateTypeId
 					,intBasisUOMId = puom.intItemUOMId
 					,dblNoOfLots = CI.dblQuantity / dbo.fnCTConvertQuantityToTargetItemUOM(IM.intItemId,MA.intUnitMeasureId,IU.intUnitMeasureId, MA.dblContractSize)
-					,cp.intCurrencyExchangeRateId
+					,cp2.intCurrencyExchangeRateId
 					,intMarketUOMId = MA.intUnitMeasureId
 					,intItemItemUOMId = MAUOM.intUnitMeasureId
 					,intWarehouseId = wc.intCityId
@@ -563,7 +563,7 @@ AS
 			)cero on cero.strCurrencyExchangeRate = CI.strRevolutionCurrencyPair
 			left join tblSMCurrencyExchangeRateType ert on ert.strCurrencyExchangeRateType = CI.strHistoricType
 			left join tblCTPricingType pt on pt.strPricingType = CI.strPricingType
-			left join tblSMCurrencyExchangeRate cp on cp.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
+			left join tblSMCurrencyExchangeRate cp2 on cp2.intFromCurrencyId = isnull(ic.intMainCurrencyId,ic.intCurrencyID) and cp2.intToCurrencyId = isnull(CY.intMainCurrencyId,CY.intCurrencyID)
 			left join tblICUnitMeasure pum on pum.strUnitMeasure = CI.strPriceUOM
 			left join tblICItemUOM puom on puom.intItemId = IM.intItemId  and puom.intUnitMeasureId = pum.intUnitMeasureId
 			left join tblSMCity wc on wc.strCity = CI.strWarehouse
