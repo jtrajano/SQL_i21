@@ -149,3 +149,8 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTFRunTax]'))
 	EXEC('DROP FUNCTION [dbo].[uspTFRunTax]')
+
+-- API
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspApiSchemaTransformBoilerplate]'))
+	EXEC('DROP FUNCTION [dbo].[uspApiSchemaTransformBoilerplate]')
