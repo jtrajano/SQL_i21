@@ -3656,7 +3656,7 @@ BEGIN TRY
 			SELECT @intNewItemId
 				,IU.intItemUOMId
 				,x.[dblUnitQty]
-				,strUPCCode
+				,x.strUPCCode
 				,x.intSort
 				,x.intConcurrencyId
 				,x.dtmDateCreated
