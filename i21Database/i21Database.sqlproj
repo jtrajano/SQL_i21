@@ -4665,7 +4665,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099INT.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099B.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetVendorApprover.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPGetVendorContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetVoucherCreatorEmail.sql" />
     <Build Include="dbo\Views\vyuICGetCountSheet.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateStorageCharge.sql" />
@@ -9632,7 +9632,6 @@
     <Build Include="dbo\Tables\tblAPVendorContactSynergy.sql" />
     <Build Include="dbo\Tables\tblAPVendorContactInfoSynergy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPVendorExportTransformSynergy.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPVendorToIPayablesJob.sql" />
     <Build Include="dbo\Views\vyuAPVendorSynergy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVendorExportSynergy.sql" />
     <Build Include="dbo\Views\vyuAPVoucherInfo.sql" />

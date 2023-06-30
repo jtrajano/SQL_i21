@@ -270,7 +270,7 @@ BEGIN /* Inbound Claims */
 			,strModuleName = 'Logistics'
 			,intConcurrencyId = 1
 			,dblDebitForeign = CASE 
-				WHEN intCurrencyId <> @intFunctionalCurrencyId
+				WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId
 					THEN DebitForeign.Value
 				ELSE 0
 				END
@@ -316,7 +316,7 @@ BEGIN /* Inbound Claims */
 			,dblDebitForeign = 0
 			,dblDebitReport = NULL
 			,dblCreditForeign = CASE 
-				WHEN intCurrencyId <> @intFunctionalCurrencyId
+				WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId
 					THEN CreditForeign.Value
 				ELSE 0
 				END
