@@ -105,3 +105,26 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspPATProcessVoid]'))
 	EXEC('DROP FUNCTION [dbo].[uspPATProcessVoid]')
+
+-- Transport
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRDeleteLoadHeader]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRDeleteLoadHeader]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRDeleteTransportLoad]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRDeleteTransportLoad]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRPosting]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRPosting]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRProcessToInventoryReceipt]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRProcessToInventoryReceipt]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRProcessToInventoryTransfer]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRProcessToInventoryTransfer]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRProcessToItemReceipt]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRProcessToItemReceipt]')
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[uspTRProcessToInvoice]'))
+	EXEC('DROP FUNCTION [dbo].[uspTRProcessToInvoice]')
