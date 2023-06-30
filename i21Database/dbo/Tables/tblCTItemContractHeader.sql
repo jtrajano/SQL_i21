@@ -39,6 +39,7 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 	guiApiUniqueId UNIQUEIDENTIFIER NULL,
 	intApiRowNumber INT NULL,
 	[intSplitId]						[int] NULL, 
+	[ysnSplit]						[bit] NOT NULL DEFAULT ((0)),
 
 	--[strShipToLocationName]				[nvarchar](50) NULL,
 	--[strShipToAddress]					[nvarchar](MAX) NULL,

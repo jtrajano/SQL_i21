@@ -122,9 +122,7 @@ ELSE
 		SET @body +='<body>Dear <strong>'+@strEntityName+'</strong>, <br><br>'
 		SET @body += 'Please find the attached ' + LOWER(@strMailType) + '.'
 		SET @body += '<br>'
-		SET @body +=@strThanks+'<br><br>'
-		SET @body +='Sincerely, <br>'
-		SET @body +=(select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId)
+		SET @body +=@strThanks+''
 		SET @body +='</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 	

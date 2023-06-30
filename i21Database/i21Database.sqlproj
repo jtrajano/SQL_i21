@@ -1757,6 +1757,13 @@
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
+    <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendorXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorXref.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCustomerXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -11673,8 +11680,7 @@
     <Build Include="dbo\Stored Procedures\uspSCCreateTicketLoadCostPayable.sql" />
     <Build Include="dbo\Views\vyuMFProcessAttributeDetail.sql" />
     <Build Include="dbo\Views\vyuQMLotStorageLocationNoLotNo.sql" />
-
-	<Build Include="dbo\Tables\tblLGGenerateLoadCost.sql" />
+    <Build Include="dbo\Tables\tblLGGenerateLoadCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPreManualDistribution.sql" />
     <Build Include="dbo\Functions\fnGRCreateGLEntriesForPercentDiscounts.sql" />
     <Build Include="dbo\Functions\fnGRGetPercentDiscounts.sql" />
@@ -11847,6 +11853,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfDIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\DeferredPaymentInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertIntraCompanyEntries.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusinessId.sql" />
