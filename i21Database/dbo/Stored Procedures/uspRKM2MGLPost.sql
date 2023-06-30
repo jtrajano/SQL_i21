@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspRKM2MGLPost
+﻿CREATE PROCEDURE [dbo].[uspRKM2MGLPost]
 	@intM2MHeaderId INT
 
 AS
@@ -114,7 +114,7 @@ BEGIN TRY
 			, @strTransactionId = strTransactionId
 			, @intTransactionId = intTransactionId
 			, @strTransactionType = strTransactionType
-			, @dblAmount = (dblDebit + dblCredit)
+			, @dblAmount = (dblCredit - dblDebit)
 			
 		FROM #tmpPostRecap
 
@@ -139,7 +139,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -177,7 +177,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -215,7 +215,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -253,7 +253,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Ratio Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo
@@ -272,7 +272,7 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Mark To Market-Cash Inventory Offset')
 		BEGIN
-			IF (ISNULL(@dblAmount, 0) >= 0)
+			IF (ISNULL(@dblAmount, 0) <= 0)
 			BEGIN
 				SELECT TOP 1 @intAccountId = intAccountId
 					, @strAccountNo = strAccountNo

@@ -6146,11 +6146,11 @@ BEGIN TRY
 					AND strContractOrInventoryType IN ('Contract(P)', 'Contract(S)')
 					AND ISNULL(dblResultRatio, 0) <> 0
 	
-				-------- intransit Offset
+				-------- In-Transit Basis
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 					, @dtmPostDate AS dtmPostDate
-					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryBasisIOSId ELSE @intUnrealizedLossOnInventoryBasisIOSId END intAccountId
-					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryBasisIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnBasisId ELSE @intUnrealizedLossOnBasisId END intAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnBasisId ELSE @strUnrealizedLossOnBasisId END strAccountId
 					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
 					, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
 					, CASE WHEN ISNULL(dblOpenQty, 0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
@@ -6183,10 +6183,11 @@ BEGIN TRY
 					AND ISNULL(strPricingType, '') <> 'Cash'
 					AND ISNULL(dblResultBasis, 0) <> 0
 
+				-------- In-Transit Basis Offset
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 					, @dtmPostDate AS dtmPostDate
-					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @intUnrealizedGainOnInventoryBasisIOSId ELSE @intUnrealizedLossOnInventoryBasisIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryBasisIOSId END strAccountId
 					, CASE WHEN ISNULL(dblResultBasis, 0) <= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblDebit
 					, CASE WHEN ISNULL(dblResultBasis, 0) >= 0 THEN 0.0 ELSE ABS(dblResultBasis) END dblCredit
 					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
@@ -6218,7 +6219,8 @@ BEGIN TRY
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
 					AND ISNULL(dblResultBasis, 0) <> 0
-	
+
+				-------- In-Transit Futures
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 					, @dtmPostDate AS dtmPostDate
 					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnFuturesId ELSE @intUnrealizedLossOnFuturesId END intAccountId
@@ -6254,11 +6256,12 @@ BEGIN TRY
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
 					AND ISNULL(dblMarketFuturesResult, 0) <> 0
-
+					
+				-------- In-Transit Futures Offset
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 					, @dtmPostDate AS dtmPostDate
-					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @intUnrealizedGainOnInventoryFuturesIOSId ELSE @intUnrealizedLossOnInventoryFuturesIOSId END intAccountId
+					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN @strUnrealizedGainOnInventoryFuturesIOSId ELSE @strUnrealizedLossOnInventoryFuturesIOSId END strAccountId
 					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) <= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblDebit
 					, CASE WHEN ISNULL(dblMarketFuturesResult, 0) >= 0 THEN 0.0 ELSE ABS(dblMarketFuturesResult) END dblCredit
 					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
@@ -6290,7 +6293,8 @@ BEGIN TRY
 					AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
 					AND ISNULL(strPricingType, '') <> 'Cash'
 					AND ISNULL(dblMarketFuturesResult, 0) <> 0
-
+					
+				-------- In-Transit Cash
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 					, @dtmPostDate AS dtmPostDate
 					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
@@ -6327,10 +6331,11 @@ BEGIN TRY
 					AND ISNULL(strPricingType, '') = 'Cash'
 					AND ISNULL(dblResultCash, 0) <> 0
 		
+				-------- In-Transit Cash Offset
 				UNION ALL SELECT @intM2MHeaderId intM2MHeaderId
 					, @dtmPostDate AS dtmPostDate
-					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryIntransitIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @intUnrealizedGainOnInventoryCashIOSId ELSE @intUnrealizedLossOnInventoryCashIOSId END intAccountId
+					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN @strUnrealizedGainOnInventoryCashIOSId ELSE @strUnrealizedLossOnInventoryCashIOSId END strAccountId
 					, CASE WHEN ISNULL(dblResultCash, 0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
 					, CASE WHEN ISNULL(dblResultCash, 0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
 					, CASE WHEN ISNULL(dblOpenQty, 0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
