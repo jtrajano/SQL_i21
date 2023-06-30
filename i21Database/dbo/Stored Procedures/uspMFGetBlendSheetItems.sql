@@ -378,45 +378,41 @@ END
 /* Create Physical Quantity. */
 INSERT INTO @tblPhysicalQty
 SELECT RecipeItem.intItemId
-	 , SUM(CASE WHEN ISNULL(Lot.dblWeight, 0) > 0 THEN Lot.dblWeight
-				ELSE (UOMFrom.dblUnitQty * Lot.dblQty) / UOMTo.dblUnitQty
-		   END) AS dblPhysicalQty
-	 , CASE WHEN ISNULL(MAX(Lot.dblWeightPerQty), 1) = 0 THEN 1
-			ELSE ISNULL(MAX(Lot.dblWeightPerQty), 1)
-	   END		AS dblWeightPerUnit
+	,SUM(CASE 
+			WHEN ISNULL(Lot.dblWeight, 0) > 0
+				THEN Lot.dblWeight
+			ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, RecipeItem.intItemUOMId, Lot.dblQty)
+			END) AS dblPhysicalQty
+	,CASE 
+		WHEN ISNULL(MAX(Lot.dblWeightPerQty), 1) = 0
+			THEN 1
+		ELSE ISNULL(MAX(Lot.dblWeightPerQty), 1)
+		END AS dblWeightPerUnit
 FROM tblICLot AS Lot
 JOIN tblMFRecipeItem AS RecipeItem ON RecipeItem.intItemId = Lot.intItemId
-JOIN tblICItem AS Item ON RecipeItem.intItemId = Item.intItemId AND Item.strType <> 'Other Charge'
-OUTER APPLY (SELECT ISNULL(dblUnitQty, 1) AS dblUnitQty
-			 FROM tblICItemUOM AS ICItemUOM
-			 WHERE ICItemUOM.intItemUOMId = Lot.intItemUOMId) AS UOMFrom
-OUTER APPLY (SELECT ISNULL(dblUnitQty, 1) AS dblUnitQty
-			 FROM tblICItemUOM AS ICItemUOM
-			 WHERE ICItemUOM.intItemUOMId = RecipeItem.intItemUOMId) AS UOMTo
+JOIN tblICItem AS Item ON RecipeItem.intItemId = Item.intItemId
+	AND Item.strType <> 'Other Charge'
 WHERE RecipeItem.intRecipeId = @intRecipeId
-  AND Lot.intLocationId = @intLocationId
+	AND Lot.intLocationId = @intLocationId
 GROUP BY RecipeItem.intItemId;
-
-
 
 /* Create Physical Quantity for Substitute. */
 INSERT INTO @tblPhysicalQty
 SELECT SubstituteItem.intSubstituteItemId
-	 , SUM(CASE WHEN ISNULL(Lot.dblWeight, 0) > 0 THEN Lot.dblWeight
-				ELSE (UOMFrom.dblUnitQty * Lot.dblQty) / UOMTo.dblUnitQty
-		   END) AS dblPhysicalQty
-	 , CASE WHEN ISNULL(MAX(Lot.dblWeightPerQty), 1) = 0 THEN 1
-			ELSE ISNULL(MAX(Lot.dblWeightPerQty), 1)
-	   END AS dblWeightPerUnit
+	,SUM(CASE 
+			WHEN ISNULL(Lot.dblWeight, 0) > 0
+				THEN Lot.dblWeight
+			ELSE dbo.fnMFConvertQuantityToTargetItemUOM(Lot.intItemUOMId, SubstituteItem.intItemUOMId, Lot.dblQty)
+			END) AS dblPhysicalQty
+	,CASE 
+		WHEN ISNULL(MAX(Lot.dblWeightPerQty), 1) = 0
+			THEN 1
+		ELSE ISNULL(MAX(Lot.dblWeightPerQty), 1)
+		END AS dblWeightPerUnit
 FROM tblICLot AS Lot
 JOIN tblMFRecipeSubstituteItem AS SubstituteItem ON SubstituteItem.intSubstituteItemId = Lot.intItemId
-OUTER APPLY (SELECT ISNULL(dblUnitQty, 1) AS dblUnitQty
-			 FROM tblICItemUOM AS ICItemUOM
-			 WHERE ICItemUOM.intItemUOMId = Lot.intItemUOMId) AS UOMFrom
-OUTER APPLY (SELECT ISNULL(dblUnitQty, 1) AS dblUnitQty
-			 FROM tblICItemUOM AS ICItemUOM
-			 WHERE ICItemUOM.intItemUOMId = SubstituteItem.intItemUOMId) AS UOMTo
-WHERE SubstituteItem.intRecipeId = @intRecipeId AND Lot.intLocationId = @intLocationId
+WHERE SubstituteItem.intRecipeId = @intRecipeId
+	AND Lot.intLocationId = @intLocationId
 GROUP BY SubstituteItem.intSubstituteItemId;
 
 /* Create Reserved Quantity. */
