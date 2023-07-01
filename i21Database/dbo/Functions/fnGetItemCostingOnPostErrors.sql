@@ -154,18 +154,29 @@ RETURN (
 				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
-					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation [Location]
 								ON Item.intItemId = @intItemId
-								AND Location.intItemLocationId = @intItemLocationId
+								AND [Location].intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICItemStockUOM StockUOM
 								ON StockUOM.intItemId = Item.intItemId
 								AND StockUOM.intItemUOMId = @intItemUOMId
-								AND StockUOM.intItemLocationId = Location.intItemLocationId
+								AND StockUOM.intItemLocationId = [Location].intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 4) < 0
+					WHERE	(
+								-- Available Qty = (On-Hand Qty) - (Reserved Qty); @Qty will make the available qty negative. 
+								(
+									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 4) < 0
+									AND ([Location].intAvailableQtyFormulaId IS NULL OR [Location].intAvailableQtyFormulaId = 1)  
+								)
+								-- Available Qty = On-Hand Qty; @Qty will make the on-hand qty negative. 
+								OR (
+									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0), 4) < 0
+									AND [Location].intAvailableQtyFormulaId = 2
+								)
+							)
 							AND (							
-								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
+								[Location].intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
 							)
 							AND @dblQty < 0							
@@ -197,11 +208,11 @@ RETURN (
 				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
-					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation [Location]
 								ON Item.intItemId = @intItemId
-								AND Location.intItemLocationId = @intItemLocationId
+								AND [Location].intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICLot Lot
-								ON Lot.intItemLocationId = Location.intItemLocationId 
+								ON Lot.intItemLocationId = [Location].intItemLocationId 
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)								
 								AND Lot.intItemUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId

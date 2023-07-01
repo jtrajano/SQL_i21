@@ -475,7 +475,8 @@ BEGIN
 		intCostAdjustmentType,
 		ysnActive,
 		intAllowZeroCostTypeId,
-		dblTransactionQtyLimit
+		dblTransactionQtyLimit,
+		intAvailableQtyFormulaId
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -541,7 +542,8 @@ BEGIN
 		intCostAdjustmentType,
 		ysnActive,
 		intAllowZeroCostTypeId,
-		dblTransactionQtyLimit
+		dblTransactionQtyLimit,
+		intAvailableQtyFormulaId
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
