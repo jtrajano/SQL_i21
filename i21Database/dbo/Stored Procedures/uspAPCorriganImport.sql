@@ -431,6 +431,37 @@ END
 	WHERE
 		intEntityVendorId IS NOT NULL
 
+	--REMOVE MATCHING VOUCHER
+	DECLARE @voucherExists TABLE(
+		strVendorOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+		intEntityVendorId INT,
+		intTransactionType INT,
+		dtmDate DATETIME
+	)
+
+	INSERT INTO @voucherExists
+	SELECT
+		B.strVendorOrderNumber,
+		B.intEntityVendorId,
+		B.intTransactionType,
+		B.dtmDate
+	FROM @voucherPayables A
+	INNER JOIN tblAPBill B 
+	ON 
+		A.intEntityVendorId = B.intEntityVendorId
+	AND	A.strVendorOrderNumber = B.strVendorOrderNumber
+	AND A.dtmDate = B.dtmDate
+	AND A.intTransactionType = B.intTransactionType
+
+	DELETE A
+	FROM @voucherPayables A
+	INNER JOIN @voucherExists B
+	ON
+		A.intEntityVendorId = B.intEntityVendorId
+	AND	A.strVendorOrderNumber = B.strVendorOrderNumber
+	AND A.dtmDate = B.dtmDate
+	AND A.intTransactionType = B.intTransactionType
+
 	--SELECT '' [tmppayablesInfo], * FROM #tmppayablesInfo
 	--SELECT ''[voucherPayables],* FROM @voucherPayables
 
@@ -476,6 +507,13 @@ END
 		WHERE intDetailAccountId IS NULL
 	) tblErrors
 	ORDER BY intPartitionId
+
+	INSERT INTO @invalidPayables
+	SELECT
+	DISTINCT
+		A.strVendorOrderNumber,
+		'Line with Invoice No. ' + A.strVendorOrderNumber + ': Invoice already exists. '
+	FROM @voucherExists A
 
 	--VOUCHER AND POST VALID PAYABLES
 	DECLARE @createdVoucher NVARCHAR(MAX);
