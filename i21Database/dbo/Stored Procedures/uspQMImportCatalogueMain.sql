@@ -923,6 +923,7 @@ BEGIN TRY
 						,dtmCreated
 						,intBookId
 						,intSubBookId
+						,intContractDetailId
 						-- Auction Fields
 						,intSaleYearId
 						,strSaleNumber
@@ -1023,6 +1024,7 @@ BEGIN TRY
 						,dtmCreated = @dtmDateCreated
 						,intBookId = S.intBookId
 						,intSubBookId = S.intSubBookId
+						,intContractDetailId = S.intContractDetailId
 						-- Auction Fields
 						,intSaleYearId = S.intSaleYearId
 						,strSaleNumber = @strSaleNumber
