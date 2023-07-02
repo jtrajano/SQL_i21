@@ -47,6 +47,7 @@ SELECT CP.intCompanyPreferenceId
 	, CP.ysnAllowBlankDriver
 	, CP.ysnAllowBlankTruck
 	, CP.ysnAllowBlankTrailer
+	, strShipViaFreightSalesUnit = SV.strFreightSalesUnit  
 FROM tblTRCompanyPreference CP
 LEFT JOIN tblSMImportFileHeader Import on Import.intImportFileHeaderId = CP.intRackPriceImportMappingId
 LEFT JOIN tblSMImportFileHeader ImportBol ON ImportBol.intImportFileHeaderId = CP.intBolImportFormatId 
@@ -56,3 +57,4 @@ LEFT JOIN tblSMShipVia Seller on Seller.intEntityId = CP.intSellerId
 LEFT JOIN tblICItem FreightItem on FreightItem.intItemId = CP.intItemForFreightId
 LEFT JOIN tblICItem SurchargeItem on SurchargeItem.intItemId = CP.intSurchargeItemId
 LEFT JOIN tblGLAccount GLA ON GLA.intAccountId = CP.intAdjustmentAccountId
+LEFT JOIN tblSMShipVia SV ON SV.intEntityId = CP.intShipViaId

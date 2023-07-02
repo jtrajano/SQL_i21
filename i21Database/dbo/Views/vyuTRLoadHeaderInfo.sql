@@ -21,6 +21,7 @@ SELECT TH.intLoadHeaderId
 	, ST.strTrailerNumber
 	, strDispatchId = LGD.strDispatchOrderNumber
 	, F.strCostMethod strCostMethodFreight
+	, SV.strFreightSalesUnit strShipViaFreightSalesUnit
 FROM tblTRLoadHeader TH
 LEFT JOIN tblSMShipVia SV ON SV.intEntityId = TH.intShipViaId
 LEFT JOIN tblSMShipVia SS ON SS.intEntityId = TH.intSellerId
