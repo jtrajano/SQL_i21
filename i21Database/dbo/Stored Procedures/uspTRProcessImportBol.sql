@@ -581,6 +581,9 @@ BEGIN
      DECLARE @strFreightSalesUnit NVARCHAR(10) = ''  
       SELECT TOP 1 @strFreightSalesUnit = ISNULL(strFreightSalesUnit,'') FROM tblTRSupplyPoint WHERE intSupplyPointId = @intSupplyPointId  
   
+     DECLARE @strShipViaFreightSalesUnit NVARCHAR(10) = ''
+      SELECT TOP 1 @strShipViaFreightSalesUnit = ISNULL(strFreightSalesUnit,'') FROM tblSMShipVia WHERE intEntityId = @intCarrierId
+
      INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId,   
       strBillOfLading,   
       strReceiptLink,  
@@ -611,14 +614,19 @@ BEGIN
          END  
        ELSE CASE WHEN @strNonBlendGrossNet = 'Net' THEN @dblNonBlendDropNet ELSE @dblNonBlendDropGross END
       END,
-      CASE  -- dblFreightUnit
-       WHEN @strFreightSalesUnit = 'Gross' THEN @dblNonBlendDropGross  
-       WHEN @strFreightSalesUnit = 'Net' THEN @dblNonBlendDropNet  
-       WHEN @strFreightSalesUnit = '' THEN  
-        CASE   
-         WHEN @strNonBlendGrossNet = 'Net' THEN @dblNonBlendDropNet ELSE @dblNonBlendDropGross  
-        END  
-      END,
+	    CASE
+		    WHEN @strShipViaFreightSalesUnit != '' THEN
+			    CASE 
+				    WHEN @strShipViaFreightSalesUnit = 'Gross' THEN @dblNonBlendDropGross
+				    WHEN @strShipViaFreightSalesUnit = 'Net' THEN @dblNonBlendDropNet
+			    END
+		    WHEN @strShipToGrossNet = 'Gross' THEN @dblNonBlendDropGross  
+		    WHEN @strShipToGrossNet = 'Net' THEN @dblNonBlendDropNet  
+		    WHEN @strShipToGrossNet = '' THEN
+			    CASE   
+				    WHEN @strNonBlendGrossNet = 'Net' THEN @dblNonBlendDropNet ELSE @dblNonBlendDropGross  
+			    END
+	    END,
       CASE --dblDistributionGrossSalesUnits
        WHEN @ysnAllowDiffUnits = 1 THEN @dblNonBlendDropGross 
        ELSE NULL  

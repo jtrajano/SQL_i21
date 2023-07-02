@@ -48,6 +48,7 @@ SELECT CP.intCompanyPreferenceId
 	, CP.ysnAllowBlankTruck
 	, CP.ysnAllowBlankTrailer
 	, CP.intSendBolAttachmentOptionId  
+	, strShipViaFreightSalesUnit = SV.strFreightSalesUnit  
 	, strSendBolAttachmentOption = (CASE WHEN CP.intSendBolAttachmentOptionId = 1 THEN 'One-to-one relationship between BoL and Customer'    
            WHEN CP.intSendBolAttachmentOptionId = 2 THEN 'Send to All Customer that received the Product'    
            WHEN CP.intSendBolAttachmentOptionId = 3 THEN 'Do not send'    
@@ -61,3 +62,4 @@ LEFT JOIN tblSMShipVia Seller on Seller.intEntityId = CP.intSellerId
 LEFT JOIN tblICItem FreightItem on FreightItem.intItemId = CP.intItemForFreightId
 LEFT JOIN tblICItem SurchargeItem on SurchargeItem.intItemId = CP.intSurchargeItemId
 LEFT JOIN tblGLAccount GLA ON GLA.intAccountId = CP.intAdjustmentAccountId
+LEFT JOIN tblSMShipVia SV ON SV.intEntityId = CP.intShipViaId

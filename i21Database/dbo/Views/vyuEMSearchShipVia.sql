@@ -18,7 +18,8 @@
 	A.strFreightBilledBy,
 	A.ysnActive,
 	A.intSort,
-	B.strEntityNo
+	B.strEntityNo,
+	A.strFreightSalesUnit
 	from 
 		tblSMShipVia A
 			JOIN tblEMEntity B
