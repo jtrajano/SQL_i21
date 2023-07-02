@@ -11863,6 +11863,7 @@
     <Build Include="dbo\Views\vyuCTContractCostViewZug.sql" />
     <Build Include="dbo\Views\vyuCTGetQualityCodes.sql" />
     <Build Include="dbo\Views\vyuQMPreEvaluationSheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMUpdateLoadShipmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
