@@ -90,6 +90,15 @@ DECLARE
    )  
    DECLARE @strCurrentTransaction NVARCHAR(100)  
   
+  IF (@strTransactionType = 'CM Swaps')
+     INSERT INTO @tblTransactions  
+      SELECT DISTINCT C.strTransactionId  
+      FROM tblGLRevalueDetails A  JOIN tblCMBankSwap B on strBankSwapId=A.strTransactionId
+      JOIN tblCMBankTransfer C on B.intSwapShortId = C.intTransactionId      
+       WHERE intConsolidationId = @intConsolidationId  
+
+  ELSE
+
    INSERT INTO @tblTransactions  
    SELECT DISTINCT strTransactionId  
    FROM tblGLRevalueDetails WHERE intConsolidationId = @intConsolidationId  
