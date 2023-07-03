@@ -98,7 +98,7 @@ BEGIN
 	END
 
 	--GET SELECTED CUSTOMERS
-	IF (@customerIds = '')
+	IF ISNULL(@customerIds, '') = ''
 	BEGIN
 		INSERT INTO @tblCustomer (intEntityId, intServiceChargeId, intTermId, ysnActive) 
 		SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
