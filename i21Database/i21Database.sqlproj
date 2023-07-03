@@ -1763,6 +1763,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorXref.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcessForIntransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpostForInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
   </ItemGroup>
   <ItemGroup>
