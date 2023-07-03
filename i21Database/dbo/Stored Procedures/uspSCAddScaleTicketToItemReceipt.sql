@@ -1741,7 +1741,7 @@ BEGIN
 				AND SH.intTicketId = Ticket.intTicketId
 		WHERE SH.[strType] IN ('From Delivery Sheet')	 
 			AND Ticket.intTicketId = @intTicketId
-
+			AND CS.intEntityId = @intEntityId
 		
 				
 	END
