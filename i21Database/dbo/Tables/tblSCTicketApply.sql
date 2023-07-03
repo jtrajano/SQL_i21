@@ -12,6 +12,8 @@
 	[dtmPosted] DATETIME NULL,
 	[intEntityUserId] INT NULL,
 
+	[intApplyTypeId] INT NOT NULL DEFAULT(1),  -- POSSIBLE VALUES 1 - ON HOLD, 2 - IN-TRANSIT
+
 	intConcurrencyId INT NOT NULL DEFAULT(1)
 
 		
