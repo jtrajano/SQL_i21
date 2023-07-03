@@ -186,6 +186,7 @@ begin
 	select 
 	
 		AllExport.intTicketNumber
+		,AllExport.intTicketId
 		,case when AllExport.intTicketNumber is null then cast(AllExport.intTicketNumber as nvarchar(50)) + '*' else AllExport.strTicketNumber end as strTicketNumber
 		,AllExport.strName
 		,CompanyLocation.strLocationName
@@ -205,9 +206,39 @@ begin
 		,AllExport.strStationUnitMeasure
 		,AllExport.dblNetUnits
 		,AllExport.dblComputedNetUnits
+		,CASE WHEN TICKET.intDeliverySheetId IS NULL 
+		THEN SUBSTRING((
+				SELECT ','+ ICI2.strItemNo + '=' + LTRIM(STR(QMD2.dblGradeReading, 10, 2))
+				FROM tblSCTicket SC2
+				INNER JOIN tblQMTicketDiscount QMD2
+					ON QMD2.intTicketId = SC2.intTicketId and QMD2.strSourceType = 'Scale'
+				INNER JOIN tblGRDiscountScheduleCode DSC2
+					ON QMD2.intDiscountScheduleCodeId = DSC2.intDiscountScheduleCodeId
+				INNER JOIN tblICItem ICI2
+					ON ICI2.intItemId = DSC2.intItemId
+				WHERE (QMD2.dblGradeReading IS NOT NULL AND QMD2.dblGradeReading > 0) and SC2.intTicketId = TICKET.intTicketId
+				FOR XML PATH('')
+			),2,1000) 
+		ELSE SUBSTRING((
+				SELECT ','+ ICI2.strItemNo + '=' + LTRIM(STR(QMD2.dblGradeReading, 10, 2)) FROM tblSCDeliverySheet DSS2
+				INNER JOIN tblSCTicket SC2
+					ON DSS2.intDeliverySheetId = SC2.intDeliverySheetId
+				INNER JOIN tblQMTicketDiscount QMD2
+					ON QMD2.intTicketFileId = DSS2.intDeliverySheetId and QMD2.strSourceType = 'Delivery Sheet'
+				INNER JOIN tblGRDiscountScheduleCode DSC2
+					ON QMD2.intDiscountScheduleCodeId = DSC2.intDiscountScheduleCodeId
+				INNER JOIN tblICItem ICI2
+					ON ICI2.intItemId = DSC2.intItemId
+				WHERE (QMD2.dblGradeReading IS NOT NULL AND QMD2.dblGradeReading > 0) and SC2.intTicketId = TICKET.intTicketId 
+				FOR XML PATH('')
+			),2,1000)
+	END COLLATE Latin1_General_CI_AS AS  strGradeReading
 		from #tmpSampleExport AllExport				
+			JOIN tblSCTicket TICKET
+				ON AllExport.intTicketId = TICKET.intTicketId
 			left join tblSMCompanyLocation CompanyLocation
 				on AllExport.intProcessingLocationId = CompanyLocation.intCompanyLocationId
+			
 			order by AllExport.intTicketNumber asc, strModTicketNumber
 			/*
 		from @RangedTicketNumber AllTicketNumber
