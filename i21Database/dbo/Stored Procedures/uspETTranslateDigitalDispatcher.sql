@@ -526,7 +526,7 @@ BEGIN
     ,0 AS intLineItem           
     ,'' AS strFileName           
     --,strMessage AS strStatus            
-    ,strMessage  +  STUFF((SELECT ',' + CAST(T2.strMessage AS VARCHAR(100))  FROM @ValidationTableLog T2 WHERE intId = T2.intLineItem AND ysnError = 0 FOR XML PATH('')),1,1,'') AS strStatus      
+    ,CAST(strMessage  +  STUFF((SELECT ',' + CAST(T2.strMessage AS VARCHAR(100))  FROM @ValidationTableLog T2 WHERE intId = T2.intLineItem AND ysnError = 0 FOR XML PATH('')),1,1,'') AS NVARCHAR(4000)) COLLATE Latin1_General_CI_AS AS strStatus
     ,ISNULL(ysnSuccess,0) AS ysnSuccessful           
     ,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId        
     ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType        
