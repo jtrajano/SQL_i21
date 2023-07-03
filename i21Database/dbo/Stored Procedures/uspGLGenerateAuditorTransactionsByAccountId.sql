@@ -78,6 +78,7 @@ BEGIN
                 , B.strAccountId
                 , strPrimary = B.strCode
                 , B.intOrderId
+                , strPostedBy = EM.strName 
             FROM  
 			tblGLDetail A LEFT JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId
             LEFT JOIN tblSMCurrency SM on SM.intCurrencyID = A.intCurrencyId
@@ -88,6 +89,9 @@ BEGIN
 			OUTER APPLY (
 				SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
 			)SE
+            OUTER APPLY (
+				SELECT TOP 1 strName  from tblEMEntity  WHERE intEntityId = A.intEntityId
+			)EM
 			OUTER APPLY (
 				SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 			)U
@@ -382,6 +386,7 @@ BEGIN
                             , strLOBSegmentDescription
                             , strCurrency
                             , strAccountId
+                            , strPostedBy
                             , total - (dblDebit - dblCredit) + @beginBalance dblBeginningBalance 
                             , totalf - (dblDebitForeign - dblCreditForeign) + @beginBalanceForeign dblBeginningBalanceForeign
                             , total + @beginBalance  dblEndingBalance
@@ -437,6 +442,7 @@ BEGIN
                                 , strLOBSegmentDescription
                                 , strCurrency
                                 , strAccountId
+                                , strPostedBy
                                 , dblBeginningBalance
                                 , dblEndingBalance
                                 , dblBeginningBalanceForeign
@@ -490,6 +496,7 @@ BEGIN
                                 , strLOBSegmentDescription
                                 , strCurrency
                                 , strAccountId
+                                , strPostedBy
                                 , dblBeginningBalance
                                 , dblEndingBalance
                                 , dblBeginningBalanceForeign
