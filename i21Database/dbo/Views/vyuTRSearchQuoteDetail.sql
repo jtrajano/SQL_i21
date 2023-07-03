@@ -29,6 +29,8 @@
 			, dblQtyOrdered = ISNULL(Detail.dblQtyOrdered, 0.000000)
 			, dblExtProfit = ISNULL(Detail.dblExtProfit, 0.000000)
 			, dblTax = ISNULL(Detail.dblTax, 0.000000)
+			, Detail.intItemCustomerXrefId
+			, strCustomerProduct = CX.strCustomerProduct
 		FROM tblTRQuoteDetail Detail
 		LEFT JOIN tblTRQuoteHeader Header ON Header.intQuoteHeaderId = Detail.intQuoteHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Header.intEntityCustomerId
@@ -39,3 +41,4 @@
 		LEFT JOIN tblEMEntityLocation SupplyPointLoc ON SupplyPointLoc.intEntityLocationId = SupplyPoint.intEntityLocationId
 		LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
 		LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Detail.intTaxGroupId
+		LEFT JOIN tblICItemCustomerXref CX ON Detail.intItemCustomerXrefId = CX.intItemCustomerXrefId
