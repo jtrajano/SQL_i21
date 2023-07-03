@@ -18,7 +18,9 @@ BEGIN TRY
  IF ISNULL(@intCompanyLocationPricingLevelId,0) = 0  
  BEGIN  
   return;  
- END   
+ END  
+ 
+  SET @dblQuantity = ISNULL(@dblQuantity,0)
   
  SELECT TOP 1 dblUnitPrice   
  FROM tblICItemPricingLevel   
