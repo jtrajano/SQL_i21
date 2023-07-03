@@ -174,7 +174,6 @@ BEGIN TRY
 		,dblComboMinimumUnits					= DD.dblComboMinimumUnits
 		,dblComboSurcharge						= DD.dblComboSurcharge
 		,intInventoryReceiptId					= TR.intInventoryReceiptId
-		,[intCompanyLocationSubLocationId]		= TR.intBulkStorageLocationId
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -997,7 +996,6 @@ BEGIN TRY
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
 		,[ysnBlended]
-		,[intCompanyLocationSubLocationId]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -1082,7 +1080,6 @@ BEGIN TRY
 		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
 		,ysnBlended								= TR.ysnBlended
-		,intCompanyLocationSubLocationId		= TR.intCompanyLocationSubLocationId
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
