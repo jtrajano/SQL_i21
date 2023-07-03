@@ -66,6 +66,7 @@ SELECT
 	,A.ysnSummaryFooter
 	,A.ysnSpace
 	,G.strName strUserName
+	,A.strPostedBy
 FROM tblGLAuditorTransaction A
 LEFT JOIN tblGLAccount ACC ON ACC.intAccountId = A.intAccountId
 LEFT JOIN tblGLAccountGroup AG ON AG.intAccountGroupId = ACC.intAccountGroupId
