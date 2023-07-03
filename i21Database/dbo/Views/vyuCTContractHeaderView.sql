@@ -49,7 +49,6 @@ AS
 			CH.intDaysForFinance,
 			CH.intSampleTypeId,
 			NM.strSampleTypeName,
-			CH.ysnLocalCurrency,
 			CH.ysnPrintCropYear,
 			CH.ysnSupplyPointContract,
 			CH.ysnQuantityAtHeaderLevel
