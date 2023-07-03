@@ -866,7 +866,8 @@ BEGIN TRY
 				UPDATE CD
 				SET dblAmountMinValue = CD.dblTotalCost	- ((CD.dblAmountMinRate / 100.0) *  CD.dblTotalCost),
 					dblAmountMaxValue = CD.dblTotalCost	+ ((CD.dblAmountMaxRate / 100.0) *  CD.dblTotalCost),
-					CD.dblFXPrice = (((CD.dblCashPrice * (sUOM.dblUnitQty / fUOM.dblUnitQty)) * tUOM.dblUnitQty)/case when isnull(ICY2.intMainCurrencyId,0) > 0 then 100 else 1 end) * 
+					CD.dblFXPrice = dbo.fnCTConvertPriceToTargetItemUOM(CD.intPriceItemUOMId,CD.intFXPriceUOMId,CD.dblCashPrice,1)
+					*
 					(
 						case
 						when CD.intCurrencyId = CD.intInvoiceCurrencyId or CD.intCurrencyId = isnull(ICY.intMainCurrencyId,0)
@@ -882,8 +883,6 @@ BEGIN TRY
 						end
 					)
 				FROM tblCTContractDetail	CD WITH (ROWLOCK)
-				join tblICItemUOM fUOM on fUOM.intItemUOMId = CD.intPriceItemUOMId
-				join tblICItemUOM tUOM on tUOM.intItemUOMId = CD.intFXPriceUOMId
 				JOIN tblCTPriceFixation		PF ON PF.intContractDetailId = CD.intContractDetailId
 				LEFT JOIN	tblSMCurrency		ICY	ON	ICY.intCurrencyID = CD.intInvoiceCurrencyId
 				LEFT JOIN	tblSMCurrency		ICY2	ON	ICY2.intCurrencyID = CD.intCurrencyId
