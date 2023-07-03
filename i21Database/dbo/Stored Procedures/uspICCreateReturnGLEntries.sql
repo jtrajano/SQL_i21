@@ -923,9 +923,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1000,9 +1000,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1069,9 +1069,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1148,9 +1148,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1225,9 +1225,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm) 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1296,9 +1296,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1370,9 +1370,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1441,9 +1441,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END 
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1522,9 +1522,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
@@ -1601,9 +1601,9 @@ SELECT
 		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
-		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
+		,dblDebitForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
 		,dblDebitReport				= NULL 
-		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
+		,dblCreditForeign			= CASE WHEN ForGLEntries_CTE.intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 

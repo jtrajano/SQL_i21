@@ -255,13 +255,13 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN 
+											WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId THEN 
 												CASE WHEN @ysnPost = 1 THEN DebitForeign.Value ELSE CreditForeign.Value END 
 											ELSE 0 
 										END 
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN 
+											WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId THEN 
 												CASE WHEN @ysnPost = 1 THEN CreditForeign.Value ELSE DebitForeign.Value END 
 											ELSE 0 
 										END 
@@ -316,13 +316,13 @@ BEGIN
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN 
+											WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId THEN 
 												CASE WHEN @ysnPost = 1 THEN CreditForeign.Value ELSE DebitForeign.Value END 
 											ELSE 0 
 										END
 			,dblDebitReport				= NULL 
 			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN 
+											WHEN ForGLEntries_CTE.intCurrencyId <> @intFunctionalCurrencyId THEN 
 												CASE WHEN @ysnPost = 1 THEN DebitForeign.Value ELSE CreditForeign.Value END 
 											ELSE 0 
 										END

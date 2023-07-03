@@ -89,7 +89,7 @@ BEGIN
 				, bill.intEntityVendorId
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
-				, settleStorage.intEntityId
+				, settleStorageSmallCaps.intEntityId
 				, adjustmentItem.intEntityId
 			)
 	FROM 
@@ -176,9 +176,9 @@ BEGIN
 						AND ty.intTransactionTypeId IN (22,46)
 			) loadShipmentSchedule 
 
-			LEFT JOIN tblGRSettleStorage settleStorage 
-				ON settleStorage.intSettleStorageId = t.intTransactionId
-				AND settleStorage.intSettleStorageId = t.intTransactionDetailId
+			LEFT JOIN tblGRSettleStorage settleStorageSmallCaps 
+				ON settleStorageSmallCaps.intSettleStorageId = t.intTransactionId
+				AND settleStorageSmallCaps.intSettleStorageId = t.intTransactionDetailId
 				AND t.strTransactionForm IN ('Settle Storage', 'Storage Settlement')
 				AND ty.intTransactionTypeId = 44 
 
@@ -250,7 +250,7 @@ BEGIN
 					, bill.intEntityVendorId
 					, loadShipmentSchedule.intVendorEntityId
 					, loadShipmentSchedule.intCustomerEntityId
-					, settleStorage.intEntityId
+					, settleStorageSmallCaps.intEntityId
 					, adjustmentItem.intEntityId
 				)
 
