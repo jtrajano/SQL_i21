@@ -266,7 +266,7 @@ BEGIN TRY
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = UnPvt.intItemId
 		AND IU.ysnStockUnit = 1
 	JOIN dbo.tblICItem I ON I.intItemId = UnPvt.intItemId
-	WHERE UnPvt.strTransactionType NOT IN (
+	WHERE UnPvt.strTransactionType COLLATE Latin1_General_CI_AS NOT IN (
 			SELECT x.strTransactionType
 			FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
 					intTransactionId INT
