@@ -189,7 +189,7 @@ BEGIN TRY
 	JOIN tblLGLoadCost LC ON LC.intLoadCostId = V.intLoadCostId
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-			WHEN ((ISNULL(LD.intPContractDetailId, 0) = 0) AND LD.intSContractDetailId = LC.intContractDetailId)
+			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
 				THEN LD.intSContractDetailId
 			ELSE LD.intPContractDetailId
 			END

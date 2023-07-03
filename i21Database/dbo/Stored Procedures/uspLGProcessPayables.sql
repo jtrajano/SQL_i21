@@ -254,7 +254,7 @@ BEGIN
 			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-			JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND (L.intPurchaseSale = 2 OR L.intPurchaseSale = 3) AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL AND LD.intSContractDetailId = A.intContractDetailId) 
+			JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL) 
 																	THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 			JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
