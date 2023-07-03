@@ -17,23 +17,45 @@ RETURN (
 	FROM (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText =	dbo.fnFormatMessage(
-								dbo.fnICGetErrorMessage(80236)
-								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
-								,dbo.fnFormatMsg80003(
-									@intItemLocationId
-									,@intSubLocationId
-									,@intStorageLocationId
+				,strText =	
+						CASE 
+							WHEN intAvailableQtyFormulaId = 1 THEN 
+								dbo.fnFormatMessage(
+									dbo.fnICGetErrorMessage(80236)
+									,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
+									,dbo.fnFormatMsg80003(
+										@intItemLocationId
+										,@intSubLocationId
+										,@intStorageLocationId
+									)
+									, v.dblOnHand
+									, v.dblUnitReserved
+									, v.dblOnHand - v.dblUnitReserved
+									, DEFAULT
+									, DEFAULT
+									, DEFAULT
+									, DEFAULT
+									, DEFAULT
 								)
-								, v.dblOnHand
-								, v.dblUnitReserved
-								, v.dblOnHand - v.dblUnitReserved
-								, DEFAULT
-								, DEFAULT
-								, DEFAULT
-								, DEFAULT
-								, DEFAULT
-							)
+							ELSE
+								dbo.fnFormatMessage(
+									dbo.fnICGetErrorMessage(80236)
+									,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
+									,dbo.fnFormatMsg80003(
+										@intItemLocationId
+										,@intSubLocationId
+										,@intStorageLocationId
+									)
+									, v.dblOnHand
+									, 0
+									, v.dblOnHand
+									, DEFAULT
+									, DEFAULT
+									, DEFAULT
+									, DEFAULT
+									, DEFAULT
+								)
+						END 
 				,intErrorCode = 80236
 		FROM	(
 				
@@ -41,17 +63,27 @@ RETURN (
 							Item.intItemId
 							,dblOnHand = ISNULL(StockUOM.dblOnHand, 0)
 							,dblUnitReserved = ISNULL(StockUOM.dblUnitReserved, 0)
-					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+							,[Location].intAvailableQtyFormulaId
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation [Location]
 								ON Item.intItemId = @intItemId								
-								AND Location.intItemLocationId = @intItemLocationId
+								AND [Location].intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICItemStockUOM StockUOM
 								ON StockUOM.intItemId = Item.intItemId
 								AND StockUOM.intItemUOMId = @intItemUOMId
-								AND StockUOM.intItemLocationId = Location.intItemLocationId
+								AND StockUOM.intItemLocationId = [Location].intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 6) < 0
-							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													
+					WHERE	(
+								(
+									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 6) < 0
+									AND [Location].intAvailableQtyFormulaId = 1
+								)
+								OR (
+									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0), 6) < 0
+									AND ([Location].intAvailableQtyFormulaId IS NULL OR [Location].intAvailableQtyFormulaId = 2) 
+								)
+							)
+							AND [Location].intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													
 						
 				) v
 		WHERE	v.intItemId IS NOT NULL 

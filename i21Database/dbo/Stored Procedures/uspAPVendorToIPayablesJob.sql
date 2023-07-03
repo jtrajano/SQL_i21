@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCorriganPaymentExportIPayables]
+
+--EXEC uspAPVendorToIpayablesJob  'D:\SQL Backup'
+
+CREATE PROCEDURE uspAPVendorToIPayablesJob
 @folderPath NVARCHAR(MAX)
 
 AS
@@ -7,13 +10,13 @@ DECLARE @_JobID UNIQUEIDENTIFIER
 
 SELECT @_JobID = job_id   
 FROM  msdb.dbo.sysjobs  
-WHERE (name = N'Payment to IPayables')   
+WHERE (name = N'Vendor to IPayables')   
 IF (@_JobID IS NOT NULL)  
-/****** Object:  Job [Payment to IPayables]    Script Date: 4/18/2023 6:24:07 PM ******/
+/****** Object:  Job [Vendor to IPayables]    Script Date: 4/18/2023 6:24:07 PM ******/
 EXEC msdb.dbo.sp_delete_job @job_id=@_JobID, @delete_unused_schedule=1
 
 
-/****** Object:  Job [Payment to IPayables]    Script Date: 4/18/2023 6:24:07 PM ******/
+/****** Object:  Job [Vendor to IPayables]    Script Date: 4/18/2023 6:24:07 PM ******/
 BEGIN TRANSACTION
 DECLARE @ReturnCode INT
 SELECT @ReturnCode = 0
@@ -26,7 +29,7 @@ IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 END
 
 DECLARE @jobId BINARY(16)
-EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name=N'Payment to IPayables', 
+EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name=N'Vendor to IPayables', 
 		@enabled=1, 
 		@notify_level_eventlog=0, 
 		@notify_level_email=0, 
@@ -40,7 +43,7 @@ IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 /****** Object:  Step [Generate CSV File]    Script Date: 4/18/2023 6:24:07 PM ******/
 DECLARE @strDate  NVARCHAR(20) =  REPLACE(CONVERT(nvarchar(20), GETDATE(), 102),'.','')
 DECLARE @command NVARCHAR(MAX) =
-N'sqlcmd -S '+ @@SERVERNAME +' -d ' + DB_NAME() + '  -Q "SET NOCOUNT ON; select * from vyuAPCorriganPaymentToIPayables;" -s "|" -o "' + @folderPath +'\C0000549_STATUS_'+ @strDate +'.txt" -W -w 1024 -h-1'
+N'sqlcmd -S '+ @@SERVERNAME +' -d ' + DB_NAME() + '  -Q "SET NOCOUNT ON; select strData from vyuAPVendorToIPayables order by intEntityId, strTag;" -o "' + @folderPath +'\C0000549_VENDOR_'+ @strDate +'.txt" -W -w 1024 -h-1'
 --N'sqlcmd -S .\MSSQL2019 -d ' + DB_NAME() + ' -U irely -P iRely486  -Q "SET NOCOUNT ON; select strData from vyuAPVendorToIPayables order by intEntityId, strTag;" -o "' + @folderPath +'\C0000549_VENDOR_'+ @strDate +'.csv" -W -w 1024 -h-1'
 EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Generate CSV File', 
 		@step_id=1, 
@@ -65,7 +68,9 @@ QuitWithRollback:
     IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
 EndSave:
 
-EXEC msdb.dbo.sp_start_job N'Payment to IPayables' ;  
+EXEC msdb.dbo.sp_start_job N'Vendor to IPayables' ;  
 
 
 END
+
+
