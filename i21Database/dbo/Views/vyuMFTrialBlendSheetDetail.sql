@@ -47,6 +47,7 @@ SELECT wo.strWorkOrderNo
 	,woil.strFW
 	,b.dblLandedPrice
 	,b.dblSellingPrice
+	,1 AS intConcurrencyId
 FROM tblMFWorkOrder wo
 INNER JOIN tblMFWorkOrderInputLot woil ON wo.intWorkOrderId = woil.intWorkOrderId
 INNER JOIN tblICLot lot ON lot.intLotId = woil.intLotId
@@ -64,3 +65,4 @@ OUTER APPLY (
 OUTER APPLY (SELECT TOP 1 SUM(dblQuantity) AS dblSumQuantity
 			 FROM tblMFWorkOrderInputLot
 			 WHERE intWorkOrderId = woil.intWorkOrderId) AS WorkOrderInputLotQty
+GO

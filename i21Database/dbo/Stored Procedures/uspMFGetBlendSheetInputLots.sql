@@ -49,7 +49,7 @@ BEGIN
 			 , sl.strName AS strStorageLocationName
 			 , l.strNotes AS strRemarks
 			 , i.dblRiskScore
-			 , ISNULL(ri.dblQuantity/@dblRecipeQty, 0) AS dblConfigRatio
+			 , ri.dblQuantity/@dblRecipeQty AS dblConfigRatio
 			 , CAST(ISNULL(q.Density,0) AS DECIMAL) AS dblDensity
 			 , CAST(ISNULL(q.Score,0) AS DECIMAL) AS dblScore
 			 , i.intCategoryId
@@ -78,6 +78,8 @@ BEGIN
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
 			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , 1 AS intConcurrencyId
+			 , '' AS strGrade
 		FROM tblMFWorkOrderInputLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -132,7 +134,7 @@ BEGIN
 			 , sl.strName AS strStorageLocationName
 			 , l.strNotes AS strRemarks
 			 , i.dblRiskScore
-			 , ISNULL(ri.dblQuantity / @dblRecipeQty, 0) AS dblConfigRatio
+			 , ri.dblQuantity / @dblRecipeQty AS dblConfigRatio
 			 , CAST(ISNULL(q.Density,0) AS DECIMAL) AS dblDensity
 			 , CAST(ISNULL(q.Score,0) AS DECIMAL) AS dblScore
 			 , i.intCategoryId
@@ -161,6 +163,8 @@ BEGIN
 			 , Batch.strLeafGrade
 			 , Garden.strGardenMark
 			 , wi.dblQuantity  AS dblRequiredQtyPerSheet
+			 , 1 AS intConcurrencyId
+			 , '' AS strGrade
 		FROM tblMFWorkOrderConsumedLot wi 
 		JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
 		JOIN tblICItemUOM iu ON wi.intItemUOMId = iu.intItemUOMId
@@ -226,7 +230,8 @@ BEGIN
 	, MT.strDescription AS strProductType
 	, B.strBrandCode
 	, wi.dblQuantity  AS dblRequiredQtyPerSheet
-
+	, 1 AS intConcurrencyId
+	, '' AS strGrade
 	INTO #tblWorkOrderInputParent
 	FROM tblMFWorkOrderInputParentLot wi 
 	JOIN tblMFWorkOrder w ON wi.intWorkOrderId = w.intWorkOrderId
