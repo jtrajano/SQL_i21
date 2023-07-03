@@ -1767,6 +1767,7 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpostForInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
