@@ -60,7 +60,9 @@ BEGIN TRY
             @strLCType					NVARCHAR(100),
             @strLCNumber				NVARCHAR(50),
 			@intCostTermId				INT,
-			@intContainerTypeId			INT
+			@intContainerTypeId			INT,
+			@ysnEnableOutrightPricing	bit
+			;
 
 
 	update pf1 set dblLotsFixed = isnull(pricing.dblPricedQty,0.00) / (cd.dblQuantity / isnull(cd.dblNoOfLots,1))
@@ -194,7 +196,7 @@ BEGIN TRY
 		, strCertifications
 	FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
-	SELECT @ysnEnableLetterOfCredit = ysnEnableLetterOfCredit, @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
+	SELECT @ysnEnableLetterOfCredit = ysnEnableLetterOfCredit, @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END), @ysnEnableOutrightPricing = ysnEnableOutrightPricing FROM tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
@@ -228,11 +230,14 @@ BEGIN TRY
 	WHERE intProducerId IS NULL
 		AND @intProducerId IS NOT NULL
 	
-	UPDATE CD
-	SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
-	FROM @CDTableUpdate CD
-	JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
-	WHERE CD.intPricingTypeId IN (1, 6)
+	if not(@intHeaderPricingTypeId = 1 and @ysnEnableOutrightPricing = 1 and @intPricingTypeId = 1)
+	begin
+		UPDATE CD
+		SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
+		FROM @CDTableUpdate CD
+		JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
+		WHERE CD.intPricingTypeId IN (1, 6)
+	end
 
 	SELECT	@ErrMsg = COALESCE(@ErrMsg, '') + '#' + LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) + '^' + CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
 	FROM	vyuCTContractCostView	CC
