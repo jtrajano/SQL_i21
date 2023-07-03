@@ -1757,6 +1757,7 @@
     <Build Include="dbo\Views\vyuAPCorriganPaymentToIPayables.sql" />
     <Build Include="dbo\Views\vyuCTItemXrefSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIPipelineStages.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
     <Build Include="dbo\Views\vyuARDistinctGLCompanyAccountIds.sql" />
     <Build Include="dbo\Tables\tblApiSchemaVendorXref.sql" />
