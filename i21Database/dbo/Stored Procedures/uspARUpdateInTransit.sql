@@ -38,8 +38,18 @@ BEGIN
 		, strInvoiceNumber					= ID.strInvoiceNumber
 		, intTransactionTypeId				= @INVENTORY_INVOICE_TYPE
 		, intFOBPointId						= FP.intFobPointId
-		, dtmTransactionDate				= ISNULL(ID.dtmPostDate, ID.dtmShipDate)
+		, dtmTransactionDate				= ID2.dtmTransactionDate
 	FROM ##ARPostInvoiceDetail ID
+	INNER JOIN (
+		SELECT 
+			 intItemId
+			,intItemLocationId
+			,dtmTransactionDate = MAX(ISNULL(dtmPostDate, dtmShipDate))
+		FROM ##ARPostInvoiceDetail
+		GROUP BY
+			 intItemId
+			,intItemLocationId
+	) ID2 ON ID.intItemId = ID2.intItemId AND ID.intItemLocationId = ID2.intItemLocationId
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
 	LEFT JOIN tblSMFreightTerms FT ON ID.intFreightTermId = FT.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
