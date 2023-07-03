@@ -1446,6 +1446,7 @@
     <Build Include="dbo\Stored Procedures\uspCTSplitItemContract.sql" />
      <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
      <Build Include="dbo\Tables\tblSMPowerBIDistribution.sql" />
+     <Build Include="dbo\Tables\tblSMPowerBIPipelineStages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
