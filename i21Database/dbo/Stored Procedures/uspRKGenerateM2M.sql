@@ -3782,9 +3782,13 @@ BEGIN TRY
 														, cuomPrice.intCommodityUnitMeasureId
 														, @intCurrencyId
 														, @intMarkToMarketRateTypeIdInv)
-						, dblCosts  = SUM(CASE WHEN s.strTransactionType = 'Inventory Receipt' THEN IRCost.dblTotalCost 
-										WHEN s.strTransactionType = 'Inventory Shipment' THEN ISCost.dblTotalCost
-										ELSE 0 END * CASE WHEN ISNULL(s.dblQuantity , 0) < 0 THEN 1 ELSE -1 END) 
+						, dblCosts  = SUM(CASE WHEN s.strTransactionType = 'Inventory Receipt' 
+											THEN IRCost.dblTotalCost / 
+												CASE WHEN i.strLotTracking <> 'No' 
+													THEN (ISNULL(IRItem.dblOpenReceive, 0) / ABS(ISNULL(s.dblQuantity, 1)))
+													ELSE 1 END
+											WHEN s.strTransactionType = 'Inventory Shipment' THEN ISCost.dblTotalCost
+											ELSE 0 END * CASE WHEN ISNULL(s.dblQuantity , 0) < 0 THEN 1 ELSE -1 END) 
 						, intItemLocationId = s.intItemLocationId
 						, intQuantityUOMId = cuomQuantity.intCommodityUnitMeasureId
 						, intPriceUOMId = cuomPrice.intCommodityUnitMeasureId
@@ -3894,6 +3898,11 @@ BEGIN TRY
 						WHERE Item.strCostType <> 'Commission'
 						AND InvS.intInventoryShipmentId = s.intTransactionId and s.strTransactionType = 'Inventory Shipment'
 					) ISCost
+					LEFT JOIN tblICInventoryReceiptItem IRItem
+						ON IRItem.intInventoryReceiptId = s.intTransactionId
+						AND IRItem.intInventoryReceiptItemId = s.intTransactionDetailId
+						AND s.strTransactionType = 'Inventory Receipt'
+						AND i.strLotTracking <> 'No' 
 					WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <>0 
 						AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId) 
 						AND ISNULL(strTicketStatus, '') <> 'V'
