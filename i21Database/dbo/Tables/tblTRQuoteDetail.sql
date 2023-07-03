@@ -19,6 +19,7 @@
 	[dblTax] DECIMAL(18, 6) NULL DEFAULT 0,
 	[intShipToLocationId] INT NULL,
 	[intSpecialPriceId] INT NULL,
+	[intItemCustomerXrefId] INT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRQuoteDetail] PRIMARY KEY ([intQuoteDetailId]),	
 	CONSTRAINT [FK_tblTRQuoteDetail_tblTRQuoteHeader_intQuoteHeaderId] FOREIGN KEY ([intQuoteHeaderId]) REFERENCES [dbo].[tblTRQuoteHeader] ([intQuoteHeaderId]) ON DELETE CASCADE,
