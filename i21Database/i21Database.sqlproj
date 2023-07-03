@@ -1323,6 +1323,7 @@
     <Build Include="dbo\Tables\tblApiSchemaCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetOverageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
