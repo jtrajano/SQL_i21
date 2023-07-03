@@ -1815,6 +1815,7 @@
     <Build Include="dbo\Views\vyuMFDemandDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFDemandAnalysisDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoadFromMbil.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIPipelineStages.sql" />
     <Build Include="dbo\Views\vyuTMDeliverySite.sql" />
     <Build Include="dbo\User Defined Types\ItemInTransitValueOnlyTableType.sql" />
     <Build Include="dbo\Functions\fnLGGetForexRateFromContract.sql" />
