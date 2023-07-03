@@ -22,7 +22,7 @@ dtmMatchDate,
 strLocationName,strAccountNumber,strFutMarketName,strOptionMonth,strMLBook strBook,strMLSubBook strSubBook,
 strName strBrokerName ,sum(dblImpact) dblGrossPnL,com.intCommodityId
 FROM vyuRKSOptionMatchedTransaction ft
-JOIN tblSMCurrency c on c.intCurrencyID=CASE WHEN ft.ysnSubCurrency=1 then (select intMainCurrencyId from tblSMCurrency where ysnSubCurrency=1) else intCurrencyId end
+JOIN tblSMCurrency c on c.intCurrencyID=CASE WHEN ft.ysnSubCurrency=1 then (select intMainCurrencyId from tblSMCurrency where ysnSubCurrency=1) else c.intCurrencyID end
 join tblICCommodity com on com.strCommodityCode=ft.strCommodityCode
 WHERE intMatchOptionsPnSId in(
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strMatchedRecId, ',')) 

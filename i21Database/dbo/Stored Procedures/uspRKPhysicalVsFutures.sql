@@ -44,7 +44,7 @@ SELECT
 	, CH.intContractHeaderId
 	, intLongFutOptTransactionHeaderId = BUY.intFutOptTransactionHeaderId
 	, intShortFutOptTransactionHeaderId = SELL.intFutOptTransactionHeaderId
-	, dblNetPL = (((SELL.dblPrice - BUY.dblPrice) * MD.dblMatchQty * FM.dblContractSize) / CASE WHEN c.ysnSubCurrency = 1 THEN c.intCent ELSE 1 END)
+	, dblNetPL = (((SELL.dblPrice - BUY.dblPrice) * MD.dblMatchQty * FM.dblContractSize) / CASE WHEN c2.ysnSubCurrency = 1 THEN c2.intCent ELSE 1 END)
 					+ (- ABS(MD.dblFutCommission))
 
 FROM tblCTPriceFixationDetail PFD
@@ -59,7 +59,7 @@ INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = SELL.intFutureMarketId
 INNER JOIN tblEMEntity AS E ON E.intEntityId = SELL.intEntityId
 INNER JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = SELL.intBrokerageAccountId
 INNER JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = SELL.intFutureMonthId
-LEFT JOIN tblSMCurrency c ON c.intCurrencyID = SELL.intCurrencyId
+LEFT JOIN tblSMCurrency c2 ON c2.intCurrencyID = SELL.intCurrencyId
 WHERE PFD.intFutOptTransactionId IS NOT NULL
 AND MH.dtmMatchDate BETWEEN @dtmMatchFromDate AND @dtmMatchToDate
 AND C.intCommodityId = ISNULL(@intCommodityId, C.intCommodityId)
@@ -102,7 +102,7 @@ SELECT
 	, intContractHeaderId = NULL --CH.intContractHeaderId
 	, intLongFutOptTransactionHeaderId = BUY.intFutOptTransactionHeaderId
 	, intShortFutOptTransactionHeaderId = SELL.intFutOptTransactionHeaderId
-	, dblNetPL = (((SELL.dblPrice - BUY.dblPrice) * MD.dblMatchQty * FM.dblContractSize) / CASE WHEN c.ysnSubCurrency = 1 THEN c.intCent ELSE 1 END)
+	, dblNetPL = (((SELL.dblPrice - BUY.dblPrice) * MD.dblMatchQty * FM.dblContractSize) / CASE WHEN c2.ysnSubCurrency = 1 THEN c2.intCent ELSE 1 END)
 					+ (- ABS(MD.dblFutCommission))
 FROM tblRKMatchFuturesPSDetail MD
 INNER JOIN tblRKMatchFuturesPSHeader MH ON MH.intMatchFuturesPSHeaderId = MD.intMatchFuturesPSHeaderId
@@ -113,7 +113,7 @@ INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = SELL.intFutureMarketId
 INNER JOIN tblEMEntity AS E ON E.intEntityId = SELL.intEntityId
 INNER JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = SELL.intBrokerageAccountId
 INNER JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = SELL.intFutureMonthId
-LEFT JOIN tblSMCurrency c ON c.intCurrencyID = SELL.intCurrencyId
+LEFT JOIN tblSMCurrency c2 ON c2.intCurrencyID = SELL.intCurrencyId
 
 WHERE MH.dtmMatchDate BETWEEN @dtmMatchFromDate AND @dtmMatchToDate
 AND C.intCommodityId = ISNULL(@intCommodityId, C.intCommodityId)

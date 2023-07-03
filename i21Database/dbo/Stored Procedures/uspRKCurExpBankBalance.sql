@@ -10,7 +10,7 @@ SM.strCompanyName
 ,strGLAccountId
 ,GL.strAccountType
 ,Balance.Value as dblAmount
-,1 as intConcurrencyId,intBankId,intCurrencyId,SM1.intMultiCompanyId intCompanyId,intBankAccountId
+,1 as intConcurrencyId,intBankId,CM.intCurrencyId,SM1.intMultiCompanyId intCompanyId,intBankAccountId
 FROM vyuCMBankAccount CM
 OUTER APPLY (select [dbo].[fnGetBankBalance] (intBankAccountId, getdate()) Value ) Balance
 OUTER APPLY (select top 1 strCompanyName from tblSMCompanySetup)SM

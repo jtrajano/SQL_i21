@@ -163,12 +163,12 @@ BEGIN
 		SET @SQL1=' SELECT  @dtmDate1 dtmDate,* into ##tempRunTime FROM '+case when LEN(@SQL1)>0 then LEFT(@SQL1,LEN(@SQL1)-11) else @SQL1 end 
 		EXEC sp_executesql @SQL1,N'@dtmDate1 DATETIME',@dtmDate1
 	
-				SELECT @intColumn_Id=min(column_id) from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime')
+				SELECT @intColumn_Id=min(column_id) from sys.columns where object_id = object_id('tempdb..##tempRunTime')
 				WHILE @intColumn_Id>0
 				BEGIN
 				 						
-					SELECT @strCumulativeNum=@strCumulativeNum+'['+name+'],' from tempdb.sys.columns where object_id = object_id('tempdb..##tempRunTime') AND  column_id=@intColumn_Id				
-				SELECT @intColumn_Id=min(column_id) from tempdb.sys.columns where object_id =object_id('tempdb..##tempRunTime') and column_id>@intColumn_Id
+					SELECT @strCumulativeNum=@strCumulativeNum+'['+name+'],' from sys.columns where object_id = object_id('tempdb..##tempRunTime') AND  column_id=@intColumn_Id				
+				SELECT @intColumn_Id=min(column_id) from sys.columns where object_id =object_id('tempdb..##tempRunTime') and column_id>@intColumn_Id
 				END
 	IF LEN(@strCumulativeNum) > 0
 	BEGIN
@@ -194,15 +194,15 @@ declare @intColCount int
 declare @SQLBalanceForward nvarchar(max)=''
 declare @SQLFinal nvarchar(max)=''
 
-select @strInsertListBF += CASE WHEN name like '%Distribution%' THEN '['+ name +'],' ELSE 'SUM(ISNULL(['+ name +'],0)),' END from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and  (name like '%_Net' or name like '%Distribution%') ORDER BY column_id
+select @strInsertListBF += CASE WHEN name like '%Distribution%' THEN '['+ name +'],' ELSE 'SUM(ISNULL(['+ name +'],0)),' END from sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and  (name like '%_Net' or name like '%Distribution%') ORDER BY column_id
 SELECT @strInsertListBF=  case when LEN(@strInsertListBF)>0 then LEFT(@strInsertListBF,LEN(@strInsertListBF)-1) else @strInsertListBF end  --Remove the comma at the end
 
-select @strInsertListBFGroupBy += '['+ name +'],'  from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and   name like '%Distribution%'  ORDER BY column_id
+select @strInsertListBFGroupBy += '['+ name +'],'  from sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and   name like '%Distribution%'  ORDER BY column_id
 SELECT @strInsertListBFGroupBy=  case when LEN(@strInsertListBFGroupBy)>0 then LEFT(@strInsertListBFGroupBy,LEN(@strInsertListBFGroupBy)-1) else @strInsertListBFGroupBy end  --Remove the comma at the end
 
 
-select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1')   ORDER BY column_id
-select @intColCount=count(name) from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
+select @strInsertList+='['+name+'],' from sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1')   ORDER BY column_id
+select @intColCount=count(name) from sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
 SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  --Remove the comma at the end
 
 

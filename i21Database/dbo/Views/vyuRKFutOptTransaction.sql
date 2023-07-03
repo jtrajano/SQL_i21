@@ -2,7 +2,88 @@
 
 AS  
 
-SELECT TOP 100 PERCENT *
+SELECT TOP 100 PERCENT 
+	  intFutOptTransactionId
+	, intFutOptTransactionHeaderId
+	, strFutMarketName
+	, dtmTransactionDate
+	, strFutureMonthYear
+	, intOptionMonthId
+	, strOptionMonthYear
+	, strOptionType
+	, intInstrumentTypeId
+	, strInstrumentType
+	, dblStrike
+	, strInternalTradeNo
+	, intEntityId
+	, strName
+	, intBrokerageAccountId
+	, intBankAccountId
+	, intBankId
+	, strBrokerageAccount
+	, dblGetNoOfContract
+	, dblContractSize
+	, dblOpenContract
+	, strUnitMeasure
+	, strBuySell
+	, dblPrice
+	, strCommodityCode
+	, intLocationId
+	, strLocationName
+	, strStatus
+	, strAssignedContracts
+	, strHedgedContracts
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
+	, dtmFilledDate
+	, intCommodityId
+	, strBankName
+	, strBankAccountNo
+	, intSelectedInstrumentTypeId
+	, strSelectedInstrumentType
+	, dtmMaturityDate
+	, intCurrencyId
+	, strCurrencyExchangeRateType
+	, strFromCurrency
+	, strToCurrency
+	, dblContractAmount
+	, dblExchangeRate
+	, dblMatchAmount
+	, dblAllocatedAmount
+	, dblUnAllocatedAmount
+	, dblSpotRate
+	, ysnLiquidation
+	, ysnSwap
+	, ysnExpired
+	, intRollingMonthId
+	, strRollingMonth
+	, strBrokerTradeNo
+	, ysnPreCrush
+	, strFutureMonth
+	, strNotes
+	, intFutureMarketId
+	, intFutureMonthId
+	, strContractNumber
+	, strSequenceNo
+	, strRefSwapTradeNo
+	, dtmCreateDateTime
+	, ysnFreezed
+	, intTraderId
+	, strSalespersonId
+	, strReference
+	, ysnSlicedTrade
+	, intOrigSliceTradeId
+	, strOriginalTradeNo
+	, strOrderType
+	, strCommissionRateType
+	, dblBrokerageRate
+	, dblCommission
+	, ysnCommissionExempt
+	, ysnCommissionOverride
+	, ysnPosted
+	, strCurrencyPair
 	, intRowNum = intFutOptTransactionId --CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId))
 	, dblHedgeQty = ISNULL(dblContractSize, 0.00) * dblOpenContract
 	, dblContractPrice = ISNULL(dblPrice, 0.00) * dblOpenContract
