@@ -19,7 +19,7 @@ RETURN (
 				,intItemLocationId = @intItemLocationId
 				,strText =	
 						CASE 
-							WHEN intAvailableQtyFormulaId IS NULL OR intAvailableQtyFormulaId = 1 THEN 
+							WHEN intAvailableQtyFormulaId = 1 THEN 
 								dbo.fnFormatMessage(
 									dbo.fnICGetErrorMessage(80236)
 									,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
@@ -76,11 +76,11 @@ RETURN (
 					WHERE	(
 								(
 									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 6) < 0
-									AND ([Location].intAvailableQtyFormulaId IS NULL OR [Location].intAvailableQtyFormulaId = 1) 
+									AND [Location].intAvailableQtyFormulaId = 1
 								)
 								OR (
 									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0), 6) < 0
-									AND [Location].intAvailableQtyFormulaId = 2
+									AND ([Location].intAvailableQtyFormulaId IS NULL OR [Location].intAvailableQtyFormulaId = 2) 
 								)
 							)
 							AND [Location].intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													

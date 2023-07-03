@@ -167,12 +167,12 @@ RETURN (
 								-- Available Qty = (On-Hand Qty) - (Reserved Qty); @Qty will make the available qty negative. 
 								(
 									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 4) < 0
-									AND ([Location].intAvailableQtyFormulaId IS NULL OR [Location].intAvailableQtyFormulaId = 1)  
+									AND [Location].intAvailableQtyFormulaId = 1
 								)
 								-- Available Qty = On-Hand Qty; @Qty will make the on-hand qty negative. 
 								OR (
 									ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0), 4) < 0
-									AND [Location].intAvailableQtyFormulaId = 2
+									AND ([Location].intAvailableQtyFormulaId IS NULL OR [Location].intAvailableQtyFormulaId = 2)
 								)
 							)
 							AND (							
