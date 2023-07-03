@@ -149,7 +149,8 @@ BEGIN TRY
 
 
 	declare @InvShpFinal table (
-		intInventoryShipmentId int
+		intId int
+		,intInventoryShipmentId int
 		,intInventoryShipmentItemId int
 		,dblShipped numeric(18,6)
 		,intInvoiceDetailId int null
@@ -786,7 +787,7 @@ BEGIN TRY
 			if (@ysnDestinationWeightsGrades = convert(bit,1))
 			begin
 				insert into @InvShpFinal
-				select * from
+				select intId = row_number() over (order by t.dtmInvoiceDate,t.intInventoryShipmentItemId),* from
 				(
 				select
 					si.intInventoryShipmentId
@@ -804,7 +805,7 @@ BEGIN TRY
 			end
 			else
 			begin
-				insert into @InvShpFinal select * from @InvShp
+				insert into @InvShpFinal select intId = row_number() over (order by intInventoryShipmentItemId),* from @InvShp
 			end
 
 
