@@ -17,6 +17,8 @@ SELECT DISTINCT RackPriceDetail.intRackPriceDetailId
 	, RackPriceHeader.strComments
 	, RackPriceDetail.dblVendorRack
 	, RackPriceDetail.dblJobberRack
+	, RackPriceDetail.intItemVendorXrefId
+	, VX.strVendorProduct
 FROM tblTRRackPriceDetail RackPriceDetail
 LEFT JOIN tblTRRackPriceHeader RackPriceHeader ON RackPriceHeader.intRackPriceHeaderId = RackPriceDetail.intRackPriceHeaderId
 LEFT JOIN tblICItem Item ON Item.intItemId = RackPriceDetail.intItemId
@@ -24,3 +26,4 @@ LEFT JOIN vyuTRRackPriceEquation PriceEquation ON PriceEquation.intSupplyPointId
 INNER JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = RackPriceHeader.intSupplyPointId
 INNER JOIN tblEMEntity Entity ON SupplyPoint.intEntityVendorId = Entity.intEntityId
 INNER JOIN tblEMEntityLocation EntityLocation ON SupplyPoint.intEntityLocationId = EntityLocation.intEntityLocationId
+LEFT JOIN tblICItemVendorXref VX ON RackPriceDetail.intItemVendorXrefId = VX.intItemVendorXrefId
