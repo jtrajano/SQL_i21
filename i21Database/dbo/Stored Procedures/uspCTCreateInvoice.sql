@@ -50,6 +50,12 @@ BEGIN TRY
 		,@intItemUOMId int
 		,@ysnDestinationWeightsGrades bit
 		,@intPricingTypeId int
+
+		,@dblDestinationQuantity numeric(18,6)
+		,@dblInvoiceQtyShipped numeric(18,6)
+		,@dblSequenceQuantity numeric(18,6)
+		,@dblSpotQuantity numeric(18,6)
+		,@intItemId int
 		;
 
 	declare @PricedShipment table
@@ -69,7 +75,8 @@ BEGIN TRY
 
 
 	declare @InvShpFinal table (
-		intInventoryShipmentId int
+		intId int
+		,intInventoryShipmentId int
 		,intInventoryShipmentItemId int
 		,dblShipped numeric(18,6)
 		,intInvoiceDetailId int null
@@ -589,7 +596,7 @@ BEGIN TRY
 		if (@ysnDestinationWeightsGrades = convert(bit,1))
 		begin
 			insert into @InvShpFinal
-			select * from
+			select intId = row_number() over (order by t.dtmInvoiceDate,t.intInventoryShipmentItemId),* from
 			(
 			select
 				si.intInventoryShipmentId
@@ -607,7 +614,7 @@ BEGIN TRY
 		end
 		else
 		begin
-			insert into @InvShpFinal select * from @InvShp
+			insert into @InvShpFinal select intId = row_number() over (order by intInventoryShipmentItemId),* from @InvShp
 		end
 
 
@@ -679,6 +686,7 @@ BEGIN TRY
 						,dblFinalPrice = dbo.fnCTConvertToSeqFXCurrency(a.intContractDetailId,c.intFinalCurrencyId,f.intItemUOMId,b.dblFinalPrice)
 						,ContractPriceItemUOMId = b.intPricingUOMId
 						,ContractDetailItemId = d.intItemId
+						,dblSequenceQuantity = d.dblQuantity
 					from
 						tblCTPriceFixation a
 						,tblCTPriceFixationDetail b
@@ -710,6 +718,7 @@ BEGIN TRY
 					,@dblFinalPrice
 					,@ContractPriceUnitMeasureId
 					,@ContractDetailItemId
+					,@dblSequenceQuantity
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
@@ -841,6 +850,37 @@ BEGIN TRY
 
 						END
 
+					   if (isnull(@ysnDestinationWeightsGrades,0) = 1)
+					   begin
+ 
+						select
+						 @intItemId = @ContractDetailItemId
+						 ,@dblDestinationQuantity = null
+						 ,@dblInvoiceQtyShipped = null
+						 ,@dblSequenceQuantity = @dblSequenceQuantity
+						 ,@dblSpotQuantity = null
+ 
+						select @dblDestinationQuantity = sum(si.dblDestinationQuantity) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intItemId = @intItemId;
+						select @dblInvoiceQtyShipped = sum(di.dblQtyShipped) from tblARInvoiceDetail di where di.intContractDetailId = @intContractDetailId and di.intItemId = @intItemId;
+ 
+						if (@dblSequenceQuantity < @dblDestinationQuantity and @dblSequenceQuantity <= @dblInvoiceQtyShipped)
+						begin
+						 select @dblSpotQuantity = @dblDestinationQuantity - @dblSequenceQuantity;
+ 
+						 exec uspCTCreateInvoiceDetail
+						  @intInvoiceDetailId = @intInvoiceDetailId
+						  ,@intInventoryShipmentId = @intInventoryShipmentId
+						  ,@intInventoryShipmentItemId = @intInventoryShipmentItemId
+						  ,@dblQty = @dblSpotQuantity
+						  ,@dblPrice = 0.00
+						  ,@intUserId = @intUserId
+						  ,@intContractHeaderId = null
+						  ,@intContractDetailId = null
+						  ,@NewInvoiceDetailId = @intInvoiceDetailId
+						  ,@intPriceFixationDetailId = @intPriceFixationDetailId;
+						end
+					   end
+
 						--Update the load applied and priced
 						IF @ysnLoad = 1
 						BEGIN
@@ -899,6 +939,38 @@ BEGIN TRY
 							,@intInventoryShipmentId = @intInventoryShipmentId
 							,@UserId = @intUserId
 							,@intInvoiceDetailId = @intInvoiceDetailId
+
+					   if (isnull(@ysnDestinationWeightsGrades,0) = 1)
+					   begin
+ 
+						select
+						 @intItemId = @ContractDetailItemId
+						 ,@dblDestinationQuantity = null
+						 ,@dblInvoiceQtyShipped = null
+						 ,@dblSequenceQuantity = @dblSequenceQuantity
+						 ,@dblSpotQuantity = null
+ 
+						select @dblDestinationQuantity = sum(si.dblDestinationQuantity) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intItemId = @intItemId;
+						select @dblInvoiceQtyShipped = sum(di.dblQtyShipped) from tblARInvoiceDetail di where di.intContractDetailId = @intContractDetailId and di.intItemId = @intItemId;
+ 
+						if (@dblSequenceQuantity < @dblDestinationQuantity and @dblSequenceQuantity <= @dblInvoiceQtyShipped)
+						begin
+						 select @dblSpotQuantity = @dblDestinationQuantity - @dblSequenceQuantity;
+ 
+						 exec uspCTCreateInvoiceDetail
+						  @intInvoiceDetailId = @intInvoiceDetailId
+						  ,@intInventoryShipmentId = @intInventoryShipmentId
+						  ,@intInventoryShipmentItemId = @intInventoryShipmentItemId
+						  ,@dblQty = @dblSpotQuantity
+						  ,@dblPrice = 0.00
+						  ,@intUserId = @intUserId
+						  ,@intContractHeaderId = null
+						  ,@intContractDetailId = null
+						  ,@NewInvoiceDetailId = @intInvoiceDetailId
+						  ,@intPriceFixationDetailId = @intPriceFixationDetailId;
+						end
+ 
+					   end
 							
 						--Deduct the quantity from @dblPricedForInvoice and @dblShippedForInvoice
 						set @dblPricedForInvoice = (@dblPricedForInvoice - @dblQuantityForInvoice);
@@ -919,6 +991,7 @@ BEGIN TRY
 						,@dblFinalPrice
 						,@ContractPriceUnitMeasureId
 						,@ContractDetailItemId
+						,@dblSequenceQuantity
 
 				END
 
