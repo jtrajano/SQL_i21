@@ -271,7 +271,7 @@ SET ANSI_WARNINGS OFF
 	  AND ARID.strType <> 'Tax Adjustment'
 
 	UPDATE ARITD
-	SET intSalesTaxAccountId = dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, CL.intProfitCenter)
+	SET intSalesTaxAccountId = ISNULL(dbo.fnGetGLAccountIdFromProfitCenter(ARITD.intSalesTaxAccountId, CL.intProfitCenter), ARITD.intSalesTaxAccountId)
 	FROM tblARInvoiceDetailTax ARITD
 	INNER JOIN tblARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId 
 	INNER JOIN tblSMCompanyLocation CL ON ARID.intCompanyLocationId = CL.intCompanyLocationId
