@@ -930,6 +930,8 @@
     <Build Include="dbo\Functions\fnGetItemCommodityGLAccount.sql" />
     <Build Include="dbo\Views\vyuAPGetItemGLAccount.sql" />
     <Build Include="dbo\Functions\fnRKGetM2MValuationAverageCost.sql" />
+    <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
