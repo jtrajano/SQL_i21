@@ -1746,7 +1746,9 @@ BEGIN TRY
 				AND nearby.intRowId = 1
 		) tbl WHERE intRowNumber = 1
 
-		SELECT * 
+		SELECT intContractDetailId
+			, dblQuantity = SUM(dblQuantity)
+			, dblInitialQty = SUM(dblInitialQty)
 		INTO #tmpInTransitLS
 		FROM 
 		(
@@ -1836,6 +1838,7 @@ BEGIN TRY
 			) LC	
 			GROUP BY PCT.intContractDetailId
 		) t
+		GROUP BY t.intContractDetailId
 
 		INSERT INTO @tblOpenContractList (intContractHeaderId
 			, intContractDetailId
