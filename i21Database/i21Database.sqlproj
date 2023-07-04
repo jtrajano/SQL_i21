@@ -1829,6 +1829,8 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyProcessForIntransit.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketApplyUnpostForInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
+    <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
