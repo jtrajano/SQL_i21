@@ -1769,6 +1769,8 @@
     <Build Include="dbo\Stored Procedures\uspCTGetItemPriceByLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
+    <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
