@@ -22,6 +22,7 @@ BEGIN TRY
 		,@strIgnoreShrinkageCommodity NVARCHAR(50)
 		,@intCommodityId int
 		,@dtmCurrentDate date
+		,@intManufacturingProcessId INT
 
 	DECLARE @tblIPIDOCXMLStage TABLE (intIDOCXMLStageId INT)
 
@@ -84,6 +85,11 @@ BEGIN TRY
 
 	DELETE FROM tblMFRecipeStage WHERE intStatusId=1 
 	DELETE FROM tblMFRecipeItemStage WHERE intStatusId=1 
+
+	SELECT @intManufacturingProcessId=NULL
+	SELECT @intManufacturingProcessId=intManufacturingProcessId
+	FROM tblMFManufacturingProcess
+	WHERE strProcessName='Blending'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -159,7 +165,7 @@ BEGIN TRY
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strVendorRefNoPrefix = x.LocationCode
 				AND strLocationType = 'Plant'
-			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = 1
+			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = @intManufacturingProcessId
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strBlendCode, '') + ','
 			FROM @tblIPRecipeName

@@ -106,7 +106,7 @@ BEGIN TRY
 			,@strBatchNo=NULL
 
 		SELECT @intBatchId = intBatchId
-			,@intOriginalItemId = intOriginalItemId
+			,@intOriginalItemId = ISNULL(intOriginalItemId,intItemId)
 			,@intItemId = intItemId
 		FROM tblMFBatchPreStage
 		WHERE intBatchPreStageId = @intBatchPreStageId
@@ -245,7 +245,7 @@ BEGIN TRY
 			FROM vyuMFBatch B WITH (NOLOCK)
 			LEFT JOIN dbo.tblSMCurrency C WITH (NOLOCK) ON C.intCurrencyID = B.intCurrencyId
 			LEFT JOIN dbo.tblSMCity CITY WITH (NOLOCK) ON CITY.intCityId = B.intFromPortId
-			LEFT JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = B.intOriginalItemId
+			LEFT JOIN dbo.tblICItem I WITH (NOLOCK) ON I.intItemId = IsNULL(B.intOriginalItemId,B.intTealingoItemId)
 			LEFT JOIN dbo.tblQMGardenMark GM WITH (NOLOCK) ON GM.intGardenMarkId = B.intGardenMarkId
 			LEFT JOIN dbo.tblICItem I1 WITH (NOLOCK) ON I1.intItemId = B.intTealingoItemId
 			LEFT JOIN dbo.tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = B.intMixingUnitLocationId
