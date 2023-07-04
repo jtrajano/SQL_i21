@@ -1419,6 +1419,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomerXref.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetClusterFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCSAddNewRecipeForBlendedFuel.sql" />
+    <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
