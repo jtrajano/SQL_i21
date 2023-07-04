@@ -925,6 +925,8 @@
     <Build Include="dbo\Stored Procedures\uspLGChangeLoadCostVendor.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptOtherCharge.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherLoadShipmentCostAdjGLEntry.sql" />
+    <Build Include="dbo\Functions\fnMFGetErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
