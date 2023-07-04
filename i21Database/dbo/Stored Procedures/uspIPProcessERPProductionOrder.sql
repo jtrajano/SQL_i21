@@ -58,6 +58,7 @@ BEGIN TRY
 		,@intPrevWorkOrderId INT = 0
 		,@dblLowerTolerance NUMERIC(18, 6)
 		,@dblUpperTolerance NUMERIC(18, 6)
+		,@intManufacturingProcessId INT
 	DECLARE @tblProductProperty AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intPropertyId INT
@@ -365,6 +366,11 @@ BEGIN TRY
 					OR @dblNoOfMixes IS NULL
 					SELECT @dblNoOfMixes = 1
 
+				SELECT @intManufacturingProcessId=NULL
+				SELECT @intManufacturingProcessId=intManufacturingProcessId
+				FROM tblMFManufacturingProcess
+				WHERE strProcessName='Blending'
+
 				INSERT INTO tblMFWorkOrder (
 					strWorkOrderNo
 					,intItemId
@@ -428,7 +434,7 @@ BEGIN TRY
 					,@dtmCurrentDate
 					,@intUserId
 					,@dtmCurrentDate
-					,1 AS intManufacturingProcessId
+					,@intManufacturingProcessId AS intManufacturingProcessId
 					,NULL AS intSalesOrderDetailId
 					,NULL AS intSalesRepresentativeId
 					,NULL AS intInvoiceDetailId
@@ -454,7 +460,7 @@ BEGIN TRY
 				SELECT @intTestId = strAttributeValue
 				FROM tblMFManufacturingProcessAttribute pa
 				JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
-				WHERE pa.intManufacturingProcessId = 1
+				WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
 					AND pa.intLocationId = @intLocationId
 					AND at.strAttributeName = 'Test Name'
 
