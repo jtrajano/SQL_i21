@@ -49,7 +49,7 @@ BEGIN
 			--CREATE VOUCHER
 			EXEC uspAPCreateVoucherForPendingPayable @payableId = @voucherPayableId, @userId = @userId, @billCreated = @stringId OUT
 			SELECT TOP 1 @createdBillId = intID FROM dbo.fnGetRowsFromDelimitedValues(@stringId)
-			UPDATE tblAPBill SET strVendorOrderNumber = strBillId WHERE intBillId = @createdBillId
+			UPDATE tblAPBill SET strVendorOrderNumber = strBillId, ysnCancelledPayable = 1 WHERE intBillId = @createdBillId
 
 			--CREATE DEBIT MEMO
 			EXEC uspAPDuplicateBill @billId = @createdBillId, @userId = @userId, @reset = 0, @type = 3, @billCreatedId = @createdDebitMemoId OUT

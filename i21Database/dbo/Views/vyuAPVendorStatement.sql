@@ -19,6 +19,7 @@ LEFT JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 LEFT JOIN tblICItem C ON C.intItemId = B.intItemId
 WHERE A.ysnPosted = 1
 AND A.intTransactionType <> 15
+AND A.ysnCancelledPayable != 1
 
 --PAID PREPAYMENTS
 UNION ALL
@@ -39,6 +40,7 @@ FROM tblAPBill A
 LEFT JOIN tblAPBillDetail B ON B.intBillId = A.intBillId
 LEFT JOIN tblICItem C ON C.intItemId = B.intItemId
 WHERE A.ysnPosted = 1 AND A.intTransactionType IN (2, 13)
+AND A.ysnCancelledPayable != 1
 
 --DELETED VOUCHERS
 UNION ALL
@@ -81,6 +83,7 @@ INNER JOIN tblAPPaymentDetail B ON B.intPaymentId = A.intPaymentId
 LEFT JOIN tblAPBill C ON C.intBillId = ISNULL(B.intBillId, B.intOrigBillId) AND C.intTransactionType <> 15
 LEFT JOIN tblAPBillArchive D ON D.intBillId = ISNULL(B.intBillId, B.intOrigBillId) AND D.intTransactionType <> 15
 WHERE A.ysnPosted = 1 AND B.ysnOffset = 0
+AND C.ysnCancelledPayable != 1
 
 --AR PAYMENTS
 UNION ALL
@@ -101,6 +104,7 @@ FROM tblARPayment A
 INNER JOIN tblARPaymentDetail B ON B.intPaymentId = A.intPaymentId
 LEFT JOIN tblAPBill C ON C.intBillId = B.intBillId AND C.intTransactionType <> 15
 WHERE A.ysnPosted = 1
+AND C.ysnCancelledPayable != 1
 
 --PREPAYMENTS APPLIED TO PAYMENT
 UNION ALL
@@ -122,6 +126,7 @@ INNER JOIN tblAPPaymentDetail B ON B.intPaymentId = A.intPaymentId
 LEFT JOIN tblAPBill C ON C.intBillId = ISNULL(B.intBillId, B.intOrigBillId) AND C.intTransactionType <> 15
 LEFT JOIN tblAPBillArchive D ON D.intBillId = ISNULL(B.intBillId, B.intOrigBillId) AND D.intTransactionType <> 15
 WHERE A.ysnPosted = 1 AND B.ysnOffset = 1
+AND C.ysnCancelledPayable != 1
 
 --PREPAYMENTS APPLIED TO VOUCHERS
 UNION ALL
@@ -143,6 +148,7 @@ INNER JOIN tblAPBill B ON B.intBillId = A.intTransactionId
 INNER JOIN tblAPBill C ON C.intBillId = A.intBillId
 WHERE C.ysnPosted = 1 AND A.ysnApplied = 1
 AND C.intTransactionType <> 15
+AND C.ysnCancelledPayable != 1
 
 --VOUCHERS WITH APPLIED PAYMENTS
 UNION ALL
@@ -164,3 +170,4 @@ INNER JOIN tblAPBill B ON B.intBillId = A.intTransactionId
 INNER JOIN tblAPBill C ON C.intBillId = A.intBillId
 WHERE C.ysnPosted = 1 AND A.ysnApplied = 1
 AND C.intTransactionType <> 15
+AND C.ysnCancelledPayable != 1
